@@ -1,0 +1,57 @@
+// Adapted from the real MDK-26.1.2-ModDevGradle template (confirmed via
+// your clone - plugin version 2.0.144, neo_version 26.1.2.100). Trimmed
+// out the datagen/generateModMetadata templating and maven-publish blocks
+// from the original template since this project doesn't need them yet -
+// add them back later if you start using data generators or publishing.
+// The one addition beyond the template: the dependency on :common at the
+// bottom, which is what makes this a two-module project instead of the
+// template's single-module layout.
+
+plugins {
+    id 'java-library'
+    id 'net.neoforged.moddev' version '2.0.144'
+}
+
+version = mod_version
+group = mod_group_id
+
+base {
+    archivesName = mod_id
+}
+
+// Mojang ships Java 25 to end users in 26.1.2, so mods should target Java 25.
+java.toolchain.languageVersion = JavaLanguageVersion.of(25)
+
+neoForge {
+    version = project.neo_version
+
+    runs {
+        client {
+            client()
+            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+        }
+        server {
+            server()
+            programArgument '--nogui'
+            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+        }
+        configureEach {
+            systemProperty 'forge.logging.markers', 'REGISTRIES'
+            logLevel = org.slf4j.event.Level.DEBUG
+        }
+    }
+
+    mods {
+        "${mod_id}" {
+            sourceSet(sourceSets.main)
+        }
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+dependencies {
+    implementation project(":common")
+}

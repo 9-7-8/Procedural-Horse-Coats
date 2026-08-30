@@ -73,6 +73,60 @@ once at genotype-assignment time and persisted - not re-rolled on reload.
 the way up the leg. It's applied uniformly to all four legs for now;
 per-leg variation is a natural next step once this is confirmed working.
 
+## If you're merging this with a real MDK checkout
+
+`neoforge-26.1.2/build.gradle` and the root `gradle.properties` here are
+now based on the real values from NeoForge's official
+`MDK-26.1.2-ModDevGradle` template (plugin version `2.0.144`, neo version
+`26.1.2.100`) rather than guessed ones. If you cloned that template
+separately, don't just drop its files at your repo root - its `build.gradle`
+and `settings.gradle` assume a single-module project, which conflicts with
+the `:common` / `:neoforge-26.1.2` split here. Merge the *values* (plugin
+version, `neo_version`, the `foojay-resolver-convention` line in
+`settings.gradle.kts`) into the files in this project instead of copying
+the template's files over top of these.
+
+Note `common/build.gradle.kts` is Kotlin DSL while
+`neoforge-26.1.2/build.gradle` is Groovy DSL (matching the real MDK
+template) - Gradle supports mixing DSLs per-module in a multi-module build,
+so this isn't a problem, just slightly inconsistent to look at.
+
+## Debug tool: infinite horse pens (dev-only)
+
+Press **F6** while playing in a dev environment (`runClient`) to teleport
+into a dedicated flat dimension (`horsegenetics:debug_pens`) and start
+generating 20x20 fenced pens along +X, one gate each, a 10-block walkway
+between them, extending forever as you walk. Each pen spawns two horses via
+plain `addFreshEntity` - no special-cased genetics code was written for
+them; `HorseGeneticsEventHandler` already listens for any horse joining any
+level, so it assigns them a genotype the same way it would a wild-spawned
+horse. This is the fastest way to eyeball a wide spread of genotypes/coats
+at once.
+
+**This is genuinely hidden in a production build, not just hard to find:**
+the keybind is only registered inside `RegisterKeyMappingsEvent` if
+`!FMLEnvironment.isProduction()`, so in a real jar it never appears in
+Controls and can't be triggered. The server-side packet handler re-checks
+the same flag independently, so a forged network packet against a
+production server still no-ops. The only trace left in a shipped jar is two
+harmless lang-file strings (`key.horsegenetics.debug_pens` and its
+category) that are never displayed because the keybind object is never
+created - cosmetic leftover, not a functional exposure.
+
+**Known limitation:** the "how far have I generated" counter is in-memory
+only and resets on server restart. Re-entering after a restart will re-run
+generation starting from pen 0, which harmlessly re-places fence blocks
+that are already there - `buildPen` checks for existing horses in a pen's
+bounds before spawning more, so you won't get duplicate horses. If you want
+this to survive restarts cleanly, the fix is to persist the counter via a
+`SavedData` instead of a static field - not done here since a debug tool
+resetting on restart is a reasonable default.
+
+**Also flagged as unverified**, consistent with the caveats above: the
+exact class name for the client tick event (`ClientTickEvent.Post`) - tick
+event naming has shifted across NeoForge versions before, so confirm it
+against current docs if it doesn't compile.
+
 ## Suggested next steps, in order
 
 1. Set up the actual Gradle project (verify the build script against the
