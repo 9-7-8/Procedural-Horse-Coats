@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.example.horsegenetics.common.coat.CoatGeneratorTest" tests="13" skipped="0" failures="0" errors="0" timestamp="2026-08-30T18:24:06.108Z" hostname="PERDIX" time="0.025">
+  <properties/>
+  <testcase name="[1] Eeaa" classname="com.example.horsegenetics.common.coat.CoatGeneratorTest" time="0.002"/>
+  <testcase name="[2] EEaa" classname="com.example.horsegenetics.common.coat.CoatGeneratorTest" time="0.001"/>
+  <testcase name="bayConsumesExactlyOneFloatDraw()" classname="com.example.horsegenetics.common.coat.CoatGeneratorTest" time="0.0"/>
+  <testcase name="[1] eeaa" classname="com.example.horsegenetics.common.coat.CoatGeneratorTest" time="0.001"/>
+  <testcase name="[2] eeAA" classname="com.example.horsegenetics.common.coat.CoatGeneratorTest" time="0.0"/>
+  <testcase name="[3] eeAa" classname="com.example.horsegenetics.common.coat.CoatGeneratorTest" time="0.001"/>
+  <testcase name="bayRejectsOutOfRangeRngOutput()" classname="com.example.horsegenetics.common.coat.CoatGeneratorTest" time="0.001"/>
+  <testcase name="[1] 0.0" classname="com.example.horsegenetics.common.coat.CoatGeneratorTest" time="0.002"/>
+  <testcase name="[2] 0.001" classname="com.example.horsegenetics.common.coat.CoatGeneratorTest" time="0.0"/>
+  <testcase name="[3] 0.5" classname="com.example.horsegenetics.common.coat.CoatGeneratorTest" time="0.001"/>
+  <testcase name="[4] 0.999" classname="com.example.horsegenetics.common.coat.CoatGeneratorTest" time="0.0"/>
+  <testcase name="[5] 1.0" classname="com.example.horsegenetics.common.coat.CoatGeneratorTest" time="0.001"/>
+  <testcase name="bayGenotypeRollsLegBlackHeightFromRng()" classname="com.example.horsegenetics.common.coat.CoatGeneratorTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

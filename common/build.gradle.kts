@@ -24,6 +24,10 @@ repositories {
 dependencies {
     testImplementation(platform("org.junit:junit-bom:5.10.2"))
     testImplementation("org.junit.jupiter:junit-jupiter")
+    // Gradle 9 no longer puts the JUnit Platform launcher on the test runtime
+    // classpath automatically - without this the test JVM fails to start with
+    // "Failed to load JUnit Platform". Version comes from the BOM above.
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
 tasks.test {

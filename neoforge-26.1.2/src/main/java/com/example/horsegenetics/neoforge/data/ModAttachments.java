@@ -19,7 +19,7 @@ public final class ModAttachments {
     public static final Supplier<AttachmentType<HorseCoatAttachment>> HORSE_COAT =
             ATTACHMENT_TYPES.register("horse_coat", () -> AttachmentType
                     .builder(() -> new HorseCoatAttachment("eeaa", CoatPhenotype.CHESTNUT, 0f))
-                    .serialize(HorseCoatAttachment.CODEC)
+                    .serialize(HorseCoatAttachment.MAP_CODEC)
                     .copyOnDeath()
                     .build());
 

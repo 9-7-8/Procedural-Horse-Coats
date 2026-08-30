@@ -5,7 +5,7 @@ import com.example.horsegenetics.neoforge.HorseGenetics;
 import com.mojang.blaze3d.platform.NativeImage;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.DynamicTexture;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.io.IOException;
 import java.util.Map;
@@ -29,16 +29,16 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public final class GeneticCoatTextureFactory {
 
-    private static final ResourceLocation BASE_BAY_TEXTURE =
-            ResourceLocation.withDefaultNamespace("textures/entity/horse/horse_brown.png");
-    private static final ResourceLocation BLACK_OVERLAY_TEXTURE =
-            ResourceLocation.withDefaultNamespace("textures/entity/horse/horse_black.png");
+    private static final Identifier BASE_BAY_TEXTURE =
+            Identifier.withDefaultNamespace("textures/entity/horse/horse_brown.png");
+    private static final Identifier BLACK_OVERLAY_TEXTURE =
+            Identifier.withDefaultNamespace("textures/entity/horse/horse_black.png");
 
     // Bucket the continuous [0,1] height into 10 steps so we generate at
     // most 10 textures total for bay horses, not one per horse.
     private static final int HEIGHT_BUCKETS = 10;
 
-    private static final Map<Integer, ResourceLocation> CACHE = new ConcurrentHashMap<>();
+    private static final Map<Integer, Identifier> CACHE = new ConcurrentHashMap<>();
 
     // PLACEHOLDER pixel rectangles on the 64x64 horse texture map, one per leg,
     // as {x, y, width, height}. These are NOT verified against the real texture
@@ -50,25 +50,33 @@ public final class GeneticCoatTextureFactory {
             {24, 0, 8, 32}, // back-right  - PLACEHOLDER
     };
 
-    public static ResourceLocation getOrCreate(CoatData coatData) {
+    public static Identifier getOrCreate(CoatData coatData) {
         int bucket = Math.round(coatData.legBlackHeight() * HEIGHT_BUCKETS);
         return CACHE.computeIfAbsent(bucket, b -> generate((float) b / HEIGHT_BUCKETS));
     }
 
-    private static ResourceLocation generate(float legBlackHeight) {
-        try (NativeImage base = loadVanillaTexture(BASE_BAY_TEXTURE);
-             NativeImage overlay = loadVanillaTexture(BLACK_OVERLAY_TEXTURE)) {
+    private static Identifier generate(float legBlackHeight) {
+        // 'base' is intentionally NOT in the try-with-resources: ownership of it
+        // transfers to the DynamicTexture (which closes it on its own close()),
+        // so closing it here too would double-free the native image.
+        NativeImage base = null;
+        try (NativeImage overlay = loadVanillaTexture(BLACK_OVERLAY_TEXTURE)) {
+            base = loadVanillaTexture(BASE_BAY_TEXTURE);
 
             for (int[] region : LEG_REGIONS) {
                 compositeLegRegion(base, overlay, region, legBlackHeight);
             }
 
-            DynamicTexture dynamicTexture = new DynamicTexture(base);
-            ResourceLocation id = ResourceLocation.fromNamespaceAndPath(
-                    HorseGenetics.MOD_ID, "bay_generated_" + Math.round(legBlackHeight * 100));
+            int heightPercent = Math.round(legBlackHeight * 100);
+            DynamicTexture dynamicTexture = new DynamicTexture(() -> "horsegenetics_bay_" + heightPercent, base);
+            Identifier id = Identifier.fromNamespaceAndPath(
+                    HorseGenetics.MOD_ID, "bay_generated_" + heightPercent);
             Minecraft.getInstance().getTextureManager().register(id, dynamicTexture);
             return id;
         } catch (IOException e) {
+            if (base != null) {
+                base.close();
+            }
             throw new RuntimeException("Failed to composite bay horse texture", e);
         }
     }
@@ -89,7 +97,7 @@ public final class GeneticCoatTextureFactory {
         }
     }
 
-    private static NativeImage loadVanillaTexture(ResourceLocation location) throws IOException {
+    private static NativeImage loadVanillaTexture(Identifier location) throws IOException {
         // NativeImage.read expects an InputStream; resource manager lookup
         // omitted here for brevity - wire this to Minecraft.getInstance()
         // .getResourceManager().open(location) in the real implementation.

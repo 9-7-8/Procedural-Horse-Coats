@@ -5,7 +5,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 
 /**
  * NOTE: verify "ClientTickEvent.Post" is the correct current event class/name
@@ -23,7 +23,7 @@ public final class DebugKeyHandler {
             return; // not registered - we're in a production build
         }
         while (DebugKeyBindings.generateDebugPens.consumeClick()) {
-            PacketDistributor.sendToServer(new RequestDebugPensPayload());
+            ClientPacketDistributor.sendToServer(new RequestDebugPensPayload());
         }
     }
 

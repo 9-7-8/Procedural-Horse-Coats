@@ -4,15 +4,16 @@ import com.example.horsegenetics.neoforge.HorseGenetics;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.FenceGateBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.entity.animal.horse.Horse;
+import net.minecraft.world.entity.animal.equine.Horse;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.core.Direction;
 
@@ -31,7 +32,7 @@ import java.util.function.Consumer;
 public final class DebugPenManager {
 
     public static final ResourceKey<Level> DEBUG_LEVEL = ResourceKey.create(
-            Registries.DIMENSION, ResourceLocation.fromNamespaceAndPath(HorseGenetics.MOD_ID, "debug_pens"));
+            Registries.DIMENSION, Identifier.fromNamespaceAndPath(HorseGenetics.MOD_ID, "debug_pens"));
 
     private static final int PEN_SIZE = 20;
     private static final int WALKWAY_WIDTH = 10;
@@ -51,7 +52,7 @@ public final class DebugPenManager {
 
     /** Entry point from the network handler: get the player into the dimension and generate around them. */
     public static void teleportAndGenerate(ServerPlayer player) {
-        ServerLevel level = player.server.getLevel(DEBUG_LEVEL);
+        ServerLevel level = ((ServerLevel) player.level()).getServer().getLevel(DEBUG_LEVEL);
         if (level == null) {
             HorseGenetics.LOGGER.error("Debug pens dimension not found - is data/horsegenetics/dimension/debug_pens.json present?");
             return;
@@ -120,7 +121,7 @@ public final class DebugPenManager {
     }
 
     private static void spawnOneHorse(ServerLevel level, double x, double z) {
-        Horse horse = EntityType.HORSE.create(level);
+        Horse horse = EntityType.HORSE.create(level, EntitySpawnReason.COMMAND);
         if (horse == null) return;
         horse.setPos(x, FLOOR_Y, z);
         // No genotype/coat assignment here on purpose - HorseGeneticsEventHandler

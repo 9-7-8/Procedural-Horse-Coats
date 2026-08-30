@@ -1,30 +1,69 @@
 package com.example.horsegenetics.neoforge.client;
 
 import com.example.horsegenetics.common.coat.CoatData;
-import net.minecraft.client.renderer.entity.HorseRenderer;
+import net.minecraft.client.model.animal.equine.BabyHorseModel;
+import net.minecraft.client.model.animal.equine.EquineSaddleModel;
+import net.minecraft.client.model.animal.equine.HorseModel;
+import net.minecraft.client.model.geom.ModelLayers;
+import net.minecraft.client.renderer.entity.AbstractHorseRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.animal.horse.Horse;
+import net.minecraft.client.renderer.entity.layers.HorseMarkingLayer;
+import net.minecraft.client.renderer.entity.layers.SimpleEquipmentLayer;
+import net.minecraft.client.renderer.entity.state.HorseRenderState;
+import net.minecraft.client.resources.model.EquipmentClientInfo;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.animal.equine.Horse;
 
 /**
- * Overrides just enough of vanilla's HorseRenderer to plug our own texture
- * selection in. Everything else (model, animation, markings layer) is left
- * to vanilla - we're only replacing the base coat texture.
+ * Vanilla's {@code HorseRenderer} is {@code final} in 26.1.2, so we cannot
+ * subclass it (CLAUDE.md flagged this as the likely outcome). Instead we
+ * extend {@code AbstractHorseRenderer} directly and replicate vanilla's
+ * constructor (models + marking/equipment layers, copied verbatim from
+ * {@code net.minecraft.client.renderer.entity.HorseRenderer}), then override
+ * the three hook points we care about.
  *
- * CAVEAT: this assumes HorseRenderer's render-state generic is open enough
- * to swap in GeneticHorseRenderState via a covariant createRenderState()
- * override, the way the NeoForged porting primers show for custom entities.
- * If vanilla's HorseRenderer is hard-coded to HorseRenderState rather than
- * generic over it, this pattern won't compile as-is and you'd instead need
- * to fully re-implement HorseRenderer (copy vanilla's class and modify) or
- * use a client-side lookup keyed by entity id directly in getTextureLocation
- * without a custom render state at all. Confirm against the decompiled
- * 26.1.2 source before assuming this compiles unmodified.
+ * <p>The render state generic stays vanilla's {@link HorseRenderState} so the
+ * copied layers type-check unchanged; {@link #createRenderState()} covariantly
+ * returns our {@link GeneticHorseRenderState} subclass, and because
+ * {@code EntityRenderer.createRenderState(entity, partialTicks)} always routes
+ * through that method, every state instance is really a
+ * {@code GeneticHorseRenderState} - the {@code instanceof} checks below never
+ * fail in practice.
  */
-public class GeneticHorseRenderer extends HorseRenderer {
+public class GeneticHorseRenderer extends AbstractHorseRenderer<Horse, HorseRenderState, HorseModel> {
+
+    private static final Identifier BLACK_TEXTURE =
+            Identifier.withDefaultNamespace("textures/entity/horse/horse_black.png");
+    private static final Identifier CHESTNUT_TEXTURE =
+            Identifier.withDefaultNamespace("textures/entity/horse/horse_chestnut.png");
+    private static final Identifier BROWN_TEXTURE =
+            Identifier.withDefaultNamespace("textures/entity/horse/horse_brown.png");
 
     public GeneticHorseRenderer(EntityRendererProvider.Context context) {
-        super(context);
+        super(context, new HorseModel(context.bakeLayer(ModelLayers.HORSE)), new BabyHorseModel(context.bakeLayer(ModelLayers.HORSE_BABY)));
+        this.addLayer(new HorseMarkingLayer(this));
+        this.addLayer(
+            new SimpleEquipmentLayer<>(
+                this,
+                context.getEquipmentRenderer(),
+                EquipmentClientInfo.LayerType.HORSE_BODY,
+                state -> state.bodyArmorItem,
+                new HorseModel(context.bakeLayer(ModelLayers.HORSE_ARMOR)),
+                null,
+                2
+            )
+        );
+        this.addLayer(
+            new SimpleEquipmentLayer<>(
+                this,
+                context.getEquipmentRenderer(),
+                EquipmentClientInfo.LayerType.HORSE_SADDLE,
+                state -> state.saddle,
+                new EquineSaddleModel(context.bakeLayer(ModelLayers.HORSE_SADDLE)),
+                null,
+                2
+            )
+        );
     }
 
     @Override
@@ -33,7 +72,7 @@ public class GeneticHorseRenderer extends HorseRenderer {
     }
 
     @Override
-    public void extractRenderState(Horse horse, net.minecraft.client.renderer.entity.state.HorseRenderState renderState, float partialTick) {
+    public void extractRenderState(Horse horse, HorseRenderState renderState, float partialTick) {
         super.extractRenderState(horse, renderState, partialTick);
         if (renderState instanceof GeneticHorseRenderState geneticState) {
             CoatData coatData = ClientCoatCache.get(horse.getId());
@@ -44,14 +83,17 @@ public class GeneticHorseRenderer extends HorseRenderer {
     }
 
     @Override
-    public ResourceLocation getTextureLocation(net.minecraft.client.renderer.entity.state.HorseRenderState renderState) {
-        if (renderState instanceof GeneticHorseRenderState geneticState) {
-            return switch (geneticState.coatData.phenotype()) {
-                case BAY -> GeneticCoatTextureFactory.getOrCreate(geneticState.coatData);
-                case BLACK -> ResourceLocation.withDefaultNamespace("textures/entity/horse/horse_black.png");
-                case CHESTNUT -> ResourceLocation.withDefaultNamespace("textures/entity/horse/horse_chestnut.png");
-            };
+    public Identifier getTextureLocation(HorseRenderState renderState) {
+        CoatData coatData = (renderState instanceof GeneticHorseRenderState geneticState)
+                ? geneticState.coatData
+                : null;
+        if (coatData == null) {
+            return BROWN_TEXTURE;
         }
-        return super.getTextureLocation(renderState);
+        return switch (coatData.phenotype()) {
+            case BAY -> GeneticCoatTextureFactory.getOrCreate(coatData);
+            case BLACK -> BLACK_TEXTURE;
+            case CHESTNUT -> CHESTNUT_TEXTURE;
+        };
     }
 }

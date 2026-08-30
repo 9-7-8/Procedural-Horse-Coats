@@ -22,7 +22,9 @@ import org.lwjgl.glfw.GLFW;
  * independently, so a modified/forged client packet against a production
  * server still won't do anything.
  */
-@EventBusSubscriber(value = Dist.CLIENT, modid = HorseGenetics.MOD_ID, bus = EventBusSubscriber.Bus.MOD)
+// NeoForge 26.1.2 dropped EventBusSubscriber#bus - RegisterKeyMappingsEvent is
+// an IModBusEvent, so it's routed to the mod bus automatically.
+@EventBusSubscriber(value = Dist.CLIENT, modid = HorseGenetics.MOD_ID)
 public final class DebugKeyBindings {
 
     /** Null in production - always null-check before use. */
@@ -38,7 +40,10 @@ public final class DebugKeyBindings {
                 KeyConflictContext.IN_GAME,
                 InputConstants.Type.KEYSYM,
                 GLFW.GLFW_KEY_F6,
-                "key.categories.horsegenetics.debug"
+                // 26.1.2's KeyMapping takes a KeyMapping.Category, not a lang key.
+                // Reusing the built-in MISC category avoids registering (and
+                // localizing) a custom one for a dev-only keybind.
+                KeyMapping.Category.MISC
         );
         event.register(generateDebugPens);
     }

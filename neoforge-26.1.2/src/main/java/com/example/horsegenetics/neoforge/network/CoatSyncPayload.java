@@ -6,7 +6,7 @@ import com.example.horsegenetics.neoforge.HorseGenetics;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 /**
  * Data attachments are NOT auto-synced to the client. Since the client needs
@@ -18,7 +18,7 @@ public record CoatSyncPayload(int entityId, CoatPhenotype phenotype, float legBl
         implements CustomPacketPayload {
 
     public static final Type<CoatSyncPayload> TYPE =
-            new Type<>(ResourceLocation.fromNamespaceAndPath(HorseGenetics.MOD_ID, "coat_sync"));
+            new Type<>(Identifier.fromNamespaceAndPath(HorseGenetics.MOD_ID, "coat_sync"));
 
     public static final StreamCodec<RegistryFriendlyByteBuf, CoatSyncPayload> STREAM_CODEC = StreamCodec.composite(
             StreamCodec.of((buf, v) -> buf.writeVarInt(v), buf -> buf.readVarInt()), CoatSyncPayload::entityId,
