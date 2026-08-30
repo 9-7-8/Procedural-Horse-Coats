@@ -3,6 +3,28 @@
 Procedural coat generation for horses, built for NeoForge 26.1.2 with an eye
 toward backporting to 1.12.2 later.
 
+## Repo structure
+
+```
+horse-genetics/
+├── settings.gradle.kts     <- declares the two modules below + JDK auto-provisioning
+├── gradle.properties       <- mod_id, versions, real neo_version (26.1.2.100)
+├── gradlew, gradlew.bat, gradle/wrapper/  <- the wrapper, shared by both modules
+├── common/                 <- pure Java, backports unchanged (see below)
+│   ├── build.gradle.kts
+│   └── src/main/java/...
+└── neoforge-26.1.2/        <- everything Minecraft-specific (see below)
+    ├── build.gradle        <- Groovy, adapted from the real MDK-26.1.2-ModDevGradle
+    └── src/main/{java,resources}/...
+```
+
+There is deliberately no `build.gradle`, `settings.gradle`, or `src/main` at
+the repo root - those belong to the official MDK template's own single-module
+layout and would conflict with the two-module split above if left in place.
+If you ever re-clone `MDK-26.1.2-ModDevGradle` for reference, pull *values*
+out of it (plugin version, `neo_version`, etc.) rather than copying its files
+over the ones here.
+
 ## Why it's split this way
 
 ```
@@ -45,10 +67,12 @@ change.
   inline. If vanilla's `HorseRenderer` turns out to hard-code
   `HorseRenderState`, you'll need to fully reimplement it instead of
   subclassing (copy vanilla's source, swap the texture line).
-- The `build.gradle.kts` for the NeoForge module is written from the general
-  shape of the ModDevGradle plugin, not verified against the real template.
-  Diff it against `https://github.com/NeoForgeMDKs/MDK-26.1.2-ModDevGradle`
-  before trusting it to build.
+- The `neoforge-26.1.2/build.gradle` is now adapted from the real
+  `MDK-26.1.2-ModDevGradle` template (confirmed plugin version `2.0.144`,
+  confirmed `neo_version` `26.1.2.100`) rather than a guess - the Gradle
+  wiring itself should be solid. What's still unverified is entity-renderer
+  specifics inside the module's Java code (below), which the build script
+  can't catch until you actually compile it.
 - Entity rendering has kept changing release over release (the
   `submit()`/`SubmitNodeCollector` split that's landed for block entities);
   double-check the current NeoForged docs for whether `HorseRenderer` still
@@ -73,23 +97,10 @@ once at genotype-assignment time and persisted - not re-rolled on reload.
 the way up the leg. It's applied uniformly to all four legs for now;
 per-leg variation is a natural next step once this is confirmed working.
 
-## If you're merging this with a real MDK checkout
+## Outstanding cleanup
 
-`neoforge-26.1.2/build.gradle` and the root `gradle.properties` here are
-now based on the real values from NeoForge's official
-`MDK-26.1.2-ModDevGradle` template (plugin version `2.0.144`, neo version
-`26.1.2.100`) rather than guessed ones. If you cloned that template
-separately, don't just drop its files at your repo root - its `build.gradle`
-and `settings.gradle` assume a single-module project, which conflicts with
-the `:common` / `:neoforge-26.1.2` split here. Merge the *values* (plugin
-version, `neo_version`, the `foojay-resolver-convention` line in
-`settings.gradle.kts`) into the files in this project instead of copying
-the template's files over top of these.
-
-Note `common/build.gradle.kts` is Kotlin DSL while
-`neoforge-26.1.2/build.gradle` is Groovy DSL (matching the real MDK
-template) - Gradle supports mixing DSLs per-module in a multi-module build,
-so this isn't a problem, just slightly inconsistent to look at.
+- `TEMPLATE_LICENSE.txt` should be deleted now that a real `LICENSE` file
+  (CC BY-NC 4.0) exists at the repo root.
 
 ## Debug tool: infinite horse pens (dev-only)
 
@@ -129,15 +140,17 @@ against current docs if it doesn't compile.
 
 ## Suggested next steps, in order
 
-1. Set up the actual Gradle project (verify the build script against the
-   real MDK), get `common/` compiling and write a few JUnit tests against
-   `Genotype` and `CoatGenerator` directly - this validates the genetics
-   logic without touching Minecraft at all.
-2. Get the NeoForge module compiling. Expect the render-state generics
-   issue flagged above to be the first real snag.
-3. Fill in real `LEG_REGIONS` coordinates and confirm a bay horse in-game
+1. Delete `TEMPLATE_LICENSE.txt` or turn it into a real `LICENSE` file (the
+   last remaining piece of root-level cleanup - see above).
+2. Get `common/` compiling and write a few JUnit tests against `Genotype`
+   and `CoatGenerator` directly - this validates the genetics logic without
+   touching Minecraft at all, and doesn't depend on the NeoForge module
+   compiling first.
+3. Get the NeoForge module compiling. Expect the render-state generics
+   issue flagged above (`GeneticHorseRenderer`) to be the first real snag.
+4. Fill in real `LEG_REGIONS` coordinates and confirm a bay horse in-game
    actually shows varying leg black height.
-4. Breeding: right now every horse gets an independently random genotype on
+5. Breeding: right now every horse gets an independently random genotype on
    spawn. Real inheritance (combine two parents' alleles on breed) is the
    next feature, and it's entirely a `common/` change plus one new hook in
    the horse-breeding event on the NeoForge side.
@@ -216,6 +229,8 @@ Procedural-Horse-Coats/
 ├── gradle.properties
 ├── gradlew
 ├── gradlew.bat
+├── LICENSE
+├── neoforge.mods.toml
 ├── README.md
 ├── settings.gradle.kts
 └── TEMPLATE_LICENSE.txt
