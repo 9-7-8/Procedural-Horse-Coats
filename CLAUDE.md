@@ -1,8 +1,11 @@
 # Horse Genetics - NeoForge 26.1.2 Mod
 
-Procedural horses: a three-locus Mendelian genotype (extension + agouti +
-white) drives coat phenotype; every horse also carries a name, a pedigree,
-and rolled speed/health stats; and there's a self-contained "horse dimension"
+Procedural horses: a Mendelian genotype of **allele objects** (extension,
+agouti + seal, white, champagne, a `T` "Test" diagnostic) drives a
+**generated coat texture** - genes restrict red/black pigment per pixel, the
+survivors are looked up in a gradient and multiplied onto a white-horse
+template. Every horse also carries a name, a pedigree, rolled speed/health
+stats, and an epigenetic seed; and there's a self-contained "horse dimension"
 reached by a hay-bale portal. Long-term aim is a 1.12.2 backport, which is
 why the logic is quarantined in a game-free module.
 
@@ -19,10 +22,12 @@ why the logic is quarantined in a game-free module.
 
 ## Status snapshot (keep this current)
 
-- **`common/`** - compiles; **124 JUnit tests pass** (`./gradlew
-  :common:test`). Covers `genetics/` (E/A/W loci, 6-char codes), `coat/`,
-  `name/` (incl. the `breedNth` foal-name scheme), `horse/` (pedigree model +
-  `HorseStats` + `ParentStats` + `offspringCount` -> `breeding.md`).
+- **`common/`** - compiles; **117 JUnit tests pass** (`./gradlew
+  :common:test`). Covers `genetics/` (allele/gene model, `Genotype` code
+  round-trip, breeding), `coat/` + `coat/pattern/` (the overlay pipeline -
+  `CoatTextureComposer`, `GradientLut`, `BayCoat`, `CoatRegions`, the genes),
+  `coat/skin/` (`HorseSkinGeometry` projection engine),
+  `name/` (incl. `breedNth`), `horse/` (pedigree + `HorseStats` -> `breeding.md`).
 - **`neoforge-26.1.2/`** - compiles and assembles (`./gradlew
   :neoforge-26.1.2:build` passes; only two `getGuiLeft/getGuiTop`
   deprecation warnings) against the real NeoForge `26.1.2.100` SDK.
@@ -66,9 +71,15 @@ why the logic is quarantined in a game-free module.
     sire)` feeding it is the unproven link.)
   - **`FamilyTreeScreen` scroll mode** - the `familyTree.scrollBar = true`
     client-config path (wheel + right-edge thumb instead of shrinking).
-  - horse coats rendering per-genotype in the open world, incl. the new
-    **WHITE** (`horse_white` / `horse_white_baby`); bay black on the legs vs
-    the face (`LEG_REGIONS = {48,25,16,11}`).
+  - **the allele/gene coat overlay pipeline in-game** (2026-08-31 rework):
+    every adult now renders a `GeneticCoatTextureFactory`-generated 128px
+    texture on `HdHorseModel`. Check black / chestnut / champagne (gold) /
+    white read right; bay has black points + random leg/face black; seal shows
+    tan up the legs; eyes survive; foals still fine on vanilla `*_baby`; the
+    family-tree node; save -> reload keeps the epigenetic seed (same coat).
+    `bakeCoatSamples` output looked right offline; not yet run in the client.
+  - the earlier **Test coat** on a live horse was owner-verified 2026-08-31
+    (smooth gradient); the projection engine (`HorseSkinGeometry`) is proven.
   - the inventory-panel **stat tint** (green/amber/red vs `parentStats`), the
     **paper dump** `vs parents` line, foal stats actually landing on the
     entity's attributes, and **legacy 4-char / no-stat saves** still loading.
@@ -141,57 +152,136 @@ pids) when the smoke test has printed `Done (...)! For help`.
 
 ## The genetics model, as implemented
 
-Three loci, six alleles, one phenotype table. Genotype is a **6-char string**:
-E-locus alleles, then A-locus, then W-locus, dominant written first per locus
-(`Genotype.parse` / `Genotype.of` canonicalize). **Legacy 4-char codes**
-(pre-W) still parse - the missing W locus is read as `ww`, so old saves are
-fine.
+**Alleles are objects now, not string positions.** A `Genotype` is one
+`AllelePair` per registered `Gene` (`common/genetics/`). It still round-trips
+through a compact **code string** (2 symbols per gene, in `Genes.codeOrder()`)
+for persistence / sync / the pedigree record - `Genotype.parse(code)` /
+`toCode()`. Shorter legacy codes still parse: a missing trailing locus is read
+as that gene's wild-type (`"EeAawwtt"` -> `"EeAawwttcc"`, `"EeAaWw"` -> add
+`"ttcc"`, `"EeAa"` -> add `"wwttcc"`).
 
-| W locus | E locus  | A locus | Phenotype                       |
-|---------|----------|---------|---------------------------------|
-| W_      | any      | any     | **White** (`horse_white`) - masks everything |
-| ww      | ee (any) | any     | Chestnut                        |
-| ww      | E_       | aa      | Black                           |
-| ww      | E_       | A_      | Bay (+ random `legBlackHeight`) |
+Built-in genes (namespace `horsegenetics` = the `<modauthor>`; a third party
+registers under its own). Order below is `Genes.codeOrder()` - **append** new
+genes so legacy codes keep padding correctly:
 
-`Genotype.random` rolls E/A 50/50 per allele and W as `1 in
-WILD_WHITE_ALLELE_ODDS` (**50**) per allele - so wild whites are uncommon
-(~4%). `breedWith` now does **6** `nextBoolean()` draws (E,E,A,A,W,W).
-`CoatPhenotype` has a `WHITE` constant; `CoatData.solid(WHITE)` /
-`CoatGenerator.generate` handle it (no leg roll). The renderer maps WHITE ->
-`horse_white` / `horse_white_baby`.
+| gene | key | alleles (symbols) | wild-type | notes |
+|------|-----|-------------------|-----------|-------|
+| Extension | `horsegenetics.extension` | `E` / `e` | `E` | `ee` = chestnut (all black pigment restricted) |
+| Agouti | `horsegenetics.agouti` | `A` / `S` (=A^t seal) / `a` | `a` | `A_` bay, `S_` seal - **both non-deterministic** |
+| White | `horsegenetics.white` | `W` / `w` | `w` | `W_` dominant white - full restriction, transparent overlay |
+| Test | `horsegenetics.test` | `T` / `t` | `t` | diagnostic - paints the `TestCoatPattern` gradient |
+| Champagne | `horsegenetics.champagne` | `C` (=Ch) / `c` | `c` | dominant dilution -> the gradient's gold column |
 
-`legBlackHeight` is a float in [0, 1], rolled once per bay horse at
-genotype-assignment time via `CoatGenerator.generate`, then persisted -
-**never re-roll it** on load or the coat visibly changes between sessions.
-Applied uniformly to all four legs; per-leg variation is a future
-enhancement, not a bug.
+`Genotype.phenotype()` still returns the coarse `CoatPhenotype`
+(`CHESTNUT`/`BLACK`/`BAY`/`WHITE`; seal and champagne fold into the nearest) -
+only used now for **foal `*_baby` textures** and family-tree fallback.
 
-Wild horses roll an **independently random** genotype on spawn. Inheritance,
-identity/sex/name/pedigree, **and the speed/health stat roll** live in the
-two-layer record system - all documented in **`breeding.md`**. One-line
-version: every horse carries a `HorseRecord` (id / sex / first+last+barn name
-/ genetic code / parent ids / tamer / breeder / generation / speed / health /
-parentStats) as a Data Attachment, mirrored into a per-world
-`HorseAncestryData` SavedData, coat derived from `record.geneticCode()`,
-synced to clients for the inventory panel + family tree.
+`Genotype.random(rng)` - each gene rolls its own pair (see the gene class for
+draw count / order); `codeOrder()` overall. Wild frequencies:
+`WhiteGene.WILD_WHITE_ALLELE_ODDS` = **50** per allele (~4% white),
+`TestGene.WILD_TEST_ODDS` = **4** (one roll -> `Tt`, ~25% carriers, deliberately
+high), `ChampagneGene.WILD_CHAMPAGNE_ALLELE_ODDS` = **40** per allele, agouti
+roughly 45% `A` / 45% `a` / 10% `S` per allele. `breedWith` = **2
+`nextBoolean()` per gene** (child allele from each parent), `codeOrder()`.
+
+`Gene.isVisible(pair, genotype)` / `isDeterministic(pair, genotype)` take the
+**whole genotype** (agouti is invisible on a chestnut - no black to restrict).
+`Genotype.hasVisibleNonDeterministic()` = "the coat texture must be generated
+per horse" (any bay / seal / marking); otherwise it's one of a shared set.
+
+## The coat overlay pipeline (`common/coat/pattern/` + `client/GeneticCoatTextureFactory`)
+
+Coats are **generated**, not picked from vanilla PNGs. Every pixel starts at
+"max red + max black pigment" (a black horse); genes restrict pigment down; the
+survivors are looked up in a colour gradient; the result is multiplied onto the
+white-horse template.
+
+- **`CoatData`** = `Genotype` + a `long epigeneticSeed`, rolled **once at
+  birth** by `CoatGenerator.generate` and persisted. Deterministic coats ignore
+  it (all identical -> shared texture); non-deterministic coats feed it into
+  each gene's own `SeededRng` so the same horse regenerates the same skin.
+  `CoatData.textureKey()` = code, plus `@<seed>` only when non-deterministic.
+- **`CoatTextureComposer.compose(genotype, seed, template, GradientLut)`**
+  (pure, 128px `int[]` ARGB):
+  1. **restrict** - `Genes.restrictionOrder()` (`extension, agouti, champagne,
+     white`), each visible gene mutates the shared `PigmentField` (per-texel
+     `red` / `black` in `[0,1]`).
+  2. **resolve** - each mapped texel's `(red, black)` -> `GradientLut.sample`
+     -> ARGB; a fully-restricted texel becomes transparent.
+  3. **paint** - `Genes.paintOrder()` (`test`) draws ARGB straight over the
+     resolved overlay.
+  4. **multiply** overlay x template per channel, **keeping the template's
+     alpha** (silhouette stays exactly the vanilla white horse).
+  5. **eyes** - copied verbatim from the template (`CoatRegions.EYE_RECTS`).
+- **`GradientLut`** wraps `assets/horsegenetics/textures/coat/redblackgradient.png`
+  (hand-authored, 500x500): **left** = more red pigment, **bottom** = more
+  black; `(1,1)` bottom-left = black, `(1,0)` top-left = chestnut, `(0,0)`
+  top-right = white, and a **champagne-gold column** near the horizontal middle.
+  `sample(red, black)`: `x = (1-red)*(w-1)`, `y = black*(h-1)`, bilinear.
+- **`CoatRegions`** - reusable region helpers (paint / restrict a `Part`, the
+  hooves / mane / tail / ears, `blackenLowerLeg` up to a fraction,
+  `blackenFace`, `redrawEyes`).
+- **`BayCoat.apply(ctx, epiRng)`** - the bay generator: knock body black down
+  to `BODY_BLACK` (0.32, red kept), hard-black the mane / tail / ears, black up
+  each leg + the face a random amount (per-leg fractions + a face fraction from
+  the epigenetic RNG), hooves always black. `AgoutiGene` calls it for `A_`;
+  `S_` gets an inline "tan creeps up the lower legs" pass.
+- **Genes**: `ExtensionGene` (`ee` -> black = 0 everywhere), `WhiteGene` (`W_`
+  -> red = black = 0 -> transparent), `ChampagneGene` (`Ch_` -> red ~= 0.5,
+  black *= 0.18 -> the gold column), `TestGene` (`T_` -> paint the
+  `TestCoatPattern` gradient over everything).
+- **`GeneticCoatTextureFactory`** (client) loads the template + gradient once,
+  runs `compose`, uploads a `DynamicTexture`, caches by `textureKey()`. Cleared
+  on world exit. **Every adult** now renders with `HdHorseModel` + a generated
+  texture; foals keep vanilla `*_baby` by `phenotype()`.
+- Dev tool: `./gradlew :common:bakeCoatSamples` renders a strip of sample coats
+  through the real pipeline to `build/coat-samples/` (no game launch).
+
+### The HD horse model (`client/HdHorseModel`)
+
+128px, fully non-mirrored UV layout - a structural copy of vanilla
+`AbstractEquineModel.createBodyMesh` with two changes: every cube passes
+`texScale = 0.5` and the layer bakes at 128x128 (`ClientSetup.HD_HORSE`), so
+`CubeDefinition.bake` -> effective texture size `128*0.5 = 64` and **every
+normalized UV is identical to vanilla** - the 2x sheet just gives each face 2x
+the texels. The four legs and two ears get their own `texOffs` and **drop
+`.mirror()`**. `horse_white.png` (in `common/.../assets/`) is the vanilla white
+scaled 2x with the extra leg / ear patches seeded from vanilla;
+`horse_white_vanilla64.png` is the untouched reference. Leg unwrap 32x30,
+ear 12x8. Assets live in `common/` (portable) and
+`neoforge-26.1.2/build.gradle`'s `processResources` folds `assets/**` in.
+
+### `common/coat/skin/HorseSkinGeometry` - the body-space projection engine
+
+Body-space grid (owner-verified in-game 2026-08-31 as smooth / seamless):
+**X** 0 at the tail's rear edge -> +nose, **Y** 0 at the hoof bottom -> +up,
+**Z** 0 at centre, **+Z = horse's right**; units are model units
+(1 = 1/16 block = 2 texels). Each `Part` is an axis-aligned box with six
+`Face`s (NOSE/TAIL span (Z,Y); TOP/BOTTOM span (X,Z); RIGHT/LEFT span (X,Y)).
+`project(part, face, a, b)` -> `Texel`; `sample(px, py)` -> `Sample(part, face,
+BodyPoint)` (memoised full-sheet grid); `forEachTexel(...)` walks mapped
+texels. One absolute scale across all parts, so a coat that's a function of X
+is seamless. Geometry table is lifted from `HdHorseModel` / vanilla
+`createBodyMesh` and must stay in sync; rotated parts (head / neck / muzzle /
+mane / ears / tail) use their rest-pose AABB - face projection there is
+approximate.
 
 ## Data flow (server -> client -> pixels)
 
-1. Horse spawns/breeds -> a `HorseRecord` is attached (see `breeding.md`);
-   its `geneticCode` drives `CoatGenerator.generate`, stored via
-   `ModAttachments.HORSE_COAT` (a Data Attachment with a `MapCodec`).
-2. Attachments are **not** auto-synced, so the handler also sends a
-   `CoatSyncPayload` (coat) and `HorseRecordSyncPayload` (record) to tracking
-   players.
-3. Client stores payloads in `ClientCoatCache` / `ClientHorseRecordCache`
-   (keyed by entity id; record cache also by UUID) - rebuilt from network
-   traffic each session, cleared on `LoggingOut` (`ClientLifecycleHandler`).
-4. `GeneticHorseRenderer` reads `ClientCoatCache` in `extractRenderState`;
-   for bay adults it calls `GeneticCoatTextureFactory` to composite a runtime
-   texture from the vanilla bay + black textures. Foals use the vanilla
-   `*_baby` texture for their phenotype (no leg compositing on the baby
-   model).
+1. Horse spawns/breeds -> `HorseRecord` attached (genetic code) and, on the
+   same join, a `HorseCoatAttachment` = `{genotype code, epigeneticSeed}`
+   (`CoatGenerator.generate` rolls the seed; legacy saves with no seed get one
+   backfilled on join). Both via `ModAttachments`.
+2. Not auto-synced -> the handler sends `CoatSyncPayload` `{entityId, code,
+   seed}` and `HorseRecordSyncPayload` to trackers.
+3. Client caches in `ClientCoatCache` (`CoatData`) / `ClientHorseRecordCache`,
+   cleared on `LoggingOut`.
+4. `GeneticHorseRenderer.extractRenderState` reads `ClientCoatCache` ->
+   `GeneticHorseRenderState.coatData`; `getTextureLocation` ->
+   `GeneticCoatTextureFactory.getOrCreate(coatData)` (adult, generated) or the
+   vanilla `*_baby` (foal). The renderer hands `HdHorseModel` to its super ctor
+   as the adult model - no per-entity model swap any more.
+
 
 ## Horse stats (speed / health)
 
@@ -270,9 +360,11 @@ This SDK is further from mainline 1.21.x than the version numbers suggest.
   `create(level, EntitySpawnReason.COMMAND)`.
 - **`DynamicTexture(NativeImage)` is gone** - use
   `DynamicTexture(Supplier<String> label, NativeImage image)`; it takes
-  ownership and closes the image (don't also close it -
-  `GeneticCoatTextureFactory.generate` keeps `base` out of its
-  try-with-resources).
+  ownership and closes the image (don't also close it). `NativeImage.getPixel
+  (x,y)` / `setPixel(x,y,argb)` are **ARGB** (`ARGB.fromABGR`/`toABGR` under
+  the hood); `getWidth()` / `getHeight()`. `GeneticCoatTextureFactory` builds
+  a fresh `new NativeImage(128,128,false)`, `setPixel`s the composer's `int[]`
+  in, and hands it to the `DynamicTexture`.
 - **Serverbound packets**: `PacketDistributor.sendToServer` ->
   `net.neoforged.neoforge.client.network.ClientPacketDistributor`.
   `sendToPlayer` / `sendToPlayersTrackingEntity` stayed on `PacketDistributor`.
@@ -641,21 +733,30 @@ dimension / Family-Tree / info-panel rework (see the Status snapshot's
    path (the default shrink-to-fit path is verified). Also: if the model should
    track the cursor a full 360deg instead of the ~±63deg swivel, switch
    `drawHorseModel` to an unbounded `atan2`.
-3. **Coats in the open world** - a `W_` horse renders `horse_white` /
-   `horse_white_baby` (breed `Ww x ww`, expect ~half white); bay black on the
-   legs vs the face (`LEG_REGIONS = {48,25,16,11}`); per-genotype coats
-   generally on wild spawns.
+3. **The allele/gene coat overlay pipeline in the client** - see the Status
+   snapshot's "NOT verified" list: black / chestnut / champagne / white read
+   right, bay + seal points + random heights, eyes survive, foals fine, the
+   family-tree node, and **save -> reload keeps the epigenetic seed** (coat
+   doesn't change). Tune targets: `BayCoat.BODY_BLACK`, the seal leg pass, the
+   agouti wild frequency, the `redblackgradient.png` art itself. Also check
+   **legacy saves** (old 8-char codes / no `epigenetic_seed`) load and get a
+   seed backfilled on join.
 4. **Stats surfaces** - foal speed/health landing on the entity's attributes;
    the inventory-panel green/amber/red tint vs `parentStats`; the paper dump's
-   `vs parents` line; **legacy 4-char-code / no-stat saves** still loading.
+   `vs parents` line; **legacy no-stat saves** still loading.
 5. **Clock no longer mounts you** - clock on a tamed foal in the horse
    dimension should just age it up, not also seat you.
 6. **Water riding** feel (`HorseWaterRidingHandler`); the **roped-horse
    right-click** portal shortcut.
-7. **Cleanups**: rename `DebugPenManager` / `DEBUG_LEVEL` /
+7. **Coat follow-ups**: per-horse coat texture for **foals** (baby UV isn't in
+   `HorseSkinGeometry`); white **markings** as a real non-deterministic gene
+   (the framework's ready - a `paint`/`restrict` gene tagged non-deterministic);
+   more loci (cream, dun, gray, roan); the overlay is a flat gradient sample
+   per pixel today (no dappling / shading); `T` on a non-deterministic coat
+   still generates a unique (identical-looking) texture per horse.
+8. **Cleanups**: rename `DebugPenManager` / `DEBUG_LEVEL` /
    `horsegenetics:debug_pens` to non-"debug" names (needs a save-data
-   migration or a one-time reset); fold speed/health/white into one Mendelian
-   model; per-leg `legBlackHeight`; more loci (cream, dun, gray); a
+   migration or a one-time reset); fold speed/health into the gene model; a
    `.gitignore`; name-generation rework; real white-fog dimension effects
    (needs a client dimension-effects mixin); the stray `neoforge.mods.toml`
    duplicate.

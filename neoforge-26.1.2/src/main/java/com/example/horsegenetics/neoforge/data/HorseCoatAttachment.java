@@ -1,40 +1,37 @@
 package com.example.horsegenetics.neoforge.data;
 
 import com.example.horsegenetics.common.coat.CoatData;
-import com.example.horsegenetics.common.genetics.CoatPhenotype;
 import com.example.horsegenetics.common.genetics.Genotype;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 /**
- * The persisted, server-side record for one horse: its genotype code plus
- * the resolved CoatData (so we never re-roll the bay leg height on reload).
+ * The persisted, server-side coat record for one horse: its genotype code and
+ * its <b>epigenetic seed</b> (rolled once at birth; drives every
+ * non-deterministic coat gene's per-horse randomness). Everything else -
+ * phenotype, whether the coat is deterministic, the actual pixels - is derived.
  *
- * This is intentionally a thin wrapper around common's types - all it adds
- * is the Codec that NeoForge's data attachment system needs for NBT
- * (de)serialization. If you backport to 1.12.2 later, this class does not
- * port; you'll write an NBTTagCompound reader/writer with the same two
- * fields instead. Everything it wraps (Genotype, CoatData) ports unchanged.
+ * <p>Thin wrapper over common's {@link CoatData} - all it adds is the NBT
+ * codec. Old saves that still carry {@code phenotype} / {@code leg_black_height}
+ * fields load fine (unknown fields are ignored); a missing {@code epigenetic_seed}
+ * reads as {@code 0}, which the join handler treats as "roll one now".
  */
-public record HorseCoatAttachment(String genotypeCode, CoatPhenotype phenotype, float legBlackHeight) {
+public record HorseCoatAttachment(String genotypeCode, long epigeneticSeed) {
 
-    /**
-     * NeoForge 26.1.2's {@code AttachmentType.Builder#serialize} takes a
-     * {@link MapCodec}, so that's the primary form; {@link #CODEC} is derived
-     * from it for any caller that needs a plain {@link Codec}.
-     */
     public static final MapCodec<HorseCoatAttachment> MAP_CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
             Codec.STRING.fieldOf("genotype").forGetter(HorseCoatAttachment::genotypeCode),
-            Codec.STRING.xmap(CoatPhenotype::valueOf, Enum::name)
-                    .fieldOf("phenotype").forGetter(HorseCoatAttachment::phenotype),
-            Codec.FLOAT.fieldOf("leg_black_height").forGetter(HorseCoatAttachment::legBlackHeight)
+            Codec.LONG.optionalFieldOf("epigenetic_seed", 0L).forGetter(HorseCoatAttachment::epigeneticSeed)
     ).apply(instance, HorseCoatAttachment::new));
 
     public static final Codec<HorseCoatAttachment> CODEC = MAP_CODEC.codec();
 
-    public static HorseCoatAttachment from(Genotype genotype, CoatData coatData) {
-        return new HorseCoatAttachment(genotype.toCode(), coatData.phenotype(), coatData.legBlackHeight());
+    public static HorseCoatAttachment from(CoatData coatData) {
+        return new HorseCoatAttachment(coatData.genotype().toCode(), coatData.epigeneticSeed());
+    }
+
+    public static HorseCoatAttachment from(Genotype genotype, long epigeneticSeed) {
+        return new HorseCoatAttachment(genotype.toCode(), epigeneticSeed);
     }
 
     public Genotype genotype() {
@@ -42,6 +39,11 @@ public record HorseCoatAttachment(String genotypeCode, CoatPhenotype phenotype, 
     }
 
     public CoatData coatData() {
-        return CoatData.fromRaw(phenotype, legBlackHeight);
+        return new CoatData(genotype(), epigeneticSeed);
+    }
+
+    /** True when a seed still needs rolling (legacy save, or the unassigned default). */
+    public boolean needsEpigeneticSeed() {
+        return epigeneticSeed == 0L;
     }
 }

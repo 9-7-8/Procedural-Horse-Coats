@@ -1,69 +1,51 @@
 package com.example.horsegenetics.common.coat;
 
 import com.example.horsegenetics.common.genetics.CoatPhenotype;
+import com.example.horsegenetics.common.genetics.Genotype;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class CoatDataTest {
 
-    @Test
-    void solidChestnutHasZeroLegBlackHeight() {
-        CoatData data = CoatData.solid(CoatPhenotype.CHESTNUT);
-        assertEquals(CoatPhenotype.CHESTNUT, data.phenotype());
-        assertEquals(0f, data.legBlackHeight());
+    private static CoatData coat(String code, long seed) {
+        return new CoatData(Genotype.parse(code), seed);
     }
 
     @Test
-    void solidRejectsBay() {
-        assertThrows(IllegalArgumentException.class, () -> CoatData.solid(CoatPhenotype.BAY));
+    void carriesGenotypeAndSeedAndDerivesPhenotype() {
+        CoatData c = coat("Eeaawwttcc", 42L);
+        assertEquals(CoatPhenotype.BLACK, c.phenotype());
+        assertEquals(42L, c.epigeneticSeed());
+        assertEquals("Eeaawwttcc", c.genotype().toCode());
     }
 
     @Test
-    void solidWhiteHasZeroLegBlackHeight() {
-        CoatData data = CoatData.solid(CoatPhenotype.WHITE);
-        assertEquals(CoatPhenotype.WHITE, data.phenotype());
-        assertEquals(0f, data.legBlackHeight());
-    }
-
-    @ParameterizedTest
-    @ValueSource(floats = {0f, 0.25f, 1f})
-    void bayKeepsItsLegBlackHeight(float height) {
-        CoatData data = CoatData.bay(height);
-        assertEquals(CoatPhenotype.BAY, data.phenotype());
-        assertEquals(height, data.legBlackHeight());
-    }
-
-    @ParameterizedTest
-    @ValueSource(floats = {-0.01f, 1.01f, -1f, 2f})
-    void bayRejectsHeightOutsideUnitRange(float bad) {
-        assertThrows(IllegalArgumentException.class, () -> CoatData.bay(bad));
+    void deterministicCoatsIgnoreTheSeedInTheirTextureKey() {
+        assertTrue(coat("Eeaawwttcc", 1L).isDeterministic());
+        assertEquals(coat("Eeaawwttcc", 1L).textureKey(), coat("Eeaawwttcc", 999L).textureKey());
     }
 
     @Test
-    void fromRawRebuildsSolidCoats() {
-        CoatData chestnut = CoatData.fromRaw(CoatPhenotype.CHESTNUT, 0f);
-        CoatData black = CoatData.fromRaw(CoatPhenotype.BLACK, 0f);
-        assertEquals(CoatPhenotype.CHESTNUT, chestnut.phenotype());
-        assertEquals(CoatPhenotype.BLACK, black.phenotype());
+    void nonDeterministicCoatsKeyOnTheSeed() {
+        CoatData bay1 = coat("EeAawwttcc", 1L);
+        CoatData bay2 = coat("EeAawwttcc", 2L);
+        assertFalse(bay1.isDeterministic());
+        assertNotEquals(bay1.textureKey(), bay2.textureKey());
     }
 
     @Test
-    void fromRawRebuildsBayWithHeight() {
-        CoatData data = CoatData.fromRaw(CoatPhenotype.BAY, 0.6f);
-        assertEquals(CoatPhenotype.BAY, data.phenotype());
-        assertEquals(0.6f, data.legBlackHeight());
+    void equalityIsGenotypePlusSeed() {
+        assertEquals(coat("Eeaawwttcc", 7L), coat("eEaawwttcc", 7L)); // code canonicalizes
+        assertNotEquals(coat("Eeaawwttcc", 7L), coat("Eeaawwttcc", 8L));
     }
 
     @Test
-    void fromRawIgnoresHeightForSolidCoats() {
-        // Persistence stores legBlackHeight=0 for non-bay, but a stray non-zero
-        // value must not blow up reconstruction - it's simply dropped.
-        CoatData data = CoatData.fromRaw(CoatPhenotype.BLACK, 0.9f);
-        assertEquals(CoatPhenotype.BLACK, data.phenotype());
-        assertEquals(0f, data.legBlackHeight());
+    void defaultIsAPlainBlackHorse() {
+        assertEquals(CoatPhenotype.BLACK, CoatData.DEFAULT.phenotype());
+        assertTrue(CoatData.DEFAULT.isDeterministic());
     }
 }

@@ -15,33 +15,23 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.animal.equine.Horse;
 
 /**
- * Vanilla's {@code HorseRenderer} is {@code final} in 26.1.2, so we cannot
- * subclass it (CLAUDE.md flagged this as the likely outcome). Instead we
- * extend {@code AbstractHorseRenderer} directly and replicate vanilla's
- * constructor (models + marking/equipment layers, copied verbatim from
- * {@code net.minecraft.client.renderer.entity.HorseRenderer}), then override
- * the three hook points we care about.
+ * Vanilla's {@code HorseRenderer} is {@code final} in 26.1.2, so we extend
+ * {@code AbstractHorseRenderer} directly and replicate its constructor
+ * (marking + equipment layers, copied from vanilla {@code HorseRenderer}).
  *
- * <p>The render state generic stays vanilla's {@link HorseRenderState} so the
- * copied layers type-check unchanged; {@link #createRenderState()} covariantly
- * returns our {@link GeneticHorseRenderState} subclass, and because
- * {@code EntityRenderer.createRenderState(entity, partialTicks)} always routes
- * through that method, every state instance is really a
- * {@code GeneticHorseRenderState} - the {@code instanceof} checks below never
- * fail in practice.
+ * <p>Since the allele/overlay rework, <b>every adult horse</b> renders with
+ * {@link HdHorseModel} (128px, non-mirrored UVs) and a coat texture generated
+ * per genotype by {@link GeneticCoatTextureFactory}. So we simply hand the HD
+ * model to the super constructor as the adult model - no per-entity model swap
+ * any more. Foals keep the vanilla {@code BabyHorseModel} + the vanilla
+ * {@code *_baby} textures (the baby UV layout isn't covered by
+ * {@code HorseSkinGeometry}).
  */
 public class GeneticHorseRenderer extends AbstractHorseRenderer<Horse, HorseRenderState, HorseModel> {
 
-    private static final Identifier BLACK_TEXTURE = vanilla("horse_black");
-    private static final Identifier CHESTNUT_TEXTURE = vanilla("horse_chestnut");
-    private static final Identifier BROWN_TEXTURE = vanilla("horse_brown");
-    private static final Identifier WHITE_TEXTURE = vanilla("horse_white");
-    // Foals use a distinct model (BabyHorseModel) with its own UV layout, so
-    // they need the vanilla *_baby texture. We don't composite bay legs onto
-    // foals - they grow up quickly and re-extract the adult texture then.
+    private static final Identifier BROWN_BABY_TEXTURE = vanilla("horse_brown_baby");
     private static final Identifier BLACK_BABY_TEXTURE = vanilla("horse_black_baby");
     private static final Identifier CHESTNUT_BABY_TEXTURE = vanilla("horse_chestnut_baby");
-    private static final Identifier BROWN_BABY_TEXTURE = vanilla("horse_brown_baby");
     private static final Identifier WHITE_BABY_TEXTURE = vanilla("horse_white_baby");
 
     private static Identifier vanilla(String name) {
@@ -49,7 +39,9 @@ public class GeneticHorseRenderer extends AbstractHorseRenderer<Horse, HorseRend
     }
 
     public GeneticHorseRenderer(EntityRendererProvider.Context context) {
-        super(context, new HorseModel(context.bakeLayer(ModelLayers.HORSE)), new BabyHorseModel(context.bakeLayer(ModelLayers.HORSE_BABY)));
+        super(context,
+                new HdHorseModel(context.bakeLayer(ClientSetup.HD_HORSE)),
+                new BabyHorseModel(context.bakeLayer(ModelLayers.HORSE_BABY)));
         this.addLayer(new HorseMarkingLayer(this));
         this.addLayer(
             new SimpleEquipmentLayer<>(
@@ -95,28 +87,24 @@ public class GeneticHorseRenderer extends AbstractHorseRenderer<Horse, HorseRend
     public Identifier getTextureLocation(HorseRenderState renderState) {
         CoatData coatData = (renderState instanceof GeneticHorseRenderState geneticState)
                 ? geneticState.coatData
-                : null;
-        if (coatData == null) {
-            return renderState.isBaby ? BROWN_BABY_TEXTURE : BROWN_TEXTURE;
-        }
+                : CoatData.DEFAULT;
         return coatTextureFor(coatData, renderState.isBaby);
     }
 
-    /** The coat texture for a phenotype - shared with the family-tree coat swatch. */
+    /**
+     * The coat texture for one horse - shared with the family-tree node.
+     * Adults: the generated overlay texture. Foals: the nearest vanilla
+     * {@code *_baby} texture (no procedural coat on the baby model yet).
+     */
     public static Identifier coatTextureFor(CoatData coatData, boolean baby) {
-        if (baby) {
-            return switch (coatData.phenotype()) {
-                case BAY -> BROWN_BABY_TEXTURE;      // bay's adult base is brown; no leg compositing on foals
-                case BLACK -> BLACK_BABY_TEXTURE;
-                case CHESTNUT -> CHESTNUT_BABY_TEXTURE;
-                case WHITE -> WHITE_BABY_TEXTURE;
-            };
+        if (!baby) {
+            return GeneticCoatTextureFactory.getOrCreate(coatData);
         }
         return switch (coatData.phenotype()) {
-            case BAY -> GeneticCoatTextureFactory.getOrCreate(coatData);
-            case BLACK -> BLACK_TEXTURE;
-            case CHESTNUT -> CHESTNUT_TEXTURE;
-            case WHITE -> WHITE_TEXTURE;
+            case BAY -> BROWN_BABY_TEXTURE;
+            case BLACK -> BLACK_BABY_TEXTURE;
+            case CHESTNUT -> CHESTNUT_BABY_TEXTURE;
+            case WHITE -> WHITE_BABY_TEXTURE;
         };
     }
 }

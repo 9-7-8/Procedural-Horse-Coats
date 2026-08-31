@@ -1,6 +1,9 @@
 package com.example.horsegenetics.neoforge.client;
 
 import com.example.horsegenetics.common.coat.CoatData;
+import com.example.horsegenetics.common.coat.pattern.CoatTextureComposer;
+import com.example.horsegenetics.common.coat.pattern.GradientLut;
+import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry;
 import com.example.horsegenetics.neoforge.HorseGenetics;
 import com.mojang.blaze3d.platform.NativeImage;
 import net.minecraft.client.Minecraft;
@@ -8,119 +11,110 @@ import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.resources.Identifier;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * This is the "generate layers by rule rather than shipping PNGs" piece:
- * for bay horses, we load the vanilla base coat texture and the vanilla
- * black texture, then composite them ourselves at runtime by copying leg
- * pixels from the black texture into the base texture up to a height
- * determined by CoatData.legBlackHeight(). The result is uploaded as a
- * DynamicTexture and cached by a bucketed height so we don't generate a
- * new texture for every single horse (small variations in height reuse
- * the same generated texture).
+ * Runs the common {@code CoatTextureComposer} pipeline and uploads the result
+ * as a {@link DynamicTexture}, cached by {@link CoatData#textureKey()}.
  *
- * <p><b>TODO before this looks right in-game:</b> LEG_REGIONS below is a
- * placeholder. Open horse_brown.png and horse_black.png (both 64x64) in
- * an image editor, find the pixel rectangles the four legs occupy, and
- * fill in real values. Everything else in this class is version-specific
- * plumbing that should work as-is once those coordinates are correct.
+ * <p>Deterministic coats (black, chestnut, champagne, white) share one texture
+ * per genotype code; non-deterministic coats (bay, seal, markings) key on the
+ * epigenetic seed too, so every such horse gets its own. The white-horse
+ * template and the red/black gradient are loaded once from the mod's assets.
  */
 public final class GeneticCoatTextureFactory {
 
-    private static final Identifier BASE_BAY_TEXTURE =
-            Identifier.withDefaultNamespace("textures/entity/horse/horse_brown.png");
-    private static final Identifier BLACK_OVERLAY_TEXTURE =
-            Identifier.withDefaultNamespace("textures/entity/horse/horse_black.png");
+    private static final int N = HorseSkinGeometry.SHEET_SIZE;
 
-    // Bucket the continuous [0,1] height into 10 steps so we generate at
-    // most 10 textures total for bay horses, not one per horse.
-    private static final int HEIGHT_BUCKETS = 10;
+    private static final Identifier WHITE_TEMPLATE =
+            Identifier.fromNamespaceAndPath(HorseGenetics.MOD_ID, "textures/entity/horse/horse_white.png");
+    private static final Identifier GRADIENT =
+            Identifier.fromNamespaceAndPath(HorseGenetics.MOD_ID, "textures/coat/redblackgradient.png");
 
-    private static final Map<Integer, Identifier> CACHE = new ConcurrentHashMap<>();
+    private static final Map<String, Identifier> CACHE = new ConcurrentHashMap<>();
 
-    // Pixel rectangle on the 64x64 horse texture that holds the legs, as
-    // {x, y, width, height}. All four legs of the vanilla equine model share
-    // ONE texture region: AbstractEquineModel puts every leg at texOffs(48, 21)
-    // as a 4x11x4 cube, so the four side faces unwrap to U 48..64, V 25..36
-    // (the earlier placeholder pointed at U/V 0,0 - the head - which is why the
-    // "black" was landing on the face). compositeLegRegion fills this bottom-up,
-    // so a small legBlackHeight only darkens the hoof end.
-    private static final int[][] LEG_REGIONS = {
-            {48, 25, 16, 11},
-    };
+    private static volatile int[] template;
+    private static volatile GradientLut gradient;
 
-    public static Identifier getOrCreate(CoatData coatData) {
-        int bucket = Math.round(coatData.legBlackHeight() * HEIGHT_BUCKETS);
-        return CACHE.computeIfAbsent(bucket, b -> generate((float) b / HEIGHT_BUCKETS));
+    private GeneticCoatTextureFactory() {
     }
 
-    private static Identifier generate(float legBlackHeight) {
-        // 'base' is intentionally NOT in the try-with-resources: ownership of it
-        // transfers to the DynamicTexture (which closes it on its own close()),
-        // so closing it here too would double-free the native image.
-        NativeImage base = null;
-        try (NativeImage overlay = loadVanillaTexture(BLACK_OVERLAY_TEXTURE)) {
-            base = loadVanillaTexture(BASE_BAY_TEXTURE);
+    public static Identifier getOrCreate(CoatData coat) {
+        return CACHE.computeIfAbsent(coat.textureKey(), key -> generate(coat, key));
+    }
 
-            for (int[] region : LEG_REGIONS) {
-                compositeLegRegion(base, overlay, region, legBlackHeight);
+    private static Identifier generate(CoatData coat, String key) {
+        ensureAssetsLoaded();
+        int[] argb = CoatTextureComposer.compose(coat.genotype(), coat.epigeneticSeed(), template, gradient);
+
+        NativeImage image = new NativeImage(N, N, false);
+        for (int y = 0; y < N; y++) {
+            for (int x = 0; x < N; x++) {
+                image.setPixel(x, y, argb[y * N + x]);
             }
+        }
+        DynamicTexture texture = new DynamicTexture(() -> "horsegenetics_coat_" + key, image);
+        Identifier id = Identifier.fromNamespaceAndPath(HorseGenetics.MOD_ID, "coat/" + sanitize(key));
+        Minecraft.getInstance().getTextureManager().register(id, texture);
+        return id;
+    }
 
-            int heightPercent = Math.round(legBlackHeight * 100);
-            DynamicTexture dynamicTexture = new DynamicTexture(() -> "horsegenetics_bay_" + heightPercent, base);
-            Identifier id = Identifier.fromNamespaceAndPath(
-                    HorseGenetics.MOD_ID, "bay_generated_" + heightPercent);
-            Minecraft.getInstance().getTextureManager().register(id, dynamicTexture);
-            return id;
+    private static synchronized void ensureAssetsLoaded() {
+        if (template != null && gradient != null) {
+            return;
+        }
+        template = loadArgb(WHITE_TEMPLATE, N, N);
+
+        try (InputStream in = Minecraft.getInstance().getResourceManager().getResourceOrThrow(GRADIENT).open();
+             NativeImage img = NativeImage.read(in)) {
+            int w = img.getWidth();
+            int h = img.getHeight();
+            int[] px = new int[w * h];
+            for (int y = 0; y < h; y++) {
+                for (int x = 0; x < w; x++) {
+                    px[y * w + x] = img.getPixel(x, y);
+                }
+            }
+            gradient = new GradientLut(px, w, h);
         } catch (IOException e) {
-            if (base != null) {
-                base.close();
-            }
-            throw new RuntimeException("Failed to composite bay horse texture", e);
+            throw new RuntimeException("failed to load coat gradient " + GRADIENT, e);
         }
     }
 
-    /**
-     * Copies overlay pixels into base within the given region, starting from
-     * the bottom of the region (the hoof) and covering upward proportional to
-     * legBlackHeight. 0.0 = no black copied, 1.0 = whole region copied.
-     */
-    private static void compositeLegRegion(NativeImage base, NativeImage overlay, int[] region, float legBlackHeight) {
-        int x = region[0], y = region[1], w = region[2], h = region[3];
-        int blackRows = Math.round(h * legBlackHeight);
-        int startY = y + (h - blackRows); // bottom-up
-        for (int row = startY; row < y + h; row++) {
-            for (int col = x; col < x + w; col++) {
-                base.setPixel(col, row, overlay.getPixel(col, row));
+    private static int[] loadArgb(Identifier location, int w, int h) {
+        try (InputStream in = Minecraft.getInstance().getResourceManager().getResourceOrThrow(location).open();
+             NativeImage img = NativeImage.read(in)) {
+            if (img.getWidth() != w || img.getHeight() != h) {
+                throw new IllegalStateException(location + " must be " + w + "x" + h
+                        + ", got " + img.getWidth() + "x" + img.getHeight());
             }
+            int[] px = new int[w * h];
+            for (int y = 0; y < h; y++) {
+                for (int x = 0; x < w; x++) {
+                    px[y * w + x] = img.getPixel(x, y);
+                }
+            }
+            return px;
+        } catch (IOException e) {
+            throw new RuntimeException("failed to load " + location, e);
         }
     }
 
-    /**
-     * Release every generated bay texture and forget the cache. Called when the
-     * player leaves a world so the textures don't outlive the horse database
-     * they were made for.
-     */
+    /** Release every generated coat texture (called on world exit). */
     public static void clear() {
         var textureManager = Minecraft.getInstance().getTextureManager();
         for (Identifier id : CACHE.values()) {
             textureManager.release(id);
         }
         CACHE.clear();
+        template = null;
+        gradient = null;
     }
 
-    private static NativeImage loadVanillaTexture(Identifier location) throws IOException {
-        // NativeImage.read expects an InputStream; resource manager lookup
-        // omitted here for brevity - wire this to Minecraft.getInstance()
-        // .getResourceManager().open(location) in the real implementation.
-        var resource = Minecraft.getInstance().getResourceManager().getResourceOrThrow(location);
-        try (var stream = resource.open()) {
-            return NativeImage.read(stream);
-        }
-    }
-
-    private GeneticCoatTextureFactory() {
+    private static String sanitize(String key) {
+        return key.replaceAll("[^A-Za-z0-9_]", "_").toLowerCase(Locale.ROOT);
     }
 }

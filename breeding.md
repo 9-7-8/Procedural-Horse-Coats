@@ -40,27 +40,24 @@ the *band* a foal's stats are rolled from.
 
 ### `genetics/Genotype.breedWith(Genotype other, Rng)`
 
-Three loci now (full phenotype table in CLAUDE.md): a **6-character** code -
-E-locus, then A-locus, then W-locus (`E`/`e`, `A`/`a`, `W`/`w`). Legacy
-4-character codes (pre-W) still parse and are read as `ww`.
+A `Genotype` is now one `AllelePair` per registered `Gene` (`genetics/Genes`);
+the full model - alleles as objects, the gene registry, the coat overlay
+pipeline - is in **CLAUDE.md** ("The genetics model" / "The coat overlay
+pipeline"). It still round-trips through a compact code string (2 symbols per
+gene, `Genes.codeOrder()` = extension, agouti, white, test, champagne).
+Shorter legacy codes still parse (missing trailing locus -> that gene's
+wild-type).
 
-`breedWith` is Mendelian segregation: the child gets **one allele from each
-parent at each locus**, each drawn 50/50 between that parent's two alleles.
-Six `Rng.nextBoolean()` draws, in order:
+`breedWith` is Mendelian segregation: for **each gene** the child takes one
+allele from each parent, drawn 50/50 within that parent's pair - **2
+`Rng.nextBoolean()` per gene**, genes in `codeOrder()` (so 10 draws for the 5
+built-in genes: E,E, A,A, W,W, T,T, C,C; `true` = that parent's first allele).
 
-| draw | picks |
-|------|-------|
-| 1 | child's E allele from `this` parent (`true` = first allele) |
-| 2 | child's E allele from `other` parent |
-| 3 | child's A allele from `this` parent |
-| 4 | child's A allele from `other` parent |
-| 5 | child's W allele from `this` parent |
-| 6 | child's W allele from `other` parent |
-
-The result goes through `Genotype.of`, which canonicalizes allele order
-(dominant first), so `breedWith` is symmetric in its two parents. Example:
-`EEAAww x eeaaww` is **always** `EeAaww`. `W` is dominant over everything -
-one `W` allele from either parent makes the foal solid white.
+Each resulting pair is canonicalized by `AllelePair` (more-dominant allele
+first, per `Gene.precedence`), so `breedWith` is symmetric. Example:
+`EEAAwwttcc x eeaawwttcc` is **always** `EeAawwttcc`. Dominance still masks:
+one `W` from either parent -> white foal; one `T` -> Test coat; one `Ch` ->
+champagne dilution.
 
 ### `horse/HorseStats.rollFoalStat(double parentA, double parentB, Rng)`
 
@@ -246,12 +243,17 @@ side, any `Horse`) -> `ensureRecordAndCoat(horse)`:
    fullHeal=false)` so a reloaded horse keeps its rolled attributes, and
    re-set the custom name if it's missing.
 4. **Coat**: if the coat attachment is missing or still the `"eeaa"`
-   sentinel, derive it from `Genotype.parse(of(horse).geneticCode())` via
-   `CoatGenerator.generate`, store `HorseCoatAttachment`, and send the coat
-   sync packet.
+   sentinel, `CoatGenerator.generate(genotype, rng)` rolls the horse's
+   **epigenetic seed** (`rng.nextLong()`, once, ever), stores
+   `HorseCoatAttachment = {genotype code, seed}`, and sends the coat sync
+   packet. A legacy save whose attachment has no seed (`epigeneticSeed == 0`)
+   gets one backfilled on this same join.
 
-Step 4 means the coat is **always derived from the record's genetic code** -
-a bred foal's coat matches the genes it actually inherited.
+Step 4 means the coat is **always derived from the record's genetic code**
+(plus the persisted seed for non-deterministic coats) - a bred foal's coat
+matches the genes it actually inherited, and stays the same across reloads.
+The actual pixels are generated client-side by `CoatTextureComposer` /
+`GeneticCoatTextureFactory` - see CLAUDE.md "The coat overlay pipeline".
 
 The horse-dimension pens spawn horses with `addFreshEntity` but pre-apply
 the founder record first (via `newFounder(horse, rng, sex)`) so each pen ends
@@ -403,8 +405,9 @@ The record attachment is server-only, so it's pushed to clients:
 | data | where | survives / scope |
 |------|-------|----------|
 | a horse's own `HorseRecord` | entity NBT, via the `HORSE_RECORD` attachment | world save/reload, chunk unload, dimension change |
+| a horse's coat (`{genotype code, epigeneticSeed}`) | entity NBT, via the `HORSE_COAT` attachment | world save/reload - the seed is what makes a non-deterministic coat (bay/seal) stable across sessions |
 | the ancestry table | `HorseAncestryData` SavedData (`horsegenetics:horse_ancestry`) | **per world** - it's `MinecraftServer#getDataStorage()`, which writes to `<save>/data/horsegenetics/horse_ancestry.dat`, so it's created per save and deleted when the save folder is deleted |
-| generated bay-leg textures | in-memory `DynamicTexture`s in the client `TextureManager` (`GeneticCoatTextureFactory.CACHE`) | session only; `ClientLifecycleHandler` releases them and clears the client caches on `ClientPlayerNetworkEvent.LoggingOut`, so a world's textures don't leak into the next world |
+| generated coat textures | in-memory `DynamicTexture`s in the client `TextureManager` (`GeneticCoatTextureFactory.CACHE`, keyed by `CoatData.textureKey()`) | session only; `ClientLifecycleHandler` releases them and clears the client caches on `ClientPlayerNetworkEvent.LoggingOut` |
 
 `HorseRecord`s round-trip through `HorseRecordCodecs` - the same codec on
 both sides.
@@ -461,14 +464,26 @@ What no automated check has covered yet:
   later. Jump strength isn't tracked at all yet.
 - **White (`W`) is a plain on/off dominant** - no true-white subtleties, no
   interaction with E/A other than masking them. Wild frequency is
-  `Genotype.WILD_WHITE_ALLELE_ODDS` (1 in 50 per allele).
-- No inbreeding prevention, no generational effects, no sex-linked loci -
-  the three E/A/W loci combine independently.
+  `WhiteGene.WILD_WHITE_ALLELE_ODDS` (1 in 50 per allele). White **markings**
+  (a real non-deterministic gene) aren't built yet.
+- **`T` (test) is a temporary diagnostic gene** - dominant, paints the Test
+  gradient over the coat. `TestGene.WILD_TEST_ODDS` = **4** (one roll -> `Tt`,
+  deliberately high; not Hardy-Weinberg). Expect it pulled once the skin engine
+  is trusted.
+- **Champagne** is a simple dominant dilution (`ChampagneGene`) - deterministic,
+  pulls the pigment sample to the gradient's gold column. Real champagne's
+  dose effects / cream interaction aren't modelled.
+- **Bay / seal leg + face black is per-horse random** (the epigenetic seed) -
+  not heritable detail, just a stored roll. Coat generation itself is
+  documented in CLAUDE.md.
+- No inbreeding prevention, no generational effects, no sex-linked loci - the
+  genes combine independently.
 - Name-generation output is rough and slated for a rework (deferred by the
   owner). The rule - `<alpha> <space> <beta>` - is fixed.
 - `HorseRecord.geneticCode` and `HorseCoatAttachment.genotypeCode` both hold
-  the genotype string. The coat derives from the record so they stay
-  consistent, but this redundancy is a likely future consolidation.
+  the genotype string (the coat attachment adds only the epigenetic seed). The
+  coat derives from the record so they stay consistent; the redundancy is a
+  likely future consolidation.
 - `ancestorsOf` only walks through records present in the database; a gap in
   the recorded chain ends that branch.
 - The family tree needs a fresh server request per re-centre; there's no
@@ -478,8 +493,12 @@ What no automated check has covered yet:
 
 ```
 common/src/main/java/com/example/horsegenetics/common/
-  genetics/Genotype.java            # breedWith(...)
+  genetics/Genotype.java            # AllelePair per Gene; parse/toCode; breedWith(...); random(...)
+  genetics/Allele.java, Gene.java, AllelePair.java, Genes.java   # the allele/gene model + registry
+  genetics/genes/*.java             # Extension, Agouti(+seal), White, Champagne, Test
   genetics/GeneticCodeCombiner.java # combine(motherCode, fatherCode, Rng)
+  coat/CoatData.java, CoatGenerator.java        # genotype + epigeneticSeed; generate() rolls the seed
+  coat/pattern/*.java               # the overlay pipeline (CLAUDE.md "The coat overlay pipeline")
   horse/Sex.java                    # + label(adult) -> stallion/mare/colt/filly
   horse/HorseRecord.java            # + speed / health (rounded up, uncapped), parentStats, withStats/withParentStats
   horse/HorseStats.java             # rollFoalStat(a, b, Rng) -> [0.75*min, 1.5*max]

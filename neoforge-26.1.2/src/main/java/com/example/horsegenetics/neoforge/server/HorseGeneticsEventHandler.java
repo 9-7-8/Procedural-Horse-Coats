@@ -116,9 +116,14 @@ public final class HorseGeneticsEventHandler {
         HorseCoatAttachment coat = horse.getData(ModAttachments.HORSE_COAT.get());
         if (coat == null || isUnassignedSentinel(coat)) {
             Genotype genotype = Genotype.parse(HorseRecords.of(horse).geneticCode());
-            CoatData coatData = CoatGenerator.generate(genotype, rng);
-            horse.setData(ModAttachments.HORSE_COAT.get(), HorseCoatAttachment.from(genotype, coatData));
+            CoatData coatData = CoatGenerator.generate(genotype, rng); // rolls the epigenetic seed once
+            horse.setData(ModAttachments.HORSE_COAT.get(), HorseCoatAttachment.from(coatData));
             syncToTrackers(horse, coatData);
+        } else if (coat.needsEpigeneticSeed()) {
+            // legacy save with no epigenetic seed - roll one now and persist it
+            HorseCoatAttachment seeded = new HorseCoatAttachment(coat.genotypeCode(), rng.nextLong());
+            horse.setData(ModAttachments.HORSE_COAT.get(), seeded);
+            syncToTrackers(horse, seeded.coatData());
         }
     }
 

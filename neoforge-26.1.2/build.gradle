@@ -52,6 +52,18 @@ tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
 }
 
+// The shared image assets (textures, and later a lot more) live in :common so
+// a future forge-1.12.2 module can consume the same source of truth. :common
+// is a plain library, so its `assets/` tree is on the classpath but is NOT
+// discovered as a mod resource pack - fold it into this module's own resources
+// at build time. `include 'assets/**'` keeps it from colliding with :common's
+// classpath-only `horsegenetics/names/**` word tables.
+processResources {
+    from(project(":common").file("src/main/resources")) {
+        include "assets/**"
+    }
+}
+
 dependencies {
     implementation project(":common")
 }

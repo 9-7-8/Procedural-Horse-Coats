@@ -1,6 +1,5 @@
 package com.example.horsegenetics.neoforge.data;
 
-import com.example.horsegenetics.common.genetics.CoatPhenotype;
 import com.example.horsegenetics.common.horse.HorseRecord;
 import com.example.horsegenetics.common.horse.Sex;
 import com.example.horsegenetics.neoforge.HorseGenetics;
@@ -22,7 +21,7 @@ public final class ModAttachments {
     // horse should ever be seen or saved with this default in practice.
     public static final Supplier<AttachmentType<HorseCoatAttachment>> HORSE_COAT =
             ATTACHMENT_TYPES.register("horse_coat", () -> AttachmentType
-                    .builder(() -> new HorseCoatAttachment("eeaa", CoatPhenotype.CHESTNUT, 0f))
+                    .builder(() -> new HorseCoatAttachment("eeaa", 0L))
                     .serialize(HorseCoatAttachment.MAP_CODEC)
                     .copyOnDeath()
                     .build());

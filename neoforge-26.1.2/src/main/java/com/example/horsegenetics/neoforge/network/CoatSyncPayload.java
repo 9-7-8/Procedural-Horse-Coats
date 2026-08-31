@@ -1,7 +1,7 @@
 package com.example.horsegenetics.neoforge.network;
 
 import com.example.horsegenetics.common.coat.CoatData;
-import com.example.horsegenetics.common.genetics.CoatPhenotype;
+import com.example.horsegenetics.common.genetics.Genotype;
 import com.example.horsegenetics.neoforge.HorseGenetics;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
@@ -9,12 +9,12 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
 
 /**
- * Data attachments are NOT auto-synced to the client. Since the client needs
- * this to render the horse at all, we push it explicitly whenever a horse's
- * coat is assigned or a player starts tracking the horse. The client stores
- * incoming payloads in ClientCoatCache, keyed by entity id.
+ * Data attachments are NOT auto-synced. The client needs the genotype + the
+ * epigenetic seed to (re)generate the coat texture, so we push both explicitly
+ * whenever a horse's coat is assigned or a player starts tracking it. Stored
+ * client-side in {@code ClientCoatCache}, keyed by entity id.
  */
-public record CoatSyncPayload(int entityId, CoatPhenotype phenotype, float legBlackHeight)
+public record CoatSyncPayload(int entityId, String genotypeCode, long epigeneticSeed)
         implements CustomPacketPayload {
 
     public static final Type<CoatSyncPayload> TYPE =
@@ -22,17 +22,17 @@ public record CoatSyncPayload(int entityId, CoatPhenotype phenotype, float legBl
 
     public static final StreamCodec<RegistryFriendlyByteBuf, CoatSyncPayload> STREAM_CODEC = StreamCodec.composite(
             StreamCodec.of((buf, v) -> buf.writeVarInt(v), buf -> buf.readVarInt()), CoatSyncPayload::entityId,
-            StreamCodec.of((buf, v) -> buf.writeEnum(v), buf -> buf.readEnum(CoatPhenotype.class)), CoatSyncPayload::phenotype,
-            StreamCodec.of((buf, v) -> buf.writeFloat(v), buf -> buf.readFloat()), CoatSyncPayload::legBlackHeight,
+            StreamCodec.of((buf, v) -> buf.writeUtf(v), buf -> buf.readUtf()), CoatSyncPayload::genotypeCode,
+            StreamCodec.of((buf, v) -> buf.writeLong(v), buf -> buf.readLong()), CoatSyncPayload::epigeneticSeed,
             CoatSyncPayload::new
     );
 
     public static CoatSyncPayload of(int entityId, CoatData coatData) {
-        return new CoatSyncPayload(entityId, coatData.phenotype(), coatData.legBlackHeight());
+        return new CoatSyncPayload(entityId, coatData.genotype().toCode(), coatData.epigeneticSeed());
     }
 
     public CoatData coatData() {
-        return CoatData.fromRaw(phenotype, legBlackHeight);
+        return new CoatData(Genotype.parse(genotypeCode), epigeneticSeed);
     }
 
     @Override

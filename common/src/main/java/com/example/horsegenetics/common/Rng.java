@@ -21,4 +21,13 @@ public interface Rng {
      * a list (e.g. name-word tables).
      */
     int nextInt(int bound);
+
+    /**
+     * Returns a uniformly distributed {@code long} across the full 64-bit range.
+     * Used to roll a horse's <b>epigenetic seed</b> once at birth - a single
+     * value that seeds every non-deterministic coat gene's own randomness, so
+     * the skin regenerates identically every session (see
+     * {@code coat.pattern.SeededRng} / {@code CoatData}).
+     */
+    long nextLong();
 }

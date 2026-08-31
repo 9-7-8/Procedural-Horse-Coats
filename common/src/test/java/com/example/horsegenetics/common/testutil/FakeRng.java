@@ -15,6 +15,7 @@ public final class FakeRng implements Rng {
     private final Deque<Float> floats = new ArrayDeque<>();
     private final Deque<Boolean> booleans = new ArrayDeque<>();
     private final Deque<Integer> ints = new ArrayDeque<>();
+    private final Deque<Long> longs = new ArrayDeque<>();
 
     public FakeRng floats(float... values) {
         for (float v : values) {
@@ -33,6 +34,13 @@ public final class FakeRng implements Rng {
     public FakeRng ints(int... values) {
         for (int v : values) {
             ints.add(v);
+        }
+        return this;
+    }
+
+    public FakeRng longs(long... values) {
+        for (long v : values) {
+            longs.add(v);
         }
         return this;
     }
@@ -64,5 +72,13 @@ public final class FakeRng implements Rng {
                     "FakeRng.nextInt(" + bound + ") next queued value " + v + " is out of range");
         }
         return v;
+    }
+
+    @Override
+    public long nextLong() {
+        if (longs.isEmpty()) {
+            throw new IllegalStateException("FakeRng.nextLong() called more times than values provided");
+        }
+        return longs.removeFirst();
     }
 }

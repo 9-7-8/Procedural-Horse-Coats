@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.example.horsegenetics.common.name.HorseNamesTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-08-31T02:29:53.599Z" hostname="PERDIX" time="0.005">
+<testsuite name="com.example.horsegenetics.common.name.HorseNamesTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-08-31T06:09:37.044Z" hostname="PERDIX" time="0.006">
   <properties/>
-  <testcase name="secondFoalIsTheOtherCombo()" classname="com.example.horsegenetics.common.name.HorseNamesTest" time="0.002"/>
-  <testcase name="neverBothHalvesFromOneParent()" classname="com.example.horsegenetics.common.name.HorseNamesTest" time="0.001"/>
+  <testcase name="secondFoalIsTheOtherCombo()" classname="com.example.horsegenetics.common.name.HorseNamesTest" time="0.001"/>
+  <testcase name="neverBothHalvesFromOneParent()" classname="com.example.horsegenetics.common.name.HorseNamesTest" time="0.0"/>
   <testcase name="foalsThreeThroughSixKeepOneParentHalfPlusRandom()" classname="com.example.horsegenetics.common.name.HorseNamesTest" time="0.0"/>
   <testcase name="firstFromDamMeansLastFromSire()" classname="com.example.horsegenetics.common.name.HorseNamesTest" time="0.001"/>
   <testcase name="firstFoalIsDamFirstSireLast()" classname="com.example.horsegenetics.common.name.HorseNamesTest" time="0.0"/>
   <testcase name="seventhFoalOnwardIsFullyRandom()" classname="com.example.horsegenetics.common.name.HorseNamesTest" time="0.0"/>
-  <testcase name="firstFromSireMeansLastFromDam()" classname="com.example.horsegenetics.common.name.HorseNamesTest" time="0.0"/>
+  <testcase name="firstFromSireMeansLastFromDam()" classname="com.example.horsegenetics.common.name.HorseNamesTest" time="0.001"/>
   <system-out><![CDATA[]]></system-out>
   <system-err><![CDATA[]]></system-err>
 </testsuite>

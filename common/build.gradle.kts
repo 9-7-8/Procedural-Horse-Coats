@@ -33,3 +33,15 @@ dependencies {
 tasks.test {
     useJUnitPlatform()
 }
+
+// Render sample coats through the real overlay pipeline (composer + gradient +
+// white template) to build/coat-samples/ so the result can be eyeballed
+// without launching the game. Dev tooling only.
+tasks.register<JavaExec>("bakeCoatSamples") {
+    group = "horsegenetics"
+    description = "Render sample coats through CoatTextureComposer to build/coat-samples/"
+    dependsOn(tasks.named("classes"))
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass.set("com.example.horsegenetics.common.coat.pattern.CoatSampleTool")
+    args(layout.buildDirectory.dir("coat-samples").get().asFile.absolutePath)
+}

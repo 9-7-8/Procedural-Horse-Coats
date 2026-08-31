@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.example.horsegenetics.common.horse.HorseStatsTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-08-31T02:29:53.572Z" hostname="PERDIX" time="0.004">
+<testsuite name="com.example.horsegenetics.common.horse.HorseStatsTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-08-31T06:09:37.015Z" hostname="PERDIX" time="0.004">
   <properties/>
-  <testcase name="topOfBandCanExceedBothParents()" classname="com.example.horsegenetics.common.horse.HorseStatsTest" time="0.001"/>
+  <testcase name="topOfBandCanExceedBothParents()" classname="com.example.horsegenetics.common.horse.HorseStatsTest" time="0.002"/>
   <testcase name="rollAtOnePicksTopOfBand()" classname="com.example.horsegenetics.common.horse.HorseStatsTest" time="0.0"/>
   <testcase name="rollAtHalfIsBandMidpoint()" classname="com.example.horsegenetics.common.horse.HorseStatsTest" time="0.0"/>
   <testcase name="equalParentsStillGiveAWideSpread()" classname="com.example.horsegenetics.common.horse.HorseStatsTest" time="0.0"/>
