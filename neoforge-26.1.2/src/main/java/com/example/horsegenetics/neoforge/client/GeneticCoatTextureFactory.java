@@ -40,14 +40,15 @@ public final class GeneticCoatTextureFactory {
 
     private static final Map<Integer, Identifier> CACHE = new ConcurrentHashMap<>();
 
-    // PLACEHOLDER pixel rectangles on the 64x64 horse texture map, one per leg,
-    // as {x, y, width, height}. These are NOT verified against the real texture
-    // layout - measure the actual files and replace before relying on this.
+    // Pixel rectangle on the 64x64 horse texture that holds the legs, as
+    // {x, y, width, height}. All four legs of the vanilla equine model share
+    // ONE texture region: AbstractEquineModel puts every leg at texOffs(48, 21)
+    // as a 4x11x4 cube, so the four side faces unwrap to U 48..64, V 25..36
+    // (the earlier placeholder pointed at U/V 0,0 - the head - which is why the
+    // "black" was landing on the face). compositeLegRegion fills this bottom-up,
+    // so a small legBlackHeight only darkens the hoof end.
     private static final int[][] LEG_REGIONS = {
-            {0, 0, 8, 32},  // front-left  - PLACEHOLDER
-            {8, 0, 8, 32},  // front-right - PLACEHOLDER
-            {16, 0, 8, 32}, // back-left   - PLACEHOLDER
-            {24, 0, 8, 32}, // back-right  - PLACEHOLDER
+            {48, 25, 16, 11},
     };
 
     public static Identifier getOrCreate(CoatData coatData) {
@@ -95,6 +96,19 @@ public final class GeneticCoatTextureFactory {
                 base.setPixel(col, row, overlay.getPixel(col, row));
             }
         }
+    }
+
+    /**
+     * Release every generated bay texture and forget the cache. Called when the
+     * player leaves a world so the textures don't outlive the horse database
+     * they were made for.
+     */
+    public static void clear() {
+        var textureManager = Minecraft.getInstance().getTextureManager();
+        for (Identifier id : CACHE.values()) {
+            textureManager.release(id);
+        }
+        CACHE.clear();
     }
 
     private static NativeImage loadVanillaTexture(Identifier location) throws IOException {

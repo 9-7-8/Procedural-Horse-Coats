@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.example.horsegenetics.common.genetics.GeneticCodeCombinerTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-08-30T23:49:26.220Z" hostname="PERDIX" time="0.034">
+  <properties/>
+  <testcase name="whiteAlleleIsInheritedAndDominant()" classname="com.example.horsegenetics.common.genetics.GeneticCodeCombinerTest" time="0.025"/>
+  <testcase name="homozygousDominantCrossHomozygousRecessiveIsAlwaysHeterozygous()" classname="com.example.horsegenetics.common.genetics.GeneticCodeCombinerTest" time="0.0"/>
+  <testcase name="rejectsMalformedCodes()" classname="com.example.horsegenetics.common.genetics.GeneticCodeCombinerTest" time="0.005"/>
+  <testcase name="breedWithIsExposedOnGenotypeToo()" classname="com.example.horsegenetics.common.genetics.GeneticCodeCombinerTest" time="0.001"/>
+  <testcase name="argumentOrderDoesNotMatterForAGivenDrawSequence()" classname="com.example.horsegenetics.common.genetics.GeneticCodeCombinerTest" time="0.0"/>
+  <testcase name="picksTheSelectedAlleleFromEachParent()" classname="com.example.horsegenetics.common.genetics.GeneticCodeCombinerTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

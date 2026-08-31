@@ -19,4 +19,9 @@ public record NeoRng(RandomSource source) implements Rng {
     public boolean nextBoolean() {
         return source.nextBoolean();
     }
+
+    @Override
+    public int nextInt(int bound) {
+        return source.nextInt(bound);
+    }
 }

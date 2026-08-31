@@ -24,6 +24,11 @@ public final class ClientCoatCache {
         return CACHE.get(entityId);
     }
 
+    /** Drop everything - entity ids are per-world, so this is called on world exit. */
+    public static void clear() {
+        CACHE.clear();
+    }
+
     private ClientCoatCache() {
     }
 }

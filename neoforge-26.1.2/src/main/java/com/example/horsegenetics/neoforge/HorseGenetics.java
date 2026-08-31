@@ -1,5 +1,7 @@
 package com.example.horsegenetics.neoforge;
 
+import com.example.horsegenetics.neoforge.block.ModBlockEntities;
+import com.example.horsegenetics.neoforge.block.ModBlocks;
 import com.example.horsegenetics.neoforge.data.ModAttachments;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
@@ -14,6 +16,8 @@ public final class HorseGenetics {
 
     public HorseGenetics(IEventBus modEventBus) {
         ModAttachments.ATTACHMENT_TYPES.register(modEventBus);
+        ModBlocks.register(modEventBus);
+        ModBlockEntities.register(modEventBus);
         // HorseGeneticsEventHandler, ModNetworking, ClientSetup, DebugKeyBindings,
         // DebugKeyHandler, and DebugPenTickHandler are all @EventBusSubscriber-
         // annotated and pick themselves up automatically - nothing else to wire

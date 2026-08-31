@@ -1,5 +1,6 @@
 package com.example.horsegenetics.neoforge.client;
 
+import com.example.horsegenetics.neoforge.block.ModBlockEntities;
 import net.minecraft.world.entity.EntityType;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -12,6 +13,7 @@ public final class ClientSetup {
     @SubscribeEvent
     static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerEntityRenderer(EntityType.HORSE, GeneticHorseRenderer::new);
+        event.registerBlockEntityRenderer(ModBlockEntities.HAY_PORTAL.get(), ctx -> new HayPortalRenderer());
     }
 
     private ClientSetup() {

@@ -14,4 +14,11 @@ public interface Rng {
 
     /** Returns true or false with equal probability. */
     boolean nextBoolean();
+
+    /**
+     * Returns an int uniformly distributed in {@code [0, bound)}.
+     * {@code bound} must be positive. Used for picking a random element out of
+     * a list (e.g. name-word tables).
+     */
+    int nextInt(int bound);
 }

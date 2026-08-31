@@ -1,0 +1,490 @@
+Black
+Bay
+Chestnut
+Palomino
+Grey
+Dappled
+Spotted
+Piebald
+Roan
+Silver
+Copper
+Mahogany
+Amber
+Ebony
+Pearl
+Wild
+Swift
+Noble
+Brave
+Gentle
+Fierce
+Bold
+Proud
+Loyal
+Keen
+Restless
+Serene
+Spirited
+Wise
+Bright
+Tall
+Strong
+Sleek
+Stocky
+Lean
+Muscled
+Fleet
+Durable
+Graceful
+Powerful
+Lithe
+Sturdy
+Nimble
+Tireless
+Midnight
+Starlit
+Moonlit
+Shadowed
+Crowned
+Blessed
+Sacred
+Enchanted
+Eternal
+Mystic
+Celestial
+Phantom
+Regal
+Golden
+Silvered
+Crazy
+Ornery
+Reckless
+Rowdy
+Rugged
+Scrappy
+Grizzled
+Weathered
+Dusty
+Rowdy
+Feisty
+Stubborn
+Untamed
+Renegade
+Rambling
+Roguish
+Cantankerous
+Grumpy
+Ragged
+Tumbleweed
+Lonesome
+Hardscrabble
+Gritty
+Dust-Covered
+Sun-Baked
+Trail-Worn
+Saddle-Sore
+Bowlegged
+Rough-Riding
+Wandering
+Racing
+Fighting
+Running
+Roaming
+Drifting
+Charging
+Galloping
+Chasing
+Hunting
+Prowling
+Stalking
+Raging
+Blazing
+Burning
+Howling
+Screaming
+Thundering
+Rearing
+Bucking
+Kicking
+Biting
+Snorting
+Stomping
+Trampling
+Roaring
+Dreaming
+Wishing
+Praying
+Waiting
+Watching
+Guarding
+Protecting
+Defending
+Seeking
+Searching
+Wondering
+Flying
+Soaring
+Diving
+Climbing
+Rising
+Falling
+Breaking
+Rebuilding
+Healing
+Surviving
+Enduring
+Fading
+Vanishing
+Returning
+Haunting
+Lingering
+Son of a
+Son of the
+Daughter of a
+Daughter of the
+Master of the
+Master of a
+Mistress of the
+King of the
+Queen of the
+Ruler of the
+Ghost of the
+Spirit of the
+Shadow of the
+Heart of the
+Soul of the
+Voice of the
+Child of the
+Child of a
+Servant of the
+Slave to the
+Prisoner of the
+Prince of the
+Princess of the
+Keeper of the
+Guardian of the
+Warden of the
+Lord of the
+Lady of the
+Heir to the
+Heir of the
+Bringer of the
+Bearer of the
+Herald of the
+Chaser of the
+Hunter of the
+Seeker of the
+Wanderer of the
+Rider of the
+Slayer of the
+Breaker of the
+Maker of the
+Builder of the
+Destroyer of the
+Protector of the
+Defender of the
+Enemy of the
+Friend of the
+Whisper of the
+Echo of the
+Shade of the
+Wraith of the
+Terror of the
+Fear of the
+Afraid of the
+Afraid of a
+Scared of the
+Scared of a
+Tired of the
+Sick of the
+Weary of the
+Fond of the
+Fond of a
+Full of the
+Full of a
+Out of the
+Out of a
+Born of the
+Born of a
+Made of the
+Made of a
+Free of the
+Free of a
+Eclipse
+Velvet
+Whispering
+Sapphire
+Crimson
+Twilight
+Aurora
+Oceanic
+Sunfire
+Emerald
+Frostbound
+Solar Flare
+Shadow
+Gilded
+Azure
+Cosmic
+Serenity
+Wildfire
+Stormy
+Radiant
+Dusk
+Lightning
+Starry
+Iron
+Thunder
+Titan's
+Spartan
+Griffin's
+Falcon's
+Storm
+Highland
+Raven's
+Phoenix
+Viking
+Arctic
+Boulder
+Captain
+Desert
+Forest
+Glacier
+Horizon
+Inferno
+Jungle
+Mountain
+Ocean
+Prairie
+River
+Sky
+Luna's
+Willow
+Autumn
+Celeste
+Dahlia
+Flora's
+Hazel
+Iris
+Jasmine
+Kiara's
+Lotus
+Meadow
+Nova's
+Pearl's
+Rose
+Scarlet
+Terra's
+Ursula's
+Winter's
+Jelly
+Butter
+Marsh
+Pip
+Tinker
+Bamboo
+Little
+American
+Red
+Sea
+War
+Big
+Blue
+Clever
+Old
+Snow
+First
+Gun
+Merry
+Peach
+Bad
+Two
+Polka-Dotted
+Apple
+Mane
+Pinkie
+Brown
+Slow
+Gray
+Strawberry
+Night
+Spark
+Bull
+Popcorn
+Rainbow
+Sweetie
+Princess
+Shining
+Granny
+Derpy
+Lyra
+Octavia
+Vinyl
+Queen
+King
+Nightmare
+Starlight
+Trixie
+Sunset
+Flash
+Cherry
+Diamond
+Cloud
+Babs
+Mayor
+Nurse
+Doctor
+Time
+Photo
+Prince
+Fancy
+Coco
+Suri
+Carrot
+Berry
+Lily
+Amethyst
+Twinkle
+Rock
+Mist
+Star
+Grand
+Pear
+Cozy
+Tempest
+Euclidian
+Kafkaesque
+Homoerotic
+Phallic
+Yonic
+Gay
+Bisexual
+Heterosexual
+Asexual
+American
+Femme
+Orwellian
+Machiavellian
+Sisyphean
+Byronic
+Freudian
+Nietzschean
+Homeric
+Shakespearean
+Dickensian
+Proustian
+Quixotic
+Bohemian
+Faustian
+Draconian
+Herculean
+Promethean
+Rabelaisian
+Jungian
+Hegelian
+Platonic
+Aristotelian
+Socratic
+Wildean
+Chaplinesque
+Kubrickian
+Lynchian
+Erotic
+Sensual
+Sensuous
+Androgynous
+Nonbinary
+Pansexual
+Queer
+Sapphic
+Fluid
+Intersex
+Cisgender
+Transgender
+Genderqueer
+Demisexual
+Polyamorous
+Sultry
+Voluptuous
+Carnal
+Butch
+Masc
+European
+British
+French
+Parisian
+Cosmopolitan
+Urban
+Suburban
+Squibbly
+Flumphing
+Gloopish
+Wibbly
+Noodle-y
+Burpy
+Snargle
+Plinky
+Fuzzle
+Mimsy
+Doodle
+Guffy
+Snerk
+Bloopish
+Queeble
+Creepy
+Lanky
+Twitching
+Stitched
+Moldy
+Giggling
+Rusty
+Tattered
+Glitched
+Hollow
+Waxen
+Furry
+Jittery
+Popping
+Toothy
+Cracked
+Dripping
+Rotting
+Shivering
+Screeching
+Flickering
+Slithering
+Twisted
+Gnashing
+Painted
+Drip
+Based
+Rizz
+Frfr
+Nocap
+Goofy
+Betty
+Fire
+Sus
+Yeet
+Slay
+Gyatt
+Mewing
+Skibidi
+Ohio
+Fanum
+Taxing
+Edging
+Mogging
+Cringe
+Woke
+Ghosted
+Clapped
+Valid
+Lit
+Yaoi
+Yuri
+East of the
+West of the
+North of the
+South of the

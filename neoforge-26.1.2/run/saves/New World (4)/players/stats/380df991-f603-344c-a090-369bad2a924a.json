@@ -1,0 +1,23 @@
+{
+  "stats": {
+    "minecraft:custom": {
+      "minecraft:time_since_rest": 5244,
+      "minecraft:walk_one_cm": 9808,
+      "minecraft:leave_game": 1,
+      "minecraft:horse_one_cm": 2199,
+      "minecraft:play_time": 4116,
+      "minecraft:jump": 6,
+      "minecraft:time_since_death": 4116,
+      "minecraft:sprint_one_cm": 915,
+      "minecraft:total_world_time": 9066,
+      "minecraft:fly_one_cm": 31693,
+      "minecraft:crouch_one_cm": 204,
+      "minecraft:sneak_time": 151,
+      "minecraft:animals_bred": 1
+    },
+    "minecraft:used": {
+      "minecraft:hay_block": 15
+    }
+  },
+  "DataVersion": 4790
+}

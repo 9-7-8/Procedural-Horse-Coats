@@ -1,0 +1,6 @@
+{
+  "__comment": "Block renders nothing (RenderShape.INVISIBLE) - the End-portal BER draws the effect. Particle texture is used for break/step particles only.",
+  "textures": {
+    "particle": "minecraft:block/hay_block_top"
+  }
+}

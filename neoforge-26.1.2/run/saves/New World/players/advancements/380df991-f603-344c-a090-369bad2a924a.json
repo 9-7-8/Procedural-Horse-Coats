@@ -1,13 +1,98 @@
 {
+  "minecraft:recipes/decorations/ladder": {
+    "criteria": {
+      "has_stick": "2026-08-30 15:02:54 -0700"
+    },
+    "done": true
+  },
+  "minecraft:recipes/misc/book": {
+    "criteria": {
+      "has_paper": "2026-08-30 14:59:40 -0700"
+    },
+    "done": true
+  },
+  "minecraft:recipes/tools/wooden_axe": {
+    "criteria": {
+      "has_stick": "2026-08-30 15:02:54 -0700"
+    },
+    "done": true
+  },
+  "minecraft:recipes/combat/wooden_spear": {
+    "criteria": {
+      "has_stick": "2026-08-30 15:02:54 -0700"
+    },
+    "done": true
+  },
   "minecraft:recipes/decorations/crafting_table": {
     "criteria": {
-      "unlock_right_away": "2026-08-30 13:00:32 -0700"
+      "unlock_right_away": "2026-08-30 14:59:34 -0700"
+    },
+    "done": true
+  },
+  "minecraft:husbandry/breed_an_animal": {
+    "criteria": {
+      "bred": "2026-08-30 15:03:09 -0700"
+    },
+    "done": true
+  },
+  "minecraft:husbandry/tame_an_animal": {
+    "criteria": {
+      "tamed_animal": "2026-08-30 15:03:03 -0700"
+    },
+    "done": true
+  },
+  "minecraft:recipes/decorations/campfire": {
+    "criteria": {
+      "has_stick": "2026-08-30 15:02:54 -0700"
+    },
+    "done": true
+  },
+  "minecraft:recipes/tools/wooden_hoe": {
+    "criteria": {
+      "has_stick": "2026-08-30 15:02:54 -0700"
+    },
+    "done": true
+  },
+  "minecraft:recipes/tools/name_tag": {
+    "criteria": {
+      "has_paper": "2026-08-30 14:59:40 -0700"
+    },
+    "done": true
+  },
+  "minecraft:husbandry/bred_all_animals": {
+    "criteria": {
+      "minecraft:horse": "2026-08-30 15:03:09 -0700"
+    },
+    "done": false
+  },
+  "minecraft:recipes/tools/wooden_pickaxe": {
+    "criteria": {
+      "has_stick": "2026-08-30 15:02:54 -0700"
+    },
+    "done": true
+  },
+  "minecraft:recipes/tools/wooden_shovel": {
+    "criteria": {
+      "has_stick": "2026-08-30 15:02:54 -0700"
+    },
+    "done": true
+  },
+  "minecraft:recipes/combat/wooden_sword": {
+    "criteria": {
+      "has_stick": "2026-08-30 15:02:54 -0700"
+    },
+    "done": true
+  },
+  "minecraft:recipes/decorations/cartography_table": {
+    "criteria": {
+      "has_paper": "2026-08-30 14:59:40 -0700"
     },
     "done": true
   },
   "minecraft:adventure/adventuring_time": {
     "criteria": {
-      "minecraft:plains": "2026-08-30 13:00:33 -0700"
+      "minecraft:birch_forest": "2026-08-30 14:59:35 -0700",
+      "minecraft:plains": "2026-08-30 14:59:40 -0700"
     },
     "done": false
   },

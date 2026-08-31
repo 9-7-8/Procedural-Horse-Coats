@@ -22,6 +22,13 @@ class CoatDataTest {
         assertThrows(IllegalArgumentException.class, () -> CoatData.solid(CoatPhenotype.BAY));
     }
 
+    @Test
+    void solidWhiteHasZeroLegBlackHeight() {
+        CoatData data = CoatData.solid(CoatPhenotype.WHITE);
+        assertEquals(CoatPhenotype.WHITE, data.phenotype());
+        assertEquals(0f, data.legBlackHeight());
+    }
+
     @ParameterizedTest
     @ValueSource(floats = {0f, 0.25f, 1f})
     void bayKeepsItsLegBlackHeight(float height) {

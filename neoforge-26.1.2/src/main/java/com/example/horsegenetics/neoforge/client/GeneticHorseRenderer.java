@@ -32,12 +32,21 @@ import net.minecraft.world.entity.animal.equine.Horse;
  */
 public class GeneticHorseRenderer extends AbstractHorseRenderer<Horse, HorseRenderState, HorseModel> {
 
-    private static final Identifier BLACK_TEXTURE =
-            Identifier.withDefaultNamespace("textures/entity/horse/horse_black.png");
-    private static final Identifier CHESTNUT_TEXTURE =
-            Identifier.withDefaultNamespace("textures/entity/horse/horse_chestnut.png");
-    private static final Identifier BROWN_TEXTURE =
-            Identifier.withDefaultNamespace("textures/entity/horse/horse_brown.png");
+    private static final Identifier BLACK_TEXTURE = vanilla("horse_black");
+    private static final Identifier CHESTNUT_TEXTURE = vanilla("horse_chestnut");
+    private static final Identifier BROWN_TEXTURE = vanilla("horse_brown");
+    private static final Identifier WHITE_TEXTURE = vanilla("horse_white");
+    // Foals use a distinct model (BabyHorseModel) with its own UV layout, so
+    // they need the vanilla *_baby texture. We don't composite bay legs onto
+    // foals - they grow up quickly and re-extract the adult texture then.
+    private static final Identifier BLACK_BABY_TEXTURE = vanilla("horse_black_baby");
+    private static final Identifier CHESTNUT_BABY_TEXTURE = vanilla("horse_chestnut_baby");
+    private static final Identifier BROWN_BABY_TEXTURE = vanilla("horse_brown_baby");
+    private static final Identifier WHITE_BABY_TEXTURE = vanilla("horse_white_baby");
+
+    private static Identifier vanilla(String name) {
+        return Identifier.withDefaultNamespace("textures/entity/horse/" + name + ".png");
+    }
 
     public GeneticHorseRenderer(EntityRendererProvider.Context context) {
         super(context, new HorseModel(context.bakeLayer(ModelLayers.HORSE)), new BabyHorseModel(context.bakeLayer(ModelLayers.HORSE_BABY)));
@@ -88,12 +97,26 @@ public class GeneticHorseRenderer extends AbstractHorseRenderer<Horse, HorseRend
                 ? geneticState.coatData
                 : null;
         if (coatData == null) {
-            return BROWN_TEXTURE;
+            return renderState.isBaby ? BROWN_BABY_TEXTURE : BROWN_TEXTURE;
+        }
+        return coatTextureFor(coatData, renderState.isBaby);
+    }
+
+    /** The coat texture for a phenotype - shared with the family-tree coat swatch. */
+    public static Identifier coatTextureFor(CoatData coatData, boolean baby) {
+        if (baby) {
+            return switch (coatData.phenotype()) {
+                case BAY -> BROWN_BABY_TEXTURE;      // bay's adult base is brown; no leg compositing on foals
+                case BLACK -> BLACK_BABY_TEXTURE;
+                case CHESTNUT -> CHESTNUT_BABY_TEXTURE;
+                case WHITE -> WHITE_BABY_TEXTURE;
+            };
         }
         return switch (coatData.phenotype()) {
             case BAY -> GeneticCoatTextureFactory.getOrCreate(coatData);
             case BLACK -> BLACK_TEXTURE;
             case CHESTNUT -> CHESTNUT_TEXTURE;
+            case WHITE -> WHITE_TEXTURE;
         };
     }
 }

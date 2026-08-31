@@ -1,16 +1,16 @@
 {
   "stats": {
-    "minecraft:mined": {
-      "minecraft:short_grass": 1
-    },
     "minecraft:custom": {
-      "minecraft:time_since_rest": 988,
-      "minecraft:walk_one_cm": 9226,
-      "minecraft:total_world_time": 751,
+      "minecraft:sprint_one_cm": 15187,
+      "minecraft:time_since_rest": 13005,
+      "minecraft:walk_one_cm": 112025,
+      "minecraft:total_world_time": 15086,
       "minecraft:leave_game": 1,
-      "minecraft:play_time": 734,
-      "minecraft:jump": 6,
-      "minecraft:time_since_death": 734
+      "minecraft:horse_one_cm": 3356,
+      "minecraft:sneak_time": 7,
+      "minecraft:play_time": 12892,
+      "minecraft:time_since_death": 12892,
+      "minecraft:animals_bred": 2
     }
   },
   "DataVersion": 4790

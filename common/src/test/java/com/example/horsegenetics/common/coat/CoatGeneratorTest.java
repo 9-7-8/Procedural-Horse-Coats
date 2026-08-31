@@ -30,6 +30,14 @@ class CoatGeneratorTest {
         assertEquals(0f, data.legBlackHeight());
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = {"eeaaWw", "EEAAWW", "EeaawW"})
+    void whiteGenotypesProduceSolidWhiteWithoutTouchingRng(String code) {
+        CoatData data = CoatGenerator.generate(Genotype.parse(code), new FakeRng());
+        assertEquals(CoatPhenotype.WHITE, data.phenotype());
+        assertEquals(0f, data.legBlackHeight());
+    }
+
     @Test
     void bayGenotypeRollsLegBlackHeightFromRng() {
         CoatData data = CoatGenerator.generate(Genotype.parse("EeAa"), new FakeRng().floats(0.42f));

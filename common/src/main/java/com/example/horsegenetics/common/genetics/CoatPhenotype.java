@@ -1,8 +1,7 @@
 package com.example.horsegenetics.common.genetics;
 
 /**
- * The visible coat outcome derived from a {@link Genotype}.
- * Only three phenotypes exist at this stage of the mod - more will be added
+ * The visible coat outcome derived from a {@link Genotype}. More will be added
  * as more loci (cream, dun, gray, etc.) come online.
  */
 public enum CoatPhenotype {
@@ -14,5 +13,12 @@ public enum CoatPhenotype {
     BLACK,
 
     /** E_ A_ - black pigment restricted to points (legs/mane/tail) by agouti. */
-    BAY
+    BAY,
+
+    /**
+     * W_ at the white locus. Dominant over everything else - a solid white
+     * horse, no markings, whatever the E / A alleles say. (Real-horse term:
+     * "dominant white" / white, no markings.)
+     */
+    WHITE
 }
