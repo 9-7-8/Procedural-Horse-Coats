@@ -11,18 +11,19 @@ import java.util.Objects;
 
 /**
  * A horse's full genotype: one {@link AllelePair} per registered {@link Gene}
- * (see {@link Genes}). Built from {@link Allele} objects; still round-trips
- * through a compact <b>code string</b> (two symbols per gene, in
- * {@link Genes#codeOrder()}) for persistence, sync and the pedigree record.
+ * (see {@link Genes}). Built from {@link Allele} objects; round-trips through a
+ * <b>code string</b> for persistence / sync / the pedigree record.
  *
- * <p>Shorter legacy codes still parse - a missing trailing locus is read as
- * that gene's wild-type. So {@code "EeAawwtt"} (pre-champagne) becomes
- * {@code "EeAawwttcc"}, {@code "EeAaWw"} (pre-test) adds {@code "ttcc"}, and
- * {@code "EeAa"} (pre-white) adds {@code "wwttcc"}.
- *
- * <p>Pure data + logic - no Minecraft.
+ * <p><b>Code format:</b> one segment per gene in {@link Genes#codeOrder()},
+ * segments joined by {@code -}, the two alleles of a gene joined by {@code /},
+ * dominant first. Alleles are their {@link Allele#token()} (any run of
+ * characters). Example: {@code "E/e-A/a-w/w-t/t-c/c-sl/sl-Spl/spl"}.
+ * There is <b>no</b> legacy short-code handling - dev only, no saves to keep.
  */
 public final class Genotype {
+
+    private static final String GENE_SEP = "-";
+    private static final String ALLELE_SEP = "/";
 
     private final Map<String, AllelePair> byGene;
 
@@ -52,60 +53,52 @@ public final class Genotype {
         return of(List.of(pairs));
     }
 
-    /** Parse a canonical or shorter-legacy code. */
+    /** All wild-type - the "unassigned" placeholder and a convenient test base. */
+    public static Genotype wildType() {
+        return of(List.of());
+    }
+
     public static Genotype parse(String code) {
         Objects.requireNonNull(code, "code");
-        String c = padLegacy(code);
-        int full = Genes.codeLength();
-        if (c.length() != full) {
-            throw new IllegalArgumentException("genotype code must be " + full
-                    + " chars (2 per gene: " + symbolHint() + "), or a shorter legacy code; got: " + code);
+        String[] segments = code.split(GENE_SEP, -1);
+        List<Gene> order = Genes.codeOrder();
+        if (segments.length != order.size()) {
+            throw new IllegalArgumentException("genotype code needs " + order.size()
+                    + " '-'-separated segments (" + hint() + "), got " + segments.length + ": " + code);
         }
         Map<String, AllelePair> m = new LinkedHashMap<>();
-        int i = 0;
-        for (Gene g : Genes.codeOrder()) {
-            Allele a1 = g.fromSymbol(c.charAt(i++));
-            Allele a2 = g.fromSymbol(c.charAt(i++));
-            m.put(g.key(), new AllelePair(a1, a2));
+        for (int i = 0; i < order.size(); i++) {
+            Gene g = order.get(i);
+            String[] tokens = segments[i].split(ALLELE_SEP, -1);
+            if (tokens.length != 2) {
+                throw new IllegalArgumentException("segment " + (i + 1) + " for " + g.key()
+                        + " needs two '/'-separated alleles, got: " + segments[i]);
+            }
+            m.put(g.key(), new AllelePair(g.fromToken(tokens[0]), g.fromToken(tokens[1])));
         }
         return new Genotype(m);
     }
 
-    private static String padLegacy(String code) {
-        int full = Genes.codeLength();
-        // Only the historical code lengths are treated as "legacy" and padded:
-        // 4 (E/A), 6 (+W), 8 (+T). Anything else must be full-length or it's an error.
-        if (code.length() >= full || code.length() < 4 || code.length() % 2 != 0) {
-            return code;
-        }
-        StringBuilder sb = new StringBuilder(code);
-        List<Gene> order = Genes.codeOrder();
-        for (int gi = code.length() / 2; sb.length() < full && gi < order.size(); gi++) {
-            char wt = order.get(gi).wildType().symbol();
-            sb.append(wt).append(wt);
-        }
-        return sb.toString();
-    }
-
-    private static String symbolHint() {
+    private static String hint() {
         StringBuilder sb = new StringBuilder();
         for (Gene g : Genes.codeOrder()) {
             if (sb.length() > 0) {
-                sb.append(", ");
+                sb.append(GENE_SEP);
             }
-            for (Allele a : g.alleles()) {
-                sb.append(a.symbol());
-            }
+            List<Allele> as = g.alleles();
+            sb.append(as.get(0).token()).append(ALLELE_SEP).append(as.get(as.size() - 1).token());
         }
         return sb.toString();
     }
 
-    /** Serialize to the canonical code. */
     public String toCode() {
         StringBuilder sb = new StringBuilder();
         for (Gene g : Genes.codeOrder()) {
+            if (sb.length() > 0) {
+                sb.append(GENE_SEP);
+            }
             AllelePair p = byGene.get(g.key());
-            sb.append(p.first().symbol()).append(p.second().symbol());
+            sb.append(p.first().token()).append(ALLELE_SEP).append(p.second().token());
         }
         return sb.toString();
     }
@@ -114,7 +107,6 @@ public final class Genotype {
     // Random population / Mendelian breeding
     // ------------------------------------------------------------------
 
-    /** Wild founder genotype - each gene rolls its own pair (see the gene classes for draw counts / order). */
     public static Genotype random(Rng rng) {
         Map<String, AllelePair> m = new LinkedHashMap<>();
         for (Gene g : Genes.codeOrder()) {
@@ -162,15 +154,13 @@ public final class Genotype {
     }
 
     // ------------------------------------------------------------------
-    // Determinism / coat generation hooks
+    // Determinism
     // ------------------------------------------------------------------
 
-    /** No gene needs per-horse randomness - the coat is one of a fixed set. */
     public boolean isDeterministic() {
         return !hasVisibleNonDeterministic();
     }
 
-    /** Some visible gene is non-deterministic - the coat texture must be generated per horse. */
     public boolean hasVisibleNonDeterministic() {
         for (Gene g : Genes.codeOrder()) {
             AllelePair p = pair(g);
@@ -198,11 +188,15 @@ public final class Genotype {
     }
 
     public boolean isSeal() {
-        return Genes.AGOUTI.isSeal(pair(Genes.AGOUTI));
+        return Genes.SEAL.isSeal(pair(Genes.SEAL));
     }
 
     public boolean isChampagne() {
         return Genes.CHAMPAGNE.isChampagne(pair(Genes.CHAMPAGNE));
+    }
+
+    public boolean isSplash() {
+        return Genes.SPLASH.isSplash(pair(Genes.SPLASH));
     }
 
     public boolean hasTest() {
@@ -236,6 +230,7 @@ public final class Genotype {
         return "Genotype[" + toCode() + " -> " + phenotype()
                 + (isChampagne() ? " +champagne" : "")
                 + (isSeal() ? " +seal" : "")
+                + (isSplash() ? " +splash" : "")
                 + (hasTest() ? " +test" : "") + "]";
     }
 }

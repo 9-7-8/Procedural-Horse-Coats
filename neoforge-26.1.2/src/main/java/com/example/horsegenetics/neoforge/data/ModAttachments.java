@@ -1,5 +1,6 @@
 package com.example.horsegenetics.neoforge.data;
 
+import com.example.horsegenetics.common.genetics.Genotype;
 import com.example.horsegenetics.common.horse.HorseRecord;
 import com.example.horsegenetics.common.horse.Sex;
 import com.example.horsegenetics.neoforge.HorseGenetics;
@@ -21,7 +22,7 @@ public final class ModAttachments {
     // horse should ever be seen or saved with this default in practice.
     public static final Supplier<AttachmentType<HorseCoatAttachment>> HORSE_COAT =
             ATTACHMENT_TYPES.register("horse_coat", () -> AttachmentType
-                    .builder(() -> new HorseCoatAttachment("eeaa", 0L))
+                    .builder(() -> HorseCoatAttachment.UNASSIGNED)
                     .serialize(HorseCoatAttachment.MAP_CODEC)
                     .copyOnDeath()
                     .build());
@@ -34,7 +35,7 @@ public final class ModAttachments {
             ATTACHMENT_TYPES.register("horse_record", () -> AttachmentType
                     .<HorseRecord>builder(holder -> HorseRecord.founder(
                             holder instanceof Entity entity ? entity.getUUID() : new UUID(0L, 0L),
-                            Sex.FEMALE, "", "", "eeaa"))
+                            Sex.FEMALE, "", "", Genotype.wildType().toCode()))
                     .serialize(HorseRecordCodecs.MAP_CODEC)
                     .build());
 

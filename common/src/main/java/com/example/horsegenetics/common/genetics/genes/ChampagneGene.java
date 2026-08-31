@@ -12,39 +12,26 @@ import java.util.List;
 
 /**
  * <b>Champagne</b> ({@code horsegenetics.champagne}) - a simple dominant,
- * non-dose-dependent dilution.
- * <ul>
- *   <li>{@code Ch} (dominant): pulls the pigment sample toward the
- *       <b>horizontal middle</b> of the red/black gradient (its champagne-gold
- *       column). It also lifts the black pigment sharply - real champagne turns
- *       a black coat warm gold, and the gradient art's gold sits near the top.</li>
- *   <li>{@code c} (wild-type): no effect.</li>
- * </ul>
- * Deterministic.
+ * non-dose-dependent dilution. Natural: it just moves the pigment sample. It
+ * pulls red toward the <b>horizontal middle</b> of the red/black gradient (its
+ * champagne-gold column) and lifts black sharply, so it reads off the
+ * <i>current</i> pigment - champagne-on-bay differs from champagne-on-black,
+ * and champagne-on-white is invisible. {@code Ch} dominant, {@code c}
+ * recessive/wild-type. {@code 1 in} {@value #WILD_CHAMPAGNE_ALLELE_ODDS} per
+ * allele. Deterministic.
  */
 public final class ChampagneGene implements Gene {
 
     public static final String KEY = "horsegenetics.champagne";
     public static final int WILD_CHAMPAGNE_ALLELE_ODDS = 40;
 
-    public final Allele Ch = new Allele(KEY, "Ch", 'C', "Champagne (Ch)", true, true);
-    public final Allele c = new Allele(KEY, "c", 'c', "Wild-type (c)", false, true);
+    public final Allele Ch = new Allele(KEY, "Ch", "Champagne (Ch)", true, true);
+    public final Allele c = new Allele(KEY, "c", "Wild-type (c)", false, true);
     private final List<Allele> alleles = List.of(Ch, c);
 
-    @Override
-    public String key() {
-        return KEY;
-    }
-
-    @Override
-    public List<Allele> alleles() {
-        return alleles;
-    }
-
-    @Override
-    public Allele wildType() {
-        return c;
-    }
+    @Override public String key() { return KEY; }
+    @Override public List<Allele> alleles() { return alleles; }
+    @Override public Allele wildType() { return c; }
 
     @Override
     public AllelePair randomPair(Rng rng) {

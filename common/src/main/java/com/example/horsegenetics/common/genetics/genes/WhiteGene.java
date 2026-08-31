@@ -11,40 +11,25 @@ import com.example.horsegenetics.common.genetics.Genotype;
 import java.util.List;
 
 /**
- * <b>Dominant white</b> ({@code horsegenetics.white}).
- * <ul>
- *   <li>{@code W} (dominant): complete restriction of <i>both</i> pigments
- *       everywhere - a fully transparent overlay, so the white template shows
- *       through unchanged. Masks every other coat gene.</li>
- *   <li>{@code w} (wild-type): no effect.</li>
- * </ul>
- * Rare in the wild ({@code 1 in} {@value #WILD_WHITE_ALLELE_ODDS} per allele).
- * Deterministic - every dominant white is identical. (White <i>markings</i>
- * will be a separate, non-deterministic gene.)
+ * <b>Dominant white</b> ({@code horsegenetics.white}). {@code W} (dominant) =
+ * total restriction of <i>both</i> pigments everywhere -> a transparent overlay,
+ * so the white template shows through unchanged and every other gene is masked.
+ * {@code w} (wild-type) = no effect. Rare ({@code 1 in}
+ * {@value #WILD_WHITE_ALLELE_ODDS} per allele). Natural, deterministic. (White
+ * <i>markings</i> are the separate {@code horsegenetics.splash} gene.)
  */
 public final class WhiteGene implements Gene {
 
     public static final String KEY = "horsegenetics.white";
     public static final int WILD_WHITE_ALLELE_ODDS = 50;
 
-    public final Allele W = new Allele(KEY, "W", 'W', "Dominant white (W)", true, true);
-    public final Allele w = new Allele(KEY, "w", 'w', "Wild-type (w)", false, true);
+    public final Allele W = new Allele(KEY, "W", "Dominant white (W)", true, true);
+    public final Allele w = new Allele(KEY, "w", "Wild-type (w)", false, true);
     private final List<Allele> alleles = List.of(W, w);
 
-    @Override
-    public String key() {
-        return KEY;
-    }
-
-    @Override
-    public List<Allele> alleles() {
-        return alleles;
-    }
-
-    @Override
-    public Allele wildType() {
-        return w;
-    }
+    @Override public String key() { return KEY; }
+    @Override public List<Allele> alleles() { return alleles; }
+    @Override public Allele wildType() { return w; }
 
     @Override
     public AllelePair randomPair(Rng rng) {

@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.example.horsegenetics.common.coat.pattern.TestCoatPatternTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-08-31T06:09:36.751Z" hostname="PERDIX" time="0.023">
+<testsuite name="com.example.horsegenetics.common.coat.pattern.TestCoatPatternTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-08-31T14:47:47.257Z" hostname="PERDIX" time="0.015">
   <properties/>
-  <testcase name="movingUpGoesRedToYellow()" classname="com.example.horsegenetics.common.coat.pattern.TestCoatPatternTest" time="0.002"/>
-  <testcase name="movingTowardTheNoseGoesPinkToBlue()" classname="com.example.horsegenetics.common.coat.pattern.TestCoatPatternTest" time="0.002"/>
-  <testcase name="alwaysOpaque()" classname="com.example.horsegenetics.common.coat.pattern.TestCoatPatternTest" time="0.001"/>
-  <testcase name="bakeFillsMostOfTheSheetOpaquelyAndMatchesThePattern()" classname="com.example.horsegenetics.common.coat.pattern.TestCoatPatternTest" time="0.015"/>
-  <testcase name="gradientIsMonotonicAlongEachAxis()" classname="com.example.horsegenetics.common.coat.pattern.TestCoatPatternTest" time="0.001"/>
+  <testcase name="movingUpGoesRedToYellow()" classname="com.example.horsegenetics.common.coat.pattern.TestCoatPatternTest" time="0.0"/>
+  <testcase name="movingTowardTheNoseGoesPinkToBlue()" classname="com.example.horsegenetics.common.coat.pattern.TestCoatPatternTest" time="0.001"/>
+  <testcase name="alwaysOpaque()" classname="com.example.horsegenetics.common.coat.pattern.TestCoatPatternTest" time="0.0"/>
+  <testcase name="bakeFillsMostOfTheSheetOpaquelyAndMatchesThePattern()" classname="com.example.horsegenetics.common.coat.pattern.TestCoatPatternTest" time="0.012"/>
+  <testcase name="gradientIsMonotonicAlongEachAxis()" classname="com.example.horsegenetics.common.coat.pattern.TestCoatPatternTest" time="0.0"/>
   <testcase name="noChangeAlongZ()" classname="com.example.horsegenetics.common.coat.pattern.TestCoatPatternTest" time="0.001"/>
   <system-out><![CDATA[]]></system-out>
   <system-err><![CDATA[]]></system-err>

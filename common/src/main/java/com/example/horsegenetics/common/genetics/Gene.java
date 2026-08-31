@@ -6,20 +6,27 @@ import com.example.horsegenetics.common.coat.pattern.CoatBuildContext;
 import java.util.List;
 
 /**
- * A single heritable gene: its alleles, how they segregate, and - the point of
- * the whole rework - <b>how it restricts / paints coat pigment</b>.
+ * A single heritable gene: its alleles, how they segregate, and how it changes
+ * the coat.
  *
  * <p>The coat is built by starting every pixel at "maximal red + maximal black
- * pigment" (a black horse) and letting each visible gene push pigment down.
- * {@link #restrict} is a gene's turn to mutate the shared
- * {@link CoatBuildContext#pigment() pigment field}; genes run in
- * {@link Genes#restrictionOrder()}. After that the field is resolved to colour
- * through the red/black gradient LUT, and {@link #paint} genes (e.g. the Test
- * gradient) get a pass to draw ARGB directly. Both default to no-op.
+ * pigment" (a black horse), then:
+ * <ol>
+ *   <li>every visible <b>natural</b> gene ({@link #isNatural()}, the default)
+ *       gets a {@link #restrict} turn to push the shared
+ *       {@link CoatBuildContext#pigment() pigment field} down - natural genes
+ *       do <i>nothing else</i>;</li>
+ *   <li>the pigment field is resolved to colour through the red/black gradient
+ *       LUT (so champagne-on-bay looks different from champagne-on-black, and
+ *       anything on white is invisible);</li>
+ *   <li>every visible <b>non-natural</b> gene gets a {@link #multiplyLayer}
+ *       turn: it fills an ARGB layer that is then <i>multiplied</i> onto the
+ *       resolved coat.</li>
+ * </ol>
  *
  * <p>(This interface lives in {@code genetics} but references
  * {@code coat.pattern.CoatBuildContext} - the two packages form an intentional
- * cycle so "the overlay function lives on the gene" stays literally true.)
+ * cycle so "the coat function lives on the gene" stays literally true.)
  */
 public interface Gene {
 
@@ -29,8 +36,17 @@ public interface Gene {
     /** All alleles this gene defines, most-dominant first. */
     List<Allele> alleles();
 
-    /** The "no visible effect" allele - what a missing locus in a legacy code becomes. */
+    /** The "no visible effect" allele - the one a wild horse most often carries. */
     Allele wildType();
+
+    /**
+     * A <b>natural</b> gene only restricts red / black pigment ({@link #restrict});
+     * it never paints colour directly. Non-natural genes (only Test so far) are
+     * applied as multiply layers after the pigment field is resolved.
+     */
+    default boolean isNatural() {
+        return true;
+    }
 
     /** Lower = more dominant. Used to canonicalize an {@link AllelePair}. */
     default int precedence(Allele allele) {
@@ -38,47 +54,44 @@ public interface Gene {
         return i < 0 ? Integer.MAX_VALUE : i;
     }
 
-    /** Resolve one character of a genotype code to an allele of this gene. */
-    default Allele fromSymbol(char c) {
+    /** Resolve one code token to an allele of this gene. */
+    default Allele fromToken(String token) {
         for (Allele a : alleles()) {
-            if (a.symbol() == c) {
+            if (a.token().equals(token)) {
                 return a;
             }
         }
-        throw new IllegalArgumentException(
-                "gene " + key() + " has no allele with symbol '" + c + "'");
+        throw new IllegalArgumentException("gene " + key() + " has no allele '" + token + "'");
     }
 
     /**
      * Draw one wild-population pair for this gene. Each gene documents how many
-     * {@link Rng} values it consumes and in what order (so {@code FakeRng}
-     * scripting stays predictable).
+     * {@link Rng} values it consumes and in what order.
      */
     AllelePair randomPair(Rng rng);
 
-    // --- coat contribution -------------------------------------------------
+    // --- coat contribution -----------------------------------------------
 
-    /** Mutate {@code ctx.pigment()} for a horse carrying {@code pair} here. */
+    /** Natural genes: mutate {@code ctx.pigment()} for a horse carrying {@code pair}. */
     default void restrict(AllelePair pair, CoatBuildContext ctx) {
     }
 
-    /** Draw ARGB onto {@code ctx.overlay()} after the pigment field is resolved. */
-    default void paint(AllelePair pair, CoatBuildContext ctx) {
+    /**
+     * Non-natural genes: fill {@code layer} (row-major ARGB, pre-filled with
+     * opaque white = multiply identity) with the colour to multiply onto the
+     * resolved coat.
+     */
+    default void multiplyLayer(AllelePair pair, CoatBuildContext ctx, int[] layer) {
     }
 
-    /**
-     * Does {@code pair} change the coat at all, in the context of the whole
-     * {@code genotype}? (A gene can be masked - e.g. agouti does nothing on a
-     * chestnut that makes no black.) Default: any visible allele.
-     */
+    /** Does {@code pair} change the coat at all, in the context of the whole {@code genotype}? */
     default boolean isVisible(AllelePair pair, Genotype genotype) {
         return pair.anyVisible();
     }
 
     /**
      * Is this gene's contribution byte-for-byte identical on every horse with
-     * this {@code pair} / {@code genotype}? Default: every allele in the pair is
-     * deterministic-tagged. A {@code false} anywhere in the genotype forces
+     * this {@code pair} / {@code genotype}? A {@code false} anywhere forces
      * per-horse texture generation.
      */
     default boolean isDeterministic(AllelePair pair, Genotype genotype) {

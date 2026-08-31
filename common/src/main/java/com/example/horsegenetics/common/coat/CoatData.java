@@ -20,8 +20,8 @@ import java.util.Objects;
  */
 public final class CoatData {
 
-    /** Fallback for an un-extracted render state: a plain black horse. */
-    public static final CoatData DEFAULT = new CoatData(Genotype.parse("Eeaawwttcc"), 0L);
+    /** Fallback for an un-extracted render state: the all-wild-type (plain black) horse. */
+    public static final CoatData DEFAULT = new CoatData(Genotype.wildType(), 0L);
 
     private final Genotype genotype;
     private final long epigeneticSeed;

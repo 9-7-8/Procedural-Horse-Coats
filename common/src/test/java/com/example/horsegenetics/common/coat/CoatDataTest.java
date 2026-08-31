@@ -11,40 +11,40 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class CoatDataTest {
 
+    private static final String BLACK = Genotype.wildType().toCode();
+    private static final String BAY = "E/e-A/a-w/w-t/t-c/c-sl/sl-spl/spl";
+
     private static CoatData coat(String code, long seed) {
         return new CoatData(Genotype.parse(code), seed);
     }
 
     @Test
     void carriesGenotypeAndSeedAndDerivesPhenotype() {
-        CoatData c = coat("Eeaawwttcc", 42L);
+        CoatData c = coat(BLACK, 42L);
         assertEquals(CoatPhenotype.BLACK, c.phenotype());
         assertEquals(42L, c.epigeneticSeed());
-        assertEquals("Eeaawwttcc", c.genotype().toCode());
     }
 
     @Test
     void deterministicCoatsIgnoreTheSeedInTheirTextureKey() {
-        assertTrue(coat("Eeaawwttcc", 1L).isDeterministic());
-        assertEquals(coat("Eeaawwttcc", 1L).textureKey(), coat("Eeaawwttcc", 999L).textureKey());
+        assertTrue(coat(BLACK, 1L).isDeterministic());
+        assertEquals(coat(BLACK, 1L).textureKey(), coat(BLACK, 999L).textureKey());
     }
 
     @Test
     void nonDeterministicCoatsKeyOnTheSeed() {
-        CoatData bay1 = coat("EeAawwttcc", 1L);
-        CoatData bay2 = coat("EeAawwttcc", 2L);
-        assertFalse(bay1.isDeterministic());
-        assertNotEquals(bay1.textureKey(), bay2.textureKey());
+        assertFalse(coat(BAY, 1L).isDeterministic());
+        assertNotEquals(coat(BAY, 1L).textureKey(), coat(BAY, 2L).textureKey());
     }
 
     @Test
     void equalityIsGenotypePlusSeed() {
-        assertEquals(coat("Eeaawwttcc", 7L), coat("eEaawwttcc", 7L)); // code canonicalizes
-        assertNotEquals(coat("Eeaawwttcc", 7L), coat("Eeaawwttcc", 8L));
+        assertEquals(coat(BLACK, 7L), coat(BLACK, 7L));
+        assertNotEquals(coat(BLACK, 7L), coat(BLACK, 8L));
     }
 
     @Test
-    void defaultIsAPlainBlackHorse() {
+    void defaultIsAPlainBlackDeterministicHorse() {
         assertEquals(CoatPhenotype.BLACK, CoatData.DEFAULT.phenotype());
         assertTrue(CoatData.DEFAULT.isDeterministic());
     }

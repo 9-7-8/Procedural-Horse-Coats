@@ -11,37 +11,22 @@ import com.example.horsegenetics.common.genetics.Genotype;
 import java.util.List;
 
 /**
- * <b>Extension</b> ({@code horsegenetics.extension}) - the "can this horse make
- * black pigment at all" gene.
- * <ul>
- *   <li>{@code E} (dominant, wild-type): black pigment allowed - no effect.</li>
- *   <li>{@code ee}: black completely restricted everywhere - a chestnut horse
- *       (only red pheomelanin survives).</li>
- * </ul>
- * Deterministic: every chestnut is identical.
+ * <b>Extension</b> ({@code horsegenetics.extension}) - can this horse make black
+ * pigment at all. {@code E} dominant/wild-type = yes (no effect); {@code ee} =
+ * black completely restricted -> chestnut (only red pheomelanin survives).
+ * Natural, deterministic. {@code E} is <b>dominant</b>, {@code e} recessive.
  */
 public final class ExtensionGene implements Gene {
 
     public static final String KEY = "horsegenetics.extension";
 
-    public final Allele E = new Allele(KEY, "E", 'E', "Extension (E)", false, true);
-    public final Allele e = new Allele(KEY, "e", 'e', "Non-extension / red (e)", true, true);
+    public final Allele E = new Allele(KEY, "E", "Extension (E)", false, true);
+    public final Allele e = new Allele(KEY, "e", "Non-extension / red (e)", true, true);
     private final List<Allele> alleles = List.of(E, e);
 
-    @Override
-    public String key() {
-        return KEY;
-    }
-
-    @Override
-    public List<Allele> alleles() {
-        return alleles;
-    }
-
-    @Override
-    public Allele wildType() {
-        return E;
-    }
+    @Override public String key() { return KEY; }
+    @Override public List<Allele> alleles() { return alleles; }
+    @Override public Allele wildType() { return E; }
 
     @Override
     public AllelePair randomPair(Rng rng) {

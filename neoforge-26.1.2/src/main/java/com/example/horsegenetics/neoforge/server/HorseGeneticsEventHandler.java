@@ -37,11 +37,6 @@ import net.neoforged.neoforge.network.PacketDistributor;
 @EventBusSubscriber
 public final class HorseGeneticsEventHandler {
 
-    // A real "eeaa" chestnut also matches this, but that's harmless: re-deriving
-    // the coat from the record's genetic code produces the same chestnut, and
-    // chestnut carries no leg-black-height to re-roll.
-    private static final String UNASSIGNED_CODE = "eeaa";
-
     /**
      * The debug-pen dimension is horses-only: cancel any other mob trying to
      * join it (villagers, monsters, other animals). Natural monster spawns are
@@ -114,21 +109,12 @@ public final class HorseGeneticsEventHandler {
         }
 
         HorseCoatAttachment coat = horse.getData(ModAttachments.HORSE_COAT.get());
-        if (coat == null || isUnassignedSentinel(coat)) {
+        if (coat == null || coat.isUnassigned()) {
             Genotype genotype = Genotype.parse(HorseRecords.of(horse).geneticCode());
             CoatData coatData = CoatGenerator.generate(genotype, rng); // rolls the epigenetic seed once
             horse.setData(ModAttachments.HORSE_COAT.get(), HorseCoatAttachment.from(coatData));
             syncToTrackers(horse, coatData);
-        } else if (coat.needsEpigeneticSeed()) {
-            // legacy save with no epigenetic seed - roll one now and persist it
-            HorseCoatAttachment seeded = new HorseCoatAttachment(coat.genotypeCode(), rng.nextLong());
-            horse.setData(ModAttachments.HORSE_COAT.get(), seeded);
-            syncToTrackers(horse, seeded.coatData());
         }
-    }
-
-    private static boolean isUnassignedSentinel(HorseCoatAttachment attachment) {
-        return UNASSIGNED_CODE.equals(attachment.genotypeCode());
     }
 
     /** Re-send coat + record data whenever a player starts tracking a horse (e.g. walks into range). */

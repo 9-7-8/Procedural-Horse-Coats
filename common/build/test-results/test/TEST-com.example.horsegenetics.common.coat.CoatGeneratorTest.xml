@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.example.horsegenetics.common.coat.CoatGeneratorTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-08-31T06:09:36.572Z" hostname="PERDIX" time="0.003">
+<testsuite name="com.example.horsegenetics.common.coat.CoatGeneratorTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-08-31T14:47:46.937Z" hostname="PERDIX" time="0.002">
   <properties/>
-  <testcase name="keepsTheGenotypeVerbatim()" classname="com.example.horsegenetics.common.coat.CoatGeneratorTest" time="0.002"/>
-  <testcase name="rollsExactlyOneLongForTheEpigeneticSeed()" classname="com.example.horsegenetics.common.coat.CoatGeneratorTest" time="0.001"/>
+  <testcase name="keepsTheGenotypeVerbatim()" classname="com.example.horsegenetics.common.coat.CoatGeneratorTest" time="0.001"/>
+  <testcase name="rollsExactlyOneLongForTheEpigeneticSeed()" classname="com.example.horsegenetics.common.coat.CoatGeneratorTest" time="0.0"/>
   <system-out><![CDATA[]]></system-out>
   <system-err><![CDATA[]]></system-err>
 </testsuite>

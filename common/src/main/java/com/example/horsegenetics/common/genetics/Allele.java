@@ -7,32 +7,33 @@ import java.util.Objects;
  * {@link AllelePair}) per gene, and the {@link Genotype} is the full set.
  *
  * <p>Identified by a <b>primary key</b> {@code <modauthor>.<gene>.<allele>}
- * (e.g. {@code "horsegenetics.agouti.At"}); {@link #geneKey()} is the
- * {@code <modauthor>.<gene>} prefix, and {@link #gene()} resolves it through
- * {@link Genes}. A third-party add-on would register genes under its own
- * {@code modauthor} namespace.
+ * (e.g. {@code "horsegenetics.splash.Spl"}); {@link #geneKey()} is the
+ * {@code <modauthor>.<gene>} prefix, {@link #gene()} resolves it through
+ * {@link Genes}.
  *
- * <p>{@link #symbol()} is the single character this allele takes in the compact
- * genotype code string (persistence / sync / pedigree). {@link #visible()} /
- * {@link #deterministic()} are population-level hints - the authoritative
- * per-horse answers come from {@link Gene#isVisible}/{@link Gene#isDeterministic}
- * for the actual pair - used as defaults and for quick "does any allele need
- * per-horse generation" checks.
+ * <p>{@link #token()} is the allele's text in a genotype code string. It can be
+ * <b>any run of characters</b>, not a single letter - the code puts a {@code /}
+ * between the two alleles of a gene and a {@code -} between genes, so
+ * {@code "Spl/spl"} is unambiguous.
+ *
+ * <p>{@link #visible()} / {@link #deterministic()} are population-level hints;
+ * the authoritative per-horse answers come from {@link Gene#isVisible} /
+ * {@link Gene#isDeterministic} for the actual pair + genotype.
  */
 public final class Allele {
 
     private final String key;
     private final String geneKey;
-    private final char symbol;
+    private final String token;
     private final String label;
     private final boolean visible;
     private final boolean deterministic;
 
     /** Created by a {@link Gene} implementation for each of its alleles. */
-    public Allele(String geneKey, String localId, char symbol, String label, boolean visible, boolean deterministic) {
+    public Allele(String geneKey, String token, String label, boolean visible, boolean deterministic) {
         this.geneKey = Objects.requireNonNull(geneKey);
-        this.key = geneKey + "." + localId;
-        this.symbol = symbol;
+        this.token = Objects.requireNonNull(token);
+        this.key = geneKey + "." + token;
         this.label = label;
         this.visible = visible;
         this.deterministic = deterministic;
@@ -50,20 +51,18 @@ public final class Allele {
         return Genes.byKey(geneKey);
     }
 
-    public char symbol() {
-        return symbol;
+    public String token() {
+        return token;
     }
 
     public String label() {
         return label;
     }
 
-    /** Does expressing this allele change the coat at all? (Wild-type alleles: false.) */
     public boolean visible() {
         return visible;
     }
 
-    /** Is this allele's visible effect identical on every horse, or does it need epigenetics / per-horse RNG? */
     public boolean deterministic() {
         return deterministic;
     }

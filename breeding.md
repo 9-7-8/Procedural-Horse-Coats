@@ -9,9 +9,8 @@ Everything here is implemented and compiles. The core breeding round-trip is
 **owner-verified as of 2026-08-30**: breeding two horses in-game produces a
 foal with stats between the parents, a correctly combined genetic code, and -
 for a pairing's **first** foal - a name combining both parents. The rest of
-the new `breedNth` name schedule (foals 2+), plus the paper dump, attribute
-application, panel tint, and legacy-save loading, are listed under "Not
-verified" at the bottom.
+the `breedNth` name schedule (foals 2+), the paper dump, attribute application
+and panel tint are in **`to be verified.md`**.
 
 ---
 
@@ -40,24 +39,23 @@ the *band* a foal's stats are rolled from.
 
 ### `genetics/Genotype.breedWith(Genotype other, Rng)`
 
-A `Genotype` is now one `AllelePair` per registered `Gene` (`genetics/Genes`);
-the full model - alleles as objects, the gene registry, the coat overlay
-pipeline - is in **CLAUDE.md** ("The genetics model" / "The coat overlay
-pipeline"). It still round-trips through a compact code string (2 symbols per
-gene, `Genes.codeOrder()` = extension, agouti, white, test, champagne).
-Shorter legacy codes still parse (missing trailing locus -> that gene's
-wild-type).
+A `Genotype` is one `AllelePair` per registered `Gene` (`genetics/Genes`). The
+full model - alleles as objects, the gene registry, the coat overlay pipeline -
+is in **CLAUDE.md**; **each gene** is in **`Gene Dict.md`**. The code string is
+one segment per gene (`Genes.codeOrder()` = extension, agouti, white, test,
+champagne, seal, splash), segments joined by `-`, alleles by `/`, dominant
+first, e.g. `E/e-A/a-w/w-t/t-c/c-sl/sl-Spl/spl`. **No legacy handling.**
 
 `breedWith` is Mendelian segregation: for **each gene** the child takes one
 allele from each parent, drawn 50/50 within that parent's pair - **2
-`Rng.nextBoolean()` per gene**, genes in `codeOrder()` (so 10 draws for the 5
-built-in genes: E,E, A,A, W,W, T,T, C,C; `true` = that parent's first allele).
+`Rng.nextBoolean()` per gene**, genes in `codeOrder()` (14 draws for the 7
+built-in genes; `true` = that parent's first allele).
 
 Each resulting pair is canonicalized by `AllelePair` (more-dominant allele
 first, per `Gene.precedence`), so `breedWith` is symmetric. Example:
-`EEAAwwttcc x eeaawwttcc` is **always** `EeAawwttcc`. Dominance still masks:
-one `W` from either parent -> white foal; one `T` -> Test coat; one `Ch` ->
-champagne dilution.
+`E/E-A/A-... x e/e-a/a-...` always gives `E/e-A/a-...`. Dominance still masks:
+one `W` -> white foal; one `T` -> Test tint; one `Ch` -> champagne; one `Sl`
+-> seal; one `Spl` -> splash markings.
 
 ### `horse/HorseStats.rollFoalStat(double parentA, double parentB, Rng)`
 
@@ -242,12 +240,11 @@ side, any `Horse`) -> `ensureRecordAndCoat(horse)`:
    into the global DB (idempotent, change-guarded), `applyStatsToEntity(...,
    fullHeal=false)` so a reloaded horse keeps its rolled attributes, and
    re-set the custom name if it's missing.
-4. **Coat**: if the coat attachment is missing or still the `"eeaa"`
-   sentinel, `CoatGenerator.generate(genotype, rng)` rolls the horse's
-   **epigenetic seed** (`rng.nextLong()`, once, ever), stores
+4. **Coat**: if the coat attachment is still `HorseCoatAttachment.UNASSIGNED`,
+   `CoatGenerator.generate(genotype, rng)` rolls the horse's **epigenetic
+   seed** (`rng.nextLong()`, once, ever), stores
    `HorseCoatAttachment = {genotype code, seed}`, and sends the coat sync
-   packet. A legacy save whose attachment has no seed (`epigeneticSeed == 0`)
-   gets one backfilled on this same join.
+   packet.
 
 Step 4 means the coat is **always derived from the record's genetic code**
 (plus the persisted seed for non-deterministic coats) - a bred foal's coat
@@ -414,68 +411,31 @@ both sides.
 
 ---
 
-## Not verified yet
+## Not verified in-game
 
-Everything compiles and `runServer` boots clean (payloads, attachment,
-SavedData, all handlers register).
+Everything compiles and `runServer` boots clean. The full `runClient`
+checklist - the `breedNth` name schedule past foal 1, foal record fields,
+stat application + panel tint, name-tag / barn-name round-trips,
+`FamilyTreeScreen`, save->reload persistence - is in **`to be verified.md`**.
 
-**Owner-verified in-game (2026-08-30):** breeding a mare + stallion rolls a
-foal whose speed/health sit between the parents, with a correctly combined
-genetic code, and (for the first foal of a pairing) a name combining the two
-parents.
-
-What no automated check has covered yet:
-
-- The `breedNth` foal-name scheme past foal 1: foal 2 = the other combo,
-  foals 3-6 = one parent half + a random word, foal 7+ = fully random. Needs
-  breeding the same pair 7+ times and checking the names change / stop
-  repeating. (`HorseNames` unit tests cover the branch logic;
-  `offspringCount` from the live `HorseAncestryData` is the unverified link.)
-- The rest of the foal record: `generation` = 1 + max(parents); `bredBy` set;
-  auto-tamed to the dam's owner if the dam was tamed.
-- Foal `speed` / `health` round up and are actually applied to the entity's
-  attributes (a foal from two fast parents is fast; lineages can climb with no
-  cap). Founder stats copy the entity's spawned attribute values.
-- The inventory-panel `speed` / `health` tint (green above both parents,
-  amber above one, red below both) matches `parentStats`.
-- A `W` allele from either parent produces a solid-white foal
-  (`horse_white` texture); legacy 4-char saved codes still load.
-- Same-sex breeding is actually blocked.
-- Name tag: splits on the first space into first/last, rejects both-blank,
-  is consumed on use.
-- Barn name: the inventory `EditBox` + "Set" button round-trips through
-  `SetBarnNamePayload` and drives `displayName()`.
-- **"Tamed by" actually populates now** (via `HorseOwnerTrackingHandler`) -
-  the previous version relied on a same-tick check that missed wild-horse
-  taming.
-- Foal texture uses `*_baby`, not a stretched adult one.
-- The panel and **`FamilyTreeScreen`** render, the tree boxes are clickable
-  (sire-top / dam-bottom), the coat swatch shows. This SDK's reworked GUI
-  API (`GuiGraphicsExtractor.extractRenderState`,
-  `mouseClicked(MouseButtonEvent, boolean)`, `EditBox`) - compiled but never
-  seen, layout is a first guess.
-- Attachment + SavedData surviving save -> quit -> reload; the texture /
-  cache cleanup firing on world exit.
+**Owner-verified in-game (2026-08-30):** breeding rolls a foal with
+speed/health between the parents, a correctly combined genetic code, and
+(first foal of a pairing) a name combining both parents.
 
 ## Known limitations / rough edges
 
 - **Stat inheritance is random, not genetic.** `HorseStats.rollFoalStat` is a
   placeholder; the plan is to fold speed / health into the Mendelian model
   later. Jump strength isn't tracked at all yet.
-- **White (`W`) is a plain on/off dominant** - no true-white subtleties, no
-  interaction with E/A other than masking them. Wild frequency is
-  `WhiteGene.WILD_WHITE_ALLELE_ODDS` (1 in 50 per allele). White **markings**
-  (a real non-deterministic gene) aren't built yet.
-- **`T` (test) is a temporary diagnostic gene** - dominant, paints the Test
-  gradient over the coat. `TestGene.WILD_TEST_ODDS` = **4** (one roll -> `Tt`,
-  deliberately high; not Hardy-Weinberg). Expect it pulled once the skin engine
-  is trusted.
-- **Champagne** is a simple dominant dilution (`ChampagneGene`) - deterministic,
-  pulls the pigment sample to the gradient's gold column. Real champagne's
-  dose effects / cream interaction aren't modelled.
-- **Bay / seal leg + face black is per-horse random** (the epigenetic seed) -
-  not heritable detail, just a stored roll. Coat generation itself is
-  documented in CLAUDE.md.
+- **Per-gene detail** (alleles, dominance, wild frequency, generation function)
+  is in **`Gene Dict.md`** - not repeated here.
+- Genes are simple dominant/recessive with no dose effects, no cross-gene
+  interaction beyond masking (white masks all; chestnut hides agouti/seal).
+  Real-horse subtleties (cream dose, champagne+cream, gray progression) aren't
+  modelled.
+- **Bay / seal / splash marking extents are per-horse random** (from the
+  epigenetic seed) - not heritable detail, just a stored roll replayed on every
+  skin regen.
 - No inbreeding prevention, no generational effects, no sex-linked loci - the
   genes combine independently.
 - Name-generation output is rough and slated for a rework (deferred by the
@@ -495,7 +455,7 @@ What no automated check has covered yet:
 common/src/main/java/com/example/horsegenetics/common/
   genetics/Genotype.java            # AllelePair per Gene; parse/toCode; breedWith(...); random(...)
   genetics/Allele.java, Gene.java, AllelePair.java, Genes.java   # the allele/gene model + registry
-  genetics/genes/*.java             # Extension, Agouti(+seal), White, Champagne, Test
+  genetics/genes/*.java             # Extension, Agouti, White, Test, Champagne, Seal, Splash (-> Gene Dict.md)
   genetics/GeneticCodeCombiner.java # combine(motherCode, fatherCode, Rng)
   coat/CoatData.java, CoatGenerator.java        # genotype + epigeneticSeed; generate() rolls the seed
   coat/pattern/*.java               # the overlay pipeline (CLAUDE.md "The coat overlay pipeline")

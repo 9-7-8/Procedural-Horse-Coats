@@ -3,7 +3,6 @@ package com.example.horsegenetics.common.genetics;
 import com.example.horsegenetics.common.testutil.FakeRng;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -14,60 +13,54 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class GenotypeTest {
 
-    // canonical code = 10 chars: EE | AA | WW | TT | CC   (extension, agouti, white, test, champagne)
+    // code = 7 gene segments joined by '-', alleles joined by '/', dominant first:
+    //   extension / agouti / white / test / champagne / seal / splash
 
-    // --- phenotype table (E/A/W only; T and C never move it) ---
-
-    @ParameterizedTest(name = "{0} -> {1}")
-    @CsvSource({
-            "eeaa, CHESTNUT",
-            "eeAa, CHESTNUT",
-            "Eeaa, BLACK",
-            "EEaa, BLACK",
-            "EeAa, BAY",
-            "EEAA, BAY",
-            "eeaawwttcc, CHESTNUT",
-            "EEAAwwttcc, BAY",
-            "eeaaWwttcc, WHITE",
-            "EEaaWWttcc, WHITE",
-            "EeaawwttCc, BLACK",     // champagne doesn't change the coarse phenotype
-            "EeAawwTtcc, BAY",       // test doesn't either
-            "EeSawwttcc, BAY",       // seal reports as BAY (foal *_baby fallback)
-    })
-    void phenotypeMatchesTable(String code, CoatPhenotype expected) {
-        assertEquals(expected, Genotype.parse(code).phenotype());
+    private static Genotype g(AllelePair... pairs) {
+        return Genotype.of(pairs);
     }
 
-    // --- legacy short codes pad with wild-type for the newer loci ---
+    private static AllelePair p(Allele a, Allele b) {
+        return new AllelePair(a, b);
+    }
 
-    @ParameterizedTest(name = "parse({0}) -> {1}")
-    @CsvSource({
-            "EeAa,      EeAawwttcc",
-            "eEaA,      EeAawwttcc",
-            "EeAaWw,    EeAaWwttcc",
-            "EeAawwtt,  EeAawwttcc",
-            "eEaAwWtTcC, EeAaWwTtCc",
-            "EEAAWWTTCC, EEAAWWTTCC",
-    })
-    void legacyAndCanonicalCodesRoundTrip(String input, String expected) {
-        assertEquals(expected, Genotype.parse(input).toCode());
+    // --- code round-trip -------------------------------------------------
+
+    @Test
+    void wildTypeCodeIsBlackAndRoundTrips() {
+        Genotype wt = Genotype.wildType();
+        assertEquals("E/E-a/a-w/w-t/t-c/c-sl/sl-spl/spl", wt.toCode());
+        assertEquals(CoatPhenotype.BLACK, wt.phenotype());
+        assertEquals(wt, Genotype.parse(wt.toCode()));
     }
 
     @Test
     void parseIsCanonicalAndOrderIndependent() {
-        assertEquals(Genotype.parse("eEaAwWtTcC"), Genotype.parse("EeAaWwTtCc"));
-        assertEquals(Genotype.parse("eEaAwWtTcC").hashCode(), Genotype.parse("EeAaWwTtCc").hashCode());
+        Genotype a = Genotype.parse("e/E-a/A-w/W-t/T-c/Ch-sl/Sl-spl/Spl");
+        Genotype b = Genotype.parse("E/e-A/a-W/w-T/t-Ch/c-Sl/sl-Spl/spl");
+        assertEquals(b, a);
+        assertEquals("E/e-A/a-W/w-T/t-Ch/c-Sl/sl-Spl/spl", a.toCode());
+    }
+
+    @Test
+    void multiCharTokensParse() {
+        Genotype seal = Genotype.parse("E/e-a/a-w/w-t/t-c/c-Sl/sl-spl/spl");
+        assertTrue(seal.isSeal());
+        Genotype splash = Genotype.parse("E/e-a/a-w/w-t/t-c/c-sl/sl-Spl/Spl");
+        assertTrue(splash.isSplash());
+        assertTrue(splash.pair(Genes.SPLASH).homozygous());
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"", "Ee", "EeA", "EeAaa", "EeAa ", "EeAawwttc", "EeAawwttccc", "EeAaw"})
-    void parseRejectsWrongLength(String bad) {
-        assertThrows(IllegalArgumentException.class, () -> Genotype.parse(bad));
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings = {"XxAa", "EeYy", "EeAaZz", "EeAawwQq", "EeAawwttZz"})
-    void parseRejectsUnknownAlleles(String bad) {
+    @ValueSource(strings = {
+            "",
+            "E/e",
+            "E/e-A/a-w/w-t/t-c/c-sl/sl",              // 6 segments, need 7
+            "E/e-A/a-w/w-t/t-c/c-sl/sl-spl/spl-x/x",  // 8 segments
+            "E/e/E-A/a-w/w-t/t-c/c-sl/sl-spl/spl",    // 3 alleles in a segment
+            "E/x-A/a-w/w-t/t-c/c-sl/sl-spl/spl",      // unknown allele
+    })
+    void parseRejectsMalformed(String bad) {
         assertThrows(IllegalArgumentException.class, () -> Genotype.parse(bad));
     }
 
@@ -76,90 +69,111 @@ class GenotypeTest {
         assertThrows(NullPointerException.class, () -> Genotype.parse(null));
     }
 
-    // --- allele predicates ---
+    // --- phenotype ----------------------------------------------------
+
+    @Test
+    void phenotype() {
+        assertEquals(CoatPhenotype.CHESTNUT, g(p(Genes.EXTENSION.e, Genes.EXTENSION.e)).phenotype());
+        assertEquals(CoatPhenotype.BLACK, g(p(Genes.EXTENSION.E, Genes.EXTENSION.e)).phenotype());
+        assertEquals(CoatPhenotype.BAY, g(p(Genes.EXTENSION.E, Genes.EXTENSION.e),
+                p(Genes.AGOUTI.A, Genes.AGOUTI.a)).phenotype());
+        assertEquals(CoatPhenotype.WHITE, g(p(Genes.WHITE.W, Genes.WHITE.w)).phenotype());
+        // seal reports as BAY for the foal-texture fallback
+        assertEquals(CoatPhenotype.BAY, g(p(Genes.EXTENSION.E, Genes.EXTENSION.e),
+                p(Genes.SEAL.Sl, Genes.SEAL.sl)).phenotype());
+        // test / champagne / splash never move the coarse phenotype
+        assertEquals(CoatPhenotype.BLACK, g(p(Genes.EXTENSION.E, Genes.EXTENSION.e),
+                p(Genes.CHAMPAGNE.Ch, Genes.CHAMPAGNE.c),
+                p(Genes.TEST.T, Genes.TEST.t)).phenotype());
+    }
 
     @Test
     void predicates() {
-        assertTrue(Genotype.parse("Eeaa").hasBlackPigment());
-        assertFalse(Genotype.parse("eeAA").hasBlackPigment());
-        assertTrue(Genotype.parse("EeAa").isAgouti());
-        assertTrue(Genotype.parse("eeaaWwttcc").isWhite());
-        assertTrue(Genotype.parse("EeAawwTtcc").hasTest());
-        assertTrue(Genotype.parse("EeaawwttCc").isChampagne());
-        assertTrue(Genotype.parse("EeSawwttcc").isSeal());
-        assertFalse(Genotype.parse("EeAawwttcc").isSeal());
+        Genotype x = Genotype.parse("E/e-A/a-w/w-T/t-Ch/c-Sl/sl-Spl/spl");
+        assertTrue(x.hasBlackPigment());
+        assertTrue(x.isAgouti());
+        assertTrue(x.hasTest());
+        assertTrue(x.isChampagne());
+        assertTrue(x.isSeal());
+        assertTrue(x.isSplash());
+        assertFalse(x.isWhite());
+        assertTrue(x.has(Genes.SPLASH.Spl));
+        assertTrue(x.has(Genes.SPLASH.spl));
     }
 
-    @Test
-    void ofFromAllelePairsFillsMissingGenesWithWildType() {
-        Genotype g = Genotype.of(new AllelePair(Genes.EXTENSION.e, Genes.EXTENSION.e));
-        assertEquals("eeaawwttcc", g.toCode());
-        assertEquals(CoatPhenotype.CHESTNUT, g.phenotype());
-    }
+    // --- determinism ------------------------------------------------
 
     @Test
-    void hasAllele() {
-        Genotype g = Genotype.parse("EeAawwTtcc");
-        assertTrue(g.has(Genes.TEST.T));
-        assertFalse(g.has(Genes.WHITE.W));
-        assertEquals(Genes.AGOUTI.A, g.pair(Genes.AGOUTI).dominant());
-    }
+    void determinism() {
+        assertTrue(Genotype.wildType().isDeterministic());                                  // black
+        assertTrue(g(p(Genes.EXTENSION.e, Genes.EXTENSION.e)).isDeterministic());           // chestnut
+        assertTrue(g(p(Genes.WHITE.W, Genes.WHITE.w)).isDeterministic());                   // white
+        assertTrue(g(p(Genes.CHAMPAGNE.Ch, Genes.CHAMPAGNE.c)).isDeterministic());          // champagne
+        assertTrue(g(p(Genes.TEST.T, Genes.TEST.t)).isDeterministic());                     // test
 
-    // --- determinism ---
+        assertFalse(g(p(Genes.EXTENSION.E, Genes.EXTENSION.e),
+                p(Genes.AGOUTI.A, Genes.AGOUTI.a)).isDeterministic());                       // bay
+        assertFalse(g(p(Genes.EXTENSION.E, Genes.EXTENSION.e),
+                p(Genes.SEAL.Sl, Genes.SEAL.sl)).isDeterministic());                         // seal
+        assertFalse(g(p(Genes.SPLASH.Spl, Genes.SPLASH.spl)).isDeterministic());            // splash
 
-    @Test
-    void determinismFollowsTheVisibleAlleles() {
-        assertTrue(Genotype.parse("Eeaawwttcc").isDeterministic());   // black
-        assertTrue(Genotype.parse("eeaawwttcc").isDeterministic());   // chestnut
-        assertTrue(Genotype.parse("EeaawwttCc").isDeterministic());   // champagne
-        assertTrue(Genotype.parse("eeaaWwttcc").isDeterministic());   // white
-        assertFalse(Genotype.parse("EeAawwttcc").isDeterministic());  // bay - random points
-        assertFalse(Genotype.parse("EeSawwttcc").isDeterministic());  // seal
         // a hidden non-deterministic allele that isn't expressed doesn't count:
-        assertTrue(Genotype.parse("eeAawwttcc").isDeterministic());   // chestnut masks agouti
+        assertTrue(g(p(Genes.EXTENSION.e, Genes.EXTENSION.e),
+                p(Genes.AGOUTI.A, Genes.AGOUTI.a)).isDeterministic());                       // chestnut masks agouti
     }
 
-    // --- random(): E,E bools | A,A ints(20) | W,W ints(50) | T int(4) | C,C ints(40) ---
+    // --- random ---------------------------------------------------
 
     @Test
     void randomConsumesDrawsInGeneOrder() {
-        Genotype g = Genotype.random(new FakeRng()
-                .booleans(true, true)           // EE
-                .ints(0, 12, 1, 1, 1, 39, 39)); // A=0->A, a=12->a ; W ww ; T tt ; C cc
-        assertEquals("EEAawwttcc", g.toCode());
-        assertEquals(CoatPhenotype.BAY, g.phenotype());
+        // extension: 2 bool | agouti: 2 bool | white: 2 int(50) | test: 1 int(4)
+        //          | champagne: 2 int(40) | seal: 2 int(16) | splash: 2 int(20)
+        Genotype x = Genotype.random(new FakeRng()
+                .booleans(true, true, true, false)                       // EE, Aa
+                .ints(1, 1, 1, 39, 39, 5, 5, 7, 7));                     // ww t cc slsl splspl
+        assertEquals("E/E-A/a-w/w-t/t-c/c-sl/sl-spl/spl", x.toCode());
+        assertEquals(CoatPhenotype.BAY, x.phenotype());
     }
 
     @Test
-    void randomRollsWhiteAndTestAndChampagneOnZero() {
-        Genotype g = Genotype.random(new FakeRng()
-                .booleans(false, false)
-                .ints(12, 12, 0, 1, 0, 0, 39));
-        assertEquals("eeaaWwTtCc", g.toCode());
-        assertTrue(g.isWhite());
-        assertTrue(g.hasTest());
-        assertTrue(g.isChampagne());
+    void randomRollsTheRarerAllelesOnZero() {
+        Genotype x = Genotype.random(new FakeRng()
+                .booleans(false, false, false, false)
+                .ints(0, 1, 0, 0, 39, 0, 15, 0, 19));                    // Ww T Chc Slsl Splspl
+        assertTrue(x.isWhite());
+        assertTrue(x.hasTest());
+        assertTrue(x.isChampagne());
+        assertTrue(x.isSeal());
+        assertTrue(x.isSplash());
     }
 
-    // --- breedWith: 2 booleans per gene (child allele from each parent), code order ---
+    // --- breeding -------------------------------------------------
 
     @Test
     void breedWithIsMendelianAndSymmetric() {
-        Genotype ab = Genotype.parse("EEAA").breedWith(Genotype.parse("eeaa"),
-                new FakeRng().booleans(true, false, true, false, true, false, true, false, true, false));
-        Genotype ba = Genotype.parse("eeaa").breedWith(Genotype.parse("EEAA"),
-                new FakeRng().booleans(false, true, false, true, false, true, false, true, false, true));
-        assertEquals("EeAawwttcc", ab.toCode());
-        assertEquals(ab, ba);
+        Genotype dad = Genotype.parse("E/E-A/A-w/w-t/t-c/c-sl/sl-spl/spl");
+        Genotype mom = Genotype.wildType(); // E/E-a/a-...
+        boolean[] allFirst = {true, true, true, true, true, true, true, true, true, true,
+                true, true, true, true};
+        Genotype ab = dad.breedWith(mom, new FakeRng().booleans(allFirst));
+        Genotype ba = mom.breedWith(dad, new FakeRng().booleans(allFirst));
+        assertEquals("E/E-A/a-w/w-t/t-c/c-sl/sl-spl/spl", ab.toCode());
+        // ba: mom-first then dad-first -> agouti a (mom) / A (dad) -> canonical A/a
+        assertEquals(ab.pair(Genes.AGOUTI), ba.pair(Genes.AGOUTI));
     }
 
     @Test
-    void breedWithInheritsTestAndChampagne() {
-        // all-"first allele" draws: E from EeAawwTtCc = E, E from eeaawwttcc = e -> Ee ; etc.
-        Genotype child = Genotype.parse("EeAawwTtCc").breedWith(Genotype.parse("eeaawwttcc"),
-                new FakeRng().booleans(true, true, true, true, true, true, true, true, true, true));
-        assertEquals("EeAawwTtCc", child.toCode());
-        assertTrue(child.hasTest());
-        assertTrue(child.isChampagne());
+    void breedInheritsEveryGene() {
+        Genotype a = Genotype.parse("E/e-A/a-W/w-T/t-Ch/c-Sl/sl-Spl/spl");
+        Genotype b = Genotype.wildType();
+        boolean[] draws = new boolean[Genes.codeOrder().size() * 2];
+        java.util.Arrays.fill(draws, true); // always the first allele of each parent's pair
+        Genotype child = a.breedWith(b, new FakeRng().booleans(draws));
+        assertEquals("E/E-A/a-W/w-T/t-Ch/c-Sl/sl-Spl/spl", child.toCode());
+    }
+
+    @Test
+    void differentGenotypesNotEqual() {
+        assertNotEquals(Genotype.wildType(), Genotype.parse("e/e-a/a-w/w-t/t-c/c-sl/sl-spl/spl"));
     }
 }

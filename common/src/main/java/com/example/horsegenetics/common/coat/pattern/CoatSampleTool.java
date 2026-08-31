@@ -22,17 +22,20 @@ import java.nio.file.Path;
  */
 public final class CoatSampleTool {
 
-    /** code, epigenetic seed, filename. */
+    /** code, epigenetic seed, filename.  segments: extension-agouti-white-test-champagne-seal-splash */
     private static final String[][] SAMPLES = {
-            {"Eeaawwttcc", "0", "black"},
-            {"eeaawwttcc", "0", "chestnut"},
-            {"EeAawwttcc", "12345", "bay"},
-            {"EeAawwttcc", "999", "bay2"},
-            {"EeSawwttcc", "4242", "seal"},
-            {"EeaawwttCc", "0", "champagne"},
-            {"EeAawwttCc", "7", "amber_champagne"},
-            {"eeaaWwttcc", "0", "white"},
-            {"EeAawwTtcc", "0", "bay_test"},
+            {"E/E-a/a-w/w-t/t-c/c-sl/sl-spl/spl", "0", "black"},
+            {"e/e-a/a-w/w-t/t-c/c-sl/sl-spl/spl", "0", "chestnut"},
+            {"E/e-A/a-w/w-t/t-c/c-sl/sl-spl/spl", "12345", "bay"},
+            {"E/e-A/a-w/w-t/t-c/c-sl/sl-spl/spl", "999", "bay2"},
+            {"E/E-a/a-w/w-t/t-c/c-Sl/sl-spl/spl", "4242", "seal"},
+            {"E/E-a/a-w/w-t/t-Ch/c-sl/sl-spl/spl", "0", "champagne_black"},
+            {"E/e-A/a-w/w-t/t-Ch/c-sl/sl-spl/spl", "7", "champagne_bay"},
+            {"e/e-a/a-w/w-t/t-Ch/c-sl/sl-spl/spl", "0", "champagne_chestnut"},
+            {"e/e-a/a-W/w-t/t-c/c-sl/sl-spl/spl", "0", "white"},
+            {"E/e-A/a-w/w-t/t-c/c-sl/sl-Spl/spl", "31", "bay_splash"},
+            {"E/E-a/a-w/w-t/t-c/c-sl/sl-Spl/spl", "88", "black_splash"},
+            {"e/e-a/a-w/w-T/t-c/c-sl/sl-spl/spl", "0", "chestnut_test"},
     };
 
     private CoatSampleTool() {}
