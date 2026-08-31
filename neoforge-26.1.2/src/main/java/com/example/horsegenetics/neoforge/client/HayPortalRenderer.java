@@ -78,10 +78,18 @@ public class HayPortalRenderer extends AbstractEndPortalRenderer<HayPortalBlockE
         if (state.facesToShow.isEmpty()) {
             return;
         }
-        Direction.Axis axis = state.axis;
+        // AXIS is the horizontal axis the portal *plane* runs along (vanilla
+        // nether-portal convention); the slab is thin along the OTHER axis, and
+        // the faces we draw are the ones perpendicular to it - i.e. the ones
+        // that face the player walking up to the frame.
+        Direction.Axis thinAxis = switch (state.axis) {
+            case X -> Direction.Axis.Z;
+            case Z -> Direction.Axis.X;
+            case Y -> Direction.Axis.Y;
+        };
         Vector3f from = new Vector3f(0f, 0f, 0f);
         Vector3f to = new Vector3f(1f, 1f, 1f);
-        switch (axis) {
+        switch (thinAxis) {
             case X -> { from.x = SLAB_MIN; to.x = SLAB_MAX; }
             case Y -> { from.y = SLAB_MIN; to.y = SLAB_MAX; }
             case Z -> { from.z = SLAB_MIN; to.z = SLAB_MAX; }
@@ -95,7 +103,7 @@ public class HayPortalRenderer extends AbstractEndPortalRenderer<HayPortalBlockE
         RenderType backing = RenderTypes.entitySolid(TEXTURE);
         submitNodeCollector.submitCustomGeometry(poseStack, backing, (pose, buffer) -> {
             for (Direction dir : state.facesToShow) {
-                if (dir.getAxis() == axis) {
+                if (dir.getAxis() == thinAxis) {
                     emitFace(pose, buffer, dir, from, to, 0f, 1f, 0, 0, 0);
                 }
             }
@@ -105,7 +113,7 @@ public class HayPortalRenderer extends AbstractEndPortalRenderer<HayPortalBlockE
         RenderType swirl = RenderTypes.entityTranslucentEmissive(TEXTURE, false);
         submitNodeCollector.submitCustomGeometry(poseStack, swirl, (pose, buffer) -> {
             for (Direction dir : state.facesToShow) {
-                if (dir.getAxis() == axis) {
+                if (dir.getAxis() == thinAxis) {
                     emitFace(pose, buffer, dir, from, to, fv0, fv1, 255, 255, 255);
                 }
             }

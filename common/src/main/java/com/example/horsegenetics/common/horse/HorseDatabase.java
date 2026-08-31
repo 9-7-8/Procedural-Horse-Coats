@@ -17,6 +17,13 @@ public interface HorseDatabase {
     Optional<HorseRecord> lookup(UUID id);
 
     /**
+     * How many stored records list exactly {@code parentA} and {@code parentB}
+     * as their two parents (order-independent). Used to vary foal names by how
+     * many foals a pairing has already produced.
+     */
+    int offspringCount(UUID parentA, UUID parentB);
+
+    /**
      * Ancestors of {@code id}, nearest generation first (parents, then
      * grandparents, ...), up to {@code depth} generations.
      *

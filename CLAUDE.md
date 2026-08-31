@@ -19,61 +19,66 @@ why the logic is quarantined in a game-free module.
 
 ## Status snapshot (keep this current)
 
-- **`common/`** - compiles; **120 JUnit tests pass** (`./gradlew
+- **`common/`** - compiles; **124 JUnit tests pass** (`./gradlew
   :common:test`). Covers `genetics/` (E/A/W loci, 6-char codes), `coat/`,
-  `name/`, `horse/` (pedigree model + `HorseStats` + `ParentStats` ->
-  `breeding.md`).
+  `name/` (incl. the `breedNth` foal-name scheme), `horse/` (pedigree model +
+  `HorseStats` + `ParentStats` + `offspringCount` -> `breeding.md`).
 - **`neoforge-26.1.2/`** - compiles and assembles (`./gradlew
   :neoforge-26.1.2:build` passes; only two `getGuiLeft/getGuiTop`
   deprecation warnings) against the real NeoForge `26.1.2.100` SDK.
 - **`runServer`** - boots clean to `Done (...)! For help`; all dimensions,
-  attachments, SavedData, payloads, the `hay_portal` block **and its block
-  entity type** register with no errors.
-- **`runClient`** - launched to the title screen in earlier sessions; F6 ->
-  the horse dimension was owner-confirmed **long before** the reworks below.
-  Not run since. **A user did try the hay-bale portal + carrot in-game and it
-  did nothing** - the frame detector was reworked (try every air-neighbour of
-  the clicked hay as a seed) but that fix is unverified. Activation was also
-  changed **carrot -> golden carrot** afterwards.
-- **Owner-verified in-game (2026-08-30):** golden-carrot portal activation;
-  breeding (foal stats between parents, correct genetics, inherited names); the
-  **info panel** (readable, buttons work, E no longer closes it while typing);
-  the reworked **E/W pen-back walls**; **return teleport** (horses land beside
-  the portal, unharmed); **no block break/place** in the horse dimension;
-  `FamilyTreeScreen` **3D models** (right coat/pose).
+  attachments, SavedData, payloads, the `hay_portal` block + block entity, and
+  the `ClientConfig` all register with no errors.
+- **`runClient`** - actively play-tested over the 2026-08-30 session; see below.
+
+- **Owner-verified in-game (2026-08-30):**
+  - **Hay-bale portal**: golden-carrot lighting; the animated `hay_portal.png`
+    texture renders, **faces the player** (thin half-block slab), is opaque (no
+    sky/clouds/water through it), and its fps **ramps 12 -> 48** as you dwell;
+    **gold** dwell-swirl particles + the chat countdown; the End-portal
+    starfield effect (before it was replaced by the custom texture); **return
+    teleport** drops your tamed horses in the air beside the overworld portal,
+    unharmed (10 s invuln), not sucked back.
+  - **Horse dimension**: the reworked **E/W pen-back walls** (gravel strip
+    flush to the pen, glowstone above, one wood wall, bedrock); the layered
+    **wall behind the portal** (gravel floor strip + floating glowstone + wood
+    wall + bedrock, no dark band / missing blocks) with the E/W walls carried
+    to `originX-1` so the corner has no gap; **no block break / place** anywhere
+    in the dimension (survival + creative).
+  - **Info panel** (mounted horse GUI): readable shadow-free text, the "View
+    Family Tree" / Set buttons + barn box visible and clickable, and **E no
+    longer closes the screen while the barn box is focused** (Enter submits,
+    Esc closes).
+  - **`FamilyTreeScreen`**: per-node **3D horse models** in the right coat/pose
+    that **turn to face the cursor**; the chart **shrinks to fit** the window
+    (`boxW`/`boxH`/`uiScale` from `rebuildNodes`, full names via `drawFitted`'s
+    pose `scale`) - no column overlap, nothing cut off, names legible, no
+    scroll bar by default.
+  - **Breeding**: a foal rolls speed/health between its parents, a correctly
+    combined genetic code, and (for the pairing's **first** foal) a name
+    combining both parents.
+
 - **NOT verified in-game (the backlog):**
-  - the instanced-plot horse dimension (void outside walls, random-Y plots,
-    teardown on leave, no pop-in), **brick walls + double gates + 6-wide
-    pens**. E/W pen-back walls verified. Still to check: the **wall behind the
-    return portal** - now a gravel *floor strip* + floating glowstone + single
-    wood wall + bedrock, every column on a bedrock/dirt base, and the E/W
-    walls' plank+bedrock now carried forward to `originX-1` to close the
-    corner seam;
-  - the **hay-portal animated texture** - `hay_portal.png` (64x2304, 36 frames);
-    `HayPortalRenderer` draws a **half-block opaque slab** (0.25..0.75 along the
-    `AXIS`, two faces only) - opaque black backing pass so sky/clouds/water
-    don't show through, then an `entityTranslucentEmissive` swirl on top;
-    `HayPortalClientAnim` ramps it **12 -> 48 fps** as the local player's dwell
-    approaches teleport. Replaces the End-portal starfield. Watch for: wrong
-    face winding (portal invisible / inside-out), UV rotation, ramp feel, slab
-    thickness/position;
-  - hay-bale portals: frame detection, dwell **swirl-particle + chat
-    countdown**, plot linking, roped-horse right-click;
-  - horse coats rendering per-genotype, incl. the new **WHITE** (`horse_white`
-    texture); bay black on the legs vs the face;
-  - `FamilyTreeScreen` - **compressed rows + scrollbar** (`ROW_SPACING` =
-    `BOX_H+6`; scrolls with the wheel + a right-edge thumb when 8
-    great-grandparent rows don't fit; content scissored to `[VIEW_TOP,
-    height-VIEW_BOTTOM_MARGIN]`). Models turn to **face the cursor**
-    (`atan((cx-mouseX)/30) * 42deg` yaw) and `MODEL_LIFT` = 16 keeps feet in
-    the row slot. Confirm nothing's cut off and the swing/scroll feel right;
-  - rolled speed/health landing on foal attributes (band now
-    `[0.75*min, 1.5*max]`, rounded up, uncapped);
-  - "clock on a tamed foal no longer also mounts you" (cancel now fires
-    client-side too);
-  - tamed horses following the player out of the dimension on exit;
-  - riding a tamed horse through water;
-  - the breeding round-trip (see `breeding.md` -> "Not verified").
+  - the **`breedNth` foal-name scheme past foal 1** - breed one pair 7+ times
+    and confirm: foal 2 = the other combo, foals 3-6 = one parent half + a
+    random word, foal 7+ = fully random, no repeats. (`HorseNames` unit tests
+    cover the branch logic; the live `HorseAncestryData.offspringCount(dam,
+    sire)` feeding it is the unproven link.)
+  - **`FamilyTreeScreen` scroll mode** - the `familyTree.scrollBar = true`
+    client-config path (wheel + right-edge thumb instead of shrinking).
+  - horse coats rendering per-genotype in the open world, incl. the new
+    **WHITE** (`horse_white` / `horse_white_baby`); bay black on the legs vs
+    the face (`LEG_REGIONS = {48,25,16,11}`).
+  - the inventory-panel **stat tint** (green/amber/red vs `parentStats`), the
+    **paper dump** `vs parents` line, foal stats actually landing on the
+    entity's attributes, and **legacy 4-char / no-stat saves** still loading.
+  - "**clock on a tamed foal** no longer also mounts you" (cancel fires
+    client-side too now).
+  - **riding a tamed horse through water** (`HorseWaterRidingHandler` feel).
+  - the **roped-horse right-click** portal shortcut.
+  - the instanced-plot dimension basics that predate this session (void outside
+    walls, random-Y plots, no pop-in, teardown on leave) - last owner-confirmed
+    long ago, before the reworks.
 - **Machine caveat (this dev laptop):** hybrid graphics (NVIDIA RTX 3050 Ti +
   AMD integrated). `java.exe`/`javaw.exe` are pinned to the NVIDIA GPU and the
   FML splash is disabled, or the JVM hard-crashes in the AMD GL driver. See
@@ -88,7 +93,8 @@ Two-module Gradle project, split deliberately:
   - `genetics/` - `Genotype` (+ `breedWith`), `CoatPhenotype`,
     `GeneticCodeCombiner`.
   - `coat/` - `CoatData`, `CoatGenerator`.
-  - `name/` - `HorseNameGenerator` (+ `HorseNames.breed`) + word tables under
+  - `name/` - `HorseNameGenerator` + `HorseNames` (`breed` = one-half-each;
+    `breedNth` = varied by a pairing's foal count) + word tables under
     `src/main/resources/horsegenetics/names/`.
   - `horse/` - the pedigree domain model (`Sex`, `HorseRecord`,
     `HorseDatabase`, `InMemoryHorseDatabase`) and `HorseStats` (foal stat
@@ -107,7 +113,8 @@ Two-module Gradle project, split deliberately:
   - `server/` - event handlers, the horse-dimension builder, the portal
     manager, the record adapter (`HorseRecords`).
   - `block/` - `ModBlocks` + `HayPortalBlock` (the only registered block),
-    `ModBlockEntities` + `HayPortalBlockEntity` (End-portal look).
+    `ModBlockEntities` + `HayPortalBlockEntity` (drives the animated
+    `hay_portal.png` slab renderer).
 
   Its job is to **translate** - build/read `common` types and shuttle them in
   and out of Minecraft's systems; the logic stays in `common/`.
@@ -309,10 +316,32 @@ This SDK is further from mainline 1.21.x than the version numbers suggest.
   `graphics.blit(Identifier, x0,y0,x1,y1, u0,u1,v0,v1)`. Mouse:
   `mouseClicked(MouseButtonEvent event, boolean doubleClick)` (`event.x()` /
   `.y()` / `.button()`), same for `mouseReleased` / `mouseDragged`. NeoForge
-  `ScreenEvent.Init.Post#addListener` and `ScreenEvent.Render.Post#
-  getGuiGraphics()` still bolt widgets/overlays onto vanilla screens.
+  `ScreenEvent.Init.Post#addListener` and the `ScreenEvent.Render.*` events
+  (each `#getGuiGraphics()`) still bolt widgets/overlays onto vanilla screens.
   `AbstractContainerScreen#getGuiLeft()` / `getGuiTop()` are
   deprecated-for-removal but still work (used by `HorseScreenHooks`).
+  - **`ScreenEvent.Render` timing**: `Pre` fires *before* the dimmed backdrop,
+    `Background` after the backdrop but before the widget stratum, `Post` after
+    everything. To draw a panel *behind* your own buttons but *over* the
+    backdrop, use `Background` (that's what `HorseScreenHooks` learned the hard
+    way - `Pre` gets painted over, `Post` covers the buttons).
+  - **Swallowing a keybind while a text field is focused**:
+    `ScreenEvent.KeyPressed.Pre` (`getKeyCode()` / `getKeyEvent()`), cancel it
+    so the screen's `keyInventory` handler doesn't close the GUI; forward the
+    key to the box yourself for backspace/arrows. `CharacterTyped` is a
+    separate event, so letters still type (`HorseScreenHooks.onKeyPressed`).
+  - **Scaling GUI text**: `g.pose()` is a `Matrix3x2fStack` -
+    `pushMatrix()` / `translate(x,y)` / `scale(s)` / `popMatrix()` around a
+    `g.text(font, comp, 0, 0, argb)` call scales it about `(x,y)`
+    (`FamilyTreeScreen.drawFitted`). `g.enableScissor(x0,y0,x1,y1)` /
+    `disableScissor()` clip everything including `g.entity(...)`.
+  - **A live 3D entity in a screen**: build the render state yourself
+    (`Minecraft.getEntityRenderDispatcher().getRenderer(e).createRenderState(e,
+    1f)`, then `state.shadowPieces.clear()`, poke `LivingEntityRenderState`
+    angles) and `g.entity(state, scale, translation, rot, camRot, x0,y0,x1,y1)`
+    - see `FamilyTreeScreen.drawHorseModel`, which uses a throwaway client-only
+    `Horse` and injects the coat onto `GeneticHorseRenderState` directly (no
+    `ClientCoatCache` pollution).
 - **`SavedData` is gutted** to a `dirty` flag - no `save(CompoundTag)`.
   Persistence is `SavedDataType<T>(Identifier id, Supplier<T> ctor,
   Codec<T> codec)` via `SavedDataStorage#computeIfAbsent`
@@ -338,11 +367,13 @@ This SDK is further from mainline 1.21.x than the version numbers suggest.
   BER registration) - `submit(...)` no longer touches the End-portal shader.
   `HayPortalRenderState extends EndPortalRenderState` adds `axis` (from the
   block's `AXIS` state), set in an `extractRenderState` override.
-  - Geometry: draws **only the two faces on the portal's plane axis**, as a
-    **half-block slab centred in the block** (`SLAB_MIN`..`SLAB_MAX` =
-    0.25..0.75 along that axis) via `emitFace(dir, from, to, ...)` -> so it
-    reads like a thin portal, not a cube. Winding: `right = up x normal`,
-    corners BL/BR/TR/TL.
+  - Geometry: `AXIS` (`HORIZONTAL_AXIS`) is the axis the portal *plane* runs
+    along (vanilla nether convention). The slab is thin along the **other**
+    axis (`thinAxis` = X<->Z swap), inset to `SLAB_MIN`..`SLAB_MAX` (0.25..0.75)
+    there, and only the two faces with `dir.getAxis() == thinAxis` are drawn -
+    so it faces the player, not edge-on. (Getting this backwards was the
+    "portal is sideways" bug.) `emitFace(dir, from, to, ...)`, winding
+    `right = up x normal`, corners BL/BR/TR/TL.
   - Two passes per face: **opaque black** (`RenderTypes.entitySolid(TEXTURE)`,
     colour 0,0,0 - `ENTITY_SOLID` has no alpha discard + writes depth, so the
     sky / clouds / water can't show through) then the **animated swirl**
@@ -370,10 +401,12 @@ This SDK is further from mainline 1.21.x than the version numbers suggest.
 - **Cross-dimension teleport for any entity**: `Entity#teleportTo(ServerLevel
   level, double x,y,z, Set<Relative>, float yRot, float xRot, boolean
   resetCamera)` - pulled up to `Entity`. `Set.of()` target-types to
-  `Set<Relative>`. *Not verified in-game for non-players.*
+  `Set<Relative>`. *Verified 2026-08-30 for non-player entities (horses come
+  back through the return portal).*
 - **Leash**: `Mob implements Leashable`; `isLeashed()`, `getLeashHolder()`
   (-> `Entity`), `dropLeash()` (drops the lead item), `removeLeash()` (no
-  drop). *Signatures compiled; not verified in-game.*
+  drop). *Compiled; `dropLeash` runs in the evacuation path but the
+  roped-horse shortcut isn't separately confirmed.*
 - **Event hooks used this pass**: `LivingIncomingDamageEvent` (cancelable,
   pre-mitigation - horse invulnerability); `EntityTickEvent.Post` (portal
   dwell timers, water riding, tamer tracking);
@@ -403,6 +436,12 @@ This SDK is further from mainline 1.21.x than the version numbers suggest.
   refuse the mod). There's a stray un-packaged duplicate at
   `src/main/neoforge.mods.toml` (wrong dir, from a `git mv`) - delete it or
   move it under `resources/META-INF/`; don't let the two drift.
+- **Config**: `ClientConfig` (`net.neoforged.neoforge.common.ModConfigSpec`,
+  `ModConfig.Type.CLIENT`) registered from the `HorseGenetics(IEventBus,
+  ModContainer)` constructor. One key so far: `familyTree.scrollBar` (default
+  `false` = shrink the Family Tree to fit; `true` = full-size + scroll). Read
+  via `ClientConfig.familyTreeScrollBar()` which swallows the not-yet-loaded
+  `IllegalStateException`.
 - Still **no `.gitignore`**: `build/`, `run/`, `.gradle/`, `.idea/` show as
   noise. Worth adding.
 - `generate_file_list.py` and the README file-tree block were removed this
@@ -557,11 +596,11 @@ on the server runtime classpath - `HorseRecords`' static
   A 100-tick cooldown blocks instant re-trigger (returning horses are parked
   in that cooldown for their 10 s invuln window so they can't be yanked back
   through the portal they land on). While the counter runs, `spawnPortalSwirl`
-  rings the entity with `PORTAL` / `REVERSE_PORTAL` particles (denser as it
-  nears zero) and a **player** gets a per-second countdown line in chat
-  (`"Portal -> N seconds..."`, last 5 s) plus a one-time "grabs hold" message
-  on tick 1. `LAST_COUNTDOWN` dedupes the lines. The dwell guard now accepts
-  any `AbstractHorse`, not just `Horse`.
+  rings the entity with **gold `DustParticleOptions`** (denser as it nears
+  zero - vanilla has no gold portal particle) and a **player** gets a
+  per-second countdown line in chat (`"Portal -> N seconds..."`, last 5 s) plus
+  a one-time "grabs hold" message on tick 1. `LAST_COUNTDOWN` dedupes the
+  lines. The dwell guard accepts any `AbstractHorse`, not just `Horse`.
   - Non-debug portal + player -> `DebugPenManager.enter(player, that dim,
     portalPos.above())` - fresh plot, return wired to that portal.
   - Debug-dim portal + player -> `plotContaining(x)` -> `plot.returnDim` /
@@ -573,12 +612,12 @@ on the server runtime classpath - `HorseRecords`' static
   isLeashed && getLeashHolder == player)`) - each horse `snapTo` the portal
   block, `dropLeash()`, dwell counter seeded so it teleports in ~3 s.
 
-**Unverified in-game**: `Entity#teleportTo(ServerLevel, ...)` for non-players,
-`Mob#getLeashHolder()` / `dropLeash()`, the dwell swirl particles + chat
-countdown, and whether the dwell/teleport loop feels right; the animated-texture
-portal (winding / UVs / fps ramp). **Verified 2026-08-30:** frame flood-fill +
-golden-carrot activation; return teleport (horses land beside the portal
-unharmed).
+**Verified 2026-08-30:** frame flood-fill + golden-carrot activation; the
+animated portal texture (faces the player, opaque, 12->48 fps ramp); gold-dust
+swirl + chat countdown; cross-dimension `teleportTo` for horses; return
+teleport (tamed horses land beside the overworld portal, unharmed).
+**Still unverified**: the `PortalEventHandler.onRightClickBlock` roped-horse
+shortcut, and whether the 10 s player dwell feels too long.
 
 Known limitation: `PLOTS` is in-memory, so a server restart orphans blocks a
 dead plot left in the void (harmless - 20k+ blocks away, and `onLogin` keeps
@@ -587,54 +626,39 @@ each exit - fine for now.
 
 ## Known gaps / next steps
 
-Nearly everything below needs a `runClient` session with a player in-world;
-`build` + `runServer` only prove it registers and boots.
+The 2026-08-30 session play-tested and signed off most of the portal / horse-
+dimension / Family-Tree / info-panel rework (see the Status snapshot's
+"Owner-verified" list). What still needs a `runClient` pass:
 
-1. **Hay-bale portal dwell + look** - ride the 10 s / 3 s dwell timers both
-   directions: the **swirl particles thicken**, the **chat countdown** appears,
-   and the **portal texture animates faster** the longer you stand in it (12 ->
-   48 fps). Check the texture shows (not invisible / inside-out - if so reverse
-   the winding in `HayPortalRenderer.emitFace`), isn't rotated oddly, that the
-   sky / clouds / water no longer show through it, that it's a **thin centred
-   slab** (~half a block), and that it looks right on a multi-block portal.
-   Push a horse through, try the roped-horse right-click.
-2. *(done)* Return teleport - horses land 5 up / beside the portal, unharmed.
-3. **Walk a plot** (F6) - void outside the walls, no pop-in, one mare + one
-   stallion per **6-wide brick-walled** pen with a **two-wide gate**, corner
-   torches stick, paper in the hotbar, horses take no damage. E/W pen-back walls
-   + block protection verified. Still to check: the **wall behind the portal**
-   (gravel floor strip + floating glowstone + one wood wall + bedrock, **no
-   dark band / missing blocks**) and that the **E/W walls now meet it with no
-   gap at the corner**. Leave and re-enter - old corridor gone, tamed horses
-   you own came out with you.
-4. **WHITE coat** - a `W_` horse renders `horse_white` (adult + `*_baby`);
-   breed `Ww x ww` and check ~half the foals are white.
-5. **Stats** - foal roll + genetics + name inheritance is **owner-verified**
-   (2026-08-30). Still to eyeball in-game: foal stats landing on the entity's
-   attributes, the inventory panel tinting speed/health green/amber/red vs
-   `parentStats`, the paper dump `vs parents` line, and that old 4-char-code /
-   no-stat saves still load.
-6. **Clock no longer mounts you** - clock on a tamed foal in the horse
-   dimension should just age it up.
-7. **`FamilyTreeScreen`** - *(models' coat/pose + cursor-following verified.)*
-   This session: rows compressed to `ROW_SPACING = BOX_H+6`, and the whole
-   chart **scrolls** (wheel + right-edge thumb) when 8 great-grandparent rows
-   don't fit; content is scissored to `[VIEW_TOP, height-VIEW_BOTTOM_MARGIN]`;
-   `MODEL_LIFT` bumped to 16 so feet stay in the slot. Confirm nothing is cut
-   off at the bottom now, the scrollbar behaves, and re-centring resets scroll.
-   If the horse should track the cursor a full 360deg rather than swivel
-   ~±63deg, switch `HorseScreenHooks`... er, `FamilyTreeScreen.drawHorseModel`
-   to an unbounded `atan2`.
-8. **Water riding**, **bay leg texture** (`LEG_REGIONS = {48,25,16,11}`),
-   **breeding round-trip** (`breeding.md` -> "Not verified") - as before.
-9. **Cleanups**: rename `DebugPenManager` / `DEBUG_LEVEL` /
+1. **`breedNth` foal names past the first foal** - breed one mare+stallion
+   7+ times and confirm the sequence: foal 1 = parent combo, foal 2 = the other
+   combo, foals 3-6 = one parent name half + a random word, foal 7+ = fully
+   random - no repeats. Only foal 1 has been checked so far. The live link is
+   `HorseAncestryData.offspringCount(dam, sire)` feeding
+   `HorseNames.breedNth` in `HorseBreedingHandler`.
+2. **`FamilyTreeScreen` scroll mode** - flip `familyTree.scrollBar` to `true`
+   in `config/horsegenetics-client.toml` and check the wheel + right-edge thumb
+   path (the default shrink-to-fit path is verified). Also: if the model should
+   track the cursor a full 360deg instead of the ~±63deg swivel, switch
+   `drawHorseModel` to an unbounded `atan2`.
+3. **Coats in the open world** - a `W_` horse renders `horse_white` /
+   `horse_white_baby` (breed `Ww x ww`, expect ~half white); bay black on the
+   legs vs the face (`LEG_REGIONS = {48,25,16,11}`); per-genotype coats
+   generally on wild spawns.
+4. **Stats surfaces** - foal speed/health landing on the entity's attributes;
+   the inventory-panel green/amber/red tint vs `parentStats`; the paper dump's
+   `vs parents` line; **legacy 4-char-code / no-stat saves** still loading.
+5. **Clock no longer mounts you** - clock on a tamed foal in the horse
+   dimension should just age it up, not also seat you.
+6. **Water riding** feel (`HorseWaterRidingHandler`); the **roped-horse
+   right-click** portal shortcut.
+7. **Cleanups**: rename `DebugPenManager` / `DEBUG_LEVEL` /
    `horsegenetics:debug_pens` to non-"debug" names (needs a save-data
    migration or a one-time reset); fold speed/health/white into one Mendelian
    model; per-leg `legBlackHeight`; more loci (cream, dun, gray); a
    `.gitignore`; name-generation rework; real white-fog dimension effects
    (needs a client dimension-effects mixin); the stray `neoforge.mods.toml`
-   duplicate. (The portal now uses the user's own animated `hay_portal.png`, so
-   "gold instead of purple" is moot.)
+   duplicate.
 
 ## License
 

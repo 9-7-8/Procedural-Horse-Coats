@@ -4,6 +4,7 @@ import com.example.horsegenetics.common.coat.CoatData;
 import com.example.horsegenetics.common.genetics.CoatPhenotype;
 import com.example.horsegenetics.common.genetics.Genotype;
 import com.example.horsegenetics.common.horse.HorseRecord;
+import com.example.horsegenetics.neoforge.ClientConfig;
 import com.example.horsegenetics.neoforge.network.FamilyTreeRequestPayload;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -43,24 +44,24 @@ import java.util.UUID;
 public final class FamilyTreeScreen extends Screen {
 
     private static final int COLUMNS = 4;        // subject + 3 ancestor columns
+    // "Natural" (maximum) box size; shrunk per-window in rebuildNodes().
     private static final int BOX_W = 132;
     private static final int BOX_H = 34;
+    private static final int MIN_BOX_W = 54;
+    private static final int MIN_BOX_H = 15;
     private static final int SWATCH = 28;        // fallback flat coat icon
-    // The 3D horse preview: its viewport is deliberately taller than the node
-    // box and reaches above it, so the head/ears draw ON TOP of the row above
-    // instead of being clipped by the box. Not scaled down.
     private static final int MODEL_VIEW_W = 50;
     private static final int MODEL_VIEW_H = 78;
-    private static final int MODEL_LIFT = 16;       // keep the model (esp. its feet) inside the row slot
+    private static final int MODEL_LIFT = 18;       // keep the model (esp. its feet) inside the row slot
     private static final float MODEL_SCALE = 16.0F; // eyeball - horse is a big model
     private static final int LINE = 0xFF5A5A66;
 
-    // Vertical layout: rows are laid out at a fixed spacing; if the widest
-    // column (8 great-grandparents) doesn't fit the window, the whole chart
-    // scrolls (mouse wheel + a thin scrollbar on the right).
     private static final int VIEW_TOP = 30;
     private static final int VIEW_BOTTOM_MARGIN = 30;   // clear of the Done button
-    private static final int ROW_SPACING = BOX_H + 6;
+    private static final int LEFT_MARGIN = 6;
+    private static final int COL_GAP = 8;               // horizontal gap between columns (for the elbow)
+    private static final int ROW_GAP = 3;               // vertical gap between rows
+    private static final int ROW_SPACING = BOX_H + 6;   // natural row pitch (scroll mode)
     private static final int HEAD_ROOM = 16;            // space above row 1 for the model head
 
     private UUID rootId;
@@ -70,6 +71,12 @@ public final class FamilyTreeScreen extends Screen {
 
     private float scrollY = 0f;
     private float maxScroll = 0f;
+
+    // Per-window layout, recomputed each rebuildNodes().
+    private boolean useScrollbar = false;
+    private int boxW = BOX_W;
+    private int boxH = BOX_H;
+    private float uiScale = 1f;   // text + model shrink factor
 
     private record Node(int col, int idx, UUID id, HorseRecord record, int x, int y) {}
 
@@ -153,10 +160,10 @@ public final class FamilyTreeScreen extends Screen {
 
     /** Three-segment elbow from the child's right edge to this node's left edge. */
     private void drawConnector(GuiGraphicsExtractor g, Node child, Node parent) {
-        int x1 = child.x + BOX_W;
+        int x1 = child.x + boxW;
         int x2 = parent.x;
-        int y1 = child.y + BOX_H / 2;
-        int y2 = parent.y + BOX_H / 2;
+        int y1 = child.y + boxH / 2;
+        int y2 = parent.y + boxH / 2;
         int midX = (x1 + x2) / 2;
         hLine(g, x1, midX, y1);
         vLine(g, midX, y1, y2);
@@ -174,26 +181,44 @@ public final class FamilyTreeScreen extends Screen {
     private void drawBox(GuiGraphicsExtractor g, Node n, int mouseX, int mouseY) {
         boolean present = n.record != null;
         boolean hovered = present && n.col > 0
-                && mouseX >= n.x && mouseX <= n.x + BOX_W && mouseY >= n.y && mouseY <= n.y + BOX_H;
+                && mouseX >= n.x && mouseX <= n.x + boxW && mouseY >= n.y && mouseY <= n.y + boxH;
 
         int bg = present ? (hovered ? 0xFF3A3A48 : 0xFF26262E) : 0xFF1A1A1E;
         int border = present ? (hovered ? 0xFFFFFFFF : 0xFF505060) : 0xFF303038;
-        g.fill(n.x, n.y, n.x + BOX_W, n.y + BOX_H, bg);
-        g.fill(n.x, n.y, n.x + BOX_W, n.y + 1, border);
-        g.fill(n.x, n.y + BOX_H - 1, n.x + BOX_W, n.y + BOX_H, border);
-        g.fill(n.x, n.y, n.x + 1, n.y + BOX_H, border);
-        g.fill(n.x + BOX_W - 1, n.y, n.x + BOX_W, n.y + BOX_H, border);
+        g.fill(n.x, n.y, n.x + boxW, n.y + boxH, bg);
+        g.fill(n.x, n.y, n.x + boxW, n.y + 1, border);
+        g.fill(n.x, n.y + boxH - 1, n.x + boxW, n.y + boxH, border);
+        g.fill(n.x, n.y, n.x + 1, n.y + boxH, border);
+        g.fill(n.x + boxW - 1, n.y, n.x + boxW, n.y + boxH, border);
 
         if (present) {
             HorseRecord r = n.record;
-            int textW = 16;
-            g.text(this.font, Component.literal(trim(r.displayName(), textW)), n.x + 4, n.y + 6, 0xFFF0F0F0);
-            String by = r.attribution().map(a -> "by " + a).orElse("wild");
-            g.text(this.font, Component.literal(trim(by, textW)), n.x + 4, n.y + 18, 0xFF8088A8);
+            // model first so the text sits on top of it
             drawHorseModel(g, r, n.x, n.y, mouseX, mouseY);
+            int textMaxW = Math.max(20, (boxW - SWATCH) - 8);
+            int line2 = n.y + 3 + Math.round(11f * uiScale);
+            drawFitted(g, r.displayName(), n.x + 4, n.y + 3, textMaxW, 0xFFF0F0F0);
+            String by = r.attribution().map(a -> "by " + a).orElse("wild");
+            drawFitted(g, by, n.x + 4, line2, textMaxW, 0xFF8088A8);
         } else {
-            g.text(this.font, Component.literal(n.col == 0 ? "?" : "—"), n.x + 4, n.y + 12, 0xFF606068);
+            g.text(this.font, Component.literal(n.col == 0 ? "?" : "—"), n.x + 4, n.y + boxH / 2 - 4, 0xFF606068);
         }
+    }
+
+    /** Draw {@code text} left-aligned at {@code (x, y)}, scaled down (never up) so the WHOLE string fits {@code maxW}. */
+    private void drawFitted(GuiGraphicsExtractor g, String text, int x, int y, int maxW, int color) {
+        float w = this.font.width(text);
+        float scale = w > 0 ? Math.min(uiScale, maxW / w) : uiScale;
+        if (scale >= 0.999f) {
+            g.text(this.font, Component.literal(text), x, y, color);
+            return;
+        }
+        var pose = g.pose();
+        pose.pushMatrix();
+        pose.translate(x, y);
+        pose.scale(scale);
+        g.text(this.font, Component.literal(text), 0, 0, color);
+        pose.popMatrix();
     }
 
     @Override
@@ -208,7 +233,7 @@ public final class FamilyTreeScreen extends Screen {
         }
         for (Node n : nodes) {
             if (n.col > 0 && n.record != null
-                    && mx >= n.x && mx <= n.x + BOX_W && my >= n.y && my <= n.y + BOX_H) {
+                    && mx >= n.x && mx <= n.x + boxW && my >= n.y && my <= n.y + boxH) {
                 request(n.id);
                 return true;
             }
@@ -220,22 +245,34 @@ public final class FamilyTreeScreen extends Screen {
 
     private void rebuildNodes() {
         nodes.clear();
-        int viewH = Math.max(1, (this.height - VIEW_BOTTOM_MARGIN) - VIEW_TOP);
-        int contentH = ROW_SPACING * 8;          // 8 great-grandparent rows, fixed spacing
-        int totalH = HEAD_ROOM + contentH;
-        maxScroll = Math.max(0f, totalH - viewH);
+        this.useScrollbar = ClientConfig.familyTreeScrollBar();
+        int viewH = Math.max(40, (this.height - VIEW_BOTTOM_MARGIN) - VIEW_TOP);
+
+        // Horizontal: 4 columns must always fit side by side.
+        int rightEdge = this.width - (useScrollbar ? 10 : 4);
+        int colStep = Math.max(MIN_BOX_W + COL_GAP, (rightEdge - LEFT_MARGIN) / COLUMNS);
+        this.boxW = Math.max(MIN_BOX_W, Math.min(BOX_W, colStep - COL_GAP));
+
+        // Vertical: either shrink 8 rows to fit (default) or keep pitch and scroll.
+        int rowSpacing = useScrollbar
+                ? ROW_SPACING
+                : Math.max(MIN_BOX_H + ROW_GAP, Math.min(ROW_SPACING, (viewH - HEAD_ROOM) / 8));
+        this.boxH = Math.max(MIN_BOX_H, Math.min(BOX_H, rowSpacing - ROW_GAP));
+        this.uiScale = Math.max(0.35f, Math.min(1f, this.boxH / (float) BOX_H));
+
+        int contentH = rowSpacing * 8;
+        maxScroll = useScrollbar ? Math.max(0f, (HEAD_ROOM + contentH) - viewH) : 0f;
         scrollY = Math.max(0f, Math.min(scrollY, maxScroll));
         int originY = VIEW_TOP + HEAD_ROOM - Math.round(scrollY);
 
-        int colStep = (this.width - 40 - BOX_W) / (COLUMNS - 1);
         for (int col = 0; col < COLUMNS; col++) {
             int slots = 1 << col;
-            int colX = this.width - 20 - BOX_W - col * colStep;
+            int colX = rightEdge - this.boxW - col * colStep;
             for (int i = 0; i < slots; i++) {
                 UUID id = ancestorId(col, i);
                 HorseRecord rec = id == null ? null : ClientHorseRecordCache.byId(id);
                 int centerY = originY + (int) ((i + 0.5) * contentH / slots);
-                nodes.add(new Node(col, i, id, rec, colX, centerY - BOX_H / 2));
+                nodes.add(new Node(col, i, id, rec, colX, centerY - this.boxH / 2));
             }
         }
     }
@@ -281,19 +318,22 @@ public final class FamilyTreeScreen extends Screen {
      * renderer isn't ready.
      */
     private void drawHorseModel(GuiGraphicsExtractor g, HorseRecord r, int boxX, int boxY, int mouseX, int mouseY) {
-        int swatchX = boxX + BOX_W - SWATCH - 4;
-        int swatchY = boxY + (BOX_H - SWATCH) / 2;
+        int sw = Math.round(SWATCH * uiScale);
+        int swatchX = boxX + boxW - sw - 3;
+        int swatchY = boxY + (boxH - sw) / 2;
         Horse horse = modelHorse(r);
         CoatData coat = coatFor(r);
         if (horse == null || coat == null) {
-            drawCoatSwatch(g, coat, swatchX, swatchY);
+            drawCoatSwatchScaled(g, coat, swatchX, swatchY, sw);
             return;
         }
+        float mScale = MODEL_SCALE * uiScale;
+        int viewW = Math.round(MODEL_VIEW_W * uiScale);
+        int viewH = Math.round(MODEL_VIEW_H * uiScale);
         // viewport centred so the feet sit near the box floor (minus MODEL_LIFT)
-        // and the head overflows upward (drawn over the row above, which
-        // rendered earlier)
-        int cx = boxX + BOX_W - 3 - MODEL_VIEW_W / 2;
-        int cy = boxY + BOX_H - 4 - MODEL_LIFT;
+        // and the head overflows upward (drawn over the row above)
+        int cx = boxX + boxW - 3 - viewW / 2;
+        int cy = boxY + boxH - 4 - Math.round(MODEL_LIFT * uiScale);
         try {
             EntityRenderer<? super Horse, ?> renderer =
                     Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(horse);
@@ -319,11 +359,10 @@ public final class FamilyTreeScreen extends Screen {
             Quaternionf xRotation = new Quaternionf().rotateX(yAngle * 22.0F * ((float) Math.PI / 180.0F));
             rotation.mul(xRotation);
             Vector3f translation = new Vector3f(0.0F, state.boundingBoxHeight / 2.0F + 0.0625F, 0.0F);
-            g.entity(state, MODEL_SCALE, translation, rotation, xRotation,
-                    cx - MODEL_VIEW_W / 2, cy - MODEL_VIEW_H / 2,
-                    cx + MODEL_VIEW_W / 2, cy + MODEL_VIEW_H / 2);
+            g.entity(state, mScale, translation, rotation, xRotation,
+                    cx - viewW / 2, cy - viewH / 2, cx + viewW / 2, cy + viewH / 2);
         } catch (RuntimeException ignored) {
-            drawCoatSwatch(g, coat, swatchX, swatchY);
+            drawCoatSwatchScaled(g, coat, swatchX, swatchY, sw);
         }
     }
 
@@ -358,22 +397,18 @@ public final class FamilyTreeScreen extends Screen {
     }
 
     /** Flat-texture fallback for {@link #drawHorseModel}. */
-    private void drawCoatSwatch(GuiGraphicsExtractor g, CoatData coat, int x, int y) {
+    private void drawCoatSwatchScaled(GuiGraphicsExtractor g, CoatData coat, int x, int y, int size) {
         if (coat == null) {
             return;
         }
         Identifier texture = GeneticHorseRenderer.coatTextureFor(coat, false);
-        g.fill(x - 1, y - 1, x + SWATCH + 1, y + SWATCH + 1, 0xFF000000);
-        g.blit(texture, x, y, x + SWATCH, y + SWATCH, 0.0f, 1.0f, 0.0f, 1.0f);
+        g.fill(x - 1, y - 1, x + size + 1, y + size + 1, 0xFF000000);
+        g.blit(texture, x, y, x + size, y + size, 0.0f, 1.0f, 0.0f, 1.0f);
     }
 
     @Override
     public void removed() {
         modelHorses.clear();
         super.removed();
-    }
-
-    private static String trim(String s, int max) {
-        return s.length() <= max ? s : s.substring(0, max - 1) + "…";
     }
 }

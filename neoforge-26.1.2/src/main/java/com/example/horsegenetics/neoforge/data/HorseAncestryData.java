@@ -68,6 +68,11 @@ public final class HorseAncestryData extends SavedData implements HorseDatabase 
     }
 
     @Override
+    public int offspringCount(UUID parentA, UUID parentB) {
+        return delegate.offspringCount(parentA, parentB);
+    }
+
+    @Override
     public List<HorseRecord> ancestorsOf(UUID id, int depth) {
         return delegate.ancestorsOf(id, depth);
     }

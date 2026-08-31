@@ -116,6 +116,23 @@ public final class HorseRecords {
         return NAMES.generateParts(rng);
     }
 
+    /** The shared name generator (for breeding, which needs random word draws). */
+    public static HorseNameGenerator names() {
+        return NAMES;
+    }
+
+    /**
+     * How many foals {@code damId} x {@code sireId} have already produced,
+     * from the server-global ancestry DB. Drives foal-name variation
+     * ({@link com.example.horsegenetics.common.name.HorseNames#breedNth}).
+     */
+    public static int offspringCount(Horse contextHorse, java.util.UUID damId, java.util.UUID sireId) {
+        if (contextHorse.level() instanceof ServerLevel level && level.getServer() != null) {
+            return HorseAncestryData.get(level.getServer()).offspringCount(damId, sireId);
+        }
+        return 0;
+    }
+
     /** Set the registered first/last name (name-tag hook). Callers guard "not both blank". */
     public static void rename(Horse horse, String firstName, String lastName) {
         apply(horse, of(horse).withNames(firstName, lastName));

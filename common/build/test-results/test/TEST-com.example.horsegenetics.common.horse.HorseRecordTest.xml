@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.example.horsegenetics.common.horse.HorseRecordTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-08-30T23:49:26.414Z" hostname="PERDIX" time="0.016">
+<testsuite name="com.example.horsegenetics.common.horse.HorseRecordTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-08-31T02:29:53.558Z" hostname="PERDIX" time="0.013">
   <properties/>
-  <testcase name="negativeGenerationClamped()" classname="com.example.horsegenetics.common.horse.HorseRecordTest" time="0.001"/>
-  <testcase name="hasNameIsFalseOnlyWhenEverythingIsBlank()" classname="com.example.horsegenetics.common.horse.HorseRecordTest" time="0.002"/>
-  <testcase name="founderHasNoParentsGenerationZeroNoAttribution()" classname="com.example.horsegenetics.common.horse.HorseRecordTest" time="0.0"/>
-  <testcase name="attributionIsBreederThenTamer()" classname="com.example.horsegenetics.common.horse.HorseRecordTest" time="0.0"/>
+  <testcase name="negativeGenerationClamped()" classname="com.example.horsegenetics.common.horse.HorseRecordTest" time="0.0"/>
+  <testcase name="hasNameIsFalseOnlyWhenEverythingIsBlank()" classname="com.example.horsegenetics.common.horse.HorseRecordTest" time="0.0"/>
+  <testcase name="founderHasNoParentsGenerationZeroNoAttribution()" classname="com.example.horsegenetics.common.horse.HorseRecordTest" time="0.001"/>
+  <testcase name="attributionIsBreederThenTamer()" classname="com.example.horsegenetics.common.horse.HorseRecordTest" time="0.001"/>
   <testcase name="parentStatsRanksAgainstBothParents()" classname="com.example.horsegenetics.common.horse.HorseRecordTest" time="0.001"/>
   <testcase name="statsRoundUpAndClampAndDriveHasStats()" classname="com.example.horsegenetics.common.horse.HorseRecordTest" time="0.0"/>
   <testcase name="withersPreserveStatsAndParentStats()" classname="com.example.horsegenetics.common.horse.HorseRecordTest" time="0.0"/>
-  <testcase name="bredCarriesParentsAndGeneration()" classname="com.example.horsegenetics.common.horse.HorseRecordTest" time="0.001"/>
-  <testcase name="displayNamePrefersBarnNameThenFirstLast()" classname="com.example.horsegenetics.common.horse.HorseRecordTest" time="0.004"/>
-  <testcase name="barnNameIsTrimmedToSixteenCharsAndBlankBecomesEmpty()" classname="com.example.horsegenetics.common.horse.HorseRecordTest" time="0.0"/>
+  <testcase name="bredCarriesParentsAndGeneration()" classname="com.example.horsegenetics.common.horse.HorseRecordTest" time="0.0"/>
+  <testcase name="displayNamePrefersBarnNameThenFirstLast()" classname="com.example.horsegenetics.common.horse.HorseRecordTest" time="0.002"/>
+  <testcase name="barnNameIsTrimmedToSixteenCharsAndBlankBecomesEmpty()" classname="com.example.horsegenetics.common.horse.HorseRecordTest" time="0.001"/>
   <testcase name="rejectsNullRequiredFields()" classname="com.example.horsegenetics.common.horse.HorseRecordTest" time="0.002"/>
   <system-out><![CDATA[]]></system-out>
   <system-err><![CDATA[]]></system-err>

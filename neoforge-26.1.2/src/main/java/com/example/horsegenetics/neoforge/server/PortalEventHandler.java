@@ -2,7 +2,7 @@ package com.example.horsegenetics.neoforge.server;
 
 import com.example.horsegenetics.neoforge.block.HayPortalBlock;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -198,7 +198,11 @@ public final class PortalEventHandler {
         return Math.max(0, (a + b - 1) / b);
     }
 
-    /** Ring of portal particles around {@code entity}, denser the closer the teleport is. */
+    /** Gold "dust" particle for the portal swirl (vanilla has no gold portal particle). */
+    private static final DustParticleOptions GOLD_DUST = new DustParticleOptions(0xFFD24A, 1.1F);
+    private static final DustParticleOptions GOLD_DUST_BRIGHT = new DustParticleOptions(0xFFF0B0, 1.3F);
+
+    /** Ring of gold particles around {@code entity}, denser the closer the teleport is. */
     private static void spawnPortalSwirl(ServerLevel level, Entity entity, int dwell, int threshold) {
         double progress = Math.min(1.0, (double) dwell / threshold);
         int count = 3 + (int) (progress * 9);
@@ -210,11 +214,11 @@ public final class PortalEventHandler {
             double x = entity.getX() + Math.cos(a) * r;
             double z = entity.getZ() + Math.sin(a) * r;
             double y = entity.getY() + level.getRandom().nextDouble() * 1.8;
-            level.sendParticles(ParticleTypes.PORTAL, x, y, z, 1,
+            level.sendParticles(GOLD_DUST, x, y, z, 1,
                     -Math.cos(a) * 0.3, 0.08, -Math.sin(a) * 0.3, 0.0);
         }
         if (progress > 0.5) {
-            level.sendParticles(ParticleTypes.REVERSE_PORTAL,
+            level.sendParticles(GOLD_DUST_BRIGHT,
                     entity.getX(), entity.getY() + 1.0, entity.getZ(),
                     (int) (progress * 6), 0.3, 0.5, 0.3, 0.02);
         }

@@ -62,10 +62,11 @@ public final class HorseBreedingHandler {
 
         String childCode = GeneticCodeCombiner.combine(damRecord.geneticCode(), sireRecord.geneticCode(), rng);
         int childGeneration = 1 + Math.max(damRecord.generation(), sireRecord.generation());
-        NameParts childName = HorseNames.breed(
+        int priorFoals = HorseRecords.offspringCount(parentA, damRecord.id(), sireRecord.id());
+        NameParts childName = HorseNames.breedNth(
                 new NameParts(damRecord.firstName(), damRecord.lastName()),
                 new NameParts(sireRecord.firstName(), sireRecord.lastName()),
-                rng);
+                priorFoals, HorseRecords.names(), rng);
 
         double childSpeed = HorseStats.rollFoalStat(damRecord.speed(), sireRecord.speed(), rng);
         double childHealth = HorseStats.rollFoalStat(damRecord.health(), sireRecord.health(), rng);

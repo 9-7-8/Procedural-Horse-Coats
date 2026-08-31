@@ -1,0 +1,4 @@
+[familyTree]
+	#Family Tree screen: false = shrink the chart to fit the window (default);
+	#true = keep it full size and add a scroll bar.
+	scrollBar = false

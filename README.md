@@ -40,16 +40,19 @@ Every horse gets a generated two-part name (a first name and a last name).
 - **Barn name**: an optional short nickname (up to 16 characters) you can set
   and change at any time from the horse's inventory screen. If set, it's what
   shows above the horse.
-- A bred foal's name is built from its parents - the first name of one and
-  the last name of the other.
+- A bred foal is named after its parents. The **first** foal of a pair takes
+  one parent's first name and the other's last name; the **second** gets the
+  opposite mix; the next few keep just one name from a parent and roll the
+  other half fresh; and once a pair has had six foals, the rest get entirely
+  new names - so a prolific pair never keeps churning out the same two names.
 
 Open a tamed horse's inventory (**press E while riding**) for a grey panel on
 the left of the screen (toggle it with the tab button on its edge) showing
 the horse's name, sex, generation, genotype, speed, health, and who bred or
 tamed it - plus a **Family Tree** button that opens a clickable pedigree
-chart back to great-grandparents. A foal's speed and health are tinted
-**green** if they beat both parents, **amber** if they beat one, **red** if
-they trail both.
+chart back to great-grandparents, with a little turning 3D model of each
+horse. A foal's speed and health are tinted **green** if they beat both
+parents, **amber** if they beat one, **red** if they trail both.
 
 Right-click a horse with **paper** to print the same information to chat.
 
@@ -77,8 +80,9 @@ place to keep a breeding herd. Horses can't be hurt there.
 
 **Getting in:** build a rectangular frame out of **hay bales** (same sizes as
 a nether portal - at least 2 wide and 3 tall on the inside, built vertically)
-and right-click a frame block with a **carrot**. The opening fills with a
-portal. Stand in it for **10 seconds** to travel.
+and right-click a frame block with a **golden carrot**. The opening fills
+with a swirling portal. Stand in it and it spins up over **10 seconds** -
+with a countdown in chat - then sends you through.
 
 **Getting back:** every trip drops you next to a matching hay-bale portal at
 the start of your corridor. Stand in it for 10 seconds to return to exactly
@@ -103,6 +107,10 @@ any items or untamed horses left inside are gone for good.
 3. Launch. No configuration is required.
 
 Works client-side and on dedicated servers; both sides need the mod.
+
+One optional client setting (`config/horsegenetics-client.toml`): the Family
+Tree screen shrinks the whole chart to fit your window by default; set
+`familyTree.scrollBar = true` to keep it full size and scroll instead.
 
 ---
 

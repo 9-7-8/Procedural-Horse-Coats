@@ -40,6 +40,24 @@ public final class InMemoryHorseDatabase implements HorseDatabase {
     }
 
     @Override
+    public int offspringCount(UUID parentA, UUID parentB) {
+        int count = 0;
+        for (HorseRecord record : byId.values()) {
+            Optional<UUID> mother = record.motherId();
+            Optional<UUID> father = record.fatherId();
+            if (mother.isEmpty() || father.isEmpty()) {
+                continue;
+            }
+            boolean match = (mother.get().equals(parentA) && father.get().equals(parentB))
+                    || (mother.get().equals(parentB) && father.get().equals(parentA));
+            if (match) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    @Override
     public List<HorseRecord> ancestorsOf(UUID id, int depth) {
         if (depth <= 0) {
             return List.of();

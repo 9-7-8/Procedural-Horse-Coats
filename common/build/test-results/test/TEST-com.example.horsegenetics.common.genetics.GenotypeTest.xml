@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.example.horsegenetics.common.genetics.GenotypeTest" tests="55" skipped="0" failures="0" errors="0" timestamp="2026-08-30T23:49:26.339Z" hostname="PERDIX" time="0.071">
+<testsuite name="com.example.horsegenetics.common.genetics.GenotypeTest" tests="55" skipped="0" failures="0" errors="0" timestamp="2026-08-31T02:29:53.480Z" hostname="PERDIX" time="0.073">
   <properties/>
   <testcase name="chestnutIgnoresAgouti()" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.0"/>
   <testcase name="isAgoutiTrueWithAnyDominantA()" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.0"/>
@@ -7,37 +7,37 @@
   <testcase name="randomAllDominantEaDrawsNoWhiteIsBay()" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.0"/>
   <testcase name="wrongLocusOrderRejected()" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.0"/>
   <testcase name="legacyFourCharCodeParsesAsHomozygousRecessiveWhite()" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.0"/>
-  <testcase name="ofCanonicalizesRegardlessOfArgOrder()" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.001"/>
+  <testcase name="ofCanonicalizesRegardlessOfArgOrder()" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.0"/>
   <testcase name="[1] XxAa" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.001"/>
-  <testcase name="[2] EeYy" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.001"/>
-  <testcase name="[3] 1234" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.001"/>
+  <testcase name="[2] EeYy" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.0"/>
+  <testcase name="[3] 1234" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.0"/>
   <testcase name="[4] BbAa" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.0"/>
   <testcase name="[5] EEaX" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.0"/>
   <testcase name="[6] EeAaXx" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.001"/>
-  <testcase name="[7] EeAawq" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.0"/>
-  <testcase name="whiteMasksEverything()" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.001"/>
+  <testcase name="[7] EeAawq" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.001"/>
+  <testcase name="whiteMasksEverything()" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.0"/>
   <testcase name="parseAndOfAgreeAndRoundTripThroughToCode()" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.0"/>
   <testcase name="[1] " classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.001"/>
   <testcase name="[2] Ee" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.0"/>
   <testcase name="[3] EeA" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.0"/>
   <testcase name="[4] EeAaa" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.0"/>
   <testcase name="[5] EeAa " classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.001"/>
-  <testcase name="[6] eeaa&#10;" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.001"/>
-  <testcase name="[7] EeAaW" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.0"/>
-  <testcase name="[8] EeAawwx" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.001"/>
-  <testcase name="randomHeterozygousDraws()" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.001"/>
+  <testcase name="[6] eeaa&#10;" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.0"/>
+  <testcase name="[7] EeAaW" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.001"/>
+  <testcase name="[8] EeAawwx" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.0"/>
+  <testcase name="randomHeterozygousDraws()" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.0"/>
   <testcase name="equalsIgnoresInputOrdering()" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.0"/>
-  <testcase name="differentGenotypesAreNotEqual()" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.001"/>
+  <testcase name="differentGenotypesAreNotEqual()" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.002"/>
   <testcase name="isWhiteTrueWithAnyDominantW()" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.0"/>
-  <testcase name="hasBlackPigmentFalseForHomozygousRecessiveE()" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.0"/>
-  <testcase name="parseRejectsNull()" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.001"/>
-  <testcase name="parse(eEaA) -&gt; EeAaww" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.0"/>
-  <testcase name="parse(eEAa) -&gt; EeAaww" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.001"/>
+  <testcase name="hasBlackPigmentFalseForHomozygousRecessiveE()" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.001"/>
+  <testcase name="parseRejectsNull()" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.0"/>
+  <testcase name="parse(eEaA) -&gt; EeAaww" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.001"/>
+  <testcase name="parse(eEAa) -&gt; EeAaww" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.0"/>
   <testcase name="parse(Eeaa) -&gt; Eeaaww" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.0"/>
-  <testcase name="parse(eeaa) -&gt; eeaaww" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.0"/>
+  <testcase name="parse(eeaa) -&gt; eeaaww" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.001"/>
   <testcase name="parse(EEAA) -&gt; EEAAww" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.0"/>
   <testcase name="parse(eEaAwW) -&gt; EeAaWw" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.0"/>
-  <testcase name="parse(EEAAWW) -&gt; EEAAWW" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.0"/>
+  <testcase name="parse(EEAAWW) -&gt; EEAAWW" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.001"/>
   <testcase name="randomRollsWhiteWhenAWhiteAlleleDrawHitsZero()" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.0"/>
   <testcase name="hasBlackPigmentTrueWithAnyDominantE()" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.0"/>
   <testcase name="fourArgOfDefaultsWhiteLocusToRecessive()" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.0"/>
@@ -45,11 +45,11 @@
   <testcase name="eeAa -&gt; CHESTNUT" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.0"/>
   <testcase name="eeAA -&gt; CHESTNUT" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.0"/>
   <testcase name="Eeaa -&gt; BLACK" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.0"/>
-  <testcase name="EEaa -&gt; BLACK" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.001"/>
-  <testcase name="EeAa -&gt; BAY" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.0"/>
+  <testcase name="EEaa -&gt; BLACK" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.0"/>
+  <testcase name="EeAa -&gt; BAY" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.001"/>
   <testcase name="EeAA -&gt; BAY" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.0"/>
-  <testcase name="EEAa -&gt; BAY" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.0"/>
-  <testcase name="EEAA -&gt; BAY" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.0"/>
+  <testcase name="EEAa -&gt; BAY" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.001"/>
+  <testcase name="EEAA -&gt; BAY" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.001"/>
   <testcase name="eeaaww -&gt; CHESTNUT" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.0"/>
   <testcase name="EEAAww -&gt; BAY" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.001"/>
   <testcase name="eeaaWw -&gt; WHITE" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.0"/>

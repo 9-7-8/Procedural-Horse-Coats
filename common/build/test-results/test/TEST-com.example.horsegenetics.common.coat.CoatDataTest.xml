@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.example.horsegenetics.common.coat.CoatDataTest" tests="13" skipped="0" failures="0" errors="0" timestamp="2026-08-30T23:49:26.256Z" hostname="PERDIX" time="0.06">
+<testsuite name="com.example.horsegenetics.common.coat.CoatDataTest" tests="13" skipped="0" failures="0" errors="0" timestamp="2026-08-31T02:29:53.363Z" hostname="PERDIX" time="0.075">
   <properties/>
-  <testcase name="solidRejectsBay()" classname="com.example.horsegenetics.common.coat.CoatDataTest" time="0.002"/>
-  <testcase name="fromRawRebuildsSolidCoats()" classname="com.example.horsegenetics.common.coat.CoatDataTest" time="0.0"/>
-  <testcase name="[1] -0.01" classname="com.example.horsegenetics.common.coat.CoatDataTest" time="0.022"/>
-  <testcase name="[2] 1.01" classname="com.example.horsegenetics.common.coat.CoatDataTest" time="0.0"/>
+  <testcase name="solidRejectsBay()" classname="com.example.horsegenetics.common.coat.CoatDataTest" time="0.017"/>
+  <testcase name="fromRawRebuildsSolidCoats()" classname="com.example.horsegenetics.common.coat.CoatDataTest" time="0.002"/>
+  <testcase name="[1] -0.01" classname="com.example.horsegenetics.common.coat.CoatDataTest" time="0.02"/>
+  <testcase name="[2] 1.01" classname="com.example.horsegenetics.common.coat.CoatDataTest" time="0.001"/>
   <testcase name="[3] -1.0" classname="com.example.horsegenetics.common.coat.CoatDataTest" time="0.0"/>
   <testcase name="[4] 2.0" classname="com.example.horsegenetics.common.coat.CoatDataTest" time="0.001"/>
   <testcase name="fromRawIgnoresHeightForSolidCoats()" classname="com.example.horsegenetics.common.coat.CoatDataTest" time="0.001"/>
-  <testcase name="solidChestnutHasZeroLegBlackHeight()" classname="com.example.horsegenetics.common.coat.CoatDataTest" time="0.001"/>
-  <testcase name="solidWhiteHasZeroLegBlackHeight()" classname="com.example.horsegenetics.common.coat.CoatDataTest" time="0.001"/>
-  <testcase name="fromRawRebuildsBayWithHeight()" classname="com.example.horsegenetics.common.coat.CoatDataTest" time="0.001"/>
-  <testcase name="[1] 0.0" classname="com.example.horsegenetics.common.coat.CoatDataTest" time="0.001"/>
+  <testcase name="solidChestnutHasZeroLegBlackHeight()" classname="com.example.horsegenetics.common.coat.CoatDataTest" time="0.0"/>
+  <testcase name="solidWhiteHasZeroLegBlackHeight()" classname="com.example.horsegenetics.common.coat.CoatDataTest" time="0.0"/>
+  <testcase name="fromRawRebuildsBayWithHeight()" classname="com.example.horsegenetics.common.coat.CoatDataTest" time="0.0"/>
+  <testcase name="[1] 0.0" classname="com.example.horsegenetics.common.coat.CoatDataTest" time="0.0"/>
   <testcase name="[2] 0.25" classname="com.example.horsegenetics.common.coat.CoatDataTest" time="0.0"/>
-  <testcase name="[3] 1.0" classname="com.example.horsegenetics.common.coat.CoatDataTest" time="0.001"/>
+  <testcase name="[3] 1.0" classname="com.example.horsegenetics.common.coat.CoatDataTest" time="0.0"/>
   <system-out><![CDATA[]]></system-out>
   <system-err><![CDATA[]]></system-err>
 </testsuite>

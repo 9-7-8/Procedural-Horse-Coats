@@ -7,9 +7,10 @@ change. README.md deliberately carries none of this.
 
 Everything here is implemented and compiles. The core breeding round-trip is
 **owner-verified as of 2026-08-30**: breeding two horses in-game produces a
-foal with stats between the parents, a correctly combined genetic code, and an
-inherited first/last name. The remaining unchecked details (paper dump,
-attribute application, panel tint, legacy saves) are listed under "Not
+foal with stats between the parents, a correctly combined genetic code, and -
+for a pairing's **first** foal - a name combining both parents. The rest of
+the new `breedNth` name schedule (foals 2+), plus the paper dump, attribute
+application, panel tint, and legacy-save loading, are listed under "Not
 verified" at the bottom.
 
 ---
@@ -129,7 +130,14 @@ rounds both stats up.
 
 ### `horse/HorseDatabase` + `horse/InMemoryHorseDatabase`
 
-Interface: `record(HorseRecord)`, `lookup(UUID)`, `ancestorsOf(UUID, depth)`.
+Interface: `record(HorseRecord)`, `lookup(UUID)`, `ancestorsOf(UUID, depth)`,
+`offspringCount(UUID a, UUID b)`.
+
+`offspringCount(a, b)` scans every stored record for one whose two parents are
+exactly `a` and `b` (order-independent). It feeds the foal-name schedule
+(`HorseNames.breedNth`, step 8 below), so it must count *prior* foals only -
+which holds because a foal's own record isn't stored until after its name is
+chosen.
 
 `ancestorsOf(id, depth)` is a breadth-first walk up the mother/father links:
 
@@ -212,6 +220,8 @@ lives here.
 | `applyStatsToEntity(horse, record, fullHeal)` | push `record.speed()` / `record.health()` onto the entity's attribute base values; `fullHeal` sets current HP to the new max (newborn) vs just clamps it (reload). No-op for `0.0`. |
 | `backfillStatsIfMissing(horse)` | if `!of(horse).hasStats()`, `apply(of(horse).withStats(entitySpeed, entityHealth))` |
 | `newNameParts(rng)` | `HorseNameGenerator.generateParts` - `{first, last}` |
+| `names()` | the shared `HorseNameGenerator` (breeding needs random word draws) |
+| `offspringCount(contextHorse, damId, sireId)` | `HorseAncestryData.get(server).offspringCount(damId, sireId)` from `contextHorse.level()`, else `0` |
 | `rename(horse, first, last)` | `apply(of(horse).withNames(first, last))` - name-tag hook |
 | `setBarnName(horse, text)` | `apply(of(horse).withBarnName(...))`; blank -> clear |
 | `setTamedBy(horse, username)` | `apply(of(horse).withTamedBy(username))`, only if still empty |
@@ -271,9 +281,20 @@ record and only fills in the coat.
    rounded up, uncapped); plus `.withParentStats(ParentStats.of(dam.speed(),
    sire.speed(), dam.health(), sire.health()))` so the UI can colour the
    foal's numbers against its parents.
-8. **Name**: `HorseNames.breed({dam.first, dam.last}, {sire.first, sire.last},
-   rng)` - the foal gets the first name of one parent and the last name of
-   the other (never both halves from one).
+8. **Name**: `HorseNames.breedNth({dam.first, dam.last}, {sire.first,
+   sire.last}, priorFoals, HorseRecords.names(), rng)`, where `priorFoals =
+   HorseRecords.offspringCount(parentA, dam.id(), sire.id())` counts how many
+   foals this exact pairing has already produced (from the server-global
+   `HorseAncestryData`, so it survives reloads). The scheme, to stop a pairing
+   churning out the same two names forever:
+   - **foal 1** -> `dam.first + sire.last`
+   - **foal 2** -> `sire.first + dam.last` (the other combo)
+   - **foals 3-6** -> one half kept from a parent (either parent, either half,
+     `rng`), the other half a fresh random word
+   - **foal 7 onward** -> a fully random `generateParts` name
+
+   `HorseNames.breed` (the old 50/50 one-half-each) stays for callers/tests
+   that don't track a foal count.
 9. `bredBy` = `event.getCausedByPlayer()`'s username, if a player caused it.
 10. **Auto-tame**: if the dam entity `isTamed()`, `child.setTamed(true)` +
     `child.setOwner(dam.getOwner())`, and `tamedBy` = the dam owner's username
@@ -397,10 +418,16 @@ SavedData, all handlers register).
 
 **Owner-verified in-game (2026-08-30):** breeding a mare + stallion rolls a
 foal whose speed/health sit between the parents, with a correctly combined
-genetic code, and whose first/last name is inherited from the two parents.
+genetic code, and (for the first foal of a pairing) a name combining the two
+parents.
 
 What no automated check has covered yet:
 
+- The `breedNth` foal-name scheme past foal 1: foal 2 = the other combo,
+  foals 3-6 = one parent half + a random word, foal 7+ = fully random. Needs
+  breeding the same pair 7+ times and checking the names change / stop
+  repeating. (`HorseNames` unit tests cover the branch logic;
+  `offspringCount` from the live `HorseAncestryData` is the unverified link.)
 - The rest of the foal record: `generation` = 1 + max(parents); `bredBy` set;
   auto-tamed to the dam's owner if the dam was tamed.
 - Foal `speed` / `health` round up and are actually applied to the entity's
@@ -457,10 +484,10 @@ common/src/main/java/com/example/horsegenetics/common/
   horse/HorseRecord.java            # + speed / health (rounded up, uncapped), parentStats, withStats/withParentStats
   horse/HorseStats.java             # rollFoalStat(a, b, Rng) -> [0.75*min, 1.5*max]
   horse/ParentStats.java            # (speedMin,speedMax,healthMin,healthMax) + rankSpeed/rankHealth
-  horse/HorseDatabase.java
+  horse/HorseDatabase.java          # + offspringCount(a, b)
   horse/InMemoryHorseDatabase.java
   name/HorseNameGenerator.java      # generateParts -> {first, last}; + resources/.../names/*.txt
-  name/HorseNames.java              # breed({dam}, {sire}, rng) -> foal name parts
+  name/HorseNames.java              # breed(...) 50/50; breedNth(..., priorFoals, gen, rng) foal-count-varied
 
 neoforge-26.1.2/src/main/java/com/example/horsegenetics/neoforge/
   data/HorseRecordCodecs.java             # Codec + StreamCodec for HorseRecord
@@ -473,14 +500,14 @@ neoforge-26.1.2/src/main/java/com/example/horsegenetics/neoforge/
   network/ModNetworking.java              # registers the above + request/barn-name handlers
   server/HorseRecords.java                # the adapter
   server/HorseGeneticsEventHandler.java   # natural spawn -> founder, + StartTracking sync
-  server/HorseBreedingHandler.java        # BabyEntitySpawnEvent -> bred (name combine, bredBy, auto-tame, same-sex gate)
+  server/HorseBreedingHandler.java        # BabyEntitySpawnEvent -> bred (breedNth name, bredBy, auto-tame, same-sex gate)
   server/HorsePaperInspectHandler.java    # paper -> chat dump
   server/HorseInteractionHandler.java     # name-tag first/last (consumed), stick tame, clock age-up
   server/HorseOwnerTrackingHandler.java   # EntityTickEvent -> fill in tamedBy from the owner
   client/ClientHorseRecordCache.java      # client store of synced records
   client/ClientLifecycleHandler.java      # clears caches + generated textures on world exit
   client/HorseScreenHooks.java            # inventory panel + barn-name box + Family Tree button
-  client/FamilyTreeScreen.java            # the pedigree chart (with coat swatches)
+  client/FamilyTreeScreen.java            # the pedigree chart (live 3D horse per node; shrinks to fit / opt. scroll)
 
 common/src/test/java/com/example/horsegenetics/common/
   genetics/GeneticCodeCombinerTest.java
