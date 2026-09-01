@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.example.horsegenetics.common.name.HorseNameGeneratorTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-09-01T19:40:39.661Z" hostname="PERDIX" time="0.022">
+<testsuite name="com.example.horsegenetics.common.name.HorseNameGeneratorTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-09-01T21:35:25.831Z" hostname="PERDIX" time="0.022">
   <properties/>
-  <testcase name="rejectsEmptyTables()" classname="com.example.horsegenetics.common.name.HorseNameGeneratorTest" time="0.004"/>
-  <testcase name="drawsAlphaThenBeta()" classname="com.example.horsegenetics.common.name.HorseNameGeneratorTest" time="0.001"/>
-  <testcase name="bundledResourcesLoadAndProduceATwoPartName()" classname="com.example.horsegenetics.common.name.HorseNameGeneratorTest" time="0.014"/>
+  <testcase name="rejectsEmptyTables()" classname="com.example.horsegenetics.common.name.HorseNameGeneratorTest" time="0.005"/>
+  <testcase name="drawsAlphaThenBeta()" classname="com.example.horsegenetics.common.name.HorseNameGeneratorTest" time="0.003"/>
+  <testcase name="bundledResourcesLoadAndProduceATwoPartName()" classname="com.example.horsegenetics.common.name.HorseNameGeneratorTest" time="0.011"/>
   <testcase name="joinsOneWordFromEachTableInOrder()" classname="com.example.horsegenetics.common.name.HorseNameGeneratorTest" time="0.001"/>
   <system-out><![CDATA[]]></system-out>
   <system-err><![CDATA[]]></system-err>

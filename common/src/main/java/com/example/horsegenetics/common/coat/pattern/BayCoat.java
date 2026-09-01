@@ -14,8 +14,15 @@ import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Skin;
  *
  * <p><b>Seal brown is the top of this same distribution</b> - a high leg / face
  * roll gives the "black creeps most of the way up" seal look; there is no
- * separate seal gene. The two epigenetic numbers are: one <b>leg</b> height
- * (shared by all four legs) and one <b>face</b> height.
+ * separate seal gene.
+ *
+ * <p>The heights come from the horse's <b>agouti {@code A} copy</b>: one
+ * uniform "point extent" number spread across the full range, so bays really do
+ * run from low socks to seal rather than clustering at the bottom, plus a small
+ * independent jitter per leg (a real horse's four socks are not the same
+ * height) and a face height that only climbs on the horses whose legs already
+ * did. Because the number rides on the allele, a foal that inherits its dam's
+ * {@code A} inherits her point extent exactly.
  */
 public final class BayCoat {
 
@@ -32,15 +39,40 @@ public final class BayCoat {
 
     private BayCoat() {}
 
-    /** Roll the (leg, face) heights from {@code epi} and paint. Consumes 4 {@code nextFloat()}s. */
+    /** Lowest / highest fraction of the leg the black can climb. */
+    private static final double LEG_MIN = 0.15;
+    private static final double LEG_RANGE = 0.80;
+    /** How far one leg may differ from the horse's own average, either way. */
+    private static final double LEG_JITTER = 0.14;
+
+    /**
+     * Roll this horse's point heights from {@code epi} and paint. Consumes 5
+     * {@code nextFloat()}s: one "point extent" for the horse, then one jitter
+     * per leg.
+     */
     public static void apply(CoatBuildContext ctx, Rng epi) {
-        double leg = 0.12 + epi.nextFloat() * epi.nextFloat() * 0.85;  // low socks .. near-full (seal)
-        double face = 0.04 + epi.nextFloat() * epi.nextFloat() * 0.60;
-        apply(ctx, leg, face);
+        double extent = epi.nextFloat();                       // 0 = low socks .. 1 = seal
+        double leg = LEG_MIN + extent * LEG_RANGE;
+        double face = 0.04 + extent * extent * 0.62;           // the face only follows high legs
+        double[] legs = new double[CoatRegions.LEGS.size()];
+        for (int i = 0; i < legs.length; i++) {
+            legs[i] = leg * (1.0 - LEG_JITTER + epi.nextFloat() * LEG_JITTER * 2.0);
+        }
+        apply(ctx, legs, face);
     }
 
-    /** Paint with explicit heights (fractions of leg height / head length). */
+    /** Paint with one explicit height for all four legs. */
     public static void apply(CoatBuildContext ctx, double legHeight, double faceHeight) {
+        double[] legs = new double[CoatRegions.LEGS.size()];
+        java.util.Arrays.fill(legs, legHeight);
+        apply(ctx, legs, faceHeight);
+    }
+
+    /**
+     * Paint with explicit heights (fractions of leg height / head length),
+     * {@code legHeights} in {@link CoatRegions#LEGS} order.
+     */
+    public static void apply(CoatBuildContext ctx, double[] legHeights, double faceHeight) {
         Skin skin = ctx.skin();
         PigmentField f = ctx.pigment();
 
@@ -53,9 +85,10 @@ public final class BayCoat {
         CoatRegions.blackenPart(skin, f, Part.LEFT_EAR);
         CoatRegions.blackenPart(skin, f, Part.RIGHT_EAR);
 
-        // 3. black up the legs (all four the same), fading out at the top
-        for (Part leg : CoatRegions.LEGS) {
-            rampBlackUpLeg(skin, f, leg, Math.max(HOOF_FRACTION / SOLID_PORTION, legHeight));
+        // 3. black up each leg (its own height), fading out at the top
+        for (int i = 0; i < CoatRegions.LEGS.size(); i++) {
+            double h = legHeights[Math.min(i, legHeights.length - 1)];
+            rampBlackUpLeg(skin, f, CoatRegions.LEGS.get(i), Math.max(HOOF_FRACTION / SOLID_PORTION, h));
         }
 
         // 4. black up the face, fading out

@@ -27,8 +27,12 @@ Foals go through the exact same pipeline on the `Skin.BABY` geometry + the
 128px `horse_white_baby.png` template. **Grey** is the only gene that reads
 age: it greys adults only, so a foal is born its base colour.
 
-Non-deterministic genes take all randomness from `ctx.epigeneticsFor(key)` -
-rolled once at birth, replayed every regen.
+Non-deterministic genes take all randomness from `ctx.epigeneticsFor(key)`.
+That runs on the epigenetic seed of the **allele copy that expresses** at that
+gene - heterozygote: the dominant copy; homozygote: the higher-**priority** one.
+Seeds are rolled once for a founder and **inherited unchanged** with the allele
+after that, so bay point heights and grey dapples run in families. See
+**Docs/breeding.md** for the inheritance rules.
 
 ---
 
@@ -106,12 +110,22 @@ restricted to 0 everywhere → chestnut (the gradient's left edge).
 | wild frequency | 50/50 per allele (2 `nextBoolean`) |
 | deterministic? | **no** when `A_` on a black-capable horse |
 | visible when | `A_` **and** `genotype.hasBlackPigment()` |
+| epigenetics | 5 `nextFloat` - point extent, then one jitter per leg |
 
 `A_` → bay via `BayCoat.apply`: body black knocked to `BayCoat.BODY_BLACK`
 (0.32, red kept → red-brown body); mane / tail / ears full black; black climbs
 the legs + the face by a **random** amount and **fades out at its top edge**.
-Two epigenetic numbers: **one leg height** (all four legs the same) and **one
-face height** (`0.12 + f*f*0.85` and `0.04 + f*f*0.60`). The bottom
+The heights come off the expressed `A` copy's epigenetics as **one "point
+extent"** number spread **uniformly** over the whole range (`extent =
+nextFloat()`), which is what makes bays actually run from low socks to seal
+instead of clustering at the bottom the way the old `f*f` product did:
+
+| number | formula | note |
+|---|---|---|
+| leg height | `0.15 + extent * 0.80` | the horse's average, then each leg is jittered `±14%` independently - four socks are never exactly level |
+| face height | `0.04 + extent² * 0.62` | squared, so the face only climbs on the horses whose legs already did (seal, not "socks + a black face") |
+
+The bottom
 `SOLID_PORTION` = **0.3** of the band is solid black, then a **smoothstep**
 fade to nothing over the rest - smoothstep (flat slope at both ends) so the
 black dissolves into the body colour with no visible cut-off line. Hooves
@@ -215,22 +229,47 @@ champagne on chestnut.
 | inheritance | simple dominant |
 | **dominance** | `DOMINANT` - one `G` greys the adult out |
 | wild frequency | `1 in 16` per allele |
-| deterministic? | yes |
+| deterministic? | **no** when `G_` (every grey adult is its own horse) |
 | visible when | `G_` **and the horse is an adult** |
 
-`G_` on an **adult** equally restricts both pigments (`red *= 0.15`,
-`black *= 0.15`) - strong enough that a grey adult reads as an unmistakable
-pale dapple-grey, not "a slightly washed-out black", but still short of
-dominant white's total. A **foal** is born whatever colour it would be without
-grey; `restrict` no-ops for `!ctx.isAdult()`. (Real grey is progressive with
-age; this is one flat adult step - no year-by-year age input.)
+`G_` on an **adult** renders a **dapple grey** (`coat.pattern.GreyCoat`). A
+**foal** is born whatever colour it would be without grey; `restrict` no-ops
+for `!ctx.isAdult()`.
 
-> **Open issue - grey renders wrong; wants a rework, not a knob turn.** Seen
-> in-game 2026-09-01. At `KEEP = 0.15` the body samples the gradient's
-> near-white corner (roughly `(227,221,215)`), so a grey reads as flat and
-> washed-out rather than as a dapple-grey. The flat single-step model is the
-> real problem: this wants progressive greying driven by an **age input to the
-> pipeline** plus actual dappling, not a different `KEEP`.
+**Grey is a remap, not a restriction, and that is the whole point.** Greying
+replaces pigmented hairs with white ones, and a mix of white and dark hairs
+reads **neutral** - so a grey has to land on the gradient's **zero-red column**,
+the only place the LUT is actually grey. Scaling red and black *together* walks
+the sample down the diagonal instead, and the diagonal runs through the
+gradient's golds: at an equal `keep` of `0.4` a black horse samples
+`(150, 109, 56)`, a tan. That is why the old flat `KEEP = 0.15` had to sit
+almost on top of white to look grey at all - and why every grey then looked
+like the same white horse.
+
+So `GreyCoat` works out how dark each texel currently is
+(`0.55*red + 0.95*black`), puts that darkness back as **black** pigment scaled
+by how far greying has gone, and keeps only a fading trace of the red. What was
+underneath still shows: a greying chestnut ends lighter than a greying black,
+and a barely-greyed horse keeps a rose / steel cast.
+
+Four numbers come off the expressed `G` copy's epigenetics (plus a `long` that
+seeds the dapple field):
+
+| knob | range | what it does |
+|---|---|---|
+| **progression** | 0 .. 1 | keep = `lerp(0.46, 0.10, p)` - dark steel grey → nearly white. Fixed for life (no age input); this is what makes one grey different from the next |
+| **dapple spacing** | 2.8 .. 5.0 body units | size of the dapples (the body is ~22 units long) |
+| **dapple strength** | 0.5 .. 1 | contrast between a dapple centre and the web around it, up to `DAPPLE_DEPTH` = 0.42 (generous on purpose - most of a composed texel's variation is the white template's own shading). Scaled to peak mid-greying - a barely-started or almost-finished horse has little pigment left to vary |
+| **point retention** | 0 .. 1 | how much longer mane / tail / ears / muzzle (full), head (half) and the lower legs (ramped, gone by mid-cannon) hold their colour. Scaled by `1 - progression`, so it's the young greys that show dark points on a light body |
+
+Dapples come from `BodyNoise.cellDistance` - distance to the nearest point of a
+jittered lattice, sampled in **body space** so the rings cross part seams
+without a join, and warped by a low-frequency `BodyNoise.value` so the lattice
+flows instead of gridding up. Near a lattice point = a dapple centre (lighter);
+out in the gaps = the web (darker).
+
+*Not modelled:* progressive greying with actual age, and flea-bitten grey. Both
+want an age input to the pipeline.
 
 ## `horsegenetics.white` - Dominant white
 

@@ -4,11 +4,12 @@ import java.util.Random;
 
 /**
  * A deterministic {@link Rng} built from a single {@code long} seed - the
- * "replay" randomness used when a horse's coat is regenerated. A horse's
- * epigenetic seed is rolled once at birth and stored; every time the skin is
- * rebuilt, each non-deterministic gene derives its own {@code SeededRng}
- * ({@code new SeededRng(epigeneticSeed, gene.key())}) so the same freckles /
- * sock heights come back out.
+ * "replay" randomness used when a horse's coat is regenerated. Every allele
+ * copy carries an epigenetic seed (rolled once for a founder, inherited
+ * unchanged after that); every time the skin is rebuilt, each
+ * non-deterministic gene derives its own {@code SeededRng} from the seed of the
+ * copy that expresses ({@code CoatBuildContext.epigeneticsFor}) so the same
+ * dapples / sock heights come back out.
  *
  * <p>Backed by {@link java.util.Random} - not a Minecraft class, so it stays
  * inside the common module's no-game-dependency rule.

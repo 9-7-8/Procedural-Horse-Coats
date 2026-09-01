@@ -5,8 +5,9 @@ agouti + seal, white, champagne, a `T` "Test" diagnostic) drives a
 **generated coat texture** - genes restrict red/black pigment per pixel, the
 survivors are looked up in a gradient and multiplied onto a white-horse
 template. Every horse also carries a name, a pedigree, rolled speed/health
-stats, and an epigenetic seed; and there's a self-contained "horse dimension"
-reached by a hay-bale portal. Long-term aim is a 1.12.2 backport, which is
+stats, and an **epigenome** - a priority + epigenetic seed on *each allele
+copy*, inherited with the allele - and there's a self-contained "horse
+dimension" reached by a hay-bale portal. Long-term aim is a 1.12.2 backport, which is
 why the logic is quarantined in a game-free module.
 
 **Docs split:** everything except `README.md` and `CLAUDE.md` lives in
@@ -29,11 +30,12 @@ why the logic is quarantined in a game-free module.
 
 ## Status snapshot (keep this current)
 
-- **`common/`** - compiles; **117 JUnit tests pass** (`./gradlew :common:test`).
+- **`common/`** - compiles; **138 JUnit tests pass** (`./gradlew :common:test`).
   Covers `genetics/` (allele/gene model - 9 genes incl. grey / cream / pearl / splash, `Genotype` code
-  round-trip, breeding, `DominancePattern` + the `GenotypeCatalog` reduction of
+  round-trip, breeding, the `Epigenome` / `Genome` per-allele epigenetics +
+  priority tie-break, `DominancePattern` + the `GenotypeCatalog` reduction of
   19 683 genotypes to 434 distinct coats), `coat/` + `coat/pattern/` (the overlay pipeline -
-  `CoatTextureComposer`, `GradientLut`, `BayCoat`, `CoatRegions`, the genes,
+  `CoatTextureComposer`, `GradientLut`, `BayCoat`, `GreyCoat`, `CoatRegions`, the genes,
   `CoatTextureId` texture-id injectivity),
   `coat/skin/` (`HorseSkinGeometry`), `name/` (`breedNth`),
   `horse/` (pedigree + `HorseStats` -> `Docs/breeding.md`).
@@ -100,6 +102,15 @@ why the logic is quarantined in a game-free module.
     combined genetic code, and (for the pairing's **first** foal) a name
     combining both parents.
 
+- **Built 2026-09-01, NOT yet play-tested:** **per-allele epigenetics** and the
+  **dapple-grey rework**. Epigenetics moved off the horse and onto the allele
+  copy (`Epigenome` / `Genome` / `AlleleEpigenetics`, each copy carrying a
+  `priority` + `epigeneticSeed`, inherited unchanged by a foal); `GreyGene` now
+  renders a real dapple grey through the new `GreyCoat` + `BodyNoise`; and
+  bay's leg black is a uniform per-horse extent with per-leg jitter instead of
+  the old low-biased single number. Compiles, 138 `common` tests pass, sample
+  bakes look right, nothing seen in-game yet - checklist in
+  **`Docs/to be verified.md`**.
 - **Built 2026-09-01, NOT yet play-tested:** the **genotype gallery** rework of
   the horse dimension - one pen per visually distinct genotype (434 of 19 683),
   per-pen genotype signs, the entrance tally sign, `Gene.dominance()` metadata,
@@ -188,12 +199,12 @@ Dict.md`** (natural genes first, then non-natural); one-liners:
 | gene | alleles | dominance | in the wild | coat effect |
 |------|---------|-----------|-------------|-------------|
 | extension | `E`/`e` | dominant | 50/50 | `ee` = black restricted → chestnut |
-| agouti | `A`/`a` | dominant | 50/50 | `A_` = bay + random leg/face black; a high roll = seal (non-det) |
+| agouti | `A`/`a` | dominant | 50/50 | `A_` = bay; one uniform "point extent" off the `A` copy sets leg + face black, each leg jittered; a high roll = seal (non-det) |
 | white | `W`/`w` | **complete** | 1/50 | `W_` = all pigment gone → transparent; masks every other gene |
 | test | `T`/`t` | **complete** | 1/4 carrier | `T_` = paint the `TestCoatPattern` gradient **flat on top**, last (only **non-natural** gene; visible on any base incl. white) |
 | champagne | `Ch`/`c` | dominant | 1/40 | dilute toward the gradient's gold; keeps bay's points chocolate (amber champagne) |
 | splash | `Spl`/`spl` | incomplete\* | 1/20 | random white socks + face blaze (non-det) - **open issue:** only the blaze, the sock edges are a hard ring, and \*it doesn't read its dose yet (`Spl/Spl` should be much bigger markings) |
-| grey | `G`/`g` | dominant | 1/16 | **adults only** - equally restrict both pigments to 0.15; foal born base colour - **open issue:** reads flat/near-white, wants a rework |
+| grey | `G`/`g` | dominant | 1/16 | **adults only** - **dapple grey** (`GreyCoat`): remaps onto the gradient's neutral column, per-horse progression / dapple size / dapple strength / point retention (non-det); foal born base colour |
 | cream | `Cr`/`N` | incomplete | 1/30 | incomplete-dominant dilution; interacts with pearl; never leaves a pitch-black point |
 | pearl | `prl`/`N` | incomplete | 1/22 | dilution; `prl/prl` no-cream = mild uniform; `Cr/prl` = double cream |
 
@@ -219,15 +230,47 @@ Seal has **no gene** - it's the top of agouti's random distribution.
 chestnut; cream/pearl read each other). `Genotype.hasVisibleNonDeterministic()`
 = "generate the texture per horse".
 
+### Epigenetics are tied to the allele, not to the horse
+
+Each **allele copy** a horse carries has an `AlleleEpigenetics(int priority,
+long epigeneticSeed)`. `Epigenome` holds one per copy, **aligned** slot-for-slot
+with the `Genotype`'s `AllelePair`s; `Genome` = `Genotype` + `Epigenome`, and it
+exists because only a breeding pass that draws both at once can keep that
+alignment true. Both round-trip through code strings (the epigenome's is
+`<priority>:<seed hex>/<priority>:<seed hex>` per gene, `-` joined, same gene
+order).
+
+- **Expression** (`Epigenome.expressed(gene, genotype)`) - heterozygote: the
+  dominant copy (an `AllelePair` is canonicalized dominant-first). Homozygote:
+  both express, so the tie goes to the **higher priority**. That seed is what
+  `CoatBuildContext.epigeneticsFor(geneKey)` runs on.
+- **Inheritance** (`Genome.breedWith`) - the allele half is bit-for-bit
+  `Genotype.breedWith`; each inherited allele brings its parent copy's priority
+  and seed **verbatim**, no re-roll and (deliberately, for now) no variation.
+  Copies are re-aligned after `AllelePair` sorts them. If both copies arrive on
+  the same priority, one extra `nextBoolean()` bumps the second **±1**
+  (`AlleleEpigenetics.deconflict`), clamped to `[1, Integer.MAX_VALUE]` - so a
+  horse never carries a tie. Draws: **2 `nextBoolean()` per gene, +1 per tie.**
+- **Founders only** roll fresh epigenetics (`Epigenome.random` via
+  `CoatGenerator.generate`). A foal must never go through that path - see the
+  data-flow section.
+- `priority` has no other consumer yet; it's a full-range int because more uses
+  are planned.
+
+Full inheritance detail: **`Docs/breeding.md`**.
+
 ## The coat overlay pipeline (`common/coat/pattern/` + `client/GeneticCoatTextureFactory`)
 
 Coats are **generated** for every horse - adult *and* foal. Per-gene detail in
 **`Docs/Gene Dict.md`**; the machinery:
 
-- **`CoatData`** = `Genotype` + `long epigeneticSeed` (rolled once at birth,
-  persisted). `textureKey()` = code, plus `@<seed>` only when non-deterministic;
-  the factory also keys on adult vs foal.
-- **`CoatTextureComposer.compose(genotype, seed, Skin, adult, template, GradientLut)`**
+- **`CoatData`** = a `Genome` (`Genotype` + `Epigenome`), assigned once at
+  birth and persisted. `textureKey()` = the genotype code, plus
+  `@<fingerprint hex>` only when non-deterministic -
+  `Epigenome.visibleFingerprint(genotype)` digests just the *expressed* seeds of
+  genes that are visible **and** non-deterministic, so epigenetics a horse can't
+  show don't fork the texture cache. The factory also keys on adult vs foal.
+- **`CoatTextureComposer.compose(genotype, epigenome, Skin, adult, template, GradientLut)`**
   → 128px `int[]` ARGB:
   1. **natural pass** - every pixel starts max red + max black; each visible
      natural gene (`Genes.naturalOrder()` = extension → agouti → cream → pearl →
@@ -261,14 +304,39 @@ Coats are **generated** for every horse - adult *and* foal. Per-gene detail in
   (hand-authored, 500x500): left = more red, bottom = more black; `(1,1)` =
   black, `(1,0)` = chestnut, `(0,0)` = white, champagne-gold column near the
   middle. `sample(red, black)`: `x = (1-red)*(w-1)`, `y = black*(h-1)`.
+  **The `red = 0` column is the only neutral grey ramp in the whole LUT**; the
+  *diagonal* runs through the golds (equal keep `0.4` on a black horse samples
+  `(150,109,56)`, a tan). Any effect that should read grey has to walk the
+  sample toward that column, not scale both pigments - that's the whole reason
+  for `GreyCoat`'s remap.
+- **`GreyCoat`** - the dapple-grey generator. Reads how dark each texel
+  currently is (`0.55*red + 0.95*black`), writes that darkness back as **black**
+  scaled by the horse's greying progression, and keeps only a fading trace of
+  the red - so a grey lands on the gradient's neutral column while a greying
+  chestnut still ends lighter than a greying black. Four epigenetic knobs off
+  the `G` copy (+ a `long` seeding the dapple field): **progression** (keep
+  `lerp(0.46, 0.10, p)`, steel → near-white), **dapple spacing** (2.8-5.0 body
+  units), **dapple strength** (contrast, peaked mid-greying), **point
+  retention** (mane/tail/ears/muzzle full, head half, lower legs ramped; scaled
+  by `1 - progression`). Dapples come from `BodyNoise`.
+- **`BodyNoise`** - pure `(seed, x, y, z)` noise sampled in **body space**, so a
+  pattern crosses part seams without a join. `cellDistance` = distance to the
+  nearest jittered-lattice point, normalized (centres = dapples, gaps = the web
+  between them); `value` = smooth value noise, used to warp the lattice off the
+  grid. No state, no `Random` - a rebuilt coat is identical.
 - **`CoatRegions`** - reusable `Skin`-aware helpers (fill mane/tail/ears/hooves,
   paint/blacken/whiten a leg, `whitenBlaze`, `redrawEyes`). **Open issue:**
   `whitenLowerLeg` cuts at a hard `point.y() <= cutoff`, so every splash sock
   ends in a perfect ring; and `whitenBlaze` is the only face marking there is.
-- **`BayCoat`** - the bay generator (two epigenetic numbers: one leg height,
-  one face height; bottom `SOLID_PORTION` = **0.3** of the band solid, then a
-  **smoothstep** fade to nothing - no hard cut-off line). Knobs: `BODY_BLACK`,
-  `HOOF_FRACTION`, `SOLID_PORTION`. Verified in-game 2026-09-01 (seal included).
+- **`BayCoat`** - the bay generator. One **uniform** per-horse "point extent"
+  off the `A` copy (`leg = 0.15 + extent*0.80`, `face = 0.04 + extent²*0.62`),
+  then each of the four legs jittered `±14%` independently - so bays actually
+  spread from low socks to seal instead of clustering low the way the old
+  `f*f` product did, and one horse's four socks are never exactly level. Bottom
+  `SOLID_PORTION` = **0.3** of the band solid, then a **smoothstep** fade to
+  nothing - no hard cut-off line. Knobs: `BODY_BLACK`, `HOOF_FRACTION`,
+  `SOLID_PORTION`, `LEG_JITTER`. Verified in-game 2026-09-01 (seal included);
+  the widened distribution is **not** yet play-tested.
   Its points are set *absolutely* (`setBlack(1.0)` / `setRed(0.0)` via
   `CoatRegions.blackenPart` / `blackenLowerLeg`) and that's fine - the
   dilutions run after and scale them. What was **not** fine is that a point
@@ -338,13 +406,19 @@ approximate.
 
 ## Data flow (server -> client -> pixels)
 
-1. Horse spawns/breeds -> `HorseRecord` attached (genetic code) and, on the
-   same join, a `HorseCoatAttachment` = `{genotype code, epigeneticSeed}`
-   (`CoatGenerator.generate` rolls the seed once). Both via `ModAttachments`;
-   the coat attachment default is `HorseCoatAttachment.UNASSIGNED` until the
-   handler replaces it.
+1. **Wild spawn / `/summon` / gallery horse** -> `HorseRecord` attached
+   (genetic code) and, on the same join, a `HorseCoatAttachment` =
+   `{genotype code, epigenome code}` (`CoatGenerator.generate` -> a founder
+   `Epigenome.random`). Both via `ModAttachments`; the coat attachment default
+   is `HorseCoatAttachment.UNASSIGNED` until the handler replaces it.
+   **Breeding is different**: `HorseBreedingHandler` writes the foal's coat
+   attachment itself, from `damGenome.breedWith(sireGenome)`, because the
+   inherited epigenetics can only be read while both parents are in hand - the
+   join handler would re-roll them. It then sees an assigned attachment and
+   leaves it alone.
 2. Not auto-synced -> the handler sends `CoatSyncPayload` `{entityId, code,
-   seed}` and `HorseRecordSyncPayload` to trackers.
+   epigenome}` and `HorseRecordSyncPayload` to trackers (on every join, plus
+   `StartTracking`).
 3. Client caches in `ClientCoatCache` (`CoatData`) / `ClientHorseRecordCache`,
    cleared on `LoggingOut`.
 4. `GeneticHorseRenderer.extractRenderState` reads `ClientCoatCache` ->
@@ -716,7 +790,7 @@ genotype that looks different from every other.
   `2i+1` on the left. The corridor reads `eeaa, EEaa, eeAA, EEAA, [white],
   [test], eeaa ChCh, ...`: extension exhausts before agouti moves. With an odd
   catalogue the final left-hand pen is simply not built.
-- **Both horses in a pen share the genotype** but not the epigenetic seed, so
+- **Both horses in a pen share the genotype** but not the epigenome, so
   they're two examples rather than two copies.
 - **Signs** (`placeSign`, waxed standing oak, same text on both faces):
   - per pen, on the road one block out from the wall and **to the right of the
@@ -862,13 +936,13 @@ The **`runClient` checklist lives in `Docs/to be verified.md`** - both the
 **open issues** found in-game and what's still unconfirmed. Keep that file
 current after each session.
 
+**Fixed since that session:** grey (was "flat near-white, wants a rework") is
+now the `GreyCoat` dapple grey - built, unit-tested and sample-baked, **not yet
+seen in-game**.
+
 **Open rendering issues (found in-game 2026-09-01, deliberately not fixed
 yet)** - full detail in `Docs/to be verified.md`:
 
-- **Grey needs a rework, not a knob.** `KEEP = 0.15` flat on both pigments
-  lands the body in the gradient's near-white corner (~`(227,221,215)`) and
-  reads flat. Wants progressive-with-age + dapples, which needs an age input to
-  the pipeline.
 - **Splash is only the centreline blaze + plain socks.** Missing the rest of
   the face-marking family (star, snip, stripe, bald face), and
   `whitenLowerLeg`'s hard `y <= cutoff` cut makes each sock a perfect ring -
@@ -882,28 +956,39 @@ yet)** - full detail in `Docs/to be verified.md`:
 
 Design follow-ups (not just "go look at it"):
 
-1. **Foal geometry is approximate** - `Skin.BABY` uses rest-pose AABBs and
+1. **Grey still has no age.** `GreyCoat`'s progression is drawn once from the
+   `G` copy's epigenetics and fixed for life, so a horse doesn't grey out as it
+   ages and flea-bitten grey isn't modelled. Both want a real age input to the
+   pipeline (the composer only knows adult vs foal).
+2. **Foal geometry is approximate** - `Skin.BABY` uses rest-pose AABBs and
    pre-resolved neck/head/ear pivots; markings on the foal face/neck can land
    loosely. Also the foal mesh has no MANE/MUZZLE part, so bay foal "black up
    the face" is coarse. Foals are also the top **unverified** item.
-2. **Genetic eye colour** - the eyes render correctly but are copied verbatim
+3. **Genetic eye colour** - the eyes render correctly but are copied verbatim
    from the template (`CoatRegions.redrawEyes`). Wants its own gene; the
    classic hook is blue eyes on cream double-dilutes.
-3. **White markings beyond splash** - the framework is ready (natural +
+4. **White markings beyond splash** - the framework is ready (natural +
    non-deterministic gene); sock distributions, roan and rabicano slot in the
    same way.
-4. **More loci** - dun, pearl-cream stacking nuance, sooty.
-5. **Coat realism** - flat gradient sample per pixel (no dappling, sooty
-   shading, seasonal coat). `T` on a non-deterministic coat still bakes a
+5. **More loci** - dun, pearl-cream stacking nuance, sooty.
+6. **Coat realism** - outside grey's dapples, every gene still samples the
+   gradient flat per pixel (no sooty shading, no seasonal coat). `BodyNoise` is
+   the reusable seam for the next one. `T` on a non-deterministic coat still bakes a
    unique (identical-looking) texture per horse.
-6. **`breedNth` foal names past foal 1** / **`FamilyTreeScreen` scroll mode** /
-   **stats surfaces** / **water-riding feel** / **epigenetic seed across a
+7. **`breedNth` foal names past foal 1** / **`FamilyTreeScreen` scroll mode** /
+   **stats surfaces** / **water-riding feel** / **the epigenome across a
    save-reload** - see `Docs/to be verified.md`.
-7. **Use `Gene.dominance()` beyond the gallery** - the metadata is on every
+8. **Epigenetics follow-ups** - a foal copies a parent's per-allele seed
+   **exactly**, with no variation, so a closed line converges on one look;
+   `AlleleEpigenetics.priority` has no consumer beyond the homozygote
+   tie-break; and the epigenome lives on the entity, not on `HorseRecord`, so
+   `FamilyTreeScreen` draws ancestors from `Epigenome.fromSeed(record UUID)` -
+   a plausible stand-in, not the real coat.
+9. **Use `Gene.dominance()` beyond the gallery** - the metadata is on every
    gene now (`DominancePattern`), but only `GenotypeCatalog` reads it. Obvious
    next consumers: a punnett/expected-foal display, "carrier" wording in the
    info panel, and `GeneCodeDisplay` deciding what's worth printing.
-8. **Cleanups**: rename `DebugPenManager` / `DEBUG_LEVEL` /
+10. **Cleanups**: rename `DebugPenManager` / `DEBUG_LEVEL` /
    `horsegenetics:debug_pens` to non-"debug" names (needs a save-data
    migration or a one-time reset); fold speed/health into the gene model; a
    `.gitignore`; name-generation rework; real white-fog dimension effects
@@ -937,4 +1022,60 @@ its licence is compatible.
 - **No legacy / back-compat code.** Dev only, single tester, no saves to keep -
   when a format changes, change it and move on (no genotype-code padding, no
   attachment field fallbacks).
-```
+
+## Ending a session
+
+The routine to run when the owner says **"end the session"** (or "wrap up",
+"we're done for today"). It is a *fixed order* - the docs pass comes after the
+code is pushed, so it's a review of where the session actually landed rather
+than a running commentary written mid-change.
+
+**0. Pre-flight.** `./gradlew :common:test` and `./gradlew
+:neoforge-26.1.2:build`. Don't push red. If something fails and can't be fixed
+in the time left, still push - but say so in the commit message and put it at
+the top of `Docs/to be verified.md`.
+
+**1. Commit and push the session's code.**
+
+- `git status --short` first and read it. This repo has **no `.gitignore`**, so
+  `build/`, `.gradle/` and `run/` are already tracked and their churn will come
+  along with `git add -A`. That is expected here - don't start pruning it as
+  part of ending a session (adding a `.gitignore` is its own task, logged under
+  "Known gaps").
+- The owner works directly on **`main`**, which tracks `origin/main`. Commit
+  and push there; don't branch.
+- One commit for the session's work, with a **descriptive** message: what
+  changed and *why*, not a file list. Multi-paragraph is fine and preferred
+  when the session did more than one thing. End it with the `Co-Authored-By:`
+  and `Claude-Session:` trailers the harness specifies.
+
+**2. Then update the docs to the current state of the program.** Not "what I
+changed today" - *what is true now*. Walk all five, in this order, and honour
+the doc-split rules under "Conventions":
+
+- **`CLAUDE.md`** - the **status snapshot** first (test count, what compiles,
+  what's owner-verified vs built-but-unplayed), then any section the session
+  invalidated, then **"Known gaps / next steps"**: delete what got fixed, add
+  what got discovered, renumber the list.
+- **`Docs/to be verified.md`** - the `runClient` checklist. Delete items the
+  owner confirmed in-game this session (they move to CLAUDE.md's
+  "Owner-verified" block, which is the permanent record); add a concrete,
+  checkable entry for anything built-but-unplayed, including *what to look at*
+  and *where* (which pen, which screen, which key).
+- **`Docs/Gene Dict.md`** - if any gene's alleles, generation function, wild
+  frequency, dominance or coat effect moved.
+- **`Docs/breeding.md`** - if breeding, pedigree, horse records or stat
+  inheritance moved.
+- **`README.md`** - only if the *player-facing* experience changed. It stays
+  user-facing: no status, no architecture, no API notes.
+
+**3. Commit and push the doc update as its own commit.** Step 2 always leaves
+the tree dirty; a session must not end with unpushed doc changes.
+
+**4. Verify clean.** `git status --short` empty (bar untracked noise you
+deliberately left) and `git log origin/main..HEAD` empty. If either isn't, fix
+it before stopping.
+
+**5. End the session** with a short terminal summary - what shipped, what's
+newly waiting in `Docs/to be verified.md`, and the one thing the next session
+should pick up first. Then stop: no new work, no "while I'm here" refactors.

@@ -3,6 +3,7 @@ package com.example.horsegenetics.common.coat.pattern;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Skin;
 import com.example.horsegenetics.common.genetics.GeneCodeDisplay;
+import com.example.horsegenetics.common.genetics.Epigenome;
 import com.example.horsegenetics.common.genetics.Genes;
 import com.example.horsegenetics.common.genetics.Genotype;
 
@@ -25,8 +26,8 @@ public final class CoatSampleTool {
     private static final String[][] SAMPLES = {
             {"black", ""},
             {"chestnut", "extension=e/e"},
-            {"bay", "agouti=A/a"},
-            {"bay_high", "agouti=A/a"},   // different seed -> seal-ish
+            {"bay", "agouti=A/a"},          // mid point extent
+            {"bay_seal", "agouti=A/a"},     // same gene, high extent -> seal
             {"champagne_black", "champagne=Ch/c"},
             {"champagne_bay", "agouti=A/a champagne=Ch/c"},
             {"buckskin", "agouti=A/a cream=Cr/N"},
@@ -34,14 +35,24 @@ public final class CoatSampleTool {
             {"perlino", "agouti=A/a cream=Cr/Cr"},
             {"pearl_bay", "agouti=A/a pearl=prl/prl"},
             {"cream_pearl_bay", "agouti=A/a cream=Cr/N pearl=prl/N"},
-            {"grey_black", "grey=G/g"},
+            {"grey_steel", "grey=G/g"},         // barely greyed
+            {"grey_dapple", "grey=G/g"},        // mid - strongest dapples
+            {"grey_old", "grey=G/g"},           // nearly white
             {"grey_bay", "agouti=A/a grey=G/g"},
+            {"grey_chestnut", "extension=e/e grey=G/g"},
+            {"bay_low", "agouti=A/a"},          // same gene as bay/bay_seal, low extent
             {"white", "white=W/w"},
             {"bay_splash", "agouti=A/a splash=Spl/spl"},
             {"chestnut_test", "extension=e/e test=T/t"},
     };
 
-    private static final long[] SEEDS = {0, 0, 12345, 88, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 31, 0};
+    /**
+     * One epigenetic seed per sample, chosen to show the spread rather than a
+     * single draw: the three bays are the same {@code A/a} genotype at a low,
+     * a middling and a seal-high point extent, and the three greys the same
+     * {@code G/g} at three stages of greying.
+     */
+    private static final long[] SEEDS = {0, 0, 7, 3, 0, 0, 0, 0, 0, 0, 0, 1, 3, 21, 3, 3, 0, 0, 31, 0};
 
     private CoatSampleTool() {}
 
@@ -59,9 +70,9 @@ public final class CoatSampleTool {
 
         for (int i = 0; i < SAMPLES.length; i++) {
             Genotype gt = build(SAMPLES[i][1]);
-            long seed = SEEDS[i];
-            int[] adult = CoatTextureComposer.compose(gt, seed, Skin.ADULT, true, adultTemplate, lut);
-            int[] foal = CoatTextureComposer.compose(gt, seed, Skin.BABY, false, babyTemplate, lut);
+            Epigenome epi = Epigenome.fromSeed(SEEDS[i]);
+            int[] adult = CoatTextureComposer.compose(gt, epi, Skin.ADULT, true, adultTemplate, lut);
+            int[] foal = CoatTextureComposer.compose(gt, epi, Skin.BABY, false, babyTemplate, lut);
             writePng(adult, n, n, outDir.resolve(SAMPLES[i][0] + ".png"));
             writePng(foal, n, n, outDir.resolve(SAMPLES[i][0] + "_foal.png"));
             System.out.println("wrote " + SAMPLES[i][0] + "(.png/_foal.png)  " + GeneCodeDisplay.shortForm(gt));

@@ -3,13 +3,14 @@ package com.example.horsegenetics.common.coat.pattern;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Skin;
 import com.example.horsegenetics.common.genetics.AllelePair;
+import com.example.horsegenetics.common.genetics.Epigenome;
 import com.example.horsegenetics.common.genetics.Gene;
 import com.example.horsegenetics.common.genetics.Genes;
 import com.example.horsegenetics.common.genetics.Genotype;
 
 /**
- * The coat overlay pipeline. Turns a {@link Genotype} + epigenetic seed into a
- * 128px ARGB coat texture for a given {@link Skin} (adult vs foal) and age
+ * The coat overlay pipeline. Turns a {@link Genotype} + its {@link Epigenome}
+ * into a 128px ARGB coat texture for a given {@link Skin} (adult vs foal) and age
  * ({@code adult} - grey only greys adults), given the white template and the
  * red/black {@link GradientLut}.
  *
@@ -46,14 +47,14 @@ public final class CoatTextureComposer {
 
     private CoatTextureComposer() {}
 
-    public static int[] compose(Genotype genotype, long epigeneticSeed, Skin skin, boolean adult,
+    public static int[] compose(Genotype genotype, Epigenome epigenome, Skin skin, boolean adult,
                                 int[] template, GradientLut lut) {
         int n = HorseSkinGeometry.SHEET_SIZE;
         if (template.length != n * n) {
             throw new IllegalArgumentException("template must be " + (n * n) + " ARGB pixels, got " + template.length);
         }
 
-        CoatBuildContext ctx = new CoatBuildContext(genotype, epigeneticSeed, skin, adult);
+        CoatBuildContext ctx = new CoatBuildContext(genotype, epigenome, skin, adult);
 
         for (Gene gene : Genes.naturalOrder()) {
             AllelePair pair = genotype.pair(gene);

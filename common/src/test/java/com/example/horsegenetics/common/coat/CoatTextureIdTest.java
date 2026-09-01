@@ -5,6 +5,7 @@ import com.example.horsegenetics.common.genetics.AllelePair;
 import com.example.horsegenetics.common.genetics.Gene;
 import com.example.horsegenetics.common.genetics.Genes;
 import com.example.horsegenetics.common.genetics.Genotype;
+import com.example.horsegenetics.common.genetics.Epigenome;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -59,7 +60,7 @@ class CoatTextureIdTest {
         for (Genotype g : allGenotypes()) {
             for (long seed : new long[]{0L, 7L, -1L}) {
                 for (String age : new String[]{":adult", ":foal"}) {
-                    String key = new CoatData(g, seed).textureKey() + age;
+                    String key = new CoatData(g, Epigenome.fromSeed(seed)).textureKey() + age;
                     String id = CoatTextureId.encode(key);
                     String clash = byId.put(id, key);
                     if (clash != null && !clash.equals(key)) {
@@ -76,7 +77,7 @@ class CoatTextureIdTest {
     @Test
     void encodedIdsUseOnlyLegalResourcePathCharacters() {
         for (Genotype g : allGenotypes()) {
-            String id = CoatTextureId.encode(new CoatData(g, 12345L).textureKey() + ":adult");
+            String id = CoatTextureId.encode(new CoatData(g, Epigenome.fromSeed(12345L)).textureKey() + ":adult");
             for (int i = 0; i < id.length(); i++) {
                 char c = id.charAt(i);
                 boolean legal = (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '_' || c == '.';

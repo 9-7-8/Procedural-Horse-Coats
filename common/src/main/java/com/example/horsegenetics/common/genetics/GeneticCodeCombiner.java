@@ -24,6 +24,17 @@ public final class GeneticCodeCombiner {
         return mother.breedWith(father, rng).toCode();
     }
 
+    /**
+     * The full seam: combines both halves of what a foal inherits - Mendelian
+     * alleles <b>and</b> the priority / epigenetic seed riding on each copy the
+     * foal received. This is what the game layer should call for a real
+     * breeding; {@link #combine(String, String, Rng)} only knows about alleles
+     * and would leave the foal's epigenetics to be re-rolled from scratch.
+     */
+    public static Genome combine(Genome mother, Genome father, Rng rng) {
+        return mother.breedWith(father, rng);
+    }
+
     private GeneticCodeCombiner() {
     }
 }

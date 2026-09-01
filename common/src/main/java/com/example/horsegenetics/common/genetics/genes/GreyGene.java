@@ -2,7 +2,7 @@ package com.example.horsegenetics.common.genetics.genes;
 
 import com.example.horsegenetics.common.Rng;
 import com.example.horsegenetics.common.coat.pattern.CoatBuildContext;
-import com.example.horsegenetics.common.coat.pattern.CoatRegions;
+import com.example.horsegenetics.common.coat.pattern.GreyCoat;
 import com.example.horsegenetics.common.genetics.Allele;
 import com.example.horsegenetics.common.genetics.DominancePattern;
 import com.example.horsegenetics.common.genetics.AllelePair;
@@ -13,28 +13,26 @@ import java.util.List;
 
 /**
  * <b>Grey</b> ({@code horsegenetics.grey}). {@code G} dominant, {@code g}
- * wild-type. Natural: {@code G_} <b>equally restricts black and red pigment all
- * over</b> - but only on <b>adults</b>. A foal is born whatever colour it would
- * be without grey; once grown it renders greying (restriction
- * {@value #KEEP_INV_PCT}% - strong, but stops short of dominant white's total).
+ * wild-type. Natural: {@code G_} <b>restricts black and red pigment equally</b>
+ * (so it lightens without shifting hue) - but only on <b>adults</b>. A foal is
+ * born whatever colour it would be without grey; once grown it renders as a
+ * <b>dapple grey</b>.
  *
- * <p>(Real grey is progressive with age; this is a single flat adult step -
- * the pipeline has no year-by-year age input.)
+ * <p><b>Non-deterministic.</b> The restriction is not one flat number: the
+ * {@code G} copy's epigenetics decide how far along this horse's greying is
+ * (dark steel grey through mid dapple grey to nearly white), how big and how
+ * pronounced its dapples are, and how much longer its mane / tail / legs hold
+ * their colour. See {@link GreyCoat}.
+ *
+ * <p>(Real greying advances with age. The pipeline has no age input past
+ * adult/foal, so a horse's stage is drawn once and fixed for life.)
  */
 public final class GreyGene implements Gene {
 
     public static final String KEY = "horsegenetics.grey";
     public static final int WILD_GREY_ALLELE_ODDS = 16;
 
-    /**
-     * Fraction of each pigment an adult grey keeps. Lower = greyer; kept low
-     * enough that a grey adult reads as an unmistakable pale dapple-grey rather
-     * than "a slightly washed-out black".
-     */
-    private static final float KEEP = 0.15f;
-    static final int KEEP_INV_PCT = Math.round((1 - KEEP) * 100);
-
-    public final Allele G = new Allele(KEY, "G", "Grey (G)", true, true);
+    public final Allele G = new Allele(KEY, "G", "Grey (G)", true, false);
     public final Allele g = new Allele(KEY, "g", "Wild-type (g)", false, true);
     private final List<Allele> alleles = List.of(G, g);
 
@@ -61,14 +59,23 @@ public final class GreyGene implements Gene {
         return isGrey(pair); // gates the pass; restrict() no-ops for foals
     }
 
+    /**
+     * Every grey adult is its own horse. This can't see the foal flag (only
+     * {@code restrict} gets the {@link CoatBuildContext}), so a grey <i>foal</i>
+     * is also treated as per-horse - it bakes its own texture and that texture
+     * is identical to a non-grey foal's. Harmless, just a few extra cache
+     * entries.
+     */
+    @Override
+    public boolean isDeterministic(AllelePair pair, Genotype genotype) {
+        return !isGrey(pair);
+    }
+
     @Override
     public void restrict(AllelePair pair, CoatBuildContext ctx) {
         if (!isGrey(pair) || !ctx.isAdult()) {
             return;
         }
-        CoatRegions.restrictAll(ctx.skin(), ctx.pigment(), (f, px, py, p) -> {
-            f.setRed(px, py, f.red(px, py) * KEEP);
-            f.setBlack(px, py, f.black(px, py) * KEEP);
-        });
+        GreyCoat.apply(ctx, ctx.epigeneticsFor(KEY));
     }
 }

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.example.horsegenetics.common.horse.InMemoryHorseDatabaseTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-09-01T19:40:39.641Z" hostname="PERDIX" time="0.013">
+<testsuite name="com.example.horsegenetics.common.horse.InMemoryHorseDatabaseTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-09-01T21:35:25.812Z" hostname="PERDIX" time="0.014">
   <properties/>
-  <testcase name="depthZeroOrNegativeIsEmpty()" classname="com.example.horsegenetics.common.horse.InMemoryHorseDatabaseTest" time="0.004"/>
+  <testcase name="depthZeroOrNegativeIsEmpty()" classname="com.example.horsegenetics.common.horse.InMemoryHorseDatabaseTest" time="0.006"/>
   <testcase name="recordReplacesSameId()" classname="com.example.horsegenetics.common.horse.InMemoryHorseDatabaseTest" time="0.001"/>
   <testcase name="unknownAncestorsAreSkipped()" classname="com.example.horsegenetics.common.horse.InMemoryHorseDatabaseTest" time="0.002"/>
   <testcase name="recordThenLookup()" classname="com.example.horsegenetics.common.horse.InMemoryHorseDatabaseTest" time="0.001"/>

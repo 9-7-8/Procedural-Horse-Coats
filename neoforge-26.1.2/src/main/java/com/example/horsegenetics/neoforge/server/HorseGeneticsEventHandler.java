@@ -108,13 +108,16 @@ public final class HorseGeneticsEventHandler {
             }
         }
 
+        // A foal already has its coat: HorseBreedingHandler gave it one built from
+        // the parents' genomes, so the alleles it inherited keep their epigenetics.
+        // Anything else (wild spawn, /summon, gallery horse) founds its own.
         HorseCoatAttachment coat = horse.getData(ModAttachments.HORSE_COAT.get());
         if (coat == null || coat.isUnassigned()) {
             Genotype genotype = Genotype.parse(HorseRecords.of(horse).geneticCode());
-            CoatData coatData = CoatGenerator.generate(genotype, rng); // rolls the epigenetic seed once
-            horse.setData(ModAttachments.HORSE_COAT.get(), HorseCoatAttachment.from(coatData));
-            syncToTrackers(horse, coatData);
+            coat = HorseCoatAttachment.from(CoatGenerator.generate(genotype, rng)); // rolls the epigenome once
+            horse.setData(ModAttachments.HORSE_COAT.get(), coat);
         }
+        syncToTrackers(horse, coat.coatData());
     }
 
     /** Re-send coat + record data whenever a player starts tracking a horse (e.g. walks into range). */

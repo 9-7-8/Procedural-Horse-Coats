@@ -24,10 +24,11 @@ public interface Rng {
 
     /**
      * Returns a uniformly distributed {@code long} across the full 64-bit range.
-     * Used to roll a horse's <b>epigenetic seed</b> once at birth - a single
-     * value that seeds every non-deterministic coat gene's own randomness, so
-     * the skin regenerates identically every session (see
-     * {@code coat.pattern.SeededRng} / {@code CoatData}).
+     * Used to roll the <b>epigenetic seed</b> carried by one allele copy - the
+     * value that seeds that gene's non-deterministic coat work, so the skin
+     * regenerates identically every session and a foal that inherits the copy
+     * inherits the look (see {@code SeededRng} /
+     * {@code genetics.AlleleEpigenetics} / {@code genetics.Epigenome}).
      */
     long nextLong();
 }

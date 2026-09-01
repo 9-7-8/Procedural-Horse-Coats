@@ -100,12 +100,12 @@ class GenotypeTest {
         assertTrue(g(p(Genes.EXTENSION.e, Genes.EXTENSION.e)).isDeterministic());       // chestnut
         assertTrue(g(p(Genes.WHITE.W, Genes.WHITE.w)).isDeterministic());               // white
         assertTrue(g(p(Genes.CHAMPAGNE.Ch, Genes.CHAMPAGNE.c)).isDeterministic());      // champagne
-        assertTrue(g(p(Genes.GREY.G, Genes.GREY.g)).isDeterministic());                 // grey
         assertTrue(g(p(Genes.CREAM.Cr, Genes.CREAM.Cr)).isDeterministic());             // perlino-on-black
 
         assertFalse(g(p(Genes.EXTENSION.E, Genes.EXTENSION.e),
                 p(Genes.AGOUTI.A, Genes.AGOUTI.a)).isDeterministic());                  // bay
         assertFalse(g(p(Genes.SPLASH.Spl, Genes.SPLASH.spl)).isDeterministic());        // splash
+        assertFalse(g(p(Genes.GREY.G, Genes.GREY.g)).isDeterministic());                // grey - dapples vary
 
         // chestnut masks agouti -> deterministic
         assertTrue(g(p(Genes.EXTENSION.e, Genes.EXTENSION.e),

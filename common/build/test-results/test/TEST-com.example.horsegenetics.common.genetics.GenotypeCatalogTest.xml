@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.example.horsegenetics.common.genetics.GenotypeCatalogTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-09-01T19:40:39.369Z" hostname="PERDIX" time="0.095">
+<testsuite name="com.example.horsegenetics.common.genetics.GenotypeCatalogTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-09-01T21:35:25.557Z" hostname="PERDIX" time="0.084">
   <properties/>
-  <testcase name="distinctPairsMatchTheDeclaredDominancePattern()" classname="com.example.horsegenetics.common.genetics.GenotypeCatalogTest" time="0.028"/>
-  <testcase name="extensionIsExhaustedBeforeAgoutiMoves()" classname="com.example.horsegenetics.common.genetics.GenotypeCatalogTest" time="0.001"/>
-  <testcase name="allPairsOfIsEveryUnorderedPairLeastDominantFirst()" classname="com.example.horsegenetics.common.genetics.GenotypeCatalogTest" time="0.003"/>
+  <testcase name="distinctPairsMatchTheDeclaredDominancePattern()" classname="com.example.horsegenetics.common.genetics.GenotypeCatalogTest" time="0.025"/>
+  <testcase name="extensionIsExhaustedBeforeAgoutiMoves()" classname="com.example.horsegenetics.common.genetics.GenotypeCatalogTest" time="0.0"/>
+  <testcase name="allPairsOfIsEveryUnorderedPairLeastDominantFirst()" classname="com.example.horsegenetics.common.genetics.GenotypeCatalogTest" time="0.004"/>
   <testcase name="indexOutsideTheCatalogueIsRejected()" classname="com.example.horsegenetics.common.genetics.GenotypeCatalogTest" time="0.002"/>
   <testcase name="sizeIsTheProductOfTheDistinctPairsPlusOnePenPerMaskingGene()" classname="com.example.horsegenetics.common.genetics.GenotypeCatalogTest" time="0.001"/>
-  <testcase name="aDominantGeneDropsItsHeterozygoteButAnIncompleteOneKeepsIt()" classname="com.example.horsegenetics.common.genetics.GenotypeCatalogTest" time="0.0"/>
-  <testcase name="eachMaskingGeneContributesExactlyOneEntry()" classname="com.example.horsegenetics.common.genetics.GenotypeCatalogTest" time="0.002"/>
-  <testcase name="everyEntryIsDistinctAndRoundTripsThroughTheCode()" classname="com.example.horsegenetics.common.genetics.GenotypeCatalogTest" time="0.017"/>
-  <testcase name="noTwoEntriesShareADisplayLabel()" classname="com.example.horsegenetics.common.genetics.GenotypeCatalogTest" time="0.012"/>
-  <testcase name="theCatalogueIsFarSmallerThanTheRawAlleleProduct()" classname="com.example.horsegenetics.common.genetics.GenotypeCatalogTest" time="0.0"/>
-  <testcase name="everyLabelWrapsOntoThreeSignLines()" classname="com.example.horsegenetics.common.genetics.GenotypeCatalogTest" time="0.02"/>
+  <testcase name="aDominantGeneDropsItsHeterozygoteButAnIncompleteOneKeepsIt()" classname="com.example.horsegenetics.common.genetics.GenotypeCatalogTest" time="0.001"/>
+  <testcase name="eachMaskingGeneContributesExactlyOneEntry()" classname="com.example.horsegenetics.common.genetics.GenotypeCatalogTest" time="0.003"/>
+  <testcase name="everyEntryIsDistinctAndRoundTripsThroughTheCode()" classname="com.example.horsegenetics.common.genetics.GenotypeCatalogTest" time="0.015"/>
+  <testcase name="noTwoEntriesShareADisplayLabel()" classname="com.example.horsegenetics.common.genetics.GenotypeCatalogTest" time="0.009"/>
+  <testcase name="theCatalogueIsFarSmallerThanTheRawAlleleProduct()" classname="com.example.horsegenetics.common.genetics.GenotypeCatalogTest" time="0.001"/>
+  <testcase name="everyLabelWrapsOntoThreeSignLines()" classname="com.example.horsegenetics.common.genetics.GenotypeCatalogTest" time="0.016"/>
   <system-out><![CDATA[]]></system-out>
   <system-err><![CDATA[]]></system-err>
 </testsuite>

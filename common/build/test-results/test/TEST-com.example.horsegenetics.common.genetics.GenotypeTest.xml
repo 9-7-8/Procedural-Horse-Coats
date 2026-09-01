@@ -1,24 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.example.horsegenetics.common.genetics.GenotypeTest" tests="18" skipped="0" failures="0" errors="0" timestamp="2026-09-01T19:40:39.466Z" hostname="PERDIX" time="0.142">
+<testsuite name="com.example.horsegenetics.common.genetics.GenotypeTest" tests="18" skipped="0" failures="0" errors="0" timestamp="2026-09-01T21:35:25.644Z" hostname="PERDIX" time="0.134">
   <properties/>
   <testcase name="randomConsumesDrawsInGeneOrder()" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.001"/>
   <testcase name="differentGenotypesNotEqual()" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.001"/>
   <testcase name="phenotype()" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.0"/>
-  <testcase name="multiCharTokensParse()" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.0"/>
+  <testcase name="multiCharTokensParse()" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.001"/>
   <testcase name="randomRollsRarerAllelesOnZero()" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.001"/>
   <testcase name="determinism()" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.001"/>
   <testcase name="breedInheritsEveryGene()" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.001"/>
-  <testcase name="parseIsCanonicalAndOrderIndependent()" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.001"/>
-  <testcase name="parseRejectsNull()" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.002"/>
-  <testcase name="breedWithIsMendelianAndSymmetric()" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.0"/>
-  <testcase name="wildTypeCodeIsBlackAndRoundTrips()" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.001"/>
+  <testcase name="parseIsCanonicalAndOrderIndependent()" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.0"/>
+  <testcase name="parseRejectsNull()" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.001"/>
+  <testcase name="breedWithIsMendelianAndSymmetric()" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.001"/>
+  <testcase name="wildTypeCodeIsBlackAndRoundTrips()" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.0"/>
   <testcase name="predicates()" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.001"/>
-  <testcase name="[1] " classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.041"/>
-  <testcase name="[2] E/e" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.002"/>
-  <testcase name="[3] E/e-A/a-w/w-t/t-c/c-spl/spl-g/g-N/N" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.002"/>
+  <testcase name="[1] " classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.036"/>
+  <testcase name="[2] E/e" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.001"/>
+  <testcase name="[3] E/e-A/a-w/w-t/t-c/c-spl/spl-g/g-N/N" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.001"/>
   <testcase name="[4] E/e-A/a-w/w-t/t-c/c-spl/spl-g/g-N/N-N/N-x/x" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.001"/>
-  <testcase name="[5] E/e/E-A/a-w/w-t/t-c/c-spl/spl-g/g-N/N-N/N" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.008"/>
-  <testcase name="[6] E/x-A/a-w/w-t/t-c/c-spl/spl-g/g-N/N-N/N" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.002"/>
+  <testcase name="[5] E/e/E-A/a-w/w-t/t-c/c-spl/spl-g/g-N/N-N/N" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.006"/>
+  <testcase name="[6] E/x-A/a-w/w-t/t-c/c-spl/spl-g/g-N/N-N/N" classname="com.example.horsegenetics.common.genetics.GenotypeTest" time="0.001"/>
   <system-out><![CDATA[]]></system-out>
   <system-err><![CDATA[]]></system-err>
 </testsuite>

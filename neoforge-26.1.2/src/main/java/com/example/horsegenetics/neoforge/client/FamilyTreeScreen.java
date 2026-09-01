@@ -1,6 +1,7 @@
 package com.example.horsegenetics.neoforge.client;
 
 import com.example.horsegenetics.common.coat.CoatData;
+import com.example.horsegenetics.common.genetics.Epigenome;
 import com.example.horsegenetics.common.genetics.Genotype;
 import com.example.horsegenetics.common.horse.HorseRecord;
 import com.example.horsegenetics.neoforge.ClientConfig;
@@ -388,9 +389,12 @@ public final class FamilyTreeScreen extends Screen {
 
     private static CoatData coatFor(HorseRecord r) {
         try {
-            // a stable per-record seed so a non-deterministic coat still shows a
-            // plausible (if not the real) pattern in the tree
-            return new CoatData(Genotype.parse(r.geneticCode()), r.id().getMostSignificantBits());
+            // The real epigenome lives on the live entity, not in the record, so
+            // an ancestor gets a stable stand-in derived from its UUID: a
+            // non-deterministic coat still shows a plausible (if not the real)
+            // pattern in the tree.
+            return new CoatData(Genotype.parse(r.geneticCode()),
+                    Epigenome.fromSeed(r.id().getMostSignificantBits()));
         } catch (RuntimeException e) {
             return null;
         }

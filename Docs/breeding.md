@@ -60,6 +60,49 @@ Test tint; one `Ch` → champagne; one `Cr` → cream dilution; one `G` → grey
 (adult only); one `Spl` → splash markings. Seal has no allele - it's a high
 roll of bay's epigenetic leg/face heights.
 
+### `genetics/Genome.breedWith(Genome other, Rng)` - the one a foal actually uses
+
+A `Genotype` says *which* alleles a horse carries. It does not say what those
+particular **copies** are carrying, and every copy carries two things:
+
+- a **priority** - an int in `[1, Integer.MAX_VALUE]`;
+- an **epigenetic seed** - the `long` that drives that gene's per-horse
+  randomness (bay point heights, grey dapples, splash markings).
+
+Those live in an `Epigenome`, one `AlleleEpigenetics(priority, seed)` per copy,
+**aligned** slot-for-slot with the `Genotype`'s `AllelePair`s. `Genome` is the
+two of them together, and it exists precisely because only a breeding pass that
+draws both at once can keep that alignment true.
+
+`breedWith`, per gene in `codeOrder()`:
+
+1. one `nextBoolean()` picks which of *this* parent's two copies is passed on,
+   one more picks the other parent's - **the same 2 draws per gene**
+   `Genotype.breedWith` makes, so the allele half is bit-for-bit unchanged;
+2. each chosen allele arrives carrying that parent copy's priority and
+   epigenetic seed **verbatim** - no re-roll, no jitter. A foal that inherits
+   its dam's `A` inherits her bay point extent exactly;
+3. the two copies are re-aligned to the canonical dominant-first `AllelePair`
+   order (the epigenetics follow their own allele across the swap);
+4. **priority tie-break**: if both copies arrived holding the *same* priority,
+   one extra `nextBoolean()` bumps the second copy a single step **up or down**
+   (`AlleleEpigenetics.deconflict`), clamped so it can't leave
+   `[1, MAX]`. A horse therefore never carries the same priority twice at one
+   gene.
+
+So the draw count is **2 `nextBoolean()` per gene, plus 1 per gene that ties.**
+
+**What priority is for.** On a **heterozygote** the expressed copy is obvious -
+the dominant one - and its epigenetics are the ones the coat reads. On a
+**homozygote** both copies express, so the tie is broken by priority:
+**higher wins** (`Epigenome.expressed`). That is its only job today; it is a
+full-range int because more uses are planned.
+
+A **founder** (wild spawn, `/summon`, a gallery horse) gets a fresh
+`Epigenome.random`: an independent priority + seed on every copy, deconflicted
+the same way. That is the only place epigenetics are ever invented -
+`CoatGenerator.generate` is the founder path and a foal must not go through it.
+
 ### `horse/HorseStats.rollFoalStat(double parentA, double parentB, Rng)`
 
 How a foal's numeric stats come from its parents - **not genetic yet**, a
@@ -76,13 +119,21 @@ independently to **speed** and **health** (two draws per foal). There is
 {@link HorseRecord} then rounds the stored value up: health to a whole
 number, speed to 3 decimals.
 
-### `genetics/GeneticCodeCombiner.combine(String motherCode, String fatherCode, Rng)`
+### `genetics/GeneticCodeCombiner`
 
-The string-level seam so callers never touch `Genotype`. Parses both codes,
-calls `mother.breedWith(father, rng)`, returns `.toCode()`. Throws
-`IllegalArgumentException` if either code is malformed. Symmetric - argument
-order only matters for which parent id gets recorded as mother vs father,
-not for the child code.
+Two overloads, and the game layer wants the second one:
+
+- `combine(String motherCode, String fatherCode, Rng)` - the string-level seam
+  so a caller never touches `Genotype`. Parses both, calls
+  `mother.breedWith(father, rng)`, returns `.toCode()`. Alleles **only** - a
+  foal bred through this would have its epigenetics re-rolled from scratch.
+- `combine(Genome mother, Genome father, Rng)` - the full seam: alleles *and*
+  the priority / epigenetic seed riding on each copy the foal received. This is
+  what `HorseBreedingHandler` calls.
+
+Both throw `IllegalArgumentException` on a malformed code and are symmetric -
+argument order only matters for which parent id gets recorded as mother vs
+father, not for the child.
 
 ### `horse/Sex`
 
@@ -283,8 +334,12 @@ record and only fills in the coat.
    Before this, `ensureParentRecord` also **backfills each parent's stats**
    from its entity if the record's are still `0.0`, so the roll has real
    numbers to work from.
-5. `childCode = GeneticCodeCombiner.combine(dam.geneticCode(),
-   sire.geneticCode(), rng)`.
+5. `childGenome = GeneticCodeCombiner.combine(genomeOf(dam), genomeOf(sire),
+   rng)`; `childCode = childGenome.genotypeCode()`. `genomeOf(parent, record,
+   rng)` reads the parent's `HorseCoatAttachment` (genotype code + epigenome
+   code); a parent whose attachment is missing or has drifted from its record
+   founds a fresh epigenome **now** and keeps it, so the foal still inherits
+   real allele copies rather than nothing.
 6. `childGeneration = 1 + max(dam.generation(), sire.generation())`.
 7. **Stats**: `childSpeed = HorseStats.rollFoalStat(dam.speed(),
    sire.speed(), rng)`, `childHealth = rollFoalStat(dam.health(),
@@ -314,9 +369,12 @@ record and only fills in the coat.
     `applyStatsToEntity(child, childRecord, fullHeal=true)` so the foal
     spawns with its rolled speed / max health (and full HP). If the child has
     no `ServerLevel` yet, flow A step 3 re-records it when the foal joins.
-12. The foal's **coat** is derived from `childCode` in flow A step 4. Foals
-    render the vanilla `*_baby` texture for the phenotype (no bay leg
-    compositing on the baby model).
+12. The foal's **coat attachment** is written **here**, not at join time:
+    `child.setData(HORSE_COAT, HorseCoatAttachment.from(childGenome))`. It has
+    to be - the inherited epigenetics can only be read while both parents are
+    in hand, and flow A's founder path would re-roll them. Flow A then sees an
+    assigned attachment and leaves it alone. Foals go through the same
+    generated-coat pipeline as adults on the `Skin.BABY` geometry.
 
 ### C. Paper inspector - chat dump
 
@@ -414,7 +472,7 @@ The record attachment is server-only, so it's pushed to clients:
 | data | where | survives / scope |
 |------|-------|----------|
 | a horse's own `HorseRecord` | entity NBT, via the `HORSE_RECORD` attachment | world save/reload, chunk unload, dimension change |
-| a horse's coat (`{genotype code, epigeneticSeed}`) | entity NBT, via the `HORSE_COAT` attachment | world save/reload - the seed is what makes a non-deterministic coat (bay/seal) stable across sessions |
+| a horse's coat (`{genotype code, epigenome code}`) | entity NBT, via the `HORSE_COAT` attachment | world save/reload - the epigenome is what makes a non-deterministic coat (bay/seal, grey dapples, splash) stable across sessions, and what a foal inherits from |
 | the ancestry table | `HorseAncestryData` SavedData (`horsegenetics:horse_ancestry`) | **per world** - it's `MinecraftServer#getDataStorage()`, which writes to `<save>/data/horsegenetics/horse_ancestry.dat`, so it's created per save and deleted when the save folder is deleted |
 | generated coat textures | in-memory `DynamicTexture`s in the client `TextureManager` (`GeneticCoatTextureFactory.CACHE`, keyed by `CoatData.textureKey()`) | session only; `ClientLifecycleHandler` releases them and clears the client caches on `ClientPlayerNetworkEvent.LoggingOut` |
 
@@ -451,17 +509,25 @@ been spot-checked - a full foal pass is still the top open item.
   interaction beyond masking (white masks all; chestnut hides agouti/seal).
   Real-horse subtleties (cream dose, champagne+cream, gray progression) aren't
   modelled.
-- **Bay / seal / splash marking extents are per-horse random** (from the
-  epigenetic seed) - not heritable detail, just a stored roll replayed on every
-  skin regen.
+- **Bay / seal / grey / splash extents are heritable** as of this pass: they
+  come off the epigenetic seed of the *allele copy* that expresses, and a foal
+  inherits that copy's seed unchanged. A **founder** still rolls them at
+  random. Note the deliberate simplification: a foal's epigenetics are copied
+  **exactly**, with no variation, so a line breeding only within itself
+  converges on one look.
 - No inbreeding prevention, no generational effects, no sex-linked loci - the
   genes combine independently.
 - Name-generation output is rough and slated for a rework (deferred by the
   owner). The rule - `<alpha> <space> <beta>` - is fixed.
 - `HorseRecord.geneticCode` and `HorseCoatAttachment.genotypeCode` both hold
-  the genotype string (the coat attachment adds only the epigenetic seed). The
-  coat derives from the record so they stay consistent; the redundancy is a
-  likely future consolidation.
+  the genotype string (the coat attachment adds the epigenome). The coat
+  derives from the record so they stay consistent; the redundancy is a likely
+  future consolidation.
+- **The epigenome lives on the entity, not in the record**, so the ancestry DB
+  can't reproduce a dead ancestor's exact coat. `FamilyTreeScreen` therefore
+  draws ancestors with `Epigenome.fromSeed(record UUID)` - a stable stand-in, a
+  plausible pattern, not necessarily the real one. Moving the epigenome onto
+  `HorseRecord` would fix that.
 - `ancestorsOf` only walks through records present in the database; a gap in
   the recorded chain ends that branch.
 - The family tree needs a fresh server request per re-centre; there's no
@@ -474,8 +540,11 @@ common/src/main/java/com/example/horsegenetics/common/
   genetics/Genotype.java            # AllelePair per Gene; parse/toCode; breedWith(...); random(...)
   genetics/Allele.java, Gene.java, AllelePair.java, Genes.java   # the allele/gene model + registry
   genetics/genes/*.java             # Extension, Agouti, White, Test, Champagne, Splash, Grey, Cream, Pearl (-> Gene Dict.md)
-  genetics/GeneticCodeCombiner.java # combine(motherCode, fatherCode, Rng)
-  coat/CoatData.java, CoatGenerator.java        # genotype + epigeneticSeed; generate() rolls the seed
+  genetics/AlleleEpigenetics.java   # (priority, epigeneticSeed) on one allele copy; bumped/deconflict
+  genetics/Epigenome.java           # one AlleleEpigenetics per copy; parse/toCode; expressed(gene, genotype)
+  genetics/Genome.java              # Genotype + Epigenome; breedWith(...) draws both at once
+  genetics/GeneticCodeCombiner.java # combine(motherCode, fatherCode, Rng) + combine(Genome, Genome, Rng)
+  coat/CoatData.java, CoatGenerator.java        # a Genome ready to render; generate() is the founder path
   coat/pattern/*.java               # the overlay pipeline (CLAUDE.md "The coat overlay pipeline")
   horse/Sex.java                    # + label(adult) -> stallion/mare/colt/filly
   horse/HorseRecord.java            # + speed / health (rounded up, uncapped), parentStats, withStats/withParentStats
@@ -488,7 +557,8 @@ common/src/main/java/com/example/horsegenetics/common/
 
 neoforge-26.1.2/src/main/java/com/example/horsegenetics/neoforge/
   data/HorseRecordCodecs.java             # Codec + StreamCodec for HorseRecord
-  data/ModAttachments.java                # HORSE_RECORD
+  data/ModAttachments.java                # HORSE_RECORD, HORSE_COAT
+  data/HorseCoatAttachment.java           # {genotype code, epigenome code}, persisted per entity
   data/HorseAncestryData.java             # SavedData over the DB
   network/HorseRecordSyncPayload.java     # S->C, one record
   network/FamilyTreeRequestPayload.java   # C->S, "tree rooted at UUID"
@@ -508,6 +578,8 @@ neoforge-26.1.2/src/main/java/com/example/horsegenetics/neoforge/
 
 common/src/test/java/com/example/horsegenetics/common/
   genetics/GeneticCodeCombinerTest.java
+  genetics/EpigenomeTest.java             # code round-trip, expressed-copy rule, fingerprint
+  genetics/GenomeTest.java                # epigenetics follow their allele; priority tie-break
   horse/HorseRecordTest.java
   horse/HorseStatsTest.java
   horse/InMemoryHorseDatabaseTest.java

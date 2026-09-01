@@ -17,11 +17,6 @@ see CLAUDE.md "Running the game".
 
 ## Open issues (seen in-game 2026-09-01, not fixed)
 
-- [ ] **Grey renders wrong** - needs a rework, not just a knob turn. `GreyGene`
-  is a single flat adult step (`KEEP = 0.15` on both pigments, so the body
-  samples the gradient's near-white corner at roughly `(227,221,215)`). Real
-  grey is progressive with age and dapples; this reads flat. Revisit alongside
-  an age input to the pipeline.
 - [ ] **Splash is missing the other face markings** - only the centreline blaze
   (`CoatRegions.whitenBlaze`) is implemented. Add the rest of the family: star,
   snip, stripe, bald face.
@@ -76,8 +71,41 @@ see CLAUDE.md "Running the game".
   foal born its base colour and greying when grown). The **baby head/neck
   geometry is a rest-pose AABB approximation** - watch the face/neck for odd
   dark patches or misplaced marks.
-- [ ] **Epigenetic seed persists** across save → reload (bay leg heights and
-  splash markings identical after a reload).
+- [ ] **Per-allele epigenetics + the grey rework** (new, 2026-09-01, not seen
+  in-game). Epigenetics moved off the horse and onto the **allele copy**:
+  `Epigenome` carries a `(priority, seed)` per copy, a foal inherits the copy's
+  seed unchanged, and priority breaks the homozygote tie. Grey is a whole new
+  generator. Check in-game:
+  - **grey adults are grey, and dappled** - a neutral grey with visible rounded
+    dapples, not the old flat near-white. Sample bakes put the dapple field itself
+    at a **21-29% lightness modulation** on the mid greys (5% on a nearly-white
+    old one, where there's no pigment left to vary);
+  - **greys differ from each other** - stand two adjacent grey pens side by side
+    (or two wild greys): one should read dark steel, another mid dapple,
+    another nearly white, with different dapple sizes;
+  - **the dapple field crosses part seams** with no join at the shoulder /
+    haunch / neck (that's what body-space sampling is for);
+  - **young greys keep darker points** (mane, tail, lower legs) - the
+    point-retention knob is strongest on the least-greyed horses;
+  - **a grey foal is still born its base colour** and greys once grown up
+    (clock it up in the horse dimension);
+  - **bay leg black really varies now** - wild bays should run from low socks to
+    seal, and the **four legs of one horse should not stop level** (a small
+    per-leg jitter). Bay's extent is now uniform, not the old `f*f` product that
+    clustered everything at the bottom;
+  - **a foal looks like its parent, not like a re-roll** - breed a seal-ish bay
+    mare to a non-bay stallion; a foal that got her `A` should carry *her* point
+    heights. Breed the same pair repeatedly: foals that inherited the same copy
+    should be identical in that respect (no variation is deliberate for now);
+  - **`Spl/Spl` vs `Spl/spl` epigenetics** - on a homozygote the *higher
+    priority* copy's seed is used. No way to see the number in-game yet; the
+    check is just that a homozygote renders stably (same markings every session).
+- [ ] **Epigenome persists** across save → reload (bay leg heights, grey dapples
+  and splash markings identical after a reload). The attachment format changed
+  (`epigenetic_seed: long` → `epigenome: String`), so **an existing dev save's
+  horses can't read their old coat attachment** - they'll re-found epigenetics
+  (or the attachment errors outright). Start a fresh world, per the
+  no-back-compat rule.
 - [ ] **`breedNth` foal names past foal 1** - breed one pair 7+ times: foal 1 =
   parent combo, foal 2 = the other combo, foals 3-6 = one parent name half + a
   random word, foal 7+ = fully random, no repeats. (`HorseNames` is

@@ -6,6 +6,7 @@ import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Part;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Skin;
 import com.example.horsegenetics.common.genetics.Genes;
 import com.example.horsegenetics.common.genetics.Genotype;
+import com.example.horsegenetics.common.genetics.Epigenome;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
@@ -75,11 +76,13 @@ class CoatTextureComposerTest {
     }
 
     private static int[] compose(String code, long seed) {
-        return CoatTextureComposer.compose(Genotype.parse(code), seed, Skin.ADULT, true, template(Skin.ADULT), lut());
+        return CoatTextureComposer.compose(
+                Genotype.parse(code), Epigenome.fromSeed(seed), Skin.ADULT, true, template(Skin.ADULT), lut());
     }
 
     private static int[] composeFoal(String code, long seed) {
-        return CoatTextureComposer.compose(Genotype.parse(code), seed, Skin.BABY, false, template(Skin.BABY), lut());
+        return CoatTextureComposer.compose(
+                Genotype.parse(code), Epigenome.fromSeed(seed), Skin.BABY, false, template(Skin.BABY), lut());
     }
 
     private static int brightness(int[] img, Skin skin, Part part) {
@@ -107,8 +110,9 @@ class CoatTextureComposerTest {
                 code.append(al.token()).append('/').append(al.token());
             }
             Genotype gt = Genotype.parse(code.toString());
-            assertEquals(N * N, CoatTextureComposer.compose(gt, mask, Skin.ADULT, true, tA, lut).length);
-            assertEquals(N * N, CoatTextureComposer.compose(gt, mask, Skin.BABY, false, tB, lut).length);
+            Epigenome epi = Epigenome.fromSeed(mask);
+            assertEquals(N * N, CoatTextureComposer.compose(gt, epi, Skin.ADULT, true, tA, lut).length);
+            assertEquals(N * N, CoatTextureComposer.compose(gt, epi, Skin.BABY, false, tB, lut).length);
         }
     }
 
@@ -142,6 +146,92 @@ class CoatTextureComposerTest {
         int chBay = brightness(compose(CHAMPAGNE_BAY, 0L), Skin.ADULT, Part.BODY);
         assertTrue(chBlack > brightness(compose(BLACK, 0L), Skin.ADULT, Part.BODY), "champagne lightens black");
         assertNotEquals(chBlack, chBay, "champagne-on-black differs from champagne-on-bay");
+    }
+
+    /** Mean and population standard deviation of texel brightness over one part. */
+    private static double[] partStats(int[] img, Skin skin, Part part) {
+        java.util.List<Double> vs = new java.util.ArrayList<>();
+        HorseSkinGeometry.forEachTexel(skin, part, (px, py, p, face, point) -> {
+            int v = img[py * N + px];
+            vs.add((((v >> 16) & 0xFF) + ((v >> 8) & 0xFF) + (v & 0xFF)) / 3.0);
+        });
+        double mean = vs.stream().mapToDouble(Double::doubleValue).average().orElse(0);
+        double var = vs.stream().mapToDouble(v -> (v - mean) * (v - mean)).average().orElse(0);
+        return new double[]{mean, Math.sqrt(var)};
+    }
+
+    /** How far up a leg, as a fraction of its height, black still reads darker than the body. */
+    private static double blackLegHeight(int[] img, Part leg) {
+        Bounds b = HorseSkinGeometry.bounds(leg);
+        double body = partStats(img, Skin.ADULT, Part.BODY)[0];
+        double[] highest = {0};
+        HorseSkinGeometry.forEachTexel(leg, (px, py, p, face, point) -> {
+            int v = img[py * N + px];
+            double lum = (((v >> 16) & 0xFF) + ((v >> 8) & 0xFF) + (v & 0xFF)) / 3.0;
+            double frac = (point.y() - b.yMin()) / b.span(HorseSkinGeometry.Axis.Y);
+            // ignore the hoof end, which the template shades dark on every horse
+            if (frac > 0.2 && lum < body * 0.75) {
+                highest[0] = Math.max(highest[0], frac);
+            }
+        });
+        return highest[0];
+    }
+
+    @Test
+    void greyIsDappledNotFlat() {
+        // the plain-black body only varies by the template's own shading; a grey
+        // one carries the dapple field on top of it
+        double flat = partStats(compose(BLACK, 0L), Skin.ADULT, Part.BODY)[1];
+        double grey = partStats(compose(GREY_BLACK, 3L), Skin.ADULT, Part.BODY)[1];
+        assertTrue(grey > flat * 2, "grey body should be dappled, sd " + grey + " vs flat " + flat);
+    }
+
+    @Test
+    void greyStaysNeutralInsteadOfWalkingIntoTheGradientsGolds() {
+        int[] img = compose(GREY_BLACK, 3L);
+        long[] rb = {0, 0, 0};
+        HorseSkinGeometry.forEachTexel(Part.BODY, (px, py, p, face, point) -> {
+            int v = img[py * N + px];
+            rb[0] += (v >> 16) & 0xFF;
+            rb[1] += v & 0xFF;
+            rb[2]++;
+        });
+        double warmth = (rb[0] - rb[1]) / (double) rb[2];
+        assertTrue(warmth < 25, "grey body should read neutral, red-minus-blue was " + warmth);
+    }
+
+    @Test
+    void howFarGreyingHasGoneIsPerHorse() {
+        double a = partStats(compose(GREY_BLACK, 1L), Skin.ADULT, Part.BODY)[0];
+        double b = partStats(compose(GREY_BLACK, 21L), Skin.ADULT, Part.BODY)[0];
+        assertTrue(Math.abs(a - b) > 20, "two greys should be at different stages, got " + a + " / " + b);
+    }
+
+    @Test
+    void greyNeverEndsUpDarkerThanTheCoatItGreys() {
+        double plain = partStats(compose(BLACK, 0L), Skin.ADULT, Part.BODY)[0];
+        for (long seed : new long[]{0L, 1L, 3L, 9L, 21L}) {
+            double grey = partStats(compose(GREY_BLACK, seed), Skin.ADULT, Part.BODY)[0];
+            assertTrue(grey > plain, "grey seed " + seed + " came out at " + grey + " vs black " + plain);
+        }
+    }
+
+    @Test
+    void bayPointHeightVariesFromHorseToHorse() {
+        double low = blackLegHeight(compose(BAY, 0L), Part.LEFT_FRONT_LEG);
+        double seal = blackLegHeight(compose(BAY, 3L), Part.LEFT_FRONT_LEG);
+        assertTrue(seal > low + 0.15,
+                "a seal-high bay should carry black much further up the leg: " + seal + " vs " + low);
+    }
+
+    @Test
+    void bayLegsDoNotAllStopAtExactlyTheSameHeight() {
+        int[] img = compose(BAY, 3L);
+        java.util.Set<Double> heights = new java.util.HashSet<>();
+        for (Part leg : com.example.horsegenetics.common.coat.pattern.CoatRegions.LEGS) {
+            heights.add(blackLegHeight(img, leg));
+        }
+        assertTrue(heights.size() > 1, "the four legs should jitter, all stopped at " + heights);
     }
 
     @Test

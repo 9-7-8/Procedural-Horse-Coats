@@ -4,6 +4,8 @@ import com.example.horsegenetics.common.Rng;
 import com.example.horsegenetics.common.SeededRng;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Skin;
+import com.example.horsegenetics.common.genetics.Epigenome;
+import com.example.horsegenetics.common.genetics.Genes;
 import com.example.horsegenetics.common.genetics.Genotype;
 
 /**
@@ -13,22 +15,23 @@ import com.example.horsegenetics.common.genetics.Genotype;
  *
  * <p>Carries the {@link Skin} (adult vs foal geometry) and whether the horse is
  * an <b>adult</b> (grey only greys adults). Non-deterministic genes take all
- * randomness from {@link #epigeneticsFor} so the same horse regenerates the
- * same coat.
+ * randomness from {@link #epigeneticsFor}, which runs on the seed of the
+ * <b>allele copy that expresses</b> at that gene, so the same horse regenerates
+ * the same coat and a foal that inherited the copy regenerates its parent's.
  */
 public final class CoatBuildContext {
 
     private final Genotype genotype;
-    private final long epigeneticSeed;
+    private final Epigenome epigenome;
     private final Skin skin;
     private final boolean adult;
     private final PigmentField pigment;
     private final int[] overlay;
     private final int size;
 
-    public CoatBuildContext(Genotype genotype, long epigeneticSeed, Skin skin, boolean adult) {
+    public CoatBuildContext(Genotype genotype, Epigenome epigenome, Skin skin, boolean adult) {
         this.genotype = genotype;
-        this.epigeneticSeed = epigeneticSeed;
+        this.epigenome = epigenome;
         this.skin = skin;
         this.adult = adult;
         this.size = HorseSkinGeometry.SHEET_SIZE;
@@ -40,8 +43,8 @@ public final class CoatBuildContext {
         return genotype;
     }
 
-    public long epigeneticSeed() {
-        return epigeneticSeed;
+    public Epigenome epigenome() {
+        return epigenome;
     }
 
     public Skin skin() {
@@ -65,7 +68,12 @@ public final class CoatBuildContext {
         return overlay;
     }
 
+    /**
+     * This horse's randomness for one gene: a {@link SeededRng} on the
+     * epigenetic seed of the allele copy expressing at {@code geneKey}
+     * (heterozygote - the dominant copy; homozygote - the higher-priority one).
+     */
     public Rng epigeneticsFor(String geneKey) {
-        return new SeededRng(epigeneticSeed, geneKey);
+        return new SeededRng(epigenome.expressedSeed(Genes.byKey(geneKey), genotype), geneKey);
     }
 }

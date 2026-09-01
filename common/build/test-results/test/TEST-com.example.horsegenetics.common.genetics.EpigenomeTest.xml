@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.example.horsegenetics.common.genetics.EpigenomeTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-09-01T21:35:25.490Z" hostname="PERDIX" time="0.017">
+  <properties/>
+  <testcase name="aCodeWithTheWrongNumberOfSegmentsIsRejected()" classname="com.example.horsegenetics.common.genetics.EpigenomeTest" time="0.008"/>
+  <testcase name="aHeterozygoteExpressesTheDominantCopy()" classname="com.example.horsegenetics.common.genetics.EpigenomeTest" time="0.003"/>
+  <testcase name="theFingerprintOnlyMovesForEpigeneticsThatCanBeSeen()" classname="com.example.horsegenetics.common.genetics.EpigenomeTest" time="0.001"/>
+  <testcase name="everyGeneGetsTwoDistinctPrioritiesWhenRolledFresh()" classname="com.example.horsegenetics.common.genetics.EpigenomeTest" time="0.0"/>
+  <testcase name="aHomozygoteBreaksTheTieOnPriorityHighestWins()" classname="com.example.horsegenetics.common.genetics.EpigenomeTest" time="0.0"/>
+  <testcase name="roundTripsThroughItsCode()" classname="com.example.horsegenetics.common.genetics.EpigenomeTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

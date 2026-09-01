@@ -66,7 +66,7 @@ public final class GeneticCoatTextureFactory {
         ensureAssetsLoaded();
         Skin skin = baby ? Skin.BABY : Skin.ADULT;
         int[] template = baby ? babyTemplate : adultTemplate;
-        int[] argb = CoatTextureComposer.compose(coat.genotype(), coat.epigeneticSeed(), skin, !baby, template, gradient);
+        int[] argb = CoatTextureComposer.compose(coat.genotype(), coat.epigenome(), skin, !baby, template, gradient);
 
         if (!FMLEnvironment.isProduction()) {
             debugLogCoat(coat, baby, argb, template);
@@ -103,7 +103,7 @@ public final class GeneticCoatTextureFactory {
         boolean bareTemplate = Arrays.equals(argb, template);
         String msg = "[coat] " + (baby ? "foal  " : "adult ")
                 + GeneCodeDisplay.shortForm(coat.genotype())
-                + " @" + Long.toUnsignedString(coat.epigeneticSeed())
+                + " @" + Long.toUnsignedString(coat.epigenome().visibleFingerprint(coat.genotype()), 16)
                 + (coat.isDeterministic() ? "  det" : "  per-horse")
                 + (bareTemplate ? "  >> FLAT WHITE (overlay fully transparent)" : "");
         mc.player.sendSystemMessage(Component.literal(msg));
