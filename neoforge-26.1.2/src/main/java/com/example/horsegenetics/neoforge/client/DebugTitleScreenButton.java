@@ -23,6 +23,9 @@ import net.neoforged.neoforge.client.event.ScreenEvent;
  * {@code DebugTestWorldHandler} to fill the hotbar (hay block, golden carrot,
  * stick, clock, paper, lead) on login - everything needed to exercise the
  * portal / taming / aging / inspect / lead features.
+ *
+ * <p>The world is throwaway: {@link DebugTestWorldCleanup} names the save
+ * directory and deletes it again when the client shuts down.
  */
 @EventBusSubscriber(value = Dist.CLIENT)
 public final class DebugTitleScreenButton {
@@ -45,7 +48,7 @@ public final class DebugTitleScreenButton {
 
     private static void spawnTestHorseWorld() {
         Minecraft mc = Minecraft.getInstance();
-        String directory = "test_horse_" + System.currentTimeMillis();
+        String directory = DebugTestWorldCleanup.newDirectoryName();
         LevelSettings settings = new LevelSettings(
                 "Test Horse World",
                 GameType.CREATIVE,

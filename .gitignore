@@ -1,0 +1,39 @@
+# --- Gradle / build output ---
+build/
+.gradle/
+!gradle/wrapper/gradle-wrapper.jar
+
+# --- IDE ---
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+
+# --- Minecraft dev run directory ---
+# Everything the game writes at runtime: world save states, logs, crash
+# reports, screenshots, caches, server op/ban/whitelist lists, options.txt.
+# None of it is source; a wiped run/ is rebuilt on the next runClient.
+**/run/*
+
+# ...except run/config/fml.toml, which carries this laptop's launch fix
+# (earlyWindowControl = false - see CLAUDE.md "Running the game"). If that is
+# lost, FML's early splash window hard-crashes the JVM in the AMD GL driver.
+!**/run/config/
+**/run/config/*
+!**/run/config/fml.toml
+
+# World save states, wherever they land. Dev test worlds from the "Spawn Test
+# Horse World" button are also deleted on shutdown by
+# client/DebugTestWorldCleanup; this is the belt-and-braces for a hard kill.
+saves/
+
+# --- Java / JVM crash droppings ---
+hs_err_pid*.log
+replay_pid*.log
+*.hprof
+
+# --- OS noise ---
+.DS_Store
+Thumbs.db
+desktop.ini

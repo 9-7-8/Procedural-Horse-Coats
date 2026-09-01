@@ -1,6 +1,0 @@
-{
-  "variants": {
-    "axis=x": { "model": "horsegenetics:block/hay_portal" },
-    "axis=z": { "model": "horsegenetics:block/hay_portal" }
-  }
-}
