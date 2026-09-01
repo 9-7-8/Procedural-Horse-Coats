@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class CoatDataTest {
 
     private static final String BLACK = Genotype.wildType().toCode();
-    private static final String BAY = "E/e-A/a-w/w-t/t-c/c-sl/sl-spl/spl";
+    private static final String BAY = "E/e-A/a-w/w-t/t-c/c-spl/spl-g/g-N/N-N/N";
 
     private static CoatData coat(String code, long seed) {
         return new CoatData(Genotype.parse(code), seed);

@@ -1,6 +1,7 @@
 package com.example.horsegenetics.common.coat;
 
 import com.example.horsegenetics.common.genetics.CoatPhenotype;
+import com.example.horsegenetics.common.genetics.GeneCodeDisplay;
 import com.example.horsegenetics.common.genetics.Genotype;
 
 import java.util.Objects;
@@ -73,6 +74,6 @@ public final class CoatData {
 
     @Override
     public String toString() {
-        return "CoatData[" + genotype.toCode() + ", epi=" + Long.toUnsignedString(epigeneticSeed) + "]";
+        return "CoatData[" + GeneCodeDisplay.shortForm(genotype) + ", epi=" + Long.toUnsignedString(epigeneticSeed) + "]";
     }
 }

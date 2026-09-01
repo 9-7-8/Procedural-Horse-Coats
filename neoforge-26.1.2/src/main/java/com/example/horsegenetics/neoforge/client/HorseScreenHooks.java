@@ -1,9 +1,11 @@
 package com.example.horsegenetics.neoforge.client;
 
+import com.example.horsegenetics.common.genetics.GeneCodeDisplay;
 import com.example.horsegenetics.common.horse.HorseRecord;
 import com.example.horsegenetics.common.horse.ParentStats;
 import com.example.horsegenetics.neoforge.network.SetBarnNamePayload;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -145,8 +147,11 @@ public final class HorseScreenHooks {
         }
         g.text(font, Component.literal(r.sex().label(adult) + "   gen " + r.generation()), tx, ty, LABEL, false);
         ty += 11;
-        g.text(font, Component.literal("code " + r.geneticCode()), tx, ty, LABEL, false);
-        ty += 11;
+        for (String line : wrap(font, shortGenes(r), PANEL_W - 14)) {
+            g.text(font, Component.literal(line), tx, ty, VALUE, false);
+            ty += 10;
+        }
+        ty += 1;
 
         String speedValue = r.hasStats() ? String.format("%.3f", r.speed()) : "-";
         g.text(font, Component.literal("speed "), tx, ty, LABEL, false);
@@ -229,6 +234,30 @@ public final class HorseScreenHooks {
 
     private static String clip(String s, int max) {
         return s.length() <= max ? s : s.substring(0, max - 1) + "…";
+    }
+
+    /** The compact gene string (degrades gracefully if the stored code won't parse). */
+    private static String shortGenes(HorseRecord r) {
+        return GeneCodeDisplay.shortForm(r.geneticCode());
+    }
+
+    /** Greedy word-wrap to {@code maxWidth} pixels, so the gene line never spills out of the panel. */
+    private static java.util.List<String> wrap(Font font, String s, int maxWidth) {
+        java.util.List<String> lines = new java.util.ArrayList<>();
+        StringBuilder cur = new StringBuilder();
+        for (String word : s.split(" ")) {
+            String candidate = cur.length() == 0 ? word : cur + " " + word;
+            if (cur.length() > 0 && font.width(candidate) > maxWidth) {
+                lines.add(cur.toString());
+                cur = new StringBuilder(word);
+            } else {
+                cur = new StringBuilder(candidate);
+            }
+        }
+        if (cur.length() > 0) {
+            lines.add(cur.toString());
+        }
+        return lines;
     }
 
     private static HorseRecord currentRecord() {

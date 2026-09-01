@@ -49,7 +49,7 @@ public final class ExtensionGene implements Gene {
     @Override
     public void restrict(AllelePair pair, CoatBuildContext ctx) {
         if (isChestnut(pair)) {
-            CoatRegions.restrictAll(ctx.pigment(), (f, px, py, p) -> f.setBlack(px, py, 0f));
+            CoatRegions.restrictAll(ctx.skin(), ctx.pigment(), (f, px, py, p) -> f.setBlack(px, py, 0f));
         }
     }
 }

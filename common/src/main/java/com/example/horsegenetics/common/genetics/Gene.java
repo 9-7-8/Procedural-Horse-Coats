@@ -19,9 +19,10 @@ import java.util.List;
  *   <li>the pigment field is resolved to colour through the red/black gradient
  *       LUT (so champagne-on-bay looks different from champagne-on-black, and
  *       anything on white is invisible);</li>
- *   <li>every visible <b>non-natural</b> gene gets a {@link #multiplyLayer}
- *       turn: it fills an ARGB layer that is then <i>multiplied</i> onto the
- *       resolved coat.</li>
+ *   <li>every visible <b>non-natural</b> gene gets an {@link #overlayLayer}
+ *       turn: it fills an ARGB layer that is then painted <i>flat on top of</i>
+ *       the resolved coat (opaque layer texels win outright - the effect shows
+ *       the same on a black, a chestnut or a white horse).</li>
  * </ol>
  *
  * <p>(This interface lives in {@code genetics} but references
@@ -42,7 +43,7 @@ public interface Gene {
     /**
      * A <b>natural</b> gene only restricts red / black pigment ({@link #restrict});
      * it never paints colour directly. Non-natural genes (only Test so far) are
-     * applied as multiply layers after the pigment field is resolved.
+     * painted flat on top after the pigment field is resolved.
      */
     default boolean isNatural() {
         return true;
@@ -77,11 +78,12 @@ public interface Gene {
     }
 
     /**
-     * Non-natural genes: fill {@code layer} (row-major ARGB, pre-filled with
-     * opaque white = multiply identity) with the colour to multiply onto the
-     * resolved coat.
+     * Non-natural genes: fill {@code layer} (row-major ARGB, pre-filled
+     * <b>transparent</b>) with the colour to paint flat on top of the resolved
+     * coat. Every texel the layer leaves transparent is left untouched; every
+     * opaque texel replaces whatever the natural pass resolved there.
      */
-    default void multiplyLayer(AllelePair pair, CoatBuildContext ctx, int[] layer) {
+    default void overlayLayer(AllelePair pair, CoatBuildContext ctx, int[] layer) {
     }
 
     /** Does {@code pair} change the coat at all, in the context of the whole {@code genotype}? */

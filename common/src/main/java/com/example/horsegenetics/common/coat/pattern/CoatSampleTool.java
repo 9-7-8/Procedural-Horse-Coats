@@ -1,6 +1,9 @@
 package com.example.horsegenetics.common.coat.pattern;
 
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry;
+import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Skin;
+import com.example.horsegenetics.common.genetics.GeneCodeDisplay;
+import com.example.horsegenetics.common.genetics.Genes;
 import com.example.horsegenetics.common.genetics.Genotype;
 
 import javax.imageio.ImageIO;
@@ -11,32 +14,34 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 /**
- * Build/dev tooling: renders a strip of sample coats through the real
- * {@link CoatTextureComposer} + {@code redblackgradient.png} + {@code
- * horse_white.png}, and writes each as a PNG so the pipeline can be eyeballed
- * without launching the game.
- *
- * <p>{@code ./gradlew :common:bakeCoatSamples} - output dir is arg 0
- * (default {@code build/coat-samples}). Not on any game-runtime path;
- * {@code javax.imageio} is confined to this class and {@link CoatSheetRasterizer}.
+ * Build/dev tooling: renders sample coats through the real
+ * {@link CoatTextureComposer} + {@code redblackgradient.png} + the white
+ * templates, so the pipeline can be eyeballed without launching the game.
+ * {@code ./gradlew :common:bakeCoatSamples} - output dir is arg 0.
  */
 public final class CoatSampleTool {
 
-    /** code, epigenetic seed, filename.  segments: extension-agouti-white-test-champagne-seal-splash */
+    /** label -> gene tokens (only the non-wild ones need naming). */
     private static final String[][] SAMPLES = {
-            {"E/E-a/a-w/w-t/t-c/c-sl/sl-spl/spl", "0", "black"},
-            {"e/e-a/a-w/w-t/t-c/c-sl/sl-spl/spl", "0", "chestnut"},
-            {"E/e-A/a-w/w-t/t-c/c-sl/sl-spl/spl", "12345", "bay"},
-            {"E/e-A/a-w/w-t/t-c/c-sl/sl-spl/spl", "999", "bay2"},
-            {"E/E-a/a-w/w-t/t-c/c-Sl/sl-spl/spl", "4242", "seal"},
-            {"E/E-a/a-w/w-t/t-Ch/c-sl/sl-spl/spl", "0", "champagne_black"},
-            {"E/e-A/a-w/w-t/t-Ch/c-sl/sl-spl/spl", "7", "champagne_bay"},
-            {"e/e-a/a-w/w-t/t-Ch/c-sl/sl-spl/spl", "0", "champagne_chestnut"},
-            {"e/e-a/a-W/w-t/t-c/c-sl/sl-spl/spl", "0", "white"},
-            {"E/e-A/a-w/w-t/t-c/c-sl/sl-Spl/spl", "31", "bay_splash"},
-            {"E/E-a/a-w/w-t/t-c/c-sl/sl-Spl/spl", "88", "black_splash"},
-            {"e/e-a/a-w/w-T/t-c/c-sl/sl-spl/spl", "0", "chestnut_test"},
+            {"black", ""},
+            {"chestnut", "extension=e/e"},
+            {"bay", "agouti=A/a"},
+            {"bay_high", "agouti=A/a"},   // different seed -> seal-ish
+            {"champagne_black", "champagne=Ch/c"},
+            {"champagne_bay", "agouti=A/a champagne=Ch/c"},
+            {"buckskin", "agouti=A/a cream=Cr/N"},
+            {"palomino", "extension=e/e cream=Cr/N"},
+            {"perlino", "agouti=A/a cream=Cr/Cr"},
+            {"pearl_bay", "agouti=A/a pearl=prl/prl"},
+            {"cream_pearl_bay", "agouti=A/a cream=Cr/N pearl=prl/N"},
+            {"grey_black", "grey=G/g"},
+            {"grey_bay", "agouti=A/a grey=G/g"},
+            {"white", "white=W/w"},
+            {"bay_splash", "agouti=A/a splash=Spl/spl"},
+            {"chestnut_test", "extension=e/e test=T/t"},
     };
+
+    private static final long[] SEEDS = {0, 0, 12345, 88, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 31, 0};
 
     private CoatSampleTool() {}
 
@@ -45,18 +50,45 @@ public final class CoatSampleTool {
         Files.createDirectories(outDir);
 
         int n = HorseSkinGeometry.SHEET_SIZE;
-        int[] template = readArgb("/assets/horsegenetics/textures/entity/horse/horse_white.png");
+        int[] adultTemplate = readArgb("/assets/horsegenetics/textures/entity/horse/horse_white.png");
+        int[] babyTemplate = readArgb("/assets/horsegenetics/textures/entity/horse/horse_white_baby.png");
+        int gw = lastReadWidth, gh = lastReadHeight;
         int[] g = readArgb("/assets/horsegenetics/textures/coat/redblackgradient.png");
-        int gw = lastReadWidth;
-        int gh = lastReadHeight;
-        GradientLut lut = new GradientLut(g, gw, gh);
+        GradientLut lut = new GradientLut(g, lastReadWidth, lastReadHeight);
+        // gw/gh above were overwritten; not needed further
 
-        for (String[] s : SAMPLES) {
-            int[] argb = CoatTextureComposer.compose(Genotype.parse(s[0]), Long.parseLong(s[1]), template, lut);
-            writePng(argb, n, n, outDir.resolve(s[2] + ".png"));
-            System.out.println("wrote " + s[2] + ".png  (" + s[0] + ")");
+        for (int i = 0; i < SAMPLES.length; i++) {
+            Genotype gt = build(SAMPLES[i][1]);
+            long seed = SEEDS[i];
+            int[] adult = CoatTextureComposer.compose(gt, seed, Skin.ADULT, true, adultTemplate, lut);
+            int[] foal = CoatTextureComposer.compose(gt, seed, Skin.BABY, false, babyTemplate, lut);
+            writePng(adult, n, n, outDir.resolve(SAMPLES[i][0] + ".png"));
+            writePng(foal, n, n, outDir.resolve(SAMPLES[i][0] + "_foal.png"));
+            System.out.println("wrote " + SAMPLES[i][0] + "(.png/_foal.png)  " + GeneCodeDisplay.shortForm(gt));
         }
         System.out.println("-> " + outDir.toAbsolutePath());
+    }
+
+    private static Genotype build(String spec) {
+        Genotype gt = Genotype.wildType();
+        if (spec.isBlank()) {
+            return gt;
+        }
+        // rebuild the code by overriding named segments
+        String[] segs = gt.toCode().split("-");
+        var order = Genes.codeOrder();
+        for (String kv : spec.trim().split("\\s+")) {
+            String[] p = kv.split("=");
+            int idx = -1;
+            for (int i = 0; i < order.size(); i++) {
+                if (order.get(i).key().endsWith("." + p[0])) {
+                    idx = i;
+                    break;
+                }
+            }
+            segs[idx] = p[1];
+        }
+        return Genotype.parse(String.join("-", segs));
     }
 
     private static int lastReadWidth;

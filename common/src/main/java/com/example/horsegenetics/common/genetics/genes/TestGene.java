@@ -13,12 +13,13 @@ import java.util.List;
 
 /**
  * <b>Test</b> ({@code horsegenetics.test}) - the diagnostic gene, the one
- * <b>non-natural</b> gene: a dominant {@code T} contributes a {@link
+ * <b>non-natural</b> gene: a dominant {@code T} paints a {@link
  * TestCoatPattern} gradient (pink-&gt;blue along body X, red-&gt;yellow along
- * body Y) as a <b>multiply layer</b> over the resolved coat, so it tints
- * whatever is underneath instead of replacing it. {@code 1 in}
- * {@value #WILD_TEST_ODDS} carriers (deliberately common while the skin engine
- * is being built). Deterministic. Expect it removed once the engine is trusted.
+ * body Y) <b>flat on top</b> of the resolved coat as the very last step, so the
+ * full colourful field is visible on any base - black, chestnut, or white.
+ * {@code 1 in} {@value #WILD_TEST_ODDS} carriers (deliberately common while the
+ * skin engine is being built). Deterministic. Expect it removed once the engine
+ * is trusted.
  */
 public final class TestGene implements Gene {
 
@@ -29,7 +30,6 @@ public final class TestGene implements Gene {
     public final Allele t = new Allele(KEY, "t", "Wild-type (t)", false, true);
     private final List<Allele> alleles = List.of(T, t);
 
-    private final TestCoatPattern pattern = new TestCoatPattern();
 
     @Override public String key() { return KEY; }
     @Override public List<Allele> alleles() { return alleles; }
@@ -55,12 +55,13 @@ public final class TestGene implements Gene {
     }
 
     @Override
-    public void multiplyLayer(AllelePair pair, CoatBuildContext ctx, int[] layer) {
+    public void overlayLayer(AllelePair pair, CoatBuildContext ctx, int[] layer) {
         if (!isTest(pair)) {
             return;
         }
         int n = ctx.size();
-        HorseSkinGeometry.forEachTexel((px, py, part, face, point) ->
+        TestCoatPattern pattern = new TestCoatPattern(HorseSkinGeometry.bodyBounds(ctx.skin()));
+        HorseSkinGeometry.forEachTexel(ctx.skin(), (px, py, part, face, point) ->
                 layer[py * n + px] = pattern.argb(point.x(), point.y(), point.z()));
     }
 }

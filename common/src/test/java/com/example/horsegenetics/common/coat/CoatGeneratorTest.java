@@ -11,8 +11,7 @@ class CoatGeneratorTest {
 
     @Test
     void rollsExactlyOneLongForTheEpigeneticSeed() {
-        // one long queued: a second draw would throw
-        Genotype bay = Genotype.parse("E/e-A/a-w/w-t/t-c/c-sl/sl-spl/spl");
+        Genotype bay = Genotype.parse("E/e-A/a-w/w-t/t-c/c-spl/spl-g/g-N/N-N/N");
         CoatData data = CoatGenerator.generate(bay, new FakeRng().longs(0xABCDL));
         assertEquals(0xABCDL, data.epigeneticSeed());
         assertEquals(CoatPhenotype.BAY, data.phenotype());
@@ -20,7 +19,7 @@ class CoatGeneratorTest {
 
     @Test
     void keepsTheGenotypeVerbatim() {
-        Genotype g = Genotype.parse("e/e-a/a-w/w-t/t-Ch/c-sl/sl-spl/spl");
+        Genotype g = Genotype.parse("e/e-a/a-w/w-t/t-Ch/c-spl/spl-g/g-N/N-N/N");
         CoatData data = CoatGenerator.generate(g, new FakeRng().longs(1L));
         assertEquals(g, data.genotype());
         assertEquals(CoatPhenotype.CHESTNUT, data.phenotype());

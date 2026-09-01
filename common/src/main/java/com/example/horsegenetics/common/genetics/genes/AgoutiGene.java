@@ -11,16 +11,16 @@ import com.example.horsegenetics.common.genetics.Genotype;
 import java.util.List;
 
 /**
- * <b>Agouti</b> ({@code horsegenetics.agouti}) - <b>two alleles only</b>.
- * {@code A} (dominant) restricts black to the <b>points</b> - a bay horse:
- * red-brown body, black mane / tail / ears / hooves, and black that climbs a
- * random amount up the legs and face. {@code a} (recessive, wild-type) = no
- * restriction, black everywhere. Natural. {@code A_} is
- * <b>non-deterministic</b> (the random point heights are the epigenetic value);
- * {@code aa} is deterministic.
+ * <b>Agouti</b> ({@code horsegenetics.agouti}) - two alleles. {@code A}
+ * (dominant) restricts black to the <b>points</b>: red-brown body, black
+ * mane / tail / ears / hooves, and black that climbs the legs + face a
+ * <b>random</b> amount (fading out at its top edge). {@code a} (recessive,
+ * wild-type) = no restriction, black everywhere. Natural. {@code A_} on a
+ * black-capable horse is <b>non-deterministic</b> - the two point heights (one
+ * for all four legs, one for the face) are the horse's epigenetic value.
  *
- * <p>(Seal brown is its own {@code horsegenetics.seal} gene, not an agouti
- * allele.)
+ * <p><b>Seal brown</b> is just a high roll of those heights - the "black creeps
+ * most of the way up" look. There is no separate seal gene / allele.
  */
 public final class AgoutiGene implements Gene {
 
@@ -36,7 +36,6 @@ public final class AgoutiGene implements Gene {
 
     @Override
     public AllelePair randomPair(Rng rng) {
-        // ~50/50 per allele
         return new AllelePair(rng.nextBoolean() ? A : a, rng.nextBoolean() ? A : a);
     }
 
@@ -51,7 +50,7 @@ public final class AgoutiGene implements Gene {
 
     @Override
     public boolean isDeterministic(AllelePair pair, Genotype genotype) {
-        return !isVisible(pair, genotype); // bay carries random point heights
+        return !isVisible(pair, genotype);
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.example.horsegenetics.neoforge.server;
 
+import com.example.horsegenetics.common.genetics.GeneCodeDisplay;
 import com.example.horsegenetics.common.horse.HorseRecord;
 import com.example.horsegenetics.neoforge.data.HorseAncestryData;
 import net.minecraft.network.chat.Component;
@@ -50,7 +51,7 @@ public final class HorsePaperInspectHandler {
         record.barnName().ifPresent(b -> sb.append("\n barn name: ").append(b));
         sb.append("\n ").append(record.sex().label(!horse.isBaby()).toLowerCase());
         sb.append("\n generation: ").append(record.generation());
-        sb.append("\n genetic code: ").append(record.geneticCode());
+        sb.append("\n genetic code: ").append(GeneCodeDisplay.shortForm(record.geneticCode()));
         sb.append("\n speed: ").append(record.hasStats() ? String.format("%.3f", record.speed()) : "(unrolled)");
         sb.append("\n health: ").append(record.hasStats() ? String.format("%.0f", record.health()) : "(unrolled)");
         record.parentStats().ifPresent(ps -> sb

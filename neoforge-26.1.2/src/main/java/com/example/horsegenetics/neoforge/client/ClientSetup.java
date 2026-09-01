@@ -20,10 +20,13 @@ public final class ClientSetup {
      */
     public static final ModelLayerLocation HD_HORSE = new ModelLayerLocation(
         Identifier.fromNamespaceAndPath(HorseGenetics.MOD_ID, "hd_horse"), "main");
+    public static final ModelLayerLocation HD_HORSE_BABY = new ModelLayerLocation(
+        Identifier.fromNamespaceAndPath(HorseGenetics.MOD_ID, "hd_horse_baby"), "main");
 
     @SubscribeEvent
     static void registerLayerDefinitions(EntityRenderersEvent.RegisterLayerDefinitions event) {
         event.registerLayerDefinition(HD_HORSE, HdHorseModel::createHdLayer);
+        event.registerLayerDefinition(HD_HORSE_BABY, HdBabyHorseModel::createHdLayer);
     }
 
     @SubscribeEvent

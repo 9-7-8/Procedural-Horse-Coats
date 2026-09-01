@@ -54,7 +54,7 @@ public final class ChampagneGene implements Gene {
         if (!isChampagne(pair)) {
             return;
         }
-        CoatRegions.restrictAll(ctx.pigment(), (f, px, py, p) -> {
+        CoatRegions.restrictAll(ctx.skin(), ctx.pigment(), (f, px, py, p) -> {
             f.setRed(px, py, 0.45f + 0.10f * f.red(px, py)); // ~horizontal middle
             f.setBlack(px, py, f.black(px, py) * 0.18f);      // reach the gold band
         });

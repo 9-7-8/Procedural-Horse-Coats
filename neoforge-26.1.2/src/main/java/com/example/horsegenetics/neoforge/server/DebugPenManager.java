@@ -26,6 +26,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.FenceGateBlock;
+import net.minecraft.world.level.block.LayeredCauldronBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 
@@ -368,6 +369,17 @@ public final class DebugPenManager {
         torchOnFence(level, xMax, floorY, zLo);
         torchOnFence(level, x0, floorY, zHi);
         torchOnFence(level, xMax, floorY, zHi);
+
+        // Amenities in the two gate-side interior corners: a full water cauldron
+        // in one, a hay bale in the other (one block in from the road-side wall).
+        // Sunk a block into the ground (floorY - 1) so their tops sit flush with
+        // the grass - a full block at floorY was a step the horses used to hop
+        // the 1-high pen wall.
+        int zGateInner = pen.zRoad() + Integer.signum(pen.zBack() - pen.zRoad());
+        level.setBlockAndUpdate(new BlockPos(x0 + 1, floorY - 1, zGateInner),
+                Blocks.WATER_CAULDRON.defaultBlockState().setValue(LayeredCauldronBlock.LEVEL, 3));
+        level.setBlockAndUpdate(new BlockPos(xMax - 1, floorY - 1, zGateInner),
+                Blocks.HAY_BLOCK.defaultBlockState());
 
         AABB interior = new AABB(x0, floorY, zLo, xMax + 1, floorY + 4, zHi + 1);
         if (level.getEntitiesOfClass(Horse.class, interior).isEmpty()) {

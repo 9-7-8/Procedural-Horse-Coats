@@ -187,16 +187,16 @@ public final class Genotype {
         return Genes.AGOUTI.isBay(pair(Genes.AGOUTI));
     }
 
-    public boolean isSeal() {
-        return Genes.SEAL.isSeal(pair(Genes.SEAL));
-    }
-
     public boolean isChampagne() {
         return Genes.CHAMPAGNE.isChampagne(pair(Genes.CHAMPAGNE));
     }
 
     public boolean isSplash() {
         return Genes.SPLASH.isSplash(pair(Genes.SPLASH));
+    }
+
+    public boolean isGrey() {
+        return Genes.GREY.isGrey(pair(Genes.GREY));
     }
 
     public boolean hasTest() {
@@ -210,7 +210,7 @@ public final class Genotype {
         if (!hasBlackPigment()) {
             return CoatPhenotype.CHESTNUT;
         }
-        return (isAgouti() || isSeal()) ? CoatPhenotype.BAY : CoatPhenotype.BLACK;
+        return isAgouti() ? CoatPhenotype.BAY : CoatPhenotype.BLACK;
     }
 
     // ------------------------------------------------------------------
@@ -227,9 +227,9 @@ public final class Genotype {
 
     @Override
     public String toString() {
-        return "Genotype[" + toCode() + " -> " + phenotype()
+        return "Genotype[" + GeneCodeDisplay.shortForm(this) + " -> " + phenotype()
                 + (isChampagne() ? " +champagne" : "")
-                + (isSeal() ? " +seal" : "")
+                + (isGrey() ? " +grey" : "")
                 + (isSplash() ? " +splash" : "")
                 + (hasTest() ? " +test" : "") + "]";
     }

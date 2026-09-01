@@ -43,19 +43,21 @@ A `Genotype` is one `AllelePair` per registered `Gene` (`genetics/Genes`). The
 full model - alleles as objects, the gene registry, the coat overlay pipeline -
 is in **CLAUDE.md**; **each gene** is in **`Gene Dict.md`**. The code string is
 one segment per gene (`Genes.codeOrder()` = extension, agouti, white, test,
-champagne, seal, splash), segments joined by `-`, alleles by `/`, dominant
-first, e.g. `E/e-A/a-w/w-t/t-c/c-sl/sl-Spl/spl`. **No legacy handling.**
+champagne, splash, grey, cream, pearl), segments joined by `-`, alleles by `/`,
+dominant first, e.g. `E/e-A/a-w/w-t/t-c/c-Spl/spl-g/g-Cr/N-N/N`. **No legacy
+handling.**
 
 `breedWith` is Mendelian segregation: for **each gene** the child takes one
 allele from each parent, drawn 50/50 within that parent's pair - **2
-`Rng.nextBoolean()` per gene**, genes in `codeOrder()` (14 draws for the 7
+`Rng.nextBoolean()` per gene**, genes in `codeOrder()` (18 draws for the 9
 built-in genes; `true` = that parent's first allele).
 
-Each resulting pair is canonicalized by `AllelePair` (more-dominant allele
-first, per `Gene.precedence`), so `breedWith` is symmetric. Example:
-`E/E-A/A-... x e/e-a/a-...` always gives `E/e-A/a-...`. Dominance still masks:
-one `W` -> white foal; one `T` -> Test tint; one `Ch` -> champagne; one `Sl`
--> seal; one `Spl` -> splash markings.
+Each resulting pair is canonicalized by `AllelePair` (more-dominant first, per
+`Gene.precedence`), so `breedWith` is symmetric: `E/E-A/A-… x e/e-a/a-…` always
+gives `E/e-A/a-…`. Dominance still masks - one `W` → white foal; one `T` →
+Test tint; one `Ch` → champagne; one `Cr` → cream dilution; one `G` → grey
+(adult only); one `Spl` → splash markings. Seal has no allele - it's a high
+roll of bay's epigenetic leg/face heights.
 
 ### `horse/HorseStats.rollFoalStat(double parentA, double parentB, Rng)`
 
@@ -455,7 +457,7 @@ speed/health between the parents, a correctly combined genetic code, and
 common/src/main/java/com/example/horsegenetics/common/
   genetics/Genotype.java            # AllelePair per Gene; parse/toCode; breedWith(...); random(...)
   genetics/Allele.java, Gene.java, AllelePair.java, Genes.java   # the allele/gene model + registry
-  genetics/genes/*.java             # Extension, Agouti, White, Test, Champagne, Seal, Splash (-> Gene Dict.md)
+  genetics/genes/*.java             # Extension, Agouti, White, Test, Champagne, Splash, Grey, Cream, Pearl (-> Gene Dict.md)
   genetics/GeneticCodeCombiner.java # combine(motherCode, fatherCode, Rng)
   coat/CoatData.java, CoatGenerator.java        # genotype + epigeneticSeed; generate() rolls the seed
   coat/pattern/*.java               # the overlay pipeline (CLAUDE.md "The coat overlay pipeline")

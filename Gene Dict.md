@@ -1,179 +1,248 @@
 # Gene Dict
 
-Every gene in the horse-genetics model: its alleles, inheritance, wild
-frequency, and how it changes the coat. Code (`common/genetics/genes/`,
-registered in `common/genetics/Genes.java`).
-
-See **CLAUDE.md** for the surrounding architecture (the genotype code format,
-the coat overlay pipeline, `HorseSkinGeometry`). See **breeding.md** for
-inheritance / segregation.
+Every gene in the horse-genetics model. Code in `common/genetics/genes/`,
+registered in `common/genetics/Genes.java`. See **CLAUDE.md** for the
+architecture, **breeding.md** for inheritance.
 
 ---
 
-## How a gene contributes to the coat
+## The pipeline in one paragraph
 
 Every coat pixel starts at **max red + max black pigment** (a black horse).
-Then:
+**Natural** genes (`Gene.isNatural()`, the default) each get a
+`restrict(pair, ctx)` turn to push the shared `PigmentField` (per-texel `red` /
+`black` in `[0,1]`) down - they do *nothing else*. The field is then resolved
+to colour through `redblackgradient.png` (`GradientLut`) - fully restricted →
+transparent, resolves-to-pure-black → 80% opacity. Finally the one
+**non-natural** gene (Test) paints an ARGB layer **flat on top** of the
+resolved coat (opaque layer texels win outright - visible even on a white
+coat). The result is composited onto the white template (adult or foal), and
+the eye texels are copied back verbatim.
 
-1. **natural pass** - every visible *natural* gene (`Gene.isNatural()`, the
-   default) gets a `restrict(pair, ctx)` turn to push the shared
-   `PigmentField` (per-texel `red` / `black` in `[0,1]`) down. Natural genes do
-   **nothing else** - no colour, just restriction. Order:
-   `Genes.naturalOrder()` = extension → agouti → seal → champagne → white →
-   splash.
-2. **resolve** - each mapped texel's `(red, black)` is looked up in
-   `redblackgradient.png` (`GradientLut`). Fully-restricted → transparent. A
-   texel that resolves to **pure black** is knocked to **80% opacity** so black
-   coats aren't a flat void.
-3. **multiply pass** - every visible *non-natural* gene (`Genes.multiplyOrder()`
-   = test only) fills an ARGB layer that is **multiplied** onto the resolved
-   coat.
-4. **composite** onto the white template (alpha-aware multiply, keep template
-   alpha), then **eyes** copied straight from the template.
+Because natural genes only move the pigment sample, **champagne-on-bay differs
+from champagne-on-black, cream-on-chestnut differs from cream-on-bay, and
+anything on white is invisible.**
 
-Because natural genes only move the pigment sample, **champagne-on-bay looks
-different from champagne-on-black, and anything on white is invisible**.
+Foals go through the exact same pipeline on the `Skin.BABY` geometry + the
+128px `horse_white_baby.png` template. **Grey** is the only gene that reads
+age: it greys adults only, so a foal is born its base colour.
 
 Non-deterministic genes take all randomness from `ctx.epigeneticsFor(key)` -
-seeded once at birth, replayed every regen.
+rolled once at birth, replayed every regen.
 
 ---
+
+## The projection engine (`common/coat/skin/HorseSkinGeometry`)
+
+Genes don't think in texels. They think in **horse body-space** and let
+`HorseSkinGeometry` translate. That's what lets a coat rule be a smooth
+function of position and still come out **seamless across every body part** -
+no visible join where the neck meets the head, no mismatch where a leg's front
+face meets its side face.
+
+**The coordinate frame** (right-handed, model units; 1 unit = 1/16 block =
+`TEXELS_PER_UNIT` = 2 texels on the 128px sheet):
+
+| axis | 0 point | + direction | rough meaning of a "plain function of this axis" |
+|------|---------|-------------|--------------------------------------------------|
+| **X** | rear edge of the tail | toward the nose | a front-to-back gradient (tail → nose) |
+| **Y** | underside of the hooves | straight up | ventral → dorsal (belly → topline) |
+| **Z** | the centre plane | the horse's **right** | left ↔ right; `z = 0` is the spine / centreline |
+
+One **absolute** scale per mesh (`ADULT`, `BABY`), with the origins read off
+the mesh itself (X=0 = the backmost tail texel, Y=0 = the hoof undersides). So
+two different parts that occupy the same body-space region sample the coat
+function at the *same* value - which is exactly why an X-function gradient has
+no seams.
+
+**Parts and faces.** Every `Part` is an axis-aligned box (rotated parts - the
+foal's tilted neck/head/ears - use their *rest-pose* AABB, so faces there are
+approximate). Each box has six `Face`s, each looking down one axis and spanned
+by the other two:
+
+- **NOSE / TAIL** face along X, spanned by (Z, Y) - the front and back caps.
+- **TOP / BOTTOM** face along Y, spanned by (X, Z) - the **dorsal** and
+  **ventral** surfaces.
+- **RIGHT / LEFT** face along Z, spanned by (X, Y) - the two flanks.
+
+So "paint the topline black" = the TOP faces; "black up the belly" = BOTTOM
+faces; "a centreline blaze" = texels with small `|z|` on the head's TOP/RIGHT/
+LEFT faces. `CoatRegions` wraps the common ones (`restrictAll`, `blackenPart`,
+`whitenLowerLeg`, `whitenBlaze`, …); a gene calls those with `ctx.skin()` and
+never touches a `px,py` directly.
+
+**Round trips.** `forEachTexel(skin, [part], visitor)` walks every mapped texel
+handing back its `(part, face, BodyPoint)`; `sample(px, py)` / `project(point)`
+go the other way. `bounds(skin, part)` / `bodyBounds(skin)` give the extents a
+gene normalises against (e.g. bay's leg-black height is a fraction of
+`bounds(leg).span(Y)`). The foal mesh has no MANE or MUZZLE part - calls for
+those are silently skipped.
+
+---
+
+# Natural genes
 
 ## `horsegenetics.extension` - Extension
 
 | | |
 |---|---|
-| **alleles** | `E` (dominant, wild-type), `e` (recessive) |
-| **inheritance** | simple dominant/recessive |
-| **wild frequency** | 50 / 50 per allele (2 `nextBoolean`) |
-| **natural?** | yes |
-| **deterministic?** | yes |
-| **visible when** | `ee` |
+| alleles | `E` (dominant, wild-type), `e` (recessive) |
+| inheritance | simple dominant/recessive |
+| wild frequency | 50/50 per allele (2 `nextBoolean`) |
+| deterministic? | yes |
+| visible when | `ee` |
 
-"Can this horse make black pigment at all." `E_` = yes, no effect. `ee` =
-`restrict` sets **black = 0 everywhere** → chestnut (only red survives → the
-gradient's left edge).
+"Can this horse make black pigment at all." `E_` = yes, no effect. `ee` = black
+restricted to 0 everywhere → chestnut (the gradient's left edge).
 
 ## `horsegenetics.agouti` - Agouti
 
 | | |
 |---|---|
-| **alleles** | `A` (dominant), `a` (recessive, wild-type) - **two only** |
-| **inheritance** | simple dominant/recessive |
-| **wild frequency** | 50 / 50 per allele (2 `nextBoolean`) |
-| **natural?** | yes |
-| **deterministic?** | **no** when `A_` on a black-capable horse |
-| **visible when** | `A_` **and** `genotype.hasBlackPigment()` |
+| alleles | `A` (dominant), `a` (recessive, wild-type) |
+| inheritance | simple dominant/recessive |
+| wild frequency | 50/50 per allele (2 `nextBoolean`) |
+| deterministic? | **no** when `A_` on a black-capable horse |
+| visible when | `A_` **and** `genotype.hasBlackPigment()` |
 
-`A_` → **bay** via `BayCoat.apply`: body black knocked to `BayCoat.BODY_BLACK`
+`A_` → bay via `BayCoat.apply`: body black knocked to `BayCoat.BODY_BLACK`
 (0.32, red kept → red-brown body); mane / tail / ears full black; black climbs
-each leg + the face a **random** amount (`0.15 + f*f*0.45` of leg height per
-leg, `0.05 + f*0.30` up the face); hooves always black
-(`BayCoat.HOOF_FRACTION` = 0.12). Seal brown is the separate `seal` gene, not
-an agouti allele.
+the legs + the face by a **random** amount and **fades out at its top edge**.
+Two epigenetic numbers: **one leg height** (all four legs the same) and **one
+face height** (`0.12 + f*f*0.85` and `0.04 + f*f*0.60`). The bottom
+`SOLID_PORTION` = **0.3** of the band is solid black, then a **smoothstep**
+fade to nothing over the rest - smoothstep (flat slope at both ends) so the
+black dissolves into the body colour with no visible cut-off line. Hooves
+always black (`HOOF_FRACTION` = 0.12).
 
-## `horsegenetics.white` - Dominant white
+**Seal brown** is just the top of this distribution - a high leg/face roll
+("black creeps most of the way up"). There is no separate seal gene.
 
-| | |
-|---|---|
-| **alleles** | `W` (dominant), `w` (recessive, wild-type) |
-| **inheritance** | simple dominant |
-| **wild frequency** | `1 in WhiteGene.WILD_WHITE_ALLELE_ODDS` = **50** per allele (~4% white) |
-| **natural?** | yes |
-| **deterministic?** | yes |
-| **visible when** | `W_` |
+## `horsegenetics.cream` - Cream  &  `horsegenetics.pearl` - Pearl
 
-`restrict` sets **red = black = 0 everywhere** → transparent overlay → the
-white template shows through, masking every other gene.
+Real-horse `SLC45A2`: allelic. Modelled here as **two genes** whose combined
+effect is computed once, in `coat.pattern.CreamPearlDilution`.
 
-## `horsegenetics.test` - Test (diagnostic)
+| gene | alleles | wild frequency | deterministic? |
+|---|---|---|---|
+| cream | `Cr` (**incomplete** dominant), `N` (wild-type) | `1 in 30` per allele | yes |
+| pearl | `prl` (recessive), `N` (wild-type) | `1 in 22` per allele | yes |
 
-| | |
-|---|---|
-| **alleles** | `T` (dominant), `t` (recessive, wild-type) |
-| **inheritance** | simple dominant |
-| **wild frequency** | `1 in TestGene.WILD_TEST_ODDS` = **4** (one roll → `Tt`; deliberately common) |
-| **natural?** | **no** |
-| **deterministic?** | yes |
-| **visible when** | `T_` |
+Both are dilutions - they restrict / redistribute existing pigment, never add.
+The combined rule (dose = number of `Cr` / `prl` copies):
 
-The one non-natural gene. `multiplyLayer` fills the layer with the
-`TestCoatPattern` gradient (pink→blue along body X, red→yellow along body Y);
-the composer **multiplies** it onto the resolved coat, so it *tints* whatever
-is underneath (invisible on pure black - multiply by anything is still black).
-Exercises `HorseSkinGeometry` end to end. Expect it removed once the engine is
-trusted.
+| Cream | Pearl | mode | effect on the pigment field |
+|---|---|---|---|
+| 0 | 0-1 | none | - |
+| 1 | 0 | **single cream** | red `*= 0.45`, black `*= 0.7` (buckskin on bay: golden body, dark-but-not-jet smoky points) |
+| 0 | 2 | **double pearl** | red `*= 0.55`, black `*= 0.60` - mild, uniform (apricot body, sepia points) |
+| 1 | 1+ | **Cr/prl** | acts as double cream |
+| 2+ | any | **double cream** | red `*= 0.08`, black `*= 0.38` (perlino: pale cream body, smoky points) |
+
+Red is always restricted harder than black, so a diluted bay body fades to
+cream while the points hold smoky colour (agouti still says *where*). Even
+single cream touches the black: bay never *adds* black anywhere - its points
+are just black it declined to restrict - so a real pigment dilution has to
+reach them, not leave them jet. `CreamGene`
+is the driver whenever a `Cr` is present; `PearlGene` drives only the
+no-cream double-pearl case; either way `CreamPearlDilution.apply` runs at most
+once.
+
+*Not modelled yet:* blue eyes on the double dilutes.
 
 ## `horsegenetics.champagne` - Champagne
 
 | | |
 |---|---|
-| **alleles** | `Ch` (dominant), `c` (recessive, wild-type) |
-| **inheritance** | simple dominant, **not dose-dependent** |
-| **wild frequency** | `1 in ChampagneGene.WILD_CHAMPAGNE_ALLELE_ODDS` = **40** per allele |
-| **natural?** | yes |
-| **deterministic?** | yes |
-| **visible when** | `Ch_` |
+| alleles | `Ch` (dominant), `c` (recessive, wild-type) |
+| inheritance | simple dominant, **not dose-dependent** |
+| wild frequency | `1 in 40` per allele |
+| deterministic? | yes |
 
-`restrict` moves the pigment sample: `red → 0.45 + 0.10*red` (roughly the
-gradient's horizontal middle - its champagne-gold column), `black *= 0.18`
-(lift eumelanin so a black coat reaches the gold). Reads off the *current*
-pigment, so champagne-on-black / -bay / -chestnut all differ; champagne-on-white
-is invisible.
+`Ch_` moves the pigment sample: `red → 0.45 + 0.10*red` (roughly the gradient's
+horizontal middle - its gold column), `black *= 0.18`. Reads the *current*
+pigment, so champagne-on-X all differ.
 
-## `horsegenetics.seal` - Seal brown
+## `horsegenetics.grey` - Grey
 
 | | |
 |---|---|
-| **alleles** | `Sl` (dominant), `sl` (recessive, wild-type) |
-| **inheritance** | simple dominant |
-| **wild frequency** | `1 in SealGene.WILD_SEAL_ALLELE_ODDS` = **16** per allele |
-| **natural?** | yes |
-| **deterministic?** | **no** when `Sl_` on a black-capable horse |
-| **visible when** | `Sl_` **and** `genotype.hasBlackPigment()` |
+| alleles | `G` (dominant), `g` (recessive, wild-type) |
+| inheritance | simple dominant |
+| wild frequency | `1 in 16` per allele |
+| deterministic? | yes |
+| visible when | `G_` **and the horse is an adult** |
 
-Real-horse `A^t`, split into its own gene. Body barely lightened (black kept at
-`SealGene.BODY_BLACK` = 0.82 - **TUNE**). The lower legs and lower face fade to
-`DEEPEST_BLACK` (0.985, just under pure so the gradient stays monotonic past
-the black-lift) - **densest at the hoof / muzzle, easing back to the body level
-by a random point** (`0.25 + f*0.55` of leg height / `0.20 + f*0.55` of head
-length). A smooth ramp, not a hard edge.
+`G_` on an **adult** equally restricts both pigments (`red *= 0.15`,
+`black *= 0.15`) - strong enough that a grey adult reads as an unmistakable
+pale dapple-grey, not "a slightly washed-out black", but still short of
+dominant white's total. A **foal** is born whatever colour it would be without
+grey; `restrict` no-ops for `!ctx.isAdult()`. (Real grey is progressive with
+age; this is one flat adult step - no year-by-year age input.)
+
+## `horsegenetics.white` - Dominant white
+
+| | |
+|---|---|
+| alleles | `W` (dominant), `w` (recessive, wild-type) |
+| inheritance | simple dominant |
+| wild frequency | `1 in 50` per allele (~4% white) |
+| deterministic? | yes |
+
+`W_` sets red = black = 0 everywhere → transparent overlay → the white
+template shows through, masking every other gene.
 
 ## `horsegenetics.splash` - Splash white
 
 | | |
 |---|---|
-| **alleles** | `Spl` (dominant), `spl` (recessive, wild-type) |
-| **inheritance** | simple dominant (real splash is more complex) |
-| **wild frequency** | `1 in SplashGene.WILD_SPLASH_ALLELE_ODDS` = **20** per allele |
-| **natural?** | yes |
-| **deterministic?** | **no** |
-| **visible when** | `Spl_` |
+| alleles | `Spl` (dominant), `spl` (recessive, wild-type) |
+| inheritance | simple dominant (real splash is more complex) |
+| wild frequency | `1 in 20` per allele |
+| deterministic? | **no** |
 
-White markings, "dipped in white from below". `restrict` removes **both**
-pigments (→ transparent → white template) up **each leg independently** a
-random amount (`0.15 + f*f*0.75` of leg height - usually socks, sometimes
-stockings) plus a random **face blaze** down the centreline of the muzzle /
-head (`whitenBlaze`, random half-width `0.4 + f*1.4` body units and length
-`0.2 + f*0.75` of the head). Flat white for now - irregular edges are a
-follow-up.
+Random white markings, "dipped in white from below". Removes both pigments
+(→ transparent → white template) up **each leg independently** a random amount
+(`0.15 + f*f*0.75` of leg height - socks .. stockings) plus a random
+**face blaze** down the centreline (`whitenBlaze`: random half-width
+`0.4 + f*1.4` body units, length `0.2 + f*0.75` of the head). Flat white
+edges for now.
+
+---
+
+# Non-natural genes
+
+## `horsegenetics.test` - Test (diagnostic)
+
+| | |
+|---|---|
+| alleles | `T` (dominant), `t` (recessive, wild-type) |
+| inheritance | simple dominant |
+| wild frequency | `1 in 4` carriers (deliberately common) |
+| natural? | **no** |
+| deterministic? | yes |
+
+`overlayLayer` fills a layer with the `TestCoatPattern` gradient (pink→blue
+along body X, red→yellow along body Y); the composer paints it **flat on top**
+of the resolved coat as the very last step, so the full colourful field is
+visible on any base - black, chestnut, or white (it does *not* interact with
+pigment restriction). Exercises `HorseSkinGeometry` end to end. Expect it
+removed once the engine is trusted.
 
 ---
 
 ## Reusable helpers (`common/coat/pattern/CoatRegions`)
 
-`fillMane` / `fillTail` / `fillEars` / `fillHooves`, `paintLowerLeg`,
-`blackenPart` / `blackenLowerLeg` / `blackenFace`, `whitenLowerLeg` /
-`whitenBlaze`, `redrawEyes` (`EYE_RECTS` = the 2x2 pupil + 2x2 sclera per eye,
-copied verbatim from the template).
+All take a `Skin`. `fillMane` / `fillTail` / `fillEars` / `fillHooves`,
+`paintLowerLeg`, `blacken*` / `whitenLowerLeg` / `whitenBlaze`, `redrawEyes`
+(adult: 2x2 pupil + 2x2 sclera per eye; foal: 2x2 pupil - the baby texture has
+no bright sclera). Parts a mesh doesn't have (a foal has no MANE / MUZZLE) are
+silently skipped.
 
 ## Adding a gene
 
-1. New `Gene` impl under `common/genetics/genes/` - alleles (any token
-   strings), `randomPair`, and either `restrict` (natural) or
-   `isNatural()=false` + `multiplyLayer`.
+1. New `Gene` impl - alleles (any token strings), `randomPair`, and either
+   `restrict` (natural) or `isNatural()=false` + `overlayLayer`.
 2. Register in `Genes`: append to `CODE_ORDER`, and to `NATURAL_ORDER` (in
-   effect order) or `MULTIPLY_ORDER`.
-3. It shows up in the code string automatically (segment appended). No legacy
-   handling - dev only.
-4. Document it here.
+   effect order) or `OVERLAY_ORDER`.
+3. Document it here.

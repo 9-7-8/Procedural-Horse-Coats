@@ -50,7 +50,7 @@ public final class WhiteGene implements Gene {
     @Override
     public void restrict(AllelePair pair, CoatBuildContext ctx) {
         if (isWhite(pair)) {
-            CoatRegions.restrictAll(ctx.pigment(), (f, px, py, p) -> {
+            CoatRegions.restrictAll(ctx.skin(), ctx.pigment(), (f, px, py, p) -> {
                 f.setRed(px, py, 0f);
                 f.setBlack(px, py, 0f);
             });

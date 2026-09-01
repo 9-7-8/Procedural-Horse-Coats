@@ -34,7 +34,7 @@ public final class TestCoatPattern implements CoatPattern {
     }
 
     /** Package-visible for tests that want to pin the normalisation range. */
-    TestCoatPattern(Bounds bounds) {
+    public TestCoatPattern(Bounds bounds) {
         this.bounds = bounds;
     }
 
