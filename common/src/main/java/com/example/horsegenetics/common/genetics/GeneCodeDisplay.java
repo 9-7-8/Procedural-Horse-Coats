@@ -5,6 +5,7 @@ import com.example.horsegenetics.common.genetics.genes.CreamGene;
 import com.example.horsegenetics.common.genetics.genes.PearlGene;
 import com.example.horsegenetics.common.genetics.genes.SplashGene;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -102,6 +103,36 @@ public final class GeneCodeDisplay {
         }
 
         return rest.length() == 0 ? head : head + " " + rest;
+    }
+
+    /**
+     * {@link #shortForm(Genotype)} greedily wrapped onto at most {@code lines}
+     * lines of at most {@code maxChars} characters, breaking only between
+     * whole gene tokens. For the horse dimension's pen signs, where a vanilla
+     * sign line holds roughly 15 characters.
+     *
+     * <p>Best effort: a single token longer than {@code maxChars}, or more
+     * tokens than will fit, overflows the last line rather than being dropped -
+     * losing part of the genotype would be worse than a sign that runs wide.
+     */
+    public static List<String> wrap(Genotype genotype, int lines, int maxChars) {
+        List<String> out = new ArrayList<>();
+        StringBuilder current = new StringBuilder();
+        for (String token : shortForm(genotype).split(" ")) {
+            boolean lastLine = out.size() == lines - 1;
+            if (current.length() > 0 && !lastLine && current.length() + 1 + token.length() > maxChars) {
+                out.add(current.toString());
+                current.setLength(0);
+            }
+            if (current.length() > 0) {
+                current.append(' ');
+            }
+            current.append(token);
+        }
+        if (current.length() > 0) {
+            out.add(current.toString());
+        }
+        return out;
     }
 
     private static String twoTokens(AllelePair pair) {

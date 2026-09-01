@@ -6,6 +6,7 @@ import com.example.horsegenetics.common.coat.pattern.CoatRegions;
 import com.example.horsegenetics.common.coat.pattern.PigmentField;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Skin;
 import com.example.horsegenetics.common.genetics.Allele;
+import com.example.horsegenetics.common.genetics.DominancePattern;
 import com.example.horsegenetics.common.genetics.AllelePair;
 import com.example.horsegenetics.common.genetics.Gene;
 import com.example.horsegenetics.common.genetics.Genotype;
@@ -31,6 +32,15 @@ public final class SplashGene implements Gene {
     @Override public String key() { return KEY; }
     @Override public List<Allele> alleles() { return alleles; }
     @Override public Allele wildType() { return spl; }
+
+    /**
+     * IncompleteDominant - <b>aspirational</b>: {@code Spl/spl} and
+     * {@code Spl/Spl} currently render identically, because this gene doesn't
+     * read its own dose yet. Homozygous splash should give much larger white
+     * markings; until it does, the catalogue gives the heterozygote its own pen
+     * and the two look the same. See {@code Docs/to be verified.md}.
+     */
+    @Override public DominancePattern dominance() { return DominancePattern.INCOMPLETE_DOMINANT; }
 
     @Override
     public AllelePair randomPair(Rng rng) {

@@ -99,10 +99,17 @@ a replacement for a boat.
 
 ### The horse dimension
 
-A private, self-contained space full of horse pens - a straight fenced
-corridor with a mare and a stallion in every pen, lit and walled so you can
-walk it end to end. Good for seeing a lot of coats at once, or as a quiet
-place to keep a breeding herd. Horses can't be hurt there.
+A private, self-contained space that shows you **every horse in the game** -
+a straight fenced corridor, lit and walled, with a mare and a stallion in
+every pen. It isn't a random sample: there is exactly one pen for each coat
+the genetics can produce, in order, and a **sign on the ground beside each
+gate** naming that pen's genes. A sign just inside the entrance tells you how
+many there are. Walk it end to end and you have seen the lot.
+
+The two horses in a pen have identical genes, so any difference between them
+is the random variation a horse is born with - handy for seeing how much a
+single genotype can vary. Horses can't be hurt in here, and nothing can be
+built or broken.
 
 **Getting in:** build a rectangular frame out of **hay bales** (same sizes as
 a nether portal - at least 2 wide and 3 tall on the inside, built vertically)
@@ -121,8 +128,9 @@ through. When you step into the exit portal to leave, **every tamed horse
 you own is teleported back with you** (if you're the last person in the
 dimension, all tamed horses come out).
 
-Each visit is its own fresh instance, and it's cleared out once you leave, so
-any items or untamed horses left inside are gone for good.
+Each visit is its own fresh instance, and every horse and item in it is
+cleared out once you leave - so anything you left behind, and any horse you
+didn't tame, is gone for good.
 
 ---
 

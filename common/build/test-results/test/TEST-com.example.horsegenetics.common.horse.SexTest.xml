@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.example.horsegenetics.common.horse.SexTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-09-01T16:33:15.294Z" hostname="PERDIX" time="0.001">
+<testsuite name="com.example.horsegenetics.common.horse.SexTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-09-01T19:40:39.656Z" hostname="PERDIX" time="0.003">
   <properties/>
-  <testcase name="horseLabels()" classname="com.example.horsegenetics.common.horse.SexTest" time="0.001"/>
+  <testcase name="horseLabels()" classname="com.example.horsegenetics.common.horse.SexTest" time="0.003"/>
   <system-out><![CDATA[]]></system-out>
   <system-err><![CDATA[]]></system-err>
 </testsuite>

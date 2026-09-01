@@ -4,6 +4,7 @@ import com.example.horsegenetics.common.Rng;
 import com.example.horsegenetics.common.coat.pattern.CoatBuildContext;
 import com.example.horsegenetics.common.coat.pattern.CoatRegions;
 import com.example.horsegenetics.common.genetics.Allele;
+import com.example.horsegenetics.common.genetics.DominancePattern;
 import com.example.horsegenetics.common.genetics.AllelePair;
 import com.example.horsegenetics.common.genetics.Gene;
 import com.example.horsegenetics.common.genetics.Genotype;
@@ -40,6 +41,9 @@ public final class GreyGene implements Gene {
     @Override public String key() { return KEY; }
     @Override public List<Allele> alleles() { return alleles; }
     @Override public Allele wildType() { return g; }
+
+    /** Dominant: one {@code G} greys the adult out. */
+    @Override public DominancePattern dominance() { return DominancePattern.DOMINANT; }
 
     @Override
     public AllelePair randomPair(Rng rng) {

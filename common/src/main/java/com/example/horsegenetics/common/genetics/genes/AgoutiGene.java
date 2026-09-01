@@ -4,6 +4,7 @@ import com.example.horsegenetics.common.Rng;
 import com.example.horsegenetics.common.coat.pattern.BayCoat;
 import com.example.horsegenetics.common.coat.pattern.CoatBuildContext;
 import com.example.horsegenetics.common.genetics.Allele;
+import com.example.horsegenetics.common.genetics.DominancePattern;
 import com.example.horsegenetics.common.genetics.AllelePair;
 import com.example.horsegenetics.common.genetics.Gene;
 import com.example.horsegenetics.common.genetics.Genotype;
@@ -33,6 +34,9 @@ public final class AgoutiGene implements Gene {
     @Override public String key() { return KEY; }
     @Override public List<Allele> alleles() { return alleles; }
     @Override public Allele wildType() { return a; }
+
+    /** Dominant: one {@code A} is enough for bay; {@code Aa} and {@code AA} are the same horse. */
+    @Override public DominancePattern dominance() { return DominancePattern.DOMINANT; }
 
     @Override
     public AllelePair randomPair(Rng rng) {

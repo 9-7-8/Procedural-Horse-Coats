@@ -128,8 +128,8 @@ rounds both stats up.
 
 ### `horse/HorseDatabase` + `horse/InMemoryHorseDatabase`
 
-Interface: `record(HorseRecord)`, `lookup(UUID)`, `ancestorsOf(UUID, depth)`,
-`offspringCount(UUID a, UUID b)`.
+Interface: `record(HorseRecord)`, `lookup(UUID)`, `forget(UUID)`,
+`ancestorsOf(UUID, depth)`, `offspringCount(UUID a, UUID b)`.
 
 `offspringCount(a, b)` scans every stored record for one whose two parents are
 exactly `a` and `b` (order-independent). It feeds the foal-name schedule
@@ -147,6 +147,14 @@ chosen.
   reachable through both the maternal and paternal line is listed once).
 - an ancestor referenced by id but **absent from the database is skipped**,
   and that branch is not explored further through it.
+
+`forget(id)` drops a record and reports whether there was one. It is for a
+horse that is **deleted outright rather than dying**: the horse dimension
+clears its gallery on exit, and without this every visit would leave hundreds
+of throwaway records in the save forever. It deliberately does **not** repair
+records that name the forgotten horse as a parent - `ancestorsOf` already skips
+ancestors it can't find, so a foal bred in the dimension and brought home keeps
+working with a missing parent node rather than breaking.
 
 `InMemoryHorseDatabase` is a plain `HashMap<UUID, HorseRecord>`. Not
 thread-safe - in the mod, every call is on the server thread. `all()` gives
@@ -194,7 +202,8 @@ The persistent ancestry store. A thin wrapper: it holds an
 
 - **dirty-tracking**: `record(...)` only calls `setDirty()` when the record
   actually changed (`HorseRecord` is a value type, so an unchanged
-  re-`record` compares equal and is a no-op).
+  re-`record` compares equal and is a no-op); `forget(...)` likewise only
+  dirties when something was actually removed.
 - **persistence**: `CODEC` is a `RecordCodecBuilder` over
   `{ "horses": [ <HorseRecord>, ... ] }`; `SavedDataType` id is
   `horsegenetics:horse_ancestry`.
@@ -472,7 +481,7 @@ common/src/main/java/com/example/horsegenetics/common/
   horse/HorseRecord.java            # + speed / health (rounded up, uncapped), parentStats, withStats/withParentStats
   horse/HorseStats.java             # rollFoalStat(a, b, Rng) -> [0.75*min, 1.5*max]
   horse/ParentStats.java            # (speedMin,speedMax,healthMin,healthMax) + rankSpeed/rankHealth
-  horse/HorseDatabase.java          # + offspringCount(a, b)
+  horse/HorseDatabase.java          # + offspringCount(a, b), forget(id)
   horse/InMemoryHorseDatabase.java
   name/HorseNameGenerator.java      # generateParts -> {first, last}; + resources/.../names/*.txt
   name/HorseNames.java              # breed(...) 50/50; breedNth(..., priorFoals, gen, rng) foal-count-varied

@@ -5,6 +5,7 @@ import com.example.horsegenetics.common.coat.pattern.CoatBuildContext;
 import com.example.horsegenetics.common.coat.pattern.TestCoatPattern;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry;
 import com.example.horsegenetics.common.genetics.Allele;
+import com.example.horsegenetics.common.genetics.DominancePattern;
 import com.example.horsegenetics.common.genetics.AllelePair;
 import com.example.horsegenetics.common.genetics.Gene;
 import com.example.horsegenetics.common.genetics.Genotype;
@@ -34,6 +35,9 @@ public final class TestGene implements Gene {
     @Override public String key() { return KEY; }
     @Override public List<Allele> alleles() { return alleles; }
     @Override public Allele wildType() { return t; }
+
+    /** CompleteDominant: the overlay is painted flat on top, so one {@code T} hides whatever is underneath. */
+    @Override public DominancePattern dominance() { return DominancePattern.COMPLETE_DOMINANT; }
 
     @Override
     public boolean isNatural() {

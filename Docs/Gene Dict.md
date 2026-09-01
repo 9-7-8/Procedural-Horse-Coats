@@ -88,6 +88,7 @@ those are silently skipped.
 |---|---|
 | alleles | `E` (dominant, wild-type), `e` (recessive) |
 | inheritance | simple dominant/recessive |
+| **dominance** | `DOMINANT` - `Ee` is a plain black-capable horse, same as `EE` |
 | wild frequency | 50/50 per allele (2 `nextBoolean`) |
 | deterministic? | yes |
 | visible when | `ee` |
@@ -101,6 +102,7 @@ restricted to 0 everywhere → chestnut (the gradient's left edge).
 |---|---|
 | alleles | `A` (dominant), `a` (recessive, wild-type) |
 | inheritance | simple dominant/recessive |
+| **dominance** | `DOMINANT` - one `A` is enough for bay; `Aa` and `AA` are the same horse |
 | wild frequency | 50/50 per allele (2 `nextBoolean`) |
 | deterministic? | **no** when `A_` on a black-capable horse |
 | visible when | `A_` **and** `genotype.hasBlackPigment()` |
@@ -142,10 +144,10 @@ they were. See each dose table below for the per-mode tint.
 Real-horse `SLC45A2`: allelic. Modelled here as **two genes** whose combined
 effect is computed once, in `coat.pattern.CreamPearlDilution`.
 
-| gene | alleles | wild frequency | deterministic? |
-|---|---|---|---|
-| cream | `Cr` (**incomplete** dominant), `N` (wild-type) | `1 in 30` per allele | yes |
-| pearl | `prl` (recessive), `N` (wild-type) | `1 in 22` per allele | yes |
+| gene | alleles | dominance | wild frequency | deterministic? |
+|---|---|---|---|---|
+| cream | `Cr` (**incomplete** dominant), `N` (wild-type) | `INCOMPLETE_DOMINANT` - one `Cr` is a single dilution, two a double | `1 in 30` per allele | yes |
+| pearl | `prl`, `N` (wild-type) | `INCOMPLETE_DOMINANT` - `prl/prl` is the mild uniform dilution, `Cr/prl` a double cream, so the heterozygote is its own thing | `1 in 22` per allele | yes |
 
 Both are dilutions - they restrict / redistribute existing pigment, never add.
 The combined rule (dose = number of `Cr` / `prl` copies):
@@ -181,6 +183,7 @@ render brown / rusty / sepia points over their diluted bodies.
 |---|---|
 | alleles | `Ch` (dominant), `c` (recessive, wild-type) |
 | inheritance | simple dominant, **not dose-dependent** |
+| **dominance** | `DOMINANT` - one `Ch` gives the full dilution |
 | wild frequency | `1 in 40` per allele |
 | deterministic? | yes |
 
@@ -210,6 +213,7 @@ champagne on chestnut.
 |---|---|
 | alleles | `G` (dominant), `g` (recessive, wild-type) |
 | inheritance | simple dominant |
+| **dominance** | `DOMINANT` - one `G` greys the adult out |
 | wild frequency | `1 in 16` per allele |
 | deterministic? | yes |
 | visible when | `G_` **and the horse is an adult** |
@@ -234,6 +238,7 @@ age; this is one flat adult step - no year-by-year age input.)
 |---|---|
 | alleles | `W` (dominant), `w` (recessive, wild-type) |
 | inheritance | simple dominant |
+| **dominance** | `COMPLETE_DOMINANT` - while `W` shows, **no other gene is visible**; every white horse looks alike |
 | wild frequency | `1 in 50` per allele (~4% white) |
 | deterministic? | yes |
 
@@ -248,6 +253,7 @@ that should ever look like the bare template - if a chestnut or bay does, see
 |---|---|
 | alleles | `Spl` (dominant), `spl` (recessive, wild-type) |
 | inheritance | simple dominant (real splash is more complex) |
+| **dominance** | `INCOMPLETE_DOMINANT` **(aspirational - see the open issue below)** |
 | wild frequency | `1 in 20` per allele |
 | deterministic? | **no** |
 
@@ -259,7 +265,13 @@ Random white markings, "dipped in white from below". Removes both pigments
 
 Owner-verified in-game **2026-09-01**: what's implemented renders correctly.
 
-> **Open issue - two gaps.** (1) The blaze is the **only** face marking; the
+> **Open issue - three gaps.** (0) It is tagged `INCOMPLETE_DOMINANT` but
+> doesn't act like it: `restrict` never looks at how many `Spl` copies the
+> horse carries, so `Spl/spl` and `Spl/Spl` render identically. Homozygous
+> splash should give **much larger** white markings (higher stockings, a wide
+> blaze/bald face, body patches). The catalogue already gives the heterozygote
+> its own pen, so the fix is visible the moment it lands.
+> (1) The blaze is the **only** face marking; the
 > rest of the family (star, snip, stripe, bald face) isn't built. (2)
 > `CoatRegions.whitenLowerLeg` cuts at a hard `point.y() <= cutoff`, so every
 > sock ends in a **perfect ring**. Break the edge up - per-texel epigenetic
@@ -275,6 +287,7 @@ Owner-verified in-game **2026-09-01**: what's implemented renders correctly.
 |---|---|
 | alleles | `T` (dominant), `t` (recessive, wild-type) |
 | inheritance | simple dominant |
+| **dominance** | `COMPLETE_DOMINANT` - painted flat on top, so one `T` hides whatever is underneath |
 | wild frequency | `1 in 4` carriers (deliberately common) |
 | natural? | **no** |
 | deterministic? | yes |
@@ -304,8 +317,10 @@ the first gene to read the cream/pearl dose for something other than pigment.
 
 ## Adding a gene
 
-1. New `Gene` impl - alleles (any token strings), `randomPair`, and either
-   `restrict` (natural) or `isNatural()=false` + `overlayLayer`.
+1. New `Gene` impl - alleles (any token strings), `randomPair`,
+   `dominance()` (see `DominancePattern`; it decides how many pens the gene
+   gets in the horse dimension's gallery), and either `restrict` (natural) or
+   `isNatural()=false` + `overlayLayer`.
 2. Register in `Genes`: append to `CODE_ORDER`, and to `NATURAL_ORDER` (in
    effect order) or `OVERLAY_ORDER`.
 3. Document it here.

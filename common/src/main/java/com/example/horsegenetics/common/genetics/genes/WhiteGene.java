@@ -4,6 +4,7 @@ import com.example.horsegenetics.common.Rng;
 import com.example.horsegenetics.common.coat.pattern.CoatBuildContext;
 import com.example.horsegenetics.common.coat.pattern.CoatRegions;
 import com.example.horsegenetics.common.genetics.Allele;
+import com.example.horsegenetics.common.genetics.DominancePattern;
 import com.example.horsegenetics.common.genetics.AllelePair;
 import com.example.horsegenetics.common.genetics.Gene;
 import com.example.horsegenetics.common.genetics.Genotype;
@@ -30,6 +31,9 @@ public final class WhiteGene implements Gene {
     @Override public String key() { return KEY; }
     @Override public List<Allele> alleles() { return alleles; }
     @Override public Allele wildType() { return w; }
+
+    /** CompleteDominant: one {@code W} erases every other gene - every white horse looks alike. */
+    @Override public DominancePattern dominance() { return DominancePattern.COMPLETE_DOMINANT; }
 
     @Override
     public AllelePair randomPair(Rng rng) {

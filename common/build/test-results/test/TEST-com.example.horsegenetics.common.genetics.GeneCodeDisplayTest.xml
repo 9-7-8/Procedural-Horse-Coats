@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.example.horsegenetics.common.genetics.GeneCodeDisplayTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-09-01T16:33:15.211Z" hostname="PERDIX" time="0.007">
+<testsuite name="com.example.horsegenetics.common.genetics.GeneCodeDisplayTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-09-01T19:40:39.333Z" hostname="PERDIX" time="0.023">
   <properties/>
-  <testcase name="absenceGenesUseLowercaseNWhenHeterozygousAndTheTokenDoubledWhenHomozygous()" classname="com.example.horsegenetics.common.genetics.GeneCodeDisplayTest" time="0.002"/>
-  <testcase name="stringOverloadDegradesGracefullyOnAnUnparseableCode()" classname="com.example.horsegenetics.common.genetics.GeneCodeDisplayTest" time="0.003"/>
-  <testcase name="stringOverloadParsesAValidCode()" classname="com.example.horsegenetics.common.genetics.GeneCodeDisplayTest" time="0.0"/>
-  <testcase name="extensionAndAgoutiAlwaysLeadAndRunTogether()" classname="com.example.horsegenetics.common.genetics.GeneCodeDisplayTest" time="0.0"/>
-  <testcase name="whiteGreyTestPrintBothRealTokensDominantFirst()" classname="com.example.horsegenetics.common.genetics.GeneCodeDisplayTest" time="0.0"/>
-  <testcase name="theExampleFromTheDocComment()" classname="com.example.horsegenetics.common.genetics.GeneCodeDisplayTest" time="0.0"/>
-  <testcase name="everythingAtOnceUsesTheDisplayOrder()" classname="com.example.horsegenetics.common.genetics.GeneCodeDisplayTest" time="0.0"/>
-  <testcase name="onlyGenesWithAVariantAlleleAreListed_spaceSeparated()" classname="com.example.horsegenetics.common.genetics.GeneCodeDisplayTest" time="0.0"/>
+  <testcase name="absenceGenesUseLowercaseNWhenHeterozygousAndTheTokenDoubledWhenHomozygous()" classname="com.example.horsegenetics.common.genetics.GeneCodeDisplayTest" time="0.004"/>
+  <testcase name="stringOverloadDegradesGracefullyOnAnUnparseableCode()" classname="com.example.horsegenetics.common.genetics.GeneCodeDisplayTest" time="0.01"/>
+  <testcase name="stringOverloadParsesAValidCode()" classname="com.example.horsegenetics.common.genetics.GeneCodeDisplayTest" time="0.001"/>
+  <testcase name="extensionAndAgoutiAlwaysLeadAndRunTogether()" classname="com.example.horsegenetics.common.genetics.GeneCodeDisplayTest" time="0.001"/>
+  <testcase name="whiteGreyTestPrintBothRealTokensDominantFirst()" classname="com.example.horsegenetics.common.genetics.GeneCodeDisplayTest" time="0.001"/>
+  <testcase name="theExampleFromTheDocComment()" classname="com.example.horsegenetics.common.genetics.GeneCodeDisplayTest" time="0.001"/>
+  <testcase name="everythingAtOnceUsesTheDisplayOrder()" classname="com.example.horsegenetics.common.genetics.GeneCodeDisplayTest" time="0.002"/>
+  <testcase name="onlyGenesWithAVariantAlleleAreListed_spaceSeparated()" classname="com.example.horsegenetics.common.genetics.GeneCodeDisplayTest" time="0.001"/>
   <system-out><![CDATA[]]></system-out>
   <system-err><![CDATA[]]></system-err>
 </testsuite>

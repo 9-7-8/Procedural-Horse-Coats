@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.example.horsegenetics.common.coat.CoatDataTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-09-01T16:33:13.952Z" hostname="PERDIX" time="0.033">
+<testsuite name="com.example.horsegenetics.common.coat.CoatDataTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-09-01T19:40:36.308Z" hostname="PERDIX" time="0.081">
   <properties/>
-  <testcase name="defaultIsAPlainBlackDeterministicHorse()" classname="com.example.horsegenetics.common.coat.CoatDataTest" time="0.017"/>
-  <testcase name="carriesGenotypeAndSeedAndDerivesPhenotype()" classname="com.example.horsegenetics.common.coat.CoatDataTest" time="0.0"/>
-  <testcase name="equalityIsGenotypePlusSeed()" classname="com.example.horsegenetics.common.coat.CoatDataTest" time="0.012"/>
-  <testcase name="nonDeterministicCoatsKeyOnTheSeed()" classname="com.example.horsegenetics.common.coat.CoatDataTest" time="0.001"/>
+  <testcase name="defaultIsAPlainBlackDeterministicHorse()" classname="com.example.horsegenetics.common.coat.CoatDataTest" time="0.044"/>
+  <testcase name="carriesGenotypeAndSeedAndDerivesPhenotype()" classname="com.example.horsegenetics.common.coat.CoatDataTest" time="0.001"/>
+  <testcase name="equalityIsGenotypePlusSeed()" classname="com.example.horsegenetics.common.coat.CoatDataTest" time="0.028"/>
+  <testcase name="nonDeterministicCoatsKeyOnTheSeed()" classname="com.example.horsegenetics.common.coat.CoatDataTest" time="0.002"/>
   <testcase name="deterministicCoatsIgnoreTheSeedInTheirTextureKey()" classname="com.example.horsegenetics.common.coat.CoatDataTest" time="0.001"/>
   <system-out><![CDATA[]]></system-out>
   <system-err><![CDATA[]]></system-err>

@@ -60,8 +60,18 @@ public final class HorseRecords {
 
     /** Founder record with a forced sex (the horse dimension wants one mare + one stallion). */
     public static HorseRecord newFounder(Horse horse, Rng rng, Sex sex) {
+        return newFounder(horse, rng, sex, Genotype.random(rng).toCode());
+    }
+
+    /**
+     * Founder record with a forced sex <b>and</b> a forced genotype - the horse
+     * dimension stocks each pen with a specific entry from
+     * {@link com.example.horsegenetics.common.genetics.GenotypeCatalog}, so it
+     * must not be re-rolled.
+     */
+    public static HorseRecord newFounder(Horse horse, Rng rng, Sex sex, String geneticCode) {
         NameParts name = NAMES.generateParts(rng);
-        return HorseRecord.founder(horse.getUUID(), sex, name.first(), name.last(), Genotype.random(rng).toCode())
+        return HorseRecord.founder(horse.getUUID(), sex, name.first(), name.last(), geneticCode)
                 .withStats(entitySpeed(horse), entityHealth(horse));
     }
 

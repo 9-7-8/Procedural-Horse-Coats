@@ -17,6 +17,16 @@ public interface HorseDatabase {
     Optional<HorseRecord> lookup(UUID id);
 
     /**
+     * Drop the record for {@code id}, if there is one; returns whether there
+     * was. Used when a horse is deleted outright rather than dying (the horse
+     * dimension clears its gallery on exit), so a throwaway horse's record
+     * doesn't sit in the save forever. Records referencing a forgotten horse as
+     * a parent are left alone - {@link #ancestorsOf} already skips ancestors it
+     * can't find.
+     */
+    boolean forget(UUID id);
+
+    /**
      * How many stored records list exactly {@code parentA} and {@code parentB}
      * as their two parents (order-independent). Used to vary foal names by how
      * many foals a pairing has already produced.

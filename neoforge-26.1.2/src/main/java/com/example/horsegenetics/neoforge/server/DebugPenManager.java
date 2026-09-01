@@ -1,13 +1,18 @@
 package com.example.horsegenetics.neoforge.server;
 
+import com.example.horsegenetics.common.genetics.GeneCodeDisplay;
+import com.example.horsegenetics.common.genetics.Genotype;
+import com.example.horsegenetics.common.genetics.GenotypeCatalog;
 import com.example.horsegenetics.common.horse.Sex;
 import com.example.horsegenetics.neoforge.HorseGenetics;
 import com.example.horsegenetics.neoforge.NeoRng;
 import com.example.horsegenetics.neoforge.block.HayPortalBlock;
 import com.example.horsegenetics.neoforge.block.ModBlocks;
+import com.example.horsegenetics.neoforge.data.HorseAncestryData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
@@ -27,7 +32,11 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.FenceGateBlock;
 import net.minecraft.world.level.block.LayeredCauldronBlock;
+import net.minecraft.world.level.block.StandingSignBlock;
+import net.minecraft.world.level.block.entity.SignBlockEntity;
+import net.minecraft.world.level.block.entity.SignText;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.RotationSegment;
 import net.minecraft.world.phys.AABB;
 
 import java.util.ArrayDeque;
@@ -40,19 +49,49 @@ import java.util.Set;
 import java.util.UUID;
 
 /**
- * Builds and populates the debug-pen dimension. Debug-tool code, not a
- * gameplay feature - it exists to eyeball coat-genetics output across many
- * horses fast. All calls happen on the server thread.
+ * Builds and populates the horse dimension: a <b>complete gallery of the
+ * genotype catalogue</b>, two horses per genotype. All calls happen on the
+ * server thread.
+ *
+ * <h2>The gallery</h2>
+ * The corridor holds exactly one pen per entry in {@link GenotypeCatalog} -
+ * every <b>visually distinct</b> genotype the registered genes can make.
+ * (The catalogue drops the duplicates for you: a dominant gene's heterozygote
+ * is a copy of a homozygote, and a horse showing a {@code COMPLETE_DOMINANT}
+ * gene looks the same whatever else it carries, so white and test get one pen
+ * each.) Two pens per segment: the <b>right-hand</b> pen (walking in from the
+ * portal) takes the even catalogue index, the left-hand one the odd, so the
+ * sequence reads {@code eeaa, EEaa, eeAA, EEAA, ...} - the first gene in
+ * {@link com.example.horsegenetics.common.genetics.Genes#codeOrder()} is
+ * exhausted before the next one moves. Each pen holds one mare and one
+ * stallion of <i>that</i> genotype (their epigenetic seeds still differ, so
+ * they are two examples, not two copies) and a sign on the road to the right of
+ * its gate, naming it in the same compact form the horse's own info panel uses.
+ * Three blocks in front of the entrance portal, a second sign gives the total
+ * count.
+ *
+ * <p>Nothing about the sequence is hard-coded: the corridor length,
+ * {@link #PLOT_SPACING_X} and both signs are all derived from
+ * {@link GenotypeCatalog}, so adding a gene widens the gallery on its own.
+ * Pens are still built lazily as the player walks
+ * ({@link #ensureGeneratedAheadOfPlayer}); the corridor stops - with an end
+ * wall - once the catalogue is exhausted.
  *
  * <h2>Instancing</h2>
  * The dimension is a flat <b>void</b> (see {@code dimension/debug_pens.json}):
  * the generator lays down nothing at all. Every visit gets its own private
- * <b>plot</b> - a fresh corridor built by this class at a unique X far from
- * every other plot ({@value #PLOT_SPACING_X} blocks) and at a random Y, so
- * "two people never end up in the same place" holds even on a shared server.
- * When the plot's player leaves (dimension change, logout, or a re-entry that
- * supersedes it) the plot is torn down: its entities are discarded and its
- * blocks are set back to air. Nothing left in the dimension survives.
+ * <b>plot</b> - a corridor built by this class at its own X, {@value
+ * #PLOT_SPACING_X} blocks clear of every other live plot, so "two people never
+ * end up in the same place" holds even on a shared server.
+ *
+ * <p>When the plot's player leaves (dimension change, logout, or a re-entry
+ * that supersedes it) {@link #tearDown} discards every non-player entity in it
+ * and forgets those horses' ancestry records - but <b>leaves the blocks
+ * standing</b>. It can: the gallery is fully deterministic (same catalogue,
+ * fixed {@link #PLOT_BASE_Y}, fixed length), so an X slot handed back to the
+ * free list is rebuilt with byte-identical geometry next time and the stale
+ * corridor is simply overwritten in place. Leaving is therefore O(entities),
+ * not O(blocks walked).
  *
  * <h2>Layout of one plot</h2>
  * A straight corridor running +X from {@code originX}. The wall <b>behind the
@@ -62,7 +101,7 @@ import java.util.UUID;
  * at {@code originX+1}; the player spawns on the road a few blocks further in,
  * facing down the corridor. Down the centre is a gravel road
  * ({@code z} in [-{@value #ROAD_HALF_WIDTH}, {@value #ROAD_HALF_WIDTH}]). A
- * pen sits on each side: {@value #PEN_LEN_X} blocks along X,
+ * pen sits on each side (one per catalogue genotype): {@value #PEN_LEN_X} blocks along X,
  * {@value #PEN_DEPTH_Z} deep, brick-wall perimeter with a <b>two-wide</b>
  * oak-fence-gate opening (horses won't cross a 1-wide gap), one gravel strip
  * between consecutive pens. Outward from each pen's back edge, flush (no grass
@@ -70,6 +109,8 @@ import java.util.UUID;
  * glowstone line {@value #WALL_TOP_DY} blocks above it, a single oak-plank wood
  * wall ({@code z} = +/-{@value #WALL_PLANK_Z}), then the bedrock core
  * ({@code z} = +/-{@value #WALL_BEDROCK_Z}). Outside the bedrock: open void.
+ * Past the last catalogue pen the corridor is closed by an end cap laid out
+ * like {@link #buildStartCap}.
  */
 public final class DebugPenManager {
 
@@ -80,8 +121,19 @@ public final class DebugPenManager {
     private static final int PEN_DEPTH_Z = 20;           // pen extent from the road outward
     private static final int PEN_GAP_X = 1;              // single gravel strip between consecutive pens
     private static final int PERIOD = PEN_LEN_X + PEN_GAP_X;
+    private static final int PENS_PER_SEGMENT = 2;       // one each side of the road
     // Build this many pens beyond the player so the ground never "pops in" (~180 blocks).
     private static final int LOOKAHEAD_PENS = 30;
+
+    /**
+     * The corridor is exactly long enough to hold {@link GenotypeCatalog#size()}
+     * pens, two per segment - the right-hand pen takes the even catalogue index,
+     * the left-hand one the odd. With an odd catalogue the very last left-hand
+     * pen is simply not built. Derived, never hard-coded: add a gene and the
+     * corridor lengthens on its own.
+     */
+    private static final int LAST_SEGMENT_INDEX =
+            (GenotypeCatalog.size() + PENS_PER_SEGMENT - 1) / PENS_PER_SEGMENT - 1;
 
     private static final int ROAD_HALF_WIDTH = 3;        // gravel road: z in [-3, 3]
     private static final int WALL_TOP_DY = 10;           // glowstone line height above the floor
@@ -94,11 +146,13 @@ public final class DebugPenManager {
     private static final int WALL_PLANK_Z = PEN_FAR_Z + 2;              // 25 - single oak-plank wood wall
     private static final int WALL_BEDROCK_Z = PEN_FAR_Z + 3;           // 26 - bedrock core (last solid block)
 
-    // Plots are spaced far enough apart on X that they never share chunks; the
-    // random Y is belt-and-braces so nothing ever visually overlaps.
-    private static final int PLOT_SPACING_X = 20_000;
-    private static final int PLOT_MIN_Y = 96;
-    private static final int PLOT_Y_RANGE = 300;         // dimension is 512 tall (see dimension_type)
+    // Plots are spaced far enough apart on X that they never share chunks - the
+    // full catalogue corridor plus a margin.
+    private static final int PLOT_SPACING_X = (LAST_SEGMENT_INDEX + 2) * PERIOD + 1_000;
+    // Fixed, not random: leaving no longer clears the blocks, so a rebuilt plot
+    // has to land exactly on top of the old one and overwrite it. Same X, same
+    // Y, same deterministic catalogue = same geometry, so it always does.
+    private static final int PLOT_BASE_Y = 128;          // dimension is 512 tall (see dimension_type)
 
     /** Geometry for one side of the road. */
     private record PenSpec(int zRoad, int zBack, Direction roadFacing) {}
@@ -109,7 +163,7 @@ public final class DebugPenManager {
     /** One private instance of the corridor. Mutable {@code highestIndex} tracks how far it's been built. */
     static final class Plot {
         final int originX;
-        final int baseY;                       // grass-surface Y for this plot
+        final int baseY;                       // grass-surface Y - always PLOT_BASE_Y
         final ResourceKey<Level> returnDim;    // where its return portal sends you
         final BlockPos returnPos;              // exact spot to land on the way back
         int highestIndex = -1;
@@ -152,18 +206,20 @@ public final class DebugPenManager {
         }
 
         int originX = allocateOriginX();
-        int baseY = PLOT_MIN_Y + player.getRandom().nextInt(PLOT_Y_RANGE);
-        Plot plot = new Plot(originX, baseY, returnDim, returnPos.immutable());
+        Plot plot = new Plot(originX, PLOT_BASE_Y, returnDim, returnPos.immutable());
         PLOTS.put(player.getUUID(), plot);
 
         ensureBuiltUpToIndex(debug, plot, LOOKAHEAD_PENS);
 
         // Spawn on the road just past the return portal, facing +X down the corridor.
-        player.teleportTo(debug, originX + 3.5, baseY + 1, 0.5, Set.of(), -90.0f, 0.0f, false);
+        player.teleportTo(debug, originX + 3.5, PLOT_BASE_Y + 1, 0.5, Set.of(), -90.0f, 0.0f, false);
         giveDebugPaper(player);
     }
 
-    /** Drop the player's plot (if any) and wipe it. Safe to call for players who never entered. */
+    /**
+     * Drop the player's plot (if any) and clear it out. Safe to call for players
+     * who never entered.
+     */
     public static void leave(MinecraftServer server, UUID playerId) {
         Plot plot = PLOTS.remove(playerId);
         if (plot == null) {
@@ -211,24 +267,38 @@ public final class DebugPenManager {
 
     // --- generation ---
 
+    /** Builds up to {@code targetIndex}, but never past the end of the catalogue. */
     private static void ensureBuiltUpToIndex(ServerLevel level, Plot plot, int targetIndex) {
-        while (plot.highestIndex < targetIndex) {
+        int capped = Math.min(targetIndex, LAST_SEGMENT_INDEX);
+        while (plot.highestIndex < capped) {
             int idx = plot.highestIndex + 1;
             buildSegment(level, plot, idx);
             plot.highestIndex = idx;
+            if (idx == LAST_SEGMENT_INDEX) {
+                buildEndCap(level, plot);
+            }
         }
     }
 
+    /**
+     * One segment = one pen on each side of the road. The right-hand pen (the
+     * {@code +Z} side, on your right walking in from the portal) shows
+     * catalogue entry {@code 2 * index}, the left-hand one {@code 2 * index + 1}
+     * - so the sequence runs {@code eeaa, Eeaa, EEaa, eeAa, ...} down the
+     * corridor, one gene exhausted before the next moves.
+     */
     private static void buildSegment(ServerLevel level, Plot plot, int index) {
         int x0 = plot.originX + index * PERIOD;
         if (index == 0) {
             buildStartCap(level, plot);
         }
         buildCorridor(level, plot, x0);
-        buildPen(level, plot, x0, NORTH_PEN);
-        buildPen(level, plot, x0, SOUTH_PEN);
+        int base = index * PENS_PER_SEGMENT;
+        buildPen(level, plot, x0, NORTH_PEN, base);
+        buildPen(level, plot, x0, SOUTH_PEN, base + 1);
         if (index == 0) {
             buildReturnPortal(level, plot);
+            buildCatalogueSign(level, plot);
         }
     }
 
@@ -341,7 +411,18 @@ public final class DebugPenManager {
 
     // --- one pen ---
 
-    private static void buildPen(ServerLevel level, Plot plot, int x0, PenSpec pen) {
+    /**
+     * {@code genotypeIndex} is this pen's entry in {@link GenotypeCatalog}: both
+     * its horses get that exact genotype, and the sign by the gate names it. An
+     * index past the end of the catalogue (the trailing left-hand pen when the
+     * catalogue size is odd) builds nothing at all.
+     */
+    private static void buildPen(ServerLevel level, Plot plot, int x0, PenSpec pen, int genotypeIndex) {
+        if (genotypeIndex >= GenotypeCatalog.size()) {
+            return;
+        }
+        Genotype genotype = GenotypeCatalog.get(genotypeIndex);
+        String geneticCode = genotype.toCode();
         int gy = plot.baseY;
         int floorY = gy + 1;
         int xMax = x0 + PEN_LEN_X - 1;
@@ -381,12 +462,14 @@ public final class DebugPenManager {
         level.setBlockAndUpdate(new BlockPos(xMax - 1, floorY - 1, zGateInner),
                 Blocks.HAY_BLOCK.defaultBlockState());
 
+        buildPenSign(level, plot, x0, pen, genotypeIndex, genotype);
+
         AABB interior = new AABB(x0, floorY, zLo, xMax + 1, floorY + 4, zHi + 1);
         if (level.getEntitiesOfClass(Horse.class, interior).isEmpty()) {
             double midX = x0 + PEN_LEN_X / 2.0;
             double midZ = (zLo + zHi) / 2.0;
-            spawnHorse(level, floorY, midX, midZ - 4, Sex.MALE);
-            spawnHorse(level, floorY, midX, midZ + 4, Sex.FEMALE);
+            spawnHorse(level, floorY, midX, midZ - 4, Sex.MALE, geneticCode);
+            spawnHorse(level, floorY, midX, midZ + 4, Sex.FEMALE, geneticCode);
         }
     }
 
@@ -394,13 +477,139 @@ public final class DebugPenManager {
         level.setBlock(new BlockPos(x, floorY + 1, z), Blocks.TORCH.defaultBlockState(), 2);
     }
 
-    private static void spawnHorse(ServerLevel level, int floorY, double x, double z, Sex sex) {
+    // --- signs -----------------------------------------------------------
+
+    private static final int SIGN_LINES = 4;              // vanilla sign: 4 lines per face
+    private static final int SIGN_GENE_LINES = SIGN_LINES - 1;  // line 0 is the catalogue number
+    private static final int SIGN_LINE_CHARS = 15;        // about what a vanilla sign line fits
+
+    /**
+     * The genotype label for one pen: a standing sign on the road, immediately
+     * to the <b>right of the gate</b> as you face the pen from the road. Both
+     * faces carry the same text so it reads from anywhere on the road.
+     */
+    private static void buildPenSign(ServerLevel level, Plot plot, int x0, PenSpec pen,
+                                     int genotypeIndex, Genotype genotype) {
+        int gateX = x0 + PEN_LEN_X / 2 - 1;               // gate occupies gateX and gateX + 1
+        Direction towardPen = pen.roadFacing().getOpposite();
+        Direction right = towardPen.getClockWise();       // always +/-X here
+        int signX = right.getStepX() > 0 ? gateX + 2 : gateX - 1;
+        int signZ = pen.zRoad() + pen.roadFacing().getStepZ();  // one block out onto the road
+        placeSign(level, new BlockPos(signX, plot.baseY + 1, signZ), pen.roadFacing(),
+                genotypeSignLines(genotypeIndex, genotype));
+    }
+
+    /**
+     * The tally sign three blocks in front of the entrance portal: how many
+     * genotypes exist at all, and how many of those are distinct to look at
+     * (which is how many pens follow). Genes only - epigenetic variation is
+     * deliberately not counted in either number.
+     */
+    private static void buildCatalogueSign(ServerLevel level, Plot plot) {
+        placeSign(level, new BlockPos(plot.originX + 4, plot.baseY + 1, 0), Direction.WEST,
+                List.of("Genotypes",
+                        String.format("%,d", GenotypeCatalog.totalGenotypes()),
+                        "Distinct",
+                        String.format("%,d pens", GenotypeCatalog.size())));
+    }
+
+    /**
+     * Line 0 is the pen's 1-based catalogue number; the rest is the genotype in
+     * the <b>same compact form the horse's info panel and paper dump use</b>
+     * ({@link GeneCodeDisplay#shortForm}) - extension + agouti, then only the
+     * genes actually carrying a variant, so a plain horse reads {@code "eeaa"}
+     * rather than a wall of wild-type slots. Wrapped over the remaining
+     * {@value #SIGN_GENE_LINES} lines between whole gene tokens.
+     */
+    private static List<String> genotypeSignLines(int genotypeIndex, Genotype genotype) {
+        List<String> lines = new ArrayList<>();
+        lines.add("#" + (genotypeIndex + 1));
+        lines.addAll(GeneCodeDisplay.wrap(genotype, SIGN_GENE_LINES, SIGN_LINE_CHARS));
+        return lines;
+    }
+
+    /**
+     * A waxed standing oak sign at {@code pos}, its text facing {@code facing},
+     * with {@code lines} written identically on both faces (lines past
+     * {@value #SIGN_LINES} are dropped). Waxed so a visitor can't scribble over
+     * the label.
+     */
+    private static void placeSign(ServerLevel level, BlockPos pos, Direction facing, List<String> lines) {
+        BlockState sign = Blocks.OAK_SIGN.defaultBlockState()
+                .setValue(StandingSignBlock.ROTATION, RotationSegment.convertToSegment(facing));
+        level.setBlock(pos, sign, 3);
+        if (!(level.getBlockEntity(pos) instanceof SignBlockEntity be)) {
+            return;
+        }
+        SignText front = be.getFrontText();
+        SignText back = be.getBackText();
+        for (int line = 0; line < SIGN_LINES; line++) {
+            Component text = Component.literal(line < lines.size() ? lines.get(line) : "");
+            front = front.setMessage(line, text);
+            back = back.setMessage(line, text);
+        }
+        be.setText(front, true);
+        be.setText(back, false);
+        be.setWaxed(true);
+        be.setChanged();
+        level.sendBlockUpdated(pos, sign, sign, 3);
+    }
+
+    /**
+     * The far end of the corridor, past the last catalogue pen - the mirror of
+     * {@link #buildStartCap}, so the gallery finishes in a wall instead of
+     * trailing off into the void.
+     */
+    private static void buildEndCap(ServerLevel level, Plot plot) {
+        int xEnd = plot.originX + (LAST_SEGMENT_INDEX + 1) * PERIOD;  // first x past the last segment
+        int gy = plot.baseY;
+        int yHi = gy + WALL_TOP_DY - 1;
+        BlockState bedrock = Blocks.BEDROCK.defaultBlockState();
+        BlockState dirt = Blocks.DIRT.defaultBlockState();
+        BlockState planks = Blocks.OAK_PLANKS.defaultBlockState();
+        BlockState gravel = Blocks.GRAVEL.defaultBlockState();
+        BlockState glowstone = Blocks.GLOWSTONE.defaultBlockState();
+        for (int z = -WALL_BEDROCK_Z; z <= WALL_BEDROCK_Z; z++) {
+            // gravel floor strip facing the corridor, glowstone line above it
+            fastSet(level, new BlockPos(xEnd, gy - 3, z), bedrock);
+            fastSet(level, new BlockPos(xEnd, gy - 2, z), dirt);
+            fastSet(level, new BlockPos(xEnd, gy - 1, z), dirt);
+            fastSet(level, new BlockPos(xEnd, gy, z), gravel);
+            fastSet(level, new BlockPos(xEnd, gy + WALL_TOP_DY, z), glowstone);
+            // wood wall on a solid base
+            fastSet(level, new BlockPos(xEnd + 1, gy - 3, z), bedrock);
+            fastSet(level, new BlockPos(xEnd + 1, gy - 2, z), dirt);
+            fastSet(level, new BlockPos(xEnd + 1, gy - 1, z), dirt);
+            for (int y = gy; y <= yHi; y++) {
+                fastSet(level, new BlockPos(xEnd + 1, y, z), planks);
+            }
+            // bedrock core, full height
+            for (int y = gy - 3; y <= yHi; y++) {
+                fastSet(level, new BlockPos(xEnd + 2, y, z), bedrock);
+            }
+        }
+        // carry the E/W wall faces into the corner so there's no gap at the seam
+        for (int side : new int[] {1, -1}) {
+            for (int y = gy; y <= yHi; y++) {
+                fastSet(level, new BlockPos(xEnd, y, side * WALL_PLANK_Z), planks);
+            }
+            for (int y = gy - 3; y <= yHi; y++) {
+                fastSet(level, new BlockPos(xEnd, y, side * WALL_BEDROCK_Z), bedrock);
+            }
+        }
+    }
+
+    private static void spawnHorse(ServerLevel level, int floorY, double x, double z, Sex sex,
+                                   String geneticCode) {
         Horse horse = EntityType.HORSE.create(level, EntitySpawnReason.COMMAND);
         if (horse == null) {
             return;
         }
         horse.setPos(x, floorY, z);
-        HorseRecords.apply(horse, HorseRecords.newFounder(horse, new NeoRng(horse.getRandom()), sex));
+        // Record applied before the entity joins, so HorseGeneticsEventHandler
+        // sees a real record and doesn't roll a random genotype over the top.
+        HorseRecords.apply(horse,
+                HorseRecords.newFounder(horse, new NeoRng(horse.getRandom()), sex, geneticCode));
         level.addFreshEntity(horse);
     }
 
@@ -471,25 +680,31 @@ public final class DebugPenManager {
 
     // --- teardown ---
 
+    /**
+     * Clear a plot on the way out: <b>entities only</b>. Everything that isn't a
+     * player is discarded, and any horse among them is dropped from the ancestry
+     * database too - otherwise every visit would leave hundreds of throwaway
+     * gallery records in the save forever. (Records that merely *reference* a
+     * forgotten horse as a parent are left alone; {@code ancestorsOf} already
+     * skips ancestors it can't find.) Tamed horses have already been moved out
+     * by {@link #evacuateTamedHorses} before this runs, so they're never caught
+     * here.
+     *
+     * <p>The <b>blocks are deliberately left standing</b>. The gallery is
+     * deterministic now - same catalogue, same {@link #PLOT_BASE_Y}, same
+     * geometry - so a plot rebuilt on a recycled X lands exactly on top of the
+     * old one and overwrites it, and there's nothing to gain from air-filling
+     * the corridor first (which, at catalogue length, was going to be a very
+     * expensive way to leave).
+     */
     private static void tearDown(ServerLevel level, Plot plot) {
-        AABB box = plotBox(plot);
-        int xLo = plot.originX - 5;
-        int xHi = plot.originX + (plot.highestIndex + 1) * PERIOD + 3;
-        int yLo = plot.baseY - 4;
-        int yHi = plot.baseY + WALL_TOP_DY + 2;
-
-        for (Entity e : level.getEntities((Entity) null, box, e -> !(e instanceof ServerPlayer))) {
-            e.discard();
-        }
-
-        BlockState air = Blocks.AIR.defaultBlockState();
-        BlockPos.MutableBlockPos m = new BlockPos.MutableBlockPos();
-        for (int x = xLo; x <= xHi; x++) {
-            for (int y = yLo; y <= yHi; y++) {
-                for (int z = -WALL_BEDROCK_Z - 1; z <= WALL_BEDROCK_Z + 1; z++) {
-                    level.setBlock(m.set(x, y, z), air, 2);
-                }
+        HorseAncestryData ancestry = level.getServer() == null
+                ? null : HorseAncestryData.get(level.getServer());
+        for (Entity e : level.getEntities((Entity) null, plotBox(plot), e -> !(e instanceof ServerPlayer))) {
+            if (ancestry != null && e instanceof Horse horse && HorseRecords.hasRealRecord(horse)) {
+                ancestry.forget(HorseRecords.of(horse).id());
             }
+            e.discard();
         }
         FREE_ORIGINS.add(plot.originX);
     }

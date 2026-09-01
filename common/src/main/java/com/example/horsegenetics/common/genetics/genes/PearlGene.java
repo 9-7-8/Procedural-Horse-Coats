@@ -4,6 +4,7 @@ import com.example.horsegenetics.common.Rng;
 import com.example.horsegenetics.common.coat.pattern.CoatBuildContext;
 import com.example.horsegenetics.common.coat.pattern.CreamPearlDilution;
 import com.example.horsegenetics.common.genetics.Allele;
+import com.example.horsegenetics.common.genetics.DominancePattern;
 import com.example.horsegenetics.common.genetics.AllelePair;
 import com.example.horsegenetics.common.genetics.Gene;
 import com.example.horsegenetics.common.genetics.Genotype;
@@ -31,6 +32,9 @@ public final class PearlGene implements Gene {
     @Override public String key() { return KEY; }
     @Override public List<Allele> alleles() { return alleles; }
     @Override public Allele wildType() { return N; }
+
+    /** IncompleteDominant: {@code prl/prl} is the mild uniform dilution and {@code Cr/prl} a double cream - the heterozygote is its own thing. */
+    @Override public DominancePattern dominance() { return DominancePattern.INCOMPLETE_DOMINANT; }
 
     @Override
     public int precedence(Allele allele) {

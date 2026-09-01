@@ -68,6 +68,15 @@ public final class HorseAncestryData extends SavedData implements HorseDatabase 
     }
 
     @Override
+    public boolean forget(UUID id) {
+        if (!delegate.forget(id)) {
+            return false;
+        }
+        setDirty();
+        return true;
+    }
+
+    @Override
     public int offspringCount(UUID parentA, UUID parentB) {
         return delegate.offspringCount(parentA, parentB);
     }

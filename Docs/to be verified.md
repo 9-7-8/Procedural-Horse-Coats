@@ -32,12 +32,44 @@ see CLAUDE.md "Running the game".
 
 ## Wanted (not built yet)
 
+- [ ] **Splash isn't really incomplete dominant** - it's tagged
+  `INCOMPLETE_DOMINANT` (so the catalogue gives `Spl/spl` and `Spl/Spl` their
+  own pens) but `SplashGene.restrict` never reads the dose, so the two render
+  identically. Homozygous splash should give **much larger** markings - higher
+  stockings, a wide blaze or bald face, body patches. Compare gallery pens
+  **#11 `eeaa nSpl`** and **#19 `eeaa SplSpl`** - identical today, and the
+  clearest place to check the fix.
 - [ ] **Genetic eye colour** - the eyes themselves render correctly everywhere,
   but they're copied verbatim from the template (`CoatRegions.redrawEyes`).
   Wants a gene, and the classic hook is blue eyes on cream double-dilutes.
 
 ## Still to verify
 
+- [ ] **The genotype gallery** (new, 2026-09-01) - the horse dimension now
+  builds one pen per entry in `GenotypeCatalog`: **434** visually distinct
+  genotypes out of 19 683 total, two per segment, right-hand pen = even index,
+  **1 519 blocks** of corridor. Check in-game:
+  - the entrance sign three blocks in front of the return portal reads
+    `Genotypes / 19,683 / Distinct / 434 pens`;
+  - the first six pens, right/left alternating, are `eeaa`, `EEaa`, `eeAA`,
+    `EEAA`, `EEaa WW`, `EEaa TT` - i.e. extension exhausts before agouti moves,
+    no heterozygote pens for dominant genes, and white and test get exactly one
+    pen each;
+  - pen signs read like the horse's own info panel (`eeaa nSpl`, not the full
+    slash-and-dash code), wrap sensibly on the busiest ones
+    (`EEAA SplSpl / ChCh CrCr / prlprl GG`) and don't run past the sign edge;
+  - the gate sign really is to the **right** of the gate on both sides of the
+    road (the two sides mirror), stands on the road surface, is readable from
+    both faces, and is **waxed** (right-click doesn't open the edit screen);
+  - both horses in a pen match the sign, and differ only where a
+    non-deterministic gene (bay points, splash) makes them differ;
+  - the corridor ends in a wall after pen 434 - now a walkable distance.
+- [ ] **Leaving no longer clears blocks** - `tearDown` discards entities and
+  forgets their ancestry records only. Check: leave and re-enter; the corridor
+  is rebuilt over the old one with no leftovers, stragglers, or doubled horses,
+  and leaving is instant. Then leave, re-enter, and walk *less* far than last
+  time - the stale far end should still be correct geometry with no horses
+  until you walk to it.
 - [ ] **Foals** - the owner has only spot-checked these; needs a real pass.
   Every treatment should apply on `HdBabyHorseModel` (bay foal with black
   points + leg black, splash foal with white socks, champagne foal gold, a grey

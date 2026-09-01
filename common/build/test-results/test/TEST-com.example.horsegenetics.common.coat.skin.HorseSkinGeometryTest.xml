@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.example.horsegenetics.common.coat.skin.HorseSkinGeometryTest" tests="12" skipped="0" failures="0" errors="0" timestamp="2026-09-01T16:33:15.164Z" hostname="PERDIX" time="0.046">
+<testsuite name="com.example.horsegenetics.common.coat.skin.HorseSkinGeometryTest" tests="12" skipped="0" failures="0" errors="0" timestamp="2026-09-01T19:40:39.214Z" hostname="PERDIX" time="0.116">
   <properties/>
   <testcase name="faceOrientationIsUprightAndNotMirrored()" classname="com.example.horsegenetics.common.coat.skin.HorseSkinGeometryTest" time="0.002"/>
   <testcase name="hoovesSitAtYZero()" classname="com.example.horsegenetics.common.coat.skin.HorseSkinGeometryTest" time="0.001"/>
   <testcase name="outOfBoundsQueryClampsAndFlags()" classname="com.example.horsegenetics.common.coat.skin.HorseSkinGeometryTest" time="0.0"/>
   <testcase name="positiveZIsTheHorsesRight()" classname="com.example.horsegenetics.common.coat.skin.HorseSkinGeometryTest" time="0.0"/>
   <testcase name="allFourLegsShareTheSameXBandFrontVsHind()" classname="com.example.horsegenetics.common.coat.skin.HorseSkinGeometryTest" time="0.0"/>
-  <testcase name="bodyIsCentredOnZ()" classname="com.example.horsegenetics.common.coat.skin.HorseSkinGeometryTest" time="0.0"/>
-  <testcase name="everyFaceRectStaysOnTheSheet()" classname="com.example.horsegenetics.common.coat.skin.HorseSkinGeometryTest" time="0.013"/>
-  <testcase name="projectRoundTripsThroughSampleForEveryMappedTexel()" classname="com.example.horsegenetics.common.coat.skin.HorseSkinGeometryTest" time="0.024"/>
-  <testcase name="noseIsTheGlobalMaxX()" classname="com.example.horsegenetics.common.coat.skin.HorseSkinGeometryTest" time="0.002"/>
-  <testcase name="xGradientIsContinuousFromBodyOntoAHindLeg()" classname="com.example.horsegenetics.common.coat.skin.HorseSkinGeometryTest" time="0.0"/>
+  <testcase name="bodyIsCentredOnZ()" classname="com.example.horsegenetics.common.coat.skin.HorseSkinGeometryTest" time="0.001"/>
+  <testcase name="everyFaceRectStaysOnTheSheet()" classname="com.example.horsegenetics.common.coat.skin.HorseSkinGeometryTest" time="0.016"/>
+  <testcase name="projectRoundTripsThroughSampleForEveryMappedTexel()" classname="com.example.horsegenetics.common.coat.skin.HorseSkinGeometryTest" time="0.077"/>
+  <testcase name="noseIsTheGlobalMaxX()" classname="com.example.horsegenetics.common.coat.skin.HorseSkinGeometryTest" time="0.006"/>
+  <testcase name="xGradientIsContinuousFromBodyOntoAHindLeg()" classname="com.example.horsegenetics.common.coat.skin.HorseSkinGeometryTest" time="0.001"/>
   <testcase name="tailBackEdgeSitsAtXZero()" classname="com.example.horsegenetics.common.coat.skin.HorseSkinGeometryTest" time="0.001"/>
-  <testcase name="mirrorPartsHaveMirroredZAndIdenticalXY()" classname="com.example.horsegenetics.common.coat.skin.HorseSkinGeometryTest" time="0.0"/>
+  <testcase name="mirrorPartsHaveMirroredZAndIdenticalXY()" classname="com.example.horsegenetics.common.coat.skin.HorseSkinGeometryTest" time="0.001"/>
   <system-out><![CDATA[]]></system-out>
   <system-err><![CDATA[]]></system-err>
 </testsuite>

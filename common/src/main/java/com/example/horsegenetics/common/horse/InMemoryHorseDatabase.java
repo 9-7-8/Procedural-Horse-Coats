@@ -40,6 +40,11 @@ public final class InMemoryHorseDatabase implements HorseDatabase {
     }
 
     @Override
+    public boolean forget(UUID id) {
+        return byId.remove(id) != null;
+    }
+
+    @Override
     public int offspringCount(UUID parentA, UUID parentB) {
         int count = 0;
         for (HorseRecord record : byId.values()) {

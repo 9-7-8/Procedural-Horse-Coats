@@ -29,9 +29,10 @@ why the logic is quarantined in a game-free module.
 
 ## Status snapshot (keep this current)
 
-- **`common/`** - compiles; **106 JUnit tests pass** (`./gradlew :common:test`).
+- **`common/`** - compiles; **117 JUnit tests pass** (`./gradlew :common:test`).
   Covers `genetics/` (allele/gene model - 9 genes incl. grey / cream / pearl / splash, `Genotype` code
-  round-trip, breeding), `coat/` + `coat/pattern/` (the overlay pipeline -
+  round-trip, breeding, `DominancePattern` + the `GenotypeCatalog` reduction of
+  19 683 genotypes to 434 distinct coats), `coat/` + `coat/pattern/` (the overlay pipeline -
   `CoatTextureComposer`, `GradientLut`, `BayCoat`, `CoatRegions`, the genes,
   `CoatTextureId` texture-id injectivity),
   `coat/skin/` (`HorseSkinGeometry`), `name/` (`breedNth`),
@@ -99,10 +100,17 @@ why the logic is quarantined in a game-free module.
     combined genetic code, and (for the pairing's **first** foal) a name
     combining both parents.
 
+- **Built 2026-09-01, NOT yet play-tested:** the **genotype gallery** rework of
+  the horse dimension - one pen per visually distinct genotype (434 of 19 683),
+  per-pen genotype signs, the entrance tally sign, `Gene.dominance()` metadata,
+  and the entity-only teardown that leaves blocks standing. Compiles, 117
+  `common` tests pass, nothing seen in-game yet. Details in the horse-dimension
+  section below; the in-game checklist is the top item in
+  **`Docs/to be verified.md`**.
 - **Open issues + NOT verified in-game:** see **`Docs/to be verified.md`**.
-  Open issues are grey and splash's face markings + leg edges; the top
-  unverified item is **foals** (only spot-checked). Update it after each
-  `runClient`.
+  Open issues are grey, and splash (face markings, leg edges, and it not
+  reading its own dose); after the gallery, the top unverified item is
+  **foals** (only spot-checked). Update it after each `runClient`.
 - **Machine caveat (this dev laptop):** hybrid graphics (NVIDIA RTX 3050 Ti +
   AMD integrated). `java.exe`/`javaw.exe` are pinned to the NVIDIA GPU and the
   FML splash is disabled, or the JVM hard-crashes in the AMD GL driver. See
@@ -177,17 +185,25 @@ handling** - dev only, no saves to keep.
 cream, pearl - **append** new ones. **Full per-gene detail is in `Gene
 Dict.md`** (natural genes first, then non-natural); one-liners:
 
-| gene | alleles | in the wild | coat effect |
-|------|---------|-------------|-------------|
-| extension | `E`/`e` | 50/50 | `ee` = black restricted → chestnut |
-| agouti | `A`/`a` | 50/50 | `A_` = bay + random leg/face black; a high roll = seal (non-det) |
-| white | `W`/`w` | 1/50 | `W_` = all pigment gone → transparent |
-| test | `T`/`t` | 1/4 carrier | `T_` = paint the `TestCoatPattern` gradient **flat on top**, last (only **non-natural** gene; visible on any base incl. white) |
-| champagne | `Ch`/`c` | 1/40 | dilute toward the gradient's gold; keeps bay's points chocolate (amber champagne) |
-| splash | `Spl`/`spl` | 1/20 | random white socks + face blaze (non-det) - **open issue:** only the blaze, and the sock edges are a hard ring |
-| grey | `G`/`g` | 1/16 | **adults only** - equally restrict both pigments to 0.15; foal born base colour - **open issue:** reads flat/near-white, wants a rework |
-| cream | `Cr`/`N` | 1/30 | incomplete-dominant dilution; interacts with pearl; never leaves a pitch-black point |
-| pearl | `prl`/`N` | 1/22 | recessive dilution; `prl/prl` no-cream = mild uniform; `Cr/prl` = double cream |
+| gene | alleles | dominance | in the wild | coat effect |
+|------|---------|-----------|-------------|-------------|
+| extension | `E`/`e` | dominant | 50/50 | `ee` = black restricted → chestnut |
+| agouti | `A`/`a` | dominant | 50/50 | `A_` = bay + random leg/face black; a high roll = seal (non-det) |
+| white | `W`/`w` | **complete** | 1/50 | `W_` = all pigment gone → transparent; masks every other gene |
+| test | `T`/`t` | **complete** | 1/4 carrier | `T_` = paint the `TestCoatPattern` gradient **flat on top**, last (only **non-natural** gene; visible on any base incl. white) |
+| champagne | `Ch`/`c` | dominant | 1/40 | dilute toward the gradient's gold; keeps bay's points chocolate (amber champagne) |
+| splash | `Spl`/`spl` | incomplete\* | 1/20 | random white socks + face blaze (non-det) - **open issue:** only the blaze, the sock edges are a hard ring, and \*it doesn't read its dose yet (`Spl/Spl` should be much bigger markings) |
+| grey | `G`/`g` | dominant | 1/16 | **adults only** - equally restrict both pigments to 0.15; foal born base colour - **open issue:** reads flat/near-white, wants a rework |
+| cream | `Cr`/`N` | incomplete | 1/30 | incomplete-dominant dilution; interacts with pearl; never leaves a pitch-black point |
+| pearl | `prl`/`N` | incomplete | 1/22 | dilution; `prl/prl` no-cream = mild uniform; `Cr/prl` = double cream |
+
+**`Gene.dominance()`** (`common/genetics/DominancePattern`) is declared
+metadata on every gene: `DOMINANT` / `RECESSIVE` / `INCOMPLETE_DOMINANT` /
+`COMPLETE_DOMINANT` (= dominant **and** epistatic - while it shows, nothing
+else is visible). `heterozygoteIsDistinct()` and `masksOtherGenes()` are the
+two questions callers ask. Today's only consumer is `GenotypeCatalog`'s
+gallery reduction, but it's per-gene metadata so a punnett/breeding UI can use
+it too. No gene is `RECESSIVE` yet.
 
 Cream + Pearl are allelic in reality; here two genes, combined once in
 `coat.pattern.CreamPearlDilution` (dose table in `Docs/Gene Dict.md`).
@@ -625,14 +641,25 @@ breaking existing save data mid-session; treat the names as legacy.
 
 `dimension/debug_pens.json` generates **nothing** (`the_void` biome, one
 `air` layer). Every visit gets its own `DebugPenManager.Plot`: a corridor
-built at a unique world X (`PLOT_SPACING_X` = 20 000 apart, X slots recycled
-via a free-list) and a **random Y** (`PLOT_MIN_Y` + rand `PLOT_Y_RANGE`).
-Plots never share chunks - "two players never land in the same place" holds
-on a server with no real per-player-dimension work.
+built at a unique world X (`PLOT_SPACING_X` = the catalogue corridor + 1 000
+= **2 526** blocks apart, X slots recycled via a free-list) and a **fixed Y**
+(`PLOT_BASE_Y` = 128). Plots never share chunks - "two players never land in
+the same place" holds on a server with no real per-player-dimension work.
 
 `PLOTS` is `Map<UUID player, Plot>`, strictly 1:1 - every `enter()` makes a
 new plot and tears down that player's previous one, so a revisit always
-regenerates and nothing left behind survives.
+regenerates and no live horse left behind survives.
+
+**Leaving clears entities, not blocks.** The gallery is deterministic (fixed
+catalogue, fixed `PLOT_BASE_Y`, fixed length), so an X slot handed back to the
+free list is rebuilt with byte-identical geometry and the stale corridor is
+overwritten in place - there's nothing to gain from air-filling it first.
+`tearDown` is therefore O(entities), not O(blocks walked). It also
+`HorseAncestryData.forget(...)`s each discarded horse, or every visit would
+leave ~868 throwaway gallery records in the save forever. (A record that
+*references* a forgotten horse as a parent is left alone - `ancestorsOf`
+already skips ancestors it can't find, so a foal bred in the dimension and
+taken home keeps working with a missing parent node.)
 
 - `teleportAndGenerate(player)` (F6) -> `enter(player, player's current dim,
   player's current pos)`.
@@ -640,7 +667,8 @@ regenerates and nothing left behind survives.
   build the return portal, teleport to `(originX + 3.5, baseY + 1, 0.5)`
   facing +X, drop a **paper** in the first free hotbar slot.
 - `leave(server, playerUUID)` -> `tearDown`: discard non-player entities in
-  the plot AABB, air-fill every block, return the X slot. Fired from
+  the plot AABB, forget their ancestry records, return the X slot. **Blocks are
+  left standing** (see above). Fired from
   `PortalEventHandler.onChangedDimension` (from == DEBUG_LEVEL) and
   `onLogout`.
 - **Leaving takes your horses.** As a player's exit-portal dwell hits tick 1
@@ -662,6 +690,51 @@ regenerates and nothing left behind survives.
   with no live plot (server restart) to the overworld spawn.
 - `DebugPenTickHandler` (`PlayerTickEvent.Post`, **not** dev-gated anymore)
   -> `ensureGeneratedAheadOfPlayer(player)` extends the corridor as you walk.
+
+### The gallery: one pen per *visually distinct* genotype (`common/genetics/GenotypeCatalog`)
+
+The dimension is a **gallery of the genotype catalogue** - two horses for every
+genotype that looks different from every other.
+
+- **`GenotypeCatalog`** (pure `common/`, unit-tested) is the enumeration.
+  `allPairsOf(gene)` = every unordered `AllelePair`, **least dominant first**
+  (`ee`, `Ee`, `EE`); `distinctPairsOf(gene)` applies the dominance reduction;
+  `totalGenotypes()` = the raw product (**19 683**); `size()` = the reduced
+  catalogue (**434**); `get(i)` / `entries()` read the list, built once at class
+  load. Nothing is hard-coded - register a gene (or an allele) and the
+  catalogue, the corridor length and both signs widen on their own.
+- **Two reductions**, both driven by `Gene.dominance()` (see below):
+  - a gene whose heterozygote isn't distinct (`DOMINANT` / `RECESSIVE`)
+    contributes only its **homozygotes** - `ee`/`EE`, not `Ee`;
+  - a `COMPLETE_DOMINANT` gene **masks everything else**, so the catalogue keeps
+    exactly **one** entry for it: the variant homozygote with every other gene
+    at wild type. Hence one white pen (`EEaa WW`, #5) and one test pen
+    (`EEaa TT`, #6) instead of a quarter of the corridor each.
+  - Net: `2·2·2·3·2·3·3 = 432` unmasked + 1 white + 1 test = **434**.
+- **Pen order**: segment `i` holds catalogue entry `2i` in the **right-hand**
+  pen (`NORTH_PEN`, the `+Z` side - your right walking in from the portal) and
+  `2i+1` on the left. The corridor reads `eeaa, EEaa, eeAA, EEAA, [white],
+  [test], eeaa ChCh, ...`: extension exhausts before agouti moves. With an odd
+  catalogue the final left-hand pen is simply not built.
+- **Both horses in a pen share the genotype** but not the epigenetic seed, so
+  they're two examples rather than two copies.
+- **Signs** (`placeSign`, waxed standing oak, same text on both faces):
+  - per pen, on the road one block out from the wall and **to the right of the
+    gate** as you face the pen (`roadFacing().getOpposite().getClockWise()`, so
+    the two sides of the road mirror): line 0 = `#<1-based catalogue number>`,
+    then **`GeneCodeDisplay.shortForm`** - the same compact form the info panel
+    and paper dump use, so a plain horse reads `eeaa`, not a wall of wild-type
+    slots - greedily wrapped over the remaining 3 lines by
+    `GeneCodeDisplay.wrap(genotype, 3, 15)`. A unit test asserts every
+    catalogue entry fits (widest today: `eeaa SplSpl nCr`, 15 chars / ~80 px of
+    a 90 px line).
+  - `originX + 4` (three blocks in front of the return portal), facing west at
+    the player's spawn: `Genotypes / 19,683 / Distinct / 434 pens`. Epigenetics
+    are deliberately not counted in either number.
+- **Length**: `LAST_SEGMENT_INDEX` = `ceil(size / 2) - 1` = 216, so the corridor
+  is **1 519 blocks**. `ensureBuiltUpToIndex` clamps to it and calls
+  `buildEndCap` (the mirror of `buildStartCap`) on the last segment. Pens are
+  still built lazily as you walk.
 
 ### Layout (`DebugPenManager`)
 
@@ -703,9 +776,10 @@ road (gravel z -3..3) | pen 6x20 (brick walls) | gravel strip + glowstone above 
   and left a gap; hence everything now stands on bedrock/dirt.)
 - Pens repeat every `PERIOD` (= `PEN_LEN_X + 1` = 7); `LOOKAHEAD_PENS` = 30
   built up front.
-- Each pen: **one mare + one stallion** (`spawnHorse(..., Sex)` pre-sets the
-  founder record so `onHorseJoin` doesn't re-roll sex; `newFounder` also
-  copies the entity's speed/health onto the record).
+- Each pen: **one mare + one stallion** (`spawnHorse(..., Sex, geneticCode)`
+  pre-sets the founder record so `onHorseJoin` doesn't re-roll sex *or*
+  genotype; `newFounder` also copies the entity's speed/health onto the
+  record).
 - Horses in `DEBUG_LEVEL` **take no damage**
   (`HorseGeneticsEventHandler.noHorseDamageInDebugDimension` cancels
   `LivingIncomingDamageEvent` for any `AbstractHorse`).
@@ -775,10 +849,12 @@ shortcut - right-clicking a `hay_portal` while leading a horse sends it through
 and drops the lead.
 **Still unverified**: whether the 10 s player dwell feels too long.
 
-Known limitation: `PLOTS` is in-memory, so a server restart orphans blocks a
-dead plot left in the void (harmless - 20k+ blocks away, and `onLogin` keeps
-players out). `tearDown` air-fills the whole plot AABB (~150k `setBlock`)
-each exit - fine for now.
+Known limitation: `PLOTS` is in-memory, so a server restart orphans a dead
+plot's blocks **and its horses** in the void (harmless - the next plot at that
+X rebuilds identical geometry over them, `buildPen` sees the surviving horses
+and doesn't double-spawn, and `onLogin` keeps players out of a plotless
+dimension). Their ancestry records are the one thing that leaks on a crash;
+a clean exit forgets them.
 
 ## Known gaps / next steps
 
@@ -797,6 +873,12 @@ yet)** - full detail in `Docs/to be verified.md`:
   the face-marking family (star, snip, stripe, bald face), and
   `whitenLowerLeg`'s hard `y <= cutoff` cut makes each sock a perfect ring -
   wants epigenetic jitter or the `BayCoat.fade` smoothstep treatment.
+- **Splash isn't actually incomplete dominant.** It's *tagged*
+  `INCOMPLETE_DOMINANT` (so the gallery gives `Spl/spl` and `Spl/Spl` their own
+  pens) but `restrict` never reads the dose, so the two render identically.
+  Homozygous splash should be **much bigger** - higher stockings, a wide blaze
+  or bald face, body patches. Gallery pens **#11** and **#19** are the side-by-
+  side check.
 
 Design follow-ups (not just "go look at it"):
 
@@ -817,7 +899,11 @@ Design follow-ups (not just "go look at it"):
 6. **`breedNth` foal names past foal 1** / **`FamilyTreeScreen` scroll mode** /
    **stats surfaces** / **water-riding feel** / **epigenetic seed across a
    save-reload** - see `Docs/to be verified.md`.
-7. **Cleanups**: rename `DebugPenManager` / `DEBUG_LEVEL` /
+7. **Use `Gene.dominance()` beyond the gallery** - the metadata is on every
+   gene now (`DominancePattern`), but only `GenotypeCatalog` reads it. Obvious
+   next consumers: a punnett/expected-foal display, "carrier" wording in the
+   info panel, and `GeneCodeDisplay` deciding what's worth printing.
+8. **Cleanups**: rename `DebugPenManager` / `DEBUG_LEVEL` /
    `horsegenetics:debug_pens` to non-"debug" names (needs a save-data
    migration or a one-time reset); fold speed/health into the gene model; a
    `.gitignore`; name-generation rework; real white-fog dimension effects

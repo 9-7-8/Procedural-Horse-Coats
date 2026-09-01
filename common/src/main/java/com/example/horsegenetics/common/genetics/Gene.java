@@ -41,6 +41,14 @@ public interface Gene {
     Allele wildType();
 
     /**
+     * How this gene's variant expresses against {@link #wildType()} - metadata,
+     * declared per gene rather than inferred. See {@link DominancePattern};
+     * {@link GenotypeCatalog} reads it to decide which pairs are visually
+     * distinct.
+     */
+    DominancePattern dominance();
+
+    /**
      * A <b>natural</b> gene only restricts red / black pigment ({@link #restrict});
      * it never paints colour directly. Non-natural genes (only Test so far) are
      * painted flat on top after the pigment field is resolved.
