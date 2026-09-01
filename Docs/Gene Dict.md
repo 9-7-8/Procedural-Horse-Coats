@@ -2,7 +2,7 @@
 
 Every gene in the horse-genetics model. Code in `common/genetics/genes/`,
 registered in `common/genetics/Genes.java`. See **CLAUDE.md** for the
-architecture, **breeding.md** for inheritance.
+architecture, **Docs/breeding.md** for inheritance.
 
 ---
 
@@ -118,6 +118,19 @@ always black (`HOOF_FRACTION` = 0.12).
 **Seal brown** is just the top of this distribution - a high leg/face roll
 ("black creeps most of the way up"). There is no separate seal gene.
 
+Owner-verified in-game **2026-09-01**: agouti renders correctly, the leg/face
+fade reads right, and seal-as-a-high-roll works.
+
+> **Open issue - bay's black does not take dilution.** `BayCoat` paints its
+> points *absolutely* (`CoatRegions.blackenPart` / `blackenLowerLeg` /
+> `rampBlack*` all do `setBlack(1.0)` + `setRed(0.0)`), and agouti runs
+> **before** cream / pearl / champagne in `Genes.naturalOrder()`. So a diluted
+> bay - buckskin, perlino, pearl bay, amber champagne - still renders **jet
+> black** points instead of the smoky tone the dose table calls for. Fix needs
+> the ordering and `CreamPearlDilution` looked at together; a *relative* bay
+> point (`restrictBlack`-style, or a post-dilution re-application) would
+> compose properly.
+
 ## `horsegenetics.cream` - Cream  &  `horsegenetics.pearl` - Pearl
 
 Real-horse `SLC45A2`: allelic. Modelled here as **two genes** whose combined
@@ -180,6 +193,13 @@ dominant white's total. A **foal** is born whatever colour it would be without
 grey; `restrict` no-ops for `!ctx.isAdult()`. (Real grey is progressive with
 age; this is one flat adult step - no year-by-year age input.)
 
+> **Open issue - grey renders wrong; wants a rework, not a knob turn.** Seen
+> in-game 2026-09-01. At `KEEP = 0.15` the body samples the gradient's
+> near-white corner (roughly `(227,221,215)`), so a grey reads as flat and
+> washed-out rather than as a dapple-grey. The flat single-step model is the
+> real problem: this wants progressive greying driven by an **age input to the
+> pipeline** plus actual dappling, not a different `KEEP`.
+
 ## `horsegenetics.white` - Dominant white
 
 | | |
@@ -190,7 +210,9 @@ age; this is one flat adult step - no year-by-year age input.)
 | deterministic? | yes |
 
 `W_` sets red = black = 0 everywhere → transparent overlay → the white
-template shows through, masking every other gene.
+template shows through, masking every other gene. This is the **only** coat
+that should ever look like the bare template - if a chestnut or bay does, see
+`CoatTextureId` in CLAUDE.md (fixed 2026-09-01).
 
 ## `horsegenetics.splash` - Splash white
 
@@ -205,8 +227,15 @@ Random white markings, "dipped in white from below". Removes both pigments
 (→ transparent → white template) up **each leg independently** a random amount
 (`0.15 + f*f*0.75` of leg height - socks .. stockings) plus a random
 **face blaze** down the centreline (`whitenBlaze`: random half-width
-`0.4 + f*1.4` body units, length `0.2 + f*0.75` of the head). Flat white
-edges for now.
+`0.4 + f*1.4` body units, length `0.2 + f*0.75` of the head).
+
+Owner-verified in-game **2026-09-01**: what's implemented renders correctly.
+
+> **Open issue - two gaps.** (1) The blaze is the **only** face marking; the
+> rest of the family (star, snip, stripe, bald face) isn't built. (2)
+> `CoatRegions.whitenLowerLeg` cuts at a hard `point.y() <= cutoff`, so every
+> sock ends in a **perfect ring**. Break the edge up - per-texel epigenetic
+> jitter, or the smoothstep treatment `BayCoat.fade` already uses.
 
 ---
 
@@ -238,6 +267,12 @@ All take a `Skin`. `fillMane` / `fillTail` / `fillEars` / `fillHooves`,
 (adult: 2x2 pupil + 2x2 sclera per eye; foal: 2x2 pupil - the baby texture has
 no bright sclera). Parts a mesh doesn't have (a foal has no MANE / MUZZLE) are
 silently skipped.
+
+**Eyes** are owner-verified in-game 2026-09-01: they survive the coat on every
+horse seen, adult and foal. They are still copied **verbatim from the
+template**, though - *wanted:* a **genetic eye-colour** gene. The classic hook
+is blue eyes on cream double-dilutes (`Cr/Cr`, `Cr/prl`), which would make it
+the first gene to read the cream/pearl dose for something other than pigment.
 
 ## Adding a gene
 

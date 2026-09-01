@@ -9,21 +9,22 @@ stats, and an epigenetic seed; and there's a self-contained "horse dimension"
 reached by a hay-bale portal. Long-term aim is a 1.12.2 backport, which is
 why the logic is quarantined in a game-free module.
 
-**Docs split:**
+**Docs split:** everything except `README.md` and `CLAUDE.md` lives in
+**`Docs/`**. New dev docs go there too - keep the repo root to those two.
 - **`README.md`** is **user-facing only** now - what the mod does, how to play
   it, install, license. No status tables, no architecture, no API notes.
   Don't put dev content there.
 - **`CLAUDE.md`** (this file) is the dev/working notes: status, the 26.1.2 API
   differences, gotchas, next steps.
-- **`breeding.md`** is the single source of truth for the breeding / horse-
+- **`Docs/breeding.md`** is the single source of truth for the breeding / horse-
   record / pedigree / **stat-inheritance** system. Keep it current when you
   touch any of that; don't re-document it here or in README (a pointer is
   fine).
-- **`Gene Dict.md`** is the single source of truth for **each gene** - alleles,
+- **`Docs/Gene Dict.md`** is the single source of truth for **each gene** - alleles,
   generation function, wild frequency, dominance, natural/non-natural. Update
   it in the same change as any gene; CLAUDE.md keeps only the machinery + a
   one-line-per-gene table.
-- **`to be verified.md`** is the rolling **`runClient` checklist** - what's
+- **`Docs/to be verified.md`** is the rolling **`runClient` checklist** - what's
   built but not yet confirmed in-game. Update after every play session.
 
 ## Status snapshot (keep this current)
@@ -34,14 +35,36 @@ why the logic is quarantined in a game-free module.
   `CoatTextureComposer`, `GradientLut`, `BayCoat`, `CoatRegions`, the genes,
   `CoatTextureId` texture-id injectivity),
   `coat/skin/` (`HorseSkinGeometry`), `name/` (`breedNth`),
-  `horse/` (pedigree + `HorseStats` -> `breeding.md`).
+  `horse/` (pedigree + `HorseStats` -> `Docs/breeding.md`).
 - **`neoforge-26.1.2/`** - compiles and assembles (`./gradlew
   :neoforge-26.1.2:build` passes; only two `getGuiLeft/getGuiTop`
   deprecation warnings) against the real NeoForge `26.1.2.100` SDK.
 - **`runServer`** - boots clean to `Done (...)! For help`; all dimensions,
   attachments, SavedData, payloads, the `hay_portal` block + block entity, and
   the `ClientConfig` all register with no errors.
-- **`runClient`** - actively play-tested over the 2026-08-30 session; see below.
+- **`runClient`** - actively play-tested over the 2026-08-30 and 2026-09-01
+  sessions; see below.
+
+- **Owner-verified in-game (2026-09-01):**
+  - **The coat pipeline end to end.** Wild spawns show a **wide variety** of
+    genotypes and every one renders its correct coat - **no more flat-white
+    horses**. That was the `CoatTextureId` fix (see the coat-pipeline section):
+    the old `sanitize()` lower-cased the texture key, folding all 19 683
+    genotypes onto 27 `Identifier`s.
+  - **Agouti / bay**: renders correctly, and **seal is properly gone as a gene**
+    - a high roll of bay's two epigenetic numbers gives the seal look.
+  - **Splash**: renders correctly (leg white + centreline blaze).
+  - **Eyes**: survive the coat on every horse seen, adult and foal.
+  - **`FamilyTreeScreen`**: correct in full - nodes, coats, layout.
+  - **Horse dimension**: correct in full, including the sunk pen amenities
+    (water cauldron + hay bale flush with the grass) keeping horses penned.
+  - **"Spawn Test Horse World"** title-screen button (dev only) works.
+  - **Clock on a tamed foal** ages it to adult **without** also seating the
+    player on it.
+  - **Roped-horse portal shortcut**: right-clicking a `hay_portal` while
+    leading a horse sends the horse through **and** drops the lead.
+  - Three rendering issues found in the same session are logged in
+    **`Docs/to be verified.md`** - see "Known gaps" below.
 
 - **Owner-verified in-game (2026-08-30):**
   - **Hay-bale portal**: golden-carrot lighting; the animated `hay_portal.png`
@@ -70,9 +93,10 @@ why the logic is quarantined in a game-free module.
     combined genetic code, and (for the pairing's **first** foal) a name
     combining both parents.
 
-- **NOT verified in-game:** see **`to be verified.md`** - the running checklist
-  (allele/gene rework + splash + the debug "Spawn Test Horse World" button are
-  the top items). Update it after each `runClient`.
+- **Open issues + NOT verified in-game:** see **`Docs/to be verified.md`**.
+  Open issues are the bay/dilution blend, grey, and splash's face markings +
+  leg edges; the top unverified item is **foals** (only spot-checked). Update
+  it after each `runClient`.
 - **Machine caveat (this dev laptop):** hybrid graphics (NVIDIA RTX 3050 Ti +
   AMD integrated). `java.exe`/`javaw.exe` are pinned to the NVIDIA GPU and the
   FML splash is disabled, or the JVM hard-crashes in the AMD GL driver. See
@@ -92,7 +116,7 @@ Two-module Gradle project, split deliberately:
     `src/main/resources/horsegenetics/names/`.
   - `horse/` - the pedigree domain model (`Sex`, `HorseRecord`,
     `HorseDatabase`, `InMemoryHorseDatabase`) and `HorseStats` (foal stat
-    roll) -> `breeding.md`.
+    roll) -> `Docs/breeding.md`.
   - `Rng` - the randomness seam (`nextFloat` / `nextBoolean` /
     `nextInt(bound)`), implemented by `NeoRng` (wraps `RandomSource`) and, in
     tests, `FakeRng`.
@@ -154,13 +178,13 @@ Dict.md`** (natural genes first, then non-natural); one-liners:
 | white | `W`/`w` | 1/50 | `W_` = all pigment gone → transparent |
 | test | `T`/`t` | 1/4 carrier | `T_` = paint the `TestCoatPattern` gradient **flat on top**, last (only **non-natural** gene; visible on any base incl. white) |
 | champagne | `Ch`/`c` | 1/40 | dilute toward the gradient's gold |
-| splash | `Spl`/`spl` | 1/20 | random white socks + face blaze (non-det) |
-| grey | `G`/`g` | 1/16 | **adults only** - equally restrict both pigments to 0.15 (pale dapple-grey); foal born base colour |
+| splash | `Spl`/`spl` | 1/20 | random white socks + face blaze (non-det) - **open issue:** only the blaze, and the sock edges are a hard ring |
+| grey | `G`/`g` | 1/16 | **adults only** - equally restrict both pigments to 0.15; foal born base colour - **open issue:** reads flat/near-white, wants a rework |
 | cream | `Cr`/`N` | 1/30 | incomplete-dominant dilution; interacts with pearl |
 | pearl | `prl`/`N` | 1/22 | recessive dilution; `prl/prl` no-cream = mild uniform; `Cr/prl` = double cream |
 
 Cream + Pearl are allelic in reality; here two genes, combined once in
-`coat.pattern.CreamPearlDilution` (dose table in `Gene Dict.md`).
+`coat.pattern.CreamPearlDilution` (dose table in `Docs/Gene Dict.md`).
 Seal has **no gene** - it's the top of agouti's random distribution.
 
 `Genotype.phenotype()` → coarse `CoatPhenotype` (`CHESTNUT`/`BLACK`/`BAY`/
@@ -176,7 +200,7 @@ chestnut; cream/pearl read each other). `Genotype.hasVisibleNonDeterministic()`
 ## The coat overlay pipeline (`common/coat/pattern/` + `client/GeneticCoatTextureFactory`)
 
 Coats are **generated** for every horse - adult *and* foal. Per-gene detail in
-**`Gene Dict.md`**; the machinery:
+**`Docs/Gene Dict.md`**; the machinery:
 
 - **`CoatData`** = `Genotype` + `long epigeneticSeed` (rolled once at birth,
   persisted). `textureKey()` = code, plus `@<seed>` only when non-deterministic;
@@ -212,11 +236,17 @@ Coats are **generated** for every horse - adult *and* foal. Per-gene detail in
   black, `(1,0)` = chestnut, `(0,0)` = white, champagne-gold column near the
   middle. `sample(red, black)`: `x = (1-red)*(w-1)`, `y = black*(h-1)`.
 - **`CoatRegions`** - reusable `Skin`-aware helpers (fill mane/tail/ears/hooves,
-  paint/blacken/whiten a leg, `whitenBlaze`, `redrawEyes`).
+  paint/blacken/whiten a leg, `whitenBlaze`, `redrawEyes`). **Open issue:**
+  `whitenLowerLeg` cuts at a hard `point.y() <= cutoff`, so every splash sock
+  ends in a perfect ring; and `whitenBlaze` is the only face marking there is.
 - **`BayCoat`** - the bay generator (two epigenetic numbers: one leg height,
   one face height; bottom `SOLID_PORTION` = **0.3** of the band solid, then a
   **smoothstep** fade to nothing - no hard cut-off line). Knobs: `BODY_BLACK`,
-  `HOOF_FRACTION`, `SOLID_PORTION`.
+  `HOOF_FRACTION`, `SOLID_PORTION`. Verified in-game 2026-09-01 (seal included).
+  **Open issue:** its points are set *absolutely* (`setBlack(1.0)` /
+  `setRed(0.0)` via `CoatRegions.blackenPart` / `blackenLowerLeg`) and agouti
+  runs before cream / pearl / champagne in `Genes.naturalOrder()`, so a bay's
+  black **does not take dilution** - a buckskin's points read jet, not smoky.
 - **`GeneticCoatTextureFactory`** (client) loads the adult + foal templates +
   gradient once, runs `compose`, uploads a `DynamicTexture`, caches by
   `textureKey()` + `:adult`/`:foal`, cleared on world exit.
@@ -293,7 +323,7 @@ approximate.
 
 ## Horse stats (speed / health)
 
-Domain side (roll band, record fields, breeding flow) is in **`breeding.md`**.
+Domain side (roll band, record fields, breeding flow) is in **`Docs/breeding.md`**.
 The Minecraft-attribute side, in `server/HorseRecords`:
 
 - `entitySpeed(horse)` / `entityHealth(horse)` =
@@ -505,8 +535,8 @@ This SDK is further from mainline 1.21.x than the version numbers suggest.
   back through the return portal).*
 - **Leash**: `Mob implements Leashable`; `isLeashed()`, `getLeashHolder()`
   (-> `Entity`), `dropLeash()` (drops the lead item), `removeLeash()` (no
-  drop). *Compiled; `dropLeash` runs in the evacuation path but the
-  roped-horse shortcut isn't separately confirmed.*
+  drop). *Verified 2026-09-01: the roped-horse portal shortcut sends the horse
+  through **and** drops the lead.*
 - **Event hooks used this pass**: `LivingIncomingDamageEvent` (cancelable,
   pre-mitigation - horse invulnerability); `EntityTickEvent.Post` (portal
   dwell timers, water riding, tamer tracking);
@@ -667,7 +697,9 @@ road (gravel z -3..3) | pen 6x20 (brick walls) | gravel strip + glowstone above 
   (`BlockEvent.EntityPlaceEvent`, which also covers `EntityMultiPlaceEvent`)
   both cancel in that dimension. Bucket/fluid placement isn't covered yet.
 - `HorseInteractionHandler` in `DEBUG_LEVEL`: **stick** tames an untamed
-  horse, **clock** ages a foal to adult (`setAge(0)`).
+  horse, **clock** ages a foal to adult (`setAge(0)`). *Verified 2026-09-01:
+  the clock ages a tamed foal without the interaction falling through to a
+  mount - see the `EntityInteract`-fires-on-both-sides note above.*
 - Non-horse mobs refused entry by
   `HorseGeneticsEventHandler.keepDebugDimensionHorsesOnly`.
 
@@ -721,8 +753,10 @@ on the server runtime classpath - `HorseRecords`' static
 animated portal texture (faces the player, opaque, 12->48 fps ramp); gold-dust
 swirl + chat countdown; cross-dimension `teleportTo` for horses; return
 teleport (tamed horses land beside the overworld portal, unharmed).
-**Still unverified**: the `PortalEventHandler.onRightClickBlock` roped-horse
-shortcut, and whether the 10 s player dwell feels too long.
+**Verified 2026-09-01:** the `PortalEventHandler.onRightClickBlock` roped-horse
+shortcut - right-clicking a `hay_portal` while leading a horse sends it through
+and drops the lead.
+**Still unverified**: whether the 10 s player dwell feels too long.
 
 Known limitation: `PLOTS` is in-memory, so a server restart orphans blocks a
 dead plot left in the void (harmless - 20k+ blocks away, and `onLogin` keeps
@@ -731,29 +765,48 @@ each exit - fine for now.
 
 ## Known gaps / next steps
 
-The **`runClient` checklist lives in `to be verified.md`** - what's built but
-unconfirmed in-game (currently: the allele/gene coat pipeline, splash, the
-debug "Spawn Test Horse World" button, plus older items). Keep that file
+The **`runClient` checklist lives in `Docs/to be verified.md`** - both the
+**open issues** found in-game and what's still unconfirmed. Keep that file
 current after each session.
+
+**Open rendering issues (found in-game 2026-09-01, deliberately not fixed
+yet)** - full detail in `Docs/to be verified.md`:
+
+- **Bay's black points ignore dilution.** On a bay carrying cream / pearl /
+  champagne, the leg / face / mane / tail black still renders **pure black**.
+  `BayCoat` sets those regions absolutely (`setBlack(1.0)` / `setRed(0.0)`) and
+  agouti runs *before* the dilutions in `Genes.naturalOrder()`, so the dilution
+  has nothing left to scale down (or scales red only). Look at the ordering and
+  `CreamPearlDilution` together; a relative bay point would compose better.
+- **Grey needs a rework, not a knob.** `KEEP = 0.15` flat on both pigments
+  lands the body in the gradient's near-white corner (~`(227,221,215)`) and
+  reads flat. Wants progressive-with-age + dapples, which needs an age input to
+  the pipeline.
+- **Splash is only the centreline blaze + plain socks.** Missing the rest of
+  the face-marking family (star, snip, stripe, bald face), and
+  `whitenLowerLeg`'s hard `y <= cutoff` cut makes each sock a perfect ring -
+  wants epigenetic jitter or the `BayCoat.fade` smoothstep treatment.
 
 Design follow-ups (not just "go look at it"):
 
 1. **Foal geometry is approximate** - `Skin.BABY` uses rest-pose AABBs and
    pre-resolved neck/head/ear pivots; markings on the foal face/neck can land
    loosely. Also the foal mesh has no MANE/MUZZLE part, so bay foal "black up
-   the face" is coarse.
-2. **White markings beyond splash** - the framework is ready (natural +
-   non-deterministic gene); blaze patterns, sock distributions, roan, rabicano
-   slot in the same way. Blue eyes on cream double-dilutes aren't done.
-3. **More loci** - dun, pearl-cream stacking nuance, sooty. Grey is a single
-   flat adult step (no year-by-year age input).
-4. **Coat realism** - flat gradient sample per pixel (no dappling, sooty
+   the face" is coarse. Foals are also the top **unverified** item.
+2. **Genetic eye colour** - the eyes render correctly but are copied verbatim
+   from the template (`CoatRegions.redrawEyes`). Wants its own gene; the
+   classic hook is blue eyes on cream double-dilutes.
+3. **White markings beyond splash** - the framework is ready (natural +
+   non-deterministic gene); sock distributions, roan and rabicano slot in the
+   same way.
+4. **More loci** - dun, pearl-cream stacking nuance, sooty.
+5. **Coat realism** - flat gradient sample per pixel (no dappling, sooty
    shading, seasonal coat). `T` on a non-deterministic coat still bakes a
    unique (identical-looking) texture per horse.
-5. **`breedNth` foal names past foal 1** / **`FamilyTreeScreen` scroll mode** /
-   **stats surfaces** / **clock-vs-mount** / **water-riding feel** /
-   **roped-horse portal shortcut** - see `to be verified.md`.
-6. **Cleanups**: rename `DebugPenManager` / `DEBUG_LEVEL` /
+6. **`breedNth` foal names past foal 1** / **`FamilyTreeScreen` scroll mode** /
+   **stats surfaces** / **water-riding feel** / **epigenetic seed across a
+   save-reload** - see `Docs/to be verified.md`.
+7. **Cleanups**: rename `DebugPenManager` / `DEBUG_LEVEL` /
    `horsegenetics:debug_pens` to non-"debug" names (needs a save-data
    migration or a one-time reset); fold speed/health into the gene model; a
    `.gitignore`; name-generation rework; real white-fog dimension effects
@@ -780,9 +833,9 @@ its licence is compatible.
 - **`README.md` is user-facing only.** No status, architecture, API notes, or
   file listings there. All of that lives in `CLAUDE.md`.
 - The breeding / pedigree / horse-record / **stat-inheritance** system is
-  documented **only** in `breeding.md`; **each gene** is documented **only** in
-  `Gene Dict.md`; the **`runClient` checklist** is **only** in
-  `to be verified.md`. Update the relevant file in the same change - a pointer
+  documented **only** in `Docs/breeding.md`; **each gene** is documented **only** in
+  `Docs/Gene Dict.md`; the **`runClient` checklist** is **only** in
+  `Docs/to be verified.md`. Update the relevant file in the same change - a pointer
   from CLAUDE.md is fine, a copy is not.
 - **No legacy / back-compat code.** Dev only, single tester, no saves to keep -
   when a format changes, change it and move on (no genotype-code padding, no

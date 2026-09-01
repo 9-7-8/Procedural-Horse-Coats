@@ -8,9 +8,10 @@ change. README.md deliberately carries none of this.
 Everything here is implemented and compiles. The core breeding round-trip is
 **owner-verified as of 2026-08-30**: breeding two horses in-game produces a
 foal with stats between the parents, a correctly combined genetic code, and -
-for a pairing's **first** foal - a name combining both parents. The rest of
+for a pairing's **first** foal - a name combining both parents.
+`FamilyTreeScreen` is owner-verified in full as of **2026-09-01**. The rest of
 the `breedNth` name schedule (foals 2+), the paper dump, attribute application
-and panel tint are in **`to be verified.md`**.
+and panel tint are in **`Docs/to be verified.md`**.
 
 ---
 
@@ -41,7 +42,7 @@ the *band* a foal's stats are rolled from.
 
 A `Genotype` is one `AllelePair` per registered `Gene` (`genetics/Genes`). The
 full model - alleles as objects, the gene registry, the coat overlay pipeline -
-is in **CLAUDE.md**; **each gene** is in **`Gene Dict.md`**. The code string is
+is in **CLAUDE.md**; **each gene** is in **`Docs/Gene Dict.md`**. The code string is
 one segment per gene (`Genes.codeOrder()` = extension, agouti, white, test,
 champagne, splash, grey, cream, pearl), segments joined by `-`, alleles by `/`,
 dominant first, e.g. `E/e-A/a-w/w-t/t-c/c-Spl/spl-g/g-Cr/N-N/N`. **No legacy
@@ -415,14 +416,20 @@ both sides.
 
 ## Not verified in-game
 
-Everything compiles and `runServer` boots clean. The full `runClient`
-checklist - the `breedNth` name schedule past foal 1, foal record fields,
-stat application + panel tint, name-tag / barn-name round-trips,
-`FamilyTreeScreen`, save->reload persistence - is in **`to be verified.md`**.
+Everything compiles and `runServer` boots clean. What's left on the `runClient`
+checklist - the `breedNth` name schedule past foal 1, foal record fields, stat
+application + panel tint, name-tag / barn-name round-trips, save->reload
+persistence, and the `familyTree.scrollBar` alternate layout - is in
+**`Docs/to be verified.md`**.
 
 **Owner-verified in-game (2026-08-30):** breeding rolls a foal with
 speed/health between the parents, a correctly combined genetic code, and
 (first foal of a pairing) a name combining both parents.
+
+**Owner-verified in-game (2026-09-01):** `FamilyTreeScreen` is correct in full
+(nodes, per-node coats, shrink-to-fit layout). A **clock on a tamed foal** ages
+it to adult without also seating the player on it. Foals themselves have only
+been spot-checked - a full foal pass is still the top open item.
 
 ## Known limitations / rough edges
 
@@ -430,7 +437,7 @@ speed/health between the parents, a correctly combined genetic code, and
   placeholder; the plan is to fold speed / health into the Mendelian model
   later. Jump strength isn't tracked at all yet.
 - **Per-gene detail** (alleles, dominance, wild frequency, generation function)
-  is in **`Gene Dict.md`** - not repeated here.
+  is in **`Docs/Gene Dict.md`** - not repeated here.
 - Genes are simple dominant/recessive with no dose effects, no cross-gene
   interaction beyond masking (white masks all; chestnut hides agouti/seal).
   Real-horse subtleties (cream dose, champagne+cream, gray progression) aren't
