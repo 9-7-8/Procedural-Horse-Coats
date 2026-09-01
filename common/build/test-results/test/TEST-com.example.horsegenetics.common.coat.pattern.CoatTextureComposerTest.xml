@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.example.horsegenetics.common.coat.pattern.CoatTextureComposerTest" tests="14" skipped="0" failures="0" errors="0" timestamp="2026-09-01T14:55:26.154Z" hostname="PERDIX" time="1.012">
+<testsuite name="com.example.horsegenetics.common.coat.pattern.CoatTextureComposerTest" tests="14" skipped="0" failures="0" errors="0" timestamp="2026-09-01T16:33:14.407Z" hostname="PERDIX" time="0.745">
   <properties/>
-  <testcase name="greyOnlyGreysAdultsNotFoals()" classname="com.example.horsegenetics.common.coat.pattern.CoatTextureComposerTest" time="0.088"/>
-  <testcase name="bayHasBlackManeAndDarkerLegBottoms()" classname="com.example.horsegenetics.common.coat.pattern.CoatTextureComposerTest" time="0.019"/>
-  <testcase name="champagneReadsOffWhatItSitsOn()" classname="com.example.horsegenetics.common.coat.pattern.CoatTextureComposerTest" time="0.008"/>
-  <testcase name="whiteHorseIsExactlyTheTemplate()" classname="com.example.horsegenetics.common.coat.pattern.CoatTextureComposerTest" time="0.004"/>
-  <testcase name="testGenePaintsItsGradientFlatOnTopOfAnyBase()" classname="com.example.horsegenetics.common.coat.pattern.CoatTextureComposerTest" time="0.014"/>
-  <testcase name="deterministicCoatsIgnoreTheSeedNonDeterministicOnesReplay()" classname="com.example.horsegenetics.common.coat.pattern.CoatTextureComposerTest" time="0.011"/>
-  <testcase name="pureBlackIsLiftedToAbout80PercentOpacity()" classname="com.example.horsegenetics.common.coat.pattern.CoatTextureComposerTest" time="0.002"/>
-  <testcase name="chestnutIsReddishAndLighterThanBlack()" classname="com.example.horsegenetics.common.coat.pattern.CoatTextureComposerTest" time="0.004"/>
-  <testcase name="splashPunchesTransparentWhiteIntoTheLowerLegs()" classname="com.example.horsegenetics.common.coat.pattern.CoatTextureComposerTest" time="0.008"/>
-  <testcase name="creamDiluesRedOnlyOnSingleDoseAndBothOnDouble()" classname="com.example.horsegenetics.common.coat.pattern.CoatTextureComposerTest" time="0.013"/>
-  <testcase name="everyBuiltInGeneComboComposesWithoutThrowingAdultAndFoal()" classname="com.example.horsegenetics.common.coat.pattern.CoatTextureComposerTest" time="0.823"/>
-  <testcase name="doublePearlDilutesBothPigmentsMildly()" classname="com.example.horsegenetics.common.coat.pattern.CoatTextureComposerTest" time="0.003"/>
+  <testcase name="greyOnlyGreysAdultsNotFoals()" classname="com.example.horsegenetics.common.coat.pattern.CoatTextureComposerTest" time="0.069"/>
+  <testcase name="bayHasBlackManeAndDarkerLegBottoms()" classname="com.example.horsegenetics.common.coat.pattern.CoatTextureComposerTest" time="0.011"/>
+  <testcase name="champagneReadsOffWhatItSitsOn()" classname="com.example.horsegenetics.common.coat.pattern.CoatTextureComposerTest" time="0.006"/>
+  <testcase name="whiteHorseIsExactlyTheTemplate()" classname="com.example.horsegenetics.common.coat.pattern.CoatTextureComposerTest" time="0.003"/>
+  <testcase name="testGenePaintsItsGradientFlatOnTopOfAnyBase()" classname="com.example.horsegenetics.common.coat.pattern.CoatTextureComposerTest" time="0.008"/>
+  <testcase name="deterministicCoatsIgnoreTheSeedNonDeterministicOnesReplay()" classname="com.example.horsegenetics.common.coat.pattern.CoatTextureComposerTest" time="0.006"/>
+  <testcase name="pureBlackIsLiftedToAbout80PercentOpacity()" classname="com.example.horsegenetics.common.coat.pattern.CoatTextureComposerTest" time="0.001"/>
+  <testcase name="chestnutIsReddishAndLighterThanBlack()" classname="com.example.horsegenetics.common.coat.pattern.CoatTextureComposerTest" time="0.003"/>
+  <testcase name="splashPunchesTransparentWhiteIntoTheLowerLegs()" classname="com.example.horsegenetics.common.coat.pattern.CoatTextureComposerTest" time="0.004"/>
+  <testcase name="creamDiluesRedOnlyOnSingleDoseAndBothOnDouble()" classname="com.example.horsegenetics.common.coat.pattern.CoatTextureComposerTest" time="0.009"/>
+  <testcase name="everyBuiltInGeneComboComposesWithoutThrowingAdultAndFoal()" classname="com.example.horsegenetics.common.coat.pattern.CoatTextureComposerTest" time="0.611"/>
+  <testcase name="doublePearlDilutesBothPigmentsMildly()" classname="com.example.horsegenetics.common.coat.pattern.CoatTextureComposerTest" time="0.002"/>
   <testcase name="foalGetsTheSameTreatments()" classname="com.example.horsegenetics.common.coat.pattern.CoatTextureComposerTest" time="0.002"/>
-  <testcase name="creamPlusPearlActsAsDoubleCream()" classname="com.example.horsegenetics.common.coat.pattern.CoatTextureComposerTest" time="0.003"/>
+  <testcase name="creamPlusPearlActsAsDoubleCream()" classname="com.example.horsegenetics.common.coat.pattern.CoatTextureComposerTest" time="0.002"/>
   <system-out><![CDATA[]]></system-out>
   <system-err><![CDATA[]]></system-err>
 </testsuite>

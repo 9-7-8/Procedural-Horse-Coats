@@ -63,8 +63,14 @@ why the logic is quarantined in a game-free module.
     player on it.
   - **Roped-horse portal shortcut**: right-clicking a `hay_portal` while
     leading a horse sends the horse through **and** drops the lead.
+  - **Diluted bay points** (fixed and re-verified the same day): a bay carrying
+    champagne / cream / pearl now shows real diluted points - amber champagne
+    chocolate over gold, buckskin dark brown over gold, perlino rusty, pearl
+    bay sepia - instead of the jet black they all rendered before. See the
+    coat-pipeline section for the cause (`PigmentField.dilute`).
   - Three rendering issues found in the same session are logged in
-    **`Docs/to be verified.md`** - see "Known gaps" below.
+    **`Docs/to be verified.md`** - see "Known gaps" below; the bay/dilution one
+    is now closed.
 
 - **Owner-verified in-game (2026-08-30):**
   - **Hay-bale portal**: golden-carrot lighting; the animated `hay_portal.png`
@@ -94,9 +100,9 @@ why the logic is quarantined in a game-free module.
     combining both parents.
 
 - **Open issues + NOT verified in-game:** see **`Docs/to be verified.md`**.
-  Open issues are the bay/dilution blend, grey, and splash's face markings +
-  leg edges; the top unverified item is **foals** (only spot-checked). Update
-  it after each `runClient`.
+  Open issues are grey and splash's face markings + leg edges; the top
+  unverified item is **foals** (only spot-checked). Update it after each
+  `runClient`.
 - **Machine caveat (this dev laptop):** hybrid graphics (NVIDIA RTX 3050 Ti +
   AMD integrated). `java.exe`/`javaw.exe` are pinned to the NVIDIA GPU and the
   FML splash is disabled, or the JVM hard-crashes in the AMD GL driver. See
@@ -177,10 +183,10 @@ Dict.md`** (natural genes first, then non-natural); one-liners:
 | agouti | `A`/`a` | 50/50 | `A_` = bay + random leg/face black; a high roll = seal (non-det) |
 | white | `W`/`w` | 1/50 | `W_` = all pigment gone → transparent |
 | test | `T`/`t` | 1/4 carrier | `T_` = paint the `TestCoatPattern` gradient **flat on top**, last (only **non-natural** gene; visible on any base incl. white) |
-| champagne | `Ch`/`c` | 1/40 | dilute toward the gradient's gold |
+| champagne | `Ch`/`c` | 1/40 | dilute toward the gradient's gold; keeps bay's points chocolate (amber champagne) |
 | splash | `Spl`/`spl` | 1/20 | random white socks + face blaze (non-det) - **open issue:** only the blaze, and the sock edges are a hard ring |
 | grey | `G`/`g` | 1/16 | **adults only** - equally restrict both pigments to 0.15; foal born base colour - **open issue:** reads flat/near-white, wants a rework |
-| cream | `Cr`/`N` | 1/30 | incomplete-dominant dilution; interacts with pearl |
+| cream | `Cr`/`N` | 1/30 | incomplete-dominant dilution; interacts with pearl; never leaves a pitch-black point |
 | pearl | `prl`/`N` | 1/22 | recessive dilution; `prl/prl` no-cream = mild uniform; `Cr/prl` = double cream |
 
 Cream + Pearl are allelic in reality; here two genes, combined once in
@@ -224,7 +230,11 @@ Coats are **generated** for every horse - adult *and* foal. Per-gene detail in
      shows the same on black, chestnut *or* white. (`overlayLayer`, layer
      pre-filled transparent = "no paint here".)
   4. **composite** onto the template, **alpha-aware** multiply (`blend`),
-     keeping template alpha.
+     keeping template alpha. Because it's a *multiply*, the template's own dark
+     detail - hooves, nostrils, the shading between mane strands - survives on
+     every coat, cremello included. Near-black texels there are expected and
+     are **not** a gene failing to dilute; check the `PigmentField` values, not
+     the composed pixels, when chasing one.
   5. **eyes** - `CoatRegions.redrawEyes(skin, …)` copies them verbatim (adult:
      2x2 pupil + 2x2 sclera at `{6,42}`/`{28,42}`; foal: 2x2 pupil at
      `{6,20}`/`{40,20}` - the head's L/R faces, not the front blob).
@@ -243,10 +253,17 @@ Coats are **generated** for every horse - adult *and* foal. Per-gene detail in
   one face height; bottom `SOLID_PORTION` = **0.3** of the band solid, then a
   **smoothstep** fade to nothing - no hard cut-off line). Knobs: `BODY_BLACK`,
   `HOOF_FRACTION`, `SOLID_PORTION`. Verified in-game 2026-09-01 (seal included).
-  **Open issue:** its points are set *absolutely* (`setBlack(1.0)` /
-  `setRed(0.0)` via `CoatRegions.blackenPart` / `blackenLowerLeg`) and agouti
-  runs before cream / pearl / champagne in `Genes.naturalOrder()`, so a bay's
-  black **does not take dilution** - a buckskin's points read jet, not smoky.
+  Its points are set *absolutely* (`setBlack(1.0)` / `setRed(0.0)` via
+  `CoatRegions.blackenPart` / `blackenLowerLeg`) and that's fine - the
+  dilutions run after and scale them. What was **not** fine is that a point
+  carries `red = 0`, and the gradient's zero-red column reads jet black down to
+  `black ~0.4`, so scaling black alone never changed the colour. Every dilution
+  now goes through **`PigmentField.dilute(keepRed, keepBlack, blackTint)`**,
+  which also adds `blackTint * black` back as *red* - walking the sample
+  sideways off that column into the warm browns. Amber champagne keeps
+  chocolate points over a gold body, perlino rusty ones, a buckskin dark brown.
+  **House rule: no cream horse keeps a pitch-black point** - dark brown is as
+  far as it goes. Per-mode numbers: `Docs/Gene Dict.md`.
 - **`GeneticCoatTextureFactory`** (client) loads the adult + foal templates +
   gradient once, runs `compose`, uploads a `DynamicTexture`, caches by
   `textureKey()` + `:adult`/`:foal`, cleared on world exit.
@@ -772,12 +789,6 @@ current after each session.
 **Open rendering issues (found in-game 2026-09-01, deliberately not fixed
 yet)** - full detail in `Docs/to be verified.md`:
 
-- **Bay's black points ignore dilution.** On a bay carrying cream / pearl /
-  champagne, the leg / face / mane / tail black still renders **pure black**.
-  `BayCoat` sets those regions absolutely (`setBlack(1.0)` / `setRed(0.0)`) and
-  agouti runs *before* the dilutions in `Genes.naturalOrder()`, so the dilution
-  has nothing left to scale down (or scales red only). Look at the ordering and
-  `CreamPearlDilution` together; a relative bay point would compose better.
 - **Grey needs a rework, not a knob.** `KEEP = 0.15` flat on both pigments
   lands the body in the gradient's near-white corner (~`(227,221,215)`) and
   reads flat. Wants progressive-with-age + dapples, which needs an age input to

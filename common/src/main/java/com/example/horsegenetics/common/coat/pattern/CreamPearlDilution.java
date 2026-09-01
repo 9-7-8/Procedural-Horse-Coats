@@ -21,6 +21,9 @@ import com.example.horsegenetics.common.genetics.Genotype;
  *
  * Red is always restricted more than black under a double dilution, which is
  * why a diluted bay body fades to cream while the points hold smoky colour.
+ * Each mode also carries a <b>black tint</b> - see
+ * {@link PigmentField#dilute} - so the points land in a real diluted-black
+ * hue instead of the gradient's jet-black zero-red column.
  */
 public final class CreamPearlDilution {
 
@@ -30,11 +33,24 @@ public final class CreamPearlDilution {
     // black anywhere; the points / lower legs are just black it declined to
     // restrict, so a real pigment dilution has to reach them too (a smoky /
     // sooty buckskin), not leave them jet black.
-    private static final float SINGLE_CREAM_BLACK = 0.7f;
+    private static final float SINGLE_CREAM_BLACK = 0.62f;
     private static final float DOUBLE_PEARL_RED = 0.55f;
-    private static final float DOUBLE_PEARL_BLACK = 0.60f;
+    private static final float DOUBLE_PEARL_BLACK = 0.52f;
     private static final float DOUBLE_DILUTE_RED = 0.08f;  // body -> pale cream
     private static final float DOUBLE_DILUTE_BLACK = 0.38f; // points -> smoky rust
+
+    // Removed eumelanin fed back in as pheomelanin - see PigmentField#dilute.
+    // Without it, bay's points (red 0) sit in the gradient's zero-red column,
+    // which reads jet black down to black ~0.4, so every "diluted" bay still
+    // rendered black points: single cream landed on #111111, double pearl on
+    // #272727. The tint walks the sample off that column into the warm browns.
+    // House rule (owner, 2026-09-01): *no* cream horse keeps a pitch-black
+    // point. A single-cream point may be a very dark brown but never a void,
+    // so its tint is a full one, not the token amount a real-world buckskin
+    // would argue for; classic pearl gets sepia points, perlino rusty ones.
+    private static final float SINGLE_CREAM_TINT = 0.30f;
+    private static final float DOUBLE_PEARL_TINT = 0.28f;
+    private static final float DOUBLE_DILUTE_TINT = 0.33f;
 
     private CreamPearlDilution() {}
 
@@ -71,14 +87,19 @@ public final class CreamPearlDilution {
         }
         final float keepRed;
         final float keepBlack;
+        final float blackTint;
         switch (m) {
-            case SINGLE_CREAM -> { keepRed = SINGLE_CREAM_RED; keepBlack = SINGLE_CREAM_BLACK; }
-            case DOUBLE_PEARL -> { keepRed = DOUBLE_PEARL_RED; keepBlack = DOUBLE_PEARL_BLACK; }
-            default -> { keepRed = DOUBLE_DILUTE_RED; keepBlack = DOUBLE_DILUTE_BLACK; }
+            case SINGLE_CREAM -> {
+                keepRed = SINGLE_CREAM_RED; keepBlack = SINGLE_CREAM_BLACK; blackTint = SINGLE_CREAM_TINT;
+            }
+            case DOUBLE_PEARL -> {
+                keepRed = DOUBLE_PEARL_RED; keepBlack = DOUBLE_PEARL_BLACK; blackTint = DOUBLE_PEARL_TINT;
+            }
+            default -> {
+                keepRed = DOUBLE_DILUTE_RED; keepBlack = DOUBLE_DILUTE_BLACK; blackTint = DOUBLE_DILUTE_TINT;
+            }
         }
-        CoatRegions.restrictAll(ctx.skin(), ctx.pigment(), (f, px, py, p) -> {
-            f.setRed(px, py, f.red(px, py) * keepRed);
-            f.setBlack(px, py, f.black(px, py) * keepBlack);
-        });
+        CoatRegions.restrictAll(ctx.skin(), ctx.pigment(),
+                (f, px, py, p) -> f.dilute(px, py, keepRed, keepBlack, blackTint));
     }
 }

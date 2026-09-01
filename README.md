@@ -15,20 +15,46 @@ their parents, and every horse carries a name and a pedigree you can inspect.
 
 ### Coats from genetics
 
-Each horse has a genotype at three loci - extension, agouti and white - that
-decides its coat:
+There is no fixed set of horse textures. Every coat is drawn from scratch,
+pixel by pixel, out of that horse's genotype - so two horses with the same
+genes look the same, and a horse that inherits an unusual combination gets a
+coat nothing else in the world has.
+
+**The base colour** comes from two genes:
 
 | Genotype | Coat |
 |----------|------|
-| `W_` (any) | Solid **white**, no markings - dominant, masks everything else. Rare in the wild. |
-| `ee` (any agouti) | Chestnut |
+| `ee` (any agouti) | Chestnut - red all over |
 | `E_` `aa` | Black |
-| `E_` `A_` | Bay - with a randomly-rolled amount of black on the legs |
+| `E_` `A_` | Bay - red-brown body with black points, and a randomly-rolled amount of black climbing the legs and face. A high roll gives the near-black "seal" look. |
+
+**Dilutions** then lighten whatever is underneath, so each one looks different
+depending on the base it lands on:
+
+| Gene | In the wild | What it does |
+|------|-------------|--------------|
+| Cream | uncommon | One copy golds the red - a bay becomes a **buckskin**, a chestnut a **palomino**. Two copies wash almost everything out: **perlino**, **cremello**. A cream horse never keeps pitch-black points. |
+| Pearl | uncommon | Two copies (with no cream) give an apricot body with sepia points. One cream + one pearl acts like double cream. |
+| Champagne | rare | Golds every base, each to its own colour - **gold champagne** on chestnut, **classic** (taupe) on black, **amber** (gold body, chocolate points) on bay. |
+| Grey | uncommon | Greys **adults** only, over any base. A grey foal is born its base colour and turns grey when it grows up. |
+
+**White markings** are the last layer:
+
+| Gene | In the wild | What it does |
+|------|-------------|--------------|
+| Splash | uncommon | White socks and a face blaze, rolled per horse - no two are quite alike. |
+| Dominant white | rare | Solid **white**, no markings. Masks everything else. |
 
 Wild horses roll a random genotype when they spawn. Bred foals inherit one
-allele from each parent at each locus, so coat colour passes down the way it
-does in real horses - two black horses can still throw a chestnut foal if
-both carry a hidden `e`, and a single hidden `W` turns a foal solid white.
+allele from each parent at every gene, so colour passes down the way it does
+in real horses - two black horses can still throw a chestnut foal if both
+carry a hidden `e`, a hidden cream can surface generations later, and a single
+hidden `W` turns a foal solid white.
+
+Some traits aren't fixed by the genes alone. How far bay's black climbs, and
+where splash puts its socks, are rolled once when the horse is born and stay
+with it for life - so a paddock of bays is a paddock of individuals, not
+copies.
 
 ### Names and pedigree
 

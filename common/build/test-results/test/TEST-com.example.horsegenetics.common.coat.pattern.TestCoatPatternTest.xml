@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.example.horsegenetics.common.coat.pattern.TestCoatPatternTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-09-01T14:55:27.168Z" hostname="PERDIX" time="0.016">
+<testsuite name="com.example.horsegenetics.common.coat.pattern.TestCoatPatternTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-09-01T16:33:15.153Z" hostname="PERDIX" time="0.011">
   <properties/>
   <testcase name="movingUpGoesRedToYellow()" classname="com.example.horsegenetics.common.coat.pattern.TestCoatPatternTest" time="0.0"/>
   <testcase name="movingTowardTheNoseGoesPinkToBlue()" classname="com.example.horsegenetics.common.coat.pattern.TestCoatPatternTest" time="0.0"/>
   <testcase name="alwaysOpaque()" classname="com.example.horsegenetics.common.coat.pattern.TestCoatPatternTest" time="0.001"/>
-  <testcase name="bakeFillsMostOfTheSheetOpaquelyAndMatchesThePattern()" classname="com.example.horsegenetics.common.coat.pattern.TestCoatPatternTest" time="0.011"/>
-  <testcase name="gradientIsMonotonicAlongEachAxis()" classname="com.example.horsegenetics.common.coat.pattern.TestCoatPatternTest" time="0.001"/>
+  <testcase name="bakeFillsMostOfTheSheetOpaquelyAndMatchesThePattern()" classname="com.example.horsegenetics.common.coat.pattern.TestCoatPatternTest" time="0.008"/>
+  <testcase name="gradientIsMonotonicAlongEachAxis()" classname="com.example.horsegenetics.common.coat.pattern.TestCoatPatternTest" time="0.0"/>
   <testcase name="noChangeAlongZ()" classname="com.example.horsegenetics.common.coat.pattern.TestCoatPatternTest" time="0.001"/>
   <system-out><![CDATA[]]></system-out>
   <system-err><![CDATA[]]></system-err>

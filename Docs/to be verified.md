@@ -17,17 +17,6 @@ see CLAUDE.md "Running the game".
 
 ## Open issues (seen in-game 2026-09-01, not fixed)
 
-- [ ] **Bay's black points don't take dilution** - on a bay carrying a dilute
-  (cream / pearl / champagne), the black leg / face / mane / tail regions still
-  render as **pure black** instead of the diluted smoky tone. A buckskin's
-  points should be dark-smoky, a perlino's paler still.
-  Suspected cause: `BayCoat.apply` uses `CoatRegions.blackenPart` /
-  `blackenLowerLeg` / `rampBlack*`, which **`setBlack(1.0)` + `setRed(0.0)`
-  absolutely**, and `Genes.naturalOrder()` runs agouti *before* cream / pearl /
-  champagne - so a later dilution scales a value agouti has already pinned to
-  the top, or the dilution's own keep-factor is applied to red only. Check
-  `CreamPearlDilution` and the ordering together; a relative
-  (`restrictBlack`-style) bay point would compose better than an absolute set.
 - [ ] **Grey renders wrong** - needs a rework, not just a knob turn. `GreyGene`
   is a single flat adult step (`KEEP = 0.15` on both pigments, so the body
   samples the gradient's near-white corner at roughly `(227,221,215)`). Real

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.example.horsegenetics.common.horse.InMemoryHorseDatabaseTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-09-01T14:55:27.363Z" hostname="PERDIX" time="0.011">
+<testsuite name="com.example.horsegenetics.common.horse.InMemoryHorseDatabaseTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-09-01T16:33:15.286Z" hostname="PERDIX" time="0.007">
   <properties/>
-  <testcase name="depthZeroOrNegativeIsEmpty()" classname="com.example.horsegenetics.common.horse.InMemoryHorseDatabaseTest" time="0.003"/>
-  <testcase name="recordReplacesSameId()" classname="com.example.horsegenetics.common.horse.InMemoryHorseDatabaseTest" time="0.001"/>
-  <testcase name="unknownAncestorsAreSkipped()" classname="com.example.horsegenetics.common.horse.InMemoryHorseDatabaseTest" time="0.002"/>
+  <testcase name="depthZeroOrNegativeIsEmpty()" classname="com.example.horsegenetics.common.horse.InMemoryHorseDatabaseTest" time="0.002"/>
+  <testcase name="recordReplacesSameId()" classname="com.example.horsegenetics.common.horse.InMemoryHorseDatabaseTest" time="0.0"/>
+  <testcase name="unknownAncestorsAreSkipped()" classname="com.example.horsegenetics.common.horse.InMemoryHorseDatabaseTest" time="0.001"/>
   <testcase name="recordThenLookup()" classname="com.example.horsegenetics.common.horse.InMemoryHorseDatabaseTest" time="0.001"/>
   <testcase name="inbreedingListsEachAncestorOnce()" classname="com.example.horsegenetics.common.horse.InMemoryHorseDatabaseTest" time="0.001"/>
   <testcase name="ancestorsByGeneration()" classname="com.example.horsegenetics.common.horse.InMemoryHorseDatabaseTest" time="0.001"/>

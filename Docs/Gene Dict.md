@@ -121,15 +121,21 @@ always black (`HOOF_FRACTION` = 0.12).
 Owner-verified in-game **2026-09-01**: agouti renders correctly, the leg/face
 fade reads right, and seal-as-a-high-roll works.
 
-> **Open issue - bay's black does not take dilution.** `BayCoat` paints its
-> points *absolutely* (`CoatRegions.blackenPart` / `blackenLowerLeg` /
-> `rampBlack*` all do `setBlack(1.0)` + `setRed(0.0)`), and agouti runs
-> **before** cream / pearl / champagne in `Genes.naturalOrder()`. So a diluted
-> bay - buckskin, perlino, pearl bay, amber champagne - still renders **jet
-> black** points instead of the smoky tone the dose table calls for. Fix needs
-> the ordering and `CreamPearlDilution` looked at together; a *relative* bay
-> point (`restrictBlack`-style, or a post-dilution re-application) would
-> compose properly.
+**Bay's black and the dilutions (fixed + owner-verified in-game 2026-09-01).** `BayCoat` paints its
+points *absolutely* (`CoatRegions.blackenPart` / `blackenLowerLeg` /
+`rampBlack*` all do `setBlack(1.0)` + `setRed(0.0)`) and agouti runs **before**
+cream / pearl / champagne in `Genes.naturalOrder()`. That is fine on its own -
+the dilutions do run after and *do* scale the points' black. What broke was the
+**gradient**, not the ordering: with `red = 0` the gradient's zero-red column
+stays visually jet black all the way down to `black ~0.4`, so scaling black
+alone moved the sample without changing the colour (single cream's
+`black *= 0.7` landed on `#111111`, double pearl's `*0.60` on `#272727`).
+
+The fix is `PigmentField.dilute(keepRed, keepBlack, blackTint)`: every dilution
+now also feeds a fraction of the **removed eumelanin back in as pheomelanin**,
+which walks the sample sideways off that column into the warm browns where a
+real diluted black lives. The ordering and the absolute bay point both stay as
+they were. See each dose table below for the per-mode tint.
 
 ## `horsegenetics.cream` - Cream  &  `horsegenetics.pearl` - Pearl
 
@@ -147,19 +153,25 @@ The combined rule (dose = number of `Cr` / `prl` copies):
 | Cream | Pearl | mode | effect on the pigment field |
 |---|---|---|---|
 | 0 | 0-1 | none | - |
-| 1 | 0 | **single cream** | red `*= 0.45`, black `*= 0.7` (buckskin on bay: golden body, dark-but-not-jet smoky points) |
-| 0 | 2 | **double pearl** | red `*= 0.55`, black `*= 0.60` - mild, uniform (apricot body, sepia points) |
+| 1 | 0 | **single cream** | keep red `0.45`, black `0.62`, tint `0.30` (buckskin on bay: golden body, **dark brown** points `#4B331A`) |
+| 0 | 2 | **double pearl** | keep red `0.55`, black `0.52`, tint `0.28` - mild, uniform (apricot body, sepia points) |
 | 1 | 1+ | **Cr/prl** | acts as double cream |
-| 2+ | any | **double cream** | red `*= 0.08`, black `*= 0.38` (perlino: pale cream body, smoky points) |
+| 2+ | any | **double cream** | keep red `0.08`, black `0.38`, tint `0.33` (perlino: pale cream body, rusty points) |
 
-Red is always restricted harder than black, so a diluted bay body fades to
-cream while the points hold smoky colour (agouti still says *where*). Even
-single cream touches the black: bay never *adds* black anywhere - its points
-are just black it declined to restrict - so a real pigment dilution has to
-reach them, not leave them jet. `CreamGene`
+"Keep" values multiply; **tint** is the share of a texel's black added back as
+red (`PigmentField.dilute`) - see the bay section above for why scaling black
+alone left every diluted bay's points jet. Red is always restricted harder than
+black, so a diluted bay body fades to cream while the points hold smoky colour
+(agouti still says *where*). **House rule (owner, 2026-09-01): no cream horse
+keeps a pitch-black point.** A single-cream point may be a very dark brown but
+never a void - so single cream carries a full tint, not the token amount a
+real-world buckskin's black points would argue for. `CreamGene`
 is the driver whenever a `Cr` is present; `PearlGene` drives only the
 no-cream double-pearl case; either way `CreamPearlDilution.apply` runs at most
 once.
+
+Owner-verified in-game **2026-09-01**: buckskin, perlino and pearl bay all
+render brown / rusty / sepia points over their diluted bodies.
 
 *Not modelled yet:* blue eyes on the double dilutes.
 
@@ -172,9 +184,25 @@ once.
 | wild frequency | `1 in 40` per allele |
 | deterministic? | yes |
 
-`Ch_` moves the pigment sample: `red → 0.45 + 0.10*red` (roughly the gradient's
-horizontal middle - its gold column), `black *= 0.18`. Reads the *current*
-pigment, so champagne-on-X all differ.
+`Ch_` moves the pigment sample through `PigmentField.dilute`: keep red `0.55`,
+keep black `0.42`, **tint `0.30`** (that share of the texel's black is added
+back as red). Reads the *current* pigment, so champagne-on-X all differ:
+
+| base | body | points |
+|---|---|---|
+| chestnut (`ee`) - **gold champagne** | gold `#E3B045` | same (no black to dilute) |
+| black (`E_ aa`) - **classic champagne** | taupe `#834A24` | same |
+| bay (`E_ A_`) - **amber champagne** | gold `#C28F39` | chocolate `#785E41` |
+
+Owner-verified in-game **2026-09-01**: an amber champagne keeps its chocolate
+points over a gold body.
+
+The tint is what makes amber champagne work. The previous rule set red
+*absolutely* (`0.45 + 0.10*red`), which lands within `0.10` of the same value
+whether the texel is a red body or a black point, so a champagne bay came out
+**flat gold with no points at all**; and it cut black so hard (`*0.18`) that a
+classic champagne on black came out gold too, indistinguishable from the gold
+champagne on chestnut.
 
 ## `horsegenetics.grey` - Grey
 

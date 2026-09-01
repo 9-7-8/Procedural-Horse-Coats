@@ -55,6 +55,28 @@ public final class PigmentField {
         black[i] = clamp01(black[i] * (1.0f - amount));
     }
 
+    /**
+     * The shared <b>dilution</b> move: {@code black *= keepBlack} and
+     * {@code red = red * keepRed + blackBefore * blackTint}.
+     *
+     * <p>The {@code blackTint} term is the part that matters and the reason a
+     * plain {@code restrictBlack} is not enough. Bay paints its points
+     * <i>absolutely</i> - {@code red = 0}, {@code black = 1} - and the gradient's
+     * zero-red column stays visually black all the way down to {@code black
+     * ~0.4}, so a dilution that only scales black leaves a "diluted" point
+     * indistinguishable from jet black (single cream's {@code keepBlack = 0.7}
+     * landed on {@code #111111}). Feeding a fraction of the eumelanin that was
+     * removed back in as pheomelanin walks the sample <b>left-to-right off that
+     * column</b>, into the warm browns where a real diluted black lives - amber
+     * champagne's chocolate points, perlino's rusty ones.
+     */
+    public void dilute(int px, int py, float keepRed, float keepBlack, float blackTint) {
+        int i = py * size + px;
+        float b = black[i];
+        red[i] = clamp01(red[i] * keepRed + b * blackTint);
+        black[i] = clamp01(b * keepBlack);
+    }
+
     /** Visit every texel (mapped or not). */
     public void forEach(PixelOp op) {
         for (int py = 0; py < size; py++) {
