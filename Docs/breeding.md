@@ -489,6 +489,15 @@ application + panel tint, name-tag / barn-name round-trips, save->reload
 persistence, and the `familyTree.scrollBar` alternate layout - is in
 **`Docs/to be verified.md`**.
 
+**Epigenetic inheritance is the newest thing here and has not been seen
+in-game at all** (built 2026-09-01). The unit tests cover the mechanism -
+an inherited allele keeps its copy's seed, the epigenetics follow their allele
+when the pair is reordered, a tie gets deconflicted. What's unproven is the
+live path: that a foal really looks like the parent it took the allele from.
+The check is in `Docs/to be verified.md` - breed a seal-ish bay mare to a
+non-bay stallion and watch whether the foals that got her `A` carry her point
+heights.
+
 **Owner-verified in-game (2026-08-30):** breeding rolls a foal with
 speed/health between the parents, a correctly combined genetic code, and
 (first foal of a pairing) a name combining both parents.

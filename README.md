@@ -36,7 +36,7 @@ depending on the base it lands on:
 | Cream | uncommon | One copy golds the red - a bay becomes a **buckskin**, a chestnut a **palomino**. Two copies wash almost everything out: **perlino**, **cremello**. A cream horse never keeps pitch-black points. |
 | Pearl | uncommon | Two copies (with no cream) give an apricot body with sepia points. One cream + one pearl acts like double cream. |
 | Champagne | rare | Golds every base, each to its own colour - **gold champagne** on chestnut, **classic** (taupe) on black, **amber** (gold body, chocolate points) on bay. |
-| Grey | uncommon | Greys **adults** only, over any base. A grey foal is born its base colour and turns grey when it grows up. |
+| Grey | uncommon | Greys **adults** only, over any base, into a **dapple grey** - a neutral grey coat patterned with rounded dapples. How far along a horse's greying is varies: some are a dark steel grey, some a mid dapple grey, some nearly white, and the ones that haven't got far keep a darker mane, tail and legs. A grey foal is born its base colour and turns grey when it grows up. |
 
 **White markings** are the last layer:
 
@@ -51,10 +51,16 @@ in real horses - two black horses can still throw a chestnut foal if both
 carry a hidden `e`, a hidden cream can surface generations later, and a single
 hidden `W` turns a foal solid white.
 
-Some traits aren't fixed by the genes alone. How far bay's black climbs, and
-where splash puts its socks, are rolled once when the horse is born and stay
-with it for life - so a paddock of bays is a paddock of individuals, not
-copies.
+Some traits aren't fixed by the genes alone. How far bay's black climbs, how
+far along a grey has greyed, where splash puts its socks - none of that is
+written in the gene itself, so a paddock of bays is a paddock of individuals,
+not copies.
+
+These details ride along **with the allele**, not with the horse. A wild horse
+rolls them when it spawns and keeps them for life; a foal inherits them from
+whichever parent gave it that allele. So a mare with black most of the way up
+her legs passes that on to the foals that inherit her bay allele, and a line
+can be bred toward a look as well as toward a colour.
 
 ### Names and pedigree
 

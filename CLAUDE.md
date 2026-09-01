@@ -55,7 +55,10 @@ why the logic is quarantined in a game-free module.
     the old `sanitize()` lower-cased the texture key, folding all 19 683
     genotypes onto 27 `Identifier`s.
   - **Agouti / bay**: renders correctly, and **seal is properly gone as a gene**
-    - a high roll of bay's two epigenetic numbers gives the seal look.
+    - a high roll of bay's epigenetics gives the seal look. (Verified against
+    the *old* two-number roll; the generator was rewidened afterwards - see the
+    coat-pipeline section - so the spread of leg heights is unverified, the
+    mechanism isn't.)
   - **Splash**: renders correctly (leg white + centreline blaze).
   - **Eyes**: survive the coat on every horse seen, adult and foal.
   - **`FamilyTreeScreen`**: correct in full - nodes, coats, layout.
@@ -72,8 +75,9 @@ why the logic is quarantined in a game-free module.
     bay sepia - instead of the jet black they all rendered before. See the
     coat-pipeline section for the cause (`PigmentField.dilute`).
   - Three rendering issues found in the same session are logged in
-    **`Docs/to be verified.md`** - see "Known gaps" below; the bay/dilution one
-    is now closed.
+    **`Docs/to be verified.md`** - see "Known gaps" below. The bay/dilution one
+    closed the same day; **grey** closed later (the `GreyCoat` rework, built but
+    not yet play-tested); the two **splash** ones are still open.
 
 - **Owner-verified in-game (2026-08-30):**
   - **Hay-bale portal**: golden-carrot lighting; the animated `hay_portal.png`
@@ -133,9 +137,13 @@ Two-module Gradle project, split deliberately:
 
 - **`common/`** - pure Java, **zero** Minecraft/NeoForge imports (not even DFU
   `Codec`s). Subpackages by concern:
-  - `genetics/` - `Genotype` (+ `breedWith`), `CoatPhenotype`,
-    `GeneticCodeCombiner`.
-  - `coat/` - `CoatData`, `CoatGenerator`.
+  - `genetics/` - `Genotype` (+ `breedWith`), `Epigenome` /
+    `AlleleEpigenetics` (the priority + seed on each allele copy), `Genome`
+    (the two together, and the breeding that keeps them aligned),
+    `CoatPhenotype`, `GeneticCodeCombiner`.
+  - `coat/` - `CoatData`, `CoatGenerator`; `coat/pattern/` also holds
+    `BodyNoise`, the reusable body-space noise any future patterned gene
+    should build on.
   - `name/` - `HorseNameGenerator` + `HorseNames` (`breed` = one-half-each;
     `breedNth` = varied by a pairing's foal count) + word tables under
     `src/main/resources/horsegenetics/names/`.
@@ -143,8 +151,8 @@ Two-module Gradle project, split deliberately:
     `HorseDatabase`, `InMemoryHorseDatabase`) and `HorseStats` (foal stat
     roll) -> `Docs/breeding.md`.
   - `Rng` - the randomness seam (`nextFloat` / `nextBoolean` /
-    `nextInt(bound)`), implemented by `NeoRng` (wraps `RandomSource`) and, in
-    tests, `FakeRng`.
+    `nextInt(bound)` / `nextLong`), implemented by `NeoRng` (wraps
+    `RandomSource`) and, in tests, `FakeRng`.
 
   This is the part that survives a version port unchanged. If you want to
   import anything Minecraft-related here, stop.
