@@ -118,10 +118,14 @@ why the logic is quarantined in a game-free module.
 - **Built 2026-09-01, NOT yet play-tested:** the **genotype gallery** rework of
   the horse dimension - one pen per visually distinct genotype (434 of 19 683),
   per-pen genotype signs, the entrance tally sign, `Gene.dominance()` metadata,
-  and the entity-only teardown that leaves blocks standing. Compiles, 117
+  and the entity-only teardown that leaves blocks standing. Compiles, 138
   `common` tests pass, nothing seen in-game yet. Details in the horse-dimension
   section below; the in-game checklist is the top item in
   **`Docs/to be verified.md`**.
+- **Built 2026-09-01, NOT yet play-tested:** the **dev test-world auto-delete**
+  - `client/DebugTestWorldCleanup` wipes every `test_horse_*` save on client
+  shutdown (and sweeps leftovers on the next start), so the button stops
+  filling `run/saves`. See "Running the game".
 - **Open issues + NOT verified in-game:** see **`Docs/to be verified.md`**.
   Open issues are grey, and splash (face markings, leg edges, and it not
   reading its own dose); after the gallery, the top unverified item is
@@ -687,8 +691,14 @@ This SDK is further from mainline 1.21.x than the version numbers suggest.
   `false` = shrink the Family Tree to fit; `true` = full-size + scroll). Read
   via `ClientConfig.familyTreeScrollBar()` which swallows the not-yet-loaded
   `IllegalStateException`.
-- Still **no `.gitignore`**: `build/`, `run/`, `.gradle/`, `.idea/` show as
-  noise. Worth adding.
+- **`.gitignore`** (repo root) covers `build/`, `.gradle/`, `.idea/`, `**/run/*`,
+  any `saves/`, and the JVM's `hs_err_pid*.log` droppings - the tracked tree is
+  down from 2 446 files to 148 (source, docs, the gradle wrapper). The **one
+  deliberate exception** is `run/config/fml.toml`, kept tracked by a
+  `!**/run/config/fml.toml` negation because it carries this laptop's
+  `earlyWindowControl = false` launch fix; the negation needs the
+  `!**/run/config/` + `**/run/config/*` pair above it to work, so don't collapse
+  those three lines.
 - `generate_file_list.py` and the README file-tree block were removed this
   session (README is user-facing now).
 
@@ -706,8 +716,30 @@ AMD integrated, AMD driver from 2023):
   "High performance" (`HKCU\Software\Microsoft\DirectX\UserGpuPreferences`,
   `GpuPreference=2;`). Durable; a driver update would also fix it.
 - **FML early-loading splash window** hits the same crash one step earlier.
-  `run/config/fml.toml` has `earlyWindowControl = false`. `run/` is not
-  tracked - if wiped, this resets to `true`.
+  `run/config/fml.toml` has `earlyWindowControl = false`. `run/` is otherwise
+  git-ignored, but **that one file is deliberately still tracked** (see "Build
+  setup notes") so a `git clean` can't reset it to `true`.
+
+### The "Spawn Test Horse World" button cleans up after itself
+
+`client/DebugTitleScreenButton` (dev only) creates a throwaway creative world
+named by `DebugTestWorldCleanup.newDirectoryName()` = `test_horse_<millis>`.
+`client/DebugTestWorldCleanup` deletes those worlds again, in two sweeps over
+`saves/`, both matching **only** `test_horse_` + digits so a hand-made world is
+never a candidate:
+
+- **`ClientStoppedEvent`** - the normal path. It's posted on the game bus from
+  `Minecraft#destroy` *after* the disconnect has halted the integrated server
+  and spun waiting for it to finish saving, and after `close()` - so nothing
+  still holds the save folder, and it's the last hook before `System.exit`.
+  (`ClientStoppingEvent` would be too early: the server is still running.)
+- **`ClientStartedEvent`** - the safety net, for a crash, a `taskkill`, or a
+  delete Windows refused because a handle lingered. Runs before anything opens
+  a world.
+
+Both are `ClientLifecycleEvent` subclasses, which do **not** implement
+`IModBusEvent`, so `@EventBusSubscriber(value = Dist.CLIENT)` routes them to
+the game bus. A failed delete only warns - the next launch retries.
 
 ## The horse dimension (`server/DebugPenManager` + portals)
 
@@ -998,8 +1030,8 @@ Design follow-ups (not just "go look at it"):
    info panel, and `GeneCodeDisplay` deciding what's worth printing.
 10. **Cleanups**: rename `DebugPenManager` / `DEBUG_LEVEL` /
    `horsegenetics:debug_pens` to non-"debug" names (needs a save-data
-   migration or a one-time reset); fold speed/health into the gene model; a
-   `.gitignore`; name-generation rework; real white-fog dimension effects
+   migration or a one-time reset); fold speed/health into the gene model;
+   name-generation rework; real white-fog dimension effects
    (needs a client dimension-effects mixin); the stray `neoforge.mods.toml`
    duplicate.
 
@@ -1045,11 +1077,10 @@ the top of `Docs/to be verified.md`.
 
 **1. Commit and push the session's code.**
 
-- `git status --short` first and read it. This repo has **no `.gitignore`**, so
-  `build/`, `.gradle/` and `run/` are already tracked and their churn will come
-  along with `git add -A`. That is expected here - don't start pruning it as
-  part of ending a session (adding a `.gitignore` is its own task, logged under
-  "Known gaps").
+- `git status --short` first and read it. The repo now has a `.gitignore`, so
+  `build/`, `.gradle/`, `.idea/` and `run/` stay out of `git add -A` and the
+  status should be short enough to actually read. If build or run output *does*
+  show up, a pattern is wrong - fix the pattern, don't `git add` around it.
 - The owner works directly on **`main`**, which tracks `origin/main`. Commit
   and push there; don't branch.
 - One commit for the session's work, with a **descriptive** message: what

@@ -124,3 +124,17 @@ see CLAUDE.md "Running the game".
   submerged lift are a first guess.
 - [ ] **Debug coat-gen chat line is quiet in a release build** - it fires
   correctly in dev; the `!FMLEnvironment.isProduction()` gate is unproven.
+- [ ] **Dev test worlds delete themselves** (new, 2026-09-01,
+  `client/DebugTestWorldCleanup`). Click **Spawn Test Horse World** on the title
+  screen, play a bit, quit Minecraft normally (Save and Quit -> Quit Game).
+  Check:
+  - `neoforge-26.1.2/run/saves/` has **no** `test_horse_*` folder left, and the
+    log has a `Deleted test horse world test_horse_... (on shutdown)` line;
+  - the hand-made worlds next to it (`New World`, ...) are **untouched** - the
+    sweep matches `test_horse_` + digits only;
+  - spawn two test worlds in one session (button, quit to title, button again),
+    quit - **both** are gone;
+  - kill the client mid-world (`taskkill`, or Alt+F4 in a hang) so shutdown
+    never runs, then relaunch: the leftover is cleared at startup with a
+    `(left over from a previous run)` log line, and it's gone before the world
+    list is shown.
