@@ -81,6 +81,8 @@
       font-weight: 600;
       z-index: 10;
       transition: opacity 0.3s ease;
+      flex-direction: column;
+      gap: 10px;
     }
 
     /* Right Output Panel */
@@ -209,6 +211,20 @@
       pointer-events: none;
       z-index: 6;
     }
+
+    .loading-spinner {
+      border: 4px solid rgba(255,255,255,0.1);
+      border-top: 4px solid #3b82f6;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
   </style>
 
   <!-- Three.js Dependencies -->
@@ -278,7 +294,10 @@
     <div id="main-workspace">
       <div id="viewport-container">
         <div class="mode-indicator" id="mode-text">Click on 3D Model to Add Curve Control Points</div>
-        <div id="loading-overlay">Loading 3D Gene Preview...</div>
+        <div id="loading-overlay">
+          <div class="loading-spinner"></div>
+          <div>Loading 3D Gene Preview...</div>
+        </div>
         <canvas id="three-canvas"></canvas>
       </div>
 
@@ -286,6 +305,11 @@
       <div class="canvas-container">
         <div class="section-title" style="margin:0;">UV Texture Assembly Map</div>
         <canvas id="coat-canvas" width="128" height="128"></canvas>
+        <div style="font-size:10px; color:#94a3b8; display:flex; gap:10px;">
+          <span>● <span style="color:#ef4444;">Points</span></span>
+          <span>━ <span style="color:#38bdf8;">Curve</span></span>
+          <span id="point-count">0 points</span>
+        </div>
       </div>
     </div>
 
@@ -392,43 +416,49 @@
 
     const baseImg = new Image();
     let isBaseImgLoaded = false;
-    let textureLoadError = false;
-    let proceduralTexture = null;
+    let proceduralTexture = createProceduralTexture();
+    let textureLoadingAttempted = false;
     
-    // Create procedural texture immediately
-    proceduralTexture = createProceduralTexture();
-    
-    // Handle texture loading with proper error handling
-    baseImg.crossOrigin = 'anonymous';
-    baseImg.src = BASE_TEXTURE_PATH;
-    baseImg.onload = () => {
-      isBaseImgLoaded = true;
-      textureLoadError = false;
-      console.log('Texture loaded successfully:', BASE_TEXTURE_PATH);
-      render2DCanvas();
+    // Handle texture loading
+    function loadTexture() {
+      if (textureLoadingAttempted) return;
+      textureLoadingAttempted = true;
+      
+      console.log('Attempting to load texture from:', BASE_TEXTURE_PATH);
+      
+      // Try to load the texture
+      baseImg.crossOrigin = 'anonymous';
+      baseImg.src = BASE_TEXTURE_PATH;
+      baseImg.onload = () => {
+        isBaseImgLoaded = true;
+        console.log('Texture loaded successfully');
+        render2DCanvas();
+        updateModelTexture();
+      };
+      baseImg.onerror = (e) => {
+        console.warn('Could not load texture, using procedural fallback');
+        // Use procedural texture
+        horseTexture.image = proceduralTexture;
+        horseTexture.needsUpdate = true;
+        render2DCanvas();
+        updateModelTexture();
+      };
+    }
+
+    function updateModelTexture() {
       if (horseMesh) {
         horseMesh.material.map = horseTexture;
         horseMesh.material.needsUpdate = true;
+        // Force a re-render
+        renderer.render(scene, camera);
       }
-    };
-    baseImg.onerror = (e) => {
-      textureLoadError = true;
-      console.warn('Could not load texture:', BASE_TEXTURE_PATH, e);
-      // Use procedural texture
-      horseTexture.image = proceduralTexture;
-      horseTexture.needsUpdate = true;
-      if (horseMesh) {
-        horseMesh.material.map = horseTexture;
-        horseMesh.material.needsUpdate = true;
-      }
-      render2DCanvas();
-    };
+    }
 
     function render2DCanvas() {
       // Clear canvas
       ctx.clearRect(0, 0, SHEET_SIZE, SHEET_SIZE);
       
-      if (isBaseImgLoaded) {
+      if (isBaseImgLoaded && baseImg.complete) {
         ctx.drawImage(baseImg, 0, 0, SHEET_SIZE, SHEET_SIZE);
       } else if (proceduralTexture) {
         ctx.drawImage(proceduralTexture, 0, 0, SHEET_SIZE, SHEET_SIZE);
@@ -460,26 +490,54 @@
 
       // Render 3D Surface Control Points onto the UV map
       if (surfaceNodes.length > 0) {
+        // Draw connecting line FIRST (so points are on top)
         ctx.beginPath();
         surfaceNodes.forEach((node, i) => {
           const px = node.uv.x * SHEET_SIZE;
           const py = (1 - node.uv.y) * SHEET_SIZE;
-
-          if (i === 0) ctx.moveTo(px, py);
-          else ctx.lineTo(px, py);
-
-          // Draw node marker
-          ctx.fillStyle = '#ef4444';
-          ctx.beginPath();
-          ctx.arc(px, py, 3, 0, Math.PI * 2);
-          ctx.fill();
+          
+          if (i === 0) {
+            ctx.moveTo(px, py);
+          } else {
+            ctx.lineTo(px, py);
+          }
         });
         ctx.strokeStyle = '#38bdf8';
         ctx.lineWidth = 2;
         ctx.stroke();
+
+        // Draw node markers (on top of line)
+        surfaceNodes.forEach((node) => {
+          const px = node.uv.x * SHEET_SIZE;
+          const py = (1 - node.uv.y) * SHEET_SIZE;
+          
+          // Outer glow
+          ctx.shadowColor = 'rgba(239, 68, 68, 0.5)';
+          ctx.shadowBlur = 10;
+          
+          // Draw node marker
+          ctx.fillStyle = '#ef4444';
+          ctx.beginPath();
+          ctx.arc(px, py, 4, 0, Math.PI * 2);
+          ctx.fill();
+          
+          // Inner white dot
+          ctx.shadowBlur = 0;
+          ctx.fillStyle = '#ffffff';
+          ctx.beginPath();
+          ctx.arc(px, py, 1.5, 0, Math.PI * 2);
+          ctx.fill();
+        });
+        
+        // Reset shadow
+        ctx.shadowBlur = 0;
       }
 
       horseTexture.needsUpdate = true;
+      
+      // Update point count
+      document.getElementById('point-count').textContent = `${surfaceNodes.length} points`;
+      
       compileGeneJSON();
     }
 
@@ -509,16 +567,17 @@
     controls.dampingFactor = 0.08;
     controls.target.set(0, 0, 0);
 
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+    // Lighting
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
     scene.add(ambientLight);
     const hemisphereLight = new THREE.HemisphereLight(0xffffff, 0x444444, 0.6);
     scene.add(hemisphereLight);
-    const dirLight = new THREE.DirectionalLight(0xffffff, 1.2);
-    dirLight.position.set(5, 12, 7);
+    const dirLight = new THREE.DirectionalLight(0xffffff, 1.0);
+    dirLight.position.set(5, 8, 5);
     scene.add(dirLight);
-    const backLight = new THREE.DirectionalLight(0x8888ff, 0.3);
-    backLight.position.set(-5, 0, -5);
-    scene.add(backLight);
+    const dirLight2 = new THREE.DirectionalLight(0x8888ff, 0.3);
+    dirLight2.position.set(-5, 3, -5);
+    scene.add(dirLight2);
 
     // Add a subtle grid helper
     const gridHelper = new THREE.GridHelper(3, 10, 0x334155, 0x1e293b);
@@ -537,11 +596,17 @@
     const visualNodesGroup = new THREE.Group();
     scene.add(visualNodesGroup);
 
-    // GLTF Model Loading with better error handling
+    // For line connections in 3D
+    const lineMaterial = new THREE.LineBasicMaterial({ color: 0x38bdf8, linewidth: 2 });
+    let curveLine3D = null;
+
+    // GLTF Model Loading
     const gltfLoader = new THREE.GLTFLoader();
     console.log('Attempting to load model:', MODEL_PATH);
     
-    // Try loading with GLTFLoader directly (simpler)
+    // Start loading texture
+    loadTexture();
+    
     gltfLoader.load(
       MODEL_PATH,
       (gltf) => {
@@ -550,9 +615,12 @@
         
         horseModel.traverse((child) => {
           if (child.isMesh) {
-            child.material = horseMaterial;
+            // Clone material to avoid sharing
+            child.material = horseMaterial.clone();
+            child.material.map = horseTexture;
+            child.material.needsUpdate = true;
             horseMesh = child;
-            console.log('Found mesh in model:', child.name);
+            console.log('Found mesh in model:', child.name, 'UVs:', child.geometry.attributes.uv ? 'Yes' : 'No');
           }
         });
 
@@ -573,34 +641,23 @@
           }
 
           scene.add(horseModel);
-          loadingOverlay.style.opacity = '0';
-          setTimeout(() => loadingOverlay.style.display = 'none', 300);
-          
-          // If texture was already loaded, update material
-          if (isBaseImgLoaded || proceduralTexture) {
-            horseMesh.material.map = horseTexture;
-            horseMesh.material.needsUpdate = true;
-          }
+          loadingOverlay.style.display = 'none';
         }
       },
       (xhr) => {
         // Progress
         const percent = Math.floor((xhr.loaded / xhr.total) * 100);
         if (xhr.total > 0) {
-          loadingOverlay.textContent = `Loading 3D Gene Preview... ${percent}%`;
+          const loadingText = loadingOverlay.querySelector('div:last-child');
+          if (loadingText) {
+            loadingText.textContent = `Loading 3D Gene Preview... ${percent}%`;
+          }
         }
       },
       (err) => {
         console.error('Failed loading 3D model:', err);
-        loadingOverlay.innerText = '3D Preview Unavailable - Using Fallback';
-        loadingOverlay.style.color = '#ef4444';
-        
         createFallbackModel();
-        
-        setTimeout(() => {
-          loadingOverlay.style.opacity = '0';
-          setTimeout(() => loadingOverlay.style.display = 'none', 300);
-        }, 1000);
+        loadingOverlay.style.display = 'none';
       }
     );
 
@@ -635,8 +692,28 @@
         }
       }
       
-      loadingOverlay.style.opacity = '0';
-      setTimeout(() => loadingOverlay.style.display = 'none', 300);
+      loadingOverlay.style.display = 'none';
+    }
+
+    // Function to update 3D curve line
+    function update3DCurve() {
+      // Remove old line
+      if (curveLine3D) {
+        scene.remove(curveLine3D);
+        curveLine3D = null;
+      }
+      
+      if (surfaceNodes.length < 2) return;
+      
+      const points = surfaceNodes.map(node => node.point3D);
+      const geometry = new THREE.BufferGeometry().setFromPoints(points);
+      curveLine3D = new THREE.Line(geometry, new THREE.LineBasicMaterial({ 
+        color: 0x38bdf8, 
+        linewidth: 2,
+        transparent: true,
+        opacity: 0.8
+      }));
+      scene.add(curveLine3D);
     }
 
     // 3D Direct Surface Interaction (Raycasting)
@@ -700,19 +777,22 @@
           marker.position.copy(hit.point);
           visualNodesGroup.add(marker);
 
+          // Update 3D curve
+          update3DCurve();
+
           render2DCanvas();
           console.log('Point added at UV:', hit.uv.x, hit.uv.y, 'Part:', partInfo.part);
         } else {
           console.warn('Clicked point has no UV data - try clicking on a different part of the model');
           // Show temporary visual feedback
-          loadingOverlay.textContent = '⚠️ No UV data at this point - try another area';
-          loadingOverlay.style.color = '#fbbf24';
-          loadingOverlay.style.opacity = '1';
+          const loadingText = loadingOverlay.querySelector('div:last-child');
+          if (loadingText) {
+            loadingText.textContent = '⚠️ No UV data at this point - try another area';
+            loadingText.style.color = '#fbbf24';
+          }
+          loadingOverlay.style.display = 'flex';
           setTimeout(() => {
-            loadingOverlay.style.opacity = '0';
-            setTimeout(() => {
-              loadingOverlay.style.display = 'none';
-            }, 300);
+            loadingOverlay.style.display = 'none';
           }, 1500);
         }
       }
@@ -766,15 +846,18 @@
       while (visualNodesGroup.children.length > 0) {
         visualNodesGroup.remove(visualNodesGroup.children[0]);
       }
+      // Remove 3D curve
+      if (curveLine3D) {
+        scene.remove(curveLine3D);
+        curveLine3D = null;
+      }
       render2DCanvas();
     });
 
     document.getElementById('btn-copy-json').addEventListener('click', () => {
       navigator.clipboard.writeText(jsonOutput.value).catch(() => {
-        // Fallback if clipboard API fails
         jsonOutput.select();
         document.execCommand('copy');
-        alert('Gene JSON copied to clipboard!');
       });
       alert('Gene JSON copied to clipboard!');
     });
@@ -805,7 +888,8 @@
     });
 
     console.log('Horse Gene Creator initialized');
-    console.log('Looking for files:', { MODEL_PATH, BASE_TEXTURE_PATH });
+    console.log('Model path:', MODEL_PATH);
+    console.log('Texture path:', BASE_TEXTURE_PATH);
   </script>
 </body>
 </html>
