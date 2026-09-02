@@ -15,24 +15,47 @@
 <p class="eyebrow">For modders</p>
 <h1>Writing a gene</h1>
 <p class="lede">
-    A gene is one class implementing one interface. It declares its alleles, how they
-    segregate, how dominant the variant is, and <em>one</em> coat function &mdash;
-    either a natural pigment restriction or a magical RGB tint, never both. This page
-    is the walkthrough; <a href="api-reference.html">Class abstractions</a> is the
-    reference.
+    A gene declares its alleles, how they segregate, how dominant the variant is, and
+    <em>one</em> coat function &mdash; either a natural pigment restriction or a magical
+    RGB tint, never both. There are two ways to write one: a <strong>JSON file</strong>,
+    which needs no code at all, or a <strong>Java class</strong> for anything the format
+    cannot say. This page covers both; <a href="api-reference.html">Class
+    abstractions</a> is the reference.
 </p>
 
-<div class="note warn">
-    <span class="label">Read this first</span>
+<div class="note good">
+    <span class="label">Try the file first</span>
     <p>
-        The registry is <strong>closed</strong> today &mdash;
-        <code>Genes.CODE_ORDER</code> is a <code>List.of(...)</code>, so a gene has to
-        be added to this repository rather than registered from another mod. The
-        open registry, the declarative builder and the abstract base classes are
+        Most genes are one shape and one number. Silver dapple is &ldquo;multiply
+        eumelanin by 0.45 and leave phaeomelanin alone&rdquo;; a sock is &ldquo;drive
+        both pigments to zero up the bottom 40% of each leg, jittered&rdquo;. Neither
+        needs a class. Build it in the
+        <a href="gene-creator/index.html">gene creator</a> &mdash; which previews it on
+        a 3D horse over any base coat &mdash; export the JSON, drop it in
+        <code>config/horsegenetics/genes/</code>, restart. The format reference is
+        <a href="gene-format.html">The gene file format</a>.
+    </p>
+    <p>
+        Come back here when you need something the format cannot express: reading
+        another gene's dose (cream reads pearl), or rewriting both pigment channels
+        together against a reading of the coat (grey's remap onto the gradient's
+        neutral column). Those are still classes, and always will be &mdash; the point
+        of the file path is that you rarely reach for one.
+    </p>
+</div>
+
+<div class="note warn">
+    <span class="label">What is and isn't open</span>
+    <p>
+        <code>Genes</code> is an <strong>open registry</strong> for data-driven genes:
+        <code>Genes.register(SpecGene)</code> appends after the eleven built-ins,
+        sorted by declared <code>priority</code> then key, so registration order never
+        decides how a horse looks. A <em>Java</em> gene from another mod still has to
+        be added to this repository &mdash; the mod-bus registration hook, the
+        declarative builder and the abstract base classes are
         <a href="roadmap.html#modder-api">designed and on the roadmap</a>. Everything
         else on this page &mdash; the interface, the contract, the pipeline, the
-        determinism rules &mdash; is live and will not change shape when the registry
-        opens.
+        determinism rules &mdash; is live and applies to both kinds of gene.
     </p>
 </div>
 
@@ -342,6 +365,13 @@ double reach   = 0.35 + epi.nextFloat() * 0.60;          // fraction of the drop
 </ol>
 
 <h2>Registering it</h2>
+
+<p>
+    A <strong>data-driven</strong> gene registers itself: every <code>.json</code> in
+    <code>config/horsegenetics/genes/</code> is loaded at startup, in filename order,
+    and placed after the built-ins by its declared <code>priority</code>. Nothing below
+    applies to it. A <strong>Java</strong> gene is three edits:
+</p>
 
 <div class="codebox">
 <div class="filename">common/genetics/Genes.java &mdash; three edits, today</div>

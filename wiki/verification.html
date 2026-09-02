@@ -84,7 +84,65 @@
 
 <h2>Still to verify</h2>
 
-<h3 id="zebra">1. Magic zebra &mdash; the top item</h3>
+<h3 id="drop-in-genes">1. Drop-in genes actually load &mdash; the top item</h3>
+
+<p>
+    New 2026-09-02, and the whole point of the
+    <a href="gene-creator/index.html">gene creator</a>: nothing about it has been seen
+    in a running game. Nothing loads by default, so this is opt-in. To test it:
+</p>
+
+<ol>
+    <li>Open the creator, pick <strong>Load an example &rarr; Tobiano</strong>, and
+        <strong>Download</strong>. Note what the preview looks like &mdash; that is the
+        claim being checked.</li>
+    <li>Drop <code>tobiano.json</code> into
+        <code>neoforge-26.1.2/run/config/horsegenetics/genes/</code>. The folder and its
+        <code>README.txt</code> should already be there from a previous launch; if not,
+        that is itself a finding.</li>
+    <li><code>./gradlew :neoforge-26.1.2:runClient</code> and read the log for
+        <code>[genes] loaded 1 gene(s)</code> and
+        <code>the genotype code now has 12 segments</code>.</li>
+</ol>
+
+<p>What to look at:</p>
+
+<ul>
+    <li><strong>Wild horses carry it.</strong> 1 in 18 per allele, so a handful of
+        spawns should include a patched one. The horse dimension's gallery should have
+        <strong>doubled in length</strong> (the entrance sign is the quick read: the
+        distinct-genotype count should go from 1&nbsp;730 to 3&nbsp;458 &mdash; the two
+        <code>COMPLETE_DOMINANT</code> pens do not double).</li>
+    <li><strong>It looks like the preview did.</strong> Not texel-identical &mdash; the
+        creator's gradient is downsampled &mdash; but the same size and shape of
+        patches, and the same socks.</li>
+    <li><strong>It breeds.</strong> A foal from two carriers should show it, and the
+        <em>homozygote</em> should be visibly more patched than the heterozygote
+        (that is the <code>perDose</code> threshold, and it is the thing splash still
+        gets wrong).</li>
+    <li><strong>A foal inherits the look, not just the gene.</strong> Two horses with
+        the same genotype should have different patches; a foal's should match the
+        parent whose copy it took.</li>
+    <li><strong>Removing the file is clean.</strong> Delete it, relaunch: the code drops
+        back to 11 segments. Horses saved with 12 will fail to load &mdash; expected,
+        but confirm it fails <em>loudly</em> rather than corrupting anything.</li>
+    <li><strong>A deliberately broken file.</strong> Put a stray comma in one and
+        confirm the game still boots, logs the error with the file name, and loads the
+        other genes.</li>
+</ul>
+
+<div class="note">
+    <span class="label">Also worth an eyeball</span>
+    <p>
+        The creator itself, opened straight off disk (<code>file://</code>) as well as
+        served: the 3D horse should appear and orbit, clicking it should report a body
+        part and a body-space point, and the &ldquo;show area&rdquo; checkbox on a layer
+        should highlight exactly the texels that layer covers. If three.js is blocked
+        the flat sheet must still bake &mdash; that fallback is untested.
+    </p>
+</div>
+
+<h3 id="zebra">2. Magic zebra</h3>
 
 <p>
     New 2026-09-02. Dominant and 1 in 100 per allele, so do not wait for a wild one:
@@ -111,7 +169,7 @@
         zebra, widen <code>SPACING_MIN</code> / <code>SPACING_RANGE</code>.</li>
 </ul>
 
-<h3 id="pink">2. Pink hair</h3>
+<h3 id="pink">3. Pink hair</h3>
 
 <p>
     New 2026-09-02. <strong>Recessive</strong>, so only <code>Pihr/Pihr</code> shows
@@ -133,7 +191,7 @@
         <code>magicalOrder()</code>.</li>
 </ul>
 
-<h3>3. Pen signs now overflow</h3>
+<h3>4. Pen signs now overflow</h3>
 
 <p>
     At 11 genes the widest genotype label is <strong>49 characters</strong> against
@@ -145,7 +203,7 @@
     answer</strong>.
 </p>
 
-<h3>4. The three-phase pipeline refactor &mdash; lowest priority</h3>
+<h3>5. The three-phase pipeline refactor &mdash; lowest priority</h3>
 
 <p>
     <code>CoatPipelineGoldenTest</code> proves 20 genotypes &times; 3 seeds &times;
@@ -162,7 +220,7 @@
     <strong>dominant-white</strong> horse. Nothing else needs looking at.
 </p>
 
-<h3>5. The genotype gallery &mdash; now low-value</h3>
+<h3>6. The genotype gallery &mdash; now low-value</h3>
 
 <p>
     Slated for revert. The owner has decided the dimension goes back to
@@ -195,7 +253,7 @@
         worth checking if you fly it.</li>
 </ul>
 
-<h3>6. Leaving the dimension no longer clears blocks</h3>
+<h3>7. Leaving the dimension no longer clears blocks</h3>
 
 <p>
     <code>tearDown</code> discards entities and forgets their ancestry records only.
@@ -205,7 +263,7 @@
     should still be correct geometry with no horses until you walk to it.
 </p>
 
-<h3 id="foals">7. Foals &mdash; only spot-checked, needs a real pass</h3>
+<h3 id="foals">8. Foals &mdash; only spot-checked, needs a real pass</h3>
 
 <p>
     Every treatment should apply on <code>HdBabyHorseModel</code>: a bay foal with
@@ -215,7 +273,7 @@
     neck for odd dark patches or misplaced marks.
 </p>
 
-<h3 id="epigenetics">8. Per-allele epigenetics + the grey rework</h3>
+<h3 id="epigenetics">9. Per-allele epigenetics + the grey rework</h3>
 
 <p>New 2026-09-01, not seen in-game.</p>
 
@@ -248,7 +306,7 @@
         &mdash; same markings every session.</li>
 </ul>
 
-<h3>9. The epigenome persists across save &rarr; reload</h3>
+<h3>10. The epigenome persists across save &rarr; reload</h3>
 
 <p>
     Bay leg heights, grey dapples and splash markings identical after a reload.
@@ -265,7 +323,7 @@
     </p>
 </div>
 
-<h3>10. Everything else</h3>
+<h3>11. Everything else</h3>
 
 <div class="table-wrap">
 <table>
@@ -281,7 +339,7 @@
 </table>
 </div>
 
-<h3>11. Dev test worlds delete themselves</h3>
+<h3>12. Dev test worlds delete themselves</h3>
 
 <p>
     New 2026-09-01, <code>client/DebugTestWorldCleanup</code>. Click <strong>Spawn Test

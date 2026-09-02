@@ -24,8 +24,15 @@ project. Its shape:
 - Each page is a standalone file: prism theme, then `styles.css`, then
   `<main class="content"><article class="doc">`. Copy an existing gene page as
   a template.
-- `wiki/gene-creator.html` is the owner's interactive 3D gene editor - a
-  separate workstream, untouched by the doc pass, and not a source of truth.
+- **`wiki/gene-creator/`** is the interactive gene editor - now a *folder*, not a
+  single page (`index.html` + `creator.css` + `js/*` + generated `assets/` and
+  `fixtures/`). It is a **real tool, not a mockup**: it runs a JavaScript port of
+  the coat pipeline, previews a gene on a 3D horse over any base coat, and
+  exports the JSON the game loads. It does **not** use the wiki's `styles.css` /
+  `nav.js` - it owns the whole window.
+- **`wiki/gene-format.html`** is the single source of truth for the **data-driven
+  gene file format** - the header, the knobs, every mask and every op. When a
+  mask or an op changes shape, update it in the same change.
 - **`README.md`** is **user-facing only** now - what the mod does, how to play
   it, install, license. No status tables, no architecture, no API notes.
   Don't put dev content there.
@@ -84,7 +91,7 @@ project. Its shape:
 
 ## Status snapshot (keep this current)
 
-- **`common/`** - compiles; **153 JUnit tests pass** (`./gradlew :common:test`).
+- **`common/`** - compiles; **177 JUnit tests pass** (`./gradlew :common:test`).
   Covers `genetics/` (allele/gene model - **11 genes**: the 9 natural ones incl.
   grey / cream / pearl / splash, plus magic zebra and pink hair; `Genotype` code
   round-trip, breeding, the `Epigenome` / `Genome` per-allele epigenetics +
@@ -95,7 +102,10 @@ project. Its shape:
   gene hooks, the `coat-golden.txt` byte-identity net, `CoatTextureId`
   texture-id injectivity),
   `coat/skin/` (`HorseSkinGeometry`), `name/` (`breedNth`),
-  `horse/` (pedigree + `HorseStats` -> `wiki/breeding.html`).
+  `horse/` (pedigree + `HorseStats` -> `wiki/breeding.html`), and
+  `genetics/spec/` (the **data-driven gene** format: `GeneSpec`, `Json`,
+  `GeneSpecParser`, `SpecSchema`, `SpecValues`, `SpecGene`, `GeneSpecLoader`,
+  plus `coat/pattern/SpecPainter` - see below).
 - **`neoforge-26.1.2/`** - compiles and assembles (`./gradlew
   :neoforge-26.1.2:build` passes; only two `getGuiLeft/getGuiTop`
   deprecation warnings) against the real NeoForge `26.1.2.100` SDK.
@@ -163,6 +173,14 @@ project. Its shape:
     combined genetic code, and (for the pairing's **first** foal) a name
     combining both parents.
 
+- **Built 2026-09-02, NOT yet play-tested:** **data-driven genes** and the
+  **rebuilt gene creator**. A gene that fits the format is now a **JSON file**
+  dropped in `config/horsegenetics/genes/` - no Java, no rebuild - and
+  `wiki/gene-creator/` is the tool that writes it, previewing the gene on a 3D
+  horse over any of 15 base coats before you export. Nothing about the eleven
+  built-in genes changed: no gene file ships by default, so the registry, the
+  genotype code, the gallery numbers and `coat-golden.txt` are all untouched.
+  See "Data-driven genes" below; in-game checklist in `wiki/verification.html`.
 - **Docs 2026-09-02, no behaviour change:** the **`Docs/*.md` -> wiki
   conversion**. All five markdown docs are gone; their content lives in
   `wiki/*.html` (see the Docs-split section above), the four Javadoc comments
@@ -244,6 +262,12 @@ Two-module Gradle project, split deliberately:
   - `horse/` - the pedigree domain model (`Sex`, `HorseRecord`,
     `HorseDatabase`, `InMemoryHorseDatabase`) and `HorseStats` (foal stat
     roll) -> `wiki/breeding.html`.
+  - `genetics/spec/` - the **data-driven gene** path: `GeneSpec` (the format as
+    records), `Json` (a hand-rolled parser - `common/` takes no dependencies),
+    `GeneSpecParser`, `SpecSchema` (the one declaration of what each mask and op
+    accepts), `SpecValues` (the per-horse knob draw), `SpecGene` (a `Gene` that
+    reads a spec), `GeneSpecLoader`, and the two dev tools `SpecFixtureTool` /
+    `CreatorAssetTool`. The painting is `coat/pattern/SpecPainter`.
   - `Rng` - the randomness seam (`nextFloat` / `nextBoolean` /
     `nextInt(bound)` / `nextLong`), implemented by `NeoRng` (wraps
     `RandomSource`) and, in tests, `FakeRng`.
@@ -274,7 +298,18 @@ NeoForge module thin. That's what makes a future `forge-1.12.2/` module cheap.
 ./gradlew :neoforge-26.1.2:build     # full compile + jar; slow first run (downloads the SDK)
 ./gradlew :neoforge-26.1.2:runClient # launch the game with the mod
 ./gradlew :neoforge-26.1.2:runServer # headless dedicated server (DEBUG logging - huge log)
+
+# gene-creator tooling (see "Data-driven genes")
+./gradlew :common:bakeSpecFixtures   # what the real Java spec engine produces
+node wiki/gene-creator/tools/check-parity.mjs   # ...and does the creator's JS agree?
+./gradlew :common:bakeCreatorAssets  # regenerate the creator's inlined textures + examples
 ```
+
+**Run the parity check whenever you touch `SpecPainter`, `SpecSchema`,
+`BodyNoise`/`BodyStripes`, or any of `wiki/gene-creator/js/`.** It is the only
+thing standing between the creator and quietly previewing a horse the game will
+not breed - it has already caught a wrong `nextLong()` port and four schema
+defaults that had drifted apart.
 
 Run `:common:test` first when iterating on genetics/stats - it doesn't touch
 Minecraft. Requires JDK 25; `foojay-resolver-convention` in
@@ -293,6 +328,15 @@ alleles of a gene joined by `/`, dominant first. Allele tokens can be **any run
 of characters** (`Spl`, `Cr`, `prl`, `Ch`, `N`, ...). Example:
 `"E/e-A/a-w/w-t/t-c/c-spl/spl-g/g-Cr/N-N/N"`. **No legacy / short-code
 handling** - dev only, no saves to keep.
+
+`Genes` is now an **open registry**: the eleven built-ins keep their fixed order
+first (so adding a gene never changes an existing horse's coat), and
+`SpecGene`s loaded from JSON are appended after them, **sorted by declared
+`priority` then key - registration order is deliberately ignored**. A magical
+spec gene slots in *before* `TEST` in `magicalOrder()`, because Test paints flat
+and masks everything and has to stay last. `GenotypeCatalog` is lazy and
+invalidated on every registration, since the catalogue is a product over
+`codeOrder()`.
 
 `Genes.codeOrder()` = extension, agouti, white, test, champagne, splash, grey,
 cream, pearl, magic zebra, pink hair - **append** new ones. **Full per-gene detail is in `Gene
@@ -367,6 +411,73 @@ order).
   cache entry. It stays a full-range int for headroom.
 
 Full inheritance detail: **`wiki/breeding.html`**.
+
+## Data-driven genes + the gene creator (`common/genetics/spec/`, `wiki/gene-creator/`)
+
+**The point:** a gene that fits a fixed set of shapes is a **JSON file**, not a
+Java class. Drop it in `config/horsegenetics/genes/` and restart. Full format
+reference is **`wiki/gene-format.html`**; the machinery:
+
+- **`GeneSpec`** is the format as records: a header (key, alleles, dominance,
+  wild odds, priority) plus a list of **layers**. A layer is **where**
+  (`Mask`s, folded into one coverage value per texel) times **what** (an `Op`),
+  and the op is applied *scaled by* that coverage - so a spec gene's edges are
+  soft by construction, which is the one thing each hand-written gene had to
+  remember separately (splash's hard sock ring is the counter-example).
+- **`SpecSchema`** is the single declaration of which parameters each mask and
+  op accepts and what each defaults to. The parser validates against it (an
+  unknown key is an error naming the key and listing the legal ones), the
+  creator builds its forms from a mirror of it, and `wiki/gene-format.html`
+  quotes it. **Add a mask or an op in all three, or the tool and the game
+  drift.**
+- **Values.** Any numeric parameter is a constant, `"$knob"`, an inline
+  `{min,max}` (which the parser turns into an anonymous knob), or
+  `{"perDose":[a,b,c]}`. `SpecValues` draws every knob once, in declaration
+  order, off `ctx.epigeneticsFor(key)` - so the determinism contract holds
+  unchanged. A `per: "leg"` knob with a `spread` reproduces `BayCoat`'s
+  "one extent for the horse, each leg jittered" in one line of JSON.
+- **`SpecGene`** answers the whole `Gene` interface from the spec, so nothing
+  downstream knows or cares that it came from a file - genotype code, breeding,
+  the catalogue, the coat.
+- **Loading** is `GeneSpecLoader`: a classpath index (for genes shipped inside a
+  mod) plus a real folder walked in filename order. **No gene file ships by
+  default** - the built-in eleven are unchanged - so the genotype code, the
+  gallery numbers and `coat-golden.txt` are all untouched by this work.
+  `neoforge/ModGeneSpecs` calls it **from the mod constructor**, which is the
+  earliest hook there is: every registration lengthens the genotype code by a
+  segment, so a gene registered after something has parsed a code would
+  invalidate it. A bad file is logged and skipped, never fatal.
+
+### The creator, and why it can be trusted
+
+`wiki/gene-creator/` is not a mockup. It runs a **JavaScript port of the coat
+pipeline** - `geometry.js` (`HorseSkinGeometry`), `noise.js`
+(`BodyNoise`/`BodyStripes`, on a hand-written two-word u64 because the hash is
+64-bit integer maths and JS numbers are doubles), `fields.js`
+(`PigmentField`/`ColorField`/`GradientLut`/the composer), `base-coats.js` (the
+real natural genes, for the 15 base coats a new gene is previewed over) and
+`spec-engine.js` (the twin of `SpecPainter`, plus a `java.util.Random` port so a
+preview seed draws the numbers the game would).
+
+- The 3D horse is **built from the geometry tables**, not loaded from a GLB, so
+  the UV layout is the game's by construction and a click maps back through the
+  same sample grid the pipeline uses. (It also means no file fetch, which
+  `file://` blocks.) The old `wiki/horse.glb` and `wiki/horse_white.png` are
+  gone with it.
+- Everything is a **classic script** with an `HG` namespace and the textures are
+  inlined data URIs, because ES modules and cross-file image reads are both
+  blocked under `file://`. The two generated files come from
+  `./gradlew :common:bakeCreatorAssets`.
+- **A port drifts, and a drifted preview is worse than none** - it shows a horse
+  the game will not breed, convincingly. So `./gradlew :common:bakeSpecFixtures`
+  writes what the real Java engine produces (48 cases: 4 example genes x 3 seeds
+  x 2 doses x adult/foal, plus the whole `SpecSchema` table) and
+  `node wiki/gene-creator/tools/check-parity.mjs` re-runs it in JS - **3 784
+  checks**. It earns its keep: it caught `nextLong()` ported as a concatenation
+  where Java does a signed add, and four schema defaults that had drifted (the
+  creator omits any setting left at its default, so a mismatched default writes
+  a file that plays differently from how it previewed - silently, and only for
+  the settings you never touched).
 
 ## The three-phase coat pipeline (`common/coat/pattern/` + `client/GeneticCoatTextureFactory`)
 
@@ -1217,10 +1328,25 @@ Design follow-ups (not just "go look at it"):
    hand-transcribes public signatures out of `common/` and
    `wiki/gene-*.html` hand-transcribes each gene's constants - neither is
    generated, so both drift silently the moment a signature or a tuning number
-   changes. Nothing checks this. The cheap guard would be a `:common:test` that
-   greps the gene pages for the constants they quote; the thorough one is
-   generating the reference page from the source. Until then it is a
-   discipline item, which is why it is in the session-end routine.
+   changes. Nothing checks *those*. The one place this is now guarded is the
+   **gene creator**: `check-parity.mjs` compares its schema mirror and its whole
+   preview engine against the real Java. That is the model for the rest - the
+   cheap version elsewhere is a `:common:test` that greps the gene pages for the
+   constants they quote. Until then the other pages are a discipline item, which
+   is why they are in the session-end routine.
+13. **Data-driven genes cover markings and dilutions, not everything.** The
+   format has no expression language and no way to read another gene, so the
+   three built-ins that genuinely need one still can't be expressed as specs:
+   **grey** (its remap onto the gradient's neutral column reads the coat's
+   darkness *and* rewrites both channels together - `PIGMENT` masking gets close
+   but not there), **cream/pearl** (they read *each other's* dose), and
+   **bay**'s exact face-follows-legs coupling. Those stay Java, which is fine -
+   the tiers were always meant to bottom out at a real class. What would move
+   the line: a `dose` mask on another gene, and a `REMAP` op.
+14. **The creator has no in-page parity button.** Parity is checked by a Node
+   script at the terminal, so the tool itself will happily show you a stale
+   preview if you edit `js/` and don't run it. Loading `fixtures/expected.json`
+   in the page and self-checking on boot would close that.
 
 ## License
 
@@ -1252,6 +1378,13 @@ its licence is compatible.
   pointer from CLAUDE.md is fine, a copy is not.
 - **The wiki has one nav.** A new page goes in the `SECTIONS` array in
   `wiki/nav.js` and nowhere else; never hand-write a sidebar into a page.
+  (`wiki/gene-creator/` is the one exception - it is an app, not a page, and
+  owns its own chrome.)
+- **The data-driven gene format** is documented **only** in
+  `wiki/gene-format.html`. A new mask or op has to land in four places in the
+  same change: `SpecSchema.java`, `SpecPainter.java`,
+  `wiki/gene-creator/js/schema.js` + `spec-engine.js`, and that page. Then
+  re-run `:common:bakeSpecFixtures` and `check-parity.mjs`.
 - **Keep the why out of the backlog.** `wiki/roadmap.html` is work items;
   when a justification there runs longer than a clause it belongs in
   `wiki/philosophy.html` with a pointer back.
@@ -1266,8 +1399,10 @@ The routine to run when the owner says **"end the session"** (or "wrap up",
 code is pushed, so it's a review of where the session actually landed rather
 than a running commentary written mid-change.
 
-**0. Pre-flight.** `./gradlew :common:test` and `./gradlew
-:neoforge-26.1.2:build`. Don't push red. If something fails and can't be fixed
+**0. Pre-flight.** `./gradlew :common:test`, `./gradlew
+:neoforge-26.1.2:build`, and - if anything under `common/genetics/spec/`,
+`SpecPainter` or `wiki/gene-creator/js/` was touched -
+`node wiki/gene-creator/tools/check-parity.mjs`. Don't push red. If something fails and can't be fixed
 in the time left, still push - but say so in the commit message and put it at
 the top of `wiki/verification.html`.
 
@@ -1305,6 +1440,10 @@ the doc-split rules under "Conventions":
   or the projection engine moved.
 - **`wiki/api-reference.html`** / **`wiki/modding.html`** - if a public
   `common/` type changed shape, or if the gene-authoring contract moved.
+- **`wiki/gene-format.html`** - if a mask, an op or the file header moved. If
+  so, also re-run `./gradlew :common:bakeSpecFixtures` and
+  `node wiki/gene-creator/tools/check-parity.mjs`, and commit the regenerated
+  `wiki/gene-creator/fixtures/expected.json`.
 - **`wiki/nav.js`** - if any page was added or renamed.
 - **`README.md`** - only if the *player-facing* experience changed. It stays
   user-facing: no status, no architecture, no API notes.

@@ -63,6 +63,17 @@ genetics/
   GeneticCodeCombiner.java  the string-level and Genome-level breeding seam
   CoatPhenotype.java        coarse CHESTNUT / BLACK / BAY / WHITE
   genes/                    the eleven shipped Gene implementations
+  spec/                     DATA-DRIVEN genes - a gene as a JSON file
+    GeneSpec.java             the format, as records (header + layers)
+    SpecSchema.java           what each mask / op accepts, and its default
+    GeneSpecParser.java       JSON tree -&gt; GeneSpec, strictly, with real errors
+    Json.java                 a hand-rolled parser (common/ takes no dependencies)
+    SpecValues.java           one horse's draw of the spec's knobs
+    SpecGene.java             a Gene that answers everything from a GeneSpec
+    GeneSpecLoader.java       find + parse + register, from a folder or the classpath
+    PartGroups.java           LEGS / HAIR / POINTS ... aliases for a parts list
+    SpecFixtureTool.java      the bakeSpecFixtures task (creator parity)
+    CreatorAssetTool.java     the bakeCreatorAssets task (creator's inlined assets)
 
 coat/
   CoatData.java             a Genome ready to render; textureKey()
@@ -86,6 +97,7 @@ coat/
     CoatPattern.java          (x,y,z) -&gt; ARGB, for the sample baker
     CoatSheetRasterizer.java  bake a CoatPattern to a sheet / PNG
     CoatSampleTool.java       the bakeCoatSamples gradle task
+    SpecPainter.java          executes a GeneSpec's layers - masks x ops
   skin/
     HorseSkinGeometry.java    body space &lt;-&gt; texel, for ADULT and BABY
 
@@ -275,11 +287,35 @@ static Gene   byKey(String geneKey);      // throws if unregistered
 static Allele allele(String alleleKey);   // "&lt;gene&gt;.&lt;token&gt;"</code></pre>
 </div>
 
+<div class="codebox">
+<pre><code class="language-java">static void register(SpecGene gene);              // throws on a duplicate key
+static void registerAll(Collection&lt;SpecGene&gt;);
+static List&lt;SpecGene&gt; loaded();                   // the data-driven genes, in gene order
+static void clearLoaded();                        // back to the eleven built-ins</code></pre>
+</div>
+
 <p>
-    The three orderings are <strong>deliberately independent</strong>. Today all
-    three are hand-written <code>List.of(...)</code>; the
-    <a href="roadmap.html#priority">plan</a> is to derive them by sorting on a
-    per-gene <code>int priority()</code>, so registration order can never matter.
+    The three orderings are <strong>deliberately independent</strong>. The eleven
+    built-ins keep their hand-written order, first &mdash; so adding a gene never
+    changes an existing horse's coat &mdash; and data-driven genes are appended after
+    them, <strong>sorted by their declared <code>priority</code> then by key</strong>.
+    Registration order is deliberately ignored: two people who drop the same gene files
+    in a different order must get the same horses. A magical spec gene lands
+    <em>before</em> <code>TEST</code> in <code>magicalOrder()</code>, because Test
+    paints flat and masks everything and has to run last.
+</p>
+
+<p>
+    Register during startup, before anything parses a genotype: each registration
+    lengthens the genotype code by a segment. <code>GenotypeCatalog</code> is lazy and
+    invalidated on every registration, since the catalogue is a product over
+    <code>codeOrder()</code>.
+</p>
+
+<p>
+    Deriving the <em>built-in</em> orderings from a per-gene
+    <code>int priority()</code> is still <a href="roadmap.html#priority">on the
+    roadmap</a>; today only the data-driven half is sorted.
 </p>
 
 <h2>Coat-pipeline abstractions</h2>
@@ -429,6 +465,74 @@ public interface CoatPattern {
 
 int[] CoatSheetRasterizer.bake(CoatPattern pattern);
 void  CoatSheetRasterizer.writePng(int[] argb, Path out) throws IOException;</code></pre>
+</div>
+
+<h2>Data-driven genes</h2>
+
+<p>
+    The types a gene <em>file</em> goes through. Full format reference:
+    <a href="gene-format.html">The gene file format</a>.
+</p>
+
+<div class="codebox">
+<pre><code class="language-java">// The format, as records.
+public record GeneSpec(String key, String name, boolean natural, DominancePattern dominance,
+                       int wildOdds, int priority, List&lt;AlleleSpec&gt; alleles,
+                       List&lt;Knob&gt; knobs, List&lt;Layer&gt; layers) {
+    static final int FORMAT = 1;
+    AlleleSpec variant();          // alleles[0]
+    AlleleSpec wild();             // alleles[last]
+    boolean isDeterministic();     // no knobs = one bake serves every carrier
+}
+
+public record Layer(String name, List&lt;Mask&gt; masks, Op op) {}
+public record Mask(MaskType type, Params params, Combine combine, boolean invert) {}
+public record Op(OpType type, Params params) {}
+public record Knob(String name, double min, double max, boolean perLeg, double spread, boolean seed) {}
+
+sealed interface Value { record Const(double v); record FromKnob(int index); record PerDose(...); }
+
+// One horse's draw. Every knob, once, in declaration order, off the expressing copy.
+public final class SpecValues {
+    static SpecValues draw(GeneSpec spec, Rng rng, int dose);
+    double get(Value value, int legIndex);   // legIndex -1 anywhere that is not a leg
+    long   seed(Value value, long fallback);
+}
+
+// A Gene that answers everything from a spec - indistinguishable downstream.
+public final class SpecGene implements Gene {
+    SpecGene(GeneSpec spec);
+    GeneSpec spec();
+    int dose(AllelePair pair);     // copies of the variant allele: 0, 1 or 2
+}
+
+// Loading. A bad file costs you that gene and no other.
+public final class GeneSpecLoader {
+    record Result(List&lt;GeneSpec&gt; specs, List&lt;String&gt; errors) { boolean ok(); Result merge(Result); }
+    static Result fromDirectory(Path dir);        // filename order; a missing folder is fine
+    static Result fromClasspath();                // horsegenetics/genes/index.json
+    static List&lt;String&gt; register(Result result);
+    static List&lt;String&gt; loadAndRegister(Path dropInDirectory);
+}
+
+// The interpreter. Same shape as the two Gene hooks.
+public final class SpecPainter {
+    static PigmentField restrict(GeneSpec, SpecValues, CoatBuildContext, PigmentView);
+    static ColorField   tint(GeneSpec, SpecValues, CoatBuildContext, PigmentView, ColorView);
+}</code></pre>
+</div>
+
+<div class="note warn">
+    <span class="label">SpecPainter has a twin</span>
+    <p>
+        <code>wiki/gene-creator/js/spec-engine.js</code> is the same interpreter in
+        JavaScript, so the creator's preview is the game's output. Changing what a mask
+        or an op <em>means</em> here without changing it there makes the tool lie.
+        <code>./gradlew :common:bakeSpecFixtures</code> then
+        <code>node wiki/gene-creator/tools/check-parity.mjs</code> is the tripwire &mdash;
+        it compares the schema tables and the painted result, and it is not optional
+        after touching either side.
+    </p>
 </div>
 
 <h2>Domain abstractions (non-coat)</h2>

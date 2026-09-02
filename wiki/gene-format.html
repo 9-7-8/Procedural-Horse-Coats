@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The gene file format &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="nav.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow">Reference <span class="sep">/</span> data-driven genes</p>
+<h1>The gene file format</h1>
+<p class="lede">
+    A gene that fits the shapes on this page is a <strong>JSON file</strong>, not a Java
+    class. Drop it in <code>config/horsegenetics/genes/</code>, restart, and wild horses
+    carry it &mdash; it takes its own segment in the genotype code, breeds Mendelian,
+    and draws its per-horse numbers off the allele copy a foal inherits, exactly like a
+    hand-written gene. The <a href="gene-creator/index.html">gene creator</a> writes
+    these files and previews them on a horse; this page is what it is writing.
+</p>
+
+<p>
+    A gene that <em>doesn't</em> fit still writes a class against <code>Gene</code>.
+    Nothing here takes that away &mdash; see <a href="modding.html">Writing a gene</a>.
+</p>
+
+<h2>The shape</h2>
+
+<p>
+    A header, then a list of <strong>layers</strong>. Each layer is
+    <strong>where</strong> (its <a href="#masks">masks</a>, folded into one coverage
+    number per texel) times <strong>what</strong> (its <a href="#ops">op</a>, applied
+    scaled by that number). Because coverage scales the effect rather than gating it,
+    every edge is soft by construction &mdash; the thing each hand-written gene had to
+    remember separately, and the reason splash's socks still end in a hard ring.
+</p>
+
+<pre><code class="language-json">{
+  "format": 1,
+  "key": "mymod.silver",
+  "name": "Silver dapple",
+  "phase": "natural",
+  "dominance": "DOMINANT",
+  "wildOdds": 60,
+  "priority": 45,
+  "alleles": [
+    { "token": "Z", "label": "Silver (Z)" },
+    { "token": "z", "label": "Wild-type (z)" }
+  ],
+  "layers": [
+    {
+      "name": "dilute the black, leave the red",
+      "masks": [ { "type": "ALL" } ],
+      "op": { "type": "DILUTE", "keepRed": 1.0, "keepBlack": 0.45, "blackTint": 0.18 }
+    }
+  ]
+}</code></pre>
+
+<h2>Header</h2>
+
+<dl class="spec">
+    <div><dt>format</dt><dd>1. A file from a newer format is refused rather than half-read.</dd></div>
+    <div><dt>key</dt><dd><code>modid.gene</code>, lower case, unique. Namespaced so two mods can't collide.</dd></div>
+    <div><dt>name</dt><dd>Display name. Defaults to the part after the dot.</dd></div>
+    <div><dt>phase</dt><dd><code>natural</code> or <code>magical</code>. See below &mdash; never both.</dd></div>
+    <div><dt>dominance</dt><dd><code>DOMINANT</code>, <code>RECESSIVE</code>, <code>INCOMPLETE_DOMINANT</code>, <code>COMPLETE_DOMINANT</code>.</dd></div>
+    <div><dt>wildOdds</dt><dd>1 in N per allele copy in the wild population.</dd></div>
+    <div><dt>priority</dt><dd>Order among drop-in genes; lower runs first. <strong>Registration order is ignored</strong>, so two people who drop the same files in a different order get the same horses.</dd></div>
+    <div><dt>alleles</dt><dd>Most dominant first, <strong>wild type last</strong>. A token may be any run of characters except <code>/</code> and <code>-</code>, which separate alleles and genes in a genotype code.</dd></div>
+    <div><dt>knobs</dt><dd>Optional. See <a href="#knobs">numbers that vary per horse</a>.</dd></div>
+    <div><dt>layers</dt><dd>The coat effect.</dd></div>
+</dl>
+
+<h3>Natural or magical, never both</h3>
+
+<p>
+    A <strong>natural</strong> gene only pushes red / black pigment down, in phase 1,
+    before the coat resolves to colour &mdash; dilutions and white markings. A
+    <strong>magical</strong> gene only adds signed RGB, in phase 3, after it resolves,
+    and can therefore paint over anything including a dominant-white horse. The two
+    op families are separate and the loader refuses a file that mixes them; a gene that
+    wants both registers as two genes. The reasoning is in
+    <a href="philosophy.html">Philosophy</a> &sect;6: natural is reserved for genes that
+    exist in real life.
+</p>
+
+<h2 id="knobs">Numbers that vary per horse</h2>
+
+<p>
+    Anywhere the format takes a number, it also takes one of these:
+</p>
+
+<table>
+<thead><tr><th>Written</th><th>Means</th></tr></thead>
+<tbody>
+<tr><td><code>0.4</code></td><td>A constant.</td></tr>
+<tr><td><code>"$extent"</code></td><td>The value of a knob declared in <code>knobs</code>.</td></tr>
+<tr><td><code>{ "min": 0.1, "max": 0.9 }</code></td><td>An <strong>inline</strong> range &mdash; an anonymous knob, written where it is used.</td></tr>
+<tr><td><code>{ "perDose": [0, 0.4, 0.9] }</code></td><td>One value per number of variant copies. How an incomplete dominant makes its homozygote louder without the format needing an expression language.</td></tr>
+</tbody>
+</table>
+
+<p>
+    A knob is drawn <strong>once per horse</strong>, in declaration order, from the
+    epigenetic seed of the allele copy that expresses &mdash; so the same horse rebuilds
+    the same coat every session, and a foal that inherits the copy inherits the look.
+    That is the <a href="philosophy.html">determinism contract</a>, and it holds for
+    data-driven genes exactly as it does for hand-written ones.
+</p>
+
+<pre><code class="language-json">"knobs": [
+  { "name": "barSeed", "type": "seed" },
+  { "name": "sock", "min": 0.25, "max": 0.6, "per": "leg", "spread": 0.18 }
+]</code></pre>
+
+<dl class="spec">
+    <div><dt>type: "seed"</dt><dd>Takes a <code>nextLong()</code> instead of a <code>nextFloat()</code>. Feeds a noise mask's <code>seed</code>.</dd></div>
+    <div><dt>per: "leg"</dt><dd>Draws once for the horse, then scales each leg by an independent <code>1 &plusmn; spread</code>. A horse's four socks come out near each other but never level &mdash; the shape <code>BayCoat</code> hand-rolls, in one line.</dd></div>
+</dl>
+
+<p class="note">
+    Adding a knob in the <em>middle</em> of the list reshuffles every knob after it, so
+    existing horses carrying the gene change look. That is fine while you are tuning;
+    it is worth knowing before you re-tune a gene people have been breeding.
+</p>
+
+<h2 id="masks">Masks &mdash; where</h2>
+
+<p>
+    Each mask returns coverage in <code>[0, 1]</code> per texel. Terms fold together by
+    their <code>combine</code> (<code>MULTIPLY</code> by default, or <code>MAX</code>,
+    <code>MIN</code>, <code>ADD</code>, <code>SUBTRACT</code>), starting from 1 &mdash;
+    so add a term to <em>narrow</em> the area and switch it to <code>MAX</code> to widen
+    it. <code>"invert": true</code> flips a term.
+</p>
+
+<p>
+    Every mask also takes <code>parts</code>: a list of part names
+    (<code>BODY</code>, <code>NECK</code>, <code>HEAD</code>, <code>MUZZLE</code>,
+    <code>MANE</code>, <code>TAIL</code>, <code>LEFT_EAR</code> &hellip;) and group
+    aliases (<code>ALL</code>, <code>LEGS</code>, <code>FRONT_LEGS</code>,
+    <code>HIND_LEGS</code>, <code>EARS</code>, <code>HAIR</code>, <code>FACE</code>,
+    <code>POINTS</code>, <code>BARREL</code>).
+</p>
+
+<table>
+<thead><tr><th>Type</th><th>Parameters</th><th>What it is for</th></tr></thead>
+<tbody>
+<tr><td><code>ALL</code></td><td>&mdash;</td><td>Everywhere this horse has skin.</td></tr>
+<tr><td><code>PARTS</code></td><td><code>parts</code></td><td>Named boxes &mdash; a mane stripe, black ears.</td></tr>
+<tr><td><code>AXIS</code></td><td><code>axis</code> (Y/X/Z), <code>space</code> (part/body/units), <code>from</code> 0, <code>to</code> 1, <code>softness</code> 0.15</td><td>A soft band along the horse. <code>space: "part"</code> normalises inside <em>each</em> part, so <code>to: 0.4</code> is the lower 40% of every leg &mdash; socks. X runs tail to nose, Y hoof to withers, Z centre to the horse's right.</td></tr>
+<tr><td><code>CENTERLINE</code></td><td><code>halfWidth</code> 1.0, <code>softness</code> 0.35, <code>offset</code> 0</td><td>A stripe down the middle. A blaze on <code>FACE</code>; a dorsal stripe if you multiply it by a high <code>AXIS</code> band on <code>BARREL</code>.</td></tr>
+<tr><td><code>STRIPES</code></td><td><code>seed</code>, <code>spacing</code> 3.0, <code>duty</code> 0.45, <code>warp</code> 1.0</td><td><code>BodyStripes</code> &mdash; zebra bars, dun leg barring, brindle. Body units; the adult barrel is 22 long.</td></tr>
+<tr><td><code>DAPPLES</code></td><td><code>seed</code>, <code>spacing</code> 3.5, <code>warp</code> 0.45, <code>edge0</code> 0.35, <code>edge1</code> 0.78</td><td><code>BodyNoise.cellDistance</code> &mdash; dapples, rosettes, appaloosa spots.</td></tr>
+<tr><td><code>PATCHES</code></td><td><code>seed</code>, <code>scale</code> 6.0, <code>threshold</code> 0.5, <code>softness</code> 0.12</td><td>Big irregular blobs &mdash; pinto, tobiano, roan patching.</td></tr>
+<tr><td><code>NOISE</code></td><td><code>seed</code>, <code>scale</code> 8.0, <code>low</code> 0, <code>high</code> 1</td><td>Shading rather than a shape &mdash; sooty, countershading.</td></tr>
+<tr><td><code>PIGMENT</code></td><td><code>channel</code> (darkness/red/black/total), <code>from</code> 0.5, <code>to</code> 1.0</td><td>Coverage read off the coat the earlier genes left &mdash; find the black points, then paint them. <code>darkness</code> is <code>0.55&middot;red + 0.95&middot;black</code>, the reading grey uses.</td></tr>
+</tbody>
+</table>
+
+<p>
+    All noise masks sample in <strong>body space</strong>, so a pattern crosses a part
+    seam without a join &mdash; see <a href="body-space.html">Body space</a>. Leaving
+    <code>seed</code> out is fine: the gene gets a stable per-layer default, different
+    for every gene and every layer, so two layers don't come out on top of each other.
+</p>
+
+<h2 id="ops">Ops &mdash; what</h2>
+
+<h3>Natural</h3>
+
+<table>
+<thead><tr><th>Type</th><th>Parameters</th><th>What it does</th></tr></thead>
+<tbody>
+<tr><td><code>DILUTE</code></td><td><code>keepRed</code> 1, <code>keepBlack</code> 1, <code>blackTint</code> 0</td><td>The dilution move. <code>blackTint</code> feeds a share of the removed eumelanin back in as red &mdash; without it a "diluted" black point stays on the gradient's jet-black column and reads as a void. Cream, champagne, pearl and silver are all this one op.</td></tr>
+<tr><td><code>RESTRICT</code></td><td><code>red</code> 0, <code>black</code> 0</td><td>Take a share of one pigment away, leaving the other alone.</td></tr>
+<tr><td><code>SET_PIGMENT</code></td><td><code>red</code>, <code>black</code></td><td>Drive pigment to a level. <code>(0, 0)</code> is a white marking; <code>(0, 1)</code> is a black point. Omit a channel to leave it alone.</td></tr>
+</tbody>
+</table>
+
+<h3>Magical</h3>
+
+<table>
+<thead><tr><th>Type</th><th>Parameters</th><th>What it does</th></tr></thead>
+<tbody>
+<tr><td><code>TINT</code></td><td><code>red</code>, <code>green</code>, <code>blue</code> (percent, signed), <code>opacity</code> 100</td><td>Adds signed colour. The accumulator is an uncapped <code>int</code>, so <code>-200</code> on all three channels reads black over <em>any</em> coat and <code>+300</code> on blue is blue whatever else the horse carries. That headroom is the point: your gene never has to know what else is there.</td></tr>
+<tr><td><code>TOWARD</code></td><td><code>color</code>, <code>strength</code> 100, <code>opacity</code> 100</td><td>Walks the texel toward a colour, reading what it already <em>looks</em> like &mdash; so one number lands the same on a black mane and a cremello one, and keeps the strand shading. The pink-hair move.</td></tr>
+<tr><td><code>FLAT</code></td><td><code>color</code>, <code>opacity</code> 100</td><td>Flat paint that <em>replaces</em> what is under it. Order-dependent, so reserve it for a <code>COMPLETE_DOMINANT</code> gene that must look identical on any base.</td></tr>
+</tbody>
+</table>
+
+<h2>What happens when a file is wrong</h2>
+
+<p>
+    Validation is strict on purpose: an unknown key is an error naming the key and
+    listing the legal ones, not a setting that silently does nothing. A file that fails
+    is logged and skipped &mdash; one typo costs you that gene and no other, and never
+    stops the game booting. A key that collides with a registered gene is reported the
+    same way.
+</p>
+
+<p class="note">
+    <strong>Adding or removing a gene changes the genotype code's shape</strong>, so
+    horses saved before the change will not load. That is expected while the mod has no
+    save compatibility (the standing "no legacy code" rule) &mdash; but it is the one
+    thing to know before adding a gene to a world you care about.
+</p>
+
+<h2>Where the numbers actually live</h2>
+
+<p>
+    The parameter table above is generated from the same declaration the game validates
+    against &mdash; <code>SpecSchema</code> in Java, mirrored in the creator's
+    <code>js/schema.js</code>. The creator omits any setting left at its default, so
+    those two defaults must match exactly;
+    <code>wiki/gene-creator/tools/check-parity.mjs</code> compares them, along with the
+    creator's whole preview engine, against what the real Java engine produces.
+</p>
+
+<div class="footer-links">
+    <div class="see-also">
+        <a href="gene-creator/index.html">Gene creator</a>
+        <a href="modding.html">Writing a gene</a>
+        <a href="api-reference.html">Class abstractions</a>
+        <a href="pipeline.html">Three-phase pipeline</a>
+        <a href="body-space.html">Body space</a>
+    </div>
+    Source: <code>common/genetics/spec/</code>, <code>common/coat/pattern/SpecPainter.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+</body>
+</html>

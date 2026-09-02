@@ -71,6 +71,27 @@ whichever parent gave it that allele. So a mare with black most of the way up
 her legs passes that on to the foals that inherit her bay allele, and a line
 can be bred toward a look as well as toward a colour.
 
+### Genes of your own
+
+You can add genes without touching any code. Open `wiki/gene-creator/index.html`
+in a browser: pick where on the horse your gene shows (legs, mane, face, a
+stripe pattern, irregular patches) and what it does there (wash the colour out,
+paint a marking, add colour that nothing else can cancel). It draws the result
+on a 3D horse as you go, and you can flip through fifteen base coats to check it
+still reads on a cremello and on a grey.
+
+When it looks right, download the file and drop it into
+`config/horsegenetics/genes/` in your game folder. Restart, and wild horses start
+carrying it - it inherits, it breeds, and it gets its own slot in the genetic
+code, exactly like the genes that ship with the mod. Delete the file to take it
+away again.
+
+Two things to know. **Adding or removing a gene changes the shape of every
+horse's genetic code**, so horses you saved before the change won't load
+afterwards - decide on your genes before you get attached to a herd. And a file
+with a mistake in it is skipped with a note in the log rather than breaking
+anything else.
+
 ### Names and pedigree
 
 Every horse gets a generated two-part name (a first name and a last name).

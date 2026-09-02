@@ -177,7 +177,12 @@
     <li><strong><code>codeOrder()</code> uses the same comparator.</strong> A
         hand-written segment order is fine for a closed registry but breaks the moment
         a third-party gene exists &mdash; the code has to read the same on every
-        install regardless of load order.</li>
+        install regardless of load order. <strong>Half of this is already live:</strong>
+        drop-in genes (<a href="gene-format.html">the file format</a>) declare a
+        <code>priority</code> and are sorted on <code>(priority, key)</code> after the
+        built-ins, precisely so load order cannot matter. What is left is giving the
+        eleven built-ins real priorities and deriving their order too, rather than
+        keeping them as a hand-written prefix.</li>
     <li><strong>Check the band at registration, and only warn.</strong> Duplicate gene
         keys, by contrast, <em>are</em> a hard failure &mdash; that one really is
         unrecoverable.</li>
@@ -223,12 +228,33 @@
 
 <h2 id="modder-api">3. Adding a gene: the modder-facing API</h2>
 
+<div class="note good">
+    <span class="label">Partly shipped, 2026-09-02</span>
+    <p>
+        Tier 1 exists, and it went further than the builder sketched below: a simple
+        gene is now a <strong>JSON file</strong> rather than a fluent call, so it needs
+        no code and no rebuild &mdash; see
+        <a href="gene-format.html">The gene file format</a> and the
+        <a href="gene-creator/index.html">gene creator</a> that writes it. The registry
+        is open <em>for those</em>: <code>Genes.register(SpecGene)</code> appends after
+        the built-ins, sorted by declared <code>priority</code> then key, so
+        registration order cannot decide how a horse looks.
+    </p>
+    <p>
+        <strong>Still open in this section:</strong> tier 2 (the abstract base classes),
+        the mod-bus registration hook so another mod can add a <em>Java</em> gene, the
+        built-in orderings being derived rather than hand-written (§2), and the
+        genotype-code question at the bottom of this section &mdash; which the drop-in
+        path makes more pressing, not less, since a player can now change the code's
+        shape by moving a file.
+    </p>
+</div>
+
 <p>
     A stated goal: <strong>adding a gene should be easy</strong>, for this mod and for
-    other mods. Today it is not. <code>Genes</code> is a closed registry, a gene is a
-    hand-written class implementing an interface with eight methods, and three separate
-    hand-written orderings have to be edited in step. §2 removes one third of that; the
-    rest is this section.
+    other mods. A gene is still a hand-written class implementing an interface with
+    eight methods, and three separate hand-written orderings have to be edited in step.
+    §2 removes one third of that; the rest is this section.
 </p>
 
 <h3>Three tiers, so simple genes stay simple</h3>
@@ -238,7 +264,13 @@
     eumelanin by 0.45 and leave phaeomelanin alone&rdquo;. It should not need a class.
 </p>
 
-<h4>Tier 1 &mdash; declarative</h4>
+<h4>Tier 1 &mdash; declarative <span class="tag">shipped, as a file</span></h4>
+
+<p>
+    What actually shipped is the file format, not this builder. Kept here because the
+    builder is still the right shape for a <em>Java</em> gene that wants tier-1
+    brevity, and because the roadmap should show what was traded for what.
+</p>
 
 <div class="codebox">
 <div class="filename">a builder for the common cases &mdash; no class at all</div>

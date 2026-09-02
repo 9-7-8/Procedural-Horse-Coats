@@ -341,6 +341,15 @@
         <a href="modding.html">Writing a gene</a> is for.</li>
 </ul>
 
+<p>
+    The <a href="gene-format.html">gene file format</a> is what the first three of those
+    look like when taken seriously: a simple gene is a file rather than a class, it
+    declares its own priority, and drop-in genes are sorted rather than kept in load
+    order. The contract is unchanged by it &mdash; a gene loaded from a file draws its
+    randomness off the expressing allele copy like any other, because determinism is a
+    property of the pipeline, not a courtesy each gene author extends.
+</p>
+
 <h2>8. The horse is something you look after</h2>
 
 <p>

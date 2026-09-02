@@ -38,6 +38,7 @@
 <tr><td><code>Genes</code></td><td>The registry. Three orderings: <code>codeOrder()</code>, <code>naturalOrder()</code>, <code>magicalOrder()</code>.</td></tr>
 <tr><td><code>DominancePattern</code></td><td>Per-gene metadata: <code>DOMINANT</code> / <code>RECESSIVE</code> / <code>INCOMPLETE_DOMINANT</code> / <code>COMPLETE_DOMINANT</code>.</td></tr>
 <tr><td><code>GenotypeCatalog</code></td><td>Every <em>visually distinct</em> genotype the registry can produce, in a stable order.</td></tr>
+<tr><td><code>GeneSpec</code> / <code>SpecGene</code></td><td>A gene described as <a href="gene-format.html">a JSON file</a> rather than a class, and the <code>Gene</code> that answers everything from it. Indistinguishable from a hand-written gene everywhere below this table.</td></tr>
 </tbody>
 </table>
 </div>
@@ -289,7 +290,10 @@ public boolean hasVisibleNonDeterministic();</code></pre>
     <code>GenotypeCatalog</code> enumerates every <strong>visually distinct</strong>
     genotype the registry can produce. Nothing is hard-coded &mdash; it falls out of
     <code>codeOrder()</code>, each gene&rsquo;s allele list and each gene&rsquo;s
-    dominance, so registering a gene widens it on its own.
+    dominance, so registering a gene widens it on its own &mdash; the catalogue is
+    built lazily and thrown away whenever the registry changes, which is what makes a
+    <a href="gene-format.html">drop-in gene</a> show up in the gallery without anything
+    else being told about it.
 </p>
 
 <div class="table-wrap">
