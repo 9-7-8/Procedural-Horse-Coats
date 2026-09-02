@@ -1,435 +1,647 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Procedural Horse Gene Editor</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Horse Gene Creator - 3D Surface Parametric Editor</title>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0f172a; color: #f8fafc; display: flex; height: 100vh; overflow: hidden; }
-    
-    #sidebar { width: 380px; background: #1e293b; border-right: 1px solid #334155; display: flex; flex-direction: column; padding: 15px; gap: 15px; overflow-y: auto; flex-shrink: 0; }
-    #viewport-container { flex: 1; position: relative; display: flex; background: #0b1120; }
-    #canvas-2d-container { width: 320px; background: #1e293b; border-left: 1px solid #334155; padding: 15px; display: flex; flex-direction: column; align-items: center; gap: 10px; flex-shrink: 0; }
-    
-    h2, h3 { color: #38bdf8; font-size: 1.1rem; }
-    .section { background: #0f172a; padding: 12px; border-radius: 6px; border: 1px solid #334155; display: flex; flex-direction: column; gap: 8px; }
-    label { font-size: 0.85rem; color: #94a3b8; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
-    input, select, button { background: #1e293b; border: 1px solid #475569; color: #fff; padding: 6px 10px; border-radius: 4px; font-size: 0.85rem; }
-    input[type="number"] { width: 80px; }
-    input[type="color"] { width: 50px; height: 34px; padding: 2px; cursor: pointer; }
-    button { cursor: pointer; background: #10b981; border: none; font-weight: bold; color: #fff; padding: 8px; border-radius: 4px; transition: all 0.2s; }
-    button:hover { background: #059669; transform: scale(1.02); }
-    button.secondary { background: #38bdf8; color: #0f172a; }
-    button.secondary:hover { background: #0ea5e9; }
-    button.danger { background: #ef4444; }
-    button.danger:hover { background: #dc2626; }
-    
-    .layer-item { background: #1e293b; padding: 8px; border-radius: 4px; border: 1px solid #334155; margin-bottom: 6px; font-size: 0.85rem; }
-    .layer-item .controls { display: flex; gap: 4px; margin-top: 4px; flex-wrap: wrap; }
-    .layer-item button { padding: 2px 6px; font-size: 0.7rem; }
-    #textureCanvas { border: 1px solid #475569; background: #fff; width: 256px; height: 256px; image-rendering: pixelated; cursor: crosshair; }
-    #three-canvas { width: 100%; height: 100%; display: block; }
-    #loading-overlay { position: absolute; top: 10px; left: 10px; background: rgba(15, 23, 42, 0.9); color: #38bdf8; padding: 8px 16px; border-radius: 4px; font-size: 0.8rem; border: 1px solid #334155; z-index: 10; }
-    
-    .curve-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
-    .curve-controls label { font-size: 0.75rem; }
-    
-    /* Scrollbar styling */
-    ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-track { background: #0f172a; }
-    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
-    ::-webkit-scrollbar-thumb:hover { background: #475569; }
+    :root {
+      --bg-dark: #0b1120;
+      --panel-bg: #1e293b;
+      --panel-border: #334155;
+      --text-main: #f8fafc;
+      --accent: #3b82f6;
+      --accent-hover: #2563eb;
+      --danger: #ef4444;
+      --active: #10b981;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    #app-container {
+      display: flex;
+      width: 100%;
+      height: 100%;
+    }
+
+    #toolbox {
+      width: 320px;
+      background-color: var(--panel-bg);
+      border-right: 1px solid var(--panel-border);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      overflow-y: auto;
+      z-index: 5;
+    }
+
+    #main-workspace {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    #viewport-container {
+      flex: 1;
+      position: relative;
+      background-color: var(--bg-dark);
+    }
+
+    #three-canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      cursor: crosshair;
+    }
+
+    #loading-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(11, 17, 32, 0.85);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 1.25rem;
+      font-weight: 600;
+      z-index: 10;
+      transition: opacity 0.3s ease;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    #output-panel {
+      width: 360px;
+      background-color: var(--panel-bg);
+      border-left: 1px solid var(--panel-border);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      z-index: 5;
+    }
+
+    .section-title {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #94a3b8;
+      margin-bottom: 8px;
+      font-weight: 700;
+    }
+
+    .tool-group {
+      background: #0f172a;
+      border: 1px solid var(--panel-border);
+      border-radius: 6px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .btn {
+      background-color: var(--accent);
+      color: #fff;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 4px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn:hover {
+      background-color: var(--accent-hover);
+    }
+
+    .btn-secondary {
+      background-color: #334155;
+    }
+
+    .btn-secondary:hover {
+      background-color: #475569;
+    }
+
+    .btn.active {
+      background-color: var(--active);
+    }
+
+    label {
+      font-size: 0.8rem;
+      color: #cbd5e1;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    input[type="range"], input[type="color"], select, input[type="number"], input[type="text"] {
+      background: #1e293b;
+      border: 1px solid var(--panel-border);
+      color: var(--text-main);
+      border-radius: 4px;
+      padding: 4px;
+    }
+
+    .canvas-container {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid var(--panel-border);
+      border-radius: 8px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      z-index: 6;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+    }
+
+    #coat-canvas {
+      width: 256px;
+      height: 256px;
+      image-rendering: pixelated;
+      background-color: #1e293b;
+      border: 1px solid var(--panel-border);
+    }
+
+    #json-output {
+      flex: 1;
+      background: #0f172a;
+      color: #38bdf8;
+      border: 1px solid var(--panel-border);
+      border-radius: 6px;
+      padding: 12px;
+      font-family: monospace;
+      font-size: 0.75rem;
+      resize: none;
+      white-space: pre-wrap;
+    }
+
+    .mode-indicator {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid var(--panel-border);
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #38bdf8;
+      pointer-events: none;
+      z-index: 6;
+    }
+
+    .loading-spinner {
+      border: 4px solid rgba(255,255,255,0.1);
+      border-top: 4px solid #3b82f6;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .legend {
+      display: flex;
+      gap: 12px;
+      font-size: 10px;
+      color: #94a3b8;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .legend-color {
+      width: 12px;
+      height: 3px;
+      border-radius: 2px;
+    }
+
+    .texture-status {
+      font-size: 10px;
+      color: #94a3b8;
+      margin-top: 4px;
+    }
+    .texture-status.loaded {
+      color: #10b981;
+    }
+    .texture-status.error {
+      color: #ef4444;
+    }
   </style>
 
-  <!-- Import Three.js, OrbitControls, and GLTFLoader -->
+  <!-- Three.js Dependencies -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 </head>
 <body>
 
-  <!-- Left Sidebar: Gene Controls -->
-  <div id="sidebar">
-    <h2>Gene Editor</h2>
+  <div id="app-container">
     
-    <div class="section">
-      <label>Gene Key / Identifier:
-        <input type="text" id="geneName" value="gene_dappled_grey">
-      </label>
-      <label>Base Texture Overlay Tint:
-        <input type="color" id="tintColor" value="#ffffff">
-      </label>
+    <!-- LEFT TOOLBOX -->
+    <div id="toolbox">
+      <h2>3D Gene Editor</h2>
+
+      <div class="tool-group">
+        <div class="section-title">Gene Definition</div>
+        <label>Gene Identifier
+          <input type="text" id="gene-id" value="gene_cross_body_stripe" />
+        </label>
+        <label>Phenotype Frequency
+          <input type="range" id="gene-frequency" min="0" max="1" step="0.01" value="0.45" />
+        </label>
+        <label>Skin Type
+          <select id="skin-type">
+            <option value="ADULT">Adult</option>
+            <option value="BABY">Baby</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="tool-group">
+        <div class="section-title">Texture Source</div>
+        <label>Base Texture Path
+          <input type="text" id="texture-path" value="horse_white.png" style="width:140px;font-size:0.7rem;" />
+        </label>
+        <button class="btn-secondary" id="btn-reload-texture" style="font-size:0.7rem;padding:4px 8px;">Reload Texture</button>
+        <div id="texture-status" class="texture-status">Waiting to load...</div>
+      </div>
+
+      <div class="tool-group">
+        <div class="section-title">Placement Mode</div>
+        <button class="btn active" id="btn-mode-placement">Click 3D Mesh to Place Points</button>
+        <button class="btn btn-secondary" id="btn-clear-points">Clear Current Curve</button>
+      </div>
+
+      <div class="tool-group">
+        <div class="section-title">Shape Type & Scale</div>
+        <label>Marking Type
+          <select id="shape-type">
+            <option value="BEZIER">Bézier Spline</option>
+            <option value="ELLIPSE">Parametric Ellipse</option>
+          </select>
+        </label>
+        <label>Min Expression Scale
+          <input type="range" id="shape-min-scale" min="0.1" max="2.0" step="0.05" value="0.5" />
+        </label>
+        <label>Max Expression Scale
+          <input type="range" id="shape-max-scale" min="0.1" max="2.0" step="0.05" value="1.2" />
+        </label>
+      </div>
+
+      <div class="tool-group">
+        <div class="section-title">Color Range & Gradient</div>
+        <label>Color Start
+          <input type="color" id="color-start" value="#ffffff" />
+        </label>
+        <label>Color End
+          <input type="color" id="color-end" value="#e2e8f0" />
+        </label>
+        <label>Gradient Mode
+          <select id="gradient-mode">
+            <option value="LINEAR">Linear</option>
+            <option value="RADIAL">Radial</option>
+            <option value="SOLID">Solid</option>
+          </select>
+        </label>
+      </div>
     </div>
 
-    <div class="section">
-      <h3>Add Marking Layer</h3>
-      <label>Shape Tool:
-        <select id="toolType">
-          <option value="ellipse">Ellipse / Dapple Spot</option>
-          <option value="bezier">Bezier Curve</option>
-          <option value="polygon">Polygon / Patch</option>
-        </select>
-      </label>
-      
-      <div id="bezierControls" style="display:none;">
-        <div class="curve-controls">
-          <label>Min Thickness: <input type="number" id="minThickness" value="2" min="1" max="50"></label>
-          <label>Max Thickness: <input type="number" id="maxThickness" value="8" min="1" max="50"></label>
-          <label>Curve Points: <input type="number" id="curvePoints" value="5" min="3" max="20"></label>
-          <label>Handle Spread: <input type="number" id="handleSpread" value="20" min="5" max="100"></label>
+    <!-- MAIN WORKSPACE -->
+    <div id="main-workspace">
+      <div id="viewport-container">
+        <div class="mode-indicator" id="mode-text">Click on 3D Model to Add Curve Control Points</div>
+        <div id="loading-overlay">
+          <div class="loading-spinner"></div>
+          <div>Loading 3D Gene Preview...</div>
+        </div>
+        <canvas id="three-canvas"></canvas>
+      </div>
+
+      <!-- Live 2D UV Canvas Overlay -->
+      <div class="canvas-container">
+        <div class="section-title" style="margin:0;">UV Texture Assembly Map</div>
+        <canvas id="coat-canvas" width="128" height="128"></canvas>
+        <div class="legend">
+          <span class="legend-item">
+            <span class="legend-color" style="background:#ef4444;height:10px;width:10px;border-radius:50%;"></span>
+            Points
+          </span>
+          <span class="legend-item">
+            <span class="legend-color" style="background:#38bdf8;"></span>
+            Curve
+          </span>
+          <span id="point-count">0 points</span>
         </div>
       </div>
-      
-      <div id="shapeControls">
-        <label>Min Size (px): <input type="number" id="minSize" value="4" min="1" max="256"></label>
-        <label>Max Size (px): <input type="number" id="maxSize" value="16" min="1" max="256"></label>
-        <label>Frequency (Count): <input type="number" id="frequency" value="30" min="1" max="1000"></label>
-      </div>
-      
-      <label>Primary Pigment: <input type="color" id="primaryColor" value="#333333"></label>
-      <label>Secondary Pigment: <input type="color" id="secondaryColor" value="#888888"></label>
-      
-      <button id="addLayerBtn">Add Layer to Gene</button>
     </div>
 
-    <div class="section">
-      <h3>Active Marking Layers</h3>
-      <div id="layersList"></div>
+    <!-- RIGHT OUTPUT PANEL -->
+    <div id="output-panel">
+      <h2>Parametric Gene JSON</h2>
+      <div class="section-title">Generated Cross-Part Definition</div>
+      <textarea id="json-output" readonly></textarea>
+      <button class="btn" id="btn-copy-json">Copy JSON</button>
     </div>
 
-    <button id="exportGeneBtn" class="secondary">Export Gene JSON</button>
-    <button id="clearAllBtn" class="danger">Clear All Layers</button>
-  </div>
-
-  <!-- Center Viewport: 3D Minecraft Horse Model -->
-  <div id="viewport-container">
-    <div id="loading-overlay">Loading horse.glb...</div>
-    <canvas id="three-canvas"></canvas>
-  </div>
-
-  <!-- Right Sidebar: 2D Texture Map Target -->
-  <div id="canvas-2d-container">
-    <h3>Coat Build Surface</h3>
-    <canvas id="textureCanvas" width="256" height="256"></canvas>
-    <div style="display:flex; gap:10px; font-size:0.75rem; color:#94a3b8;">
-      <span>● Click to add control points</span>
-      <span>━ Curve path</span>
-    </div>
-    <div id="curvePointStatus" style="font-size:0.7rem; color:#38bdf8;">0 points placed</div>
   </div>
 
   <script>
-    const WHITE_BASE_TEXTURE_PATH = 'horse_white.png';
+    // --- 1. Configuration & Geometry Mapping Data ---
     const MODEL_PATH = 'horse.glb';
+    const SHEET_SIZE = 128;
 
-    // --- 1. Gene Data Model ---
-    let geneDefinition = {
-      id: "gene_dappled_grey",
-      tintColor: "#ffffff",
-      layers: []
+    // UV Part bounds based on the Java code's face mapping
+    const PART_BOUNDS = {
+      BODY: { tu: 0, tv: 32, w: 44, h: 20 },
+      NECK: { tu: 0, tv: 35, w: 14, h: 24 },
+      HEAD: { tu: 0, tv: 13, w: 14, h: 10 },
+      MUZZLE: { tu: 0, tv: 25, w: 10, h: 10 },
+      MANE: { tu: 56, tv: 36, w: 4, h: 32 },
+      TAIL: { tu: 42, tv: 36, w: 6, h: 28 },
+      LEFT_EAR: { tu: 19, tv: 0, w: 4, h: 6 },
+      RIGHT_EAR: { tu: 19, tv: 16, w: 4, h: 6 },
+      LEFT_HIND_LEG: { tu: 26, tv: 0, w: 8, h: 22 },
+      RIGHT_HIND_LEG: { tu: 48, tv: 21, w: 8, h: 22 },
+      LEFT_FRONT_LEG: { tu: 26, tv: 16, w: 8, h: 22 },
+      RIGHT_FRONT_LEG: { tu: 48, tv: 0, w: 8, h: 22 }
     };
 
-    // --- 2. Canvas & Base Texture Loading ---
-    const texCanvas = document.getElementById('textureCanvas');
+    // Part colors for visualization
+    const PART_COLORS = {
+      BODY: '#3b82f6',
+      NECK: '#8b5cf6',
+      HEAD: '#ec4899',
+      MUZZLE: '#f59e0b',
+      MANE: '#10b981',
+      TAIL: '#14b8a6',
+      LEFT_EAR: '#f472b6',
+      RIGHT_EAR: '#f472b6',
+      LEFT_HIND_LEG: '#8b5cf6',
+      RIGHT_HIND_LEG: '#8b5cf6',
+      LEFT_FRONT_LEG: '#6366f1',
+      RIGHT_FRONT_LEG: '#6366f1'
+    };
+
+    // Raw 3D placement nodes placed on the mesh
+    const surfaceNodes = [];
+
+    const geneState = {
+      geneId: "gene_cross_body_stripe",
+      frequency: 0.45,
+      curves: []
+    };
+
+    // Helper: Identify body part from absolute pixel UV coordinates on sheet
+    function getPartFromUV(u, v) {
+      const px = u * SHEET_SIZE;
+      const py = (1 - v) * SHEET_SIZE;
+
+      for (const [partName, b] of Object.entries(PART_BOUNDS)) {
+        if (px >= b.tu && px <= b.tu + b.w && py >= b.tv && py <= b.tv + b.h) {
+          return {
+            part: partName,
+            localX: (px - b.tu) / b.w,
+            localY: (py - b.tv) / b.h
+          };
+        }
+      }
+      
+      return { part: "BODY", localX: px / SHEET_SIZE, localY: py / SHEET_SIZE };
+    }
+
+    // --- 2. 2D Interactive Canvas Editor with External Texture ---
+    const texCanvas = document.getElementById('coat-canvas');
     const ctx = texCanvas.getContext('2d');
-    
-    // Curve drawing state
-    let curvePoints = [];
-    let isDrawingCurve = false;
-    let currentLayerType = 'bezier';
-    
-    // Load default white base texture
-    const baseImg = new Image();
-    baseImg.crossOrigin = "anonymous";
-    baseImg.src = WHITE_BASE_TEXTURE_PATH;
-    baseImg.onload = () => {
-      texCanvas.width = Math.min(baseImg.width || 256, 512);
-      texCanvas.height = Math.min(baseImg.height || 256, 512);
-      renderTexture();
-    };
-    baseImg.onerror = () => {
-      console.warn(`Could not load ${WHITE_BASE_TEXTURE_PATH}, using fallback.`);
-      texCanvas.width = 256;
-      texCanvas.height = 256;
-      renderTexture();
-    };
 
-    function renderTexture() {
-      // Clear canvas
-      ctx.clearRect(0, 0, texCanvas.width, texCanvas.height);
+    const horseTexture = new THREE.CanvasTexture(texCanvas);
+    horseTexture.magFilter = THREE.NearestFilter;
+    horseTexture.minFilter = THREE.NearestFilter;
+    horseTexture.wrapS = THREE.ClampToEdgeWrapping;
+    horseTexture.wrapT = THREE.ClampToEdgeWrapping;
+    horseTexture.flipY = true;
+
+    // Texture loading state
+    let baseTextureImage = null;
+    let textureLoaded = false;
+    let textureError = false;
+    let textureLoading = false;
+
+    // Create a procedural fallback texture
+    function createFallbackTexture() {
+      const canvas = document.createElement('canvas');
+      canvas.width = 128;
+      canvas.height = 128;
+      const c = canvas.getContext('2d');
       
-      // Draw white base texture image or fallback background
-      if (baseImg.complete && baseImg.naturalWidth !== 0) {
-        ctx.drawImage(baseImg, 0, 0, texCanvas.width, texCanvas.height);
+      // Dark background
+      c.fillStyle = '#1a2332';
+      c.fillRect(0, 0, 128, 128);
+      
+      // Draw each part with a different color
+      for (const [partName, b] of Object.entries(PART_BOUNDS)) {
+        const color = PART_COLORS[partName] || '#334155';
+        c.fillStyle = color;
+        c.globalAlpha = 0.3;
+        c.fillRect(b.tu, b.tv, b.w, b.h);
+        c.globalAlpha = 1.0;
+        
+        c.strokeStyle = '#334155';
+        c.lineWidth = 1;
+        c.strokeRect(b.tu, b.tv, b.w, b.h);
+        
+        c.fillStyle = '#94a3b8';
+        c.font = '5px sans-serif';
+        c.textAlign = 'left';
+        c.fillText(partName.substring(0, 4), b.tu + 2, b.tv + 6);
+      }
+      
+      return canvas;
+    }
+
+    const fallbackTexture = createFallbackTexture();
+
+    function updateTextureStatus(message, isError = false, isLoaded = false) {
+      const statusEl = document.getElementById('texture-status');
+      statusEl.textContent = message;
+      statusEl.className = 'texture-status';
+      if (isError) {
+        statusEl.classList.add('error');
+      } else if (isLoaded) {
+        statusEl.classList.add('loaded');
+      }
+    }
+
+    function loadTexture(texturePath) {
+      if (textureLoading) return;
+      textureLoading = true;
+      textureLoaded = false;
+      textureError = false;
+      
+      updateTextureStatus(`Loading: ${texturePath}...`);
+      
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      
+      img.onload = function() {
+        console.log('Texture loaded successfully:', texturePath);
+        baseTextureImage = img;
+        textureLoaded = true;
+        textureError = false;
+        textureLoading = false;
+        updateTextureStatus(`✓ Loaded: ${texturePath} (${img.width}x${img.height})`, false, true);
+        render2DCanvas();
+        updateModelTexture();
+      };
+      
+      img.onerror = function(err) {
+        console.warn('Failed to load texture:', texturePath, err);
+        baseTextureImage = null;
+        textureLoaded = false;
+        textureError = true;
+        textureLoading = false;
+        updateTextureStatus(`✗ Failed to load: ${texturePath} - using fallback`, true);
+        render2DCanvas();
+        updateModelTexture();
+      };
+      
+      // Try to load from the provided path
+      img.src = texturePath;
+      
+      // Set a timeout in case the image hangs
+      setTimeout(() => {
+        if (!textureLoaded && !textureError) {
+          textureLoading = false;
+          textureError = true;
+          updateTextureStatus(`✗ Timeout loading: ${texturePath} - using fallback`, true);
+          render2DCanvas();
+          updateModelTexture();
+        }
+      }, 10000);
+    }
+
+    function updateModelTexture() {
+      if (horseMesh) {
+        horseMesh.material.map = horseTexture;
+        horseMesh.material.needsUpdate = true;
+        renderer.render(scene, camera);
+      }
+    }
+
+    function render2DCanvas() {
+      ctx.clearRect(0, 0, SHEET_SIZE, SHEET_SIZE);
+      
+      // Draw the base texture or fallback
+      if (textureLoaded && baseTextureImage) {
+        ctx.drawImage(baseTextureImage, 0, 0, SHEET_SIZE, SHEET_SIZE);
       } else {
-        ctx.fillStyle = "#ffffff";
-        ctx.fillRect(0, 0, texCanvas.width, texCanvas.height);
-        
-        // Draw a subtle grid for reference
-        ctx.strokeStyle = "rgba(200,200,200,0.3)";
-        ctx.lineWidth = 0.5;
-        for (let i = 0; i < texCanvas.width; i += 16) {
-          ctx.beginPath();
-          ctx.moveTo(i, 0);
-          ctx.lineTo(i, texCanvas.height);
-          ctx.stroke();
-          ctx.beginPath();
-          ctx.moveTo(0, i);
-          ctx.lineTo(texCanvas.width, i);
-          ctx.stroke();
-        }
+        ctx.drawImage(fallbackTexture, 0, 0, SHEET_SIZE, SHEET_SIZE);
       }
 
-      // Apply tint overlay
-      if (geneDefinition.tintColor && geneDefinition.tintColor !== "#ffffff") {
-        ctx.fillStyle = geneDefinition.tintColor;
-        ctx.globalCompositeOperation = "multiply";
-        ctx.fillRect(0, 0, texCanvas.width, texCanvas.height);
-        ctx.globalCompositeOperation = "source-over";
-      }
-
-      // Render marking layers
-      geneDefinition.layers.forEach(layer => {
-        if (layer.type === 'bezier' && layer.points && layer.points.length >= 2) {
-          drawBezierLayer(layer);
-        } else if (layer.type === 'ellipse') {
-          drawEllipseLayer(layer);
-        } else if (layer.type === 'polygon') {
-          drawPolygonLayer(layer);
-        }
-      });
-
-      // Draw curve points if in bezier mode
-      if (currentLayerType === 'bezier' && curvePoints.length > 0) {
-        drawCurvePoints();
-      }
-
-      if (horseTexture) horseTexture.needsUpdate = true;
-    }
-
-    function drawBezierLayer(layer) {
-      const points = layer.points;
-      const thickness = layer.thickness || 4;
-      
-      ctx.save();
-      
-      // Draw the curve path
-      ctx.beginPath();
-      ctx.moveTo(points[0].x, points[0].y);
-      
-      // Draw bezier curve through points
-      for (let i = 0; i < points.length - 1; i++) {
-        const p0 = points[i];
-        const p1 = points[i + 1];
-        
-        // Calculate control points with handle spread
-        const spread = layer.handleSpread || 20;
-        const dx = p1.x - p0.x;
-        const dy = p1.y - p0.y;
-        const dist = Math.sqrt(dx*dx + dy*dy);
-        
-        if (dist > 0) {
-          const handleLen = Math.min(dist * 0.3, spread);
-          const angle = Math.atan2(dy, dx);
-          
-          // Perpendicular offset for handle
-          const perpAngle = angle + Math.PI / 2;
-          const offset = (layer.handleOffset || 0) * (i % 2 === 0 ? 1 : -1);
-          
-          const cp1x = p0.x + Math.cos(angle) * handleLen + Math.cos(perpAngle) * offset;
-          const cp1y = p0.y + Math.sin(angle) * handleLen + Math.sin(perpAngle) * offset;
-          const cp2x = p1.x - Math.cos(angle) * handleLen + Math.cos(perpAngle) * offset;
-          const cp2y = p1.y - Math.sin(angle) * handleLen + Math.sin(perpAngle) * offset;
-          
-          ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, p1.x, p1.y);
-        } else {
-          ctx.lineTo(p1.x, p1.y);
-        }
-      }
-      
-      // Apply gradient along the curve
-      const grad = ctx.createLinearGradient(
-        points[0].x, points[0].y,
-        points[points.length-1].x, points[points.length-1].y
-      );
-      grad.addColorStop(0, layer.primaryColor || '#333333');
-      grad.addColorStop(1, layer.secondaryColor || '#888888');
-      
-      ctx.strokeStyle = grad;
-      ctx.lineWidth = thickness;
-      ctx.lineCap = 'round';
-      ctx.lineJoin = 'round';
-      ctx.stroke();
-      
-      // Draw handles if in edit mode
-      if (layer.showHandles) {
-        ctx.strokeStyle = 'rgba(56, 189, 248, 0.3)';
-        ctx.lineWidth = 1;
-        ctx.setLineDash([3, 3]);
-        
-        for (let i = 0; i < points.length - 1; i++) {
-          const p0 = points[i];
-          const p1 = points[i + 1];
-          const dx = p1.x - p0.x;
-          const dy = p1.y - p0.y;
-          const dist = Math.sqrt(dx*dx + dy*dy);
-          
-          if (dist > 0) {
-            const handleLen = Math.min(dist * 0.3, layer.handleSpread || 20);
-            const angle = Math.atan2(dy, dx);
-            const perpAngle = angle + Math.PI / 2;
-            const offset = (layer.handleOffset || 0) * (i % 2 === 0 ? 1 : -1);
-            
-            const cp1x = p0.x + Math.cos(angle) * handleLen + Math.cos(perpAngle) * offset;
-            const cp1y = p0.y + Math.sin(angle) * handleLen + Math.sin(perpAngle) * offset;
-            const cp2x = p1.x - Math.cos(angle) * handleLen + Math.cos(perpAngle) * offset;
-            const cp2y = p1.y - Math.sin(angle) * handleLen + Math.sin(perpAngle) * offset;
-            
-            // Draw handle lines
-            ctx.beginPath();
-            ctx.moveTo(p0.x, p0.y);
-            ctx.lineTo(cp1x, cp1y);
-            ctx.stroke();
-            
-            ctx.beginPath();
-            ctx.moveTo(p1.x, p1.y);
-            ctx.lineTo(cp2x, cp2y);
-            ctx.stroke();
-            
-            // Draw handle points
-            ctx.fillStyle = 'rgba(56, 189, 248, 0.5)';
-            ctx.beginPath();
-            ctx.arc(cp1x, cp1y, 3, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.beginPath();
-            ctx.arc(cp2x, cp2y, 3, 0, Math.PI * 2);
-            ctx.fill();
-          }
-        }
-        ctx.setLineDash([]);
-      }
-      
-      ctx.restore();
-      
-      // Draw control points
-      ctx.save();
-      points.forEach(p => {
-        ctx.fillStyle = '#ef4444';
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.fillStyle = '#ffffff';
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, 1.5, 0, Math.PI * 2);
-        ctx.fill();
-      });
-      ctx.restore();
-    }
-
-    function drawEllipseLayer(layer) {
-      for (let i = 0; i < layer.frequency; i++) {
-        const x = Math.random() * texCanvas.width;
-        const y = Math.random() * texCanvas.height;
-        const size = layer.minSize + Math.random() * (layer.maxSize - layer.minSize);
-
-        ctx.save();
-        const grad = ctx.createRadialGradient(x, y, 0, x, y, size);
-        grad.addColorStop(0, layer.primaryColor);
-        grad.addColorStop(1, layer.secondaryColor);
-        ctx.fillStyle = grad;
-        ctx.beginPath();
-        ctx.ellipse(x, y, size, size * 0.7, Math.random() * Math.PI, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.restore();
-      }
-    }
-
-    function drawPolygonLayer(layer) {
-      for (let i = 0; i < layer.frequency; i++) {
-        const x = Math.random() * texCanvas.width;
-        const y = Math.random() * texCanvas.height;
-        const size = layer.minSize + Math.random() * (layer.maxSize - layer.minSize);
-
-        ctx.save();
-        ctx.beginPath();
-        const points = 5 + Math.floor(Math.random() * 3);
-        for (let j = 0; j < points; j++) {
-          const angle = (j / points) * Math.PI * 2 + Math.random() * 0.3;
-          const r = size * (0.6 + Math.random() * 0.4);
-          const px = x + Math.cos(angle) * r;
-          const py = y + Math.sin(angle) * r;
-          if (j === 0) ctx.moveTo(px, py);
-          else ctx.lineTo(px, py);
-        }
-        ctx.closePath();
-        
-        const grad = ctx.createRadialGradient(x, y, 0, x, y, size);
-        grad.addColorStop(0, layer.primaryColor);
-        grad.addColorStop(1, layer.secondaryColor);
-        ctx.fillStyle = grad;
-        ctx.fill();
-        ctx.restore();
-      }
-    }
-
-    function drawCurvePoints() {
-      ctx.save();
-      
-      // Draw connecting lines
-      if (curvePoints.length > 1) {
-        ctx.beginPath();
-        ctx.moveTo(curvePoints[0].x, curvePoints[0].y);
-        for (let i = 1; i < curvePoints.length; i++) {
-          ctx.lineTo(curvePoints[i].x, curvePoints[i].y);
-        }
-        ctx.strokeStyle = 'rgba(56, 189, 248, 0.5)';
-        ctx.lineWidth = 1;
-        ctx.setLineDash([4, 4]);
-        ctx.stroke();
-        ctx.setLineDash([]);
-      }
-      
-      // Draw points
-      curvePoints.forEach((p, i) => {
-        // Glow
-        const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, 8);
-        grad.addColorStop(0, 'rgba(239, 68, 68, 0.3)');
-        grad.addColorStop(1, 'rgba(239, 68, 68, 0)');
-        ctx.fillStyle = grad;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, 8, 0, Math.PI * 2);
-        ctx.fill();
-        
-        // Point
-        ctx.fillStyle = '#ef4444';
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
-        ctx.fill();
-        
-        // Index
-        ctx.fillStyle = '#ffffff';
-        ctx.font = '8px sans-serif';
+      // Draw part labels
+      for (const [partName, b] of Object.entries(PART_BOUNDS)) {
+        ctx.fillStyle = 'rgba(255,255,255,0.3)';
+        ctx.font = '5px sans-serif';
         ctx.textAlign = 'center';
-        ctx.textBaseline = 'bottom';
-        ctx.fillText(i + 1, p.x, p.y - 6);
-      });
-      
-      ctx.restore();
-      
-      document.getElementById('curvePointStatus').textContent = `${curvePoints.length} points placed`;
+        ctx.textBaseline = 'middle';
+        ctx.fillText(partName.replace('_', ' ').substring(0, 6), b.tu + b.w/2, b.tv + b.h/2);
+      }
+
+      // Render 3D Surface Control Points onto the UV map
+      if (surfaceNodes.length > 0) {
+        // Draw connecting line
+        ctx.beginPath();
+        surfaceNodes.forEach((node, i) => {
+          const px = node.uv.x * SHEET_SIZE;
+          const py = (1 - node.uv.y) * SHEET_SIZE;
+          
+          if (i === 0) {
+            ctx.moveTo(px, py);
+          } else {
+            ctx.lineTo(px, py);
+          }
+        });
+        ctx.strokeStyle = '#38bdf8';
+        ctx.lineWidth = 2;
+        ctx.shadowColor = 'rgba(56, 189, 248, 0.5)';
+        ctx.shadowBlur = 5;
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+
+        // Draw node markers
+        surfaceNodes.forEach((node, i) => {
+          const px = node.uv.x * SHEET_SIZE;
+          const py = (1 - node.uv.y) * SHEET_SIZE;
+          
+          const partColor = PART_COLORS[node.partInfo.part] || '#ef4444';
+          
+          ctx.shadowColor = 'rgba(239, 68, 68, 0.5)';
+          ctx.shadowBlur = 8;
+          
+          ctx.fillStyle = partColor;
+          ctx.beginPath();
+          ctx.arc(px, py, 4, 0, Math.PI * 2);
+          ctx.fill();
+          
+          ctx.shadowBlur = 0;
+          ctx.fillStyle = '#ffffff';
+          ctx.beginPath();
+          ctx.arc(px, py, 1.5, 0, Math.PI * 2);
+          ctx.fill();
+          
+          ctx.fillStyle = '#ffffff';
+          ctx.font = '5px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'bottom';
+          ctx.fillText(i + 1, px, py - 6);
+        });
+        
+        ctx.shadowBlur = 0;
+      }
+
+      horseTexture.needsUpdate = true;
+      document.getElementById('point-count').textContent = `${surfaceNodes.length} points`;
+      compileGeneJSON();
     }
 
-    // --- 3. Three.js 3D Viewport Setup ---
+    // --- 3. Three.js & 3D Raycasting Viewport ---
     const viewport = document.getElementById('viewport-container');
     const loadingOverlay = document.getElementById('loading-overlay');
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x0b1120);
 
     const camera = new THREE.PerspectiveCamera(45, viewport.clientWidth / viewport.clientHeight, 0.1, 1000);
-    camera.position.set(2, 1.8, 4.5);
+    camera.position.set(0, 1.5, 5.0);
 
-    const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('three-canvas'), antialias: true });
+    const renderer = new THREE.WebGLRenderer({ 
+      canvas: document.getElementById('three-canvas'), 
+      antialias: true 
+    });
     renderer.setSize(viewport.clientWidth, viewport.clientHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     if (THREE.SRGBColorSpace) {
@@ -441,45 +653,42 @@
     const controls = new THREE.OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.dampingFactor = 0.08;
-    controls.target.set(0, 0.8, 0);
-    controls.minDistance = 1.5;
-    controls.maxDistance = 8;
+    controls.target.set(0, 0, 0);
 
     // Lighting
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
     scene.add(ambientLight);
-    const hemisphereLight = new THREE.HemisphereLight(0xffffff, 0x444444, 0.5);
+    const hemisphereLight = new THREE.HemisphereLight(0xffffff, 0x444444, 0.6);
     scene.add(hemisphereLight);
-    const dirLight = new THREE.DirectionalLight(0xffffff, 0.9);
-    dirLight.position.set(5, 10, 7);
+    const dirLight = new THREE.DirectionalLight(0xffffff, 1.0);
+    dirLight.position.set(5, 8, 5);
     scene.add(dirLight);
-    const fillLight = new THREE.DirectionalLight(0x8888ff, 0.3);
-    fillLight.position.set(-5, 2, -5);
-    scene.add(fillLight);
+    const dirLight2 = new THREE.DirectionalLight(0x8888ff, 0.3);
+    dirLight2.position.set(-5, 3, -5);
+    scene.add(dirLight2);
 
-    // Dynamic Canvas Texture
-    const horseTexture = new THREE.CanvasTexture(texCanvas);
-    horseTexture.magFilter = THREE.NearestFilter;
-    horseTexture.minFilter = THREE.NearestFilter;
-    horseTexture.wrapS = THREE.RepeatWrapping;
-    horseTexture.wrapT = THREE.RepeatWrapping;
-    horseTexture.flipY = true;
+    const gridHelper = new THREE.GridHelper(3, 10, 0x334155, 0x1e293b);
+    gridHelper.position.y = -1.2;
+    scene.add(gridHelper);
 
     const horseMaterial = new THREE.MeshStandardMaterial({ 
       map: horseTexture,
-      roughness: 0.8,
-      metalness: 0.1,
+      roughness: 0.7,
+      metalness: 0.05,
       side: THREE.DoubleSide
     });
 
-    let horseModel = null;
     let horseMesh = null;
+    let horseModel = null;
+    const visualNodesGroup = new THREE.Group();
+    scene.add(visualNodesGroup);
+    let curveLine3D = null;
 
-    // Load actual horse.glb GLTF Model
-    const loader = new THREE.GLTFLoader();
-    console.log('Loading model from:', MODEL_PATH);
+    // GLTF Model Loading
+    const gltfLoader = new THREE.GLTFLoader();
+    console.log('Attempting to load model:', MODEL_PATH);
     
-    loader.load(
+    gltfLoader.load(
       MODEL_PATH,
       (gltf) => {
         horseModel = gltf.scene;
@@ -491,243 +700,260 @@
             child.material.map = horseTexture;
             child.material.needsUpdate = true;
             horseMesh = child;
-            console.log('Found mesh:', child.name);
+            console.log('Found mesh:', child.name, 'UVs:', child.geometry.attributes.uv ? 'Yes' : 'No');
+            
+            if (child.geometry.attributes.uv) {
+              const uv = child.geometry.attributes.uv;
+              let minU = 1, maxU = 0, minV = 1, maxV = 0;
+              for (let i = 0; i < uv.count; i++) {
+                minU = Math.min(minU, uv.getX(i));
+                maxU = Math.max(maxU, uv.getX(i));
+                minV = Math.min(minV, uv.getY(i));
+                maxV = Math.max(maxV, uv.getY(i));
+              }
+              console.log('UV range:', { minU, maxU, minV, maxV });
+            }
           }
         });
-        
+
         if (!horseMesh) {
-          console.warn('No mesh found in model, creating fallback');
+          console.warn('No mesh found in model');
           createFallbackModel();
         } else {
-          // Auto-center model
           const box = new THREE.Box3().setFromObject(horseModel);
           const center = box.getCenter(new THREE.Vector3());
           horseModel.position.sub(center);
-          const size = box.getSize(new THREE.Vector3());
-          const maxDim = Math.max(size.x, size.y, size.z);
-          if (maxDim > 2.5) {
-            const scale = 2.0 / maxDim;
-            horseModel.scale.set(scale, scale, scale);
-          }
-          horseModel.position.y += 0.2;
-
           scene.add(horseModel);
           loadingOverlay.style.display = 'none';
         }
       },
       (xhr) => {
-        if (xhr.lengthComputable) {
-          const percent = Math.round((xhr.loaded / xhr.total) * 100);
-          loadingOverlay.innerText = `Loading horse.glb... (${percent}%)`;
+        const percent = Math.floor((xhr.loaded / xhr.total) * 100);
+        if (xhr.total > 0) {
+          const loadingText = loadingOverlay.querySelector('div:last-child');
+          if (loadingText) {
+            loadingText.textContent = `Loading 3D Gene Preview... ${percent}%`;
+          }
         }
       },
-      (error) => {
-        console.error('Error loading horse.glb:', error);
-        loadingOverlay.innerText = 'Failed to load model - using fallback';
-        loadingOverlay.style.color = '#ef4444';
+      (err) => {
+        console.error('Failed loading 3D model:', err);
         createFallbackModel();
-        setTimeout(() => {
-          loadingOverlay.style.display = 'none';
-        }, 2000);
+        loadingOverlay.style.display = 'none';
       }
     );
 
     function createFallbackModel() {
-      console.log('Creating fallback model');
-      const geometry = new THREE.CylinderGeometry(0.6, 0.5, 1.8, 16);
+      console.log('Creating fallback model with UVs');
+      const geometry = new THREE.SphereGeometry(1, 32, 32);
       const mesh = new THREE.Mesh(geometry, horseMaterial);
       mesh.position.y = 0.2;
       horseMesh = mesh;
       horseModel = mesh;
       scene.add(mesh);
-      
-      // Add simple legs
-      const legGeo = new THREE.BoxGeometry(0.08, 0.4, 0.08);
-      const legMat = new THREE.MeshStandardMaterial({ color: 0x8B7355 });
-      const positions = [[-0.2, -0.4, -0.15], [0.2, -0.4, -0.15], [-0.2, -0.4, 0.15], [0.2, -0.4, 0.15]];
-      positions.forEach(pos => {
-        const leg = new THREE.Mesh(legGeo, legMat);
-        leg.position.set(pos[0], 0.2 + pos[1], pos[2]);
-        mesh.add(leg);
-      });
-      
-      // Add head
-      const headGeo = new THREE.SphereGeometry(0.2, 8, 8);
-      const headMat = new THREE.MeshStandardMaterial({ color: 0x8B7355 });
-      const head = new THREE.Mesh(headGeo, headMat);
-      head.position.set(0, 0.6, -0.3);
-      head.scale.set(0.7, 0.5, 0.8);
-      mesh.add(head);
-      
       loadingOverlay.style.display = 'none';
+      
+      const wireframe = new THREE.LineSegments(
+        new THREE.WireframeGeometry(geometry),
+        new THREE.LineBasicMaterial({ color: 0x334155, transparent: true, opacity: 0.3 })
+      );
+      mesh.add(wireframe);
     }
 
-    // --- 4. Canvas Interaction for Bezier Curve Drawing ---
-    texCanvas.addEventListener('click', (e) => {
-      const rect = texCanvas.getBoundingClientRect();
-      const scaleX = texCanvas.width / rect.width;
-      const scaleY = texCanvas.height / rect.height;
-      
-      const x = (e.clientX - rect.left) * scaleX;
-      const y = (e.clientY - rect.top) * scaleY;
-      
-      if (currentLayerType === 'bezier') {
-        curvePoints.push({ x, y });
-        renderTexture();
-      }
-    });
-
-    texCanvas.addEventListener('contextmenu', (e) => {
-      e.preventDefault();
-      if (currentLayerType === 'bezier' && curvePoints.length > 1) {
-        // Finish curve and add as layer
-        addBezierLayer();
-      }
-    });
-
-    function addBezierLayer() {
-      if (curvePoints.length < 2) {
-        alert('Need at least 2 points to create a curve');
-        return;
+    function update3DCurve() {
+      if (curveLine3D) {
+        scene.remove(curveLine3D);
+        curveLine3D = null;
       }
       
-      const layer = {
-        id: Date.now(),
-        type: 'bezier',
-        points: [...curvePoints],
-        thickness: parseFloat(document.getElementById('minThickness').value) + 
-          Math.random() * (parseFloat(document.getElementById('maxThickness').value) - 
-          parseFloat(document.getElementById('minThickness').value)),
-        handleSpread: parseFloat(document.getElementById('handleSpread').value),
-        handleOffset: (Math.random() - 0.5) * 10,
-        primaryColor: document.getElementById('primaryColor').value,
-        secondaryColor: document.getElementById('secondaryColor').value,
-        showHandles: true
-      };
+      if (surfaceNodes.length < 2) return;
       
-      geneDefinition.layers.push(layer);
-      curvePoints = [];
-      updateLayersUI();
-      renderTexture();
-      document.getElementById('curvePointStatus').textContent = '0 points placed';
+      const points = surfaceNodes.map(node => node.point3D);
+      const geometry = new THREE.BufferGeometry().setFromPoints(points);
+      curveLine3D = new THREE.Line(geometry, new THREE.LineBasicMaterial({ 
+        color: 0x38bdf8, 
+        linewidth: 2,
+        transparent: true,
+        opacity: 0.8
+      }));
+      scene.add(curveLine3D);
     }
 
-    // --- 5. UI Interactions ---
-    document.getElementById('tintColor').addEventListener('input', (e) => {
-      geneDefinition.tintColor = e.target.value;
-      renderTexture();
+    // 3D Direct Surface Interaction
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+    let isDragging = false;
+    let dragStart = { x: 0, y: 0 };
+
+    renderer.domElement.addEventListener('pointerdown', (e) => {
+      if (e.button !== 0) return;
+      isDragging = false;
+      dragStart.x = e.clientX;
+      dragStart.y = e.clientY;
     });
 
-    document.getElementById('toolType').addEventListener('change', (e) => {
-      const type = e.target.value;
-      currentLayerType = type;
-      
-      document.getElementById('bezierControls').style.display = type === 'bezier' ? 'block' : 'none';
-      document.getElementById('shapeControls').style.display = type === 'bezier' ? 'none' : 'block';
-      
-      if (type === 'bezier') {
-        document.getElementById('curvePointStatus').style.display = 'block';
-        texCanvas.style.cursor = 'crosshair';
-      } else {
-        document.getElementById('curvePointStatus').style.display = 'none';
-        texCanvas.style.cursor = 'default';
-        curvePoints = [];
-        renderTexture();
+    renderer.domElement.addEventListener('pointermove', (e) => {
+      if (e.buttons === 1) {
+        const dx = e.clientX - dragStart.x;
+        const dy = e.clientY - dragStart.y;
+        if (Math.sqrt(dx*dx + dy*dy) > 5) {
+          isDragging = true;
+        }
       }
     });
 
-    document.getElementById('addLayerBtn').addEventListener('click', () => {
-      const type = document.getElementById('toolType').value;
-      
-      if (type === 'bezier') {
-        addBezierLayer();
-        return;
-      }
-      
-      const layer = {
-        id: Date.now(),
-        type: type,
-        minSize: parseFloat(document.getElementById('minSize').value),
-        maxSize: parseFloat(document.getElementById('maxSize').value),
-        frequency: parseInt(document.getElementById('frequency').value),
-        primaryColor: document.getElementById('primaryColor').value,
-        secondaryColor: document.getElementById('secondaryColor').value
-      };
+    renderer.domElement.addEventListener('pointerup', (e) => {
+      if (e.button !== 0) return;
+      if (isDragging) return;
 
-      geneDefinition.layers.push(layer);
-      updateLayersUI();
-      renderTexture();
-    });
+      const rect = renderer.domElement.getBoundingClientRect();
+      mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+      mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
 
-    function updateLayersUI() {
-      const list = document.getElementById('layersList');
-      list.innerHTML = '';
-      geneDefinition.layers.forEach((layer, idx) => {
-        const item = document.createElement('div');
-        item.className = 'layer-item';
-        const typeLabel = layer.type.toUpperCase();
-        const info = layer.type === 'bezier' 
-          ? `${layer.points.length} points, thickness: ${layer.thickness.toFixed(1)}px`
-          : `${layer.frequency}x, size: ${layer.minSize}-${layer.maxSize}px`;
-        
-        item.innerHTML = `
-          <strong>${idx + 1}. ${typeLabel}</strong><br>
-          ${info}
-          <div class="controls">
-            <button class="secondary" onclick="toggleHandles(${layer.id})">Toggle Handles</button>
-            <button class="danger" onclick="removeLayer(${layer.id})">Remove</button>
-          </div>
-        `;
-        list.appendChild(item);
+      raycaster.setFromCamera(mouse, camera);
+      
+      const objects = [];
+      scene.traverse((child) => {
+        if (child.isMesh) {
+          objects.push(child);
+        }
       });
+      
+      const intersects = raycaster.intersectObjects(objects, false);
+
+      if (intersects.length > 0) {
+        const hit = intersects[0];
+        console.log('Hit:', hit.object.name, 'UV:', hit.uv);
+        
+        if (hit.uv) {
+          const partInfo = getPartFromUV(hit.uv.x, hit.uv.y);
+          console.log('Part:', partInfo.part, 'Local:', partInfo.localX, partInfo.localY);
+          
+          surfaceNodes.push({
+            point3D: hit.point.clone(),
+            uv: hit.uv.clone(),
+            partInfo: partInfo
+          });
+
+          const markerGeo = new THREE.SphereGeometry(0.04, 16, 16);
+          const markerMat = new THREE.MeshBasicMaterial({ 
+            color: 0xef4444,
+            transparent: true,
+            opacity: 0.8
+          });
+          const marker = new THREE.Mesh(markerGeo, markerMat);
+          marker.position.copy(hit.point);
+          visualNodesGroup.add(marker);
+
+          update3DCurve();
+          render2DCanvas();
+        } else {
+          console.warn('No UV data at click point');
+        }
+      }
+    });
+
+    // --- 4. JSON Generation ---
+    const jsonOutput = document.getElementById('json-output');
+
+    function compileGeneJSON() {
+      const curveSegments = [];
+      let currentPart = null;
+      let currentSegment = null;
+
+      surfaceNodes.forEach(node => {
+        const pInfo = node.partInfo;
+        if (pInfo.part !== currentPart) {
+          currentPart = pInfo.part;
+          currentSegment = {
+            part: currentPart,
+            type: document.getElementById('shape-type').value,
+            expression: {
+              minScale: parseFloat(document.getElementById('shape-min-scale').value),
+              maxScale: parseFloat(document.getElementById('shape-max-scale').value)
+            },
+            color: {
+              start: document.getElementById('color-start').value,
+              end: document.getElementById('color-end').value,
+              gradient: document.getElementById('gradient-mode').value
+            },
+            points: []
+          };
+          curveSegments.push(currentSegment);
+        }
+
+        currentSegment.points.push({
+          x: parseFloat(pInfo.localX.toFixed(3)),
+          y: parseFloat(pInfo.localY.toFixed(3))
+        });
+      });
+
+      geneState.geneId = document.getElementById('gene-id').value;
+      geneState.frequency = parseFloat(document.getElementById('gene-frequency').value);
+      geneState.skin = document.getElementById('skin-type').value;
+      geneState.texturePath = document.getElementById('texture-path').value;
+      geneState.curves = curveSegments;
+      jsonOutput.value = JSON.stringify(geneState, null, 2);
     }
 
-    window.toggleHandles = function(id) {
-      const layer = geneDefinition.layers.find(l => l.id === id);
-      if (layer && layer.type === 'bezier') {
-        layer.showHandles = !layer.showHandles;
-        renderTexture();
-      }
-    };
+    // --- 5. UI Event Handlers ---
 
-    window.removeLayer = function(id) {
-      geneDefinition.layers = geneDefinition.layers.filter(l => l.id !== id);
-      updateLayersUI();
-      renderTexture();
-    };
-
-    document.getElementById('clearAllBtn').addEventListener('click', () => {
-      if (confirm('Remove all layers?')) {
-        geneDefinition.layers = [];
-        curvePoints = [];
-        updateLayersUI();
-        renderTexture();
-        document.getElementById('curvePointStatus').textContent = '0 points placed';
+    // Texture reload
+    document.getElementById('btn-reload-texture').addEventListener('click', () => {
+      const path = document.getElementById('texture-path').value.trim();
+      if (path) {
+        loadTexture(path);
+      } else {
+        updateTextureStatus('Please enter a texture path', true);
       }
     });
 
-    // Export JSON
-    document.getElementById('exportGeneBtn').addEventListener('click', () => {
-      geneDefinition.id = document.getElementById('geneName').value;
-      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(geneDefinition, null, 2));
-      const downloadAnchor = document.createElement('a');
-      downloadAnchor.setAttribute("href", dataStr);
-      downloadAnchor.setAttribute("download", `${geneDefinition.id}.json`);
-      document.body.appendChild(downloadAnchor);
-      downloadAnchor.click();
-      downloadAnchor.remove();
-    });
-
-    // Keyboard shortcuts
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && curvePoints.length > 0) {
-        curvePoints = [];
-        renderTexture();
-        document.getElementById('curvePointStatus').textContent = '0 points placed';
+    // Clear points
+    document.getElementById('btn-clear-points').addEventListener('click', () => {
+      surfaceNodes.length = 0;
+      while (visualNodesGroup.children.length > 0) {
+        visualNodesGroup.remove(visualNodesGroup.children[0]);
       }
+      if (curveLine3D) {
+        scene.remove(curveLine3D);
+        curveLine3D = null;
+      }
+      render2DCanvas();
     });
 
-    // Window Resizing
+    // Copy JSON
+    document.getElementById('btn-copy-json').addEventListener('click', () => {
+      navigator.clipboard.writeText(jsonOutput.value).catch(() => {
+        jsonOutput.select();
+        document.execCommand('copy');
+      });
+      alert('Gene JSON copied to clipboard!');
+    });
+
+    // Auto-update on UI changes
+    document.querySelectorAll('#toolbox input, #toolbox select').forEach(el => {
+      el.addEventListener('change', compileGeneJSON);
+      el.addEventListener('input', compileGeneJSON);
+    });
+
+    // --- 6. Initialization ---
+    
+    // Load the default texture
+    const defaultTexturePath = document.getElementById('texture-path').value;
+    loadTexture(defaultTexturePath);
+
+    // Render initial canvas
+    render2DCanvas();
+
+    // --- 7. Render Loop ---
+    function animate() {
+      requestAnimationFrame(animate);
+      controls.update();
+      renderer.render(scene, camera);
+    }
+
+    animate();
+
     window.addEventListener('resize', () => {
       const width = viewport.clientWidth;
       const height = viewport.clientHeight;
@@ -736,20 +962,10 @@
       renderer.setSize(width, height);
     });
 
-    // Animation Loop
-    function animate() {
-      requestAnimationFrame(animate);
-      controls.update();
-      renderer.render(scene, camera);
-    }
-
-    // Initial setup
-    document.getElementById('toolType').dispatchEvent(new Event('change'));
-    renderTexture();
-    animate();
-
-    console.log('Horse Gene Editor initialized');
+    console.log('Horse Gene Creator initialized');
     console.log('Model path:', MODEL_PATH);
+    console.log('Default texture path:', defaultTexturePath);
+    console.log('Part bounds:', PART_BOUNDS);
   </script>
 </body>
 </html>
