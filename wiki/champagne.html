@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bay Coat Generator - Wiki</title>
+    <title>Champagne Gene - Wiki</title>
     <style>
         :root {
             --bg-color: #0f172a;
@@ -82,7 +82,7 @@
 
         /* Information Panel */
         .info-panel {
-            width: 360px;
+            width: 380px;
             background-color: var(--panel-bg);
             border: 1px solid var(--border);
             border-radius: 8px;
@@ -132,6 +132,18 @@
             padding-top: 1rem;
         }
 
+        /* Feature List */
+        .feature-list {
+            padding-left: 1.2rem;
+            margin: 0.5rem 0 0 0;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .feature-list li {
+            margin-bottom: 0.4rem;
+        }
+
         /* Code View Container */
         .code-container {
             flex: 1;
@@ -164,49 +176,66 @@
 
     <nav class="sidebar">
         <a href="../index.html" class="back-link">&larr; Back to Index</a>
-        <div style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted);">Coat Patterns</div>
+        <div style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted);">Dilution Genes</div>
         <ul>
-            <li><a href="bay-coat.html" class="active">Bay Coat</a></li>
+            <li><a href="bay-coat.html">Bay Coat</a></li>
+            <li><a href="cream-pearl-dilution.html">Cream & Pearl</a></li>
+            <li><a href="dapple-grey.html">Dapple Grey</a></li>
+            <li><a href="champagne.html" class="active">Champagne</a></li>
         </ul>
     </nav>
 
     <main class="content">
         <!-- Metadata Info Panel -->
         <section class="info-panel">
-            <h1>Bay Coat</h1>
+            <h1>Champagne</h1>
             
             <div class="metadata-group">
                 <div class="metadata-row">
-                    <span class="metadata-label">Gene / Locus</span>
-                    <span class="metadata-value">Agouti (A)</span>
+                    <span class="metadata-label">Gene Key</span>
+                    <span class="metadata-value">horsegenetics.champagne</span>
                 </div>
                 <div class="metadata-row">
-                    <span class="metadata-label">Body Black Level</span>
-                    <span class="metadata-value">0.32</span>
+                    <span class="metadata-label">Dominance</span>
+                    <span class="metadata-value">Dominant (Simple)</span>
                 </div>
                 <div class="metadata-row">
-                    <span class="metadata-label">Min Hoof Fraction</span>
-                    <span class="metadata-value">0.12</span>
+                    <span class="metadata-label">Alleles</span>
+                    <span class="metadata-value">Ch (Champagne), c (Wild-type)</span>
                 </div>
                 <div class="metadata-row">
-                    <span class="metadata-label">Leg Range</span>
-                    <span class="metadata-value">0.15 - 0.95</span>
+                    <span class="metadata-label">Wild Allele Odds</span>
+                    <span class="metadata-value">1 in 40</span>
                 </div>
                 <div class="metadata-row">
-                    <span class="metadata-label">Leg Jitter</span>
-                    <span class="metadata-value">&plusmn;0.14</span>
+                    <span class="metadata-label">Red Kept</span>
+                    <span class="metadata-value">0.55</span>
+                </div>
+                <div class="metadata-row">
+                    <span class="metadata-label">Black Kept</span>
+                    <span class="metadata-value">0.42</span>
+                </div>
+                <div class="metadata-row">
+                    <span class="metadata-label">Black Tint Boost</span>
+                    <span class="metadata-value">0.30</span>
                 </div>
             </div>
 
             <div class="description">
-                Paints a red-brown body with black points (mane, tail, ears, and hooves). The height of black points climbing up the legs and face is determined continuously from the Agouti allele value. Higher rolls result in a "Seal Brown" phenotype rather than using a separate gene.
+                A non-dose-dependent dilution gene that severely cuts eumelanin (black) while leaving most pheomelanin (red) intact.
+                
+                <ul class="feature-list">
+                    <li><strong>Gold Champagne:</strong> Dilutes chestnut coats to a rich gold.</li>
+                    <li><strong>Classic Champagne:</strong> Dilutes black coats to a muted taupe.</li>
+                    <li><strong>Amber Champagne:</strong> Dilutes bay coats to a gold body while retaining rich chocolate points via black-to-red tint feedback.</li>
+                </ul>
             </div>
         </section>
 
         <!-- Direct File Embed -->
         <section class="code-container">
-            <div class="code-header">Source File: 9-7-8/Procedural-Horse-Coats/common/src/main/java/com/example/horsegenetics/common/coat/pattern/BayCoat.java</div>
-            <iframe class="code-frame" src="../9-7-8/Procedural-Horse-Coats/common/src/main/java/com/example/horsegenetics/common/coat/pattern/BayCoat.java"></iframe>
+            <div class="code-header">Source File: 9-7-8/Procedural-Horse-Coats/common/src/main/java/com/example/horsegenetics/common/genetics/genes/ChampagneGene.java</div>
+            <iframe class="code-frame" src="../9-7-8/Procedural-Horse-Coats/common/src/main/java/com/example/horsegenetics/common/genetics/genes/ChampagneGene.java"></iframe>
         </section>
     </main>
 
