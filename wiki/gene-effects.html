@@ -17,18 +17,19 @@
 <p class="lede">
     An <strong>effect</strong> is a Minecraft-specific thing a data-driven gene makes
     the horse <em>do</em> &mdash; walk on water, resist fire, trail particles, be
-    milked for a fluid &mdash; as opposed to a coat pixel. This page is the reference
-    for the effects that exist and the <a href="#adding">contract for adding a new
-    one</a>, which is built to be as modular as a closed vocabulary can be: one
-    declaration per effect, and the parser never changes.
+    milked for a fluid &mdash; as opposed to a coat pixel. This page is the complete
+    reference for the effect vocabulary: the five verbs that exist today, the whole
+    surface the <a href="horse-traits.html">architecture spec</a> defines around them,
+    and the <a href="#adding">contract for adding a new one</a>. It is built to be as
+    modular as a closed vocabulary can be: one declaration per effect, and the parser
+    never changes.
 </p>
 
 <p>
-    The wider (mostly unbuilt) behaviour system this is a slice of &mdash; selectors,
-    auras, resource pools, goals, cooldown abilities &mdash; is
-    <a href="horse-traits.html">the trait &amp; effect architecture</a>. The rest of
-    the gene file (header, knobs, coat layers) is
-    <a href="gene-format.html">the gene file format</a>.
+    The rest of the gene file (header, knobs, coat layers) is
+    <a href="gene-format.html">the gene file format</a>. Where this page and the
+    architecture spec disagree, see <a href="#divergences">Divergences from the
+    spec</a> &mdash; the disagreements are catalogued rather than smoothed over.
 </p>
 
 <div class="note warn">
@@ -44,7 +45,95 @@
         been seen in a running game &mdash; see
         <a href="verification.html">To be verified</a>.
     </p>
+    <p>
+        Everything else on this page &mdash; selectors, auras, resource pools, memory,
+        goals, abilities, trait relations, spawn variants &mdash; is
+        <strong>specified and unbuilt</strong>. It is documented here so the shipped
+        slice can be read against the shape it is growing into, not because any of it
+        runs.
+    </p>
 </div>
+
+<h2 id="reading">How to read this page</h2>
+<dl class="spec">
+    <div>
+        <dt>Live</dt>
+        <dd>Parses in <code>common/</code> and executes in the translator. Untested in
+            a running game, but the code path exists end to end.</dd>
+    </div>
+    <div>
+        <dt>Parses only</dt>
+        <dd>Validated at load and carried on the record, but the translator does
+            nothing with it. Logged once via <code>warnUntranslated</code>.</dd>
+    </div>
+    <div>
+        <dt>Unbuilt</dt>
+        <dd>Defined in the architecture spec, absent from the gene layer. Writing it
+            in a gene file is a load error, because validation is strict and the key
+            is not in the allowed set.</dd>
+    </div>
+    <div>
+        <dt><code>[[&hellip;]]</code></dt>
+        <dd>A placeholder for a class, file, method or constant that does not exist
+            yet, or that the author of this revision could not read. Every one is a
+            note to fill in against the source tree &mdash; treat a
+            <code>[[&hellip;]]</code> left standing as an unanswered question, not as
+            documentation.</dd>
+    </div>
+</dl>
+
+<hr>
+
+<h1 id="architecture">The model</h1>
+
+<p>The spec's core shape is three levels deep:</p>
+
+<pre><code>Horse      &rarr;  has a set of Traits
+Trait      &rarr;  a named bundle of Components
+Component  &rarr;  (Trigger, Condition, Selector, Effect)</code></pre>
+
+<p>Four axes describe any behaviour:</p>
+
+<table>
+<thead><tr><th>Axis</th><th>Question</th><th>Example</th><th>In the gene layer</th></tr></thead>
+<tbody>
+<tr><td><strong>Trigger</strong></td><td>When does it fire?</td><td>when a rider mounts</td><td>Partial &mdash; four triggers, see <a href="#triggers">Triggers</a></td></tr>
+<tr><td><strong>Condition</strong></td><td>Is it active right now?</td><td>daytime and sky-visible</td><td>Partial &mdash; boolean flags, see <a href="#conditions">Conditions</a></td></tr>
+<tr><td><strong>Selector</strong></td><td>Who or what does it act on?</td><td>undead within 8 blocks</td><td>Unbuilt &mdash; every effect acts on <code>self</code> or <code>rider</code></td></tr>
+<tr><td><strong>Effect</strong></td><td>What happens?</td><td>deal 2 damage, set flee flag</td><td>Five of the spec's verbs, see <a href="#effects">Effect verbs</a></td></tr>
+</tbody>
+</table>
+
+<p>
+    Adding new behaviour should mean writing a JSON file. Writing Java means you have
+    hit a genuinely new primitive &mdash; which should be rare, and is an architectural
+    decision rather than a task.
+</p>
+
+<h2 id="genes-and-traits">Genes and traits</h2>
+<p>
+    The spec talks about <em>traits</em>; the gene file talks about a gene's
+    <code>effects</code> array. Today these are the same thing under two names: a
+    gene that expresses contributes its effects to the horse, and the set of effects
+    in play is the union across expressing genes. The mapping:
+</p>
+<table>
+<thead><tr><th>Spec concept</th><th>Gene layer today</th><th>Note</th></tr></thead>
+<tbody>
+<tr><td>Trait</td><td>A gene's <code>effects</code> array</td><td>No trait ID, no <code>cost</code>, no relations. A gene is an implicit anonymous trait.</td></tr>
+<tr><td>Trait set on a horse</td><td><code>SpecAbilities.activeFor(genotype)</code></td><td>Assembled from visible gene pairs rather than from a stored trait list.</td></tr>
+<tr><td>Component</td><td>One entry in <code>effects</code></td><td>Carries its own <code>when</code> and trigger; there is no component grouping above it.</td></tr>
+<tr><td>State attachment</td><td><code>[[per-horse attachment class? &mdash; yield cooldowns are stored somewhere per horse]]</code></td><td>The spec's <code>State</code> is a full record; the gene layer stores far less. See <a href="#state">State</a>.</td></tr>
+<tr><td>Dose</td><td><code>minDose</code></td><td><strong>Not in the spec.</strong> Genetics-specific: the spec's trait model has no notion of allele copies.</td></tr>
+</tbody>
+</table>
+<p>
+    The consequence worth noticing: <em>the horse has no trait list</em>. Trait
+    relations, the trait budget, discovery state and granted traits all assume a
+    stored, addressable set of trait IDs. None of that can be built until genes carry
+    IDs and the horse carries the assembled set. It is the first structural
+    prerequisite for most of the unbuilt half of this page.
+</p>
 
 <h2 id="block">The <code>effects</code> block</h2>
 
@@ -85,7 +174,226 @@
     A bad gene file is skipped with a log line, never fatal.
 </p>
 
-<h2 id="effects">The five effects</h2>
+<p>Fields the spec puts on every component that the block does not accept yet:</p>
+<table>
+<thead><tr><th>Field</th><th>Status</th><th>What it would do</th></tr></thead>
+<tbody>
+<tr><td><code>selector</code></td><td>Unbuilt</td><td>Choose targets other than <code>self</code> / <code>rider</code>. See <a href="#selectors">Selectors</a>.</td></tr>
+<tr><td>Scaling block in place of a literal</td><td>Unbuilt</td><td><code>{ "base": 1.0, "scale_by": "bond", "curve": "ease_out", "max": 3.0 }</code>. See <a href="#scaling">Trait scaling</a>.</td></tr>
+<tr><td><code>cost</code></td><td>Unbuilt</td><td>Pool cost for a triggered effect. See <a href="#pools">Resource pools</a>.</td></tr>
+<tr><td><code>cooldown</code></td><td>Live on <code>yield</code> only</td><td>The spec keys cooldowns per ability ID; the gene layer keys them per <code>[[yield cooldown key? &mdash; gene id, or gene+index?]]</code>.</td></tr>
+</tbody>
+</table>
+
+<hr>
+
+<h1 id="triggers">Triggers</h1>
+
+<p>
+    The firing vocabulary. Every component that is not continuous declares a trigger.
+    In the gene layer, <code>emitter</code> and <code>yield</code> take one; write it
+    as an object with one key, or &mdash; for the two that take no argument &mdash; a
+    bare string.
+</p>
+
+<h2 id="triggers-live">Live today</h2>
+<table>
+<thead><tr><th>Trigger</th><th>Fires</th></tr></thead>
+<tbody>
+<tr><td><code>"continuous"</code></td><td>Every tick <code>when</code> allows. The default if an emitter omits <code>trigger</code> is <code>on_move</code>, not this.</td></tr>
+<tr><td><code>"on_move"</code></td><td>Every tick the horse is moving on the ground under its own power.</td></tr>
+<tr><td><code>{ "interval": 40 }</code></td><td>Every <em>N</em> ticks (<code>horse.tickCount % N == 0</code>).</td></tr>
+<tr><td><code>{ "on_interact": "minecraft:bucket" }</code></td><td>A player right-clicks the horse holding that item. <code>""</code> = any item. The only trigger a <code>yield</code> accepts; an <code>emitter</code> may not use it.</td></tr>
+</tbody>
+</table>
+<p>
+    Note the divergence: the spec writes <code>on_interact(item_or_tag)</code>. The
+    gene layer accepts an item ID only, so <code>#minecraft:buckets</code> will not
+    match. Tag support is <code>[[item tag resolution helper? &mdash; needs a
+    translator-side tag lookup]]</code>.
+</p>
+
+<h2 id="triggers-spec">The full vocabulary</h2>
+<p>
+    Everything below is unbuilt unless marked. Adding one is
+    <a href="#adding-trigger">three edits</a>, and a trigger is shared across every
+    effect that takes one &mdash; so keep the set tiny and prefer
+    <code>on_change</code>-style generality over a verb per game event.
+</p>
+
+<table>
+<thead><tr><th>Group</th><th>Triggers</th><th>Status</th></tr></thead>
+<tbody>
+<tr><td>Time-based</td><td><code>continuous</code> &middot; <code>interval(ticks)</code> &middot; <code>on_cooldown_expire(ability_id)</code></td><td>First two live; the third needs <a href="#ability">Ability</a>.</td></tr>
+<tr><td>Lifecycle</td><td><code>on_spawn</code> &middot; <code>on_tame</code> &middot; <code>on_death</code> &middot; <code>on_load</code> (chunk enters ticking range)</td><td>Unbuilt</td></tr>
+<tr><td>Rider</td><td><code>on_ride</code> &middot; <code>on_dismount</code> &middot; <code>on_rider_input(key)</code></td><td>Unbuilt. <code>on_rider_input</code> also needs a network packet: <code>[[keybind + payload class?]]</code></td></tr>
+<tr><td>Movement</td><td><code>on_move</code> &middot; <code>on_jump</code> &middot; <code>on_land(fall_distance)</code> &middot; <code>on_sprint_start</code> &middot; <code>on_sprint_end</code> &middot; <code>on_step(distance)</code></td><td><code>on_move</code> live; rest unbuilt</td></tr>
+<tr><td>Interaction</td><td><code>on_interact(item_or_tag)</code> &middot; <code>on_sneak_interact(item_or_tag)</code> &middot; <code>on_interact_fail</code> &middot; <code>on_feed(item_or_tag)</code></td><td><code>on_interact</code> live (item IDs only); rest unbuilt</td></tr>
+<tr><td>Combat</td><td><code>on_hurt(source_predicate)</code> &middot; <code>on_hurt_rider</code> &middot; <code>on_hurt_owner</code> &middot; <code>on_damage_dealt</code> &middot; <code>on_kill(selector)</code></td><td>Unbuilt</td></tr>
+<tr><td>World</td><td><code>on_entity_spawn_nearby(selector, radius)</code> &middot; <code>on_item_pickup</code> &middot; <code>on_block_break</code> &middot; <code>on_block_place</code></td><td>Unbuilt</td></tr>
+<tr><td>Edge detection</td><td><code>on_change(condition_source)</code></td><td>Unbuilt &mdash; see below</td></tr>
+</tbody>
+</table>
+
+<h2 id="on-change"><code>on_change</code></h2>
+<p>
+    This one is doing a lot of work and is worth calling out. Biome change, dimension
+    change, weather change, light-level threshold crossing, mood transition, bond
+    tier-up, day/night flip and pool-empty are <strong>all the same trigger</strong>:
+    watch a condition source, fire on the edge. One implementation, one cached
+    previous value per watched source, and every future condition source gets an edge
+    trigger for free.
+</p>
+<pre><code class="language-json">{ "trigger": { "on_change": "biome", "direction": "any" } }
+{ "trigger": { "on_change": "is_raining", "direction": "rising" } }</code></pre>
+<p>
+    Building it needs somewhere to cache the previous value per horse per watched
+    source: <code>[[previous-value map &mdash; on the state attachment, or a
+    translator-side cache?]]</code>. The spec puts edge detection and its bookkeeping
+    in pure <code>common/</code>, which means the cache is keyed by source name and
+    fed a fresh <code>ContextSnapshot</code> rather than reading the horse.
+</p>
+
+<h2 id="damage-hooks">Damage hooks are triggers</h2>
+<p>
+    There is no separate hook system, and adding one would be a mistake to catch in
+    review. <code>on_hurt</code> fires with the incoming damage in context, and the
+    damage-modifying verbs (<code>cancel_damage</code>, <code>reduce_damage</code>,
+    <code>reflect_damage</code>) are ordinary effects valid only in that context.
+</p>
+
+<hr>
+
+<h1 id="conditions">Conditions</h1>
+
+<p>
+    A composable predicate evaluated against a context snapshot. Every other component
+    accepts an optional <code>condition</code> &mdash; spelled <code>when</code> in a
+    gene file.
+</p>
+
+<h2 id="conditions-live">Live today</h2>
+<p>
+    <code>when</code> is a predicate on the live horse. It is <strong>boolean</strong>
+    today &mdash; the spec&rsquo;s 0&ndash;1 scalar model is unbuilt. Shapes:
+</p>
+<pre><code class="language-json">{ "flag": "sex_female" }
+{ "flag": "in_water", "negate": true }
+{ "all": [ { "flag": "tamed" }, { "flag": "day" } ] }
+{ "any": [ { "flag": "raining" }, { "flag": "submerged" } ] }
+{ "not": { "flag": "has_rider" } }</code></pre>
+<p>Flags (each mapped to game state by the translator):</p>
+<p>
+    <code>sex_female</code> &middot; <code>sex_male</code> &middot; <code>tamed</code> &middot;
+    <code>untamed</code> &middot; <code>adult</code> &middot; <code>baby</code> &middot;
+    <code>has_rider</code> &middot; <code>in_water</code> &middot; <code>submerged</code> &middot;
+    <code>on_ground</code> &middot; <code>on_fire</code> &middot; <code>day</code> &middot;
+    <code>night</code> &middot; <code>raining</code> &middot; <code>thundering</code> &middot;
+    <code>sky_visible</code>
+</p>
+<p>Adding one is <a href="#adding-flag">two one-liners</a>.</p>
+
+<h2 id="conditions-scalar">The scalar model <span class="allele wild">unbuilt</span></h2>
+<p>
+    Conditions in the spec evaluate to a <strong>scalar 0.0&ndash;1.0</strong>, not a
+    boolean. Boolean contexts treat <code>&gt; 0.5</code> as true. This lets effects
+    ramp &mdash; a sun-powered horse gains speed gradually through the morning rather
+    than snapping at dawn. <code>curve</code> remaps a scalar through a named easing
+    function for non-linear response.
+</p>
+<p>
+    Migrating to it is a change of return type on
+    <code>GeneAbilityHandler.flagHolds</code> and everything that calls it, plus a
+    decision about which effects read the magnitude rather than the truth value.
+    <code>emitter.chance</code> and <code>attribute.amount</code> are the obvious first
+    consumers. The curve library itself is <code>[[curve registry? &mdash; named
+    easing functions, does not exist]]</code>.
+</p>
+
+<h2 id="conditions-sources">Condition sources</h2>
+<p>
+    The spec&rsquo;s full source list. Sixteen boolean flags exist today; the rest are
+    unbuilt. Where a flag covers part of a source, it is named in the third column.
+</p>
+<table>
+<thead><tr><th>Group</th><th>Sources</th><th>Today</th></tr></thead>
+<tbody>
+<tr><td>World</td><td>time of day &middot; moon phase &middot; weather &middot; sky access &middot; light level &middot; dimension &middot; biome or biome tag &middot; block underfoot &middot; fluid underfoot &middot; in spawn chunks</td><td><code>day</code>, <code>night</code>, <code>raining</code>, <code>thundering</code>, <code>sky_visible</code></td></tr>
+<tr><td>Self</td><td>health fraction &middot; pool threshold &middot; has trait &middot; has active ability &middot; standing-still duration &middot; velocity &middot; is tamed &middot; is in water/lava</td><td><code>tamed</code>, <code>untamed</code>, <code>in_water</code>, <code>submerged</code>, <code>on_ground</code>, <code>on_fire</code></td></tr>
+<tr><td>Rider and owner</td><td>rider present &middot; rider&rsquo;s held item &middot; rider sneaking &middot; rider sprinting &middot; rider flying &middot; owner online &middot; owner sleeping &middot; owner within range</td><td><code>has_rider</code></td></tr>
+<tr><td>Genetics</td><td>&mdash;</td><td><code>sex_female</code>, <code>sex_male</code>, <code>adult</code>, <code>baby</code>. Not in the spec; a gene-layer addition.</td></tr>
+<tr><td>Entity state</td><td><code>entity_state(selector, predicate)</code> where predicate is <code>has_effect(id)</code> &middot; <code>has_tag(tag)</code> &middot; <code>is_glowing</code> &middot; <code>is_invisible</code> &middot; <code>is_on_fire</code> &middot; <code>is_baby</code> &middot; <code>health_below(pct)</code> &middot; <code>count(op, n)</code></td><td>Unbuilt &mdash; needs <a href="#selectors">Selectors</a></td></tr>
+<tr><td>Combinators</td><td><code>all</code> &middot; <code>any</code> &middot; <code>not</code> &middot; <code>threshold(source, op, value)</code> &middot; <code>curve(source, curve_id)</code></td><td><code>all</code>, <code>any</code>, <code>not</code>, plus <code>negate</code> on a flag</td></tr>
+</tbody>
+</table>
+<p>
+    Folding entity checks into one source with a predicate sub-vocabulary matters:
+    they compose with any selector, so &ldquo;an undead within 8 blocks is on
+    fire&rdquo; and &ldquo;my owner has Regeneration&rdquo; use the same code path.
+</p>
+
+<h2 id="conditions-integration">Integration conditions</h2>
+<p>
+    Sources like claimed-chunk membership or region-protection state belong in optional
+    compat submodules that register additional condition sources at load. They are not
+    built-ins, and a gene referencing an unregistered source is disabled with a
+    load-time warning rather than crashing. The registration seam is
+    <code>[[condition source registry? &mdash; today the list is the constant
+    AbilityType.CONDITION_FLAGS, which is closed and cannot be extended at load]]</code>
+    &mdash; note that today&rsquo;s constant-list design actively blocks this and would
+    have to become a registry first.
+</p>
+
+<hr>
+
+<h1 id="selectors">Selectors <span class="allele wild">unbuilt</span></h1>
+
+<p>
+    The targeting DSL: one implementation, used everywhere something needs to find
+    entities or blocks. Nothing in the gene layer selects &mdash; every effect acts on
+    <code>self</code>, or on <code>rider</code> where the verb offers it.
+</p>
+
+<table>
+<thead><tr><th>Kind</th><th>Vocabulary</th></tr></thead>
+<tbody>
+<tr><td>Entity selectors</td><td>type &middot; entity tag (<code>undead</code>, <code>arthropod</code>, <code>passive</code>, <code>hostile</code>, <code>tamed</code>, <code>players</code>, <code>horses</code>, <code>items</code>) &middot; radius or box &middot; line-of-sight requirement &middot; state predicate &middot; limit &middot; sort</td></tr>
+<tr><td>Relationships</td><td><code>self</code> &middot; <code>rider</code> &middot; <code>owner</code> &middot; <code>owner_target</code> &middot; <code>owner_last_attacker</code> &middot; <code>attacker</code> &middot; <code>last_attacker</code> &middot; <code>untamed</code> &middot; <code>owner_other_horses</code></td></tr>
+<tr><td>Block selectors</td><td>block or block tag &middot; block state predicate &middot; shape (sphere, cylinder, contact ring, cone) &middot; radius &middot; limit &middot; sort</td></tr>
+<tr><td>Sort modes</td><td><code>nearest</code> &middot; <code>farthest</code> &middot; <code>random</code> &middot; <code>lowest_health</code> &middot; <code>highest_health</code></td></tr>
+</tbody>
+</table>
+
+<p>
+    <code>nearest</code> plus a block tag covers finding the closest chest, bed,
+    campfire or ore without a dedicated selector for each &mdash; which is why
+    <code>nearest_chest</code>-style verbs are on the
+    <a href="#excluded">excluded list</a>.
+</p>
+<p>
+    <code>last_attacker</code> and <code>owner_last_attacker</code> are memory-backed:
+    they need <a href="#memory">Memory</a> to record the reference and a timeout after
+    which it clears. Store a UUID and resolve on demand &mdash; never a hard entity
+    reference held across ticks.
+</p>
+<p>
+    Split when built: the selector <em>definition</em> and its predicate logic are pure
+    <code>common/</code>; the world query is the translator&rsquo;s.
+    <code>[[selector record + resolver interface? &mdash; neither exists]]</code>
+</p>
+
+<hr>
+
+<h1 id="effects">Effect verbs</h1>
+
+<p>
+    <strong>Keep this list closed.</strong> It is the main lever on long-term
+    maintainability &mdash; everything else composes these. Five exist; the rest are
+    the spec&rsquo;s vocabulary, recorded here so a new verb is checked against them
+    before it is written.
+</p>
+
+<h2 id="verbs-live">The five that exist</h2>
 
 <h3 id="traversal"><code>traversal</code></h3>
 <p>Holds a movement / survival flag up while <code>when</code> is true.</p>
@@ -102,6 +410,13 @@
     <code>walk_on_lava</code> and <code>water_averse</code> parse but aren&rsquo;t
     executed.
 </p>
+<p>
+    The spec lists three more flags the gene layer does not accept:
+    <code>flight</code>, <code>swim_speed</code> and <code>phasing</code>.
+    <code>swim_speed</code> is a magnitude rather than a boolean and lives on
+    <code>attribute</code> here; <code>flight</code> and <code>phasing</code> are
+    simply absent. See <a href="#divergences">Divergences</a>.
+</p>
 <pre><code class="language-json">{ "type": "traversal", "flag": "fire_immune" }</code></pre>
 
 <h3 id="attribute"><code>attribute</code> <span class="allele wild">not executed yet</span></h3>
@@ -116,6 +431,13 @@
 </table>
 <pre><code class="language-json">{ "type": "attribute", "attribute": "movement_speed", "op": "multiply_total",
   "amount": 0.15, "when": { "flag": "in_water" } }</code></pre>
+<p>
+    When this is wired, the spec&rsquo;s merge rule applies: additive modifiers with
+    vanilla operation semantics, <strong>and a cap on the total per attribute</strong>.
+    The cap is config, not code: <code>[[per-attribute cap config key? &mdash; no
+    config surface for this yet]]</code>. Modifier IDs must be keyed per
+    gene+attribute so re-application does not duplicate.
+</p>
 
 <h3 id="emitter"><code>emitter</code></h3>
 <p>Spawns particles (a dynamic <code>light</code> kind is defined but not wired).</p>
@@ -135,6 +457,28 @@
   "trigger": { "interval": 40 },
   "particle": "minecraft:happy_villager", "chance": 1.0 }</code></pre>
 
+<p>The spec&rsquo;s emitter is wider on three axes:</p>
+<table>
+<thead><tr><th>Field</th><th>Spec</th><th>Gene layer</th></tr></thead>
+<tbody>
+<tr><td><code>kind</code></td><td><code>light</code> &middot; <code>particle</code> &middot; <code>sound</code> &middot; <code>block_trail</code></td><td><code>particle</code> live, <code>light</code> parses only. No sound or block trail.</td></tr>
+<tr><td><code>shape</code></td><td><code>point</code> &middot; <code>ring</code> &middot; <code>cone</code> &middot; <code>sphere</code> &middot; <code>trail</code> &middot; <code>burst</code></td><td><code>cone</code> and <code>sphere</code> missing.</td></tr>
+<tr><td><code>anchor</code></td><td><code>entity</code> &middot; <code>feet</code> &middot; <code>head</code> &middot; <code>eyes</code> &middot; <code>forward_offset</code> &middot; <code>impact_point</code> &middot; <code>target</code></td><td><code>body</code> in place of <code>entity</code>; the last three missing (two of them need triggers or selectors that don&rsquo;t exist).</td></tr>
+<tr><td><code>color_source</code></td><td><code>fixed</code> &middot; <code>dye_slot</code> &middot; <code>bound(state_field)</code></td><td>Fixed hex only.</td></tr>
+<tr><td><code>pattern</code></td><td>Sound sequence; see <a href="#sound">sound signalling</a></td><td>Unbuilt.</td></tr>
+</tbody>
+</table>
+<p>
+    <code>shape</code> and <code>anchor</code> do most of the work and are worth
+    keeping as parameters rather than letting them split into emitter types: a
+    hoofprint is <code>particle + point + feet</code>, a landing shockwave is
+    <code>particle + ring + impact_point</code>, a forward light beam is
+    <code>particle + cone + forward_offset</code>, a warning flash is
+    <code>light + burst + entity</code>. <code>color_source</code> is the same
+    principle applied to colour: a dye-driven glow and a mood-driven glow are one
+    emitter with a different binding, and both read <a href="#state">State</a>.
+</p>
+
 <h3 id="mob_effect"><code>mob_effect</code> <span class="allele wild">not executed yet</span></h3>
 <p>Keeps a mob effect topped up on <code>self</code> or <code>rider</code> while <code>when</code> holds &mdash; the &ldquo;aura on self&rdquo; pattern.</p>
 <table>
@@ -148,6 +492,13 @@
 </table>
 <pre><code class="language-json">{ "type": "mob_effect", "effect": "minecraft:water_breathing",
   "when": { "flag": "submerged" } }</code></pre>
+<p>
+    This is the spec&rsquo;s <code>apply_effect</code> with the target list clamped to
+    two relationships instead of a selector. When selectors arrive, the honest move is
+    to widen <code>target</code> rather than add a second verb &mdash; and at that
+    point <code>max_targets</code> becomes mandatory, because
+    <a href="#invariants">every radius effect has a target cap</a>.
+</p>
 
 <h3 id="yield"><code>yield</code></h3>
 <p>Something the horse hands back on a right-click. Fires on <code>on_interact</code> only.</p>
@@ -166,45 +517,124 @@
   "consumes": "minecraft:bucket", "produces": "minecraft:water_bucket",
   "cooldown": 2400,
   "when": { "all": [ { "flag": "sex_female" }, { "flag": "tamed" } ] } }</code></pre>
-
-<h2 id="triggers">Triggers</h2>
-<p>
-    <code>emitter</code> and <code>yield</code> take a <code>trigger</code>. Write it as
-    an object with one key, or &mdash; for the two that take no argument &mdash; a bare
-    string.
-</p>
+<p>The spec&rsquo;s Yield is the same system with three fields the gene layer lacks:</p>
+<pre><code>Yield {
+  trigger, condition, cooldown,
+  consumes: item?,
+  output: items | fluid | effect | entity | block | structure | area_cloud,
+  roll_table: id?
+}</code></pre>
 <table>
-<thead><tr><th>Trigger</th><th>Fires</th></tr></thead>
+<thead><tr><th>Gap</th><th>Effect</th></tr></thead>
 <tbody>
-<tr><td><code>"continuous"</code></td><td>Every tick <code>when</code> allows. The default if an emitter omits <code>trigger</code> is <code>on_move</code>, not this.</td></tr>
-<tr><td><code>"on_move"</code></td><td>Every tick the horse is moving on the ground under its own power.</td></tr>
-<tr><td><code>{ "interval": 40 }</code></td><td>Every <em>N</em> ticks (<code>horse.tickCount % N == 0</code>).</td></tr>
-<tr><td><code>{ "on_interact": "minecraft:bucket" }</code></td><td>A player right-clicks the horse holding that item. <code>""</code> = any item. The only trigger a <code>yield</code> accepts; an <code>emitter</code> may not use it.</td></tr>
+<tr><td><code>output</code> kinds</td><td>Only a single item ID from a recognised set. No fluid, effect, entity, block, structure or area cloud output.</td></tr>
+<tr><td><code>roll_table</code></td><td>No weighted or conditional outputs. <code>[[loot/roll table id resolution? &mdash; would this reuse vanilla loot tables or a mod table registry?]]</code></td></tr>
+<tr><td>Non-interact triggers</td><td>The spec unifies interval production, container extraction and death drops. Today only right-click works, so &ldquo;produces an egg every 20 minutes&rdquo; is unexpressible.</td></tr>
 </tbody>
 </table>
 
-<h2 id="conditions">Conditions</h2>
+<h2 id="verbs-spec">The full verb vocabulary</h2>
 <p>
-    <code>when</code> is a predicate on the live horse. It is <strong>boolean</strong>
-    today &mdash; the architecture&rsquo;s 0&ndash;1 scalar model (for effects that
-    ramp) is unbuilt. Shapes:
-</p>
-<pre><code class="language-json">{ "flag": "sex_female" }
-{ "flag": "in_water", "negate": true }
-{ "all": [ { "flag": "tamed" }, { "flag": "day" } ] }
-{ "any": [ { "flag": "raining" }, { "flag": "submerged" } ] }
-{ "not": { "flag": "has_rider" } }</code></pre>
-<p>Flags (each mapped to game state by the translator):</p>
-<p>
-    <code>sex_female</code> &middot; <code>sex_male</code> &middot; <code>tamed</code> &middot;
-    <code>untamed</code> &middot; <code>adult</code> &middot; <code>baby</code> &middot;
-    <code>has_rider</code> &middot; <code>in_water</code> &middot; <code>submerged</code> &middot;
-    <code>on_ground</code> &middot; <code>on_fire</code> &middot; <code>day</code> &middot;
-    <code>night</code> &middot; <code>raining</code> &middot; <code>thundering</code> &middot;
-    <code>sky_visible</code>
+    Everything not marked live is unbuilt. Before proposing a new verb, check it is
+    not a parameter on one of these &mdash; and check the
+    <a href="#excluded">excluded list</a>, which records the ones already rejected.
 </p>
 
-<h2 id="model">Execution &amp; merge model</h2>
+<h3>Entity</h3>
+<table>
+<thead><tr><th>Verb</th><th>Status</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td><code>apply_effect</code></td><td>Partial &mdash; <code>mob_effect</code>, parses only</td><td>Mob effect to self, rider or selected</td></tr>
+<tr><td><code>remove_effect</code></td><td>Unbuilt</td><td></td></tr>
+<tr><td><code>transfer_effect</code></td><td>Unbuilt</td><td>Move effects between self and target</td></tr>
+<tr><td><code>damage</code></td><td>Unbuilt</td><td></td></tr>
+<tr><td><code>heal</code></td><td>Unbuilt</td><td></td></tr>
+<tr><td><code>modify_attribute</code></td><td>Partial &mdash; <code>attribute</code>, parses only</td><td>Temporary or condition-gated</td></tr>
+<tr><td><code>set_ai_flag</code></td><td>Unbuilt</td><td>Flee, no-target, follow</td></tr>
+<tr><td><code>teleport</code></td><td>Unbuilt</td><td>Self or target, with a destination resolver</td></tr>
+<tr><td><code>impulse</code></td><td>Unbuilt</td><td>Push, pull, launch</td></tr>
+<tr><td><code>spawn_entity</code></td><td>Unbuilt</td><td>Supports copying the source entity&rsquo;s data for clones</td></tr>
+<tr><td><code>spawn_area_cloud</code></td><td>Unbuilt</td><td>Lingering effect cloud</td></tr>
+<tr><td><code>set_entity_tag</code></td><td>Unbuilt</td><td>Add or remove a scoreboard tag; cross-mod integration surface</td></tr>
+</tbody>
+</table>
+
+<h3>Damage-context <span class="allele wild">unbuilt</span></h3>
+<p>Valid only under <code>on_hurt</code> triggers.</p>
+<table>
+<thead><tr><th>Verb</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td><code>cancel_damage</code></td><td></td></tr>
+<tr><td><code>reduce_damage</code></td><td>Flat or percentage</td></tr>
+<tr><td><code>reflect_damage</code></td><td>Fraction back to the source</td></tr>
+</tbody>
+</table>
+
+<h3>World <span class="allele wild">unbuilt</span></h3>
+<table>
+<thead><tr><th>Verb</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td><code>transform_block</code></td><td>Predicate &rarr; new state</td></tr>
+<tr><td><code>place_block</code></td><td></td></tr>
+<tr><td><code>break_block</code></td><td>Respects block tags and protection checks</td></tr>
+<tr><td><code>place_structure</code></td><td>Small configured feature</td></tr>
+<tr><td><code>set_weather</code></td><td>Config-gated</td></tr>
+<tr><td><code>strike_lightning</code></td><td></td></tr>
+<tr><td><code>set_time</code></td><td>Config-gated, default off</td></tr>
+<tr><td><code>set_moon_phase</code></td><td>Config-gated, default off</td></tr>
+</tbody>
+</table>
+<p>
+    The config gates are <code>[[config keys for world-mutating verbs? &mdash; no
+    config surface exists; needs a server-config spec before any of these ship]]</code>.
+</p>
+
+<h3>Output and feedback</h3>
+<table>
+<thead><tr><th>Verb</th><th>Status</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td><code>give_item</code></td><td>Partial &mdash; <code>yield</code>&rsquo;s <code>produces</code></td><td>To inventory, to player, or drop in world</td></tr>
+<tr><td><code>consume_item</code></td><td>Partial &mdash; <code>yield</code>&rsquo;s <code>consumes</code></td><td>From horse inventory or rider hand</td></tr>
+<tr><td><code>give_experience</code></td><td>Unbuilt</td><td></td></tr>
+<tr><td><code>play_sound</code></td><td>Unbuilt</td><td>The worked example in <a href="#adding">Adding a new effect</a> builds exactly this</td></tr>
+<tr><td><code>queue_sound_sequence</code></td><td>Unbuilt</td><td>Pattern-based; see <a href="#sound">Structured sound signalling</a></td></tr>
+<tr><td><code>spawn_particles</code></td><td>Live &mdash; <code>emitter</code></td><td></td></tr>
+<tr><td><code>emit_light</code></td><td>Parses only &mdash; <code>emitter</code> with <code>kind: light</code></td><td></td></tr>
+<tr><td><code>send_message</code></td><td>Unbuilt</td><td><code>channel: chat | action_bar | title | subtitle</code></td></tr>
+<tr><td><code>open_screen</code></td><td>Unbuilt</td><td></td></tr>
+</tbody>
+</table>
+
+<h3>State and control <span class="allele wild">unbuilt</span></h3>
+<table>
+<thead><tr><th>Verb</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td><code>set_state</code></td><td>Writes a state field; the general-purpose lever</td></tr>
+<tr><td><code>modify_pool</code></td><td>Add to or drain a resource pool</td></tr>
+<tr><td><code>grant_trait</code></td><td>With optional duration</td></tr>
+<tr><td><code>revoke_trait</code></td><td></td></tr>
+<tr><td><code>modify_cooldown</code></td><td>Set, reset or offset an ability cooldown</td></tr>
+<tr><td><code>store_waypoint</code></td><td></td></tr>
+<tr><td><code>remove_waypoint</code></td><td></td></tr>
+<tr><td><code>recall_waypoint</code></td><td></td></tr>
+<tr><td><code>navigate_to</code></td><td>Position resolver &rarr; pathfinding target</td></tr>
+<tr><td><code>deny_spawn</code></td><td></td></tr>
+</tbody>
+</table>
+<p>
+    <code>set_state</code> deliberately absorbs a large family of one-off verbs.
+    Setting a follow target, a guard anchor, a patrol route, a model scale, an emissive
+    overlay, a particle colour or a visual flag are all <em>writing a state field that
+    some other system reads</em>. Goals read navigation state; the renderer reads
+    visual state; emitters read colour state. Adding a fifth verb for each would put
+    the same operation in five places. <strong>Reach for <code>set_state</code> before
+    adding a verb</strong> &mdash; but note it cannot be built before
+    <a href="#state">State</a> exists as a real attachment.
+</p>
+
+<hr>
+
+<h1 id="model">How it runs today</h1>
 <ul>
     <li><strong>Effects are neither natural nor magical.</strong> The
         <a href="pipeline.html">coat pipeline</a>&rsquo;s natural / magical split is
@@ -233,7 +663,528 @@
         <code>attribute</code> with no other tell is borderline.</li>
 </ul>
 
-<h2 id="waterborn">Worked example: Waterborn</h2>
+<h2 id="merge">Merge policy</h2>
+<p>
+    A horse carries several genes at once, so resolution rules are defined up front
+    rather than discovered through bug reports. The spec&rsquo;s table, with what the
+    gene layer actually does:
+</p>
+<table>
+<thead><tr><th>Component</th><th>Spec rule</th><th>Today</th></tr></thead>
+<tbody>
+<tr><td>Attributes</td><td>Additive modifiers, vanilla operation semantics; cap the total per attribute</td><td>Stacking is specified but unexecuted; <strong>no cap</strong></td></tr>
+<tr><td>Auras</td><td>All stack; deduplicate identical <code>(selector, effect)</code> pairs</td><td>No auras</td></tr>
+<tr><td>Traversal flags</td><td>Boolean OR, except mutually exclusive pairs resolved by trait priority</td><td>Boolean OR. No priority, so <code>walk_on_water</code> + <code>water_averse</code> is undefined: <code>[[which wins? &mdash; needs a decision and a test]]</code></td></tr>
+<tr><td>Emitters</td><td>All run; light level takes the maximum, not the sum</td><td>All run. Light unwired, so the max rule is untested.</td></tr>
+<tr><td>Abilities</td><td>Cooldowns keyed per ability ID, never global</td><td>No abilities; yield cooldowns are per-horse per-<code>[[key?]]</code></td></tr>
+<tr><td>Goals</td><td>Priority = base priority + trait weight; document the numeric bands</td><td>No goals</td></tr>
+<tr><td>Pools</td><td>A pool declared by multiple traits takes the widest bounds and the sum of regen/decay rates</td><td>No pools</td></tr>
+<tr><td>Diet</td><td>A rejection anywhere overrides any acceptance</td><td>No diet table</td></tr>
+<tr><td>Yields</td><td>Independent cooldowns; no shared budget unless explicitly configured</td><td>Matches</td></tr>
+<tr><td>Damage effects</td><td><code>cancel_damage</code> wins over reductions; reductions apply multiplicatively; reflection uses post-reduction damage</td><td>No damage effects</td></tr>
+<tr><td>Granted traits</td><td>Merge normally, but never re-trigger <code>on_tame</code> or other lifecycle triggers</td><td>No granted traits</td></tr>
+</tbody>
+</table>
+<p>
+    <strong>Trait budget.</strong> Each trait carries a <code>cost</code>, and spawn
+    rules and breeding enforce a cap so no horse ends up running fourteen auras. The
+    cap is config, not code. Genes carry no <code>cost</code> today, and breeding does
+    not count effects: <code>[[budget config key + enforcement point in the breeding
+    path?]]</code>. Traits granted temporarily via <code>grant_trait</code> bypass the
+    budget but carry an expiry.
+</p>
+
+<hr>
+
+<h1 id="unbuilt-components">Components the gene layer does not have</h1>
+<p>
+    The rest of the spec&rsquo;s component list. Each is recorded with its schema so
+    that a gene-layer feature request can be matched against an existing shape before
+    a new one is invented.
+</p>
+
+<h2 id="aura">Aura <span class="allele wild">unbuilt</span></h2>
+<p>Continuous radius effect on entities or blocks.</p>
+<pre><code>Aura {
+  radius, interval, mode: entity|block,
+  selector, condition, effects[], max_targets
+}</code></pre>
+<p>
+    Block-mode auras run a <code>transform_block</code> table across the selected
+    volume. Contact effects are a radius of ~1 with a grounded condition.
+    <code>max_targets</code> is not optional &mdash; an unbounded aura in a mob farm is
+    a server-killer.
+</p>
+<p>
+    <code>mob_effect</code> with <code>target: self</code> is the degenerate case of an
+    aura with a radius of zero, which is why it exists first.
+</p>
+
+<h2 id="pools">Resource pools <span class="allele wild">unbuilt</span></h2>
+<p>A per-horse scalar with defined bounds and change rules, declared in data, not hardcoded.</p>
+<pre><code>Pool {
+  id, min, max, initial,
+  regen: { rate, interval, condition },
+  decay: { rate, interval, condition },
+  on_empty: effects[],
+  on_full: effects[],
+  persist: bool,
+  visible: bool
+}</code></pre>
+<p>
+    Stamina, hunger, thirst, body temperature, stored charge, distance travelled since
+    last reset, aggression, alertness, curiosity, loyalty, bond and mood intensity are
+    <em>all</em> pools. There are no special cases.
+</p>
+<p>Pools connect through three existing seams and need no new machinery:</p>
+<ul>
+    <li><strong>Conditions</strong> read them via <code>threshold(pool_id, op, value)</code> and <code>curve(pool_id, curve_id)</code></li>
+    <li><strong>Effects</strong> write them via <code>modify_pool</code></li>
+    <li><strong>Abilities</strong> consume them via <code>cost: { pool, amount }</code></li>
+</ul>
+<pre><code class="language-json">{
+  "id": "stamina",
+  "min": 0, "max": 100, "initial": 100,
+  "regen": { "rate": 1.0, "interval": 20, "condition": { "not": "is_sprinting" } },
+  "decay": { "rate": 2.0, "interval": 20, "condition": "is_sprinting" },
+  "on_empty": [ { "apply_effect": { "effect": "slowness", "duration": 100 } } ],
+  "persist": true, "visible": true
+}</code></pre>
+<p>
+    Pools that drive AI (aggression, alertness, curiosity) feed goal weights through
+    condition-scaled weight modifiers, so personality profiles and momentary emotional
+    state use one pathway. Pool math, regen and decay accumulation are pure
+    <code>common/</code>; persistence is a state attachment field.
+    <code>[[pool declaration file &mdash; part of the gene file, or a separate data
+    registry? The spec does not say, and it changes who declares stamina.]]</code>
+</p>
+
+<h2 id="memory">Memory <span class="allele wild">unbuilt</span></h2>
+<p>Per-horse persistent waypoint and reference store.</p>
+<pre><code>Memory {
+  home, owner_last_death, own_death_site,
+  visited[], notable_finds[], named[],
+  last_attacker_uuid, owner_last_target_uuid,
+  patrol_route[]
+}</code></pre>
+<p>
+    Written by <code>store_waypoint</code> and by relationship tracking; read by
+    Locator, by <code>teleport</code> and <code>navigate_to</code> destination
+    resolvers, and by Goals. Entity references are UUIDs with a timeout, never hard
+    references. <code>[[timeout duration &mdash; config or constant?]]</code>
+</p>
+
+<h2 id="locator">Locator <span class="allele wild">unbuilt</span></h2>
+<p>Resolves a target position and reports it.</p>
+<pre><code>Locator {
+  resolver: biome | structure | block | entity_selector | item | waypoint(name),
+  activation: interact(item) | passive | trigger,
+  output: particle_trail | chat | action_bar | sound | write_to_item | navigate
+}</code></pre>
+<p>
+    Death sites, bed locations, world spawn and home are all
+    <code>waypoint(name)</code> &mdash; Memory holds them, Locator reports them. The
+    difference between pointing toward something and travelling to it is the
+    <code>navigate</code> output, not a second system.
+</p>
+
+<h2 id="ability">Ability <span class="allele wild">unbuilt</span></h2>
+<p>Explicitly triggered, cooldown-gated action.</p>
+<pre><code>Ability {
+  trigger, condition, cooldown,
+  cost: { pool, amount }?,
+  requires_item: item_or_tag?,
+  consumes_item: bool,
+  effects[]
+}</code></pre>
+<p>
+    Cooldowns are keyed per ability ID and stored in horse state, not held on the
+    entity instance. An ability whose cost cannot be paid does not fire and emits the
+    <code>on_interact_fail</code> trigger &mdash; which is how &ldquo;the horse is too
+    tired&rdquo; gets feedback without special-casing it.
+</p>
+<p>
+    <code>yield</code> is a narrow ability: interact trigger, cooldown, item cost, one
+    output. Widening it into the general shape is plausibly cheaper than writing
+    Ability alongside it, but it is a real decision:
+    <code>[[keep yield as its own verb, or fold it into ability once abilities
+    exist?]]</code>
+</p>
+
+<h2 id="attributes">Attributes and traversal flags</h2>
+<p>A flat map, merged across all traits. Both are covered by live verbs; see <a href="#attribute"><code>attribute</code></a> and <a href="#traversal"><code>traversal</code></a>.</p>
+<p><strong>Attributes</strong> &mdash; movement speed, jump strength, max health, armor, knockback resistance, scale</p>
+<p><strong>Traversal flags</strong> &mdash; <code>walk_on_water</code> &middot; <code>walk_on_lava</code> &middot; <code>fire_immune</code> &middot; <code>fall_immune</code> &middot; <code>flight</code> &middot; <code>underwater_breathing</code> &middot; <code>swim_speed</code> &middot; <code>water_averse</code> &middot; <code>phasing</code></p>
+<p>
+    Both accept condition-gated modifiers, so a conditional buff is not a separate
+    concept from a permanent one &mdash; which the gene layer already gets right via
+    <code>when</code>.
+</p>
+
+<h2 id="goals">Goal set <span class="allele wild">unbuilt</span></h2>
+<p>A library of parameterised AI goals. Traits contribute goals with weights; they do not contribute goal <em>code</em>.</p>
+<table>
+<thead><tr><th>Goal</th><th>Parameters</th></tr></thead>
+<tbody>
+<tr><td><code>Follow</code></td><td>selector, min distance, max distance</td></tr>
+<tr><td><code>Watch</code></td><td>selector, range</td></tr>
+<tr><td><code>Stalk</code></td><td>selector, min distance, max distance, break_line_of_sight</td></tr>
+<tr><td><code>Patrol</code></td><td>route (waypoints from Memory), radius, speed</td></tr>
+<tr><td><code>StayAt</code></td><td>anchor (state field), leash length</td></tr>
+<tr><td><code>Flee</code></td><td>selector, range</td></tr>
+<tr><td><code>Attack</code></td><td>selector</td></tr>
+<tr><td><code>SeekItem</code></td><td>filter, radius, stop distance</td></tr>
+<tr><td><code>SeekEntity</code></td><td>selector, radius, stop distance</td></tr>
+<tr><td><code>SeekBlock</code></td><td>predicate, radius, stop distance</td></tr>
+<tr><td><code>Herd</code></td><td>selector, cohesion weight, separation weight</td></tr>
+<tr><td><code>Investigate</code></td><td>trigger source, radius, curiosity weight</td></tr>
+<tr><td><code>Idle</code></td><td>wander weight</td></tr>
+</tbody>
+</table>
+<p>
+    <strong>Personality</strong> is a named weight profile over this library plus
+    threshold adjustments &mdash; not separate behaviour code. A timid profile raises
+    <code>Flee</code>, drops <code>Attack</code> and shrinks investigate radius.
+    Composite behaviours come from combining goals: a stationary guard is
+    <code>StayAt(anchor_state) + Attack(hostile)</code>. Goal weights accept condition
+    scaling, which is how a pool like aggression modulates behaviour continuously
+    instead of through discrete mode switches.
+</p>
+<p>
+    Numeric priority bands are meant to be documented rather than discovered:
+    <code>[[goal priority bands &mdash; undecided]]</code>.
+</p>
+
+<h2 id="interaction">Interaction and diet table <span class="allele wild">unbuilt</span></h2>
+<p>
+    Right-click dispatch: <code>held item or item tag &rarr; component ID</code>. Keeps
+    interaction routing in one place instead of scattered across ability handlers.
+    Also fires <code>on_interact_fail</code> when nothing matches, with the attempted
+    item in context.
+</p>
+<p>Holds the diet table:</p>
+<pre><code>item_tag &rarr; {
+  accepted, pool_deltas{},
+  effects_on_horse[], effects_on_rider[],
+  refusal_message
+}</code></pre>
+<p>
+    Today <code>GeneYieldHandler</code> does the dispatch for yields directly off the
+    interact event. That is the thing the interaction table is meant to replace, and it
+    is worth doing before a second interact-driven verb exists rather than after.
+</p>
+
+<h2 id="inventory">Inventory <span class="allele wild">unbuilt</span></h2>
+<pre><code>Inventory { slots, pickup: none|all|filter, filter[], display_slot }</code></pre>
+<p>
+    <code>display_slot</code> renders a single item visibly on the horse. Item-seeking
+    comes from pairing a pickup filter with the <code>SeekItem</code> goal. Pickup
+    fires the <code>on_item_pickup</code> trigger.
+</p>
+
+<h2 id="state">State <span class="allele wild">unbuilt</span></h2>
+<p>Per-horse persistent data, stored as a NeoForge Data Attachment.</p>
+<pre><code>State {
+  trait_ids[], granted_traits[] (with expiry),
+  pools{}, personality_id,
+  cooldowns{}, memory,
+  visual{} (dye colors, scale, overlays),
+  navigation{} (follow target, guard anchor, patrol route),
+  discovered_traits[]
+}</code></pre>
+<p>
+    State is the read source for <code>bound()</code> emitter colours, pool-based
+    conditions, goal navigation targets and the render layer. Anything written by
+    <code>set_state</code> lands here.
+</p>
+<p>
+    The gene layer stores a fraction of this &mdash; the genotype, and yield cooldowns.
+    <code>[[existing attachment class + which fields it holds today]]</code>. Because
+    almost everything unbuilt reads or writes State, it is the natural first build step
+    after the current slice, not a late one.
+</p>
+
+<hr>
+
+<h1 id="trait-machinery">Trait relations, scaling and discovery</h1>
+<p>
+    All three are unbuilt, and all three depend on genes carrying IDs and the horse
+    carrying an assembled trait set &mdash; see <a href="#genes-and-traits">Genes and
+    traits</a>.
+</p>
+
+<h2 id="relations">Trait relations</h2>
+<pre><code>Trait {
+  id, cost,
+  requires: [trait_id],       // inert unless all present
+  conflicts: [trait_id],      // mutually exclusive; higher priority wins
+  grants: [trait_id],         // implies another trait
+  replaces: [trait_id],       // supersedes a weaker version
+  priority: int,
+  ...components
+}</code></pre>
+<p>
+    Resolution order: expand <code>grants</code> transitively &rarr; apply
+    <code>replaces</code> &rarr; drop traits with unmet <code>requires</code> &rarr;
+    resolve <code>conflicts</code> by priority &rarr; enforce the trait point budget.
+    Cycles are a load-time error, not a runtime one.
+</p>
+<p>
+    <code>replaces</code> is what makes tiered traits clean &mdash; a strong variant
+    supersedes the weak one rather than stacking with it. Note the overlap with
+    genetics: dominance and <code>minDose</code> already express some tiering, and it
+    is worth deciding deliberately which layer owns it rather than building both.
+    <code>[[does allele dominance subsume `replaces` for gene-carried traits?]]</code>
+</p>
+
+<h2 id="scaling">Trait scaling</h2>
+<p>Any numeric field in a component accepts a scaling block instead of a literal:</p>
+<pre><code class="language-json">{ "value": { "base": 1.0, "scale_by": "bond", "curve": "ease_out", "max": 3.0 } }</code></pre>
+<p>
+    <code>scale_by</code> names a condition source or a pool. This is the same scalar
+    machinery as conditions applied to magnitude rather than gating, so &ldquo;this
+    ability gets stronger as the horse bonds with you&rdquo; requires no code &mdash;
+    once <a href="#conditions-scalar">scalar conditions</a> and
+    <a href="#pools">pools</a> exist. In parser terms this means every
+    <code>Param.num</code> must accept an object as well as a number:
+    <code>[[does Param.num grow a scaling variant, or does a new Kind handle it?]]</code>
+</p>
+
+<h2 id="discovery">Trait discovery</h2>
+<p>Traits may be hidden until observed.</p>
+<pre><code>Trait {
+  discovery: {
+    hidden_until: condition,
+    hint: message_id?,
+    reveal_on: trigger[]
+  }
+}</code></pre>
+<p>
+    A hidden trait is fully active &mdash; it just doesn&rsquo;t appear in the stat
+    display or tooltip until revealed. Reveal conditions are ordinary triggers and
+    conditions: witnessing the effect fire, reaching a bond threshold, using a specific
+    item on the horse, or breeding a horse that expresses it.
+</p>
+<p>
+    This is worth building early even though it is cheap, because it changes what the
+    mod feels like. A horse whose full capability is legible from a book on first tame
+    is a spreadsheet; one whose traits emerge through use is a character. It needs a
+    <code>discovered_traits[]</code> field on State and a read in
+    <code>[[stat display / tooltip surface?]]</code>.
+</p>
+<div class="note warn">
+    <span class="label">Visual legibility convention</span>
+    <p>
+        Every trait should declare at least one emitter, message or otherwise
+        perceivable effect. A trait with no observable signature is undebuggable for
+        you and invisible to players. Treat it as a design error, and consider
+        enforcing it with a load-time warning:
+        <code>[[warn on an effects array with no perceivable member &mdash; not
+        implemented]]</code>.
+    </p>
+</div>
+
+<hr>
+
+<h1 id="variants">Variants and spawn rules <span class="allele wild">unbuilt</span></h1>
+<p>A variant is a spawn preset: a spawn condition plus a trait list. Variants contain no mechanics of their own.</p>
+<pre><code class="language-json">{
+  "id": "nether",
+  "spawn": {
+    "dimension": "minecraft:the_nether",
+    "biomes": ["#minecraft:is_nether"],
+    "light_level": { "max": 7 },
+    "time": "any",
+    "weather": "any",
+    "near_blocks": [{ "block": "#minecraft:base_stone_nether", "radius": 4 }],
+    "near_entities": [{ "selector": { "entity_tag": "hostile" }, "max": 2, "radius": 16 }],
+    "group_size": { "min": 1, "max": 3 },
+    "weight": 4
+  },
+  "traits": ["lava_walker", "fire_immune", "ember_hooves", "blaze_yield"]
+}</code></pre>
+<p>
+    Spawn conditions reuse the Condition vocabulary wherever they overlap, so anything
+    you can gate a trait on you can gate a spawn on. In the gene layer the equivalent
+    question is which genes a wild horse spawns with:
+    <code>[[current wild genotype roll &mdash; where does it happen, and would a
+    variant preset replace or bias it?]]</code>
+</p>
+
+<hr>
+
+<h1 id="split">Domain and integration split</h1>
+<p>Consistent with the pure-domain <code>common/</code> module and thin NeoForge translator layer.</p>
+<table>
+<thead><tr><th>Pure Java, zero Minecraft imports</th><th>NeoForge translator layer</th></tr></thead>
+<tbody>
+<tr><td>Condition evaluation against a <code>ContextSnapshot</code> interface</td><td>Populating <code>ContextSnapshot</code> from the level</td></tr>
+<tr><td>Selector definitions and predicate logic (not the world query)</td><td>Executing selectors as entity and block queries</td></tr>
+<tr><td>Trigger edge detection and previous-value bookkeeping</td><td>The effect verb executor</td></tr>
+<tr><td>Trait registry, JSON parsing, relation resolution, merge policy</td><td>Goal adapters onto vanilla <code>Goal</code></td></tr>
+<tr><td>Resource pool math, regen and decay accumulation</td><td>Trigger dispatch from game events</td></tr>
+<tr><td>Cooldown bookkeeping</td><td>Data attachments, networking, rendering, particles</td></tr>
+<tr><td>Personality weight profiles</td><td></td></tr>
+<tr><td>Yield roll tables, diet table lookup</td><td></td></tr>
+<tr><td>Trait budget and discovery-state arithmetic</td><td></td></tr>
+</tbody>
+</table>
+<p>
+    All the interesting logic is unit-testable without a running game, and a Minecraft
+    version bump touches the executor, the trigger dispatcher and the goal adapters
+    rather than any gene definition.
+</p>
+<div class="note warn">
+    <span class="label">One gap against the spec</span>
+    <p>
+        The spec evaluates conditions in <code>common/</code> against a
+        <code>ContextSnapshot</code> interface. Today conditions are evaluated in the
+        translator by <code>GeneAbilityHandler.flagHolds(name, horse, record)</code>,
+        reading the live horse. The parse-and-validate half is pure; the evaluation
+        half is not. Introducing <code>ContextSnapshot</code> is the move that makes
+        condition logic unit-testable and is a prerequisite for scalar conditions and
+        <code>on_change</code>. <code>[[ContextSnapshot interface &mdash; does not
+        exist]]</code>
+    </p>
+</div>
+
+<hr>
+
+<h1 id="sound">Structured sound signalling <span class="allele wild">unbuilt</span></h1>
+<p>Sound emitters accept a pattern, and <code>queue_sound_sequence</code> schedules one:</p>
+<pre><code>Pattern { steps: [ { pitch, volume, sound, delay_ticks } ] }</code></pre>
+<p>
+    A <code>SignalBinding</code> maps a trigger to a pattern. The encoder is small:
+    walk the steps, schedule sound events, cancel on interruption.
+</p>
+<p>
+    The hard part is not the code. It is designing a pattern vocabulary players can
+    actually learn and distinguish under normal play conditions &mdash; ambient noise,
+    other mobs, no visual reinforcement, no reference chart. Budget the design effort
+    accordingly. Keep the initial vocabulary to three or four signals with obviously
+    different <em>rhythms</em> rather than different pitches, since rhythm survives a
+    noisy soundscape and pitch does not. Treat expansion as a separate decision once
+    there is evidence players learned the first set.
+</p>
+
+<hr>
+
+<h1 id="divergences">Divergences from the spec</h1>
+<p>
+    Places where the shipped gene layer and the architecture spec disagree. Each is
+    either a deliberate narrowing, a rename that should be reconciled, or a genuine
+    gap worth a decision. None of them should be quietly harmonised on one side
+    without a note here.
+</p>
+<table>
+<thead><tr><th>Divergence</th><th>Kind</th><th>Note</th></tr></thead>
+<tbody>
+<tr><td><code>minDose</code> exists on every effect</td><td>Addition</td><td>Genetics-specific. The spec&rsquo;s trait model has no dose concept, and nothing in it needs one.</td></tr>
+<tr><td><code>sex_female</code> / <code>sex_male</code> / <code>adult</code> / <code>baby</code> flags</td><td>Addition</td><td>Genetics and vanilla age; <code>is_baby</code> exists in the spec only as an <code>entity_state</code> predicate on a selected entity, not as a self condition.</td></tr>
+<tr><td>Conditions are boolean, not 0&ndash;1 scalars</td><td>Narrowing</td><td>Known. Blocks ramping effects and <code>curve</code>. See <a href="#conditions-scalar">the scalar model</a>.</td></tr>
+<tr><td>Conditions evaluate in the translator, not against <code>ContextSnapshot</code></td><td>Gap</td><td>Breaks the domain/translator split for condition logic. See <a href="#split">Domain and integration split</a>.</td></tr>
+<tr><td><code>anchor: body</code> vs the spec&rsquo;s <code>entity</code></td><td>Rename</td><td>Same thing, two names. Pick one before external gene packs exist.</td></tr>
+<tr><td>Emitter shapes lack <code>cone</code> and <code>sphere</code></td><td>Narrowing</td><td>No blocker; both are pure geometry.</td></tr>
+<tr><td><code>swim_speed</code> is an attribute here, a traversal flag in the spec</td><td>Rename</td><td>The gene layer is arguably right &mdash; it is a magnitude, and traversal flags are booleans. Fix the spec, not the code.</td></tr>
+<tr><td><code>flight</code> and <code>phasing</code> traversal flags absent</td><td>Gap</td><td>Both are large behavioural changes; absence is probably correct for now.</td></tr>
+<tr><td><code>on_interact</code> takes an item ID, not an item tag</td><td>Narrowing</td><td>The spec says <code>item_or_tag</code> everywhere an item appears. Tag support is a translator-side lookup.</td></tr>
+<tr><td><code>yield.produces</code> accepts a recognised item set only</td><td>Narrowing</td><td>The spec allows fluid, effect, entity, block, structure and area-cloud outputs, plus roll tables.</td></tr>
+<tr><td>No trait IDs, cost, relations or budget</td><td>Gap</td><td>The structural prerequisite for most of the unbuilt half of this page.</td></tr>
+<tr><td>No per-attribute cap</td><td>Gap</td><td>The spec requires one. Worth adding when <code>attribute</code> is wired, not after.</td></tr>
+<tr><td><code>walk_on_water</code> + <code>water_averse</code> unresolved</td><td>Gap</td><td>The spec resolves mutually exclusive flags by trait priority; there is no priority here.</td></tr>
+<tr><td><code>AbilityType.CONDITION_FLAGS</code> is a closed constant</td><td>Gap</td><td>Blocks the spec&rsquo;s load-time registration of integration condition sources.</td></tr>
+</tbody>
+</table>
+
+<hr>
+
+<h1 id="excluded">Deliberately excluded</h1>
+<p>
+    Recorded so these do not get re-proposed. Each is either already expressible or is
+    a composition that would erode the abstraction.
+</p>
+<table>
+<thead><tr><th>Proposed</th><th>Where it lives instead</th></tr></thead>
+<tbody>
+<tr><td><code>on_biome_change</code>, <code>on_dimension_change</code>, <code>on_weather_change</code></td><td><code>on_change(condition_source)</code></td></tr>
+<tr><td><code>is_crouching</code></td><td>Duplicate of <code>rider_sneaking</code></td></tr>
+<tr><td><code>is_in_loaded_chunk</code></td><td>Not a condition. If the chunk isn&rsquo;t ticking, nothing evaluates.</td></tr>
+<tr><td><code>has_ridden_distance</code></td><td>A pool plus <code>threshold</code></td></tr>
+<tr><td><code>nearest_chest</code>, <code>nearest_bed</code></td><td>Block selector with <code>sort: nearest</code></td></tr>
+<tr><td><code>items_in_radius</code></td><td>Entity selector with <code>entity_tag: items</code></td></tr>
+<tr><td><code>blocks_of_type_in_radius</code></td><td>Block selector with a block predicate</td></tr>
+<tr><td><code>nearest_player_death</code>, <code>spawn_location</code>, <code>bed_location</code></td><td>Memory waypoints via <code>waypoint(name)</code></td></tr>
+<tr><td><code>clone_entity</code></td><td><code>spawn_entity</code> with source-data copying</td></tr>
+<tr><td><code>set_light_level</code></td><td><code>emit_light</code></td></tr>
+<tr><td><code>send_action_bar</code>, <code>send_title</code></td><td><code>send_message</code> with a <code>channel</code></td></tr>
+<tr><td><code>set_follow_target</code>, <code>set_guard_position</code>, <code>set_patrol_points</code></td><td><code>set_state</code> on navigation fields</td></tr>
+<tr><td><code>set_model_scale</code>, <code>set_emissive_texture</code>, <code>set_particle_color</code>, <code>set_visual_state</code></td><td><code>set_state</code> on visual fields, read by the renderer</td></tr>
+<tr><td><code>set_aura</code>, <code>toggle_ability</code></td><td><code>grant_trait</code> / <code>revoke_trait</code> with duration</td></tr>
+<tr><td><code>light_pulse</code>, <code>shockwave</code>, <code>directional_beam</code>, <code>footstep_effect</code>, <code>impact_effect</code></td><td>Emitter <code>shape</code> + <code>anchor</code> combinations</td></tr>
+<tr><td><code>colored_aura</code></td><td>Emitter with <code>color_source: bound(state)</code></td></tr>
+<tr><td><code>drop_sequence</code></td><td>A yield on an interval trigger</td></tr>
+<tr><td><code>summon_lightning</code>, <code>produce_fluid</code>, <code>produce_potion</code></td><td>Existing effect verbs and yield outputs</td></tr>
+<tr><td><code>Guard</code> goal</td><td><code>StayAt</code> + <code>Attack</code> composed</td></tr>
+<tr><td>Separate <code>DamageHook</code> component</td><td>Triggers plus damage-context effect verbs</td></tr>
+<tr><td><code>is_tamed</code> as a distinct gate</td><td>An ordinary condition source, not a special case</td></tr>
+</tbody>
+</table>
+
+<hr>
+
+<h1 id="invariants">Invariants</h1>
+<ol>
+    <li><strong>New behaviour is data.</strong> If a feature request requires Java, it is a new primitive &mdash; treat that as an architectural decision, not a task.</li>
+    <li><strong>The effect vocabulary is closed.</strong> Growth happens through composition. Reach for <code>set_state</code> before adding a verb.</li>
+    <li><strong>Conditions gate everything.</strong> No component implements its own situational logic.</li>
+    <li><strong>One selector implementation.</strong> No component hand-rolls entity lookup.</li>
+    <li><strong>One trigger vocabulary.</strong> No component invents its own firing mechanism.</li>
+    <li><strong>Domain logic never imports Minecraft.</strong> The translator layer is a translator, nothing more.</li>
+    <li><strong>Every radius effect has a target cap.</strong> No exceptions.</li>
+    <li><strong>Every trait has a perceivable signature.</strong> A trait players can&rsquo;t observe is a bug.</li>
+    <li><strong>Entity references are UUIDs with a timeout.</strong> Never a hard reference held across ticks.</li>
+</ol>
+
+<hr>
+
+<h1 id="build-order">Build order</h1>
+<p>
+    The spec&rsquo;s order, annotated with where the gene layer sits. The shipped slice
+    took a shortcut &mdash; it built parts of steps 2, 3 and 9 without steps 1 and 4
+    &mdash; which is why several later items are blocked on structural work rather than
+    on their own complexity.
+</p>
+<table>
+<thead><tr><th>#</th><th>Step</th><th>State</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>Trait registry, JSON loading, State attachment</td><td>Partial &mdash; gene JSON loads and validates; no trait IDs, minimal State</td></tr>
+<tr><td>2</td><td>Effect executor &mdash; start with <code>apply_effect</code>, <code>damage</code>, <code>heal</code>, <code>play_sound</code>, <code>spawn_particles</code>, <code>give_item</code>, <code>set_state</code>, <code>modify_pool</code></td><td>Partial &mdash; a different eight: particles, traversal, yield items; no damage, heal, sound, state or pools</td></tr>
+<tr><td>3</td><td>Condition engine</td><td>Partial &mdash; boolean flags, translator-side</td></tr>
+<tr><td>4</td><td>Trigger dispatch, including <code>on_change</code></td><td>Partial &mdash; four triggers, no edge detection</td></tr>
+<tr><td>5</td><td>Selector and Aura</td><td>Not started</td></tr>
+<tr><td>6</td><td>Emitter, with shape and anchor from the start</td><td>Mostly &mdash; shape and anchor are in, narrower sets</td></tr>
+<tr><td>7</td><td>Resource pools</td><td>Not started</td></tr>
+<tr><td>8</td><td>Attributes and traversal flags</td><td>Traversal live; attributes parse only</td></tr>
+<tr><td>9</td><td>Yield</td><td>Live, narrowed</td></tr>
+<tr><td>10</td><td>Interaction and diet tables</td><td>Not started</td></tr>
+<tr><td>11</td><td>Trait relations and budget (before the trait count passes ~20)</td><td>Blocked on step 1</td></tr>
+<tr><td>12</td><td>Goal library and personality profiles</td><td>Not started</td></tr>
+<tr><td>13</td><td>Memory and Locator</td><td>Not started</td></tr>
+<tr><td>14</td><td>Ability and cooldowns</td><td>Not started &mdash; yield holds the cooldown pattern</td></tr>
+<tr><td>15</td><td>Inventory</td><td>Not started</td></tr>
+<tr><td>16</td><td>Trait discovery</td><td>Not started</td></tr>
+<tr><td>17</td><td>Variants and spawn rules &mdash; pure data by this point</td><td>Not started</td></tr>
+</tbody>
+</table>
+<p>
+    Retrofitting anchors onto emitters later would mean rewriting every emitter
+    definition, which is why step 6 was done properly. The same argument applies to
+    step 1 now: every trait-set feature is waiting on it.
+</p>
+
+<hr>
+
+<h1 id="waterborn">Worked example: Waterborn</h1>
 <p>
     <code>example.waterborn</code> ships loaded. Its coat half is a magical
     <code>STRIPES</code>&nbsp;&times;&nbsp;<code>TOWARD</code> layer (neon-blue mane and
@@ -242,6 +1193,12 @@
     trail on the move), and a <code>yield</code> (a tamed mare hands back a water
     bucket for an empty one). The full file and a line-by-line walkthrough are on
     <a href="horse-traits.html#waterborn">the architecture page</a>.
+</p>
+<p>
+    Read against the spec, Waterborn is a trait with three components, no relations, no
+    cost, no discovery block and a boolean condition on each component. That is a fair
+    picture of the whole gene layer today: the component shapes are right and the
+    machinery around them is missing.
 </p>
 
 <hr>
@@ -303,6 +1260,11 @@ record Sound(Trigger trigger, String sound, double volume, double pitch,
 </tbody>
 </table>
 <p>
+    No kind exists yet for a <a href="#selectors">selector</a> or a
+    <a href="#scaling">scaling block</a>; both would be new kinds when those land
+    (<code>[[Param.selector / Param.scalable &mdash; not written]]</code>).
+</p>
+<p>
     The builder gets a <code>Values</code> bag with <code>v.when</code> /
     <code>v.minDose</code> already filled and <code>v.bad("...")</code> for a scoped
     error. Range checks (like <code>emitter</code>&rsquo;s <code>chance</code> in
@@ -333,7 +1295,14 @@ record Sound(Trigger trigger, String sound, double volume, double pitch,
 </p>
 
 <h3>4. A section on this page</h3>
-<p>Add a <code>&lt;h3&gt;</code> under <a href="#effects">The five effects</a> with the parameter table and a JSON example, and bump the count in the heading.</p>
+<p>
+    Add an <code>&lt;h3&gt;</code> under <a href="#verbs-live">The five that exist</a>
+    with the parameter table and a JSON example, bump the count in that heading, and
+    update the verb&rsquo;s row in <a href="#verbs-spec">The full verb vocabulary</a>
+    from <em>Unbuilt</em> to its new status. If the verb is <em>not</em> in the
+    spec&rsquo;s vocabulary, add a row to
+    <a href="#divergences">Divergences from the spec</a> saying so and why.
+</p>
 
 <h2>Rules an effect must follow</h2>
 <ul>
@@ -341,6 +1310,10 @@ record Sound(Trigger trigger, String sound, double volume, double pitch,
         verb before adding a verb. A new verb needs a one-line justification that it
         is a genuinely new <em>kind</em> of thing, not a special case of
         <code>emitter</code> / <code>attribute</code> / <code>yield</code>.</li>
+    <li><strong>Check it against the spec first.</strong> If the spec already names
+        the verb, use its name and its shape. If the spec put it on the
+        <a href="#excluded">excluded list</a>, the answer is the composition named
+        there, not a new verb.</li>
     <li><strong><code>common/</code> stays pure.</strong> The record and the
         <code>AbilityType</code> declaration must not import Minecraft. All game
         knowledge lives in the translator.</li>
@@ -351,6 +1324,8 @@ record Sound(Trigger trigger, String sound, double volume, double pitch,
     <li><strong>Perceivable.</strong> The effect must have an observable signature.
         If it doesn&rsquo;t inherently (a pure stat tweak), pair it with an
         <code>emitter</code> in the same gene or reconsider.</li>
+    <li><strong>Capped if it has a radius.</strong> Any effect that touches more than
+        one entity takes a <code>max_targets</code>, no exceptions.</li>
     <li><strong>Names are <code>snake_case</code></strong>, matching the JSON style of
         the rest of the format.</li>
     <li><strong>Errors name the offender.</strong> Choice params get this
@@ -370,6 +1345,11 @@ record Sound(Trigger trigger, String sound, double volume, double pitch,
     already compose it. No parser change &mdash; <code>readCondition</code> validates
     against the list.
 </p>
+<p>
+    Where the spec names the same source, use the spec&rsquo;s name. Where it does not,
+    check it is not really an <code>entity_state</code> predicate in disguise &mdash;
+    those belong on a selector, not on the self-flag list.
+</p>
 
 <h2 id="adding-trigger">Adding a trigger</h2>
 <p>Triggers are a small sealed hierarchy, so this one does touch the parser:</p>
@@ -385,8 +1365,11 @@ record Sound(Trigger trigger, String sound, double volume, double pitch,
 </ol>
 <p>
     A trigger is shared across every effect that takes one, so keep the set tiny and
-    prefer <code>on_change(condition)</code>-style generality (roadmap) over a verb
-    per game event.
+    prefer <code>on_change(condition)</code>-style generality over a verb per game
+    event. Before adding one, check
+    <a href="#triggers-spec">the full vocabulary</a> &mdash; if the spec names it, use
+    that name and signature, and if it is a state edge, it is
+    <a href="#on-change"><code>on_change</code></a> rather than a new trigger.
 </p>
 
 <div class="page-foot">
@@ -402,7 +1385,9 @@ record Sound(Trigger trigger, String sound, double volume, double pitch,
     <code>common/genetics/spec/GeneSpecParser.java</code> (<code>readAbility</code>),
     <code>common/genetics/spec/SpecAbilities.java</code>,
     <code>neoforge-26.1.2/&hellip;/server/GeneAbilityHandler.java</code>,
-    <code>&hellip;/server/GeneYieldHandler.java</code>
+    <code>&hellip;/server/GeneYieldHandler.java</code>.
+    Unbuilt sections follow <em>Horse Trait System &mdash; Architecture
+    Specification, revision 2</em>; they have no source files yet.
 </div>
 
 </article>
