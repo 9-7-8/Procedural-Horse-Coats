@@ -53,6 +53,7 @@
             items: [
                 { href: "gene-pink-hair.html", text: "Pink hair", kind: "magical" },
                 { href: "gene-magic-zebra.html", text: "Magic zebra", kind: "magical" },
+                { href: "gene-waterborn.html", text: "Waterborn", kind: "magical" },
                 { href: "gene-test.html", text: "Test (diagnostic)", kind: "magical" }
             ]
         },

@@ -366,41 +366,44 @@
         shown.</li>
 </ul>
 
-<h3 id="effects">13. Gene <code>effects</code> &mdash; the Waterborn example</h3>
+<h3 id="effects">13. Gene <code>effects</code> &mdash; the Waterborn gene</h3>
 
 <p>
-    New 2026-09-02. A data-driven gene can now carry Minecraft behaviour, not just a
-    coat. Nothing has been seen in-game. <strong>Waterborn now ships loaded</strong>
-    (classpath index in the NeoForge module), so <code>runClient</code> and confirm
-    the boot log shows <code>[genes] loaded 1 data-driven gene(s)</code> /
-    <code>12 segments</code> with no config drop needed. Then, on a
-    <strong>Waterborn</strong> horse &mdash; fastest is the
-    <strong>custom horse spawn egg</strong> (item&nbsp;14: add <em>Waterborn</em>, which
-    now defaults to homozygous, and spawn), or breed carriers, or find a wild one
-    (1 in 90 per allele, so it is rare):
+    New 2026-09-02, and the proof that the data-driven <a href="gene-effects.html">
+    effects</a> pipeline works in a running game. <strong>Waterborn ships loaded</strong>
+    (classpath index in the NeoForge module) &mdash; boot log shows
+    <code>[genes] loaded 1 data-driven gene(s)</code> / <code>12 segments</code> with
+    no config drop. Gene page: <a href="gene-waterborn.html">Waterborn</a>. Fastest
+    test horse is the <strong>custom horse spawn egg</strong> (item&nbsp;14: add
+    <em>Waterborn</em>, spawn).
 </p>
 
+<p><strong>Confirmed in-game 2026-09-02:</strong></p>
 <ul>
-    <li><strong>Neon-blue stripes down the mane and tail.</strong> A coat layer, so it
-        should read on every base coat including cremello and dominant white, and keep
-        the strand shading like pink hair does.</li>
+    <li>The <strong>neon-blue streaks in the mane and tail</strong> render.</li>
+    <li>The <strong>blue particle trail</strong> works.</li>
+</ul>
+
+<p><strong>Still to check:</strong></p>
+<ul>
+    <li><strong>Streaks on hard cases.</strong> Confirm they still read on a
+        <strong>cremello</strong> and on a <strong>dominant-white</strong> horse (the
+        <code>TOWARD</code> + <code>opacity: 100</code> claim), and that a foal gets
+        them on the <strong>tail only</strong> (no <code>MANE</code> part on the foal
+        mesh).</li>
     <li><strong>Walks on water.</strong> A grown Waterborn horse in water should ride
         at the surface and not sink; a foal should <em>not</em> (the
         <code>when: adult</code> gate). This is an approximation &mdash; buoyancy, not
         a solid plane &mdash; so watch for bobbing, getting stuck at the edge, or the
         rider's head going under.</li>
-    <li><strong>Blue dust trail.</strong> Particles at the hooves only while it is
-        moving on the ground, roughly 7 in 10 ticks. Not while standing or swimming.</li>
     <li><strong>Mares milk for water.</strong> Right-click a <strong>tamed mare</strong>
         with an empty bucket &rarr; it becomes a water bucket, no mount happens, and a
         second try within ~2 minutes does nothing. A <strong>stallion</strong>, or an
         untamed mare, should just mount as normal.</li>
     <li><strong>The log line</strong> <code>effect 'attribute' ... defined but not
-        translated</code> should <em>not</em> appear for Waterborn (it has none) &mdash;
-        it is the tell for a gene that uses the unbuilt verbs.</li>
-    <li><strong>No effect on a non-Waterborn horse</strong>, and no measurable tick
-        cost when the file is absent (the handler short-circuits on
-        <code>SpecAbilities.anyLoaded()</code>).</li>
+        translated</code> should <em>not</em> appear for Waterborn (it has none).</li>
+    <li><strong>Streak pattern varies per horse</strong> and a foal inherits its
+        parent's (the <code>stripeSeed</code> / <code>stripeSpacing</code> knobs).</li>
 </ul>
 
 <h3 id="custom-spawn-egg">14. Custom horse spawn egg &mdash; the two follow-up fixes</h3>

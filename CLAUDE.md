@@ -127,8 +127,16 @@ project. Its shape:
   `hay_portal` block + block entity, the `custom_horse_spawn_egg` item, and
   the `ClientConfig` all register with no errors. Re-verified 2026-09-02 with
   the shipped Waterborn gene loaded (`[genes] ... 12 segments`).
-- **`runClient`** - actively play-tested over the 2026-08-30 and 2026-09-01
-  sessions; see below.
+- **`runClient`** - actively play-tested over the 2026-08-30, 2026-09-01 and
+  2026-09-02 sessions; see below.
+
+- **Owner-verified in-game (2026-09-02):**
+  - **Custom horse spawn egg** end to end - the egg, the age/sex/genome editor,
+    and the spawn (see the status bullet below for the two follow-up fixes).
+  - **Waterborn's coat**: the neon-blue streaks in the mane and tail render.
+  - **Waterborn's particle trail**: the blue dust at the hooves on the move
+    works. `walk_on_water` and the tamed-mare milking are **not** yet
+    confirmed - `wiki/verification.html` §13.
 
 - **Owner-verified in-game (2026-09-01):**
   - **The coat pipeline end to end.** Wild spawns show a **wide variety** of
@@ -196,21 +204,23 @@ project. Its shape:
   built-in genes changed: no gene file ships by default, so the registry, the
   genotype code, the gallery numbers and `coat-golden.txt` are all untouched.
   See "Data-driven genes" below; in-game checklist in `wiki/verification.html`.
-- **Built 2026-09-02, NOT yet play-tested:** **gene `effects`** - a data-driven
-  gene can now carry Minecraft-specific behaviour alongside its coat `layers`.
+- **Built 2026-09-02, partly play-tested:** **gene `effects`** - a data-driven
+  gene can carry Minecraft-specific behaviour alongside its coat `layers`.
   Five verbs (`traversal`, `attribute`, `emitter`, `mob_effect`, `yield`), each
   with an optional boolean `when` and a `minDose`. `common/` parses and
-  validates all five (`GeneAbility` records / `AbilityType` per-verb
-  declarations / a generic `GeneSpecParser.readAbility` / `SpecAbilities`,
+  validates all five (`GeneAbility` records / one `AbilityType` per-verb
+  declaration / a generic `GeneSpecParser.readAbility` / `SpecAbilities`,
   unit-tested); the NeoForge translator
   (`server/GeneAbilityHandler`, `server/GeneYieldHandler`) executes
   `traversal` + `emitter` + `yield`. **`attribute` and `mob_effect` are parsed
   but not executed yet** (logged once). `walk_on_water` is an approximation
-  (surface buoyancy, not a solid plane). Example gene
-  `common/.../example-genes/waterborn.json` (**Waterborn**: neon-blue mane/tail
-  stripes, walk on water, blue trail particles, mares milkable for water) - it
-  is an example, **not registered**, so no derived numbers move. Full reference:
-  `wiki/horse-traits.html`; checklist in `wiki/verification.html`.
+  (surface buoyancy, not a solid plane). The shipped **Waterborn** gene is the
+  exerciser: neon-blue mane/tail streaks + the blue particle trail are
+  **owner-confirmed in-game (2026-09-02)**; `walk_on_water` and the tamed-mare
+  milking are not yet. Reference: `wiki/gene-effects.html` (verbs + the
+  "add an effect" contract), `wiki/gene-waterborn.html` (the gene),
+  `wiki/horse-traits.html` (the wider architecture); checklist
+  `wiki/verification.html` §13.
 - **Play-tested 2026-09-02, works:** the **custom horse spawn egg**
   (`item/ModItems` -> `CUSTOM_HORSE_SPAWN_EGG`). A plain `Item` reusing the
   vanilla `minecraft:item/horse_spawn_egg` texture (identical icon), in the

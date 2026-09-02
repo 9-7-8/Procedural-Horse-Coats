@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Waterborn &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="nav.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow magical">Magical gene <span class="sep">/</span> phase 3 + effects</p>
+<h1>Waterborn</h1>
+<p class="lede">
+    Neon-blue streaks through the mane and tail, and a horse that walks on the
+    surface of water instead of wading. It leaves a trail of blue sparks where it
+    treads, and a tamed mare can be milked with an empty bucket for a bucket of
+    water. Waterborn is the mod&rsquo;s <strong>first data-driven gene to ship</strong>
+    and the <strong>first to carry an <a href="gene-effects.html">effects</a>
+    block</strong> &mdash; it is a JSON file, not a Java class.
+</p>
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd>example.waterborn</dd></div>
+    <div><dt>Alleles</dt><dd><span class="allele dom">Wtb</span> <span class="allele wild">n</span></dd></div>
+    <div><dt>Dominance</dt><dd>DOMINANT</dd></div>
+    <div><dt>Wild type</dt><dd>n</dd></div>
+    <div><dt>Wild frequency</dt><dd>1 in 90 per allele &rarr; ~1 wild horse in 45 shows it</dd></div>
+    <div><dt>Founder draws</dt><dd>2 &times; nextInt(90)</dd></div>
+    <div><dt>Deterministic</dt><dd><strong>no</strong> when expressed &mdash; the stripe field varies per horse</dd></div>
+    <div><dt>Visible when</dt><dd>Wtb_</dd></div>
+    <div><dt>Epigenetic draws</dt><dd>1 long (stripe seed) + 1 nextFloat (stripe spacing), off the <code>Wtb</code> copy</dd></div>
+    <div><dt>Priority</dt><dd>215 &mdash; a data-driven magical gene, slots before Test in <code>magicalOrder()</code></dd></div>
+    <div><dt>Stripe colour</dt><dd><code>#1ec8ff</code> (30, 200, 255), 92% of the way there</dd></div>
+    <div><dt>Effects</dt><dd><code>traversal</code> walk_on_water, <code>emitter</code> dust trail, <code>yield</code> mare&rarr;water bucket</dd></div>
+</dl>
+
+<div class="note warn">
+    <span class="label">Partly verified in-game (2026-09-02)</span>
+    <p>
+        <strong>Confirmed:</strong> the neon streaks in the mane and tail render, and
+        the blue particle trail works. <strong>Still unverified:</strong>
+        <code>walk_on_water</code> (an approximation &mdash; surface buoyancy, not a
+        solid plane) and the tamed-mare milking. Checklist item is
+        <a href="verification.html#effects">To be verified &sect;13</a>.
+    </p>
+</div>
+
+<h2 id="coat">The coat: neon streaks in the mane and tail</h2>
+
+<p>
+    The visual half is one ordinary magical coat layer: a <code>STRIPES</code> mask
+    restricted to the <code>HAIR</code> parts (mane + tail) crossed with a
+    <code>TOWARD</code> op that walks each covered texel <strong>92%</strong> of the
+    way to <code>#1ec8ff</code>.
+</p>
+
+<div class="codebox">
+<div class="filename">the coat layer, from waterborn.json</div>
+<pre><code class="language-json">{
+  "name": "neon blue stripes down the mane and tail",
+  "masks": [
+    { "type": "STRIPES", "parts": [ "HAIR" ], "seed": "$stripeSeed",
+      "spacing": "$stripeSpacing", "duty": 0.4, "warp": 0.8 }
+  ],
+  "op": { "type": "TOWARD", "color": "#1ec8ff", "strength": 92, "opacity": 100 }
+}</code></pre>
+</div>
+
+<p>
+    <code>TOWARD</code> rather than <code>TINT</code> for the same reason
+    <a href="gene-pink-hair.html">pink hair</a> uses it: it <em>reads</em> what each
+    strand currently looks like and steps it toward the target, so the mane keeps its
+    light and dark instead of turning into a flat slab, and it reads the same on a
+    black, a chestnut or a cremello. <code>opacity: 100</code> means the streaks also
+    show on a <a href="gene-white.html">dominant-white</a> horse.
+</p>
+
+<p>Two knobs make the pattern per-horse, so no two Waterborn manes are identical:</p>
+<table>
+<thead><tr><th>Knob</th><th>Range</th><th>Effect</th></tr></thead>
+<tbody>
+<tr><td><code>stripeSeed</code></td><td>a <code>nextLong()</code></td><td>seeds the <a href="body-space.html">BodyStripes</a> field &mdash; where the streaks fall and how the noise warps them.</td></tr>
+<tr><td><code>stripeSpacing</code></td><td>1.6&ndash;2.8 body units</td><td>centre-to-centre gap. Tight, so the hair reads as several thin streaks rather than one band. <code>duty</code> 0.4 = 40% of each period is streak; <code>warp</code> 0.8 bends them off-straight.</td></tr>
+</tbody>
+</table>
+
+<p>
+    Because a knob is in play, a visible Waterborn is <strong>non-deterministic</strong>:
+    each horse bakes its own texture, keyed by the seed on the <code>Wtb</code> copy
+    it carries, and a foal that inherits that copy inherits the exact streak pattern.
+</p>
+
+<h2 id="effects">The effects</h2>
+
+<p>
+    The behaviour half is an <code>effects</code> block &mdash; three of the
+    <a href="gene-effects.html">five effect verbs</a>. <code>common/</code> parses it;
+    the NeoForge translator runs it.
+</p>
+
+<div class="codebox">
+<div class="filename">the effects block, from waterborn.json</div>
+<pre><code class="language-json">"effects": [
+  { "type": "traversal", "flag": "walk_on_water", "when": { "flag": "adult" } },
+  {
+    "type": "emitter", "kind": "particle", "shape": "trail", "anchor": "feet",
+    "trigger": { "on_move": {} },
+    "particle": "minecraft:dust", "color": "#1ec8ff", "chance": 0.7
+  },
+  {
+    "type": "yield",
+    "trigger": { "on_interact": "minecraft:bucket" },
+    "consumes": "minecraft:bucket", "produces": "minecraft:water_bucket",
+    "cooldown": 2400,
+    "when": { "all": [ { "flag": "sex_female" }, { "flag": "tamed" } ] }
+  }
+]</code></pre>
+</div>
+
+<dl class="spec">
+    <div>
+        <dt>walk_on_water</dt>
+        <dd>An adult Waterborn horse rides at the surface instead of sinking &mdash;
+            the <code>when: { flag: adult }</code> gate means a <strong>foal wades
+            normally</strong>. This one is an <em>approximation</em>: the translator
+            adds buoyancy and clears the fall each tick, it does not build a solid
+            collision plane, so the feel (edges, bobbing, a rider&rsquo;s head
+            dipping) is the thing to watch in-game.</dd>
+    </div>
+    <div>
+        <dt>the dust trail</dt>
+        <dd>A <code>minecraft:dust</code> particle in <code>#1ec8ff</code> at the
+            hooves, fired <code>on_move</code> &mdash; only while the horse is moving
+            on the ground &mdash; with a per-tick chance of 0.7. Nothing while
+            standing or swimming. <strong>Confirmed working 2026-09-02.</strong></dd>
+    </div>
+    <div>
+        <dt>the mare milking</dt>
+        <dd>Right-click a <strong>tamed mare</strong> with an empty bucket and it
+            becomes a water bucket; the interaction is eaten so no mount happens, and
+            a <code>cooldown</code> of 2400 ticks (2 minutes) throttles it. The
+            <code>when</code> is <code>sex_female</code> <em>and</em> <code>tamed</code>,
+            so a stallion or an untamed mare just gets mounted as usual. A
+            non-creative player&rsquo;s bucket is consumed.</dd>
+    </div>
+</dl>
+
+<div class="note">
+    <span class="label">Nothing here is natural or magical in the coat sense</span>
+    <p>
+        Effects touch neither pigment nor RGB, so Waterborn being a
+        <em>magical</em>-phase gene (for its coat layer) is unrelated to its effects.
+        A natural gene could carry the same block.
+    </p>
+</div>
+
+<h2 id="shipping">The first gene that ships as a file</h2>
+
+<p>
+    Every other gene is either a hand-written Java class or a file the player drops in
+    themselves. Waterborn ships <em>inside the mod</em>: a classpath index
+    (<code>neoforge-26.1.2/src/main/resources/horsegenetics/genes/index.json</code>
+    listing <code>waterborn.json</code>) that <code>GeneSpecLoader.fromClasspath()</code>
+    registers from the mod constructor. It was done to make the effects work testable
+    without a config drop, and it breaks the standing &ldquo;no gene ships by
+    default&rdquo; rule on purpose:
+</p>
+
+<ul>
+    <li>the <strong>in-game genotype code is 12 segments</strong>, and 11-segment
+        saved horses will not load;</li>
+    <li>the horse-dimension gallery / <code>GenotypeCatalog</code> roughly
+        <strong>doubles</strong>;</li>
+    <li><strong><code>:common:test</code> is unaffected</strong> &mdash; that index is
+        in the NeoForge module&rsquo;s resources, not on the common test classpath, so
+        the golden test and the 11-built-in count still hold.</li>
+</ul>
+
+<p>
+    To turn Waterborn off, delete those two files. The horse dimension is due for an
+    overhaul regardless.
+</p>
+
+<h2>Not modelled yet</h2>
+
+<ul>
+    <li>One stripe colour and one strength; no per-horse colour variation. An allelic
+        series (teal / indigo / white-water) would make it the first shipped
+        data-driven gene with more than two alleles.</li>
+    <li>The <code>walk_on_lava</code> sibling flag exists in the format but the
+        translator does not wire it; an <em>ember-born</em> counterpart is the obvious
+        pair.</li>
+    <li>The <a href="gene-creator/index.html">gene creator</a> cannot edit an
+        <code>effects</code> block yet &mdash; Waterborn&rsquo;s was hand-written.</li>
+</ul>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="gene-effects.html">Gene effects reference</a>
+        <a href="horse-traits.html">Trait &amp; effect architecture</a>
+        <a href="gene-pink-hair.html">Pink hair (the TOWARD move)</a>
+        <a href="gene-format.html">The gene file format</a>
+        <a href="verification.html#effects">What to check in-game</a>
+    </div>
+    Source: <code>common/src/main/resources/horsegenetics/example-genes/waterborn.json</code>
+    (and the shipped copy under <code>neoforge-26.1.2/&hellip;/resources/horsegenetics/genes/</code>)
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+</body>
+</html>
