@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gene effects &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="nav.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow magical">Reference <span class="sep">/</span> data-driven genes</p>
+<h1>Gene effects</h1>
+<p class="lede">
+    An <strong>effect</strong> is a Minecraft-specific thing a data-driven gene makes
+    the horse <em>do</em> &mdash; walk on water, resist fire, trail particles, be
+    milked for a fluid &mdash; as opposed to a coat pixel. This page is the reference
+    for the effects that exist and the <a href="#adding">contract for adding a new
+    one</a>, which is built to be as modular as a closed vocabulary can be: one
+    declaration per effect, and the parser never changes.
+</p>
+
+<p>
+    The wider (mostly unbuilt) behaviour system this is a slice of &mdash; selectors,
+    auras, resource pools, goals, cooldown abilities &mdash; is
+    <a href="horse-traits.html">the trait &amp; effect architecture</a>. The rest of
+    the gene file (header, knobs, coat layers) is
+    <a href="gene-format.html">the gene file format</a>.
+</p>
+
+<div class="note warn">
+    <span class="label">Status &mdash; built 2026-09-02, not play-tested</span>
+    <p>
+        <code>common/</code> parses and validates all five verbs
+        (<code>AbilityType</code>, <code>GeneAbility</code>, <code>GeneSpecParser</code>,
+        <code>SpecAbilities</code>; unit-tested). The NeoForge translator
+        (<code>server/GeneAbilityHandler</code>, <code>server/GeneYieldHandler</code>)
+        runs <code>traversal</code>, <code>emitter</code> and <code>yield</code>;
+        <code>attribute</code> and <code>mob_effect</code> parse and are carried but
+        <strong>not executed yet</strong> (logged once at runtime). Nothing here has
+        been seen in a running game &mdash; see
+        <a href="verification.html">To be verified</a>.
+    </p>
+</div>
+
+<h2 id="block">The <code>effects</code> block</h2>
+
+<p>
+    A gene&rsquo;s JSON may carry an <code>effects</code> array alongside its
+    <code>layers</code>. Each entry is an object with a <code>type</code> and that
+    type&rsquo;s own fields, plus two things every effect accepts:
+</p>
+
+<dl class="spec">
+    <div>
+        <dt>when</dt>
+        <dd>A <a href="#conditions">condition</a> &mdash; the effect is only active
+            while it holds. Omitted = always. Evaluated by the translator against the
+            live horse, every tick (or at interaction time for a yield).</dd>
+    </div>
+    <div>
+        <dt>minDose</dt>
+        <dd><code>1</code> (default &mdash; any expressing copy) or <code>2</code>
+            (homozygous variant only). Lets an incomplete-dominant gene gate the
+            louder half of its effect on two copies without an expression language.</dd>
+    </div>
+</dl>
+
+<pre><code class="language-json">"effects": [
+  { "type": "traversal", "flag": "walk_on_water", "when": { "flag": "adult" } },
+  {
+    "type": "emitter", "shape": "trail", "anchor": "feet",
+    "trigger": { "on_move": {} },
+    "particle": "minecraft:dust", "color": "#1ec8ff", "chance": 0.7
+  }
+]</code></pre>
+
+<p>
+    Validation is strict, the same as the rest of the format: an unknown
+    <code>type</code>, an unknown key inside an effect, or a value outside its
+    allowed set is a load error that names the offender and lists the legal choices.
+    A bad gene file is skipped with a log line, never fatal.
+</p>
+
+<h2 id="effects">The five effects</h2>
+
+<h3 id="traversal"><code>traversal</code></h3>
+<p>Holds a movement / survival flag up while <code>when</code> is true.</p>
+<table>
+<thead><tr><th>Field</th><th>Default</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr><td><code>flag</code></td><td><em>required</em></td><td>One of <code>walk_on_water</code>, <code>walk_on_lava</code>, <code>fire_immune</code>, <code>fall_immune</code>, <code>underwater_breathing</code>, <code>water_averse</code>.</td></tr>
+</tbody>
+</table>
+<p>
+    Wired today: <code>walk_on_water</code> (surface buoyancy &mdash; an
+    approximation, not a solid plane), <code>fire_immune</code>,
+    <code>fall_immune</code>, <code>underwater_breathing</code>.
+    <code>walk_on_lava</code> and <code>water_averse</code> parse but aren&rsquo;t
+    executed.
+</p>
+<pre><code class="language-json">{ "type": "traversal", "flag": "fire_immune" }</code></pre>
+
+<h3 id="attribute"><code>attribute</code> <span class="allele wild">not executed yet</span></h3>
+<p>A temporary attribute modifier, present while <code>when</code> holds, removed when it stops.</p>
+<table>
+<thead><tr><th>Field</th><th>Default</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr><td><code>attribute</code></td><td><em>required</em></td><td><code>movement_speed</code>, <code>jump_strength</code>, <code>max_health</code>, <code>armor</code>, <code>armor_toughness</code>, <code>knockback_resistance</code>, <code>step_height</code>, <code>safe_fall_distance</code>, <code>scale</code>, <code>swim_speed</code>.</td></tr>
+<tr><td><code>op</code></td><td><code>add</code></td><td><code>add</code>, <code>multiply_base</code>, <code>multiply_total</code> &mdash; vanilla modifier operations.</td></tr>
+<tr><td><code>amount</code></td><td><code>0</code></td><td>Signed modifier amount.</td></tr>
+</tbody>
+</table>
+<pre><code class="language-json">{ "type": "attribute", "attribute": "movement_speed", "op": "multiply_total",
+  "amount": 0.15, "when": { "flag": "in_water" } }</code></pre>
+
+<h3 id="emitter"><code>emitter</code></h3>
+<p>Spawns particles (a dynamic <code>light</code> kind is defined but not wired).</p>
+<table>
+<thead><tr><th>Field</th><th>Default</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr><td><code>kind</code></td><td><code>particle</code></td><td><code>particle</code> or <code>light</code>.</td></tr>
+<tr><td><code>shape</code></td><td><code>point</code></td><td><code>point</code>, <code>ring</code>, <code>trail</code>, <code>burst</code>. Controls spread and count.</td></tr>
+<tr><td><code>anchor</code></td><td><code>feet</code></td><td><code>feet</code>, <code>body</code>, <code>head</code>, <code>eyes</code> &mdash; where on the horse it is centred.</td></tr>
+<tr><td><code>trigger</code></td><td><code>on_move</code></td><td>A <a href="#triggers">trigger</a>. An emitter can&rsquo;t use <code>on_interact</code>.</td></tr>
+<tr><td><code>particle</code></td><td><code>minecraft:dust</code></td><td>Particle id. A small set of common ids is mapped by name; anything else falls back to coloured dust.</td></tr>
+<tr><td><code>color</code></td><td><code>#ffffff</code></td><td><code>#rrggbb</code>. Used by particle types that take a colour (dust).</td></tr>
+<tr><td><code>chance</code></td><td><code>1.0</code></td><td>Per-fire probability, in <code>(0, 1]</code>.</td></tr>
+</tbody>
+</table>
+<pre><code class="language-json">{ "type": "emitter", "shape": "burst", "anchor": "body",
+  "trigger": { "interval": 40 },
+  "particle": "minecraft:happy_villager", "chance": 1.0 }</code></pre>
+
+<h3 id="mob_effect"><code>mob_effect</code> <span class="allele wild">not executed yet</span></h3>
+<p>Keeps a mob effect topped up on <code>self</code> or <code>rider</code> while <code>when</code> holds &mdash; the &ldquo;aura on self&rdquo; pattern.</p>
+<table>
+<thead><tr><th>Field</th><th>Default</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr><td><code>effect</code></td><td><em>required</em></td><td>Mob effect id, e.g. <code>minecraft:dolphins_grace</code>.</td></tr>
+<tr><td><code>target</code></td><td><code>self</code></td><td><code>self</code> or <code>rider</code>.</td></tr>
+<tr><td><code>amplifier</code></td><td><code>0</code></td><td>0-based amplifier.</td></tr>
+<tr><td><code>refresh</code></td><td><code>40</code></td><td>Re-apply every N ticks (at least 1).</td></tr>
+</tbody>
+</table>
+<pre><code class="language-json">{ "type": "mob_effect", "effect": "minecraft:water_breathing",
+  "when": { "flag": "submerged" } }</code></pre>
+
+<h3 id="yield"><code>yield</code></h3>
+<p>Something the horse hands back on a right-click. Fires on <code>on_interact</code> only.</p>
+<table>
+<thead><tr><th>Field</th><th>Default</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr><td><code>trigger</code></td><td><code>on_interact</code> (any item)</td><td>An <code>{"on_interact": "item id"}</code> trigger. Bare <code>""</code> = any held item.</td></tr>
+<tr><td><code>consumes</code></td><td><code>""</code></td><td>Item id taken from the player&rsquo;s hand, or <code>""</code> for nothing.</td></tr>
+<tr><td><code>produces</code></td><td><code>""</code></td><td>Item id handed back. Recognised set: buckets, bottles, egg, slime ball.</td></tr>
+<tr><td><code>cooldown</code></td><td><code>0</code></td><td>Per-horse cooldown, ticks.</td></tr>
+</tbody>
+</table>
+<p>The interaction is eaten so vanilla doesn&rsquo;t also read it as a mount; a non-creative player loses the consumed item.</p>
+<pre><code class="language-json">{ "type": "yield",
+  "trigger": { "on_interact": "minecraft:bucket" },
+  "consumes": "minecraft:bucket", "produces": "minecraft:water_bucket",
+  "cooldown": 2400,
+  "when": { "all": [ { "flag": "sex_female" }, { "flag": "tamed" } ] } }</code></pre>
+
+<h2 id="triggers">Triggers</h2>
+<p>
+    <code>emitter</code> and <code>yield</code> take a <code>trigger</code>. Write it as
+    an object with one key, or &mdash; for the two that take no argument &mdash; a bare
+    string.
+</p>
+<table>
+<thead><tr><th>Trigger</th><th>Fires</th></tr></thead>
+<tbody>
+<tr><td><code>"continuous"</code></td><td>Every tick <code>when</code> allows. The default if an emitter omits <code>trigger</code> is <code>on_move</code>, not this.</td></tr>
+<tr><td><code>"on_move"</code></td><td>Every tick the horse is moving on the ground under its own power.</td></tr>
+<tr><td><code>{ "interval": 40 }</code></td><td>Every <em>N</em> ticks (<code>horse.tickCount % N == 0</code>).</td></tr>
+<tr><td><code>{ "on_interact": "minecraft:bucket" }</code></td><td>A player right-clicks the horse holding that item. <code>""</code> = any item. The only trigger a <code>yield</code> accepts; an <code>emitter</code> may not use it.</td></tr>
+</tbody>
+</table>
+
+<h2 id="conditions">Conditions</h2>
+<p>
+    <code>when</code> is a predicate on the live horse. It is <strong>boolean</strong>
+    today &mdash; the architecture&rsquo;s 0&ndash;1 scalar model (for effects that
+    ramp) is unbuilt. Shapes:
+</p>
+<pre><code class="language-json">{ "flag": "sex_female" }
+{ "flag": "in_water", "negate": true }
+{ "all": [ { "flag": "tamed" }, { "flag": "day" } ] }
+{ "any": [ { "flag": "raining" }, { "flag": "submerged" } ] }
+{ "not": { "flag": "has_rider" } }</code></pre>
+<p>Flags (each mapped to game state by the translator):</p>
+<p>
+    <code>sex_female</code> &middot; <code>sex_male</code> &middot; <code>tamed</code> &middot;
+    <code>untamed</code> &middot; <code>adult</code> &middot; <code>baby</code> &middot;
+    <code>has_rider</code> &middot; <code>in_water</code> &middot; <code>submerged</code> &middot;
+    <code>on_ground</code> &middot; <code>on_fire</code> &middot; <code>day</code> &middot;
+    <code>night</code> &middot; <code>raining</code> &middot; <code>thundering</code> &middot;
+    <code>sky_visible</code>
+</p>
+
+<h2 id="model">Execution &amp; merge model</h2>
+<ul>
+    <li><strong>Effects are neither natural nor magical.</strong> The
+        <a href="pipeline.html">coat pipeline</a>&rsquo;s natural / magical split is
+        about pigment vs. RGB; effects touch neither. A gene can be natural
+        <em>and</em> carry effects, or magical and carry effects.</li>
+    <li><strong>When they run.</strong> <code>traversal</code>,
+        <code>attribute</code>, <code>emitter</code> and <code>mob_effect</code> are
+        evaluated every tick by <code>GeneAbilityHandler</code>
+        (<code>EntityTickEvent.Post</code>), gated by <code>when</code> and the
+        trigger. <code>yield</code> runs from <code>GeneYieldHandler</code> on
+        <code>PlayerInteractEvent.EntityInteract</code>.</li>
+    <li><strong>Which abilities are in play</strong> is
+        <code>SpecAbilities.activeFor(genotype)</code> in <code>common/</code>: for
+        every loaded spec gene whose pair is visible, every effect whose
+        <code>minDose</code> the horse meets. The translator then evaluates
+        <code>when</code> per tick.</li>
+    <li><strong>Multiple genes.</strong> Traversal flags OR together. Emitters all
+        fire independently. Attribute modifiers stack (once wired, keyed per
+        gene+attribute so they don&rsquo;t duplicate). Yields have independent
+        per-horse cooldowns.</li>
+    <li><strong>Cheap when idle.</strong> Both handlers return immediately if no
+        loaded gene declares any effect (<code>SpecAbilities.anyLoaded()</code>).</li>
+    <li><strong>Every effect must be perceivable.</strong> A trait a player
+        can&rsquo;t observe is a bug (the architecture&rsquo;s rule). An
+        <code>emitter</code> or a visible coat layer is the usual signature; a bare
+        <code>attribute</code> with no other tell is borderline.</li>
+</ul>
+
+<h2 id="waterborn">Worked example: Waterborn</h2>
+<p>
+    <code>example.waterborn</code> ships loaded. Its coat half is a magical
+    <code>STRIPES</code>&nbsp;&times;&nbsp;<code>TOWARD</code> layer (neon-blue mane and
+    tail); its <code>effects</code> half is a <code>traversal</code>
+    (<code>walk_on_water</code>, adults only), an <code>emitter</code> (blue dust
+    trail on the move), and a <code>yield</code> (a tamed mare hands back a water
+    bucket for an empty one). The full file and a line-by-line walkthrough are on
+    <a href="horse-traits.html#waterborn">the architecture page</a>.
+</p>
+
+<hr>
+
+<h1 id="adding">Adding a new effect</h1>
+<p class="lede">
+    The design goal is that an effect is a <strong>module</strong>: everything about
+    its shape lives in one declaration, and the JSON parser has no per-effect code.
+    Adding one is four edits, and only one of them is in shared code.
+</p>
+
+<h2>The four steps</h2>
+
+<h3>1. A record on <code>GeneAbility</code></h3>
+<p>
+    In <code>common/genetics/spec/GeneAbility.java</code>, add a record to the sealed
+    interface. Its components are your parameters, then <code>Condition when</code>
+    and <code>int minDose</code> (every effect carries those). Add a
+    <code>Trigger</code> component if the effect is event-driven. Keep it a plain
+    data record &mdash; no Minecraft imports, no logic.
+</p>
+<pre><code class="language-java">/** Play a sound at the horse when the trigger fires. */
+record Sound(Trigger trigger, String sound, double volume, double pitch,
+             Condition when, int minDose) implements GeneAbility {}</code></pre>
+
+<h3>2. One declaration on <code>AbilityType</code></h3>
+<p>
+    In <code>common/genetics/spec/AbilityType.java</code>, add a
+    <code>register(new AbilityType(...))</code> field. This is the single source for
+    the JSON <code>type</code> name, the parameter list (each with a kind, a default,
+    and a doc string), any range validation, and how to build the record. The parser
+    reads all of it generically &mdash; <strong>you do not touch
+    <code>GeneSpecParser</code></strong>.
+</p>
+<pre><code class="language-java">public static final AbilityType SOUND = register(new AbilityType("sound",
+        List.of(
+                Param.trigger("trigger", new Trigger.Interval(20), "when it plays"),
+                Param.required("sound", "sound event id, e.g. 'minecraft:entity.horse.ambient'"),
+                Param.num("volume", 1.0, "0..1+"),
+                Param.num("pitch", 1.0, "0.5..2.0")),
+        v -> {
+            double pitch = v.num("pitch");
+            if (pitch &lt;= 0) throw v.bad("pitch must be positive, got " + pitch);
+            return new GeneAbility.Sound(v.trigger("trigger"), v.str("sound"),
+                    v.num("volume"), pitch, v.when, v.minDose);
+        }));</code></pre>
+<p>Parameter kinds (<code>AbilityType.Kind</code>):</p>
+<table>
+<thead><tr><th>Helper</th><th>Kind</th><th>JSON &rarr; builder sees</th></tr></thead>
+<tbody>
+<tr><td><code>Param.str(name, fallback, doc)</code></td><td>STRING</td><td>a string; <code>v.str(name)</code></td></tr>
+<tr><td><code>Param.required(name, doc)</code></td><td>STRING, no default</td><td>as above, but omitting the key is an error</td></tr>
+<tr><td><code>Param.choice(name, choices, fallback, doc)</code></td><td>CHOICE</td><td>a lower-cased string checked against <code>choices</code>; <code>v.str(name)</code></td></tr>
+<tr><td><code>Param.requiredChoice(name, choices, doc)</code></td><td>CHOICE, no default</td><td>as above, required</td></tr>
+<tr><td><code>Param.num(name, fallback, doc)</code></td><td>NUMBER</td><td>a double; <code>v.num(name)</code> / <code>v.intOf(name)</code></td></tr>
+<tr><td><code>Param.bool(name, fallback, doc)</code></td><td>BOOL</td><td>a boolean; <code>v.bool(name)</code></td></tr>
+<tr><td><code>Param.color(name, fallback, doc)</code></td><td>COLOR</td><td><code>#rrggbb</code> parsed to <code>0xRRGGBB</code>; <code>v.color(name)</code></td></tr>
+<tr><td><code>Param.trigger(name, fallback, doc)</code></td><td>TRIGGER</td><td>a parsed <code>Trigger</code>; <code>v.trigger(name)</code></td></tr>
+</tbody>
+</table>
+<p>
+    The builder gets a <code>Values</code> bag with <code>v.when</code> /
+    <code>v.minDose</code> already filled and <code>v.bad("...")</code> for a scoped
+    error. Range checks (like <code>emitter</code>&rsquo;s <code>chance</code> in
+    <code>(0,1]</code>) go here, not in the parser.
+</p>
+
+<h3>3. A branch in the NeoForge translator</h3>
+<p>
+    In <code>neoforge-26.1.2/&hellip;/server/GeneAbilityHandler.java</code> add a
+    <code>case</code> to the <code>switch (ability)</code> in <code>onHorseTick</code>
+    for a tick / triggered effect, or handle it in
+    <code>server/GeneYieldHandler.java</code> if it fires on interaction. Read the
+    record&rsquo;s fields, check the trigger, and make the game calls. Use
+    <code>GeneAbilityHandler.conditionHolds(ability.when(), horse, record)</code> to
+    respect <code>when</code>; it&rsquo;s already applied for you in the tick loop.
+</p>
+<pre><code class="language-java">case GeneAbility.Sound s -&gt; {
+    if (firesThisTick(s.trigger(), horse)) {
+        level.playSound(null, horse.getX(), horse.getY(), horse.getZ(),
+                soundEvent(s.sound()), SoundSource.NEUTRAL,
+                (float) s.volume(), (float) s.pitch());
+    }
+}</code></pre>
+<p>
+    If you can&rsquo;t implement it yet, call <code>warnUntranslated("sound", &hellip;)</code>
+    &mdash; it logs once so a gene author knows the verb parsed but does nothing,
+    exactly like <code>attribute</code> / <code>mob_effect</code> today.
+</p>
+
+<h3>4. A section on this page</h3>
+<p>Add a <code>&lt;h3&gt;</code> under <a href="#effects">The five effects</a> with the parameter table and a JSON example, and bump the count in the heading.</p>
+
+<h2>Rules an effect must follow</h2>
+<ul>
+    <li><strong>The set stays closed.</strong> Reach for a parameter on an existing
+        verb before adding a verb. A new verb needs a one-line justification that it
+        is a genuinely new <em>kind</em> of thing, not a special case of
+        <code>emitter</code> / <code>attribute</code> / <code>yield</code>.</li>
+    <li><strong><code>common/</code> stays pure.</strong> The record and the
+        <code>AbilityType</code> declaration must not import Minecraft. All game
+        knowledge lives in the translator.</li>
+    <li><strong>Condition-gated and dose-aware for free.</strong> Take
+        <code>Condition when</code> and <code>int minDose</code> as the last two
+        record components and pass <code>v.when</code> / <code>v.minDose</code> in the
+        builder &mdash; then <code>when</code> and <code>minDose</code> just work.</li>
+    <li><strong>Perceivable.</strong> The effect must have an observable signature.
+        If it doesn&rsquo;t inherently (a pure stat tweak), pair it with an
+        <code>emitter</code> in the same gene or reconsider.</li>
+    <li><strong>Names are <code>snake_case</code></strong>, matching the JSON style of
+        the rest of the format.</li>
+    <li><strong>Errors name the offender.</strong> Choice params get this
+        automatically; a range check in the builder should say the key, the rule and
+        the value it got.</li>
+</ul>
+
+<h2 id="adding-flag">Adding a condition flag</h2>
+<p>Two edits, both a one-liner:</p>
+<ol>
+    <li>Add the name to <code>AbilityType.CONDITION_FLAGS</code>.</li>
+    <li>Add a <code>case</code> to <code>GeneAbilityHandler.flagHolds(name, horse, record)</code>
+        returning the boolean read off the live horse.</li>
+</ol>
+<p>
+    Combinators (<code>all</code> / <code>any</code> / <code>not</code>) and negation
+    already compose it. No parser change &mdash; <code>readCondition</code> validates
+    against the list.
+</p>
+
+<h2 id="adding-trigger">Adding a trigger</h2>
+<p>Triggers are a small sealed hierarchy, so this one does touch the parser:</p>
+<ol>
+    <li>Add a record to <code>GeneAbility.Trigger</code> (e.g.
+        <code>record OnJump() implements Trigger {}</code>).</li>
+    <li>Add its name to <code>AbilityType.TRIGGERS</code> and a branch to
+        <code>GeneSpecParser.readTrigger</code> (a bare-string case if it takes no
+        argument, an object case if it does).</li>
+    <li>Handle it wherever triggers are checked in the translator
+        (<code>GeneAbilityHandler.maybeEmit</code> and any new effect that reads a
+        trigger).</li>
+</ol>
+<p>
+    A trigger is shared across every effect that takes one, so keep the set tiny and
+    prefer <code>on_change(condition)</code>-style generality (roadmap) over a verb
+    per game event.
+</p>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="gene-format.html">The gene file format</a>
+        <a href="horse-traits.html">Trait &amp; effect architecture</a>
+        <a href="modding.html">Writing a gene</a>
+        <a href="api-reference.html">Class abstractions</a>
+        <a href="verification.html">What to check in-game</a>
+    </div>
+    Source: <code>common/genetics/spec/AbilityType.java</code>,
+    <code>common/genetics/spec/GeneAbility.java</code>,
+    <code>common/genetics/spec/GeneSpecParser.java</code> (<code>readAbility</code>),
+    <code>common/genetics/spec/SpecAbilities.java</code>,
+    <code>neoforge-26.1.2/&hellip;/server/GeneAbilityHandler.java</code>,
+    <code>&hellip;/server/GeneYieldHandler.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

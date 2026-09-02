@@ -34,12 +34,16 @@ project. Its shape:
   gene file format** - the header, the knobs, every mask and every op, and the
   `effects` block's shape. When a mask, an op or an effect verb changes shape,
   update it in the same change.
-- **`wiki/horse-traits.html`** is the single source of truth for the **trait /
-  effect architecture** - the `effects` verbs a data-driven gene can carry
-  (traversal, attribute, emitter, mob_effect, yield), their conditions and
-  triggers, the Waterborn worked example, and the full unbuilt behaviour-system
-  design the slice grows into. When an effect verb or its translator changes,
-  update it here.
+- **`wiki/gene-effects.html`** is the single source of truth for the **`effects`
+  block** - every verb and its parameters, the triggers, the condition flags,
+  the execution / merge model, and the **modular contract for adding a new
+  effect** (one `AbilityType` declaration; the parser never changes). Update it
+  in the same change as any effect verb, flag, or trigger.
+- **`wiki/horse-traits.html`** is the single source of truth for the wider
+  **trait / effect architecture** - the mostly-unbuilt behaviour system
+  (selectors, auras, pools, goals) that `effects` is a first slice of, plus the
+  Waterborn worked example and the slice-vs-architecture map. It points at
+  `gene-effects.html` for the built reference.
 - **`README.md`** is **user-facing only** now - what the mod does, how to play
   it, install, license. No status tables, no architecture, no API notes.
   Don't put dev content there.
@@ -113,7 +117,7 @@ project. Its shape:
   `genetics/spec/` (the **data-driven gene** format: `GeneSpec`, `Json`,
   `GeneSpecParser`, `SpecSchema`, `SpecValues`, `SpecGene`, `GeneSpecLoader`,
   plus `coat/pattern/SpecPainter`; and the **gene `effects`** path -
-  `GeneAbility`, `AbilitySchema`, `SpecAbilities` - the Minecraft-specific
+  `GeneAbility`, `AbilityType`, `SpecAbilities` - the Minecraft-specific
   things a data-driven gene does beyond the coat - see below).
 - **`neoforge-26.1.2/`** - compiles and assembles (`./gradlew
   :neoforge-26.1.2:build` passes; only two `getGuiLeft/getGuiTop`
@@ -196,8 +200,9 @@ project. Its shape:
   gene can now carry Minecraft-specific behaviour alongside its coat `layers`.
   Five verbs (`traversal`, `attribute`, `emitter`, `mob_effect`, `yield`), each
   with an optional boolean `when` and a `minDose`. `common/` parses and
-  validates all five (`GeneAbility` / `AbilitySchema` / `GeneSpecParser` /
-  `SpecAbilities`, unit-tested); the NeoForge translator
+  validates all five (`GeneAbility` records / `AbilityType` per-verb
+  declarations / a generic `GeneSpecParser.readAbility` / `SpecAbilities`,
+  unit-tested); the NeoForge translator
   (`server/GeneAbilityHandler`, `server/GeneYieldHandler`) executes
   `traversal` + `emitter` + `yield`. **`attribute` and `mob_effect` are parsed
   but not executed yet** (logged once). `walk_on_water` is an approximation
@@ -523,7 +528,8 @@ makes the horse *do*, not the pixels it paints. Closed set of five verbs
 (`traversal`, `attribute`, `emitter`, `mob_effect`, `yield`); each takes an
 optional boolean **`when`** (flags + `all`/`any`/`not`) and a **`minDose`**
 (1 = any expressing copy, 2 = homozygous). `common/` owns the vocabulary and
-the parse (`GeneAbility` records, `AbilitySchema` tables, `GeneSpecParser`,
+the parse (`GeneAbility` records, one `AbilityType` module per verb, a
+  generic `GeneSpecParser.readAbility`,
 and `SpecAbilities.activeFor(Genotype)` which picks the expressed ones); it
 never touches Minecraft. The **NeoForge translator** is `server/`
 `GeneAbilityHandler` (an `EntityTickEvent.Post` that evaluates conditions and
@@ -1489,12 +1495,16 @@ its licence is compatible.
   same change: `SpecSchema.java`, `SpecPainter.java`,
   `wiki/gene-creator/js/schema.js` + `spec-engine.js`, and that page. Then
   re-run `:common:bakeSpecFixtures` and `check-parity.mjs`.
-- **A new `effects` verb / flag** lands in: `AbilitySchema.java` (the vocab),
-  `GeneSpecParser.readAbility`/`readTrigger`/`readCondition`, the NeoForge
-  translator (`server/GeneAbilityHandler` or `server/GeneYieldHandler`), and
-  **both** `wiki/horse-traits.html` and the `effects` section of
-  `wiki/gene-format.html`. It is *not* part of `SpecSchema` or the parity
-  check (effects don't paint).
+- **A new `effects` verb** lands in **four** places, only one of them shared:
+  a `record` on `GeneAbility`, one `register(new AbilityType(...))` on
+  `AbilityType` (name + params + defaults + validation + record builder - the
+  parser reads this generically, no `readAbility` change), a `case` in the
+  NeoForge translator (`server/GeneAbilityHandler` tick switch, or
+  `server/GeneYieldHandler` for interaction), and a section in
+  `wiki/gene-effects.html`. A new **condition flag** is two lines
+  (`AbilityType.CONDITION_FLAGS` + `GeneAbilityHandler.flagHolds`); a new
+  **trigger** also touches `GeneSpecParser.readTrigger`. None of it is part of
+  `SpecSchema` or the parity check - effects don't paint.
 - **Keep the why out of the backlog.** `wiki/roadmap.html` is work items;
   when a justification there runs longer than a clause it belongs in
   `wiki/philosophy.html` with a pointer back.

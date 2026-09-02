@@ -132,81 +132,55 @@ public final class GeneSpecParser {
         return List.copyOf(out);
     }
 
+    /**
+     * Reads any effect off the {@link AbilityType} table - no per-verb code. The
+     * type declares its parameters (name, kind, default) and how to build its
+     * record; this walks that list, type-checks each value, then hands the bag
+     * to the builder. See {@link AbilityType} for the "adding an effect" contract.
+     */
     private static GeneAbility readAbility(Map<String, Object> o, String where) {
-        String type = string(o, "type", null).toLowerCase(Locale.ROOT);
-        return switch (type) {
-            case "traversal" -> {
-                expectKeys(o, where, "type", "flag", "when", "minDose");
-                yield new GeneAbility.Traversal(
-                        AbilitySchema.requireOneOf(AbilitySchema.TRAVERSAL_FLAGS,
-                                string(o, "flag", null), where + " flag"),
-                        readCondition(o.get("when"), where + " when"),
-                        readMinDose(o, where));
-            }
-            case "attribute" -> {
-                expectKeys(o, where, "type", "attribute", "op", "amount", "when", "minDose");
-                yield new GeneAbility.AttributeMod(
-                        AbilitySchema.requireOneOf(AbilitySchema.ATTRIBUTES,
-                                string(o, "attribute", null), where + " attribute"),
-                        AbilitySchema.requireOneOf(AbilitySchema.ATTRIBUTE_OPS,
-                                string(o, "op", "add"), where + " op"),
-                        number(o, "amount", 0),
-                        readCondition(o.get("when"), where + " when"),
-                        readMinDose(o, where));
-            }
-            case "emitter" -> {
-                expectKeys(o, where, "type", "kind", "shape", "anchor", "trigger",
-                        "particle", "color", "chance", "when", "minDose");
-                double chance = number(o, "chance", 1.0);
-                if (chance <= 0 || chance > 1) {
-                    throw new IllegalArgumentException(where + " chance: must be in (0, 1], got " + chance);
+        AbilityType type;
+        try {
+            type = AbilityType.byName(string(o, "type", null));
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException(where + ": " + e.getMessage());
+        }
+        expectKeys(o, where, type.allowedKeys().toArray(new String[0]));
+
+        AbilityType.Values values = new AbilityType.Values();
+        values.where = where;
+        for (AbilityType.Param p : type.params()) {
+            values.raw.put(p.name(), readAbilityParam(o, p, where + " '" + p.name() + "'"));
+        }
+        values.when = readCondition(o.get("when"), where + " when");
+        values.minDose = readMinDose(o, where);
+        return type.build(values);
+    }
+
+    /** One effect parameter, per its {@link AbilityType.Kind}. Missing + no fallback = an error for STRING / CHOICE. */
+    private static Object readAbilityParam(Map<String, Object> o, AbilityType.Param p, String at) {
+        boolean present = o.containsKey(p.name());
+        return switch (p.kind()) {
+            case STRING -> {
+                if (!present) {
+                    if (p.fallback() == null) {
+                        throw new IllegalArgumentException(at + " is required");
+                    }
+                    yield p.fallback();
                 }
-                yield new GeneAbility.Emitter(
-                        AbilitySchema.requireOneOf(AbilitySchema.EMITTER_KINDS,
-                                string(o, "kind", "particle"), where + " kind"),
-                        AbilitySchema.requireOneOf(AbilitySchema.EMITTER_SHAPES,
-                                string(o, "shape", "point"), where + " shape"),
-                        AbilitySchema.requireOneOf(AbilitySchema.EMITTER_ANCHORS,
-                                string(o, "anchor", "feet"), where + " anchor"),
-                        readTrigger(o.get("trigger"), where + " trigger", new GeneAbility.Trigger.OnMove()),
-                        readColor(o.getOrDefault("color", "#ffffff"), where + " color"),
-                        string(o, "particle", "minecraft:dust"),
-                        chance,
-                        readCondition(o.get("when"), where + " when"),
-                        readMinDose(o, where));
+                yield asString(o.get(p.name()), at);
             }
-            case "mob_effect" -> {
-                expectKeys(o, where, "type", "effect", "target", "amplifier", "refresh", "when", "minDose");
-                int refresh = (int) number(o, "refresh", 40);
-                if (refresh < 1) {
-                    throw new IllegalArgumentException(where + " refresh: must be at least 1 tick, got " + refresh);
+            case CHOICE -> {
+                String s = present ? asString(o.get(p.name()), at) : (String) p.fallback();
+                if (s == null) {
+                    throw new IllegalArgumentException(at + " is required");
                 }
-                yield new GeneAbility.SelfEffect(
-                        string(o, "effect", null),
-                        AbilitySchema.requireOneOf(AbilitySchema.EFFECT_TARGETS,
-                                string(o, "target", "self"), where + " target"),
-                        (int) number(o, "amplifier", 0),
-                        refresh,
-                        readCondition(o.get("when"), where + " when"),
-                        readMinDose(o, where));
+                yield AbilityType.requireOneOf(p.choices(), s, at);
             }
-            case "yield" -> {
-                expectKeys(o, where, "type", "trigger", "consumes", "produces", "cooldown", "when", "minDose");
-                GeneAbility.Trigger trigger = readTrigger(o.get("trigger"), where + " trigger",
-                        new GeneAbility.Trigger.OnInteract(""));
-                if (!(trigger instanceof GeneAbility.Trigger.OnInteract onInteract)) {
-                    throw new IllegalArgumentException(where + " trigger: a yield fires on 'on_interact' only");
-                }
-                yield new GeneAbility.Yield(
-                        onInteract,
-                        string(o, "consumes", ""),
-                        string(o, "produces", ""),
-                        (int) number(o, "cooldown", 0),
-                        readCondition(o.get("when"), where + " when"),
-                        readMinDose(o, where));
-            }
-            default -> throw new IllegalArgumentException(where + ": unknown effect type '" + type
-                    + "'; allowed are [traversal, attribute, emitter, mob_effect, yield]");
+            case NUMBER -> present ? asNumber(o.get(p.name()), at) : (Double) p.fallback();
+            case BOOL -> present ? asBoolean(o.get(p.name()), at) : (Boolean) p.fallback();
+            case COLOR -> readColor(present ? o.get(p.name()) : p.fallback(), at);
+            case TRIGGER -> readTrigger(o.get(p.name()), at, (GeneAbility.Trigger) p.fallback());
         };
     }
 
@@ -264,7 +238,7 @@ public final class GeneSpecParser {
         }
         if (o.containsKey("flag")) {
             expectKeys(o, where, "flag", "negate");
-            String flag = AbilitySchema.requireOneOf(AbilitySchema.CONDITION_FLAGS,
+            String flag = AbilityType.requireOneOf(AbilityType.CONDITION_FLAGS,
                     asString(o.get("flag"), where + " flag"), where + " flag");
             return new GeneAbility.Condition.Flag(flag, flag(o, "negate", false));
         }

@@ -204,9 +204,9 @@
     every entry accepts an optional <code>when</code> condition (boolean flags with
     <code>all</code>/<code>any</code>/<code>not</code>) and an optional
     <code>minDose</code> (<code>1</code> = any expressing copy, <code>2</code> =
-    homozygous only). The <a href="horse-traits.html">trait &amp; effect
-    architecture</a> page is the full reference and the worked
-    <strong>Waterborn</strong> example; the short version:
+    homozygous only). <strong><a href="gene-effects.html">Gene effects</a></strong> is
+    the full reference &mdash; every verb, the triggers, the condition flags, and how
+    to add a new verb. The short version:
 </p>
 
 <pre><code class="language-json">"effects": [
@@ -228,9 +228,9 @@
 <p class="note">
     <strong>Built 2026-09-02, not play-tested.</strong> <code>common/</code> parses
     and validates all five; the NeoForge translator runs <code>traversal</code>,
-    <code>emitter</code> and <code>yield</code>. <code>attribute</code> and
-    <code>mob_effect</code> are parsed but not executed yet. The gene creator does
-    <strong>not</strong> edit <code>effects</code> yet &mdash; hand-write that block.
+    <code>emitter</code> and <code>yield</code>; <code>attribute</code> and
+    <code>mob_effect</code> parse but don&rsquo;t run yet. The gene creator does
+    <strong>not</strong> edit <code>effects</code> &mdash; hand-write that block.
 </p>
 
 <h2>What happens when a file is wrong</h2>

@@ -72,7 +72,9 @@ genetics/
     SpecGene.java             a Gene that answers everything from a GeneSpec
     GeneSpecLoader.java       find + parse + register, from a folder or the classpath
     GeneAbility.java          the closed set of Minecraft "effects" a gene can carry
-    AbilitySchema.java        the flags / attributes / modes those effects may name
+    AbilityType.java          one self-contained declaration per effect verb (name,
+                              params, defaults, validation, record builder) + the
+                              shared condition-flag / trigger vocab
     SpecAbilities.java        which abilities a Genotype expresses (NeoForge reads this)
     PartGroups.java           LEGS / HAIR / POINTS ... aliases for a parts list
     SpecFixtureTool.java      the bakeSpecFixtures task (creator parity)
@@ -491,7 +493,7 @@ public record GeneSpec(String key, String name, boolean natural, DominancePatter
 }
 
 // The "effects" block - Minecraft behaviour, inert in common/, run by NeoForge.
-// See wiki/horse-traits.html. Closed set; every entry has when()/minDose().
+// See wiki/gene-effects.html. Closed set; every entry has when()/minDose().
 public sealed interface GeneAbility {
     record Traversal(String flag, Condition when, int minDose)                    implements GeneAbility {}
     record AttributeMod(String attribute, String op, double amount, Condition when, int minDose) ..
@@ -503,6 +505,18 @@ public sealed interface GeneAbility {
                  int cooldownTicks, Condition when, int minDose)                  implements GeneAbility {}
     sealed interface Trigger   { /* Continuous, OnMove, Interval(ticks), OnInteract(item) */ }
     sealed interface Condition { /* Always, Flag(name,negate), All, Any, Not */ }
+}
+
+// One effect verb as a module. GeneSpecParser reads any effect off this table -
+// no per-verb parser code. Adding a verb = a record above + a register(...) here
+// + a translator branch + a wiki/gene-effects.html section.
+public final class AbilityType {
+    static final List&lt;String&gt; CONDITION_FLAGS;   // what a "when" flag may name
+    static final List&lt;String&gt; TRIGGERS;
+    static AbilityType byName(String type);       // error lists all
+    static Collection&lt;AbilityType&gt; all();
+    List&lt;Param&gt; params();  List&lt;String&gt; allowedKeys();
+    // TRAVERSAL, ATTRIBUTE, EMITTER, MOB_EFFECT, YIELD - the five, one field each
 }
 
 // Which of a genotype's abilities are in play (visible gene, minDose met).

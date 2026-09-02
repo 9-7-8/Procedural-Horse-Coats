@@ -11,7 +11,7 @@ import java.util.List;
  * something with a running game around it - a traversal flag, an attribute
  * modifier, a particle trail, a mob effect, a thing the horse can be milked
  * for. {@code common/} still owns the <b>vocabulary</b> and the parsing (this
- * file, {@link AbilitySchema}, {@link GeneSpecParser}); the NeoForge module owns
+ * file, {@link AbilityType}, {@link GeneSpecParser}); the NeoForge module owns
  * the <b>execution</b> - it reads {@link SpecAbilities#activeFor} and translates
  * each record into game calls. That split is the same one the rest of the mod
  * uses, and it is what keeps a future 1.12.2 backport cheap: the ability
@@ -50,16 +50,15 @@ public sealed interface GeneAbility {
 
     /**
      * A traversal flag - {@code walk_on_water}, {@code fire_immune}, ... - one of
-     * {@link AbilitySchema#TRAVERSAL_FLAGS}. Condition-gated: a
+     * the {@code flag} choices on {@link AbilityType#TRAVERSAL}. Condition-gated: a
      * {@code walk_on_water} with {@code "when": {"flag": "adult"}} only holds up
      * grown horses.
      */
     record Traversal(String flag, Condition when, int minDose) implements GeneAbility {}
 
     /**
-     * A temporary attribute modifier - {@code attribute} in
-     * {@link AbilitySchema#ATTRIBUTES}, {@code op} in
-     * {@link AbilitySchema#ATTRIBUTE_OPS}. Present while {@link #when()} holds,
+     * A temporary attribute modifier - {@code attribute} and {@code op} are the
+     * choices on {@link AbilityType#ATTRIBUTE}. Present while {@link #when()} holds,
      * removed when it stops.
      */
     record AttributeMod(String attribute, String op, double amount, Condition when, int minDose)
@@ -67,7 +66,7 @@ public sealed interface GeneAbility {
 
     /**
      * A particle / light emitter. {@code kind} / {@code shape} / {@code anchor}
-     * are the {@link AbilitySchema} sets; {@code particle} is a particle id
+     * are the choices on {@link AbilityType#EMITTER}; {@code particle} is a particle id
      * (e.g. {@code "minecraft:dust"}); {@code color} is {@code 0xRRGGBB}, used by
      * particle types that take a colour; {@code chance} is the per-fire
      * probability {@code (0,1]} so a dense trail is one number.
@@ -128,7 +127,7 @@ public sealed interface GeneAbility {
 
         record Always() implements Condition {}
 
-        /** One of {@link AbilitySchema#CONDITION_FLAGS}, optionally negated. */
+        /** One of {@link AbilityType#CONDITION_FLAGS}, optionally negated. */
         record Flag(String name, boolean negate) implements Condition {}
 
         record All(List<Condition> terms) implements Condition {}

@@ -29,7 +29,7 @@
     <p>
         <strong>Implemented:</strong> the <code>effects</code> block is parsed and
         validated in <code>common/</code> (<code>GeneAbility</code>,
-        <code>AbilitySchema</code>, <code>GeneSpecParser</code>,
+        <code>AbilityType</code>, <code>GeneSpecParser</code>,
         <code>SpecAbilities</code>; unit-tested). The NeoForge translator
         (<code>server/GeneAbilityHandler</code>, <code>server/GeneYieldHandler</code>)
         executes <code>traversal</code>, <code>emitter</code> and <code>yield</code>.
@@ -45,105 +45,22 @@
 
 <p>
     A data-driven gene&rsquo;s JSON may carry an <code>effects</code> array alongside
-    its <code>layers</code>. Each entry has a <code>type</code> and its own fields.
-    The set is <strong>closed</strong> &mdash; five verbs &mdash; and every entry
-    accepts an optional <code>when</code> condition and an optional
-    <code>minDose</code> (<code>1</code> = any expressing copy, <code>2</code> =
-    homozygous variant only, so an incomplete dominant can gate the louder half of
-    its effect). The full file format is on
-    <a href="gene-format.html">the gene file format</a>; this is the effects half.
+    its <code>layers</code>: a <strong>closed set of five verbs</strong> &mdash;
+    <code>traversal</code> (a movement / survival flag), <code>attribute</code> (a
+    condition-gated modifier), <code>emitter</code> (particles on a trigger),
+    <code>mob_effect</code> (an aura on self or rider), and <code>yield</code> (the
+    horse hands something back on a right-click). Every entry also takes an optional
+    <code>when</code> condition and a <code>minDose</code> (<code>1</code> = any
+    expressing copy, <code>2</code> = homozygous only).
 </p>
 
-<table>
-<thead><tr><th>type</th><th>fields</th><th>what it does</th></tr></thead>
-<tbody>
-<tr>
-    <td><code>traversal</code></td>
-    <td><code>flag</code></td>
-    <td>Holds up a movement / survival flag while <code>when</code> is true. One of
-        <code>walk_on_water</code>, <code>walk_on_lava</code>,
-        <code>fire_immune</code>, <code>fall_immune</code>,
-        <code>underwater_breathing</code>, <code>water_averse</code>.
-        <em>(<code>walk_on_lava</code> and <code>water_averse</code> are defined but
-        not wired yet.)</em></td>
-</tr>
-<tr>
-    <td><code>attribute</code></td>
-    <td><code>attribute</code>, <code>op</code>, <code>amount</code></td>
-    <td>A temporary attribute modifier, present while <code>when</code> holds.
-        <code>attribute</code>: <code>movement_speed</code>,
-        <code>jump_strength</code>, <code>max_health</code>, <code>armor</code>,
-        <code>armor_toughness</code>, <code>knockback_resistance</code>,
-        <code>step_height</code>, <code>safe_fall_distance</code>,
-        <code>scale</code>, <code>swim_speed</code>. <code>op</code>:
-        <code>add</code>, <code>multiply_base</code>, <code>multiply_total</code>.
-        <strong>Not executed yet.</strong></td>
-</tr>
-<tr>
-    <td><code>emitter</code></td>
-    <td><code>kind</code>, <code>shape</code>, <code>anchor</code>,
-        <code>trigger</code>, <code>particle</code>, <code>color</code>,
-        <code>chance</code></td>
-    <td>Spawns particles. <code>kind</code>: <code>particle</code> | <code>light</code>
-        (<code>light</code> not wired). <code>shape</code>: <code>point</code> |
-        <code>ring</code> | <code>trail</code> | <code>burst</code>.
-        <code>anchor</code>: <code>feet</code> | <code>body</code> | <code>head</code>
-        | <code>eyes</code>. <code>particle</code> is an id (e.g.
-        <code>minecraft:dust</code>, which takes the <code>color</code>);
-        <code>chance</code> is the per-fire probability in <code>(0, 1]</code>.</td>
-</tr>
-<tr>
-    <td><code>mob_effect</code></td>
-    <td><code>effect</code>, <code>target</code>, <code>amplifier</code>,
-        <code>refresh</code></td>
-    <td>Keeps a mob effect topped up on <code>self</code> or <code>rider</code> while
-        <code>when</code> holds &mdash; the &ldquo;aura on self&rdquo; pattern.
-        <strong>Not executed yet.</strong></td>
-</tr>
-<tr>
-    <td><code>yield</code></td>
-    <td><code>trigger</code> (<code>on_interact</code>), <code>consumes</code>,
-        <code>produces</code>, <code>cooldown</code></td>
-    <td>The horse hands something back when right-clicked with <code>consumes</code>
-        in hand: the held item is swapped for <code>produces</code>, the interaction
-        is eaten so vanilla doesn&rsquo;t read it as a mount, and a per-horse
-        <code>cooldown</code> (ticks) throttles it. Output items are a small fixed
-        set (buckets, bottles, egg, slime ball).</td>
-</tr>
-</tbody>
-</table>
-
-<h3 id="triggers">Triggers</h3>
 <p>
-    <code>emitter</code> and <code>yield</code> take a <code>trigger</code>. A small
-    closed set, written as an object with one key (or a bare string for the first
-    two):
-</p>
-<ul>
-    <li><code>"continuous"</code> &mdash; every tick <code>when</code> allows (the default for an emitter that omits it).</li>
-    <li><code>"on_move"</code> &mdash; every tick the horse is moving on the ground.</li>
-    <li><code>{ "interval": 40 }</code> &mdash; every <em>N</em> ticks.</li>
-    <li><code>{ "on_interact": "minecraft:bucket" }</code> &mdash; a player right-clicks holding that item (<code>""</code> = anything). The only trigger a <code>yield</code> accepts.</li>
-</ul>
-
-<h3 id="conditions">Conditions</h3>
-<p>
-    <code>when</code> is a predicate on the live horse, evaluated by the translator.
-    Boolean for now &mdash; the full architecture&rsquo;s 0&ndash;1 scalar model
-    (see below) is unbuilt. Shapes:
-</p>
-<pre><code class="language-json">{ "flag": "sex_female" }
-{ "flag": "in_water", "negate": true }
-{ "all": [ { "flag": "sex_female" }, { "flag": "tamed" } ] }
-{ "any": [ { "flag": "day" }, { "flag": "sky_visible" } ] }
-{ "not": { "flag": "has_rider" } }</code></pre>
-<p>
-    Flags: <code>sex_female</code>, <code>sex_male</code>, <code>tamed</code>,
-    <code>untamed</code>, <code>adult</code>, <code>baby</code>,
-    <code>has_rider</code>, <code>in_water</code>, <code>submerged</code>,
-    <code>on_ground</code>, <code>on_fire</code>, <code>day</code>,
-    <code>night</code>, <code>raining</code>, <code>thundering</code>,
-    <code>sky_visible</code>.
+    <strong><a href="gene-effects.html">Gene effects</a></strong> is the full
+    reference &mdash; every verb&rsquo;s parameters, the triggers, the condition
+    flags, the execution and merge model, and the <a href="gene-effects.html#adding">
+    modular contract for adding a new effect</a> (one <code>AbilityType</code>
+    declaration; the parser never changes). The rest of this page is the wider
+    architecture that <code>effects</code> is a first slice of.
 </p>
 
 <h2 id="waterborn">Waterborn &mdash; the worked example</h2>
@@ -660,14 +577,14 @@ Component  -> (Trigger, Condition, Selector, Effect)</code></pre>
 
 <div class="page-foot">
     <div class="seealso">
+        <a href="gene-effects.html">Gene effects reference</a>
         <a href="gene-format.html">The gene file format</a>
         <a href="pipeline.html">Three-phase pipeline</a>
         <a href="philosophy.html">Philosophy</a>
         <a href="roadmap.html">Roadmap</a>
-        <a href="verification.html">What to check in-game</a>
     </div>
     Source: <code>common/genetics/spec/GeneAbility.java</code>,
-    <code>common/genetics/spec/AbilitySchema.java</code>,
+    <code>common/genetics/spec/AbilityType.java</code>,
     <code>common/genetics/spec/SpecAbilities.java</code>,
     <code>neoforge-26.1.2/&hellip;/server/GeneAbilityHandler.java</code>,
     <code>&hellip;/server/GeneYieldHandler.java</code>
