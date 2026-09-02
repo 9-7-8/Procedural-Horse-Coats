@@ -48,6 +48,15 @@
     <li><a href="#random-pens">The horse dimension: back to random pens</a></li>
     <li><a href="#spawner">The custom horse spawner</a></li>
     <li><a href="#scale">What breaks at scale</a></li>
+    <li><a href="#gameplay">The gameplay layer &mdash; scope and ground rules</a></li>
+    <li><a href="#hair">Horse hair, shearing and the crafting economy</a></li>
+    <li><a href="#bond">Bond and herds</a></li>
+    <li><a href="#carrots">Breeding modifiers: the carrot family</a></li>
+    <li><a href="#ivf">Assisted reproduction: vials, embryos, cloning</a></li>
+    <li><a href="#database">Knowledge: the gene database and research papers</a></li>
+    <li><a href="#browser">The horse browser, and the creative egg</a></li>
+    <li><a href="#villager">The Horse Master villager</a></li>
+    <li><a href="#gene-metadata">What a gene definition has to gain</a></li>
     <li><a href="#order">Suggested order of work</a></li>
     <li><a href="#open">Decisions still open</a></li>
 </ol>
@@ -1148,7 +1157,623 @@ interface ConditionRule    { void conditions(AllelePair, ConditionSink); } // CS
 
 <hr>
 
-<h2 id="order">11. Suggested order of work</h2>
+<h2 id="gameplay">11. The gameplay layer &mdash; scope and ground rules</h2>
+
+<p>
+    Sections 11&ndash;19 come from two design documents handed over whole: a system
+    summary of the mod&rsquo;s gameplay features, and a specification for a trading
+    villager. Together they describe a layer sitting <em>on top of</em> the genetics
+    &mdash; shearing and a crafting economy, bond and herds, carrots that bias
+    breeding, seed vials and IVF, a discovered-gene database with research papers, a
+    browser UI, and a villager who sells all of it. <strong>None of it exists</strong>,
+    and none of it is designed against this codebase yet.
+</p>
+
+<div class="note danger">
+    <span class="label">They were written against a different codebase &mdash; four things to re-decide first</span>
+    <p>
+        <strong>1. The namespace.</strong> The documents use <code>yourmod:</code>
+        throughout. It is <code>horsegenetics:</code>. Mechanical, but it is in every
+        NBT key and item id they name.
+    </p>
+    <p>
+        <strong>2. <code>EntityCustomHorse extends HorseEntity</code>, with vanilla
+        horse spawns zeroed by biome modifiers.</strong> This mod does not work that
+        way: it hangs its data off the <em>vanilla</em> <code>Horse</code> &mdash; the
+        record, the attachments, both sync payloads &mdash; and injects the coat at
+        render time. A subclass is a far bigger change than its table row implies:
+        horses in existing worlds stay vanilla and never convert, the 1.12.2 backport
+        goal (§21) gets harder, and biome-modifier spawn replacement is NeoForge-side
+        where <code>common/</code> cannot see it. Nothing in 12&ndash;19 actually
+        requires a new entity type &mdash; the visual override the documents cite as the
+        reason already works without one. <strong>Decide this explicitly before
+        anything else here is designed</strong>, because every following section assumes
+        the attachment path.
+    </p>
+    <p>
+        <strong>3. Item NBT.</strong> The documents call
+        <code>stack.setNbt()</code> / <code>getOrCreateNbt()</code>, which is a
+        pre-1.20.5 API. Every &ldquo;stores genetic data in NBT&rdquo; line means a
+        <strong>registered data component</strong> holding a genotype code plus an
+        epigenome code. <em>Unverified against 26.1.2</em> &mdash; check the
+        component-registration path before designing the vial, since it is the item that
+        carries the most.
+    </p>
+    <p>
+        <strong>4. The philosophy came with them.</strong> &ldquo;Carrot, not
+        stick&rdquo;, &ldquo;knowledge is infinite&rdquo;, the pricing rationale, the
+        balance table. That is <a href="philosophy.html">Philosophy</a>&rsquo;s page,
+        not this one. Only the <em>consequences</em> are recorded below.
+    </p>
+</div>
+
+<h3>Named but never specified</h3>
+
+<p>
+    These appear in the documents&rsquo; recipe and feature tables with no behaviour
+    attached. They cannot be scheduled until someone writes down what they do.
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Thing</th><th>What is known</th><th>What is missing</th></tr></thead>
+<tbody>
+<tr><td><strong>Stalls, holding pens</strong></td><td>Blocks, with signs; horses can be teleported to a stall and recalled to a pen. A horse has an <code>assignedPen</code>.</td><td>Everything else: are they blocks or a region, how is one claimed, what happens when the block is broken with horses assigned.</td></tr>
+<tr><td><strong>Double-wide gate</strong></td><td>Crafted via braided rope.</td><td>Presumably a two-block-wide fence gate. A vanilla-shaped block problem, unrelated to the genetics.</td></tr>
+<tr><td><strong>Tickets</strong> &mdash; blank, basic, bound, interdimensional</td><td>Four tiers, hair-based recipes.</td><td>No stated function. &ldquo;Interdimensional&rdquo; presumably reaches the horse dimension (§8) &mdash; if so it is the first survival-mode entry to it, which is a decision, not a detail.</td></tr>
+<tr><td><strong>Whistles</strong> &mdash; basic, golden, echo</td><td>Call bonded horses; three tiers imply three radii.</td><td>Radius, cooldown, whether it crosses dimensions, and what &ldquo;echo&rdquo; adds.</td></tr>
+<tr><td><strong>Shearing overhaul</strong></td><td>Listed as a 1.0 feature and the source of horse hair.</td><td>&ldquo;Overhaul&rdquo; of what &mdash; there is no shearing today. Treated below (§12) as new work.</td></tr>
+</tbody>
+</table>
+</div>
+
+<hr>
+
+<h2 id="hair">12. Horse hair, shearing and the crafting economy</h2>
+
+<p>
+    The material floor for every recipe the two documents add. Cheap, self-contained,
+    and it blocks the carrots, the vials and the villager, so it goes early.
+</p>
+
+<h3>12.1 Shearing</h3>
+
+<ul>
+    <li><strong>Right-click an adult horse with shears, get 1&ndash;3 horse hair</strong>,
+        regrowing on a cooldown. It belongs in
+        <code>HorseInteractionHandler</code> beside milking (§7.1) and hits
+        <strong>the same trap that file already documents</strong>:
+        <code>EntityInteract</code> fires on both sides, and any item used on a tamed
+        horse is otherwise turned into a mount by vanilla. Cancel on the client too, do
+        the drop server-side.</li>
+    <li><strong>Regrowth is per-horse state</strong> &mdash; the same attachment shape
+        as milking&rsquo;s cooldown, and the same rule: store the <em>game time</em> of
+        the last shear, not a countdown, so it survives a reload. The documents call it
+        <code>shearProgress</code>, which implies a ramp rather than a flag; a stored
+        timestamp gives a ramp for free.</li>
+    <li><strong>Does a sheared horse look different?</strong> Sheep have a wool flag; a
+        horse coat is baked per genome and cached by <code>CoatTextureId</code>, so a
+        sheared variant either <strong>doubles the texture key space</strong> or is a
+        render-layer overlay. The overlay is much cheaper. &ldquo;No visual at all&rdquo;
+        is also a legitimate answer &mdash; but pick one, because the first option is
+        the sort of thing that quietly doubles bake cost at scale (§10).</li>
+    <li>Bond gives +5 per shear (§13), so shearing is the one interaction that is both
+        an economy and a relationship input.</li>
+</ul>
+
+<h3>12.2 The material chain</h3>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Item</th><th>Recipe (shapeless)</th><th>Reversible</th></tr></thead>
+<tbody>
+<tr><td><strong>Horse hair</strong></td><td>Shear a horse, 1&ndash;3</td><td>&mdash;</td></tr>
+<tr><td><strong>Hair bundle</strong></td><td>4 horse hair</td><td>yes</td></tr>
+<tr><td><strong>Braided rope</strong></td><td>3 hair bundles</td><td>yes</td></tr>
+<tr><td><strong>Hair cloth</strong></td><td>4 hair bundles</td><td>yes</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3>12.3 Collision-proofing, and the one part that is not free</h3>
+
+<p>
+    The stated rules &mdash; every recipe takes at least one modded item, every output
+    is a modded item, everything is shapeless &mdash; cost nothing and are worth
+    keeping as written. The layer that <em>is</em> work:
+</p>
+
+<div class="note warn">
+    <span class="label">A recipe that must match a <em>specific</em> research paper is not a vanilla shapeless recipe</span>
+    <p>
+        Vanilla ingredient matching is item plus, at best, a component predicate. &ldquo;A
+        research paper whose gene component is peafowl&rdquo; as an <em>ingredient</em>,
+        with the gene copied onto the output carrot, needs a <strong>custom recipe
+        type</strong> &mdash; one recipe parameterised by the paper it is given, not N
+        generated recipes.
+    </p>
+    <p>
+        This matters more than it looks. With one parameterised recipe, a third-party
+        gene gets its carrot for free the moment it registers. With generated
+        per-gene recipes, every modded gene has to ship a datapack &mdash; which
+        contradicts the drop-in gene file that already shipped (§3).
+    </p>
+</div>
+
+<ul>
+    <li><strong>Do not invent a second identifier space.</strong> The documents key
+        papers on a short symbol (<code>PFWL</code>) and specify it as
+        case-insensitive-but-exact. Genes already have a validated namespaced key,
+        <code>&lt;modid&gt;.&lt;gene&gt;</code> (§3). Use it. A symbol can stay as a
+        <em>display</em> string; it must not be what a recipe matches on, or two mods
+        will collide on <code>PFWL</code> in exactly the way the rest of this design is
+        trying to prevent.</li>
+    <li><strong>Papers are consumed on craft</strong>, and must be in the inventory to
+        craft. That is the ordinary behaviour of an ingredient, so nothing special is
+        needed &mdash; the &ldquo;knowledge key&rdquo; framing is philosophy, the
+        implementation is just an ingredient.</li>
+</ul>
+
+<hr>
+
+<h2 id="bond">13. Bond and herds</h2>
+
+<p>
+    A per-horse relationship number that changes behaviour, and an emergent grouping
+    on top of it. Independent of the genetics entirely.
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Bond</th><th>Behaviour</th></tr></thead>
+<tbody>
+<tr><td>0&ndash;30</td><td>Vanilla &mdash; ignores the player</td></tr>
+<tr><td>31&ndash;60</td><td>Faces the player within 10 blocks</td></tr>
+<tr><td>61&ndash;80</td><td>Wanders toward the player on a clear path</td></tr>
+<tr><td>81&ndash;100</td><td>Follows at a walk, respecting fences and walls</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    Gains, capped at <strong>+15 per day</strong>: shearing +5, feeding +2, riding
+    +1/min, proximity +0.5/min, sleeping nearby +1/night. Foals in a herd gain at
+    double rate.
+</p>
+
+<h3>What it needs</h3>
+
+<ul>
+    <li><strong>Two new per-horse values</strong>: a bond int and a herd id.
+        Attachment plus sync, since the info panel will want to show bond.</li>
+    <li><strong>Share one slow tick with §7.2.</strong> Proximity bond, herd formation
+        and gated healing are three proximity scans with the same performance
+        constraint, and the horse dimension spawns horses by the hundred. One handler on
+        a 20&ndash;40 tick interval, staggered by entity id, caching its last answer
+        &mdash; not three independent scans. <strong>This is the reason to design 7.2
+        and 13 together rather than in sequence.</strong></li>
+    <li><strong>Behaviour tiers should be one goal that reads bond</strong>, returning
+        false from <code>canUse</code> below its threshold. Adding and removing goals as
+        a number crosses a line is fiddly and hard to test. &ldquo;Respects fences and
+        walls&rdquo; is then free &mdash; it is pathfinding, which a real goal gets and a
+        teleport never does.</li>
+    <li><strong>Herd formation is continuous, so track it continuously</strong>: two or
+        more horses within 10 blocks for ten minutes means an accumulating counter that
+        decays, not a scan of history. Alpha is the oldest or highest-bond member, which
+        needs an explicit tiebreak or the alpha flickers between two equal horses every
+        tick.</li>
+    <li><strong>The daily cap needs a definition of &ldquo;day&rdquo;</strong> &mdash;
+        the same unresolved question as milking&rsquo;s &ldquo;about an hour&rdquo;
+        (§21). Answer both at once.</li>
+</ul>
+
+<div class="note warn">
+    <span class="label">The herd comfort buff is blocked</span>
+    <p>
+        It is specified as reduced stamina drain and faster regen. <strong>There is no
+        stamina in this mod.</strong> That is a new resource, and
+        <a href="horse-traits.html">the trait &amp; effect architecture</a>&rsquo;s
+        resource pools (§6.6) are where it would live. Either scope stamina as its own
+        piece of work or restate the buff in terms of something that exists &mdash;
+        health regen, speed, or feed consumption.
+    </p>
+</div>
+
+<hr>
+
+<h2 id="carrots">14. Breeding modifiers: the carrot family</h2>
+
+<p>
+    Three kinds of consumable, all fed to a parent <em>before</em> breeding: four
+    general breeding carrots, one magic carrot per gene, and combinations of both.
+    They are the mod&rsquo;s first mechanism for <strong>influencing inheritance</strong>,
+    which makes them the first thing to touch the determinism contract.
+</p>
+
+<div class="note warn">
+    <span class="label">Where the effect is applied decides whether this is sound</span>
+    <p>
+        A carrot must bias the <strong>gamete</strong> the fed parent contributes, not
+        rewrite the parent&rsquo;s own genotype. Rewriting silently mutates a horse the
+        player spent generations breeding for, and it makes the horse&rsquo;s displayed
+        code stop matching its history. Every carrot below is a modifier on the draw.
+    </p>
+    <p>
+        And because breeding is deterministic given the parents, <strong>fed carrot
+        effects have to be part of the state the determinism is computed over</strong>
+        &mdash; stored on the horse, synced, and visible &mdash; not a side channel read
+        at breed time.
+    </p>
+</div>
+
+<h3>14.1 The four breeding carrots</h3>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Carrot</th><th>Stated effect</th><th>What it means here</th></tr></thead>
+<tbody>
+<tr><td><strong>Mutinogenic</strong></td><td>Re-rolls epigenetics</td><td><strong>Check this before designing it.</strong> Epigenetic seeds are per allele copy. Whether a foal <em>inherits</em> its parent&rsquo;s seed or rolls a fresh one decides whether feeding a parent does anything at all. If foals roll fresh, this is a cosmetic re-roll of <em>the horse fed</em> &mdash; still a good item, but not a breeding carrot, and it belongs in a different row.</td></tr>
+<tr><td><strong>Chaos</strong></td><td>Adds one new gene with random alleles</td><td>There is no adding. Every horse carries a pair for every registered gene, wild type <code>n</code> where it has nothing. So this is &ldquo;pick one locus currently <code>n/n</code> and contribute a random non-wild allele&rdquo;. Needs a rule for what happens when no locus is <code>n/n</code>.</td></tr>
+<tr><td><strong>Stabilizer</strong></td><td>Forces dominant alleles</td><td>A bias on which copy the parent contributes. Cheap, and it does nothing when the parent has no dominant allele &mdash; which is stated, and should <em>say so</em> to the player rather than no-op.</td></tr>
+<tr><td><strong>Magnifier</strong></td><td>Forces recessive alleles</td><td>The mirror. Same path, same no-op rule.</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3>14.2 Magic gene carrots</h3>
+
+<p>
+    One per gene. Feeding it makes the game treat that parent as
+    <code>n&lt;Gene&gt;</code> (heterozygous, the default) or
+    <code>&lt;Gene&gt;&lt;Gene&gt;</code> (homozygous) for that one gene when its gamete
+    is drawn. Normal Mendelian rules then apply, so two heterozygous-carrot parents give
+    the ordinary 25/50/25.
+</p>
+
+<ul>
+    <li><strong>The recipe is standardised</strong>: golden carrot + research paper +
+        horse hair + a rarity item + at least one flavour ingredient. Rarity item by
+        tier: iron, gold, diamond, emerald, netherite ingot, nether star. Keep the
+        <em>tier</em> on the gene and the <em>tier&rarr;item</em> mapping in one table,
+        so retuning the economy is a one-line change and a modded gene cannot invent its
+        own currency.</li>
+    <li><strong>&ldquo;Mod authors cannot disable the carrot&rdquo; is wrong for an open
+        registry.</strong> Sex (§5.3) and the recessive lethals (§4.4) are genes for
+        which a carrot is either nonsense or actively hostile. A gene must be able to opt
+        out; the documents&rsquo; own exceptions &mdash; extension and agouti have no
+        carrot &mdash; are that flag, they just hard-coded it.</li>
+    <li><strong>It needs metadata that does not exist</strong>: rarity, behaviour,
+        flavour ingredients, descriptions. That is §19, and it lands first.</li>
+</ul>
+
+<h3>14.3 Combination</h3>
+
+<ul>
+    <li>Multiple carrots crafted together become one carrot carrying all the effects.
+        A <strong>component holding a list</strong>, no visual change, tooltip
+        enumerating them, no cap on count.</li>
+    <li><strong>Contradictory combinations are unspecified.</strong> Stabilizer plus
+        magnifier; two magic carrots for the same gene with different behaviours.
+        Define the resolution &mdash; reject at craft time is clearer than
+        last-one-wins, because the player can see it happen.</li>
+    <li><strong>Expiry is also unspecified.</strong> The vial path gives a 30-second
+        window; the plain breeding path gives none, so a carrot fed today applies to a
+        pairing next week. Pick one rule for both.</li>
+</ul>
+
+<hr>
+
+<h2 id="ivf">15. Assisted reproduction: vials, embryos, cloning</h2>
+
+<h3>15.1 The seed vial flow</h3>
+
+<ol>
+    <li>Feed the stallion a breeding carrot &rarr; a 30-second collection window.</li>
+    <li>Right-click with an empty seed bottle (glass bottle + horse hair) &rarr; a
+        stallion seed vial carrying his genetics <em>and</em> the carrot effects.</li>
+    <li>Feed the mare a breeding carrot &rarr; a 30-second receptive window.</li>
+    <li>Right-click the mare with the vial &rarr; pregnancy. Vial consumed, one
+        Minecraft day of stallion cooldown.</li>
+</ol>
+
+<ul>
+    <li><strong>Sex is already available</strong> &mdash; §7.1 relies on the record
+        lookup for milking &mdash; and once sex becomes a gene (§5.3) it comes from
+        there instead. No new state.</li>
+    <li><strong>The vial should store the genotype, not a drawn gamete.</strong> Draw at
+        impregnation, using the same seeded path as ordinary breeding, and the vial
+        route is deterministic in exactly the way normal breeding is. Freezing a gamete
+        at collection time is the alternative and it is a worse fit &mdash; it puts the
+        draw somewhere the player cannot see it and gives the mare no part in it.</li>
+    <li><strong>Vial contents</strong>: genotype code, epigenome code, the carrot effect
+        list, and a <code>collectedFrom</code> marker. The marker exists solely so the
+        villager (§18) can tell a player-made vial from one it sold; if the villager is
+        cut, the marker is still worth keeping for the tooltip.</li>
+    <li><strong>Pregnancy is genuinely new.</strong> Vanilla breeding produces a foal
+        immediately. A gestation state means an attachment plus a tick, and answers for:
+        the mare is killed, the chunk unloads, the world reloads mid-term, the mare is
+        bred again normally while carrying.</li>
+    <li><strong>&ldquo;No magic carrot on a vial&rdquo;</strong> is a recipe restriction,
+        not a mechanic. Free.</li>
+    <li>Cryo vials and time-limited viability are <s>cut</s> &mdash; but the one-day
+        stallion cooldown is itself time-gating, and it inherits §21&rsquo;s
+        &ldquo;which day&rdquo; question.</li>
+</ul>
+
+<h3>15.2 The later tiers</h3>
+
+<p>
+    Embryo extraction, gene screening, gene splicing, cloning, cross-species. Each is a
+    block with an inventory and a screen, and each is endgame by intent. Three notes
+    that change how they should be scoped:
+</p>
+
+<ul>
+    <li><strong>The gene sequencer is not new work</strong> &mdash; it is the browser
+        (§17) or the family-tree screen pointed at a vial or an embryo. Build it as a
+        view, not a machine with its own UI.</li>
+    <li><strong>Gene splicing is the first thing in the mod that writes an arbitrary
+        genotype in survival.</strong> It needs the same validity predicate the creative
+        spawner (§9) needs &mdash; is this allele pair legal, does this locus exist
+        &mdash; and that predicate should be written once and shared. Splicing also
+        interacts with the lethals (§6.4) in an obvious way that wants deciding: can a
+        player splice a horse into a lethal genotype.</li>
+    <li><strong>Cross-species is much larger than its row.</strong> Donkeys and mules
+        are separate vanilla entity types, mules are sterile by design, and neither
+        carries any of this mod&rsquo;s genetics. Extending the genome to another
+        species is a project, not a tier. <strong>Scope it separately or cut it.</strong></li>
+</ul>
+
+<hr>
+
+<h2 id="database">16. Knowledge: the gene database and research papers</h2>
+
+<h3>16.1 The database</h3>
+
+<p>
+    A per-player set of discovered genes, filled by taming a horse carrying one,
+    breeding a foal with one, sequencing, or reading a paper. Per gene it holds the
+    symbol, name, descriptions, inheritance type, which allele variants have been seen,
+    whether the carrot recipe is unlocked, and where it was first met.
+</p>
+
+<ul>
+    <li><strong>It is per-player, per-world saved data</strong>, synced to the client
+        for the UI. The documents propose a JSON file per player uuid; use whatever
+        saved-data path the mod already uses rather than a bespoke file, and never store
+        it client-side, since it gates crafting.</li>
+    <li><strong>The description text does not exist for any gene.</strong> Name, blurb,
+        visual effect, gameplay effect &mdash; none of it is in the gene format today,
+        and a third-party gene will not have it either. §19.</li>
+</ul>
+
+<div class="note warn">
+    <span class="label">The gating question, and it is a philosophy question</span>
+    <p>
+        Today every gene a horse carries is visible &mdash; in the info panel, on the
+        pen signs, in the genotype code. A discovery database creates a
+        <strong>second source of truth about what a player knows</strong>, and the two
+        have to agree. Either the info panel starts hiding undiscovered genes &mdash; a
+        real behaviour change to something that ships today, and one that argues with
+        &ldquo;a player should be able to plan&rdquo; &mdash; or the database is
+        decorative and the only thing discovery actually gates is the carrot recipe.
+    </p>
+    <p>
+        <strong>The second reading is the cheaper and more consistent one</strong>, but
+        it is <a href="philosophy.html">Philosophy</a>&rsquo;s call. Decide there, record
+        the answer here.
+    </p>
+</div>
+
+<h3>16.2 Research papers</h3>
+
+<ul>
+    <li>An item with a gene component. Reading it adds the gene to the database and
+        unlocks its carrot recipe; crafting the carrot consumes it.</li>
+    <li><strong>Three sources</strong>: loot chests, other players, and writing one from
+        your own database at the cost of one book. The third is what makes knowledge
+        shareable rather than hoardable, and it is the cheapest of the three to build
+        &mdash; a button in the database tab.</li>
+    <li><strong>Loot injection</strong> is a global loot modifier on the NeoForge side,
+        weighted by rarity tier (§19). Not <code>common/</code> work.</li>
+    <li><strong>No villager trading for papers</strong> &mdash; per the first document.
+        The second document sells them at two tiers. See §18.</li>
+</ul>
+
+<hr>
+
+<h2 id="browser">17. The horse browser, and the creative egg</h2>
+
+<p>
+    One screen on the <code>H</code> key with five tabs: horse list, gene database,
+    vial inventory, herd view, and a crafting tree. Plus the out-of-band actions
+    &mdash; teleport a horse to a stall, whistle for bonded horses, recall to a holding
+    pen.
+</p>
+
+<ul>
+    <li><strong><code>FamilyTreeScreen</code> is the working reference</strong> for a
+        from-scratch retained-mode screen in this codebase, including scissor clipping
+        and the entity draw &mdash; the same note §9 makes about the spawner. It should
+        probably <em>become</em> a tab rather than stay a separate screen, and its
+        <code>drawHorseModel</code> is what row portraits use. The same warning applies:
+        build the render state from a throwaway client-only <code>Horse</code>, and do
+        not touch <code>ClientCoatCache</code>.</li>
+    <li><strong>The expensive part is not the UI &mdash; it is the index.</strong> There
+        is no list of a player&rsquo;s horses today. It needs a per-player owned-horse
+        registry, updated on tame, breed, death and transfer, holding enough denormalised
+        data (name, sex, age, genotype, bond, herd) that horses in unloaded chunks still
+        appear and can be sorted. <strong>Design that before the tabs.</strong></li>
+    <li><strong>Sort and filter by gene run server-side</strong> over that index, and the
+        result paginates. Do not sync every horse&rsquo;s genome to the client to filter
+        it there.</li>
+    <li><strong>Teleport, recall and whistle</strong> need the stall and pen definitions
+        that §11 says are missing, plus answers for a destination that no longer exists
+        and for whether any of it crosses dimensions &mdash; which matters because the
+        horse dimension (§8) exists.</li>
+    <li><strong>The crafting tree tab goes stale on contact with a modded gene.</strong>
+        Generate it from the recipe manager at runtime; do not hard-code the graph.</li>
+</ul>
+
+<div class="note warn">
+    <span class="label">The &ldquo;limited custom egg&rdquo; is §9&rsquo;s spawner, in a worse form</span>
+    <p>
+        A creative-only item that sets extension and agouti plus one heterozygous custom
+        gene is a strict subset of what the custom horse spawner already plans to do,
+        with its own validation code to maintain. <strong>Recommend cutting it</strong>
+        &mdash; and if a placeable, giftable object is genuinely wanted for events and
+        contest prizes, give the spawner an &ldquo;export as spawn egg&rdquo; output
+        instead. One screen, one validator, one code path.
+    </p>
+</div>
+
+<hr>
+
+<h2 id="villager">18. The Horse Master villager</h2>
+
+<div class="note danger">
+    <span class="label">The two documents contradict each other on whether this exists</span>
+    <p>
+        The system summary lists <strong>&ldquo;No Villager Trading &mdash; removed
+        (doesn&rsquo;t make sense thematically)&rdquo;</strong> among its settled
+        deletions, and repeats it under research papers. The second document is a
+        complete villager profession with a workstation, five tiers and sixteen trades,
+        selling random magic carrots, random research papers and random seed vials.
+    </p>
+    <p>
+        Both are recorded here because both were handed over. <strong>Settle this
+        first.</strong> It is a philosophy call rather than a code one: a trader who
+        sells papers and carrots is a second, purchasable path to every gene below
+        mythic, which is close to the thing the first document deleted. Nothing in
+        11&ndash;17 depends on the answer, so the rest of the layer can proceed while it
+        is open &mdash; but do not build half of it.
+    </p>
+</div>
+
+<h3>18.1 If it stays, what it needs</h3>
+
+<ul>
+    <li><strong>A profession, a workstation and a POI.</strong> Horse Trader&rsquo;s
+        Post: 3 hair cloth + 2 braided rope + 2 fence. Spawns where horses do &mdash;
+        plains, savanna, meadow.</li>
+    <li><strong>Random trades cannot be plain offers.</strong> A vanilla trade offer is a
+        fixed <code>ItemStack</code>. &ldquo;A random rare magic carrot&rdquo;, &ldquo;a
+        random paper&rdquo;, &ldquo;a vial with a rolled genotype&rdquo; each need a
+        custom listing that rolls when the offer is <em>generated</em> &mdash; which
+        means <strong>the roll is per restock, not per purchase</strong>. That is
+        already what the documents want: their &ldquo;stock refreshes every in-game
+        day&rdquo; is vanilla restock. Say so and delete the separate stock system.</li>
+    <li><strong>Buying back player-made vials needs component matching</strong> on
+        <code>collectedFrom</code> (§15.1), which a vanilla trade cannot express either
+        &mdash; the same custom listing does it.</li>
+    <li><strong>Random vials and random papers need the rarity field</strong> (§19), and
+        a pool per tier that a third-party gene joins automatically.</li>
+    <li><strong>Legendary and mythic are never sold</strong> &mdash; a rarity check in
+        the listing, and the reason the rarity tier has to be a real enum rather than a
+        display string.</li>
+    <li><strong>The custom gossip type</strong> (<code>HORSE_TRADER</code>, for
+        discounts) is <em>unverified</em> &mdash; gossip types are not obviously
+        extensible. Check before designing around it, and fall back to vanilla gossip if
+        not.</li>
+    <li><strong>Use vanilla&rsquo;s tier names.</strong> The document&rsquo;s ladder is
+        Apprentice (Novice) / Journeyman / Adept / Expert / Master; vanilla&rsquo;s is
+        Novice / Apprentice / Journeyman / Expert / Master. Five either way, so this is
+        purely a naming fix, but &ldquo;Adept&rdquo; does not exist.</li>
+</ul>
+
+<h3>18.2 The trade table as specified</h3>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Tier</th><th>Buys</th><th>Sells</th></tr></thead>
+<tbody>
+<tr><td><strong>1</strong></td><td>16 horse hair &rarr; 1 emerald</td><td>Hair bundle, 1 emerald</td></tr>
+<tr><td><strong>2</strong></td><td>8 hair bundles &rarr; 1 emerald</td><td>Basic whistle 2; blank ticket &times;2 for 1</td></tr>
+<tr><td><strong>3</strong></td><td>4 braided rope &rarr; 1 emerald</td><td>Mutinogenic 3, Chaos 4, Stabilizer 3, Magnifier 3</td></tr>
+<tr><td><strong>4</strong></td><td>2 hair cloth &rarr; 1 emerald</td><td>Common carrot 2, uncommon carrot 4, random vial (C/U) 3, paper (C/U) 5</td></tr>
+<tr><td><strong>5</strong></td><td>1 player-made vial &rarr; 5 emeralds</td><td>Rare carrot 8, epic carrot 12, random vial (R/E) 8, paper (R/E) 10</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    Prices, stock sizes and the &ldquo;more expensive than finding it&rdquo; balance
+    argument are <a href="philosophy.html">Philosophy</a>&rsquo;s, not this page&rsquo;s.
+    What belongs here is that <strong>hair buying is the early-game emerald tap</strong>
+    and therefore the number most likely to need retuning after the fact &mdash; keep it
+    in config.
+</p>
+
+<hr>
+
+<h2 id="gene-metadata">19. What a gene definition has to gain</h2>
+
+<p>
+    Almost everything in 12&ndash;18 reads metadata that no gene has. This is one change
+    to <a href="gene-format.html">the gene file format</a> and the
+    <a href="gene-creator/index.html">gene creator</a>, and it should land <strong>once,
+    before</strong> the systems that consume it &mdash; otherwise each of them invents
+    its own side table.
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>New field</th><th>Read by</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td><strong><code>rarity</code></strong> &mdash; common / uncommon / rare / epic / legendary / mythic</td><td>Carrot recipe cost, loot weighting, villager stock and pools, random vials</td><td>A real enum, not a string. <strong>Needs a default</strong> for a third-party gene that omits it &mdash; common is the safe one. The tier&rarr;rarity-item mapping stays in one table on the recipe side, not on the gene.</td></tr>
+<tr><td><strong><code>carrot</code></strong> &mdash; enabled, behaviour (heterozygous / homozygous), flavour ingredients</td><td>Magic carrot recipe and effect</td><td>Must be <strong>opt-out-able</strong> (§14.2). At least one flavour ingredient when enabled; defaults to the minimal recipe when the author defines none.</td></tr>
+<tr><td><strong>Description block</strong> &mdash; display name, blurb, visual effect, gameplay effect</td><td>Database, papers, tooltips, browser</td><td>The documents impose minimum character counts on gene authors. That is <strong>creator-side validation</strong>, not a runtime check &mdash; the runtime needs a fallback for a gene that arrives without text, not a crash.</td></tr>
+<tr><td><strong>Attached model parts</strong></td><td>Unicorn horn, wings</td><td>Below.</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3>19.1 The gene creator already is most of the &ldquo;web gene editor&rdquo;</h3>
+
+<p>
+    The system summary describes a browser-based visual gene designer as a future,
+    post-launch system. <strong>Its export half shipped</strong> &mdash; the creator
+    writes the JSON a gene needs, and the registry loads it without a rebuild (§3). The
+    genuinely new parts of that section are narrower than they look:
+</p>
+
+<ul>
+    <li><strong>Rarity, carrot behaviour, flavour ingredients and descriptions</strong>
+        become fields on the existing form, plus a schema version bump. Small.</li>
+    <li><strong>A visual expression designer</strong> &mdash; SVG upload, shapes and
+        curves for maximal expression, deletion down to minimal expression, per-part
+        colour ranges and gradients, glow and particles scaled by expression &mdash; is
+        a much larger claim than the rest of that document and effectively a second
+        product. <strong>Scope it separately.</strong> It also assumes an
+        expression&rarr;part-rendering model the coat pipeline does not have; the
+        epigenetics that exist select a seed, not a percentage that scales parts.</li>
+    <li>Gameplay effects authored per gene already have a home: the
+        <code>effects</code> block and its five verbs (§6.6). The editor should emit
+        <em>that</em>, not a parallel format.</li>
+</ul>
+
+<h3>19.2 Attached model parts</h3>
+
+<ul>
+    <li>The proposal is GeckoLib plus Blockbench, with an attached render layer whose
+        bones are children of the horse&rsquo;s body bone so they inherit every
+        animation, conditional on the horse&rsquo;s genes.</li>
+    <li><strong>This is a new runtime dependency and the mod&rsquo;s first non-texture
+        visual.</strong> The coat pipeline is texture-only and
+        <code>common/</code> is Minecraft-free, so <code>common/</code> can only declare
+        <em>that</em> a gene wants a part, by id; the renderer resolves it &mdash; the
+        same shape as <code>GradientLut</code> arriving as an <code>int[]</code>.</li>
+    <li><strong>Check whether a plain render layer parented to the existing model part
+        does the job</strong> before taking the dependency. Animation inheritance is the
+        entire argument for GeckoLib, and a horn does not animate independently of the
+        head.</li>
+    <li>Saddle, armour and any third-party tack render at the same time. Layer order and
+        z-fighting are the predictable bugs.</li>
+</ul>
+
+<hr>
+
+<h2 id="order">20. Suggested order of work</h2>
 
 <p>Each step is useful on its own and unblocks the next.</p>
 
@@ -1219,9 +1844,59 @@ interface ConditionRule    { void conditions(AllelePair, ConditionSink); } // CS
     </p>
 </div>
 
+<h3>The gameplay layer &mdash; a second chain, largely independent</h3>
+
+<p>
+    §§11&ndash;19 touch the genetics in only three places: the carrots bias a gamete
+    draw (§14), the vials carry a genome (§15), and the database and carrot recipes
+    read gene metadata (§19). Everything else &mdash; hair, bond, herds, the browser,
+    the villager &mdash; is ordinary Minecraft work that can proceed in parallel with
+    the gene rollout above.
+</p>
+
+<ol>
+    <li><strong>Settle the two prerequisites</strong> before writing anything: the
+        custom-entity question (§11) and whether the villager exists at all (§18). Both
+        are decisions, not work, and both invalidate a lot of code if answered
+        late.</li>
+    <li><strong>Gene metadata</strong> (§19) &mdash; rarity, the carrot block, the
+        description fields, and the creator form that writes them. Everything downstream
+        reads it, and adding it later means retrofitting every gene file.</li>
+    <li><strong>Hair and shearing</strong> (§12), including the custom parameterised
+        recipe type. It is the material floor for every other recipe, and shearing lands
+        beside milking in a file that already documents the trap.</li>
+    <li><strong>The carrots</strong> (§14) &mdash; the four breeding carrots first, since
+        they need only the gamete hook; magic carrots second, once §19 exists;
+        combination last.</li>
+    <li><strong>Seed vials</strong> (§15.1) after the carrots, since a vial captures
+        carrot effects. Gestation is the new part, not the item.</li>
+    <li><strong>Bond and herds</strong> (§13) whenever &mdash; but design the slow tick
+        <em>with</em> §7.2 rather than after it, or there will be two scans doing the
+        same work.</li>
+    <li><strong>Database and papers</strong> (§16), which is mostly UI once §19 is
+        done.</li>
+    <li><strong>The browser</strong> (§17) &mdash; the owned-horse index first, the tabs
+        second. <code>FamilyTreeScreen</code> should move into it rather than be
+        duplicated.</li>
+    <li><strong>The villager</strong> (§18) last, if it survives.</li>
+    <li><strong>IVF tiers 2&ndash;6</strong> (§15.2) and <strong>attached model
+        parts</strong> (§19.2) are endgame; cross-species should be re-scoped or cut
+        before it is scheduled at all.</li>
+</ol>
+
+<div class="note">
+    <span class="label">Build the spawner first anyway</span>
+    <p>
+        §9 was already worth pulling early for the gene work. It is worth more now: every
+        system in §§13&ndash;18 needs a horse with a known genotype to test against, and
+        the alternative is breeding for one each time. It also makes the
+        &ldquo;limited custom egg&rdquo; (§17) redundant before anyone builds it.
+    </p>
+</div>
+
 <hr>
 
-<h2 id="open">12. Decisions still open</h2>
+<h2 id="open">21. Decisions still open</h2>
 
 <h3>Settled &mdash; do not reopen</h3>
 
@@ -1269,10 +1944,19 @@ interface ConditionRule    { void conditions(AllelePair, ConditionSink); } // CS
 <tr><td><strong>Does the polygenic system survive?</strong></td><td>Leaning toward cutting it in favour of atomic genes; check first whether group traits already subsume it. Decide before the performance genes get written.</td></tr>
 <tr><td><strong>How is a cutie mark chosen?</strong></td><td>Allele-per-mark is the better breeding game; epigenetics scales further. A hybrid is probably right. Also: is mark colour its own gene?</td></tr>
 <tr><td><strong>What does &ldquo;a 0&ndash;100% chance the gene appears&rdquo; mean for a multi-allele gene?</strong></td><td>One draw for &ldquo;carries a variant&rdquo; then a weighted pick, or weights per allele copy? It changes how often homozygotes appear.</td></tr>
-<tr><td><strong>How long is milking&rsquo;s &ldquo;about an hour&rdquo;?</strong></td><td>A real hour is 72,000 ticks; a Minecraft hour is 1,000, and a whole Minecraft day is 20 real minutes.</td></tr>
+<tr><td><strong>How long is milking&rsquo;s &ldquo;about an hour&rdquo;, and what is &ldquo;a day&rdquo;?</strong></td><td>A real hour is 72,000 ticks; a Minecraft hour is 1,000, and a whole Minecraft day is 20 real minutes. Three things now depend on the answer, not one: milking&rsquo;s cooldown (§7.1), bond&rsquo;s daily cap (§13) and the stallion collection cooldown (§15.1). Answer once.</td></tr>
 <tr><td><strong>What happens to a saved horse when a gene mod is added or removed?</strong></td><td>Leaning toward padding missing segments with wild type on parse and dropping unknown ones with a warning &mdash; but it should be decided once and written into the breeding docs.</td></tr>
 <tr><td><strong>How much health does the mod want?</strong></td><td>Fewer hearts is uncontroversial; foals that die is the tonal question. Current answer: implement the genetics for everything and gate the deaths behind config.</td></tr>
 <tr><td><strong>Does aging ever land?</strong></td><td>Deliberately deferred, deliberately not foreclosed. If it does, the composer needs an age input and grey gets a real progression curve; nothing else changes.</td></tr>
+<tr><td><strong>Does the villager exist?</strong></td><td><strong>The two gameplay documents flatly contradict each other</strong> (§18) &mdash; one deletes villager trading as unthematic, the other specifies sixteen trades. A philosophy call. Nothing else in §§11&ndash;19 blocks on it, but do not build half of it.</td></tr>
+<tr><td><strong>A custom horse entity, or attachments on the vanilla <code>Horse</code>?</strong></td><td>The documents assume a subclass with vanilla spawns zeroed; the codebase assumes attachments. <strong>Leaning hard toward attachments</strong> &mdash; existing horses keep working, the backport stays feasible, and nothing in the gameplay layer actually needs a new entity type. Owner&rsquo;s call, but it has to be made before §§12&ndash;19 are designed.</td></tr>
+<tr><td><strong>Does discovery hide anything?</strong></td><td>If the gene database (§16.1) gates knowledge, the info panel has to start hiding undiscovered genes &mdash; a behaviour change to something that ships today. If it does not, discovery gates only the carrot recipe and the database is a record rather than a fog of war. The second is cheaper and more consistent with &ldquo;a player should be able to plan&rdquo;.</td></tr>
+<tr><td><strong>Do foals inherit epigenetic seeds from a parent?</strong></td><td>Decides whether the mutinogenic carrot (§14.1) is a breeding carrot at all or a cosmetic re-roll of the horse fed. <strong>Check the existing behaviour before designing the item</strong> &mdash; this is a question about shipped code, not a design choice.</td></tr>
+<tr><td><strong>Where do fed carrot effects live, and when do they expire?</strong></td><td>They must be stored on the horse and part of the determinism input (§14), not a side channel. Expiry is unspecified: the vial path has a 30-second window, the plain breeding path has none. One rule for both.</td></tr>
+<tr><td><strong>Does a seed vial store a genotype or a drawn gamete?</strong></td><td>Storing the genotype and drawing at impregnation keeps the vial route identical to ordinary breeding and keeps the mare in it &mdash; recommended, but the owner&rsquo;s call.</td></tr>
+<tr><td><strong>Is there stamina?</strong></td><td>The herd comfort buff (§13) is specified in terms of a resource the mod does not have. Either scope stamina as its own piece of work under §6.6&rsquo;s resource pools, or restate the buff in terms of health, speed or feed.</td></tr>
+<tr><td><strong>What is the rarity of a gene that declares none, and can a gene opt out of a carrot?</strong></td><td>An open registry means both cases will happen. Common as the rarity default, and <strong>yes</strong> to opting out &mdash; sex and the recessive lethals are genes for which a magic carrot is nonsense (§19).</td></tr>
+<tr><td><strong>Does a sheared horse look sheared?</strong></td><td>A coat variant doubles the texture key space (§10); a render-layer overlay does not; no visual at all is also a legitimate answer. Decide before shearing is built, not after (§12.1).</td></tr>
 <tr><td><strong>The 1.12.2 backport.</strong></td><td>Everything here is <code>common/</code>-side except entity scale, gait animation, the health tick handler, and the gene registration hook. Those four are the only places the backport goal should shape the design.</td></tr>
 </tbody>
 </table>
