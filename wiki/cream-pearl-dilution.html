@@ -3,186 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cream & Pearl Dilution - Wiki</title>
-    <style>
-        :root {
-            --bg-color: #0f172a;
-            --panel-bg: #1e293b;
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-            --accent: #38bdf8;
-            --border: #334155;
-            --code-bg: #020617;
-        }
-
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            margin: 0;
-            display: flex;
-            height: 100vh;
-            overflow: hidden;
-        }
-
-        /* Sidebar Navigation */
-        nav.sidebar {
-            width: 240px;
-            background-color: var(--panel-bg);
-            border-right: 1px solid var(--border);
-            padding: 1.5rem;
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-            flex-shrink: 0;
-        }
-
-        nav.sidebar a.back-link {
-            color: var(--accent);
-            text-decoration: none;
-            font-size: 0.9rem;
-            font-weight: bold;
-            margin-bottom: 1rem;
-            display: inline-block;
-        }
-
-        nav.sidebar ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        nav.sidebar li {
-            margin-bottom: 0.5rem;
-        }
-
-        nav.sidebar li a {
-            color: var(--text-muted);
-            text-decoration: none;
-            font-size: 0.95rem;
-        }
-
-        nav.sidebar li a.active {
-            color: var(--text-main);
-            font-weight: bold;
-        }
-
-        /* Content Layout */
-        main.content {
-            flex: 1;
-            display: flex;
-            gap: 1.5rem;
-            padding: 1.5rem;
-            overflow: hidden;
-        }
-
-        /* Information Panel */
-        .info-panel {
-            width: 380px;
-            background-color: var(--panel-bg);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 1.5rem;
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-            overflow-y: auto;
-            flex-shrink: 0;
-        }
-
-        .info-panel h1 {
-            margin: 0;
-            font-size: 1.75rem;
-            color: var(--accent);
-        }
-
-        .metadata-group {
-            display: flex;
-            flex-direction: column;
-            gap: 0.75rem;
-            border-top: 1px solid var(--border);
-            padding-top: 1rem;
-        }
-
-        .metadata-row {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.88rem;
-        }
-
-        .metadata-label {
-            color: var(--text-muted);
-        }
-
-        .metadata-value {
-            color: var(--text-main);
-            font-family: monospace;
-            font-weight: bold;
-        }
-
-        .description {
-            font-size: 0.9rem;
-            line-height: 1.5;
-            color: var(--text-muted);
-            border-top: 1px solid var(--border);
-            padding-top: 1rem;
-        }
-
-        /* Dilution Table */
-        .mode-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.82rem;
-            margin-top: 0.5rem;
-            border: 1px solid var(--border);
-        }
-
-        .mode-table th, .mode-table td {
-            padding: 0.4rem 0.6rem;
-            text-align: left;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .mode-table th {
-            background-color: rgba(255, 255, 255, 0.05);
-            color: var(--accent);
-        }
-
-        .mode-table td {
-            color: var(--text-main);
-        }
-
-        /* Code View Container */
-        .code-container {
-            flex: 1;
-            background-color: var(--code-bg);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        .code-header {
-            background-color: var(--panel-bg);
-            padding: 0.75rem 1rem;
-            border-bottom: 1px solid var(--border);
-            font-family: monospace;
-            font-size: 0.85rem;
-            color: var(--text-muted);
-        }
-
-        iframe.code-frame {
-            width: 100%;
-            height: 100%;
-            border: none;
-            background-color: #ffffff;
-        }
-    </style>
+    <title>Cream &amp; Pearl Dilution - Wiki</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
 </head>
 <body>
 
@@ -191,66 +14,59 @@
         <div style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted);">Dilution Genes</div>
         <ul>
             <li><a href="bay-coat.html">Bay Coat</a></li>
-            <li><a href="cream-pearl-dilution.html" class="active">Cream & Pearl</a></li>
+            <li><a href="cream-pearl-dilution.html" class="active">Cream &amp; Pearl</a></li>
+            <li><a href="dapple-grey.html">Dapple Grey</a></li>
+            <li><a href="champagne.html">Champagne</a></li>
         </ul>
     </nav>
 
     <main class="content">
-        <!-- Metadata Info Panel -->
         <section class="info-panel">
-            <h1>Cream & Pearl</h1>
+            <h1>Cream &amp; Pearl</h1>
             
             <div class="metadata-group">
                 <div class="metadata-row">
-                    <span class="metadata-label">Gene Loci</span>
-                    <span class="metadata-value">Cream (Cr), Pearl (prl)</span>
+                    <span class="metadata-label">Gene Key</span>
+                    <span class="metadata-value">horsegenetics.cream_pearl</span>
                 </div>
                 <div class="metadata-row">
-                    <span class="metadata-label">Single Cream Keep (R / B)</span>
-                    <span class="metadata-value">0.45 / 0.62</span>
+                    <span class="metadata-label">Dominance</span>
+                    <span class="metadata-value">Incomplete Dominant</span>
                 </div>
                 <div class="metadata-row">
-                    <span class="metadata-label">Double Pearl Keep (R / B)</span>
-                    <span class="metadata-value">0.55 / 0.52</span>
-                </div>
-                <div class="metadata-row">
-                    <span class="metadata-label">Double Dilute Keep (R / B)</span>
-                    <span class="metadata-value">0.08 / 0.38</span>
-                </div>
-                <div class="metadata-row">
-                    <span class="metadata-label">Black Tint Boost</span>
-                    <span class="metadata-value">0.28 - 0.33</span>
+                    <span class="metadata-label">Alleles</span>
+                    <span class="metadata-value">Cr, prl, C</span>
                 </div>
             </div>
 
             <div class="description">
-                Calculates the combined interaction between the Cream (<code>SLC45A2</code>) and Pearl loci. Evaluates gene dosages to apply single cream, double pearl, or double dilute modifiers across the pigment field.
-                
-                <table class="mode-table">
-                    <thead>
-                        <tr>
-                            <th>Cr</th>
-                            <th>prl</th>
-                            <th>Resulting Mode</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr><td>0</td><td>0-1</td><td>NONE</td></tr>
-                        <tr><td>1</td><td>0</td><td>SINGLE_CREAM</td></tr>
-                        <tr><td>0</td><td>2</td><td>DOUBLE_PEARL</td></tr>
-                        <tr><td>1</td><td>1+</td><td>DOUBLE_DILUTE</td></tr>
-                        <tr><td>2+</td><td>Any</td><td>DOUBLE_DILUTE</td></tr>
-                    </tbody>
-                </table>
+                Handles dose-dependent dilution effects including Palomino, Buckskin, Cremello, Perlino, Smoky Cream, and Pearl combinations.
             </div>
         </section>
 
-        <!-- Direct File Embed -->
         <section class="code-container">
-            <div class="code-header">Source File: src/com/example/horsegenetics/common/coat/pattern/CreamPearlDilution.java</div>
-            <iframe class="code-frame" src="../src/com/example/horsegenetics/common/coat/pattern/CreamPearlDilution.java"></iframe>
+            <div class="code-header">Source File: common/src/main/java/com/example/horsegenetics/common/genetics/genes/CreamPearlGene.java</div>
+            <pre class="code-body"><code id="code-block" class="language-java">Loading code...</code></pre>
         </section>
     </main>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+    <script>
+        const sourcePath = '../common/src/main/java/com/example/horsegenetics/common/genetics/genes/CreamPearlGene.java';
+        fetch(sourcePath)
+            .then(res => {
+                if (!res.ok) throw new Error('Could not load file');
+                return res.text();
+            })
+            .then(data => {
+                const codeBlock = document.getElementById('code-block');
+                codeBlock.textContent = data;
+                Prism.highlightElement(codeBlock);
+            })
+            .catch(err => {
+                document.getElementById('code-block').textContent = '// Error loading file: ' + err.message;
+            });
+    </script>
 </body>
 </html>

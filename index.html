@@ -13,6 +13,8 @@
             --accent: #38bdf8;
             --border: #334155;
             --card-hover: #26334d;
+            --tool-accent: #10b981;
+            --tool-hover: #1e3a34;
         }
 
         * {
@@ -71,6 +73,10 @@
             padding-left: 0.75rem;
         }
 
+        .category-title.tool-title {
+            border-left-color: var(--tool-accent);
+        }
+
         .gene-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -106,6 +112,16 @@
             color: var(--text-muted);
             font-family: monospace;
         }
+
+        /* Tool Card Styles */
+        a.gene-card.tool-card:hover {
+            background-color: var(--tool-hover);
+            border-color: var(--tool-accent);
+        }
+
+        a.gene-card.tool-card h2 {
+            color: var(--tool-accent);
+        }
     </style>
 </head>
 <body>
@@ -116,6 +132,17 @@
     </header>
 
     <main>
+        <!-- Tools & Editors -->
+        <section class="category-section">
+            <div class="category-title tool-title">Tools &amp; Editors</div>
+            <div class="gene-grid">
+                <a href="gene-creator.html" class="gene-card tool-card">
+                    <h2>Gene Visual Editor</h2>
+                    <span>Interactive 3D Spline &amp; Pattern Studio</span>
+                </a>
+            </div>
+        </section>
+
         <!-- Pattern Generators -->
         <section class="category-section">
             <div class="category-title">Pattern Generators</div>

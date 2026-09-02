@@ -3,177 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bay Coat Generator - Wiki</title>
-    <style>
-        :root {
-            --bg-color: #0f172a;
-            --panel-bg: #1e293b;
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-            --accent: #38bdf8;
-            --border: #334155;
-            --code-bg: #020617;
-        }
-
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            margin: 0;
-            display: flex;
-            height: 100vh;
-            overflow: hidden;
-        }
-
-        /* Sidebar Navigation */
-        nav.sidebar {
-            width: 240px;
-            background-color: var(--panel-bg);
-            border-right: 1px solid var(--border);
-            padding: 1.5rem;
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-            flex-shrink: 0;
-        }
-
-        nav.sidebar a.back-link {
-            color: var(--accent);
-            text-decoration: none;
-            font-size: 0.9rem;
-            font-weight: bold;
-            margin-bottom: 1rem;
-            display: inline-block;
-        }
-
-        nav.sidebar ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        nav.sidebar li {
-            margin-bottom: 0.5rem;
-        }
-
-        nav.sidebar li a {
-            color: var(--text-muted);
-            text-decoration: none;
-            font-size: 0.95rem;
-        }
-
-        nav.sidebar li a.active {
-            color: var(--text-main);
-            font-weight: bold;
-        }
-
-        /* Content Layout */
-        main.content {
-            flex: 1;
-            display: flex;
-            gap: 1.5rem;
-            padding: 1.5rem;
-            overflow: hidden;
-        }
-
-        /* Information Panel */
-        .info-panel {
-            width: 360px;
-            background-color: var(--panel-bg);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 1.5rem;
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-            overflow-y: auto;
-            flex-shrink: 0;
-        }
-
-        .info-panel h1 {
-            margin: 0;
-            font-size: 1.75rem;
-            color: var(--accent);
-        }
-
-        .metadata-group {
-            display: flex;
-            flex-direction: column;
-            gap: 0.75rem;
-            border-top: 1px solid var(--border);
-            padding-top: 1rem;
-        }
-
-        .metadata-row {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.88rem;
-        }
-
-        .metadata-label {
-            color: var(--text-muted);
-        }
-
-        .metadata-value {
-            color: var(--text-main);
-            font-family: monospace;
-            font-weight: bold;
-        }
-
-        .description {
-            font-size: 0.9rem;
-            line-height: 1.5;
-            color: var(--text-muted);
-            border-top: 1px solid var(--border);
-            padding-top: 1rem;
-        }
-
-        /* Code View Container */
-        .code-container {
-            flex: 1;
-            background-color: var(--code-bg);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        .code-header {
-            background-color: var(--panel-bg);
-            padding: 0.75rem 1rem;
-            border-bottom: 1px solid var(--border);
-            font-family: monospace;
-            font-size: 0.85rem;
-            color: var(--text-muted);
-        }
-
-        iframe.code-frame {
-            width: 100%;
-            height: 100%;
-            border: none;
-            background-color: #ffffff;
-        }
-    </style>
+    <title>Bay / Seal Brown Coat - Wiki</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
 </head>
 <body>
 
     <nav class="sidebar">
         <a href="../index.html" class="back-link">&larr; Back to Index</a>
-        <div style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted);">Coat Patterns</div>
+        <div style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted);">Pattern Generators</div>
         <ul>
             <li><a href="bay-coat.html" class="active">Bay Coat</a></li>
+            <li><a href="cream-pearl-dilution.html">Cream &amp; Pearl</a></li>
+            <li><a href="dapple-grey.html">Dapple Grey</a></li>
+            <li><a href="champagne.html">Champagne</a></li>
         </ul>
     </nav>
 
     <main class="content">
-        <!-- Metadata Info Panel -->
         <section class="info-panel">
-            <h1>Bay Coat</h1>
+            <h1>Bay / Seal Brown</h1>
             
             <div class="metadata-group">
                 <div class="metadata-row">
@@ -181,34 +30,39 @@
                     <span class="metadata-value">Agouti (A)</span>
                 </div>
                 <div class="metadata-row">
-                    <span class="metadata-label">Body Black Level</span>
-                    <span class="metadata-value">0.32</span>
-                </div>
-                <div class="metadata-row">
-                    <span class="metadata-label">Min Hoof Fraction</span>
-                    <span class="metadata-value">0.12</span>
-                </div>
-                <div class="metadata-row">
-                    <span class="metadata-label">Leg Range</span>
-                    <span class="metadata-value">0.15 - 0.95</span>
-                </div>
-                <div class="metadata-row">
-                    <span class="metadata-label">Leg Jitter</span>
-                    <span class="metadata-value">&plusmn;0.14</span>
+                    <span class="metadata-label">Pattern Type</span>
+                    <span class="metadata-value">Procedural Base Coat</span>
                 </div>
             </div>
 
             <div class="description">
-                Paints a red-brown body with black points (mane, tail, ears, and hooves). The height of black points climbing up the legs and face is determined continuously from the Agouti allele value. Higher rolls result in a "Seal Brown" phenotype rather than using a separate gene.
+                Restricts eumelanin (black pigment) to the points (mane, tail, lower legs, and ear tips) while leaving pheomelanin (red pigment) across the body.
             </div>
         </section>
 
-        <!-- Direct File Embed -->
         <section class="code-container">
             <div class="code-header">Source File: common/src/main/java/com/example/horsegenetics/common/coat/pattern/BayCoat.java</div>
-            <iframe class="code-frame" src="../common/src/main/java/com/example/horsegenetics/common/coat/pattern/BayCoat.java"></iframe>
+            <pre class="code-body"><code id="code-block" class="language-java">Loading code...</code></pre>
         </section>
     </main>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+    <script>
+        const sourcePath = '../common/src/main/java/com/example/horsegenetics/common/coat/pattern/BayCoat.java';
+        fetch(sourcePath)
+            .then(res => {
+                if (!res.ok) throw new Error('Could not load file');
+                return res.text();
+            })
+            .then(data => {
+                const codeBlock = document.getElementById('code-block');
+                codeBlock.textContent = data;
+                Prism.highlightElement(codeBlock);
+            })
+            .catch(err => {
+                document.getElementById('code-block').textContent = '// Error loading file: ' + err.message;
+            });
+    </script>
 </body>
 </html>

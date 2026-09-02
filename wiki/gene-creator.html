@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Procedural Horse Gene Editor</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #1a1a1a; color: #eee; display: flex; height: 100vh; overflow: hidden; }
+    
+    #sidebar { width: 340px; background: #252526; border-right: 1px solid #3c3c3c; display: flex; flex-direction: column; padding: 15px; gap: 15px; overflow-y: auto; }
+    #viewport-container { flex: 1; position: relative; display: flex; background: #111; }
+    #canvas-2d-container { width: 300px; background: #222; border-left: 1px solid #3c3c3c; padding: 10px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+    
+    h2, h3 { color: #58a6ff; font-size: 1.1rem; }
+    .section { background: #2d2d2d; padding: 10px; border-radius: 6px; border: 1px solid #3c3c3c; display: flex; flex-direction: column; gap: 8px; }
+    label { font-size: 0.85rem; color: #ccc; display: flex; justify-content: space-between; align-items: center; }
+    input, select, button { background: #3c3c3c; border: 1px solid #555; color: #fff; padding: 6px 10px; border-radius: 4px; font-size: 0.85rem; }
+    input[type="number"] { width: 70px; }
+    button { cursor: pointer; background: #238636; border: none; font-weight: bold; }
+    button:hover { background: #2ea043; }
+    button.secondary { background: #388bfd; }
+    button.danger { background: #da3633; }
+    
+    .layer-item { background: #1e1e1e; padding: 8px; border-radius: 4px; border: 1px solid #444; margin-bottom: 6px; font-size: 0.85rem; }
+    #textureCanvas { border: 1px solid #555; background: #fff; width: 256px; height: 256px; image-rendering: pixelated; }
+    #three-canvas { width: 100%; height: 100%; }
+  </style>
+
+  <!-- Import Three.js & OrbitControls -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+</head>
+<body>
+
+  <!-- Left Sidebar: Gene Controls -->
+  <div id="sidebar">
+    <h2>Gene Editor</h2>
+    
+    <div class="section">
+      <label>Gene Identifier:
+        <input type="text" id="geneName" value="gene_dappled_grey">
+      </label>
+      <label>Base Layer:
+        <select id="baseColor">
+          <option value="#ffffff">White Base</option>
+          <option value="#8b4513">Bay / Chestnut</option>
+          <option value="#111111">Black</option>
+        </select>
+      </label>
+    </div>
+
+    <div class="section">
+      <h3>Add Vector Marking Layer</h3>
+      <label>Shape Type:
+        <select id="toolType">
+          <option value="curve">Spline / Curve</option>
+          <option value="ellipse">Ellipse / Dapple Spot</option>
+          <option value="polygon">Polygon / Patch</option>
+        </select>
+      </label>
+      <label>Min Size (px): <input type="number" id="minSize" value="4" min="1" max="100"></label>
+      <label>Max Size (px): <input type="number" id="maxSize" value="12" min="1" max="100"></label>
+      <label>Frequency (Count): <input type="number" id="frequency" value="25" min="1" max="500"></label>
+      <label>Primary Color: <input type="color" id="primaryColor" value="#4a4a4a"></label>
+      <label>Secondary Color (Gradient): <input type="color" id="secondaryColor" value="#a0a0a0"></label>
+      
+      <button id="addLayerBtn">Add Layer to Gene</button>
+    </div>
+
+    <div class="section">
+      <h3>Gene Markings Stack</h3>
+      <div id="layersList"></div>
+    </div>
+
+    <button id="exportGeneBtn" class="secondary">Export Gene JSON</button>
+  </div>
+
+  <!-- Center Viewport: 3D Minecraft Horse Model -->
+  <div id="viewport-container">
+    <canvas id="three-canvas"></canvas>
+  </div>
+
+  <!-- Right Sidebar: 2D Texture Map Target -->
+  <div id="canvas-2d-container">
+    <h3>2D UV Texture Canvas</h3>
+    <canvas id="textureCanvas" width="256" height="256"></canvas>
+    <p style="font-size: 0.75rem; color: #aaa; text-align: center;">Direct UV layout rendering target for the 3D mesh.</p>
+  </div>
+
+  <script>
+    // --- 1. Gene Data Model ---
+    let geneDefinition = {
+      id: "gene_dappled_grey",
+      baseColor: "#ffffff",
+      layers: []
+    };
+
+    // --- 2. 2D Texture Generator & Renderer ---
+    const texCanvas = document.getElementById('textureCanvas');
+    const ctx = texCanvas.getContext('2d');
+
+    function renderTexture() {
+      // Clear with base color
+      ctx.fillStyle = geneDefinition.baseColor;
+      ctx.fillRect(0, 0, texCanvas.width, texCanvas.height);
+
+      // Procedurally render defined layers onto the canvas
+      geneDefinition.layers.forEach(layer => {
+        for (let i = 0; i < layer.frequency; i++) {
+          const x = Math.random() * texCanvas.width;
+          const y = Math.random() * texCanvas.height;
+          const size = layer.minSize + Math.random() * (layer.maxSize - layer.minSize);
+
+          ctx.save();
+          const grad = ctx.createRadialGradient(x, y, 0, x, y, size);
+          grad.addColorStop(0, layer.primaryColor);
+          grad.addColorStop(1, layer.secondaryColor);
+          ctx.fillStyle = grad;
+          ctx.strokeStyle = layer.primaryColor;
+
+          if (layer.type === 'ellipse') {
+            ctx.beginPath();
+            ctx.ellipse(x, y, size, size * 0.7, Math.random() * Math.PI, 0, Math.PI * 2);
+            ctx.fill();
+          } else if (layer.type === 'polygon') {
+            ctx.beginPath();
+            const points = 5;
+            for (let j = 0; j < points; j++) {
+              const angle = (j / points) * Math.PI * 2;
+              const r = size * (0.6 + Math.random() * 0.4);
+              const px = x + Math.cos(angle) * r;
+              const py = y + Math.sin(angle) * r;
+              if (j === 0) ctx.moveTo(px, py);
+              else ctx.lineTo(px, py);
+            }
+            ctx.closePath();
+            ctx.fill();
+          } else if (layer.type === 'curve') {
+            ctx.beginPath();
+            ctx.lineWidth = size * 0.2;
+            ctx.moveTo(x, y);
+            ctx.bezierCurveTo(
+              x + (Math.random() - 0.5) * 40, y + (Math.random() - 0.5) * 40,
+              x + (Math.random() - 0.5) * 40, y + (Math.random() - 0.5) * 40,
+              x + (Math.random() - 0.5) * 60, y + (Math.random() - 0.5) * 60
+            );
+            ctx.stroke();
+          }
+          ctx.restore();
+        }
+      });
+
+      if (horseTexture) horseTexture.needsUpdate = true;
+    }
+
+    // --- 3. Three.js 3D Viewport Setup ---
+    const viewport = document.getElementById('viewport-container');
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x111111);
+
+    const camera = new THREE.PerspectiveCamera(45, viewport.clientWidth / viewport.clientHeight, 0.1, 1000);
+    camera.position.set(20, 15, 25);
+
+    const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('three-canvas'), antialias: true });
+    renderer.setSize(viewport.clientWidth, viewport.clientHeight);
+
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+
+    // Lighting
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+    scene.add(ambientLight);
+    const dirLight = new THREE.DirectionalLight(0xffffff, 0.5);
+    dirLight.position.set(10, 20, 15);
+    scene.add(dirLight);
+
+    // Dynamic Canvas Texture
+    const horseTexture = new THREE.CanvasTexture(texCanvas);
+    horseTexture.magFilter = THREE.NearestFilter;
+    const horseMaterial = new THREE.MeshLambertMaterial({ map: horseTexture });
+
+    // Blocky Minecraft-Style Horse Model Group
+    const horseGroup = new THREE.Group();
+
+    // Body
+    const bodyGeom = new THREE.BoxGeometry(6, 6, 10);
+    const bodyMesh = new THREE.Mesh(bodyGeom, horseMaterial);
+    bodyMesh.position.set(0, 7, 0);
+    horseGroup.add(bodyMesh);
+
+    // Neck & Head
+    const neckGeom = new THREE.BoxGeometry(2.5, 6, 3);
+    const neckMesh = new THREE.Mesh(neckGeom, horseMaterial);
+    neckMesh.position.set(0, 11, 4);
+    neckMesh.rotation.x = -0.3;
+    horseGroup.add(neckMesh);
+
+    const headGeom = new THREE.BoxGeometry(2.6, 2.6, 5);
+    const headMesh = new THREE.Mesh(headGeom, horseMaterial);
+    headMesh.position.set(0, 13.5, 5.5);
+    horseGroup.add(headMesh);
+
+    // Legs
+    const createLeg = (x, z) => {
+      const legGeom = new THREE.BoxGeometry(1.8, 7, 1.8);
+      const legMesh = new THREE.Mesh(legGeom, horseMaterial);
+      legMesh.position.set(x, 3.5, z);
+      return legMesh;
+    };
+    horseGroup.add(createLeg(-2, 3.5));
+    horseGroup.add(createLeg(2, 3.5));
+    horseGroup.add(createLeg(-2, -3.5));
+    horseGroup.add(createLeg(2, -3.5));
+
+    scene.add(horseGroup);
+
+    // --- 4. UI Interactions & Event Handlers ---
+    document.getElementById('baseColor').addEventListener('change', (e) => {
+      geneDefinition.baseColor = e.target.value;
+      renderTexture();
+    });
+
+    document.getElementById('addLayerBtn').addEventListener('click', () => {
+      const layer = {
+        id: Date.now(),
+        type: document.getElementById('toolType').value,
+        minSize: parseFloat(document.getElementById('minSize').value),
+        maxSize: parseFloat(document.getElementById('maxSize').value),
+        frequency: parseInt(document.getElementById('frequency').value),
+        primaryColor: document.getElementById('primaryColor').value,
+        secondaryColor: document.getElementById('secondaryColor').value
+      };
+
+      geneDefinition.layers.push(layer);
+      updateLayersUI();
+      renderTexture();
+    });
+
+    function updateLayersUI() {
+      const list = document.getElementById('layersList');
+      list.innerHTML = '';
+      geneDefinition.layers.forEach((layer, idx) => {
+        const item = document.createElement('div');
+        item.className = 'layer-item';
+        item.innerHTML = `
+          <strong>${idx + 1}. ${layer.type.toUpperCase()}</strong> (${layer.frequency}x)<br>
+          Size: ${layer.minSize}-${layer.maxSize}px
+          <button class="danger" style="float:right; padding: 2px 6px;" onclick="removeLayer(${layer.id})">X</button>
+        `;
+        list.appendChild(item);
+      });
+    }
+
+    window.removeLayer = function(id) {
+      geneDefinition.layers = geneDefinition.layers.filter(l => l.id !== id);
+      updateLayersUI();
+      renderTexture();
+    };
+
+    // Export JSON
+    document.getElementById('exportGeneBtn').addEventListener('click', () => {
+      geneDefinition.id = document.getElementById('geneName').value;
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(geneDefinition, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `${geneDefinition.id}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+    });
+
+    // Handle Window Resizing
+    window.addEventListener('resize', () => {
+      camera.aspect = viewport.clientWidth / viewport.clientHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(viewport.clientWidth, viewport.clientHeight);
+    });
+
+    // Render loop
+    function animate() {
+      requestAnimationFrame(animate);
+      controls.update();
+      renderer.render(scene, camera);
+    }
+
+    // Initial render call
+    renderTexture();
+    animate();
+  </script>
+</body>
+</html>
