@@ -40,10 +40,15 @@ see CLAUDE.md "Running the game".
 
 ## Still to verify
 
-- [ ] **The genotype gallery** (new, 2026-09-01) - the horse dimension now
-  builds one pen per entry in `GenotypeCatalog`: **434** visually distinct
-  genotypes out of 19 683 total, two per segment, right-hand pen = even index,
-  **1 519 blocks** of corridor. Check in-game:
+- [ ] **The genotype gallery** (new, 2026-09-01) - **slated for revert**, so
+  this is now low-value: the owner has decided the dimension goes back to
+  **random** pens (keeping the pairs and the per-pen genome sign) - see
+  `Docs/to be completed.md` §9. Verify only the parts that survive the revert
+  (the per-pen sign, the pairs, the pen amenities); don't spend a session
+  walking 1 519 blocks checking catalogue order. What it does *today*: one pen
+  per entry in `GenotypeCatalog`, **434** visually distinct genotypes out of
+  19 683 total, two per segment, right-hand pen = even index, **1 519 blocks**
+  of corridor. Check in-game:
   - the entrance sign three blocks in front of the return portal reads
     `Genotypes / 19,683 / Distinct / 434 pens`;
   - the first six pens, right/left alternating, are `eeaa`, `EEaa`, `eeAA`,

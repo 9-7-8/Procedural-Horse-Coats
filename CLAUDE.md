@@ -27,6 +27,30 @@ why the logic is quarantined in a game-free module.
   one-line-per-gene table.
 - **`Docs/to be verified.md`** is the rolling **`runClient` checklist** - what's
   built but not yet confirmed in-game. Update after every play session.
+- **`Docs/Philosophy.md`** is the **why** - Mendelian breeding as a game of
+  skill, procgen coats for functionally infinite outcomes, "interesting" being
+  the player's word, and the deliberately-acknowledged abstractions (no
+  crossing over, no aging; **X-linked genes are the one exception**). It also
+  owns the **determinism contract** - the same code always makes the same
+  horse, what that forbids, and the founder-only randomness rule - because
+  that's a standing rule, not a task. It ends with a priority order for when
+  two goals conflict. **Read it before making a design call**; most arguments
+  in the other docs are downstream of it. Keep it short and principled - no
+  implementation detail, no status, no task lists.
+- **`Docs/to be completed.md`** is the **long-range backlog** - the full gene
+  wishlist and the systems it needs (the three-phase pigment pipeline, the
+  determinism contract, hard-coded gene priority, the modder-facing
+  gene-authoring API, non-coat and health genes), each with notes on what would
+  have to change - plus the non-gene features (mare milking, healing gated on
+  nearby water + food, a creative-only custom horse spawner) and the **planned
+  revert of the genotype gallery** to random pens. It is **work items only**;
+  the reasoning behind them lives in `Philosophy.md`. Nothing in it is
+  implemented; when something ships it moves to `Gene Dict.md` /
+  `breeding.md` and is deleted there. Its "Decisions still open" section keeps
+  a short list of what's already **settled** - aging out of scope, health as
+  fewer hearts, the magical RGB phase being signed unclamped `int`s capped only
+  at conversion, alphanumeric allele tokens with `n` as wild type - so a later
+  session doesn't reopen them.
 
 ## Status snapshot (keep this current)
 
@@ -266,8 +290,12 @@ order).
 - **Founders only** roll fresh epigenetics (`Epigenome.random` via
   `CoatGenerator.generate`). A foal must never go through that path - see the
   data-flow section.
-- `priority` has no other consumer yet; it's a full-range int because more uses
-  are planned.
+- `priority` has no other consumer, and **by design it never will**: it picks
+  *which copy's seed expresses*, never the order genes are processed in. Gene
+  order comes from a hard-coded per-gene number (planned - see
+  `Docs/to be completed.md` §3), so that two horses with the same genotype and
+  the same seeds can't diverge on priority alone and silently share a coat
+  cache entry. It stays a full-range int for headroom.
 
 Full inheritance detail: **`Docs/breeding.md`**.
 
@@ -974,7 +1002,10 @@ a clean exit forgets them.
 
 The **`runClient` checklist lives in `Docs/to be verified.md`** - both the
 **open issues** found in-game and what's still unconfirmed. Keep that file
-current after each session.
+current after each session. The **long-range** backlog (the full gene wishlist,
+the three-phase pigment pipeline, per-allele stack priority, non-coat and
+health genes) lives in **`Docs/to be completed.md`**; this list stays
+near-term.
 
 **Fixed since that session:** grey (was "flat near-white, wants a rework") is
 now the `GreyCoat` dapple grey - built, unit-tested and sample-baked, **not yet
@@ -996,10 +1027,14 @@ yet)** - full detail in `Docs/to be verified.md`:
 
 Design follow-ups (not just "go look at it"):
 
-1. **Grey still has no age.** `GreyCoat`'s progression is drawn once from the
-   `G` copy's epigenetics and fixed for life, so a horse doesn't grey out as it
-   ages and flea-bitten grey isn't modelled. Both want a real age input to the
-   pipeline (the composer only knows adult vs foal).
+1. **Grey has no age - and that's now a decision, not a gap.** Horse **aging is
+   deliberately out of scope** (it risks feeling bad for a player attached to a
+   horse), so `GreyCoat`'s progression stays drawn once from the `G` copy's
+   epigenetics and fixed for life: one grey is a steel four-year-old, another
+   near-white, neither changes. Flea-bitten grey and grey melanoma are parked
+   with it. The option isn't foreclosed - reopening it means giving the
+   composer a real age input, which today only knows adult vs foal. See
+   `Docs/to be completed.md` §7.4.
 2. **Foal geometry is approximate** - `Skin.BABY` uses rest-pose AABBs and
    pre-resolved neck/head/ear pivots; markings on the foal face/neck can land
    loosely. Also the foal mesh has no MANE/MUZZLE part, so bay foal "black up
@@ -1020,8 +1055,7 @@ Design follow-ups (not just "go look at it"):
    save-reload** - see `Docs/to be verified.md`.
 8. **Epigenetics follow-ups** - a foal copies a parent's per-allele seed
    **exactly**, with no variation, so a closed line converges on one look;
-   `AlleleEpigenetics.priority` has no consumer beyond the homozygote
-   tie-break; and the epigenome lives on the entity, not on `HorseRecord`, so
+   and the epigenome lives on the entity, not on `HorseRecord`, so
    `FamilyTreeScreen` draws ancestors from `Epigenome.fromSeed(record UUID)` -
    a plausible stand-in, not the real coat.
 9. **Use `Gene.dominance()` beyond the gallery** - the metadata is on every
@@ -1057,8 +1091,13 @@ its licence is compatible.
 - The breeding / pedigree / horse-record / **stat-inheritance** system is
   documented **only** in `Docs/breeding.md`; **each gene** is documented **only** in
   `Docs/Gene Dict.md`; the **`runClient` checklist** is **only** in
-  `Docs/to be verified.md`. Update the relevant file in the same change - a pointer
-  from CLAUDE.md is fine, a copy is not.
+  `Docs/to be verified.md`; the **design rationale** is **only** in
+  `Docs/Philosophy.md` and the **future backlog** **only** in
+  `Docs/to be completed.md`. Update the relevant file in the same change - a
+  pointer from CLAUDE.md is fine, a copy is not.
+- **Keep the why out of the backlog.** `Docs/to be completed.md` is work items;
+  when a justification there runs longer than a clause it belongs in
+  `Docs/Philosophy.md` with a pointer back.
 - **No legacy / back-compat code.** Dev only, single tester, no saves to keep -
   when a format changes, change it and move on (no genotype-code padding, no
   attachment field fallbacks).
