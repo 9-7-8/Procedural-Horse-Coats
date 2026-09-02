@@ -2,6 +2,8 @@ package com.example.horsegenetics.common.genetics.genes;
 
 import com.example.horsegenetics.common.Rng;
 import com.example.horsegenetics.common.coat.pattern.CoatBuildContext;
+import com.example.horsegenetics.common.coat.pattern.PigmentField;
+import com.example.horsegenetics.common.coat.pattern.PigmentView;
 import com.example.horsegenetics.common.coat.pattern.CoatRegions;
 import com.example.horsegenetics.common.genetics.Allele;
 import com.example.horsegenetics.common.genetics.DominancePattern;
@@ -70,11 +72,13 @@ public final class ChampagneGene implements Gene {
     }
 
     @Override
-    public void restrict(AllelePair pair, CoatBuildContext ctx) {
+    public PigmentField restrict(AllelePair pair, CoatBuildContext ctx, PigmentView coat) {
         if (!isChampagne(pair)) {
-            return;
+            return null;
         }
-        CoatRegions.restrictAll(ctx.skin(), ctx.pigment(),
-                (f, px, py, p) -> f.dilute(px, py, KEEP_RED, KEEP_BLACK, BLACK_TINT));
+        PigmentField f = coat.mutableCopy();
+        CoatRegions.restrictAll(ctx.skin(), f,
+                (field, px, py, p) -> field.dilute(px, py, KEEP_RED, KEEP_BLACK, BLACK_TINT));
+        return f;
     }
 }

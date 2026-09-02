@@ -32,6 +32,10 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
+    // The exhaustive tests scale as 3^genes: CoatTextureIdTest walks every
+    // genotype (177 147 at 11 genes) and CoatTextureComposerTest bakes 2^genes
+    // coats. Gradle's 512 MB default stopped being enough at 11 genes.
+    maxHeapSize = "2g"
 }
 
 // Render sample coats through the real overlay pipeline (composer + gradient +

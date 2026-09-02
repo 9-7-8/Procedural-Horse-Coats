@@ -2,6 +2,10 @@ package com.example.horsegenetics.common.genetics;
 
 import com.example.horsegenetics.common.Rng;
 import com.example.horsegenetics.common.coat.pattern.CoatBuildContext;
+import com.example.horsegenetics.common.coat.pattern.ColorField;
+import com.example.horsegenetics.common.coat.pattern.ColorView;
+import com.example.horsegenetics.common.coat.pattern.PigmentField;
+import com.example.horsegenetics.common.coat.pattern.PigmentView;
 
 import java.util.List;
 
@@ -9,25 +13,38 @@ import java.util.List;
  * A single heritable gene: its alleles, how they segregate, and how it changes
  * the coat.
  *
- * <p>The coat is built by starting every pixel at "maximal red + maximal black
- * pigment" (a black horse), then:
+ * <p>The coat is built in <b>three phases</b>. Every pixel starts at "maximal
+ * red + maximal black pigment, no magical colour" - a plain black horse - and
+ * then:
  * <ol>
- *   <li>every visible <b>natural</b> gene ({@link #isNatural()}, the default)
- *       gets a {@link #restrict} turn to push the shared
- *       {@link CoatBuildContext#pigment() pigment field} down - natural genes
- *       do <i>nothing else</i>;</li>
- *   <li>the pigment field is resolved to colour through the red/black gradient
- *       LUT (so champagne-on-bay looks different from champagne-on-black, and
- *       anything on white is invisible);</li>
- *   <li>every visible <b>non-natural</b> gene gets an {@link #overlayLayer}
- *       turn: it fills an ARGB layer that is then painted <i>flat on top of</i>
- *       the resolved coat (opaque layer texels win outright - the effect shows
- *       the same on a black, a chestnut or a white horse).</li>
+ *   <li><b>natural (melanin) phase</b> - every visible <b>natural</b> gene
+ *       ({@link #isNatural()}, the default) gets a {@link #restrict} turn to
+ *       push the {@link PigmentView pigment field} <i>down</i>. Downward only:
+ *       a natural gene can take red or black away, never add colour.</li>
+ *   <li><b>resolve</b> - the surviving {@code (red, black)} pair is looked up
+ *       in the red/black gradient and becomes an RGB colour (so
+ *       champagne-on-bay differs from champagne-on-black, and anything under a
+ *       fully-restricted white is invisible).</li>
+ *   <li><b>magical (RGB) phase</b> - every visible <b>magical</b> gene
+ *       ({@code isNatural() == false}) gets a {@link #tint} turn to add or
+ *       remove signed red / green / blue on top of that resolved colour. The
+ *       accumulator is an uncapped {@code int} per channel and is only capped
+ *       to 0-255 at conversion, so a gene can commit hard enough that nothing
+ *       else can pull the horse back.</li>
  * </ol>
  *
+ * <p><b>A gene is natural or magical, never both</b> - declared, not inferred.
+ * A gene that wants to do both registers as two genes. Natural is reserved for
+ * genes that exist in real life (see {@code Docs/Philosophy.md}).
+ *
+ * <p><b>Both coat hooks are pure.</b> A gene is handed read-only views of the
+ * state so far and <i>returns</i> its contribution; it never mutates shared
+ * scratch space. Two genes handed the same inputs always return the same
+ * outputs, and each is testable on its own against a synthetic coat.
+ *
  * <p>(This interface lives in {@code genetics} but references
- * {@code coat.pattern.CoatBuildContext} - the two packages form an intentional
- * cycle so "the coat function lives on the gene" stays literally true.)
+ * {@code coat.pattern} - the two packages form an intentional cycle so "the
+ * coat function lives on the gene" stays literally true.)
  */
 public interface Gene {
 
@@ -49,9 +66,10 @@ public interface Gene {
     DominancePattern dominance();
 
     /**
-     * A <b>natural</b> gene only restricts red / black pigment ({@link #restrict});
-     * it never paints colour directly. Non-natural genes (only Test so far) are
-     * painted flat on top after the pigment field is resolved.
+     * A <b>natural</b> gene only restricts red / black pigment
+     * ({@link #restrict}); it never paints colour. A <b>magical</b> gene
+     * ({@code false}, only Test so far) only adds signed RGB ({@link #tint})
+     * after the pigment field has been resolved. Never both.
      */
     default boolean isNatural() {
         return true;
@@ -81,17 +99,43 @@ public interface Gene {
 
     // --- coat contribution -----------------------------------------------
 
-    /** Natural genes: mutate {@code ctx.pigment()} for a horse carrying {@code pair}. */
-    default void restrict(AllelePair pair, CoatBuildContext ctx) {
+    /**
+     * <b>Phase 1.</b> A natural gene's turn to push pigment down, given the
+     * coat as the genes before it have left it.
+     *
+     * <p>Take {@code coat}{@link PigmentView#mutableCopy() .mutableCopy()},
+     * paint into that, and return it. Return {@code null} (the default) to
+     * change nothing - which is also the cheap answer for a gene whose pair
+     * happens not to express. <b>Never write through {@code coat}</b>: it is
+     * the previous gene's output and the next gene's input.
+     *
+     * <p>The magical field does not exist yet at this point in the bake, which
+     * is why - unlike {@link #tint} - there is nothing to read here but the
+     * pigment.
+     */
+    default PigmentField restrict(AllelePair pair, CoatBuildContext ctx, PigmentView coat) {
+        return null;
     }
 
     /**
-     * Non-natural genes: fill {@code layer} (row-major ARGB, pre-filled
-     * <b>transparent</b>) with the colour to paint flat on top of the resolved
-     * coat. Every texel the layer leaves transparent is left untouched; every
-     * opaque texel replaces whatever the natural pass resolved there.
+     * <b>Phase 3.</b> A magical gene's turn to add colour, given the resolved
+     * natural {@code coat} (so a gene can <i>find</i> the black areas, or the
+     * white ones, before painting them) and the {@code colour} accumulated by
+     * the magical genes before it.
+     *
+     * <p>Return a delta - {@link ColorField#deltaLike(ColorView)} filled with
+     * {@link ColorField#add} - or {@code null} for no contribution. Deltas are
+     * folded in by signed integer addition, so ordinary magical genes are
+     * order-independent. A gene that must show identically on any base uses
+     * {@link ColorField#set} instead, which replaces rather than adds.
+     *
+     * <p>A texel the natural phase left fully transparent (dominant white, a
+     * splash marking) has zero opacity: colour alone will not show there, so a
+     * gene that means to paint a white horse must raise
+     * {@link ColorField#addOpacity} or {@code set} the texel.
      */
-    default void overlayLayer(AllelePair pair, CoatBuildContext ctx, int[] layer) {
+    default ColorField tint(AllelePair pair, CoatBuildContext ctx, PigmentView coat, ColorView colour) {
+        return null;
     }
 
     /** Does {@code pair} change the coat at all, in the context of the whole {@code genotype}? */

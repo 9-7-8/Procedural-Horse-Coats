@@ -1,16 +1,23 @@
 package com.example.horsegenetics.common.coat.pattern;
 
 /**
- * The <b>overlay layer</b> the genes build up: per texel, how much red
- * (pheomelanin) and black (eumelanin) pigment survives, each in {@code [0, 1]}.
+ * <b>Phase 1</b> of the coat pipeline: per texel, how much red (pheomelanin)
+ * and black (eumelanin) pigment survives, each in {@code [0, 1]}.
  *
  * <p>Every texel starts at {@code (red = 1, black = 1)} - a maximally
- * pigmented black horse. Genes then knock pigment down
+ * pigmented black horse. Natural genes then knock pigment down
  * ({@link #restrictRed}/{@link #restrictBlack} multiply it toward 0,
- * {@link #setRed}/{@link #setBlack} clamp it). {@link CoatTextureComposer}
- * later reads each texel and looks the colour up in the red/black gradient.
+ * {@link #setRed}/{@link #setBlack} clamp it, {@link #dilute} does both and
+ * walks the sample sideways). Pigment only ever comes off; nothing here can
+ * add colour, which is what the magical {@link ColorField} is for.
+ *
+ * <p>{@link CoatTextureComposer} then resolves each texel through the
+ * red/black gradient into that colour field.
+ *
+ * <p>A gene never mutates the field it was handed - it works on a
+ * {@link PigmentView#mutableCopy()} and returns that. See {@code Gene#restrict}.
  */
-public final class PigmentField {
+public final class PigmentField implements PigmentView {
 
     private final int size;
     private final float[] red;
@@ -24,16 +31,27 @@ public final class PigmentField {
         java.util.Arrays.fill(black, 1.0f);
     }
 
+    @Override
     public int size() {
         return size;
     }
 
+    @Override
     public float red(int px, int py) {
         return red[py * size + px];
     }
 
+    @Override
     public float black(int px, int py) {
         return black[py * size + px];
+    }
+
+    @Override
+    public PigmentField mutableCopy() {
+        PigmentField copy = new PigmentField(size);
+        System.arraycopy(red, 0, copy.red, 0, red.length);
+        System.arraycopy(black, 0, copy.black, 0, black.length);
+        return copy;
     }
 
     public void setRed(int px, int py, float value) {

@@ -9,15 +9,19 @@ import com.example.horsegenetics.common.genetics.Genes;
 import com.example.horsegenetics.common.genetics.Genotype;
 
 /**
- * Scratch space a {@code Gene} draws into while a coat texture is built. Passed
- * to {@code Gene.restrict} (mutate {@link #pigment()}) and
- * {@code Gene.overlayLayer}.
+ * Everything a {@code Gene} needs to know about the <b>horse</b> while a coat
+ * texture is built: its genotype and epigenome, the {@link Skin} (adult vs foal
+ * geometry) and whether it is an <b>adult</b> (grey only greys adults).
  *
- * <p>Carries the {@link Skin} (adult vs foal geometry) and whether the horse is
- * an <b>adult</b> (grey only greys adults). Non-deterministic genes take all
- * randomness from {@link #epigeneticsFor}, which runs on the seed of the
- * <b>allele copy that expresses</b> at that gene, so the same horse regenerates
- * the same coat and a foal that inherited the copy regenerates its parent's.
+ * <p>It is <b>immutable and carries no scratch space</b>. The pigment and
+ * colour fields are the composer's, handed to a gene as read-only views on the
+ * call; a gene returns its contribution rather than drawing into shared state.
+ * See {@code Gene.restrict} / {@code Gene.tint}.
+ *
+ * <p>Non-deterministic genes take all randomness from {@link #epigeneticsFor},
+ * which runs on the seed of the <b>allele copy that expresses</b> at that gene,
+ * so the same horse regenerates the same coat and a foal that inherited the
+ * copy regenerates its parent's.
  */
 public final class CoatBuildContext {
 
@@ -25,8 +29,6 @@ public final class CoatBuildContext {
     private final Epigenome epigenome;
     private final Skin skin;
     private final boolean adult;
-    private final PigmentField pigment;
-    private final int[] overlay;
     private final int size;
 
     public CoatBuildContext(Genotype genotype, Epigenome epigenome, Skin skin, boolean adult) {
@@ -35,8 +37,6 @@ public final class CoatBuildContext {
         this.skin = skin;
         this.adult = adult;
         this.size = HorseSkinGeometry.SHEET_SIZE;
-        this.pigment = new PigmentField(size);
-        this.overlay = new int[size * size];
     }
 
     public Genotype genotype() {
@@ -58,14 +58,6 @@ public final class CoatBuildContext {
 
     public int size() {
         return size;
-    }
-
-    public PigmentField pigment() {
-        return pigment;
-    }
-
-    public int[] overlay() {
-        return overlay;
     }
 
     /**

@@ -2,6 +2,8 @@ package com.example.horsegenetics.common.genetics.genes;
 
 import com.example.horsegenetics.common.Rng;
 import com.example.horsegenetics.common.coat.pattern.CoatBuildContext;
+import com.example.horsegenetics.common.coat.pattern.PigmentField;
+import com.example.horsegenetics.common.coat.pattern.PigmentView;
 import com.example.horsegenetics.common.coat.pattern.GreyCoat;
 import com.example.horsegenetics.common.genetics.Allele;
 import com.example.horsegenetics.common.genetics.DominancePattern;
@@ -72,10 +74,12 @@ public final class GreyGene implements Gene {
     }
 
     @Override
-    public void restrict(AllelePair pair, CoatBuildContext ctx) {
+    public PigmentField restrict(AllelePair pair, CoatBuildContext ctx, PigmentView coat) {
         if (!isGrey(pair) || !ctx.isAdult()) {
-            return;
+            return null;
         }
-        GreyCoat.apply(ctx, ctx.epigeneticsFor(KEY));
+        PigmentField f = coat.mutableCopy();
+        GreyCoat.apply(ctx, f, ctx.epigeneticsFor(KEY));
+        return f;
     }
 }

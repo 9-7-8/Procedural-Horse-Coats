@@ -3,7 +3,7 @@ package com.example.horsegenetics.common.genetics;
 /**
  * How a {@link Gene}'s variant allele expresses against its wild type. Gene
  * <b>metadata</b>: it doesn't do the expressing (that's {@link Gene#restrict} /
- * {@link Gene#overlayLayer}), it tells the rest of the mod what to expect, so
+ * {@link Gene#tint}), it tells the rest of the mod what to expect, so
  * code can reason about a gene without special-casing it by key.
  *
  * <p>Today its one consumer is {@link GenotypeCatalog}, which uses it to decide

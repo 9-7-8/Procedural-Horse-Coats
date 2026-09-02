@@ -2,7 +2,9 @@ package com.example.horsegenetics.common.genetics;
 
 import com.example.horsegenetics.common.genetics.genes.ChampagneGene;
 import com.example.horsegenetics.common.genetics.genes.CreamGene;
+import com.example.horsegenetics.common.genetics.genes.MagicZebraGene;
 import com.example.horsegenetics.common.genetics.genes.PearlGene;
+import com.example.horsegenetics.common.genetics.genes.PinkHairGene;
 import com.example.horsegenetics.common.genetics.genes.SplashGene;
 
 import java.util.ArrayList;
@@ -22,7 +24,8 @@ import java.util.Set;
  *       allele</b>, space-separated, in {@link #TRAILING_ORDER} (splash, white,
  *       champagne, cream, pearl, grey, test).</li>
  *   <li>Genes that aren't present in every horse - <b>splash, champagne, cream,
- *       pearl</b> - write their wild-type slot as a lowercase {@code n} ("none")
+ *       pearl, magic zebra, pink hair</b> - write their wild-type slot as a
+ *       lowercase {@code n} ("none")
  *       when heterozygous: {@code "nSpl"}, {@code "nCh"}, {@code "nCr"},
  *       {@code "nprl"}. Homozygous is the token doubled ({@code "SplSpl"}).</li>
  *   <li>The rest (white, grey, test) print both real tokens, dominant first:
@@ -36,15 +39,17 @@ public final class GeneCodeDisplay {
 
     /** Genes whose wild-type allele means "this trait is simply absent". */
     private static final Set<String> ABSENCE_WILDTYPE = Set.of(
-            ChampagneGene.KEY, SplashGene.KEY, CreamGene.KEY, PearlGene.KEY);
+            ChampagneGene.KEY, SplashGene.KEY, CreamGene.KEY, PearlGene.KEY,
+            MagicZebraGene.KEY, PinkHairGene.KEY);
 
     /**
      * Order the non-extension/agouti genes are listed in: white patterns first
      * (splash, white), then the dilutions (champagne, cream, pearl), then grey,
-     * then the diagnostic test gene.
+     * then the magical genes, then the diagnostic test gene.
      */
     private static final List<Gene> TRAILING_ORDER = List.of(
-            Genes.SPLASH, Genes.WHITE, Genes.CHAMPAGNE, Genes.CREAM, Genes.PEARL, Genes.GREY, Genes.TEST);
+            Genes.SPLASH, Genes.WHITE, Genes.CHAMPAGNE, Genes.CREAM, Genes.PEARL, Genes.GREY,
+            Genes.MAGIC_ZEBRA, Genes.PINK_HAIR, Genes.TEST);
 
     private GeneCodeDisplay() {}
 

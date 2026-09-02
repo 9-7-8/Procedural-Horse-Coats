@@ -2,6 +2,7 @@ package com.example.horsegenetics.common.genetics.genes;
 
 import com.example.horsegenetics.common.Rng;
 import com.example.horsegenetics.common.coat.pattern.CoatBuildContext;
+import com.example.horsegenetics.common.coat.pattern.PigmentView;
 import com.example.horsegenetics.common.coat.pattern.CoatRegions;
 import com.example.horsegenetics.common.coat.pattern.PigmentField;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Skin;
@@ -64,13 +65,13 @@ public final class SplashGene implements Gene {
     }
 
     @Override
-    public void restrict(AllelePair pair, CoatBuildContext ctx) {
+    public PigmentField restrict(AllelePair pair, CoatBuildContext ctx, PigmentView coat) {
         if (!isSplash(pair)) {
-            return;
+            return null;
         }
         Rng epi = ctx.epigeneticsFor(KEY);
         Skin skin = ctx.skin();
-        PigmentField f = ctx.pigment();
+        PigmentField f = coat.mutableCopy();
 
         for (var leg : CoatRegions.LEGS) {
             double h = 0.15 + epi.nextFloat() * epi.nextFloat() * 0.75; // socks .. stockings
@@ -80,5 +81,6 @@ public final class SplashGene implements Gene {
         double blazeHalfWidth = 0.4 + epi.nextFloat() * 1.4;  // body units either side of centre
         double blazeLength = 0.2 + epi.nextFloat() * 0.75;     // fraction of the head length
         CoatRegions.whitenBlaze(skin, f, blazeHalfWidth, blazeLength);
+        return f;
     }
 }

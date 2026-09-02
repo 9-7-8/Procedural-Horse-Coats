@@ -11,11 +11,11 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 class CoatGeneratorTest {
 
-    private static final Genotype BAY = Genotype.parse("E/e-A/a-w/w-t/t-c/c-spl/spl-g/g-N/N-N/N");
+    private static final Genotype BAY = Genotype.parse("E/e-A/a-w/w-t/t-c/c-spl/spl-g/g-N/N-N/N-n/n-n/n");
 
     @Test
     void keepsTheGenotypeVerbatim() {
-        Genotype g = Genotype.parse("e/e-a/a-w/w-t/t-Ch/c-spl/spl-g/g-N/N-N/N");
+        Genotype g = Genotype.parse("e/e-a/a-w/w-t/t-Ch/c-spl/spl-g/g-N/N-N/N-n/n-n/n");
         CoatData data = CoatGenerator.generate(g, new SeededRng(1L));
         assertEquals(g, data.genotype());
         assertEquals(CoatPhenotype.CHESTNUT, data.phenotype());

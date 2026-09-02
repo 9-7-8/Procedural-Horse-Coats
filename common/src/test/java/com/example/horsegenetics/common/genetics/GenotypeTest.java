@@ -15,7 +15,7 @@ class GenotypeTest {
 
     // code = 9 gene segments joined by '-', alleles by '/', dominant first:
     //   extension / agouti / white / test / champagne / splash / grey / cream / pearl
-    private static final String WT = "E/E-a/a-w/w-t/t-c/c-spl/spl-g/g-N/N-N/N";
+    private static final String WT = "E/E-a/a-w/w-t/t-c/c-spl/spl-g/g-N/N-N/N-n/n-n/n";
 
     private static Genotype g(AllelePair... pairs) {
         return Genotype.of(pairs);
@@ -35,15 +35,15 @@ class GenotypeTest {
 
     @Test
     void parseIsCanonicalAndOrderIndependent() {
-        Genotype a = Genotype.parse("e/E-a/A-w/W-t/T-c/Ch-spl/Spl-g/G-N/Cr-prl/N");
-        Genotype b = Genotype.parse("E/e-A/a-W/w-T/t-Ch/c-Spl/spl-G/g-Cr/N-N/prl");
+        Genotype a = Genotype.parse("e/E-a/A-w/W-t/T-c/Ch-spl/Spl-g/G-N/Cr-prl/N-n/n-n/n");
+        Genotype b = Genotype.parse("E/e-A/a-W/w-T/t-Ch/c-Spl/spl-G/g-Cr/N-N/prl-n/n-n/n");
         assertEquals(b, a);
         assertEquals(b.toCode(), a.toCode());
     }
 
     @Test
     void multiCharTokensParse() {
-        Genotype x = Genotype.parse("E/e-A/a-w/w-t/t-c/c-Spl/spl-g/g-Cr/Cr-prl/prl");
+        Genotype x = Genotype.parse("E/e-A/a-w/w-t/t-c/c-Spl/spl-g/g-Cr/Cr-prl/prl-n/n-n/n");
         assertTrue(x.isSplash());
         assertTrue(x.pair(Genes.CREAM).homozygous());
         assertTrue(x.pair(Genes.PEARL).homozygous());
@@ -56,7 +56,7 @@ class GenotypeTest {
             "E/e-A/a-w/w-t/t-c/c-spl/spl-g/g-N/N",     // 8 segments, need 9
             "E/e-A/a-w/w-t/t-c/c-spl/spl-g/g-N/N-N/N-x/x", // 10
             "E/e/E-A/a-w/w-t/t-c/c-spl/spl-g/g-N/N-N/N",   // 3 alleles in a segment
-            "E/x-A/a-w/w-t/t-c/c-spl/spl-g/g-N/N-N/N",     // unknown allele
+            "E/x-A/a-w/w-t/t-c/c-spl/spl-g/g-N/N-N/N-n/n-n/n",     // unknown allele
     })
     void parseRejectsMalformed(String bad) {
         assertThrows(IllegalArgumentException.class, () -> Genotype.parse(bad));
@@ -83,7 +83,7 @@ class GenotypeTest {
 
     @Test
     void predicates() {
-        Genotype x = Genotype.parse("E/e-A/a-w/w-T/t-Ch/c-Spl/spl-G/g-Cr/N-N/N");
+        Genotype x = Genotype.parse("E/e-A/a-w/w-T/t-Ch/c-Spl/spl-G/g-Cr/N-N/N-n/n-n/n");
         assertTrue(x.hasBlackPigment());
         assertTrue(x.isAgouti());
         assertTrue(x.hasTest());
@@ -115,11 +115,12 @@ class GenotypeTest {
     @Test
     void randomConsumesDrawsInGeneOrder() {
         // ext 2 bool | agouti 2 bool | white 2 int(50) | test 1 int(4)
-        //   | champ 2 int(40) | splash 2 int(20) | grey 2 int(16) | cream 2 int(30) | pearl 2 int(22)
+        //   | champ 2 int(40) | splash 2 int(20) | grey 2 int(16) | cream 2 int(30)
+        //   | pearl 2 int(22) | magic zebra 2 int(100) | pink hair 2 int(12)
         Genotype x = Genotype.random(new FakeRng()
                 .booleans(true, true, true, false)
-                .ints(1, 1, 1, 39, 39, 5, 5, 12, 12, 20, 20, 10, 10));
-        assertEquals("E/E-A/a-w/w-t/t-c/c-spl/spl-g/g-N/N-N/N", x.toCode());
+                .ints(1, 1, 1, 39, 39, 5, 5, 12, 12, 20, 20, 10, 10, 50, 50, 5, 5));
+        assertEquals("E/E-A/a-w/w-t/t-c/c-spl/spl-g/g-N/N-N/N-n/n-n/n", x.toCode());
         assertEquals(CoatPhenotype.BAY, x.phenotype());
     }
 
@@ -127,7 +128,7 @@ class GenotypeTest {
     void randomRollsRarerAllelesOnZero() {
         Genotype x = Genotype.random(new FakeRng()
                 .booleans(false, false, false, false)
-                .ints(0, 1, 0, 0, 39, 0, 15, 0, 15, 0, 25, 0, 20));
+                .ints(0, 1, 0, 0, 39, 0, 15, 0, 15, 0, 25, 0, 20, 0, 50, 0, 5));
         assertTrue(x.isWhite());
         assertTrue(x.hasTest());
         assertTrue(x.isChampagne());
@@ -135,31 +136,33 @@ class GenotypeTest {
         assertTrue(x.isGrey());
         assertTrue(x.has(Genes.CREAM.Cr));
         assertTrue(x.has(Genes.PEARL.prl));
+        assertTrue(x.has(Genes.MAGIC_ZEBRA.Mzeb));
+        assertTrue(x.has(Genes.PINK_HAIR.Pihr));
     }
 
     @Test
     void breedWithIsMendelianAndSymmetric() {
-        Genotype dad = Genotype.parse("E/E-A/A-w/w-t/t-c/c-spl/spl-g/g-N/N-N/N");
+        Genotype dad = Genotype.parse("E/E-A/A-w/w-t/t-c/c-spl/spl-g/g-N/N-N/N-n/n-n/n");
         Genotype mom = Genotype.wildType();
         boolean[] allFirst = new boolean[Genes.codeOrder().size() * 2];
         java.util.Arrays.fill(allFirst, true);
         Genotype ab = dad.breedWith(mom, new FakeRng().booleans(allFirst));
         Genotype ba = mom.breedWith(dad, new FakeRng().booleans(allFirst));
-        assertEquals("E/E-A/a-w/w-t/t-c/c-spl/spl-g/g-N/N-N/N", ab.toCode());
+        assertEquals("E/E-A/a-w/w-t/t-c/c-spl/spl-g/g-N/N-N/N-n/n-n/n", ab.toCode());
         assertEquals(ab.pair(Genes.AGOUTI), ba.pair(Genes.AGOUTI));
     }
 
     @Test
     void breedInheritsEveryGene() {
-        Genotype a = Genotype.parse("E/e-A/a-W/w-T/t-Ch/c-Spl/spl-G/g-Cr/N-N/prl");
+        Genotype a = Genotype.parse("E/e-A/a-W/w-T/t-Ch/c-Spl/spl-G/g-Cr/N-N/prl-n/n-n/n");
         boolean[] draws = new boolean[Genes.codeOrder().size() * 2];
         java.util.Arrays.fill(draws, true);
         Genotype child = a.breedWith(Genotype.wildType(), new FakeRng().booleans(draws));
-        assertEquals("E/E-A/a-W/w-T/t-Ch/c-Spl/spl-G/g-Cr/N-N/N", child.toCode());
+        assertEquals("E/E-A/a-W/w-T/t-Ch/c-Spl/spl-G/g-Cr/N-N/N-n/n-n/n", child.toCode());
     }
 
     @Test
     void differentGenotypesNotEqual() {
-        assertNotEquals(Genotype.wildType(), Genotype.parse("e/e-a/a-w/w-t/t-c/c-spl/spl-g/g-N/N-N/N"));
+        assertNotEquals(Genotype.wildType(), Genotype.parse("e/e-a/a-w/w-t/t-c/c-spl/spl-g/g-N/N-N/N-n/n-n/n"));
     }
 }

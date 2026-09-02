@@ -44,15 +44,25 @@ public final class CoatSampleTool {
             {"white", "white=W/w"},
             {"bay_splash", "agouti=A/a splash=Spl/spl"},
             {"chestnut_test", "extension=e/e test=T/t"},
+            {"zebra_bay", "agouti=A/a magic_zebra=Mzeb/n"},          // stripes over a bay
+            {"zebra_bay_long", "agouti=A/a magic_zebra=Mzeb/n"},     // same gene, stripes reaching further down
+            {"zebra_palomino", "extension=e/e cream=Cr/N magic_zebra=Mzeb/n"},
+            {"zebra_white", "white=W/w magic_zebra=Mzeb/n"},         // magical paints over dominant white
+            {"pink_hair_black", "pink_hair=Pihr/Pihr"},
+            {"pink_hair_chestnut", "extension=e/e pink_hair=Pihr/Pihr"},
+            {"pink_hair_perlino", "agouti=A/a cream=Cr/Cr pink_hair=Pihr/Pihr"},
+            {"zebra_pink_bay", "agouti=A/a magic_zebra=Mzeb/n pink_hair=Pihr/Pihr"}, // two magical genes at once
     };
 
     /**
      * One epigenetic seed per sample, chosen to show the spread rather than a
      * single draw: the three bays are the same {@code A/a} genotype at a low,
      * a middling and a seal-high point extent, and the three greys the same
-     * {@code G/g} at three stages of greying.
+     * {@code G/g} at three stages of greying, and the two zebras the same
+     * {@code Mzeb/n} at two different stripe reaches.
      */
-    private static final long[] SEEDS = {0, 0, 7, 3, 0, 0, 0, 0, 0, 0, 0, 1, 3, 21, 3, 3, 0, 0, 31, 0};
+    private static final long[] SEEDS = {0, 0, 7, 3, 0, 0, 0, 0, 0, 0, 0, 1, 3, 21, 3, 3, 0, 0, 31, 0,
+            5, 11, 5, 5, 0, 0, 0, 11};
 
     private CoatSampleTool() {}
 

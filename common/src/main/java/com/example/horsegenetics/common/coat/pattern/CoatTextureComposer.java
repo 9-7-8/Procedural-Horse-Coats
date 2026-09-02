@@ -9,24 +9,31 @@ import com.example.horsegenetics.common.genetics.Genes;
 import com.example.horsegenetics.common.genetics.Genotype;
 
 /**
- * The coat overlay pipeline. Turns a {@link Genotype} + its {@link Epigenome}
- * into a 128px ARGB coat texture for a given {@link Skin} (adult vs foal) and age
- * ({@code adult} - grey only greys adults), given the white template and the
- * red/black {@link GradientLut}.
+ * The three-phase coat pipeline. Turns a {@link Genotype} + its
+ * {@link Epigenome} into a 128px ARGB coat texture for a given {@link Skin}
+ * (adult vs foal) and age ({@code adult} - grey only greys adults), given the
+ * white template and the red/black {@link GradientLut}.
  *
  * <ol>
- *   <li><b>natural pass</b> - every pixel starts max red + max black; each
- *       visible natural gene (in {@link Genes#naturalOrder()}) pushes the
- *       {@link PigmentField} down.</li>
- *   <li><b>resolve</b> - {@code (red, black)} -&gt; {@link GradientLut}. Fully
- *       restricted -&gt; transparent; resolves to pure black -&gt; 80% opacity.</li>
- *   <li><b>overlay pass</b> - each visible non-natural gene
- *       ({@link Genes#overlayOrder()}) paints its layer flat on top of the
- *       overlay (opaque layer texels replace what the natural pass resolved,
- *       so the effect shows even on a white / fully-restricted coat).</li>
- *   <li><b>composite</b> onto the template, alpha-aware, keeping template alpha.</li>
+ *   <li><b>natural (melanin) phase</b> - every texel starts max red + max
+ *       black; each visible natural gene (in {@link Genes#naturalOrder()})
+ *       returns a {@link PigmentField} with the pigment pushed further down.
+ *       Downward only.</li>
+ *   <li><b>resolve</b> - {@code (red, black)} -&gt; {@link GradientLut}, into
+ *       the {@link ColorField}. Fully restricted -&gt; transparent; resolves to
+ *       pure black -&gt; 80% opacity.</li>
+ *   <li><b>magical (RGB) phase</b> - each visible magical gene (in
+ *       {@link Genes#magicalOrder()}) returns a signed RGB delta, folded into
+ *       that colour field by integer addition (or, for flat paint, a replace).
+ *       Nothing is capped to 0-255 until the field is converted.</li>
+ *   <li><b>composite</b> onto the template, alpha-aware, keeping template
+ *       alpha.</li>
  *   <li><b>eyes</b> - copied verbatim from the template.</li>
  * </ol>
+ *
+ * <p>The composer owns both fields; genes only ever see read-only views and
+ * hand back their own contribution, so the whole bake is a fold and a gene can
+ * be tested against a synthetic coat on its own.
  */
 public final class CoatTextureComposer {
 
@@ -56,43 +63,46 @@ public final class CoatTextureComposer {
 
         CoatBuildContext ctx = new CoatBuildContext(genotype, epigenome, skin, adult);
 
+        // 1. natural phase - each gene folds the pigment field further down.
+        PigmentField pigment = new PigmentField(n);
         for (Gene gene : Genes.naturalOrder()) {
-            AllelePair pair = genotype.pair(gene);
-            if (gene.isVisible(pair, genotype)) {
-                gene.restrict(pair, ctx);
-            }
-        }
-
-        int[] overlay = ctx.overlay();
-        PigmentField pig = ctx.pigment();
-        HorseSkinGeometry.forEachTexel(skin, (px, py, part, face, point) -> {
-            int i = py * n + px;
-            float r = pig.red(px, py);
-            float b = pig.black(px, py);
-            if (r <= TRANSPARENT_EPS && b <= TRANSPARENT_EPS) {
-                overlay[i] = 0;
-                return;
-            }
-            int rgb = lut.sample(r, b) & 0xFFFFFF;
-            overlay[i] = (rgb == 0 ? PURE_BLACK_ALPHA << 24 : 0xFF000000) | rgb;
-        });
-
-        for (Gene gene : Genes.overlayOrder()) {
             AllelePair pair = genotype.pair(gene);
             if (!gene.isVisible(pair, genotype)) {
                 continue;
             }
-            int[] layer = new int[n * n]; // transparent (0) = "no paint here"
-            gene.overlayLayer(pair, ctx, layer);
-            for (int i = 0; i < overlay.length; i++) {
-                int l = layer[i];
-                if ((l >>> 24) == 0) {
-                    continue;
-                }
-                overlay[i] = l; // flat paint on top - the layer wins outright
+            PigmentField next = gene.restrict(pair, ctx, pigment);
+            if (next != null) {
+                pigment = next;
             }
         }
 
+        // 2. resolve - pigment through the gradient, into the colour field.
+        // Texels this skin doesn't map are left at zero = fully transparent.
+        ColorField colour = new ColorField(n);
+        PigmentField resolved = pigment;
+        HorseSkinGeometry.forEachTexel(skin, (px, py, part, face, point) -> {
+            float r = resolved.red(px, py);
+            float b = resolved.black(px, py);
+            if (r <= TRANSPARENT_EPS && b <= TRANSPARENT_EPS) {
+                return;
+            }
+            int rgb = lut.sample(r, b) & 0xFFFFFF;
+            colour.setArgb(px, py, (rgb == 0 ? PURE_BLACK_ALPHA << 24 : 0xFF000000) | rgb);
+        });
+
+        // 3. magical phase - each gene's signed RGB delta accumulates.
+        for (Gene gene : Genes.magicalOrder()) {
+            AllelePair pair = genotype.pair(gene);
+            if (!gene.isVisible(pair, genotype)) {
+                continue;
+            }
+            ColorField delta = gene.tint(pair, ctx, pigment, colour);
+            if (delta != null) {
+                colour.apply(delta);
+            }
+        }
+
+        // 4. composite onto the template, alpha-aware multiply.
         int[] out = new int[n * n];
         for (int i = 0; i < out.length; i++) {
             int t = template[i];
@@ -101,7 +111,7 @@ public final class CoatTextureComposer {
                 out[i] = 0;
                 continue;
             }
-            int o = overlay[i];
+            int o = colour.argb(i % n, i / n);
             float oa = (o >>> 24) / 255f;
             int rr = blend((t >> 16) & 0xFF, (o >> 16) & 0xFF, oa);
             int gg = blend((t >> 8) & 0xFF, (o >> 8) & 0xFF, oa);

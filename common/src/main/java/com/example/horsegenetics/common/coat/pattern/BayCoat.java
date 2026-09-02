@@ -8,7 +8,7 @@ import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Part;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Skin;
 
 /**
- * Builds a <b>bay</b> coat into a {@link CoatBuildContext}'s pigment field:
+ * Builds a <b>bay</b> coat into a {@link PigmentField}:
  * red-brown body, black points (mane, tail, ear tips, hooves), and black that
  * climbs the legs + face by a <b>random</b> amount, fading out at its top edge.
  *
@@ -50,7 +50,7 @@ public final class BayCoat {
      * {@code nextFloat()}s: one "point extent" for the horse, then one jitter
      * per leg.
      */
-    public static void apply(CoatBuildContext ctx, Rng epi) {
+    public static void apply(CoatBuildContext ctx, PigmentField f, Rng epi) {
         double extent = epi.nextFloat();                       // 0 = low socks .. 1 = seal
         double leg = LEG_MIN + extent * LEG_RANGE;
         double face = 0.04 + extent * extent * 0.62;           // the face only follows high legs
@@ -58,23 +58,22 @@ public final class BayCoat {
         for (int i = 0; i < legs.length; i++) {
             legs[i] = leg * (1.0 - LEG_JITTER + epi.nextFloat() * LEG_JITTER * 2.0);
         }
-        apply(ctx, legs, face);
+        apply(ctx, f, legs, face);
     }
 
     /** Paint with one explicit height for all four legs. */
-    public static void apply(CoatBuildContext ctx, double legHeight, double faceHeight) {
+    public static void apply(CoatBuildContext ctx, PigmentField f, double legHeight, double faceHeight) {
         double[] legs = new double[CoatRegions.LEGS.size()];
         java.util.Arrays.fill(legs, legHeight);
-        apply(ctx, legs, faceHeight);
+        apply(ctx, f, legs, faceHeight);
     }
 
     /**
      * Paint with explicit heights (fractions of leg height / head length),
      * {@code legHeights} in {@link CoatRegions#LEGS} order.
      */
-    public static void apply(CoatBuildContext ctx, double[] legHeights, double faceHeight) {
+    public static void apply(CoatBuildContext ctx, PigmentField f, double[] legHeights, double faceHeight) {
         Skin skin = ctx.skin();
-        PigmentField f = ctx.pigment();
 
         // 1. bay body: keep the red, knock the black down everywhere
         CoatRegions.restrictAll(skin, f, (field, px, py, p) -> field.setBlack(px, py, BODY_BLACK));

@@ -2,6 +2,8 @@ package com.example.horsegenetics.common.genetics.genes;
 
 import com.example.horsegenetics.common.Rng;
 import com.example.horsegenetics.common.coat.pattern.CoatBuildContext;
+import com.example.horsegenetics.common.coat.pattern.PigmentField;
+import com.example.horsegenetics.common.coat.pattern.PigmentView;
 import com.example.horsegenetics.common.coat.pattern.CreamPearlDilution;
 import com.example.horsegenetics.common.genetics.Allele;
 import com.example.horsegenetics.common.genetics.DominancePattern;
@@ -56,7 +58,9 @@ public final class PearlGene implements Gene {
     }
 
     @Override
-    public void restrict(AllelePair pair, CoatBuildContext ctx) {
-        CreamPearlDilution.apply(ctx);
+    public PigmentField restrict(AllelePair pair, CoatBuildContext ctx, PigmentView coat) {
+        PigmentField f = coat.mutableCopy();
+        CreamPearlDilution.apply(ctx, f);
+        return f;
     }
 }

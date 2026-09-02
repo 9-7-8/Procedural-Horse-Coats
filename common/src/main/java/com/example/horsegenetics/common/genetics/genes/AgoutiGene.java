@@ -3,6 +3,8 @@ package com.example.horsegenetics.common.genetics.genes;
 import com.example.horsegenetics.common.Rng;
 import com.example.horsegenetics.common.coat.pattern.BayCoat;
 import com.example.horsegenetics.common.coat.pattern.CoatBuildContext;
+import com.example.horsegenetics.common.coat.pattern.PigmentField;
+import com.example.horsegenetics.common.coat.pattern.PigmentView;
 import com.example.horsegenetics.common.genetics.Allele;
 import com.example.horsegenetics.common.genetics.DominancePattern;
 import com.example.horsegenetics.common.genetics.AllelePair;
@@ -58,9 +60,12 @@ public final class AgoutiGene implements Gene {
     }
 
     @Override
-    public void restrict(AllelePair pair, CoatBuildContext ctx) {
-        if (isBay(pair)) {
-            BayCoat.apply(ctx, ctx.epigeneticsFor(KEY));
+    public PigmentField restrict(AllelePair pair, CoatBuildContext ctx, PigmentView coat) {
+        if (!isBay(pair)) {
+            return null;
         }
+        PigmentField f = coat.mutableCopy();
+        BayCoat.apply(ctx, f, ctx.epigeneticsFor(KEY));
+        return f;
     }
 }

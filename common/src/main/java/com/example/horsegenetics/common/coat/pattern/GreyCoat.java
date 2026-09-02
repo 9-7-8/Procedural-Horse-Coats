@@ -11,7 +11,7 @@ import java.util.EnumMap;
 import java.util.Map;
 
 /**
- * Builds a <b>dapple grey</b> into a {@link CoatBuildContext}'s pigment field.
+ * Builds a <b>dapple grey</b> into a {@link PigmentField}.
  *
  * <p><b>Why this isn't just "restrict both pigments":</b> greying replaces
  * pigmented hairs with white ones, and a mix of white and dark hairs reads
@@ -79,21 +79,20 @@ public final class GreyCoat {
      * 1 {@code nextLong()} (the dapple field's seed) + 4 {@code nextFloat()}s
      * (progression, dapple spacing, dapple strength, point retention).
      */
-    public static void apply(CoatBuildContext ctx, Rng epi) {
+    public static void apply(CoatBuildContext ctx, PigmentField f, Rng epi) {
         long noiseSeed = epi.nextLong();
         float progress = epi.nextFloat();                          // steel grey .. near white
         double spacing = DAPPLE_SPACING_MIN + epi.nextFloat() * DAPPLE_SPACING_RANGE;
         float dappleStrength = 0.5f + epi.nextFloat() * 0.5f;
         float pointRetention = epi.nextFloat();
 
-        apply(ctx, noiseSeed, progress, spacing, dappleStrength, pointRetention);
+        apply(ctx, f, noiseSeed, progress, spacing, dappleStrength, pointRetention);
     }
 
     /** Paint with explicit knobs (the sample tool and tests drive this directly). */
-    public static void apply(CoatBuildContext ctx, long noiseSeed, float progress, double spacing,
-                             float dappleStrength, float pointRetention) {
+    public static void apply(CoatBuildContext ctx, PigmentField f, long noiseSeed, float progress,
+                             double spacing, float dappleStrength, float pointRetention) {
         Skin skin = ctx.skin();
-        PigmentField f = ctx.pigment();
 
         float p = clamp01(progress);
         float keepWeb = lerp(KEEP_YOUNG, KEEP_OLD, p);

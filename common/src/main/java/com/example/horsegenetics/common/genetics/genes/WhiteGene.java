@@ -2,6 +2,8 @@ package com.example.horsegenetics.common.genetics.genes;
 
 import com.example.horsegenetics.common.Rng;
 import com.example.horsegenetics.common.coat.pattern.CoatBuildContext;
+import com.example.horsegenetics.common.coat.pattern.PigmentField;
+import com.example.horsegenetics.common.coat.pattern.PigmentView;
 import com.example.horsegenetics.common.coat.pattern.CoatRegions;
 import com.example.horsegenetics.common.genetics.Allele;
 import com.example.horsegenetics.common.genetics.DominancePattern;
@@ -52,12 +54,15 @@ public final class WhiteGene implements Gene {
     }
 
     @Override
-    public void restrict(AllelePair pair, CoatBuildContext ctx) {
-        if (isWhite(pair)) {
-            CoatRegions.restrictAll(ctx.skin(), ctx.pigment(), (f, px, py, p) -> {
-                f.setRed(px, py, 0f);
-                f.setBlack(px, py, 0f);
-            });
+    public PigmentField restrict(AllelePair pair, CoatBuildContext ctx, PigmentView coat) {
+        if (!isWhite(pair)) {
+            return null;
         }
+        PigmentField f = coat.mutableCopy();
+        CoatRegions.restrictAll(ctx.skin(), f, (field, px, py, p) -> {
+            field.setRed(px, py, 0f);
+            field.setBlack(px, py, 0f);
+        });
+        return f;
     }
 }

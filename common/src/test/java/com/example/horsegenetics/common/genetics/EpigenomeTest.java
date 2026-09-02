@@ -13,8 +13,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class EpigenomeTest {
 
-    private static final Genotype HET_AGOUTI = Genotype.parse("E/e-A/a-w/w-t/t-c/c-spl/spl-g/g-N/N-N/N");
-    private static final Genotype HOM_AGOUTI = Genotype.parse("E/E-A/A-w/w-t/t-c/c-spl/spl-g/g-N/N-N/N");
+    private static final Genotype HET_AGOUTI = Genotype.parse("E/e-A/a-w/w-t/t-c/c-spl/spl-g/g-N/N-N/N-n/n-n/n");
+    private static final Genotype HOM_AGOUTI = Genotype.parse("E/E-A/A-w/w-t/t-c/c-spl/spl-g/g-N/N-N/N-n/n-n/n");
 
     /** An epigenome with the given (priority, seed) on both copies of agouti and junk elsewhere. */
     private static Epigenome withAgouti(AlleleEpigenetics first, AlleleEpigenetics second) {

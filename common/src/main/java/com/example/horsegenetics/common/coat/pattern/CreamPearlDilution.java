@@ -79,8 +79,8 @@ public final class CreamPearlDilution {
         return prl >= 2 ? Mode.DOUBLE_PEARL : Mode.NONE;
     }
 
-    /** Apply the combined effect to {@code ctx.pigment()}. Safe to call when Mode is NONE. */
-    public static void apply(CoatBuildContext ctx) {
+    /** Apply the combined effect to {@code f}. Safe to call when Mode is NONE. */
+    public static void apply(CoatBuildContext ctx, PigmentField f) {
         Mode m = mode(ctx.genotype());
         if (m == Mode.NONE) {
             return;
@@ -99,7 +99,7 @@ public final class CreamPearlDilution {
                 keepRed = DOUBLE_DILUTE_RED; keepBlack = DOUBLE_DILUTE_BLACK; blackTint = DOUBLE_DILUTE_TINT;
             }
         }
-        CoatRegions.restrictAll(ctx.skin(), ctx.pigment(),
-                (f, px, py, p) -> f.dilute(px, py, keepRed, keepBlack, blackTint));
+        CoatRegions.restrictAll(ctx.skin(), f,
+                (field, px, py, p) -> field.dilute(px, py, keepRed, keepBlack, blackTint));
     }
 }

@@ -13,9 +13,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class CoatDataTest {
 
     private static final String BLACK = Genotype.wildType().toCode();
-    private static final String BAY = "E/e-A/a-w/w-t/t-c/c-spl/spl-g/g-N/N-N/N";
+    private static final String BAY = "E/e-A/a-w/w-t/t-c/c-spl/spl-g/g-N/N-N/N-n/n-n/n";
     /** Same bay, but also carrying grey - whose epigenetics are invisible on a foal-free adult check. */
-    private static final String BAY_GREY = "E/e-A/a-w/w-t/t-c/c-spl/spl-G/g-N/N-N/N";
+    private static final String BAY_GREY = "E/e-A/a-w/w-t/t-c/c-spl/spl-G/g-N/N-N/N-n/n-n/n";
 
     private static CoatData coat(String code, long seed) {
         return new CoatData(Genotype.parse(code), Epigenome.fromSeed(seed));

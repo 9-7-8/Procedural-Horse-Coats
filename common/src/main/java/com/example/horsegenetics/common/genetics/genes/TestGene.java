@@ -2,6 +2,9 @@ package com.example.horsegenetics.common.genetics.genes;
 
 import com.example.horsegenetics.common.Rng;
 import com.example.horsegenetics.common.coat.pattern.CoatBuildContext;
+import com.example.horsegenetics.common.coat.pattern.ColorField;
+import com.example.horsegenetics.common.coat.pattern.ColorView;
+import com.example.horsegenetics.common.coat.pattern.PigmentView;
 import com.example.horsegenetics.common.coat.pattern.TestCoatPattern;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry;
 import com.example.horsegenetics.common.genetics.Allele;
@@ -14,10 +17,10 @@ import java.util.List;
 
 /**
  * <b>Test</b> ({@code horsegenetics.test}) - the diagnostic gene, the one
- * <b>non-natural</b> gene: a dominant {@code T} paints a {@link
- * TestCoatPattern} gradient (pink-&gt;blue along body X, red-&gt;yellow along
- * body Y) <b>flat on top</b> of the resolved coat as the very last step, so the
- * full colourful field is visible on any base - black, chestnut, or white.
+ * <b>magical</b> gene: a dominant {@code T} paints a {@link TestCoatPattern}
+ * gradient (pink-&gt;blue along body X, red-&gt;yellow along body Y) <b>flat on
+ * top</b> of the resolved coat in phase 3, so the full colourful field is
+ * visible on any base - black, chestnut, or white.
  * {@code 1 in} {@value #WILD_TEST_ODDS} carriers (deliberately common while the
  * skin engine is being built). Deterministic. Expect it removed once the engine
  * is trusted.
@@ -36,7 +39,7 @@ public final class TestGene implements Gene {
     @Override public List<Allele> alleles() { return alleles; }
     @Override public Allele wildType() { return t; }
 
-    /** CompleteDominant: the overlay is painted flat on top, so one {@code T} hides whatever is underneath. */
+    /** CompleteDominant: the paint is flat and opaque, so one {@code T} hides whatever is underneath. */
     @Override public DominancePattern dominance() { return DominancePattern.COMPLETE_DOMINANT; }
 
     @Override
@@ -58,14 +61,22 @@ public final class TestGene implements Gene {
         return isTest(pair);
     }
 
+    /**
+     * Flat, opaque paint - the one magical effect that {@link ColorField#set}s
+     * instead of adding, because a diagnostic gradient is only useful if it
+     * reads the same over black, chestnut and dominant white alike.
+     */
     @Override
-    public void overlayLayer(AllelePair pair, CoatBuildContext ctx, int[] layer) {
+    public ColorField tint(AllelePair pair, CoatBuildContext ctx, PigmentView coat, ColorView colour) {
         if (!isTest(pair)) {
-            return;
+            return null;
         }
-        int n = ctx.size();
+        ColorField delta = ColorField.deltaLike(colour);
         TestCoatPattern pattern = new TestCoatPattern(HorseSkinGeometry.bodyBounds(ctx.skin()));
-        HorseSkinGeometry.forEachTexel(ctx.skin(), (px, py, part, face, point) ->
-                layer[py * n + px] = pattern.argb(point.x(), point.y(), point.z()));
+        HorseSkinGeometry.forEachTexel(ctx.skin(), (px, py, part, face, point) -> {
+            int argb = pattern.argb(point.x(), point.y(), point.z());
+            delta.set(px, py, argb >>> 24, (argb >> 16) & 0xFF, (argb >> 8) & 0xFF, argb & 0xFF);
+        });
+        return delta;
     }
 }
