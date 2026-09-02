@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Procedural Horse Coats Wiki</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #38bdf8;
+            --border: #334155;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 2rem;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 900px;
+            width: 100%;
+        }
+
+        header {
+            margin-bottom: 2.5rem;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 1.5rem;
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            margin: 0 0 0.5rem 0;
+            color: var(--accent);
+        }
+
+        p.subtitle {
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        .category-title {
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-size: 0.85rem;
+            margin: 2rem 0 1rem 0;
+        }
+
+        .gene-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .gene-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.25rem;
+            text-decoration: none;
+            color: inherit;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+
+        .gene-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--accent);
+        }
+
+        .gene-card h2 {
+            margin: 0 0 0.4rem 0;
+            font-size: 1.2rem;
+            color: var(--text-main);
+        }
+
+        .gene-card span {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Procedural Horse Coats Wiki</h1>
+        <p class="subtitle">Documentation and direct source code listings for procedural coat generators.</p>
+    </header>
+
+    <main>
+        <div class="category-title">Pattern Generators</div>
+        <div class="gene-grid">
+            <a href="wiki/bay-coat.html" class="gene-card">
+                <h2>Bay / Seal Brown</h2>
+                <span>Locus: Agouti (A)</span>
+            </a>
+        </div>
+        <div class="category-title">Dilution Genes</div>
+<div class="gene-grid">
+    <a href="wiki/cream-pearl-dilution.html" class="gene-card">
+        <h2>Cream & Pearl</h2>
+        <span>Locus: Cr / prl</span>
+    </a>
+</div>
+    </main>
+</div>
+
+</body>
+</html>

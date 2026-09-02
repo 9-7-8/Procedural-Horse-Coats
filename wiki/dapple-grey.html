@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dapple Grey - Wiki</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --panel-bg: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #38bdf8;
+            --border: #334155;
+            --code-bg: #020617;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Sidebar Navigation */
+        nav.sidebar {
+            width: 240px;
+            background-color: var(--panel-bg);
+            border-right: 1px solid var(--border);
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            flex-shrink: 0;
+        }
+
+        nav.sidebar a.back-link {
+            color: var(--accent);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            display: inline-block;
+        }
+
+        nav.sidebar ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        nav.sidebar li {
+            margin-bottom: 0.5rem;
+        }
+
+        nav.sidebar li a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.95rem;
+        }
+
+        nav.sidebar li a.active {
+            color: var(--text-main);
+            font-weight: bold;
+        }
+
+        /* Content Layout */
+        main.content {
+            flex: 1;
+            display: flex;
+            gap: 1.5rem;
+            padding: 1.5rem;
+            overflow: hidden;
+        }
+
+        /* Information Panel */
+        .info-panel {
+            width: 380px;
+            background-color: var(--panel-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+
+        .info-panel h1 {
+            margin: 0;
+            font-size: 1.75rem;
+            color: var(--accent);
+        }
+
+        .metadata-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            border-top: 1px solid var(--border);
+            padding-top: 1rem;
+        }
+
+        .metadata-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.88rem;
+        }
+
+        .metadata-label {
+            color: var(--text-muted);
+        }
+
+        .metadata-value {
+            color: var(--text-main);
+            font-family: monospace;
+            font-weight: bold;
+        }
+
+        .description {
+            font-size: 0.9rem;
+            line-height: 1.5;
+            color: var(--text-muted);
+            border-top: 1px solid var(--border);
+            padding-top: 1rem;
+        }
+
+        /* Feature List */
+        .feature-list {
+            padding-left: 1.2rem;
+            margin: 0.5rem 0 0 0;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .feature-list li {
+            margin-bottom: 0.4rem;
+        }
+
+        /* Code View Container */
+        .code-container {
+            flex: 1;
+            background-color: var(--code-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .code-header {
+            background-color: var(--panel-bg);
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border);
+            font-family: monospace;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        iframe.code-frame {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background-color: #ffffff;
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="sidebar">
+        <a href="../index.html" class="back-link">&larr; Back to Index</a>
+        <div style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted);">Pattern Generators</div>
+        <ul>
+            <li><a href="bay-coat.html">Bay Coat</a></li>
+            <li><a href="cream-pearl-dilution.html">Cream & Pearl</a></li>
+            <li><a href="dapple-grey.html" class="active">Dapple Grey</a></li>
+        </ul>
+    </nav>
+
+    <main class="content">
+        <!-- Metadata Info Panel -->
+        <section class="info-panel">
+            <h1>Dapple Grey</h1>
+            
+            <div class="metadata-group">
+                <div class="metadata-row">
+                    <span class="metadata-label">Gene / Locus</span>
+                    <span class="metadata-value">Grey (G)</span>
+                </div>
+                <div class="metadata-row">
+                    <span class="metadata-label">Keep (Steel / White)</span>
+                    <span class="metadata-value">0.46 / 0.10</span>
+                </div>
+                <div class="metadata-row">
+                    <span class="metadata-label">Red Trace (Young / Old)</span>
+                    <span class="metadata-value">0.22 / 0.02</span>
+                </div>
+                <div class="metadata-row">
+                    <span class="metadata-label">Dapple Depth</span>
+                    <span class="metadata-value">0.42</span>
+                </div>
+                <div class="metadata-row">
+                    <span class="metadata-label">Dapple Spacing</span>
+                    <span class="metadata-value">2.8 - 5.0 units</span>
+                </div>
+            </div>
+
+            <div class="description">
+                Progressively greys the coat by remapping existing texel darkness directly onto the neutral zero-red column, avoiding warm tan artifacts.
+                
+                <ul class="feature-list">
+                    <li><strong>Dapple Lattice:</strong> Generated using cellular 3D body-space noise to seamlessly bridge UV seams.</li>
+                    <li><strong>Progression Stage:</strong> Evaluates adult stage along a continuum from dark steel grey to near-white.</li>
+                    <li><strong>Late Point Retention:</strong> Retains stronger original pigment across mane, tail, ears, muzzle, and lower legs.</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Direct File Embed -->
+        <section class="code-container">
+            <div class="code-header">Source File: src/com/example/horsegenetics/common/coat/pattern/GreyCoat.java</div>
+            <iframe class="code-frame" src="../src/com/example/horsegenetics/common/coat/pattern/GreyCoat.java"></iframe>
+        </section>
+    </main>
+
+</body>
+</html>
