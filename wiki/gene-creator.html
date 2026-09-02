@@ -78,6 +78,7 @@
       font-size: 1.25rem;
       font-weight: 600;
       z-index: 10;
+      transition: opacity 0.3s ease;
     }
 
     /* Right Output Panel */
@@ -286,9 +287,9 @@
   <script>
     // --- 1. Configuration & Geometry Mapping Data ---
     const MODEL_PATH = 'horse.glb'; 
-    const SHEET_SIZE = 128; // Matches HorseSkinGeometry.java
+    const BASE_TEXTURE_PATH = 'horse_white.png';
+    const SHEET_SIZE = 128;
 
-    // Standard 64-space sub-rectangles scaled x2 for HD 128-sheet (matching HorseSkinGeometry.java)
     const PART_BOUNDS = {
       BODY: { tu: 0*2, tv: 32*2, w: 22*2, h: 10*2, d: 10*2 },
       NECK: { tu: 0*2, tv: 35*2, w: 7*2, h: 12*2, d: 4*2 },
@@ -299,7 +300,6 @@
       RIGHT_HIND_LEG: { tu: 48*2, tv: 21*2, w: 4*2, h: 11*2, d: 4*2 }
     };
 
-    // Active Gene Mathematical State
     const geneState = {
       geneId: "gene_tobiano_stripe",
       frequency: 0.35,
@@ -310,7 +310,6 @@
           part: "BODY",
           expression: { minScale: 0.5, maxScale: 1.2 },
           color: { start: "#ffffff", end: "#f1f5f9", gradient: "LINEAR" },
-          // Normalized cubic control points within the body sub-texture
           points: [
             { x: 0.1, y: 0.5 },
             { x: 0.4, y: 0.1 },
@@ -326,10 +325,31 @@
     const ctx = texCanvas.getContext('2d');
     let selectedPoint = null;
 
+    // FIX #1: Declare horseTexture BEFORE render2DCanvas() relies on it
+    const horseTexture = new THREE.CanvasTexture(texCanvas);
+    horseTexture.magFilter = THREE.NearestFilter;
+    horseTexture.minFilter = THREE.NearestFilter;
+    horseTexture.wrapS = THREE.ClampToEdgeWrapping;
+    horseTexture.wrapT = THREE.ClampToEdgeWrapping;
+    horseTexture.flipY = true;
+
+    // FIX #2: Load base texture asynchronously
+    const baseImg = new Image();
+    let isBaseImgLoaded = false;
+    baseImg.src = BASE_TEXTURE_PATH;
+    baseImg.onload = () => {
+      isBaseImgLoaded = true;
+      render2DCanvas();
+    };
+
     function render2DCanvas() {
-      // Clear
-      ctx.fillStyle = '#1e293b';
-      ctx.fillRect(0, 0, SHEET_SIZE, SHEET_SIZE);
+      // Clear or draw loaded base skin texture
+      if (isBaseImgLoaded) {
+        ctx.drawImage(baseImg, 0, 0, SHEET_SIZE, SHEET_SIZE);
+      } else {
+        ctx.fillStyle = '#1e293b';
+        ctx.fillRect(0, 0, SHEET_SIZE, SHEET_SIZE);
+      }
 
       // Draw UV Part Outlines
       ctx.strokeStyle = '#334155';
@@ -338,19 +358,17 @@
         ctx.strokeRect(bounds.tu, bounds.tv, bounds.w + bounds.d, bounds.h + bounds.d);
       }
 
-      // Draw Shapes
+      // Render Active Shapes
       geneState.shapes.forEach(shape => {
         const bounds = PART_BOUNDS[shape.part];
         if (!bounds) return;
 
         if (shape.type === "BEZIER") {
-          // Convert normalized (0..1) local space to sheet pixel space
           const pts = shape.points.map(p => ({
             x: bounds.tu + p.x * bounds.w,
             y: bounds.tv + p.y * bounds.h
           }));
 
-          // Fill spline curve
           ctx.beginPath();
           ctx.moveTo(pts[0].x, pts[0].y);
           ctx.bezierCurveTo(pts[1].x, pts[1].y, pts[2].x, pts[2].y, pts[3].x, pts[3].y);
@@ -358,7 +376,6 @@
           ctx.lineWidth = 6 * shape.expression.maxScale;
           ctx.stroke();
 
-          // Draw Control Points & Handles
           ctx.strokeStyle = '#38bdf8';
           ctx.lineWidth = 1;
           ctx.beginPath();
@@ -392,11 +409,11 @@
         }
       });
 
-      if (horseTexture) horseTexture.needsUpdate = true;
+      horseTexture.needsUpdate = true;
       updateJSONOutput();
     }
 
-    // Interactive Dragging on 2D Canvas
+    // Canvas Interactions
     texCanvas.addEventListener('mousedown', (e) => {
       const rect = texCanvas.getBoundingClientRect();
       const clickX = (e.clientX - rect.left) * (SHEET_SIZE / rect.width);
@@ -424,7 +441,6 @@
       const shape = geneState.shapes[0];
       const bounds = PART_BOUNDS[shape.part];
 
-      // Normalize within targeted part
       shape.points[selectedPoint].x = Math.max(0, Math.min(1, (clickX - bounds.tu) / bounds.w));
       shape.points[selectedPoint].y = Math.max(0, Math.min(1, (clickY - bounds.tv) / bounds.h));
 
@@ -433,18 +449,25 @@
 
     window.addEventListener('mouseup', () => { selectedPoint = null; });
 
-    // --- 3. Three.js 3D Viewport Setup ---
+    // --- 3. Three.js Viewport Setup ---
     const viewport = document.getElementById('viewport-container');
     const loadingOverlay = document.getElementById('loading-overlay');
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x0b1120);
 
     const camera = new THREE.PerspectiveCamera(45, viewport.clientWidth / viewport.clientHeight, 0.1, 1000);
-    camera.position.set(0, 3.0, 12.0); // Farther zoomed-out view
+    // FIX #3: Adjusted camera framing for closer viewport positioning
+    camera.position.set(0, 1.5, 5.0);
 
     const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('three-canvas'), antialias: true });
     renderer.setSize(viewport.clientWidth, viewport.clientHeight);
-    renderer.outputEncoding = THREE.sRGBEncoding;
+    
+    // FIX #5: Updated color space API specification for modern Three.js
+    if (THREE.SRGBColorSpace) {
+      renderer.outputColorSpace = THREE.SRGBColorSpace;
+    } else {
+      renderer.outputEncoding = THREE.sRGBEncoding;
+    }
 
     const controls = new THREE.OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
@@ -456,24 +479,19 @@
     dirLight.position.set(5, 12, 7);
     scene.add(dirLight);
 
-    // Dynamic Canvas Texture Mapping
-    const horseTexture = new THREE.CanvasTexture(texCanvas);
-    horseTexture.magFilter = THREE.NearestFilter;
-    horseTexture.minFilter = THREE.NearestFilter;
-    horseTexture.wrapS = THREE.ClampToEdgeWrapping;
-    horseTexture.wrapT = THREE.ClampToEdgeWrapping;
-    horseTexture.flipY = true; // Aligns UVs with HorseSkinGeometry
-
     const horseMaterial = new THREE.MeshStandardMaterial({ 
       map: horseTexture,
       roughness: 0.8,
       metalness: 0.1
     });
 
-    // GLTF Loader (ArrayBuffer method)
+    // GLTF Model Loading
     const gltfLoader = new THREE.GLTFLoader();
     fetch(MODEL_PATH)
-      .then(res => res.arrayBuffer())
+      .then(res => {
+        if (!res.ok) throw new Error(`HTTP Error ${res.status}`);
+        return res.arrayBuffer();
+      })
       .then(buffer => {
         gltfLoader.parse(buffer, '', (gltf) => {
           const horseModel = gltf.scene;
@@ -486,22 +504,29 @@
           horseModel.position.sub(center);
 
           scene.add(horseModel);
-          loadingOverlay.style.display = 'none';
+          loadingOverlay.style.opacity = '0';
+          setTimeout(() => loadingOverlay.style.display = 'none', 300);
         });
       })
-      .catch(() => {
-        loadingOverlay.innerText = 'Failed to load model. Ensure local HTTP server is running.';
+      .catch((err) => {
+        // FIX #4: Clear loading overlay on error with explicit user notification
+        console.warn('Failed loading 3D model:', err);
+        loadingOverlay.innerText = '3D Preview Unavailable (Canvas Editor Active)';
         loadingOverlay.style.color = '#ef4444';
+        setTimeout(() => {
+          loadingOverlay.style.opacity = '0';
+          setTimeout(() => loadingOverlay.style.display = 'none', 300);
+        }, 3000);
       });
 
-    // --- 4. JSON Generation & Controls Sync ---
+    // --- 4. JSON Serialization ---
     const jsonOutput = document.getElementById('json-output');
 
     function updateJSONOutput() {
       jsonOutput.value = JSON.stringify(geneState, null, 2);
     }
 
-    // UI Event Listeners
+    // UI Event Handlers
     document.getElementById('gene-id').addEventListener('input', (e) => {
       geneState.geneId = e.target.value;
       updateJSONOutput();
