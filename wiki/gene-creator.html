@@ -355,18 +355,73 @@
 
     const baseImg = new Image();
     let isBaseImgLoaded = false;
+    let textureLoadError = false;
+    
+    // Handle texture loading with proper error handling
+    baseImg.crossOrigin = 'anonymous';
     baseImg.src = BASE_TEXTURE_PATH;
     baseImg.onload = () => {
       isBaseImgLoaded = true;
+      textureLoadError = false;
+      console.log('Texture loaded successfully:', BASE_TEXTURE_PATH);
+      render2DCanvas();
+      if (horseMesh) {
+        horseMesh.material.map = horseTexture;
+        horseMesh.material.needsUpdate = true;
+      }
+    };
+    baseImg.onerror = (e) => {
+      textureLoadError = true;
+      console.warn('Could not load texture:', BASE_TEXTURE_PATH, e);
+      // Create a fallback texture
+      const fallbackCanvas = document.createElement('canvas');
+      fallbackCanvas.width = 128;
+      fallbackCanvas.height = 128;
+      const fallbackCtx = fallbackCanvas.getContext('2d');
+      fallbackCtx.fillStyle = '#8B7355';
+      fallbackCtx.fillRect(0, 0, 128, 128);
+      fallbackCtx.fillStyle = '#6B5345';
+      fallbackCtx.fillRect(10, 10, 108, 108);
+      const fallbackTexture = new THREE.CanvasTexture(fallbackCanvas);
+      horseTexture.image = fallbackCanvas;
+      horseTexture.needsUpdate = true;
+      if (horseMesh) {
+        horseMesh.material.map = horseTexture;
+        horseMesh.material.needsUpdate = true;
+      }
       render2DCanvas();
     };
 
     function render2DCanvas() {
+      // Clear canvas
+      ctx.clearRect(0, 0, SHEET_SIZE, SHEET_SIZE);
+      
       if (isBaseImgLoaded) {
         ctx.drawImage(baseImg, 0, 0, SHEET_SIZE, SHEET_SIZE);
       } else {
+        // Draw a checkerboard pattern as fallback
         ctx.fillStyle = '#1e293b';
         ctx.fillRect(0, 0, SHEET_SIZE, SHEET_SIZE);
+        
+        // Draw a simple grid for visual reference
+        ctx.strokeStyle = '#334155';
+        ctx.lineWidth = 0.5;
+        for (let i = 0; i < SHEET_SIZE; i += 16) {
+          ctx.beginPath();
+          ctx.moveTo(i, 0);
+          ctx.lineTo(i, SHEET_SIZE);
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.moveTo(0, i);
+          ctx.lineTo(SHEET_SIZE, i);
+          ctx.stroke();
+        }
+        
+        // Show loading message
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = '10px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('Loading texture...', SHEET_SIZE/2, SHEET_SIZE/2);
       }
 
       // Draw UV Part Outlines
@@ -374,6 +429,10 @@
       ctx.lineWidth = 1;
       for (const [partName, b] of Object.entries(PART_BOUNDS)) {
         ctx.strokeRect(b.tu, b.tv, b.w, b.h);
+        // Label parts
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = '6px sans-serif';
+        ctx.fillText(partName.substring(0, 4), b.tu + 2, b.tv + 8);
       }
 
       // Render 3D Surface Control Points onto the UV map
@@ -388,10 +447,12 @@
 
           // Draw node marker
           ctx.fillStyle = '#ef4444';
-          ctx.fillRect(px - 2, py - 2, 4, 4);
+          ctx.beginPath();
+          ctx.arc(px, py, 3, 0, Math.PI * 2);
+          ctx.fill();
         });
         ctx.strokeStyle = '#38bdf8';
-        ctx.lineWidth = 3;
+        ctx.lineWidth = 2;
         ctx.stroke();
       }
 
@@ -410,64 +471,153 @@
 
     const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('three-canvas'), antialias: true });
     renderer.setSize(viewport.clientWidth, viewport.clientHeight);
-    if (THREE.SRGBColorSpace) renderer.outputColorSpace = THREE.SRGBColorSpace;
-    else renderer.outputEncoding = THREE.sRGBEncoding;
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    if (THREE.SRGBColorSpace) {
+      renderer.outputColorSpace = THREE.SRGBColorSpace;
+    } else if (renderer.outputEncoding !== undefined) {
+      renderer.outputEncoding = THREE.sRGBEncoding;
+    }
 
     const controls = new THREE.OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
+    controls.dampingFactor = 0.08;
     controls.target.set(0, 0, 0);
 
-    const ambientLight = new THREE.AmbientLight(0xffffff, 1.0);
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
     scene.add(ambientLight);
-    const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    const hemisphereLight = new THREE.HemisphereLight(0xffffff, 0x444444, 0.6);
+    scene.add(hemisphereLight);
+    const dirLight = new THREE.DirectionalLight(0xffffff, 1.2);
     dirLight.position.set(5, 12, 7);
     scene.add(dirLight);
+    const backLight = new THREE.DirectionalLight(0x8888ff, 0.3);
+    backLight.position.set(-5, 0, -5);
+    scene.add(backLight);
+
+    // Add a subtle grid helper
+    const gridHelper = new THREE.GridHelper(3, 10, 0x334155, 0x1e293b);
+    gridHelper.position.y = -1.2;
+    scene.add(gridHelper);
 
     const horseMaterial = new THREE.MeshStandardMaterial({ 
       map: horseTexture,
-      roughness: 0.8,
-      metalness: 0.1
+      roughness: 0.7,
+      metalness: 0.05,
+      side: THREE.DoubleSide
     });
 
     let horseMesh = null;
+    let horseModel = null;
     const visualNodesGroup = new THREE.Group();
     scene.add(visualNodesGroup);
 
-    // GLTF Model Loading
+    // GLTF Model Loading with better error handling
     const gltfLoader = new THREE.GLTFLoader();
+    console.log('Attempting to load model:', MODEL_PATH);
+    
     fetch(MODEL_PATH)
       .then(res => {
-        if (!res.ok) throw new Error(`HTTP Error ${res.status}`);
+        if (!res.ok) {
+          throw new Error(`HTTP Error ${res.status}: ${res.statusText}`);
+        }
+        console.log('Model fetch successful');
         return res.arrayBuffer();
       })
       .then(buffer => {
-        gltfLoader.parse(buffer, '', (gltf) => {
-          const horseModel = gltf.scene;
-          horseModel.traverse((child) => {
-            if (child.isMesh) {
-              child.material = horseMaterial;
-              horseMesh = child;
-            }
+        return new Promise((resolve, reject) => {
+          gltfLoader.parse(buffer, '', (gltf) => {
+            resolve(gltf);
+          }, (error) => {
+            reject(error);
           });
+        });
+      })
+      .then((gltf) => {
+        horseModel = gltf.scene;
+        console.log('Model parsed successfully');
+        
+        horseModel.traverse((child) => {
+          if (child.isMesh) {
+            child.material = horseMaterial;
+            horseMesh = child;
+            console.log('Found mesh in model:', child.name);
+          }
+        });
 
+        if (!horseMesh) {
+          console.warn('No mesh found in model, creating fallback');
+          createFallbackModel();
+        } else {
           const box = new THREE.Box3().setFromObject(horseModel);
           const center = box.getCenter(new THREE.Vector3());
+          const size = box.getSize(new THREE.Vector3());
+          const maxDim = Math.max(size.x, size.y, size.z);
           horseModel.position.sub(center);
+          
+          // Scale if needed
+          if (maxDim > 2.5) {
+            const scale = 2.0 / maxDim;
+            horseModel.scale.set(scale, scale, scale);
+          }
 
           scene.add(horseModel);
           loadingOverlay.style.opacity = '0';
           setTimeout(() => loadingOverlay.style.display = 'none', 300);
-        });
+          
+          // If texture was already loaded, update material
+          if (isBaseImgLoaded) {
+            horseMesh.material.map = horseTexture;
+            horseMesh.material.needsUpdate = true;
+          }
+        }
       })
       .catch((err) => {
-        console.warn('Failed loading 3D model:', err);
-        loadingOverlay.innerText = '3D Preview Unavailable';
+        console.error('Failed loading 3D model:', err);
+        loadingOverlay.innerText = '3D Preview Unavailable - Using Fallback';
         loadingOverlay.style.color = '#ef4444';
+        
+        createFallbackModel();
+        
         setTimeout(() => {
           loadingOverlay.style.opacity = '0';
           setTimeout(() => loadingOverlay.style.display = 'none', 300);
-        }, 3000);
+        }, 1000);
       });
+
+    // Create a fallback model if GLB can't load
+    function createFallbackModel() {
+      console.log('Creating fallback model');
+      // Create a simple horse-like shape using geometry
+      const geometry = new THREE.CylinderGeometry(0.8, 0.6, 2.0, 16);
+      const mesh = new THREE.Mesh(geometry, horseMaterial);
+      mesh.position.y = 0.2;
+      horseMesh = mesh;
+      horseModel = mesh;
+      scene.add(mesh);
+      
+      // Add a head
+      const headGeo = new THREE.SphereGeometry(0.3, 8, 8);
+      const headMat = new THREE.MeshStandardMaterial({ color: 0x8B7355 });
+      const head = new THREE.Mesh(headGeo, headMat);
+      head.position.set(0, 0.8, -0.3);
+      head.scale.set(0.7, 0.5, 0.8);
+      mesh.add(head);
+      
+      // Add legs
+      const legGeo = new THREE.CylinderGeometry(0.08, 0.1, 0.6, 6);
+      const legMat = new THREE.MeshStandardMaterial({ color: 0x7A6548 });
+      for (let i = -1; i <= 1; i += 2) {
+        for (let j = -1; j <= 1; j += 2) {
+          const leg = new THREE.Mesh(legGeo, legMat);
+          leg.position.set(i * 0.3, -0.6, j * 0.4);
+          leg.rotation.x = 0.2;
+          mesh.add(leg);
+        }
+      }
+      
+      loadingOverlay.style.opacity = '0';
+      setTimeout(() => loadingOverlay.style.display = 'none', 300);
+    }
 
     // 3D Direct Surface Interaction (Raycasting)
     const raycaster = new THREE.Raycaster();
@@ -503,6 +653,8 @@
           visualNodesGroup.add(marker);
 
           render2DCanvas();
+        } else {
+          console.warn('Clicked point has no UV data');
         }
       }
     });
@@ -543,6 +695,8 @@
         });
       });
 
+      geneState.geneId = document.getElementById('gene-id').value;
+      geneState.frequency = parseFloat(document.getElementById('gene-frequency').value);
       geneState.curves = curveSegments;
       jsonOutput.value = JSON.stringify(geneState, null, 2);
     }
@@ -557,8 +711,19 @@
     });
 
     document.getElementById('btn-copy-json').addEventListener('click', () => {
-      navigator.clipboard.writeText(jsonOutput.value);
+      navigator.clipboard.writeText(jsonOutput.value).catch(() => {
+        // Fallback if clipboard API fails
+        jsonOutput.select();
+        document.execCommand('copy');
+        alert('Gene JSON copied to clipboard!');
+      });
       alert('Gene JSON copied to clipboard!');
+    });
+
+    // Update JSON when UI controls change
+    document.querySelectorAll('#toolbox input, #toolbox select').forEach(el => {
+      el.addEventListener('change', compileGeneJSON);
+      el.addEventListener('input', compileGeneJSON);
     });
 
     // --- 5. Render Loop ---
@@ -568,14 +733,20 @@
       renderer.render(scene, camera);
     }
 
+    // Initial render
     render2DCanvas();
     animate();
 
     window.addEventListener('resize', () => {
-      camera.aspect = viewport.clientWidth / viewport.clientHeight;
+      const width = viewport.clientWidth;
+      const height = viewport.clientHeight;
+      camera.aspect = width / height;
       camera.updateProjectionMatrix();
-      renderer.setSize(viewport.clientWidth, viewport.clientHeight);
+      renderer.setSize(width, height);
     });
+
+    console.log('Horse Gene Creator initialized');
+    console.log('Looking for files:', { MODEL_PATH, BASE_TEXTURE_PATH });
   </script>
 </body>
 </html>
