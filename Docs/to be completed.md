@@ -1,7 +1,9 @@
 # To be completed
 
-The **future-features backlog**. Nothing in this file is implemented; nothing
-in it should be treated as a description of the program. It is the long list of
+The **future-features backlog**. Nothing in this file is implemented (section 1
+is the one exception - it shipped, and is kept as a stub because the rest of the
+file refers to it); nothing in it should be treated as a description of the
+program. It is the long list of
 genes and systems the mod is aiming at, plus - for each one - **what would have
 to change in the code to accommodate it**.
 
@@ -20,8 +22,8 @@ How it relates to the other docs:
 
 Order of the file:
 
-1. [The three-phase pigment pipeline](#1-the-three-phase-pigment-pipeline) - the
-   architectural prerequisite for almost everything else.
+1. [The three-phase pigment pipeline](#1-the-three-phase-pigment-pipeline) -
+   **shipped**; kept as a pointer because the rest of the file refers to it.
 2. [Gene priority and processing order](#2-gene-priority-and-processing-order)
 3. [Adding a gene: the modder-facing API](#3-adding-a-gene-the-modder-facing-api)
 4. [The gene backlog](#4-the-gene-backlog) - the master table, annotated.
@@ -44,198 +46,46 @@ this file should link to it.
 
 ## 1. The three-phase pigment pipeline
 
-### The idea
+**Shipped 2026-09-02.** This was the architectural prerequisite for almost
+everything else in this file, so the section stays as a pointer rather than
+being deleted - the rest of the document refers to "section 1" throughout.
 
-A magic Minecraft horse's cells carry **five pigments**:
+**What it is now** lives in **`CLAUDE.md`, "The three-phase coat pipeline"**.
+The short version:
 
-| pigment | wild-type level | who moves it |
-|---------|-----------------|--------------|
-| **eumelanin** (black) | max | natural genes, downward only |
-| **phaeomelanin** (red) | max | natural genes, downward only |
-| **red** | 0 | magical genes, upward only |
-| **green** | 0 | magical genes, upward only |
-| **blue** | 0 | magical genes, upward only |
+- Phase 1 **natural (melanin)**, downward only, on a `PigmentField`; phase 2
+  **resolve** through the red/black gradient; phase 3 **magical (RGB)**,
+  signed and additive, on a `ColorField`.
+- A gene is **natural or magical, never both** - declared (`Gene.isNatural()`),
+  not inferred.
+- Both hooks are **pure**: read-only views (`PigmentView` / `ColorView`) in, a
+  contribution out. `restrict` returns the pigment field it produced (a
+  multiplicative "delta" isn't a representable object, so it hands back the
+  state it built from a copy of its input); `tint` returns a genuine additive
+  RGB delta. `CoatBuildContext` carries no scratch space any more.
+- The `ColorField` accumulator is a **signed `int` per channel plus its own
+  opacity**, saturating on overflow and capped only at conversion - so a gene
+  can commit hard enough that nothing else can pull the horse back, and a
+  magical gene can paint a dominant-white horse if it raises opacity.
+- `CoatPipelineGoldenTest` proved the whole refactor **byte-identical** on 20
+  genotypes × 3 seeds × adult/foal, and nothing in `neoforge-26.1.2/` had to
+  change.
 
-The wild-type horse is therefore **maximal eumelanin + phaeomelanin, zero
-RGB** - a pure black horse - and the pipeline runs in three phases:
+**What is still open, and belongs to other sections:**
 
-1. **Natural (melanin) phase.** Every visible natural gene gets a turn to
-   *reduce* how much eumelanin / phaeomelanin a given cell can produce.
-   Downward only; this is exactly today's `PigmentField` + `Gene.restrict`.
-2. **Resolve.** The surviving `(phaeomelanin, eumelanin)` pair is looked up in
-   the red/black gradient and becomes an **RGB colour**. Today's
-   `GradientLut.sample` step.
-3. **Magical (RGB) phase.** Every visible magical gene gets a turn to **add or
-   remove** red, green and/or blue at a given cell. Signed, and accumulated
-   **unclamped** - see below.
-
-The worked example: a plain black horse, then bay restriction (natural, phase
-1), then cream dilution (natural, phase 1) - so far a buckskin. Then the
-magical **zebra** gene (phase 3) *removes* a large amount of all three channels
-along a set of stripes, which clamps to zero and renders as a buckskin with
-black stripes.
-
-**A gene is natural or magical, never both** - mutually exclusive, declared,
-not inferred; a gene that wants both registers as two genes. **Natural is
-reserved for genes that exist in real life** (`Docs/Philosophy.md` §6).
-Priority (section 2) orders genes *within* a phase; it does not decide the
-phase.
-
-### The RGB channels: nominally 0-255, actually `int`
-
-- Each channel **starts at 0** and is nominally a 0-255 scale. The **guidance
-  for a gene author is to think of 0-255 as 0-100%** and to write the gene's
-  numbers on that scale.
-- The **true accumulator range is `Integer.MIN_VALUE` to
-  `Integer.MAX_VALUE`.** Genes add and subtract freely, without clamping, and
-  the value is only **capped to 0-255 at the moment the overlay is converted
-  into actual colour**.
-- That headroom is the point. A fantasy gene can apply *so much* blue that no
-  combination of other genes can pull it back under 255 - the horse is blue,
-  unconditionally, and the author didn't have to know what else the horse
-  carries. Zebra is the same trick with the sign flipped: subtract enough from
-  all three channels that the stripe is black no matter what is underneath.
-- **This is the ordering answer for phase 3.** Signed integer addition is
-  associative and exact, so the magical phase is **order-independent and
-  drift-free** - two genes that both touch blue give the same result either
-  way round. (Gene order still matters for phase 1, and the deterministic order
-  in section 2 still applies; phase 3 just stops being a place where a bug can
-  hide.) It also means phase 3 needs no float maths at all, which sidesteps
-  the linear-vs-sRGB question entirely for additive genes.
-
-### It is an overlay, not flat paint
-
-The RGB result is **applied over whatever the natural phase produced**, not
-stamped on top of it. Painting flat would throw away the shading the coat
-already has - the dapples in a grey, a bay's points, the gradient's own
-variation - and leave a dead, uniform patch of colour.
-
-So a magical gene modifies the resolved natural colour rather than replacing
-it, and the existing multiply-onto-the-template step still runs afterwards, so
-the template's own detail (hooves, nostrils, the shading between mane strands)
-survives on a magical coat exactly as it does today.
-
-**Exactly which blend that is - straight signed add on the resolved RGB, or
-something closer to a real overlay/soft-light blend - is deliberately left open
-until there's something to look at.** Start with the straight add (it is what
-the unclamped `int` model describes, and it is the only one that keeps phase 3
-order-independent), bake some samples, and tweak from there. Anything fancier
-than an add reintroduces order-dependence, so if the blend changes, re-read
-this section's ordering claim.
-
-### Genes read the current state and return a delta
-
-Every gene ships a function of the shape:
-
-```
-delta = gene.contribution(pair, ctx, naturalCoat, magicalDeltas)
-```
-
-- It is handed the **current natural coat** (the pigment field as the natural
-  phase has left it so far) **and the current magical deltas** - the
-  accumulated signed RGB, **not** the composited image.
-- It returns **its own delta**, to be applied to whichever field its phase owns.
-- It does not mutate shared state. Two genes handed the same inputs return the
-  same outputs, always.
-
-**Why read access is required.** The target cases are things like "add a red
-border to every white area" and "turn all the black to pink" - both have to
-*find* the region before painting it, and neither is expressible if a gene can
-only write blind, which is what today's `overlayLayer` does.
-
-**Why deltas and not the composite.** A gene reading the composited image would
-be reading the template's shading and the eye texels too, and would be coupled
-to compositing order. Reading the deltas keeps a gene looking at *pigment
-decisions*, which is the thing it can reason about.
-
-**Consequences worth building for:**
-
-- Both fields need **read-only views** to hand out - a gene that writes through
-  its input parameter has just broken the "returns a delta" contract quietly.
-- The delta a gene returns is sparse in practice (most genes touch a minority
-  of texels). A dense `int[]` per gene per bake is simple and probably fine at
-  16 384 texels; measure before optimizing.
-- This is a bigger change than "rename `overlayLayer`": it converts
-  `Gene.restrict(pair, ctx)` from *mutate the shared field* to *return a
-  delta*, and every shipped gene changes shape with it. Worth doing at the same
-  time as the phase-3 work rather than twice.
-- It makes each gene independently testable - hand it a synthetic natural coat,
-  assert on the delta - which nothing in the current design allows.
-
-### Why this is a real change and not a rename
-
-Today phase 3 does exist, but it is not additive colour - it is
-`Gene.overlayLayer(pair, ctx, int[] layer)`, an ARGB layer that is painted
-**flat on top**: "an opaque layer texel replaces whatever the natural pass
-resolved there". That is a *replace*, and it has exactly one consumer
-(`TestGene`). Replace can't express "add 40% red to whatever is already
-there", which is what the zebra example and every future magical gene want -
-and it can't express two magical genes interacting, because the second one
-overwrites the first instead of stacking on it.
-
-### The concrete changes
-
-- **A new field type next to `PigmentField`.** Call it `ColorField`: per texel
-  a **signed `int`** `r`, `g`, `b` plus an **`alpha`/opacity** channel, with
-  `add(px, py, dr, dg, db)` and **no clamping until conversion** -
-  the accumulator is a full `int` per channel per texel (three `int[]`s, 16 384
-  texels each, so ~200 KB of scratch; fine).
-  - Seed it from the resolved natural colour so a gene that adds nothing
-    changes nothing.
-  - Guard the accumulation against `int` overflow, or a gene author's
-    "obviously large" `Integer.MAX_VALUE / 2` plus a second one wraps negative
-    and turns the always-blue horse black. Saturating add, or accumulate in
-    `long` and cap once.
-  - It needs an explicit alpha because transparency currently rides on the
-    pigment channels: `CoatTextureComposer.TRANSPARENT_EPS` says "both
-    pigments essentially zero -> transparent", which is how dominant white and
-    splash markings work. Once phase 3 can add colour to a transparent texel,
-    "no pigment" and "no paint" stop being the same statement and need separate
-    storage. **A magical gene can paint a dominant-white horse** - settled:
-    dominant white is a *natural* gene, and every magical gene runs after every
-    natural one, so a positive RGB contribution must be able to make a
-    transparent texel opaque again.
-- **`Gene`'s coat hook splits in two, and both become pure.**
-  - Natural phase: `restrict(...)` stops mutating `ctx.pigment()` and instead
-    **returns a pigment delta**, given read-only views of the natural coat and
-    the magical deltas.
-  - Magical phase: `overlayLayer(pair, ctx, int[] layer)` is **replaced** by a
-    `tint(...)` that likewise **returns an RGB delta** from the same two
-    inputs.
-  - The Javadoc on `Gene` (which currently spells out the two-pass model in
-    full) and on `CoatTextureComposer` both describe the pipeline normatively
-    and must be rewritten in the same change.
-- **`CoatBuildContext` gains the colour field** alongside `pigment()` and
-  loses the raw `int[] overlay()` accessor, or keeps it as the composited
-  output only.
-- **`CoatTextureComposer.compose` grows a third loop.** Order becomes: natural
-  loop -> resolve into the `ColorField` -> magical loop -> composite onto the
-  template -> `redrawEyes`. The `PURE_BLACK_ALPHA` (80% opacity on pure black)
-  rule and the multiply-onto-template step both live *after* phase 3 and need
-  re-checking against magical colours - a magical gene that paints bright cyan
-  will be multiplied by the template's shading, which is probably what we want
-  (mane strands still read) but has never been tried.
-- **`Genes.overlayOrder()` becomes `magicalOrder()`**, and both it and
-  `naturalOrder()` become *derived* from the priority numbers rather than
-  hand-written lists (section 2).
-- **`TestGene` is the migration canary.** It is the only non-natural gene, so
-  port it first: it currently paints its gradient flat; under the new model it
-  should set RGB directly (an "opaque paint" is `alpha = 1` plus an absolute
-  `set`, not an `add`).
-- **Tests.** New `common` tests for `ColorField` clamping/additivity, for the
-  three-phase ordering, and a regression test that a horse with no magical
-  genes composes **byte-identically** to today's output. That last one is the
-  cheapest safety net for the whole refactor.
-- **`./gradlew :common:bakeCoatSamples`** keeps working unchanged and is the
-  visual check.
-
-### Knock-ons
-
-- **Texture cache keys** (`CoatData.textureKey()`) don't change shape - the
-  genotype code plus the epigenetic fingerprint still identifies the coat.
-- **Nothing in `neoforge-26.1.2/` should need to change**, which is the test of
-  whether the refactor stayed inside `common/`. If the renderer needs touching,
-  something leaked.
+- **The exact phase-3 blend** - straight signed add for now. It is the only
+  blend that keeps phase 3 order-independent; revisit once there are real
+  magical genes to look at (see "Decisions still open").
+- ~~Two magical genes have never been stacked.~~ **Settled 2026-09-02** by
+  magic zebra and pink hair (section 4.5). Straight signed add stays the blend;
+  what changed is that `magicalOrder()` matters more than this section assumed,
+  because a gene aiming at a *specific* colour reads the accumulator first and
+  is order-dependent by choice.
+- **`naturalOrder()` / `magicalOrder()` are still hand-written lists.** Making
+  them *derived* from per-gene priority numbers is section 2's job, not this
+  one's.
+- **The gene-authoring tiers** that would make writing a magical gene pleasant
+  are section 3.
 
 ---
 
@@ -323,8 +173,10 @@ Notes for the implementation:
 
 - Processing order is two hand-written lists in `Genes`: `NATURAL_ORDER`
   (extension → agouti → cream → pearl → champagne → grey → white → splash) and
-  `OVERLAY_ORDER`. Adding a gene means editing them, the ordering isn't visible
-  from the gene class, and a third-party gene can't insert itself at all.
+  `MAGICAL_ORDER` (pink hair → magic zebra → test). Adding a gene means editing
+  them, the ordering isn't visible from the gene class, and a third-party gene
+  can't insert itself at all. Magical order stopped being cosmetic when pink
+  hair started reading the accumulator, so this matters more than it did.
 - `AlleleEpigenetics.priority` works as described above; its Javadoc notes it
   is "kept as a full-range int because more uses are planned".
   **Under this design that stays its only job** - the planned second use
@@ -333,8 +185,8 @@ Notes for the implementation:
 ### The concrete changes
 
 - **`Gene` gains `int priority()`** - no default, so every gene has to answer.
-- **`Genes` sorts.** `naturalOrder()`, `magicalOrder()` (renamed from
-  `overlayOrder()`) and `all()` become derived: one sort on
+- **`Genes` sorts.** `naturalOrder()`, `magicalOrder()` and `all()` become
+  derived (the rename already happened with section 1): one sort on
   `(priority, geneKey)` at registry-freeze time. Keep the method names so
   callers don't change; make the lists a *result*, not a *source*.
 - **`codeOrder()` uses the same comparator.** Today the code string's segment
@@ -402,9 +254,9 @@ mutually exclusive, and a gene that wants both registers as two genes. Status
 effects are orthogonal: either kind of gene can have them, or a gene can be
 status-only with no coat effect at all.
 
-Whatever it does, a gene's coat contribution is the **pure delta function**
-from section 1: given the natural coat and the magical deltas as they stand, it
-returns its own delta.
+Whatever it does, a gene's coat contribution is the **pure function** section 1
+shipped: given read-only views of the state so far, it returns its own
+contribution and never writes through its arguments.
 
 The tiers below exist so a gene that only does one of these is cheap to write.
 
@@ -611,10 +463,19 @@ upstream source to be complete against - **add to it freely**. Each needs a
 priority, an allele set with `n` as wild type, a spawn chance, and a delta
 function (sections 1-3).
 
+**Shipped 2026-09-02** and written up in `Docs/Gene Dict.md`: **magic zebra**
+(`Mzeb`, dominant) and **pink hair** (`Pihr`, recessive - deliberately named
+"hair" rather than "mane and tail"). Magic zebra is explicitly *not* the natural
+zebra locus, which is still to come as a phase-1 gene. Two things they settled:
+the unclamped signed model works in the negative direction exactly as sketched,
+and a magical gene that wants a *specific* colour has to **read before it
+writes** - a blind add can reach pink on a black mane only by pushing hard
+enough to saturate a pale one to white. `coat/pattern/BodyStripes` came out of
+zebra and is the shared stripe helper the row below asked for; dun's leg barring
+and brindle should use it.
+
 | Gene | Sketch | What it needs |
 |---|---|---|
-| **Zebra stripes** | Colour production driven to nothing along body-space stripes, so the horse keeps its own coat between black stripes. | The proof-of-concept magical gene: a large *negative* RGB contribution, which is what validates the unclamped signed model. Stripe function in body space; shares its maths with dun's leg barring and brindle's striping, so build one stripe helper and let all three use it. |
-| **Pink mane and tail** | Mane, tail (and optionally forelock/feathering) rendered pink regardless of base coat. | **The cheapest magical gene, and the best first one.** `CoatRegions` already has mane and tail fills, so the delta is "large positive red + blue on these parts". Ideal tier-1 declarative test: if this needs more than a few lines, the authoring API isn't done. Worth alleles for a couple of intensities rather than one on/off. |
 | **Cutie marks** | An emblem on each flank, mirrored left and right. | The most involved one on the list, and the first gene that wants an **asset** rather than pure maths - see the note below. |
 
 **Cutie marks, in more detail**, because they break new ground:
@@ -780,8 +641,8 @@ Not planned: Y-linked genes, imprinting, mosaicism.
 
 Today `Gene` is *defined* by its coat contribution: the interface's entire
 Javadoc is the pigment pipeline, and its only non-trivial methods are
-`restrict` and `overlayLayer`. Everything in sections 5.3 and 5.4 needs a
-second kind of contribution.
+`restrict` and `tint`. Everything in sections 5.3 and 5.4 needs a second kind
+of contribution.
 
 ### 6.1 The shape of the change
 
@@ -1058,10 +919,10 @@ being the thing that blocks adding genes.
   are **foundation horses with no parents**, which is exactly where the
   determinism contract allows a draw (`Docs/Philosophy.md` §2).
 - **The corridor stops having an end.** `LAST_SEGMENT_INDEX` (currently
-  `ceil(size / 2) - 1` = 216, giving 1 519 blocks) and the `buildEndCap` call
+  `ceil(size / 2) - 1` = 864, giving **6 055 blocks**) and the `buildEndCap` call
   go away, or become an arbitrary length. `ensureGeneratedAheadOfPlayer` keeps
   extending as you walk, as it always did.
-- **The entrance tally sign** (`Genotypes / 19,683 / Distinct / 434 pens`) no
+- **The entrance tally sign** (`Genotypes / 177,147 / Distinct / 1,730 pens`) no
   longer means anything - drop it, or replace it with something that's true of
   a random corridor.
 - **The per-pen sign stays** - `GeneCodeDisplay.shortForm` + `wrap(genotype, 3,
@@ -1157,14 +1018,17 @@ The master table is ~27 loci against today's 9, several with many alleles, and
 third-party genes (section 3) make the count open-ended. That is not a linear
 change.
 
-- **The genotype space.** Today: `3^9 = 19 683` genotypes. With the full table
+- **The genotype space.** Today: `3^11 = 177 147` genotypes - it was `3^9 =
+  19 683` two genes ago, which is the multiplier in miniature. With the full table
   (KIT merged at 39 alleles, MITF 7, PAX3 5, MATP 5, ACAN 5, MC1R 3, dun 3,
   tiger eye 3, the rest biallelic) the raw product is on the order of
   **1.85 × 10^19**.
 - **The gallery would have died - but it's being reverted anyway.** A
-  catalogue-driven dimension (one pen per `GenotypeCatalog` entry: 434 pens,
-  1 519 blocks) cannot survive a genotype space of 10^19, and the catalogue's
-  reductions buy a constant factor, not an order of magnitude. **Section 8
+  catalogue-driven dimension (one pen per `GenotypeCatalog` entry: **1 730
+  pens, 6 055 blocks** - it was 434 / 1 519 before magic zebra and pink hair)
+  cannot survive a genotype space of 10^19, and the catalogue's reductions buy a
+  constant factor, not an order of magnitude. Two genes quadrupling the corridor
+  is the argument arriving early. **Section 8
   settles this** by going back to random pens, which don't care how large the
   space is. If a *systematic* gallery is ever wanted again, the shape that
   scales is a **wing per locus** - each gene's pairs on a fixed wild-type
@@ -1209,15 +1073,13 @@ Each step is useful on its own and unblocks the next.
 1. **Gene priority + derived orderings** (section 2). Small, self-contained,
    and it deletes the three hand-maintained lists that make every later step
    annoying. Add the determinism tests `Docs/Philosophy.md` §2 calls for alongside it.
-2. **Three-phase pipeline** (section 1). Port `TestGene`; add the
-   byte-identical regression test. Nothing new is possible until colour is
-   additive.
-3. **The first magical genes** (section 4.5) - **pink mane and tail** first,
-   because `CoatRegions` already has the mane and tail fills and it should be a
-   few lines; then **zebra**, which proves the *negative* half of the unclamped
-   signed model and builds the body-space stripe helper that dun and brindle
-   both reuse. Cutie marks come much later - they need multi-allele support and
-   an asset pipeline.
+2. ~~**Three-phase pipeline** (section 1).~~ **Done 2026-09-02** - and done
+   before step 1, so `naturalOrder()` / `magicalOrder()` are still hand-written
+   lists waiting on it.
+3. ~~**The first magical genes** (section 4.5).~~ **Done 2026-09-02** - pink
+   hair and magic zebra, with `BodyStripes` as the shared stripe helper. Cutie
+   marks still come much later - they need multi-allele support and an asset
+   pipeline.
 4. **The gene-authoring tiers** (section 3) - base classes first, the
    declarative builder second, the open registry third. Doing it here means
    every gene from step 5 onward is written the easy way instead of being

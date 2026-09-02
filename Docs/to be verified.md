@@ -40,30 +40,79 @@ see CLAUDE.md "Running the game".
 
 ## Still to verify
 
+- [ ] **Magic zebra** (`Mzeb`, new 2026-09-02) - the top item. Dominant and
+  1/100 per allele, so don't wait for a wild one: the gallery has zebra pens, or
+  summon one with `magic_zebra=Mzeb/n` in the code. What to look at:
+  - stripes read **black over any coat** - check one on a **cremello / perlino**
+    and one on a **dominant-white** horse, which is the `-200%` claim and the
+    whole reason phase 3 is an unclamped signed `int`;
+  - they hang from the **topline** and fade out partway down - and the reach is
+    per-horse, so two zebras should differ (one striped just over the back,
+    another nearly to the hooves);
+  - **the chevron over the back and the stripes on the chest, rump and leg
+    fronts.** These come from `BodyStripes`' `|z|` slant, added precisely
+    because those faces were rendering as flat bands. They looked right in a
+    sample bake but have never been seen on the actual 3D model, which is where
+    a body-space pattern usually goes wrong. This is the one that most needs
+    real eyes.
+  - **stripe density and width** are a first guess (spacing 2.2-4.2 body units,
+    width 0.32-0.56 of a period). If it reads more brindle than zebra, widen
+    `SPACING_MIN`/`SPACING_RANGE` in `MagicZebraGene`.
+- [ ] **Pink hair** (`Pihr`, new 2026-09-02) - **recessive**, so only
+  `Pihr/Pihr` shows and a wild one is ~1 in 144; use the gallery or a summon.
+  - the mane and tail read pink on a **black**, a **chestnut** and a
+    **cremello** alike, and the strand shading survives (it should not be a flat
+    pink slab - that's the whole reason it reads `ColorView.visible` first);
+  - on a **dominant-white** horse the hair is pink rather than white;
+  - a **foal** gets a pink **tail only** - the foal mesh has no MANE part. Worth
+    confirming that looks acceptable rather than broken.
+  - a horse carrying **both** genes: the zebra stripes should cut **across** the
+    pink mane, not the other way round (that's `magicalOrder()`).
+- [ ] **Pen signs now overflow.** At 11 genes the widest genotype label is 49
+  characters against three 15-char sign lines, so `GeneCodeDisplay.wrap`
+  overflows the last line (worst case 27 chars). Confirm how badly that reads
+  in-game before deciding whether it's worth anything - the gallery is slated
+  for revert to random pens (`Docs/to be completed.md` §9), which retires the
+  per-genotype sign, so "leave it" is a legitimate answer.
+
+- [ ] **The three-phase pipeline refactor** (2026-09-02) - **lowest priority
+  here.** `CoatPipelineGoldenTest` proves 20 genotypes × 3 seeds × adult/foal
+  compose byte-identically to the pre-refactor code, so no coat is *expected*
+  to have moved. The one thing the test can't cover is that it runs against a
+  synthetic 16x16 gradient and a flat template, not the real 500x500
+  `redblackgradient.png` and `horse_white*.png`. So: on the next `runClient`
+  for any other reason, just glance at a **Test (`T_`) horse** - it should still
+  be the flat pink/blue/red/yellow field on any base, including white - and at
+  any **dominant-white** horse. Nothing else needs looking at.
+
 - [ ] **The genotype gallery** (new, 2026-09-01) - **slated for revert**, so
   this is now low-value: the owner has decided the dimension goes back to
   **random** pens (keeping the pairs and the per-pen genome sign) - see
   `Docs/to be completed.md` §9. Verify only the parts that survive the revert
   (the per-pen sign, the pairs, the pen amenities); don't spend a session
-  walking 1 519 blocks checking catalogue order. What it does *today*: one pen
-  per entry in `GenotypeCatalog`, **434** visually distinct genotypes out of
-  19 683 total, two per segment, right-hand pen = even index, **1 519 blocks**
-  of corridor. Check in-game:
+  walking 6 055 blocks checking catalogue order. What it does *today*: one pen
+  per entry in `GenotypeCatalog`, **1 730** visually distinct genotypes out of
+  177 147 total, two per segment, right-hand pen = even index, **6 055 blocks**
+  of corridor (it was 434 / 1 519 before magic zebra and pink hair - two genes
+  quadrupled it, which is its own argument for the revert). Check in-game:
   - the entrance sign three blocks in front of the return portal reads
-    `Genotypes / 19,683 / Distinct / 434 pens`;
+    `Genotypes / 177,147 / Distinct / 1,730 pens`;
   - the first six pens, right/left alternating, are `eeaa`, `EEaa`, `eeAA`,
     `EEAA`, `EEaa WW`, `EEaa TT` - i.e. extension exhausts before agouti moves,
     no heterozygote pens for dominant genes, and white and test get exactly one
     pen each;
   - pen signs read like the horse's own info panel (`eeaa nSpl`, not the full
-    slash-and-dash code), wrap sensibly on the busiest ones
-    (`EEAA SplSpl / ChCh CrCr / prlprl GG`) and don't run past the sign edge;
+    slash-and-dash code) and wrap sensibly on the ordinary ones
+    (`EEAA SplSpl / ChCh CrCr / prlprl GG`). The **busiest** ones now overflow -
+    see the separate entry above; don't file that twice;
   - the gate sign really is to the **right** of the gate on both sides of the
     road (the two sides mirror), stands on the road surface, is readable from
     both faces, and is **waxed** (right-click doesn't open the edit screen);
   - both horses in a pen match the sign, and differ only where a
     non-deterministic gene (bay points, splash) makes them differ;
-  - the corridor ends in a wall after pen 434 - now a walkable distance.
+  - the corridor ends in a wall after pen **1 730**. That is 6 055 blocks out,
+    no longer a walkable distance, so this one is only worth checking if you
+    fly it - and it stops mattering entirely once the pens go random.
 - [ ] **Leaving no longer clears blocks** - `tearDown` discards entities and
   forgets their ancestry records only. Check: leave and re-enter; the corridor
   is rebuilt over the old one with no leftovers, stragglers, or doubled horses,

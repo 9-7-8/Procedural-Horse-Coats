@@ -45,6 +45,13 @@ depending on the base it lands on:
 | Splash | uncommon | White socks and a face blaze, rolled per horse - no two are quite alike. |
 | Dominant white | rare | Solid **white**, no markings. Masks everything else. |
 
+And then there are the ones no real horse has:
+
+| Gene | In the wild | What it does |
+|------|-------------|--------------|
+| Magic zebra | rare | Black **stripes**, hung from the spine and reaching down the horse's sides. They go black over *anything* - a cremello, a dapple grey, even a solid white horse. How far down they reach is its own horse's business: some are striped just across the back, some nearly to the hooves. |
+| Pink hair | **hidden** | A **pink mane and tail**, whatever colour the rest of the horse is. It's the one gene a horse can carry without showing it - **both** parents have to pass it on before a foal has pink hair, so this is one you go looking for and breed toward rather than stumble across. (A foal gets the tail; the mane comes in when it grows up.) |
+
 Wild horses roll a random genotype when they spawn. Bred foals inherit one
 allele from each parent at every gene, so colour passes down the way it does
 in real horses - two black horses can still throw a chestnut foal if both

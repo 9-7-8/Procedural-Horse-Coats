@@ -12,6 +12,10 @@ why the logic is quarantined in a game-free module.
 
 **Docs split:** everything except `README.md` and `CLAUDE.md` lives in
 **`Docs/`**. New dev docs go there too - keep the repo root to those two.
+(The root also carries **`index.html` + `wiki/`** - the owner's browser-based
+horse-genetics wiki and interactive gene creator, a separate workstream from
+these markdown docs. It has its own per-gene pages; it is *not* a source of
+truth for the mod's behaviour, and nothing here is generated from it.)
 - **`README.md`** is **user-facing only** now - what the mod does, how to play
   it, install, license. No status tables, no architecture, no API notes.
   Don't put dev content there.
@@ -22,7 +26,7 @@ why the logic is quarantined in a game-free module.
   touch any of that; don't re-document it here or in README (a pointer is
   fine).
 - **`Docs/Gene Dict.md`** is the single source of truth for **each gene** - alleles,
-  generation function, wild frequency, dominance, natural/non-natural. Update
+  generation function, wild frequency, dominance, natural/magical. Update
   it in the same change as any gene; CLAUDE.md keeps only the machinery + a
   one-line-per-gene table.
 - **`Docs/to be verified.md`** is the rolling **`runClient` checklist** - what's
@@ -54,13 +58,16 @@ why the logic is quarantined in a game-free module.
 
 ## Status snapshot (keep this current)
 
-- **`common/`** - compiles; **138 JUnit tests pass** (`./gradlew :common:test`).
-  Covers `genetics/` (allele/gene model - 9 genes incl. grey / cream / pearl / splash, `Genotype` code
+- **`common/`** - compiles; **153 JUnit tests pass** (`./gradlew :common:test`).
+  Covers `genetics/` (allele/gene model - **11 genes**: the 9 natural ones incl.
+  grey / cream / pearl / splash, plus magic zebra and pink hair; `Genotype` code
   round-trip, breeding, the `Epigenome` / `Genome` per-allele epigenetics +
   priority tie-break, `DominancePattern` + the `GenotypeCatalog` reduction of
-  19 683 genotypes to 434 distinct coats), `coat/` + `coat/pattern/` (the overlay pipeline -
-  `CoatTextureComposer`, `GradientLut`, `BayCoat`, `GreyCoat`, `CoatRegions`, the genes,
-  `CoatTextureId` texture-id injectivity),
+  177 147 genotypes to 1 730 distinct coats), `coat/` + `coat/pattern/` (the
+  three-phase pipeline - `CoatTextureComposer`, `PigmentField`, `ColorField`,
+  `GradientLut`, `BayCoat`, `GreyCoat`, `BodyStripes`, `CoatRegions`, the pure
+  gene hooks, the `coat-golden.txt` byte-identity net, `CoatTextureId`
+  texture-id injectivity),
   `coat/skin/` (`HorseSkinGeometry`), `name/` (`breedNth`),
   `horse/` (pedigree + `HorseStats` -> `Docs/breeding.md`).
 - **`neoforge-26.1.2/`** - compiles and assembles (`./gradlew
@@ -130,6 +137,25 @@ why the logic is quarantined in a game-free module.
     combined genetic code, and (for the pairing's **first** foal) a name
     combining both parents.
 
+- **Built 2026-09-02, NOT yet play-tested:** the first two **magical genes** -
+  **magic zebra** (`Mzeb`, dominant, 1/100 per allele) and **pink hair**
+  (`Pihr`, **recessive**, 1/12 per allele). Both are phase-3 genes; details in
+  `Docs/Gene Dict.md`, in-game checklist in `Docs/to be verified.md`. They take
+  the registry to **11 genes**, which moves a lot of derived numbers: the code
+  string is 11 segments, `breedWith` draws 22 booleans, and the gallery goes
+  from 434 pens / 1 519 blocks to **1 730 pens / 6 055 blocks** of corridor.
+  Sample bakes look right (stripes read black over cremello and over dominant
+  white; pink manes keep their strand shading on black, chestnut and perlino
+  alike); nothing seen in-game.
+- **Built 2026-09-02, behaviour-neutral by construction:** the **three-phase
+  pigment pipeline** (`Docs/to be completed.md` §1). Phase 3 is now a signed,
+  uncapped `ColorField` that magical genes *add* into, both gene hooks are pure
+  (read-only views in, a contribution out), and `CoatBuildContext` no longer
+  carries scratch space. **No coat changed**: `CoatPipelineGoldenTest` hashes
+  20 genotypes × 3 seeds × adult/foal and every one is byte-identical to the
+  pre-refactor bake, so there is **nothing new to play-test** - it's groundwork
+  for the magical genes. Nothing in `neoforge-26.1.2/` needed touching, which
+  was the test of whether the refactor stayed inside `common/`.
 - **Built 2026-09-01, NOT yet play-tested:** **per-allele epigenetics** and the
   **dapple-grey rework**. Epigenetics moved off the horse and onto the allele
   copy (`Epigenome` / `Genome` / `AlleleEpigenetics`, each copy carrying a
@@ -140,7 +166,7 @@ why the logic is quarantined in a game-free module.
   bakes look right, nothing seen in-game yet - checklist in
   **`Docs/to be verified.md`**.
 - **Built 2026-09-01, NOT yet play-tested:** the **genotype gallery** rework of
-  the horse dimension - one pen per visually distinct genotype (434 of 19 683),
+  the horse dimension - one pen per visually distinct genotype (1 730 of 177 147),
   per-pen genotype signs, the entrance tally sign, `Gene.dominance()` metadata,
   and the entity-only teardown that leaves blocks standing. Compiles, 138
   `common` tests pass, nothing seen in-game yet. Details in the horse-dimension
@@ -169,9 +195,11 @@ Two-module Gradle project, split deliberately:
     `AlleleEpigenetics` (the priority + seed on each allele copy), `Genome`
     (the two together, and the breeding that keeps them aligned),
     `CoatPhenotype`, `GeneticCodeCombiner`.
-  - `coat/` - `CoatData`, `CoatGenerator`; `coat/pattern/` also holds
-    `BodyNoise`, the reusable body-space noise any future patterned gene
-    should build on.
+  - `coat/` - `CoatData`, `CoatGenerator`; `coat/pattern/` holds the
+    three-phase pipeline (`CoatTextureComposer`, the `PigmentField` /
+    `ColorField` accumulators and their read-only `PigmentView` / `ColorView`
+    faces) and `BodyNoise`, the reusable body-space noise any future patterned
+    gene should build on.
   - `name/` - `HorseNameGenerator` + `HorseNames` (`breed` = one-half-each;
     `breedNth` = varied by a pairing's foal count) + word tables under
     `src/main/resources/horsegenetics/names/`.
@@ -229,20 +257,22 @@ of characters** (`Spl`, `Cr`, `prl`, `Ch`, `N`, ...). Example:
 handling** - dev only, no saves to keep.
 
 `Genes.codeOrder()` = extension, agouti, white, test, champagne, splash, grey,
-cream, pearl - **append** new ones. **Full per-gene detail is in `Gene
-Dict.md`** (natural genes first, then non-natural); one-liners:
+cream, pearl, magic zebra, pink hair - **append** new ones. **Full per-gene detail is in `Gene
+Dict.md`** (natural genes first, then magical); one-liners:
 
 | gene | alleles | dominance | in the wild | coat effect |
 |------|---------|-----------|-------------|-------------|
 | extension | `E`/`e` | dominant | 50/50 | `ee` = black restricted → chestnut |
 | agouti | `A`/`a` | dominant | 50/50 | `A_` = bay; one uniform "point extent" off the `A` copy sets leg + face black, each leg jittered; a high roll = seal (non-det) |
 | white | `W`/`w` | **complete** | 1/50 | `W_` = all pigment gone → transparent; masks every other gene |
-| test | `T`/`t` | **complete** | 1/4 carrier | `T_` = paint the `TestCoatPattern` gradient **flat on top**, last (only **non-natural** gene; visible on any base incl. white) |
+| test | `T`/`t` | **complete** | 1/4 carrier | `T_` = paint the `TestCoatPattern` gradient **flat on top** in phase 3 (the only **magical** gene; visible on any base incl. white) |
 | champagne | `Ch`/`c` | dominant | 1/40 | dilute toward the gradient's gold; keeps bay's points chocolate (amber champagne) |
 | splash | `Spl`/`spl` | incomplete\* | 1/20 | random white socks + face blaze (non-det) - **open issue:** only the blaze, the sock edges are a hard ring, and \*it doesn't read its dose yet (`Spl/Spl` should be much bigger markings) |
 | grey | `G`/`g` | dominant | 1/16 | **adults only** - **dapple grey** (`GreyCoat`): remaps onto the gradient's neutral column, per-horse progression / dapple size / dapple strength / point retention (non-det); foal born base colour |
 | cream | `Cr`/`N` | incomplete | 1/30 | incomplete-dominant dilution; interacts with pearl; never leaves a pitch-black point |
 | pearl | `prl`/`N` | incomplete | 1/22 | dilution; `prl/prl` no-cream = mild uniform; `Cr/prl` = double cream |
+| magic zebra | `Mzeb`/`n` | dominant | 1/100 | **magical** - black stripes hung from the topline, `-200%` on all three channels so they read black over any coat incl. dominant white (non-det) |
+| pink hair | `Pihr`/`n` | **recessive** | 1/12 carrier | **magical** - mane + tail walked 82% toward hot pink; reads what it paints over, so it keeps the strand shading (foal: tail only) |
 
 **`Gene.dominance()`** (`common/genetics/DominancePattern`) is declared
 metadata on every gene: `DOMINANT` / `RECESSIVE` / `INCOMPLETE_DOMINANT` /
@@ -250,7 +280,8 @@ metadata on every gene: `DOMINANT` / `RECESSIVE` / `INCOMPLETE_DOMINANT` /
 else is visible). `heterozygoteIsDistinct()` and `masksOtherGenes()` are the
 two questions callers ask. Today's only consumer is `GenotypeCatalog`'s
 gallery reduction, but it's per-gene metadata so a punnett/breeding UI can use
-it too. No gene is `RECESSIVE` yet.
+it too. **Pink hair is the only `RECESSIVE` gene** - the first one where the
+heterozygote is a carrier you cannot see.
 
 Cream + Pearl are allelic in reality; here two genes, combined once in
 `coat.pattern.CreamPearlDilution` (dose table in `Docs/Gene Dict.md`).
@@ -299,10 +330,31 @@ order).
 
 Full inheritance detail: **`Docs/breeding.md`**.
 
-## The coat overlay pipeline (`common/coat/pattern/` + `client/GeneticCoatTextureFactory`)
+## The three-phase coat pipeline (`common/coat/pattern/` + `client/GeneticCoatTextureFactory`)
 
 Coats are **generated** for every horse - adult *and* foal. Per-gene detail in
 **`Docs/Gene Dict.md`**; the machinery:
+
+- **Every gene is either natural or magical, never both** (`Gene.isNatural()`,
+  declared not inferred; a gene wanting both registers as two). A **natural**
+  gene only pushes red/black pigment *down* in phase 1; a **magical** gene only
+  adds *signed RGB* in phase 3, after the pigment has been resolved to colour.
+  Natural is reserved for genes that exist in real life
+  (`Docs/Philosophy.md` §6).
+- **Both coat hooks are pure.** A gene is handed **read-only views** of the
+  state so far (`PigmentView`, `ColorView`) and **returns** its contribution;
+  it never draws into shared scratch. `CoatBuildContext` therefore carries no
+  fields any more - it's just genotype / epigenome / skin / adult /
+  `epigeneticsFor`, and the composer owns both fields. Same inputs → same
+  output, and a gene can be unit-tested against a synthetic coat on its own
+  (`GeneCoatHookTest`).
+  - Phase 1: `PigmentField restrict(pair, ctx, PigmentView coat)` - take
+    `coat.mutableCopy()`, paint into it, return it; `null` = no contribution.
+    (The doc's original sketch also handed phase 1 the magical field; it
+    doesn't exist yet at that point in the bake, so it isn't passed.)
+  - Phase 3: `ColorField tint(pair, ctx, PigmentView coat, ColorView colour)` -
+    return a delta, or `null`. It gets the resolved natural coat too, so a gene
+    can *find* a region (all the black, all the white) before painting it.
 
 - **`CoatData`** = a `Genome` (`Genotype` + `Epigenome`), assigned once at
   birth and persisted. `textureKey()` = the genotype code, plus
@@ -323,11 +375,16 @@ Coats are **generated** for every horse - adult *and* foal. Per-gene detail in
      cremello / perlino chestnuts and bays into flat white horses.
      **Resolves to pure black → 80% opacity** (`PURE_BLACK_ALPHA`) so black
      isn't a flat void.
-  3. **overlay pass** - each visible non-natural gene (`Genes.overlayOrder()`
-     = test) paints a layer **flat on top** of the overlay: an opaque layer
-     texel replaces whatever the natural pass resolved there, so the effect
-     shows the same on black, chestnut *or* white. (`overlayLayer`, layer
-     pre-filled transparent = "no paint here".)
+  3. **magical (RGB) pass** - each visible magical gene (`Genes.magicalOrder()`
+     = pink hair → magic zebra → test) returns a signed RGB delta, folded into the `ColorField` by
+     integer addition. Because that's associative and exact, ordinary magical
+     genes are **order-independent and drift-free**. `ColorField.set` is the
+     escape hatch - flat opaque paint that *replaces* the accumulator (order
+     *does* matter for those), used only by a `COMPLETE_DOMINANT` gene that
+     must read the same on black, chestnut *or* white. Test is the only one.
+     **`magicalOrder()` is not arbitrary**, despite the additivity: pink hair
+     *reads* what it's painting over (so it's order-dependent by choice), and
+     Test paints flat and masks everything, so it has to run **last**.
   4. **composite** onto the template, **alpha-aware** multiply (`blend`),
      keeping template alpha. Because it's a *multiply*, the template's own dark
      detail - hooves, nostrils, the shading between mane strands - survives on
@@ -340,6 +397,31 @@ Coats are **generated** for every horse - adult *and* foal. Per-gene detail in
 
   Natural genes only move the pigment sample → champagne / cream / pearl all
   read off whatever is underneath; anything on white is invisible.
+- **`ColorField`** is the phase-3 accumulator: per texel a **signed `int`**
+  r/g/b **plus a separate opacity**, seeded from the resolved colour.
+  - **Nothing is capped until `argb()`.** That headroom is the point: a gene
+    can add so much blue that no combination of other genes pulls it back
+    under 255 - the horse is blue unconditionally and its author never had to
+    know what else it carries. Zebra is the same trick with the sign flipped.
+    `add` **saturates** at `Integer.MIN/MAX_VALUE` rather than wrapping, so
+    "obviously large" numbers stacked twice can't flip an always-blue horse
+    black.
+  - **Opacity is its own channel, deliberately.** Transparency used to ride on
+    the pigment channels (both ≈ 0 → the bald template shows). Once phase 3 can
+    add colour to a texel carrying no pigment, "no pigment" and "no paint" stop
+    being the same statement. A magical gene *may* paint a dominant-white horse
+    - white is natural, and every magical gene runs after every natural one -
+    but it has to say so with `addOpacity`/`set`; colour alone on a transparent
+    texel shows nothing.
+  - The blend onto the resolved colour is a **straight signed add**, which is
+    what keeps phase 3 order-independent. Anything fancier (a real
+    overlay/soft-light) reintroduces order-dependence - if it ever changes,
+    re-check that claim.
+- **`CoatPipelineGoldenTest`** is the machinery's safety net: 20 genotypes ×
+  3 seeds × adult/foal, hashed. It exists to prove a change to the *pipeline*
+  leaves every horse byte-identical. When a **gene** deliberately changes,
+  regenerate `common/src/test/resources/coat-golden.txt` (delete it, run the
+  test, copy `common/build/coat-golden.txt` back) and say so in the commit.
 - **`GradientLut`** wraps `assets/horsegenetics/textures/coat/redblackgradient.png`
   (hand-authored, 500x500): left = more red, bottom = more black; `(1,1)` =
   black, `(1,0)` = chestnut, `(0,0)` = white, champagne-gold column near the
@@ -359,6 +441,13 @@ Coats are **generated** for every horse - adult *and* foal. Per-gene detail in
   units), **dapple strength** (contrast, peaked mid-greying), **point
   retention** (mane/tail/ears/muzzle full, head half, lower legs ramped; scaled
   by `1 - progression`). Dapples come from `BodyNoise`.
+- **`BodyStripes`** - the reusable stripe field, pure and in body space:
+  bands of near-constant X warped by `BodyNoise`, plus a small **slant on
+  `|z|`** that bends each stripe into a shallow chevron over the back. The
+  slant isn't decoration - without it every face perpendicular to X (chest,
+  rump, the front and back of each leg) sits at one phase and renders as a flat
+  band. Magic zebra is the first caller; a natural **dun**'s leg barring and
+  **brindle** should reuse it rather than reinvent it.
 - **`BodyNoise`** - pure `(seed, x, y, z)` noise sampled in **body space**, so a
   pattern crosses part seams without a join. `cellDistance` = distance to the
   nearest jittered-lattice point, normalized (centres = dapples, gaps = the web
@@ -841,8 +930,8 @@ genotype that looks different from every other.
 - **`GenotypeCatalog`** (pure `common/`, unit-tested) is the enumeration.
   `allPairsOf(gene)` = every unordered `AllelePair`, **least dominant first**
   (`ee`, `Ee`, `EE`); `distinctPairsOf(gene)` applies the dominance reduction;
-  `totalGenotypes()` = the raw product (**19 683**); `size()` = the reduced
-  catalogue (**434**); `get(i)` / `entries()` read the list, built once at class
+  `totalGenotypes()` = the raw product (**177 147**); `size()` = the reduced
+  catalogue (**1 730**); `get(i)` / `entries()` read the list, built once at class
   load. Nothing is hard-coded - register a gene (or an allele) and the
   catalogue, the corridor length and both signs widen on their own.
 - **Two reductions**, both driven by `Gene.dominance()` (see below):
@@ -852,7 +941,9 @@ genotype that looks different from every other.
     exactly **one** entry for it: the variant homozygote with every other gene
     at wild type. Hence one white pen (`EEaa WW`, #5) and one test pen
     (`EEaa TT`, #6) instead of a quarter of the corridor each.
-  - Net: `2·2·2·3·2·3·3 = 432` unmasked + 1 white + 1 test = **434**.
+  - Net: `2·2·2·3·2·3·3·2·2 = 1 728` unmasked + 1 white + 1 test = **1 730**
+    (the last two 2s are magic zebra and pink hair - a `RECESSIVE` gene reduces
+    exactly like a `DOMINANT` one, homozygotes only).
 - **Pen order**: segment `i` holds catalogue entry `2i` in the **right-hand**
   pen (`NORTH_PEN`, the `+Z` side - your right walking in from the portal) and
   `2i+1` on the left. The corridor reads `eeaa, EEaa, eeAA, EEAA, [white],
@@ -867,14 +958,20 @@ genotype that looks different from every other.
     then **`GeneCodeDisplay.shortForm`** - the same compact form the info panel
     and paper dump use, so a plain horse reads `eeaa`, not a wall of wild-type
     slots - greedily wrapped over the remaining 3 lines by
-    `GeneCodeDisplay.wrap(genotype, 3, 15)`. A unit test asserts every
-    catalogue entry fits (widest today: `eeaa SplSpl nCr`, 15 chars / ~80 px of
-    a 90 px line).
+    `GeneCodeDisplay.wrap(genotype, 3, 15)`. **At 11 genes the widest labels no
+    longer fit**: `eeaa SplSpl ChCh CrCr prlprl GG MzebMzeb PihrPihr` is 49
+    chars against 3x15, and `wrap` deliberately overflows its **last** line
+    rather than dropping a gene, so those signs read wide in-game (worst case
+    27 chars). The unit test now asserts only that nothing is lost and that the
+    overflow doesn't grow past 30. The real fix is the planned revert to random
+    pens (`Docs/to be completed.md` §9), which retires the per-genotype sign
+    entirely - so this is deliberately left alone.
   - `originX + 4` (three blocks in front of the return portal), facing west at
-    the player's spawn: `Genotypes / 19,683 / Distinct / 434 pens`. Epigenetics
-    are deliberately not counted in either number.
-- **Length**: `LAST_SEGMENT_INDEX` = `ceil(size / 2) - 1` = 216, so the corridor
-  is **1 519 blocks**. `ensureBuiltUpToIndex` clamps to it and calls
+    the player's spawn: `Genotypes / 177,147 / Distinct / 1,730 pens`.
+    Epigenetics are deliberately not counted in either number.
+- **Length**: `LAST_SEGMENT_INDEX` = `ceil(size / 2) - 1` = 864, so the corridor
+  is **6 055 blocks** (it was 1 519 at 9 genes - each new gene multiplies it, which
+  is its own argument for §9's revert to random pens). `ensureBuiltUpToIndex` clamps to it and calls
   `buildEndCap` (the mirror of `buildStartCap`) on the last segment. Pens are
   still built lazily as you walk.
 
@@ -1003,9 +1100,8 @@ a clean exit forgets them.
 The **`runClient` checklist lives in `Docs/to be verified.md`** - both the
 **open issues** found in-game and what's still unconfirmed. Keep that file
 current after each session. The **long-range** backlog (the full gene wishlist,
-the three-phase pigment pipeline, per-allele stack priority, non-coat and
-health genes) lives in **`Docs/to be completed.md`**; this list stays
-near-term.
+per-allele stack priority, the modder-facing gene API, non-coat and health
+genes) lives in **`Docs/to be completed.md`**; this list stays near-term.
 
 **Fixed since that session:** grey (was "flat near-white, wants a rework") is
 now the `GreyCoat` dapple grey - built, unit-tested and sample-baked, **not yet
@@ -1050,19 +1146,30 @@ Design follow-ups (not just "go look at it"):
    gradient flat per pixel (no sooty shading, no seasonal coat). `BodyNoise` is
    the reusable seam for the next one. `T` on a non-deterministic coat still bakes a
    unique (identical-looking) texture per horse.
-7. **`breedNth` foal names past foal 1** / **`FamilyTreeScreen` scroll mode** /
+7. **Phase 3 now has three inhabitants and the blend question is answered.**
+   Magic zebra validated the *negative* half of the unclamped signed model
+   (`-200%` reads black over any coat, dominant white included); pink hair
+   showed that a **blind add is not enough** on its own - to reach pink on a
+   black mane a fixed delta has to push hard enough to saturate a pale mane to
+   white, so it reads `ColorView.visible` and returns the delta that walks the
+   texel toward its target. So: *straight signed add* stays the blend, but the
+   useful magical genes will read first, and `magicalOrder()` matters more than
+   §1 assumed. `naturalOrder()` / `magicalOrder()` are still hand-written lists
+   - making them *derived* is the gene-priority work (`Docs/to be completed.md`
+   §2), not done here.
+8. **`breedNth` foal names past foal 1** / **`FamilyTreeScreen` scroll mode** /
    **stats surfaces** / **water-riding feel** / **the epigenome across a
    save-reload** - see `Docs/to be verified.md`.
-8. **Epigenetics follow-ups** - a foal copies a parent's per-allele seed
+9. **Epigenetics follow-ups** - a foal copies a parent's per-allele seed
    **exactly**, with no variation, so a closed line converges on one look;
    and the epigenome lives on the entity, not on `HorseRecord`, so
    `FamilyTreeScreen` draws ancestors from `Epigenome.fromSeed(record UUID)` -
    a plausible stand-in, not the real coat.
-9. **Use `Gene.dominance()` beyond the gallery** - the metadata is on every
+10. **Use `Gene.dominance()` beyond the gallery** - the metadata is on every
    gene now (`DominancePattern`), but only `GenotypeCatalog` reads it. Obvious
    next consumers: a punnett/expected-foal display, "carrier" wording in the
    info panel, and `GeneCodeDisplay` deciding what's worth printing.
-10. **Cleanups**: rename `DebugPenManager` / `DEBUG_LEVEL` /
+11. **Cleanups**: rename `DebugPenManager` / `DEBUG_LEVEL` /
    `horsegenetics:debug_pens` to non-"debug" names (needs a save-data
    migration or a one-time reset); fold speed/health into the gene model;
    name-generation rework; real white-fog dimension effects

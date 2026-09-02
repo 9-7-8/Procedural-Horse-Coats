@@ -41,23 +41,27 @@ the *band* a foal's stats are rolled from.
 ### `genetics/Genotype.breedWith(Genotype other, Rng)`
 
 A `Genotype` is one `AllelePair` per registered `Gene` (`genetics/Genes`). The
-full model - alleles as objects, the gene registry, the coat overlay pipeline -
+full model - alleles as objects, the gene registry, the three-phase coat pipeline -
 is in **CLAUDE.md**; **each gene** is in **`Docs/Gene Dict.md`**. The code string is
 one segment per gene (`Genes.codeOrder()` = extension, agouti, white, test,
-champagne, splash, grey, cream, pearl), segments joined by `-`, alleles by `/`,
-dominant first, e.g. `E/e-A/a-w/w-t/t-c/c-Spl/spl-g/g-Cr/N-N/N`. **No legacy
+champagne, splash, grey, cream, pearl, magic zebra, pink hair), segments joined
+by `-`, alleles by `/`, dominant first, e.g.
+`E/e-A/a-w/w-t/t-c/c-Spl/spl-g/g-Cr/N-N/N-Mzeb/n-n/Pihr`. **No legacy
 handling.**
 
 `breedWith` is Mendelian segregation: for **each gene** the child takes one
 allele from each parent, drawn 50/50 within that parent's pair - **2
-`Rng.nextBoolean()` per gene**, genes in `codeOrder()` (18 draws for the 9
+`Rng.nextBoolean()` per gene**, genes in `codeOrder()` (22 draws for the 11
 built-in genes; `true` = that parent's first allele).
 
 Each resulting pair is canonicalized by `AllelePair` (more-dominant first, per
 `Gene.precedence`), so `breedWith` is symmetric: `E/E-A/A-… x e/e-a/a-…` always
 gives `E/e-A/a-…`. Dominance still masks - one `W` → white foal; one `T` →
 Test tint; one `Ch` → champagne; one `Cr` → cream dilution; one `G` → grey
-(adult only); one `Spl` → splash markings. Seal has no allele - it's a high
+(adult only); one `Spl` → splash markings; one `Mzeb` → magic zebra stripes.
+**Pink hair is the one recessive**: a single `Pihr` is an invisible carrier and
+only `Pihr/Pihr` shows, which makes it the first gene you have to *breed for*
+rather than spot. Seal has no allele - it's a high
 roll of bay's epigenetic leg/face heights.
 
 ### `genetics/Genome.breedWith(Genome other, Rng)` - the one a foal actually uses
@@ -313,7 +317,7 @@ Step 4 means the coat is **always derived from the record's genetic code**
 (plus the persisted seed for non-deterministic coats) - a bred foal's coat
 matches the genes it actually inherited, and stays the same across reloads.
 The actual pixels are generated client-side by `CoatTextureComposer` /
-`GeneticCoatTextureFactory` - see CLAUDE.md "The coat overlay pipeline".
+`GeneticCoatTextureFactory` - see CLAUDE.md "The three-phase coat pipeline".
 
 The horse-dimension pens spawn horses with `addFreshEntity` but pre-apply
 the founder record first (via `newFounder(horse, rng, sex)`) so each pen ends
@@ -554,7 +558,7 @@ common/src/main/java/com/example/horsegenetics/common/
   genetics/Genome.java              # Genotype + Epigenome; breedWith(...) draws both at once
   genetics/GeneticCodeCombiner.java # combine(motherCode, fatherCode, Rng) + combine(Genome, Genome, Rng)
   coat/CoatData.java, CoatGenerator.java        # a Genome ready to render; generate() is the founder path
-  coat/pattern/*.java               # the overlay pipeline (CLAUDE.md "The coat overlay pipeline")
+  coat/pattern/*.java               # the three-phase pipeline (CLAUDE.md "The three-phase coat pipeline")
   horse/Sex.java                    # + label(adult) -> stallion/mare/colt/filly
   horse/HorseRecord.java            # + speed / health (rounded up, uncapped), parentStats, withStats/withParentStats
   horse/HorseStats.java             # rollFoalStat(a, b, Rng) -> [0.75*min, 1.5*max]

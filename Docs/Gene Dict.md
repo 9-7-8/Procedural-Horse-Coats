@@ -8,16 +8,21 @@ architecture, **Docs/breeding.md** for inheritance.
 
 ## The pipeline in one paragraph
 
-Every coat pixel starts at **max red + max black pigment** (a black horse).
-**Natural** genes (`Gene.isNatural()`, the default) each get a
-`restrict(pair, ctx)` turn to push the shared `PigmentField` (per-texel `red` /
-`black` in `[0,1]`) down - they do *nothing else*. The field is then resolved
-to colour through `redblackgradient.png` (`GradientLut`) - fully restricted →
-transparent, resolves-to-pure-black → 80% opacity. Finally the one
-**non-natural** gene (Test) paints an ARGB layer **flat on top** of the
-resolved coat (opaque layer texels win outright - visible even on a white
-coat). The result is composited onto the white template (adult or foal), and
-the eye texels are copied back verbatim.
+Every coat pixel starts at **max red + max black pigment** (a black horse) and
+**zero magical colour**. **Natural** genes (`Gene.isNatural()`, the default)
+each get a `restrict(pair, ctx, coat)` turn to push a `PigmentField` (per-texel
+`red` / `black` in `[0,1]`) down - they do *nothing else*, and downward only.
+The field is then resolved to colour through `redblackgradient.png`
+(`GradientLut`) - fully restricted → transparent, resolves-to-pure-black → 80%
+opacity - into a `ColorField`. Finally every **magical** gene (only Test so far)
+gets a `tint(pair, ctx, coat, colour)` turn to **add signed R/G/B** on top of
+that, accumulated uncapped and only clamped to 0-255 at conversion. The result
+is composited onto the white template (adult or foal), and the eye texels are
+copied back verbatim.
+
+A gene is **natural or magical, never both**, and both hooks are **pure**: a
+gene gets read-only views of the state so far and *returns* its contribution,
+so it can be tested on its own. Full machinery in **CLAUDE.md**.
 
 Because natural genes only move the pigment sample, **champagne-on-bay differs
 from champagne-on-black, cream-on-chestnut differs from cream-on-bay, and
@@ -318,7 +323,85 @@ Owner-verified in-game **2026-09-01**: what's implemented renders correctly.
 
 ---
 
-# Non-natural genes
+# Magical genes
+
+Invented genes. They run in **phase 3**, after the pigment field has been
+resolved to colour, and they **add signed RGB** rather than restricting pigment
+(`tint`, not `restrict`). Order among them is `Genes.magicalOrder()` =
+**pink hair -> magic zebra -> test**; the additive ones commute, but pink hair
+reads what it is painting over and Test paints flat, so the list is not
+arbitrary - see each entry.
+
+## `horsegenetics.magic_zebra` - Magic zebra
+
+| | |
+|---|---|
+| alleles | `Mzeb` (dominant), `n` (wild-type) |
+| inheritance | simple dominant - `Mzeb/n` and `Mzeb/Mzeb` look alike |
+| **dominance** | `DOMINANT` |
+| wild frequency | `1 in 100` **per allele** (~2% of wild horses carry, and a carrier shows) |
+| natural? | **no** - magical (phase 3) |
+| deterministic? | **no** - five knobs off the expressing `Mzeb` copy |
+
+Black stripes hung from the **topline**, reaching down the horse's sides.
+
+- **Not the natural zebra gene.** A real-world zebra-striping locus is a
+  separate, later, *natural* gene. This one is invented and paints over whatever
+  the melanin genes produced.
+- **Strength is `-200%`** on all three channels (`MagicZebraGene.STRIPE_PERCENT`).
+  Deliberate overkill, and the reason the phase-3 accumulator is an unclamped
+  signed `int`: a resolved channel tops out at 100%, so a stripe lands hard on 0
+  and reads black over *any* coat - cremello, chestnut, grey - without the gene
+  knowing what else the horse carries. It also raises opacity, so the stripes
+  show on a **dominant-white** horse.
+- **The stripe field is `coat/pattern/BodyStripes`** - bands of near-constant
+  body-space X, warped by `BodyNoise` so they wiggle and taper. The phase also
+  carries a small **slant on `|z|`**, which bends each stripe into a shallow
+  chevron over the back. That is not decoration: without it, every face
+  perpendicular to X - chest, rump, the front and back of each leg - sits at one
+  phase and renders as a flat band. `BodyStripes` is deliberately generic, and
+  is what a natural **dun**'s leg barring and **brindle** should reuse.
+- **Epigenetic knobs**, off the `Mzeb` copy in this order: `nextLong()` (the
+  stripe field's seed), then `nextFloat()` for **spacing** (2.2-4.2 body units),
+  **width** (0.32-0.56 of a period), **bend** (0.6-2.2 units of warp) and
+  **reach** (0.35-0.95 of the drop from topline to hooves, with the last quarter
+  spent fading out). So one magic zebra is striped just over the back and
+  another to the hooves. A foal that inherits the copy inherits the pattern.
+- Everything **above** the topline - head, neck, mane, ears - is inside the
+  stripes at full strength.
+
+## `horsegenetics.pink_hair` - Pink hair
+
+| | |
+|---|---|
+| alleles | `Pihr` (recessive), `n` (wild-type, dominant) |
+| inheritance | simple **recessive** - only `Pihr/Pihr` shows |
+| **dominance** | `RECESSIVE` - the first gene in the mod that is |
+| wild frequency | `1 in 12` **per allele**, so ~1 wild horse in 144 shows it and many more carry it |
+| natural? | **no** - magical (phase 3) |
+| deterministic? | yes |
+
+The **mane and tail** turn pink.
+
+- **It reads before it writes.** Flat paint would throw away the shading the
+  natural phase gave those strands and leave a dead pink patch, so the gene asks
+  `ColorView.visible` what each hair texel currently looks like and returns the
+  delta that walks it **82%** of the way to hot pink (`255,105,180`). The mane
+  keeps its own light and dark while ending up unmistakably pink on a black, a
+  chestnut or a cremello alike. It raises opacity too, so a dominant-white horse
+  gets pink hair rather than nothing.
+- **A blind `add` cannot do this** - and that is the point of phase-3 read
+  access. To reach pink on a black mane a fixed delta has to push so hard that a
+  pale mane saturates to white. The cost is that this gene is
+  **order-dependent**, which is why it runs *before* magic zebra: stripes should
+  black out pink hair, not the other way round.
+- **A recessive is something you breed for** - a single `Pihr` is invisible, so
+  finding one is a breeding problem rather than a spotting problem. That's the
+  reason for the comparatively common allele frequency.
+- **Foals get a pink tail only.** The foal mesh has no `MANE` part, so the mane
+  comes in with adulthood.
+- One intensity, no per-horse variation yet; alleles for a couple of intensities
+  are the obvious extension.
 
 ## `horsegenetics.test` - Test (diagnostic)
 
@@ -326,17 +409,19 @@ Owner-verified in-game **2026-09-01**: what's implemented renders correctly.
 |---|---|
 | alleles | `T` (dominant), `t` (recessive, wild-type) |
 | inheritance | simple dominant |
-| **dominance** | `COMPLETE_DOMINANT` - painted flat on top, so one `T` hides whatever is underneath |
+| **dominance** | `COMPLETE_DOMINANT` - painted flat and opaque, so one `T` hides whatever is underneath |
 | wild frequency | `1 in 4` carriers (deliberately common) |
-| natural? | **no** |
+| natural? | **no** - magical (phase 3) |
 | deterministic? | yes |
 
-`overlayLayer` fills a layer with the `TestCoatPattern` gradient (pink→blue
-along body X, red→yellow along body Y); the composer paints it **flat on top**
-of the resolved coat as the very last step, so the full colourful field is
-visible on any base - black, chestnut, or white (it does *not* interact with
-pigment restriction). Exercises `HorseSkinGeometry` end to end. Expect it
-removed once the engine is trusted.
+`tint` returns a delta built with `ColorField.set` - **flat, opaque paint**
+rather than the additive tint every other magical gene should use - carrying the
+`TestCoatPattern` gradient (pink→blue along body X, red→yellow along body Y).
+Setting instead of adding is what makes the field read the same on any base -
+black, chestnut, or white (it does *not* interact with pigment restriction) -
+and it's reserved for `COMPLETE_DOMINANT` genes for exactly that reason.
+Exercises `HorseSkinGeometry` end to end. Expect it removed once the engine is
+trusted.
 
 ---
 
@@ -359,7 +444,16 @@ the first gene to read the cream/pearl dose for something other than pigment.
 1. New `Gene` impl - alleles (any token strings), `randomPair`,
    `dominance()` (see `DominancePattern`; it decides how many pens the gene
    gets in the horse dimension's gallery), and either `restrict` (natural) or
-   `isNatural()=false` + `overlayLayer`.
+   `isNatural()=false` + `tint` (magical). Never both hooks.
+   - `restrict` takes `coat.mutableCopy()`, paints into it and returns it;
+     return `null` for "no contribution". Never write through the view.
+   - `tint` returns `ColorField.deltaLike(colour)` filled with `add` - signed,
+     and order-independent because of it. `set` is flat paint and is only for a
+     gene that masks everything. To paint a texel the natural phase left
+     transparent (dominant white, a splash marking) you must raise
+     `addOpacity`/`set`; colour alone won't show there.
 2. Register in `Genes`: append to `CODE_ORDER`, and to `NATURAL_ORDER` (in
-   effect order) or `OVERLAY_ORDER`.
+   effect order) or `MAGICAL_ORDER`.
 3. Document it here.
+4. If the gene changes an existing coat, regenerate
+   `common/src/test/resources/coat-golden.txt` - see `CoatPipelineGoldenTest`.
