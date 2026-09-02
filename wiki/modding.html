@@ -61,13 +61,20 @@
 
 <h2>What a gene is allowed to do</h2>
 
-<p>A gene has three kinds of effect, and may have any combination:</p>
+<p>A gene has four kinds of effect, and may have any combination:</p>
 
 <ol>
     <li><strong>The natural coat</strong> &mdash; restrict eumelanin / phaeomelanin
         in phase 1. <strong>Reserved for genes that exist in real life.</strong></li>
     <li><strong>The artificial coat</strong> &mdash; add or remove signed R/G/B in
         phase 3.</li>
+    <li><strong>Minecraft behaviour</strong> &mdash; a data-driven gene may carry an
+        <code>effects</code> block: walk on water, resist fire/fall, trail particles,
+        be milked for a fluid. A closed set of five verbs with boolean
+        <code>when</code> conditions &mdash; see
+        <a href="horse-traits.html">the trait &amp; effect architecture</a> and the
+        Waterborn example. (<code>attribute</code> and <code>mob_effect</code> parse
+        but are not executed yet.)</li>
     <li><strong>Status effects</strong> &mdash; stats, body size, health. <em>Not
         built yet</em>; sketched in <a href="roadmap.html#traits">Roadmap §6</a>.</li>
 </ol>

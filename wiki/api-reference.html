@@ -64,13 +64,16 @@ genetics/
   CoatPhenotype.java        coarse CHESTNUT / BLACK / BAY / WHITE
   genes/                    the eleven shipped Gene implementations
   spec/                     DATA-DRIVEN genes - a gene as a JSON file
-    GeneSpec.java             the format, as records (header + layers)
+    GeneSpec.java             the format, as records (header + layers + effects)
     SpecSchema.java           what each mask / op accepts, and its default
     GeneSpecParser.java       JSON tree -&gt; GeneSpec, strictly, with real errors
     Json.java                 a hand-rolled parser (common/ takes no dependencies)
     SpecValues.java           one horse's draw of the spec's knobs
     SpecGene.java             a Gene that answers everything from a GeneSpec
     GeneSpecLoader.java       find + parse + register, from a folder or the classpath
+    GeneAbility.java          the closed set of Minecraft "effects" a gene can carry
+    AbilitySchema.java        the flags / attributes / modes those effects may name
+    SpecAbilities.java        which abilities a Genotype expresses (NeoForge reads this)
     PartGroups.java           LEGS / HAIR / POINTS ... aliases for a parts list
     SpecFixtureTool.java      the bakeSpecFixtures task (creator parity)
     CreatorAssetTool.java     the bakeCreatorAssets task (creator's inlined assets)
@@ -478,11 +481,35 @@ void  CoatSheetRasterizer.writePng(int[] argb, Path out) throws IOException;</co
 <pre><code class="language-java">// The format, as records.
 public record GeneSpec(String key, String name, boolean natural, DominancePattern dominance,
                        int wildOdds, int priority, List&lt;AlleleSpec&gt; alleles,
-                       List&lt;Knob&gt; knobs, List&lt;Layer&gt; layers) {
+                       List&lt;Knob&gt; knobs, List&lt;Layer&gt; layers,
+                       List&lt;GeneAbility&gt; abilities) {
     static final int FORMAT = 1;
     AlleleSpec variant();          // alleles[0]
     AlleleSpec wild();             // alleles[last]
     boolean isDeterministic();     // no knobs = one bake serves every carrier
+    boolean hasAbilities();        // any Minecraft "effects" beyond the coat?
+}
+
+// The "effects" block - Minecraft behaviour, inert in common/, run by NeoForge.
+// See wiki/horse-traits.html. Closed set; every entry has when()/minDose().
+public sealed interface GeneAbility {
+    record Traversal(String flag, Condition when, int minDose)                    implements GeneAbility {}
+    record AttributeMod(String attribute, String op, double amount, Condition when, int minDose) ..
+    record Emitter(String kind, String shape, String anchor, Trigger trigger, int color,
+                   String particle, double chance, Condition when, int minDose)   implements GeneAbility {}
+    record SelfEffect(String effect, String target, int amplifier, int refreshTicks,
+                      Condition when, int minDose)                                implements GeneAbility {}
+    record Yield(Trigger.OnInteract trigger, String consumes, String produces,
+                 int cooldownTicks, Condition when, int minDose)                  implements GeneAbility {}
+    sealed interface Trigger   { /* Continuous, OnMove, Interval(ticks), OnInteract(item) */ }
+    sealed interface Condition { /* Always, Flag(name,negate), All, Any, Not */ }
+}
+
+// Which of a genotype's abilities are in play (visible gene, minDose met).
+public final class SpecAbilities {
+    record Active(String geneKey, GeneAbility ability) {}
+    static List&lt;Active&gt; activeFor(Genotype genotype);
+    static boolean anyLoaded();
 }
 
 public record Layer(String name, List&lt;Mask&gt; masks, Op op) {}
