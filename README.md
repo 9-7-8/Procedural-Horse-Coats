@@ -8,6 +8,8 @@ their parents, and every horse carries a name and a pedigree you can inspect.
 - **Minecraft:** 26.1.2
 - **Loader:** NeoForge 26.1.2
 - **License:** CC BY-NC 4.0
+- **Wiki:** open `index.html` in a browser - a page per gene, with its alleles,
+  how common it is in the wild, and what it does to a coat
 
 ---
 

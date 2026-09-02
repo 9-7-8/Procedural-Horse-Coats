@@ -163,6 +163,18 @@ project. Its shape:
     combined genetic code, and (for the pairing's **first** foal) a name
     combining both parents.
 
+- **Docs 2026-09-02, no behaviour change:** the **`Docs/*.md` -> wiki
+  conversion**. All five markdown docs are gone; their content lives in
+  `wiki/*.html` (see the Docs-split section above), the four Javadoc comments
+  that named them were repointed, and `Gene Dict.md` was split into **a page
+  per gene** - all **11** now documented, where only 4 were before (and two of
+  those pointed at a `CreamPearlGene.java` that has never existed). Two pages
+  are new rather than converted: **`wiki/modding.html`** (how to write a gene)
+  and **`wiki/api-reference.html`** (class abstractions), which is the
+  modder-facing documentation `wiki/roadmap.html` §3 assumed would exist.
+  `wiki/nav.js` builds every sidebar from one array, so a new page is one line.
+  **No Java behaviour changed** - only Javadoc text - and `:common:test` (153)
+  and `:neoforge-26.1.2:build` are both green. Nothing to play-test.
 - **Built 2026-09-02, NOT yet play-tested:** the first two **magical genes** -
   **magic zebra** (`Mzeb`, dominant, 1/100 per allele) and **pink hair**
   (`Pihr`, **recessive**, 1/12 per allele). Both are phase-3 genes; details in
@@ -1201,6 +1213,14 @@ Design follow-ups (not just "go look at it"):
    name-generation rework; real white-fog dimension effects
    (needs a client dimension-effects mixin); the stray `neoforge.mods.toml`
    duplicate.
+12. **The wiki is now load-bearing, so it can rot.** `wiki/api-reference.html`
+   hand-transcribes public signatures out of `common/` and
+   `wiki/gene-*.html` hand-transcribes each gene's constants - neither is
+   generated, so both drift silently the moment a signature or a tuning number
+   changes. Nothing checks this. The cheap guard would be a `:common:test` that
+   greps the gene pages for the constants they quote; the thorough one is
+   generating the reference page from the source. Until then it is a
+   discipline item, which is why it is in the session-end routine.
 
 ## License
 
