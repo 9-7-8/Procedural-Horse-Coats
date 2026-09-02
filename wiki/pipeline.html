@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Three-Phase Pipeline &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="nav.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow">The coat engine</p>
+<h1>The three-phase coat pipeline</h1>
+<p class="lede">
+    Every coat pixel starts as a maximally pigmented black horse. Natural genes push
+    pigment <em>down</em>; the survivors are resolved through a hand-authored
+    red/black gradient; magical genes then add <em>signed</em> RGB on top. The result
+    is multiplied onto a white template. Adult and foal go through the same pipeline.
+</p>
+
+<h2>The phases</h2>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>#</th><th>Phase</th><th>Who runs</th><th>Data</th><th>Direction</th></tr></thead>
+<tbody>
+<tr><td>1</td><td><strong>Natural (melanin)</strong></td><td>Every visible <em>natural</em> gene, in <code>Genes.naturalOrder()</code></td><td><code>PigmentField</code> &mdash; per texel <code>red</code>, <code>black</code> in <code>[0,1]</code></td><td>Down only</td></tr>
+<tr><td>2</td><td><strong>Resolve</strong></td><td>The composer</td><td><code>GradientLut</code> &rarr; <code>ColorField</code></td><td>&mdash;</td></tr>
+<tr><td>3</td><td><strong>Magical (RGB)</strong></td><td>Every visible <em>magical</em> gene, in <code>Genes.magicalOrder()</code></td><td><code>ColorField</code> &mdash; signed <code>int</code> r/g/b + opacity</td><td>Signed, uncapped</td></tr>
+<tr><td>4</td><td><strong>Composite</strong></td><td>The composer</td><td>Alpha-aware multiply onto the white template</td><td>&mdash;</td></tr>
+<tr><td>5</td><td><strong>Eyes</strong></td><td>The composer</td><td><code>CoatRegions.redrawEyes</code> &mdash; copied verbatim</td><td>&mdash;</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="note rule">
+    <span class="label">Two rules that hold the design up</span>
+    <p>
+        <strong>A gene is natural or magical, never both</strong> &mdash; declared
+        via <code>Gene.isNatural()</code>, not inferred. A gene that wants both
+        registers as two genes. <em>Natural</em> is reserved for genes that exist in
+        real life (<a href="philosophy.html">Philosophy §6</a>).
+    </p>
+    <p>
+        <strong>Both coat hooks are pure.</strong> A gene is handed read-only views
+        of the state so far and <em>returns</em> its contribution; it never draws
+        into shared scratch. <code>CoatBuildContext</code> therefore carries no
+        mutable fields at all &mdash; the composer owns both accumulators.
+    </p>
+</div>
+
+<h2>The two hooks</h2>
+
+<div class="codebox">
+<div class="filename">common/genetics/Gene.java</div>
+<pre><code class="language-java">/** Phase 1 - a natural gene pushes pigment down. null = no contribution. */
+default PigmentField restrict(AllelePair pair, CoatBuildContext ctx, PigmentView coat) {
+    return null;
+}
+
+/** Phase 3 - a magical gene returns a signed RGB delta. null = no contribution. */
+default ColorField tint(AllelePair pair, CoatBuildContext ctx,
+                        PigmentView coat, ColorView colour) {
+    return null;
+}</code></pre>
+</div>
+
+<ul>
+    <li><code>restrict</code> takes <code>coat.mutableCopy()</code>, paints into
+        that, and returns it. <strong>Never write through <code>coat</code></strong>
+        &mdash; it is the previous gene&rsquo;s output and the next gene&rsquo;s
+        input. (A multiplicative &ldquo;delta&rdquo; is not a representable object,
+        so phase 1 hands back the state it built rather than a difference.)</li>
+    <li><code>tint</code> returns <code>ColorField.deltaLike(colour)</code> filled
+        with <code>add</code>. It gets the resolved natural coat <em>as well as</em>
+        the accumulated colour, so a gene can <em>find</em> a region &mdash; all the
+        black, all the white &mdash; before painting it.</li>
+</ul>
+
+<p>
+    Phase 1 is not handed the magical field: it does not exist yet at that point in
+    the bake.
+</p>
+
+<h2>Phase 1 &mdash; the pigment field</h2>
+
+<p>
+    Every texel starts at <code>(red = 1, black = 1)</code>. Natural genes only ever
+    take pigment away.
+</p>
+
+<div class="table-wrap">
+<table class="facts">
+<tbody>
+<tr><th><code>setRed / setBlack(px, py, v)</code></th><td>Clamp a texel to an absolute value.</td></tr>
+<tr><th><code>restrictRed / restrictBlack(px, py, amount)</code></th><td><code>value *= (1 - amount)</code>. 0 keeps it, 1 removes it.</td></tr>
+<tr><th><code>dilute(px, py, keepRed, keepBlack, blackTint)</code></th><td>The shared dilution move &mdash; see below.</td></tr>
+<tr><th><code>forEach(op)</code></th><td>Visit every texel, mapped or not.</td></tr>
+<tr><th><code>mutableCopy()</code></th><td>A private, writable copy. This is how a gene starts.</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3 id="dilute">Why <code>dilute</code> exists, and why <code>restrictBlack</code> was not enough</h3>
+
+<div class="codebox">
+<div class="filename">common/coat/pattern/PigmentField.java</div>
+<pre><code class="language-java">public void dilute(int px, int py, float keepRed, float keepBlack, float blackTint) {
+    int i = py * size + px;
+    float b = black[i];
+    red[i]   = clamp01(red[i] * keepRed + b * blackTint);
+    black[i] = clamp01(b * keepBlack);
+}</code></pre>
+</div>
+
+<p>
+    <a href="gene-agouti.html">Bay</a> paints its points <em>absolutely</em>:
+    <code>black = 1</code>, <code>red = 0</code>. The gradient&rsquo;s
+    <strong>zero-red column stays visually jet black all the way down to
+    <code>black ≈ 0.4</code></strong>, so a dilution that only scaled black moved the
+    sample without changing the colour &mdash; single cream&rsquo;s
+    <code>black *= 0.7</code> landed on <code>#111111</code>, double pearl on
+    <code>#272727</code>. Every &ldquo;diluted&rdquo; bay still had jet points.
+</p>
+
+<p>
+    The <code>blackTint</code> term feeds a fraction of the <em>removed
+    eumelanin back in as pheomelanin</em>, which walks the sample sideways off that
+    column into the warm browns where a real diluted black lives. Amber champagne
+    keeps chocolate points over a gold body, perlino rusty ones, a buckskin dark
+    brown.
+</p>
+
+<div class="note good">
+    <span class="label">House rule</span>
+    <p>
+        <strong>No cream horse keeps a pitch-black point.</strong> Dark brown is as
+        far as it goes &mdash; so single cream carries a full tint, not the token
+        amount a real-world buckskin&rsquo;s black points would argue for.
+    </p>
+</div>
+
+<h2>Phase 2 &mdash; resolve through the gradient</h2>
+
+<p>
+    <code>GradientLut</code> wraps
+    <code>assets/horsegenetics/textures/coat/redblackgradient.png</code> &mdash; a
+    hand-authored 500&times;500 image. Left = more red, bottom = more black.
+    <code>sample(red, black)</code> reads
+    <code>x = (1-red)·(w-1)</code>, <code>y = black·(h-1)</code>.
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Corner</th><th>Colour</th></tr></thead>
+<tbody>
+<tr><td><code>(red 1, black 1)</code></td><td>black</td></tr>
+<tr><td><code>(red 1, black 0)</code></td><td>chestnut</td></tr>
+<tr><td><code>(red 0, black 0)</code></td><td>white</td></tr>
+<tr><td>middle column</td><td>champagne gold</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="note warn">
+    <span class="label">The red = 0 column is the only neutral ramp in the LUT</span>
+    <p>
+        The <em>diagonal</em> runs through the golds &mdash; an equal
+        <code>keep</code> of 0.4 on a black horse samples <code>(150,109,56)</code>,
+        a tan. So any effect that should read <strong>grey</strong> has to walk the
+        sample <em>toward</em> that column, not scale both pigments. That is the
+        entire reason <a href="gene-grey.html"><code>GreyCoat</code></a> is a remap
+        rather than a restriction.
+    </p>
+</div>
+
+<h3>Transparency and pure black</h3>
+
+<div class="codebox">
+<div class="filename">common/coat/pattern/CoatTextureComposer.java</div>
+<pre><code class="language-java">private static final int   PURE_BLACK_ALPHA = 0xCC;    // 80%
+private static final float TRANSPARENT_EPS  = 0.001f;</code></pre>
+</div>
+
+<ul>
+    <li>A texel goes <strong>fully transparent</strong> (the bald white template
+        shows through) only when <em>both</em> pigments are essentially zero &mdash;
+        i.e. dominant white or a splash marking, both of which
+        <code>setRed(0)</code> / <code>setBlack(0)</code> exactly.</li>
+    <li>A texel that resolves to <strong>pure black</strong> gets 80% opacity, so
+        black is not a flat void.</li>
+</ul>
+
+<p>
+    The cutoff is deliberately far below any <em>dilution</em> floor: grey keeps
+    0.15, and grey on a double-dilute cream still lands near 0.012 &mdash; a
+    near-white coat that must resolve in the gradient, not vanish. A 0.02 cutoff here
+    once turned grey cremellos and grey perlino bays into flat white horses.
+</p>
+
+<h2>Phase 3 &mdash; the colour field</h2>
+
+<p>
+    <code>ColorField</code> holds, per texel, a <strong>signed <code>int</code></strong>
+    red, green and blue <em>plus a separate opacity</em>, seeded from the resolved
+    colour. <strong>Nothing is capped until <code>argb()</code>.</strong>
+</p>
+
+<h3>Why the headroom is the point</h3>
+
+<p>
+    A gene can add so much blue that no combination of other genes pulls it back
+    under 255 &mdash; the horse is blue unconditionally, and its author never had to
+    know what else it carries. <a href="gene-magic-zebra.html">Magic zebra</a> is the
+    same trick with the sign flipped: <code>-200%</code> on all three channels, so a
+    stripe lands hard on 0 and reads black over a cremello, a chestnut or a grey
+    alike.
+</p>
+
+<p>
+    <code>add</code> <strong>saturates</strong> at
+    <code>Integer.MIN_VALUE</code>/<code>MAX_VALUE</code> rather than wrapping, so an
+    author&rsquo;s &ldquo;obviously large&rdquo; number stacked twice cannot flip an
+    always-blue horse black.
+</p>
+
+<h3>Opacity is its own channel, deliberately</h3>
+
+<p>
+    Transparency used to ride on the pigment channels &mdash; both ≈ 0 means the bald
+    template shows. Once phase 3 can add colour to a texel carrying no pigment,
+    &ldquo;no pigment&rdquo; and &ldquo;no paint&rdquo; stop being the same
+    statement.
+</p>
+
+<div class="note">
+    <span class="label">Painting a white horse</span>
+    <p>
+        A magical gene <em>may</em> paint a dominant-white horse &mdash; white is
+        natural, and every magical gene runs after every natural one &mdash; but it
+        has to say so with <code>addOpacity</code> or <code>set</code>. Colour alone
+        on a transparent texel shows nothing.
+    </p>
+</div>
+
+<h3>Add vs. set</h3>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Call</th><th>Semantics</th><th>Order-dependent?</th><th>Use for</th></tr></thead>
+<tbody>
+<tr><td><code>add(px, py, dr, dg, db)</code></td><td>Signed integer addition into the accumulator.</td><td><strong>No</strong> &mdash; associative and exact.</td><td>Every ordinary magical gene.</td></tr>
+<tr><td><code>addOpacity(px, py, da)</code></td><td>Makes the texel more (or less) solid.</td><td>No</td><td>Painting where the coat is transparent.</td></tr>
+<tr><td><code>set(px, py, a, r, g, b)</code></td><td><strong>Flat paint</strong> that replaces the accumulator.</td><td><strong>Yes</strong></td><td>Only a <code>COMPLETE_DOMINANT</code> gene that must read identically on any base. <a href="gene-test.html">Test</a> is the only one.</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3>Reading before writing</h3>
+
+<p>
+    <code>ColorView</code> exposes the raw signed channels, <code>argb()</code> (the
+    capped pixel), and &mdash; the one a gene usually wants &mdash;
+    <code>visible(px, py, channel)</code>:
+</p>
+
+<div class="codebox">
+<div class="filename">common/coat/pattern/ColorView.java</div>
+<pre><code class="language-java">/**
+ * What this texel will actually LOOK like, per channel, 0-255:
+ *   colour * opacity + white * (1 - opacity)
+ *
+ * A transparent texel reads as WHITE here - because that is what a viewer
+ * sees, the bald template - not as the black that argb() reports. A texel
+ * that resolved to pure black reads as 20% grey, for the same reason.
+ */
+default int visible(int px, int py, int channel);</code></pre>
+</div>
+
+<p>
+    <a href="gene-pink-hair.html">Pink hair</a> is the gene that proved this
+    necessary: a blind <code>add</code> cannot reach pink on a black mane without
+    pushing hard enough to saturate a pale mane to white. Reading first is the whole
+    point of phase-3 read access &mdash; and the cost is that such a gene is
+    <strong>order-dependent by choice</strong>.
+</p>
+
+<h3>Why <code>magicalOrder()</code> is not arbitrary</h3>
+
+<div class="codebox">
+<div class="filename">common/genetics/Genes.java</div>
+<pre><code class="language-java">private static final List&lt;Gene&gt; MAGICAL_ORDER = List.of(PINK_HAIR, MAGIC_ZEBRA, TEST);</code></pre>
+</div>
+
+<p>
+    Additive genes commute, so pink hair and magic zebra could in principle go either
+    way &mdash; except pink hair <em>reads</em> what it is painting over, and zebra
+    stripes should black out pink hair rather than the other way round. Test paints
+    flat and is <code>COMPLETE_DOMINANT</code>, so it must run <strong>last</strong>
+    or the genes after it would show through its overlay.
+</p>
+
+<h2>Phase 4 &mdash; compositing</h2>
+
+<p>
+    The colour field is composited onto the white template with an
+    <strong>alpha-aware multiply</strong>, keeping the template&rsquo;s own alpha.
+    Because it is a multiply, the template&rsquo;s dark detail &mdash; hooves,
+    nostrils, the shading between mane strands &mdash; survives on every coat,
+    cremello included.
+</p>
+
+<div class="note warn">
+    <span class="label">Debugging tip</span>
+    <p>
+        Near-black texels in a composed cremello are <strong>expected</strong> and
+        are <em>not</em> a gene failing to dilute &mdash; they are the template
+        showing through the multiply. When chasing a dilution bug, check the
+        <code>PigmentField</code> values, not the composed pixels.
+    </p>
+</div>
+
+<h2>Phase 5 &mdash; eyes</h2>
+
+<p>
+    <code>CoatRegions.redrawEyes(skin, out, template)</code> copies the eye texels
+    back verbatim. Adult: 2&times;2 pupil + 2&times;2 sclera at <code>{6,42}</code>
+    and <code>{28,42}</code> &mdash; the head&rsquo;s L/R faces. Foal: 2&times;2 pupil
+    at <code>{6,20}</code> and <code>{40,20}</code> (the baby texture has no bright
+    sclera), and again the head&rsquo;s side faces, not the front blob.
+</p>
+
+<p>
+    There is no genetic eye colour yet; it is a
+    <a href="verification.html#eyes">wanted gene</a> and the classic hook is blue eyes on
+    cream double-dilutes.
+</p>
+
+<h2>Texture identity and caching</h2>
+
+<p>
+    On the client, <code>GeneticCoatTextureFactory</code> loads the adult and foal
+    templates plus the gradient once, runs <code>compose</code>, uploads a
+    <code>DynamicTexture</code>, and caches by <code>textureKey()</code> plus
+    <code>:adult</code> / <code>:foal</code>. The cache is cleared on world exit.
+</p>
+
+<div class="note danger">
+    <span class="label">CoatTextureId &mdash; do not go back to lower-casing</span>
+    <p>
+        The <code>Identifier</code> a texture registers under is <code>coat/</code> +
+        <code>CoatTextureId.encode(key)</code>: an <strong>injective</strong> map into
+        Minecraft&rsquo;s legal path charset &mdash; <code>a-z0-9</code> verbatim,
+        <code>A-Z</code> &rarr; <code>.</code> + lower-case, everything else &rarr;
+        <code>_</code> + 4 hex.
+    </p>
+    <p>
+        <strong>Case is the dominance encoding.</strong> An older
+        <code>sanitize()</code> lower-cased the key, folding all 19,683 genotypes onto
+        <strong>27</strong> ids (<code>E/e</code> ≡ <code>e/e</code>,
+        <code>W/w</code> ≡ <code>w/w</code>, …).
+        <code>TextureManager#register</code> is a silent <code>Map.put</code> that
+        <em>closes the loser</em>, so every deterministic coat in a bucket rendered
+        whichever one baked last &mdash; a plain white horse whenever that was a
+        dominant-white one. That was the real
+        &ldquo;chestnut renders as the default white horse&rdquo; bug, and the
+        victim&rsquo;s own bake was correct, so a &ldquo;flat white&rdquo; debug line
+        never caught it. <code>KEY_BY_ID</code> in the factory is now a tripwire that
+        throws if two keys ever share an id again.
+    </p>
+</div>
+
+<h2 id="golden">The golden test</h2>
+
+<p>
+    <code>CoatPipelineGoldenTest</code> hashes <strong>20 genotypes &times; 3 seeds
+    &times; adult/foal</strong> and compares against
+    <code>common/src/test/resources/coat-golden.txt</code>. It exists to prove that a
+    change to the <em>pipeline</em> leaves every horse byte-identical &mdash; which is
+    how the three-phase refactor shipped with no coat moving at all.
+</p>
+
+<p>
+    When a <strong>gene</strong> deliberately changes, regenerate the file: delete
+    it, run the test, copy <code>common/build/coat-golden.txt</code> back &mdash; and
+    say so in the commit.
+</p>
+
+<p>
+    Its one blind spot: it runs against a synthetic 16&times;16 gradient and a flat
+    template, not the real 500&times;500 <code>redblackgradient.png</code> and
+    <code>horse_white*.png</code>.
+</p>
+
+<h2>Dev tools</h2>
+
+<div class="table-wrap">
+<table class="facts">
+<tbody>
+<tr><th><code>./gradlew :common:bakeCoatSamples</code></th><td>Writes <code>build/coat-samples/*.png</code> and <code>*_foal.png</code>. No game launch.</td></tr>
+<tr><th><code>./gradlew :common:test</code></th><td>Pure Java, no Minecraft &mdash; the fastest loop when iterating on genetics or coats.</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="body-space.html">Body space &amp; regions</a>
+        <a href="modding.html">Writing a gene</a>
+        <a href="api-reference.html">Class abstractions</a>
+        <a href="genetics-model.html">The genetics model</a>
+    </div>
+    Source: <code>common/src/main/java/com/example/horsegenetics/common/coat/pattern/</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

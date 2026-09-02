@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Grey &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="nav.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow natural">Natural gene <span class="sep">/</span> phase 1</p>
+<h1>Grey &mdash; dapple grey</h1>
+<p class="lede">
+    <span class="allele dom">G_</span> renders an adult as a <strong>dapple
+    grey</strong>: a neutral coat with rounded dapples, at a stage that varies from
+    dark steel to nearly white. A foal is born whatever colour it would be without
+    grey. It is the only gene that reads age &mdash; and the only one that is a
+    <em>remap</em> rather than a restriction.
+</p>
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd>horsegenetics.grey</dd></div>
+    <div><dt>Alleles</dt><dd><span class="allele dom">G</span> <span class="allele wild">g</span></dd></div>
+    <div><dt>Dominance</dt><dd>DOMINANT</dd></div>
+    <div><dt>Wild type</dt><dd>g</dd></div>
+    <div><dt>Wild frequency</dt><dd>1 in 16 per allele</dd></div>
+    <div><dt>Founder draws</dt><dd>2 &times; nextInt(16)</dd></div>
+    <div><dt>Deterministic</dt><dd><strong>no</strong> when expressed</dd></div>
+    <div><dt>Visible when</dt><dd>G_ <strong>and adult</strong></dd></div>
+    <div><dt>Epigenetic draws</dt><dd>1 long + 4 nextFloat</dd></div>
+    <div><dt>Generator</dt><dd>coat.pattern.GreyCoat</dd></div>
+</dl>
+
+<div class="note warn">
+    <span class="label">Built, not yet seen in-game</span>
+    <p>
+        The <code>GreyCoat</code> rework replaced a flat near-white pass. It compiles,
+        is unit-tested and sample-baked, but has not been play-tested &mdash; the
+        checklist is on <a href="verification.html">To be verified</a>.
+    </p>
+</div>
+
+<h2 id="remap">Grey is a remap, and that is the whole point</h2>
+
+<p>
+    Greying replaces pigmented hairs with white ones, and a mix of white and dark
+    hairs reads <strong>neutral</strong>. So a grey has to land on the
+    gradient&rsquo;s <strong>zero-red column</strong>, the only place the LUT is
+    actually grey.
+</p>
+
+<div class="note">
+    <span class="label">Why scaling both pigments does not work</span>
+    <p>
+        Scaling red and black <em>together</em> walks the sample down the
+        gradient&rsquo;s <strong>diagonal</strong> &mdash; and the diagonal runs
+        through the golds. At an equal <code>keep</code> of 0.4 a black horse samples
+        <code>(150, 109, 56)</code>: a tan. That is why the old flat
+        <code>KEEP = 0.15</code> had to sit almost on top of white to look grey at
+        all, and why every grey then looked like the same white horse.
+    </p>
+</div>
+
+<p>So <code>GreyCoat</code> instead:</p>
+
+<ol>
+    <li>works out how dark each texel currently reads
+        (<code>0.55&times;red + 0.95&times;black</code>);</li>
+    <li>writes that darkness back as <strong>black</strong> pigment, scaled by how far
+        this horse&rsquo;s greying has gone;</li>
+    <li>keeps only a fading trace of the red.</li>
+</ol>
+
+<p>
+    What was underneath still shows: a greying chestnut ends lighter than a greying
+    black, and a barely-greyed horse keeps a rose or steel cast.
+</p>
+
+<h2>The four knobs</h2>
+
+<p>
+    Drawn off the expressing <span class="allele dom">G</span> copy&rsquo;s
+    epigenetics, in this order: <code>nextLong()</code> for the dapple field&rsquo;s
+    seed, then four <code>nextFloat()</code>s.
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Knob</th><th>Range</th><th>What it does</th></tr></thead>
+<tbody>
+<tr><td><strong>progression</strong></td><td>0 &hellip; 1</td><td>keep = <code>lerp(0.46, 0.10, p)</code> &mdash; dark steel grey through to nearly white. <strong>Fixed for life</strong> (there is no age input). This is what makes one grey different from the next.</td></tr>
+<tr><td><strong>dapple spacing</strong></td><td>2.8 &hellip; 5.0 body units</td><td>Size of the dapples. The body is about 22 units long.</td></tr>
+<tr><td><strong>dapple strength</strong></td><td>0.5 &hellip; 1</td><td>Contrast between a dapple centre and the web around it, up to <code>DAPPLE_DEPTH</code> = 0.42. Scaled to <strong>peak mid-greying</strong> &mdash; a barely-started or almost-finished horse has little pigment left to vary.</td></tr>
+<tr><td><strong>point retention</strong></td><td>0 &hellip; 1</td><td>How much longer mane / tail / ears / muzzle (full), head (half) and the lower legs (ramped, gone by mid-cannon) hold their colour. Scaled by <code>1 - progression</code>, so it is the <em>young</em> greys that show dark points on a light body.</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    <code>DAPPLE_DEPTH</code> is generous on purpose: most of a <em>composed</em>
+    texel&rsquo;s variation is the white template&rsquo;s own shading, so the dapple
+    field has to push harder than it looks like it should. Sample bakes put the field
+    itself at a 21&ndash;29% lightness modulation on the mid greys, and about 5% on a
+    nearly-white one.
+</p>
+
+<h2>The dapples</h2>
+
+<p>
+    Dapples come from <a href="body-space.html"><code>BodyNoise.cellDistance</code></a>
+    &mdash; distance to the nearest point of a jittered lattice, sampled in
+    <strong>body space</strong> so the rings cross part seams without a join, and
+    warped by a low-frequency <code>BodyNoise.value</code> so the lattice flows
+    instead of gridding up. Near a lattice point is a dapple centre (lighter); out in
+    the gaps is the web (darker).
+</p>
+
+<div class="codebox">
+<div class="filename">common/coat/pattern/GreyCoat.java</div>
+<pre><code class="language-java">// Warp the sample so the dapple lattice flows instead of gridding up.
+double n  = BodyNoise.value(noiseSeed ^ 0x51L, x * warpScale, y * warpScale, z * warpScale);
+double m  = BodyNoise.value(noiseSeed ^ 0x52L, z * warpScale, x * warpScale, y * warpScale);
+double wx = x + (n - 0.5) * warp;
+double wy = y + (m - 0.5) * warp;
+double wz = z + (n - m)   * warp;
+
+double d   = BodyNoise.cellDistance(noiseSeed, wx * scale, wy * scale, wz * scale);
+float  web = (float) smoothstep(0.35, 0.78, d);   // 0 at a dapple centre -&gt; 1 in the web
+float  keep = lerp(keepDapple, keepWeb, web);</code></pre>
+</div>
+
+<h2>Foals</h2>
+
+<p>
+    <code>restrict</code> no-ops when <code>!ctx.isAdult()</code>, so a grey foal is
+    born its base colour and greys once grown. One wrinkle:
+    <code>isDeterministic</code> cannot see the foal flag (only <code>restrict</code>
+    gets the <code>CoatBuildContext</code>), so a grey <em>foal</em> is also treated
+    as per-horse. It bakes its own texture, and that texture is identical to a
+    non-grey foal&rsquo;s. Harmless &mdash; just a few extra cache entries.
+</p>
+
+<h2 id="age">No age, and that is now a decision</h2>
+
+<div class="note rule">
+    <span class="label">Settled</span>
+    <p>
+        <strong>Horse aging is deliberately out of scope</strong> &mdash; it risks
+        feeling bad for a player attached to a horse. So grey&rsquo;s progression is
+        drawn once from the <span class="allele dom">G</span> copy&rsquo;s epigenetics
+        and fixed for life: one grey is a steel four-year-old, another near-white, and
+        neither changes. <strong>Flea-bitten grey and grey melanoma are parked with
+        it.</strong>
+    </p>
+    <p>
+        The option is not foreclosed. Reopening it means giving the composer a real
+        age input, which today only knows adult vs foal &mdash; and nothing else in
+        the design would have to change.
+    </p>
+</div>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="body-space.html">BodyNoise</a>
+        <a href="pipeline.html">The gradient and the neutral column</a>
+        <a href="gene-agouti.html">Agouti</a>
+        <a href="verification.html">What to check in-game</a>
+    </div>
+    Source: <code>common/genetics/genes/GreyGene.java</code>,
+    <code>common/coat/pattern/GreyCoat.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

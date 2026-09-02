@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>To Be Verified &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="nav.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow">Project</p>
+<h1>To be verified</h1>
+<p class="lede">
+    The rolling <code>runClient</code> checklist. <strong>Open issues</strong> are
+    reproducible in-game and not yet fixed; <strong>still to verify</strong> is built
+    but not yet confirmed in a play session. Confirmed items are
+    <strong>deleted</strong>, not ticked &mdash; <code>CLAUDE.md</code>&rsquo;s
+    &ldquo;Owner-verified in-game&rdquo; block is the permanent record.
+</p>
+
+<div class="note">
+    <span class="label">Machine note</span>
+    <p>
+        This dev laptop needs <code>java.exe</code> / <code>javaw.exe</code> pinned to
+        the NVIDIA GPU and the FML splash disabled, or the JVM hard-crashes in the AMD
+        GL driver. See <code>CLAUDE.md</code>, &ldquo;Running the game&rdquo;.
+    </p>
+</div>
+
+<h2>Open issues</h2>
+<p>Seen in-game 2026-09-01, not fixed.</p>
+
+<div class="note warn">
+    <span class="label">Splash is missing the other face markings</span>
+    <p>
+        Only the centreline blaze (<code>CoatRegions.whitenBlaze</code>) exists. Add
+        the rest of the family: <strong>star, snip, stripe, bald face</strong>.
+        &rarr; <a href="gene-splash.html">splash</a>
+    </p>
+</div>
+
+<div class="note warn">
+    <span class="label">Splash leg edges are too clean</span>
+    <p>
+        <code>whitenLowerLeg</code> cuts at a hard <code>point.y() &lt;= cutoff</code>,
+        so a sock&rsquo;s top edge is a perfect ring. Break it up &mdash; per-texel
+        epigenetic jitter, or the smoothstep treatment <code>BayCoat.fade</code>
+        already uses.
+    </p>
+</div>
+
+<h2>Wanted (not built yet)</h2>
+
+<div class="note warn">
+    <span class="label">Splash is not really incomplete dominant</span>
+    <p>
+        It is tagged <code>INCOMPLETE_DOMINANT</code> so the catalogue gives
+        <code>Spl/spl</code> and <code>Spl/Spl</code> their own pens, but
+        <code>SplashGene.restrict</code> never reads the dose, so the two render
+        identically. Homozygous splash should give <strong>much larger</strong>
+        markings &mdash; higher stockings, a wide blaze or bald face, body patches.
+    </p>
+    <p>
+        Compare gallery pens <strong>#11 <code>eeaa nSpl</code></strong> and
+        <strong>#19 <code>eeaa SplSpl</code></strong> &mdash; identical today, and the
+        clearest place to check the fix.
+    </p>
+</div>
+
+<div class="note warn" id="eyes">
+    <span class="label">Genetic eye colour</span>
+    <p>
+        The eyes render correctly everywhere, but they are copied verbatim from the
+        template (<code>CoatRegions.redrawEyes</code>). Wants a gene &mdash; and the
+        classic hook is <strong>blue eyes on cream double-dilutes</strong>, which would
+        make it the first gene to read the cream/pearl dose for something other than
+        pigment.
+    </p>
+</div>
+
+<h2>Still to verify</h2>
+
+<h3 id="zebra">1. Magic zebra &mdash; the top item</h3>
+
+<p>
+    New 2026-09-02. Dominant and 1 in 100 per allele, so do not wait for a wild one:
+    the gallery has zebra pens, or summon one with <code>magic_zebra=Mzeb/n</code> in
+    the code. What to look at:
+</p>
+
+<ul>
+    <li><strong>Stripes read black over any coat.</strong> Check one on a
+        <strong>cremello / perlino</strong> and one on a <strong>dominant-white</strong>
+        horse &mdash; that is the &minus;200% claim, and the whole reason phase 3 is an
+        unclamped signed <code>int</code>.</li>
+    <li><strong>They hang from the topline and fade out partway down</strong>, and the
+        reach is per-horse: two zebras should differ, one striped just over the back,
+        another nearly to the hooves.</li>
+    <li><strong>The chevron over the back, and the stripes on the chest, rump and leg
+        fronts.</strong> These come from <code>BodyStripes</code>&rsquo; <code>|z|</code>
+        slant, added precisely because those faces rendered as flat bands. They looked
+        right in a sample bake but have <em>never been seen on the actual 3D model</em>,
+        which is where a body-space pattern usually goes wrong. <strong>This is the one
+        that most needs real eyes.</strong></li>
+    <li><strong>Stripe density and width</strong> are a first guess (spacing 2.2&ndash;4.2
+        body units, width 0.32&ndash;0.56 of a period). If it reads more brindle than
+        zebra, widen <code>SPACING_MIN</code> / <code>SPACING_RANGE</code>.</li>
+</ul>
+
+<h3 id="pink">2. Pink hair</h3>
+
+<p>
+    New 2026-09-02. <strong>Recessive</strong>, so only <code>Pihr/Pihr</code> shows
+    and a wild one is about 1 in 144 &mdash; use the gallery or a summon.
+</p>
+
+<ul>
+    <li>The mane and tail read pink on a <strong>black</strong>, a
+        <strong>chestnut</strong> and a <strong>cremello</strong> alike, and the strand
+        shading survives. It should <em>not</em> be a flat pink slab &mdash; that is the
+        whole reason it reads <code>ColorView.visible</code> first.</li>
+    <li>On a <strong>dominant-white</strong> horse the hair is pink rather than
+        white.</li>
+    <li>A <strong>foal</strong> gets a pink <strong>tail only</strong> &mdash; the foal
+        mesh has no MANE part. Worth confirming that looks acceptable rather than
+        broken.</li>
+    <li>A horse carrying <strong>both</strong> magical genes: the zebra stripes should
+        cut <strong>across</strong> the pink mane, not the other way round. That is
+        <code>magicalOrder()</code>.</li>
+</ul>
+
+<h3>3. Pen signs now overflow</h3>
+
+<p>
+    At 11 genes the widest genotype label is <strong>49 characters</strong> against
+    three 15-char sign lines, so <code>GeneCodeDisplay.wrap</code> overflows the last
+    line (worst case 27 chars). Confirm how badly that reads in-game before deciding
+    whether it is worth anything &mdash; the gallery is
+    <a href="roadmap.html#random-pens">slated for revert to random pens</a>, which
+    retires the per-genotype sign, so <strong>&ldquo;leave it&rdquo; is a legitimate
+    answer</strong>.
+</p>
+
+<h3>4. The three-phase pipeline refactor &mdash; lowest priority</h3>
+
+<p>
+    <code>CoatPipelineGoldenTest</code> proves 20 genotypes &times; 3 seeds &times;
+    adult/foal compose byte-identically to the pre-refactor code, so no coat is
+    <em>expected</em> to have moved. The one thing the test cannot cover is that it
+    runs against a synthetic 16&times;16 gradient and a flat template, not the real
+    500&times;500 <code>redblackgradient.png</code> and <code>horse_white*.png</code>.
+</p>
+
+<p>
+    So: on the next <code>runClient</code> for any other reason, glance at a
+    <strong>Test (<code>T_</code>) horse</strong> &mdash; it should still be the flat
+    pink/blue/red/yellow field on any base, including white &mdash; and at any
+    <strong>dominant-white</strong> horse. Nothing else needs looking at.
+</p>
+
+<h3>5. The genotype gallery &mdash; now low-value</h3>
+
+<p>
+    Slated for revert. The owner has decided the dimension goes back to
+    <strong>random</strong> pens (keeping the pairs and the per-pen genome sign), so
+    verify only the parts that survive: the per-pen sign, the pairs, the pen
+    amenities. <strong>Do not spend a session walking 6,055 blocks checking catalogue
+    order.</strong>
+</p>
+
+<p>What it does today, if you do look:</p>
+
+<ul>
+    <li>The entrance sign three blocks in front of the return portal reads
+        <code>Genotypes / 177,147 / Distinct / 1,730 pens</code>.</li>
+    <li>The first six pens, right/left alternating, are <code>eeaa</code>,
+        <code>EEaa</code>, <code>eeAA</code>, <code>EEAA</code>,
+        <code>EEaa WW</code>, <code>EEaa TT</code> &mdash; extension exhausts before
+        agouti moves, no heterozygote pens for dominant genes, and white and test get
+        exactly one pen each.</li>
+    <li>Pen signs read like the horse&rsquo;s own info panel (<code>eeaa nSpl</code>,
+        not the full slash-and-dash code) and wrap sensibly on the ordinary ones. The
+        busiest ones overflow &mdash; that is item 3, do not file it twice.</li>
+    <li>The gate sign really is to the <strong>right</strong> of the gate on both
+        sides of the road (the two sides mirror), stands on the road surface, is
+        readable from both faces, and is <strong>waxed</strong> (right-click does not
+        open the edit screen).</li>
+    <li>Both horses in a pen match the sign, and differ only where a
+        non-deterministic gene (bay points, splash) makes them differ.</li>
+    <li>The corridor ends in a wall after pen 1,730 &mdash; 6,055 blocks out, so only
+        worth checking if you fly it.</li>
+</ul>
+
+<h3>6. Leaving the dimension no longer clears blocks</h3>
+
+<p>
+    <code>tearDown</code> discards entities and forgets their ancestry records only.
+    Check: leave and re-enter; the corridor is rebuilt over the old one with no
+    leftovers, stragglers or doubled horses, and leaving is instant. Then leave,
+    re-enter, and walk <em>less</em> far than last time &mdash; the stale far end
+    should still be correct geometry with no horses until you walk to it.
+</p>
+
+<h3 id="foals">7. Foals &mdash; only spot-checked, needs a real pass</h3>
+
+<p>
+    Every treatment should apply on <code>HdBabyHorseModel</code>: a bay foal with
+    black points and leg black, a splash foal with white socks, a champagne foal gold,
+    a grey foal born its base colour and greying when grown. The <strong>baby head and
+    neck geometry is a rest-pose AABB approximation</strong> &mdash; watch the face and
+    neck for odd dark patches or misplaced marks.
+</p>
+
+<h3 id="epigenetics">8. Per-allele epigenetics + the grey rework</h3>
+
+<p>New 2026-09-01, not seen in-game.</p>
+
+<ul>
+    <li><strong>Grey adults are grey, and dappled</strong> &mdash; a neutral grey with
+        visible rounded dapples, not the old flat near-white. Sample bakes put the
+        dapple field at a <strong>21&ndash;29% lightness modulation</strong> on the mid
+        greys (5% on a nearly-white one, where there is no pigment left to vary).</li>
+    <li><strong>Greys differ from each other.</strong> Stand two adjacent grey pens
+        side by side: one should read dark steel, another mid dapple, another nearly
+        white, with different dapple sizes.</li>
+    <li><strong>The dapple field crosses part seams</strong> with no join at the
+        shoulder, haunch or neck &mdash; that is what body-space sampling is for.</li>
+    <li><strong>Young greys keep darker points</strong> (mane, tail, lower legs) &mdash;
+        the point-retention knob is strongest on the least-greyed horses.</li>
+    <li><strong>A grey foal is still born its base colour</strong> and greys once grown
+        (clock it up in the horse dimension).</li>
+    <li><strong>Bay leg black really varies now.</strong> Wild bays should run from low
+        socks to seal, and the <strong>four legs of one horse should not stop
+        level</strong>. Bay&rsquo;s extent is now uniform, not the old <code>f*f</code>
+        product that clustered everything at the bottom.</li>
+    <li><strong>A foal looks like its parent, not like a re-roll.</strong> Breed a
+        seal-ish bay mare to a non-bay stallion; a foal that got her <code>A</code>
+        should carry <em>her</em> point heights. Breed the same pair repeatedly: foals
+        that inherited the same copy should be identical in that respect (no variation
+        is deliberate for now).</li>
+    <li><strong><code>Spl/Spl</code> vs <code>Spl/spl</code> epigenetics.</strong> On a
+        homozygote the higher-priority copy&rsquo;s seed is used. There is no way to see
+        the number in-game yet, so the check is just that a homozygote renders stably
+        &mdash; same markings every session.</li>
+</ul>
+
+<h3>9. The epigenome persists across save &rarr; reload</h3>
+
+<p>
+    Bay leg heights, grey dapples and splash markings identical after a reload.
+</p>
+
+<div class="note danger">
+    <span class="label">Start a fresh world</span>
+    <p>
+        The attachment format changed (<code>epigenetic_seed: long</code> &rarr;
+        <code>epigenome: String</code>), so an existing dev save&rsquo;s horses cannot
+        read their old coat attachment &mdash; they will re-found epigenetics, or the
+        attachment errors outright. That is the no-back-compat rule working as
+        intended.
+    </p>
+</div>
+
+<h3>10. Everything else</h3>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Item</th><th>How to check</th></tr></thead>
+<tbody>
+<tr><td><code>breedNth</code> foal names past foal 1</td><td>Breed one pair 7+ times: foal 1 = parent combo, foal 2 = the other combo, foals 3&ndash;6 = one parent name half + a random word, foal 7+ = fully random, no repeats. <code>HorseNames</code> is unit-tested; the live <code>offspringCount(dam, sire)</code> link is unproven.</td></tr>
+<tr><td><code>FamilyTreeScreen</code> scroll mode</td><td>The default shrink-to-fit chart is confirmed good; the other path is not. Flip <code>familyTree.scrollBar</code> true in <code>config/horsegenetics-client.toml</code> and check the wheel and the right-edge thumb.</td></tr>
+<tr><td>Stats surfaces</td><td>Foal speed/health landing on the entity&rsquo;s attributes; the inventory-panel green/amber/red tint vs <code>parentStats</code>; the paper dump&rsquo;s <code>vs parents</code> line.</td></tr>
+<tr><td>Compact gene code</td><td><code>GeneCodeDisplay.shortForm</code> on the surfaces not specifically eyeballed: the paper dump&rsquo;s <code>genetic code:</code> line and the mounted info panel&rsquo;s word-wrapped block.</td></tr>
+<tr><td>Water riding feel</td><td><code>HorseWaterRidingHandler</code> &mdash; the speed cap (0.09 b/t) and the submerged lift are a first guess.</td></tr>
+<tr><td>Debug coat-gen chat line</td><td>Should be quiet in a release build. It fires correctly in dev; the <code>!FMLEnvironment.isProduction()</code> gate is unproven.</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3>11. Dev test worlds delete themselves</h3>
+
+<p>
+    New 2026-09-01, <code>client/DebugTestWorldCleanup</code>. Click <strong>Spawn Test
+    Horse World</strong> on the title screen, play a bit, quit Minecraft normally
+    (Save and Quit &rarr; Quit Game). Check:
+</p>
+
+<ul>
+    <li><code>neoforge-26.1.2/run/saves/</code> has <strong>no</strong>
+        <code>test_horse_*</code> folder left, and the log has a
+        <code>Deleted test horse world test_horse_… (on shutdown)</code> line.</li>
+    <li>The hand-made worlds next to it are <strong>untouched</strong> &mdash; the
+        sweep matches <code>test_horse_</code> + digits only.</li>
+    <li>Spawn two test worlds in one session (button, quit to title, button again),
+        quit &mdash; <strong>both</strong> are gone.</li>
+    <li>Kill the client mid-world (<code>taskkill</code>, or Alt+F4 in a hang) so
+        shutdown never runs, then relaunch: the leftover is cleared at startup with a
+        <code>(left over from a previous run)</code> log line, before the world list is
+        shown.</li>
+</ul>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="roadmap.html">Roadmap / backlog</a>
+        <a href="gene-magic-zebra.html">Magic zebra</a>
+        <a href="gene-pink-hair.html">Pink hair</a>
+        <a href="gene-grey.html">Grey</a>
+        <a href="gene-splash.html">Splash</a>
+    </div>
+    Update this page after every play session. This is &ldquo;built, not yet seen&rdquo;;
+    <a href="roadmap.html">the roadmap</a> is &ldquo;not built at all&rdquo;.
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

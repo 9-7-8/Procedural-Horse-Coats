@@ -35,7 +35,7 @@ import java.util.List;
  *
  * <p><b>A gene is natural or magical, never both</b> - declared, not inferred.
  * A gene that wants to do both registers as two genes. Natural is reserved for
- * genes that exist in real life (see {@code Docs/Philosophy.md}).
+ * genes that exist in real life (see {@code wiki/philosophy.html}).
  *
  * <p><b>Both coat hooks are pure.</b> A gene is handed read-only views of the
  * state so far and <i>returns</i> its contribution; it never mutates shared

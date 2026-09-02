@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Genetics Model &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="nav.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow">Start here</p>
+<h1>The genetics model</h1>
+<p class="lede">
+    Alleles are objects, not letters in a string. A horse carries one
+    <code>AllelePair</code> per registered <code>Gene</code>, plus an
+    <strong>epigenome</strong> &mdash; a priority and a random seed riding on
+    <em>each allele copy</em>. Everything below lives in
+    <code>common/genetics/</code> and imports nothing from Minecraft.
+</p>
+
+<h2>The pieces</h2>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Type</th><th>What it is</th></tr></thead>
+<tbody>
+<tr><td><code>Gene</code></td><td>An interface: the alleles a locus defines, how they segregate, and how the locus changes the coat. One singleton instance per gene.</td></tr>
+<tr><td><code>Allele</code></td><td>One allele of one gene. Identified by <code>&lt;modauthor&gt;.&lt;gene&gt;.&lt;token&gt;</code>, e.g. <code>horsegenetics.splash.Spl</code>.</td></tr>
+<tr><td><code>AllelePair</code></td><td>The two copies a horse carries at one gene. A record, canonicalized <strong>dominant-first</strong> on construction.</td></tr>
+<tr><td><code>Genotype</code></td><td>One <code>AllelePair</code> per registered gene. Round-trips through a code string.</td></tr>
+<tr><td><code>AlleleEpigenetics</code></td><td><code>(int priority, long epigeneticSeed)</code> &mdash; the heritable payload on <strong>one copy</strong> of one allele.</td></tr>
+<tr><td><code>Epigenome</code></td><td>One <code>AlleleEpigenetics</code> per copy, aligned slot-for-slot with the genotype&rsquo;s pairs.</td></tr>
+<tr><td><code>Genome</code></td><td><code>Genotype</code> + <code>Epigenome</code>. The thing a foal actually inherits.</td></tr>
+<tr><td><code>Genes</code></td><td>The registry. Three orderings: <code>codeOrder()</code>, <code>naturalOrder()</code>, <code>magicalOrder()</code>.</td></tr>
+<tr><td><code>DominancePattern</code></td><td>Per-gene metadata: <code>DOMINANT</code> / <code>RECESSIVE</code> / <code>INCOMPLETE_DOMINANT</code> / <code>COMPLETE_DOMINANT</code>.</td></tr>
+<tr><td><code>GenotypeCatalog</code></td><td>Every <em>visually distinct</em> genotype the registry can produce, in a stable order.</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2>The genotype code string</h2>
+
+<p>
+    A <code>Genotype</code> serialises to one segment per gene, in
+    <code>Genes.codeOrder()</code>. Segments are joined by <code>-</code>, the two
+    alleles of a gene by <code>/</code>, <strong>dominant first</strong>:
+</p>
+
+<div class="codebox">
+<div class="filename">a wild-type-ish horse, all 11 genes</div>
+<pre><code class="language-none">E/e-A/a-w/w-t/t-c/c-Spl/spl-g/g-Cr/N-N/N-Mzeb/n-n/Pihr
+ |   |   |   |   |    |      |    |    |    |      |
+ |   |   |   |   |    |      |    |    |    |      pink hair
+ |   |   |   |   |    |      |    |    |    magic zebra
+ |   |   |   |   |    |      |    |    pearl
+ |   |   |   |   |    |      |    cream
+ |   |   |   |   |    |      grey
+ |   |   |   |   |    splash
+ |   |   |   |   champagne
+ |   |   |   test
+ |   |   white
+ |   agouti
+ extension</code></pre>
+</div>
+
+<p>
+    Allele <strong>tokens can be any run of characters</strong> &mdash;
+    <code>Spl</code>, <code>Cr</code>, <code>prl</code>, <code>Mzeb</code>,
+    <code>Pihr</code> &mdash; not single letters. The <code>/</code> and
+    <code>-</code> separators keep that unambiguous. The forward-looking rule for
+    third-party genes is stricter: <a href="modding.html#alleles">alphanumeric
+    tokens, 1&ndash;128 characters, wild type named <code>n</code></a>.
+</p>
+
+<div class="note warn">
+    <span class="label">No legacy handling</span>
+    <p>
+        <code>Genotype.parse</code> requires exactly one segment per registered
+        gene. There is no padding, no short-code fallback and no version field
+        &mdash; when the format changes it changes, and old saves are discarded.
+        That rule was written for a solo developer; what happens when a
+        <em>player</em> installs a gene mod is
+        <a href="roadmap.html#third-party">still an open question</a>.
+    </p>
+</div>
+
+<h2>The eleven registered genes</h2>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Gene</th><th>Alleles</th><th>Dominance</th><th>In the wild</th><th>Phase</th></tr></thead>
+<tbody>
+<tr><td><a href="gene-extension.html">extension</a></td><td><span class="allele dom">E</span> / <span class="allele rec">e</span></td><td>Dominant</td><td>50/50</td><td>natural</td></tr>
+<tr><td><a href="gene-agouti.html">agouti</a></td><td><span class="allele dom">A</span> / <span class="allele rec">a</span></td><td>Dominant</td><td>50/50</td><td>natural</td></tr>
+<tr><td><a href="gene-white.html">white</a></td><td><span class="allele dom">W</span> / <span class="allele wild">w</span></td><td><strong>Complete dominant</strong></td><td>1 in 50 per allele</td><td>natural</td></tr>
+<tr><td><a href="gene-test.html">test</a></td><td><span class="allele dom">T</span> / <span class="allele wild">t</span></td><td><strong>Complete dominant</strong></td><td>1 in 4 carriers</td><td>magical</td></tr>
+<tr><td><a href="gene-champagne.html">champagne</a></td><td><span class="allele dom">Ch</span> / <span class="allele wild">c</span></td><td>Dominant</td><td>1 in 40 per allele</td><td>natural</td></tr>
+<tr><td><a href="gene-splash.html">splash</a></td><td><span class="allele dom">Spl</span> / <span class="allele wild">spl</span></td><td>Incomplete&nbsp;dominant*</td><td>1 in 20 per allele</td><td>natural</td></tr>
+<tr><td><a href="gene-grey.html">grey</a></td><td><span class="allele dom">G</span> / <span class="allele wild">g</span></td><td>Dominant</td><td>1 in 16 per allele</td><td>natural</td></tr>
+<tr><td><a href="gene-cream.html">cream</a></td><td><span class="allele dom">Cr</span> / <span class="allele wild">N</span></td><td>Incomplete dominant</td><td>1 in 30 per allele</td><td>natural</td></tr>
+<tr><td><a href="gene-pearl.html">pearl</a></td><td><span class="allele rec">prl</span> / <span class="allele wild">N</span></td><td>Incomplete dominant</td><td>1 in 22 per allele</td><td>natural</td></tr>
+<tr><td><a href="gene-magic-zebra.html">magic zebra</a></td><td><span class="allele dom">Mzeb</span> / <span class="allele wild">n</span></td><td>Dominant</td><td>1 in 100 per allele</td><td>magical</td></tr>
+<tr><td><a href="gene-pink-hair.html">pink hair</a></td><td><span class="allele rec">Pihr</span> / <span class="allele wild">n</span></td><td><strong>Recessive</strong></td><td>1 in 12 per allele</td><td>magical</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    * Splash is <em>tagged</em> <code>INCOMPLETE_DOMINANT</code> but does not read
+    its own dose yet, so <code>Spl/spl</code> and <code>Spl/Spl</code> render
+    identically. See <a href="gene-splash.html">its page</a>.
+</p>
+
+<p>
+    <strong>Seal brown has no gene.</strong> It is the top of agouti&rsquo;s
+    epigenetic distribution &mdash; a high roll of the point extent. Cream and pearl
+    are <em>allelic</em> in real horses (both <code>MATP</code>); here they are two
+    genes whose combined effect is computed once in
+    <code>coat.pattern.CreamPearlDilution</code>, with a
+    <a href="roadmap.html#multi-allele">planned merge</a> into one multi-allele
+    locus.
+</p>
+
+<h2>Dominance as declared metadata</h2>
+
+<p>
+    <code>Gene.dominance()</code> does not <em>do</em> the expressing &mdash;
+    <code>restrict</code> and <code>tint</code> do that. It tells the rest of the mod
+    what to expect, so code can reason about a gene without special-casing it by key.
+    Every gene declares it.
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Pattern</th><th>Meaning</th><th>Distinct pairs</th></tr></thead>
+<tbody>
+<tr><td><code>DOMINANT</code></td><td>One variant allele gives the full effect; the heterozygote is the homozygous variant.</td><td>2 (both homozygotes)</td></tr>
+<tr><td><code>RECESSIVE</code></td><td>Only the homozygous variant shows; the heterozygote is an invisible carrier.</td><td>2 (both homozygotes)</td></tr>
+<tr><td><code>INCOMPLETE_DOMINANT</code></td><td>The heterozygote has a look of its own, between the two homozygotes.</td><td>3 (all pairs)</td></tr>
+<tr><td><code>COMPLETE_DOMINANT</code></td><td>Dominant <strong>and epistatic</strong>: while the variant shows, no other gene is visible.</td><td>1 (the variant, on wild type)</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    Two questions callers ask: <code>heterozygoteIsDistinct()</code> (only
+    <code>INCOMPLETE_DOMINANT</code>) and <code>masksOtherGenes()</code> (only
+    <code>COMPLETE_DOMINANT</code>). Today the one consumer is
+    <code>GenotypeCatalog</code>; the obvious next ones are a punnett /
+    expected-foal display and &ldquo;carrier of X&rdquo; wording in the info panel.
+</p>
+
+<h2 id="epigenetics">Epigenetics ride on the allele, not on the horse</h2>
+
+<p>
+    A genotype says <em>which</em> alleles a horse carries. It does not say what
+    those particular <strong>copies</strong> are carrying, and every copy carries
+    two things:
+</p>
+
+<ul>
+    <li>a <strong>priority</strong> &mdash; an int in
+        <code>[1, Integer.MAX_VALUE]</code>;</li>
+    <li>an <strong>epigenetic seed</strong> &mdash; the <code>long</code> that drives
+        that gene&rsquo;s per-horse randomness (bay point heights, grey dapples,
+        splash markings, zebra stripe knobs).</li>
+</ul>
+
+<p>
+    So a horse carrying <code>A/a</code> has a seed on its <code>A</code> and another
+    on its <code>a</code>, and a foal that inherits the <code>A</code> inherits
+    <strong>that copy&rsquo;s</strong> seed exactly &mdash; no re-roll, no jitter.
+    Bay point heights run in families rather than being reinvented every generation.
+</p>
+
+<h3>Which copy expresses</h3>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Case</th><th>Expressed copy</th></tr></thead>
+<tbody>
+<tr><td>Heterozygote</td><td>The dominant copy &mdash; <code>AllelePair</code> is canonicalized dominant-first, so it is <code>first()</code>.</td></tr>
+<tr><td>Homozygote</td><td>Both copies express, so the tie goes to the <strong>higher priority</strong>.</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    That is what <code>Epigenome.expressed(gene, genotype)</code> answers, and its
+    seed is what <code>CoatBuildContext.epigeneticsFor(geneKey)</code> runs on.
+</p>
+
+<div class="note rule">
+    <span class="label">Priority selects a seed, never an order</span>
+    <p>
+        Epigenetic priority picks <em>which copy&rsquo;s seed expresses</em>. It can
+        never move a gene in the processing queue, and by design it never will
+        &mdash; if it could, two horses with the same genotype and the same seeds
+        could diverge on priority alone and silently share a coat cache entry. Gene
+        processing order is a separate, hard-coded, per-gene number. See
+        <a href="philosophy.html">Philosophy §2</a> and
+        <a href="roadmap.html#priority">Roadmap §2</a>.
+    </p>
+</div>
+
+<h3>The epigenome code string</h3>
+
+<p>
+    Same shape as the genotype code: one segment per gene in
+    <code>codeOrder()</code>, joined by <code>-</code>, the two copies joined by
+    <code>/</code>, each copy written <code>&lt;priority&gt;:&lt;seed hex&gt;</code>.
+</p>
+
+<div class="codebox">
+<pre><code class="language-none">17334:9f3c1ab27de40015/842911:0c5e...-...-...</code></pre>
+</div>
+
+<p>
+    <code>Epigenome.fromSeed(long)</code> replays a whole epigenome from a single
+    <code>long</code>, which is the stand-in <code>FamilyTreeScreen</code> uses for
+    an ancestor whose real epigenome is not stored anywhere &mdash; a plausible
+    pattern, not necessarily the real one.
+</p>
+
+<h3>Founders roll; foals inherit</h3>
+
+<ul>
+    <li><strong>Founder</strong> (wild spawn, <code>/summon</code>, a gallery horse)
+        &mdash; <code>Epigenome.random(rng)</code>: an independent priority and seed
+        on every copy, deconflicted. Reached through
+        <code>CoatGenerator.generate</code>, which is <em>the</em> founder path.</li>
+    <li><strong>Foal</strong> &mdash; <code>Genome.breedWith</code>. Every inherited
+        allele brings its parent copy&rsquo;s priority and seed <strong>verbatim</strong>.
+        A foal must never go through the founder path.</li>
+</ul>
+
+<p>
+    If both copies arrive on the same priority, one extra
+    <code>nextBoolean()</code> bumps the second &plusmn;1
+    (<code>AlleleEpigenetics.deconflict</code>), clamped to <code>[1, MAX]</code>
+    &mdash; so a horse never carries a tie. Full inheritance detail is on the
+    <a href="breeding.html">breeding page</a>.
+</p>
+
+<h2>What the texture key captures</h2>
+
+<p>
+    <code>CoatData.textureKey()</code> is the genotype code, plus
+    <code>@&lt;fingerprint hex&gt;</code> <strong>only when the horse is
+    non-deterministic</strong>.
+    <code>Epigenome.visibleFingerprint(genotype)</code> digests only the
+    <em>expressed</em> seeds of genes that are both visible <strong>and</strong>
+    non-deterministic, so epigenetics a horse cannot show do not fork the cache.
+</p>
+
+<div class="codebox">
+<div class="filename">common/genetics/Genotype.java &mdash; the two questions the cache asks</div>
+<pre><code class="language-java">/** Is every gene's contribution identical on every horse with this genotype? */
+public boolean isDeterministic();
+
+/** Does any *visible* gene need per-horse randomness? -&gt; bake per horse. */
+public boolean hasVisibleNonDeterministic();</code></pre>
+</div>
+
+<p>
+    <code>Gene.isVisible(pair, genotype)</code> and
+    <code>Gene.isDeterministic(pair, genotype)</code> both see the <em>whole</em>
+    genotype, which is how agouti knows it is invisible on a chestnut and how cream
+    and pearl read each other.
+</p>
+
+<div class="note danger">
+    <span class="label">Declare determinism honestly</span>
+    <p>
+        Claiming determinism you do not have poisons the coat cache for every horse
+        sharing your genotype: the first horse to bake wins, and the others render
+        <em>its</em> coat. This is the single most damaging mistake a third-party
+        gene can make.
+    </p>
+</div>
+
+<h2>The genotype catalogue</h2>
+
+<p>
+    <code>GenotypeCatalog</code> enumerates every <strong>visually distinct</strong>
+    genotype the registry can produce. Nothing is hard-coded &mdash; it falls out of
+    <code>codeOrder()</code>, each gene&rsquo;s allele list and each gene&rsquo;s
+    dominance, so registering a gene widens it on its own.
+</p>
+
+<div class="table-wrap">
+<table class="facts">
+<tbody>
+<tr><th><code>allPairsOf(gene)</code></th><td>Every unordered pair, least dominant first (<code>ee</code>, <code>Ee</code>, <code>EE</code>).</td></tr>
+<tr><th><code>distinctPairsOf(gene)</code></th><td>The same, with the dominance reduction applied.</td></tr>
+<tr><th><code>totalGenotypes()</code></th><td>The raw product &mdash; <strong>177,147</strong> at 11 genes.</td></tr>
+<tr><th><code>size()</code></th><td>The reduced catalogue &mdash; <strong>1,730</strong>.</td></tr>
+<tr><th><code>get(i)</code> / <code>entries()</code></th><td>Read the list, built once at class load.</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    The arithmetic: <code>2·2·2·3·2·3·3·2·2 = 1,728</code> unmasked, plus one white
+    pen and one test pen (each <code>COMPLETE_DOMINANT</code> gene collapses to a
+    single entry) = <strong>1,730</strong>. Ordering is a mixed-radix odometer whose
+    <em>first</em> gene is the fastest-varying digit, so the catalogue reads
+    <code>eeaa, EEaa, eeAA, EEAA, [white], [test], eeaa ChCh, …</code>
+</p>
+
+<p>
+    Its only consumer today is the horse dimension&rsquo;s gallery, which is
+    <a href="roadmap.html#random-pens">slated to revert to random pens</a> &mdash;
+    the catalogue itself stays, because a punnett display and the tests want it.
+</p>
+
+<h2>Phenotype, coarsely</h2>
+
+<p>
+    <code>Genotype.phenotype()</code> gives a coarse <code>CoatPhenotype</code>
+    (<code>CHESTNUT</code> / <code>BLACK</code> / <code>BAY</code> /
+    <code>WHITE</code>; everything else ignored). It is <strong>only</strong> a
+    family-tree fallback now &mdash; foals and adults alike are fully generated
+    through the <a href="pipeline.html">coat pipeline</a>.
+</p>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="breeding.html">Breeding &amp; pedigree</a>
+        <a href="pipeline.html">Three-phase pipeline</a>
+        <a href="api-reference.html">Class abstractions</a>
+        <a href="modding.html">Writing a gene</a>
+    </div>
+    Source: <code>common/src/main/java/com/example/horsegenetics/common/genetics/</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

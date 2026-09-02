@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pink Hair &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="nav.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow magical">Magical gene <span class="sep">/</span> phase 3</p>
+<h1>Pink hair</h1>
+<p class="lede">
+    The mane and tail turn pink &mdash; and keep their shading, because the gene
+    <em>reads</em> what each hair texel currently looks like before deciding what to
+    add. It is also the <strong>only recessive gene in the mod</strong>: a single
+    copy is a carrier you cannot see, so it is the first thing you have to
+    <em>breed for</em> rather than spot.
+</p>
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd>horsegenetics.pink_hair</dd></div>
+    <div><dt>Alleles</dt><dd><span class="allele rec">Pihr</span> <span class="allele wild">n</span></dd></div>
+    <div><dt>Dominance</dt><dd><strong>RECESSIVE</strong></dd></div>
+    <div><dt>Wild type</dt><dd>n (the dominant one here)</dd></div>
+    <div><dt>Wild frequency</dt><dd>1 in 12 per allele &rarr; ~1 horse in 144 shows it</dd></div>
+    <div><dt>Founder draws</dt><dd>2 &times; nextInt(12)</dd></div>
+    <div><dt>Deterministic</dt><dd>yes</dd></div>
+    <div><dt>Visible when</dt><dd>Pihr/Pihr only</dd></div>
+    <div><dt>Target colour</dt><dd>255, 105, 180</dd></div>
+    <div><dt>Strength</dt><dd>82% of the way there</dd></div>
+</dl>
+
+<div class="note warn">
+    <span class="label">Built 2026-09-02, not yet play-tested</span>
+    <p>
+        Sample bakes look right &mdash; pink manes keep their strand shading on black,
+        chestnut and perlino alike. Nothing has been seen in-game; the checklist is on
+        <a href="verification.html">To be verified</a>.
+    </p>
+</div>
+
+<h2 id="read-before-write">It reads before it writes</h2>
+
+<p>
+    Flat paint would throw away the shading the natural phase gave those strands and
+    leave a dead pink slab. So the gene asks <code>ColorView.visible</code> what each
+    hair texel currently <em>looks like</em>, and returns the delta that walks it
+    <strong>82%</strong> of the way to hot pink.
+</p>
+
+<div class="codebox">
+<div class="filename">common/genetics/genes/PinkHairGene.java</div>
+<pre><code class="language-java">/** The signed step from this texel's accumulated channel to its pink one. */
+private static int toward(ColorView colour, int px, int py, int channel, int target) {
+    int seen   = colour.visible(px, py, channel);
+    int wanted = (int) Math.round(seen + (target - seen) * (STRENGTH_PERCENT / 100.0));
+    return wanted - switch (channel) {
+        case 0 -&gt; colour.red(px, py);
+        case 1 -&gt; colour.green(px, py);
+        default -&gt; colour.blue(px, py);
+    };
+}</code></pre>
+</div>
+
+<p>
+    The mane keeps its own light and dark while ending up unmistakably pink on a
+    black, a chestnut or a cremello alike. It also raises opacity, so a
+    <a href="gene-white.html">dominant-white</a> horse gets pink hair rather than
+    nothing.
+</p>
+
+<div class="note rule">
+    <span class="label">A blind add cannot do this &mdash; and that is the point</span>
+    <p>
+        To reach pink on a <em>black</em> mane, a fixed delta has to push so hard that
+        a <em>pale</em> mane saturates to white. Reading first is exactly what phase-3
+        read access exists for.
+    </p>
+    <p>
+        The cost is that this gene is <strong>order-dependent by choice</strong>,
+        which is why it runs <em>before</em> <a href="gene-magic-zebra.html">magic
+        zebra</a> in <code>Genes.magicalOrder()</code>: stripes should black out pink
+        hair, not the other way round.
+    </p>
+</div>
+
+<h2>Why recessive, and why 1 in 12</h2>
+
+<p>
+    Every other gene in the mod is spottable &mdash; you can look at a horse and know
+    whether it has the thing. Pink hair is the first where the carrier is invisible,
+    so finding one is a <strong>breeding problem</strong>: you notice one wild horse
+    in 144 showing it, and you have to work out who else is carrying.
+</p>
+
+<p>
+    The comparatively common allele frequency is deliberate for that reason &mdash; a
+    recessive that is also rare per allele is a recessive nobody ever gets to play
+    with. At 1 in 12 per allele, roughly 16% of wild horses carry a copy.
+</p>
+
+<p>
+    It also makes pink hair the natural first consumer of a
+    <a href="genetics-model.html">&ldquo;carrier of X&rdquo; display</a> &mdash;
+    <code>DominancePattern.RECESSIVE</code> is already declared and read by nothing
+    but the catalogue.
+</p>
+
+<h2>Foals get a pink tail only</h2>
+
+<p>
+    The foal mesh has no <code>MANE</code> part (see
+    <a href="body-space.html">body space</a>), so the gene skips it. The mane arrives
+    with adulthood. The loop guards with <code>hasPart</code>, which is the pattern
+    every part-targeted gene should copy:
+</p>
+
+<div class="codebox">
+<pre><code class="language-java">private static final List&lt;Part&gt; HAIR = List.of(Part.MANE, Part.TAIL);
+
+for (Part part : HAIR) {
+    if (!HorseSkinGeometry.hasPart(skin, part)) {
+        continue;                                   // a foal has no mane
+    }
+    HorseSkinGeometry.forEachTexel(skin, part, (px, py, p, face, point) -&gt; {
+        delta.add(px, py,
+                toward(colour, px, py, 0, PINK_R),
+                toward(colour, px, py, 1, PINK_G),
+                toward(colour, px, py, 2, PINK_B));
+        delta.addOpacity(px, py, 255 - colour.opacity(px, py));
+    });
+}</code></pre>
+</div>
+
+<h2>One more thing about the allele order</h2>
+
+<p>
+    <code>alleles()</code> is declared <strong>most dominant first</strong>, and here
+    the wild type <em>is</em> the dominant one &mdash; so the list is
+    <code>List.of(n, Pihr)</code>, not the other way round. A horse&rsquo;s code
+    segment reads <code>n/Pihr</code> for a carrier and <code>Pihr/Pihr</code> for an
+    affected horse.
+</p>
+
+<h2>Not modelled yet</h2>
+
+<p>
+    One intensity, no per-horse variation. Alleles for a couple of intensities are the
+    obvious extension &mdash; and would make it the first magical gene with a real
+    allelic series.
+</p>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="gene-magic-zebra.html">Magic zebra</a>
+        <a href="pipeline.html">Phase 3 and ColorView.visible</a>
+        <a href="modding.html">Writing a magical gene</a>
+        <a href="verification.html">What to check in-game</a>
+    </div>
+    Source: <code>common/genetics/genes/PinkHairGene.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

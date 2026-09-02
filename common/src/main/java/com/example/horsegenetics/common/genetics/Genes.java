@@ -18,7 +18,7 @@ import java.util.Map;
 
 /**
  * The built-in gene registry. Genes are addressed by {@code <modauthor>.<gene>}
- * ({@link #NS} for these). See <b>Docs/Gene Dict.md</b> for the full description of
+ * ({@link #NS} for these). See <b>wiki/gene-*.html</b> for the full description of
  * every gene.
  *
  * <p>Three orderings, deliberately independent:

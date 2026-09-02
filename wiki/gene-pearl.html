@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pearl &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="nav.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow natural">Natural gene <span class="sep">/</span> phase 1</p>
+<h1>Pearl</h1>
+<p class="lede">
+    One copy does nothing. Two copies with <strong>no cream</strong> give a mild,
+    uniform dilution of both pigments &mdash; classic pearl, an apricot body with
+    sepia points. With cream present, <a href="gene-cream.html">cream</a> is the
+    driver and this gene is inert.
+</p>
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd>horsegenetics.pearl</dd></div>
+    <div><dt>Alleles</dt><dd><span class="allele rec">prl</span> <span class="allele wild">N</span></dd></div>
+    <div><dt>Dominance</dt><dd>INCOMPLETE_DOMINANT</dd></div>
+    <div><dt>Wild type</dt><dd>N</dd></div>
+    <div><dt>Wild frequency</dt><dd>1 in 22 per allele</dd></div>
+    <div><dt>Founder draws</dt><dd>2 &times; nextInt(22)</dd></div>
+    <div><dt>Deterministic</dt><dd>yes</dd></div>
+    <div><dt>Visible when</dt><dd>creamDose == 0 &amp;&amp; pearlDose == 2</dd></div>
+    <div><dt>Resolver</dt><dd>coat.pattern.CreamPearlDilution</dd></div>
+</dl>
+
+<h2>Why it is tagged incomplete dominant</h2>
+
+<p>
+    Read on its own, <span class="allele rec">prl</span> looks purely recessive
+    &mdash; one copy is invisible. But <code>Cr/prl</code> acts as a
+    <strong>double cream</strong>, so the heterozygote <em>is</em> its own thing once
+    the locus is considered as a whole. That is what the tag records, and it is why
+    the <a href="genetics-model.html">genotype catalogue</a> gives all three pearl
+    pairs their own entry.
+</p>
+
+<p>
+    It is also the honest signal that the real model is one locus, not two &mdash; the
+    <a href="roadmap.html#multi-allele">MATP merge</a> retires this gene.
+</p>
+
+<h2>Its one job, and the precedence override</h2>
+
+<p>
+    Because <code>prl</code> is recessive, the default &ldquo;first allele in the list
+    is most dominant&rdquo; ordering would print pairs the wrong way round. Pearl
+    overrides <code>precedence</code> so that <code>N</code> sorts first and a
+    heterozygote canonicalizes as <code>N/prl</code>, keeping the visible allele last:
+</p>
+
+<div class="codebox">
+<div class="filename">common/genetics/genes/PearlGene.java</div>
+<pre><code class="language-java">@Override
+public int precedence(Allele allele) {
+    // prl is recessive; put N "first" so N/prl canonicalizes with the visible allele last
+    return allele.equals(N) ? 0 : 1;
+}
+
+@Override
+public boolean isVisible(AllelePair pair, Genotype genotype) {
+    // pearl only "drives" when there's no cream and it's homozygous
+    return CreamPearlDilution.creamDose(genotype) == 0
+        &amp;&amp; CreamPearlDilution.pearlDose(genotype) == 2;
+}</code></pre>
+</div>
+
+<div class="note">
+    <span class="label">A worked example of cross-gene visibility</span>
+    <p>
+        <code>isVisible</code> gets the <strong>whole genotype</strong>, not just its
+        own pair &mdash; which is how pearl knows to stand down when cream is present,
+        without either gene reaching into the other&rsquo;s internals. Both genes then
+        call the same resolver, and the resolver decides which mode applies. That is
+        the pattern to copy for any pair of interacting loci.
+    </p>
+</div>
+
+<h2>The numbers</h2>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Mode</th><th>keep red</th><th>keep black</th><th>tint</th><th>Reads as</th></tr></thead>
+<tbody>
+<tr><td><strong>double pearl</strong> (<code>prl/prl</code>, no cream)</td><td>0.55</td><td>0.52</td><td>0.28</td><td>apricot body, sepia points &mdash; mild and uniform</td></tr>
+<tr><td><code>Cr/prl</code></td><td colspan="3">handled as double cream (0.08 / 0.38 / 0.33)</td><td>pale cream body, rusty points</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    The full table, including single and double cream, is on the
+    <a href="gene-cream.html">cream page</a>.
+</p>
+
+<div class="note good">
+    <span class="label">Owner-verified in-game, 2026-09-01</span>
+    <p>Pearl bay renders sepia points over a diluted body.</p>
+</div>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="gene-cream.html">Cream (the shared dose table)</a>
+        <a href="gene-agouti.html">Agouti</a>
+        <a href="genetics-model.html">The genetics model</a>
+        <a href="roadmap.html#multi-allele">The planned MATP merge</a>
+    </div>
+    Source: <code>common/genetics/genes/PearlGene.java</code>,
+    <code>common/coat/pattern/CreamPearlDilution.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

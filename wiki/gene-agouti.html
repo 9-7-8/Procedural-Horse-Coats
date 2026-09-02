@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agouti &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="nav.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow natural">Natural gene <span class="sep">/</span> phase 1</p>
+<h1>Agouti &mdash; bay and seal brown</h1>
+<p class="lede">
+    <span class="allele dom">A</span> restricts black to the <strong>points</strong>:
+    a red-brown body with black mane, tail, ears and hooves, and black that climbs
+    the legs and face by a per-horse random amount. <strong>Seal brown is not a
+    separate gene</strong> &mdash; it is the top of that distribution.
+</p>
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd>horsegenetics.agouti</dd></div>
+    <div><dt>Alleles</dt><dd><span class="allele dom">A</span> <span class="allele rec">a</span></dd></div>
+    <div><dt>Dominance</dt><dd>DOMINANT</dd></div>
+    <div><dt>Wild type</dt><dd>a</dd></div>
+    <div><dt>Wild frequency</dt><dd>50/50 per allele</dd></div>
+    <div><dt>Founder draws</dt><dd>2 &times; nextBoolean</dd></div>
+    <div><dt>Deterministic</dt><dd><strong>no</strong> when expressed</dd></div>
+    <div><dt>Visible when</dt><dd>A_ and hasBlackPigment()</dd></div>
+    <div><dt>Epigenetic draws</dt><dd>5 &times; nextFloat</dd></div>
+    <div><dt>Generator</dt><dd>coat.pattern.BayCoat</dd></div>
+</dl>
+
+<div class="note good">
+    <span class="label">Owner-verified in-game, 2026-09-01</span>
+    <p>
+        Agouti renders correctly, the leg and face fade reads right, and seal-as-a-high-roll
+        works. That verification was against the <em>old</em> two-number roll; the
+        distribution was rewidened afterwards, so the <em>spread</em> of leg heights
+        is unverified &mdash; the mechanism is not.
+    </p>
+</div>
+
+<h2>What it does</h2>
+
+<div class="table-wrap">
+<table class="facts">
+<tbody>
+<tr><th>Body</th><td>Black knocked to <code>BayCoat.BODY_BLACK</code> = <strong>0.32</strong>; red kept, so the body reads red-brown.</td></tr>
+<tr><th>Mane, tail, ears</th><td>Full black &mdash; <code>setBlack(1)</code>, <code>setRed(0)</code>.</td></tr>
+<tr><th>Hooves</th><td>Always black, <code>HOOF_FRACTION</code> = 0.12 of leg height.</td></tr>
+<tr><th>Legs</th><td>Black climbs a random height, fading out at the top edge.</td></tr>
+<tr><th>Face</th><td>Black climbs from the muzzle, but only on horses whose legs already did.</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2>The point-extent roll</h2>
+
+<p>
+    One number decides the horse, drawn <strong>uniformly</strong> off the expressing
+    <span class="allele dom">A</span> copy&rsquo;s epigenetic seed:
+</p>
+
+<div class="codebox">
+<div class="filename">common/coat/pattern/BayCoat.java &mdash; 5 nextFloat()s, in this order</div>
+<pre><code class="language-java">double extent = epi.nextFloat();                    // 0 = low socks .. 1 = seal
+double leg    = LEG_MIN + extent * LEG_RANGE;       // 0.15 + extent * 0.80
+double face   = 0.04 + extent * extent * 0.62;      // squared - see below
+
+for (int i = 0; i &lt; legs.length; i++) {             // one jitter per leg
+    legs[i] = leg * (1.0 - LEG_JITTER + epi.nextFloat() * LEG_JITTER * 2.0);  // +/- 14%
+}</code></pre>
+</div>
+
+<ul>
+    <li><strong>Uniform, not <code>f*f</code>.</strong> The old product of two rolls
+        clustered nearly every bay at the bottom of the range. A flat
+        <code>extent</code> is what makes wild bays actually run from low socks to
+        seal.</li>
+    <li><strong>The face is squared</strong>, so it only climbs on horses whose legs
+        already did &mdash; you get seal brown, not &ldquo;socks plus a black
+        face&rdquo;.</li>
+    <li><strong>Per-leg jitter of &plusmn;14%</strong>, independently, so one
+        horse&rsquo;s four socks are never exactly level.</li>
+</ul>
+
+<h3>The fade</h3>
+
+<p>
+    The bottom <code>SOLID_PORTION</code> = <strong>0.3</strong> of each band is solid
+    black; the rest is a <strong>smoothstep</strong> fade to nothing. Smoothstep has a
+    flat slope at both ends, so the black dissolves into the body colour with no
+    visible cut-off line. (<a href="gene-splash.html">Splash</a>&rsquo;s socks
+    <em>do</em> have a visible cut-off line, and that is the open issue there.)
+</p>
+
+<h2>Seal brown</h2>
+
+<div class="note">
+    <span class="label">There is no seal allele</span>
+    <p>
+        Seal is a high roll of <code>extent</code> &mdash; &ldquo;the black creeps
+        most of the way up&rdquo;. A seal-brown mare passes on <em>her</em> point
+        extent with her <code>A</code> copy, so seal runs in families exactly as if it
+        were a gene, without being one. Real horses have <code>A+</code> /
+        <code>A</code> / <code>At</code> / <code>a</code>; the two-allele form plus an
+        epigenetic extent is the deliberate abstraction.
+    </p>
+</div>
+
+<h2 id="absolute">Bay sets pigment absolutely &mdash; and why that matters</h2>
+
+<p>
+    <code>BayCoat</code> paints its points <em>absolutely</em>:
+    <code>setBlack(1.0)</code>, <code>setRed(0.0)</code>, via
+    <code>CoatRegions.blackenPart</code> and <code>blackenLowerLeg</code>. Agouti runs
+    <strong>before</strong> cream, pearl and champagne in
+    <code>Genes.naturalOrder()</code>, so the dilutions do run after and do scale the
+    points.
+</p>
+
+<p>
+    What broke, once, was the <strong>gradient</strong>, not the ordering. With
+    <code>red = 0</code> the gradient&rsquo;s zero-red column stays visually jet black
+    all the way down to <code>black ≈ 0.4</code>, so scaling black alone moved the
+    sample without changing the colour: single cream&rsquo;s <code>black *= 0.7</code>
+    landed on <code>#111111</code>, double pearl on <code>#272727</code>. Every
+    &ldquo;diluted&rdquo; bay still had jet points.
+</p>
+
+<p>
+    The fix was <a href="pipeline.html#dilute"><code>PigmentField.dilute</code></a>,
+    which feeds a fraction of the removed eumelanin back in as pheomelanin and walks
+    the sample sideways off that column into the warm browns. The ordering and the
+    absolute bay point both stayed as they were.
+</p>
+
+<div class="note good">
+    <span class="label">Owner-verified in-game, 2026-09-01</span>
+    <p>
+        A bay carrying champagne, cream or pearl now shows real diluted points &mdash;
+        amber champagne chocolate over gold, buckskin dark brown over gold, perlino
+        rusty, pearl bay sepia &mdash; instead of the jet black they all rendered
+        before.
+    </p>
+</div>
+
+<h2>Interactions</h2>
+
+<ul>
+    <li><strong>Invisible on a chestnut.</strong> No black to restrict &mdash; a
+        chestnut can carry <code>A</code> silently for generations.</li>
+    <li><strong>The dilutions decide the <em>colour</em> of the points; agouti still
+        decides <em>where</em> they are.</strong></li>
+    <li><strong><a href="gene-grey.html">Grey</a> reads bay&rsquo;s output</strong>
+        like any other pigment, and its point-retention knob keeps mane, tail and
+        lower legs darker on the least-greyed horses &mdash; which reads as a young
+        grey that used to be a bay.</li>
+</ul>
+
+<h2>Knobs</h2>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Constant</th><th>Value</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr><td><code>BODY_BLACK</code></td><td>0.32</td><td>Black left on the body.</td></tr>
+<tr><td><code>HOOF_FRACTION</code></td><td>0.12</td><td>Always-black bottom of each leg.</td></tr>
+<tr><td><code>SOLID_PORTION</code></td><td>0.3</td><td>Fraction of the point band that is solid before the fade.</td></tr>
+<tr><td><code>LEG_MIN</code> / <code>LEG_RANGE</code></td><td>0.15 / 0.80</td><td>Leg-black height = <code>LEG_MIN + extent * LEG_RANGE</code>.</td></tr>
+<tr><td><code>LEG_JITTER</code></td><td>0.14</td><td>Per-leg variation around the horse&rsquo;s own average.</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="gene-extension.html">Extension</a>
+        <a href="gene-cream.html">Cream</a>
+        <a href="gene-champagne.html">Champagne</a>
+        <a href="body-space.html">Body space &amp; regions</a>
+    </div>
+    Source: <code>common/genetics/genes/AgoutiGene.java</code>,
+    <code>common/coat/pattern/BayCoat.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

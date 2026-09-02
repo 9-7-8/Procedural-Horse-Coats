@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Extension &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="nav.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow natural">Natural gene <span class="sep">/</span> phase 1</p>
+<h1>Extension</h1>
+<p class="lede">
+    Can this horse make black pigment at all? <span class="allele dom">E</span> says
+    yes and does nothing. <span class="allele rec">ee</span> restricts black to zero
+    everywhere, and the horse is a chestnut. It is the first gene in
+    <code>naturalOrder()</code> because it decides which pigment the rest of the
+    pipeline has to work with.
+</p>
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd>horsegenetics.extension</dd></div>
+    <div><dt>Alleles</dt><dd><span class="allele dom">E</span> <span class="allele rec">e</span></dd></div>
+    <div><dt>Dominance</dt><dd>DOMINANT</dd></div>
+    <div><dt>Wild type</dt><dd>E</dd></div>
+    <div><dt>Wild frequency</dt><dd>50/50 per allele</dd></div>
+    <div><dt>Founder draws</dt><dd>2 &times; nextBoolean</dd></div>
+    <div><dt>Deterministic</dt><dd>yes</dd></div>
+    <div><dt>Visible when</dt><dd>ee</dd></div>
+</dl>
+
+<h2>What it does</h2>
+
+<p>
+    <span class="allele dom">E_</span> &mdash; the horse can make eumelanin. No coat
+    effect at all; <code>isVisible</code> returns <code>false</code>, so the gene is
+    skipped entirely.
+</p>
+
+<p>
+    <span class="allele rec">ee</span> &mdash; black is set to <strong>0 on every
+    texel</strong>. Only red pheomelanin survives, so every subsequent gene samples
+    the gradient&rsquo;s left edge and the horse is a chestnut.
+</p>
+
+<div class="codebox">
+<div class="filename">common/genetics/genes/ExtensionGene.java</div>
+<pre><code class="language-java">@Override
+public PigmentField restrict(AllelePair pair, CoatBuildContext ctx, PigmentView coat) {
+    if (!isChestnut(pair)) {
+        return null;
+    }
+    PigmentField f = coat.mutableCopy();
+    CoatRegions.restrictAll(ctx.skin(), f, (field, px, py, p) -&gt; field.setBlack(px, py, 0f));
+    return f;
+}</code></pre>
+</div>
+
+<h2>Interactions</h2>
+
+<ul>
+    <li><strong><a href="gene-agouti.html">Agouti</a> is invisible on a chestnut.</strong>
+        Bay is a restriction of black to the points; with no black to restrict there
+        is nothing to see. <code>AgoutiGene.isVisible</code> checks
+        <code>genotype.hasBlackPigment()</code> for exactly this reason &mdash; and
+        that is a real-world behaviour, not a shortcut: a chestnut can carry
+        <code>A</code> invisibly for generations.</li>
+    <li><strong>Dilutions read what is left.</strong> Champagne on a chestnut is gold
+        champagne; cream on a chestnut is palomino, then cremello. All of that falls
+        out of the dilutions sampling the <em>current</em> pigment rather than
+        branching on a colour name.</li>
+    <li><strong>Everything is invisible under
+        <a href="gene-white.html">dominant white</a>.</strong></li>
+</ul>
+
+<div class="note">
+    <span class="label">Why this is the model, not a special case</span>
+    <p>
+        Nothing anywhere in the pipeline says &ldquo;if chestnut then …&rdquo;. A
+        chestnut is just a horse whose black channel is zero, and every later gene
+        behaves correctly on it without knowing it exists. That is the payoff of the
+        pigment-field design.
+    </p>
+</div>
+
+<h2>Not modelled</h2>
+
+<p>
+    Real <code>MC1R</code> has a third allele, <code>ea</code>, phenotypically red
+    like <code>e</code>. It is the natural place to prove
+    <a href="roadmap.html#multi-allele">multi-allele support</a> &mdash; the interest
+    is in the code string and the carrier display, not in a new look.
+</p>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="gene-agouti.html">Agouti</a>
+        <a href="pipeline.html">Three-phase pipeline</a>
+        <a href="genetics-model.html">The genetics model</a>
+    </div>
+    Source: <code>common/genetics/genes/ExtensionGene.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

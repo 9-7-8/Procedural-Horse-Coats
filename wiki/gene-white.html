@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dominant White &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="nav.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow natural">Natural gene <span class="sep">/</span> phase 1</p>
+<h1>Dominant white</h1>
+<p class="lede">
+    Total restriction of <em>both</em> pigments, everywhere. The overlay goes fully
+    transparent, the white template shows through unchanged, and every other natural
+    gene is masked. It is the <strong>only</strong> coat that should ever look like
+    the bare template.
+</p>
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd>horsegenetics.white</dd></div>
+    <div><dt>Alleles</dt><dd><span class="allele dom">W</span> <span class="allele wild">w</span></dd></div>
+    <div><dt>Dominance</dt><dd><strong>COMPLETE_DOMINANT</strong></dd></div>
+    <div><dt>Wild type</dt><dd>w</dd></div>
+    <div><dt>Wild frequency</dt><dd>1 in 50 per allele (~4% white)</dd></div>
+    <div><dt>Founder draws</dt><dd>2 &times; nextInt(50)</dd></div>
+    <div><dt>Deterministic</dt><dd>yes</dd></div>
+    <div><dt>Visible when</dt><dd>W_</dd></div>
+</dl>
+
+<h2>What it does</h2>
+
+<div class="codebox">
+<div class="filename">common/genetics/genes/WhiteGene.java</div>
+<pre><code class="language-java">@Override
+public PigmentField restrict(AllelePair pair, CoatBuildContext ctx, PigmentView coat) {
+    if (!isWhite(pair)) {
+        return null;
+    }
+    PigmentField f = coat.mutableCopy();
+    CoatRegions.restrictAll(ctx.skin(), f, (field, px, py, p) -&gt; {
+        field.setRed(px, py, 0f);
+        field.setBlack(px, py, 0f);
+    });
+    return f;
+}</code></pre>
+</div>
+
+<p>
+    Both pigments land <em>exactly</em> on zero, which is what the composer&rsquo;s
+    <code>TRANSPARENT_EPS</code> = 0.001 cutoff is looking for. Only dominant white
+    and a <a href="gene-splash.html">splash marking</a> ever reach it &mdash; a
+    dilution floor never does, even grey stacked on a double-dilute cream.
+</p>
+
+<h2>Complete dominance, and what it buys</h2>
+
+<p>
+    <code>COMPLETE_DOMINANT</code> means dominant <strong>and epistatic</strong>:
+    while <span class="allele dom">W</span> shows, no other gene is visible, so every
+    white horse looks alike whatever else it carries. Two consequences:
+</p>
+
+<ul>
+    <li><strong>The catalogue keeps exactly one white entry</strong> &mdash; the
+        variant homozygote on an otherwise wild-type background. Without that
+        reduction, white would claim a quarter of the gallery corridor with
+        indistinguishable horses.</li>
+    <li><strong>A white horse&rsquo;s genotype is still fully there.</strong> It is
+        carrying whatever it is carrying, and its foals will show it. The masking is
+        visual only &mdash; which is exactly the kind of thing a
+        <a href="genetics-model.html">carrier display</a> should surface.</li>
+</ul>
+
+<h2 id="magical">A magical gene can still paint a white horse</h2>
+
+<div class="note rule">
+    <span class="label">White is natural; magical genes run after every natural gene</span>
+    <p>
+        So <a href="gene-magic-zebra.html">magic zebra</a>&rsquo;s stripes and
+        <a href="gene-pink-hair.html">pink hair</a>&rsquo;s mane <em>do</em> show on a
+        dominant-white horse &mdash; both raise <code>addOpacity</code> as well as
+        adding colour. A magical gene that adds colour without opacity paints nothing
+        there, because the texel has no paint to tint.
+    </p>
+    <p>
+        <a href="gene-test.html">Test</a> reaches it a different way: it uses
+        <code>ColorField.set</code>, flat opaque paint that replaces the accumulator
+        entirely.
+    </p>
+</div>
+
+<h2 id="flat-white-bug">If a chestnut renders as a white horse, it is not this gene</h2>
+
+<div class="note danger">
+    <span class="label">The texture-id collision, fixed 2026-09-01</span>
+    <p>
+        An older <code>sanitize()</code> lower-cased the texture key on its way to an
+        <code>Identifier</code>, folding all 19,683 genotypes onto <strong>27</strong>
+        ids &mdash; <code>E/e</code> ≡ <code>e/e</code>, <code>W/w</code> ≡
+        <code>w/w</code>, and so on. <strong>Case is the dominance
+        encoding.</strong>
+    </p>
+    <p>
+        <code>TextureManager#register</code> is a silent <code>Map.put</code> that
+        <em>closes the loser</em>, so every deterministic coat in a bucket rendered
+        whichever one baked last &mdash; a plain white horse whenever that was a
+        <code>W_</code> one. The victim&rsquo;s own bake was correct, so a
+        &ldquo;flat white&rdquo; debug line never caught it.
+        <a href="pipeline.html"><code>CoatTextureId</code></a> is now injective and
+        <code>KEY_BY_ID</code> throws if two keys ever share an id again.
+    </p>
+</div>
+
+<div class="note good">
+    <span class="label">Owner-verified in-game, 2026-09-01</span>
+    <p>
+        Wild spawns show a wide variety of genotypes and every one renders its correct
+        coat &mdash; no more flat-white horses.
+    </p>
+</div>
+
+<h2>Not modelled</h2>
+
+<p>
+    Real <code>KIT</code> dominant white is a series of <strong>36 alleles</strong> of
+    graded extent, most of them <em>not</em> fully masking. Expanding it is the single
+    largest combinatorial change on the backlog and is
+    <a href="roadmap.html#scale">deliberately deferred</a> &mdash; or would be capped
+    at a handful of representative alleles. <code>KIT</code> also carries tobiano and
+    sabino 1 in reality.
+</p>
+
+<p>
+    White <em>markings</em> are a separate gene: <a href="gene-splash.html">splash</a>.
+</p>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="gene-splash.html">Splash white</a>
+        <a href="pipeline.html">Transparency and the composite</a>
+        <a href="genetics-model.html">Dominance patterns</a>
+    </div>
+    Source: <code>common/genetics/genes/WhiteGene.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

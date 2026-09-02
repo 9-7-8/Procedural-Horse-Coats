@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Writing a Gene &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="nav.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow">For modders</p>
+<h1>Writing a gene</h1>
+<p class="lede">
+    A gene is one class implementing one interface. It declares its alleles, how they
+    segregate, how dominant the variant is, and <em>one</em> coat function &mdash;
+    either a natural pigment restriction or a magical RGB tint, never both. This page
+    is the walkthrough; <a href="api-reference.html">Class abstractions</a> is the
+    reference.
+</p>
+
+<div class="note warn">
+    <span class="label">Read this first</span>
+    <p>
+        The registry is <strong>closed</strong> today &mdash;
+        <code>Genes.CODE_ORDER</code> is a <code>List.of(...)</code>, so a gene has to
+        be added to this repository rather than registered from another mod. The
+        open registry, the declarative builder and the abstract base classes are
+        <a href="roadmap.html#modder-api">designed and on the roadmap</a>. Everything
+        else on this page &mdash; the interface, the contract, the pipeline, the
+        determinism rules &mdash; is live and will not change shape when the registry
+        opens.
+    </p>
+</div>
+
+<h2>What a gene is allowed to do</h2>
+
+<p>A gene has three kinds of effect, and may have any combination:</p>
+
+<ol>
+    <li><strong>The natural coat</strong> &mdash; restrict eumelanin / phaeomelanin
+        in phase 1. <strong>Reserved for genes that exist in real life.</strong></li>
+    <li><strong>The artificial coat</strong> &mdash; add or remove signed R/G/B in
+        phase 3.</li>
+    <li><strong>Status effects</strong> &mdash; stats, body size, health. <em>Not
+        built yet</em>; sketched in <a href="roadmap.html#traits">Roadmap §6</a>.</li>
+</ol>
+
+<div class="note rule">
+    <span class="label">Natural or magical, never both</span>
+    <p>
+        The two coat effects are mutually exclusive and the choice is
+        <strong>declared</strong> (<code>Gene.isNatural()</code>), not inferred. A
+        gene that wants both registers as two genes. The separation is a promise to
+        the player that the real-world genetics are real &mdash; see
+        <a href="philosophy.html">Philosophy §6</a>.
+    </p>
+</div>
+
+<h2 id="alleles">Allele rules</h2>
+
+<p>Binding on every gene, this mod&rsquo;s and anyone else&rsquo;s:</p>
+
+<ul>
+    <li><strong>Tokens are alphanumeric</strong> &mdash; <code>a-z</code>,
+        <code>A-Z</code>, <code>0-9</code>, nothing else. That keeps the code
+        string&rsquo;s <code>/</code> and <code>-</code> separators unambiguous for
+        free, and it lets real scientific allele names (<code>SW1</code>,
+        <code>W36</code>, <code>D1</code>, <code>TE2</code>) be used verbatim.</li>
+    <li><strong>Length 1 to 128</strong>, with strong guidance to keep it to
+        <strong>1&ndash;5</strong>. Tokens end up on pen signs, in the info panel and
+        in the genotype code; a 40-character token is legal and will look terrible
+        everywhere.</li>
+    <li><strong>Unique within the gene</strong>, and the gene key must be namespaced
+        <code>&lt;modid&gt;.&lt;gene&gt;</code>.</li>
+    <li><strong>The wild type is the least magical version</strong>, and by
+        convention it is named <strong><code>n</code></strong>. For a real-world gene
+        that is the ordinary allele; for a magical gene it is &ldquo;this horse does
+        not have the magic&rdquo;. Naming it consistently matters more than it looks:
+        <code>n</code> is the most-printed token in the mod, and
+        <code>GeneCodeDisplay.shortForm</code> leans on recognising it to keep a
+        genotype readable.</li>
+    <li><strong>An indefinite number of alleles</strong> is the design target. Two is
+        the common case, not the assumption &mdash; though
+        <a href="roadmap.html#multi-allele">multi-allele support is not finished</a>
+        (dominance is still declared per gene rather than per pair).</li>
+    <li><strong>Most dominant first</strong> in <code>alleles()</code>. That list is
+        what <code>precedence()</code> reads to canonicalize an
+        <code>AllelePair</code>. Override <code>precedence</code> if your ordering
+        needs to differ &mdash; <a href="gene-pearl.html">pearl</a> does.</li>
+</ul>
+
+<h2>The interface</h2>
+
+<div class="codebox">
+<div class="filename">common/genetics/Gene.java &mdash; everything you must or may answer</div>
+<pre><code class="language-java">public interface Gene {
+
+    // --- required ---------------------------------------------------------
+    String key();                          // "&lt;modauthor&gt;.&lt;gene&gt;"
+    List&lt;Allele&gt; alleles();                // most dominant first
+    Allele wildType();                     // the "no visible effect" allele
+    DominancePattern dominance();          // declared metadata
+    AllelePair randomPair(Rng rng);        // one wild-population draw
+
+    // --- phase declaration ------------------------------------------------
+    default boolean isNatural() { return true; }
+
+    // --- exactly one of these ---------------------------------------------
+    default PigmentField restrict(AllelePair pair, CoatBuildContext ctx,
+                                  PigmentView coat) { return null; }
+
+    default ColorField tint(AllelePair pair, CoatBuildContext ctx,
+                            PigmentView coat, ColorView colour) { return null; }
+
+    // --- cache correctness -------------------------------------------------
+    default boolean isVisible(AllelePair pair, Genotype genotype) {
+        return pair.anyVisible();
+    }
+    default boolean isDeterministic(AllelePair pair, Genotype genotype) {
+        return pair.allDeterministic();
+    }
+
+    // --- rarely overridden -------------------------------------------------
+    default int precedence(Allele allele) { ... }   // lower = more dominant
+    default Allele fromToken(String token) { ... }  // token -&gt; allele
+}</code></pre>
+</div>
+
+<h2>Walkthrough 1 &mdash; a natural gene</h2>
+
+<p>
+    The smallest useful shape. <strong>Silver dapple</strong> dilutes eumelanin only,
+    so a chestnut carrying it looks unchanged &mdash; a single
+    <code>restrictAll</code> call is the entire coat effect.
+</p>
+
+<div class="codebox">
+<div class="filename">a natural gene, end to end</div>
+<pre><code class="language-java">public final class SilverGene implements Gene {
+
+    public static final String KEY = "mymod.silver";
+    public static final int WILD_ODDS = 60;              // 1 in 60 per allele
+
+    /** Eumelanin kept. Phaeomelanin is untouched, so a chestnut is unchanged. */
+    private static final float KEEP_BLACK = 0.45f;
+
+    public final Allele Z = new Allele(KEY, "Z", "Silver (Z)", true,  true);
+    public final Allele n = new Allele(KEY, "n", "Wild-type (n)", false, true);
+    private final List&lt;Allele&gt; alleles = List.of(Z, n);   // most dominant first
+
+    @Override public String key()               { return KEY; }
+    @Override public List&lt;Allele&gt; alleles()     { return alleles; }
+    @Override public Allele wildType()          { return n; }
+    @Override public DominancePattern dominance() { return DominancePattern.DOMINANT; }
+
+    @Override
+    public AllelePair randomPair(Rng rng) {
+        return new AllelePair(
+                rng.nextInt(WILD_ODDS) == 0 ? Z : n,
+                rng.nextInt(WILD_ODDS) == 0 ? Z : n);
+    }
+
+    @Override
+    public boolean isVisible(AllelePair pair, Genotype genotype) {
+        // nothing to dilute on a horse that makes no black pigment
+        return pair.has(Z) &amp;&amp; genotype.hasBlackPigment();
+    }
+
+    @Override
+    public PigmentField restrict(AllelePair pair, CoatBuildContext ctx, PigmentView coat) {
+        if (!pair.has(Z)) {
+            return null;                                  // no contribution
+        }
+        PigmentField f = coat.mutableCopy();               // never write through `coat`
+        CoatRegions.restrictAll(ctx.skin(), f,
+                (field, px, py, p) -&gt; field.dilute(px, py, 1.0f, KEEP_BLACK, 0.12f));
+        return f;
+    }
+}</code></pre>
+</div>
+
+<h3>Notes on that</h3>
+
+<ul>
+    <li><code>Allele(geneKey, token, label, visible, deterministic)</code> &mdash; the
+        last two are <em>population-level hints</em>. The authoritative per-horse
+        answers come from <code>isVisible</code> / <code>isDeterministic</code>.</li>
+    <li>Returning <code>null</code> is the cheap answer when the pair does not
+        express. Do it; the composer skips the copy entirely.</li>
+    <li>Use <code>dilute</code>, not a bare <code>restrictBlack</code>, whenever the
+        effect is a dilution &mdash;
+        <a href="pipeline.html#dilute">the zero-red column is a trap</a>.</li>
+    <li><code>isVisible</code> sees the <strong>whole genotype</strong>, which is how
+        a gene declines to run on a base that has nothing for it to do.</li>
+</ul>
+
+<h2>Walkthrough 2 &mdash; a magical gene</h2>
+
+<p>
+    Phase 3 works on a signed, uncapped <code>ColorField</code>. Two shapes matter,
+    and the difference is whether the gene needs to <em>know</em> what it is painting
+    over.
+</p>
+
+<h3>Shape A &mdash; a blind, unconditional add</h3>
+
+<p>
+    The gene commits hard enough that nothing can pull the horse back. This is
+    order-independent and needs no read access:
+</p>
+
+<div class="codebox">
+<pre><code class="language-java">@Override public boolean isNatural() { return false; }
+
+@Override
+public ColorField tint(AllelePair pair, CoatBuildContext ctx,
+                       PigmentView coat, ColorView colour) {
+    if (!pair.has(Blu)) {
+        return null;
+    }
+    ColorField delta = ColorField.deltaLike(colour);
+    HorseSkinGeometry.forEachTexel(ctx.skin(), (px, py, part, face, point) -&gt; {
+        // A resolved channel tops out at 255, so -510 lands hard on 0 and
+        // +510 lands hard on 255, whatever else the horse carries.
+        delta.add(px, py, -510, -510, 510);
+        delta.addOpacity(px, py, 255);   // so it shows on a dominant-white horse too
+    });
+    return delta;
+}</code></pre>
+</div>
+
+<h3>Shape B &mdash; read the accumulator, then walk toward a target</h3>
+
+<p>
+    When the gene wants a <em>specific</em> colour and wants to keep the shading
+    underneath, a blind add cannot do it: to reach pink on a black mane a fixed delta
+    has to push so hard that a pale mane saturates to white. Read
+    <code>ColorView.visible</code> first and return the delta that lands where you
+    want:
+</p>
+
+<div class="codebox">
+<div class="filename">the pattern PinkHairGene uses</div>
+<pre><code class="language-java">/** The signed step from this texel's accumulated channel to its target one. */
+private static int toward(ColorView colour, int px, int py, int channel, int target) {
+    int seen   = colour.visible(px, py, channel);       // what a viewer would see
+    int wanted = (int) Math.round(seen + (target - seen) * (STRENGTH_PERCENT / 100.0));
+    return wanted - switch (channel) {                  // minus what is already there
+        case 0 -&gt; colour.red(px, py);
+        case 1 -&gt; colour.green(px, py);
+        default -&gt; colour.blue(px, py);
+    };
+}</code></pre>
+</div>
+
+<div class="note warn">
+    <span class="label">Reading makes your gene order-dependent</span>
+    <p>
+        That is a legitimate choice &mdash; but it means your position in
+        <code>Genes.magicalOrder()</code> now matters, and you should say so in the
+        gene&rsquo;s Javadoc. Pink hair runs <em>before</em> magic zebra precisely so
+        that stripes black out pink hair rather than the other way round.
+    </p>
+</div>
+
+<h3>Flat paint (<code>set</code>) is almost never what you want</h3>
+
+<p>
+    <code>ColorField.set</code> <em>replaces</em> the accumulator instead of adding to
+    it. It is reserved for a <code>COMPLETE_DOMINANT</code> gene that must read
+    identically on black, chestnut <em>or</em> white &mdash;
+    <a href="gene-test.html">Test</a> is the only one. Using it makes your gene
+    strictly order-dependent and erases every gene before it.
+</p>
+
+<h2>Randomness: the epigenome, and nothing else</h2>
+
+<p>
+    A non-deterministic gene takes <strong>all</strong> its randomness from
+    <code>ctx.epigeneticsFor(key())</code>. That returns a <code>SeededRng</code> on
+    the epigenetic seed of the allele copy that <em>expresses</em> at your gene
+    &mdash; the dominant copy on a heterozygote, the higher-priority copy on a
+    homozygote.
+</p>
+
+<div class="codebox">
+<pre><code class="language-java">Rng epi = ctx.epigeneticsFor(KEY);
+
+// Document the draw order. It is part of your gene's contract: change it and
+// every existing horse carrying this gene changes appearance.
+long   seed    = epi.nextLong();                         // a noise field seed
+double spacing = 2.2 + epi.nextFloat() * 2.0;            // body units
+double reach   = 0.35 + epi.nextFloat() * 0.60;          // fraction of the drop</code></pre>
+</div>
+
+<ul>
+    <li>Founders roll a fresh seed; a <strong>foal inherits the copy&rsquo;s seed
+        verbatim</strong>, so your pattern runs in families for free.</li>
+    <li>Declare <code>isDeterministic(pair, genotype)</code> <code>false</code>
+        whenever the pair expresses. The usual one-liner is
+        <code>return !isVisibleVariant(pair);</code>.</li>
+    <li>Prefer normalising against <code>bounds(skin, part)</code> /
+        <code>bodyBounds(skin)</code> rather than hard-coded numbers, so the effect
+        works on the foal mesh too.</li>
+</ul>
+
+<h2 id="contract">The contract</h2>
+
+<div class="note danger">
+    <span class="label">A violation shows up as someone else&rsquo;s horse rendering wrong</span>
+    <p>
+        Coats are cached per texture key and shared by every horse with that key. A
+        gene that is not a pure function of its inputs does not render <em>wrong</em>
+        &mdash; it renders as <strong>another horse&rsquo;s coat</strong>.
+    </p>
+</div>
+
+<ol>
+    <li><strong>All randomness through <code>ctx.epigeneticsFor(...)</code>.</strong>
+        No <code>new Random()</code>, no <code>Math.random()</code>, no
+        <code>RandomSource</code> from the level.</li>
+    <li><strong>No input the texture key does not capture.</strong> Not entity UUID,
+        position, world seed, wall-clock time or tick count.</li>
+    <li><strong>No mutable static state.</strong> Your gene is a singleton shared by
+        every horse on the server; a cached field is a cross-contamination bug.</li>
+    <li><strong>Return a contribution; never write through your arguments.</strong>
+        <code>coat</code> is the previous gene&rsquo;s output and the next
+        gene&rsquo;s input.</li>
+    <li><strong>Declare <code>isDeterministic</code> honestly.</strong> Claiming
+        determinism you do not have poisons the cache for every horse sharing your
+        genotype.</li>
+    <li><strong>Declare the phase honestly.</strong> Magical unless the gene exists
+        in real life, and never both.</li>
+    <li><strong>Do not depend on load order.</strong> Every ordering the engine uses
+        is (or will be) computed by sorting.</li>
+    <li><strong>Only inspect lower-priority genes</strong> in a genome-aware spawn
+        chance &mdash; the higher ones have not been rolled yet.</li>
+</ol>
+
+<h2>Registering it</h2>
+
+<div class="codebox">
+<div class="filename">common/genetics/Genes.java &mdash; three edits, today</div>
+<pre><code class="language-java">public static final SilverGene SILVER = new SilverGene();
+
+// 1. the genotype code string's segment order - APPEND, never insert
+private static final List&lt;Gene&gt; CODE_ORDER =
+        List.of(EXTENSION, AGOUTI, WHITE, TEST, CHAMPAGNE, SPLASH, GREY,
+                CREAM, PEARL, MAGIC_ZEBRA, PINK_HAIR, SILVER);
+
+// 2. phase-1 effect order - position matters, see below
+private static final List&lt;Gene&gt; NATURAL_ORDER =
+        List.of(EXTENSION, AGOUTI, SILVER, CREAM, PEARL, CHAMPAGNE, GREY, WHITE, SPLASH);
+
+// 3. (magical genes go in MAGICAL_ORDER instead)</code></pre>
+</div>
+
+<div class="note warn">
+    <span class="label">Phase-1 order is a dependency order, not a preference</span>
+    <p>
+        Multiplicative restriction commutes &mdash; <em>except</em> where a gene sets
+        pigment <strong>absolutely</strong>. <a href="gene-agouti.html">Bay</a> sets
+        its points with <code>setBlack(1.0)</code> / <code>setRed(0.0)</code>, and the
+        whole <code>PigmentField.dilute</code> design exists because the dilutions have
+        to run <em>after</em> that. So: <strong>absolute setters early, dilutions
+        later.</strong> Silver must sit after agouti or a bay&rsquo;s mane will not
+        lighten, and nobody will know why.
+    </p>
+</div>
+
+<p>
+    The current natural order is
+    extension &rarr; agouti &rarr; cream &rarr; pearl &rarr; champagne &rarr; grey
+    &rarr; white &rarr; splash. The
+    <a href="roadmap.html#priority">planned replacement</a> is a hard-coded
+    <code>int priority()</code> on each gene with the lists <em>derived</em> by
+    sorting on <code>(priority, geneKey)</code> &mdash; natural band 0&ndash;99,
+    magical band 100+.
+</p>
+
+<h2>Then</h2>
+
+<ol>
+    <li><strong>Write the gene up.</strong> Add a page under <code>wiki/</code>
+        modelled on an existing gene page, and add it to the
+        <code>SECTIONS</code> array in <code>wiki/nav.js</code>.</li>
+    <li><strong>Bake samples</strong>: <code>./gradlew :common:bakeCoatSamples</code>
+        writes <code>build/coat-samples/*.png</code> without launching the game.</li>
+    <li><strong>Run the tests</strong>: <code>./gradlew :common:test</code>.</li>
+    <li><strong>Regenerate the golden file</strong> if the gene deliberately changes
+        an existing coat: delete
+        <code>common/src/test/resources/coat-golden.txt</code>, run the test, copy
+        <code>common/build/coat-golden.txt</code> back &mdash; and say so in the
+        commit message.</li>
+    <li><strong>Add an entry to <a href="verification.html">To be verified</a></strong>
+        saying what to look at in-game and where.</li>
+</ol>
+
+<h2>Testing a gene on its own</h2>
+
+<p>
+    Because both hooks are pure, a gene is unit-testable against a synthetic coat
+    with no game and no composer &mdash; which is what
+    <code>GeneCoatHookTest</code> does:
+</p>
+
+<div class="codebox">
+<pre><code class="language-java">Genotype g   = Genotype.parse("E/E-a/a-w/w-t/t-c/c-spl/spl-g/g-N/N-N/N-n/n-n/n");
+Epigenome ep = Epigenome.fromSeed(1234L);
+CoatBuildContext ctx = new CoatBuildContext(g, ep, Skin.ADULT, true);
+
+PigmentField before = new PigmentField(HorseSkinGeometry.SHEET_SIZE);
+PigmentField after  = new SilverGene().restrict(pair, ctx, before);
+
+// `before` must be untouched, and `after` must be a pure function of the inputs.</code></pre>
+</div>
+
+<h2>Things that will bite you</h2>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Symptom</th><th>Cause</th></tr></thead>
+<tbody>
+<tr><td>Your dilution leaves jet-black points</td><td>You scaled black without a <code>blackTint</code>. The gradient&rsquo;s zero-red column reads black down to <code>black ≈ 0.4</code>. Use <code>dilute</code>.</td></tr>
+<tr><td>Your effect should read grey and reads tan</td><td>You scaled both pigments, walking down the gradient&rsquo;s <em>diagonal</em>, which runs through the golds. Walk toward the <code>red = 0</code> column instead.</td></tr>
+<tr><td>Your magical gene is invisible on a white horse</td><td>You added colour but not opacity. A transparent texel needs <code>addOpacity</code> or <code>set</code>.</td></tr>
+<tr><td>Your pattern has a flat band on the chest, rump or leg fronts</td><td>A pure function of X puts every face perpendicular to X at one phase. Add a slant on <code>|z|</code> &mdash; or just use <code>BodyStripes</code>.</td></tr>
+<tr><td>Your pattern has a visible seam at the shoulder</td><td>You sampled noise in texture space. Sample in body space with <code>BodyNoise</code>.</td></tr>
+<tr><td>A marking ends in a perfect ring</td><td>A hard <code>y &lt;= cutoff</code> cut. Use a <code>smoothstep</code> fade, as <code>BayCoat</code> does.</td></tr>
+<tr><td>Two horses with different genotypes share a coat</td><td>A texture-id collision. <code>KEY_BY_ID</code> should throw &mdash; if it did not, your <code>textureKey</code> inputs are wrong.</td></tr>
+<tr><td>Your gene works on adults and breaks on foals</td><td>The foal mesh has no <code>MANE</code> or <code>MUZZLE</code>, and its head / neck use rest-pose AABBs. Guard with <code>hasPart</code>.</td></tr>
+<tr><td>Near-black texels in a cremello</td><td>Expected &mdash; that is the white template&rsquo;s own shading surviving the multiply. Check <code>PigmentField</code> values, not composed pixels.</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="api-reference.html">Class abstractions</a>
+        <a href="pipeline.html">Three-phase pipeline</a>
+        <a href="body-space.html">Body space &amp; regions</a>
+        <a href="philosophy.html">Philosophy</a>
+        <a href="roadmap.html#modder-api">The planned authoring tiers</a>
+    </div>
+    Every shipped gene is a worked example:
+    <a href="gene-champagne.html">champagne</a> is the simplest natural one,
+    <a href="gene-magic-zebra.html">magic zebra</a> the fullest magical one.
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

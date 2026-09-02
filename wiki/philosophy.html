@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Philosophy &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="nav.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow">Start here</p>
+<h1>Philosophy</h1>
+<p class="lede">
+    Why the mod is built this way. Not what it does, not how it works &mdash;
+    <strong>why</strong>. Read this before making a design decision: most of the
+    arguments elsewhere in this wiki are downstream of something here, and when two
+    good options conflict, this page is the tie-breaker.
+</p>
+
+<div class="note">
+    <span class="label">The one-sentence version</span>
+    <p>
+        <strong>Real Mendelian genetics</strong>, so breeding is a game you can
+        actually play; a <strong>procedurally generated coat</strong>, so the space
+        of outcomes is functionally infinite; and <strong>determinism</strong>
+        throughout, so a surprising horse is a discovery rather than a dice roll.
+    </p>
+</div>
+
+<h2>1. Breeding should be a game of skill, not a slot machine</h2>
+
+<p>
+    Mendelian inheritance is the point, not set dressing. Two copies of every gene,
+    one from each parent, dominance and recessives, carriers that hide a trait for
+    generations and then produce it. That is already a good game &mdash; it is why
+    animal breeding is a hobby in real life &mdash; and it is a game that
+    <strong>rewards knowing things</strong>.
+</p>
+
+<ul>
+    <li>A player who understands the model can <strong>plan</strong>. If you want a
+        cremello you can work out what to breed and how long it will take. You can
+        hold onto a plain-looking mare because you know what she carries.</li>
+    <li>Surprises are <strong>explainable after the fact</strong>. A foal that comes
+        out unexpectedly should always have an answer, and the answer should be in
+        the genotype &mdash; not &ldquo;the RNG felt like it&rdquo;.</li>
+    <li>Rare things stay rare <strong>because of the genetics</strong>, not because
+        of a low-probability roll bolted on top.</li>
+</ul>
+
+<p>
+    The failure state this guards against: a player breeds two horses, something
+    unexpected comes out, and their conclusion is &ldquo;I guess it&rsquo;s
+    random.&rdquo; The moment that happens, every breeding decision after it is
+    arbitrary, and the whole system collapses into a slot machine with a long lever.
+</p>
+
+<h2>2. Determinism is the load-bearing wall</h2>
+
+<div class="note rule">
+    <span class="label">The contract</span>
+    <p>
+        <strong>The same genetic code with the same alleles always produces the same
+        horse.</strong> Every client, the server, a unit test, a sample bake, this
+        launch and the next one, with any set of mods loaded.
+    </p>
+</div>
+
+<p>
+    This is the rule that outranks the others, and it is worth being explicit about
+    <em>why</em> it matters so much, because it looks like a technical concern and
+    is not:
+</p>
+
+<ul>
+    <li><strong>It is what makes the genetics feel real.</strong> A horse&rsquo;s
+        appearance is a <em>fact about its genome</em>, not a decoration that
+        happened to be applied to it. Two horses with the same code look the same
+        because they <em>are</em> the same, and that is what makes a genotype worth
+        reasoning about.</li>
+    <li><strong>It is what makes surprise legitimate.</strong> A player can only
+        feel &ldquo;I bred something remarkable&rdquo; if the remarkable thing was
+        determined by the breeding. If the same pairing could have produced it or
+        not, the achievement is hollow.</li>
+    <li><strong>It is what makes the whole thing debuggable.</strong> A genetic code
+        in a bug report reproduces the horse exactly. This has already paid for
+        itself once &mdash; the flat-white-horse bug was found because a coat that
+        should have been reproducible was not.</li>
+</ul>
+
+<p>
+    It is also structurally load-bearing: a coat is baked once per texture key and
+    reused by every horse sharing that key, so a coat that is not a pure function of
+    its key does not render <em>wrong</em>, it renders as <strong>another
+    horse&rsquo;s coat</strong>.
+</p>
+
+<h3>What the contract forbids</h3>
+
+<ul>
+    <li><strong>No unseeded randomness.</strong> All per-horse variation comes from
+        the epigenetic seed of the allele copy that expresses. No
+        <code>new Random()</code>, no <code>Math.random()</code>, no
+        <code>RandomSource</code> from the level.</li>
+    <li><strong>No input the key does not capture.</strong> Not entity UUID, not
+        position, not world seed, not wall-clock time, not tick count. If something
+        is to be depended on, it has to become part of the texture key first.</li>
+    <li><strong>No iteration-order luck.</strong> Registries and per-gene maps need
+        a defined order; a <code>HashMap</code> walked in iteration order is a
+        latent non-determinism.</li>
+    <li><strong>No mod-load-order dependence.</strong> With third-party genes,
+        registry contents arrive in any order, so every ordering the engine uses
+        &mdash; processing, code string, catalogue &mdash; is <strong>computed by
+        sorting</strong>, never taken from registration order.</li>
+    <li><strong>No order-dependent float drift.</strong> A total, stable processing
+        order is what keeps two runs bit-identical rather than merely similar.</li>
+    <li><strong>No mutable static state on a gene.</strong> A gene is a singleton
+        shared by every horse on the server; a cached field is a
+        cross-contamination bug.</li>
+    <li><strong>Nothing may reorder genes per horse.</strong> Gene order comes from
+        hard-coded numbers. Per-allele epigenetic priority chooses <em>which
+        copy&rsquo;s seed expresses</em>, never <em>what runs when</em> &mdash; if
+        it could, two horses with the same genotype and seeds could diverge while
+        sharing a cache entry.</li>
+</ul>
+
+<h3>Where randomness is allowed to happen at all</h3>
+
+<p>
+    Exactly one place: <strong>the creation of a foundation horse</strong> &mdash; a
+    wild spawn, a <code>/summon</code>, a horse the dimension places. Those have no
+    parents, so there is nothing to inherit and something has to be invented.
+</p>
+
+<p>
+    Everywhere else a horse&rsquo;s genetics are a <strong>pure function of its
+    parents</strong>. Breeding does consume randomness &mdash; segregation has to
+    pick a copy &mdash; but that is <em>inheritance</em>, not invention: the alleles
+    and their seeds all come from the parents unchanged. <strong>A foal must never
+    go through the founder path.</strong>
+</p>
+
+<p>
+    Practical corollary, and it is a strict one: <strong>a horse&rsquo;s appearance
+    can never drift after birth.</strong> No re-rolls on reload, no per-tick
+    variation, no appearance that depends on where it is standing or what time it
+    is. Any future feature wanting per-horse variation takes it from the epigenome,
+    not from a fresh draw.
+</p>
+
+<h3>How it gets checked</h3>
+
+<p>
+    Three tests worth keeping alive: composing the same genome twice gives identical
+    pixels; shuffling gene registration order changes nothing; and a stored hash for
+    a handful of reference genotypes, so an accidental change to a shared helper is
+    caught rather than silently restyling every horse. That last one is
+    <code>CoatPipelineGoldenTest</code> &mdash; see
+    <a href="pipeline.html#golden">the pipeline page</a>.
+</p>
+
+<h2>3. The coat should have functionally infinite outcomes</h2>
+
+<p>
+    Vanilla Minecraft has seven horse colours and five markings: 35 horses, and you
+    have seen them all in an afternoon. That is the thing being replaced.
+</p>
+
+<p>
+    Coats here are <strong>generated</strong>, not picked from a list. Genes restrict
+    pigment per pixel, the survivors get looked up in a hand-authored gradient, and
+    the result is multiplied onto a white template. Add the epigenetics &mdash; a
+    per-allele-copy seed that varies how a gene expresses, inherited with the allele
+    &mdash; and the space stops being enumerable. Two bays with the same code have
+    different point heights. Two greys are at different stages of dappling.
+</p>
+
+<p>
+    The goal is that a player can look at a horse and think <em>I have not seen that
+    one before</em>, and be right, for a very long time.
+</p>
+
+<p>
+    This is why the pipeline is a pipeline and not a lookup table, and why every new
+    gene has to be a <strong>function</strong> over the horse&rsquo;s body rather
+    than a sprite. It is more work per gene. It is the entire point.
+</p>
+
+<h2>4. &ldquo;Interesting&rdquo; is the player&rsquo;s word, not ours</h2>
+
+<p>
+    There is no scoring function on a horse. No rarity tier, no
+    &ldquo;legendary&rdquo; tag, nothing telling a player which coat is the good one.
+</p>
+
+<p>
+    The mod&rsquo;s job is to make a <strong>large space of visibly different
+    outcomes</strong>, all reachable by breeding, and then get out of the way. One
+    player breeds for the palest cremello they can get. Another wants the most
+    extreme splash markings. Another is chasing a specific dapple pattern they saw
+    once, or breeding for speed and does not care what the horse looks like, or
+    trying to fix a rare recessive in a closed line just to prove they can.
+</p>
+
+<p>All of those are the same feature. Design consequences:</p>
+
+<ul>
+    <li><strong>Do not put a value judgement in the model.</strong> No gene is
+        &ldquo;better&rdquo;. Rarity is a frequency, not a quality.</li>
+    <li><strong>Show players what they need to plan</strong>, and let them decide
+        what to aim for &mdash; carrier information, a punnett display, the genotype
+        itself.</li>
+    <li><strong>Variety beats polish on any single outcome.</strong> A gene that
+        adds a new axis of visible difference is worth more than one that perfects
+        an existing look.</li>
+</ul>
+
+<h2>5. Abstraction is a feature, and we say so out loud</h2>
+
+<p>
+    The genetics are <strong>deliberately a simplification</strong>, and the
+    simplifications are chosen, not accidental:
+</p>
+
+<ul>
+    <li><strong>No crossing over, no recombination.</strong> Every gene segregates
+        independently. Two genes on the same real chromosome are unlinked here.</li>
+    <li><strong>No maternal or mitochondrial inheritance.</strong></li>
+    <li><strong>No imprinting, no mosaicism.</strong></li>
+    <li><strong>No aging.</strong> Horses do not get older, do not grey out over
+        time, do not develop age-related conditions. (Reopenable &mdash; but not
+        assumed.)</li>
+    <li><strong>Real loci get collapsed.</strong> Several distinct real-world genes
+        are one gene here, and several real alleles are dropped.</li>
+</ul>
+
+<p>
+    The test each of these passes: <strong>does modelling it make breeding a better
+    game, or just a more accurate simulation?</strong> Linkage makes a punnett
+    square lie. Aging makes a player watch something they are attached to decline.
+    Neither buys enough to pay for what it costs.
+</p>
+
+<p>
+    Being explicit about this is itself the philosophy. A player who knows the rules
+    &mdash; including which ones we broke &mdash; can trust their own reasoning
+    completely. A player who suspects there might be <em>hidden</em> rules cannot
+    trust any of it, which lands right back in &ldquo;I guess it&rsquo;s
+    random&rdquo;. The abstractions are published, not concealed.
+</p>
+
+<h3>The one exception: sex linkage</h3>
+
+<p>
+    <strong>X-linked genes are in</strong>, and they are the single deliberate
+    departure from strict Mendelian inheritance. Brindle is the case that earns it.
+</p>
+
+<p>
+    This one passes the test where the others fail. Sex linkage does not make
+    breeding less legible &mdash; it makes it <em>more interesting to reason
+    about</em>, and the reasoning is still exact. A stallion carries one copy and
+    therefore can never be a carrier: whatever is on his X, he shows, and he passes
+    it to every daughter and no son. A mare needs two. That produces a trait which
+    visibly runs down one side of a pedigree, and a player who knows the rule can
+    predict it perfectly and plan around it.
+</p>
+
+<p>
+    That is the distinction that matters here. An abstraction gets dropped when it
+    <strong>adds unpredictability without adding decisions</strong>. Sex linkage
+    adds decisions &mdash; it makes <em>which parent</em> carries a gene matter,
+    which nothing else in the model does &mdash; while staying completely
+    predictable. So it stays, and it is the only one.
+</p>
+
+<h2>6. Real and magical, clearly separated</h2>
+
+<p>Two kinds of gene, and the line between them is hard:</p>
+
+<ul>
+    <li><strong>Natural genes are only genes that exist in real life.</strong> They
+        work like real pigment: they restrict how much eumelanin and phaeomelanin a
+        cell can produce. They can only ever take colour <em>away</em>, which is why
+        every real horse colour is a subtraction from black.</li>
+    <li><strong>Magical genes are everything invented for this mod.</strong> They
+        work on RGB directly, adding and removing colour after the natural pigment
+        has resolved, and they can do things no real horse does.</li>
+</ul>
+
+<p>
+    A gene is one or the other, never both. The separation is a promise to the
+    player: <strong>the real-world genetics are real.</strong> A bay is a bay for the
+    actual reason a bay is a bay. If a horse is glowing, that is a magical gene and
+    it is labelled as one &mdash; it is not the &ldquo;realistic&rdquo; system
+    quietly being unrealistic.
+</p>
+
+<p>
+    It also keeps the fantasy from constraining the simulation. Magical genes run
+    last and can paint over anything, so they never need the natural model to bend
+    for them. In code this is <code>Gene.isNatural()</code>, which is
+    <em>declared</em>, not inferred &mdash; see
+    <a href="pipeline.html">the pipeline</a>.
+</p>
+
+<h2>7. Other people should be able to add to this</h2>
+
+<p>
+    The gene model is meant to be <strong>extended by other mods</strong>, and that
+    is a design constraint from the start rather than a feature to add later.
+</p>
+
+<p>
+    Why it matters philosophically and not just practically: a genetics system with a
+    fixed gene list has a ceiling, and every player eventually hits it. A system
+    anyone can add a locus to does not. The functionally-infinite promise in §3 is
+    much easier to keep if the mod is not the only source of genes.
+</p>
+
+<p>What that demands of the design:</p>
+
+<ul>
+    <li><strong>A gene declares itself</strong>, rather than being wired into
+        hand-maintained lists. Priority, phase, alleles, spawn chance, coat function
+        &mdash; all on the gene.</li>
+    <li><strong>Simple genes must be genuinely simple.</strong> A dilution that
+        multiplies black by 0.45 should be a few lines, not a class implementing
+        eight methods.</li>
+    <li><strong>Load order can never matter.</strong> Every ordering is computed by
+        sorting, so a horse looks the same regardless of which mods loaded in what
+        order &mdash; which is §2 again, arriving from a different direction.</li>
+    <li><strong>The contract has to be stated, not assumed.</strong> A third-party
+        gene that breaks determinism corrupts <em>other people&rsquo;s</em> horses
+        through a shared texture cache. That has to be written down where a modder
+        will read it &mdash; which is what
+        <a href="modding.html">Writing a gene</a> is for.</li>
+</ul>
+
+<h2>8. The horse is something you look after</h2>
+
+<p>
+    Horses are animals you keep, not equipment you own. The care features exist to
+    give that some texture &mdash; a horse heals when it has water and food nearby, a
+    tamed mare in good health can be milked &mdash; and to make the world you build
+    for them matter.
+</p>
+
+<p>
+    The rule these follow: <strong>add texture, do not add chores.</strong> A
+    mechanic that makes a player tend to their horses is good. A mechanic that
+    punishes a player for going on a long trip is not. Hence hand-feeding always
+    works and never needs water: the player always has a direct, reliable way to look
+    after a horse, and the ambient rules are about horses looking after themselves in
+    a pasture you made well.
+</p>
+
+<p>
+    Health genetics land in the same place: a genetically frail horse has
+    <strong>fewer hearts</strong>, which is legible at a glance and needs no new
+    system to express. The harshest consequence &mdash; a foal that inherits two
+    lethal copies and dies &mdash; is real genetics and stays in, but it is
+    config-gated, because a mod that is a breeding game for one player is a horse
+    game for another.
+</p>
+
+<h2>When these conflict</h2>
+
+<p>Rough priority, for the cases where two of these pull apart:</p>
+
+<ol>
+    <li><strong>Determinism</strong> (§2) wins over everything. A feature that
+        cannot be made deterministic does not ship.</li>
+    <li><strong>Mendelian legibility</strong> (§1) wins over accuracy. If a
+        real-world mechanism makes breeding harder to reason about, abstract it away
+        (§5) and say so.</li>
+    <li><strong>Variety</strong> (§3) wins over polish on any single outcome.</li>
+    <li><strong>Player-defined goals</strong> (§4) win over designer-defined ones.
+        When in doubt, expose information and let the player decide.</li>
+    <li><strong>Extensibility</strong> (§7) wins over convenience for us. A shortcut
+        that only works because we control every gene is a shortcut that breaks the
+        first time someone else adds one.</li>
+</ol>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="genetics-model.html">The genetics model</a>
+        <a href="pipeline.html">Three-phase pipeline</a>
+        <a href="modding.html">Writing a gene</a>
+        <a href="roadmap.html">Roadmap</a>
+    </div>
+    This page is the <em>why</em>. It holds no status, no implementation detail and
+    no task lists &mdash; those live on the pages linked above.
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Breeding &amp; Pedigree &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="nav.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow">Start here</p>
+<h1>Breeding &amp; pedigree</h1>
+<p class="lede">
+    The single source of truth for the breeding, horse-record, pedigree and
+    stat-inheritance system. Layer 1 (<code>common/</code>, pure Java) owns the rules;
+    layer 2 (<code>neoforge-26.1.2/</code>) only translates &mdash; it never decides
+    how codes combine, what an ancestor is, or the band a foal&rsquo;s stats come
+    from.
+</p>
+
+<h2>What &ldquo;breeding&rdquo; covers</h2>
+
+<ol>
+    <li><strong>Genetic-code combination</strong> &mdash; two parents&rsquo; codes
+        produce a child&rsquo;s.</li>
+    <li><strong>Stat inheritance</strong> &mdash; a foal&rsquo;s speed and health,
+        rolled from the parents. Random for now; Mendelian later.</li>
+    <li><strong>The horse record</strong> &mdash; the per-horse data bag: identity,
+        sex, name, genetic code, parents, stats.</li>
+    <li><strong>The ancestry database</strong> &mdash; a server-wide store of every
+        record, queryable for a horse&rsquo;s ancestors.</li>
+    <li><strong>Integration</strong> &mdash; attaching a record to a live
+        <code>Horse</code>, persisting it, pushing stats onto attributes, syncing to
+        clients, and the in-game surfaces.</li>
+</ol>
+
+<div class="note good">
+    <span class="label">Verified in-game</span>
+    <p>
+        <strong>2026-08-30:</strong> breeding two horses produces a foal with stats
+        between the parents, a correctly combined genetic code, and &mdash; for a
+        pairing&rsquo;s first foal &mdash; a name combining both parents.<br>
+        <strong>2026-09-01:</strong> <code>FamilyTreeScreen</code> is correct in full
+        (nodes, per-node coats, shrink-to-fit layout). A clock on a tamed foal ages it
+        to adult without seating the player on it.
+    </p>
+</div>
+
+<hr>
+
+<h2>Layer 1 &mdash; the domain model</h2>
+
+<h3><code>Genotype.breedWith(Genotype other, Rng)</code></h3>
+
+<p>
+    Mendelian segregation: for <strong>each gene</strong> the child takes one allele
+    from each parent, drawn 50/50 within that parent&rsquo;s pair. That is
+    <strong>2 <code>nextBoolean()</code> per gene</strong>, genes in
+    <code>codeOrder()</code> &mdash; 22 draws for the 11 built-in genes;
+    <code>true</code> means that parent&rsquo;s first allele.
+</p>
+
+<p>
+    Each resulting pair is canonicalized by <code>AllelePair</code> (more dominant
+    first), so <code>breedWith</code> is <strong>symmetric</strong>:
+    <code>E/E-A/A-… &times; e/e-a/a-…</code> always gives <code>E/e-A/a-…</code>.
+</p>
+
+<p>
+    Dominance still masks &mdash; one <code>W</code> gives a white foal, one
+    <code>T</code> the test tint, one <code>Ch</code> champagne, one <code>Cr</code>
+    a cream dilution, one <code>G</code> grey (adult only), one <code>Spl</code>
+    splash markings, one <code>Mzeb</code> zebra stripes.
+</p>
+
+<div class="note">
+    <span class="label">Pink hair is the one recessive</span>
+    <p>
+        A single <code>Pihr</code> is an invisible carrier; only
+        <code>Pihr/Pihr</code> shows. That makes it the first gene you have to
+        <em>breed for</em> rather than spot. <a href="gene-pink-hair.html">Its
+        page</a> has the frequencies.
+    </p>
+</div>
+
+<p>
+    Seal brown has no allele &mdash; it is a high roll of
+    <a href="gene-agouti.html">bay&rsquo;s epigenetic leg and face heights</a>.
+</p>
+
+<h3><code>Genome.breedWith(Genome other, Rng)</code> &mdash; the one a foal actually uses</h3>
+
+<p>
+    A genotype says <em>which</em> alleles a horse carries. It does not say what those
+    particular <strong>copies</strong> carry, and every copy carries a
+    <strong>priority</strong> and an <strong>epigenetic seed</strong>. Those live in
+    an <code>Epigenome</code>, aligned slot-for-slot with the genotype&rsquo;s pairs.
+    <code>Genome</code> is the two together, and it exists because only a breeding
+    pass that draws both at once can keep that alignment true.
+</p>
+
+<p>Per gene, in <code>codeOrder()</code>:</p>
+
+<ol>
+    <li>One <code>nextBoolean()</code> picks which of <em>this</em> parent&rsquo;s two
+        copies is passed on, one more picks the other parent&rsquo;s &mdash;
+        <strong>the same 2 draws</strong> <code>Genotype.breedWith</code> makes, so
+        the allele half is bit-for-bit unchanged.</li>
+    <li>Each chosen allele arrives carrying that parent copy&rsquo;s priority and
+        seed <strong>verbatim</strong> &mdash; no re-roll, no jitter. A foal that
+        inherits its dam&rsquo;s <code>A</code> inherits her bay point extent
+        exactly.</li>
+    <li>The two copies are re-aligned to the canonical dominant-first pair order; the
+        epigenetics follow their own allele across the swap.</li>
+    <li><strong>Priority tie-break</strong>: if both copies arrived holding the same
+        priority, one extra <code>nextBoolean()</code> bumps the second copy a single
+        step up or down (<code>AlleleEpigenetics.deconflict</code>), clamped inside
+        <code>[1, MAX]</code>. A horse never carries the same priority twice at one
+        gene.</li>
+</ol>
+
+<div class="note rule">
+    <span class="label">Draw count</span>
+    <p>
+        <strong>2 <code>nextBoolean()</code> per gene, plus 1 per gene that ties.</strong>
+        This is asserted in tests; a change to it changes every foal.
+    </p>
+</div>
+
+<h4>What priority is for</h4>
+
+<p>
+    On a <strong>heterozygote</strong> the expressed copy is obvious &mdash; the
+    dominant one &mdash; and its epigenetics are what the coat reads. On a
+    <strong>homozygote</strong> both copies express, so the tie goes to the
+    <strong>higher</strong> priority. That is its only job today; it is a full-range
+    int because more uses are planned. It selects a <em>seed</em>, never an
+    <em>order</em>.
+</p>
+
+<h4>Founders</h4>
+
+<p>
+    A founder &mdash; wild spawn, <code>/summon</code>, a gallery horse &mdash; gets a
+    fresh <code>Epigenome.random</code>: an independent priority and seed on every
+    copy, deconflicted the same way. That is the <strong>only</strong> place
+    epigenetics are ever invented. <code>CoatGenerator.generate</code> is the founder
+    path, and a foal must not go through it.
+</p>
+
+<h3><code>HorseStats.rollFoalStat(double parentA, double parentB, Rng)</code></h3>
+
+<p>
+    <strong>Not genetic yet</strong> &mdash; an explicit placeholder until stats fold
+    into the Mendelian model. One <code>nextFloat()</code>, uniform in the band:
+</p>
+
+<div class="codebox">
+<pre><code class="language-none">[ 0.75 * min(parentA, parentB) , 1.5 * max(parentA, parentB) ]</code></pre>
+</div>
+
+<p>
+    So a foal can meaningfully out- or under-do both parents. Applied independently to
+    speed and health (two draws per foal). There is <strong>no upper cap</strong>
+    &mdash; a determined breeder can push a line to absurd numbers.
+    <code>HorseRecord</code> then rounds up: health to a whole number, speed to 3
+    decimals.
+</p>
+
+<h3><code>GeneticCodeCombiner</code></h3>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Overload</th><th>What it carries</th></tr></thead>
+<tbody>
+<tr><td><code>combine(String motherCode, String fatherCode, Rng)</code></td><td>Alleles <strong>only</strong>. The string-level seam, so a caller never touches <code>Genotype</code>. A foal bred through this would have its epigenetics re-rolled from scratch.</td></tr>
+<tr><td><code>combine(Genome mother, Genome father, Rng)</code></td><td>Alleles <em>and</em> the priority / seed on each copy the foal received. <strong>This is what the game calls.</strong></td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    Both throw <code>IllegalArgumentException</code> on a malformed code and are
+    symmetric &mdash; argument order only decides which parent id is recorded as
+    mother vs father.
+</p>
+
+<h3><code>Sex</code></h3>
+
+<p>
+    <code>MALE</code> / <code>FEMALE</code>. Vanilla horses have no sex; this is
+    mod-assigned, used to decide dam and sire, to gate breeding (one of each), and for
+    display. <code>Sex.label(boolean adult)</code> gives the horse term:
+    <strong>stallion / mare</strong> for adults, <strong>colt / filly</strong> for
+    foals.
+</p>
+
+<h3><code>HorseRecord</code></h3>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Field</th><th>Type</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td><code>id</code></td><td><code>UUID</code></td><td>The entity&rsquo;s own <code>getUUID()</code>.</td></tr>
+<tr><td><code>sex</code></td><td><code>Sex</code></td><td></td></tr>
+<tr><td><code>firstName</code> / <code>lastName</code></td><td><code>String</code></td><td>The two halves of the registered name. Either may be blank &mdash; <strong>not both</strong>.</td></tr>
+<tr><td><code>barnName</code></td><td><code>Optional&lt;String&gt;</code></td><td>Free-form display override, clamped to 16 chars, owner-editable.</td></tr>
+<tr><td><code>geneticCode</code></td><td><code>String</code></td><td>A <code>Genotype</code> code.</td></tr>
+<tr><td><code>motherId</code> / <code>fatherId</code></td><td><code>Optional&lt;UUID&gt;</code></td><td>Dam / sire, if bred.</td></tr>
+<tr><td><code>tamedBy</code> / <code>bredBy</code></td><td><code>Optional&lt;String&gt;</code></td><td>Usernames.</td></tr>
+<tr><td><code>generation</code></td><td><code>int</code></td><td><strong>0</strong> for a foundation horse; a child of two foundations is <strong>1</strong>; otherwise <code>1 + max(dam, sire)</code>, fixed at birth. <em>Not</em> the family-tree column depth.</td></tr>
+<tr><td><code>speed</code></td><td><code>double</code></td><td>Movement-speed attribute value, rounded up to 3 decimals by the constructor, uncapped. <strong><code>0.0</code> = not recorded yet.</strong></td></tr>
+<tr><td><code>health</code></td><td><code>double</code></td><td>Max-health attribute value, rounded up to a whole number. Same <code>0.0</code> convention.</td></tr>
+<tr><td><code>parentStats</code></td><td><code>Optional&lt;ParentStats&gt;</code></td><td>Low/high of the two parents&rsquo; speed and health at birth, so the UI can colour this horse&rsquo;s numbers. Absent for founders.</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="codebox">
+<pre><code class="language-java">String displayName();   // barnName if present, else "firstName lastName", stripped
+String attribution();   // bredBy if present, else tamedBy - "who is this horse's human"
+boolean hasName();      // any name part non-blank, or a barn name set
+boolean hasStats();     // speed &gt; 0 &amp;&amp; health &gt; 0
+
+static double ceilSpeed(double v);    // 3 decimals, up
+static double ceilHealth(double v);   // whole number, up
+
+// factories
+static HorseRecord founder(id, sex, first, last, code);           // generation 0
+static HorseRecord bred(id, sex, first, last, code, motherId, fatherId, generation);
+
+// copy helpers
+withNames, withBarnName, withTamedBy, withBredBy, withStats, withParentStats</code></pre>
+</div>
+
+<p>
+    <strong>Rounding lives in the constructor.</strong> Every stored value is rounded
+    up; callers do not need to round. The constructor also null-checks required
+    fields, normalizes <code>null</code> <code>Optional</code>s, strips and clamps the
+    barn name, and clamps <code>generation</code> to <code>&ge; 0</code>.
+</p>
+
+<p>
+    <code>ParentStats.rankSpeed(v)</code> / <code>rankHealth(v)</code> return
+    <code>1</code> above both parents, <code>0</code> between, <code>-1</code> below
+    both.
+</p>
+
+<h3><code>HorseDatabase</code> and <code>InMemoryHorseDatabase</code></h3>
+
+<div class="codebox">
+<pre><code class="language-java">void    record(HorseRecord r);
+Optional&lt;HorseRecord&gt; lookup(UUID id);
+boolean forget(UUID id);
+List&lt;HorseRecord&gt; ancestorsOf(UUID id, int depth);
+int     offspringCount(UUID a, UUID b);</code></pre>
+</div>
+
+<h4><code>ancestorsOf(id, depth)</code></h4>
+
+<p>A breadth-first walk up the mother/father links:</p>
+
+<ul>
+    <li><strong>Nearest generation first</strong> &mdash; parents, then
+        grandparents.</li>
+    <li><code>depth</code> is how many generations: <code>1</code> = parents only.
+        <code>depth &le; 0</code> returns empty.</li>
+    <li>The horse itself is never included.</li>
+    <li><strong>Each ancestor appears at most once</strong>, even under inbreeding.</li>
+    <li>An ancestor referenced by id but <strong>absent from the database is
+        skipped</strong>, and that branch is not explored further.</li>
+</ul>
+
+<h4><code>offspringCount(a, b)</code></h4>
+
+<p>
+    Scans every stored record for one whose two parents are exactly <code>a</code> and
+    <code>b</code>, order-independent. It feeds the foal-name schedule, so it must
+    count <em>prior</em> foals only &mdash; which holds because a foal&rsquo;s own
+    record is not stored until after its name is chosen.
+</p>
+
+<h4><code>forget(id)</code></h4>
+
+<p>
+    For a horse <strong>deleted outright rather than dying</strong>: the horse
+    dimension clears its gallery on exit, and without this every visit would leave
+    hundreds of throwaway records in the save forever. It deliberately does
+    <em>not</em> repair records naming the forgotten horse as a parent &mdash;
+    <code>ancestorsOf</code> already skips ancestors it cannot find, so a foal bred in
+    the dimension and brought home keeps working with a missing parent node.
+</p>
+
+<hr>
+
+<h2>Layer 2 &mdash; integration</h2>
+
+<h3><code>data/HorseRecordCodecs</code></h3>
+
+<p>
+    <code>MapCodec</code> / <code>Codec</code> for <code>HorseRecord</code>, kept
+    <strong>out of</strong> the layer-1 type so it stays free of DataFixerUpper. NBT
+    keys: <code>id</code>, <code>sex</code>, <code>first_name</code>,
+    <code>last_name</code>, <code>barn_name</code>, <code>genetic_code</code>,
+    <code>mother_id</code>, <code>father_id</code>, <code>tamed_by</code>,
+    <code>bred_by</code>, <code>generation</code>, <code>speed</code>,
+    <code>health</code>, <code>parent_stats</code>.
+</p>
+
+<p>
+    The record has 14 components &mdash; still under
+    <code>RecordCodecBuilder.group</code>&rsquo;s limit of 16. Also exposes
+    <code>STREAM_CODEC</code> / <code>LIST_STREAM_CODEC</code> for the sync payloads.
+</p>
+
+<h3><code>data/ModAttachments.HORSE_RECORD</code></h3>
+
+<p>
+    A NeoForge Data Attachment whose <strong>value type is the layer-1
+    <code>HorseRecord</code> itself</strong>, registered with the map codec, so it
+    persists in entity NBT with no hand-rolled save/load.
+</p>
+
+<p>
+    Its default is a <strong>sentinel</strong>:
+    <code>HorseRecord.founder(holder.getUUID(), FEMALE, "", "", "eeaa")</code> &mdash;
+    built via the <code>AttachmentType.builder(Function&lt;IAttachmentHolder, T&gt;)</code>
+    overload so the default can read the holder&rsquo;s own UUID. Its blank name is how
+    the code distinguishes &ldquo;never assigned&rdquo; from a real record.
+</p>
+
+<h3><code>data/HorseAncestryData</code></h3>
+
+<p>
+    <code>extends SavedData implements HorseDatabase</code> &mdash; a thin wrapper
+    holding an <code>InMemoryHorseDatabase</code>. What it adds:
+</p>
+
+<ul>
+    <li><strong>Dirty-tracking</strong>: <code>record(...)</code> only calls
+        <code>setDirty()</code> when the record actually changed
+        (<code>HorseRecord</code> is a value type, so an unchanged re-record compares
+        equal and is a no-op).</li>
+    <li><strong>Persistence</strong>: <code>SavedDataType</code> id
+        <code>horsegenetics:horse_ancestry</code>.</li>
+    <li><strong>Scope</strong>: <strong>server-global</strong>, not per-level &mdash;
+        <code>server.getDataStorage()</code>, so a parent stays lookup-able even when
+        unloaded, in another dimension, or dead.</li>
+</ul>
+
+<h3><code>server/HorseRecords</code> &mdash; the adapter</h3>
+
+<p>The only class that talks to both sides. No genetics, naming or lookup logic lives here.</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Method</th><th>Does</th></tr></thead>
+<tbody>
+<tr><td><code>of(horse)</code> / <code>hasRealRecord(horse)</code></td><td>Read the attachment; <code>hasName()</code>.</td></tr>
+<tr><td><code>apply(horse, record)</code></td><td>Write the attachment, set the custom name visible, record into the global DB, <strong>and</strong> send a <code>HorseRecordSyncPayload</code> to trackers.</td></tr>
+<tr><td><code>newFounder(horse, rng[, sex])</code></td><td>Founder record: random genotype, random name, sex random or forced, plus <code>.withStats(entitySpeed, entityHealth)</code>.</td></tr>
+<tr><td><code>entitySpeed / entityHealth(horse)</code></td><td><code>getAttributeValue(MOVEMENT_SPEED / MAX_HEALTH)</code>.</td></tr>
+<tr><td><code>applyStatsToEntity(horse, record, fullHeal)</code></td><td>Push the record&rsquo;s numbers onto the attribute <em>base</em> values. <code>fullHeal</code> sets current HP to the new max (newborn); otherwise it only clamps HP down (reload, so no free heal). No-op for <code>0.0</code>.</td></tr>
+<tr><td><code>backfillStatsIfMissing(horse)</code></td><td>Fill <code>0.0</code> stats from the live entity.</td></tr>
+<tr><td><code>offspringCount(contextHorse, damId, sireId)</code></td><td>From the server-global ancestry data, else <code>0</code>.</td></tr>
+<tr><td><code>rename</code> / <code>setBarnName</code> / <code>setTamedBy</code></td><td>Copy-and-apply helpers.</td></tr>
+<tr><td><code>randomSex(rng)</code> / <code>rng(horse)</code> / <code>names()</code></td><td>Small utilities.</td></tr>
+</tbody>
+</table>
+</div>
+
+<hr>
+
+<h2>Runtime flows</h2>
+
+<h3>A. Wild spawn &rarr; founder record</h3>
+
+<p>
+    <code>HorseGeneticsEventHandler.onHorseJoin</code> on
+    <code>EntityJoinLevelEvent</code> (server side, any <code>Horse</code>) calls
+    <code>ensureRecordAndCoat(horse)</code>:
+</p>
+
+<ol>
+    <li><code>rng</code> from <code>horse.getRandom()</code>.</li>
+    <li>No real record &rarr; <code>apply(horse, newFounder(...))</code>: random
+        genotype, random sex, generated name, no parents, speed and health copied from
+        the entity&rsquo;s current attributes.</li>
+    <li>Otherwise (bred or reloaded) &rarr; backfill stats, re-record into the global
+        DB (idempotent), <code>applyStatsToEntity(..., fullHeal=false)</code> so a
+        reloaded horse keeps its rolled attributes, and re-set the custom name if
+        missing.</li>
+    <li><strong>Coat</strong>: if the coat attachment is still
+        <code>UNASSIGNED</code>, <code>CoatGenerator.generate</code> rolls a founder
+        epigenome, stores <code>{genotype code, epigenome code}</code>, and sends the
+        coat sync packet.</li>
+</ol>
+
+<p>
+    Step 4 means the coat is <strong>always derived from the record&rsquo;s genetic
+    code</strong> plus the persisted epigenome &mdash; a bred foal&rsquo;s coat
+    matches the genes it actually inherited and stays the same across reloads. The
+    pixels are generated client-side; see <a href="pipeline.html">the pipeline</a>.
+</p>
+
+<p>
+    The horse-dimension pens pre-apply a founder record before adding the entity, so
+    each pen ends up with exactly one mare and one stallion;
+    <code>onHorseJoin</code> then sees a real record and only fills in the coat.
+</p>
+
+<h3>B. Real breeding &rarr; combined record</h3>
+
+<p>
+    <code>HorseBreedingHandler.onBabySpawn</code> on
+    <code>BabyEntitySpawnEvent</code> (fired <em>before</em> the foal is added to the
+    world):
+</p>
+
+<ol>
+    <li>Require both parents and the child to be <code>Horse</code>.</li>
+    <li><code>ensureParentRecord(parent)</code> for each &mdash; a parent that
+        predates the mod gets a founder record now, and its stats are backfilled from
+        its entity so the roll has real numbers.</li>
+    <li><strong>Sex gate</strong>: same-sex parents &rarr;
+        <code>event.setCanceled(true)</code>, no foal.</li>
+    <li>The <code>FEMALE</code> parent is the dam, the <code>MALE</code> the sire.</li>
+    <li><code>childGenome = GeneticCodeCombiner.combine(genomeOf(dam), genomeOf(sire), rng)</code>.
+        <code>genomeOf</code> reads the parent&rsquo;s coat attachment; a parent whose
+        attachment is missing or has drifted founds a fresh epigenome <em>now</em> and
+        keeps it, so the foal still inherits real allele copies.</li>
+    <li><code>childGeneration = 1 + max(dam, sire)</code>.</li>
+    <li><strong>Stats</strong>: <code>rollFoalStat</code> for speed and health, plus
+        <code>ParentStats.of(...)</code> so the UI can colour the foal&rsquo;s numbers
+        against its parents.</li>
+    <li><strong>Name</strong> &mdash; see the schedule below.</li>
+    <li><code>bredBy</code> = the causing player&rsquo;s username, if any.</li>
+    <li><strong>Auto-tame</strong>: if the dam is tamed, the foal is tamed to the
+        dam&rsquo;s owner, and <code>tamedBy</code> is that owner&rsquo;s
+        username.</li>
+    <li><code>apply(child, record)</code> then
+        <code>applyStatsToEntity(child, record, fullHeal=true)</code> so the foal
+        spawns with its rolled speed and max health at full HP.</li>
+    <li><strong>The foal&rsquo;s coat attachment is written here</strong>, not at join
+        time. It has to be: the inherited epigenetics can only be read while both
+        parents are in hand, and flow A&rsquo;s founder path would re-roll them. Flow
+        A then sees an assigned attachment and leaves it alone.</li>
+</ol>
+
+<h4>The foal-name schedule</h4>
+
+<p>
+    <code>HorseNames.breedNth(dam, sire, priorFoals, generator, rng)</code>, where
+    <code>priorFoals</code> counts how many foals <em>this exact pairing</em> has
+    already produced (from the server-global ancestry data, so it survives reloads).
+    The point is to stop a pairing churning out the same two names forever:
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Foal</th><th>Name</th></tr></thead>
+<tbody>
+<tr><td>1</td><td><code>dam.first + sire.last</code></td></tr>
+<tr><td>2</td><td><code>sire.first + dam.last</code> &mdash; the other combo</td></tr>
+<tr><td>3&ndash;6</td><td>One half kept from a parent (either parent, either half), the other a fresh random word</td></tr>
+<tr><td>7+</td><td>A fully random <code>generateParts</code> name</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    <code>HorseNames.breed</code> &mdash; the old 50/50 one-half-each &mdash; stays for
+    callers and tests that do not track a foal count.
+</p>
+
+<h3>C. Paper inspector</h3>
+
+<p>
+    Holding <strong>paper</strong> and right-clicking a horse dumps to chat: name,
+    id, the horse term (stallion / mare / colt / filly), generation, genetic code,
+    speed (3dp) and health (whole) &mdash; or <code>(unrolled)</code> &mdash; a
+    <strong><code>vs parents</code></strong> line (<code>above both</code> /
+    <code>between</code> / <code>below both</code>) when <code>parentStats</code> is
+    present, bred by, tamed by, sire and dam resolved to names, and
+    <code>ancestors (3 gen)</code>.
+</p>
+
+<h3>D. Name-tag rename</h3>
+
+<p>
+    A <strong>renamed</strong> name tag on a horse with a real record: the text is
+    split on the <strong>first space</strong> &mdash; before is the new first name,
+    the rest is the last name. Either may be blank but not both. The tag is consumed
+    (unless creative) and the event cancelled, so vanilla does not also name the entity
+    with the raw string.
+</p>
+
+<h3>E. Barn name</h3>
+
+<p>
+    A free-form display override, editable from the horse inventory screen (an edit box
+    plus a &ldquo;Set&rdquo; button). The server checks the player is within 8 blocks,
+    then sets it &mdash; blank clears, otherwise clamped to 16 characters. When set,
+    it is what <code>displayName()</code> returns.
+</p>
+
+<h3>F. Horse-dimension right-clicks</h3>
+
+<ul>
+    <li><strong>Stick</strong> on an untamed horse &rarr; tame it.</li>
+    <li><strong>Clock</strong> on a foal &rarr; instant adult.</li>
+</ul>
+
+<div class="note warn">
+    <span class="label">EntityInteract fires on both sides</span>
+    <p>
+        Any item used on a <em>tamed</em> horse is otherwise turned into a mount by
+        vanilla, so the event must be cancelled <strong>on the client too</strong> or
+        the client predicts a mount and rubber-bands. Do the state mutation
+        server-only; cancel on both.
+    </p>
+</div>
+
+<h3>G. Tamer tracking</h3>
+
+<p>
+    Wild-horse taming resolves inside the horse&rsquo;s own tick, after the bucking
+    logic &mdash; not during the interact packet &mdash; so it cannot be caught in the
+    interaction handler. Instead, every ~40 ticks any tamed horse whose record has no
+    <code>tamedBy</code> gets its owner&rsquo;s username recorded. Once set, the check
+    short-circuits.
+</p>
+
+<h3>H. Client sync, inventory panel, family tree</h3>
+
+<p>The record attachment is server-only, so it is pushed to clients:</p>
+
+<ul>
+    <li><code>HorseRecordSyncPayload</code> (S&rarr;C) on
+        <code>PlayerEvent.StartTracking</code> and from every
+        <code>HorseRecords.apply</code>. The client stores it in
+        <code>ClientHorseRecordCache</code>, keyed by both entity id and record
+        UUID.</li>
+    <li><code>HorseScreenHooks</code> hangs a metadata panel, an editable barn-name
+        field and a <strong>Family Tree</strong> button off the vanilla horse
+        inventory screen. It is a grey vanilla-style panel to the left, behind a
+        collapsible tab &mdash; <em>additive</em>, so a second horse-inventory mod is
+        not clobbered. Speed and health are tinted green / amber / red by
+        <code>parentStats.rank*</code>.</li>
+    <li><code>FamilyTreeScreen</code> is a pedigree chart: the subject is the
+        right-hand column, each column left is one chart-step older, out to
+        great-grandparents. <strong>Within every pair the sire is the top box, the dam
+        the bottom.</strong> Each box shows the display name, the horse term,
+        <code>by &lt;breeder-or-tamer&gt;</code>, and a live 3D horse in the right coat
+        and pose that turns to face the cursor. Clicking a known ancestor re-roots the
+        tree. The chart shrinks to fit the window by default; a
+        <code>familyTree.scrollBar</code> config flag switches to full-size +
+        scroll.</li>
+</ul>
+
+<div class="note warn">
+    <span class="label">Ancestor coats are a stand-in</span>
+    <p>
+        The epigenome lives on the <em>entity</em>, not in the record, so the ancestry
+        database cannot reproduce a dead ancestor&rsquo;s exact coat.
+        <code>FamilyTreeScreen</code> draws ancestors from
+        <code>Epigenome.fromSeed(record UUID)</code> &mdash; stable and plausible, but
+        not necessarily the real one. Moving the epigenome onto
+        <code>HorseRecord</code> would fix it.
+    </p>
+</div>
+
+<hr>
+
+<h2>Persistence summary</h2>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Data</th><th>Where</th><th>Scope</th></tr></thead>
+<tbody>
+<tr><td>A horse&rsquo;s <code>HorseRecord</code></td><td>Entity NBT, via the <code>HORSE_RECORD</code> attachment</td><td>Save/reload, chunk unload, dimension change</td></tr>
+<tr><td>A horse&rsquo;s coat <code>{genotype code, epigenome code}</code></td><td>Entity NBT, via the <code>HORSE_COAT</code> attachment</td><td>Save/reload. The epigenome is what makes a non-deterministic coat stable across sessions, and what a foal inherits from</td></tr>
+<tr><td>The ancestry table</td><td><code>HorseAncestryData</code> SavedData</td><td><strong>Per world</strong> &mdash; <code>&lt;save&gt;/data/horsegenetics/horse_ancestry.dat</code></td></tr>
+<tr><td>Generated coat textures</td><td>In-memory <code>DynamicTexture</code>s in the client <code>TextureManager</code></td><td>Session only; released on <code>LoggingOut</code></td></tr>
+</tbody>
+</table>
+</div>
+
+<h2>Known limitations</h2>
+
+<ul>
+    <li><strong>Stat inheritance is random, not genetic.</strong>
+        <code>rollFoalStat</code> is a placeholder; the plan is to fold speed and
+        health into the Mendelian model. Jump strength is not tracked at all.</li>
+    <li><strong>A foal&rsquo;s epigenetics are copied exactly, with no
+        variation</strong>, so a closed line converges on one look. Deliberate for
+        now.</li>
+    <li>No inbreeding prevention, no generational effects, no sex-linked loci yet
+        &mdash; genes combine independently.
+        <a href="roadmap.html#sex-linked">Sex linkage is designed</a> and is the one
+        planned exception.</li>
+    <li>Name-generation output is rough and slated for a rework. The rule &mdash;
+        <code>&lt;alpha&gt; &lt;space&gt; &lt;beta&gt;</code> &mdash; is fixed.</li>
+    <li><code>HorseRecord.geneticCode</code> and the coat attachment&rsquo;s genotype
+        code both hold the genotype string. The coat derives from the record so they
+        stay consistent; the redundancy is a likely future consolidation.</li>
+    <li><code>ancestorsOf</code> only walks records present in the database; a gap in
+        the chain ends that branch.</li>
+    <li>The family tree needs a fresh server request per re-centre; there is no local
+        caching of &ldquo;the whole tree&rdquo;.</li>
+</ul>
+
+<div class="note warn">
+    <span class="label">Epigenetic inheritance is the newest thing here</span>
+    <p>
+        Built 2026-09-01, <strong>not seen in-game at all</strong>. Unit tests cover
+        the mechanism &mdash; an inherited allele keeps its copy&rsquo;s seed, the
+        epigenetics follow their allele when the pair is reordered, a tie gets
+        deconflicted. What is unproven is the live path: that a foal really looks like
+        the parent it took the allele from. The check is on
+        <a href="verification.html">To be verified</a>.
+    </p>
+</div>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="genetics-model.html">The genetics model</a>
+        <a href="pipeline.html">Three-phase pipeline</a>
+        <a href="verification.html">To be verified</a>
+        <a href="roadmap.html#traits">Planned Mendelian stats</a>
+    </div>
+    Source: <code>common/genetics/</code>, <code>common/horse/</code>,
+    <code>common/name/</code>, <code>neoforge-26.1.2/{data,server,client,network}/</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

@@ -119,7 +119,7 @@ class GenotypeCatalogTest {
      * rather than dropping a gene, because a sign that reads wide is better than
      * a sign that lies. The cap below is a tripwire against it ballooning
      * further, not a claim that it fits. The real fix is the gallery's planned
-     * revert to random pens ({@code Docs/to be completed.md} §9), which retires
+     * revert to random pens ({@code wiki/roadmap.html} §9), which retires
      * the per-genotype sign.
      */
     @Test

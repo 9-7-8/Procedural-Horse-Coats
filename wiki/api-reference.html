@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Class Abstractions &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="nav.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow">For modders</p>
+<h1>Class abstractions</h1>
+<p class="lede">
+    The reference half of the modder docs: every type a gene author touches, what it
+    abstracts, and the signatures that matter. For the narrative version &mdash; how
+    to actually write one &mdash; see <a href="modding.html">Writing a gene</a>.
+</p>
+
+<h2>The two modules</h2>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Module</th><th>Contains</th><th>Rule</th></tr></thead>
+<tbody>
+<tr><td><code>common/</code></td><td>Pure Java: genetics, coat pipeline, skin geometry, names, the pedigree domain model.</td><td><strong>Zero Minecraft / NeoForge imports</strong> &mdash; not even DFU <code>Codec</code>s. This is the part that survives a version port unchanged.</td></tr>
+<tr><td><code>neoforge-26.1.2/</code></td><td>Renderer, attachments, payloads, screens, event handlers, the horse dimension, blocks.</td><td>Its job is to <strong>translate</strong>: build and read <code>common</code> types and shuttle them in and out of Minecraft&rsquo;s systems. The logic stays in <code>common/</code>.</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="note rule">
+    <span class="label">The hard rule</span>
+    <p>
+        If you want to import anything Minecraft-related into <code>common/</code>,
+        stop. A gene never needs to &mdash; the whole gene API is expressed in plain
+        Java, and that is what makes a future <code>forge-1.12.2/</code> module cheap.
+    </p>
+</div>
+
+<h2>Package map</h2>
+
+<div class="codebox">
+<div class="filename">common/src/main/java/com/example/horsegenetics/common/</div>
+<pre><code class="language-none">Rng.java                    the randomness seam - the only source of chance
+SeededRng.java              a deterministic Rng from one long
+
+genetics/
+  Gene.java                 THE interface a gene implements
+  Allele.java               one allele of one gene
+  AllelePair.java           the two copies at one gene (canonicalized)
+  DominancePattern.java     DOMINANT / RECESSIVE / INCOMPLETE / COMPLETE
+  Genotype.java             one AllelePair per gene; parse / toCode / breedWith
+  AlleleEpigenetics.java    (priority, seed) on ONE allele copy
+  Epigenome.java            one AlleleEpigenetics per copy, aligned to the genotype
+  Genome.java               Genotype + Epigenome; the thing a foal inherits
+  Genes.java                the registry + the three orderings
+  GenotypeCatalog.java      every visually distinct genotype
+  GeneCodeDisplay.java      shortForm / wrap - human-readable codes
+  GeneticCodeCombiner.java  the string-level and Genome-level breeding seam
+  CoatPhenotype.java        coarse CHESTNUT / BLACK / BAY / WHITE
+  genes/                    the eleven shipped Gene implementations
+
+coat/
+  CoatData.java             a Genome ready to render; textureKey()
+  CoatGenerator.java        the FOUNDER path - the only place epigenetics are invented
+  CoatTextureId.java        injective code -&gt; Identifier-legal path
+  pattern/
+    CoatTextureComposer.java  the three-phase bake
+    PigmentField.java         phase 1 accumulator (writable)
+    PigmentView.java          phase 1 accumulator (read-only) - what a gene gets
+    ColorField.java           phase 3 accumulator (writable)
+    ColorView.java            phase 3 accumulator (read-only) - what a gene gets
+    CoatBuildContext.java     the horse: genotype, epigenome, skin, adult, rng
+    GradientLut.java          the red/black gradient lookup
+    CoatRegions.java          reusable "paint / restrict this region" helpers
+    BodyNoise.java            seamless body-space noise
+    BodyStripes.java          seamless body-space stripe field
+    BayCoat.java              bay / seal generator
+    GreyCoat.java             dapple grey generator
+    CreamPearlDilution.java   the shared cream+pearl dose table
+    TestCoatPattern.java      the diagnostic gradient
+    CoatPattern.java          (x,y,z) -&gt; ARGB, for the sample baker
+    CoatSheetRasterizer.java  bake a CoatPattern to a sheet / PNG
+    CoatSampleTool.java       the bakeCoatSamples gradle task
+  skin/
+    HorseSkinGeometry.java    body space &lt;-&gt; texel, for ADULT and BABY
+
+horse/    Sex, HorseRecord, ParentStats, HorseStats, HorseDatabase, InMemoryHorseDatabase
+name/     HorseNameGenerator, HorseNames</code></pre>
+</div>
+
+<h2>Core abstractions</h2>
+
+<h3><code>Rng</code> &mdash; the randomness seam</h3>
+
+<div class="codebox">
+<pre><code class="language-java">public interface Rng {
+    float   nextFloat();        // [0.0, 1.0)
+    boolean nextBoolean();
+    int     nextInt(int bound); // [0, bound)
+    long    nextLong();         // full 64-bit range - epigenetic seeds
+}</code></pre>
+</div>
+
+<p>
+    <code>common/</code> depends on this instead of <code>java.util.Random</code> or
+    Minecraft&rsquo;s <code>RandomSource</code>, so the version adapter can plug
+    either in. Implementations: <code>NeoRng</code> (wraps
+    <code>RandomSource</code>), <code>SeededRng</code> (a <code>long</code> seed;
+    what a coat rebuild uses), and <code>FakeRng</code> in tests.
+</p>
+
+<p>
+    <code>SeededRng</code> also has a namespaced constructor
+    <code>SeededRng(long baseSeed, String namespace)</code>, which is how
+    <code>epigeneticsFor</code> derives an independent stream per gene key from one
+    copy&rsquo;s seed.
+</p>
+
+<h3><code>Gene</code></h3>
+
+<p>
+    The full interface is listed on <a href="modding.html">Writing a gene</a>. In
+    summary:
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Member</th><th>Abstracts</th></tr></thead>
+<tbody>
+<tr><td><code>key()</code></td><td>Identity: <code>&lt;modauthor&gt;.&lt;gene&gt;</code>. Also the namespace for the gene&rsquo;s epigenetic RNG stream.</td></tr>
+<tr><td><code>alleles()</code></td><td>Everything this locus can carry, <strong>most dominant first</strong>.</td></tr>
+<tr><td><code>wildType()</code></td><td>The &ldquo;no visible effect&rdquo; allele a wild horse most often carries.</td></tr>
+<tr><td><code>dominance()</code></td><td>Declared metadata &mdash; what other systems should expect, without special-casing your key.</td></tr>
+<tr><td><code>randomPair(rng)</code></td><td>One wild-population draw. Each gene documents how many <code>Rng</code> values it consumes and in what order.</td></tr>
+<tr><td><code>isNatural()</code></td><td>Phase declaration. <code>true</code> (default) = phase 1; <code>false</code> = phase 3.</td></tr>
+<tr><td><code>restrict(...)</code></td><td>Phase-1 contribution. Returns a <code>PigmentField</code> or <code>null</code>.</td></tr>
+<tr><td><code>tint(...)</code></td><td>Phase-3 contribution. Returns a <code>ColorField</code> delta or <code>null</code>.</td></tr>
+<tr><td><code>isVisible(pair, genotype)</code></td><td>Does this pair change the coat <em>in the context of the whole genotype</em>. Gates the pass.</td></tr>
+<tr><td><code>isDeterministic(pair, genotype)</code></td><td>Is the contribution byte-identical on every horse with this genotype. <strong>Cache correctness depends on this.</strong></td></tr>
+<tr><td><code>precedence(allele)</code></td><td>Lower = more dominant. Canonicalizes an <code>AllelePair</code>. Defaults to the <code>alleles()</code> index.</td></tr>
+<tr><td><code>fromToken(token)</code></td><td>Code-string token &rarr; allele. Defaults to a scan of <code>alleles()</code>.</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3><code>Allele</code> and <code>AllelePair</code></h3>
+
+<div class="codebox">
+<pre><code class="language-java">public Allele(String geneKey, String token, String label,
+              boolean visible, boolean deterministic);
+
+String key();          // "&lt;geneKey&gt;.&lt;token&gt;" - the primary key
+String geneKey();
+Gene   gene();         // resolves through Genes
+String token();        // the text in a code string
+String label();        // human-readable
+boolean visible();     // population-level HINT - Gene.isVisible is authoritative
+boolean deterministic();</code></pre>
+</div>
+
+<div class="codebox">
+<pre><code class="language-java">public record AllelePair(Allele first, Allele second) {
+    // ctor throws if the two alleles belong to different genes,
+    // and swaps them so `first` is the more dominant (per Gene.precedence)
+
+    String  geneKey();
+    Gene    gene();
+    boolean has(Allele a);
+    boolean homozygous();
+    Allele  dominant();          // == first(), after canonicalization
+    boolean anyVisible();
+    boolean allDeterministic();
+}</code></pre>
+</div>
+
+<p>
+    Canonicalization is why a pair equals its reverse and why the genotype code is
+    stable: <code>E/e</code> and <code>e/E</code> are the same object and print the
+    same way.
+</p>
+
+<h3><code>Genotype</code></h3>
+
+<div class="codebox">
+<pre><code class="language-java">static Genotype of(List&lt;AllelePair&gt; pairs);
+static Genotype of(AllelePair... pairs);
+static Genotype wildType();
+static Genotype parse(String code);        // exactly one segment per registered gene
+static Genotype random(Rng rng);           // each gene rolls its own pair
+String          toCode();
+
+Genotype   breedWith(Genotype other, Rng rng);   // 2 nextBoolean() per gene
+AllelePair pair(Gene gene);
+AllelePair pair(String geneKey);
+Collection&lt;AllelePair&gt; pairs();
+boolean    has(Allele allele);
+
+boolean isDeterministic();
+boolean hasVisibleNonDeterministic();      // -&gt; bake a texture per horse
+
+// convenience predicates the coat code reads
+boolean isWhite();  boolean hasBlackPigment();  boolean isAgouti();
+boolean isChampagne();  boolean isSplash();  boolean isGrey();  boolean hasTest();
+
+CoatPhenotype phenotype();                 // coarse; family-tree fallback only</code></pre>
+</div>
+
+<h3><code>AlleleEpigenetics</code>, <code>Epigenome</code>, <code>Genome</code></h3>
+
+<div class="codebox">
+<pre><code class="language-java">public record AlleleEpigenetics(int priority, long epigeneticSeed) {
+    static final int MIN_PRIORITY = 1, MAX_PRIORITY = Integer.MAX_VALUE;
+
+    static AlleleEpigenetics random(Rng rng);            // 1 int + 1 long
+    AlleleEpigenetics bumped(boolean up);                // same seed, priority +/-1
+    static AlleleEpigenetics deconflict(AlleleEpigenetics first,
+                                        AlleleEpigenetics second, Rng rng);
+}</code></pre>
+</div>
+
+<div class="codebox">
+<pre><code class="language-java">public final class Epigenome {
+    public record Copies(AlleleEpigenetics first, AlleleEpigenetics second) {
+        Copies swapped();
+    }
+
+    static Epigenome random(Rng rng);            // FOUNDERS ONLY
+    static Epigenome fromSeed(long seed);        // replay from one long (stand-in)
+    static Epigenome of(Map&lt;String, Copies&gt; byGene);
+    static Epigenome parse(String code);
+    String toCode();                             // "&lt;prio&gt;:&lt;seed hex&gt;/&lt;prio&gt;:&lt;hex&gt;-..."
+
+    Copies            copies(Gene gene);
+    AlleleEpigenetics expressed(Gene gene, Genotype genotype);
+    long              expressedSeed(Gene gene, Genotype genotype);
+    long              visibleFingerprint(Genotype genotype);   // for the texture key
+}</code></pre>
+</div>
+
+<div class="codebox">
+<pre><code class="language-java">public record Genome(Genotype genotype, Epigenome epigenome) {
+    static Genome random(Rng rng);
+    static Genome of(Genotype genotype, Rng rng);        // founder epigenetics
+    static Genome parse(String genotypeCode, String epigenomeCode);
+
+    Genome breedWith(Genome other, Rng rng);   // alleles AND their epigenetics
+    String genotypeCode();
+    String epigenomeCode();
+    long   expressedSeed(Gene gene);
+}</code></pre>
+</div>
+
+<p>
+    <code>Genome</code> exists because only a breeding pass that draws both halves at
+    once can keep the epigenome aligned slot-for-slot with the genotype after
+    <code>AllelePair</code> re-sorts a pair.
+</p>
+
+<h3><code>Genes</code> &mdash; the registry</h3>
+
+<div class="codebox">
+<pre><code class="language-java">public static final String NS = "horsegenetics";
+
+static List&lt;Gene&gt; codeOrder();      // segment order in a genotype code string
+static List&lt;Gene&gt; naturalOrder();   // phase-1 effect order
+static List&lt;Gene&gt; magicalOrder();   // phase-3 effect order
+static List&lt;Gene&gt; all();
+
+static Gene   byKey(String geneKey);      // throws if unregistered
+static Allele allele(String alleleKey);   // "&lt;gene&gt;.&lt;token&gt;"</code></pre>
+</div>
+
+<p>
+    The three orderings are <strong>deliberately independent</strong>. Today all
+    three are hand-written <code>List.of(...)</code>; the
+    <a href="roadmap.html#priority">plan</a> is to derive them by sorting on a
+    per-gene <code>int priority()</code>, so registration order can never matter.
+</p>
+
+<h2>Coat-pipeline abstractions</h2>
+
+<h3><code>CoatBuildContext</code> &mdash; the horse, immutable</h3>
+
+<div class="codebox">
+<pre><code class="language-java">public CoatBuildContext(Genotype genotype, Epigenome epigenome, Skin skin, boolean adult);
+
+Genotype  genotype();
+Epigenome epigenome();
+Skin      skin();          // ADULT or BABY geometry
+boolean   isAdult();       // grey only greys adults
+int       size();          // sheet edge, 128
+
+/** This horse's randomness for one gene - a SeededRng on the EXPRESSING copy's seed. */
+Rng epigeneticsFor(String geneKey);</code></pre>
+</div>
+
+<p>
+    It carries <strong>no scratch space</strong>. The pigment and colour fields are
+    the composer&rsquo;s, handed to a gene as read-only views on the call.
+</p>
+
+<h3><code>PigmentView</code> / <code>PigmentField</code></h3>
+
+<div class="codebox">
+<pre><code class="language-java">public interface PigmentView {
+    int   size();
+    float red(int px, int py);      // surviving pheomelanin, [0,1]
+    float black(int px, int py);    // surviving eumelanin,   [0,1]
+    PigmentField mutableCopy();     // your private working field
+}
+
+public final class PigmentField implements PigmentView {
+    void setRed / setBlack(int px, int py, float value);
+    void restrictRed / restrictBlack(int px, int py, float amount);  // *= (1 - amount)
+    void dilute(int px, int py, float keepRed, float keepBlack, float blackTint);
+    void forEach(PixelOp op);
+}</code></pre>
+</div>
+
+<h3><code>ColorView</code> / <code>ColorField</code></h3>
+
+<div class="codebox">
+<pre><code class="language-java">public interface ColorView {
+    int size();
+    int red / green / blue(int px, int py);   // SIGNED, UNCAPPED accumulators
+    int opacity(int px, int py);
+    boolean isAbsolute(int px, int py);       // meaningful on a delta only
+    int argb(int px, int py);                 // the capped pixel
+    default int visible(int px, int py, int channel);  // what a VIEWER would see
+    ColorField mutableCopy();
+}
+
+public final class ColorField implements ColorView {
+    static ColorField deltaLike(ColorView like);      // an all-zero delta
+
+    void add(int px, int py, int dr, int dg, int db); // saturating, order-independent
+    void addOpacity(int px, int py, int da);
+    void set(int px, int py, int a, int r, int g, int b);  // FLAT PAINT - replaces
+    void setArgb(int px, int py, int argb);
+    void apply(ColorView delta);                      // fold one gene's delta in
+    int  argb(int px, int py);                        // the only place anything caps
+}</code></pre>
+</div>
+
+<div class="note">
+    <span class="label">visible() vs argb()</span>
+    <p>
+        They are not the same and the difference matters to any gene painting over
+        something. A texel the natural phase left <strong>transparent</strong> reads
+        as <strong>white</strong> from <code>visible()</code> &mdash; because that is
+        what a viewer sees, the bald template &mdash; not as the black
+        <code>argb()</code> reports. A texel that resolved to pure black reads as 20%
+        grey, for the same reason.
+    </p>
+</div>
+
+<h3><code>GradientLut</code></h3>
+
+<div class="codebox">
+<pre><code class="language-java">public GradientLut(int[] argb, int width, int height);
+int width();  int height();
+
+/** x = (1-redLevel)*(w-1), y = blackLevel*(h-1) */
+int sample(float redLevel, float blackLevel);</code></pre>
+</div>
+
+<h3><code>HorseSkinGeometry</code></h3>
+
+<p>Covered in full on <a href="body-space.html">Body space &amp; regions</a>. The surface:</p>
+
+<div class="codebox">
+<pre><code class="language-java">enum Skin { ADULT, BABY }
+enum Axis { X, Y, Z }
+enum Face { NOSE, TAIL, TOP, BOTTOM, RIGHT, LEFT }   // normal(), spanA(), spanB()
+enum Part { BODY, NECK, HEAD, MUZZLE, MANE, TAIL,
+            LEFT_EAR, RIGHT_EAR, LEFT_/RIGHT_ FRONT_/HIND_ LEG }   // mirror()
+
+record Bounds(double xMin, xMax, yMin, yMax, zMin, zMax) { min/max/span(Axis) }
+record BodyPoint(double x, double y, double z)           { along(Axis) }
+record Texel(double u, double v, int x, int y, boolean clamped)
+record Sample(Part part, Face face, BodyPoint point)
+
+interface TexelVisitor { void visit(int px, int py, Part part, Face face, BodyPoint point); }
+
+static final int TEXELS_PER_UNIT = 2, SHEET_SIZE = 128;
+
+static boolean  hasPart(Skin, Part);
+static Bounds   bounds(Skin, Part);       static Bounds bodyBounds(Skin);
+static void     forEachTexel(Skin[, Part], TexelVisitor);
+static Optional&lt;Sample&gt; sample(Skin, int px, int py);
+static Texel    project(Skin, Part, Face, BodyPoint);</code></pre>
+</div>
+
+<h3><code>CoatData</code> and <code>CoatGenerator</code></h3>
+
+<div class="codebox">
+<pre><code class="language-java">public final class CoatData {
+    static final CoatData DEFAULT;
+    CoatData(Genome genome);
+    CoatData(Genotype genotype, Epigenome epigenome);
+
+    Genome genome();  Genotype genotype();  Epigenome epigenome();
+    CoatPhenotype phenotype();
+    boolean isDeterministic();
+
+    /** the genotype code, + "@&lt;fingerprint hex&gt;" only when non-deterministic */
+    String textureKey();
+}
+
+public final class CoatGenerator {
+    /** THE FOUNDER PATH - rolls a fresh Epigenome. A foal must never come here. */
+    static CoatData generate(Genotype genotype, Rng rng);
+    static CoatData of(Genome genome);
+}</code></pre>
+</div>
+
+<h3><code>CoatPattern</code> and the sample baker</h3>
+
+<div class="codebox">
+<pre><code class="language-java">/** A pure (x,y,z) -&gt; ARGB function in body space. Used by the offline baker. */
+public interface CoatPattern {
+    int argb(double x, double y, double z);
+}
+
+int[] CoatSheetRasterizer.bake(CoatPattern pattern);
+void  CoatSheetRasterizer.writePng(int[] argb, Path out) throws IOException;</code></pre>
+</div>
+
+<h2>Domain abstractions (non-coat)</h2>
+
+<div class="codebox">
+<pre><code class="language-java">enum Sex { MALE, FEMALE;  String label(boolean adult); }   // stallion/mare, colt/filly
+
+record ParentStats(double speedMin, speedMax, healthMin, healthMax) {
+    static ParentStats of(double damSpeed, sireSpeed, damHealth, sireHealth);
+    int rankSpeed(double child);    // 1 above both, 0 between, -1 below both
+    int rankHealth(double child);
+}
+
+/** Placeholder, NOT genetic yet. One nextFloat in [0.75*min, 1.5*max]. */
+double HorseStats.rollFoalStat(double parentA, double parentB, Rng rng);
+
+interface HorseDatabase {
+    void    record(HorseRecord r);
+    Optional&lt;HorseRecord&gt; lookup(UUID id);
+    boolean forget(UUID id);
+    List&lt;HorseRecord&gt; ancestorsOf(UUID id, int depth);
+    int     offspringCount(UUID a, UUID b);
+}
+
+/** The string-level and Genome-level breeding seams. */
+String GeneticCodeCombiner.combine(String motherCode, String fatherCode, Rng rng);
+Genome GeneticCodeCombiner.combine(Genome mother, Genome father, Rng rng);   // use this</code></pre>
+</div>
+
+<p>
+    Full detail on <a href="breeding.html">Breeding &amp; pedigree</a>, which is the
+    single source of truth for records, pedigree and stat inheritance.
+</p>
+
+<h2>Display helpers</h2>
+
+<div class="codebox">
+<pre><code class="language-java">/** "eeaa nSpl" rather than the full slash-and-dash code - drops wild-type slots. */
+String GeneCodeDisplay.shortForm(String code);
+String GeneCodeDisplay.shortForm(Genotype genotype);
+
+/** Greedy wrap for a sign / panel. Overflows the LAST line rather than dropping a gene. */
+List&lt;String&gt; GeneCodeDisplay.wrap(Genotype genotype, int lines, int maxChars);</code></pre>
+</div>
+
+<h2>Build &amp; test commands</h2>
+
+<div class="table-wrap">
+<table class="facts">
+<tbody>
+<tr><th><code>./gradlew :common:test</code></th><td>Pure-Java logic, no Minecraft. The fastest loop &mdash; run this first when iterating on genetics or coats.</td></tr>
+<tr><th><code>./gradlew :common:bakeCoatSamples</code></th><td>Writes <code>build/coat-samples/*.png</code> and <code>*_foal.png</code>. No game launch.</td></tr>
+<tr><th><code>./gradlew :neoforge-26.1.2:build</code></th><td>Full compile + jar. Slow on the first run (downloads the SDK).</td></tr>
+<tr><th><code>./gradlew :neoforge-26.1.2:runClient</code></th><td>Launch the game with the mod.</td></tr>
+<tr><th><code>./gradlew :neoforge-26.1.2:runServer</code></th><td>Headless dedicated server. Does not auto-stop &mdash; kill it once it prints <code>Done (…)! For help</code>.</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>Requires JDK 25; <code>foojay-resolver-convention</code> auto-provisions it.</p>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="modding.html">Writing a gene</a>
+        <a href="pipeline.html">Three-phase pipeline</a>
+        <a href="body-space.html">Body space &amp; regions</a>
+        <a href="genetics-model.html">The genetics model</a>
+    </div>
+    Signatures are abridged for readability &mdash; the Javadoc in the source is the
+    authority, and it is unusually complete.
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

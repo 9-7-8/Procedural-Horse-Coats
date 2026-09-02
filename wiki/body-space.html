@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Body Space &amp; Regions &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="nav.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow">The coat engine</p>
+<h1>Body space &amp; regions</h1>
+<p class="lede">
+    Genes do not think in texels. They think in <strong>horse body-space</strong> and
+    let <code>HorseSkinGeometry</code> translate. That is what lets a coat rule be a
+    smooth function of position and still come out seamless across every body part
+    &mdash; no visible join where the neck meets the head, no mismatch where a
+    leg&rsquo;s front face meets its side.
+</p>
+
+<h2>The coordinate frame</h2>
+
+<p>
+    Right-handed, in <strong>model units</strong>: 1 unit = 1/16 block =
+    <code>TEXELS_PER_UNIT</code> = 2 texels on the
+    <code>SHEET_SIZE</code> = 128px sheet.
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Axis</th><th>Zero point</th><th>+ direction</th><th>A plain function of this axis means…</th></tr></thead>
+<tbody>
+<tr><td><strong>X</strong></td><td>rear edge of the tail</td><td>toward the nose</td><td>a front-to-back gradient (tail &rarr; nose)</td></tr>
+<tr><td><strong>Y</strong></td><td>underside of the hooves</td><td>straight up</td><td>ventral &rarr; dorsal (belly &rarr; topline)</td></tr>
+<tr><td><strong>Z</strong></td><td>the centre plane</td><td>the horse&rsquo;s <strong>right</strong></td><td>left &harr; right; <code>z = 0</code> is the spine / centreline</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    There is <strong>one absolute scale per mesh</strong>
+    (<code>Skin.ADULT</code>, <code>Skin.BABY</code>), with the origins read off the
+    mesh itself &mdash; X = 0 is the backmost tail texel, Y = 0 the hoof undersides.
+    So two different parts occupying the same body-space region sample a coat
+    function at the <em>same</em> value, which is exactly why an X-function gradient
+    has no seams.
+</p>
+
+<div class="note good">
+    <span class="label">Verified in-game</span>
+    <p>
+        The adult mesh was confirmed smooth and seamless in a play session on
+        2026-08-31. The <strong>foal</strong> mesh is an approximation &mdash; see
+        the caveat below.
+    </p>
+</div>
+
+<h2>Parts and faces</h2>
+
+<p>
+    Every <code>Part</code> is an axis-aligned box. Each box has six
+    <code>Face</code>s, each looking down one axis and spanned by the other two:
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Faces</th><th>Normal</th><th>Spanned by</th><th>What they are</th></tr></thead>
+<tbody>
+<tr><td><code>NOSE</code> / <code>TAIL</code></td><td>X</td><td>(Z, Y)</td><td>the front and back caps</td></tr>
+<tr><td><code>TOP</code> / <code>BOTTOM</code></td><td>Y</td><td>(X, Z)</td><td>the <strong>dorsal</strong> and <strong>ventral</strong> surfaces</td></tr>
+<tr><td><code>RIGHT</code> / <code>LEFT</code></td><td>Z</td><td>(X, Y)</td><td>the two flanks</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>So, concretely:</p>
+
+<ul>
+    <li>&ldquo;paint the topline black&rdquo; = the <code>TOP</code> faces;</li>
+    <li>&ldquo;black up the belly&rdquo; = <code>BOTTOM</code> faces;</li>
+    <li>&ldquo;a centreline blaze&rdquo; = texels with small <code>|z|</code> on the
+        head&rsquo;s <code>TOP</code>/<code>RIGHT</code>/<code>LEFT</code> faces.</li>
+</ul>
+
+<h3>The part list</h3>
+
+<div class="codebox">
+<div class="filename">common/coat/skin/HorseSkinGeometry.java</div>
+<pre><code class="language-java">public enum Part {
+    BODY, NECK, HEAD, MUZZLE, MANE, TAIL,
+    LEFT_EAR, RIGHT_EAR,
+    LEFT_FRONT_LEG, RIGHT_FRONT_LEG, LEFT_HIND_LEG, RIGHT_HIND_LEG;
+
+    public Part mirror();   // LEFT_EAR &lt;-&gt; RIGHT_EAR, etc.
+}</code></pre>
+</div>
+
+<div class="note warn">
+    <span class="label">The foal mesh has no MANE and no MUZZLE</span>
+    <p>
+        Always guard with <code>HorseSkinGeometry.hasPart(skin, part)</code>, or use a
+        <code>CoatRegions</code> helper &mdash; those skip a missing part silently.
+        This is why <a href="gene-pink-hair.html">pink hair</a> gives a foal a pink
+        <em>tail only</em>: the mane arrives with adulthood.
+    </p>
+    <p>
+        Rotated parts use their <strong>rest-pose AABB</strong>, and the foal&rsquo;s
+        neck / head / ear pivots are pre-resolved through the tilted neck &mdash; so
+        face projection there is approximate, and markings on a foal&rsquo;s face or
+        neck can land loosely.
+    </p>
+</div>
+
+<h2>The API</h2>
+
+<div class="table-wrap">
+<table class="facts">
+<tbody>
+<tr><th><code>forEachTexel(skin, visitor)</code></th><td>Walks every mapped texel, handing back <code>(px, py, Part, Face, BodyPoint)</code>. The workhorse.</td></tr>
+<tr><th><code>forEachTexel(skin, part, visitor)</code></th><td>The same, restricted to one part.</td></tr>
+<tr><th><code>bounds(skin, part)</code></th><td>The part&rsquo;s <code>Bounds</code> &mdash; <code>min/max/span</code> per axis.</td></tr>
+<tr><th><code>bodyBounds(skin)</code></th><td>The whole horse&rsquo;s extents; what a pattern normalises against.</td></tr>
+<tr><th><code>hasPart(skin, part)</code></th><td>Does this mesh have that box at all.</td></tr>
+<tr><th><code>sample(skin, px, py)</code></th><td>Texel &rarr; <code>Optional&lt;Sample(part, face, point)&gt;</code>.</td></tr>
+<tr><th><code>project(skin, part, face, point)</code></th><td>Body point &rarr; <code>Texel(u, v, x, y, clamped)</code>.</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    The static no-<code>Skin</code> overloads target <code>Skin.ADULT</code>; the
+    <code>Skin</code>-first overloads pick the mesh. It is pure data and arithmetic
+    &mdash; keep the geometry tables in sync with <code>HdHorseModel</code> and
+    <code>HdBabyHorseModel</code>.
+</p>
+
+<div class="codebox">
+<div class="filename">the shape of every pattern gene</div>
+<pre><code class="language-java">HorseSkinGeometry.forEachTexel(ctx.skin(), (px, py, part, face, point) -&gt; {
+    // point.x() / point.y() / point.z() are body-space model units
+    double t = (point.y() - hooves) / drop;
+    field.restrictBlack(px, py, (float) (1.0 - t));
+});</code></pre>
+</div>
+
+<h2>CoatRegions &mdash; the reusable moves</h2>
+
+<p>
+    <code>common/coat/pattern/CoatRegions</code> wraps the common cases so a gene
+    never touches a <code>px,py</code> directly. Everything takes a
+    <code>Skin</code>; parts a mesh does not have are silently skipped.
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Helper</th><th>Does</th></tr></thead>
+<tbody>
+<tr><td><code>restrictAll(skin, field, rule)</code></td><td>Apply a per-texel rule to every mapped texel. The whole of champagne is one call.</td></tr>
+<tr><td><code>restrictPart(skin, field, part, rule)</code></td><td>The same for one part.</td></tr>
+<tr><td><code>blackenPart(skin, field, part)</code></td><td>Full-black a part &mdash; <code>black = 1</code>, <code>red = 0</code>.</td></tr>
+<tr><td><code>blackenLowerLeg(skin, field, leg, heightFraction)</code></td><td>Full-black the bottom fraction of a leg.</td></tr>
+<tr><td><code>blackenFace(skin, field, upFraction)</code></td><td>Muzzle (if present) plus the front fraction of the head.</td></tr>
+<tr><td><code>whitenLowerLeg(skin, field, leg, heightFraction)</code></td><td>Remove <em>both</em> pigments up a leg &rarr; the white template shows.</td></tr>
+<tr><td><code>whitenBlaze(skin, field, halfWidth, lengthFraction)</code></td><td>A centreline stripe on muzzle + head, <code>halfWidth</code> body units either side of <code>z = 0</code>.</td></tr>
+<tr><td><code>paintPart</code> / <code>fillPart</code> / <code>fillMane</code> / <code>fillTail</code> / <code>fillEars</code> / <code>fillHooves</code> / <code>paintLowerLeg</code></td><td>ARGB overlay painting, for callers working in colour rather than pigment.</td></tr>
+<tr><td><code>redrawEyes(skin, dst, template)</code></td><td>Copy the eye texels back verbatim &mdash; the composer&rsquo;s last step.</td></tr>
+<tr><td><code>LEGS</code></td><td><code>List&lt;Part&gt;</code> of the four legs, for iterating.</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="note warn">
+    <span class="label">Open issue: hard edges</span>
+    <p>
+        <code>whitenLowerLeg</code> cuts at a hard <code>point.y() &lt;= cutoff</code>,
+        so every splash sock ends in a <strong>perfect ring</strong>. And
+        <code>whitenBlaze</code> is the only face marking there is &mdash; star, snip,
+        stripe and bald face are not built. Both are logged on the
+        <a href="verification.html">to-be-verified</a> list. The fix wants per-texel
+        epigenetic jitter, or the smoothstep treatment <code>BayCoat.fade</code>
+        already uses.
+    </p>
+</div>
+
+<h2>BodyNoise &mdash; noise that crosses seams</h2>
+
+<p>
+    <code>BodyNoise</code> is deterministic procedural noise sampled in
+    <strong>body space</strong> &mdash; the same <code>(x, y, z)</code> model-unit
+    coordinates every texel already carries.
+</p>
+
+<p>
+    Sampling in 3D rather than in texture space is the whole point: two texels that
+    sit next to each other on the horse get neighbouring samples even when they live
+    on opposite ends of the sheet (the body&rsquo;s side face and its top face, say),
+    so a pattern built from these functions crosses part seams without a visible
+    join.
+</p>
+
+<div class="table-wrap">
+<table class="facts">
+<tbody>
+<tr><th><code>cellDistance(seed, x, y, z)</code></th><td>Distance to the nearest point of a jittered unit lattice, normalised to roughly <code>[0,1]</code>. Near 0 at a lattice point, near 1 in the gaps &mdash; a field of round cells with a web between them. Exactly the shape of dapples.</td></tr>
+<tr><th><code>value(seed, x, y, z)</code></th><td>Smooth value noise in <code>[0,1]</code> on a unit lattice. Used to warp other fields off the grid.</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    Callers scale their coordinates to choose the cell size. Everything is a
+    <strong>pure function of <code>(seed, x, y, z)</code></strong> &mdash; no state,
+    no <code>Random</code> &mdash; so a coat rebuilt next session comes out identical.
+</p>
+
+<h2>BodyStripes &mdash; the shared stripe field</h2>
+
+<p>
+    Bands that run mostly across the horse (constant body-space X), so a stripe wraps
+    from the barrel&rsquo;s side over the spine without a seam.
+</p>
+
+<div class="codebox">
+<div class="filename">common/coat/pattern/BodyStripes.java</div>
+<pre><code class="language-java">/**
+ * @param spacing centre-to-centre distance in body units (the adult barrel is 22 long)
+ * @param duty    how much of each period is stripe, (0,1) - 0.5 is equal stripe and gap
+ * @param warp    how far, in body units, the noise field may bend a stripe off its plane
+ */
+public static double coverage(long seed, double x, double y, double z,
+                              double spacing, double duty, double warp);
+
+/** Hermite fade from 0 at edge0 to 1 at edge1. */
+public static double smoothstep(double edge0, double edge1, double v);</code></pre>
+</div>
+
+<div class="note">
+    <span class="label">The slant is not decoration</span>
+    <p>
+        The phase carries a small <strong>slant on <code>|z|</code></strong>, which
+        bends each stripe into a shallow chevron over the back. Without it, every face
+        perpendicular to X &mdash; the chest, the rump, the front and back of every
+        leg &mdash; sits at one phase and renders as a flat band of solid stripe or
+        solid coat. The slant is symmetric left to right, so the horse does not look
+        lopsided.
+    </p>
+</div>
+
+<p>
+    <a href="gene-magic-zebra.html">Magic zebra</a> is the first caller.
+    <code>BodyStripes</code> is deliberately generic: a natural <strong>dun</strong>&rsquo;s
+    leg barring and <strong>brindle</strong>&rsquo;s striping should reuse it rather
+    than reinvent the maths. Keep gene-specific decisions &mdash; how far down the
+    horse the stripes reach, what colour they are &mdash; in the gene.
+</p>
+
+<h2>The HD models the geometry describes</h2>
+
+<p>
+    <code>HdHorseModel</code> and <code>HdBabyHorseModel</code> are 128px, per-part
+    UV, structural copies of vanilla&rsquo;s meshes with every cube at
+    <code>texScale = 0.5</code> and the layer baked at 128&times;128 &mdash; so the
+    effective texture size stays 64 and <strong>every normalized UV is identical to
+    vanilla</strong>. The 2&times; sheet just gives each face twice the texels.
+</p>
+
+<p>
+    <code>GeneticHorseRenderer</code> deliberately <strong>does not</strong> add
+    vanilla&rsquo;s <code>HorseMarkingLayer</code>: that layer paints
+    <code>horse_markings_white.png</code> over the whole texture, so any horse that
+    rolled <code>Markings.WHITE</code> rendered as a flat white horse on top of a
+    correct generated coat. All white markings here come from the
+    <a href="gene-splash.html">splash gene</a>, inside the coat texture.
+</p>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="pipeline.html">Three-phase pipeline</a>
+        <a href="modding.html">Writing a gene</a>
+        <a href="api-reference.html">Class abstractions</a>
+        <a href="gene-grey.html">Grey (uses BodyNoise)</a>
+        <a href="gene-magic-zebra.html">Magic zebra (uses BodyStripes)</a>
+    </div>
+    Source: <code>common/coat/skin/HorseSkinGeometry.java</code>,
+    <code>common/coat/pattern/{CoatRegions,BodyNoise,BodyStripes}.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

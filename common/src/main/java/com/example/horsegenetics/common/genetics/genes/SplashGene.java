@@ -39,7 +39,7 @@ public final class SplashGene implements Gene {
      * {@code Spl/Spl} currently render identically, because this gene doesn't
      * read its own dose yet. Homozygous splash should give much larger white
      * markings; until it does, the catalogue gives the heterozygote its own pen
-     * and the two look the same. See {@code Docs/to be verified.md}.
+     * and the two look the same. See {@code wiki/verification.html}.
      */
     @Override public DominancePattern dominance() { return DominancePattern.INCOMPLETE_DOMINANT; }
 

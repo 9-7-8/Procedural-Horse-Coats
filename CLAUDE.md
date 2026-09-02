@@ -10,28 +10,38 @@ copy*, inherited with the allele - and there's a self-contained "horse
 dimension" reached by a hay-bale portal. Long-term aim is a 1.12.2 backport, which is
 why the logic is quarantined in a game-free module.
 
-**Docs split:** everything except `README.md` and `CLAUDE.md` lives in
-**`Docs/`**. New dev docs go there too - keep the repo root to those two.
-(The root also carries **`index.html` + `wiki/`** - the owner's browser-based
-horse-genetics wiki and interactive gene creator, a separate workstream from
-these markdown docs. It has its own per-gene pages; it is *not* a source of
-truth for the mod's behaviour, and nothing here is generated from it.)
+**Docs split:** the only two markdown files in the repo are `README.md` and
+`CLAUDE.md`. **Everything else is the wiki** - `index.html` (the hub) +
+`wiki/*.html`. The old `Docs/*.md` files were converted into wiki pages and
+deleted; there is no markdown dev doc any more, and new dev docs go in `wiki/`
+as HTML.
+
+The wiki is now a **source of truth for the mod's behaviour**, not a side
+project. Its shape:
+- `wiki/styles.css` + `wiki/nav.js` are shared by every page. **The sidebar is
+  built from the `SECTIONS` array in `nav.js`** - add a page there once and it
+  appears on every page. No per-page nav markup.
+- Each page is a standalone file: prism theme, then `styles.css`, then
+  `<main class="content"><article class="doc">`. Copy an existing gene page as
+  a template.
+- `wiki/gene-creator.html` is the owner's interactive 3D gene editor - a
+  separate workstream, untouched by the doc pass, and not a source of truth.
 - **`README.md`** is **user-facing only** now - what the mod does, how to play
   it, install, license. No status tables, no architecture, no API notes.
   Don't put dev content there.
 - **`CLAUDE.md`** (this file) is the dev/working notes: status, the 26.1.2 API
   differences, gotchas, next steps.
-- **`Docs/breeding.md`** is the single source of truth for the breeding / horse-
+- **`wiki/breeding.html`** is the single source of truth for the breeding / horse-
   record / pedigree / **stat-inheritance** system. Keep it current when you
   touch any of that; don't re-document it here or in README (a pointer is
   fine).
-- **`Docs/Gene Dict.md`** is the single source of truth for **each gene** - alleles,
+- **`wiki/gene-*.html`** is the single source of truth for **each gene** - alleles,
   generation function, wild frequency, dominance, natural/magical. Update
   it in the same change as any gene; CLAUDE.md keeps only the machinery + a
   one-line-per-gene table.
-- **`Docs/to be verified.md`** is the rolling **`runClient` checklist** - what's
+- **`wiki/verification.html`** is the rolling **`runClient` checklist** - what's
   built but not yet confirmed in-game. Update after every play session.
-- **`Docs/Philosophy.md`** is the **why** - Mendelian breeding as a game of
+- **`wiki/philosophy.html`** is the **why** - Mendelian breeding as a game of
   skill, procgen coats for functionally infinite outcomes, "interesting" being
   the player's word, and the deliberately-acknowledged abstractions (no
   crossing over, no aging; **X-linked genes are the one exception**). It also
@@ -41,20 +51,36 @@ truth for the mod's behaviour, and nothing here is generated from it.)
   two goals conflict. **Read it before making a design call**; most arguments
   in the other docs are downstream of it. Keep it short and principled - no
   implementation detail, no status, no task lists.
-- **`Docs/to be completed.md`** is the **long-range backlog** - the full gene
+- **`wiki/roadmap.html`** is the **long-range backlog** - the full gene
   wishlist and the systems it needs (the three-phase pigment pipeline, the
   determinism contract, hard-coded gene priority, the modder-facing
   gene-authoring API, non-coat and health genes), each with notes on what would
   have to change - plus the non-gene features (mare milking, healing gated on
   nearby water + food, a creative-only custom horse spawner) and the **planned
   revert of the genotype gallery** to random pens. It is **work items only**;
-  the reasoning behind them lives in `Philosophy.md`. Nothing in it is
-  implemented; when something ships it moves to `Gene Dict.md` /
-  `breeding.md` and is deleted there. Its "Decisions still open" section keeps
+  the reasoning behind them lives in `wiki/philosophy.html`. Nothing in it is
+  implemented; when something ships it moves to its own `wiki/gene-*.html` page
+  (or `wiki/breeding.html`) and is deleted there. Its "Decisions still open" section keeps
   a short list of what's already **settled** - aging out of scope, health as
   fewer hearts, the magical RGB phase being signed unclamped `int`s capped only
   at conversion, alphanumeric allele tokens with `n` as wild type - so a later
   session doesn't reopen them.
+- **New with the wiki conversion**, and not derived from any old markdown -
+  keep them current too:
+  - **`wiki/genetics-model.html`** - the Mendelian model as implemented:
+    alleles as objects, the code string, `DominancePattern`, the per-allele
+    epigenome, `GenotypeCatalog`, and what the texture key captures.
+  - **`wiki/pipeline.html`** - the three-phase coat pipeline in full
+    (`PigmentField` / `ColorField` / `GradientLut` / `CoatTextureId` / the
+    golden test). This is where the coat machinery is documented now; CLAUDE.md
+    keeps a summary.
+  - **`wiki/body-space.html`** - `HorseSkinGeometry`, `CoatRegions`,
+    `BodyNoise`, `BodyStripes`.
+  - **`wiki/modding.html`** + **`wiki/api-reference.html`** - the
+    **modder-facing** docs: how to write a gene (two worked walkthroughs, the
+    allele rules, the determinism contract, the pitfalls table) and the
+    class-by-class abstraction reference. When a public type in `common/`
+    changes shape, update `api-reference.html` in the same change.
 
 ## Status snapshot (keep this current)
 
@@ -69,7 +95,7 @@ truth for the mod's behaviour, and nothing here is generated from it.)
   gene hooks, the `coat-golden.txt` byte-identity net, `CoatTextureId`
   texture-id injectivity),
   `coat/skin/` (`HorseSkinGeometry`), `name/` (`breedNth`),
-  `horse/` (pedigree + `HorseStats` -> `Docs/breeding.md`).
+  `horse/` (pedigree + `HorseStats` -> `wiki/breeding.html`).
 - **`neoforge-26.1.2/`** - compiles and assembles (`./gradlew
   :neoforge-26.1.2:build` passes; only two `getGuiLeft/getGuiTop`
   deprecation warnings) against the real NeoForge `26.1.2.100` SDK.
@@ -106,7 +132,7 @@ truth for the mod's behaviour, and nothing here is generated from it.)
     bay sepia - instead of the jet black they all rendered before. See the
     coat-pipeline section for the cause (`PigmentField.dilute`).
   - Three rendering issues found in the same session are logged in
-    **`Docs/to be verified.md`** - see "Known gaps" below. The bay/dilution one
+    **`wiki/verification.html`** - see "Known gaps" below. The bay/dilution one
     closed the same day; **grey** closed later (the `GreyCoat` rework, built but
     not yet play-tested); the two **splash** ones are still open.
 
@@ -140,7 +166,7 @@ truth for the mod's behaviour, and nothing here is generated from it.)
 - **Built 2026-09-02, NOT yet play-tested:** the first two **magical genes** -
   **magic zebra** (`Mzeb`, dominant, 1/100 per allele) and **pink hair**
   (`Pihr`, **recessive**, 1/12 per allele). Both are phase-3 genes; details in
-  `Docs/Gene Dict.md`, in-game checklist in `Docs/to be verified.md`. They take
+  `wiki/gene-*.html`, in-game checklist in `wiki/verification.html`. They take
   the registry to **11 genes**, which moves a lot of derived numbers: the code
   string is 11 segments, `breedWith` draws 22 booleans, and the gallery goes
   from 434 pens / 1 519 blocks to **1 730 pens / 6 055 blocks** of corridor.
@@ -148,7 +174,7 @@ truth for the mod's behaviour, and nothing here is generated from it.)
   white; pink manes keep their strand shading on black, chestnut and perlino
   alike); nothing seen in-game.
 - **Built 2026-09-02, behaviour-neutral by construction:** the **three-phase
-  pigment pipeline** (`Docs/to be completed.md` §1). Phase 3 is now a signed,
+  pigment pipeline** (`wiki/roadmap.html` §1). Phase 3 is now a signed,
   uncapped `ColorField` that magical genes *add* into, both gene hooks are pure
   (read-only views in, a contribution out), and `CoatBuildContext` no longer
   carries scratch space. **No coat changed**: `CoatPipelineGoldenTest` hashes
@@ -164,19 +190,19 @@ truth for the mod's behaviour, and nothing here is generated from it.)
   bay's leg black is a uniform per-horse extent with per-leg jitter instead of
   the old low-biased single number. Compiles, 138 `common` tests pass, sample
   bakes look right, nothing seen in-game yet - checklist in
-  **`Docs/to be verified.md`**.
+  **`wiki/verification.html`**.
 - **Built 2026-09-01, NOT yet play-tested:** the **genotype gallery** rework of
   the horse dimension - one pen per visually distinct genotype (1 730 of 177 147),
   per-pen genotype signs, the entrance tally sign, `Gene.dominance()` metadata,
   and the entity-only teardown that leaves blocks standing. Compiles, 138
   `common` tests pass, nothing seen in-game yet. Details in the horse-dimension
   section below; the in-game checklist is the top item in
-  **`Docs/to be verified.md`**.
+  **`wiki/verification.html`**.
 - **Built 2026-09-01, NOT yet play-tested:** the **dev test-world auto-delete**
   - `client/DebugTestWorldCleanup` wipes every `test_horse_*` save on client
   shutdown (and sweeps leftovers on the next start), so the button stops
   filling `run/saves`. See "Running the game".
-- **Open issues + NOT verified in-game:** see **`Docs/to be verified.md`**.
+- **Open issues + NOT verified in-game:** see **`wiki/verification.html`**.
   Open issues are grey, and splash (face markings, leg edges, and it not
   reading its own dose); after the gallery, the top unverified item is
   **foals** (only spot-checked). Update it after each `runClient`.
@@ -205,7 +231,7 @@ Two-module Gradle project, split deliberately:
     `src/main/resources/horsegenetics/names/`.
   - `horse/` - the pedigree domain model (`Sex`, `HorseRecord`,
     `HorseDatabase`, `InMemoryHorseDatabase`) and `HorseStats` (foal stat
-    roll) -> `Docs/breeding.md`.
+    roll) -> `wiki/breeding.html`.
   - `Rng` - the randomness seam (`nextFloat` / `nextBoolean` /
     `nextInt(bound)` / `nextLong`), implemented by `NeoRng` (wraps
     `RandomSource`) and, in tests, `FakeRng`.
@@ -284,7 +310,7 @@ it too. **Pink hair is the only `RECESSIVE` gene** - the first one where the
 heterozygote is a carrier you cannot see.
 
 Cream + Pearl are allelic in reality; here two genes, combined once in
-`coat.pattern.CreamPearlDilution` (dose table in `Docs/Gene Dict.md`).
+`coat.pattern.CreamPearlDilution` (dose table in `wiki/gene-*.html`).
 Seal has **no gene** - it's the top of agouti's random distribution.
 
 `Genotype.phenotype()` → coarse `CoatPhenotype` (`CHESTNUT`/`BLACK`/`BAY`/
@@ -324,23 +350,23 @@ order).
 - `priority` has no other consumer, and **by design it never will**: it picks
   *which copy's seed expresses*, never the order genes are processed in. Gene
   order comes from a hard-coded per-gene number (planned - see
-  `Docs/to be completed.md` §3), so that two horses with the same genotype and
+  `wiki/roadmap.html` §3), so that two horses with the same genotype and
   the same seeds can't diverge on priority alone and silently share a coat
   cache entry. It stays a full-range int for headroom.
 
-Full inheritance detail: **`Docs/breeding.md`**.
+Full inheritance detail: **`wiki/breeding.html`**.
 
 ## The three-phase coat pipeline (`common/coat/pattern/` + `client/GeneticCoatTextureFactory`)
 
 Coats are **generated** for every horse - adult *and* foal. Per-gene detail in
-**`Docs/Gene Dict.md`**; the machinery:
+**`wiki/gene-*.html`**; the machinery:
 
 - **Every gene is either natural or magical, never both** (`Gene.isNatural()`,
   declared not inferred; a gene wanting both registers as two). A **natural**
   gene only pushes red/black pigment *down* in phase 1; a **magical** gene only
   adds *signed RGB* in phase 3, after the pigment has been resolved to colour.
   Natural is reserved for genes that exist in real life
-  (`Docs/Philosophy.md` §6).
+  (`wiki/philosophy.html` §6).
 - **Both coat hooks are pure.** A gene is handed **read-only views** of the
   state so far (`PigmentView`, `ColorView`) and **returns** its contribution;
   it never draws into shared scratch. `CoatBuildContext` therefore carries no
@@ -476,7 +502,7 @@ Coats are **generated** for every horse - adult *and* foal. Per-gene detail in
   sideways off that column into the warm browns. Amber champagne keeps
   chocolate points over a gold body, perlino rusty ones, a buckskin dark brown.
   **House rule: no cream horse keeps a pitch-black point** - dark brown is as
-  far as it goes. Per-mode numbers: `Docs/Gene Dict.md`.
+  far as it goes. Per-mode numbers: `wiki/gene-*.html`.
 - **`GeneticCoatTextureFactory`** (client) loads the adult + foal templates +
   gradient once, runs `compose`, uploads a `DynamicTexture`, caches by
   `textureKey()` + `:adult`/`:foal`, cleared on world exit.
@@ -559,7 +585,7 @@ approximate.
 
 ## Horse stats (speed / health)
 
-Domain side (roll band, record fields, breeding flow) is in **`Docs/breeding.md`**.
+Domain side (roll band, record fields, breeding flow) is in **`wiki/breeding.html`**.
 The Minecraft-attribute side, in `server/HorseRecords`:
 
 - `entitySpeed(horse)` / `entityHealth(horse)` =
@@ -964,7 +990,7 @@ genotype that looks different from every other.
     rather than dropping a gene, so those signs read wide in-game (worst case
     27 chars). The unit test now asserts only that nothing is lost and that the
     overflow doesn't grow past 30. The real fix is the planned revert to random
-    pens (`Docs/to be completed.md` §9), which retires the per-genotype sign
+    pens (`wiki/roadmap.html` §9), which retires the per-genotype sign
     entirely - so this is deliberately left alone.
   - `originX + 4` (three blocks in front of the return portal), facing west at
     the player's spawn: `Genotypes / 177,147 / Distinct / 1,730 pens`.
@@ -1097,18 +1123,18 @@ a clean exit forgets them.
 
 ## Known gaps / next steps
 
-The **`runClient` checklist lives in `Docs/to be verified.md`** - both the
+The **`runClient` checklist lives in `wiki/verification.html`** - both the
 **open issues** found in-game and what's still unconfirmed. Keep that file
 current after each session. The **long-range** backlog (the full gene wishlist,
 per-allele stack priority, the modder-facing gene API, non-coat and health
-genes) lives in **`Docs/to be completed.md`**; this list stays near-term.
+genes) lives in **`wiki/roadmap.html`**; this list stays near-term.
 
 **Fixed since that session:** grey (was "flat near-white, wants a rework") is
 now the `GreyCoat` dapple grey - built, unit-tested and sample-baked, **not yet
 seen in-game**.
 
 **Open rendering issues (found in-game 2026-09-01, deliberately not fixed
-yet)** - full detail in `Docs/to be verified.md`:
+yet)** - full detail in `wiki/verification.html`:
 
 - **Splash is only the centreline blaze + plain socks.** Missing the rest of
   the face-marking family (star, snip, stripe, bald face), and
@@ -1130,7 +1156,7 @@ Design follow-ups (not just "go look at it"):
    near-white, neither changes. Flea-bitten grey and grey melanoma are parked
    with it. The option isn't foreclosed - reopening it means giving the
    composer a real age input, which today only knows adult vs foal. See
-   `Docs/to be completed.md` §7.4.
+   `wiki/roadmap.html` §7.4.
 2. **Foal geometry is approximate** - `Skin.BABY` uses rest-pose AABBs and
    pre-resolved neck/head/ear pivots; markings on the foal face/neck can land
    loosely. Also the foal mesh has no MANE/MUZZLE part, so bay foal "black up
@@ -1155,11 +1181,11 @@ Design follow-ups (not just "go look at it"):
    texel toward its target. So: *straight signed add* stays the blend, but the
    useful magical genes will read first, and `magicalOrder()` matters more than
    §1 assumed. `naturalOrder()` / `magicalOrder()` are still hand-written lists
-   - making them *derived* is the gene-priority work (`Docs/to be completed.md`
+   - making them *derived* is the gene-priority work (`wiki/roadmap.html`
    §2), not done here.
 8. **`breedNth` foal names past foal 1** / **`FamilyTreeScreen` scroll mode** /
    **stats surfaces** / **water-riding feel** / **the epigenome across a
-   save-reload** - see `Docs/to be verified.md`.
+   save-reload** - see `wiki/verification.html`.
 9. **Epigenetics follow-ups** - a foal copies a parent's per-allele seed
    **exactly**, with no variation, so a closed line converges on one look;
    and the epigenome lives on the entity, not on `HorseRecord`, so
@@ -1196,15 +1222,19 @@ its licence is compatible.
 - **`README.md` is user-facing only.** No status, architecture, API notes, or
   file listings there. All of that lives in `CLAUDE.md`.
 - The breeding / pedigree / horse-record / **stat-inheritance** system is
-  documented **only** in `Docs/breeding.md`; **each gene** is documented **only** in
-  `Docs/Gene Dict.md`; the **`runClient` checklist** is **only** in
-  `Docs/to be verified.md`; the **design rationale** is **only** in
-  `Docs/Philosophy.md` and the **future backlog** **only** in
-  `Docs/to be completed.md`. Update the relevant file in the same change - a
+  documented **only** in `wiki/breeding.html`; **each gene** is documented **only** in
+  `wiki/gene-*.html`; the **`runClient` checklist** is **only** in
+  `wiki/verification.html`; the **design rationale** is **only** in
+  `wiki/philosophy.html` and the **future backlog** **only** in
+  `wiki/roadmap.html`; the **coat machinery** is in `wiki/pipeline.html` +
+  `wiki/body-space.html`, and the **modder API** in `wiki/modding.html` +
+  `wiki/api-reference.html`. Update the relevant file in the same change - a
   pointer from CLAUDE.md is fine, a copy is not.
-- **Keep the why out of the backlog.** `Docs/to be completed.md` is work items;
+- **The wiki has one nav.** A new page goes in the `SECTIONS` array in
+  `wiki/nav.js` and nowhere else; never hand-write a sidebar into a page.
+- **Keep the why out of the backlog.** `wiki/roadmap.html` is work items;
   when a justification there runs longer than a clause it belongs in
-  `Docs/Philosophy.md` with a pointer back.
+  `wiki/philosophy.html` with a pointer back.
 - **No legacy / back-compat code.** Dev only, single tester, no saves to keep -
   when a format changes, change it and move on (no genotype-code padding, no
   attachment field fallbacks).
@@ -1219,7 +1249,7 @@ than a running commentary written mid-change.
 **0. Pre-flight.** `./gradlew :common:test` and `./gradlew
 :neoforge-26.1.2:build`. Don't push red. If something fails and can't be fixed
 in the time left, still push - but say so in the commit message and put it at
-the top of `Docs/to be verified.md`.
+the top of `wiki/verification.html`.
 
 **1. Commit and push the session's code.**
 
@@ -1242,15 +1272,20 @@ the doc-split rules under "Conventions":
   what's owner-verified vs built-but-unplayed), then any section the session
   invalidated, then **"Known gaps / next steps"**: delete what got fixed, add
   what got discovered, renumber the list.
-- **`Docs/to be verified.md`** - the `runClient` checklist. Delete items the
+- **`wiki/verification.html`** - the `runClient` checklist. Delete items the
   owner confirmed in-game this session (they move to CLAUDE.md's
   "Owner-verified" block, which is the permanent record); add a concrete,
   checkable entry for anything built-but-unplayed, including *what to look at*
   and *where* (which pen, which screen, which key).
-- **`Docs/Gene Dict.md`** - if any gene's alleles, generation function, wild
+- **`wiki/gene-*.html`** - if any gene's alleles, generation function, wild
   frequency, dominance or coat effect moved.
-- **`Docs/breeding.md`** - if breeding, pedigree, horse records or stat
+- **`wiki/breeding.html`** - if breeding, pedigree, horse records or stat
   inheritance moved.
+- **`wiki/pipeline.html`** / **`wiki/body-space.html`** - if the coat machinery
+  or the projection engine moved.
+- **`wiki/api-reference.html`** / **`wiki/modding.html`** - if a public
+  `common/` type changed shape, or if the gene-authoring contract moved.
+- **`wiki/nav.js`** - if any page was added or renamed.
 - **`README.md`** - only if the *player-facing* experience changed. It stays
   user-facing: no status, no architecture, no API notes.
 
@@ -1262,5 +1297,5 @@ deliberately left) and `git log origin/main..HEAD` empty. If either isn't, fix
 it before stopping.
 
 **5. End the session** with a short terminal summary - what shipped, what's
-newly waiting in `Docs/to be verified.md`, and the one thing the next session
+newly waiting in `wiki/verification.html`, and the one thing the next session
 should pick up first. Then stop: no new work, no "while I'm here" refactors.

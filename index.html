@@ -1,178 +1,187 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Procedural Horse Genetics - Documentation</title>
-    <style>
-        :root {
-            --bg-color: #0f172a;
-            --panel-bg: #1e293b;
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-            --accent: #38bdf8;
-            --border: #334155;
-            --card-hover: #26334d;
-            --tool-accent: #10b981;
-            --tool-hover: #1e3a34;
-        }
-
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            margin: 0;
-            padding: 2rem;
-            min-height: 100vh;
-        }
-
-        header {
-            max-width: 1000px;
-            margin: 0 auto 2.5rem auto;
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 1rem;
-        }
-
-        header h1 {
-            color: var(--accent);
-            margin: 0 0 0.5rem 0;
-            font-size: 2rem;
-        }
-
-        header p {
-            color: var(--text-muted);
-            margin: 0;
-            font-size: 1rem;
-        }
-
-        main {
-            max-width: 1000px;
-            margin: 0 auto;
-            display: flex;
-            flex-direction: column;
-            gap: 2rem;
-        }
-
-        .category-section {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        .category-title {
-            font-size: 1.25rem;
-            font-weight: 600;
-            color: var(--text-main);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            border-left: 3px solid var(--accent);
-            padding-left: 0.75rem;
-        }
-
-        .category-title.tool-title {
-            border-left-color: var(--tool-accent);
-        }
-
-        .gene-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 1rem;
-        }
-
-        a.gene-card {
-            background-color: var(--panel-bg);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 1.25rem;
-            text-decoration: none;
-            color: var(--text-main);
-            transition: background-color 0.15s ease, border-color 0.15s ease;
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-
-        a.gene-card:hover {
-            background-color: var(--card-hover);
-            border-color: var(--accent);
-        }
-
-        a.gene-card h2 {
-            margin: 0;
-            font-size: 1.1rem;
-            color: var(--accent);
-        }
-
-        a.gene-card span {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            font-family: monospace;
-        }
-
-        /* Tool Card Styles */
-        a.gene-card.tool-card:hover {
-            background-color: var(--tool-hover);
-            border-color: var(--tool-accent);
-        }
-
-        a.gene-card.tool-card h2 {
-            color: var(--tool-accent);
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Procedural Horse Genetics &middot; Wiki</title>
+<link rel="stylesheet" href="wiki/styles.css">
 </head>
-<body>
+<body class="landing">
 
-    <header>
+<header class="hero">
+    <div class="hero-inner">
         <h1>Procedural Horse Genetics</h1>
-        <p>Technical reference for coat color patterns, dilution loci, and procedural generator implementations.</p>
-    </header>
+        <p>
+            A Minecraft mod where every horse carries a real Mendelian genotype, and
+            its coat is <strong>generated</strong> from that genotype rather than
+            picked from a list. This wiki is the reference for the genes, the coat
+            engine, and how to add genes of your own.
+        </p>
+        <div class="stats">
+            <div><span>11</span><small>genes</small></div>
+            <div><span>3</span><small>pipeline phases</small></div>
+            <div><span>177,147</span><small>genotypes</small></div>
+            <div><span>1,730</span><small>visually distinct</small></div>
+        </div>
+    </div>
+</header>
 
-    <main>
-        <!-- Tools & Editors -->
-        <section class="category-section">
-            <div class="category-title tool-title">Tools &amp; Editors</div>
-            <div class="gene-grid">
-                <a href="wiki/gene-creator.html" class="gene-card tool-card">
-                    <h2>Gene Visual Editor</h2>
-                    <span>Interactive 3D Spline &amp; Pattern Studio</span>
-                </a>
-            </div>
-        </section>
+<main class="landing-main">
 
-        <!-- Pattern Generators -->
-        <section class="category-section">
-            <div class="category-title">Pattern Generators</div>
-            <div class="gene-grid">
-                <a href="wiki/bay-coat.html" class="gene-card">
-                    <h2>Bay / Seal Brown</h2>
-                    <span>Locus: Agouti (A)</span>
-                </a>
-                <a href="wiki/dapple-grey.html" class="gene-card">
-                    <h2>Dapple Grey</h2>
-                    <span>Locus: Grey (G)</span>
-                </a>
-            </div>
-        </section>
+    <div class="section-head">
+        <h2>Start here</h2>
+        <p>What the mod is, and the model underneath it</p>
+    </div>
+    <div class="cards">
+        <a href="wiki/philosophy.html" class="card">
+            <h3>Philosophy</h3>
+            <p>Why breeding is a game of skill, why determinism is the load-bearing wall, and which abstractions were chosen on purpose.</p>
+            <span class="tag">read before making a design call</span>
+        </a>
+        <a href="wiki/genetics-model.html" class="card">
+            <h3>The genetics model</h3>
+            <p>Alleles as objects, the genotype code string, dominance patterns, and the per-allele epigenome.</p>
+            <span class="tag">common/genetics/</span>
+        </a>
+        <a href="wiki/breeding.html" class="card">
+            <h3>Breeding &amp; pedigree</h3>
+            <p>Segregation, epigenetic inheritance, horse records, the ancestry database and the family tree.</p>
+            <span class="tag">source of truth</span>
+        </a>
+    </div>
 
-        <!-- Dilution Genes -->
-        <section class="category-section">
-            <div class="category-title">Dilution Genes</div>
-            <div class="gene-grid">
-                <a href="wiki/cream-pearl-dilution.html" class="gene-card">
-                    <h2>Cream &amp; Pearl</h2>
-                    <span>Locus: Cream (Cr / prl)</span>
-                </a>
-                <a href="wiki/champagne.html" class="gene-card">
-                    <h2>Champagne</h2>
-                    <span>Locus: Champagne (Ch)</span>
-                </a>
-            </div>
-        </section>
-    </main>
+    <div class="section-head">
+        <h2>The coat engine</h2>
+        <p>How a genotype becomes 16,384 pixels</p>
+    </div>
+    <div class="cards">
+        <a href="wiki/pipeline.html" class="card">
+            <h3>Three-phase pipeline</h3>
+            <p>Natural genes restrict pigment, the gradient resolves it to colour, magical genes add signed RGB on top.</p>
+            <span class="tag">CoatTextureComposer</span>
+        </a>
+        <a href="wiki/body-space.html" class="card">
+            <h3>Body space &amp; regions</h3>
+            <p>The projection engine that lets a coat rule be a smooth function of position and still come out seamless.</p>
+            <span class="tag">HorseSkinGeometry</span>
+        </a>
+    </div>
+
+    <div class="section-head">
+        <h2>For modders</h2>
+        <p>Adding a gene of your own</p>
+    </div>
+    <div class="cards">
+        <a href="wiki/modding.html" class="card">
+            <h3>Writing a gene</h3>
+            <p>Two worked walkthroughs, the allele rules, the determinism contract, and the mistakes that bite.</p>
+            <span class="tag">start here</span>
+        </a>
+        <a href="wiki/api-reference.html" class="card">
+            <h3>Class abstractions</h3>
+            <p>Every type a gene author touches, what it abstracts, and the signatures that matter.</p>
+            <span class="tag">reference</span>
+        </a>
+        <a href="wiki/gene-creator.html" class="card tool">
+            <h3>Gene creator</h3>
+            <p>Interactive 3D spline and pattern studio for prototyping a coat function in the browser.</p>
+            <span class="tag">tool</span>
+        </a>
+    </div>
+
+    <div class="section-head">
+        <h2>Natural genes</h2>
+        <p>Genes that exist in real life. They restrict pigment in phase 1, and only ever take colour away.</p>
+    </div>
+    <div class="cards">
+        <a href="wiki/gene-extension.html" class="card natural">
+            <h3>Extension</h3>
+            <p>Can this horse make black pigment at all? <code>ee</code> gives chestnut.</p>
+            <span class="tag">E / e &middot; dominant &middot; 50/50</span>
+        </a>
+        <a href="wiki/gene-agouti.html" class="card natural">
+            <h3>Agouti</h3>
+            <p>Bay: black restricted to the points. Seal brown is the top of its distribution, not a separate gene.</p>
+            <span class="tag">A / a &middot; dominant &middot; 50/50</span>
+        </a>
+        <a href="wiki/gene-cream.html" class="card natural">
+            <h3>Cream</h3>
+            <p>Dose-dependent dilution &mdash; palomino and buckskin, then cremello and perlino.</p>
+            <span class="tag">Cr / N &middot; incomplete &middot; 1 in 30</span>
+        </a>
+        <a href="wiki/gene-pearl.html" class="card natural">
+            <h3>Pearl</h3>
+            <p>Mild uniform dilution when homozygous with no cream; a pseudo-double cream when paired with one.</p>
+            <span class="tag">prl / N &middot; incomplete &middot; 1 in 22</span>
+        </a>
+        <a href="wiki/gene-champagne.html" class="card natural">
+            <h3>Champagne</h3>
+            <p>Gold, classic and amber champagne from a single rule that reads the current pigment.</p>
+            <span class="tag">Ch / c &middot; dominant &middot; 1 in 40</span>
+        </a>
+        <a href="wiki/gene-grey.html" class="card natural">
+            <h3>Grey</h3>
+            <p>Dapple grey on adults only, at a per-horse stage from dark steel to nearly white.</p>
+            <span class="tag">G / g &middot; dominant &middot; 1 in 16</span>
+        </a>
+        <a href="wiki/gene-white.html" class="card natural">
+            <h3>Dominant white</h3>
+            <p>Both pigments gone everywhere. The only coat that should look like the bare template.</p>
+            <span class="tag">W / w &middot; complete &middot; 1 in 50</span>
+        </a>
+        <a href="wiki/gene-splash.html" class="card natural">
+            <h3>Splash white</h3>
+            <p>Random socks and a centreline blaze &mdash; dipped in white from below.</p>
+            <span class="tag">Spl / spl &middot; incomplete &middot; 1 in 20</span>
+        </a>
+    </div>
+
+    <div class="section-head">
+        <h2>Magical genes</h2>
+        <p>Invented for this mod. They add signed RGB in phase 3, after the pigment has resolved to colour.</p>
+    </div>
+    <div class="cards">
+        <a href="wiki/gene-pink-hair.html" class="card magical">
+            <h3>Pink hair</h3>
+            <p>Mane and tail walked toward hot pink, keeping their shading. The mod&rsquo;s only recessive.</p>
+            <span class="tag">Pihr / n &middot; recessive &middot; 1 in 12</span>
+        </a>
+        <a href="wiki/gene-magic-zebra.html" class="card magical">
+            <h3>Magic zebra</h3>
+            <p>Black stripes hung from the topline at &minus;200% per channel &mdash; black over any coat at all.</p>
+            <span class="tag">Mzeb / n &middot; dominant &middot; 1 in 100</span>
+        </a>
+        <a href="wiki/gene-test.html" class="card magical">
+            <h3>Test</h3>
+            <p>The diagnostic gradient, painted flat on any base. Exercises the projection engine end to end.</p>
+            <span class="tag">T / t &middot; complete &middot; 1 in 4</span>
+        </a>
+    </div>
+
+    <div class="section-head">
+        <h2>Project</h2>
+        <p>What is unproven, and what is coming</p>
+    </div>
+    <div class="cards">
+        <a href="wiki/verification.html" class="card">
+            <h3>To be verified</h3>
+            <p>The rolling <code>runClient</code> checklist &mdash; open issues, and what is built but not yet seen in-game.</p>
+            <span class="tag">built, not confirmed</span>
+        </a>
+        <a href="wiki/roadmap.html" class="card">
+            <h3>Roadmap &amp; backlog</h3>
+            <p>The full gene wishlist, the systems each one needs, and the decisions still open.</p>
+            <span class="tag">not built at all</span>
+        </a>
+    </div>
+
+    <div class="page-foot">
+        Developer notes live in <code>CLAUDE.md</code>; player-facing install and
+        gameplay notes are in <code>README.md</code>. Everything else is here.
+        Licensed CC BY-NC 4.0.
+    </div>
+
+</main>
 
 </body>
 </html>

@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Splash White &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="nav.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow natural">Natural gene <span class="sep">/</span> phase 1</p>
+<h1>Splash white</h1>
+<p class="lede">
+    Random white markings, as if the horse were dipped in white from below: white
+    climbs each leg an independent random amount, plus a random centreline blaze. It
+    removes both pigments, so the white template shows through &mdash; the same
+    mechanism <a href="gene-white.html">dominant white</a> uses, applied to a region.
+</p>
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd>horsegenetics.splash</dd></div>
+    <div><dt>Alleles</dt><dd><span class="allele dom">Spl</span> <span class="allele wild">spl</span></dd></div>
+    <div><dt>Dominance</dt><dd>INCOMPLETE_DOMINANT*</dd></div>
+    <div><dt>Wild type</dt><dd>spl</dd></div>
+    <div><dt>Wild frequency</dt><dd>1 in 20 per allele</dd></div>
+    <div><dt>Founder draws</dt><dd>2 &times; nextInt(20)</dd></div>
+    <div><dt>Deterministic</dt><dd><strong>no</strong> when expressed</dd></div>
+    <div><dt>Visible when</dt><dd>Spl_</dd></div>
+    <div><dt>Epigenetic draws</dt><dd>2 per leg + 2 for the blaze</dd></div>
+    <div><dt>Real locus</dt><dd>SW1 (MITF)</dd></div>
+</dl>
+
+<div class="note good">
+    <span class="label">Owner-verified in-game, 2026-09-01</span>
+    <p>What is implemented renders correctly &mdash; leg white plus a centreline blaze.</p>
+</div>
+
+<h2>What it does</h2>
+
+<div class="codebox">
+<div class="filename">common/genetics/genes/SplashGene.java</div>
+<pre><code class="language-java">Rng epi = ctx.epigeneticsFor(KEY);
+PigmentField f = coat.mutableCopy();
+
+for (var leg : CoatRegions.LEGS) {
+    double h = 0.15 + epi.nextFloat() * epi.nextFloat() * 0.75;   // socks .. stockings
+    CoatRegions.whitenLowerLeg(skin, f, leg, h);
+}
+
+double blazeHalfWidth = 0.4 + epi.nextFloat() * 1.4;   // body units either side of centre
+double blazeLength    = 0.2 + epi.nextFloat() * 0.75;  // fraction of the head length
+CoatRegions.whitenBlaze(skin, f, blazeHalfWidth, blazeLength);
+return f;</code></pre>
+</div>
+
+<p>
+    Each leg is rolled <strong>independently</strong> (unlike
+    <a href="gene-agouti.html">bay</a>, which rolls one extent for the horse and
+    jitters around it), so a splash horse can have three socks and one stocking. The
+    <code>f*f</code> product biases the distribution low: most splash horses have
+    modest socks and a few have tall ones.
+</p>
+
+<h2 id="issues">Three open gaps</h2>
+
+<div class="note warn">
+    <span class="label">1. It is not actually incomplete dominant</span>
+    <p>
+        It is <em>tagged</em> <code>INCOMPLETE_DOMINANT</code>, but
+        <code>restrict</code> never looks at how many <span class="allele dom">Spl</span>
+        copies the horse carries &mdash; so <code>Spl/spl</code> and
+        <code>Spl/Spl</code> render <strong>identically</strong>. A homozygote should
+        give much larger markings: higher stockings, a wide blaze or bald face, body
+        patches.
+    </p>
+    <p>
+        The catalogue already gives the heterozygote its own pen, so the fix is
+        visible the moment it lands. Gallery pens <strong>#11
+        <code>eeaa nSpl</code></strong> and <strong>#19 <code>eeaa SplSpl</code></strong>
+        are the side-by-side check.
+    </p>
+</div>
+
+<div class="note warn">
+    <span class="label">2. The blaze is the only face marking</span>
+    <p>
+        <code>CoatRegions.whitenBlaze</code> paints a centreline stripe on the muzzle
+        and head. The rest of the family &mdash; <strong>star, snip, stripe, bald
+        face</strong> &mdash; is not built.
+    </p>
+</div>
+
+<div class="note warn">
+    <span class="label">3. Every sock ends in a perfect ring</span>
+    <p>
+        <code>CoatRegions.whitenLowerLeg</code> cuts at a hard
+        <code>point.y() &lt;= cutoff</code>, so the top edge is a clean circle all the
+        way round. Break it up &mdash; per-texel epigenetic jitter, or the
+        <strong>smoothstep</strong> treatment <code>BayCoat.fade</code> already uses,
+        which is why bay&rsquo;s leg black dissolves and splash&rsquo;s white does
+        not.
+    </p>
+</div>
+
+<p>
+    All three are tracked on <a href="verification.html">To be verified</a>. Fixing
+    the dose is the prerequisite for the rest of the real
+    <code>SW1</code>&ndash;<code>SW10</code> series making any sense.
+</p>
+
+<h2>Interactions</h2>
+
+<ul>
+    <li><strong>It runs last</strong> in <code>naturalOrder()</code>, after even
+        dominant white. A splash marking is set absolutely to zero, so nothing later
+        can dilute it back into existence.</li>
+    <li><strong>Invisible on a dominant-white horse</strong> &mdash; there is nothing
+        left to remove.</li>
+    <li><strong>A magical gene can still paint over a splash marking</strong>, because
+        magical genes run after all of this and a transparent texel can be given
+        opacity. That is how zebra stripes cross a sock.</li>
+</ul>
+
+<h2>The real locus</h2>
+
+<p>
+    This is essentially <strong>SW1</strong> on <code>MITF</code>. The full picture is
+    two multi-allele loci, not one: SW1/3/5/6/8/10 are on <code>MITF</code>, SW2/4/7/9
+    on <code>PAX3</code>. So today&rsquo;s splash gene eventually becomes the
+    <code>MITF</code> locus with seven alleles &mdash; and
+    <code>whitenLowerLeg</code>&rsquo;s hard cut is shared with a future
+    <strong>sabino 1</strong>, so fixing it benefits both. See
+    <a href="roadmap.html#gene-backlog">the gene backlog</a>.
+</p>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="gene-white.html">Dominant white</a>
+        <a href="body-space.html">CoatRegions</a>
+        <a href="verification.html">Open issues</a>
+        <a href="roadmap.html#gene-backlog">The SW series</a>
+    </div>
+    Source: <code>common/genetics/genes/SplashGene.java</code>,
+    <code>common/coat/pattern/CoatRegions.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

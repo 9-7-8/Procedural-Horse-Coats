@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Champagne &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="nav.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow natural">Natural gene <span class="sep">/</span> phase 1</p>
+<h1>Champagne</h1>
+<p class="lede">
+    A simple dominant, <strong>not dose-dependent</strong>: it keeps most of the red,
+    cuts black hard, and feeds part of the removed black back in as red. Because it
+    reads the <em>current</em> pigment rather than a colour name, one rule gives gold,
+    classic and amber champagne for free. It is also the simplest gene in the mod
+    &mdash; a good first read.
+</p>
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd>horsegenetics.champagne</dd></div>
+    <div><dt>Alleles</dt><dd><span class="allele dom">Ch</span> <span class="allele wild">c</span></dd></div>
+    <div><dt>Dominance</dt><dd>DOMINANT</dd></div>
+    <div><dt>Wild type</dt><dd>c</dd></div>
+    <div><dt>Wild frequency</dt><dd>1 in 40 per allele</dd></div>
+    <div><dt>Founder draws</dt><dd>2 &times; nextInt(40)</dd></div>
+    <div><dt>Deterministic</dt><dd>yes</dd></div>
+    <div><dt>Visible when</dt><dd>Ch_</dd></div>
+    <div><dt>keep red</dt><dd>0.55</dd></div>
+    <div><dt>keep black</dt><dd>0.42</dd></div>
+    <div><dt>black tint</dt><dd>0.30</dd></div>
+</dl>
+
+<h2>The whole gene</h2>
+
+<div class="codebox">
+<div class="filename">common/genetics/genes/ChampagneGene.java</div>
+<pre><code class="language-java">private static final float KEEP_RED   = 0.55f;  // champagne barely touches red
+private static final float KEEP_BLACK = 0.42f;  // hard, but not so hard a black horse goes gold
+private static final float BLACK_TINT = 0.30f;  // removed eumelanin, fed back as pheomelanin
+
+@Override
+public PigmentField restrict(AllelePair pair, CoatBuildContext ctx, PigmentView coat) {
+    if (!isChampagne(pair)) {
+        return null;
+    }
+    PigmentField f = coat.mutableCopy();
+    CoatRegions.restrictAll(ctx.skin(), f,
+            (field, px, py, p) -&gt; field.dilute(px, py, KEEP_RED, KEEP_BLACK, BLACK_TINT));
+    return f;
+}</code></pre>
+</div>
+
+<h2>What it looks like on each base</h2>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Base</th><th>Name</th><th>Body</th><th>Points</th></tr></thead>
+<tbody>
+<tr><td>chestnut (<code>ee</code>)</td><td><strong>gold champagne</strong></td><td>gold <code>#E3B045</code></td><td>same &mdash; no black to dilute</td></tr>
+<tr><td>black (<code>E_ aa</code>)</td><td><strong>classic champagne</strong></td><td>taupe <code>#834A24</code></td><td>same</td></tr>
+<tr><td>bay (<code>E_ A_</code>)</td><td><strong>amber champagne</strong></td><td>gold <code>#C28F39</code></td><td>chocolate <code>#785E41</code></td></tr>
+</tbody>
+</table>
+</div>
+
+<p>Champagne on a <a href="gene-white.html">dominant white</a> horse is invisible.</p>
+
+<div class="note good">
+    <span class="label">Owner-verified in-game, 2026-09-01</span>
+    <p>An amber champagne keeps its chocolate points over a gold body.</p>
+</div>
+
+<h2 id="tint">The tint is what makes amber champagne work</h2>
+
+<p>
+    This gene is the clearest case for
+    <a href="pipeline.html#dilute"><code>PigmentField.dilute</code></a>. The previous
+    rule set red <em>absolutely</em>:
+</p>
+
+<div class="codebox">
+<div class="filename">the old rule, and why it failed</div>
+<pre><code class="language-java">field.setRed(px, py, 0.45f + 0.10f * red);   // WRONG
+field.restrictBlack(px, py, 0.82f);          // black *= 0.18</code></pre>
+</div>
+
+<ul>
+    <li><strong>Two failures, one cause.</strong> Setting red absolutely lands within
+        0.10 of the same value whether the texel is a red body or a black point, so a
+        champagne bay came out <strong>flat gold with no points at all</strong>.</li>
+    <li>And cutting black to 0.18 was hard enough that a classic champagne on black
+        also came out gold &mdash; indistinguishable from a gold champagne on
+        chestnut. Two of the three champagne colours collapsed into one.</li>
+</ul>
+
+<p>
+    Feeding 30% of the texel&rsquo;s black back in as red walks the sample sideways
+    off the gradient&rsquo;s zero-red column, so a bay&rsquo;s points (which carry
+    <code>red = 0</code>) land in the warm browns while the body, which already had
+    red, goes gold. One term, three distinct colours.
+</p>
+
+<h2>What makes it the simplest gene</h2>
+
+<ul>
+    <li>No dose &mdash; <code>Ch/c</code> and <code>Ch/Ch</code> are the same
+        horse.</li>
+    <li>No epigenetics &mdash; fully deterministic, so every champagne of a given
+        genotype shares one baked texture.</li>
+    <li>No cross-gene reading &mdash; <code>isVisible</code> is just
+        <code>pair.has(Ch)</code>.</li>
+    <li>No geometry &mdash; one <code>restrictAll</code> over every texel.</li>
+</ul>
+
+<p>
+    It is almost exactly the shape the planned
+    <a href="roadmap.html#modder-api">tier-1 declarative builder</a> is meant to cover
+    in five lines.
+</p>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="gene-cream.html">Cream</a>
+        <a href="gene-agouti.html">Agouti</a>
+        <a href="modding.html">Writing a gene</a>
+        <a href="pipeline.html#dilute">Why dilute() exists</a>
+    </div>
+    Source: <code>common/genetics/genes/ChampagneGene.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>
