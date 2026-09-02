@@ -78,7 +78,8 @@ public final class ModGeneSpecs {
             for (SpecGene gene : Genes.loaded()) {
                 names.append(names.isEmpty() ? "" : ", ").append(gene.key());
             }
-            HorseGenetics.LOGGER.info("[genes] loaded {} gene(s) from {}: {}", added, dir, names);
+            HorseGenetics.LOGGER.info("[genes] loaded {} data-driven gene(s): {} "
+                    + "(shipped on the classpath and/or dropped in {})", added, names, dir);
             HorseGenetics.LOGGER.info("[genes] the genotype code now has {} segments", Genes.codeOrder().size());
         }
         return added;

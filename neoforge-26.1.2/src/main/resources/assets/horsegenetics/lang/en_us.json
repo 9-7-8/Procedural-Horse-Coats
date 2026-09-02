@@ -1,4 +1,5 @@
 {
   "key.horsegenetics.debug_pens": "Generate Debug Horse Pens",
-  "key.categories.horsegenetics.debug": "Horse Genetics (Debug)"
+  "key.categories.horsegenetics.debug": "Horse Genetics (Debug)",
+  "item.horsegenetics.custom_horse_spawn_egg": "Custom Horse Spawn Egg"
 }

@@ -890,6 +890,20 @@ interface ConditionRule    { void conditions(AllelePair, ConditionSink); } // CS
     final until it lands.
 </p>
 
+<div class="note">
+    <span class="label">A first slice landed &mdash; <a href="horse-traits.html">the trait &amp; effect architecture</a></span>
+    <p>
+        A data-driven gene can already carry an <code>effects</code> block: a closed
+        set of five verbs (<code>traversal</code>, <code>attribute</code>,
+        <code>emitter</code>, <code>mob_effect</code>, <code>yield</code>) with boolean
+        <code>when</code> conditions. The NeoForge translator runs three of them today
+        (walk-on-water, particle trails, milk-a-mare &mdash; see the Waterborn example).
+        The full behaviour system it is a slice of &mdash; triggers, selectors, auras,
+        resource pools, goals, trait relations &mdash; is written up on that page and
+        is otherwise unbuilt.
+    </p>
+</div>
+
 <hr>
 
 <h2 id="care">7. Horse care: milking and gated healing</h2>

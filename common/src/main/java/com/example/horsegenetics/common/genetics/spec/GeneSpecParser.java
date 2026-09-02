@@ -62,7 +62,7 @@ public final class GeneSpecParser {
 
     private static GeneSpec read(Map<String, Object> root) {
         expectKeys(root, "the file", "format", "key", "name", "phase", "dominance",
-                "wildOdds", "priority", "alleles", "knobs", "layers");
+                "wildOdds", "priority", "alleles", "knobs", "layers", "effects");
 
         int format = (int) number(root, "format", GeneSpec.FORMAT);
         if (format != GeneSpec.FORMAT) {
@@ -112,9 +112,180 @@ public final class GeneSpecParser {
                     "layer " + (i + 1), natural, knobs, knobIndex));
         }
 
+        List<GeneAbility> abilities = readAbilities(root);
+
         List<AlleleSpec> alleles = readAlleles(root, !knobs.isEmpty());
         return new GeneSpec(key, name, natural, dominance, wildOdds, priority,
-                alleles, List.copyOf(knobs), List.copyOf(layers));
+                alleles, List.copyOf(knobs), List.copyOf(layers), abilities);
+    }
+
+    // ------------------------------------------------------------------
+    // effects - the Minecraft-specific abilities a gene grants
+    // ------------------------------------------------------------------
+
+    private static List<GeneAbility> readAbilities(Map<String, Object> root) {
+        List<Object> raw = array(root, "effects");
+        List<GeneAbility> out = new ArrayList<>();
+        for (int i = 0; i < raw.size(); i++) {
+            out.add(readAbility(asObject(raw.get(i), "effect " + (i + 1)), "effect " + (i + 1)));
+        }
+        return List.copyOf(out);
+    }
+
+    private static GeneAbility readAbility(Map<String, Object> o, String where) {
+        String type = string(o, "type", null).toLowerCase(Locale.ROOT);
+        return switch (type) {
+            case "traversal" -> {
+                expectKeys(o, where, "type", "flag", "when", "minDose");
+                yield new GeneAbility.Traversal(
+                        AbilitySchema.requireOneOf(AbilitySchema.TRAVERSAL_FLAGS,
+                                string(o, "flag", null), where + " flag"),
+                        readCondition(o.get("when"), where + " when"),
+                        readMinDose(o, where));
+            }
+            case "attribute" -> {
+                expectKeys(o, where, "type", "attribute", "op", "amount", "when", "minDose");
+                yield new GeneAbility.AttributeMod(
+                        AbilitySchema.requireOneOf(AbilitySchema.ATTRIBUTES,
+                                string(o, "attribute", null), where + " attribute"),
+                        AbilitySchema.requireOneOf(AbilitySchema.ATTRIBUTE_OPS,
+                                string(o, "op", "add"), where + " op"),
+                        number(o, "amount", 0),
+                        readCondition(o.get("when"), where + " when"),
+                        readMinDose(o, where));
+            }
+            case "emitter" -> {
+                expectKeys(o, where, "type", "kind", "shape", "anchor", "trigger",
+                        "particle", "color", "chance", "when", "minDose");
+                double chance = number(o, "chance", 1.0);
+                if (chance <= 0 || chance > 1) {
+                    throw new IllegalArgumentException(where + " chance: must be in (0, 1], got " + chance);
+                }
+                yield new GeneAbility.Emitter(
+                        AbilitySchema.requireOneOf(AbilitySchema.EMITTER_KINDS,
+                                string(o, "kind", "particle"), where + " kind"),
+                        AbilitySchema.requireOneOf(AbilitySchema.EMITTER_SHAPES,
+                                string(o, "shape", "point"), where + " shape"),
+                        AbilitySchema.requireOneOf(AbilitySchema.EMITTER_ANCHORS,
+                                string(o, "anchor", "feet"), where + " anchor"),
+                        readTrigger(o.get("trigger"), where + " trigger", new GeneAbility.Trigger.OnMove()),
+                        readColor(o.getOrDefault("color", "#ffffff"), where + " color"),
+                        string(o, "particle", "minecraft:dust"),
+                        chance,
+                        readCondition(o.get("when"), where + " when"),
+                        readMinDose(o, where));
+            }
+            case "mob_effect" -> {
+                expectKeys(o, where, "type", "effect", "target", "amplifier", "refresh", "when", "minDose");
+                int refresh = (int) number(o, "refresh", 40);
+                if (refresh < 1) {
+                    throw new IllegalArgumentException(where + " refresh: must be at least 1 tick, got " + refresh);
+                }
+                yield new GeneAbility.SelfEffect(
+                        string(o, "effect", null),
+                        AbilitySchema.requireOneOf(AbilitySchema.EFFECT_TARGETS,
+                                string(o, "target", "self"), where + " target"),
+                        (int) number(o, "amplifier", 0),
+                        refresh,
+                        readCondition(o.get("when"), where + " when"),
+                        readMinDose(o, where));
+            }
+            case "yield" -> {
+                expectKeys(o, where, "type", "trigger", "consumes", "produces", "cooldown", "when", "minDose");
+                GeneAbility.Trigger trigger = readTrigger(o.get("trigger"), where + " trigger",
+                        new GeneAbility.Trigger.OnInteract(""));
+                if (!(trigger instanceof GeneAbility.Trigger.OnInteract onInteract)) {
+                    throw new IllegalArgumentException(where + " trigger: a yield fires on 'on_interact' only");
+                }
+                yield new GeneAbility.Yield(
+                        onInteract,
+                        string(o, "consumes", ""),
+                        string(o, "produces", ""),
+                        (int) number(o, "cooldown", 0),
+                        readCondition(o.get("when"), where + " when"),
+                        readMinDose(o, where));
+            }
+            default -> throw new IllegalArgumentException(where + ": unknown effect type '" + type
+                    + "'; allowed are [traversal, attribute, emitter, mob_effect, yield]");
+        };
+    }
+
+    private static int readMinDose(Map<String, Object> o, String where) {
+        int d = (int) number(o, "minDose", 1);
+        if (d != 1 && d != 2) {
+            throw new IllegalArgumentException(where + " minDose: must be 1 (any expressing copy) or 2 "
+                    + "(homozygous variant), got " + d);
+        }
+        return d;
+    }
+
+    private static GeneAbility.Trigger readTrigger(Object raw, String where, GeneAbility.Trigger fallback) {
+        if (raw == null) {
+            return fallback;
+        }
+        if (raw instanceof String s) {
+            return switch (s.toLowerCase(Locale.ROOT)) {
+                case "continuous" -> new GeneAbility.Trigger.Continuous();
+                case "on_move" -> new GeneAbility.Trigger.OnMove();
+                default -> throw new IllegalArgumentException(where + ": bare trigger must be "
+                        + "'continuous' or 'on_move'; use an object for 'interval' / 'on_interact'");
+            };
+        }
+        Map<String, Object> o = asObject(raw, where);
+        if (o.size() != 1) {
+            throw new IllegalArgumentException(where + ": name exactly one of "
+                    + "[continuous, on_move, interval, on_interact]");
+        }
+        String kind = o.keySet().iterator().next();
+        Object v = o.get(kind);
+        return switch (kind) {
+            case "continuous" -> new GeneAbility.Trigger.Continuous();
+            case "on_move" -> new GeneAbility.Trigger.OnMove();
+            case "interval" -> {
+                int ticks = (int) asNumber(v, where + " interval");
+                if (ticks < 1) {
+                    throw new IllegalArgumentException(where + " interval: at least 1 tick, got " + ticks);
+                }
+                yield new GeneAbility.Trigger.Interval(ticks);
+            }
+            case "on_interact" -> new GeneAbility.Trigger.OnInteract(v == null ? "" : asString(v, where + " on_interact"));
+            default -> throw new IllegalArgumentException(where + ": unknown trigger '" + kind
+                    + "'; allowed are [continuous, on_move, interval, on_interact]");
+        };
+    }
+
+    private static GeneAbility.Condition readCondition(Object raw, String where) {
+        if (raw == null) {
+            return GeneAbility.Condition.ALWAYS;
+        }
+        Map<String, Object> o = asObject(raw, where);
+        if (o.isEmpty()) {
+            return GeneAbility.Condition.ALWAYS;
+        }
+        if (o.containsKey("flag")) {
+            expectKeys(o, where, "flag", "negate");
+            String flag = AbilitySchema.requireOneOf(AbilitySchema.CONDITION_FLAGS,
+                    asString(o.get("flag"), where + " flag"), where + " flag");
+            return new GeneAbility.Condition.Flag(flag, flag(o, "negate", false));
+        }
+        if (o.containsKey("not")) {
+            expectKeys(o, where, "not");
+            return new GeneAbility.Condition.Not(readCondition(o.get("not"), where + " not"));
+        }
+        if (o.containsKey("all") || o.containsKey("any")) {
+            String key = o.containsKey("all") ? "all" : "any";
+            expectKeys(o, where, key);
+            List<GeneAbility.Condition> terms = new ArrayList<>();
+            List<Object> arr = asArray(o.get(key), where + " " + key);
+            for (int i = 0; i < arr.size(); i++) {
+                terms.add(readCondition(arr.get(i), where + " " + key + "[" + i + "]"));
+            }
+            return key.equals("all")
+                    ? new GeneAbility.Condition.All(List.copyOf(terms))
+                    : new GeneAbility.Condition.Any(List.copyOf(terms));
+        }
+        throw new IllegalArgumentException(where + ": a condition is {\"flag\":..}, {\"not\":..}, "
+                + "{\"all\":[..]} or {\"any\":[..]}");
     }
 
     private static List<AlleleSpec> readAlleles(Map<String, Object> root, boolean anyKnobs) {

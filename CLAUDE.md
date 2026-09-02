@@ -31,8 +31,15 @@ project. Its shape:
   exports the JSON the game loads. It does **not** use the wiki's `styles.css` /
   `nav.js` - it owns the whole window.
 - **`wiki/gene-format.html`** is the single source of truth for the **data-driven
-  gene file format** - the header, the knobs, every mask and every op. When a
-  mask or an op changes shape, update it in the same change.
+  gene file format** - the header, the knobs, every mask and every op, and the
+  `effects` block's shape. When a mask, an op or an effect verb changes shape,
+  update it in the same change.
+- **`wiki/horse-traits.html`** is the single source of truth for the **trait /
+  effect architecture** - the `effects` verbs a data-driven gene can carry
+  (traversal, attribute, emitter, mob_effect, yield), their conditions and
+  triggers, the Waterborn worked example, and the full unbuilt behaviour-system
+  design the slice grows into. When an effect verb or its translator changes,
+  update it here.
 - **`README.md`** is **user-facing only** now - what the mod does, how to play
   it, install, license. No status tables, no architecture, no API notes.
   Don't put dev content there.
@@ -91,7 +98,7 @@ project. Its shape:
 
 ## Status snapshot (keep this current)
 
-- **`common/`** - compiles; **177 JUnit tests pass** (`./gradlew :common:test`).
+- **`common/`** - compiles; **185 JUnit tests pass** (`./gradlew :common:test`).
   Covers `genetics/` (allele/gene model - **11 genes**: the 9 natural ones incl.
   grey / cream / pearl / splash, plus magic zebra and pink hair; `Genotype` code
   round-trip, breeding, the `Epigenome` / `Genome` per-allele epigenetics +
@@ -105,13 +112,17 @@ project. Its shape:
   `horse/` (pedigree + `HorseStats` -> `wiki/breeding.html`), and
   `genetics/spec/` (the **data-driven gene** format: `GeneSpec`, `Json`,
   `GeneSpecParser`, `SpecSchema`, `SpecValues`, `SpecGene`, `GeneSpecLoader`,
-  plus `coat/pattern/SpecPainter` - see below).
+  plus `coat/pattern/SpecPainter`; and the **gene `effects`** path -
+  `GeneAbility`, `AbilitySchema`, `SpecAbilities` - the Minecraft-specific
+  things a data-driven gene does beyond the coat - see below).
 - **`neoforge-26.1.2/`** - compiles and assembles (`./gradlew
   :neoforge-26.1.2:build` passes; only two `getGuiLeft/getGuiTop`
   deprecation warnings) against the real NeoForge `26.1.2.100` SDK.
 - **`runServer`** - boots clean to `Done (...)! For help`; all dimensions,
-  attachments, SavedData, payloads, the `hay_portal` block + block entity, and
-  the `ClientConfig` all register with no errors.
+  attachments, SavedData, payloads (incl. `spawn_custom_horse`), the
+  `hay_portal` block + block entity, the `custom_horse_spawn_egg` item, and
+  the `ClientConfig` all register with no errors. Re-verified 2026-09-02 with
+  the shipped Waterborn gene loaded (`[genes] ... 12 segments`).
 - **`runClient`** - actively play-tested over the 2026-08-30 and 2026-09-01
   sessions; see below.
 
@@ -181,6 +192,56 @@ project. Its shape:
   built-in genes changed: no gene file ships by default, so the registry, the
   genotype code, the gallery numbers and `coat-golden.txt` are all untouched.
   See "Data-driven genes" below; in-game checklist in `wiki/verification.html`.
+- **Built 2026-09-02, NOT yet play-tested:** **gene `effects`** - a data-driven
+  gene can now carry Minecraft-specific behaviour alongside its coat `layers`.
+  Five verbs (`traversal`, `attribute`, `emitter`, `mob_effect`, `yield`), each
+  with an optional boolean `when` and a `minDose`. `common/` parses and
+  validates all five (`GeneAbility` / `AbilitySchema` / `GeneSpecParser` /
+  `SpecAbilities`, unit-tested); the NeoForge translator
+  (`server/GeneAbilityHandler`, `server/GeneYieldHandler`) executes
+  `traversal` + `emitter` + `yield`. **`attribute` and `mob_effect` are parsed
+  but not executed yet** (logged once). `walk_on_water` is an approximation
+  (surface buoyancy, not a solid plane). Example gene
+  `common/.../example-genes/waterborn.json` (**Waterborn**: neon-blue mane/tail
+  stripes, walk on water, blue trail particles, mares milkable for water) - it
+  is an example, **not registered**, so no derived numbers move. Full reference:
+  `wiki/horse-traits.html`; checklist in `wiki/verification.html`.
+- **Play-tested 2026-09-02, works:** the **custom horse spawn egg**
+  (`item/ModItems` -> `CUSTOM_HORSE_SPAWN_EGG`). A plain `Item` reusing the
+  vanilla `minecraft:item/horse_spawn_egg` texture (identical icon), in the
+  Spawn Eggs creative tab. Right-clicking it (`client/CustomHorseSpawnEggClient`
+  cancels the interaction) opens `client/CustomHorseSpawnScreen`: pick **age**
+  (Adult/Foal), **sex** (Mare/Stallion), and a **genome** - starts as a bare
+  `EEaa` (extension `E/E` + agouti `a/a`, both required and not removable),
+  `+` lists the genes not yet added, each row has two allele buttons that cycle
+  through `gene.alleles()` (fine for 3+ alleles); a newly added gene defaults
+  to **homozygous for its first non-wild-type allele** (the one that does
+  something), not wild/wild. **Spawn** sends `network/SpawnCustomHorsePayload` -> the server
+  parses the code, spawns a `Horse` at the player's look target, and
+  `HorseRecords.apply(newFounder(..., sex, code))` **before** `addFreshEntity`
+  so `HorseGeneticsEventHandler` keeps the genome (epigenome still rolled
+  fresh). Non-creative players lose one egg. All custom horses get default
+  (not randomised) speed/health - fine for a genome-test tool. Owner-tested:
+  the egg + editor + spawn all work; two follow-ups fixed the same day - a
+  full-screen dim in `extractRenderState` was drawing over the buttons
+  (widgets render *during* `super.extractRenderState`, so the backdrop is now
+  narrow strips in the gaps), and the gene picker + genome list could run off
+  the bottom of a short screen and hide the last gene (now bounded multi-column
+  in the picker, mouse-wheel scroll in the editor). A gene only shows in the
+  list (and can only be spawned) if it is actually registered.
+- **Behaviour change 2026-09-02: Waterborn now ships loaded.** To make the
+  data-driven-effects work testable in-game, `example.waterborn` is registered
+  via a **classpath gene index** - `neoforge-26.1.2/src/main/resources/
+  horsegenetics/genes/index.json` (`["waterborn.json"]`) + `waterborn.json`
+  beside it, which `GeneSpecLoader.fromClasspath()` picks up in the mod
+  constructor. This is the **first gene file to ship**, so it breaks the "no
+  gene ships by default" invariant on purpose (the owner OK'd it): the in-game
+  genotype code is now **12 segments**, `GenotypeCatalog`/the gallery double,
+  and 11-segment saved horses won't parse. **`:common:test` is unaffected** -
+  the index lives in the neoforge module's resources, not on the `common` test
+  classpath, so `Genes` stays at 11 built-ins there and `coat-golden.txt` +
+  `SpecGeneTest`'s `BUILT_IN_GENES == 11` still hold. The horse dimension will
+  be overhauled later regardless.
 - **Docs 2026-09-02, no behaviour change:** the **`Docs/*.md` -> wiki
   conversion**. All five markdown docs are gone; their content lives in
   `wiki/*.html` (see the Docs-split section above), the four Javadoc comments
@@ -284,6 +345,10 @@ Two-module Gradle project, split deliberately:
   - `block/` - `ModBlocks` + `HayPortalBlock` (the only registered block),
     `ModBlockEntities` + `HayPortalBlockEntity` (drives the animated
     `hay_portal.png` slab renderer).
+  - `item/` - `ModItems` + the **custom horse spawn egg** (a dev tool - a
+    reskin of the horse spawn egg that opens a genome/age/sex editor first;
+    the editor screen is `client/CustomHorseSpawnScreen`, the spawn itself
+    goes through `network/SpawnCustomHorsePayload`).
 
   Its job is to **translate** - build/read `common` types and shuttle them in
   and out of Minecraft's systems; the logic stays in `common/`.
@@ -440,13 +505,37 @@ reference is **`wiki/gene-format.html`**; the machinery:
   downstream knows or cares that it came from a file - genotype code, breeding,
   the catalogue, the coat.
 - **Loading** is `GeneSpecLoader`: a classpath index (for genes shipped inside a
-  mod) plus a real folder walked in filename order. **No gene file ships by
-  default** - the built-in eleven are unchanged - so the genotype code, the
-  gallery numbers and `coat-golden.txt` are all untouched by this work.
+  mod) plus a real folder walked in filename order. **One gene now ships** -
+  `example.waterborn`, via `neoforge/src/main/resources/horsegenetics/genes/
+  index.json`, added 2026-09-02 to make the effects work testable (see the
+  status snapshot). So **in-game** the genotype code is 12 segments and the
+  gallery numbers are doubled; **`:common:test` still sees 11** because that
+  index is not on its classpath, so `coat-golden.txt` is untouched.
   `neoforge/ModGeneSpecs` calls it **from the mod constructor**, which is the
   earliest hook there is: every registration lengthens the genotype code by a
   segment, so a gene registered after something has parsed a code would
   invalidate it. A bad file is logged and skipped, never fatal.
+
+### `effects` - Minecraft behaviour on a data-driven gene
+
+A spec may carry an **`effects`** array alongside `layers` - the things a gene
+makes the horse *do*, not the pixels it paints. Closed set of five verbs
+(`traversal`, `attribute`, `emitter`, `mob_effect`, `yield`); each takes an
+optional boolean **`when`** (flags + `all`/`any`/`not`) and a **`minDose`**
+(1 = any expressing copy, 2 = homozygous). `common/` owns the vocabulary and
+the parse (`GeneAbility` records, `AbilitySchema` tables, `GeneSpecParser`,
+and `SpecAbilities.activeFor(Genotype)` which picks the expressed ones); it
+never touches Minecraft. The **NeoForge translator** is `server/`
+`GeneAbilityHandler` (an `EntityTickEvent.Post` that evaluates conditions and
+applies `traversal` + fires `emitter`s) and `server/GeneYieldHandler` (an
+`EntityInteract` handler for `yield`). Both short-circuit when
+`SpecAbilities.anyLoaded()` is false (true again if the shipped Waterborn gene
+is removed).
+**`attribute` and `mob_effect` are carried but not executed yet** - the
+handler logs each type once. `walk_on_water` is surface buoyancy + "don't
+sink", not a real collision plane. **Not play-tested.** Full reference and the
+Waterborn worked example: `wiki/horse-traits.html`. **Built-in Java genes do
+not use this path** - it is spec-only.
 
 ### The creator, and why it can be trusted
 
@@ -694,6 +783,12 @@ approximate.
    inherited epigenetics can only be read while both parents are in hand - the
    join handler would re-roll them. It then sees an assigned attachment and
    leaves it alone.
+   **The custom horse spawn egg** is a third path: `ModNetworking`'s
+   `SpawnCustomHorsePayload` handler applies a founder record with the
+   player-picked code + sex **before** `addFreshEntity`, so the join handler
+   takes its "already has a real record" branch and keeps the genome; the coat
+   attachment is still unset at that point, so a founder `Epigenome.random` is
+   rolled exactly as for a wild spawn.
 2. Not auto-synced -> the handler sends `CoatSyncPayload` `{entityId, code,
    epigenome}` and `HorseRecordSyncPayload` to trackers (on every join, plus
    `StartTracking`).
@@ -1347,6 +1442,15 @@ Design follow-ups (not just "go look at it"):
    script at the terminal, so the tool itself will happily show you a stale
    preview if you edit `js/` and don't run it. Loading `fixtures/expected.json`
    in the page and self-checking on boot would close that.
+15. **Gene `effects` are a thin slice and untested.** `attribute` and
+   `mob_effect` parse but the translator doesn't apply them (logged once).
+   `walk_on_water` is buoyancy, not a solid plane; `emitter` only does
+   particles (`light` is a no-op); `yield` recognises a fixed handful of output
+   items. Conditions are boolean, not the architecture's 0-1 scalars. There is
+   no trait registry, no `on_change`, no selectors/auras/pools. The gene
+   creator can't edit an `effects` block - it's hand-written. Nothing here has
+   been seen in-game (`wiki/verification.html`). The full plan is
+   `wiki/horse-traits.html`.
 
 ## License
 
@@ -1360,7 +1464,7 @@ its licence is compatible.
 
 - Keep `common/` free of Minecraft imports - a hard rule.
 - New version-specific logic goes in `neoforge-26.1.2/`, by concern
-  (`client/` / `data/` / `network/` / `server/` / `block/`).
+  (`client/` / `data/` / `network/` / `server/` / `block/` / `item/`).
 - Flag genuinely unverified API usage in comments the way the existing code
   does - more useful to the next session than silent confidence.
 - When you resolve something flagged here as unverified or a known gap,
@@ -1385,6 +1489,12 @@ its licence is compatible.
   same change: `SpecSchema.java`, `SpecPainter.java`,
   `wiki/gene-creator/js/schema.js` + `spec-engine.js`, and that page. Then
   re-run `:common:bakeSpecFixtures` and `check-parity.mjs`.
+- **A new `effects` verb / flag** lands in: `AbilitySchema.java` (the vocab),
+  `GeneSpecParser.readAbility`/`readTrigger`/`readCondition`, the NeoForge
+  translator (`server/GeneAbilityHandler` or `server/GeneYieldHandler`), and
+  **both** `wiki/horse-traits.html` and the `effects` section of
+  `wiki/gene-format.html`. It is *not* part of `SpecSchema` or the parity
+  check (effects don't paint).
 - **Keep the why out of the backlog.** `wiki/roadmap.html` is work items;
   when a justification there runs longer than a clause it belongs in
   `wiki/philosophy.html` with a pointer back.

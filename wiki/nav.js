@@ -31,7 +31,8 @@
             title: "For modders",
             items: [
                 { href: "modding.html", text: "Writing a gene", kind: "core" },
-                { href: "api-reference.html", text: "Class abstractions", kind: "core" }
+                { href: "api-reference.html", text: "Class abstractions", kind: "core" },
+                { href: "horse-traits.html", text: "Trait & effect architecture", kind: "magical" }
             ]
         },
         {

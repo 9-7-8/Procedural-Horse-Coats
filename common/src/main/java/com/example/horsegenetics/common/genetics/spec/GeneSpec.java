@@ -25,6 +25,11 @@ import java.util.Map;
  * the effect, so every edge is soft by construction rather than by each author
  * remembering to fade it.
  *
+ * <p>A spec may also carry an <b>{@code effects}</b> list - {@link GeneAbility}s,
+ * the Minecraft-specific things a gene does beyond the coat (walk on water,
+ * trail particles, be milked for a fluid). Those are inert in {@code common/};
+ * the NeoForge module executes them.
+ *
  * <h2>Numbers that vary per horse</h2>
  * Any numeric parameter is a {@link Value}: a constant, a {@link Knob} the horse
  * draws once from its epigenetics, or a per-dose triple. Knobs are drawn in
@@ -45,7 +50,8 @@ public record GeneSpec(
         int priority,
         List<AlleleSpec> alleles,
         List<Knob> knobs,
-        List<Layer> layers) {
+        List<Layer> layers,
+        List<GeneAbility> abilities) {
 
     /** The current format version. Bumped only if the shape changes incompatibly. */
     public static final int FORMAT = 1;
@@ -63,6 +69,15 @@ public record GeneSpec(
     /** Does any value on this gene vary per horse? If not, one bake serves every carrier. */
     public boolean isDeterministic() {
         return knobs.isEmpty();
+    }
+
+    /**
+     * Does this gene carry any Minecraft-specific effects (traversal flags,
+     * emitters, yields, ...)? The coat pipeline never asks; the NeoForge
+     * translator does. See {@link GeneAbility}.
+     */
+    public boolean hasAbilities() {
+        return !abilities.isEmpty();
     }
 
     // ------------------------------------------------------------------

@@ -89,7 +89,11 @@
 <p>
     New 2026-09-02, and the whole point of the
     <a href="gene-creator/index.html">gene creator</a>: nothing about it has been seen
-    in a running game. Nothing loads by default, so this is opt-in. To test it:
+    in a running game.
+    <strong>Baseline note:</strong> as of 2026-09-02 <code>example.waterborn</code>
+    ships loaded (classpath index), so a stock in-game genotype code is already
+    <strong>12 segments</strong> and the gallery is already doubled. Dropping one more
+    gene in takes it to 13. To test the drop-in path:
 </p>
 
 <ol>
@@ -101,8 +105,8 @@
         <code>README.txt</code> should already be there from a previous launch; if not,
         that is itself a finding.</li>
     <li><code>./gradlew :neoforge-26.1.2:runClient</code> and read the log for
-        <code>[genes] loaded 1 gene(s)</code> and
-        <code>the genotype code now has 12 segments</code>.</li>
+        <code>[genes] loaded 2 data-driven gene(s)</code> (Waterborn + Tobiano) and
+        <code>the genotype code now has 13 segments</code>.</li>
 </ol>
 
 <p>What to look at:</p>
@@ -110,9 +114,9 @@
 <ul>
     <li><strong>Wild horses carry it.</strong> 1 in 18 per allele, so a handful of
         spawns should include a patched one. The horse dimension's gallery should have
-        <strong>doubled in length</strong> (the entrance sign is the quick read: the
-        distinct-genotype count should go from 1&nbsp;730 to 3&nbsp;458 &mdash; the two
-        <code>COMPLETE_DOMINANT</code> pens do not double).</li>
+        <strong>roughly doubled again</strong> from its Waterborn-baseline length (the
+        two <code>COMPLETE_DOMINANT</code> pens don't double); the entrance sign is the
+        quick read.</li>
     <li><strong>It looks like the preview did.</strong> Not texel-identical &mdash; the
         creator's gradient is downsampled &mdash; but the same size and shape of
         patches, and the same socks.</li>
@@ -124,8 +128,9 @@
         the same genotype should have different patches; a foal's should match the
         parent whose copy it took.</li>
     <li><strong>Removing the file is clean.</strong> Delete it, relaunch: the code drops
-        back to 11 segments. Horses saved with 12 will fail to load &mdash; expected,
-        but confirm it fails <em>loudly</em> rather than corrupting anything.</li>
+        back to the 12-segment Waterborn baseline. Horses saved at 13 will fail to load
+        &mdash; expected, but confirm it fails <em>loudly</em> rather than corrupting
+        anything.</li>
     <li><strong>A deliberately broken file.</strong> Put a stray comma in one and
         confirm the game still boots, logs the error with the file name, and loads the
         other genes.</li>
@@ -361,9 +366,82 @@
         shown.</li>
 </ul>
 
+<h3 id="effects">13. Gene <code>effects</code> &mdash; the Waterborn example</h3>
+
+<p>
+    New 2026-09-02. A data-driven gene can now carry Minecraft behaviour, not just a
+    coat. Nothing has been seen in-game. <strong>Waterborn now ships loaded</strong>
+    (classpath index in the NeoForge module), so <code>runClient</code> and confirm
+    the boot log shows <code>[genes] loaded 1 data-driven gene(s)</code> /
+    <code>12 segments</code> with no config drop needed. Then, on a
+    <strong>Waterborn</strong> horse &mdash; fastest is the
+    <strong>custom horse spawn egg</strong> (item&nbsp;14: add <em>Waterborn</em>, which
+    now defaults to homozygous, and spawn), or breed carriers, or find a wild one
+    (1 in 90 per allele, so it is rare):
+</p>
+
+<ul>
+    <li><strong>Neon-blue stripes down the mane and tail.</strong> A coat layer, so it
+        should read on every base coat including cremello and dominant white, and keep
+        the strand shading like pink hair does.</li>
+    <li><strong>Walks on water.</strong> A grown Waterborn horse in water should ride
+        at the surface and not sink; a foal should <em>not</em> (the
+        <code>when: adult</code> gate). This is an approximation &mdash; buoyancy, not
+        a solid plane &mdash; so watch for bobbing, getting stuck at the edge, or the
+        rider's head going under.</li>
+    <li><strong>Blue dust trail.</strong> Particles at the hooves only while it is
+        moving on the ground, roughly 7 in 10 ticks. Not while standing or swimming.</li>
+    <li><strong>Mares milk for water.</strong> Right-click a <strong>tamed mare</strong>
+        with an empty bucket &rarr; it becomes a water bucket, no mount happens, and a
+        second try within ~2 minutes does nothing. A <strong>stallion</strong>, or an
+        untamed mare, should just mount as normal.</li>
+    <li><strong>The log line</strong> <code>effect 'attribute' ... defined but not
+        translated</code> should <em>not</em> appear for Waterborn (it has none) &mdash;
+        it is the tell for a gene that uses the unbuilt verbs.</li>
+    <li><strong>No effect on a non-Waterborn horse</strong>, and no measurable tick
+        cost when the file is absent (the handler short-circuits on
+        <code>SpecAbilities.anyLoaded()</code>).</li>
+</ul>
+
+<h3 id="custom-spawn-egg">14. Custom horse spawn egg &mdash; the two follow-up fixes</h3>
+
+<p>
+    Owner-tested 2026-09-02: the egg, the editor, and the spawn all work. Two things
+    were fixed the same day and want a second look:
+</p>
+
+<ul>
+    <li><strong>No dark tint over the buttons.</strong> The backdrop used to be a
+        full-screen fill drawn after <code>super.extractRenderState</code>, which in
+        the retained-mode GUI paints <em>over</em> the widgets. It is now a few narrow
+        strips in the gaps (behind the title, the gene-name column, the preview line)
+        &mdash; the buttons should look normal.</li>
+    <li><strong>Every gene is reachable.</strong> The gene picker is now bounded
+        multi-column (no button runs off the bottom), and the genome list in the editor
+        scrolls with the mouse wheel when it is long. <strong>Waterborn</strong> (now a
+        shipped gene) should be in the picker; add it and confirm it&rsquo;s clickable
+        and lands as a row.</li>
+    <li><strong>New rows default to the &ldquo;does something&rdquo; allele.</strong>
+        Adding a gene from the picker now sets it <strong>homozygous for its first
+        non-wild-type allele</strong> (e.g. <em>Cream</em> lands as <code>Cr</code>/<code>Cr</code>,
+        <em>Waterborn</em> as <code>Wtb</code>/<code>Wtb</code>), not wild/wild. You can
+        still cycle either allele back to wild.</li>
+</ul>
+
+<p>Still unconfirmed from the first pass:</p>
+
+<ul>
+    <li>Allele buttons cycle and wrap (check a 3-allele drop-in gene if you have one).</li>
+    <li>Spawned horse renders the picked coat (not a random one); its info panel / paper
+        dump shows that genotype; Foal/Adult and Mare/Stallion match the toggles.</li>
+    <li>Non-creative use consumes one egg; creative does not. Spawned horses are
+        persistent. Two custom horses breed normally.</li>
+</ul>
+
 <div class="page-foot">
     <div class="seealso">
         <a href="roadmap.html">Roadmap / backlog</a>
+        <a href="horse-traits.html">Trait &amp; effect architecture</a>
         <a href="gene-magic-zebra.html">Magic zebra</a>
         <a href="gene-pink-hair.html">Pink hair</a>
         <a href="gene-grey.html">Grey</a>

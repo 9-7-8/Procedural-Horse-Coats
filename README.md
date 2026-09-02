@@ -53,6 +53,7 @@ And then there are the ones no real horse has:
 |------|-------------|--------------|
 | Magic zebra | rare | Black **stripes**, hung from the spine and reaching down the horse's sides. They go black over *anything* - a cremello, a dapple grey, even a solid white horse. How far down they reach is its own horse's business: some are striped just across the back, some nearly to the hooves. |
 | Pink hair | **hidden** | A **pink mane and tail**, whatever colour the rest of the horse is. It's the one gene a horse can carry without showing it - **both** parents have to pass it on before a foal has pink hair, so this is one you go looking for and breed toward rather than stumble across. (A foal gets the tail; the mane comes in when it grows up.) |
+| Waterborn | rare | **Neon-blue stripes** through the mane and tail, and the horse **walks on the surface of water** instead of wading. It leaves a trail of blue sparks where it treads, and a **tamed mare** can be milked with an empty bucket for a bucket of water. |
 
 Wild horses roll a random genotype when they spawn. Bred foals inherit one
 allele from each parent at every gene, so colour passes down the way it does
@@ -85,6 +86,11 @@ When it looks right, download the file and drop it into
 carrying it - it inherits, it breeds, and it gets its own slot in the genetic
 code, exactly like the genes that ship with the mod. Delete the file to take it
 away again.
+
+A gene can also do things beyond colour - hand-written into the file for now,
+not the creator: walk on water or lava, resist fire or fall damage, trail
+particles as it moves, or let the horse be milked for a fluid. The
+**Waterborn** gene above is the worked example.
 
 Two things to know. **Adding or removing a gene changes the shape of every
 horse's genetic code**, so horses you saved before the change won't load

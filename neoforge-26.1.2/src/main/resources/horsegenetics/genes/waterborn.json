@@ -1,0 +1,52 @@
+{
+  "format": 1,
+  "key": "example.waterborn",
+  "name": "Waterborn",
+  "phase": "magical",
+  "dominance": "DOMINANT",
+  "wildOdds": 90,
+  "priority": 215,
+  "alleles": [
+    { "token": "Wtb", "label": "Waterborn (Wtb)" },
+    { "token": "n", "label": "Wild-type (n)" }
+  ],
+  "knobs": [
+    { "name": "stripeSeed", "type": "seed" },
+    { "name": "stripeSpacing", "min": 1.6, "max": 2.8 }
+  ],
+  "layers": [
+    {
+      "name": "neon blue stripes down the mane and tail",
+      "masks": [
+        { "type": "STRIPES", "parts": [ "HAIR" ], "seed": "$stripeSeed",
+          "spacing": "$stripeSpacing", "duty": 0.4, "warp": 0.8 }
+      ],
+      "op": { "type": "TOWARD", "color": "#1ec8ff", "strength": 92, "opacity": 100 }
+    }
+  ],
+  "effects": [
+    {
+      "type": "traversal",
+      "flag": "walk_on_water",
+      "when": { "flag": "adult" }
+    },
+    {
+      "type": "emitter",
+      "kind": "particle",
+      "shape": "trail",
+      "anchor": "feet",
+      "trigger": { "on_move": {} },
+      "particle": "minecraft:dust",
+      "color": "#1ec8ff",
+      "chance": 0.7
+    },
+    {
+      "type": "yield",
+      "trigger": { "on_interact": "minecraft:bucket" },
+      "consumes": "minecraft:bucket",
+      "produces": "minecraft:water_bucket",
+      "cooldown": 2400,
+      "when": { "all": [ { "flag": "sex_female" }, { "flag": "tamed" } ] }
+    }
+  ]
+}
