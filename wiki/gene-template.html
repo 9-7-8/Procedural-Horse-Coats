@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gene Wiki - [Gene Name]</title>
+    <title>Gene Name - Wiki</title>
     <style>
         :root {
             --bg-color: #0f172a;
@@ -20,7 +20,7 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background-color: var(--bg-color);
             color: var(--text-main);
             margin: 0;
@@ -64,14 +64,14 @@
             color: var(--text-muted);
             text-decoration: none;
             font-size: 0.95rem;
-            transition: color 0.2s;
         }
 
-        nav.sidebar li a:hover, nav.sidebar li a.active {
+        nav.sidebar li a.active {
             color: var(--text-main);
+            font-weight: bold;
         }
 
-        /* Main Workspace */
+        /* Content Layout */
         main.content {
             flex: 1;
             display: flex;
@@ -82,7 +82,7 @@
 
         /* Information Panel */
         .info-panel {
-            width: 360px;
+            width: 380px;
             background-color: var(--panel-bg);
             border: 1px solid var(--border);
             border-radius: 8px;
@@ -96,7 +96,7 @@
 
         .info-panel h1 {
             margin: 0;
-            font-size: 1.8rem;
+            font-size: 1.75rem;
             color: var(--accent);
         }
 
@@ -111,12 +111,11 @@
         .metadata-row {
             display: flex;
             justify-content: space-between;
-            font-size: 0.9rem;
+            font-size: 0.88rem;
         }
 
         .metadata-label {
             color: var(--text-muted);
-            font-weight: 500;
         }
 
         .metadata-value {
@@ -126,14 +125,26 @@
         }
 
         .description {
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             line-height: 1.5;
             color: var(--text-muted);
             border-top: 1px solid var(--border);
             padding-top: 1rem;
         }
 
-        /* Code Viewer (iframe container) */
+        /* Feature List */
+        .feature-list {
+            padding-left: 1.2rem;
+            margin: 0.5rem 0 0 0;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .feature-list li {
+            margin-bottom: 0.4rem;
+        }
+
+        /* Code View Container */
         .code-container {
             flex: 1;
             background-color: var(--code-bg);
@@ -157,62 +168,63 @@
             width: 100%;
             height: 100%;
             border: none;
-            background-color: #ffffff; /* White background for plain text/js rendering */
+            background-color: #ffffff;
         }
     </style>
 </head>
 <body>
 
-    <!-- Sidebar Navigation -->
     <nav class="sidebar">
-        <a href="../index.html" class="back-link">&larr; Back to Wiki Index</a>
-        <div style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted);">Gene Index</div>
+        <a href="../index.html" class="back-link">&larr; Back to Index</a>
+        <div style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted);">Category Name</div>
         <ul>
-            <li><a href="extension.html" class="active">Extension</a></li>
-            <li><a href="agouti.html">Agouti</a></li>
-            <li><a href="cream.html">Cream</a></li>
-            <li><a href="dun.html">Dun</a></li>
+            <li><a href="bay-coat.html">Bay Coat</a></li>
+            <li><a href="cream-pearl-dilution.html">Cream & Pearl</a></li>
+            <li><a href="dapple-grey.html">Dapple Grey</a></li>
+            <li><a href="champagne.html">Champagne</a></li>
+            <li><a href="your-new-gene.html" class="active">Gene Name</a></li>
         </ul>
     </nav>
 
-    <!-- Main Workspace -->
     <main class="content">
-        
         <!-- Metadata Info Panel -->
         <section class="info-panel">
-            <h1>Extension</h1>
+            <h1>Gene Name</h1>
             
             <div class="metadata-group">
                 <div class="metadata-row">
-                    <span class="metadata-label">Locus Symbol</span>
-                    <span class="metadata-value">E</span>
+                    <span class="metadata-label">Gene Key</span>
+                    <span class="metadata-value">horsegenetics.gene_key</span>
                 </div>
                 <div class="metadata-row">
                     <span class="metadata-label">Dominance</span>
-                    <span class="metadata-value">Dominant (E > e)</span>
+                    <span class="metadata-value">Dominant / Recessive</span>
                 </div>
                 <div class="metadata-row">
                     <span class="metadata-label">Alleles</span>
-                    <span class="metadata-value">E, e</span>
+                    <span class="metadata-value">A (Dominant), a (Wild-type)</span>
                 </div>
                 <div class="metadata-row">
-                    <span class="metadata-label">Category</span>
-                    <span class="metadata-value">Base Pigment</span>
+                    <span class="metadata-label">Wild Allele Odds</span>
+                    <span class="metadata-value">1 in 50</span>
                 </div>
             </div>
 
             <div class="description">
-                Controls the production of black (eumelanin) vs. red (pheomelanin) pigment across the body. The dominant allele <code>E</code> enables black pigment production, while the recessive <code>e</code> allele restricts pigment to red (chestnut).
+                Brief description of how this gene modifies horse pigment, coat patterns, or skin rendering.
+                
+                <ul class="feature-list">
+                    <li><strong>Feature One:</strong> Description of phenotypic effect.</li>
+                    <li><strong>Feature Two:</strong> Interactions with other loci or base coats.</li>
+                </ul>
             </div>
         </section>
 
-        <!-- Embedded Code View -->
+        <!-- Direct File Embed -->
         <section class="code-container">
-            <div class="code-header">Source File: ../genes/extension.js</div>
-            <!-- Directly hosts the code file relative to this html location -->
-            <iframe class="code-frame" src="../genes/extension.js"></iframe>
+            <div class="code-header">Source File: common/src/main/java/com/example/horsegenetics/path/to/GeneFile.java</div>
+            <iframe class="code-frame" src="../common/src/main/java/com/example/horsegenetics/path/to/GeneFile.java"></iframe>
         </section>
-
     </main>
 
 </body>
