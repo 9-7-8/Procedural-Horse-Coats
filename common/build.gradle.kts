@@ -49,3 +49,27 @@ tasks.register<JavaExec>("bakeCoatSamples") {
     mainClass.set("com.example.horsegenetics.common.coat.pattern.CoatSampleTool")
     args(layout.buildDirectory.dir("coat-samples").get().asFile.absolutePath)
 }
+
+// Bake the gene-spec parity fixtures the creator checks itself against. The
+// creator previews genes with a JavaScript twin of SpecPainter; this writes what
+// the real Java engine produces so wiki/gene-creator/tools/check-parity.mjs can
+// prove the two still agree. Dev tooling only.
+tasks.register<JavaExec>("bakeSpecFixtures") {
+    group = "horsegenetics"
+    description = "Write wiki/gene-creator/fixtures/expected.json from the real spec engine"
+    dependsOn(tasks.named("classes"))
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass.set("com.example.horsegenetics.common.genetics.spec.SpecFixtureTool")
+    args(rootProject.layout.projectDirectory.file("wiki/gene-creator/fixtures/expected.json").asFile.absolutePath)
+}
+
+// Regenerate the gene creator's two generated files - the inlined coat textures
+// and the worked examples - from the mod's own assets and example genes.
+tasks.register<JavaExec>("bakeCreatorAssets") {
+    group = "horsegenetics"
+    description = "Regenerate wiki/gene-creator/assets/textures.js and js/examples.js"
+    dependsOn(tasks.named("classes"))
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass.set("com.example.horsegenetics.common.genetics.spec.CreatorAssetTool")
+    args(rootProject.layout.projectDirectory.dir("wiki/gene-creator").asFile.absolutePath)
+}

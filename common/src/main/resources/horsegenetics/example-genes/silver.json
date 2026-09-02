@@ -1,0 +1,25 @@
+{
+  "format": 1,
+  "key": "example.silver",
+  "name": "Silver dapple",
+  "phase": "natural",
+  "dominance": "DOMINANT",
+  "wildOdds": 60,
+  "priority": 45,
+  "alleles": [
+    { "token": "Z", "label": "Silver (Z)" },
+    { "token": "z", "label": "Wild-type (z)" }
+  ],
+  "layers": [
+    {
+      "name": "dilute the black, leave the red",
+      "masks": [ { "type": "ALL" } ],
+      "op": { "type": "DILUTE", "keepRed": 1.0, "keepBlack": 0.45, "blackTint": 0.18 }
+    },
+    {
+      "name": "flaxen mane and tail",
+      "masks": [ { "type": "PARTS", "parts": [ "HAIR" ] } ],
+      "op": { "type": "DILUTE", "keepRed": 0.9, "keepBlack": 0.12, "blackTint": 0.3 }
+    }
+  ]
+}

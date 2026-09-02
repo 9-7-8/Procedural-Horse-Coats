@@ -1,0 +1,43 @@
+{
+  "format": 1,
+  "key": "example.dun",
+  "name": "Dun",
+  "phase": "natural",
+  "dominance": "DOMINANT",
+  "wildOdds": 25,
+  "priority": 30,
+  "alleles": [
+    { "token": "D", "label": "Dun (D)" },
+    { "token": "d", "label": "Wild-type (d)" }
+  ],
+  "knobs": [
+    { "name": "barSeed", "type": "seed" },
+    { "name": "barHeight", "min": 0.25, "max": 0.6, "per": "leg", "spread": 0.18 },
+    { "name": "dorsalWidth", "min": 0.7, "max": 1.6 }
+  ],
+  "layers": [
+    {
+      "name": "dilute the body, keep the points",
+      "masks": [ { "type": "ALL" } ],
+      "op": { "type": "DILUTE", "keepRed": 0.62, "keepBlack": 0.7, "blackTint": 0.12 }
+    },
+    {
+      "name": "dorsal stripe down the spine",
+      "masks": [
+        { "type": "CENTERLINE", "parts": [ "BARREL" ], "halfWidth": "$dorsalWidth", "softness": 0.6 },
+        { "type": "AXIS", "axis": "Y", "space": "part", "from": 0.72, "to": 1.0, "softness": 0.18 }
+      ],
+      "op": { "type": "SET_PIGMENT", "red": 0.05, "black": 0.95 }
+    },
+    {
+      "name": "leg barring",
+      "masks": [
+        { "type": "STRIPES", "parts": [ "LEGS" ], "seed": "$barSeed",
+          "spacing": 1.4, "duty": 0.4, "warp": 0.3 },
+        { "type": "AXIS", "parts": [ "LEGS" ], "axis": "Y", "space": "part",
+          "from": 0.0, "to": "$barHeight", "softness": 0.2 }
+      ],
+      "op": { "type": "SET_PIGMENT", "red": 0.1, "black": 0.85 }
+    }
+  ]
+}

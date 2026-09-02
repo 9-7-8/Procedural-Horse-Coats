@@ -38,10 +38,34 @@ import java.util.List;
  */
 public final class GenotypeCatalog {
 
-    /** Built once at class load - a few hundred entries, so eager is fine. */
-    private static final List<Genotype> ENTRIES = build();
+    /**
+     * Built on first use and thrown away whenever a gene is registered - the
+     * catalogue is a product over {@link Genes#codeOrder()}, so a gene loaded at
+     * startup widens it. A few thousand entries, so rebuilding is cheap; the
+     * alternative (eager, at class load) silently missed every data-driven gene.
+     */
+    private static volatile List<Genotype> entries;
 
     private GenotypeCatalog() {
+    }
+
+    /** Called by {@link Genes} when the registry changes. */
+    static void invalidate() {
+        entries = null;
+    }
+
+    private static List<Genotype> entriesOrBuild() {
+        List<Genotype> e = entries;
+        if (e == null) {
+            synchronized (GenotypeCatalog.class) {
+                e = entries;
+                if (e == null) {
+                    e = build();
+                    entries = e;
+                }
+            }
+        }
+        return e;
     }
 
     /**
@@ -84,7 +108,7 @@ public final class GenotypeCatalog {
      * seeds are one entry.
      */
     public static int size() {
-        return ENTRIES.size();
+        return entriesOrBuild().size();
     }
 
     /**
@@ -103,12 +127,12 @@ public final class GenotypeCatalog {
 
     /** The genotype at {@code index} in {@code [0, size())}. */
     public static Genotype get(int index) {
-        return ENTRIES.get(index);
+        return entriesOrBuild().get(index);
     }
 
     /** The whole catalogue, in order. */
     public static List<Genotype> entries() {
-        return ENTRIES;
+        return entriesOrBuild();
     }
 
     // ------------------------------------------------------------------

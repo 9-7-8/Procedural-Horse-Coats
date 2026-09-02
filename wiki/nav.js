@@ -65,7 +65,8 @@
         {
             title: "Tools",
             items: [
-                { href: "gene-creator.html", text: "Gene creator", kind: "tool" }
+                { href: "gene-creator/index.html", text: "Gene creator", kind: "tool" },
+                { href: "gene-format.html", text: "Gene file format", kind: "tool" }
             ]
         }
     ];

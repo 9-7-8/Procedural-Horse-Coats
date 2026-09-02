@@ -17,6 +17,10 @@ public final class HorseGenetics {
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
     public HorseGenetics(IEventBus modEventBus, ModContainer modContainer) {
+        // First, before anything can parse a genotype code: each drop-in gene
+        // adds a segment to that code, so registering one late would invalidate
+        // codes already read. See ModGeneSpecs.
+        ModGeneSpecs.load();
         ModAttachments.ATTACHMENT_TYPES.register(modEventBus);
         ModBlocks.register(modEventBus);
         ModBlockEntities.register(modEventBus);
