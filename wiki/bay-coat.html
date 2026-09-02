@@ -49,19 +49,26 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
     <script>
-        const sourcePath = '../common/src/main/java/com/example/horsegenetics/common/coat/pattern/BayCoat.java';
-        fetch(sourcePath)
-            .then(res => {
-                if (!res.ok) throw new Error('Could not load file');
+        // Path relative to wiki/ directory
+        const primaryPath = '../common/src/main/java/com/example/horsegenetics/common/coat/pattern/BayCoat.java';
+        const fallbackPath = '../common/src/main/java/com/example/horsegenetics/common/genetics/genes/BayCoat.java';
+
+        function loadSourceFile(path) {
+            return fetch(path).then(res => {
+                if (!res.ok) throw new Error(`HTTP ${res.status} - ${path}`);
                 return res.text();
-            })
+            });
+        }
+
+        loadSourceFile(primaryPath)
+            .catch(() => loadSourceFile(fallbackPath))
             .then(data => {
                 const codeBlock = document.getElementById('code-block');
                 codeBlock.textContent = data;
                 Prism.highlightElement(codeBlock);
             })
             .catch(err => {
-                document.getElementById('code-block').textContent = '// Error loading file: ' + err.message;
+                document.getElementById('code-block').textContent = '// Error loading file: Could not find BayCoat.java at expected path.\n// ' + err.message;
             });
     </script>
 </body>
