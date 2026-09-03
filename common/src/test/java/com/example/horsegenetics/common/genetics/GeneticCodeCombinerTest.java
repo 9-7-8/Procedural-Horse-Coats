@@ -11,6 +11,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class GeneticCodeCombinerTest {
 
+    /** Wild-type segments for the visual-pattern genes added after the first 11. */
+    private static final String T = "-d/d-z/z-mu/mu-rn/rn-to/to-ov/ov-sb1/sb1";
+
     private static FakeRng allFirst() {
         boolean[] draws = new boolean[Genes.codeOrder().size() * 2];
         Arrays.fill(draws, true);
@@ -19,18 +22,18 @@ class GeneticCodeCombinerTest {
 
     @Test
     void homozygousDominantCrossHomozygousRecessiveIsHeterozygous() {
-        String dad = "E/E-A/A-w/w-t/t-c/c-spl/spl-g/g-N/N-N/N-n/n-n/n";
-        String mom = "e/e-a/a-w/w-t/t-c/c-spl/spl-g/g-N/N-N/N-n/n-n/n";
+        String dad = "E/E-A/A-w/w-t/t-c/c-spl/spl-g/g-N/N-N/N-n/n-n/n" + T;
+        String mom = "e/e-a/a-w/w-t/t-c/c-spl/spl-g/g-N/N-N/N-n/n-n/n" + T;
         String child = GeneticCodeCombiner.combine(dad, mom, allFirst());
-        assertEquals("E/e-A/a-w/w-t/t-c/c-spl/spl-g/g-N/N-N/N-n/n-n/n", child);
+        assertEquals("E/e-A/a-w/w-t/t-c/c-spl/spl-g/g-N/N-N/N-n/n-n/n" + T, child);
         assertEquals(CoatPhenotype.BAY, Genotype.parse(child).phenotype());
     }
 
     @Test
     void everyGeneSegregates() {
-        String a = "E/e-A/a-W/w-T/t-Ch/c-Spl/spl-G/g-Cr/N-N/prl-n/n-n/n";
+        String a = "E/e-A/a-W/w-T/t-Ch/c-Spl/spl-G/g-Cr/N-N/prl-n/n-n/n" + T;
         String child = GeneticCodeCombiner.combine(a, Genotype.wildType().toCode(), allFirst());
-        assertEquals("E/E-A/a-W/w-T/t-Ch/c-Spl/spl-G/g-Cr/N-N/N-n/n-n/n", child);
+        assertEquals("E/E-A/a-W/w-T/t-Ch/c-Spl/spl-G/g-Cr/N-N/N-n/n-n/n" + T, child);
         assertTrue(Genotype.parse(child).hasTest());
         assertTrue(Genotype.parse(child).isSplash());
         assertTrue(Genotype.parse(child).isGrey());

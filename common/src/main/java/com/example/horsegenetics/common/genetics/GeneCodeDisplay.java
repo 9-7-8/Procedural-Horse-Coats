@@ -40,7 +40,9 @@ public final class GeneCodeDisplay {
     /** Genes whose wild-type allele means "this trait is simply absent". */
     private static final Set<String> ABSENCE_WILDTYPE = Set.of(
             ChampagneGene.KEY, SplashGene.KEY, CreamGene.KEY, PearlGene.KEY,
-            MagicZebraGene.KEY, PinkHairGene.KEY);
+            MagicZebraGene.KEY, PinkHairGene.KEY,
+            Genes.DUN.key(), Genes.SILVER.key(), Genes.MUSHROOM.key(), Genes.ROAN.key(),
+            Genes.TOBIANO.key(), Genes.FRAME.key(), Genes.SABINO.key());
 
     /**
      * Order the non-extension/agouti genes are listed in: white patterns first
@@ -48,8 +50,9 @@ public final class GeneCodeDisplay {
      * then the magical genes, then the diagnostic test gene.
      */
     private static final List<Gene> TRAILING_ORDER = List.of(
-            Genes.SPLASH, Genes.WHITE, Genes.CHAMPAGNE, Genes.CREAM, Genes.PEARL, Genes.GREY,
-            Genes.MAGIC_ZEBRA, Genes.PINK_HAIR, Genes.TEST);
+            Genes.SPLASH, Genes.ROAN, Genes.TOBIANO, Genes.FRAME, Genes.SABINO, Genes.WHITE,
+            Genes.DUN, Genes.SILVER, Genes.MUSHROOM, Genes.CHAMPAGNE, Genes.CREAM, Genes.PEARL,
+            Genes.GREY, Genes.MAGIC_ZEBRA, Genes.PINK_HAIR, Genes.TEST);
 
     private GeneCodeDisplay() {}
 

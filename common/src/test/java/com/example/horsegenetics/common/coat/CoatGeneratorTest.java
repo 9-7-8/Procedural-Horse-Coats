@@ -4,6 +4,7 @@ import com.example.horsegenetics.common.SeededRng;
 import com.example.horsegenetics.common.genetics.CoatPhenotype;
 import com.example.horsegenetics.common.genetics.Genes;
 import com.example.horsegenetics.common.genetics.Genotype;
+import com.example.horsegenetics.common.testutil.Codes;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -11,11 +12,11 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 class CoatGeneratorTest {
 
-    private static final Genotype BAY = Genotype.parse("E/e-A/a-w/w-t/t-c/c-spl/spl-g/g-N/N-N/N-n/n-n/n");
+    private static final Genotype BAY = Genotype.parse(Codes.of("extension", "E/e", "agouti", "A/a"));
 
     @Test
     void keepsTheGenotypeVerbatim() {
-        Genotype g = Genotype.parse("e/e-a/a-w/w-t/t-Ch/c-spl/spl-g/g-N/N-N/N-n/n-n/n");
+        Genotype g = Genotype.parse(Codes.of("extension", "e/e", "champagne", "Ch/c"));
         CoatData data = CoatGenerator.generate(g, new SeededRng(1L));
         assertEquals(g, data.genotype());
         assertEquals(CoatPhenotype.CHESTNUT, data.phenotype());

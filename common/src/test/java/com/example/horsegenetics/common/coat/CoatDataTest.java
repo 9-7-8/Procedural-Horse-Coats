@@ -3,6 +3,7 @@ package com.example.horsegenetics.common.coat;
 import com.example.horsegenetics.common.genetics.CoatPhenotype;
 import com.example.horsegenetics.common.genetics.Epigenome;
 import com.example.horsegenetics.common.genetics.Genotype;
+import com.example.horsegenetics.common.testutil.Codes;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -13,9 +14,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class CoatDataTest {
 
     private static final String BLACK = Genotype.wildType().toCode();
-    private static final String BAY = "E/e-A/a-w/w-t/t-c/c-spl/spl-g/g-N/N-N/N-n/n-n/n";
+    private static final String BAY = Codes.of("extension", "E/e", "agouti", "A/a");
     /** Same bay, but also carrying grey - whose epigenetics are invisible on a foal-free adult check. */
-    private static final String BAY_GREY = "E/e-A/a-w/w-t/t-c/c-spl/spl-G/g-N/N-N/N-n/n-n/n";
+    private static final String BAY_GREY = Codes.of("extension", "E/e", "agouti", "A/a", "grey", "G/g");
 
     private static CoatData coat(String code, long seed) {
         return new CoatData(Genotype.parse(code), Epigenome.fromSeed(seed));

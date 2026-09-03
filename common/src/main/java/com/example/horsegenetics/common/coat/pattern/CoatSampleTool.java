@@ -52,6 +52,18 @@ public final class CoatSampleTool {
             {"pink_hair_chestnut", "extension=e/e pink_hair=Pihr/Pihr"},
             {"pink_hair_perlino", "agouti=A/a cream=Cr/Cr pink_hair=Pihr/Pihr"},
             {"zebra_pink_bay", "agouti=A/a magic_zebra=Mzeb/n pink_hair=Pihr/Pihr"}, // two magical genes at once
+            {"dun_bay", "agouti=A/a dun=D/d"},          // dorsal stripe + leg bars over tan
+            {"dun_black", "dun=D/d"},                    // grullo
+            {"dun_chestnut", "extension=e/e dun=D/d"},   // red dun
+            {"silver_black", "silver=Z/z"},              // chocolate body, flaxen mane
+            {"silver_bay", "agouti=A/a silver=Z/z"},     // silver bay
+            {"mushroom_chestnut", "extension=e/e mushroom=Mu/Mu"},
+            {"roan_black", "roan=Rn/rn"},                // blue roan
+            {"roan_bay", "agouti=A/a roan=Rn/rn"},
+            {"tobiano_black", "tobiano=To/to"},
+            {"frame_bay", "agouti=A/a frame=Ov/ov"},
+            {"sabino_het_black", "sabino=SB1/sb1"},
+            {"sabino_hom_bay", "agouti=A/a sabino=SB1/SB1"},
     };
 
     /**
@@ -62,7 +74,8 @@ public final class CoatSampleTool {
      * {@code Mzeb/n} at two different stripe reaches.
      */
     private static final long[] SEEDS = {0, 0, 7, 3, 0, 0, 0, 0, 0, 0, 0, 1, 3, 21, 3, 3, 0, 0, 31, 0,
-            5, 11, 5, 5, 0, 0, 0, 11};
+            5, 11, 5, 5, 0, 0, 0, 11,
+            0, 0, 0, 0, 0, 0, 4, 9, 2, 6, 3, 8};
 
     private CoatSampleTool() {}
 

@@ -2,6 +2,7 @@ package com.example.horsegenetics.common.coat.pattern;
 
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Axis;
+import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.BodyPoint;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Bounds;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Part;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Skin;
@@ -200,6 +201,66 @@ public final class CoatRegions {
                 }
             });
         }
+    }
+
+    // ---- primitive markings (dun) ----------------------------------
+
+    /**
+     * Coverage of a <b>dorsal stripe</b> at a texel: {@code 1} on the
+     * centreline, smoothly fading to {@code 0} by {@code halfWidth} body-units
+     * to either side of {@code z == 0}, and - on the barrel and neck - further
+     * weighted so it only lands on the <b>upper</b> part of the box and not the
+     * belly (the belly also runs along {@code z ~ 0}). The mane, tail, head and
+     * muzzle get the full width (the stripe carries up the crest and down the
+     * face, and hangs in the tail).
+     */
+    public static double dorsalStripe(Skin skin, Part part, BodyPoint point, double halfWidth) {
+        double topWeight;
+        switch (part) {
+            case MANE, TAIL, HEAD, MUZZLE -> topWeight = 1.0;
+            case BODY, NECK -> {
+                Bounds b = HorseSkinGeometry.bounds(skin, part);
+                double frac = (point.y() - b.yMin()) / b.span(Axis.Y);
+                topWeight = smooth01((frac - 0.45) / 0.45);
+            }
+            default -> {
+                return 0;
+            }
+        }
+        if (topWeight <= 0 || halfWidth <= 0) {
+            return 0;
+        }
+        double d = Math.abs(point.z()) / halfWidth;
+        double lateral = d >= 1 ? 0 : 1 - d * d * (3 - 2 * d);
+        return lateral * topWeight;
+    }
+
+    /**
+     * Coverage of horizontal <b>leg barring</b> at a texel on a leg part:
+     * near-constant-{@code y} bands repeating every {@code spacing} body-units,
+     * each band {@code duty} of the period wide with a soft edge, and the whole
+     * field fading out over the top {@code (1 - reach)} of the leg so the bars
+     * sit on the cannon and gaskin, not the stifle.
+     */
+    public static double legBar(Skin skin, Part leg, BodyPoint point, double spacing, double duty, double reach) {
+        if (!HorseSkinGeometry.hasPart(skin, leg)) {
+            return 0;
+        }
+        Bounds b = HorseSkinGeometry.bounds(skin, leg);
+        double frac = (point.y() - b.yMin()) / b.span(Axis.Y);
+        double fade = 1.0 - smooth01((frac - reach) / Math.max(1e-4, 1 - reach));
+        if (fade <= 0) {
+            return 0;
+        }
+        double phase = (point.y() - b.yMin()) / spacing;
+        double off = phase - Math.floor(phase);
+        double d = Math.abs(off - 0.5) * 2.0;      // 0 mid-bar .. 1 mid-gap
+        return (1.0 - smooth01((d - (duty - 0.12)) / 0.24)) * fade;
+    }
+
+    private static double smooth01(double t) {
+        t = t < 0 ? 0 : (t > 1 ? 1 : t);
+        return t * t * (3 - 2 * t);
     }
 
     private static double clamp01(double v) {

@@ -1,15 +1,22 @@
 package com.example.horsegenetics.common.genetics;
 
 import com.example.horsegenetics.common.genetics.genes.AgoutiGene;
+import com.example.horsegenetics.common.genetics.genes.DunGene;
+import com.example.horsegenetics.common.genetics.genes.FrameGene;
 import com.example.horsegenetics.common.genetics.genes.ChampagneGene;
 import com.example.horsegenetics.common.genetics.genes.CreamGene;
 import com.example.horsegenetics.common.genetics.genes.ExtensionGene;
 import com.example.horsegenetics.common.genetics.genes.GreyGene;
 import com.example.horsegenetics.common.genetics.genes.MagicZebraGene;
+import com.example.horsegenetics.common.genetics.genes.MushroomGene;
 import com.example.horsegenetics.common.genetics.genes.PearlGene;
 import com.example.horsegenetics.common.genetics.genes.PinkHairGene;
+import com.example.horsegenetics.common.genetics.genes.RoanGene;
+import com.example.horsegenetics.common.genetics.genes.SabinoGene;
+import com.example.horsegenetics.common.genetics.genes.SilverGene;
 import com.example.horsegenetics.common.genetics.genes.SplashGene;
 import com.example.horsegenetics.common.genetics.genes.TestGene;
+import com.example.horsegenetics.common.genetics.genes.TobianoGene;
 import com.example.horsegenetics.common.genetics.genes.WhiteGene;
 import com.example.horsegenetics.common.genetics.spec.SpecGene;
 
@@ -66,13 +73,21 @@ public final class Genes {
     public static final PearlGene PEARL = new PearlGene();
     public static final MagicZebraGene MAGIC_ZEBRA = new MagicZebraGene();
     public static final PinkHairGene PINK_HAIR = new PinkHairGene();
+    public static final DunGene DUN = new DunGene();
+    public static final SilverGene SILVER = new SilverGene();
+    public static final MushroomGene MUSHROOM = new MushroomGene();
+    public static final RoanGene ROAN = new RoanGene();
+    public static final TobianoGene TOBIANO = new TobianoGene();
+    public static final FrameGene FRAME = new FrameGene();
+    public static final SabinoGene SABINO = new SabinoGene();
 
     private static final List<Gene> BUILTIN_CODE_ORDER =
             List.of(EXTENSION, AGOUTI, WHITE, TEST, CHAMPAGNE, SPLASH, GREY, CREAM, PEARL,
-                    MAGIC_ZEBRA, PINK_HAIR);
+                    MAGIC_ZEBRA, PINK_HAIR, DUN, SILVER, MUSHROOM, ROAN, TOBIANO, FRAME, SABINO);
 
     private static final List<Gene> BUILTIN_NATURAL_ORDER =
-            List.of(EXTENSION, AGOUTI, CREAM, PEARL, CHAMPAGNE, GREY, WHITE, SPLASH);
+            List.of(EXTENSION, AGOUTI, SILVER, MUSHROOM, DUN, CREAM, PEARL, CHAMPAGNE, GREY, WHITE,
+                    ROAN, TOBIANO, FRAME, SABINO, SPLASH);
 
     /**
      * Pink hair and magic zebra both <i>add</i>, so their order between

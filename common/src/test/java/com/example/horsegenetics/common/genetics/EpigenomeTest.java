@@ -1,6 +1,7 @@
 package com.example.horsegenetics.common.genetics;
 
 import com.example.horsegenetics.common.SeededRng;
+import com.example.horsegenetics.common.testutil.Codes;
 import org.junit.jupiter.api.Test;
 
 import java.util.LinkedHashMap;
@@ -13,8 +14,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class EpigenomeTest {
 
-    private static final Genotype HET_AGOUTI = Genotype.parse("E/e-A/a-w/w-t/t-c/c-spl/spl-g/g-N/N-N/N-n/n-n/n");
-    private static final Genotype HOM_AGOUTI = Genotype.parse("E/E-A/A-w/w-t/t-c/c-spl/spl-g/g-N/N-N/N-n/n-n/n");
+    private static final Genotype HET_AGOUTI = Genotype.parse(Codes.of("extension", "E/e", "agouti", "A/a"));
+    private static final Genotype HOM_AGOUTI = Genotype.parse(Codes.of("agouti", "A/A"));
 
     /** An epigenome with the given (priority, seed) on both copies of agouti and junk elsewhere. */
     private static Epigenome withAgouti(AlleleEpigenetics first, AlleleEpigenetics second) {

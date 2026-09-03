@@ -73,7 +73,17 @@ class CoatPipelineGoldenTest {
             override("extension=e/e", "pink_hair=Pihr/Pihr"),
             override("white=W/w", "pink_hair=Pihr/Pihr"),
             override("agouti=A/a", "magic_zebra=Mzeb/n", "pink_hair=Pihr/Pihr"),
-            override("test=T/t", "magic_zebra=Mzeb/n", "pink_hair=Pihr/Pihr"));
+            override("test=T/t", "magic_zebra=Mzeb/n", "pink_hair=Pihr/Pihr"),
+            override("dun=D/d"),
+            override("agouti=A/a", "dun=D/d"),
+            override("silver=Z/z"),
+            override("agouti=A/a", "silver=Z/z"),
+            override("extension=e/e", "mushroom=Mu/Mu"),
+            override("roan=Rn/rn"),
+            override("tobiano=To/to"),
+            override("frame=Ov/ov"),
+            override("sabino=SB1/sb1"),
+            override("sabino=SB1/SB1"));
 
     private static final long[] SEEDS = {0L, 3L, 4242L};
 

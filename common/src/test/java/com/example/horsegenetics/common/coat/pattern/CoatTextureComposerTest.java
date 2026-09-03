@@ -95,15 +95,34 @@ class CoatTextureComposerTest {
         return (int) (acc[0] / Math.max(1, acc[1]));
     }
 
+    /**
+     * Every gene has to compose without throwing, alone and in combination, adult
+     * and foal. The full {@code 2^genes} homozygous sweep is no longer tractable,
+     * so this runs the all-wild and all-variant corners, a single-gene-on sweep
+     * (each gene by itself), and a large seeded random sample of combinations.
+     */
     @Test
     void everyBuiltInGeneComboComposesWithoutThrowingAdultAndFoal() {
         var genes = Genes.codeOrder();
+        int n = genes.size();
         int[] tA = template(Skin.ADULT);
         int[] tB = template(Skin.BABY);
         GradientLut lut = lut();
-        for (int mask = 0; mask < (1 << genes.size()); mask++) {
+
+        java.util.List<Long> masks = new java.util.ArrayList<>();
+        masks.add(0L);
+        masks.add((1L << n) - 1);
+        for (int i = 0; i < n; i++) {
+            masks.add(1L << i);
+        }
+        java.util.Random rng = new java.util.Random(20260902L);
+        for (int k = 0; k < 3000; k++) {
+            masks.add(rng.nextLong() & ((1L << n) - 1));
+        }
+
+        for (long mask : masks) {
             StringBuilder code = new StringBuilder();
-            for (int i = 0; i < genes.size(); i++) {
+            for (int i = 0; i < n; i++) {
                 var alleles = genes.get(i).alleles();
                 var al = ((mask >> i) & 1) == 1 ? alleles.get(0) : alleles.get(alleles.size() - 1);
                 if (code.length() > 0) code.append('-');

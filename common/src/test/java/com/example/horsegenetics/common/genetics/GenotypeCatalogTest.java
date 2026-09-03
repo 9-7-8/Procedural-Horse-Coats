@@ -112,13 +112,13 @@ class GenotypeCatalogTest {
      * Every entry's label wraps onto the three gene lines of a pen sign without
      * losing anything.
      *
-     * <p><b>The last line is allowed to run wide.</b> Eleven genes no longer fit
-     * three 15-character lines - the widest genotype
-     * ({@code eeaa SplSpl ChCh CrCr prlprl GG MzebMzeb PihrPihr}) needs about
-     * 50 characters - and {@code wrap} deliberately overflows the last line
-     * rather than dropping a gene, because a sign that reads wide is better than
-     * a sign that lies. The cap below is a tripwire against it ballooning
-     * further, not a claim that it fits. The real fix is the gallery's planned
+     * <p><b>The last line is allowed to run wide.</b> Eighteen genes come
+     * nowhere near fitting three 15-character lines - a horse loaded up on the
+     * white-pattern and dilution genes needs well over a hundred characters -
+     * and {@code wrap} deliberately overflows the last line rather than
+     * dropping a gene, because a sign that reads wide is better than a sign
+     * that lies. The cap below is a tripwire against a regression in the wrap
+     * logic, not a claim that it fits. The real fix is the gallery's planned
      * revert to random pens ({@code wiki/roadmap.html} §9), which retires
      * the per-genotype sign.
      */
@@ -134,7 +134,7 @@ class GenotypeCatalogTest {
             widestLast = Math.max(widestLast, lines.get(lines.size() - 1).length());
             assertEquals(GeneCodeDisplay.shortForm(g), String.join(" ", lines));
         }
-        assertTrue(widestLast <= 30, "the overflowing last sign line has grown to " + widestLast + " chars");
+        assertTrue(widestLast <= 140, "the overflowing last sign line has grown to " + widestLast + " chars");
     }
 
     @Test
