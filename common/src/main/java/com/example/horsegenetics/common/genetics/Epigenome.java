@@ -19,17 +19,23 @@ import java.util.Objects;
  * anything that builds the two together has to align them the same way - which
  * is exactly why {@link Genome} owns both and does the breeding.
  *
- * <p>Round-trips through a <b>code string</b> shaped like the genotype code:
- * one segment per gene in {@link Genes#codeOrder()} joined by {@code -}, the
- * two copies joined by {@code /}, each copy written
- * {@code <priority>:<seed in unsigned hex>}. There is <b>no</b> legacy-format
- * handling.
+ * <p>Round-trips through a <b>gene-keyed code string</b> shaped like the
+ * genotype code: one {@code <geneKey>=<copy>/<copy>} segment per gene in
+ * {@link Genes#codeOrder()} joined by {@code -}, each copy written
+ * {@code <priority>:<seed in unsigned hex>}. Parsing is <b>tolerant</b> the
+ * same way {@link Genotype#parse} is: a registered gene with no segment gets a
+ * deterministic placeholder (derived from its key, so two horses agree on it),
+ * and a segment naming an unregistered gene is dropped. Safe because an absent
+ * gene reads wild type - invisible, excluded from
+ * {@link #visibleFingerprint} - so a placeholder never changes the texture key.
+ * There is <b>no</b> legacy positional-format handling.
  */
 public final class Epigenome {
 
     private static final String GENE_SEP = "-";
     private static final String COPY_SEP = "/";
     private static final String FIELD_SEP = ":";
+    private static final String NAME_SEP = "=";
 
     /** The two allele copies at one gene, aligned to that gene's {@link AllelePair}. */
     public record Copies(AlleleEpigenetics first, AlleleEpigenetics second) {
@@ -88,22 +94,44 @@ public final class Epigenome {
 
     public static Epigenome parse(String code) {
         Objects.requireNonNull(code, "code");
-        String[] segments = code.split(GENE_SEP, -1);
-        var order = Genes.codeOrder();
-        if (segments.length != order.size()) {
-            throw new IllegalArgumentException("epigenome code needs " + order.size()
-                    + " '-'-separated segments, got " + segments.length + ": " + code);
+        Map<String, Copies> supplied = new LinkedHashMap<>();
+        if (!code.isEmpty()) {
+            for (String segment : code.split(GENE_SEP, -1)) {
+                int eq = segment.indexOf(NAME_SEP);
+                if (eq < 0) {
+                    throw new IllegalArgumentException(
+                            "epigenome segment needs '<gene>=<copy>/<copy>', got: " + segment);
+                }
+                Gene g = Genes.byKeyOrNull(segment.substring(0, eq));
+                if (g == null) {
+                    continue; // a gene no longer registered - drop the segment
+                }
+                String[] copies = segment.substring(eq + 1).split(COPY_SEP, -1);
+                if (copies.length != 2) {
+                    throw new IllegalArgumentException("segment for " + g.key()
+                            + " needs two '/'-separated copies, got: " + segment);
+                }
+                supplied.put(g.key(), new Copies(parseCopy(copies[0]), parseCopy(copies[1])));
+            }
         }
         Map<String, Copies> m = new LinkedHashMap<>();
-        for (int i = 0; i < order.size(); i++) {
-            String[] copies = segments[i].split(COPY_SEP, -1);
-            if (copies.length != 2) {
-                throw new IllegalArgumentException("segment " + (i + 1) + " for " + order.get(i).key()
-                        + " needs two '/'-separated copies, got: " + segments[i]);
-            }
-            m.put(order.get(i).key(), new Copies(parseCopy(copies[0]), parseCopy(copies[1])));
+        for (Gene g : Genes.codeOrder()) {
+            Copies c = supplied.get(g.key());
+            m.put(g.key(), c != null ? c : placeholder(g.key()));
         }
         return new Epigenome(m);
+    }
+
+    /**
+     * Deterministic stand-in epigenetics for a gene the stored code predates -
+     * seeded off the gene key so every horse agrees, and never visible (the
+     * gene reads wild type), so it can't fork a texture cache entry.
+     */
+    private static Copies placeholder(String geneKey) {
+        Rng rng = new SeededRng(geneKey.hashCode());
+        AlleleEpigenetics a = AlleleEpigenetics.random(rng);
+        AlleleEpigenetics b = AlleleEpigenetics.deconflict(a, AlleleEpigenetics.random(rng), rng);
+        return new Copies(a, b);
     }
 
     private static AlleleEpigenetics parseCopy(String s) {
@@ -123,6 +151,7 @@ public final class Epigenome {
                 sb.append(GENE_SEP);
             }
             Copies c = byGene.get(g.key());
+            sb.append(g.key()).append(NAME_SEP);
             appendCopy(sb, c.first());
             sb.append(COPY_SEP);
             appendCopy(sb, c.second());

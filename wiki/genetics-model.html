@@ -46,48 +46,72 @@
 <h2>The genotype code string</h2>
 
 <p>
-    A <code>Genotype</code> serialises to one segment per gene, in
-    <code>Genes.codeOrder()</code>. Segments are joined by <code>-</code>, the two
-    alleles of a gene by <code>/</code>, <strong>dominant first</strong>:
+    A <code>Genotype</code> is held internally as a map keyed by gene, and
+    serialises to one <strong>gene-keyed</strong> segment per gene, in
+    <code>Genes.codeOrder()</code>. Each segment is
+    <code>&lt;geneKey&gt;=&lt;a&gt;/&lt;b&gt;</code> &mdash; the full
+    <code>Gene.key()</code>, then the two alleles, <strong>dominant
+    first</strong>; segments joined by <code>-</code>, alleles by <code>/</code>:
 </p>
 
 <div class="codebox">
-<div class="filename">a wild-type-ish horse &mdash; the first 11 of the 18 gene segments</div>
-<pre><code class="language-none">E/e-A/a-w/w-t/t-c/c-Spl/spl-g/g-Cr/N-N/N-Mzeb/n-n/Pihr
- |   |   |   |   |    |      |    |    |    |      |
- |   |   |   |   |    |      |    |    |    |      pink hair
- |   |   |   |   |    |      |    |    |    magic zebra
- |   |   |   |   |    |      |    |    pearl
- |   |   |   |   |    |      |    cream
- |   |   |   |   |    |      grey
- |   |   |   |   |    splash
- |   |   |   |   champagne
- |   |   |   test
- |   |   white
- |   agouti
- extension</code></pre>
+<div class="filename">a wild-type-ish horse &mdash; the first few of the 18 gene segments</div>
+<pre><code class="language-none">horsegenetics.extension=E/e-horsegenetics.agouti=A/a-horsegenetics.silver=z/z-horsegenetics.cream=Cr/N- &hellip;</code></pre>
 </div>
 
 <p>
     Allele <strong>tokens can be any run of characters</strong> &mdash;
     <code>Spl</code>, <code>Cr</code>, <code>prl</code>, <code>Mzeb</code>,
-    <code>Pihr</code> &mdash; not single letters. The <code>/</code> and
-    <code>-</code> separators keep that unambiguous. The forward-looking rule for
+    <code>Pihr</code> &mdash; not single letters. The <code>=</code>,
+    <code>/</code> and <code>-</code> separators (and the gene key, which
+    contains none of them) keep that unambiguous. The forward-looking rule for
     third-party genes is stricter: <a href="modding.html#alleles">alphanumeric
     tokens, 1&ndash;128 characters, wild type named <code>n</code></a>.
 </p>
 
-<div class="note warn">
-    <span class="label">No legacy handling</span>
+<div class="note">
+    <span class="label">Parsing is tolerant &mdash; a gene is added or removed, nothing else</span>
     <p>
-        <code>Genotype.parse</code> requires exactly one segment per registered
-        gene. There is no padding, no short-code fallback and no version field
-        &mdash; when the format changes it changes, and old saves are discarded.
-        That rule was written for a solo developer; what happens when a
-        <em>player</em> installs a gene mod is
-        <a href="roadmap.html#third-party">still an open question</a>.
+        <code>Genotype.parse</code> looks each segment's gene up <strong>by
+        key</strong>, not by position. A registered gene with <strong>no
+        segment</strong> reads as its wild type; a segment naming a gene that is
+        <strong>not registered</strong> is dropped; the <strong>empty
+        string</strong> is the all-wild-type genotype. A bad <em>allele
+        token</em> on a known gene is still a hard error. So adding or removing a
+        gene is just a coat regeneration &mdash; no padding, no version field, no
+        positional / legacy fallback. What happens when a <em>player</em>
+        installs a gene mod is <a href="roadmap.html#third-party">still an open
+        question</a>.
     </p>
 </div>
+
+<h2 id="gene-priority">Gene priority and the derived orderings</h2>
+
+<p>
+    Every <code>Gene</code> declares an <code>int priority()</code> &mdash; a
+    fixed constant of the gene, no default. <code>Genes</code> keeps a single
+    order: <strong>every</strong> registered gene, built-in and data-driven
+    alike, sorted on <code>(priority, key)</code>. The three public views are a
+    <em>result</em> of that one sort, never a source:
+    <code>codeOrder()</code> / <code>all()</code> is the whole list,
+    <code>naturalOrder()</code> is it filtered to <code>isNatural()</code>,
+    <code>magicalOrder()</code> to the magical genes. Ties break alphabetically
+    by key. A data-driven natural gene at priority 45 lands <em>between</em> the
+    built-in pearl (42) and champagne (50) &mdash; loaded genes are not
+    appended.
+</p>
+<p>
+    Bands are a convention: <code>0&ndash;99</code> natural, <code>100+</code>
+    magical &mdash; the <em>phase</em> (<code>isNatural()</code>), not the
+    number, splits the two coat passes, and <code>Genes.register</code> only
+    <em>warns</em> when a gene sits outside its band. Within the natural band,
+    <strong>low numbers set pigment absolutely, higher numbers dilute</strong>
+    (agouti's absolute points must precede <code>PigmentField.dilute</code>).
+    Built-in priorities were chosen to reproduce the pre-rewrite hand-written
+    order, so no coat changed. This is <strong>not</strong>
+    <code>AlleleEpigenetics.priority</code>, which selects a seed and never an
+    order.
+</p>
 
 <h2>The eighteen registered genes</h2>
 
@@ -208,11 +232,13 @@
 <div class="note rule">
     <span class="label">Priority selects a seed, never an order</span>
     <p>
-        Epigenetic priority picks <em>which copy&rsquo;s seed expresses</em>. It can
-        never move a gene in the processing queue, and by design it never will
-        &mdash; if it could, two horses with the same genotype and the same seeds
-        could diverge on priority alone and silently share a coat cache entry. Gene
-        processing order is a separate, hard-coded, per-gene number. See
+        Epigenetic priority (<code>AlleleEpigenetics.priority</code>) picks
+        <em>which copy&rsquo;s seed expresses</em>. It can never move a gene in
+        the processing queue, and by design it never will &mdash; if it could,
+        two horses with the same genotype and the same seeds could diverge on
+        priority alone and silently share a coat cache entry. Gene processing
+        order is a separate per-gene constant, <code>Gene.priority()</code>
+        (<code>Genes</code> sorts on <code>(priority, key)</code>). See
         <a href="philosophy.html">Philosophy §2</a> and
         <a href="roadmap.html#priority">Roadmap §2</a>.
     </p>
@@ -221,13 +247,18 @@
 <h3>The epigenome code string</h3>
 
 <p>
-    Same shape as the genotype code: one segment per gene in
-    <code>codeOrder()</code>, joined by <code>-</code>, the two copies joined by
-    <code>/</code>, each copy written <code>&lt;priority&gt;:&lt;seed hex&gt;</code>.
+    Same gene-keyed shape as the genotype code: one
+    <code>&lt;geneKey&gt;=&lt;copy&gt;/&lt;copy&gt;</code> segment per gene in
+    <code>codeOrder()</code>, joined by <code>-</code>, each copy written
+    <code>&lt;priority&gt;:&lt;seed hex&gt;</code>. Parsing is tolerant the same
+    way the genotype code is: a gene a stored code predates gets a
+    <strong>deterministic key-seeded placeholder</strong> (never visible, so it
+    can&rsquo;t fork the texture cache), and an unregistered gene&rsquo;s
+    segment is dropped.
 </p>
 
 <div class="codebox">
-<pre><code class="language-none">17334:9f3c1ab27de40015/842911:0c5e...-...-...</code></pre>
+<pre><code class="language-none">horsegenetics.extension=17334:9f3c1ab27de40015/842911:0c5e...-horsegenetics.agouti=...</code></pre>
 </div>
 
 <p>

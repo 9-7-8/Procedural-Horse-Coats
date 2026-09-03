@@ -154,6 +154,7 @@ name/     HorseNameGenerator, HorseNames</code></pre>
 <tr><td><code>alleles()</code></td><td>Everything this locus can carry, <strong>most dominant first</strong>.</td></tr>
 <tr><td><code>wildType()</code></td><td>The &ldquo;no visible effect&rdquo; allele a wild horse most often carries.</td></tr>
 <tr><td><code>dominance()</code></td><td>Declared metadata &mdash; what other systems should expect, without special-casing your key.</td></tr>
+<tr><td><code>priority()</code></td><td>Fixed <code>int</code> processing priority, no default. <code>Genes</code> derives every ordering by sorting on <code>(priority, key)</code>. <code>0&ndash;99</code> natural band, <code>100+</code> magical (convention; out-of-band only warns). Not <code>AlleleEpigenetics.priority</code>.</td></tr>
 <tr><td><code>randomPair(rng)</code></td><td>One wild-population draw. Each gene documents how many <code>Rng</code> values it consumes and in what order.</td></tr>
 <tr><td><code>isNatural()</code></td><td>Phase declaration. <code>true</code> (default) = phase 1; <code>false</code> = phase 3.</td></tr>
 <tr><td><code>restrict(...)</code></td><td>Phase-1 contribution. Returns a <code>PigmentField</code> or <code>null</code>.</td></tr>
@@ -294,34 +295,29 @@ static Allele allele(String alleleKey);   // "&lt;gene&gt;.&lt;token&gt;"</code>
 </div>
 
 <div class="codebox">
-<pre><code class="language-java">static void register(SpecGene gene);              // throws on a duplicate key
+<pre><code class="language-java">static void register(SpecGene gene);              // throws on a duplicate key; warns if out of band
 static void registerAll(Collection&lt;SpecGene&gt;);
 static List&lt;SpecGene&gt; loaded();                   // the data-driven genes, in gene order
-static void clearLoaded();                        // back to the eighteen built-ins</code></pre>
+static void clearLoaded();                        // back to the eighteen built-ins
+static Gene byKeyOrNull(String geneKey);          // null (not throw) if unregistered - for tolerant parse</code></pre>
 </div>
 
 <p>
-    The three orderings are <strong>deliberately independent</strong>. The eighteen
-    built-ins keep their hand-written order, first &mdash; so adding a gene never
-    changes an existing horse's coat &mdash; and data-driven genes are appended after
-    them, <strong>sorted by their declared <code>priority</code> then by key</strong>.
-    Registration order is deliberately ignored: two people who drop the same gene files
-    in a different order must get the same horses. A magical spec gene lands
-    <em>before</em> <code>TEST</code> in <code>magicalOrder()</code>, because Test
-    paints flat and masks everything and has to run last.
+    All three orderings are one <strong>derived</strong> result: every registered
+    gene &mdash; built-in and <code>SpecGene</code> alike &mdash; sorted on
+    <code>(</code><code>priority()</code><code>, key)</code>.
+    <code>codeOrder()</code> / <code>all()</code> is the whole list;
+    <code>naturalOrder()</code> and <code>magicalOrder()</code> are it filtered by
+    <code>isNatural()</code>. A data-driven natural gene at priority 45 lands between
+    the built-in pearl (42) and champagne (50) &mdash; loaded genes are not appended.
+    Registration order is ignored; ties break alphabetically by key.
 </p>
 
 <p>
-    Register during startup, before anything parses a genotype: each registration
-    lengthens the genotype code by a segment. <code>GenotypeCatalog</code> is lazy and
+    Register during startup, before anything parses a genotype: each registration can
+    move where a gene sits in the code. <code>GenotypeCatalog</code> is lazy and
     invalidated on every registration, since the catalogue is a product over
     <code>codeOrder()</code>.
-</p>
-
-<p>
-    Deriving the <em>built-in</em> orderings from a per-gene
-    <code>int priority()</code> is still <a href="roadmap.html#priority">on the
-    roadmap</a>; today only the data-driven half is sorted.
 </p>
 
 <h2>Coat-pipeline abstractions</h2>

@@ -159,7 +159,7 @@ class CoatPipelineGoldenTest {
             String[] p = entry.split("=");
             for (int i = 0; i < order.size(); i++) {
                 if (order.get(i).key().endsWith("." + p[0])) {
-                    segs[i] = p[1];
+                    segs[i] = order.get(i).key() + "=" + p[1];
                 }
             }
         }

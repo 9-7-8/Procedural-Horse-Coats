@@ -31,6 +31,7 @@ public final class WhiteGene implements Gene {
     private final List<Allele> alleles = List.of(W, w);
 
     @Override public String key() { return KEY; }
+    @Override public int priority() { return 60; }
     @Override public List<Allele> alleles() { return alleles; }
     @Override public Allele wildType() { return w; }
 

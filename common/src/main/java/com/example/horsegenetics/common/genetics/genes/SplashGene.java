@@ -31,6 +31,7 @@ public final class SplashGene implements Gene {
     private final List<Allele> alleles = List.of(Spl, spl);
 
     @Override public String key() { return KEY; }
+    @Override public int priority() { return 80; }
     @Override public List<Allele> alleles() { return alleles; }
     @Override public Allele wildType() { return spl; }
 

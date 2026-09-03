@@ -36,6 +36,7 @@ public final class CreamGene implements Gene {
     private final List<Allele> alleles = List.of(Cr, N);
 
     @Override public String key() { return KEY; }
+    @Override public int priority() { return 40; }
     @Override public List<Allele> alleles() { return alleles; }
     @Override public Allele wildType() { return N; }
 

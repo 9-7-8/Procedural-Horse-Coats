@@ -131,14 +131,18 @@
     </p>
 </div>
 
-<h4>What priority is for</h4>
+<h4>What epigenetic priority is for</h4>
 
 <p>
-    On a <strong>heterozygote</strong> the expressed copy is obvious &mdash; the
+    This is <code>AlleleEpigenetics.priority</code> &mdash; <strong>not</strong>
+    <code>Gene.priority()</code>, which is the fixed per-gene constant
+    <code>Genes</code> sorts <code>codeOrder()</code> on (so breeding rolls each
+    gene in a stable order and a gene only ever sees lower-priority genes). On a
+    <strong>heterozygote</strong> the expressed copy is obvious &mdash; the
     dominant one &mdash; and its epigenetics are what the coat reads. On a
     <strong>homozygote</strong> both copies express, so the tie goes to the
-    <strong>higher</strong> priority. That is its only job today; it is a full-range
-    int because more uses are planned. It selects a <em>seed</em>, never an
+    <strong>higher</strong> epigenetic priority. That is its only job; it is a
+    full-range int for headroom. It selects a <em>seed</em>, never an
     <em>order</em>.
 </p>
 

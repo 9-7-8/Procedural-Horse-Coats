@@ -124,6 +124,22 @@ project. Its shape:
 
 ## Status snapshot (keep this current)
 
+- **Built 2026-09-03, NOT yet play-tested: the data-model rewrite (roadmap
+  Tier 1, §2).** Every `Gene` now declares `int priority()`; `codeOrder()` /
+  `naturalOrder()` / `magicalOrder()` are all *derived* by one sort on
+  `(priority, key)` over built-ins + `SpecGene`s together (no hand-written
+  lists, loaded genes interleave by priority). The genotype / epigenome code
+  strings became **gene-keyed and tolerant** (`<geneKey>=<a>/<b>`; missing gene
+  = wild type, unknown gene = dropped, `""` = wild type) - see "The genetics
+  model" below. `coat-golden.txt` regenerated: every **deterministic** coat is
+  byte-identical (the pipeline is untouched); non-deterministic rows shifted
+  because `Epigenome.random` / `fromSeed` now draw per-gene seeds in the new
+  `codeOrder()` - a *stored* epigenome code round-trips unchanged, only the
+  seed-derived stand-in moved. `:common:test` 195 green, `:neoforge:build`
+  green, `runServer` boots clean (`20 segments` with the two shipped spec
+  genes). NeoForge needed **no** source changes - it delegates all code
+  parsing to `common/`. Closes old known-gap #18 (`GeneCodeDisplay` now derives
+  its gene list, so spec genes show).
 - **`common/`** - compiles; **195 JUnit tests pass** (`./gradlew :common:test`).
   Covers `genetics/` (allele/gene model - **18 genes**: the 16 natural ones
   (extension, agouti, champagne, splash, grey, cream, pearl, **dun**,
@@ -650,30 +666,47 @@ pids) when the smoke test has printed `Done (...)! For help`.
 ## The genetics model, as implemented
 
 **Alleles are objects.** A `Genotype` is one `AllelePair` per registered
-`Gene` (`common/genetics/`). It round-trips through a **code string**: one
-segment per gene in `Genes.codeOrder()`, segments joined by `-`, the two
-alleles of a gene joined by `/`, dominant first. Allele tokens can be **any run
-of characters** (`Spl`, `Cr`, `prl`, `Ch`, `N`, ...). Example:
-`"E/e-A/a-w/w-t/t-c/c-spl/spl-g/g-Cr/N-N/N"`. **No legacy / short-code
-handling** - dev only, no saves to keep.
+`Gene` (`common/genetics/`), held internally as a `Map<geneKey, AllelePair>`.
+It round-trips through a **gene-keyed code string**: one
+`<geneKey>=<a>/<b>` segment per gene in `Genes.codeOrder()`, segments joined by
+`-`, the two alleles joined by `/`, dominant first. Allele tokens can be **any
+run of characters** (`Spl`, `Cr`, `prl`, `Ch`, `N`, ...). Example:
+`"horsegenetics.extension=E/e-horsegenetics.agouti=A/a-..."`. **Parsing is
+tolerant** (dev only, no saves): a registered gene with no segment reads as its
+wild type; a segment naming an unregistered gene is dropped; the empty string
+is the all-wild-type genotype. A bad *allele token* on a known gene is still a
+hard error. `Epigenome`'s code string is the same shape
+(`<geneKey>=<pri>:<seedhex>/<pri>:<seedhex>`), with a deterministic
+key-seeded placeholder filling any gene a stored code predates. **No positional
+/ legacy parsing** - so adding or removing a gene is just a coat regeneration.
 
-`Genes` is now an **open registry**: the eighteen built-ins keep their fixed order
-first (so adding a gene never changes an existing horse's coat), and
-`SpecGene`s loaded from JSON are appended after them, **sorted by declared
-`priority` then key - registration order is deliberately ignored**. A magical
-spec gene slots in *before* `TEST` in `magicalOrder()`, because Test paints flat
-and masks everything and has to stay last. `GenotypeCatalog` is lazy and
-invalidated on every registration, since the catalogue is a product over
-`codeOrder()`.
+**Gene priority + derived orderings.** Every `Gene` declares an
+`int priority()` (a fixed constant of the gene, no default). All three
+orderings are *derived* by one sort of **every** registered gene - built-in and
+`SpecGene` alike - on `(priority, key())`: `codeOrder()`/`all()` = the whole
+sorted list, `naturalOrder()` = it filtered to `isNatural()`, `magicalOrder()`
+= filtered to the magical genes. There are no hand-written lists any more, and
+a data-driven natural gene at priority 45 lands *between* the built-in pearl
+(42) and champagne (50) - loaded genes are not appended. Bands are a
+convention: `0-99` natural, `100+` magical; `Genes.register` logs a warning for
+a gene outside its phase's band (via `System.getLogger`) but carries on. Ties
+break alphabetically by key. Built-in priorities (chosen to reproduce the old
+hand-written order, so no coat changed): extension 10, agouti 20, silver 30,
+mushroom 32, dun 34, cream 40, pearl 42, champagne 50, grey 55, white 60,
+roan 70, tobiano 72, frame 74, sabino 76, splash 80, pink hair 110, magic
+zebra 120, test 900. Within the natural band **low = sets pigment absolutely,
+higher = dilution** (agouti's absolute points must precede
+`PigmentField.dilute`). `AlleleEpigenetics.priority` is unrelated - it picks a
+*seed*, never an order. `GenotypeCatalog` is lazy and invalidated on every
+registration.
 
-`Genes.codeOrder()` = extension, agouti, white, test, champagne, splash, grey,
-cream, pearl, magic zebra, pink hair, dun, silver, mushroom, roan, tobiano,
-frame, sabino - **append** new ones. `naturalOrder()` (phase-1 pigment
-restriction) = extension, agouti, **silver, mushroom, dun**, cream, pearl,
-champagne, grey, white, **roan, tobiano, frame, sabino**, splash - silver /
-mushroom / dun slot in right after agouti so the points exist to dilute, the
-white-pattern genes just before splash. **Full per-gene detail is in
-`wiki/gene-*.html`** (one page per gene); one-liners:
+`Genes.codeOrder()` (derived) = extension, agouti, silver, mushroom, dun,
+cream, pearl, champagne, grey, white, roan, tobiano, frame, sabino, splash,
+pink hair, magic zebra, test. `naturalOrder()` (phase-1 pigment restriction) =
+the same list minus the three magical genes - silver / mushroom / dun sit
+right after agouti so the points exist to dilute, the white-pattern genes just
+before splash. **Full per-gene detail is in `wiki/gene-*.html`** (one page per
+gene); one-liners:
 
 | gene | alleles | dominance | in the wild | coat effect |
 |------|---------|-----------|-------------|-------------|
@@ -743,12 +776,13 @@ order).
 - **Founders only** roll fresh epigenetics (`Epigenome.random` via
   `CoatGenerator.generate`). A foal must never go through that path - see the
   data-flow section.
-- `priority` has no other consumer, and **by design it never will**: it picks
-  *which copy's seed expresses*, never the order genes are processed in. Gene
-  order comes from a hard-coded per-gene number (planned - see
-  `wiki/roadmap.html` §3), so that two horses with the same genotype and
-  the same seeds can't diverge on priority alone and silently share a coat
-  cache entry. It stays a full-range int for headroom.
+- `priority` (the epigenetic one, `AlleleEpigenetics.priority`) has no other
+  consumer, and **by design it never will**: it picks *which copy's seed
+  expresses*, never the order genes are processed in. Gene processing order
+  comes from `Gene.priority()` (a fixed per-gene constant; `Genes` sorts on
+  `(priority, key)`), so two horses with the same genotype and the same seeds
+  can't diverge on epigenetic priority alone and silently share a coat cache
+  entry. It stays a full-range int for headroom.
 
 Full inheritance detail: **`wiki/breeding.html`**.
 
@@ -1815,14 +1849,12 @@ Design follow-ups (not just "go look at it"):
    transforms in hand now; (b) worked with no breeding-mode requirement ->
    fixed, both ends now require `isInLove()` and consume it.
    `wiki/verification.html` §16.
-18. **The short genome string omits data-driven genes.** `GeneCodeDisplay`
-   (info panel, paper dump, seed-jar tooltip) has a hard-coded `TRAILING_ORDER`
-   of the 18 built-ins, so a spec gene - including the shipped Suntouched /
-   Waterborn - never shows. The underlying genotype/epigenome data is correct
-   (owner confirmed via the seed jar 2026-09-02) - it's purely the display.
-   Fix: append `Genes.loaded()` to the trailing list and treat a spec gene's
-   `n` wild type as "absent" in `ABSENCE_WILDTYPE`. `wiki/verification.html`
-   open issues.
+18. **Fixed 2026-09-03 (data-model rewrite), not play-tested.** The short
+   genome string now shows data-driven genes: `GeneCodeDisplay` derives its
+   trailing gene list from `Genes.codeOrder()` (built-ins in a curated display
+   order, then `Genes.loaded()`) and derives the "wild type means absent"
+   test from `dominance()`, so the shipped Suntouched / Waterborn appear.
+   Confirm in-game (info panel, paper dump, seed-jar tooltip).
 19. **The stall system is detection + storage only.** A stall gets defined and
    persisted (`StallData`), but nothing *uses* it yet: no teleport-to-stall, no
    "assigned pen" behaviour, no auto-return. Cleanup is thin - a stall only goes

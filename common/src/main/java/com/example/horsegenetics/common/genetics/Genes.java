@@ -20,6 +20,7 @@ import com.example.horsegenetics.common.genetics.genes.TobianoGene;
 import com.example.horsegenetics.common.genetics.genes.WhiteGene;
 import com.example.horsegenetics.common.genetics.spec.SpecGene;
 
+import java.lang.System.Logger;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -32,35 +33,40 @@ import java.util.Map;
  * ({@link #NS} for the built-ins). See <b>wiki/gene-*.html</b> for the full
  * description of every gene.
  *
- * <p>Three orderings, deliberately independent:
+ * <h2>One order, derived</h2>
+ * There is a single processing order: <b>every</b> registered gene - built-in
+ * and data-driven alike - sorted on {@code (}{@link Gene#priority()}{@code ,
+ * key)}. The three public views are all a <i>result</i> of that one sort, never
+ * a source:
  * <ul>
- *   <li>{@link #codeOrder()} - position in the genotype code string.</li>
- *   <li>{@link #naturalOrder()} - the order the <b>natural</b> genes push
- *       pigment down in phase 1.</li>
- *   <li>{@link #magicalOrder()} - the order the <b>magical</b> genes add
- *       signed RGB in phase 3. Ordinary magical genes accumulate by integer
- *       addition and so are order-independent; the order still matters for a
- *       gene that paints flat.</li>
+ *   <li>{@link #codeOrder()} / {@link #all()} - the whole sorted list;
+ *       position in the genotype code follows it.</li>
+ *   <li>{@link #naturalOrder()} - the sorted list filtered to
+ *       {@link Gene#isNatural()} - the order natural genes push pigment down in
+ *       phase 1.</li>
+ *   <li>{@link #magicalOrder()} - the sorted list filtered to the magical
+ *       genes - the order they add signed RGB in phase 3.</li>
  * </ul>
- *
- * <h2>Built-ins, then data-driven genes</h2>
- * The eleven hand-written genes keep their fixed order, first, exactly as they
- * were - so adding a gene never changes an existing horse's coat. Genes loaded
- * from JSON ({@link SpecGene}, see {@code genetics.spec.GeneSpecLoader}) are
- * appended after them, sorted by their declared {@code priority} and then by
- * key. <b>Registration order is deliberately not respected</b>: two people who
- * drop the same two gene files in a different order must get the same horses,
- * which is the same argument as the hard-coded gene priority in
- * {@code wiki/roadmap.html} §2.
+ * The natural / magical <b>phase</b> (not the priority number) is what splits
+ * the two coat passes; the {@code 0-99} / {@code 100+} bands are only a
+ * convention, and {@link #register} logs a warning when a gene sits outside its
+ * band. <b>Registration order is never respected</b>: two people who drop the
+ * same gene files in a different order must get the same horses.
  *
  * <p>Register during startup, before anything parses a genotype - each
- * registration lengthens the genotype code by one segment, and codes written
- * before it will no longer parse. (Dev-only mod, no saves to keep; see the "no
- * legacy code" rule in {@code CLAUDE.md}.)
+ * registration can move where a gene sits in the code, and a code written
+ * against the old order still parses (a gene now absent from it reads as wild
+ * type) but is a different genotype. Dev-only mod, no saves to keep; see the
+ * "no legacy code" rule in {@code CLAUDE.md}.
  */
 public final class Genes {
 
     public static final String NS = "horsegenetics";
+
+    private static final Logger LOG = System.getLogger("horsegenetics.genetics");
+
+    /** The lowest priority in the magical band - below this a gene is "natural" by convention. */
+    public static final int MAGICAL_BAND_START = 100;
 
     public static final ExtensionGene EXTENSION = new ExtensionGene();
     public static final AgoutiGene AGOUTI = new AgoutiGene();
@@ -81,34 +87,25 @@ public final class Genes {
     public static final FrameGene FRAME = new FrameGene();
     public static final SabinoGene SABINO = new SabinoGene();
 
-    private static final List<Gene> BUILTIN_CODE_ORDER =
-            List.of(EXTENSION, AGOUTI, WHITE, TEST, CHAMPAGNE, SPLASH, GREY, CREAM, PEARL,
-                    MAGIC_ZEBRA, PINK_HAIR, DUN, SILVER, MUSHROOM, ROAN, TOBIANO, FRAME, SABINO);
+    /** The hand-written genes. Order here is irrelevant - the registry sorts. */
+    private static final List<Gene> BUILTINS = List.of(
+            EXTENSION, AGOUTI, WHITE, TEST, CHAMPAGNE, SPLASH, GREY, CREAM, PEARL,
+            MAGIC_ZEBRA, PINK_HAIR, DUN, SILVER, MUSHROOM, ROAN, TOBIANO, FRAME, SABINO);
 
-    private static final List<Gene> BUILTIN_NATURAL_ORDER =
-            List.of(EXTENSION, AGOUTI, SILVER, MUSHROOM, DUN, CREAM, PEARL, CHAMPAGNE, GREY, WHITE,
-                    ROAN, TOBIANO, FRAME, SABINO, SPLASH);
-
-    /**
-     * Pink hair and magic zebra both <i>add</i>, so their order between
-     * themselves doesn't matter - but Test paints <b>flat</b>, and it is
-     * {@code COMPLETE_DOMINANT} ("while it shows, nothing else is"), so it has
-     * to run <b>last</b>. Loaded magical genes slot in between the two halves,
-     * for the same reason.
-     */
-    private static final List<Gene> BUILTIN_MAGICAL_HEAD = List.of(PINK_HAIR, MAGIC_ZEBRA);
-    private static final List<Gene> BUILTIN_MAGICAL_TAIL = List.of(TEST);
+    /** Ordering: lower priority first, ties broken alphabetically by key. */
+    private static final Comparator<Gene> BY_PRIORITY_THEN_KEY =
+            Comparator.comparingInt(Gene::priority).thenComparing(Gene::key);
 
     private static final List<SpecGene> LOADED = new ArrayList<>();
 
-    private static volatile List<Gene> codeOrder = BUILTIN_CODE_ORDER;
-    private static volatile List<Gene> naturalOrder = BUILTIN_NATURAL_ORDER;
-    private static volatile List<Gene> magicalOrder = concat(BUILTIN_MAGICAL_HEAD, BUILTIN_MAGICAL_TAIL);
+    private static volatile List<Gene> order = List.of();
+    private static volatile List<Gene> naturalOrder = List.of();
+    private static volatile List<Gene> magicalOrder = List.of();
     private static volatile Map<String, Gene> byKey = Map.of();
     private static volatile Map<String, Allele> alleleByKey = Map.of();
 
     static {
-        rebuildIndexes();
+        rebuild();
     }
 
     private Genes() {}
@@ -118,13 +115,17 @@ public final class Genes {
     // ------------------------------------------------------------------
 
     /**
-     * Add a data-driven gene. Throws if its key is taken. Call during startup;
-     * see the class note on why registration order does not decide gene order.
+     * Add a data-driven gene. Throws if its key is taken (that is genuinely
+     * unrecoverable); warns, but carries on, if its priority sits outside its
+     * phase's conventional band. Call during startup; the gene sorts into the
+     * one {@code (priority, key)} order, so registration order does not decide
+     * where it lands.
      */
     public static synchronized void register(SpecGene gene) {
         if (byKey.containsKey(gene.key())) {
             throw new IllegalArgumentException("a gene is already registered under " + gene.key());
         }
+        checkBand(gene);
         LOADED.add(gene);
         rebuild();
     }
@@ -137,52 +138,57 @@ public final class Genes {
 
     /** Every data-driven gene currently registered, in gene order. */
     public static List<SpecGene> loaded() {
-        return List.copyOf(LOADED);
+        List<SpecGene> out = new ArrayList<>(LOADED);
+        out.sort(BY_PRIORITY_THEN_KEY);
+        return List.copyOf(out);
     }
 
-    /** Drop every loaded gene, back to the eleven built-ins. Tests and reloads. */
+    /** Drop every loaded gene, back to the built-ins. Tests and reloads. */
     public static synchronized void clearLoaded() {
         LOADED.clear();
         rebuild();
     }
 
-    private static void rebuild() {
-        LOADED.sort(Comparator.comparingInt(SpecGene::priority).thenComparing(SpecGene::key));
-
-        List<Gene> loadedNatural = new ArrayList<>();
-        List<Gene> loadedMagical = new ArrayList<>();
-        for (SpecGene g : LOADED) {
-            (g.isNatural() ? loadedNatural : loadedMagical).add(g);
+    private static void checkBand(Gene gene) {
+        boolean magicalByNumber = gene.priority() >= MAGICAL_BAND_START;
+        if (gene.isNatural() && magicalByNumber) {
+            LOG.log(Logger.Level.WARNING, "gene {0} is natural but its priority {1} is in the magical band (>= {2})",
+                    gene.key(), gene.priority(), MAGICAL_BAND_START);
+        } else if (!gene.isNatural() && !magicalByNumber) {
+            LOG.log(Logger.Level.WARNING, "gene {0} is magical but its priority {1} is in the natural band (< {2})",
+                    gene.key(), gene.priority(), MAGICAL_BAND_START);
         }
-
-        codeOrder = concat(BUILTIN_CODE_ORDER, LOADED);
-        naturalOrder = concat(BUILTIN_NATURAL_ORDER, loadedNatural);
-        List<Gene> magical = new ArrayList<>(BUILTIN_MAGICAL_HEAD);
-        magical.addAll(loadedMagical);
-        magical.addAll(BUILTIN_MAGICAL_TAIL);
-        magicalOrder = List.copyOf(magical);
-
-        rebuildIndexes();
-        GenotypeCatalog.invalidate();
     }
 
-    private static void rebuildIndexes() {
-        Map<String, Gene> genes = new LinkedHashMap<>();
+    private static void rebuild() {
+        LOADED.sort(BY_PRIORITY_THEN_KEY);
+
+        List<Gene> all = new ArrayList<>(BUILTINS.size() + LOADED.size());
+        all.addAll(BUILTINS);
+        all.addAll(LOADED);
+        all.sort(BY_PRIORITY_THEN_KEY);
+        order = List.copyOf(all);
+
+        List<Gene> natural = new ArrayList<>();
+        List<Gene> magical = new ArrayList<>();
+        for (Gene g : order) {
+            (g.isNatural() ? natural : magical).add(g);
+        }
+        naturalOrder = List.copyOf(natural);
+        magicalOrder = List.copyOf(magical);
+
+        Map<String, Gene> keys = new LinkedHashMap<>();
         Map<String, Allele> alleles = new LinkedHashMap<>();
-        for (Gene g : codeOrder) {
-            genes.put(g.key(), g);
+        for (Gene g : order) {
+            keys.put(g.key(), g);
             for (Allele a : g.alleles()) {
                 alleles.put(a.key(), a);
             }
         }
-        byKey = Map.copyOf(genes);
+        byKey = Map.copyOf(keys);
         alleleByKey = Map.copyOf(alleles);
-    }
 
-    private static List<Gene> concat(List<? extends Gene> a, List<? extends Gene> b) {
-        List<Gene> out = new ArrayList<>(a);
-        out.addAll(b);
-        return List.copyOf(out);
+        GenotypeCatalog.invalidate();
     }
 
     // ------------------------------------------------------------------
@@ -190,7 +196,7 @@ public final class Genes {
     // ------------------------------------------------------------------
 
     public static List<Gene> codeOrder() {
-        return codeOrder;
+        return order;
     }
 
     public static List<Gene> naturalOrder() {
@@ -202,7 +208,7 @@ public final class Genes {
     }
 
     public static List<Gene> all() {
-        return codeOrder;
+        return order;
     }
 
     public static Gene byKey(String geneKey) {
@@ -211,6 +217,15 @@ public final class Genes {
             throw new IllegalArgumentException("no gene registered under " + geneKey);
         }
         return g;
+    }
+
+    /**
+     * The gene registered under {@code geneKey}, or {@code null} if none - a
+     * genotype-code segment naming an unregistered gene is dropped, not an
+     * error, so parsing can stay tolerant across a gene being added or removed.
+     */
+    public static Gene byKeyOrNull(String geneKey) {
+        return byKey.get(geneKey);
     }
 
     public static Allele allele(String alleleKey) {

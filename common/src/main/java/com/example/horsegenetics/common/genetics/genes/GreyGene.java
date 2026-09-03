@@ -39,6 +39,7 @@ public final class GreyGene implements Gene {
     private final List<Allele> alleles = List.of(G, g);
 
     @Override public String key() { return KEY; }
+    @Override public int priority() { return 55; }
     @Override public List<Allele> alleles() { return alleles; }
     @Override public Allele wildType() { return g; }
 

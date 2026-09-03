@@ -51,6 +51,37 @@ public interface Gene {
     /** {@code <modauthor>.<gene>}, e.g. {@code "horsegenetics.agouti"}. */
     String key();
 
+    /**
+     * <b>Gene priority</b> - a fixed constant of the gene (never data on a
+     * horse, never varies between horses) that decides <b>processing order</b>.
+     * Every gene has to answer; there is no default.
+     *
+     * <p>{@link Genes} derives all three orderings ({@link Genes#codeOrder()},
+     * {@link Genes#naturalOrder()}, {@link Genes#magicalOrder()}) by sorting on
+     * {@code (priority, key())} - a lower number is processed earlier, and
+     * <b>ties break alphabetically by {@link #key()}</b>, so two mods that both
+     * pick the same number still produce one fixed, reproducible order. The
+     * same order rolls a founder's genes, so a gene can only ever look at genes
+     * with a <i>lower</i> priority than its own.
+     *
+     * <p><b>This is not {@link AlleleEpigenetics#priority()}.</b> That one is
+     * per allele copy and only selects <i>which copy's seed expresses</i>; it
+     * cannot move a gene in the processing queue and never will.
+     *
+     * <p><b>Bands, by convention:</b> {@code 0}-{@code 99} is the natural band,
+     * {@code 100} and up is the magical band. The band is only a convention -
+     * registering a natural gene at {@code >= 100} (or a magical one below it)
+     * logs a warning and carries on; it is the {@link #isNatural() phase}, not
+     * the number, that decides which of the two coat passes a gene runs in.
+     *
+     * <p><b>Within the natural band, low numbers are for genes that set pigment
+     * absolutely, higher numbers for dilutions</b> - agouti
+     * ({@code BayCoat} sets its points absolutely) must run before
+     * {@code PigmentField.dilute} does anything, or a bay's mane will not
+     * dilute. See {@code wiki/roadmap.html} §2.
+     */
+    int priority();
+
     /** All alleles this gene defines, most-dominant first. */
     List<Allele> alleles();
 

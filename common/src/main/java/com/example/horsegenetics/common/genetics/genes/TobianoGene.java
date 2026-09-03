@@ -53,6 +53,7 @@ public final class TobianoGene implements Gene {
     private final List<Allele> alleles = List.of(To, to);
 
     @Override public String key() { return KEY; }
+    @Override public int priority() { return 72; }
     @Override public List<Allele> alleles() { return alleles; }
     @Override public Allele wildType() { return to; }
 

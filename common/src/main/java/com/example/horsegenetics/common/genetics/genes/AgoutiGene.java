@@ -34,6 +34,7 @@ public final class AgoutiGene implements Gene {
     private final List<Allele> alleles = List.of(A, a);
 
     @Override public String key() { return KEY; }
+    @Override public int priority() { return 20; }
     @Override public List<Allele> alleles() { return alleles; }
     @Override public Allele wildType() { return a; }
 

@@ -67,6 +67,7 @@ public final class PinkHairGene implements Gene {
     private final List<Allele> alleles = List.of(n, Pihr);
 
     @Override public String key() { return KEY; }
+    @Override public int priority() { return 110; }
     @Override public List<Allele> alleles() { return alleles; }
     @Override public Allele wildType() { return n; }
 

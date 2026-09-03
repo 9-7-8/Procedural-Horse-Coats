@@ -14,16 +14,24 @@ import java.util.Objects;
  * (see {@link Genes}). Built from {@link Allele} objects; round-trips through a
  * <b>code string</b> for persistence / sync / the pedigree record.
  *
- * <p><b>Code format:</b> one segment per gene in {@link Genes#codeOrder()},
- * segments joined by {@code -}, the two alleles of a gene joined by {@code /},
- * dominant first. Alleles are their {@link Allele#token()} (any run of
- * characters). Example: {@code "E/e-A/a-w/w-t/t-c/c-sl/sl-Spl/spl"}.
- * There is <b>no</b> legacy short-code handling - dev only, no saves to keep.
+ * <p><b>Code format:</b> one <b>gene-keyed</b> segment per gene in
+ * {@link Genes#codeOrder()}, each {@code <geneKey>=<a>/<b>} - the full
+ * {@link Gene#key()}, the two alleles joined by {@code /}, dominant first,
+ * segments joined by {@code -}. Alleles are their {@link Allele#token()}.
+ * Example:
+ * {@code "horsegenetics.extension=E/e-horsegenetics.agouti=A/a-..."}.
+ *
+ * <p><b>Parsing is tolerant</b> (dev only, no saves): a registered gene with no
+ * segment reads as its wild type, and a segment naming a gene that is not
+ * registered is <b>dropped</b> - so adding or removing a gene is nothing more
+ * than a coat regeneration. A bad <i>allele token</i> on a known gene is still
+ * a hard error. There is no positional / legacy code handling.
  */
 public final class Genotype {
 
     private static final String GENE_SEP = "-";
     private static final String ALLELE_SEP = "/";
+    private static final String NAME_SEP = "=";
 
     private final Map<String, AllelePair> byGene;
 
@@ -60,35 +68,27 @@ public final class Genotype {
 
     public static Genotype parse(String code) {
         Objects.requireNonNull(code, "code");
-        String[] segments = code.split(GENE_SEP, -1);
-        List<Gene> order = Genes.codeOrder();
-        if (segments.length != order.size()) {
-            throw new IllegalArgumentException("genotype code needs " + order.size()
-                    + " '-'-separated segments (" + hint() + "), got " + segments.length + ": " + code);
-        }
-        Map<String, AllelePair> m = new LinkedHashMap<>();
-        for (int i = 0; i < order.size(); i++) {
-            Gene g = order.get(i);
-            String[] tokens = segments[i].split(ALLELE_SEP, -1);
-            if (tokens.length != 2) {
-                throw new IllegalArgumentException("segment " + (i + 1) + " for " + g.key()
-                        + " needs two '/'-separated alleles, got: " + segments[i]);
+        Map<String, AllelePair> supplied = new LinkedHashMap<>();
+        if (!code.isEmpty()) {
+            for (String segment : code.split(GENE_SEP, -1)) {
+                int eq = segment.indexOf(NAME_SEP);
+                if (eq < 0) {
+                    throw new IllegalArgumentException(
+                            "genotype segment needs '<gene>=<a>/<b>', got: " + segment);
+                }
+                Gene g = Genes.byKeyOrNull(segment.substring(0, eq));
+                if (g == null) {
+                    continue; // a gene no longer registered - drop the segment
+                }
+                String[] tokens = segment.substring(eq + 1).split(ALLELE_SEP, -1);
+                if (tokens.length != 2) {
+                    throw new IllegalArgumentException("segment for " + g.key()
+                            + " needs two '/'-separated alleles, got: " + segment);
+                }
+                supplied.put(g.key(), new AllelePair(g.fromToken(tokens[0]), g.fromToken(tokens[1])));
             }
-            m.put(g.key(), new AllelePair(g.fromToken(tokens[0]), g.fromToken(tokens[1])));
         }
-        return new Genotype(m);
-    }
-
-    private static String hint() {
-        StringBuilder sb = new StringBuilder();
-        for (Gene g : Genes.codeOrder()) {
-            if (sb.length() > 0) {
-                sb.append(GENE_SEP);
-            }
-            List<Allele> as = g.alleles();
-            sb.append(as.get(0).token()).append(ALLELE_SEP).append(as.get(as.size() - 1).token());
-        }
-        return sb.toString();
+        return of(List.copyOf(supplied.values()));
     }
 
     public String toCode() {
@@ -98,7 +98,8 @@ public final class Genotype {
                 sb.append(GENE_SEP);
             }
             AllelePair p = byGene.get(g.key());
-            sb.append(p.first().token()).append(ALLELE_SEP).append(p.second().token());
+            sb.append(g.key()).append(NAME_SEP)
+              .append(p.first().token()).append(ALLELE_SEP).append(p.second().token());
         }
         return sb.toString();
     }

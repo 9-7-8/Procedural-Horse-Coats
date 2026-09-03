@@ -46,16 +46,20 @@ class SpecGeneTest {
         assertEquals(BUILT_IN_GENES, Genes.codeOrder().size());
         int catalogueBefore = GenotypeCatalog.size();
 
-        SpecGene silver = register("silver.json");
+        SpecGene silver = register("silver.json"); // example.silver, priority 45
 
         assertEquals(BUILT_IN_GENES + 1, Genes.codeOrder().size());
         assertEquals(silver, Genes.byKey("example.silver"));
-        assertEquals(silver, Genes.codeOrder().get(BUILT_IN_GENES), "loaded genes go after the built-ins");
+        // priority 45 sorts it into the one unified order, between the built-in
+        // pearl (42) and champagne (50) - not appended after the built-ins.
+        int i = Genes.codeOrder().indexOf(silver);
+        assertEquals("horsegenetics.pearl", Genes.codeOrder().get(i - 1).key());
+        assertEquals("horsegenetics.champagne", Genes.codeOrder().get(i + 1).key());
         assertTrue(Genes.naturalOrder().contains(silver));
         assertFalse(Genes.magicalOrder().contains(silver));
 
         String code = Genotype.wildType().toCode();
-        assertTrue(code.endsWith("-z/z"), "the wild type gains a segment: " + code);
+        assertTrue(code.contains("example.silver=z/z"), "the wild type gains a segment: " + code);
         assertEquals(Genotype.wildType(), Genotype.parse(code));
         // Every unmasked entry doubles; the two COMPLETE_DOMINANT entries
         // (white, test) stay at one pen each, because while they show nothing
@@ -76,14 +80,20 @@ class SpecGeneTest {
     void loadOrderDoesNotDecideGeneOrder() {
         register("tobiano.json");   // priority 80
         register("dun.json");       // priority 30
-        assertEquals("example.dun", Genes.codeOrder().get(BUILT_IN_GENES).key());
-        assertEquals("example.tobiano", Genes.codeOrder().get(BUILT_IN_GENES + 1).key());
+        assertOrder("example.dun", "example.tobiano");
 
         Genes.clearLoaded();
         register("dun.json");
         register("tobiano.json");
-        assertEquals("example.dun", Genes.codeOrder().get(BUILT_IN_GENES).key(),
-                "priority decides, not who was registered first");
+        assertOrder("example.dun", "example.tobiano");
+    }
+
+    /** {@code a} sorts before {@code b} in the one derived {@code codeOrder()}. */
+    private static void assertOrder(String a, String b) {
+        int ia = Genes.codeOrder().indexOf(Genes.byKey(a));
+        int ib = Genes.codeOrder().indexOf(Genes.byKey(b));
+        assertTrue(ia >= 0 && ib >= 0 && ia < ib,
+                "priority decides, not registration order: " + a + "@" + ia + " " + b + "@" + ib);
     }
 
     @Test

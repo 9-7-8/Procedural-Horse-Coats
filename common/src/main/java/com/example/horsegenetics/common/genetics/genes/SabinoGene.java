@@ -56,6 +56,7 @@ public final class SabinoGene implements Gene {
     private final List<Allele> alleles = List.of(SB1, sb1);
 
     @Override public String key() { return KEY; }
+    @Override public int priority() { return 76; }
     @Override public List<Allele> alleles() { return alleles; }
     @Override public Allele wildType() { return sb1; }
 

@@ -34,7 +34,7 @@ public final class Codes {
             boolean hit = false;
             for (int i = 0; i < order.size(); i++) {
                 if (order.get(i).key().endsWith("." + gene)) {
-                    segs[i] = pair;
+                    segs[i] = order.get(i).key() + "=" + pair;
                     hit = true;
                     break;
                 }

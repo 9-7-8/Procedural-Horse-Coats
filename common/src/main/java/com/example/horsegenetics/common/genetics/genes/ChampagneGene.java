@@ -49,6 +49,7 @@ public final class ChampagneGene implements Gene {
     private final List<Allele> alleles = List.of(Ch, c);
 
     @Override public String key() { return KEY; }
+    @Override public int priority() { return 50; }
     @Override public List<Allele> alleles() { return alleles; }
     @Override public Allele wildType() { return c; }
 

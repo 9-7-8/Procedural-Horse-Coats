@@ -57,6 +57,7 @@ public final class RoanGene implements Gene {
     private final List<Allele> alleles = List.of(Rn, rn);
 
     @Override public String key() { return KEY; }
+    @Override public int priority() { return 70; }
     @Override public List<Allele> alleles() { return alleles; }
     @Override public Allele wildType() { return rn; }
 

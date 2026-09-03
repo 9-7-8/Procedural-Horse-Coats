@@ -68,6 +68,7 @@ public final class MagicZebraGene implements Gene {
     private final List<Allele> alleles = List.of(Mzeb, n);
 
     @Override public String key() { return KEY; }
+    @Override public int priority() { return 120; }
     @Override public List<Allele> alleles() { return alleles; }
     @Override public Allele wildType() { return n; }
 

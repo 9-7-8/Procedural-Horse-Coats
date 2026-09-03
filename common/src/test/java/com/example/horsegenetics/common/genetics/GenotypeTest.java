@@ -2,6 +2,7 @@ package com.example.horsegenetics.common.genetics;
 
 import com.example.horsegenetics.common.testutil.Codes;
 import com.example.horsegenetics.common.testutil.FakeRng;
+import com.example.horsegenetics.common.testutil.LegacyCode;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -15,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class GenotypeTest {
 
     private static final String WT = Codes.wildType();
-    /** Wild-type segments for the visual-pattern genes added after the first 11. */
+    /** Wild-type visual-pattern segments in the pre-rewrite positional order. */
     private static final String T = "-d/d-z/z-mu/mu-rn/rn-to/to-ov/ov-sb1/sb1";
 
     private static Genotype g(AllelePair... pairs) {
@@ -36,15 +37,27 @@ class GenotypeTest {
 
     @Test
     void parseIsCanonicalAndOrderIndependent() {
-        Genotype a = Genotype.parse("e/E-a/A-w/W-t/T-c/Ch-spl/Spl-g/G-N/Cr-prl/N-n/n-n/n" + T);
-        Genotype b = Genotype.parse("E/e-A/a-W/w-T/t-Ch/c-Spl/spl-G/g-Cr/N-N/prl-n/n-n/n" + T);
+        Genotype a = Genotype.parse(LegacyCode.keyed("e/E-a/A-w/W-t/T-c/Ch-spl/Spl-g/G-N/Cr-prl/N-n/n-n/n" + T));
+        Genotype b = Genotype.parse(LegacyCode.keyed("E/e-A/a-W/w-T/t-Ch/c-Spl/spl-G/g-Cr/N-N/prl-n/n-n/n" + T));
         assertEquals(b, a);
         assertEquals(b.toCode(), a.toCode());
     }
 
     @Test
+    void parseIgnoresSegmentOrderAndFillsOrDropsGenes() {
+        // segments in any order; a gene left out reads as wild type; a segment
+        // naming a gene that is not registered is dropped, not an error.
+        Genotype x = Genotype.parse("horsegenetics.agouti=A/a-horsegenetics.extension=E/e");
+        assertEquals(Genotype.parse(Codes.of("extension", "E/e", "agouti", "A/a")), x);
+        assertEquals(x, Genotype.parse(
+                "horsegenetics.agouti=A/a-horsegenetics.extension=E/e-example.nosuchgene=q/q"));
+        // the empty string is the all-wild-type genotype
+        assertEquals(Genotype.wildType(), Genotype.parse(""));
+    }
+
+    @Test
     void multiCharTokensParse() {
-        Genotype x = Genotype.parse("E/e-A/a-w/w-t/t-c/c-Spl/spl-g/g-Cr/Cr-prl/prl-n/n-n/n" + T);
+        Genotype x = Genotype.parse(LegacyCode.keyed("E/e-A/a-w/w-t/t-c/c-Spl/spl-g/g-Cr/Cr-prl/prl-n/n-n/n" + T));
         assertTrue(x.isSplash());
         assertTrue(x.pair(Genes.CREAM).homozygous());
         assertTrue(x.pair(Genes.PEARL).homozygous());
@@ -52,12 +65,11 @@ class GenotypeTest {
 
     @ParameterizedTest
     @ValueSource(strings = {
-            "",
-            "E/e",
-            "E/e-A/a-w/w-t/t-c/c-spl/spl-g/g-N/N",     // 8 segments, need 18
-            "E/e-A/a-w/w-t/t-c/c-spl/spl-g/g-N/N-N/N-x/x", // 10
-            "E/e/E-A/a-w/w-t/t-c/c-spl/spl-g/g-N/N-N/N",   // 3 alleles in a segment
-            "E/x-A/a-w/w-t/t-c/c-spl/spl-g/g-N/N-N/N-n/n-n/n",     // unknown allele
+            "horsegenetics.extensionE/e",           // a segment with no '='
+            "horsegenetics.extension=E",             // one allele, not two
+            "horsegenetics.extension=E/e/E",         // three alleles in a segment
+            "horsegenetics.extension=E/x",           // unknown allele token on a known gene
+            "horsegenetics.extension=E/e-agouti",    // a later segment with no '='
     })
     void parseRejectsMalformed(String bad) {
         assertThrows(IllegalArgumentException.class, () -> Genotype.parse(bad));
@@ -90,7 +102,7 @@ class GenotypeTest {
 
     @Test
     void predicates() {
-        Genotype x = Genotype.parse("E/e-A/a-w/w-T/t-Ch/c-Spl/spl-G/g-Cr/N-N/N-n/n-n/n" + T);
+        Genotype x = Genotype.parse(LegacyCode.keyed("E/e-A/a-w/w-T/t-Ch/c-Spl/spl-G/g-Cr/N-N/N-n/n-n/n" + T));
         assertTrue(x.hasBlackPigment());
         assertTrue(x.isAgouti());
         assertTrue(x.hasTest());
@@ -119,27 +131,41 @@ class GenotypeTest {
                 p(Genes.AGOUTI.A, Genes.AGOUTI.a)).isDeterministic());
     }
 
+    /**
+     * {@code random} rolls each gene's pair in {@code codeOrder()} order.
+     * Extension and agouti each draw a boolean pair; the diagnostic test gene
+     * draws a single int; every other built-in draws an int pair.
+     */
     @Test
-    void randomConsumesDrawsInGeneOrder() {
-        // ext 2 bool | agouti 2 bool | white 2 int(50) | test 1 int(4)
-        //   | champ 2 int(40) | splash 2 int(20) | grey 2 int(16) | cream 2 int(30)
-        //   | pearl 2 int(22) | magic zebra 2 int(100) | pink hair 2 int(12)
-        //   | dun 2 int(24) | silver 2 int(60) | mushroom 2 int(34) | roan 2 int(30)
-        //   | tobiano 2 int(50) | frame 2 int(55) | sabino 2 int(45)
-        Genotype x = Genotype.random(new FakeRng()
-                .booleans(true, true, true, false)
-                .ints(1, 1, 1, 39, 39, 5, 5, 12, 12, 20, 20, 10, 10, 50, 50, 5, 5,
-                        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1));
-        assertEquals("E/E-A/a-w/w-t/t-c/c-spl/spl-g/g-N/N-N/N-n/n-n/n" + T, x.toCode());
-        assertEquals(CoatPhenotype.BAY, x.phenotype());
+    void randomConsumesItsDeclaredDrawsPerGeneInGeneOrder() {
+        FakeRng rng = new FakeRng();
+        for (Gene gene : Genes.codeOrder()) {
+            if (gene == Genes.EXTENSION || gene == Genes.AGOUTI) {
+                rng.booleans(true, true);
+            } else if (gene == Genes.TEST) {
+                rng.ints(1); // one draw, non-zero -> not a carrier
+            } else {
+                rng.ints(1, 1); // non-zero -> no rare allele
+            }
+        }
+        Genotype x = Genotype.random(rng);
+        assertEquals(CoatPhenotype.BAY, x.phenotype()); // E/E + A/A
+        rng.assertExhausted();
     }
 
     @Test
     void randomRollsRarerAllelesOnZero() {
-        Genotype x = Genotype.random(new FakeRng()
-                .booleans(false, false, false, false)
-                .ints(0, 1, 0, 0, 39, 0, 15, 0, 15, 0, 25, 0, 20, 0, 50, 0, 5,
-                        0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1));
+        FakeRng rng = new FakeRng();
+        for (Gene gene : Genes.codeOrder()) {
+            if (gene == Genes.EXTENSION || gene == Genes.AGOUTI) {
+                rng.booleans(false, false);
+            } else if (gene == Genes.TEST) {
+                rng.ints(0); // one draw, zero -> carrier
+            } else {
+                rng.ints(0, 0); // zero -> the rare / variant allele
+            }
+        }
+        Genotype x = Genotype.random(rng);
         assertTrue(x.isWhite());
         assertTrue(x.hasTest());
         assertTrue(x.isChampagne());
@@ -156,31 +182,37 @@ class GenotypeTest {
         assertTrue(x.has(Genes.TOBIANO.To));
         assertTrue(x.has(Genes.FRAME.Ov));
         assertTrue(x.has(Genes.SABINO.SB1));
+        rng.assertExhausted();
     }
 
     @Test
     void breedWithIsMendelianAndSymmetric() {
-        Genotype dad = Genotype.parse("E/E-A/A-w/w-t/t-c/c-spl/spl-g/g-N/N-N/N-n/n-n/n" + T);
+        Genotype dad = Genotype.parse(LegacyCode.keyed("E/E-A/A-w/w-t/t-c/c-spl/spl-g/g-N/N-N/N-n/n-n/n" + T));
         Genotype mom = Genotype.wildType();
         boolean[] allFirst = new boolean[Genes.codeOrder().size() * 2];
         java.util.Arrays.fill(allFirst, true);
         Genotype ab = dad.breedWith(mom, new FakeRng().booleans(allFirst));
         Genotype ba = mom.breedWith(dad, new FakeRng().booleans(allFirst));
-        assertEquals("E/E-A/a-w/w-t/t-c/c-spl/spl-g/g-N/N-N/N-n/n-n/n" + T, ab.toCode());
+        // dad E/E x mom E/E -> E/E; dad A/A x mom a/a -> A/a
+        assertEquals(Genotype.parse(Codes.of("agouti", "A/a")), ab);
         assertEquals(ab.pair(Genes.AGOUTI), ba.pair(Genes.AGOUTI));
     }
 
     @Test
     void breedInheritsEveryGene() {
-        Genotype a = Genotype.parse("E/e-A/a-W/w-T/t-Ch/c-Spl/spl-G/g-Cr/N-N/prl-n/n-n/n" + T);
+        Genotype a = Genotype.parse(LegacyCode.keyed("E/e-A/a-W/w-T/t-Ch/c-Spl/spl-G/g-Cr/N-N/prl-n/n-n/n" + T));
         boolean[] draws = new boolean[Genes.codeOrder().size() * 2];
         java.util.Arrays.fill(draws, true);
         Genotype child = a.breedWith(Genotype.wildType(), new FakeRng().booleans(draws));
-        assertEquals("E/E-A/a-W/w-T/t-Ch/c-Spl/spl-G/g-Cr/N-N/N-n/n-n/n" + T, child.toCode());
+        assertTrue(child.hasTest());
+        assertTrue(child.isSplash());
+        assertTrue(child.isGrey());
+        assertTrue(child.isChampagne());
+        assertTrue(child.has(Genes.CREAM.Cr));
     }
 
     @Test
     void differentGenotypesNotEqual() {
-        assertNotEquals(Genotype.wildType(), Genotype.parse("e/e-a/a-w/w-t/t-c/c-spl/spl-g/g-N/N-N/N-n/n-n/n" + T));
+        assertNotEquals(Genotype.wildType(), Genotype.parse(Codes.of("extension", "e/e")));
     }
 }

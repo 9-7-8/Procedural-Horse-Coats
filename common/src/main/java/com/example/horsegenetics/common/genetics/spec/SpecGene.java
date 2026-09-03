@@ -54,7 +54,13 @@ public final class SpecGene implements Gene {
         return spec;
     }
 
-    /** Ordering hint among data-driven genes - see {@code Genes.register}. */
+    /**
+     * The gene's processing priority - see {@link Gene#priority()}. A spec gene
+     * sorts into the one unified {@code (priority, key)} order alongside the
+     * built-ins, so a data-driven natural gene at priority 35 lands between the
+     * built-in cream and champagne.
+     */
+    @Override
     public int priority() {
         return spec.priority();
     }

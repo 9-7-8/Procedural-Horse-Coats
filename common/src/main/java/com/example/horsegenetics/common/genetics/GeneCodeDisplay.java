@@ -1,15 +1,7 @@
 package com.example.horsegenetics.common.genetics;
 
-import com.example.horsegenetics.common.genetics.genes.ChampagneGene;
-import com.example.horsegenetics.common.genetics.genes.CreamGene;
-import com.example.horsegenetics.common.genetics.genes.MagicZebraGene;
-import com.example.horsegenetics.common.genetics.genes.PearlGene;
-import com.example.horsegenetics.common.genetics.genes.PinkHairGene;
-import com.example.horsegenetics.common.genetics.genes.SplashGene;
-
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 /**
  * A short, human-readable rendering of a {@link Genotype} for UI surfaces - much
@@ -37,22 +29,35 @@ import java.util.Set;
  */
 public final class GeneCodeDisplay {
 
-    /** Genes whose wild-type allele means "this trait is simply absent". */
-    private static final Set<String> ABSENCE_WILDTYPE = Set.of(
-            ChampagneGene.KEY, SplashGene.KEY, CreamGene.KEY, PearlGene.KEY,
-            MagicZebraGene.KEY, PinkHairGene.KEY,
-            Genes.DUN.key(), Genes.SILVER.key(), Genes.MUSHROOM.key(), Genes.ROAN.key(),
-            Genes.TOBIANO.key(), Genes.FRAME.key(), Genes.SABINO.key());
+    /**
+     * Does {@code gene}'s wild-type allele mean "this trait is simply absent"
+     * (so a heterozygote shows {@code nXxx} and a homozygote {@code XxxXxx})?
+     * True for every gene except a {@link DominancePattern#COMPLETE_DOMINANT}
+     * one (white, test - which print both real tokens) and grey (which prints
+     * {@code Gg}). Derived, so a data-driven pattern gene is covered for free.
+     */
+    private static boolean absenceWildtype(Gene gene) {
+        return gene.dominance() != DominancePattern.COMPLETE_DOMINANT && gene != Genes.GREY;
+    }
 
     /**
-     * Order the non-extension/agouti genes are listed in: white patterns first
-     * (splash, white), then the dilutions (champagne, cream, pearl), then grey,
-     * then the magical genes, then the diagnostic test gene.
+     * Order the non-extension/agouti genes are listed in: a curated built-in
+     * order (white patterns, then dilutions, then grey, then the magical genes,
+     * then the diagnostic test gene), followed by any data-driven genes in
+     * their {@code (priority, key)} order.
      */
-    private static final List<Gene> TRAILING_ORDER = List.of(
-            Genes.SPLASH, Genes.ROAN, Genes.TOBIANO, Genes.FRAME, Genes.SABINO, Genes.WHITE,
-            Genes.DUN, Genes.SILVER, Genes.MUSHROOM, Genes.CHAMPAGNE, Genes.CREAM, Genes.PEARL,
-            Genes.GREY, Genes.MAGIC_ZEBRA, Genes.PINK_HAIR, Genes.TEST);
+    private static List<Gene> trailingOrder() {
+        List<Gene> out = new ArrayList<>(List.of(
+                Genes.SPLASH, Genes.ROAN, Genes.TOBIANO, Genes.FRAME, Genes.SABINO, Genes.WHITE,
+                Genes.DUN, Genes.SILVER, Genes.MUSHROOM, Genes.CHAMPAGNE, Genes.CREAM, Genes.PEARL,
+                Genes.GREY, Genes.MAGIC_ZEBRA, Genes.PINK_HAIR, Genes.TEST));
+        for (Gene g : Genes.loaded()) {
+            if (!out.contains(g)) {
+                out.add(g);
+            }
+        }
+        return out;
+    }
 
     private GeneCodeDisplay() {}
 
@@ -69,13 +74,15 @@ public final class GeneCodeDisplay {
         } catch (RuntimeException parseFailed) {
             StringBuilder sb = new StringBuilder();
             for (String segment : code.split("-")) {
-                String[] alleles = segment.split("/");
+                int eq = segment.indexOf('=');
+                String body = eq < 0 ? segment : segment.substring(eq + 1);
+                String[] alleles = body.split("/");
                 if (sb.length() > 0) {
                     sb.append(' ');
                 }
                 sb.append(alleles.length == 2 && alleles[0].equals(alleles[1])
                         ? alleles[0] + alleles[1]
-                        : segment);
+                        : body);
             }
             return sb.toString();
         }
@@ -85,7 +92,7 @@ public final class GeneCodeDisplay {
         String head = twoTokens(genotype.pair(Genes.EXTENSION)) + twoTokens(genotype.pair(Genes.AGOUTI));
 
         StringBuilder rest = new StringBuilder();
-        for (Gene gene : TRAILING_ORDER) {
+        for (Gene gene : trailingOrder()) {
             AllelePair pair = genotype.pair(gene);
             Allele wild = gene.wildType();
             boolean firstWild = pair.first().equals(wild);
@@ -95,7 +102,7 @@ public final class GeneCodeDisplay {
             }
 
             String token;
-            if (ABSENCE_WILDTYPE.contains(gene.key())) {
+            if (absenceWildtype(gene)) {
                 Allele variant = firstWild ? pair.second() : pair.first();
                 token = (firstWild || secondWild)
                         ? "n" + variant.token()                  // heterozygous

@@ -50,6 +50,7 @@ public final class MushroomGene implements Gene {
     private final List<Allele> alleles = List.of(Mu, mu);
 
     @Override public String key() { return KEY; }
+    @Override public int priority() { return 32; }
     @Override public List<Allele> alleles() { return alleles; }
     @Override public Allele wildType() { return mu; }
 

@@ -34,18 +34,18 @@
 <h2 id="open-issues">Open issues</h2>
 <p>Seen in-game, not fixed.</p>
 
-<div class="note warn">
-    <span class="label">Genome display omits data-driven (magical) genes</span>
+<div class="note">
+    <span class="label">Genome display omits data-driven genes &mdash; fixed 2026-09-03, unverified</span>
     <p>
         Owner, 2026-09-02: the short genome string (info panel, paper dump, seed-jar
-        tooltip &mdash; all via <code>GeneCodeDisplay.shortForm</code>) never shows the
+        tooltip &mdash; all via <code>GeneCodeDisplay.shortForm</code>) never showed the
         <strong>spec genes</strong>, including the shipped <em>Suntouched</em> /
-        <em>Waterborn</em>. Cause: <code>GeneCodeDisplay.TRAILING_ORDER</code> is a
-        hard-coded <code>List.of(...)</code>. As of 2026-09-02 it lists all <strong>18
-        built-ins</strong> (the seven new visual genes were added), but still not
-        <code>Genes.loaded()</code> &mdash; so the shipped spec genes remain missing.
-        Fix: append <code>Genes.loaded()</code> and have <code>ABSENCE_WILDTYPE</code>
-        treat a spec gene&rsquo;s <code>n</code> wild type as "absent".
+        <em>Waterborn</em>. Fixed with the data-model rewrite:
+        <code>GeneCodeDisplay</code> now derives its trailing gene list (curated
+        built-in order, then <code>Genes.loaded()</code>) and derives the
+        &ldquo;wild type means absent&rdquo; test from <code>dominance()</code>.
+        Confirm a horse carrying Suntouched or Waterborn shows it. See
+        <a href="#data-model">&sect;0</a>.
     </p>
 </div>
 
@@ -99,7 +99,42 @@
 
 <h2>Still to verify</h2>
 
-<h3 id="horse-care">0. Horse care &mdash; gated healing, bond &amp; herds (new 2026-09-02)</h3>
+<h3 id="data-model">0. The data-model rewrite &mdash; gene priority + gene-keyed codes (new 2026-09-03)</h3>
+
+<p>
+    <a href="roadmap.html#priority">Roadmap Tier&nbsp;1</a>: every gene has
+    <code>int priority()</code>; all orderings derived by sorting on
+    <code>(priority, key)</code>; genotype / epigenome code strings are now
+    gene-keyed (<code>&lt;geneKey&gt;=&hellip;</code>) and tolerant. 195
+    <code>:common:test</code> pass, <code>runServer</code> boots clean
+    (<code>20 segments</code>). Machinery:
+    <a href="genetics-model.html#gene-priority">Genetics model</a>. What to look
+    at in-game:
+</p>
+
+<ul>
+    <li><strong>Wild spawns still render every coat.</strong> Roam the overworld
+        (or a gallery visit) &mdash; the same variety of correct coats as before,
+        no flat-white horses, eyes intact. This is the load-bearing check: coat
+        output should be visually unchanged (deterministic coats are provably
+        byte-identical; non-deterministic ones use the same maths on a
+        differently-drawn seed, so bay leg heights / grey dapples / splash
+        markings may land differently than a pre-2026-09-03 save of the
+        &ldquo;same&rdquo; horse, but should look right).</li>
+    <li><strong>Breeding still produces a valid foal</strong> with a combined
+        code and inherited epigenetics &mdash; family tree renders.</li>
+    <li><strong>Seed jar round-trips.</strong> Collect from a stallion, read the
+        tooltip, impregnate a mare &mdash; the foal&rsquo;s genome still matches
+        (the jar stores the new-format code).</li>
+    <li><strong>Info panel / paper dump / seed-jar tooltip now list the shipped
+        spec genes</strong> (Suntouched / Waterborn) when a horse carries one
+        &mdash; the old <code>GeneCodeDisplay</code> bug (closed with this
+        change) hid them.</li>
+    <li><strong>Custom horse spawn egg</strong> editor still lists every
+        registered gene and spawns the picked genome.</li>
+</ul>
+
+<h3 id="horse-care">0.1 Horse care &mdash; gated healing, bond &amp; herds (new 2026-09-02)</h3>
 
 <p>
     First slice of <a href="roadmap.html#care">roadmap &sect;7</a> and

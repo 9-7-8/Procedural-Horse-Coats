@@ -28,6 +28,7 @@ public final class ExtensionGene implements Gene {
     private final List<Allele> alleles = List.of(E, e);
 
     @Override public String key() { return KEY; }
+    @Override public int priority() { return 10; }
     @Override public List<Allele> alleles() { return alleles; }
     @Override public Allele wildType() { return E; }
 

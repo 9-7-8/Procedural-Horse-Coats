@@ -81,4 +81,12 @@ public final class FakeRng implements Rng {
         }
         return longs.removeFirst();
     }
+
+    /** Fails if any queued value was left unconsumed - the "consumed exactly N draws" check. */
+    public void assertExhausted() {
+        if (!floats.isEmpty() || !booleans.isEmpty() || !ints.isEmpty() || !longs.isEmpty()) {
+            throw new AssertionError("FakeRng had unused values: floats=" + floats.size()
+                    + " booleans=" + booleans.size() + " ints=" + ints.size() + " longs=" + longs.size());
+        }
+    }
 }

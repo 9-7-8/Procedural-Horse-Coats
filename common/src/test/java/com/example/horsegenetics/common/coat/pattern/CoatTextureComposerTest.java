@@ -29,7 +29,7 @@ class CoatTextureComposerTest {
             String[] p = pair.split("=");
             for (int i = 0; i < order.size(); i++) {
                 if (order.get(i).key().endsWith("." + p[0])) {
-                    segs[i] = p[1];
+                    segs[i] = order.get(i).key() + "=" + p[1];
                 }
             }
         }
@@ -126,7 +126,8 @@ class CoatTextureComposerTest {
                 var alleles = genes.get(i).alleles();
                 var al = ((mask >> i) & 1) == 1 ? alleles.get(0) : alleles.get(alleles.size() - 1);
                 if (code.length() > 0) code.append('-');
-                code.append(al.token()).append('/').append(al.token());
+                code.append(genes.get(i).key()).append('=')
+                        .append(al.token()).append('/').append(al.token());
             }
             Genotype gt = Genotype.parse(code.toString());
             Epigenome epi = Epigenome.fromSeed(mask);

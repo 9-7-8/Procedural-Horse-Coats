@@ -69,6 +69,7 @@ public final class DunGene implements Gene {
     private final List<Allele> alleles = List.of(D, d);
 
     @Override public String key() { return KEY; }
+    @Override public int priority() { return 34; }
     @Override public List<Allele> alleles() { return alleles; }
     @Override public Allele wildType() { return d; }
 

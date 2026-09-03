@@ -134,6 +134,7 @@
     List&lt;Allele&gt; alleles();                // most dominant first
     Allele wildType();                     // the "no visible effect" allele
     DominancePattern dominance();          // declared metadata
+    int priority();                        // processing order; no default (see below)
     AllelePair randomPair(Rng rng);        // one wild-population draw
 
     // --- phase declaration ------------------------------------------------
@@ -196,6 +197,7 @@
     @Override public List&lt;Allele&gt; alleles()     { return alleles; }
     @Override public Allele wildType()          { return n; }
     @Override public DominancePattern dominance() { return DominancePattern.DOMINANT; }
+    @Override public int priority()             { return 35; }   // natural band; a dilution, so after agouti (20)
 
     @Override
     public AllelePair randomPair(Rng rng) {
@@ -301,9 +303,10 @@ private static int toward(ColorView colour, int px, int py, int channel, int tar
     <span class="label">Reading makes your gene order-dependent</span>
     <p>
         That is a legitimate choice &mdash; but it means your position in
-        <code>Genes.magicalOrder()</code> now matters, and you should say so in the
-        gene&rsquo;s Javadoc. Pink hair runs <em>before</em> magic zebra precisely so
-        that stripes black out pink hair rather than the other way round.
+        <code>Genes.magicalOrder()</code> now matters, so pick your
+        <code>priority()</code> deliberately and say so in the gene&rsquo;s Javadoc.
+        Pink hair (110) runs <em>before</em> magic zebra (120) precisely so that
+        stripes black out pink hair rather than the other way round.
     </p>
 </div>
 
@@ -421,14 +424,19 @@ private static final List&lt;Gene&gt; NATURAL_ORDER =
 </div>
 
 <p>
-    The current natural order is
-    extension &rarr; agouti &rarr; silver &rarr; mushroom &rarr; dun &rarr; cream &rarr;
-    pearl &rarr; champagne &rarr; grey &rarr; white &rarr; roan &rarr; tobiano &rarr;
-    frame &rarr; sabino &rarr; splash. The
-    <a href="roadmap.html#priority">planned replacement</a> is a hard-coded
-    <code>int priority()</code> on each gene with the lists <em>derived</em> by
-    sorting on <code>(priority, geneKey)</code> &mdash; natural band 0&ndash;99,
-    magical band 100+.
+    Every ordering is <em>derived</em>: <code>Genes</code> sorts every registered
+    gene &mdash; built-in and data-driven alike &mdash; on
+    <code>(</code><code>priority()</code><code>, key)</code>, and
+    <code>naturalOrder()</code> / <code>magicalOrder()</code> are that list filtered
+    by phase. Natural band <code>0&ndash;99</code>, magical band <code>100+</code>
+    (a convention &mdash; out of band only warns). <strong>Within the natural band,
+    give an absolute pigment-setter a low number and a dilution a higher one</strong>
+    &mdash; agouti (20) must run before <code>PigmentField.dilute</code> or a bay&rsquo;s
+    mane will not dilute. The current natural order is extension (10) &rarr; agouti
+    (20) &rarr; silver (30) &rarr; mushroom (32) &rarr; dun (34) &rarr; cream (40)
+    &rarr; pearl (42) &rarr; champagne (50) &rarr; grey (55) &rarr; white (60) &rarr;
+    roan (70) &rarr; tobiano (72) &rarr; frame (74) &rarr; sabino (76) &rarr; splash
+    (80). Pick a number in a gap; ties break alphabetically by key.
 </p>
 
 <h2>Then</h2>

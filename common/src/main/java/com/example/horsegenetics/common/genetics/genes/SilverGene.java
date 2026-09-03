@@ -55,6 +55,7 @@ public final class SilverGene implements Gene {
     private final List<Allele> alleles = List.of(Z, z);
 
     @Override public String key() { return KEY; }
+    @Override public int priority() { return 30; }
     @Override public List<Allele> alleles() { return alleles; }
     @Override public Allele wildType() { return z; }
 

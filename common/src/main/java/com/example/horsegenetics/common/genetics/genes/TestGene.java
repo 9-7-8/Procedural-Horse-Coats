@@ -36,6 +36,7 @@ public final class TestGene implements Gene {
 
 
     @Override public String key() { return KEY; }
+    @Override public int priority() { return 900; }
     @Override public List<Allele> alleles() { return alleles; }
     @Override public Allele wildType() { return t; }
 

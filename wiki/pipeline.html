@@ -297,17 +297,24 @@ default int visible(int px, int py, int channel);</code></pre>
 
 <h3>Why <code>magicalOrder()</code> is not arbitrary</h3>
 
-<div class="codebox">
-<div class="filename">common/genetics/Genes.java</div>
-<pre><code class="language-java">private static final List&lt;Gene&gt; MAGICAL_ORDER = List.of(PINK_HAIR, MAGIC_ZEBRA, TEST);</code></pre>
-</div>
-
 <p>
-    Additive genes commute, so pink hair and magic zebra could in principle go either
-    way &mdash; except pink hair <em>reads</em> what it is painting over, and zebra
-    stripes should black out pink hair rather than the other way round. Test paints
-    flat and is <code>COMPLETE_DOMINANT</code>, so it must run <strong>last</strong>
-    or the genes after it would show through its overlay.
+    <code>naturalOrder()</code> and <code>magicalOrder()</code> are not
+    hand-written lists &mdash; both are <code>Genes.codeOrder()</code> (every
+    registered gene sorted on <code>(</code><code>priority()</code><code>,
+    key)</code>) filtered by <code>isNatural()</code>. The magical genes sort to
+    <code>PINK_HAIR</code> (110), <code>MAGIC_ZEBRA</code> (120),
+    <code>TEST</code> (900); a data-driven magical gene slots in by its own
+    priority. Those numbers are chosen, not incidental: additive genes commute,
+    so pink hair and magic zebra could in principle go either way &mdash; except
+    pink hair <em>reads</em> what it is painting over, and zebra stripes should
+    black out pink hair rather than the other way round. Test paints flat and is
+    <code>COMPLETE_DOMINANT</code>, so it must run <strong>last</strong> (hence
+    the large gap to 900) or the genes after it would show through its overlay.
+    In the natural band the same logic applies to <em>absolute setters before
+    dilutions</em> &mdash; agouti (20) must precede
+    <code>PigmentField.dilute</code>. See
+    <a href="genetics-model.html#gene-priority">Genetics model &sect; Gene
+    priority</a>.
 </p>
 
 <h2>Phase 4 &mdash; compositing</h2>

@@ -34,7 +34,7 @@ class GeneCoatHookTest {
             if (code.length() > 0) {
                 code.append('-');
             }
-            code.append(token).append('/').append(token);
+            code.append(g.key()).append('=').append(token).append('/').append(token);
         }
         return Genotype.parse(code.toString());
     }

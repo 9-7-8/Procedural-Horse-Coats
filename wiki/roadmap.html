@@ -87,15 +87,16 @@
 <h3>Tier 1 &mdash; the data-model rewrite (touches nearly everything)</h3>
 
 <ol>
-    <li><strong>Gene priority + derived orderings + the genotype-as-list rewrite</strong>
-        (§2). <code>int priority()</code> on every gene; <code>naturalOrder()</code> /
-        <code>magicalOrder()</code> / <code>codeOrder()</code> all <em>derived</em> by
-        sorting on <code>(priority, key)</code>; the genotype stored as a <strong>list
-        keyed by gene</strong> so adding / removing a gene is a coat regen and nothing
-        more. Touches every gene (§3, §4), the catalogue and gallery (§8, §10), the
-        spawner (§9), breeding, saves, <code>CoatTextureId</code>, and both sync
-        payloads. <strong>Nothing else should be built on the current hand-written
-        lists.</strong></li>
+    <li><s><strong>Gene priority + derived orderings + the genotype-as-list
+        rewrite</strong> (§2)</s> &mdash; <strong>shipped 2026-09-03.</strong>
+        <code>int priority()</code> on every gene;
+        <code>naturalOrder()</code> / <code>magicalOrder()</code> /
+        <code>codeOrder()</code> derived by one sort on
+        <code>(priority, key)</code>; genotype and epigenome are gene-keyed,
+        tolerant code strings. NeoForge needed no changes (it delegates parsing
+        to <code>common/</code>); <code>coat-golden.txt</code> regenerated with
+        every deterministic coat byte-identical. Written up on
+        <a href="genetics-model.html">Genetics model</a>.</li>
     <li><strong>The per-genotype chance tables</strong> (§2, §5.1, §14.1). One shared
         weighted-draw helper feeding two per-gene distributions: the <strong>founder
         frequency</strong> table and the <strong>chaos-carrot chance function</strong>.
@@ -159,6 +160,22 @@
 <hr>
 
 <h2 id="priority">2. Gene priority and processing order</h2>
+
+<div class="note tip">
+    <span class="label">Gene priority + derived orderings + genotype-as-list: shipped 2026-09-03</span>
+    <p>
+        Every <code>Gene</code> now has <code>int priority()</code>;
+        <code>codeOrder()</code> / <code>naturalOrder()</code> /
+        <code>magicalOrder()</code> are all derived from one sort on
+        <code>(priority, key)</code> over built-ins and <code>SpecGene</code>s
+        together; the genotype and epigenome are gene-keyed, tolerant code
+        strings (missing gene &rarr; wild type, unknown gene &rarr; dropped).
+        Written up on <a href="genetics-model.html#gene-priority">Genetics model</a>.
+        <strong>Still open here:</strong> the per-genotype founder-frequency /
+        chaos-carrot chance tables below, and the multi-allele physical-locus
+        merges the reserved-number table anticipates.
+    </p>
+</div>
 
 <h3>Two priorities, at two levels</h3>
 
@@ -228,47 +245,17 @@
         it is just a table.</li>
 </ul>
 
-<h3>What exists today</h3>
+<h3>The reserved numbers</h3>
 
-<ul>
-    <li>Processing order is two hand-written lists in <code>Genes</code>. Adding a
-        gene means editing them, the ordering is not visible from the gene class, and a
-        third-party gene cannot insert itself at all. Magical order stopped being
-        cosmetic when pink hair started reading the accumulator, so this matters more
-        than it did.</li>
-    <li><code>AlleleEpigenetics.priority</code> works as described. <strong>Under this
-        design that stays its only job</strong> &mdash; the planned second use
-        (reordering genes) is explicitly rejected, and the Javadoc should say so.</li>
-</ul>
-
-<h3>The concrete changes</h3>
-
-<ul>
-    <li><strong><code>Gene</code> gains <code>int priority()</code></strong> &mdash; no
-        default, so every gene has to answer.</li>
-    <li><strong><code>Genes</code> sorts.</strong> <code>naturalOrder()</code>,
-        <code>magicalOrder()</code> and <code>all()</code> become derived: one sort on
-        <code>(priority, geneKey)</code> at registry-freeze time. Keep the method names
-        so callers do not change; make the lists a <em>result</em>, not a
-        <em>source</em>.</li>
-    <li><strong>The genotype stops being a positional string.</strong> It becomes a
-        <strong>list keyed by gene</strong> &mdash; parse and lookup are by gene key,
-        not by segment index &mdash; with each gene carrying its own order number so a
-        display / processing order can be derived at any point. A gene present in the
-        registry but absent from a stored genotype reads as <strong>wild type</strong>;
-        a stored gene no longer registered is <strong>dropped</strong>. Either just
-        triggers a coat regeneration. No segment-padding, no back-compat parsing &mdash;
-        the mod is pre-release and keeps no saves. <strong>Half of the ordering is
-        already live:</strong> drop-in <code>SpecGene</code>s
-        (<a href="gene-format.html">the file format</a>) declare a <code>priority</code>
-        and sort on <code>(priority, key)</code> after the built-ins. What is left is
-        giving the built-ins real priorities and deriving their order too.</li>
-    <li><strong>Check the band at registration, and only warn.</strong> Duplicate gene
-        keys, by contrast, <em>are</em> a hard failure &mdash; that one really is
-        unrecoverable.</li>
-</ul>
-
-<h4>The reserved numbers, with room to grow</h4>
+<p>
+    The built-ins now carry real priorities (chosen to reproduce the old
+    hand-written order, so no coat changed): extension 10, agouti 20, silver 30,
+    mushroom 32, dun 34, cream 40, pearl 42, champagne 50, grey 55, white 60,
+    roan 70, tobiano 72, frame 74, sabino 76, splash 80; magical: pink hair 110,
+    magic zebra 120, test 900. The table below is the <em>target</em> once the
+    physical-locus merges (§5.1) land &mdash; one <code>Gene</code> per locus,
+    with sex reserved at 1.
+</p>
 
 <div class="table-wrap">
 <table>
@@ -298,9 +285,9 @@
         <strong>absolute setters get low numbers, dilutions get higher ones.</strong>
     </p>
     <p>
-        Document the constraint on <code>PigmentField</code> and on the priority field,
-        or the next gene added at the wrong number will produce a bay whose mane does
-        not dilute and nobody will know why.
+        The <code>Gene.priority()</code> Javadoc now states this; keep it on
+        <code>PigmentField</code> too, or the next gene added at the wrong number
+        will produce a bay whose mane does not dilute and nobody will know why.
     </p>
 </div>
 
@@ -313,14 +300,14 @@
     file</strong>, not the fluent builder this section originally sketched: a simple
     gene needs no code and no rebuild. See <a href="gene-format.html">the gene file
     format</a> and the <a href="gene-creator/index.html">gene creator</a> that writes
-    it; drop-in <code>SpecGene</code>s are appended after the built-ins and sorted on
-    <code>(priority, key)</code>, so registration order cannot decide how a horse looks.
+    it; every gene &mdash; built-in and drop-in <code>SpecGene</code> &mdash; sorts
+    into one <code>(priority, key)</code> order (§2, shipped), so registration order
+    cannot decide how a horse looks.
     <strong>What is left:</strong> tier 2 below (the abstract base classes for a
     <em>Java</em> gene), the mod-bus registration hook so another mod can add a Java
-    gene at all, the built-in orderings becoming derived rather than hand-written (§2),
-    and the genotype-code-segment policy at the bottom of this section &mdash; which the
-    drop-in path makes more pressing, since a player can now change the code&rsquo;s
-    shape by moving a file.
+    gene at all, and the genotype-code-segment policy at the bottom of this section
+    &mdash; which the drop-in path makes more pressing, since a player can now change
+    the code&rsquo;s shape by moving a file.
 </p>
 
 <h3>The tiers, for a Java gene</h3>

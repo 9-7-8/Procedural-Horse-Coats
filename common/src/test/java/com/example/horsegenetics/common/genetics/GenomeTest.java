@@ -2,6 +2,7 @@ package com.example.horsegenetics.common.genetics;
 
 import com.example.horsegenetics.common.SeededRng;
 import com.example.horsegenetics.common.testutil.FakeRng;
+import com.example.horsegenetics.common.testutil.LegacyCode;
 import org.junit.jupiter.api.Test;
 
 import java.util.LinkedHashMap;
@@ -42,9 +43,9 @@ class GenomeTest {
     @Test
     void anInheritedAlleleBringsItsOwnEpigeneticsAlongUnchanged() {
         // dam A/a: slot one is the A, carrying seed 700
-        Genome dam = genome("E/e-A/a-w/w-t/t-c/c-spl/spl-g/g-N/N-N/N-n/n-n/n" + T,
+        Genome dam = genome(LegacyCode.keyed("E/e-A/a-w/w-t/t-c/c-spl/spl-g/g-N/N-N/N-n/n-n/n" + T),
                 new Epigenome.Copies(new AlleleEpigenetics(10, 700L), new AlleleEpigenetics(20, 701L)), 100, 5000L);
-        Genome sire = genome("E/e-a/a-w/w-t/t-c/c-spl/spl-g/g-N/N-N/N-n/n-n/n" + T,
+        Genome sire = genome(LegacyCode.keyed("E/e-a/a-w/w-t/t-c/c-spl/spl-g/g-N/N-N/N-n/n-n/n" + T),
                 new Epigenome.Copies(new AlleleEpigenetics(30, 900L), new AlleleEpigenetics(40, 901L)), 300, 9000L);
 
         // always take each parent's first slot -> foal is A/a with the dam's A
@@ -61,9 +62,9 @@ class GenomeTest {
     @Test
     void epigeneticsFollowTheirAlleleWhenThePairIsReordered() {
         // dam a/a (only 'a' to give), sire A/a with the A in slot one
-        Genome dam = genome("E/e-a/a-w/w-t/t-c/c-spl/spl-g/g-N/N-N/N-n/n-n/n" + T,
+        Genome dam = genome(LegacyCode.keyed("E/e-a/a-w/w-t/t-c/c-spl/spl-g/g-N/N-N/N-n/n-n/n" + T),
                 new Epigenome.Copies(new AlleleEpigenetics(10, 700L), new AlleleEpigenetics(20, 701L)), 100, 5000L);
-        Genome sire = genome("E/e-A/a-w/w-t/t-c/c-spl/spl-g/g-N/N-N/N-n/n-n/n" + T,
+        Genome sire = genome(LegacyCode.keyed("E/e-A/a-w/w-t/t-c/c-spl/spl-g/g-N/N-N/N-n/n-n/n" + T),
                 new Epigenome.Copies(new AlleleEpigenetics(30, 900L), new AlleleEpigenetics(40, 901L)), 300, 9000L);
 
         Genome foal = dam.breedWith(sire, new FakeRng().booleans(repeat(true, GENES * 2)));
@@ -77,9 +78,9 @@ class GenomeTest {
 
     @Test
     void aTiedPriorityIsBumpedOneStepSoTheTwoCopiesNeverMatch() {
-        Genome dam = genome("E/e-A/a-w/w-t/t-c/c-spl/spl-g/g-N/N-N/N-n/n-n/n" + T,
+        Genome dam = genome(LegacyCode.keyed("E/e-A/a-w/w-t/t-c/c-spl/spl-g/g-N/N-N/N-n/n-n/n" + T),
                 new Epigenome.Copies(new AlleleEpigenetics(50, 700L), new AlleleEpigenetics(51, 701L)), 100, 5000L);
-        Genome sire = genome("E/e-a/a-w/w-t/t-c/c-spl/spl-g/g-N/N-N/N-n/n-n/n" + T,
+        Genome sire = genome(LegacyCode.keyed("E/e-a/a-w/w-t/t-c/c-spl/spl-g/g-N/N-N/N-n/n-n/n" + T),
                 new Epigenome.Copies(new AlleleEpigenetics(50, 900L), new AlleleEpigenetics(52, 901L)), 100, 5000L);
 
         // Both parents sit on the same priorities, so roughly half the genes draw

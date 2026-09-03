@@ -32,6 +32,7 @@ public final class PearlGene implements Gene {
     private final List<Allele> alleles = List.of(prl, N);
 
     @Override public String key() { return KEY; }
+    @Override public int priority() { return 42; }
     @Override public List<Allele> alleles() { return alleles; }
     @Override public Allele wildType() { return N; }
 
