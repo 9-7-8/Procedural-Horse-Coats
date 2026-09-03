@@ -162,7 +162,24 @@ public final class HorseScreenHooks {
         g.text(font, Component.literal(healthValue), tx + font.width("health "), ty, statColor(r, false), false);
         ty += 11;
 
+        ClientHorseCareCache.Care care = horse == null ? null : ClientHorseCareCache.get(horse.getId());
+        if (care != null) {
+            g.text(font, Component.literal("bond "), tx, ty, LABEL, false);
+            g.text(font, Component.literal(care.bond() + "  " + bondTierLabel(care.bond())
+                    + (care.inHerd() ? "  • herd" : "")),
+                    tx + font.width("bond "), ty, VALUE, false);
+            ty += 11;
+        }
+
         g.text(font, Component.literal(clip(attributionLine(r), 22)), tx, ty, LABEL, false);
+    }
+
+    /** Matches HorseCareAttachment.behaviourTier() - kept here to avoid a server import. */
+    private static String bondTierLabel(int bond) {
+        if (bond >= 81) return "follows";
+        if (bond >= 61) return "approaches";
+        if (bond >= 31) return "attentive";
+        return "wary";
     }
 
     /**

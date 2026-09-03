@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Horse care &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="nav.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow core">Gameplay <span class="sep">/</span> non-genetic</p>
+<h1>Horse care: gated healing, bond &amp; herds</h1>
+<p class="lede">
+    Three non-genetic systems that apply to <strong>every</strong> horse and
+    share <strong>one slow tick</strong>
+    (<code>server/HorseCareHandler</code>): passive healing gated on nearby water
+    <em>and</em> food, a per-horse <strong>bond</strong> number that changes how
+    a horse behaves toward its owner, and an emergent <strong>herd</strong>
+    grouping. First slice built 2026-09-02, <strong>not play-tested</strong> &mdash;
+    checklist in <a href="verification.html">verification</a>. This page is the
+    single source of truth for the machinery; the design rationale is
+    <a href="roadmap.html#care">roadmap &sect;7</a> and
+    <a href="roadmap.html#bond">&sect;13</a>.
+</p>
+
+<h2>Where it lives</h2>
+<ul>
+    <li><code>data/HorseCareAttachment</code> &mdash; the per-horse state
+        (<code>bond</code>, <code>herd</code> id, the <code>bondToday</code> /
+        <code>dayStamp</code> daily-cap pair, a <code>bondTicks</code>
+        fractional accumulator, a <code>togetherTicks</code> herd-formation
+        counter). Registered as <code>horsegenetics:horse_care</code> in
+        <code>ModAttachments</code>, <code>copyOnDeath</code>, serialized by its
+        own <code>MAP_CODEC</code>.</li>
+    <li><code>server/HorseCareHandler</code> &mdash; the shared tick
+        (<code>EntityTickEvent.Post</code>, every <strong>30 ticks</strong>,
+        phase-staggered by <code>tickCount + entityId</code>), plus the
+        <code>PlayerInteractEvent.EntityInteract</code> hook for feed-bond and
+        the <code>EntityJoinLevelEvent</code> hook that adds the goal.</li>
+    <li><code>server/BondFollowGoal</code> &mdash; the one AI goal, added at
+        priority 4 to every <code>Horse</code>, that reads the bond tier.</li>
+    <li><code>network/HorseCareSyncPayload</code> &rarr;
+        <code>client/ClientHorseCareCache</code> &mdash; bond + in-herd flag
+        pushed to trackers on change and on start-tracking, shown in the
+        horse-inventory panel (<code>client/HorseScreenHooks</code>).</li>
+    <li>Block tags <code>data/horsegenetics/tags/block/horse_water.json</code>
+        and <code>horse_food.json</code>.</li>
+</ul>
+
+<h2>1. Gated healing (roadmap &sect;7)</h2>
+<p>
+    Vanilla horses have <strong>no passive regeneration</strong> &mdash; they
+    heal only from being hand-fed. This <em>adds</em> a gated regen mechanic on
+    top; hand-feeding is untouched and still works with no water requirement, so
+    a stabled horse in a dry biome is never unhealable.
+</p>
+<ul>
+    <li>Only a horse whose health is below its own max is considered &mdash;
+        the block scan is skipped entirely otherwise, so a pen full of healthy
+        horses costs nothing beyond the entity lookup.</li>
+    <li>The scan is a <strong>3-block-radius</strong> box around the horse. It
+        heals <strong>+1</strong> health per scan (per 30 ticks) only if it
+        finds <strong>both</strong>:
+        <ul>
+            <li>a block in <code>#horsegenetics:horse_water</code>
+                (<code>water</code>, <code>bubble_column</code>,
+                <code>water_cauldron</code>) <em>or</em> any block whose fluid
+                is in <code>#minecraft:water</code>;</li>
+            <li>a block in <code>#horsegenetics:horse_food</code>
+                (<code>hay_block</code>, <code>grass_block</code>, short/tall
+                grass, ferns, <code>moss_block</code>, pumpkin, melon, sugar
+                cane, pitcher crop, and <code>#minecraft:crops</code>).</li>
+        </ul>
+        Tags, not a hard-coded list, so a datapack can extend both.</li>
+    <li>A healing horse emits a couple of <code>HEART</code> particles, so
+        "it <em>is</em> recovering" is visible.</li>
+    <li>Healing is toward the horse's <em>own</em> max health, so a
+        genetically frail horse (when health genes land) stops at its own
+        ceiling.</li>
+    <li>The dimension's gallery pens satisfy this by accident &mdash; every pen
+        has a full water cauldron and a hay bale.</li>
+</ul>
+<div class="note"><span class="label">Not built yet</span>
+    <p>Milking (roadmap &sect;7) &mdash; the other half of that section &mdash; is
+    <strong>not</strong> in this slice. When it lands, its "mare must be at full
+    health" rule is the hook back into this system.</p>
+</div>
+
+<h2>2. Bond (roadmap &sect;13)</h2>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Bond</th><th>Tier</th><th>Behaviour (<code>BondFollowGoal</code>)</th></tr></thead>
+<tbody>
+<tr><td>0&ndash;30</td><td>0</td><td>Vanilla &mdash; ignores the player</td></tr>
+<tr><td>31&ndash;60</td><td>1</td><td>Turns its head to face the owner within 10 blocks; no movement</td></tr>
+<tr><td>61&ndash;80</td><td>2</td><td>Paths toward the owner <em>only if a route exists</em>; gives up otherwise</td></tr>
+<tr><td>81&ndash;100</td><td>3</td><td>Follows at a walk, re-pathing persistently, stopping ~3 blocks away &mdash; fences and walls respected because it is real pathfinding, never a teleport</td></tr>
+</tbody>
+</table>
+</div>
+<p>One goal that reads the number and returns false from <code>canUse()</code>
+    below tier 1, rather than adding/removing goals as the number crosses a
+    line. The goal is inert while the horse is leashed or ridden.</p>
+
+<h3>Gains &mdash; capped at +15 per Minecraft day</h3>
+<p>
+    A "day" is <strong>24 000 game ticks</strong> (<code>DAY_TICKS</code>);
+    <code>dayStamp = getGameTime() / 24000</code>, monotonic and reload-safe.
+    <code>bondToday</code> resets when it rolls over. This answers
+    <a href="roadmap.html">roadmap &sect;21</a>'s "which day" for the bond side.
+</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Source</th><th>Rate</th><th>How</th></tr></thead>
+<tbody>
+<tr><td>Proximity</td><td>~+0.5 / min</td><td>Owner within 10 blocks at scan time &rarr; +15 ticks into <code>bondTicks</code></td></tr>
+<tr><td>Riding</td><td>~+1 / min</td><td>Owner is the controlling passenger &rarr; +30 ticks into <code>bondTicks</code></td></tr>
+<tr><td>Feeding</td><td>+2 each</td><td>Owner right-clicks with any <code>isFood</code> item (event not cancelled &mdash; vanilla feeding still happens)</td></tr>
+</tbody>
+</table>
+</div>
+<p>
+    <code>bondTicks</code> converts to one bond point every
+    <strong>1 200</strong> ticks (one real minute). A <strong>foal in a
+    herd</strong> gains at <strong>double</strong> rate (the doubling is applied
+    before the daily cap).
+</p>
+<div class="note"><span class="label">Not built yet</span>
+    <p>Shearing +5 (shearing itself is unbuilt, roadmap &sect;12) and
+    "sleeping nearby +1/night" are not wired. Proximity already covers the
+    common "near my owner" case.</p>
+</div>
+
+<h2>3. Herds (roadmap &sect;13)</h2>
+<ul>
+    <li>Each scan, a horse looks for another live horse within <strong>10
+        blocks</strong>. <code>togetherTicks</code> accumulates
+        <strong>+30</strong> while company is present (capped at
+        <code>2 &times; TICKS_TO_FORM_HERD</code>) and decays
+        <strong>&minus;30</strong> while alone.</li>
+    <li>Crossing <strong>12 000</strong> ticks (ten minutes) with no herd yet:
+        the horse <strong>joins</strong> a nearby horse's herd if one has an id,
+        otherwise it <strong>mints a new</strong> <code>UUID</code> and pulls in
+        every herdless neighbour that is itself at least half-way to the
+        threshold.</li>
+    <li><code>togetherTicks</code> decaying back to <strong>0</strong> while in
+        a herd &rarr; the horse <strong>leaves</strong> it (clears its id).</li>
+    <li><strong>Alpha is not stored.</strong> The oldest / highest-bond member
+        is computed on demand by whatever needs it, with an explicit tiebreak,
+        so it can't flicker.</li>
+    <li><strong>Herd comfort buff</strong>: restated as faster regen (the mod
+        has no stamina resource). A horse in a herd heals <strong>+2</strong>
+        per scan instead of +1 when the water/food gate is met.</li>
+</ul>
+
+<h2>Performance</h2>
+<p>
+    One handler, 30-tick interval, staggered by entity id. Per scan: one entity
+    lookup (herd radius) always; the ~7&times;7&times;7 block scan
+    <em>only</em> when the horse is hurt. The attachment is written back only
+    when a field actually changed, and the sync packet only when bond or
+    in-herd changed.
+</p>
+
+</article>
+</main>
+</body>
+</html>

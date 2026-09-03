@@ -39,6 +39,16 @@ public final class ModAttachments {
                     .serialize(HorseRecordCodecs.MAP_CODEC)
                     .build());
 
+    // Care + social state. Roadmap wiki: 7.2 gated healing, 13 bond and herds.
+    // Non-genetic; default is DEFAULT (bond 0, no herd). HorseCareHandler mutates it.
+    // copyOnDeath so a re-summoned horse keeps its bond.
+    public static final Supplier<AttachmentType<HorseCareAttachment>> HORSE_CARE =
+            ATTACHMENT_TYPES.register("horse_care", () -> AttachmentType
+                    .builder(() -> HorseCareAttachment.DEFAULT)
+                    .serialize(HorseCareAttachment.MAP_CODEC)
+                    .copyOnDeath()
+                    .build());
+
     private ModAttachments() {
     }
 }

@@ -134,6 +134,13 @@ public final class HorseGeneticsEventHandler {
             PacketDistributor.sendToPlayer(player,
                     new com.example.horsegenetics.neoforge.network.HorseRecordSyncPayload(horse.getId(), HorseRecords.of(horse)));
         }
+        com.example.horsegenetics.neoforge.data.HorseCareAttachment care =
+                horse.getData(ModAttachments.HORSE_CARE.get());
+        if (care != null) {
+            PacketDistributor.sendToPlayer(player,
+                    new com.example.horsegenetics.neoforge.network.HorseCareSyncPayload(
+                            horse.getId(), care.bond(), care.inHerd()));
+        }
     }
 
     private static void syncToTrackers(Horse horse, CoatData coatData) {

@@ -66,6 +66,12 @@
             ]
         },
         {
+            title: "Gameplay",
+            items: [
+                { href: "horse-care.html", text: "Horse care: healing, bond, herds", kind: "core" }
+            ]
+        },
+        {
             title: "Project",
             items: [
                 { href: "verification.html", text: "To be verified", kind: "core" },

@@ -18,6 +18,7 @@ public final class ClientLifecycleHandler {
     static void onLoggingOut(ClientPlayerNetworkEvent.LoggingOut event) {
         ClientCoatCache.clear();
         ClientHorseRecordCache.clear();
+        ClientHorseCareCache.clear();
         GeneticCoatTextureFactory.clear();
     }
 

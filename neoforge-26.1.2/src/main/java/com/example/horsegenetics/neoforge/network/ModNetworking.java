@@ -57,6 +57,14 @@ public final class ModNetworking {
         );
 
         registrar.playToClient(
+                com.example.horsegenetics.neoforge.network.HorseCareSyncPayload.TYPE,
+                com.example.horsegenetics.neoforge.network.HorseCareSyncPayload.STREAM_CODEC,
+                (payload, context) -> context.enqueueWork(() ->
+                        com.example.horsegenetics.neoforge.client.ClientHorseCareCache.put(
+                                payload.entityId(), payload.bond(), payload.inHerd()))
+        );
+
+        registrar.playToClient(
                 FamilyTreeDataPayload.TYPE,
                 FamilyTreeDataPayload.STREAM_CODEC,
                 (payload, context) -> context.enqueueWork(() ->
