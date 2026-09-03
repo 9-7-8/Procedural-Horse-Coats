@@ -1,7 +1,9 @@
 package com.example.horsegenetics.common.genetics;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Every <b>visually distinct</b> genotype the registered {@link Genes} can
@@ -10,23 +12,26 @@ import java.util.List;
  *
  * <p>Nothing here is hard-coded. The catalogue falls out of
  * {@link Genes#codeOrder()}, each {@link Gene#alleles()} list and each
- * {@link Gene#dominance()}, so registering a gene (or an allele) widens it on
+ * {@link Gene#expressionOf}, so registering a gene (or an allele) widens it on
  * its own.
  *
  * <h2>What counts as distinct</h2>
  * The full product of every allele pair would be mostly duplicates, so two
- * reductions from {@link DominancePattern} are applied:
+ * reductions are applied - both of them read straight off the gene's
+ * {@link Expression} table, with no dominance metadata in the middle:
  * <ul>
- *   <li><b>Heterozygotes are dropped</b> unless the gene is
- *       {@link DominancePattern#INCOMPLETE_DOMINANT} - on a dominant or
- *       recessive gene the heterozygote is a copy of one of the homozygotes.
- *       So extension contributes {@code ee} and {@code EE}, but cream
- *       contributes {@code NN}, {@code CrN} <i>and</i> {@code CrCr}.</li>
- *   <li>A {@link DominancePattern#COMPLETE_DOMINANT} gene <b>masks everything
+ *   <li><b>Pairs that land on the same {@link Expression} collapse</b> to one
+ *       representative. That is what the old "drop the heterozygote unless the
+ *       gene is incomplete dominant" rule was approximating, except it is now
+ *       exact and works for any number of alleles: extension contributes
+ *       {@code ee} and {@code EE} because {@code Ee} and {@code EE} both land
+ *       on the wild type, while sabino contributes all three because all three
+ *       land somewhere different.</li>
+ *   <li>An expression that {@link Expression#masks() masks} <b>hides everything
  *       else</b>: while it shows, no other gene is visible, so the catalogue
- *       keeps exactly one entry for it - the variant homozygote with every
- *       other gene at its wild type. That's why there is one white pen and one
- *       test pen instead of hundreds.</li>
+ *       keeps exactly one entry for it - that combination with every other gene
+ *       at its wild type. That's why there is one white pen and one test pen
+ *       instead of hundreds.</li>
  * </ul>
  *
  * <h2>Ordering</h2>
@@ -34,7 +39,7 @@ import java.util.List;
  * in {@link Genes#codeOrder()} is the fastest-varying digit, with the masked
  * duplicates filtered out - so walking the catalogue exhausts one gene before
  * touching the next: {@code eeaa, EEaa, eeAA, EEAA, [white], ...} Within one
- * gene the pairs run <b>least dominant first</b>.
+ * gene the pairs run in {@link #allPairsOf} order.
  */
 public final class GenotypeCatalog {
 
@@ -69,8 +74,10 @@ public final class GenotypeCatalog {
     }
 
     /**
-     * Every unordered {@link AllelePair} of {@code gene}, least dominant first.
-     * {@link Gene#alleles()} is most-dominant-first, so this walks it backwards.
+     * Every unordered {@link AllelePair} of {@code gene} - all
+     * {@code n(n+1)/2} of them for {@code n} alleles - walking
+     * {@link Gene#alleles()} backwards, so the last-declared allele (by
+     * convention the population's baseline) comes first.
      */
     public static List<AllelePair> allPairsOf(Gene gene) {
         List<Allele> alleles = gene.alleles();
@@ -84,22 +91,29 @@ public final class GenotypeCatalog {
     }
 
     /**
-     * The pairs of {@code gene} that are worth their own pen: all of them when
-     * the heterozygote has a look of its own
-     * ({@link DominancePattern#heterozygoteIsDistinct()}), otherwise the
-     * homozygotes only.
+     * The pairs of {@code gene} that are worth their own pen: one per distinct
+     * {@link Expression}. Pairs landing on the same expression look the same, so
+     * only one is kept - the <b>homozygous</b> one where the group has one
+     * (a pen labelled {@code EE} reads better than one labelled {@code Ee}),
+     * otherwise the first in {@link #allPairsOf} order.
+     *
+     * <p><b>Every wild type is one group.</b> A gene may declare several
+     * ({@code "wild"} and {@code "carrier"} say something different in the gene
+     * dictionary), but "changes nothing" is one look, and the gallery is about
+     * looks - so a carrier does not get its own pen indistinguishable from the
+     * plain one.
      */
     public static List<AllelePair> distinctPairsOf(Gene gene) {
-        if (gene.dominance().heterozygoteIsDistinct()) {
-            return allPairsOf(gene);
-        }
-        List<AllelePair> homozygous = new ArrayList<>();
+        Map<String, AllelePair> byExpression = new LinkedHashMap<>();
         for (AllelePair pair : allPairsOf(gene)) {
-            if (pair.homozygous()) {
-                homozygous.add(pair);
+            Expression e = gene.expressionOf(pair);
+            String group = e.wildType() ? "" : e.id();
+            AllelePair kept = byExpression.get(group);
+            if (kept == null || (!kept.homozygous() && pair.homozygous())) {
+                byExpression.put(group, pair);
             }
         }
-        return List.copyOf(homozygous);
+        return List.copyOf(byExpression.values());
     }
 
     /**
@@ -112,7 +126,7 @@ public final class GenotypeCatalog {
     }
 
     /**
-     * How many genotypes exist <i>before</i> the dominance reduction - the raw
+     * How many genotypes exist <i>before</i> the same-expression reduction - the raw
      * product of every gene's {@link #allPairsOf} count. Every one of these is
      * a distinct heritable genotype; {@link #size()} is how many of them are
      * distinct to <i>look</i> at. Epigenetics aren't counted in either.
@@ -165,15 +179,16 @@ public final class GenotypeCatalog {
 
     /**
      * Is this the catalogue's chosen representative of how it looks? Only
-     * masking matters here (the heterozygote reduction already happened in
-     * {@link #distinctPairsOf}): once a {@code COMPLETE_DOMINANT} gene shows,
-     * every other gene is invisible, so the one entry kept is the one where
-     * every other gene sits at its wild type.
+     * masking matters here (the same-expression reduction already happened in
+     * {@link #distinctPairsOf}): once a gene lands on a
+     * {@link Expression#masks() masking} expression every other gene is
+     * invisible, so the one entry kept is the one where every other gene sits
+     * at a wild type.
      */
     private static boolean isCanonical(Genotype genotype) {
         Gene masker = null;
         for (Gene gene : Genes.codeOrder()) {
-            if (gene.dominance().masksOtherGenes() && showsVariant(gene, genotype.pair(gene))) {
+            if (gene.expressionOf(genotype.pair(gene)).masks()) {
                 masker = gene;
                 break;
             }
@@ -182,23 +197,10 @@ public final class GenotypeCatalog {
             return true;
         }
         for (Gene gene : Genes.codeOrder()) {
-            if (gene != masker && !isWildType(gene, genotype.pair(gene))) {
+            if (gene != masker && !gene.expressionOf(genotype.pair(gene)).wildType()) {
                 return false;
             }
         }
         return true;
-    }
-
-    /**
-     * Does {@code pair} express the variant? Only asked of dominant genes
-     * (including {@code COMPLETE_DOMINANT}), where carrying one variant allele
-     * is enough - so this is just "not homozygous wild type".
-     */
-    private static boolean showsVariant(Gene gene, AllelePair pair) {
-        return !isWildType(gene, pair);
-    }
-
-    private static boolean isWildType(Gene gene, AllelePair pair) {
-        return pair.homozygous() && pair.first().equals(gene.wildType());
     }
 }

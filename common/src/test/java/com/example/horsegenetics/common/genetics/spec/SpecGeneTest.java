@@ -28,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 class SpecGeneTest {
 
-    private static final int BUILT_IN_GENES = 18;
+    private static final int BUILT_IN_GENES = 17;
 
     @AfterEach
     void unregister() {
@@ -51,9 +51,9 @@ class SpecGeneTest {
         assertEquals(BUILT_IN_GENES + 1, Genes.codeOrder().size());
         assertEquals(silver, Genes.byKey("example.silver"));
         // priority 45 sorts it into the one unified order, between the built-in
-        // pearl (42) and champagne (50) - not appended after the built-ins.
+        // MATP (40) and champagne (50) - not appended after the built-ins.
         int i = Genes.codeOrder().indexOf(silver);
-        assertEquals("horsegenetics.pearl", Genes.codeOrder().get(i - 1).key());
+        assertEquals("horsegenetics.matp", Genes.codeOrder().get(i - 1).key());
         assertEquals("horsegenetics.champagne", Genes.codeOrder().get(i + 1).key());
         assertTrue(Genes.naturalOrder().contains(silver));
         assertFalse(Genes.magicalOrder().contains(silver));
@@ -61,9 +61,9 @@ class SpecGeneTest {
         String code = Genotype.wildType().toCode();
         assertTrue(code.contains("example.silver=z/z"), "the wild type gains a segment: " + code);
         assertEquals(Genotype.wildType(), Genotype.parse(code));
-        // Every unmasked entry doubles; the two COMPLETE_DOMINANT entries
-        // (white, test) stay at one pen each, because while they show nothing
-        // else is visible - including this gene.
+        // Every unmasked entry doubles; the two masking entries (white, test)
+        // stay at one pen each, because while they show nothing else is
+        // visible - including this gene.
         assertEquals((catalogueBefore - 2) * 2 + 2, GenotypeCatalog.size(),
                 "a dominant two-allele gene doubles every unmasked pen");
     }
@@ -96,10 +96,14 @@ class SpecGeneTest {
                 "priority decides, not registration order: " + a + "@" + ia + " " + b + "@" + ib);
     }
 
+    /**
+     * What "recessive" used to be a word for: two of the three combinations map
+     * to a wild-type expression, and the gene never has to say so.
+     */
     @Test
-    void aRecessiveGeneOnlyShowsWhenHomozygous() {
+    void aCarrierCombinationLandsOnAWildTypeExpression() {
         SpecGene aurora = register("aurora.json");
-        AllelePair carrier = new AllelePair(aurora.alleles().get(0), aurora.wildType());
+        AllelePair carrier = new AllelePair(aurora.alleles().get(0), aurora.defaultAllele());
         AllelePair shows = new AllelePair(aurora.alleles().get(0), aurora.alleles().get(0));
         Genotype genotype = Genotype.of(carrier);
 
@@ -113,24 +117,27 @@ class SpecGeneTest {
     void aNaturalGeneOnlyAnswersRestrictAndAMagicalOneOnlyTint() {
         SpecGene silver = register("silver.json");
         SpecGene aurora = register("aurora.json");
-        AllelePair silverPair = new AllelePair(silver.alleles().get(0), silver.wildType());
+        AllelePair silverPair = new AllelePair(silver.alleles().get(0), silver.defaultAllele());
         AllelePair auroraPair = new AllelePair(aurora.alleles().get(0), aurora.alleles().get(0));
         Genotype genotype = Genotype.of(silverPair, auroraPair);
         CoatBuildContext ctx = context(genotype);
         PigmentField coat = new PigmentField(HorseSkinGeometry.SHEET_SIZE);
 
-        assertNotNull(silver.restrict(silverPair, ctx, coat));
-        assertNull(silver.tint(silverPair, ctx, coat, new com.example.horsegenetics.common.coat.pattern
-                .ColorField(HorseSkinGeometry.SHEET_SIZE)));
-        assertNull(aurora.restrict(auroraPair, ctx, coat));
-        assertNotNull(aurora.tint(auroraPair, ctx, coat, new com.example.horsegenetics.common.coat.pattern
-                .ColorField(HorseSkinGeometry.SHEET_SIZE)));
+        var silverExpression = silver.expressionOf(silverPair);
+        var auroraExpression = aurora.expressionOf(auroraPair);
+        var accumulator = new com.example.horsegenetics.common.coat.pattern
+                .ColorField(HorseSkinGeometry.SHEET_SIZE);
+
+        assertNotNull(silverExpression.restrict(ctx, coat));
+        assertNull(silverExpression.tint(ctx, coat, accumulator));
+        assertNull(auroraExpression.restrict(ctx, coat));
+        assertNotNull(auroraExpression.tint(ctx, coat, accumulator));
     }
 
     @Test
     void aDilutionTakesBlackDownAndWalksTheSampleOffTheZeroRedColumn() {
         SpecGene silver = register("silver.json");
-        AllelePair pair = new AllelePair(silver.alleles().get(0), silver.wildType());
+        AllelePair pair = new AllelePair(silver.alleles().get(0), silver.defaultAllele());
         Genotype genotype = Genotype.of(pair);
         PigmentField before = new PigmentField(HorseSkinGeometry.SHEET_SIZE);
         // A black point: all eumelanin, no pheomelanin - the case a naive
@@ -140,7 +147,7 @@ class SpecGeneTest {
             before.setBlack(px, py, 1f);
         });
 
-        PigmentField after = silver.restrict(pair, context(genotype), before);
+        PigmentField after = silver.expressionOf(pair).restrict(context(genotype), before);
 
         int[] body = someTexelOn(Part.BODY);
         assertEquals(0.45f, after.black(body[0], body[1]), 1e-4);
@@ -157,22 +164,26 @@ class SpecGeneTest {
      * this is about the {@code perLeg} + {@code spread} draw, nothing more.
      */
     private static final String SOCKS_ONLY = """
-            { "key": "example.socks",
+            { "format": 2, "key": "example.socks",
               "alleles": [ {"token":"S"}, {"token":"s"} ],
+              "founders": { "S/S": 1, "S/s": 9, "s/s": 90 },
               "knobs": [ { "name": "sock", "min": 0.2, "max": 0.6, "per": "leg", "spread": 0.25 } ],
-              "layers": [ { "name": "socks",
-                            "masks": [ { "type": "AXIS", "parts": ["LEGS"], "axis": "Y",
-                                         "space": "part", "from": 0.0, "to": "$sock",
-                                         "softness": 0.05 } ],
-                            "op": { "type": "SET_PIGMENT", "red": 0.0, "black": 0.0 } } ] }
+              "expressions": [
+                { "id": "socks", "when": [ "S/S", "S/s" ],
+                  "layers": [ { "name": "socks",
+                                "masks": [ { "type": "AXIS", "parts": ["LEGS"], "axis": "Y",
+                                             "space": "part", "from": 0.0, "to": "$sock",
+                                             "softness": 0.05 } ],
+                                "op": { "type": "SET_PIGMENT", "red": 0.0, "black": 0.0 } } ] },
+                { "id": "wild", "wildType": true } ] }
             """;
 
     @Test
     void aPerLegKnobGivesFourDifferentSockHeights() {
         SpecGene socks = new SpecGene(GeneSpecParser.parse(SOCKS_ONLY, "socks.json"));
         Genes.register(socks);
-        AllelePair pair = new AllelePair(socks.alleles().get(0), socks.wildType());
-        PigmentField coat = socks.restrict(pair, context(Genotype.of(pair)),
+        AllelePair pair = new AllelePair(socks.alleles().get(0), socks.defaultAllele());
+        PigmentField coat = socks.expressionOf(pair).restrict(context(Genotype.of(pair)),
                 new PigmentField(HorseSkinGeometry.SHEET_SIZE));
 
         double[] heights = new double[4];
@@ -229,10 +240,15 @@ class SpecGeneTest {
             SpecGene gene = new SpecGene(GeneSpecParser.parse(GeneSpecParserTest.example(file), file));
             Gene asGene = gene;
             assertNotNull(asGene.key());
-            assertNotNull(asGene.dominance());
-            assertEquals(gene.wildType(), asGene.alleles().get(asGene.alleles().size() - 1));
-            assertEquals(0, asGene.precedence(asGene.alleles().get(0)));
+            assertFalse(asGene.expressions().isEmpty());
+            assertEquals(gene.defaultAllele(), asGene.alleles().get(asGene.alleles().size() - 1));
+            assertEquals(0, asGene.alleles().get(0).order());
             assertEquals(asGene.alleles().get(0), asGene.fromToken(asGene.alleles().get(0).token()));
+            // the combination table is total: every pair resolves to a declared outcome
+            for (var pair : GenotypeCatalog.allPairsOf(asGene)) {
+                assertTrue(asGene.expressions().contains(asGene.expressionOf(pair)),
+                        file + " " + pair.toTokens());
+            }
         }
     }
 }

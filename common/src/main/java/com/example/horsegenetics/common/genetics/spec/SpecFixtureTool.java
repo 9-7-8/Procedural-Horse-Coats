@@ -8,6 +8,8 @@ import com.example.horsegenetics.common.coat.pattern.SpecPainter;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Part;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Skin;
+import com.example.horsegenetics.common.genetics.Allele;
+import com.example.horsegenetics.common.genetics.AllelePair;
 import com.example.horsegenetics.common.genetics.Epigenome;
 import com.example.horsegenetics.common.genetics.Genotype;
 
@@ -136,9 +138,18 @@ public final class SpecFixtureTool {
         // CoatBuildContext.epigeneticsFor does.
         SpecValues values = SpecValues.draw(spec, new SeededRng(seed, spec.key()), dose);
 
+        // Which outcome a horse carrying `dose` copies of the first-declared
+        // allele lands on. The fixture pins the resolution table as well as the
+        // painting, so a creator that maps a combination to the wrong
+        // expression fails parity instead of quietly previewing another horse.
+        AllelePair pair = pairForDose(gene, dose);
+        GeneSpec.ExpressionSpec expressed = gene.expressionSpecOf(pair);
+
         StringBuilder sb = new StringBuilder();
         sb.append("    { \"spec\": \"").append(file).append("\", \"seed\": ").append(seed)
                 .append(", \"dose\": ").append(dose)
+                .append(", \"combination\": \"").append(pair.toTokens()).append("\"")
+                .append(", \"expression\": \"").append(expressed.id()).append("\"")
                 .append(", \"skin\": \"").append(skin).append("\",\n");
 
         sb.append("      \"knobs\": [");
@@ -166,7 +177,7 @@ public final class SpecFixtureTool {
         sb.append("      \"probes\": [");
         boolean first = true;
         if (spec.natural()) {
-            PigmentField after = SpecPainter.restrict(spec, values, ctx, base);
+            PigmentField after = SpecPainter.restrict(spec, expressed.layers(), values, ctx, base);
             for (int[] probe : probes(skin)) {
                 if (!first) {
                     sb.append(", ");
@@ -178,7 +189,7 @@ public final class SpecFixtureTool {
             }
         } else {
             ColorField colour = resolvedBlackCoat(skin);
-            ColorField delta = SpecPainter.tint(spec, values, ctx, base, colour);
+            ColorField delta = SpecPainter.tint(spec, expressed.layers(), values, ctx, base, colour);
             for (int[] probe : probes(skin)) {
                 if (!first) {
                     sb.append(", ");
@@ -193,6 +204,17 @@ public final class SpecFixtureTool {
         }
         sb.append("] }");
         return sb.toString();
+    }
+
+    /** The combination a horse carrying {@code dose} copies of the first-declared allele holds. */
+    private static AllelePair pairForDose(SpecGene gene, int dose) {
+        Allele variant = gene.alleles().get(0);
+        Allele baseline = gene.defaultAllele();
+        return switch (dose) {
+            case 2 -> new AllelePair(variant, variant);
+            case 1 -> new AllelePair(variant, baseline);
+            default -> new AllelePair(baseline, baseline);
+        };
     }
 
     /**

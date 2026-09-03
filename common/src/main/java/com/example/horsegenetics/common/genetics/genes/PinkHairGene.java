@@ -1,6 +1,5 @@
 package com.example.horsegenetics.common.genetics.genes;
 
-import com.example.horsegenetics.common.Rng;
 import com.example.horsegenetics.common.coat.pattern.CoatBuildContext;
 import com.example.horsegenetics.common.coat.pattern.ColorField;
 import com.example.horsegenetics.common.coat.pattern.ColorView;
@@ -10,24 +9,35 @@ import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Part;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Skin;
 import com.example.horsegenetics.common.genetics.Allele;
 import com.example.horsegenetics.common.genetics.AllelePair;
-import com.example.horsegenetics.common.genetics.DominancePattern;
+import com.example.horsegenetics.common.genetics.Expression;
+import com.example.horsegenetics.common.genetics.FounderContext;
+import com.example.horsegenetics.common.genetics.FounderTable;
 import com.example.horsegenetics.common.genetics.Gene;
-import com.example.horsegenetics.common.genetics.Genotype;
 
 import java.util.List;
 
 /**
- * <b>Pink hair</b> ({@code horsegenetics.pink_hair}) - a <b>magical</b> gene:
- * {@code Pihr} is <b>recessive</b>, so only {@code Pihr/Pihr} shows it and a
- * single copy is a carrier you can't see. {@code n} is wild-type. {@code 1 in}
- * {@value #WILD_PIHR_ALLELE_ODDS} per allele, so roughly 1 wild horse in
- * {@value #WILD_PIHR_HORSE_ODDS} is born with it and a good many more carry it -
- * which is the point: a recessive is something you <i>breed for</i>.
+ * <b>Pink hair</b> ({@code horsegenetics.pink_hair}) - a <b>magical</b> gene,
+ * and the model's clearest carrier locus.
  *
- * <p>Turns the <b>mane and tail</b> pink. It is <b>not</b> flat paint - that
- * would throw away the shading the natural phase gave those strands and leave a
- * dead pink patch. Instead the gene <i>reads</i> what each hair texel currently
- * looks like ({@code ColorView.visible}) and returns the delta that walks it
+ * <table>
+ *   <tr><th>combination</th><th>outcome</th></tr>
+ *   <tr><td>{@code n/n}</td><td>wild type</td></tr>
+ *   <tr><td>{@code n/Pihr}</td><td>wild type - a carrier you cannot see</td></tr>
+ *   <tr><td>{@code Pihr/Pihr}</td><td>{@code pink-hair} - the mane and tail turn hot pink</td></tr>
+ * </table>
+ *
+ * <p>Two of the three combinations landing on a wild type is exactly what the
+ * word "recessive" used to mean, and the table says it without needing the word.
+ * Founder frequency {@code 1/}{@value #WILD_PIHR_ONE_IN} per allele, so roughly
+ * one wild horse in {@value #WILD_PIHR_HORSE_ODDS} is born with it and a good
+ * many more carry it - which is the point: an invisible carrier is something you
+ * <i>breed for</i>.
+ *
+ * <p>The pink is <b>not</b> flat paint - that would throw away the shading the
+ * natural phase gave those strands and leave a dead pink patch. Instead the
+ * expression <i>reads</i> what each hair texel currently looks like
+ * ({@link ColorView#visible}) and returns the delta that walks it
  * {@value #STRENGTH_PERCENT}% of the way to hot pink, so the mane keeps its own
  * light and dark while ending up unmistakably pink on a black, a chestnut or a
  * cremello alike. It raises opacity too, so a dominant-white horse gets pink
@@ -40,7 +50,8 @@ import java.util.List;
  * black out pink hair, not the other way round). See {@code Genes.magicalOrder}.
  *
  * <p>Deterministic - one intensity, no per-horse variation yet. Alleles for a
- * couple of intensities are the obvious extension.
+ * couple of intensities are the obvious extension, and are now just two more
+ * rows in the table above.
  *
  * <p><b>Foals get a pink tail only.</b> The foal mesh has no {@code MANE} part
  * (see {@code HorseSkinGeometry}), so the mane comes in with adulthood.
@@ -48,9 +59,9 @@ import java.util.List;
 public final class PinkHairGene implements Gene {
 
     public static final String KEY = "horsegenetics.pink_hair";
-    public static final int WILD_PIHR_ALLELE_ODDS = 12;
+    public static final int WILD_PIHR_ONE_IN = 12;
     /** Both copies, so the square of the per-allele odds - for the Javadoc above. */
-    public static final int WILD_PIHR_HORSE_ODDS = WILD_PIHR_ALLELE_ODDS * WILD_PIHR_ALLELE_ODDS;
+    public static final int WILD_PIHR_HORSE_ODDS = WILD_PIHR_ONE_IN * WILD_PIHR_ONE_IN;
 
     /** Hot pink, the colour the hair is walked toward. */
     private static final int PINK_R = 255;
@@ -61,47 +72,52 @@ public final class PinkHairGene implements Gene {
 
     private static final List<Part> HAIR = List.of(Part.MANE, Part.TAIL);
 
-    public final Allele n = new Allele(KEY, "n", "Wild-type (n)", false, true);
-    public final Allele Pihr = new Allele(KEY, "Pihr", "Pink hair (Pihr)", true, true);
-    /** Most-dominant first: the wild type is the dominant one here. */
+    public final Allele n = new Allele(KEY, 0, "n", "Wild-type (n)");
+    public final Allele Pihr = new Allele(KEY, 1, "Pihr", "Pink hair (Pihr)");
     private final List<Allele> alleles = List.of(n, Pihr);
 
+    private final Expression WILD = Expression.wildType("The mane and tail keep their coat colour.");
+
+    private final Expression CARRIER = Expression.wildType(
+            "pink-carrier", "Pink hair carrier",
+            "One copy shows nothing at all. The horse looks ordinary and only passes the allele on - "
+                    + "two carriers bred together are how pink hair appears.");
+
+    private final Expression PINK = Expression.of("pink-hair", "Pink hair")
+            .describe("The mane and tail walk most of the way to hot pink while keeping their own "
+                    + "strand shading, on any base coat at all. A foal gets a pink tail; the mane "
+                    + "arrives with adulthood.")
+            .tint(PinkHairGene::paintHair);
+
+    private final List<Expression> expressions = List.of(WILD, CARRIER, PINK);
+
+    private final FounderTable founders = FounderTable.hardyWeinberg(Pihr, n, 1.0 / WILD_PIHR_ONE_IN);
+
     @Override public String key() { return KEY; }
+    @Override public String name() { return "Pink hair"; }
     @Override public int priority() { return 110; }
+    @Override public boolean isNatural() { return false; }
     @Override public List<Allele> alleles() { return alleles; }
-    @Override public Allele wildType() { return n; }
-
-    /** Recessive: {@code n/Pihr} is an invisible carrier; only {@code Pihr/Pihr} shows. */
-    @Override public DominancePattern dominance() { return DominancePattern.RECESSIVE; }
-
-    @Override
-    public boolean isNatural() {
-        return false;
-    }
+    @Override public Allele defaultAllele() { return n; }
+    @Override public List<Expression> expressions() { return expressions; }
+    @Override public FounderTable founderTable(FounderContext context) { return founders; }
 
     @Override
-    public AllelePair randomPair(Rng rng) {
-        return new AllelePair(
-                rng.nextInt(WILD_PIHR_ALLELE_ODDS) == 0 ? Pihr : n,
-                rng.nextInt(WILD_PIHR_ALLELE_ODDS) == 0 ? Pihr : n);
+    public Expression expressionOf(AllelePair pair) {
+        return switch (pair.count(Pihr)) {
+            case 2 -> PINK;
+            case 1 -> CARRIER;
+            default -> WILD;
+        };
     }
 
     public boolean isPinkHaired(AllelePair pair) {
-        return pair.first().equals(Pihr) && pair.second().equals(Pihr);
+        return pair.count(Pihr) == 2;
     }
 
-    @Override
-    public boolean isVisible(AllelePair pair, Genotype genotype) {
-        return isPinkHaired(pair);
-    }
-
-    @Override
-    public ColorField tint(AllelePair pair, CoatBuildContext ctx, PigmentView coat, ColorView colour) {
-        if (!isPinkHaired(pair)) {
-            return null;
-        }
+    private static ColorField paintHair(CoatBuildContext ctx, PigmentView coat, ColorView accumulated) {
         Skin skin = ctx.skin();
-        ColorField delta = ColorField.deltaLike(colour);
+        ColorField delta = ColorField.deltaLike(accumulated);
         for (Part part : HAIR) {
             if (!HorseSkinGeometry.hasPart(skin, part)) {
                 continue; // a foal has no mane
@@ -110,10 +126,10 @@ public final class PinkHairGene implements Gene {
                 // The hair ends up fully opaque, so what it will look like is
                 // just the accumulated colour - hence the delta that lands there.
                 delta.add(px, py,
-                        toward(colour, px, py, 0, PINK_R),
-                        toward(colour, px, py, 1, PINK_G),
-                        toward(colour, px, py, 2, PINK_B));
-                delta.addOpacity(px, py, 255 - colour.opacity(px, py));
+                        toward(accumulated, px, py, 0, PINK_R),
+                        toward(accumulated, px, py, 1, PINK_G),
+                        toward(accumulated, px, py, 2, PINK_B));
+                delta.addOpacity(px, py, 255 - accumulated.opacity(px, py));
             });
         }
         return delta;

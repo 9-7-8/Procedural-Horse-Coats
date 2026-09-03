@@ -1,35 +1,41 @@
 package com.example.horsegenetics.common.genetics.genes;
 
-import com.example.horsegenetics.common.Rng;
-import com.example.horsegenetics.common.coat.pattern.CoatBuildContext;
-import com.example.horsegenetics.common.coat.pattern.PigmentField;
-import com.example.horsegenetics.common.coat.pattern.PigmentView;
 import com.example.horsegenetics.common.coat.pattern.CoatRegions;
+import com.example.horsegenetics.common.coat.pattern.PigmentField;
 import com.example.horsegenetics.common.genetics.Allele;
-import com.example.horsegenetics.common.genetics.DominancePattern;
 import com.example.horsegenetics.common.genetics.AllelePair;
+import com.example.horsegenetics.common.genetics.Expression;
+import com.example.horsegenetics.common.genetics.FounderContext;
+import com.example.horsegenetics.common.genetics.FounderTable;
 import com.example.horsegenetics.common.genetics.Gene;
-import com.example.horsegenetics.common.genetics.Genotype;
 
 import java.util.List;
 
 /**
- * <b>Champagne</b> ({@code horsegenetics.champagne}) - a simple dominant,
- * non-dose-dependent dilution. Natural: it just moves the pigment sample. It
- * keeps most of the red, cuts black hard, and feeds part of the removed black
- * back in as red ({@link com.example.horsegenetics.common.coat.pattern.PigmentField#dilute}),
+ * <b>Champagne</b> ({@code horsegenetics.champagne}) - a dilution that does not
+ * read its own dose.
+ *
+ * <table>
+ *   <tr><th>combination</th><th>outcome</th></tr>
+ *   <tr><td>{@code c/c}</td><td>wild type</td></tr>
+ *   <tr><td>{@code Ch/c}, {@code Ch/Ch}</td><td>{@code champagne} - the full dilution either way</td></tr>
+ * </table>
+ *
+ * <p>Natural: it just moves the pigment sample. It keeps most of the red, cuts
+ * black hard, and feeds part of the removed black back in as red
+ * ({@link com.example.horsegenetics.common.coat.pattern.PigmentField#dilute}),
  * so it reads off the <i>current</i> pigment - gold champagne (on chestnut)
  * stays gold, classic champagne (on black) lands taupe, and amber champagne
  * (on bay) keeps <b>chocolate points</b> over a gold body instead of washing
- * the points out to the body colour. Champagne-on-white is invisible.
- * {@code Ch} dominant, {@code c}
- * recessive/wild-type. {@code 1 in} {@value #WILD_CHAMPAGNE_ALLELE_ODDS} per
- * allele. Deterministic.
+ * the points out to the body colour. Champagne on a white horse is invisible.
+ *
+ * <p>Deterministic. Founder frequency {@code 1/}{@value #WILD_CHAMPAGNE_ONE_IN}
+ * per allele.
  */
 public final class ChampagneGene implements Gene {
 
     public static final String KEY = "horsegenetics.champagne";
-    public static final int WILD_CHAMPAGNE_ALLELE_ODDS = 40;
+    public static final int WILD_CHAMPAGNE_ONE_IN = 40;
 
     /** Pheomelanin kept - champagne barely touches red (gold champagne stays gold). */
     private static final float KEEP_RED = 0.55f;
@@ -39,47 +45,45 @@ public final class ChampagneGene implements Gene {
      * Fraction of a texel's eumelanin fed back in as pheomelanin. This is what
      * gives an <b>amber champagne</b> its chocolate points: bay's black points
      * carry no red at all, and without this term champagne washed them to the
-     * same gold as the body (the previous {@code setRed(0.45 + 0.10 * red)} set
-     * red almost identically whether the texel was a red body or a black point).
+     * same gold as the body.
      */
     private static final float BLACK_TINT = 0.30f;
 
-    public final Allele Ch = new Allele(KEY, "Ch", "Champagne (Ch)", true, true);
-    public final Allele c = new Allele(KEY, "c", "Wild-type (c)", false, true);
+    public final Allele Ch = new Allele(KEY, 0, "Ch", "Champagne (Ch)");
+    public final Allele c = new Allele(KEY, 1, "c", "Wild-type (c)");
     private final List<Allele> alleles = List.of(Ch, c);
 
+    private final Expression WILD = Expression.wildType("No dilution.");
+
+    private final Expression CHAMPAGNE = Expression.of("champagne", "Champagne")
+            .describe("Red mostly kept and black cut hard, with some of the removed black fed back as "
+                    + "red - gold champagne on a chestnut, classic taupe on a black, amber with "
+                    + "chocolate points on a bay. One copy and two look the same.")
+            .restrict((ctx, coat) -> {
+                PigmentField f = coat.mutableCopy();
+                CoatRegions.restrictAll(ctx.skin(), f,
+                        (field, px, py, p) -> field.dilute(px, py, KEEP_RED, KEEP_BLACK, BLACK_TINT));
+                return f;
+            });
+
+    private final List<Expression> expressions = List.of(WILD, CHAMPAGNE);
+
+    private final FounderTable founders = FounderTable.hardyWeinberg(Ch, c, 1.0 / WILD_CHAMPAGNE_ONE_IN);
+
     @Override public String key() { return KEY; }
+    @Override public String name() { return "Champagne"; }
     @Override public int priority() { return 50; }
     @Override public List<Allele> alleles() { return alleles; }
-    @Override public Allele wildType() { return c; }
-
-    /** Dominant: one {@code Ch} gives the full dilution. */
-    @Override public DominancePattern dominance() { return DominancePattern.DOMINANT; }
+    @Override public Allele defaultAllele() { return c; }
+    @Override public List<Expression> expressions() { return expressions; }
+    @Override public FounderTable founderTable(FounderContext context) { return founders; }
 
     @Override
-    public AllelePair randomPair(Rng rng) {
-        return new AllelePair(
-                rng.nextInt(WILD_CHAMPAGNE_ALLELE_ODDS) == 0 ? Ch : c,
-                rng.nextInt(WILD_CHAMPAGNE_ALLELE_ODDS) == 0 ? Ch : c);
+    public Expression expressionOf(AllelePair pair) {
+        return pair.has(Ch) ? CHAMPAGNE : WILD;
     }
 
     public boolean isChampagne(AllelePair pair) {
         return pair.has(Ch);
-    }
-
-    @Override
-    public boolean isVisible(AllelePair pair, Genotype genotype) {
-        return isChampagne(pair);
-    }
-
-    @Override
-    public PigmentField restrict(AllelePair pair, CoatBuildContext ctx, PigmentView coat) {
-        if (!isChampagne(pair)) {
-            return null;
-        }
-        PigmentField f = coat.mutableCopy();
-        CoatRegions.restrictAll(ctx.skin(), f,
-                (field, px, py, p) -> field.dilute(px, py, KEEP_RED, KEEP_BLACK, BLACK_TINT));
-        return f;
     }
 }

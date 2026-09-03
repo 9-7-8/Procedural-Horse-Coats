@@ -12,16 +12,17 @@ import java.util.List;
  *   <li><b>Extension then agouti</b> come first, always, their two allele
  *       tokens run together with no separator ({@code E/e} + {@code A/a} →
  *       {@code "EeAa"}).</li>
- *   <li>Every other gene is shown <b>only if it carries a non-wild-type
- *       allele</b>, space-separated, in {@link #TRAILING_ORDER} (splash, white,
- *       champagne, cream, pearl, grey, test).</li>
- *   <li>Genes that aren't present in every horse - <b>splash, champagne, cream,
- *       pearl, magic zebra, pink hair</b> - write their wild-type slot as a
- *       lowercase {@code n} ("none")
- *       when heterozygous: {@code "nSpl"}, {@code "nCh"}, {@code "nCr"},
- *       {@code "nprl"}. Homozygous is the token doubled ({@code "SplSpl"}).</li>
- *   <li>The rest (white, grey, test) print both real tokens, dominant first:
- *       {@code "Ww"}, {@code "Gg"}, {@code "Tt"}.</li>
+ *   <li>Every other gene is shown <b>only if it carries an allele other than
+ *       the gene's {@link Gene#defaultAllele() baseline}</b>, space-separated,
+ *       in the order {@code trailingOrder()} gives.</li>
+ *   <li>Genes that aren't present in every horse - splash, champagne, MATP,
+ *       magic zebra, pink hair - write a baseline slot as a lowercase
+ *       {@code n} ("none"): {@code "nSpl"}, {@code "nCh"}, {@code "nCr"},
+ *       {@code "nprl"}. Two real alleles print both tokens, so a MATP
+ *       {@code Cr/Cr} is {@code "CrCr"} and a {@code Cr/prl} is
+ *       {@code "Crprl"}.</li>
+ *   <li>A gene that can mask the coat (white, test) and grey always print both
+ *       real tokens: {@code "Ww"}, {@code "Gg"}, {@code "Tt"}.</li>
  * </ul>
  *
  * Example: a bay with one splash, one champagne and two cream alleles →
@@ -30,14 +31,23 @@ import java.util.List;
 public final class GeneCodeDisplay {
 
     /**
-     * Does {@code gene}'s wild-type allele mean "this trait is simply absent"
-     * (so a heterozygote shows {@code nXxx} and a homozygote {@code XxxXxx})?
-     * True for every gene except a {@link DominancePattern#COMPLETE_DOMINANT}
-     * one (white, test - which print both real tokens) and grey (which prints
-     * {@code Gg}). Derived, so a data-driven pattern gene is covered for free.
+     * Does {@code gene}'s default allele mean "this trait is simply absent"
+     * (so one variant copy shows {@code nXxx} and two show {@code XxxXxx})?
+     * True for every gene except one that can <b>mask</b> the rest of the coat
+     * (white, test - which print both real tokens) and grey (which prints
+     * {@code Gg}). Derived from the gene's {@link Expression} table, so a
+     * data-driven pattern gene is covered for free.
      */
     private static boolean absenceWildtype(Gene gene) {
-        return gene.dominance() != DominancePattern.COMPLETE_DOMINANT && gene != Genes.GREY;
+        if (gene == Genes.GREY) {
+            return false;
+        }
+        for (Expression e : gene.expressions()) {
+            if (e.masks()) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
@@ -49,7 +59,7 @@ public final class GeneCodeDisplay {
     private static List<Gene> trailingOrder() {
         List<Gene> out = new ArrayList<>(List.of(
                 Genes.SPLASH, Genes.ROAN, Genes.TOBIANO, Genes.FRAME, Genes.SABINO, Genes.WHITE,
-                Genes.DUN, Genes.SILVER, Genes.MUSHROOM, Genes.CHAMPAGNE, Genes.CREAM, Genes.PEARL,
+                Genes.DUN, Genes.SILVER, Genes.MUSHROOM, Genes.CHAMPAGNE, Genes.MATP,
                 Genes.GREY, Genes.MAGIC_ZEBRA, Genes.PINK_HAIR, Genes.TEST));
         for (Gene g : Genes.loaded()) {
             if (!out.contains(g)) {
@@ -94,20 +104,19 @@ public final class GeneCodeDisplay {
         StringBuilder rest = new StringBuilder();
         for (Gene gene : trailingOrder()) {
             AllelePair pair = genotype.pair(gene);
-            Allele wild = gene.wildType();
-            boolean firstWild = pair.first().equals(wild);
-            boolean secondWild = pair.second().equals(wild);
-            if (firstWild && secondWild) {
-                continue; // no variant allele - not worth showing
+            Allele baseline = gene.defaultAllele();
+            boolean firstBaseline = pair.first().equals(baseline);
+            boolean secondBaseline = pair.second().equals(baseline);
+            if (firstBaseline && secondBaseline) {
+                continue; // nothing but the population baseline - not worth showing
             }
 
             String token;
-            if (absenceWildtype(gene)) {
-                Allele variant = firstWild ? pair.second() : pair.first();
-                token = (firstWild || secondWild)
-                        ? "n" + variant.token()                  // heterozygous
-                        : variant.token() + variant.token();     // homozygous variant
+            if (absenceWildtype(gene) && (firstBaseline || secondBaseline)) {
+                // exactly one baseline copy - write it as "none"
+                token = "n" + (firstBaseline ? pair.second() : pair.first()).token();
             } else {
+                // two real alleles (or a masking gene): print both, e.g. "Crprl", "Ww"
                 token = pair.first().token() + pair.second().token();
             }
 

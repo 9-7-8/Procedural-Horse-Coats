@@ -4,12 +4,11 @@ import com.example.horsegenetics.common.genetics.genes.AgoutiGene;
 import com.example.horsegenetics.common.genetics.genes.DunGene;
 import com.example.horsegenetics.common.genetics.genes.FrameGene;
 import com.example.horsegenetics.common.genetics.genes.ChampagneGene;
-import com.example.horsegenetics.common.genetics.genes.CreamGene;
 import com.example.horsegenetics.common.genetics.genes.ExtensionGene;
 import com.example.horsegenetics.common.genetics.genes.GreyGene;
 import com.example.horsegenetics.common.genetics.genes.MagicZebraGene;
 import com.example.horsegenetics.common.genetics.genes.MushroomGene;
-import com.example.horsegenetics.common.genetics.genes.PearlGene;
+import com.example.horsegenetics.common.genetics.genes.MatpGene;
 import com.example.horsegenetics.common.genetics.genes.PinkHairGene;
 import com.example.horsegenetics.common.genetics.genes.RoanGene;
 import com.example.horsegenetics.common.genetics.genes.SabinoGene;
@@ -75,8 +74,7 @@ public final class Genes {
     public static final ChampagneGene CHAMPAGNE = new ChampagneGene();
     public static final SplashGene SPLASH = new SplashGene();
     public static final GreyGene GREY = new GreyGene();
-    public static final CreamGene CREAM = new CreamGene();
-    public static final PearlGene PEARL = new PearlGene();
+    public static final MatpGene MATP = new MatpGene();
     public static final MagicZebraGene MAGIC_ZEBRA = new MagicZebraGene();
     public static final PinkHairGene PINK_HAIR = new PinkHairGene();
     public static final DunGene DUN = new DunGene();
@@ -89,7 +87,7 @@ public final class Genes {
 
     /** The hand-written genes. Order here is irrelevant - the registry sorts. */
     private static final List<Gene> BUILTINS = List.of(
-            EXTENSION, AGOUTI, WHITE, TEST, CHAMPAGNE, SPLASH, GREY, CREAM, PEARL,
+            EXTENSION, AGOUTI, WHITE, TEST, CHAMPAGNE, SPLASH, GREY, MATP,
             MAGIC_ZEBRA, PINK_HAIR, DUN, SILVER, MUSHROOM, ROAN, TOBIANO, FRAME, SABINO);
 
     /** Ordering: lower priority first, ties broken alphabetically by key. */

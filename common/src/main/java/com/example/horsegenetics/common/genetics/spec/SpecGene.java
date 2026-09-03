@@ -1,53 +1,111 @@
 package com.example.horsegenetics.common.genetics.spec;
 
-import com.example.horsegenetics.common.Rng;
 import com.example.horsegenetics.common.coat.pattern.CoatBuildContext;
-import com.example.horsegenetics.common.coat.pattern.ColorField;
-import com.example.horsegenetics.common.coat.pattern.ColorView;
-import com.example.horsegenetics.common.coat.pattern.PigmentField;
-import com.example.horsegenetics.common.coat.pattern.PigmentView;
 import com.example.horsegenetics.common.coat.pattern.SpecPainter;
 import com.example.horsegenetics.common.genetics.Allele;
 import com.example.horsegenetics.common.genetics.AllelePair;
-import com.example.horsegenetics.common.genetics.DominancePattern;
+import com.example.horsegenetics.common.genetics.Expression;
+import com.example.horsegenetics.common.genetics.FounderContext;
+import com.example.horsegenetics.common.genetics.FounderTable;
 import com.example.horsegenetics.common.genetics.Gene;
-import com.example.horsegenetics.common.genetics.Genotype;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * A {@link Gene} whose behaviour comes from a {@link GeneSpec} instead of from
- * Java. Everything the interface asks - alleles, precedence, inheritance,
- * visibility, determinism, the coat hooks - is answered from the spec, so a gene
- * that fits the format is a file rather than a class.
+ * Java. Everything the interface asks - alleles, the combination table,
+ * inheritance, the founder distribution, the coat hooks - is answered from the
+ * spec, so a gene that fits the format is a file rather than a class.
  *
  * <p>It is an ordinary gene in every other respect: it goes in the same
  * registry, takes the same place in the genotype code, breeds by the same
- * Mendelian draw, and its non-deterministic numbers come off the same per-allele
- * epigenetic seed. Nothing downstream knows or cares that it was loaded from a
- * file.
+ * Mendelian draw, and its non-deterministic numbers come off the same
+ * per-allele epigenetic seed. Nothing downstream knows or cares that it was
+ * loaded from a file.
  *
- * <p>Randomness consumed by {@link #randomPair}: one {@code nextInt(wildOdds)}
- * per allele copy, plus one {@code nextInt} per copy to pick between variants on
- * a gene that declares more than two alleles.
+ * <p>The spec's {@code expressions} table is turned into real
+ * {@link Expression} objects at construction, one per entry, each carrying a
+ * painter that runs that entry's layers through {@link SpecPainter}. A
+ * combination is then resolved by a map lookup, which is why the parser insists
+ * the table cover every combination exactly once.
  */
 public final class SpecGene implements Gene {
 
     private final GeneSpec spec;
     private final List<Allele> alleles;
-    private final Allele wildType;
+    private final Allele baseline;
     private final Allele variant;
+    private final List<Expression> expressions;
+    /** Canonical {@code "<a>/<b>"} to the outcome it produces - total, by construction. */
+    private final Map<String, Expression> byCombination;
+    /** Same key, back to the spec entry - what {@link SpecAbilities} needs. */
+    private final Map<String, GeneSpec.ExpressionSpec> specByCombination;
+    private final FounderTable founders;
 
     public SpecGene(GeneSpec spec) {
         this.spec = spec;
+
         List<Allele> built = new ArrayList<>();
-        for (GeneSpec.AlleleSpec a : spec.alleles()) {
-            built.add(new Allele(spec.key(), a.token(), a.label(), a.visible(), a.deterministic()));
+        for (int i = 0; i < spec.alleles().size(); i++) {
+            GeneSpec.AlleleSpec a = spec.alleles().get(i);
+            built.add(new Allele(spec.key(), i, a.token(), a.label()));
         }
         this.alleles = List.copyOf(built);
         this.variant = alleles.get(0);
-        this.wildType = alleles.get(alleles.size() - 1);
+        this.baseline = alleles.get(alleles.size() - 1);
+
+        List<Expression> outcomes = new ArrayList<>();
+        Map<String, Expression> byCombo = new LinkedHashMap<>();
+        Map<String, GeneSpec.ExpressionSpec> specByCombo = new LinkedHashMap<>();
+        for (GeneSpec.ExpressionSpec e : spec.expressions()) {
+            Expression expression = toExpression(spec, e);
+            outcomes.add(expression);
+            for (String combination : e.combinations()) {
+                byCombo.put(combination, expression);
+                specByCombo.put(combination, e);
+            }
+        }
+        this.expressions = List.copyOf(outcomes);
+        this.byCombination = Map.copyOf(byCombo);
+        this.specByCombination = Map.copyOf(specByCombo);
+
+        FounderTable.Builder table = FounderTable.builder();
+        for (GeneSpec.FounderWeight w : spec.founders()) {
+            String[] tokens = w.combination().split("/");
+            table.weight(fromToken(tokens[0]), fromToken(tokens[1]), w.percent());
+        }
+        this.founders = table.build();
+    }
+
+    private Expression toExpression(GeneSpec spec, GeneSpec.ExpressionSpec e) {
+        if (e.wildType()) {
+            return Expression.wildType(e.id(), e.name(), e.description());
+        }
+        Expression.Builder b = Expression.of(e.id(), e.name()).describe(e.description());
+        if (e.masks()) {
+            b = b.masking();
+        }
+        if (!e.deterministic()) {
+            b = b.varies();
+        }
+        // An expression carrying only effects still isn't a wild type - it
+        // changes the horse, just not its coat - so it gets a painter that
+        // contributes nothing rather than being folded into the wild type.
+        return spec.natural()
+                ? b.restrict((ctx, coat) -> e.layers().isEmpty()
+                        ? null
+                        : SpecPainter.restrict(spec, e.layers(), values(ctx), ctx, coat))
+                : b.tint((ctx, coat, accumulated) -> e.layers().isEmpty()
+                        ? null
+                        : SpecPainter.tint(spec, e.layers(), values(ctx), ctx, coat, accumulated));
+    }
+
+    private SpecValues values(CoatBuildContext ctx) {
+        AllelePair pair = ctx.genotype().pair(spec.key());
+        return SpecValues.draw(spec, ctx.epigeneticsFor(spec.key()), pair == null ? 0 : dose(pair));
     }
 
     public GeneSpec spec() {
@@ -58,7 +116,7 @@ public final class SpecGene implements Gene {
      * The gene's processing priority - see {@link Gene#priority()}. A spec gene
      * sorts into the one unified {@code (priority, key)} order alongside the
      * built-ins, so a data-driven natural gene at priority 35 lands between the
-     * built-in cream and champagne.
+     * built-in silver and MATP.
      */
     @Override
     public int priority() {
@@ -67,70 +125,37 @@ public final class SpecGene implements Gene {
 
     @Override public String key() { return spec.key(); }
 
+    @Override public String name() { return spec.name(); }
+
     @Override public List<Allele> alleles() { return alleles; }
 
-    @Override public Allele wildType() { return wildType; }
-
-    @Override public DominancePattern dominance() { return spec.dominance(); }
+    @Override public Allele defaultAllele() { return baseline; }
 
     @Override public boolean isNatural() { return spec.natural(); }
 
+    @Override public List<Expression> expressions() { return expressions; }
+
+    @Override public FounderTable founderTable(FounderContext context) { return founders; }
+
     @Override
-    public AllelePair randomPair(Rng rng) {
-        return new AllelePair(rollAllele(rng), rollAllele(rng));
-    }
-
-    private Allele rollAllele(Rng rng) {
-        if (rng.nextInt(spec.wildOdds()) != 0) {
-            return wildType;
+    public Expression expressionOf(AllelePair pair) {
+        Expression e = byCombination.get(pair.toTokens());
+        if (e == null) {
+            // Unreachable: the parser proves the table is total over every
+            // combination. Loud rather than silent if that ever stops holding.
+            throw new IllegalStateException(spec.key() + " has no expression for " + pair.toTokens());
         }
-        int variants = alleles.size() - 1;
-        return variants <= 1 ? variant : alleles.get(rng.nextInt(variants));
+        return e;
     }
 
-    /** How many copies of the <b>variant</b> allele ({@code alleles[0]}) this horse carries. */
+    /** The spec entry behind {@code pair} - the effects list the translator walks. */
+    public GeneSpec.ExpressionSpec expressionSpecOf(AllelePair pair) {
+        return specByCombination.get(pair.toTokens());
+    }
+
+    /** How many copies of the <b>first-declared</b> allele this horse carries - what {@code perDose} counts. */
     public int dose(AllelePair pair) {
-        int n = 0;
-        if (pair.first().equals(variant)) {
-            n++;
-        }
-        if (pair.second().equals(variant)) {
-            n++;
-        }
-        return n;
-    }
-
-    @Override
-    public boolean isVisible(AllelePair pair, Genotype genotype) {
-        if (spec.dominance() == DominancePattern.RECESSIVE) {
-            return dose(pair) >= 2;
-        }
-        return !pair.first().equals(wildType) || !pair.second().equals(wildType);
-    }
-
-    @Override
-    public boolean isDeterministic(AllelePair pair, Genotype genotype) {
-        return spec.isDeterministic() || !isVisible(pair, genotype);
-    }
-
-    @Override
-    public PigmentField restrict(AllelePair pair, CoatBuildContext ctx, PigmentView coat) {
-        if (!spec.natural() || !isVisible(pair, ctx.genotype())) {
-            return null;
-        }
-        return SpecPainter.restrict(spec, values(pair, ctx), ctx, coat);
-    }
-
-    @Override
-    public ColorField tint(AllelePair pair, CoatBuildContext ctx, PigmentView coat, ColorView colour) {
-        if (spec.natural() || !isVisible(pair, ctx.genotype())) {
-            return null;
-        }
-        return SpecPainter.tint(spec, values(pair, ctx), ctx, coat, colour);
-    }
-
-    private SpecValues values(AllelePair pair, CoatBuildContext ctx) {
-        return SpecValues.draw(spec, ctx.epigeneticsFor(spec.key()), dose(pair));
+        return pair.count(variant);
     }
 
     @Override

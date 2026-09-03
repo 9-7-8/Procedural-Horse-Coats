@@ -6,15 +6,16 @@ package com.example.horsegenetics.common.testutil;
  * {@code Genotype.parse} accepts. Lets the existing table-of-literals tests keep
  * their readable {@code "E/e-A/a-..."} strings without re-typing every case.
  *
- * <p>The order below is the built-in {@code codeOrder} as it stood before genes
- * gained a {@code priority()} and the orderings became derived. Segments past
- * the end of a shorter string are simply omitted (parsing fills them with wild
- * type).
+ * <p>The order below is a fixed reading order for these literals - roughly the
+ * hand-written {@code codeOrder} of an earlier build, with the old separate
+ * cream and pearl slots replaced by the single {@code matp} locus they merged
+ * into. Segments past the end of a shorter string are simply omitted (parsing
+ * fills them with the gene's default allele).
  */
 public final class LegacyCode {
 
     private static final String[] ORDER = {
-            "extension", "agouti", "white", "test", "champagne", "splash", "grey", "cream", "pearl",
+            "extension", "agouti", "white", "test", "champagne", "splash", "grey", "matp",
             "magic_zebra", "pink_hair", "dun", "silver", "mushroom", "roan", "tobiano", "frame", "sabino"};
 
     private LegacyCode() {}

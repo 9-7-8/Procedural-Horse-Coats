@@ -45,12 +45,18 @@ public final class SpecPainter {
     // Phase 1 - natural
     // ------------------------------------------------------------------
 
-    /** Apply every natural layer to a copy of {@code coat}. */
-    public static PigmentField restrict(GeneSpec spec, SpecValues values, CoatBuildContext ctx, PigmentView coat) {
+    /**
+     * Apply one expression's natural layers to a copy of {@code coat}.
+     *
+     * <p>{@code layers} comes from the expression the horse's allele
+     * combination landed on, not from the gene as a whole - two combinations of
+     * the same gene can paint entirely different things.
+     */
+    public static PigmentField restrict(GeneSpec spec, List<Layer> layers, SpecValues values,
+                                        CoatBuildContext ctx, PigmentView coat) {
         Skin skin = ctx.skin();
         Map<Part, Bounds> bounds = boundsOf(skin);
         PigmentField field = coat.mutableCopy();
-        List<Layer> layers = spec.layers();
         for (int i = 0; i < layers.size(); i++) {
             Layer layer = layers.get(i);
             long fallbackSeed = layerSeed(spec, i);
@@ -98,13 +104,12 @@ public final class SpecPainter {
     // Phase 3 - magical
     // ------------------------------------------------------------------
 
-    /** Build this gene's signed colour delta. */
-    public static ColorField tint(GeneSpec spec, SpecValues values, CoatBuildContext ctx,
-                                  PigmentView coat, ColorView colour) {
+    /** Build one expression's signed colour delta. See {@link #restrict} on {@code layers}. */
+    public static ColorField tint(GeneSpec spec, List<Layer> layers, SpecValues values,
+                                  CoatBuildContext ctx, PigmentView coat, ColorView colour) {
         Skin skin = ctx.skin();
         Map<Part, Bounds> bounds = boundsOf(skin);
         ColorField delta = ColorField.deltaLike(colour);
-        List<Layer> layers = spec.layers();
         for (int i = 0; i < layers.size(); i++) {
             Layer layer = layers.get(i);
             long fallbackSeed = layerSeed(spec, i);

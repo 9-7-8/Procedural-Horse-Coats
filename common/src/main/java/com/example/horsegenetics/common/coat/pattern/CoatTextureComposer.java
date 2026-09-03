@@ -2,8 +2,8 @@ package com.example.horsegenetics.common.coat.pattern;
 
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Skin;
-import com.example.horsegenetics.common.genetics.AllelePair;
 import com.example.horsegenetics.common.genetics.Epigenome;
+import com.example.horsegenetics.common.genetics.Expression;
 import com.example.horsegenetics.common.genetics.Gene;
 import com.example.horsegenetics.common.genetics.Genes;
 import com.example.horsegenetics.common.genetics.Genotype;
@@ -63,14 +63,14 @@ public final class CoatTextureComposer {
 
         CoatBuildContext ctx = new CoatBuildContext(genotype, epigenome, skin, adult);
 
-        // 1. natural phase - each gene folds the pigment field further down.
+        // 1. natural phase - each gene's expression folds the pigment field further down.
         PigmentField pigment = new PigmentField(n);
         for (Gene gene : Genes.naturalOrder()) {
-            AllelePair pair = genotype.pair(gene);
-            if (!gene.isVisible(pair, genotype)) {
+            Expression expression = gene.expressionIn(genotype.pair(gene), genotype);
+            if (expression.wildType()) {
                 continue;
             }
-            PigmentField next = gene.restrict(pair, ctx, pigment);
+            PigmentField next = expression.restrict(ctx, pigment);
             if (next != null) {
                 pigment = next;
             }
@@ -92,11 +92,11 @@ public final class CoatTextureComposer {
 
         // 3. magical phase - each gene's signed RGB delta accumulates.
         for (Gene gene : Genes.magicalOrder()) {
-            AllelePair pair = genotype.pair(gene);
-            if (!gene.isVisible(pair, genotype)) {
+            Expression expression = gene.expressionIn(genotype.pair(gene), genotype);
+            if (expression.wildType()) {
                 continue;
             }
-            ColorField delta = gene.tint(pair, ctx, pigment, colour);
+            ColorField delta = expression.tint(ctx, pigment, colour);
             if (delta != null) {
                 colour.apply(delta);
             }

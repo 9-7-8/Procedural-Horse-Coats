@@ -9,22 +9,118 @@ window.HG = window.HG || {};
 
   var schema = HG.schema;
 
+  // ---- the gene the creator edits ---------------------------------------
+  //
+  // The creator authors a two-allele gene with ONE visible outcome plus a wild
+  // type. That is what its single layer list can describe, and saying so out
+  // loud is better than pretending otherwise: the format allows any number of
+  // alleles and any number of outcomes (wiki/gene-format.html), and a gene that
+  // needs them is hand-edited JSON for now.
+  //
+  // visible(spec) is the outcome the forms edit; wild(spec) is the silent one.
+
   function blank() {
     return {
-      format: 1,
+      format: 2,
       key: "mymod.my_gene",
       name: "My gene",
       phase: "natural",
-      dominance: "DOMINANT",
-      wildOdds: 40,
       priority: 100,
       alleles: [
         { token: "My", label: "My gene (My)" },
         { token: "my", label: "Wild-type (my)" }
       ],
       knobs: [],
-      layers: [newLayer("natural")]
+      expressions: [
+        {
+          id: "my_gene",
+          name: "My gene",
+          description: "What a horse carrying this looks like.",
+          when: ["My/My", "My/my"],
+          layers: [newLayer("natural")]
+        },
+        { id: "wild", name: "Wild type", description: "No effect.", wildType: true }
+      ],
+      founders: { "My/My": 0.5, "My/my": 4.5, "my/my": 95.0 }
     };
+  }
+
+  /** The one outcome the forms edit - the first non-wild-type entry. */
+  function visible(spec) {
+    var list = spec.expressions || [];
+    for (var i = 0; i < list.length; i++) {
+      if (!list[i].wildType) return list[i];
+    }
+    return list[0];
+  }
+
+  /** The do-nothing outcome. */
+  function wild(spec) {
+    var list = spec.expressions || [];
+    for (var i = 0; i < list.length; i++) {
+      if (list[i].wildType) return list[i];
+    }
+    return null;
+  }
+
+  /** The layer list the forms edit. */
+  function layersOf(spec) {
+    var e = visible(spec);
+    if (e && !e.layers) e.layers = [];
+    return e ? e.layers : [];
+  }
+
+  /** Every unordered combination of the gene alleles, canonical order. */
+  function combinations(spec) {
+    return HG.specEngine.combinations(spec);
+  }
+
+  /**
+   * Which combinations land on the visible outcome. Two shapes, which is all a
+   * two-allele gene can be: one copy is enough, or it takes two. That is the
+   * old DOMINANT / RECESSIVE pair said as the table rather than as a label.
+   */
+  function showsWhen(spec) {
+    var e = visible(spec);
+    var owned = (e && Array.isArray(e.when)) ? e.when : [];
+    return owned.length > 1 ? "any" : "homozygous";
+  }
+
+  function setShowsWhen(spec, mode) {
+    var a = spec.alleles || [];
+    if (a.length < 2) return;
+    var variant = a[0].token;
+    var baseline = a[a.length - 1].token;
+    var e = visible(spec);
+    e.when = mode === "any"
+      ? [variant + "/" + variant, variant + "/" + baseline]
+      : [variant + "/" + variant];
+  }
+
+  /**
+   * Keep the "when" list and the founder table pointing at the current allele
+   * tokens - renaming an allele must not silently orphan either.
+   */
+  function retoken(spec, oldTokens) {
+    var a = spec.alleles || [];
+    if (a.length < 2) return;
+    var mode = showsWhen(spec);
+    var weights = {};
+    if (oldTokens && oldTokens.length === a.length) {
+      var oldCombos = HG.specEngine.combinations({
+        alleles: oldTokens.map(function (t) { return { token: t }; })
+      });
+      var newCombos = combinations(spec);
+      oldCombos.forEach(function (c, i) {
+        if (newCombos[i] !== undefined) weights[newCombos[i]] = (spec.founders || {})[c];
+      });
+    }
+    setShowsWhen(spec, mode);
+    var out = {};
+    combinations(spec).forEach(function (c) {
+      out[c] = weights[c] === undefined ? 0 : weights[c];
+    });
+    spec.founders = out;
   }
 
   function newLayer(phase) {
@@ -76,15 +172,12 @@ window.HG = window.HG || {};
     // Callable on a raw file as well as on the editor's own object, so the
     // export and the validator work on anything you paste in.
     var knobs = spec.knobs || [];
-    var layers = spec.layers || [];
     var alleles = spec.alleles || [];
     var out = {
-      format: 1,
+      format: 2,
       key: spec.key,
       name: spec.name,
       phase: spec.phase,
-      dominance: spec.dominance,
-      wildOdds: Number(spec.wildOdds),
       priority: Number(spec.priority),
       alleles: alleles.map(function (a) {
         return a.label ? { token: a.token, label: a.label } : { token: a.token };
@@ -101,12 +194,26 @@ window.HG = window.HG || {};
         return knob;
       });
     }
-    out.layers = layers.map(function (layer) {
-      return {
-        name: layer.name,
-        masks: (layer.masks || []).map(function (m) { return tidyMask(m); }),
-        op: tidyOp(layer.op)
-      };
+    out.expressions = (spec.expressions || []).map(function (e) {
+      var entry = { id: e.id, name: e.name, description: e.description || "" };
+      if (e.wildType) entry.wildType = true;
+      if (e.masks) entry.masks = true;
+      if (e.when !== undefined && e.when !== null) entry.when = e.when;
+      if (!e.wildType) {
+        entry.layers = (e.layers || []).map(function (layer) {
+          return {
+            name: layer.name,
+            masks: (layer.masks || []).map(function (m) { return tidyMask(m); }),
+            op: tidyOp(layer.op)
+          };
+        });
+        if (e.effects && e.effects.length) entry.effects = e.effects;
+      }
+      return entry;
+    });
+    out.founders = {};
+    Object.keys(spec.founders || {}).forEach(function (c) {
+      out.founders[c] = num(spec.founders[c]);
     });
     return out;
   }
@@ -194,9 +301,18 @@ window.HG = window.HG || {};
     tokens.forEach(function (t, i) {
       if (tokens.indexOf(t) !== i) out.push("Two alleles share the token \"" + t + "\".");
     });
-    if (!(Number(spec.wildOdds) >= 1)) out.push("Wild frequency must be 1 in 1 or rarer.");
-    if (!spec.layers || !spec.layers.length) out.push("A gene with no layers does nothing to the coat.");
-    (spec.layers || []).forEach(function (layer, i) {
+    var founders = spec.founders || {};
+    var total = 0;
+    combinations(spec).forEach(function (c) { total += Number(founders[c]) || 0; });
+    if (!(total > 0)) {
+      out.push("Every founder share is zero, so no wild horse can carry this gene.");
+    } else if (Math.abs(total - 100) > 0.01) {
+      out.push("Founder shares add up to " + (Math.round(total * 100) / 100)
+        + "%, not 100. The game normalises them and warns - better to fix the numbers.");
+    }
+    var layers = layersOf(spec);
+    if (!layers.length) out.push("A gene with no layers does nothing to the coat.");
+    layers.forEach(function (layer, i) {
       var op = schema.OPS[layer.op.type];
       if (op && op.phase !== spec.phase) {
         out.push("Layer " + (i + 1) + " uses the " + op.phase + " op " + layer.op.type
@@ -218,7 +334,7 @@ window.HG = window.HG || {};
   function knobUses(spec, name) {
     var uses = 0;
     var ref = "$" + name;
-    (spec.layers || []).forEach(function (layer) {
+    layersOf(spec).forEach(function (layer) {
       (layer.masks || []).forEach(function (m) {
         Object.keys(m).forEach(function (k) { if (m[k] === ref) uses++; });
       });
@@ -229,6 +345,13 @@ window.HG = window.HG || {};
 
   HG.specModel = {
     blank: blank,
+    visible: visible,
+    wild: wild,
+    layersOf: layersOf,
+    combinations: combinations,
+    showsWhen: showsWhen,
+    setShowsWhen: setShowsWhen,
+    retoken: retoken,
     newLayer: newLayer,
     newMask: newMask,
     newOp: newOp,

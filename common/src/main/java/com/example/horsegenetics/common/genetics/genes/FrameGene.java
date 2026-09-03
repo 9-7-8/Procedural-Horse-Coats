@@ -12,9 +12,10 @@ import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Part;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Skin;
 import com.example.horsegenetics.common.genetics.Allele;
 import com.example.horsegenetics.common.genetics.AllelePair;
-import com.example.horsegenetics.common.genetics.DominancePattern;
+import com.example.horsegenetics.common.genetics.Expression;
+import com.example.horsegenetics.common.genetics.FounderContext;
+import com.example.horsegenetics.common.genetics.FounderTable;
 import com.example.horsegenetics.common.genetics.Gene;
-import com.example.horsegenetics.common.genetics.Genotype;
 
 import java.util.List;
 
@@ -46,7 +47,7 @@ import java.util.List;
 public final class FrameGene implements Gene {
 
     public static final String KEY = "horsegenetics.frame";
-    public static final int WILD_FRAME_ALLELE_ODDS = 55;
+    public static final int WILD_FRAME_ONE_IN = 55;
 
     private static final double SCALE = 0.19;
     /** How much of the flank band is white, before the jagged edge - deliberately high, frame is bold. */
@@ -62,44 +63,47 @@ public final class FrameGene implements Gene {
     private static final double FACE_HALF_MIN = 0.9;
     private static final double FACE_HALF_RANGE = 2.6;
 
-    public final Allele Ov = new Allele(KEY, "Ov", "Frame overo (Ov)", true, false);
-    public final Allele ov = new Allele(KEY, "ov", "Wild-type (ov)", false, true);
+    public final Allele Ov = new Allele(KEY, 0, "Ov", "Frame overo (Ov)");
+    public final Allele ov = new Allele(KEY, 1, "ov", "Wild-type (ov)");
     private final List<Allele> alleles = List.of(Ov, ov);
 
+    private final Expression WILD = Expression.wildType("No white patches.");
+
+    private final Expression FRAME = Expression.of("frame", "Frame overo")
+            .describe("Bold, jagged-edged white patches on the sides of the neck and barrel that "
+                    + "never reach the topline, framed by colour above and below, plus a broad "
+                    + "white face. The legs stay coloured.")
+            .varies()
+            .restrict(FrameGene::paintFrame);
+
+    private final List<Expression> expressions = List.of(WILD, FRAME);
+
+    private final FounderTable founders = FounderTable.hardyWeinberg(Ov, ov, 1.0 / WILD_FRAME_ONE_IN);
+
     @Override public String key() { return KEY; }
+    @Override public String name() { return "Frame overo"; }
     @Override public int priority() { return 74; }
     @Override public List<Allele> alleles() { return alleles; }
-    @Override public Allele wildType() { return ov; }
+    @Override public Allele defaultAllele() { return ov; }
+    @Override public List<Expression> expressions() { return expressions; }
+    @Override public FounderTable founderTable(FounderContext context) { return founders; }
 
-    /** Dominant for the coat (see the class note on the homozygote / lethal white). */
-    @Override public DominancePattern dominance() { return DominancePattern.DOMINANT; }
-
+    /**
+     * Both {@code Ov/ov} and {@code Ov/Ov} land here. In a real horse the
+     * homozygote is overo lethal white syndrome, which wants a third
+     * expression once health genetics exist ({@code wiki/roadmap.html} §4.2 /
+     * §6.4) - adding it is one row, not a redesign.
+     */
     @Override
-    public AllelePair randomPair(Rng rng) {
-        return new AllelePair(
-                rng.nextInt(WILD_FRAME_ALLELE_ODDS) == 0 ? Ov : ov,
-                rng.nextInt(WILD_FRAME_ALLELE_ODDS) == 0 ? Ov : ov);
+    public Expression expressionOf(AllelePair pair) {
+        return pair.has(Ov) ? FRAME : WILD;
     }
 
     public boolean isFrame(AllelePair pair) {
         return pair.has(Ov);
     }
 
-    @Override
-    public boolean isVisible(AllelePair pair, Genotype genotype) {
-        return isFrame(pair);
-    }
-
-    @Override
-    public boolean isDeterministic(AllelePair pair, Genotype genotype) {
-        return !isFrame(pair);
-    }
-
-    @Override
-    public PigmentField restrict(AllelePair pair, CoatBuildContext ctx, PigmentView coat) {
-        if (!isFrame(pair)) {
-            return null;
-        }
+    private static PigmentField paintFrame(CoatBuildContext ctx, PigmentView coat) {
         Rng epi = ctx.epigeneticsFor(KEY);
         long seed = epi.nextLong();
         double cover = COVER_MIN + epi.nextFloat() * COVER_RANGE;

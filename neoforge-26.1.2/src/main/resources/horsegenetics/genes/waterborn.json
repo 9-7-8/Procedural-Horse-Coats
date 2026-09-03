@@ -1,10 +1,8 @@
 {
-  "format": 1,
+  "format": 2,
   "key": "example.waterborn",
   "name": "Waterborn",
   "phase": "magical",
-  "dominance": "DOMINANT",
-  "wildOdds": 90,
   "priority": 215,
   "alleles": [
     { "token": "Wtb", "label": "Waterborn (Wtb)" },
@@ -14,39 +12,58 @@
     { "name": "stripeSeed", "type": "seed" },
     { "name": "stripeSpacing", "min": 1.6, "max": 2.8 }
   ],
-  "layers": [
+  "expressions": [
     {
-      "name": "neon blue stripes down the mane and tail",
-      "masks": [
-        { "type": "STRIPES", "parts": [ "HAIR" ], "seed": "$stripeSeed",
-          "spacing": "$stripeSpacing", "duty": 0.4, "warp": 0.8 }
+      "id": "waterborn",
+      "name": "Waterborn",
+      "description": "Neon-blue streaks run through the mane and tail, blue dust trails from the hooves on the move, a grown horse walks over water instead of sinking into it, and a tamed mare can be milked for a bucket of water.",
+      "when": [ "Wtb/Wtb", "Wtb/n" ],
+      "layers": [
+        {
+          "name": "neon blue stripes down the mane and tail",
+          "masks": [
+            { "type": "STRIPES", "parts": [ "HAIR" ], "seed": "$stripeSeed",
+              "spacing": "$stripeSpacing", "duty": 0.4, "warp": 0.8 }
+          ],
+          "op": { "type": "TOWARD", "color": "#1ec8ff", "strength": 92, "opacity": 100 }
+        }
       ],
-      "op": { "type": "TOWARD", "color": "#1ec8ff", "strength": 92, "opacity": 100 }
+      "effects": [
+        {
+          "type": "traversal",
+          "flag": "walk_on_water",
+          "when": { "flag": "adult" }
+        },
+        {
+          "type": "emitter",
+          "kind": "particle",
+          "shape": "trail",
+          "anchor": "feet",
+          "trigger": { "on_move": {} },
+          "particle": "minecraft:dust",
+          "color": "#1ec8ff",
+          "chance": 0.7
+        },
+        {
+          "type": "yield",
+          "trigger": { "on_interact": "minecraft:bucket" },
+          "consumes": "minecraft:bucket",
+          "produces": "minecraft:water_bucket",
+          "cooldown": 2400,
+          "when": { "all": [ { "flag": "sex_female" }, { "flag": "tamed" } ] }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "No blue streaks and no affinity for water.",
+      "wildType": true
     }
   ],
-  "effects": [
-    {
-      "type": "traversal",
-      "flag": "walk_on_water",
-      "when": { "flag": "adult" }
-    },
-    {
-      "type": "emitter",
-      "kind": "particle",
-      "shape": "trail",
-      "anchor": "feet",
-      "trigger": { "on_move": {} },
-      "particle": "minecraft:dust",
-      "color": "#1ec8ff",
-      "chance": 0.7
-    },
-    {
-      "type": "yield",
-      "trigger": { "on_interact": "minecraft:bucket" },
-      "consumes": "minecraft:bucket",
-      "produces": "minecraft:water_bucket",
-      "cooldown": 2400,
-      "when": { "all": [ { "flag": "sex_female" }, { "flag": "tamed" } ] }
-    }
-  ]
+  "founders": {
+    "Wtb/Wtb": 0.0123457,
+    "Wtb/n": 2.1975309,
+    "n/n": 97.7901234
+  }
 }

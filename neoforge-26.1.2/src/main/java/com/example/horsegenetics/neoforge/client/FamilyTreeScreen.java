@@ -389,12 +389,14 @@ public final class FamilyTreeScreen extends Screen {
 
     private static CoatData coatFor(HorseRecord r) {
         try {
-            // The real epigenome lives on the live entity, not in the record, so
-            // an ancestor gets a stable stand-in derived from its UUID: a
-            // non-deterministic coat still shows a plausible (if not the real)
-            // pattern in the tree.
-            return new CoatData(Genotype.parse(r.geneticCode()),
-                    Epigenome.fromSeed(r.id().getMostSignificantBits()));
+            // The record carries the epigenome now, so a dead or distant
+            // ancestor draws its *real* coat rather than a plausible stand-in
+            // invented from its UUID. The fallback is only for a record written
+            // before the field existed.
+            return r.hasGenome()
+                    ? new CoatData(r.genome())
+                    : new CoatData(Genotype.parse(r.geneticCode()),
+                            Epigenome.fromSeed(r.id().getMostSignificantBits()));
         } catch (RuntimeException e) {
             return null;
         }

@@ -36,7 +36,9 @@ class GeneSpecLoaderTest {
         for (String file : List.of("silver.json", "dun.json", "tobiano.json", "aurora.json")) {
             GeneSpec spec = GeneSpecParser.parse(GeneSpecParserTest.example(file), file);
             assertTrue(spec.key().startsWith("example."), file + " should use the example namespace");
-            assertFalse(spec.layers().isEmpty(), file + " does nothing to the coat");
+            assertFalse(spec.expressions().isEmpty(), file + " declares no outcomes");
+            boolean paints = spec.expressions().stream().anyMatch(e -> !e.layers().isEmpty());
+            assertTrue(paints, file + " does nothing to the coat");
         }
     }
 
@@ -91,10 +93,14 @@ class GeneSpecLoaderTest {
 
     private static String gene(String key, int priority) {
         return """
-                { "key": "%s", "priority": %d,
+                { "format": 2, "key": "%s", "priority": %d,
                   "alleles": [ {"token":"A"}, {"token":"a"} ],
-                  "layers": [ { "masks": [ { "type": "ALL" } ],
-                                "op": { "type": "RESTRICT", "black": 0.5 } } ] }
+                  "founders": { "A/A": 1, "A/a": 9, "a/a": 90 },
+                  "expressions": [
+                    { "id": "v", "when": [ "A/A", "A/a" ],
+                      "layers": [ { "masks": [ { "type": "ALL" } ],
+                                    "op": { "type": "RESTRICT", "black": 0.5 } } ] },
+                    { "id": "wild", "wildType": true } ] }
                 """.formatted(key, priority);
     }
 }

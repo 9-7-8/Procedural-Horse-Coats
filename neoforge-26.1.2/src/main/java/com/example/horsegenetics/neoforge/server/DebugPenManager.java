@@ -609,7 +609,7 @@ public final class DebugPenManager {
         // Record applied before the entity joins, so HorseGeneticsEventHandler
         // sees a real record and doesn't roll a random genotype over the top.
         HorseRecords.apply(horse,
-                HorseRecords.newFounder(horse, new NeoRng(horse.getRandom()), sex, geneticCode));
+                HorseRecords.newFounder(horse, new NeoRng(horse.getRandom()), sex, Genotype.parse(geneticCode)));
         level.addFreshEntity(horse);
     }
 

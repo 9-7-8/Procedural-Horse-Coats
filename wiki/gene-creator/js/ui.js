@@ -61,6 +61,18 @@ window.HG = window.HG || {};
     return input;
   }
 
+  function checkbox(value, onChange) {
+    var input = el("input", { type: "checkbox" });
+    input.checked = !!value;
+    input.addEventListener("change", function () { onChange(input.checked); });
+    return input;
+  }
+
+  /** e.g. "My/my" - the combination for a copy count, for a hint line. */
+  function combinationLabel(spec, dose) {
+    return HG.specEngine.combinationForDose(spec, dose);
+  }
+
   function text(value, onChange) {
     var input = el("input", { type: "text", value: value || "" });
     input.addEventListener("input", function () { onChange(input.value); });
@@ -205,7 +217,7 @@ window.HG = window.HG || {};
     ], spec.phase, function (v) {
       spec.phase = v;
       // Ops belong to one phase; carry each layer over to that phase's default.
-      spec.layers.forEach(function (layer) {
+      model.layersOf(spec).forEach(function (layer) {
         if (schema.OPS[layer.op.type].phase !== v) {
           layer.op = model.newOp(v === "magical" ? "TINT" : "SET_PIGMENT");
         }
@@ -215,31 +227,85 @@ window.HG = window.HG || {};
       ? "Pushes red / black pigment down before the coat resolves. Dilutions and white markings."
       : "Adds signed RGB after the coat resolves. Paints over anything, including dominant white."));
 
-    root.appendChild(field("Dominance", select(schema.DOMINANCE, spec.dominance,
-      function (v) { spec.dominance = v; changed(); }),
-      spec.dominance === "RECESSIVE" ? "Only shows on a horse carrying two copies."
-        : spec.dominance === "INCOMPLETE_DOMINANT" ? "One copy and two copies look different - use Per dose values."
-          : spec.dominance === "COMPLETE_DOMINANT" ? "While it shows, no other gene is visible."
-            : "One copy is enough; a second adds nothing."));
-
-    root.appendChild(field("Wild frequency: 1 in",
-      number(spec.wildOdds, function (v) { spec.wildOdds = v; changed(); }, { min: 1, step: 1 }),
-      "per allele copy, in the wild population"));
     root.appendChild(field("Priority",
       number(spec.priority, function (v) { spec.priority = v; changed(); }, { step: 1 }),
       "lower runs earlier, among drop-in genes"));
 
+    // ---- what this gene does, and to whom -------------------------------
+    //
+    // There is no "dominance" setting, because there is no such property. A
+    // gene has alleles, and every combination of two of them produces some
+    // outcome; which combinations share an outcome is the whole of what the
+    // classical words meant. So this asks the question directly.
+    var expression = model.visible(spec);
+
+    root.appendChild(el("h3", { text: "What it does" }));
+    root.appendChild(el("p", {
+      class: "hint",
+      text: "One outcome, and the allele combinations that produce it. The "
+        + "description is what the gene dictionary and the wiki show."
+    }));
+    root.appendChild(field("Outcome name",
+      text(expression.name, function (v) { expression.name = v; changed(); })));
+    root.appendChild(field("Description",
+      text(expression.description || "", function (v) { expression.description = v; changed(); }),
+      "one sentence: what a horse carrying this looks like"));
+
+    root.appendChild(field("Shows when the horse has", select([
+      { value: "any", label: "one copy or two" },
+      { value: "homozygous", label: "two copies only" }
+    ], model.showsWhen(spec), function (v) { model.setShowsWhen(spec, v); changed(); }),
+      model.showsWhen(spec) === "homozygous"
+        ? "A single copy is an invisible carrier - " + combinationLabel(spec, 1)
+          + " lands on the wild type."
+        : "Both " + combinationLabel(spec, 2) + " and " + combinationLabel(spec, 1)
+          + " land on this outcome."));
+
+    root.appendChild(field("Masks every other gene",
+      checkbox(!!expression.masks, function (v) { expression.masks = v || undefined; changed(); }),
+      "while this shows, no other gene is visible - dominant white does this"));
+
+    root.appendChild(el("h3", { text: "Founder population" }));
+    root.appendChild(el("p", {
+      class: "hint",
+      text: "The share of wild horses carrying each combination. Declared per "
+        + "combination, not per allele, so you set the rare-homozygote rate "
+        + "yourself. Should add up to 100%."
+    }));
+    var total = 0;
+    model.combinations(spec).forEach(function (c) {
+      total += Number((spec.founders || {})[c]) || 0;
+      root.appendChild(field(c, number((spec.founders || {})[c] || 0, function (v) {
+        spec.founders = spec.founders || {};
+        spec.founders[c] = Number(v);
+        changed();
+      }, { min: 0, step: 0.001 }), "% of founders"));
+    });
+    root.appendChild(el("p", {
+      class: Math.abs(total - 100) > 0.01 ? "hint warn" : "hint",
+      text: "Total: " + (Math.round(total * 1000) / 1000) + "%"
+    }));
+
     root.appendChild(el("h3", { text: "Alleles" }));
     root.appendChild(el("p", {
       class: "hint",
-      text: "Variant first, wild type last. The format allows more than two, but the "
-        + "preview's copy count assumes two - hand-edit the JSON if you need a third."
+      text: "Variant first, population baseline last. The format allows any number "
+        + "of alleles and an outcome per combination, but this editor authors one "
+        + "visible outcome on a two-allele gene - hand-edit the JSON for more."
     }));
     spec.alleles.forEach(function (a, i) {
       var row = el("div", { class: "row" }, [
-        text(a.token, function (v) { a.token = v; changed(); }),
+        text(a.token, function (v) {
+          // Renaming an allele has to carry the combination table and the
+          // founder shares with it, or both quietly point at a token that no
+          // longer exists and the game refuses the file.
+          var before = spec.alleles.map(function (x) { return x.token; });
+          a.token = v;
+          model.retoken(spec, before);
+          changed();
+        }),
         text(a.label, function (v) { a.label = v; changed(); }),
-        el("span", { class: "tag", text: i === spec.alleles.length - 1 ? "wild" : "variant" })
+        el("span", { class: "tag", text: i === spec.alleles.length - 1 ? "baseline" : "variant" })
       ]);
       root.appendChild(row);
     });
@@ -286,10 +352,11 @@ window.HG = window.HG || {};
 
   function renderLayers() {
     var spec = state.spec;
+    var layers = model.layersOf(spec);
     var root = $("layers-panel");
     root.innerHTML = "";
 
-    spec.layers.forEach(function (layer, li) {
+    layers.forEach(function (layer, li) {
       var open = li === state.selectedLayer;
       var card = el("div", { class: "layer" + (open ? " open" : "") });
 
@@ -311,12 +378,12 @@ window.HG = window.HG || {};
           })(),
           el("span", { text: "show area" })
         ]),
-        button("↑", function () { move(spec.layers, li, -1); }, "btn tiny"),
-        button("↓", function () { move(spec.layers, li, 1); }, "btn tiny"),
+        button("↑", function () { move(layers, li, -1); }, "btn tiny"),
+        button("↓", function () { move(layers, li, 1); }, "btn tiny"),
         button("✕", function () {
-          spec.layers.splice(li, 1);
-          if (state.coverageLayer >= spec.layers.length) state.coverageLayer = -1;
-          state.selectedLayer = Math.min(state.selectedLayer, spec.layers.length - 1);
+          layers.splice(li, 1);
+          if (state.coverageLayer >= layers.length) state.coverageLayer = -1;
+          state.selectedLayer = Math.min(state.selectedLayer, layers.length - 1);
           changed();
         }, "btn tiny danger")
       ]));
@@ -354,8 +421,8 @@ window.HG = window.HG || {};
     });
 
     root.appendChild(button("+ add layer", function () {
-      spec.layers.push(model.newLayer(spec.phase));
-      state.selectedLayer = spec.layers.length - 1;
+      layers.push(model.newLayer(spec.phase));
+      state.selectedLayer = layers.length - 1;
       changed();
     }, "btn"));
   }
@@ -602,14 +669,29 @@ window.HG = window.HG || {};
     out.knobs = (spec.knobs || []).map(function (k) {
       return Object.assign({ per: "horse", spread: 0 }, k);
     });
-    out.layers = (spec.layers || []).map(function (layer) {
-      return {
-        name: layer.name || "layer",
-        masks: (layer.masks || []).map(function (m) { return Object.assign({}, m); }),
-        op: Object.assign({}, layer.op)
-      };
+    out.expressions = (spec.expressions || []).map(function (e) {
+      var entry = Object.assign({ description: "" }, e);
+      entry.layers = (e.layers || []).map(function (layer) {
+        return {
+          name: layer.name || "layer",
+          masks: (layer.masks || []).map(function (m) { return Object.assign({}, m); }),
+          op: Object.assign({}, layer.op)
+        };
+      });
+      return entry;
     });
-    if (!out.layers.length) out.layers = [model.newLayer(out.phase)];
+    // The forms need one visible outcome and one wild type to bind to; a file
+    // with more than that still previews, it just cannot be fully edited here.
+    if (!model.visible(out)) {
+      out.expressions.unshift(model.blank().expressions[0]);
+    }
+    if (!model.wild(out)) {
+      out.expressions.push({ id: "wild", name: "Wild type", description: "No effect.", wildType: true });
+    }
+    if (!model.layersOf(out).length) {
+      model.visible(out).layers = [model.newLayer(out.phase)];
+    }
+    out.founders = Object.assign({}, spec.founders || model.blank().founders);
     return out;
   }
 

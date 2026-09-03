@@ -1,7 +1,6 @@
 package com.example.horsegenetics.common.genetics.spec;
 
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Part;
-import com.example.horsegenetics.common.genetics.DominancePattern;
 
 import java.util.List;
 import java.util.Map;
@@ -18,17 +17,29 @@ import java.util.Map;
  * {@code wiki/modding.html}).
  *
  * <h2>Shape</h2>
- * A spec is a header (key, alleles, dominance, wild frequency) plus a list of
- * {@link Layer}s. Each layer is <b>where</b> ({@link Mask}s, folded into one
- * coverage value per texel) crossed with <b>what</b> ({@link Op} - a pigment
- * move for a natural gene, a colour move for a magical one). Coverage scales
- * the effect, so every edge is soft by construction rather than by each author
- * remembering to fade it.
+ * A spec is a header (key, alleles, priority) plus two tables:
+ * <ul>
+ *   <li><b>{@code expressions}</b> - one entry per distinct outcome, each
+ *       naming the allele combinations that land on it, a human-readable
+ *       description, and what it paints. A wild-type entry paints nothing.
+ *       This is the data form of {@code genetics.Expression}, and it is why
+ *       the format has no {@code dominance} field: which combinations share an
+ *       outcome <i>is</i> the whole of what dominance used to say, and saying
+ *       it directly works for any number of alleles.</li>
+ *   <li><b>{@code founders}</b> - the share of wild horses carrying each
+ *       combination, replacing the old per-allele {@code wildOdds}.</li>
+ * </ul>
  *
- * <p>A spec may also carry an <b>{@code effects}</b> list - {@link GeneAbility}s,
- * the Minecraft-specific things a gene does beyond the coat (walk on water,
- * trail particles, be milked for a fluid). Those are inert in {@code common/};
- * the NeoForge module executes them.
+ * <p>An expression paints with a list of {@link Layer}s. Each layer is
+ * <b>where</b> ({@link Mask}s, folded into one coverage value per texel)
+ * crossed with <b>what</b> ({@link Op} - a pigment move for a natural gene, a
+ * colour move for a magical one). Coverage scales the effect, so every edge is
+ * soft by construction rather than by each author remembering to fade it.
+ *
+ * <p>An expression may also carry an <b>{@code effects}</b> list -
+ * {@link GeneAbility}s, the Minecraft-specific things a gene does beyond the
+ * coat (walk on water, trail particles, be milked for a fluid). Those are inert
+ * in {@code common/}; the NeoForge module executes them.
  *
  * <h2>Numbers that vary per horse</h2>
  * Any numeric parameter is a {@link Value}: a constant, a {@link Knob} the horse
@@ -45,24 +56,27 @@ public record GeneSpec(
         String key,
         String name,
         boolean natural,
-        DominancePattern dominance,
-        int wildOdds,
         int priority,
         List<AlleleSpec> alleles,
         List<Knob> knobs,
-        List<Layer> layers,
-        List<GeneAbility> abilities) {
+        List<ExpressionSpec> expressions,
+        List<FounderWeight> founders) {
 
-    /** The current format version. Bumped only if the shape changes incompatibly. */
-    public static final int FORMAT = 1;
+    /**
+     * The current format version. <b>2</b> since the combination-table rewrite:
+     * {@code dominance} and {@code wildOdds} are gone, {@code layers} and
+     * {@code effects} moved inside an {@code expressions} entry, and
+     * {@code founders} declares a weight per allele combination.
+     */
+    public static final int FORMAT = 2;
 
-    /** The variant allele - {@code alleles().get(0)}, the most dominant one. */
+    /** The first-declared allele - the one {@code perDose} counts. */
     public AlleleSpec variant() {
         return alleles.get(0);
     }
 
-    /** The wild type - the <b>last</b> allele, by convention of the format. */
-    public AlleleSpec wild() {
+    /** The last-declared allele - the population's baseline, by convention of the format. */
+    public AlleleSpec baseline() {
         return alleles.get(alleles.size() - 1);
     }
 
@@ -73,24 +87,81 @@ public record GeneSpec(
 
     /**
      * Does this gene carry any Minecraft-specific effects (traversal flags,
-     * emitters, yields, ...)? The coat pipeline never asks; the NeoForge
-     * translator does. See {@link GeneAbility}.
+     * emitters, yields, ...) on <i>any</i> of its expressions? The coat pipeline
+     * never asks; the NeoForge translator does. See {@link GeneAbility}.
      */
     public boolean hasAbilities() {
-        return !abilities.isEmpty();
+        for (ExpressionSpec e : expressions) {
+            if (!e.abilities().isEmpty()) {
+                return true;
+            }
+        }
+        return false;
     }
+
+    /** The expression declared under {@code id}, or {@code null}. */
+    public ExpressionSpec expression(String id) {
+        for (ExpressionSpec e : expressions) {
+            if (e.id().equals(id)) {
+                return e;
+            }
+        }
+        return null;
+    }
+
+    // ------------------------------------------------------------------
+    // Expressions - one per distinct outcome
+    // ------------------------------------------------------------------
+
+    /**
+     * One outcome the gene can produce, and which allele combinations land on
+     * it - the data form of {@code genetics.Expression}.
+     *
+     * <p>{@code combinations} holds canonical {@code "<a>/<b>"} tokens; an
+     * entry with an <b>empty</b> list is the gene's single <b>catch-all</b>,
+     * taking every combination no other expression claimed. The parser checks
+     * that the two together cover each of the {@code n(n+1)/2} combinations
+     * exactly once, so an unreachable expression or an unclaimed combination is
+     * a load error rather than a horse nobody can explain.
+     *
+     * <p>{@code wildType} means "changes nothing" - such an entry carries no
+     * layers and no effects. {@code masks} means "hides every other gene".
+     */
+    public record ExpressionSpec(
+            String id,
+            String name,
+            String description,
+            boolean wildType,
+            boolean masks,
+            boolean deterministic,
+            List<String> combinations,
+            List<Layer> layers,
+            List<GeneAbility> abilities) {
+
+        /** Is this the catch-all that takes whatever no other expression claimed? */
+        public boolean isCatchAll() {
+            return combinations.isEmpty();
+        }
+    }
+
+    /**
+     * How common one allele combination is among founder horses, as a
+     * percentage. {@code combination} is a canonical {@code "<a>/<b>"} token
+     * pair; the weights are normalised to 100 by
+     * {@code genetics.FounderTable}.
+     */
+    public record FounderWeight(String combination, double percent) {}
 
     // ------------------------------------------------------------------
     // Header
     // ------------------------------------------------------------------
 
     /**
-     * One allele. {@code visible} / {@code deterministic} are the population
-     * hints {@code Allele} carries; the parser defaults them from position -
-     * the wild type is invisible and deterministic, a variant is visible, and
-     * deterministic only if the gene declares no knobs.
+     * One allele - a token and a label, and nothing else. Whether carrying it
+     * shows, and whether that looks the same on every horse, are properties of
+     * a <i>combination</i> and live on {@link ExpressionSpec}.
      */
-    public record AlleleSpec(String token, String label, boolean visible, boolean deterministic) {}
+    public record AlleleSpec(String token, String label) {}
 
     /**
      * A number this horse draws once, off the expressing allele copy.
@@ -137,9 +208,10 @@ public record GeneSpec(
         record FromKnob(int index) implements Value {}
 
         /**
-         * One value per number of variant copies: {@code [0 copies, 1, 2]}.
-         * How an {@code INCOMPLETE_DOMINANT} gene makes the homozygote louder
-         * without the format needing an expression language.
+         * One value per number of copies of the gene's <b>first-declared</b>
+         * allele: {@code [0 copies, 1, 2]}. A convenience for scaling one
+         * expression by dose; a genuinely different outcome should be its own
+         * {@link ExpressionSpec} instead.
          */
         record PerDose(double zero, double one, double two) implements Value {}
     }

@@ -43,9 +43,9 @@ class CoatTextureComposerTest {
     private static final String CHAMPAGNE_BAY = override("agouti=A/a", "champagne=Ch/c");
     private static final String SPLASH = override("agouti=A/a", "splash=Spl/spl");
     private static final String GREY_BLACK = override("grey=G/g");
-    private static final String BUCKSKIN = override("agouti=A/a", "cream=Cr/N");
-    private static final String PERLINO = override("agouti=A/a", "cream=Cr/Cr");
-    private static final String PEARL_BAY = override("agouti=A/a", "pearl=prl/prl");
+    private static final String BUCKSKIN = override("agouti=A/a", "matp=Cr/N");
+    private static final String PERLINO = override("agouti=A/a", "matp=Cr/Cr");
+    private static final String PEARL_BAY = override("agouti=A/a", "matp=prl/prl");
 
     /** Synthetic LUT; bottom row is pure black. */
     private static GradientLut lut() {
@@ -222,9 +222,14 @@ class CoatTextureComposerTest {
 
     @Test
     void howFarGreyingHasGoneIsPerHorse() {
-        double a = partStats(compose(GREY_BLACK, 1L), Skin.ADULT, Part.BODY)[0];
-        double b = partStats(compose(GREY_BLACK, 21L), Skin.ADULT, Part.BODY)[0];
+        double a = greyBodyBrightness(55L);
+        double b = greyBodyBrightness(8L);
         assertTrue(Math.abs(a - b) > 20, "two greys should be at different stages, got " + a + " / " + b);
+    }
+
+    /** Mean body brightness of a grey adult rolled from {@code seed}. */
+    private static double greyBodyBrightness(long seed) {
+        return partStats(compose(GREY_BLACK, seed), Skin.ADULT, Part.BODY)[0];
     }
 
     @Test
@@ -279,7 +284,7 @@ class CoatTextureComposerTest {
     @Test
     void creamPlusPearlActsAsDoubleCream() {
         int perlino = brightness(compose(PERLINO, 0L), Skin.ADULT, Part.BODY);
-        int crPrl = brightness(compose(override("agouti=A/a", "cream=Cr/N", "pearl=prl/N"), 0L), Skin.ADULT, Part.BODY);
+        int crPrl = brightness(compose(override("agouti=A/a", "matp=Cr/prl"), 0L), Skin.ADULT, Part.BODY);
         assertTrue(Math.abs(perlino - crPrl) < 25, "Cr/prl body should be about as pale as Cr/Cr");
     }
 

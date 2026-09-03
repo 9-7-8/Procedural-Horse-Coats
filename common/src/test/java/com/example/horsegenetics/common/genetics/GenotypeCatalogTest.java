@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class GenotypeCatalogTest {
 
     @Test
-    void allPairsOfIsEveryUnorderedPairLeastDominantFirst() {
+    void allPairsOfIsEveryUnorderedPair() {
         assertEquals(List.of("ee", "Ee", "EE"), tokens(GenotypeCatalog.allPairsOf(Genes.EXTENSION)));
         for (Gene gene : Genes.codeOrder()) {
             int n = gene.alleles().size();
@@ -23,21 +23,39 @@ class GenotypeCatalogTest {
         }
     }
 
+    /**
+     * Pairs collapse by the {@link Expression} they land on, and nothing else -
+     * so the reduction is exactly as coarse as the gene's own combination table
+     * says, with no dominance metadata to disagree with it.
+     */
     @Test
-    void aDominantGeneDropsItsHeterozygoteButAnIncompleteOneKeepsIt() {
+    void pairsCollapseByTheExpressionTheyLandOn() {
+        // two outcomes, so two pens, and the homozygote represents each group
         assertEquals(List.of("ee", "EE"), tokens(GenotypeCatalog.distinctPairsOf(Genes.EXTENSION)));
         assertEquals(List.of("ww", "WW"), tokens(GenotypeCatalog.distinctPairsOf(Genes.WHITE)));
-        assertEquals(List.of("NN", "CrN", "CrCr"), tokens(GenotypeCatalog.distinctPairsOf(Genes.CREAM)));
-        assertEquals(List.of("splspl", "Splspl", "SplSpl"), tokens(GenotypeCatalog.distinctPairsOf(Genes.SPLASH)));
+        // three alleles, six combinations. Five outcomes, but "wild" and the
+        // pearl carrier are both wild types and look the same, so four pens.
+        assertEquals(List.of("NN", "prlprl", "CrN", "CrCr"),
+                tokens(GenotypeCatalog.distinctPairsOf(Genes.MATP)));
+        // pink hair's carrier likewise folds into its wild type
+        assertEquals(List.of("PihrPihr", "nn"), tokens(GenotypeCatalog.distinctPairsOf(Genes.PINK_HAIR)));
+        // sabino reads its dose, so all three combinations are their own pen
+        assertEquals(List.of("sb1sb1", "SB1sb1", "SB1SB1"),
+                tokens(GenotypeCatalog.distinctPairsOf(Genes.SABINO)));
+        // splash does *not* yet read its dose, and the catalogue says so out
+        // loud: both variant combinations land on one expression, so one pen
+        assertEquals(List.of("splspl", "SplSpl"), tokens(GenotypeCatalog.distinctPairsOf(Genes.SPLASH)));
     }
 
     @Test
-    void distinctPairsMatchTheDeclaredDominancePattern() {
+    void thereIsOneDistinctPairPerExpressionTheGeneCanActuallyProduce() {
         for (Gene gene : Genes.codeOrder()) {
-            int expected = gene.dominance().heterozygoteIsDistinct()
-                    ? GenotypeCatalog.allPairsOf(gene).size()
-                    : gene.alleles().size();
-            assertEquals(expected, GenotypeCatalog.distinctPairsOf(gene).size(), gene.key());
+            Set<String> reachable = new HashSet<>();
+            for (AllelePair pair : GenotypeCatalog.allPairsOf(gene)) {
+                Expression e = gene.expressionOf(pair);
+                reachable.add(e.wildType() ? "" : e.id());   // every wild type is one look
+            }
+            assertEquals(reachable.size(), GenotypeCatalog.distinctPairsOf(gene).size(), gene.key());
         }
     }
 
@@ -57,7 +75,7 @@ class GenotypeCatalogTest {
         long unmasked = 1L;
         int masking = 0;
         for (Gene gene : Genes.codeOrder()) {
-            if (gene.dominance().masksOtherGenes()) {
+            if (masks(gene)) {
                 masking++;                       // collapses to a single entry
             } else {
                 unmasked *= GenotypeCatalog.distinctPairsOf(gene).size();
@@ -70,7 +88,7 @@ class GenotypeCatalogTest {
     @Test
     void eachMaskingGeneContributesExactlyOneEntry() {
         for (Gene masking : Genes.codeOrder()) {
-            if (!masking.dominance().masksOtherGenes()) {
+            if (!masks(masking)) {
                 continue;
             }
             List<Genotype> showing = GenotypeCatalog.entries().stream()
@@ -79,6 +97,8 @@ class GenotypeCatalogTest {
             assertEquals(1, showing.size(), masking.key() + " should own exactly one entry");
             Genotype only = showing.get(0);
             assertTrue(only.pair(masking).homozygous(), masking.key() + " entry should be homozygous");
+            assertTrue(masking.expressionOf(only.pair(masking)).masks(),
+                    masking.key() + " entry should be the combination that masks");
             for (Gene other : Genes.codeOrder()) {
                 if (other != masking) {
                     assertTrue(isWildType(other, only),
@@ -149,12 +169,21 @@ class GenotypeCatalogTest {
         for (Gene gene : Genes.codeOrder()) {
             raw *= GenotypeCatalog.allPairsOf(gene).size();
         }
-        assertFalse(GenotypeCatalog.size() >= raw, "the dominance reduction should have removed duplicates");
+        assertFalse(GenotypeCatalog.size() >= raw, "the same-expression reduction should have removed duplicates");
+    }
+
+    /** Can any combination of this gene hide every other gene? */
+    private static boolean masks(Gene gene) {
+        for (Expression e : gene.expressions()) {
+            if (e.masks()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static boolean isWildType(Gene gene, Genotype genotype) {
-        AllelePair p = genotype.pair(gene);
-        return p.homozygous() && p.first().equals(gene.wildType());
+        return gene.expressionOf(genotype.pair(gene)).wildType();
     }
 
     private static List<String> tokens(List<AllelePair> pairs) {

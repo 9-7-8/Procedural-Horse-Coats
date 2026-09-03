@@ -29,7 +29,14 @@ public final class SpecAbilities {
     /** One expressed ability, tagged with the gene it came from (for logging / attribute-modifier ids). */
     public record Active(String geneKey, GeneAbility ability) {}
 
-    /** Every ability the {@code genotype} expresses, across all loaded spec genes. */
+    /**
+     * Every ability the {@code genotype} expresses, across all loaded spec
+     * genes. Effects hang off an <b>expression</b>, so this is simply "which
+     * outcome did this horse's combination land on, and what does that outcome
+     * do" - a homozygote and a heterozygote can carry entirely different
+     * effects because they are different expressions, not because anything here
+     * compares doses.
+     */
     public static List<Active> activeFor(Genotype genotype) {
         List<Active> out = new ArrayList<>();
         for (SpecGene gene : Genes.loaded()) {
@@ -37,11 +44,12 @@ public final class SpecAbilities {
                 continue;
             }
             AllelePair pair = genotype.pair(gene.key());
-            if (!gene.isVisible(pair, genotype)) {
+            GeneSpec.ExpressionSpec expressed = gene.expressionSpecOf(pair);
+            if (expressed == null || expressed.abilities().isEmpty()) {
                 continue;
             }
             int dose = gene.dose(pair);
-            for (GeneAbility ability : gene.spec().abilities()) {
+            for (GeneAbility ability : expressed.abilities()) {
                 if (dose >= ability.minDose()) {
                     out.add(new Active(gene.key(), ability));
                 }

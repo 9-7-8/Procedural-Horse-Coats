@@ -1,5 +1,8 @@
 package com.example.horsegenetics.common.horse;
 
+import com.example.horsegenetics.common.SeededRng;
+import com.example.horsegenetics.common.genetics.Genome;
+import com.example.horsegenetics.common.genetics.Genotype;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
@@ -16,14 +19,17 @@ class HorseRecordTest {
     private static final UUID DAM = UUID.fromString("00000000-0000-0000-0000-0000000000aa");
     private static final UUID SIRE = UUID.fromString("00000000-0000-0000-0000-0000000000bb");
 
+    /** A genome standing in for "whatever this horse carries" - these tests are about the record. */
+    private static final Genome GENOME = Genome.of(Genotype.wildType(), new SeededRng(7L));
+
     private static HorseRecord raw(UUID id, Sex sex, String first, String last, String code) {
-        return new HorseRecord(id, sex, first, last, Optional.empty(), code,
+        return new HorseRecord(id, sex, first, last, Optional.empty(), code, GENOME.epigenomeCode(),
                 Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), 0, 0.0, 0.0, Optional.empty());
     }
 
     @Test
     void founderHasNoParentsGenerationZeroNoAttribution() {
-        HorseRecord r = HorseRecord.founder(ID, Sex.MALE, "Swift", "Aspen", "EeAa");
+        HorseRecord r = HorseRecord.founder(ID, Sex.MALE, "Swift", "Aspen", GENOME);
         assertFalse(r.hasKnownParents());
         assertEquals(0, r.generation());
         assertTrue(r.tamedBy().isEmpty());
@@ -33,7 +39,7 @@ class HorseRecordTest {
 
     @Test
     void bredCarriesParentsAndGeneration() {
-        HorseRecord r = HorseRecord.bred(ID, Sex.FEMALE, "Bold", "Canyon", "eeaa", DAM, SIRE, 2);
+        HorseRecord r = HorseRecord.bred(ID, Sex.FEMALE, "Bold", "Canyon", GENOME, DAM, SIRE, 2);
         assertEquals(Optional.of(DAM), r.motherId());
         assertEquals(Optional.of(SIRE), r.fatherId());
         assertEquals(2, r.generation());
@@ -41,7 +47,7 @@ class HorseRecordTest {
 
     @Test
     void displayNamePrefersBarnNameThenFirstLast() {
-        HorseRecord r = HorseRecord.founder(ID, Sex.MALE, "Swift", "Aspen", "EeAa");
+        HorseRecord r = HorseRecord.founder(ID, Sex.MALE, "Swift", "Aspen", GENOME);
         assertEquals("Swift Aspen", r.displayName());
         assertEquals("Barn", r.withBarnName(Optional.of("Barn")).displayName());
         assertEquals("Swift", r.withNames("Swift", "").displayName());
@@ -50,14 +56,14 @@ class HorseRecordTest {
 
     @Test
     void barnNameIsTrimmedToSixteenCharsAndBlankBecomesEmpty() {
-        HorseRecord r = HorseRecord.founder(ID, Sex.MALE, "a", "b", "EeAa");
+        HorseRecord r = HorseRecord.founder(ID, Sex.MALE, "a", "b", GENOME);
         assertEquals(Optional.of("0123456789ABCDEF"), r.withBarnName(Optional.of("0123456789ABCDEF__extra")).barnName());
         assertTrue(r.withBarnName(Optional.of("   ")).barnName().isEmpty());
     }
 
     @Test
     void attributionIsBreederThenTamer() {
-        HorseRecord r = HorseRecord.founder(ID, Sex.MALE, "a", "b", "EeAa");
+        HorseRecord r = HorseRecord.founder(ID, Sex.MALE, "a", "b", GENOME);
         assertEquals(Optional.of("TamerJoe"), r.withTamedBy("TamerJoe").attribution());
         assertEquals(Optional.of("BreederAmy"), r.withTamedBy("TamerJoe").withBredBy("BreederAmy").attribution());
     }
@@ -81,13 +87,13 @@ class HorseRecordTest {
 
     @Test
     void negativeGenerationClamped() {
-        assertEquals(0, new HorseRecord(ID, Sex.MALE, "a", "b", null, "EeAa",
+        assertEquals(0, new HorseRecord(ID, Sex.MALE, "a", "b", null, "EeAa", "",
                 null, null, null, null, -9, 0.0, 0.0, null).generation());
     }
 
     @Test
     void statsRoundUpAndClampAndDriveHasStats() {
-        HorseRecord r = HorseRecord.founder(ID, Sex.MALE, "a", "b", "EeAa");
+        HorseRecord r = HorseRecord.founder(ID, Sex.MALE, "a", "b", GENOME);
         assertEquals(0.0, r.speed());
         assertEquals(0.0, r.health());
         assertFalse(r.hasStats());
@@ -106,7 +112,7 @@ class HorseRecordTest {
     @Test
     void withersPreserveStatsAndParentStats() {
         ParentStats ps = ParentStats.of(0.2, 0.3, 20.0, 26.0);
-        HorseRecord r = HorseRecord.founder(ID, Sex.MALE, "Swift", "Aspen", "EeAa")
+        HorseRecord r = HorseRecord.founder(ID, Sex.MALE, "Swift", "Aspen", GENOME)
                 .withStats(0.3, 27.0).withParentStats(ps);
         assertEquals(0.3, r.withNames("New", "Name").speed());
         assertEquals(27.0, r.withBarnName(Optional.of("Barn")).health());

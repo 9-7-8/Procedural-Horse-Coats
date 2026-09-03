@@ -1,6 +1,7 @@
 package com.example.horsegenetics.neoforge.server;
 
 import com.example.horsegenetics.common.Rng;
+import com.example.horsegenetics.common.coat.CoatGenerator;
 import com.example.horsegenetics.common.genetics.Genotype;
 import com.example.horsegenetics.common.horse.HorseRecord;
 import com.example.horsegenetics.common.horse.Sex;
@@ -60,18 +61,26 @@ public final class HorseRecords {
 
     /** Founder record with a forced sex (the horse dimension wants one mare + one stallion). */
     public static HorseRecord newFounder(Horse horse, Rng rng, Sex sex) {
-        return newFounder(horse, rng, sex, Genotype.random(rng).toCode());
+        return newFounder(horse, rng, sex, Genotype.random(rng));
     }
 
     /**
      * Founder record with a forced sex <b>and</b> a forced genotype - the horse
      * dimension stocks each pen with a specific entry from
-     * {@link com.example.horsegenetics.common.genetics.GenotypeCatalog}, so it
-     * must not be re-rolled.
+     * {@link com.example.horsegenetics.common.genetics.GenotypeCatalog}, and the
+     * custom spawn egg with the one the player built, so neither may be
+     * re-rolled.
+     *
+     * <p>The <b>epigenome is rolled here</b>, in the same breath as the record,
+     * because both now live on the record and a founder is exactly the horse
+     * that is allowed to draw fresh ones. A foal must never come through this
+     * path - it inherits its parents' allele copies verbatim
+     * ({@code HorseBreedingHandler}).
      */
-    public static HorseRecord newFounder(Horse horse, Rng rng, Sex sex, String geneticCode) {
+    public static HorseRecord newFounder(Horse horse, Rng rng, Sex sex, Genotype genotype) {
         NameParts name = NAMES.generateParts(rng);
-        return HorseRecord.founder(horse.getUUID(), sex, name.first(), name.last(), geneticCode)
+        return HorseRecord.founder(horse.getUUID(), sex, name.first(), name.last(),
+                        CoatGenerator.generate(genotype, rng).genome())
                 .withStats(entitySpeed(horse), entityHealth(horse));
     }
 

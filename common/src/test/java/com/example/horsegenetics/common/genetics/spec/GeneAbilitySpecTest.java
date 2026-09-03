@@ -32,10 +32,11 @@ class GeneAbilitySpecTest {
 
         assertEquals("example.waterborn", spec.key());
         assertTrue(spec.hasAbilities());
-        assertEquals(1, spec.layers().size(), "the neon stripes are an ordinary magical coat layer");
-        assertEquals(0x1ec8ff, spec.layers().get(0).op().params().color("color", 0));
+        GeneSpec.ExpressionSpec expressed = spec.expression("waterborn");
+        assertEquals(1, expressed.layers().size(), "the neon stripes are an ordinary magical coat layer");
+        assertEquals(0x1ec8ff, expressed.layers().get(0).op().params().color("color", 0));
 
-        List<GeneAbility> effects = spec.abilities();
+        List<GeneAbility> effects = expressed.abilities();
         assertEquals(3, effects.size());
 
         GeneAbility.Traversal walk = assertInstanceOf(GeneAbility.Traversal.class, effects.get(0));
@@ -71,8 +72,8 @@ class GeneAbilitySpecTest {
         Genes.register(gene);
 
         AllelePair homo = new AllelePair(gene.alleles().get(0), gene.alleles().get(0));
-        AllelePair carrier = new AllelePair(gene.alleles().get(0), gene.wildType());
-        AllelePair none = new AllelePair(gene.wildType(), gene.wildType());
+        AllelePair carrier = new AllelePair(gene.alleles().get(0), gene.defaultAllele());
+        AllelePair none = new AllelePair(gene.defaultAllele(), gene.defaultAllele());
 
         assertEquals(3, SpecAbilities.activeFor(Genotype.of(homo)).size());
         assertEquals(3, SpecAbilities.activeFor(Genotype.of(carrier)).size(),
@@ -81,20 +82,30 @@ class GeneAbilitySpecTest {
         assertTrue(SpecAbilities.anyLoaded());
     }
 
+    /**
+     * The combination table's own way of saying what {@code minDose} used to:
+     * the homozygote is a <b>different expression</b>, carrying a different set
+     * of effects. No dose comparison anywhere.
+     */
     @Test
-    void minDoseTwoGatesAnEffectOnTheHomozygote() {
+    void aHomozygoteExpressionCanCarryEffectsTheHeterozygoteDoesNot() {
         String json = """
-                { "key": "example.gilled", "phase": "magical", "dominance": "INCOMPLETE_DOMINANT",
+                { "format": 2, "key": "example.gilled", "phase": "magical",
                   "alleles": [ {"token":"G"}, {"token":"n"} ],
-                  "layers": [],
-                  "effects": [
-                    { "type": "traversal", "flag": "underwater_breathing" },
-                    { "type": "traversal", "flag": "walk_on_water", "minDose": 2 } ] }
+                  "founders": { "G/G": 1, "G/n": 9, "n/n": 90 },
+                  "expressions": [
+                    { "id": "gilled", "when": ["G/n"],
+                      "effects": [ { "type": "traversal", "flag": "underwater_breathing" } ] },
+                    { "id": "fully-gilled", "when": ["G/G"],
+                      "effects": [
+                        { "type": "traversal", "flag": "underwater_breathing" },
+                        { "type": "traversal", "flag": "walk_on_water" } ] },
+                    { "id": "wild", "wildType": true } ] }
                 """;
         SpecGene gene = new SpecGene(GeneSpecParser.parse(json, "gilled.json"));
         Genes.register(gene);
 
-        AllelePair carrier = new AllelePair(gene.alleles().get(0), gene.wildType());
+        AllelePair carrier = new AllelePair(gene.alleles().get(0), gene.defaultAllele());
         AllelePair homo = new AllelePair(gene.alleles().get(0), gene.alleles().get(0));
 
         assertEquals(1, SpecAbilities.activeFor(Genotype.of(carrier)).size());
@@ -108,10 +119,11 @@ class GeneAbilitySpecTest {
         assertEquals("example.suntouched", spec.key());
         assertTrue(spec.hasAbilities());
         assertTrue(spec.isDeterministic(), "no knobs - every carrier bakes the same gold mane");
-        assertEquals(1, spec.layers().size());
-        assertEquals(0xffcf47, spec.layers().get(0).op().params().color("color", 0));
+        GeneSpec.ExpressionSpec expressed = spec.expression("suntouched");
+        assertEquals(1, expressed.layers().size());
+        assertEquals(0xffcf47, expressed.layers().get(0).op().params().color("color", 0));
 
-        List<GeneAbility> effects = spec.abilities();
+        List<GeneAbility> effects = expressed.abilities();
         assertEquals(2, effects.size());
 
         GeneAbility.Glow glow = assertInstanceOf(GeneAbility.Glow.class, effects.get(0));
@@ -132,7 +144,7 @@ class GeneAbilitySpecTest {
                 "effects": [ { "type": "glow" } ]
                 """);
         GeneAbility.Glow glow = assertInstanceOf(GeneAbility.Glow.class,
-                GeneSpecParser.parse(json, "g.json").abilities().get(0));
+                effectsOf(GeneSpecParser.parse(json, "g.json")).get(0));
         assertEquals(0, glow.light());
         assertEquals(List.of(), glow.emissiveParts());
     }
@@ -163,7 +175,7 @@ class GeneAbilitySpecTest {
                 "effects": [ { "type": "mob_effect", "effect": "minecraft:dolphins_grace" } ]
                 """);
         GeneSpec spec = GeneSpecParser.parse(json, "aura.json");
-        GeneAbility.SelfEffect e = assertInstanceOf(GeneAbility.SelfEffect.class, spec.abilities().get(0));
+        GeneAbility.SelfEffect e = assertInstanceOf(GeneAbility.SelfEffect.class, effectsOf(spec).get(0));
         assertEquals("minecraft:dolphins_grace", e.effect());
         assertEquals("self", e.target());
         assertEquals(0, e.amplifier());
@@ -235,9 +247,21 @@ class GeneAbilitySpecTest {
         assertTrue(e.getMessage().contains("wehn"), e.getMessage());
     }
 
+    /**
+     * A minimal magical gene whose single visible expression carries
+     * {@code effectsLine} and nothing else - so a test can say only the effect
+     * it is about.
+     */
     private static String base(String effectsLine) {
-        return "{ \"key\": \"example.t\", \"phase\": \"magical\", "
-                + "\"alleles\": [ {\"token\":\"A\"}, {\"token\":\"a\"} ], \"layers\": [], "
-                + effectsLine + " }";
+        return "{ \"format\": 2, \"key\": \"example.t\", \"phase\": \"magical\", "
+                + "\"alleles\": [ {\"token\":\"A\"}, {\"token\":\"a\"} ], "
+                + "\"founders\": { \"A/A\": 1, \"A/a\": 9, \"a/a\": 90 }, "
+                + "\"expressions\": [ { \"id\": \"v\", \"when\": [\"A/A\", \"A/a\"], "
+                + effectsLine + " }, { \"id\": \"wild\", \"wildType\": true } ] }";
+    }
+
+    /** The effects on the one visible expression of a {@link #base} gene. */
+    private static List<GeneAbility> effectsOf(GeneSpec spec) {
+        return spec.expression("v").abilities();
     }
 }

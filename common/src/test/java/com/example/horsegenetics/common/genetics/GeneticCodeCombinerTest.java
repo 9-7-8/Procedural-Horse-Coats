@@ -23,23 +23,23 @@ class GeneticCodeCombinerTest {
 
     @Test
     void homozygousDominantCrossHomozygousRecessiveIsHeterozygous() {
-        String dad = LegacyCode.keyed("E/E-A/A-w/w-t/t-c/c-spl/spl-g/g-N/N-N/N-n/n-n/n" + T);
-        String mom = LegacyCode.keyed("e/e-a/a-w/w-t/t-c/c-spl/spl-g/g-N/N-N/N-n/n-n/n" + T);
+        String dad = LegacyCode.keyed("E/E-A/A-w/w-t/t-c/c-spl/spl-g/g-N/N-n/n-n/n" + T);
+        String mom = LegacyCode.keyed("e/e-a/a-w/w-t/t-c/c-spl/spl-g/g-N/N-n/n-n/n" + T);
         String child = GeneticCodeCombiner.combine(dad, mom, allFirst());
         assertEquals(
-                Genotype.parse(LegacyCode.keyed("E/e-A/a-w/w-t/t-c/c-spl/spl-g/g-N/N-N/N-n/n-n/n" + T)),
+                Genotype.parse(LegacyCode.keyed("E/e-A/a-w/w-t/t-c/c-spl/spl-g/g-N/N-n/n-n/n" + T)),
                 Genotype.parse(child));
         assertEquals(CoatPhenotype.BAY, Genotype.parse(child).phenotype());
     }
 
     @Test
     void everyGeneSegregates() {
-        String a = LegacyCode.keyed("E/e-A/a-W/w-T/t-Ch/c-Spl/spl-G/g-Cr/N-N/prl-n/n-n/n" + T);
+        String a = LegacyCode.keyed("E/e-A/a-W/w-T/t-Ch/c-Spl/spl-G/g-Cr/prl-n/n-n/n" + T);
         String child = GeneticCodeCombiner.combine(a, Genotype.wildType().toCode(), allFirst());
-        assertTrue(Genotype.parse(child).hasTest());
-        assertTrue(Genotype.parse(child).isSplash());
-        assertTrue(Genotype.parse(child).isGrey());
-        assertTrue(Genotype.parse(child).isChampagne());
+        assertTrue(Genotype.parse(child).shows(Genes.TEST));
+        assertTrue(Genotype.parse(child).shows(Genes.SPLASH));
+        assertTrue(Genotype.parse(child).shows(Genes.GREY));
+        assertTrue(Genotype.parse(child).shows(Genes.CHAMPAGNE));
     }
 
     @Test

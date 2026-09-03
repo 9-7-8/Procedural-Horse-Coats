@@ -10,7 +10,6 @@ import com.example.horsegenetics.common.horse.ParentStats;
 import com.example.horsegenetics.common.horse.Sex;
 import com.example.horsegenetics.common.name.HorseNameGenerator.NameParts;
 import com.example.horsegenetics.common.name.HorseNames;
-import com.example.horsegenetics.neoforge.data.HorseCoatAttachment;
 import com.example.horsegenetics.neoforge.data.ModAttachments;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.animal.equine.Horse;
@@ -118,7 +117,7 @@ public final class HorseBreedingHandler {
                 HorseRecords.randomSex(rng),
                 childName.first(),
                 childName.last(),
-                childCode,
+                childGenome,
                 damRecord.id(),
                 sireRecord.id(),
                 childGeneration)
@@ -143,22 +142,19 @@ public final class HorseBreedingHandler {
 
         HorseRecords.apply(child, childRecord);
         HorseRecords.applyStatsToEntity(child, childRecord, true);
-        child.setData(ModAttachments.HORSE_COAT.get(), HorseCoatAttachment.from(childGenome));
     }
 
     /**
-     * The parent's full genome: its stored genotype + epigenome. A parent that
-     * predates its coat attachment (or whose attachment has drifted from its
-     * record) founds one now, so the foal still inherits real allele copies
-     * rather than nothing.
+     * The parent's full genome, straight off its record. A parent whose record
+     * predates the epigenome field founds one now, so the foal still inherits
+     * real allele copies rather than nothing.
      */
     static Genome genomeOf(Horse parent, HorseRecord record, Rng rng) {
-        HorseCoatAttachment coat = parent.getData(ModAttachments.HORSE_COAT.get());
-        if (coat != null && !coat.isUnassigned() && coat.genotypeCode().equals(record.geneticCode())) {
-            return coat.genome();
+        if (record.hasGenome()) {
+            return record.genome();
         }
-        Genome genome = Genome.of(Genotype.parse(record.geneticCode()), rng);
-        parent.setData(ModAttachments.HORSE_COAT.get(), HorseCoatAttachment.from(genome));
+        Genome genome = Genome.of(record.genotype(), rng);
+        HorseRecords.apply(parent, record.withGenome(genome));
         return genome;
     }
 

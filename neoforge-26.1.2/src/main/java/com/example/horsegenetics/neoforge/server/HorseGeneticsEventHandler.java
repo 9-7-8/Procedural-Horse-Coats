@@ -6,7 +6,6 @@ import com.example.horsegenetics.common.genetics.Genotype;
 import com.example.horsegenetics.common.horse.HorseRecord;
 import com.example.horsegenetics.neoforge.NeoRng;
 import com.example.horsegenetics.neoforge.data.HorseAncestryData;
-import com.example.horsegenetics.neoforge.data.HorseCoatAttachment;
 import com.example.horsegenetics.neoforge.data.ModAttachments;
 import com.example.horsegenetics.neoforge.network.CoatSyncPayload;
 import net.minecraft.network.chat.Component;
@@ -108,16 +107,16 @@ public final class HorseGeneticsEventHandler {
             }
         }
 
-        // A foal already has its coat: HorseBreedingHandler gave it one built from
+        // A foal already has its epigenome: HorseBreedingHandler built one from
         // the parents' genomes, so the alleles it inherited keep their epigenetics.
         // Anything else (wild spawn, /summon, gallery horse) founds its own.
-        HorseCoatAttachment coat = horse.getData(ModAttachments.HORSE_COAT.get());
-        if (coat == null || coat.isUnassigned()) {
-            Genotype genotype = Genotype.parse(HorseRecords.of(horse).geneticCode());
-            coat = HorseCoatAttachment.from(CoatGenerator.generate(genotype, rng)); // rolls the epigenome once
-            horse.setData(ModAttachments.HORSE_COAT.get(), coat);
+        HorseRecord record = HorseRecords.of(horse);
+        if (!record.hasGenome()) {
+            // rolls the epigenome once, against the genotype the record already carries
+            record = record.withGenome(CoatGenerator.generate(record.genotype(), rng).genome());
+            HorseRecords.apply(horse, record);
         }
-        syncToTrackers(horse, coat.coatData());
+        syncToTrackers(horse, new CoatData(record.genome()));
     }
 
     /** Re-send coat + record data whenever a player starts tracking a horse (e.g. walks into range). */
@@ -126,9 +125,10 @@ public final class HorseGeneticsEventHandler {
         if (!(event.getTarget() instanceof Horse horse)) return;
         ServerPlayer player = (ServerPlayer) event.getEntity();
 
-        HorseCoatAttachment coat = horse.getData(ModAttachments.HORSE_COAT.get());
-        if (coat != null) {
-            PacketDistributor.sendToPlayer(player, CoatSyncPayload.of(horse.getId(), coat.coatData()));
+        HorseRecord record = HorseRecords.of(horse);
+        if (record.hasGenome()) {
+            PacketDistributor.sendToPlayer(player,
+                    CoatSyncPayload.of(horse.getId(), new CoatData(record.genome())));
         }
         if (HorseRecords.hasRealRecord(horse)) {
             PacketDistributor.sendToPlayer(player,

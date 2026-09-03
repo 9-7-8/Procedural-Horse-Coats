@@ -1,6 +1,5 @@
 package com.example.horsegenetics.common.genetics.genes;
 
-import com.example.horsegenetics.common.Rng;
 import com.example.horsegenetics.common.coat.pattern.CoatBuildContext;
 import com.example.horsegenetics.common.coat.pattern.CoatRegions;
 import com.example.horsegenetics.common.coat.pattern.PigmentField;
@@ -10,23 +9,29 @@ import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Part;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Skin;
 import com.example.horsegenetics.common.genetics.Allele;
 import com.example.horsegenetics.common.genetics.AllelePair;
-import com.example.horsegenetics.common.genetics.DominancePattern;
+import com.example.horsegenetics.common.genetics.Expression;
+import com.example.horsegenetics.common.genetics.FounderContext;
+import com.example.horsegenetics.common.genetics.FounderTable;
 import com.example.horsegenetics.common.genetics.Gene;
-import com.example.horsegenetics.common.genetics.Genotype;
 
 import java.util.List;
 
 /**
- * <b>Dun</b> ({@code horsegenetics.dun}) - real-horse {@code TBX3}. {@code D}
- * dominant, {@code d} wild-type. Natural, deterministic.
+ * <b>Dun</b> ({@code horsegenetics.dun}) - real-horse {@code TBX3}.
+ *
+ * <table>
+ *   <tr><th>combination</th><th>outcome</th></tr>
+ *   <tr><td>{@code d/d}</td><td>wild type</td></tr>
+ *   <tr><td>{@code D/d}, {@code D/D}</td><td>{@code dun} - diluted body with primitive markings</td></tr>
+ * </table>
  *
  * <p>Two effects at once:
  * <ul>
  *   <li><b>Body dilution</b> - a mild, roughly hue-keeping lightening. On a
  *       black base it must land on the gradient's <b>neutral column</b>
  *       (grullo is a mouse-grey, not a warm brown), so the dilution feeds
- *       <b>no</b> black back in as red ({@code blackTint = 0}); a red or bay
- *       base already carries red and comes out a paler tan.</li>
+ *       <b>no</b> black back in as red; a red or bay base already carries red
+ *       and comes out a paler tan.</li>
  *   <li><b>Primitive markings</b> - the parts of the coat that <i>do not</i>
  *       dilute: a full-length <b>dorsal stripe</b> from poll to tail
  *       ({@link CoatRegions#dorsalStripe}) and faint horizontal <b>leg
@@ -34,14 +39,20 @@ import java.util.List;
  *       everything around them got lighter, not because pigment was added.</li>
  * </ul>
  *
- * <p>The real locus has three alleles ({@code D} / {@code d1} / {@code d2})
- * with a dominance order a single {@link DominancePattern} can't express; this
- * is the two-allele form. See {@code wiki/gene-dun.html}.
+ * <p><b>The real locus has three alleles</b> - {@code D} (marked dun),
+ * {@code d1} (undiluted but still faintly marked) and {@code d2} (neither) -
+ * with a relationship the old dominance enum could not express, which is why
+ * this shipped as the two-allele form. That constraint is gone: adding
+ * {@code d1} and {@code d2} is now two alleles and a few more rows in the table
+ * above. See {@code wiki/gene-dun.html}.
+ *
+ * <p>Natural, deterministic. Founder frequency {@code 1/}{@value #WILD_DUN_ONE_IN}
+ * per allele.
  */
 public final class DunGene implements Gene {
 
     public static final String KEY = "horsegenetics.dun";
-    public static final int WILD_DUN_ALLELE_ODDS = 24;
+    public static final int WILD_DUN_ONE_IN = 24;
 
     /**
      * Body dilution. {@code keepRed} is <b>not a constant</b>: a black horse
@@ -64,39 +75,40 @@ public final class DunGene implements Gene {
      *  grey, not as a re-saturated warm patch (which is what re-introducing red on a black base does). */
     private static final float BAR_KEEP_BLACK = 0.82f;
 
-    public final Allele D = new Allele(KEY, "D", "Dun (D)", true, true);
-    public final Allele d = new Allele(KEY, "d", "Non-dun (d)", false, true);
+    public final Allele D = new Allele(KEY, 0, "D", "Dun (D)");
+    public final Allele d = new Allele(KEY, 1, "d", "Non-dun (d)");
     private final List<Allele> alleles = List.of(D, d);
 
+    private final Expression WILD = Expression.wildType("No dilution and no primitive markings.");
+
+    private final Expression DUN = Expression.of("dun", "Dun")
+            .describe("The body lightens - dun on a bay, red dun on a chestnut, mouse-grey grullo on a "
+                    + "black - while a dorsal stripe from poll to tail and faint horizontal bars on "
+                    + "the legs skip the dilution and stay dark.")
+            .restrict(DunGene::paintDun);
+
+    private final List<Expression> expressions = List.of(WILD, DUN);
+
+    private final FounderTable founders = FounderTable.hardyWeinberg(D, d, 1.0 / WILD_DUN_ONE_IN);
+
     @Override public String key() { return KEY; }
+    @Override public String name() { return "Dun"; }
     @Override public int priority() { return 34; }
     @Override public List<Allele> alleles() { return alleles; }
-    @Override public Allele wildType() { return d; }
-
-    /** Dominant: one {@code D} gives full dun. */
-    @Override public DominancePattern dominance() { return DominancePattern.DOMINANT; }
+    @Override public Allele defaultAllele() { return d; }
+    @Override public List<Expression> expressions() { return expressions; }
+    @Override public FounderTable founderTable(FounderContext context) { return founders; }
 
     @Override
-    public AllelePair randomPair(Rng rng) {
-        return new AllelePair(
-                rng.nextInt(WILD_DUN_ALLELE_ODDS) == 0 ? D : d,
-                rng.nextInt(WILD_DUN_ALLELE_ODDS) == 0 ? D : d);
+    public Expression expressionOf(AllelePair pair) {
+        return pair.has(D) ? DUN : WILD;
     }
 
     public boolean isDun(AllelePair pair) {
         return pair.has(D);
     }
 
-    @Override
-    public boolean isVisible(AllelePair pair, Genotype genotype) {
-        return isDun(pair);
-    }
-
-    @Override
-    public PigmentField restrict(AllelePair pair, CoatBuildContext ctx, PigmentView coat) {
-        if (!isDun(pair)) {
-            return null;
-        }
+    private static PigmentField paintDun(CoatBuildContext ctx, PigmentView coat) {
         Skin skin = ctx.skin();
         PigmentField f = coat.mutableCopy();
         HorseSkinGeometry.forEachTexel(skin, (px, py, part, face, point) -> {

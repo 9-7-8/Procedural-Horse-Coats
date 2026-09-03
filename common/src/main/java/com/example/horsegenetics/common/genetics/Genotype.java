@@ -2,6 +2,7 @@ package com.example.horsegenetics.common.genetics;
 
 import com.example.horsegenetics.common.Rng;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -43,7 +44,7 @@ public final class Genotype {
     // Construction
     // ------------------------------------------------------------------
 
-    /** From explicit pairs; any gene not supplied is filled with its wild-type. */
+    /** From explicit pairs; any gene not supplied is filled with its default allele. */
     public static Genotype of(List<AllelePair> pairs) {
         Map<String, AllelePair> supplied = new LinkedHashMap<>();
         for (AllelePair p : pairs) {
@@ -52,7 +53,7 @@ public final class Genotype {
         Map<String, AllelePair> full = new LinkedHashMap<>();
         for (Gene g : Genes.codeOrder()) {
             AllelePair p = supplied.get(g.key());
-            full.put(g.key(), p != null ? p : new AllelePair(g.wildType(), g.wildType()));
+            full.put(g.key(), p != null ? p : new AllelePair(g.defaultAllele(), g.defaultAllele()));
         }
         return new Genotype(full);
     }
@@ -108,10 +109,17 @@ public final class Genotype {
     // Random population / Mendelian breeding
     // ------------------------------------------------------------------
 
+    /**
+     * One founder / wild horse. Each gene in {@link Genes#codeOrder()} draws its
+     * combination from its own {@link FounderTable} - <b>one
+     * {@link Rng#nextFloat()} per gene</b> - and is handed a
+     * {@link FounderContext} over the genes already rolled, so a gene's
+     * frequency may depend on what the horse already is.
+     */
     public static Genotype random(Rng rng) {
         Map<String, AllelePair> m = new LinkedHashMap<>();
         for (Gene g : Genes.codeOrder()) {
-            m.put(g.key(), g.randomPair(rng));
+            m.put(g.key(), g.founderTable(new FounderContext(m, g)).draw(rng));
         }
         return new Genotype(m);
     }
@@ -176,6 +184,33 @@ public final class Genotype {
     // Coarse phenotype label (foal *_baby textures, family-tree fallback, UI)
     // ------------------------------------------------------------------
 
+    /**
+     * Does {@code gene} do anything on this horse - i.e. is the combination it
+     * carries something other than a {@link Expression#wildType() wild type},
+     * in the context of the rest of the genotype? The generic question that
+     * used to be a hand-written {@code isChampagne()} / {@code isGrey()} /
+     * {@code hasTest()} per gene.
+     */
+    public boolean shows(Gene gene) {
+        return gene.isVisible(pair(gene), this);
+    }
+
+    /** The {@link Expression} {@code gene} produces on this horse. */
+    public Expression expressionOf(Gene gene) {
+        return gene.expressionIn(pair(gene), this);
+    }
+
+    /** Every gene doing something on this horse, in {@link Genes#codeOrder()}. */
+    public List<Gene> visibleGenes() {
+        List<Gene> out = new ArrayList<>();
+        for (Gene g : Genes.codeOrder()) {
+            if (shows(g)) {
+                out.add(g);
+            }
+        }
+        return List.copyOf(out);
+    }
+
     public boolean isWhite() {
         return Genes.WHITE.isWhite(pair(Genes.WHITE));
     }
@@ -186,22 +221,6 @@ public final class Genotype {
 
     public boolean isAgouti() {
         return Genes.AGOUTI.isBay(pair(Genes.AGOUTI));
-    }
-
-    public boolean isChampagne() {
-        return Genes.CHAMPAGNE.isChampagne(pair(Genes.CHAMPAGNE));
-    }
-
-    public boolean isSplash() {
-        return Genes.SPLASH.isSplash(pair(Genes.SPLASH));
-    }
-
-    public boolean isGrey() {
-        return Genes.GREY.isGrey(pair(Genes.GREY));
-    }
-
-    public boolean hasTest() {
-        return Genes.TEST.isTest(pair(Genes.TEST));
     }
 
     public CoatPhenotype phenotype() {
@@ -228,10 +247,14 @@ public final class Genotype {
 
     @Override
     public String toString() {
-        return "Genotype[" + GeneCodeDisplay.shortForm(this) + " -> " + phenotype()
-                + (isChampagne() ? " +champagne" : "")
-                + (isGrey() ? " +grey" : "")
-                + (isSplash() ? " +splash" : "")
-                + (hasTest() ? " +test" : "") + "]";
+        StringBuilder sb = new StringBuilder("Genotype[")
+                .append(GeneCodeDisplay.shortForm(this)).append(" -> ").append(phenotype());
+        for (Gene g : visibleGenes()) {
+            if (g == Genes.EXTENSION || g == Genes.AGOUTI || g == Genes.WHITE) {
+                continue; // already said by phenotype()
+            }
+            sb.append(" +").append(expressionOf(g).id());
+        }
+        return sb.append(']').toString();
     }
 }

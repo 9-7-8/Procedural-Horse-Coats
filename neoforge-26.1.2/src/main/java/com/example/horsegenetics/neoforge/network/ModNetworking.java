@@ -152,7 +152,7 @@ public final class ModNetworking {
         // sees a real record and keeps this genome instead of rolling a random
         // one. The epigenome is still rolled fresh, like any founder.
         HorseRecords.apply(horse,
-                HorseRecords.newFounder(horse, new NeoRng(horse.getRandom()), sex, code));
+                HorseRecords.newFounder(horse, new NeoRng(horse.getRandom()), sex, Genotype.parse(code)));
         level.addFreshEntity(horse);
 
         if (!serverPlayer.getAbilities().instabuild) {

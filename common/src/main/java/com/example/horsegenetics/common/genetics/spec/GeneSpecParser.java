@@ -1,8 +1,9 @@
 package com.example.horsegenetics.common.genetics.spec;
 
-import com.example.horsegenetics.common.genetics.DominancePattern;
 import com.example.horsegenetics.common.genetics.spec.GeneSpec.AlleleSpec;
 import com.example.horsegenetics.common.genetics.spec.GeneSpec.Combine;
+import com.example.horsegenetics.common.genetics.spec.GeneSpec.ExpressionSpec;
+import com.example.horsegenetics.common.genetics.spec.GeneSpec.FounderWeight;
 import com.example.horsegenetics.common.genetics.spec.GeneSpec.Knob;
 import com.example.horsegenetics.common.genetics.spec.GeneSpec.Layer;
 import com.example.horsegenetics.common.genetics.spec.GeneSpec.Mask;
@@ -61,8 +62,8 @@ public final class GeneSpecParser {
     // ------------------------------------------------------------------
 
     private static GeneSpec read(Map<String, Object> root) {
-        expectKeys(root, "the file", "format", "key", "name", "phase", "dominance",
-                "wildOdds", "priority", "alleles", "knobs", "layers", "effects");
+        expectKeys(root, "the file", "format", "key", "name", "phase",
+                "priority", "alleles", "knobs", "expressions", "founders");
 
         int format = (int) number(root, "format", GeneSpec.FORMAT);
         if (format != GeneSpec.FORMAT) {
@@ -83,13 +84,6 @@ public final class GeneSpecParser {
             default -> throw new IllegalArgumentException("phase must be 'natural' or 'magical', got '" + phase + "'");
         };
 
-        DominancePattern dominance = enumValue(DominancePattern.class,
-                string(root, "dominance", "DOMINANT"), "dominance");
-
-        int wildOdds = (int) number(root, "wildOdds", 50);
-        if (wildOdds < 1) {
-            throw new IllegalArgumentException("wildOdds is '1 in N per allele' and must be at least 1, got " + wildOdds);
-        }
         int priority = (int) number(root, "priority", 1000);
 
         // Knobs are collected mutably: inline ranges found while reading layers
@@ -105,18 +99,278 @@ public final class GeneSpecParser {
             knobs.add(knob);
         }
 
-        List<Object> layerJson = array(root, "layers");
-        List<Layer> layers = new ArrayList<>();
-        for (int i = 0; i < layerJson.size(); i++) {
-            layers.add(readLayer(asObject(layerJson.get(i), "layer " + (i + 1)),
-                    "layer " + (i + 1), natural, knobs, knobIndex));
+        List<AlleleSpec> alleles = readAlleles(root);
+        List<String> combinations = allCombinations(alleles);
+        List<ExpressionSpec> expressions =
+                readExpressions(root, natural, alleles, combinations, knobs, knobIndex);
+        List<FounderWeight> founders = readFounders(root, combinations);
+
+        return new GeneSpec(key, name, natural, priority,
+                alleles, List.copyOf(knobs), expressions, founders);
+    }
+
+    // ------------------------------------------------------------------
+    // expressions - one entry per distinct outcome
+    // ------------------------------------------------------------------
+
+    /**
+     * Every unordered combination of {@code alleles}, as canonical
+     * {@code "<a>/<b>"} tokens with the earlier-declared allele first - the
+     * same order {@code AllelePair} canonicalizes to, so a combination written
+     * either way round in the file resolves to one entry here.
+     */
+    private static List<String> allCombinations(List<AlleleSpec> alleles) {
+        List<String> out = new ArrayList<>();
+        for (int i = 0; i < alleles.size(); i++) {
+            for (int j = i; j < alleles.size(); j++) {
+                out.add(alleles.get(i).token() + "/" + alleles.get(j).token());
+            }
+        }
+        return List.copyOf(out);
+    }
+
+    /**
+     * Reads the {@code expressions} table and checks it is <b>total and
+     * unambiguous</b>: every one of the gene's combinations is claimed by
+     * exactly one expression, counting at most one catch-all (an entry with no
+     * {@code when}). A gap or an overlap is a load error - the whole value of
+     * declaring the table is that it cannot quietly be wrong.
+     */
+    private static List<ExpressionSpec> readExpressions(Map<String, Object> root, boolean natural,
+                                                        List<AlleleSpec> alleles, List<String> combinations,
+                                                        List<Knob> knobs, Map<String, Integer> knobIndex) {
+        List<Object> raw = array(root, "expressions");
+        if (raw.isEmpty()) {
+            throw new IllegalArgumentException("a gene needs at least one expression - "
+                    + "one entry per distinct thing a combination of its alleles does");
         }
 
-        List<GeneAbility> abilities = readAbilities(root);
+        Map<String, String> claimedBy = new LinkedHashMap<>();
+        List<ExpressionSpec> out = new ArrayList<>();
+        List<String> ids = new ArrayList<>();
+        int catchAllAt = -1;
 
-        List<AlleleSpec> alleles = readAlleles(root, !knobs.isEmpty());
-        return new GeneSpec(key, name, natural, dominance, wildOdds, priority,
-                alleles, List.copyOf(knobs), List.copyOf(layers), abilities);
+        for (int i = 0; i < raw.size(); i++) {
+            String where = "expression " + (i + 1);
+            Map<String, Object> o = asObject(raw.get(i), where);
+            expectKeys(o, where, "id", "name", "description", "wildType", "masks", "varies",
+                    "when", "layers", "effects");
+
+            String id = string(o, "id", null);
+            if (ids.contains(id)) {
+                throw new IllegalArgumentException("two expressions share the id '" + id + "'");
+            }
+            ids.add(id);
+            where = "expression '" + id + "'";
+
+            boolean wildType = flag(o, "wildType", false);
+            boolean masks = flag(o, "masks", false);
+
+            List<Layer> layers = new ArrayList<>();
+            List<Object> layerJson = array(o, "layers");
+            for (int k = 0; k < layerJson.size(); k++) {
+                String lw = where + " layer " + (k + 1);
+                layers.add(readLayer(asObject(layerJson.get(k), lw), lw, natural, knobs, knobIndex));
+            }
+            List<GeneAbility> abilities = readAbilities(o);
+
+            if (wildType && (!layers.isEmpty() || !abilities.isEmpty())) {
+                throw new IllegalArgumentException(where + ": a wildType expression is the outcome for a"
+                        + " combination that changes nothing, so it cannot carry layers or effects");
+            }
+            if (!wildType && layers.isEmpty() && abilities.isEmpty()) {
+                throw new IllegalArgumentException(where + ": has neither layers nor effects, so it does"
+                        + " nothing - mark it \"wildType\": true if that is what you meant");
+            }
+
+            List<String> claims = readCombinations(o, id, alleles, combinations);
+            if (claims.isEmpty()) {
+                if (catchAllAt >= 0) {
+                    throw new IllegalArgumentException("expressions '" + ids.get(catchAllAt) + "' and '" + id
+                            + "' both omit \"when\" - only one expression can be the catch-all");
+                }
+                catchAllAt = i;
+            }
+            for (String c : claims) {
+                String prior = claimedBy.putIfAbsent(c, id);
+                if (prior != null) {
+                    throw new IllegalArgumentException("combination '" + c + "' is claimed by both '"
+                            + prior + "' and '" + id + "'");
+                }
+            }
+
+            boolean varies = flag(o, "varies", !wildType && !layers.isEmpty() && !knobs.isEmpty());
+            out.add(new ExpressionSpec(id, string(o, "name", id), string(o, "description", ""),
+                    wildType, masks, !varies, claims, List.copyOf(layers), abilities));
+        }
+
+        List<String> unclaimed = new ArrayList<>();
+        for (String c : combinations) {
+            if (!claimedBy.containsKey(c)) {
+                unclaimed.add(c);
+            }
+        }
+        if (catchAllAt < 0 && !unclaimed.isEmpty()) {
+            throw new IllegalArgumentException("no expression covers " + unclaimed
+                    + " - every combination of a gene's alleles has to produce something."
+                    + " Add them to a \"when\", or give one expression no \"when\" at all to catch"
+                    + " whatever is left");
+        }
+        if (catchAllAt >= 0 && unclaimed.isEmpty()) {
+            throw new IllegalArgumentException("expression '" + ids.get(catchAllAt) + "' omits \"when\" but"
+                    + " every combination is already claimed, so it can never happen");
+        }
+        if (catchAllAt >= 0) {
+            ExpressionSpec fallback = out.get(catchAllAt);
+            out.set(catchAllAt, new ExpressionSpec(fallback.id(), fallback.name(), fallback.description(),
+                    fallback.wildType(), fallback.masks(), fallback.deterministic(),
+                    List.copyOf(unclaimed), fallback.layers(), fallback.abilities()));
+        }
+        return List.copyOf(out);
+    }
+
+    /**
+     * An expression's {@code when}: a list of {@code "<a>/<b>"} combinations, or
+     * an object of allele token to required copy count
+     * ({@code {"Cr": 1, "prl": 1}}), which expands to every combination
+     * matching those counts. Absent means "the catch-all".
+     */
+    private static List<String> readCombinations(Map<String, Object> o, String id,
+                                                 List<AlleleSpec> alleles, List<String> combinations) {
+        Object when = o.get("when");
+        if (when == null) {
+            return List.of();
+        }
+        String where = "expression '" + id + "' when";
+        List<String> out = new ArrayList<>();
+
+        if (when instanceof List<?> list) {
+            if (list.isEmpty()) {
+                throw new IllegalArgumentException(where + ": an empty list claims nothing."
+                        + " Omit \"when\" entirely to make this the catch-all");
+            }
+            for (Object item : list) {
+                out.add(canonicalCombination(String.valueOf(item), where, alleles, combinations));
+            }
+            return List.copyOf(out);
+        }
+
+        Map<String, Object> counts = asObject(when, where);
+        if (counts.isEmpty()) {
+            throw new IllegalArgumentException(where + ": an empty count table claims nothing."
+                    + " Omit \"when\" entirely to make this the catch-all");
+        }
+        for (Map.Entry<String, Object> e : counts.entrySet()) {
+            if (!hasToken(alleles, e.getKey())) {
+                throw new IllegalArgumentException(where + ": no allele '" + e.getKey() + "' on this gene");
+            }
+            if (!(e.getValue() instanceof Number n) || n.intValue() < 0 || n.intValue() > 2) {
+                throw new IllegalArgumentException(where + " '" + e.getKey()
+                        + "': a copy count is 0, 1 or 2, got " + e.getValue());
+            }
+        }
+        for (String combination : combinations) {
+            if (matchesCounts(combination, counts)) {
+                out.add(combination);
+            }
+        }
+        if (out.isEmpty()) {
+            throw new IllegalArgumentException(where + ": no combination of this gene's alleles matches "
+                    + counts + ", so the expression can never happen");
+        }
+        return List.copyOf(out);
+    }
+
+    private static boolean matchesCounts(String combination, Map<String, Object> counts) {
+        String[] tokens = combination.split("/");
+        for (Map.Entry<String, Object> e : counts.entrySet()) {
+            int want = ((Number) e.getValue()).intValue();
+            int have = (tokens[0].equals(e.getKey()) ? 1 : 0) + (tokens[1].equals(e.getKey()) ? 1 : 0);
+            if (have != want) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /** {@code "a/b"} in either order, resolved to the canonical form and checked against the gene. */
+    private static String canonicalCombination(String text, String where,
+                                               List<AlleleSpec> alleles, List<String> combinations) {
+        String[] parts = text.split("/", -1);
+        if (parts.length != 2) {
+            throw new IllegalArgumentException(where + ": '" + text
+                    + "' is not a combination - write two allele tokens as \"<a>/<b>\"");
+        }
+        for (String p : parts) {
+            if (!hasToken(alleles, p)) {
+                throw new IllegalArgumentException(where + ": no allele '" + p + "' on this gene");
+            }
+        }
+        String forward = parts[0] + "/" + parts[1];
+        String reversed = parts[1] + "/" + parts[0];
+        if (combinations.contains(forward)) {
+            return forward;
+        }
+        if (combinations.contains(reversed)) {
+            return reversed;
+        }
+        throw new IllegalArgumentException(where + ": '" + text + "' is not a combination of this gene");
+    }
+
+    private static boolean hasToken(List<AlleleSpec> alleles, String token) {
+        for (AlleleSpec a : alleles) {
+            if (a.token().equals(token)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // ------------------------------------------------------------------
+    // founders - the wild population
+    // ------------------------------------------------------------------
+
+    /**
+     * Reads {@code founders}: an object of combination to percentage. A
+     * combination left out simply never turns up in the wild, which is how a
+     * gene forbids (say) a lethal homozygote among founders. The percentages
+     * should sum to 100; {@code genetics.FounderTable} normalises and warns if
+     * they do not.
+     */
+    private static List<FounderWeight> readFounders(Map<String, Object> root, List<String> combinations) {
+        Object raw = root.get("founders");
+        if (raw == null) {
+            throw new IllegalArgumentException("a gene needs a \"founders\" table - the share of wild"
+                    + " horses carrying each combination of its alleles, as percentages summing to 100."
+                    + " Legal combinations here: " + combinations);
+        }
+        Map<String, Object> o = asObject(raw, "founders");
+        List<FounderWeight> out = new ArrayList<>();
+        double total = 0;
+        for (Map.Entry<String, Object> e : o.entrySet()) {
+            String combination = e.getKey();
+            if (!combinations.contains(combination)) {
+                String[] parts = combination.split("/", -1);
+                String flipped = parts.length == 2 ? parts[1] + "/" + parts[0] : null;
+                if (flipped != null && combinations.contains(flipped)) {
+                    combination = flipped;
+                } else {
+                    throw new IllegalArgumentException("founders: '" + e.getKey()
+                            + "' is not a combination of this gene's alleles. Legal ones: " + combinations);
+                }
+            }
+            if (!(e.getValue() instanceof Number n) || n.doubleValue() < 0) {
+                throw new IllegalArgumentException("founders '" + e.getKey()
+                        + "': a share is a percentage >= 0, got " + e.getValue());
+            }
+            out.add(new FounderWeight(combination, n.doubleValue()));
+            total += n.doubleValue();
+        }
+        if (total <= 0) {
+            throw new IllegalArgumentException("founders: every share is zero, so no horse can carry"
+                    + " this gene at all");
+        }
+        return List.copyOf(out);
     }
 
     // ------------------------------------------------------------------
@@ -263,27 +517,25 @@ public final class GeneSpecParser {
                 + "{\"all\":[..]} or {\"any\":[..]}");
     }
 
-    private static List<AlleleSpec> readAlleles(Map<String, Object> root, boolean anyKnobs) {
+    private static List<AlleleSpec> readAlleles(Map<String, Object> root) {
         List<Object> raw = array(root, "alleles");
         if (raw.size() < 2) {
-            throw new IllegalArgumentException("a gene needs at least two alleles, most dominant first, "
-                    + "with the wild type last");
+            throw new IllegalArgumentException("a gene needs at least two alleles; the last one is the "
+                    + "population's baseline, and a genotype code with no segment for this gene reads as "
+                    + "two copies of it");
         }
         List<AlleleSpec> out = new ArrayList<>();
         for (int i = 0; i < raw.size(); i++) {
             Map<String, Object> a = asObject(raw.get(i), "allele " + (i + 1));
-            expectKeys(a, "allele " + (i + 1), "token", "label", "visible", "deterministic");
+            expectKeys(a, "allele " + (i + 1), "token", "label");
             String token = string(a, "token", null);
             if (token.isBlank() || token.contains("/") || token.contains("-")) {
                 throw new IllegalArgumentException("allele token '" + token + "' must be non-empty and free of "
                         + "'/' and '-' (they separate alleles and genes in a genotype code)");
             }
-            boolean wild = i == raw.size() - 1;
-            out.add(new AlleleSpec(
-                    token,
-                    string(a, "label", (wild ? "Wild-type (" : "") + token + (wild ? ")" : "")),
-                    flag(a, "visible", !wild),
-                    flag(a, "deterministic", wild || !anyKnobs)));
+            boolean baseline = i == raw.size() - 1;
+            out.add(new AlleleSpec(token,
+                    string(a, "label", (baseline ? "Wild-type (" : "") + token + (baseline ? ")" : ""))));
         }
         for (int i = 0; i < out.size(); i++) {
             for (int j = i + 1; j < out.size(); j++) {

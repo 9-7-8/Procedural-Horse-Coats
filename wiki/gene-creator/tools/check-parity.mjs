@@ -122,6 +122,22 @@ for (const c of expected.cases) {
   const s = seededRngSeed(c.seed, spec.key);
   const values = HG.specEngine.drawValues(spec, s.h, s.l, c.dose);
 
+  // 0b. the combination table itself. The fixture records which outcome the
+  // game resolved this dose to, so a creator that maps a combination to the
+  // wrong expression fails here rather than previewing a different horse.
+  const expression = HG.specEngine.expressionFor(spec, c.combination);
+  checked++;
+  if (!expression) {
+    failures.push(`${c.spec}: no expression covers ${c.combination}`);
+    continue;
+  }
+  if (expression.id !== c.expression) {
+    failures.push(`${c.spec} ${c.combination}: the game resolves it to "${c.expression}", `
+      + `the creator to "${expression.id}"`);
+    continue;
+  }
+  const layers = expression.layers || [];
+
   // 1. the knob draw - this is the java.util.Random port under test.
   (spec.knobs || []).forEach((knob, i) => {
     const want = c.knobs[i];
@@ -139,7 +155,7 @@ for (const c of expected.cases) {
   // 2. the painter.
   const N = HG.geometry.SHEET_SIZE;
   if (spec.phase !== "magical") {
-    const after = HG.specEngine.restrict(spec, values, c.skin, new HG.fields.PigmentField(N));
+    const after = HG.specEngine.restrict(spec, layers, values, c.skin, new HG.fields.PigmentField(N));
     c.probes.forEach((p, i) => {
       const [px, py, red, black] = p;
       if (Math.abs(after.redAt(px, py) - Number(red)) > TOLERANCE) {
@@ -153,7 +169,7 @@ for (const c of expected.cases) {
   } else {
     const colour = new HG.fields.ColorField(N);
     HG.geometry.forEachTexel(c.skin, (px, py) => colour.setArgb(px, py, 0xFF404040));
-    const delta = HG.specEngine.tint(spec, values, c.skin, new HG.fields.PigmentField(N), colour);
+    const delta = HG.specEngine.tint(spec, layers, values, c.skin, new HG.fields.PigmentField(N), colour);
     c.probes.forEach((p, i) => {
       const [px, py, r, g, b, a] = p;
       const got = [delta.redAt(px, py), delta.greenAt(px, py), delta.blueAt(px, py), delta.opacityAt(px, py)];

@@ -1,5 +1,8 @@
 package com.example.horsegenetics.common.horse;
 
+import com.example.horsegenetics.common.SeededRng;
+import com.example.horsegenetics.common.genetics.Genome;
+import com.example.horsegenetics.common.genetics.Genotype;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -11,16 +14,18 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class InMemoryHorseDatabaseTest {
 
+    private static final Genome GENOME = Genome.of(Genotype.wildType(), new SeededRng(7L));
+
     private static UUID id(String tail) {
         return UUID.fromString("00000000-0000-0000-0000-0000000000" + tail);
     }
 
     private static HorseRecord founder(String tail) {
-        return HorseRecord.founder(id(tail), Sex.MALE, "F" + tail, "Wind", "EeAa");
+        return HorseRecord.founder(id(tail), Sex.MALE, "F" + tail, "Wind", GENOME);
     }
 
     private static HorseRecord bred(String tail, String dam, String sire) {
-        return HorseRecord.bred(id(tail), Sex.FEMALE, "B" + tail, "Wind", "eeaa", id(dam), id(sire), 1);
+        return HorseRecord.bred(id(tail), Sex.FEMALE, "B" + tail, "Wind", GENOME, id(dam), id(sire), 1);
     }
 
     @Test

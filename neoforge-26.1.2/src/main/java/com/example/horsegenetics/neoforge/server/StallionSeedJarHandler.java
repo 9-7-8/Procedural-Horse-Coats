@@ -5,7 +5,6 @@ import com.example.horsegenetics.common.genetics.Genome;
 import com.example.horsegenetics.common.genetics.Genotype;
 import com.example.horsegenetics.common.horse.HorseRecord;
 import com.example.horsegenetics.common.horse.Sex;
-import com.example.horsegenetics.neoforge.data.HorseCoatAttachment;
 import com.example.horsegenetics.neoforge.data.ModAttachments;
 import com.example.horsegenetics.neoforge.data.ModDataComponents;
 import com.example.horsegenetics.neoforge.data.StoredGenome;
@@ -185,7 +184,7 @@ public final class StallionSeedJarHandler {
 
         String[] name = splitName(stored.sourceName());
         HorseRecord sireRecord = HorseRecord
-                .founder(stored.sourceId(), Sex.MALE, name[0], name[1], sireGenome.genotypeCode())
+                .founder(stored.sourceId(), Sex.MALE, name[0], name[1], sireGenome)
                 .withStats(stored.speed(), stored.health());
 
         Horse foal = EntityType.HORSE.create(level, EntitySpawnReason.BREEDING);
@@ -207,14 +206,13 @@ public final class StallionSeedJarHandler {
         return true;
     }
 
-    /** The stallion's stored genome, founding one if the attachment is missing / stale. */
+    /** The horse's stored genome, founding one if its record predates the field. */
     private static Genome genomeOf(Horse horse, HorseRecord record) {
-        HorseCoatAttachment coat = horse.getData(ModAttachments.HORSE_COAT.get());
-        if (coat != null && !coat.isUnassigned() && coat.genotypeCode().equals(record.geneticCode())) {
-            return coat.genome();
+        if (record.hasGenome()) {
+            return record.genome();
         }
-        Genome genome = Genome.of(Genotype.parse(record.geneticCode()), HorseRecords.rng(horse));
-        horse.setData(ModAttachments.HORSE_COAT.get(), HorseCoatAttachment.from(genome));
+        Genome genome = Genome.of(record.genotype(), HorseRecords.rng(horse));
+        HorseRecords.apply(horse, record.withGenome(genome));
         return genome;
     }
 

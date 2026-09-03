@@ -194,8 +194,6 @@ window.HG = window.HG || {};
     GROUPS: GROUPS,
     expandParts: expandParts,
     COMBINES: ["MULTIPLY", "MAX", "MIN", "ADD", "SUBTRACT"],
-    DOMINANCE: ["DOMINANT", "RECESSIVE", "INCOMPLETE_DOMINANT", "COMPLETE_DOMINANT"],
-
     maskParam: function (type, name) {
       var ps = MASKS[type].params;
       for (var i = 0; i < ps.length; i++) if (ps[i].name === name) return ps[i];

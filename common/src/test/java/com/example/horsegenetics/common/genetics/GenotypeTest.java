@@ -37,8 +37,8 @@ class GenotypeTest {
 
     @Test
     void parseIsCanonicalAndOrderIndependent() {
-        Genotype a = Genotype.parse(LegacyCode.keyed("e/E-a/A-w/W-t/T-c/Ch-spl/Spl-g/G-N/Cr-prl/N-n/n-n/n" + T));
-        Genotype b = Genotype.parse(LegacyCode.keyed("E/e-A/a-W/w-T/t-Ch/c-Spl/spl-G/g-Cr/N-N/prl-n/n-n/n" + T));
+        Genotype a = Genotype.parse(LegacyCode.keyed("e/E-a/A-w/W-t/T-c/Ch-spl/Spl-g/G-Cr/prl-n/n-n/n" + T));
+        Genotype b = Genotype.parse(LegacyCode.keyed("E/e-A/a-W/w-T/t-Ch/c-Spl/spl-G/g-Cr/prl-n/n-n/n" + T));
         assertEquals(b, a);
         assertEquals(b.toCode(), a.toCode());
     }
@@ -57,10 +57,10 @@ class GenotypeTest {
 
     @Test
     void multiCharTokensParse() {
-        Genotype x = Genotype.parse(LegacyCode.keyed("E/e-A/a-w/w-t/t-c/c-Spl/spl-g/g-Cr/Cr-prl/prl-n/n-n/n" + T));
-        assertTrue(x.isSplash());
-        assertTrue(x.pair(Genes.CREAM).homozygous());
-        assertTrue(x.pair(Genes.PEARL).homozygous());
+        Genotype x = Genotype.parse(LegacyCode.keyed("E/e-A/a-w/w-t/t-c/c-Spl/spl-g/g-Cr/Cr-n/n-n/n" + T));
+        assertTrue(x.shows(Genes.SPLASH));
+        assertTrue(x.pair(Genes.MATP).homozygous());
+        assertTrue(x.pair(Genes.MATP).homozygous());
     }
 
     @ParameterizedTest
@@ -97,20 +97,20 @@ class GenotypeTest {
         assertEquals(CoatPhenotype.BLACK, g(p(Genes.EXTENSION.E, Genes.EXTENSION.e),
                 p(Genes.CHAMPAGNE.Ch, Genes.CHAMPAGNE.c),
                 p(Genes.GREY.G, Genes.GREY.g),
-                p(Genes.CREAM.Cr, Genes.CREAM.N)).phenotype());
+                p(Genes.MATP.Cr, Genes.MATP.N)).phenotype());
     }
 
     @Test
     void predicates() {
-        Genotype x = Genotype.parse(LegacyCode.keyed("E/e-A/a-w/w-T/t-Ch/c-Spl/spl-G/g-Cr/N-N/N-n/n-n/n" + T));
+        Genotype x = Genotype.parse(LegacyCode.keyed("E/e-A/a-w/w-T/t-Ch/c-Spl/spl-G/g-Cr/N-n/n-n/n" + T));
         assertTrue(x.hasBlackPigment());
         assertTrue(x.isAgouti());
-        assertTrue(x.hasTest());
-        assertTrue(x.isChampagne());
-        assertTrue(x.isSplash());
-        assertTrue(x.isGrey());
+        assertTrue(x.shows(Genes.TEST));
+        assertTrue(x.shows(Genes.CHAMPAGNE));
+        assertTrue(x.shows(Genes.SPLASH));
+        assertTrue(x.shows(Genes.GREY));
         assertFalse(x.isWhite());
-        assertTrue(x.has(Genes.CREAM.Cr));
+        assertTrue(x.has(Genes.MATP.Cr));
     }
 
     @Test
@@ -119,7 +119,7 @@ class GenotypeTest {
         assertTrue(g(p(Genes.EXTENSION.e, Genes.EXTENSION.e)).isDeterministic());       // chestnut
         assertTrue(g(p(Genes.WHITE.W, Genes.WHITE.w)).isDeterministic());               // white
         assertTrue(g(p(Genes.CHAMPAGNE.Ch, Genes.CHAMPAGNE.c)).isDeterministic());      // champagne
-        assertTrue(g(p(Genes.CREAM.Cr, Genes.CREAM.Cr)).isDeterministic());             // perlino-on-black
+        assertTrue(g(p(Genes.MATP.Cr, Genes.MATP.Cr)).isDeterministic());             // perlino-on-black
 
         assertFalse(g(p(Genes.EXTENSION.E, Genes.EXTENSION.e),
                 p(Genes.AGOUTI.A, Genes.AGOUTI.a)).isDeterministic());                  // bay
@@ -136,43 +136,50 @@ class GenotypeTest {
      * Extension and agouti each draw a boolean pair; the diagnostic test gene
      * draws a single int; every other built-in draws an int pair.
      */
+    /**
+     * A founder draws <b>one {@code nextFloat()} per gene</b>, in
+     * {@link Genes#codeOrder()}, and it picks a bucket out of that gene's
+     * {@link FounderTable} - so the whole wild population is one number per
+     * locus, not a per-allele coin flip.
+     */
     @Test
-    void randomConsumesItsDeclaredDrawsPerGeneInGeneOrder() {
+    void randomDrawsOneFloatPerGeneInGeneOrder() {
         FakeRng rng = new FakeRng();
-        for (Gene gene : Genes.codeOrder()) {
-            if (gene == Genes.EXTENSION || gene == Genes.AGOUTI) {
-                rng.booleans(true, true);
-            } else if (gene == Genes.TEST) {
-                rng.ints(1); // one draw, non-zero -> not a carrier
-            } else {
-                rng.ints(1, 1); // non-zero -> no rare allele
-            }
+        for (int i = 0; i < Genes.codeOrder().size(); i++) {
+            rng.floats(0.999999f);      // the last bucket every table declares
         }
         Genotype x = Genotype.random(rng);
-        assertEquals(CoatPhenotype.BAY, x.phenotype()); // E/E + A/A
         rng.assertExhausted();
+
+        // Every table lists its rarest combination first and its commonest
+        // last, so a high roll is the plain horse everywhere.
+        assertEquals(CoatPhenotype.CHESTNUT, x.phenotype());
+        for (Gene gene : Genes.codeOrder()) {
+            if (gene == Genes.EXTENSION || gene == Genes.AGOUTI) {
+                // the two 50/50 loci: their last bucket is the recessive
+                // homozygote, not the default allele, hence the chestnut above
+                continue;
+            }
+            assertTrue(x.pair(gene).homozygousFor(gene.defaultAllele()),
+                    gene.key() + " should have landed on its baseline combination");
+        }
     }
 
     @Test
-    void randomRollsRarerAllelesOnZero() {
+    void aZeroRollLandsInEveryGenesFirstBucket() {
         FakeRng rng = new FakeRng();
-        for (Gene gene : Genes.codeOrder()) {
-            if (gene == Genes.EXTENSION || gene == Genes.AGOUTI) {
-                rng.booleans(false, false);
-            } else if (gene == Genes.TEST) {
-                rng.ints(0); // one draw, zero -> carrier
-            } else {
-                rng.ints(0, 0); // zero -> the rare / variant allele
-            }
+        for (int i = 0; i < Genes.codeOrder().size(); i++) {
+            rng.floats(0f);
         }
         Genotype x = Genotype.random(rng);
+        rng.assertExhausted();
+
         assertTrue(x.isWhite());
-        assertTrue(x.hasTest());
-        assertTrue(x.isChampagne());
-        assertTrue(x.isSplash());
-        assertTrue(x.isGrey());
-        assertTrue(x.has(Genes.CREAM.Cr));
-        assertTrue(x.has(Genes.PEARL.prl));
+        assertTrue(x.shows(Genes.TEST));
+        assertTrue(x.shows(Genes.CHAMPAGNE));
+        assertTrue(x.shows(Genes.SPLASH));
+        assertTrue(x.shows(Genes.GREY));
+        assertTrue(x.has(Genes.MATP.Cr));
         assertTrue(x.has(Genes.MAGIC_ZEBRA.Mzeb));
         assertTrue(x.has(Genes.PINK_HAIR.Pihr));
         assertTrue(x.has(Genes.DUN.D));
@@ -182,12 +189,30 @@ class GenotypeTest {
         assertTrue(x.has(Genes.TOBIANO.To));
         assertTrue(x.has(Genes.FRAME.Ov));
         assertTrue(x.has(Genes.SABINO.SB1));
-        rng.assertExhausted();
+    }
+
+    /**
+     * The founder table is per <b>combination</b>, so a gene can declare a
+     * homozygote that simply never turns up in the wild - which no per-allele
+     * frequency can express. Test is the case: a quarter of founders carry one
+     * copy, and none carry two.
+     */
+    @Test
+    void aGeneCanForbidAHomozygoteAmongFounders() {
+        for (float roll : new float[]{0f, 0.24f, 0.26f, 0.99f}) {
+            FakeRng rng = new FakeRng();
+            for (int i = 0; i < Genes.codeOrder().size(); i++) {
+                rng.floats(roll);
+            }
+            AllelePair test = Genotype.random(rng).pair(Genes.TEST);
+            assertFalse(test.homozygousFor(Genes.TEST.T),
+                    "no founder should be T/T, got " + test.toTokens() + " at roll " + roll);
+        }
     }
 
     @Test
     void breedWithIsMendelianAndSymmetric() {
-        Genotype dad = Genotype.parse(LegacyCode.keyed("E/E-A/A-w/w-t/t-c/c-spl/spl-g/g-N/N-N/N-n/n-n/n" + T));
+        Genotype dad = Genotype.parse(LegacyCode.keyed("E/E-A/A-w/w-t/t-c/c-spl/spl-g/g-N/N-n/n-n/n" + T));
         Genotype mom = Genotype.wildType();
         boolean[] allFirst = new boolean[Genes.codeOrder().size() * 2];
         java.util.Arrays.fill(allFirst, true);
@@ -200,15 +225,15 @@ class GenotypeTest {
 
     @Test
     void breedInheritsEveryGene() {
-        Genotype a = Genotype.parse(LegacyCode.keyed("E/e-A/a-W/w-T/t-Ch/c-Spl/spl-G/g-Cr/N-N/prl-n/n-n/n" + T));
+        Genotype a = Genotype.parse(LegacyCode.keyed("E/e-A/a-W/w-T/t-Ch/c-Spl/spl-G/g-Cr/prl-n/n-n/n" + T));
         boolean[] draws = new boolean[Genes.codeOrder().size() * 2];
         java.util.Arrays.fill(draws, true);
         Genotype child = a.breedWith(Genotype.wildType(), new FakeRng().booleans(draws));
-        assertTrue(child.hasTest());
-        assertTrue(child.isSplash());
-        assertTrue(child.isGrey());
-        assertTrue(child.isChampagne());
-        assertTrue(child.has(Genes.CREAM.Cr));
+        assertTrue(child.shows(Genes.TEST));
+        assertTrue(child.shows(Genes.SPLASH));
+        assertTrue(child.shows(Genes.GREY));
+        assertTrue(child.shows(Genes.CHAMPAGNE));
+        assertTrue(child.has(Genes.MATP.Cr));
     }
 
     @Test

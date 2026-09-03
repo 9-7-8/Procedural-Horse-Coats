@@ -43,12 +43,6 @@ window.HG = window.HG || {};
     });
   }
 
-  /** Does this gene express at this dose, by its declared dominance? */
-  function expresses(spec, dose) {
-    if (dose <= 0) return false;
-    return spec.dominance === "RECESSIVE" ? dose >= 2 : true;
-  }
-
   /**
    * opts: { spec, skin, baseCoatId, seed, dose, coverageLayer }
    * Returns the composed sheet plus the intermediate fields, so the UI can show
@@ -59,7 +53,12 @@ window.HG = window.HG || {};
     var skin = opts.skin;
     var base = HG.baseCoats.byId(opts.baseCoatId);
     var seedLow = opts.seed >>> 0;
-    var showsGene = expresses(spec, opts.dose);
+    // Which outcome this copy count lands on - the gene's own combination
+    // table decides, exactly as it does in the game. A wild-type outcome paints
+    // nothing, which is how a carrier previews as an ordinary horse.
+    var expression = HG.specEngine.expressionForDose(spec, opts.dose) || {};
+    var layers = expression.layers || [];
+    var showsGene = !expression.wildType && layers.length > 0;
 
     // Seed the draw the way the game does: SeededRng(seed, geneKey).
     var s = HG.noise.xor(HG.noise.u64(0, seedLow),
@@ -78,10 +77,10 @@ window.HG = window.HG || {};
     if (spec.phase === "natural") {
       naturals.push(function (field) {
         pigmentBeforeGene = field.mutableCopy();
-        if (opts.coverageLayer >= 0 && spec.layers[opts.coverageLayer]) {
-          coverage = HG.specEngine.coverageMap(spec, opts.coverageLayer, values, skin, field);
+        if (opts.coverageLayer >= 0 && layers[opts.coverageLayer]) {
+          coverage = HG.specEngine.coverageMap(spec, layers, opts.coverageLayer, values, skin, field);
         }
-        return showsGene ? HG.specEngine.restrict(spec, values, skin, field) : null;
+        return showsGene ? HG.specEngine.restrict(spec, layers, values, skin, field) : null;
       });
     }
 
@@ -89,10 +88,10 @@ window.HG = window.HG || {};
     if (spec.phase === "magical") {
       magicals.push(function (pigment, colour) {
         pigmentBeforeGene = pigment;
-        if (opts.coverageLayer >= 0 && spec.layers[opts.coverageLayer]) {
-          coverage = HG.specEngine.coverageMap(spec, opts.coverageLayer, values, skin, pigment);
+        if (opts.coverageLayer >= 0 && layers[opts.coverageLayer]) {
+          coverage = HG.specEngine.coverageMap(spec, layers, opts.coverageLayer, values, skin, pigment);
         }
-        return showsGene ? HG.specEngine.tint(spec, values, skin, pigment, colour) : null;
+        return showsGene ? HG.specEngine.tint(spec, layers, values, skin, pigment, colour) : null;
       });
     }
 

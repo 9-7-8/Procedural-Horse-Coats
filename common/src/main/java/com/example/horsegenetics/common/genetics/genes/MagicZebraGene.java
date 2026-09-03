@@ -2,26 +2,28 @@ package com.example.horsegenetics.common.genetics.genes;
 
 import com.example.horsegenetics.common.Rng;
 import com.example.horsegenetics.common.coat.pattern.BodyStripes;
-import com.example.horsegenetics.common.coat.pattern.CoatBuildContext;
 import com.example.horsegenetics.common.coat.pattern.ColorField;
-import com.example.horsegenetics.common.coat.pattern.ColorView;
-import com.example.horsegenetics.common.coat.pattern.PigmentView;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Part;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Skin;
 import com.example.horsegenetics.common.genetics.Allele;
 import com.example.horsegenetics.common.genetics.AllelePair;
-import com.example.horsegenetics.common.genetics.DominancePattern;
+import com.example.horsegenetics.common.genetics.Expression;
+import com.example.horsegenetics.common.genetics.FounderContext;
+import com.example.horsegenetics.common.genetics.FounderTable;
 import com.example.horsegenetics.common.genetics.Gene;
-import com.example.horsegenetics.common.genetics.Genotype;
 
 import java.util.List;
 
 /**
  * <b>Magic zebra</b> ({@code horsegenetics.magic_zebra}) - a <b>magical</b>
- * gene: {@code Mzeb} (dominant) hangs black stripes from the horse's topline
- * and lets them reach down its sides. {@code n} is wild-type. {@code 1 in}
- * {@value #WILD_MZEB_ALLELE_ODDS} per allele.
+ * gene.
+ *
+ * <table>
+ *   <tr><th>combination</th><th>outcome</th></tr>
+ *   <tr><td>{@code n/n}</td><td>wild type</td></tr>
+ *   <tr><td>{@code Mzeb/n}, {@code Mzeb/Mzeb}</td><td>{@code zebra} - black stripes hung from the topline</td></tr>
+ * </table>
  *
  * <p><b>Not the natural zebra gene.</b> A real-world zebra-striping locus is a
  * separate, later, <i>natural</i> gene; this one is invented, runs in phase 3,
@@ -40,11 +42,13 @@ import java.util.List;
  * {@code nextFloat()} for stripe <b>spacing</b>, <b>width</b>, how far the
  * stripes <b>bend</b>, and how far down the horse they <b>reach</b>. A foal
  * that inherits the copy inherits the pattern.
+ *
+ * <p>Founder frequency {@code 1/}{@value #WILD_MZEB_ONE_IN} per allele.
  */
 public final class MagicZebraGene implements Gene {
 
     public static final String KEY = "horsegenetics.magic_zebra";
-    public static final int WILD_MZEB_ALLELE_ODDS = 100;
+    public static final int WILD_MZEB_ONE_IN = 100;
 
     /** Per channel, as a percentage of full scale. Negative - stripes remove colour. */
     public static final int STRIPE_PERCENT = -200;
@@ -63,49 +67,45 @@ public final class MagicZebraGene implements Gene {
     /** The fraction of the reach spent fading out, so stripes don't stop on a line. */
     private static final double REACH_FADE = 0.25;
 
-    public final Allele Mzeb = new Allele(KEY, "Mzeb", "Magic zebra (Mzeb)", true, false);
-    public final Allele n = new Allele(KEY, "n", "Wild-type (n)", false, true);
+    public final Allele Mzeb = new Allele(KEY, 0, "Mzeb", "Magic zebra (Mzeb)");
+    public final Allele n = new Allele(KEY, 1, "n", "Wild-type (n)");
     private final List<Allele> alleles = List.of(Mzeb, n);
 
+    private final Expression WILD = Expression.wildType("No stripes.");
+
+    private final Expression ZEBRA = Expression.of("zebra", "Magic zebra")
+            .describe("Hard black stripes hung from the topline and reaching down the sides, per-horse "
+                    + "in spacing, width, bend and reach. They read black over any coat at all, "
+                    + "including a cremello or a dominant white.")
+            .varies()
+            .tint(MagicZebraGene::paintStripes);
+
+    private final List<Expression> expressions = List.of(WILD, ZEBRA);
+
+    private final FounderTable founders = FounderTable.hardyWeinberg(Mzeb, n, 1.0 / WILD_MZEB_ONE_IN);
+
     @Override public String key() { return KEY; }
+    @Override public String name() { return "Magic zebra"; }
     @Override public int priority() { return 120; }
+    @Override public boolean isNatural() { return false; }
     @Override public List<Allele> alleles() { return alleles; }
-    @Override public Allele wildType() { return n; }
-
-    /** Dominant: one {@code Mzeb} stripes the horse, and a second adds nothing. */
-    @Override public DominancePattern dominance() { return DominancePattern.DOMINANT; }
-
-    @Override
-    public boolean isNatural() {
-        return false;
-    }
+    @Override public Allele defaultAllele() { return n; }
+    @Override public List<Expression> expressions() { return expressions; }
+    @Override public FounderTable founderTable(FounderContext context) { return founders; }
 
     @Override
-    public AllelePair randomPair(Rng rng) {
-        return new AllelePair(
-                rng.nextInt(WILD_MZEB_ALLELE_ODDS) == 0 ? Mzeb : n,
-                rng.nextInt(WILD_MZEB_ALLELE_ODDS) == 0 ? Mzeb : n);
+    public Expression expressionOf(AllelePair pair) {
+        return pair.has(Mzeb) ? ZEBRA : WILD;
     }
 
     public boolean isZebra(AllelePair pair) {
         return pair.has(Mzeb);
     }
 
-    @Override
-    public boolean isVisible(AllelePair pair, Genotype genotype) {
-        return isZebra(pair);
-    }
-
-    @Override
-    public boolean isDeterministic(AllelePair pair, Genotype genotype) {
-        return !isZebra(pair);
-    }
-
-    @Override
-    public ColorField tint(AllelePair pair, CoatBuildContext ctx, PigmentView coat, ColorView colour) {
-        if (!isZebra(pair)) {
-            return null;
-        }
+    private static ColorField paintStripes(
+            com.example.horsegenetics.common.coat.pattern.CoatBuildContext ctx,
+            com.example.horsegenetics.common.coat.pattern.PigmentView coat,
+            com.example.horsegenetics.common.coat.pattern.ColorView accumulated) {
         Rng epi = ctx.epigeneticsFor(KEY);
         long seed = epi.nextLong();
         double spacing = SPACING_MIN + epi.nextFloat() * SPACING_RANGE;
@@ -120,7 +120,7 @@ public final class MagicZebraGene implements Gene {
         double hooves = HorseSkinGeometry.bodyBounds(skin).yMin();
         double drop = topline - hooves;
 
-        ColorField delta = ColorField.deltaLike(colour);
+        ColorField delta = ColorField.deltaLike(accumulated);
         HorseSkinGeometry.forEachTexel(skin, (px, py, part, face, point) -> {
             double below = (topline - point.y()) / drop;
             double vertical = 1.0 - BodyStripes.smoothstep(reach * (1 - REACH_FADE), reach, below);

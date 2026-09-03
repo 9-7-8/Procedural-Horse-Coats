@@ -236,7 +236,7 @@ public final class CustomHorseSpawnScreen extends Screen {
         List<Allele> as = gene.alleles();
         int variant = 0;
         for (int i = 0; i < as.size(); i++) {
-            if (!as.get(i).equals(gene.wildType())) {
+            if (!as.get(i).equals(gene.defaultAllele())) {
                 variant = i;
                 break;
             }

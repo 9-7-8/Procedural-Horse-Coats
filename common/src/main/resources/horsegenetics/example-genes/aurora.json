@@ -1,10 +1,8 @@
 {
-  "format": 1,
+  "format": 2,
   "key": "example.aurora",
   "name": "Aurora coat",
   "phase": "magical",
-  "dominance": "RECESSIVE",
-  "wildOdds": 10,
   "priority": 200,
   "alleles": [
     { "token": "Aur", "label": "Aurora (Aur)" },
@@ -14,21 +12,47 @@
     { "name": "bandSeed", "type": "seed" },
     { "name": "bandSpacing", "min": 3.0, "max": 6.5 }
   ],
-  "layers": [
+  "expressions": [
     {
-      "name": "teal bands over the whole horse",
-      "masks": [
-        { "type": "STRIPES", "seed": "$bandSeed", "spacing": "$bandSpacing",
-          "duty": 0.5, "warp": 2.2 }
-      ],
-      "op": { "type": "TOWARD", "color": "#2ee6c1", "strength": 75, "opacity": 100 }
+      "id": "aurora",
+      "name": "Aurora coat",
+      "description": "Shifting teal bands ripple over the whole horse, deepening to violet wherever the coat underneath is darkest. Both copies are needed.",
+      "when": { "Aur": 2 },
+      "layers": [
+        {
+          "name": "teal bands over the whole horse",
+          "masks": [
+            { "type": "STRIPES", "seed": "$bandSeed", "spacing": "$bandSpacing",
+              "duty": 0.5, "warp": 2.2 }
+          ],
+          "op": { "type": "TOWARD", "color": "#2ee6c1", "strength": 75, "opacity": 100 }
+        },
+        {
+          "name": "violet where the coat is darkest",
+          "masks": [
+            { "type": "PIGMENT", "channel": "darkness", "from": 0.55, "to": 0.95 }
+          ],
+          "op": { "type": "TINT", "red": 25, "green": -10, "blue": 60, "opacity": 40 }
+        }
+      ]
     },
     {
-      "name": "violet where the coat is darkest",
-      "masks": [
-        { "type": "PIGMENT", "channel": "darkness", "from": 0.55, "to": 0.95 }
-      ],
-      "op": { "type": "TINT", "red": 25, "green": -10, "blue": 60, "opacity": 40 }
+      "id": "carrier",
+      "name": "Aurora carrier",
+      "description": "One copy shows nothing at all. The allele passes on invisibly, and two carriers bred together are how the aurora coat appears.",
+      "wildType": true,
+      "when": { "Aur": 1 }
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "No aurora.",
+      "wildType": true
     }
-  ]
+  ],
+  "founders": {
+    "Aur/Aur": 1.0,
+    "Aur/n": 18.0,
+    "n/n": 81.0
+  }
 }

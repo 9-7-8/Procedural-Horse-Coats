@@ -5,37 +5,52 @@
 window.HG = window.HG || {};
 window.HG.examples = {
   "Silver dapple (dilution, no randomness)": {
-    "format": 1,
+    "format": 2,
     "key": "example.silver",
     "name": "Silver dapple",
     "phase": "natural",
-    "dominance": "DOMINANT",
-    "wildOdds": 60,
     "priority": 45,
     "alleles": [
       { "token": "Z", "label": "Silver (Z)" },
       { "token": "z", "label": "Wild-type (z)" }
     ],
-    "layers": [
+    "expressions": [
       {
-        "name": "dilute the black, leave the red",
-        "masks": [ { "type": "ALL" } ],
-        "op": { "type": "DILUTE", "keepRed": 1.0, "keepBlack": 0.45, "blackTint": 0.18 }
+        "id": "silver",
+        "name": "Silver dapple",
+        "description": "Black pigment diluted to chocolate, and the mane and tail taken most of the way to flaxen, with red left alone - so a chestnut carrying it looks unchanged.",
+        "when": [ "Z/Z", "Z/z" ],
+        "layers": [
+          {
+            "name": "dilute the black, leave the red",
+            "masks": [ { "type": "ALL" } ],
+            "op": { "type": "DILUTE", "keepRed": 1.0, "keepBlack": 0.45, "blackTint": 0.18 }
+          },
+          {
+            "name": "flaxen mane and tail",
+            "masks": [ { "type": "PARTS", "parts": [ "HAIR" ] } ],
+            "op": { "type": "DILUTE", "keepRed": 0.9, "keepBlack": 0.12, "blackTint": 0.3 }
+          }
+        ]
       },
       {
-        "name": "flaxen mane and tail",
-        "masks": [ { "type": "PARTS", "parts": [ "HAIR" ] } ],
-        "op": { "type": "DILUTE", "keepRed": 0.9, "keepBlack": 0.12, "blackTint": 0.3 }
+        "id": "wild",
+        "name": "Wild type",
+        "description": "Black pigment is left alone.",
+        "wildType": true
       }
-    ]
+    ],
+    "founders": {
+      "Z/Z": 0.027778,
+      "Z/z": 3.277778,
+      "z/z": 96.694444
+    }
   },
   "Dun (dilution + dorsal stripe + leg bars)": {
-    "format": 1,
+    "format": 2,
     "key": "example.dun",
     "name": "Dun",
     "phase": "natural",
-    "dominance": "DOMINANT",
-    "wildOdds": 25,
     "priority": 30,
     "alleles": [
       { "token": "D", "label": "Dun (D)" },
@@ -46,39 +61,56 @@ window.HG.examples = {
       { "name": "barHeight", "min": 0.25, "max": 0.6, "per": "leg", "spread": 0.18 },
       { "name": "dorsalWidth", "min": 0.7, "max": 1.6 }
     ],
-    "layers": [
+    "expressions": [
       {
-        "name": "dilute the body, keep the points",
-        "masks": [ { "type": "ALL" } ],
-        "op": { "type": "DILUTE", "keepRed": 0.62, "keepBlack": 0.7, "blackTint": 0.12 }
+        "id": "dun",
+        "name": "Dun",
+        "description": "The body lightens while a dorsal stripe down the spine and faint bars across the legs keep their colour. One copy is as dun as two.",
+        "when": [ "D/D", "D/d" ],
+        "layers": [
+          {
+            "name": "dilute the body, keep the points",
+            "masks": [ { "type": "ALL" } ],
+            "op": { "type": "DILUTE", "keepRed": 0.62, "keepBlack": 0.7, "blackTint": 0.12 }
+          },
+          {
+            "name": "dorsal stripe down the spine",
+            "masks": [
+              { "type": "CENTERLINE", "parts": [ "BARREL" ], "halfWidth": "$dorsalWidth", "softness": 0.6 },
+              { "type": "AXIS", "axis": "Y", "space": "part", "from": 0.72, "to": 1.0, "softness": 0.18 }
+            ],
+            "op": { "type": "SET_PIGMENT", "red": 0.05, "black": 0.95 }
+          },
+          {
+            "name": "leg barring",
+            "masks": [
+              { "type": "STRIPES", "parts": [ "LEGS" ], "seed": "$barSeed",
+                "spacing": 1.4, "duty": 0.4, "warp": 0.3 },
+              { "type": "AXIS", "parts": [ "LEGS" ], "axis": "Y", "space": "part",
+                "from": 0.0, "to": "$barHeight", "softness": 0.2 }
+            ],
+            "op": { "type": "SET_PIGMENT", "red": 0.1, "black": 0.85 }
+          }
+        ]
       },
       {
-        "name": "dorsal stripe down the spine",
-        "masks": [
-          { "type": "CENTERLINE", "parts": [ "BARREL" ], "halfWidth": "$dorsalWidth", "softness": 0.6 },
-          { "type": "AXIS", "axis": "Y", "space": "part", "from": 0.72, "to": 1.0, "softness": 0.18 }
-        ],
-        "op": { "type": "SET_PIGMENT", "red": 0.05, "black": 0.95 }
-      },
-      {
-        "name": "leg barring",
-        "masks": [
-          { "type": "STRIPES", "parts": [ "LEGS" ], "seed": "$barSeed",
-            "spacing": 1.4, "duty": 0.4, "warp": 0.3 },
-          { "type": "AXIS", "parts": [ "LEGS" ], "axis": "Y", "space": "part",
-            "from": 0.0, "to": "$barHeight", "softness": 0.2 }
-        ],
-        "op": { "type": "SET_PIGMENT", "red": 0.1, "black": 0.85 }
+        "id": "wild",
+        "name": "Wild type",
+        "description": "No dilution and no primitive markings.",
+        "wildType": true
       }
-    ]
+    ],
+    "founders": {
+      "D/D": 0.16,
+      "D/d": 7.68,
+      "d/d": 92.16
+    }
   },
   "Tobiano (white patches, dose-sensitive)": {
-    "format": 1,
+    "format": 2,
     "key": "example.tobiano",
     "name": "Tobiano",
     "phase": "natural",
-    "dominance": "INCOMPLETE_DOMINANT",
-    "wildOdds": 18,
     "priority": 80,
     "alleles": [
       { "token": "To", "label": "Tobiano (To)" },
@@ -89,32 +121,49 @@ window.HG.examples = {
       { "name": "patchScale", "min": 4.0, "max": 8.0 },
       { "name": "sock", "min": 0.2, "max": 0.75, "per": "leg", "spread": 0.25 }
     ],
-    "layers": [
+    "expressions": [
       {
-        "name": "white patches, bigger on a homozygote",
-        "masks": [
-          { "type": "PATCHES", "seed": "$patchSeed", "scale": "$patchScale",
-            "threshold": { "perDose": [ 1.0, 0.62, 0.44 ] }, "softness": 0.07 }
-        ],
-        "op": { "type": "SET_PIGMENT", "red": 0.0, "black": 0.0 }
+        "id": "tobiano",
+        "name": "Tobiano",
+        "description": "Big smooth-edged white patches and white socks. Two copies give markedly more white than one - here that is done with a perDose threshold inside a single outcome, but splitting it into two expressions would say the same thing more plainly.",
+        "when": [ "To/To", "To/to" ],
+        "layers": [
+          {
+            "name": "white patches, bigger on a homozygote",
+            "masks": [
+              { "type": "PATCHES", "seed": "$patchSeed", "scale": "$patchScale",
+                "threshold": { "perDose": [ 1.0, 0.62, 0.44 ] }, "softness": 0.07 }
+            ],
+            "op": { "type": "SET_PIGMENT", "red": 0.0, "black": 0.0 }
+          },
+          {
+            "name": "white socks",
+            "masks": [
+              { "type": "AXIS", "parts": [ "LEGS" ], "axis": "Y", "space": "part",
+                "from": 0.0, "to": "$sock", "softness": 0.12 }
+            ],
+            "op": { "type": "SET_PIGMENT", "red": 0.0, "black": 0.0 }
+          }
+        ]
       },
       {
-        "name": "white socks",
-        "masks": [
-          { "type": "AXIS", "parts": [ "LEGS" ], "axis": "Y", "space": "part",
-            "from": 0.0, "to": "$sock", "softness": 0.12 }
-        ],
-        "op": { "type": "SET_PIGMENT", "red": 0.0, "black": 0.0 }
+        "id": "wild",
+        "name": "Wild type",
+        "description": "No white patches.",
+        "wildType": true
       }
-    ]
+    ],
+    "founders": {
+      "To/To": 0.308642,
+      "To/to": 10.493827,
+      "to/to": 89.197531
+    }
   },
   "Aurora (magical, recessive)": {
-    "format": 1,
+    "format": 2,
     "key": "example.aurora",
     "name": "Aurora coat",
     "phase": "magical",
-    "dominance": "RECESSIVE",
-    "wildOdds": 10,
     "priority": 200,
     "alleles": [
       { "token": "Aur", "label": "Aurora (Aur)" },
@@ -124,22 +173,48 @@ window.HG.examples = {
       { "name": "bandSeed", "type": "seed" },
       { "name": "bandSpacing", "min": 3.0, "max": 6.5 }
     ],
-    "layers": [
+    "expressions": [
       {
-        "name": "teal bands over the whole horse",
-        "masks": [
-          { "type": "STRIPES", "seed": "$bandSeed", "spacing": "$bandSpacing",
-            "duty": 0.5, "warp": 2.2 }
-        ],
-        "op": { "type": "TOWARD", "color": "#2ee6c1", "strength": 75, "opacity": 100 }
+        "id": "aurora",
+        "name": "Aurora coat",
+        "description": "Shifting teal bands ripple over the whole horse, deepening to violet wherever the coat underneath is darkest. Both copies are needed.",
+        "when": { "Aur": 2 },
+        "layers": [
+          {
+            "name": "teal bands over the whole horse",
+            "masks": [
+              { "type": "STRIPES", "seed": "$bandSeed", "spacing": "$bandSpacing",
+                "duty": 0.5, "warp": 2.2 }
+            ],
+            "op": { "type": "TOWARD", "color": "#2ee6c1", "strength": 75, "opacity": 100 }
+          },
+          {
+            "name": "violet where the coat is darkest",
+            "masks": [
+              { "type": "PIGMENT", "channel": "darkness", "from": 0.55, "to": 0.95 }
+            ],
+            "op": { "type": "TINT", "red": 25, "green": -10, "blue": 60, "opacity": 40 }
+          }
+        ]
       },
       {
-        "name": "violet where the coat is darkest",
-        "masks": [
-          { "type": "PIGMENT", "channel": "darkness", "from": 0.55, "to": 0.95 }
-        ],
-        "op": { "type": "TINT", "red": 25, "green": -10, "blue": 60, "opacity": 40 }
+        "id": "carrier",
+        "name": "Aurora carrier",
+        "description": "One copy shows nothing at all. The allele passes on invisibly, and two carriers bred together are how the aurora coat appears.",
+        "wildType": true,
+        "when": { "Aur": 1 }
+      },
+      {
+        "id": "wild",
+        "name": "Wild type",
+        "description": "No aurora.",
+        "wildType": true
       }
-    ]
+    ],
+    "founders": {
+      "Aur/Aur": 1.0,
+      "Aur/n": 18.0,
+      "n/n": 81.0
+    }
   }
 };

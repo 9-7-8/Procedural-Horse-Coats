@@ -306,11 +306,74 @@ window.HG = window.HG || {};
     }
   }
 
+  // ---- the combination table -------------------------------------------
+  //
+  // Mirrors GeneSpecParser.readExpressions / SpecGene.expressionOf: an
+  // expression claims the combinations its "when" names, and at most one
+  // expression may omit "when" and take whatever is left.
+
+  /** Every unordered combination, canonical (earlier-declared allele first). */
+  function combinations(spec) {
+    var out = [];
+    var a = spec.alleles || [];
+    for (var i = 0; i < a.length; i++) {
+      for (var j = i; j < a.length; j++) out.push(a[i].token + "/" + a[j].token);
+    }
+    return out;
+  }
+
+  /** The combination a horse with `dose` copies of the first-declared allele holds. */
+  function combinationForDose(spec, dose) {
+    var a = spec.alleles || [];
+    if (!a.length) return "";
+    var variant = a[0].token;
+    var baseline = a[a.length - 1].token;
+    if (dose >= 2) return variant + "/" + variant;
+    if (dose === 1) return variant + "/" + baseline;
+    return baseline + "/" + baseline;
+  }
+
+  function claims(spec, expression) {
+    var when = expression.when;
+    if (when === undefined || when === null) return null;   // the catch-all
+    if (Array.isArray(when)) {
+      var all = combinations(spec);
+      return when.map(function (c) {
+        if (all.indexOf(c) >= 0) return c;
+        var parts = String(c).split("/");
+        return parts.length === 2 ? parts[1] + "/" + parts[0] : c;
+      });
+    }
+    return combinations(spec).filter(function (c) {
+      var t = c.split("/");
+      return Object.keys(when).every(function (token) {
+        return (t[0] === token ? 1 : 0) + (t[1] === token ? 1 : 0) === Number(when[token]);
+      });
+    });
+  }
+
+  /** Which outcome `combination` produces. Never null for a well-formed spec. */
+  function expressionFor(spec, combination) {
+    var list = spec.expressions || [];
+    var fallback = null;
+    for (var i = 0; i < list.length; i++) {
+      var owned = claims(spec, list[i]);
+      if (owned === null) fallback = list[i];
+      else if (owned.indexOf(combination) >= 0) return list[i];
+    }
+    return fallback;
+  }
+
+  /** {@link #expressionFor} for a copy count of the first-declared allele. */
+  function expressionForDose(spec, dose) {
+    return expressionFor(spec, combinationForDose(spec, dose));
+  }
+
   // ---- the two hooks ---------------------------------------------------
 
-  function restrict(spec, values, skin, coat) {
+  function restrict(spec, layers, values, skin, coat) {
     var field = coat.mutableCopy();
-    (spec.layers || []).forEach(function (layer, i) {
+    (layers || []).forEach(function (layer, i) {
       var asRead = field.mutableCopy();
       var seed = layerSeed(spec, i);
       geo.forEachTexel(skin, function (px, py, part, face, point) {
@@ -322,9 +385,9 @@ window.HG = window.HG || {};
     return field;
   }
 
-  function tint(spec, values, skin, coat, colour) {
+  function tint(spec, layers, values, skin, coat, colour) {
     var delta = new HG.fields.ColorField(geo.SHEET_SIZE);
-    (spec.layers || []).forEach(function (layer, i) {
+    (layers || []).forEach(function (layer, i) {
       var seed = layerSeed(spec, i);
       geo.forEachTexel(skin, function (px, py, part, face, point) {
         var leg = geo.legIndex(part);
@@ -336,8 +399,8 @@ window.HG = window.HG || {};
   }
 
   /** Coverage of one layer at every texel - what the "coverage" overlay draws. */
-  function coverageMap(spec, layerIndex, values, skin, coat) {
-    var layer = spec.layers[layerIndex];
+  function coverageMap(spec, layers, layerIndex, values, skin, coat) {
+    var layer = layers[layerIndex];
     var seed = layerSeed(spec, layerIndex);
     var out = new Float32Array(geo.SHEET_SIZE * geo.SHEET_SIZE);
     geo.forEachTexel(skin, function (px, py, part, face, point) {
@@ -349,6 +412,10 @@ window.HG = window.HG || {};
 
   HG.specEngine = {
     drawValues: drawValues,
+    combinations: combinations,
+    combinationForDose: combinationForDose,
+    expressionFor: expressionFor,
+    expressionForDose: expressionForDose,
     restrict: restrict,
     tint: tint,
     coverageMap: coverageMap,

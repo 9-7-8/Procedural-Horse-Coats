@@ -13,9 +13,10 @@ import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Part;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Skin;
 import com.example.horsegenetics.common.genetics.Allele;
 import com.example.horsegenetics.common.genetics.AllelePair;
-import com.example.horsegenetics.common.genetics.DominancePattern;
+import com.example.horsegenetics.common.genetics.Expression;
+import com.example.horsegenetics.common.genetics.FounderContext;
+import com.example.horsegenetics.common.genetics.FounderTable;
 import com.example.horsegenetics.common.genetics.Gene;
-import com.example.horsegenetics.common.genetics.Genotype;
 
 import java.util.List;
 
@@ -43,7 +44,7 @@ import java.util.List;
 public final class SabinoGene implements Gene {
 
     public static final String KEY = "horsegenetics.sabino";
-    public static final int WILD_SABINO_ALLELE_ODDS = 45;
+    public static final int WILD_SABINO_ONE_IN = 45;
 
     /** Leg-white height as a fraction of leg height: dose 1 band, then dose 2 band. */
     private static final double LEG1_MIN = 0.35, LEG1_RANGE = 0.42;
@@ -51,49 +52,57 @@ public final class SabinoGene implements Gene {
     /** How far the jagged edge wanders, in fractions of leg height. */
     private static final double LEG_JAG = 0.18;
 
-    public final Allele SB1 = new Allele(KEY, "SB1", "Sabino 1 (SB1)", true, false);
-    public final Allele sb1 = new Allele(KEY, "sb1", "Wild-type (sb1)", false, true);
+    public final Allele SB1 = new Allele(KEY, 0, "SB1", "Sabino 1 (SB1)");
+    public final Allele sb1 = new Allele(KEY, 1, "sb1", "Wild-type (sb1)");
     private final List<Allele> alleles = List.of(SB1, sb1);
 
+    private final Expression WILD = Expression.wildType("No white markings.");
+
+    private final Expression SABINO = Expression.of("sabino1", "Sabino 1")
+            .describe("Tall jagged stockings, a splash of white up the belly, a broad blaze, and a "
+                    + "little roaning at the margins - the edges are ragged rather than the clean "
+                    + "ring a splash sock leaves.")
+            .varies()
+            .restrict((ctx, coat) -> paintSabino(ctx, coat, 1));
+
+    private final Expression SABINO_WHITE = Expression.of("sabino-white", "Sabino-white")
+            .describe("Ninety per cent white or more, with a few coloured flecks left on the ears "
+                    + "and flank. Two copies, and unmistakably not just a bolder sabino.")
+            .varies()
+            .restrict((ctx, coat) -> paintSabino(ctx, coat, 2));
+
+    private final List<Expression> expressions = List.of(WILD, SABINO, SABINO_WHITE);
+
+    private final FounderTable founders = FounderTable.hardyWeinberg(SB1, sb1, 1.0 / WILD_SABINO_ONE_IN);
+
     @Override public String key() { return KEY; }
+    @Override public String name() { return "Sabino 1"; }
     @Override public int priority() { return 76; }
     @Override public List<Allele> alleles() { return alleles; }
-    @Override public Allele wildType() { return sb1; }
+    @Override public Allele defaultAllele() { return sb1; }
+    @Override public List<Expression> expressions() { return expressions; }
+    @Override public FounderTable founderTable(FounderContext context) { return founders; }
 
-    /** IncompleteDominant: {@code SB1/sb1} and {@code SB1/SB1} are distinct - and the gene reads the dose. */
-    @Override public DominancePattern dominance() { return DominancePattern.INCOMPLETE_DOMINANT; }
-
+    /**
+     * The gene that made the dominance vocabulary creak: all three combinations
+     * land somewhere different, and the difference between one copy and two is
+     * not a matter of degree.
+     */
     @Override
-    public AllelePair randomPair(Rng rng) {
-        return new AllelePair(
-                rng.nextInt(WILD_SABINO_ALLELE_ODDS) == 0 ? SB1 : sb1,
-                rng.nextInt(WILD_SABINO_ALLELE_ODDS) == 0 ? SB1 : sb1);
+    public Expression expressionOf(AllelePair pair) {
+        return switch (pair.count(SB1)) {
+            case 2 -> SABINO_WHITE;
+            case 1 -> SABINO;
+            default -> WILD;
+        };
     }
 
     /** 0, 1 or 2 copies of {@code SB1}. */
     public int dose(AllelePair pair) {
-        int n = 0;
-        if (pair.first().equals(SB1)) n++;
-        if (pair.second().equals(SB1)) n++;
-        return n;
+        return pair.count(SB1);
     }
 
-    @Override
-    public boolean isVisible(AllelePair pair, Genotype genotype) {
-        return dose(pair) >= 1;
-    }
-
-    @Override
-    public boolean isDeterministic(AllelePair pair, Genotype genotype) {
-        return dose(pair) == 0;
-    }
-
-    @Override
-    public PigmentField restrict(AllelePair pair, CoatBuildContext ctx, PigmentView coat) {
-        int dose = dose(pair);
-        if (dose == 0) {
-            return null;
-        }
+    private static PigmentField paintSabino(CoatBuildContext ctx, PigmentView coat, int dose) {
         Rng epi = ctx.epigeneticsFor(KEY);
         long seed = epi.nextLong();
         double[] legH = new double[CoatRegions.LEGS.size()];

@@ -12,9 +12,10 @@ import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Part;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Skin;
 import com.example.horsegenetics.common.genetics.Allele;
 import com.example.horsegenetics.common.genetics.AllelePair;
-import com.example.horsegenetics.common.genetics.DominancePattern;
+import com.example.horsegenetics.common.genetics.Expression;
+import com.example.horsegenetics.common.genetics.FounderContext;
+import com.example.horsegenetics.common.genetics.FounderTable;
 import com.example.horsegenetics.common.genetics.Gene;
-import com.example.horsegenetics.common.genetics.Genotype;
 
 import java.util.List;
 
@@ -37,7 +38,7 @@ import java.util.List;
 public final class TobianoGene implements Gene {
 
     public static final String KEY = "horsegenetics.tobiano";
-    public static final int WILD_TOBIANO_ALLELE_ODDS = 50;
+    public static final int WILD_TOBIANO_ONE_IN = 50;
 
     private static final double SCALE_MIN = 0.15;   // body-space frequency of the patch field
     private static final double SCALE_RANGE = 0.07;
@@ -48,44 +49,41 @@ public final class TobianoGene implements Gene {
     /** Tobiano tends to white legs: an extra lift low on each leg. */
     private static final double LEG_LIFT = 0.20;
 
-    public final Allele To = new Allele(KEY, "To", "Tobiano (To)", true, false);
-    public final Allele to = new Allele(KEY, "to", "Wild-type (to)", false, true);
+    public final Allele To = new Allele(KEY, 0, "To", "Tobiano (To)");
+    public final Allele to = new Allele(KEY, 1, "to", "Wild-type (to)");
     private final List<Allele> alleles = List.of(To, to);
 
+    private final Expression WILD = Expression.wildType("No white patches.");
+
+    private final Expression TOBIANO = Expression.of("tobiano", "Tobiano")
+            .describe("Large, smooth-edged white patches that run up and over the topline, flowing "
+                    + "unbroken from the barrel down the legs. The legs tend to white; the head "
+                    + "stays coloured.")
+            .varies()
+            .restrict(TobianoGene::paintTobiano);
+
+    private final List<Expression> expressions = List.of(WILD, TOBIANO);
+
+    private final FounderTable founders = FounderTable.hardyWeinberg(To, to, 1.0 / WILD_TOBIANO_ONE_IN);
+
     @Override public String key() { return KEY; }
+    @Override public String name() { return "Tobiano"; }
     @Override public int priority() { return 72; }
     @Override public List<Allele> alleles() { return alleles; }
-    @Override public Allele wildType() { return to; }
-
-    /** Dominant: one {@code To} gives the pattern. */
-    @Override public DominancePattern dominance() { return DominancePattern.DOMINANT; }
+    @Override public Allele defaultAllele() { return to; }
+    @Override public List<Expression> expressions() { return expressions; }
+    @Override public FounderTable founderTable(FounderContext context) { return founders; }
 
     @Override
-    public AllelePair randomPair(Rng rng) {
-        return new AllelePair(
-                rng.nextInt(WILD_TOBIANO_ALLELE_ODDS) == 0 ? To : to,
-                rng.nextInt(WILD_TOBIANO_ALLELE_ODDS) == 0 ? To : to);
+    public Expression expressionOf(AllelePair pair) {
+        return pair.has(To) ? TOBIANO : WILD;
     }
 
     public boolean isTobiano(AllelePair pair) {
         return pair.has(To);
     }
 
-    @Override
-    public boolean isVisible(AllelePair pair, Genotype genotype) {
-        return isTobiano(pair);
-    }
-
-    @Override
-    public boolean isDeterministic(AllelePair pair, Genotype genotype) {
-        return !isTobiano(pair);
-    }
-
-    @Override
-    public PigmentField restrict(AllelePair pair, CoatBuildContext ctx, PigmentView coat) {
-        if (!isTobiano(pair)) {
-            return null;
-        }
+    private static PigmentField paintTobiano(CoatBuildContext ctx, PigmentView coat) {
         Rng epi = ctx.epigeneticsFor(KEY);
         long seed = epi.nextLong();
         double cover = COVER_MIN + epi.nextFloat() * COVER_RANGE;

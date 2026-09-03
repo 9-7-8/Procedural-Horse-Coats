@@ -25,11 +25,21 @@ class GeneCodeDisplayTest {
     }
 
     @Test
-    void absenceGenesUseLowercaseNWhenHeterozygousAndTheTokenDoubledWhenHomozygous() {
-        assertEquals("eeaa CrCr", sf("extension", "e/e", "cream", "Cr/Cr"));
-        assertEquals("EEaa nCr", sf("cream", "Cr/N"));
-        assertEquals("EEaa prlprl", sf("pearl", "prl/prl"));
-        assertEquals("EEaa nprl", sf("pearl", "N/prl"));
+    void absenceGenesUseLowercaseNAgainstTheBaselineAlleleAndPrintBothOtherwise() {
+        assertEquals("eeaa CrCr", sf("extension", "e/e", "matp", "Cr/Cr"));
+        assertEquals("EEaa nCr", sf("matp", "Cr/N"));
+        assertEquals("EEaa prlprl", sf("matp", "prl/prl"));
+        assertEquals("EEaa nprl", sf("matp", "N/prl"));
+    }
+
+    /**
+     * A three-allele locus can hold two <i>different</i> non-baseline alleles,
+     * which the {@code n}-for-absent shorthand cannot describe - so both real
+     * tokens are printed.
+     */
+    @Test
+    void twoDifferentVariantAllelesPrintBothTokens() {
+        assertEquals("EEaa Crprl", sf("matp", "Cr/prl"));
     }
 
     @Test
@@ -41,16 +51,16 @@ class GeneCodeDisplayTest {
 
     @Test
     void everythingAtOnceUsesTheDisplayOrder() {
-        // splash, white, champagne, cream, pearl, grey, test
-        assertEquals("EeAa nSpl Ww nCh nCr nprl Gg Tt",
+        // splash, white, champagne, MATP, grey, test
+        assertEquals("EeAa nSpl Ww nCh nCr Gg Tt",
                 sf("extension", "E/e", "agouti", "A/a", "white", "W/w", "test", "T/t",
-                   "champagne", "Ch/c", "splash", "Spl/spl", "grey", "G/g", "cream", "Cr/N", "pearl", "N/prl"));
+                   "champagne", "Ch/c", "splash", "Spl/spl", "grey", "G/g", "matp", "Cr/N"));
     }
 
     @Test
     void theExampleFromTheDocComment() {
         assertEquals("EeAa nSpl nCh CrCr",
-                sf("extension", "E/e", "agouti", "A/a", "champagne", "Ch/c", "splash", "Spl/spl", "cream", "Cr/Cr"));
+                sf("extension", "E/e", "agouti", "A/a", "champagne", "Ch/c", "splash", "Spl/spl", "matp", "Cr/Cr"));
     }
 
     @Test

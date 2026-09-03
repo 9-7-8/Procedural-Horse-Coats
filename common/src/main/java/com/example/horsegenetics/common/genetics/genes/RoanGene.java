@@ -12,9 +12,10 @@ import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Part;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Skin;
 import com.example.horsegenetics.common.genetics.Allele;
 import com.example.horsegenetics.common.genetics.AllelePair;
-import com.example.horsegenetics.common.genetics.DominancePattern;
+import com.example.horsegenetics.common.genetics.Expression;
+import com.example.horsegenetics.common.genetics.FounderContext;
+import com.example.horsegenetics.common.genetics.FounderTable;
 import com.example.horsegenetics.common.genetics.Gene;
-import com.example.horsegenetics.common.genetics.Genotype;
 
 import java.util.List;
 
@@ -41,7 +42,7 @@ import java.util.List;
 public final class RoanGene implements Gene {
 
     public static final String KEY = "horsegenetics.roan";
-    public static final int WILD_ROAN_ALLELE_ODDS = 30;
+    public static final int WILD_ROAN_ONE_IN = 30;
 
     /** Body-space frequency of the hair-by-hair mottle. */
     private static final double FREQ = 2.6;
@@ -52,44 +53,41 @@ public final class RoanGene implements Gene {
     /** Soft edge on the per-texel white/coloured decision, in noise units - keeps ~1px feathering. */
     private static final double EDGE = 0.05;
 
-    public final Allele Rn = new Allele(KEY, "Rn", "Roan (Rn)", true, false);
-    public final Allele rn = new Allele(KEY, "rn", "Wild-type (rn)", false, true);
+    public final Allele Rn = new Allele(KEY, 0, "Rn", "Roan (Rn)");
+    public final Allele rn = new Allele(KEY, 1, "rn", "Wild-type (rn)");
     private final List<Allele> alleles = List.of(Rn, rn);
 
+    private final Expression WILD = Expression.wildType("No white hairs mixed in.");
+
+    private final Expression ROAN = Expression.of("roan", "Roan")
+            .describe("White hairs mixed evenly through the body coat while the head, mane, tail and "
+                    + "lower legs stay solid. Densest over the hindquarters and feathering out "
+                    + "across the neck, so it never ends on a hard line against the face.")
+            .varies()
+            .restrict(RoanGene::paintRoan);
+
+    private final List<Expression> expressions = List.of(WILD, ROAN);
+
+    private final FounderTable founders = FounderTable.hardyWeinberg(Rn, rn, 1.0 / WILD_ROAN_ONE_IN);
+
     @Override public String key() { return KEY; }
+    @Override public String name() { return "Roan"; }
     @Override public int priority() { return 70; }
     @Override public List<Allele> alleles() { return alleles; }
-    @Override public Allele wildType() { return rn; }
-
-    /** Dominant: one {@code Rn} roans the horse. */
-    @Override public DominancePattern dominance() { return DominancePattern.DOMINANT; }
+    @Override public Allele defaultAllele() { return rn; }
+    @Override public List<Expression> expressions() { return expressions; }
+    @Override public FounderTable founderTable(FounderContext context) { return founders; }
 
     @Override
-    public AllelePair randomPair(Rng rng) {
-        return new AllelePair(
-                rng.nextInt(WILD_ROAN_ALLELE_ODDS) == 0 ? Rn : rn,
-                rng.nextInt(WILD_ROAN_ALLELE_ODDS) == 0 ? Rn : rn);
+    public Expression expressionOf(AllelePair pair) {
+        return pair.has(Rn) ? ROAN : WILD;
     }
 
     public boolean isRoan(AllelePair pair) {
         return pair.has(Rn);
     }
 
-    @Override
-    public boolean isVisible(AllelePair pair, Genotype genotype) {
-        return isRoan(pair);
-    }
-
-    @Override
-    public boolean isDeterministic(AllelePair pair, Genotype genotype) {
-        return !isRoan(pair);
-    }
-
-    @Override
-    public PigmentField restrict(AllelePair pair, CoatBuildContext ctx, PigmentView coat) {
-        if (!isRoan(pair)) {
-            return null;
-        }
+    private static PigmentField paintRoan(CoatBuildContext ctx, PigmentView coat) {
         Rng epi = ctx.epigeneticsFor(KEY);
         long seed = epi.nextLong();
         double density = epi.nextFloat() * DENSITY_RANGE;

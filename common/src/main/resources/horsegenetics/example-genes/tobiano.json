@@ -1,10 +1,8 @@
 {
-  "format": 1,
+  "format": 2,
   "key": "example.tobiano",
   "name": "Tobiano",
   "phase": "natural",
-  "dominance": "INCOMPLETE_DOMINANT",
-  "wildOdds": 18,
   "priority": 80,
   "alleles": [
     { "token": "To", "label": "Tobiano (To)" },
@@ -15,22 +13,41 @@
     { "name": "patchScale", "min": 4.0, "max": 8.0 },
     { "name": "sock", "min": 0.2, "max": 0.75, "per": "leg", "spread": 0.25 }
   ],
-  "layers": [
+  "expressions": [
     {
-      "name": "white patches, bigger on a homozygote",
-      "masks": [
-        { "type": "PATCHES", "seed": "$patchSeed", "scale": "$patchScale",
-          "threshold": { "perDose": [ 1.0, 0.62, 0.44 ] }, "softness": 0.07 }
-      ],
-      "op": { "type": "SET_PIGMENT", "red": 0.0, "black": 0.0 }
+      "id": "tobiano",
+      "name": "Tobiano",
+      "description": "Big smooth-edged white patches and white socks. Two copies give markedly more white than one - here that is done with a perDose threshold inside a single outcome, but splitting it into two expressions would say the same thing more plainly.",
+      "when": [ "To/To", "To/to" ],
+      "layers": [
+        {
+          "name": "white patches, bigger on a homozygote",
+          "masks": [
+            { "type": "PATCHES", "seed": "$patchSeed", "scale": "$patchScale",
+              "threshold": { "perDose": [ 1.0, 0.62, 0.44 ] }, "softness": 0.07 }
+          ],
+          "op": { "type": "SET_PIGMENT", "red": 0.0, "black": 0.0 }
+        },
+        {
+          "name": "white socks",
+          "masks": [
+            { "type": "AXIS", "parts": [ "LEGS" ], "axis": "Y", "space": "part",
+              "from": 0.0, "to": "$sock", "softness": 0.12 }
+          ],
+          "op": { "type": "SET_PIGMENT", "red": 0.0, "black": 0.0 }
+        }
+      ]
     },
     {
-      "name": "white socks",
-      "masks": [
-        { "type": "AXIS", "parts": [ "LEGS" ], "axis": "Y", "space": "part",
-          "from": 0.0, "to": "$sock", "softness": 0.12 }
-      ],
-      "op": { "type": "SET_PIGMENT", "red": 0.0, "black": 0.0 }
+      "id": "wild",
+      "name": "Wild type",
+      "description": "No white patches.",
+      "wildType": true
     }
-  ]
+  ],
+  "founders": {
+    "To/To": 0.308642,
+    "To/to": 10.493827,
+    "to/to": 89.197531
+  }
 }
