@@ -91,9 +91,10 @@
     <a href="gene-creator/index.html">gene creator</a>: nothing about it has been seen
     in a running game.
     <strong>Baseline note:</strong> as of 2026-09-02 <code>example.waterborn</code>
-    ships loaded (classpath index), so a stock in-game genotype code is already
-    <strong>12 segments</strong> and the gallery is already doubled. Dropping one more
-    gene in takes it to 13. To test the drop-in path:
+    <em>and</em> <code>example.suntouched</code> ship loaded (classpath index), so a
+    stock in-game genotype code is already <strong>13 segments</strong> and the
+    gallery is already ~4&times; its no-gene size. Dropping one more gene in takes it
+    to 14. To test the drop-in path:
 </p>
 
 <ol>
@@ -105,8 +106,8 @@
         <code>README.txt</code> should already be there from a previous launch; if not,
         that is itself a finding.</li>
     <li><code>./gradlew :neoforge-26.1.2:runClient</code> and read the log for
-        <code>[genes] loaded 2 data-driven gene(s)</code> (Waterborn + Tobiano) and
-        <code>the genotype code now has 13 segments</code>.</li>
+        <code>[genes] loaded 3 data-driven gene(s)</code> (Suntouched + Waterborn +
+        Tobiano) and <code>the genotype code now has 14 segments</code>.</li>
 </ol>
 
 <p>What to look at:</p>
@@ -114,9 +115,9 @@
 <ul>
     <li><strong>Wild horses carry it.</strong> 1 in 18 per allele, so a handful of
         spawns should include a patched one. The horse dimension's gallery should have
-        <strong>roughly doubled again</strong> from its Waterborn-baseline length (the
-        two <code>COMPLETE_DOMINANT</code> pens don't double); the entrance sign is the
-        quick read.</li>
+        <strong>roughly doubled again</strong> from the shipped-gene baseline length
+        (the two <code>COMPLETE_DOMINANT</code> pens don't double); the entrance sign
+        is the quick read.</li>
     <li><strong>It looks like the preview did.</strong> Not texel-identical &mdash; the
         creator's gradient is downsampled &mdash; but the same size and shape of
         patches, and the same socks.</li>
@@ -128,7 +129,7 @@
         the same genotype should have different patches; a foal's should match the
         parent whose copy it took.</li>
     <li><strong>Removing the file is clean.</strong> Delete it, relaunch: the code drops
-        back to the 12-segment Waterborn baseline. Horses saved at 13 will fail to load
+        back to the 13-segment shipped-gene baseline. Horses saved at 14 will fail to load
         &mdash; expected, but confirm it fails <em>loudly</em> rather than corrupting
         anything.</li>
     <li><strong>A deliberately broken file.</strong> Put a stray comma in one and
@@ -366,16 +367,16 @@
         shown.</li>
 </ul>
 
-<h3 id="effects">13. Gene <code>effects</code> &mdash; the Waterborn gene</h3>
+<h3 id="effects">13. Gene <code>effects</code> &mdash; the Waterborn &amp; Suntouched genes</h3>
 
 <p>
     New 2026-09-02, and the proof that the data-driven <a href="gene-effects.html">
-    effects</a> pipeline works in a running game. <strong>Waterborn ships loaded</strong>
-    (classpath index in the NeoForge module) &mdash; boot log shows
-    <code>[genes] loaded 1 data-driven gene(s)</code> / <code>12 segments</code> with
-    no config drop. Gene page: <a href="gene-waterborn.html">Waterborn</a>. Fastest
-    test horse is the <strong>custom horse spawn egg</strong> (item&nbsp;14: add
-    <em>Waterborn</em>, spawn).
+    effects</a> pipeline works in a running game. <strong>Waterborn and Suntouched
+    ship loaded</strong> (classpath index in the NeoForge module) &mdash; boot log
+    shows <code>[genes] loaded 2 data-driven gene(s)</code> / <code>13 segments</code>
+    with no config drop. Gene pages: <a href="gene-waterborn.html">Waterborn</a>,
+    <a href="gene-suntouched.html">Suntouched</a>. Fastest test horse is the
+    <strong>custom horse spawn egg</strong> (item&nbsp;14: add the gene, spawn).
 </p>
 
 <p><strong>Confirmed in-game 2026-09-02:</strong></p>
@@ -404,6 +405,28 @@
         translated</code> should <em>not</em> appear for Waterborn (it has none).</li>
     <li><strong>Streak pattern varies per horse</strong> and a foal inherits its
         parent's (the <code>stripeSeed</code> / <code>stripeSpacing</code> knobs).</li>
+</ul>
+
+<p><strong>Suntouched &mdash; the <code>glow</code> verb. Confirmed in-game
+2026-09-02:</strong> the emissive gold mane + tail render and look good, the
+gold-dust <code>emitter</code> shows, and the horse lights the area around it
+(the trailing <code>minecraft:light</code> block).</p>
+<p><strong>Still to check:</strong></p>
+<ul>
+    <li><strong>The light cleans up.</strong> Kill the horse, or walk it far enough
+        to unload &mdash; the <code>minecraft:light</code> block must disappear, not
+        linger. In the <strong>horse dimension gallery</strong> there should be
+        <em>no</em> light blocks at all (it is skipped there on purpose).</li>
+    <li><strong>The light follows and lags.</strong> Gallop and watch the lit patch
+        lag or stick a block behind &mdash; it is a trailing block, not a smooth
+        source. Confirm it can't light a spot already filled by a block.</li>
+    <li><strong>Foal.</strong> A Suntouched foal should glow too, tail only (no mane
+        part on the foal mesh), and still cast light.</li>
+    <li><strong>Hard base coats.</strong> The emissive mane should still read over a
+        <strong>cremello</strong> and a <strong>dominant-white</strong> horse
+        (<code>opacity: 100</code> on the coat layer).</li>
+    <li><strong>Deterministic.</strong> Two Suntouched horses of the same base coat
+        should look identical (no knobs).</li>
 </ul>
 
 <h3 id="custom-spawn-egg">14. Custom horse spawn egg &mdash; the two follow-up fixes</h3>

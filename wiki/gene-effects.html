@@ -18,7 +18,7 @@
     An <strong>effect</strong> is a Minecraft-specific thing a data-driven gene makes
     the horse <em>do</em> &mdash; walk on water, resist fire, trail particles, be
     milked for a fluid &mdash; as opposed to a coat pixel. This page is the complete
-    reference for the effect vocabulary: the five verbs that exist today, the whole
+    reference for the effect vocabulary: the six verbs that exist today, the whole
     surface the <a href="horse-traits.html">architecture spec</a> defines around them,
     and the <a href="#adding">contract for adding a new one</a>. It is built to be as
     modular as a closed vocabulary can be: one declaration per effect, and the parser
@@ -33,16 +33,20 @@
 </p>
 
 <div class="note warn">
-    <span class="label">Status &mdash; built 2026-09-02, not play-tested</span>
+    <span class="label">Status &mdash; partly owner-confirmed in-game (2026-09-02)</span>
     <p>
-        <code>common/</code> parses and validates all five verbs
+        <code>common/</code> parses and validates all six verbs
         (<code>AbilityType</code>, <code>GeneAbility</code>, <code>GeneSpecParser</code>,
         <code>SpecAbilities</code>; unit-tested). The NeoForge translator
         (<code>server/GeneAbilityHandler</code>, <code>server/GeneYieldHandler</code>)
-        runs <code>traversal</code>, <code>emitter</code> and <code>yield</code>;
-        <code>attribute</code> and <code>mob_effect</code> parse and are carried but
-        <strong>not executed yet</strong> (logged once at runtime). Nothing here has
-        been seen in a running game &mdash; see
+        runs <code>traversal</code>, <code>emitter</code>, <code>mob_effect</code>,
+        <code>yield</code> and <code>glow</code> (dynamic light server-side;
+        <code>client/EmissiveCoatLayer</code> draws the emissive coat parts);
+        <code>attribute</code> is the one verb that parses and is carried but is
+        <strong>not executed yet</strong> (logged once at runtime).
+        <strong>Owner-confirmed in-game (2026-09-02):</strong> Waterborn's coat +
+        particle trail, and Suntouched's <code>glow</code> (emissive gold mane +
+        area lighting). The rest is unverified &mdash; see
         <a href="verification.html">To be verified</a>.
     </p>
     <p>
@@ -100,7 +104,7 @@ Component  &rarr;  (Trigger, Condition, Selector, Effect)</code></pre>
 <tr><td><strong>Trigger</strong></td><td>When does it fire?</td><td>when a rider mounts</td><td>Partial &mdash; four triggers, see <a href="#triggers">Triggers</a></td></tr>
 <tr><td><strong>Condition</strong></td><td>Is it active right now?</td><td>daytime and sky-visible</td><td>Partial &mdash; boolean flags, see <a href="#conditions">Conditions</a></td></tr>
 <tr><td><strong>Selector</strong></td><td>Who or what does it act on?</td><td>undead within 8 blocks</td><td>Unbuilt &mdash; every effect acts on <code>self</code> or <code>rider</code></td></tr>
-<tr><td><strong>Effect</strong></td><td>What happens?</td><td>deal 2 damage, set flee flag</td><td>Five of the spec's verbs, see <a href="#effects">Effect verbs</a></td></tr>
+<tr><td><strong>Effect</strong></td><td>What happens?</td><td>deal 2 damage, set flee flag</td><td>Six of the spec's verbs, see <a href="#effects">Effect verbs</a></td></tr>
 </tbody>
 </table>
 
@@ -388,12 +392,12 @@ Component  &rarr;  (Trigger, Condition, Selector, Effect)</code></pre>
 
 <p>
     <strong>Keep this list closed.</strong> It is the main lever on long-term
-    maintainability &mdash; everything else composes these. Five exist; the rest are
+    maintainability &mdash; everything else composes these. Six exist; the rest are
     the spec&rsquo;s vocabulary, recorded here so a new verb is checked against them
     before it is written.
 </p>
 
-<h2 id="verbs-live">The five that exist</h2>
+<h2 id="verbs-live">The six that exist</h2>
 
 <h3 id="traversal"><code>traversal</code></h3>
 <p>Holds a movement / survival flag up while <code>when</code> is true.</p>
@@ -479,7 +483,7 @@ Component  &rarr;  (Trigger, Condition, Selector, Effect)</code></pre>
     emitter with a different binding, and both read <a href="#state">State</a>.
 </p>
 
-<h3 id="mob_effect"><code>mob_effect</code> <span class="allele wild">not executed yet</span></h3>
+<h3 id="mob_effect"><code>mob_effect</code></h3>
 <p>Keeps a mob effect topped up on <code>self</code> or <code>rider</code> while <code>when</code> holds &mdash; the &ldquo;aura on self&rdquo; pattern.</p>
 <table>
 <thead><tr><th>Field</th><th>Default</th><th>Meaning</th></tr></thead>
@@ -498,6 +502,17 @@ Component  &rarr;  (Trigger, Condition, Selector, Effect)</code></pre>
     to widen <code>target</code> rather than add a second verb &mdash; and at that
     point <code>max_targets</code> becomes mandatory, because
     <a href="#invariants">every radius effect has a target cap</a>.
+</p>
+<p>
+    <strong>How the translator runs it:</strong> on the <code>refresh</code> beat
+    (<code>tickCount % refresh == 0</code>) it resolves the id against the mob-effect
+    registry &mdash; an unknown id is logged once and skipped &mdash; picks the
+    target (<code>self</code>, or the controlling passenger for <code>rider</code>,
+    nothing if the saddle is empty), and re-applies a hidden, ambient,
+    icon-less <code>MobEffectInstance</code> of duration <code>refresh + 20</code>.
+    When <code>when</code> goes false the re-apply stops and the effect decays within
+    that window &mdash; there is no explicit removal. <a href="gene-suntouched.html">Suntouched</a>
+    is the worked example (<code>minecraft:glowing</code> on <code>self</code>).
 </p>
 
 <h3 id="yield"><code>yield</code></h3>
@@ -533,6 +548,48 @@ Component  &rarr;  (Trigger, Condition, Selector, Effect)</code></pre>
 </tbody>
 </table>
 
+<h3 id="glow"><code>glow</code></h3>
+<p>
+    Makes the carrier a light source and/or marks coat regions as full-bright &mdash;
+    the &ldquo;this horse shines&rdquo; verb. The two halves are independent.
+</p>
+<table>
+<thead><tr><th>Field</th><th>Default</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr><td><code>light</code></td><td><code>0</code></td><td>World light level 0&ndash;15 the horse emits. <code>0</code> = no dynamic light.</td></tr>
+<tr><td><code>parts</code></td><td><code>[]</code></td><td>Coat regions rendered full-bright over the base coat &mdash; part names or a <a href="gene-format.html">group</a> like <code>"HAIR"</code>. Empty = none.</td></tr>
+</tbody>
+</table>
+<pre><code class="language-json">{ "type": "glow", "light": 12, "parts": [ "HAIR" ] }</code></pre>
+<p>
+    <strong>Dynamic light</strong> is a server-side trick, not a shader: the
+    translator keeps one <code>minecraft:light</code> block trailing the horse,
+    moving it only when the horse changes block and removing it on death / unload
+    (<code>EntityLeaveLevelEvent</code>) or when <code>when</code> goes false. It is
+    skipped in the read-only gallery dimension, only placed into air, and a server
+    crash can orphan one block (the same caveat the portal plots carry). A real
+    mixin-based dynamic light would be cleaner; this needs no coremod.
+</p>
+<p>
+    <strong>Emissive parts</strong> are pure client render.
+    <code>GeneticCoatTextureFactory</code> bakes a second texture &mdash; the coat
+    colour on the named parts, transparent elsewhere &mdash; and
+    <code>client/EmissiveCoatLayer</code> (a twin of vanilla&rsquo;s
+    <code>HorseMarkingLayer</code>) redraws the model through it with
+    <code>RenderTypes.eyes(&hellip;)</code> at full brightness. The emissive colour is
+    whatever the coat <code>layers</code> already painted there, so
+    <a href="gene-suntouched.html">Suntouched</a>&rsquo;s gold <code>TOWARD</code>
+    layer and its <code>glow.parts</code> stay in sync by construction. It is the
+    only effect verb with a client-render component &mdash; adding another such verb
+    means a render layer, not just a translator <code>case</code>.
+</p>
+<p>
+    <code>parts</code> introduced a new parameter kind, <code>PARTS</code>, on
+    <code>AbilityType</code> (parsed through <code>PartGroups.expand</code>, the same
+    expander the coat masks use) &mdash; it is reusable by any future verb that needs
+    a body-region list.
+</p>
+
 <h2 id="verbs-spec">The full verb vocabulary</h2>
 <p>
     Everything not marked live is unbuilt. Before proposing a new verb, check it is
@@ -544,7 +601,8 @@ Component  &rarr;  (Trigger, Condition, Selector, Effect)</code></pre>
 <table>
 <thead><tr><th>Verb</th><th>Status</th><th>Notes</th></tr></thead>
 <tbody>
-<tr><td><code>apply_effect</code></td><td>Partial &mdash; <code>mob_effect</code>, parses only</td><td>Mob effect to self, rider or selected</td></tr>
+<tr><td><code>apply_effect</code></td><td>Live &mdash; <code>mob_effect</code> (<code>self</code> / <code>rider</code>)</td><td>Mob effect to self, rider or selected</td></tr>
+<tr><td><code>emit_light</code> / emissive render</td><td>Live &mdash; <code>glow</code></td><td>Dynamic <code>minecraft:light</code> block + full-bright coat parts. New to the gene layer; see <a href="#divergences">Divergences</a>.</td></tr>
 <tr><td><code>remove_effect</code></td><td>Unbuilt</td><td></td></tr>
 <tr><td><code>transfer_effect</code></td><td>Unbuilt</td><td>Move effects between self and target</td></tr>
 <tr><td><code>damage</code></td><td>Unbuilt</td><td></td></tr>
@@ -1080,6 +1138,8 @@ Component  &rarr;  (Trigger, Condition, Selector, Effect)</code></pre>
 <thead><tr><th>Divergence</th><th>Kind</th><th>Note</th></tr></thead>
 <tbody>
 <tr><td><code>minDose</code> exists on every effect</td><td>Addition</td><td>Genetics-specific. The spec&rsquo;s trait model has no dose concept, and nothing in it needs one.</td></tr>
+<tr><td>The <code>glow</code> verb</td><td>Addition</td><td>The spec models a light as <code>emitter kind:light</code> and has no emissive-render concept at all. <code>glow</code> folds &ldquo;emit world light&rdquo; and &ldquo;render these coat parts full-bright&rdquo; into one verb because they are the two halves of one visible trait. If the spec&rsquo;s emitter ever grows a real <code>light</code> kind, the light half should move there and <code>glow</code> keep only the emissive parts.</td></tr>
+<tr><td><code>glow</code> has a client-render half</td><td>Addition</td><td>Every other verb is translator-only. <code>glow.parts</code> is drawn by <code>client/EmissiveCoatLayer</code>, so &ldquo;add a verb&rdquo; is no longer always just a server <code>case</code>.</td></tr>
 <tr><td><code>sex_female</code> / <code>sex_male</code> / <code>adult</code> / <code>baby</code> flags</td><td>Addition</td><td>Genetics and vanilla age; <code>is_baby</code> exists in the spec only as an <code>entity_state</code> predicate on a selected entity, not as a self condition.</td></tr>
 <tr><td>Conditions are boolean, not 0&ndash;1 scalars</td><td>Narrowing</td><td>Known. Blocks ramping effects and <code>curve</code>. See <a href="#conditions-scalar">the scalar model</a>.</td></tr>
 <tr><td>Conditions evaluate in the translator, not against <code>ContextSnapshot</code></td><td>Gap</td><td>Breaks the domain/translator split for condition logic. See <a href="#split">Domain and integration split</a>.</td></tr>
@@ -1291,12 +1351,12 @@ record Sound(Trigger trigger, String sound, double volume, double pitch,
 <p>
     If you can&rsquo;t implement it yet, call <code>warnUntranslated("sound", &hellip;)</code>
     &mdash; it logs once so a gene author knows the verb parsed but does nothing,
-    exactly like <code>attribute</code> / <code>mob_effect</code> today.
+    exactly like <code>attribute</code> today.
 </p>
 
 <h3>4. A section on this page</h3>
 <p>
-    Add an <code>&lt;h3&gt;</code> under <a href="#verbs-live">The five that exist</a>
+    Add an <code>&lt;h3&gt;</code> under <a href="#verbs-live">The six that exist</a>
     with the parameter table and a JSON example, bump the count in that heading, and
     update the verb&rsquo;s row in <a href="#verbs-spec">The full verb vocabulary</a>
     from <em>Unbuilt</em> to its new status. If the verb is <em>not</em> in the

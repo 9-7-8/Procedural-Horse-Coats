@@ -355,6 +355,15 @@ default int visible(int px, int py, int channel);</code></pre>
     <code>:adult</code> / <code>:foal</code>. The cache is cleared on world exit.
 </p>
 
+<p>
+    A <a href="gene-effects.html#glow"><code>glow</code></a> gene adds a second
+    consumer: <code>getOrCreateEmissive</code> re-runs <code>compose</code>, copies
+    the resulting colour on the gene's emissive parts into a fresh mask (transparent
+    elsewhere), and caches it under <code>coat_glow/&lt;hash&gt;</code>.
+    <code>EmissiveCoatLayer</code> draws that mask full-bright over the base coat.
+    The pipeline itself is untouched &mdash; the emissive path only reads its output.
+</p>
+
 <div class="note danger">
     <span class="label">CoatTextureId &mdash; do not go back to lower-casing</span>
     <p>

@@ -163,26 +163,28 @@
 <p>
     Every other gene is either a hand-written Java class or a file the player drops in
     themselves. Waterborn ships <em>inside the mod</em>: a classpath index
-    (<code>neoforge-26.1.2/src/main/resources/horsegenetics/genes/index.json</code>
-    listing <code>waterborn.json</code>) that <code>GeneSpecLoader.fromClasspath()</code>
-    registers from the mod constructor. It was done to make the effects work testable
-    without a config drop, and it breaks the standing &ldquo;no gene ships by
-    default&rdquo; rule on purpose:
+    (<code>neoforge-26.1.2/src/main/resources/horsegenetics/genes/index.json</code>)
+    that <code>GeneSpecLoader.fromClasspath()</code> registers from the mod
+    constructor. <a href="gene-suntouched.html">Suntouched</a> was added beside it
+    the same way. It was done to make the effects work testable without a config
+    drop, and it breaks the standing &ldquo;no gene ships by default&rdquo; rule on
+    purpose &mdash; with the two shipped genes:
 </p>
 
 <ul>
-    <li>the <strong>in-game genotype code is 12 segments</strong>, and 11-segment
-        saved horses will not load;</li>
-    <li>the horse-dimension gallery / <code>GenotypeCatalog</code> roughly
-        <strong>doubles</strong>;</li>
+    <li>the <strong>in-game genotype code is 13 segments</strong>, and shorter saved
+        horses will not load;</li>
+    <li>the horse-dimension gallery / <code>GenotypeCatalog</code> is roughly
+        <strong>4&times;</strong> its no-gene size (each shipped DOMINANT
+        two-allele gene doubles it);</li>
     <li><strong><code>:common:test</code> is unaffected</strong> &mdash; that index is
         in the NeoForge module&rsquo;s resources, not on the common test classpath, so
         the golden test and the 11-built-in count still hold.</li>
 </ul>
 
 <p>
-    To turn Waterborn off, delete those two files. The horse dimension is due for an
-    overhaul regardless.
+    To turn Waterborn off, drop it from <code>index.json</code> and delete the file.
+    The horse dimension is due for an overhaul regardless.
 </p>
 
 <h2>Not modelled yet</h2>

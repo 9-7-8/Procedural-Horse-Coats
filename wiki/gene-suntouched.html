@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Suntouched &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="nav.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow magical">Magical gene <span class="sep">/</span> phase 3 + effects</p>
+<h1>Suntouched</h1>
+<p class="lede">
+    A horse lit from within &mdash; molten-gold mane and tail that stay bright in
+    the dark, and a body that <strong>casts light</strong> like a torch. It sheds a
+    slow drift of gold sparks as it stands or moves. Suntouched is a data-driven
+    gene &mdash; a JSON file, not a Java class &mdash; and it is the
+    <strong>worked example for the <code>glow</code>
+    <a href="gene-effects.html#glow">effect verb</a></strong>.
+</p>
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd>example.suntouched</dd></div>
+    <div><dt>Alleles</dt><dd><span class="allele dom">Sntch</span> <span class="allele wild">n</span></dd></div>
+    <div><dt>Dominance</dt><dd>DOMINANT</dd></div>
+    <div><dt>Wild type</dt><dd>n</dd></div>
+    <div><dt>Wild frequency</dt><dd>1 in 128 per allele &rarr; ~1 wild horse in 64 shows it</dd></div>
+    <div><dt>Founder draws</dt><dd>2 &times; nextInt(128)</dd></div>
+    <div><dt>Deterministic</dt><dd><strong>yes</strong> &mdash; no knobs, so every carrier bakes the same gold mane</dd></div>
+    <div><dt>Visible when</dt><dd>Sntch_</dd></div>
+    <div><dt>Epigenetic draws</dt><dd>none</dd></div>
+    <div><dt>Priority</dt><dd>210 &mdash; a data-driven magical gene, slots before <a href="gene-waterborn.html">Waterborn</a> (215) and before Test in <code>magicalOrder()</code></dd></div>
+    <div><dt>Mane colour</dt><dd><code>#ffcf47</code> (255, 207, 71), 88% of the way there</dd></div>
+    <div><dt>Effects</dt><dd><code>glow</code> light 12 + emissive <code>HAIR</code>, <code>emitter</code> gold-dust aura</dd></div>
+</dl>
+
+<div class="note warn">
+    <span class="label">Partly verified in-game (2026-09-02)</span>
+    <p>
+        <strong>Confirmed:</strong> the emissive gold mane and tail render (bright
+        in the dark) and look good, the gold-dust <code>emitter</code> shows, and
+        the horse lights the area around it. <strong>Still unverified:</strong> the
+        light cleaning up on death / unload, the foal case, the gallery-dimension
+        skip, and hard base coats (cremello, dominant white). Checklist item is
+        <a href="verification.html#effects">To be verified &sect;13</a>.
+    </p>
+</div>
+
+<h2 id="coat">The coat: a molten-gold mane and tail</h2>
+
+<p>
+    The visual half is one ordinary magical coat layer: a <code>PARTS</code> mask on
+    the <code>HAIR</code> parts (mane + tail) crossed with a <code>TOWARD</code> op
+    that walks each hair texel <strong>88%</strong> of the way to <code>#ffcf47</code>.
+</p>
+
+<div class="codebox">
+<div class="filename">the coat layer, from suntouched.json</div>
+<pre><code class="language-json">{
+  "name": "molten-gold glow through the mane and tail",
+  "masks": [
+    { "type": "PARTS", "parts": [ "HAIR" ] }
+  ],
+  "op": { "type": "TOWARD", "color": "#ffcf47", "strength": 88, "opacity": 100 }
+}</code></pre>
+</div>
+
+<p>
+    <code>TOWARD</code> rather than <code>TINT</code> for the same reason
+    <a href="gene-pink-hair.html">pink hair</a> and <a href="gene-waterborn.html">Waterborn</a>
+    use it: it <em>reads</em> what each strand currently looks like and steps it
+    toward the target, so the mane keeps its light and dark instead of flattening to
+    a slab, and it reads the same over a black, a chestnut or a cremello.
+    <code>opacity: 100</code> means the gold also shows on a
+    <a href="gene-white.html">dominant-white</a> horse.
+</p>
+
+<p>
+    Suntouched carries <strong>no knobs</strong>, so a visible carrier is
+    <strong>deterministic</strong>: every Suntouched horse bakes one shared texture
+    per base coat, and there is nothing on the <code>Sntch</code> copy for a foal to
+    inherit beyond the allele itself. It is the first shipped data-driven gene with
+    no per-horse randomness at all.
+</p>
+
+<h2 id="effects">The effects</h2>
+
+<p>
+    The behaviour half is an <code>effects</code> block &mdash; two of the
+    <a href="gene-effects.html">six effect verbs</a>. <code>common/</code> parses it;
+    the NeoForge translator and the client renderer run it.
+</p>
+
+<div class="codebox">
+<div class="filename">the effects block, from suntouched.json</div>
+<pre><code class="language-json">"effects": [
+  {
+    "type": "glow",
+    "light": 12,
+    "parts": [ "HAIR" ]
+  },
+  {
+    "type": "emitter", "kind": "particle", "shape": "point", "anchor": "body",
+    "trigger": { "interval": 6 },
+    "particle": "minecraft:dust", "color": "#ffcf47", "chance": 0.35
+  }
+]</code></pre>
+</div>
+
+<dl class="spec">
+    <div>
+        <dt>the cast light (<code>light: 12</code>)</dt>
+        <dd>The server keeps a single <code>minecraft:light</code> block at light
+            level&nbsp;12 trailing the horse &mdash; moved only when the horse walks
+            into a new block, dropped on death / unload / dimension change
+            (<code>EntityLeaveLevelEvent</code>). It is only placed into air, and it
+            is <strong>skipped in the gallery dimension</strong> so the read-only
+            horse dimension doesn&rsquo;t fill with light blocks. A server crash can
+            orphan one block &mdash; the same caveat the portal plots carry. There is
+            no <code>when</code>, so a Suntouched horse always glows, foal included.</dd>
+    </div>
+    <div>
+        <dt>the emissive mane (<code>parts: ["HAIR"]</code>)</dt>
+        <dd>Pure client render. <code>GeneticCoatTextureFactory</code> bakes a second
+            texture &mdash; the coat colour on the mane and tail texels, transparent
+            everywhere else &mdash; and <code>EmissiveCoatLayer</code> redraws the
+            model through it at full brightness, so the gold hair keeps glowing with
+            no light on it. The colour is exactly what the <code>TOWARD</code> layer
+            above painted, so the two never drift. Foal: tail only (no mane part on
+            the foal mesh), matching the coat layer.</dd>
+    </div>
+    <div>
+        <dt>the gold-dust aura</dt>
+        <dd>A <code>minecraft:dust</code> particle in <code>#ffcf47</code> centred on
+            the horse&rsquo;s <code>body</code>, a single point every
+            <code>interval</code> = 6 ticks with a per-fire chance of 0.35. Unlike
+            Waterborn&rsquo;s <code>on_move</code> hoof trail, this one fires whether
+            the horse is standing or moving &mdash; a steady shimmer rather than a
+            track.</dd>
+    </div>
+</dl>
+
+<div class="note">
+    <span class="label">Why <code>glow</code> and not <code>mob_effect: glowing</code></span>
+    <p>
+        <code>minecraft:glowing</code> only draws the entity outline through walls
+        &mdash; it doesn&rsquo;t light anything and it isn&rsquo;t gold. Suntouched
+        wants real illumination and a mane that reads as molten metal in a cave, so
+        it uses the <a href="gene-effects.html#glow"><code>glow</code></a> verb, whose
+        two halves (a world light level, a set of full-bright coat parts) are exactly
+        those two asks. The <code>mob_effect</code> verb is still there for auras like
+        <code>dolphins_grace</code>; it just isn&rsquo;t the right tool for &ldquo;this
+        horse shines&rdquo;.
+    </p>
+</div>
+
+<h2 id="shipping">Ships as a file, like Waterborn</h2>
+
+<p>
+    Suntouched ships <em>inside the mod</em> the same way
+    <a href="gene-waterborn.html#shipping">Waterborn</a> does: the classpath index
+    <code>neoforge-26.1.2/src/main/resources/horsegenetics/genes/index.json</code>
+    now lists <code>suntouched.json</code> and <code>waterborn.json</code>, and
+    <code>GeneSpecLoader.fromClasspath()</code> registers both from the mod
+    constructor. With two shipped genes:
+</p>
+
+<ul>
+    <li>the <strong>in-game genotype code is 13 segments</strong>, and shorter saved
+        horses will not load;</li>
+    <li>the horse-dimension gallery / <code>GenotypeCatalog</code> is roughly
+        <strong>4&times;</strong> its no-gene size (each shipped
+        <code>DOMINANT</code> two-allele gene doubles it);</li>
+    <li><strong><code>:common:test</code> is unaffected</strong> &mdash; the index is
+        in the NeoForge module&rsquo;s resources, not on the common test classpath, so
+        the golden test and the 11-built-in count still hold. The
+        <code>example-genes/suntouched.json</code> copy that the unit tests read is
+        loaded by name, never as a registered gene.</li>
+</ul>
+
+<p>To turn Suntouched off, drop it from <code>index.json</code> and delete the file.</p>
+
+<h2>Not modelled yet</h2>
+
+<ul>
+    <li>One gold, one strength; no per-horse variation and no allelic series
+        (rose-gold / white-gold / ember).</li>
+    <li>The dynamic light is a trailing <code>minecraft:light</code> block, not a
+        proper moving light source &mdash; it lags a fast gallop and can&rsquo;t light
+        a spot already occupied by a block. A mixin-based light would be smoother.</li>
+    <li>The glow is on all the time. A <code>when: { flag: "night" }</code> or
+        <code>{ flag: "sky_visible" }</code> gate would make it a day/night trait
+        &mdash; the light block clears within a tick of <code>when</code> going
+        false.</li>
+    <li>The <a href="gene-creator/index.html">gene creator</a> cannot edit an
+        <code>effects</code> block &mdash; this one was hand-written.</li>
+</ul>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="gene-effects.html#glow">glow verb reference</a>
+        <a href="gene-waterborn.html">Waterborn (the other shipped gene)</a>
+        <a href="horse-traits.html">Trait &amp; effect architecture</a>
+        <a href="gene-format.html">The gene file format</a>
+        <a href="verification.html#effects">What to check in-game</a>
+    </div>
+    Source: <code>common/src/main/resources/horsegenetics/example-genes/suntouched.json</code>
+    (and the shipped copy under <code>neoforge-26.1.2/&hellip;/resources/horsegenetics/genes/</code>)
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+</body>
+</html>

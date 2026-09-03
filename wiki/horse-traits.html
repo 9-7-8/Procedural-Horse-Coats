@@ -32,10 +32,13 @@
         <code>AbilityType</code>, <code>GeneSpecParser</code>,
         <code>SpecAbilities</code>; unit-tested). The NeoForge translator
         (<code>server/GeneAbilityHandler</code>, <code>server/GeneYieldHandler</code>)
-        executes <code>traversal</code>, <code>emitter</code> and <code>yield</code>.
-        <strong>Defined but not executed yet:</strong> <code>attribute</code> and
-        <code>mob_effect</code> (parsed and carried, logged once at runtime).
-        Nothing here has been seen in-game &mdash; see
+        executes <code>traversal</code>, <code>emitter</code>, <code>mob_effect</code>,
+        <code>yield</code> and <code>glow</code> (a dynamic <code>minecraft:light</code>
+        block plus a client-side full-bright coat layer).
+        <strong>Defined but not executed yet:</strong>
+        <code>attribute</code> (parsed and carried, logged once at runtime).
+        Owner-confirmed in-game (2026-09-02): Waterborn's coat + trail and
+        Suntouched's <code>glow</code>; the rest is unverified &mdash; see
         <a href="verification.html">To be verified</a>. Everything below the
         &ldquo;full architecture&rdquo; heading is <em>unbuilt</em>.
     </p>
@@ -45,13 +48,14 @@
 
 <p>
     A data-driven gene&rsquo;s JSON may carry an <code>effects</code> array alongside
-    its <code>layers</code>: a <strong>closed set of five verbs</strong> &mdash;
+    its <code>layers</code>: a <strong>closed set of six verbs</strong> &mdash;
     <code>traversal</code> (a movement / survival flag), <code>attribute</code> (a
     condition-gated modifier), <code>emitter</code> (particles on a trigger),
-    <code>mob_effect</code> (an aura on self or rider), and <code>yield</code> (the
-    horse hands something back on a right-click). Every entry also takes an optional
-    <code>when</code> condition and a <code>minDose</code> (<code>1</code> = any
-    expressing copy, <code>2</code> = homozygous only).
+    <code>mob_effect</code> (an aura on self or rider), <code>yield</code> (the
+    horse hands something back on a right-click), and <code>glow</code> (the horse
+    emits world light and/or renders some coat parts full-bright). Every entry also
+    takes an optional <code>when</code> condition and a <code>minDose</code>
+    (<code>1</code> = any expressing copy, <code>2</code> = homozygous only).
 </p>
 
 <p>
@@ -568,7 +572,7 @@ Component  -> (Trigger, Condition, Selector, Effect)</code></pre>
 <tr><td>Trigger</td><td><code>continuous</code>, <code>on_move</code>, <code>interval</code>, <code>on_interact</code></td><td>lifecycle, combat, <code>on_change</code> edge detection</td></tr>
 <tr><td>Condition</td><td>boolean flags + <code>all</code>/<code>any</code>/<code>not</code></td><td>0&ndash;1 scalars, <code>threshold</code>, <code>curve</code>, pool reads</td></tr>
 <tr><td>Selector</td><td>&mdash; (self only)</td><td>the whole targeting DSL</td></tr>
-<tr><td>Effect</td><td><code>traversal</code>, <code>emitter</code>, <code>yield</code> (built); <code>attribute</code>, <code>mob_effect</code> (defined)</td><td>the closed verb list</td></tr>
+<tr><td>Effect</td><td><code>traversal</code>, <code>emitter</code>, <code>mob_effect</code>, <code>yield</code>, <code>glow</code> (built); <code>attribute</code> (defined)</td><td>the closed verb list</td></tr>
 <tr><td>Aura</td><td>&mdash;</td><td>radius effects with <code>max_targets</code></td></tr>
 <tr><td>Pools, Memory, Locator, Ability, Goals</td><td>&mdash;</td><td>each its own system</td></tr>
 <tr><td>Trait scaling / discovery / variants</td><td>&mdash; (<code>minDose</code> is the only dose-sensitivity)</td><td>scaling blocks, hidden traits, spawn presets</td></tr>

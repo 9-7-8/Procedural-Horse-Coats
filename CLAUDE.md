@@ -102,7 +102,7 @@ project. Its shape:
 
 ## Status snapshot (keep this current)
 
-- **`common/`** - compiles; **185 JUnit tests pass** (`./gradlew :common:test`).
+- **`common/`** - compiles; **191 JUnit tests pass** (`./gradlew :common:test`).
   Covers `genetics/` (allele/gene model - **11 genes**: the 9 natural ones incl.
   grey / cream / pearl / splash, plus magic zebra and pink hair; `Genotype` code
   round-trip, breeding, the `Epigenome` / `Genome` per-allele epigenetics +
@@ -126,7 +126,8 @@ project. Its shape:
   attachments, SavedData, payloads (incl. `spawn_custom_horse`), the
   `hay_portal` block + block entity, the `custom_horse_spawn_egg` item, and
   the `ClientConfig` all register with no errors. Re-verified 2026-09-02 with
-  the shipped Waterborn gene loaded (`[genes] ... 12 segments`).
+  the shipped **Waterborn + Suntouched** genes loaded (`[genes] loaded 2
+  data-driven gene(s): example.suntouched, example.waterborn ... 13 segments`).
 - **`runClient`** - actively play-tested over the 2026-08-30, 2026-09-01 and
   2026-09-02 sessions; see below.
 
@@ -136,6 +137,11 @@ project. Its shape:
   - **Waterborn's coat**: the neon-blue streaks in the mane and tail render.
   - **Waterborn's particle trail**: the blue dust at the hooves on the move
     works. `walk_on_water` and the tamed-mare milking are **not** yet
+    confirmed - `wiki/verification.html` §13.
+  - **Suntouched's `glow`**: the emissive gold mane + tail render (bright in the
+    dark), the gold-dust `emitter` shows, and the horse **lights the area around
+    it** (the trailing `minecraft:light` block). Light cleanup on death/unload,
+    the foal case, and hard base coats (cremello, dominant white) are **not** yet
     confirmed - `wiki/verification.html` §13.
 
 - **Owner-verified in-game (2026-09-01):**
@@ -206,19 +212,33 @@ project. Its shape:
   See "Data-driven genes" below; in-game checklist in `wiki/verification.html`.
 - **Built 2026-09-02, partly play-tested:** **gene `effects`** - a data-driven
   gene can carry Minecraft-specific behaviour alongside its coat `layers`.
-  Five verbs (`traversal`, `attribute`, `emitter`, `mob_effect`, `yield`), each
-  with an optional boolean `when` and a `minDose`. `common/` parses and
-  validates all five (`GeneAbility` records / one `AbilityType` per-verb
-  declaration / a generic `GeneSpecParser.readAbility` / `SpecAbilities`,
+  Six verbs (`traversal`, `attribute`, `emitter`, `mob_effect`, `yield`,
+  `glow`), each with an optional boolean `when` and a `minDose`. `common/`
+  parses and validates all six (`GeneAbility` records / one `AbilityType`
+  per-verb declaration / a generic `GeneSpecParser.readAbility` / `SpecAbilities`,
   unit-tested); the NeoForge translator
   (`server/GeneAbilityHandler`, `server/GeneYieldHandler`) executes
-  `traversal` + `emitter` + `yield`. **`attribute` and `mob_effect` are parsed
-  but not executed yet** (logged once). `walk_on_water` is an approximation
-  (surface buoyancy, not a solid plane). The shipped **Waterborn** gene is the
-  exerciser: neon-blue mane/tail streaks + the blue particle trail are
-  **owner-confirmed in-game (2026-09-02)**; `walk_on_water` and the tamed-mare
-  milking are not yet. Reference: `wiki/gene-effects.html` (verbs + the
-  "add an effect" contract), `wiki/gene-waterborn.html` (the gene),
+  `traversal` + `emitter` + `mob_effect` + `yield` + `glow`. **`attribute` is
+  the one verb parsed but not executed yet** (logged once). `mob_effect`
+  resolves the id against the registry and keeps a hidden/ambient effect topped
+  up on the `self` / `rider` target on its `refresh` beat (duration
+  `refresh + 20`, so a `when` going false lets it decay - no explicit removal).
+  **`glow`** has two independent halves: `light` (0-15) maintains a trailing
+  `minecraft:light` block server-side (moved on block change, cleared on
+  `EntityLeaveLevelEvent` / `when` false, skipped in the gallery dimension,
+  air-only placement), and `parts` (a body-region list - a new `AbilityType`
+  `Kind.PARTS` parsed through `PartGroups.expand`) drives
+  `client/EmissiveCoatLayer`, which redraws those coat parts full-bright over
+  the base coat via a second baked texture. `walk_on_water` is an approximation
+  (surface buoyancy, not a solid plane). Two shipped genes exercise it:
+  **Waterborn** (`traversal` + `emitter` + `yield`) - neon-blue mane/tail
+  streaks + blue particle trail **owner-confirmed in-game (2026-09-02)**,
+  `walk_on_water` and the tamed-mare milking not yet - and **Suntouched**
+  (`glow` + `emitter`) - light 12 + emissive gold mane + a gold-dust aura, the
+  emissive mane and the area lighting both **owner-confirmed in-game
+  (2026-09-02)**.
+  Reference: `wiki/gene-effects.html` (verbs + the "add an effect" contract),
+  `wiki/gene-waterborn.html` + `wiki/gene-suntouched.html` (the genes),
   `wiki/horse-traits.html` (the wider architecture); checklist
   `wiki/verification.html` §13.
 - **Play-tested 2026-09-02, works:** the **custom horse spawn egg**
@@ -244,19 +264,33 @@ project. Its shape:
   the bottom of a short screen and hide the last gene (now bounded multi-column
   in the picker, mouse-wheel scroll in the editor). A gene only shows in the
   list (and can only be spawned) if it is actually registered.
-- **Behaviour change 2026-09-02: Waterborn now ships loaded.** To make the
-  data-driven-effects work testable in-game, `example.waterborn` is registered
-  via a **classpath gene index** - `neoforge-26.1.2/src/main/resources/
-  horsegenetics/genes/index.json` (`["waterborn.json"]`) + `waterborn.json`
-  beside it, which `GeneSpecLoader.fromClasspath()` picks up in the mod
-  constructor. This is the **first gene file to ship**, so it breaks the "no
-  gene ships by default" invariant on purpose (the owner OK'd it): the in-game
-  genotype code is now **12 segments**, `GenotypeCatalog`/the gallery double,
-  and 11-segment saved horses won't parse. **`:common:test` is unaffected** -
-  the index lives in the neoforge module's resources, not on the `common` test
-  classpath, so `Genes` stays at 11 built-ins there and `coat-golden.txt` +
-  `SpecGeneTest`'s `BUILT_IN_GENES == 11` still hold. The horse dimension will
-  be overhauled later regardless.
+- **Behaviour change 2026-09-02: Waterborn + Suntouched ship loaded.** To make
+  the data-driven-effects work testable in-game, `example.waterborn` and
+  `example.suntouched` are registered via a **classpath gene index** -
+  `neoforge-26.1.2/src/main/resources/horsegenetics/genes/index.json`
+  (`["suntouched.json", "waterborn.json"]`) + the two files beside it, which
+  `GeneSpecLoader.fromClasspath()` picks up in the mod constructor. These are the
+  **first (and so far only) gene files to ship**, breaking the "no gene ships by
+  default" invariant on purpose (the owner OK'd it): the in-game genotype code is
+  now **13 segments**, `GenotypeCatalog`/the gallery are ~**4x** (each shipped
+  `DOMINANT` two-allele gene doubles them), and shorter saved horses won't parse.
+  **`:common:test` is unaffected** - the index lives in the neoforge module's
+  resources, not on the `common` test classpath, so `Genes` stays at 11
+  built-ins there and `coat-golden.txt` + `SpecGeneTest`'s `BUILT_IN_GENES == 11`
+  still hold. The horse dimension will be overhauled later regardless.
+- **Built 2026-09-02, `glow` owner-confirmed in-game:** **Suntouched**
+  (`example.suntouched`, allele `Sntch`/`n`, DOMINANT magical, wildOdds 128,
+  priority 210), plus the **`mob_effect`** and **`glow`** verb translators
+  (`mob_effect` has no shipped user and is unverified). Suntouched is a spec gene
+  shipped as its own file: one deterministic coat layer (`PARTS` on `HAIR` x
+  `TOWARD` gold `#ffcf47` at 88%) plus an `effects` block of `glow`
+  (`light: 12`, `parts: ["HAIR"]`) and an `emitter` (gold `#ffcf47` dust,
+  `interval` 6, `body` anchor). It is the worked example for `glow`:
+  `server/GeneAbilityHandler.reconcileGlow` maintains the light block and
+  `client/EmissiveCoatLayer` + `GeneticCoatTextureFactory.getOrCreateEmissive`
+  draw the full-bright mane. `mob_effect` was wired in the same pass
+  (`applyMobEffect`) but nothing shipped uses it now. See
+  `wiki/gene-suntouched.html`; checklist `wiki/verification.html` §13.
 - **Docs 2026-09-02, no behaviour change:** the **`Docs/*.md` -> wiki
   conversion**. All five markdown docs are gone; their content lives in
   `wiki/*.html` (see the Docs-split section above), the four Javadoc comments
@@ -351,7 +385,8 @@ Two-module Gradle project, split deliberately:
   This is the part that survives a version port unchanged. If you want to
   import anything Minecraft-related here, stop.
 - **`neoforge-26.1.2/`** - everything Minecraft-specific, by concern:
-  - `client/` - renderer, texture compositing, client caches, the inventory
+  - `client/` - renderer, texture compositing (incl. `EmissiveCoatLayer` for a
+    `glow` gene's full-bright coat parts), client caches, the inventory
     hooks + `FamilyTreeScreen`, keybind, lifecycle cleanup.
   - `data/` - Data Attachments, the ancestry `SavedData`, codecs.
   - `network/` - custom payloads + `ModNetworking`.
@@ -520,12 +555,13 @@ reference is **`wiki/gene-format.html`**; the machinery:
   downstream knows or cares that it came from a file - genotype code, breeding,
   the catalogue, the coat.
 - **Loading** is `GeneSpecLoader`: a classpath index (for genes shipped inside a
-  mod) plus a real folder walked in filename order. **One gene now ships** -
-  `example.waterborn`, via `neoforge/src/main/resources/horsegenetics/genes/
-  index.json`, added 2026-09-02 to make the effects work testable (see the
-  status snapshot). So **in-game** the genotype code is 12 segments and the
-  gallery numbers are doubled; **`:common:test` still sees 11** because that
-  index is not on its classpath, so `coat-golden.txt` is untouched.
+  mod) plus a real folder walked in filename order. **Two genes now ship** -
+  `example.suntouched` and `example.waterborn`, via
+  `neoforge/src/main/resources/horsegenetics/genes/index.json`, added 2026-09-02
+  to make the effects work testable (see the status snapshot). So **in-game** the
+  genotype code is 13 segments and the gallery numbers are ~4x; **`:common:test`
+  still sees 11** because that index is not on its classpath, so `coat-golden.txt`
+  is untouched.
   `neoforge/ModGeneSpecs` calls it **from the mod constructor**, which is the
   earliest hook there is: every registration lengthens the genotype code by a
   segment, so a gene registered after something has parsed a code would
@@ -534,8 +570,8 @@ reference is **`wiki/gene-format.html`**; the machinery:
 ### `effects` - Minecraft behaviour on a data-driven gene
 
 A spec may carry an **`effects`** array alongside `layers` - the things a gene
-makes the horse *do*, not the pixels it paints. Closed set of five verbs
-(`traversal`, `attribute`, `emitter`, `mob_effect`, `yield`); each takes an
+makes the horse *do*, not the pixels it paints. Closed set of six verbs
+(`traversal`, `attribute`, `emitter`, `mob_effect`, `yield`, `glow`); each takes an
 optional boolean **`when`** (flags + `all`/`any`/`not`) and a **`minDose`**
 (1 = any expressing copy, 2 = homozygous). `common/` owns the vocabulary and
 the parse (`GeneAbility` records, one `AbilityType` module per verb, a
@@ -543,15 +579,23 @@ the parse (`GeneAbility` records, one `AbilityType` module per verb, a
 and `SpecAbilities.activeFor(Genotype)` which picks the expressed ones); it
 never touches Minecraft. The **NeoForge translator** is `server/`
 `GeneAbilityHandler` (an `EntityTickEvent.Post` that evaluates conditions and
-applies `traversal` + fires `emitter`s) and `server/GeneYieldHandler` (an
+applies `traversal`, fires `emitter`s, keeps `mob_effect`s topped up via
+`applyMobEffect`, and reconciles `glow`'s light block via `reconcileGlow` +
+an `EntityLeaveLevelEvent` cleanup) and `server/GeneYieldHandler` (an
 `EntityInteract` handler for `yield`). Both short-circuit when
-`SpecAbilities.anyLoaded()` is false (true again if the shipped Waterborn gene
-is removed).
-**`attribute` and `mob_effect` are carried but not executed yet** - the
-handler logs each type once. `walk_on_water` is surface buoyancy + "don't
-sink", not a real collision plane. **Not play-tested.** Full reference and the
-Waterborn worked example: `wiki/horse-traits.html`. **Built-in Java genes do
-not use this path** - it is spec-only.
+`SpecAbilities.anyLoaded()` is false (true again only if both shipped genes are
+removed). `glow` also has a **client** half - `GeneticHorseRenderer` reads the
+expressed `Glow.emissiveParts()`, `GeneticCoatTextureFactory.getOrCreateEmissive`
+bakes a full-bright mask, and `client/EmissiveCoatLayer` (a twin of vanilla's
+`HorseMarkingLayer`) draws it with `RenderTypes.eyes(...)`. It is the only verb
+with a client-render component.
+**`attribute` is the one verb carried but not executed yet** - the handler logs
+it once (and logs `mob_effect:<id>` once if an effect id fails to resolve).
+`walk_on_water` is surface buoyancy + "don't sink", not a real collision plane.
+**Not play-tested.** Full reference: `wiki/gene-effects.html`; worked examples
+`wiki/gene-waterborn.html` + `wiki/gene-suntouched.html`; the wider architecture
+`wiki/horse-traits.html`. **Built-in Java genes do not use this path** - it is
+spec-only.
 
 ### The creator, and why it can be trusted
 
@@ -1458,15 +1502,20 @@ Design follow-ups (not just "go look at it"):
    script at the terminal, so the tool itself will happily show you a stale
    preview if you edit `js/` and don't run it. Loading `fixtures/expected.json`
    in the page and self-checking on boot would close that.
-15. **Gene `effects` are a thin slice and untested.** `attribute` and
-   `mob_effect` parse but the translator doesn't apply them (logged once).
-   `walk_on_water` is buoyancy, not a solid plane; `emitter` only does
-   particles (`light` is a no-op); `yield` recognises a fixed handful of output
-   items. Conditions are boolean, not the architecture's 0-1 scalars. There is
-   no trait registry, no `on_change`, no selectors/auras/pools. The gene
-   creator can't edit an `effects` block - it's hand-written. Nothing here has
-   been seen in-game (`wiki/verification.html`). The full plan is
-   `wiki/horse-traits.html`.
+15. **Gene `effects` are a thin slice and mostly untested.** `attribute` still
+   parses but the translator doesn't apply it (logged once). `mob_effect` is
+   wired (`applyMobEffect`). `glow` is wired both sides - the light half is a
+   trailing `minecraft:light` block (janky vs a mixin-based dynamic light: lags
+   a gallop, air-only, orphans on a server crash, skipped in the gallery), the
+   emissive half is `EmissiveCoatLayer` reading the composed coat. `emitter`'s
+   own `light` kind is still a no-op (use `glow`); `emitter` otherwise only does
+   particles; `yield` recognises a fixed handful of output items;
+   `walk_on_water` is buoyancy, not a solid plane. Conditions are boolean, not
+   the architecture's 0-1 scalars. There is no trait registry, no `on_change`,
+   no selectors/auras/pools. The gene creator can't edit an `effects` block -
+   it's hand-written. Only Waterborn's coat + trail are confirmed in-game;
+   Suntouched and every other effect verb are unverified
+   (`wiki/verification.html` §13). The full plan is `wiki/horse-traits.html`.
 
 ## License
 
@@ -1508,13 +1557,17 @@ its licence is compatible.
 - **A new `effects` verb** lands in **four** places, only one of them shared:
   a `record` on `GeneAbility`, one `register(new AbilityType(...))` on
   `AbilityType` (name + params + defaults + validation + record builder - the
-  parser reads this generically, no `readAbility` change), a `case` in the
+  parser reads this generically, no `readAbility` change unless the verb needs a
+  new param `Kind`, as `glow`'s `parts` needed `Kind.PARTS`), a `case` in the
   NeoForge translator (`server/GeneAbilityHandler` tick switch, or
   `server/GeneYieldHandler` for interaction), and a section in
-  `wiki/gene-effects.html`. A new **condition flag** is two lines
-  (`AbilityType.CONDITION_FLAGS` + `GeneAbilityHandler.flagHolds`); a new
-  **trigger** also touches `GeneSpecParser.readTrigger`. None of it is part of
-  `SpecSchema` or the parity check - effects don't paint.
+  `wiki/gene-effects.html`. A verb with a **client-render** component (so far
+  only `glow`) also needs a `RenderLayer` + a `GeneticHorseRenderState` field +
+  the bake in `GeneticCoatTextureFactory` - not just a translator `case`. A new
+  **condition flag** is two lines (`AbilityType.CONDITION_FLAGS` +
+  `GeneAbilityHandler.flagHolds`); a new **trigger** also touches
+  `GeneSpecParser.readTrigger`. None of it is part of `SpecSchema` or the parity
+  check - effects don't paint.
 - **Keep the why out of the backlog.** `wiki/roadmap.html` is work items;
   when a justification there runs longer than a clause it belongs in
   `wiki/philosophy.html` with a pointer back.

@@ -200,7 +200,8 @@
     A gene may carry an <code>effects</code> array alongside <code>layers</code>: the
     <strong>Minecraft-specific things it makes the horse do</strong>. The set is
     closed &mdash; <code>traversal</code>, <code>attribute</code>,
-    <code>emitter</code>, <code>mob_effect</code>, <code>yield</code> &mdash; and
+    <code>emitter</code>, <code>mob_effect</code>, <code>yield</code>, <code>glow</code>
+    &mdash; and
     every entry accepts an optional <code>when</code> condition (boolean flags with
     <code>all</code>/<code>any</code>/<code>not</code>) and an optional
     <code>minDose</code> (<code>1</code> = any expressing copy, <code>2</code> =
@@ -222,15 +223,18 @@
     "consumes": "minecraft:bucket", "produces": "minecraft:water_bucket",
     "cooldown": 2400,
     "when": { "all": [ { "flag": "sex_female" }, { "flag": "tamed" } ] }
-  }
+  },
+  { "type": "glow", "light": 12, "parts": [ "HAIR" ] }
 ]</code></pre>
 
 <p class="note">
-    <strong>Built 2026-09-02, not play-tested.</strong> <code>common/</code> parses
-    and validates all five; the NeoForge translator runs <code>traversal</code>,
-    <code>emitter</code> and <code>yield</code>; <code>attribute</code> and
-    <code>mob_effect</code> parse but don&rsquo;t run yet. The gene creator does
-    <strong>not</strong> edit <code>effects</code> &mdash; hand-write that block.
+    <code>common/</code> parses and validates all six; the NeoForge translator runs
+    <code>traversal</code>, <code>emitter</code>, <code>mob_effect</code>,
+    <code>yield</code> and <code>glow</code>; <code>attribute</code> parses but
+    doesn&rsquo;t run yet. Waterborn's coat + trail and Suntouched's
+    <code>glow</code> are owner-confirmed in-game (2026-09-02); the rest is
+    unverified. The gene creator does <strong>not</strong> edit <code>effects</code>
+    &mdash; hand-write that block.
 </p>
 
 <h2>What happens when a file is wrong</h2>

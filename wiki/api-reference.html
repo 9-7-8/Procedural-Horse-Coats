@@ -503,6 +503,8 @@ public sealed interface GeneAbility {
                       Condition when, int minDose)                                implements GeneAbility {}
     record Yield(Trigger.OnInteract trigger, String consumes, String produces,
                  int cooldownTicks, Condition when, int minDose)                  implements GeneAbility {}
+    record Glow(int light, List&lt;HorseSkinGeometry.Part&gt; emissiveParts,
+                Condition when, int minDose)                                      implements GeneAbility {}
     sealed interface Trigger   { /* Continuous, OnMove, Interval(ticks), OnInteract(item) */ }
     sealed interface Condition { /* Always, Flag(name,negate), All, Any, Not */ }
 }
@@ -516,7 +518,8 @@ public final class AbilityType {
     static AbilityType byName(String type);       // error lists all
     static Collection&lt;AbilityType&gt; all();
     List&lt;Param&gt; params();  List&lt;String&gt; allowedKeys();
-    // TRAVERSAL, ATTRIBUTE, EMITTER, MOB_EFFECT, YIELD - the five, one field each
+    // TRAVERSAL, ATTRIBUTE, EMITTER, MOB_EFFECT, YIELD, GLOW - the six, one field each.
+    // Param.Kind adds PARTS for GLOW's body-region list (via PartGroups.expand).
 }
 
 // Which of a genotype's abilities are in play (visible gene, minDose met).
