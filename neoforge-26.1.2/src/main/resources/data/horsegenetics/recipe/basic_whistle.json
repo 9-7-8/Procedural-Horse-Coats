@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "horsegenetics:horse_hair",
+    "minecraft:iron_nugget",
+    "minecraft:stick"
+  ],
+  "result": {
+    "id": "horsegenetics:basic_whistle"
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "horsegenetics:horse_hair_bundle"
+  ],
+  "result": {
+    "id": "horsegenetics:horse_hair",
+    "count": 4
+  }
+}

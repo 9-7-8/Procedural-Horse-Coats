@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "horsegenetics:basic_whistle",
+    "minecraft:gold_ingot"
+  ],
+  "result": {
+    "id": "horsegenetics:golden_whistle"
+  }
+}

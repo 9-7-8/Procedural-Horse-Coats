@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:golden_carrot",
+    "horsegenetics:horse_hair",
+    "minecraft:fermented_spider_eye"
+  ],
+  "result": {
+    "id": "horsegenetics:mutinogenic_carrot"
+  }
+}

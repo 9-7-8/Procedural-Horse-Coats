@@ -30,6 +30,9 @@ public final class DebugKeyBindings {
     /** Null in production - always null-check before use. */
     public static KeyMapping generateDebugPens;
 
+    /** Null in production - flashes the particle outline of nearby stalls. */
+    public static KeyMapping showStalls;
+
     @SubscribeEvent
     static void register(RegisterKeyMappingsEvent event) {
         if (FMLEnvironment.isProduction()) {
@@ -46,6 +49,15 @@ public final class DebugKeyBindings {
                 KeyMapping.Category.MISC
         );
         event.register(generateDebugPens);
+
+        showStalls = new KeyMapping(
+                "key.horsegenetics.show_stalls",
+                KeyConflictContext.IN_GAME,
+                InputConstants.Type.KEYSYM,
+                GLFW.GLFW_KEY_F7,
+                KeyMapping.Category.MISC
+        );
+        event.register(showStalls);
     }
 
     private DebugKeyBindings() {

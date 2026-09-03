@@ -31,8 +31,21 @@
     </p>
 </div>
 
-<h2>Open issues</h2>
-<p>Seen in-game 2026-09-01, not fixed.</p>
+<h2 id="open-issues">Open issues</h2>
+<p>Seen in-game, not fixed.</p>
+
+<div class="note warn">
+    <span class="label">Genome display omits data-driven (magical) genes</span>
+    <p>
+        Owner, 2026-09-02: the short genome string (info panel, paper dump, seed-jar
+        tooltip &mdash; all via <code>GeneCodeDisplay.shortForm</code>) never shows the
+        <strong>spec genes</strong>, including the shipped <em>Suntouched</em> /
+        <em>Waterborn</em>. Cause: <code>GeneCodeDisplay.TRAILING_ORDER</code> is a
+        hard-coded <code>List.of(...)</code> of the 11 built-ins; it needs to append
+        <code>Genes.loaded()</code> (and <code>ABSENCE_WILDTYPE</code> should treat a
+        spec gene&rsquo;s <code>n</code> wild type as "absent").
+    </p>
+</div>
 
 <div class="note warn">
     <span class="label">Splash is missing the other face markings</span>
@@ -463,6 +476,191 @@ gold-dust <code>emitter</code> shows, and the horse lights the area around it
     <li>Non-creative use consumes one egg; creative does not. Spawned horses are
         persistent. Two custom horses breed normally.</li>
 </ul>
+
+<h3 id="gameplay-items">15. The gameplay-layer items &mdash; roadmap &sect;&sect;12&ndash;19</h3>
+
+<p>
+    Built 2026-09-02: <strong>17 items</strong> for the gameplay layer. Most are
+    still behaviourless (item + recipe + creative tab only); the <strong>two seed
+    jars have behaviour</strong> &mdash; see &sect;16. Registered in
+    <code>item/ModItems</code>; one <strong>Horse Genetics</strong> creative tab
+    (<code>item/ModCreativeTabs</code>) holds all of them, and the custom horse spawn
+    egg still also shows in the vanilla Spawn Eggs tab. Every item except the two
+    stall signs (which borrow the vanilla oak-sign icon) has owner-supplied art.
+</p>
+
+<ul>
+    <li><strong>Creative tab &amp; names.</strong> Open creative, find the
+        <em>Horse Genetics</em> tab (just before Spawn Eggs); confirm all 20 items
+        show (spawn egg + 19), each with a readable name and its own icon &mdash; not
+        an <code>item.horsegenetics.&hellip;</code> lang key or a missing-texture
+        checkerboard. Tickets (4) deliberately share one icon; whistles (3) share one;
+        the two stall signs share the oak-sign icon.</li>
+    <li><strong>Hair chain.</strong> <code>horse_hair</code> (individual) and
+        <code>horse_hair_bundle</code> are distinct items with distinct art; 4 hair
+        craft a bundle and a bundle uncrafts to 4 hair.</li>
+    <li><strong>Debug world.</strong> The &ldquo;Spawn Test Horse World&rdquo;
+        title-screen button puts the <strong>custom horse spawn egg on hotbar slot
+        0</strong> (tools hay/carrot/stick/clock/paper/lead shifted to 1&ndash;6) and
+        <strong>one of every new item in the main inventory</strong> (slots 9+).</li>
+    <li><strong>Recipes.</strong> All shapeless, each takes at least one modded item.
+        Spot-check in a crafting table:
+        <ul>
+            <li><code>magic_gene_carrot</code> = golden carrot + PLACEHOLDER GENE BOOK
+                + horse hair + gold ingot</li>
+            <li><code>empty_seed_jar</code> = glass bottle + horse hair</li>
+            <li><code>blank_ticket</code> &rarr; <code>basic_ticket</code> &rarr;
+                <code>bound_ticket</code> (+ ender pearl) &rarr;
+                <code>interdimensional_ticket</code> (+ ender eye + blaze powder)</li>
+            <li><code>basic_whistle</code> (horse hair + iron nugget + stick) &rarr;
+                <code>golden_whistle</code> (+ gold ingot) &rarr; <code>echo_whistle</code>
+                (+ echo shard)</li>
+            <li>the four breeding carrots = golden carrot + horse hair + one reagent
+                (fermented spider eye / gunpowder / quartz / glowstone dust)</li>
+        </ul>
+        <code>horse_hair</code> and <code>stallion_seed_jar</code> have no recipe (the
+        first is sheared &mdash; not built &mdash; the second comes from a stallion,
+        &sect;16); both are in the debug inventory.</li>
+    <li><strong>Inert, do not expect anything on use:</strong> shearing for hair, any
+        carrot effect, and the <strong>tickets</strong> (intended to teleport a horse
+        back to its stall &mdash; stalls now exist, &sect;18, but the teleport isn&rsquo;t
+        wired). The <strong>whistles</strong> (&sect;17) and <strong>stall signs</strong>
+        (&sect;18) work.</li>
+</ul>
+
+<h3 id="seed-jar">16. Stallion seed jar &mdash; collection + impregnation (first slice)</h3>
+
+<p>
+    Built 2026-09-02 (<code>server/StallionSeedJarHandler</code>, the
+    <code>horsegenetics:stored_genome</code> data component,
+    <code>common/genetics/GenomeSample</code>, and the shared
+    <code>HorseBreedingHandler.applyBredFoal</code>). First test 2026-09-02 found the
+    held jar never changed in creative (result went to another slot); fixed &mdash;
+    the jar now <strong>transforms in the player&rsquo;s hand</strong>, creative
+    included. Owner also asked that the horse be <strong>in breeding mode first</strong>
+    (fed a carrot / apple &mdash; <code>isInLove()</code>); that gate is now on both
+    ends and the love state is consumed by the op. Partly owner-confirmed
+    2026-09-02 (collection + tooltip work; genome-string display bug is a
+    separate <a href="#open-issues">open issue</a>, the data itself is right).
+    Still to check:
+</p>
+
+<ul>
+    <li><strong>Breeding-mode gate.</strong> Right-click a stallion that has
+        <em>not</em> been fed &rarr; chat &ldquo;&hellip; must be in breeding mode -
+        feed it first.&rdquo;, jar unchanged, no mount. Feed it a golden carrot (works
+        in creative), then collect &rarr; succeeds, and the stallion is <strong>no
+        longer in love</strong> (hearts stop) afterward.</li>
+    <li><strong>Collect.</strong> Right-click a <strong>tamed adult stallion in
+        breeding mode</strong> (info panel says &ldquo;Stallion&rdquo;) with an
+        <code>empty_seed_jar</code>. Expect: the jar <strong>in hand becomes</strong> a
+        <code>stallion_seed_jar</code> (stack &gt;1: one spent, filled one to the
+        inventory), a chat line &ldquo;Collected a seed sample from &hellip;&rdquo;, and
+        <strong>no mount</strong>. Hover the filled jar: tooltip shows
+        &ldquo;Sire: &lt;name&gt;&rdquo; and a short genotype string.</li>
+    <li><strong>Wrong target.</strong> Empty jar on a mare, or a filled jar on a
+        stallion / foal &rarr; a chat line naming the horse and its recorded sex, no
+        mount, jar unchanged.</li>
+    <li><strong>Impregnate.</strong> Right-click a <strong>tamed adult mare in
+        breeding mode</strong> (not on breeding cooldown) with the filled jar. Expect:
+        heart particles on the mare, a <strong>foal spawns at the mare</strong>, the
+        jar is consumed, the mare drops out of love and goes on the normal
+        post-breeding cooldown, and a chat line &ldquo;&lt;foal&gt; was born.&rdquo;</li>
+    <li><strong>The foal is a real bred horse.</strong> Its coat renders (adult art on
+        an adult, correct once grown), its info panel / paper dump shows a genotype
+        combined from the mare and the jar&rsquo;s stored sire, its name mixes both
+        parents, generation = 1 + max(parents), and stats roll between them. It is
+        tamed to the mare&rsquo;s owner.</li>
+    <li><strong>Determinism.</strong> Same mare + same jar should not be testable
+        twice (jar is consumed) &mdash; but a foal from the jar vs. a foal from the
+        live stallion, same mare, should look like siblings, not clones.</li>
+    <li><strong>Persistence.</strong> A filled jar keeps its data across a
+        save/reload and when dropped on the ground / put in a chest (it is a real
+        persistent + networked component).</li>
+</ul>
+
+<p>
+    <strong>Explicitly not built</strong> (don&rsquo;t flag as bugs): the breeding-mode
+    gate is vanilla love, not one of this mod&rsquo;s breeding carrots (they still do
+    nothing); no 30-second timed window beyond however long love lasts; no gestation
+    delay (foal is immediate); no carrot effects on the jar. Family tree may not draw
+    the sire node (the jar stores the donor UUID but the stallion isn&rsquo;t
+    necessarily loaded).
+</p>
+
+<h3 id="whistles">17. Whistles &mdash; recall your tamed horses</h3>
+
+<p>
+    Built 2026-09-02 (<code>item/WhistleItem</code>). <strong>Not play-tested.</strong>
+    Right-click <em>anywhere</em> (air, ground, a block) holding a whistle: every
+    <strong>tamed horse you own</strong> within range, in the same dimension, not
+    being ridden, is teleported to a spot beside you (spread on a grid). Ranges:
+    <strong>basic 16</strong>, <strong>golden 32</strong>, <strong>echo 64</strong>
+    blocks. ~3-second use cooldown.
+</p>
+
+<ul>
+    <li>Tame 2&ndash;3 horses, walk ~10 blocks away, right-click the
+        <strong>basic whistle</strong> &rarr; they appear next to you, not stacked
+        inside each other, on the ground (not buried / floating); a chime plays; chat
+        says &ldquo;Whistled N horse(s) to you.&rdquo;</li>
+    <li>A horse <strong>you don&rsquo;t own</strong>, or an <strong>untamed</strong>
+        one, or one <strong>being ridden</strong>, is not moved. A horse already within
+        3 blocks is left alone.</li>
+    <li>Stand &gt;16 but &lt;32 blocks from a horse: basic whistle says
+        &ldquo;No tamed horses&hellip;&rdquo;, <strong>golden</strong> pulls it in.</li>
+    <li>A <strong>leashed</strong> horse is unleashed and comes. A horse you are
+        <strong>riding</strong> is not yanked out from under you.</li>
+    <li>Cross-dimension is out of scope &mdash; a horse in another dimension is never
+        recalled.</li>
+</ul>
+
+<h3 id="stalls">18. Stall signs &mdash; bind a horse, define its stall</h3>
+
+<p>
+    Built 2026-09-02 (<code>item/StallSignItem</code>, <code>server/StallSignHandler</code>,
+    <code>server/StallDetector</code>, <code>server/StallDebug</code>,
+    <code>data/StallData</code> + <code>data/StallRecord</code> + <code>data/BoundHorse</code>).
+    <strong>Not play-tested.</strong> Both stall-sign items are in the
+    <em>Horse Genetics</em> creative tab and the debug-world inventory; they borrow the
+    vanilla oak-sign icon for now.
+</p>
+
+<ul>
+    <li><strong>Bind.</strong> Right-click a horse with a <strong>Stall Sign</strong>
+        (blank). Expect: the sign in hand becomes a <strong>Bound Stall Sign</strong>
+        (stack &gt;1: one consumed, bound one to the inventory), chat
+        &ldquo;Stall sign bound to &lt;name&gt;.&rdquo;, <strong>no mount</strong>.
+        Hover it: tooltip reads &ldquo;Bound to: &lt;name&gt;&rdquo;.</li>
+    <li><strong>Build a stall &amp; place the sign.</strong> Wall in a small area (a
+        1&ndash;3 block-tall box, fully enclosed, &le;512 open blocks &mdash; leave no
+        gaps). Right-click the <strong>outside</strong> face of one wall block with the
+        bound sign. Expect: a real <strong>oak wall sign</strong> appears there reading
+        &ldquo;Stall / &lt;name&gt;&rdquo;, a green <strong>particle box</strong> flashes
+        around the detected interior, and chat prints
+        &ldquo;[stall] &lt;name&gt; @ x,y,z  WxHxD  (N blocks)&rdquo;. The sign item is
+        consumed (not in creative).</li>
+    <li><strong>Not enclosed.</strong> Try it with a hole in the wall / open top beyond
+        one layer up &rarr; chat &ldquo;No enclosed area behind that block&hellip;&rdquo;,
+        <strong>no sign placed</strong>, item not consumed.</li>
+    <li><strong>Wrong face.</strong> Click the top/bottom of a block &rarr; &ldquo;Place
+        the stall sign on a vertical wall face.&rdquo;</li>
+    <li><strong>Debug overlay.</strong> Press <strong>F7</strong> anywhere: every stall
+        within ~96 blocks in this dimension re-flashes its particle box and prints its
+        summary line. (Dev-only keybind; nothing in a production build.)</li>
+    <li><strong>Release.</strong> Break the placed oak wall sign &rarr; chat
+        &ldquo;Stall released - its sign was broken.&rdquo; and F7 no longer shows it.</li>
+    <li><strong>Re-bind / move.</strong> Bind a new sign to the same horse and place it
+        on a different stall &rarr; the old stall record is replaced (one stall per
+        horse). Persists across a save/reload.</li>
+</ul>
+
+<p>
+    <strong>Not built</strong> (don&rsquo;t flag): teleport-to-stall / auto-return (that
+    is the tickets); a persistent in-world wireframe (the overlay is a one-shot particle
+    flash); any cleanup other than breaking the exact sign block (rebuild the wall
+    elsewhere and the record goes stale).
+</p>
 
 <div class="page-foot">
     <div class="seealso">

@@ -18,6 +18,7 @@ import net.minecraft.world.entity.player.Player;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.living.BabyEntitySpawnEvent;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Real breeding. On {@link BabyEntitySpawnEvent} (fired from
@@ -31,18 +32,22 @@ import net.neoforged.neoforge.event.entity.living.BabyEntitySpawnEvent;
  *       epigenetic seed of the exact parent copy it came from, so a foal that
  *       inherits its dam's {@code A} inherits her bay point heights too;</li>
  *   <li>its name takes the first name of one parent and the last name of the
- *       other ({@link HorseNames#breed});</li>
+ *       other ({@link HorseNames#breedNth});</li>
  *   <li>its generation is {@code 1 + max(dam, sire)};</li>
  *   <li>its {@code speed} / {@code health} are rolled from the parents by
  *       {@link HorseStats#rollFoalStat} and pushed onto the foal's attributes;</li>
- *   <li>it's credited to the breeding player ({@code bredBy});</li>
+ *   <li>it is credited to the breeding player ({@code bredBy});</li>
  *   <li>if the dam is tamed, the foal is auto-tamed to the dam's owner.</li>
  * </ul>
  *
- * The foal's coat attachment is written here rather than at join time - the
- * inherited epigenetics can only be read while both parents are in hand.
- * {@link HorseGeneticsEventHandler} founds one from scratch for everything that
- * arrives without one (wild spawns, {@code /summon}, gallery horses).
+ * <p>The foal-building step is {@link #applyBredFoal} - split out so the
+ * <b>stallion seed jar</b> ({@code server/StallionSeedJarHandler}) can reuse it
+ * with a synthetic sire record built from the jar's stored genome, instead of a
+ * live stallion entity. The foal's coat attachment is written there rather than
+ * at join time - the inherited epigenetics can only be read while both genomes
+ * are in hand. {@link HorseGeneticsEventHandler} founds one from scratch for
+ * everything that arrives without one (wild spawns, {@code /summon}, gallery
+ * horses).
  */
 @EventBusSubscriber
 public final class HorseBreedingHandler {
@@ -69,11 +74,35 @@ public final class HorseBreedingHandler {
         Horse damHorse = aIsDam ? parentA : parentB;
         Horse sireHorse = aIsDam ? parentB : parentA;
 
-        Genome childGenome = GeneticCodeCombiner.combine(
-                genomeOf(damHorse, damRecord, rng), genomeOf(sireHorse, sireRecord, rng), rng);
+        applyBredFoal(child, damHorse,
+                genomeOf(damHorse, damRecord, rng), damRecord,
+                genomeOf(sireHorse, sireRecord, rng), sireRecord,
+                event.getCausedByPlayer(), rng);
+    }
+
+    /**
+     * Populate a just-created foal entity from its two parents' genomes and
+     * records: combined genome, code, generation, varied name, rolled stats,
+     * {@code bredBy}, dam-owner taming, the {@link HorseRecord}, and the coat
+     * attachment. Everything except adding the child to the world.
+     *
+     * <p>Shared by natural breeding and the stallion seed jar - the jar path
+     * passes a synthetic {@code sireRecord} built from its stored genome and a
+     * {@code null} live sire.
+     *
+     * @param child    the foal entity (already spawned for natural breeding;
+     *                 created-but-not-yet-added for the seed-jar path)
+     * @param damHorse the live dam - only its tame state / owner is read here
+     * @param breeder  the player who caused the breeding, or {@code null}
+     */
+    static void applyBredFoal(Horse child, Horse damHorse,
+                              Genome damGenome, HorseRecord damRecord,
+                              Genome sireGenome, HorseRecord sireRecord,
+                              @Nullable Player breeder, Rng rng) {
+        Genome childGenome = GeneticCodeCombiner.combine(damGenome, sireGenome, rng);
         String childCode = childGenome.genotypeCode();
         int childGeneration = 1 + Math.max(damRecord.generation(), sireRecord.generation());
-        int priorFoals = HorseRecords.offspringCount(parentA, damRecord.id(), sireRecord.id());
+        int priorFoals = HorseRecords.offspringCount(child, damRecord.id(), sireRecord.id());
         NameParts childName = HorseNames.breedNth(
                 new NameParts(damRecord.firstName(), damRecord.lastName()),
                 new NameParts(sireRecord.firstName(), sireRecord.lastName()),
@@ -96,7 +125,6 @@ public final class HorseBreedingHandler {
                 .withStats(childSpeed, childHealth)
                 .withParentStats(parentStats);
 
-        Player breeder = event.getCausedByPlayer();
         if (breeder != null) {
             childRecord = childRecord.withBredBy(breeder.getGameProfile().name());
         }
@@ -124,7 +152,7 @@ public final class HorseBreedingHandler {
      * record) founds one now, so the foal still inherits real allele copies
      * rather than nothing.
      */
-    private static Genome genomeOf(Horse parent, HorseRecord record, Rng rng) {
+    static Genome genomeOf(Horse parent, HorseRecord record, Rng rng) {
         HorseCoatAttachment coat = parent.getData(ModAttachments.HORSE_COAT.get());
         if (coat != null && !coat.isUnassigned() && coat.genotypeCode().equals(record.geneticCode())) {
             return coat.genome();
@@ -135,7 +163,7 @@ public final class HorseBreedingHandler {
     }
 
     /** Return the parent's record, creating a founder and/or backfilling stats if needed. */
-    private static HorseRecord ensureParentRecord(Horse parent) {
+    static HorseRecord ensureParentRecord(Horse parent) {
         if (!HorseRecords.hasRealRecord(parent)) {
             HorseRecord founder = HorseRecords.newFounder(parent, HorseRecords.rng(parent));
             HorseRecords.apply(parent, founder);

@@ -3,6 +3,7 @@ package com.example.horsegenetics.neoforge;
 import com.example.horsegenetics.neoforge.block.ModBlockEntities;
 import com.example.horsegenetics.neoforge.block.ModBlocks;
 import com.example.horsegenetics.neoforge.data.ModAttachments;
+import com.example.horsegenetics.neoforge.data.ModDataComponents;
 import com.example.horsegenetics.neoforge.item.ModItems;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
@@ -23,6 +24,7 @@ public final class HorseGenetics {
         // codes already read. See ModGeneSpecs.
         ModGeneSpecs.load();
         ModAttachments.ATTACHMENT_TYPES.register(modEventBus);
+        ModDataComponents.register(modEventBus);
         ModBlocks.register(modEventBus);
         ModBlockEntities.register(modEventBus);
         ModItems.register(modEventBus);

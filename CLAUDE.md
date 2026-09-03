@@ -102,11 +102,12 @@ project. Its shape:
 
 ## Status snapshot (keep this current)
 
-- **`common/`** - compiles; **191 JUnit tests pass** (`./gradlew :common:test`).
+- **`common/`** - compiles; **194 JUnit tests pass** (`./gradlew :common:test`).
   Covers `genetics/` (allele/gene model - **11 genes**: the 9 natural ones incl.
   grey / cream / pearl / splash, plus magic zebra and pink hair; `Genotype` code
   round-trip, breeding, the `Epigenome` / `Genome` per-allele epigenetics +
-  priority tie-break, `DominancePattern` + the `GenotypeCatalog` reduction of
+  priority tie-break, `GenomeSample` - a genome detached from a horse, for the
+  stallion seed jar - `DominancePattern` + the `GenotypeCatalog` reduction of
   177 147 genotypes to 1 730 distinct coats), `coat/` + `coat/pattern/` (the
   three-phase pipeline - `CoatTextureComposer`, `PigmentField`, `ColorField`,
   `GradientLut`, `BayCoat`, `GreyCoat`, `BodyStripes`, `CoatRegions`, the pure
@@ -127,9 +128,79 @@ project. Its shape:
   `hay_portal` block + block entity, the `custom_horse_spawn_egg` item, and
   the `ClientConfig` all register with no errors. Re-verified 2026-09-02 with
   the shipped **Waterborn + Suntouched** genes loaded (`[genes] loaded 2
-  data-driven gene(s): example.suntouched, example.waterborn ... 13 segments`).
+  data-driven gene(s): example.suntouched, example.waterborn ... 13 segments`)
+  and again after the **gameplay-layer items** + the `stored_genome` data
+  component were added (`Loaded 1531 recipes`, 16 new shapeless recipes among
+  them; the component registers with no error - the 26.1.2 path the roadmap
+  flagged as unverified now works).
 - **`runClient`** - actively play-tested over the 2026-08-30, 2026-09-01 and
   2026-09-02 sessions; see below.
+
+- **Built 2026-09-02, NOT yet play-tested:** the **gameplay-layer items**
+  (roadmap wiki §§11-19, first slice). 19 new `Item`s in `item/ModItems`:
+  `horse_hair` + `horse_hair_bundle` (4 hair &harr; 1 bundle, roadmap §12.2's
+  first two rungs), four breeding carrots
+  (`mutinogenic`/`chaos`/`stabilizer`/`magnifier`), one generic
+  `magic_gene_carrot` (per-gene parameterisation needs a data component -
+  deferred), `placeholder_gene_book` (literal name "PLACEHOLDER GENE BOOK",
+  stands in for the research paper), `empty_seed_jar` + `stallion_seed_jar`
+  (both `SeedJarItem`, tooltip from the `stored_genome` component), four tickets,
+  three whistles, and `stall_sign` + `bound_stall_sign`. The 17 non-sign items
+  have **owner-supplied textures** (tickets share one, whistles share one); the
+  two stall signs borrow `minecraft:item/oak_sign` - per-tier / real art is a
+  follow-up in `wiki/verification.html` §15. New `item/ModCreativeTabs`
+  registers one **Horse Genetics** tab holding all of them (20 with the custom
+  spawn egg, which also still shows in vanilla Spawn Eggs). The
+  **dev test-world hotbar** (`server/DebugTestWorldHandler`) gives the spawn egg
+  on slot 0 (tools shifted to 1-6) and one of every new item in the main
+  inventory. Recipes are datapack JSON under `data/horsegenetics/recipe/`
+  (singular). **Tickets are inert** (stall-teleport needs stall blocks that
+  don't exist); the carrots do nothing yet. The **whistles work** - see below.
+- **Built 2026-09-02, NOT yet play-tested:** the **whistles** (`item/WhistleItem`).
+  Right-click anywhere to teleport every tamed horse you own within range
+  (basic 16 / golden 32 / echo 64 blocks), same dimension, not ridden, to a
+  grid of spots beside you; ~3 s use cooldown, a chime, a chat count. Leashed
+  horses are unleashed and come; a horse already within 3 blocks or one you are
+  riding is left alone. This is the owner's "area recall" reading of roadmap
+  §11; the bond-gated version waits on bond, and "what echo adds" beyond range
+  is still open. Checklist `wiki/verification.html` §17.
+- **Built 2026-09-02, NOT yet play-tested:** the **stall system** (roadmap §11).
+  A new `bound_horse` data component (`data/BoundHorse`), a `stall_sign` /
+  `bound_stall_sign` item (`item/StallSignItem`, texture borrowed from
+  `minecraft:item/oak_sign`), a server-global `data/StallData` SavedData of
+  `data/StallRecord`s (one per bound horse), a flood-fill `server/StallDetector`,
+  and `server/StallDebug` (the "debug overlay" - a particle wireframe + chat
+  summary). Flow: right-click a horse with a blank `stall_sign`
+  (`server/StallSignHandler`) -> it becomes a `bound_stall_sign` carrying that
+  horse's UUID + name; right-click the **outside** face of a wall with the bound
+  sign -> `StallSignItem.useOn` drops a real `oak_wall_sign` with the horse's
+  name and flood-fills the block **behind** that wall (this layer ± 1, air only,
+  &le; `MAX_BLOCKS` 512) - an enclosed area becomes that horse's stall, its
+  outline flashed with `HAPPY_VILLAGER` particles. Breaking the sign
+  (`BreakBlockEvent`) releases the stall. Dev keybind **F7**
+  (`key.horsegenetics.show_stalls` -> `RequestStallHighlightPayload`, dev-gated
+  in `ModNetworking`) re-flashes every stall's outline near the player + prints
+  a summary. **No teleport-to-stall yet** (that's the tickets, still inert); no
+  client-side persistent wireframe (particles only). Checklist
+  `wiki/verification.html` §18.
+- **Built 2026-09-02, NOT yet play-tested:** the **stallion seed jar** first
+  slice (roadmap §15.1). New `common/genetics/GenomeSample` (a `Genotype` +
+  `Epigenome` detached from a horse as code strings, with `breedInto(mareGenome,
+  rng)`); new `data/StoredGenome` + `data/ModDataComponents` registering the
+  `horsegenetics:stored_genome` data component (persistent `Codec` +
+  networked `StreamCodec`); `server/HorseBreedingHandler` refactored so its
+  foal-building body is a reusable `applyBredFoal(...)`; new
+  `server/StallionSeedJarHandler` - right-click a tamed adult **stallion** with
+  an `empty_seed_jar` &rarr; a `stallion_seed_jar` stamped with his genome, sex,
+  UUID, name, speed/health; right-click a tamed adult **mare** with a filled jar
+  &rarr; a foal bred immediately through `applyBredFoal` from her live genome +
+  the jar's stored one, jar consumed, mare put on the vanilla breeding cooldown.
+  **Both ends require the horse to be in breeding mode** (`isInLove()` - fed a
+  carrot/apple, works in creative); the op consumes that love state. The jar
+  **transforms in the player's hand** (creative included). **No** real
+  breeding-carrot gate (vanilla love is the stand-in), **no** gestation state
+  (foal is immediate). Partly owner-confirmed 2026-09-02 (collection + tooltip);
+  `:common:test` 194, `:neoforge-26.1.2:build`, `runServer` all green.
 
 - **Owner-verified in-game (2026-09-02):**
   - **Custom horse spawn egg** end to end - the egg, the age/sex/genome editor,
@@ -143,6 +214,14 @@ project. Its shape:
     it** (the trailing `minecraft:light` block). Light cleanup on death/unload,
     the foal case, and hard base coats (cremello, dominant white) are **not** yet
     confirmed - `wiki/verification.html` §13.
+  - **Stallion seed jar** - collecting from a stallion and impregnating a mare
+    produces a real bred foal, and the jar carries the **correct** genome. Two
+    bugs found and fixed the same day: the jar didn't visibly change in creative
+    (now transforms in hand), and it worked with the horse not in breeding mode
+    (now both ends require `isInLove()`). The **short genome display string**
+    (info panel / tooltip) is **missing the magical genes** - a
+    `GeneCodeDisplay` bug, data is fine (open issue in `wiki/verification.html`).
+    The breeding-mode gate itself is built-but-unretested.
 
 - **Owner-verified in-game (2026-09-01):**
   - **The coat pipeline end to end.** Wild spawns show a **wide variety** of
@@ -360,7 +439,9 @@ Two-module Gradle project, split deliberately:
   - `genetics/` - `Genotype` (+ `breedWith`), `Epigenome` /
     `AlleleEpigenetics` (the priority + seed on each allele copy), `Genome`
     (the two together, and the breeding that keeps them aligned),
-    `CoatPhenotype`, `GeneticCodeCombiner`.
+    `GenomeSample` (a `Genome` frozen to code strings and taken off the horse -
+    what the stallion seed jar carries; `breedInto(mareGenome, rng)` runs the
+    ordinary draw), `CoatPhenotype`, `GeneticCodeCombiner`.
   - `coat/` - `CoatData`, `CoatGenerator`; `coat/pattern/` holds the
     three-phase pipeline (`CoatTextureComposer`, the `PigmentField` /
     `ColorField` accumulators and their read-only `PigmentView` / `ColorView`
@@ -388,17 +469,32 @@ Two-module Gradle project, split deliberately:
   - `client/` - renderer, texture compositing (incl. `EmissiveCoatLayer` for a
     `glow` gene's full-bright coat parts), client caches, the inventory
     hooks + `FamilyTreeScreen`, keybind, lifecycle cleanup.
-  - `data/` - Data Attachments, the ancestry `SavedData`, codecs.
+  - `data/` - Data Attachments, the ancestry `SavedData`, codecs;
+    `ModDataComponents` (the item data components: `stored_genome` /
+    `StoredGenome` on the stallion seed jar, `bound_horse` / `BoundHorse` on a
+    bound stall sign); and `StallData` / `StallRecord` (server-global SavedData
+    of assigned stalls).
   - `network/` - custom payloads + `ModNetworking`.
   - `server/` - event handlers, the horse-dimension builder, the portal
-    manager, the record adapter (`HorseRecords`).
+    manager, the record adapter (`HorseRecords`); `HorseBreedingHandler`
+    (natural breeding + the shared `applyBredFoal`), `StallionSeedJarHandler`
+    (seed collection + mare impregnation, reusing `applyBredFoal`), and the
+    stall trio `StallSignHandler` (bind / sign-break cleanup) + `StallDetector`
+    (the enclosed-area flood-fill) + `StallDebug` (particle-outline overlay).
   - `block/` - `ModBlocks` + `HayPortalBlock` (the only registered block),
     `ModBlockEntities` + `HayPortalBlockEntity` (drives the animated
     `hay_portal.png` slab renderer).
-  - `item/` - `ModItems` + the **custom horse spawn egg** (a dev tool - a
+  - `item/` - `ModItems` (the **custom horse spawn egg** - a dev tool, a
     reskin of the horse spawn egg that opens a genome/age/sex editor first;
     the editor screen is `client/CustomHorseSpawnScreen`, the spawn itself
-    goes through `network/SpawnCustomHorsePayload`).
+    goes through `network/SpawnCustomHorsePayload` - plus the 17
+    **gameplay-layer items**, roadmap §§11-19 first slice; the two
+    `SeedJarItem`s, the three `WhistleItem`s and the two `StallSignItem`s have
+    behaviour, the rest don't yet), `SeedJarItem` (tooltip), `WhistleItem`
+    (`use` -> recall your tamed horses in a radius), `StallSignItem` (`useOn` ->
+    place an oak wall sign + flood-fill the stall behind it), and
+    `ModCreativeTabs` (one **Horse Genetics** tab). Recipes are datapack JSON
+    under `resources/data/horsegenetics/recipe/`.
 
   Its job is to **translate** - build/read `common` types and shuttle them in
   and out of Minecraft's systems; the logic stays in `common/`.
@@ -849,6 +945,11 @@ approximate.
    takes its "already has a real record" branch and keeps the genome; the coat
    attachment is still unset at that point, so a founder `Epigenome.random` is
    rolled exactly as for a wild spawn.
+   **The stallion seed jar** is a fourth path, and it behaves like breeding:
+   `StallionSeedJarHandler` builds the foal `Horse` itself, reads the mare's
+   genome live and the sire's from the jar's `StoredGenome`, and calls the same
+   `HorseBreedingHandler.applyBredFoal` - which writes the coat attachment
+   before `addFreshEntity`, so the join handler leaves it alone.
 2. Not auto-synced -> the handler sends `CoatSyncPayload` `{entityId, code,
    epigenome}` and `HorseRecordSyncPayload` to trackers (on every join, plus
    `StartTracking`).
@@ -1094,6 +1195,24 @@ This SDK is further from mainline 1.21.x than the version numbers suggest.
   `RotationSegment.convertToSegment(...)`); text via `SignBlockEntity#
   getFrontText()` -> `SignText#setMessage(line, Component)` (returns a new
   one) -> `setText(text, true)` + `setChanged()` + `sendBlockUpdated`.
+- **Wall signs, placed from code** (the stall sign does this):
+  `Blocks.OAK_WALL_SIGN.defaultBlockState().setValue(WallSignBlock.FACING, dir)`
+  (`FACING` is a horizontal `EnumProperty<Direction>`), `level.setBlock(pos,
+  state, Block.UPDATE_ALL)`, then `((SignBlockEntity) level.getBlockEntity(pos))
+  .updateText(t -> t.setMessage(line, Component), /*front=*/true)` -
+  `updateText` takes a `UnaryOperator<SignText>` and `SignText.setMessage`
+  returns a new `SignText` (chain the calls).
+- **`BreakBlockEvent`** (`net.neoforged.neoforge.event.level.block`): fires
+  *before* removal, so `event.getState()` is still the block being broken;
+  `getLevel()` -> `LevelAccessor`, `getPos()`, `getPlayer()`. Cancelable.
+- **`SavedDataType<T>(Identifier, Supplier<T>, Codec<T>)`** + `server
+  .getDataStorage().computeIfAbsent(TYPE)` is the server-global SavedData
+  pattern (`HorseAncestryData`, `StallData`). `ResourceKey<Level>` round-trips
+  in a codec via `ResourceKey.codec(Registries.DIMENSION)`.
+- **`ServerLevel#sendParticles(ServerPlayer, T, boolean overrideLimiter,
+  boolean alwaysRender, x, y, z, int count, dx, dy, dz, double speed)`** -
+  the per-player overload; `alwaysRender = true` defeats distance culling
+  (used for the stall debug outline).
 
 ## Build setup notes
 
@@ -1167,7 +1286,10 @@ the game bus. A failed delete only warns - the next launch retries.
 It is a **normal feature** now, not debug-only - reachable by hay-bale portal
 in any build. Only the **F6 shortcut** is dev-gated (`DebugKeyBindings`
 registers the keybind only if `!FMLEnvironment.isProduction()`, and
-`ModNetworking`'s `RequestDebugPensPayload` handler re-checks). The class /
+`ModNetworking`'s `RequestDebugPensPayload` handler re-checks). **F7** is the
+other dev keybind - `key.horsegenetics.show_stalls`, flashes the particle
+outline of nearby stalls (`RequestStallHighlightPayload` -> `StallDebug`, also
+re-checked against `isProduction()`). The class /
 dimension / `ResourceKey` names still say "debug" (`DebugPenManager`,
 `DEBUG_LEVEL`, `horsegenetics:debug_pens`) - a rename is deferred to avoid
 breaking existing save data mid-session; treat the names as legacy.
@@ -1516,6 +1638,50 @@ Design follow-ups (not just "go look at it"):
    it's hand-written. Only Waterborn's coat + trail are confirmed in-game;
    Suntouched and every other effect verb are unverified
    (`wiki/verification.html` §13). The full plan is `wiki/horse-traits.html`.
+
+16. **Some gameplay-layer items still have no behaviour.** The seed jars,
+   whistles and stall signs work; still unwired: shearing to get `horse_hair`,
+   any carrot effect on the breeding draw, and **the tickets** - owner's intent
+   is that a ticket teleports its bound horse back to its stall, which is now
+   possible (stalls exist - `StallData` / `StallRecord.center()`), it's just not
+   built. The `magic_gene_carrot` is one generic item because per-gene targeting
+   wants a data component (`wiki/roadmap.html` §14.2, §19);
+   `placeholder_gene_book` replaces the real research paper. Tickets share one
+   texture, whistles share one, stall signs borrow `oak_sign` - per-tier / real
+   art is a follow-up (`wiki/verification.html` §15).
+17. **The stallion seed jar is a first slice, not the §15.1 flow.** Collection
+   and impregnation are wired (`StallionSeedJarHandler` + the `stored_genome`
+   component + `GenomeSample` + `HorseBreedingHandler.applyBredFoal`). The gate
+   is **vanilla love** (`isInLove()`), not one of this mod's breeding carrots
+   (they still do nothing); there's **no gestation** (the foal appears
+   immediately, like vanilla breeding), and the jar carries **no carrot
+   effects**. The synthetic sire record uses the stored donor UUID as its
+   pedigree edge, so the family tree may not find the sire node. Gestation is
+   the "genuinely new" piece per the roadmap; the real carrot gate waits on
+   §14. Owner tests 2026-09-02: (a) held jar didn't change in creative -> fixed,
+   transforms in hand now; (b) worked with no breeding-mode requirement ->
+   fixed, both ends now require `isInLove()` and consume it.
+   `wiki/verification.html` §16.
+18. **The short genome string omits data-driven genes.** `GeneCodeDisplay`
+   (info panel, paper dump, seed-jar tooltip) has a hard-coded `TRAILING_ORDER`
+   of the 11 built-ins, so a spec gene - including the shipped Suntouched /
+   Waterborn - never shows. The underlying genotype/epigenome data is correct
+   (owner confirmed via the seed jar 2026-09-02) - it's purely the display.
+   Fix: append `Genes.loaded()` to the trailing list and treat a spec gene's
+   `n` wild type as "absent" in `ABSENCE_WILDTYPE`. `wiki/verification.html`
+   open issues.
+19. **The stall system is detection + storage only.** A stall gets defined and
+   persisted (`StallData`), but nothing *uses* it yet: no teleport-to-stall, no
+   "assigned pen" behaviour, no auto-return. Cleanup is thin - a stall only goes
+   away if its exact sign block is broken (`BreakBlockEvent`); rebuilding a wall
+   elsewhere, or removing the horse, leaves a stale record. The sign is a plain
+   vanilla `oak_wall_sign` (no marker that it's a stall sign beyond the
+   `StallData` entry keyed on its pos). The "debug overlay" is server-emitted
+   `HAPPY_VILLAGER` particles on the F7 keybind (one flash per press) + a chat
+   summary - not a persistent client wireframe, which would need a
+   `RenderLevelStageEvent` renderer (the 26.1.2 render pipeline changed enough
+   that this was deliberately deferred). Flood-fill is air-only and capped at
+   `StallDetector.MAX_BLOCKS` (512).
 
 ## License
 

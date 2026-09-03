@@ -1,6 +1,7 @@
 package com.example.horsegenetics.neoforge.client;
 
 import com.example.horsegenetics.neoforge.network.RequestDebugPensPayload;
+import com.example.horsegenetics.neoforge.network.RequestStallHighlightPayload;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.api.distmarker.Dist;
@@ -24,6 +25,9 @@ public final class DebugKeyHandler {
         }
         while (DebugKeyBindings.generateDebugPens.consumeClick()) {
             ClientPacketDistributor.sendToServer(new RequestDebugPensPayload());
+        }
+        while (DebugKeyBindings.showStalls != null && DebugKeyBindings.showStalls.consumeClick()) {
+            ClientPacketDistributor.sendToServer(new RequestStallHighlightPayload());
         }
     }
 

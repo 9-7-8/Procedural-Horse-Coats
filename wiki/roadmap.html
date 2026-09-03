@@ -29,6 +29,20 @@
         end: &ldquo;built, not yet seen in-game&rdquo;.
     </p>
     <p>
+        <strong>Partial exception, 2026-09-02:</strong> the <em>item objects</em> for
+        §§12&ndash;19 &mdash; horse hair + a hair bundle, the breeding and gene carrots,
+        the <code>PLACEHOLDER GENE BOOK</code>, the seed jars, the tickets and the
+        whistles &mdash; now register, with shapeless recipes and a creative tab
+        (<code>item/ModItems</code>). Most are still behaviourless; the mechanics built
+        are the <strong>stallion seed jar</strong> first slice (§15.1 below &mdash;
+        collect from a stallion, impregnate a mare, gated on vanilla breeding mode, no
+        real carrot gate / gestation), the <strong>whistles</strong> (right-click to
+        recall your tamed horses in a radius), and <strong>stall definition</strong>
+        (bind a horse to a sign, place it on a wall, the enclosed area behind becomes
+        that horse's stall &mdash; nothing consumes a stall yet). See
+        <a href="verification.html">To be verified</a> §§15&ndash;18.
+    </p>
+    <p>
         This page is <strong>work to be done, not reasoning about why</strong>. The
         <em>why</em> lives in <a href="philosophy.html">Philosophy</a>; when something
         here needs a justification longer than a clause, it belongs there.
@@ -1218,10 +1232,10 @@ interface ConditionRule    { void conditions(AllelePair, ConditionSink); } // CS
 <table>
 <thead><tr><th>Thing</th><th>What is known</th><th>What is missing</th></tr></thead>
 <tbody>
-<tr><td><strong>Stalls, holding pens</strong></td><td>Blocks, with signs; horses can be teleported to a stall and recalled to a pen. A horse has an <code>assignedPen</code>.</td><td>Everything else: are they blocks or a region, how is one claimed, what happens when the block is broken with horses assigned.</td></tr>
+<tr><td><strong>Stalls, holding pens</strong></td><td><strong>Stall definition shipped 2026-09-02</strong>: a <code>stall_sign</code> item bound to a horse, placed on the outside of a wall, flood-fills the enclosed area behind it (this layer &plusmn;1, &le;512 blocks) and stores it as that horse's stall (<code>data/StallData</code>). Breaking the sign releases it. Dev F7 keybind particle-outlines nearby stalls.</td><td>What <em>uses</em> a stall: teleport-to-stall (the tickets), auto-return, "recalled to a pen". Cleanup beyond breaking the sign. Holding pens as distinct from stalls. A real stall-sign block instead of a repurposed <code>oak_wall_sign</code>.</td></tr>
 <tr><td><strong>Double-wide gate</strong></td><td>Crafted via braided rope.</td><td>Presumably a two-block-wide fence gate. A vanilla-shaped block problem, unrelated to the genetics.</td></tr>
 <tr><td><strong>Tickets</strong> &mdash; blank, basic, bound, interdimensional</td><td>Four tiers, hair-based recipes.</td><td>No stated function. &ldquo;Interdimensional&rdquo; presumably reaches the horse dimension (§8) &mdash; if so it is the first survival-mode entry to it, which is a decision, not a detail.</td></tr>
-<tr><td><strong>Whistles</strong> &mdash; basic, golden, echo</td><td>Call bonded horses; three tiers imply three radii.</td><td>Radius, cooldown, whether it crosses dimensions, and what &ldquo;echo&rdquo; adds.</td></tr>
+<tr><td><strong>Whistles</strong> &mdash; basic, golden, echo</td><td><strong>First slice shipped 2026-09-02</strong> (<code>item/WhistleItem</code>): right-click teleports every tamed horse <em>you own</em> within <strong>16 / 32 / 64</strong> blocks, same dimension, not ridden, to a grid beside you; ~3&nbsp;s cooldown. The owner&rsquo;s "recall in an area" reading, not bond-gated.</td><td>Bond gating (needs bond, §13); whether it should path rather than teleport; whether "echo" crosses dimensions or just has the longest range. Not play-tested.</td></tr>
 <tr><td><strong>Shearing overhaul</strong></td><td>Listed as a 1.0 feature and the source of horse hair.</td><td>&ldquo;Overhaul&rdquo; of what &mdash; there is no shearing today. Treated below (§12) as new work.</td></tr>
 </tbody>
 </table>
@@ -1466,6 +1480,35 @@ interface ConditionRule    { void conditions(AllelePair, ConditionSink); } // CS
 <h2 id="ivf">15. Assisted reproduction: vials, embryos, cloning</h2>
 
 <h3>15.1 The seed vial flow</h3>
+
+<div class="note">
+    <span class="label">First slice shipped 2026-09-02 &mdash; partly play-tested</span>
+    <p>
+        The <strong>item is <code>stallion_seed_jar</code></strong> (not "vial"), and a
+        cut-down version of all four steps works:
+        <strong>feed the stallion</strong> a carrot / apple so it is in breeding mode
+        (<code>isInLove()</code>), then right-click it with an
+        <code>empty_seed_jar</code> &rarr; the jar in hand becomes a filled one
+        carrying a <code>GenomeSample</code> (genotype + epigenome) plus the donor's
+        sex / UUID / name / stats, in the <code>horsegenetics:stored_genome</code>
+        data component, and the stallion's love state is consumed;
+        <strong>feed the mare</strong>, then right-click it with the jar &rarr; a foal,
+        bred through the same <code>applyBredFoal</code> path natural breeding uses,
+        drawn at impregnation from the stored genotype exactly as this section argues
+        for. Jar consumed, mare drops out of love and onto the vanilla breeding
+        cooldown.
+    </p>
+    <p>
+        The <code>isInLove()</code> check is a stand-in for steps 1 / 3's "feed a
+        <em>breeding carrot</em> for a 30-second window" &mdash; vanilla love already
+        lasts ~30&nbsp;s and works in creative. What is still missing:
+        <strong>the real breeding-carrot gate</strong> (the carrots do nothing yet),
+        <strong>a timed window independent of love</strong>, <strong>gestation</strong>
+        (the foal is immediate), and any carrot effects on the jar. Code:
+        <code>server/StallionSeedJarHandler</code>, <code>data/StoredGenome</code> +
+        <code>data/ModDataComponents</code>, <code>common/genetics/GenomeSample</code>.
+    </p>
+</div>
 
 <ol>
     <li>Feed the stallion a breeding carrot &rarr; a 30-second collection window.</li>

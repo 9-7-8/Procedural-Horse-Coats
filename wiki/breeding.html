@@ -451,6 +451,21 @@ int     offspringCount(UUID a, UUID b);</code></pre>
         A then sees an assigned attachment and leaves it alone.</li>
 </ol>
 
+<p>
+    Steps 5&ndash;12 are factored into
+    <code>HorseBreedingHandler.applyBredFoal(child, damHorse, damGenome, damRecord,
+    sireGenome, sireRecord, breeder, rng)</code> so a second entry point can reuse
+    them: the <strong>stallion seed jar</strong>
+    (<code>server/StallionSeedJarHandler</code>, roadmap &sect;15.1) builds the foal
+    <code>Horse</code> itself, passes the mare&rsquo;s live genome and a
+    <em>synthetic</em> sire <code>HorseRecord</code> reconstructed from the jar&rsquo;s
+    <code>stored_genome</code> component (a <code>GenomeSample</code> + the donor&rsquo;s
+    sex / UUID / name / stats), and adds the foal after. Same Mendelian +
+    carrier-faithful draw, drawn at impregnation &mdash; no gamete is frozen at
+    collection. There is no gestation delay yet and no breeding-carrot gate; the foal
+    is immediate, exactly as flow B.
+</p>
+
 <h4>The foal-name schedule</h4>
 
 <p>

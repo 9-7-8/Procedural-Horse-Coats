@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:golden_carrot",
+    "horsegenetics:horse_hair",
+    "minecraft:glowstone_dust"
+  ],
+  "result": {
+    "id": "horsegenetics:magnifier_carrot"
+  }
+}

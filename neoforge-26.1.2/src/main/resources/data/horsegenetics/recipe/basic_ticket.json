@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "horsegenetics:blank_ticket",
+    "horsegenetics:horse_hair"
+  ],
+  "result": {
+    "id": "horsegenetics:basic_ticket"
+  }
+}

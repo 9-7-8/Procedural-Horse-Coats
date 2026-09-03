@@ -1,5 +1,26 @@
 {
   "key.horsegenetics.debug_pens": "Generate Debug Horse Pens",
   "key.categories.horsegenetics.debug": "Horse Genetics (Debug)",
-  "item.horsegenetics.custom_horse_spawn_egg": "Custom Horse Spawn Egg"
+  "itemGroup.horsegenetics.main": "Horse Genetics",
+  "item.horsegenetics.custom_horse_spawn_egg": "Custom Horse Spawn Egg",
+  "item.horsegenetics.horse_hair": "Horse Hair",
+  "item.horsegenetics.horse_hair_bundle": "Horse Hair Bundle",
+  "item.horsegenetics.mutinogenic_carrot": "Mutinogenic Carrot",
+  "item.horsegenetics.chaos_carrot": "Chaos Carrot",
+  "item.horsegenetics.stabilizer_carrot": "Stabilizer Carrot",
+  "item.horsegenetics.magnifier_carrot": "Magnifier Carrot",
+  "item.horsegenetics.magic_gene_carrot": "Magic Gene Carrot",
+  "item.horsegenetics.placeholder_gene_book": "PLACEHOLDER GENE BOOK",
+  "item.horsegenetics.empty_seed_jar": "Empty Seed Jar",
+  "item.horsegenetics.stallion_seed_jar": "Stallion Seed Jar",
+  "item.horsegenetics.blank_ticket": "Blank Ticket",
+  "item.horsegenetics.basic_ticket": "Basic Ticket",
+  "item.horsegenetics.bound_ticket": "Bound Ticket",
+  "item.horsegenetics.interdimensional_ticket": "Interdimensional Ticket",
+  "item.horsegenetics.stall_sign": "Stall Sign",
+  "item.horsegenetics.bound_stall_sign": "Bound Stall Sign",
+  "key.horsegenetics.show_stalls": "Show Stalls (debug)",
+  "item.horsegenetics.basic_whistle": "Basic Whistle",
+  "item.horsegenetics.golden_whistle": "Golden Whistle",
+  "item.horsegenetics.echo_whistle": "Echo Whistle"
 }

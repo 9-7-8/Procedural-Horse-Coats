@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "horsegenetics:basic_ticket",
+    "horsegenetics:horse_hair",
+    "minecraft:ender_pearl"
+  ],
+  "result": {
+    "id": "horsegenetics:bound_ticket"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:golden_carrot",
+    "horsegenetics:placeholder_gene_book",
+    "horsegenetics:horse_hair",
+    "minecraft:gold_ingot"
+  ],
+  "result": {
+    "id": "horsegenetics:magic_gene_carrot"
+  }
+}

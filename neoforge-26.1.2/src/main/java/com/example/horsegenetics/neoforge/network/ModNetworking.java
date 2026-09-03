@@ -93,6 +93,17 @@ public final class ModNetworking {
                 SpawnCustomHorsePayload.STREAM_CODEC,
                 (payload, context) -> context.enqueueWork(() -> handleSpawnCustomHorse(payload, context.player()))
         );
+
+        registrar.playToServer(
+                RequestStallHighlightPayload.TYPE,
+                RequestStallHighlightPayload.STREAM_CODEC,
+                (payload, context) -> context.enqueueWork(() -> {
+                    if (FMLEnvironment.isProduction()) return; // dev-only debug overlay
+                    if (context.player() instanceof ServerPlayer serverPlayer) {
+                        com.example.horsegenetics.neoforge.server.StallDebug.highlight(serverPlayer);
+                    }
+                })
+        );
     }
 
     private static void handleSpawnCustomHorse(SpawnCustomHorsePayload payload,

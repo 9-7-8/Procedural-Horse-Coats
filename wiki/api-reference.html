@@ -57,6 +57,7 @@ genetics/
   AlleleEpigenetics.java    (priority, seed) on ONE allele copy
   Epigenome.java            one AlleleEpigenetics per copy, aligned to the genotype
   Genome.java               Genotype + Epigenome; the thing a foal inherits
+  GenomeSample.java          a Genome frozen to code strings, off the horse (seed jar)
   Genes.java                the registry + the three orderings
   GenotypeCatalog.java      every visually distinct genotype
   GeneCodeDisplay.java      shortForm / wrap - human-readable codes
@@ -603,7 +604,14 @@ interface HorseDatabase {
 
 /** The string-level and Genome-level breeding seams. */
 String GeneticCodeCombiner.combine(String motherCode, String fatherCode, Rng rng);
-Genome GeneticCodeCombiner.combine(Genome mother, Genome father, Rng rng);   // use this</code></pre>
+Genome GeneticCodeCombiner.combine(Genome mother, Genome father, Rng rng);   // use this
+
+/** A Genome detached from a horse, as code strings - what the stallion seed jar carries. */
+record GenomeSample(String genotypeCode, String epigenomeCode) {
+    static GenomeSample of(Genome genome);
+    Genome genome();
+    Genome breedInto(Genome mare, Rng rng);   // == mare.breedWith(genome(), rng)
+}</code></pre>
 </div>
 
 <p>

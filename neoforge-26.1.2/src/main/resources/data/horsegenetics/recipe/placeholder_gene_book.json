@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:book",
+    "horsegenetics:horse_hair",
+    "minecraft:ink_sac"
+  ],
+  "result": {
+    "id": "horsegenetics:placeholder_gene_book"
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:glass_bottle",
+    "horsegenetics:horse_hair"
+  ],
+  "result": {
+    "id": "horsegenetics:empty_seed_jar"
+  }
+}
