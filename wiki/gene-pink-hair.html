@@ -17,7 +17,7 @@
 <p class="lede">
     The mane and tail turn pink &mdash; and keep their shading, because the gene
     <em>reads</em> what each hair texel currently looks like before deciding what to
-    add. It is also the <strong>only recessive gene in the mod</strong>: a single
+    add. It is also the mod&rsquo;s clearest <strong>carrier locus</strong>: a single
     copy is a carrier you cannot see, so it is the first thing you have to
     <em>breed for</em> rather than spot.
 </p>
@@ -25,12 +25,12 @@
 <dl class="spec">
     <div><dt>Gene key</dt><dd>horsegenetics.pink_hair</dd></div>
     <div><dt>Alleles</dt><dd><span class="allele rec">Pihr</span> <span class="allele wild">n</span></dd></div>
-    <div><dt>Dominance</dt><dd><strong>RECESSIVE</strong></dd></div>
-    <div><dt>Wild type</dt><dd>n (the dominant one here)</dd></div>
+    <div><dt>Outcomes</dt><dd>wild, <code>pink-carrier</code>, <code>pink-hair</code></dd></div>
+    <div><dt>Shows when</dt><dd><code>Pihr/Pihr</code> only &mdash; <code>n/Pihr</code> is a carrier wild type</dd></div>
+    <div><dt>Default allele</dt><dd>n</dd></div>
     <div><dt>Wild frequency</dt><dd>1 in 12 per allele &rarr; ~1 horse in 144 shows it</dd></div>
-    <div><dt>Founder draws</dt><dd>2 &times; nextInt(12)</dd></div>
+    <div><dt>Founder draws</dt><dd>1 &times; nextFloat()</dd></div>
     <div><dt>Deterministic</dt><dd>yes</dd></div>
-    <div><dt>Visible when</dt><dd>Pihr/Pihr only</dd></div>
     <div><dt>Target colour</dt><dd>255, 105, 180</dd></div>
     <div><dt>Strength</dt><dd>82% of the way there</dd></div>
 </dl>
@@ -89,7 +89,7 @@ private static int toward(ColorView colour, int px, int py, int channel, int tar
     </p>
 </div>
 
-<h2>Why recessive, and why 1 in 12</h2>
+<h2>Why a carrier gene, and why 1 in 12</h2>
 
 <p>
     Every other gene in the mod is spottable &mdash; you can look at a horse and know
@@ -99,16 +99,17 @@ private static int toward(ColorView colour, int px, int py, int channel, int tar
 </p>
 
 <p>
-    The comparatively common allele frequency is deliberate for that reason &mdash; a
-    recessive that is also rare per allele is a recessive nobody ever gets to play
+    The comparatively common allele frequency is deliberate for that reason &mdash; an
+    invisible carrier that is <em>also</em> rare is something nobody ever gets to play
     with. At 1 in 12 per allele, roughly 16% of wild horses carry a copy.
 </p>
 
 <p>
     It also makes pink hair the natural first consumer of a
-    <a href="genetics-model.html">&ldquo;carrier of X&rdquo; display</a> &mdash;
-    <code>DominancePattern.RECESSIVE</code> is already declared and read by nothing
-    but the catalogue.
+    <a href="genetics-model.html#combinations">&ldquo;carrier of X&rdquo;
+    display</a>: the gene declares a <code>pink-carrier</code> wild-type
+    expression with its own description, so the wording a UI would show already
+    exists &mdash; nothing reads it yet but the gene dictionary.
 </p>
 
 <h2>Foals get a pink tail only</h2>
@@ -140,11 +141,13 @@ for (Part part : HAIR) {
 <h2>One more thing about the allele order</h2>
 
 <p>
-    <code>alleles()</code> is declared <strong>most dominant first</strong>, and here
-    the wild type <em>is</em> the dominant one &mdash; so the list is
-    <code>List.of(n, Pihr)</code>, not the other way round. A horse&rsquo;s code
-    segment reads <code>n/Pihr</code> for a carrier and <code>Pihr/Pihr</code> for an
-    affected horse.
+    <code>alleles()</code> declares <code>List.of(n, Pihr)</code> &mdash; the
+    baseline first. That order is <strong>bookkeeping, not biology</strong>: it
+    only fixes which allele lands in which slot of an
+    <code>AllelePair</code>, so a pair equals its reverse and the code string
+    round-trips. Nothing about what the combination <em>does</em> consults it. A
+    horse&rsquo;s code segment reads <code>n/Pihr</code> for a carrier and
+    <code>Pihr/Pihr</code> for an affected horse.
 </p>
 
 <h2>Not modelled yet</h2>

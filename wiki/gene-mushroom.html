@@ -24,12 +24,12 @@
 <dl class="spec">
     <div><dt>Gene key</dt><dd>horsegenetics.mushroom</dd></div>
     <div><dt>Alleles</dt><dd><span class="allele dom">Mu</span> <span class="allele wild">mu</span></dd></div>
-    <div><dt>Dominance</dt><dd>RECESSIVE</dd></div>
-    <div><dt>Wild type</dt><dd>mu</dd></div>
+    <div><dt>Outcomes</dt><dd>wild, <code>mushroom-carrier</code>, <code>mushroom</code></dd></div>
+    <div><dt>Shows when</dt><dd><code>Mu/Mu</code> only &mdash; <code>Mu/mu</code> is a carrier wild type</dd></div>
+    <div><dt>Default allele</dt><dd>mu</dd></div>
     <div><dt>Wild frequency</dt><dd>1 in 34 per allele (carrier ~1 in 17)</dd></div>
-    <div><dt>Founder draws</dt><dd>2 &times; nextInt(34)</dd></div>
+    <div><dt>Founder draws</dt><dd>1 &times; nextFloat()</dd></div>
     <div><dt>Deterministic</dt><dd>yes</dd></div>
-    <div><dt>Visible when</dt><dd>Mu/Mu</dd></div>
     <div><dt>keep red</dt><dd>0.12 &mdash; cut hard, to leave the chestnut corner</dd></div>
     <div><dt>red &rarr; black tint</dt><dd>0.34 &mdash; drops the sample down the neutral ramp</dd></div>
 </dl>

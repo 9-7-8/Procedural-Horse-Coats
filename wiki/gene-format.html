@@ -31,7 +31,24 @@
 <h2>The shape</h2>
 
 <p>
-    A header, then a list of <strong>layers</strong>. Each layer is
+    A header, then two tables:
+</p>
+
+<ul>
+    <li><strong><code>expressions</code></strong> &mdash; one entry per distinct
+        <em>outcome</em>, each naming the allele combinations that produce it, a
+        human-readable description, and what it paints. This is why the format has
+        no <code>dominance</code> field: which combinations share an outcome
+        <em>is</em> the whole of what dominance used to say, and saying it directly
+        works for any number of alleles. See
+        <a href="genetics-model.html#combinations">the genetics model</a>.</li>
+    <li><strong><code>founders</code></strong> &mdash; the share of wild horses
+        carrying each combination, as percentages. Replaces the old per-allele
+        <code>wildOdds</code>.</li>
+</ul>
+
+<p>
+    An expression paints with a list of <strong>layers</strong>. Each layer is
     <strong>where</strong> (its <a href="#masks">masks</a>, folded into one coverage
     number per texel) times <strong>what</strong> (its <a href="#ops">op</a>, applied
     scaled by that number). Because coverage scales the effect rather than gating it,
@@ -40,41 +57,144 @@
 </p>
 
 <pre><code class="language-json">{
-  "format": 1,
+  "format": 2,
   "key": "mymod.silver",
   "name": "Silver dapple",
   "phase": "natural",
-  "dominance": "DOMINANT",
-  "wildOdds": 60,
   "priority": 45,
   "alleles": [
     { "token": "Z", "label": "Silver (Z)" },
     { "token": "z", "label": "Wild-type (z)" }
   ],
-  "layers": [
+  "expressions": [
     {
-      "name": "dilute the black, leave the red",
-      "masks": [ { "type": "ALL" } ],
-      "op": { "type": "DILUTE", "keepRed": 1.0, "keepBlack": 0.45, "blackTint": 0.18 }
+      "id": "silver",
+      "name": "Silver dapple",
+      "description": "Black pigment diluted to chocolate, with red left alone.",
+      "when": [ "Z/Z", "Z/z" ],
+      "layers": [
+        {
+          "name": "dilute the black, leave the red",
+          "masks": [ { "type": "ALL" } ],
+          "op": { "type": "DILUTE", "keepRed": 1.0, "keepBlack": 0.45, "blackTint": 0.18 }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "Black pigment is left alone.",
+      "wildType": true
     }
-  ]
+  ],
+  "founders": { "Z/Z": 0.027778, "Z/z": 3.277778, "z/z": 96.694444 }
 }</code></pre>
 
 <h2>Header</h2>
 
 <dl class="spec">
-    <div><dt>format</dt><dd>1. A file from a newer format is refused rather than half-read.</dd></div>
+    <div><dt>format</dt><dd>2. A file from another format is refused rather than half-read.</dd></div>
     <div><dt>key</dt><dd><code>modid.gene</code>, lower case, unique. Namespaced so two mods can't collide.</dd></div>
     <div><dt>name</dt><dd>Display name. Defaults to the part after the dot.</dd></div>
     <div><dt>phase</dt><dd><code>natural</code> or <code>magical</code>. See below &mdash; never both.</dd></div>
-    <div><dt>dominance</dt><dd><code>DOMINANT</code>, <code>RECESSIVE</code>, <code>INCOMPLETE_DOMINANT</code>, <code>COMPLETE_DOMINANT</code>.</dd></div>
-    <div><dt>wildOdds</dt><dd>1 in N per allele copy in the wild population.</dd></div>
-    <div><dt>priority</dt><dd>Processing order &mdash; lower runs first. Sorted into the <strong>one</strong> <code>(priority, key)</code> order alongside the built-ins (extension 10 &hellip; splash 80; magical 100+), so a natural gene at 45 lands between the built-in pearl and champagne. <strong>Registration order is ignored.</strong> Natural band <code>0&ndash;99</code>, magical <code>100+</code> (out of band only warns); within the natural band, put an absolute pigment-setter low and a dilution higher.</dd></div>
-    <div><dt>alleles</dt><dd>Most dominant first, <strong>wild type last</strong>. A token may be any run of characters except <code>/</code> and <code>-</code>, which separate alleles and genes in a genotype code.</dd></div>
+    <div><dt>priority</dt><dd>Processing order &mdash; lower runs first. Sorted into the <strong>one</strong> <code>(priority, key)</code> order alongside the built-ins (extension 10 &hellip; splash 80; magical 100+), so a natural gene at 45 lands between the built-in MATP and champagne. <strong>Registration order is ignored.</strong> Natural band <code>0&ndash;99</code>, magical <code>100+</code> (out of band only warns); within the natural band, put an absolute pigment-setter low and a dilution higher.</dd></div>
+    <div><dt>alleles</dt><dd>Any number, two or more. The <strong>last</strong> one is the population baseline &mdash; a genotype code with no segment for this gene reads as two copies of it. A token may be any run of characters except <code>/</code> and <code>-</code>, which separate alleles and genes in a genotype code.</dd></div>
     <div><dt>knobs</dt><dd>Optional. See <a href="#knobs">numbers that vary per horse</a>.</dd></div>
-    <div><dt>layers</dt><dd>The coat effect.</dd></div>
-    <div><dt>effects</dt><dd>Optional. Minecraft-specific behaviour &mdash; walk on water, trail particles, be milked. See <a href="#effects">below</a>.</dd></div>
+    <div><dt>expressions</dt><dd>The outcomes. Required &mdash; see below.</dd></div>
+    <div><dt>founders</dt><dd>The wild population. Required &mdash; see below.</dd></div>
 </dl>
+
+<h2 id="expressions">Expressions &mdash; one entry per outcome</h2>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Field</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr><td><code>id</code></td><td>A slug, unique within the gene, stable. The gallery dedups combinations by it and the wiki keys tables on it.</td></tr>
+<tr><td><code>name</code></td><td>Short display name. Defaults to the id.</td></tr>
+<tr><td><code>description</code></td><td>One human-readable sentence: what a horse with this combination looks like. What the gene dictionary and the tooltips show.</td></tr>
+<tr><td><code>when</code></td><td>Which combinations land here. Two shapes, below. <strong>Omit it</strong> on exactly one entry to make that the catch-all.</td></tr>
+<tr><td><code>wildType</code></td><td><code>true</code> = this combination changes nothing. Carries no layers and no effects; skipped by the composer, excluded from the texture key, reads as absent in the genome display.</td></tr>
+<tr><td><code>masks</code></td><td><code>true</code> = while this shows, no other gene is visible. Dominant white does this.</td></tr>
+<tr><td><code>varies</code></td><td>Override the &ldquo;non-deterministic if the gene has knobs&rdquo; default. Declaring determinism you do not have poisons the coat cache &mdash; see <a href="modding.html">Writing a gene</a>.</td></tr>
+<tr><td><code>layers</code></td><td>What it paints.</td></tr>
+<tr><td><code>effects</code></td><td>Optional Minecraft behaviour &mdash; see <a href="#effects">below</a>. An expression with effects but no layers is fine: it changes the horse, just not its coat.</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3><code>when</code>: which combinations</h3>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Written</th><th>Means</th></tr></thead>
+<tbody>
+<tr><td><code>"when": [ "Cr/Cr", "Cr/prl" ]</code></td><td>Exactly these combinations. Either order works &mdash; <code>"prl/Cr"</code> resolves to the same entry.</td></tr>
+<tr><td><code>"when": { "Cr": 1, "prl": 0 }</code></td><td>Every combination with those copy counts. Compact when a locus has many alleles.</td></tr>
+<tr><td>omitted</td><td>The <strong>catch-all</strong>: whatever no other entry claimed. At most one per gene.</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="note rule">
+    <span class="label">The table has to be total and unambiguous</span>
+    <p>
+        The loader enumerates every one of the gene's
+        <em>n</em>(<em>n</em>+1)/2 combinations and checks each is claimed by
+        <strong>exactly one</strong> expression. A gap is an error naming the
+        unclaimed combinations; an overlap is an error naming both claimants; a
+        catch-all with nothing left to catch is an error too. The whole value of
+        declaring the table is that it cannot quietly be wrong &mdash; a horse
+        nobody can explain is worse than a file that will not load.
+    </p>
+</div>
+
+<h3>Worked example: three alleles</h3>
+
+<pre><code class="language-json">"alleles": [ { "token": "Cr" }, { "token": "prl" }, { "token": "N" } ],
+"expressions": [
+  { "id": "double-dilute", "name": "Double dilute",
+    "description": "Cremello, perlino or smoky cream.",
+    "when": [ "Cr/Cr", "Cr/prl" ],
+    "layers": [ /* ... */ ] },
+  { "id": "single-cream", "name": "Single cream",
+    "description": "Palomino, buckskin or smoky black.",
+    "when": { "Cr": 1, "prl": 0 },
+    "layers": [ /* ... */ ] },
+  { "id": "classic-pearl", "name": "Classic pearl",
+    "description": "An apricot body with sepia points.",
+    "when": [ "prl/prl" ],
+    "layers": [ /* ... */ ] },
+  { "id": "wild", "name": "Wild type",
+    "description": "No dilution.",
+    "wildType": true }
+],
+"founders": {
+  "Cr/Cr": 0.111111, "Cr/prl": 0.303030, "Cr/N": 6.141414,
+  "prl/prl": 0.206612, "prl/N": 8.374656, "N/N": 84.863177
+}</code></pre>
+
+<p>
+    The catch-all sweeps up <code>prl/N</code> and <code>N/N</code>, the two
+    combinations that genuinely do nothing. That is what &ldquo;pearl is
+    recessive&rdquo; used to mean, said as the table.
+</p>
+
+<h2 id="founders">Founders &mdash; the wild population</h2>
+
+<p>
+    An object of combination to percentage. The shares should sum to 100; if they
+    do not they are <strong>normalised proportionally</strong> with a warning, not
+    an error. A combination left out simply <strong>never turns up in the
+    wild</strong> &mdash; which is how a gene forbids a lethal homozygote among
+    founders, and what no per-allele frequency could ever say.
+</p>
+
+<p>
+    One <code>nextFloat()</code> per gene per founder picks a bucket, so a
+    founder's genotype is reproducible from the RNG stream. <strong>Founders
+    only</strong>: breeding never consults this table.
+</p>
 
 <h3>Natural or magical, never both</h3>
 
@@ -101,7 +221,7 @@
 <tr><td><code>0.4</code></td><td>A constant.</td></tr>
 <tr><td><code>"$extent"</code></td><td>The value of a knob declared in <code>knobs</code>.</td></tr>
 <tr><td><code>{ "min": 0.1, "max": 0.9 }</code></td><td>An <strong>inline</strong> range &mdash; an anonymous knob, written where it is used.</td></tr>
-<tr><td><code>{ "perDose": [0, 0.4, 0.9] }</code></td><td>One value per number of variant copies. How an incomplete dominant makes its homozygote louder without the format needing an expression language.</td></tr>
+<tr><td><code>{ "perDose": [0, 0.4, 0.9] }</code></td><td>One value per number of copies of the <strong>first-declared</strong> allele. A convenience for scaling one outcome by dose; a genuinely different outcome should be its own expression instead.</td></tr>
 </tbody>
 </table>
 
@@ -190,14 +310,15 @@
 <tbody>
 <tr><td><code>TINT</code></td><td><code>red</code>, <code>green</code>, <code>blue</code> (percent, signed), <code>opacity</code> 100</td><td>Adds signed colour. The accumulator is an uncapped <code>int</code>, so <code>-200</code> on all three channels reads black over <em>any</em> coat and <code>+300</code> on blue is blue whatever else the horse carries. That headroom is the point: your gene never has to know what else is there.</td></tr>
 <tr><td><code>TOWARD</code></td><td><code>color</code>, <code>strength</code> 100, <code>opacity</code> 100</td><td>Walks the texel toward a colour, reading what it already <em>looks</em> like &mdash; so one number lands the same on a black mane and a cremello one, and keeps the strand shading. The pink-hair move.</td></tr>
-<tr><td><code>FLAT</code></td><td><code>color</code>, <code>opacity</code> 100</td><td>Flat paint that <em>replaces</em> what is under it. Order-dependent, so reserve it for a <code>COMPLETE_DOMINANT</code> gene that must look identical on any base.</td></tr>
+<tr><td><code>FLAT</code></td><td><code>color</code>, <code>opacity</code> 100</td><td>Flat paint that <em>replaces</em> what is under it. Order-dependent, so reserve it for a <code>masks</code> expression that must look identical on any base.</td></tr>
 </tbody>
 </table>
 
 <h2 id="effects">Effects &mdash; behaviour beyond the coat</h2>
 
 <p>
-    A gene may carry an <code>effects</code> array alongside <code>layers</code>: the
+    An <strong>expression</strong> may carry an <code>effects</code> array alongside
+    its <code>layers</code>: the
     <strong>Minecraft-specific things it makes the horse do</strong>. The set is
     closed &mdash; <code>traversal</code>, <code>attribute</code>,
     <code>emitter</code>, <code>mob_effect</code>, <code>yield</code>, <code>glow</code>
@@ -205,7 +326,9 @@
     every entry accepts an optional <code>when</code> condition (boolean flags with
     <code>all</code>/<code>any</code>/<code>not</code>) and an optional
     <code>minDose</code> (<code>1</code> = any expressing copy, <code>2</code> =
-    homozygous only). <strong><a href="gene-effects.html">Gene effects</a></strong> is
+    homozygous only &mdash; largely superseded now that a homozygote can simply be
+    its own expression with its own effects list).
+    <strong><a href="gene-effects.html">Gene effects</a></strong> is
     the full reference &mdash; every verb, the triggers, the condition flags, and how
     to add a new verb. The short version:
 </p>

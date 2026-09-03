@@ -43,7 +43,8 @@
         <em>Waterborn</em>. Fixed with the data-model rewrite:
         <code>GeneCodeDisplay</code> now derives its trailing gene list (curated
         built-in order, then <code>Genes.loaded()</code>) and derives the
-        &ldquo;wild type means absent&rdquo; test from <code>dominance()</code>.
+        &ldquo;baseline means absent&rdquo; test from the gene&rsquo;s own
+        expression table (does any combination <code>mask</code>?).
         Confirm a horse carrying Suntouched or Waterborn shows it. See
         <a href="#data-model">&sect;0</a>.
     </p>
@@ -71,18 +72,21 @@
 <h2>Wanted (not built yet)</h2>
 
 <div class="note warn">
-    <span class="label">Splash is not really incomplete dominant</span>
+    <span class="label">Splash does not read its own dose</span>
     <p>
-        It is tagged <code>INCOMPLETE_DOMINANT</code> so the catalogue gives
-        <code>Spl/spl</code> and <code>Spl/Spl</code> their own pens, but
-        <code>SplashGene.restrict</code> never reads the dose, so the two render
-        identically. Homozygous splash should give <strong>much larger</strong>
-        markings &mdash; higher stockings, a wide blaze or bald face, body patches.
+        <code>Spl/spl</code> and <code>Spl/Spl</code> return the <em>same</em>
+        expression, so a homozygote is no bolder than a carrier. It should be:
+        higher stockings, a wide blaze or bald face, body patches.
     </p>
     <p>
-        Compare gallery pens <strong>#11 <code>eeaa nSpl</code></strong> and
-        <strong>#19 <code>eeaa SplSpl</code></strong> &mdash; identical today, and the
-        clearest place to check the fix.
+        The combination-table rewrite did not fix this, but it did stop the code
+        <em>lying</em> about it. Splash used to be tagged
+        <code>INCOMPLETE_DOMINANT</code> while its painter ignored the dose &mdash;
+        the tag and the pixels disagreed and nothing could tell, and the gallery
+        gave the two combinations separate, identical-looking pens. Now both map to
+        one expression, so splash gets <strong>one</strong> pen and the gap is
+        visible in the source. Fixing it is adding a second expression, exactly as
+        <a href="gene-sabino.html">sabino</a> already does.
     </p>
 </div>
 
@@ -92,22 +96,105 @@
         The eyes render correctly everywhere, but they are copied verbatim from the
         template (<code>CoatRegions.redrawEyes</code>). Wants a gene &mdash; and the
         classic hook is <strong>blue eyes on cream double-dilutes</strong>, which would
-        make it the first gene to read the cream/pearl dose for something other than
-        pigment.
+        make it the first gene to read <a href="gene-matp.html">MATP</a>&rsquo;s
+        expression for something other than pigment.
     </p>
 </div>
 
 <h2>Still to verify</h2>
 
-<h3 id="data-model">0. The data-model rewrite &mdash; gene priority + gene-keyed codes (new 2026-09-03)</h3>
+<h3 id="expressions">0. The combination-table rewrite &mdash; no more dominance (new 2026-09-03)</h3>
+
+<p>
+    <a href="roadmap.html#multi-allele">Roadmap &sect;5.1 / &sect;5.2 / &sect;2</a>:
+    <code>DominancePattern</code> is deleted; every gene declares an
+    <code>Expression</code> per distinct outcome and one function mapping any allele
+    combination to one of them; <code>randomPair</code> is replaced by a per-combination
+    <code>FounderTable</code>; cream and pearl merged into three-allele
+    <a href="gene-matp.html">MATP</a>; the JSON gene format moved to
+    <code>"format": 2</code>; and the <strong>epigenome moved onto
+    <code>HorseRecord</code></strong> (the separate coat attachment is gone). 213
+    <code>:common:test</code> pass, parity is 3,832 checks across 48 cases,
+    <code>runServer</code> boots clean (<code>19 segments</code>). Machinery:
+    <a href="genetics-model.html#combinations">Genetics model</a>,
+    <a href="gene-format.html">the gene file format</a>,
+    <a href="gene-matp.html">MATP</a>.
+</p>
+
+<div class="note danger">
+    <span class="label">Every horse in an existing world is a different horse</span>
+    <p>
+        The genotype code lost a segment (cream + pearl &rarr; MATP) and founders now
+        draw one <code>nextFloat()</code> per gene instead of two <code>nextInt</code>s,
+        so <strong>old saves will not reproduce their horses</strong>. Dev-only, no
+        saves to keep &mdash; but start a fresh world rather than wondering why a
+        familiar horse changed.
+    </p>
+</div>
+
+<ul>
+    <li><strong>Wild spawns still render correctly</strong> and show a wide variety.
+        This is the whole-pipeline check: founder draws, the expression table, and the
+        record-borne epigenome all changed under it.</li>
+    <li><strong>A cream horse looks right.</strong> Find or spawn <code>Cr/N</code>
+        (palomino / buckskin / smoky black), <code>Cr/Cr</code> (cremello / perlino),
+        <code>prl/prl</code> (classic pearl, apricot with sepia points) and
+        <strong><code>Cr/prl</code></strong> &mdash; the new combination, which should
+        look like a double dilute, not like a single cream. The genome display writes
+        it <code>Crprl</code>.</li>
+    <li><strong>A pearl carrier is invisible.</strong> <code>prl/N</code> should render
+        exactly like <code>N/N</code>; the display shows <code>nprl</code>.</li>
+    <li><strong>Breeding still works</strong> &mdash; a bred foal gets a combined code,
+        rolled stats and a name, and its coat matches its inherited alleles. The foal
+        path now writes the epigenome into its <em>record</em>; a foal rendering as a
+        plain black horse would mean the record never got one.</li>
+    <li><strong>The family tree draws ancestors&rsquo; real coats.</strong> This is the
+        visible payoff of moving the epigenome onto the record: a non-deterministic
+        ancestor (a bay, a grey, a splash) should show the <em>same</em> markings in
+        the tree as the horse does in the world. It used to show a plausible invention
+        derived from the record UUID.</li>
+    <li><strong>Save and reload.</strong> The epigenome is serialised in a new
+        <code>epigenome_code</code> field on the record; a horse whose coat changes
+        across a reload means that field is not round-tripping.</li>
+    <li><strong>The seed jar still round-trips</strong> &mdash; collect from a stallion,
+        impregnate a mare, and check the foal. The jar reads the sire&rsquo;s genome
+        off his record now rather than off an attachment.</li>
+    <li><strong>Suntouched / Waterborn still load and express.</strong> Both gene files
+        were rewritten to format 2; the log should read
+        <code>loaded 2 data-driven gene(s)</code> and <code>19 segments</code>. A
+        parse error would drop them silently from the genotype.</li>
+    <li><strong>The gene creator still exports a file the game accepts.</strong> Open
+        <code>wiki/gene-creator/index.html</code>, load an example, export, drop it in
+        <code>config/horsegenetics/genes/</code> and restart. The form now asks
+        &ldquo;shows when the horse has one copy or two&rdquo; and takes three founder
+        percentages instead of a dominance dropdown and a 1-in-N field.</li>
+    <li><strong>Pen signs and the entrance tally.</strong> The gallery is now
+        <strong>98,306 pens</strong> over ~344,000 blocks (it was 331,778 / ~1.16&nbsp;M):
+        splash collapsed from three pens to two and MATP from nine to four.</li>
+</ul>
+
+<div class="note">
+    <span class="label">Known gap: the creator authors one outcome only</span>
+    <p>
+        The format allows any number of alleles and an outcome per combination; the
+        <a href="gene-creator/index.html">creator</a> authors a <strong>two-allele
+        gene with one visible outcome</strong> plus a wild type, which is what its
+        single layer list can describe. A three-allele locus like MATP, or a
+        sabino-style two-outcome gene, is hand-edited JSON. The creator says so in
+        its own hint text; it is not a silent limitation.
+    </p>
+</div>
+
+
+<h3 id="data-model">0.1 The data-model rewrite &mdash; gene priority + gene-keyed codes (2026-09-03)</h3>
 
 <p>
     <a href="roadmap.html#priority">Roadmap Tier&nbsp;1</a>: every gene has
     <code>int priority()</code>; all orderings derived by sorting on
     <code>(priority, key)</code>; genotype / epigenome code strings are now
     gene-keyed (<code>&lt;geneKey&gt;=&hellip;</code>) and tolerant. 195
-    <code>:common:test</code> pass, <code>runServer</code> boots clean
-    (<code>20 segments</code>). Machinery:
+    <code>:common:test</code> pass, <code>runServer</code> boots clean. (Superseded
+    in part by <a href="#expressions">&sect;0</a>, which reran all of it.) Machinery:
     <a href="genetics-model.html#gene-priority">Genetics model</a>.
 </p>
 <p>
@@ -128,7 +215,7 @@
         <code>GeneCodeDisplay</code> bug (closed with this change) hid them.</li>
 </ul>
 
-<h3 id="horse-care">0.1 Horse care &mdash; gated healing, bond &amp; herds (new 2026-09-02)</h3>
+<h3 id="horse-care">0.2 Horse care &mdash; gated healing, bond &amp; herds (new 2026-09-02)</h3>
 
 <p>
     First slice of <a href="roadmap.html#care">roadmap &sect;7</a> and
@@ -291,7 +378,7 @@
 <h3>4. Pen signs now overflow</h3>
 
 <p>
-    At 18 genes a fully loaded-up genotype label runs to well over a hundred
+    At 17 genes a fully loaded-up genotype label runs to well over a hundred
     characters against three 15-char sign lines, so <code>GeneCodeDisplay.wrap</code>
     overflows the last line badly (the unit-test tripwire is now 140). Confirm how
     badly that reads in-game before deciding
@@ -332,12 +419,12 @@
 
 <ul>
     <li>The entrance sign three blocks in front of the return portal reads
-        <code>Genotypes / 387,420,489 / Distinct / 331,778 pens</code>.</li>
+        <code>Genotypes / 258,280,326 / Distinct / 98,306 pens</code>.</li>
     <li>The first six pens, right/left alternating, are <code>eeaa</code>,
         <code>EEaa</code>, <code>eeAA</code>, <code>EEAA</code>,
         <code>EEaa WW</code>, <code>EEaa TT</code> &mdash; extension exhausts before
-        agouti moves, no heterozygote pens for dominant genes, and white and test get
-        exactly one pen each.</li>
+        agouti moves, no separate pen for a combination that lands on the same
+        expression as another, and white and test get exactly one pen each.</li>
     <li>Pen signs read like the horse&rsquo;s own info panel (<code>eeaa nSpl</code>,
         not the full slash-and-dash code) and wrap sensibly on the ordinary ones. The
         busiest ones overflow &mdash; that is item 3, do not file it twice.</li>
@@ -347,8 +434,8 @@
         open the edit screen).</li>
     <li>Both horses in a pen match the sign, and differ only where a
         non-deterministic gene (bay points, splash) makes them differ.</li>
-    <li>The corridor ends in a wall after the last pen &mdash; now ~1.16&nbsp;M blocks
-        out (331,778 pens), so not something to fly either.</li>
+    <li>The corridor ends in a wall after the last pen &mdash; now ~344,000 blocks
+        out (98,306 pens), so not something to fly either.</li>
 </ul>
 
 <h3>7. Leaving the dimension no longer clears blocks</h3>

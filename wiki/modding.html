@@ -48,7 +48,7 @@
     <span class="label">What is and isn't open</span>
     <p>
         <code>Genes</code> is an <strong>open registry</strong> for data-driven genes:
-        <code>Genes.register(SpecGene)</code> appends after the eighteen built-ins,
+        <code>Genes.register(SpecGene)</code> appends after the seventeen built-ins,
         sorted by declared <code>priority</code> then key, so registration order never
         decides how a horse looks. A <em>Java</em> gene from another mod still has to
         be added to this repository &mdash; the mod-bus registration hook, the
@@ -113,14 +113,16 @@
         <code>n</code> is the most-printed token in the mod, and
         <code>GeneCodeDisplay.shortForm</code> leans on recognising it to keep a
         genotype readable.</li>
-    <li><strong>An indefinite number of alleles</strong> is the design target. Two is
-        the common case, not the assumption &mdash; though
-        <a href="roadmap.html#multi-allele">multi-allele support is not finished</a>
-        (dominance is still declared per gene rather than per pair).</li>
-    <li><strong>Most dominant first</strong> in <code>alleles()</code>. That list is
-        what <code>precedence()</code> reads to canonicalize an
-        <code>AllelePair</code>. Override <code>precedence</code> if your ordering
-        needs to differ &mdash; <a href="gene-pearl.html">pearl</a> does.</li>
+    <li><strong>Any number of alleles.</strong> Two is the common case, not the
+        assumption: <a href="gene-matp.html">MATP</a> has three, and the model
+        scales to a thirty-allele <code>KIT</code> without a special case, because
+        you declare an outcome per <em>combination</em> rather than a dominance
+        label per gene.</li>
+    <li><strong>The <code>alleles()</code> order is bookkeeping, not biology.</strong>
+        It fixes which allele lands in which slot of an <code>AllelePair</code>, so
+        a pair equals its reverse and a code string round-trips &mdash; and it must
+        agree with each <code>Allele.order()</code>. Nothing about what a
+        combination <em>does</em> consults it.</li>
 </ul>
 
 <h2>The interface</h2>
@@ -131,34 +133,47 @@
 
     // --- required ---------------------------------------------------------
     String key();                          // "&lt;modauthor&gt;.&lt;gene&gt;"
-    List&lt;Allele&gt; alleles();                // most dominant first
-    Allele wildType();                     // the "no visible effect" allele
-    DominancePattern dominance();          // declared metadata
+    List&lt;Allele&gt; alleles();                // any number; the order is a slot
+                                           // order, not a dominance ranking
+    Allele defaultAllele();                // what a missing code segment reads as
     int priority();                        // processing order; no default (see below)
-    AllelePair randomPair(Rng rng);        // one wild-population draw
+
+    // --- the combination table --------------------------------------------
+    List&lt;Expression&gt; expressions();        // every distinct outcome, wild types too
+    Expression expressionOf(AllelePair pair);              // THE function
+
+    // ...and the same question in the context of the whole genotype, for a gene
+    // that depends on another. This is what the coat pipeline calls.
+    default Expression expressionIn(AllelePair pair, Genotype genotype) {
+        return expressionOf(pair);
+    }
+
+    // --- the wild population ----------------------------------------------
+    FounderTable founderTable(FounderContext context);     // weight per combination
 
     // --- phase declaration ------------------------------------------------
     default boolean isNatural() { return true; }
 
-    // --- exactly one of these ---------------------------------------------
-    default PigmentField restrict(AllelePair pair, CoatBuildContext ctx,
-                                  PigmentView coat) { return null; }
-
-    default ColorField tint(AllelePair pair, CoatBuildContext ctx,
-                            PigmentView coat, ColorView colour) { return null; }
-
-    // --- cache correctness -------------------------------------------------
-    default boolean isVisible(AllelePair pair, Genotype genotype) {
-        return pair.anyVisible();
-    }
-    default boolean isDeterministic(AllelePair pair, Genotype genotype) {
-        return pair.allDeterministic();
-    }
-
-    // --- rarely overridden -------------------------------------------------
-    default int precedence(Allele allele) { ... }   // lower = more dominant
-    default Allele fromToken(String token) { ... }  // token -&gt; allele
+    // --- derived; you do not implement these ------------------------------
+    default boolean isVisible(AllelePair p, Genotype g);       // !expression.wildType()
+    default boolean isDeterministic(AllelePair p, Genotype g); // expression.deterministic()
+    default Allele fromToken(String token);                    // token -&gt; allele
+    default Expression expression(String id);
 }</code></pre>
+</div>
+
+<div class="note">
+    <span class="label">There is no <code>dominance()</code>, and there never will be</span>
+    <p>
+        A gene has alleles; every unordered combination of two of them produces
+        <em>something</em>; the gene says what by declaring
+        <code>Expression</code>s and mapping pairs to them. &ldquo;Dominant&rdquo;
+        and &ldquo;recessive&rdquo; were shorthand for <em>which combinations
+        happen to share an outcome</em> &mdash; they only describe a two-allele
+        locus, and they cannot express codominance at all. Say the table instead;
+        it is shorter, it is exact, and it works for any number of alleles. See
+        <a href="genetics-model.html#combinations">the genetics model</a>.
+    </p>
 </div>
 
 <h2>Walkthrough 1 &mdash; a natural gene</h2>
@@ -184,43 +199,47 @@
 <pre><code class="language-java">public final class SilverGene implements Gene {
 
     public static final String KEY = "mymod.silver";
-    public static final int WILD_ODDS = 60;              // 1 in 60 per allele
+    public static final int WILD_ONE_IN = 60;            // 1 in 60 per allele
 
     /** Eumelanin kept. Phaeomelanin is untouched, so a chestnut is unchanged. */
     private static final float KEEP_BLACK = 0.45f;
 
-    public final Allele Z = new Allele(KEY, "Z", "Silver (Z)", true,  true);
-    public final Allele n = new Allele(KEY, "n", "Wild-type (n)", false, true);
-    private final List&lt;Allele&gt; alleles = List.of(Z, n);   // most dominant first
+    //           gene  order  token  label
+    public final Allele Z = new Allele(KEY, 0, "Z", "Silver (Z)");
+    public final Allele n = new Allele(KEY, 1, "n", "Wild-type (n)");
+    private final List&lt;Allele&gt; alleles = List.of(Z, n);
 
-    @Override public String key()               { return KEY; }
-    @Override public List&lt;Allele&gt; alleles()     { return alleles; }
-    @Override public Allele wildType()          { return n; }
-    @Override public DominancePattern dominance() { return DominancePattern.DOMINANT; }
-    @Override public int priority()             { return 35; }   // natural band; a dilution, so after agouti (20)
+    // --- the two outcomes, declared once ----------------------------------
 
+    private final Expression WILD = Expression.wildType("Black pigment is left alone.");
+
+    private final Expression SILVER = Expression.of("silver", "Silver dapple")
+            .describe("Black pigment walked toward chocolate, with red untouched - so "
+                    + "a chestnut carrying it looks unchanged.")
+            .restrict((ctx, coat) -&gt; {
+                PigmentField f = coat.mutableCopy();      // never write through `coat`
+                CoatRegions.restrictAll(ctx.skin(), f,
+                        (field, px, py, p) -&gt; field.dilute(px, py, 1.0f, KEEP_BLACK, 0.12f));
+                return f;
+            });
+
+    private final List&lt;Expression&gt; expressions = List.of(WILD, SILVER);
+
+    // 1 in 60 per allele, as the three combination shares it implies
+    private final FounderTable founders = FounderTable.hardyWeinberg(Z, n, 1.0 / WILD_ONE_IN);
+
+    @Override public String key()                    { return KEY; }
+    @Override public String name()                   { return "Silver dapple"; }
+    @Override public List&lt;Allele&gt; alleles()          { return alleles; }
+    @Override public Allele defaultAllele()          { return n; }
+    @Override public List&lt;Expression&gt; expressions()  { return expressions; }
+    @Override public int priority()                  { return 35; }  // a dilution: after agouti (20)
+    @Override public FounderTable founderTable(FounderContext c) { return founders; }
+
+    /** The whole gene: which combination gives which outcome. */
     @Override
-    public AllelePair randomPair(Rng rng) {
-        return new AllelePair(
-                rng.nextInt(WILD_ODDS) == 0 ? Z : n,
-                rng.nextInt(WILD_ODDS) == 0 ? Z : n);
-    }
-
-    @Override
-    public boolean isVisible(AllelePair pair, Genotype genotype) {
-        // nothing to dilute on a horse that makes no black pigment
-        return pair.has(Z) &amp;&amp; genotype.hasBlackPigment();
-    }
-
-    @Override
-    public PigmentField restrict(AllelePair pair, CoatBuildContext ctx, PigmentView coat) {
-        if (!pair.has(Z)) {
-            return null;                                  // no contribution
-        }
-        PigmentField f = coat.mutableCopy();               // never write through `coat`
-        CoatRegions.restrictAll(ctx.skin(), f,
-                (field, px, py, p) -&gt; field.dilute(px, py, 1.0f, KEEP_BLACK, 0.12f));
-        return f;
+    public Expression expressionOf(AllelePair pair) {
+        return pair.has(Z) ? SILVER : WILD;
     }
 }</code></pre>
 </div>
@@ -228,16 +247,19 @@
 <h3>Notes on that</h3>
 
 <ul>
-    <li><code>Allele(geneKey, token, label, visible, deterministic)</code> &mdash; the
-        last two are <em>population-level hints</em>. The authoritative per-horse
-        answers come from <code>isVisible</code> / <code>isDeterministic</code>.</li>
-    <li>Returning <code>null</code> is the cheap answer when the pair does not
-        express. Do it; the composer skips the copy entirely.</li>
+    <li><code>Allele(geneKey, order, token, label)</code> &mdash; and nothing else.
+        An allele carries no &ldquo;visible&rdquo; or &ldquo;deterministic&rdquo;
+        hint, because both are properties of a <em>combination</em> and live on the
+        <code>Expression</code>.</li>
+    <li>A wild-type expression has <strong>no painter at all</strong>, so
+        &ldquo;does nothing&rdquo; is structural rather than an early
+        <code>return null</code> you have to remember. The composer skips it.</li>
     <li>Use <code>dilute</code>, not a bare <code>restrictBlack</code>, whenever the
         effect is a dilution &mdash;
         <a href="pipeline.html#dilute">the zero-red column is a trap</a>.</li>
-    <li><code>isVisible</code> sees the <strong>whole genotype</strong>, which is how
-        a gene declines to run on a base that has nothing for it to do.</li>
+    <li>Override <code>expressionIn(pair, genotype)</code> and return a wild type
+        when a gene should decline to run on a base that has nothing for it to do
+        &mdash; that is how agouti stays silent on a chestnut.</li>
 </ul>
 
 <h2>Walkthrough 2 &mdash; a magical gene</h2>
@@ -258,21 +280,18 @@
 <div class="codebox">
 <pre><code class="language-java">@Override public boolean isNatural() { return false; }
 
-@Override
-public ColorField tint(AllelePair pair, CoatBuildContext ctx,
-                       PigmentView coat, ColorView colour) {
-    if (!pair.has(Blu)) {
-        return null;
-    }
-    ColorField delta = ColorField.deltaLike(colour);
-    HorseSkinGeometry.forEachTexel(ctx.skin(), (px, py, part, face, point) -&gt; {
-        // A resolved channel tops out at 255, so -510 lands hard on 0 and
-        // +510 lands hard on 255, whatever else the horse carries.
-        delta.add(px, py, -510, -510, 510);
-        delta.addOpacity(px, py, 255);   // so it shows on a dominant-white horse too
-    });
-    return delta;
-}</code></pre>
+private final Expression BLUE = Expression.of("blue", "Blue")
+        .describe("Unconditionally, unmistakably blue - on any base coat at all.")
+        .tint((ctx, coat, accumulated) -&gt; {
+            ColorField delta = ColorField.deltaLike(accumulated);
+            HorseSkinGeometry.forEachTexel(ctx.skin(), (px, py, part, face, point) -&gt; {
+                // A resolved channel tops out at 255, so -510 lands hard on 0 and
+                // +510 lands hard on 255, whatever else the horse carries.
+                delta.add(px, py, -510, -510, 510);
+                delta.addOpacity(px, py, 255);  // so it shows on a dominant white too
+            });
+            return delta;
+        });</code></pre>
 </div>
 
 <h3>Shape B &mdash; read the accumulator, then walk toward a target</h3>
@@ -314,7 +333,7 @@ private static int toward(ColorView colour, int px, int py, int channel, int tar
 
 <p>
     <code>ColorField.set</code> <em>replaces</em> the accumulator instead of adding to
-    it. It is reserved for a <code>COMPLETE_DOMINANT</code> gene that must read
+    it. It is reserved for a <code>masking</code> expression that must read
     identically on black, chestnut <em>or</em> white &mdash;
     <a href="gene-test.html">Test</a> is the only one. Using it makes your gene
     strictly order-dependent and erases every gene before it.
@@ -343,9 +362,10 @@ double reach   = 0.35 + epi.nextFloat() * 0.60;          // fraction of the drop
 <ul>
     <li>Founders roll a fresh seed; a <strong>foal inherits the copy&rsquo;s seed
         verbatim</strong>, so your pattern runs in families for free.</li>
-    <li>Declare <code>isDeterministic(pair, genotype)</code> <code>false</code>
-        whenever the pair expresses. The usual one-liner is
-        <code>return !isVisibleVariant(pair);</code>.</li>
+    <li>Mark the expression <code>.varies()</code>. Determinism is per
+        <em>outcome</em>, so a gene whose homozygote is random and whose
+        heterozygote is not says exactly that, with no per-gene predicate to get
+        subtly wrong.</li>
     <li>Prefer normalising against <code>bounds(skin, part)</code> /
         <code>bodyBounds(skin)</code> rather than hard-coded numbers, so the effect
         works on the foal mesh too.</li>
@@ -373,15 +393,22 @@ double reach   = 0.35 + epi.nextFloat() * 0.60;          // fraction of the drop
     <li><strong>Return a contribution; never write through your arguments.</strong>
         <code>coat</code> is the previous gene&rsquo;s output and the next
         gene&rsquo;s input.</li>
-    <li><strong>Declare <code>isDeterministic</code> honestly.</strong> Claiming
+    <li><strong>Mark <code>.varies()</code> honestly.</strong> Claiming
         determinism you do not have poisons the cache for every horse sharing your
-        genotype.</li>
+        genotype: the first to bake wins, and the rest render <em>its</em> coat.</li>
     <li><strong>Declare the phase honestly.</strong> Magical unless the gene exists
         in real life, and never both.</li>
     <li><strong>Do not depend on load order.</strong> Every ordering the engine uses
         is (or will be) computed by sorting.</li>
-    <li><strong>Only inspect lower-priority genes</strong> in a genome-aware spawn
-        chance &mdash; the higher ones have not been rolled yet.</li>
+    <li><strong>Only inspect lower-priority genes</strong> in a genome-aware
+        <code>founderTable</code> &mdash; the higher ones have not been rolled yet,
+        and <code>FounderContext.pair</code> throws rather than pretend.</li>
+    <li><strong>Cover every combination exactly once.</strong>
+        <code>expressionOf</code> must return one of your declared
+        <code>expressions()</code> for every one of the
+        <em>n</em>(<em>n</em>+1)/2 pairs. A <code>switch</code> on
+        <code>pair.count(allele)</code> with a <code>default</code> is the usual
+        shape.</li>
 </ol>
 
 <h2>Registering it</h2>

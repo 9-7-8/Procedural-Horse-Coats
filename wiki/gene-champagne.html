@@ -15,7 +15,8 @@
 <p class="eyebrow natural">Natural gene <span class="sep">/</span> phase 1</p>
 <h1>Champagne</h1>
 <p class="lede">
-    A simple dominant, <strong>not dose-dependent</strong>: it keeps most of the red,
+    One outcome for both variant combinations &mdash; <strong>it does not read its
+    own dose</strong>: it keeps most of the red,
     cuts black hard, and feeds part of the removed black back in as red. Because it
     reads the <em>current</em> pigment rather than a colour name, one rule gives gold,
     classic and amber champagne for free. It is also the simplest gene in the mod
@@ -25,12 +26,12 @@
 <dl class="spec">
     <div><dt>Gene key</dt><dd>horsegenetics.champagne</dd></div>
     <div><dt>Alleles</dt><dd><span class="allele dom">Ch</span> <span class="allele wild">c</span></dd></div>
-    <div><dt>Dominance</dt><dd>DOMINANT</dd></div>
-    <div><dt>Wild type</dt><dd>c</dd></div>
+    <div><dt>Outcomes</dt><dd>wild, <code>champagne</code></dd></div>
+    <div><dt>Shows when</dt><dd><code>Ch/c</code>, <code>Ch/Ch</code></dd></div>
+    <div><dt>Default allele</dt><dd>c</dd></div>
     <div><dt>Wild frequency</dt><dd>1 in 40 per allele</dd></div>
-    <div><dt>Founder draws</dt><dd>2 &times; nextInt(40)</dd></div>
+    <div><dt>Founder draws</dt><dd>1 &times; nextFloat()</dd></div>
     <div><dt>Deterministic</dt><dd>yes</dd></div>
-    <div><dt>Visible when</dt><dd>Ch_</dd></div>
     <div><dt>keep red</dt><dd>0.55</dd></div>
     <div><dt>keep black</dt><dd>0.42</dd></div>
     <div><dt>black tint</dt><dd>0.30</dd></div>
@@ -126,7 +127,7 @@ field.restrictBlack(px, py, 0.82f);          // black *= 0.18</code></pre>
 
 <div class="page-foot">
     <div class="seealso">
-        <a href="gene-cream.html">Cream</a>
+        <a href="gene-matp.html">MATP (cream / pearl)</a>
         <a href="gene-agouti.html">Agouti</a>
         <a href="modding.html">Writing a gene</a>
         <a href="pipeline.html#dilute">Why dilute() exists</a>

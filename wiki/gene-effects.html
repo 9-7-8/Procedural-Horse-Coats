@@ -142,9 +142,12 @@ Component  &rarr;  (Trigger, Condition, Selector, Effect)</code></pre>
 <h2 id="block">The <code>effects</code> block</h2>
 
 <p>
-    A gene&rsquo;s JSON may carry an <code>effects</code> array alongside its
-    <code>layers</code>. Each entry is an object with a <code>type</code> and that
-    type&rsquo;s own fields, plus two things every effect accepts:
+    An <strong>expression</strong> in a gene&rsquo;s JSON may carry an
+    <code>effects</code> array alongside its <code>layers</code> &mdash; so a
+    homozygote and a heterozygote can grant entirely different behaviour by being
+    different outcomes, with nothing anywhere comparing doses. Each entry is an
+    object with a <code>type</code> and that type&rsquo;s own fields, plus two
+    things every effect accepts:
 </p>
 
 <dl class="spec">
@@ -157,7 +160,9 @@ Component  &rarr;  (Trigger, Condition, Selector, Effect)</code></pre>
     <div>
         <dt>minDose</dt>
         <dd><code>1</code> (default &mdash; any expressing copy) or <code>2</code>
-            (homozygous variant only). Lets an incomplete-dominant gene gate the
+            (homozygous variant only). Largely superseded by the expression
+            table &mdash; a homozygote can be its own outcome with its own
+            effects list. Lets a gene gate the
             louder half of its effect on two copies without an expression language.</dd>
     </div>
 </dl>
@@ -990,9 +995,11 @@ Component  &rarr;  (Trigger, Condition, Selector, Effect)</code></pre>
 <p>
     <code>replaces</code> is what makes tiered traits clean &mdash; a strong variant
     supersedes the weak one rather than stacking with it. Note the overlap with
-    genetics: dominance and <code>minDose</code> already express some tiering, and it
-    is worth deciding deliberately which layer owns it rather than building both.
-    <code>[[does allele dominance subsume `replaces` for gene-carried traits?]]</code>
+    genetics: the gene&rsquo;s own <a href="genetics-model.html#combinations">expression
+    table</a> already expresses tiering exactly &mdash; a stronger variant is a
+    different outcome carrying a different effects list &mdash; and it is worth
+    deciding deliberately which layer owns it rather than building both.
+    <code>[[does the expression table subsume `replaces` for gene-carried traits?]]</code>
 </p>
 
 <h2 id="scaling">Trait scaling</h2>

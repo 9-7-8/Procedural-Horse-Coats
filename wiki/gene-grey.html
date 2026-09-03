@@ -25,12 +25,12 @@
 <dl class="spec">
     <div><dt>Gene key</dt><dd>horsegenetics.grey</dd></div>
     <div><dt>Alleles</dt><dd><span class="allele dom">G</span> <span class="allele wild">g</span></dd></div>
-    <div><dt>Dominance</dt><dd>DOMINANT</dd></div>
-    <div><dt>Wild type</dt><dd>g</dd></div>
+    <div><dt>Outcomes</dt><dd>wild, <code>grey</code></dd></div>
+    <div><dt>Shows when</dt><dd><code>G/g</code>, <code>G/G</code> &mdash; painted on adults only</dd></div>
+    <div><dt>Default allele</dt><dd>g</dd></div>
     <div><dt>Wild frequency</dt><dd>1 in 16 per allele</dd></div>
-    <div><dt>Founder draws</dt><dd>2 &times; nextInt(16)</dd></div>
+    <div><dt>Founder draws</dt><dd>1 &times; nextFloat()</dd></div>
     <div><dt>Deterministic</dt><dd><strong>no</strong> when expressed</dd></div>
-    <div><dt>Visible when</dt><dd>G_ <strong>and adult</strong></dd></div>
     <div><dt>Epigenetic draws</dt><dd>1 long + 4 nextFloat</dd></div>
     <div><dt>Generator</dt><dd>coat.pattern.GreyCoat</dd></div>
 </dl>

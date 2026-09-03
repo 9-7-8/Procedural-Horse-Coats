@@ -108,7 +108,8 @@ project. Its shape:
 - **New with the wiki conversion**, and not derived from any old markdown -
   keep them current too:
   - **`wiki/genetics-model.html`** - the Mendelian model as implemented:
-    alleles as objects, the code string, `DominancePattern`, the per-allele
+    alleles as objects, the code string, the **combination table**
+    (`Expression`) and `FounderTable` that replaced dominance, the per-allele
     epigenome, `GenotypeCatalog`, and what the texture key captures.
   - **`wiki/pipeline.html`** - the three-phase coat pipeline in full
     (`PigmentField` / `ColorField` / `GradientLut` / `CoatTextureId` / the
@@ -124,7 +125,74 @@ project. Its shape:
 
 ## Status snapshot (keep this current)
 
-- **Built 2026-09-03, partly owner-verified: the data-model rewrite (roadmap
+- **Built 2026-09-03, NOT yet play-tested: the combination-table rewrite
+  (roadmap Tier 1 §2, Tier 2 §5.1/§5.2).** `DominancePattern` is **deleted**.
+  A gene no longer declares a dominance label; it declares an **`Expression`
+  per distinct outcome** - id, display name, a human-readable description, a
+  `wildType` flag ("this combination changes nothing"), a `masks` flag, a
+  `deterministic` flag and **its own paint function** - plus one function
+  `expressionOf(AllelePair)` mapping any combination to one of them. Several
+  pairs sharing an expression *is* what "dominant" meant; only the
+  double-variant landing on a non-wild-type outcome *is* what "recessive"
+  meant; two variant alleles each with an outcome plus a third for the pair of
+  them *is* codominance. Works for any number of alleles with no special case.
+  Landing with it:
+  - **`Gene.randomPair(rng)` → `FounderTable`** - a weight per allele
+    *combination* as percentages, sparse (an unlisted combination never occurs),
+    normalised-with-a-warning, **one `nextFloat()` per gene per founder**, with a
+    `FounderContext` for a genome-aware distribution that *throws* if asked
+    about a gene not yet rolled. `FounderTable.hardyWeinberg(variant, baseline,
+    p)` is the convenience that reproduces the old "1 in N per allele" numbers.
+    The **test gene** is why this matters: 25% of founders are `T/t` and **none**
+    are `T/T`, which no per-allele frequency can express.
+  - **Cream + pearl → `MatpGene`** (`horsegenetics.matp`, priority 40) - the
+    proving case and the mod's first three-allele locus: `Cr`/`prl`/`N`, six
+    combinations, four outcomes. Kills the impossible `Cr/Cr`-and-`prl/prl`
+    genotype; `coat/pattern/CreamPearlDilution` is gone (the dose table is a
+    six-row `switch` on the gene). **17 built-in genes**, 19 in-game.
+  - **`Allele` lost `visible` / `deterministic`** (both are properties of a
+    *combination*) and **gained an `order`** - its index in `alleles()`, which
+    is a slot order for `AllelePair`'s canonical form and **not** dominance.
+    `Gene.precedence` and `AllelePair.dominant()` are gone.
+  - **`Gene.wildType()` → `defaultAllele()`** - what a code segment-less gene
+    reads as, a *parsing* default. The word "wild type" now means an expression.
+  - **The JSON gene format went to `"format": 2`** - `dominance` and `wildOdds`
+    replaced by an `expressions` table (each entry with `when`, `wildType`,
+    `masks`, `description`, its own `layers` and its own `effects`) and a
+    `founders` table. The parser proves the table is **total and unambiguous**
+    over every `n(n+1)/2` combination: a gap, an overlap, or an unreachable
+    catch-all is a load error naming the offending combination. Both shipped
+    genes and all six examples rewritten.
+  - **The epigenome moved onto `HorseRecord`** - see the separate bullet below.
+  - `GenotypeCatalog.distinctPairsOf` now groups pairs by the **expression**
+    they land on, with **every wild type counting as one group** ("changes
+    nothing" is one *look*). Exact rather than an approximation, and it shrank
+    the gallery from 331 778 pens to **98 306** (splash 3→2, MATP 9→4);
+    `totalGenotypes()` is **258 280 326**.
+  - `coat-golden.txt` regenerated - **every coat changed**, because founder
+    draws and the gene set both moved. `:common:test` **213 green**,
+    `:neoforge-26.1.2:build` green, parity **3 832 checks / 48 cases** (up 48:
+    the fixtures now pin which expression each combination resolves to),
+    `runServer` boots clean (`19 segments`, `loaded 2 data-driven gene(s)`).
+  - **Old saves will not reproduce their horses** - the code lost a segment and
+    the founder draw changed. Dev only; start a fresh world.
+  - Docs: `wiki/genetics-model.html#combinations`, `wiki/gene-format.html`,
+    `wiki/gene-matp.html`, `wiki/modding.html`, `wiki/api-reference.html`.
+    Checklist: `wiki/verification.html` §0.
+- **Built 2026-09-03, NOT yet play-tested: the epigenome lives on
+  `HorseRecord`.** `HorseRecord` gained `epigenomeCode` beside `geneticCode`
+  (plus `genotype()` / `epigenome()` / `genome()` / `hasGenome()` /
+  `withGenome()`), and `data/HorseCoatAttachment` + the `horsegenetics:horse_coat`
+  attachment are **deleted**. Both are heritable facts assigned once at birth, so
+  storing the genotype in two places was one fact twice - and keeping the
+  epigenome *off* the record is why `FamilyTreeScreen` had to invent an
+  ancestor's coat from its UUID. It now draws **the real coat** (closing old
+  known gap #9's second half). `HorseRecords.newFounder` rolls the whole genome;
+  `HorseBreedingHandler` / `StallionSeedJarHandler` read the parent genome off
+  the record; the record attachment gained `copyOnDeath`. `HorseRecordCodecs`
+  serialises `epigenome_code` as an optional field defaulting to `""`, which is
+  the `hasGenome()` sentinel.
+- **Built 2026-09-03, owner-verified: the earlier data-model rewrite (roadmap
   Tier 1, §2).** Every `Gene` now declares `int priority()`; `codeOrder()` /
   `naturalOrder()` / `magicalOrder()` are all *derived* by one sort on
   `(priority, key)` over built-ins + `SpecGene`s together (no hand-written
@@ -144,15 +212,16 @@ project. Its shape:
   Still unconfirmed: bred foal, seed-jar round-trip, a spec gene actually
   showing in the display (needs a horse carrying Suntouched/Waterborn) -
   `wiki/verification.html` §0.
-- **`common/`** - compiles; **195 JUnit tests pass** (`./gradlew :common:test`).
-  Covers `genetics/` (allele/gene model - **18 genes**: the 16 natural ones
-  (extension, agouti, champagne, splash, grey, cream, pearl, **dun**,
-  **silver**, **mushroom**, **roan**, **tobiano**, **frame**, **sabino**, plus
-  the epistatic dominant white), and magic zebra + pink hair; `Genotype` code
-  round-trip, breeding, the `Epigenome` / `Genome` per-allele epigenetics +
-  priority tie-break, `GenomeSample` - a genome detached from a horse, for the
-  stallion seed jar - `DominancePattern` + the `GenotypeCatalog` reduction of
-  387 420 489 genotypes to 331 778 distinct coats), `coat/` + `coat/pattern/` (the
+- **`common/`** - compiles; **213 JUnit tests pass** (`./gradlew :common:test`).
+  Covers `genetics/` (allele/gene model - **17 genes**: the 15 natural ones
+  (extension, agouti, champagne, splash, grey, **MATP** (cream + pearl, three
+  alleles), **dun**, **silver**, **mushroom**, **roan**, **tobiano**, **frame**,
+  **sabino**, plus the masking dominant white), and magic zebra + pink hair;
+  `Genotype` code round-trip, breeding, the `Epigenome` / `Genome` per-allele
+  epigenetics + priority tie-break, `GenomeSample` - a genome detached from a
+  horse, for the stallion seed jar - `Expression` + `FounderTable` + the
+  `GenotypeCatalog` reduction of 258 280 326 genotypes to 98 306 distinct
+  coats), `coat/` + `coat/pattern/` (the
   three-phase pipeline - `CoatTextureComposer`, `PigmentField`, `ColorField`,
   `GradientLut`, `BayCoat`, `GreyCoat`, `BodyStripes`, `CoatRegions`, the pure
   gene hooks, the `coat-golden.txt` byte-identity net, `CoatTextureId`
@@ -218,12 +287,13 @@ project. Its shape:
     texel reads gold on the LUT); frame produced almost nothing (per-part
     `sideWeight` left the barrel untouched -> absolute-Y band); sabino showed
     axis-aligned squares (`PatchNoise` instead of raw `BodyNoise.value`).
-  - Registry now **18 genes** / genotype code 18 segments (20 in-game with the
-    two shipped spec genes). `GeneCodeDisplay.TRAILING_ORDER` +
-    `ABSENCE_WILDTYPE` gained all seven. `coat-golden.txt` regenerated (10 new
-    cases). `GenotypeCatalog` blows up to **331 778** distinct coats
-    (`totalGenotypes()` 387 420 489), so the gallery corridor is now ~1.16 M
-    blocks of lazily-built pens - another argument for roadmap §9. The
+  - Registry was 18 genes then; it is **17** now that cream and pearl merged
+    (19 in-game with the two shipped spec genes). `GeneCodeDisplay`'s trailing
+    order gained all seven. `coat-golden.txt` regenerated (10 new cases).
+    `GenotypeCatalog` blew up to 331 778 distinct coats; the combination-table
+    rewrite brought that back to **98 306** (`totalGenotypes()` 258 280 326),
+    so the gallery corridor is ~344 000 blocks of lazily-built pens - still an
+    argument for roadmap §9. The
     exhaustive `2^genes` / `3^genes` tests (`CoatTextureIdTest`,
     `CoatTextureComposerTest`'s combo sweep) were converted to **seeded
     sampling** - enumerating them is no longer tractable. Sample bakes
@@ -490,11 +560,11 @@ project. Its shape:
   `GeneSpecLoader.fromClasspath()` picks up in the mod constructor. These are the
   **first (and so far only) gene files to ship**, breaking the "no gene ships by
   default" invariant on purpose (the owner OK'd it): the in-game genotype code is
-  now **13 segments**, `GenotypeCatalog`/the gallery are ~**4x** (each shipped
+  now **19 segments** (13 at the time), `GenotypeCatalog`/the gallery are ~**4x** (each shipped
   `DOMINANT` two-allele gene doubles them), and shorter saved horses won't parse.
   **`:common:test` is unaffected** - the index lives in the neoforge module's
   resources, not on the `common` test classpath, so `Genes` stays at 11
-  built-ins there and `coat-golden.txt` + `SpecGeneTest`'s `BUILT_IN_GENES == 11`
+  built-ins there (17 now) and `coat-golden.txt` + `SpecGeneTest`'s `BUILT_IN_GENES`
   still hold. The horse dimension will be overhauled later regardless.
 - **Built 2026-09-02, `glow` owner-confirmed in-game:** **Suntouched**
   (`example.suntouched`, allele `Sntch`/`n`, DOMINANT magical, wildOdds 128,
@@ -550,9 +620,10 @@ project. Its shape:
   bakes look right, nothing seen in-game yet - checklist in
   **`wiki/verification.html`**.
 - **Built 2026-09-01, NOT yet play-tested:** the **genotype gallery** rework of
-  the horse dimension - one pen per visually distinct genotype (331 778 of
-  387 420 489),
-  per-pen genotype signs, the entrance tally sign, `Gene.dominance()` metadata,
+  the horse dimension - one pen per visually distinct genotype (98 306 of
+  258 280 326 as of 2026-09-03),
+  per-pen genotype signs, the entrance tally sign, the per-gene distinctness
+  metadata (`Gene.dominance()` then, the expression table now),
   and the entity-only teardown that leaves blocks standing. Compiles, 138
   `common` tests pass, nothing seen in-game yet. Details in the horse-dimension
   section below; the in-game checklist is the top item in
@@ -576,7 +647,11 @@ Two-module Gradle project, split deliberately:
 
 - **`common/`** - pure Java, **zero** Minecraft/NeoForge imports (not even DFU
   `Codec`s). Subpackages by concern:
-  - `genetics/` - `Genotype` (+ `breedWith`), `Epigenome` /
+  - `genetics/` - `Gene` + `Allele` + `AllelePair`, `Expression` (one outcome a
+    gene can produce, with its own paint function - what replaced
+    `DominancePattern`), `FounderTable` + `FounderContext` (the wild-population
+    weight per allele combination - what replaced `Gene.randomPair`),
+    `Genotype` (+ `breedWith`), `Epigenome` /
     `AlleleEpigenetics` (the priority + seed on each allele copy), `Genome`
     (the two together, and the breeding that keeps them aligned),
     `GenomeSample` (a `Genome` frozen to code strings and taken off the horse -
@@ -610,9 +685,12 @@ Two-module Gradle project, split deliberately:
   - `client/` - renderer, texture compositing (incl. `EmissiveCoatLayer` for a
     `glow` gene's full-bright coat parts), client caches, the inventory
     hooks + `FamilyTreeScreen`, keybind, lifecycle cleanup.
-  - `data/` - Data Attachments (incl. `HorseCareAttachment` -
-    `horsegenetics:horse_care` - the non-genetic bond / herd / daily-cap
-    state), the ancestry `SavedData`, codecs; `ModDataComponents` (the item
+  - `data/` - Data Attachments. **Two** on a horse: `horsegenetics:horse_record`
+    (a `HorseRecord`, which carries the whole genome - genotype *and*
+    epigenome - since 2026-09-03; there is no separate coat attachment) and
+    `horsegenetics:horse_care` (`HorseCareAttachment`, the non-genetic bond /
+    herd / daily-cap state). Plus the ancestry `SavedData`, codecs;
+    `ModDataComponents` (the item
     data components: `stored_genome` / `StoredGenome` on the stallion seed
     jar, `bound_horse` / `BoundHorse` on a bound stall sign); and `StallData`
     / `StallRecord` (server-global SavedData of assigned stalls).
@@ -698,13 +776,12 @@ orderings are *derived* by one sort of **every** registered gene - built-in and
 `SpecGene` alike - on `(priority, key())`: `codeOrder()`/`all()` = the whole
 sorted list, `naturalOrder()` = it filtered to `isNatural()`, `magicalOrder()`
 = filtered to the magical genes. There are no hand-written lists any more, and
-a data-driven natural gene at priority 45 lands *between* the built-in pearl
-(42) and champagne (50) - loaded genes are not appended. Bands are a
+a data-driven natural gene at priority 45 lands *between* the built-in MATP
+(40) and champagne (50) - loaded genes are not appended. Bands are a
 convention: `0-99` natural, `100+` magical; `Genes.register` logs a warning for
 a gene outside its phase's band (via `System.getLogger`) but carries on. Ties
-break alphabetically by key. Built-in priorities (chosen to reproduce the old
-hand-written order, so no coat changed): extension 10, agouti 20, silver 30,
-mushroom 32, dun 34, cream 40, pearl 42, champagne 50, grey 55, white 60,
+break alphabetically by key. Built-in priorities: extension 10, agouti 20,
+silver 30, mushroom 32, dun 34, **MATP 40**, champagne 50, grey 55, white 60,
 roan 70, tobiano 72, frame 74, sabino 76, splash 80, pink hair 110, magic
 zebra 120, test 900. Within the natural band **low = sets pigment absolutely,
 higher = dilution** (agouti's absolute points must precede
@@ -713,53 +790,70 @@ higher = dilution** (agouti's absolute points must precede
 registration.
 
 `Genes.codeOrder()` (derived) = extension, agouti, silver, mushroom, dun,
-cream, pearl, champagne, grey, white, roan, tobiano, frame, sabino, splash,
+MATP, champagne, grey, white, roan, tobiano, frame, sabino, splash,
 pink hair, magic zebra, test. `naturalOrder()` (phase-1 pigment restriction) =
 the same list minus the three magical genes - silver / mushroom / dun sit
 right after agouti so the points exist to dilute, the white-pattern genes just
 before splash. **Full per-gene detail is in `wiki/gene-*.html`** (one page per
 gene); one-liners:
 
-| gene | alleles | dominance | in the wild | coat effect |
-|------|---------|-----------|-------------|-------------|
-| extension | `E`/`e` | dominant | 50/50 | `ee` = black restricted → chestnut |
-| agouti | `A`/`a` | dominant | 50/50 | `A_` = bay; one uniform "point extent" off the `A` copy sets leg + face black, each leg jittered; a high roll = seal (non-det) |
-| white | `W`/`w` | **complete** | 1/50 | `W_` = all pigment gone → transparent; masks every other gene |
-| test | `T`/`t` | **complete** | 1/4 carrier | `T_` = paint the `TestCoatPattern` gradient **flat on top** in phase 3 (the only **magical** gene; visible on any base incl. white) |
-| champagne | `Ch`/`c` | dominant | 1/40 | dilute toward the gradient's gold; keeps bay's points chocolate (amber champagne) |
-| splash | `Spl`/`spl` | incomplete\* | 1/20 | random white socks + face blaze (non-det) - **open issue:** only the blaze, the sock edges are a hard ring, and \*it doesn't read its dose yet (`Spl/Spl` should be much bigger markings) |
-| grey | `G`/`g` | dominant | 1/16 | **adults only** - **dapple grey** (`GreyCoat`): remaps onto the gradient's neutral column, per-horse progression / dapple size / dapple strength / point retention (non-det); foal born base colour |
-| cream | `Cr`/`N` | incomplete | 1/30 | incomplete-dominant dilution; interacts with pearl; never leaves a pitch-black point |
-| pearl | `prl`/`N` | incomplete | 1/22 | dilution; `prl/prl` no-cream = mild uniform; `Cr/prl` = double cream |
-| magic zebra | `Mzeb`/`n` | dominant | 1/100 | **magical** - black stripes hung from the topline, `-200%` on all three channels so they read black over any coat incl. dominant white (non-det) |
-| pink hair | `Pihr`/`n` | **recessive** | 1/12 carrier | **magical** - mane + tail walked 82% toward hot pink; reads what it paints over, so it keeps the strand shading (foal: tail only) |
-| dun | `D`/`d` | dominant | 1/24 | mild body dilution + **primitive markings** (dorsal stripe full length, faint leg bars) that *skip* the dilution so they read dark; `CoatRegions.dorsalStripe`/`legBar`. 2-allele form (real locus is `D`/`d1`/`d2`) |
-| silver | `Z`/`z` | dominant | 1/60 | eumelanin-**only** dilution → chocolate body + near-flaxen mane/tail; chestnut carrier looks unchanged. Runs after agouti. Dapples are a follow-up |
-| mushroom | `Mu`/`mu` | **recessive** | 1/34 | pheomelanin-**only** dilution, `Mu/Mu` only → chestnut becomes flat sepia; near-invisible on black/bay |
-| roan | `Rn`/`rn` | dominant | 1/30 | high-freq `BodyNoise` white-hair dither on the barrel + upper legs; head / mane / tail / lower legs stay solid (non-det) |
-| tobiano | `To`/`to` | dominant | 1/50 | big smooth-edged white patches from a low-freq noise field **biased toward the topline** so they cross the back; white legs, coloured head (non-det) |
-| frame | `Ov`/`ov` | dominant\* | 1/55 | flank patches that **never cross the topline** (noise × a spine→0 weight) + a bald face; legs coloured. \***`Ov/Ov` lethal white is not modelled** (health, deferred) (non-det) |
-| sabino | `SB1`/`sb1` | incomplete | 1/45 | **reads its dose**: `SB1/sb1` = jagged stockings + belly patch + broad blaze; `SB1/SB1` = "sabino-white", 90%+ white. Jagged leg edges (unlike splash's ring) (non-det) |
+| gene | alleles | outcomes (per combination) | in the wild | coat effect |
+|------|---------|-----------------------------|-------------|-------------|
+| extension | `E`/`e` | wild (`E_`), `chestnut` (`ee`) | 25/50/25 | `ee` = black restricted → chestnut |
+| agouti | `A`/`a` | wild (`aa`), `bay` (`A_`) | 25/50/25 | `A_` = bay; one uniform "point extent" off the `A` copy sets leg + face black, each leg jittered; a high roll = seal (non-det). Reports wild on a chestnut via `expressionIn` |
+| white | `W`/`w` | wild, `white` **(masks)** | 1/50 per allele | `W_` = all pigment gone → transparent; masks every other gene |
+| test | `T`/`t` | wild, `test-overlay` **(masks)** | **25% `T/t`, 0% `T/T`** | `T_` = paint the `TestCoatPattern` gradient **flat on top** in phase 3 (magical; visible on any base incl. white). Its founder table is why frequency is per *combination* |
+| champagne | `Ch`/`c` | wild, `champagne` | 1/40 per allele | dilute toward the gradient's gold; keeps bay's points chocolate (amber champagne) |
+| splash | `Spl`/`spl` | wild, `splash` | 1/20 per allele | random white socks + face blaze (non-det) - **open issue:** only the blaze, the sock edges are a hard ring, and **both variant combinations map to the one expression**, i.e. it still doesn't read its dose. The table now *says* that rather than hiding it behind a mislabelled tag |
+| grey | `G`/`g` | wild, `grey` | 1/16 per allele | **adults only** - **dapple grey** (`GreyCoat`): remaps onto the gradient's neutral column, per-horse progression / dapple size / dapple strength / point retention (non-det); foal born base colour |
+| MATP | `Cr`/`prl`/`N` | wild (`N/N`), `pearl-carrier` (`prl/N`, a wild type), `single-cream` (`Cr/N`), `classic-pearl` (`prl/prl`), `double-dilute` (`Cr/Cr`, `Cr/prl`) | `Cr` 1/30, `prl` 1/22 | **three alleles, six combinations**: cream and pearl are one locus. Never leaves a pitch-black point. Was two genes + `CreamPearlDilution` |
+| magic zebra | `Mzeb`/`n` | wild, `zebra` | 1/100 per allele | **magical** - black stripes hung from the topline, `-200%` on all three channels so they read black over any coat incl. dominant white (non-det) |
+| pink hair | `Pihr`/`n` | wild, `pink-carrier` (a wild type), `pink-hair` | 1/12 per allele | **magical** - mane + tail walked 82% toward hot pink; reads what it paints over, so it keeps the strand shading (foal: tail only). The clearest carrier locus: two of three combinations are wild types |
+| dun | `D`/`d` | wild, `dun` | 1/24 per allele | mild body dilution + **primitive markings** (dorsal stripe full length, faint leg bars) that *skip* the dilution so they read dark; `CoatRegions.dorsalStripe`/`legBar`. 2-allele form (real locus is `D`/`d1`/`d2` - now expressible, just not written) |
+| silver | `Z`/`z` | wild, `silver` | 1/60 per allele | eumelanin-**only** dilution → chocolate body + near-flaxen mane/tail; chestnut carrier looks unchanged. Runs after agouti. Dapples are a follow-up |
+| mushroom | `Mu`/`mu` | wild, `mushroom-carrier` (a wild type), `mushroom` | 1/34 per allele | pheomelanin-**only** dilution, `Mu/Mu` only → chestnut becomes flat sepia; near-invisible on black/bay |
+| roan | `Rn`/`rn` | wild, `roan` | 1/30 per allele | high-freq `BodyNoise` white-hair dither on the barrel + upper legs; head / mane / tail / lower legs stay solid (non-det) |
+| tobiano | `To`/`to` | wild, `tobiano` | 1/50 per allele | big smooth-edged white patches from a low-freq noise field **biased toward the topline** so they cross the back; white legs, coloured head (non-det) |
+| frame | `Ov`/`ov` | wild, `frame` | 1/55 per allele | flank patches that **never cross the topline** (noise × a spine→0 weight) + a bald face; legs coloured. **`Ov/Ov` lethal white is not modelled** - it wants a third expression when health lands (non-det) |
+| sabino | `SB1`/`sb1` | wild, `sabino1` (`SB1/sb1`), `sabino-white` (`SB1/SB1`) | 1/45 per allele | **the gene that broke the dominance vocabulary**: all three combinations land somewhere different. `SB1/sb1` = jagged stockings + belly patch + broad blaze; `SB1/SB1` = "sabino-white", 90%+ white (non-det) |
 
-**`Gene.dominance()`** (`common/genetics/DominancePattern`) is declared
-metadata on every gene: `DOMINANT` / `RECESSIVE` / `INCOMPLETE_DOMINANT` /
-`COMPLETE_DOMINANT` (= dominant **and** epistatic - while it shows, nothing
-else is visible). `heterozygoteIsDistinct()` and `masksOtherGenes()` are the
-two questions callers ask. Today's only consumer is `GenotypeCatalog`'s
-gallery reduction, but it's per-gene metadata so a punnett/breeding UI can use
-it too. **Pink hair is the only `RECESSIVE` gene** - the first one where the
-heterozygote is a carrier you cannot see.
+**Expressions, not dominance.** `common/genetics/Expression` is one *outcome*
+a gene can produce: `id` (stable, unique in the gene - the gallery dedups on
+it), `name`, a human-readable `description` for the gene dictionary and the
+wiki, `wildType` ("this combination changes nothing" - no painter, skipped by
+the composer, excluded from the texture key, reads as absent in the display),
+`masks` ("while this shows nothing else is visible"), `deterministic`, and
+**the paint function itself** (`restrict` for a natural gene, `tint` for a
+magical one - never both). A gene declares its outcomes as constants and maps
+any pair to one with `expressionOf(AllelePair)`; `expressionIn(pair, genotype)`
+is the same question in genotype context and is what the pipeline calls (only
+agouti overrides it). `isVisible` / `isDeterministic` are now *derived*.
 
-Cream + Pearl are allelic in reality; here two genes, combined once in
-`coat.pattern.CreamPearlDilution` (dose table in `wiki/gene-*.html`).
-Seal has **no gene** - it's the top of agouti's random distribution.
+There is **no dominance property and there will not be one.** "Dominant" and
+"recessive" only describe a two-allele locus, cannot express codominance, and
+are shorthand for *which combinations happen to share an outcome* - which the
+table says directly, for any number of alleles. Several pairs on one expression
+= dominant; only the double-variant off the wild type = recessive; MATP's
+`Cr`/`prl`/`N` = codominance. A gene may declare **several wild types** when
+silent combinations deserve different wording (MATP's `pearl-carrier`); the
+gallery collapses them all into one pen, because "changes nothing" is one look.
+
+**`FounderTable`** replaces `randomPair`: a weight per allele *combination* as
+percentages, sparse, normalised-with-a-warning, **one `nextFloat()` per gene
+per founder**, in `codeOrder()`. `FounderContext` carries the genes already
+rolled for a genome-aware distribution and *throws* if asked about a later one.
+`FounderTable.hardyWeinberg(variant, baseline, p)` computes the three
+two-allele numbers the old "1 in N" meant.
+
+Seal has **no gene** - it's the top of agouti's random distribution. Cream and
+pearl are **one gene** (`MatpGene`), which is what the multi-allele model bought.
 
 `Genotype.phenotype()` → coarse `CoatPhenotype` (`CHESTNUT`/`BLACK`/`BAY`/
 `WHITE`; everything else ignored) - now only used for family-tree fallback
 (foals are fully generated too).
 
-`random(rng)` - each gene rolls its pair (draw counts in the gene class).
-`breedWith` = **2 `nextBoolean()` per gene**. `Gene.isVisible(pair, genotype)`
+`random(rng)` - each gene draws its pair from its `FounderTable`: **1
+`nextFloat()` per gene**. `breedWith` = **2 `nextBoolean()` per gene**. `Gene.isVisible(pair, genotype)`
 / `isDeterministic(pair, genotype)` see the whole genotype (agouti invisible on
 chestnut; cream/pearl read each other). `Genotype.hasVisibleNonDeterministic()`
 = "generate the texture per horse".
@@ -804,12 +898,19 @@ Full inheritance detail: **`wiki/breeding.html`**.
 Java class. Drop it in `config/horsegenetics/genes/` and restart. Full format
 reference is **`wiki/gene-format.html`**; the machinery:
 
-- **`GeneSpec`** is the format as records: a header (key, alleles, dominance,
-  wild odds, priority) plus a list of **layers**. A layer is **where**
-  (`Mask`s, folded into one coverage value per texel) times **what** (an `Op`),
-  and the op is applied *scaled by* that coverage - so a spec gene's edges are
-  soft by construction, which is the one thing each hand-written gene had to
-  remember separately (splash's hard sock ring is the counter-example).
+- **`GeneSpec`** is the format as records (**`"format": 2`** since the
+  combination-table rewrite): a header (key, alleles, priority) plus an
+  **`expressions`** table and a **`founders`** table. Each expression names the
+  combinations that land on it (`when`, a list or a token→count map; exactly one
+  entry may omit it and catch the rest), carries `wildType` / `masks` /
+  `varies` / a human-readable `description`, and holds **its own `layers` and
+  its own `effects`**. The parser proves the table is **total and unambiguous**
+  over all `n(n+1)/2` combinations - a gap, an overlap or an unreachable
+  catch-all is a load error naming the offending combination. A layer is
+  **where** (`Mask`s, folded into one coverage value per texel) times **what**
+  (an `Op`), applied *scaled by* that coverage - so a spec gene's edges are soft
+  by construction, which is the one thing each hand-written gene had to remember
+  separately (splash's hard sock ring is the counter-example).
 - **`SpecSchema`** is the single declaration of which parameters each mask and
   op accepts and what each defaults to. The parser validates against it (an
   unknown key is an error naming the key and listing the legal ones), the
@@ -818,7 +919,9 @@ reference is **`wiki/gene-format.html`**; the machinery:
   drift.**
 - **Values.** Any numeric parameter is a constant, `"$knob"`, an inline
   `{min,max}` (which the parser turns into an anonymous knob), or
-  `{"perDose":[a,b,c]}`. `SpecValues` draws every knob once, in declaration
+  `{"perDose":[a,b,c]}` (which counts copies of the **first-declared** allele -
+  a within-one-expression convenience, largely superseded now that a different
+  dose can simply be a different expression). `SpecValues` draws every knob once, in declaration
   order, off `ctx.epigeneticsFor(key)` - so the determinism contract holds
   unchanged. A `per: "leg"` knob with a `spread` reproduces `BayCoat`'s
   "one extent for the horse, each leg jittered" in one line of JSON.
@@ -830,9 +933,9 @@ reference is **`wiki/gene-format.html`**; the machinery:
   `example.suntouched` and `example.waterborn`, via
   `neoforge/src/main/resources/horsegenetics/genes/index.json`, added 2026-09-02
   to make the effects work testable (see the status snapshot). So **in-game** the
-  genotype code is 13 segments and the gallery numbers are ~4x; **`:common:test`
-  still sees 11** because that index is not on its classpath, so `coat-golden.txt`
-  is untouched.
+  genotype code is **19 segments** and the gallery numbers are ~4x;
+  **`:common:test` still sees the 17 built-ins** because that index is not on its
+  classpath, so `coat-golden.txt` is untouched.
   `neoforge/ModGeneSpecs` calls it **from the mod constructor**, which is the
   earliest hook there is: every registration lengthens the genotype code by a
   segment, so a gene registered after something has parsed a code would
@@ -840,8 +943,11 @@ reference is **`wiki/gene-format.html`**; the machinery:
 
 ### `effects` - Minecraft behaviour on a data-driven gene
 
-A spec may carry an **`effects`** array alongside `layers` - the things a gene
-makes the horse *do*, not the pixels it paints. Closed set of six verbs
+An **expression** may carry an **`effects`** array alongside its `layers` - the
+things a gene makes the horse *do*, not the pixels it paints. Because effects
+hang off the outcome, a homozygote and a heterozygote can grant entirely
+different behaviour by being different expressions, with nothing comparing
+doses. Closed set of six verbs
 (`traversal`, `attribute`, `emitter`, `mob_effect`, `yield`, `glow`); each takes an
 optional boolean **`when`** (flags + `all`/`any`/`not`) and a **`minDose`**
 (1 = any expressing copy, 2 = homozygous). `common/` owns the vocabulary and
@@ -1104,16 +1210,17 @@ approximate.
 
 ## Data flow (server -> client -> pixels)
 
-1. **Wild spawn / `/summon` / gallery horse** -> `HorseRecord` attached
-   (genetic code) and, on the same join, a `HorseCoatAttachment` =
-   `{genotype code, epigenome code}` (`CoatGenerator.generate` -> a founder
-   `Epigenome.random`). Both via `ModAttachments`; the coat attachment default
-   is `HorseCoatAttachment.UNASSIGNED` until the handler replaces it.
-   **Breeding is different**: `HorseBreedingHandler` writes the foal's coat
-   attachment itself, from `damGenome.breedWith(sireGenome)`, because the
-   inherited epigenetics can only be read while both parents are in hand - the
-   join handler would re-roll them. It then sees an assigned attachment and
-   leaves it alone.
+1. **Wild spawn / `/summon` / gallery horse** -> one `HorseRecord` attachment
+   carrying **both** the genotype code and the epigenome code
+   (`HorseRecords.newFounder` -> `CoatGenerator.generate` -> a founder
+   `Epigenome.random`). There is **no separate coat attachment** any more; the
+   record default is `HorseRecord.unassigned(uuid)`, whose empty
+   `epigenomeCode` is the `hasGenome()` sentinel the join handler tests.
+   **Breeding is different**: `HorseBreedingHandler` builds the foal's genome
+   itself from `damGenome.breedWith(sireGenome)` and writes it into the foal's
+   record, because the inherited epigenetics can only be read while both
+   parents are in hand - the join handler would re-roll them. It then sees
+   `hasGenome()` true and leaves it alone.
    **The custom horse spawn egg** is a third path: `ModNetworking`'s
    `SpawnCustomHorsePayload` handler applies a founder record with the
    player-picked code + sex **before** `addFreshEntity`, so the join handler
@@ -1529,23 +1636,27 @@ The dimension is a **gallery of the genotype catalogue** - two horses for every
 genotype that looks different from every other.
 
 - **`GenotypeCatalog`** (pure `common/`, unit-tested) is the enumeration.
-  `allPairsOf(gene)` = every unordered `AllelePair`, **least dominant first**
-  (`ee`, `Ee`, `EE`); `distinctPairsOf(gene)` applies the dominance reduction;
-  `totalGenotypes()` = the raw product (**387 420 489**); `size()` = the reduced
-  catalogue (**331 778**); `get(i)` / `entries()` read the list, built once at class
-  load. Nothing is hard-coded - register a gene (or an allele) and the
+  `allPairsOf(gene)` = every unordered `AllelePair`, all `n(n+1)/2` of them
+  (`ee`, `Ee`, `EE`); `distinctPairsOf(gene)` keeps one representative per
+  distinct `Expression`; `totalGenotypes()` = the raw product
+  (**258 280 326**); `size()` = the reduced catalogue (**98 306**); `get(i)` /
+  `entries()` read the list, built once at class load. Nothing is hard-coded - register a gene (or an allele) and the
   catalogue, the corridor length and both signs widen on their own.
-- **Two reductions**, both driven by `Gene.dominance()` (see below):
-  - a gene whose heterozygote isn't distinct (`DOMINANT` / `RECESSIVE`)
-    contributes only its **homozygotes** - `ee`/`EE`, not `Ee`;
-  - a `COMPLETE_DOMINANT` gene **masks everything else**, so the catalogue keeps
-    exactly **one** entry for it: the variant homozygote with every other gene
-    at wild type. Hence one white pen (`EEaa WW`, #5) and one test pen
-    (`EEaa TT`, #6) instead of a quarter of the corridor each.
-  - Net: `1 728 · 192 = 331 776` unmasked + 1 white + 1 test = **331 778**
-    (the extra `192` is the seven new genes: dun / silver / mushroom / roan /
-    tobiano / frame each ×2 homozygotes, sabino ×3; a `RECESSIVE` gene -
-    mushroom - reduces exactly like a `DOMINANT` one, homozygotes only).
+- **Two reductions**, both read straight off the gene's expression table with
+  no dominance metadata in the middle:
+  - **pairs landing on the same `Expression` collapse** to one representative -
+    the homozygous pair where the group has one, so a pen reads `EE` not `Ee`.
+    **Every wild type is one group**, however many the gene declares, because
+    "changes nothing" is one look: MATP's `pearl-carrier` shares a pen with its
+    plain `N/N`. This is exact, where the old "drop the heterozygote unless the
+    gene is incomplete dominant" rule was an approximation;
+  - an expression that **`masks`** hides everything else, so the catalogue keeps
+    exactly **one** entry for it: that combination with every other gene at a
+    wild type. Hence one white pen (`EEaa WW`) and one test pen (`EEaa TT`)
+    instead of a huge fraction of the corridor each.
+  - Net: `2^13 · 4 (MATP) · 3 (sabino) = 98 304` unmasked + 1 white + 1 test =
+    **98 306**. Splash dropped from 3 pens to 2 (its two variant combinations
+    are one expression) and MATP from cream×3 · pearl×3 = 9 to 4.
 - **Pen order**: segment `i` holds catalogue entry `2i` in the **right-hand**
   pen (`NORTH_PEN`, the `+Z` side - your right walking in from the portal) and
   `2i+1` on the left. The corridor reads `eeaa, EEaa, eeAA, EEAA, [white],
@@ -1728,8 +1839,10 @@ remaining follow-ups, none seen in-game:**
 
 - **Dun** leg barring is a hand-rolled Y-phase; roadmap §4.1 wants it to reuse
   `BodyStripes` (which runs on X). The third allele (`d1` marked / `d2`
-  unmarked) needs more than one `DominancePattern`. (Grullo now lands on the
-  LUT neutral column - `keepRed` scales to 0 by the texel's black content.)
+  unmarked) used to need more than one `DominancePattern`; the combination
+  table can express it now, so it is a gene rewrite rather than a framework
+  change. (Grullo now lands on the LUT neutral column - `keepRed` scales to 0
+  by the texel's black content.)
 - **Silver** has no dapples yet - v1 is the dilution only. A deterministic
   (fixed-seed) `BodyNoise` dapple modulation is the obvious next step. The
   flaxen mane currently reads a little gold rather than pale.
@@ -1787,13 +1900,18 @@ Design follow-ups (not just "go look at it"):
    save-reload** - see `wiki/verification.html`.
 9. **Epigenetics follow-ups** - a foal copies a parent's per-allele seed
    **exactly**, with no variation, so a closed line converges on one look;
-   and the epigenome lives on the entity, not on `HorseRecord`, so
-   `FamilyTreeScreen` draws ancestors from `Epigenome.fromSeed(record UUID)` -
-   a plausible stand-in, not the real coat.
-10. **Use `Gene.dominance()` beyond the gallery** - the metadata is on every
-   gene now (`DominancePattern`), but only `GenotypeCatalog` reads it. Obvious
-   next consumers: a punnett/expected-foal display, "carrier" wording in the
-   info panel, and `GeneCodeDisplay` deciding what's worth printing.
+   (the second half of this gap - the epigenome living on the entity, so
+   `FamilyTreeScreen` had to invent an ancestor's coat from its UUID - was
+   closed 2026-09-03 by moving the epigenome onto `HorseRecord`.)
+10. **Nothing reads the expression table but the coat and the gallery.** Every
+   gene now carries, per combination, a display name and a human-readable
+   sentence saying what it does - written for the gene dictionary and the wiki,
+   and read by neither yet. The obvious consumers: a punnett / expected-foal
+   display, "carrier of X" wording in the info panel (MATP's `pearl-carrier`
+   and pink hair's `pink-carrier` already have the sentence), a generated gene
+   dictionary, and `GeneCodeDisplay` deciding what is worth printing. Also
+   unread: `Expression.masks()` outside `GenotypeCatalog`, and
+   `Gene.name()`.
 11. **Cleanups**: rename `DebugPenManager` / `DEBUG_LEVEL` /
    `horsegenetics:debug_pens` to non-"debug" names (needs a save-data
    migration or a one-time reset); fold speed/health into the gene model;

@@ -25,12 +25,12 @@
 <dl class="spec">
     <div><dt>Gene key</dt><dd>horsegenetics.roan</dd></div>
     <div><dt>Alleles</dt><dd><span class="allele dom">Rn</span> <span class="allele wild">rn</span></dd></div>
-    <div><dt>Dominance</dt><dd>DOMINANT</dd></div>
-    <div><dt>Wild type</dt><dd>rn</dd></div>
+    <div><dt>Outcomes</dt><dd>wild, <code>roan</code></dd></div>
+    <div><dt>Shows when</dt><dd><code>Rn/rn</code>, <code>Rn/Rn</code></dd></div>
+    <div><dt>Default allele</dt><dd>rn</dd></div>
     <div><dt>Wild frequency</dt><dd>1 in 30 per allele</dd></div>
-    <div><dt>Founder draws</dt><dd>2 &times; nextInt(30)</dd></div>
+    <div><dt>Founder draws</dt><dd>1 &times; nextFloat()</dd></div>
     <div><dt>Deterministic</dt><dd><strong>no</strong> &mdash; the dither seed rides on the <code>Rn</code> copy</dd></div>
-    <div><dt>Visible when</dt><dd>Rn_</dd></div>
     <div><dt>Epi draws</dt><dd>nextLong() seed, then nextFloat() extra density</dd></div>
     <div><dt>White fraction</dt><dd>~0.42 of body texels at the rear, tapering forward</dd></div>
     <div><dt>Noise</dt><dd>PatchNoise.fbm2, ~2.6 per body unit</dd></div>

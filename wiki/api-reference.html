@@ -52,7 +52,9 @@ genetics/
   Gene.java                 THE interface a gene implements
   Allele.java               one allele of one gene
   AllelePair.java           the two copies at one gene (canonicalized)
-  DominancePattern.java     DOMINANT / RECESSIVE / INCOMPLETE / COMPLETE
+  Expression.java           ONE outcome a gene can produce, and its paint function
+  FounderTable.java         the wild-population weight per allele combination
+  FounderContext.java       the genotype so far, for a context-aware founder table
   Genotype.java             one AllelePair per gene; parse / toCode / breedWith
   AlleleEpigenetics.java    (priority, seed) on ONE allele copy
   Epigenome.java            one AlleleEpigenetics per copy, aligned to the genotype
@@ -63,7 +65,7 @@ genetics/
   GeneCodeDisplay.java      shortForm / wrap - human-readable codes
   GeneticCodeCombiner.java  the string-level and Genome-level breeding seam
   CoatPhenotype.java        coarse CHESTNUT / BLACK / BAY / WHITE
-  genes/                    the eighteen shipped Gene implementations
+  genes/                    the seventeen shipped Gene implementations
   spec/                     DATA-DRIVEN genes - a gene as a JSON file
     GeneSpec.java             the format, as records (header + layers + effects)
     SpecSchema.java           what each mask / op accepts, and its default
@@ -98,7 +100,6 @@ coat/
     BodyStripes.java          seamless body-space stripe field
     BayCoat.java              bay / seal generator
     GreyCoat.java             dapple grey generator
-    CreamPearlDilution.java   the shared cream+pearl dose table
     TestCoatPattern.java      the diagnostic gradient
     CoatPattern.java          (x,y,z) -&gt; ARGB, for the sample baker
     CoatSheetRasterizer.java  bake a CoatPattern to a sheet / PNG
@@ -151,17 +152,17 @@ name/     HorseNameGenerator, HorseNames</code></pre>
 <thead><tr><th>Member</th><th>Abstracts</th></tr></thead>
 <tbody>
 <tr><td><code>key()</code></td><td>Identity: <code>&lt;modauthor&gt;.&lt;gene&gt;</code>. Also the namespace for the gene&rsquo;s epigenetic RNG stream.</td></tr>
-<tr><td><code>alleles()</code></td><td>Everything this locus can carry, <strong>most dominant first</strong>.</td></tr>
-<tr><td><code>wildType()</code></td><td>The &ldquo;no visible effect&rdquo; allele a wild horse most often carries.</td></tr>
-<tr><td><code>dominance()</code></td><td>Declared metadata &mdash; what other systems should expect, without special-casing your key.</td></tr>
+<tr><td><code>alleles()</code></td><td>Everything this locus can carry &mdash; any number. The list order is <strong>not</strong> a dominance ranking; it is the slot order <code>AllelePair</code> canonicalizes to, and must agree with each <code>Allele.order()</code>.</td></tr>
+<tr><td><code>defaultAllele()</code></td><td>What a genotype code with no segment for this gene reads as &mdash; the population baseline. A <strong>parsing default</strong>, not a claim about expression.</td></tr>
+<tr><td><code>expressions()</code></td><td>Every distinct outcome this gene can produce, wild types included. The gene dictionary and the wiki read it; the coat pipeline does not.</td></tr>
+<tr><td><code>expressionOf(pair)</code></td><td><strong>The function.</strong> Which outcome this allele combination produces, on its own. Several pairs may return the same <code>Expression</code> &mdash; that is what a &ldquo;dominant&rdquo; gene is.</td></tr>
+<tr><td><code>expressionIn(pair, genotype)</code></td><td>The same in the context of the whole genotype, for a gene that depends on another (agouti does nothing on a chestnut). Defaults to <code>expressionOf</code>; this is what the pipeline calls.</td></tr>
 <tr><td><code>priority()</code></td><td>Fixed <code>int</code> processing priority, no default. <code>Genes</code> derives every ordering by sorting on <code>(priority, key)</code>. <code>0&ndash;99</code> natural band, <code>100+</code> magical (convention; out-of-band only warns). Not <code>AlleleEpigenetics.priority</code>.</td></tr>
-<tr><td><code>randomPair(rng)</code></td><td>One wild-population draw. Each gene documents how many <code>Rng</code> values it consumes and in what order.</td></tr>
+<tr><td><code>founderTable(ctx)</code></td><td>The wild-population distribution over this gene&rsquo;s allele <em>combinations</em>. One <code>nextFloat()</code> per founder. <code>ctx</code> carries the genes already rolled.</td></tr>
 <tr><td><code>isNatural()</code></td><td>Phase declaration. <code>true</code> (default) = phase 1; <code>false</code> = phase 3.</td></tr>
-<tr><td><code>restrict(...)</code></td><td>Phase-1 contribution. Returns a <code>PigmentField</code> or <code>null</code>.</td></tr>
-<tr><td><code>tint(...)</code></td><td>Phase-3 contribution. Returns a <code>ColorField</code> delta or <code>null</code>.</td></tr>
-<tr><td><code>isVisible(pair, genotype)</code></td><td>Does this pair change the coat <em>in the context of the whole genotype</em>. Gates the pass.</td></tr>
-<tr><td><code>isDeterministic(pair, genotype)</code></td><td>Is the contribution byte-identical on every horse with this genotype. <strong>Cache correctness depends on this.</strong></td></tr>
-<tr><td><code>precedence(allele)</code></td><td>Lower = more dominant. Canonicalizes an <code>AllelePair</code>. Defaults to the <code>alleles()</code> index.</td></tr>
+<tr><td><code>isNatural()</code> phase</td><td>Where the <em>expression</em> paints: <code>Expression.restrict</code> in phase 1, <code>Expression.tint</code> in phase 3. The paint function lives on the outcome, not on the gene.</td></tr>
+<tr><td><code>isVisible(pair, genotype)</code></td><td>Derived: <code>!expressionIn(...).wildType()</code>.</td></tr>
+<tr><td><code>isDeterministic(pair, genotype)</code></td><td>Derived: <code>expressionIn(...).deterministic()</code>. <strong>Cache correctness depends on this.</strong></td></tr>
 <tr><td><code>fromToken(token)</code></td><td>Code-string token &rarr; allele. Defaults to a scan of <code>alleles()</code>.</td></tr>
 </tbody>
 </table>
@@ -170,30 +171,84 @@ name/     HorseNameGenerator, HorseNames</code></pre>
 <h3><code>Allele</code> and <code>AllelePair</code></h3>
 
 <div class="codebox">
-<pre><code class="language-java">public Allele(String geneKey, String token, String label,
-              boolean visible, boolean deterministic);
+<pre><code class="language-java">// order = the allele's index in Gene.alleles(). A slot order, NOT dominance:
+// it only lets AllelePair canonicalize without a registry lookup.
+public Allele(String geneKey, int order, String token, String label);
 
 String key();          // "&lt;geneKey&gt;.&lt;token&gt;" - the primary key
 String geneKey();
 Gene   gene();         // resolves through Genes
 String token();        // the text in a code string
 String label();        // human-readable
-boolean visible();     // population-level HINT - Gene.isVisible is authoritative
-boolean deterministic();</code></pre>
+int    order();        // index in Gene.alleles() - a slot order, NOT dominance</code></pre>
 </div>
 
 <div class="codebox">
 <pre><code class="language-java">public record AllelePair(Allele first, Allele second) {
-    // ctor throws if the two alleles belong to different genes,
-    // and swaps them so `first` is the more dominant (per Gene.precedence)
+    // An UNORDERED combination. The ctor throws if the two alleles belong to
+    // different genes, and puts them in Allele.order() order so a pair equals
+    // its reverse. Bookkeeping, not biology - see Expression.
 
-    String  geneKey();
-    Gene    gene();
-    boolean has(Allele a);
-    boolean homozygous();
-    Allele  dominant();          // == first(), after canonicalization
-    boolean anyVisible();
-    boolean allDeterministic();
+    String     geneKey();
+    Gene       gene();
+    Expression expression();          // what this combination does
+    boolean    has(Allele a);
+    int        count(Allele a);       // 0, 1 or 2 - the dose
+    boolean    homozygous();
+    boolean    homozygousFor(Allele a);
+    String     toTokens();            // "Cr/prl"
+}</code></pre>
+</div>
+
+<h3><code>Expression</code> &mdash; one outcome</h3>
+
+<div class="codebox">
+<pre><code class="language-java">public final class Expression {
+    // Replaces DominancePattern. A gene declares one of these per DISTINCT
+    // outcome and maps any AllelePair to one of them; several pairs sharing an
+    // expression is what "dominant" used to mean.
+
+    static Expression wildType(String description);                 // id "wild"
+    static Expression wildType(String id, String name, String description);
+    static Builder    of(String id, String name);                   // .describe().varies()
+                                                                    // .masking()
+                                                                    // then .restrict(..) or .tint(..)
+
+    String  id();            // identity - the gallery dedups on it
+    String  name();
+    String  description();   // one sentence, for the gene dictionary and the wiki
+    boolean wildType();      // changes nothing: no painter, skipped by the composer
+    boolean masks();         // while this shows, no other gene is visible
+    boolean deterministic(); // every horse with this combination is painted alike
+    boolean isNatural();     // does it paint pigment (phase 1) or colour (phase 3)?
+
+    PigmentField restrict(CoatBuildContext ctx, PigmentView coat);
+    ColorField   tint(CoatBuildContext ctx, PigmentView coat, ColorView accumulated);
+}</code></pre>
+</div>
+
+<h3><code>FounderTable</code> &mdash; the wild population</h3>
+
+<div class="codebox">
+<pre><code class="language-java">public final class FounderTable {
+    static Builder      builder();               // .weight(a, b, percent)
+    static FounderTable always(Allele a, Allele b);
+    // p*p / 2pq / q*q from a variant's frequency - a convenience, not a second
+    // model. What the old "1 in N per allele" meant.
+    static FounderTable hardyWeinberg(Allele variant, Allele baseline, double p);
+
+    AllelePair       draw(Rng rng);      // exactly one nextFloat()
+    List&lt;AllelePair&gt; pairs();            // the combinations that occur at all
+    double           share(AllelePair p);// normalised, 0 for one not listed
+}
+
+// Handed to Gene.founderTable so a gene's frequency can depend on the genes
+// already rolled. Asking about a gene that has NOT been rolled throws.
+public final class FounderContext {
+    Gene       gene();
+    AllelePair pair(Gene gene);
+    Expression expressionOf(Gene gene);
+    boolean    isRolled(Gene gene);
 }</code></pre>
 </div>
 
@@ -298,7 +353,7 @@ static Allele allele(String alleleKey);   // "&lt;gene&gt;.&lt;token&gt;"</code>
 <pre><code class="language-java">static void register(SpecGene gene);              // throws on a duplicate key; warns if out of band
 static void registerAll(Collection&lt;SpecGene&gt;);
 static List&lt;SpecGene&gt; loaded();                   // the data-driven genes, in gene order
-static void clearLoaded();                        // back to the eighteen built-ins
+static void clearLoaded();                        // back to the seventeen built-ins
 static Gene byKeyOrNull(String geneKey);          // null (not throw) if unregistered - for tolerant parse</code></pre>
 </div>
 
@@ -478,16 +533,26 @@ void  CoatSheetRasterizer.writePng(int[] argb, Path out) throws IOException;</co
 
 <div class="codebox">
 <pre><code class="language-java">// The format, as records.
-public record GeneSpec(String key, String name, boolean natural, DominancePattern dominance,
-                       int wildOdds, int priority, List&lt;AlleleSpec&gt; alleles,
-                       List&lt;Knob&gt; knobs, List&lt;Layer&gt; layers,
-                       List&lt;GeneAbility&gt; abilities) {
-    static final int FORMAT = 1;
-    AlleleSpec variant();          // alleles[0]
-    AlleleSpec wild();             // alleles[last]
+public record GeneSpec(String key, String name, boolean natural, int priority,
+                       List&lt;AlleleSpec&gt; alleles, List&lt;Knob&gt; knobs,
+                       List&lt;ExpressionSpec&gt; expressions,
+                       List&lt;FounderWeight&gt; founders) {
+    static final int FORMAT = 2;
+    AlleleSpec variant();          // alleles[0] - what perDose counts
+    AlleleSpec baseline();         // alleles[last] - the population default
     boolean isDeterministic();     // no knobs = one bake serves every carrier
-    boolean hasAbilities();        // any Minecraft "effects" beyond the coat?
+    boolean hasAbilities();        // any Minecraft "effects" on any expression?
+    ExpressionSpec expression(String id);
 }
+
+// One outcome. `combinations` is total over the gene's n(n+1)/2 pairs, checked
+// at load: a gap, an overlap or an unreachable catch-all is a load error.
+public record ExpressionSpec(String id, String name, String description,
+                             boolean wildType, boolean masks, boolean deterministic,
+                             List&lt;String&gt; combinations, List&lt;Layer&gt; layers,
+                             List&lt;GeneAbility&gt; abilities) {}
+
+public record FounderWeight(String combination, double percent) {}
 
 // The "effects" block - Minecraft behaviour, inert in common/, run by NeoForge.
 // See wiki/gene-effects.html. Closed set; every entry has when()/minDose().

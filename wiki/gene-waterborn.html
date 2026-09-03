@@ -26,12 +26,12 @@
 <dl class="spec">
     <div><dt>Gene key</dt><dd>example.waterborn</dd></div>
     <div><dt>Alleles</dt><dd><span class="allele dom">Wtb</span> <span class="allele wild">n</span></dd></div>
-    <div><dt>Dominance</dt><dd>DOMINANT</dd></div>
-    <div><dt>Wild type</dt><dd>n</dd></div>
+    <div><dt>Outcomes</dt><dd>wild, <code>waterborn</code></dd></div>
+    <div><dt>Shows when</dt><dd><code>Wtb/n</code>, <code>Wtb/Wtb</code></dd></div>
+    <div><dt>Default allele</dt><dd>n</dd></div>
     <div><dt>Wild frequency</dt><dd>1 in 90 per allele &rarr; ~1 wild horse in 45 shows it</dd></div>
-    <div><dt>Founder draws</dt><dd>2 &times; nextInt(90)</dd></div>
+    <div><dt>Founder draws</dt><dd>1 &times; nextFloat()</dd></div>
     <div><dt>Deterministic</dt><dd><strong>no</strong> when expressed &mdash; the stripe field varies per horse</dd></div>
-    <div><dt>Visible when</dt><dd>Wtb_</dd></div>
     <div><dt>Epigenetic draws</dt><dd>1 long (stripe seed) + 1 nextFloat (stripe spacing), off the <code>Wtb</code> copy</dd></div>
     <div><dt>Priority</dt><dd>215 &mdash; a data-driven magical gene, slots before Test in <code>magicalOrder()</code></dd></div>
     <div><dt>Stripe colour</dt><dd><code>#1ec8ff</code> (30, 200, 255), 92% of the way there</dd></div>

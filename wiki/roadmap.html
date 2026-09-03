@@ -98,20 +98,30 @@
         to <code>common/</code>); <code>coat-golden.txt</code> regenerated with
         every deterministic coat byte-identical. Written up on
         <a href="genetics-model.html">Genetics model</a>.</li>
-    <li><strong>The per-genotype chance tables</strong> (§2, §5.1, §14.1). One shared
-        weighted-draw helper feeding two per-gene distributions: the <strong>founder
-        frequency</strong> table and the <strong>chaos-carrot chance function</strong>.
-        Same shape, same helper. Blocks every founder roll and the whole carrot family
-        (§14).</li>
+    <li><s><strong>The per-genotype founder table</strong> (§2, §5.1)</s> &mdash;
+        <strong>shipped 2026-09-03.</strong> <code>FounderTable</code> is the shared
+        weighted-draw helper: a weight per allele <em>combination</em>, sparse,
+        normalised with a warning, one <code>nextFloat()</code> per gene per founder,
+        and a <code>FounderContext</code> for a genome-aware distribution.
+        <code>Gene.randomPair(rng)</code> is gone.
+        <strong>Still open here: the chaos-carrot chance function</strong> (§14.1) &mdash;
+        the same shape and the same helper, kept separate so the two can differ.</li>
 </ol>
 
 <h3>Tier 2 &mdash; multi-area systems (each needs Tier 1)</h3>
 
 <ol start="3">
-    <li><strong>Multi-allele support + the physical-locus merges</strong> (§5.1, §5.2)
-        &mdash; one <code>Gene</code> per locus with its <code>tint</code> handling every
-        pair; cream/pearl &rarr; MATP first, then MITF, PAX3, KIT. Touches many §4 genes,
-        the catalogue (§8), the spawner (§9), §10.</li>
+    <li><s><strong>Multi-allele support</strong> (§5.1)</s> &mdash;
+        <strong>shipped 2026-09-03.</strong> <code>DominancePattern</code> is deleted;
+        a gene declares an <code>Expression</code> per distinct outcome and one
+        function mapping any combination to one of them, so any number of alleles
+        works with no special case. <strong>Cream/pearl &rarr;
+        <a href="gene-matp.html">MATP</a> landed with it</strong> as the proving case.
+        <strong>Still open: the remaining physical-locus merges</strong> &mdash; MITF
+        (today&rsquo;s splash), PAX3, and the hard one, a <code>KIT</code> class
+        expressing several visually unrelated patterns from one allele set. Each is
+        now a single gene file rather than a framework change; each touches the
+        catalogue (§8), the spawner (§9) and §10.</li>
     <li><strong>The trait framework</strong> (§6.1) &mdash; <code>HorseTraits</code>, the
         capability interfaces, the attribute adapter. Prereq for <em>every</em> non-coat
         gene: performance (§4.3), size, health (§4.4, §6.4). Touches breeding and the
@@ -188,6 +198,21 @@
 
 <h3>Founder spawn chance &mdash; per-genotype percentages</h3>
 
+<div class="note tip">
+    <span class="label">Shipped 2026-09-03 &mdash; <code>FounderTable</code></span>
+    <p>
+        Everything below is built, bar the <strong>chaos-carrot</strong> variant
+        (§14.1), which reuses the same class.
+        <code>Gene.founderTable(FounderContext)</code> replaces
+        <code>randomPair(rng)</code>; the table is sparse (an unlisted combination
+        never occurs, which is how the test gene forbids its own homozygote); one
+        <code>nextFloat()</code> per gene per founder; genome-aware distributions get
+        a <code>FounderContext</code> that <em>throws</em> if asked about a gene not
+        yet rolled. See
+        <a href="genetics-model.html#founders">Genetics model &sect; Founder frequency</a>.
+    </p>
+</div>
+
 <p>
     <strong>Every gene declares the percentage of founder horses that carry each of its
     genotypes.</strong> A two-allele gene declares three numbers &mdash; e.g. 50% wild
@@ -218,9 +243,8 @@
 <h3>The reserved numbers</h3>
 
 <p>
-    The built-ins now carry real priorities (chosen to reproduce the old
-    hand-written order, so no coat changed): extension 10, agouti 20, silver 30,
-    mushroom 32, dun 34, cream 40, pearl 42, champagne 50, grey 55, white 60,
+    The built-ins carry real priorities: extension 10, agouti 20, silver 30,
+    mushroom 32, dun 34, <strong>MATP 40</strong>, champagne 50, grey 55, white 60,
     roan 70, tobiano 72, frame 74, sabino 76, splash 80; magical: pink hair 110,
     magic zebra 120, test 900. The table below is the <em>target</em> once the
     physical-locus merges (§5.1) land &mdash; one <code>Gene</code> per locus,
@@ -234,7 +258,7 @@
 <tr><td>1</td><td><strong>sex (X/Y)</strong></td><td>Must be first &mdash; every X-linked and Y-linked gene reads it (§5.3).</td></tr>
 <tr><td>10</td><td>extension</td><td>Decides which pigment exists at all.</td></tr>
 <tr><td>20</td><td>agouti</td><td>Restricts black to the points; <strong>sets pigment absolutely</strong>.</td></tr>
-<tr><td>30</td><td>MATP (cream + pearl)</td><td>Dilutions &mdash; must run after the absolute set.</td></tr>
+<tr><td>40</td><td>MATP (cream + pearl) &mdash; <strong>shipped</strong></td><td>Dilutions &mdash; must run after the absolute set.</td></tr>
 <tr><td>40</td><td>champagne</td><td>Dilution.</td></tr>
 <tr><td>50</td><td>grey</td><td>Remaps onto the neutral column.</td></tr>
 <tr><td>60</td><td>white</td><td>Masks everything.</td></tr>
@@ -320,10 +344,10 @@
 
 <p>
     <strong>What the base classes absorb</strong>, all of it boilerplate today:
-    building the <code>Allele</code> objects and their keys, <code>precedence</code>,
-    <code>fromToken</code>, <code>randomPair</code> from a declared frequency, the
-    <code>isVisible</code> / <code>isDeterministic</code> defaults, the dominance
-    metadata, and handing you the seeded RNG instead of making you find it.
+    building the <code>Allele</code> objects, their keys and their slot orders,
+    <code>fromToken</code>, a two-allele <code>founderTable</code> from a declared
+    frequency, the &ldquo;wild type plus one visible outcome&rdquo; expression pair,
+    and handing you the seeded RNG instead of making you find it.
 </p>
 
 <h3>An open registry</h3>
@@ -398,8 +422,8 @@
 <thead><tr><th>Locus</th><th>Alleles</th><th>Status</th><th>What it needs</th></tr></thead>
 <tbody>
 <tr><td><strong>Red factor (MC1R)</strong></td><td><code>E</code>, <code>e</code>, <code>ea</code></td><td>partial</td><td>Add the third allele. First real 3-allele locus, so the natural place to prove multi-allele support. <code>ea</code> is phenotypically red like <code>e</code>; the interest is in the code string and the carrier display.</td></tr>
-<tr><td><strong>MATP &mdash; the cream/pearl merge</strong></td><td><code>Cr</code>, <code>prl</code>, <code>sun</code>, <code>sno</code>, wild</td><td>partial</td><td>Cream and pearl ship as two genes, which lets a horse be <code>Cr/Cr</code> <em>and</em> <code>prl/prl</code> &mdash; a genotype that cannot exist. <strong>Merge into one 5-allele MATP locus.</strong> Breaks the genotype code (two segments become one) &mdash; fine. The dose table (already one shared resolver, <code>CreamPearlDilution</code>) moves onto the locus. Smallest real multi-allele case, so it is the one that proves §5.1.</td></tr>
-<tr><td><strong>Dun (TBX3) &mdash; third allele</strong></td><td><code>D</code>, <code>d1</code>, <code>d2</code></td><td>partial</td><td>Ships as <code>D</code>/<code>d</code>. The real locus is <code>D</code> (full dun) / <code>d1</code> (non-dun, still marked) / <code>d2</code> (no dun, no markings), whose split dominance &mdash; <code>D</code> dominant for dilution, only <code>d1</code> carrying markings &mdash; a single <code>DominancePattern</code> cannot express (§5.1). Leg barring should also move to <code>BodyStripes</code>. See <a href="gene-dun.html">its page</a>.</td></tr>
+<tr><td><strong>MATP &mdash; two more alleles</strong></td><td><code>Cr</code>, <code>prl</code>, <em><code>sun</code></em>, <em><code>sno</code></em>, <code>N</code></td><td>partial</td><td><strong>The merge shipped 2026-09-03</strong> &mdash; cream and pearl are one three-allele locus with six combinations and four outcomes (<a href="gene-matp.html">MATP</a>), and it was the case that proved §5.1. Left: the other two real alleles, <strong>sunshine</strong> (<code>sun</code>) and <strong>snowdrop</strong> (<code>sno</code>), which take it to five alleles and fifteen combinations. Purely additive now &mdash; two allele constants and the rows they need.</td></tr>
+<tr><td><strong>Dun (TBX3) &mdash; third allele</strong></td><td><code>D</code>, <code>d1</code>, <code>d2</code></td><td>partial</td><td>Ships as <code>D</code>/<code>d</code>. The real locus is <code>D</code> (full dun) / <code>d1</code> (non-dun, still marked) / <code>d2</code> (no dun, no markings), whose split behaviour &mdash; <code>D</code> diluting, only <code>d1</code> carrying markings &mdash; the old single <code>DominancePattern</code> could not express. <strong>The combination table can</strong> (§5.1 shipped): three alleles, six combinations, and an outcome per row. Now a gene rewrite, not a framework change. Leg barring should also move to <code>BodyStripes</code>. See <a href="gene-dun.html">its page</a>.</td></tr>
 <tr><td><strong>Silver dapple &mdash; the dappling</strong></td><td><code>Z</code>, <code>z</code></td><td>partial</td><td>Ships as the dilution only. The dapples the gene is named for want a deterministic fixed-seed <code>BodyNoise</code> modulation (like grey&rsquo;s, lighter, per-genotype). Health: <code>Z/Z</code> &rarr; MCOA, blocked on §6.4. See <a href="gene-silver.html">its page</a>.</td></tr>
 <tr><td><strong>Tiger eye</strong></td><td><code>TE1</code>, <code>TE2</code>, wild</td><td>new</td><td>No coat effect at all &mdash; <strong>eye colour</strong>. Blocked on an eye-colour system: <code>redrawEyes</code> copies eye texels verbatim, so there is no colour channel to write to.</td></tr>
 </tbody>
@@ -542,37 +566,36 @@
 
 <h3>5.1 Three or more alleles per locus</h3>
 
-<p>Mostly already supported, and better than expected:</p>
-
-<ul>
-    <li><code>AllelePair</code> + <code>Gene.precedence(allele)</code> already order any
-        number of alleles.</li>
-    <li><code>GenotypeCatalog.allPairsOf(gene)</code> already enumerates
-        <code>n(n+1)/2</code> pairs for any <code>n</code>.</li>
-    <li>The code string already tolerates arbitrary tokens.</li>
-</ul>
-
-<p>What does <strong>not</strong> hold:</p>
-
-<ul>
-    <li><strong>No dominance-per-pair table.</strong> With
-        <code>D</code>/<code>d1</code>/<code>d2</code> or
-        <code>W1</code>&hellip;<code>W36</code>, different pairs at one locus relate
-        differently &mdash; but the answer (§21) is <em>not</em> to make
-        <code>DominancePattern</code> a function of the pair. The gene&rsquo;s own
-        <code>restrict</code> / <code>tint</code> function is handed the whole pair and
-        produces the coat result for <strong>every</strong> allele combination directly;
-        <code>DominancePattern</code> stays a per-gene hint used only by the gallery /
-        UI. <code>GenotypeCatalog.distinctPairsOf</code> still needs <em>a</em>
-        &ldquo;which pairs look different&rdquo; answer for a multi-allele gene &mdash;
-        either the gene supplies one, or the gallery just shows every pair. That is the
-        only open detail here.</li>
-    <li><strong><code>randomPair(rng)</code> is hand-rolled per gene.</strong> It is
-        replaced by the <strong>per-genotype founder percentage table</strong> (§2): the
-        gene declares the share of founders carrying each genotype, and one shared helper
-        does the weighted draw. Founder draws only, not breeding draws &mdash; but
-        <a href="breeding.html">the breeding page</a> must be updated in step.</li>
-</ul>
+<div class="note tip">
+    <span class="label">Shipped 2026-09-03 &mdash; the combination table</span>
+    <p>
+        <code>DominancePattern</code> is <strong>deleted</strong>. A gene declares
+        its distinct outcomes as <code>Expression</code>s &mdash; each with a name, a
+        human-readable description, a <code>wildType</code> flag ("changes nothing"),
+        a <code>masks</code> flag and its own paint function &mdash; and one function
+        maps any <code>AllelePair</code> to one of them. Several pairs sharing an
+        expression <em>is</em> what "dominant" meant; only the double-variant landing
+        on a non-wild-type outcome <em>is</em> what "recessive" meant; two variant
+        alleles each with an outcome plus a third for the pair of them <em>is</em>
+        codominance. None of it needs a name or a special case, and it works for any
+        <em>n</em>.
+    </p>
+    <p>
+        The open detail this section flagged &mdash; how the gallery decides which
+        pairs look alike &mdash; answered itself: <code>distinctPairsOf</code> groups
+        pairs by the expression they land on (every wild type counting as one group,
+        since "changes nothing" is one look), which is exact rather than an
+        approximation. <code>randomPair(rng)</code> was replaced by the per-genotype
+        <code>FounderTable</code> in the same change (§2), and
+        <a href="breeding.html">breeding</a> updated in step.
+    </p>
+    <p>
+        Written up on
+        <a href="genetics-model.html#combinations">Genetics model &sect; Alleles,
+        combinations and expressions</a>, <a href="modding.html">Writing a gene</a>
+        and <a href="gene-format.html">the gene file format</a>.
+    </p>
+</div>
 
 <h3>5.2 One physical gene, several traits</h3>
 
@@ -584,18 +607,28 @@
 
 <p>
     <strong>Settled (§21): one <code>Gene</code> per physical locus, many alleles.</strong>
-    Biologically honest, kills the impossible genotypes (a horse can no longer be
-    <code>Cr/Cr</code> <em>and</em> <code>prl/prl</code>), and shrinks the genotype.
-    There is <strong>no dominance-per-pair cost</strong> &mdash; the gene&rsquo;s
-    <code>tint</code> / <code>restrict</code> handles every allele combination itself
-    (§5.1). The one genuinely hard part is a <code>KIT</code> class that expresses
-    several visually unrelated patterns from one allele set.
+    Biologically honest, kills the impossible genotypes, and shrinks the genotype.
+    There is <strong>no dominance-per-pair cost</strong> &mdash; the gene&rsquo;s own
+    expression table handles every allele combination directly (§5.1).
 </p>
 
+<div class="note tip">
+    <span class="label">MATP shipped 2026-09-03</span>
+    <p>
+        Cream and pearl are one locus with three alleles, six combinations and four
+        outcomes &mdash; see <a href="gene-matp.html">MATP</a>. A horse can no longer
+        be <code>Cr/Cr</code> <em>and</em> <code>prl/prl</code>;
+        <code>CreamPearlDilution</code> is gone (the dose table is a six-row
+        <code>switch</code> on the gene); the genotype code lost a segment and the
+        gallery lost 8,192 duplicate pens.
+    </p>
+</div>
+
 <p>
-    Start with the <strong>cream/pearl &rarr; MATP merge</strong>: smallest case, and it
-    already has a shared resolver (<code>CreamPearlDilution</code>) to fold in. Then
-    MITF (today&rsquo;s splash), PAX3, and KIT.
+    <strong>Left to do:</strong> MITF (today&rsquo;s splash), PAX3, and the genuinely
+    hard one &mdash; a <code>KIT</code> class expressing dominant white, tobiano
+    <em>and</em> sabino 1 from one allele set. Each is now a single gene rewrite
+    rather than a framework change.
 </p>
 
 <h3 id="sex-linked">5.3 Sex-linked genes &mdash; the two non-autosomal exceptions</h3>
@@ -811,11 +844,14 @@ interface ConditionRule    { void conditions(AllelePair, ConditionSink); } // CS
 <h4>Carrier display</h4>
 
 <p>
-    <code>Gene.dominance()</code> already exists and is read only by
-    <code>GenotypeCatalog</code>. &ldquo;Carrier of X&rdquo; wording in the info panel
-    becomes far more valuable once recessive lethals exist &mdash; it is the difference
-    between a breeding programme and a lottery. A punnett / expected-foal display is the
-    natural companion.
+    <strong>The wording already exists and nothing reads it.</strong> A carrier
+    combination is an <code>Expression</code> marked <code>wildType</code> with its
+    own name and description &mdash; MATP&rsquo;s <code>pearl-carrier</code>, pink
+    hair&rsquo;s <code>pink-carrier</code>, mushroom&rsquo;s
+    <code>mushroom-carrier</code> &mdash; so the info panel needs to <em>show</em> a
+    sentence, not compute one. It becomes far more valuable once recessive lethals
+    exist: the difference between a breeding programme and a lottery. A punnett /
+    expected-foal display is the natural companion, and reads the same table.
 </p>
 
 <h3>6.5 Traits that come from a <em>group</em> of genes</h3>
@@ -1058,13 +1094,14 @@ interface ConditionRule    { void conditions(AllelePair, ConditionSink); } // CS
 </p>
 
 <ul>
-    <li><strong>The genotype space.</strong> Now <code>3^18 = 387,420,489</code>
-        after the seven visual genes shipped (it was <code>3^11 = 177,147</code>
-        before) &mdash; the multiplier in miniature. With the full table the raw
-        product is on the order of <strong>1.85 &times; 10<sup>19</sup></strong>.</li>
+    <li><strong>The genotype space.</strong> Now <code>3^16 &times; 6 =
+        258,280,326</code> (sixteen two-allele genes plus three-allele MATP) &mdash;
+        it was <code>3^11 = 177,147</code> before the seven visual genes shipped, the
+        multiplier in miniature. With the full table the raw product is on the order
+        of <strong>10<sup>19</sup></strong>.</li>
     <li><strong>The gallery has effectively died</strong> &mdash; and it is being
         reverted anyway. Seven genes took the corridor from 1,730 pens / 6,055 blocks
-        to <strong>331,778 pens / ~1.16&nbsp;M blocks</strong> (lazily built, so it
+        to <strong>98,306 pens / ~344,000 blocks</strong> (lazily built, so it
         doesn&rsquo;t hang, but it is no longer a thing a player walks). The argument
         for &sect;9 has now fully arrived. If a <em>systematic</em> gallery is ever
         wanted again, the shape that scales is a <strong>wing per locus</strong>: each
@@ -1824,12 +1861,28 @@ interface ConditionRule    { void conditions(AllelePair, ConditionSink); } // CS
         genes are expressible. A hemizygous allele <strong>displays</strong> with an
         <code>X-</code> / <code>Y-</code> prefix; the code keeps the bare token.</li>
     <li><strong>A physical locus with many patterns is one gene</strong> (KIT, MITF,
-        MATP) with a large allele set. There is <strong>no dominance-per-pair
-        table</strong> &mdash; the gene&rsquo;s own <code>restrict</code> /
-        <code>tint</code> function branches on the whole pair and produces the result for
-        every allele combination directly. <code>DominancePattern</code> stays a
-        per-gene hint for the gallery / UI only. Grouping alleles onto one locus is a
-        modelling choice, <strong>not linkage</strong> (linkage: settled no).</li>
+        MATP) with a large allele set. There is <strong>no dominance property at
+        all</strong> &mdash; the gene declares an <code>Expression</code> per distinct
+        outcome and maps every allele combination to one of them.
+        <code>DominancePattern</code> is <strong>deleted</strong>, not demoted to a
+        hint: "which combinations share an outcome" is the whole of what it said, and
+        the table says it exactly, for any number of alleles. Grouping alleles onto
+        one locus is a modelling choice, <strong>not linkage</strong> (linkage:
+        settled no).</li>
+    <li><strong>Determinism, masking and "changes nothing" are per
+        <em>combination</em></strong>, not per gene and not per allele &mdash; they
+        are fields on the expression. An <code>Allele</code> therefore carries no
+        visible / deterministic hint at all, only a token, a label and a slot
+        order.</li>
+    <li><strong>Every wild type is one look.</strong> A gene may declare several
+        (MATP&rsquo;s <code>pearl-carrier</code> reads differently from its plain
+        <code>wild</code> in the gene dictionary), but the gallery collapses them
+        into one pen, because "changes nothing" is one appearance.</li>
+    <li><strong>The epigenome lives on <code>HorseRecord</code></strong>, beside the
+        genotype, not on a separate entity attachment. Both are heritable facts
+        assigned once at birth; storing the genotype twice was one fact in two
+        places, and keeping the epigenome off the record is why the family tree used
+        to draw ancestors from an invented seed.</li>
     <li><strong>Founder frequency is per genotype, declared by the gene author.</strong>
         A two-allele gene might declare &ldquo;50% wild type, 40%
         <code>n/Pfwl</code>, 10% <code>Pfwl/Pfwl</code>&rdquo;. The percentages must sum

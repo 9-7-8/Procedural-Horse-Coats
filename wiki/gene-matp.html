@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MATP (cream / pearl) &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="nav.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow natural">Natural gene <span class="sep">/</span> phase 1</p>
+<h1>MATP &mdash; cream and pearl</h1>
+<p class="lede">
+    One locus, <strong>three alleles</strong>, six combinations and four
+    outcomes. Cream and pearl are the same physical gene in a real horse
+    (<code>SLC45A2</code> / <code>MATP</code>); this mod modelled them as two
+    two-allele genes with a shared resolver until the combination-table rewrite,
+    which is what made a single multi-allele locus expressible at all.
+</p>
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd>horsegenetics.matp</dd></div>
+    <div><dt>Alleles</dt><dd><span class="allele dom">Cr</span> <span class="allele rec">prl</span> <span class="allele wild">N</span></dd></div>
+    <div><dt>Combinations</dt><dd>6</dd></div>
+    <div><dt>Outcomes</dt><dd>4 (plus a carrier wild type)</dd></div>
+    <div><dt>Default allele</dt><dd>N</dd></div>
+    <div><dt>Priority</dt><dd>40</dd></div>
+    <div><dt>Founder draws</dt><dd>1 &times; nextFloat()</dd></div>
+    <div><dt>Deterministic</dt><dd>yes</dd></div>
+</dl>
+
+<h2>The combination table</h2>
+
+<p>
+    This is the table no single word describes. <code>Cr</code> on its own is a
+    partial dilution; <code>prl</code> on its own is nothing; two <code>prl</code>
+    is a different dilution again; and one of each is the <em>strongest</em> of
+    the three. &ldquo;Incomplete dominant&rdquo; was never going to say that,
+    which is why there is no dominance property any more &mdash; the six rows
+    below are the whole model.
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Combination</th><th>Outcome</th><th>What it looks like</th></tr></thead>
+<tbody>
+<tr><td><code>N/N</code></td><td><code>wild</code></td><td>No dilution.</td></tr>
+<tr><td><code>prl/N</code></td><td><code>pearl-carrier</code> <span class="tag">wild type</span></td><td>One pearl copy does nothing on its own &mdash; the horse looks undiluted and only its descendants show it. Breeding two carriers is how classic pearl appears.</td></tr>
+<tr><td><code>Cr/N</code></td><td><code>single-cream</code></td><td>Red cut hard and black cut a little &mdash; palomino on a chestnut, buckskin on a bay, smoky black on a black. The points go dark brown, never jet black.</td></tr>
+<tr><td><code>prl/prl</code></td><td><code>classic-pearl</code></td><td>Both pigments diluted mildly and evenly &mdash; an apricot body with sepia points.</td></tr>
+<tr><td><code>Cr/prl</code></td><td><code>double-dilute</code></td><td>The two complement: one of each acts as a double cream.</td></tr>
+<tr><td><code>Cr/Cr</code></td><td><code>double-dilute</code></td><td>Cremello, perlino or smoky cream &mdash; a near-white body over rusty points.</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="note tip">
+    <span class="label">What the merge bought</span>
+    <p>
+        A horse can no longer be <code>Cr/Cr</code> <em>and</em>
+        <code>prl/prl</code> at once &mdash; a genotype the two-gene model
+        happily represented and no real horse can hold. The genotype code lost a
+        segment, the cross-gene <code>CreamPearlDilution</code> resolver is gone
+        (the dose table is a six-row <code>switch</code> on the gene itself), and
+        the gallery lost 8,192 duplicate pens.
+    </p>
+</div>
+
+<h2>The numbers</h2>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Outcome</th><th>keepRed</th><th>keepBlack</th><th>blackTint</th></tr></thead>
+<tbody>
+<tr><td><code>single-cream</code></td><td>0.45</td><td>0.62</td><td>0.30</td></tr>
+<tr><td><code>classic-pearl</code></td><td>0.55</td><td>0.52</td><td>0.28</td></tr>
+<tr><td><code>double-dilute</code></td><td>0.08</td><td>0.38</td><td>0.33</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    Red is always restricted more than black under a double dilution, which is
+    why a diluted bay body fades to cream while the points hold smoky colour.
+    Each outcome also carries a <strong>black tint</strong> (see
+    <a href="pipeline.html"><code>PigmentField.dilute</code></a>) so the points
+    land in a real diluted-black hue instead of the gradient&rsquo;s jet-black
+    zero-red column.
+</p>
+
+<div class="note rule">
+    <span class="label">House rule</span>
+    <p>
+        <em>No</em> cream horse keeps a pitch-black point. A single-cream point
+        may be a very dark brown but never a void &mdash; so its tint is a full
+        one, not the token amount a real-world buckskin would argue for. Classic
+        pearl gets sepia points, perlino rusty ones.
+    </p>
+</div>
+
+<h2>Founder frequency</h2>
+
+<p>
+    Allele frequencies <code>1/30</code> for <code>Cr</code> and
+    <code>1/22</code> for <code>prl</code> &mdash; the same numbers the two old
+    genes carried, so the wild population is unchanged apart from the impossible
+    genotypes disappearing. The gene declares the resulting six shares directly
+    rather than computing them, so an author can retune one row without touching
+    the others:
+</p>
+
+<div class="codebox">
+<div class="filename">MatpGene &mdash; the founder table</div>
+<pre><code class="language-java">FounderTable.builder()
+        .weight(Cr,  Cr,  0.111111)
+        .weight(Cr,  prl, 0.303030)
+        .weight(Cr,  N,   6.141414)
+        .weight(prl, prl, 0.206612)
+        .weight(prl, N,   8.374656)
+        .weight(N,   N,  84.863177)
+        .build();</code></pre>
+</div>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="genetics-model.html#combinations">Alleles, combinations and expressions</a>
+        <a href="gene-champagne.html">Champagne</a>
+        <a href="gene-silver.html">Silver dapple</a>
+        <a href="pipeline.html">The coat pipeline</a>
+    </div>
+    Cream and pearl used to have a page each; both are this locus now.
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

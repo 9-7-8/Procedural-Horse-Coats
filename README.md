@@ -35,8 +35,7 @@ depending on the base it lands on:
 
 | Gene | In the wild | What it does |
 |------|-------------|--------------|
-| Cream | uncommon | One copy golds the red - a bay becomes a **buckskin**, a chestnut a **palomino**. Two copies wash almost everything out: **perlino**, **cremello**. A cream horse never keeps pitch-black points. |
-| Pearl | uncommon | Two copies (with no cream) give an apricot body with sepia points. One cream + one pearl acts like double cream. |
+| Cream / pearl | uncommon | One gene with three versions, so a horse gets one of four looks. One **cream** golds the red - a bay becomes a **buckskin**, a chestnut a **palomino**. Two creams wash almost everything out: **perlino**, **cremello**. Two **pearls** instead give an apricot body with sepia points. And one of each - the rarest of them - comes out like double cream. A cream horse never keeps pitch-black points. |
 | Champagne | rare | Golds every base, each to its own colour - **gold champagne** on chestnut, **classic** (taupe) on black, **amber** (gold body, chocolate points) on bay. |
 | Grey | uncommon | Greys **adults** only, over any base, into a **dapple grey** - a neutral grey coat patterned with rounded dapples. How far along a horse's greying is varies: some are a dark steel grey, some a mid dapple grey, some nearly white, and the ones that haven't got far keep a darker mane, tail and legs. A grey foal is born its base colour and turns grey when it grows up. |
 | Dun | uncommon | Lightens the body but keeps its colour - a black becomes a mouse-grey **grullo**, a bay a tan **bay dun**, a chestnut a pale **red dun** - and paints on **primitive markings**: a dark stripe down the spine from nose to tail, and faint bars across the legs. |
@@ -59,15 +58,15 @@ And then there are the ones no real horse has:
 | Gene | In the wild | What it does |
 |------|-------------|--------------|
 | Magic zebra | rare | Black **stripes**, hung from the spine and reaching down the horse's sides. They go black over *anything* - a cremello, a dapple grey, even a solid white horse. How far down they reach is its own horse's business: some are striped just across the back, some nearly to the hooves. |
-| Pink hair | **hidden** | A **pink mane and tail**, whatever colour the rest of the horse is. It's the one gene a horse can carry without showing it - **both** parents have to pass it on before a foal has pink hair, so this is one you go looking for and breed toward rather than stumble across. (A foal gets the tail; the mane comes in when it grows up.) |
+| Pink hair | **hidden** | A **pink mane and tail**, whatever colour the rest of the horse is. **Both** parents have to pass it on before a foal has pink hair, so this is one you go looking for and breed toward rather than stumble across - the clearest of the mod's hidden genes, alongside pearl and mushroom. (A foal gets the tail; the mane comes in when it grows up.) |
 | Waterborn | rare | **Neon-blue stripes** through the mane and tail, and the horse **walks on the surface of water** instead of wading. It leaves a trail of blue sparks where it treads, and a **tamed mare** can be milked with an empty bucket for a bucket of water. |
 | Suntouched | rare | A **mane and tail of molten gold** that stay bright in the dark, a faint drift of gold sparks, and a body that **casts light** - a Suntouched horse lights the ground around it like a torch. |
 
 Wild horses roll a random genotype when they spawn. Bred foals inherit one
 allele from each parent at every gene, so colour passes down the way it does
 in real horses - two black horses can still throw a chestnut foal if both
-carry a hidden `e`, a hidden cream can surface generations later, and a single
-hidden `W` turns a foal solid white.
+carry a hidden `e`, a pearl hidden for generations can surface when two
+carriers finally meet, and a single hidden `W` turns a foal solid white.
 
 Some traits aren't fixed by the genes alone. How far bay's black climbs, how
 far along a grey has greyed, where splash puts its socks - none of that is

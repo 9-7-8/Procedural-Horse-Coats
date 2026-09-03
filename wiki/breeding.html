@@ -65,16 +65,18 @@
 </p>
 
 <p>
-    Each resulting pair is canonicalized by <code>AllelePair</code> (more dominant
-    first), so <code>breedWith</code> is <strong>symmetric</strong>:
+    Each resulting pair is put in <code>AllelePair</code>&rsquo;s canonical slot
+    order, so <code>breedWith</code> is <strong>symmetric</strong>:
     <code>E/E-A/A-… &times; e/e-a/a-…</code> always gives <code>E/e-A/a-…</code>.
 </p>
 
 <p>
-    Dominance still masks &mdash; one <code>W</code> gives a white foal, one
-    <code>T</code> the test tint, one <code>Ch</code> champagne, one <code>Cr</code>
-    a cream dilution, one <code>G</code> grey (adult only), one <code>Spl</code>
-    splash markings, one <code>Mzeb</code> zebra stripes.
+    What the foal then <em>looks</em> like is its genes&rsquo;
+    <a href="genetics-model.html#combinations">combination tables</a>, nothing
+    more: one <code>W</code> gives a white foal because <code>W/w</code> and
+    <code>W/W</code> both map to white&rsquo;s masking expression, and one
+    <code>n/Pihr</code> gives an ordinary-looking foal because that combination
+    maps to a wild type. There is no dominance rule in the middle.
 </p>
 
 <div class="note">
@@ -114,8 +116,8 @@
         seed <strong>verbatim</strong> &mdash; no re-roll, no jitter. A foal that
         inherits its dam&rsquo;s <code>A</code> inherits her bay point extent
         exactly.</li>
-    <li>The two copies are re-aligned to the canonical dominant-first pair order; the
-        epigenetics follow their own allele across the swap.</li>
+    <li>The two copies are re-aligned to <code>AllelePair</code>&rsquo;s canonical
+        slot order; the epigenetics follow their own allele across the swap.</li>
     <li><strong>Priority tie-break</strong>: if both copies arrived holding the same
         priority, one extra <code>nextBoolean()</code> bumps the second copy a single
         step up or down (<code>AlleleEpigenetics.deconflict</code>), clamped inside
@@ -137,11 +139,11 @@
     This is <code>AlleleEpigenetics.priority</code> &mdash; <strong>not</strong>
     <code>Gene.priority()</code>, which is the fixed per-gene constant
     <code>Genes</code> sorts <code>codeOrder()</code> on (so breeding rolls each
-    gene in a stable order and a gene only ever sees lower-priority genes). On a
-    <strong>heterozygote</strong> the expressed copy is obvious &mdash; the
-    dominant one &mdash; and its epigenetics are what the coat reads. On a
-    <strong>homozygote</strong> both copies express, so the tie goes to the
-    <strong>higher</strong> epigenetic priority. That is its only job; it is a
+    gene in a stable order and a gene only ever sees lower-priority genes). When
+    the two copies are <strong>different alleles</strong> the expressed one is the
+    canonically first &mdash; an arbitrary but fixed choice, not a claim that one
+    allele wins. When they are the <strong>same</strong> both express, so the tie
+    goes to the <strong>higher</strong> epigenetic priority. That is its only job; it is a
     full-range int for headroom. It selects a <em>seed</em>, never an
     <em>order</em>.
 </p>

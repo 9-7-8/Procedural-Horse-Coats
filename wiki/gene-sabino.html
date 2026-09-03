@@ -24,12 +24,12 @@
 <dl class="spec">
     <div><dt>Gene key</dt><dd>horsegenetics.sabino</dd></div>
     <div><dt>Alleles</dt><dd><span class="allele dom">SB1</span> <span class="allele wild">sb1</span></dd></div>
-    <div><dt>Dominance</dt><dd>INCOMPLETE_DOMINANT</dd></div>
-    <div><dt>Wild type</dt><dd>sb1</dd></div>
+    <div><dt>Outcomes</dt><dd>wild, <code>sabino1</code>, <code>sabino-white</code></dd></div>
+    <div><dt>Shows when</dt><dd><code>SB1/sb1</code> &rarr; sabino1; <code>SB1/SB1</code> &rarr; sabino-white</dd></div>
+    <div><dt>Default allele</dt><dd>sb1</dd></div>
     <div><dt>Wild frequency</dt><dd>1 in 45 per allele</dd></div>
-    <div><dt>Founder draws</dt><dd>2 &times; nextInt(45)</dd></div>
+    <div><dt>Founder draws</dt><dd>1 &times; nextFloat()</dd></div>
     <div><dt>Deterministic</dt><dd><strong>no</strong></dd></div>
-    <div><dt>Visible when</dt><dd>SB1_ (dose 1) / SB1&nbsp;SB1 (dose 2)</dd></div>
     <div><dt>Epi draws</dt><dd>nextLong() seed, 4 &times; nextFloat() leg heights, nextFloat() belly, nextFloat() face</dd></div>
 </dl>
 

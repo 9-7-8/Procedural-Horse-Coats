@@ -40,8 +40,7 @@
             items: [
                 { href: "gene-extension.html", text: "Extension", kind: "natural" },
                 { href: "gene-agouti.html", text: "Agouti (bay / seal)", kind: "natural" },
-                { href: "gene-cream.html", text: "Cream", kind: "natural" },
-                { href: "gene-pearl.html", text: "Pearl", kind: "natural" },
+                { href: "gene-matp.html", text: "MATP (cream / pearl)", kind: "natural" },
                 { href: "gene-champagne.html", text: "Champagne", kind: "natural" },
                 { href: "gene-grey.html", text: "Grey (dapple)", kind: "natural" },
                 { href: "gene-white.html", text: "Dominant white", kind: "natural" },

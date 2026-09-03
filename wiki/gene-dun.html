@@ -24,12 +24,12 @@
 <dl class="spec">
     <div><dt>Gene key</dt><dd>horsegenetics.dun</dd></div>
     <div><dt>Alleles</dt><dd><span class="allele dom">D</span> <span class="allele wild">d</span></dd></div>
-    <div><dt>Dominance</dt><dd>DOMINANT</dd></div>
-    <div><dt>Wild type</dt><dd>d</dd></div>
+    <div><dt>Outcomes</dt><dd>wild, <code>dun</code></dd></div>
+    <div><dt>Shows when</dt><dd><code>D/d</code>, <code>D/D</code></dd></div>
+    <div><dt>Default allele</dt><dd>d</dd></div>
     <div><dt>Wild frequency</dt><dd>1 in 24 per allele</dd></div>
-    <div><dt>Founder draws</dt><dd>2 &times; nextInt(24)</dd></div>
+    <div><dt>Founder draws</dt><dd>1 &times; nextFloat()</dd></div>
     <div><dt>Deterministic</dt><dd>yes</dd></div>
-    <div><dt>Visible when</dt><dd>D_</dd></div>
     <div><dt>keep red</dt><dd>0.85 on a red base &rarr; 0.0 on a black base (by black content)</dd></div>
     <div><dt>keep black</dt><dd>0.48 body; 0.82 in a leg bar</dd></div>
     <div><dt>dorsal half-width</dt><dd>1.5 body units</dd></div>
@@ -91,11 +91,13 @@ f.setBlack(px, py, b * keepBlack);</code></pre>
     <p>
         The real locus has three alleles &mdash; <code>D</code> (full dun),
         <code>d1</code> (non-dun but still marked), <code>d2</code> (no dun, no
-        markings) &mdash; whose dominance order (<code>D &gt; d1 = d2</code> for
-        dilution, but only <code>d1</code> carries markings) a single
-        <a href="genetics-model.html"><code>DominancePattern</code></a> can&rsquo;t
-        express. This is the two-allele form; the third allele is a
-        <a href="roadmap.html">roadmap</a> item. Leg barring is also a hand-rolled
+        markings) &mdash; whose relationship (<code>D &gt; d1 = d2</code> for
+        dilution, but only <code>d1</code> carries markings) the old per-gene
+        dominance label could not express. The
+        <a href="genetics-model.html#combinations">combination table</a> can:
+        three alleles, six combinations, an outcome per row. So this is still the
+        two-allele form, but the third allele is now a gene rewrite rather than a
+        framework change &mdash; a <a href="roadmap.html">roadmap</a> item. Leg barring is also a hand-rolled
         Y-phase rather than a reuse of
         <a href="body-space.html"><code>BodyStripes</code></a> (which runs on X).
     </p>

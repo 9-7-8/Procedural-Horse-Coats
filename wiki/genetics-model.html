@@ -30,13 +30,14 @@
 <tbody>
 <tr><td><code>Gene</code></td><td>An interface: the alleles a locus defines, how they segregate, and how the locus changes the coat. One singleton instance per gene.</td></tr>
 <tr><td><code>Allele</code></td><td>One allele of one gene. Identified by <code>&lt;modauthor&gt;.&lt;gene&gt;.&lt;token&gt;</code>, e.g. <code>horsegenetics.splash.Spl</code>.</td></tr>
-<tr><td><code>AllelePair</code></td><td>The two copies a horse carries at one gene. A record, canonicalized <strong>dominant-first</strong> on construction.</td></tr>
+<tr><td><code>AllelePair</code></td><td>The two copies a horse carries at one gene &mdash; an <strong>unordered</strong> combination, put in a canonical slot order on construction so a pair equals its reverse.</td></tr>
+<tr><td><code>Expression</code></td><td><strong>One outcome</strong> a gene can produce: a name, a human-readable description, whether it is a wild type, whether it masks, and the paint function. Replaces <code>DominancePattern</code> entirely.</td></tr>
+<tr><td><code>FounderTable</code></td><td>How common each allele <em>combination</em> is in the wild population, as percentages. Replaces the old per-allele &ldquo;1 in N&rdquo; frequency.</td></tr>
 <tr><td><code>Genotype</code></td><td>One <code>AllelePair</code> per registered gene. Round-trips through a code string.</td></tr>
 <tr><td><code>AlleleEpigenetics</code></td><td><code>(int priority, long epigeneticSeed)</code> &mdash; the heritable payload on <strong>one copy</strong> of one allele.</td></tr>
 <tr><td><code>Epigenome</code></td><td>One <code>AlleleEpigenetics</code> per copy, aligned slot-for-slot with the genotype&rsquo;s pairs.</td></tr>
 <tr><td><code>Genome</code></td><td><code>Genotype</code> + <code>Epigenome</code>. The thing a foal actually inherits.</td></tr>
 <tr><td><code>Genes</code></td><td>The registry. Three orderings: <code>codeOrder()</code>, <code>naturalOrder()</code>, <code>magicalOrder()</code>.</td></tr>
-<tr><td><code>DominancePattern</code></td><td>Per-gene metadata: <code>DOMINANT</code> / <code>RECESSIVE</code> / <code>INCOMPLETE_DOMINANT</code> / <code>COMPLETE_DOMINANT</code>.</td></tr>
 <tr><td><code>GenotypeCatalog</code></td><td>Every <em>visually distinct</em> genotype the registry can produce, in a stable order.</td></tr>
 <tr><td><code>GeneSpec</code> / <code>SpecGene</code></td><td>A gene described as <a href="gene-format.html">a JSON file</a> rather than a class, and the <code>Gene</code> that answers everything from it. Indistinguishable from a hand-written gene everywhere below this table.</td></tr>
 </tbody>
@@ -50,13 +51,14 @@
     serialises to one <strong>gene-keyed</strong> segment per gene, in
     <code>Genes.codeOrder()</code>. Each segment is
     <code>&lt;geneKey&gt;=&lt;a&gt;/&lt;b&gt;</code> &mdash; the full
-    <code>Gene.key()</code>, then the two alleles, <strong>dominant
-    first</strong>; segments joined by <code>-</code>, alleles by <code>/</code>:
+    <code>Gene.key()</code>, then the two alleles in the gene&rsquo;s own
+    declaration order; segments joined by <code>-</code>, alleles by
+    <code>/</code>:
 </p>
 
 <div class="codebox">
-<div class="filename">a wild-type-ish horse &mdash; the first few of the 18 gene segments</div>
-<pre><code class="language-none">horsegenetics.extension=E/e-horsegenetics.agouti=A/a-horsegenetics.silver=z/z-horsegenetics.cream=Cr/N- &hellip;</code></pre>
+<div class="filename">a wild-type-ish horse &mdash; the first few of the 17 gene segments</div>
+<pre><code class="language-none">horsegenetics.extension=E/e-horsegenetics.agouti=A/a-horsegenetics.silver=z/z-horsegenetics.matp=Cr/N- &hellip;</code></pre>
 </div>
 
 <p>
@@ -97,7 +99,7 @@
     <code>naturalOrder()</code> is it filtered to <code>isNatural()</code>,
     <code>magicalOrder()</code> to the magical genes. Ties break alphabetically
     by key. A data-driven natural gene at priority 45 lands <em>between</em> the
-    built-in pearl (42) and champagne (50) &mdash; loaded genes are not
+    built-in MATP (40) and champagne (50) &mdash; loaded genes are not
     appended.
 </p>
 <p>
@@ -113,80 +115,195 @@
     order.
 </p>
 
-<h2>The eighteen registered genes</h2>
+<h2 id="combinations">Alleles, combinations and expressions</h2>
+
+<p>
+    A gene has <strong>any number of alleles</strong>. A horse carries two, and
+    order does not matter, so a gene with <em>n</em> alleles has
+    <em>n</em>(<em>n</em>+1)/2 combinations &mdash; three for two alleles, six
+    for three, 465 for a thirty-allele <code>KIT</code>. <strong>Every
+    combination produces some result</strong>, and the gene says which by
+    declaring its distinct results as <code>Expression</code>s and mapping any
+    pair to one of them with <code>expressionOf(AllelePair)</code>.
+</p>
+
+<div class="note">
+    <span class="label">There is no dominance property anywhere in this model</span>
+    <p>
+        &ldquo;Dominant&rdquo; and &ldquo;recessive&rdquo; are shorthand for
+        <em>which combinations happen to share a result</em>. They only describe
+        a two-allele locus, and they cannot say what a third allele does without
+        inventing a fourth word. The combination table says all of it directly,
+        and says it for any number of alleles:
+    </p>
+    <ul>
+        <li>several combinations landing on one outcome <em>is</em> what
+            &ldquo;dominant&rdquo; meant &mdash; <code>E/E</code> and
+            <code>E/e</code> both wild type;</li>
+        <li>only the double-variant landing on a non-wild-type outcome <em>is</em>
+            what &ldquo;recessive&rdquo; meant &mdash; <code>n/Pihr</code> is a
+            carrier because it maps to a wild type, not because of a label;</li>
+        <li>two variant alleles each with their own outcome and a third for the
+            pair of them <em>is</em> codominance &mdash;
+            <a href="gene-matp.html">MATP</a> is exactly that.</li>
+    </ul>
+    <p>
+        None of them needs a name, and none of them needs a special case.
+    </p>
+</div>
+
+<h3>What an expression carries</h3>
 
 <div class="table-wrap">
 <table>
-<thead><tr><th>Gene</th><th>Alleles</th><th>Dominance</th><th>In the wild</th><th>Phase</th></tr></thead>
+<thead><tr><th>Field</th><th>What it means</th></tr></thead>
 <tbody>
-<tr><td><a href="gene-extension.html">extension</a></td><td><span class="allele dom">E</span> / <span class="allele rec">e</span></td><td>Dominant</td><td>50/50</td><td>natural</td></tr>
-<tr><td><a href="gene-agouti.html">agouti</a></td><td><span class="allele dom">A</span> / <span class="allele rec">a</span></td><td>Dominant</td><td>50/50</td><td>natural</td></tr>
-<tr><td><a href="gene-white.html">white</a></td><td><span class="allele dom">W</span> / <span class="allele wild">w</span></td><td><strong>Complete dominant</strong></td><td>1 in 50 per allele</td><td>natural</td></tr>
-<tr><td><a href="gene-test.html">test</a></td><td><span class="allele dom">T</span> / <span class="allele wild">t</span></td><td><strong>Complete dominant</strong></td><td>1 in 4 carriers</td><td>magical</td></tr>
-<tr><td><a href="gene-champagne.html">champagne</a></td><td><span class="allele dom">Ch</span> / <span class="allele wild">c</span></td><td>Dominant</td><td>1 in 40 per allele</td><td>natural</td></tr>
-<tr><td><a href="gene-splash.html">splash</a></td><td><span class="allele dom">Spl</span> / <span class="allele wild">spl</span></td><td>Incomplete&nbsp;dominant*</td><td>1 in 20 per allele</td><td>natural</td></tr>
-<tr><td><a href="gene-grey.html">grey</a></td><td><span class="allele dom">G</span> / <span class="allele wild">g</span></td><td>Dominant</td><td>1 in 16 per allele</td><td>natural</td></tr>
-<tr><td><a href="gene-cream.html">cream</a></td><td><span class="allele dom">Cr</span> / <span class="allele wild">N</span></td><td>Incomplete dominant</td><td>1 in 30 per allele</td><td>natural</td></tr>
-<tr><td><a href="gene-pearl.html">pearl</a></td><td><span class="allele rec">prl</span> / <span class="allele wild">N</span></td><td>Incomplete dominant</td><td>1 in 22 per allele</td><td>natural</td></tr>
-<tr><td><a href="gene-magic-zebra.html">magic zebra</a></td><td><span class="allele dom">Mzeb</span> / <span class="allele wild">n</span></td><td>Dominant</td><td>1 in 100 per allele</td><td>magical</td></tr>
-<tr><td><a href="gene-pink-hair.html">pink hair</a></td><td><span class="allele rec">Pihr</span> / <span class="allele wild">n</span></td><td><strong>Recessive</strong></td><td>1 in 12 per allele</td><td>magical</td></tr>
-<tr><td><a href="gene-dun.html">dun</a></td><td><span class="allele dom">D</span> / <span class="allele wild">d</span></td><td>Dominant</td><td>1 in 24 per allele</td><td>natural</td></tr>
-<tr><td><a href="gene-silver.html">silver</a></td><td><span class="allele dom">Z</span> / <span class="allele wild">z</span></td><td>Dominant</td><td>1 in 60 per allele</td><td>natural</td></tr>
-<tr><td><a href="gene-mushroom.html">mushroom</a></td><td><span class="allele rec">Mu</span> / <span class="allele wild">mu</span></td><td><strong>Recessive</strong></td><td>1 in 34 per allele</td><td>natural</td></tr>
-<tr><td><a href="gene-roan.html">roan</a></td><td><span class="allele dom">Rn</span> / <span class="allele wild">rn</span></td><td>Dominant</td><td>1 in 30 per allele</td><td>natural</td></tr>
-<tr><td><a href="gene-tobiano.html">tobiano</a></td><td><span class="allele dom">To</span> / <span class="allele wild">to</span></td><td>Dominant</td><td>1 in 50 per allele</td><td>natural</td></tr>
-<tr><td><a href="gene-frame.html">frame overo</a></td><td><span class="allele dom">Ov</span> / <span class="allele wild">ov</span></td><td>Dominant&dagger;</td><td>1 in 55 per allele</td><td>natural</td></tr>
-<tr><td><a href="gene-sabino.html">sabino 1</a></td><td><span class="allele dom">SB1</span> / <span class="allele wild">sb1</span></td><td>Incomplete dominant</td><td>1 in 45 per allele</td><td>natural</td></tr>
+<tr><td><code>id</code></td><td>The gene&rsquo;s slug for this outcome, unique within the gene and stable. Two expressions are equal when their ids match, and the gallery dedups allele pairs by it.</td></tr>
+<tr><td><code>name</code></td><td>Short display name &mdash; &ldquo;Sabino-white&rdquo;.</td></tr>
+<tr><td><code>description</code></td><td>One human-readable sentence: what this combination does to the horse. What the gene dictionary, the tooltips and these wiki pages show.</td></tr>
+<tr><td><code>wildType</code></td><td>This combination <strong>changes nothing</strong>. No painter, skipped by the composer, excluded from the texture key, reads as &ldquo;absent&rdquo; in the genome display. A property of the <em>combination</em>, not of an allele.</td></tr>
+<tr><td><code>masks</code></td><td>While this shows, no other gene is visible &mdash; dominant white, the test overlay. Also per-combination: <code>w/w</code> does not mask, <code>W/w</code> does.</td></tr>
+<tr><td><code>deterministic</code></td><td>Every horse with this combination is painted byte-for-byte identically. A <code>false</code> anywhere forces per-horse texture generation.</td></tr>
+<tr><td>the painter</td><td>Either a phase-1 <code>restrict</code> (a natural gene) or a phase-3 <code>tint</code> (a magical one) &mdash; never both, because a gene is one or the other. Both are pure: handed read-only views, they return a contribution.</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="codebox">
+<div class="filename">Sabino, whose three combinations land on three different outcomes</div>
+<pre><code class="language-java">private final Expression WILD = Expression.wildType("No white markings.");
+
+private final Expression SABINO = Expression.of("sabino1", "Sabino 1")
+        .describe("Tall jagged stockings, a splash of white up the belly, ...")
+        .varies()
+        .restrict((ctx, coat) -&gt; paintSabino(ctx, coat, 1));
+
+private final Expression SABINO_WHITE = Expression.of("sabino-white", "Sabino-white")
+        .describe("Ninety per cent white or more, with a few coloured flecks ...")
+        .varies()
+        .restrict((ctx, coat) -&gt; paintSabino(ctx, coat, 2));
+
+@Override
+public Expression expressionOf(AllelePair pair) {
+    return switch (pair.count(SB1)) {
+        case 2  -&gt; SABINO_WHITE;
+        case 1  -&gt; SABINO;
+        default -&gt; WILD;
+    };
+}</code></pre>
+</div>
+
+<p>
+    A gene may declare <strong>more than one wild type</strong> when different
+    silent combinations deserve different wording &mdash; MATP&rsquo;s
+    <code>prl/N</code> is a &ldquo;pearl carrier&rdquo;, distinct in the gene
+    dictionary from the plain <code>N/N</code> even though the two horses look
+    identical. The gallery collapses every wild type into one pen, because
+    &ldquo;changes nothing&rdquo; is one <em>look</em>.
+</p>
+
+<h3>The genotype-aware question</h3>
+
+<p>
+    A handful of genes depend on another gene: agouti paints black points, so it
+    does nothing at all on a chestnut horse. Those override
+    <code>expressionIn(pair, genotype)</code>, which defaults to
+    <code>expressionOf(pair)</code> and is what the coat pipeline actually calls.
+    An override may only return one of the gene&rsquo;s own declared expressions
+    &mdash; typically a wild type, meaning &ldquo;suppressed here&rdquo;.
+</p>
+
+<h2 id="founders">Founder frequency, per combination</h2>
+
+<p>
+    <code>Gene.founderTable(FounderContext)</code> returns a
+    <code>FounderTable</code>: a weight per allele <strong>combination</strong>,
+    as percentages that should sum to 100. One
+    <code>nextFloat()</code> per gene per founder picks a bucket, drawn in
+    <code>codeOrder()</code>, so a founder&rsquo;s genotype is reproducible from
+    the RNG stream. <strong>Founders only</strong> &mdash; breeding never
+    consults it.
+</p>
+
+<p>
+    This replaces the &ldquo;1 in N per allele&rdquo; frequency each gene used to
+    hand-roll, for two reasons. It has <strong>no meaning past two
+    alleles</strong> &mdash; &ldquo;1 in 45 per allele&rdquo; says nothing about
+    a locus with thirty of them. And it <strong>hid the number the author cares
+    about</strong>: a per-allele chance only <em>implies</em> a homozygote rate,
+    where a per-combination table lets you set it directly. The diagnostic
+    <a href="gene-test.html">test gene</a> is the clearest case &mdash; a quarter
+    of wild horses are <code>T/t</code> and <strong>none at all</strong> are
+    <code>T/T</code>, which no per-allele frequency can express.
+</p>
+
+<p>
+    The table is <strong>sparse</strong>: a combination left out simply never
+    turns up in the wild. That is what lets a thirty-allele locus declare the
+    dozen combinations that actually occur instead of all 465. Weights that miss
+    100 are normalised proportionally with a warning, not an error.
+    <code>FounderTable.hardyWeinberg(variant, baseline, p)</code> is a
+    convenience that computes the three numbers a two-allele author would
+    otherwise work out by hand &mdash; it is what the old &ldquo;1 in N&rdquo;
+    meant, not a second model.
+</p>
+
+<p>
+    <code>FounderContext</code> carries the part of the genotype already rolled,
+    so a gene&rsquo;s frequency may depend on what the horse already is
+    (&ldquo;champagne twice as likely on a chestnut&rdquo;). Genes roll in
+    <code>codeOrder()</code>, so a gene can only read genes with a
+    <em>lower</em> priority; asking about a later one throws rather than quietly
+    handing back a wild type that would make the bug invisible.
+</p>
+
+<h2>The seventeen registered genes</h2>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Gene</th><th>Alleles</th><th>Outcomes</th><th>In the wild</th><th>Phase</th></tr></thead>
+<tbody>
+<tr><td><a href="gene-extension.html">extension</a></td><td><span class="allele dom">E</span> / <span class="allele rec">e</span></td><td>wild, chestnut</td><td>25 / 50 / 25</td><td>natural</td></tr>
+<tr><td><a href="gene-agouti.html">agouti</a></td><td><span class="allele dom">A</span> / <span class="allele rec">a</span></td><td>wild, bay</td><td>25 / 50 / 25</td><td>natural</td></tr>
+<tr><td><a href="gene-white.html">white</a></td><td><span class="allele dom">W</span> / <span class="allele wild">w</span></td><td>wild, white <strong>(masks)</strong></td><td>1/50 per allele</td><td>natural</td></tr>
+<tr><td><a href="gene-test.html">test</a></td><td><span class="allele dom">T</span> / <span class="allele wild">t</span></td><td>wild, test-overlay <strong>(masks)</strong></td><td>25% carriers, no homozygotes</td><td>magical</td></tr>
+<tr><td><a href="gene-champagne.html">champagne</a></td><td><span class="allele dom">Ch</span> / <span class="allele wild">c</span></td><td>wild, champagne</td><td>1/40 per allele</td><td>natural</td></tr>
+<tr><td><a href="gene-splash.html">splash</a></td><td><span class="allele dom">Spl</span> / <span class="allele wild">spl</span></td><td>wild, splash*</td><td>1/20 per allele</td><td>natural</td></tr>
+<tr><td><a href="gene-grey.html">grey</a></td><td><span class="allele dom">G</span> / <span class="allele wild">g</span></td><td>wild, grey</td><td>1/16 per allele</td><td>natural</td></tr>
+<tr><td><a href="gene-matp.html">MATP</a></td><td><span class="allele dom">Cr</span> / <span class="allele rec">prl</span> / <span class="allele wild">N</span></td><td>wild, pearl-carrier, single-cream, classic-pearl, double-dilute</td><td>1/30 <code>Cr</code>, 1/22 <code>prl</code></td><td>natural</td></tr>
+<tr><td><a href="gene-magic-zebra.html">magic zebra</a></td><td><span class="allele dom">Mzeb</span> / <span class="allele wild">n</span></td><td>wild, zebra</td><td>1/100 per allele</td><td>magical</td></tr>
+<tr><td><a href="gene-pink-hair.html">pink hair</a></td><td><span class="allele rec">Pihr</span> / <span class="allele wild">n</span></td><td>wild, pink-carrier, pink-hair</td><td>1/12 per allele</td><td>magical</td></tr>
+<tr><td><a href="gene-dun.html">dun</a></td><td><span class="allele dom">D</span> / <span class="allele wild">d</span></td><td>wild, dun</td><td>1/24 per allele</td><td>natural</td></tr>
+<tr><td><a href="gene-silver.html">silver</a></td><td><span class="allele dom">Z</span> / <span class="allele wild">z</span></td><td>wild, silver</td><td>1/60 per allele</td><td>natural</td></tr>
+<tr><td><a href="gene-mushroom.html">mushroom</a></td><td><span class="allele rec">Mu</span> / <span class="allele wild">mu</span></td><td>wild, mushroom-carrier, mushroom</td><td>1/34 per allele</td><td>natural</td></tr>
+<tr><td><a href="gene-roan.html">roan</a></td><td><span class="allele dom">Rn</span> / <span class="allele wild">rn</span></td><td>wild, roan</td><td>1/30 per allele</td><td>natural</td></tr>
+<tr><td><a href="gene-tobiano.html">tobiano</a></td><td><span class="allele dom">To</span> / <span class="allele wild">to</span></td><td>wild, tobiano</td><td>1/50 per allele</td><td>natural</td></tr>
+<tr><td><a href="gene-frame.html">frame overo</a></td><td><span class="allele dom">Ov</span> / <span class="allele wild">ov</span></td><td>wild, frame&dagger;</td><td>1/55 per allele</td><td>natural</td></tr>
+<tr><td><a href="gene-sabino.html">sabino 1</a></td><td><span class="allele dom">SB1</span> / <span class="allele wild">sb1</span></td><td>wild, sabino1, sabino-white</td><td>1/45 per allele</td><td>natural</td></tr>
 </tbody>
 </table>
 </div>
 
 <p>
-    * Splash is <em>tagged</em> <code>INCOMPLETE_DOMINANT</code> but does not read
-    its own dose yet, so <code>Spl/spl</code> and <code>Spl/Spl</code> render
-    identically. See <a href="gene-splash.html">its page</a>.
+    * <strong>Splash still does not read its own dose</strong>, and the
+    combination table now says so where a label used to hide it: both
+    <code>Spl/spl</code> and <code>Spl/Spl</code> return the one
+    <code>splash</code> expression, so the gallery gives splash <em>one</em>
+    pen. Splitting it is a matter of adding a second expression. See
+    <a href="gene-splash.html">its page</a>.
     &dagger; Frame models the coat only; <code>Ov/Ov</code> lethal white is
-    deliberately not modelled (a <a href="roadmap.html">roadmap</a> item).
-    <a href="gene-sabino.html">Sabino</a>, by contrast, <em>does</em> read its dose.
+    deliberately not modelled &mdash; a third expression when health genetics
+    land (a <a href="roadmap.html">roadmap</a> item).
 </p>
 
 <p>
     <strong>Seal brown has no gene.</strong> It is the top of agouti&rsquo;s
-    epigenetic distribution &mdash; a high roll of the point extent. Cream and pearl
-    are <em>allelic</em> in real horses (both <code>MATP</code>); here they are two
-    genes whose combined effect is computed once in
-    <code>coat.pattern.CreamPearlDilution</code>, with a
-    <a href="roadmap.html#multi-allele">planned merge</a> into one multi-allele
-    locus.
-</p>
-
-<h2>Dominance as declared metadata</h2>
-
-<p>
-    <code>Gene.dominance()</code> does not <em>do</em> the expressing &mdash;
-    <code>restrict</code> and <code>tint</code> do that. It tells the rest of the mod
-    what to expect, so code can reason about a gene without special-casing it by key.
-    Every gene declares it.
-</p>
-
-<div class="table-wrap">
-<table>
-<thead><tr><th>Pattern</th><th>Meaning</th><th>Distinct pairs</th></tr></thead>
-<tbody>
-<tr><td><code>DOMINANT</code></td><td>One variant allele gives the full effect; the heterozygote is the homozygous variant.</td><td>2 (both homozygotes)</td></tr>
-<tr><td><code>RECESSIVE</code></td><td>Only the homozygous variant shows; the heterozygote is an invisible carrier.</td><td>2 (both homozygotes)</td></tr>
-<tr><td><code>INCOMPLETE_DOMINANT</code></td><td>The heterozygote has a look of its own, between the two homozygotes.</td><td>3 (all pairs)</td></tr>
-<tr><td><code>COMPLETE_DOMINANT</code></td><td>Dominant <strong>and epistatic</strong>: while the variant shows, no other gene is visible.</td><td>1 (the variant, on wild type)</td></tr>
-</tbody>
-</table>
-</div>
-
-<p>
-    Two questions callers ask: <code>heterozygoteIsDistinct()</code> (only
-    <code>INCOMPLETE_DOMINANT</code>) and <code>masksOtherGenes()</code> (only
-    <code>COMPLETE_DOMINANT</code>). Today the one consumer is
-    <code>GenotypeCatalog</code>; the obvious next ones are a punnett /
-    expected-foal display and &ldquo;carrier of X&rdquo; wording in the info panel.
+    epigenetic distribution &mdash; a high roll of the point extent.
+    <strong>Cream and pearl are one gene</strong>: they are allelic in real
+    horses (both <code>MATP</code>) and are now one locus with three alleles,
+    which kills the impossible <code>Cr/Cr</code>-<em>and</em>-<code>prl/prl</code>
+    genotype the old two-gene model allowed. See
+    <a href="gene-matp.html">its page</a>.
 </p>
 
 <h2 id="epigenetics">Epigenetics ride on the allele, not on the horse</h2>
@@ -218,7 +335,7 @@
 <table>
 <thead><tr><th>Case</th><th>Expressed copy</th></tr></thead>
 <tbody>
-<tr><td>Heterozygote</td><td>The dominant copy &mdash; <code>AllelePair</code> is canonicalized dominant-first, so it is <code>first()</code>.</td></tr>
+<tr><td>Two different alleles</td><td>The <strong>canonically first</strong> copy &mdash; the earlier-declared allele. An arbitrary but fixed choice, not a claim about which allele &ldquo;wins&rdquo;: what the combination <em>does</em> is its <a href="#combinations">expression</a>, which reads both.</td></tr>
 <tr><td>Homozygote</td><td>Both copies express, so the tie goes to the <strong>higher priority</strong>.</td></tr>
 </tbody>
 </table>
@@ -311,8 +428,8 @@ public boolean hasVisibleNonDeterministic();</code></pre>
 <p>
     <code>Gene.isVisible(pair, genotype)</code> and
     <code>Gene.isDeterministic(pair, genotype)</code> both see the <em>whole</em>
-    genotype, which is how agouti knows it is invisible on a chestnut and how cream
-    and pearl read each other.
+    genotype &mdash; both derive from <code>expressionIn(pair, genotype)</code>,
+    which is how agouti knows it is invisible on a chestnut.
 </p>
 
 <div class="note danger">
@@ -331,7 +448,7 @@ public boolean hasVisibleNonDeterministic();</code></pre>
     <code>GenotypeCatalog</code> enumerates every <strong>visually distinct</strong>
     genotype the registry can produce. Nothing is hard-coded &mdash; it falls out of
     <code>codeOrder()</code>, each gene&rsquo;s allele list and each gene&rsquo;s
-    dominance, so registering a gene widens it on its own &mdash; the catalogue is
+    expression table, so registering a gene widens it on its own &mdash; the catalogue is
     built lazily and thrown away whenever the registry changes, which is what makes a
     <a href="gene-format.html">drop-in gene</a> show up in the gallery without anything
     else being told about it.
@@ -340,24 +457,23 @@ public boolean hasVisibleNonDeterministic();</code></pre>
 <div class="table-wrap">
 <table class="facts">
 <tbody>
-<tr><th><code>allPairsOf(gene)</code></th><td>Every unordered pair, least dominant first (<code>ee</code>, <code>Ee</code>, <code>EE</code>).</td></tr>
-<tr><th><code>distinctPairsOf(gene)</code></th><td>The same, with the dominance reduction applied.</td></tr>
-<tr><th><code>totalGenotypes()</code></th><td>The raw product &mdash; <strong>387,420,489</strong> at 18 genes.</td></tr>
-<tr><th><code>size()</code></th><td>The reduced catalogue &mdash; <strong>331,778</strong>.</td></tr>
+<tr><th><code>allPairsOf(gene)</code></th><td>Every unordered pair &mdash; all <em>n</em>(<em>n</em>+1)/2 of them (<code>ee</code>, <code>Ee</code>, <code>EE</code>).</td></tr>
+<tr><th><code>distinctPairsOf(gene)</code></th><td>One representative per distinct <code>Expression</code> &mdash; the homozygous pair where the group has one. Every wild type is <em>one</em> group, because &ldquo;changes nothing&rdquo; is one look.</td></tr>
+<tr><th><code>totalGenotypes()</code></th><td>The raw product &mdash; every distinct heritable genotype.</td></tr>
+<tr><th><code>size()</code></th><td>The reduced catalogue &mdash; how many of them are distinct to <em>look</em> at.</td></tr>
 <tr><th><code>get(i)</code> / <code>entries()</code></th><td>Read the list, built once at class load.</td></tr>
 </tbody>
 </table>
 </div>
 
 <p>
-    The arithmetic: <code>1,728 · 192 = 331,776</code> unmasked (the extra 192 is
-    the seven visual genes added 2026-09-02 &mdash; six &times;2 homozygotes, sabino
-    &times;3), plus one white pen and one test pen (each
-    <code>COMPLETE_DOMINANT</code> gene collapses to a single entry) =
-    <strong>331,778</strong>. Ordering is a mixed-radix odometer whose
-    <em>first</em> gene is the fastest-varying digit, so the catalogue reads
-    <code>eeaa, EEaa, eeAA, EEAA, [white], [test], eeaa ChCh, …</code>
-</p>
+    Two reductions, both read straight off the expression table with no
+    dominance metadata in the middle: pairs landing on the same expression
+    collapse to one, and a gene on a <code>masks</code> expression keeps exactly
+    one entry &mdash; that combination with every other gene at a wild type,
+    which is why there is one white pen and one test pen instead of hundreds of
+    thousands. Ordering is a mixed-radix odometer whose <em>first</em> gene is
+    the fastest-varying digit, so the catalogue reads</p>
 
 <p>
     Its only consumer today is the horse dimension&rsquo;s gallery, which is

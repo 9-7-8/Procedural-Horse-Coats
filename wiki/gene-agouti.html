@@ -24,12 +24,12 @@
 <dl class="spec">
     <div><dt>Gene key</dt><dd>horsegenetics.agouti</dd></div>
     <div><dt>Alleles</dt><dd><span class="allele dom">A</span> <span class="allele rec">a</span></dd></div>
-    <div><dt>Dominance</dt><dd>DOMINANT</dd></div>
-    <div><dt>Wild type</dt><dd>a</dd></div>
+    <div><dt>Outcomes</dt><dd>wild, <code>bay</code></dd></div>
+    <div><dt>Shows when</dt><dd><code>A/a</code>, <code>A/A</code> &mdash; and only on a horse that makes black</dd></div>
+    <div><dt>Default allele</dt><dd>a</dd></div>
     <div><dt>Wild frequency</dt><dd>50/50 per allele</dd></div>
-    <div><dt>Founder draws</dt><dd>2 &times; nextBoolean</dd></div>
+    <div><dt>Founder draws</dt><dd>1 &times; nextFloat()</dd></div>
     <div><dt>Deterministic</dt><dd><strong>no</strong> when expressed</dd></div>
-    <div><dt>Visible when</dt><dd>A_ and hasBlackPigment()</dd></div>
     <div><dt>Epigenetic draws</dt><dd>5 &times; nextFloat</dd></div>
     <div><dt>Generator</dt><dd>coat.pattern.BayCoat</dd></div>
 </dl>
@@ -180,7 +180,7 @@ for (int i = 0; i &lt; legs.length; i++) {             // one jitter per leg
 <div class="page-foot">
     <div class="seealso">
         <a href="gene-extension.html">Extension</a>
-        <a href="gene-cream.html">Cream</a>
+        <a href="gene-matp.html">MATP (cream / pearl)</a>
         <a href="gene-champagne.html">Champagne</a>
         <a href="body-space.html">Body space &amp; regions</a>
     </div>

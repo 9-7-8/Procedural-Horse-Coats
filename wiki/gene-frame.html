@@ -26,12 +26,12 @@
 <dl class="spec">
     <div><dt>Gene key</dt><dd>horsegenetics.frame</dd></div>
     <div><dt>Alleles</dt><dd><span class="allele dom">Ov</span> <span class="allele wild">ov</span></dd></div>
-    <div><dt>Dominance</dt><dd>DOMINANT (for the coat)</dd></div>
-    <div><dt>Wild type</dt><dd>ov</dd></div>
+    <div><dt>Outcomes</dt><dd>wild, <code>frame</code></dd></div>
+    <div><dt>Shows when</dt><dd><code>Ov/ov</code>, <code>Ov/Ov</code></dd></div>
+    <div><dt>Default allele</dt><dd>ov</dd></div>
     <div><dt>Wild frequency</dt><dd>1 in 55 per allele</dd></div>
-    <div><dt>Founder draws</dt><dd>2 &times; nextInt(55)</dd></div>
+    <div><dt>Founder draws</dt><dd>1 &times; nextFloat()</dd></div>
     <div><dt>Deterministic</dt><dd><strong>no</strong></dd></div>
-    <div><dt>Visible when</dt><dd>Ov_</dd></div>
     <div><dt>Epi draws</dt><dd>nextLong() seed, nextFloat() body white, nextFloat() face white</dd></div>
     <div><dt>Applies to</dt><dd>BODY + NECK only (legs, crest, tail, ears stay coloured)</dd></div>
     <div><dt>Flank band</dt><dd>absolute body-Y, 0.28&ndash;0.74 of body height, feathered</dd></div>

@@ -71,7 +71,8 @@
 
 <p>
     <code>common/src/main/resources/horsegenetics/example-genes/waterborn.json</code>.
-    A magical, dominant gene (<span class="allele dom">Wtb</span>
+    A magical gene whose one visible outcome takes either variant combination
+    (<span class="allele dom">Wtb</span>
     <span class="allele wild">n</span>, 1 in 90 per allele) that does four things,
     each a different part of the system:
 </p>
@@ -87,12 +88,10 @@
 </table>
 
 <pre><code class="language-json">{
-  "format": 1,
+  "format": 2,
   "key": "example.waterborn",
   "name": "Waterborn",
   "phase": "magical",
-  "dominance": "DOMINANT",
-  "wildOdds": 90,
   "priority": 215,
   "alleles": [
     { "token": "Wtb", "label": "Waterborn (Wtb)" },
@@ -102,31 +101,41 @@
     { "name": "stripeSeed", "type": "seed" },
     { "name": "stripeSpacing", "min": 1.6, "max": 2.8 }
   ],
-  "layers": [
+  "expressions": [
     {
-      "name": "neon blue stripes down the mane and tail",
-      "masks": [
-        { "type": "STRIPES", "parts": [ "HAIR" ], "seed": "$stripeSeed",
-          "spacing": "$stripeSpacing", "duty": 0.4, "warp": 0.8 }
+      "id": "waterborn",
+      "name": "Waterborn",
+      "description": "Neon-blue streaks in the mane and tail, blue dust off the hooves, a grown horse walks over water, and a tamed mare can be milked for a bucket of it.",
+      "when": [ "Wtb/Wtb", "Wtb/n" ],
+      "layers": [
+        {
+          "name": "neon blue stripes down the mane and tail",
+          "masks": [
+            { "type": "STRIPES", "parts": [ "HAIR" ], "seed": "$stripeSeed",
+              "spacing": "$stripeSpacing", "duty": 0.4, "warp": 0.8 }
+          ],
+          "op": { "type": "TOWARD", "color": "#1ec8ff", "strength": 92, "opacity": 100 }
+        }
       ],
-      "op": { "type": "TOWARD", "color": "#1ec8ff", "strength": 92, "opacity": 100 }
-    }
-  ],
-  "effects": [
-    { "type": "traversal", "flag": "walk_on_water", "when": { "flag": "adult" } },
-    {
-      "type": "emitter", "kind": "particle", "shape": "trail", "anchor": "feet",
-      "trigger": { "on_move": {} },
-      "particle": "minecraft:dust", "color": "#1ec8ff", "chance": 0.7
+      "effects": [
+        { "type": "traversal", "flag": "walk_on_water", "when": { "flag": "adult" } },
+        {
+          "type": "emitter", "kind": "particle", "shape": "trail", "anchor": "feet",
+          "trigger": { "on_move": {} },
+          "particle": "minecraft:dust", "color": "#1ec8ff", "chance": 0.7
+        },
+        {
+          "type": "yield",
+          "trigger": { "on_interact": "minecraft:bucket" },
+          "consumes": "minecraft:bucket", "produces": "minecraft:water_bucket",
+          "cooldown": 2400,
+          "when": { "all": [ { "flag": "sex_female" }, { "flag": "tamed" } ] }
+        }
+      ]
     },
-    {
-      "type": "yield",
-      "trigger": { "on_interact": "minecraft:bucket" },
-      "consumes": "minecraft:bucket", "produces": "minecraft:water_bucket",
-      "cooldown": 2400,
-      "when": { "all": [ { "flag": "sex_female" }, { "flag": "tamed" } ] }
-    }
-  ]
+    { "id": "wild", "name": "Wild type", "description": "No blue streaks and no affinity for water.", "wildType": true }
+  ],
+  "founders": { "Wtb/Wtb": 0.0123457, "Wtb/n": 2.1975309, "n/n": 97.7901234 }
 }</code></pre>
 
 <div class="note">
@@ -137,10 +146,10 @@
         <code>GeneSpecLoader.fromClasspath()</code> registers it in the mod
         constructor. It is the <strong>first gene file to ship</strong> &mdash; done
         deliberately to make the effects work testable in-game &mdash; so the
-        in-game genotype code is now <strong>12 segments</strong> and the horse-
-        dimension gallery doubles. <code>:common:test</code> is unaffected (that index
+        in-game genotype code is now <strong>19 segments</strong> and the horse-
+        dimension gallery grows. <code>:common:test</code> is unaffected (that index
         is not on the test classpath, so <code>coat-golden.txt</code> and the
-        11-built-in count still hold). The other <code>example-genes/*.json</code> are
+        17-built-in count still hold). The other <code>example-genes/*.json</code> are
         still just examples &mdash; drop one in <code>config/horsegenetics/genes/</code>
         to load it.
     </p>
