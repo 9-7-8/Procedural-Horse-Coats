@@ -99,6 +99,51 @@
 
 <h2>Still to verify</h2>
 
+<h3 id="horse-care">0. Horse care &mdash; gated healing, bond &amp; herds (new 2026-09-02)</h3>
+
+<p>
+    First slice of <a href="roadmap.html#care">roadmap &sect;7</a> and
+    <a href="roadmap.html#bond">&sect;13</a>, all in
+    <code>server/HorseCareHandler</code> + <code>server/BondFollowGoal</code>.
+    Nothing seen in a running game. Full machinery:
+    <a href="horse-care.html">horse-care</a>.
+</p>
+
+<ul>
+    <li><strong>Gated healing.</strong> Hurt a tamed horse (let it take fall
+        damage). Stand it next to <strong>both</strong> water and a hay bale /
+        grass &mdash; it should tick back up ~1 health every 1.5&nbsp;s with a
+        couple of heart particles. Move it away from the water (or onto stone
+        away from any food) &rarr; healing <strong>stops</strong>. Hand-feeding
+        wheat should still heal it regardless of surroundings.</li>
+    <li><strong>Any gallery pen is a ready test bed</strong> &mdash; cauldron +
+        hay bale &mdash; but horses there take no damage, so hurt one in the
+        overworld.</li>
+    <li><strong>Bond number shows.</strong> Ride a tamed horse, open its
+        inventory (E): the left panel should show a <code>bond N  wary</code>
+        line. Ride / stay near it for a few minutes and reopen &mdash; the
+        number should have climbed (cap +15/MC-day). Feed it a carrot &rarr;
+        +2 immediately.</li>
+    <li><strong>Bond tiers.</strong> Cheat the bond up (there is no command
+        yet &mdash; either grind it or temporarily lower the tier thresholds):
+        at 31&ndash;60 a dismounted horse <strong>turns to face you</strong>
+        within 10 blocks; 61&ndash;80 it <strong>walks toward you</strong> when
+        a path exists; 81&ndash;100 it <strong>follows</strong> you around
+        fences and walls, stopping ~3 blocks off. It should ignore you while
+        leashed or while someone rides it.</li>
+    <li><strong>Herds.</strong> Park 2+ horses within 10 blocks for ten real
+        minutes &rarr; the inventory panel should start showing
+        <code>&bull; herd</code>. Separate them for ten minutes &rarr; the flag
+        clears. A <strong>foal in a herd</strong> should gain bond noticeably
+        faster than one alone. Herd members near water+food should heal at +2.</li>
+    <li><strong>Persistence.</strong> Bond and herd id survive a save/reload
+        (they are on a serialized attachment). Re-summoning via death does
+        <em>not</em> apply here, but <code>copyOnDeath</code> is set.</li>
+    <li><strong>Performance.</strong> Stand in the gallery corridor with
+        hundreds of (healthy) horses loaded &mdash; no tick lag. The block scan
+        only runs for hurt horses.</li>
+</ul>
+
 <h3 id="drop-in-genes">1. Drop-in genes actually load &mdash; the top item</h3>
 
 <p>

@@ -57,6 +57,10 @@ project. Its shape:
   generation function, wild frequency, dominance, natural/magical. Update
   it in the same change as any gene; CLAUDE.md keeps only the machinery + a
   one-line-per-gene table.
+- **`wiki/horse-care.html`** is the single source of truth for the **non-genetic
+  horse-care systems** - gated healing, bond tiers, herd formation, the shared
+  slow tick and the block tags. Update it in the same change as
+  `HorseCareHandler` / `BondFollowGoal` / `HorseCareAttachment`.
 - **`wiki/verification.html`** is the rolling **`runClient` checklist** - what's
   built but not yet confirmed in-game. Update after every play session.
 - **`wiki/philosophy.html`** is the **why** - Mendelian breeding as a game of
@@ -69,20 +73,38 @@ project. Its shape:
   two goals conflict. **Read it before making a design call**; most arguments
   in the other docs are downstream of it. Keep it short and principled - no
   implementation detail, no status, no task lists.
-- **`wiki/roadmap.html`** is the **long-range backlog** - the full gene
-  wishlist and the systems it needs (the three-phase pigment pipeline, the
-  determinism contract, hard-coded gene priority, the modder-facing
-  gene-authoring API, non-coat and health genes), each with notes on what would
-  have to change - plus the non-gene features (mare milking, healing gated on
-  nearby water + food, a creative-only custom horse spawner) and the **planned
-  revert of the genotype gallery** to random pens. It is **work items only**;
-  the reasoning behind them lives in `wiki/philosophy.html`. Nothing in it is
-  implemented; when something ships it moves to its own `wiki/gene-*.html` page
-  (or `wiki/breeding.html`) and is deleted there. Its "Decisions still open" section keeps
-  a short list of what's already **settled** - aging out of scope, health as
-  fewer hearts, the magical RGB phase being signed unclamped `int`s capped only
-  at conversion, alphanumeric allele tokens with `n` as wild type - so a later
-  session doesn't reopen them.
+- **`wiki/roadmap.html`** is the **long-range backlog** - the gene wishlist and
+  the systems it needs (hard-coded gene priority, the modder-facing
+  gene-authoring API, multi-allele loci, non-coat and health genes), each with
+  notes on what would have to change - plus the non-gene features (mare milking,
+  the custom horse spawner) and the **planned revert of the genotype gallery**
+  to random pens. **Only not-yet-done work lives here**: a section is either
+  unbuilt or marked *partly built* with just the remainder; anything finished is
+  deleted and written up on its own page (`wiki/gene-*.html`,
+  `wiki/breeding.html`, `wiki/horse-care.html`, `wiki/pipeline.html`). Section
+  numbers are stable (a retired section keeps its slot as a pointer) so
+  cross-references don't rot. It is **work items only**; the reasoning lives in
+  `wiki/philosophy.html`. Its §21 keeps a **settled** list so a later session
+  doesn't reopen those calls - the load-bearing ones: **Mendelian + X-linked +
+  Y-linked only** (polygenic cut; a stallion carries a real `X` *and* `Y`);
+  **aging out entirely** (flea-bitten grey / melanoma cut with it); health =
+  fewer hearts + lethal foals behind a default-on config; one gene per physical
+  locus (KIT/MITF/MATP) with the gene's own `tint` handling every allele combo,
+  **no dominance-per-pair table**; founder frequency declared **per genotype**
+  (percentages, auto-normalised) not per allele, and a separate per-gene
+  **chaos-carrot chance function** of the same shape (§14.1/§19); the genotype
+  stored as a **list keyed by gene**, each gene carrying its order number, so
+  adding/removing a gene just triggers a coat regen (no padding, no back-compat);
+  signed-unclamped `int` phase-3 with context-aware genes intended; **every time-gate is once per
+  24 000-tick MC day**; herd comfort buff stays passive regen (no stamina); the
+  villager **exists**; the gene DB is a plain progressive record (no fog of war,
+  nothing hidden); a magic carrot's timing = a vanilla golden carrot (temporary
+  window, coloured heart particles per type); mutinogenic re-rolls every allele
+  copy a fed parent passes on; the seed jar stores enough sire data for the
+  family tree; sheared look = render-layer overlay; magic-carrot rarity defaults
+  to the gold-ingot tier and a gene can opt out. **Still open**: custom-entity
+  subclass vs attachments (§11, owner wants to discuss), how a cutie mark is
+  chosen, the 1.12.2 backport surface.
 - **New with the wiki conversion**, and not derived from any old markdown -
   keep them current too:
   - **`wiki/genetics-model.html`** - the Mendelian model as implemented:
@@ -134,7 +156,10 @@ project. Its shape:
   and again after the **gameplay-layer items** + the `stored_genome` data
   component were added (`Loaded 1531 recipes`, 16 new shapeless recipes among
   them; the component registers with no error - the 26.1.2 path the roadmap
-  flagged as unverified now works).
+  flagged as unverified now works). Re-verified again 2026-09-02 after the
+  **horse-care** attachment (`horse_care`), the `care_sync` payload and the
+  `horse_water` / `horse_food` block tags were added - still boots clean to
+  `Done`.
 - **`runClient`** - actively play-tested over the 2026-08-30, 2026-09-01 and
   2026-09-02 sessions; see below.
 
@@ -250,6 +275,43 @@ project. Its shape:
   breeding-carrot gate (vanilla love is the stand-in), **no** gestation state
   (foal is immediate). Partly owner-confirmed 2026-09-02 (collection + tooltip);
   `:common:test` 194, `:neoforge-26.1.2:build`, `runServer` all green.
+
+- **Built 2026-09-02, NOT yet play-tested:** the **horse-care systems** -
+  gated healing (roadmap §7.2) plus bond + herds (§13), the first slice of
+  both, sharing **one** slow tick as the roadmap demands. All in
+  `neoforge-26.1.2/`, nothing in `common/`:
+  - `data/HorseCareAttachment` - a `copyOnDeath` attachment
+    (`horsegenetics:horse_care`) holding `bond` (0-100), an `Optional<UUID>`
+    herd id, the `bondToday`/`dayStamp` daily-cap pair, a `bondTicks`
+    fractional accumulator and a `togetherTicks` herd-formation counter;
+    `behaviourTier()` (0 vanilla / 1 face / 2 approach / 3 follow).
+  - `server/HorseCareHandler` - `EntityTickEvent.Post`, every **30 ticks**,
+    staggered by `tickCount + entityId`. **Gated healing:** only for a hurt
+    horse, a 3-block scan for a block in `#horsegenetics:horse_water` (or any
+    `#minecraft:water` fluid) **and** one in `#horsegenetics:horse_food`;
+    `heal(1)` + `HEART` particles per hit (`2` if in a herd). **Bond:**
+    proximity (~+0.5/min), riding (~+1/min), feeding (+2, on
+    `EntityInteract` with any `isFood` stack from the owner); cap **+15 per
+    24 000-tick day**; foal-in-herd doubles the accrual. **Herds:**
+    `togetherTicks` +30 with company / -30 alone; ≥ 12 000 → join a
+    neighbour's herd or mint a `UUID` and pull in herdless neighbours; decays
+    to 0 → leave. Attachment written back only on change; sync packet only
+    when bond / in-herd changed.
+  - `server/BondFollowGoal` - one `Goal` added at priority 4 to every `Horse`
+    on join (dedup via `goalSelector.getAvailableGoals()`), inert below tier 1
+    / while leashed / while ridden; tier 1 look-only, tier 2 paths only if a
+    route exists, tier 3 follows persistently. Real pathfinding, never a
+    teleport.
+  - `network/HorseCareSyncPayload` → `client/ClientHorseCareCache` (cleared on
+    `LoggingOut`); `client/HorseScreenHooks` shows a `bond N  <tier>  • herd`
+    line. Care sync also sent on `StartTracking`.
+  - Two block tags: `data/horsegenetics/tags/block/horse_water.json`,
+    `horse_food.json`.
+  - `:common:test` (195), `:neoforge-26.1.2:build`, `runServer` (boots clean,
+    tags load with no error) all green. Checklist:
+    `wiki/verification.html` §0; machinery: `wiki/horse-care.html`.
+  - **Not in this slice:** milking (§7.1), shearing/sleeping bond (shearing
+    unbuilt), a stored herd alpha, any stamina resource.
 
 - **Owner-verified in-game (2026-09-02):**
   - **Custom horse spawn egg** end to end - the egg, the age/sex/genome editor,
@@ -520,18 +582,22 @@ Two-module Gradle project, split deliberately:
   - `client/` - renderer, texture compositing (incl. `EmissiveCoatLayer` for a
     `glow` gene's full-bright coat parts), client caches, the inventory
     hooks + `FamilyTreeScreen`, keybind, lifecycle cleanup.
-  - `data/` - Data Attachments, the ancestry `SavedData`, codecs;
-    `ModDataComponents` (the item data components: `stored_genome` /
-    `StoredGenome` on the stallion seed jar, `bound_horse` / `BoundHorse` on a
-    bound stall sign); and `StallData` / `StallRecord` (server-global SavedData
-    of assigned stalls).
+  - `data/` - Data Attachments (incl. `HorseCareAttachment` -
+    `horsegenetics:horse_care` - the non-genetic bond / herd / daily-cap
+    state), the ancestry `SavedData`, codecs; `ModDataComponents` (the item
+    data components: `stored_genome` / `StoredGenome` on the stallion seed
+    jar, `bound_horse` / `BoundHorse` on a bound stall sign); and `StallData`
+    / `StallRecord` (server-global SavedData of assigned stalls).
   - `network/` - custom payloads + `ModNetworking`.
   - `server/` - event handlers, the horse-dimension builder, the portal
     manager, the record adapter (`HorseRecords`); `HorseBreedingHandler`
     (natural breeding + the shared `applyBredFoal`), `StallionSeedJarHandler`
-    (seed collection + mare impregnation, reusing `applyBredFoal`), and the
+    (seed collection + mare impregnation, reusing `applyBredFoal`), the
     stall trio `StallSignHandler` (bind / sign-break cleanup) + `StallDetector`
-    (the enclosed-area flood-fill) + `StallDebug` (particle-outline overlay).
+    (the enclosed-area flood-fill) + `StallDebug` (particle-outline overlay),
+    and the **horse-care** pair `HorseCareHandler` (the one 30-tick scan for
+    gated healing + bond + herd formation) + `BondFollowGoal` (the single
+    bond-tier AI goal). See `wiki/horse-care.html`.
   - `block/` - `ModBlocks` + `HayPortalBlock` (the only registered block),
     `ModBlockEntities` + `HayPortalBlockEntity` (drives the animated
     `hay_portal.png` slab renderer).
@@ -1770,6 +1836,21 @@ Design follow-ups (not just "go look at it"):
    that this was deliberately deferred). Flood-fill is air-only and capped at
    `StallDetector.MAX_BLOCKS` (512).
 
+20. **Horse care is a first slice, and unplayed.** `HorseCareHandler` +
+   `BondFollowGoal` + `HorseCareAttachment` cover §7.2 gated healing and §13
+   bond/herds; details and what's deferred are in `wiki/horse-care.html`, the
+   in-game checklist in `wiki/verification.html` §0. Specifics still open:
+   **milking (§7.1)** is not built (its "full health" rule is the hook into
+   the healing gate); **bond has no shearing/sleeping source** and there is
+   **no console command to set it**, so testing the tiers means grinding or
+   temporarily lowering the thresholds; **herd alpha** is computed-on-demand
+   with nothing consuming it yet; the **comfort buff** is restated as +1 regen
+   because the mod has no stamina; the healing scan uses **block tags** so a
+   pack can extend `horse_water` / `horse_food`, but bucket/fluid-source
+   placement inside a waterlogged block only counts via the `#minecraft:water`
+   fluid check, not the block tag. Feed-bond fires on `EntityInteract` for any
+   `isFood` stack and is **not** dose/temper-aware.
+
 ## License
 
 CC BY-NC 4.0 (see `LICENSE`). Forks/derivatives are welcome without asking
@@ -1796,8 +1877,9 @@ its licence is compatible.
   `wiki/philosophy.html` and the **future backlog** **only** in
   `wiki/roadmap.html`; the **coat machinery** is in `wiki/pipeline.html` +
   `wiki/body-space.html`, and the **modder API** in `wiki/modding.html` +
-  `wiki/api-reference.html`. Update the relevant file in the same change - a
-  pointer from CLAUDE.md is fine, a copy is not.
+  `wiki/api-reference.html`; the **non-genetic horse-care systems** (gated
+  healing, bond, herds) **only** in `wiki/horse-care.html`. Update the relevant
+  file in the same change - a pointer from CLAUDE.md is fine, a copy is not.
 - **The wiki has one nav.** A new page goes in the `SECTIONS` array in
   `wiki/nav.js` and nowhere else; never hand-write a sidebar into a page.
   (`wiki/gene-creator/` is the one exception - it is an app, not a page, and
