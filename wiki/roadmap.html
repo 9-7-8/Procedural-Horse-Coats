@@ -41,9 +41,10 @@
 <p>
     Section numbers are stable so cross-references keep working; a retired section keeps
     its slot as a pointer. <strong>1</strong> (the three-phase pigment pipeline) shipped
-    &mdash; see <a href="pipeline.html">the pipeline page</a>. The one pipeline task
-    still open, deriving <code>naturalOrder()</code> / <code>magicalOrder()</code> from
-    a per-gene priority number instead of hand-written lists, is §2. The first two
+    &mdash; see <a href="pipeline.html">the pipeline page</a>. <strong>§2</strong>&rsquo;s
+    gene priority + derived orderings + genotype-as-list shipped 2026-09-03 (see
+    <a href="genetics-model.html#gene-priority">Genetics model</a>); what is left in §2
+    is the per-genotype founder-frequency tables. The first two
     <strong>magical genes</strong> also shipped, with their own pages
     (<a href="gene-magic-zebra.html">magic zebra</a>,
     <a href="gene-pink-hair.html">pink hair</a>).
@@ -162,59 +163,28 @@
 <h2 id="priority">2. Gene priority and processing order</h2>
 
 <div class="note tip">
-    <span class="label">Gene priority + derived orderings + genotype-as-list: shipped 2026-09-03</span>
+    <span class="label">Shipped 2026-09-03 &mdash; gene priority, derived orderings, genotype-as-list</span>
     <p>
-        Every <code>Gene</code> now has <code>int priority()</code>;
+        Every <code>Gene</code> now declares <code>int priority()</code>;
         <code>codeOrder()</code> / <code>naturalOrder()</code> /
-        <code>magicalOrder()</code> are all derived from one sort on
+        <code>magicalOrder()</code> are all one derived sort on
         <code>(priority, key)</code> over built-ins and <code>SpecGene</code>s
         together; the genotype and epigenome are gene-keyed, tolerant code
-        strings (missing gene &rarr; wild type, unknown gene &rarr; dropped).
-        Written up on <a href="genetics-model.html#gene-priority">Genetics model</a>.
-        <strong>Still open here:</strong> the per-genotype founder-frequency /
-        chaos-carrot chance tables below, and the multi-allele physical-locus
-        merges the reserved-number table anticipates.
+        strings (a missing gene reads as wild type, an unregistered gene is
+        dropped). The two-priorities distinction, the band convention, the
+        absolute-setter-before-dilution rule and the reserved built-in numbers
+        are written up on
+        <a href="genetics-model.html#gene-priority">Genetics model &sect; Gene
+        priority</a> and <a href="modding.html">Writing a gene</a>. Owner-verified
+        in-game (coats render, the paper genome dump works).
+    </p>
+    <p>
+        <strong>What is still open in this section:</strong> the per-genotype
+        founder-frequency / chaos-carrot chance tables below, and the future
+        priority slots for the multi-allele physical-locus merges (&sect;5.1) that
+        the reserved-number table anticipates.
     </p>
 </div>
-
-<h3>Two priorities, at two levels</h3>
-
-<p>They are easy to confuse, so the names should stay distinct in code and docs.</p>
-
-<h4>1. Gene priority &mdash; hard-coded, per gene, decides processing order</h4>
-
-<ul>
-    <li>Every <code>Gene</code> declares a fixed <code>int</code> priority. It is a
-        constant of the gene, not data on a horse, and never varies between
-        horses.</li>
-    <li><strong>The phase is declared separately.</strong> Priority orders genes; it
-        does not choose the phase.</li>
-    <li><strong><code>0</code>&ndash;<code>99</code> is the natural band</strong> by
-        convention &mdash; where this mod&rsquo;s real-world genes live.</li>
-    <li><strong><code>100</code> and up is the magical band.</strong>
-        <code>100</code> itself is magical, and every three-or-more-digit priority is
-        magical. The number inside the band is the author&rsquo;s choice.</li>
-    <li><strong>The band is a convention, not a constraint.</strong> Registering
-        outside it <strong>logs a warning</strong> and carries on. The warning exists so
-        a modder who squats on <code>50</code> finds out, not so the game refuses to
-        start.</li>
-    <li>The engine walks <strong>all natural genes first, in ascending
-        priority</strong>, then all magical genes. Because the bands are only a
-        convention, the <em>phase</em> separates the two passes, not the number.</li>
-    <li><strong>Ties break alphabetically by gene key</strong>, so two mods that both
-        pick <code>5000</code> still produce one fixed, reproducible order. Arbitrary,
-        but deterministic &mdash; which is the requirement.</li>
-    <li><strong>The same order rolls a founder&rsquo;s genes</strong>, so a gene can
-        only ever look at genes with a lower priority than its own.</li>
-</ul>
-
-<h4>2. Epigenetic priority &mdash; per allele copy, decides which copy expresses</h4>
-
-<p>
-    This one <a href="genetics-model.html#epigenetics">already exists and already
-    works</a>. It selects a <strong>seed</strong>, never an order. It cannot move a
-    gene in the processing queue, and it must never be allowed to.
-</p>
 
 <h3>Founder spawn chance &mdash; per-genotype percentages</h3>
 

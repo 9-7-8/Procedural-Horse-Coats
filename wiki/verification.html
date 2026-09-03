@@ -108,30 +108,24 @@
     gene-keyed (<code>&lt;geneKey&gt;=&hellip;</code>) and tolerant. 195
     <code>:common:test</code> pass, <code>runServer</code> boots clean
     (<code>20 segments</code>). Machinery:
-    <a href="genetics-model.html#gene-priority">Genetics model</a>. What to look
-    at in-game:
+    <a href="genetics-model.html#gene-priority">Genetics model</a>.
 </p>
-
+<p>
+    <strong>Confirmed 2026-09-03:</strong> wild spawns render their correct
+    coats (no regression from the new <code>codeOrder()</code> / code format),
+    and the right-click paper genome dump works.
+</p>
+<p><strong>Still to check:</strong></p>
 <ul>
-    <li><strong>Wild spawns still render every coat.</strong> Roam the overworld
-        (or a gallery visit) &mdash; the same variety of correct coats as before,
-        no flat-white horses, eyes intact. This is the load-bearing check: coat
-        output should be visually unchanged (deterministic coats are provably
-        byte-identical; non-deterministic ones use the same maths on a
-        differently-drawn seed, so bay leg heights / grey dapples / splash
-        markings may land differently than a pre-2026-09-03 save of the
-        &ldquo;same&rdquo; horse, but should look right).</li>
     <li><strong>Breeding still produces a valid foal</strong> with a combined
         code and inherited epigenetics &mdash; family tree renders.</li>
     <li><strong>Seed jar round-trips.</strong> Collect from a stallion, read the
         tooltip, impregnate a mare &mdash; the foal&rsquo;s genome still matches
         (the jar stores the new-format code).</li>
-    <li><strong>Info panel / paper dump / seed-jar tooltip now list the shipped
-        spec genes</strong> (Suntouched / Waterborn) when a horse carries one
-        &mdash; the old <code>GeneCodeDisplay</code> bug (closed with this
-        change) hid them.</li>
-    <li><strong>Custom horse spawn egg</strong> editor still lists every
-        registered gene and spawns the picked genome.</li>
+    <li><strong>The short genome display lists a spec gene.</strong> Get a horse
+        that carries Suntouched or Waterborn (custom spawn egg) and check the
+        info panel / paper dump / seed-jar tooltip name it &mdash; the old
+        <code>GeneCodeDisplay</code> bug (closed with this change) hid them.</li>
 </ul>
 
 <h3 id="horse-care">0.1 Horse care &mdash; gated healing, bond &amp; herds (new 2026-09-02)</h3>

@@ -124,7 +124,7 @@ project. Its shape:
 
 ## Status snapshot (keep this current)
 
-- **Built 2026-09-03, NOT yet play-tested: the data-model rewrite (roadmap
+- **Built 2026-09-03, partly owner-verified: the data-model rewrite (roadmap
   Tier 1, §2).** Every `Gene` now declares `int priority()`; `codeOrder()` /
   `naturalOrder()` / `magicalOrder()` are all *derived* by one sort on
   `(priority, key)` over built-ins + `SpecGene`s together (no hand-written
@@ -139,7 +139,11 @@ project. Its shape:
   green, `runServer` boots clean (`20 segments` with the two shipped spec
   genes). NeoForge needed **no** source changes - it delegates all code
   parsing to `common/`. Closes old known-gap #18 (`GeneCodeDisplay` now derives
-  its gene list, so spec genes show).
+  its gene list, so spec genes show). **Owner-verified in-game 2026-09-03:**
+  wild horses spawn and render correctly, right-click paper genome dump works.
+  Still unconfirmed: bred foal, seed-jar round-trip, a spec gene actually
+  showing in the display (needs a horse carrying Suntouched/Waterborn) -
+  `wiki/verification.html` §0.
 - **`common/`** - compiles; **195 JUnit tests pass** (`./gradlew :common:test`).
   Covers `genetics/` (allele/gene model - **18 genes**: the 16 natural ones
   (extension, agouti, champagne, splash, grey, cream, pearl, **dun**,
@@ -328,6 +332,14 @@ project. Its shape:
     `wiki/verification.html` §0; machinery: `wiki/horse-care.html`.
   - **Not in this slice:** milking (§7.1), shearing/sleeping bond (shearing
     unbuilt), a stored herd alpha, any stamina resource.
+
+- **Owner-verified in-game (2026-09-03):**
+  - **The data-model rewrite** (gene priority + derived orderings + gene-keyed
+    tolerant code strings): wild horses spawn and render their correct coats -
+    no regression from the new `codeOrder()` / code format - and the
+    right-click **paper genome dump** works. Not yet checked: a bred foal, the
+    stallion-seed-jar round-trip, and a spec gene (Suntouched/Waterborn)
+    appearing in the short genome display.
 
 - **Owner-verified in-game (2026-09-02):**
   - **Custom horse spawn egg** end to end - the egg, the age/sex/genome editor,
