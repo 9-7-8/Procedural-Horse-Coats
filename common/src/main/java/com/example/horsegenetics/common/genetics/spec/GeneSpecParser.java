@@ -181,6 +181,7 @@ public final class GeneSpecParser {
             case BOOL -> present ? asBoolean(o.get(p.name()), at) : (Boolean) p.fallback();
             case COLOR -> readColor(present ? o.get(p.name()) : p.fallback(), at);
             case TRIGGER -> readTrigger(o.get(p.name()), at, (GeneAbility.Trigger) p.fallback());
+            case PARTS -> present ? PartGroups.expand(strings(o.get(p.name()), at)) : p.fallback();
         };
     }
 

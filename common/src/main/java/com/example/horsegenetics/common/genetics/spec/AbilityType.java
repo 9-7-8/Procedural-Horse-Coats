@@ -1,5 +1,6 @@
 package com.example.horsegenetics.common.genetics.spec;
 
+import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Part;
 import com.example.horsegenetics.common.genetics.spec.GeneAbility.Condition;
 import com.example.horsegenetics.common.genetics.spec.GeneAbility.Trigger;
 
@@ -73,14 +74,15 @@ public final class AbilityType {
     // ================================================================
 
     /** How a parameter's JSON value is read. Simpler than {@code SpecSchema.Kind} - an effect never varies per horse. */
-    public enum Kind { STRING, CHOICE, NUMBER, BOOL, COLOR, TRIGGER }
+    public enum Kind { STRING, CHOICE, NUMBER, BOOL, COLOR, TRIGGER, PARTS }
 
     /**
      * One parameter of an effect. {@code fallback} is what the parser uses when
      * the file omits the key - its runtime type follows {@code kind}: a
      * {@code String} for STRING / CHOICE / COLOR, a {@code Double} for NUMBER, a
-     * {@code Boolean} for BOOL, a {@link Trigger} for TRIGGER. A {@code null}
-     * fallback on a STRING / CHOICE means the key is <b>required</b>.
+     * {@code Boolean} for BOOL, a {@link Trigger} for TRIGGER, an immutable
+     * {@code List<Part>} for PARTS. A {@code null} fallback on a STRING / CHOICE
+     * means the key is <b>required</b>.
      */
     public record Param(String name, Kind kind, Object fallback, List<String> choices, String doc) {
 
@@ -115,6 +117,10 @@ public final class AbilityType {
         static Param trigger(String name, Trigger fallback, String doc) {
             return new Param(name, Kind.TRIGGER, fallback, List.of(), doc);
         }
+
+        static Param parts(String name, String doc) {
+            return new Param(name, Kind.PARTS, List.of(), List.of(), doc);
+        }
     }
 
     /**
@@ -135,6 +141,8 @@ public final class AbilityType {
         boolean bool(String key)   { return (Boolean) raw.get(key); }
         int color(String key)      { return (Integer) raw.get(key); }
         Trigger trigger(String key) { return (Trigger) raw.get(key); }
+        @SuppressWarnings("unchecked")
+        List<Part> parts(String key) { return (List<Part>) raw.get(key); }
 
         IllegalArgumentException bad(String message) {
             return new IllegalArgumentException(where + ": " + message);
@@ -290,5 +298,25 @@ public final class AbilityType {
                 }
                 return new GeneAbility.Yield(onInteract, v.str("consumes"), v.str("produces"),
                         v.intOf("cooldown"), v.when, v.minDose);
+            }));
+
+    /**
+     * Makes the horse a <b>light source</b> and/or marks body {@code parts} as
+     * <b>full-bright</b> in the coat render - the "this gene glows" verb.
+     * {@code light} is a 0-15 world light level (0 = no dynamic light);
+     * {@code parts} names the emissive coat regions (empty = none). The
+     * emissive colour is whatever the coat layers already painted there, drawn
+     * again at full brightness.
+     */
+    public static final AbilityType GLOW = register(new AbilityType("glow",
+            List.of(
+                    Param.num("light", 0, "world light level 0-15 the horse emits (0 = none)"),
+                    Param.parts("parts", "coat regions that render full-bright, e.g. [\"HAIR\"] (empty = none)")),
+            v -> {
+                int light = v.intOf("light");
+                if (light < 0 || light > 15) {
+                    throw v.bad("light must be 0-15, got " + light);
+                }
+                return new GeneAbility.Glow(light, v.parts("parts"), v.when, v.minDose);
             }));
 }

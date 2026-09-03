@@ -1,0 +1,39 @@
+{
+  "format": 1,
+  "key": "example.suntouched",
+  "name": "Suntouched",
+  "phase": "magical",
+  "dominance": "DOMINANT",
+  "wildOdds": 128,
+  "priority": 210,
+  "alleles": [
+    { "token": "Sntch", "label": "Suntouched (Sntch)" },
+    { "token": "n", "label": "Wild-type (n)" }
+  ],
+  "layers": [
+    {
+      "name": "molten-gold glow through the mane and tail",
+      "masks": [
+        { "type": "PARTS", "parts": [ "HAIR" ] }
+      ],
+      "op": { "type": "TOWARD", "color": "#ffcf47", "strength": 88, "opacity": 100 }
+    }
+  ],
+  "effects": [
+    {
+      "type": "glow",
+      "light": 12,
+      "parts": [ "HAIR" ]
+    },
+    {
+      "type": "emitter",
+      "kind": "particle",
+      "shape": "point",
+      "anchor": "body",
+      "trigger": { "interval": 6 },
+      "particle": "minecraft:dust",
+      "color": "#ffcf47",
+      "chance": 0.35
+    }
+  ]
+}

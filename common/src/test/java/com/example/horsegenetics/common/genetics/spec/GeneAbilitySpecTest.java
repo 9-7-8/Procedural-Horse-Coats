@@ -1,5 +1,6 @@
 package com.example.horsegenetics.common.genetics.spec;
 
+import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Part;
 import com.example.horsegenetics.common.genetics.AllelePair;
 import com.example.horsegenetics.common.genetics.Genes;
 import com.example.horsegenetics.common.genetics.Genotype;
@@ -98,6 +99,85 @@ class GeneAbilitySpecTest {
 
         assertEquals(1, SpecAbilities.activeFor(Genotype.of(carrier)).size());
         assertEquals(2, SpecAbilities.activeFor(Genotype.of(homo)).size());
+    }
+
+    @Test
+    void suntouchedCarriesAGoldLayerAndAGlowAndASparkle() {
+        GeneSpec spec = GeneSpecParser.parse(GeneSpecParserTest.example("suntouched.json"), "suntouched.json");
+
+        assertEquals("example.suntouched", spec.key());
+        assertTrue(spec.hasAbilities());
+        assertTrue(spec.isDeterministic(), "no knobs - every carrier bakes the same gold mane");
+        assertEquals(1, spec.layers().size());
+        assertEquals(0xffcf47, spec.layers().get(0).op().params().color("color", 0));
+
+        List<GeneAbility> effects = spec.abilities();
+        assertEquals(2, effects.size());
+
+        GeneAbility.Glow glow = assertInstanceOf(GeneAbility.Glow.class, effects.get(0));
+        assertEquals(12, glow.light());
+        assertEquals(List.of(Part.MANE, Part.TAIL), glow.emissiveParts(), "HAIR expands to mane + tail");
+        assertEquals(GeneAbility.Condition.ALWAYS, glow.when());
+        assertEquals(1, glow.minDose());
+
+        GeneAbility.Emitter sparkle = assertInstanceOf(GeneAbility.Emitter.class, effects.get(1));
+        assertEquals("body", sparkle.anchor());
+        assertEquals(new GeneAbility.Trigger.Interval(6), sparkle.trigger());
+        assertEquals(0xffcf47, sparkle.color());
+    }
+
+    @Test
+    void glowDefaultsToNoLightAndNoEmissiveParts() {
+        String json = base("""
+                "effects": [ { "type": "glow" } ]
+                """);
+        GeneAbility.Glow glow = assertInstanceOf(GeneAbility.Glow.class,
+                GeneSpecParser.parse(json, "g.json").abilities().get(0));
+        assertEquals(0, glow.light());
+        assertEquals(List.of(), glow.emissiveParts());
+    }
+
+    @Test
+    void glowRejectsALightLevelAboveFifteen() {
+        String json = base("""
+                "effects": [ { "type": "glow", "light": 20 } ]
+                """);
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
+                () -> GeneSpecParser.parse(json, "bad.json"));
+        assertTrue(e.getMessage().contains("light"), e.getMessage());
+    }
+
+    @Test
+    void glowRejectsAnUnknownPartName() {
+        String json = base("""
+                "effects": [ { "type": "glow", "parts": [ "WITHERS" ] } ]
+                """);
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
+                () -> GeneSpecParser.parse(json, "bad.json"));
+        assertTrue(e.getMessage().contains("WITHERS"), e.getMessage());
+    }
+
+    @Test
+    void mobEffectFillsItsDefaults() {
+        String json = base("""
+                "effects": [ { "type": "mob_effect", "effect": "minecraft:dolphins_grace" } ]
+                """);
+        GeneSpec spec = GeneSpecParser.parse(json, "aura.json");
+        GeneAbility.SelfEffect e = assertInstanceOf(GeneAbility.SelfEffect.class, spec.abilities().get(0));
+        assertEquals("minecraft:dolphins_grace", e.effect());
+        assertEquals("self", e.target());
+        assertEquals(0, e.amplifier());
+        assertEquals(40, e.refreshTicks());
+    }
+
+    @Test
+    void rejectsAMobEffectRefreshBelowOne() {
+        String json = base("""
+                "effects": [ { "type": "mob_effect", "effect": "minecraft:glowing", "refresh": 0 } ]
+                """);
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+                () -> GeneSpecParser.parse(json, "bad.json"));
+        assertTrue(ex.getMessage().contains("refresh"), ex.getMessage());
     }
 
     // --- what it refuses ----------------------------------------------

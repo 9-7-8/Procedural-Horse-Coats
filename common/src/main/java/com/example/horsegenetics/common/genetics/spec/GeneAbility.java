@@ -1,5 +1,7 @@
 package com.example.horsegenetics.common.genetics.spec;
 
+import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Part;
+
 import java.util.List;
 
 /**
@@ -90,6 +92,17 @@ public sealed interface GeneAbility {
      */
     record Yield(Trigger.OnInteract trigger, String consumes, String produces, int cooldownTicks,
                  Condition when, int minDose) implements GeneAbility {}
+
+    /**
+     * Makes the carrier <b>glow</b>: emit world light and/or render some coat
+     * regions full-bright. {@code light} is a 0-15 light level the horse gives
+     * off (0 = none - the translator maintains a {@code minecraft:light} block
+     * that follows the horse); {@code emissiveParts} are the body parts the
+     * client re-draws at full brightness over the generated coat (empty = none).
+     * The two are independent - a gene can light its surroundings without an
+     * emissive texture, or vice versa. See {@link AbilityType#GLOW}.
+     */
+    record Glow(int light, List<Part> emissiveParts, Condition when, int minDose) implements GeneAbility {}
 
     // ------------------------------------------------------------------
     // Triggers

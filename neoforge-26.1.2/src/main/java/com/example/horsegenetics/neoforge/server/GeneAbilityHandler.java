@@ -6,15 +6,26 @@ import com.example.horsegenetics.common.genetics.spec.SpecAbilities;
 import com.example.horsegenetics.common.horse.HorseRecord;
 import com.example.horsegenetics.common.horse.Sex;
 import com.example.horsegenetics.neoforge.HorseGenetics;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.animal.equine.Horse;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.LightBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.entity.EntityLeaveLevelEvent;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
 
 import java.util.List;
@@ -37,8 +48,10 @@ import java.util.concurrent.ConcurrentHashMap;
  * <p><b>Not verified in-game.</b> Written against 26.1.2 sources. The
  * {@code walk_on_water} implementation in particular is an approximation -
  * surface buoyancy plus "don't sink", not a solid collision plane - and its
- * feel is a guess. {@code attribute} and {@code mob_effect} abilities are parsed
- * and carried but <b>not executed yet</b> (logged once); see
+ * feel is a guess. {@code mob_effect} is executed - the effect id is resolved
+ * against the registry and kept topped up on the {@code self} / {@code rider}
+ * target while its {@code when} holds. {@code attribute} is the one verb still
+ * parsed but <b>not executed yet</b> (logged once); see
  * {@code wiki/horse-traits.html}.
  *
  * <p>Yields ({@code minecraft:bucket} on a mare, ...) are handled on the
@@ -54,6 +67,14 @@ public final class GeneAbilityHandler {
 
     /** Effect types that are defined but not translated yet - warned about once each. */
     private static final Set<String> WARNED = ConcurrentHashMap.newKeySet();
+
+    /**
+     * Where each glowing horse's {@code minecraft:light} block currently sits, so
+     * it can be moved when the horse walks and cleared when the horse leaves.
+     * A server restart can orphan an entry (same caveat as the portal plots);
+     * {@link #clearLight} tolerates the block already being gone.
+     */
+    private static final Map<UUID, BlockPos> GLOW_LIGHT = new ConcurrentHashMap<>();
 
     private record Snapshot(String code, List<SpecAbilities.Active> abilities) {}
 
@@ -89,10 +110,13 @@ public final class GeneAbilityHandler {
                 case GeneAbility.Traversal t -> applyTraversal(t.flag(), horse);
                 case GeneAbility.Emitter e -> maybeEmit(e, horse, (ServerLevel) level, moving);
                 case GeneAbility.AttributeMod ignored -> warnUntranslated("attribute", active.geneKey());
-                case GeneAbility.SelfEffect ignored -> warnUntranslated("mob_effect", active.geneKey());
+                case GeneAbility.SelfEffect se -> applyMobEffect(se, horse, active.geneKey());
                 case GeneAbility.Yield ignored -> { /* handled on interaction */ }
+                case GeneAbility.Glow ignored -> { /* reconciled once, after the loop */ }
             }
         }
+
+        reconcileGlow(horse, (ServerLevel) level, record, abilities);
     }
 
     // ------------------------------------------------------------------
@@ -186,6 +210,105 @@ public final class GeneAbilityHandler {
             // one particle that takes the emitter's colour.
             default -> new DustParticleOptions(color, 1.0F);
         };
+    }
+
+    // ------------------------------------------------------------------
+    // Glow - a light source that follows the horse
+    // ------------------------------------------------------------------
+
+    /**
+     * Keep at most one {@code minecraft:light} block trailing a glowing horse.
+     * The block is moved only when the horse changes block position and is
+     * removed when no {@code glow} ability is currently active. Emissive
+     * {@code parts} are a client-render concern and are ignored here.
+     */
+    private static void reconcileGlow(Horse horse, ServerLevel level, HorseRecord record,
+                                      List<SpecAbilities.Active> abilities) {
+        int want = 0;
+        boolean anyGlow = false;
+        for (SpecAbilities.Active active : abilities) {
+            if (active.ability() instanceof GeneAbility.Glow glow) {
+                anyGlow = true;
+                if (glow.light() > 0 && conditionHolds(glow.when(), horse, record)) {
+                    want = Math.max(want, glow.light());
+                }
+            }
+        }
+        if (!anyGlow) {
+            return;
+        }
+
+        UUID id = horse.getUUID();
+        BlockPos current = GLOW_LIGHT.get(id);
+
+        // Don't litter the read-only gallery dimension with light blocks.
+        if (want <= 0 || level.dimension().equals(DebugPenManager.DEBUG_LEVEL)) {
+            if (current != null) {
+                clearLight(level, current);
+                GLOW_LIGHT.remove(id);
+            }
+            return;
+        }
+
+        BlockPos target = BlockPos.containing(horse.getX(), horse.getY() + horse.getBbHeight() * 0.6, horse.getZ());
+        if (target.equals(current)) {
+            return; // already lit where the horse is
+        }
+        if (current != null) {
+            clearLight(level, current);
+        }
+        if (level.getBlockState(target).isAir()) {
+            level.setBlock(target, Blocks.LIGHT.defaultBlockState()
+                    .setValue(LightBlock.LEVEL, want)
+                    .setValue(LightBlock.WATERLOGGED, Boolean.FALSE), 2 | 16);
+            GLOW_LIGHT.put(id, target);
+        } else {
+            GLOW_LIGHT.remove(id); // blocked this tick; try again when the horse moves
+        }
+    }
+
+    private static void clearLight(Level level, BlockPos pos) {
+        BlockState state = level.getBlockState(pos);
+        if (state.is(Blocks.LIGHT)) {
+            level.removeBlock(pos, false);
+        }
+    }
+
+    /** Drop a glowing horse's light block when it dies, unloads or changes dimension. */
+    @SubscribeEvent
+    static void onEntityLeave(EntityLeaveLevelEvent event) {
+        if (!(event.getEntity() instanceof Horse horse)) {
+            return;
+        }
+        BlockPos pos = GLOW_LIGHT.remove(horse.getUUID());
+        if (pos != null && !event.getLevel().isClientSide()) {
+            clearLight(event.getLevel(), pos);
+        }
+    }
+
+    // ------------------------------------------------------------------
+    // Mob effects - the "aura on self / rider" pattern
+    // ------------------------------------------------------------------
+
+    private static void applyMobEffect(GeneAbility.SelfEffect e, Horse horse, String geneKey) {
+        int refresh = Math.max(1, e.refreshTicks());
+        if (horse.tickCount % refresh != 0) {
+            return; // only re-apply on the refresh beat
+        }
+        LivingEntity target = "rider".equals(e.target()) ? horse.getControllingPassenger() : horse;
+        if (target == null) {
+            return; // "rider" with nobody aboard
+        }
+        Holder<MobEffect> effect = BuiltInRegistries.MOB_EFFECT.get(Identifier.parse(e.effect())).orElse(null);
+        if (effect == null) {
+            warnUntranslated("mob_effect:" + e.effect(), geneKey);
+            return;
+        }
+        // Duration outlives one refresh beat so a skipped tick can't flicker it;
+        // ambient + hidden particles + no icon so it reads as an innate trait,
+        // not a potion. When 'when' goes false the re-apply stops and the effect
+        // fades within refresh+20 ticks.
+        target.addEffect(new MobEffectInstance(effect, refresh + 20, e.amplifier(), true, false, false), null);
     }
 
     // ------------------------------------------------------------------

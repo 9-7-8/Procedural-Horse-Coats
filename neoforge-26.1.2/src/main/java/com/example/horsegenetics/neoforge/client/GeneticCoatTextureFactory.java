@@ -6,6 +6,7 @@ import com.example.horsegenetics.common.coat.pattern.CoatTextureComposer;
 import com.example.horsegenetics.common.coat.pattern.GradientLut;
 import com.example.horsegenetics.common.genetics.GeneCodeDisplay;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry;
+import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Part;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Skin;
 import com.example.horsegenetics.neoforge.HorseGenetics;
 import com.mojang.blaze3d.platform.NativeImage;
@@ -19,6 +20,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -50,6 +53,16 @@ public final class GeneticCoatTextureFactory {
      */
     private static final Map<Identifier, String> KEY_BY_ID = new ConcurrentHashMap<>();
 
+    /**
+     * Emissive-mask textures, one per (coat, foal/adult, emissive part set). The
+     * mask carries the composed coat's own colour on the named parts and is
+     * transparent everywhere else; {@code EmissiveCoatLayer} draws it full-bright
+     * over the base coat. Keyed off the same texture key so it invalidates with
+     * the coat.
+     */
+    private static final Map<String, Identifier> EMISSIVE_CACHE = new ConcurrentHashMap<>();
+    private static final Map<Identifier, String> EMISSIVE_KEY_BY_ID = new ConcurrentHashMap<>();
+
     private static volatile int[] adultTemplate;
     private static volatile int[] babyTemplate;
     private static volatile GradientLut gradient;
@@ -60,6 +73,62 @@ public final class GeneticCoatTextureFactory {
     public static Identifier getOrCreate(CoatData coat, boolean baby) {
         String key = coat.textureKey() + (baby ? ":foal" : ":adult");
         return CACHE.computeIfAbsent(key, k -> generate(coat, baby, k));
+    }
+
+    /**
+     * The full-bright mask for one horse, or {@code null} if {@code parts} is
+     * empty (no {@code glow} gene wants an emissive region). The named body
+     * parts are painted with the coat colour the composer produced there; the
+     * rest is transparent.
+     */
+    public static Identifier getOrCreateEmissive(CoatData coat, boolean baby, Set<Part> parts) {
+        if (parts == null || parts.isEmpty()) {
+            return null;
+        }
+        StringBuilder tag = new StringBuilder();
+        for (Part part : new TreeSet<>(parts)) {
+            tag.append(tag.isEmpty() ? "" : "+").append(part.name());
+        }
+        String key = coat.textureKey() + (baby ? ":foal" : ":adult") + ":glow:" + tag;
+        return EMISSIVE_CACHE.computeIfAbsent(key, k -> generateEmissive(coat, baby, parts, k));
+    }
+
+    private static Identifier generateEmissive(CoatData coat, boolean baby, Set<Part> parts, String key) {
+        ensureAssetsLoaded();
+        Skin skin = baby ? Skin.BABY : Skin.ADULT;
+        int[] template = baby ? babyTemplate : adultTemplate;
+        int[] argb = CoatTextureComposer.compose(coat.genotype(), coat.epigenome(), skin, !baby, template, gradient);
+
+        int[] mask = new int[N * N];
+        for (Part part : parts) {
+            HorseSkinGeometry.forEachTexel(skin, part, (px, py, p2, face, point) -> {
+                int i = py * N + px;
+                int c = argb[i];
+                if ((c >>> 24) != 0) {
+                    mask[i] = 0xFF000000 | (c & 0xFFFFFF);
+                }
+            });
+        }
+
+        NativeImage image = new NativeImage(N, N, false);
+        for (int y = 0; y < N; y++) {
+            for (int x = 0; x < N; x++) {
+                image.setPixel(x, y, mask[y * N + x]);
+            }
+        }
+        DynamicTexture texture = new DynamicTexture(() -> "horsegenetics_glow_" + key, image);
+        // The composed key can be long at 13 genotype segments; a hash keeps the
+        // Identifier path well inside the 256-char limit. A tripwire guards the
+        // (astronomically unlikely) collision rather than letting it be silent.
+        Identifier id = Identifier.fromNamespaceAndPath(HorseGenetics.MOD_ID,
+                "coat_glow/" + Integer.toUnsignedString(key.hashCode(), 16));
+        String previous = EMISSIVE_KEY_BY_ID.put(id, key);
+        if (previous != null && !previous.equals(key)) {
+            throw new IllegalStateException("emissive coat id collision on " + id
+                    + ": '" + previous + "' vs '" + key + "'");
+        }
+        Minecraft.getInstance().getTextureManager().register(id, texture);
+        return id;
     }
 
     private static Identifier generate(CoatData coat, boolean baby, String key) {
@@ -157,8 +226,13 @@ public final class GeneticCoatTextureFactory {
         for (Identifier id : CACHE.values()) {
             textureManager.release(id);
         }
+        for (Identifier id : EMISSIVE_CACHE.values()) {
+            textureManager.release(id);
+        }
         CACHE.clear();
         KEY_BY_ID.clear();
+        EMISSIVE_CACHE.clear();
+        EMISSIVE_KEY_BY_ID.clear();
         adultTemplate = null;
         babyTemplate = null;
         gradient = null;

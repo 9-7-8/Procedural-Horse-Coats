@@ -1,6 +1,9 @@
 package com.example.horsegenetics.neoforge.client;
 
 import com.example.horsegenetics.common.coat.CoatData;
+import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Part;
+import com.example.horsegenetics.common.genetics.spec.GeneAbility;
+import com.example.horsegenetics.common.genetics.spec.SpecAbilities;
 import net.minecraft.client.model.animal.equine.EquineSaddleModel;
 import net.minecraft.client.model.animal.equine.HorseModel;
 import net.minecraft.client.model.geom.ModelLayers;
@@ -11,6 +14,8 @@ import net.minecraft.client.renderer.entity.state.HorseRenderState;
 import net.minecraft.client.resources.model.EquipmentClientInfo;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.animal.equine.Horse;
+
+import java.util.EnumSet;
 
 /**
  * Vanilla's {@code HorseRenderer} is {@code final} in 26.1.2, so we extend
@@ -33,6 +38,10 @@ public class GeneticHorseRenderer extends AbstractHorseRenderer<Horse, HorseRend
         // generated coat - a wild horse or foal that rolled Markings.WHITE then
         // renders as a flat white horse. All white markings in this mod come
         // from the splash gene inside the coat texture instead.
+        //
+        // The emissive layer, on the other hand, IS ours: it redraws a glow
+        // gene's emissive coat regions (Suntouched's mane) at full brightness.
+        this.addLayer(new EmissiveCoatLayer(this));
         this.addLayer(
             new SimpleEquipmentLayer<>(
                 this,
@@ -70,7 +79,23 @@ public class GeneticHorseRenderer extends AbstractHorseRenderer<Horse, HorseRend
             if (coatData != null) {
                 geneticState.coatData = coatData;
             }
+            geneticState.emissiveCoatId = emissiveCoatFor(geneticState.coatData, renderState.isBaby);
         }
+    }
+
+    /**
+     * The full-bright mask for whatever {@code glow} genes this horse expresses,
+     * or {@code null} if none want an emissive region. Cheap: the ability scan is
+     * a handful of allele checks and the bake itself is cached by coat key.
+     */
+    private static Identifier emissiveCoatFor(CoatData coatData, boolean baby) {
+        EnumSet<Part> parts = EnumSet.noneOf(Part.class);
+        for (SpecAbilities.Active active : SpecAbilities.activeFor(coatData.genotype())) {
+            if (active.ability() instanceof GeneAbility.Glow glow) {
+                parts.addAll(glow.emissiveParts());
+            }
+        }
+        return parts.isEmpty() ? null : GeneticCoatTextureFactory.getOrCreateEmissive(coatData, baby, parts);
     }
 
     @Override
