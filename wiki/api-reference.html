@@ -63,7 +63,7 @@ genetics/
   GeneCodeDisplay.java      shortForm / wrap - human-readable codes
   GeneticCodeCombiner.java  the string-level and Genome-level breeding seam
   CoatPhenotype.java        coarse CHESTNUT / BLACK / BAY / WHITE
-  genes/                    the eleven shipped Gene implementations
+  genes/                    the eighteen shipped Gene implementations
   spec/                     DATA-DRIVEN genes - a gene as a JSON file
     GeneSpec.java             the format, as records (header + layers + effects)
     SpecSchema.java           what each mask / op accepts, and its default
@@ -297,11 +297,11 @@ static Allele allele(String alleleKey);   // "&lt;gene&gt;.&lt;token&gt;"</code>
 <pre><code class="language-java">static void register(SpecGene gene);              // throws on a duplicate key
 static void registerAll(Collection&lt;SpecGene&gt;);
 static List&lt;SpecGene&gt; loaded();                   // the data-driven genes, in gene order
-static void clearLoaded();                        // back to the eleven built-ins</code></pre>
+static void clearLoaded();                        // back to the eighteen built-ins</code></pre>
 </div>
 
 <p>
-    The three orderings are <strong>deliberately independent</strong>. The eleven
+    The three orderings are <strong>deliberately independent</strong>. The eighteen
     built-ins keep their hand-written order, first &mdash; so adding a gene never
     changes an existing horse's coat &mdash; and data-driven genes are appended after
     them, <strong>sorted by their declared <code>priority</code> then by key</strong>.

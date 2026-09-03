@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tobiano &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="nav.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow natural">Natural gene <span class="sep">/</span> phase 1</p>
+<h1>Tobiano</h1>
+<p class="lede">
+    Large, smooth-edged white patches that <strong>cross the topline</strong> &mdash;
+    the shape that separates tobiano from <a href="gene-frame.html">frame overo</a>.
+    White is placed where a low-frequency
+    <a href="body-space.html"><code>BodyNoise</code></a> field crosses a threshold,
+    with a bias added toward the spine so the patches favour crossing the back. The
+    legs come out white; the head stays coloured.
+</p>
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd>horsegenetics.tobiano</dd></div>
+    <div><dt>Alleles</dt><dd><span class="allele dom">To</span> <span class="allele wild">to</span></dd></div>
+    <div><dt>Dominance</dt><dd>DOMINANT</dd></div>
+    <div><dt>Wild type</dt><dd>to</dd></div>
+    <div><dt>Wild frequency</dt><dd>1 in 50 per allele</dd></div>
+    <div><dt>Founder draws</dt><dd>2 &times; nextInt(50)</dd></div>
+    <div><dt>Deterministic</dt><dd><strong>no</strong></dd></div>
+    <div><dt>Visible when</dt><dd>To_</dd></div>
+    <div><dt>Epi draws</dt><dd>nextLong() seed, nextFloat() coverage, nextFloat() patch scale</dd></div>
+    <div><dt>Patch field</dt><dd>PatchNoise.field (warped 3-octave), scale ~0.15&ndash;0.22</dd></div>
+    <div><dt>Topline bias</dt><dd>0.18; extra lift low on each leg (white legs)</dd></div>
+    <div><dt>Edges</dt><dd>hard binary &mdash; tobiano reads crisp, and a half-scaled black texel would read gold</dd></div>
+</dl>
+
+<h2>The pattern field</h2>
+
+<div class="codebox">
+<div class="filename">common/genetics/genes/TobianoGene.java</div>
+<pre><code class="language-java">double v = PatchNoise.field(seed, x, y, z, scale);                 // warped 3-octave, body space
+v += TOPLINE_BIAS * clamp01((y - midY) / (topY - midY));           // lift toward the spine
+if (isLeg(part)) v += LEG_LIFT * (1 - smoothstep(0.35, 0.8, legFrac));  // white legs
+if (v &lt;= 1.0 - cover) return;
+f.setRed(px, py, 0f); f.setBlack(px, py, 0f);   // hard edge, no gold fringe</code></pre>
+</div>
+
+<p>
+    <code>PatchNoise.field</code> is a <b>domain-warped three-octave</b> value-noise
+    field sampled in body space (with <code>z</code> stretched, or the two sides would
+    come out mirror-identical), so a patch flows unbroken across every part seam and
+    has detail at more than one scale &mdash; single-octave <code>BodyNoise.value</code>
+    was one lattice cell across the whole horse and gridded up visibly. The bias term
+    rises toward the spine so patches run up and over the back; the head
+    (<code>HEAD</code> / <code>MUZZLE</code> / ears) is skipped entirely; a lift low
+    on each leg gives the white legs. The white decision is <b>hard binary</b> &mdash;
+    a partial (half-scaled) black texel resolves <em>gold</em> on the gradient, not
+    grey, so tobiano cannot afford a soft edge.
+</p>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="gene-frame.html">Frame overo</a>
+        <a href="gene-roan.html">Roan</a>
+        <a href="gene-sabino.html">Sabino 1</a>
+        <a href="gene-splash.html">Splash white</a>
+    </div>
+    Source: <code>common/genetics/genes/TobianoGene.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

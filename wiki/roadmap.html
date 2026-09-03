@@ -43,6 +43,17 @@
         <a href="verification.html">To be verified</a> §§15&ndash;18.
     </p>
     <p>
+        <strong>Also 2026-09-02:</strong> seven of the &sect;&sect;4.1&ndash;4.2 natural
+        genes shipped &mdash; <a href="gene-dun.html">dun</a>,
+        <a href="gene-silver.html">silver</a>, <a href="gene-mushroom.html">mushroom</a>,
+        <a href="gene-roan.html">roan</a>, <a href="gene-tobiano.html">tobiano</a>,
+        <a href="gene-frame.html">frame overo</a> (coat only, no lethal white),
+        <a href="gene-sabino.html">sabino 1</a>. Their table rows below are marked
+        <strong>shipped</strong> and keep only the residual work; the full description
+        moved to each gene&rsquo;s own page. <a href="verification.html">To be
+        verified</a> §19.
+    </p>
+    <p>
         This page is <strong>work to be done, not reasoning about why</strong>. The
         <em>why</em> lives in <a href="philosophy.html">Philosophy</a>; when something
         here needs a justification longer than a clause, it belongs there.
@@ -204,7 +215,7 @@
         drop-in genes (<a href="gene-format.html">the file format</a>) declare a
         <code>priority</code> and are sorted on <code>(priority, key)</code> after the
         built-ins, precisely so load order cannot matter. What is left is giving the
-        eleven built-ins real priorities and deriving their order too, rather than
+        eighteen built-ins real priorities and deriving their order too, rather than
         keeping them as a hand-written prefix.</li>
     <li><strong>Check the band at registration, and only warn.</strong> Duplicate gene
         keys, by contrast, <em>are</em> a hard failure &mdash; that one really is
@@ -419,9 +430,9 @@
 <tr><td><strong>Cream (MATP)</strong></td><td><code>Cr</code>, <code>prl</code>, <code>sun</code>, <code>sno</code>, wild</td><td>partial</td><td>The big cleanup: <strong>merge into one 5-allele MATP locus</strong>. Removes the fiction that a horse can be <code>Cr/Cr</code> <em>and</em> <code>prl/prl</code>. Breaks the genotype code (two segments become one) &mdash; fine. The dose table moves onto the locus.</td></tr>
 <tr><td><strong>Pearl</strong></td><td><code>prl</code></td><td>partial</td><td>Stops being its own gene after the merge.</td></tr>
 <tr><td><strong>Champagne</strong></td><td><code>Ch</code>, <code>ch</code></td><td><strong>shipped</strong></td><td>No change.</td></tr>
-<tr><td><strong>Dun (TBX3)</strong></td><td><code>D</code>, <code>d1</code>, <code>d2</code></td><td>new</td><td>3 alleles with <strong>non-uniform dominance</strong> (<code>D</code> &gt; <code>d1</code> = <code>d2</code> for dilution, but <code>d1</code> carries primitive markings and <code>d2</code> does not) &mdash; so per-gene <code>DominancePattern</code> is not enough. Coat work: body dilution <em>plus</em> primitive markings. The dorsal stripe is a clean body-space function; leg barring should reuse <code>BodyStripes</code>. Wants new <code>CoatRegions.dorsalStripe</code> / <code>legBarring</code>.</td></tr>
-<tr><td><strong>Silver dapple (PMEL17)</strong></td><td><code>Z</code>, <code>z</code></td><td>new</td><td>Dilutes <strong>eumelanin only</strong>, so a chestnut carrying it looks unchanged. The tier-1 declarative case almost exactly. The trap is priority: it must sit <strong>above agouti&rsquo;s number</strong> or a bay&rsquo;s mane will not lighten. Health: <code>Z/Z</code> &rarr; MCOA.</td></tr>
-<tr><td><strong>Mushroom</strong></td><td><code>Mu</code>, <code>mu</code></td><td>new</td><td>Dilutes <strong>phaeomelanin only</strong>, homozygous only. The mirror of silver; same shape, same tier.</td></tr>
+<tr><td><strong>Dun (TBX3)</strong></td><td><code>D</code>, <code>d</code></td><td><strong>shipped</strong> (2-allele)</td><td>Shipped 2026-09-02 as <code>D</code>/<code>d</code> &mdash; body dilution + dorsal stripe + leg bars (<code>CoatRegions.dorsalStripe</code> / <code>legBar</code>). See <a href="gene-dun.html">its page</a>. <strong>Still to do:</strong> the third allele (<code>d1</code> marked / <code>d2</code> unmarked) needs more than one <code>DominancePattern</code>; leg barring is a hand-rolled Y-phase rather than a <code>BodyStripes</code> reuse; grullo reads warm-brown, not mouse-grey.</td></tr>
+<tr><td><strong>Silver dapple (PMEL17)</strong></td><td><code>Z</code>, <code>z</code></td><td><strong>shipped</strong></td><td>Shipped 2026-09-02, eumelanin-only, runs right after agouti in <code>naturalOrder()</code>. See <a href="gene-silver.html">its page</a>. <strong>Still to do:</strong> the dappling (v1 is the dilution only); health <code>Z/Z</code> &rarr; MCOA.</td></tr>
+<tr><td><strong>Mushroom</strong></td><td><code>Mu</code>, <code>mu</code></td><td><strong>shipped</strong></td><td>Shipped 2026-09-02, phaeomelanin-only, <code>Mu/Mu</code> only. See <a href="gene-mushroom.html">its page</a>.</td></tr>
 <tr><td><strong>Tiger eye</strong></td><td><code>TE1</code>, <code>TE2</code>, wild</td><td>new</td><td>No coat effect at all &mdash; <strong>eye colour</strong>. Blocked on an eye-colour system: <code>redrawEyes</code> copies eye texels verbatim, so there is no colour channel to write to.</td></tr>
 </tbody>
 </table>
@@ -435,13 +446,13 @@
 <tbody>
 <tr><td><strong>Grey</strong></td><td><code>G</code>, <code>g</code></td><td><strong>shipped</strong></td><td>With aging deliberately out of scope, grey&rsquo;s fixed progression is <a href="gene-grey.html#age">a decision, not a gap</a>. Flea-bitten grey and melanoma are parked with aging.</td></tr>
 <tr><td><strong>Leopard complex (TRPM1)</strong></td><td><code>LP</code>, <code>lp</code></td><td>new</td><td>The most pattern-heavy gene on the list: leopard, blanket, snowcap, varnish roan, plus the appaloosa characteristics. Wants a <code>BodyNoise</code> spot field plus a separate blanket mask, and heterozygote vs homozygote <strong>must</strong> differ. Realistically <strong>PATN1</strong> comes with it. Health: <code>LP/LP</code> &rarr; CSNB.</td></tr>
-<tr><td><strong>Tobiano</strong></td><td><code>To</code>, <code>to</code></td><td>new</td><td>Rounded vertical white patches that <strong>cross the topline</strong> &mdash; the defining shape. White where a low-frequency noise field crosses a threshold, biased toward crossing the topline.</td></tr>
-<tr><td><strong>Overo (frame)</strong></td><td><code>Ov</code>, <code>ov</code></td><td>new</td><td>Horizontal white that <strong>does not</strong> cross the topline &mdash; the inverse constraint of tobiano, and a good test that both fit one noise framework. Health: <code>Ov/Ov</code> &rarr; <strong>lethal white foal syndrome</strong>, the first lethal in the model.</td></tr>
+<tr><td><strong>Tobiano</strong></td><td><code>To</code>, <code>to</code></td><td><strong>shipped</strong></td><td>Shipped 2026-09-02 &mdash; low-freq <code>BodyNoise</code> field with a topline bias, white legs, coloured head. See <a href="gene-tobiano.html">its page</a>.</td></tr>
+<tr><td><strong>Overo (frame)</strong></td><td><code>Ov</code>, <code>ov</code></td><td><strong>shipped</strong> (coat only)</td><td>Shipped 2026-09-02 &mdash; flank patches pinned off the topline by a spine&rarr;0 weight, inverse of tobiano. See <a href="gene-frame.html">its page</a>. <strong>Still to do:</strong> <code>Ov/Ov</code> &rarr; lethal white foal syndrome, the first lethal in the model (see &sect;6.4) &mdash; the homozygote currently renders as an ordinary frame.</td></tr>
 <tr><td><strong>Splashed white SW1 (MITF)</strong></td><td><code>SW1</code>, <code>sw1</code></td><td>partial</td><td><a href="gene-splash.html#issues">Two open issues already logged</a>: it does not read its own dose, and the face-marking family is just the centreline blaze. Fixing the dose is the prerequisite for the rest of the SW series.</td></tr>
 <tr><td><strong>Splashed white SW2&ndash;SW10</strong></td><td><code>SW2</code>&hellip;<code>SW10</code></td><td>new</td><td><strong>Not</strong> one locus: SW1/3/5/6/8/10 are on <strong>MITF</strong>, SW2/4/7/9 on <strong>PAX3</strong>. Two multi-allele loci &mdash; and today&rsquo;s splash gene becomes the MITF locus with 7 alleles.</td></tr>
-<tr><td><strong>Sabino 1</strong></td><td><code>SB1</code>, <code>sb1</code></td><td>new</td><td>White roaning + belly splash + high leg white. Shares <code>CoatRegions</code> helpers with splash &mdash; fixing <code>whitenLowerLeg</code>&rsquo;s hard ring benefits both. On <strong>KIT</strong>.</td></tr>
+<tr><td><strong>Sabino 1</strong></td><td><code>SB1</code>, <code>sb1</code></td><td><strong>shipped</strong></td><td>Shipped 2026-09-02 &mdash; and it is the first gene that <strong>reads its own dose</strong> (the thing splash still doesn&rsquo;t): dose 1 = jagged stockings + belly + blaze, dose 2 = sabino-white. Jagged leg edges are done here in the gene, so <code>whitenLowerLeg</code>&rsquo;s hard ring is still splash&rsquo;s to fix. See <a href="gene-sabino.html">its page</a>.</td></tr>
 <tr><td><strong>Dominant white (KIT)</strong></td><td><code>W1</code>&hellip;<code>W36</code></td><td>partial</td><td>Today&rsquo;s white is <code>COMPLETE_DOMINANT</code> and masks everything, which keeps the gallery tractable. The real series is 36 alleles of graded extent, most <strong>not</strong> fully masking. The single largest combinatorial change in this document &mdash; deliberately defer, or cap at a handful of representative alleles.</td></tr>
-<tr><td><strong>Roan</strong></td><td><code>Rn</code>, <code>rn</code></td><td>new</td><td>Mixed white hairs over the body, head and legs left dark. At 128px that is a high-frequency <code>BodyNoise</code> dither masked off the head and lower legs &mdash; the closest thing to a pure <code>BodyNoise</code> gene on the list, and the cheapest pattern gene to build.</td></tr>
+<tr><td><strong>Roan</strong></td><td><code>Rn</code>, <code>rn</code></td><td><strong>shipped</strong></td><td>Shipped 2026-09-02 &mdash; the high-freq <code>BodyNoise</code> dither, head / mane / tail / lower legs left solid. See <a href="gene-roan.html">its page</a>.</td></tr>
 <tr><td><strong>Brindle (MBTPS2)</strong></td><td><code>Br</code>, <code>br</code></td><td>new</td><td>Vertical striping in a darker or lighter shade of the base coat. <strong>The one sex-linked gene</strong> (§5.3), and the reason that scaffolding is needed at all. Pattern work shares <code>BodyStripes</code>; the interesting part is the inheritance. <strong>Build the scaffolding first, then this gene as its proof.</strong></td></tr>
 </tbody>
 </table>
@@ -1131,13 +1142,15 @@ interface ConditionRule    { void conditions(AllelePair, ConditionSink); } // CS
 </p>
 
 <ul>
-    <li><strong>The genotype space.</strong> Today <code>3^11 = 177,147</code> &mdash;
-        it was <code>3^9 = 19,683</code> two genes ago, which is the multiplier in
-        miniature. With the full table the raw product is on the order of
-        <strong>1.85 &times; 10<sup>19</sup></strong>.</li>
-    <li><strong>The gallery would have died</strong> &mdash; but it is being reverted
-        anyway. Two genes quadrupling the corridor (434 pens / 1,519 blocks &rarr; 1,730
-        / 6,055) is the argument arriving early. If a <em>systematic</em> gallery is ever
+    <li><strong>The genotype space.</strong> Now <code>3^18 = 387,420,489</code>
+        after the seven visual genes shipped (it was <code>3^11 = 177,147</code>
+        before) &mdash; the multiplier in miniature. With the full table the raw
+        product is on the order of <strong>1.85 &times; 10<sup>19</sup></strong>.</li>
+    <li><strong>The gallery has effectively died</strong> &mdash; and it is being
+        reverted anyway. Seven genes took the corridor from 1,730 pens / 6,055 blocks
+        to <strong>331,778 pens / ~1.16&nbsp;M blocks</strong> (lazily built, so it
+        doesn&rsquo;t hang, but it is no longer a thing a player walks). The argument
+        for &sect;9 has now fully arrived. If a <em>systematic</em> gallery is ever
         wanted again, the shape that scales is a <strong>wing per locus</strong>: each
         gene&rsquo;s pairs on a fixed wild-type background, bounded by alleles rather
         than by their product, extending naturally to a modded gene adding its own

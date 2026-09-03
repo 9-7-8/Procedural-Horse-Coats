@@ -39,12 +39,19 @@ depending on the base it lands on:
 | Pearl | uncommon | Two copies (with no cream) give an apricot body with sepia points. One cream + one pearl acts like double cream. |
 | Champagne | rare | Golds every base, each to its own colour - **gold champagne** on chestnut, **classic** (taupe) on black, **amber** (gold body, chocolate points) on bay. |
 | Grey | uncommon | Greys **adults** only, over any base, into a **dapple grey** - a neutral grey coat patterned with rounded dapples. How far along a horse's greying is varies: some are a dark steel grey, some a mid dapple grey, some nearly white, and the ones that haven't got far keep a darker mane, tail and legs. A grey foal is born its base colour and turns grey when it grows up. |
+| Dun | uncommon | Lightens the body but keeps its colour - a black becomes a mouse-grey **grullo**, a bay a tan **bay dun**, a chestnut a pale **red dun** - and paints on **primitive markings**: a dark stripe down the spine from nose to tail, and faint bars across the legs. |
+| Silver | rare | Lightens **black pigment only**. A black horse gets a chocolate body and a near-white mane and tail (**silver dapple**); a bay keeps its red body but its points and mane lighten (**silver bay**). A chestnut carrying it looks no different - it has no black to touch. |
+| Mushroom | rare, hidden | **Two copies** turn a chestnut a flat sepia-khaki. On a black or bay it does almost nothing, so it is another one you carry unseen and breed toward. |
 
 **White markings** are the last layer:
 
 | Gene | In the wild | What it does |
 |------|-------------|--------------|
 | Splash | uncommon | White socks and a face blaze, rolled per horse - no two are quite alike. |
+| Roan | uncommon | White hairs mixed evenly through the **body** while the head, mane, tail and lower legs stay solid - blue roan on a black, red roan on a chestnut. The density varies horse to horse. |
+| Tobiano | rare | Big, smooth-edged **white patches that cross the topline**, with white legs and a coloured head. Every tobiano's patches are different. |
+| Frame overo | rare | Ragged white on the **sides of the neck and barrel that stops short of the spine** - the mirror of tobiano - usually with a broad white face. |
+| Sabino 1 | rare | One copy: tall **jagged** stockings, a belly patch and a wide blaze. Two copies: **sabino-white**, 90%+ white with only a few coloured flecks left. The two are meant to look clearly different. |
 | Dominant white | rare | Solid **white**, no markings. Masks everything else. |
 
 And then there are the ones no real horse has:

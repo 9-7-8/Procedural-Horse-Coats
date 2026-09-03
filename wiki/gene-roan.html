@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Roan &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="nav.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow natural">Natural gene <span class="sep">/</span> phase 1</p>
+<h1>Roan</h1>
+<p class="lede">
+    White hairs mixed evenly through the <strong>body coat</strong> while the head,
+    mane, tail and lower legs stay solid. At 128&nbsp;px that is a high-frequency
+    dither &mdash; each body texel is either a white hair or a coloured one &mdash;
+    from a <a href="body-space.html"><code>BodyNoise</code></a> field sampled in body
+    space so the mix carries across part seams. The cheapest pattern gene in the mod.
+</p>
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd>horsegenetics.roan</dd></div>
+    <div><dt>Alleles</dt><dd><span class="allele dom">Rn</span> <span class="allele wild">rn</span></dd></div>
+    <div><dt>Dominance</dt><dd>DOMINANT</dd></div>
+    <div><dt>Wild type</dt><dd>rn</dd></div>
+    <div><dt>Wild frequency</dt><dd>1 in 30 per allele</dd></div>
+    <div><dt>Founder draws</dt><dd>2 &times; nextInt(30)</dd></div>
+    <div><dt>Deterministic</dt><dd><strong>no</strong> &mdash; the dither seed rides on the <code>Rn</code> copy</dd></div>
+    <div><dt>Visible when</dt><dd>Rn_</dd></div>
+    <div><dt>Epi draws</dt><dd>nextLong() seed, then nextFloat() extra density</dd></div>
+    <div><dt>White fraction</dt><dd>~0.42 of body texels at the rear, tapering forward</dd></div>
+    <div><dt>Noise</dt><dd>PatchNoise.fbm2, ~2.6 per body unit</dd></div>
+</dl>
+
+<h2>The whole gene</h2>
+
+<div class="codebox">
+<div class="filename">common/genetics/genes/RoanGene.java</div>
+<pre><code class="language-java">double region = regionWeight(skin, part, point, frontStart, frontEnd); // 1 rear .. 0 head
+double n = PatchNoise.fbm2(seed, x * FREQ, y * FREQ, z * FREQ * 1.6);
+// a texel is a white hair OR a coloured hair - the *fraction* white varies
+// smoothly with region. Near-binary with a ~1px soft edge, so the flecks read
+// crisp but not aliased, and never through the gradient's warm mid-tones.
+double threshold = 1.0 - region * (WHITE_FRACTION + density);
+double w = smoothstep(threshold - EDGE, threshold + EDGE, n);
+// on the soft edge pull red down faster than black, so a partial texel greys
+// out instead of going gold.
+f.setRed(px, py,  red   * (1 - w) * (1 - 0.6 * w));
+f.setBlack(px, py, black * (1 - w));</code></pre>
+</div>
+
+<div class="note">
+    <span class="label">Why not a plain fade to white</span>
+    <p>
+        Scaling both pigment channels toward <code>(0, 0)</code> walks the sample
+        <em>down the gradient's gold diagonal</em> - a half-whitened black texel comes
+        out orange, not grey. So roan keeps the decision <b>per-texel binary</b> (white
+        hair or coloured hair) with only a ~1px soft edge, and biases that edge toward
+        the neutral axis. A fully white texel is <code>setRed(0)</code> /
+        <code>setBlack(0)</code> exactly - the same "resolve to transparent" path
+        <a href="gene-splash.html">splash</a> and <a href="gene-white.html">dominant
+        white</a> use.
+    </p>
+</div>
+
+<p>
+    <code>regionWeight</code> is <b>1 over the hindquarters</b>, tapering forward from
+    mid-barrel and feathering out across the neck, so the roan never ends on a hard
+    line against the solid face; on the legs it fades to nothing toward the hoof. The
+    head, mane, tail and ears are excluded outright.
+</p>
+
+<h2>Result</h2>
+<p>
+    Blue roan on a black base, red roan on a chestnut, bay roan on a bay &mdash; the
+    body reads as a lighter, hazier version of the base colour with a solid-coloured
+    head and points. Density varies horse to horse from the second epigenetic draw.
+</p>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="gene-tobiano.html">Tobiano</a>
+        <a href="gene-frame.html">Frame overo</a>
+        <a href="gene-sabino.html">Sabino 1</a>
+        <a href="body-space.html">BodyNoise</a>
+    </div>
+    Source: <code>common/genetics/genes/RoanGene.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

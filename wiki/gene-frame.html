@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Frame overo &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="nav.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow natural">Natural gene <span class="sep">/</span> phase 1</p>
+<h1>Frame overo</h1>
+<p class="lede">
+    The inverse constraint of <a href="gene-tobiano.html">tobiano</a>: ragged
+    horizontal white patches on the sides of the neck and barrel that
+    <strong>do not cross the topline</strong>, plus the broad white face frame is the
+    classic gene for. The legs stay coloured. White comes from a low-frequency
+    <a href="body-space.html"><code>BodyNoise</code></a> field multiplied by a weight
+    that goes to zero at the spine, pinning the patches to the flanks.
+</p>
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd>horsegenetics.frame</dd></div>
+    <div><dt>Alleles</dt><dd><span class="allele dom">Ov</span> <span class="allele wild">ov</span></dd></div>
+    <div><dt>Dominance</dt><dd>DOMINANT (for the coat)</dd></div>
+    <div><dt>Wild type</dt><dd>ov</dd></div>
+    <div><dt>Wild frequency</dt><dd>1 in 55 per allele</dd></div>
+    <div><dt>Founder draws</dt><dd>2 &times; nextInt(55)</dd></div>
+    <div><dt>Deterministic</dt><dd><strong>no</strong></dd></div>
+    <div><dt>Visible when</dt><dd>Ov_</dd></div>
+    <div><dt>Epi draws</dt><dd>nextLong() seed, nextFloat() body white, nextFloat() face white</dd></div>
+    <div><dt>Applies to</dt><dd>BODY + NECK only (legs, crest, tail, ears stay coloured)</dd></div>
+    <div><dt>Flank band</dt><dd>absolute body-Y, 0.28&ndash;0.74 of body height, feathered</dd></div>
+    <div><dt>Coverage</dt><dd>0.52&ndash;0.74 &mdash; deliberately bold; edge wobbled by fine noise</dd></div>
+    <div><dt>Face blaze half-width</dt><dd>0.9 &ndash; 3.5 body units (there is always at least a blaze)</dd></div>
+</dl>
+
+<h2>Pinning white to the flank band</h2>
+
+<div class="codebox">
+<div class="filename">common/genetics/genes/FrameGene.java</div>
+<pre><code class="language-java">// flank band in ABSOLUTE body-space Y - no dependence on which face a texel is on
+double side = smoothstep(bandLo - feather, bandLo, y) * (1 - smoothstep(bandHi, bandHi + feather, y));
+if (side &lt;= 0) return;
+double v   = PatchNoise.field(seed, x, y, z, SCALE);
+double jag = JAG * (PatchNoise.fbm2(seed ^ k, x*JAG_FREQ, y*JAG_FREQ, z*JAG_FREQ*1.4) - 0.5);
+// outside the band the threshold climbs steeply, so white never reaches the topline
+if (v + jag &gt; (1 - cover) + (1 - side) * 0.6) { f.setRed(px,py,0f); f.setBlack(px,py,0f); }</code></pre>
+</div>
+
+<p>
+    The band is measured in <b>absolute body-space Y</b> against the whole-body bounds
+    rather than a per-part fraction, so it lands the same whether a texel is on a side,
+    top or bottom face - the earlier per-part version left the barrel almost untouched.
+    White is bold inside the band (coverage 0.52&ndash;0.74) and its threshold climbs
+    hard as <code>side</code> falls, so the spine and belly stay solidly coloured -
+    the "frame". The <code>jag</code> term wobbles the margin at a fine scale, which is
+    the ragged edge frame is known for. The face is whitened along the centreline out
+    to <code>faceHalf</code> - a floor guarantees at least a blaze, a high roll gives a
+    bald face.
+</p>
+
+<div class="note">
+    <span class="label">Health &mdash; out of scope for now</span>
+    <p>
+        In real horses <code>Ov/Ov</code> is overo lethal white syndrome. Here the
+        homozygote is treated as an ordinary frame; the lethal is a
+        <a href="roadmap.html">roadmap</a> item (&sect;4.2 / &sect;6.4) and would be
+        the first lethal in the model.
+    </p>
+</div>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="gene-tobiano.html">Tobiano</a>
+        <a href="gene-sabino.html">Sabino 1</a>
+        <a href="gene-roan.html">Roan</a>
+    </div>
+    Source: <code>common/genetics/genes/FrameGene.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

@@ -166,6 +166,8 @@
 <tr><td><code>blackenFace(skin, field, upFraction)</code></td><td>Muzzle (if present) plus the front fraction of the head.</td></tr>
 <tr><td><code>whitenLowerLeg(skin, field, leg, heightFraction)</code></td><td>Remove <em>both</em> pigments up a leg &rarr; the white template shows.</td></tr>
 <tr><td><code>whitenBlaze(skin, field, halfWidth, lengthFraction)</code></td><td>A centreline stripe on muzzle + head, <code>halfWidth</code> body units either side of <code>z = 0</code>.</td></tr>
+<tr><td><code>dorsalStripe(skin, part, point, halfWidth)</code></td><td>Coverage <code>[0,1]</code> of a nose-to-tail dorsal stripe: a band around <code>z = 0</code>, weighted to the <em>upper</em> half of the barrel/neck (not the belly), full on the mane/tail/head. <a href="gene-dun.html">Dun</a>.</td></tr>
+<tr><td><code>legBar(skin, leg, point, spacing, duty, reach)</code></td><td>Coverage <code>[0,1]</code> of horizontal leg barring &mdash; constant-<code>y</code> bands, fading out over the top of the leg. <a href="gene-dun.html">Dun</a>.</td></tr>
 <tr><td><code>paintPart</code> / <code>fillPart</code> / <code>fillMane</code> / <code>fillTail</code> / <code>fillEars</code> / <code>fillHooves</code> / <code>paintLowerLeg</code></td><td>ARGB overlay painting, for callers working in colour rather than pigment.</td></tr>
 <tr><td><code>redrawEyes(skin, dst, template)</code></td><td>Copy the eye texels back verbatim &mdash; the composer&rsquo;s last step.</td></tr>
 <tr><td><code>LEGS</code></td><td><code>List&lt;Part&gt;</code> of the four legs, for iterating.</td></tr>
@@ -215,6 +217,23 @@
     Callers scale their coordinates to choose the cell size. Everything is a
     <strong>pure function of <code>(seed, x, y, z)</code></strong> &mdash; no state,
     no <code>Random</code> &mdash; so a coat rebuilt next session comes out identical.
+</p>
+
+<h2>PatchNoise &mdash; smooth patch fields for spotting</h2>
+
+<p>
+    <code>common/coat/pattern/PatchNoise</code> is what the white-spotting genes
+    (<a href="gene-tobiano.html">tobiano</a>, <a href="gene-frame.html">frame</a>,
+    <a href="gene-sabino.html">sabino</a>) sample for their patches.
+    <code>BodyNoise.value</code> on its own is one lattice cell across the whole
+    horse at the low frequencies a big patch needs, and grids up into visible
+    axis-aligned squares. <code>PatchNoise.field(seed, x, y, z, scale)</code> fixes
+    both: <b>three octaves</b> (detail at more than one scale) and a
+    <b>domain warp</b> (the sample point is pushed around by a second noise field,
+    so the octaves do not line up and the edges wander). <code>z</code> is
+    stretched before sampling, or the two sides of the horse come out
+    mirror-identical. <code>fbm2</code> is the cheaper two-octave version, for fine
+    speckle (roan, sabino roaning).
 </p>
 
 <h2>BodyStripes &mdash; the shared stripe field</h2>

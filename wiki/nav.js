@@ -45,7 +45,14 @@
                 { href: "gene-champagne.html", text: "Champagne", kind: "natural" },
                 { href: "gene-grey.html", text: "Grey (dapple)", kind: "natural" },
                 { href: "gene-white.html", text: "Dominant white", kind: "natural" },
-                { href: "gene-splash.html", text: "Splash white", kind: "natural" }
+                { href: "gene-splash.html", text: "Splash white", kind: "natural" },
+                { href: "gene-dun.html", text: "Dun", kind: "natural" },
+                { href: "gene-silver.html", text: "Silver dapple", kind: "natural" },
+                { href: "gene-mushroom.html", text: "Mushroom", kind: "natural" },
+                { href: "gene-roan.html", text: "Roan", kind: "natural" },
+                { href: "gene-tobiano.html", text: "Tobiano", kind: "natural" },
+                { href: "gene-frame.html", text: "Frame overo", kind: "natural" },
+                { href: "gene-sabino.html", text: "Sabino 1", kind: "natural" }
             ]
         },
         {

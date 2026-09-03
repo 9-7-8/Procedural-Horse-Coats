@@ -41,9 +41,11 @@
         tooltip &mdash; all via <code>GeneCodeDisplay.shortForm</code>) never shows the
         <strong>spec genes</strong>, including the shipped <em>Suntouched</em> /
         <em>Waterborn</em>. Cause: <code>GeneCodeDisplay.TRAILING_ORDER</code> is a
-        hard-coded <code>List.of(...)</code> of the 11 built-ins; it needs to append
-        <code>Genes.loaded()</code> (and <code>ABSENCE_WILDTYPE</code> should treat a
-        spec gene&rsquo;s <code>n</code> wild type as "absent").
+        hard-coded <code>List.of(...)</code>. As of 2026-09-02 it lists all <strong>18
+        built-ins</strong> (the seven new visual genes were added), but still not
+        <code>Genes.loaded()</code> &mdash; so the shipped spec genes remain missing.
+        Fix: append <code>Genes.loaded()</code> and have <code>ABSENCE_WILDTYPE</code>
+        treat a spec gene&rsquo;s <code>n</code> wild type as "absent".
     </p>
 </div>
 
@@ -105,9 +107,9 @@
     in a running game.
     <strong>Baseline note:</strong> as of 2026-09-02 <code>example.waterborn</code>
     <em>and</em> <code>example.suntouched</code> ship loaded (classpath index), so a
-    stock in-game genotype code is already <strong>13 segments</strong> and the
-    gallery is already ~4&times; its no-gene size. Dropping one more gene in takes it
-    to 14. To test the drop-in path:
+    stock in-game genotype code is <strong>20 segments</strong> (18 built-ins + the
+    two shipped spec genes) and the gallery is enormous. Dropping one more gene in
+    takes it to 21. To test the drop-in path:
 </p>
 
 <ol>
@@ -120,7 +122,9 @@
         that is itself a finding.</li>
     <li><code>./gradlew :neoforge-26.1.2:runClient</code> and read the log for
         <code>[genes] loaded 3 data-driven gene(s)</code> (Suntouched + Waterborn +
-        Tobiano) and <code>the genotype code now has 14 segments</code>.</li>
+        Tobiano) and <code>the genotype code now has 21 segments</code>. (The fixture is
+        <code>example.tobiano</code> &mdash; a different key from the built-in
+        <code>horsegenetics.tobiano</code>, so both coexist.)</li>
 </ol>
 
 <p>What to look at:</p>
@@ -142,7 +146,7 @@
         the same genotype should have different patches; a foal's should match the
         parent whose copy it took.</li>
     <li><strong>Removing the file is clean.</strong> Delete it, relaunch: the code drops
-        back to the 13-segment shipped-gene baseline. Horses saved at 14 will fail to load
+        back to the 20-segment shipped-gene baseline. Horses saved at 21 will fail to load
         &mdash; expected, but confirm it fails <em>loudly</em> rather than corrupting
         anything.</li>
     <li><strong>A deliberately broken file.</strong> Put a stray comma in one and
@@ -213,9 +217,10 @@
 <h3>4. Pen signs now overflow</h3>
 
 <p>
-    At 11 genes the widest genotype label is <strong>49 characters</strong> against
-    three 15-char sign lines, so <code>GeneCodeDisplay.wrap</code> overflows the last
-    line (worst case 27 chars). Confirm how badly that reads in-game before deciding
+    At 18 genes a fully loaded-up genotype label runs to well over a hundred
+    characters against three 15-char sign lines, so <code>GeneCodeDisplay.wrap</code>
+    overflows the last line badly (the unit-test tripwire is now 140). Confirm how
+    badly that reads in-game before deciding
     whether it is worth anything &mdash; the gallery is
     <a href="roadmap.html#random-pens">slated for revert to random pens</a>, which
     retires the per-genotype sign, so <strong>&ldquo;leave it&rdquo; is a legitimate
@@ -245,15 +250,15 @@
     Slated for revert. The owner has decided the dimension goes back to
     <strong>random</strong> pens (keeping the pairs and the per-pen genome sign), so
     verify only the parts that survive: the per-pen sign, the pairs, the pen
-    amenities. <strong>Do not spend a session walking 6,055 blocks checking catalogue
-    order.</strong>
+    amenities. <strong>Do not spend a session walking a million-plus blocks checking
+    catalogue order.</strong>
 </p>
 
 <p>What it does today, if you do look:</p>
 
 <ul>
     <li>The entrance sign three blocks in front of the return portal reads
-        <code>Genotypes / 177,147 / Distinct / 1,730 pens</code>.</li>
+        <code>Genotypes / 387,420,489 / Distinct / 331,778 pens</code>.</li>
     <li>The first six pens, right/left alternating, are <code>eeaa</code>,
         <code>EEaa</code>, <code>eeAA</code>, <code>EEAA</code>,
         <code>EEaa WW</code>, <code>EEaa TT</code> &mdash; extension exhausts before
@@ -268,8 +273,8 @@
         open the edit screen).</li>
     <li>Both horses in a pen match the sign, and differ only where a
         non-deterministic gene (bay points, splash) makes them differ.</li>
-    <li>The corridor ends in a wall after pen 1,730 &mdash; 6,055 blocks out, so only
-        worth checking if you fly it.</li>
+    <li>The corridor ends in a wall after the last pen &mdash; now ~1.16&nbsp;M blocks
+        out (331,778 pens), so not something to fly either.</li>
 </ul>
 
 <h3>7. Leaving the dimension no longer clears blocks</h3>
@@ -661,6 +666,64 @@ gold-dust <code>emitter</code> shows, and the horse lights the area around it
     flash); any cleanup other than breaking the exact sign block (rebuild the wall
     elsewhere and the record goes stale).
 </p>
+
+<h3 id="visual-genes">19. The seven remaining visual natural genes</h3>
+
+<p>
+    Built 2026-09-02 &mdash; <a href="gene-dun.html">dun</a>,
+    <a href="gene-silver.html">silver dapple</a>,
+    <a href="gene-mushroom.html">mushroom</a>, <a href="gene-roan.html">roan</a>,
+    <a href="gene-tobiano.html">tobiano</a>, <a href="gene-frame.html">frame overo</a>,
+    <a href="gene-sabino.html">sabino 1</a>. Hand-written <code>Gene</code>s in
+    <code>common/genetics/genes/</code>. All are rare in the wild
+    (1/24&ndash;1/60 per allele); <strong>summon them</strong> with e.g.
+    <code>dun=D/d</code>, <code>silver=Z/z</code>, <code>mushroom=Mu/Mu</code>,
+    <code>roan=Rn/rn</code>, <code>tobiano=To/to</code>, <code>frame=Ov/ov</code>,
+    <code>sabino=SB1/sb1</code> (and <code>sabino=SB1/SB1</code>). Sample bakes look
+    right; nothing seen on the 3D model. What to check:
+</p>
+
+<ul>
+    <li><strong>Dun</strong> &mdash; body lightens (grullo on black, tan on bay, apricot
+        on chestnut) <em>and</em> a dark <strong>dorsal stripe runs nose&nbsp;&rarr;&nbsp;tail</strong>
+        with faint horizontal <strong>leg bars</strong> on the cannons. The markings
+        must read <em>dark against the diluted body</em>, not vanish. (Grullo was
+        warm-brown in the first bake; <code>keepRed</code> now scales to 0 on a black
+        base so it should land a proper mouse-grey.)</li>
+    <li><strong>Silver</strong> on a <strong>black</strong> &rarr; chocolate body,
+        near-flaxen mane/tail; on a <strong>bay</strong> &rarr; "silver bay" (red body
+        untouched, points + mane lightened). On a <strong>chestnut</strong> it must be
+        <em>invisible</em>. No dapples yet &mdash; don't flag that.</li>
+    <li><strong>Mushroom</strong> only shows <code>Mu/Mu</code> and only on a
+        <strong>chestnut</strong> &rarr; flat sepia/khaki. On black/bay it's a carrier
+        (near-invisible).</li>
+    <li><strong>Roan</strong> &mdash; salt-and-pepper white flecks through the
+        <strong>barrel</strong>, <strong>densest at the hindquarters</strong> and
+        feathering out forward so there is <em>no hard line at the face</em>; head,
+        mane, tail and lower legs solid. Blue/red/bay roan by base. Watch for stray
+        gold specks at fleck edges (the LUT diagonal) - a few are expected.</li>
+    <li><strong>Tobiano</strong> &mdash; large <strong>crisp-edged</strong> white
+        patches (hard binary, no soft fringe) that <strong>cross the topline</strong>,
+        white legs, coloured head. Non-deterministic: two tobianos differ. Check the
+        patches actually run over the spine and that both sides of the horse are not
+        mirror-identical.</li>
+    <li><strong>Frame overo</strong> &mdash; ragged white on the <strong>sides of the
+        neck/barrel that stops short of the spine</strong>, plus a broad white face;
+        legs stay coloured. This is the exact inverse of tobiano &mdash; check the two
+        side by side. <code>Ov/Ov</code> renders as an ordinary frame (lethal white is
+        deliberately not modelled).</li>
+    <li><strong>Sabino</strong> reads its dose: <code>SB1/sb1</code> = tall
+        <strong>jagged</strong> stockings (not a clean ring), a belly patch and a broad
+        blaze; <code>SB1/SB1</code> = "sabino-white", 90%+ white with a few coloured
+        flecks. The dose-1 and dose-2 horses must look clearly different &mdash; that
+        is the point (splash still doesn't do this).</li>
+    <li><strong>Eyes</strong> survive a big <code>SB1/SB1</code> and a topline-crossing
+        tobiano (<code>redrawEyes</code> runs last, so they should).</li>
+    <li><strong>Foals</strong> &mdash; all seven on a foal; the foal mesh has no
+        MANE/MUZZLE so dorsal-stripe-up-the-face and flaxen-mane are coarse there.</li>
+    <li><strong>Stacking</strong> &mdash; silver bay dun, a roan tobiano, a cream +
+        sabino: nothing should throw or produce a flat-white horse.</li>
+</ul>
 
 <div class="page-foot">
     <div class="seealso">

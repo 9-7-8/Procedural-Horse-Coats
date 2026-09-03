@@ -93,7 +93,7 @@ project. Its shape:
     golden test). This is where the coat machinery is documented now; CLAUDE.md
     keeps a summary.
   - **`wiki/body-space.html`** - `HorseSkinGeometry`, `CoatRegions`,
-    `BodyNoise`, `BodyStripes`.
+    `BodyNoise`, `BodyStripes`, `PatchNoise`.
   - **`wiki/modding.html`** + **`wiki/api-reference.html`** - the
     **modder-facing** docs: how to write a gene (two worked walkthroughs, the
     allele rules, the determinism contract, the pitfalls table) and the
@@ -102,13 +102,15 @@ project. Its shape:
 
 ## Status snapshot (keep this current)
 
-- **`common/`** - compiles; **194 JUnit tests pass** (`./gradlew :common:test`).
-  Covers `genetics/` (allele/gene model - **11 genes**: the 9 natural ones incl.
-  grey / cream / pearl / splash, plus magic zebra and pink hair; `Genotype` code
+- **`common/`** - compiles; **195 JUnit tests pass** (`./gradlew :common:test`).
+  Covers `genetics/` (allele/gene model - **18 genes**: the 16 natural ones
+  (extension, agouti, champagne, splash, grey, cream, pearl, **dun**,
+  **silver**, **mushroom**, **roan**, **tobiano**, **frame**, **sabino**, plus
+  the epistatic dominant white), and magic zebra + pink hair; `Genotype` code
   round-trip, breeding, the `Epigenome` / `Genome` per-allele epigenetics +
   priority tie-break, `GenomeSample` - a genome detached from a horse, for the
   stallion seed jar - `DominancePattern` + the `GenotypeCatalog` reduction of
-  177 147 genotypes to 1 730 distinct coats), `coat/` + `coat/pattern/` (the
+  387 420 489 genotypes to 331 778 distinct coats), `coat/` + `coat/pattern/` (the
   three-phase pipeline - `CoatTextureComposer`, `PigmentField`, `ColorField`,
   `GradientLut`, `BayCoat`, `GreyCoat`, `BodyStripes`, `CoatRegions`, the pure
   gene hooks, the `coat-golden.txt` byte-identity net, `CoatTextureId`
@@ -135,6 +137,53 @@ project. Its shape:
   flagged as unverified now works).
 - **`runClient`** - actively play-tested over the 2026-08-30, 2026-09-01 and
   2026-09-02 sessions; see below.
+
+- **Built 2026-09-02, NOT yet play-tested:** the **seven remaining visual
+  natural genes** (roadmap §§4.1-4.2), all hand-written `Gene`s in
+  `common/genetics/genes/`:
+  - **dilutions** - `DunGene` (`D`/`d`, DOMINANT: mild body dilution +
+    primitive markings - a dorsal stripe + leg barring that skip the dilution,
+    via new `CoatRegions.dorsalStripe` / `legBar`), `SilverGene` (`Z`/`z`,
+    DOMINANT: eumelanin-only, chocolate body + flaxen mane/tail, chestnut
+    unaffected - runs right after agouti in `naturalOrder()`), `MushroomGene`
+    (`Mu`/`mu`, RECESSIVE: pheomelanin-only, chestnut -> sepia).
+  - **white patterns** (all non-deterministic, epigenetic seed on the variant
+    copy) - `RoanGene` (`Rn`/`rn`, DOMINANT: near-binary white-hair dither,
+    density tapering back-to-front so it feathers into the solid face),
+    `TobianoGene` (`To`/`to`, DOMINANT: big crisp patches from a topline-biased
+    `PatchNoise.field`, white legs), `FrameGene` (`Ov`/`ov`, DOMINANT for the
+    coat - **`Ov/Ov` lethal white deliberately not modelled**: bold jagged-edged
+    patches in an absolute-Y flank band on BODY/NECK + a bald face), `SabinoGene`
+    (`SB1`/`sb1`, INCOMPLETE_DOMINANT and **it reads its own dose** - the
+    counter to splash's open issue: dose 1 = jagged stockings + belly + blaze,
+    dose 2 = "sabino-white").
+  - New helper `coat/pattern/PatchNoise` (warped 3-octave fractal `field` +
+    2-octave `fbm2`) - the spotting genes need patch fields that cross seams
+    smoothly *and* aren't one lattice cell wide; single-octave `BodyNoise`
+    gridded up into visible squares. `CoatRegions.dorsalStripe` /
+    `legBar` are the dun primitive-marking helpers.
+  - **Reworked 2026-09-02 after owner feedback on the first bakes:** grullo
+    was warm-brown not mouse-grey (dun's `keepRed` now scales to ~0 by the
+    texel's black content, so a black base lands on the LUT's neutral column);
+    mushroom read as no-op (`keepRed` 0.44 -> 0.12); silver's mane came out
+    chestnut not flaxen (mane now pulls red down too); roan made hard 100%
+    white pixels and had a hard edge at the face (now near-binary flecks +
+    a smooth rear->front density falloff); tobiano was ~80% white with gold
+    fringing (higher threshold, hard-binary decision - a half-scaled black
+    texel reads gold on the LUT); frame produced almost nothing (per-part
+    `sideWeight` left the barrel untouched -> absolute-Y band); sabino showed
+    axis-aligned squares (`PatchNoise` instead of raw `BodyNoise.value`).
+  - Registry now **18 genes** / genotype code 18 segments (20 in-game with the
+    two shipped spec genes). `GeneCodeDisplay.TRAILING_ORDER` +
+    `ABSENCE_WILDTYPE` gained all seven. `coat-golden.txt` regenerated (10 new
+    cases). `GenotypeCatalog` blows up to **331 778** distinct coats
+    (`totalGenotypes()` 387 420 489), so the gallery corridor is now ~1.16 M
+    blocks of lazily-built pens - another argument for roadmap §9. The
+    exhaustive `2^genes` / `3^genes` tests (`CoatTextureIdTest`,
+    `CoatTextureComposerTest`'s combo sweep) were converted to **seeded
+    sampling** - enumerating them is no longer tractable. Sample bakes
+    (`:common:bakeCoatSamples`, 12 new) look right after the rework; nothing
+    seen in-game - checklist in `wiki/verification.html`.
 
 - **Built 2026-09-02, NOT yet play-tested:** the **gameplay-layer items**
   (roadmap wiki §§11-19, first slice). 19 new `Item`s in `item/ModItems`:
@@ -411,7 +460,8 @@ project. Its shape:
   bakes look right, nothing seen in-game yet - checklist in
   **`wiki/verification.html`**.
 - **Built 2026-09-01, NOT yet play-tested:** the **genotype gallery** rework of
-  the horse dimension - one pen per visually distinct genotype (1 730 of 177 147),
+  the horse dimension - one pen per visually distinct genotype (331 778 of
+  387 420 489),
   per-pen genotype signs, the entrance tally sign, `Gene.dominance()` metadata,
   and the entity-only teardown that leaves blocks standing. Compiles, 138
   `common` tests pass, nothing seen in-game yet. Details in the horse-dimension
@@ -445,8 +495,9 @@ Two-module Gradle project, split deliberately:
   - `coat/` - `CoatData`, `CoatGenerator`; `coat/pattern/` holds the
     three-phase pipeline (`CoatTextureComposer`, the `PigmentField` /
     `ColorField` accumulators and their read-only `PigmentView` / `ColorView`
-    faces) and `BodyNoise`, the reusable body-space noise any future patterned
-    gene should build on.
+    faces) and the reusable body-space noise: `BodyNoise` (single-octave
+    value + Worley), `BodyStripes` (X-oriented stripe field) and `PatchNoise`
+    (warped 3-octave fractal for white-spotting patches - `field` + `fbm2`).
   - `name/` - `HorseNameGenerator` + `HorseNames` (`breed` = one-half-each;
     `breedNth` = varied by a pairing's foal count) + word tables under
     `src/main/resources/horsegenetics/names/`.
@@ -540,7 +591,7 @@ of characters** (`Spl`, `Cr`, `prl`, `Ch`, `N`, ...). Example:
 `"E/e-A/a-w/w-t/t-c/c-spl/spl-g/g-Cr/N-N/N"`. **No legacy / short-code
 handling** - dev only, no saves to keep.
 
-`Genes` is now an **open registry**: the eleven built-ins keep their fixed order
+`Genes` is now an **open registry**: the eighteen built-ins keep their fixed order
 first (so adding a gene never changes an existing horse's coat), and
 `SpecGene`s loaded from JSON are appended after them, **sorted by declared
 `priority` then key - registration order is deliberately ignored**. A magical
@@ -550,8 +601,13 @@ invalidated on every registration, since the catalogue is a product over
 `codeOrder()`.
 
 `Genes.codeOrder()` = extension, agouti, white, test, champagne, splash, grey,
-cream, pearl, magic zebra, pink hair - **append** new ones. **Full per-gene detail is in `Gene
-Dict.md`** (natural genes first, then magical); one-liners:
+cream, pearl, magic zebra, pink hair, dun, silver, mushroom, roan, tobiano,
+frame, sabino - **append** new ones. `naturalOrder()` (phase-1 pigment
+restriction) = extension, agouti, **silver, mushroom, dun**, cream, pearl,
+champagne, grey, white, **roan, tobiano, frame, sabino**, splash - silver /
+mushroom / dun slot in right after agouti so the points exist to dilute, the
+white-pattern genes just before splash. **Full per-gene detail is in
+`wiki/gene-*.html`** (one page per gene); one-liners:
 
 | gene | alleles | dominance | in the wild | coat effect |
 |------|---------|-----------|-------------|-------------|
@@ -566,6 +622,13 @@ Dict.md`** (natural genes first, then magical); one-liners:
 | pearl | `prl`/`N` | incomplete | 1/22 | dilution; `prl/prl` no-cream = mild uniform; `Cr/prl` = double cream |
 | magic zebra | `Mzeb`/`n` | dominant | 1/100 | **magical** - black stripes hung from the topline, `-200%` on all three channels so they read black over any coat incl. dominant white (non-det) |
 | pink hair | `Pihr`/`n` | **recessive** | 1/12 carrier | **magical** - mane + tail walked 82% toward hot pink; reads what it paints over, so it keeps the strand shading (foal: tail only) |
+| dun | `D`/`d` | dominant | 1/24 | mild body dilution + **primitive markings** (dorsal stripe full length, faint leg bars) that *skip* the dilution so they read dark; `CoatRegions.dorsalStripe`/`legBar`. 2-allele form (real locus is `D`/`d1`/`d2`) |
+| silver | `Z`/`z` | dominant | 1/60 | eumelanin-**only** dilution → chocolate body + near-flaxen mane/tail; chestnut carrier looks unchanged. Runs after agouti. Dapples are a follow-up |
+| mushroom | `Mu`/`mu` | **recessive** | 1/34 | pheomelanin-**only** dilution, `Mu/Mu` only → chestnut becomes flat sepia; near-invisible on black/bay |
+| roan | `Rn`/`rn` | dominant | 1/30 | high-freq `BodyNoise` white-hair dither on the barrel + upper legs; head / mane / tail / lower legs stay solid (non-det) |
+| tobiano | `To`/`to` | dominant | 1/50 | big smooth-edged white patches from a low-freq noise field **biased toward the topline** so they cross the back; white legs, coloured head (non-det) |
+| frame | `Ov`/`ov` | dominant\* | 1/55 | flank patches that **never cross the topline** (noise × a spine→0 weight) + a bald face; legs coloured. \***`Ov/Ov` lethal white is not modelled** (health, deferred) (non-det) |
+| sabino | `SB1`/`sb1` | incomplete | 1/45 | **reads its dose**: `SB1/sb1` = jagged stockings + belly patch + broad blaze; `SB1/SB1` = "sabino-white", 90%+ white. Jagged leg edges (unlike splash's ring) (non-det) |
 
 **`Gene.dominance()`** (`common/genetics/DominancePattern`) is declared
 metadata on every gene: `DOMINANT` / `RECESSIVE` / `INCOMPLETE_DOMINANT` /
@@ -1356,8 +1419,8 @@ genotype that looks different from every other.
 - **`GenotypeCatalog`** (pure `common/`, unit-tested) is the enumeration.
   `allPairsOf(gene)` = every unordered `AllelePair`, **least dominant first**
   (`ee`, `Ee`, `EE`); `distinctPairsOf(gene)` applies the dominance reduction;
-  `totalGenotypes()` = the raw product (**177 147**); `size()` = the reduced
-  catalogue (**1 730**); `get(i)` / `entries()` read the list, built once at class
+  `totalGenotypes()` = the raw product (**387 420 489**); `size()` = the reduced
+  catalogue (**331 778**); `get(i)` / `entries()` read the list, built once at class
   load. Nothing is hard-coded - register a gene (or an allele) and the
   catalogue, the corridor length and both signs widen on their own.
 - **Two reductions**, both driven by `Gene.dominance()` (see below):
@@ -1367,9 +1430,10 @@ genotype that looks different from every other.
     exactly **one** entry for it: the variant homozygote with every other gene
     at wild type. Hence one white pen (`EEaa WW`, #5) and one test pen
     (`EEaa TT`, #6) instead of a quarter of the corridor each.
-  - Net: `2·2·2·3·2·3·3·2·2 = 1 728` unmasked + 1 white + 1 test = **1 730**
-    (the last two 2s are magic zebra and pink hair - a `RECESSIVE` gene reduces
-    exactly like a `DOMINANT` one, homozygotes only).
+  - Net: `1 728 · 192 = 331 776` unmasked + 1 white + 1 test = **331 778**
+    (the extra `192` is the seven new genes: dun / silver / mushroom / roan /
+    tobiano / frame each ×2 homozygotes, sabino ×3; a `RECESSIVE` gene -
+    mushroom - reduces exactly like a `DOMINANT` one, homozygotes only).
 - **Pen order**: segment `i` holds catalogue entry `2i` in the **right-hand**
   pen (`NORTH_PEN`, the `+Z` side - your right walking in from the portal) and
   `2i+1` on the left. The corridor reads `eeaa, EEaa, eeAA, EEAA, [white],
@@ -1384,16 +1448,16 @@ genotype that looks different from every other.
     then **`GeneCodeDisplay.shortForm`** - the same compact form the info panel
     and paper dump use, so a plain horse reads `eeaa`, not a wall of wild-type
     slots - greedily wrapped over the remaining 3 lines by
-    `GeneCodeDisplay.wrap(genotype, 3, 15)`. **At 11 genes the widest labels no
-    longer fit**: `eeaa SplSpl ChCh CrCr prlprl GG MzebMzeb PihrPihr` is 49
-    chars against 3x15, and `wrap` deliberately overflows its **last** line
-    rather than dropping a gene, so those signs read wide in-game (worst case
-    27 chars). The unit test now asserts only that nothing is lost and that the
-    overflow doesn't grow past 30. The real fix is the planned revert to random
+    `GeneCodeDisplay.wrap(genotype, 3, 15)`. **At 18 genes the widest labels
+    come nowhere near fitting** three 15-char lines - a horse loaded up on the
+    white-pattern + dilution genes runs to well over a hundred chars - and
+    `wrap` deliberately overflows its **last** line rather than dropping a
+    gene, so those signs read very wide in-game. The unit test asserts only
+    that nothing is lost and that the overflow doesn't grow past 140. The real fix is the planned revert to random
     pens (`wiki/roadmap.html` §9), which retires the per-genotype sign
     entirely - so this is deliberately left alone.
   - `originX + 4` (three blocks in front of the return portal), facing west at
-    the player's spawn: `Genotypes / 177,147 / Distinct / 1,730 pens`.
+    the player's spawn: `Genotypes / 387,420,489 / Distinct / 331,778 pens`.
     Epigenetics are deliberately not counted in either number.
 - **Length**: `LAST_SEGMENT_INDEX` = `ceil(size / 2) - 1` = 864, so the corridor
   is **6 055 blocks** (it was 1 519 at 9 genes - each new gene multiplies it, which
@@ -1547,6 +1611,29 @@ yet)** - full detail in `wiki/verification.html`:
   or bald face, body patches. Gallery pens **#11** and **#19** are the side-by-
   side check.
 
+**The seven new visual genes (2026-09-02, reworked once after owner feedback) -
+remaining follow-ups, none seen in-game:**
+
+- **Dun** leg barring is a hand-rolled Y-phase; roadmap §4.1 wants it to reuse
+  `BodyStripes` (which runs on X). The third allele (`d1` marked / `d2`
+  unmarked) needs more than one `DominancePattern`. (Grullo now lands on the
+  LUT neutral column - `keepRed` scales to 0 by the texel's black content.)
+- **Silver** has no dapples yet - v1 is the dilution only. A deterministic
+  (fixed-seed) `BodyNoise` dapple modulation is the obvious next step. The
+  flaxen mane currently reads a little gold rather than pale.
+- **Frame** models the coat only; `Ov/Ov` lethal white (roadmap §4.2 / §6.4,
+  the first lethal in the model) is not built - the homozygote just renders as
+  an ordinary frame. Coverage is deliberately bold (0.52-0.74); may want
+  trimming once seen in-game.
+- **Sabino / roan / tobiano / frame** thresholds and densities are eyeballed
+  off sample bakes, not play-tested - expect a coverage retune once on the 3D
+  model. Roan still shows the odd 1px gold fleck at a fleck edge (the LUT
+  diagonal); tobiano/frame are hard-binary so they don't.
+- **The wide white-pattern genes don't compose an eye-safe check** - like
+  splash, a big `SB1/SB1` or a topline-crossing tobiano could in principle wipe
+  the eye texels; `CoatRegions.redrawEyes` runs last so eyes always come back,
+  but confirm in-game.
+
 Design follow-ups (not just "go look at it"):
 
 1. **Grey has no age - and that's now a decision, not a gap.** Horse **aging is
@@ -1664,7 +1751,7 @@ Design follow-ups (not just "go look at it"):
    `wiki/verification.html` §16.
 18. **The short genome string omits data-driven genes.** `GeneCodeDisplay`
    (info panel, paper dump, seed-jar tooltip) has a hard-coded `TRAILING_ORDER`
-   of the 11 built-ins, so a spec gene - including the shipped Suntouched /
+   of the 18 built-ins, so a spec gene - including the shipped Suntouched /
    Waterborn - never shows. The underlying genotype/epigenome data is correct
    (owner confirmed via the seed jar 2026-09-02) - it's purely the display.
    Fix: append `Genes.loaded()` to the trailing list and treat a spec gene's

@@ -48,7 +48,7 @@
     <span class="label">What is and isn't open</span>
     <p>
         <code>Genes</code> is an <strong>open registry</strong> for data-driven genes:
-        <code>Genes.register(SpecGene)</code> appends after the eleven built-ins,
+        <code>Genes.register(SpecGene)</code> appends after the eighteen built-ins,
         sorted by declared <code>priority</code> then key, so registration order never
         decides how a horse looks. A <em>Java</em> gene from another mod still has to
         be added to this repository &mdash; the mod-bus registration hook, the
@@ -161,6 +161,16 @@
 </div>
 
 <h2>Walkthrough 1 &mdash; a natural gene</h2>
+
+<div class="note">
+    <span class="label">This one has since shipped</span>
+    <p>
+        Silver dapple landed as a built-in on 2026-09-02
+        (<code>horsegenetics.silver</code>, <code>common/genetics/genes/SilverGene.java</code>) &mdash;
+        so this walkthrough now doubles as a description of a real gene. Your own
+        gene would use a <code>mymod.*</code> key; everything else is unchanged.
+    </p>
+</div>
 
 <p>
     The smallest useful shape. <strong>Silver dapple</strong> dilutes eumelanin only,
@@ -382,16 +392,17 @@ double reach   = 0.35 + epi.nextFloat() * 0.60;          // fraction of the drop
 
 <div class="codebox">
 <div class="filename">common/genetics/Genes.java &mdash; three edits, today</div>
-<pre><code class="language-java">public static final SilverGene SILVER = new SilverGene();
+<pre><code class="language-java">public static final SilverGene SILVER = new SilverGene();  // ...among six more added the same day
 
 // 1. the genotype code string's segment order - APPEND, never insert
 private static final List&lt;Gene&gt; CODE_ORDER =
-        List.of(EXTENSION, AGOUTI, WHITE, TEST, CHAMPAGNE, SPLASH, GREY,
-                CREAM, PEARL, MAGIC_ZEBRA, PINK_HAIR, SILVER);
+        List.of(EXTENSION, AGOUTI, WHITE, TEST, CHAMPAGNE, SPLASH, GREY, CREAM, PEARL,
+                MAGIC_ZEBRA, PINK_HAIR, DUN, SILVER, MUSHROOM, ROAN, TOBIANO, FRAME, SABINO);
 
 // 2. phase-1 effect order - position matters, see below
 private static final List&lt;Gene&gt; NATURAL_ORDER =
-        List.of(EXTENSION, AGOUTI, SILVER, CREAM, PEARL, CHAMPAGNE, GREY, WHITE, SPLASH);
+        List.of(EXTENSION, AGOUTI, SILVER, MUSHROOM, DUN, CREAM, PEARL, CHAMPAGNE, GREY, WHITE,
+                ROAN, TOBIANO, FRAME, SABINO, SPLASH);
 
 // 3. (magical genes go in MAGICAL_ORDER instead)</code></pre>
 </div>
@@ -411,8 +422,9 @@ private static final List&lt;Gene&gt; NATURAL_ORDER =
 
 <p>
     The current natural order is
-    extension &rarr; agouti &rarr; cream &rarr; pearl &rarr; champagne &rarr; grey
-    &rarr; white &rarr; splash. The
+    extension &rarr; agouti &rarr; silver &rarr; mushroom &rarr; dun &rarr; cream &rarr;
+    pearl &rarr; champagne &rarr; grey &rarr; white &rarr; roan &rarr; tobiano &rarr;
+    frame &rarr; sabino &rarr; splash. The
     <a href="roadmap.html#priority">planned replacement</a> is a hard-coded
     <code>int priority()</code> on each gene with the lists <em>derived</em> by
     sorting on <code>(priority, geneKey)</code> &mdash; natural band 0&ndash;99,

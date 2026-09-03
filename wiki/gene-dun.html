@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dun &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="nav.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow natural">Natural gene <span class="sep">/</span> phase 1</p>
+<h1>Dun</h1>
+<p class="lede">
+    Real-horse <code>TBX3</code>. Two effects at once: a mild, hue-keeping
+    <strong>body dilution</strong>, and <strong>primitive markings</strong> &mdash; a
+    full-length dorsal stripe and faint horizontal leg barring &mdash; that read dark
+    because everything around them got lighter, not because pigment was added.
+</p>
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd>horsegenetics.dun</dd></div>
+    <div><dt>Alleles</dt><dd><span class="allele dom">D</span> <span class="allele wild">d</span></dd></div>
+    <div><dt>Dominance</dt><dd>DOMINANT</dd></div>
+    <div><dt>Wild type</dt><dd>d</dd></div>
+    <div><dt>Wild frequency</dt><dd>1 in 24 per allele</dd></div>
+    <div><dt>Founder draws</dt><dd>2 &times; nextInt(24)</dd></div>
+    <div><dt>Deterministic</dt><dd>yes</dd></div>
+    <div><dt>Visible when</dt><dd>D_</dd></div>
+    <div><dt>keep red</dt><dd>0.85 on a red base &rarr; 0.0 on a black base (by black content)</dd></div>
+    <div><dt>keep black</dt><dd>0.48 body; 0.82 in a leg bar</dd></div>
+    <div><dt>dorsal half-width</dt><dd>1.5 body units</dd></div>
+    <div><dt>leg bars</dt><dd>spacing 4.2, duty 0.28, reach 0.60</dd></div>
+</dl>
+
+<h2>How the markings survive the dilution</h2>
+
+<p>
+    Phase 1 is downward-only &mdash; a gene can never add pigment back. So dun computes,
+    per texel a <strong>marking strength</strong> and <em>lerps its dilution off</em>
+    where a marking is: a dorsal-stripe texel skips the dilution entirely and keeps
+    the base colour, a leg-bar texel keeps extra <b>black only</b>.
+</p>
+
+<p>
+    <b><code>keepRed</code> is not a constant.</b> A black horse still carries
+    <code>red = 1</code> (its blackness is all eumelanin), so keeping any of that red
+    lands grullo in the gradient&rsquo;s warm browns instead of on its neutral column.
+    So <code>keepRed</code> is interpolated by the texel&rsquo;s <em>black</em>
+    content: a chestnut keeps almost all its red and comes out a pale red dun, a
+    black one loses nearly all of it and comes out a mouse-grey grullo, a bay body
+    sits between. A leg bar keeps <em>black</em> rather than re-introducing red, or a
+    bar on a black leg reads as a warm patch, not a dark band.
+</p>
+
+<div class="codebox">
+<div class="filename">common/genetics/genes/DunGene.java</div>
+<pre><code class="language-java">float keepRed   = lerp(KEEP_RED_CHESTNUT, KEEP_RED_BLACK, b);   // b = this texel&#39;s black
+float keepBlack = KEEP_BLACK;
+
+float dorsal = (float) CoatRegions.dorsalStripe(skin, part, point, DORSAL_HALF_WIDTH);
+keepRed   = lerp(keepRed,   1f, dorsal);   // dorsal: skip the dilution, keep the base
+keepBlack = lerp(keepBlack, 1f, dorsal);
+
+if (isLeg(part)) {
+    float bar = (float) CoatRegions.legBar(skin, part, point, BAR_SPACING, BAR_DUTY, BAR_REACH);
+    keepBlack = Math.max(keepBlack, lerp(KEEP_BLACK, BAR_KEEP_BLACK, bar));   // black only
+}
+f.setRed(px, py, r * keepRed);
+f.setBlack(px, py, b * keepBlack);</code></pre>
+</div>
+
+<h2>What it looks like on each base</h2>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Base</th><th>Name</th><th>Body</th></tr></thead>
+<tbody>
+<tr><td>bay (<code>E_ A_</code>)</td><td><strong>bay dun / zebra dun</strong></td><td>tan body, black points, dark dorsal + leg bars</td></tr>
+<tr><td>black (<code>E_ aa</code>)</td><td><strong>grullo</strong></td><td>mouse-grey body, dark dorsal</td></tr>
+<tr><td>chestnut (<code>ee</code>)</td><td><strong>red dun</strong></td><td>pale apricot body, red dorsal</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="note">
+    <span class="label">Simplification</span>
+    <p>
+        The real locus has three alleles &mdash; <code>D</code> (full dun),
+        <code>d1</code> (non-dun but still marked), <code>d2</code> (no dun, no
+        markings) &mdash; whose dominance order (<code>D &gt; d1 = d2</code> for
+        dilution, but only <code>d1</code> carries markings) a single
+        <a href="genetics-model.html"><code>DominancePattern</code></a> can&rsquo;t
+        express. This is the two-allele form; the third allele is a
+        <a href="roadmap.html">roadmap</a> item. Leg barring is also a hand-rolled
+        Y-phase rather than a reuse of
+        <a href="body-space.html"><code>BodyStripes</code></a> (which runs on X).
+    </p>
+</div>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="gene-agouti.html">Agouti</a>
+        <a href="gene-grey.html">Grey</a>
+        <a href="body-space.html">Body space &amp; regions</a>
+    </div>
+    Source: <code>common/genetics/genes/DunGene.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>
