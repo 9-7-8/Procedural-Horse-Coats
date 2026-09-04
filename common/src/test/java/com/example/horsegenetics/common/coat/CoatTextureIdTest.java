@@ -43,8 +43,11 @@ class CoatTextureIdTest {
         Set<String> seen = new LinkedHashSet<>();
         List<Genotype> out = new ArrayList<>();
 
+        // Dedup on the *coat* code, not the full genotype: a gene that paints
+        // nothing (sex) is not part of the texture key, so two genotypes that
+        // differ only there are one coat and are meant to share an id.
         java.util.function.Consumer<Genotype> add = g -> {
-            if (seen.add(g.toCode())) {
+            if (seen.add(g.coatCode())) {
                 out.add(g);
             }
         };

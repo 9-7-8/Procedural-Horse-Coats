@@ -1,6 +1,7 @@
 package com.example.horsegenetics.common.genetics;
 
 import com.example.horsegenetics.common.Rng;
+import com.example.horsegenetics.common.horse.Sex;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -92,9 +93,31 @@ public final class Genotype {
         return of(List.copyOf(supplied.values()));
     }
 
+    /**
+     * This genotype with its sex locus set to {@code sex} - the rest untouched.
+     * The one legitimate way to <i>choose</i> a horse's sex, and it is a founder
+     * operation: the horse dimension stocks each pen with one mare and one
+     * stallion of the same colour, and the custom spawn egg lets the player
+     * pick. A foal never goes through it - its sex is inherited like any other
+     * gene.
+     */
+    public Genotype withSex(Sex sex) {
+        Map<String, AllelePair> m = new LinkedHashMap<>(byGene);
+        m.put(Genes.SEX.key(), Genes.SEX.pairFor(sex));
+        return new Genotype(m);
+    }
+
     public String toCode() {
+        return code(g -> true);
+    }
+
+    /** One {@code <geneKey>=<a>/<b>} segment per gene {@code include} accepts, {@code -}-joined. */
+    private String code(java.util.function.Predicate<Gene> include) {
         StringBuilder sb = new StringBuilder();
         for (Gene g : Genes.codeOrder()) {
+            if (!include.test(g)) {
+                continue;
+            }
             if (sb.length() > 0) {
                 sb.append(GENE_SEP);
             }
@@ -145,6 +168,41 @@ public final class Genotype {
     // Access
     // ------------------------------------------------------------------
 
+    /**
+     * This horse's {@link Sex}, read off the sex locus - the single source of
+     * truth. {@code X/X} is a mare, anything else a stallion.
+     */
+    public Sex sex() {
+        return Genes.SEX.sexOf(pair(Genes.SEX));
+    }
+
+    /**
+     * The sex a code string describes, <b>without parsing the rest of it</b> -
+     * {@link com.example.horsegenetics.common.horse.HorseRecord#sex()} is asked
+     * this on every GUI frame and on every horse's ability tick, and building
+     * one {@link AllelePair} per registered gene to read one of them is waste.
+     * Falls back to
+     * the sex gene's default ({@code X/X}, a mare) when the code has no sex
+     * segment, exactly as {@link #parse} would.
+     */
+    public static Sex sexOf(String code) {
+        String prefix = Genes.SEX.key() + NAME_SEP;
+        int at = code.indexOf(prefix);
+        boolean atSegmentStart = at == 0 || (at > 0 && code.charAt(at - 1) == GENE_SEP.charAt(0));
+        if (at >= 0 && atSegmentStart) {
+            int from = at + prefix.length();
+            int end = code.indexOf(GENE_SEP.charAt(0), from);
+            String body = end < 0 ? code.substring(from) : code.substring(from, end);
+            int slash = body.indexOf(ALLELE_SEP.charAt(0));
+            if (slash >= 0) {
+                return Genes.SEX.sexOf(new AllelePair(
+                        Genes.SEX.fromToken(body.substring(0, slash)),
+                        Genes.SEX.fromToken(body.substring(slash + 1))));
+            }
+        }
+        return Genes.SEX.sexOf(new AllelePair(Genes.SEX.defaultAllele(), Genes.SEX.defaultAllele()));
+    }
+
     public AllelePair pair(Gene gene) {
         return byGene.get(gene.key());
     }
@@ -160,6 +218,21 @@ public final class Genotype {
     public boolean has(Allele allele) {
         AllelePair p = byGene.get(allele.geneKey());
         return p != null && p.has(allele);
+    }
+
+    /**
+     * {@link #toCode()} restricted to the genes that can paint something
+     * ({@link Gene#affectsCoat()}) - the part of the genotype a texture depends
+     * on, and so the basis of {@code CoatData.textureKey()}. Two horses with the
+     * same {@code coatCode} are painted identically (epigenetics aside), which
+     * is why a mare and a stallion of the same colour share one baked texture
+     * rather than doubling the cache.
+     *
+     * <p>Not a persistence format - it is lossy on purpose and nothing parses
+     * it back.
+     */
+    public String coatCode() {
+        return code(Gene::affectsCoat);
     }
 
     // ------------------------------------------------------------------

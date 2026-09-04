@@ -74,17 +74,22 @@ public final class GenotypeCatalog {
     }
 
     /**
-     * Every unordered {@link AllelePair} of {@code gene} - all
-     * {@code n(n+1)/2} of them for {@code n} alleles - walking
-     * {@link Gene#alleles()} backwards, so the last-declared allele (by
-     * convention the population's baseline) comes first.
+     * Every unordered {@link AllelePair} of {@code gene} a horse can actually
+     * carry - all {@code n(n+1)/2} of them for {@code n} alleles, minus any the
+     * gene rules out with {@link Gene#canOccur} (the sex locus has no
+     * {@code Y/Y}) - walking {@link Gene#alleles()} backwards, so the
+     * last-declared allele (by convention the population's baseline) comes
+     * first.
      */
     public static List<AllelePair> allPairsOf(Gene gene) {
         List<Allele> alleles = gene.alleles();
         List<AllelePair> pairs = new ArrayList<>();
         for (int i = alleles.size() - 1; i >= 0; i--) {
             for (int j = alleles.size() - 1; j >= i; j--) {
-                pairs.add(new AllelePair(alleles.get(i), alleles.get(j)));
+                AllelePair pair = new AllelePair(alleles.get(i), alleles.get(j));
+                if (gene.canOccur(pair)) {
+                    pairs.add(pair);
+                }
             }
         }
         return List.copyOf(pairs);

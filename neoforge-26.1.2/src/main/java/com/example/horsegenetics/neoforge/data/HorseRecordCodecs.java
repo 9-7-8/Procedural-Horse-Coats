@@ -2,7 +2,6 @@ package com.example.horsegenetics.neoforge.data;
 
 import com.example.horsegenetics.common.horse.HorseRecord;
 import com.example.horsegenetics.common.horse.ParentStats;
-import com.example.horsegenetics.common.horse.Sex;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -20,8 +19,9 @@ import net.minecraft.network.codec.StreamCodec;
  */
 public final class HorseRecordCodecs {
 
-    // Sex is a plain Layer-1 enum (no StringRepresentable), so map it by name.
-    public static final Codec<Sex> SEX = Codec.STRING.xmap(Sex::valueOf, Sex::name);
+    // No "sex" field: sex is a gene, so it already rides in "genetic_code"
+    // (see HorseRecord.sex()). Serialising it separately would let a saved
+    // record disagree with the genome it carries.
 
     public static final Codec<ParentStats> PARENT_STATS = RecordCodecBuilder.create(i -> i.group(
             Codec.DOUBLE.fieldOf("speed_min").forGetter(ParentStats::speedMin),
@@ -32,7 +32,6 @@ public final class HorseRecordCodecs {
 
     public static final MapCodec<HorseRecord> MAP_CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
             UUIDUtil.STRING_CODEC.fieldOf("id").forGetter(HorseRecord::id),
-            SEX.fieldOf("sex").forGetter(HorseRecord::sex),
             Codec.STRING.optionalFieldOf("first_name", "").forGetter(HorseRecord::firstName),
             Codec.STRING.optionalFieldOf("last_name", "").forGetter(HorseRecord::lastName),
             Codec.STRING.optionalFieldOf("barn_name").forGetter(HorseRecord::barnName),

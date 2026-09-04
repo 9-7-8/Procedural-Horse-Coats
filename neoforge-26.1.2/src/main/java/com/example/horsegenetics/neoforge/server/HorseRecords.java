@@ -55,13 +55,12 @@ public final class HorseRecords {
         }
     }
 
+    /**
+     * A wild horse: everything rolled, <b>sex included</b> - it is a gene now,
+     * so {@link Genotype#random} draws it along with the rest.
+     */
     public static HorseRecord newFounder(Horse horse, Rng rng) {
-        return newFounder(horse, rng, randomSex(rng));
-    }
-
-    /** Founder record with a forced sex (the horse dimension wants one mare + one stallion). */
-    public static HorseRecord newFounder(Horse horse, Rng rng, Sex sex) {
-        return newFounder(horse, rng, sex, Genotype.random(rng));
+        return newFounder(horse, rng, Genotype.random(rng));
     }
 
     /**
@@ -69,7 +68,9 @@ public final class HorseRecords {
      * dimension stocks each pen with a specific entry from
      * {@link com.example.horsegenetics.common.genetics.GenotypeCatalog}, and the
      * custom spawn egg with the one the player built, so neither may be
-     * re-rolled.
+     * re-rolled. The sex is written <i>into</i> the genotype
+     * ({@link Genotype#withSex}) rather than beside it, because that is where a
+     * horse's sex lives.
      *
      * <p>The <b>epigenome is rolled here</b>, in the same breath as the record,
      * because both now live on the record and a founder is exactly the horse
@@ -78,8 +79,13 @@ public final class HorseRecords {
      * ({@code HorseBreedingHandler}).
      */
     public static HorseRecord newFounder(Horse horse, Rng rng, Sex sex, Genotype genotype) {
+        return newFounder(horse, rng, genotype.withSex(sex));
+    }
+
+    /** Founder record with a forced genotype, whose sex locus is taken as-is. */
+    public static HorseRecord newFounder(Horse horse, Rng rng, Genotype genotype) {
         NameParts name = NAMES.generateParts(rng);
-        return HorseRecord.founder(horse.getUUID(), sex, name.first(), name.last(),
+        return HorseRecord.founder(horse.getUUID(), name.first(), name.last(),
                         CoatGenerator.generate(genotype, rng).genome())
                 .withStats(entitySpeed(horse), entityHealth(horse));
     }
@@ -169,10 +175,6 @@ public final class HorseRecords {
         if (record.tamedBy().isEmpty()) {
             apply(horse, record.withTamedBy(username));
         }
-    }
-
-    public static Sex randomSex(Rng rng) {
-        return rng.nextBoolean() ? Sex.MALE : Sex.FEMALE;
     }
 
     public static Rng rng(Horse horse) {

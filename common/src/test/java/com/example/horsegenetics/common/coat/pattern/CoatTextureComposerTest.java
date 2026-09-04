@@ -241,12 +241,23 @@ class CoatTextureComposerTest {
         }
     }
 
+    /**
+     * Bays spread from low socks to seal. Scanned over a range of seeds rather
+     * than pinned to two of them: the epigenome derives a gene's seed from its
+     * position in {@code codeOrder()}, so registering a gene reshuffles which
+     * horse a given seed produces without changing the spread this asserts.
+     */
     @Test
     void bayPointHeightVariesFromHorseToHorse() {
-        double low = blackLegHeight(compose(BAY, 0L), Part.LEFT_FRONT_LEG);
-        double seal = blackLegHeight(compose(BAY, 3L), Part.LEFT_FRONT_LEG);
-        assertTrue(seal > low + 0.15,
-                "a seal-high bay should carry black much further up the leg: " + seal + " vs " + low);
+        double low = Double.MAX_VALUE;
+        double high = -1.0;
+        for (long seed = 0L; seed < 12L; seed++) {
+            double h = blackLegHeight(compose(BAY, seed), Part.LEFT_FRONT_LEG);
+            low = Math.min(low, h);
+            high = Math.max(high, h);
+        }
+        assertTrue(high > low + 0.15,
+                "bays should run from low socks to seal, got " + low + " .. " + high);
     }
 
     @Test

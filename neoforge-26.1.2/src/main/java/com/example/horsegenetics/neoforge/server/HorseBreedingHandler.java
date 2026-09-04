@@ -112,9 +112,10 @@ public final class HorseBreedingHandler {
         ParentStats parentStats = ParentStats.of(
                 damRecord.speed(), sireRecord.speed(), damRecord.health(), sireRecord.health());
 
+        // No sex argument: the foal's sex came out of the Mendelian draw above,
+        // like every other locus, and HorseRecord reads it back off the code.
         HorseRecord childRecord = HorseRecord.bred(
                 child.getUUID(),
-                HorseRecords.randomSex(rng),
                 childName.first(),
                 childName.last(),
                 childGenome,

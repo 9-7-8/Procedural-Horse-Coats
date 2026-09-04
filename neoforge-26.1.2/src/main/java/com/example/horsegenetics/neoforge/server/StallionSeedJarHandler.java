@@ -118,7 +118,6 @@ public final class StallionSeedJarHandler {
         StoredGenome stored = new StoredGenome(
                 genome.genotypeCode(),
                 genome.epigenomeCode(),
-                Sex.MALE,
                 stallion.getUUID(),
                 record.displayName(),
                 record.hasStats() ? record.speed() : HorseRecords.entitySpeed(stallion),
@@ -184,7 +183,7 @@ public final class StallionSeedJarHandler {
 
         String[] name = splitName(stored.sourceName());
         HorseRecord sireRecord = HorseRecord
-                .founder(stored.sourceId(), Sex.MALE, name[0], name[1], sireGenome)
+                .founder(stored.sourceId(), name[0], name[1], sireGenome)
                 .withStats(stored.speed(), stored.health());
 
         Horse foal = EntityType.HORSE.create(level, EntitySpawnReason.BREEDING);

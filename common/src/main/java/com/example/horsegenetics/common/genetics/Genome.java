@@ -1,6 +1,7 @@
 package com.example.horsegenetics.common.genetics;
 
 import com.example.horsegenetics.common.Rng;
+import com.example.horsegenetics.common.horse.Sex;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -93,6 +94,20 @@ public record Genome(Genotype genotype, Epigenome epigenome) {
         }
 
         return new Genome(Genotype.of(List.copyOf(pairs.values())), Epigenome.of(copies));
+    }
+
+    /**
+     * This genome with its sex locus forced to {@code sex} - see
+     * {@link Genotype#withSex}. The epigenome is untouched and stays aligned:
+     * the sex locus has two copies either way, and nothing reads their seeds.
+     */
+    public Genome withSex(Sex sex) {
+        return new Genome(genotype.withSex(sex), epigenome);
+    }
+
+    /** This horse's {@link Sex}, read off the sex locus. */
+    public Sex sex() {
+        return genotype.sex();
     }
 
     public String genotypeCode() {

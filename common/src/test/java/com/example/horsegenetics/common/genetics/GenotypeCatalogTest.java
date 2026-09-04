@@ -15,12 +15,40 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class GenotypeCatalogTest {
 
     @Test
-    void allPairsOfIsEveryUnorderedPair() {
+    void allPairsOfIsEveryUnorderedPairAHorseCanCarry() {
         assertEquals(List.of("ee", "Ee", "EE"), tokens(GenotypeCatalog.allPairsOf(Genes.EXTENSION)));
         for (Gene gene : Genes.codeOrder()) {
             int n = gene.alleles().size();
-            assertEquals(n * (n + 1) / 2, GenotypeCatalog.allPairsOf(gene).size(), gene.key());
+            int impossible = 0;
+            for (Allele a : gene.alleles()) {
+                for (Allele b : gene.alleles()) {
+                    if (a.order() <= b.order() && !gene.canOccur(new AllelePair(a, b))) {
+                        impossible++;
+                    }
+                }
+            }
+            assertEquals(n * (n + 1) / 2 - impossible, GenotypeCatalog.allPairsOf(gene).size(), gene.key());
         }
+    }
+
+    /**
+     * The sex locus is the one gene with a combination that cannot happen:
+     * a foal always takes an {@code X} from its dam, so there is no
+     * {@code Y/Y} horse to give a pen to - or to count.
+     */
+    @Test
+    void theSexLocusHasNoYYCombination() {
+        assertEquals(List.of("XY", "XX"), tokens(GenotypeCatalog.allPairsOf(Genes.SEX)));
+    }
+
+    /**
+     * Sex changes nothing about the coat - both its outcomes are wild types -
+     * so the gallery gives the whole locus one pen rather than doubling it.
+     */
+    @Test
+    void sexDoesNotWidenTheGallery() {
+        assertEquals(1, GenotypeCatalog.distinctPairsOf(Genes.SEX).size());
+        assertFalse(Genes.SEX.affectsCoat());
     }
 
     /**

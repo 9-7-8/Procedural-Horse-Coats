@@ -28,6 +28,12 @@ import java.util.UUID;
  * ancestor's alleles but not its coat, so the family tree had to invent a
  * plausible stand-in from the record UUID.
  *
+ * <p>There is <b>no {@code sex} field</b>. Sex is a gene like any other
+ * ({@code horsegenetics.sex}, {@code X}/{@code Y}), so it is already in
+ * {@code geneticCode} and {@link #sex()} reads it from there. Storing it twice
+ * would let a record disagree with the genome it carries, and would mean a
+ * foal's sex was invented rather than inherited.
+ *
  * <p>{@code speed} and {@code health} mirror the entity's movement-speed and
  * max-health attribute values. A foundation horse copies whatever the entity
  * spawned with; a foal's are rolled from its parents by
@@ -39,7 +45,6 @@ import java.util.UUID;
  */
 public record HorseRecord(
         UUID id,
-        Sex sex,
         String firstName,
         String lastName,
         Optional<String> barnName,
@@ -58,7 +63,6 @@ public record HorseRecord(
 
     public HorseRecord {
         Objects.requireNonNull(id, "id");
-        Objects.requireNonNull(sex, "sex");
         Objects.requireNonNull(firstName, "firstName");
         Objects.requireNonNull(lastName, "lastName");
         Objects.requireNonNull(geneticCode, "geneticCode");
@@ -102,29 +106,47 @@ public record HorseRecord(
      * world, so no real horse is ever seen or saved holding one.
      */
     public static HorseRecord unassigned(UUID id) {
-        return new HorseRecord(id, Sex.FEMALE, "", "", Optional.empty(),
+        return new HorseRecord(id, "", "", Optional.empty(),
                 Genotype.wildType().toCode(), "",
                 Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), 0, 0.0, 0.0,
                 Optional.empty());
     }
 
-    /** A foundation horse - no recorded parents, generation 0, stats unrecorded. */
-    public static HorseRecord founder(UUID id, Sex sex, String firstName, String lastName, Genome genome) {
-        return new HorseRecord(id, sex, firstName, lastName, Optional.empty(),
+    /**
+     * A foundation horse - no recorded parents, generation 0, stats unrecorded.
+     * Its sex comes from {@code genome}; a caller that wants to <i>choose</i>
+     * one hands in {@link Genome#withSex}.
+     */
+    public static HorseRecord founder(UUID id, String firstName, String lastName, Genome genome) {
+        return new HorseRecord(id, firstName, lastName, Optional.empty(),
                 genome.genotypeCode(), genome.epigenomeCode(),
                 Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), 0, 0.0, 0.0, Optional.empty());
     }
 
-    /** A horse bred from two known parents; {@code generation} is the caller's {@code 1 + max(parent gens)}. */
-    public static HorseRecord bred(UUID id, Sex sex, String firstName, String lastName, Genome genome,
+    /**
+     * A horse bred from two known parents; {@code generation} is the caller's
+     * {@code 1 + max(parent gens)}. Its sex is <b>inherited</b> - whichever sex
+     * chromosome the Mendelian draw handed it - so there is nothing to pass.
+     */
+    public static HorseRecord bred(UUID id, String firstName, String lastName, Genome genome,
                                    UUID motherId, UUID fatherId, int generation) {
-        return new HorseRecord(id, sex, firstName, lastName, Optional.empty(),
+        return new HorseRecord(id, firstName, lastName, Optional.empty(),
                 genome.genotypeCode(), genome.epigenomeCode(),
                 Optional.of(motherId), Optional.of(fatherId), Optional.empty(), Optional.empty(), generation,
                 0.0, 0.0, Optional.empty());
     }
 
     // --- the genome ---------------------------------------------------
+
+    /**
+     * This horse's {@link Sex}, read off the sex locus in {@link #geneticCode}
+     * - the single source of truth. A code with no sex segment (the blank
+     * sentinel) reads as a mare, which is what this record's hard-coded default
+     * always was.
+     */
+    public Sex sex() {
+        return Genotype.sexOf(geneticCode);
+    }
 
     /** The alleles this horse carries. */
     public Genotype genotype() {
@@ -147,7 +169,7 @@ public record HorseRecord(
     }
 
     public HorseRecord withGenome(Genome genome) {
-        return new HorseRecord(id, sex, firstName, lastName, barnName,
+        return new HorseRecord(id, firstName, lastName, barnName,
                 genome.genotypeCode(), genome.epigenomeCode(),
                 motherId, fatherId, tamedBy, bredBy, generation, speed, health, parentStats);
     }
@@ -173,32 +195,32 @@ public record HorseRecord(
     }
 
     public HorseRecord withNames(String newFirst, String newLast) {
-        return new HorseRecord(id, sex, newFirst, newLast, barnName, geneticCode, epigenomeCode,
+        return new HorseRecord(id, newFirst, newLast, barnName, geneticCode, epigenomeCode,
                 motherId, fatherId, tamedBy, bredBy, generation, speed, health, parentStats);
     }
 
     public HorseRecord withBarnName(Optional<String> newBarnName) {
-        return new HorseRecord(id, sex, firstName, lastName, newBarnName, geneticCode, epigenomeCode,
+        return new HorseRecord(id, firstName, lastName, newBarnName, geneticCode, epigenomeCode,
                 motherId, fatherId, tamedBy, bredBy, generation, speed, health, parentStats);
     }
 
     public HorseRecord withTamedBy(String username) {
-        return new HorseRecord(id, sex, firstName, lastName, barnName, geneticCode, epigenomeCode,
+        return new HorseRecord(id, firstName, lastName, barnName, geneticCode, epigenomeCode,
                 motherId, fatherId, Optional.of(username), bredBy, generation, speed, health, parentStats);
     }
 
     public HorseRecord withBredBy(String username) {
-        return new HorseRecord(id, sex, firstName, lastName, barnName, geneticCode, epigenomeCode,
+        return new HorseRecord(id, firstName, lastName, barnName, geneticCode, epigenomeCode,
                 motherId, fatherId, tamedBy, Optional.of(username), generation, speed, health, parentStats);
     }
 
     public HorseRecord withStats(double newSpeed, double newHealth) {
-        return new HorseRecord(id, sex, firstName, lastName, barnName, geneticCode, epigenomeCode,
+        return new HorseRecord(id, firstName, lastName, barnName, geneticCode, epigenomeCode,
                 motherId, fatherId, tamedBy, bredBy, generation, newSpeed, newHealth, parentStats);
     }
 
     public HorseRecord withParentStats(ParentStats newParentStats) {
-        return new HorseRecord(id, sex, firstName, lastName, barnName, geneticCode, epigenomeCode,
+        return new HorseRecord(id, firstName, lastName, barnName, geneticCode, epigenomeCode,
                 motherId, fatherId, tamedBy, bredBy, generation, speed, health, Optional.ofNullable(newParentStats));
     }
 

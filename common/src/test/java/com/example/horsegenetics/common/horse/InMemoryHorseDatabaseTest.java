@@ -21,11 +21,11 @@ class InMemoryHorseDatabaseTest {
     }
 
     private static HorseRecord founder(String tail) {
-        return HorseRecord.founder(id(tail), Sex.MALE, "F" + tail, "Wind", GENOME);
+        return HorseRecord.founder(id(tail), "F" + tail, "Wind", GENOME);
     }
 
     private static HorseRecord bred(String tail, String dam, String sire) {
-        return HorseRecord.bred(id(tail), Sex.FEMALE, "B" + tail, "Wind", GENOME, id(dam), id(sire), 1);
+        return HorseRecord.bred(id(tail), "B" + tail, "Wind", GENOME, id(dam), id(sire), 1);
     }
 
     @Test

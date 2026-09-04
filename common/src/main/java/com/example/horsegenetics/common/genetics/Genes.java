@@ -12,6 +12,7 @@ import com.example.horsegenetics.common.genetics.genes.MatpGene;
 import com.example.horsegenetics.common.genetics.genes.PinkHairGene;
 import com.example.horsegenetics.common.genetics.genes.RoanGene;
 import com.example.horsegenetics.common.genetics.genes.SabinoGene;
+import com.example.horsegenetics.common.genetics.genes.SexGene;
 import com.example.horsegenetics.common.genetics.genes.SilverGene;
 import com.example.horsegenetics.common.genetics.genes.SplashGene;
 import com.example.horsegenetics.common.genetics.genes.TestGene;
@@ -67,6 +68,8 @@ public final class Genes {
     /** The lowest priority in the magical band - below this a gene is "natural" by convention. */
     public static final int MAGICAL_BAND_START = 100;
 
+    /** Sex, at priority 1 - the first gene resolved, and the only one that paints nothing. */
+    public static final SexGene SEX = new SexGene();
     public static final ExtensionGene EXTENSION = new ExtensionGene();
     public static final AgoutiGene AGOUTI = new AgoutiGene();
     public static final WhiteGene WHITE = new WhiteGene();
@@ -87,7 +90,7 @@ public final class Genes {
 
     /** The hand-written genes. Order here is irrelevant - the registry sorts. */
     private static final List<Gene> BUILTINS = List.of(
-            EXTENSION, AGOUTI, WHITE, TEST, CHAMPAGNE, SPLASH, GREY, MATP,
+            SEX, EXTENSION, AGOUTI, WHITE, TEST, CHAMPAGNE, SPLASH, GREY, MATP,
             MAGIC_ZEBRA, PINK_HAIR, DUN, SILVER, MUSHROOM, ROAN, TOBIANO, FRAME, SABINO);
 
     /** Ordering: lower priority first, ties broken alphabetically by key. */

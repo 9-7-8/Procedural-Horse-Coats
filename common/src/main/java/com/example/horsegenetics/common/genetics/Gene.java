@@ -146,6 +146,25 @@ public interface Gene {
     Expression expressionOf(AllelePair pair);
 
     /**
+     * <b>Can a horse actually carry this combination?</b> True for every
+     * combination of almost every gene - a locus normally lets any two of its
+     * alleles pair up. The exception is a gene whose alleles are not
+     * interchangeable: the sex locus has no {@code Y/Y} horse, because a foal
+     * always takes an {@code X} from its dam.
+     *
+     * <p>A combination that cannot occur is left out of
+     * {@link GenotypeCatalog#allPairsOf} - so it gets no gallery pen and is not
+     * counted in {@link GenotypeCatalog#totalGenotypes()} - and an author
+     * should leave it out of the {@link #founderTable founder table} too.
+     * {@link #expressionOf} still has to answer for it: parsing is tolerant, so
+     * a hand-written code string can name one, and returning the nearest
+     * sensible outcome beats throwing.
+     */
+    default boolean canOccur(AllelePair pair) {
+        return true;
+    }
+
+    /**
      * The same question <b>in the context of the whole genotype</b>, for the
      * handful of genes whose result depends on another gene: agouti paints
      * black points, so it does nothing at all on a chestnut horse.
@@ -160,6 +179,26 @@ public interface Gene {
      */
     default Expression expressionIn(AllelePair pair, Genotype genotype) {
         return expressionOf(pair);
+    }
+
+    /**
+     * <b>Does this gene ever paint anything?</b> Derived: false only when
+     * <i>every</i> combination it can produce is a
+     * {@link Expression#wildType() wild type}, i.e. the gene is heritable but
+     * has no coat function at all. The sex locus is the first such gene.
+     *
+     * <p>A gene like that is excluded from a horse's texture key
+     * ({@code CoatData.textureKey()}), so two horses that differ only in it
+     * share one baked texture - the same reasoning that already keeps invisible
+     * epigenetics out of the key.
+     */
+    default boolean affectsCoat() {
+        for (Expression e : expressions()) {
+            if (!e.wildType()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     // --- founder population ----------------------------------------------

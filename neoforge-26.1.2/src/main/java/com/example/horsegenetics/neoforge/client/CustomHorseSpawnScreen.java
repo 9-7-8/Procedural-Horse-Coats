@@ -251,6 +251,9 @@ public final class CustomHorseSpawnScreen extends Screen {
             if (gene == Genes.EXTENSION || gene == Genes.AGOUTI) {
                 continue;
             }
+            if (gene == Genes.SEX) {
+                continue; // the Mare / Stallion button already sets this locus
+            }
             boolean present = false;
             for (Row row : rows) {
                 if (row.gene == gene) {

@@ -62,16 +62,19 @@ public final class CoatData {
     }
 
     /**
-     * Key for caching the generated texture: the genotype code, plus - only
-     * when the coat is non-deterministic - a digest of the epigenetics that can
-     * actually change its pixels ({@link Epigenome#visibleFingerprint}). So all
-     * black horses share one texture, two bays don't, and two bays that differ
-     * only in (invisible) grey epigenetics still do.
+     * Key for caching the generated texture: the genotype's
+     * {@link Genotype#coatCode() coat code} - the genes that can paint
+     * something, so a purely heritable locus like sex doesn't fork the cache -
+     * plus, only when the coat is non-deterministic, a digest of the
+     * epigenetics that can actually change its pixels
+     * ({@link Epigenome#visibleFingerprint}). So all black horses share one
+     * texture, two bays don't, and two bays that differ only in (invisible)
+     * grey epigenetics still do.
      */
     public String textureKey() {
         return isDeterministic()
-                ? genotype().toCode()
-                : genotype().toCode() + "@"
+                ? genotype().coatCode()
+                : genotype().coatCode() + "@"
                         + Long.toUnsignedString(epigenome().visibleFingerprint(genotype()), 16);
     }
 

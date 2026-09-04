@@ -1,6 +1,7 @@
 package com.example.horsegenetics.neoforge.data;
 
 import com.example.horsegenetics.common.genetics.GenomeSample;
+import com.example.horsegenetics.common.genetics.Genotype;
 import com.example.horsegenetics.common.horse.Sex;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -13,10 +14,13 @@ import net.minecraft.network.codec.StreamCodec;
 /**
  * The payload of the {@code horsegenetics:stored_genome} data component - a
  * {@link GenomeSample} (genotype + epigenome code) plus the small amount of
- * bookkeeping an item carrying one needs: the donor's {@link Sex}, its entity
- * {@link UUID} (so a foal bred from the sample still has a real pedigree edge),
- * a display name for the tooltip, and its speed / health (not genetic, but part
- * of "him" - the foal-stat roll needs a value for the sire side).
+ * bookkeeping an item carrying one needs: the donor's entity {@link UUID} (so a
+ * foal bred from the sample still has a real pedigree edge), a display name for
+ * the tooltip, and its speed / health (not genetic, but part of "him" - the
+ * foal-stat roll needs a value for the sire side).
+ *
+ * <p>The donor's {@link Sex} is <b>not</b> a field: sex is a gene, so it is
+ * already in {@code genotypeCode} and {@link #sex()} reads it back.
  *
  * <p>This is what the <b>stallion seed jar</b> holds. It deliberately stores
  * the <i>genotype</i>, never a drawn gamete: the Mendelian draw happens at
@@ -27,15 +31,12 @@ import net.minecraft.network.codec.StreamCodec;
  * effect list joins this record and {@code GenomeSample.breedInto} grows a bias
  * argument.
  */
-public record StoredGenome(String genotypeCode, String epigenomeCode, Sex sex,
+public record StoredGenome(String genotypeCode, String epigenomeCode,
                            UUID sourceId, String sourceName, double speed, double health) {
-
-    private static final Codec<Sex> SEX_CODEC = Codec.STRING.xmap(Sex::valueOf, Sex::name);
 
     public static final Codec<StoredGenome> CODEC = RecordCodecBuilder.create(i -> i.group(
             Codec.STRING.fieldOf("genotype").forGetter(StoredGenome::genotypeCode),
             Codec.STRING.fieldOf("epigenome").forGetter(StoredGenome::epigenomeCode),
-            SEX_CODEC.fieldOf("sex").forGetter(StoredGenome::sex),
             UUIDUtil.CODEC.fieldOf("source_id").forGetter(StoredGenome::sourceId),
             Codec.STRING.optionalFieldOf("source_name", "").forGetter(StoredGenome::sourceName),
             Codec.DOUBLE.optionalFieldOf("speed", 0.0).forGetter(StoredGenome::speed),
@@ -45,13 +46,16 @@ public record StoredGenome(String genotypeCode, String epigenomeCode, Sex sex,
     public static final StreamCodec<ByteBuf, StoredGenome> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.STRING_UTF8, StoredGenome::genotypeCode,
             ByteBufCodecs.STRING_UTF8, StoredGenome::epigenomeCode,
-            ByteBufCodecs.BOOL, sg -> sg.sex == Sex.FEMALE,
             UUIDUtil.STREAM_CODEC, StoredGenome::sourceId,
             ByteBufCodecs.STRING_UTF8, StoredGenome::sourceName,
             ByteBufCodecs.DOUBLE, StoredGenome::speed,
             ByteBufCodecs.DOUBLE, StoredGenome::health,
-            (genotype, epigenome, female, id, name, speed, health) ->
-                    new StoredGenome(genotype, epigenome, female ? Sex.FEMALE : Sex.MALE, id, name, speed, health));
+            StoredGenome::new);
+
+    /** The donor's sex, read off the stored genotype - a filled jar is always a stallion's. */
+    public Sex sex() {
+        return Genotype.sexOf(genotypeCode);
+    }
 
     public GenomeSample sample() {
         return new GenomeSample(genotypeCode, epigenomeCode);

@@ -3,6 +3,7 @@ package com.example.horsegenetics.common.genetics;
 import com.example.horsegenetics.common.testutil.Codes;
 import com.example.horsegenetics.common.testutil.FakeRng;
 import com.example.horsegenetics.common.testutil.LegacyCode;
+import com.example.horsegenetics.common.horse.Sex;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -154,6 +155,7 @@ class GenotypeTest {
         // Every table lists its rarest combination first and its commonest
         // last, so a high roll is the plain horse everywhere.
         assertEquals(CoatPhenotype.CHESTNUT, x.phenotype());
+        assertEquals(Sex.FEMALE, x.sex());   // sex's last bucket is X/X, its baseline
         for (Gene gene : Genes.codeOrder()) {
             if (gene == Genes.EXTENSION || gene == Genes.AGOUTI) {
                 // the two 50/50 loci: their last bucket is the recessive
@@ -189,6 +191,8 @@ class GenotypeTest {
         assertTrue(x.has(Genes.TOBIANO.To));
         assertTrue(x.has(Genes.FRAME.Ov));
         assertTrue(x.has(Genes.SABINO.SB1));
+        // sex is drawn from a table like any other gene: its first bucket is X/Y
+        assertEquals(Sex.MALE, x.sex());
     }
 
     /**
