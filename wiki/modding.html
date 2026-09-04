@@ -156,7 +156,7 @@
 
     // --- override only if a combination genuinely cannot exist -------------
     // Almost every locus lets any two of its alleles pair up. Say otherwise and
-    // the combination gets no gallery pen and is not counted in
+    // the combination gets no catalogue entry and is not counted in
     // totalGenotypes(). Only the sex locus does, to rule out Y/Y.
     default boolean canOccur(AllelePair pair) { return true; }
 
@@ -424,11 +424,11 @@ private static int toward(ColorView colour, int px, int py, int channel, int tar
         <code>wildType</code> means &ldquo;changes nothing <em>about the coat</em>&rdquo;,
         and that is what makes <code>Gene.affectsCoat()</code> false, keeps your gene out
         of the texture key, and collapses your whole locus to a single entry in the
-        genotype gallery. Get this wrong and every horse in the world re-bakes a
+        genotype catalogue. Get this wrong and every horse in the world re-bakes a
         texture.</li>
     <li><strong>Declare the baseline allele last.</strong>
         <code>GenotypeCatalog.allPairsOf</code> walks the allele list backwards, so the
-        last-declared allele is the one a gallery pen ends up carrying &mdash; and
+        last-declared allele is the one a catalogue entry ends up carrying &mdash; and
         <code>GeneCodeDisplay</code> hides a gene sitting entirely on its
         <code>defaultAllele()</code>. Declare the variant first and the baseline last, and
         an ordinary horse&rsquo;s short genome string is unchanged.</li>

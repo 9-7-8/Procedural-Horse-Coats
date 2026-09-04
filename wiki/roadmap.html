@@ -160,11 +160,12 @@
     <li><strong>The gene-authoring tiers + mod-bus hook</strong> (§3) &mdash; abstract
         base classes and <code>RegisterHorseGenesEvent</code>. Not strictly blocking, but
         it pays for itself on the next gene written.</li>
-    <li><strong>Revert the dimension to random pens</strong> (§8) &mdash; small,
-        self-contained, removes the combinatorial blocker (§10) so genes can be added
-        freely. Could be done first.</li>
-    <li><strong>The custom horse spawner</strong> (§9) &mdash; pull early once Tier 1
-        exists; it makes every later gene and every gameplay system faster to test.</li>
+    <li><s><strong>Revert the dimension to random pens</strong> (§8)</s> &mdash;
+        <strong>done 2026-09-04</strong>; the combinatorial blocker (§10) is gone, so
+        genes can be added freely.</li>
+    <li><s><strong>The custom horse spawner</strong> (§9)</s> &mdash; <strong>mostly
+        done 2026-09-04</strong>: gene list, live preview, epigenetics reroll, code
+        round-trip, creative gate. Only the per-allele seed editor is left.</li>
     <li><strong>Decide the custom-entity question</strong> (§11) &mdash; a decision, not
         code, but it gates the <em>design</em> of §§12&ndash;19. Make it before building
         any of them.</li>
@@ -699,9 +700,10 @@
         <code>lethal-white</code> outcome.
     </p>
     <p>
-        <strong>Left over from the change:</strong> the catalogue is now 2,064,387 pens,
-        which forced <code>MAX_GALLERY_PENS</code> and a lazily-computed
-        <code>GenotypeCatalog</code> &mdash; see §8 and §10.
+        <strong>Left over from the change:</strong> the catalogue is now 2,064,387 pens
+        &mdash; briefly capped, then answered outright by §8&rsquo;s revert to random
+        pens. <code>GenotypeCatalog</code> is still computed lazily rather than
+        materialised; see §10.
     </p>
 </div>
 
@@ -1037,60 +1039,31 @@
 
 <hr>
 
-<h2 id="random-pens">8. The horse dimension: back to random pens</h2>
+<h2 id="random-pens">8. The horse dimension: back to random pens &mdash; <em>done</em></h2>
 
 <p>
-    <strong>Revert the gallery.</strong> The catalogue-driven dimension goes back to
-    <strong>random genotypes per pen</strong>. Keep the two things worth keeping:
-    <strong>pairs</strong> (a mare and a stallion with the same genome) and <strong>a
-    sign out front listing the genome</strong>.
+    <strong>Built 2026-09-04.</strong> The catalogue-driven gallery is gone: every pen
+    now rolls its own <strong>showcase genotype</strong> &mdash; an ordinary founder
+    draw with a floor under it, so a pen is never a plain bay &mdash; and the corridor
+    is a fixed, arbitrary <strong>2,000 pens</strong> rather than a length derived from
+    the genotype space. The pair, the per-pen sign and the walk-ahead build all stayed;
+    the entrance tally sign was replaced with something true of a random corridor, and
+    the catalogue-entry sign-fits test gained a property-test twin over random draws.
+    <code>GenotypeCatalog</code> itself stays &mdash; it is still what the tests and a
+    future punnett display want, it just no longer drives the dimension.
 </p>
 
 <p>
-    This also resolves the combinatorial problem in §10 &mdash; a random corridor does
-    not care that the genotype space is 10<sup>19</sup>, so the gallery stops being the
-    thing that blocks adding genes.
+    This is what resolves the combinatorial problem in <a href="#scale">&sect;10</a>: a
+    random corridor does not care that the genotype space is 10<sup>19</sup>, so the
+    dimension has stopped being the thing that blocks adding genes.
 </p>
 
-<h3>What changes in the code</h3>
-
-<ul>
-    <li><code>buildPen</code> goes back to rolling a genotype per pen. Randomness here
-        is legitimate: these are <strong>foundation horses with no parents</strong>,
-        which is exactly where the determinism contract allows a draw.</li>
-    <li><strong>The corridor stops having an end.</strong>
-        <code>LAST_SEGMENT_INDEX</code> (now pinned by the
-        <code>MAX_GALLERY_PENS</code> cap at 9,999 segments, giving <strong>70,000
-        blocks</strong>) and <code>buildEndCap</code> go away, or become an arbitrary
-        length. The walk-ahead extension stays.</li>
-    <li><strong>The entrance tally sign</strong> no longer means anything &mdash; drop
-        it, or replace it with something true of a random corridor.</li>
-    <li><strong>The per-pen sign stays.</strong></li>
-    <li><strong>The sign-fits test changes shape.</strong> It currently asserts every
-        catalogue entry fits three 15-char lines. With random genotypes there is no
-        finite list, so it becomes a property test over many random draws, or an
-        assertion that <code>wrap</code> truncates gracefully. <strong>Do not just
-        delete it</strong> &mdash; a sign that silently drops a gene is exactly the bug
-        it was written for.</li>
-    <li><strong><code>GenotypeCatalog</code> itself can stay.</strong> The distinct-pair
-        reduction is useful to a punnett display and to tests; it just stops driving the
-        dimension.</li>
-    <li><strong>One thing to re-check</strong>: &ldquo;a rebuilt plot is byte-identical,
-        so an X slot handed back to the free list can be overwritten in place&rdquo; is
-        <strong>no longer true</strong> once pens are random. Either air-fill on
-        teardown, or confirm that overwriting a different random corridor leaves nothing
-        stale &mdash; leftover signs from a longer previous corridor are the likely
-        artifact.</li>
-</ul>
-
-<div class="note rule">
-    <span class="label">Settled: the pair shares a genotype, not an epigenome</span>
-    <p>
-        Both horses are independent founder rolls with only the genotype pinned, so a
-        pen shows one genotype twice, differently. That is what the catalogue version
-        already does, so <code>buildPen</code> needs no change here.
-    </p>
-</div>
+<p class="muted">
+    Machinery: <code>common/genetics/ShowcaseGenotypes</code> and
+    <code>server/DebugPenManager</code>. The section number is kept as a pointer so
+    cross-references do not rot.
+</p>
 
 <hr>
 
@@ -1101,60 +1074,35 @@
 </p>
 
 <p>
-    <strong>Partly built.</strong> A dev <code>custom_horse_spawn_egg</code> ships: it
-    opens an age / sex / genome editor (<code>client/CustomHorseSpawnScreen</code>),
-    spawns through <code>SpawnCustomHorsePayload</code> with the server re-checking the
-    sender, and a gene only appears if it is registered. <strong>What is left:</strong>
-    the <em>live 3D preview</em>, the <em>per-allele epigenetics editor</em> (reroll +
-    type-in), gating on <em>creative</em> rather than a dev build, and
-    <em>round-tripping a pasted genotype code</em>. The rest of this section is that
-    remaining work.
+    <strong>Mostly built (2026-09-04).</strong> The
+    <code>custom_horse_spawn_egg</code> opens <code>client/CustomHorseSpawnScreen</code>:
+    <strong>every registered gene in alphabetical order</strong> down the left &mdash;
+    click a name to put that gene on the horse, homozygous for the allele that does
+    something, after which it carries its two allele copies as buttons &mdash; a
+    <strong>live 3D preview</strong> in the middle, and age /
+    sex / <strong>reroll epigenetics</strong> / <strong>copy &amp; paste the genotype
+    code</strong> / spawn down the right. The spawn is <strong>creative-only, re-checked
+    on the server</strong>, and the <strong>epigenome travels with the genotype</strong>
+    so the horse that appears is the horse that was on screen.
 </p>
 
-<h3>What it does</h3>
+<p>
+    <strong>What is left</strong> is the second half of the epigenetics editor: each
+    allele copy&rsquo;s <em>priority and seed shown individually</em>, with a
+    type-it-in field for an exact value. The whole-genome reroll covers the creative
+    use; the per-copy view is the debugging one &mdash; it is the only way to ask
+    &ldquo;which copy is expressing, and what does <em>that</em> seed do&rdquo; without
+    reading a log. Two consequences to design around: at 30-odd genes that is 60 fields,
+    so it wants to be a per-gene expander rather than a flat list, and a hand-typed seed
+    has to survive <code>Epigenome.parse</code> or be rejected visibly.
+</p>
 
-<ul>
-    <li><strong>Every registered gene, every allele.</strong> One row per gene, both
-        allele copies selectable. Built off the registry, so a modded gene appears
-        without the screen knowing about it.</li>
-    <li><strong>Per-allele epigenetics.</strong> Each copy gets its priority and seed
-        shown, a <strong>reroll</strong> button, and a type-it-in field for an exact
-        value. The first place epigenetics become directly visible &mdash; a debugging
-        tool as much as a creative one.</li>
-    <li><strong>A live preview</strong> that redraws as the genotype changes.</li>
-    <li><strong>Spawn.</strong></li>
-</ul>
-
-<h3>Building it</h3>
-
-<ul>
-    <li><strong>Creative only, checked on the server.</strong> The screen opens
-        client-side, but the spawn arrives as a payload and the <em>server</em> must
-        re-check that the sender is in creative before acting. A client-side-only check
-        is bypassable, and this payload spawns arbitrary entities.</li>
-    <li><strong>The preview already has a proven technique.</strong>
-        <code>FamilyTreeScreen.drawHorseModel</code> builds a render state from a
-        throwaway client-only <code>Horse</code> and injects the coat straight onto the
-        render state, deliberately without touching <code>ClientCoatCache</code>. Reuse
-        it exactly &mdash; polluting the cache from a preview would leak edited horses
-        into the world&rsquo;s rendering.</li>
-    <li><strong>The preview needs a coat per edit.</strong> Debounce, and reuse the
-        texture key so an already-baked combination is free &mdash; the cache key is a
-        pure function of the genome, which is exactly what makes this cheap.</li>
-    <li><strong>The screen must scale to an unknown gene count.</strong> Nine genes fit
-        on a screen; twenty-seven do not, and a modded install has no upper bound.
-        Scrolling plus grouping from the start, not retrofitted.</li>
-    <li><strong>26.1.2&rsquo;s GUI layer is retained-mode.</strong>
-        <code>FamilyTreeScreen</code> is the working reference for a from-scratch screen
-        in this codebase, including scissor clipping and the entity draw.</li>
-    <li><strong>How is it opened?</strong> A creative-only item, a keybind, or a
-        command. A keybind is closest to the existing pattern &mdash; but this should be
-        gated on <em>creative mode</em>, not on a dev build, so it needs its own
-        gate.</li>
-    <li><strong>Round-trip the code.</strong> Paste a genotype code in, get the horse;
-        copy the current horse&rsquo;s code out. Nearly free once the screen exists, and
-        it turns every bug report into something reproducible.</li>
-</ul>
+<p class="muted">
+    The rest of the original section &mdash; the preview technique, the creative gate,
+    the code round-trip, scrolling to an unknown gene count &mdash; is built; see
+    <code>client/CustomHorseSpawnScreen</code>. The section number is kept so
+    cross-references do not rot.
+</p>
 
 <hr>
 
@@ -1173,22 +1121,20 @@
         it was <code>3^11 = 177,147</code> before the seven visual genes shipped, the
         multiplier in miniature. With the full table the raw product is on the order
         of <strong>10<sup>19</sup></strong>.</li>
-    <li><strong>The gallery has effectively died</strong> &mdash; and it is being
-        reverted anyway. The white-pattern loci took the catalogue to
-        <strong>2,064,387 pens</strong>, whose corridor would be about
-        <strong>7.2 million blocks</strong> &mdash; a quarter of the way to the world
-        border, leaving room for four plots in the whole dimension. That is what forced
-        <code>MAX_GALLERY_PENS</code> (20,000, about 70,000 blocks), which is a lid on the
-        symptom and not a fix; the entrance sign now says how many pens it is
-        <em>showing</em> out of how many exist. The catalogue itself is computed on demand
-        rather than materialised (a two-million-entry <code>List&lt;Genotype&gt;</code> is
-        hundreds of megabytes), so it costs nothing until walked (lazily built, so it
-        doesn&rsquo;t hang, but it is no longer a thing a player walks). The argument
-        for &sect;9 has now fully arrived. If a <em>systematic</em> gallery is ever
-        wanted again, the shape that scales is a <strong>wing per locus</strong>: each
-        gene&rsquo;s pairs on a fixed wild-type background, bounded by alleles rather
-        than by their product, extending naturally to a modded gene adding its own
-        wing.</li>
+    <li><strong>The gallery died, and was reverted</strong> (&sect;8, done). The
+        white-pattern loci took the catalogue to <strong>2,064,387 pens</strong>, whose
+        corridor would have been about <strong>7.2 million blocks</strong> &mdash; a
+        quarter of the way to the world border, leaving room for four plots in the whole
+        dimension. A 20,000-pen cap held it for one session; the fix was to stop
+        enumerating at all, and the corridor is now a fixed <strong>2,000 random
+        pens</strong>. The catalogue survives as arithmetic &mdash; computed on demand
+        rather than materialised, because a two-million-entry
+        <code>List&lt;Genotype&gt;</code> is hundreds of megabytes &mdash; and is what
+        the tests and a future punnett display read. <strong>Still open:</strong> if a
+        <em>systematic</em> gallery is ever wanted again, the shape that scales is a
+        <strong>wing per locus</strong>: each gene&rsquo;s pairs on a fixed wild-type
+        background, bounded by alleles rather than by their product, extending naturally
+        to a modded gene adding its own wing.</li>
     <li><strong>The genotype code string.</strong> 27+ segments with tokens like
         <code>SW10</code> / <code>W36</code> puts a code in the low hundreds of
         characters. Everything carrying it grows in step &mdash; the record, the
@@ -1809,9 +1755,8 @@
     <li><strong>Trait framework proper</strong> (§6.1) with <strong>MSTN</strong> as its
         first consumer, then the size genes once the entity-scale question is
         answered.</li>
-    <li><strong>Revert the dimension to random pens</strong> (§8) &mdash; small, and it
-        unblocks adding genes freely. Could just as well go first; it is independent of
-        everything above.</li>
+    <li><s><strong>Revert the dimension to random pens</strong> (§8)</s> &mdash;
+        <strong>done 2026-09-04</strong>. Genes can be added freely now.</li>
     <li><strong>Lethals</strong> (§6.4) &mdash; <strong>MET</strong> first (a conception
         check only, no death behaviour to design), then the born-and-dies path with its
         config toggle and carrier display, then frame&rsquo;s <code>Ov/Ov</code>. Note
@@ -1835,9 +1780,10 @@
 <div class="note">
     <span class="label">Worth pulling early</span>
     <p>
-        <strong>The custom horse spawner</strong> (§9), as soon as the registry from step
-        4 exists. It is the fastest way to look at any genotype without breeding for it,
-        so every gene after it is quicker to build and check.
+        <s><strong>The custom horse spawner</strong> (§9)</s> &mdash; <strong>built
+        2026-09-04</strong>, and it did what it promised: the fastest way to look at any
+        genotype without breeding for it, so every gene after it is quicker to build and
+        check.
     </p>
     <p>
         <strong>Independent of the whole chain</strong>, doable whenever: milking (§7).
@@ -1894,12 +1840,12 @@
 </ol>
 
 <div class="note">
-    <span class="label">Build the spawner first anyway</span>
+    <span class="label">The spawner is built &mdash; use it</span>
     <p>
-        §9 was already worth pulling early for the gene work. It is worth more now: every
-        system in §§13&ndash;18 needs a horse with a known genotype to test against, and
-        the alternative is breeding for one each time. It also makes the
-        &ldquo;limited custom egg&rdquo; (§17) redundant before anyone builds it.
+        §9 landed 2026-09-04. Every system in §§13&ndash;18 needs a horse with a known
+        genotype to test against, and that is now one screen rather than a breeding
+        programme. It also makes the &ldquo;limited custom egg&rdquo; (§17) redundant
+        before anyone builds it.
     </p>
 </div>
 

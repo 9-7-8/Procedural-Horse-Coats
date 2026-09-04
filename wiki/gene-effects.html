@@ -571,7 +571,7 @@ Component  &rarr;  (Trigger, Condition, Selector, Effect)</code></pre>
     translator keeps one <code>minecraft:light</code> block trailing the horse,
     moving it only when the horse changes block and removing it on death / unload
     (<code>EntityLeaveLevelEvent</code>) or when <code>when</code> goes false. It is
-    skipped in the read-only gallery dimension, only placed into air, and a server
+    skipped in the read-only horse dimension, only placed into air, and a server
     crash can orphan one block (the same caveat the portal plots carry). A real
     mixin-based dynamic light would be cleaner; this needs no coremod.
 </p>

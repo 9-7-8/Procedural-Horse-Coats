@@ -69,7 +69,7 @@
 </p>
 
 <ul>
-    <li><strong>The gallery does not widen.</strong> Both combinations land on a wild
+    <li><strong>The catalogue does not widen.</strong> Both combinations land on a wild
         type, and <code>GenotypeCatalog</code> collapses every wild type into one group,
         so the whole locus is <b>one pen</b>. The catalogue did not move; only
         <code>totalGenotypes()</code> doubled, because every genotype now genuinely
@@ -98,7 +98,7 @@
     Nothing that can actually happen produces one: a founder draws from a table with two
     entries, and a foal always takes an <code>X</code> from its dam. So the sex locus is
     the first gene to override <code>Gene.canOccur(AllelePair)</code>, which
-    <code>GenotypeCatalog.allPairsOf</code> filters on &mdash; no gallery pen, and not
+    <code>GenotypeCatalog.allPairsOf</code> filters on &mdash; no catalogue entry, and not
     counted in <code>totalGenotypes()</code>.
 </p>
 

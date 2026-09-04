@@ -79,7 +79,7 @@
 <tbody>
 <tr><td>What happens</td><td>presumed <strong>embryonic</strong> lethal &mdash; never a foal</td><td><strong>born</strong>, all white, dies within a day or two without the gut&rsquo;s nerve supply</td></tr>
 <tr><td><code>canOccur</code></td><td><strong>false</strong></td><td><strong>true</strong></td></tr>
-<tr><td>Gallery pen</td><td>none</td><td><strong>yes</strong> &mdash; it has a look, and a player will see it</td></tr>
+<tr><td>Catalogue entry</td><td>none</td><td><strong>yes</strong> &mdash; it has a look, and a player will see it</td></tr>
 <tr><td>In the founder table</td><td>no</td><td>no &mdash; a founder is an adult horse</td></tr>
 <tr><td>How you get one</td><td>you don&rsquo;t</td><td>two carriers, one time in four</td></tr>
 </tbody>
@@ -123,7 +123,7 @@ private static final double JAG = 0.15, JAG_FREQ = 3.1;</code></pre>
 
 <p>
     <code>lethal-white</code> is a different painter: both pigments to zero everywhere,
-    and it <code>masks</code>, so it takes exactly one gallery pen however much else the
+    and it <code>masks</code>, so it takes exactly one catalogue entry however much else the
     horse carries. Measured coverage: <code>O/N</code> 42%, <code>O/O</code> 100%.
 </p>
 
@@ -144,7 +144,7 @@ private static final double JAG = 0.15, JAG_FREQ = 3.1;</code></pre>
 <p>
     That is the whole difference between this gene and <a href="gene-met.html">MET</a>,
     and the model keeps the two apart deliberately. An <code>O/O</code> foal is born, so
-    it <code>canOccur</code>, it is counted, and it gets a gallery pen. A
+    it <code>canOccur</code>, it is counted, and it gets a catalogue entry. A
     <code>met/met</code> embryo never implants, so it does not occur at all and the
     pairing simply produces no foal.
 </p>

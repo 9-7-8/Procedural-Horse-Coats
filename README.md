@@ -195,12 +195,16 @@ a replacement for a boat.
 
 ### The horse dimension
 
-A private, self-contained space that shows you **every horse in the game** -
-a straight fenced corridor, lit and walled, with a mare and a stallion in
-every pen. It isn't a random sample: there is exactly one pen for each coat
-the genetics can produce, in order, and a **sign on the ground beside each
-gate** naming that pen's genes. A sign just inside the entrance tells you how
-many there are. Walk it end to end and you have seen the lot.
+A private, self-contained space full of horses to look at - a straight fenced
+corridor, lit and walled, two thousand pens long, with a mare and a stallion
+in every pen and a **sign on the ground beside each gate** naming that pen's
+genes.
+
+Every pen rolls its own genome, and the roll has a floor under it: a pen
+horse always shows **at least one coat gene beyond its base colour**, and
+about half of them show a **magical** gene as well - so walking the corridor
+is a tour of what the genes can do rather than a field of plain bays. Walk it
+again, or leave and come back, and it is a different corridor.
 
 The two horses in a pen have identical genes, so any difference between them
 is the random variation a horse is born with - handy for seeing how much a

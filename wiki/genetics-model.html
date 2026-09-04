@@ -158,7 +158,7 @@
 <table>
 <thead><tr><th>Field</th><th>What it means</th></tr></thead>
 <tbody>
-<tr><td><code>id</code></td><td>The gene&rsquo;s slug for this outcome, unique within the gene and stable. Two expressions are equal when their ids match, and the gallery dedups allele pairs by it.</td></tr>
+<tr><td><code>id</code></td><td>The gene&rsquo;s slug for this outcome, unique within the gene and stable. Two expressions are equal when their ids match, and the catalogue dedups allele pairs by it.</td></tr>
 <tr><td><code>name</code></td><td>Short display name &mdash; &ldquo;Sabino-white&rdquo;.</td></tr>
 <tr><td><code>description</code></td><td>One human-readable sentence: what this combination does to the horse. What the gene dictionary, the tooltips and these wiki pages show.</td></tr>
 <tr><td><code>wildType</code></td><td>This combination <strong>changes nothing</strong>. No painter, skipped by the composer, excluded from the texture key, reads as &ldquo;absent&rdquo; in the genome display. A property of the <em>combination</em>, not of an allele.</td></tr>
@@ -198,7 +198,7 @@ public Expression expressionOf(AllelePair pair) {
     silent combinations deserve different wording &mdash; MATP&rsquo;s
     <code>prl/N</code> is a &ldquo;pearl carrier&rdquo;, distinct in the gene
     dictionary from the plain <code>N/N</code> even though the two horses look
-    identical. The gallery collapses every wild type into one pen, because
+    identical. The catalogue collapses every wild type into one entry, because
     &ldquo;changes nothing&rdquo; is one <em>look</em>.
 </p>
 
@@ -322,7 +322,7 @@ public Expression expressionOf(AllelePair pair) {
     not a dun. No single dominance label covers both orders, which is the
     clearest case yet for the table. See <a href="gene-dun.html">its page</a>.
     &Dagger; <strong>Sex is the one gene that never paints.</strong> Both its
-    outcomes are wild types, so it costs the gallery nothing and is left out of
+    outcomes are wild types, so it costs the catalogue nothing and is left out of
     the texture key; it is registered at priority 1 so a future
     <a href="roadmap.html#sex-linked">sex-linked gene</a> can read a sex that is
     already resolved, and so a foal&rsquo;s sex is <em>inherited</em> rather
@@ -424,7 +424,7 @@ public Expression expressionOf(AllelePair pair) {
 <h3>Founders roll; foals inherit</h3>
 
 <ul>
-    <li><strong>Founder</strong> (wild spawn, <code>/summon</code>, a gallery horse)
+    <li><strong>Founder</strong> (wild spawn, <code>/summon</code>, a dimension pen horse)
         &mdash; <code>Epigenome.random(rng)</code>: an independent priority and seed
         on every copy, deconflicted. Reached through
         <code>CoatGenerator.generate</code>, which is <em>the</em> founder path.</li>
@@ -495,8 +495,8 @@ public boolean hasVisibleNonDeterministic();</code></pre>
     <code>codeOrder()</code>, each gene&rsquo;s allele list and each gene&rsquo;s
     expression table, so registering a gene widens it on its own &mdash; the catalogue is
     built lazily and thrown away whenever the registry changes, which is what makes a
-    <a href="gene-format.html">drop-in gene</a> show up in the gallery without anything
-    else being told about it.
+    <a href="gene-format.html">drop-in gene</a> show up in the catalogue without
+    anything else being told about it.
 </p>
 
 <div class="table-wrap">
@@ -521,9 +521,12 @@ public boolean hasVisibleNonDeterministic();</code></pre>
     the fastest-varying digit, so the catalogue reads</p>
 
 <p>
-    Its only consumer today is the horse dimension&rsquo;s gallery, which is
-    <a href="roadmap.html#random-pens">slated to revert to random pens</a> &mdash;
-    the catalogue itself stays, because a punnett display and the tests want it.
+    <strong>Nothing in the game reads it any more.</strong> It used to drive the horse
+    dimension, one pen per entry; that corridor
+    <a href="roadmap.html#random-pens">went back to random pens</a> on 2026-09-04,
+    because at two million entries the corridor was longer than the world. The
+    catalogue stays because the tests read it and a punnett display will &mdash; the
+    reduction is a statement about the genes, not about the dimension.
 </p>
 
 <h2>Phenotype, coarsely</h2>
@@ -575,7 +578,7 @@ public boolean hasVisibleNonDeterministic();</code></pre>
         <code>Genotype.coatCode()</code>. Two horses that differ only in them share
         <strong>one baked texture</strong>.</li>
     <li><code>GenotypeCatalog.distinctPairsOf</code> collapses every wild type into one
-        group, so each contributes <strong>one</strong> gallery entry however many
+        group, so each contributes <strong>one</strong> catalogue entry however many
         alleles it has &mdash; <a href="gene-acan.html">ACAN</a>&rsquo;s five alleles
         and fifteen combinations included. The catalogue is unchanged at
         <strong>2 064 387</strong> distinct coats.</li>

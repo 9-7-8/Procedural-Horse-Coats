@@ -139,7 +139,7 @@
 <p>
     The four alleles UC Davis lists as &ldquo;homozygosity thought nonviable&rdquo; get
     <code>canOccur</code> <strong>false</strong>. Those are <em>embryonic</em> lethals, so
-    there is no such horse &mdash; no gallery pen, nothing in
+    there is no such horse &mdash; no catalogue entry, nothing in
     <code>totalGenotypes()</code>, nothing in the founder table. It is the same statement
     the <a href="gene-sex.html">sex locus</a> makes about <code>Y/Y</code>, and it is a
     different statement from <a href="gene-ednrb.html">lethal white</a>, which is a foal
@@ -163,7 +163,7 @@
 <div class="note">
     <span class="label">Breeding can still make an impossible foal</span>
     <p>
-        <code>canOccur</code> is consulted by the gallery and the founder table, not by
+        <code>canOccur</code> is consulted by the catalogue and the founder table, not by
         <code>breedWith</code> &mdash; so crossing two <code>W5</code> carriers can still
         produce a <code>W5/W5</code> foal, which is born and renders as
         <code>near-white</code>. Making it not exist needs the health system

@@ -152,7 +152,7 @@
 <h4>Founders</h4>
 
 <p>
-    A founder &mdash; wild spawn, <code>/summon</code>, a gallery horse &mdash; gets a
+    A founder &mdash; wild spawn, <code>/summon</code>, a dimension pen horse &mdash; gets a
     fresh <code>Epigenome.random</code>: an independent priority and seed on every
     copy, deconflicted the same way. That is the <strong>only</strong> place
     epigenetics are ever invented. <code>CoatGenerator.generate</code> is the founder
@@ -355,7 +355,7 @@ int     offspringCount(UUID a, UUID b);</code></pre>
 
 <p>
     For a horse <strong>deleted outright rather than dying</strong>: the horse
-    dimension clears its gallery on exit, and without this every visit would leave
+    dimension clears its pens on exit, and without this every visit would leave
     hundreds of throwaway records in the save forever. It deliberately does
     <em>not</em> repair records naming the forgotten horse as a parent &mdash;
     <code>ancestorsOf</code> already skips ancestors it cannot find, so a foal bred in
@@ -431,7 +431,8 @@ int     offspringCount(UUID a, UUID b);</code></pre>
 <tr><td><code>of(horse)</code> / <code>hasRealRecord(horse)</code></td><td>Read the attachment; <code>hasName()</code>.</td></tr>
 <tr><td><code>apply(horse, record)</code></td><td>Write the attachment, set the custom name visible, record into the global DB, <strong>and</strong> send a <code>HorseRecordSyncPayload</code> to trackers.</td></tr>
 <tr><td><code>newFounder(horse, rng)</code></td><td>Founder record: random genotype (<strong>sex included</strong> &mdash; it is a gene now) and a random name. Nothing is copied off the entity any more: whatever vanilla randomised its attributes to is about to be overwritten by what its alleles say.</td></tr>
-<tr><td><code>newFounder(horse, rng, genotype)</code> / <code>(horse, rng, sex, genotype)</code></td><td>Founder record on a fixed genotype (a gallery pen, the custom spawn egg). The 4-arg form writes the sex <em>into</em> the genotype with <code>withSex</code>.</td></tr>
+<tr><td><code>newFounder(horse, rng, genotype)</code> / <code>(horse, rng, sex, genotype)</code></td><td>Founder record on a fixed genotype (a dimension pen). The epigenome is still rolled. The 4-arg form writes the sex <em>into</em> the genotype with <code>withSex</code>.</td></tr>
+<tr><td><code>newFounder(horse, rng, genome)</code></td><td>Founder record on a fixed <strong>genome</strong> &mdash; epigenome included, so nothing is rolled but the name. The custom spawn egg is the caller: its editor previews a live 3D horse, and a preview the spawn then re-rolls is not a preview.</td></tr>
 <tr><td><code>traitsOf(horse)</code> / <code>traitsOf(record)</code></td><td>Resolve the body from the genotype, honouring the server&rsquo;s <code>health.mode</code>. See <a href="horse-body.html">the horse&rsquo;s body</a>.</td></tr>
 <tr><td><code>applyTraitsToEntity(horse, traits, fullHeal)</code></td><td>Push the resolved body onto four attribute <em>base</em> values: <code>MOVEMENT_SPEED</code>, <code>MAX_HEALTH</code>, <code>JUMP_STRENGTH</code> and <code>SCALE</code>. <code>fullHeal</code> sets current HP to the new max (newborn); otherwise HP is only clamped <em>down</em>, so nothing is healed for free on a reload.</td></tr>
 <tr><td><code>offspringCount(contextHorse, damId, sireId)</code></td><td>From the server-global ancestry data, else <code>0</code>.</td></tr>

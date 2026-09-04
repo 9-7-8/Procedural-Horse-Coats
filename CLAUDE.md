@@ -84,8 +84,7 @@ project. Its shape:
   the systems it needs (hard-coded gene priority, the modder-facing
   gene-authoring API, multi-allele loci, non-coat and health genes), each with
   notes on what would have to change - plus the non-gene features (mare milking,
-  the custom horse spawner) and the **planned revert of the genotype gallery**
-  to random pens. **Only not-yet-done work lives here**: a section is either
+  the custom horse spawner). **Only not-yet-done work lives here**: a section is either
   unbuilt or marked *partly built* with just the remainder; anything finished is
   deleted and written up on its own page (`wiki/gene-*.html`,
   `wiki/breeding.html`, `wiki/horse-care.html`, `wiki/pipeline.html`). Section
@@ -131,6 +130,103 @@ project. Its shape:
     changes shape, update `api-reference.html` in the same change.
 
 ## Status snapshot (keep this current)
+
+- **Built 2026-09-04, NOT yet play-tested: the horse dimension goes back to
+  random pens** (roadmap §8, done). The genotype gallery is retired before
+  anyone ever walked it.
+  - **`common/genetics/ShowcaseGenotypes`** (new, pure, 6 tests) is the draw: an
+    ordinary `Genotype.random` founder roll with a **floor** under it. Always at
+    least one **natural** coat gene expressing beyond extension and agouti; with
+    `MAGICAL_CHANCE` = **0.5**, a **magical** one too. A draw that already
+    clears the floor is left exactly as it fell.
+  - **Two rules keep it honest.** Forcing only ever keeps a combination that
+    actually expresses *in this genotype* (`Genotype.shows`), so a chestnut is
+    never handed an agouti it will not paint. And a combination that **`masks`**
+    neither counts toward the floor nor is ever forced - a quarter of all
+    founders carry the diagnostic test gene, which paints flat over everything,
+    so counting it would quietly exempt a quarter of the corridor.
+  - **The one honest gap**: the floor guarantees a gene *expresses*, not that it
+    is *perceptible*. Mushroom on a black horse is a real expression that looks
+    like nothing, and nothing in the model can answer "would a player see this".
+    Accepted rather than special-cased; flagged in `wiki/verification.html`.
+  - **`Genotype.with(AllelePair)`** is the founder-only setter it needed - one
+    locus replaced, the shape of `withSex`, which now delegates to it.
+  - **The corridor is a fixed 2 000 pens** (`DebugPenManager.PEN_COUNT`, ~7 000
+    blocks), an arbitrary number rather than one derived from the genotype
+    space - which is the whole point. `MAX_GALLERY_PENS`, `galleryPens()` and
+    the catalogue tally sign are gone; the entrance sign now reads `Horse Pens /
+    2,000 pens / random genome / mare + stallion`. `PLOT_SPACING_X` drops from
+    2 526 to 8 007.
+  - **Two correctness fixes the randomness forced.** `buildPen` now **clears
+    untamed horses** in the pen before stocking (a pen is built once per plot,
+    so anything standing there belongs to a previous occupant of that recycled X
+    slot and has nothing to do with the sign just written); and `plotBox` covers
+    the **whole** X slot rather than stopping at `highestIndex`, or a slot where
+    a previous visitor walked further would accumulate horses forever. The
+    "leaving clears entities, not blocks" claim still holds, for a new reason -
+    see the horse-dimension section.
+  - **`GenotypeCatalog` is untouched and still used**, by the tests and by
+    whatever punnett display gets built - it just stopped driving the dimension.
+    `size()` is still 2 064 387. **Known gap #12 is closed** by this rather than
+    by a cap.
+  - The catalogue's per-entry sign-fits test stays; `ShowcaseGenotypesTest` adds
+    the **property-test twin over random draws** the roadmap asked for (a sign
+    may overflow its last line, it may never drop a gene).
+  - `:common:test` **268 green**, `:neoforge-26.1.2:build` green.
+    `coat-golden.txt` untouched - nothing about the pipeline or any gene moved.
+- **Built 2026-09-04, NOT yet play-tested: the custom horse spawn egg's editor
+  was rebuilt** (roadmap §9, most of what was left). `client/
+  CustomHorseSpawnScreen` is now **gene list left / live 3D horse centre /
+  controls right**, and the horse that spawns is the horse you were looking at.
+  - **Every registered gene is a row, alphabetically by `Gene.name()`** - "ACAN,
+    Agouti, B4GALT7, Champagne, EDNRB (frame overo), KIT (white spotting)..."
+    rather than `horsegenetics.ednrb` in registry order. The sex locus is
+    excluded - the Mare/Stallion button owns it. The old modal `+ Add gene`
+    picker is gone; the list *is* the picker.
+  - **The list is a catalogue you add from.** A gene starts **off** the horse
+    and draws as a plain name; **clicking the row adds it**, and only then does
+    it grow two allele buttons and an `x`. Every gene carrying two baseline
+    buttons from the start was a wall of `N/N` that said nothing - a horse
+    carries every locus whether or not you have touched it, so what the list is
+    for is picking the handful you want to see. `Row.added` is held explicitly,
+    not inferred from the alleles, so a gene you added and cycled back to
+    baseline stays on the horse.
+  - **A gene is added homozygous for the allele that does something** - the
+    first allele that is not `defaultAllele()`, doubled. If a horse cannot carry
+    that pair (`KIT`'s four nonviable `W` homozygotes, `MET`'s `met/met`) the
+    next one it can, and failing all of them one copy against the baseline.
+    Either copy can then be cycled anywhere, baseline included.
+  - **A row that expresses says so** - the name turns green and the
+    `Expression.name()` prints under it (`no effect` otherwise). That is one
+    more consumer for the expression prose (known gap #10).
+  - **A live 3D preview** in the middle, reusing `FamilyTreeScreen`'s technique
+    exactly: a throwaway client-only `Horse`, the `CoatData` injected straight
+    onto `GeneticHorseRenderState`, **never** through `ClientCoatCache`. The
+    coat is rebuilt only when the genotype-plus-epigenome key moves, and the
+    texture factory caches by `textureKey()` on top of that, so editing is cheap.
+  - **`Reroll epi.` is the point of the change.** The screen holds a real
+    `Epigenome` and previews with it, so re-rolling flips through the bay leg
+    heights / grey dapples / splash edges one genotype can produce - the first
+    surface anywhere that makes per-allele epigenetics visible. It is then sent
+    **with** the genotype (`SpawnCustomHorsePayload` gained `epigenomeCode`) and
+    written straight in via the new `HorseRecords.newFounder(horse, rng,
+    Genome)`. The server used to roll its own, which made the preview a
+    suggestion rather than a preview.
+  - **Copy code / Paste code** round-trip the genotype code through the
+    clipboard (roadmap §9's "turns every bug report into something
+    reproducible"). Genotype only - the epigenome has its own button, and a code
+    you can paste into chat wants to stay one line. A pasted locus sitting at
+    its baseline is **not** marked added, or a paste would come back as 30-odd
+    rows of `N/N`. Plus a **Clear genes**.
+  - **Creative-only, re-checked on the server.** `handleSpawnCustomHorse` now
+    requires `getAbilities().instabuild` **and** that the sender is holding the
+    egg; the payload spawns an arbitrary entity with an arbitrary genome, so the
+    client-side gate was worth nothing on its own. The survival
+    egg-consumption path is gone with it - it can't be reached any more.
+  - **Still not built** (the remainder of roadmap §9): the per-allele
+    epigenetics editor proper - each copy's priority and seed shown
+    individually with a type-it-in field. At 30-odd genes that is 60 fields, so
+    it wants a per-gene expander rather than a flat list.
 
 - **Built 2026-09-04, NOT yet play-tested: the trait / size / health system, and
   the death of the random stat roll (roadmap Tier 2 §6.1, Tier 3 §7, §4.3, §4.4,
@@ -204,7 +300,7 @@ project. Its shape:
     **28% of the foal's own max health, floor 2, once a second**, which
     out-damages `HorseCareHandler`'s regen at any health value (roadmap §7's
     open item, closed). Guards: **babies only** (an adult spawned by the egg is a
-    debug tool for looking at a coat), not in the gallery dimension, and only on
+    debug tool for looking at a coat), not in the horse dimension, and only on
     `health.mode = FULL`. New datapack damage type
     `horsegenetics:genetic_defect` + a lang key.
   - **The conception lethal is one branch**: `applyBredFoal` now returns
@@ -316,11 +412,11 @@ project. Its shape:
     them (so masked pens moved from mid-corridor to the tail). It had to change:
     the catalogue is **2 064 387** pens and an eager `List<Genotype>` that size
     is hundreds of megabytes. `totalGenotypes()` is **55 099 802 880**.
-  - **The gallery is capped.** 2M pens is a ~7.2M-block corridor - a quarter of
+  - **The gallery was capped.** 2M pens is a ~7.2M-block corridor - a quarter of
     the way to the world border, leaving room for four plots in the dimension.
-    `DebugPenManager.MAX_GALLERY_PENS` = **20 000** (~70 000 blocks) and the
-    entrance sign now reads `Genotypes / 55,099,802,880 / 2,064,387 distinct /
-    showing 20,000`. A lid on the symptom; the fix is roadmap §9.
+    `MAX_GALLERY_PENS` = 20 000 held it for one session. **Superseded
+    2026-09-04**: the corridor is random pens now and there is no cap, no
+    catalogue tally sign and no `MAX_GALLERY_PENS`.
   - **`CoatRegions.whitenLowerLeg` / `whitenBlaze` now have no callers.** Both
     cut hard, which is why every splash sock used to end in a perfect ring -
     that old known gap is gone with the gene rather than fixed. Kept as helpers,
@@ -438,8 +534,8 @@ project. Its shape:
     `X`, the sire gives his `X` or `Y` 50/50, all through the same
     `breedWith` draw as every other gene. No special case anywhere.
     `Genotype.withSex(Sex)` / `Genome.withSex(Sex)` is the founder-only way to
-    *choose* one (gallery pens, the custom spawn egg); the egg's gene picker
-    filters the sex locus out, since its Mare/Stallion button owns that locus.
+    *choose* one (the custom spawn egg); the egg's gene list leaves the sex
+    locus out, since its Mare/Stallion button owns it.
   - `coat-golden.txt` regenerated - **90 of 240 rows are byte-identical** (the
     deterministic coats; the pipeline didn't move), the other 150 shifted
     because the code gained a segment and every gene's derived epigenetic seed
@@ -540,7 +636,7 @@ project. Its shape:
   Still unconfirmed: bred foal, seed-jar round-trip, a spec gene actually
   showing in the display (needs a horse carrying Suntouched/Waterborn) -
   `wiki/verification.html` §0.
-- **`common/`** - compiles; **262 JUnit tests pass** (`./gradlew :common:test`).
+- **`common/`** - compiles; **268 JUnit tests pass** (`./gradlew :common:test`).
   Covers `trait/` (the non-coat body: `HorseTraits` / `Traits` / `Condition` /
   `TraitBuilder` -> `wiki/horse-body.html`) and
   `genetics/` (allele/gene model - **31 genes**, 18 that paint and 13 that never
@@ -633,8 +729,8 @@ project. Its shape:
     `GenotypeCatalog` blew up to 331 778 distinct coats; the combination-table
     rewrite brought that back to 98 306, and the white-pattern rewrite took it
     to **2 064 387** (`totalGenotypes()` **55 099 802 880**) - which is where
-    the catalogue stopped being materialised at all and the gallery gained
-    `MAX_GALLERY_PENS`. Still the argument for roadmap §9. The
+    the catalogue stopped being materialised at all and the gallery gained a
+    cap - both since superseded by the revert to random pens. The
     exhaustive `2^genes` / `3^genes` tests (`CoatTextureIdTest`,
     `CoatTextureComposerTest`'s combo sweep) were converted to **seeded
     sampling** - enumerating them is no longer tractable. Sample bakes
@@ -865,7 +961,7 @@ project. Its shape:
   `refresh + 20`, so a `when` going false lets it decay - no explicit removal).
   **`glow`** has two independent halves: `light` (0-15) maintains a trailing
   `minecraft:light` block server-side (moved on block change, cleared on
-  `EntityLeaveLevelEvent` / `when` false, skipped in the gallery dimension,
+  `EntityLeaveLevelEvent` / `when` false, skipped in the horse dimension,
   air-only placement), and `parts` (a body-region list - a new `AbilityType`
   `Kind.PARTS` parsed through `PartGroups.expand`) drives
   `client/EmissiveCoatLayer`, which redraws those coat parts full-bright over
@@ -885,25 +981,14 @@ project. Its shape:
   (`item/ModItems` -> `CUSTOM_HORSE_SPAWN_EGG`). A plain `Item` reusing the
   vanilla `minecraft:item/horse_spawn_egg` texture (identical icon), in the
   Spawn Eggs creative tab. Right-clicking it (`client/CustomHorseSpawnEggClient`
-  cancels the interaction) opens `client/CustomHorseSpawnScreen`: pick **age**
-  (Adult/Foal), **sex** (Mare/Stallion), and a **genome** - starts as a bare
-  `EEaa` (extension `E/E` + agouti `a/a`, both required and not removable),
-  `+` lists the genes not yet added, each row has two allele buttons that cycle
-  through `gene.alleles()` (fine for 3+ alleles); a newly added gene defaults
-  to **homozygous for its first non-wild-type allele** (the one that does
-  something), not wild/wild. **Spawn** sends `network/SpawnCustomHorsePayload` -> the server
-  parses the code, spawns a `Horse` at the player's look target, and
-  `HorseRecords.apply(newFounder(..., sex, code))` **before** `addFreshEntity`
-  so `HorseGeneticsEventHandler` keeps the genome (epigenome still rolled
-  fresh). Non-creative players lose one egg. All custom horses get default
-  (not randomised) speed/health - fine for a genome-test tool. Owner-tested:
-  the egg + editor + spawn all work; two follow-ups fixed the same day - a
-  full-screen dim in `extractRenderState` was drawing over the buttons
-  (widgets render *during* `super.extractRenderState`, so the backdrop is now
-  narrow strips in the gaps), and the gene picker + genome list could run off
-  the bottom of a short screen and hide the last gene (now bounded multi-column
-  in the picker, mouse-wheel scroll in the editor). A gene only shows in the
-  list (and can only be spawned) if it is actually registered.
+  cancels the interaction) opens `client/CustomHorseSpawnScreen`. The egg, the
+  editor and the spawn were all confirmed working, and two follow-ups were fixed
+  the same day: a full-screen dim in `extractRenderState` was drawing over the
+  buttons (widgets render *during* `super.extractRenderState`), and the gene
+  list could run off the bottom of a short screen. **The editor itself was
+  rebuilt 2026-09-04** - see the entry at the top of this list; what carries
+  over is the egg, the interaction cancel, and the two drawing lessons. All
+  custom horses get their body from their genotype like any other horse.
 - **Behaviour change 2026-09-02: Waterborn + Suntouched ship loaded.** To make
   the data-driven-effects work testable in-game, `example.waterborn` and
   `example.suntouched` are registered via a **classpath gene index** -
@@ -972,16 +1057,12 @@ project. Its shape:
   the old low-biased single number. Compiles, 138 `common` tests pass, sample
   bakes look right, nothing seen in-game yet - checklist in
   **`wiki/verification.html`**.
-- **Built 2026-09-01, NOT yet play-tested:** the **genotype gallery** rework of
-  the horse dimension - one pen per visually distinct genotype (2 064 387 of
-  55 099 802 880 as of 2026-09-04, of which the corridor builds the first
-  20 000),
-  per-pen genotype signs, the entrance tally sign, the per-gene distinctness
-  metadata (`Gene.dominance()` then, the expression table now),
-  and the entity-only teardown that leaves blocks standing. Compiles, 138
-  `common` tests pass, nothing seen in-game yet. Details in the horse-dimension
-  section below; the in-game checklist is the top item in
-  **`wiki/verification.html`**.
+- **Built 2026-09-01, never play-tested, and superseded 2026-09-04:** the
+  **genotype gallery** rework of the horse dimension - one pen per visually
+  distinct genotype, the entrance tally sign, and the per-gene distinctness
+  metadata. Reverted to random pens before anyone walked it. What survives from
+  it: the per-pen genotype sign, the pair per pen, and the entity-only teardown
+  that leaves blocks standing.
 - **Built 2026-09-01, NOT yet play-tested:** the **dev test-world auto-delete**
   - `client/DebugTestWorldCleanup` wipes every `test_horse_*` save on client
   shutdown (and sweeps leftovers on the next start), so the button stops
@@ -989,8 +1070,9 @@ project. Its shape:
 - **Open issues + NOT verified in-game:** see **`wiki/verification.html`**.
   Open issues are grey, and the face-marking family (every white-pattern locus
   draws the same centreline stripe; a star and a snip are detached patches, so
-  nothing can draw one); after the gallery, the top unverified item is
-  **foals** (only spot-checked). Update it after each `runClient`.
+  nothing can draw one); the top unverified items are the **random pens** and
+  the **rebuilt spawn egg** (both new 2026-09-04), then **foals** (only
+  spot-checked). Update it after each `runClient`.
 - **Machine caveat (this dev laptop):** hybrid graphics (NVIDIA RTX 3050 Ti +
   AMD integrated). `java.exe`/`javaw.exe` are pinned to the NVIDIA GPU and the
   FML splash is disabled, or the JVM hard-crashes in the AMD GL driver. See
@@ -1011,7 +1093,9 @@ Two-module Gradle project, split deliberately:
     (the two together, and the breeding that keeps them aligned),
     `GenomeSample` (a `Genome` frozen to code strings and taken off the horse -
     what the stallion seed jar carries; `breedInto(mareGenome, rng)` runs the
-    ordinary draw), `CoatPhenotype`, `GeneticCodeCombiner`.
+    ordinary draw), `ShowcaseGenotypes` (a founder draw with a floor under it -
+    the horse dimension's stock; see the pens section), `CoatPhenotype`,
+    `GeneticCodeCombiner`.
   - `coat/` - `CoatData`, `CoatGenerator`; `coat/pattern/` holds the
     three-phase pipeline (`CoatTextureComposer`, the `PigmentField` /
     `ColorField` accumulators and their read-only `PigmentView` / `ColorView`
@@ -1073,10 +1157,11 @@ Two-module Gradle project, split deliberately:
   - `block/` - `ModBlocks` + `HayPortalBlock` (the only registered block),
     `ModBlockEntities` + `HayPortalBlockEntity` (drives the animated
     `hay_portal.png` slab renderer).
-  - `item/` - `ModItems` (the **custom horse spawn egg** - a dev tool, a
-    reskin of the horse spawn egg that opens a genome/age/sex editor first;
-    the editor screen is `client/CustomHorseSpawnScreen`, the spawn itself
-    goes through `network/SpawnCustomHorsePayload` - plus the 17
+  - `item/` - `ModItems` (the **custom horse spawn egg** - a creative tool, a
+    reskin of the horse spawn egg that opens a gene-list / preview / genome
+    editor first; the editor screen is `client/CustomHorseSpawnScreen`, the
+    spawn itself goes through `network/SpawnCustomHorsePayload` and is
+    creative-gated on the server - plus the 17
     **gameplay-layer items**, roadmap §§11-19 first slice; the two
     `SeedJarItem`s, the three `WhistleItem`s and the two `StallSignItem`s have
     behaviour, the rest don't yet), `SeedJarItem` (tooltip), `WhistleItem`
@@ -1197,7 +1282,7 @@ gene); one-liners:
 
 **The thirteen non-coat genes** (priority 80-92). Every one of their outcomes is
 a wild type, so **none of them paints anything** and none of them widens the
-gallery; what they do goes through `common/trait/`. Full detail in
+catalogue; what they do goes through `common/trait/`. Full detail in
 `wiki/gene-*.html` + `wiki/horse-body.html`:
 
 | gene | alleles | in the wild | what it does |
@@ -1214,10 +1299,10 @@ gallery; what they do goes through `common/trait/`. Full detail in
 | RAPGEF5 | `efih`/`N` | 1.4% carriers | EFIH - **lethal at birth**, the most severe and the rarest |
 | ST14 | `nfs`/`N` | 1.8% carriers | naked foal syndrome - **lethal at birth**. The coat half is *not* built (phase 1 only removes pigment; a de-pigmented mane is a *white* mane) |
 | SHOX | `sa`/`N` | 2.0% carriers | skeletal atavism - **lethal at birth**. Pseudoautosomal, so it segregates like an autosome and needs none of §5.3 |
-| MET | `met`/`N` | 3.0% carriers | **lethal at conception** - `canOccur = false`, no gallery pen, and the pairing produces no foal at all. The opposite of `O/O`, which *is* born |
+| MET | `met`/`N` | 3.0% carriers | **lethal at conception** - `canOccur = false`, no catalogue entry, and the pairing produces no foal at all. The opposite of `O/O`, which *is* born |
 
 **Expressions, not dominance.** `common/genetics/Expression` is one *outcome*
-a gene can produce: `id` (stable, unique in the gene - the gallery dedups on
+a gene can produce: `id` (stable, unique in the gene - the catalogue dedups on
 it), `name`, a human-readable `description` for the gene dictionary and the
 wiki, `wildType` ("this combination changes nothing" - no painter, skipped by
 the composer, excluded from the texture key, reads as absent in the display),
@@ -1235,7 +1320,8 @@ table says directly, for any number of alleles. Several pairs on one expression
 = dominant; only the double-variant off the wild type = recessive; MATP's
 `Cr`/`prl`/`N` = codominance. A gene may declare **several wild types** when
 silent combinations deserve different wording (MATP's `pearl-carrier`); the
-gallery collapses them all into one pen, because "changes nothing" is one look.
+catalogue collapses them all into one entry, because "changes nothing" is one
+look.
 
 **`FounderTable`** replaces `randomPair`: a weight per allele *combination* as
 percentages, sparse, normalised-with-a-warning, **one `nextFloat()` per gene
@@ -1634,7 +1720,7 @@ approximate.
 
 ## Data flow (server -> client -> pixels)
 
-1. **Wild spawn / `/summon` / gallery horse** -> one `HorseRecord` attachment
+1. **Wild spawn / `/summon` / a dimension pen horse** -> one `HorseRecord` attachment
    carrying **both** the genotype code and the epigenome code
    (`HorseRecords.newFounder` -> `CoatGenerator.generate` -> a founder
    `Epigenome.random`). There is **no separate coat attachment** any more; the
@@ -1648,9 +1734,11 @@ approximate.
    **The custom horse spawn egg** is a third path: `ModNetworking`'s
    `SpawnCustomHorsePayload` handler applies a founder record with the
    player-picked code + sex **before** `addFreshEntity`, so the join handler
-   takes its "already has a real record" branch and keeps the genome; the coat
-   attachment is still unset at that point, so a founder `Epigenome.random` is
-   rolled exactly as for a wild spawn.
+   takes its "already has a real record" branch and keeps the genome. Since
+   2026-09-04 the **epigenome comes with it** rather than being rolled: the
+   editor previews a live 3D horse, and a preview the spawn re-rolls is not a
+   preview. That is the one founder path that does not call
+   `CoatGenerator.generate`.
    **The stallion seed jar** is a fourth path, and it behaves like breeding:
    `StallionSeedJarHandler` builds the foal `Horse` itself, reads the mare's
    genome live and the sire's from the jar's `StoredGenome`, and calls the same
@@ -2002,8 +2090,8 @@ breaking existing save data mid-session; treat the names as legacy.
 
 `dimension/debug_pens.json` generates **nothing** (`the_void` biome, one
 `air` layer). Every visit gets its own `DebugPenManager.Plot`: a corridor
-built at a unique world X (`PLOT_SPACING_X` = the catalogue corridor + 1 000
-= **2 526** blocks apart, X slots recycled via a free-list) and a **fixed Y**
+built at a unique world X (`PLOT_SPACING_X` = the corridor + 1 000 = **8 007**
+blocks apart, X slots recycled via a free-list) and a **fixed Y**
 (`PLOT_BASE_Y` = 128). Plots never share chunks - "two players never land in
 the same place" holds on a server with no real per-player-dimension work.
 
@@ -2011,13 +2099,18 @@ the same place" holds on a server with no real per-player-dimension work.
 new plot and tears down that player's previous one, so a revisit always
 regenerates and no live horse left behind survives.
 
-**Leaving clears entities, not blocks.** The gallery is deterministic (fixed
-catalogue, fixed `PLOT_BASE_Y`, fixed length), so an X slot handed back to the
-free list is rebuilt with byte-identical geometry and the stale corridor is
-overwritten in place - there's nothing to gain from air-filling it first.
-`tearDown` is therefore O(entities), not O(blocks walked). It also
+**Leaving clears entities, not blocks.** The *geometry* is fixed (`PEN_COUNT`
+pens, fixed `PLOT_BASE_Y`), so an X slot handed back to the free list is rebuilt
+with byte-identical geometry on top of the old one. The *contents* are random
+now and differ every visit, but every pen a player can reach is rebuilt from
+index 0 upward as they walk - sign and horses together - so a stale genotype is
+never on show, and `buildPen` clears untamed leftovers before it stocks. Only
+pens past the new player's frontier hold anything old, and walking there
+rebuilds them. `tearDown` is therefore still O(entities), not O(blocks walked);
+its AABB covers the **whole** X slot (not just what this visit built), or a slot
+where a previous visitor walked further would accumulate horses forever. It also
 `HorseAncestryData.forget(...)`s each discarded horse, or every visit would
-leave ~868 throwaway gallery records in the save forever. (A record that
+leave hundreds of throwaway pen records in the save forever. (A record that
 *references* a forgotten horse as a parent is left alone - `ancestorsOf`
 already skips ancestors it can't find, so a foal bred in the dimension and
 taken home keeps working with a missing parent node.)
@@ -2052,81 +2145,74 @@ taken home keeps working with a missing parent node.)
 - `DebugPenTickHandler` (`PlayerTickEvent.Post`, **not** dev-gated anymore)
   -> `ensureGeneratedAheadOfPlayer(player)` extends the corridor as you walk.
 
-### The gallery: one pen per *visually distinct* genotype (`common/genetics/GenotypeCatalog`)
+### The pens: one random showcase genotype each (`common/genetics/ShowcaseGenotypes`)
 
-The dimension is a **gallery of the genotype catalogue** - two horses for every
-genotype that looks different from every other.
+The dimension is a corridor of **2 000 pens**, each holding a mare and a
+stallion rolled from **one random genotype**. `DebugPenManager.PEN_COUNT` is a
+fixed, arbitrary number - **not** derived from anything - which is the whole
+point of the revert: the corridor no longer grows when a gene is added.
 
-- **`GenotypeCatalog`** (pure `common/`, unit-tested) is the enumeration.
-  `allPairsOf(gene)` = every unordered `AllelePair` a horse can carry, all
-  `n(n+1)/2` of them (`ee`, `Ee`, `EE`) minus any the gene rules out with
-  `canOccur` (sex has no `Y/Y`; KIT has no homozygote of a nonviable `W`; MITF
-  no `SW3/SW3`, PAX3 no `SW4/SW4`); `distinctPairsOf(gene)` keeps one
-  representative per distinct `Expression`; `totalGenotypes()` = the raw product
-  (**55 099 802 880**); `size()` = the reduced catalogue (**2 064 387**).
-  **Nothing is materialised**: `size()` is arithmetic and `get(i)` builds one
-  genotype from an odometer reading over each gene's *non-masking* distinct
-  pairs, with the one entry per masking combination appended after all of them.
-  `entries()` is a **lazy view** - iterate it, never collect it. (It used to be
-  an eager `List<Genotype>`, which was fine at a few thousand entries and is
-  hundreds of megabytes at two million.) Nothing is hard-coded - register a gene
-  (or an allele) and the catalogue and both signs widen on their own.
-- **Two reductions**, both read straight off the gene's expression table with
-  no dominance metadata in the middle:
-  - **pairs landing on the same `Expression` collapse** to one representative -
-    the homozygous pair where the group has one, so a pen reads `EE` not `Ee`.
-    **Every wild type is one group**, however many the gene declares, because
-    "changes nothing" is one look: MATP's `pearl-carrier` shares a pen with its
-    plain `N/N`. This is exact, where the old "drop the heterozygote unless the
-    gene is incomplete dominant" rule was an approximation;
-  - an expression that **`masks`** hides everything else, so the catalogue keeps
-    exactly **one** entry for it: that combination with every other gene at a
-    wild type. Hence one dominant-white pen, one lethal-white pen and one test
-    pen instead of a huge fraction of the corridor each. A gene can contribute
-    to *both* halves: KIT has 7 ordinary outcomes **and** one that masks.
-  - Net: `2^11 (the eleven two-outcome genes, EDNRB's non-masking half among
-    them) · 3 (dun) · 4 (MATP) · 7 (KIT's non-masking outcomes) · 4 (MITF) ·
-    3 (PAX3) = 2 064 384` unmasked, + 1 dominant white + 1 lethal white +
-    1 test = **2 064 387**. **Sex adds no pens** - both its outcomes are wild
-    types, so the whole locus is one group; it only doubles
-    `totalGenotypes()`.
-- **Pen order**: segment `i` holds catalogue entry `2i` in the **right-hand**
-  pen (`NORTH_PEN`, the `+Z` side - your right walking in from the portal) and
-  `2i+1` on the left. The corridor reads `eeaa, EEaa, eeAA, EEAA, eeaa ChCh,
-  ...`: extension exhausts before agouti moves. **The masked pens moved to the
-  tail** with the lazy rewrite - they used to sit at their gene's odometer
-  position mid-corridor, and now the three of them are the last three entries.
-  With an odd catalogue the final left-hand pen is simply not built.
-- **Both horses in a pen share the genotype** but not the epigenome, so
-  they're two examples rather than two copies.
+- **`ShowcaseGenotypes.random(rng)`** (pure `common/`, unit-tested) is the draw:
+  an ordinary `Genotype.random` founder roll with a **floor** under it.
+  - The honest wild distribution is mostly plain horses - every founder table is
+    weighted hard toward its baseline - which is correct for a wild spawn and
+    useless for a corridor whose job is to show what the genes do.
+  - So: **at least one natural coat gene beyond extension and agouti is
+    expressing**, always, and with `MAGICAL_CHANCE` = **0.5** a magical gene is
+    too. A draw that already clears the floor is left exactly as it fell; only
+    an all-baseline draw gets a gene forced in.
+  - Forcing picks a random combination of a random candidate gene and keeps only
+    one that **actually expresses in this genotype** (`Genotype.shows`), so a
+    chestnut is never handed an agouti it will not paint.
+  - A combination that **`masks`** neither counts toward the floor nor is ever
+    forced. That is load-bearing: a quarter of all founders carry the diagnostic
+    test gene, which paints flat over everything, so counting it would quietly
+    exempt a quarter of the corridor from the guarantee.
+  - Candidates are derived from the registry (`naturalOrder()` / `magicalOrder()`
+    filtered to `affectsCoat()`, minus extension and agouti), so a drop-in gene
+    joins the pool on its own.
+  - **The one honest gap**: the floor guarantees a gene *expresses*, not that it
+    is *perceptible*. Mushroom on a black horse is a real expression that looks
+    like nothing. Nothing in the model can currently answer "would a player see
+    this", so this is accepted rather than special-cased.
+  - It is a **founder path** - randomness here is legitimate because these horses
+    have no parents. Nothing else calls it; a wild spawn is still a wild spawn.
+- **`Genotype.with(AllelePair)`** is the new founder-only setter it needs - one
+  locus replaced, the rest untouched, the same shape as `withSex` (which now
+  delegates to it).
+- **Both horses in a pen share the genotype** but not the epigenome, so they're
+  two examples rather than two copies.
+- **`buildPen` always stocks fresh.** A pen is built exactly once per plot, so
+  anything already standing in it belongs to a *previous* occupant of that
+  recycled X slot and has nothing to do with the sign just written. Untamed
+  horses there are discarded (and forgotten from the ancestry DB) before the
+  pair spawns; tamed ones are left alone, since a player can have ridden one
+  ahead of the build frontier.
 - **Signs** (`placeSign`, waxed standing oak, same text on both faces):
   - per pen, on the road one block out from the wall and **to the right of the
     gate** as you face the pen (`roadFacing().getOpposite().getClockWise()`, so
-    the two sides of the road mirror): line 0 = `#<1-based catalogue number>`,
-    then **`GeneCodeDisplay.shortForm`** - the same compact form the info panel
-    and paper dump use, so a plain horse reads `eeaa`, not a wall of wild-type
-    slots - greedily wrapped over the remaining 3 lines by
-    `GeneCodeDisplay.wrap(genotype, 3, 15)`. **At 20 in-game genes the widest labels
-    come nowhere near fitting** three 15-char lines - a horse loaded up on the
-    white-pattern + dilution genes runs to well over a hundred chars - and
-    `wrap` deliberately overflows its **last** line rather than dropping a
-    gene, so those signs read very wide in-game. The unit test asserts only
-    that nothing is lost and that the overflow doesn't grow past 200. The real fix is the planned revert to random
-    pens (`wiki/roadmap.html` §9), which retires the per-genotype sign
-    entirely - so this is deliberately left alone.
+    the two sides of the road mirror): line 0 = `#<1-based pen number>`, then
+    **`GeneCodeDisplay.shortForm`** - the same compact form the info panel and
+    paper dump use - greedily wrapped over the remaining 3 lines by
+    `GeneCodeDisplay.wrap(genotype, 3, 15)`. `wrap` deliberately overflows its
+    **last** line rather than dropping a gene, so a busy horse still reads very
+    wide; `ShowcaseGenotypesTest` pins that nothing is ever lost and that the
+    overflow doesn't grow past 200 chars. Random labels overflow far less often
+    than the exhaustive catalogue ones did, so this is left alone.
   - `originX + 4` (three blocks in front of the return portal), facing west at
-    the player's spawn: `Genotypes / <totalGenotypes()> / <size()> distinct /
-    showing <galleryPens()>` - all derived, so
-    **55,099,802,880 / 2,064,387 / showing 20,000** today. Epigenetics are
-    deliberately not counted in any of them.
-- **Length**: capped. `DebugPenManager.MAX_GALLERY_PENS` = **20 000**, so
-  `LAST_SEGMENT_INDEX` = `ceil(min(size, 20 000) / 2) - 1` = 9 999 and the
-  corridor is **~70 000 blocks**. Uncapped it would be ~7.2 million blocks for
-  2 064 387 pens - a quarter of the way to the world border, and
-  `PLOT_SPACING_X` is the corridor plus 1 000, so the dimension would fit four
-  plots. The cap is a lid on the symptom; §9's revert to random pens is the fix.
+    the player's spawn: `Horse Pens / 2,000 pens / random genome / mare +
+    stallion`. The old catalogue tally (`Genotypes / <totalGenotypes()> /
+    <size()> distinct / showing <n>`) is gone - none of it is true of a random
+    corridor.
+- **Length**: `PEN_COUNT` = **2 000**, so `LAST_SEGMENT_INDEX` = 999 and the
+  corridor is **~7 000 blocks** - short enough to fly to the end of, and
+  `PLOT_SPACING_X` (the corridor + 1 000) is back down to **8 007**.
   `ensureBuiltUpToIndex` clamps to it and calls `buildEndCap` (the mirror of
   `buildStartCap`) on the last segment. Pens are still built lazily as you walk.
+- **`GenotypeCatalog` is untouched and still used** - by the tests, and by
+  whatever punnett display gets built. It just no longer drives the dimension.
+  `size()` is still **2 064 387** and `totalGenotypes()` **292 822 943 423 500 800**;
+  see "the genetics model" for what those numbers mean.
 
 ### Layout (`DebugPenManager`)
 
@@ -2361,39 +2447,37 @@ Design follow-ups (not just "go look at it"):
    `Expression.masks()` outside `GenotypeCatalog` and `Gene.name()`. The
    punnett / expected-foal display is the natural companion and is what turns
    two carriers from a nasty surprise into a decision. Original entry:
-   *Nothing reads the expression table but the coat and the gallery.* Every
+   *Nothing reads the expression table but the coat and the catalogue.* Every
    gene now carries, per combination, a display name and a human-readable
    sentence saying what it does - written for the gene dictionary and the wiki,
    and read by neither yet. The obvious consumers: a punnett / expected-foal
    display, "carrier of X" wording in the info panel (MATP's `pearl-carrier`
    and pink hair's `pink-carrier` already have the sentence), a generated gene
-   dictionary, and `GeneCodeDisplay` deciding what is worth printing. Also
-   unread: `Expression.masks()` outside `GenotypeCatalog`, and
-   `Gene.name()`.
+   dictionary, and `GeneCodeDisplay` deciding what is worth printing.
+   **`Gene.name()` and one more `Expression.name()` reader landed 2026-09-04**:
+   the rebuilt spawn-egg editor lists genes by their display name and prints the
+   outcome name under any row that expresses. Still unread: `Expression.masks()`
+   outside `GenotypeCatalog`.
 11. **Cleanups**: rename `DebugPenManager` / `DEBUG_LEVEL` /
    `horsegenetics:debug_pens` to non-"debug" names (needs a save-data
    migration or a one-time reset); name-generation rework; real white-fog dimension effects
    (needs a client dimension-effects mixin); the stray `neoforge.mods.toml`
    duplicate.
-12. **Fixed 2026-09-04. The gallery is capped, and that is a lid on a symptom.**
-   `GenotypeCatalog` is no longer materialised (`size()` is arithmetic,
-   `get(i)` reads an odometer) because at **2 064 387** entries an eager
-   `List<Genotype>` is hundreds of megabytes. But the *corridor* for that many
-   pens would be ~7.2 million blocks - a quarter of the way to the world border,
-   leaving room for four plots in the dimension - so
-   `DebugPenManager.MAX_GALLERY_PENS` holds it at **20 000** and the entrance
-   sign says how many it is *showing* out of how many exist. Every gene
-   multiplies the catalogue, so the cap will keep being hit; the real answer is
-   roadmap §9's revert to random pens, which retires one-pen-per-genotype
-   entirely. Also note the knock-on for callers: `entries()` is a **lazy view**,
-   so `entries().stream()` still walks and builds all two million - sample it,
-   or ask the arithmetic. Three catalogue tests were converted to seeded
-   sampling for exactly that reason.
+12. **Closed 2026-09-04. The gallery is gone; the catalogue stays as arithmetic.**
+   `GenotypeCatalog` is no longer materialised (`size()` is arithmetic, `get(i)`
+   reads an odometer) because at **2 064 387** entries an eager
+   `List<Genotype>` is hundreds of megabytes. That was half the answer; the
+   other half was that a corridor of that many pens is ~7.2 million blocks. A
+   20 000-pen cap held it for one session and the revert to **random pens**
+   (roadmap §8) closed it properly - the corridor is a fixed 2 000 pens and does
+   not grow when a gene is added. What is left is a caller note, not a gap:
+   `entries()` is a **lazy view**, so `entries().stream()` still walks and builds
+   all two million - sample it, or ask the arithmetic. Three catalogue tests are
+   seeded sampling for exactly that reason.
    *(The previous #12 - `CoatPipelineGoldenTest.override` silently ignoring an
    unknown gene, so a case naming a retired gene pinned nothing - is fixed: it
    throws now, and the five stale `cream` / `pearl` cases were re-pointed at
    `matp=`.)*
-
 13. **The wiki is now load-bearing, so it can rot.** `wiki/api-reference.html`
    hand-transcribes public signatures out of `common/` and
    `wiki/gene-*.html` hand-transcribes each gene's constants - neither is

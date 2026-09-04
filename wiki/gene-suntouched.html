@@ -44,7 +44,7 @@
         <strong>Confirmed:</strong> the emissive gold mane and tail render (bright
         in the dark) and look good, the gold-dust <code>emitter</code> shows, and
         the horse lights the area around it. <strong>Still unverified:</strong> the
-        light cleaning up on death / unload, the foal case, the gallery-dimension
+        light cleaning up on death / unload, the foal case, the horse-dimension
         skip, and hard base coats (cremello, dominant white). Checklist item is
         <a href="verification.html#effects">To be verified &sect;13</a>.
     </p>
@@ -118,7 +118,7 @@
             level&nbsp;12 trailing the horse &mdash; moved only when the horse walks
             into a new block, dropped on death / unload / dimension change
             (<code>EntityLeaveLevelEvent</code>). It is only placed into air, and it
-            is <strong>skipped in the gallery dimension</strong> so the read-only
+            is <strong>skipped in the horse dimension</strong> so the read-only
             horse dimension doesn&rsquo;t fill with light blocks. A server crash can
             orphan one block &mdash; the same caveat the portal plots carry. There is
             no <code>when</code>, so a Suntouched horse always glows, foal included.</dd>
@@ -172,7 +172,7 @@
 <ul>
     <li>the <strong>in-game genotype code is 13 segments</strong>, and shorter saved
         horses will not load;</li>
-    <li>the horse-dimension gallery / <code>GenotypeCatalog</code> is roughly
+    <li>the <code>GenotypeCatalog</code> count is roughly
         <strong>4&times;</strong> its no-gene size (each shipped
         <code>DOMINANT</code> two-allele gene doubles it);</li>
     <li><strong><code>:common:test</code> is unaffected</strong> &mdash; the index is

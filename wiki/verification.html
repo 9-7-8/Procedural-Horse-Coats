@@ -188,8 +188,8 @@
         sometimes eat the food, show hearts, and produce <em>no foal</em> plus a chat line
         saying why. Roughly one pairing in four.</li>
     <li><strong>An adult must not die.</strong> Spawn an adult <code>plod1=ffs/ffs</code>
-        &mdash; it should live indefinitely. Same in the genotype gallery: the lethal-white
-        pen horses must not start dying.</li>
+        &mdash; it should live indefinitely. Same in the horse dimension: a pen horse that
+        rolls lethal white must not start dying.</li>
     <li>Check the <a href="breeding.html">family tree</a> still renders with a
         short-lived foal in it.</li>
 </ul>
@@ -288,10 +288,9 @@
         <code>nD</code> for <code>D/d2</code>, <code>nd1</code> for <code>d1/d2</code>
         and <code>d1d1</code> for <code>d1/d1</code> &mdash; check the info panel, the
         paper dump and a pen sign agree.</li>
-    <li><strong>The gallery grew by half.</strong> The entrance sign should read
-        <code>Genotypes / 55,099,802,880 / 2,064,387 distinct / showing 20,000</code>, and the
-        corridor is now ~516,000 blocks. Dun contributes <em>three</em> pens per
-        position now, not two.</li>
+    <li><strong>Dun in the pens.</strong> The catalogue tally is off the entrance
+        sign (the corridor is random now &mdash; item 4), so check dun in a pen the
+        ordinary way: some pen horses should carry a stripe and no dilution.</li>
 </ul>
 
 <h3 id="sex-gene">0.1 Sex is a gene (new 2026-09-03)</h3>
@@ -337,12 +336,10 @@
         coat. (They now share one baked texture &mdash; if one is a plain white horse,
         the coat-code / texture-id work is wrong.)</li>
     <li><strong>The custom spawn egg&rsquo;s Mare / Stallion button still works</strong>,
-        and <strong>sex does not appear in the &ldquo;+ Add gene&rdquo; picker</strong>
-        (it is filtered out; the button owns that locus).</li>
-    <li><strong>The gallery still has one mare and one stallion per pen</strong>, and
-        the pen signs are unchanged &mdash; the short genome form does not print sex.
-        The entrance sign&rsquo;s numbers moved again with dun&rsquo;s third allele
-        &mdash; see &sect;0 for what they should read now.</li>
+        and <strong>sex is not in the gene list at all</strong> (it is filtered out; the
+        button owns that locus).</li>
+    <li><strong>Every pen still has one mare and one stallion</strong>, and the pen
+        signs do not print sex &mdash; the short genome form leaves it out.</li>
     <li><strong>The seed jar still refuses a mare</strong> (collection) and
         <strong>refuses a stallion</strong> (impregnation) &mdash; both sides now read
         the sex out of the genome rather than a stored field, and the jar&rsquo;s own
@@ -419,10 +416,9 @@
         <code>config/horsegenetics/genes/</code> and restart. The form now asks
         &ldquo;shows when the horse has one copy or two&rdquo; and takes three founder
         percentages instead of a dominance dropdown and a 1-in-N field.</li>
-    <li><strong>Pen signs and the entrance tally.</strong> The gallery is now
-        <strong>2,064,387 pens</strong>, of which the corridor now builds the first
-        <strong>20,000</strong> (the <code>MAX_GALLERY_PENS</code> cap, ~70,000 blocks):
-        splash collapsed from three pens to two and MATP from nine to four.</li>
+    <li><strong>Pen signs.</strong> The catalogue no longer drives the corridor
+        (item 4), so there is no tally to check &mdash; but a pen sign must still name
+        exactly what its two horses are carrying.</li>
 </ul>
 
 <div class="note">
@@ -484,7 +480,7 @@
         couple of heart particles. Move it away from the water (or onto stone
         away from any food) &rarr; healing <strong>stops</strong>. Hand-feeding
         wheat should still heal it regardless of surroundings.</li>
-    <li><strong>Any gallery pen is a ready test bed</strong> &mdash; cauldron +
+    <li><strong>Any dimension pen is a ready test bed</strong> &mdash; cauldron +
         hay bale &mdash; but horses there take no damage, so hurt one in the
         overworld.</li>
     <li><strong>Bond number shows.</strong> Ride a tamed horse, open its
@@ -507,7 +503,7 @@
     <li><strong>Persistence.</strong> Bond and herd id survive a save/reload
         (they are on a serialized attachment). Re-summoning via death does
         <em>not</em> apply here, but <code>copyOnDeath</code> is set.</li>
-    <li><strong>Performance.</strong> Stand in the gallery corridor with
+    <li><strong>Performance.</strong> Stand in the pen corridor with
         hundreds of (healthy) horses loaded &mdash; no tick lag. The block scan
         only runs for hurt horses.</li>
 </ul>
@@ -520,9 +516,9 @@
     in a running game.
     <strong>Baseline note:</strong> as of 2026-09-02 <code>example.waterborn</code>
     <em>and</em> <code>example.suntouched</code> ship loaded (classpath index), so a
-    stock in-game genotype code is <strong>20 segments</strong> (18 built-ins + the
-    two shipped spec genes) and the gallery is enormous. Dropping one more gene in
-    takes it to 21. To test the drop-in path:
+    stock in-game genotype code is <strong>33 segments</strong> (31 built-ins + the
+    two shipped spec genes). Dropping one more gene in takes it to 34. To test the
+    drop-in path:
 </p>
 
 <ol>
@@ -535,7 +531,7 @@
         that is itself a finding.</li>
     <li><code>./gradlew :neoforge-26.1.2:runClient</code> and read the log for
         <code>[genes] loaded 3 data-driven gene(s)</code> (Suntouched + Waterborn +
-        Tobiano) and <code>the genotype code now has 21 segments</code>. (The fixture is
+        Tobiano) and <code>the genotype code now has 34 segments</code>. (The fixture is
         <code>example.tobiano</code> &mdash; a different key from the built-in
         <code>horsegenetics.tobiano</code>, so both coexist.)</li>
 </ol>
@@ -544,10 +540,10 @@
 
 <ul>
     <li><strong>Wild horses carry it.</strong> 1 in 18 per allele, so a handful of
-        spawns should include a patched one. The horse dimension's gallery should have
-        <strong>roughly doubled again</strong> from the shipped-gene baseline length
-        (the two <code>COMPLETE_DOMINANT</code> pens don't double); the entrance sign
-        is the quick read.</li>
+        spawns should include a patched one. It should also turn up on pen horses in
+        the horse dimension, and &mdash; because it is a natural gene that paints
+        &mdash; it joins the pool the showcase draw can force, so it will show up
+        there more often than 1 in 18 would suggest.</li>
     <li><strong>It looks like the preview did.</strong> Not texel-identical &mdash; the
         creator's gradient is downsampled &mdash; but the same size and shape of
         patches, and the same socks.</li>
@@ -582,7 +578,8 @@
 
 <p>
     New 2026-09-02. Dominant and 1 in 100 per allele, so do not wait for a wild one:
-    the gallery has zebra pens, or summon one with <code>magic_zebra=Mzeb/n</code> in
+    the dimension&rsquo;s pens force a magical gene half the time, or summon one with
+    <code>magic_zebra=Mzeb/n</code> in
     the code. What to look at:
 </p>
 
@@ -609,7 +606,8 @@
 
 <p>
     New 2026-09-02. <strong>Recessive</strong>, so only <code>Pihr/Pihr</code> shows
-    and a wild one is about 1 in 144 &mdash; use the gallery or a summon.
+    and a wild one is about 1 in 144 &mdash; use the dimension&rsquo;s pens (they force
+    a magical gene half the time) or a summon.
 </p>
 
 <ul>
@@ -627,18 +625,69 @@
         <code>magicalOrder()</code>.</li>
 </ul>
 
-<h3>4. Pen signs now overflow</h3>
+<h3 id="random-pens">4. The horse dimension is random pens now (new 2026-09-04)</h3>
 
 <p>
-    At 18 genes a fully loaded-up genotype label runs to well over a hundred
-    characters against three 15-char sign lines, so <code>GeneCodeDisplay.wrap</code>
-    overflows the last line badly (the unit-test tripwire is now 140). Confirm how
-    badly that reads in-game before deciding
-    whether it is worth anything &mdash; the gallery is
-    <a href="roadmap.html#random-pens">slated for revert to random pens</a>, which
-    retires the per-genotype sign, so <strong>&ldquo;leave it&rdquo; is a legitimate
-    answer</strong>.
+    <strong>The gallery is gone.</strong> Each pen rolls its own
+    <code>ShowcaseGenotypes.random</code> draw instead of holding a catalogue entry,
+    and the corridor is a fixed <strong>2,000 pens</strong> (about 7,000 blocks)
+    rather than a length derived from the genotype space. This replaces the old items
+    4, 6 and 7 &mdash; do not go looking for catalogue order.
 </p>
+
+<p>Enter with <strong>F6</strong> (or a hay portal) and walk 20&ndash;30 pens:</p>
+
+<ul>
+    <li><strong>No plain horses.</strong> Every pen shows at least one coat gene
+        beyond extension and agouti &mdash; a dilution, a marking, a grey, something.
+        A corridor of ordinary bays and chestnuts means the floor is not working.
+        <em>Note the one honest gap:</em> the floor guarantees a gene is
+        <em>expressing</em>, not that it is <em>perceptible</em> &mdash; mushroom on a
+        black horse is a real expression that looks like nothing. If pens read plain
+        often enough to be annoying, that is the cause, and it is worth reporting.</li>
+    <li><strong>Roughly half the pens show a magical gene</strong> (a pink mane, zebra
+        stripes, a shipped Suntouched or Waterborn). Not exactly half by eye &mdash;
+        it is a coin per pen &mdash; but a corridor with none, or with one in every
+        pen, is a bug.</li>
+    <li><strong>The pen sign</strong> still stands on the road to the <strong>right of
+        the gate</strong> as you face the pen (the two sides of the road mirror), is
+        readable from both faces, is <strong>waxed</strong> (right-click does not open
+        the edit screen), and <strong>matches the two horses in that pen</strong>.
+        Line 0 is now just the pen number.</li>
+    <li><strong>Busy signs still overflow their last line.</strong> Known and
+        deliberate &mdash; <code>wrap</code> would rather run off the sign than drop a
+        gene. Now that the labels are random rather than exhaustive they should
+        overflow far less often; if it still reads badly, that is worth a decision.</li>
+    <li><strong>The entrance sign</strong> three blocks in front of the return portal
+        now reads <code>Horse Pens / 2,000 pens / random genome / mare + stallion</code>
+        &mdash; no catalogue tally, because there is no catalogue to tally.</li>
+    <li><strong>The pair still differs.</strong> Both horses match the sign and differ
+        only where a non-deterministic gene (bay points, grey dapples, splash) makes
+        them differ &mdash; they share a genotype and not an epigenome.</li>
+    <li><strong>The corridor ends in a wall</strong> after pen 2,000, about 7,000
+        blocks out. Reachable by flying, unlike the old one.</li>
+    <li><strong>Pen amenities</strong>: the sunk water cauldron and hay bale still sit
+        flush with the grass, and the horses stay penned.</li>
+</ul>
+
+<p>
+    <strong>Leave and re-enter</strong> &mdash; this is the item that changed shape.
+    Blocks are still left standing on teardown, but the <em>contents</em> are random
+    now, so:
+</p>
+
+<ul>
+    <li>The new corridor is a <strong>different set of horses</strong> from the last
+        visit &mdash; every pen you walk past is rebuilt, sign and horses together.</li>
+    <li>Walk <em>further</em> than last time: no stale sign, no doubled horses, no pen
+        whose horses disagree with its sign. <code>buildPen</code> clears untamed
+        leftovers before it stocks, so a previous visit&rsquo;s animals must not
+        survive.</li>
+    <li>Walk <em>less</em> far than last time, then leave: nothing should be left
+        behind in the far end. The teardown box now covers the whole corridor, not
+        just the part built this visit.</li>
+    <li>Leaving is still instant.</li>
+</ul>
 
 <h3>5. The three-phase pipeline refactor &mdash; lowest priority</h3>
 
@@ -657,48 +706,69 @@
     <strong>dominant-white</strong> horse. Nothing else needs looking at.
 </p>
 
-<h3>6. The genotype gallery &mdash; now low-value</h3>
+<h3 id="spawn-egg-ui">6. The custom spawn egg, rebuilt (new 2026-09-04)</h3>
 
 <p>
-    Slated for revert. The owner has decided the dimension goes back to
-    <strong>random</strong> pens (keeping the pairs and the per-pen genome sign), so
-    verify only the parts that survive: the per-pen sign, the pairs, the pen
-    amenities. <strong>Do not spend a session walking a million-plus blocks checking
-    catalogue order.</strong>
+    The editor is a different screen now: <strong>every registered gene down the left
+    in alphabetical order</strong> by its display name, a <strong>live 3D horse</strong>
+    in the middle, and age / sex / reroll / copy / paste / reset / spawn down the
+    right. Open it by right-clicking with the <strong>custom horse spawn egg</strong>.
 </p>
 
-<p>What it does today, if you do look:</p>
-
 <ul>
-    <li>The entrance sign three blocks in front of the return portal reads
-        <code>Genotypes / 55,099,802,880 / 2,064,387 distinct / showing 20,000</code> (all derived,
-        so the first number doubled when the sex locus landed).</li>
-    <li>The first six pens, right/left alternating, are <code>eeaa</code>,
-        <code>EEaa</code>, <code>eeAA</code>, <code>EEAA</code>,
-        <code>EEaa WW</code>, <code>EEaa TT</code> &mdash; extension exhausts before
-        agouti moves, no separate pen for a combination that lands on the same
-        expression as another, and white and test get exactly one pen each.</li>
-    <li>Pen signs read like the horse&rsquo;s own info panel (<code>eeaa nSpl</code>,
-        not the full slash-and-dash code) and wrap sensibly on the ordinary ones. The
-        busiest ones overflow &mdash; that is item 3, do not file it twice.</li>
-    <li>The gate sign really is to the <strong>right</strong> of the gate on both
-        sides of the road (the two sides mirror), stands on the road surface, is
-        readable from both faces, and is <strong>waxed</strong> (right-click does not
-        open the edit screen).</li>
-    <li>Both horses in a pen match the sign, and differ only where a
-        non-deterministic gene (bay points, splash) makes them differ.</li>
-    <li>The corridor ends in a wall after the last pen &mdash; now ~70,000 blocks
-        out (the 20,000-pen cap), so not something to fly either.</li>
+    <li><strong>The names are the real ones.</strong> The list reads
+        &ldquo;ACAN&rdquo;, &ldquo;Agouti&rdquo;, &ldquo;B4GALT7&rdquo;,
+        &ldquo;Champagne&rdquo;, &ldquo;EDNRB (frame overo)&rdquo;, &ldquo;KIT (white
+        spotting)&rdquo;&hellip; in alphabetical order &mdash; not
+        <code>horsegenetics.ednrb</code>, and not registry order. Long names are
+        scaled down to fit; check they are still legible.</li>
+    <li><strong>Clicking a gene adds it.</strong> A gene not on the horse is a plain
+        name that highlights under the cursor; click the row and it gains two allele
+        buttons and an <code>x</code>. Nothing should show allele buttons until you
+        add it &mdash; a screen of <code>N/N</code> buttons is the thing this
+        replaced. Scroll the list (mouse wheel over the left column) and confirm the
+        last gene is reachable at your window size.</li>
+    <li><strong>It lands homozygous for the allele that does something</strong>
+        &mdash; Champagne as <code>Ch/Ch</code>, Grey as <code>G/G</code>, not
+        <code>N/N</code>. Two to check specifically: <strong>KIT</strong>, whose first
+        four <code>W</code> homozygotes cannot occur, must land on the first one that
+        can (never a nonviable pair); and <strong>MET</strong>, whose
+        <code>met/met</code> cannot occur at all, must land heterozygous.</li>
+    <li><strong>The <code>x</code> takes a gene back off</strong> and it returns to a
+        plain name.</li>
+    <li><strong>The row says what it expresses.</strong> An added gene shows its
+        outcome name under it (&ldquo;Bay&rdquo;, &ldquo;Silver&rdquo;,
+        &ldquo;Dominant white&rdquo;) and the name turns green; cycle it back to
+        baseline and it reads <code>no effect</code>. That is the expression prose
+        finally being read by something.</li>
+    <li><strong>The preview redraws as you edit</strong>, turns to follow the cursor,
+        and switches between the adult and foal model with the Age button.</li>
+    <li><strong>Reroll epi.</strong> changes the preview <em>without</em> changing the
+        genotype &mdash; watch bay leg heights, grey dapples or a splash edge move. The
+        <code>epigenetics #</code> line under the list changes with it.</li>
+    <li><strong>The spawned horse is the previewed horse.</strong> This is the point of
+        the change: set up a striking non-deterministic coat, note the epigenetics
+        number, spawn, and check the horse in the world looks <em>identical</em> to the
+        preview. The server used to re-roll it.</li>
+    <li><strong>Copy code</strong> puts the genotype code on the clipboard;
+        <strong>Paste code</strong> reads one back and the whole list (and the sex
+        button) moves to match &mdash; and only the loci that are actually off
+        baseline come back as added rows, not all thirty. Round-trip one: copy,
+        <strong>Clear genes</strong>, paste, confirm you are back where you were.</li>
+    <li><strong>Creative only, server-checked.</strong> In survival, Spawn must do
+        nothing but print &ldquo;the custom spawn egg is a creative-mode tool&rdquo;.
+        The egg is no longer consumed in survival, because it no longer works there.</li>
+    <li>A gene with many alleles (KIT has eight) cycles through all of them on repeat
+        clicks &mdash; tedious by design, but confirm it wraps rather than sticking.</li>
 </ul>
 
-<h3>7. Leaving the dimension no longer clears blocks</h3>
+<h3>7. The old spawn-egg follow-ups, re-check after the rebuild</h3>
 
 <p>
-    <code>tearDown</code> discards entities and forgets their ancestry records only.
-    Check: leave and re-enter; the corridor is rebuilt over the old one with no
-    leftovers, stragglers or doubled horses, and leaving is instant. Then leave,
-    re-enter, and walk <em>less</em> far than last time &mdash; the stale far end
-    should still be correct geometry with no horses until you walk to it.
+    Both 2026-09-02 fixes were in the code the rebuild replaced, so confirm they still
+    hold: the screen&rsquo;s backdrop must not draw over its own buttons (widgets
+    render <em>during</em> <code>super.extractRenderState</code>), and nothing may run
+    off the bottom of a short window.
 </p>
 
 <h3 id="foals">8. Foals &mdash; only spot-checked, needs a real pass</h3>
@@ -847,7 +917,7 @@ gold-dust <code>emitter</code> shows, and the horse lights the area around it
 <ul>
     <li><strong>The light cleans up.</strong> Kill the horse, or walk it far enough
         to unload &mdash; the <code>minecraft:light</code> block must disappear, not
-        linger. In the <strong>horse dimension gallery</strong> there should be
+        linger. In the <strong>horse dimension</strong> there should be
         <em>no</em> light blocks at all (it is skipped there on purpose).</li>
     <li><strong>The light follows and lags.</strong> Gallop and watch the lit patch
         lag or stick a block behind &mdash; it is a trailing block, not a smooth
@@ -861,40 +931,34 @@ gold-dust <code>emitter</code> shows, and the horse lights the area around it
         should look identical (no knobs).</li>
 </ul>
 
-<h3 id="custom-spawn-egg">14. Custom horse spawn egg &mdash; the two follow-up fixes</h3>
+<h3 id="custom-spawn-egg">14. Custom horse spawn egg &mdash; what survived the rebuild</h3>
 
 <p>
-    Owner-tested 2026-09-02: the egg, the editor, and the spawn all work. Two things
-    were fixed the same day and want a second look:
+    The screen was rebuilt on 2026-09-04 (item 6 above is the new surface). Three
+    things from the 2026-09-02 pass are still worth a look because the rebuild kept
+    the behaviour but not the code:
 </p>
 
 <ul>
-    <li><strong>No dark tint over the buttons.</strong> The backdrop used to be a
-        full-screen fill drawn after <code>super.extractRenderState</code>, which in
-        the retained-mode GUI paints <em>over</em> the widgets. It is now a few narrow
-        strips in the gaps (behind the title, the gene-name column, the preview line)
-        &mdash; the buttons should look normal.</li>
-    <li><strong>Every gene is reachable.</strong> The gene picker is now bounded
-        multi-column (no button runs off the bottom), and the genome list in the editor
-        scrolls with the mouse wheel when it is long. <strong>Waterborn</strong> (now a
-        shipped gene) should be in the picker; add it and confirm it&rsquo;s clickable
-        and lands as a row.</li>
-    <li><strong>New rows default to the &ldquo;does something&rdquo; allele.</strong>
-        Adding a gene from the picker now sets it <strong>homozygous for its first
-        non-wild-type allele</strong> (e.g. <em>Cream</em> lands as <code>Cr</code>/<code>Cr</code>,
-        <em>Waterborn</em> as <code>Wtb</code>/<code>Wtb</code>), not wild/wild. You can
-        still cycle either allele back to wild.</li>
+    <li><strong>The spawned horse renders the picked coat</strong>, not a random one,
+        and its info panel / paper dump shows that genotype. Foal/Adult and
+        Mare/Stallion match the toggles. Spawned horses are persistent, and two custom
+        horses breed normally.</li>
+    <li><strong>Allele buttons cycle and wrap</strong> on a multi-allele gene &mdash;
+        MATP has three, KIT eight.</li>
+    <li><strong>A drop-in gene appears in the list.</strong> <em>Waterborn</em> and
+        <em>Suntouched</em> ship loaded, so they should be in the list like any other
+        gene, and both are magical genes with real effects to check on the spawned
+        horse.</li>
 </ul>
 
-<p>Still unconfirmed from the first pass:</p>
-
-<ul>
-    <li>Allele buttons cycle and wrap (check a 3-allele drop-in gene if you have one).</li>
-    <li>Spawned horse renders the picked coat (not a random one); its info panel / paper
-        dump shows that genotype; Foal/Adult and Mare/Stallion match the toggles.</li>
-    <li>Non-creative use consumes one egg; creative does not. Spawned horses are
-        persistent. Two custom horses breed normally.</li>
-</ul>
+<p>
+    <strong>Carried over, differently:</strong> the modal &ldquo;+ Add gene&rdquo;
+    picker is gone, but adding is not &mdash; the list itself is the picker now, and
+    the &ldquo;a new row lands on the allele that does something&rdquo; rule is still
+    there (item 6). <strong>Retired outright:</strong> the survival egg-consumption
+    path, since the spawn is creative-only.
+</p>
 
 <h3 id="gameplay-items">15. The gameplay-layer items &mdash; roadmap &sect;&sect;12&ndash;19</h3>
 

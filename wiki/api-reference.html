@@ -218,7 +218,7 @@ int    order();        // index in Gene.alleles() - a slot order, NOT dominance<
                                                                     // .masking()
                                                                     // then .restrict(..) or .tint(..)
 
-    String  id();            // identity - the gallery dedups on it
+    String  id();            // identity - the catalogue dedups on it
     String  name();
     String  description();   // one sentence, for the gene dictionary and the wiki
     boolean wildType();      // changes nothing: no painter, skipped by the composer
@@ -287,6 +287,7 @@ static Sex      sexOf(String code);        // the sex segment, without a full pa
 
 Sex      sex();                            // read off the sex locus
 Genotype withSex(Sex sex);                 // founders only - a foal inherits its own
+Genotype with(AllelePair pair);            // founders only - one locus replaced
 
 Genotype   breedWith(Genotype other, Rng rng);   // 2 nextBoolean() per gene
 AllelePair pair(Gene gene);
@@ -837,8 +838,54 @@ List&lt;String&gt; GeneCodeDisplay.wrap(Genotype genotype, int lines, int maxCha
 <p>
     The consequence for callers: <code>entries()</code> is a view, so
     <code>entries().stream().filter(...)</code> still walks every entry and building each
-    one. Sample it, or ask the arithmetic instead. The gallery is capped separately at
-    <code>DebugPenManager.MAX_GALLERY_PENS</code>.
+    one. Sample it, or ask the arithmetic instead.
+</p>
+
+<p>
+    The catalogue no longer drives the horse dimension &mdash; that corridor is
+    <a href="roadmap.html#random-pens">random pens</a> now, a fixed
+    <code>DebugPenManager.PEN_COUNT</code> of them. What still reads the catalogue is
+    the test suite, and whatever punnett display gets built.
+</p>
+
+<h3><code>ShowcaseGenotypes</code> &mdash; a founder worth looking at</h3>
+
+<div class="codebox">
+<pre><code class="language-java">public final class ShowcaseGenotypes {
+    static final float MAGICAL_CHANCE = 0.5f;
+
+    static Genotype random(Rng rng);           // the horse dimension&rsquo;s stock draw
+
+    static List&lt;Gene&gt;       naturalShowcaseGenes();  // paints, and not extension/agouti
+    static List&lt;Gene&gt;       magicalShowcaseGenes();
+    static List&lt;AllelePair&gt; showcasePairs(Gene gene); // occurs, expresses, does not mask
+}</code></pre>
+</div>
+
+<p>
+    An ordinary <code>Genotype.random</code> founder is the honest wild distribution,
+    and the honest wild distribution is mostly plain horses &mdash; correct for a wild
+    spawn, useless for a corridor whose whole job is to show what the genes do. So a
+    showcase draw is a wild draw with a floor: <strong>at least one natural coat gene
+    beyond extension and agouti is expressing</strong>, and with probability
+    <code>MAGICAL_CHANCE</code> a magical one is too. A draw that already clears the
+    floor is left exactly as it fell.
+</p>
+
+<p>
+    Two rules keep it honest. Forcing only ever picks a combination that
+    <strong>actually expresses in this genotype</strong>
+    (<code>Genotype.shows</code>), so a chestnut is never handed an agouti it will not
+    paint; and a combination that <code>masks</code> neither counts toward the floor
+    nor gets forced &mdash; a quarter of all founders carry the diagnostic test gene,
+    which paints flat over everything, and letting that satisfy the floor would exempt
+    a quarter of the corridor from it.
+</p>
+
+<p>
+    Pure, and a <strong>founder path</strong>: the randomness is legitimate because
+    these horses have no parents. Nothing else should call it &mdash; a wild spawn is
+    a wild spawn.
 </p>
 
 <h3><code>WhitePattern</code> &mdash; the two shapes white spotting comes in</h3>
