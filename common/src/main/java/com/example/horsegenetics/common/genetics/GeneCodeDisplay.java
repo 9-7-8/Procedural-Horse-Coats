@@ -15,18 +15,18 @@ import java.util.List;
  *   <li>Every other gene is shown <b>only if it carries an allele other than
  *       the gene's {@link Gene#defaultAllele() baseline}</b>, space-separated,
  *       in the order {@code trailingOrder()} gives.</li>
- *   <li>Genes that aren't present in every horse - splash, champagne, MATP,
+ *   <li>Genes that aren't present in every horse - the splash loci, champagne, MATP,
  *       magic zebra, pink hair - write a baseline slot as a lowercase
- *       {@code n} ("none"): {@code "nSpl"}, {@code "nCh"}, {@code "nCr"},
+ *       {@code n} ("none"): {@code "nSW1"}, {@code "nCh"}, {@code "nCr"},
  *       {@code "nprl"}. Two real alleles print both tokens, so a MATP
  *       {@code Cr/Cr} is {@code "CrCr"} and a {@code Cr/prl} is
  *       {@code "Crprl"}.</li>
- *   <li>A gene that can mask the coat (white, test) and grey always print both
+ *   <li>A gene that can mask the coat (KIT, EDNRB, test) and grey always print both
  *       real tokens: {@code "Ww"}, {@code "Gg"}, {@code "Tt"}.</li>
  * </ul>
  *
- * Example: a bay with one splash, one champagne and two cream alleles →
- * {@code "EeAa nSpl nCh CrCr"}.
+ * Example: a bay with one MITF splash, one champagne and two cream alleles →
+ * {@code "EeAa nSW1 nCh CrCr"}.
  */
 public final class GeneCodeDisplay {
 
@@ -34,7 +34,7 @@ public final class GeneCodeDisplay {
      * Does {@code gene}'s default allele mean "this trait is simply absent"
      * (so one variant copy shows {@code nXxx} and two show {@code XxxXxx})?
      * True for every gene except one that can <b>mask</b> the rest of the coat
-     * (white, test - which print both real tokens) and grey (which prints
+     * (KIT, EDNRB, test - which print both real tokens) and grey (which prints
      * {@code Gg}). Derived from the gene's {@link Expression} table, so a
      * data-driven pattern gene is covered for free.
      */
@@ -58,7 +58,7 @@ public final class GeneCodeDisplay {
      */
     private static List<Gene> trailingOrder() {
         List<Gene> out = new ArrayList<>(List.of(
-                Genes.SPLASH, Genes.ROAN, Genes.TOBIANO, Genes.FRAME, Genes.SABINO, Genes.WHITE,
+                Genes.KIT, Genes.MITF, Genes.PAX3, Genes.EDNRB, Genes.ROAN, Genes.TOBIANO,
                 Genes.DUN, Genes.SILVER, Genes.MUSHROOM, Genes.CHAMPAGNE, Genes.MATP,
                 Genes.GREY, Genes.MAGIC_ZEBRA, Genes.PINK_HAIR, Genes.TEST));
         for (Gene g : Genes.loaded()) {

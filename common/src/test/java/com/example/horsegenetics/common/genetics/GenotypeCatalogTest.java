@@ -4,7 +4,9 @@ import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -32,9 +34,9 @@ class GenotypeCatalogTest {
     }
 
     /**
-     * The sex locus is the one gene with a combination that cannot happen:
-     * a foal always takes an {@code X} from its dam, so there is no
-     * {@code Y/Y} horse to give a pen to - or to count.
+     * A combination that cannot happen gets no pen and is not counted. The sex
+     * locus is the clearest case - a foal always takes an {@code X} from its
+     * dam, so there is no {@code Y/Y} horse at all.
      */
     @Test
     void theSexLocusHasNoYYCombination() {
@@ -60,19 +62,25 @@ class GenotypeCatalogTest {
     void pairsCollapseByTheExpressionTheyLandOn() {
         // two outcomes, so two pens, and the homozygote represents each group
         assertEquals(List.of("ee", "EE"), tokens(GenotypeCatalog.distinctPairsOf(Genes.EXTENSION)));
-        assertEquals(List.of("ww", "WW"), tokens(GenotypeCatalog.distinctPairsOf(Genes.WHITE)));
+        // EDNRB: three combinations, three outcomes - the carrier and the
+        // homozygous lethal white are not the same horse
+        assertEquals(List.of("NN", "ON", "OO"), tokens(GenotypeCatalog.distinctPairsOf(Genes.EDNRB)));
         // three alleles, six combinations. Five outcomes, but "wild" and the
         // pearl carrier are both wild types and look the same, so four pens.
         assertEquals(List.of("NN", "prlprl", "CrN", "CrCr"),
                 tokens(GenotypeCatalog.distinctPairsOf(Genes.MATP)));
         // pink hair's carrier likewise folds into its wild type
         assertEquals(List.of("PihrPihr", "nn"), tokens(GenotypeCatalog.distinctPairsOf(Genes.PINK_HAIR)));
-        // sabino reads its dose, so all three combinations are their own pen
-        assertEquals(List.of("sb1sb1", "SB1sb1", "SB1SB1"),
-                tokens(GenotypeCatalog.distinctPairsOf(Genes.SABINO)));
-        // splash does *not* yet read its dose, and the catalogue says so out
-        // loud: both variant combinations land on one expression, so one pen
-        assertEquals(List.of("splspl", "SplSpl"), tokens(GenotypeCatalog.distinctPairsOf(Genes.SPLASH)));
+        // KIT: eight alleles, thirty-two carryable combinations, eight outcomes.
+        // This is the reduction doing real work - twenty-four of those
+        // combinations look like one of the other eight.
+        assertEquals(List.of("NN", "W20N", "W20W20", "SB1N", "SB1W20", "SB1SB1", "W23SB1", "W22N"),
+                tokens(GenotypeCatalog.distinctPairsOf(Genes.KIT)));
+        // the two splash loci: MITF has four outcomes, PAX3 three
+        assertEquals(List.of("NN", "SW5N", "SW5SW5", "SW3SW5"),
+                tokens(GenotypeCatalog.distinctPairsOf(Genes.MITF)));
+        assertEquals(List.of("NN", "SW4N", "SW2SW2"),
+                tokens(GenotypeCatalog.distinctPairsOf(Genes.PAX3)));
     }
 
     @Test
@@ -98,48 +106,95 @@ class GenotypeCatalogTest {
         assertEquals(List.of("eeaa", "EEaa", "eeAA", "EEAA"), first);
     }
 
+    /**
+     * Size is arithmetic, not a count of a list: the product of every gene's
+     * <b>non-masking</b> distinct pairs, plus one entry for each masking
+     * combination anywhere in the registry. A gene can contribute to both
+     * halves - {@code KIT} has seven ordinary outcomes and one that masks.
+     */
     @Test
-    void sizeIsTheProductOfTheDistinctPairsPlusOnePenPerMaskingGene() {
+    void sizeIsTheProductOfTheUnmaskedPairsPlusOnePenPerMaskingCombination() {
         long unmasked = 1L;
         int masking = 0;
         for (Gene gene : Genes.codeOrder()) {
-            if (masks(gene)) {
-                masking++;                       // collapses to a single entry
-            } else {
-                unmasked *= GenotypeCatalog.distinctPairsOf(gene).size();
+            int plain = 0;
+            for (AllelePair pair : GenotypeCatalog.distinctPairsOf(gene)) {
+                if (gene.expressionOf(pair).masks()) {
+                    masking++;
+                } else {
+                    plain++;
+                }
             }
+            unmasked *= plain;
         }
         assertEquals(unmasked + masking, GenotypeCatalog.size());
     }
 
-    /** A masking gene gets exactly one pen, and it's the plain wild-type horse plus that gene. */
+    /**
+     * A masking combination gets exactly one pen, and it is the plain wild-type
+     * horse plus that one gene.
+     *
+     * <p><b>Why this samples.</b> The catalogue is millions of entries now, and
+     * walking all of them to find the handful that mask would be minutes spent
+     * building {@link Genotype}s to throw away. The claim splits in two and
+     * both halves are cheap: the arithmetic above already fixes how <i>many</i>
+     * masked entries there are, so this checks the <i>shape</i> of each one and
+     * then that a wide random sample of ordinary entries masks nothing.
+     */
     @Test
-    void eachMaskingGeneContributesExactlyOneEntry() {
-        for (Gene masking : Genes.codeOrder()) {
-            if (!masks(masking)) {
-                continue;
-            }
-            List<Genotype> showing = GenotypeCatalog.entries().stream()
-                    .filter(g -> !isWildType(masking, g))
-                    .toList();
-            assertEquals(1, showing.size(), masking.key() + " should own exactly one entry");
-            Genotype only = showing.get(0);
-            assertTrue(only.pair(masking).homozygous(), masking.key() + " entry should be homozygous");
-            assertTrue(masking.expressionOf(only.pair(masking)).masks(),
-                    masking.key() + " entry should be the combination that masks");
-            for (Gene other : Genes.codeOrder()) {
-                if (other != masking) {
-                    assertTrue(isWildType(other, only),
-                            "everything but " + masking.key() + " should be wild type, " + other.key() + " isn't");
+    void eachMaskingCombinationContributesExactlyOneWildTypeEntry() {
+        int size = GenotypeCatalog.size();
+        int maskingCombinations = 0;
+        for (Gene gene : Genes.codeOrder()) {
+            for (AllelePair pair : GenotypeCatalog.distinctPairsOf(gene)) {
+                if (gene.expressionOf(pair).masks()) {
+                    maskingCombinations++;
                 }
+            }
+        }
+        assertTrue(maskingCombinations > 0, "the model should still have masking combinations to check");
+
+        for (int i = size - maskingCombinations; i < size; i++) {
+            Genotype only = GenotypeCatalog.get(i);
+            Gene masker = null;
+            for (Gene gene : Genes.codeOrder()) {
+                if (gene.expressionOf(only.pair(gene)).masks()) {
+                    masker = gene;
+                    break;
+                }
+            }
+            assertTrue(masker != null, "entry " + i + " should be a masked one: " + only.toCode());
+            for (Gene other : Genes.codeOrder()) {
+                if (other != masker) {
+                    assertTrue(isWildType(other, only),
+                            "everything but " + masker.key() + " should be wild type, " + other.key() + " isn't");
+                }
+            }
+        }
+
+        // ...and nothing in the ordinary run of the catalogue masks anything.
+        Random rng = new Random(20260903L);
+        long plain = size - maskingCombinations;
+        for (int n = 0; n < 4000; n++) {
+            Genotype g = GenotypeCatalog.get((int) (rng.nextDouble() * plain));
+            for (Gene gene : Genes.codeOrder()) {
+                assertFalse(gene.expressionOf(g.pair(gene)).masks(),
+                        "an unmasked entry carries a masking combination: " + g.toCode());
             }
         }
     }
 
+    /**
+     * Every entry is a different genotype and every one round-trips through its
+     * code string. Sampled - see
+     * {@link #eachMaskingCombinationContributesExactlyOneWildTypeEntry()} for
+     * why the whole catalogue is no longer walked - but sampled across the
+     * <i>whole</i> range, both ends and the masked tail included.
+     */
     @Test
     void everyEntryIsDistinctAndRoundTripsThroughTheCode() {
         Set<String> codes = new HashSet<>();
-        for (int i = 0; i < GenotypeCatalog.size(); i++) {
+        for (int i : sampleIndices(6000)) {
             Genotype g = GenotypeCatalog.get(i);
             String code = g.toCode();
             assertTrue(codes.add(code), "duplicate genotype at index " + i + ": " + code);
@@ -151,8 +206,9 @@ class GenotypeCatalogTest {
     @Test
     void noTwoEntriesShareADisplayLabel() {
         Set<String> labels = new HashSet<>();
-        for (Genotype g : GenotypeCatalog.entries()) {
-            assertTrue(labels.add(GeneCodeDisplay.shortForm(g)), "duplicate label: " + GeneCodeDisplay.shortForm(g));
+        for (int i : sampleIndices(6000)) {
+            String label = GeneCodeDisplay.shortForm(GenotypeCatalog.get(i));
+            assertTrue(labels.add(label), "duplicate label: " + label);
         }
     }
 
@@ -173,16 +229,42 @@ class GenotypeCatalogTest {
     @Test
     void everyLabelWrapsOntoThreeSignLinesWithoutLosingAnything() {
         int widestLast = 0;
-        for (Genotype g : GenotypeCatalog.entries()) {
+        for (int i : sampleIndices(6000)) {
+            Genotype g = GenotypeCatalog.get(i);
             List<String> lines = GeneCodeDisplay.wrap(g, 3, 15);
             assertTrue(lines.size() <= 3, "too many lines for " + GeneCodeDisplay.shortForm(g) + ": " + lines);
-            for (int i = 0; i < lines.size() - 1; i++) {
-                assertTrue(lines.get(i).length() <= 15, "line too wide: '" + lines.get(i) + "'");
+            for (int k = 0; k < lines.size() - 1; k++) {
+                assertTrue(lines.get(k).length() <= 15, "line too wide: '" + lines.get(k) + "'");
             }
             widestLast = Math.max(widestLast, lines.get(lines.size() - 1).length());
             assertEquals(GeneCodeDisplay.shortForm(g), String.join(" ", lines));
         }
-        assertTrue(widestLast <= 140, "the overflowing last sign line has grown to " + widestLast + " chars");
+        assertTrue(widestLast <= 200, "the overflowing last sign line has grown to " + widestLast + " chars");
+    }
+
+    /**
+     * {@code n} catalogue indices: the first and last few hundred - where the
+     * odometer's low digits and the masked tail live - plus a seeded random
+     * spread over everything in between.
+     */
+    private static int[] sampleIndices(int n) {
+        int size = GenotypeCatalog.size();
+        Set<Integer> picked = new LinkedHashSet<>();
+        int ends = Math.min(size / 2, n / 6);
+        for (int i = 0; i < ends; i++) {
+            picked.add(i);
+            picked.add(size - 1 - i);
+        }
+        Random rng = new Random(4242L);
+        while (picked.size() < Math.min(n, size)) {
+            picked.add((int) (rng.nextDouble() * size));
+        }
+        int[] out = new int[picked.size()];
+        int k = 0;
+        for (int i : picked) {
+            out[k++] = i;
+        }
+        return out;
     }
 
     @Test

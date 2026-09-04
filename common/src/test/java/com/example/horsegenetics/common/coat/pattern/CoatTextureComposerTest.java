@@ -38,10 +38,10 @@ class CoatTextureComposerTest {
 
     private static final String CHESTNUT = override("extension=e/e");
     private static final String BAY = override("agouti=A/a");
-    private static final String WHITE = override("white=W/w");
+    private static final String WHITE = override("kit=W22/N");
     private static final String CHAMPAGNE_BLACK = override("champagne=Ch/c");
     private static final String CHAMPAGNE_BAY = override("agouti=A/a", "champagne=Ch/c");
-    private static final String SPLASH = override("agouti=A/a", "splash=Spl/spl");
+    private static final String SPLASH = override("agouti=A/a", "mitf=SW1/N");
     private static final String GREY_BLACK = override("grey=G/g");
     private static final String BUCKSKIN = override("agouti=A/a", "matp=Cr/N");
     private static final String PERLINO = override("agouti=A/a", "matp=Cr/Cr");

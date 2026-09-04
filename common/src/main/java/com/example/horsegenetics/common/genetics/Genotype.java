@@ -284,8 +284,15 @@ public final class Genotype {
         return List.copyOf(out);
     }
 
+    /**
+     * Is this horse white all over - i.e. does {@code KIT} carry dominant
+     * white, or {@code EDNRB} the homozygous lethal white? Both remove every
+     * pigment everywhere and mask every other gene, which is the only thing
+     * {@link CoatPhenotype#WHITE} means.
+     */
     public boolean isWhite() {
-        return Genes.WHITE.isWhite(pair(Genes.WHITE));
+        return Genes.KIT.isDominantWhite(pair(Genes.KIT))
+                || Genes.EDNRB.isLethalWhite(pair(Genes.EDNRB));
     }
 
     public boolean hasBlackPigment() {
@@ -323,7 +330,7 @@ public final class Genotype {
         StringBuilder sb = new StringBuilder("Genotype[")
                 .append(GeneCodeDisplay.shortForm(this)).append(" -> ").append(phenotype());
         for (Gene g : visibleGenes()) {
-            if (g == Genes.EXTENSION || g == Genes.AGOUTI || g == Genes.WHITE) {
+            if (g == Genes.EXTENSION || g == Genes.AGOUTI) {
                 continue; // already said by phenotype()
             }
             sb.append(" +").append(expressionOf(g).id());

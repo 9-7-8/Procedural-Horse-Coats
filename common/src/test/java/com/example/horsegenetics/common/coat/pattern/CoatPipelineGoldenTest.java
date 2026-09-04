@@ -48,30 +48,30 @@ class CoatPipelineGoldenTest {
             override("extension=e/e"),
             override("agouti=A/a"),
             override("agouti=A/A"),
-            override("white=W/w"),
+            override("kit=W22/N"),
             override("test=T/t"),
             override("extension=e/e", "test=T/t"),
-            override("white=W/w", "test=T/t"),
+            override("kit=W22/N", "test=T/t"),
             override("champagne=Ch/c"),
             override("agouti=A/a", "champagne=Ch/c"),
-            override("splash=Spl/spl"),
-            override("agouti=A/a", "splash=Spl/spl"),
+            override("mitf=SW1/N"),
+            override("agouti=A/a", "mitf=SW1/N"),
             override("grey=G/g"),
             override("extension=e/e", "grey=G/g"),
-            override("agouti=A/a", "cream=Cr/N"),
-            override("agouti=A/a", "cream=Cr/Cr"),
-            override("agouti=A/a", "pearl=prl/prl"),
-            override("agouti=A/a", "cream=Cr/N", "pearl=prl/N"),
-            override("extension=e/e", "grey=G/g", "cream=Cr/Cr"),
-            override("agouti=A/a", "champagne=Ch/c", "splash=Spl/spl", "grey=G/g", "cream=Cr/N"),
+            override("agouti=A/a", "matp=Cr/N"),
+            override("agouti=A/a", "matp=Cr/Cr"),
+            override("agouti=A/a", "matp=prl/prl"),
+            override("agouti=A/a", "matp=Cr/prl"),
+            override("extension=e/e", "grey=G/g", "matp=Cr/Cr"),
+            override("agouti=A/a", "champagne=Ch/c", "mitf=SW1/N", "grey=G/g", "matp=Cr/N"),
             override("magic_zebra=Mzeb/n"),
             override("magic_zebra=Mzeb/Mzeb"),
             override("agouti=A/a", "magic_zebra=Mzeb/n"),
-            override("white=W/w", "magic_zebra=Mzeb/n"),
+            override("kit=W22/N", "magic_zebra=Mzeb/n"),
             override("pink_hair=Pihr/Pihr"),
             override("pink_hair=n/Pihr"),
             override("extension=e/e", "pink_hair=Pihr/Pihr"),
-            override("white=W/w", "pink_hair=Pihr/Pihr"),
+            override("kit=W22/N", "pink_hair=Pihr/Pihr"),
             override("agouti=A/a", "magic_zebra=Mzeb/n", "pink_hair=Pihr/Pihr"),
             override("test=T/t", "magic_zebra=Mzeb/n", "pink_hair=Pihr/Pihr"),
             override("dun=D/d2"),
@@ -83,9 +83,27 @@ class CoatPipelineGoldenTest {
             override("extension=e/e", "mushroom=Mu/Mu"),
             override("roan=Rn/rn"),
             override("tobiano=To/to"),
-            override("frame=Ov/ov"),
-            override("sabino=SB1/sb1"),
-            override("sabino=SB1/SB1"));
+            // EDNRB: the carrier, and the homozygous lethal white it can throw
+            override("ednrb=O/N"),
+            override("agouti=A/a", "ednrb=O/N"),
+            override("ednrb=O/O"),
+            // KIT, the whole ladder - every outcome the eight-allele locus has
+            override("kit=W20/N"),
+            override("kit=W20/W20"),
+            override("kit=SB1/N"),
+            override("agouti=A/a", "kit=SB1/N"),
+            override("kit=SB1/W20"),
+            override("kit=SB1/SB1"),
+            override("kit=W23/SB1"),
+            override("kit=W13/W10"),
+            // the two splash loci, alone and stacked - the whole point of the split
+            override("mitf=SW1/SW1"),
+            override("mitf=SW3/N"),
+            override("mitf=SW3/SW1"),
+            override("pax3=SW2/N"),
+            override("pax3=SW2/SW2"),
+            override("agouti=A/a", "mitf=SW1/N", "pax3=SW2/N"),
+            override("agouti=A/a", "kit=SB1/N", "tobiano=To/to", "ednrb=O/N"));
 
     private static final long[] SEEDS = {0L, 3L, 4242L};
 
@@ -153,16 +171,30 @@ class CoatPipelineGoldenTest {
         return hex.toString();
     }
 
-    /** The wild-type code with the named genes' segments replaced. */
+    /**
+     * The wild-type code with the named genes' segments replaced.
+     *
+     * <p><b>An unknown gene name is a hard error</b>, and that is the whole
+     * point. This used to leave the segment alone and say nothing, so a case
+     * naming a gene that had since been renamed or retired quietly became a
+     * duplicate of its own base colour - five cases were pinning nothing after
+     * cream and pearl merged into MATP, and nobody could have noticed.
+     */
     private static String override(String... kv) {
         String[] segs = Genotype.wildType().toCode().split("-");
         List<Gene> order = Genes.codeOrder();
         for (String entry : kv) {
             String[] p = entry.split("=");
+            boolean hit = false;
             for (int i = 0; i < order.size(); i++) {
                 if (order.get(i).key().endsWith("." + p[0])) {
                     segs[i] = order.get(i).key() + "=" + p[1];
+                    hit = true;
                 }
+            }
+            if (!hit) {
+                throw new IllegalArgumentException("no gene named '" + p[0]
+                        + "' - a golden case naming a retired gene pins nothing");
             }
         }
         return String.join("-", segs);

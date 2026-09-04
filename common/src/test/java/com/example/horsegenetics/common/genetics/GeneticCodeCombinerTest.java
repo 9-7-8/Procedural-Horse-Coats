@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class GeneticCodeCombinerTest {
 
     /** Wild-type segments for the visual-pattern genes added after the first 11. */
-    private static final String T = "-d2/d2-z/z-mu/mu-rn/rn-to/to-ov/ov-sb1/sb1";
+    private static final String T = "-d2/d2-z/z-mu/mu-rn/rn-to/to-N/N-N/N";
 
     private static FakeRng allFirst() {
         boolean[] draws = new boolean[Genes.codeOrder().size() * 2];
@@ -23,21 +23,21 @@ class GeneticCodeCombinerTest {
 
     @Test
     void homozygousDominantCrossHomozygousRecessiveIsHeterozygous() {
-        String dad = LegacyCode.keyed("E/E-A/A-w/w-t/t-c/c-spl/spl-g/g-N/N-n/n-n/n" + T);
-        String mom = LegacyCode.keyed("e/e-a/a-w/w-t/t-c/c-spl/spl-g/g-N/N-n/n-n/n" + T);
+        String dad = LegacyCode.keyed("E/E-A/A-N/N-t/t-c/c-N/N-g/g-N/N-n/n-n/n" + T);
+        String mom = LegacyCode.keyed("e/e-a/a-N/N-t/t-c/c-N/N-g/g-N/N-n/n-n/n" + T);
         String child = GeneticCodeCombiner.combine(dad, mom, allFirst());
         assertEquals(
-                Genotype.parse(LegacyCode.keyed("E/e-A/a-w/w-t/t-c/c-spl/spl-g/g-N/N-n/n-n/n" + T)),
+                Genotype.parse(LegacyCode.keyed("E/e-A/a-N/N-t/t-c/c-N/N-g/g-N/N-n/n-n/n" + T)),
                 Genotype.parse(child));
         assertEquals(CoatPhenotype.BAY, Genotype.parse(child).phenotype());
     }
 
     @Test
     void everyGeneSegregates() {
-        String a = LegacyCode.keyed("E/e-A/a-W/w-T/t-Ch/c-Spl/spl-G/g-Cr/prl-n/n-n/n" + T);
+        String a = LegacyCode.keyed("E/e-A/a-W22/N-T/t-Ch/c-SW1/N-G/g-Cr/prl-n/n-n/n" + T);
         String child = GeneticCodeCombiner.combine(a, Genotype.wildType().toCode(), allFirst());
         assertTrue(Genotype.parse(child).shows(Genes.TEST));
-        assertTrue(Genotype.parse(child).shows(Genes.SPLASH));
+        assertTrue(Genotype.parse(child).shows(Genes.MITF));
         assertTrue(Genotype.parse(child).shows(Genes.GREY));
         assertTrue(Genotype.parse(child).shows(Genes.CHAMPAGNE));
     }

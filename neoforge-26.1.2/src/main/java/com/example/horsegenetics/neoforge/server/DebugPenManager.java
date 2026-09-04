@@ -126,14 +126,38 @@ public final class DebugPenManager {
     private static final int LOOKAHEAD_PENS = 30;
 
     /**
-     * The corridor is exactly long enough to hold {@link GenotypeCatalog#size()}
-     * pens, two per segment - the right-hand pen takes the even catalogue index,
-     * the left-hand one the odd. With an odd catalogue the very last left-hand
-     * pen is simply not built. Derived, never hard-coded: add a gene and the
-     * corridor lengthens on its own.
+     * <b>How many pens the corridor will actually build.</b>
+     *
+     * <p>The gallery's premise - one pen per visually distinct genotype - stops
+     * being buildable long before it stops being computable. Each gene
+     * multiplies the catalogue, and the white-pattern loci alone put it past
+     * two million; at seven blocks a segment that is a corridor about seven
+     * <i>million</i> blocks long, which is a quarter of the way to the world
+     * border and would leave room for four plots in the whole dimension.
+     *
+     * <p>So the corridor is capped. It shows the first {@value} entries - a
+     * corridor of about seventy thousand blocks, still far longer than anyone
+     * walks - and the entrance sign says plainly how many it is showing out of
+     * how many exist, rather than quietly pretending the gallery is complete.
+     * The real answer is {@code wiki/roadmap.html} §9's planned revert to
+     * random pens, which retires the one-pen-per-genotype premise entirely.
+     */
+    private static final int MAX_GALLERY_PENS = 20_000;
+
+    /** How many pens the corridor holds: the catalogue, or the cap, whichever is smaller. */
+    static int galleryPens() {
+        return Math.min(GenotypeCatalog.size(), MAX_GALLERY_PENS);
+    }
+
+    /**
+     * The corridor is exactly long enough to hold {@link #galleryPens()} pens,
+     * two per segment - the right-hand pen takes the even catalogue index, the
+     * left-hand one the odd. With an odd count the very last left-hand pen is
+     * simply not built. Derived, never hard-coded: add a gene and the corridor
+     * lengthens on its own, up to the cap.
      */
     private static final int LAST_SEGMENT_INDEX =
-            (GenotypeCatalog.size() + PENS_PER_SEGMENT - 1) / PENS_PER_SEGMENT - 1;
+            (Math.min(GenotypeCatalog.size(), MAX_GALLERY_PENS) + PENS_PER_SEGMENT - 1) / PENS_PER_SEGMENT - 1;
 
     private static final int ROAD_HALF_WIDTH = 3;        // gravel road: z in [-3, 3]
     private static final int WALL_TOP_DY = 10;           // glowstone line height above the floor
@@ -418,7 +442,7 @@ public final class DebugPenManager {
      * catalogue size is odd) builds nothing at all.
      */
     private static void buildPen(ServerLevel level, Plot plot, int x0, PenSpec pen, int genotypeIndex) {
-        if (genotypeIndex >= GenotypeCatalog.size()) {
+        if (genotypeIndex >= galleryPens()) {
             return;
         }
         Genotype genotype = GenotypeCatalog.get(genotypeIndex);
@@ -501,16 +525,20 @@ public final class DebugPenManager {
 
     /**
      * The tally sign three blocks in front of the entrance portal: how many
-     * genotypes exist at all, and how many of those are distinct to look at
-     * (which is how many pens follow). Genes only - epigenetic variation is
-     * deliberately not counted in either number.
+     * genotypes exist at all, how many of those are distinct to look at, and -
+     * when the catalogue outruns {@link #MAX_GALLERY_PENS} - how many of them
+     * this corridor actually holds. Genes only: epigenetic variation is
+     * deliberately not counted in any of the numbers.
      */
     private static void buildCatalogueSign(ServerLevel level, Plot plot) {
+        int shown = galleryPens();
         placeSign(level, new BlockPos(plot.originX + 4, plot.baseY + 1, 0), Direction.WEST,
                 List.of("Genotypes",
                         String.format("%,d", GenotypeCatalog.totalGenotypes()),
-                        "Distinct",
-                        String.format("%,d pens", GenotypeCatalog.size())));
+                        String.format("%,d distinct", GenotypeCatalog.size()),
+                        shown < GenotypeCatalog.size()
+                                ? String.format("showing %,d", shown)
+                                : String.format("%,d pens", shown)));
     }
 
     /**

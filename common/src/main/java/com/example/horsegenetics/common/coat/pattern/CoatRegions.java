@@ -165,7 +165,16 @@ public final class CoatRegions {
         });
     }
 
-    /** Remove <i>both</i> pigments (-> white template) up a leg. */
+    /**
+     * Remove <i>both</i> pigments (-&gt; white template) up a leg.
+     *
+     * <p><b>No built-in gene calls this any more.</b> The cut is a hard
+     * {@code point.y() <= cutoff}, so every sock it draws ends in a perfect
+     * ring - which is why the white-pattern loci paint their own jagged or
+     * wobbled margins in {@link WhitePattern} instead. Kept as a helper for a
+     * data-driven or third-party gene that genuinely wants a clean edge; if you
+     * want a realistic one, jitter the cutoff per texel.
+     */
     public static void whitenLowerLeg(Skin skin, PigmentField field, Part leg, double heightFraction) {
         Bounds b = HorseSkinGeometry.bounds(skin, leg);
         double cutoff = b.yMin() + b.span(Axis.Y) * clamp01(heightFraction);
@@ -181,6 +190,12 @@ public final class CoatRegions {
      * A white blaze: a centreline stripe on the muzzle (if present) + head,
      * {@code halfWidth} body-units either side of {@code z == 0}, up
      * {@code lengthFraction} of the head length from the nose.
+     *
+     * <p><b>No built-in gene calls this any more</b> - the white-pattern loci
+     * draw their own face marking, because the width and length have to scale
+     * with the outcome. It is also the whole face-marking vocabulary the mod
+     * has: a star and a snip are <i>detached</i> patches, not short stripes, so
+     * neither this nor anything else can draw one yet.
      */
     public static void whitenBlaze(Skin skin, PigmentField field, double halfWidth, double lengthFraction) {
         double back = 0;

@@ -21,7 +21,7 @@ class GeneCodeDisplayTest {
 
     @Test
     void onlyGenesWithAVariantAlleleAreListed_spaceSeparated() {
-        assertEquals("EeAa nSpl", sf("extension", "E/e", "agouti", "A/a", "splash", "Spl/spl"));
+        assertEquals("EeAa nSW1", sf("extension", "E/e", "agouti", "A/a", "mitf", "SW1/N"));
     }
 
     @Test
@@ -42,31 +42,47 @@ class GeneCodeDisplayTest {
         assertEquals("EEaa Crprl", sf("matp", "Cr/prl"));
     }
 
+    /**
+     * A gene that can <b>mask</b> - and grey, which is special-cased - never
+     * uses the {@code n}-for-absent shorthand, because "carries one copy of
+     * something that hides the whole coat" is not an absence worth hiding.
+     */
     @Test
-    void whiteGreyTestPrintBothRealTokensDominantFirst() {
-        assertEquals("EEaa Ww", sf("white", "W/w"));
+    void maskingGenesAndGreyPrintBothRealTokensDominantFirst() {
+        assertEquals("EEaa W22N", sf("kit", "W22/N"));
+        assertEquals("EEaa ON", sf("ednrb", "O/N"));
         assertEquals("EEaa Gg", sf("grey", "G/g"));
         assertEquals("EEaa Tt", sf("test", "T/t"));
     }
 
+    /**
+     * The two splash loci are separate genes, so a horse carrying one copy at
+     * each prints both - which is the whole thing a single splash gene could
+     * not say.
+     */
+    @Test
+    void theTwoSplashLociPrintSeparately() {
+        assertEquals("EEaa nSW1 nSW2", sf("mitf", "SW1/N", "pax3", "SW2/N"));
+    }
+
     @Test
     void everythingAtOnceUsesTheDisplayOrder() {
-        // splash, white, champagne, MATP, grey, test
-        assertEquals("EeAa nSpl Ww nCh nCr Gg Tt",
-                sf("extension", "E/e", "agouti", "A/a", "white", "W/w", "test", "T/t",
-                   "champagne", "Ch/c", "splash", "Spl/spl", "grey", "G/g", "matp", "Cr/N"));
+        // KIT, MITF, champagne, MATP, grey, test
+        assertEquals("EeAa W22N nSW1 nCh nCr Gg Tt",
+                sf("extension", "E/e", "agouti", "A/a", "kit", "W22/N", "test", "T/t",
+                   "champagne", "Ch/c", "mitf", "SW1/N", "grey", "G/g", "matp", "Cr/N"));
     }
 
     @Test
     void theExampleFromTheDocComment() {
-        assertEquals("EeAa nSpl nCh CrCr",
-                sf("extension", "E/e", "agouti", "A/a", "champagne", "Ch/c", "splash", "Spl/spl", "matp", "Cr/Cr"));
+        assertEquals("EeAa nSW1 nCh CrCr",
+                sf("extension", "E/e", "agouti", "A/a", "champagne", "Ch/c", "mitf", "SW1/N", "matp", "Cr/Cr"));
     }
 
     @Test
     void stringOverloadParsesAValidCode() {
-        assertEquals("EeAa nSpl",
-                GeneCodeDisplay.shortForm(Codes.of("extension", "E/e", "agouti", "A/a", "splash", "Spl/spl")));
+        assertEquals("EeAa nSW1",
+                GeneCodeDisplay.shortForm(Codes.of("extension", "E/e", "agouti", "A/a", "mitf", "SW1/N")));
     }
 
     @Test

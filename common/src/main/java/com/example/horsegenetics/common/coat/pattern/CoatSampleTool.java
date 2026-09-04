@@ -41,13 +41,13 @@ public final class CoatSampleTool {
             {"grey_bay", "agouti=A/a grey=G/g"},
             {"grey_chestnut", "extension=e/e grey=G/g"},
             {"bay_low", "agouti=A/a"},          // same gene as bay/bay_seal, low extent
-            {"white", "white=W/w"},
-            {"bay_splash", "agouti=A/a splash=Spl/spl"},
+            {"kit_dominant_white", "kit=W22/N"},
+            {"bay_splash", "agouti=A/a mitf=SW1/N"},
             {"chestnut_test", "extension=e/e test=T/t"},
             {"zebra_bay", "agouti=A/a magic_zebra=Mzeb/n"},          // stripes over a bay
             {"zebra_bay_long", "agouti=A/a magic_zebra=Mzeb/n"},     // same gene, stripes reaching further down
             {"zebra_palomino", "extension=e/e matp=Cr/N magic_zebra=Mzeb/n"},
-            {"zebra_white", "white=W/w magic_zebra=Mzeb/n"},         // magical paints over dominant white
+            {"zebra_white", "kit=W22/N magic_zebra=Mzeb/n"},        // magical paints over dominant white
             {"pink_hair_black", "pink_hair=Pihr/Pihr"},
             {"pink_hair_chestnut", "extension=e/e pink_hair=Pihr/Pihr"},
             {"pink_hair_perlino", "agouti=A/a matp=Cr/Cr pink_hair=Pihr/Pihr"},
@@ -63,9 +63,20 @@ public final class CoatSampleTool {
             {"roan_black", "roan=Rn/rn"},                // blue roan
             {"roan_bay", "agouti=A/a roan=Rn/rn"},
             {"tobiano_black", "tobiano=To/to"},
-            {"frame_bay", "agouti=A/a frame=Ov/ov"},
-            {"sabino_het_black", "sabino=SB1/sb1"},
-            {"sabino_hom_bay", "agouti=A/a sabino=SB1/SB1"},
+            {"frame_bay", "agouti=A/a ednrb=O/N"},
+            {"lethal_white_bay", "agouti=A/a ednrb=O/O"},     // all white, and in a real horse fatal
+            // the KIT ladder, all on a bay so the white reads against colour
+            {"kit_w20_bay", "agouti=A/a kit=W20/N"},          // a star and a sock
+            {"kit_w20_hom_bay", "agouti=A/a kit=W20/W20"},
+            {"kit_sabino_bay", "agouti=A/a kit=SB1/N"},
+            {"kit_sabino_boosted_bay", "agouti=A/a kit=SB1/W20"},
+            {"kit_sabino_white_bay", "agouti=A/a kit=SB1/SB1"},
+            {"kit_broad_black", "kit=W5/N"},
+            {"kit_extensive_bay", "agouti=A/a kit=W13/N"},
+            // the two splash loci, alone and together
+            {"splash_mitf_bay", "agouti=A/a mitf=SW1/SW1"},
+            {"splash_pax3_bay", "agouti=A/a pax3=SW2/N"},
+            {"splash_both_loci_bay", "agouti=A/a mitf=SW1/N pax3=SW2/N"},
     };
 
     /**
@@ -77,7 +88,10 @@ public final class CoatSampleTool {
      */
     private static final long[] SEEDS = {0, 0, 7, 3, 0, 0, 0, 0, 0, 0, 0, 1, 3, 21, 3, 3, 0, 0, 31, 0,
             5, 11, 5, 5, 0, 0, 0, 11,
-            0, 0, 0, 7, 0, 0, 0, 0, 4, 9, 2, 6, 3, 8};
+            0, 0, 0, 7, 0, 0, 0, 0, 4, 9, 2, 6,
+            3, 0,
+            2, 5, 8, 8, 8, 4, 6,
+            3, 3, 3};
 
     private CoatSampleTool() {}
 

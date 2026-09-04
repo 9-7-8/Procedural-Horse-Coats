@@ -128,18 +128,16 @@ class CoatTextureIdTest {
 
     @Test
     void dominanceSurvivesTheEncoding() {
-        // the exact shape the old lower-casing encoder merged: E/E-A/A-W/W-... vs
-        // e/e-a/a-w/w-..., which are identical once case is thrown away.
-        String white = Genotype.of(
+        // the exact shape the old lower-casing encoder merged: E/E-A/A-... vs
+        // e/e-a/a-..., which are identical once case is thrown away.
+        String black = Genotype.of(
                 new AllelePair(Genes.EXTENSION.E, Genes.EXTENSION.E),
-                new AllelePair(Genes.AGOUTI.A, Genes.AGOUTI.A),
-                new AllelePair(Genes.WHITE.W, Genes.WHITE.W)).toCode();
+                new AllelePair(Genes.AGOUTI.A, Genes.AGOUTI.A)).toCode();
         String chestnut = Genotype.of(
                 new AllelePair(Genes.EXTENSION.e, Genes.EXTENSION.e),
-                new AllelePair(Genes.AGOUTI.a, Genes.AGOUTI.a),
-                new AllelePair(Genes.WHITE.w, Genes.WHITE.w)).toCode();
-        assertEquals(white.toLowerCase(java.util.Locale.ROOT), chestnut.toLowerCase(java.util.Locale.ROOT));
+                new AllelePair(Genes.AGOUTI.a, Genes.AGOUTI.a)).toCode();
+        assertEquals(black.toLowerCase(java.util.Locale.ROOT), chestnut.toLowerCase(java.util.Locale.ROOT));
         org.junit.jupiter.api.Assertions.assertNotEquals(
-                CoatTextureId.encode(white), CoatTextureId.encode(chestnut));
+                CoatTextureId.encode(black), CoatTextureId.encode(chestnut));
     }
 }

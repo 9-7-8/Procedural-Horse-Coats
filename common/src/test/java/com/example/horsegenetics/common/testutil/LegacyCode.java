@@ -7,16 +7,20 @@ package com.example.horsegenetics.common.testutil;
  * their readable {@code "E/e-A/a-..."} strings without re-typing every case.
  *
  * <p>The order below is a fixed reading order for these literals - roughly the
- * hand-written {@code codeOrder} of an earlier build, with the old separate
- * cream and pearl slots replaced by the single {@code matp} locus they merged
- * into. Segments past the end of a shorter string are simply omitted (parsing
- * fills them with the gene's default allele).
+ * hand-written {@code codeOrder} of an earlier build, with each retired gene's
+ * slot handed to the locus that absorbed it: the old {@code cream} and
+ * {@code pearl} slots to {@code matp}, {@code white} and {@code sabino} to
+ * {@code kit}, {@code splash} to {@code mitf}, and {@code frame} to
+ * {@code ednrb} (with {@code pax3} taking the freed tail slot). The literals in
+ * the tests moved with them, so a slot's <i>tokens</i> are the new locus's.
+ * Segments past the end of a shorter string are simply omitted (parsing fills
+ * them with the gene's default allele).
  */
 public final class LegacyCode {
 
     private static final String[] ORDER = {
-            "extension", "agouti", "white", "test", "champagne", "splash", "grey", "matp",
-            "magic_zebra", "pink_hair", "dun", "silver", "mushroom", "roan", "tobiano", "frame", "sabino"};
+            "extension", "agouti", "kit", "test", "champagne", "mitf", "grey", "matp",
+            "magic_zebra", "pink_hair", "dun", "silver", "mushroom", "roan", "tobiano", "ednrb", "pax3"};
 
     private LegacyCode() {}
 

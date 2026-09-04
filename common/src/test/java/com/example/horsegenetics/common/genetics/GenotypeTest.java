@@ -18,7 +18,7 @@ class GenotypeTest {
 
     private static final String WT = Codes.wildType();
     /** Wild-type visual-pattern segments in the pre-rewrite positional order. */
-    private static final String T = "-d2/d2-z/z-mu/mu-rn/rn-to/to-ov/ov-sb1/sb1";
+    private static final String T = "-d2/d2-z/z-mu/mu-rn/rn-to/to-N/N-N/N";
 
     private static Genotype g(AllelePair... pairs) {
         return Genotype.of(pairs);
@@ -38,8 +38,8 @@ class GenotypeTest {
 
     @Test
     void parseIsCanonicalAndOrderIndependent() {
-        Genotype a = Genotype.parse(LegacyCode.keyed("e/E-a/A-w/W-t/T-c/Ch-spl/Spl-g/G-Cr/prl-n/n-n/n" + T));
-        Genotype b = Genotype.parse(LegacyCode.keyed("E/e-A/a-W/w-T/t-Ch/c-Spl/spl-G/g-Cr/prl-n/n-n/n" + T));
+        Genotype a = Genotype.parse(LegacyCode.keyed("e/E-a/A-N/W22-t/T-c/Ch-N/SW1-g/G-Cr/prl-n/n-n/n" + T));
+        Genotype b = Genotype.parse(LegacyCode.keyed("E/e-A/a-W22/N-T/t-Ch/c-SW1/N-G/g-Cr/prl-n/n-n/n" + T));
         assertEquals(b, a);
         assertEquals(b.toCode(), a.toCode());
     }
@@ -58,8 +58,8 @@ class GenotypeTest {
 
     @Test
     void multiCharTokensParse() {
-        Genotype x = Genotype.parse(LegacyCode.keyed("E/e-A/a-w/w-t/t-c/c-Spl/spl-g/g-Cr/Cr-n/n-n/n" + T));
-        assertTrue(x.shows(Genes.SPLASH));
+        Genotype x = Genotype.parse(LegacyCode.keyed("E/e-A/a-N/N-t/t-c/c-SW1/N-g/g-Cr/Cr-n/n-n/n" + T));
+        assertTrue(x.shows(Genes.MITF));
         assertTrue(x.pair(Genes.MATP).homozygous());
         assertTrue(x.pair(Genes.MATP).homozygous());
     }
@@ -93,7 +93,9 @@ class GenotypeTest {
         assertEquals(CoatPhenotype.BLACK, g(p(Genes.EXTENSION.E, Genes.EXTENSION.e)).phenotype());
         assertEquals(CoatPhenotype.BAY, g(p(Genes.EXTENSION.E, Genes.EXTENSION.e),
                 p(Genes.AGOUTI.A, Genes.AGOUTI.a)).phenotype());
-        assertEquals(CoatPhenotype.WHITE, g(p(Genes.WHITE.W, Genes.WHITE.w)).phenotype());
+        assertEquals(CoatPhenotype.WHITE, g(p(Genes.KIT.W22, Genes.KIT.N)).phenotype());
+        // the other way to be all white: two frame copies, which is lethal white
+        assertEquals(CoatPhenotype.WHITE, g(p(Genes.EDNRB.O, Genes.EDNRB.O)).phenotype());
         // champagne / grey / cream / pearl / test / splash never move the coarse phenotype
         assertEquals(CoatPhenotype.BLACK, g(p(Genes.EXTENSION.E, Genes.EXTENSION.e),
                 p(Genes.CHAMPAGNE.Ch, Genes.CHAMPAGNE.c),
@@ -103,12 +105,12 @@ class GenotypeTest {
 
     @Test
     void predicates() {
-        Genotype x = Genotype.parse(LegacyCode.keyed("E/e-A/a-w/w-T/t-Ch/c-Spl/spl-G/g-Cr/N-n/n-n/n" + T));
+        Genotype x = Genotype.parse(LegacyCode.keyed("E/e-A/a-N/N-T/t-Ch/c-SW1/N-G/g-Cr/N-n/n-n/n" + T));
         assertTrue(x.hasBlackPigment());
         assertTrue(x.isAgouti());
         assertTrue(x.shows(Genes.TEST));
         assertTrue(x.shows(Genes.CHAMPAGNE));
-        assertTrue(x.shows(Genes.SPLASH));
+        assertTrue(x.shows(Genes.MITF));
         assertTrue(x.shows(Genes.GREY));
         assertFalse(x.isWhite());
         assertTrue(x.has(Genes.MATP.Cr));
@@ -118,13 +120,13 @@ class GenotypeTest {
     void determinism() {
         assertTrue(Genotype.wildType().isDeterministic());                             // black
         assertTrue(g(p(Genes.EXTENSION.e, Genes.EXTENSION.e)).isDeterministic());       // chestnut
-        assertTrue(g(p(Genes.WHITE.W, Genes.WHITE.w)).isDeterministic());               // white
+        assertTrue(g(p(Genes.KIT.W22, Genes.KIT.N)).isDeterministic());                 // dominant white
         assertTrue(g(p(Genes.CHAMPAGNE.Ch, Genes.CHAMPAGNE.c)).isDeterministic());      // champagne
         assertTrue(g(p(Genes.MATP.Cr, Genes.MATP.Cr)).isDeterministic());             // perlino-on-black
 
         assertFalse(g(p(Genes.EXTENSION.E, Genes.EXTENSION.e),
                 p(Genes.AGOUTI.A, Genes.AGOUTI.a)).isDeterministic());                  // bay
-        assertFalse(g(p(Genes.SPLASH.Spl, Genes.SPLASH.spl)).isDeterministic());        // splash
+        assertFalse(g(p(Genes.MITF.SW1, Genes.MITF.N)).isDeterministic());              // splash
         assertFalse(g(p(Genes.GREY.G, Genes.GREY.g)).isDeterministic());                // grey - dapples vary
 
         // chestnut masks agouti -> deterministic
@@ -179,7 +181,8 @@ class GenotypeTest {
         assertTrue(x.isWhite());
         assertTrue(x.shows(Genes.TEST));
         assertTrue(x.shows(Genes.CHAMPAGNE));
-        assertTrue(x.shows(Genes.SPLASH));
+        assertTrue(x.shows(Genes.MITF));
+        assertTrue(x.shows(Genes.PAX3));
         assertTrue(x.shows(Genes.GREY));
         assertTrue(x.has(Genes.MATP.Cr));
         assertTrue(x.has(Genes.MAGIC_ZEBRA.Mzeb));
@@ -189,8 +192,10 @@ class GenotypeTest {
         assertTrue(x.has(Genes.MUSHROOM.Mu));
         assertTrue(x.has(Genes.ROAN.Rn));
         assertTrue(x.has(Genes.TOBIANO.To));
-        assertTrue(x.has(Genes.FRAME.Ov));
-        assertTrue(x.has(Genes.SABINO.SB1));
+        assertTrue(x.has(Genes.EDNRB.O));
+        // KIT's first bucket is a compound heterozygote of two strong W alleles -
+        // the rarest thing the locus can produce, which is what a zero roll means
+        assertTrue(x.has(Genes.KIT.W22));
         // sex is drawn from a table like any other gene: its first bucket is X/Y
         assertEquals(Sex.MALE, x.sex());
     }
@@ -216,7 +221,7 @@ class GenotypeTest {
 
     @Test
     void breedWithIsMendelianAndSymmetric() {
-        Genotype dad = Genotype.parse(LegacyCode.keyed("E/E-A/A-w/w-t/t-c/c-spl/spl-g/g-N/N-n/n-n/n" + T));
+        Genotype dad = Genotype.parse(LegacyCode.keyed("E/E-A/A-N/N-t/t-c/c-N/N-g/g-N/N-n/n-n/n" + T));
         Genotype mom = Genotype.wildType();
         boolean[] allFirst = new boolean[Genes.codeOrder().size() * 2];
         java.util.Arrays.fill(allFirst, true);
@@ -229,12 +234,12 @@ class GenotypeTest {
 
     @Test
     void breedInheritsEveryGene() {
-        Genotype a = Genotype.parse(LegacyCode.keyed("E/e-A/a-W/w-T/t-Ch/c-Spl/spl-G/g-Cr/prl-n/n-n/n" + T));
+        Genotype a = Genotype.parse(LegacyCode.keyed("E/e-A/a-W22/N-T/t-Ch/c-SW1/N-G/g-Cr/prl-n/n-n/n" + T));
         boolean[] draws = new boolean[Genes.codeOrder().size() * 2];
         java.util.Arrays.fill(draws, true);
         Genotype child = a.breedWith(Genotype.wildType(), new FakeRng().booleans(draws));
         assertTrue(child.shows(Genes.TEST));
-        assertTrue(child.shows(Genes.SPLASH));
+        assertTrue(child.shows(Genes.MITF));
         assertTrue(child.shows(Genes.GREY));
         assertTrue(child.shows(Genes.CHAMPAGNE));
         assertTrue(child.has(Genes.MATP.Cr));

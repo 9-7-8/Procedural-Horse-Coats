@@ -1,5 +1,6 @@
 package com.example.horsegenetics.common.genetics;
 
+import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -25,61 +26,55 @@ import java.util.Map;
  *       gene is incomplete dominant" rule was approximating, except it is now
  *       exact and works for any number of alleles: extension contributes
  *       {@code ee} and {@code EE} because {@code Ee} and {@code EE} both land
- *       on the wild type, while sabino contributes all three because all three
- *       land somewhere different.</li>
+ *       on the wild type, while {@code KIT}'s eight alleles contribute eight
+ *       entries out of thirty-six combinations.</li>
  *   <li>An expression that {@link Expression#masks() masks} <b>hides everything
  *       else</b>: while it shows, no other gene is visible, so the catalogue
  *       keeps exactly one entry for it - that combination with every other gene
- *       at its wild type. That's why there is one white pen and one test pen
- *       instead of hundreds.</li>
+ *       at its wild type. That's why dominant white, lethal white and the test
+ *       overlay get one pen each instead of a third of the corridor.</li>
  * </ul>
  *
+ * <h2>Nothing is materialised</h2>
+ * The catalogue is <b>computed on demand</b>: {@link #size()} is arithmetic and
+ * {@link #get(int)} builds one {@link Genotype} from an odometer reading. It
+ * used to be an eagerly-built {@code List}, which was fine at a few thousand
+ * entries and is not fine now - every gene multiplies the count, and the white
+ * -pattern loci alone put it in the millions. A list that size is hundreds of
+ * megabytes of {@code Genotype} nobody ever reads more than a few hundred of.
+ *
  * <h2>Ordering</h2>
- * A mixed-radix odometer over {@link #distinctPairsOf} whose <b>first</b> gene
- * in {@link Genes#codeOrder()} is the fastest-varying digit, with the masked
- * duplicates filtered out - so walking the catalogue exhausts one gene before
- * touching the next: {@code eeaa, EEaa, eeAA, EEAA, [white], ...} Within one
- * gene the pairs run in {@link #allPairsOf} order.
+ * A mixed-radix odometer over the <b>non-masking</b> {@link #distinctPairsOf}
+ * whose <b>first</b> gene in {@link Genes#codeOrder()} is the fastest-varying
+ * digit - so walking the catalogue exhausts one gene before touching the next:
+ * {@code eeaa, EEaa, eeAA, EEAA, eeaa ChCh, ...} The one entry each masking
+ * expression owns comes <b>after</b> all of them, in gene order, because a
+ * masked horse has no position in a product it takes no part in.
  */
 public final class GenotypeCatalog {
 
     /**
-     * Built on first use and thrown away whenever a gene is registered - the
-     * catalogue is a product over {@link Genes#codeOrder()}, so a gene loaded at
-     * startup widens it. A few thousand entries, so rebuilding is cheap; the
-     * alternative (eager, at class load) silently missed every data-driven gene.
+     * The odometer's digits, rebuilt whenever a gene is registered. Cheap to
+     * compute (it is one pass over the genes) and it holds only the per-gene
+     * pair lists, never the product.
      */
-    private static volatile List<Genotype> entries;
+    private static volatile Layout layout;
 
     private GenotypeCatalog() {
     }
 
     /** Called by {@link Genes} when the registry changes. */
     static void invalidate() {
-        entries = null;
-    }
-
-    private static List<Genotype> entriesOrBuild() {
-        List<Genotype> e = entries;
-        if (e == null) {
-            synchronized (GenotypeCatalog.class) {
-                e = entries;
-                if (e == null) {
-                    e = build();
-                    entries = e;
-                }
-            }
-        }
-        return e;
+        layout = null;
     }
 
     /**
      * Every unordered {@link AllelePair} of {@code gene} a horse can actually
      * carry - all {@code n(n+1)/2} of them for {@code n} alleles, minus any the
      * gene rules out with {@link Gene#canOccur} (the sex locus has no
-     * {@code Y/Y}) - walking {@link Gene#alleles()} backwards, so the
-     * last-declared allele (by convention the population's baseline) comes
-     * first.
+     * {@code Y/Y}; {@code KIT} has no homozygote of a nonviable {@code W}) -
+     * walking {@link Gene#alleles()} backwards, so the last-declared allele (by
+     * convention the population's baseline) comes first.
      */
     public static List<AllelePair> allPairsOf(Gene gene) {
         List<Allele> alleles = gene.alleles();
@@ -127,7 +122,9 @@ public final class GenotypeCatalog {
      * seeds are one entry.
      */
     public static int size() {
-        return entriesOrBuild().size();
+        Layout l = layoutOrBuild();
+        long total = l.plainCombinations + l.masked.size();
+        return (int) Math.min(total, Integer.MAX_VALUE);
     }
 
     /**
@@ -144,68 +141,115 @@ public final class GenotypeCatalog {
         return total;
     }
 
-    /** The genotype at {@code index} in {@code [0, size())}. */
+    /** The genotype at {@code index} in {@code [0, size())}. Built on the spot. */
     public static Genotype get(int index) {
-        return entriesOrBuild().get(index);
+        Layout l = layoutOrBuild();
+        if (index < 0 || index >= size()) {
+            throw new IndexOutOfBoundsException("index " + index + " outside catalogue of " + size());
+        }
+        if (index >= l.plainCombinations) {
+            return l.masked.get((int) (index - l.plainCombinations));
+        }
+        List<AllelePair> pairs = new ArrayList<>(l.plain.size());
+        long remaining = index;
+        for (List<AllelePair> gene : l.plain) {
+            pairs.add(gene.get((int) (remaining % gene.size())));
+            remaining /= gene.size();
+        }
+        return Genotype.of(pairs);
     }
 
-    /** The whole catalogue, in order. */
+    /**
+     * The whole catalogue, in order, as a <b>lazy view</b> - iterating it is
+     * fine, holding on to it costs nothing, and calling something like
+     * {@code toList()} on a multi-million-entry catalogue is the caller's
+     * problem to avoid.
+     */
     public static List<Genotype> entries() {
-        return entriesOrBuild();
+        int n = size();
+        return new AbstractList<>() {
+            @Override public Genotype get(int index) {
+                return GenotypeCatalog.get(index);
+            }
+
+            @Override public int size() {
+                return n;
+            }
+        };
     }
 
     // ------------------------------------------------------------------
 
-    private static List<Genotype> build() {
+    /**
+     * The odometer digits: one list of non-masking pairs per gene, plus the
+     * flat list of one-entry-each masked genotypes.
+     */
+    private record Layout(List<List<AllelePair>> plain, long plainCombinations, List<Genotype> masked) {
+    }
+
+    private static Layout layoutOrBuild() {
+        Layout l = layout;
+        if (l == null) {
+            synchronized (GenotypeCatalog.class) {
+                l = layout;
+                if (l == null) {
+                    l = buildLayout();
+                    layout = l;
+                }
+            }
+        }
+        return l;
+    }
+
+    private static Layout buildLayout() {
         List<Gene> order = Genes.codeOrder();
-        List<List<AllelePair>> options = new ArrayList<>();
-        long combinations = 1L;
+        Map<Gene, List<AllelePair>> distinct = new LinkedHashMap<>();
         for (Gene gene : order) {
-            List<AllelePair> pairs = distinctPairsOf(gene);
-            options.add(pairs);
-            combinations *= pairs.size();
+            distinct.put(gene, distinctPairsOf(gene));
         }
 
-        List<Genotype> out = new ArrayList<>();
-        for (long combination = 0; combination < combinations; combination++) {
-            List<AllelePair> pairs = new ArrayList<>(order.size());
-            long remaining = combination;
-            for (List<AllelePair> gene : options) {
-                pairs.add(gene.get((int) (remaining % gene.size())));
-                remaining /= gene.size();
+        List<List<AllelePair>> plain = new ArrayList<>(order.size());
+        long combinations = 1L;
+        for (Gene gene : order) {
+            List<AllelePair> unmasked = new ArrayList<>();
+            for (AllelePair pair : distinct.get(gene)) {
+                if (!gene.expressionOf(pair).masks()) {
+                    unmasked.add(pair);
+                }
             }
-            Genotype genotype = Genotype.of(pairs);
-            if (isCanonical(genotype)) {
-                out.add(genotype);
+            plain.add(List.copyOf(unmasked));
+            combinations *= unmasked.size();
+        }
+
+        // One entry per masking expression: that combination, everything else wild.
+        List<Genotype> masked = new ArrayList<>();
+        for (Gene masker : order) {
+            for (AllelePair pair : distinct.get(masker)) {
+                if (!masker.expressionOf(pair).masks()) {
+                    continue;
+                }
+                List<AllelePair> pairs = new ArrayList<>(order.size());
+                for (Gene gene : order) {
+                    pairs.add(gene == masker ? pair : wildTypePairOf(gene, distinct.get(gene)));
+                }
+                masked.add(Genotype.of(pairs));
             }
         }
-        return List.copyOf(out);
+
+        return new Layout(List.copyOf(plain), combinations, List.copyOf(masked));
     }
 
     /**
-     * Is this the catalogue's chosen representative of how it looks? Only
-     * masking matters here (the same-expression reduction already happened in
-     * {@link #distinctPairsOf}): once a gene lands on a
-     * {@link Expression#masks() masking} expression every other gene is
-     * invisible, so the one entry kept is the one where every other gene sits
-     * at a wild type.
+     * The representative of {@code gene}'s wild-type group. Every gene in the
+     * model has one; the fallback exists so a gene that somehow declares no
+     * silent combination still produces a valid genotype instead of a null.
      */
-    private static boolean isCanonical(Genotype genotype) {
-        Gene masker = null;
-        for (Gene gene : Genes.codeOrder()) {
-            if (gene.expressionOf(genotype.pair(gene)).masks()) {
-                masker = gene;
-                break;
+    private static AllelePair wildTypePairOf(Gene gene, List<AllelePair> distinct) {
+        for (AllelePair pair : distinct) {
+            if (gene.expressionOf(pair).wildType()) {
+                return pair;
             }
         }
-        if (masker == null) {
-            return true;
-        }
-        for (Gene gene : Genes.codeOrder()) {
-            if (gene != masker && !gene.expressionOf(genotype.pair(gene)).wildType()) {
-                return false;
-            }
-        }
-        return true;
+        return distinct.get(0);
     }
 }

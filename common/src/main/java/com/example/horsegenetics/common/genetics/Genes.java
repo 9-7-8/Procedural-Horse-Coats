@@ -2,7 +2,7 @@ package com.example.horsegenetics.common.genetics;
 
 import com.example.horsegenetics.common.genetics.genes.AgoutiGene;
 import com.example.horsegenetics.common.genetics.genes.DunGene;
-import com.example.horsegenetics.common.genetics.genes.FrameGene;
+import com.example.horsegenetics.common.genetics.genes.EdnrbGene;
 import com.example.horsegenetics.common.genetics.genes.ChampagneGene;
 import com.example.horsegenetics.common.genetics.genes.ExtensionGene;
 import com.example.horsegenetics.common.genetics.genes.GreyGene;
@@ -11,13 +11,13 @@ import com.example.horsegenetics.common.genetics.genes.MushroomGene;
 import com.example.horsegenetics.common.genetics.genes.MatpGene;
 import com.example.horsegenetics.common.genetics.genes.PinkHairGene;
 import com.example.horsegenetics.common.genetics.genes.RoanGene;
-import com.example.horsegenetics.common.genetics.genes.SabinoGene;
+import com.example.horsegenetics.common.genetics.genes.KitGene;
 import com.example.horsegenetics.common.genetics.genes.SexGene;
 import com.example.horsegenetics.common.genetics.genes.SilverGene;
-import com.example.horsegenetics.common.genetics.genes.SplashGene;
+import com.example.horsegenetics.common.genetics.genes.MitfGene;
 import com.example.horsegenetics.common.genetics.genes.TestGene;
 import com.example.horsegenetics.common.genetics.genes.TobianoGene;
-import com.example.horsegenetics.common.genetics.genes.WhiteGene;
+import com.example.horsegenetics.common.genetics.genes.Pax3Gene;
 import com.example.horsegenetics.common.genetics.spec.SpecGene;
 
 import java.lang.System.Logger;
@@ -72,10 +72,8 @@ public final class Genes {
     public static final SexGene SEX = new SexGene();
     public static final ExtensionGene EXTENSION = new ExtensionGene();
     public static final AgoutiGene AGOUTI = new AgoutiGene();
-    public static final WhiteGene WHITE = new WhiteGene();
     public static final TestGene TEST = new TestGene();
     public static final ChampagneGene CHAMPAGNE = new ChampagneGene();
-    public static final SplashGene SPLASH = new SplashGene();
     public static final GreyGene GREY = new GreyGene();
     public static final MatpGene MATP = new MatpGene();
     public static final MagicZebraGene MAGIC_ZEBRA = new MagicZebraGene();
@@ -85,13 +83,26 @@ public final class Genes {
     public static final MushroomGene MUSHROOM = new MushroomGene();
     public static final RoanGene ROAN = new RoanGene();
     public static final TobianoGene TOBIANO = new TobianoGene();
-    public static final FrameGene FRAME = new FrameGene();
-    public static final SabinoGene SABINO = new SabinoGene();
+
+    /**
+     * The four <b>white-pattern loci</b>, named for the real genes they model.
+     * Keeping them apart is not pedantry: only alleles at the <i>same</i> locus
+     * compete for a slot, so {@code KIT} can hold dominant white or sabino but
+     * never both, while {@code MITF} and {@code PAX3} splash stack freely and
+     * frame stacks with everything. Tobiano and roan sit near {@code KIT} on
+     * chromosome 3 but are not {@code KIT} variants, so they stay their own
+     * genes above.
+     */
+    public static final EdnrbGene EDNRB = new EdnrbGene();
+    public static final KitGene KIT = new KitGene();
+    public static final MitfGene MITF = new MitfGene();
+    public static final Pax3Gene PAX3 = new Pax3Gene();
 
     /** The hand-written genes. Order here is irrelevant - the registry sorts. */
     private static final List<Gene> BUILTINS = List.of(
-            SEX, EXTENSION, AGOUTI, WHITE, TEST, CHAMPAGNE, SPLASH, GREY, MATP,
-            MAGIC_ZEBRA, PINK_HAIR, DUN, SILVER, MUSHROOM, ROAN, TOBIANO, FRAME, SABINO);
+            SEX, EXTENSION, AGOUTI, TEST, CHAMPAGNE, GREY, MATP,
+            MAGIC_ZEBRA, PINK_HAIR, DUN, SILVER, MUSHROOM, ROAN, TOBIANO,
+            EDNRB, KIT, MITF, PAX3);
 
     /** Ordering: lower priority first, ties broken alphabetically by key. */
     private static final Comparator<Gene> BY_PRIORITY_THEN_KEY =

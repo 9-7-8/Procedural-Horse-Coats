@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 
 /**
  * <b>How common each of a gene's allele combinations is in the founder
@@ -101,6 +102,77 @@ public final class FounderTable {
                 .weight(variant, baseline, 100.0 * 2.0 * p * q)
                 .weight(baseline, baseline, 100.0 * q * q)
                 .build();
+    }
+
+    /**
+     * The <b>multi-allele</b> generalisation of
+     * {@link #hardyWeinberg(Allele, Allele, double)}: given a frequency per
+     * allele, every combination {@code i,j} gets {@code 2 p_i p_j} (or
+     * {@code p_i²} when {@code i == j}), and any combination {@code occurs}
+     * rejects is dropped and the rest <b>rescaled</b> to 100.
+     *
+     * <p>Written for a locus with too many combinations to hand-tabulate
+     * honestly - {@code KIT} has thirty-six of them, four of which are
+     * homozygous-lethal - where writing the numbers out by hand is not
+     * transparency, it is an invitation to a typo nobody would ever notice. A
+     * gene that wants one combination at something other than its
+     * random-mating share still states its whole table directly with
+     * {@link #builder()}; that is the model, and this is a convenience on top
+     * of it.
+     *
+     * <p>The rescale is <b>deliberate</b>, and it is what the biology says: a
+     * lethal combination is not a horse that never got conceived, it is one
+     * that never turns up in the adult founder population, so the population
+     * you <i>do</i> see is the survivors renormalised. It also keeps
+     * {@link Builder#build()} from warning about a total that is short by
+     * exactly the lethal share.
+     *
+     * @param frequencies population frequency per allele, summing to 1; use a
+     *                    {@link LinkedHashMap} - iteration order decides the
+     *                    table's row order, and that has to be reproducible
+     * @param occurs      which combinations exist at all; should agree with the
+     *                    gene's {@link Gene#canOccur}
+     */
+    public static FounderTable hardyWeinberg(Map<Allele, Double> frequencies, Predicate<AllelePair> occurs) {
+        double sum = 0.0;
+        for (double p : frequencies.values()) {
+            if (p < 0.0 || p > 1.0) {
+                throw new IllegalArgumentException("allele frequency must be in [0, 1], got " + p);
+            }
+            sum += p;
+        }
+        if (Math.abs(sum - 1.0) > 1e-6) {
+            LOG.log(Logger.Level.WARNING, "allele frequencies sum to {0}, not 1 - normalising", sum);
+        }
+
+        List<Allele> alleles = new ArrayList<>(frequencies.keySet());
+        Map<AllelePair, Double> raw = new LinkedHashMap<>();
+        double kept = 0.0;
+        for (int i = 0; i < alleles.size(); i++) {
+            for (int j = i; j < alleles.size(); j++) {
+                AllelePair pair = new AllelePair(alleles.get(i), alleles.get(j));
+                if (!occurs.test(pair)) {
+                    continue;
+                }
+                double pi = frequencies.get(alleles.get(i)) / sum;
+                double pj = frequencies.get(alleles.get(j)) / sum;
+                double w = (i == j) ? pi * pi : 2.0 * pi * pj;
+                if (w <= 0.0) {
+                    continue;
+                }
+                raw.put(pair, w);
+                kept += w;
+            }
+        }
+        if (kept <= 0.0) {
+            throw new IllegalArgumentException("every combination was excluded - nothing left to draw");
+        }
+
+        Builder b = builder();
+        for (Map.Entry<AllelePair, Double> e : raw.entrySet()) {
+            b.weight(e.getKey().first(), e.getKey().second(), 100.0 * e.getValue() / kept);
+        }
+        return b.build();
     }
 
     /** Fluent construction. Weights are percentages; see {@link FounderTable}. */

@@ -4,8 +4,8 @@
 // palomino and a grey, and "does it read on a cremello?" is the question the
 // creator exists to answer before you ship the gene. So these are ports of the
 // mod's real natural genes and their real constants - ExtensionGene,
-// AgoutiGene/BayCoat, CreamPearlDilution, ChampagneGene, GreyCoat, WhiteGene -
-// not hand-picked colours that merely look similar.
+// AgoutiGene/BayCoat, MatpGene, ChampagneGene, GreyCoat, and KitGene's
+// dominant-white outcome - not hand-picked colours that merely look similar.
 //
 // They are ports, so they drift if the Java changes. What they are NOT is a
 // second implementation the game could ever use: the game runs the Java.

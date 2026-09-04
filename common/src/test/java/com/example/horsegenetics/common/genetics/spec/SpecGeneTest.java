@@ -45,6 +45,7 @@ class SpecGeneTest {
     void aLoadedGeneJoinsTheRegistryAndTheCode() {
         assertEquals(BUILT_IN_GENES, Genes.codeOrder().size());
         int catalogueBefore = GenotypeCatalog.size();
+        int maskingBefore = maskingCombinations();
 
         SpecGene silver = register("silver.json"); // example.silver, priority 45
 
@@ -61,10 +62,10 @@ class SpecGeneTest {
         String code = Genotype.wildType().toCode();
         assertTrue(code.contains("example.silver=z/z"), "the wild type gains a segment: " + code);
         assertEquals(Genotype.wildType(), Genotype.parse(code));
-        // Every unmasked entry doubles; the two masking entries (white, test)
-        // stay at one pen each, because while they show nothing else is
-        // visible - including this gene.
-        assertEquals((catalogueBefore - 2) * 2 + 2, GenotypeCatalog.size(),
+        // Every unmasked entry doubles; each masking combination (KIT's
+        // dominant white, EDNRB's lethal white, test) stays at one pen, because
+        // while it shows nothing else is visible - including this gene.
+        assertEquals((catalogueBefore - maskingBefore) * 2 + maskingBefore, GenotypeCatalog.size(),
                 "a dominant two-allele gene doubles every unmasked pen");
     }
 
@@ -250,5 +251,18 @@ class SpecGeneTest {
                         file + " " + pair.toTokens());
             }
         }
+    }
+
+    /** How many combinations anywhere in the registry hide every other gene. */
+    private static int maskingCombinations() {
+        int n = 0;
+        for (var gene : Genes.codeOrder()) {
+            for (var pair : GenotypeCatalog.distinctPairsOf(gene)) {
+                if (gene.expressionOf(pair).masks()) {
+                    n++;
+                }
+            }
+        }
+        return n;
     }
 }
