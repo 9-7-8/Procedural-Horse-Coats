@@ -159,23 +159,63 @@
     path, and a foal must not go through it.
 </p>
 
-<h3><code>HorseStats.rollFoalStat(double parentA, double parentB, Rng)</code></h3>
+<h3>Stats are inherited, not rolled</h3>
 
-<p>
-    <strong>Not genetic yet</strong> &mdash; an explicit placeholder until stats fold
-    into the Mendelian model. One <code>nextFloat()</code>, uniform in the band:
-</p>
-
-<div class="codebox">
-<pre><code class="language-none">[ 0.75 * min(parentA, parentB) , 1.5 * max(parentA, parentB) ]</code></pre>
+<div class="note danger">
+    <span class="label"><code>HorseStats.rollFoalStat</code> is gone</span>
+    <p>
+        A foal&rsquo;s speed and health used to be drawn uniformly from
+        <code>[0.75 &times; min(parents), 1.5 &times; max(parents)]</code> &mdash; an
+        uncapped random walk with <em>no genetics in it at all</em>. Two full siblings
+        could differ by a factor of two, and &ldquo;breeding for speed&rdquo; was
+        breeding for luck. The class is deleted.
+    </p>
 </div>
 
 <p>
-    So a foal can meaningfully out- or under-do both parents. Applied independently to
-    speed and health (two draws per foal). There is <strong>no upper cap</strong>
-    &mdash; a determined breeder can push a line to absurd numbers.
-    <code>HorseRecord</code> then rounds up: health to a whole number, speed to 3
-    decimals.
+    A horse&rsquo;s <strong>body</strong> &mdash; speed, max health, jump strength,
+    body size and the disorders it expresses &mdash; is now a pure function of its
+    genotype, resolved by <code>HorseTraits.resolve</code>. So a foal inherits its
+    stats the same way it inherits its colour: through the alleles, and nowhere else.
+    <b>There are no <code>speed</code> or <code>health</code> fields on
+    <code>HorseRecord</code> at all</b>, the same way there is no <code>sex</code>
+    field &mdash; a stored derived value can only ever go stale against the alleles
+    beside it.
+</p>
+
+<p>
+    Full machinery, the baselines, the per-gene weights and the two kinds of lethal:
+    <strong><a href="horse-body.html">the horse&rsquo;s body</a></strong>. What
+    matters on this page is that <b>breeding draws nothing extra</b> &mdash; the same
+    two <code>nextBoolean()</code> per gene that always decided the coat now decide
+    the body too.
+</p>
+
+<h3>Breeding can now fail, or produce a foal that dies</h3>
+
+<p>
+    Two of the new <a href="horse-body.html">health loci</a> change the shape of a
+    pairing:
+</p>
+
+<ul>
+    <li><strong>Embryonic lethal</strong> (<a href="gene-met.html">MET</a>): the
+        Mendelian draw runs as usual, <code>applyBredFoal</code> reads the genotype it
+        produced, returns <code>false</code>, and the caller cancels the
+        <code>BabyEntitySpawnEvent</code>. <b>No foal at all.</b>
+        <code>Genotype.breedWith</code> is untouched, so the odds stay the ordinary
+        one-in-four for two carriers.</li>
+    <li><strong>Lethal at birth</strong> (<a href="gene-ednrb.html">overo lethal
+        white</a> and four recessives): the foal <em>is</em> born, named, and filed in
+        the pedigree, and then dies over a few seconds. The pedigree is fine with it
+        &mdash; <code>ancestorsOf</code> already tolerates ancestors it cannot
+        find.</li>
+</ul>
+
+<p>
+    Both send the breeding player a chat line naming the disorder. Both are governed
+    by the server&rsquo;s <code>health.mode</code> setting, which never changes what a
+    horse <em>carries</em> or passes on.
 </p>
 
 <h3><code>GeneticCodeCombiner</code></h3>
@@ -238,9 +278,7 @@
 <tr><td><code>motherId</code> / <code>fatherId</code></td><td><code>Optional&lt;UUID&gt;</code></td><td>Dam / sire, if bred.</td></tr>
 <tr><td><code>tamedBy</code> / <code>bredBy</code></td><td><code>Optional&lt;String&gt;</code></td><td>Usernames.</td></tr>
 <tr><td><code>generation</code></td><td><code>int</code></td><td><strong>0</strong> for a foundation horse; a child of two foundations is <strong>1</strong>; otherwise <code>1 + max(dam, sire)</code>, fixed at birth. <em>Not</em> the family-tree column depth.</td></tr>
-<tr><td><code>speed</code></td><td><code>double</code></td><td>Movement-speed attribute value, rounded up to 3 decimals by the constructor, uncapped. <strong><code>0.0</code> = not recorded yet.</strong></td></tr>
-<tr><td><code>health</code></td><td><code>double</code></td><td>Max-health attribute value, rounded up to a whole number. Same <code>0.0</code> convention.</td></tr>
-<tr><td><code>parentStats</code></td><td><code>Optional&lt;ParentStats&gt;</code></td><td>Low/high of the two parents&rsquo; speed and health at birth, so the UI can colour this horse&rsquo;s numbers. Absent for founders.</td></tr>
+<tr><td><code>parentStats</code></td><td><code>Optional&lt;ParentStats&gt;</code></td><td>Low/high of the two parents&rsquo; <em>resolved</em> speed and health at birth, so the UI can colour this foal&rsquo;s numbers. Absent for founders. It stays a stored snapshot even though both parents&rsquo; numbers are derivable, because a parent can be dead, sold or simply forgotten by the ancestry DB by the time anyone looks.</td></tr>
 </tbody>
 </table>
 </div>
@@ -249,10 +287,9 @@
 <pre><code class="language-java">String displayName();   // barnName if present, else "firstName lastName", stripped
 String attribution();   // bredBy if present, else tamedBy - "who is this horse's human"
 boolean hasName();      // any name part non-blank, or a barn name set
-boolean hasStats();     // speed &gt; 0 &amp;&amp; health &gt; 0
 
-static double ceilSpeed(double v);    // 3 decimals, up
-static double ceilHealth(double v);   // whole number, up
+Traits traits();        // speed / health / jump / scale / conditions, resolved
+                        // from geneticCode on demand - never stored
 
 // factories
 static HorseRecord founder(id, first, last, genome);              // generation 0
@@ -263,14 +300,15 @@ static HorseRecord bred(id, first, last, genome, motherId, fatherId, generation)
 Sex sex();              // read back off the sex locus in geneticCode
 
 // copy helpers
-withNames, withBarnName, withTamedBy, withBredBy, withStats, withParentStats</code></pre>
+withNames, withBarnName, withTamedBy, withBredBy, withGenome, withParentStats</code></pre>
 </div>
 
 <p>
-    <strong>Rounding lives in the constructor.</strong> Every stored value is rounded
-    up; callers do not need to round. The constructor also null-checks required
-    fields, normalizes <code>null</code> <code>Optional</code>s, strips and clamps the
-    barn name, and clamps <code>generation</code> to <code>&ge; 0</code>.
+    The constructor null-checks required fields, normalizes <code>null</code>
+    <code>Optional</code>s, strips and clamps the barn name, and clamps
+    <code>generation</code> to <code>&ge; 0</code>. It no longer rounds anything:
+    there are no numeric stat fields left to round.<br>
+    <em>(<code>ceilSpeed</code> / <code>ceilHealth</code> went with them.)</em>
 </p>
 
 <p>
@@ -392,11 +430,10 @@ int     offspringCount(UUID a, UUID b);</code></pre>
 <tbody>
 <tr><td><code>of(horse)</code> / <code>hasRealRecord(horse)</code></td><td>Read the attachment; <code>hasName()</code>.</td></tr>
 <tr><td><code>apply(horse, record)</code></td><td>Write the attachment, set the custom name visible, record into the global DB, <strong>and</strong> send a <code>HorseRecordSyncPayload</code> to trackers.</td></tr>
-<tr><td><code>newFounder(horse, rng)</code></td><td>Founder record: random genotype (<strong>sex included</strong> &mdash; it is a gene now), random name, plus <code>.withStats(entitySpeed, entityHealth)</code>.</td></tr>
+<tr><td><code>newFounder(horse, rng)</code></td><td>Founder record: random genotype (<strong>sex included</strong> &mdash; it is a gene now) and a random name. Nothing is copied off the entity any more: whatever vanilla randomised its attributes to is about to be overwritten by what its alleles say.</td></tr>
 <tr><td><code>newFounder(horse, rng, genotype)</code> / <code>(horse, rng, sex, genotype)</code></td><td>Founder record on a fixed genotype (a gallery pen, the custom spawn egg). The 4-arg form writes the sex <em>into</em> the genotype with <code>withSex</code>.</td></tr>
-<tr><td><code>entitySpeed / entityHealth(horse)</code></td><td><code>getAttributeValue(MOVEMENT_SPEED / MAX_HEALTH)</code>.</td></tr>
-<tr><td><code>applyStatsToEntity(horse, record, fullHeal)</code></td><td>Push the record&rsquo;s numbers onto the attribute <em>base</em> values. <code>fullHeal</code> sets current HP to the new max (newborn); otherwise it only clamps HP down (reload, so no free heal). No-op for <code>0.0</code>.</td></tr>
-<tr><td><code>backfillStatsIfMissing(horse)</code></td><td>Fill <code>0.0</code> stats from the live entity.</td></tr>
+<tr><td><code>traitsOf(horse)</code> / <code>traitsOf(record)</code></td><td>Resolve the body from the genotype, honouring the server&rsquo;s <code>health.mode</code>. See <a href="horse-body.html">the horse&rsquo;s body</a>.</td></tr>
+<tr><td><code>applyTraitsToEntity(horse, traits, fullHeal)</code></td><td>Push the resolved body onto four attribute <em>base</em> values: <code>MOVEMENT_SPEED</code>, <code>MAX_HEALTH</code>, <code>JUMP_STRENGTH</code> and <code>SCALE</code>. <code>fullHeal</code> sets current HP to the new max (newborn); otherwise HP is only clamped <em>down</em>, so nothing is healed for free on a reload.</td></tr>
 <tr><td><code>offspringCount(contextHorse, damId, sireId)</code></td><td>From the server-global ancestry data, else <code>0</code>.</td></tr>
 <tr><td><code>rename</code> / <code>setBarnName</code> / <code>setTamedBy</code></td><td>Copy-and-apply helpers.</td></tr>
 <tr><td><code>rng(horse)</code> / <code>names()</code></td><td>Small utilities. (<code>randomSex</code> is gone &mdash; the founder draw rolls the sex locus.)</td></tr>
@@ -419,12 +456,17 @@ int     offspringCount(UUID a, UUID b);</code></pre>
 <ol>
     <li><code>rng</code> from <code>horse.getRandom()</code>.</li>
     <li>No real record &rarr; <code>apply(horse, newFounder(...))</code>: random
-        genotype (<strong>the sex locus among it</strong>), generated name, no parents,
-        speed and health copied from the entity&rsquo;s current attributes.</li>
-    <li>Otherwise (bred or reloaded) &rarr; backfill stats, re-record into the global
-        DB (idempotent), <code>applyStatsToEntity(..., fullHeal=false)</code> so a
-        reloaded horse keeps its rolled attributes, and re-set the custom name if
-        missing.</li>
+        genotype (<strong>the sex locus among it</strong>), generated name, no
+        parents.</li>
+    <li>Otherwise (bred or reloaded) &rarr; re-record into the global DB (idempotent)
+        and re-set the custom name if missing.</li>
+    <li><strong>Every</strong> horse, every join &rarr;
+        <code>applyTraitsToEntity(...)</code>. Vanilla has just randomised this
+        horse&rsquo;s speed, health and jump; this is where that gets overwritten with
+        what its alleles say. Doing it on every join rather than storing it is what
+        lets a re-tuned gene, or a change to <code>health.mode</code>, reach horses
+        that already exist. A newly founded horse is healed to its new max; a reloaded
+        one is only clamped down.</li>
     <li><strong>Coat</strong>: if the coat attachment is still
         <code>UNASSIGNED</code>, <code>CoatGenerator.generate</code> rolls a founder
         epigenome, stores <code>{genotype code, epigenome code}</code>, and sends the
@@ -465,17 +507,24 @@ int     offspringCount(UUID a, UUID b);</code></pre>
         attachment is missing or has drifted founds a fresh epigenome <em>now</em> and
         keeps it, so the foal still inherits real allele copies.</li>
     <li><code>childGeneration = 1 + max(dam, sire)</code>.</li>
-    <li><strong>Stats</strong>: <code>rollFoalStat</code> for speed and health, plus
-        <code>ParentStats.of(...)</code> so the UI can colour the foal&rsquo;s numbers
-        against its parents.</li>
+    <li><strong>Viability</strong>: the drawn genotype is resolved to
+        <code>Traits</code>. An <a href="gene-met.html">embryonic lethal</a> stops
+        here &mdash; <code>applyBredFoal</code> returns <code>false</code> and the
+        event is cancelled, so there is no foal.</li>
+    <li><strong>Stats</strong>: nothing is rolled. <code>ParentStats.of(damTraits,
+        sireTraits)</code> is captured so the UI can colour the foal&rsquo;s numbers
+        against its parents&rsquo;.</li>
     <li><strong>Name</strong> &mdash; see the schedule below.</li>
     <li><code>bredBy</code> = the causing player&rsquo;s username, if any.</li>
     <li><strong>Auto-tame</strong>: if the dam is tamed, the foal is tamed to the
         dam&rsquo;s owner, and <code>tamedBy</code> is that owner&rsquo;s
         username.</li>
     <li><code>apply(child, record)</code> then
-        <code>applyStatsToEntity(child, record, fullHeal=true)</code> so the foal
-        spawns with its rolled speed and max health at full HP.</li>
+        <code>applyTraitsToEntity(child, childTraits, fullHeal=true)</code> so the
+        foal spawns at the max health <em>its own</em> genotype gives it &mdash; which
+        for an affected foal is not many hearts.</li>
+    <li>If the foal is <a href="horse-body.html">lethal at birth</a>, a chat line
+        names the disorder. <code>LethalFoalHandler</code> does the rest.</li>
     <li><strong>The foal&rsquo;s coat attachment is written here</strong>, not at join
         time. It has to be: the inherited epigenetics can only be read while both
         parents are in hand, and flow A&rsquo;s founder path would re-roll them. Flow
@@ -529,7 +578,8 @@ int     offspringCount(UUID a, UUID b);</code></pre>
 <p>
     Holding <strong>paper</strong> and right-clicking a horse dumps to chat: name,
     id, the horse term (stallion / mare / colt / filly), generation, genetic code,
-    speed (3dp) and health (whole) &mdash; or <code>(unrolled)</code> &mdash; a
+    speed, health, jump and size &mdash; all resolved from the genotype &mdash; any
+    <a href="horse-body.html">conditions</a> it expresses with their descriptions, a
     <strong><code>vs parents</code></strong> line (<code>above both</code> /
     <code>between</code> / <code>below both</code>) when <code>parentStats</code> is
     present, bred by, tamed by, sire and dam resolved to names, and
@@ -640,9 +690,11 @@ int     offspringCount(UUID a, UUID b);</code></pre>
 <h2>Known limitations</h2>
 
 <ul>
-    <li><strong>Stat inheritance is random, not genetic.</strong>
-        <code>rollFoalStat</code> is a placeholder; the plan is to fold speed and
-        health into the Mendelian model. Jump strength is not tracked at all.</li>
+    <li><strong>No environmental noise on the stats.</strong> They are now purely
+        genetic, so two horses with the same genotype are the same horse. That is
+        deliberate; if the numbers ever feel too tidy, the place to reopen it is
+        epigenetic variation (inherited with the allele, still deterministic), not a
+        fresh die roll. See <a href="horse-body.html">the horse&rsquo;s body</a>.</li>
     <li><strong>A foal&rsquo;s epigenetics are copied exactly, with no
         variation</strong>, so a closed line converges on one look. Deliberate for
         now.</li>

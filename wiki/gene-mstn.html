@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MSTN &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="nav.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow natural">Natural gene <span class="sep">/</span> performance</p>
+<h1>MSTN (myostatin)</h1>
+<p class="lede">
+    The speed gene, and the first gene in this mod with <strong>no coat effect at
+    all</strong>. Codominant: each <code>C</code> copy buys movement speed and pays
+    for it in hearts, so the heterozygote is genuinely the midpoint of the two
+    homozygotes rather than a copy of one of them.
+</p>
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd>horsegenetics.mstn</dd></div>
+    <div><dt>Priority</dt><dd>80</dd></div>
+    <div><dt>Alleles</dt><dd><span class="allele dom">C</span> <span class="allele wild">T</span></dd></div>
+    <div><dt>Outcomes</dt><dd><code>sprinter</code>, <code>middle-distance</code>, <code>stayer</code></dd></div>
+    <div><dt>Coat effect</dt><dd><strong>none</strong> &mdash; every outcome is a wild type</dd></div>
+    <div><dt>Default allele</dt><dd>T</dd></div>
+    <div><dt>Wild population</dt><dd>p(C) = 0.35 &mdash; both ends are common</dd></div>
+    <div><dt>Founder draws</dt><dd>1 &times; nextFloat()</dd></div>
+    <div><dt>Gallery pens</dt><dd>1 &mdash; it never changes what a horse looks like</dd></div>
+</dl>
+
+<div class="note rule">
+    <span class="label">It paints nothing, and that is what makes it free</span>
+    <p>
+        Every combination of this gene is an <a href="genetics-model.html">expression</a>
+        marked <code>wildType</code>. That reads oddly for a gene that can change how
+        big a horse is or kill a foal, and it is exactly right: <code>wildType</code>
+        means <em>changes nothing about the coat</em>. Because none of the non-coat
+        genes paints, <code>Gene.affectsCoat()</code> is false for all of them, they
+        are left out of a horse&rsquo;s texture key, and the
+        <a href="roadmap.html">genotype gallery</a> collapses the whole locus into one
+        entry however many alleles it has. What the gene actually does travels on
+        <a href="horse-body.html">the trait system</a> instead.
+    </p>
+</div>
+
+<h2>The combination table</h2>
+
+<div class="table-wrap">
+<table>
+<thead><tr>
+<th>combination</th>
+<th>outcome</th>
+<th>speed</th>
+<th>max health</th>
+</tr></thead>
+<tbody>
+<tr><td><code>C/C</code></td><td><code>sprinter</code></td><td>+0.040</td><td>&minus;4.0</td></tr>
+<tr><td><code>C/T</code></td><td><code>middle-distance</code></td><td>+0.020</td><td>&minus;2.0</td></tr>
+<tr><td><code>T/T</code></td><td><code>stayer</code></td><td>&mdash;</td><td>&mdash;</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2>Codominant, and therefore additive</h2>
+
+<p>
+    Neither allele hides the other. Each <code>C</code> copy is worth
+    <code>0.020</code> movement speed and costs <code>2.0</code> health, and the
+    contribution just counts copies &mdash; which is all &ldquo;incompletely
+    dominant&rdquo; has ever meant. No special case anywhere.
+</p>
+
+<h2>Where the stamina went</h2>
+
+<p>
+    In real horses this locus trades sprint against stamina. This mod has settled
+    that <strong>there is no stamina resource</strong>
+    (<a href="roadmap.html">roadmap &sect;21</a>), so there is nothing for the
+    <code>T</code> side to buy &mdash; and a gene where one allele is simply better
+    than the other is not a choice, it is a chore. So stamina is paid out in the
+    nearest thing the game does have: <strong>max health</strong>. A stayer is the
+    horse that keeps going, and in Minecraft terms that is the horse with more
+    hearts.
+</p>
+
+<div class="note rule">
+    <span class="label">The baseline allele contributes zero</span>
+    <p>
+        The whole trade rides on <code>C</code>; <code>T</code> is worth exactly
+        nothing. That is the rule everywhere in the trait system, and it is what
+        makes an all-wild-type horse resolve to the flat baselines in
+        <a href="horse-body.html">HorseTraits</a>. Paying the stayer a bonus instead
+        would have said the same thing about the <em>difference</em> between the two
+        homozygotes, and made the baseline a lie.
+    </p>
+</div>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="gene-pdk4.html">PDK4</a>
+        <a href="gene-ckm.html">CKM</a>
+        <a href="horse-body.html">The trait system</a>
+    </div>
+    Source: <code>common/genetics/genes/MstnGene.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

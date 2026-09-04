@@ -546,6 +546,50 @@ public boolean hasVisibleNonDeterministic();</code></pre>
     Source: <code>common/src/main/java/com/example/horsegenetics/common/genetics/</code>
 </div>
 
+
+<h2 id="noncoat">Genes that never paint</h2>
+
+<p>
+    Fourteen of the registry&rsquo;s thirty-one built-in genes change nothing about a
+    horse&rsquo;s colour: the <a href="gene-sex.html">sex locus</a>, the six
+    performance and size loci, and the seven health loci. Every combination they can
+    produce is an <code>Expression</code> marked <code>wildType</code>.
+</p>
+
+<p>
+    That reads oddly for a gene that can kill a foal, and it is exactly right:
+    <strong><code>wildType</code> means &ldquo;changes nothing <em>about the
+    coat</em>&rdquo;</strong>. It is the property the coat pipeline asks about, and
+    nothing else. What these genes do instead travels on
+    <a href="horse-body.html">the trait system</a> &mdash; speed, max health, jump
+    strength, body scale, and the disorders a horse expresses.
+</p>
+
+<p>
+    Three consequences follow, and together they are why fourteen non-painting genes
+    are nearly free:
+</p>
+
+<ul>
+    <li><code>Gene.affectsCoat()</code> is false, so they are excluded from
+        <code>Genotype.coatCode()</code>. Two horses that differ only in them share
+        <strong>one baked texture</strong>.</li>
+    <li><code>GenotypeCatalog.distinctPairsOf</code> collapses every wild type into one
+        group, so each contributes <strong>one</strong> gallery entry however many
+        alleles it has &mdash; <a href="gene-acan.html">ACAN</a>&rsquo;s five alleles
+        and fifteen combinations included. The catalogue is unchanged at
+        <strong>2 064 387</strong> distinct coats.</li>
+    <li>The <em>raw</em> genotype count is <strong>292 822 943 423 500 800</strong>.
+        All real, all heritable, all distinguishable &mdash; just not by colour.</li>
+</ul>
+
+<p>
+    An expression still carries a name and a description when it is a wild type, which
+    is what lets a carrier outcome say something useful
+    (<a href="gene-matp.html">MATP</a>&rsquo;s <code>pearl-carrier</code>, every health
+    locus&rsquo;s <code>&hellip;-carrier</code>) without pretending to change the coat.
+</p>
+
 </article>
 </main>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>

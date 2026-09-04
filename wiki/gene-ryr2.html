@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RYR2 &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="nav.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow natural">Natural gene <span class="sep">/</span> performance</p>
+<h1>RYR2 (jumping)</h1>
+<p class="lede">
+    Jumping ability &mdash; the locus that moves a stat nothing in this mod tracked
+    before. Each <code>J</code> copy is worth <code>0.09</code> jump strength on a
+    baseline of <code>0.50</code>.
+</p>
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd>horsegenetics.ryr2</dd></div>
+    <div><dt>Priority</dt><dd>83</dd></div>
+    <div><dt>Alleles</dt><dd><span class="allele dom">J</span> <span class="allele wild">n</span></dd></div>
+    <div><dt>Outcomes</dt><dd><code>jumper</code>, <code>jumper-mixed</code>, <code>jumper-plain</code></dd></div>
+    <div><dt>Coat effect</dt><dd><strong>none</strong> &mdash; every outcome is a wild type</dd></div>
+    <div><dt>Default allele</dt><dd>n</dd></div>
+    <div><dt>Wild population</dt><dd>p(J) = 0.20</dd></div>
+    <div><dt>Founder draws</dt><dd>1 &times; nextFloat()</dd></div>
+    <div><dt>Gallery pens</dt><dd>1 &mdash; it never changes what a horse looks like</dd></div>
+</dl>
+
+<div class="note rule">
+    <span class="label">It paints nothing, and that is what makes it free</span>
+    <p>
+        Every combination of this gene is an <a href="genetics-model.html">expression</a>
+        marked <code>wildType</code>. That reads oddly for a gene that can change how
+        big a horse is or kill a foal, and it is exactly right: <code>wildType</code>
+        means <em>changes nothing about the coat</em>. Because none of the non-coat
+        genes paints, <code>Gene.affectsCoat()</code> is false for all of them, they
+        are left out of a horse&rsquo;s texture key, and the
+        <a href="roadmap.html">genotype gallery</a> collapses the whole locus into one
+        entry however many alleles it has. What the gene actually does travels on
+        <a href="horse-body.html">the trait system</a> instead.
+    </p>
+</div>
+
+<h2>The combination table</h2>
+
+<div class="table-wrap">
+<table>
+<thead><tr>
+<th>combination</th>
+<th>outcome</th>
+<th>jump strength</th>
+</tr></thead>
+<tbody>
+<tr><td><code>J/J</code></td><td><code>jumper</code></td><td>+0.18</td></tr>
+<tr><td><code>J/n</code></td><td><code>jumper-mixed</code></td><td>+0.09</td></tr>
+<tr><td><code>n/n</code></td><td><code>jumper-plain</code></td><td>&mdash;</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2>Why jump strength exists now and did not before</h2>
+
+<p>
+    Jump strength was on the &ldquo;not tracked yet&rdquo; list for as long as the
+    stats were a random roll off the parents, because there was nothing sensible to
+    roll it <em>from</em>. With the body resolved out of the genotype it costs one
+    gene and one attribute write, and it gives a breeding programme a third axis to
+    trade against speed.
+</p>
+
+<p>
+    The two size loci nudge it in both directions as well &mdash;
+    <a href="gene-lcorl.html">a tall horse</a> clears more and
+    <a href="gene-hmga2.html">a pony</a> clears less &mdash; so the range across the
+    whole model runs about <code>0.46</code> to <code>0.72</code>, inside
+    vanilla&rsquo;s <code>0.4</code>&ndash;<code>0.8</code>.
+</p>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="gene-lcorl.html">LCORL / NCAPG</a>
+        <a href="gene-hmga2.html">HMGA2</a>
+        <a href="horse-body.html">The trait system</a>
+    </div>
+    Source: <code>common/genetics/genes/Ryr2Gene.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

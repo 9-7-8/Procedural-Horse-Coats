@@ -124,10 +124,16 @@
         <a href="gene-ednrb.html">EDNRB</a> (frame, with the lethal-white outcome).
         Tobiano and roan stayed their own genes; they are not <code>KIT</code>
         variants. The combinatorial cost landed on §8 and §10 as predicted.</li>
-    <li><strong>The trait framework</strong> (§6.1) &mdash; <code>HorseTraits</code>, the
-        capability interfaces, the attribute adapter. Prereq for <em>every</em> non-coat
-        gene: performance (§4.3), size, health (§4.4, §6.4). Touches breeding and the
-        stat surfaces.</li>
+    <li><s><strong>The trait framework</strong> (§6.1)</s> &mdash;
+        <strong>shipped 2026-09-04.</strong> <code>HorseTraits</code> resolves a
+        <code>Traits</code> record out of the genotype; one capability interface
+        (<code>TraitContribution</code>, plus a <code>HealthContribution</code> marker
+        for the config toggle) instead of the four sketched below; the attribute
+        adapter writes four attributes including <code>SCALE</code> and
+        <code>JUMP_STRENGTH</code>. <strong>The random stat roll is deleted</strong> and
+        <code>HorseRecord</code> lost its <code>speed</code> / <code>health</code>
+        fields. All of §4.3, §4.4 and §6.4 landed with it &mdash; thirteen new genes.
+        Machinery: <a href="horse-body.html">the horse&rsquo;s body</a>.</li>
     <li><strong>Gene metadata</strong> (§19) &mdash; rarity (default gold-ingot), the
         carrot block (opt-out + the chaos chance function), the description block, and
         the creator form. Prereq for the whole gameplay economy: carrots (§14), database
@@ -143,10 +149,14 @@
 <h3>Tier 3 &mdash; enabling work (a couple of areas each)</h3>
 
 <ol start="7">
-    <li><strong>Health, the cheap half + lethals</strong> (§6.4) &mdash; max-health
-        contribution, then MET, then born-and-dies + the default-on config, then
-        frame&rsquo;s <code>Ov/Ov</code>. Touches §4.4, breeding, config, and §7 (a
-        lethal foal must out-damage the shipped regen). Needs the trait framework.</li>
+    <li><s><strong>Health, the cheap half + lethals</strong> (§6.4)</s> &mdash;
+        <strong>shipped 2026-09-04</strong>, all of it in one pass: the max-health
+        contribution, <a href="gene-met.html">MET</a>&rsquo;s conception check, the
+        born-and-dies handler with its own damage type, the default-on
+        <code>ServerConfig</code>, and <a href="gene-ednrb.html">EDNRB</a>&rsquo;s
+        <code>O/O</code> death. The lethal damage is a fraction of the foal&rsquo;s own
+        max health once a second, so it out-damages §7&rsquo;s regen at any health
+        value.</li>
     <li><strong>The gene-authoring tiers + mod-bus hook</strong> (§3) &mdash; abstract
         base classes and <code>RegisterHorseGenesEvent</code>. Not strictly blocking, but
         it pays for itself on the next gene written.</li>
@@ -428,7 +438,7 @@
 <tr><td><strong>Red factor (MC1R)</strong></td><td><code>E</code>, <code>e</code>, <code>ea</code></td><td>partial</td><td>Add the third allele. First real 3-allele locus, so the natural place to prove multi-allele support. <code>ea</code> is phenotypically red like <code>e</code>; the interest is in the code string and the carrier display.</td></tr>
 <tr><td><strong>MATP &mdash; two more alleles</strong></td><td><code>Cr</code>, <code>prl</code>, <em><code>sun</code></em>, <em><code>sno</code></em>, <code>N</code></td><td>partial</td><td><strong>The merge shipped 2026-09-03</strong> &mdash; cream and pearl are one three-allele locus with six combinations and four outcomes (<a href="gene-matp.html">MATP</a>), and it was the case that proved §5.1. Left: the other two real alleles, <strong>sunshine</strong> (<code>sun</code>) and <strong>snowdrop</strong> (<code>sno</code>), which take it to five alleles and fifteen combinations. Purely additive now &mdash; two allele constants and the rows they need.</td></tr>
 <tr><td><strong>Dun (TBX3) &mdash; leg barring</strong></td><td><code>D</code>, <code>d1</code>, <code>d2</code></td><td>partial</td><td><strong>The third allele shipped 2026-09-03</strong> &mdash; three alleles, six combinations, three outcomes, with <code>d1</code> carrying the primitive markings and no dilution (<a href="gene-dun.html">Dun</a>). Left: leg barring is still a hand-rolled Y-phase and should move to <code>BodyStripes</code>; and <code>d1</code> shows only the dorsal stripe, where a real one can also carry faint bars and shoulder shadowing.</td></tr>
-<tr><td><strong>Silver dapple &mdash; the dappling</strong></td><td><code>Z</code>, <code>z</code></td><td>partial</td><td>Ships as the dilution only. The dapples the gene is named for want a deterministic fixed-seed <code>BodyNoise</code> modulation (like grey&rsquo;s, lighter, per-genotype). Health: <code>Z/Z</code> &rarr; MCOA, blocked on §6.4. See <a href="gene-silver.html">its page</a>.</td></tr>
+<tr><td><strong>Silver dapple &mdash; the dappling</strong></td><td><code>Z</code>, <code>z</code></td><td>partial</td><td>Ships as the dilution only. The dapples the gene is named for want a deterministic fixed-seed <code>BodyNoise</code> modulation (like grey&rsquo;s, lighter, per-genotype). Health: <code>Z/Z</code> &rarr; MCOA is <strong>built</strong> (impairing, two hearts). See <a href="gene-silver.html">its page</a>.</td></tr>
 <tr><td><strong>Tiger eye</strong></td><td><code>TE1</code>, <code>TE2</code>, wild</td><td>new</td><td>No coat effect at all &mdash; <strong>eye colour</strong>. Blocked on an eye-colour system: <code>redrawEyes</code> copies eye texels verbatim, so there is no colour channel to write to.</td></tr>
 </tbody>
 </table>
@@ -453,7 +463,7 @@
 <thead><tr><th>Locus</th><th>Alleles</th><th>Status</th><th>What it needs</th></tr></thead>
 <tbody>
 <tr><td><strong>Leopard complex (TRPM1)</strong> + <strong>PATN1</strong></td><td><code>LP</code>, <code>lp</code>; <code>PATN1</code>, <code>N</code></td><td>new</td><td><strong>Deliberately left out of the white-pattern rewrite</strong>, and the largest single gene job remaining. It is not a pinto pattern and does not belong to any locus that rewrite touched: leopard, blanket, snowcap and varnish roan, plus white sclera, striped hooves and mottled skin. Wants a spot field <em>and</em> a separate blanket mask &mdash; neither of which <code>WhitePattern</code>&rsquo;s two shapes cover &mdash; and heterozygote vs homozygote <strong>must</strong> differ. <code>PATN1</code> is a second locus that only means anything on an <code>LP</code> horse, so it comes with it and is the model&rsquo;s first real modifier gene. Health: <code>LP/LP</code> &rarr; CSNB. Mottled skin and striped hooves also want the skin layer the coat does not have.</td></tr>
-<tr><td><strong>Overo lethal white &mdash; the death</strong></td><td><code>O</code>, <code>N</code></td><td>partial</td><td>The <em>coat</em> ships: <code>O/O</code> has its own <code>lethal-white</code> outcome, occurs, and renders all white. What is missing is the consequence &mdash; the foal lives. This is the first real lethal in the model and it needs the health system (§6.4) before it can do anything but look right. See <a href="gene-ednrb.html">its page</a>.</td></tr>
+<tr><td><strong>Overo lethal white &mdash; the death</strong></td><td><code>O</code>, <code>N</code></td><td><strong>built</strong> 2026-09-04</td><td>Both halves ship now. <code>O/O</code> has its own masking all-white outcome, occurs, gets a gallery pen &mdash; and the foal is born, named, filed in the pedigree, and then dies. See <a href="gene-ednrb.html">its page</a> and <a href="horse-body.html">the horse&rsquo;s body</a>. Not play-tested.</td></tr>
 <tr><td><strong>The rest of the <code>W</code> series</strong></td><td><code>W1</code>&ndash;<code>W4</code>, <code>W6</code>&ndash;<code>W9</code>, <code>W11</code>&ndash;<code>W19</code>, <code>W21</code>, <code>W24+</code></td><td>partial</td><td>Eight of the thirty-plus are modelled. The rest are not blocked on anything &mdash; each is a line in <code>alleles()</code>, a row in <code>expressionOf</code> and a frequency &mdash; they are simply <strong>not worth adding while their published descriptions do not separate them</strong> from the eight that are. Add one when the science gives it a phenotype a player could tell apart. Note the combinatorial cost: each allele adds <code>n</code> combinations to a locus that already has thirty-six.</td></tr>
 <tr><td><strong>The rest of the splash series</strong></td><td><code>SW6</code>&ndash;<code>SW10</code></td><td>partial</td><td><code>SW6</code>&ndash;<code>SW8</code> are folded into <a href="gene-mitf.html"><code>SW5</code></a> on purpose &mdash; the source describes all four in word-for-word identical terms, so four alleles would be four indistinguishable rows. Split them when they are distinguishable. <code>SW9</code>/<code>SW10</code> want a locus check first: the assignment of the higher numbers between <code>MITF</code> and <code>PAX3</code> is not settled in the reference used.</td></tr>
 <tr><td><strong>Face markings as their own thing</strong></td><td>&mdash;</td><td>new</td><td>Every white-pattern gene draws its face marking as a centreline stripe of some width and length. Real horses have a named family &mdash; star, snip, stripe, blaze, bald face &mdash; that is not simply &ldquo;a wider stripe&rdquo;, and a star in particular is a <em>detached</em> patch. Wants a shared <code>WhitePattern.face(kind, ...)</code> the loci call, not a per-gene reinvention.</td></tr>
@@ -464,10 +474,19 @@
 
 <h3>4.3 Performance and body size</h3>
 
+<div class="note good">
+    <span class="label">Mostly shipped 2026-09-04</span>
+    <p>
+        MSTN, PDK4, CKM, jumping and both height loci are built. What is left in this
+        section is <strong>DMRT3 (gait)</strong> and the two follow-ups called out
+        below. None of these genes touches the coat; the machinery is on
+        <a href="horse-body.html">the horse&rsquo;s body</a>.
+    </p>
+</div>
+
 <p>
-    None of these touch the coat. All are blocked on the trait framework in §6.
     <strong>Polygenic inheritance is cut</strong> (§6.3 / §21): every performance trait
-    that is really a QTL cluster becomes <strong>one atomic gene</strong> with a handful
+    that is really a QTL cluster became <strong>one atomic gene</strong> with a handful
     of alleles and an additive weight &mdash; legible, breedable-for, and Mendelian.
 </p>
 
@@ -475,45 +494,62 @@
 <table>
 <thead><tr><th>Locus</th><th>Inheritance</th><th>Notes</th></tr></thead>
 <tbody>
-<tr><td><strong>MSTN (myostatin)</strong></td><td>incompletely dominant</td><td>The obvious first non-coat gene: additive, two alleles, maps to speed vs endurance. Would replace part of today&rsquo;s random stat roll with something Mendelian.</td></tr>
+<tr><td><strong>MSTN (myostatin)</strong></td><td>codominant</td><td><strong>Built</strong> &mdash; <a href="gene-mstn.html">its page</a>. Each <code>C</code> copy buys speed and pays in hearts. With no stamina resource in the mod (§21), endurance is paid out as max health.</td></tr>
 <tr><td><strong>DMRT3</strong></td><td>dominant</td><td>Gait &mdash; a movement/animation change, not a stat. The only gene here needing renderer + movement work; lowest priority for that reason.</td></tr>
-<tr><td><strong>PDK4</strong>, <strong>CKM</strong></td><td>atomic (was polygenic)</td><td>Racing performance. Model each as one gene, a few alleles, additive weight into speed / endurance. No marker set.</td></tr>
-<tr><td><strong>Jumping ability</strong> (RYR2 / ECA QTLs)</td><td>atomic (was polygenic)</td><td>One gene. Still blocked on jump strength not being tracked at all today.</td></tr>
-<tr><td><strong>LCORL / NCAPG</strong></td><td>additive</td><td>Body <strong>height</strong>. Needs an entity-scale path: a scale attribute if 26.1.2 exposes one &mdash; <strong>unverified, check before designing</strong> &mdash; otherwise renderer-side scaling plus a hitbox change. Also interacts with foal geometry, already approximate.</td></tr>
-<tr><td><strong>HMGA2</strong></td><td>additive</td><td>Same scale path.</td></tr>
+<tr><td><strong>PDK4</strong>, <strong>CKM</strong></td><td>atomic (was polygenic)</td><td><strong>Built</strong> &mdash; <a href="gene-pdk4.html">PDK4</a>, <a href="gene-ckm.html">CKM</a>. One gene each, two alleles, an additive weight into speed. No marker set.</td></tr>
+<tr><td><strong>Jumping ability</strong> (RYR2 / ECA QTLs)</td><td>atomic (was polygenic)</td><td><strong>Built</strong> &mdash; <a href="gene-ryr2.html">RYR2</a>. Jump strength is tracked now: it was only ever blocked on there being nothing sensible to roll it from.</td></tr>
+<tr><td><strong>LCORL / NCAPG</strong></td><td>additive</td><td><strong>Built</strong> &mdash; <a href="gene-lcorl.html">its page</a>. <b>The scale question is answered</b>: <code>Attributes.SCALE</code> exists in 26.1.2 and is on every living entity, and vanilla scales the model <em>and</em> the hitbox from it. No renderer work, no hitbox work.</td></tr>
+<tr><td><strong>HMGA2</strong></td><td>additive</td><td><strong>Built</strong> &mdash; <a href="gene-hmga2.html">its page</a>. Pulls the other way, and pays for the loss in hearts so small is worth breeding toward.</td></tr>
+<tr><td><strong>Foal geometry vs scale</strong></td><td>&mdash;</td><td><strong>Unverified.</strong> A scaled foal has not been looked at in-game, and <code>Skin.BABY</code>&rsquo;s projection is already approximate. Check a <code>p/p</code> foal before adding anything else here.</td></tr>
 </tbody>
 </table>
 </div>
 
 <h3>4.4 Health and dwarfism</h3>
 
+<div class="note good">
+    <span class="label">Shipped 2026-09-04</span>
+    <p>
+        All seven are built, along with the health system they were blocked on. They
+        surface exactly as planned: a <strong>lethal</strong> foal is born and then
+        dies, and everything sub-lethal is <strong>fewer hearts</strong>. Machinery on
+        <a href="horse-body.html">the horse&rsquo;s body</a>; one page per gene in the
+        sidebar.
+    </p>
+</div>
+
 <p>
-    All <strong>recessive</strong>, most severe. They need the health system in §6.4
-    first; without it they are inert genotype entries. In game they surface two ways: a
-    <strong>lethal</strong> foal is born and then dies shortly after birth, and
-    everything sub-lethal is <strong>fewer hearts</strong>.
+    All <strong>recessive</strong>, and none of them appears in a founder table as a
+    homozygote &mdash; a wild-caught horse is an adult that survived, so the only way
+    to see any of these is to breed two carriers.
 </p>
 
 <div class="table-wrap">
 <table>
 <thead><tr><th>Locus</th><th>Effect</th><th>Notes</th></tr></thead>
 <tbody>
-<tr><td><strong>ACAN</strong></td><td>chondrodysplastic dwarfism</td><td>5 alleles, and <strong>any two</strong> non-functional copies are affected &mdash; <code>D1/D4</code> is affected, not just <code>D1/D1</code>. So the health check cannot be &ldquo;is it homozygous?&rdquo;; it has to be a predicate on the whole pair. Visually a body-proportion change.</td></tr>
-<tr><td><strong>B4GALT7</strong></td><td>Friesian dwarfism</td><td>Limbs and ribs affected, head near-normal &mdash; per-part scaling.</td></tr>
-<tr><td><strong>FFS1 (PLOD1)</strong></td><td>fragile foal syndrome</td><td>Lethal.</td></tr>
-<tr><td><strong>EFIH (RAPGEF5)</strong></td><td>no parathyroid glands</td><td>Lethal.</td></tr>
-<tr><td><strong>NFS (ST14)</strong></td><td>naked foal syndrome</td><td>The one health gene with a <strong>coat</strong> effect: an affected foal is near-hairless. A template swap, or a heavy phase-1 pass. Lethal.</td></tr>
-<tr><td><strong>Skeletal atavism</strong></td><td>abnormal limb growth</td><td>Lethal.</td></tr>
-<tr><td><strong>MET</strong></td><td>embryonic lethal</td><td>Homozygous embryos die <strong>before birth</strong>, so this is checked at conception and the pairing simply produces no foal &mdash; a different code path from the others.</td></tr>
+<tr><td><strong>ACAN</strong></td><td>chondrodysplastic dwarfism</td><td><strong>Built</strong> &mdash; <a href="gene-acan.html">its page</a>. Five alleles; the check is &ldquo;no working copy left&rdquo;, not &ldquo;homozygous&rdquo;, so <code>D1/D4</code> is affected. <code>D1/D1</code> is lethal, the rest are impairing. <em>Remaining:</em> the body-proportion change is an overall scale, not a proportion.</td></tr>
+<tr><td><strong>B4GALT7</strong></td><td>Friesian dwarfism</td><td><strong>Built</strong> &mdash; <a href="gene-b4galt7.html">its page</a>, and the one disorder a horse lives with. <em>Remaining:</em> <strong>per-part scaling</strong>. <code>Attributes.SCALE</code> is one number for the whole entity, so the limbs-and-ribs-but-not-the-head shape needs owning the horse model rather than borrowing vanilla&rsquo;s. It renders as an overall three-quarter horse today.</td></tr>
+<tr><td><strong>FFS1 (PLOD1)</strong></td><td>fragile foal syndrome</td><td><strong>Built</strong> &mdash; <a href="gene-plod1.html">its page</a>. Lethal at birth.</td></tr>
+<tr><td><strong>EFIH (RAPGEF5)</strong></td><td>no parathyroid glands</td><td><strong>Built</strong> &mdash; <a href="gene-rapgef5.html">its page</a>. Lethal at birth; the most severe and the rarest.</td></tr>
+<tr><td><strong>NFS (ST14)</strong></td><td>naked foal syndrome</td><td><strong>Partly built</strong> &mdash; <a href="gene-st14.html">its page</a>. The disorder ships; <em>the coat does not</em>. Phase 1 only removes pigment, and a de-pigmented mane reads as a <em>white</em> mane, which is a different horse. Wants a bare-skin template or a real phase-3 pass.</td></tr>
+<tr><td><strong>Skeletal atavism</strong></td><td>abnormal limb growth</td><td><strong>Built</strong> &mdash; <a href="gene-shox.html">its page</a>. Pseudoautosomal, so it segregates like an autosome and needs none of §5.3.</td></tr>
+<tr><td><strong>MET</strong></td><td>embryonic lethal</td><td><strong>Built</strong> &mdash; <a href="gene-met.html">its page</a>. Checked at conception; the pairing produces no foal. <code>canOccur</code> is false, so it gets no gallery pen &mdash; the opposite of lethal white, which is born.</td></tr>
 </tbody>
 </table>
 </div>
 
 <p>
-    Plus the health effects riding on colour genes already listed: <strong>CSNB</strong>
-    (<code>LP/LP</code>), <strong>MCOA</strong> (<code>Z/Z</code>),
-    <strong>LWFS</strong> (<code>Ov/Ov</code>, lethal), and deafness on some
-    splashed-white variants. <strong>Melanoma in greys is parked with aging</strong>.
+    The health effects riding on colour genes are built too:
+    <strong>MCOA</strong> on <a href="gene-silver.html">silver</a> <code>Z/Z</code>
+    (impairing, two hearts), <strong>LWFS</strong> on
+    <a href="gene-ednrb.html">EDNRB</a> <code>O/O</code> (lethal at birth), and
+    <strong>deafness</strong> on a homozygote at either splash locus
+    (<a href="gene-mitf.html">MITF</a> / <a href="gene-pax3.html">PAX3</a>) &mdash;
+    informational, because the mod has no hearing for a horse to lose.
+    <strong>CSNB</strong> rides on <code>LP/LP</code> and is still blocked on the
+    leopard complex not existing (§4.2). <strong>Melanoma in greys is parked with
+    aging.</strong>
 </p>
 
 <h3>4.5 Magical genes &mdash; the to-do list</h3>
@@ -794,56 +830,63 @@
 
 <h2 id="traits">6. Non-coat genes: performance, size, health</h2>
 
-<h3>6.1 The shape of the change</h3>
-
-<p>
-    Add <strong>capability interfaces</strong> a gene may additionally implement, rather
-    than widening <code>Gene</code> with methods most genes ignore:
-</p>
-
-<div class="codebox">
-<pre><code class="language-java">interface StatContribution { void contribute(AllelePair, TraitBuilder); }  // speed, health, jump
-interface BodyContribution { void contribute(AllelePair, BodyBuilder); }  // overall + per-part scale
-interface ViabilityRule    { Viability check(AllelePair, Genotype); }     // lethal at conception / birth
-interface ConditionRule    { void conditions(AllelePair, ConditionSink); } // CSNB, MCOA, deafness</code></pre>
+<div class="note good">
+    <span class="label">&sect;&sect;6.1&ndash;6.4 shipped 2026-09-04</span>
+    <p>
+        The trait framework, the Mendelian stats, and the whole health layer are
+        built. <strong>The machinery is documented on
+        <a href="horse-body.html">the horse&rsquo;s body</a></strong>, not here &mdash;
+        a finished system belongs on its own page. What follows is the remainder:
+        where the built version deviated from the plan and why, and the two
+        sub-sections that are still entirely unbuilt.
+    </p>
 </div>
 
-<p>
-    Plus a <code>common/horse/HorseTraits</code> resolver that walks the genotype once
-    and produces a plain-data <code>Traits</code> record (stats, body scale, conditions,
-    viability). Same discipline as the coat: <strong>all of it in
-    <code>common/</code></strong>, with the server adapter translating to Minecraft
-    attributes the way it already does for speed and health. It is also the tier-1 case
-    from §3 &mdash; a performance gene has no coat effect, so declaring alleles plus one
-    stat contribution should be the whole gene.
-</p>
-
-<h3>6.2 Stats become (partly) Mendelian</h3>
+<h3>6.1&ndash;6.2 The framework &mdash; where it landed differently</h3>
 
 <p>
-    Target: the genetic contribution comes from <code>HorseTraits</code>, and the random
-    roll survives only as <strong>environmental noise</strong> on top. Consequences:
-    <code>HorseRecord</code> gains fields (jump, endurance, height &mdash; not stamina,
-    which is not a resource, §21);
-    <a href="breeding.html">the breeding page</a> would need a substantial rewrite; and
-    <code>backfillStatsIfMissing</code> becomes &ldquo;recompute from genotype&rdquo;,
-    which is <em>better</em> &mdash; it stops being a guess.
+    Two deliberate deviations from the sketch, both worth recording because the sketch
+    is what a future reader would otherwise trust:
 </p>
+
+<ul>
+    <li><strong>One capability interface, not four.</strong>
+        <code>TraitContribution</code> replaced <code>StatContribution</code> /
+        <code>BodyContribution</code> / <code>ViabilityRule</code> /
+        <code>ConditionRule</code>. They all run in the same single walk of the
+        genotype, so four of them would be four sinks threaded through one loop; and
+        the genes that need any of them mostly need several at once
+        (<a href="gene-acan.html">ACAN</a> is a stat change <em>and</em> a size change
+        <em>and</em> a condition). <strong>Viability is not an interface at all</strong>
+        &mdash; it is derived from the severity of the conditions reported, so a gene
+        can never declare a horse lethal without saying what killed it. A
+        <code>HealthContribution</code> marker was added that the sketch did not have,
+        because the config toggle needs to know which contributions are disorders.</li>
+    <li><strong>The random roll did not survive as environmental noise.</strong> §6.2
+        left room for it. It is gone entirely: two horses with the same genotype are
+        the same horse. If the numbers ever feel too tidy, the place to reopen this is
+        <strong>epigenetic variation</strong> &mdash; inherited with the allele copy,
+        still deterministic, still reproducible &mdash; not a fresh die roll.</li>
+    <li><code>HorseRecord</code> lost its <code>speed</code> and <code>health</code>
+        fields rather than gaining jump / height ones. §6.2 predicted it would gain
+        fields; storing a derived value is what created the problem in the first
+        place.</li>
+</ul>
 
 <h3>6.3 Polygenic traits &mdash; cut</h3>
 
 <p>
     <strong>Settled (§21): the mod does Mendelian and sex-linked inheritance only.</strong>
-    PDK4, CKM and the jumping QTLs are polygenic in reality; here each becomes
-    <strong>one atomic gene</strong> with a handful of alleles and an additive weight
-    into a performance stat. Atomic genes are legible &mdash; a player can breed
-    <em>for</em> one &mdash; where a hidden sum of anonymous markers reads as a dice
-    roll, which is exactly what the philosophy says not to do. No marker-set subsystem,
-    no <code>TraitRule</code>-with-a-sum. Group traits (§6.5) stay, because they are
-    still Mendelian epistasis, not polygenic weighting.
+    PDK4, CKM and the jumping QTLs are polygenic in reality; each became <strong>one
+    atomic gene</strong> with two alleles and an additive weight into a performance
+    stat. Atomic genes are legible &mdash; a player can breed <em>for</em> one &mdash;
+    where a hidden sum of anonymous markers reads as a dice roll, which is exactly what
+    the philosophy says not to do. No marker-set subsystem, no
+    <code>TraitRule</code>-with-a-sum. Group traits (§6.5) stay, because they are still
+    Mendelian epistasis, not polygenic weighting.
 </p>
 
-<h3>6.4 Health: fewer hearts, and foals that do not make it</h3>
+<h3>6.4 Health &mdash; what is left</h3>
 
 <div class="note rule">
     <span class="label">Aging is out &mdash; a firm no</span>
@@ -856,74 +899,29 @@ interface ConditionRule    { void conditions(AllelePair, ConditionSink); } // CS
     </p>
 </div>
 
-<h4>Sub-lethal: fewer hearts</h4>
-
 <p>
-    A health gene lowers the horse&rsquo;s max-health attribute, so an affected horse
-    visibly has fewer hearts. This lands on an existing path &mdash;
-    <code>applyStatsToEntity</code> already sets the <code>MAX_HEALTH</code> base value
-    from the record &mdash; so the genetic contribution just becomes another input via
-    <code>HorseTraits</code>. Cheapest possible mechanic, no new subsystem.
+    The sub-lethal half, both lethal paths and the three-position
+    <code>ServerConfig</code> all shipped. The remainder:
 </p>
 
 <ul>
-    <li>Watch the interaction with <code>fullHeal</code>: a foal born with a low max
-        health should start at <em>its</em> max, and a reload must not heal it. The
-        existing flag already draws that line correctly.</li>
-    <li><code>hasStats()</code> treats <code>0.0</code> as &ldquo;not recorded
-        yet&rdquo;, so a genetic health value must never resolve to exactly zero &mdash;
-        clamp to a minimum (half a heart) and let the damage path do the killing.</li>
+    <li><strong>Nothing is play-tested.</strong> None of it has been seen in-game &mdash;
+        not a scaled horse, not a dying foal, not a refused pairing. The
+        <a href="verification.html">checklist</a> is where that lives.</li>
+    <li><strong>Per-part scaling</strong> for the two dwarfisms (see the §4.4 table).</li>
+    <li><strong>The naked-foal coat</strong> (see the §4.4 table).</li>
+    <li><strong>Carrier display is half done.</strong> The info panel and the paper
+        dump now show a horse&rsquo;s <em>expressed</em> conditions, which is the easy
+        half. What is still unread is the <code>Expression</code> table&rsquo;s carrier
+        wording &mdash; every disorder declares a sentence explaining what carrying one
+        copy means, and nothing shows it. A <strong>punnett / expected-foal
+        display</strong> reading the same table is the natural companion, and it is
+        what turns two carriers from a nasty surprise into a decision.</li>
+    <li><strong>Founder frequencies are guesses.</strong> Carrier rates run 1.4% to
+        4%, chosen so a wild horse is healthy and an inbred line is not. Whether a
+        player ever actually meets a lethal at those numbers is a play-test question,
+        and the answer may be that they are all too rare to matter.</li>
 </ul>
-
-<h4>Lethal: the foal dies shortly after birth</h4>
-
-<p>
-    The foal <em>is</em> born &mdash; it gets a record, a name and a place in the family
-    tree &mdash; and then takes damage until it dies. Mark it at birth from its
-    <code>ViabilityRule</code>, and have a tick handler apply a small recurring damage
-    over a few seconds rather than instantly, so the player sees what happened.
-</p>
-
-<ul>
-    <li>Needs a data attachment for the condition, a tick handler, and a damage source
-        that reads as &ldquo;genetic defect&rdquo; rather than an unexplained
-        death.</li>
-    <li>Give the player feedback &mdash; a chat line naming the condition beats a foal
-        that silently drops dead.</li>
-    <li><code>HorseAncestryData</code> already tolerates ancestors it cannot find, so a
-        short-lived foal in the pedigree is fine.</li>
-</ul>
-
-<h4>Embryonic lethal (MET)</h4>
-
-<p>
-    Checked at conception: if the drawn foal genotype is inviable, no foal is produced.
-    The foal genotype is drawn <em>before</em> the check, so
-    <code>Genome.breedWith</code> stays untouched and the check just reads its result.
-</p>
-
-<h4>Config toggle</h4>
-
-<p>
-    A <strong>server/common</strong> setting, the mod&rsquo;s first
-    <code>ServerConfig</code> (<code>ClientConfig</code> exists but is the wrong side).
-    <strong>Three positions:</strong> full genetics with foal deaths
-    (<strong>the default</strong>); genetics and reduced hearts but no deaths; off. All
-    the health genetics get built regardless &mdash; the toggle only governs the deaths.
-</p>
-
-<h4>Carrier display</h4>
-
-<p>
-    <strong>The wording already exists and nothing reads it.</strong> A carrier
-    combination is an <code>Expression</code> marked <code>wildType</code> with its
-    own name and description &mdash; MATP&rsquo;s <code>pearl-carrier</code>, pink
-    hair&rsquo;s <code>pink-carrier</code>, mushroom&rsquo;s
-    <code>mushroom-carrier</code> &mdash; so the info panel needs to <em>show</em> a
-    sentence, not compute one. It becomes far more valuable once recessive lethals
-    exist: the difference between a breeding programme and a lottery. A punnett /
-    expected-foal display is the natural companion, and reads the same table.
-</p>
 
 <h3>6.5 Traits that come from a <em>group</em> of genes</h3>
 
@@ -995,9 +993,11 @@ interface ConditionRule    { void conditions(AllelePair, ConditionSink); } // CS
 <p>
     <strong>Gated healing shipped</strong> &mdash; a hurt horse regenerates only near
     both water and food, sharing one slow tick with §13. Full machinery on
-    <a href="horse-care.html">horse care</a>. Two things it left for other sections: a
-    lethal foal (§6.4) must out-damage that regen, and an info-panel line naming
-    &ldquo;what is missing&rdquo; would beat particles alone.
+    <a href="horse-care.html">horse care</a>. One of the two things it left for other
+    sections is done: <strong>a lethal foal out-damages the regen</strong> &mdash; the
+    damage is a fraction of the foal&rsquo;s own max health once a second, so a player
+    cannot save one by standing it next to a hay bale. Still open: an info-panel line
+    naming &ldquo;what is missing&rdquo; would beat particles alone.
 </p>
 
 <p>

@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The horse&rsquo;s body &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="nav.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow natural">Core <span class="sep">/</span> traits, size &amp; health</p>
+<h1>The horse&rsquo;s body</h1>
+<p class="lede">
+    Speed, max health, jump strength, body size, and the disorders a horse
+    expresses &mdash; all of it a <strong>pure function of the genotype</strong>.
+    This page owns the machinery: the resolver, the baselines, how a gene
+    contributes, the two kinds of lethal, and the server setting that governs
+    them. The genes themselves are one page each.
+</p>
+
+<div class="note danger">
+    <span class="label">What this replaced</span>
+    <p>
+        A foal&rsquo;s speed and health used to be drawn uniformly from
+        <code>[0.75 &times; min(parents), 1.5 &times; max(parents)]</code> &mdash; an
+        uncapped random walk with <em>no genetics in it at all</em>. Two full
+        siblings could differ by a factor of two, a line&rsquo;s numbers drifted
+        upward on luck rather than on choices, and nothing a player did to a pairing
+        was legible in the result. <code>HorseStats</code> is deleted. Every number
+        on this page is now a sum of allele weights.
+    </p>
+</div>
+
+<h2 id="resolve">One walk, one record</h2>
+
+<p>
+    <code>HorseTraits.resolve(genotype)</code> walks
+    <a href="genetics-model.html"><code>Genes.codeOrder()</code></a> once, hands every
+    gene that implements <code>TraitContribution</code> a <code>TraitBuilder</code>,
+    and returns a <code>Traits</code> record.
+</p>
+
+<div class="codebox">
+<div class="filename">common/trait/Traits.java</div>
+<pre><code class="language-java">public record Traits(double speed, double health, double jump, double scale,
+                     List&lt;Condition&gt; conditions) {
+
+    Viability viability();              // derived: the worst severity in the list
+    Optional&lt;Condition&gt; lethalCondition();
+}</code></pre>
+</div>
+
+<p>
+    <strong>Nothing is stored.</strong> <code>HorseRecord</code> has no
+    <code>speed</code> or <code>health</code> field any more &mdash; the same
+    reasoning that removed its <code>sex</code> field. A stored derived value can
+    only ever go stale against the alleles sitting next to it, and re-resolving on
+    demand means a change to a gene&rsquo;s weight (or to the server setting below)
+    reaches horses that already exist.
+</p>
+
+<h3>Determinism</h3>
+
+<p>
+    No <code>Rng</code>, no epigenetics, no entity state. The same genotype always
+    resolves to the same body &mdash; on the server, on a reload, and in a unit test.
+    That is the <a href="philosophy.html">determinism contract</a> applied to the
+    body rather than the coat.
+</p>
+
+<h2 id="baselines">The baselines</h2>
+
+<p>
+    A horse carrying nothing but wild types lands on these. They sit a little under
+    vanilla&rsquo;s midpoints on purpose: the variant alleles are what push a horse
+    up through the vanilla range, so a bred line beats a wild-caught one and there is
+    somewhere to go.
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>stat</th><th>baseline</th><th>vanilla rolls</th><th>this model&rsquo;s wild range</th></tr></thead>
+<tbody>
+<tr><td>movement speed</td><td><code>0.1875</code></td><td>0.1125 &ndash; 0.3375</td><td>0.1715 &ndash; 0.3135</td></tr>
+<tr><td>max health</td><td><code>22.0</code> (11 hearts)</td><td>15 &ndash; 30</td><td>18 &ndash; 26</td></tr>
+<tr><td>jump strength</td><td><code>0.50</code></td><td>0.4 &ndash; 0.8</td><td>0.46 &ndash; 0.72</td></tr>
+<tr><td>body scale</td><td><code>1.0</code></td><td>&mdash; (vanilla has no size variation)</td><td>0.88 &ndash; 1.10</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    The wild range is measured over 200&nbsp;000 founder draws. It is deliberately
+    narrower than vanilla&rsquo;s at both ends: a wild-caught horse should be
+    unremarkable, and both the ceiling and the floor should be things you find by
+    breeding.
+</p>
+
+<div class="note rule">
+    <span class="label">Health never resolves to zero</span>
+    <p>
+        It bottoms out at <code>MIN_HEALTH = 1.0</code>, half a heart. A zero
+        max-health attribute is not &ldquo;a very sick horse&rdquo;, it is a
+        degenerate value &mdash; and killing a horse is the damage path&rsquo;s job,
+        not the attribute&rsquo;s. Speed and jump have floors for the same reason: a
+        zero-speed horse is stuck, not ill.
+    </p>
+</div>
+
+<h2 id="contributing">How a gene contributes</h2>
+
+<div class="codebox">
+<div class="filename">common/trait/TraitContribution.java</div>
+<pre><code class="language-java">public interface TraitContribution {
+    void contribute(AllelePair pair, Genotype genotype, TraitBuilder out);
+}
+
+/** Marker: this contribution is a disorder, and the server setting can suppress it. */
+public interface HealthContribution extends TraitContribution { }</code></pre>
+</div>
+
+<p>
+    A capability a <code>Gene</code> may <em>additionally</em> implement, rather than
+    more methods on <code>Gene</code> that most genes would leave empty. A gene that
+    only does this &mdash; every performance, size and health gene &mdash; is an
+    allele list, a combination table and one method.
+</p>
+
+<h3>One interface, not four</h3>
+
+<p>
+    The roadmap sketched four (<code>StatContribution</code>,
+    <code>BodyContribution</code>, <code>ViabilityRule</code>,
+    <code>ConditionRule</code>). They collapsed into one for two reasons. They all run
+    in the same single walk, so four of them would be four sinks threaded through one
+    loop; and the genes that need any of them mostly need several at once &mdash;
+    <a href="gene-acan.html">chondrodysplastic dwarfism</a> is a stat change
+    <em>and</em> a size change <em>and</em> a condition, and splitting that across
+    three interfaces would scatter one gene&rsquo;s answer over three methods that
+    have to agree.
+</p>
+
+<p>
+    Viability is not an interface at all. It is <em>derived</em> from the severity of
+    the conditions reported, so a gene can never declare a horse lethal without saying
+    what killed it.
+</p>
+
+<h3>Additive, and therefore order-independent</h3>
+
+<p>
+    A contribution is either <strong>additive</strong> (<code>addSpeed</code>,
+    <code>addHealth</code>, <code>addJump</code>, <code>addScale</code>) or a
+    <strong>scale multiplier</strong> (<code>multiplyScale</code>).
+    <code>build()</code> applies every addition before every multiplication, and both
+    operations are associative, so the result does not depend on the order genes are
+    visited in &mdash; the same argument that keeps the coat&rsquo;s phase-3
+    accumulator drift-free. Gene priority still fixes the <em>code</em> order; it
+    deliberately buys nothing here, so nobody is tempted to encode a dependency
+    between two genes as a priority number.
+</p>
+
+<p>
+    Multipliers exist for one reason: dwarfism is a <em>proportional</em> change. A
+    <a href="gene-hmga2.html">pony</a> with
+    <a href="gene-acan.html">chondrodysplasia</a> should end up small twice over, not
+    be dragged to the same absolute height as a draught horse with it. Speed, health
+    and jump stay purely additive, which keeps a gene&rsquo;s weight readable as
+    &ldquo;this allele is worth two hearts&rdquo; rather than &ldquo;it depends&rdquo;.
+</p>
+
+<h2 id="invisible">The non-coat genes cost the coat nothing</h2>
+
+<p>
+    All thirteen of them paint nothing: every combination is an
+    <a href="genetics-model.html">expression</a> marked <code>wildType</code>. That is
+    not a loophole, it is what <code>wildType</code> means &mdash; <em>changes nothing
+    about the coat</em>. Three things follow, and together they are why thirteen new
+    genes were nearly free:
+</p>
+
+<ul>
+    <li><code>Gene.affectsCoat()</code> is false, so they are excluded from
+        <code>Genotype.coatCode()</code> and two horses that differ only in them share
+        <strong>one baked texture</strong>.</li>
+    <li><code>GenotypeCatalog.distinctPairsOf</code> collapses every wild type into
+        one group, so each locus contributes <strong>one</strong> gallery entry however
+        many alleles it has. The catalogue stayed at <strong>2 064 387</strong>
+        distinct coats.</li>
+    <li>The <em>raw</em> genotype count multiplied by 5 314 410, to
+        <strong>292 822 943 423 500 800</strong>. Those are all real, heritable,
+        distinguishable horses &mdash; they just are not distinguishable by
+        <em>colour</em>.</li>
+</ul>
+
+<h2 id="conditions">Conditions</h2>
+
+<p>
+    A <code>Condition</code> is a named disorder, declared by a gene as a constant
+    next to the expression that produces it. It carries the same two pieces of prose
+    an expression does &mdash; a short name and a sentence &mdash; because the
+    surfaces that show it are the same surfaces that show an expression, and a player
+    who has just lost a foal deserves to be told which disorder took it.
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>severity</th><th>meaning</th><th>who has it</th></tr></thead>
+<tbody>
+<tr><td><code>INFORMATIONAL</code></td><td>Named and shown; no mechanical cost.</td>
+    <td>Splash deafness (<a href="gene-mitf.html">MITF</a> / <a href="gene-pax3.html">PAX3</a>)</td></tr>
+<tr><td><code>IMPAIRING</code></td><td>Fewer hearts, usually with a smaller body or a lower jump.</td>
+    <td><a href="gene-acan.html">ACAN</a> dwarf, <a href="gene-b4galt7.html">B4GALT7</a>,
+        <a href="gene-silver.html">silver</a> MCOA</td></tr>
+<tr><td><code>LETHAL_AT_BIRTH</code></td><td>Born, named, filed in the pedigree, then dies.</td>
+    <td><a href="gene-ednrb.html">EDNRB</a> <code>O/O</code>,
+        <a href="gene-plod1.html">PLOD1</a>, <a href="gene-rapgef5.html">RAPGEF5</a>,
+        <a href="gene-st14.html">ST14</a>, <a href="gene-shox.html">SHOX</a>,
+        ACAN <code>D1/D1</code></td></tr>
+<tr><td><code>LETHAL_AT_CONCEPTION</code></td><td>No foal is produced at all.</td>
+    <td><a href="gene-met.html">MET</a></td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    The mechanical effect is <em>not</em> on the condition. A gene applies its own
+    stat changes through <code>TraitBuilder</code> in the same breath as it reports
+    the condition; the record is the label plus the one bit the breeding and death
+    code switches on. Keeping them apart is what lets two genes cause
+    &ldquo;dwarfism&rdquo; with different numbers without either pretending to be the
+    other.
+</p>
+
+<h3>Deafness and MCOA cost nothing that exists</h3>
+
+<p>
+    A deaf horse and a horse with malformed eyes are both real and both worth telling
+    the player about, and the mod has no hearing or vision for a horse to lose. So
+    deafness is <code>INFORMATIONAL</code> &mdash; reported, no cost &mdash; while
+    MCOA is priced the way every sub-lethal disorder here is priced, in hearts. Both
+    are honest; neither pretends to a system the mod does not have.
+</p>
+
+<h2 id="lethals">The two kinds of lethal</h2>
+
+<h3>Lethal at conception &mdash; no foal</h3>
+
+<p>
+    The Mendelian draw happens exactly as it always does.
+    <code>Genotype.breedWith</code> knows nothing about viability and was not touched.
+    <code>HorseBreedingHandler.applyBredFoal</code> then <em>reads</em> the genotype it
+    just drew, and returns <code>false</code>; the caller cancels the
+    <code>BabyEntitySpawnEvent</code>. So the odds are the ordinary one-in-four for
+    two carriers, the draw stays a pure function of the two parents and the RNG, and
+    the check is one branch in one place.
+</p>
+
+<h3>Lethal at birth &mdash; born, then lost</h3>
+
+<p>
+    The foal <em>is</em> born: it gets a name, a record and a place in the family
+    tree, and then dies over about four seconds.
+    <code>LethalFoalHandler</code> does it, and it stores nothing &mdash; being lethal
+    is a property of the genotype, so it re-reads it each second. A foal that logs out
+    mid-death still dies on the way back in.
+</p>
+
+<ul>
+    <li><strong>It has to out-damage the healing.</strong>
+        <a href="horse-care.html">Gated healing</a> regenerates a hurt horse by 1 (or
+        2 in a herd) every 30 ticks. The damage is a <em>fraction of the foal&rsquo;s
+        own max health</em> (28%, floor 2) applied once a second, so it beats that
+        comfortably at any health value and a player cannot save a foal by standing it
+        next to a hay bale.</li>
+    <li><strong>Foals only.</strong> An adult is never killed by this. The only ways
+        to get an adult with a lethal genotype are the custom spawn egg and a
+        hand-written <code>/summon</code>, and both are debug tools for looking at a
+        coat &mdash; and lethal white is exactly the coat people want to look at.</li>
+    <li><strong>Not in the genotype gallery.</strong> It stocks a pen for lethal
+        white, and it is a viewing gallery, not a fight.</li>
+    <li>The damage source is <code>horsegenetics:genetic_defect</code>, a real
+        datapack damage type, so the death message reads as a genetic defect rather
+        than an unexplained death.</li>
+</ul>
+
+<div class="note good">
+    <span class="label">The chat line is the feature</span>
+    <p>
+        A foal that silently drops dead reads as a bug; a pairing that silently
+        produces nothing reads as a worse one. Both cases send a line naming the
+        disorder, at the moment of birth (or refusal) rather than at death. That line
+        is a statement about <em>both</em> parents at once, and it is the moment a
+        pedigree stops being decoration.
+    </p>
+</div>
+
+<h2 id="config">The server setting</h2>
+
+<p>
+    <code>ServerConfig</code> &mdash; the mod&rsquo;s first, and server-side because
+    whether a foal dies has to be one answer for everyone.
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th><code>health.mode</code></th><th>fewer hearts</th><th>conditions shown</th><th>deaths</th></tr></thead>
+<tbody>
+<tr><td><code>FULL</code> <em>(default)</em></td><td>yes</td><td>yes</td><td>yes</td></tr>
+<tr><td><code>NO_DEATHS</code></td><td>yes</td><td>yes</td><td>no</td></tr>
+<tr><td><code>OFF</code></td><td>no</td><td>no</td><td>no</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="note rule">
+    <span class="label">What the setting cannot change</span>
+    <p>
+        <b>All the health genetics are built and inherited regardless.</b> The genes
+        are registered in every world, they occupy the same slots in the genotype
+        code, they are drawn from the same founder tables and they pass to foals the
+        same way. If the setting could change any of that, two players on different
+        settings would be breeding different animals and a horse traded between them
+        would change genotype on the way. All it governs is whether what a horse
+        <em>carries</em> is allowed to affect the horse standing in front of you.
+    </p>
+</div>
+
+<p>
+    Mechanically, <code>OFF</code> is
+    <code>HorseTraits.resolve(genotype, /*healthGenetics=*/false)</code>, which skips
+    every gene marked <code>HealthContribution</code>. The performance and size loci
+    are not health genetics and keep working in all three modes. A gene may paint a
+    coat <em>and</em> be a health contribution &mdash;
+    <a href="gene-ednrb.html">overo lethal white</a> is a white pattern and a foal
+    lethal at once &mdash; and only the trait half is ever gated; the coat never is.
+</p>
+
+<h2 id="attributes">Reaching the game</h2>
+
+<p>
+    <code>HorseRecords.applyTraitsToEntity</code> writes four attributes, and is
+    called on <strong>every horse join</strong> as well as at birth. Vanilla has just
+    randomised this horse&rsquo;s speed, health and jump; this is where that gets
+    overwritten with what its alleles actually say.
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>trait</th><th>attribute</th><th>notes</th></tr></thead>
+<tbody>
+<tr><td>speed</td><td><code>MOVEMENT_SPEED</code></td><td>base value</td></tr>
+<tr><td>health</td><td><code>MAX_HEALTH</code></td><td>current HP clamped down, never healed for free on a reload</td></tr>
+<tr><td>jump</td><td><code>JUMP_STRENGTH</code></td><td>tracked for the first time</td></tr>
+<tr><td>scale</td><td><code>SCALE</code></td><td>vanilla scales the <b>model and the hitbox</b> from it</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="note good">
+    <span class="label">Answered: the entity-scale question</span>
+    <p>
+        The roadmap flagged the size path as <em>unverified, check before
+        designing</em>. <code>Attributes.SCALE</code> exists in 26.1.2 and is on the
+        attribute supplier of every living entity
+        (<code>LivingEntity.createLivingAttributes</code>), so the whole size system
+        is one attribute write &mdash; no renderer-side scaling and no hand-written
+        hitbox change. <code>JUMP_STRENGTH</code> is there too.
+    </p>
+</div>
+
+<h2 id="notbuilt">What this is not</h2>
+
+<ul>
+    <li><strong>No environmental noise.</strong> The roadmap left room for the random
+        roll to survive as jitter on top of the genetic value. It did not: two horses
+        with the same genotype are the same horse, full stop. Epigenetic variation
+        (which would be inherited with the allele and still deterministic) is the
+        obvious place to reopen this if the numbers ever feel too tidy.</li>
+    <li><strong>No per-part scaling.</strong> Friesian dwarfism should shorten the
+        limbs and leave the head; <code>SCALE</code> is one number for the whole
+        entity. See <a href="roadmap.html">&sect;4.4</a>.</li>
+    <li><strong>No naked-foal coat.</strong> <a href="gene-st14.html">ST14</a>&rsquo;s
+        hairless foal is reported, not drawn &mdash; phase 1 can only remove pigment,
+        and a de-pigmented mane is a <em>white</em> mane.</li>
+    <li><strong>No gait.</strong> DMRT3 needs animation work and is still on the
+        backlog.</li>
+    <li><strong>No CSNB.</strong> It rides on <code>LP/LP</code>, and the leopard
+        complex is not built.</li>
+    <li><strong>No group traits.</strong> <code>TraitRule</code> &mdash; two genes
+        that only together trigger an outcome &mdash; is still
+        <a href="roadmap.html">&sect;6.5</a>.</li>
+</ul>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="genetics-model.html">The genetics model</a>
+        <a href="breeding.html">Breeding &amp; pedigree</a>
+        <a href="horse-care.html">Horse care</a>
+        <a href="roadmap.html">Roadmap</a>
+    </div>
+    Source: <code>common/trait/</code>,
+    <code>neoforge-26.1.2/server/LethalFoalHandler.java</code>,
+    <code>neoforge-26.1.2/ServerConfig.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

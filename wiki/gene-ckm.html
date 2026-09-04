@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CKM &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="nav.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow natural">Natural gene <span class="sep">/</span> performance</p>
+<h1>CKM</h1>
+<p class="lede">
+    Creatine kinase &mdash; the third speed locus, and deliberately the smallest and
+    second-rarest of the three. The last few hundredths of a horse&rsquo;s speed
+    should be the hardest to find.
+</p>
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd>horsegenetics.ckm</dd></div>
+    <div><dt>Priority</dt><dd>82</dd></div>
+    <div><dt>Alleles</dt><dd><span class="allele dom">T</span> <span class="allele wild">C</span></dd></div>
+    <div><dt>Outcomes</dt><dd><code>ckm-fast</code>, <code>ckm-mixed</code>, <code>ckm-plain</code></dd></div>
+    <div><dt>Coat effect</dt><dd><strong>none</strong> &mdash; every outcome is a wild type</dd></div>
+    <div><dt>Default allele</dt><dd>C</dd></div>
+    <div><dt>Wild population</dt><dd>p(T) = 0.20</dd></div>
+    <div><dt>Founder draws</dt><dd>1 &times; nextFloat()</dd></div>
+    <div><dt>Gallery pens</dt><dd>1 &mdash; it never changes what a horse looks like</dd></div>
+</dl>
+
+<div class="note rule">
+    <span class="label">It paints nothing, and that is what makes it free</span>
+    <p>
+        Every combination of this gene is an <a href="genetics-model.html">expression</a>
+        marked <code>wildType</code>. That reads oddly for a gene that can change how
+        big a horse is or kill a foal, and it is exactly right: <code>wildType</code>
+        means <em>changes nothing about the coat</em>. Because none of the non-coat
+        genes paints, <code>Gene.affectsCoat()</code> is false for all of them, they
+        are left out of a horse&rsquo;s texture key, and the
+        <a href="roadmap.html">genotype gallery</a> collapses the whole locus into one
+        entry however many alleles it has. What the gene actually does travels on
+        <a href="horse-body.html">the trait system</a> instead.
+    </p>
+</div>
+
+<h2>The combination table</h2>
+
+<div class="table-wrap">
+<table>
+<thead><tr>
+<th>combination</th>
+<th>outcome</th>
+<th>speed</th>
+</tr></thead>
+<tbody>
+<tr><td><code>T/T</code></td><td><code>ckm-fast</code></td><td>+0.030</td></tr>
+<tr><td><code>T/C</code></td><td><code>ckm-mixed</code></td><td>+0.015</td></tr>
+<tr><td><code>C/C</code></td><td><code>ckm-plain</code></td><td>&mdash;</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    Same treatment as <a href="gene-pdk4.html">PDK4</a>: really a marker in a
+    polygenic cluster, modelled here as one atomic gene with an additive weight,
+    because a legible gene a player can breed for beats an accurate sum a player
+    cannot see.
+</p>
+
+<p>
+    It is the weakest and the rarest of the three speed loci on purpose. Once the
+    obvious gene is fixed there has to be something left to chase, and a locus worth
+    <code>0.030</code> at <code>p = 0.20</code> is exactly the kind of thing a
+    programme finds in its fourth generation rather than its first.
+</p>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="gene-mstn.html">MSTN</a>
+        <a href="gene-pdk4.html">PDK4</a>
+        <a href="horse-body.html">The trait system</a>
+    </div>
+    Source: <code>common/genetics/genes/CkmGene.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

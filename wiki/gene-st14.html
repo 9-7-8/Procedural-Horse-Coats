@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ST14 &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="nav.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow natural">Natural gene <span class="sep">/</span> health</p>
+<h1>ST14 (naked foal syndrome)</h1>
+<p class="lede">
+    Naked foal syndrome &mdash; the one health gene that is supposed to be a
+    <em>coat</em> gene as well. An affected foal is born near-hairless.
+</p>
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd>horsegenetics.st14</dd></div>
+    <div><dt>Priority</dt><dd>90</dd></div>
+    <div><dt>Alleles</dt><dd><span class="allele dom">nfs</span> <span class="allele wild">N</span></dd></div>
+    <div><dt>Outcomes</dt><dd>wild, <code>st14-carrier</code>, <code>naked-foal-syndrome</code></dd></div>
+    <div><dt>Coat effect</dt><dd><strong>none</strong> &mdash; every outcome is a wild type</dd></div>
+    <div><dt>Default allele</dt><dd>N</dd></div>
+    <div><dt>Wild population</dt><dd>1.8% of founders carry one copy; <b>none</b> carries two</dd></div>
+    <div><dt>Founder draws</dt><dd>1 &times; nextFloat()</dd></div>
+    <div><dt>Gallery pens</dt><dd>1 &mdash; it never changes what a horse looks like</dd></div>
+</dl>
+
+<div class="note rule">
+    <span class="label">It paints nothing, and that is what makes it free</span>
+    <p>
+        Every combination of this gene is an <a href="genetics-model.html">expression</a>
+        marked <code>wildType</code>. That reads oddly for a gene that can change how
+        big a horse is or kill a foal, and it is exactly right: <code>wildType</code>
+        means <em>changes nothing about the coat</em>. Because none of the non-coat
+        genes paints, <code>Gene.affectsCoat()</code> is false for all of them, they
+        are left out of a horse&rsquo;s texture key, and the
+        <a href="roadmap.html">genotype gallery</a> collapses the whole locus into one
+        entry however many alleles it has. What the gene actually does travels on
+        <a href="horse-body.html">the trait system</a> instead.
+    </p>
+</div>
+
+<h2>The combination table</h2>
+
+<div class="table-wrap">
+<table>
+<thead><tr>
+<th>combination</th>
+<th>outcome</th>
+<th>effect</th>
+</tr></thead>
+<tbody>
+<tr><td><code>N/N</code></td><td>wild type</td><td>nothing</td></tr>
+<tr><td><code>nfs/N</code></td><td><code>st14-carrier</code></td><td>nothing &mdash; a completely normal horse</td></tr>
+<tr><td><code>nfs/nfs</code></td><td><code>naked-foal-syndrome</code></td><td>&minus;13 health &mdash; <b>the foal is born and then dies</b></td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="note warn">
+    <span class="label">The coat half is not built</span>
+    <p>
+        Phase 1 of the pipeline can only push pigment <em>down</em>, and &ldquo;no
+        hair&rdquo; is not &ldquo;less pigment&rdquo;: a de-pigmented mane reads as a
+        <em>white</em> mane, which is a different horse entirely and a worse lie than
+        drawing nothing at all. Doing it honestly means a bare-skin template or a real
+        phase-3 pass. It is logged as a follow-up in
+        <a href="roadmap.html">&sect;4.4</a> rather than approximated here.
+    </p>
+</div>
+
+<p>
+    What ships is the disorder itself: the foal is born, the info panel names it as
+    hairless, and it does not survive. The horse looks like an ordinary foal of its
+    colour in the meantime.
+</p>
+
+<div class="note warn">
+    <span class="label">No founder is ever affected</span>
+    <p>
+        The founder table lists only the clear horse and the carrier. A wild-caught
+        horse is an adult that survived, so it can carry this and never have it, and
+        the homozygote&rsquo;s weight is simply absent from the table. <b>The only way
+        to produce an affected foal is to breed two carriers</b> &mdash; which is the
+        whole design: it is what makes a pedigree worth keeping, and what turns the
+        carrier wording in the info panel from decoration into the difference between
+        a breeding programme and a lottery.
+    </p>
+</div>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="gene-plod1.html">PLOD1</a>
+        <a href="pipeline.html">The coat pipeline</a>
+        <a href="roadmap.html">Roadmap &sect;4.4</a>
+    </div>
+    Source: <code>common/genetics/genes/St14Gene.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

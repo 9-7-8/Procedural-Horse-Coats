@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HMGA2 &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="nav.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow natural">Natural gene <span class="sep">/</span> body size</p>
+<h1>HMGA2 (pony)</h1>
+<p class="lede">
+    The <strong>pony</strong> locus &mdash; the second size gene, and the one that
+    pulls the other way. Smaller, slower, lower-jumping, and <em>hardier</em>.
+</p>
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd>horsegenetics.hmga2</dd></div>
+    <div><dt>Priority</dt><dd>85</dd></div>
+    <div><dt>Alleles</dt><dd><span class="allele dom">p</span> <span class="allele wild">N</span></dd></div>
+    <div><dt>Outcomes</dt><dd><code>pony</code>, <code>pony-mixed</code>, <code>pony-plain</code></dd></div>
+    <div><dt>Coat effect</dt><dd><strong>none</strong> &mdash; every outcome is a wild type</dd></div>
+    <div><dt>Default allele</dt><dd>N</dd></div>
+    <div><dt>Wild population</dt><dd>p(p) = 0.25</dd></div>
+    <div><dt>Founder draws</dt><dd>1 &times; nextFloat()</dd></div>
+    <div><dt>Gallery pens</dt><dd>1 &mdash; it never changes what a horse looks like</dd></div>
+</dl>
+
+<div class="note rule">
+    <span class="label">It paints nothing, and that is what makes it free</span>
+    <p>
+        Every combination of this gene is an <a href="genetics-model.html">expression</a>
+        marked <code>wildType</code>. That reads oddly for a gene that can change how
+        big a horse is or kill a foal, and it is exactly right: <code>wildType</code>
+        means <em>changes nothing about the coat</em>. Because none of the non-coat
+        genes paints, <code>Gene.affectsCoat()</code> is false for all of them, they
+        are left out of a horse&rsquo;s texture key, and the
+        <a href="roadmap.html">genotype gallery</a> collapses the whole locus into one
+        entry however many alleles it has. What the gene actually does travels on
+        <a href="horse-body.html">the trait system</a> instead.
+    </p>
+</div>
+
+<h2>The combination table</h2>
+
+<div class="table-wrap">
+<table>
+<thead><tr>
+<th>combination</th>
+<th>outcome</th>
+<th>scale</th>
+<th>speed</th>
+<th>jump</th>
+<th>max health</th>
+</tr></thead>
+<tbody>
+<tr><td><code>p/p</code></td><td><code>pony</code></td><td>&minus;0.12</td><td>&minus;0.016</td><td>&minus;0.04</td><td>+4.0</td></tr>
+<tr><td><code>p/N</code></td><td><code>pony-mixed</code></td><td>&minus;0.06</td><td>&minus;0.008</td><td>&minus;0.02</td><td>+2.0</td></tr>
+<tr><td><code>N/N</code></td><td><code>pony-plain</code></td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2>The hearts are the whole point</h2>
+
+<p>
+    A pony is not a broken horse, it is a hardy one. The small end of the size range
+    has to <em>buy</em> something or nobody would ever breed toward it &mdash; and a
+    locus whose only effect is &ldquo;worse&rdquo; is a locus a player fixes once and
+    never thinks about again. Four hearts against a sixth of a jump and a hundredth
+    of a horse&rsquo;s speed is a real decision.
+</p>
+
+<div class="note rule">
+    <span class="label">Being a pony is not dwarfism</span>
+    <p>
+        The model keeps them apart on purpose. Being a pony is a <em>size</em>; being
+        a dwarf (<a href="gene-acan.html">ACAN</a>,
+        <a href="gene-b4galt7.html">B4GALT7</a>) is a <em>disorder</em>. Only the
+        second reports a <code>Condition</code>, only the second is suppressed when
+        the server&rsquo;s health genetics are switched off, and only the second costs
+        the horse hearts rather than paying them.
+    </p>
+</div>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="gene-lcorl.html">LCORL / NCAPG</a>
+        <a href="gene-b4galt7.html">B4GALT7</a>
+        <a href="horse-body.html">The trait system</a>
+    </div>
+    Source: <code>common/genetics/genes/Hmga2Gene.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

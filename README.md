@@ -53,7 +53,7 @@ markings that live on the *same* gene can never appear together, while two on
 | Splash (two genes) | uncommon | White as if the horse were **dipped in paint from below**: high leg white with a clean, sharp edge, white up the belly, a broad blaze to a bald face. Splash comes from **two** different genes, so a horse can carry it twice over - and one that does is markedly whiter than one carrying either alone. |
 | Roan | uncommon | White hairs mixed evenly through the **body** while the head, mane, tail and lower legs stay solid - blue roan on a black, red roan on a chestnut. The density varies horse to horse. |
 | Tobiano | rare | Big, smooth-edged **white patches that cross the topline**, with white legs and a coloured head. Every tobiano's patches are different. |
-| Frame overo | rare | Ragged white on the **sides of the neck and barrel that stops short of the spine** - the mirror of tobiano - usually with a broad white face. Some carriers are marked so little you would never guess. **Careful with this one:** a foal that inherits frame from *both* parents is born pure white, and in a real horse it would not survive. It happens one time in four when two carriers are bred. |
+| Frame overo | rare | Ragged white on the **sides of the neck and barrel that stops short of the spine** - the mirror of tobiano - usually with a broad white face. Some carriers are marked so little you would never guess. **Careful with this one:** a foal that inherits frame from *both* parents is born pure white and does not survive. It happens one time in four when two carriers are bred. |
 
 And then there are the ones no real horse has:
 
@@ -127,22 +127,65 @@ Every horse gets a generated two-part name (a first name and a last name).
 
 Open a tamed horse's inventory (**press E while riding**) for a grey panel on
 the left of the screen (toggle it with the tab button on its edge) showing
-the horse's name, sex, generation, genotype, speed, health, and who bred or
-tamed it - plus a **Family Tree** button that opens a clickable pedigree
-chart back to great-grandparents, with a little turning 3D model of each
-horse. A foal's speed and health are tinted **green** if they beat both
-parents, **amber** if they beat one, **red** if they trail both.
+the horse's name, sex, generation, genotype, speed, health, jump, size, any
+disorders it has, and who bred or tamed it - plus a **Family Tree** button that
+opens a clickable pedigree chart back to great-grandparents, with a little
+turning 3D model of each horse. A foal's speed and health are tinted **green**
+if they beat both parents, **amber** if they beat one, **red** if they trail
+both.
 
 Right-click a horse with **paper** to print the same information to chat.
 
-### Inherited stats
+### Stats you can breed for
 
-Alongside the genotype, a foal's **movement speed** and **max health** are
-rolled from its parents: each lands somewhere between **75% of the lower
-parent and 150% of the higher one**, and is rounded up with **no cap**. So a
-determined breeder can push a bloodline to ridiculous numbers over
-generations - and there's always some spread. (These are random for now; a
-future version folds them into the genetic model.)
+A horse's **speed**, **max health**, **jump strength** and **size** are not
+rolled. They come out of its genes, exactly the way its colour does - so two
+horses with the same genotype are the same horse, and the only way to make a
+line faster is to find and fix the alleles that make it faster.
+
+Three separate genes contribute to speed, so it is a real breeding problem
+rather than one switch to flip. One of them, the **sprint gene**, is a trade:
+each copy makes the horse faster and costs it a heart, so the fastest horse
+you can breed is also the frailest. A fourth gene decides how well a horse
+jumps.
+
+Two more decide **how big it is**. One makes horses taller - longer stride,
+higher jump - and the other makes **ponies**: smaller, slower, lower-jumping,
+and noticeably hardier. A pony is not a worse horse, it is a different one, and
+which end of that you want is up to you. The difference is visible: a pony is
+a genuinely smaller animal, and a smaller target.
+
+A wild-caught horse is deliberately unremarkable. Everything at the top and the
+bottom of the range is something you breed toward.
+
+### Things that can go wrong
+
+Real horses carry disorders, and so do these. **Seven genes** in the mod are
+recessive diseases, and a wild horse is never affected by one - it survived to
+adulthood, so at worst it is a **carrier**, and a carrier looks exactly like a
+healthy horse. There is no way to tell by looking.
+
+Breed two carriers of the same disorder and one foal in four is affected:
+
+- **Two of them are survivable.** A dwarf foal grows up small, slow, and short
+  of hearts, and it is yours to keep or not.
+- **Five of them are not.** The foal is born, named, and added to your family
+  tree, and then dies within a few seconds, with a message telling you which
+  disorder it was. That message is worth reading: it tells you something about
+  *both* parents at once.
+- **One never gets that far.** Two carriers of it will feed, show hearts, and
+  simply produce no foal at all - over and over, with any other partner working
+  fine.
+
+This is what makes a pedigree worth keeping. It is also the one part of the mod
+you can turn off: a server setting (`health.mode` in
+`config/horsegenetics-server.toml`) has three positions - the full thing, fewer
+hearts but nothing dies, or no effect at all. The genes are inherited the same
+way whichever you pick.
+
+A couple of the colour genes carry a disorder too: a **doubly-silver** horse
+has bad eyes and fewer hearts, a horse with a **double dose of splash** is
+deaf, and **two frame overos** is the pure-white foal described above.
 
 ### Riding through water
 

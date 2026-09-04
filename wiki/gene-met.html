@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MET &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="nav.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow natural">Natural gene <span class="sep">/</span> health</p>
+<h1>MET (embryonic lethal)</h1>
+<p class="lede">
+    The mod&rsquo;s <strong>embryonic lethal</strong>. Two non-functional copies and
+    the embryo never develops, so the pairing simply produces no foal.
+</p>
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd>horsegenetics.met</dd></div>
+    <div><dt>Priority</dt><dd>92</dd></div>
+    <div><dt>Alleles</dt><dd><span class="allele dom">met</span> <span class="allele wild">N</span></dd></div>
+    <div><dt>Outcomes</dt><dd>wild, <code>met-carrier</code>, <code>met-embryonic-lethal</code></dd></div>
+    <div><dt>Coat effect</dt><dd><strong>none</strong> &mdash; every outcome is a wild type</dd></div>
+    <div><dt>Default allele</dt><dd>N</dd></div>
+    <div><dt>Wild population</dt><dd>3.0% of founders carry one copy; <b>none</b> carries two</dd></div>
+    <div><dt>Founder draws</dt><dd>1 &times; nextFloat()</dd></div>
+    <div><dt>Gallery pens</dt><dd>1 &mdash; it never changes what a horse looks like</dd></div>
+</dl>
+
+<div class="note rule">
+    <span class="label">It paints nothing, and that is what makes it free</span>
+    <p>
+        Every combination of this gene is an <a href="genetics-model.html">expression</a>
+        marked <code>wildType</code>. That reads oddly for a gene that can change how
+        big a horse is or kill a foal, and it is exactly right: <code>wildType</code>
+        means <em>changes nothing about the coat</em>. Because none of the non-coat
+        genes paints, <code>Gene.affectsCoat()</code> is false for all of them, they
+        are left out of a horse&rsquo;s texture key, and the
+        <a href="roadmap.html">genotype gallery</a> collapses the whole locus into one
+        entry however many alleles it has. What the gene actually does travels on
+        <a href="horse-body.html">the trait system</a> instead.
+    </p>
+</div>
+
+<h2>The combination table</h2>
+
+<div class="table-wrap">
+<table>
+<thead><tr>
+<th>combination</th>
+<th>outcome</th>
+<th>effect</th>
+</tr></thead>
+<tbody>
+<tr><td><code>N/N</code></td><td>wild type</td><td>nothing</td></tr>
+<tr><td><code>met/N</code></td><td><code>met-carrier</code></td><td>nothing &mdash; a completely normal horse</td></tr>
+<tr><td><code>met/met</code></td><td><code>met-embryonic-lethal</code></td><td><b>no foal is produced at all</b></td></tr>
+</tbody>
+</table>
+</div>
+
+<h2>A different code path, and worth being precise about</h2>
+
+<p>
+    The Mendelian draw happens exactly as it always does &mdash;
+    <code>Genotype.breedWith</code> knows nothing about viability and is not touched
+    &mdash; and then the breeding handler <em>reads</em> the genotype it just drew and
+    cancels the birth. So the odds are the ordinary one-in-four for two carriers, the
+    draw stays a pure function of the two parents and the RNG, and the check is one
+    branch in one place.
+</p>
+
+<h2>Two consequences of &ldquo;no horse is ever born with it&rdquo;</h2>
+
+<ul>
+    <li><code>canOccur</code> is <strong>false</strong> for <code>met/met</code>, so
+        the genotype gallery gives it no pen and does not count it. That is the same
+        rule that rules out a <code>Y/Y</code> horse &mdash; and the exact opposite of
+        <a href="gene-ednrb.html">overo lethal white</a>, which <em>is</em> born and
+        therefore does get one.</li>
+    <li><code>expressionOf</code> still answers for it, because parsing is tolerant
+        and a hand-written code can name any combination.</li>
+</ul>
+
+<h2>What it reads like in play</h2>
+
+<p>
+    A pairing that keeps refusing: two horses that will breed with anything else and
+    never with each other. The chat line naming the cause is what turns that from a
+    bug report into a clue.
+</p>
+
+<div class="note warn">
+    <span class="label">No founder is ever affected</span>
+    <p>
+        The founder table lists only the clear horse and the carrier. A wild-caught
+        horse is an adult that survived, so it can carry this and never have it, and
+        the homozygote&rsquo;s weight is simply absent from the table. <b>The only way
+        to produce an affected foal is to breed two carriers</b> &mdash; which is the
+        whole design: it is what makes a pedigree worth keeping, and what turns the
+        carrier wording in the info panel from decoration into the difference between
+        a breeding programme and a lottery.
+    </p>
+</div>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="gene-ednrb.html">EDNRB (lethal white)</a>
+        <a href="breeding.html">Breeding &amp; pedigree</a>
+        <a href="horse-body.html">The trait system</a>
+    </div>
+    Source: <code>common/genetics/genes/MetGene.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

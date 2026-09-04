@@ -146,6 +146,29 @@ private static final double S_EXTENSIVE = 0.86;</code></pre>
     </p>
 </div>
 
+<h2>Deafness</h2>
+
+<p>
+    The splash pattern comes from melanocytes failing to reach the skin, and the same
+    cells line the inner ear &mdash; so a horse white enough at this locus is very often
+    deaf. A <strong>homozygote at this locus</strong> (no <code>N</code> copy) gets the
+    <code>splash-deafness</code> condition.
+</p>
+
+<p>
+    It costs the horse <strong>nothing</strong>. The mod has no hearing for a horse to
+    lose, and inventing a penalty to stand in for one would be worse than saying so: it
+    is <code>INFORMATIONAL</code> &mdash; named in the info panel and the paper dump,
+    and that is all. See <a href="horse-body.html">the horse&rsquo;s body</a>.
+</p>
+
+<p>
+    The condition is <em>shared</em> with <a href="gene-pax3.html">PAX3</a>: one
+    disorder with two causes. A horse homozygous at both loci is told it is deaf once,
+    not twice &mdash; <code>TraitBuilder</code> de-duplicates on the condition id for
+    exactly this case.
+</p>
+
 <div class="page-foot">
     <div class="seealso">
         <a href="gene-pax3.html">PAX3 (splash white)</a>

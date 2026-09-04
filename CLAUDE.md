@@ -58,6 +58,12 @@ project. Its shape:
   generation function, wild frequency, dominance, natural/magical. Update
   it in the same change as any gene; CLAUDE.md keeps only the machinery + a
   one-line-per-gene table.
+- **`wiki/horse-body.html`** is the single source of truth for the **trait /
+  size / health system** - `HorseTraits`, the baselines, `TraitContribution` /
+  `HealthContribution`, `Condition` / `Severity` / `Viability`, the two lethal
+  paths, `ServerConfig`, and the four attributes it writes. Update it in the
+  same change as anything under `common/trait/`, `LethalFoalHandler` or
+  `HorseRecords.applyTraitsToEntity`. **CLAUDE.md keeps a summary, not a copy.**
 - **`wiki/horse-care.html`** is the single source of truth for the **non-genetic
   horse-care systems** - gated healing, bond tiers, herd formation, the shared
   slow tick and the block tags. Update it in the same change as
@@ -125,6 +131,120 @@ project. Its shape:
     changes shape, update `api-reference.html` in the same change.
 
 ## Status snapshot (keep this current)
+
+- **Built 2026-09-04, NOT yet play-tested: the trait / size / health system, and
+  the death of the random stat roll (roadmap Tier 2 §6.1, Tier 3 §7, §4.3, §4.4,
+  §6.2-6.4).** Thirteen new genes, a new `common/trait/` package, and the removal
+  of the last non-genetic randomness on a horse. **31 built-in genes, 33
+  in-game.** Machinery is `wiki/horse-body.html`; the shape of it:
+  - **`HorseStats` is deleted.** A foal's speed and health used to be a uniform
+    draw from `[0.75*min(parents), 1.5*max(parents)]` - an uncapped random walk
+    with no genetics in it, where two full siblings could differ by a factor of
+    two and "breeding for speed" was breeding for luck. **`HorseRecord` lost its
+    `speed` and `health` fields** (and `hasStats` / `withStats` / `ceilSpeed` /
+    `ceilHealth`), exactly as it lost `sex`: a stored derived value can only go
+    stale against the alleles beside it. `HorseRecord.traits()` resolves on
+    demand. `StoredGenome` and `HorseRecordCodecs` lost the two fields too.
+  - **`common/trait/`** - `HorseTraits.resolve(genotype[, healthGenetics])` walks
+    `Genes.codeOrder()` once, hands every `TraitContribution` a `TraitBuilder`,
+    and returns a `Traits(speed, health, jump, scale, conditions)`. **Pure**: no
+    `Rng`, no epigenetics, no entity. Baselines `0.1875 / 22.0 / 0.5 / 1.0`, a
+    little under vanilla's midpoints so the variant alleles are what push a horse
+    up. `MIN_HEALTH = 1.0` - a genetic health value must never resolve to zero.
+  - **One capability interface, not the roadmap's four.** `TraitContribution`
+    (+ a `HealthContribution` marker) replaced `StatContribution` /
+    `BodyContribution` / `ViabilityRule` / `ConditionRule`: they all run in the
+    same walk, and the genes that need any of them mostly need several at once.
+    **Viability is derived** from the worst `Condition.severity()`, so a gene
+    cannot declare a horse lethal without saying what killed it.
+  - **Additions are applied before multipliers**, so trait resolution is
+    order-independent by construction and gene priority buys nothing here.
+    Multipliers exist only for scale, because dwarfism is *proportional* - a
+    dwarf pony is smaller than either alone.
+  - **All thirteen genes paint nothing**: every expression is `wildType`, which
+    now explicitly means "changes nothing *about the coat*". So `affectsCoat()`
+    is false for all of them, they are out of the texture key, and
+    `GenotypeCatalog` collapses each locus to one entry - **`size()` is unchanged
+    at 2 064 387**, while `totalGenotypes()` went to **292 822 943 423 500 800**.
+    Thirteen genes for zero gallery growth; the sex locus's trick, reused.
+  - **Priority sub-band 80-99 is now "non-coat"**: mstn 80, pdk4 81, ckm 82,
+    ryr2 83, lcorl 84, hmga2 85, acan 86, b4galt7 87, plod1 88, rapgef5 89,
+    st14 90, shox 91, met 92. They sort after every painting gene and before the
+    magical band.
+  - **Performance / size (6):** `MstnGene` (codominant; each `C` buys 0.020 speed
+    and costs 2 health - with no stamina resource, endurance is paid in hearts),
+    `Pdk4Gene`, `CkmGene` (speed), `Ryr2Gene` (**jump strength is tracked for the
+    first time**), `LcorlGene` + `Hmga2Gene` (**size**).
+  - **`Attributes.SCALE` answers the roadmap's flagged-unverified question.** It
+    exists in 26.1.2, is on `LivingEntity.createLivingAttributes` (so every
+    living entity has it), and vanilla scales the **model and the hitbox** from
+    it. No renderer work, no hitbox work - the whole size system is one attribute
+    write. `JUMP_STRENGTH` is there too.
+  - **Health (7):** `AcanGene` (**5 alleles, 15 combinations**; affected is "no
+    working copy left", so `D1/D4` is affected - the check is a predicate on the
+    pair, not `homozygous()`, which is the clearest argument yet for the
+    combination table), `B4galt7Gene` (the one survivable disorder), `Plod1Gene`,
+    `Rapgef5Gene`, `St14Gene`, `ShoxGene` (lethal at birth) and `MetGene`
+    (**lethal at conception**, `canOccur = false`). Six of them extend a new
+    `RecessiveDisorderGene` base - two alleles, three combinations, only the
+    double-variant does anything.
+  - **Four colour genes gained a disorder**: `SilverGene` `Z/Z` -> MCOA
+    (impairing, -2 health), `EdnrbGene` `O/O` -> **overo lethal white, which now
+    actually kills** (closing the "the death is not modelled" gap), and
+    `MitfGene` / `Pax3Gene` homozygotes -> deafness, shared as **one** condition
+    with two causes (`TraitBuilder` de-dups on id) and `INFORMATIONAL`, because
+    the mod has no hearing to take away.
+  - **No founder is ever affected** - verified over 200 000 draws. Every health
+    founder table lists only the clear horse and the carrier: a wild-caught horse
+    is an adult that survived, so the *only* way to see a disorder is to breed
+    two carriers. Carrier rates 1.4%-4%.
+  - **`server/LethalFoalHandler`** - born, then dies. **Stores nothing**: being
+    lethal is a property of the genotype, so it re-reads it each second and a
+    foal that logs out mid-death still dies on the way back in. Damage is
+    **28% of the foal's own max health, floor 2, once a second**, which
+    out-damages `HorseCareHandler`'s regen at any health value (roadmap §7's
+    open item, closed). Guards: **babies only** (an adult spawned by the egg is a
+    debug tool for looking at a coat), not in the gallery dimension, and only on
+    `health.mode = FULL`. New datapack damage type
+    `horsegenetics:genetic_defect` + a lang key.
+  - **The conception lethal is one branch**: `applyBredFoal` now returns
+    `boolean`, `onBabySpawn` cancels the event on `false`, and
+    `StallionSeedJarHandler` discards the foal (spending the jar and the mare's
+    love, as a real pairing would). `Genotype.breedWith` is untouched, so the
+    odds stay the ordinary one-in-four.
+  - **`ServerConfig`** (the mod's first) - `health.mode` = `FULL` (default) /
+    `NO_DEATHS` / `OFF`. **The genes are registered and inherited identically in
+    all three**; the setting only governs whether what a horse carries is allowed
+    to affect it. `OFF` is `resolve(g, false)`, which skips every
+    `HealthContribution`.
+  - **Surfaces read it.** The info panel shows speed / health / **jump** / **size
+    (as a word)** plus a condition list, reading speed and health off the *live
+    entity attributes* (authoritative and synced) and the conditions off the
+    genotype; the paper dump prints all four plus every condition with its
+    description. That partly closes old gap #10 - the expression/condition prose
+    is finally read by something.
+  - `coat-golden.txt` regenerated: **312 of 342 rows byte-identical**. Only the
+    30 rows involving pink hair / magic zebra / test moved, because those three
+    genes shifted position in `codeOrder()` and their derived epigenetic seeds
+    moved with them. Nothing else about any coat changed - the pipeline was not
+    touched. New `HorseTraitsTest` (10) + `HealthGenesTest` (8);
+    `:common:test` **262 green**, `:neoforge-26.1.2:build` green, `runServer`
+    boots clean (`33 segments`, `loaded 2 data-driven gene(s)`, the server config
+    file generates correctly).
+  - **Old saves will not parse.** The genotype code went 20 -> 33 segments. Dev
+    only; start a fresh world.
+  - **Deliberately not built:** DMRT3 (gait - needs animation work); per-part
+    scaling for the two dwarfisms (`SCALE` is one number for the whole entity);
+    ST14's near-hairless coat (phase 1 only *removes* pigment, and a de-pigmented
+    mane reads as a *white* mane); CSNB (rides on `LP/LP`, and the leopard complex
+    does not exist); environmental noise on the stats (deliberately zero - see
+    the gaps list).
+  - Docs: `wiki/horse-body.html` (new, the machinery), thirteen new
+    `wiki/gene-*.html`, `wiki/nav.js`, `wiki/breeding.html`,
+    `wiki/genetics-model.html`, `wiki/api-reference.html`, `wiki/modding.html`
+    (walkthrough 3), `wiki/roadmap.html` §§4.3/4.4/6/7, `wiki/gene-silver.html`,
+    `gene-ednrb.html`, `gene-mitf.html`, `gene-pax3.html`, `index.html`,
+    `README.md`. Checklist: `wiki/verification.html` §0b.
 
 - **Built and owner-verified in-game 2026-09-04: the white-pattern rewrite -
   four real loci replace four made-up genes.** `WhiteGene`, `SplashGene`,
@@ -420,14 +540,20 @@ project. Its shape:
   Still unconfirmed: bred foal, seed-jar round-trip, a spec gene actually
   showing in the display (needs a horse carrying Suntouched/Waterborn) -
   `wiki/verification.html` §0.
-- **`common/`** - compiles; **248 JUnit tests pass** (`./gradlew :common:test`).
-  Covers `genetics/` (allele/gene model - **18 genes**: **sex** (the only gene
+- **`common/`** - compiles; **262 JUnit tests pass** (`./gradlew :common:test`).
+  Covers `trait/` (the non-coat body: `HorseTraits` / `Traits` / `Condition` /
+  `TraitBuilder` -> `wiki/horse-body.html`) and
+  `genetics/` (allele/gene model - **31 genes**, 18 that paint and 13 that never
+  do: **sex** (the only gene
   that paints nothing), the 15 natural ones (extension, agouti, champagne,
   grey, **MATP** (cream + pearl, three alleles), **dun** (three alleles),
   **silver**, **mushroom**, **roan**, **tobiano**, and the four white-pattern
   loci **`KIT`** (eight alleles - sabino + the `W` series + dominant white),
   **`MITF`** and **`PAX3`** (splash, which really is two genes) and **`EDNRB`**
-  (frame + lethal white)), and magic zebra + pink hair;
+  (frame + lethal white)), magic zebra + pink hair, and the **thirteen non-coat
+  genes** - performance (**MSTN**, **PDK4**, **CKM**), jump (**RYR2**), size
+  (**LCORL**, **HMGA2**) and health (**ACAN** with five alleles, **B4GALT7**,
+  **PLOD1**, **RAPGEF5**, **ST14**, **SHOX**, **MET**);
   `Genotype` code round-trip, breeding, the `Epigenome` / `Genome` per-allele
   epigenetics + priority tie-break, `GenomeSample` - a genome detached from a
   horse, for the stallion seed jar - `Expression` + `FounderTable` + the
@@ -439,7 +565,8 @@ project. Its shape:
   gene hooks, the `coat-golden.txt` byte-identity net, `CoatTextureId`
   texture-id injectivity),
   `coat/skin/` (`HorseSkinGeometry`), `name/` (`breedNth`),
-  `horse/` (pedigree + `HorseStats` -> `wiki/breeding.html`), and
+  `horse/` (pedigree -> `wiki/breeding.html`), `trait/` (the non-coat body ->
+  `wiki/horse-body.html`), and
   `genetics/spec/` (the **data-driven gene** format: `GeneSpec`, `Json`,
   `GeneSpecParser`, `SpecSchema`, `SpecValues`, `SpecGene`, `GeneSpecLoader`,
   plus `coat/pattern/SpecPainter`; and the **gene `effects`** path -
@@ -894,11 +1021,18 @@ Two-module Gradle project, split deliberately:
   - `name/` - `HorseNameGenerator` + `HorseNames` (`breed` = one-half-each;
     `breedNth` = varied by a pairing's foal count) + word tables under
     `src/main/resources/horsegenetics/names/`.
-  - `horse/` - the pedigree domain model (`Sex`, `HorseRecord`,
-    `HorseDatabase`, `InMemoryHorseDatabase`) and `HorseStats` (foal stat
-    roll) -> `wiki/breeding.html`. **`Sex` is an enum the rest of the code
-    reads, not a stored fact**: `HorseRecord` has no `sex` field and derives
-    `sex()` from the sex locus in its genetic code.
+  - `horse/` - the pedigree domain model (`Sex`, `HorseRecord`, `ParentStats`,
+    `HorseDatabase`, `InMemoryHorseDatabase`) -> `wiki/breeding.html`.
+    **`Sex` is an enum the rest of the code reads, not a stored fact**:
+    `HorseRecord` has no `sex` field and derives `sex()` from the sex locus in
+    its genetic code. It has **no `speed` / `health` fields either**, for the
+    same reason - `traits()` resolves them from the genotype.
+  - `trait/` - the **non-coat body**: `HorseTraits` (the one walk),
+    `Traits` / `Condition` / `Severity` / `Viability` (the result),
+    `TraitBuilder` (the sink), and the capability interfaces
+    `TraitContribution` / `HealthContribution`. Depends on `genetics/` and
+    nothing depends on it except the genes that contribute - no cycle.
+    -> `wiki/horse-body.html`.
   - `genetics/spec/` - the **data-driven gene** path: `GeneSpec` (the format as
     records), `Json` (a hand-rolled parser - `common/` takes no dependencies),
     `GeneSpecParser`, `SpecSchema` (the one declaration of what each mask and op
@@ -926,7 +1060,9 @@ Two-module Gradle project, split deliberately:
     / `StallRecord` (server-global SavedData of assigned stalls).
   - `network/` - custom payloads + `ModNetworking`.
   - `server/` - event handlers, the horse-dimension builder, the portal
-    manager, the record adapter (`HorseRecords`); `HorseBreedingHandler`
+    manager, the record adapter (`HorseRecords`, which now also resolves and
+    writes the four body attributes); `LethalFoalHandler` (foals that do not
+    make it - see `wiki/horse-body.html`); `HorseBreedingHandler`
     (natural breeding + the shared `applyBredFoal`), `StallionSeedJarHandler`
     (seed collection + mare impregnation, reusing `applyBredFoal`), the
     stall trio `StallSignHandler` (bind / sign-break cleanup) + `StallDetector`
@@ -1013,6 +1149,10 @@ a gene outside its phase's band (via `System.getLogger`) but carries on. Ties
 break alphabetically by key. Built-in priorities: **sex 1**, extension 10, agouti 20,
 silver 30, mushroom 32, dun 34, **MATP 40**, champagne 50, grey 55,
 roan 70, tobiano 72, **EDNRB 74**, **KIT 76**, **MITF 78**, **PAX3 79**,
+then the **non-coat sub-band 80-99** (mstn 80, pdk4 81, ckm 82, ryr2 83,
+lcorl 84, hmga2 85, acan 86, b4galt7 87, plod1 88, rapgef5 89, st14 90,
+shox 91, met 92 - all of which paint nothing, so their order among themselves
+is arbitrary),
 pink hair 110, magic zebra 120, test 900. Within the natural band **low = sets pigment absolutely,
 higher = dilution** (agouti's absolute points must precede
 `PigmentField.dilute`). `AlleleEpigenetics.priority` is unrelated - it picks a
@@ -1021,14 +1161,17 @@ registration.
 
 `Genes.codeOrder()` (derived) = **sex**, extension, agouti, silver, mushroom, dun,
 MATP, champagne, grey, roan, tobiano, EDNRB, KIT, MITF, PAX3,
-pink hair, magic zebra, test. `naturalOrder()` (phase-1 pigment restriction) =
-the same list minus the three magical genes - silver / mushroom / dun sit
+**MSTN, PDK4, CKM, RYR2, LCORL, HMGA2, ACAN, B4GALT7, PLOD1, RAPGEF5, ST14,
+SHOX, MET**, pink hair, magic zebra, test. `naturalOrder()` (phase-1 pigment
+restriction) = the same list minus the three magical genes - silver / mushroom / dun sit
 right after agouti so the points exist to dilute, and the six white-pattern
 genes run last. Their order among *themselves* barely matters (they all zero
 both pigments) with one exception: each reads how white the horse already is,
-so a later one paints harder - see `WhitePattern` below. Sex is *in* `naturalOrder()` (it declares `isNatural()`) but
-every one of its outcomes is a wild type, so the composer skips it - it is the
-one gene that never paints, and `Gene.affectsCoat()` is false only for it. **Full per-gene detail is in `wiki/gene-*.html`** (one page per
+so a later one paints harder - see `WhitePattern` below. Sex and the thirteen non-coat genes are *in* `naturalOrder()` (they declare
+`isNatural()`) but every one of their outcomes is a wild type, so the composer
+skips them: **fourteen of the thirty-one built-ins never paint**, and
+`Gene.affectsCoat()` is false for exactly those. What they do instead goes
+through `common/trait/` - see `wiki/horse-body.html`. **Full per-gene detail is in `wiki/gene-*.html`** (one page per
 gene); one-liners:
 
 | gene | alleles | outcomes (per combination) | in the wild | coat effect |
@@ -1050,7 +1193,28 @@ gene); one-liners:
 | EDNRB (frame) | `O`/`N` | wild, `frame`, `lethal-white` **(masks)** | `O` 1/55; **no `O/O` founder** | flank patches that **never cross the topline** (noise × a spine→0 weight) + a bald face; legs coloured. **`O/O` is Overo Lethal White** - born, all white, and the model's first real lethal: it `canOccur`, it gets a pen, and the *death* waits on the health system (non-det for `frame`) |
 | KIT | `W22`/`W13`/`W10`/`W5`/`W23`/`SB1`/`W20`/`N` | wild, `minimal-white`, `modest-white`, `sabino`, `broad-white`, `extensive-white`, `near-white`, `dominant-white` **(masks)** | `W20` 6%, `SB1` 2.2%, the rest <1% | **eight alleles, 36 combinations, 32 carryable, 8 outcomes** - sabino and the `W` series are one gene, so a horse is one of them and never two. `W20` is a *booster* (subtle alone), `SB1` the one viable dose series, the strong `W`s "dominant with variable expression". Four homozygotes `canOccur = false` (embryonic lethal); compound heterozygotes are fine - the risk is *the same allele twice*. `WhitePattern.sabino` at a strength per outcome (non-det) |
 | MITF (splash) | `SW3`/`SW1`/`SW5`/`N` | wild, `splash`, `splash-bold`, `splash-extensive` | `SW1` 4%, `SW5` 0.6%, `SW3` 0.4% | dipped in white from below, **hard-edged** waterline. `SW1/SW1` is the documented viable dose step; no `SW3/SW3`. `SW6`-`SW8` folded into `SW5` (the source words them identically) (non-det) |
-| PAX3 (splash) | `SW2`/`SW4`/`N` | wild, `splash`, `splash-bold` | `SW2` 2%, `SW4` 0.5% | **the second splash locus** - same painter, different gene, so a horse can be splash twice over and comes out markedly whiter than either alone. No `SW4/SW4` (never detected). Deafness on `SW2/SW2` is described, not modelled (non-det) |
+| PAX3 (splash) | `SW2`/`SW4`/`N` | wild, `splash`, `splash-bold` | `SW2` 2%, `SW4` 0.5% | **the second splash locus** - same painter, different gene, so a horse can be splash twice over and comes out markedly whiter than either alone. No `SW4/SW4` (never detected). A homozygote is **deaf** (informational) (non-det) |
+
+**The thirteen non-coat genes** (priority 80-92). Every one of their outcomes is
+a wild type, so **none of them paints anything** and none of them widens the
+gallery; what they do goes through `common/trait/`. Full detail in
+`wiki/gene-*.html` + `wiki/horse-body.html`:
+
+| gene | alleles | in the wild | what it does |
+|------|---------|-------------|--------------|
+| MSTN | `C`/`T` | p(C) = 0.35 | **codominant**, the speed/hardiness trade: each `C` = +0.020 speed and **-2 health**. The whole trade rides on `C`; `T` contributes zero, which is the rule everywhere (the baseline allele is worth nothing, so an all-wild-type horse *is* the baseline). With no stamina resource (§21), endurance is paid in hearts |
+| PDK4 | `A`/`G` | p(A) = 0.25 | +0.018 speed per `A`. One **atomic** gene, not a marker set - a hidden polygenic sum is indistinguishable from a dice roll |
+| CKM | `T`/`C` | p(T) = 0.20 | +0.015 speed per `T`. The weakest and second-rarest of the three speed loci, deliberately |
+| RYR2 | `J`/`n` | p(J) = 0.20 | +0.09 **jump strength** per `J` - the first thing to move a stat the mod never tracked |
+| LCORL | `L`/`n` | p(L) = 0.30 | **height**: +0.05 scale, +0.010 speed, +0.02 jump per `L`. `Attributes.SCALE` scales the model *and* the hitbox |
+| HMGA2 | `p`/`N` | p(p) = 0.25 | **pony**: -0.06 scale, -0.008 speed, -0.02 jump, **+2 health** per `p`. The hearts are the point - small has to buy something |
+| ACAN | `D1`/`D2`/`D3`/`D4`/`N` | 0.4% per variant, affected combos excluded | **5 alleles, 15 combinations**. Affected = **no working copy left**, so `D1/D4` is affected too - the check is a predicate on the pair, not `homozygous()`. `D1/D1` lethal at birth; every other `D/D` is a dwarf (scale x0.70, -6 health) |
+| B4GALT7 | `d`/`N` | 4.0% carriers | Friesian dwarfism - scale x0.75, -5 health. **The one disorder a horse lives with**, and the only one that leaves the player a decision rather than a corpse |
+| PLOD1 | `ffs`/`N` | 2.6% carriers | fragile foal syndrome - **lethal at birth** |
+| RAPGEF5 | `efih`/`N` | 1.4% carriers | EFIH - **lethal at birth**, the most severe and the rarest |
+| ST14 | `nfs`/`N` | 1.8% carriers | naked foal syndrome - **lethal at birth**. The coat half is *not* built (phase 1 only removes pigment; a de-pigmented mane is a *white* mane) |
+| SHOX | `sa`/`N` | 2.0% carriers | skeletal atavism - **lethal at birth**. Pseudoautosomal, so it segregates like an autosome and needs none of §5.3 |
+| MET | `met`/`N` | 3.0% carriers | **lethal at conception** - `canOccur = false`, no gallery pen, and the pairing produces no foal at all. The opposite of `O/O`, which *is* born |
 
 **Expressions, not dominance.** `common/genetics/Expression` is one *outcome*
 a gene can produce: `id` (stable, unique in the gene - the gallery dedups on
@@ -1086,6 +1250,10 @@ two-allele numbers the old "1 in N" meant.
 are wild types, so it never reaches the coat: `Gene.affectsCoat()` is false and
 `Genotype.coatCode()` (what `CoatData.textureKey()` runs on) leaves it out.
 `Gene.canOccur(AllelePair)` rules out `Y/Y` for `GenotypeCatalog`.
+
+**Nothing about a horse is random any more except its founder draw.** Speed,
+health, jump and size come out of the genotype (`common/trait/`), and the
+per-allele epigenetics decide the rest; there is no third source.
 
 Seal has **no gene** - it's the top of agouti's random distribution. Cream and
 pearl are **one gene** (`MatpGene`), and dominant white and sabino are **one
@@ -1500,37 +1668,35 @@ approximate.
    handed to the super ctor; no per-entity model swap).
 
 
-## Horse stats (speed / health)
+## The horse's body (speed / health / jump / size)
 
-Domain side (roll band, record fields, breeding flow) is in **`wiki/breeding.html`**.
-The Minecraft-attribute side, in `server/HorseRecords`:
+**`wiki/horse-body.html` is the source of truth.** Summary:
 
-- `entitySpeed(horse)` / `entityHealth(horse)` =
-  `horse.getAttributeValue(Attributes.MOVEMENT_SPEED / MAX_HEALTH)`.
-- `newFounder(...)` copies those onto the founder record via `.withStats(...)`.
-- `HorseBreedingHandler` rolls the foal's stats from the parent records
-  (`HorseStats.rollFoalStat`, band **`[0.75*min, 1.5*max]`**, **no cap**),
-  stores them on the child record with a `ParentStats.of(damSpeed, sireSpeed,
-  damHealth, sireHealth)` snapshot (for UI colouring), and calls
-  `applyStatsToEntity(child, record, fullHeal=true)`.
-- **Rounding lives in the `HorseRecord` ctor**: `ceilHealth` (whole number),
-  `ceilSpeed` (3 decimals). Every stored value is rounded up; callers don't
-  need to round.
-- `applyStatsToEntity(horse, record, fullHeal)` sets the attribute **base**
-  values (`AttributeInstance#setBaseValue`); `fullHeal` true = set current HP
-  to the new max (newborn), false = only clamp current HP down if it now
-  exceeds max (reload, so no free heal).
-- `backfillStatsIfMissing(horse)` fills `0.0` stats from the live entity;
-  `HorseGeneticsEventHandler.onHorseJoin` calls it for reloaded/bred horses
-  and then `applyStatsToEntity(..., false)`.
-- `0.0` on a record = "not recorded yet"; `HorseRecord.hasStats()` is
-  `speed > 0 && health > 0`. Paper dump + inventory panel show `(unrolled)` /
-  `-` in that case; when `parentStats` is present, both surfaces show
-  `above both` / `between` / `below both` (paper) or a green/amber/red tint
-  (`ParentStats.rankSpeed` / `rankHealth`, panel).
-
-Still random, **not Mendelian** - `HorseStats` is an explicit placeholder.
-Jump strength is not tracked yet.
+- `HorseTraits.resolve(genotype[, healthGenetics])` in `common/trait/` returns a
+  `Traits(speed, health, jump, scale, conditions)` - a **pure function of the
+  genotype**, with no `Rng`, no epigenetics and no entity state. Baselines
+  `0.1875 / 22.0 / 0.5 / 1.0`; `MIN_HEALTH = 1.0` so a genetic health value
+  never resolves to zero.
+- **Nothing is stored.** `HorseRecord` has no `speed` / `health` field, the same
+  way it has no `sex` field; `record.traits()` resolves on demand. The old
+  `HorseStats.rollFoalStat` (a uniform draw in `[0.75*min, 1.5*max]`) is
+  **deleted**, and with it the last non-genetic randomness on a horse.
+- A gene contributes by additionally implementing `TraitContribution` (or
+  `HealthContribution`, the marker the config toggle reads). Additions are
+  applied before scale multipliers, so resolution is order-independent.
+- `HorseRecords.traitsOf(horse|record)` resolves honouring `ServerConfig`;
+  `HorseRecords.applyTraitsToEntity(horse, traits, fullHeal)` writes the
+  attribute **base** values for `MOVEMENT_SPEED`, `MAX_HEALTH`, `JUMP_STRENGTH`
+  and **`SCALE`** (vanilla scales the model *and* the hitbox from it).
+  `fullHeal` true = set current HP to the new max (newborn); false = only clamp
+  HP down (reload, so no free heal).
+- **It runs on every horse join**, not just at birth: vanilla has just
+  randomised the entity's speed/health/jump, and this overwrites it with what
+  the alleles say. Resolving rather than storing is what lets a re-tuned gene -
+  or a change to `health.mode` - reach horses that already exist.
+- `ParentStats` survives, now built from the two parents' *resolved* traits at
+  birth. It stays a stored snapshot because a parent can be dead, sold or
+  forgotten by the ancestry DB by the time anyone looks.
 
 ## Riding through water (`HorseWaterRidingHandler`)
 
@@ -2187,7 +2353,15 @@ Design follow-ups (not just "go look at it"):
    (the second half of this gap - the epigenome living on the entity, so
    `FamilyTreeScreen` had to invent an ancestor's coat from its UUID - was
    closed 2026-09-03 by moving the epigenome onto `HorseRecord`.)
-10. **Nothing reads the expression table but the coat and the gallery.** Every
+10. **Partly fixed 2026-09-04; the carrier half is still open.** The info panel
+   and the paper dump now read a horse's expressed `Condition`s and print their
+   names and sentences, so the prose is finally read by something. What is
+   **still** unread is the *carrier* wording - every health locus declares a
+   sentence explaining what one copy means and nothing shows it - plus
+   `Expression.masks()` outside `GenotypeCatalog` and `Gene.name()`. The
+   punnett / expected-foal display is the natural companion and is what turns
+   two carriers from a nasty surprise into a decision. Original entry:
+   *Nothing reads the expression table but the coat and the gallery.* Every
    gene now carries, per combination, a display name and a human-readable
    sentence saying what it does - written for the gene dictionary and the wiki,
    and read by neither yet. The obvious consumers: a punnett / expected-foal
@@ -2198,8 +2372,7 @@ Design follow-ups (not just "go look at it"):
    `Gene.name()`.
 11. **Cleanups**: rename `DebugPenManager` / `DEBUG_LEVEL` /
    `horsegenetics:debug_pens` to non-"debug" names (needs a save-data
-   migration or a one-time reset); fold speed/health into the gene model;
-   name-generation rework; real white-fog dimension effects
+   migration or a one-time reset); name-generation rework; real white-fog dimension effects
    (needs a client dimension-effects mixin); the stray `neoforge.mods.toml`
    duplicate.
 12. **Fixed 2026-09-04. The gallery is capped, and that is a lid on a symptom.**
@@ -2329,6 +2502,40 @@ Design follow-ups (not just "go look at it"):
    *sexual dimorphism* in the coat - sex paints nothing and deliberately never
    will, so a stallion's crest would be a separate gene reading this one.
 
+23. **The whole trait / size / health layer is unplayed.** Thirteen genes, a new
+   subsystem, four attributes and a death handler, and none of it has been seen
+   in-game - not a scaled horse, not a dying foal, not a refused pairing, not the
+   config. The checklist is `wiki/verification.html` §0b, and the quickest way in
+   is the custom spawn egg: adding a health gene defaults it to the affected
+   genotype, so "add PLOD1, pick Foal, spawn" is a one-click lethal foal.
+   Specific unknowns worth naming: **a scaled foal** (`Skin.BABY`'s projection is
+   already approximate, and nothing has been rendered at 0.88 scale), **the rider
+   position** on a large and a small horse, whether the **info panel still fits**
+   (it gained two rows and a condition list), and whether the
+   `death.attack.horsegenetics.genetic_defect` lang key actually resolves rather
+   than showing a raw key.
+
+24. **The stats are purely genetic, with no noise, and that is a decision.**
+   Roadmap §6.2 left room for the random roll to survive as environmental jitter
+   on top. It did not: two horses with the same genotype are byte-identical
+   animals. If the numbers ever feel too tidy the place to reopen it is
+   **epigenetic variation** - drawn from the expressing copy's seed, inherited
+   with the allele, still deterministic - not a fresh die roll. Related: the
+   **founder carrier rates (1.4%-4%) are guesses**, chosen so a wild horse is
+   healthy and an inbred line is not, and it is entirely possible a player never
+   meets a lethal at those numbers.
+
+25. **Two health genes are only half-drawn.** `B4GALT7`'s Friesian dwarfism
+   should shorten the limbs and ribs and leave the head, but `Attributes.SCALE`
+   is one number for the whole entity - per-part scaling means owning the horse
+   model rather than borrowing vanilla's, so it renders as an overall
+   three-quarter horse. `ST14`'s naked foal is reported and not drawn: phase 1
+   can only push pigment *down*, and a de-pigmented mane reads as a *white* mane,
+   which is a different horse and a worse lie than drawing nothing. Both are in
+   `wiki/roadmap.html` §4.4. Also still absent: **CSNB** (rides on `LP/LP`, and
+   the leopard complex does not exist), **DMRT3 / gait** (animation work), and
+   **`TraitRule`** - two genes that only together trigger an outcome (§6.5).
+
 ## License
 
 CC BY-NC 4.0 (see `LICENSE`). Forks/derivatives are welcome without asking
@@ -2356,7 +2563,9 @@ its licence is compatible.
   `wiki/roadmap.html`; the **coat machinery** is in `wiki/pipeline.html` +
   `wiki/body-space.html`, and the **modder API** in `wiki/modding.html` +
   `wiki/api-reference.html`; the **non-genetic horse-care systems** (gated
-  healing, bond, herds) **only** in `wiki/horse-care.html`. Update the relevant
+  healing, bond, herds) **only** in `wiki/horse-care.html`; the **trait / size /
+  health system** (speed, health, jump, size, disorders, the two lethal paths,
+  `ServerConfig`) **only** in `wiki/horse-body.html`. Update the relevant
   file in the same change - a pointer from CLAUDE.md is fine, a copy is not.
 - **The wiki has one nav.** A new page goes in the `SECTIONS` array in
   `wiki/nav.js` and nowhere else; never hand-write a sidebar into a page.

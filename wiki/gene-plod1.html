@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PLOD1 &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="nav.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow natural">Natural gene <span class="sep">/</span> health</p>
+<h1>PLOD1 (fragile foal syndrome)</h1>
+<p class="lede">
+    Fragile foal syndrome (FFS1), a collagen defect: the skin tears at a touch and
+    the joints will not hold. The foal is born alive and does not survive it.
+</p>
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd>horsegenetics.plod1</dd></div>
+    <div><dt>Priority</dt><dd>88</dd></div>
+    <div><dt>Alleles</dt><dd><span class="allele dom">ffs</span> <span class="allele wild">N</span></dd></div>
+    <div><dt>Outcomes</dt><dd>wild, <code>plod1-carrier</code>, <code>fragile-foal-syndrome</code></dd></div>
+    <div><dt>Coat effect</dt><dd><strong>none</strong> &mdash; every outcome is a wild type</dd></div>
+    <div><dt>Default allele</dt><dd>N</dd></div>
+    <div><dt>Wild population</dt><dd>2.6% of founders carry one copy; <b>none</b> carries two</dd></div>
+    <div><dt>Founder draws</dt><dd>1 &times; nextFloat()</dd></div>
+    <div><dt>Gallery pens</dt><dd>1 &mdash; it never changes what a horse looks like</dd></div>
+</dl>
+
+<div class="note rule">
+    <span class="label">It paints nothing, and that is what makes it free</span>
+    <p>
+        Every combination of this gene is an <a href="genetics-model.html">expression</a>
+        marked <code>wildType</code>. That reads oddly for a gene that can change how
+        big a horse is or kill a foal, and it is exactly right: <code>wildType</code>
+        means <em>changes nothing about the coat</em>. Because none of the non-coat
+        genes paints, <code>Gene.affectsCoat()</code> is false for all of them, they
+        are left out of a horse&rsquo;s texture key, and the
+        <a href="roadmap.html">genotype gallery</a> collapses the whole locus into one
+        entry however many alleles it has. What the gene actually does travels on
+        <a href="horse-body.html">the trait system</a> instead.
+    </p>
+</div>
+
+<h2>The combination table</h2>
+
+<div class="table-wrap">
+<table>
+<thead><tr>
+<th>combination</th>
+<th>outcome</th>
+<th>effect</th>
+</tr></thead>
+<tbody>
+<tr><td><code>N/N</code></td><td>wild type</td><td>nothing</td></tr>
+<tr><td><code>ffs/N</code></td><td><code>plod1-carrier</code></td><td>nothing &mdash; a completely normal horse</td></tr>
+<tr><td><code>ffs/ffs</code></td><td><code>fragile-foal-syndrome</code></td><td>&minus;13 health &mdash; <b>the foal is born and then dies</b></td></tr>
+</tbody>
+</table>
+</div>
+
+<h2>Born, and then lost</h2>
+
+<p>
+    Lethal <em>at birth</em>, so the foal really is born: it gets a name, a
+    <a href="breeding.html">record</a> and a place in the family tree, and then dies
+    over a few seconds with a chat line naming what took it.
+</p>
+
+<p>
+    That is deliberate. A pairing that silently produced nothing would teach a player
+    nothing about the two horses they just bred, and the whole value of a recessive
+    lethal is that it tells you something about <em>both</em> parents at once. The
+    mechanics of the death are on <a href="horse-body.html">the trait system</a> page.
+</p>
+
+<p>
+    The highest carrier rate of the four foal lethals, because in the real population
+    it is the one hiding inside the largest number of otherwise excellent animals.
+</p>
+
+<div class="note warn">
+    <span class="label">No founder is ever affected</span>
+    <p>
+        The founder table lists only the clear horse and the carrier. A wild-caught
+        horse is an adult that survived, so it can carry this and never have it, and
+        the homozygote&rsquo;s weight is simply absent from the table. <b>The only way
+        to produce an affected foal is to breed two carriers</b> &mdash; which is the
+        whole design: it is what makes a pedigree worth keeping, and what turns the
+        carrier wording in the info panel from decoration into the difference between
+        a breeding programme and a lottery.
+    </p>
+</div>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="gene-met.html">MET</a>
+        <a href="gene-ednrb.html">EDNRB (lethal white)</a>
+        <a href="horse-body.html">The trait system</a>
+    </div>
+    Source: <code>common/genetics/genes/Plod1Gene.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

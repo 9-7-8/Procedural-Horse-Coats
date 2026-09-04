@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>B4GALT7 &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="nav.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow natural">Natural gene <span class="sep">/</span> health</p>
+<h1>B4GALT7 (Friesian dwarfism)</h1>
+<p class="lede">
+    Friesian dwarfism &mdash; and the one disorder in the mod a horse lives a full
+    life with. Short, splayed limbs and a weak ribcage on a normal-sized head.
+</p>
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd>horsegenetics.b4galt7</dd></div>
+    <div><dt>Priority</dt><dd>87</dd></div>
+    <div><dt>Alleles</dt><dd><span class="allele dom">d</span> <span class="allele wild">N</span></dd></div>
+    <div><dt>Outcomes</dt><dd>wild, <code>b4galt7-carrier</code>, <code>friesian-dwarfism</code></dd></div>
+    <div><dt>Coat effect</dt><dd><strong>none</strong> &mdash; every outcome is a wild type</dd></div>
+    <div><dt>Default allele</dt><dd>N</dd></div>
+    <div><dt>Wild population</dt><dd>4.0% of founders carry one copy; <b>none</b> carries two</dd></div>
+    <div><dt>Founder draws</dt><dd>1 &times; nextFloat()</dd></div>
+    <div><dt>Gallery pens</dt><dd>1 &mdash; it never changes what a horse looks like</dd></div>
+</dl>
+
+<div class="note rule">
+    <span class="label">It paints nothing, and that is what makes it free</span>
+    <p>
+        Every combination of this gene is an <a href="genetics-model.html">expression</a>
+        marked <code>wildType</code>. That reads oddly for a gene that can change how
+        big a horse is or kill a foal, and it is exactly right: <code>wildType</code>
+        means <em>changes nothing about the coat</em>. Because none of the non-coat
+        genes paints, <code>Gene.affectsCoat()</code> is false for all of them, they
+        are left out of a horse&rsquo;s texture key, and the
+        <a href="roadmap.html">genotype gallery</a> collapses the whole locus into one
+        entry however many alleles it has. What the gene actually does travels on
+        <a href="horse-body.html">the trait system</a> instead.
+    </p>
+</div>
+
+<h2>The combination table</h2>
+
+<div class="table-wrap">
+<table>
+<thead><tr>
+<th>combination</th>
+<th>outcome</th>
+<th>effect</th>
+</tr></thead>
+<tbody>
+<tr><td><code>N/N</code></td><td>wild type</td><td>nothing</td></tr>
+<tr><td><code>d/N</code></td><td><code>b4galt7-carrier</code></td><td>nothing &mdash; a completely normal horse</td></tr>
+<tr><td><code>d/d</code></td><td><code>friesian-dwarfism</code></td><td>scale &times;0.75, &minus;5 health, &minus;0.020 speed, &minus;0.10 jump &mdash; <b>the horse lives</b></td></tr>
+</tbody>
+</table>
+</div>
+
+<h2>What is drawn, and what is not</h2>
+
+<p>
+    The real defect hits the long bones and the chest and leaves the skull almost
+    alone. The mod cannot draw that yet: <code>Attributes.SCALE</code> is one number
+    for the whole entity, and per-part scaling would mean owning the horse model
+    rather than borrowing the vanilla one. So it renders as an <strong>overall</strong>
+    three-quarter-size horse, with the ribcage weakness paid for in hearts. The
+    per-part version is logged in <a href="roadmap.html">&sect;4.4</a>.
+</p>
+
+<h2>Not lethal &mdash; which is the interesting part</h2>
+
+<p>
+    Affected foals survive. That makes this the one place in the model where a player
+    ends up with a live animal in front of them and a decision to make about a
+    carrier line, rather than a corpse and a chat message. Every other disorder here
+    resolves itself; this one asks a question.
+</p>
+
+<div class="note warn">
+    <span class="label">No founder is ever affected</span>
+    <p>
+        The founder table lists only the clear horse and the carrier. A wild-caught
+        horse is an adult that survived, so it can carry this and never have it, and
+        the homozygote&rsquo;s weight is simply absent from the table. <b>The only way
+        to produce an affected foal is to breed two carriers</b> &mdash; which is the
+        whole design: it is what makes a pedigree worth keeping, and what turns the
+        carrier wording in the info panel from decoration into the difference between
+        a breeding programme and a lottery.
+    </p>
+</div>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="gene-acan.html">ACAN</a>
+        <a href="gene-hmga2.html">HMGA2 (pony)</a>
+        <a href="horse-body.html">The trait system</a>
+    </div>
+    Source: <code>common/genetics/genes/B4galt7Gene.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

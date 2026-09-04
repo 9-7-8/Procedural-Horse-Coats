@@ -359,6 +359,139 @@ private static int toward(ColorView colour, int px, int py, int channel, int tar
     strictly order-dependent and erases every gene before it.
 </p>
 
+<h2 id="noncoat">Walkthrough 3 &mdash; a gene that changes the horse, not the coat</h2>
+
+<p>
+    Speed, max health, jump strength, body size and the disorders a horse expresses all
+    come from the same place: a gene that additionally implements
+    <code>TraitContribution</code>. The full machinery is on
+    <a href="horse-body.html">the horse&rsquo;s body</a>; this is how you write one.
+</p>
+
+<p>
+    It is the shortest kind of gene in the mod, because there is no painter. An allele
+    list, a combination table, a founder table, one method.
+</p>
+
+<div class="codebox">
+<div class="filename">a two-allele performance gene, in full</div>
+<pre><code class="language-java">public final class StrideGene implements Gene, TraitContribution {
+
+    public static final String KEY = "yourmod.stride";
+
+    public final Allele S = new Allele(KEY, 0, "S", "Long stride (S)");
+    public final Allele n = new Allele(KEY, 1, "n", "Wild-type (n)");
+    private final List&lt;Allele&gt; alleles = List.of(S, n);
+
+    // EVERY outcome is a wild type: this gene never paints.
+    private final Expression LONG = Expression.wildType("stride-long", "Long stride",
+            "Two copies. The full bonus to movement speed.");
+    private final Expression HALF = Expression.wildType("stride-half", "Part stride",
+            "One copy, half the bonus - the alleles add rather than one masking the other.");
+    private final Expression PLAIN = Expression.wildType("stride-plain", "Wild type",
+            "No copy. Baseline speed.");
+
+    @Override public String key() { return KEY; }
+    @Override public int priority() { return 95; }            // the non-coat sub-band
+    @Override public List&lt;Allele&gt; alleles() { return alleles; }
+    @Override public Allele defaultAllele() { return n; }     // declared LAST, see below
+    @Override public List&lt;Expression&gt; expressions() { return List.of(LONG, HALF, PLAIN); }
+
+    @Override public FounderTable founderTable(FounderContext c) {
+        return FounderTable.hardyWeinberg(S, n, 0.25);
+    }
+
+    @Override public Expression expressionOf(AllelePair pair) {
+        return switch (pair.count(S)) {
+            case 2 -&gt; LONG;
+            case 1 -&gt; HALF;
+            default -&gt; PLAIN;
+        };
+    }
+
+    @Override
+    public void contribute(AllelePair pair, Genotype genotype, TraitBuilder out) {
+        out.addSpeed(pair.count(S) * 0.012);
+    }
+}</code></pre>
+</div>
+
+<h3>The four rules that are specific to this kind of gene</h3>
+
+<ol>
+    <li><strong>Every expression must be a <code>wildType</code>.</strong> There is no
+        way to build a non-wild one without a painter, and you do not want one:
+        <code>wildType</code> means &ldquo;changes nothing <em>about the coat</em>&rdquo;,
+        and that is what makes <code>Gene.affectsCoat()</code> false, keeps your gene out
+        of the texture key, and collapses your whole locus to a single entry in the
+        genotype gallery. Get this wrong and every horse in the world re-bakes a
+        texture.</li>
+    <li><strong>Declare the baseline allele last.</strong>
+        <code>GenotypeCatalog.allPairsOf</code> walks the allele list backwards, so the
+        last-declared allele is the one a gallery pen ends up carrying &mdash; and
+        <code>GeneCodeDisplay</code> hides a gene sitting entirely on its
+        <code>defaultAllele()</code>. Declare the variant first and the baseline last, and
+        an ordinary horse&rsquo;s short genome string is unchanged.</li>
+    <li><strong>The baseline allele should contribute zero.</strong> Then an
+        all-wild-type horse resolves to the flat baselines in
+        <code>HorseTraits</code>, and every number a player sees is a departure from a
+        known starting point. If your gene is a trade-off, put the whole trade on the
+        variant &mdash; see <a href="gene-mstn.html">MSTN</a>, where the sprint allele
+        buys speed <em>and</em> costs hearts rather than the stayer being paid a
+        bonus.</li>
+    <li><strong>Use the non-coat priority sub-band, 80&ndash;99.</strong> It sits after
+        every gene that paints and before the magical band. Position among the non-coat
+        genes is arbitrary &mdash; contributions are additive and order-independent by
+        construction &mdash; so the number only fixes a stable slot in the genotype
+        code.</li>
+</ol>
+
+<h3>If it is a disorder</h3>
+
+<p>
+    Implement <code>HealthContribution</code> instead (it extends
+    <code>TraitContribution</code>), declare a <code>Condition</code> constant, and
+    report it alongside the numbers:
+</p>
+
+<div class="codebox">
+<pre><code class="language-java">public static final Condition WEAK_HOCKS = Condition.impairing(
+        "weak-hocks", "Weak hocks",
+        "The hind joints do not hold. The horse is sound to ride but jumps badly.");
+
+@Override
+public void contribute(AllelePair pair, Genotype genotype, TraitBuilder out) {
+    if (pair.homozygousFor(w)) {
+        out.condition(WEAK_HOCKS).addHealth(-3.0).addJump(-0.15);
+    }
+}</code></pre>
+</div>
+
+<p>
+    The marker interface is what lets the server&rsquo;s <code>health.mode</code> setting
+    switch your disorder out of a world <em>without</em> switching your gene out &mdash;
+    it stays registered, stays in the genotype code, and stays inherited. Viability is
+    not something you declare: it is derived from the severity of the conditions you
+    report, so you cannot kill a foal without saying what killed it.
+</p>
+
+<p>
+    If your disorder is the ordinary &ldquo;two alleles, only the double-variant does
+    anything&rdquo; shape, extend <code>RecessiveDisorderGene</code> instead and supply
+    the numbers &mdash; it writes the three expressions, the carrier wording and the
+    founder table for you. Six of the seven built-in health genes do.
+</p>
+
+<div class="note warn">
+    <span class="label">Keep the affected combination out of your founder table</span>
+    <p>
+        A wild-caught horse is an adult that survived. If founders can be affected, the
+        disorder is not a breeding hazard, it is background noise &mdash; and the carrier
+        wording on your heterozygote expression, which is the whole player-facing value
+        of the gene, stops meaning anything.
+    </p>
+</div>
+
 <h2>Randomness: the epigenome, and nothing else</h2>
 
 <p>

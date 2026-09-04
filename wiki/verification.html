@@ -99,10 +99,123 @@
         &mdash; an <code>O/O</code> horse renders pure white and masks everything.
     </p>
     <p>
-        The foal then <strong>lives</strong>, because there is no health system. That is
-        expected, not a bug &mdash; see <a href="roadmap.html">roadmap</a> &sect;6.4.
+        <strong>The foal no longer lives.</strong> As of 2026-09-04 the health system
+        exists, so an <code>O/O</code> foal is born, named, filed in the pedigree, and
+        then dies. Check that too while you are breeding the carrier pair &mdash; and
+        see &sect;0b below, which is where the whole health layer waits.
     </p>
 </div>
+
+<h2 id="body">&sect;0b &mdash; the trait, size and health system (new 2026-09-04, NOT play-tested)</h2>
+
+<p>
+    <strong>Thirteen new genes and a whole new subsystem, none of it seen in-game.</strong>
+    Machinery: <a href="horse-body.html">the horse&rsquo;s body</a>. Old saves will not
+    parse &mdash; the genotype code went from 20 segments to <strong>33</strong>. Start a
+    fresh world.
+</p>
+
+<div class="note warn">
+    <span class="label">Testing ergonomics come first &mdash; owner, 2026-09-04</span>
+    <p>
+        The owner&rsquo;s next change is to <strong>make this easier to test</strong>
+        before working through the list below. Expect the tooling described here (the
+        spawn egg flow especially) to move; re-read this section against the code
+        before trusting the steps.
+    </p>
+</div>
+
+<div class="note warn">
+    <span class="label">How to test any of this quickly</span>
+    <p>
+        The <strong>custom horse spawn egg</strong> is the tool. Adding a gene in its
+        editor defaults it to <em>homozygous for its first non-baseline allele</em>,
+        which for every health locus is the affected genotype &mdash; so
+        &ldquo;add PLOD1, pick Foal, spawn&rdquo; is a one-click lethal foal. Spawn
+        <em>Adult</em> instead and it lives (the death handler only touches babies), which
+        is how to look at a dwarf without it dying.
+    </p>
+</div>
+
+<h3>Stats are genetic now &mdash; the random roll is gone</h3>
+
+<ul>
+    <li>Ride a wild-caught horse and a bred one. Wild speed should sit between
+        <code>0.17</code> and <code>0.31</code>; an all-wild-type horse is exactly
+        <code>0.1875</code>. <b>Two horses with the same genotype must have identical
+        stats</b> &mdash; that is the whole point, so spawn two of the same code and
+        compare the info panel.</li>
+    <li>The info panel now shows <strong>speed, health, jump and size</strong> (size as
+        a word: dwarf / small / average / large / draught) plus any conditions. Check the
+        panel still fits &mdash; it gained two rows and a condition list.</li>
+    <li>Right-click with paper: speed, health, jump, size, and a
+        <code>conditions:</code> block with full descriptions.</li>
+    <li><strong>A reload must not heal an injured horse.</strong> Hurt one, quit, rejoin
+        &mdash; its current HP should be unchanged, not restored to max.</li>
+    <li>Breed a foal and check the <code>vs parents</code> colouring still works
+        (green / amber / red on speed and health).</li>
+</ul>
+
+<h3>Size &mdash; the first visible non-coat gene</h3>
+
+<ul>
+    <li>Spawn <code>hmga2=p/p</code> and <code>lcorl=L/L</code> side by side. The pony
+        should be visibly smaller and the tall horse visibly larger;
+        <code>Attributes.SCALE</code> scales the <b>hitbox</b> too, so check you can
+        still hit and mount both.</li>
+    <li><strong>A scaled foal is the unverified case.</strong> <code>Skin.BABY</code>&rsquo;s
+        projection is already approximate; a <code>p/p</code> foal at ~0.88 scale has not
+        been looked at. Also check the <em>rider</em> sits correctly on a large and a small
+        horse.</li>
+    <li>An <a href="gene-acan.html">ACAN</a> dwarf (<code>acan=D2/D3</code>) should be
+        much smaller again &mdash; dwarfism multiplies where the height loci add, so a
+        dwarf pony should be smaller than either alone.</li>
+</ul>
+
+<h3>The lethals</h3>
+
+<ul>
+    <li><strong>Lethal at birth.</strong> Spawn a <code>plod1=ffs/ffs</code> <em>foal</em>.
+        It should appear normally, produce a chat line naming fragile foal syndrome, and
+        die in about four seconds to a &ldquo;did not survive a genetic defect&rdquo;
+        death message. Check the message actually resolves (the lang key is
+        <code>death.attack.horsegenetics.genetic_defect</code>) rather than showing a raw
+        translation key.</li>
+    <li><strong>It has to out-damage the healing.</strong> Stand a dying foal next to
+        water and a hay bale &mdash; <a href="horse-care.html">gated healing</a> must not
+        save it.</li>
+    <li><strong>Lethal at conception.</strong> Two <code>met=met/N</code> carriers should
+        sometimes eat the food, show hearts, and produce <em>no foal</em> plus a chat line
+        saying why. Roughly one pairing in four.</li>
+    <li><strong>An adult must not die.</strong> Spawn an adult <code>plod1=ffs/ffs</code>
+        &mdash; it should live indefinitely. Same in the genotype gallery: the lethal-white
+        pen horses must not start dying.</li>
+    <li>Check the <a href="breeding.html">family tree</a> still renders with a
+        short-lived foal in it.</li>
+</ul>
+
+<h3>The server config</h3>
+
+<ul>
+    <li><code>run/config/horsegenetics-server.toml</code>, <code>health.mode</code>.
+        Set <code>NO_DEATHS</code>: a lethal foal should be born with very few hearts and
+        <em>live</em>, and a MET pairing should produce a foal.</li>
+    <li>Set <code>OFF</code>: a dwarf should be full size with full hearts, and no
+        conditions should show anywhere.</li>
+    <li><strong>The genotype must not change in any mode.</strong> Compare a horse&rsquo;s
+        genetic code across all three settings &mdash; identical, or the whole design is
+        broken.</li>
+</ul>
+
+<h3>Carriers</h3>
+
+<ul>
+    <li>A carrier (<code>plod1=ffs/N</code>) must be indistinguishable from a clear
+        horse: full stats, no conditions, and the short genome string showing
+        <code>nffs</code>.</li>
+    <li>Breed two carriers repeatedly and check the affected rate looks like one in
+        four.</li>
+</ul>
 
 <h2>Wanted (not built yet)</h2>
 

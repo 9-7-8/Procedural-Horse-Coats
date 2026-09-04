@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ACAN &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="nav.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow natural">Natural gene <span class="sep">/</span> health</p>
+<h1>ACAN (chondrodysplastic dwarfism)</h1>
+<p class="lede">
+    Chondrodysplastic dwarfism &mdash; five alleles, fifteen combinations, and the
+    gene that proves the combination table was worth building. A horse is affected
+    when it has <strong>no working copy left</strong>, which is not the same
+    statement as &ldquo;it is homozygous&rdquo;.
+</p>
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd>horsegenetics.acan</dd></div>
+    <div><dt>Priority</dt><dd>86</dd></div>
+    <div><dt>Alleles</dt><dd><span class="allele dom">D1</span> <span class="allele dom">D2</span> <span class="allele dom">D3</span> <span class="allele dom">D4</span> <span class="allele wild">N</span></dd></div>
+    <div><dt>Outcomes</dt><dd>wild, <code>acan-carrier</code>, <code>acan-dwarf</code>, <code>acan-lethal</code></dd></div>
+    <div><dt>Coat effect</dt><dd><strong>none</strong> &mdash; every outcome is a wild type</dd></div>
+    <div><dt>Default allele</dt><dd>N</dd></div>
+    <div><dt>Wild population</dt><dd>p = 0.004 per variant; affected combinations excluded and the rest rescaled</dd></div>
+    <div><dt>Founder draws</dt><dd>1 &times; nextFloat()</dd></div>
+    <div><dt>Gallery pens</dt><dd>1 &mdash; it never changes what a horse looks like</dd></div>
+</dl>
+
+<div class="note rule">
+    <span class="label">It paints nothing, and that is what makes it free</span>
+    <p>
+        Every combination of this gene is an <a href="genetics-model.html">expression</a>
+        marked <code>wildType</code>. That reads oddly for a gene that can change how
+        big a horse is or kill a foal, and it is exactly right: <code>wildType</code>
+        means <em>changes nothing about the coat</em>. Because none of the non-coat
+        genes paints, <code>Gene.affectsCoat()</code> is false for all of them, they
+        are left out of a horse&rsquo;s texture key, and the
+        <a href="roadmap.html">genotype gallery</a> collapses the whole locus into one
+        entry however many alleles it has. What the gene actually does travels on
+        <a href="horse-body.html">the trait system</a> instead.
+    </p>
+</div>
+
+<h2>The combination table</h2>
+
+<div class="table-wrap">
+<table>
+<thead><tr>
+<th>combination</th>
+<th>outcome</th>
+<th>effect</th>
+</tr></thead>
+<tbody>
+<tr><td><code>N/N</code></td><td>wild type</td><td>nothing</td></tr>
+<tr><td>one <code>D</code> and <code>N</code></td><td><code>acan-carrier</code></td><td>nothing &mdash; a normal-sized horse with no way to see it</td></tr>
+<tr><td><code>D1/D1</code></td><td><code>acan-lethal</code></td><td>scale &times;0.62, &minus;14 health &mdash; <b>the foal dies</b></td></tr>
+<tr><td>any other two <code>D</code>s</td><td><code>acan-dwarf</code></td><td>scale &times;0.70, &minus;6 health, &minus;0.030 speed, &minus;0.12 jump</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2>Why this is not &ldquo;is it homozygous?&rdquo;</h2>
+
+<p>
+    A <code>D1/D4</code> horse is affected. So is <code>D2/D3</code>. The four
+    variants are different broken versions of the <em>same</em> gene, and what
+    matters is that the horse has no working copy, not that its two copies match.
+</p>
+
+<p>
+    Every other disorder in this mod can be written as &ldquo;count the variant
+    allele and check for two&rdquo;. This one cannot, and the check has to be a
+    predicate over the whole pair. It is the clearest argument in the model for a
+    combination table over a dominance label: <em>recessive</em> describes nine of
+    these ten affected combinations and quietly loses the compound heterozygotes.
+</p>
+
+<div class="note warn">
+    <span class="label">What that means at the paddock gate</span>
+    <p>
+        Two carriers of <em>different</em> variants are exactly as dangerous as two
+        carriers of the same one. &ldquo;My two lines carry different
+        mutations&rdquo; is not the safety it sounds like.
+    </p>
+</div>
+
+<h2>The founder table</h2>
+
+<p>
+    Built with the multi-allele Hardy&ndash;Weinberg helper at <code>p = 0.004</code>
+    per variant, with <b>every</b> affected combination excluded and the rest
+    rescaled to 100. That is the biology as much as the bookkeeping &mdash; a
+    wild-caught horse is an adult that survived, and an affected foal mostly did not.
+    Ten of the fifteen combinations therefore carry weight zero.
+</p>
+
+<div class="note warn">
+    <span class="label">No founder is ever affected</span>
+    <p>
+        The founder table lists only the clear horse and the carrier. A wild-caught
+        horse is an adult that survived, so it can carry this and never have it, and
+        the homozygote&rsquo;s weight is simply absent from the table. <b>The only way
+        to produce an affected foal is to breed two carriers</b> &mdash; which is the
+        whole design: it is what makes a pedigree worth keeping, and what turns the
+        carrier wording in the info panel from decoration into the difference between
+        a breeding programme and a lottery.
+    </p>
+</div>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="gene-b4galt7.html">B4GALT7</a>
+        <a href="genetics-model.html">The genetics model</a>
+        <a href="horse-body.html">The trait system</a>
+    </div>
+    Source: <code>common/genetics/genes/AcanGene.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

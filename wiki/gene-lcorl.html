@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LCORL / NCAPG &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="nav.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow natural">Natural gene <span class="sep">/</span> body size</p>
+<h1>LCORL / NCAPG (height)</h1>
+<p class="lede">
+    <strong>Body height</strong> &mdash; the larger of the two size loci, and the
+    first gene in this mod that changes how big a horse <em>is</em> without touching
+    a pixel of its coat.
+</p>
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd>horsegenetics.lcorl</dd></div>
+    <div><dt>Priority</dt><dd>84</dd></div>
+    <div><dt>Alleles</dt><dd><span class="allele dom">L</span> <span class="allele wild">n</span></dd></div>
+    <div><dt>Outcomes</dt><dd><code>lcorl-tall</code>, <code>lcorl-mixed</code>, <code>lcorl-plain</code></dd></div>
+    <div><dt>Coat effect</dt><dd><strong>none</strong> &mdash; every outcome is a wild type</dd></div>
+    <div><dt>Default allele</dt><dd>n</dd></div>
+    <div><dt>Wild population</dt><dd>p(L) = 0.30</dd></div>
+    <div><dt>Founder draws</dt><dd>1 &times; nextFloat()</dd></div>
+    <div><dt>Gallery pens</dt><dd>1 &mdash; it never changes what a horse looks like</dd></div>
+</dl>
+
+<div class="note rule">
+    <span class="label">It paints nothing, and that is what makes it free</span>
+    <p>
+        Every combination of this gene is an <a href="genetics-model.html">expression</a>
+        marked <code>wildType</code>. That reads oddly for a gene that can change how
+        big a horse is or kill a foal, and it is exactly right: <code>wildType</code>
+        means <em>changes nothing about the coat</em>. Because none of the non-coat
+        genes paints, <code>Gene.affectsCoat()</code> is false for all of them, they
+        are left out of a horse&rsquo;s texture key, and the
+        <a href="roadmap.html">genotype gallery</a> collapses the whole locus into one
+        entry however many alleles it has. What the gene actually does travels on
+        <a href="horse-body.html">the trait system</a> instead.
+    </p>
+</div>
+
+<h2>The combination table</h2>
+
+<div class="table-wrap">
+<table>
+<thead><tr>
+<th>combination</th>
+<th>outcome</th>
+<th>scale</th>
+<th>speed</th>
+<th>jump</th>
+</tr></thead>
+<tbody>
+<tr><td><code>L/L</code></td><td><code>lcorl-tall</code></td><td>+0.10</td><td>+0.020</td><td>+0.04</td></tr>
+<tr><td><code>L/n</code></td><td><code>lcorl-mixed</code></td><td>+0.05</td><td>+0.010</td><td>+0.02</td></tr>
+<tr><td><code>n/n</code></td><td><code>lcorl-plain</code></td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="note good">
+    <span class="label">Answered: how size is drawn</span>
+    <p>
+        The roadmap flagged the entity-scale path as <em>unverified, check before
+        designing</em>. It is verified: <code>Attributes.SCALE</code> exists in
+        26.1.2, it is on the attribute supplier of <b>every living entity</b>
+        (<code>LivingEntity.createLivingAttributes</code>), and vanilla scales the
+        model <b>and the hitbox</b> from it. So the whole size system is one
+        attribute write in <code>HorseRecords.applyTraitsToEntity</code> &mdash; no
+        renderer-side scaling, no hand-written hitbox change, and a pony is genuinely
+        a smaller target.
+    </p>
+</div>
+
+<h2>Why it also moves speed and jump</h2>
+
+<p>
+    A taller horse covers more ground per stride and clears more. Those side effects
+    are what stop the size loci being pure decoration, and they are what makes
+    <a href="gene-hmga2.html">HMGA2</a>&rsquo;s pony allele a real trade rather than a
+    strict downgrade.
+</p>
+
+<p>
+    Between this and HMGA2 the healthy size range runs from about <code>0.88</code>
+    to <code>1.10</code> of a vanilla horse. The dwarfism loci reach further down by
+    <em>multiplying</em> rather than subtracting &mdash; see
+    <a href="horse-body.html">the trait system</a> for why that composition matters.
+</p>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="gene-hmga2.html">HMGA2 (pony)</a>
+        <a href="gene-acan.html">ACAN</a>
+        <a href="horse-body.html">The trait system</a>
+    </div>
+    Source: <code>common/genetics/genes/LcorlGene.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

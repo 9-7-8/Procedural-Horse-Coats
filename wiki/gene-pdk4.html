@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PDK4 &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="nav.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow natural">Natural gene <span class="sep">/</span> performance</p>
+<h1>PDK4</h1>
+<p class="lede">
+    Racing performance, as <strong>one atomic gene</strong>. Each <code>A</code>
+    copy is worth <code>0.018</code> movement speed, and nothing else.
+</p>
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd>horsegenetics.pdk4</dd></div>
+    <div><dt>Priority</dt><dd>81</dd></div>
+    <div><dt>Alleles</dt><dd><span class="allele dom">A</span> <span class="allele wild">G</span></dd></div>
+    <div><dt>Outcomes</dt><dd><code>pdk4-fast</code>, <code>pdk4-mixed</code>, <code>pdk4-plain</code></dd></div>
+    <div><dt>Coat effect</dt><dd><strong>none</strong> &mdash; every outcome is a wild type</dd></div>
+    <div><dt>Default allele</dt><dd>G</dd></div>
+    <div><dt>Wild population</dt><dd>p(A) = 0.25</dd></div>
+    <div><dt>Founder draws</dt><dd>1 &times; nextFloat()</dd></div>
+    <div><dt>Gallery pens</dt><dd>1 &mdash; it never changes what a horse looks like</dd></div>
+</dl>
+
+<div class="note rule">
+    <span class="label">It paints nothing, and that is what makes it free</span>
+    <p>
+        Every combination of this gene is an <a href="genetics-model.html">expression</a>
+        marked <code>wildType</code>. That reads oddly for a gene that can change how
+        big a horse is or kill a foal, and it is exactly right: <code>wildType</code>
+        means <em>changes nothing about the coat</em>. Because none of the non-coat
+        genes paints, <code>Gene.affectsCoat()</code> is false for all of them, they
+        are left out of a horse&rsquo;s texture key, and the
+        <a href="roadmap.html">genotype gallery</a> collapses the whole locus into one
+        entry however many alleles it has. What the gene actually does travels on
+        <a href="horse-body.html">the trait system</a> instead.
+    </p>
+</div>
+
+<h2>The combination table</h2>
+
+<div class="table-wrap">
+<table>
+<thead><tr>
+<th>combination</th>
+<th>outcome</th>
+<th>speed</th>
+</tr></thead>
+<tbody>
+<tr><td><code>A/A</code></td><td><code>pdk4-fast</code></td><td>+0.036</td></tr>
+<tr><td><code>A/G</code></td><td><code>pdk4-mixed</code></td><td>+0.018</td></tr>
+<tr><td><code>G/G</code></td><td><code>pdk4-plain</code></td><td>&mdash;</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2>Why one gene and not a marker set</h2>
+
+<p>
+    In reality this is one marker in a cluster, and racing ability is a polygenic
+    sum over many of them. <strong>Polygenic inheritance is cut</strong> from this
+    mod (<a href="roadmap.html">&sect;6.3</a> / <a href="roadmap.html">&sect;21</a>),
+    and the reason is a design one rather than a technical one: a hidden sum of
+    anonymous markers is <em>indistinguishable from a dice roll</em> at the scale a
+    player can observe, and the whole point of the genetics here is that a player can
+    breed <em>for</em> something and see it work. So the cluster collapses into two
+    alleles with an additive weight, and a player who fixes <code>A/A</code> in a
+    line has visibly made it faster.
+</p>
+
+<p>
+    Together with <a href="gene-mstn.html">MSTN</a> and <a href="gene-ckm.html">CKM</a>
+    it makes speed a three-locus breeding problem rather than a single switch: the
+    fastest horse the model can make is <code>0.3135</code>, against a baseline of
+    <code>0.1875</code> and a vanilla range of <code>0.1125</code>&ndash;<code>0.3375</code>.
+</p>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="gene-mstn.html">MSTN</a>
+        <a href="gene-ckm.html">CKM</a>
+        <a href="horse-body.html">The trait system</a>
+    </div>
+    Source: <code>common/genetics/genes/Pdk4Gene.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

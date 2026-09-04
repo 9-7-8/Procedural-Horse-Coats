@@ -108,7 +108,9 @@ coat/
   skin/
     HorseSkinGeometry.java    body space &lt;-&gt; texel, for ADULT and BABY
 
-horse/    Sex, HorseRecord, ParentStats, HorseStats, HorseDatabase, InMemoryHorseDatabase
+horse/    Sex, HorseRecord, ParentStats, HorseDatabase, InMemoryHorseDatabase
+trait/    Traits, Condition, Severity, Viability, TraitBuilder,
+          TraitContribution, HealthContribution, HorseTraits
 name/     HorseNameGenerator, HorseNames</code></pre>
 </div>
 
@@ -671,13 +673,15 @@ public final class SpecPainter {
 <pre><code class="language-java">enum Sex { MALE, FEMALE;  String label(boolean adult); }   // stallion/mare, colt/filly
 
 record ParentStats(double speedMin, speedMax, healthMin, healthMax) {
+    static ParentStats of(Traits dam, Traits sire);                 // the ordinary way
     static ParentStats of(double damSpeed, sireSpeed, damHealth, sireHealth);
     int rankSpeed(double child);    // 1 above both, 0 between, -1 below both
     int rankHealth(double child);
 }
 
-/** Placeholder, NOT genetic yet. One nextFloat in [0.75*min, 1.5*max]. */
-double HorseStats.rollFoalStat(double parentA, double parentB, Rng rng);
+// HorseStats.rollFoalStat is DELETED. A horse's speed and health are resolved
+// from its genotype (see "The trait system" below); HorseRecord has no speed or
+// health field at all, the same way it has no sex field.
 
 interface HorseDatabase {
     void    record(HorseRecord r);
@@ -702,6 +706,81 @@ record GenomeSample(String genotypeCode, String epigenomeCode) {
 <p>
     Full detail on <a href="breeding.html">Breeding &amp; pedigree</a>, which is the
     single source of truth for records, pedigree and stat inheritance.
+</p>
+
+<h2>The trait system (<code>common/trait/</code>)</h2>
+
+<p>
+    Genotype in, body out. The full argument is on
+    <a href="horse-body.html">the horse&rsquo;s body</a>; this is the surface.
+</p>
+
+<div class="codebox">
+<pre><code class="language-java">/** Everything a genotype says about the horse's body. Pure data, resolved not stored. */
+record Traits(double speed, double health, double jump, double scale,
+              List&lt;Condition&gt; conditions) {
+    Viability viability();                  // derived: the worst severity present
+    Optional&lt;Condition&gt; lethalCondition();  // what kills it, for the chat line
+    boolean lethal();
+    boolean hasConditions();
+}
+
+record Condition(String id, String name, String description, Severity severity) {
+    static Condition informational(id, name, description);      // no cost - deafness
+    static Condition impairing(id, name, description);          // fewer hearts
+    static Condition lethalAtBirth(id, name, description);      // born, then dies
+    static Condition lethalAtConception(id, name, description); // no foal at all
+}
+
+enum Severity { INFORMATIONAL, IMPAIRING, LETHAL_AT_BIRTH, LETHAL_AT_CONCEPTION }
+enum Viability { VIABLE, LETHAL_AT_BIRTH, LETHAL_AT_CONCEPTION }
+
+/** The capability a Gene may ALSO implement to contribute something non-coat. */
+interface TraitContribution {
+    void contribute(AllelePair pair, Genotype genotype, TraitBuilder out);
+}
+
+/** Marker: this contribution is a disorder, so the server's health.mode can skip it. */
+interface HealthContribution extends TraitContribution { }
+
+/** The sink. Additions are applied before multipliers, so gene order buys nothing. */
+final class TraitBuilder {
+    TraitBuilder addSpeed(double d);
+    TraitBuilder addHealth(double d);      // health points - two per heart
+    TraitBuilder addJump(double d);
+    TraitBuilder addScale(double d);       // the height loci
+    TraitBuilder multiplyScale(double f);  // dwarfism, which is proportional
+    TraitBuilder condition(Condition c);   // de-duplicated on the condition id
+}
+
+/** One walk of Genes.codeOrder(). Pure: no Rng, no epigenetics, no entity. */
+final class HorseTraits {
+    static Traits resolve(Genotype g);                          // health genetics on
+    static Traits resolve(Genotype g, boolean healthGenetics);  // false = config "off"
+    static Traits baseline();
+
+    static final double BASE_SPEED  = 0.1875;
+    static final double BASE_HEALTH = 22.0;
+    static final double BASE_JUMP   = 0.5;
+    static final double BASE_SCALE  = 1.0;
+    static final double MIN_HEALTH  = 1.0;   // never zero: that is a crash, not a sick horse
+}</code></pre>
+</div>
+
+<p>
+    On the NeoForge side, <code>HorseRecords.traitsOf(...)</code> resolves honouring
+    the server config and <code>HorseRecords.applyTraitsToEntity(...)</code> writes
+    <code>MOVEMENT_SPEED</code>, <code>MAX_HEALTH</code>, <code>JUMP_STRENGTH</code>
+    and <code>SCALE</code>.
+</p>
+
+<p>
+    <strong>Writing a non-coat gene</strong> is an allele list, a combination table of
+    <code>wildType</code> expressions, a founder table and one
+    <code>contribute</code> method &mdash; there is no painter, because it never
+    paints. <code>RecessiveDisorderGene</code> is an abstract base covering the whole
+    of the &ldquo;two alleles, only the double-variant does anything&rdquo; shape; six
+    of the seven health genes extend it.
 </p>
 
 <h2>Display helpers</h2>

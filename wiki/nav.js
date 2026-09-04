@@ -17,7 +17,8 @@
                 { href: "../index.html", text: "Wiki home", kind: "core" },
                 { href: "philosophy.html", text: "Philosophy", kind: "core" },
                 { href: "genetics-model.html", text: "The genetics model", kind: "core" },
-                { href: "breeding.html", text: "Breeding & pedigree", kind: "core" }
+                { href: "breeding.html", text: "Breeding & pedigree", kind: "core" },
+                { href: "horse-body.html", text: "The horse's body", kind: "core" }
             ]
         },
         {
@@ -58,6 +59,29 @@
                 { href: "gene-ednrb.html", text: "EDNRB (frame overo)", kind: "natural" },
                 { href: "gene-tobiano.html", text: "Tobiano", kind: "natural" },
                 { href: "gene-roan.html", text: "Roan", kind: "natural" }
+            ]
+        },
+        {
+            title: "Performance & size genes",
+            items: [
+                { href: "gene-mstn.html", text: "MSTN (myostatin)", kind: "natural" },
+                { href: "gene-pdk4.html", text: "PDK4", kind: "natural" },
+                { href: "gene-ckm.html", text: "CKM", kind: "natural" },
+                { href: "gene-ryr2.html", text: "RYR2 (jumping)", kind: "natural" },
+                { href: "gene-lcorl.html", text: "LCORL / NCAPG (height)", kind: "natural" },
+                { href: "gene-hmga2.html", text: "HMGA2 (pony)", kind: "natural" }
+            ]
+        },
+        {
+            title: "Health genes",
+            items: [
+                { href: "gene-acan.html", text: "ACAN (dwarfism)", kind: "natural" },
+                { href: "gene-b4galt7.html", text: "B4GALT7 (Friesian dwarfism)", kind: "natural" },
+                { href: "gene-plod1.html", text: "PLOD1 (fragile foal)", kind: "natural" },
+                { href: "gene-rapgef5.html", text: "RAPGEF5 (EFIH)", kind: "natural" },
+                { href: "gene-st14.html", text: "ST14 (naked foal)", kind: "natural" },
+                { href: "gene-shox.html", text: "SHOX (skeletal atavism)", kind: "natural" },
+                { href: "gene-met.html", text: "MET (embryonic lethal)", kind: "natural" }
             ]
         },
         {
