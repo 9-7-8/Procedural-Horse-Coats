@@ -2,7 +2,7 @@ package com.example.horsegenetics.neoforge.server;
 
 import com.example.horsegenetics.common.genetics.GeneCodeDisplay;
 import com.example.horsegenetics.common.genetics.Genotype;
-import com.example.horsegenetics.common.genetics.GenotypeCatalog;
+import com.example.horsegenetics.common.genetics.ShowcaseGenotypes;
 import com.example.horsegenetics.common.horse.Sex;
 import com.example.horsegenetics.neoforge.HorseGenetics;
 import com.example.horsegenetics.neoforge.NeoRng;
@@ -49,33 +49,33 @@ import java.util.Set;
 import java.util.UUID;
 
 /**
- * Builds and populates the horse dimension: a <b>complete gallery of the
- * genotype catalogue</b>, two horses per genotype. All calls happen on the
- * server thread.
+ * Builds and populates the horse dimension: a corridor of pens, each holding a
+ * <b>random pair</b> of horses to look at. All calls happen on the server
+ * thread.
  *
- * <h2>The gallery</h2>
- * The corridor holds exactly one pen per entry in {@link GenotypeCatalog} -
- * every <b>visually distinct</b> genotype the registered genes can make.
- * (The catalogue drops the duplicates for you: a dominant gene's heterozygote
- * is a copy of a homozygote, and a horse showing a {@code COMPLETE_DOMINANT}
- * gene looks the same whatever else it carries, so white and test get one pen
- * each.) Two pens per segment: the <b>right-hand</b> pen (walking in from the
- * portal) takes the even catalogue index, the left-hand one the odd, so the
- * sequence reads {@code eeaa, EEaa, eeAA, EEAA, ...} - the first gene in
- * {@link com.example.horsegenetics.common.genetics.Genes#codeOrder()} is
- * exhausted before the next one moves. Each pen holds one mare and one
- * stallion of <i>that</i> genotype (their epigenetic seeds still differ, so
- * they are two examples, not two copies) and a sign on the road to the right of
- * its gate, naming it in the same compact form the horse's own info panel uses.
- * Three blocks in front of the entrance portal, a second sign gives the total
- * count.
+ * <h2>The pens</h2>
+ * Each pen gets one {@link ShowcaseGenotypes#random showcase genotype} - an
+ * ordinary founder draw with a floor under it, so a pen is never a plain bay -
+ * and stocks one mare and one stallion with it. The two share the genotype and
+ * <i>not</i> the epigenome, so they are two examples rather than two copies. A
+ * sign on the road, to the right of the gate, names the genotype in the same
+ * compact form the horse's own info panel uses.
  *
- * <p>Nothing about the sequence is hard-coded: the corridor length,
- * {@link #PLOT_SPACING_X} and both signs are all derived from
- * {@link GenotypeCatalog}, so adding a gene widens the gallery on its own.
- * Pens are still built lazily as the player walks
- * ({@link #ensureGeneratedAheadOfPlayer}); the corridor stops - with an end
- * wall - once the catalogue is exhausted.
+ * <p>This used to be a <b>gallery of the genotype catalogue</b>: one pen per
+ * visually distinct genotype, in odometer order, with the corridor length
+ * derived from {@code GenotypeCatalog}. That premise stopped being buildable
+ * long before it stopped being computable - every gene multiplies the
+ * catalogue, the white-pattern loci alone put it past two million, and at seven
+ * blocks a segment that is a corridor a quarter of the way to the world border.
+ * Random pens do not care how large the genotype space is, which is exactly why
+ * the corridor stops being the thing that blocks adding genes
+ * ({@code wiki/roadmap.html} §8). The catalogue itself stays - it is still what
+ * a punnett display and the tests want, it just no longer drives the dimension.
+ *
+ * <p>The corridor is {@value #PEN_COUNT} pens long: an arbitrary number, not a
+ * derived one, chosen as far more than anyone walks. Pens are built lazily as
+ * the player goes ({@link #ensureGeneratedAheadOfPlayer}) and the corridor
+ * closes in an end wall.
  *
  * <h2>Instancing</h2>
  * The dimension is a flat <b>void</b> (see {@code dimension/debug_pens.json}):
@@ -87,11 +87,17 @@ import java.util.UUID;
  * <p>When the plot's player leaves (dimension change, logout, or a re-entry
  * that supersedes it) {@link #tearDown} discards every non-player entity in it
  * and forgets those horses' ancestry records - but <b>leaves the blocks
- * standing</b>. It can: the gallery is fully deterministic (same catalogue,
- * fixed {@link #PLOT_BASE_Y}, fixed length), so an X slot handed back to the
- * free list is rebuilt with byte-identical geometry next time and the stale
- * corridor is simply overwritten in place. Leaving is therefore O(entities),
- * not O(blocks walked).
+ * standing</b>. Leaving is therefore O(entities), not O(blocks walked).
+ *
+ * <p>That is still safe now the pens are random, but for a different reason
+ * than it used to be. The <b>geometry</b> is fixed ({@value #PEN_COUNT} pens,
+ * fixed {@link #PLOT_BASE_Y}), so a plot rebuilt on a recycled X lands exactly
+ * on the old one; the <b>contents</b> are not, but every pen a player can reach
+ * is rebuilt from index 0 upward as they walk, signs and horses included, so
+ * nothing stale is ever visible. The only leftovers are pens past the new
+ * player's frontier, which they would have to walk to - and walking there
+ * rebuilds them. {@link #buildPen} clears any untamed horse it finds before
+ * stocking, so a previous occupant's animals cannot outlive their sign.
  *
  * <h2>Layout of one plot</h2>
  * A straight corridor running +X from {@code originX}. The wall <b>behind the
@@ -109,7 +115,7 @@ import java.util.UUID;
  * glowstone line {@value #WALL_TOP_DY} blocks above it, a single oak-plank wood
  * wall ({@code z} = +/-{@value #WALL_PLANK_Z}), then the bedrock core
  * ({@code z} = +/-{@value #WALL_BEDROCK_Z}). Outside the bedrock: open void.
- * Past the last catalogue pen the corridor is closed by an end cap laid out
+ * Past the last pen the corridor is closed by an end cap laid out
  * like {@link #buildStartCap}.
  */
 public final class DebugPenManager {
@@ -126,38 +132,24 @@ public final class DebugPenManager {
     private static final int LOOKAHEAD_PENS = 30;
 
     /**
-     * <b>How many pens the corridor will actually build.</b>
-     *
-     * <p>The gallery's premise - one pen per visually distinct genotype - stops
-     * being buildable long before it stops being computable. Each gene
-     * multiplies the catalogue, and the white-pattern loci alone put it past
-     * two million; at seven blocks a segment that is a corridor about seven
-     * <i>million</i> blocks long, which is a quarter of the way to the world
-     * border and would leave room for four plots in the whole dimension.
-     *
-     * <p>So the corridor is capped. It shows the first {@value} entries - a
-     * corridor of about seventy thousand blocks, still far longer than anyone
-     * walks - and the entrance sign says plainly how many it is showing out of
-     * how many exist, rather than quietly pretending the gallery is complete.
-     * The real answer is {@code wiki/roadmap.html} §9's planned revert to
-     * random pens, which retires the one-pen-per-genotype premise entirely.
+     * <b>How long the corridor is.</b> An arbitrary number now, and
+     * deliberately so: the length used to be derived from the genotype
+     * catalogue, which meant every gene added made the dimension bigger, and by
+     * the white-pattern loci it wanted a corridor about seven <i>million</i>
+     * blocks long - a quarter of the way to the world border. Random pens do
+     * not have to enumerate anything, so the corridor is simply as long as is
+     * worth walking: {@value} pens, one genotype each, about seven thousand
+     * blocks end to end.
      */
-    private static final int MAX_GALLERY_PENS = 20_000;
-
-    /** How many pens the corridor holds: the catalogue, or the cap, whichever is smaller. */
-    static int galleryPens() {
-        return Math.min(GenotypeCatalog.size(), MAX_GALLERY_PENS);
-    }
+    static final int PEN_COUNT = 2_000;
 
     /**
-     * The corridor is exactly long enough to hold {@link #galleryPens()} pens,
-     * two per segment - the right-hand pen takes the even catalogue index, the
-     * left-hand one the odd. With an odd count the very last left-hand pen is
-     * simply not built. Derived, never hard-coded: add a gene and the corridor
-     * lengthens on its own, up to the cap.
+     * The corridor holds {@link #PEN_COUNT} pens, two per segment. Fixed, so a
+     * plot rebuilt on a recycled X has the same geometry as the one it replaces
+     * - see the teardown note in the class javadoc.
      */
     private static final int LAST_SEGMENT_INDEX =
-            (Math.min(GenotypeCatalog.size(), MAX_GALLERY_PENS) + PENS_PER_SEGMENT - 1) / PENS_PER_SEGMENT - 1;
+            (PEN_COUNT + PENS_PER_SEGMENT - 1) / PENS_PER_SEGMENT - 1;
 
     private static final int ROAD_HALF_WIDTH = 3;        // gravel road: z in [-3, 3]
     private static final int WALL_TOP_DY = 10;           // glowstone line height above the floor
@@ -269,7 +261,7 @@ public final class DebugPenManager {
     /** The plot whose corridor spans this world X, or {@code null}. */
     static Plot plotContaining(int blockX) {
         for (Plot p : PLOTS.values()) {
-            int end = p.originX + (p.highestIndex + 2) * PERIOD;
+            int end = p.originX + (LAST_SEGMENT_INDEX + 2) * PERIOD;
             if (blockX >= p.originX - 4 && blockX < end) {
                 return p;
             }
@@ -291,7 +283,7 @@ public final class DebugPenManager {
 
     // --- generation ---
 
-    /** Builds up to {@code targetIndex}, but never past the end of the catalogue. */
+    /** Builds up to {@code targetIndex}, but never past the end of the corridor. */
     private static void ensureBuiltUpToIndex(ServerLevel level, Plot plot, int targetIndex) {
         int capped = Math.min(targetIndex, LAST_SEGMENT_INDEX);
         while (plot.highestIndex < capped) {
@@ -306,10 +298,9 @@ public final class DebugPenManager {
 
     /**
      * One segment = one pen on each side of the road. The right-hand pen (the
-     * {@code +Z} side, on your right walking in from the portal) shows
-     * catalogue entry {@code 2 * index}, the left-hand one {@code 2 * index + 1}
-     * - so the sequence runs {@code eeaa, Eeaa, EEaa, eeAa, ...} down the
-     * corridor, one gene exhausted before the next moves.
+     * {@code +Z} side, on your right walking in from the portal) is pen
+     * {@code 2 * index}, the left-hand one {@code 2 * index + 1} - the number
+     * on its sign, and nothing more: each pen rolls its own genotype.
      */
     private static void buildSegment(ServerLevel level, Plot plot, int index) {
         int x0 = plot.originX + index * PERIOD;
@@ -322,7 +313,7 @@ public final class DebugPenManager {
         buildPen(level, plot, x0, SOUTH_PEN, base + 1);
         if (index == 0) {
             buildReturnPortal(level, plot);
-            buildCatalogueSign(level, plot);
+            buildEntranceSign(level, plot);
         }
     }
 
@@ -436,16 +427,17 @@ public final class DebugPenManager {
     // --- one pen ---
 
     /**
-     * {@code genotypeIndex} is this pen's entry in {@link GenotypeCatalog}: both
-     * its horses get that exact genotype, and the sign by the gate names it. An
-     * index past the end of the catalogue (the trailing left-hand pen when the
-     * catalogue size is odd) builds nothing at all.
+     * One pen and the pair of horses in it. The genotype is a fresh
+     * {@link ShowcaseGenotypes#random showcase draw} - a wild founder roll that
+     * is guaranteed to express at least one natural gene beyond extension and
+     * agouti, and half the time a magical one as well - and the sign by the
+     * gate names it. {@code penIndex} is only the number on that sign.
      */
-    private static void buildPen(ServerLevel level, Plot plot, int x0, PenSpec pen, int genotypeIndex) {
-        if (genotypeIndex >= galleryPens()) {
+    private static void buildPen(ServerLevel level, Plot plot, int x0, PenSpec pen, int penIndex) {
+        if (penIndex >= PEN_COUNT) {
             return;
         }
-        Genotype genotype = GenotypeCatalog.get(genotypeIndex);
+        Genotype genotype = ShowcaseGenotypes.random(new NeoRng(level.getRandom()));
         String geneticCode = genotype.toCode();
         int gy = plot.baseY;
         int floorY = gy + 1;
@@ -486,14 +478,28 @@ public final class DebugPenManager {
         level.setBlockAndUpdate(new BlockPos(xMax - 1, floorY - 1, zGateInner),
                 Blocks.HAY_BLOCK.defaultBlockState());
 
-        buildPenSign(level, plot, x0, pen, genotypeIndex, genotype);
+        buildPenSign(level, plot, x0, pen, penIndex, genotype);
 
+        // A pen is built exactly once per plot, so anything already standing in
+        // it belongs to a previous occupant of this recycled X slot - and its
+        // genotype has nothing to do with the sign that was just written. Clear
+        // it out and stock fresh. Tamed horses are left alone: a player can
+        // have ridden one this far ahead of the build frontier.
         AABB interior = new AABB(x0, floorY, zLo, xMax + 1, floorY + 4, zHi + 1);
-        if (level.getEntitiesOfClass(Horse.class, interior).isEmpty()) {
-            double midX = x0 + PEN_LEN_X / 2.0;
-            double midZ = (zLo + zHi) / 2.0;
-            spawnHorse(level, floorY, midX, midZ - 4, Sex.MALE, geneticCode);
-            spawnHorse(level, floorY, midX, midZ + 4, Sex.FEMALE, geneticCode);
+        for (Horse stale : level.getEntitiesOfClass(Horse.class, interior, h -> !h.isTamed())) {
+            forget(level, stale);
+            stale.discard();
+        }
+        double midX = x0 + PEN_LEN_X / 2.0;
+        double midZ = (zLo + zHi) / 2.0;
+        spawnHorse(level, floorY, midX, midZ - 4, Sex.MALE, geneticCode);
+        spawnHorse(level, floorY, midX, midZ + 4, Sex.FEMALE, geneticCode);
+    }
+
+    /** Drop {@code horse} from the ancestry database, if it has a record there. */
+    private static void forget(ServerLevel level, Horse horse) {
+        if (level.getServer() != null && HorseRecords.hasRealRecord(horse)) {
+            HorseAncestryData.get(level.getServer()).forget(HorseRecords.of(horse).id());
         }
     }
 
@@ -504,7 +510,7 @@ public final class DebugPenManager {
     // --- signs -----------------------------------------------------------
 
     private static final int SIGN_LINES = 4;              // vanilla sign: 4 lines per face
-    private static final int SIGN_GENE_LINES = SIGN_LINES - 1;  // line 0 is the catalogue number
+    private static final int SIGN_GENE_LINES = SIGN_LINES - 1;  // line 0 is the pen number
     private static final int SIGN_LINE_CHARS = 15;        // about what a vanilla sign line fits
 
     /**
@@ -513,45 +519,43 @@ public final class DebugPenManager {
      * faces carry the same text so it reads from anywhere on the road.
      */
     private static void buildPenSign(ServerLevel level, Plot plot, int x0, PenSpec pen,
-                                     int genotypeIndex, Genotype genotype) {
+                                     int penIndex, Genotype genotype) {
         int gateX = x0 + PEN_LEN_X / 2 - 1;               // gate occupies gateX and gateX + 1
         Direction towardPen = pen.roadFacing().getOpposite();
         Direction right = towardPen.getClockWise();       // always +/-X here
         int signX = right.getStepX() > 0 ? gateX + 2 : gateX - 1;
         int signZ = pen.zRoad() + pen.roadFacing().getStepZ();  // one block out onto the road
         placeSign(level, new BlockPos(signX, plot.baseY + 1, signZ), pen.roadFacing(),
-                genotypeSignLines(genotypeIndex, genotype));
+                genotypeSignLines(penIndex, genotype));
     }
 
     /**
-     * The tally sign three blocks in front of the entrance portal: how many
-     * genotypes exist at all, how many of those are distinct to look at, and -
-     * when the catalogue outruns {@link #MAX_GALLERY_PENS} - how many of them
-     * this corridor actually holds. Genes only: epigenetic variation is
-     * deliberately not counted in any of the numbers.
+     * The sign three blocks in front of the entrance portal. It used to be a
+     * tally of the genotype catalogue - how many genotypes exist, how many are
+     * distinct, how many of those the corridor was showing. None of that is
+     * true of a random corridor, so it says what <i>is</i>: how many pens there
+     * are and what is in one.
      */
-    private static void buildCatalogueSign(ServerLevel level, Plot plot) {
-        int shown = galleryPens();
+    private static void buildEntranceSign(ServerLevel level, Plot plot) {
         placeSign(level, new BlockPos(plot.originX + 4, plot.baseY + 1, 0), Direction.WEST,
-                List.of("Genotypes",
-                        String.format("%,d", GenotypeCatalog.totalGenotypes()),
-                        String.format("%,d distinct", GenotypeCatalog.size()),
-                        shown < GenotypeCatalog.size()
-                                ? String.format("showing %,d", shown)
-                                : String.format("%,d pens", shown)));
+                List.of("Horse Pens",
+                        String.format("%,d pens", PEN_COUNT),
+                        "random genome",
+                        "mare + stallion"));
     }
 
     /**
-     * Line 0 is the pen's 1-based catalogue number; the rest is the genotype in
-     * the <b>same compact form the horse's info panel and paper dump use</b>
-     * ({@link GeneCodeDisplay#shortForm}) - extension + agouti, then only the
-     * genes actually carrying a variant, so a plain horse reads {@code "eeaa"}
-     * rather than a wall of wild-type slots. Wrapped over the remaining
-     * {@value #SIGN_GENE_LINES} lines between whole gene tokens.
+     * Line 0 is the pen's 1-based number down the corridor; the rest is the
+     * genotype in the <b>same compact form the horse's info panel and paper
+     * dump use</b> ({@link GeneCodeDisplay#shortForm}) - extension + agouti,
+     * then only the genes actually carrying a variant. Wrapped over the
+     * remaining {@value #SIGN_GENE_LINES} lines between whole gene tokens;
+     * {@code wrap} deliberately overflows its last line rather than dropping a
+     * gene, which {@code ShowcaseGenotypesTest} pins over random draws.
      */
-    private static List<String> genotypeSignLines(int genotypeIndex, Genotype genotype) {
+    private static List<String> genotypeSignLines(int penIndex, Genotype genotype) {
         List<String> lines = new ArrayList<>();
-        lines.add("#" + (genotypeIndex + 1));
+        lines.add("#" + (penIndex + 1));
         lines.addAll(GeneCodeDisplay.wrap(genotype, SIGN_GENE_LINES, SIGN_LINE_CHARS));
         return lines;
     }
@@ -584,7 +588,7 @@ public final class DebugPenManager {
     }
 
     /**
-     * The far end of the corridor, past the last catalogue pen - the mirror of
+     * The far end of the corridor, past the last pen - the mirror of
      * {@link #buildStartCap}, so the gallery finishes in a wall instead of
      * trailing off into the void.
      */
@@ -665,9 +669,16 @@ public final class DebugPenManager {
 
     // --- leaving: take your tamed horses with you ---
 
+    /**
+     * The whole X slot, not just the part built so far. It has to be: a plot
+     * that recycles an X where a previous visitor walked further leaves that
+     * visitor's horses standing past the new frontier, and if the box stopped
+     * at {@code highestIndex} they would never be cleared and the slot would
+     * accumulate animals for the life of the world.
+     */
     private static AABB plotBox(Plot plot) {
         int xLo = plot.originX - 5; // covers the layered back wall at originX-3..-1
-        int xHi = plot.originX + (plot.highestIndex + 1) * PERIOD + 3;
+        int xHi = plot.originX + (LAST_SEGMENT_INDEX + 2) * PERIOD + 3;
         int yLo = plot.baseY - 4;
         int yHi = plot.baseY + WALL_TOP_DY + 2;
         return new AABB(xLo, yLo, -WALL_BEDROCK_Z - 1, xHi + 1, yHi + 1, WALL_BEDROCK_Z + 2);
@@ -718,12 +729,14 @@ public final class DebugPenManager {
      * by {@link #evacuateTamedHorses} before this runs, so they're never caught
      * here.
      *
-     * <p>The <b>blocks are deliberately left standing</b>. The gallery is
-     * deterministic now - same catalogue, same {@link #PLOT_BASE_Y}, same
-     * geometry - so a plot rebuilt on a recycled X lands exactly on top of the
-     * old one and overwrites it, and there's nothing to gain from air-filling
-     * the corridor first (which, at catalogue length, was going to be a very
-     * expensive way to leave).
+     * <p>The <b>blocks are deliberately left standing</b>. The corridor's
+     * geometry is fixed ({@link #PEN_COUNT} pens, fixed {@link #PLOT_BASE_Y}),
+     * so a plot rebuilt on a recycled X lands exactly on top of the old one and
+     * overwrites it. Its <i>contents</i> are random now and therefore different
+     * every time, but every pen a player can reach is rebuilt from index 0
+     * upward as they walk - sign and horses together - so a stale genotype is
+     * never on show. Air-filling the corridor instead would be a very expensive
+     * way to leave, for nothing.
      */
     private static void tearDown(ServerLevel level, Plot plot) {
         HorseAncestryData ancestry = level.getServer() == null

@@ -1,6 +1,8 @@
 package com.example.horsegenetics.neoforge.network;
 
 import com.example.horsegenetics.common.genetics.GeneCodeDisplay;
+import com.example.horsegenetics.common.genetics.Epigenome;
+import com.example.horsegenetics.common.genetics.Genome;
 import com.example.horsegenetics.common.genetics.Genotype;
 import com.example.horsegenetics.common.horse.HorseRecord;
 import com.example.horsegenetics.common.horse.Sex;
@@ -20,7 +22,6 @@ import net.minecraft.world.entity.animal.equine.Horse;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -114,6 +115,17 @@ public final class ModNetworking {
         );
     }
 
+    /**
+     * <b>Creative only, and checked here.</b> The editor screen opens on the
+     * client, but this payload spawns an arbitrary entity carrying an arbitrary
+     * genome, so the client-side gate is worth nothing on its own; the sender
+     * must be in creative <i>and</i> holding the egg.
+     *
+     * <p>The epigenome the screen was previewing arrives with the genotype and
+     * is written straight into the founder record - so the horse that appears
+     * is the horse that was on screen. An empty epigenome code (an older
+     * client, or a hand-sent packet) falls back to rolling one.
+     */
     private static void handleSpawnCustomHorse(SpawnCustomHorsePayload payload,
                                                net.minecraft.world.entity.player.Player player) {
         if (!(player instanceof ServerPlayer serverPlayer)) {
@@ -122,15 +134,27 @@ public final class ModNetworking {
         if (!(serverPlayer.level() instanceof ServerLevel level)) {
             return;
         }
+        if (!serverPlayer.getAbilities().instabuild) {
+            serverPlayer.sendSystemMessage(
+                    Component.literal("[Custom Horse] the custom spawn egg is a creative-mode tool."));
+            return;
+        }
+        if (!holdsSpawnEgg(serverPlayer)) {
+            return;
+        }
 
-        Genotype genotype;
+        Sex sex = payload.female() ? Sex.FEMALE : Sex.MALE;
+        Genome genome;
         try {
-            genotype = Genotype.parse(payload.genotypeCode());
+            Genotype genotype = Genotype.parse(payload.genotypeCode()).withSex(sex);
+            Epigenome epigenome = payload.epigenomeCode().isEmpty()
+                    ? Epigenome.random(new NeoRng(serverPlayer.getRandom()))
+                    : Epigenome.parse(payload.epigenomeCode());
+            genome = new Genome(genotype, epigenome);
         } catch (RuntimeException e) {
             serverPlayer.sendSystemMessage(Component.literal("[Custom Horse] rejected genome: " + e.getMessage()));
             return;
         }
-        String code = genotype.toCode();
 
         HitResult hit = serverPlayer.pick(6.0, 1.0F, false);
         Vec3 pos = hit.getType() != HitResult.Type.MISS
@@ -147,27 +171,23 @@ public final class ModNetworking {
         }
         horse.setPersistenceRequired();
 
-        Sex sex = payload.female() ? Sex.FEMALE : Sex.MALE;
         // Record applied before the entity joins, so HorseGeneticsEventHandler
-        // sees a real record and keeps this genome instead of rolling a random
-        // one. The epigenome is still rolled fresh, like any founder.
-        HorseRecords.apply(horse,
-                HorseRecords.newFounder(horse, new NeoRng(horse.getRandom()), sex, Genotype.parse(code)));
+        // sees a real record and keeps this genome instead of rolling a random one.
+        HorseRecords.apply(horse, HorseRecords.newFounder(horse, new NeoRng(horse.getRandom()), genome));
         level.addFreshEntity(horse);
-
-        if (!serverPlayer.getAbilities().instabuild) {
-            for (InteractionHand hand : InteractionHand.values()) {
-                ItemStack held = serverPlayer.getItemInHand(hand);
-                if (held.is(ModItems.CUSTOM_HORSE_SPAWN_EGG.get())) {
-                    held.shrink(1);
-                    break;
-                }
-            }
-        }
 
         serverPlayer.sendSystemMessage(Component.literal("[Custom Horse] spawned "
                 + (payload.baby() ? "foal " : "") + sex.label(!payload.baby()) + " - "
-                + GeneCodeDisplay.shortForm(genotype)));
+                + GeneCodeDisplay.shortForm(genome.genotype())));
+    }
+
+    private static boolean holdsSpawnEgg(ServerPlayer player) {
+        for (InteractionHand hand : InteractionHand.values()) {
+            if (player.getItemInHand(hand).is(ModItems.CUSTOM_HORSE_SPAWN_EGG.get())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static void handleSetBarnName(SetBarnNamePayload payload, net.minecraft.world.entity.player.Player player) {

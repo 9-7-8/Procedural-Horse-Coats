@@ -102,8 +102,19 @@ public final class Genotype {
      * gene.
      */
     public Genotype withSex(Sex sex) {
+        return with(Genes.SEX.pairFor(sex));
+    }
+
+    /**
+     * This genotype with one gene's combination replaced - the rest untouched.
+     * A <b>founder</b> operation, like {@link #withSex}: it is how the horse
+     * dimension forces a showcase horse to actually show something
+     * ({@link ShowcaseGenotypes}) and how the custom spawn egg builds the
+     * genome the player picked. A foal never goes through it.
+     */
+    public Genotype with(AllelePair pair) {
         Map<String, AllelePair> m = new LinkedHashMap<>(byGene);
-        m.put(Genes.SEX.key(), Genes.SEX.pairFor(sex));
+        m.put(pair.geneKey(), pair);
         return new Genotype(m);
     }
 

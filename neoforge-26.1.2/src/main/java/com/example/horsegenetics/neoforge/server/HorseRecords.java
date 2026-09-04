@@ -2,6 +2,7 @@ package com.example.horsegenetics.neoforge.server;
 
 import com.example.horsegenetics.common.Rng;
 import com.example.horsegenetics.common.coat.CoatGenerator;
+import com.example.horsegenetics.common.genetics.Genome;
 import com.example.horsegenetics.common.genetics.Genotype;
 import com.example.horsegenetics.common.horse.HorseRecord;
 import com.example.horsegenetics.common.horse.Sex;
@@ -68,10 +69,8 @@ public final class HorseRecords {
 
     /**
      * Founder record with a forced sex <b>and</b> a forced genotype - the horse
-     * dimension stocks each pen with a specific entry from
-     * {@link com.example.horsegenetics.common.genetics.GenotypeCatalog}, and the
-     * custom spawn egg with the one the player built, so neither may be
-     * re-rolled. The sex is written <i>into</i> the genotype
+     * dimension stocks each pen with a rolled showcase genotype, and the custom
+     * spawn egg with the one the player built, so neither may be re-rolled. The sex is written <i>into</i> the genotype
      * ({@link Genotype#withSex}) rather than beside it, because that is where a
      * horse's sex lives.
      *
@@ -87,9 +86,22 @@ public final class HorseRecords {
 
     /** Founder record with a forced genotype, whose sex locus is taken as-is. */
     public static HorseRecord newFounder(Horse horse, Rng rng, Genotype genotype) {
+        return newFounder(horse, rng, CoatGenerator.generate(genotype, rng).genome());
+    }
+
+    /**
+     * Founder record with a forced <b>genome</b> - epigenome included, so
+     * nothing about the horse is rolled but its name.
+     *
+     * <p>The custom spawn egg is the caller. Its editor previews a live 3D
+     * horse, and a preview that the spawn then re-rolls is not a preview; the
+     * epigenome the player was looking at travels with the genotype and is
+     * written straight in. Every other founder path rolls its own
+     * ({@link CoatGenerator#generate}) and should keep doing so.
+     */
+    public static HorseRecord newFounder(Horse horse, Rng rng, Genome genome) {
         NameParts name = NAMES.generateParts(rng);
-        return HorseRecord.founder(horse.getUUID(), name.first(), name.last(),
-                CoatGenerator.generate(genotype, rng).genome());
+        return HorseRecord.founder(horse.getUUID(), name.first(), name.last(), genome);
     }
 
     // --- the body, resolved from the genotype ---------------------------
