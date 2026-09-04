@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sex &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="nav.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow natural">Natural gene <span class="sep">/</span> no coat phase</p>
+<h1>Sex</h1>
+<p class="lede">
+    The sex chromosome pair, registered as an ordinary locus. A mare is
+    <code>X/X</code>, a stallion is <code>X/Y</code> &mdash; <strong>a real
+    <code>X</code> and a real <code>Y</code></strong>, both slots occupied. It is the
+    <strong>first gene in the order</strong> and the <strong>only gene that paints
+    nothing</strong>.
+</p>
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd>horsegenetics.sex</dd></div>
+    <div><dt>Alleles</dt><dd><span class="allele wild">X</span> <span class="allele dom">Y</span></dd></div>
+    <div><dt>Priority</dt><dd>1 &mdash; ahead of every coat gene</dd></div>
+    <div><dt>Outcomes</dt><dd><code>mare</code> (<code>X/X</code>), <code>stallion</code> (<code>X/Y</code>) &mdash; <strong>both wild types</strong></dd></div>
+    <div><dt>Cannot occur</dt><dd><code>Y/Y</code> &mdash; see below</dd></div>
+    <div><dt>Default allele</dt><dd>X (so a code with no sex segment reads as a mare)</dd></div>
+    <div><dt>Wild frequency</dt><dd>50% <code>X/X</code>, 50% <code>X/Y</code></dd></div>
+    <div><dt>Founder draws</dt><dd>1 &times; nextFloat()</dd></div>
+    <div><dt>Coat effect</dt><dd>none, ever</dd></div>
+</dl>
+
+<h2>Why sex is a gene</h2>
+
+<p>
+    Sex used to be a field on the <a href="breeding.html">horse record</a>, rolled by a
+    coin flip at birth. That made it a <strong>second source of truth</strong> beside
+    the genotype, and it meant a foal&rsquo;s sex was <em>invented</em> rather than
+    <em>inherited</em>. As a locus it costs one allele pair and buys three things:
+</p>
+
+<ul>
+    <li><strong>Inheritance falls out of the ordinary Mendelian draw.</strong> A mare
+        is <code>X/X</code> and can only pass an <code>X</code>; a stallion is
+        <code>X/Y</code> and passes one or the other 50/50 &mdash; exactly the two
+        <code>nextBoolean()</code> per gene that
+        <a href="genetics-model.html">breeding</a> already draws. There is <b>no special
+        case anywhere</b>: the sire decides the foal&rsquo;s sex because that is what
+        the alleles say, not because a handler was told to.</li>
+    <li><strong>It is resolved before every other gene.</strong> At priority
+        <code>1</code> the sex locus is the first entry in <code>Genes.codeOrder()</code>,
+        so a future X-linked or Y-linked gene (<a href="roadmap.html#sex-linked">roadmap
+        &sect;5.3</a>, brindle is the driving case) can segregate against a sex that is
+        already decided.</li>
+    <li><strong>Sex travels with the genome</strong> &mdash; into the genotype code, the
+        stallion seed jar&rsquo;s stored sample, and the custom spawn egg &mdash; instead
+        of needing its own field in each of them.</li>
+</ul>
+
+<h2>It paints nothing</h2>
+
+<p>
+    Both outcomes are <strong>wild types</strong>: this is the first gene in the model
+    whose every combination changes nothing about the coat. That is what keeps it free.
+</p>
+
+<ul>
+    <li><strong>The gallery does not widen.</strong> Both combinations land on a wild
+        type, and <code>GenotypeCatalog</code> collapses every wild type into one group,
+        so the whole locus is <b>one pen</b>. The catalogue stays at 98,306; only
+        <code>totalGenotypes()</code> doubles, to <b>516,560,652</b>, because every
+        genotype now genuinely comes in two sexes.</li>
+    <li><strong>The texture cache does not double.</strong> A derived
+        <code>Gene.affectsCoat()</code> is false when every one of a gene&rsquo;s outcomes
+        is a wild type, and <code>Genotype.coatCode()</code> &mdash; what
+        <code>CoatData.textureKey()</code> keys on &mdash; leaves those genes out. So a
+        mare and a stallion of the same colour share one baked texture, the same
+        reasoning that already keeps invisible epigenetics out of the key.</li>
+    <li><strong>The short display form ignores it.</strong> A plain horse still reads
+        <code>eeaa</code>; the info panel and the paper dump say
+        &ldquo;Mare&rdquo; / &ldquo;Stallion&rdquo; in words, as they always did.</li>
+</ul>
+
+<p>
+    Sexual dimorphism (a stallion&rsquo;s crest, a heavier build) is <strong>not</strong>
+    modelled. If it ever is, it belongs to a separate gene that <em>reads</em> this one,
+    not to this one.
+</p>
+
+<h2><code>Y/Y</code> is not a horse</h2>
+
+<p>
+    Nothing that can actually happen produces one: a founder draws from a table with two
+    entries, and a foal always takes an <code>X</code> from its dam. So the sex locus is
+    the first gene to override <code>Gene.canOccur(AllelePair)</code>, which
+    <code>GenotypeCatalog.allPairsOf</code> filters on &mdash; no gallery pen, and not
+    counted in <code>totalGenotypes()</code>.
+</p>
+
+<div class="codebox">
+<div class="filename">common/genetics/genes/SexGene.java</div>
+<pre><code class="language-java">@Override
+public Expression expressionOf(AllelePair pair) {
+    return pair.homozygousFor(X) ? MARE : STALLION;
+}
+
+@Override
+public boolean canOccur(AllelePair pair) {
+    return !pair.homozygousFor(Y);
+}</code></pre>
+</div>
+
+<p>
+    <code>expressionOf</code> still has to answer for it: parsing is deliberately
+    tolerant, so a hand-written code string can name <code>Y/Y</code>, and reading it as
+    a stallion beats throwing.
+</p>
+
+<h2>Reading the sex</h2>
+
+<p>
+    <code>Sex</code> stays the enum the rest of the code reads &mdash; it is now
+    <em>derived</em> rather than stored. <code>HorseRecord</code> has no
+    <code>sex</code> field and no <code>"sex"</code> codec entry;
+    <code>HorseRecord.sex()</code> reads the locus out of the genetic code it already
+    carries, and so does <code>StoredGenome.sex()</code> on a filled seed jar.
+</p>
+
+<div class="codebox">
+<div class="filename">common/genetics/Genotype.java</div>
+<pre><code class="language-java">public Sex sex() {
+    return Genes.SEX.sexOf(pair(Genes.SEX));
+}
+
+/** The sex segment alone, without parsing the rest - this is asked per GUI frame. */
+public static Sex sexOf(String code) { ... }</code></pre>
+</div>
+
+<p>
+    The one place sex is still <em>chosen</em> rather than inherited is a founder:
+    <code>Genotype.withSex(Sex)</code> rewrites the locus and nothing else. The horse
+    dimension uses it to stock each pen with one mare and one stallion of the same
+    colour, and the custom spawn egg uses it for the Mare / Stallion button. A foal never
+    goes through it.
+</p>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="genetics-model.html">The genetics model</a>
+        <a href="breeding.html">Breeding &amp; pedigree</a>
+        <a href="roadmap.html#sex-linked">Sex-linked genes (&sect;5.3)</a>
+    </div>
+    Source: <code>common/genetics/genes/SexGene.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

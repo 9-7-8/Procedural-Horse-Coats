@@ -205,6 +205,25 @@
     foals.
 </p>
 
+<div class="note">
+    <span class="label">Sex is a gene, and the enum is derived</span>
+    <p>
+        The enum is now a <em>reading</em> of the <a href="gene-sex.html">sex locus</a>
+        (<code>horsegenetics.sex</code>, <code>X</code>/<code>Y</code>, priority 1), not
+        a stored field: <code>HorseRecord</code> has no <code>sex</code> component and
+        the codec has no <code>"sex"</code> key. <code>HorseRecord.sex()</code> reads it
+        out of <code>geneticCode</code>, via <code>Genotype.sexOf(String)</code> (which
+        skips a full parse, because the info panel asks per frame).
+    </p>
+    <p>
+        So <strong>a foal&rsquo;s sex is inherited, not rolled</strong> &mdash; the dam
+        is <code>X/X</code> and gives an <code>X</code>, the sire is <code>X/Y</code> and
+        gives one or the other 50/50, all of it through the same
+        <code>breedWith</code> draw as every other gene. The only place sex is
+        <em>chosen</em> is a founder, via <code>Genotype.withSex(Sex)</code>.
+    </p>
+</div>
+
 <h3><code>HorseRecord</code></h3>
 
 <div class="table-wrap">
@@ -212,10 +231,9 @@
 <thead><tr><th>Field</th><th>Type</th><th>Notes</th></tr></thead>
 <tbody>
 <tr><td><code>id</code></td><td><code>UUID</code></td><td>The entity&rsquo;s own <code>getUUID()</code>.</td></tr>
-<tr><td><code>sex</code></td><td><code>Sex</code></td><td></td></tr>
 <tr><td><code>firstName</code> / <code>lastName</code></td><td><code>String</code></td><td>The two halves of the registered name. Either may be blank &mdash; <strong>not both</strong>.</td></tr>
 <tr><td><code>barnName</code></td><td><code>Optional&lt;String&gt;</code></td><td>Free-form display override, clamped to 16 chars, owner-editable.</td></tr>
-<tr><td><code>geneticCode</code></td><td><code>String</code></td><td>A <code>Genotype</code> code.</td></tr>
+<tr><td><code>geneticCode</code></td><td><code>String</code></td><td>A <code>Genotype</code> code &mdash; which now includes the <a href="gene-sex.html">sex locus</a>, so <code>sex()</code> is derived from this and there is no separate field.</td></tr>
 <tr><td><code>motherId</code> / <code>fatherId</code></td><td><code>Optional&lt;UUID&gt;</code></td><td>Dam / sire, if bred.</td></tr>
 <tr><td><code>tamedBy</code> / <code>bredBy</code></td><td><code>Optional&lt;String&gt;</code></td><td>Usernames.</td></tr>
 <tr><td><code>generation</code></td><td><code>int</code></td><td><strong>0</strong> for a foundation horse; a child of two foundations is <strong>1</strong>; otherwise <code>1 + max(dam, sire)</code>, fixed at birth. <em>Not</em> the family-tree column depth.</td></tr>
@@ -236,8 +254,12 @@ static double ceilSpeed(double v);    // 3 decimals, up
 static double ceilHealth(double v);   // whole number, up
 
 // factories
-static HorseRecord founder(id, sex, first, last, code);           // generation 0
-static HorseRecord bred(id, sex, first, last, code, motherId, fatherId, generation);
+static HorseRecord founder(id, first, last, genome);              // generation 0
+static HorseRecord bred(id, first, last, genome, motherId, fatherId, generation);
+// no sex argument: it rides in the genome. A founder that wants a particular
+// sex hands in genome.withSex(sex); a foal's is inherited.
+
+Sex sex();              // read back off the sex locus in geneticCode
 
 // copy helpers
 withNames, withBarnName, withTamedBy, withBredBy, withStats, withParentStats</code></pre>
@@ -310,7 +332,7 @@ int     offspringCount(UUID a, UUID b);</code></pre>
 <p>
     <code>MapCodec</code> / <code>Codec</code> for <code>HorseRecord</code>, kept
     <strong>out of</strong> the layer-1 type so it stays free of DataFixerUpper. NBT
-    keys: <code>id</code>, <code>sex</code>, <code>first_name</code>,
+    keys: <code>id</code>, <code>first_name</code>,
     <code>last_name</code>, <code>barn_name</code>, <code>genetic_code</code>,
     <code>mother_id</code>, <code>father_id</code>, <code>tamed_by</code>,
     <code>bred_by</code>, <code>generation</code>, <code>speed</code>,
@@ -318,7 +340,8 @@ int     offspringCount(UUID a, UUID b);</code></pre>
 </p>
 
 <p>
-    The record has 14 components &mdash; still under
+    There is <strong>no <code>sex</code> key</strong> any more: sex is a gene, so it
+    is already inside <code>genetic_code</code>. The record has 14 components &mdash; still under
     <code>RecordCodecBuilder.group</code>&rsquo;s limit of 16. Also exposes
     <code>STREAM_CODEC</code> / <code>LIST_STREAM_CODEC</code> for the sync payloads.
 </p>
@@ -368,13 +391,14 @@ int     offspringCount(UUID a, UUID b);</code></pre>
 <tbody>
 <tr><td><code>of(horse)</code> / <code>hasRealRecord(horse)</code></td><td>Read the attachment; <code>hasName()</code>.</td></tr>
 <tr><td><code>apply(horse, record)</code></td><td>Write the attachment, set the custom name visible, record into the global DB, <strong>and</strong> send a <code>HorseRecordSyncPayload</code> to trackers.</td></tr>
-<tr><td><code>newFounder(horse, rng[, sex])</code></td><td>Founder record: random genotype, random name, sex random or forced, plus <code>.withStats(entitySpeed, entityHealth)</code>.</td></tr>
+<tr><td><code>newFounder(horse, rng)</code></td><td>Founder record: random genotype (<strong>sex included</strong> &mdash; it is a gene now), random name, plus <code>.withStats(entitySpeed, entityHealth)</code>.</td></tr>
+<tr><td><code>newFounder(horse, rng, genotype)</code> / <code>(horse, rng, sex, genotype)</code></td><td>Founder record on a fixed genotype (a gallery pen, the custom spawn egg). The 4-arg form writes the sex <em>into</em> the genotype with <code>withSex</code>.</td></tr>
 <tr><td><code>entitySpeed / entityHealth(horse)</code></td><td><code>getAttributeValue(MOVEMENT_SPEED / MAX_HEALTH)</code>.</td></tr>
 <tr><td><code>applyStatsToEntity(horse, record, fullHeal)</code></td><td>Push the record&rsquo;s numbers onto the attribute <em>base</em> values. <code>fullHeal</code> sets current HP to the new max (newborn); otherwise it only clamps HP down (reload, so no free heal). No-op for <code>0.0</code>.</td></tr>
 <tr><td><code>backfillStatsIfMissing(horse)</code></td><td>Fill <code>0.0</code> stats from the live entity.</td></tr>
 <tr><td><code>offspringCount(contextHorse, damId, sireId)</code></td><td>From the server-global ancestry data, else <code>0</code>.</td></tr>
 <tr><td><code>rename</code> / <code>setBarnName</code> / <code>setTamedBy</code></td><td>Copy-and-apply helpers.</td></tr>
-<tr><td><code>randomSex(rng)</code> / <code>rng(horse)</code> / <code>names()</code></td><td>Small utilities.</td></tr>
+<tr><td><code>rng(horse)</code> / <code>names()</code></td><td>Small utilities. (<code>randomSex</code> is gone &mdash; the founder draw rolls the sex locus.)</td></tr>
 </tbody>
 </table>
 </div>
@@ -394,8 +418,8 @@ int     offspringCount(UUID a, UUID b);</code></pre>
 <ol>
     <li><code>rng</code> from <code>horse.getRandom()</code>.</li>
     <li>No real record &rarr; <code>apply(horse, newFounder(...))</code>: random
-        genotype, random sex, generated name, no parents, speed and health copied from
-        the entity&rsquo;s current attributes.</li>
+        genotype (<strong>the sex locus among it</strong>), generated name, no parents,
+        speed and health copied from the entity&rsquo;s current attributes.</li>
     <li>Otherwise (bred or reloaded) &rarr; backfill stats, re-record into the global
         DB (idempotent), <code>applyStatsToEntity(..., fullHeal=false)</code> so a
         reloaded horse keeps its rolled attributes, and re-set the custom name if
@@ -466,7 +490,8 @@ int     offspringCount(UUID a, UUID b);</code></pre>
     <code>Horse</code> itself, passes the mare&rsquo;s live genome and a
     <em>synthetic</em> sire <code>HorseRecord</code> reconstructed from the jar&rsquo;s
     <code>stored_genome</code> component (a <code>GenomeSample</code> + the donor&rsquo;s
-    sex / UUID / name / stats), and adds the foal after. Same Mendelian +
+    UUID / name / stats &mdash; his sex is in the stored genotype), and adds the foal
+    after. Same Mendelian +
     carrier-faithful draw, drawn at impregnation &mdash; no gamete is frozen at
     collection. There is no gestation delay yet and no breeding-carrot gate; the foal
     is immediate, exactly as flow B.
@@ -620,10 +645,12 @@ int     offspringCount(UUID a, UUID b);</code></pre>
     <li><strong>A foal&rsquo;s epigenetics are copied exactly, with no
         variation</strong>, so a closed line converges on one look. Deliberate for
         now.</li>
-    <li>No inbreeding prevention, no generational effects, no sex-linked loci yet
-        &mdash; genes combine independently.
-        <a href="roadmap.html#sex-linked">Sex linkage is designed</a> and is the one
-        planned exception.</li>
+    <li>No inbreeding prevention, no generational effects, and <strong>no sex-linked
+        loci yet</strong> &mdash; genes combine independently. The
+        <a href="gene-sex.html">sex locus itself is built</a>, which was the
+        prerequisite; X-linked and Y-linked inheritance
+        (<a href="roadmap.html#sex-linked">&sect;5.3</a>) is the remaining half and the
+        one planned exception to independent assortment.</li>
     <li>Name-generation output is rough and slated for a rework. The rule &mdash;
         <code>&lt;alpha&gt; &lt;space&gt; &lt;beta&gt;</code> &mdash; is fixed.</li>
     <li><code>HorseRecord.geneticCode</code> and the coat attachment&rsquo;s genotype

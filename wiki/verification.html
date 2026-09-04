@@ -103,7 +103,66 @@
 
 <h2>Still to verify</h2>
 
-<h3 id="expressions">0. The combination-table rewrite &mdash; no more dominance (new 2026-09-03)</h3>
+<h3 id="sex-gene">0. Sex is a gene (new 2026-09-03)</h3>
+
+<p>
+    <a href="roadmap.html#sex-linked">Roadmap &sect;5.3</a>, first half:
+    <a href="gene-sex.html"><code>horsegenetics.sex</code></a> is registered at priority
+    1 with alleles <code>X</code> / <code>Y</code>. <code>HorseRecord.sex</code> is no
+    longer a field &mdash; it is read off the genetic code &mdash; and
+    <code>HorseRecords.randomSex</code> is gone, so <strong>a foal&rsquo;s sex is
+    inherited rather than rolled</strong>. 227 <code>:common:test</code> pass, parity is
+    3,832 checks across 48 cases, <code>:neoforge-26.1.2:build</code> is green and
+    <code>runServer</code> boots clean at <strong>20 segments</strong>.
+</p>
+
+<div class="note danger">
+    <span class="label">Every horse in an existing world is a different horse, again</span>
+    <p>
+        The genotype code <em>gained</em> a segment and every gene&rsquo;s epigenetic
+        seed shifted with its position in <code>codeOrder()</code>, so a save from
+        before this change will not reproduce its horses. <strong>Start a fresh
+        world.</strong> (90 of the 240 golden rows are byte-identical &mdash; the
+        deterministic coats &mdash; which is the proof the pipeline itself did not
+        move.)
+    </p>
+</div>
+
+<ul>
+    <li><strong>Wild spawns come in both sexes.</strong> Spawn a dozen; the info panel
+        should show a mix of <em>Mare</em> and <em>Stallion</em>, roughly half and
+        half. A run of twelve of one kind means the founder table is not being
+        drawn.</li>
+    <li><strong>A foal&rsquo;s sex is inherited.</strong> Breed one pair repeatedly
+        (or use the seed jar) and watch the foals: both colts and fillies should turn
+        up. <b>Two mares can never make a colt</b> &mdash; but they cannot breed at
+        all, so the real check is that the sex shown on the foal matches what the
+        family tree and the paper dump say, every time.</li>
+    <li><strong>The same-sex breeding gate still works.</strong> Two mares or two
+        stallions in love mode must refuse to produce a foal &mdash; that gate now
+        reads a derived value, so it is worth re-confirming.</li>
+    <li><strong>A mare and a stallion of the same colour look identical.</strong>
+        Spawn both from the custom egg with the same genome; they must render the same
+        coat. (They now share one baked texture &mdash; if one is a plain white horse,
+        the coat-code / texture-id work is wrong.)</li>
+    <li><strong>The custom spawn egg&rsquo;s Mare / Stallion button still works</strong>,
+        and <strong>sex does not appear in the &ldquo;+ Add gene&rdquo; picker</strong>
+        (it is filtered out; the button owns that locus).</li>
+    <li><strong>The gallery still has one mare and one stallion per pen</strong>, and
+        the pen signs are unchanged &mdash; the short genome form does not print sex.
+        The entrance sign&rsquo;s <em>Genotypes</em> number should now read
+        <strong>516,560,652</strong>; <em>Distinct</em> stays <strong>98,306</strong>.</li>
+    <li><strong>The seed jar still refuses a mare</strong> (collection) and
+        <strong>refuses a stallion</strong> (impregnation) &mdash; both sides now read
+        the sex out of the genome rather than a stored field, and the jar&rsquo;s own
+        <code>sex</code> component is gone.</li>
+    <li><strong>A reloaded horse keeps its sex.</strong> Save and quit with a known
+        stallion, come back: he must still be a stallion. (The record no longer carries
+        a <code>"sex"</code> NBT key, so this is really "does the genetic code survive",
+        but it is the cheapest way to catch a regression.)</li>
+</ul>
+
+<h3 id="expressions">0.1 The combination-table rewrite &mdash; no more dominance (new 2026-09-03)</h3>
 
 <p>
     <a href="roadmap.html#multi-allele">Roadmap &sect;5.1 / &sect;5.2 / &sect;2</a>:
@@ -114,8 +173,9 @@
     <a href="gene-matp.html">MATP</a>; the JSON gene format moved to
     <code>"format": 2</code>; and the <strong>epigenome moved onto
     <code>HorseRecord</code></strong> (the separate coat attachment is gone). 213
-    <code>:common:test</code> pass, parity is 3,832 checks across 48 cases,
-    <code>runServer</code> boots clean (<code>19 segments</code>). Machinery:
+    <code>:common:test</code> pass at the time (227 now), parity is 3,832 checks across
+    48 cases, <code>runServer</code> boots clean (<code>19 segments</code> then,
+    <code>20</code> since the sex locus). Machinery:
     <a href="genetics-model.html#combinations">Genetics model</a>,
     <a href="gene-format.html">the gene file format</a>,
     <a href="gene-matp.html">MATP</a>.
@@ -161,7 +221,7 @@
         off his record now rather than off an attachment.</li>
     <li><strong>Suntouched / Waterborn still load and express.</strong> Both gene files
         were rewritten to format 2; the log should read
-        <code>loaded 2 data-driven gene(s)</code> and <code>19 segments</code>. A
+        <code>loaded 2 data-driven gene(s)</code> and <code>20 segments</code>. A
         parse error would drop them silently from the genotype.</li>
     <li><strong>The gene creator still exports a file the game accepts.</strong> Open
         <code>wiki/gene-creator/index.html</code>, load an example, export, drop it in
@@ -186,7 +246,7 @@
 </div>
 
 
-<h3 id="data-model">0.1 The data-model rewrite &mdash; gene priority + gene-keyed codes (2026-09-03)</h3>
+<h3 id="data-model">0.2 The data-model rewrite &mdash; gene priority + gene-keyed codes (2026-09-03)</h3>
 
 <p>
     <a href="roadmap.html#priority">Roadmap Tier&nbsp;1</a>: every gene has
@@ -215,7 +275,7 @@
         <code>GeneCodeDisplay</code> bug (closed with this change) hid them.</li>
 </ul>
 
-<h3 id="horse-care">0.2 Horse care &mdash; gated healing, bond &amp; herds (new 2026-09-02)</h3>
+<h3 id="horse-care">0.3 Horse care &mdash; gated healing, bond &amp; herds (new 2026-09-02)</h3>
 
 <p>
     First slice of <a href="roadmap.html#care">roadmap &sect;7</a> and
@@ -378,7 +438,7 @@
 <h3>4. Pen signs now overflow</h3>
 
 <p>
-    At 17 genes a fully loaded-up genotype label runs to well over a hundred
+    At 18 genes a fully loaded-up genotype label runs to well over a hundred
     characters against three 15-char sign lines, so <code>GeneCodeDisplay.wrap</code>
     overflows the last line badly (the unit-test tripwire is now 140). Confirm how
     badly that reads in-game before deciding
@@ -419,7 +479,8 @@
 
 <ul>
     <li>The entrance sign three blocks in front of the return portal reads
-        <code>Genotypes / 258,280,326 / Distinct / 98,306 pens</code>.</li>
+        <code>Genotypes / 516,560,652 / Distinct / 98,306 pens</code> (both derived,
+        so the first number doubled when the sex locus landed).</li>
     <li>The first six pens, right/left alternating, are <code>eeaa</code>,
         <code>EEaa</code>, <code>eeAA</code>, <code>EEAA</code>,
         <code>EEaa WW</code>, <code>EEaa TT</code> &mdash; extension exhausts before

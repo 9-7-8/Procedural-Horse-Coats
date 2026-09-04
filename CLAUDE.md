@@ -125,6 +125,47 @@ project. Its shape:
 
 ## Status snapshot (keep this current)
 
+- **Built 2026-09-03, NOT yet play-tested: sex is a gene (roadmap §5.3, first
+  half).** `SexGene` (`horsegenetics.sex`, **priority 1** - the first gene in
+  `codeOrder()`), alleles `X`/`Y`: `X/X` is a mare, `X/Y` a stallion, `Y/Y`
+  cannot occur. **18 built-in genes**, 20 in-game. Landing with it:
+  - **Both outcomes are wild types** - the first gene in the model that paints
+    nothing, ever. So the gallery does **not** widen (`GenotypeCatalog`
+    collapses every wild type into one group): still **98 306** pens, while
+    `totalGenotypes()` doubles to **516 560 652** (every genotype now genuinely
+    comes in two sexes).
+  - **`Gene.affectsCoat()`** (derived: "is any of my outcomes not a wild type?")
+    plus **`Genotype.coatCode()`** - `toCode()` minus the genes that can never
+    paint. `CoatData.textureKey()` runs on that, so a mare and a stallion of the
+    same colour still share **one** baked texture instead of doubling the cache.
+    Same reasoning as the epigenetics already excluded from the key.
+  - **`Gene.canOccur(AllelePair)`** (default `true`) - `GenotypeCatalog.
+    allPairsOf` filters on it, so `Y/Y` gets no pen and is not counted.
+    `expressionOf` still answers for it (a hand-written code reads as a
+    stallion) because parsing is tolerant.
+  - **`HorseRecord.sex` is gone as a field** - `sex()` reads the locus out of
+    `geneticCode` via `Genotype.sexOf(String)` (a segment scan, not a full
+    parse: the info panel asks per frame). The `"sex"` codec key and
+    `StoredGenome`'s `sex` component went with it, and
+    `HorseRecords.randomSex` is **deleted**. `HorseRecord.founder` / `bred` lost
+    their `Sex` parameter.
+  - **A foal's sex is inherited, not rolled** - the dam is `X/X` and gives an
+    `X`, the sire gives his `X` or `Y` 50/50, all through the same
+    `breedWith` draw as every other gene. No special case anywhere.
+    `Genotype.withSex(Sex)` / `Genome.withSex(Sex)` is the founder-only way to
+    *choose* one (gallery pens, the custom spawn egg); the egg's gene picker
+    filters the sex locus out, since its Mare/Stallion button owns that locus.
+  - `coat-golden.txt` regenerated - **90 of 240 rows are byte-identical** (the
+    deterministic coats; the pipeline didn't move), the other 150 shifted
+    because the code gained a segment and every gene's derived epigenetic seed
+    moved with its position. `:common:test` **227 green**,
+    `:neoforge-26.1.2:build` green, parity **3 832 checks / 48 cases**,
+    `runServer` boots clean (`20 segments`, `loaded 2 data-driven gene(s)`).
+  - **Old saves will not reproduce their horses.** Dev only; start a fresh world.
+  - Docs: `wiki/gene-sex.html` (new), `wiki/genetics-model.html`,
+    `wiki/breeding.html`, `wiki/pipeline.html`, `wiki/api-reference.html`,
+    `wiki/roadmap.html` §5.3. Checklist: `wiki/verification.html` §0.
+
 - **Built 2026-09-03, NOT yet play-tested: the combination-table rewrite
   (roadmap Tier 1 §2, Tier 2 §5.1/§5.2).** `DominancePattern` is **deleted**.
   A gene no longer declares a dominance label; it declares an **`Expression`
@@ -149,7 +190,8 @@ project. Its shape:
     proving case and the mod's first three-allele locus: `Cr`/`prl`/`N`, six
     combinations, four outcomes. Kills the impossible `Cr/Cr`-and-`prl/prl`
     genotype; `coat/pattern/CreamPearlDilution` is gone (the dose table is a
-    six-row `switch` on the gene). **17 built-in genes**, 19 in-game.
+    six-row `switch` on the gene). 17 built-in genes at the time (18 now, with
+    sex); 19 in-game, 20 now.
   - **`Allele` lost `visible` / `deterministic`** (both are properties of a
     *combination*) and **gained an `order`** - its index in `alleles()`, which
     is a slot order for `AllelePair`'s canonical form and **not** dominance.
@@ -168,12 +210,13 @@ project. Its shape:
     they land on, with **every wild type counting as one group** ("changes
     nothing" is one *look*). Exact rather than an approximation, and it shrank
     the gallery from 331 778 pens to **98 306** (splash 3→2, MATP 9→4);
-    `totalGenotypes()` is **258 280 326**.
+    `totalGenotypes()` was **258 280 326** (**516 560 652** since the sex gene).
   - `coat-golden.txt` regenerated - **every coat changed**, because founder
-    draws and the gene set both moved. `:common:test` **213 green**,
+    draws and the gene set both moved. `:common:test` **213 green** at the time,
     `:neoforge-26.1.2:build` green, parity **3 832 checks / 48 cases** (up 48:
     the fixtures now pin which expression each combination resolves to),
-    `runServer` boots clean (`19 segments`, `loaded 2 data-driven gene(s)`).
+    `runServer` boots clean (`19 segments` at the time, 20 since the sex gene;
+    `loaded 2 data-driven gene(s)`).
   - **Old saves will not reproduce their horses** - the code lost a segment and
     the founder draw changed. Dev only; start a fresh world.
   - Docs: `wiki/genetics-model.html#combinations`, `wiki/gene-format.html`,
@@ -212,15 +255,16 @@ project. Its shape:
   Still unconfirmed: bred foal, seed-jar round-trip, a spec gene actually
   showing in the display (needs a horse carrying Suntouched/Waterborn) -
   `wiki/verification.html` §0.
-- **`common/`** - compiles; **213 JUnit tests pass** (`./gradlew :common:test`).
-  Covers `genetics/` (allele/gene model - **17 genes**: the 15 natural ones
+- **`common/`** - compiles; **227 JUnit tests pass** (`./gradlew :common:test`).
+  Covers `genetics/` (allele/gene model - **18 genes**: **sex** (the only gene
+  that paints nothing), the 15 natural ones
   (extension, agouti, champagne, splash, grey, **MATP** (cream + pearl, three
   alleles), **dun**, **silver**, **mushroom**, **roan**, **tobiano**, **frame**,
   **sabino**, plus the masking dominant white), and magic zebra + pink hair;
   `Genotype` code round-trip, breeding, the `Epigenome` / `Genome` per-allele
   epigenetics + priority tie-break, `GenomeSample` - a genome detached from a
   horse, for the stallion seed jar - `Expression` + `FounderTable` + the
-  `GenotypeCatalog` reduction of 258 280 326 genotypes to 98 306 distinct
+  `GenotypeCatalog` reduction of 516 560 652 genotypes to 98 306 distinct
   coats), `coat/` + `coat/pattern/` (the
   three-phase pipeline - `CoatTextureComposer`, `PigmentField`, `ColorField`,
   `GradientLut`, `BayCoat`, `GreyCoat`, `BodyStripes`, `CoatRegions`, the pure
@@ -287,11 +331,12 @@ project. Its shape:
     texel reads gold on the LUT); frame produced almost nothing (per-part
     `sideWeight` left the barrel untouched -> absolute-Y band); sabino showed
     axis-aligned squares (`PatchNoise` instead of raw `BodyNoise.value`).
-  - Registry was 18 genes then; it is **17** now that cream and pearl merged
-    (19 in-game with the two shipped spec genes). `GeneCodeDisplay`'s trailing
+  - Registry was 18 genes then; it is **18** now - cream and pearl merged, then
+    sex was added (20 in-game with the two shipped spec genes). `GeneCodeDisplay`'s trailing
     order gained all seven. `coat-golden.txt` regenerated (10 new cases).
     `GenotypeCatalog` blew up to 331 778 distinct coats; the combination-table
-    rewrite brought that back to **98 306** (`totalGenotypes()` 258 280 326),
+    rewrite brought that back to **98 306** (`totalGenotypes()` 258 280 326 then,
+    516 560 652 since sex),
     so the gallery corridor is ~344 000 blocks of lazily-built pens - still an
     argument for roadmap §9. The
     exhaustive `2^genes` / `3^genes` tests (`CoatTextureIdTest`,
@@ -560,7 +605,7 @@ project. Its shape:
   `GeneSpecLoader.fromClasspath()` picks up in the mod constructor. These are the
   **first (and so far only) gene files to ship**, breaking the "no gene ships by
   default" invariant on purpose (the owner OK'd it): the in-game genotype code is
-  now **19 segments** (13 at the time), `GenotypeCatalog`/the gallery are ~**4x** (each shipped
+  now **20 segments** (13 at the time), `GenotypeCatalog`/the gallery are ~**4x** (each shipped
   `DOMINANT` two-allele gene doubles them), and shorter saved horses won't parse.
   **`:common:test` is unaffected** - the index lives in the neoforge module's
   resources, not on the `common` test classpath, so `Genes` stays at 11
@@ -621,7 +666,7 @@ project. Its shape:
   **`wiki/verification.html`**.
 - **Built 2026-09-01, NOT yet play-tested:** the **genotype gallery** rework of
   the horse dimension - one pen per visually distinct genotype (98 306 of
-  258 280 326 as of 2026-09-03),
+  516 560 652 as of 2026-09-03),
   per-pen genotype signs, the entrance tally sign, the per-gene distinctness
   metadata (`Gene.dominance()` then, the expression table now),
   and the entity-only teardown that leaves blocks standing. Compiles, 138
@@ -668,7 +713,9 @@ Two-module Gradle project, split deliberately:
     `src/main/resources/horsegenetics/names/`.
   - `horse/` - the pedigree domain model (`Sex`, `HorseRecord`,
     `HorseDatabase`, `InMemoryHorseDatabase`) and `HorseStats` (foal stat
-    roll) -> `wiki/breeding.html`.
+    roll) -> `wiki/breeding.html`. **`Sex` is an enum the rest of the code
+    reads, not a stored fact**: `HorseRecord` has no `sex` field and derives
+    `sex()` from the sex locus in its genetic code.
   - `genetics/spec/` - the **data-driven gene** path: `GeneSpec` (the format as
     records), `Json` (a hand-rolled parser - `common/` takes no dependencies),
     `GeneSpecParser`, `SpecSchema` (the one declaration of what each mask and op
@@ -780,7 +827,7 @@ a data-driven natural gene at priority 45 lands *between* the built-in MATP
 (40) and champagne (50) - loaded genes are not appended. Bands are a
 convention: `0-99` natural, `100+` magical; `Genes.register` logs a warning for
 a gene outside its phase's band (via `System.getLogger`) but carries on. Ties
-break alphabetically by key. Built-in priorities: extension 10, agouti 20,
+break alphabetically by key. Built-in priorities: **sex 1**, extension 10, agouti 20,
 silver 30, mushroom 32, dun 34, **MATP 40**, champagne 50, grey 55, white 60,
 roan 70, tobiano 72, frame 74, sabino 76, splash 80, pink hair 110, magic
 zebra 120, test 900. Within the natural band **low = sets pigment absolutely,
@@ -789,16 +836,19 @@ higher = dilution** (agouti's absolute points must precede
 *seed*, never an order. `GenotypeCatalog` is lazy and invalidated on every
 registration.
 
-`Genes.codeOrder()` (derived) = extension, agouti, silver, mushroom, dun,
+`Genes.codeOrder()` (derived) = **sex**, extension, agouti, silver, mushroom, dun,
 MATP, champagne, grey, white, roan, tobiano, frame, sabino, splash,
 pink hair, magic zebra, test. `naturalOrder()` (phase-1 pigment restriction) =
 the same list minus the three magical genes - silver / mushroom / dun sit
 right after agouti so the points exist to dilute, the white-pattern genes just
-before splash. **Full per-gene detail is in `wiki/gene-*.html`** (one page per
+before splash. Sex is *in* `naturalOrder()` (it declares `isNatural()`) but
+every one of its outcomes is a wild type, so the composer skips it - it is the
+one gene that never paints, and `Gene.affectsCoat()` is false only for it. **Full per-gene detail is in `wiki/gene-*.html`** (one page per
 gene); one-liners:
 
 | gene | alleles | outcomes (per combination) | in the wild | coat effect |
 |------|---------|-----------------------------|-------------|-------------|
+| sex | `X`/`Y` | `mare` (`X/X`), `stallion` (`X/Y`) - **both wild types**; `Y/Y` `canOccur` = false | 50/50 | **none, ever** - the only gene that paints nothing. Priority 1 so a future sex-linked gene reads a resolved sex; `HorseRecord.sex()` is derived from it |
 | extension | `E`/`e` | wild (`E_`), `chestnut` (`ee`) | 25/50/25 | `ee` = black restricted → chestnut |
 | agouti | `A`/`a` | wild (`aa`), `bay` (`A_`) | 25/50/25 | `A_` = bay; one uniform "point extent" off the `A` copy sets leg + face black, each leg jittered; a high roll = seal (non-det). Reports wild on a chestnut via `expressionIn` |
 | white | `W`/`w` | wild, `white` **(masks)** | 1/50 per allele | `W_` = all pigment gone → transparent; masks every other gene |
@@ -845,6 +895,13 @@ rolled for a genome-aware distribution and *throws* if asked about a later one.
 `FounderTable.hardyWeinberg(variant, baseline, p)` computes the three
 two-allele numbers the old "1 in N" meant.
 
+**Sex is a gene** (`horsegenetics.sex`, priority 1, `X`/`Y`) - see
+`wiki/gene-sex.html`. `Genotype.sex()` / `Genotype.sexOf(String code)` read it;
+`Genotype.withSex(Sex)` is the founder-only way to force one. Both its outcomes
+are wild types, so it never reaches the coat: `Gene.affectsCoat()` is false and
+`Genotype.coatCode()` (what `CoatData.textureKey()` runs on) leaves it out.
+`Gene.canOccur(AllelePair)` rules out `Y/Y` for `GenotypeCatalog`.
+
 Seal has **no gene** - it's the top of agouti's random distribution. Cream and
 pearl are **one gene** (`MatpGene`), which is what the multi-allele model bought.
 
@@ -853,7 +910,9 @@ pearl are **one gene** (`MatpGene`), which is what the multi-allele model bought
 (foals are fully generated too).
 
 `random(rng)` - each gene draws its pair from its `FounderTable`: **1
-`nextFloat()` per gene**. `breedWith` = **2 `nextBoolean()` per gene**. `Gene.isVisible(pair, genotype)`
+`nextFloat()` per gene**, sex among them. `breedWith` = **2 `nextBoolean()` per
+gene**, which is also the whole of sex inheritance (the dam only has `X` to
+give; the sire gives `X` or `Y` 50/50). `Gene.isVisible(pair, genotype)`
 / `isDeterministic(pair, genotype)` see the whole genotype (agouti invisible on
 chestnut; cream/pearl read each other). `Genotype.hasVisibleNonDeterministic()`
 = "generate the texture per horse".
@@ -933,7 +992,7 @@ reference is **`wiki/gene-format.html`**; the machinery:
   `example.suntouched` and `example.waterborn`, via
   `neoforge/src/main/resources/horsegenetics/genes/index.json`, added 2026-09-02
   to make the effects work testable (see the status snapshot). So **in-game** the
-  genotype code is **19 segments** and the gallery numbers are ~4x;
+  genotype code is **20 segments** and the gallery numbers are ~4x;
   **`:common:test` still sees the 17 built-ins** because that index is not on its
   classpath, so `coat-golden.txt` is untouched.
   `neoforge/ModGeneSpecs` calls it **from the mod constructor**, which is the
@@ -1032,11 +1091,15 @@ Coats are **generated** for every horse - adult *and* foal. Per-gene detail in
     can *find* a region (all the black, all the white) before painting it.
 
 - **`CoatData`** = a `Genome` (`Genotype` + `Epigenome`), assigned once at
-  birth and persisted. `textureKey()` = the genotype code, plus
-  `@<fingerprint hex>` only when non-deterministic -
+  birth and persisted. `textureKey()` = **`Genotype.coatCode()`** - the code
+  minus every gene that can never paint (`Gene.affectsCoat()`; only sex, today,
+  which is what stops a mare and a stallion of the same colour baking two
+  identical textures) - plus `@<fingerprint hex>` only when non-deterministic -
   `Epigenome.visibleFingerprint(genotype)` digests just the *expressed* seeds of
   genes that are visible **and** non-deterministic, so epigenetics a horse can't
   show don't fork the texture cache. The factory also keys on adult vs foal.
+  `coatCode()` is **not** a persistence format - it's lossy and nothing parses
+  it back.
 - **`CoatTextureComposer.compose(genotype, epigenome, Skin, adult, template, GradientLut)`**
   → 128px `int[]` ARGB:
   1. **natural pass** - every pixel starts max red + max black; each visible
@@ -1636,10 +1699,11 @@ The dimension is a **gallery of the genotype catalogue** - two horses for every
 genotype that looks different from every other.
 
 - **`GenotypeCatalog`** (pure `common/`, unit-tested) is the enumeration.
-  `allPairsOf(gene)` = every unordered `AllelePair`, all `n(n+1)/2` of them
-  (`ee`, `Ee`, `EE`); `distinctPairsOf(gene)` keeps one representative per
-  distinct `Expression`; `totalGenotypes()` = the raw product
-  (**258 280 326**); `size()` = the reduced catalogue (**98 306**); `get(i)` /
+  `allPairsOf(gene)` = every unordered `AllelePair` a horse can carry, all
+  `n(n+1)/2` of them (`ee`, `Ee`, `EE`) minus any the gene rules out with
+  `canOccur` (only sex, which has no `Y/Y`); `distinctPairsOf(gene)` keeps one
+  representative per distinct `Expression`; `totalGenotypes()` = the raw product
+  (**516 560 652**); `size()` = the reduced catalogue (**98 306**); `get(i)` /
   `entries()` read the list, built once at class load. Nothing is hard-coded - register a gene (or an allele) and the
   catalogue, the corridor length and both signs widen on their own.
 - **Two reductions**, both read straight off the gene's expression table with
@@ -1656,7 +1720,9 @@ genotype that looks different from every other.
     instead of a huge fraction of the corridor each.
   - Net: `2^13 · 4 (MATP) · 3 (sabino) = 98 304` unmasked + 1 white + 1 test =
     **98 306**. Splash dropped from 3 pens to 2 (its two variant combinations
-    are one expression) and MATP from cream×3 · pearl×3 = 9 to 4.
+    are one expression) and MATP from cream×3 · pearl×3 = 9 to 4. **Sex adds no
+    pens** - both its outcomes are wild types, so the whole locus is one group;
+    it only doubles `totalGenotypes()`.
 - **Pen order**: segment `i` holds catalogue entry `2i` in the **right-hand**
   pen (`NORTH_PEN`, the `+Z` side - your right walking in from the portal) and
   `2i+1` on the left. The corridor reads `eeaa, EEaa, eeAA, EEAA, [white],
@@ -1671,7 +1737,7 @@ genotype that looks different from every other.
     then **`GeneCodeDisplay.shortForm`** - the same compact form the info panel
     and paper dump use, so a plain horse reads `eeaa`, not a wall of wild-type
     slots - greedily wrapped over the remaining 3 lines by
-    `GeneCodeDisplay.wrap(genotype, 3, 15)`. **At 18 genes the widest labels
+    `GeneCodeDisplay.wrap(genotype, 3, 15)`. **At 20 in-game genes the widest labels
     come nowhere near fitting** three 15-char lines - a horse loaded up on the
     white-pattern + dilution genes runs to well over a hundred chars - and
     `wrap` deliberately overflows its **last** line rather than dropping a
@@ -1680,7 +1746,8 @@ genotype that looks different from every other.
     pens (`wiki/roadmap.html` §9), which retires the per-genotype sign
     entirely - so this is deliberately left alone.
   - `originX + 4` (three blocks in front of the return portal), facing west at
-    the player's spawn: `Genotypes / 387,420,489 / Distinct / 331,778 pens`.
+    the player's spawn: `Genotypes / <totalGenotypes()> / Distinct / <size()>
+    pens` - both derived, so **516,560,652 / 98,306** today.
     Epigenetics are deliberately not counted in either number.
 - **Length**: `LAST_SEGMENT_INDEX` = `ceil(size / 2) - 1` = 864, so the corridor
   is **6 055 blocks** (it was 1 519 at 9 genes - each new gene multiplies it, which
@@ -2012,6 +2079,19 @@ Design follow-ups (not just "go look at it"):
    placement inside a waterlogged block only counts via the `#minecraft:water`
    fluid check, not the block tag. Feed-bond fires on `EntityInteract` for any
    `isFood` stack and is **not** dose/temper-aware.
+
+21. **Sex is a gene, but nothing is sex-*linked* yet** (roadmap §5.3, second
+   half). The locus is built and `HorseRecord.sex` is derived from it, which was
+   the prerequisite; what's left is the inheritance *mode*. Specifically:
+   `Gene` has no autosomal / X-linked / Y-linked declaration; `breedWith` has no
+   two extra cases (sire gives his `X` to a filly and his `Y` to a colt, mirrored
+   for Y-linked); `Gene.canOccur` is the seam the catalogue already filters on
+   but it doesn't consult a mode, so an `X/X` mare at a Y-linked locus would
+   still be enumerated; a founder table can't yet say "a colt draws one allele
+   here, a filly two"; and no surface writes the hemizygous `X-`/`Y-` prefix.
+   **Brindle** (§4.2) is the gene that wants all of it. Also unbuilt: any
+   *sexual dimorphism* in the coat - sex paints nothing and deliberately never
+   will, so a stallion's crest would be a separate gene reading this one.
 
 ## License
 

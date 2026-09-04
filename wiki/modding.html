@@ -48,7 +48,7 @@
     <span class="label">What is and isn't open</span>
     <p>
         <code>Genes</code> is an <strong>open registry</strong> for data-driven genes:
-        <code>Genes.register(SpecGene)</code> appends after the seventeen built-ins,
+        <code>Genes.register(SpecGene)</code> appends after the eighteen built-ins,
         sorted by declared <code>priority</code> then key, so registration order never
         decides how a horse looks. A <em>Java</em> gene from another mod still has to
         be added to this repository &mdash; the mod-bus registration hook, the
@@ -154,12 +154,32 @@
     // --- phase declaration ------------------------------------------------
     default boolean isNatural() { return true; }
 
+    // --- override only if a combination genuinely cannot exist -------------
+    // Almost every locus lets any two of its alleles pair up. Say otherwise and
+    // the combination gets no gallery pen and is not counted in
+    // totalGenotypes(). Only the sex locus does, to rule out Y/Y.
+    default boolean canOccur(AllelePair pair) { return true; }
+
     // --- derived; you do not implement these ------------------------------
     default boolean isVisible(AllelePair p, Genotype g);       // !expression.wildType()
     default boolean isDeterministic(AllelePair p, Genotype g); // expression.deterministic()
+    default boolean affectsCoat();          // is any outcome not a wild type?
+                                            // false =&gt; left out of the texture key
     default Allele fromToken(String token);                    // token -&gt; allele
     default Expression expression(String id);
 }</code></pre>
+</div>
+
+<div class="note">
+    <span class="label">A gene does not have to paint</span>
+    <p>
+        If every one of your outcomes is a wild type, your gene is heritable and
+        invisible: it still gets a slot in the genotype code, still breeds, still
+        shows in a punnett square &mdash; but the coat pipeline skips it,
+        <code>affectsCoat()</code> is false, and it is left out of
+        <code>Genotype.coatCode()</code> so it cannot fork the texture cache. The
+        <a href="gene-sex.html">sex locus</a> is the worked example.
+    </p>
 </div>
 
 <div class="note">

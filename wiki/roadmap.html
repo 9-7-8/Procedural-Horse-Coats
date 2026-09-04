@@ -130,11 +130,12 @@
         carrot block (opt-out + the chaos chance function), the description block, and
         the creator form. Prereq for the whole gameplay economy: carrots (§14), database
         + papers (§16), browser (§17), villager (§18).</li>
-    <li><strong>Sex as a gene + sex-linked scaffolding</strong> (§5.3) &mdash;
-        <code>X</code> / <code>Y</code> at priority 1, the reserved-slot storage, the two
-        <code>breedWith</code> cases. Touches breeding, the catalogue, the spawner, the
-        info-panel / paper / punnett surfaces; unblocks brindle (§4.2) and any future
-        sex-linked gene.</li>
+    <li><strong>Sex-linked scaffolding</strong> (§5.3) &mdash; the reserved-slot
+        storage and the two <code>breedWith</code> cases. <strong>The sex locus itself
+        is built</strong> (<a href="gene-sex.html">gene page</a>), which was the
+        prerequisite; what is left is X-linked / Y-linked inheritance and the
+        hemizygous surfaces. Unblocks brindle (§4.2) and any future sex-linked
+        gene.</li>
 </ol>
 
 <h3>Tier 3 &mdash; enabling work (a couple of areas each)</h3>
@@ -246,16 +247,16 @@
     The built-ins carry real priorities: extension 10, agouti 20, silver 30,
     mushroom 32, dun 34, <strong>MATP 40</strong>, champagne 50, grey 55, white 60,
     roan 70, tobiano 72, frame 74, sabino 76, splash 80; magical: pink hair 110,
-    magic zebra 120, test 900. The table below is the <em>target</em> once the
-    physical-locus merges (§5.1) land &mdash; one <code>Gene</code> per locus,
-    with sex reserved at 1.
+    magic zebra 120, test 900 &mdash; and <strong>sex 1</strong>, which is no longer
+    reserved but built. The table below is the <em>target</em> once the
+    physical-locus merges (§5.1) land &mdash; one <code>Gene</code> per locus.
 </p>
 
 <div class="table-wrap">
 <table>
 <thead><tr><th>Priority</th><th>Gene</th><th>Why here</th></tr></thead>
 <tbody>
-<tr><td>1</td><td><strong>sex (X/Y)</strong></td><td>Must be first &mdash; every X-linked and Y-linked gene reads it (§5.3).</td></tr>
+<tr><td>1</td><td><strong>sex (X/Y)</strong> &mdash; <strong>shipped</strong></td><td>Must be first &mdash; every X-linked and Y-linked gene reads it (§5.3).</td></tr>
 <tr><td>10</td><td>extension</td><td>Decides which pigment exists at all.</td></tr>
 <tr><td>20</td><td>agouti</td><td>Restricts black to the points; <strong>sets pigment absolutely</strong>.</td></tr>
 <tr><td>40</td><td>MATP (cream + pearl) &mdash; <strong>shipped</strong></td><td>Dilutions &mdash; must run after the absolute set.</td></tr>
@@ -644,7 +645,39 @@
     every colt that carries one.
 </p>
 
-<h4>Sex itself becomes a gene</h4>
+<h4>Sex itself becomes a gene &mdash; <strong>built</strong></h4>
+
+<div class="note">
+    <span class="label">Shipped 2026-09-03</span>
+    <p>
+        <code>SexGene</code> is registered at priority 1 with alleles <code>X</code> /
+        <code>Y</code>; a mare is <code>X/X</code>, a stallion <code>X/Y</code>, and
+        <code>Y/Y</code> is ruled out by a new <code>Gene.canOccur(AllelePair)</code>
+        that <code>GenotypeCatalog.allPairsOf</code> filters on. Both outcomes are
+        <strong>wild types</strong>, so the gallery does not widen (still 98,306 pens);
+        only <code>totalGenotypes()</code> doubles, to 516,560,652. A new derived
+        <code>Gene.affectsCoat()</code> plus <code>Genotype.coatCode()</code> keep a
+        gene that never paints out of the texture key, so a mare and a stallion of the
+        same colour still share one baked texture.
+    </p>
+    <p>
+        <code>HorseRecord.sex</code> is <strong>gone as a field</strong> and derived
+        from the code (<code>Genotype.sexOf(String)</code>, which skips a full parse);
+        the <code>"sex"</code> codec key and <code>StoredGenome</code>&rsquo;s
+        <code>sex</code> component went with it, and
+        <code>HorseRecords.randomSex</code> is deleted &mdash; a foal&rsquo;s sex now
+        comes out of the ordinary <code>breedWith</code> draw. Founders that need a
+        chosen sex use <code>Genotype.withSex(Sex)</code>. Full write-up:
+        <a href="gene-sex.html">the sex gene page</a>.
+    </p>
+    <p>
+        <strong>Still to do below:</strong> everything from &ldquo;Hemizygous
+        notation&rdquo; on &mdash; the inheritance <em>mode</em> on <code>Gene</code>,
+        the two <code>breedWith</code> cases, the reserved-slot storage, and the
+        hemizygous surfaces.
+    </p>
+</div>
+
 
 <p>
     Sex registered like any other locus, alleles <code>X</code> and <code>Y</code>, at
@@ -708,8 +741,9 @@
         one real allele, so it expresses &mdash; no dominance question, no
         epigenetic-priority tie-break.</li>
     <li><strong><code>GenotypeCatalog</code></strong> would otherwise produce nonsense
-        pairs (<code>Y/Y</code>, or an <code>X/X</code> mare at a Y-linked locus). It
-        needs to know the mode.</li>
+        pairs (<code>Y/Y</code>, or an <code>X/X</code> mare at a Y-linked locus).
+        <code>Gene.canOccur</code> is the seam and already rules out <code>Y/Y</code>;
+        the sex-linked cases need it to consult the mode as well.</li>
     <li><strong>The founder percentage table</strong> has to respect sex: a colt at an
         X-linked locus draws one allele, a filly two; the reverse for Y-linked.</li>
     <li><strong>Surfaces</strong>: the info panel and paper dump want hemizygous wording
@@ -1094,8 +1128,9 @@ interface ConditionRule    { void conditions(AllelePair, ConditionSink); } // CS
 </p>
 
 <ul>
-    <li><strong>The genotype space.</strong> Now <code>3^16 &times; 6 =
-        258,280,326</code> (sixteen two-allele genes plus three-allele MATP) &mdash;
+    <li><strong>The genotype space.</strong> Now <code>3^16 &times; 6 &times; 2 =
+        516,560,652</code> (sixteen two-allele genes, three-allele MATP, and the
+        two-combination sex locus) &mdash;
         it was <code>3^11 = 177,147</code> before the seven visual genes shipped, the
         multiplier in miniature. With the full table the raw product is on the order
         of <strong>10<sup>19</sup></strong>.</li>
@@ -1854,7 +1889,8 @@ interface ConditionRule    { void conditions(AllelePair, ConditionSink); } // CS
         and Y-linked</strong> genes. Crossing over, maternal inheritance, imprinting,
         mosaicism and <strong>polygenic traits</strong> are all out &mdash; the mod does
         Mendelian and sex-linked inheritance and nothing else.</li>
-    <li><strong>Sex is itself a gene</strong> at <strong>priority 1</strong>. A stallion
+    <li><strong>Sex is itself a gene</strong> at <strong>priority 1</strong> &mdash;
+        <strong>built</strong>, see <a href="gene-sex.html">its page</a>. A stallion
         carries a real <strong><code>X</code> allele <em>and</em> a <code>Y</code>
         allele</strong> (two occupied slots, no structural change to
         <code>AllelePair</code> / <code>Epigenome</code>), so both X-linked and Y-linked

@@ -257,12 +257,13 @@ public Expression expressionOf(AllelePair pair) {
     handing back a wild type that would make the bug invisible.
 </p>
 
-<h2>The seventeen registered genes</h2>
+<h2>The eighteen registered genes</h2>
 
 <div class="table-wrap">
 <table>
 <thead><tr><th>Gene</th><th>Alleles</th><th>Outcomes</th><th>In the wild</th><th>Phase</th></tr></thead>
 <tbody>
+<tr><td><a href="gene-sex.html">sex</a></td><td><span class="allele wild">X</span> / <span class="allele dom">Y</span></td><td>mare, stallion &mdash; <strong>both wild types</strong>&Dagger;</td><td>50 / 50, no <code>Y/Y</code></td><td>neither (paints nothing)</td></tr>
 <tr><td><a href="gene-extension.html">extension</a></td><td><span class="allele dom">E</span> / <span class="allele rec">e</span></td><td>wild, chestnut</td><td>25 / 50 / 25</td><td>natural</td></tr>
 <tr><td><a href="gene-agouti.html">agouti</a></td><td><span class="allele dom">A</span> / <span class="allele rec">a</span></td><td>wild, bay</td><td>25 / 50 / 25</td><td>natural</td></tr>
 <tr><td><a href="gene-white.html">white</a></td><td><span class="allele dom">W</span> / <span class="allele wild">w</span></td><td>wild, white <strong>(masks)</strong></td><td>1/50 per allele</td><td>natural</td></tr>
@@ -294,6 +295,12 @@ public Expression expressionOf(AllelePair pair) {
     &dagger; Frame models the coat only; <code>Ov/Ov</code> lethal white is
     deliberately not modelled &mdash; a third expression when health genetics
     land (a <a href="roadmap.html">roadmap</a> item).
+    &Dagger; <strong>Sex is the one gene that never paints.</strong> Both its
+    outcomes are wild types, so it costs the gallery nothing and is left out of
+    the texture key; it is registered at priority 1 so a future
+    <a href="roadmap.html#sex-linked">sex-linked gene</a> can read a sex that is
+    already resolved, and so a foal&rsquo;s sex is <em>inherited</em> rather
+    than rolled. See <a href="gene-sex.html">its page</a>.
 </p>
 
 <p>
@@ -408,12 +415,21 @@ public Expression expressionOf(AllelePair pair) {
 <h2>What the texture key captures</h2>
 
 <p>
-    <code>CoatData.textureKey()</code> is the genotype code, plus
+    <code>CoatData.textureKey()</code> is the genotype&rsquo;s <em>coat code</em>, plus
     <code>@&lt;fingerprint hex&gt;</code> <strong>only when the horse is
     non-deterministic</strong>.
     <code>Epigenome.visibleFingerprint(genotype)</code> digests only the
     <em>expressed</em> seeds of genes that are both visible <strong>and</strong>
     non-deterministic, so epigenetics a horse cannot show do not fork the cache.
+</p>
+
+<p>
+    <code>Genotype.coatCode()</code> is the full code minus every gene that can never
+    paint anything &mdash; <code>Gene.affectsCoat()</code>, derived as &ldquo;is any of
+    my outcomes not a wild type?&rdquo;. Today the <a href="gene-sex.html">sex
+    locus</a> is the only such gene, and leaving it out is what stops a mare and a
+    stallion of the same colour baking two identical textures. It is <strong>not</strong>
+    a persistence format: it is lossy on purpose and nothing parses it back.
 </p>
 
 <div class="codebox">
@@ -457,7 +473,7 @@ public boolean hasVisibleNonDeterministic();</code></pre>
 <div class="table-wrap">
 <table class="facts">
 <tbody>
-<tr><th><code>allPairsOf(gene)</code></th><td>Every unordered pair &mdash; all <em>n</em>(<em>n</em>+1)/2 of them (<code>ee</code>, <code>Ee</code>, <code>EE</code>).</td></tr>
+<tr><th><code>allPairsOf(gene)</code></th><td>Every unordered pair a horse can carry &mdash; all <em>n</em>(<em>n</em>+1)/2 of them (<code>ee</code>, <code>Ee</code>, <code>EE</code>), minus any the gene rules out with <code>canOccur</code>. Only the sex locus does: there is no <code>Y/Y</code> horse.</td></tr>
 <tr><th><code>distinctPairsOf(gene)</code></th><td>One representative per distinct <code>Expression</code> &mdash; the homozygous pair where the group has one. Every wild type is <em>one</em> group, because &ldquo;changes nothing&rdquo; is one look.</td></tr>
 <tr><th><code>totalGenotypes()</code></th><td>The raw product &mdash; every distinct heritable genotype.</td></tr>
 <tr><th><code>size()</code></th><td>The reduced catalogue &mdash; how many of them are distinct to <em>look</em> at.</td></tr>

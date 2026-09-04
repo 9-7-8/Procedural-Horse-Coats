@@ -363,6 +363,15 @@ default int visible(int px, int py, int channel);</code></pre>
 </p>
 
 <p>
+    <code>textureKey()</code> runs on <code>Genotype.coatCode()</code>, not the full
+    code: a gene whose every outcome is a wild type can never paint anything
+    (<code>Gene.affectsCoat()</code>), so leaving it out means two horses that differ
+    only there share one baked texture. The <a href="gene-sex.html">sex locus</a> is
+    the only such gene today &mdash; without this the cache would carry every coat
+    twice, once per sex.
+</p>
+
+<p>
     A <a href="gene-effects.html#glow"><code>glow</code></a> gene adds a second
     consumer: <code>getOrCreateEmissive</code> re-runs <code>compose</code>, copies
     the resulting colour on the gene's emissive parts into a fresh mask (transparent
