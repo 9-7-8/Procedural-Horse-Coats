@@ -29,6 +29,9 @@ public final class HorseGenetics {
         ModBlockEntities.register(modEventBus);
         ModItems.register(modEventBus);
         modContainer.registerConfig(ModConfig.Type.CLIENT, ClientConfig.SPEC);
+        // Server-side: how much of the health genetics this world plays with.
+        // Whether a foal dies has to be one answer for everyone on a server.
+        modContainer.registerConfig(ModConfig.Type.SERVER, ServerConfig.SPEC);
         // HorseGeneticsEventHandler, ModNetworking, ClientSetup, DebugKeyBindings,
         // DebugKeyHandler, and DebugPenTickHandler are all @EventBusSubscriber-
         // annotated and pick themselves up automatically - nothing else to wire

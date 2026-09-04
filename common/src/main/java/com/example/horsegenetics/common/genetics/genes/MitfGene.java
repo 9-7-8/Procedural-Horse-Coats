@@ -7,6 +7,10 @@ import com.example.horsegenetics.common.genetics.Expression;
 import com.example.horsegenetics.common.genetics.FounderContext;
 import com.example.horsegenetics.common.genetics.FounderTable;
 import com.example.horsegenetics.common.genetics.Gene;
+import com.example.horsegenetics.common.genetics.Genotype;
+import com.example.horsegenetics.common.trait.Condition;
+import com.example.horsegenetics.common.trait.HealthContribution;
+import com.example.horsegenetics.common.trait.TraitBuilder;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -58,13 +62,30 @@ import java.util.Map;
  *
  * <p>Natural, <b>non-deterministic</b>. See {@code wiki/gene-mitf.html}.
  */
-public final class MitfGene implements Gene {
+public final class MitfGene implements Gene, HealthContribution {
 
     public static final String KEY = "horsegenetics.mitf";
 
     private static final double S_SPLASH = 0.38;
     private static final double S_BOLD = 0.62;
     private static final double S_EXTENSIVE = 0.86;
+
+    /**
+     * <b>Congenital deafness.</b> The splash pattern comes from melanocytes
+     * failing to reach the skin, and the same cells line the inner ear - so a
+     * horse white enough at this locus is very often deaf. The mod has no
+     * hearing for a horse to lose, so this costs it nothing: it is reported and
+     * named and that is all. See {@link com.example.horsegenetics.common.trait.Severity#INFORMATIONAL}.
+     *
+     * <p>Shared between the two splash loci deliberately - it is one condition
+     * with two causes, and a horse homozygous at both should be told it is deaf
+     * once, not twice. {@link com.example.horsegenetics.common.trait.TraitBuilder}
+     * de-duplicates on the condition id for exactly this case.
+     */
+    public static final Condition DEAFNESS = Condition.informational(
+            "splash-deafness", "Congenital deafness",
+            "Two splash copies at one locus. The pigment cells that never reached the coat "
+                    + "never reached the inner ear either, and the horse is deaf.");
 
     public final Allele SW3 = new Allele(KEY, 0, "SW3", "Splash white 3 (SW3)");
     public final Allele SW1 = new Allele(KEY, 1, "SW1", "Splash white 1 (SW1)");
@@ -154,5 +175,16 @@ public final class MitfGene implements Gene {
     /** Does this combination draw splash markings at all? */
     public boolean isSplash(AllelePair pair) {
         return !expressionOf(pair).wildType();
+    }
+
+    /**
+     * Two variant copies at this locus and the horse is deaf. One copy is a
+     * pattern and nothing else.
+     */
+    @Override
+    public void contribute(AllelePair pair, Genotype genotype, TraitBuilder out) {
+        if (pair.count(N) == 0) {
+            out.condition(DEAFNESS);
+        }
     }
 }

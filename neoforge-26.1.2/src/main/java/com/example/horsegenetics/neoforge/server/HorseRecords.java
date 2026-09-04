@@ -5,6 +5,9 @@ import com.example.horsegenetics.common.coat.CoatGenerator;
 import com.example.horsegenetics.common.genetics.Genotype;
 import com.example.horsegenetics.common.horse.HorseRecord;
 import com.example.horsegenetics.common.horse.Sex;
+import com.example.horsegenetics.common.trait.HorseTraits;
+import com.example.horsegenetics.common.trait.Traits;
+import com.example.horsegenetics.neoforge.ServerConfig;
 import com.example.horsegenetics.common.name.HorseNameGenerator;
 import com.example.horsegenetics.common.name.HorseNameGenerator.NameParts;
 import com.example.horsegenetics.neoforge.NeoRng;
@@ -86,54 +89,74 @@ public final class HorseRecords {
     public static HorseRecord newFounder(Horse horse, Rng rng, Genotype genotype) {
         NameParts name = NAMES.generateParts(rng);
         return HorseRecord.founder(horse.getUUID(), name.first(), name.last(),
-                        CoatGenerator.generate(genotype, rng).genome())
-                .withStats(entitySpeed(horse), entityHealth(horse));
+                CoatGenerator.generate(genotype, rng).genome());
     }
 
-    // --- speed / health stats ---
+    // --- the body, resolved from the genotype ---------------------------
 
-    public static double entitySpeed(Horse horse) {
-        return horse.getAttributeValue(Attributes.MOVEMENT_SPEED);
+    /**
+     * <b>What this horse's alleles say its body is</b> - speed, max health, jump
+     * strength, body scale and the disorders it expresses.
+     *
+     * <p>Resolved, never stored. There used to be {@code speed} and
+     * {@code health} fields on the record, filled from whatever the entity
+     * happened to spawn with and then, for a foal, drawn uniformly out of a wide
+     * band around its parents' numbers. That is gone: the numbers are a function
+     * of the genotype, so re-deriving them costs a parse and buys the guarantee
+     * that a horse's stats can never disagree with the alleles printed beside
+     * them.
+     *
+     * <p>The server's {@code health.mode} setting is applied here, at the one
+     * place the game asks - so a world with the disorders switched off still
+     * breeds and inherits them identically, it just does not let them bite.
+     */
+    public static Traits traitsOf(Horse horse) {
+        return traitsOf(of(horse));
     }
 
-    public static double entityHealth(Horse horse) {
-        return horse.getAttributeValue(Attributes.MAX_HEALTH);
+    public static Traits traitsOf(HorseRecord record) {
+        return HorseTraits.resolve(record.genotype(), ServerConfig.healthGeneticsActive());
     }
 
     /**
-     * Push a record's rolled {@code speed} / {@code health} onto the live
-     * entity's attributes. No-op for values still at the {@code 0.0} sentinel.
-     * {@code fullHeal} = set current HP to the new max (true for a newborn
-     * foal, false on a reload so an injured horse isn't healed for free).
+     * Push a genotype's resolved body onto the live entity's attributes:
+     * movement speed, max health, jump strength and {@code SCALE}.
+     *
+     * <p>{@code SCALE} is what makes the size loci visible, and it is doing more
+     * than the other three - vanilla scales the model <b>and</b> the hitbox from
+     * it, so a pony is genuinely a smaller target and a dwarf genuinely a
+     * shorter one, with no renderer work at all.
+     *
+     * @param fullHeal set current HP to the new max (a newborn foal). When
+     *                 {@code false} - a reload, or a re-resolve after a config
+     *                 change - current HP is only clamped <i>down</i>, so an
+     *                 injured horse is never healed for free and a foal born
+     *                 with four hearts does not quietly gain any.
      */
-    public static void applyStatsToEntity(Horse horse, HorseRecord record, boolean fullHeal) {
-        if (record.speed() > 0.0) {
-            AttributeInstance speed = horse.getAttribute(Attributes.MOVEMENT_SPEED);
-            if (speed != null) {
-                speed.setBaseValue(record.speed());
-            }
-        }
-        if (record.health() > 0.0) {
-            AttributeInstance health = horse.getAttribute(Attributes.MAX_HEALTH);
-            if (health != null) {
-                health.setBaseValue(record.health());
-                if (fullHeal) {
-                    horse.setHealth((float) record.health());
-                } else if (horse.getHealth() > record.health()) {
-                    horse.setHealth((float) record.health());
-                }
+    public static void applyTraitsToEntity(Horse horse, Traits traits, boolean fullHeal) {
+        setBase(horse, Attributes.MOVEMENT_SPEED, traits.speed());
+        setBase(horse, Attributes.JUMP_STRENGTH, traits.jump());
+        setBase(horse, Attributes.SCALE, traits.scale());
+
+        AttributeInstance health = horse.getAttribute(Attributes.MAX_HEALTH);
+        if (health != null) {
+            health.setBaseValue(traits.health());
+            if (fullHeal || horse.getHealth() > traits.health()) {
+                horse.setHealth((float) traits.health());
             }
         }
     }
 
-    /**
-     * If this horse's record predates the stat fields (old save, or a founder
-     * whose stats never got copied), fill them from the live entity now.
-     */
-    public static void backfillStatsIfMissing(Horse horse) {
-        HorseRecord record = of(horse);
-        if (!record.hasStats()) {
-            apply(horse, record.withStats(entitySpeed(horse), entityHealth(horse)));
+    /** Convenience: resolve and apply in one step. */
+    public static void applyTraitsToEntity(Horse horse, HorseRecord record, boolean fullHeal) {
+        applyTraitsToEntity(horse, traitsOf(record), fullHeal);
+    }
+
+    private static void setBase(Horse horse, net.minecraft.core.Holder<
+            net.minecraft.world.entity.ai.attributes.Attribute> attribute, double value) {
+        AttributeInstance instance = horse.getAttribute(attribute);
+        if (instance != null) {
+            instance.setBaseValue(value);
         }
     }
 

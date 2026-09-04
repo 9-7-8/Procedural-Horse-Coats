@@ -5,9 +5,13 @@ import com.example.horsegenetics.common.genetics.GeneticCodeCombiner;
 import com.example.horsegenetics.common.genetics.Genome;
 import com.example.horsegenetics.common.genetics.Genotype;
 import com.example.horsegenetics.common.horse.HorseRecord;
-import com.example.horsegenetics.common.horse.HorseStats;
 import com.example.horsegenetics.common.horse.ParentStats;
 import com.example.horsegenetics.common.horse.Sex;
+import com.example.horsegenetics.common.trait.Condition;
+import com.example.horsegenetics.common.trait.HorseTraits;
+import com.example.horsegenetics.common.trait.Traits;
+import com.example.horsegenetics.common.trait.Viability;
+import com.example.horsegenetics.neoforge.ServerConfig;
 import com.example.horsegenetics.common.name.HorseNameGenerator.NameParts;
 import com.example.horsegenetics.common.name.HorseNames;
 import com.example.horsegenetics.neoforge.data.ModAttachments;
@@ -33,8 +37,16 @@ import org.jetbrains.annotations.Nullable;
  *   <li>its name takes the first name of one parent and the last name of the
  *       other ({@link HorseNames#breedNth});</li>
  *   <li>its generation is {@code 1 + max(dam, sire)};</li>
- *   <li>its {@code speed} / {@code health} are rolled from the parents by
- *       {@link HorseStats#rollFoalStat} and pushed onto the foal's attributes;</li>
+ *   <li>its <b>body</b> - speed, max health, jump strength and size - is
+ *       resolved from the genome it just inherited
+ *       ({@link HorseTraits#resolve}) and pushed onto its attributes. It is
+ *       <b>not rolled</b>: the uniform draw off the parents' numbers that
+ *       used to live here had no genetics in it at all, so two full siblings
+ *       could differ by a factor of two and breeding for speed was breeding
+ *       for luck;</li>
+ *   <li>if the drawn genotype is an <b>embryonic lethal</b> the birth is
+ *       cancelled outright; if it is <b>lethal at birth</b> the foal is still
+ *       made, named and filed, and {@link LethalFoalHandler} does the rest;</li>
  *   <li>it is credited to the breeding player ({@code bredBy});</li>
  *   <li>if the dam is tamed, the foal is auto-tamed to the dam's owner.</li>
  * </ul>
@@ -73,17 +85,22 @@ public final class HorseBreedingHandler {
         Horse damHorse = aIsDam ? parentA : parentB;
         Horse sireHorse = aIsDam ? parentB : parentA;
 
-        applyBredFoal(child, damHorse,
+        boolean born = applyBredFoal(child, damHorse,
                 genomeOf(damHorse, damRecord, rng), damRecord,
                 genomeOf(sireHorse, sireRecord, rng), sireRecord,
                 event.getCausedByPlayer(), rng);
+        if (!born) {
+            // the drawn genotype was an embryonic lethal - the embryo never
+            // implants, so there is no foal to add to the world
+            event.setCanceled(true);
+        }
     }
 
     /**
      * Populate a just-created foal entity from its two parents' genomes and
-     * records: combined genome, code, generation, varied name, rolled stats,
-     * {@code bredBy}, dam-owner taming, the {@link HorseRecord}, and the coat
-     * attachment. Everything except adding the child to the world.
+     * records: combined genome, generation, varied name, {@code bredBy},
+     * dam-owner taming, the {@link HorseRecord}, and the attributes resolved
+     * from the genome. Everything except adding the child to the world.
      *
      * <p>Shared by natural breeding and the stallion seed jar - the jar path
      * passes a synthetic {@code sireRecord} built from its stored genome and a
@@ -93,13 +110,30 @@ public final class HorseBreedingHandler {
      *                 created-but-not-yet-added for the seed-jar path)
      * @param damHorse the live dam - only its tame state / owner is read here
      * @param breeder  the player who caused the breeding, or {@code null}
+     * @return {@code false} if the drawn genotype is an embryonic lethal, in
+     *         which case nothing was written to {@code child} and the caller
+     *         must not add it to the world
      */
-    static void applyBredFoal(Horse child, Horse damHorse,
-                              Genome damGenome, HorseRecord damRecord,
-                              Genome sireGenome, HorseRecord sireRecord,
-                              @Nullable Player breeder, Rng rng) {
+    static boolean applyBredFoal(Horse child, Horse damHorse,
+                                 Genome damGenome, HorseRecord damRecord,
+                                 Genome sireGenome, HorseRecord sireRecord,
+                                 @Nullable Player breeder, Rng rng) {
         Genome childGenome = GeneticCodeCombiner.combine(damGenome, sireGenome, rng);
-        String childCode = childGenome.genotypeCode();
+
+        // The draw happens first and is never conditioned on viability - it is
+        // the ordinary Mendelian one, and this only reads its result. That is
+        // what keeps the odds honest (one in four for two carriers) and keeps
+        // Genotype.breedWith free of any notion of a lethal.
+        Traits childTraits = HorseTraits.resolve(childGenome.genotype(),
+                ServerConfig.healthGeneticsActive());
+        if (childTraits.viability() == Viability.LETHAL_AT_CONCEPTION && ServerConfig.lethalsActive()) {
+            Condition cause = childTraits.lethalCondition().orElse(null);
+            if (cause != null) {
+                LethalFoalHandler.announceRefusedPairing(breeder, cause);
+            }
+            return false;
+        }
+
         int childGeneration = 1 + Math.max(damRecord.generation(), sireRecord.generation());
         int priorFoals = HorseRecords.offspringCount(child, damRecord.id(), sireRecord.id());
         NameParts childName = HorseNames.breedNth(
@@ -107,10 +141,11 @@ public final class HorseBreedingHandler {
                 new NameParts(sireRecord.firstName(), sireRecord.lastName()),
                 priorFoals, HorseRecords.names(), rng);
 
-        double childSpeed = HorseStats.rollFoalStat(damRecord.speed(), sireRecord.speed(), rng);
-        double childHealth = HorseStats.rollFoalStat(damRecord.health(), sireRecord.health(), rng);
+        // What the parents' bodies were, so the UI can say whether this foal came
+        // out above both of them, between, or below. Resolved from their
+        // genotypes - there is no stored stat field to read any more.
         ParentStats parentStats = ParentStats.of(
-                damRecord.speed(), sireRecord.speed(), damRecord.health(), sireRecord.health());
+                HorseRecords.traitsOf(damRecord), HorseRecords.traitsOf(sireRecord));
 
         // No sex argument: the foal's sex came out of the Mendelian draw above,
         // like every other locus, and HorseRecord reads it back off the code.
@@ -122,7 +157,6 @@ public final class HorseBreedingHandler {
                 damRecord.id(),
                 sireRecord.id(),
                 childGeneration)
-                .withStats(childSpeed, childHealth)
                 .withParentStats(parentStats);
 
         if (breeder != null) {
@@ -142,7 +176,12 @@ public final class HorseBreedingHandler {
         }
 
         HorseRecords.apply(child, childRecord);
-        HorseRecords.applyStatsToEntity(child, childRecord, true);
+        HorseRecords.applyTraitsToEntity(child, childTraits, true);
+
+        if (childTraits.viability() == Viability.LETHAL_AT_BIRTH) {
+            LethalFoalHandler.announceLethalBirth(child, childRecord, childTraits, breeder);
+        }
+        return true;
     }
 
     /**
@@ -159,19 +198,18 @@ public final class HorseBreedingHandler {
         return genome;
     }
 
-    /** Return the parent's record, creating a founder and/or backfilling stats if needed. */
+    /**
+     * Return the parent's record, founding one if this horse somehow arrived
+     * without one. There is nothing to backfill any more - a record's stats
+     * are derived from the genetic code it already carries.
+     */
     static HorseRecord ensureParentRecord(Horse parent) {
         if (!HorseRecords.hasRealRecord(parent)) {
             HorseRecord founder = HorseRecords.newFounder(parent, HorseRecords.rng(parent));
             HorseRecords.apply(parent, founder);
             return founder;
         }
-        HorseRecord record = HorseRecords.of(parent);
-        if (!record.hasStats()) {
-            record = record.withStats(HorseRecords.entitySpeed(parent), HorseRecords.entityHealth(parent));
-            HorseRecords.apply(parent, record);
-        }
-        return record;
+        return HorseRecords.of(parent);
     }
 
     private HorseBreedingHandler() {

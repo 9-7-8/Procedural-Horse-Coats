@@ -28,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 class SpecGeneTest {
 
-    private static final int BUILT_IN_GENES = 18;
+    private static final int BUILT_IN_GENES = 31;
 
     @AfterEach
     void unregister() {

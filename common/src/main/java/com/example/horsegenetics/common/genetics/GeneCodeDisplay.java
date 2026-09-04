@@ -27,6 +27,13 @@ import java.util.List;
  *
  * Example: a bay with one MITF splash, one champagne and two cream alleles →
  * {@code "EeAa nSW1 nCh CrCr"}.
+ *
+ * <p>The <b>non-coat loci</b> (performance, size, health) are listed last, after
+ * every gene that paints. They follow exactly the same rule as the rest - shown
+ * only when the horse carries something other than the baseline - so an ordinary
+ * horse's short form is unchanged, and a carrier of a foal lethal reads
+ * {@code "nffs"} in the same breath as its colour. That is the point: the string
+ * a player glances at is the one that has to warn them.
  */
 public final class GeneCodeDisplay {
 
@@ -60,7 +67,12 @@ public final class GeneCodeDisplay {
         List<Gene> out = new ArrayList<>(List.of(
                 Genes.KIT, Genes.MITF, Genes.PAX3, Genes.EDNRB, Genes.ROAN, Genes.TOBIANO,
                 Genes.DUN, Genes.SILVER, Genes.MUSHROOM, Genes.CHAMPAGNE, Genes.MATP,
-                Genes.GREY, Genes.MAGIC_ZEBRA, Genes.PINK_HAIR, Genes.TEST));
+                Genes.GREY, Genes.MAGIC_ZEBRA, Genes.PINK_HAIR, Genes.TEST,
+                // the non-coat loci, last: they never change what a horse looks
+                // like, so they belong after everything that does
+                Genes.MSTN, Genes.PDK4, Genes.CKM, Genes.RYR2, Genes.LCORL, Genes.HMGA2,
+                Genes.ACAN, Genes.B4GALT7, Genes.PLOD1, Genes.RAPGEF5, Genes.ST14,
+                Genes.SHOX, Genes.MET));
         for (Gene g : Genes.loaded()) {
             if (!out.contains(g)) {
                 out.add(g);

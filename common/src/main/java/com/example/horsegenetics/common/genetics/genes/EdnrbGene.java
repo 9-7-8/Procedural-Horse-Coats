@@ -16,6 +16,10 @@ import com.example.horsegenetics.common.genetics.Expression;
 import com.example.horsegenetics.common.genetics.FounderContext;
 import com.example.horsegenetics.common.genetics.FounderTable;
 import com.example.horsegenetics.common.genetics.Gene;
+import com.example.horsegenetics.common.genetics.Genotype;
+import com.example.horsegenetics.common.trait.Condition;
+import com.example.horsegenetics.common.trait.HealthContribution;
+import com.example.horsegenetics.common.trait.TraitBuilder;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -65,7 +69,7 @@ import java.util.Map;
  * <p>Natural. {@code frame} is <b>non-deterministic</b>; {@code lethal-white}
  * is deterministic (it is total). See {@code wiki/gene-ednrb.html}.
  */
-public final class EdnrbGene implements Gene {
+public final class EdnrbGene implements Gene, HealthContribution {
 
     public static final String KEY = "horsegenetics.ednrb";
     /** Founder frequency of {@code O}: one allele copy in this many. */
@@ -84,6 +88,24 @@ public final class EdnrbGene implements Gene {
     /** Face-blaze half-width at z==0, body units: a floor (always a blaze) + a roll toward bald face. */
     private static final double FACE_HALF_MIN = 0.9;
     private static final double FACE_HALF_RANGE = 2.6;
+
+    /**
+     * <b>Overo lethal white syndrome.</b> The all-white foal an {@code O/O}
+     * pairing throws has no working enteric nervous system and cannot pass
+     * anything through its gut.
+     *
+     * <p>The coat half of this has shipped since the white-pattern rewrite -
+     * {@code O/O} has its own masking all-white outcome, it occurs, and it gets
+     * a gallery pen. <b>This is the death</b>, which was the half that was
+     * missing: the foal is born, named and filed in the pedigree, and then does
+     * not survive. That is the whole difference between this gene and
+     * {@link MetGene}, whose embryo never implants and which therefore produces
+     * no foal to name.
+     */
+    public static final Condition LETHAL_WHITE_SYNDROME = Condition.lethalAtBirth(
+            "overo-lethal-white", "Overo lethal white syndrome",
+            "Two frame copies. The foal is born pure white with an unformed gut and cannot "
+                    + "survive its first day.");
 
     public final Allele O = new Allele(KEY, 0, "O", "Frame overo (O)");
     public final Allele N = new Allele(KEY, 1, "N", "Wild-type (N)");
@@ -200,5 +222,17 @@ public final class EdnrbGene implements Gene {
             f.setBlack(px, py, 0f);
         });
         return f;
+    }
+
+    /**
+     * {@code O/O} is the lethal. A single frame copy is a white pattern and
+     * nothing more - the horse is entirely healthy, which is exactly what makes
+     * the locus dangerous to breed blind.
+     */
+    @Override
+    public void contribute(AllelePair pair, Genotype genotype, TraitBuilder out) {
+        if (pair.homozygousFor(O)) {
+            out.condition(LETHAL_WHITE_SYNDROME).addHealth(-14.0).addSpeed(-0.05).addJump(-0.2);
+        }
     }
 }

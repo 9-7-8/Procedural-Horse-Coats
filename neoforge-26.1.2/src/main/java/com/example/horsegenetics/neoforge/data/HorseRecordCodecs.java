@@ -22,6 +22,10 @@ public final class HorseRecordCodecs {
     // No "sex" field: sex is a gene, so it already rides in "genetic_code"
     // (see HorseRecord.sex()). Serialising it separately would let a saved
     // record disagree with the genome it carries.
+    //
+    // No "speed" or "health" either, for the same reason: they are resolved
+    // from the genotype (HorseRecord.traits()), so a saved number could only
+    // ever go stale against the alleles sitting next to it.
 
     public static final Codec<ParentStats> PARENT_STATS = RecordCodecBuilder.create(i -> i.group(
             Codec.DOUBLE.fieldOf("speed_min").forGetter(ParentStats::speedMin),
@@ -42,8 +46,6 @@ public final class HorseRecordCodecs {
             Codec.STRING.optionalFieldOf("tamed_by").forGetter(HorseRecord::tamedBy),
             Codec.STRING.optionalFieldOf("bred_by").forGetter(HorseRecord::bredBy),
             Codec.INT.optionalFieldOf("generation", 0).forGetter(HorseRecord::generation),
-            Codec.DOUBLE.optionalFieldOf("speed", 0.0).forGetter(HorseRecord::speed),
-            Codec.DOUBLE.optionalFieldOf("health", 0.0).forGetter(HorseRecord::health),
             PARENT_STATS.optionalFieldOf("parent_stats").forGetter(HorseRecord::parentStats)
     ).apply(instance, HorseRecord::new));
 

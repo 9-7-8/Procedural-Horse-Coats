@@ -3,6 +3,9 @@ package com.example.horsegenetics.neoforge.client;
 import com.example.horsegenetics.common.genetics.GeneCodeDisplay;
 import com.example.horsegenetics.common.horse.HorseRecord;
 import com.example.horsegenetics.common.horse.ParentStats;
+import com.example.horsegenetics.common.trait.Condition;
+import com.example.horsegenetics.common.trait.HorseTraits;
+import com.example.horsegenetics.common.trait.Traits;
 import com.example.horsegenetics.neoforge.network.SetBarnNamePayload;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -11,6 +14,7 @@ import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.HorseInventoryScreen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.animal.equine.AbstractHorse;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -153,14 +157,31 @@ public final class HorseScreenHooks {
         }
         ty += 1;
 
-        String speedValue = r.hasStats() ? String.format("%.3f", r.speed()) : "-";
-        g.text(font, Component.literal("speed "), tx, ty, LABEL, false);
-        g.text(font, Component.literal(speedValue), tx + font.width("speed "), ty, statColor(r, true), false);
-        ty += 10;
-        String healthValue = r.hasStats() ? String.format("%.0f", r.health()) : "-";
-        g.text(font, Component.literal("health "), tx, ty, LABEL, false);
-        g.text(font, Component.literal(healthValue), tx + font.width("health "), ty, statColor(r, false), false);
-        ty += 11;
+        // Speed and health come off the live entity's attributes, not off a
+        // stored field - there is no stored field any more, and the entity is
+        // the one number the server has already told this client is true. The
+        // conditions below are resolved from the genotype instead, because
+        // carrying a disorder is a fact about the alleles whatever the server
+        // has its health.mode set to.
+        double liveSpeed = horse == null ? 0.0 : horse.getAttributeValue(Attributes.MOVEMENT_SPEED);
+        double liveHealth = horse == null ? 0.0 : horse.getAttributeValue(Attributes.MAX_HEALTH);
+        double liveJump = horse == null ? 0.0 : horse.getAttributeValue(Attributes.JUMP_STRENGTH);
+        double liveScale = horse == null ? 1.0 : horse.getAttributeValue(Attributes.SCALE);
+
+        ty = stat(g, font, tx, ty, "speed ", String.format("%.3f", liveSpeed),
+                statColor(r, true, liveSpeed));
+        ty = stat(g, font, tx, ty, "health ", String.format("%.1f", liveHealth),
+                statColor(r, false, liveHealth));
+        ty = stat(g, font, tx, ty, "jump ", String.format("%.2f", liveJump), VALUE);
+        ty = stat(g, font, tx, ty, "size ", sizeWord(liveScale), VALUE);
+        ty += 1;
+
+        for (Condition c : conditionsOf(r)) {
+            g.text(font, Component.literal(clip(c.name(), 22)), tx, ty,
+                    c.severity().lethal() ? STAT_DOWN : STAT_MID, false);
+            ty += 10;
+        }
+        ty += 1;
 
         ClientHorseCareCache.Care care = horse == null ? null : ClientHorseCareCache.get(horse.getId());
         if (care != null) {
@@ -211,12 +232,44 @@ public final class HorseScreenHooks {
         event.setCanceled(true);
     }
 
-    private static int statColor(HorseRecord r, boolean speed) {
-        if (!r.hasStats() || r.parentStats().isEmpty()) {
+    /** One {@code label value} row; returns the next y. */
+    private static int stat(net.minecraft.client.gui.GuiGraphicsExtractor g, Font font,
+                            int tx, int ty, String label, String value, int colour) {
+        g.text(font, Component.literal(label), tx, ty, LABEL, false);
+        g.text(font, Component.literal(value), tx + font.width(label), ty, colour, false);
+        return ty + 10;
+    }
+
+    /**
+     * The disorders this horse's alleles give it. Resolved with the health
+     * genetics on regardless of the server setting: the setting decides whether
+     * the disorder <i>bites</i>, not whether the horse has it, and a breeder
+     * needs to see it either way. A malformed code just shows nothing.
+     */
+    private static java.util.List<Condition> conditionsOf(HorseRecord r) {
+        try {
+            Traits traits = HorseTraits.resolve(r.genotype());
+            return traits.conditions();
+        } catch (RuntimeException unparseable) {
+            return java.util.List.of();
+        }
+    }
+
+    /** Body scale as a word - a number between 0.88 and 1.10 means nothing to a player. */
+    private static String sizeWord(double scale) {
+        if (scale < 0.80) return "dwarf";
+        if (scale < 0.94) return "small";
+        if (scale <= 1.03) return "average";
+        if (scale <= 1.12) return "large";
+        return "draught";
+    }
+
+    private static int statColor(HorseRecord r, boolean speed, double value) {
+        if (r.parentStats().isEmpty()) {
             return VALUE;
         }
         ParentStats ps = r.parentStats().get();
-        int rank = speed ? ps.rankSpeed(r.speed()) : ps.rankHealth(r.health());
+        int rank = speed ? ps.rankSpeed(value) : ps.rankHealth(value);
         return rank > 0 ? STAT_UP : rank < 0 ? STAT_DOWN : STAT_MID;
     }
 

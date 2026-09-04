@@ -119,9 +119,7 @@ public final class StallionSeedJarHandler {
                 genome.genotypeCode(),
                 genome.epigenomeCode(),
                 stallion.getUUID(),
-                record.displayName(),
-                record.hasStats() ? record.speed() : HorseRecords.entitySpeed(stallion),
-                record.hasStats() ? record.health() : HorseRecords.entityHealth(stallion));
+                record.displayName());
 
         ItemStack filled = new ItemStack(ModItems.STALLION_SEED_JAR.get());
         filled.set(ModDataComponents.STORED_GENOME.get(), stored);
@@ -183,8 +181,7 @@ public final class StallionSeedJarHandler {
 
         String[] name = splitName(stored.sourceName());
         HorseRecord sireRecord = HorseRecord
-                .founder(stored.sourceId(), name[0], name[1], sireGenome)
-                .withStats(stored.speed(), stored.health());
+                .founder(stored.sourceId(), name[0], name[1], sireGenome);
 
         Horse foal = EntityType.HORSE.create(level, EntitySpawnReason.BREEDING);
         if (foal == null) {
@@ -193,7 +190,18 @@ public final class StallionSeedJarHandler {
         foal.setAge(-24000); // newborn
         foal.snapTo(mare.getX(), mare.getY(), mare.getZ(), mare.getYRot(), 0.0F);
 
-        HorseBreedingHandler.applyBredFoal(foal, mare, mareGenome, mareRecord, sireGenome, sireRecord, player, rng);
+        boolean born = HorseBreedingHandler.applyBredFoal(
+                foal, mare, mareGenome, mareRecord, sireGenome, sireRecord, player, rng);
+        if (!born) {
+            // an embryonic lethal - the jar is spent and the mare has used her
+            // breeding window, exactly as a real pairing would have, but there
+            // is no foal. applyBredFoal has already told the player why.
+            foal.discard();
+            jar.shrink(1);
+            mare.resetLove();
+            mare.setAge(6000);
+            return true;
+        }
         level.addFreshEntity(foal);
         level.broadcastEntityEvent(mare, (byte) 18); // heart particles, like vanilla breeding
 

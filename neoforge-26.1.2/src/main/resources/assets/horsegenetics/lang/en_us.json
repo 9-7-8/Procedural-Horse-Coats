@@ -22,5 +22,6 @@
   "key.horsegenetics.show_stalls": "Show Stalls (debug)",
   "item.horsegenetics.basic_whistle": "Basic Whistle",
   "item.horsegenetics.golden_whistle": "Golden Whistle",
-  "item.horsegenetics.echo_whistle": "Echo Whistle"
+  "item.horsegenetics.echo_whistle": "Echo Whistle",
+  "death.attack.horsegenetics.genetic_defect": "%1$s did not survive a genetic defect"
 }

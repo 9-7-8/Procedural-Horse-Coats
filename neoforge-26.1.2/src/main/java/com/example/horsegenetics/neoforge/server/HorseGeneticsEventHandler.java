@@ -90,19 +90,17 @@ public final class HorseGeneticsEventHandler {
     private static void ensureRecordAndCoat(Horse horse) {
         NeoRng rng = new NeoRng(horse.getRandom());
 
-        if (!HorseRecords.hasRealRecord(horse)) {
+        boolean founded = !HorseRecords.hasRealRecord(horse);
+        if (founded) {
             // wild / imported horse - found a new line
             HorseRecords.apply(horse, HorseRecords.newFounder(horse, rng));
         } else if (horse.level() instanceof ServerLevel level) {
             // bred (BabyEntitySpawnEvent already set the attachment) or reloaded:
-            // make sure the global DB knows it, the floating name is showing, and
-            // the speed/health stats are filled in (older records predate them).
-            HorseRecords.backfillStatsIfMissing(horse);
-            HorseRecord record = HorseRecords.of(horse);
-            HorseAncestryData.get(level.getServer()).record(record);
-            HorseRecords.applyStatsToEntity(horse, record, false);
+            // make sure the global DB knows it and the floating name is showing
+            HorseRecord known = HorseRecords.of(horse);
+            HorseAncestryData.get(level.getServer()).record(known);
             if (horse.getCustomName() == null) {
-                horse.setCustomName(Component.literal(record.displayName()));
+                horse.setCustomName(Component.literal(known.displayName()));
                 horse.setCustomNameVisible(true);
             }
         }
@@ -116,6 +114,16 @@ public final class HorseGeneticsEventHandler {
             record = record.withGenome(CoatGenerator.generate(record.genotype(), rng).genome());
             HorseRecords.apply(horse, record);
         }
+
+        // Resolve the body from the genotype, every join, for every horse -
+        // vanilla has just randomised this horse's speed, health and jump, and
+        // this is where that gets overwritten with what its alleles actually
+        // say. Doing it on every join rather than storing it is what lets a
+        // re-tuned gene, or a change to the server's health.mode, reach horses
+        // that already exist. A newly founded horse is healed to its new max;
+        // a reloaded one is only clamped down, so nothing is healed for free.
+        HorseRecords.applyTraitsToEntity(horse, record, founded);
+
         syncToTrackers(horse, new CoatData(record.genome()));
     }
 

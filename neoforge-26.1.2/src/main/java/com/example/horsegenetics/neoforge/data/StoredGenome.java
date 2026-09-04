@@ -15,9 +15,14 @@ import net.minecraft.network.codec.StreamCodec;
  * The payload of the {@code horsegenetics:stored_genome} data component - a
  * {@link GenomeSample} (genotype + epigenome code) plus the small amount of
  * bookkeeping an item carrying one needs: the donor's entity {@link UUID} (so a
- * foal bred from the sample still has a real pedigree edge), a display name for
- * the tooltip, and its speed / health (not genetic, but part of "him" - the
- * foal-stat roll needs a value for the sire side).
+ * foal bred from the sample still has a real pedigree edge) and a display name
+ * for the tooltip.
+ *
+ * <p>It no longer stores the donor's speed and health. It used to have to,
+ * because a foal's stats were rolled from two numbers and the sire side needed
+ * one. Now they are resolved from the genotype - which this record already
+ * carries - so storing them would be storing the same fact twice, in a form
+ * that could go stale the moment a gene was re-tuned.
  *
  * <p>The donor's {@link Sex} is <b>not</b> a field: sex is a gene, so it is
  * already in {@code genotypeCode} and {@link #sex()} reads it back.
@@ -32,15 +37,13 @@ import net.minecraft.network.codec.StreamCodec;
  * argument.
  */
 public record StoredGenome(String genotypeCode, String epigenomeCode,
-                           UUID sourceId, String sourceName, double speed, double health) {
+                           UUID sourceId, String sourceName) {
 
     public static final Codec<StoredGenome> CODEC = RecordCodecBuilder.create(i -> i.group(
             Codec.STRING.fieldOf("genotype").forGetter(StoredGenome::genotypeCode),
             Codec.STRING.fieldOf("epigenome").forGetter(StoredGenome::epigenomeCode),
             UUIDUtil.CODEC.fieldOf("source_id").forGetter(StoredGenome::sourceId),
-            Codec.STRING.optionalFieldOf("source_name", "").forGetter(StoredGenome::sourceName),
-            Codec.DOUBLE.optionalFieldOf("speed", 0.0).forGetter(StoredGenome::speed),
-            Codec.DOUBLE.optionalFieldOf("health", 0.0).forGetter(StoredGenome::health)
+            Codec.STRING.optionalFieldOf("source_name", "").forGetter(StoredGenome::sourceName)
     ).apply(i, StoredGenome::new));
 
     public static final StreamCodec<ByteBuf, StoredGenome> STREAM_CODEC = StreamCodec.composite(
@@ -48,8 +51,6 @@ public record StoredGenome(String genotypeCode, String epigenomeCode,
             ByteBufCodecs.STRING_UTF8, StoredGenome::epigenomeCode,
             UUIDUtil.STREAM_CODEC, StoredGenome::sourceId,
             ByteBufCodecs.STRING_UTF8, StoredGenome::sourceName,
-            ByteBufCodecs.DOUBLE, StoredGenome::speed,
-            ByteBufCodecs.DOUBLE, StoredGenome::health,
             StoredGenome::new);
 
     /** The donor's sex, read off the stored genotype - a filled jar is always a stallion's. */
@@ -59,5 +60,11 @@ public record StoredGenome(String genotypeCode, String epigenomeCode,
 
     public GenomeSample sample() {
         return new GenomeSample(genotypeCode, epigenomeCode);
+    }
+
+    /** The donor's body, resolved from the stored genotype. */
+    public com.example.horsegenetics.common.trait.Traits traits() {
+        return com.example.horsegenetics.common.trait.HorseTraits.resolve(
+                com.example.horsegenetics.common.genetics.Genotype.parse(genotypeCode));
     }
 }

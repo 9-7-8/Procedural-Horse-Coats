@@ -3,6 +3,8 @@ package com.example.horsegenetics.common.horse;
 import com.example.horsegenetics.common.SeededRng;
 import com.example.horsegenetics.common.genetics.Genome;
 import com.example.horsegenetics.common.genetics.Genotype;
+import com.example.horsegenetics.common.trait.HorseTraits;
+import com.example.horsegenetics.common.trait.Traits;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
@@ -24,7 +26,7 @@ class HorseRecordTest {
 
     private static HorseRecord raw(UUID id, String first, String last, String code) {
         return new HorseRecord(id, first, last, Optional.empty(), code, GENOME.epigenomeCode(),
-                Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), 0, 0.0, 0.0, Optional.empty());
+                Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), 0, Optional.empty());
     }
 
     /**
@@ -107,34 +109,30 @@ class HorseRecordTest {
     @Test
     void negativeGenerationClamped() {
         assertEquals(0, new HorseRecord(ID, "a", "b", null, "EeAa", "",
-                null, null, null, null, -9, 0.0, 0.0, null).generation());
+                null, null, null, null, -9, null).generation());
     }
 
+    /**
+     * There are no stat fields to store any more: a record's speed and health
+     * are resolved out of the genetic code it already carries, so the two can
+     * never disagree.
+     */
     @Test
-    void statsRoundUpAndClampAndDriveHasStats() {
+    void statsAreDerivedFromTheGeneticCode() {
         HorseRecord r = HorseRecord.founder(ID, "a", "b", GENOME);
-        assertEquals(0.0, r.speed());
-        assertEquals(0.0, r.health());
-        assertFalse(r.hasStats());
-
-        HorseRecord s = r.withStats(-1.0, 25.0);
-        assertEquals(0.0, s.speed());
-        assertEquals(25.0, s.health());
-        assertFalse(s.hasStats());
-
-        HorseRecord t = r.withStats(0.2401, 21.2);
-        assertEquals(0.241, t.speed(), 1e-9);  // ceil to 3 decimals
-        assertEquals(22.0, t.health(), 1e-9);  // ceil to whole
-        assertTrue(t.hasStats());
+        Traits t = r.traits();
+        assertEquals(HorseTraits.resolve(r.genotype()).speed(), t.speed(), 1e-12);
+        assertEquals(HorseTraits.resolve(r.genotype()).health(), t.health(), 1e-12);
+        // ...and a rename cannot move them, because they were never copied.
+        assertEquals(t.speed(), r.withNames("New", "Name").traits().speed(), 1e-12);
     }
 
     @Test
-    void withersPreserveStatsAndParentStats() {
+    void withersPreserveParentStats() {
         ParentStats ps = ParentStats.of(0.2, 0.3, 20.0, 26.0);
-        HorseRecord r = HorseRecord.founder(ID, "Swift", "Aspen", GENOME)
-                .withStats(0.3, 27.0).withParentStats(ps);
-        assertEquals(0.3, r.withNames("New", "Name").speed());
-        assertEquals(27.0, r.withBarnName(Optional.of("Barn")).health());
+        HorseRecord r = HorseRecord.founder(ID, "Swift", "Aspen", GENOME).withParentStats(ps);
+        assertEquals(Optional.of(ps), r.withNames("New", "Name").parentStats());
+        assertEquals(Optional.of(ps), r.withBarnName(Optional.of("Barn")).parentStats());
         assertEquals(Optional.of(ps), r.withTamedBy("x").parentStats());
         assertEquals(Optional.of(ps), r.withBredBy("y").parentStats());
     }

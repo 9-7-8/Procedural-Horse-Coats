@@ -7,6 +7,9 @@ import com.example.horsegenetics.common.genetics.Expression;
 import com.example.horsegenetics.common.genetics.FounderContext;
 import com.example.horsegenetics.common.genetics.FounderTable;
 import com.example.horsegenetics.common.genetics.Gene;
+import com.example.horsegenetics.common.genetics.Genotype;
+import com.example.horsegenetics.common.trait.HealthContribution;
+import com.example.horsegenetics.common.trait.TraitBuilder;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -43,7 +46,7 @@ import java.util.Map;
  * the two loci produce the same pattern, which is exactly why they were
  * mistaken for one gene. See {@code wiki/gene-pax3.html}.
  */
-public final class Pax3Gene implements Gene {
+public final class Pax3Gene implements Gene, HealthContribution {
 
     public static final String KEY = "horsegenetics.pax3";
 
@@ -111,5 +114,16 @@ public final class Pax3Gene implements Gene {
     /** Does this combination draw splash markings at all? */
     public boolean isSplash(AllelePair pair) {
         return !pair.homozygousFor(N);
+    }
+
+    /**
+     * Two variant copies at this locus and the horse is deaf. One copy is a
+     * pattern and nothing else.
+     */
+    @Override
+    public void contribute(AllelePair pair, Genotype genotype, TraitBuilder out) {
+        if (pair.count(N) == 0) {
+            out.condition(MitfGene.DEAFNESS);
+        }
     }
 }

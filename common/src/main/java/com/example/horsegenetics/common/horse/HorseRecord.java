@@ -3,6 +3,8 @@ package com.example.horsegenetics.common.horse;
 import com.example.horsegenetics.common.genetics.Epigenome;
 import com.example.horsegenetics.common.genetics.Genome;
 import com.example.horsegenetics.common.genetics.Genotype;
+import com.example.horsegenetics.common.trait.HorseTraits;
+import com.example.horsegenetics.common.trait.Traits;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -34,14 +36,18 @@ import java.util.UUID;
  * would let a record disagree with the genome it carries, and would mean a
  * foal's sex was invented rather than inherited.
  *
- * <p>{@code speed} and {@code health} mirror the entity's movement-speed and
- * max-health attribute values. A foundation horse copies whatever the entity
- * spawned with; a foal's are rolled from its parents by
- * {@link HorseStats#rollFoalStat}. Both are <b>rounded up</b> by the
- * constructor - health to a whole number, speed to 3 decimals - and are
- * uncapped. {@code 0.0} means "not recorded yet". {@code parentStats}, when
- * present, is the low/high of the two parents' values at birth, for the UI to
- * colour this horse's stats against.
+ * <p>There are <b>no {@code speed} or {@code health} fields</b> either, for the
+ * same reason. A horse's speed, max health, jump strength and body size are a
+ * pure function of its genotype ({@link Traits}), so storing them would be
+ * storing a derived value that could disagree with the alleles beside it - and
+ * did, back when they were a uniform random roll off the two parents' numbers
+ * with no genetics in it. {@link #traits()} resolves them on demand.
+ *
+ * <p>{@code parentStats} survives that change and is worth more after it: it is
+ * the low/high of the two parents' resolved speed and health at the moment of
+ * birth, so the UI can say whether this foal came out above both its parents,
+ * between them, or below - which is now a statement about which alleles it drew
+ * rather than about how a die fell.
  */
 public record HorseRecord(
         UUID id,
@@ -55,8 +61,6 @@ public record HorseRecord(
         Optional<String> tamedBy,
         Optional<String> bredBy,
         int generation,
-        double speed,
-        double health,
         Optional<ParentStats> parentStats) {
 
     public static final int MAX_BARN_NAME = 16;
@@ -74,18 +78,6 @@ public record HorseRecord(
         bredBy = bredBy == null ? Optional.empty() : bredBy;
         parentStats = parentStats == null ? Optional.empty() : parentStats;
         generation = Math.max(0, generation);
-        speed = ceilSpeed(speed);
-        health = ceilHealth(health);
-    }
-
-    /** Speed rounds up to 3 decimals (a horse's speed attribute is a small fraction). */
-    public static double ceilSpeed(double v) {
-        return v <= 0.0 ? 0.0 : Math.ceil(v * 1000.0) / 1000.0;
-    }
-
-    /** Health rounds up to a whole number. No cap. */
-    public static double ceilHealth(double v) {
-        return v <= 0.0 ? 0.0 : Math.ceil(v);
     }
 
     private static Optional<String> clampBarnName(Optional<String> barnName) {
@@ -108,19 +100,19 @@ public record HorseRecord(
     public static HorseRecord unassigned(UUID id) {
         return new HorseRecord(id, "", "", Optional.empty(),
                 Genotype.wildType().toCode(), "",
-                Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), 0, 0.0, 0.0,
+                Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), 0,
                 Optional.empty());
     }
 
     /**
-     * A foundation horse - no recorded parents, generation 0, stats unrecorded.
+     * A foundation horse - no recorded parents, generation 0.
      * Its sex comes from {@code genome}; a caller that wants to <i>choose</i>
      * one hands in {@link Genome#withSex}.
      */
     public static HorseRecord founder(UUID id, String firstName, String lastName, Genome genome) {
         return new HorseRecord(id, firstName, lastName, Optional.empty(),
                 genome.genotypeCode(), genome.epigenomeCode(),
-                Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), 0, 0.0, 0.0, Optional.empty());
+                Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), 0, Optional.empty());
     }
 
     /**
@@ -133,7 +125,7 @@ public record HorseRecord(
         return new HorseRecord(id, firstName, lastName, Optional.empty(),
                 genome.genotypeCode(), genome.epigenomeCode(),
                 Optional.of(motherId), Optional.of(fatherId), Optional.empty(), Optional.empty(), generation,
-                0.0, 0.0, Optional.empty());
+                Optional.empty());
     }
 
     // --- the genome ---------------------------------------------------
@@ -171,7 +163,7 @@ public record HorseRecord(
     public HorseRecord withGenome(Genome genome) {
         return new HorseRecord(id, firstName, lastName, barnName,
                 genome.genotypeCode(), genome.epigenomeCode(),
-                motherId, fatherId, tamedBy, bredBy, generation, speed, health, parentStats);
+                motherId, fatherId, tamedBy, bredBy, generation, parentStats);
     }
 
     /** What to show in-game: the barn name if set, otherwise "first last". */
@@ -189,39 +181,41 @@ public record HorseRecord(
         return !firstName.isEmpty() || !lastName.isEmpty() || barnName.isPresent();
     }
 
-    /** True once {@link #speed} and {@link #health} have been filled in. */
-    public boolean hasStats() {
-        return speed > 0.0 && health > 0.0;
+    /**
+     * <b>The body this genotype describes</b> - speed, max health, jump
+     * strength, body scale and the disorders it expresses - resolved fresh from
+     * {@link #geneticCode} every time it is asked for.
+     *
+     * <p>Cheap enough to call per frame is <i>not</i> the claim: it parses the
+     * code. Callers that need it in a hot loop should hold on to the result.
+     */
+    public Traits traits() {
+        return HorseTraits.resolve(genotype());
     }
 
     public HorseRecord withNames(String newFirst, String newLast) {
         return new HorseRecord(id, newFirst, newLast, barnName, geneticCode, epigenomeCode,
-                motherId, fatherId, tamedBy, bredBy, generation, speed, health, parentStats);
+                motherId, fatherId, tamedBy, bredBy, generation, parentStats);
     }
 
     public HorseRecord withBarnName(Optional<String> newBarnName) {
         return new HorseRecord(id, firstName, lastName, newBarnName, geneticCode, epigenomeCode,
-                motherId, fatherId, tamedBy, bredBy, generation, speed, health, parentStats);
+                motherId, fatherId, tamedBy, bredBy, generation, parentStats);
     }
 
     public HorseRecord withTamedBy(String username) {
         return new HorseRecord(id, firstName, lastName, barnName, geneticCode, epigenomeCode,
-                motherId, fatherId, Optional.of(username), bredBy, generation, speed, health, parentStats);
+                motherId, fatherId, Optional.of(username), bredBy, generation, parentStats);
     }
 
     public HorseRecord withBredBy(String username) {
         return new HorseRecord(id, firstName, lastName, barnName, geneticCode, epigenomeCode,
-                motherId, fatherId, tamedBy, Optional.of(username), generation, speed, health, parentStats);
-    }
-
-    public HorseRecord withStats(double newSpeed, double newHealth) {
-        return new HorseRecord(id, firstName, lastName, barnName, geneticCode, epigenomeCode,
-                motherId, fatherId, tamedBy, bredBy, generation, newSpeed, newHealth, parentStats);
+                motherId, fatherId, tamedBy, Optional.of(username), generation, parentStats);
     }
 
     public HorseRecord withParentStats(ParentStats newParentStats) {
         return new HorseRecord(id, firstName, lastName, barnName, geneticCode, epigenomeCode,
-                motherId, fatherId, tamedBy, bredBy, generation, speed, health, Optional.ofNullable(newParentStats));
+                motherId, fatherId, tamedBy, bredBy, generation, Optional.ofNullable(newParentStats));
     }
 
     public boolean hasKnownParents() {

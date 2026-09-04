@@ -12,6 +12,10 @@ import com.example.horsegenetics.common.genetics.Expression;
 import com.example.horsegenetics.common.genetics.FounderContext;
 import com.example.horsegenetics.common.genetics.FounderTable;
 import com.example.horsegenetics.common.genetics.Gene;
+import com.example.horsegenetics.common.genetics.Genotype;
+import com.example.horsegenetics.common.trait.Condition;
+import com.example.horsegenetics.common.trait.HealthContribution;
+import com.example.horsegenetics.common.trait.TraitBuilder;
 
 import java.util.List;
 
@@ -42,7 +46,7 @@ import java.util.List;
  * dilution only. Natural, deterministic. Founder frequency
  * {@code 1/}{@value #WILD_SILVER_ONE_IN} per allele.
  */
-public final class SilverGene implements Gene {
+public final class SilverGene implements Gene, HealthContribution {
 
     public static final String KEY = "horsegenetics.silver";
     public static final int WILD_SILVER_ONE_IN = 60;
@@ -59,6 +63,24 @@ public final class SilverGene implements Gene {
     private static final float HAIR_KEEP_RED = 0.40f;
     private static final float HAIR_KEEP_BLACK = 0.10f;
     private static final float HAIR_BLACK_TINT = 0.28f;
+
+    /**
+     * <b>MCOA</b> - multiple congenital ocular anomalies, the eye defect that
+     * rides along with a homozygous silver. Cysts and a malformed cornea; the
+     * horse sees badly. The mod has no vision for a horse to lose, so it is
+     * priced the way every sub-lethal disorder here is priced - in hearts.
+     *
+     * <p>Only {@code Z/Z}. A single silver copy gives the coat with none of the
+     * defect, which is exactly why the disorder survives in the population: the
+     * gene people breed <i>for</i> is the gene that hides it.
+     */
+    public static final Condition MCOA = Condition.impairing(
+            "mcoa", "Multiple congenital ocular anomalies",
+            "Two silver copies. The eyes are malformed - cysts and a misshapen cornea - and "
+                    + "the horse is a little frailer for it.");
+
+    /** Max health a homozygous silver loses to MCOA. */
+    public static final double MCOA_HEALTH_PENALTY = 2.0;
 
     public final Allele Z = new Allele(KEY, 0, "Z", "Silver dapple (Z)");
     public final Allele z = new Allele(KEY, 1, "z", "Wild-type (z)");
@@ -105,5 +127,16 @@ public final class SilverGene implements Gene {
                     hair ? HAIR_BLACK_TINT : BODY_BLACK_TINT);
         });
         return f;
+    }
+
+    /**
+     * Homozygous silver carries {@link #MCOA}. Nothing else on this locus does:
+     * a {@code Z/z} horse is a silver dapple with sound eyes.
+     */
+    @Override
+    public void contribute(AllelePair pair, Genotype genotype, TraitBuilder out) {
+        if (pair.homozygousFor(Z)) {
+            out.condition(MCOA).addHealth(-MCOA_HEALTH_PENALTY);
+        }
     }
 }

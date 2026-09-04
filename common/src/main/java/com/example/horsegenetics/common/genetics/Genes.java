@@ -1,19 +1,32 @@
 package com.example.horsegenetics.common.genetics;
 
+import com.example.horsegenetics.common.genetics.genes.AcanGene;
 import com.example.horsegenetics.common.genetics.genes.AgoutiGene;
+import com.example.horsegenetics.common.genetics.genes.B4galt7Gene;
+import com.example.horsegenetics.common.genetics.genes.CkmGene;
 import com.example.horsegenetics.common.genetics.genes.DunGene;
 import com.example.horsegenetics.common.genetics.genes.EdnrbGene;
 import com.example.horsegenetics.common.genetics.genes.ChampagneGene;
 import com.example.horsegenetics.common.genetics.genes.ExtensionGene;
 import com.example.horsegenetics.common.genetics.genes.GreyGene;
+import com.example.horsegenetics.common.genetics.genes.Hmga2Gene;
+import com.example.horsegenetics.common.genetics.genes.LcorlGene;
 import com.example.horsegenetics.common.genetics.genes.MagicZebraGene;
 import com.example.horsegenetics.common.genetics.genes.MushroomGene;
 import com.example.horsegenetics.common.genetics.genes.MatpGene;
+import com.example.horsegenetics.common.genetics.genes.MetGene;
+import com.example.horsegenetics.common.genetics.genes.MstnGene;
+import com.example.horsegenetics.common.genetics.genes.Pdk4Gene;
 import com.example.horsegenetics.common.genetics.genes.PinkHairGene;
+import com.example.horsegenetics.common.genetics.genes.Plod1Gene;
+import com.example.horsegenetics.common.genetics.genes.Rapgef5Gene;
 import com.example.horsegenetics.common.genetics.genes.RoanGene;
 import com.example.horsegenetics.common.genetics.genes.KitGene;
 import com.example.horsegenetics.common.genetics.genes.SexGene;
+import com.example.horsegenetics.common.genetics.genes.Ryr2Gene;
+import com.example.horsegenetics.common.genetics.genes.ShoxGene;
 import com.example.horsegenetics.common.genetics.genes.SilverGene;
+import com.example.horsegenetics.common.genetics.genes.St14Gene;
 import com.example.horsegenetics.common.genetics.genes.MitfGene;
 import com.example.horsegenetics.common.genetics.genes.TestGene;
 import com.example.horsegenetics.common.genetics.genes.TobianoGene;
@@ -98,11 +111,51 @@ public final class Genes {
     public static final MitfGene MITF = new MitfGene();
     public static final Pax3Gene PAX3 = new Pax3Gene();
 
+    /**
+     * The <b>non-coat genes</b> - performance, size and health. They occupy the
+     * top of the natural band ({@code 80}-{@code 99}), after every gene that
+     * paints, because <b>none of them paints anything</b>: every combination
+     * they can produce is a {@link Expression#wildType() wild type}, so
+     * {@link Gene#affectsCoat()} is false for all of them, they are left out of
+     * a horse's texture key, and the genotype gallery collapses each of them to
+     * a single entry however many alleles it has. What they do instead travels
+     * through {@link com.example.horsegenetics.common.trait.HorseTraits}: speed,
+     * max health, jump strength, body size, and the disorders a horse expresses.
+     *
+     * <p>Their position among <i>themselves</i> is arbitrary - trait
+     * contributions are additive and order-independent by construction (see
+     * {@link com.example.horsegenetics.common.trait.TraitBuilder}) - so the
+     * numbers here only fix a stable slot in the genotype code.
+     */
+    public static final MstnGene MSTN = new MstnGene();
+    public static final Pdk4Gene PDK4 = new Pdk4Gene();
+    public static final CkmGene CKM = new CkmGene();
+    public static final Ryr2Gene RYR2 = new Ryr2Gene();
+    public static final LcorlGene LCORL = new LcorlGene();
+    public static final Hmga2Gene HMGA2 = new Hmga2Gene();
+
+    /**
+     * The <b>health</b> loci. Every one of them is recessive and every one of
+     * them is absent from its own founder table as a homozygote - a wild-caught
+     * horse is an adult that survived, so it can carry a disorder but never have
+     * one. The only way to see any of these is to breed two carriers, which is
+     * the whole design: it makes a pedigree worth keeping.
+     */
+    public static final AcanGene ACAN = new AcanGene();
+    public static final B4galt7Gene B4GALT7 = new B4galt7Gene();
+    public static final Plod1Gene PLOD1 = new Plod1Gene();
+    public static final Rapgef5Gene RAPGEF5 = new Rapgef5Gene();
+    public static final St14Gene ST14 = new St14Gene();
+    public static final ShoxGene SHOX = new ShoxGene();
+    public static final MetGene MET = new MetGene();
+
     /** The hand-written genes. Order here is irrelevant - the registry sorts. */
     private static final List<Gene> BUILTINS = List.of(
             SEX, EXTENSION, AGOUTI, TEST, CHAMPAGNE, GREY, MATP,
             MAGIC_ZEBRA, PINK_HAIR, DUN, SILVER, MUSHROOM, ROAN, TOBIANO,
-            EDNRB, KIT, MITF, PAX3);
+            EDNRB, KIT, MITF, PAX3,
+            MSTN, PDK4, CKM, RYR2, LCORL, HMGA2,
+            ACAN, B4GALT7, PLOD1, RAPGEF5, ST14, SHOX, MET);
 
     /** Ordering: lower priority first, ties broken alphabetically by key. */
     private static final Comparator<Gene> BY_PRIORITY_THEN_KEY =
