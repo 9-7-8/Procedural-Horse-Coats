@@ -15,34 +15,66 @@
 <p class="eyebrow natural">Natural gene <span class="sep">/</span> phase 1</p>
 <h1>Dun</h1>
 <p class="lede">
-    Real-horse <code>TBX3</code>. Two effects at once: a mild, hue-keeping
-    <strong>body dilution</strong>, and <strong>primitive markings</strong> &mdash; a
-    full-length dorsal stripe and faint horizontal leg barring &mdash; that read dark
-    because everything around them got lighter, not because pigment was added.
+    Real-horse <code>TBX3</code>, and the mod&rsquo;s second <strong>three-allele</strong>
+    locus. Two effects that come apart: a mild, hue-keeping <strong>body dilution</strong>,
+    and <strong>primitive markings</strong> &mdash; a full-length dorsal stripe, plus faint
+    leg barring &mdash; that read dark because everything around them got lighter. The third
+    allele is the one that carries the markings <em>without</em> the dilution.
 </p>
 
 <dl class="spec">
     <div><dt>Gene key</dt><dd>horsegenetics.dun</dd></div>
-    <div><dt>Alleles</dt><dd><span class="allele dom">D</span> <span class="allele wild">d</span></dd></div>
-    <div><dt>Outcomes</dt><dd>wild, <code>dun</code></dd></div>
-    <div><dt>Shows when</dt><dd><code>D/d</code>, <code>D/D</code></dd></div>
-    <div><dt>Default allele</dt><dd>d</dd></div>
-    <div><dt>Wild frequency</dt><dd>1 in 24 per allele</dd></div>
+    <div><dt>Alleles</dt><dd><span class="allele dom">D</span> <span class="allele dom">d1</span> <span class="allele wild">d2</span></dd></div>
+    <div><dt>Outcomes</dt><dd>wild, <code>primitive-marks</code>, <code>dun</code></dd></div>
+    <div><dt>Combinations</dt><dd>6, landing on 3 outcomes</dd></div>
+    <div><dt>Default allele</dt><dd>d2</dd></div>
+    <div><dt>Wild frequency</dt><dd><code>D</code> 1 in 24, <code>d1</code> 1 in 10 per allele</dd></div>
     <div><dt>Founder draws</dt><dd>1 &times; nextFloat()</dd></div>
     <div><dt>Deterministic</dt><dd>yes</dd></div>
-    <div><dt>keep red</dt><dd>0.85 on a red base &rarr; 0.0 on a black base (by black content)</dd></div>
-    <div><dt>keep black</dt><dd>0.48 body; 0.82 in a leg bar</dd></div>
+    <div><dt>keep red (<code>D</code>)</dt><dd>0.85 on a red base &rarr; 0.0 on a black base (by black content)</dd></div>
+    <div><dt>keep black (<code>D</code>)</dt><dd>0.48 body; 0.82 in a leg bar</dd></div>
+    <div><dt>keep red (<code>d1</code>)</dt><dd>0.86 on a red base &rarr; 1.0 on a black base</dd></div>
+    <div><dt>keep black (<code>d1</code>)</dt><dd>1.0 &mdash; never touched</dd></div>
     <div><dt>dorsal half-width</dt><dd>1.5 body units</dd></div>
-    <div><dt>leg bars</dt><dd>spacing 4.2, duty 0.28, reach 0.60</dd></div>
+    <div><dt>leg bars</dt><dd>spacing 4.2, duty 0.28, reach 0.60 &mdash; <code>D</code> only</dd></div>
 </dl>
+
+<h2>Two dominance orders over one locus</h2>
+
+<p>
+    This is the gene that most obviously needs a table rather than a label. Dilution reads
+    <code>D &gt; d1 = d2</code>; marking reads <code>D = d1 &gt; d2</code>. Two orders over
+    the same three alleles, and no single word covers both &mdash; which is exactly why
+    there is no dominance property in this model, only an
+    <a href="genetics-model.html#combinations">outcome per combination</a>.
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Combination</th><th>Outcome</th><th>Dilutes?</th><th>Dorsal stripe?</th><th>Leg bars?</th></tr></thead>
+<tbody>
+<tr><td><code>D/D</code>, <code>D/d1</code>, <code>D/d2</code></td><td><code>dun</code></td><td>yes</td><td>yes</td><td>yes</td></tr>
+<tr><td><code>d1/d1</code>, <code>d1/d2</code></td><td><code>primitive-marks</code></td><td>no</td><td>yes</td><td>no</td></tr>
+<tr><td><code>d2/d2</code></td><td>wild type</td><td>no</td><td>no</td><td>no</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    So <strong><code>d2</code> is the only allele that draws nothing</strong>, and it &mdash;
+    not the old catch-all <code>d</code> &mdash; is the gene&rsquo;s
+    <a href="api-reference.html">default allele</a>: the token a code with no dun segment
+    reads as. A horse can now carry a dorsal stripe and not be a dun, which is what
+    <code>d1</code> is for.
+</p>
 
 <h2>How the markings survive the dilution</h2>
 
 <p>
-    Phase 1 is downward-only &mdash; a gene can never add pigment back. So dun computes,
-    per texel a <strong>marking strength</strong> and <em>lerps its dilution off</em>
-    where a marking is: a dorsal-stripe texel skips the dilution entirely and keeps
-    the base colour, a leg-bar texel keeps extra <b>black only</b>.
+    Phase 1 is downward-only &mdash; a gene can never add pigment back. So dun computes, per
+    texel, a <strong>marking strength</strong> and <em>lerps its dilution off</em> where a
+    marking is: a dorsal-stripe texel skips the dilution entirely and keeps the base colour,
+    a leg-bar texel keeps extra <b>black only</b>.
 </p>
 
 <p>
@@ -58,53 +90,117 @@
 
 <div class="codebox">
 <div class="filename">common/genetics/genes/DunGene.java</div>
-<pre><code class="language-java">float keepRed   = lerp(KEEP_RED_CHESTNUT, KEEP_RED_BLACK, b);   // b = this texel&#39;s black
-float keepBlack = KEEP_BLACK;
+<pre><code class="language-java">float keepRed   = lerp(keepRedChestnut, keepRedBlack, b);   // b = this texel&#39;s black
+float keepBlack = keepBlackBody;
 
 float dorsal = (float) CoatRegions.dorsalStripe(skin, part, point, DORSAL_HALF_WIDTH);
 keepRed   = lerp(keepRed,   1f, dorsal);   // dorsal: skip the dilution, keep the base
 keepBlack = lerp(keepBlack, 1f, dorsal);
 
-if (isLeg(part)) {
+if (legBars &amp;&amp; isLeg(part)) {
     float bar = (float) CoatRegions.legBar(skin, part, point, BAR_SPACING, BAR_DUTY, BAR_REACH);
-    keepBlack = Math.max(keepBlack, lerp(KEEP_BLACK, BAR_KEEP_BLACK, bar));   // black only
+    keepBlack = Math.max(keepBlack, lerp(keepBlackBody, BAR_KEEP_BLACK, bar));   // black only
 }
 f.setRed(px, py, r * keepRed);
 f.setBlack(px, py, b * keepBlack);</code></pre>
+</div>
+
+<h2><code>d1</code>: a marking with no dilution</h2>
+
+<p>
+    A non-dun horse is by definition undiluted, so <code>d1</code> cannot paint a dark
+    line on it &mdash; phase 1 has no way to add pigment. It does not need to. A primitive
+    marking is <strong>countershading</strong>, and &ldquo;a stripe darker than the body&rdquo;
+    and &ldquo;a body lighter than the stripe&rdquo; are the same picture. So both marked
+    outcomes run the <strong>same painter</strong>, differing only in their constants, and in
+    both cases the marking is simply the region the dilution is lerped back off.
+</p>
+
+<p>
+    <code>d1</code>&rsquo;s two constants are chosen to move as little as possible:
+</p>
+
+<ul>
+    <li><strong>Black is never touched</strong> (<code>keepBlack = 1</code>). The whole
+        <code>black = 1</code> row of the gradient is pure black, and the composer gives a
+        texel resolving to pure black <em>80% opacity</em> (<code>PURE_BLACK_ALPHA</code>).
+        Nudging a black texel off that row therefore makes it <em>fully opaque</em> &mdash; and
+        so <em>darker</em>. A body darker than its own dorsal stripe is worse than no stripe.</li>
+    <li><strong>Red is taken only where there is red to take.</strong> <code>d1</code>&rsquo;s
+        <code>keepRed</code> runs <em>up</em> to 1 as the texel&rsquo;s black rises &mdash; the
+        mirror of <code>D</code>&rsquo;s ramp <em>down</em> to 0. A chestnut lightens a little,
+        a bay body less, a true black or a bay&rsquo;s points not at all.</li>
+</ul>
+
+<div class="note">
+    <span class="label">A no-op is the right answer here</span>
+    <p>
+        A <code>d1</code> horse on a solid black base is composed <strong>byte-identically</strong>
+        to a plain black one &mdash; there is no red to take and black is untouched. That is not
+        a gap: a real non-dun black shows no visible primitive markings either. The marking
+        appears on the bases that have red to give up &mdash; chestnut, bay, and everything
+        downstream of them. <code>DunGeneTest</code> pins both halves.
+    </p>
 </div>
 
 <h2>What it looks like on each base</h2>
 
 <div class="table-wrap">
 <table>
-<thead><tr><th>Base</th><th>Name</th><th>Body</th></tr></thead>
+<thead><tr><th>Base</th><th>With <code>D</code></th><th>With <code>d1</code> only</th></tr></thead>
 <tbody>
-<tr><td>bay (<code>E_ A_</code>)</td><td><strong>bay dun / zebra dun</strong></td><td>tan body, black points, dark dorsal + leg bars</td></tr>
-<tr><td>black (<code>E_ aa</code>)</td><td><strong>grullo</strong></td><td>mouse-grey body, dark dorsal</td></tr>
-<tr><td>chestnut (<code>ee</code>)</td><td><strong>red dun</strong></td><td>pale apricot body, red dorsal</td></tr>
+<tr><td>bay (<code>E_ A_</code>)</td><td><strong>bay dun / zebra dun</strong> &mdash; tan body, black points, dark dorsal + leg bars</td><td>ordinary bay, slightly warmer through the barrel, with a deeper line down the spine</td></tr>
+<tr><td>black (<code>E_ aa</code>)</td><td><strong>grullo</strong> &mdash; mouse-grey body, dark dorsal</td><td>plain black &mdash; nothing visible</td></tr>
+<tr><td>chestnut (<code>ee</code>)</td><td><strong>red dun</strong> &mdash; pale apricot body, red dorsal</td><td>ordinary chestnut with a distinctly redder dorsal line</td></tr>
 </tbody>
 </table>
 </div>
 
+<h2>Founder frequencies</h2>
+
+<p>
+    The six weights are written out rather than computed, so one row can be retuned without
+    disturbing the others. They are Hardy-Weinberg at <code>p(D) = 1/24</code> and
+    <code>p(d1) = 1/10</code>. The three <code>D</code> rows still sum to <strong>8.16%</strong>
+    &mdash; exactly what the old two-allele table gave &mdash; so adding <code>d1</code> split
+    the non-dun population rather than making duns rarer.
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Combination</th><th>% of founders</th></tr></thead>
+<tbody>
+<tr><td><code>D/D</code></td><td>0.174</td></tr>
+<tr><td><code>D/d1</code></td><td>0.833</td></tr>
+<tr><td><code>D/d2</code></td><td>7.153</td></tr>
+<tr><td><code>d1/d1</code></td><td>1.000</td></tr>
+<tr><td><code>d1/d2</code></td><td>17.167</td></tr>
+<tr><td><code>d2/d2</code></td><td>73.674</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    So roughly <strong>one wild horse in five</strong> carries primitive markings without
+    being a dun &mdash; common enough to be a familiar sight, and the reason the locus is
+    worth three alleles rather than two.
+</p>
+
 <div class="note">
-    <span class="label">Simplification</span>
+    <span class="label">Still simplified</span>
     <p>
-        The real locus has three alleles &mdash; <code>D</code> (full dun),
-        <code>d1</code> (non-dun but still marked), <code>d2</code> (no dun, no
-        markings) &mdash; whose relationship (<code>D &gt; d1 = d2</code> for
-        dilution, but only <code>d1</code> carries markings) the old per-gene
-        dominance label could not express. The
-        <a href="genetics-model.html#combinations">combination table</a> can:
-        three alleles, six combinations, an outcome per row. So this is still the
-        two-allele form, but the third allele is now a gene rewrite rather than a
-        framework change &mdash; a <a href="roadmap.html">roadmap</a> item. Leg barring is also a hand-rolled
-        Y-phase rather than a reuse of
-        <a href="body-space.html"><code>BodyStripes</code></a> (which runs on X).
+        Leg barring is a hand-rolled Y-phase rather than a reuse of
+        <a href="body-space.html"><code>BodyStripes</code></a> (which runs on X) &mdash; a
+        <a href="roadmap.html">roadmap</a> item. Real <code>d1</code> horses can show faint
+        leg bars and shoulder shadowing as well as the dorsal stripe; here the bars belong to
+        <code>D</code> alone, since at <code>d1</code>&rsquo;s strength a bar on a mostly-black
+        leg would have nothing to work with anyway.
     </p>
 </div>
 
 <div class="page-foot">
     <div class="seealso">
+        <a href="gene-matp.html">MATP</a>
         <a href="gene-agouti.html">Agouti</a>
         <a href="gene-grey.html">Grey</a>
         <a href="body-space.html">Body space &amp; regions</a>

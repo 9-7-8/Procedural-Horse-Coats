@@ -125,6 +125,53 @@ project. Its shape:
 
 ## Status snapshot (keep this current)
 
+- **Built 2026-09-03, NOT yet play-tested: dun becomes a three-allele locus
+  (roadmap §4.1).** `DunGene` now carries `D` / `d1` / `d2` - six combinations,
+  three outcomes - and **`d1` is the allele that draws the dorsal stripe without
+  diluting anything**, so a horse can carry primitive markings and not be a dun.
+  Landing with it:
+  - **The locus with two dominance orders.** Dilution reads `D > d1 = d2`;
+    marking reads `D = d1 > d2`. No single label covers both, which makes this
+    the clearest argument yet for the combination table - clearer than MATP,
+    which at least had *one* order.
+  - **`d2`, not the old catch-all `d`, is `defaultAllele()`** (the only allele
+    that draws nothing). So the allele tokens moved: **summon with
+    `dun=D/d2`**. `CoatSampleTool`, `CoatPipelineGoldenTest` and the three
+    `LegacyCode` test strings were updated with it.
+  - **How an undiluted horse shows a darker stripe.** Phase 1 is downward-only,
+    so `d1` cannot paint a dark line - and does not need to: a primitive marking
+    is *countershading*, so both marked outcomes run **one painter** and differ
+    only in constants, the marking being the region the dilution is lerped off.
+    `d1` **never touches black** (the gradient's whole `black = 1` row is pure
+    black and `PURE_BLACK_ALPHA` gives such a texel 80% opacity, so nudging it
+    off that row makes it *fully opaque* and therefore **darker** than its own
+    stripe) and takes red only where there is red - `keepRed` ramps *up* to 1 as
+    the texel's black rises, the mirror of `D`'s ramp *down* to 0. Consequence,
+    and the right one: **`d1` on a solid black composes byte-identically to a
+    plain black horse.** A real non-dun black shows no markings either.
+  - **Leg bars stay `D`-only** (`primitive(..., legBars)`); `d1` is the dorsal
+    stripe alone.
+  - Founder table written out as six weights, Hardy-Weinberg at `p(D) = 1/24`
+    and `p(d1) = 1/10`. The three `D` rows still sum to **8.16%**, exactly the
+    old two-allele number - `d1` split the non-dun population rather than making
+    duns rarer. About **18%** of wild horses now carry a stripe and no dilution.
+  - The gallery grew by half: dun contributes **3** distinct pens instead of 2,
+    so `GenotypeCatalog.size()` is **147 458** and `totalGenotypes()` is
+    **1 033 121 304** (dun's `allPairsOf` doubled, 3 → 6).
+  - `coat-golden.txt` regenerated: **all 240 pre-existing rows are
+    byte-identical**, including every `D` one - the only change is 12 new `d1`
+    cases. Nothing about any other coat moved. New `DunGeneTest` (8 tests) pins
+    the table, the founder shares, the spine-vs-flank contrast on both marked
+    outcomes, the black-coat no-op and the `D`-only leg bars. `:common:test`
+    **235 green**, `:neoforge-26.1.2:build` green.
+  - **Also fixed in passing:** `:common:bakeCoatSamples` had been broken since
+    the MATP merge - its `build()` helper still wrote *positional* code segments
+    into what is now a gene-keyed string, and three samples named the retired
+    `cream` / `pearl` genes. Both fixed; two `dun_marked_*` samples added.
+  - **Old saves will not parse their dun locus.** Dev only; start a fresh world.
+  - Docs: `wiki/gene-dun.html` (rewritten), `wiki/genetics-model.html`,
+    `wiki/roadmap.html` §4.1. Checklist: `wiki/verification.html` §0.
+
 - **Built 2026-09-03, NOT yet play-tested: sex is a gene (roadmap §5.3, first
   half).** `SexGene` (`horsegenetics.sex`, **priority 1** - the first gene in
   `codeOrder()`), alleles `X`/`Y`: `X/X` is a mare, `X/Y` a stallion, `Y/Y`
@@ -255,16 +302,16 @@ project. Its shape:
   Still unconfirmed: bred foal, seed-jar round-trip, a spec gene actually
   showing in the display (needs a horse carrying Suntouched/Waterborn) -
   `wiki/verification.html` §0.
-- **`common/`** - compiles; **227 JUnit tests pass** (`./gradlew :common:test`).
+- **`common/`** - compiles; **235 JUnit tests pass** (`./gradlew :common:test`).
   Covers `genetics/` (allele/gene model - **18 genes**: **sex** (the only gene
   that paints nothing), the 15 natural ones
   (extension, agouti, champagne, splash, grey, **MATP** (cream + pearl, three
-  alleles), **dun**, **silver**, **mushroom**, **roan**, **tobiano**, **frame**,
+  alleles), **dun** (three alleles), **silver**, **mushroom**, **roan**, **tobiano**, **frame**,
   **sabino**, plus the masking dominant white), and magic zebra + pink hair;
   `Genotype` code round-trip, breeding, the `Epigenome` / `Genome` per-allele
   epigenetics + priority tie-break, `GenomeSample` - a genome detached from a
   horse, for the stallion seed jar - `Expression` + `FounderTable` + the
-  `GenotypeCatalog` reduction of 516 560 652 genotypes to 98 306 distinct
+  `GenotypeCatalog` reduction of 1 033 121 304 genotypes to 147 458 distinct
   coats), `coat/` + `coat/pattern/` (the
   three-phase pipeline - `CoatTextureComposer`, `PigmentField`, `ColorField`,
   `GradientLut`, `BayCoat`, `GreyCoat`, `BodyStripes`, `CoatRegions`, the pure
@@ -299,7 +346,8 @@ project. Its shape:
 - **Built 2026-09-02, NOT yet play-tested:** the **seven remaining visual
   natural genes** (roadmap §§4.1-4.2), all hand-written `Gene`s in
   `common/genetics/genes/`:
-  - **dilutions** - `DunGene` (`D`/`d`, DOMINANT: mild body dilution +
+  - **dilutions** - `DunGene` (then `D`/`d`, now the three-allele
+    `D`/`d1`/`d2`: mild body dilution +
     primitive markings - a dorsal stripe + leg barring that skip the dilution,
     via new `CoatRegions.dorsalStripe` / `legBar`), `SilverGene` (`Z`/`z`,
     DOMINANT: eumelanin-only, chocolate body + flaxen mane/tail, chestnut
@@ -665,8 +713,8 @@ project. Its shape:
   bakes look right, nothing seen in-game yet - checklist in
   **`wiki/verification.html`**.
 - **Built 2026-09-01, NOT yet play-tested:** the **genotype gallery** rework of
-  the horse dimension - one pen per visually distinct genotype (98 306 of
-  516 560 652 as of 2026-09-03),
+  the horse dimension - one pen per visually distinct genotype (147 458 of
+  1 033 121 304 as of 2026-09-03),
   per-pen genotype signs, the entrance tally sign, the per-gene distinctness
   metadata (`Gene.dominance()` then, the expression table now),
   and the entity-only teardown that leaves blocks standing. Compiles, 138
@@ -859,7 +907,7 @@ gene); one-liners:
 | MATP | `Cr`/`prl`/`N` | wild (`N/N`), `pearl-carrier` (`prl/N`, a wild type), `single-cream` (`Cr/N`), `classic-pearl` (`prl/prl`), `double-dilute` (`Cr/Cr`, `Cr/prl`) | `Cr` 1/30, `prl` 1/22 | **three alleles, six combinations**: cream and pearl are one locus. Never leaves a pitch-black point. Was two genes + `CreamPearlDilution` |
 | magic zebra | `Mzeb`/`n` | wild, `zebra` | 1/100 per allele | **magical** - black stripes hung from the topline, `-200%` on all three channels so they read black over any coat incl. dominant white (non-det) |
 | pink hair | `Pihr`/`n` | wild, `pink-carrier` (a wild type), `pink-hair` | 1/12 per allele | **magical** - mane + tail walked 82% toward hot pink; reads what it paints over, so it keeps the strand shading (foal: tail only). The clearest carrier locus: two of three combinations are wild types |
-| dun | `D`/`d` | wild, `dun` | 1/24 per allele | mild body dilution + **primitive markings** (dorsal stripe full length, faint leg bars) that *skip* the dilution so they read dark; `CoatRegions.dorsalStripe`/`legBar`. 2-allele form (real locus is `D`/`d1`/`d2` - now expressible, just not written) |
+| dun | `D`/`d1`/`d2` | wild (`d2/d2`), `primitive-marks` (`d1/d1`, `d1/d2`), `dun` (any `D`) | `D` 1/24, `d1` 1/10 | **three alleles, two dominance orders**: dilution is `D > d1 = d2`, marking is `D = d1 > d2`. `D` = mild body dilution + **primitive markings** (dorsal stripe + leg bars) that *skip* the dilution so they read dark; `d1` = the dorsal stripe with **no** dilution, done as countershading (it never touches black, and takes red only where there is red - so on a solid black it is a byte-exact no-op, as a real non-dun black is). `CoatRegions.dorsalStripe`/`legBar` |
 | silver | `Z`/`z` | wild, `silver` | 1/60 per allele | eumelanin-**only** dilution → chocolate body + near-flaxen mane/tail; chestnut carrier looks unchanged. Runs after agouti. Dapples are a follow-up |
 | mushroom | `Mu`/`mu` | wild, `mushroom-carrier` (a wild type), `mushroom` | 1/34 per allele | pheomelanin-**only** dilution, `Mu/Mu` only → chestnut becomes flat sepia; near-invisible on black/bay |
 | roan | `Rn`/`rn` | wild, `roan` | 1/30 per allele | high-freq `BodyNoise` white-hair dither on the barrel + upper legs; head / mane / tail / lower legs stay solid (non-det) |
@@ -1703,7 +1751,7 @@ genotype that looks different from every other.
   `n(n+1)/2` of them (`ee`, `Ee`, `EE`) minus any the gene rules out with
   `canOccur` (only sex, which has no `Y/Y`); `distinctPairsOf(gene)` keeps one
   representative per distinct `Expression`; `totalGenotypes()` = the raw product
-  (**516 560 652**); `size()` = the reduced catalogue (**98 306**); `get(i)` /
+  (**1 033 121 304**); `size()` = the reduced catalogue (**147 458**); `get(i)` /
   `entries()` read the list, built once at class load. Nothing is hard-coded - register a gene (or an allele) and the
   catalogue, the corridor length and both signs widen on their own.
 - **Two reductions**, both read straight off the gene's expression table with
@@ -1718,11 +1766,12 @@ genotype that looks different from every other.
     exactly **one** entry for it: that combination with every other gene at a
     wild type. Hence one white pen (`EEaa WW`) and one test pen (`EEaa TT`)
     instead of a huge fraction of the corridor each.
-  - Net: `2^13 · 4 (MATP) · 3 (sabino) = 98 304` unmasked + 1 white + 1 test =
-    **98 306**. Splash dropped from 3 pens to 2 (its two variant combinations
-    are one expression) and MATP from cream×3 · pearl×3 = 9 to 4. **Sex adds no
-    pens** - both its outcomes are wild types, so the whole locus is one group;
-    it only doubles `totalGenotypes()`.
+  - Net: `2^12 · 3 (dun) · 4 (MATP) · 3 (sabino) = 147 456` unmasked + 1 white
+    + 1 test = **147 458**. Splash dropped from 3 pens to 2 (its two variant
+    combinations are one expression) and MATP from cream×3 · pearl×3 = 9 to 4;
+    dun went 2 → 3 with its third allele. **Sex adds no pens** - both its
+    outcomes are wild types, so the whole locus is one group; it only doubles
+    `totalGenotypes()`.
 - **Pen order**: segment `i` holds catalogue entry `2i` in the **right-hand**
   pen (`NORTH_PEN`, the `+Z` side - your right walking in from the portal) and
   `2i+1` on the left. The corridor reads `eeaa, EEaa, eeAA, EEAA, [white],
@@ -1747,7 +1796,7 @@ genotype that looks different from every other.
     entirely - so this is deliberately left alone.
   - `originX + 4` (three blocks in front of the return portal), facing west at
     the player's spawn: `Genotypes / <totalGenotypes()> / Distinct / <size()>
-    pens` - both derived, so **516,560,652 / 98,306** today.
+    pens` - both derived, so **1,033,121,304 / 147,458** today.
     Epigenetics are deliberately not counted in either number.
 - **Length**: `LAST_SEGMENT_INDEX` = `ceil(size / 2) - 1` = 864, so the corridor
   is **6 055 blocks** (it was 1 519 at 9 genes - each new gene multiplies it, which
@@ -1905,11 +1954,11 @@ yet)** - full detail in `wiki/verification.html`:
 remaining follow-ups, none seen in-game:**
 
 - **Dun** leg barring is a hand-rolled Y-phase; roadmap §4.1 wants it to reuse
-  `BodyStripes` (which runs on X). The third allele (`d1` marked / `d2`
-  unmarked) used to need more than one `DominancePattern`; the combination
-  table can express it now, so it is a gene rewrite rather than a framework
-  change. (Grullo now lands on the LUT neutral column - `keepRed` scales to 0
-  by the texel's black content.)
+  `BodyStripes` (which runs on X). The third allele **is built** (2026-09-03);
+  what is left there is that `d1` shows only the dorsal stripe, where a real
+  non-dun-1 horse can also carry faint bars and shoulder shadowing. (Grullo
+  lands on the LUT neutral column - `keepRed` scales to 0 by the texel's black
+  content.)
 - **Silver** has no dapples yet - v1 is the dilution only. A deterministic
   (fixed-seed) `BodyNoise` dapple modulation is the obvious next step. The
   flaxen mane currently reads a little gold rather than pale.
@@ -1985,7 +2034,21 @@ Design follow-ups (not just "go look at it"):
    name-generation rework; real white-fog dimension effects
    (needs a client dimension-effects mixin); the stray `neoforge.mods.toml`
    duplicate.
-12. **The wiki is now load-bearing, so it can rot.** `wiki/api-reference.html`
+12. **A renamed or retired gene silently guts its golden-test cases.**
+   `CoatPipelineGoldenTest.override(...)` matches a gene by key suffix and, when
+   nothing matches, **leaves the segment alone and says nothing** - so a case
+   naming a gene that no longer exists quietly becomes a duplicate of its base.
+   Found 2026-09-03: five cases still name the retired `cream` / `pearl` genes
+   (gone in the MATP merge), four of which now duplicate plain
+   `agouti=A/a`, so those rows are pinning nothing. `Codes.of` in the test utils
+   *does* throw on an unknown gene; `override` should too, and the five cases
+   should be re-pointed at `matp=`. **The same silent-miss shape bit
+   `CoatSampleTool.build()` harder** - it also wrote a *positional* segment into
+   what is now a gene-keyed code, which broke `:common:bakeCoatSamples`
+   outright; that half is fixed (it now throws on an unknown gene and writes the
+   key), the golden test's half is not.
+
+13. **The wiki is now load-bearing, so it can rot.** `wiki/api-reference.html`
    hand-transcribes public signatures out of `common/` and
    `wiki/gene-*.html` hand-transcribes each gene's constants - neither is
    generated, so both drift silently the moment a signature or a tuning number
@@ -1995,7 +2058,7 @@ Design follow-ups (not just "go look at it"):
    cheap version elsewhere is a `:common:test` that greps the gene pages for the
    constants they quote. Until then the other pages are a discipline item, which
    is why they are in the session-end routine.
-13. **Data-driven genes cover markings and dilutions, not everything.** The
+14. **Data-driven genes cover markings and dilutions, not everything.** The
    format has no expression language and no way to read another gene, so the
    three built-ins that genuinely need one still can't be expressed as specs:
    **grey** (its remap onto the gradient's neutral column reads the coat's
@@ -2004,11 +2067,11 @@ Design follow-ups (not just "go look at it"):
    **bay**'s exact face-follows-legs coupling. Those stay Java, which is fine -
    the tiers were always meant to bottom out at a real class. What would move
    the line: a `dose` mask on another gene, and a `REMAP` op.
-14. **The creator has no in-page parity button.** Parity is checked by a Node
+15. **The creator has no in-page parity button.** Parity is checked by a Node
    script at the terminal, so the tool itself will happily show you a stale
    preview if you edit `js/` and don't run it. Loading `fixtures/expected.json`
    in the page and self-checking on boot would close that.
-15. **Gene `effects` are a thin slice and mostly untested.** `attribute` still
+16. **Gene `effects` are a thin slice and mostly untested.** `attribute` still
    parses but the translator doesn't apply it (logged once). `mob_effect` is
    wired (`applyMobEffect`). `glow` is wired both sides - the light half is a
    trailing `minecraft:light` block (janky vs a mixin-based dynamic light: lags
@@ -2023,7 +2086,7 @@ Design follow-ups (not just "go look at it"):
    Suntouched and every other effect verb are unverified
    (`wiki/verification.html` §13). The full plan is `wiki/horse-traits.html`.
 
-16. **Some gameplay-layer items still have no behaviour.** The seed jars,
+17. **Some gameplay-layer items still have no behaviour.** The seed jars,
    whistles and stall signs work; still unwired: shearing to get `horse_hair`,
    any carrot effect on the breeding draw, and **the tickets** - owner's intent
    is that a ticket teleports its bound horse back to its stall, which is now
@@ -2033,7 +2096,7 @@ Design follow-ups (not just "go look at it"):
    `placeholder_gene_book` replaces the real research paper. Tickets share one
    texture, whistles share one, stall signs borrow `oak_sign` - per-tier / real
    art is a follow-up (`wiki/verification.html` §15).
-17. **The stallion seed jar is a first slice, not the §15.1 flow.** Collection
+18. **The stallion seed jar is a first slice, not the §15.1 flow.** Collection
    and impregnation are wired (`StallionSeedJarHandler` + the `stored_genome`
    component + `GenomeSample` + `HorseBreedingHandler.applyBredFoal`). The gate
    is **vanilla love** (`isInLove()`), not one of this mod's breeding carrots
@@ -2046,13 +2109,13 @@ Design follow-ups (not just "go look at it"):
    transforms in hand now; (b) worked with no breeding-mode requirement ->
    fixed, both ends now require `isInLove()` and consume it.
    `wiki/verification.html` §16.
-18. **Fixed 2026-09-03 (data-model rewrite), not play-tested.** The short
+19. **Fixed 2026-09-03 (data-model rewrite), not play-tested.** The short
    genome string now shows data-driven genes: `GeneCodeDisplay` derives its
    trailing gene list from `Genes.codeOrder()` (built-ins in a curated display
    order, then `Genes.loaded()`) and derives the "wild type means absent"
    test from `dominance()`, so the shipped Suntouched / Waterborn appear.
    Confirm in-game (info panel, paper dump, seed-jar tooltip).
-19. **The stall system is detection + storage only.** A stall gets defined and
+20. **The stall system is detection + storage only.** A stall gets defined and
    persisted (`StallData`), but nothing *uses* it yet: no teleport-to-stall, no
    "assigned pen" behaviour, no auto-return. Cleanup is thin - a stall only goes
    away if its exact sign block is broken (`BreakBlockEvent`); rebuilding a wall
@@ -2065,7 +2128,7 @@ Design follow-ups (not just "go look at it"):
    that this was deliberately deferred). Flood-fill is air-only and capped at
    `StallDetector.MAX_BLOCKS` (512).
 
-20. **Horse care is a first slice, and unplayed.** `HorseCareHandler` +
+21. **Horse care is a first slice, and unplayed.** `HorseCareHandler` +
    `BondFollowGoal` + `HorseCareAttachment` cover §7.2 gated healing and §13
    bond/herds; details and what's deferred are in `wiki/horse-care.html`, the
    in-game checklist in `wiki/verification.html` §0. Specifics still open:
@@ -2080,7 +2143,7 @@ Design follow-ups (not just "go look at it"):
    fluid check, not the block tag. Feed-bond fires on `EntityInteract` for any
    `isFood` stack and is **not** dose/temper-aware.
 
-21. **Sex is a gene, but nothing is sex-*linked* yet** (roadmap §5.3, second
+22. **Sex is a gene, but nothing is sex-*linked* yet** (roadmap §5.3, second
    half). The locus is built and `HorseRecord.sex` is derived from it, which was
    the prerequisite; what's left is the inheritance *mode*. Specifically:
    `Gene` has no autosomal / X-linked / Y-linked declaration; `breedWith` has no

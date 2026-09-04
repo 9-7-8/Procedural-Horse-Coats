@@ -71,9 +71,10 @@
 <ul>
     <li><strong>The gallery does not widen.</strong> Both combinations land on a wild
         type, and <code>GenotypeCatalog</code> collapses every wild type into one group,
-        so the whole locus is <b>one pen</b>. The catalogue stays at 98,306; only
-        <code>totalGenotypes()</code> doubles, to <b>516,560,652</b>, because every
-        genotype now genuinely comes in two sexes.</li>
+        so the whole locus is <b>one pen</b>. The catalogue did not move; only
+        <code>totalGenotypes()</code> doubled, because every genotype now genuinely
+        comes in two sexes. (Both numbers have since grown again with dun&rsquo;s
+        third allele &mdash; <b>147,458</b> pens of <b>1,033,121,304</b> genotypes.)</li>
     <li><strong>The texture cache does not double.</strong> A derived
         <code>Gene.affectsCoat()</code> is false when every one of a gene&rsquo;s outcomes
         is a wild type, and <code>Genotype.coatCode()</code> &mdash; what

@@ -274,7 +274,7 @@ public Expression expressionOf(AllelePair pair) {
 <tr><td><a href="gene-matp.html">MATP</a></td><td><span class="allele dom">Cr</span> / <span class="allele rec">prl</span> / <span class="allele wild">N</span></td><td>wild, pearl-carrier, single-cream, classic-pearl, double-dilute</td><td>1/30 <code>Cr</code>, 1/22 <code>prl</code></td><td>natural</td></tr>
 <tr><td><a href="gene-magic-zebra.html">magic zebra</a></td><td><span class="allele dom">Mzeb</span> / <span class="allele wild">n</span></td><td>wild, zebra</td><td>1/100 per allele</td><td>magical</td></tr>
 <tr><td><a href="gene-pink-hair.html">pink hair</a></td><td><span class="allele rec">Pihr</span> / <span class="allele wild">n</span></td><td>wild, pink-carrier, pink-hair</td><td>1/12 per allele</td><td>magical</td></tr>
-<tr><td><a href="gene-dun.html">dun</a></td><td><span class="allele dom">D</span> / <span class="allele wild">d</span></td><td>wild, dun</td><td>1/24 per allele</td><td>natural</td></tr>
+<tr><td><a href="gene-dun.html">dun</a></td><td><span class="allele dom">D</span> / <span class="allele dom">d1</span> / <span class="allele wild">d2</span></td><td>wild, primitive-marks, dun&sect;</td><td>1/24 <code>D</code>, 1/10 <code>d1</code></td><td>natural</td></tr>
 <tr><td><a href="gene-silver.html">silver</a></td><td><span class="allele dom">Z</span> / <span class="allele wild">z</span></td><td>wild, silver</td><td>1/60 per allele</td><td>natural</td></tr>
 <tr><td><a href="gene-mushroom.html">mushroom</a></td><td><span class="allele rec">Mu</span> / <span class="allele wild">mu</span></td><td>wild, mushroom-carrier, mushroom</td><td>1/34 per allele</td><td>natural</td></tr>
 <tr><td><a href="gene-roan.html">roan</a></td><td><span class="allele dom">Rn</span> / <span class="allele wild">rn</span></td><td>wild, roan</td><td>1/30 per allele</td><td>natural</td></tr>
@@ -295,6 +295,12 @@ public Expression expressionOf(AllelePair pair) {
     &dagger; Frame models the coat only; <code>Ov/Ov</code> lethal white is
     deliberately not modelled &mdash; a third expression when health genetics
     land (a <a href="roadmap.html">roadmap</a> item).
+    &sect; <strong>Dun is the locus with two dominance orders.</strong>
+    Dilution reads <code>D &gt; d1 = d2</code> but marking reads
+    <code>D = d1 &gt; d2</code>, so <code>d1</code> draws the dorsal stripe
+    without diluting anything &mdash; a horse with primitive markings that is
+    not a dun. No single dominance label covers both orders, which is the
+    clearest case yet for the table. See <a href="gene-dun.html">its page</a>.
     &Dagger; <strong>Sex is the one gene that never paints.</strong> Both its
     outcomes are wild types, so it costs the gallery nothing and is left out of
     the texture key; it is registered at priority 1 so a future
@@ -310,7 +316,9 @@ public Expression expressionOf(AllelePair pair) {
     horses (both <code>MATP</code>) and are now one locus with three alleles,
     which kills the impossible <code>Cr/Cr</code>-<em>and</em>-<code>prl/prl</code>
     genotype the old two-gene model allowed. See
-    <a href="gene-matp.html">its page</a>.
+    <a href="gene-matp.html">its page</a>. <strong>Dun is the other
+    three-allele locus</strong>, and the one that shows why a dominance label
+    could never have worked: see <a href="gene-dun.html">its page</a>.
 </p>
 
 <h2 id="epigenetics">Epigenetics ride on the allele, not on the horse</h2>

@@ -46,7 +46,7 @@
         &ldquo;baseline means absent&rdquo; test from the gene&rsquo;s own
         expression table (does any combination <code>mask</code>?).
         Confirm a horse carrying Suntouched or Waterborn shows it. See
-        <a href="#data-model">&sect;0</a>.
+        <a href="#data-model">&sect;0.3</a>.
     </p>
 </div>
 
@@ -103,7 +103,69 @@
 
 <h2>Still to verify</h2>
 
-<h3 id="sex-gene">0. Sex is a gene (new 2026-09-03)</h3>
+<h3 id="dun-locus">0. Dun becomes a three-allele locus (new 2026-09-03)</h3>
+
+<p>
+    <a href="gene-dun.html">Dun</a> now carries <code>D</code> / <code>d1</code> /
+    <code>d2</code> &mdash; six combinations on three outcomes. <strong><code>d1</code>
+    is the new one</strong>: it draws the <strong>dorsal stripe with no dilution</strong>,
+    so a horse can have primitive markings and not be a dun. The old catch-all
+    <code>d</code> is gone; the baseline allele is <code>d2</code>, so
+    <strong>summon with <code>dun=D/d2</code></strong>, not <code>dun=D/d</code>.
+    235 <code>:common:test</code> pass (8 of them a new <code>DunGeneTest</code>),
+    <code>:neoforge-26.1.2:build</code> is green.
+</p>
+
+<div class="note danger">
+    <span class="label">Another fresh world</span>
+    <p>
+        The dun segment&rsquo;s allele tokens changed, so a save from before this will
+        not parse its dun locus. <strong>Start a fresh world.</strong> Every one of the
+        240 pre-existing golden rows is byte-identical though &mdash; only the 12 new
+        <code>d1</code> cases were added &mdash; so nothing else about any coat moved.
+    </p>
+</div>
+
+<ul>
+    <li><strong>A <code>d1</code> bay shows a spine line and nothing else.</strong>
+        Summon <code>agouti=A/a dun=d1/d1</code> beside a plain <code>agouti=A/a</code>.
+        The body must look like an ordinary bay &mdash; only a touch warmer through the
+        barrel &mdash; with a <em>visibly darker line down the spine</em>. If the whole
+        horse reads noticeably lighter, <code>MARKED_KEEP_RED_CHESTNUT</code> is too
+        low; if you cannot find the stripe at all, it is too high.</li>
+    <li><strong>A <code>d1</code> chestnut is the clearest case.</strong>
+        <code>extension=e/e dun=d1/d2</code>: an ordinary chestnut with a distinctly
+        redder dorsal line running nose &rarr; tail.</li>
+    <li><strong>A <code>d1</code> black shows nothing &mdash; that is correct.</strong>
+        <code>dun=d1/d1</code> on a plain black must be <em>indistinguishable</em> from
+        a plain black horse (it composes byte-identically). If it comes out
+        <em>brown</em> or <em>darker than</em> a plain black, the keepRed ramp has been
+        broken &mdash; that is the exact failure mode the constants are shaped to
+        avoid.</li>
+    <li><strong><code>D</code> still does everything it did.</strong>
+        <code>dun=D/d2</code> on black / bay / chestnut &rarr; grullo / bay dun / red
+        dun, dorsal stripe <em>and</em> leg bars. Unchanged bytes, so this is a
+        regression check, not a new look.</li>
+    <li><strong><code>D/d1</code> is a dun, not a blend.</strong> A horse carrying one
+        of each must look exactly like <code>D/d2</code> &mdash; dominance for the
+        dilution is <code>D &gt; d1</code>, and the two land on the same
+        expression.</li>
+    <li><strong>Marked horses are common in the wild now.</strong> <code>d1</code> is
+        1 in 10 per allele, so roughly <strong>18%</strong> of wild spawns should carry
+        a dorsal stripe with no dilution, against about 8% duns. Spawn thirty and
+        look along their backs; if you see none, the founder table is not being
+        drawn.</li>
+    <li><strong>The genome display reads sensibly.</strong> The short form writes
+        <code>nD</code> for <code>D/d2</code>, <code>nd1</code> for <code>d1/d2</code>
+        and <code>d1d1</code> for <code>d1/d1</code> &mdash; check the info panel, the
+        paper dump and a pen sign agree.</li>
+    <li><strong>The gallery grew by half.</strong> The entrance sign should read
+        <code>Genotypes / 1,033,121,304 / Distinct / 147,458 pens</code>, and the
+        corridor is now ~516,000 blocks. Dun contributes <em>three</em> pens per
+        position now, not two.</li>
+</ul>
+
+<h3 id="sex-gene">0.1 Sex is a gene (new 2026-09-03)</h3>
 
 <p>
     <a href="roadmap.html#sex-linked">Roadmap &sect;5.3</a>, first half:
@@ -150,8 +212,8 @@
         (it is filtered out; the button owns that locus).</li>
     <li><strong>The gallery still has one mare and one stallion per pen</strong>, and
         the pen signs are unchanged &mdash; the short genome form does not print sex.
-        The entrance sign&rsquo;s <em>Genotypes</em> number should now read
-        <strong>516,560,652</strong>; <em>Distinct</em> stays <strong>98,306</strong>.</li>
+        The entrance sign&rsquo;s numbers moved again with dun&rsquo;s third allele
+        &mdash; see &sect;0 for what they should read now.</li>
     <li><strong>The seed jar still refuses a mare</strong> (collection) and
         <strong>refuses a stallion</strong> (impregnation) &mdash; both sides now read
         the sex out of the genome rather than a stored field, and the jar&rsquo;s own
@@ -162,7 +224,7 @@
         but it is the cheapest way to catch a regression.)</li>
 </ul>
 
-<h3 id="expressions">0.1 The combination-table rewrite &mdash; no more dominance (new 2026-09-03)</h3>
+<h3 id="expressions">0.2 The combination-table rewrite &mdash; no more dominance (new 2026-09-03)</h3>
 
 <p>
     <a href="roadmap.html#multi-allele">Roadmap &sect;5.1 / &sect;5.2 / &sect;2</a>:
@@ -246,7 +308,7 @@
 </div>
 
 
-<h3 id="data-model">0.2 The data-model rewrite &mdash; gene priority + gene-keyed codes (2026-09-03)</h3>
+<h3 id="data-model">0.3 The data-model rewrite &mdash; gene priority + gene-keyed codes (2026-09-03)</h3>
 
 <p>
     <a href="roadmap.html#priority">Roadmap Tier&nbsp;1</a>: every gene has
@@ -254,7 +316,7 @@
     <code>(priority, key)</code>; genotype / epigenome code strings are now
     gene-keyed (<code>&lt;geneKey&gt;=&hellip;</code>) and tolerant. 195
     <code>:common:test</code> pass, <code>runServer</code> boots clean. (Superseded
-    in part by <a href="#expressions">&sect;0</a>, which reran all of it.) Machinery:
+    in part by <a href="#expressions">&sect;0.2</a>, which reran all of it.) Machinery:
     <a href="genetics-model.html#gene-priority">Genetics model</a>.
 </p>
 <p>
@@ -275,7 +337,7 @@
         <code>GeneCodeDisplay</code> bug (closed with this change) hid them.</li>
 </ul>
 
-<h3 id="horse-care">0.3 Horse care &mdash; gated healing, bond &amp; herds (new 2026-09-02)</h3>
+<h3 id="horse-care">0.4 Horse care &mdash; gated healing, bond &amp; herds (new 2026-09-02)</h3>
 
 <p>
     First slice of <a href="roadmap.html#care">roadmap &sect;7</a> and
@@ -899,7 +961,7 @@ gold-dust <code>emitter</code> shows, and the horse lights the area around it
     <a href="gene-sabino.html">sabino 1</a>. Hand-written <code>Gene</code>s in
     <code>common/genetics/genes/</code>. All are rare in the wild
     (1/24&ndash;1/60 per allele); <strong>summon them</strong> with e.g.
-    <code>dun=D/d</code>, <code>silver=Z/z</code>, <code>mushroom=Mu/Mu</code>,
+    <code>dun=D/d2</code>, <code>silver=Z/z</code>, <code>mushroom=Mu/Mu</code>,
     <code>roan=Rn/rn</code>, <code>tobiano=To/to</code>, <code>frame=Ov/ov</code>,
     <code>sabino=SB1/sb1</code> (and <code>sabino=SB1/SB1</code>). Sample bakes look
     right; nothing seen on the 3D model. What to check:
@@ -911,7 +973,8 @@ gold-dust <code>emitter</code> shows, and the horse lights the area around it
         with faint horizontal <strong>leg bars</strong> on the cannons. The markings
         must read <em>dark against the diluted body</em>, not vanish. (Grullo was
         warm-brown in the first bake; <code>keepRed</code> now scales to 0 on a black
-        base so it should land a proper mouse-grey.)</li>
+        base so it should land a proper mouse-grey.) The third allele is a separate
+        item &mdash; see <a href="#dun-locus">&sect;0</a>.</li>
     <li><strong>Silver</strong> on a <strong>black</strong> &rarr; chocolate body,
         near-flaxen mane/tail; on a <strong>bay</strong> &rarr; "silver bay" (red body
         untouched, points + mane lightened). On a <strong>chestnut</strong> it must be

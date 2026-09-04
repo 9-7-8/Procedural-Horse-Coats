@@ -424,7 +424,7 @@
 <tbody>
 <tr><td><strong>Red factor (MC1R)</strong></td><td><code>E</code>, <code>e</code>, <code>ea</code></td><td>partial</td><td>Add the third allele. First real 3-allele locus, so the natural place to prove multi-allele support. <code>ea</code> is phenotypically red like <code>e</code>; the interest is in the code string and the carrier display.</td></tr>
 <tr><td><strong>MATP &mdash; two more alleles</strong></td><td><code>Cr</code>, <code>prl</code>, <em><code>sun</code></em>, <em><code>sno</code></em>, <code>N</code></td><td>partial</td><td><strong>The merge shipped 2026-09-03</strong> &mdash; cream and pearl are one three-allele locus with six combinations and four outcomes (<a href="gene-matp.html">MATP</a>), and it was the case that proved §5.1. Left: the other two real alleles, <strong>sunshine</strong> (<code>sun</code>) and <strong>snowdrop</strong> (<code>sno</code>), which take it to five alleles and fifteen combinations. Purely additive now &mdash; two allele constants and the rows they need.</td></tr>
-<tr><td><strong>Dun (TBX3) &mdash; third allele</strong></td><td><code>D</code>, <code>d1</code>, <code>d2</code></td><td>partial</td><td>Ships as <code>D</code>/<code>d</code>. The real locus is <code>D</code> (full dun) / <code>d1</code> (non-dun, still marked) / <code>d2</code> (no dun, no markings), whose split behaviour &mdash; <code>D</code> diluting, only <code>d1</code> carrying markings &mdash; the old single <code>DominancePattern</code> could not express. <strong>The combination table can</strong> (§5.1 shipped): three alleles, six combinations, and an outcome per row. Now a gene rewrite, not a framework change. Leg barring should also move to <code>BodyStripes</code>. See <a href="gene-dun.html">its page</a>.</td></tr>
+<tr><td><strong>Dun (TBX3) &mdash; leg barring</strong></td><td><code>D</code>, <code>d1</code>, <code>d2</code></td><td>partial</td><td><strong>The third allele shipped 2026-09-03</strong> &mdash; three alleles, six combinations, three outcomes, with <code>d1</code> carrying the primitive markings and no dilution (<a href="gene-dun.html">Dun</a>). Left: leg barring is still a hand-rolled Y-phase and should move to <code>BodyStripes</code>; and <code>d1</code> shows only the dorsal stripe, where a real one can also carry faint bars and shoulder shadowing.</td></tr>
 <tr><td><strong>Silver dapple &mdash; the dappling</strong></td><td><code>Z</code>, <code>z</code></td><td>partial</td><td>Ships as the dilution only. The dapples the gene is named for want a deterministic fixed-seed <code>BodyNoise</code> modulation (like grey&rsquo;s, lighter, per-genotype). Health: <code>Z/Z</code> &rarr; MCOA, blocked on §6.4. See <a href="gene-silver.html">its page</a>.</td></tr>
 <tr><td><strong>Tiger eye</strong></td><td><code>TE1</code>, <code>TE2</code>, wild</td><td>new</td><td>No coat effect at all &mdash; <strong>eye colour</strong>. Blocked on an eye-colour system: <code>redrawEyes</code> copies eye texels verbatim, so there is no colour channel to write to.</td></tr>
 </tbody>
@@ -654,8 +654,8 @@
         <code>Y</code>; a mare is <code>X/X</code>, a stallion <code>X/Y</code>, and
         <code>Y/Y</code> is ruled out by a new <code>Gene.canOccur(AllelePair)</code>
         that <code>GenotypeCatalog.allPairsOf</code> filters on. Both outcomes are
-        <strong>wild types</strong>, so the gallery does not widen (still 98,306 pens);
-        only <code>totalGenotypes()</code> doubles, to 516,560,652. A new derived
+        <strong>wild types</strong>, so the gallery does not widen at all; only
+        <code>totalGenotypes()</code> doubles. A new derived
         <code>Gene.affectsCoat()</code> plus <code>Genotype.coatCode()</code> keep a
         gene that never paints out of the texture key, so a mare and a stallion of the
         same colour still share one baked texture.
@@ -1128,15 +1128,15 @@ interface ConditionRule    { void conditions(AllelePair, ConditionSink); } // CS
 </p>
 
 <ul>
-    <li><strong>The genotype space.</strong> Now <code>3^16 &times; 6 &times; 2 =
-        516,560,652</code> (sixteen two-allele genes, three-allele MATP, and the
-        two-combination sex locus) &mdash;
+    <li><strong>The genotype space.</strong> Now <code>3^15 &times; 6 &times; 6 &times; 2 =
+        1,033,121,304</code> (fifteen two-allele genes, three-allele MATP and dun, and
+        the two-combination sex locus) &mdash;
         it was <code>3^11 = 177,147</code> before the seven visual genes shipped, the
         multiplier in miniature. With the full table the raw product is on the order
         of <strong>10<sup>19</sup></strong>.</li>
     <li><strong>The gallery has effectively died</strong> &mdash; and it is being
         reverted anyway. Seven genes took the corridor from 1,730 pens / 6,055 blocks
-        to <strong>98,306 pens / ~344,000 blocks</strong> (lazily built, so it
+        to <strong>147,458 pens / ~516,000 blocks</strong> (lazily built, so it
         doesn&rsquo;t hang, but it is no longer a thing a player walks). The argument
         for &sect;9 has now fully arrived. If a <em>systematic</em> gallery is ever
         wanted again, the shape that scales is a <strong>wing per locus</strong>: each
@@ -1755,7 +1755,8 @@ interface ConditionRule    { void conditions(AllelePair, ConditionSink); } // CS
         step onward is written the easy way instead of being rewritten later.</li>
     <li><strong>Multi-allele support</strong> (§5.1) + <strong>merge cream and pearl
         into MATP</strong>. Smallest real multi-allele locus, with an existing resolver
-        to fold in. Also unblocks dun&rsquo;s third allele.</li>
+        to fold in. Also unblocked dun&rsquo;s third allele, which shipped straight
+        after it.</li>
     <li><strong>Health, the cheap half</strong> (§6.4): genetic contribution to max
         health. No new subsystem, visible immediately as hearts, and it makes the health
         genes worth carrying.</li>
