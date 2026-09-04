@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MITF (splash white) &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="nav.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow natural">Natural gene <span class="sep">/</span> phase 1</p>
+<h1>MITF (splash white)</h1>
+<p class="lede">
+    The first of the <strong>two</strong> splash white loci, carrying <code>SW1</code>,
+    <code>SW3</code> and <code>SW5</code>. Splash is caused by variants in two different
+    genes &mdash; this one and <a href="gene-pax3.html"><code>PAX3</code></a> &mdash; and
+    that is the whole reason the old single <code>horsegenetics.splash</code> gene had to
+    go.
+</p>
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd>horsegenetics.mitf</dd></div>
+    <div><dt>Priority</dt><dd>78</dd></div>
+    <div><dt>Alleles</dt><dd>
+        <span class="allele dom">SW3</span> <span class="allele dom">SW1</span>
+        <span class="allele dom">SW5</span> <span class="allele wild">N</span>
+    </dd></div>
+    <div><dt>Combinations</dt><dd>10, of which 9 a horse can carry, landing on 4 outcomes</dd></div>
+    <div><dt>Outcomes</dt><dd>wild, <code>splash</code>, <code>splash-bold</code>, <code>splash-extensive</code></dd></div>
+    <div><dt>Default allele</dt><dd>N</dd></div>
+    <div><dt>Wild frequency</dt><dd><code>SW1</code> 4%, <code>SW5</code> 0.6%, <code>SW3</code> 0.4%, rest <code>N</code></dd></div>
+    <div><dt>Founder draws</dt><dd>1 &times; nextFloat()</dd></div>
+    <div><dt>Deterministic</dt><dd><strong>no</strong></dd></div>
+    <div><dt>Epi draws</dt><dd>nextLong() seed, nextFloat() waterline, nextFloat() face width, nextFloat() face length</dd></div>
+    <div><dt>Painter</dt><dd><code>WhitePattern.splash</code>, at a strength per outcome</dd></div>
+</dl>
+
+<h2>Why splash is two genes</h2>
+
+<p>
+    A gene has two slots. If <code>SW1</code> and <code>SW2</code> were alleles of one
+    gene, they would compete for those slots &mdash; and a horse could not carry both. In
+    life a horse carries <code>N/SW1</code> at <code>MITF</code> <em>and</em>
+    <code>N/SW2</code> at <code>PAX3</code>, and comes out with markedly more face, leg and
+    belly white than either alone. One gene cannot express that genotype at all.
+</p>
+
+<p>
+    Two <em>MITF</em> variants can still meet &mdash; <code>SW1/SW3</code> is a real
+    compound heterozygote &mdash; and that is what this locus&rsquo;s own table is for.
+</p>
+
+<h2>The alleles</h2>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Allele</th><th>One copy</th><th>Two copies</th></tr></thead>
+<tbody>
+<tr><td><code>N</code></td><td>&mdash;</td><td>wild type</td></tr>
+<tr><td><code>SW1</code></td><td>subtle to bold splash</td><td><strong>viable</strong>, and reliably whiter &mdash; the best-established viable splash homozygote there is</td></tr>
+<tr><td><code>SW3</code></td><td>usually a more obvious splash</td><td><strong>cannot occur</strong> &mdash; unconfirmed, likely embryonic lethal</td></tr>
+<tr><td><code>SW5</code></td><td>splash-type, variable</td><td>viability not established &mdash; <strong>allowed</strong></td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="note">
+    <span class="label"><code>SW6</code>, <code>SW7</code> and <code>SW8</code> are folded into <code>SW5</code></span>
+    <p>
+        All four are <code>MITF</code> variants the source describes in word-for-word
+        identical terms &mdash; &ldquo;splash-type variable white pattern; rare; homozygous
+        viability not established&rdquo;. Four separate alleles would be four
+        indistinguishable rows in a table whose whole point is that each row says
+        something. <code>SW5</code> stands for the group; splitting them out is one line
+        each the day the science separates them.
+    </p>
+</div>
+
+<h2>The combination table</h2>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Combination</th><th>Outcome</th><th>Look</th></tr></thead>
+<tbody>
+<tr><td><code>SW3/SW1</code>, <code>SW3/SW5</code></td><td><code>splash-extensive</code></td><td>everything below the topline white; colour only along the spine and over the ears</td></tr>
+<tr><td><code>SW3/N</code>, <code>SW1/SW1</code>, <code>SW1/SW5</code>, <code>SW5/SW5</code></td><td><code>splash-bold</code></td><td>white well past elbow and stifle, bald face, topline and quarters coloured</td></tr>
+<tr><td><code>SW1/N</code>, <code>SW5/N</code></td><td><code>splash</code></td><td>high leg white with a clean edge, belly white, broad blaze</td></tr>
+<tr><td><code>N/N</code></td><td>wild type</td><td>nothing</td></tr>
+<tr><td><code>SW3/SW3</code></td><td colspan="2"><em>cannot occur</em></td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    <code>SW1</code> is the one allele here with a documented viable dose effect, so its
+    homozygote is a step up rather than more of the same; <code>SW3</code> is the strong
+    one, so any second variant beside it tips the horse into the extensive outcome.
+</p>
+
+<h2>How it paints</h2>
+
+<p>
+    <strong>The horse dipped in white from below.</strong> One level waterline in absolute
+    body-space Y rises with strength, taking the legs and belly whole, with a blaze
+    widening to a bald face above it. The line is <strong>hard</strong> &mdash; wobbled at
+    two octaves so it reads torn rather than ruled, but never faded:
+</p>
+
+<ul>
+    <li>a sharply bounded margin is the diagnostic difference from
+        <a href="gene-kit.html"><code>KIT</code></a>&rsquo;s ragged sabino edge, and the
+        thing a horse is actually looked at to tell them apart;</li>
+    <li>the red/black gradient has no grey between a coloured texel and a spent one, so a
+        half-scaled black texel samples the warm diagonal and reads <em>gold</em>. A
+        one-pixel fade paints a tan fringe along the entire waterline. (It did, in the
+        first bake.)</li>
+</ul>
+
+<div class="codebox">
+<div class="filename">common/genetics/genes/MitfGene.java</div>
+<pre><code class="language-java">private static final double S_SPLASH    = 0.38;
+private static final double S_BOLD      = 0.62;
+private static final double S_EXTENSIVE = 0.86;</code></pre>
+</div>
+
+<p>
+    Measured coverage, averaged over three seeds: <code>SW1/N</code> 45%,
+    <code>SW1/SW1</code> 72%, <code>SW3/N</code> 71%, <code>SW3/SW1</code> 91%. One copy
+    each of <code>SW1</code> and <a href="gene-pax3.html"><code>SW2</code></a> comes out at
+    <strong>70%</strong> &mdash; well past either alone, which is the claim the split
+    exists to make and which <code>WhitePatternGenesTest</code> pins.
+</p>
+
+<div class="note">
+    <span class="label">Blue eyes are not modelled</span>
+    <p>
+        One or two blue eyes is splash&rsquo;s most recognisable feature, but eyes are
+        copied verbatim from the template after the whole coat is composed
+        (<code>CoatRegions.redrawEyes</code>) precisely so a wide pattern can never blind a
+        horse. Eye colour wants its own gene reading this one &mdash; the classic hook is
+        blue eyes on cream double-dilutes as well.
+    </p>
+</div>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="gene-pax3.html">PAX3 (splash white)</a>
+        <a href="gene-kit.html">KIT (white spotting)</a>
+        <a href="gene-ednrb.html">EDNRB (frame overo)</a>
+        <a href="gene-tobiano.html">Tobiano</a>
+    </div>
+    Source: <code>common/genetics/genes/MitfGene.java</code>,
+    <code>common/coat/pattern/WhitePattern.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

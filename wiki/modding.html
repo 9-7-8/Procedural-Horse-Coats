@@ -437,25 +437,29 @@ double reach   = 0.35 + epi.nextFloat() * 0.60;          // fraction of the drop
     A <strong>data-driven</strong> gene registers itself: every <code>.json</code> in
     <code>config/horsegenetics/genes/</code> is loaded at startup, in filename order,
     and placed after the built-ins by its declared <code>priority</code>. Nothing below
-    applies to it. A <strong>Java</strong> gene is three edits:
+    applies to it. A <strong>Java</strong> gene is <strong>two</strong> edits, and
+    neither of them is an ordering &mdash; your gene&rsquo;s own
+    <code>priority()</code> decides where it lands:
 </p>
 
 <div class="codebox">
-<div class="filename">common/genetics/Genes.java &mdash; three edits, today</div>
-<pre><code class="language-java">public static final SilverGene SILVER = new SilverGene();  // ...among six more added the same day
+<div class="filename">common/genetics/Genes.java &mdash; two edits</div>
+<pre><code class="language-java">// 1. a field, so callers can name it
+public static final KitGene KIT = new KitGene();
 
-// 1. the genotype code string's segment order - APPEND, never insert
-private static final List&lt;Gene&gt; CODE_ORDER =
-        List.of(EXTENSION, AGOUTI, WHITE, TEST, CHAMPAGNE, SPLASH, GREY, CREAM, PEARL,
-                MAGIC_ZEBRA, PINK_HAIR, DUN, SILVER, MUSHROOM, ROAN, TOBIANO, FRAME, SABINO);
-
-// 2. phase-1 effect order - position matters, see below
-private static final List&lt;Gene&gt; NATURAL_ORDER =
-        List.of(EXTENSION, AGOUTI, SILVER, MUSHROOM, DUN, CREAM, PEARL, CHAMPAGNE, GREY, WHITE,
-                ROAN, TOBIANO, FRAME, SABINO, SPLASH);
-
-// 3. (magical genes go in MAGICAL_ORDER instead)</code></pre>
+// 2. add it to BUILTINS. The order of this list is IRRELEVANT - the registry
+//    sorts every gene, built-in and data-driven alike, on (priority, key).
+private static final List&lt;Gene&gt; BUILTINS = List.of(
+        SEX, EXTENSION, AGOUTI, TEST, CHAMPAGNE, GREY, MATP,
+        MAGIC_ZEBRA, PINK_HAIR, DUN, SILVER, MUSHROOM, ROAN, TOBIANO,
+        EDNRB, KIT, MITF, PAX3);</code></pre>
 </div>
+
+<p>
+    There are no hand-written <code>CODE_ORDER</code> / <code>NATURAL_ORDER</code>
+    lists any more. Two people who drop the same gene files in a different order have
+    to get the same horses, so registration order is never respected.
+</p>
 
 <div class="note warn">
     <span class="label">Phase-1 order is a dependency order, not a preference</span>
@@ -481,9 +485,9 @@ private static final List&lt;Gene&gt; NATURAL_ORDER =
     &mdash; agouti (20) must run before <code>PigmentField.dilute</code> or a bay&rsquo;s
     mane will not dilute. The current natural order is extension (10) &rarr; agouti
     (20) &rarr; silver (30) &rarr; mushroom (32) &rarr; dun (34) &rarr; MATP (40)
-    &rarr; champagne (50) &rarr; grey (55) &rarr; white (60) &rarr;
-    roan (70) &rarr; tobiano (72) &rarr; frame (74) &rarr; sabino (76) &rarr; splash
-    (80). Pick a number in a gap; ties break alphabetically by key.
+    &rarr; champagne (50) &rarr; grey (55) &rarr; roan (70) &rarr; tobiano (72)
+    &rarr; EDNRB / frame (74) &rarr; KIT (76) &rarr; MITF (78) &rarr; PAX3 (79).
+    Pick a number in a gap; ties break alphabetically by key.
 </p>
 
 <h2>Then</h2>
@@ -513,7 +517,9 @@ private static final List&lt;Gene&gt; NATURAL_ORDER =
 </p>
 
 <div class="codebox">
-<pre><code class="language-java">Genotype g   = Genotype.parse("E/E-a/a-w/w-t/t-c/c-spl/spl-g/g-N/N-N/N-n/n-n/n");
+<pre><code class="language-java">// the code is gene-keyed and tolerant: name only what you care about,
+// and every gene you leave out reads as its default allele.
+Genotype g   = Genotype.parse("horsegenetics.extension=E/E-horsegenetics.silver=Z/z");
 Epigenome ep = Epigenome.fromSeed(1234L);
 CoatBuildContext ctx = new CoatBuildContext(g, ep, Skin.ADULT, true);
 

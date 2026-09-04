@@ -259,6 +259,19 @@ public Expression expressionOf(AllelePair pair) {
 
 <h2>The eighteen registered genes</h2>
 
+<p>
+    Six of them are <strong>white-pattern loci</strong>, and they are six because
+    real white patterning is six genes. Only alleles at <em>exactly</em> the same
+    locus share a gene here: sabino and the numbered <code>W</code> series are
+    all <code>KIT</code> variants, so they are one gene; splash lives on
+    <code>MITF</code> <em>and</em> <code>PAX3</code>, so it is two; and tobiano
+    (an inversion near <code>KIT</code>, not a <code>KIT</code> variant), roan
+    (region-mapped, causal change unresolved) and frame (<code>EDNRB</code>) each
+    keep their own. That is what lets a horse be tobiano <em>and</em>
+    <code>W20</code> <em>and</em> splash at two loci &mdash; and what stops it
+    being sabino and dominant white at once.
+</p>
+
 <div class="table-wrap">
 <table>
 <thead><tr><th>Gene</th><th>Alleles</th><th>Outcomes</th><th>In the wild</th><th>Phase</th></tr></thead>
@@ -266,10 +279,8 @@ public Expression expressionOf(AllelePair pair) {
 <tr><td><a href="gene-sex.html">sex</a></td><td><span class="allele wild">X</span> / <span class="allele dom">Y</span></td><td>mare, stallion &mdash; <strong>both wild types</strong>&Dagger;</td><td>50 / 50, no <code>Y/Y</code></td><td>neither (paints nothing)</td></tr>
 <tr><td><a href="gene-extension.html">extension</a></td><td><span class="allele dom">E</span> / <span class="allele rec">e</span></td><td>wild, chestnut</td><td>25 / 50 / 25</td><td>natural</td></tr>
 <tr><td><a href="gene-agouti.html">agouti</a></td><td><span class="allele dom">A</span> / <span class="allele rec">a</span></td><td>wild, bay</td><td>25 / 50 / 25</td><td>natural</td></tr>
-<tr><td><a href="gene-white.html">white</a></td><td><span class="allele dom">W</span> / <span class="allele wild">w</span></td><td>wild, white <strong>(masks)</strong></td><td>1/50 per allele</td><td>natural</td></tr>
 <tr><td><a href="gene-test.html">test</a></td><td><span class="allele dom">T</span> / <span class="allele wild">t</span></td><td>wild, test-overlay <strong>(masks)</strong></td><td>25% carriers, no homozygotes</td><td>magical</td></tr>
 <tr><td><a href="gene-champagne.html">champagne</a></td><td><span class="allele dom">Ch</span> / <span class="allele wild">c</span></td><td>wild, champagne</td><td>1/40 per allele</td><td>natural</td></tr>
-<tr><td><a href="gene-splash.html">splash</a></td><td><span class="allele dom">Spl</span> / <span class="allele wild">spl</span></td><td>wild, splash*</td><td>1/20 per allele</td><td>natural</td></tr>
 <tr><td><a href="gene-grey.html">grey</a></td><td><span class="allele dom">G</span> / <span class="allele wild">g</span></td><td>wild, grey</td><td>1/16 per allele</td><td>natural</td></tr>
 <tr><td><a href="gene-matp.html">MATP</a></td><td><span class="allele dom">Cr</span> / <span class="allele rec">prl</span> / <span class="allele wild">N</span></td><td>wild, pearl-carrier, single-cream, classic-pearl, double-dilute</td><td>1/30 <code>Cr</code>, 1/22 <code>prl</code></td><td>natural</td></tr>
 <tr><td><a href="gene-magic-zebra.html">magic zebra</a></td><td><span class="allele dom">Mzeb</span> / <span class="allele wild">n</span></td><td>wild, zebra</td><td>1/100 per allele</td><td>magical</td></tr>
@@ -279,22 +290,31 @@ public Expression expressionOf(AllelePair pair) {
 <tr><td><a href="gene-mushroom.html">mushroom</a></td><td><span class="allele rec">Mu</span> / <span class="allele wild">mu</span></td><td>wild, mushroom-carrier, mushroom</td><td>1/34 per allele</td><td>natural</td></tr>
 <tr><td><a href="gene-roan.html">roan</a></td><td><span class="allele dom">Rn</span> / <span class="allele wild">rn</span></td><td>wild, roan</td><td>1/30 per allele</td><td>natural</td></tr>
 <tr><td><a href="gene-tobiano.html">tobiano</a></td><td><span class="allele dom">To</span> / <span class="allele wild">to</span></td><td>wild, tobiano</td><td>1/50 per allele</td><td>natural</td></tr>
-<tr><td><a href="gene-frame.html">frame overo</a></td><td><span class="allele dom">Ov</span> / <span class="allele wild">ov</span></td><td>wild, frame&dagger;</td><td>1/55 per allele</td><td>natural</td></tr>
-<tr><td><a href="gene-sabino.html">sabino 1</a></td><td><span class="allele dom">SB1</span> / <span class="allele wild">sb1</span></td><td>wild, sabino1, sabino-white</td><td>1/45 per allele</td><td>natural</td></tr>
+<tr><td><a href="gene-ednrb.html">EDNRB &mdash; frame</a></td><td><span class="allele dom">O</span> / <span class="allele wild">N</span></td><td>wild, frame, lethal-white <strong>(masks)</strong>&dagger;</td><td>1/55 per allele; no <code>O/O</code> founder</td><td>natural</td></tr>
+<tr><td><a href="gene-kit.html">KIT &mdash; white spotting</a></td><td><span class="allele dom">W22</span> / <span class="allele dom">W13</span> / <span class="allele dom">W10</span> / <span class="allele dom">W5</span> / <span class="allele dom">W23</span> / <span class="allele dom">SB1</span> / <span class="allele dom">W20</span> / <span class="allele wild">N</span></td><td>wild, minimal-white, modest-white, sabino, broad-white, extensive-white, near-white, dominant-white <strong>(masks)</strong>*</td><td><code>W20</code> 6%, <code>SB1</code> 2.2%, the rest under 1% each; four homozygotes cannot occur</td><td>natural</td></tr>
+<tr><td><a href="gene-mitf.html">MITF &mdash; splash</a></td><td><span class="allele dom">SW3</span> / <span class="allele dom">SW1</span> / <span class="allele dom">SW5</span> / <span class="allele wild">N</span></td><td>wild, splash, splash-bold, splash-extensive</td><td><code>SW1</code> 4%, <code>SW5</code> 0.6%, <code>SW3</code> 0.4%; no <code>SW3/SW3</code></td><td>natural</td></tr>
+<tr><td><a href="gene-pax3.html">PAX3 &mdash; splash</a></td><td><span class="allele dom">SW2</span> / <span class="allele dom">SW4</span> / <span class="allele wild">N</span></td><td>wild, splash, splash-bold</td><td><code>SW2</code> 2%, <code>SW4</code> 0.5%; no <code>SW4/SW4</code></td><td>natural</td></tr>
 </tbody>
 </table>
 </div>
 
 <p>
-    * <strong>Splash still does not read its own dose</strong>, and the
-    combination table now says so where a label used to hide it: both
-    <code>Spl/spl</code> and <code>Spl/Spl</code> return the one
-    <code>splash</code> expression, so the gallery gives splash <em>one</em>
-    pen. Splitting it is a matter of adding a second expression. See
-    <a href="gene-splash.html">its page</a>.
-    &dagger; Frame models the coat only; <code>Ov/Ov</code> lethal white is
-    deliberately not modelled &mdash; a third expression when health genetics
-    land (a <a href="roadmap.html">roadmap</a> item).
+    * <strong><code>KIT</code> is the locus that broke the last of the old
+    model.</strong> Eight alleles, thirty-six combinations, and four of them
+    homozygotes that are thought nonviable &mdash; so <code>canOccur</code> rules
+    them out and the founder table is the survivors, renormalised. It also
+    settles a genotype the old model allowed and biology does not: a horse can
+    be homozygous sabino <em>or</em> dominant white, never both, because they
+    are alleles of one gene competing for two slots. See
+    <a href="gene-kit.html">its page</a>.
+    &dagger; <strong><code>O/O</code> is the model&rsquo;s first real lethal, and
+    a different kind from <code>KIT</code>&rsquo;s.</strong> An embryonic lethal
+    is a horse that never existed (<code>canOccur</code> false, no pen); lethal
+    white is a foal that <em>is</em> born, so it occurs, it has its own outcome
+    and it gets a pen &mdash; it is simply never a founder. What is not modelled
+    yet is the death, which waits on the health system (a
+    <a href="roadmap.html">roadmap</a> item). See
+    <a href="gene-ednrb.html">its page</a>.
     &sect; <strong>Dun is the locus with two dominance orders.</strong>
     Dilution reads <code>D &gt; d1 = d2</code> but marking reads
     <code>D = d1 &gt; d2</code>, so <code>d1</code> draws the dorsal stripe
@@ -312,8 +332,9 @@ public Expression expressionOf(AllelePair pair) {
 <p>
     <strong>Seal brown has no gene.</strong> It is the top of agouti&rsquo;s
     epigenetic distribution &mdash; a high roll of the point extent.
-    <strong>Cream and pearl are one gene</strong>: they are allelic in real
-    horses (both <code>MATP</code>) and are now one locus with three alleles,
+    <strong>Cream and pearl are one gene</strong>, and so are dominant white
+    and sabino: they are allelic in real horses (<code>MATP</code> and
+    <code>KIT</code> respectively) and are now one locus each,
     which kills the impossible <code>Cr/Cr</code>-<em>and</em>-<code>prl/prl</code>
     genotype the old two-gene model allowed. See
     <a href="gene-matp.html">its page</a>. <strong>Dun is the other

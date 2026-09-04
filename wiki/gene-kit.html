@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KIT (white spotting) &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="nav.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow natural">Natural gene <span class="sep">/</span> phase 1</p>
+<h1>KIT (white spotting)</h1>
+<p class="lede">
+    The white-patterning neighbourhood on equine chromosome 3, and the mod&rsquo;s
+    <strong>eight-allele</strong> locus. Sabino&nbsp;1 and the numbered
+    <code>W</code> series are all <code>KIT</code> variants, so they are alleles of
+    <em>one</em> gene &mdash; which means a horse can be sabino <em>or</em> dominant
+    white, and never both. It replaces the old separate <code>horsegenetics.white</code>
+    and <code>horsegenetics.sabino</code> genes.
+</p>
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd>horsegenetics.kit</dd></div>
+    <div><dt>Priority</dt><dd>76</dd></div>
+    <div><dt>Alleles</dt><dd>
+        <span class="allele dom">W22</span> <span class="allele dom">W13</span>
+        <span class="allele dom">W10</span> <span class="allele dom">W5</span>
+        <span class="allele dom">W23</span> <span class="allele dom">SB1</span>
+        <span class="allele dom">W20</span> <span class="allele wild">N</span>
+    </dd></div>
+    <div><dt>Combinations</dt><dd>36, of which 32 a horse can carry, landing on 8 outcomes</dd></div>
+    <div><dt>Outcomes</dt><dd>wild, <code>minimal-white</code>, <code>modest-white</code>, <code>sabino</code>, <code>broad-white</code>, <code>extensive-white</code>, <code>near-white</code>, <code>dominant-white</code> (masks)</dd></div>
+    <div><dt>Default allele</dt><dd>N</dd></div>
+    <div><dt>Wild frequency</dt><dd><code>W20</code> 6%, <code>SB1</code> 2.2%, <code>W23</code> 0.6%, <code>W5</code> 0.5%, <code>W10</code> 0.4%, <code>W13</code> 0.2%, <code>W22</code> 0.1%, rest <code>N</code></dd></div>
+    <div><dt>Founder draws</dt><dd>1 &times; nextFloat()</dd></div>
+    <div><dt>Deterministic</dt><dd><strong>no</strong>, except the wild type and dominant white</dd></div>
+    <div><dt>Epi draws</dt><dd>nextLong() seed, 4 &times; nextFloat() leg heights, nextFloat() belly, nextFloat() face</dd></div>
+    <div><dt>Painter</dt><dd><code>WhitePattern.sabino</code>, at a strength per outcome</dd></div>
+</dl>
+
+<h2>What is at this locus, and what only looks like it is</h2>
+
+<p>
+    This is the distinction the whole restructure turns on. <strong>Only alleles at
+    exactly the same locus share a gene.</strong> <code>SB1</code> and every numbered
+    <code>W</code> are defined <code>KIT</code> variants, so they compete for the same
+    two chromosome slots. Two patterns that sit right beside them do not:
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Pattern</th><th>What it actually is</th><th>Where it lives here</th></tr></thead>
+<tbody>
+<tr><td>Sabino&nbsp;1, <code>W1</code>&ndash;<code>W35</code></td><td><code>KIT</code> variants</td><td><strong>this gene</strong></td></tr>
+<tr><td>Tobiano</td><td>a large inversion <em>near / downstream of</em> <code>KIT</code></td><td><a href="gene-tobiano.html">its own gene</a></td></tr>
+<tr><td>Roan</td><td>maps to the region; causal change unresolved, breed-dependent</td><td><a href="gene-roan.html">its own gene</a></td></tr>
+<tr><td>Splash white</td><td><code>MITF</code> and <code>PAX3</code> &mdash; different chromosomes entirely</td><td><a href="gene-mitf.html">two</a> <a href="gene-pax3.html">genes</a></td></tr>
+<tr><td>Frame overo</td><td><code>EDNRB</code></td><td><a href="gene-ednrb.html">its own gene</a></td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    So a tobiano can also carry <code>W20</code>, and a dominant white can be a roan
+    underneath &mdash; both of which real horses are, and neither of which the old
+    single &ldquo;white&rdquo; gene could say.
+</p>
+
+<h2>The alleles</h2>
+
+<p>
+    Eight of the thirty-plus named ones, chosen to span the real range rather than to
+    reproduce a testing panel. <strong>The <code>W</code> number is a discovery order,
+    not a severity ranking</strong> &mdash; <code>W20</code> is far milder than
+    <code>W5</code>, and nothing about an allele can be inferred from its number.
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Allele</th><th>One copy</th><th>Two copies</th></tr></thead>
+<tbody>
+<tr><td><code>N</code></td><td>&mdash;</td><td>wild type</td></tr>
+<tr><td><code>W20</code></td><td>subtle: ordinary face and leg white; a <strong>booster</strong> beside another variant</td><td><strong>viable</strong>, modestly more &mdash; not twice as white</td></tr>
+<tr><td><code>SB1</code></td><td>classic sabino&nbsp;1</td><td><strong>viable</strong>, sabino-white (90%+)</td></tr>
+<tr><td><code>W23</code></td><td>modest to broad spotting</td><td>viability unknown &mdash; <strong>allowed</strong></td></tr>
+<tr><td><code>W5</code></td><td>sabino-like, broad</td><td><strong>cannot occur</strong></td></tr>
+<tr><td><code>W10</code></td><td>sabino-like, broad</td><td><strong>cannot occur</strong></td></tr>
+<tr><td><code>W13</code></td><td>extensive white spotting</td><td><strong>cannot occur</strong></td></tr>
+<tr><td><code>W22</code></td><td>dominant white &mdash; all white, <strong>masks</strong></td><td><strong>cannot occur</strong></td></tr>
+</tbody>
+</table>
+</div>
+
+<h2>The combination table</h2>
+
+<p>
+    Thirty-six combinations, eight outcomes, written as a cascade: the strongest allele
+    first, then what the second copy adds. There is no dose arithmetic and deliberately
+    so &mdash; this locus holds a real viable dose series (<code>SB1</code>), a booster
+    that is subtle alone (<code>W20</code>), and several alleles that are
+    &ldquo;dominant with variable expression&rdquo;, where one copy is already effective
+    and the phenotype is not neatly intermediate. Only a table says all three at once.
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Combination</th><th>Outcome</th><th>Look</th></tr></thead>
+<tbody>
+<tr><td>anything with <code>W22</code></td><td><code>dominant-white</code> <em>(masks)</em></td><td>pure white, pink skin, no other coat gene visible</td></tr>
+<tr><td>two of <code>W13</code>/<code>W10</code>/<code>W5</code>/<code>W23</code>; <code>W13</code>+<code>SB1</code>; <code>W10</code>/<code>W5</code>+<code>SB1</code>; <code>SB1/SB1</code></td><td><code>near-white</code></td><td>90%+ white, a few coloured flecks on ears and crest</td></tr>
+<tr><td><code>W13</code>+<code>N</code>/<code>W20</code>; <code>W10</code>/<code>W5</code>+<code>W20</code>; <code>W23</code>+<code>SB1</code></td><td><code>extensive-white</code></td><td>most of the horse white, colour holding along the topline</td></tr>
+<tr><td><code>W10</code>/<code>W5</code>/<code>W23</code>+<code>N</code>; <code>W23</code>+<code>W20</code>; <code>SB1</code>+<code>W20</code></td><td><code>broad-white</code></td><td>irregular white well up legs and flanks, wide blaze, first barrel patches</td></tr>
+<tr><td><code>SB1/N</code></td><td><code>sabino</code></td><td>tall jagged stockings, belly white, broad blaze, roaned margins</td></tr>
+<tr><td><code>W20/W20</code></td><td><code>modest-white</code></td><td>narrow blaze, socks past the fetlock, maybe a belly fleck</td></tr>
+<tr><td><code>W20/N</code></td><td><code>minimal-white</code></td><td>a star or snip and a low sock or two</td></tr>
+<tr><td><code>N/N</code></td><td>wild type</td><td>nothing</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="note">
+    <span class="label">Two of these are the same expression on purpose</span>
+    <p>
+        <code>W5/N</code> and <code>W23/W20</code> both land on <code>broad-white</code>,
+        and so do several others. That is not the model losing information: the source
+        describes those alleles in overlapping terms and separates them mainly by how much
+        white a copy tends to make. Several combinations sharing an outcome <em>is</em>
+        what &ldquo;dominant&rdquo; used to mean, and the
+        <a href="genetics-model.html#combinations">combination table</a> says it directly.
+    </p>
+</div>
+
+<h2>Viability: what <code>canOccur</code> means here</h2>
+
+<p>
+    The four alleles UC Davis lists as &ldquo;homozygosity thought nonviable&rdquo; get
+    <code>canOccur</code> <strong>false</strong>. Those are <em>embryonic</em> lethals, so
+    there is no such horse &mdash; no gallery pen, nothing in
+    <code>totalGenotypes()</code>, nothing in the founder table. It is the same statement
+    the <a href="gene-sex.html">sex locus</a> makes about <code>Y/Y</code>, and it is a
+    different statement from <a href="gene-ednrb.html">lethal white</a>, which is a foal
+    that <em>is</em> born.
+</p>
+
+<p>
+    <strong>Compound heterozygotes are allowed.</strong> <code>W5/W13</code>,
+    <code>W22/W10</code> and the rest are real horses. The evidence is about an allele
+    paired <em>with itself</em>, and the breeding advice is to test a prospective mate for
+    <em>the same exact</em> variant &mdash; so the rule in the model is one allele twice,
+    not two strong alleles.
+</p>
+
+<p>
+    <code>W23</code>&rsquo;s homozygote has no evidence either way. The model has to pick,
+    and picking &ldquo;allowed&rdquo; is the choice that does not invent a lethal the
+    source never claims; it lands on <code>near-white</code>.
+</p>
+
+<div class="note">
+    <span class="label">Breeding can still make an impossible foal</span>
+    <p>
+        <code>canOccur</code> is consulted by the gallery and the founder table, not by
+        <code>breedWith</code> &mdash; so crossing two <code>W5</code> carriers can still
+        produce a <code>W5/W5</code> foal, which is born and renders as
+        <code>near-white</code>. Making it not exist needs the health system
+        (<a href="roadmap.html">roadmap</a> &sect;6.4); until then the tolerant answer beats
+        throwing.
+    </p>
+</div>
+
+<h2>How it paints</h2>
+
+<p>
+    Every painted outcome is the same <code>WhitePattern.sabino</code> shape at a different
+    strength: white grows inward from the extremities &mdash; legs, belly, face &mdash;
+    with <strong>ragged, roaned margins</strong>, and past about strength 0.42 the body
+    follows in torn patches, colour retreating last to the ears and crest. That is what
+    &ldquo;sabino-like&rdquo; means throughout the <code>W</code> series, and writing a
+    bespoke painter per allele would be writing the same painter eight times and pretending
+    the differences were principled.
+</p>
+
+<div class="codebox">
+<div class="filename">common/genetics/genes/KitGene.java</div>
+<pre><code class="language-java">private static final double S_MINIMAL    = 0.12;
+private static final double S_MODEST    = 0.24;
+private static final double S_SABINO    = 0.42;
+private static final double S_BROAD     = 0.58;
+private static final double S_EXTENSIVE = 0.74;
+private static final double S_NEAR_WHITE = 0.93;</code></pre>
+</div>
+
+<p>
+    Measured coverage through the real pipeline, averaged over three epigenetic seeds:
+    <code>W20/N</code> 5.7%, <code>W20/W20</code> 11%, <code>SB1/N</code> 15%,
+    <code>SB1/W20</code> 25%, <code>W13/N</code> 73%, <code>SB1/SB1</code> 94%,
+    <code>W22/N</code> 100%. <code>WhitePatternGenesTest</code> pins that the ladder is
+    monotone at every step, because a ladder whose rungs a player cannot tell apart is a
+    ladder whose descriptions are decoration.
+</p>
+
+<p>
+    <strong>Dominant white is a different painter</strong>, not the top of the ramp: it
+    zeroes both pigments everywhere and <code>masks</code>. All-white is not a great deal
+    of sabino, it is the absence of pigment cells altogether &mdash; and the model has one
+    true epistatic result rather than an asymptote.
+</p>
+
+<h2>White finds white</h2>
+
+<p>
+    The painter reads the coat handed to it and raises its own strength by
+    <code>0.35 &times;</code> however much of the horse is already de-pigmented. That is
+    what makes <code>W20</code> a booster rather than a decoration, and it is why a
+    <code>KIT</code> pattern over a <a href="gene-tobiano.html">tobiano</a> or a
+    <a href="gene-ednrb.html">frame</a> reads louder than the same pattern on a solid
+    horse. One line in the painter, no interaction table anywhere. Full reasoning on
+    <a href="pipeline.html">the pipeline page</a>.
+</p>
+
+<div class="note">
+    <span class="label">Still simplified</span>
+    <p>
+        Pink skin is not rendered (the model has no skin layer, only hair). The
+        <code>W1</code>&ndash;<code>W4</code>, <code>W6</code>&ndash;<code>W9</code>,
+        <code>W11</code>&ndash;<code>W19</code> and <code>W21</code> alleles are not
+        modelled &mdash; their published descriptions do not separate them from the eight
+        that are, and each would add a row nobody could read on a horse. Adding one is a
+        line in <code>alleles()</code>, a row in <code>expressionOf</code> and a frequency.
+    </p>
+</div>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="gene-mitf.html">MITF (splash white)</a>
+        <a href="gene-pax3.html">PAX3 (splash white)</a>
+        <a href="gene-ednrb.html">EDNRB (frame overo)</a>
+        <a href="gene-tobiano.html">Tobiano</a>
+        <a href="gene-roan.html">Roan</a>
+    </div>
+    Source: <code>common/genetics/genes/KitGene.java</code>,
+    <code>common/coat/pattern/WhitePattern.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

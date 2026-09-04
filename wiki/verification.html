@@ -51,44 +51,60 @@
 </div>
 
 <div class="note warn">
-    <span class="label">Splash is missing the other face markings</span>
+    <span class="label">Face markings are still one shape everywhere</span>
     <p>
-        Only the centreline blaze (<code>CoatRegions.whitenBlaze</code>) exists. Add
-        the rest of the family: <strong>star, snip, stripe, bald face</strong>.
-        &rarr; <a href="gene-splash.html">splash</a>
+        Every white-pattern locus draws its face marking as a centreline stripe of some
+        width and length &mdash; wider and longer as the outcome gets stronger. That
+        covers stripe, blaze and bald face, and it does <em>not</em> cover
+        <strong>star</strong> or <strong>snip</strong>, which are detached patches rather
+        than a short stripe. Wants a shared <code>WhitePattern.face(kind, &hellip;)</code>
+        the loci call, not four reinventions.
+    </p>
+    <p>
+        The old &ldquo;splash leg edges are a perfect ring&rdquo; issue is <strong>gone
+        with the gene</strong>: <code>whitenLowerLeg</code>&rsquo;s hard
+        <code>y &lt;= cutoff</code> is no longer on any white-pattern path.
+        <code>WhitePattern.sabino</code> jitters each leg&rsquo;s margin per texel, and
+        <code>WhitePattern.splash</code> is one wobbled waterline that crosses the legs at
+        an irregular height by construction. <code>CoatRegions.whitenLowerLeg</code> and
+        <code>whitenBlaze</code> now have no callers.
     </p>
 </div>
 
+<h2 id="white-loci">&sect;0 &mdash; the white-pattern loci (owner-verified 2026-09-04)</h2>
+
+<p>
+    The white-marking rewrite &mdash; <a href="gene-kit.html">KIT</a>,
+    <a href="gene-mitf.html">MITF</a>, <a href="gene-pax3.html">PAX3</a> and
+    <a href="gene-ednrb.html">EDNRB</a> replacing the old white / splash / sabino /
+    frame genes &mdash; is <strong>confirmed rendering correctly in-game</strong>. The
+    eleven-item checklist that was here has moved to <code>CLAUDE.md</code>&rsquo;s
+    owner-verified block, which is the permanent record.
+</p>
+
+<p>
+    <strong>Old saves will not parse their white-pattern loci.</strong> Dev only; start a
+    fresh world. Summon tokens: <code>kit=SB1/N</code>, <code>mitf=SW1/N</code>,
+    <code>pax3=SW2/N</code>, <code>ednrb=O/N</code>.
+</p>
+
 <div class="note warn">
-    <span class="label">Splash leg edges are too clean</span>
+    <span class="label">One thing left, and it is not something you can see</span>
     <p>
-        <code>whitenLowerLeg</code> cuts at a hard <code>point.y() &lt;= cutoff</code>,
-        so a sock&rsquo;s top edge is a perfect ring. Break it up &mdash; per-texel
-        epigenetic jitter, or the smoothstep treatment <code>BayCoat.fade</code>
-        already uses.
+        <strong>The lethal-white breeding ratio.</strong> Two <code>ednrb=O/N</code>
+        carriers should throw an all-white <code>O/O</code> foal about
+        <strong>one time in four</strong>. That is a statistic over a run of foals rather
+        than something a play session shows you, so it stays here: breed a carrier pair
+        repeatedly and check the rate looks Mendelian. The <em>coat</em> is confirmed
+        &mdash; an <code>O/O</code> horse renders pure white and masks everything.
+    </p>
+    <p>
+        The foal then <strong>lives</strong>, because there is no health system. That is
+        expected, not a bug &mdash; see <a href="roadmap.html">roadmap</a> &sect;6.4.
     </p>
 </div>
 
 <h2>Wanted (not built yet)</h2>
-
-<div class="note warn">
-    <span class="label">Splash does not read its own dose</span>
-    <p>
-        <code>Spl/spl</code> and <code>Spl/Spl</code> return the <em>same</em>
-        expression, so a homozygote is no bolder than a carrier. It should be:
-        higher stockings, a wide blaze or bald face, body patches.
-    </p>
-    <p>
-        The combination-table rewrite did not fix this, but it did stop the code
-        <em>lying</em> about it. Splash used to be tagged
-        <code>INCOMPLETE_DOMINANT</code> while its painter ignored the dose &mdash;
-        the tag and the pixels disagreed and nothing could tell, and the gallery
-        gave the two combinations separate, identical-looking pens. Now both map to
-        one expression, so splash gets <strong>one</strong> pen and the gap is
-        visible in the source. Fixing it is adding a second expression, exactly as
-        <a href="gene-sabino.html">sabino</a> already does.
-    </p>
-</div>
 
 <div class="note warn" id="eyes">
     <span class="label">Genetic eye colour</span>
@@ -160,7 +176,7 @@
         and <code>d1d1</code> for <code>d1/d1</code> &mdash; check the info panel, the
         paper dump and a pen sign agree.</li>
     <li><strong>The gallery grew by half.</strong> The entrance sign should read
-        <code>Genotypes / 1,033,121,304 / Distinct / 147,458 pens</code>, and the
+        <code>Genotypes / 55,099,802,880 / 2,064,387 distinct / showing 20,000</code>, and the
         corridor is now ~516,000 blocks. Dun contributes <em>three</em> pens per
         position now, not two.</li>
 </ul>
@@ -291,7 +307,8 @@
         &ldquo;shows when the horse has one copy or two&rdquo; and takes three founder
         percentages instead of a dominance dropdown and a 1-in-N field.</li>
     <li><strong>Pen signs and the entrance tally.</strong> The gallery is now
-        <strong>98,306 pens</strong> over ~344,000 blocks (it was 331,778 / ~1.16&nbsp;M):
+        <strong>2,064,387 pens</strong>, of which the corridor now builds the first
+        <strong>20,000</strong> (the <code>MAX_GALLERY_PENS</code> cap, ~70,000 blocks):
         splash collapsed from three pens to two and MATP from nine to four.</li>
 </ul>
 
@@ -541,7 +558,7 @@
 
 <ul>
     <li>The entrance sign three blocks in front of the return portal reads
-        <code>Genotypes / 516,560,652 / Distinct / 98,306 pens</code> (both derived,
+        <code>Genotypes / 55,099,802,880 / 2,064,387 distinct / showing 20,000</code> (all derived,
         so the first number doubled when the sex locus landed).</li>
     <li>The first six pens, right/left alternating, are <code>eeaa</code>,
         <code>EEaa</code>, <code>eeAA</code>, <code>EEAA</code>,
@@ -557,8 +574,8 @@
         open the edit screen).</li>
     <li>Both horses in a pen match the sign, and differ only where a
         non-deterministic gene (bay points, splash) makes them differ.</li>
-    <li>The corridor ends in a wall after the last pen &mdash; now ~344,000 blocks
-        out (98,306 pens), so not something to fly either.</li>
+    <li>The corridor ends in a wall after the last pen &mdash; now ~70,000 blocks
+        out (the 20,000-pen cap), so not something to fly either.</li>
 </ul>
 
 <h3>7. Leaving the dimension no longer clears blocks</h3>
@@ -951,19 +968,20 @@ gold-dust <code>emitter</code> shows, and the horse lights the area around it
     elsewhere and the record goes stale).
 </p>
 
-<h3 id="visual-genes">19. The seven remaining visual natural genes</h3>
+<h3 id="visual-genes">19. The dilution and non-KIT pattern genes</h3>
 
 <p>
     Built 2026-09-02 &mdash; <a href="gene-dun.html">dun</a>,
     <a href="gene-silver.html">silver dapple</a>,
     <a href="gene-mushroom.html">mushroom</a>, <a href="gene-roan.html">roan</a>,
-    <a href="gene-tobiano.html">tobiano</a>, <a href="gene-frame.html">frame overo</a>,
-    <a href="gene-sabino.html">sabino 1</a>. Hand-written <code>Gene</code>s in
+    <a href="gene-tobiano.html">tobiano</a> and frame. Hand-written <code>Gene</code>s in
     <code>common/genetics/genes/</code>. All are rare in the wild
-    (1/24&ndash;1/60 per allele); <strong>summon them</strong> with e.g.
+    (1/24&ndash;1/60 per allele); <strong>summon them</strong> with
     <code>dun=D/d2</code>, <code>silver=Z/z</code>, <code>mushroom=Mu/Mu</code>,
-    <code>roan=Rn/rn</code>, <code>tobiano=To/to</code>, <code>frame=Ov/ov</code>,
-    <code>sabino=SB1/sb1</code> (and <code>sabino=SB1/SB1</code>). Sample bakes look
+    <code>roan=Rn/rn</code>, <code>tobiano=To/to</code>, <code>ednrb=O/N</code>.
+    <strong>Sabino has moved</strong> to the <code>KIT</code> locus and frame to
+    <code>EDNRB</code> &mdash; both are checked in
+    <a href="#white-loci">&sect;0, the white-pattern loci</a>, not here. Sample bakes look
     right; nothing seen on the 3D model. What to check:
 </p>
 
@@ -992,22 +1010,17 @@ gold-dust <code>emitter</code> shows, and the horse lights the area around it
         white legs, coloured head. Non-deterministic: two tobianos differ. Check the
         patches actually run over the spine and that both sides of the horse are not
         mirror-identical.</li>
-    <li><strong>Frame overo</strong> &mdash; ragged white on the <strong>sides of the
-        neck/barrel that stops short of the spine</strong>, plus a broad white face;
-        legs stay coloured. This is the exact inverse of tobiano &mdash; check the two
-        side by side. <code>Ov/Ov</code> renders as an ordinary frame (lethal white is
-        deliberately not modelled).</li>
-    <li><strong>Sabino</strong> reads its dose: <code>SB1/sb1</code> = tall
-        <strong>jagged</strong> stockings (not a clean ring), a belly patch and a broad
-        blaze; <code>SB1/SB1</code> = "sabino-white", 90%+ white with a few coloured
-        flecks. The dose-1 and dose-2 horses must look clearly different &mdash; that
-        is the point (splash still doesn't do this).</li>
-    <li><strong>Eyes</strong> survive a big <code>SB1/SB1</code> and a topline-crossing
-        tobiano (<code>redrawEyes</code> runs last, so they should).</li>
-    <li><strong>Foals</strong> &mdash; all seven on a foal; the foal mesh has no
+    <li><strong>Frame overo</strong> (now <code>ednrb=O/N</code>) &mdash; ragged white
+        on the <strong>sides of the neck/barrel that stops short of the spine</strong>,
+        plus a broad white face; legs stay coloured. This is the exact inverse of
+        tobiano &mdash; check the two side by side. <code>O/O</code> is a separate item
+        in <a href="#white-loci">&sect;0</a>.</li>
+    <li><strong>Eyes</strong> survive a topline-crossing tobiano
+        (<code>redrawEyes</code> runs last, so they should).</li>
+    <li><strong>Foals</strong> &mdash; all of them on a foal; the foal mesh has no
         MANE/MUZZLE so dorsal-stripe-up-the-face and flaxen-mane are coarse there.</li>
-    <li><strong>Stacking</strong> &mdash; silver bay dun, a roan tobiano, a cream +
-        sabino: nothing should throw or produce a flat-white horse.</li>
+    <li><strong>Stacking</strong> &mdash; silver bay dun, a roan tobiano, a cream plus
+        <code>kit=SB1/N</code>: nothing should throw or produce a flat-white horse.</li>
 </ul>
 
 <div class="page-foot">
@@ -1017,7 +1030,8 @@ gold-dust <code>emitter</code> shows, and the horse lights the area around it
         <a href="gene-magic-zebra.html">Magic zebra</a>
         <a href="gene-pink-hair.html">Pink hair</a>
         <a href="gene-grey.html">Grey</a>
-        <a href="gene-splash.html">Splash</a>
+        <a href="gene-kit.html">KIT</a>
+        <a href="gene-mitf.html">MITF splash</a>
     </div>
     Update this page after every play session. This is &ldquo;built, not yet seen&rdquo;;
     <a href="roadmap.html">the roadmap</a> is &ldquo;not built at all&rdquo;.

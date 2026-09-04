@@ -52,8 +52,10 @@
     <strong>where</strong> (its <a href="#masks">masks</a>, folded into one coverage
     number per texel) times <strong>what</strong> (its <a href="#ops">op</a>, applied
     scaled by that number). Because coverage scales the effect rather than gating it,
-    every edge is soft by construction &mdash; the thing each hand-written gene had to
-    remember separately, and the reason splash's socks still end in a hard ring.
+    every edge is soft by construction &mdash; the thing each hand-written gene has to
+    remember separately. (<code>CoatRegions.whitenLowerLeg</code> is the standing
+    counter-example: it cuts hard, so every sock it draws ends in a perfect ring, which
+    is why no built-in gene calls it any more.)
 </p>
 
 <pre><code class="language-json">{
@@ -97,7 +99,7 @@
     <div><dt>key</dt><dd><code>modid.gene</code>, lower case, unique. Namespaced so two mods can't collide.</dd></div>
     <div><dt>name</dt><dd>Display name. Defaults to the part after the dot.</dd></div>
     <div><dt>phase</dt><dd><code>natural</code> or <code>magical</code>. See below &mdash; never both.</dd></div>
-    <div><dt>priority</dt><dd>Processing order &mdash; lower runs first. Sorted into the <strong>one</strong> <code>(priority, key)</code> order alongside the built-ins (extension 10 &hellip; splash 80; magical 100+), so a natural gene at 45 lands between the built-in MATP and champagne. <strong>Registration order is ignored.</strong> Natural band <code>0&ndash;99</code>, magical <code>100+</code> (out of band only warns); within the natural band, put an absolute pigment-setter low and a dilution higher.</dd></div>
+    <div><dt>priority</dt><dd>Processing order &mdash; lower runs first. Sorted into the <strong>one</strong> <code>(priority, key)</code> order alongside the built-ins (sex 1, extension 10 &hellip; PAX3 79; magical 100+), so a natural gene at 45 lands between the built-in MATP and champagne. <strong>Registration order is ignored.</strong> Natural band <code>0&ndash;99</code>, magical <code>100+</code> (out of band only warns); within the natural band, put an absolute pigment-setter low and a dilution higher.</dd></div>
     <div><dt>alleles</dt><dd>Any number, two or more. The <strong>last</strong> one is the population baseline &mdash; a genotype code with no segment for this gene reads as two copies of it. A token may be any run of characters except <code>/</code> and <code>-</code>, which separate alleles and genes in a genotype code.</dd></div>
     <div><dt>knobs</dt><dd>Optional. See <a href="#knobs">numbers that vary per horse</a>.</dd></div>
     <div><dt>expressions</dt><dd>The outcomes. Required &mdash; see below.</dd></div>

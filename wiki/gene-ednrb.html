@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EDNRB (frame overo) &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="nav.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow natural">Natural gene <span class="sep">/</span> phase 1</p>
+<h1>EDNRB (frame overo)</h1>
+<p class="lede">
+    Frame overo, and the model&rsquo;s <strong>first genuine lethal</strong>. Bold
+    jagged-edged white on the flanks that never crosses the topline &mdash; and, when two
+    carriers meet, an all-white foal that in life does not survive its first days. This is
+    what used to be <code>horsegenetics.frame</code>, renamed to its locus alongside
+    <a href="gene-kit.html"><code>KIT</code></a>, <a href="gene-mitf.html"><code>MITF</code></a>
+    and <a href="gene-pax3.html"><code>PAX3</code></a>.
+</p>
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd>horsegenetics.ednrb</dd></div>
+    <div><dt>Priority</dt><dd>74</dd></div>
+    <div><dt>Alleles</dt><dd><span class="allele dom">O</span> <span class="allele wild">N</span></dd></div>
+    <div><dt>Combinations</dt><dd>3, all of which occur, landing on 3 outcomes</dd></div>
+    <div><dt>Outcomes</dt><dd>wild, <code>frame</code>, <code>lethal-white</code> (masks)</dd></div>
+    <div><dt>Default allele</dt><dd>N</dd></div>
+    <div><dt>Wild frequency</dt><dd><code>O</code> 1 in 55 per allele &mdash; but <strong>no founder is <code>O/O</code></strong></dd></div>
+    <div><dt>Founder draws</dt><dd>1 &times; nextFloat()</dd></div>
+    <div><dt>Deterministic</dt><dd><code>frame</code> <strong>no</strong>; <code>lethal-white</code> yes</dd></div>
+    <div><dt>Epi draws</dt><dd>nextLong() seed, nextFloat() body cover, nextFloat() face width</dd></div>
+</dl>
+
+<h2>Why frame has a locus to itself</h2>
+
+<p>
+    Because it does &mdash; <code>EDNRB</code> is nothing to do with <code>KIT</code> or
+    the splash genes. And that is not a filing detail: a locus of its own is precisely why
+    frame composes freely with everything else. A horse really can be frame
+    <em>and</em> tobiano <em>and</em> splash, and the loudest overos in life are exactly
+    those stacks.
+</p>
+
+<h2>The combination table</h2>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Combination</th><th>Outcome</th><th>Look</th></tr></thead>
+<tbody>
+<tr><td><code>N/N</code></td><td>wild type</td><td>nothing</td></tr>
+<tr><td><code>O/N</code></td><td><code>frame</code></td><td>irregular horizontal white on the sides of neck and barrel that never reaches the topline, framed by colour above and below, plus a broad white face. Legs stay coloured.</td></tr>
+<tr><td><code>O/O</code></td><td><code>lethal-white</code> <em>(masks)</em></td><td>an all-white foal with pink skin</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    Some carriers are marked so little you would never guess &mdash; which is exactly why
+    frame is tested for and not eyeballed, and why a nearly all-white horse may carry no
+    frame at all while a minimally marked one does.
+</p>
+
+<h2>Two kinds of lethal, and the model keeps them apart</h2>
+
+<p>
+    <a href="gene-kit.html"><code>KIT</code></a>&rsquo;s nonviable <code>W</code>
+    homozygotes and <code>EDNRB</code>&rsquo;s <code>O/O</code> are not the same
+    statement, and collapsing them would lose the more important one:
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th></th><th><code>W5/W5</code> and friends</th><th><code>O/O</code></th></tr></thead>
+<tbody>
+<tr><td>What happens</td><td>presumed <strong>embryonic</strong> lethal &mdash; never a foal</td><td><strong>born</strong>, all white, dies within a day or two without the gut&rsquo;s nerve supply</td></tr>
+<tr><td><code>canOccur</code></td><td><strong>false</strong></td><td><strong>true</strong></td></tr>
+<tr><td>Gallery pen</td><td>none</td><td><strong>yes</strong> &mdash; it has a look, and a player will see it</td></tr>
+<tr><td>In the founder table</td><td>no</td><td>no &mdash; a founder is an adult horse</td></tr>
+<tr><td>How you get one</td><td>you don&rsquo;t</td><td>two carriers, one time in four</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    Hiding <code>O/O</code> would hide the single most important fact about breeding frame
+    horses. So it occurs, it has its own outcome, and it is painted.
+</p>
+
+<div class="note">
+    <span class="label">Built: the coat. Not built: the death.</span>
+    <p>
+        The mod has no health system, so an <code>O/O</code> foal is born all-white and
+        then simply lives. That is a deliberate first slice &mdash; the coat is honest, the
+        consequence waits for the health work (<a href="roadmap.html">roadmap</a>
+        &sect;6.4). It is why the outcome is named <code>lethal-white</code> rather than
+        something softer: the name is a standing note that half of it is missing.
+    </p>
+</div>
+
+<h2>How frame paints</h2>
+
+<p>
+    A warped fractal field turned white where it clears a threshold, with the threshold
+    <strong>lowered on the mid-height flank</strong> &mdash; a weight that is zero at the
+    spine <em>and</em> at the belly &mdash; and wobbled at a fine scale so the margins are
+    ragged. The band is measured in <b>absolute body-space Y</b>, not per part, so it does
+    not depend on which face a texel is on; an earlier per-part <code>sideWeight</code>
+    version left the barrel untouched and produced almost nothing.
+</p>
+
+<div class="codebox">
+<div class="filename">common/genetics/genes/EdnrbGene.java</div>
+<pre><code class="language-java">private static final double BAND_LO = 0.28;   // above the belly
+private static final double BAND_HI = 0.74;   // below the topline
+private static final double COVER_MIN = 0.52, COVER_RANGE = 0.22;
+private static final double JAG = 0.15, JAG_FREQ = 3.1;</code></pre>
+</div>
+
+<p>
+    <code>lethal-white</code> is a different painter: both pigments to zero everywhere,
+    and it <code>masks</code>, so it takes exactly one gallery pen however much else the
+    horse carries. Measured coverage: <code>O/N</code> 42%, <code>O/O</code> 100%.
+</p>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="gene-kit.html">KIT (white spotting)</a>
+        <a href="gene-mitf.html">MITF (splash white)</a>
+        <a href="gene-pax3.html">PAX3 (splash white)</a>
+        <a href="gene-tobiano.html">Tobiano</a>
+    </div>
+    Source: <code>common/genetics/genes/EdnrbGene.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

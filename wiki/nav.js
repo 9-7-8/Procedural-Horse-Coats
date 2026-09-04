@@ -44,15 +44,20 @@
                 { href: "gene-matp.html", text: "MATP (cream / pearl)", kind: "natural" },
                 { href: "gene-champagne.html", text: "Champagne", kind: "natural" },
                 { href: "gene-grey.html", text: "Grey (dapple)", kind: "natural" },
-                { href: "gene-white.html", text: "Dominant white", kind: "natural" },
-                { href: "gene-splash.html", text: "Splash white", kind: "natural" },
                 { href: "gene-dun.html", text: "Dun", kind: "natural" },
                 { href: "gene-silver.html", text: "Silver dapple", kind: "natural" },
-                { href: "gene-mushroom.html", text: "Mushroom", kind: "natural" },
-                { href: "gene-roan.html", text: "Roan", kind: "natural" },
+                { href: "gene-mushroom.html", text: "Mushroom", kind: "natural" }
+            ]
+        },
+        {
+            title: "White pattern loci",
+            items: [
+                { href: "gene-kit.html", text: "KIT (dominant white / sabino)", kind: "natural" },
+                { href: "gene-mitf.html", text: "MITF (splash white)", kind: "natural" },
+                { href: "gene-pax3.html", text: "PAX3 (splash white)", kind: "natural" },
+                { href: "gene-ednrb.html", text: "EDNRB (frame overo)", kind: "natural" },
                 { href: "gene-tobiano.html", text: "Tobiano", kind: "natural" },
-                { href: "gene-frame.html", text: "Frame overo", kind: "natural" },
-                { href: "gene-sabino.html", text: "Sabino 1", kind: "natural" }
+                { href: "gene-roan.html", text: "Roan", kind: "natural" }
             ]
         },
         {

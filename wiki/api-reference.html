@@ -163,7 +163,7 @@ name/     HorseNameGenerator, HorseNames</code></pre>
 <tr><td><code>isNatural()</code> phase</td><td>Where the <em>expression</em> paints: <code>Expression.restrict</code> in phase 1, <code>Expression.tint</code> in phase 3. The paint function lives on the outcome, not on the gene.</td></tr>
 <tr><td><code>isVisible(pair, genotype)</code></td><td>Derived: <code>!expressionIn(...).wildType()</code>.</td></tr>
 <tr><td><code>isDeterministic(pair, genotype)</code></td><td>Derived: <code>expressionIn(...).deterministic()</code>. <strong>Cache correctness depends on this.</strong></td></tr>
-<tr><td><code>canOccur(pair)</code></td><td>Can a horse actually carry this combination? <code>true</code> by default. <code>GenotypeCatalog.allPairsOf</code> filters on it, so a combination that cannot happen gets no pen and is not counted. Only the <a href="gene-sex.html">sex locus</a> overrides it, to rule out <code>Y/Y</code>.</td></tr>
+<tr><td><code>canOccur(pair)</code></td><td>Can a horse actually carry this combination? <code>true</code> by default. <code>GenotypeCatalog.allPairsOf</code> filters on it, so a combination that cannot happen gets no pen and is not counted, and an author should leave it out of the founder table too. Overridden by the <a href="gene-sex.html">sex locus</a> (no <code>Y/Y</code>), <a href="gene-kit.html"><code>KIT</code></a> (four nonviable <code>W</code> homozygotes), <a href="gene-mitf.html"><code>MITF</code></a> (<code>SW3/SW3</code>) and <a href="gene-pax3.html"><code>PAX3</code></a> (<code>SW4/SW4</code>). It means <em>embryonic</em> lethal: a foal that is born and then dies, like <a href="gene-ednrb.html"><code>O/O</code></a>, stays <code>true</code> and keeps its outcome. <code>expressionOf</code> must still answer for a combination this rules out &mdash; parsing is tolerant.</td></tr>
 <tr><td><code>affectsCoat()</code></td><td>Derived: does <em>any</em> outcome fail to be a wild type? <code>false</code> means the gene never paints, and <code>Genotype.coatCode()</code> leaves it out of the texture key. Only the sex locus is false today.</td></tr>
 <tr><td><code>fromToken(token)</code></td><td>Code-string token &rarr; allele. Defaults to a scan of <code>alleles()</code>.</td></tr>
 </tbody>
@@ -239,6 +239,16 @@ int    order();        // index in Gene.alleles() - a slot order, NOT dominance<
     // model. What the old "1 in N per allele" meant.
     static FounderTable hardyWeinberg(Allele variant, Allele baseline, double p);
 
+    // ...and its multi-allele generalisation: 2*p_i*p_j per combination (p_i^2
+    // when i == j), with anything `occurs` rejects dropped and the rest
+    // RESCALED to 100. Written for KIT, which has thirty-six combinations and
+    // four homozygous lethals - hand-tabulating that is not transparency, it is
+    // an invitation to a typo nobody would ever see. The rescale is the biology:
+    // a lethal combination is absent from the adult population you observe.
+    // Pass a LinkedHashMap - iteration order fixes the table's row order.
+    static FounderTable hardyWeinberg(Map&lt;Allele, Double&gt; frequencies,
+                                      Predicate&lt;AllelePair&gt; occurs);
+
     AllelePair       draw(Rng rng);      // exactly one nextFloat()
     List&lt;AllelePair&gt; pairs();            // the combinations that occur at all
     double           share(AllelePair p);// normalised, 0 for one not listed
@@ -285,9 +295,15 @@ boolean    has(Allele allele);
 boolean isDeterministic();
 boolean hasVisibleNonDeterministic();      // -&gt; bake a texture per horse
 
-// convenience predicates the coat code reads
+// the generic question - "does this gene do anything on this horse?"
+boolean    shows(Gene gene);
+Expression expressionOf(Gene gene);
+List&lt;Gene&gt; visibleGenes();
+
+// the three coarse predicates the coat code still reads by name.
+// isWhite() is true for KIT dominant white *or* EDNRB lethal white - the two
+// combinations that remove every pigment everywhere.
 boolean isWhite();  boolean hasBlackPigment();  boolean isAgouti();
-boolean isChampagne();  boolean isSplash();  boolean isGrey();  boolean hasTest();
 
 CoatPhenotype phenotype();                 // coarse; family-tree fallback only</code></pre>
 </div>
@@ -714,6 +730,63 @@ List&lt;String&gt; GeneCodeDisplay.wrap(Genotype genotype, int lines, int maxCha
 </div>
 
 <p>Requires JDK 25; <code>foojay-resolver-convention</code> auto-provisions it.</p>
+
+<h3><code>GenotypeCatalog</code> &mdash; every distinct genotype, computed on demand</h3>
+
+<div class="codebox">
+<pre><code class="language-java">public final class GenotypeCatalog {
+    static List&lt;AllelePair&gt; allPairsOf(Gene gene);       // minus what canOccur rejects
+    static List&lt;AllelePair&gt; distinctPairsOf(Gene gene);  // one per Expression; all wild types are one group
+
+    static int      size();            // the reduced catalogue
+    static long     totalGenotypes();  // the raw product, before the reduction
+    static Genotype get(int index);    // built on the spot, not fetched from a list
+    static List&lt;Genotype&gt; entries();   // a LAZY view - iterate it, don't collect it
+}</code></pre>
+</div>
+
+<p>
+    <strong>Nothing is materialised.</strong> <code>size()</code> is arithmetic and
+    <code>get(i)</code> reads an odometer over each gene&rsquo;s non-masking distinct
+    pairs; the one entry each masking combination owns is appended after all of them, in
+    gene order. It used to be an eagerly built <code>List&lt;Genotype&gt;</code>, which was
+    fine at a few thousand entries and stopped being fine the moment the white-pattern loci
+    took the catalogue past two million &mdash; that list is hundreds of megabytes of
+    genotype nobody reads more than a few hundred of.
+</p>
+
+<p>
+    The consequence for callers: <code>entries()</code> is a view, so
+    <code>entries().stream().filter(...)</code> still walks every entry and building each
+    one. Sample it, or ask the arithmetic instead. The gallery is capped separately at
+    <code>DebugPenManager.MAX_GALLERY_PENS</code>.
+</p>
+
+<h3><code>WhitePattern</code> &mdash; the two shapes white spotting comes in</h3>
+
+<div class="codebox">
+<pre><code class="language-java">public final class WhitePattern {
+    // the KIT shape: ragged margins growing inward from legs, belly and face
+    static PigmentField sabino(CoatBuildContext ctx, PigmentView coat,
+                               String geneKey, double strength);
+
+    // the MITF / PAX3 shape: a sharply bounded waterline rising up the horse
+    static PigmentField splash(CoatBuildContext ctx, PigmentView coat,
+                               String geneKey, double strength);
+}</code></pre>
+</div>
+
+<p>
+    One painter per <em>family</em>, not per gene and certainly not per allele: the
+    difference between two alleles at one locus is overwhelmingly a difference of degree,
+    so each <a href="genetics-model.html#combinations">outcome</a> picks a
+    <code>strength</code> in <code>[0, 1]</code> and the painter does the rest. Both raise
+    that strength by how much of the coat they are handed is already de-pigmented &mdash;
+    see <a href="pipeline.html#white-finds-white">white finds white</a>. Both draw every
+    number from <code>ctx.epigeneticsFor(geneKey)</code>, and
+    <strong>the draw order is part of the contract</strong>: change it and every existing
+    horse carrying that gene repaints.
+</p>
 
 <div class="page-foot">
     <div class="seealso">

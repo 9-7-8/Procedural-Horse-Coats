@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PAX3 (splash white) &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="nav.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow natural">Natural gene <span class="sep">/</span> phase 1</p>
+<h1>PAX3 (splash white)</h1>
+<p class="lede">
+    The <strong>second</strong> splash white locus, carrying <code>SW2</code> and
+    <code>SW4</code>. Its twin is <a href="gene-mitf.html"><code>MITF</code></a>, and it
+    exists to make one point that a single splash gene could not:
+    <strong>a horse can be splash twice over.</strong>
+</p>
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd>horsegenetics.pax3</dd></div>
+    <div><dt>Priority</dt><dd>79</dd></div>
+    <div><dt>Alleles</dt><dd>
+        <span class="allele dom">SW2</span> <span class="allele dom">SW4</span>
+        <span class="allele wild">N</span>
+    </dd></div>
+    <div><dt>Combinations</dt><dd>6, of which 5 a horse can carry, landing on 3 outcomes</dd></div>
+    <div><dt>Outcomes</dt><dd>wild, <code>splash</code>, <code>splash-bold</code></dd></div>
+    <div><dt>Default allele</dt><dd>N</dd></div>
+    <div><dt>Wild frequency</dt><dd><code>SW2</code> 2%, <code>SW4</code> 0.5%, rest <code>N</code></dd></div>
+    <div><dt>Founder draws</dt><dd>1 &times; nextFloat()</dd></div>
+    <div><dt>Deterministic</dt><dd><strong>no</strong></dd></div>
+    <div><dt>Epi draws</dt><dd>nextLong() seed, nextFloat() waterline, nextFloat() face width, nextFloat() face length</dd></div>
+    <div><dt>Painter</dt><dd><code>WhitePattern.splash</code> &mdash; the same shape <code>MITF</code> uses</dd></div>
+</dl>
+
+<h2>Two loci, one pattern</h2>
+
+<p>
+    <code>SW1</code> sits on <code>MITF</code> and <code>SW2</code> on <code>PAX3</code>.
+    They are different genes on different chromosomes, they produce the
+    <em>same-looking</em> pattern &mdash; which is exactly why they were long taken for one
+    gene &mdash; and a horse carrying one copy of each has considerably more white than a
+    horse carrying either alone.
+</p>
+
+<p>
+    In this model that falls out for free. Both genes paint, one after the other, and
+    <a href="pipeline.html">white finds white</a>: each painter raises its own strength by
+    how much of the horse is already de-pigmented. There is no interaction rule anywhere,
+    and the measured result is <strong>70%</strong> white for
+    <code>SW1/N&nbsp;+&nbsp;SW2/N</code> against 45% and 42% for the two on their own.
+</p>
+
+<div class="note">
+    <span class="label">Painted blindly, this would be wrong</span>
+    <p>
+        Before the stacking rule, two waterlines drawn at roughly the same height came out
+        at 45% versus 43.7% &mdash; the two-gene split would have been an architectural
+        gesture with nothing visible behind it. Reading the coat is what makes the split
+        mean something on the horse.
+    </p>
+</div>
+
+<h2>The alleles</h2>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Allele</th><th>One copy</th><th>Two copies</th></tr></thead>
+<tbody>
+<tr><td><code>N</code></td><td>&mdash;</td><td>wild type</td></tr>
+<tr><td><code>SW2</code></td><td>variable splash, often bold face and leg white, belly white</td><td><strong>viable</strong> and reported &mdash; and in life associated with deafness</td></tr>
+<tr><td><code>SW4</code></td><td>splash-type face, leg and belly white</td><td><strong>cannot occur</strong> &mdash; never detected</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2>The combination table</h2>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Combination</th><th>Outcome</th><th>Look</th></tr></thead>
+<tbody>
+<tr><td><code>SW2/SW2</code>, <code>SW2/SW4</code></td><td><code>splash-bold</code></td><td>white carried well up the barrel and over the face</td></tr>
+<tr><td><code>SW2/N</code>, <code>SW4/N</code></td><td><code>splash</code></td><td>clean-edged leg white, belly white, a bold face marking</td></tr>
+<tr><td><code>N/N</code></td><td>wild type</td><td>nothing</td></tr>
+<tr><td><code>SW4/SW4</code></td><td colspan="2"><em>cannot occur</em></td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="note">
+    <span class="label">Deafness is not modelled</span>
+    <p>
+        <code>SW2/SW2</code> carries a real hearing risk in live horses. The mod has no
+        hearing, and inventing a penalty the player cannot perceive would be flavour text
+        pretending to be a mechanic. It is recorded in the outcome&rsquo;s
+        <code>description</code> instead &mdash; which is where the gene dictionary will
+        read it from when that lands.
+    </p>
+</div>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="gene-mitf.html">MITF (splash white)</a>
+        <a href="gene-kit.html">KIT (white spotting)</a>
+        <a href="gene-ednrb.html">EDNRB (frame overo)</a>
+    </div>
+    Source: <code>common/genetics/genes/Pax3Gene.java</code>,
+    <code>common/coat/pattern/WhitePattern.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

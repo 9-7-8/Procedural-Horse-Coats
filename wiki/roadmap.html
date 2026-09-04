@@ -117,11 +117,13 @@
         function mapping any combination to one of them, so any number of alleles
         works with no special case. <strong>Cream/pearl &rarr;
         <a href="gene-matp.html">MATP</a> landed with it</strong> as the proving case.
-        <strong>Still open: the remaining physical-locus merges</strong> &mdash; MITF
-        (today&rsquo;s splash), PAX3, and the hard one, a <code>KIT</code> class
-        expressing several visually unrelated patterns from one allele set. Each is
-        now a single gene file rather than a framework change; each touches the
-        catalogue (§8), the spawner (§9) and §10.</li>
+        <strong>The remaining physical-locus merges shipped 2026-09-04</strong>
+        &mdash; <a href="gene-kit.html">KIT</a> (eight alleles, absorbing dominant
+        white and sabino), <a href="gene-mitf.html">MITF</a> and
+        <a href="gene-pax3.html">PAX3</a> (splash is two genes, not one) and
+        <a href="gene-ednrb.html">EDNRB</a> (frame, with the lethal-white outcome).
+        Tobiano and roan stayed their own genes; they are not <code>KIT</code>
+        variants. The combinatorial cost landed on §8 and §10 as predicted.</li>
     <li><strong>The trait framework</strong> (§6.1) &mdash; <code>HorseTraits</code>, the
         capability interfaces, the attribute adapter. Prereq for <em>every</em> non-coat
         gene: performance (§4.3), size, health (§4.4, §6.4). Touches breeding and the
@@ -244,12 +246,13 @@
 <h3>The reserved numbers</h3>
 
 <p>
-    The built-ins carry real priorities: extension 10, agouti 20, silver 30,
-    mushroom 32, dun 34, <strong>MATP 40</strong>, champagne 50, grey 55, white 60,
-    roan 70, tobiano 72, frame 74, sabino 76, splash 80; magical: pink hair 110,
-    magic zebra 120, test 900 &mdash; and <strong>sex 1</strong>, which is no longer
-    reserved but built. The table below is the <em>target</em> once the
-    physical-locus merges (§5.1) land &mdash; one <code>Gene</code> per locus.
+    The built-ins carry real priorities: <strong>sex 1</strong>, extension 10,
+    agouti 20, silver 30, mushroom 32, dun 34, <strong>MATP 40</strong>,
+    champagne 50, grey 55, roan 70, tobiano 72, <strong>EDNRB 74</strong>,
+    <strong>KIT 76</strong>, <strong>MITF 78</strong>, <strong>PAX3 79</strong>;
+    magical: pink hair 110, magic zebra 120, test 900. The physical-locus merges
+    (§5.1, §5.2) have all landed, so this is now the shipped order rather than a
+    target.
 </p>
 
 <div class="table-wrap">
@@ -261,9 +264,9 @@
 <tr><td>20</td><td>agouti</td><td>Restricts black to the points; <strong>sets pigment absolutely</strong>.</td></tr>
 <tr><td>40</td><td>MATP (cream + pearl) &mdash; <strong>shipped</strong></td><td>Dilutions &mdash; must run after the absolute set.</td></tr>
 <tr><td>40</td><td>champagne</td><td>Dilution.</td></tr>
-<tr><td>50</td><td>grey</td><td>Remaps onto the neutral column.</td></tr>
-<tr><td>60</td><td>white</td><td>Masks everything.</td></tr>
-<tr><td>70</td><td>splash</td><td>White markings, set absolutely.</td></tr>
+<tr><td>55</td><td>grey</td><td>Remaps onto the neutral column.</td></tr>
+<tr><td>70&ndash;72</td><td>roan, tobiano</td><td>White patterns near <code>KIT</code> but not of it.</td></tr>
+<tr><td>74&ndash;79</td><td>EDNRB, KIT, MITF, PAX3 &mdash; <strong>shipped</strong></td><td>The white-pattern loci. All set pigment to zero, so their order between themselves barely matters &mdash; except that each reads how white the horse already is, so a later one paints harder.</td></tr>
 </tbody>
 </table>
 </div>
@@ -403,9 +406,9 @@
 <p>
     <strong>Status</strong>: <em>partial</em> = a gene with that name ships but this
     entry is more than it does; <em>new</em> = nothing exists. Genes already finished
-    &mdash; extension, agouti, cream, pearl, champagne, grey, dominant white (as a
-    masking stand-in), splash (as SW1), dun, silver, mushroom, roan, tobiano, frame,
-    sabino &mdash; are <strong>not listed</strong>; each has its own
+    &mdash; extension, agouti, MATP (cream + pearl), champagne, grey, dun, silver,
+    mushroom, roan, tobiano, and the four white-pattern loci KIT, MITF, PAX3 and
+    EDNRB &mdash; are <strong>not listed</strong>; each has its own
     <a href="gene-extension.html">gene page</a>, and any residual tuning lives there.
 </p>
 
@@ -434,21 +437,26 @@
 <h3>4.2 White spotting and patterns</h3>
 
 <p>
-    Grey, tobiano, frame overo (coat), sabino 1 and roan all ship &mdash; see their
-    gene pages. What is left on those: frame&rsquo;s <code>Ov/Ov</code> lethal white
-    (below and §6.4), and splash&rsquo;s <code>whitenLowerLeg</code> hard ring (sabino
-    already does jagged leg edges the right way; splash should copy it).
+    <strong>The white-pattern loci are done as loci.</strong> Sabino and the
+    <code>W</code> series merged into <a href="gene-kit.html"><code>KIT</code></a> (eight
+    alleles); splash became <a href="gene-mitf.html"><code>MITF</code></a> and
+    <a href="gene-pax3.html"><code>PAX3</code></a>, which is what lets a horse be splash
+    twice over; frame became <a href="gene-ednrb.html"><code>EDNRB</code></a> with its
+    <code>O/O</code> lethal-white coat. Tobiano and roan stay their own genes, because
+    neither is a <code>KIT</code> variant. What is left below is the two families that are
+    genuinely not built &mdash; the leopard complex and brindle &mdash; plus the alleles
+    each built locus does not yet carry.
 </p>
 
 <div class="table-wrap">
 <table>
 <thead><tr><th>Locus</th><th>Alleles</th><th>Status</th><th>What it needs</th></tr></thead>
 <tbody>
-<tr><td><strong>Leopard complex (TRPM1)</strong></td><td><code>LP</code>, <code>lp</code></td><td>new</td><td>The most pattern-heavy gene on the list: leopard, blanket, snowcap, varnish roan, plus the appaloosa characteristics. Wants a <code>BodyNoise</code> spot field plus a separate blanket mask, and heterozygote vs homozygote <strong>must</strong> differ. Realistically <strong>PATN1</strong> comes with it. Health: <code>LP/LP</code> &rarr; CSNB.</td></tr>
-<tr><td><strong>Frame overo &mdash; lethal white</strong></td><td><code>Ov</code>, <code>ov</code></td><td>partial</td><td>The coat ships. <code>Ov/Ov</code> &rarr; lethal white foal syndrome is not modelled &mdash; the homozygote renders as an ordinary frame. This is the first lethal in the model (§6.4) and needs that system first. See <a href="gene-frame.html">its page</a>.</td></tr>
-<tr><td><strong>Splashed white SW1 (MITF) &mdash; dose + face markings</strong></td><td><code>SW1</code>, <code>sw1</code></td><td>partial</td><td><a href="gene-splash.html#issues">Two open issues logged on its page</a>: it does not read its own dose (<code>SW1/SW1</code> should be much bigger), and the face-marking family is just the centreline blaze. Fixing the dose is the prerequisite for the rest of the SW series.</td></tr>
-<tr><td><strong>Splashed white SW2&ndash;SW10</strong></td><td><code>SW2</code>&hellip;<code>SW10</code></td><td>new</td><td><strong>Not</strong> one locus: SW1/3/5/6/8/10 are on <strong>MITF</strong>, SW2/4/7/9 on <strong>PAX3</strong>. Two multi-allele loci &mdash; and today&rsquo;s splash gene becomes the MITF locus with 7 alleles.</td></tr>
-<tr><td><strong>Dominant white (KIT)</strong></td><td><code>W1</code>&hellip;<code>W36</code></td><td>partial</td><td>Today&rsquo;s white is <code>COMPLETE_DOMINANT</code> and masks everything, which keeps the gallery tractable. The real series is 36 alleles of graded extent, most <strong>not</strong> fully masking. The single largest combinatorial change in this document &mdash; deliberately defer, or cap at a handful of representative alleles.</td></tr>
+<tr><td><strong>Leopard complex (TRPM1)</strong> + <strong>PATN1</strong></td><td><code>LP</code>, <code>lp</code>; <code>PATN1</code>, <code>N</code></td><td>new</td><td><strong>Deliberately left out of the white-pattern rewrite</strong>, and the largest single gene job remaining. It is not a pinto pattern and does not belong to any locus that rewrite touched: leopard, blanket, snowcap and varnish roan, plus white sclera, striped hooves and mottled skin. Wants a spot field <em>and</em> a separate blanket mask &mdash; neither of which <code>WhitePattern</code>&rsquo;s two shapes cover &mdash; and heterozygote vs homozygote <strong>must</strong> differ. <code>PATN1</code> is a second locus that only means anything on an <code>LP</code> horse, so it comes with it and is the model&rsquo;s first real modifier gene. Health: <code>LP/LP</code> &rarr; CSNB. Mottled skin and striped hooves also want the skin layer the coat does not have.</td></tr>
+<tr><td><strong>Overo lethal white &mdash; the death</strong></td><td><code>O</code>, <code>N</code></td><td>partial</td><td>The <em>coat</em> ships: <code>O/O</code> has its own <code>lethal-white</code> outcome, occurs, and renders all white. What is missing is the consequence &mdash; the foal lives. This is the first real lethal in the model and it needs the health system (§6.4) before it can do anything but look right. See <a href="gene-ednrb.html">its page</a>.</td></tr>
+<tr><td><strong>The rest of the <code>W</code> series</strong></td><td><code>W1</code>&ndash;<code>W4</code>, <code>W6</code>&ndash;<code>W9</code>, <code>W11</code>&ndash;<code>W19</code>, <code>W21</code>, <code>W24+</code></td><td>partial</td><td>Eight of the thirty-plus are modelled. The rest are not blocked on anything &mdash; each is a line in <code>alleles()</code>, a row in <code>expressionOf</code> and a frequency &mdash; they are simply <strong>not worth adding while their published descriptions do not separate them</strong> from the eight that are. Add one when the science gives it a phenotype a player could tell apart. Note the combinatorial cost: each allele adds <code>n</code> combinations to a locus that already has thirty-six.</td></tr>
+<tr><td><strong>The rest of the splash series</strong></td><td><code>SW6</code>&ndash;<code>SW10</code></td><td>partial</td><td><code>SW6</code>&ndash;<code>SW8</code> are folded into <a href="gene-mitf.html"><code>SW5</code></a> on purpose &mdash; the source describes all four in word-for-word identical terms, so four alleles would be four indistinguishable rows. Split them when they are distinguishable. <code>SW9</code>/<code>SW10</code> want a locus check first: the assignment of the higher numbers between <code>MITF</code> and <code>PAX3</code> is not settled in the reference used.</td></tr>
+<tr><td><strong>Face markings as their own thing</strong></td><td>&mdash;</td><td>new</td><td>Every white-pattern gene draws its face marking as a centreline stripe of some width and length. Real horses have a named family &mdash; star, snip, stripe, blaze, bald face &mdash; that is not simply &ldquo;a wider stripe&rdquo;, and a star in particular is a <em>detached</em> patch. Wants a shared <code>WhitePattern.face(kind, ...)</code> the loci call, not a per-gene reinvention.</td></tr>
 <tr><td><strong>Brindle (MBTPS2)</strong></td><td><code>Br</code>, <code>br</code></td><td>new</td><td>Vertical striping in a darker or lighter shade of the base coat. <strong>The one sex-linked gene</strong> (§5.3), and the reason that scaffolding is needed at all. Pattern work shares <code>BodyStripes</code>; the interesting part is the inheritance. <strong>Build the scaffolding first, then this gene as its proof.</strong></td></tr>
 </tbody>
 </table>
@@ -601,9 +609,18 @@
 <h3>5.2 One physical gene, several traits</h3>
 
 <p>
-    <strong>KIT</strong> carries dominant white, tobiano <em>and</em> sabino 1.
-    <strong>MITF</strong> carries SW1, 3, 5, 6, 8, 10; <strong>PAX3</strong> carries
-    SW2, 4, 7, 9. <strong>MATP</strong> carries cream and pearl.
+    <strong>KIT</strong> carries sabino 1 and the whole numbered <code>W</code> series.
+    <strong>MITF</strong> carries SW1, 3, 5, 6, 8; <strong>PAX3</strong> carries SW2 and 4.
+    <strong>MATP</strong> carries cream and pearl. <strong>EDNRB</strong> carries frame.
+</p>
+
+<p>
+    <strong>Tobiano is not one of them.</strong> It is a large inversion <em>near /
+    downstream of</em> <code>KIT</code>, not a <code>KIT</code> variant, and roan maps to
+    the region with an unresolved causal change &mdash; so both stay their own genes and
+    both can co-occur with anything at <code>KIT</code>. An earlier draft of this section
+    had all three sharing a locus; that would have been wrong, and would have made a
+    tobiano-plus-<code>W20</code> horse impossible.
 </p>
 
 <p>
@@ -625,12 +642,32 @@
     </p>
 </div>
 
-<p>
-    <strong>Left to do:</strong> MITF (today&rsquo;s splash), PAX3, and the genuinely
-    hard one &mdash; a <code>KIT</code> class expressing dominant white, tobiano
-    <em>and</em> sabino 1 from one allele set. Each is now a single gene rewrite
-    rather than a framework change.
-</p>
+<div class="note tip">
+    <span class="label">KIT, MITF, PAX3 and EDNRB shipped 2026-09-04</span>
+    <p>
+        The white-pattern rewrite finished this section. <a href="gene-kit.html">KIT</a>
+        is one gene with <strong>eight</strong> alleles &mdash; sabino 1, five <code>W</code>
+        variants, the <code>W20</code> booster and <code>N</code> &mdash; thirty-six
+        combinations, eight outcomes, and four homozygotes ruled out by
+        <code>canOccur</code> as embryonic lethals. It absorbed the old
+        <code>horsegenetics.white</code> and <code>horsegenetics.sabino</code>, which had
+        been modelling two alleles of one gene as two independent genes and so allowed a
+        horse to be homozygous sabino and dominant white at once.
+    </p>
+    <p>
+        Splash split the other way, into <a href="gene-mitf.html">MITF</a> and
+        <a href="gene-pax3.html">PAX3</a>, because it really is two genes &mdash; and that
+        is a gain, not bookkeeping: a horse carrying one copy at each is markedly whiter
+        than either alone, a genotype the single splash gene could not express at all.
+        Frame became <a href="gene-ednrb.html">EDNRB</a> and gained its
+        <code>lethal-white</code> outcome.
+    </p>
+    <p>
+        <strong>Left over from the change:</strong> the catalogue is now 2,064,387 pens,
+        which forced <code>MAX_GALLERY_PENS</code> and a lazily-computed
+        <code>GenotypeCatalog</code> &mdash; see §8 and §10.
+    </p>
+</div>
 
 <h3 id="sex-linked">5.3 Sex-linked genes &mdash; the two non-autosomal exceptions</h3>
 
@@ -1022,7 +1059,8 @@ interface ConditionRule    { void conditions(AllelePair, ConditionSink); } // CS
         is legitimate: these are <strong>foundation horses with no parents</strong>,
         which is exactly where the determinism contract allows a draw.</li>
     <li><strong>The corridor stops having an end.</strong>
-        <code>LAST_SEGMENT_INDEX</code> (currently 864, giving <strong>6,055
+        <code>LAST_SEGMENT_INDEX</code> (now pinned by the
+        <code>MAX_GALLERY_PENS</code> cap at 9,999 segments, giving <strong>70,000
         blocks</strong>) and <code>buildEndCap</code> go away, or become an arbitrary
         length. The walk-ahead extension stays.</li>
     <li><strong>The entrance tally sign</strong> no longer means anything &mdash; drop
@@ -1129,14 +1167,22 @@ interface ConditionRule    { void conditions(AllelePair, ConditionSink); } // CS
 
 <ul>
     <li><strong>The genotype space.</strong> Now <code>3^15 &times; 6 &times; 6 &times; 2 =
-        1,033,121,304</code> (fifteen two-allele genes, three-allele MATP and dun, and
+        55,099,802,880</code> (twelve two-allele genes, three-allele MATP, dun and PAX3,
+        four-allele MITF, eight-allele KIT, and
         the two-combination sex locus) &mdash;
         it was <code>3^11 = 177,147</code> before the seven visual genes shipped, the
         multiplier in miniature. With the full table the raw product is on the order
         of <strong>10<sup>19</sup></strong>.</li>
     <li><strong>The gallery has effectively died</strong> &mdash; and it is being
-        reverted anyway. Seven genes took the corridor from 1,730 pens / 6,055 blocks
-        to <strong>147,458 pens / ~516,000 blocks</strong> (lazily built, so it
+        reverted anyway. The white-pattern loci took the catalogue to
+        <strong>2,064,387 pens</strong>, whose corridor would be about
+        <strong>7.2 million blocks</strong> &mdash; a quarter of the way to the world
+        border, leaving room for four plots in the whole dimension. That is what forced
+        <code>MAX_GALLERY_PENS</code> (20,000, about 70,000 blocks), which is a lid on the
+        symptom and not a fix; the entrance sign now says how many pens it is
+        <em>showing</em> out of how many exist. The catalogue itself is computed on demand
+        rather than materialised (a two-million-entry <code>List&lt;Genotype&gt;</code> is
+        hundreds of megabytes), so it costs nothing until walked (lazily built, so it
         doesn&rsquo;t hang, but it is no longer a thing a player walks). The argument
         for &sect;9 has now fully arrived. If a <em>systematic</em> gallery is ever
         wanted again, the shape that scales is a <strong>wing per locus</strong>: each
@@ -1776,12 +1822,14 @@ interface ConditionRule    { void conditions(AllelePair, ConditionSink); } // CS
         worth doing early. The scaffolding touches <code>breedWith</code> and
         <code>GenotypeCatalog</code>, so do it while the breeding tests are still small.
         Brindle is its proof.</li>
-    <li><strong>The remaining pattern genes</strong> &mdash; LP (leopard complex), the
-        SW2&ndash;SW10 series &mdash; in ascending order of difficulty.</li>
-    <li><strong>KIT dominant white</strong> last: the largest allele set and the biggest
-        combinatorial hit, its <code>tint</code> function carrying every pattern in the
-        series. Fix the two splash bugs (dose, face markings) before expanding splash
-        into the full MITF series.</li>
+    <li><strong>LP (leopard complex) and PATN1</strong> &mdash; the one pattern family
+        the white-pattern rewrite deliberately left alone, and the largest gene job
+        remaining. It needs a spot field and a blanket mask, neither of which
+        <code>WhitePattern</code>&rsquo;s two shapes cover, and PATN1 is the model&rsquo;s
+        first modifier gene.</li>
+    <li><strong>Face markings as a shared family</strong> before adding more
+        white-pattern alleles: every locus currently draws its own centreline stripe, and
+        a star is not a narrow blaze.</li>
 </ol>
 
 <div class="note">

@@ -195,8 +195,8 @@ private static final float TRANSPARENT_EPS  = 0.001f;</code></pre>
 <ul>
     <li>A texel goes <strong>fully transparent</strong> (the bald white template
         shows through) only when <em>both</em> pigments are essentially zero &mdash;
-        i.e. dominant white or a splash marking, both of which
-        <code>setRed(0)</code> / <code>setBlack(0)</code> exactly.</li>
+        i.e. a white-pattern gene, all of which <code>setRed(0)</code> /
+        <code>setBlack(0)</code> exactly.</li>
     <li>A texel that resolves to <strong>pure black</strong> gets 80% opacity, so
         black is not a flat void.</li>
 </ul>
@@ -437,6 +437,64 @@ default int visible(int px, int py, int channel);</code></pre>
 </tbody>
 </table>
 </div>
+
+<h2 id="white-finds-white">White finds white</h2>
+
+<p>
+    The <a href="gene-kit.html">six white-pattern loci</a> all paint in phase 1, one after
+    another, and two of them share a painter apiece:
+    <code>WhitePattern.sabino</code> (the <code>KIT</code> shape &mdash; ragged margins
+    growing inward from legs, belly and face) and <code>WhitePattern.splash</code> (the
+    <code>MITF</code>&nbsp;/&nbsp;<code>PAX3</code> shape &mdash; a sharply bounded
+    waterline rising up the horse). Each takes one <code>strength</code> in
+    <code>[0, 1]</code>, and each <em>outcome</em> of each gene picks a number on that
+    ramp. An allele has no phenotype of its own; a combination lands on an outcome, and an
+    outcome is a number.
+</p>
+
+<p>
+    <strong>Both painters read the coat they are handed and paint harder the more of it is
+    already white.</strong> That is not a flourish. It is the single most-repeated
+    observation in the real genetics, and without it the model gets its own headline cases
+    wrong:
+</p>
+
+<ul>
+    <li><a href="gene-mitf.html"><code>MITF</code></a> and
+        <a href="gene-pax3.html"><code>PAX3</code></a> splash are different genes, so a
+        horse carries one copy at each and should be markedly whiter than either alone.
+        Painted blindly it is not &mdash; two waterlines drawn at roughly the same height
+        are one waterline. Measured: 45% and 42% separately, <strong>44%</strong> together
+        before the rule and <strong>70%</strong> after it.</li>
+    <li><code>W20</code> is described as a <em>booster</em>: subtle alone, adding white
+        beside another spotting variant. Reading the coat is what lets it be that.</li>
+    <li>A <a href="gene-ednrb.html">frame</a> or <a href="gene-tobiano.html">tobiano</a>
+        horse that is also splash is louder than either.</li>
+</ul>
+
+<div class="codebox">
+<div class="filename">common/coat/pattern/WhitePattern.java</div>
+<pre><code class="language-java">private static final double SPLASH_STACKING = 0.55;
+private static final double SABINO_STACKING = 0.35;
+
+double s = clamp01(strength + STACKING * alreadyWhite(coat, ctx.skin()));</code></pre>
+</div>
+
+<p>
+    One line in each painter and <strong>no interaction table anywhere</strong>. Both genes
+    stay pure functions of what they are handed, and phase 1 is already an ordered fold, so
+    nothing about the pipeline&rsquo;s contract moves. <code>alreadyWhite</code> counts
+    only texels whose pigments are <em>exactly</em> spent, far below anything a dilution
+    leaves behind &mdash; a pale horse is not a white-spotted one.
+</p>
+
+<p>
+    The splash waterline is a <strong>hard</strong> cut with no fade, for the same reason
+    tobiano&rsquo;s patches are: the gradient has no grey between a coloured texel and a
+    spent one, so a half-scaled black texel samples the warm diagonal and reads
+    <em>gold</em>. A one-pixel fade paints a tan fringe along the whole waterline. The
+    irregularity comes from wobbling <em>where</em> the line falls instead.
+</p>
 
 <div class="page-foot">
     <div class="seealso">

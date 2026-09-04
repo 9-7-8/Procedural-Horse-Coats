@@ -42,16 +42,18 @@ depending on the base it lands on:
 | Silver | rare | Lightens **black pigment only**. A black horse gets a chocolate body and a near-white mane and tail (**silver dapple**); a bay keeps its red body but its points and mane lighten (**silver bay**). A chestnut carrying it looks no different - it has no black to touch. |
 | Mushroom | rare, hidden | **Two copies** turn a chestnut a flat sepia-khaki. On a black or bay it does almost nothing, so it is another one you carry unseen and breed toward. |
 
-**White markings** are the last layer:
+**White markings** are the last layer, and they come from six separate genes -
+because in real horses they do. A horse has two copies of each gene, so two
+markings that live on the *same* gene can never appear together, while two on
+*different* genes stack up:
 
 | Gene | In the wild | What it does |
 |------|-------------|--------------|
-| Splash | uncommon | White socks and a face blaze, rolled per horse - no two are quite alike. |
+| KIT | see below | The big one: **eight** versions of a single gene, from a horse with just a star and a sock, through **sabino** (tall jagged stockings, a belly patch, a wide blaze), up to **sabino-white** at ninety per cent white, and finally **dominant white** - solid white, no markings, hiding everything else the horse carries. Because they are all one gene, a horse gets **at most two** of them, and can never be both sabino-white and dominant white. |
+| Splash (two genes) | uncommon | White as if the horse were **dipped in paint from below**: high leg white with a clean, sharp edge, white up the belly, a broad blaze to a bald face. Splash comes from **two** different genes, so a horse can carry it twice over - and one that does is markedly whiter than one carrying either alone. |
 | Roan | uncommon | White hairs mixed evenly through the **body** while the head, mane, tail and lower legs stay solid - blue roan on a black, red roan on a chestnut. The density varies horse to horse. |
 | Tobiano | rare | Big, smooth-edged **white patches that cross the topline**, with white legs and a coloured head. Every tobiano's patches are different. |
-| Frame overo | rare | Ragged white on the **sides of the neck and barrel that stops short of the spine** - the mirror of tobiano - usually with a broad white face. |
-| Sabino 1 | rare | One copy: tall **jagged** stockings, a belly patch and a wide blaze. Two copies: **sabino-white**, 90%+ white with only a few coloured flecks left. The two are meant to look clearly different. |
-| Dominant white | rare | Solid **white**, no markings. Masks everything else. |
+| Frame overo | rare | Ragged white on the **sides of the neck and barrel that stops short of the spine** - the mirror of tobiano - usually with a broad white face. Some carriers are marked so little you would never guess. **Careful with this one:** a foal that inherits frame from *both* parents is born pure white, and in a real horse it would not survive. It happens one time in four when two carriers are bred. |
 
 And then there are the ones no real horse has:
 
@@ -66,10 +68,12 @@ Wild horses roll a random genotype when they spawn. Bred foals inherit one
 allele from each parent at every gene, so colour passes down the way it does
 in real horses - two black horses can still throw a chestnut foal if both
 carry a hidden `e`, a pearl hidden for generations can surface when two
-carriers finally meet, and a single hidden `W` turns a foal solid white.
+carriers finally meet, and a single hidden dominant white turns a foal solid
+white.
 
 Some traits aren't fixed by the genes alone. How far bay's black climbs, how
-far along a grey has greyed, where splash puts its socks - none of that is
+far along a grey has greyed, how high the white climbs on a splash - none of
+that is
 written in the gene itself, so a paddock of bays is a paddock of individuals,
 not copies.
 
