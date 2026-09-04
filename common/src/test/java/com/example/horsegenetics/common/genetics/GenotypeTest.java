@@ -18,7 +18,7 @@ class GenotypeTest {
 
     private static final String WT = Codes.wildType();
     /** Wild-type visual-pattern segments in the pre-rewrite positional order. */
-    private static final String T = "-d/d-z/z-mu/mu-rn/rn-to/to-ov/ov-sb1/sb1";
+    private static final String T = "-d2/d2-z/z-mu/mu-rn/rn-to/to-ov/ov-sb1/sb1";
 
     private static Genotype g(AllelePair... pairs) {
         return Genotype.of(pairs);

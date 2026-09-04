@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class GeneticCodeCombinerTest {
 
     /** Wild-type segments for the visual-pattern genes added after the first 11. */
-    private static final String T = "-d/d-z/z-mu/mu-rn/rn-to/to-ov/ov-sb1/sb1";
+    private static final String T = "-d2/d2-z/z-mu/mu-rn/rn-to/to-ov/ov-sb1/sb1";
 
     private static FakeRng allFirst() {
         boolean[] draws = new boolean[Genes.codeOrder().size() * 2];

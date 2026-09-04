@@ -16,7 +16,7 @@ class GenomeTest {
 
     private static final int GENES = Genes.codeOrder().size();
     /** Wild-type segments for the visual-pattern genes added after the first 11. */
-    private static final String T = "-d/d-z/z-mu/mu-rn/rn-to/to-ov/ov-sb1/sb1";
+    private static final String T = "-d2/d2-z/z-mu/mu-rn/rn-to/to-ov/ov-sb1/sb1";
 
     /** Every copy gets {@code priority} and {@code seed}; agouti is then overridden. */
     private static Epigenome flat(int priority, long seed, Epigenome.Copies agouti) {

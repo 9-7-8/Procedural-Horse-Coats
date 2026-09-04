@@ -30,11 +30,11 @@ public final class CoatSampleTool {
             {"bay_seal", "agouti=A/a"},     // same gene, high extent -> seal
             {"champagne_black", "champagne=Ch/c"},
             {"champagne_bay", "agouti=A/a champagne=Ch/c"},
-            {"buckskin", "agouti=A/a cream=Cr/N"},
-            {"palomino", "extension=e/e cream=Cr/N"},
-            {"perlino", "agouti=A/a cream=Cr/Cr"},
-            {"pearl_bay", "agouti=A/a pearl=prl/prl"},
-            {"cream_pearl_bay", "agouti=A/a cream=Cr/N pearl=prl/N"},
+            {"buckskin", "agouti=A/a matp=Cr/N"},
+            {"palomino", "extension=e/e matp=Cr/N"},
+            {"perlino", "agouti=A/a matp=Cr/Cr"},
+            {"pearl_bay", "agouti=A/a matp=prl/prl"},
+            {"cream_pearl_bay", "agouti=A/a matp=Cr/prl"},
             {"grey_steel", "grey=G/g"},         // barely greyed
             {"grey_dapple", "grey=G/g"},        // mid - strongest dapples
             {"grey_old", "grey=G/g"},           // nearly white
@@ -46,15 +46,17 @@ public final class CoatSampleTool {
             {"chestnut_test", "extension=e/e test=T/t"},
             {"zebra_bay", "agouti=A/a magic_zebra=Mzeb/n"},          // stripes over a bay
             {"zebra_bay_long", "agouti=A/a magic_zebra=Mzeb/n"},     // same gene, stripes reaching further down
-            {"zebra_palomino", "extension=e/e cream=Cr/N magic_zebra=Mzeb/n"},
+            {"zebra_palomino", "extension=e/e matp=Cr/N magic_zebra=Mzeb/n"},
             {"zebra_white", "white=W/w magic_zebra=Mzeb/n"},         // magical paints over dominant white
             {"pink_hair_black", "pink_hair=Pihr/Pihr"},
             {"pink_hair_chestnut", "extension=e/e pink_hair=Pihr/Pihr"},
-            {"pink_hair_perlino", "agouti=A/a cream=Cr/Cr pink_hair=Pihr/Pihr"},
+            {"pink_hair_perlino", "agouti=A/a matp=Cr/Cr pink_hair=Pihr/Pihr"},
             {"zebra_pink_bay", "agouti=A/a magic_zebra=Mzeb/n pink_hair=Pihr/Pihr"}, // two magical genes at once
-            {"dun_bay", "agouti=A/a dun=D/d"},          // dorsal stripe + leg bars over tan
-            {"dun_black", "dun=D/d"},                    // grullo
-            {"dun_chestnut", "extension=e/e dun=D/d"},   // red dun
+            {"dun_bay", "agouti=A/a dun=D/d2"},          // dorsal stripe + leg bars over tan
+            {"dun_black", "dun=D/d2"},                    // grullo
+            {"dun_chestnut", "extension=e/e dun=D/d2"},   // red dun
+            {"dun_marked_bay", "agouti=A/a dun=d1/d2"},  // undiluted, dorsal stripe only
+            {"dun_marked_black", "dun=d1/d1"},           // undiluted black + spine line
             {"silver_black", "silver=Z/z"},              // chocolate body, flaxen mane
             {"silver_bay", "agouti=A/a silver=Z/z"},     // silver bay
             {"mushroom_chestnut", "extension=e/e mushroom=Mu/Mu"},
@@ -75,7 +77,7 @@ public final class CoatSampleTool {
      */
     private static final long[] SEEDS = {0, 0, 7, 3, 0, 0, 0, 0, 0, 0, 0, 1, 3, 21, 3, 3, 0, 0, 31, 0,
             5, 11, 5, 5, 0, 0, 0, 11,
-            0, 0, 0, 0, 0, 0, 4, 9, 2, 6, 3, 8};
+            0, 0, 0, 7, 0, 0, 0, 0, 4, 9, 2, 6, 3, 8};
 
     private CoatSampleTool() {}
 
@@ -120,7 +122,11 @@ public final class CoatSampleTool {
                     break;
                 }
             }
-            segs[idx] = p[1];
+            if (idx < 0) {
+                throw new IllegalArgumentException("no registered gene named '" + p[0] + "' in sample spec: " + spec);
+            }
+            // the code is gene-keyed, so a replaced segment carries its key too
+            segs[idx] = order.get(idx).key() + "=" + p[1];
         }
         return Genotype.parse(String.join("-", segs));
     }
