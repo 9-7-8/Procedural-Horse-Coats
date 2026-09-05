@@ -245,6 +245,19 @@ public final class AbilityType {
             v -> new GeneAbility.AttributeMod(
                     v.str("attribute"), v.str("op"), v.num("amount"), v.when, v.minDose)));
 
+    /**
+     * Where on the horse an {@link #EMITTER} is centred. The first four are
+     * single points; the last five are <b>body sites</b> the translator picks a
+     * point within, which is what lets one emitter trail off four hooves or run
+     * the length of the spine rather than beading out of one spot.
+     */
+    public static final List<String> EMITTER_ANCHORS = List.of(
+            "feet", "body", "head", "eyes",
+            "spine", "hooves", "front_hooves", "back_hooves", "tail");
+
+    /** The most particles one firing may spawn. A guard, not a design - see the particle locus. */
+    public static final int MAX_EMITTER_COUNT = 16;
+
     /** Particle (or, one day, light) emitter fired by a {@link Trigger}. */
     public static final AbilityType EMITTER = register(new AbilityType("emitter",
             List.of(
@@ -252,20 +265,35 @@ public final class AbilityType {
                             "'particle', or 'light' (not wired yet)"),
                     Param.choice("shape", List.of("point", "ring", "trail", "burst"), "point",
                             "emission shape"),
-                    Param.choice("anchor", List.of("feet", "body", "head", "eyes"), "feet",
+                    Param.choice("anchor", EMITTER_ANCHORS, "feet",
                             "where on the horse it is centred"),
                     Param.trigger("trigger", new Trigger.OnMove(), "when it fires (default on_move)"),
                     Param.str("particle", "minecraft:dust",
                             "particle id; 'minecraft:dust' is the one that takes 'color'"),
                     Param.color("color", "#ffffff", "0xRRGGBB, used by particle types that take a colour"),
+                    Param.color("color2", "#ffffff",
+                            "the second 0xRRGGBB, for a particle that fades between two"),
+                    Param.num("count", 1, "particles per firing, 1.." + MAX_EMITTER_COUNT),
+                    Param.num("data", 0.0,
+                            "a normalised [0,1) number for whatever else the particle takes - "
+                                    + "a shriek's delay, a note's pitch, a sculk charge's roll"),
                     Param.num("chance", 1.0, "per-fire probability, in (0, 1]")),
             v -> {
                 double chance = v.num("chance");
                 if (chance <= 0 || chance > 1) {
                     throw v.bad("chance must be in (0, 1], got " + chance);
                 }
+                int count = v.intOf("count");
+                if (count < 1 || count > MAX_EMITTER_COUNT) {
+                    throw v.bad("count must be in [1, " + MAX_EMITTER_COUNT + "], got " + count);
+                }
+                double data = v.num("data");
+                if (data < 0 || data >= 1) {
+                    throw v.bad("data must be in [0, 1), got " + data);
+                }
                 return new GeneAbility.Emitter(v.str("kind"), v.str("shape"), v.str("anchor"),
-                        v.trigger("trigger"), v.color("color"), v.str("particle"), chance, v.when, v.minDose);
+                        v.trigger("trigger"), v.color("color"), v.color("color2"), count, data,
+                        v.str("particle"), chance, v.when, v.minDose);
             }));
 
     /** Mob effect kept topped up on self or rider while {@code when} holds. */

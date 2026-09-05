@@ -69,12 +69,33 @@ public sealed interface GeneAbility {
     /**
      * A particle / light emitter. {@code kind} / {@code shape} / {@code anchor}
      * are the choices on {@link AbilityType#EMITTER}; {@code particle} is a particle id
-     * (e.g. {@code "minecraft:dust"}); {@code color} is {@code 0xRRGGBB}, used by
-     * particle types that take a colour; {@code chance} is the per-fire
+     * (e.g. {@code "minecraft:dust"}); {@code chance} is the per-fire
      * probability {@code (0,1]} so a dense trail is one number.
+     *
+     * <p>Three of the fields exist for the minority of particles that carry
+     * their own data, and every one of them is <b>ignored by particles that do
+     * not take it</b> - the translator knows which is which, so an author (or a
+     * gene) may always fill all three in and let the particle decide:
+     * <ul>
+     *   <li>{@code color} - {@code 0xRRGGBB}, for {@code dust},
+     *       {@code dust_color_transition}, {@code effect},
+     *       {@code entity_effect} and friends;</li>
+     *   <li>{@code color2} - the second {@code 0xRRGGBB}, for the one particle
+     *       that fades between two ({@code dust_color_transition});</li>
+     *   <li>{@code data} - a normalised {@code [0,1)} number standing in for
+     *       whatever else a particle wants: a {@code shriek}'s delay, a
+     *       {@code note}'s pitch, a {@code sculk_charge}'s roll. One number
+     *       rather than a union type, because the alternative is a parameter per
+     *       particle in a vocabulary that is meant to stay small.</li>
+     * </ul>
+     *
+     * <p>{@code count} is how many particles one firing spawns (at least 1) -
+     * the difference between a trickle and a plume, and the one knob that reads
+     * from across a paddock.
      */
-    record Emitter(String kind, String shape, String anchor, Trigger trigger, int color,
-                   String particle, double chance, Condition when, int minDose) implements GeneAbility {}
+    record Emitter(String kind, String shape, String anchor, Trigger trigger, int color, int color2,
+                   int count, double data, String particle, double chance, Condition when, int minDose)
+            implements GeneAbility {}
 
     /**
      * A mob effect kept on {@code target} ({@code self} or {@code rider}) while

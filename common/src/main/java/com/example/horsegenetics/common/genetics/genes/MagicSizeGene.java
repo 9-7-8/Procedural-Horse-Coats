@@ -8,7 +8,7 @@ import com.example.horsegenetics.common.genetics.FounderContext;
 import com.example.horsegenetics.common.genetics.FounderTable;
 import com.example.horsegenetics.common.genetics.Gene;
 import com.example.horsegenetics.common.genetics.Genotype;
-import com.example.horsegenetics.common.trait.AlleleRandomness;
+import com.example.horsegenetics.common.genetics.AlleleRandomness;
 import com.example.horsegenetics.common.trait.EpigeneticTraitContribution;
 import com.example.horsegenetics.common.trait.HorseTraits;
 import com.example.horsegenetics.common.trait.TraitBuilder;

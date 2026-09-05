@@ -4,6 +4,7 @@ import com.example.horsegenetics.common.MidpointRng;
 import com.example.horsegenetics.common.Rng;
 import com.example.horsegenetics.common.SeededRng;
 import com.example.horsegenetics.common.genetics.AllelePair;
+import com.example.horsegenetics.common.genetics.AlleleRandomness;
 import com.example.horsegenetics.common.genetics.Epigenome;
 import com.example.horsegenetics.common.genetics.Gene;
 import com.example.horsegenetics.common.genetics.Genes;
@@ -148,38 +149,12 @@ public final class HorseTraits {
      *
      * <p>With no epigenome every accessor is {@link MidpointRng}, so an
      * epigenetic trait reports the midpoint of what the genotype can produce.
+     * The construction itself lives on {@link AlleleRandomness} because the
+     * ability side needs the identical thing.
      */
     private static AlleleRandomness randomnessFor(Gene gene, Genotype genotype, Epigenome epigenome) {
-        if (epigenome == null) {
-            return MIDPOINT;
-        }
-        Epigenome.Copies copies = epigenome.copies(gene);
-        return new AlleleRandomness() {
-            @Override
-            public Rng expressed() {
-                return new SeededRng(epigenome.expressedSeed(gene, genotype), gene.key());
-            }
-
-            @Override
-            public Rng copy(int slot) {
-                long seed = (slot == 0 ? copies.first() : copies.second()).epigeneticSeed();
-                return new SeededRng(seed, gene.key());
-            }
-        };
+        return AlleleRandomness.forGene(gene, genotype, epigenome);
     }
-
-    /** Every accessor is the midpoint - see {@link #resolve(Genotype)}. */
-    private static final AlleleRandomness MIDPOINT = new AlleleRandomness() {
-        @Override
-        public Rng expressed() {
-            return MidpointRng.INSTANCE;
-        }
-
-        @Override
-        public Rng copy(int slot) {
-            return MidpointRng.INSTANCE;
-        }
-    };
 
     /** The all-wild-type horse - the baselines, nothing added. */
     public static Traits baseline() {

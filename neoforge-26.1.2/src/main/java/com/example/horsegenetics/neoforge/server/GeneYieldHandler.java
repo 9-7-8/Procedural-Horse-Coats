@@ -1,5 +1,6 @@
 package com.example.horsegenetics.neoforge.server;
 
+import com.example.horsegenetics.common.genetics.Epigenome;
 import com.example.horsegenetics.common.genetics.Genotype;
 import com.example.horsegenetics.common.genetics.spec.GeneAbility;
 import com.example.horsegenetics.common.genetics.spec.HorseAbilities;
@@ -68,7 +69,8 @@ public final class GeneYieldHandler {
 
         List<HorseAbilities.Active> abilities;
         try {
-            abilities = HorseAbilities.activeFor(Genotype.parse(record.geneticCode()));
+            abilities = HorseAbilities.activeFor(Genotype.parse(record.geneticCode()),
+                    Epigenome.parse(record.epigenomeCode()));
         } catch (RuntimeException e) {
             return;
         }

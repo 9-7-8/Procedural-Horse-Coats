@@ -1,5 +1,6 @@
 package com.example.horsegenetics.neoforge.server;
 
+import com.example.horsegenetics.common.genetics.Epigenome;
 import com.example.horsegenetics.common.genetics.Genotype;
 import com.example.horsegenetics.common.genetics.spec.GeneAbility;
 import com.example.horsegenetics.common.genetics.spec.HorseAbilities;
@@ -8,9 +9,18 @@ import com.example.horsegenetics.common.horse.Sex;
 import com.example.horsegenetics.neoforge.HorseGenetics;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
+import net.minecraft.core.particles.BlockParticleOption;
+import net.minecraft.core.particles.ColorParticleOption;
+import net.minecraft.core.particles.DustColorTransitionOptions;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.particles.SculkChargeParticleOptions;
+import net.minecraft.core.particles.SimpleParticleType;
+import net.minecraft.core.particles.ShriekParticleOption;
+import net.minecraft.core.particles.SpellParticleOption;
+import net.minecraft.core.particles.VibrationParticleOption;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
@@ -24,6 +34,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LightBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gameevent.BlockPositionSource;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -83,7 +94,13 @@ public final class GeneAbilityHandler {
      */
     private static final Map<UUID, BlockPos> GLOW_LIGHT = new ConcurrentHashMap<>();
 
-    private record Snapshot(String code, List<HorseAbilities.Active> abilities) {}
+    /**
+     * Keyed on <b>both</b> code strings. An ability's magnitude can live on the
+     * allele copy (see {@code EpigeneticAbilityContribution}), so two horses
+     * with identical alleles are not interchangeable here - caching on the
+     * genotype alone would hand one horse another one's colours.
+     */
+    private record Snapshot(String code, String epigenome, List<HorseAbilities.Active> abilities) {}
 
     @SubscribeEvent
     static void onHorseTick(EntityTickEvent.Post event) {
@@ -187,39 +204,143 @@ public final class GeneAbilityHandler {
             return; // 'light' is defined but needs a dynamic light source; not wired
         }
 
-        double x = horse.getX();
-        double z = horse.getZ();
-        double y = switch (e.anchor()) {
-            case "body" -> horse.getY() + horse.getBbHeight() * 0.5;
-            case "head", "eyes" -> horse.getEyeY();
-            default -> horse.getY() + 0.05; // feet
-        };
         double spread = switch (e.shape()) {
             case "burst", "ring" -> 0.45;
             case "point" -> 0.06;
             default -> 0.18; // trail
         };
-        int count = "burst".equals(e.shape()) ? 6 : 1;
+        ParticleOptions particle = particleFor(e, horse);
+        int count = "burst".equals(e.shape()) ? Math.max(6, e.count()) : e.count();
 
-        level.sendParticles(particleFor(e.particle(), e.color()),
-                x, y, z, count, spread, spread * 0.5, spread, 0.0);
+        // A multi-point site is re-picked per particle rather than per firing, so
+        // one beat off "hooves" really does come off different hooves.
+        for (int i = 0; i < count; i++) {
+            Vec3 at = anchorPoint(e.anchor(), horse, level);
+            level.sendParticles(particle, at.x, at.y, at.z, 1, spread, spread * 0.5, spread, 0.0);
+        }
     }
 
-    private static ParticleOptions particleFor(String id, int color) {
-        return switch (id) {
-            case "minecraft:splash" -> ParticleTypes.SPLASH;
-            case "minecraft:bubble" -> ParticleTypes.BUBBLE;
-            case "minecraft:bubble_pop" -> ParticleTypes.BUBBLE_POP;
-            case "minecraft:falling_water" -> ParticleTypes.FALLING_WATER;
-            case "minecraft:happy_villager" -> ParticleTypes.HAPPY_VILLAGER;
-            case "minecraft:end_rod" -> ParticleTypes.END_ROD;
-            case "minecraft:soul_fire_flame" -> ParticleTypes.SOUL_FIRE_FLAME;
-            case "minecraft:electric_spark" -> ParticleTypes.ELECTRIC_SPARK;
-            // "minecraft:dust" and anything else: a coloured dust, which is the
-            // one particle that takes the emitter's colour.
-            default -> new DustParticleOptions(color, 1.0F);
+    /**
+     * Where on the horse a firing comes from.
+     *
+     * <p>The first four anchors are single points, and were all the verb had
+     * while its only users were a trail at the feet and an aura round the body.
+     * The five <b>body sites</b> below exist for the particle locus, where which
+     * part of the horse a trail comes off is a heritable, epigenetic fact - so
+     * they have to be real places on the animal rather than one spot with a wide
+     * spread. A site covering several points picks one of them per particle.
+     *
+     * <p>Everything is derived from the live bounding box and yaw rather than
+     * from {@code HorseSkinGeometry}: this is a world position, not a texel, and
+     * the box has already had the horse's scale attribute applied to it - so a
+     * magically enormous horse trails from its own hooves and not from where an
+     * ordinary horse's would be.
+     */
+    private static Vec3 anchorPoint(String anchor, Horse horse, ServerLevel level) {
+        double yaw = Math.toRadians(horse.getYRot());
+        double fx = -Math.sin(yaw);
+        double fz = Math.cos(yaw);
+        double rx = fz;
+        double rz = -fx;
+
+        double half = horse.getBbWidth() * 0.5;
+        double reach = horse.getBbWidth() * 0.9; // nose-to-centre, roughly
+        double foot = horse.getY() + 0.05;
+        double back = horse.getY() + horse.getBbHeight() * 0.78;
+
+        return switch (anchor) {
+            case "head" -> new Vec3(horse.getX() + fx * reach, horse.getEyeY(), horse.getZ() + fz * reach);
+            case "eyes" -> new Vec3(horse.getX(), horse.getEyeY(), horse.getZ());
+            case "body" -> new Vec3(horse.getX(), horse.getY() + horse.getBbHeight() * 0.5, horse.getZ());
+            case "tail" -> new Vec3(horse.getX() - fx * reach, back, horse.getZ() - fz * reach);
+            case "spine" -> {
+                double t = level.getRandom().nextDouble() * 2.0 - 1.0; // withers to croup
+                yield new Vec3(horse.getX() + fx * reach * t, back, horse.getZ() + fz * reach * t);
+            }
+            case "hooves", "front_hooves", "back_hooves" -> {
+                boolean front = "front_hooves".equals(anchor)
+                        || ("hooves".equals(anchor) && level.getRandom().nextBoolean());
+                double along = (front ? 1 : -1) * reach * 0.65;
+                double across = (level.getRandom().nextBoolean() ? 1 : -1) * half * 0.6;
+                yield new Vec3(horse.getX() + fx * along + rx * across, foot,
+                        horse.getZ() + fz * along + rz * across);
+            }
+            default -> new Vec3(horse.getX(), foot, horse.getZ()); // feet
         };
     }
+
+    /**
+     * A particle id to a real {@link ParticleOptions}.
+     *
+     * <p>Most particles are a {@code SimpleParticleType} and ignore everything
+     * the emitter carries. The handful that are not take their extra values from
+     * the emitter's {@code color} / {@code color2} / {@code data}, which is what
+     * those three fields are for: the gene draws all three unconditionally and
+     * this switch decides which of them the particle actually wanted.
+     *
+     * <p><b>The colour-carrying options want ARGB and read the alpha</b>
+     * ({@code ColorParticleOption.getAlpha}), so a bare {@code 0xRRGGBB} would be
+     * fully transparent and show nothing. {@code DustParticleOptions} is the
+     * exception - it takes the plain RGB, which is why the two are written
+     * differently here rather than by oversight.
+     *
+     * <p>An unrecognised id falls back to a coloured dust rather than throwing: a
+     * gene file naming a particle this build has never heard of should look odd,
+     * not crash a tick.
+     */
+    private static ParticleOptions particleFor(GeneAbility.Emitter e, Horse horse) {
+        int rgb = e.color();
+        int argb = 0xFF000000 | rgb;
+        double data = e.data();
+        return switch (e.particle()) {
+            // --- carry a colour ---
+            case "minecraft:dust" -> new DustParticleOptions(rgb, 1.0F);
+            case "minecraft:dust_color_transition" ->
+                    new DustColorTransitionOptions(rgb, e.color2(), 1.0F);
+            case "minecraft:effect" -> SpellParticleOption.create(ParticleTypes.EFFECT, argb, 1.0F);
+            case "minecraft:instant_effect" ->
+                    SpellParticleOption.create(ParticleTypes.INSTANT_EFFECT, argb, 1.0F);
+            case "minecraft:entity_effect" ->
+                    ColorParticleOption.create(ParticleTypes.ENTITY_EFFECT, argb);
+            case "minecraft:tinted_leaves" ->
+                    ColorParticleOption.create(ParticleTypes.TINTED_LEAVES, argb);
+
+            // --- carry the spare number ---
+            case "minecraft:shriek" -> new ShriekParticleOption((int) (data * 60));
+            case "minecraft:sculk_charge" -> new SculkChargeParticleOptions((float) (data * Math.PI * 2));
+            case "minecraft:vibration" -> new VibrationParticleOption(
+                    new BlockPositionSource(horse.blockPosition()), 10 + (int) (data * 20));
+
+            // --- carry a block ---
+            case "minecraft:block" -> new BlockParticleOption(ParticleTypes.BLOCK,
+                    Blocks.SCULK.defaultBlockState());
+
+            // Everything else is a SimpleParticleType, which carries no data and
+            // *is* its own ParticleOptions - so it is looked up in the registry
+            // rather than written out. A table of forty case labels would have
+            // been forty chances to mistype a field name that does not match its
+            // own id (TRIAL_SPAWNER_DETECTED_PLAYER_OMINOUS is registered as
+            // "trial_spawner_detection_ominous"), and it would go stale the next
+            // time the game adds a particle.
+            default -> simpleParticle(e.particle(), rgb);
+        };
+    }
+
+    /**
+     * A registered id with no parameters, or a coloured dust if the id is
+     * unknown to this build or needs data this method cannot supply. Falling
+     * back rather than throwing is deliberate: a gene file naming a particle
+     * that does not exist here should look wrong, not kill the tick.
+     */
+    private static ParticleOptions simpleParticle(String id, int rgb) {
+        ParticleType<?> type = BuiltInRegistries.PARTICLE_TYPE.getValue(Identifier.parse(id));
+        if (type instanceof SimpleParticleType simple) {
+            return simple;
+        }
+        warnUntranslated("particle:" + id, "(gene)");
+        return new DustParticleOptions(rgb, 1.0F);
+    }
+
 
     // ------------------------------------------------------------------
     // Glow - a light source that follows the horse
@@ -490,20 +611,21 @@ public final class GeneAbilityHandler {
 
     private static List<HorseAbilities.Active> resolve(Horse horse, HorseRecord record) {
         String code = record.geneticCode();
+        String epigenomeCode = record.epigenomeCode();
         Snapshot snap = CACHE.get(horse.getUUID());
-        if (snap != null && snap.code().equals(code)) {
+        if (snap != null && snap.code().equals(code) && snap.epigenome().equals(epigenomeCode)) {
             return snap.abilities();
         }
         List<HorseAbilities.Active> list;
         try {
-            list = HorseAbilities.activeFor(Genotype.parse(code));
+            list = HorseAbilities.activeFor(Genotype.parse(code), Epigenome.parse(epigenomeCode));
         } catch (RuntimeException e) {
             list = List.of();
         }
         if (CACHE.size() > 4096) {
             CACHE.clear(); // dev-mod housekeeping; the list rebuilds on the next tick
         }
-        CACHE.put(horse.getUUID(), new Snapshot(code, list));
+        CACHE.put(horse.getUUID(), new Snapshot(code, epigenomeCode, list));
         return list;
     }
 

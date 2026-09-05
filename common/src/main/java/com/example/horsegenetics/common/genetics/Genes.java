@@ -37,6 +37,7 @@ import com.example.horsegenetics.common.genetics.genes.TestGene;
 import com.example.horsegenetics.common.genetics.genes.TailColorGene;
 import com.example.horsegenetics.common.genetics.genes.TobianoGene;
 import com.example.horsegenetics.common.genetics.genes.VerdantGene;
+import com.example.horsegenetics.common.genetics.genes.ParticleGene;
 import com.example.horsegenetics.common.genetics.genes.Pax3Gene;
 import com.example.horsegenetics.common.genetics.spec.SpecGene;
 
@@ -138,6 +139,7 @@ public final class Genes {
     public static final MagicSizeGene BODY_SIZE = new MagicSizeGene();
     public static final ManeColorGene MANE_COLOR = new ManeColorGene();
     public static final TailColorGene TAIL_COLOR = new TailColorGene();
+    public static final ParticleGene PARTICLE = new ParticleGene();
     public static final LightGene LIGHT = new LightGene();
     public static final HealerGene HEALER = new HealerGene();
     public static final VerdantGene VERDANT = new VerdantGene();
@@ -185,7 +187,7 @@ public final class Genes {
             SEX, EXTENSION, AGOUTI, TEST, CHAMPAGNE, GREY, MATP,
             MAGIC_ZEBRA, PINK_HAIR, DUN, SILVER, MUSHROOM, ROAN, TOBIANO,
             EDNRB, KIT, MITF, PAX3,
-            MILK, BODY_SIZE, MANE_COLOR, TAIL_COLOR, LIGHT, HEALER, VERDANT,
+            MILK, BODY_SIZE, MANE_COLOR, TAIL_COLOR, PARTICLE, LIGHT, HEALER, VERDANT,
             MSTN, PDK4, CKM, RYR2, LCORL, HMGA2,
             ACAN, B4GALT7, PLOD1, RAPGEF5, ST14, SHOX, MET);
 

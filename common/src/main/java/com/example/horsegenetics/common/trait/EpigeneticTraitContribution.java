@@ -1,5 +1,6 @@
 package com.example.horsegenetics.common.trait;
 
+import com.example.horsegenetics.common.genetics.AlleleRandomness;
 import com.example.horsegenetics.common.genetics.AllelePair;
 import com.example.horsegenetics.common.genetics.Gene;
 import com.example.horsegenetics.common.genetics.Genotype;

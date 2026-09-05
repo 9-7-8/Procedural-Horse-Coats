@@ -1,5 +1,6 @@
 package com.example.horsegenetics.common.genetics;
 
+import java.math.BigInteger;
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -132,11 +133,20 @@ public final class GenotypeCatalog {
      * product of every gene's {@link #allPairsOf} count. Every one of these is
      * a distinct heritable genotype; {@link #size()} is how many of them are
      * distinct to <i>look</i> at. Epigenetics aren't counted in either.
+     *
+     * <p><b>A {@link BigInteger}, and it has to be.</b> It was a {@code long}
+     * until the particle locus - forty alleles, 861 combinations - multiplied
+     * the product past {@code 2^63} and made it wrap to a smaller, entirely
+     * plausible-looking number. Saturating would have been the other option and
+     * is what {@link #size()} does, but {@code size()} is an index bound that
+     * callers loop over, where a cap is a real safety property; this is a
+     * statistic nothing indexes, so the honest answer costs nothing. Adding one
+     * more gene to the model must not quietly rewrite this number downward.
      */
-    public static long totalGenotypes() {
-        long total = 1L;
+    public static BigInteger totalGenotypes() {
+        BigInteger total = BigInteger.ONE;
         for (Gene gene : Genes.codeOrder()) {
-            total *= allPairsOf(gene).size();
+            total = total.multiply(BigInteger.valueOf(allPairsOf(gene).size()));
         }
         return total;
     }
