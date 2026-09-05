@@ -68,4 +68,25 @@ public final class CoatBuildContext {
     public Rng epigeneticsFor(String geneKey) {
         return new SeededRng(epigenome.expressedSeed(Genes.byKey(geneKey), genotype), geneKey);
     }
+
+    /**
+     * This horse's randomness for <b>one particular allele copy</b> at a gene -
+     * {@code slot} 0 is {@code pair.first()}, 1 is {@code pair.second()}.
+     *
+     * <p>{@link #epigeneticsFor(String)} answers "what does this horse show at
+     * this gene", which is the right question almost everywhere: one locus, one
+     * look, so one seed. It is the wrong question for a gene whose two alleles
+     * each paint <i>at the same time</i> - a mane that is solid in one copy's
+     * colour and striped in the other's needs both numbers, and asking for "the
+     * expressed one" would silently paint the stripes in the base colour.
+     *
+     * <p>Derived identically to the single-copy form, so for a heterozygote
+     * {@code epigeneticsForCopy(key, 0)} and {@code epigeneticsFor(key)} are the
+     * same generator.
+     */
+    public Rng epigeneticsForCopy(String geneKey, int slot) {
+        Epigenome.Copies copies = epigenome.copies(geneKey);
+        long seed = (slot == 0 ? copies.first() : copies.second()).epigeneticSeed();
+        return new SeededRng(seed, geneKey);
+    }
 }

@@ -196,7 +196,8 @@ class HorseTraitsTest {
                 contributors++;
             }
         }
-        // 13 non-coat genes plus the four colour loci that carry a disorder
-        assertEquals(17, contributors);
+        // 13 non-coat genes, the four colour loci that carry a disorder, and
+        // milk (whose water/lava heterozygote is an embryonic lethal)
+        assertEquals(18, contributors);
     }
 }

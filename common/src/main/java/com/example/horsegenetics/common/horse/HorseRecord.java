@@ -186,11 +186,19 @@ public record HorseRecord(
      * strength, body scale and the disorders it expresses - resolved fresh from
      * {@link #geneticCode} every time it is asked for.
      *
+     * <p>Resolved from the <b>whole genome</b>, genotype and epigenome together,
+     * because a trait can be epigenetic - the magical size locus is "big by
+     * <i>this much</i>", and the amount is written on the allele copy. A record
+     * with no epigenome yet ({@link #hasGenome()} false) falls back to the
+     * genotype alone, where such a trait reports its midpoint.
+     *
      * <p>Cheap enough to call per frame is <i>not</i> the claim: it parses the
      * code. Callers that need it in a hot loop should hold on to the result.
      */
     public Traits traits() {
-        return HorseTraits.resolve(genotype());
+        return hasGenome()
+                ? HorseTraits.resolve(genotype(), epigenome(), true)
+                : HorseTraits.resolve(genotype());
     }
 
     public HorseRecord withNames(String newFirst, String newLast) {

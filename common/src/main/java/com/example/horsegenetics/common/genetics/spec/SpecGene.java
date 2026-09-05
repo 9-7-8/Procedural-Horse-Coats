@@ -41,7 +41,7 @@ public final class SpecGene implements Gene {
     private final List<Expression> expressions;
     /** Canonical {@code "<a>/<b>"} to the outcome it produces - total, by construction. */
     private final Map<String, Expression> byCombination;
-    /** Same key, back to the spec entry - what {@link SpecAbilities} needs. */
+    /** Same key, back to the spec entry - what {@link HorseAbilities} needs. */
     private final Map<String, GeneSpec.ExpressionSpec> specByCombination;
     private final FounderTable founders;
 

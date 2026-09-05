@@ -3,7 +3,7 @@ package com.example.horsegenetics.neoforge.client;
 import com.example.horsegenetics.common.coat.CoatData;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Part;
 import com.example.horsegenetics.common.genetics.spec.GeneAbility;
-import com.example.horsegenetics.common.genetics.spec.SpecAbilities;
+import com.example.horsegenetics.common.genetics.spec.HorseAbilities;
 import net.minecraft.client.model.animal.equine.EquineSaddleModel;
 import net.minecraft.client.model.animal.equine.HorseModel;
 import net.minecraft.client.model.geom.ModelLayers;
@@ -74,6 +74,7 @@ public class GeneticHorseRenderer extends AbstractHorseRenderer<Horse, HorseRend
     @Override
     public void extractRenderState(Horse horse, HorseRenderState renderState, float partialTick) {
         super.extractRenderState(horse, renderState, partialTick);
+        stretchGaitToSize(renderState);
         if (renderState instanceof GeneticHorseRenderState geneticState) {
             CoatData coatData = ClientCoatCache.get(horse.getId());
             if (coatData != null) {
@@ -84,18 +85,62 @@ public class GeneticHorseRenderer extends AbstractHorseRenderer<Horse, HorseRend
     }
 
     /**
-     * The full-bright mask for whatever {@code glow} genes this horse expresses,
-     * or {@code null} if none want an emissive region. Cheap: the ability scan is
-     * a handful of allele checks and the bake itself is cached by coat key.
+     * <b>Make a scaled horse take proportionally longer strides.</b> Without
+     * this, a horse from the magical size locus walks with its feet sliding
+     * along the ground.
+     *
+     * <p>Vanilla advances the leg-swing phase (<code>walkAnimationPos</code>)
+     * from the <b>world distance the entity moved</b> and nothing else -
+     * {@code LivingEntity.updateWalkAnimation} is {@code min(distance * 4, 1)}
+     * fed into {@code walkAnimation.update(...)}. The only size compensation
+     * anywhere in it is a hard-coded {@code isBaby() ? 3.0F : 1.0F}: a foal's
+     * legs are short, so they cycle three times as fast for the same ground.
+     * Nothing consults {@link net.minecraft.world.entity.ai.attributes.Attributes#SCALE},
+     * because before this mod nothing changed it.
+     *
+     * <p>So a horse rendered at twice the size covers ground at its ordinary
+     * speed while its legs - now twice as long - swing at the ordinary rate. Its
+     * feet have to slide to keep up. The bigger the horse, the worse it looks,
+     * and a tiny horse gets the mirror image: legs windmilling far faster than
+     * the ground goes by.
+     *
+     * <p>Dividing the phase by the render scale is the whole fix. The phase is a
+     * monotonic accumulator, so scaling it after the fact is identical to having
+     * accumulated it at {@code 1/scale} the rate, and the scale is a constant of
+     * the horse's genotype so the division never jumps mid-stride. Amplitude
+     * (<code>walkAnimationSpeed</code>) is deliberately left alone: it is a 0-1
+     * multiplier on an angle, and an angle already scales with the model.
+     *
+     * <p>Nothing happens at scale 1, which is every horse in a world where the
+     * size locus is switched off.
+     */
+    private static void stretchGaitToSize(HorseRenderState renderState) {
+        float scale = renderState.scale;
+        if (scale > 0.0F && scale != 1.0F) {
+            renderState.walkAnimationPos /= scale;
+        }
+    }
+
+    /**
+     * The full-bright mask for whatever this horse glows with, or {@code null}
+     * if nothing does. Cheap: the ability scan is a handful of allele checks and
+     * the bake is cached by coat key - including the "nothing glows" answer, so
+     * an ordinary horse costs one map lookup a frame.
+     *
+     * <p>The factory is asked <b>every</b> time, even with no {@code glow}
+     * effect in the list, because a built-in gene writes its emissive texels in
+     * the coat bake rather than declaring body parts here - which is what lets
+     * the light locus glow four hooves and two eyes instead of four whole legs
+     * and a head.
      */
     private static Identifier emissiveCoatFor(CoatData coatData, boolean baby) {
         EnumSet<Part> parts = EnumSet.noneOf(Part.class);
-        for (SpecAbilities.Active active : SpecAbilities.activeFor(coatData.genotype())) {
+        for (HorseAbilities.Active active : HorseAbilities.activeFor(coatData.genotype())) {
             if (active.ability() instanceof GeneAbility.Glow glow) {
                 parts.addAll(glow.emissiveParts());
             }
         }
-        return parts.isEmpty() ? null : GeneticCoatTextureFactory.getOrCreateEmissive(coatData, baby, parts);
+        return GeneticCoatTextureFactory.getOrCreateEmissive(coatData, baby, parts);
     }
 
     @Override

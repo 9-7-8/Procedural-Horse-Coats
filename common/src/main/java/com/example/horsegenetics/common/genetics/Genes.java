@@ -9,9 +9,14 @@ import com.example.horsegenetics.common.genetics.genes.EdnrbGene;
 import com.example.horsegenetics.common.genetics.genes.ChampagneGene;
 import com.example.horsegenetics.common.genetics.genes.ExtensionGene;
 import com.example.horsegenetics.common.genetics.genes.GreyGene;
+import com.example.horsegenetics.common.genetics.genes.HealerGene;
 import com.example.horsegenetics.common.genetics.genes.Hmga2Gene;
 import com.example.horsegenetics.common.genetics.genes.LcorlGene;
+import com.example.horsegenetics.common.genetics.genes.LightGene;
+import com.example.horsegenetics.common.genetics.genes.MagicSizeGene;
 import com.example.horsegenetics.common.genetics.genes.MagicZebraGene;
+import com.example.horsegenetics.common.genetics.genes.ManeColorGene;
+import com.example.horsegenetics.common.genetics.genes.MilkGene;
 import com.example.horsegenetics.common.genetics.genes.MushroomGene;
 import com.example.horsegenetics.common.genetics.genes.MatpGene;
 import com.example.horsegenetics.common.genetics.genes.MetGene;
@@ -29,7 +34,9 @@ import com.example.horsegenetics.common.genetics.genes.SilverGene;
 import com.example.horsegenetics.common.genetics.genes.St14Gene;
 import com.example.horsegenetics.common.genetics.genes.MitfGene;
 import com.example.horsegenetics.common.genetics.genes.TestGene;
+import com.example.horsegenetics.common.genetics.genes.TailColorGene;
 import com.example.horsegenetics.common.genetics.genes.TobianoGene;
+import com.example.horsegenetics.common.genetics.genes.VerdantGene;
 import com.example.horsegenetics.common.genetics.genes.Pax3Gene;
 import com.example.horsegenetics.common.genetics.spec.SpecGene;
 
@@ -112,6 +119,30 @@ public final class Genes {
     public static final Pax3Gene PAX3 = new Pax3Gene();
 
     /**
+     * The <b>magical utility genes</b> - the second wave of magic, and the first
+     * genes whose point is what the horse <i>does</i> rather than what it looks
+     * like. Four of them ({@link MilkGene}, {@link MagicSizeGene},
+     * {@link LightGene}, {@link VerdantGene}, {@link HealerGene}) reach the game
+     * through {@link AbilityContribution} or
+     * {@link com.example.horsegenetics.common.trait.EpigeneticTraitContribution}
+     * rather than through the coat.
+     *
+     * <p>They were designed as a set rather than one at a time, with broad
+     * epigenetic ranges, so that they <b>combine</b>: a ten-times healer with a
+     * striped mane that spreads moss is a horse nobody wrote a line of code for.
+     * The mane and tail loci are separate on purpose, and light is codominant on
+     * purpose, for the same reason - each doubling of the outcome space is a
+     * doubling of what a breeder can aim at.
+     */
+    public static final MilkGene MILK = new MilkGene();
+    public static final MagicSizeGene BODY_SIZE = new MagicSizeGene();
+    public static final ManeColorGene MANE_COLOR = new ManeColorGene();
+    public static final TailColorGene TAIL_COLOR = new TailColorGene();
+    public static final LightGene LIGHT = new LightGene();
+    public static final HealerGene HEALER = new HealerGene();
+    public static final VerdantGene VERDANT = new VerdantGene();
+
+    /**
      * The <b>non-coat genes</b> - performance, size and health. They occupy the
      * top of the natural band ({@code 80}-{@code 99}), after every gene that
      * paints, because <b>none of them paints anything</b>: every combination
@@ -154,6 +185,7 @@ public final class Genes {
             SEX, EXTENSION, AGOUTI, TEST, CHAMPAGNE, GREY, MATP,
             MAGIC_ZEBRA, PINK_HAIR, DUN, SILVER, MUSHROOM, ROAN, TOBIANO,
             EDNRB, KIT, MITF, PAX3,
+            MILK, BODY_SIZE, MANE_COLOR, TAIL_COLOR, LIGHT, HEALER, VERDANT,
             MSTN, PDK4, CKM, RYR2, LCORL, HMGA2,
             ACAN, B4GALT7, PLOD1, RAPGEF5, ST14, SHOX, MET);
 

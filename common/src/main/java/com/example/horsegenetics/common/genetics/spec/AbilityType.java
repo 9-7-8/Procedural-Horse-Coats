@@ -319,4 +319,66 @@ public final class AbilityType {
                 }
                 return new GeneAbility.Glow(light, v.parts("parts"), v.when, v.minDose);
             }));
+
+    /**
+     * A <b>healing aura</b> around the horse - the first effect that reaches
+     * anything other than the horse and its rider. {@code target} says who is
+     * caught by it, {@code radius} how far it reaches, {@code amount} how much
+     * health each beat restores and {@code interval} how far apart the beats
+     * are.
+     */
+    public static final AbilityType HEALING = register(new AbilityType("healing",
+            List.of(
+                    Param.choice("target", List.of("players", "rider", "self", "animals"), "players",
+                            "who the aura heals"),
+                    Param.num("radius", 3, "reach in blocks, 1-16"),
+                    Param.num("amount", 1, "health points restored per beat (two per heart)"),
+                    Param.num("interval", 40, "ticks between beats (at least 1)"),
+                    Param.num("max_targets", 8, "most entities one beat may reach, 1-64")),
+            v -> {
+                double radius = v.num("radius");
+                if (radius < 1 || radius > 16) {
+                    throw v.bad("radius must be 1-16 blocks, got " + radius);
+                }
+                int interval = v.intOf("interval");
+                if (interval < 1) {
+                    throw v.bad("interval must be at least 1 tick, got " + interval);
+                }
+                int maxTargets = v.intOf("max_targets");
+                if (maxTargets < 1 || maxTargets > 64) {
+                    throw v.bad("max_targets must be 1-64, got " + maxTargets);
+                }
+                return new GeneAbility.Healing(v.str("target"), radius, v.num("amount"), interval,
+                        maxTargets, v.when, v.minDose);
+            }));
+
+    /**
+     * <b>Ground cover spreading from the hooves</b>. {@code cover} names one of
+     * a small closed set of conversions the translator knows how to make -
+     * {@code mycelium} / {@code moss} / {@code grass} - rather than a block id,
+     * because "spreading moss" is a family of conversions plus a rule about
+     * what it will and will not eat.
+     */
+    public static final AbilityType SPREAD = register(new AbilityType("spread",
+            List.of(
+                    Param.requiredChoice("cover", List.of("mycelium", "moss", "grass"),
+                            "which ground cover spreads from the horse"),
+                    Param.num("radius", 2, "reach in blocks, 1-8"),
+                    Param.num("chance", 0.5, "per-beat probability, in (0, 1]"),
+                    Param.num("interval", 40, "ticks between beats (at least 1)")),
+            v -> {
+                double radius = v.num("radius");
+                if (radius < 1 || radius > 8) {
+                    throw v.bad("radius must be 1-8 blocks, got " + radius);
+                }
+                double chance = v.num("chance");
+                if (chance <= 0 || chance > 1) {
+                    throw v.bad("chance must be in (0, 1], got " + chance);
+                }
+                int interval = v.intOf("interval");
+                if (interval < 1) {
+                    throw v.bad("interval must be at least 1 tick, got " + interval);
+                }
+                return new GeneAbility.Spread(v.str("cover"), radius, chance, interval, v.when, v.minDose);
+            }));
 }

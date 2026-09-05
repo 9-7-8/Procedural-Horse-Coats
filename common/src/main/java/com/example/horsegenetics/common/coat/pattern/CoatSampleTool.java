@@ -77,6 +77,22 @@ public final class CoatSampleTool {
             {"splash_mitf_bay", "agouti=A/a mitf=SW1/SW1"},
             {"splash_pax3_bay", "agouti=A/a pax3=SW2/N"},
             {"splash_both_loci_bay", "agouti=A/a mitf=SW1/N pax3=SW2/N"},
+            // the magical utility genes that paint - hair colour, healer, light
+            {"mane_solid_bay", "agouti=A/a mane_color=Mnsld/n"},
+            {"mane_solid_bay_alt", "agouti=A/a mane_color=Mnsld/n"},   // same gene, another colour
+            {"mane_striped_black", "mane_color=Mnstrp/n"},
+            {"mane_solid_striped_bay", "agouti=A/a mane_color=Mnsld/Mnstrp"},  // two colours at once
+            {"tail_solid_chestnut", "extension=e/e tail_color=Tlsld/n"},
+            {"tail_solid_striped_bay", "agouti=A/a tail_color=Tlsld/Tlstrp"},
+            {"mane_and_tail_bay", "agouti=A/a mane_color=Mnsld/n tail_color=Tlstrp/n"},
+            {"healer_bay", "agouti=A/a healer=Hlr/Hlr"},
+            {"healer_faint_black", "healer=Hlr/Hlr"},                  // same gene, low opacity
+            {"healer_over_mane_colour", "agouti=A/a mane_color=Mnsld/n healer=Hlr/Hlr"},
+            {"light_hooves_bay", "agouti=A/a light=Lthf/n"},
+            {"light_mane_black", "light=Ltmn/n"},
+            {"light_eyes_chestnut", "extension=e/e light=Lteye/n"},
+            {"light_hooves_mane_bay", "agouti=A/a light=Lthf/Ltmn"},
+            {"light_mane_eyes_white", "kit=W22/N light=Ltmn/Lteye"},
     };
 
     /**
@@ -91,7 +107,10 @@ public final class CoatSampleTool {
             0, 0, 0, 7, 0, 0, 0, 0, 4, 9, 2, 6,
             3, 0,
             2, 5, 8, 8, 8, 4, 6,
-            3, 3, 3};
+            3, 3, 3,
+            4, 19, 6, 6, 2, 8, 12,
+            9, 2, 9,
+            0, 0, 0, 0, 0};
 
     private CoatSampleTool() {}
 

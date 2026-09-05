@@ -76,38 +76,77 @@ public final class GeneticCoatTextureFactory {
     }
 
     /**
-     * The full-bright mask for one horse, or {@code null} if {@code parts} is
-     * empty (no {@code glow} gene wants an emissive region). The named body
-     * parts are painted with the coat colour the composer produced there; the
-     * rest is transparent.
+     * The full-bright mask for one horse, or {@code null} when nothing on it
+     * glows. Two sources are folded together, because both kinds of gene can ask
+     * for one:
+     * <ul>
+     *   <li>a data-driven {@code glow} effect's {@code parts} list, passed in by
+     *       the renderer as whole body parts;</li>
+     *   <li>the <b>texel mask the coat bake itself produced</b>
+     *       ({@link CoatTextureComposer.Baked#emissive()}) - a built-in gene
+     *       writing it in the overlay phase, which is how the light locus lights
+     *       four hooves and two eyes rather than four whole legs and a head.</li>
+     * </ul>
+     * Whatever is emissive is painted with the coat colour the composer produced
+     * there; the rest is transparent.
      */
     public static Identifier getOrCreateEmissive(CoatData coat, boolean baby, Set<Part> parts) {
-        if (parts == null || parts.isEmpty()) {
-            return null;
-        }
+        Set<Part> wanted = parts == null ? Set.of() : parts;
         StringBuilder tag = new StringBuilder();
-        for (Part part : new TreeSet<>(parts)) {
+        for (Part part : new TreeSet<>(wanted)) {
             tag.append(tag.isEmpty() ? "" : "+").append(part.name());
         }
+        // The gene-written half of the mask is a function of the texture key
+        // already, so only the spec parts need to appear in the cache key.
         String key = coat.textureKey() + (baby ? ":foal" : ":adult") + ":glow:" + tag;
-        return EMISSIVE_CACHE.computeIfAbsent(key, k -> generateEmissive(coat, baby, parts, k));
+        Identifier cached = EMISSIVE_CACHE.computeIfAbsent(key, k -> generateEmissive(coat, baby, wanted, k));
+        return cached == NO_GLOW ? null : cached;
     }
+
+    /**
+     * Cached stand-in for "this horse has nothing emissive". A real entry rather
+     * than {@code null}, because {@code computeIfAbsent} refuses to store a null
+     * and would recompose the whole coat every frame for every ordinary horse.
+     */
+    private static final Identifier NO_GLOW =
+            Identifier.fromNamespaceAndPath(HorseGenetics.MOD_ID, "coat_glow/none");
 
     private static Identifier generateEmissive(CoatData coat, boolean baby, Set<Part> parts, String key) {
         ensureAssetsLoaded();
         Skin skin = baby ? Skin.BABY : Skin.ADULT;
         int[] template = baby ? babyTemplate : adultTemplate;
-        int[] argb = CoatTextureComposer.compose(coat.genotype(), coat.epigenome(), skin, !baby, template, gradient);
+        CoatTextureComposer.Baked baked =
+                CoatTextureComposer.bake(coat.genotype(), coat.epigenome(), skin, !baby, template, gradient);
+        int[] argb = baked.argb();
+        boolean[] byGene = baked.emissive();
+
+        if (parts.isEmpty() && byGene == null) {
+            return NO_GLOW;
+        }
 
         int[] mask = new int[N * N];
+        boolean[] any = {false};
+        if (byGene != null) {
+            for (int i = 0; i < mask.length; i++) {
+                int c = argb[i];
+                if (byGene[i] && (c >>> 24) != 0) {
+                    mask[i] = 0xFF000000 | (c & 0xFFFFFF);
+                    any[0] = true;
+                }
+            }
+        }
         for (Part part : parts) {
             HorseSkinGeometry.forEachTexel(skin, part, (px, py, p2, face, point) -> {
                 int i = py * N + px;
                 int c = argb[i];
                 if ((c >>> 24) != 0) {
                     mask[i] = 0xFF000000 | (c & 0xFFFFFF);
+                    any[0] = true;
                 }
             });
+        }
+        if (!any[0]) {
+            return NO_GLOW; // e.g. a mane glow on a foal, which has no mane
         }
 
         NativeImage image = new NativeImage(N, N, false);
@@ -227,7 +266,9 @@ public final class GeneticCoatTextureFactory {
             textureManager.release(id);
         }
         for (Identifier id : EMISSIVE_CACHE.values()) {
-            textureManager.release(id);
+            if (!id.equals(NO_GLOW)) { // never registered - it is a "nothing glows" marker
+                textureManager.release(id);
+            }
         }
         CACHE.clear();
         KEY_BY_ID.clear();

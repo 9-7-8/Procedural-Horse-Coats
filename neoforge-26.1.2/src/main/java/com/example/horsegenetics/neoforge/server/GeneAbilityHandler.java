@@ -2,7 +2,7 @@ package com.example.horsegenetics.neoforge.server;
 
 import com.example.horsegenetics.common.genetics.Genotype;
 import com.example.horsegenetics.common.genetics.spec.GeneAbility;
-import com.example.horsegenetics.common.genetics.spec.SpecAbilities;
+import com.example.horsegenetics.common.genetics.spec.HorseAbilities;
 import com.example.horsegenetics.common.horse.HorseRecord;
 import com.example.horsegenetics.common.horse.Sex;
 import com.example.horsegenetics.neoforge.HorseGenetics;
@@ -19,9 +19,12 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.animal.equine.Horse;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LightBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -37,13 +40,17 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * The <b>translator</b> for a data-driven gene's {@code effects} block - the
  * NeoForge half of {@link GeneAbility}. Every tick it reads the abilities a
- * horse's genotype expresses ({@link SpecAbilities#activeFor}) and turns each
+ * horse's genotype expresses ({@link HorseAbilities#activeFor}) and turns each
  * one into game state: a traversal flag held up, a particle emitter fired, a
  * mob effect kept topped up.
  *
- * <p>Cheap when idle: if no loaded gene declares any ability
- * ({@link SpecAbilities#anyLoaded()} - the default, since no gene file ships)
- * the handler returns immediately.
+ * <p>Both kinds of gene reach it. A data-driven gene's {@code effects} block
+ * and a built-in gene's
+ * {@link com.example.horsegenetics.common.genetics.AbilityContribution} produce
+ * the same records, so there is one switch here and not two. Since the magical
+ * utility genes were built in, {@link HorseAbilities#anyLoaded()} is always true
+ * and the idle short-circuit below no longer fires - the per-horse ability list
+ * is cached by genetic code, which is where the cost actually was.
  *
  * <p><b>Not verified in-game.</b> Written against 26.1.2 sources. The
  * {@code walk_on_water} implementation in particular is an approximation -
@@ -76,7 +83,7 @@ public final class GeneAbilityHandler {
      */
     private static final Map<UUID, BlockPos> GLOW_LIGHT = new ConcurrentHashMap<>();
 
-    private record Snapshot(String code, List<SpecAbilities.Active> abilities) {}
+    private record Snapshot(String code, List<HorseAbilities.Active> abilities) {}
 
     @SubscribeEvent
     static void onHorseTick(EntityTickEvent.Post event) {
@@ -87,21 +94,21 @@ public final class GeneAbilityHandler {
         if (level.isClientSide() || !horse.isAlive()) {
             return;
         }
-        if (!SpecAbilities.anyLoaded()) {
+        if (!HorseAbilities.anyLoaded()) {
             return;
         }
         HorseRecord record = HorseRecords.of(horse);
         if (!record.hasName()) {
             return; // record not assigned yet - onHorseJoin runs first
         }
-        List<SpecAbilities.Active> abilities = resolve(horse, record);
+        List<HorseAbilities.Active> abilities = resolve(horse, record);
         if (abilities.isEmpty()) {
             return;
         }
 
         boolean moving = horse.getDeltaMovement().horizontalDistanceSqr() > 1.0E-6;
 
-        for (SpecAbilities.Active active : abilities) {
+        for (HorseAbilities.Active active : abilities) {
             GeneAbility ability = active.ability();
             if (!conditionHolds(ability.when(), horse, record)) {
                 continue;
@@ -113,6 +120,8 @@ public final class GeneAbilityHandler {
                 case GeneAbility.SelfEffect se -> applyMobEffect(se, horse, active.geneKey());
                 case GeneAbility.Yield ignored -> { /* handled on interaction */ }
                 case GeneAbility.Glow ignored -> { /* reconciled once, after the loop */ }
+                case GeneAbility.Healing h -> heal(h, horse, (ServerLevel) level);
+                case GeneAbility.Spread sp -> spread(sp, horse, (ServerLevel) level);
             }
         }
 
@@ -223,10 +232,10 @@ public final class GeneAbilityHandler {
      * {@code parts} are a client-render concern and are ignored here.
      */
     private static void reconcileGlow(Horse horse, ServerLevel level, HorseRecord record,
-                                      List<SpecAbilities.Active> abilities) {
+                                      List<HorseAbilities.Active> abilities) {
         int want = 0;
         boolean anyGlow = false;
-        for (SpecAbilities.Active active : abilities) {
+        for (HorseAbilities.Active active : abilities) {
             if (active.ability() instanceof GeneAbility.Glow glow) {
                 anyGlow = true;
                 if (glow.light() > 0 && conditionHolds(glow.when(), horse, record)) {
@@ -284,6 +293,134 @@ public final class GeneAbilityHandler {
         if (pos != null && !event.getLevel().isClientSide()) {
             clearLight(event.getLevel(), pos);
         }
+    }
+
+    // ------------------------------------------------------------------
+    // Healing aura
+    // ------------------------------------------------------------------
+
+    /**
+     * Mend everything the aura catches, on its own beat. Beats are counted off
+     * the horse's own {@code tickCount} rather than the world's, so a stable
+     * full of healers does not pulse in lockstep - which matters less for the
+     * look than for not doing all of the work on one tick.
+     */
+    private static void heal(GeneAbility.Healing h, Horse horse, ServerLevel level) {
+        int interval = Math.max(1, h.intervalTicks());
+        if (horse.tickCount % interval != 0) {
+            return;
+        }
+        AABB box = horse.getBoundingBox().inflate(h.radius());
+        float amount = (float) h.amount();
+        double reachSqr = h.radius() * h.radius();
+        int healed = 0;
+        for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, box, LivingEntity::isAlive)) {
+            if (healed >= h.maxTargets()) {
+                break; // every radius effect is capped - see wiki/gene-effects.html
+            }
+            if (!matchesHealTarget(h.target(), target, horse)) {
+                continue;
+            }
+            // The scan box is a box and the aura is a sphere, so check properly.
+            if (target.distanceToSqr(horse) > reachSqr || target.getHealth() >= target.getMaxHealth()) {
+                continue;
+            }
+            target.heal(amount);
+            healed++;
+            level.sendParticles(ParticleTypes.HEART, target.getX(),
+                    target.getY() + target.getBbHeight() * 0.8, target.getZ(), 1, 0.25, 0.25, 0.25, 0.0);
+        }
+    }
+
+    private static boolean matchesHealTarget(String target, LivingEntity candidate, Horse horse) {
+        return switch (target) {
+            case "players" -> candidate instanceof Player;
+            case "rider" -> candidate == horse.getControllingPassenger();
+            case "self" -> candidate == horse;
+            case "animals" -> candidate instanceof Animal;
+            default -> false;
+        };
+    }
+
+    // ------------------------------------------------------------------
+    // Ground cover spreading
+    // ------------------------------------------------------------------
+
+    /**
+     * Convert <b>at most one</b> eligible block near the horse per beat. That
+     * cap is the design, not a performance dodge: this is a horse changing the
+     * ground it walks over, and a player who leaves one standing in a field
+     * should come back to a patch rather than to a new biome.
+     *
+     * <p>One random candidate is picked rather than the nearest eligible block,
+     * which also makes the edge of a spread ragged instead of a perfect
+     * expanding disc.
+     *
+     * <p>Skipped in the read-only gallery dimension, for the same reason the
+     * glow light block is: nothing there should be able to rewrite the floor.
+     */
+    private static void spread(GeneAbility.Spread s, Horse horse, ServerLevel level) {
+        int interval = Math.max(1, s.intervalTicks());
+        if (horse.tickCount % interval != 0) {
+            return;
+        }
+        if (level.dimension().equals(DebugPenManager.DEBUG_LEVEL)) {
+            return;
+        }
+        if (level.getRandom().nextDouble() > s.chance()) {
+            return;
+        }
+
+        int r = (int) Math.ceil(s.radius());
+        BlockPos target = horse.blockPosition().offset(
+                level.getRandom().nextInt(2 * r + 1) - r,
+                level.getRandom().nextInt(3) - 1,
+                level.getRandom().nextInt(2 * r + 1) - r);
+        if (!level.isLoaded(target)) {
+            return;
+        }
+        BlockState converted = convert(s.cover(), level.getBlockState(target));
+        if (converted == null) {
+            return;
+        }
+        level.setBlockAndUpdate(target, converted);
+        level.sendParticles(ParticleTypes.HAPPY_VILLAGER,
+                target.getX() + 0.5, target.getY() + 1.05, target.getZ() + 0.5, 2, 0.3, 0.1, 0.3, 0.0);
+    }
+
+    /**
+     * What one cover does to one block, or {@code null} for "leave it alone".
+     * The lists are deliberately narrow, and every entry is ground a player
+     * would expect to green over - never a block anyone built with. This is the
+     * judgement the {@code spread} verb keeps on the game side: the gene names a
+     * cover, and knowing that mycelium eats podzol but not deepslate needs the
+     * block registry.
+     */
+    private static BlockState convert(String cover, BlockState state) {
+        return switch (cover) {
+            case "mycelium" -> {
+                if (state.is(Blocks.GRASS_BLOCK) || state.is(Blocks.DIRT) || state.is(Blocks.COARSE_DIRT)
+                        || state.is(Blocks.PODZOL) || state.is(Blocks.ROOTED_DIRT)) {
+                    yield Blocks.MYCELIUM.defaultBlockState();
+                }
+                yield null;
+            }
+            case "moss" -> {
+                if (state.is(Blocks.STONE) || state.is(Blocks.COBBLESTONE) || state.is(Blocks.ANDESITE)
+                        || state.is(Blocks.GRAVEL) || state.is(Blocks.DIRT) || state.is(Blocks.COARSE_DIRT)
+                        || state.is(Blocks.GRASS_BLOCK)) {
+                    yield Blocks.MOSS_BLOCK.defaultBlockState();
+                }
+                yield null;
+            }
+            case "grass" -> {
+                if (state.is(Blocks.DIRT) || state.is(Blocks.COARSE_DIRT) || state.is(Blocks.ROOTED_DIRT)) {
+                    yield Blocks.GRASS_BLOCK.defaultBlockState();
+                }
+                yield null;
+            }
+            default -> null;
+        };
     }
 
     // ------------------------------------------------------------------
@@ -351,15 +488,15 @@ public final class GeneAbilityHandler {
 
     // ------------------------------------------------------------------
 
-    private static List<SpecAbilities.Active> resolve(Horse horse, HorseRecord record) {
+    private static List<HorseAbilities.Active> resolve(Horse horse, HorseRecord record) {
         String code = record.geneticCode();
         Snapshot snap = CACHE.get(horse.getUUID());
         if (snap != null && snap.code().equals(code)) {
             return snap.abilities();
         }
-        List<SpecAbilities.Active> list;
+        List<HorseAbilities.Active> list;
         try {
-            list = SpecAbilities.activeFor(Genotype.parse(code));
+            list = HorseAbilities.activeFor(Genotype.parse(code));
         } catch (RuntimeException e) {
             list = List.of();
         }

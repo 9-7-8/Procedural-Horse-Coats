@@ -75,11 +75,13 @@ class GeneAbilitySpecTest {
         AllelePair carrier = new AllelePair(gene.alleles().get(0), gene.defaultAllele());
         AllelePair none = new AllelePair(gene.defaultAllele(), gene.defaultAllele());
 
-        assertEquals(3, SpecAbilities.activeFor(Genotype.of(homo)).size());
-        assertEquals(3, SpecAbilities.activeFor(Genotype.of(carrier)).size(),
+        // Counted for this gene only: built-in genes contribute abilities to
+        // every horse now (milk, at least), so a bare total says nothing.
+        assertEquals(3, abilitiesOf(gene, homo));
+        assertEquals(3, abilitiesOf(gene, carrier),
                 "Waterborn is dominant - one copy expresses every minDose-1 effect");
-        assertEquals(0, SpecAbilities.activeFor(Genotype.of(none)).size());
-        assertTrue(SpecAbilities.anyLoaded());
+        assertEquals(0, abilitiesOf(gene, none));
+        assertTrue(HorseAbilities.anyLoaded());
     }
 
     /**
@@ -108,8 +110,15 @@ class GeneAbilitySpecTest {
         AllelePair carrier = new AllelePair(gene.alleles().get(0), gene.defaultAllele());
         AllelePair homo = new AllelePair(gene.alleles().get(0), gene.alleles().get(0));
 
-        assertEquals(1, SpecAbilities.activeFor(Genotype.of(carrier)).size());
-        assertEquals(2, SpecAbilities.activeFor(Genotype.of(homo)).size());
+        assertEquals(1, abilitiesOf(gene, carrier));
+        assertEquals(2, abilitiesOf(gene, homo));
+    }
+
+    /** How many abilities {@code gene} alone contributes to a horse carrying {@code pair}. */
+    private static int abilitiesOf(SpecGene gene, AllelePair pair) {
+        return (int) HorseAbilities.activeFor(Genotype.of(pair)).stream()
+                .filter(a -> a.geneKey().equals(gene.key()))
+                .count();
     }
 
     @Test

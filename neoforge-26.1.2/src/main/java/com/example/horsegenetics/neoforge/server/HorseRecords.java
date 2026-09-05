@@ -127,7 +127,11 @@ public final class HorseRecords {
     }
 
     public static Traits traitsOf(HorseRecord record) {
-        return HorseTraits.resolve(record.genotype(), ServerConfig.healthGeneticsActive());
+        // The epigenome matters here: the magical size locus says "big", and how
+        // big is written on the allele copy the horse inherited.
+        return HorseTraits.resolve(record.genotype(),
+                record.hasGenome() ? record.epigenome() : null,
+                ServerConfig.healthGeneticsActive());
     }
 
     /**

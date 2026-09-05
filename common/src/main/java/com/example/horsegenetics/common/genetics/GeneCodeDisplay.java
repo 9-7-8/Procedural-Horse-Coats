@@ -67,7 +67,9 @@ public final class GeneCodeDisplay {
         List<Gene> out = new ArrayList<>(List.of(
                 Genes.KIT, Genes.MITF, Genes.PAX3, Genes.EDNRB, Genes.ROAN, Genes.TOBIANO,
                 Genes.DUN, Genes.SILVER, Genes.MUSHROOM, Genes.CHAMPAGNE, Genes.MATP,
-                Genes.GREY, Genes.MAGIC_ZEBRA, Genes.PINK_HAIR, Genes.TEST,
+                Genes.GREY, Genes.MAGIC_ZEBRA, Genes.PINK_HAIR,
+                Genes.MANE_COLOR, Genes.TAIL_COLOR, Genes.HEALER, Genes.LIGHT,
+                Genes.BODY_SIZE, Genes.MILK, Genes.VERDANT, Genes.TEST,
                 // the non-coat loci, last: they never change what a horse looks
                 // like, so they belong after everything that does
                 Genes.MSTN, Genes.PDK4, Genes.CKM, Genes.RYR2, Genes.LCORL, Genes.HMGA2,

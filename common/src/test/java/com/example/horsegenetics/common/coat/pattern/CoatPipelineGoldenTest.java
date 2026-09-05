@@ -103,7 +103,26 @@ class CoatPipelineGoldenTest {
             override("pax3=SW2/N"),
             override("pax3=SW2/SW2"),
             override("agouti=A/a", "mitf=SW1/N", "pax3=SW2/N"),
-            override("agouti=A/a", "kit=SB1/N", "tobiano=To/to", "ednrb=O/N"));
+            override("agouti=A/a", "kit=SB1/N", "tobiano=To/to", "ednrb=O/N"),
+            // the magical utility genes that paint: hair colour, healer, light
+            override("mane_color=Mnsld/n"),
+            override("mane_color=Mnstrp/n"),
+            override("mane_color=Mnsld/Mnstrp"),
+            override("tail_color=Tlsld/n"),
+            override("tail_color=Tlsld/Tlstrp"),
+            override("mane_color=Mnsld/Mnstrp", "tail_color=Tlstrp/n"),
+            override("mane_color=Mnsld/n", "magic_zebra=Mzeb/n"),
+            override("healer=Hlr/Hlr"),
+            override("extension=e/e", "healer=Hlr/Hlr"),
+            override("mane_color=Mnsld/n", "healer=Hlr/Hlr"),
+            override("light=Lthf/n"),
+            override("light=Ltmn/n"),
+            override("light=Lteye/n"),
+            override("light=Lthf/Ltmn"),
+            override("light=Ltmn/Lteye"),
+            override("light=Lthf/Lteye"),
+            override("kit=W22/N", "light=Ltmn/n"),
+            override("agouti=A/a", "light=Lthf/Ltmn", "mane_color=Mnstrp/n"));
 
     private static final long[] SEEDS = {0L, 3L, 4242L};
 

@@ -10,6 +10,8 @@ import com.example.horsegenetics.common.genetics.GeneCodeDisplay;
 import com.example.horsegenetics.common.genetics.Genes;
 import com.example.horsegenetics.common.genetics.Genotype;
 import com.example.horsegenetics.common.horse.Sex;
+import com.example.horsegenetics.common.trait.HorseTraits;
+import com.example.horsegenetics.common.trait.Traits;
 import com.example.horsegenetics.neoforge.NeoRng;
 import com.example.horsegenetics.neoforge.network.SpawnCustomHorsePayload;
 import net.minecraft.client.Minecraft;
@@ -428,6 +430,23 @@ public final class CustomHorseSpawnScreen extends Screen {
     // Preview
     // ------------------------------------------------------------------
 
+    /**
+     * How far the preview will grow the model before it stops. Past this a horse
+     * is a wall of pixels in a panel this size and you learn nothing more from
+     * it; the printed multiplier carries the rest.
+     */
+    private static final double PREVIEW_SCALE_CAP = 2.5;
+
+    /**
+     * The body the current genome resolves to. Cheap enough for a frame - it is
+     * one walk of the gene list - and it has to be re-resolved rather than
+     * cached against the coat key, because the epigenome moves the size without
+     * moving a single pixel of the coat.
+     */
+    private Traits previewTraits() {
+        return HorseTraits.resolve(genotype(), epigenome, true);
+    }
+
     /** The coat the current genome makes, rebuilt only when the genome moves. */
     private CoatData previewCoat() {
         Genotype genotype = genotype();
@@ -476,10 +495,21 @@ public final class CustomHorseSpawnScreen extends Screen {
         if (horse == null) {
             return;
         }
+        drawSizeReadout(g, x0, x1, y1);
         int cx = (x0 + x1) / 2;
         int cy = y0 + h * 2 / 3;
         // Same framing ratio the family tree uses (a 50x78 viewport at scale 16).
         float mScale = Math.min(w / 3.1F, h / 4.9F);
+
+        // ...times whatever the genome says the horse's body scale is, so the
+        // magical size locus is visible here and "Reroll epi." visibly resizes
+        // the horse. Framing is deliberately NOT refitted to the result: fitting
+        // a big horse back into the panel would cancel exactly the thing being
+        // previewed. Capped only so an extreme draw is still a recognisable
+        // horse rather than a wall of pixels - the readout below never caps.
+        double bodyScale = previewTraits().scale();
+        mScale *= (float) Math.min(bodyScale, PREVIEW_SCALE_CAP);
+
         try {
             EntityRenderer<? super Horse, ?> renderer =
                     Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(horse);
@@ -564,6 +594,29 @@ public final class CustomHorseSpawnScreen extends Screen {
         drawFitted(g, GeneCodeDisplay.shortForm(genotype), LIST_X, this.height - 39, listW - 4, 0xFF88CC88);
         drawFitted(g, "epigenetics #" + Long.toHexString(epigenome.visibleFingerprint(genotype)),
                 LIST_X, this.height - 26, listW - 4, 0xFF8890A8);
+    }
+
+    /**
+     * The exact body scale, along the bottom of the preview panel. It is the one
+     * thing the picture cannot be trusted for: the model is capped at
+     * {@link #PREVIEW_SCALE_CAP}, and past that only this number is telling the
+     * truth - so it says so when it is carrying the weight.
+     *
+     * <p>Only drawn when the horse is not ordinary size, so a screen with the
+     * size locus untouched looks exactly as it did.
+     */
+    private void drawSizeReadout(GuiGraphicsExtractor g, int x0, int x1, int y1) {
+        double scale = previewTraits().scale();
+        if (Math.abs(scale - 1.0) < 0.005) {
+            return;
+        }
+        String text = String.format(java.util.Locale.ROOT, "size %.2fx", scale);
+        if (scale > PREVIEW_SCALE_CAP) {
+            text += " (preview capped)";
+        }
+        int colour = scale > 1.0 ? 0xFFE0C070 : 0xFF80B8D0;
+        Component line = Component.literal(text);
+        g.text(this.font, line, (x0 + x1) / 2 - this.font.width(line) / 2, y1 - 11, colour);
     }
 
     /** Left-aligned at {@code (x, y)}, scaled down (never up) so the whole string fits {@code maxW}. */

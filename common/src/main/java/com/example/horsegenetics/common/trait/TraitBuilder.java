@@ -33,6 +33,7 @@ public final class TraitBuilder {
     private double jump = HorseTraits.BASE_JUMP;
     private double scale = HorseTraits.BASE_SCALE;
     private double scaleFactor = 1.0;
+    private double magicalScaleFactor = 1.0;
     private final List<Condition> conditions = new ArrayList<>();
 
     TraitBuilder() {
@@ -68,6 +69,28 @@ public final class TraitBuilder {
         return this;
     }
 
+    /**
+     * Body scale <b>outside the natural bounds</b> - the magical escape hatch,
+     * and the exact counterpart of the coat's uncapped phase-3 accumulator.
+     *
+     * <p>{@link HorseTraits#MIN_SCALE} / {@link HorseTraits#MAX_SCALE} exist so
+     * that no amount of stacking real size and dwarfism loci can produce a horse
+     * that is not a horse. A magical gene is allowed to produce exactly that, so
+     * its factor is applied <b>after</b> that clamp and is bounded only by
+     * {@link HorseTraits#MAGICAL_MIN_SCALE} / {@link HorseTraits#MAGICAL_MAX_SCALE}
+     * - ten times either way, which is a limit on absurdity rather than a limit
+     * on size.
+     *
+     * <p>The two stages compose the way you would want: a magically enormous
+     * pony is still smaller than a magically enormous draught horse, because the
+     * natural loci settle the horse's own size first and the magic multiplies
+     * whatever that turned out to be.
+     */
+    public TraitBuilder multiplyScaleUnclamped(double factor) {
+        magicalScaleFactor *= factor;
+        return this;
+    }
+
     /** Report a disorder this horse expresses. Duplicates are ignored. */
     public TraitBuilder condition(Condition condition) {
         if (!conditions.contains(condition)) {
@@ -83,11 +106,15 @@ public final class TraitBuilder {
      * path's job, not the attribute's.
      */
     Traits build() {
+        double natural = Math.min(HorseTraits.MAX_SCALE,
+                Math.max(HorseTraits.MIN_SCALE, scale * scaleFactor));
+        double magical = Math.min(HorseTraits.MAGICAL_MAX_SCALE,
+                Math.max(HorseTraits.MAGICAL_MIN_SCALE, natural * magicalScaleFactor));
         return new Traits(
                 Math.max(HorseTraits.MIN_SPEED, speed),
                 Math.max(HorseTraits.MIN_HEALTH, health),
                 Math.max(HorseTraits.MIN_JUMP, jump),
-                Math.min(HorseTraits.MAX_SCALE, Math.max(HorseTraits.MIN_SCALE, scale * scaleFactor)),
+                magical,
                 conditions);
     }
 }

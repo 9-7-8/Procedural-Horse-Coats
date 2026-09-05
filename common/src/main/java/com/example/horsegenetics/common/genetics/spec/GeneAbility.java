@@ -14,7 +14,7 @@ import java.util.List;
  * modifier, a particle trail, a mob effect, a thing the horse can be milked
  * for. {@code common/} still owns the <b>vocabulary</b> and the parsing (this
  * file, {@link AbilityType}, {@link GeneSpecParser}); the NeoForge module owns
- * the <b>execution</b> - it reads {@link SpecAbilities#activeFor} and translates
+ * the <b>execution</b> - it reads {@link HorseAbilities#activeFor} and translates
  * each record into game calls. That split is the same one the rest of the mod
  * uses, and it is what keeps a future 1.12.2 backport cheap: the ability
  * definitions port unchanged, only the translator is rewritten.
@@ -103,6 +103,35 @@ public sealed interface GeneAbility {
      * emissive texture, or vice versa. See {@link AbilityType#GLOW}.
      */
     record Glow(int light, List<Part> emissiveParts, Condition when, int minDose) implements GeneAbility {}
+
+    /**
+     * A <b>healing aura</b>: while {@link #when()} holds, everything of
+     * {@code target} within {@code radius} blocks of the horse regains
+     * {@code amount} health every {@code intervalTicks}. See
+     * {@link AbilityType#HEALING}.
+     *
+     * <p>The radius is deliberately small everywhere it is used - the point of
+     * the verb is a horse worth standing next to, not a horse that trivialises
+     * combat from across a field - and {@code maxTargets} caps how many entities
+     * one beat may reach, which every radius effect is required to do.
+     */
+    record Healing(String target, double radius, double amount, int intervalTicks,
+                   int maxTargets, Condition when, int minDose) implements GeneAbility {}
+
+    /**
+     * <b>Ground cover spreading from the hooves</b>: every
+     * {@code intervalTicks}, with probability {@code chance}, one eligible
+     * block within {@code radius} of the horse is converted to the named
+     * {@code cover}. See {@link AbilityType#SPREAD}.
+     *
+     * <p>{@code cover} is a <i>vocabulary word</i> ({@code "mycelium"},
+     * {@code "moss"}, {@code "grass"}), not a block id: what "spreading moss"
+     * means is a small family of conversions and a set of blocks it will and
+     * will not eat, and that judgement belongs to the translator that knows the
+     * game's blocks - not to a gene file naming one id and hoping.
+     */
+    record Spread(String cover, double radius, double chance, int intervalTicks,
+                  Condition when, int minDose) implements GeneAbility {}
 
     // ------------------------------------------------------------------
     // Triggers

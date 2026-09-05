@@ -2,7 +2,7 @@ package com.example.horsegenetics.neoforge.server;
 
 import com.example.horsegenetics.common.genetics.Genotype;
 import com.example.horsegenetics.common.genetics.spec.GeneAbility;
-import com.example.horsegenetics.common.genetics.spec.SpecAbilities;
+import com.example.horsegenetics.common.genetics.spec.HorseAbilities;
 import com.example.horsegenetics.common.horse.HorseRecord;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.InteractionResult;
@@ -45,6 +45,7 @@ public final class GeneYieldHandler {
     /** The output items a {@code yield} may name. Small and explicit on purpose. */
     private static final Map<String, Item> OUTPUTS = Map.of(
             "minecraft:water_bucket", Items.WATER_BUCKET,
+            "minecraft:lava_bucket", Items.LAVA_BUCKET,
             "minecraft:milk_bucket", Items.MILK_BUCKET,
             "minecraft:bucket", Items.BUCKET,
             "minecraft:honey_bottle", Items.HONEY_BOTTLE,
@@ -57,7 +58,7 @@ public final class GeneYieldHandler {
         if (!(event.getTarget() instanceof Horse horse)) {
             return;
         }
-        if (!SpecAbilities.anyLoaded()) {
+        if (!HorseAbilities.anyLoaded()) {
             return;
         }
         HorseRecord record = HorseRecords.of(horse);
@@ -65,9 +66,9 @@ public final class GeneYieldHandler {
             return;
         }
 
-        List<SpecAbilities.Active> abilities;
+        List<HorseAbilities.Active> abilities;
         try {
-            abilities = SpecAbilities.activeFor(Genotype.parse(record.geneticCode()));
+            abilities = HorseAbilities.activeFor(Genotype.parse(record.geneticCode()));
         } catch (RuntimeException e) {
             return;
         }
@@ -77,7 +78,7 @@ public final class GeneYieldHandler {
         String heldId = BuiltInRegistries.ITEM.getKey(held.getItem()).toString();
         boolean client = event.getLevel().isClientSide();
 
-        for (SpecAbilities.Active active : abilities) {
+        for (HorseAbilities.Active active : abilities) {
             if (!(active.ability() instanceof GeneAbility.Yield yield)) {
                 continue;
             }

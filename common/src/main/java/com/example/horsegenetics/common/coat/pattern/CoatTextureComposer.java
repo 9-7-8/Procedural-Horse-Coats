@@ -2,6 +2,7 @@ package com.example.horsegenetics.common.coat.pattern;
 
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Skin;
+import com.example.horsegenetics.common.genetics.AllelePair;
 import com.example.horsegenetics.common.genetics.Epigenome;
 import com.example.horsegenetics.common.genetics.Expression;
 import com.example.horsegenetics.common.genetics.Gene;
@@ -29,6 +30,10 @@ import com.example.horsegenetics.common.genetics.Genotype;
  *   <li><b>composite</b> onto the template, alpha-aware, keeping template
  *       alpha.</li>
  *   <li><b>eyes</b> - copied verbatim from the template.</li>
+ *   <li><b>overlay</b> - each gene implementing
+ *       {@link CoatOverlayContribution} gets to write final pixels over the
+ *       finished coat and to mark texels <b>emissive</b>. Almost nothing runs
+ *       here; see {@link CoatOverlay} for the two things that have to.</li>
  * </ol>
  *
  * <p>The composer owns both fields; genes only ever see read-only views and
@@ -54,8 +59,27 @@ public final class CoatTextureComposer {
 
     private CoatTextureComposer() {}
 
+    /**
+     * A finished coat: the ARGB sheet, plus the texels a
+     * {@link CoatOverlayContribution} marked full-bright ({@code null} when none
+     * did, which is the ordinary case).
+     */
+    public record Baked(int[] argb, boolean[] emissive) {
+
+        /** Does any gene on this horse want an emissive render pass at all? */
+        public boolean hasEmissive() {
+            return emissive != null;
+        }
+    }
+
+    /** {@link #bake}'s pixels alone - what every caller but the emissive layer wants. */
     public static int[] compose(Genotype genotype, Epigenome epigenome, Skin skin, boolean adult,
                                 int[] template, GradientLut lut) {
+        return bake(genotype, epigenome, skin, adult, template, lut).argb();
+    }
+
+    public static Baked bake(Genotype genotype, Epigenome epigenome, Skin skin, boolean adult,
+                             int[] template, GradientLut lut) {
         int n = HorseSkinGeometry.SHEET_SIZE;
         if (template.length != n * n) {
             throw new IllegalArgumentException("template must be " + (n * n) + " ARGB pixels, got " + template.length);
@@ -120,7 +144,23 @@ public final class CoatTextureComposer {
         }
 
         CoatRegions.redrawEyes(skin, out, template);
-        return out;
+
+        // 5. overlay phase - final pixels and emissive texels, over the finished
+        // coat. Runs after the eyes precisely so a gene can colour them.
+        CoatOverlay overlay = new CoatOverlay(skin, out.clone());
+        for (Gene gene : Genes.codeOrder()) {
+            if (!(gene instanceof CoatOverlayContribution contribution)) {
+                continue;
+            }
+            AllelePair pair = genotype.pair(gene);
+            if (gene.expressionIn(pair, genotype).wildType()) {
+                continue;
+            }
+            contribution.overlay(pair, ctx, overlay);
+        }
+        overlay.applyTo(out);
+
+        return new Baked(out, overlay.emissiveMask());
     }
 
     private static int blend(int templateCh, int overlayCh, float a) {
