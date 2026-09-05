@@ -487,11 +487,74 @@ Component  &rarr;  (Trigger, Condition, Selector, Effect)</code></pre>
 <tbody>
 <tr><td><code>kind</code></td><td><code>particle</code></td><td><code>particle</code> or <code>light</code>.</td></tr>
 <tr><td><code>shape</code></td><td><code>point</code></td><td><code>point</code>, <code>ring</code>, <code>trail</code>, <code>burst</code>. Controls spread and count.</td></tr>
-<tr><td><code>anchor</code></td><td><code>feet</code></td><td><code>feet</code>, <code>body</code>, <code>head</code>, <code>eyes</code> &mdash; where on the horse it is centred.</td></tr>
+<tr><td><code>anchor</code></td><td><code>feet</code></td><td>Where on the horse it comes from &mdash; see <a href="#anchors">the sites</a> below.</td></tr>
 <tr><td><code>trigger</code></td><td><code>on_move</code></td><td>A <a href="#triggers">trigger</a>. An emitter can&rsquo;t use <code>on_interact</code>.</td></tr>
-<tr><td><code>particle</code></td><td><code>minecraft:dust</code></td><td>Particle id. A small set of common ids is mapped by name; anything else falls back to coloured dust.</td></tr>
-<tr><td><code>color</code></td><td><code>#ffffff</code></td><td><code>#rrggbb</code>. Used by particle types that take a colour (dust).</td></tr>
+<tr><td><code>particle</code></td><td><code>minecraft:dust</code></td><td>Particle id. Any registered id with no parameters of its own works; the parameterised ones are listed below. An id this build has never heard of falls back to coloured dust.</td></tr>
+<tr><td><code>color</code></td><td><code>#ffffff</code></td><td><code>#rrggbb</code>. Used by the particle types that take a colour.</td></tr>
+<tr><td><code>color2</code></td><td><code>#ffffff</code></td><td><code>#rrggbb</code>. The second colour, for the one particle that fades between two.</td></tr>
+<tr><td><code>count</code></td><td><code>1</code></td><td>Particles per firing, <code>1</code>&ndash;<code>16</code>. A trickle or a plume.</td></tr>
+<tr><td><code>data</code></td><td><code>0.0</code></td><td>A normalised <code>[0, 1)</code> number standing in for whatever else a particle takes.</td></tr>
 <tr><td><code>chance</code></td><td><code>1.0</code></td><td>Per-fire probability, in <code>(0, 1]</code>.</td></tr>
+</tbody>
+</table>
+
+<h4 id="anchors">Anchors, and the five body sites</h4>
+
+<p>
+    The first four anchors are single points, and were all the verb had while its only
+    users were a trail at the feet and an aura round the body. The five
+    <strong>body sites</strong> came in with the
+    <a href="gene-particle.html">particle</a> locus, where <em>which part of the horse
+    a trail comes off</em> is a heritable fact and so has to be a real place on the
+    animal rather than one spot with a wide spread. A site covering several points
+    picks one of them <em>per particle</em>, so a firing of four off
+    <code>hooves</code> genuinely comes off different hooves.
+</p>
+
+<table>
+<thead><tr><th>Anchor</th><th>Where</th></tr></thead>
+<tbody>
+<tr><td><code>feet</code></td><td>The ground under the horse&rsquo;s centre. The default.</td></tr>
+<tr><td><code>body</code></td><td>Mid-height, on the centre line.</td></tr>
+<tr><td><code>head</code></td><td>Eye height, forward of the chest.</td></tr>
+<tr><td><code>eyes</code></td><td>Eye height, on the centre line.</td></tr>
+<tr><td><code>spine</code></td><td>A point along the topline, withers to croup.</td></tr>
+<tr><td><code>hooves</code></td><td>One of all four, at ground level.</td></tr>
+<tr><td><code>front_hooves</code></td><td>One of the front pair.</td></tr>
+<tr><td><code>back_hooves</code></td><td>One of the back pair.</td></tr>
+<tr><td><code>tail</code></td><td>Behind the horse, at topline height.</td></tr>
+</tbody>
+</table>
+
+<p>
+    Positions come from the live bounding box and yaw, not from
+    <a href="body-space.html"><code>HorseSkinGeometry</code></a> &mdash; these are world
+    positions rather than texels, and the box has already had the horse&rsquo;s scale
+    attribute applied, so a <a href="gene-body-size.html">magically enormous</a> horse
+    trails from its own hooves rather than from where an ordinary horse&rsquo;s would be.
+</p>
+
+<h4 id="particle-data">Which particles read <code>color</code>, <code>color2</code> and <code>data</code></h4>
+
+<p>
+    Most particles are a <code>SimpleParticleType</code> and ignore all three, so the
+    translator looks them up in the registry by id rather than keeping a name table
+    that would go stale. The handful that carry their own parameters take them from
+    these fields, which is what the three exist for &mdash; write all three and let the
+    particle decide.
+</p>
+
+<table>
+<thead><tr><th>Particle</th><th>Reads</th></tr></thead>
+<tbody>
+<tr><td><code>dust</code></td><td><code>color</code></td></tr>
+<tr><td><code>dust_color_transition</code></td><td><code>color</code> &rarr; <code>color2</code></td></tr>
+<tr><td><code>effect</code>, <code>instant_effect</code></td><td><code>color</code></td></tr>
+<tr><td><code>entity_effect</code>, <code>tinted_leaves</code></td><td><code>color</code></td></tr>
+<tr><td><code>shriek</code></td><td><code>data</code> as a delay, 0&ndash;60 ticks</td></tr>
+<tr><td><code>sculk_charge</code></td><td><code>data</code> as a roll angle</td></tr>
+<tr><td><code>vibration</code></td><td><code>data</code> as travel time; the destination is the horse</td></tr>
+<tr><td><code>block</code></td><td>neither &mdash; it carries a sculk state</td></tr>
 </tbody>
 </table>
 <pre><code class="language-json">{ "type": "emitter", "shape": "burst", "anchor": "body",

@@ -635,6 +635,58 @@ public void contribute(AllelePair pair, Genotype genotype, AlleleRandomness epig
     number rather than a doubled effect.
 </p>
 
+<p>
+    <code>AlleleRandomness</code> lives in <code>common/genetics/</code> rather than
+    <code>common/trait/</code>, because the <em>ability</em> side needs exactly the
+    same thing and the two packages must not depend on each other.
+</p>
+
+<h3>...and epigenetics on an ability</h3>
+
+<p>
+    Same idea again, one layer along. A gene that grants <em>behaviour</em> normally
+    implements <code>AbilityContribution</code>, which is a pure function of the
+    genotype &mdash; right for every gene where the alleles fix what the horse does,
+    and two <code>Hlr/Hlr</code> healers should heal identically. When what the effect
+    <em>looks like</em> should vary between horses carrying the same allele, implement
+    <strong><code>EpigeneticAbilityContribution</code></strong> instead (one or the
+    other, never both) and you are handed the same <code>AlleleRandomness</code>:
+</p>
+
+<div class="codebox">
+<pre><code class="language-java">@Override
+public List&lt;GeneAbility&gt; abilitiesFor(AllelePair pair, Genotype genotype,
+                                      AlleleRandomness epigenetics) {
+    // One emitter per copy that shows, each reading its OWN copy - so the two
+    // halves of a codominant pair are genuinely independent.
+    List&lt;GeneAbility&gt; out = new ArrayList&lt;&gt;();
+    for (int slot = 0; slot &lt; shown(pair).size(); slot++) {
+        Rng rng = epigenetics.copy(slot);
+        out.add(new GeneAbility.Emitter(..., HairPattern.randomBrightColour(rng), ...));
+    }
+    return out;
+}</code></pre>
+</div>
+
+<div class="note warn">
+    <span class="label">Draw order is the contract</span>
+    <p>
+        Draw the same values in the same order <em>every time</em>, whether or not this
+        combination ends up using them &mdash; draw first, then decide. The order
+        <em>is</em> the meaning of each number, so inserting one, or skipping one
+        conditionally, silently rewrites every horse in every save that carries the
+        gene. <a href="gene-particle.html">The particle locus</a> draws five values on
+        every copy for exactly this reason, and uses two of them on most particles.
+    </p>
+</div>
+
+<p>
+    The same two consequences apply: asked with no epigenome the draws come from
+    <code>MidpointRng</code>, so make sure the midpoint is a sensible answer; and
+    anything <em>caching</em> the resulting ability list has to key on the epigenome as
+    well as the genotype, or one horse gets another horse&rsquo;s colours.
+</p>
+
 <h2 id="contract">The contract</h2>
 
 <div class="note danger">

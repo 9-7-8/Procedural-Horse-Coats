@@ -300,7 +300,7 @@
 <p>
     <strong>Status</strong>: <em>partial</em> = a gene with that name ships but this
     entry is more than it does; <em>new</em> = nothing exists. <strong>Finished genes are
-    not listed here</strong> &mdash; that is all thirty-eight of them, the roster being on
+    not listed here</strong> &mdash; that is all thirty-nine of them, the roster being on
     <a href="genetics-model.html#registry">the genetics model</a> with a page each. Any
     residual tuning lives on the gene&rsquo;s own page; what is below is only what no
     gene does yet.
@@ -859,11 +859,14 @@
 
 <ul>
     <li><strong>The genotype space.</strong> Now
-        <strong>3 028 898 126 035 238 912</strong> raw genotypes, of which
+        <strong>81 687 059 589 193 477 171 200 000</strong> raw genotypes, of which
         <strong>462 422 019</strong> are distinct to look at &mdash; it was
         <code>3^11 = 177,147</code> before the seven visual genes shipped, the
-        multiplier in miniature. The raw product is already past
-        <strong>10<sup>18</sup></strong>, and
+        multiplier in miniature. The raw product is past
+        <strong>10<sup>25</sup></strong> and is a <code>BigInteger</code>: the
+        <a href="gene-particle.html">particle</a> locus pushed it beyond
+        2<sup>63</sup>, and the figure recorded here until then had already
+        wrapped. Meanwhile
         <code>GenotypeCatalog.size()</code> is an <code>int</code> with about
         4.6&times; of headroom left (it saturates rather than wraps, so the
         failure is a truncated catalogue, not a nonsense one).</li>
@@ -879,7 +882,7 @@
         the shape that scales is a <strong>wing per locus</strong> &mdash; each gene&rsquo;s
         pairs on a fixed wild-type background, bounded by alleles rather than by their
         product, extending naturally to a modded gene adding its own wing.</li>
-    <li><strong>The genotype code string.</strong> Already 40 segments; 27 more loci with
+    <li><strong>The genotype code string.</strong> Already 41 segments; 27 more loci with
         tokens like <code>SW10</code> / <code>W36</code> puts a code in the low hundreds of
         characters. Everything carrying it grows in step &mdash; the record, the
         attachment, both sync payloads, and the epigenome code, which is already the

@@ -54,6 +54,8 @@ genetics/
   AllelePair.java           the two copies at one gene (canonicalized)
   Expression.java           ONE outcome a gene can produce, and its paint function
   AbilityContribution.java  capability: this gene makes the horse DO something
+  EpigeneticAbilityContribution.java  ...and what it looks like is on the allele copy
+  AlleleRandomness.java     one gene's per-horse randomness, by copy or by expression
   FounderTable.java         the wild-population weight per allele combination
   FounderContext.java       the genotype so far, for a context-aware founder table
   Genotype.java             one AllelePair per gene; parse / toCode / breedWith
@@ -115,6 +117,8 @@ coat/
 horse/    Sex, HorseRecord, ParentStats, HorseDatabase, InMemoryHorseDatabase
 trait/    Traits, Condition, Severity, Viability, TraitBuilder, TraitContribution,
           EpigeneticTraitContribution, HealthContribution, HorseTraits
+          (AlleleRandomness moved to genetics/ 2026-09-04 - the ability side
+           needs it too, and genetics/ must not depend on trait/)
 name/     HorseNameGenerator, HorseNames</code></pre>
 </div>
 
@@ -654,14 +658,26 @@ public final class AbilityType {
 // implement AbilityContribution and return the same records.
 public final class HorseAbilities {
     record Active(String geneKey, GeneAbility ability) {}
-    static List&lt;Active&gt; activeFor(Genotype genotype);
+    static List&lt;Active&gt; activeFor(Genotype genotype);                     // midpoint
+    static List&lt;Active&gt; activeFor(Genotype genotype, Epigenome epigenome); // this HORSE
     static boolean anyLoaded();
 }
+// A caller that CACHES activeFor must key on the epigenome too - an ability's
+// magnitude can live on the allele copy, so two horses with identical alleles
+// are not interchangeable.
 
 /** The capability a built-in Gene implements to grant game behaviour.
  *  Same vocabulary as a gene file's effects block - one translator, not two. */
 public interface AbilityContribution {
     List&lt;GeneAbility&gt; abilitiesFor(AllelePair pair, Genotype genotype);
+}
+
+/** ...and its per-horse twin, for a gene whose effect VARIES between horses
+ *  carrying the same alleles. Exactly EpigeneticTraitContribution one layer
+ *  along. A gene implements one or the other, never both. */
+public interface EpigeneticAbilityContribution {
+    List&lt;GeneAbility&gt; abilitiesFor(AllelePair pair, Genotype genotype,
+                                   AlleleRandomness epigenetics);
 }
 // (HorseAbilities was SpecAbilities until 2026-09-04; renamed when built-in genes
 //  started contributing, since it was no longer about the spec path.)
@@ -799,10 +815,14 @@ interface EpigeneticTraitContribution {
     void contribute(AllelePair pair, Genotype genotype, AlleleRandomness epigenetics, TraitBuilder out);
 }
 
-/** Trait-side twin of CoatBuildContext's two accessors. */
-interface AlleleRandomness {
+/** Twin of CoatBuildContext's two accessors. Lives in genetics/, NOT trait/ -
+ *  the ability side needs it as well, and genetics/ must not depend on trait/. */
+interface AlleleRandomness {                                  // genetics/
     Rng expressed();      // the copy this horse shows - one locus, one result
     Rng copy(int slot);   // one particular copy - for a CODOMINANT gene
+
+    // epigenome may be null -> every accessor is MidpointRng.
+    static AlleleRandomness forGene(Gene g, Genotype genotype, Epigenome epigenome);
 }
 
 /** The sink. Additions are applied before multipliers, so gene order buys nothing. */
@@ -884,8 +904,10 @@ List&lt;String&gt; GeneCodeDisplay.wrap(Genotype genotype, int lines, int maxCha
     static List&lt;AllelePair&gt; allPairsOf(Gene gene);       // minus what canOccur rejects
     static List&lt;AllelePair&gt; distinctPairsOf(Gene gene);  // one per Expression; all wild types are one group
 
-    static int      size();            // the reduced catalogue
-    static long     totalGenotypes();  // the raw product, before the reduction
+    static int        size();            // the reduced catalogue; SATURATES at MAX_VALUE
+    static BigInteger totalGenotypes();  // the raw product, before the reduction.
+    //   A BigInteger since 2026-09-04: the particle locus pushed the product past
+    //   2^63 and the long WRAPPED - to a smaller, entirely plausible-looking number.
     static Genotype get(int index);    // built on the spot, not fetched from a list
     static List&lt;Genotype&gt; entries();   // a LAZY view - iterate it, don't collect it
 }</code></pre>

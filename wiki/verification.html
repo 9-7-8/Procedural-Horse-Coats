@@ -388,6 +388,54 @@
         four.</li>
 </ul>
 
+<h2 id="particle">&sect;0c &mdash; the particle locus (new 2026-09-04, NOT play-tested)</h2>
+
+<p>
+    <strong>Forty alleles on one gene, a new ability interface, and a rebuilt
+    <code>emitter</code> verb &mdash; none of it seen in-game.</strong> Page:
+    <a href="gene-particle.html">particle</a>. Old saves will not parse: the genotype
+    code went from 40 segments to <strong>41</strong> in-game. Start a fresh world.
+</p>
+
+<p>
+    The way in is the custom spawn egg. Adding the gene defaults it to the first allele
+    that does something doubled, which is <code>Dst/Dst</code> &mdash; coloured dust.
+    Summon tokens look like <code>particle=Rflm/n</code>. <strong>You have to make the
+    horse walk</strong>: the trail fires only while it is moving on the ground, so a
+    horse standing in a spawn pen shows nothing and that is correct.
+</p>
+
+<table class="data">
+<thead><tr><th>Check</th><th>Where</th><th>What right looks like</th></tr></thead>
+<tbody>
+<tr><td>A trail appears at all</td><td>Spawn <code>particle=Dst/n</code>, ride it</td><td>Coloured dust behind the horse while moving, nothing while stopped</td></tr>
+<tr><td>The six body sites read as different places</td><td>Spawn the same allele with several <strong>Reroll epi.</strong> presses</td><td>head / spine / all four hooves / front pair / back pair / tail are visibly distinct origins. The hoof sites are the ones most likely to be wrong &mdash; they are computed from the bounding box and yaw, so check they track when the horse turns</td></tr>
+<tr><td>Two horses of one allele differ</td><td><strong>Reroll epi.</strong> on <code>Rflm/n</code> repeatedly</td><td>Different colours, sites and densities every time; the particle itself never changes</td></tr>
+<tr><td>A codominant pair shows both, independently</td><td><code>particle=Rflm/Csmk</code></td><td>Flames <em>and</em> campfire smoke, from two different places, in two colours &mdash; not one merged stream</td></tr>
+<tr><td>A non-codominant pair hides one</td><td><code>particle=Dst/Soul</code></td><td>Dust only. Indistinguishable from <code>Dst/n</code> &mdash; that is the point</td></tr>
+<tr><td>A foal inherits the exact look</td><td>Breed a trailing stallion onto a plain mare</td><td>Roughly half the foals trail, and those that do match the sire <em>exactly</em> &mdash; same colour, same site, same count</td></tr>
+<tr><td>All forty particles render sensibly at horse scale</td><td>Walk the list with the spawn egg</td><td>The suspects are the <strong>emitter-style</strong> ones, which in Bedrock spawned <em>other</em> particles and here are plain: <code>Snc</code> (sonic ring), <code>Shrk</code>, <code>Raid</code>, <code>Skl</code>. Also <code>Sklk2</code> (a vibration aimed at the horse itself) and <code>Dig</code> (a sculk block particle) &mdash; both were substitutions, not the named particle</td></tr>
+<tr><td>The colour-carrying particles are not invisible</td><td><code>particle=Bwswrl/n</code>, <code>Whtswrl/n</code>, <code>Bkswrl/n</code>, <code>Dst2/n</code></td><td>They are visible and coloured. <code>ColorParticleOption</code> reads the alpha byte, so a bug here shows as <em>nothing at all</em> rather than as a wrong colour</td></tr>
+<tr><td><code>Dst2</code> actually fades</td><td><code>particle=Dst2/n</code></td><td>Two colours, one becoming the other &mdash; not a single flat colour</td></tr>
+<tr><td>Density is not overwhelming</td><td>A count-4 horse at a gallop, then a herd of them</td><td>20% of moving ticks &times; up to 4 particles &times; up to 2 emitters. If a single horse is too much, <code>EMIT_CHANCE</code> is the one number to turn down</td></tr>
+<tr><td>The wild rate feels right</td><td>Walk the overworld, or the horse dimension corridor</td><td>Roughly 1 wild horse in 13 trails <em>something</em>. If it reads as noise rather than as a find, <code>WILD_ALLELE_FREQUENCY</code> is the dial</td></tr>
+<tr><td>Sites track a scaled horse</td><td>Pair it with <code>body_size=Big/Big</code></td><td>The trail comes off the big horse&rsquo;s own hooves, not off where an ordinary horse&rsquo;s would be</td></tr>
+<tr><td>A foal emits</td><td>Any trailing foal</td><td>It emits. The sites are computed from the bounding box, so they should scale down &mdash; but nothing has looked</td></tr>
+</tbody>
+</table>
+
+<div class="note">
+    <span class="label">Known, and accepted for now</span>
+    <p>
+        Ten of the forty alleles are named after Bedrock particles with no Java
+        equivalent and carry a substitute &mdash; the table is on
+        <a href="gene-particle.html#java">the gene page</a>. Two more
+        (<code>Bigflm</code>, <code>Cndlflm</code>) were cut rather than substituted,
+        because Java flames carry neither a colour nor a scale and the pair would have
+        been indistinguishable from alleles that already exist.
+    </p>
+</div>
+
 <h2>Wanted (not built yet)</h2>
 
 <div class="note warn" id="eyes">
@@ -687,8 +735,8 @@
     in a running game.
     <strong>Baseline note:</strong> as of 2026-09-02 <code>example.waterborn</code>
     <em>and</em> <code>example.suntouched</code> ship loaded (classpath index), so a
-    stock in-game genotype code is <strong>40 segments</strong> (38 built-ins + the
-    two shipped spec genes). Dropping one more gene in takes it to 41. To test the
+    stock in-game genotype code is <strong>41 segments</strong> (39 built-ins + the
+    two shipped spec genes). Dropping one more gene in takes it to 42. To test the
     drop-in path:
 </p>
 

@@ -95,6 +95,7 @@
                 { href: "gene-milk.html", text: "Milk (water / lava)", kind: "magical" },
                 { href: "gene-body-size.html", text: "Magic body size", kind: "magical" },
                 { href: "gene-light.html", text: "Light", kind: "magical" },
+                { href: "gene-particle.html", text: "Particle", kind: "magical" },
                 { href: "gene-verdant.html", text: "Verdant", kind: "magical" },
                 { href: "gene-suntouched.html", text: "Suntouched", kind: "magical" },
                 { href: "gene-waterborn.html", text: "Waterborn", kind: "magical" },

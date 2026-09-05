@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Particle &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="nav.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow magical">Magical gene <span class="sep">/</span> no coat effect</p>
+<h1>Particle</h1>
+<p class="lede">
+    A horse that trails something as it moves &mdash; flames, souls, snow, hearts,
+    portal motes, a shrieker&rsquo;s mark. <strong>Forty variant alleles at one
+    locus</strong>, which makes it by a wide margin the largest gene in the mod, and
+    the reason it is one locus rather than forty genes is the whole design: a horse
+    has two copies of the chromosome, so it shows <strong>at most two</strong>, ever,
+    and choosing which two is the game.
+</p>
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd>horsegenetics.particle</dd></div>
+    <div><dt>Priority</dt><dd>150 (magical band)</dd></div>
+    <div><dt>Alleles</dt><dd>40 variants + <span class="allele wild">n</span> &mdash; see <a href="#alleles">the table</a></dd></div>
+    <div><dt>Combinations</dt><dd>861, all carryable &mdash; 87 outcomes</dd></div>
+    <div><dt>Outcomes</dt><dd>wild, 40 single, 46 codominant double</dd></div>
+    <div><dt>Default allele</dt><dd>n</dd></div>
+    <div><dt>Wild frequency</dt><dd>0.1% per variant allele &mdash; about <strong>7.7%</strong> of founders trail something</dd></div>
+    <div><dt>Founder draws</dt><dd>1 &times; nextFloat()</dd></div>
+    <div><dt>Coat effect</dt><dd><strong>none, ever</strong></dd></div>
+    <div><dt>Emission</dt><dd>while moving on the ground, 20% of ticks, 1&ndash;4 particles a firing</dd></div>
+</dl>
+
+<div class="note warn">
+    <span class="label">Built 2026-09-04, not yet play-tested</span>
+    <p>
+        Nothing has watched a horse trail anything. Forty particle ids is forty
+        chances for one to read badly at horse scale, and the body sites have never
+        been looked at on a scaled horse. Checklist on
+        <a href="verification.html">To be verified</a>.
+    </p>
+</div>
+
+<h2 id="one-locus">Why one locus and not forty genes</h2>
+
+<p>
+    Forty independent two-allele genes would let a horse carry all forty at once, and
+    then the interesting question &mdash; <em>which</em> of these does this horse
+    trail &mdash; stops having an answer. Every serious line converges on a horse
+    emitting everything, and the fortieth gene is worth nothing because the horse was
+    already covered in particles.
+</p>
+
+<p>
+    One locus with forty alleles says the opposite, and says it structurally rather
+    than by a rule anyone has to enforce. A horse has two copies of chromosome
+    whatever-this-is, so it can carry two of these and no more; a third is not rare,
+    it is impossible. It is exactly the argument that folded dominant white and
+    sabino into <a href="gene-kit.html">KIT</a>, at forty times the scale.
+</p>
+
+<h2 id="dominance">Rank, and the copy a horse is hiding</h2>
+
+<p>
+    Every allele carries a <strong>rank</strong>, and the alleles are declared in rank
+    order &mdash; which is load-bearing rather than tidy, because
+    <code>AllelePair</code> canonicalises on <code>Allele.order()</code>, so declaring
+    them this way is what puts the copy a horse <em>shows</em> in slot 0 and the copy
+    it <em>hides</em> in slot 1.
+</p>
+
+<p>
+    Meet two alleles that are not codominant and the lower rank is the one you see.
+    The other is carried in silence and passed on intact, and a horse carrying it is
+    indistinguishable from one carrying a wild type. That is what makes a locus this
+    wide <em>breedable</em> rather than merely large: a horse trailing dust may be
+    hiding a soul, and only its foals will ever say so.
+</p>
+
+<h2 id="codominance">Codominance is by family</h2>
+
+<p>
+    Every allele belongs to at most one <strong>family</strong>, and two
+    <em>different</em> alleles of one family both show at once &mdash; in two
+    different colours, from two different places on the horse. Nine families cover
+    twenty-nine of the forty alleles and produce the locus&rsquo;s <strong>46 double
+    outcomes</strong>; the other eleven alleles belong to no family and never stack
+    with anything.
+</p>
+
+<table class="data">
+    <thead><tr><th>Family</th><th>Alleles</th><th>Doubles</th></tr></thead>
+    <tbody>
+        <tr><td><code>burn</code></td><td><code>Smflm Rflm Bflm Smbflm</code> + <code>Wtsmk Smk Wtsmk2 Csmk</code></td><td>28</td></tr>
+        <tr><td><code>dst</code></td><td><code>Dst Dst2 Dst3</code></td><td>3</td></tr>
+        <tr><td><code>str</code></td><td><code>Clrstr Whtstr Grnstr</code></td><td>3</td></tr>
+        <tr><td><code>swrl</code></td><td><code>Bwswrl Whtswrl Bkswrl</code></td><td>3</td></tr>
+        <tr><td><code>life</code></td><td><code>Chrylf Hrt Soul</code></td><td>3</td></tr>
+        <tr><td><code>sklk</code></td><td><code>Sklk Sklk2 Sklk3</code></td><td>3</td></tr>
+        <tr><td><code>rain</code></td><td><code>Rain Rain2</code></td><td>1</td></tr>
+        <tr><td><code>prtl</code></td><td><code>Prtl Prtl2</code></td><td>1</td></tr>
+        <tr><td><code>spk</code></td><td><code>Ornspk Blspk</code></td><td>1</td></tr>
+    </tbody>
+</table>
+
+<p>
+    <strong>The flames and the smokes are one family of eight, not two of four.</strong>
+    Any <code>-flm</code> stacks with any <code>-smk</code> as well as with its own
+    kind, which is 28 of the 46 doubles all by itself &mdash; get that grouping wrong
+    and most of the locus&rsquo;s double outcomes quietly disappear. A unit test pins
+    it.
+</p>
+
+<p>
+    Two alleles whose tokens <em>look</em> related but are not: <code>Dstrn</code>
+    (enchanting glyphs) is not a <code>dst</code>, and <code>Lmstr</code> (totem
+    sparks) is not a <code>str</code>. Both are ungrouped, on purpose &mdash; the
+    family is about what the particle is, not what the token spells.
+</p>
+
+<h2 id="epigenetics">Everything you can see about it is epigenetic</h2>
+
+<p>
+    The allele names a particle and <em>nothing else</em>. Five values are drawn from
+    the epigenetic seed of the allele copy that carries it, in this fixed order:
+</p>
+
+<table class="data">
+    <thead><tr><th>#</th><th>Value</th><th>Range</th><th>Used by</th></tr></thead>
+    <tbody>
+        <tr><td>1</td><td>Colour</td><td>a bright hue (<code>HairPattern.randomBrightColour</code>)</td><td>dust, fading dust, all three swirls, tinted leaves</td></tr>
+        <tr><td>2</td><td>Second colour</td><td>the same</td><td>fading dust, the only particle that goes from one colour to another</td></tr>
+        <tr><td>3</td><td>Body site</td><td>head, spine, hooves, front hooves, back hooves, tail</td><td>every particle</td></tr>
+        <tr><td>4</td><td>Count</td><td>1&ndash;4 per firing</td><td>every particle</td></tr>
+        <tr><td>5</td><td>Data</td><td>[0, 1)</td><td>a shriek&rsquo;s delay, a sculk vibration&rsquo;s travel time &mdash; whatever else a particle takes</td></tr>
+    </tbody>
+</table>
+
+<p>
+    <strong>All five are drawn every time, whether or not the particle uses them.</strong>
+    The draw order <em>is</em> the contract &mdash; a particle that starts or stops
+    caring about its second colour must not shift the numbers drawn after it, or every
+    horse in every save quietly changes.
+</p>
+
+<p>
+    So two horses that are both <code>Rflm/n</code> are not the same horse: one trails
+    four red flames off its front hooves, the other one green flame off its tail. And
+    because each copy of a codominant pair carries its own draw, the two halves are
+    <em>independent</em> &mdash; red flames off the front hooves and blue smoke off the
+    tail is one horse, and nobody wrote that combination down.
+</p>
+
+<p>
+    A foal that inherits the copy inherits the exact number, the way
+    <a href="gene-body-size.html">magic body size</a> and
+    <a href="gene-mane-color.html">mane colour</a> do. That is what makes a particular
+    look worth breeding from rather than worth re-rolling.
+</p>
+
+<h2 id="machinery">The machinery it needed</h2>
+
+<p>
+    Abilities used to be a pure function of the genotype
+    (<code>AbilityContribution</code>), which is right for every gene where the alleles
+    fix the behaviour &mdash; two <code>Hlr/Hlr</code> horses heal identically, and
+    should. This locus is the case that cannot express, so it is the first
+    <strong><code>EpigeneticAbilityContribution</code></strong>: the same interface one
+    layer along, handed an <code>AlleleRandomness</code> so it can read
+    <code>copy(0)</code> and <code>copy(1)</code> separately. It is the exact twin of
+    what <code>EpigeneticTraitContribution</code> did for the body, and
+    <code>AlleleRandomness</code> moved from <code>common/trait/</code> to
+    <code>common/genetics/</code> so both sides could use it without the two packages
+    depending on each other.
+</p>
+
+<p>
+    <code>HorseAbilities.activeFor</code> gained an <code>Epigenome</code> overload,
+    and the translator&rsquo;s per-horse cache is now keyed on <strong>both</strong>
+    code strings &mdash; keyed on the genotype alone it would have handed one horse
+    another horse&rsquo;s colours.
+</p>
+
+<p>
+    The <a href="gene-effects.html#emitter"><code>emitter</code></a> verb grew with it:
+    a second colour, a count, a spare data number, and five new <strong>body
+    sites</strong> beside the four single-point anchors it had. All of it is usable
+    from a gene file today, which is the property the shared vocabulary was chosen for.
+</p>
+
+<h2 id="wild">Rare individually, not rare in aggregate</h2>
+
+<p>
+    Every variant sits at <strong>0.1%</strong>, the same for all forty, because no
+    particle is the ordinary one. Forty of them puts the variant share of the
+    population at 4%, so about <strong>7.7%</strong> of wild horses trail
+    <em>something</em> while any <em>named</em> particle is roughly one horse in five
+    hundred. That is the split the locus wants: meeting a particle horse is a good day,
+    meeting the one you were looking for is a find.
+</p>
+
+<p>
+    A codominant double is about <strong>one wild horse in ten thousand</strong>, which
+    for practical purposes means you cannot catch one. Same rule as the
+    <a href="horse-body.html">health loci</a> and
+    <a href="gene-body-size.html">magic body size</a>, pointed at something worth
+    having: every double in the world is one somebody bred.
+</p>
+
+<h2 id="alleles">The forty alleles</h2>
+
+<p>
+    In rank order &mdash; most dominant first. Where two are not in the same family,
+    the one higher in this table is the one that shows.
+</p>
+
+<table class="data">
+    <thead><tr><th>Rank</th><th>Allele</th><th>Shows as</th><th>Particle</th><th>Family</th></tr></thead>
+    <tbody>
+        <tr><td>1</td><td><code>Dst</code></td><td>Dust</td><td><code>dust</code></td><td>dst</td></tr>
+        <tr><td>2</td><td><code>Dst2</code></td><td>Fading dust</td><td><code>dust_color_transition</code></td><td>dst</td></tr>
+        <tr><td>3</td><td><code>Clrstr</code></td><td>Glow motes</td><td><code>glow</code></td><td>str</td></tr>
+        <tr><td>4</td><td><code>Rain</code></td><td>Rain splash</td><td><code>rain</code></td><td>rain</td></tr>
+        <tr><td>5</td><td><code>Smflm</code></td><td>Small flame</td><td><code>small_flame</code></td><td>burn</td></tr>
+        <tr><td>6</td><td><code>Rain2</code></td><td>Water wake</td><td><code>fishing</code></td><td>rain</td></tr>
+        <tr><td>10</td><td><code>Skl</code></td><td>Trial omen</td><td><code>trial_omen</code></td><td>&mdash;</td></tr>
+        <tr><td>20</td><td><code>Wtsmk</code></td><td>White smoke</td><td><code>white_smoke</code></td><td>burn</td></tr>
+        <tr><td>30</td><td><code>Smk</code></td><td>Smoke</td><td><code>smoke</code></td><td>burn</td></tr>
+        <tr><td>31</td><td><code>Wtsmk2</code></td><td>White ash</td><td><code>white_ash</code></td><td>burn</td></tr>
+        <tr><td>34</td><td><code>Prtl2</code></td><td>Reverse portal</td><td><code>reverse_portal</code></td><td>prtl</td></tr>
+        <tr><td>41</td><td><code>Bwswrl</code></td><td>Spell swirl</td><td><code>effect</code></td><td>swrl</td></tr>
+        <tr><td>43</td><td><code>Whtswrl</code></td><td>Ambient swirl</td><td><code>entity_effect</code></td><td>swrl</td></tr>
+        <tr><td>44</td><td><code>Lmstr</code></td><td>Totem sparks</td><td><code>totem_of_undying</code></td><td>&mdash;</td></tr>
+        <tr><td>50</td><td><code>Rflm</code></td><td>Flame</td><td><code>flame</code></td><td>burn</td></tr>
+        <tr><td>51</td><td><code>Bflm</code></td><td>Soul flame</td><td><code>soul_fire_flame</code></td><td>burn</td></tr>
+        <tr><td>52</td><td><code>Chrylf</code></td><td>Cherry petals</td><td><code>cherry_leaves</code></td><td>life</td></tr>
+        <tr><td>53</td><td><code>Dst3</code></td><td>Dust plume</td><td><code>dust_plume</code></td><td>dst</td></tr>
+        <tr><td>54</td><td><code>Lava</code></td><td>Lava embers</td><td><code>lava</code></td><td>&mdash;</td></tr>
+        <tr><td>60</td><td><code>Smbflm</code></td><td>Copper flame</td><td><code>copper_fire_flame</code></td><td>burn</td></tr>
+        <tr><td>65</td><td><code>Raid</code></td><td>Raid omen</td><td><code>raid_omen</code></td><td>&mdash;</td></tr>
+        <tr><td>66</td><td><code>Sklk</code></td><td>Sculk charge</td><td><code>sculk_charge_pop</code></td><td>sklk</td></tr>
+        <tr><td>67</td><td><code>Sklk2</code></td><td>Sculk vibration</td><td><code>vibration</code></td><td>sklk</td></tr>
+        <tr><td>68</td><td><code>Sklk3</code></td><td>Sculk soul</td><td><code>sculk_soul</code></td><td>sklk</td></tr>
+        <tr><td>69</td><td><code>Shrk</code></td><td>Shriek</td><td><code>shriek</code></td><td>&mdash;</td></tr>
+        <tr><td>72</td><td><code>Ornspk</code></td><td>Spawner sparks</td><td><code>trial_spawner_detection</code></td><td>spk</td></tr>
+        <tr><td>73</td><td><code>Blspk</code></td><td>Ominous sparks</td><td><code>trial_spawner_detection_ominous</code></td><td>spk</td></tr>
+        <tr><td>74</td><td><code>Snw</code></td><td>Snowflakes</td><td><code>snowflake</code></td><td>&mdash;</td></tr>
+        <tr><td>75</td><td><code>Whtstr</code></td><td>Electric sparks</td><td><code>electric_spark</code></td><td>str</td></tr>
+        <tr><td>80</td><td><code>Prtl</code></td><td>Portal motes</td><td><code>portal</code></td><td>prtl</td></tr>
+        <tr><td>83</td><td><code>Ooze</code></td><td>Ooze</td><td><code>item_slime</code></td><td>&mdash;</td></tr>
+        <tr><td>84</td><td><code>Note</code></td><td>Notes</td><td><code>note</code></td><td>&mdash;</td></tr>
+        <tr><td>85</td><td><code>Snc</code></td><td>Sonic ring</td><td><code>sonic_boom</code></td><td>&mdash;</td></tr>
+        <tr><td>88</td><td><code>Dstrn</code></td><td>Enchanting glyphs</td><td><code>enchant</code></td><td>&mdash;</td></tr>
+        <tr><td>90</td><td><code>Hrt</code></td><td>Hearts</td><td><code>heart</code></td><td>life</td></tr>
+        <tr><td>91</td><td><code>Dig</code></td><td>Sculk debris</td><td><code>block</code> (sculk)</td><td>&mdash;</td></tr>
+        <tr><td>95</td><td><code>Grnstr</code></td><td>Growth motes</td><td><code>happy_villager</code></td><td>str</td></tr>
+        <tr><td>97</td><td><code>Csmk</code></td><td>Campfire smoke</td><td><code>campfire_cosy_smoke</code></td><td>burn</td></tr>
+        <tr><td>98</td><td><code>Bkswrl</code></td><td>Evoker swirl</td><td><code>instant_effect</code></td><td>swrl</td></tr>
+        <tr><td>99</td><td><code>Soul</code></td><td>Souls</td><td><code>soul</code></td><td>life</td></tr>
+        <tr><td>&mdash;</td><td><code>n</code></td><td>wild type</td><td>none</td><td>&mdash;</td></tr>
+    </tbody>
+</table>
+
+<h2 id="java">Ten of them are not the particle they were named after</h2>
+
+<p>
+    The list this gene was designed from uses <strong>Bedrock</strong> particle names,
+    and ten of them have no Java equivalent in 26.1.2. Each was mapped to the nearest
+    real particle, and the substitutions are recorded here because the allele
+    <em>tokens</em> still carry the original intent:
+</p>
+
+<table class="data">
+    <thead><tr><th>Allele</th><th>Named after</th><th>Java particle used</th></tr></thead>
+    <tbody>
+        <tr><td><code>Wtsmk2</code></td><td>magnesium_salts</td><td><code>white_ash</code></td></tr>
+        <tr><td><code>Smbflm</code></td><td>small_soul_fire_flame</td><td><code>copper_fire_flame</code> &mdash; new in 26.1.2, a genuinely third flame colour</td></tr>
+        <tr><td><code>Sklk2</code></td><td>sculk_sensor_redstone</td><td><code>vibration</code>, aimed at the horse</td></tr>
+        <tr><td><code>Ooze</code></td><td>oozing_emitter</td><td><code>item_slime</code></td></tr>
+        <tr><td><code>Dig</code></td><td>warden_dig</td><td><code>block</code> carrying a sculk state</td></tr>
+        <tr><td><code>Grnstr</code></td><td>crop_growth_emitter</td><td><code>happy_villager</code></td></tr>
+        <tr><td><code>Bkswrl</code></td><td>evoker_spell</td><td><code>instant_effect</code></td></tr>
+        <tr><td><code>Skl</code></td><td>trial_omen_ambient</td><td><code>trial_omen</code></td></tr>
+        <tr><td><code>Rain2</code></td><td>water_wake</td><td><code>fishing</code> (the same particle, renamed)</td></tr>
+        <tr><td><code>Prtl2</code></td><td>portal_reverse_particle</td><td><code>reverse_portal</code></td></tr>
+    </tbody>
+</table>
+
+<p>
+    <strong>Two alleles were cut rather than substituted.</strong>
+    <code>Bigflm</code> (mobflame_emitter) and <code>Cndlflm</code> (candle) both land
+    on a particle another allele already has &mdash; <code>flame</code> and
+    <code>small_flame</code> &mdash; and Java flames are
+    <code>SimpleParticleType</code>s carrying neither a colour nor a scale, so there
+    would have been no way to tell the pairs apart. Two alleles a player cannot tell
+    apart are worse than two alleles that do not exist, so the list is forty rather
+    than forty-two.
+</p>
+
+<h2 id="invisible">It paints nothing</h2>
+
+<p>
+    All 87 outcomes are wild types, so <code>affectsCoat()</code> is false, the locus
+    is out of the texture key, and <code>GenotypeCatalog</code> collapses all 861
+    combinations to a single entry &mdash; <strong>forty alleles for no catalogue
+    growth at all</strong>, the trick <a href="gene-sex.html">sex</a>,
+    <a href="gene-milk.html">milk</a> and <a href="gene-verdant.html">verdant</a>
+    already use.
+</p>
+
+<p>
+    Unlike those two, though, there is no visibility gap here: the whole gene
+    <em>is</em> the thing you can see. It is the answer to the complaint
+    <a href="gene-milk.html">milk</a> and <a href="gene-verdant.html">verdant</a> both
+    attract &mdash; an effect a player can watch without having to test for it.
+</p>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="gene-effects.html#emitter">The emitter verb</a>
+        <a href="gene-light.html">Light &mdash; the other codominant magical locus</a>
+        <a href="gene-body-size.html">Magic body size &mdash; the other epigenetic-magnitude gene</a>
+        <a href="genetics-model.html">The genetics model</a>
+        <a href="verification.html">What to check in-game</a>
+    </div>
+    Source: <code>common/genetics/genes/ParticleGene.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>
