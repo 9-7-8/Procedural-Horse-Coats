@@ -127,6 +127,28 @@ public final class SpecGene implements Gene {
 
     @Override public String name() { return spec.name(); }
 
+    @Override
+    public String description() {
+        return spec.blurb().isBlank() ? Gene.super.description() : spec.blurb();
+    }
+
+    @Override public com.example.horsegenetics.common.genetics.GeneRarity rarity() { return spec.rarity(); }
+
+    @Override public boolean hasMagicCarrot() { return spec.carrot().enabled(); }
+
+    @Override
+    public java.util.Optional<FounderTable> chaosTable() {
+        if (spec.chaos().isEmpty()) {
+            return java.util.Optional.empty();
+        }
+        FounderTable.Builder table = FounderTable.builder();
+        for (GeneSpec.FounderWeight w : spec.chaos()) {
+            String[] tokens = w.combination().split("/");
+            table.weight(fromToken(tokens[0]), fromToken(tokens[1]), w.percent());
+        }
+        return java.util.Optional.of(table.build());
+    }
+
     @Override public List<Allele> alleles() { return alleles; }
 
     @Override public Allele defaultAllele() { return baseline; }

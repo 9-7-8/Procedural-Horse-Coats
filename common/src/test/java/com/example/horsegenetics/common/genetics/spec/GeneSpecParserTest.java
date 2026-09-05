@@ -22,7 +22,7 @@ class GeneSpecParserTest {
 
     /** A minimal well-formed gene, so a test only has to state the part it is about. */
     private static String gene(String body) {
-        return "{ \"format\": 2, \"key\": \"example.probe\","
+        return "{ \"format\": 3, \"key\": \"example.probe\","
                 + " \"alleles\": [ {\"token\":\"A\"}, {\"token\":\"a\"} ],"
                 + " \"founders\": { \"A/A\": 1, \"A/a\": 9, \"a/a\": 90 }"
                 + body + " }";
@@ -176,7 +176,7 @@ class GeneSpecParserTest {
     @Test
     void rejectsAlleleTokensThatWouldBreakAGenotypeCode() {
         String json = """
-                { "format": 2, "key": "example.bad",
+                { "format": 3, "key": "example.bad",
                   "alleles": [ {"token":"A/B"}, {"token":"a"} ],
                   "founders": { "a/a": 100 },
                   "expressions": [ { "id": "wild", "wildType": true } ] }
@@ -189,7 +189,7 @@ class GeneSpecParserTest {
     @Test
     void rejectsAKeyWithoutANamespace() {
         String json = """
-                { "format": 2, "key": "silver",
+                { "format": 3, "key": "silver",
                   "alleles": [ {"token":"A"}, {"token":"a"} ],
                   "founders": { "a/a": 100 },
                   "expressions": [ { "id": "wild", "wildType": true } ] }
@@ -293,7 +293,7 @@ class GeneSpecParserTest {
     @Test
     void rejectsAFounderTableNamingACombinationTheGeneCannotHave() {
         String json = """
-                { "format": 2, "key": "example.bad",
+                { "format": 3, "key": "example.bad",
                   "alleles": [ {"token":"A"}, {"token":"a"} ],
                   "founders": { "A/Q": 100 },
                   "expressions": [ { "id": "wild", "wildType": true } ] }
@@ -306,7 +306,7 @@ class GeneSpecParserTest {
     @Test
     void rejectsAMissingFounderTable() {
         String json = """
-                { "format": 2, "key": "example.bad",
+                { "format": 3, "key": "example.bad",
                   "alleles": [ {"token":"A"}, {"token":"a"} ],
                   "expressions": [ { "id": "wild", "wildType": true } ] }
                 """;
@@ -319,7 +319,7 @@ class GeneSpecParserTest {
     @Test
     void readsAThreeAlleleLocus() {
         String json = """
-                { "format": 2, "key": "example.matp", "phase": "natural",
+                { "format": 3, "key": "example.matp", "phase": "natural",
                   "alleles": [ {"token":"Cr"}, {"token":"prl"}, {"token":"N"} ],
                   "founders": { "Cr/Cr": 1, "Cr/prl": 1, "Cr/N": 8, "prl/prl": 2, "prl/N": 8, "N/N": 80 },
                   "expressions": [

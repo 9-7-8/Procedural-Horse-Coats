@@ -82,6 +82,44 @@ public interface Gene {
         return GeneDescriptions.of(key());
     }
 
+    // ------------------------------------------------------------------
+    // Gameplay-economy metadata (roadmap wiki §19)
+    // ------------------------------------------------------------------
+
+    /**
+     * How rare this gene is - the axis the magic-carrot recipe cost, the
+     * research-paper loot weighting and the villager stock all sort on. A real
+     * enum; the tier&rarr;rarity-item mapping stays on the recipe side. The
+     * default is {@link GeneRarity#DEFAULT}, the gold-ingot tier (settled,
+     * &sect;21).
+     */
+    default GeneRarity rarity() {
+        return GeneRarity.DEFAULT;
+    }
+
+    /**
+     * Whether a <b>magic gene carrot</b> exists for this gene (&sect;14.2).
+     * True for almost every gene; a handful turn it off because a carrot for
+     * them is nonsense or hostile - the {@link com.example.horsegenetics.common.genetics.genes.SexGene
+     * sex locus} and the recessive lethals. The parameterised carrot recipe
+     * simply refuses a research paper naming a gene that returns {@code false}.
+     */
+    default boolean hasMagicCarrot() {
+        return true;
+    }
+
+    /**
+     * What the <b>chaos carrot</b> rolls when it lands on this gene (&sect;14.1)
+     * - a distribution over this gene's own combinations, the same shape as
+     * {@link #founderTable} and kept separate so the two can differ. An author
+     * can make it guarantee a heterozygote, forbid a homozygote, keep it always
+     * wild type... A gene that declares none gets a <b>uniform draw over its
+     * viable combinations</b> (the caller builds that fallback).
+     */
+    default java.util.Optional<FounderTable> chaosTable() {
+        return java.util.Optional.empty();
+    }
+
     /**
      * <b>Gene priority</b> - a fixed constant of the gene (never data on a
      * horse, never varies between horses) that decides <b>processing order</b>.

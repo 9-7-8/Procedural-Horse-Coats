@@ -92,7 +92,7 @@ class GeneAbilitySpecTest {
     @Test
     void aHomozygoteExpressionCanCarryEffectsTheHeterozygoteDoesNot() {
         String json = """
-                { "format": 2, "key": "example.gilled", "phase": "magical",
+                { "format": 3, "key": "example.gilled", "phase": "magical",
                   "alleles": [ {"token":"G"}, {"token":"n"} ],
                   "founders": { "G/G": 1, "G/n": 9, "n/n": 90 },
                   "expressions": [
@@ -262,7 +262,7 @@ class GeneAbilitySpecTest {
      * it is about.
      */
     private static String base(String effectsLine) {
-        return "{ \"format\": 2, \"key\": \"example.t\", \"phase\": \"magical\", "
+        return "{ \"format\": 3, \"key\": \"example.t\", \"phase\": \"magical\", "
                 + "\"alleles\": [ {\"token\":\"A\"}, {\"token\":\"a\"} ], "
                 + "\"founders\": { \"A/A\": 1, \"A/a\": 9, \"a/a\": 90 }, "
                 + "\"expressions\": [ { \"id\": \"v\", \"when\": [\"A/A\", \"A/a\"], "

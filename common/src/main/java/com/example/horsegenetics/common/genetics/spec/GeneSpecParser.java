@@ -1,5 +1,6 @@
 package com.example.horsegenetics.common.genetics.spec;
 
+import com.example.horsegenetics.common.genetics.GeneRarity;
 import com.example.horsegenetics.common.genetics.spec.GeneSpec.AlleleSpec;
 import com.example.horsegenetics.common.genetics.spec.GeneSpec.Combine;
 import com.example.horsegenetics.common.genetics.spec.GeneSpec.ExpressionSpec;
@@ -63,7 +64,8 @@ public final class GeneSpecParser {
 
     private static GeneSpec read(Map<String, Object> root) {
         expectKeys(root, "the file", "format", "key", "name", "phase",
-                "priority", "alleles", "knobs", "expressions", "founders");
+                "priority", "alleles", "knobs", "expressions", "founders",
+                "blurb", "rarity", "carrot", "chaos");
 
         int format = (int) number(root, "format", GeneSpec.FORMAT);
         if (format != GeneSpec.FORMAT) {
@@ -103,10 +105,40 @@ public final class GeneSpecParser {
         List<String> combinations = allCombinations(alleles);
         List<ExpressionSpec> expressions =
                 readExpressions(root, natural, alleles, combinations, knobs, knobIndex);
-        List<FounderWeight> founders = readFounders(root, combinations);
+        List<FounderWeight> founders = readWeightTable(root, "founders", combinations, true);
+
+        // --- gameplay-economy metadata (roadmap §19), all optional ---
+        String blurb = string(root, "blurb", "");
+        GeneRarity rarity = GeneRarity.fromString(string(root, "rarity", ""));
+        GeneSpec.Carrot carrot = readCarrot(root);
+        List<FounderWeight> chaos = readWeightTable(root, "chaos", combinations, false);
 
         return new GeneSpec(key, name, natural, priority,
-                alleles, List.copyOf(knobs), expressions, founders);
+                alleles, List.copyOf(knobs), expressions, founders,
+                blurb, rarity, carrot, chaos);
+    }
+
+    /** The optional {@code carrot} block - defaults to "enabled, heterozygous, no flavour". */
+    private static GeneSpec.Carrot readCarrot(Map<String, Object> root) {
+        Object raw = root.get("carrot");
+        if (raw == null) {
+            return GeneSpec.Carrot.DEFAULT;
+        }
+        Map<String, Object> o = asObject(raw, "carrot");
+        expectKeys(o, "carrot", "enabled", "behaviour", "flavour");
+        boolean enabled = flag(o, "enabled", true);
+        String behaviour = string(o, "behaviour", "heterozygous").toLowerCase(Locale.ROOT);
+        boolean homozygous = switch (behaviour) {
+            case "heterozygous" -> false;
+            case "homozygous" -> true;
+            default -> throw new IllegalArgumentException(
+                    "carrot.behaviour must be 'heterozygous' or 'homozygous', got '" + behaviour + "'");
+        };
+        List<String> flavour = new ArrayList<>();
+        for (Object f : array(o, "flavour")) {
+            flavour.add(String.valueOf(f));
+        }
+        return new GeneSpec.Carrot(enabled, homozygous, List.copyOf(flavour));
     }
 
     // ------------------------------------------------------------------
@@ -337,14 +369,24 @@ public final class GeneSpecParser {
      * should sum to 100; {@code genetics.FounderTable} normalises and warns if
      * they do not.
      */
-    private static List<FounderWeight> readFounders(Map<String, Object> root, List<String> combinations) {
-        Object raw = root.get("founders");
+    /**
+     * A weight-per-combination table: {@code "founders"} (required, the wild
+     * distribution) and {@code "chaos"} (optional, what the chaos carrot rolls
+     * on this gene - roadmap &sect;14.1) share the shape exactly, kept as two
+     * keys so they can differ. An absent optional table returns an empty list.
+     */
+    private static List<FounderWeight> readWeightTable(Map<String, Object> root, String tableKey,
+                                                       List<String> combinations, boolean required) {
+        Object raw = root.get(tableKey);
         if (raw == null) {
-            throw new IllegalArgumentException("a gene needs a \"founders\" table - the share of wild"
-                    + " horses carrying each combination of its alleles, as percentages summing to 100."
-                    + " Legal combinations here: " + combinations);
+            if (required) {
+                throw new IllegalArgumentException("a gene needs a \"" + tableKey + "\" table - the share of"
+                        + " wild horses carrying each combination of its alleles, as percentages summing to 100."
+                        + " Legal combinations here: " + combinations);
+            }
+            return List.of();
         }
-        Map<String, Object> o = asObject(raw, "founders");
+        Map<String, Object> o = asObject(raw, tableKey);
         List<FounderWeight> out = new ArrayList<>();
         double total = 0;
         for (Map.Entry<String, Object> e : o.entrySet()) {
@@ -355,19 +397,19 @@ public final class GeneSpecParser {
                 if (flipped != null && combinations.contains(flipped)) {
                     combination = flipped;
                 } else {
-                    throw new IllegalArgumentException("founders: '" + e.getKey()
+                    throw new IllegalArgumentException(tableKey + ": '" + e.getKey()
                             + "' is not a combination of this gene's alleles. Legal ones: " + combinations);
                 }
             }
             if (!(e.getValue() instanceof Number n) || n.doubleValue() < 0) {
-                throw new IllegalArgumentException("founders '" + e.getKey()
+                throw new IllegalArgumentException(tableKey + " '" + e.getKey()
                         + "': a share is a percentage >= 0, got " + e.getValue());
             }
             out.add(new FounderWeight(combination, n.doubleValue()));
             total += n.doubleValue();
         }
         if (total <= 0) {
-            throw new IllegalArgumentException("founders: every share is zero, so no horse can carry"
+            throw new IllegalArgumentException(tableKey + ": every share is zero, so no horse can carry"
                     + " this gene at all");
         }
         return List.copyOf(out);

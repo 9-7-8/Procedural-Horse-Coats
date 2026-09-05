@@ -71,8 +71,13 @@ public final class MilkGene implements Gene, TraitContribution, AbilityContribut
     public static final double WILD_WATR_FREQUENCY = 0.08;
     public static final double WILD_LAVA_FREQUENCY = 0.06;
 
-    /** How long a horse needs between fillings, in ticks. Lava is worth more, so it takes longer. */
-    public static final int MILK_COOLDOWN_TICKS = 200;
+    /**
+     * How long a horse needs between fillings, in ticks. Milking is <b>once per
+     * Minecraft day</b> - the mod's standard time gate (roadmap &sect;7, &sect;21).
+     * Water and lava are a different thing (a rare double-recessive novelty, not
+     * a dairy) and recharge faster; lava is worth more, so it takes longer.
+     */
+    public static final int MILK_COOLDOWN_TICKS = 24_000;
     public static final int WATER_COOLDOWN_TICKS = 200;
     public static final int LAVA_COOLDOWN_TICKS = 1200;
 
@@ -127,14 +132,8 @@ public final class MilkGene implements Gene, TraitContribution, AbilityContribut
         return p;
     }
 
-    private final List<GeneAbility> milkAbility = List.of(bucketOf("minecraft:milk_bucket",
-            MILK_COOLDOWN_TICKS, new Condition.All(List.of(flag("adult"), flag("sex_female")))));
-
-    private final List<GeneAbility> waterAbility =
-            List.of(bucketOf("minecraft:water_bucket", WATER_COOLDOWN_TICKS, flag("adult")));
-
-    private final List<GeneAbility> lavaAbility =
-            List.of(bucketOf("minecraft:lava_bucket", LAVA_COOLDOWN_TICKS, flag("adult")));
+    /** Milking a stallion earns a kick - half a heart (roadmap &sect;7). */
+    public static final double STALLION_KICK_DAMAGE = 1.0;
 
     @Override public String key() { return KEY; }
     @Override public String name() { return "Milk"; }
@@ -174,16 +173,27 @@ public final class MilkGene implements Gene, TraitContribution, AbilityContribut
 
     @Override
     public List<GeneAbility> abilitiesFor(AllelePair pair, Genotype genotype) {
-        if (pair.homozygousFor(Watr)) {
-            return waterAbility;
-        }
-        if (pair.homozygousFor(Lava)) {
-            return lavaAbility;
-        }
         if (pair.has(Watr) && pair.has(Lava)) {
             return List.of(); // never born
         }
-        return milkAbility;
+        List<GeneAbility> out = new java.util.ArrayList<>(3);
+        if (pair.homozygousFor(Watr)) {
+            out.add(bucketOf("minecraft:water_bucket", WATER_COOLDOWN_TICKS, flag("adult")));
+        } else if (pair.homozygousFor(Lava)) {
+            out.add(bucketOf("minecraft:lava_bucket", LAVA_COOLDOWN_TICKS, flag("adult")));
+        } else {
+            // A mare gives milk: tamed, grown, and at her OWN full health - the
+            // rule that ties milking to the healing gate (roadmap §7).
+            out.add(bucketOf("minecraft:milk_bucket", MILK_COOLDOWN_TICKS, new Condition.All(List.of(
+                    flag("adult"), flag("sex_female"), flag("tamed"), flag("full_health")))));
+            // Milking a stallion gets you kicked - better than a silent no-op,
+            // and it teaches the player the horse's sex by doing.
+            out.add(deniedBucket(new Condition.All(List.of(flag("adult"), flag("sex_male"))),
+                    STALLION_KICK_DAMAGE, "message.horsegenetics.milk.stallion"));
+        }
+        // A foal has nothing to give, but says so rather than reading as a bug.
+        out.add(deniedBucket(flag("baby"), 0.0, "message.horsegenetics.milk.foal"));
+        return List.copyOf(out);
     }
 
     /** What this horse fills a bucket with, for the wiki and the info surfaces. */
@@ -199,7 +209,16 @@ public final class MilkGene implements Gene, TraitContribution, AbilityContribut
 
     private static GeneAbility bucketOf(String produces, int cooldown, Condition when) {
         return new GeneAbility.Yield(new Trigger.OnInteract("minecraft:bucket"),
-                "minecraft:bucket", produces, cooldown, when, 1);
+                "minecraft:bucket", produces, cooldown, 0.0, "", when, 1);
+    }
+
+    /**
+     * A yield that produces nothing and instead punishes / explains when
+     * {@code when} holds - the else-branch a bare {@code yield} cannot express.
+     */
+    private static GeneAbility deniedBucket(Condition when, double damage, String messageKey) {
+        return new GeneAbility.Yield(new Trigger.OnInteract("minecraft:bucket"),
+                "", "", 0, damage, messageKey, when, 1);
     }
 
     private static Condition flag(String name) {

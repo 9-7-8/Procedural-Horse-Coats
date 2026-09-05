@@ -1,11 +1,17 @@
 package com.example.horsegenetics.neoforge.server;
 
+import com.example.horsegenetics.neoforge.data.HorseCooldownsAttachment;
+import com.example.horsegenetics.neoforge.data.ModAttachments;
 import com.example.horsegenetics.common.genetics.Epigenome;
 import com.example.horsegenetics.common.genetics.Genotype;
 import com.example.horsegenetics.common.genetics.spec.GeneAbility;
 import com.example.horsegenetics.common.genetics.spec.HorseAbilities;
 import com.example.horsegenetics.common.horse.HorseRecord;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.animal.equine.Horse;
 import net.minecraft.world.entity.player.Player;
@@ -18,30 +24,28 @@ import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * The translator for a data-driven gene's {@code yield} effect - "the horse
- * produces something when you interact with it". Waterborn's mares hand back a
- * water bucket for an empty one.
+ * produces something when you interact with it", and its <b>else branch</b>:
+ * milking a stallion earns a kick, milking a foal earns a message
+ * ({@code deniedDamage} / {@code deniedMessage}).
  *
- * <p>Fires on {@link PlayerInteractEvent.EntityInteract}: if the player is
- * holding the yield's {@code consumes} item and the {@code when} condition holds
- * (mare, tamed, ...), the held item is swapped for {@code produces} and the
- * interaction is cancelled on both sides so vanilla doesn't also read it as a
- * mount. A per-horse cooldown throttles it.
+ * <p>Fires on {@link PlayerInteractEvent.EntityInteract}: the first yield whose
+ * trigger item and {@code when} both match wins. If it {@code produces}
+ * something, the held item is swapped and a per-horse, per-gene cooldown is
+ * stamped; if it produces nothing it is a denial - the punishment / message is
+ * applied. Either way the interaction is cancelled on both sides so vanilla does
+ * not also read it as a mount.
  *
- * <p><b>Not verified in-game</b> - written against 26.1.2 sources. Only a small
- * fixed set of output items is recognised ({@link #OUTPUTS}); an unknown
- * {@code produces} id is logged once and the yield does nothing.
+ * <p>The cooldown now lives in {@link HorseCooldownsAttachment} keyed
+ * {@code "yield:<geneKey>"} - a stored game time that survives a restart and is
+ * inspectable, replacing the old {@code static Map} (roadmap &sect;7).
  */
 @EventBusSubscriber
 public final class GeneYieldHandler {
 
     private GeneYieldHandler() {}
-
-    private static final Map<UUID, Long> COOLDOWN = new ConcurrentHashMap<>();
 
     /** The output items a {@code yield} may name. Small and explicit on purpose. */
     private static final Map<String, Item> OUTPUTS = Map.of(
@@ -93,7 +97,11 @@ public final class GeneYieldHandler {
             }
 
             if (!client) {
-                fulfil(horse, player, held, yield);
+                if (yield.produces().isEmpty()) {
+                    applyDenial(horse, player, yield);
+                } else {
+                    fulfil(horse, player, held, yield, active.geneKey());
+                }
             }
             event.setCanceled(true);
             event.setCancellationResult(InteractionResult.SUCCESS);
@@ -101,19 +109,21 @@ public final class GeneYieldHandler {
         }
     }
 
-    private static void fulfil(Horse horse, Player player, ItemStack held, GeneAbility.Yield yield) {
+    private static void fulfil(Horse horse, Player player, ItemStack held, GeneAbility.Yield yield, String geneKey) {
         long now = horse.level().getGameTime();
-        Long readyAt = COOLDOWN.get(horse.getUUID());
-        if (readyAt != null && now < readyAt) {
-            return; // still recharging - the cancelled interaction is the only feedback for now
+        String key = "yield:" + geneKey;
+        HorseCooldownsAttachment cooldowns = horse.getData(ModAttachments.HORSE_COOLDOWNS.get());
+        long cd = Math.max(1, yield.cooldownTicks());
+        if (!cooldowns.ready(key, now, cd)) {
+            player.sendSystemMessage(
+                    Component.translatable("message.horsegenetics.yield.recharging"));
+            return;
         }
 
-        Item output = yield.produces().isEmpty() ? null : OUTPUTS.get(yield.produces());
+        Item output = OUTPUTS.get(yield.produces());
         if (output == null) {
-            if (!yield.produces().isEmpty()) {
-                com.example.horsegenetics.neoforge.HorseGenetics.LOGGER.info(
-                        "[genes] yield output '{}' is not a recognised item - nothing produced", yield.produces());
-            }
+            com.example.horsegenetics.neoforge.HorseGenetics.LOGGER.info(
+                    "[genes] yield output '{}' is not a recognised item - nothing produced", yield.produces());
             return;
         }
 
@@ -124,8 +134,18 @@ public final class GeneYieldHandler {
         if (!player.addItem(produced)) {
             player.drop(produced, false);
         }
-        if (yield.cooldownTicks() > 0) {
-            COOLDOWN.put(horse.getUUID(), now + yield.cooldownTicks());
+        horse.setData(ModAttachments.HORSE_COOLDOWNS.get(), cooldowns.stamp(key, now));
+    }
+
+    /** The else branch: a stallion kick, a foal's "nothing to give". */
+    private static void applyDenial(Horse horse, Player player, GeneAbility.Yield yield) {
+        if (yield.deniedDamage() > 0 && player.level() instanceof ServerLevel level) {
+            player.hurtServer(level, horse.damageSources().mobAttack(horse), (float) yield.deniedDamage());
+            horse.level().playSound(null, horse.getX(), horse.getY(), horse.getZ(),
+                    SoundEvents.HORSE_ANGRY, SoundSource.NEUTRAL, 1.0F, 1.0F);
+        }
+        if (!yield.deniedMessage().isEmpty()) {
+            player.sendSystemMessage(Component.translatable(yield.deniedMessage()));
         }
     }
 }

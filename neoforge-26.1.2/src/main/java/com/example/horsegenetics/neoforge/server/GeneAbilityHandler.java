@@ -593,6 +593,10 @@ public final class GeneAbilityHandler {
             case "untamed" -> !horse.isTamed();
             case "adult" -> !horse.isBaby();
             case "baby" -> horse.isBaby();
+            // full_health is measured against this horse's OWN max, so a
+            // genetically frail mare is milkable at her own ceiling, not the
+            // species max (roadmap §7 - ties milking to the healing gate).
+            case "full_health" -> horse.getHealth() >= horse.getMaxHealth() - 1.0e-3F;
             case "has_rider" -> horse.isVehicle();
             case "in_water" -> horse.isInWater();
             case "submerged" -> horse.isUnderWater();

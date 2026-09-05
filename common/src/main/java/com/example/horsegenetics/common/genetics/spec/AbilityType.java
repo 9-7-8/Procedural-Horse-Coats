@@ -59,7 +59,7 @@ public final class AbilityType {
      */
     public static final List<String> CONDITION_FLAGS = List.of(
             "sex_female", "sex_male", "tamed", "untamed", "adult", "baby",
-            "has_rider", "in_water", "submerged", "on_ground", "on_fire",
+            "full_health", "has_rider", "in_water", "submerged", "on_ground", "on_fire",
             "day", "night", "raining", "thundering", "sky_visible");
 
     /**
@@ -319,13 +319,16 @@ public final class AbilityType {
                             "on_interact only - the item that triggers it, or \"\" for anything"),
                     Param.str("consumes", "", "item id taken from the hand, or \"\" for nothing"),
                     Param.str("produces", "", "item id handed back"),
-                    Param.num("cooldown", 0, "per-horse cooldown, ticks")),
+                    Param.num("cooldown", 0, "per-horse cooldown, ticks"),
+                    Param.num("denied_damage", 0, "damage dealt when 'when' fails (e.g. a stallion kick); 0 = none"),
+                    Param.str("denied_message", "", "message shown when 'when' fails, or \"\" for silent")),
             v -> {
                 if (!(v.trigger("trigger") instanceof Trigger.OnInteract onInteract)) {
                     throw v.bad("a yield fires on 'on_interact' only");
                 }
                 return new GeneAbility.Yield(onInteract, v.str("consumes"), v.str("produces"),
-                        v.intOf("cooldown"), v.when, v.minDose);
+                        v.intOf("cooldown"), v.num("denied_damage"), v.str("denied_message"),
+                        v.when, v.minDose);
             }));
 
     /**

@@ -167,7 +167,7 @@ class SpecGeneTest {
      * this is about the {@code perLeg} + {@code spread} draw, nothing more.
      */
     private static final String SOCKS_ONLY = """
-            { "format": 2, "key": "example.socks",
+            { "format": 3, "key": "example.socks",
               "alleles": [ {"token":"S"}, {"token":"s"} ],
               "founders": { "S/S": 1, "S/s": 9, "s/s": 90 },
               "knobs": [ { "name": "sock", "min": 0.2, "max": 0.6, "per": "leg", "spread": 0.25 } ],

@@ -44,6 +44,16 @@ public final class ModAttachments {
                     .copyOnDeath()
                     .build());
 
+    // Timed-interaction stamps (last shear, last per-gene yield, ...). Gated
+    // "once per Minecraft day". Replaces the static cooldown map that used to
+    // live in GeneYieldHandler. copyOnDeath so a re-summoned horse keeps them.
+    public static final Supplier<AttachmentType<HorseCooldownsAttachment>> HORSE_COOLDOWNS =
+            ATTACHMENT_TYPES.register("horse_cooldowns", () -> AttachmentType
+                    .builder(() -> HorseCooldownsAttachment.DEFAULT)
+                    .serialize(HorseCooldownsAttachment.MAP_CODEC)
+                    .copyOnDeath()
+                    .build());
+
     private ModAttachments() {
     }
 }

@@ -110,8 +110,17 @@ public sealed interface GeneAbility {
      * id taken from the player's hand (or {@code ""} for nothing); {@code produces}
      * is the item id handed back. {@code cooldownTicks} throttles it. The
      * trigger is always {@link Trigger.OnInteract}.
+     *
+     * <p>{@code deniedDamage} / {@code deniedMessage} are the <b>else branch</b> -
+     * what happens when a matching interaction's {@link #when()} <i>fails</i>:
+     * milking a stallion earns a kick ({@code deniedDamage 1}), milking a foal
+     * earns a "nothing to give" message ({@code deniedDamage 0}). A yield with
+     * neither is silent when its condition fails, as before. The message is fed
+     * through {@code Component.translatable}, so a built-in gene passes a lang
+     * key and a spec author passes literal text - both render.
      */
     record Yield(Trigger.OnInteract trigger, String consumes, String produces, int cooldownTicks,
+                 double deniedDamage, String deniedMessage,
                  Condition when, int minDose) implements GeneAbility {}
 
     /**

@@ -1,6 +1,7 @@
 package com.example.horsegenetics.common.genetics.spec;
 
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Part;
+import com.example.horsegenetics.common.genetics.GeneRarity;
 
 import java.util.List;
 import java.util.Map;
@@ -60,15 +61,40 @@ public record GeneSpec(
         List<AlleleSpec> alleles,
         List<Knob> knobs,
         List<ExpressionSpec> expressions,
-        List<FounderWeight> founders) {
+        List<FounderWeight> founders,
+        String blurb,
+        GeneRarity rarity,
+        Carrot carrot,
+        List<FounderWeight> chaos) {
 
     /**
-     * The current format version. <b>2</b> since the combination-table rewrite:
-     * {@code dominance} and {@code wildOdds} are gone, {@code layers} and
-     * {@code effects} moved inside an {@code expressions} entry, and
-     * {@code founders} declares a weight per allele combination.
+     * The current format version. <b>3</b> adds the gameplay-economy metadata
+     * (roadmap wiki &sect;19): an optional {@code blurb} (a gene-level summary),
+     * {@code rarity} (a tier enum), a {@code carrot} block (opt-out + behaviour
+     * + flavour ingredients) and an optional {@code chaos} table (what the
+     * chaos carrot rolls on this gene). All four are optional - a format-2 file
+     * that only bumps its version number still loads.
+     *
+     * <p><b>2</b> was the combination-table rewrite: {@code dominance} and
+     * {@code wildOdds} gone, {@code layers} and {@code effects} moved inside an
+     * {@code expressions} entry, {@code founders} a weight per combination.
      */
-    public static final int FORMAT = 2;
+    public static final int FORMAT = 3;
+
+    /**
+     * The magic-carrot block (roadmap &sect;14.2). {@code enabled} is the
+     * opt-out flag surfaced as {@link com.example.horsegenetics.common.genetics.Gene#hasMagicCarrot()};
+     * {@code homozygous} chooses whether feeding the carrot makes the game treat
+     * the parent as {@code <Gene><Gene>} rather than {@code n<Gene>} for that
+     * gamete; {@code flavour} is the extra recipe ingredients (item ids).
+     */
+    public record Carrot(boolean enabled, boolean homozygous, List<String> flavour) {
+        public static final Carrot DEFAULT = new Carrot(true, false, List.of());
+
+        public Carrot {
+            flavour = List.copyOf(flavour);
+        }
+    }
 
     /** The first-declared allele - the one {@code perDose} counts. */
     public AlleleSpec variant() {

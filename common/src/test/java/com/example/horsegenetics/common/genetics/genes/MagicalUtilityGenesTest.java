@@ -209,16 +209,25 @@ class MagicalUtilityGenesTest {
         }
     }
 
-    /** A horse yields exactly one thing, and it is the one its combination says. */
+    /**
+     * A horse's first yield is the producing one, and it hands back what its
+     * combination says. The rest are the else-branch denials (a foal message;
+     * for a plain mare's-milk horse, a stallion kick) - they produce nothing.
+     */
     @Test
-    void milkGrantsExactlyOneYieldAbility() {
+    void milkGrantsOneProducingYieldPlusDenials() {
         MilkGene milk = Genes.MILK;
         for (AllelePair pair : GenotypeCatalog.allPairsOf(milk)) {
             List<GeneAbility> abilities = milk.abilitiesFor(pair, Genotype.wildType());
-            assertEquals(1, abilities.size(), pair.toTokens());
-            GeneAbility.Yield y = (GeneAbility.Yield) abilities.get(0);
-            assertEquals("minecraft:bucket", y.consumes());
-            assertEquals(milk.yieldItem(pair), y.produces());
+            assertFalse(abilities.isEmpty(), pair.toTokens());
+            GeneAbility.Yield produce = (GeneAbility.Yield) abilities.get(0);
+            assertEquals("minecraft:bucket", produce.consumes());
+            assertEquals(milk.yieldItem(pair), produce.produces());
+            for (int i = 1; i < abilities.size(); i++) {
+                GeneAbility.Yield denial = (GeneAbility.Yield) abilities.get(i);
+                assertEquals("", denial.produces(), "denial yields produce nothing");
+                assertFalse(denial.deniedMessage().isEmpty(), "a denial yield explains itself");
+            }
         }
     }
 

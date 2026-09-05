@@ -67,6 +67,7 @@ public final class AgoutiGene implements Gene {
     @Override public String key() { return KEY; }
     @Override public String name() { return "Agouti"; }
     @Override public int priority() { return 20; }
+    @Override public boolean hasMagicCarrot() { return false; }
     @Override public List<Allele> alleles() { return alleles; }
     @Override public Allele defaultAllele() { return a; }
     @Override public List<Expression> expressions() { return expressions; }

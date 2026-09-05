@@ -75,9 +75,11 @@ public final class ModItems {
     // real SpawnEggItem; see client/CustomHorseSpawnEggClient.
     public static final DeferredItem<Item> CUSTOM_HORSE_SPAWN_EGG = simple("custom_horse_spawn_egg");
 
-    // --- material floor -----------------------------------------------------
+    // --- material floor (roadmap §12.2) -----------------------------------
     public static final DeferredItem<Item> HORSE_HAIR = simple("horse_hair");
     public static final DeferredItem<Item> HORSE_HAIR_BUNDLE = simple("horse_hair_bundle");
+    public static final DeferredItem<Item> BRAIDED_ROPE = simple("braided_rope");
+    public static final DeferredItem<Item> HAIR_CLOTH = simple("hair_cloth");
 
     // --- the four breeding carrots (roadmap §14.1) -------------------------
     public static final DeferredItem<Item> MUTINOGENIC_CARROT = simple("mutinogenic_carrot");

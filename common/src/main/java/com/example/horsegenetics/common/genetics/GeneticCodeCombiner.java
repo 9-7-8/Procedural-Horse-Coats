@@ -35,6 +35,16 @@ public final class GeneticCodeCombiner {
         return mother.breedWith(father, rng);
     }
 
+    /**
+     * The full seam <b>with a breeding-carrot {@link GameteBias}</b> on each
+     * parent (roadmap &sect;14). {@link GameteBias#NONE} on both sides is
+     * identical to {@link #combine(Genome, Genome, Rng)}.
+     */
+    public static Genome combine(Genome mother, Genome father, Rng rng,
+                                 GameteBias motherBias, GameteBias fatherBias) {
+        return mother.breedWith(father, rng, motherBias, fatherBias);
+    }
+
     private GeneticCodeCombiner() {
     }
 }

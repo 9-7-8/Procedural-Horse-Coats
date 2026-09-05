@@ -315,6 +315,24 @@ public final class HorseCareHandler {
         return water && food;
     }
 
+    /**
+     * Add {@code amount} bond to a tamed horse from a one-off interaction -
+     * shearing (roadmap &sect;12), sleeping nearby (&sect;13) - honouring the
+     * daily cap and syncing the result. No-op for an untamed horse or one not
+     * on a server level.
+     */
+    public static void awardBondFor(Horse horse, int amount) {
+        if (!horse.isTamed() || !(horse.level() instanceof ServerLevel level)) {
+            return;
+        }
+        HorseCareAttachment before = horse.getData(ModAttachments.HORSE_CARE.get());
+        HorseCareAttachment after = awardBond(level, horse, before, amount);
+        if (!after.equals(before)) {
+            horse.setData(ModAttachments.HORSE_CARE.get(), after);
+            syncCare(horse, after);
+        }
+    }
+
     private static void syncCare(Horse horse, HorseCareAttachment care) {
         PacketDistributor.sendToPlayersTrackingEntity(horse,
                 new HorseCareSyncPayload(horse.getId(), care.bond(), care.inHerd()));

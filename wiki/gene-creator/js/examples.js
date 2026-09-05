@@ -5,7 +5,7 @@
 window.HG = window.HG || {};
 window.HG.examples = {
   "Silver dapple (dilution, no randomness)": {
-    "format": 2,
+    "format": 3,
     "key": "example.silver",
     "name": "Silver dapple",
     "phase": "natural",
@@ -47,7 +47,7 @@ window.HG.examples = {
     }
   },
   "Dun (dilution + dorsal stripe + leg bars)": {
-    "format": 2,
+    "format": 3,
     "key": "example.dun",
     "name": "Dun",
     "phase": "natural",
@@ -107,7 +107,7 @@ window.HG.examples = {
     }
   },
   "Tobiano (white patches, dose-sensitive)": {
-    "format": 2,
+    "format": 3,
     "key": "example.tobiano",
     "name": "Tobiano",
     "phase": "natural",
@@ -160,7 +160,7 @@ window.HG.examples = {
     }
   },
   "Aurora (magical, recessive)": {
-    "format": 2,
+    "format": 3,
     "key": "example.aurora",
     "name": "Aurora coat",
     "phase": "magical",

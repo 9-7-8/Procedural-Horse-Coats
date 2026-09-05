@@ -62,27 +62,64 @@ public record Genome(Genotype genotype, Epigenome epigenome) {
      * So: 2 {@code nextBoolean()} per gene, plus 1 per gene that ties.
      */
     public Genome breedWith(Genome other, Rng rng) {
+        return breedWith(other, rng, GameteBias.NONE, GameteBias.NONE);
+    }
+
+    /**
+     * One foal, with a <b>breeding-carrot {@link GameteBias}</b> on each parent
+     * (roadmap wiki &sect;14). With {@link GameteBias#NONE} on both sides this is
+     * bit-for-bit {@link #breedWith(Genome, Rng)} - the same {@code nextBoolean()}
+     * per parent per gene, in the same order, with no extra draws - so a carrot
+     * that is not fed changes nothing. A bias may then:
+     * <ul>
+     *   <li>replace the 50/50 copy pick with "always the dominant / always the
+     *       recessive copy" (the {@code nextBoolean()} is still <i>consumed</i>,
+     *       so the other parent's stream stays aligned);</li>
+     *   <li>draw that parent's gamete for a named gene from a substitute pair
+     *       (magic gene carrot, chaos carrot);</li>
+     *   <li>hand the contributed copy a fresh epigenetic seed rather than the
+     *       parent copy's own (mutinogenic carrot, and always for a substituted
+     *       copy) - which consumes one {@code int} + one {@code long} extra.</li>
+     * </ul>
+     */
+    public Genome breedWith(Genome other, Rng rng, GameteBias mineBias, GameteBias theirsBias) {
         Map<String, AllelePair> pairs = new LinkedHashMap<>();
         Map<String, Epigenome.Copies> copies = new LinkedHashMap<>();
+        // Which child slot carries the copy this parent contributed - needed by
+        // the second pass, since AllelePair may have swapped the two.
+        Map<String, Boolean> damIsFirst = new LinkedHashMap<>();
 
+        // --- Pass 1: the allele draw. This consumes EXACTLY what the plain
+        // breed consumes - two nextBoolean() per gene plus a deconflict tie -
+        // so an unfed carrot (NONE/NONE) is bit-for-bit identical, and a bias
+        // that only re-rolls epigenetics does not shift a single allele.
         for (Gene g : Genes.codeOrder()) {
-            AllelePair mine = genotype.pair(g);
-            AllelePair theirs = other.genotype().pair(g);
+            AllelePair mine = mineBias.pairFor(g.key(), genotype.pair(g));
+            AllelePair theirs = theirsBias.pairFor(g.key(), other.genotype().pair(g));
             Epigenome.Copies myEpi = epigenome.copies(g);
             Epigenome.Copies theirEpi = other.epigenome().copies(g);
 
             boolean fromMyFirst = rng.nextBoolean();
             Allele a = fromMyFirst ? mine.first() : mine.second();
             AlleleEpigenetics aEpi = fromMyFirst ? myEpi.first() : myEpi.second();
+            if (mineBias.preferLowerOrder().isPresent() && !mine.homozygous()) {
+                boolean lower = mineBias.preferLowerOrder().get();
+                a = lower ? mine.first() : mine.second();
+                aEpi = lower ? myEpi.first() : myEpi.second();
+            }
 
             boolean fromTheirFirst = rng.nextBoolean();
             Allele b = fromTheirFirst ? theirs.first() : theirs.second();
             AlleleEpigenetics bEpi = fromTheirFirst ? theirEpi.first() : theirEpi.second();
+            if (theirsBias.preferLowerOrder().isPresent() && !theirs.homozygous()) {
+                boolean lower = theirsBias.preferLowerOrder().get();
+                b = lower ? theirs.first() : theirs.second();
+                bEpi = lower ? theirEpi.first() : theirEpi.second();
+            }
 
             AllelePair pair = new AllelePair(a, b);
-            // AllelePair may have swapped the two to put the dominant first;
-            // the epigenetics have to follow their own allele.
-            Epigenome.Copies childCopies = pair.first().equals(a)
+            boolean aFirst = pair.first().equals(a);
+            Epigenome.Copies childCopies = aFirst
                     ? new Epigenome.Copies(aEpi, bEpi)
                     : new Epigenome.Copies(bEpi, aEpi);
             childCopies = new Epigenome.Copies(
@@ -91,6 +128,31 @@ public record Genome(Genotype genotype, Epigenome epigenome) {
 
             pairs.put(g.key(), pair);
             copies.put(g.key(), childCopies);
+            damIsFirst.put(g.key(), aFirst);
+        }
+
+        // --- Pass 2: epigenetic re-rolls (mutinogenic, and every substituted
+        // copy - a chaos / magic-carrot gamete has no real parent copy behind
+        // it). Runs AFTER every allele is locked, so its extra draws never move
+        // a foal's genotype - only its seeds.
+        boolean anyReroll = mineBias.rerollEpigenetics() || theirsBias.rerollEpigenetics()
+                || !mineBias.substitutePairs().isEmpty() || !theirsBias.substitutePairs().isEmpty();
+        if (anyReroll) {
+            for (Gene g : Genes.codeOrder()) {
+                boolean rerollMine = mineBias.rerollEpigenetics() || mineBias.substitutes(g.key());
+                boolean rerollTheirs = theirsBias.rerollEpigenetics() || theirsBias.substitutes(g.key());
+                if (!rerollMine && !rerollTheirs) {
+                    continue;
+                }
+                Epigenome.Copies c = copies.get(g.key());
+                boolean aFirst = damIsFirst.get(g.key());
+                AlleleEpigenetics first = (aFirst ? rerollMine : rerollTheirs)
+                        ? AlleleEpigenetics.random(rng) : c.first();
+                AlleleEpigenetics second = (aFirst ? rerollTheirs : rerollMine)
+                        ? AlleleEpigenetics.random(rng) : c.second();
+                second = AlleleEpigenetics.deconflict(first, second, rng);
+                copies.put(g.key(), new Epigenome.Copies(first, second));
+            }
         }
 
         return new Genome(Genotype.of(List.copyOf(pairs.values())), Epigenome.of(copies));

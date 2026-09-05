@@ -21,7 +21,7 @@ window.HG = window.HG || {};
 
   function blank() {
     return {
-      format: 2,
+      format: 3,
       key: "mymod.my_gene",
       name: "My gene",
       phase: "natural",
@@ -174,7 +174,7 @@ window.HG = window.HG || {};
     var knobs = spec.knobs || [];
     var alleles = spec.alleles || [];
     var out = {
-      format: 2,
+      format: 3,
       key: spec.key,
       name: spec.name,
       phase: spec.phase,

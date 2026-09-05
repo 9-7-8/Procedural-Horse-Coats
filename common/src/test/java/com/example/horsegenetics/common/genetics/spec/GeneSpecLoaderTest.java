@@ -93,7 +93,7 @@ class GeneSpecLoaderTest {
 
     private static String gene(String key, int priority) {
         return """
-                { "format": 2, "key": "%s", "priority": %d,
+                { "format": 3, "key": "%s", "priority": %d,
                   "alleles": [ {"token":"A"}, {"token":"a"} ],
                   "founders": { "A/A": 1, "A/a": 9, "a/a": 90 },
                   "expressions": [
