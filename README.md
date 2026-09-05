@@ -146,12 +146,18 @@ Every horse gets a generated two-part name (a first name and a last name).
 
 Open a tamed horse's inventory (**press E while riding**) for a grey panel on
 the left of the screen (toggle it with the tab button on its edge) showing
-the horse's name, sex, generation, **breed**, genotype, speed, health, jump,
-size, any disorders it has, and who bred or tamed it - plus a **Family Tree**
-button that opens a clickable pedigree chart back to great-grandparents, with a
-little turning 3D model of each horse. A foal's speed and health are tinted
-**green** if they beat both parents, **amber** if they beat one, **red** if they
-trail both.
+the horse's name, sex, generation, **breed**, speed, health, jump, size, any
+disorders it has, and who bred or tamed it - plus a **View Genes** button that
+lists every gene the horse carries something other than the plain baseline at,
+each with a plain-English description of what that combination does, and a
+**Family Tree** button that opens a clickable pedigree chart back to
+great-grandparents, with a little turning 3D model of each horse. A foal's speed
+and health are tinted **green** if they beat both parents, **amber** if they beat
+one, **red** if they trail both.
+
+Press **H** anywhere for the gene browser. In creative it's a searchable
+reference to every gene in the mod - each one's alleles and a description of what
+every phenotype does; search by gene name or by an allele.
 
 Right-click a horse with **paper** to print its stats, its breed, and its
 herd (the lead's name, the band type, how many are nearby) to chat.

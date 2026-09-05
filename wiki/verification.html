@@ -723,6 +723,66 @@
 
 <h2>Still to verify</h2>
 
+<h3 id="gene-browser">0. The Horse Browser (H) &amp; the per-horse gene popup (new 2026-09-05)</h3>
+
+<p>
+    First slice of the <strong>&ldquo;H page&rdquo;</strong>
+    (<code>HorseBrowserScreen</code>) plus a per-horse gene inspector
+    (<code>GeneInspectScreen</code>). Nothing here talks to the server &mdash;
+    it is all <code>common/</code> data already on the client. Built, not
+    play-tested.
+</p>
+<ul>
+    <li><strong>Press <kbd>H</kbd> in-game</strong> (rebindable, category
+        &ldquo;Miscellaneous&rdquo;, lang key
+        <code>key.horsegenetics.horse_browser</code>) &rarr; the browser opens
+        when no other screen is up. <kbd>Esc</kbd> closes it. Confirm it does
+        <em>not</em> fight the vanilla <kbd>H</kbd>-less defaults or any other
+        mod&rsquo;s bind.</li>
+    <li><strong>Gene Database tab, in creative</strong>: every registered gene
+        listed alphabetically by display name; the count line sits clear of the
+        filter box; the list scrolls with the wheel and its scrollbar tracks.</li>
+    <li><strong>Filter box</strong>: typing part of a gene name
+        (&ldquo;splash&rdquo;), a key (&ldquo;kit&rdquo;) or an allele token /
+        label (&ldquo;SW1&rdquo;, &ldquo;cream&rdquo;) narrows the list; clearing
+        it restores all. Selection follows the filter (keeps the current gene if
+        it survives, else jumps to the first hit).</li>
+    <li><strong>Detail pane</strong>: gene name, then
+        <code>key &middot; natural/magical &middot; priority N &middot; [no coat
+        effect]</code>, then the one-paragraph <code>Gene.description()</code>
+        summary (new; from <code>GeneDescriptions</code> &mdash; every built-in
+        has one, a data-driven gene shows &ldquo;no summary&hellip;&rdquo;), then
+        every allele (<code>token &mdash; label</code>), then every phenotype
+        with its <code>Expression</code> sentence and inline
+        <code>wild type</code> / <code>masks other genes</code> /
+        <code>varies per horse</code> flags. Pane scrolls independently.</li>
+    <li><strong>Outside creative</strong>: the tab is a two-line note, no list.</li>
+    <li><strong>Tab strip</strong>: one tab for now; clicking it is wired
+        (<code>tabAt</code>) so a second tab drops in without touching input
+        code. Check the strip draws and the active tab reads as active.</li>
+    <li><strong>Horse inventory panel</strong> (<kbd>E</kbd> on a tamed horse):
+        the compact genotype line is <strong>gone</strong> from the grey panel;
+        a new <strong>&ldquo;View Genes&rdquo;</strong> button sits above
+        &ldquo;View Family Tree&rdquo;. It opens
+        <code>GeneInspectScreen</code> &mdash; a full-window popup, the
+        horse&rsquo;s two allele tokens in column one and the genotype-context
+        phenotype sentence (<code>genotype.expressionOf(gene)</code>) in column
+        two. It lists <strong>sex, extension and agouti always</strong>, then
+        <strong>every gene the horse carries something other than the plain
+        baseline at</strong> &mdash; an expressing coat gene, or a heterozygous
+        carrier (the <code>nJ</code> / <code>nC</code> / <code>nCr</code> the
+        paper dump lists). A gene at its baseline is left out. Expressing rows
+        are green, carrier rows a muted gold, and both show the outcome&rsquo;s
+        real name and sentence (a one-copy MSTN reads &ldquo;Middle distance
+        &mdash; half a sprinter&rsquo;s speed for half its hearts&rdquo;, not
+        &ldquo;no effect&rdquo;). Confirm the alleles shown match the coat you
+        see. Closes to the game (like the family tree), not back to the
+        inventory.</li>
+    <li>Check the panel layout still fits with three stacked buttons (View
+        Genes / View Family Tree / barn-name row) &mdash; the constants are
+        eyeballed and the condition list can be long.</li>
+</ul>
+
 <h3 id="dun-locus">0. Dun becomes a three-allele locus (new 2026-09-03)</h3>
 
 <p>

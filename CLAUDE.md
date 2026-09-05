@@ -139,6 +139,54 @@ project. Its shape:
 
 ## Status snapshot (keep this current)
 
+- **Built 2026-09-05, NOT yet play-tested: the Horse Browser (H page), first
+  slice, + a per-horse gene popup.** A new `common/genetics/GeneDescriptions`
+  (a one-paragraph, plain-English summary of every one of the 41 built-in
+  genes) behind a new `Gene.description()` default - the authoritative gene
+  docs stay in `wiki/gene-*.html`; this is the glanceable version, and a
+  data-driven gene returns `""`. `:common:test` still green (no test touches
+  it). Three new client screens / handlers in `neoforge-26.1.2/client/`:
+  - **`HorseBrowserScreen`** - opened by a new **`H`** keybind
+    (`HorseBrowserKeyBindings` + `HorseBrowserKeyHandler`, registered in
+    production, category `MISC`, lang `key.horsegenetics.horse_browser`). A
+    tabbed reference window; one tab built, **Gene Database**. In **creative**:
+    every registered gene alphabetically by `name()`, a filter box matching
+    gene name / key / allele token / label, and a detail pane with the
+    `description()` summary, every allele (`token — label`) and every
+    `Expression` (name + sentence + `wild type` / `masks` / `varies` flags).
+    Both list and detail scroll independently. Outside creative the tab is a
+    short note. The tab strip is drawn and click-wired (`tabAt`) so a second
+    tab slots in without input changes.
+  - **`GeneInspectScreen`** - a full-window popup opened from a new **"View
+    Genes"** button on the horse inventory panel (above "View Family Tree").
+    The horse's two allele tokens in column one, the **genotype-context**
+    phenotype sentence (`genotype.expressionOf(gene)`) in column two. Lists
+    **sex / extension / agouti always**, then every gene the horse carries a
+    **non-baseline** allele at (`!pair.homozygousFor(defaultAllele())`) - so
+    expressing coat genes *and* heterozygous carriers, matching the paper
+    dump's `nJ` / `nC` / `nCr` shortform. Expressing rows green, carrier rows
+    muted gold; both print the outcome's real name + sentence (a one-copy
+    MSTN reads "Middle distance", not "no effect"). Closes to the game like
+    the family tree.
+  - **`HorseScreenHooks`** - the compact **genotype short-form line is removed**
+    from the grey panel (superseded by the popup); `GeneCodeDisplay` and the
+    local `wrap` / `shortGenes` helpers went with it. New shared
+    `client/GuiText` (pixel word-wrap + clip).
+  - Nothing talks to the server - all the data is `common/` already on the
+    client. `:neoforge-26.1.2:build` green. Checklist:
+    `wiki/verification.html` "Still to verify" §0 (gene-browser).
+  - Docs: `wiki/verification.html` (§0), `wiki/api-reference.html` (the
+    `Gene.name()` / `description()` row), `README.md` (the panel + the H key),
+    `index.html` - which was **also** brought current in the same pass: it was
+    missing cards for **dun, silver, mushroom, roan, tobiano** and had no
+    section at all for the **13 non-coat genes**, so all 41 built-ins now have
+    a card (a new "Non-coat genes" section). Lang: `key.horsegenetics.horse_browser`.
+  - **Not built:** any second tab (horse roster, breeding planner, punnett);
+    a gene-level description for data-driven genes (the spec format has no
+    field for it); returning the popup to the inventory screen instead of the
+    world; surfacing `description()` on the wiki / a generated gene dictionary
+    (gap #10).
+
 - **Built 2026-09-05, partly play-tested: breeds + herds + wild aggro; Test gene
   removed.** A `common/breed/` package, 49 real-world breeds + `UNKNOWN`,
   biome-weighted wild-herd spawning (traditional harems + bachelor bands),
@@ -3244,8 +3292,16 @@ Design follow-ups (not just "go look at it"):
    dictionary, and `GeneCodeDisplay` deciding what is worth printing.
    **`Gene.name()` and one more `Expression.name()` reader landed 2026-09-04**:
    the rebuilt spawn-egg editor lists genes by their display name and prints the
-   outcome name under any row that expresses. Still unread: `Expression.masks()`
-   outside `GenotypeCatalog`.
+   outcome name under any row that expresses. **The Horse Browser + the "View
+   Genes" popup (2026-09-05) are the biggest readers yet**: they show every
+   `Expression`'s name *and* sentence, the `wild type` / `masks` / `varies`
+   flags, and a new gene-level `Gene.description()` (from `GeneDescriptions`, a
+   central table of the 41 built-ins - the first time a gene has a
+   plain-English summary of *itself* anywhere in code). Still unread: the
+   *carrier* wording (the health loci's one-copy sentence), and the
+   punnett / expected-foal display that would turn two carriers into a
+   decision. Data-driven genes still have no `description()` (the spec format
+   has no field for it).
 11. **Cleanups**: rename `DebugPenManager` / `DEBUG_LEVEL` /
    `horsegenetics:debug_pens` to non-"debug" names (needs a save-data
    migration or a one-time reset); name-generation rework; real white-fog dimension effects
