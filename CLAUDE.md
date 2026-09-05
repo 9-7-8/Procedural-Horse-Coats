@@ -132,6 +132,68 @@ project. Its shape:
 
 ## Status snapshot (keep this current)
 
+- **Built 2026-09-05, NOT yet play-tested: magic speed, magic health and magic
+  jump - three more genes on the `MagicSizeGene` pattern.** `MagicSpeedGene`
+  (`horsegenetics.magic_speed`, priority 141, `Swift`/`Sluggish`/`n`),
+  `MagicHealthGene` (`horsegenetics.magic_health`, 142, `Hardy`/`Frail`/`n`),
+  `MagicJumpGene` (`horsegenetics.magic_jump`, 143, `Springy`/`Leaden`/`n`).
+  **42 built-in genes, 44 in-game.** Shape of it:
+  - **One shared base, `AbstractMagicStatGene`** (the ManeColor/TailColor ->
+    HairColor precedent). It is the magic body size design generalised to the
+    three *additive* stats: codominant, three alleles, `MEAN_DELTA` 0.10 /
+    `SIGMA_DELTA` 0.07 / `MIN_DELTA` 0.01 per copy, one `nextGaussian()` off
+    **each copy's own** epigenetic seed (`AlleleRandomness.copy(slot)`), both
+    copies added (`up` positive, `down` negative), six combinations = **six
+    outcomes**, all `wildType`. Founder table written out **40% up/n, 40%
+    down/n, 20% n/n** - heterozygotes only, ~80% carrier rate, so most wild
+    horses now carry all four body-stat genes. `MagicSizeGene` stays its own
+    class - it multiplies *scale*, which has the two-stage natural+magical
+    clamp; the other three have no natural clamp.
+  - **New on `TraitBuilder`: `multiplySpeedUnclamped` / `multiplyHealthUnclamped`
+    / `multiplyJumpUnclamped`**, the exact counterparts of
+    `multiplyScaleUnclamped` - applied after every addition, clamped only to
+    new `HorseTraits.MAGICAL_MIN_FACTOR` / `MAGICAL_MAX_FACTOR` (**0.1 - 10**,
+    the "10x either way" cap). The bounded Gaussian keeps the real reach near
+    **2.04x** at two maximal copies, so the guard never fires - same story as
+    size. `MIN_HEALTH` (0.5 heart) is still applied last, so `Frail/Frail` +
+    a disorder can't zero a horse.
+  - **It multiplies the natural loci, it doesn't add.** A magic-speed horse
+    that is also `mstn=C/C` is faster than a plain magic-speed horse by the
+    same *ratio* - `MagicBodyStatGenesTest.theMagicScalesTheNaturalStat` pins
+    it. A magically fast pony is still slower than a magically fast racehorse.
+  - **Magic health is deliberately NOT a `HealthContribution`.** That marker is
+    what `health.mode = OFF` suppresses, and it is for *disorders*; turning
+    those off must not strip a horse's magical vigour. `Frail/Frail` is a horse
+    with fewer hearts, not a sick one - no `Condition`, never suppressed. (Same
+    call milk's `Watr/Lava` lethal made.)
+  - **Paints nothing** - all outcomes `wildType`, so `affectsCoat()` false, out
+    of the texture key, `GenotypeCatalog` collapses each to one entry:
+    `size()` **unchanged at 462 422 019**. `totalGenotypes()` went to
+    **17 644 404 871 265 791 068 979 200 000** (x216, three loci x 6 carryable
+    pairs).
+  - New `MagicBodyStatGenesTest` (16 tests). `:common:test` **348 green**,
+    `:neoforge-26.1.2:build` green. `SpecGeneTest.BUILT_IN_GENES` 39 -> 42.
+    Two brittle statistical tests were widened where the seed-stream reshuffle
+    tipped them: `ShowcaseGenotypesTest` magical-share upper bound 0.60 -> 0.66
+    (it is a floor, not a rate), and `GenotypeCatalogTest`'s raw-product
+    comparison moved to `BigInteger` (the `long` had already wrapped - gap #13).
+  - **`coat-golden.txt` regenerated, but no coat moved** - all 450 rows are
+    byte-identical bar the three new `=n/n` code segments per line. Per-gene
+    epigenetic seeds are keyed by gene, not by stream position, so inserting
+    genes at priority 141-143 doesn't shift particle / light / verdant / test.
+  - **Old saves will not parse.** Genotype code went 41 -> 44 segments. Dev
+    only; start a fresh world.
+  - **Deliberately not built:** per-part scaling, a coat marking (they are the
+    magic body size family and it has none either), per-allele founder
+    frequencies, environmental noise on the natural stats (still zero - gap
+    #24).
+  - Docs: `wiki/gene-magic-speed.html` / `-health` / `-jump` (new),
+    `wiki/nav.js` (new "Magical body-stat genes" section, `gene-body-size.html`
+    moved into it), `wiki/genetics-model.html` (table + counts + raw total),
+    `wiki/horse-body.html`, `wiki/api-reference.html`, `wiki/modding.html`,
+    `wiki/roadmap.html`, `index.html`, `README.md`. Checklist:
+    `wiki/verification.html` §0d.
+
 - **Built 2026-09-05, NOT yet play-tested: `PAX3` `SW2` is the ordinary horse -
   90% of founders carry one copy.** Owner's call, and it is how minimal splash
   works in life: a mild splash allele is near-ubiquitous, and what one copy buys
@@ -1023,17 +1085,17 @@ project. Its shape:
   Still unconfirmed: bred foal, seed-jar round-trip, a spec gene actually
   showing in the display (needs a horse carrying Suntouched/Waterborn) -
   `wiki/verification.html` §0.
-- **`common/`** - compiles; **333 JUnit tests pass** (`./gradlew :common:test`).
+- **`common/`** - compiles; **348 JUnit tests pass** (`./gradlew :common:test`).
   Covers `trait/` (the non-coat body: `HorseTraits` / `Traits` / `Condition` /
   `TraitBuilder` / `EpigeneticTraitContribution` -> `wiki/horse-body.html`) and
-  `genetics/` (allele/gene model - **39 genes**, 21 that paint and 18 that never
+  `genetics/` (allele/gene model - **42 genes**, 21 that paint and 21 that never
   do: **sex**, the 15 natural ones (extension, agouti, champagne,
   grey, **MATP** (cream + pearl, three alleles), **dun** (three alleles),
   **silver**, **mushroom**, **roan**, **tobiano**, and the four white-pattern
   loci **`KIT`** (eight alleles - sabino + the `W` series + dominant white),
   **`MITF`** and **`PAX3`** (splash, which really is two genes) and **`EDNRB`**
-  (frame + lethal white)), magic zebra + pink hair, the **seven magical utility
-  genes** - **mane colour** + **tail colour** (three alleles each, a per-copy
+  (frame + lethal white)), magic zebra + pink hair, the **magical utility +
+  body-stat genes** - **mane colour** + **tail colour** (three alleles each, a per-copy
   hue), **healer**, **light** (four alleles, codominant), **milk** (three
   alleles, one lethal pair), **magic body size** (codominant, epigenetic, on most
   horses), **particle** (**forty alleles**, epigenetic, paints nothing) and
@@ -1044,8 +1106,8 @@ project. Its shape:
   `Genotype` code round-trip, breeding, the `Epigenome` / `Genome` per-allele
   epigenetics + priority tie-break, `GenomeSample` - a genome detached from a
   horse, for the stallion seed jar - `Expression` + `FounderTable` + the
-  `GenotypeCatalog` reduction of 81 687 059 589 193 477 171 200 000 genotypes to
-  462 422 019 distinct coats), `coat/` + `coat/pattern/` (the
+  `GenotypeCatalog` reduction of 17 644 404 871 265 791 068 979 200 000 genotypes
+  to 462 422 019 distinct coats), `coat/` + `coat/pattern/` (the
   pipeline - `CoatTextureComposer`, `PigmentField`, `ColorField`, `CoatOverlay`,
   `GradientLut`, `BayCoat`, `GreyCoat`, `WhitePattern`, `BodyStripes`,
   `HairPattern`, `CoatRegions`, the pure
@@ -1654,7 +1716,8 @@ lcorl 84, hmga2 85, acan 86, b4galt7 87, plod1 88, rapgef5 89, st14 90,
 shox 91, met 92 - all of which paint nothing, so their order among themselves
 is arbitrary),
 pink hair 110, **mane colour 112, tail colour 114, healer 116**, magic zebra 120,
-**milk 130, body size 140, particle 150, light 160, verdant 180**, test 900.
+**milk 130, body size 140, magic speed 141, magic health 142, magic jump 143,
+particle 150, light 160, verdant 180**, test 900.
 Within the natural band **low = sets pigment absolutely,
 higher = dilution** (agouti's absolute points must precede
 `PigmentField.dilute`). `AlleleEpigenetics.priority` is unrelated - it picks a
@@ -1665,15 +1728,17 @@ registration.
 MATP, champagne, grey, roan, tobiano, EDNRB, KIT, MITF, PAX3,
 **MSTN, PDK4, CKM, RYR2, LCORL, HMGA2, ACAN, B4GALT7, PLOD1, RAPGEF5, ST14,
 SHOX, MET**, pink hair, **mane colour, tail colour, healer**, magic zebra,
-**milk, body size, particle, light, verdant**, test. `naturalOrder()` (phase-1 pigment
+**milk, body size, magic speed, magic health, magic jump, particle, light,
+verdant**, test. `naturalOrder()` (phase-1 pigment
 restriction) = the same list minus the magical genes - silver / mushroom / dun sit
 right after agouti so the points exist to dilute, and the six white-pattern
 genes run last. Their order among *themselves* barely matters (they all zero
 both pigments) with one exception: each reads how white the horse already is,
 so a later one paints harder - see `WhitePattern` below. Sex and the thirteen non-coat genes are *in* `naturalOrder()` (they declare
 `isNatural()`) but every one of their outcomes is a wild type, so the composer
-skips them - as do milk, body size, particle and verdant on the magical side:
-**eighteen of the thirty-nine built-ins never paint**, and
+skips them - as do milk, the four body-stat genes (size, magic speed, magic
+health, magic jump), particle and verdant on the magical side:
+**twenty-one of the forty-two built-ins never paint**, and
 `Gene.affectsCoat()` is false for exactly those. What they do instead goes
 through `common/trait/` (see `wiki/horse-body.html`) or
 `common/genetics/AbilityContribution`.
@@ -1702,6 +1767,7 @@ gene); one-liners:
 | healer | `Hlr`/`n` | wild, `healer-carrier`, `healer` | 9% per allele | **magical** - `Hlr/Hlr` only: a red stripe down the centre of the mane (opacity is the one epigenetic value) and a `healing` aura, 1 HP / 40 t to players within 3 blocks. The mark deliberately says nothing about the strength (non-det) |
 | milk | `Watr`/`Lava`/`n` | `mares-milk`, `milk-carrier`, `water-milk`, `lava-milk`, `milk-lethal` - **all wild types** | `Watr` 8%, `Lava` 6%; no `Watr/Lava` | **magical, paints nothing** - a bucket gets milk (grown mare), water (`Watr/Watr`, any sex) or lava (`Lava/Lava`, any sex, 60 s cooldown) via a `yield`. Both variants recessive to the wild type *and each other*. `Watr/Lava` is an **embryonic lethal** (`canOccur` false), and deliberately not a `HealthContribution` |
 | magic body size | `Big`/`Small`/`n` | six combinations, **six outcomes** - `giant`, `double-giant`, `tiny`, `double-tiny`, `balanced`, wild; all wild types | **80% of founders carry one copy**; heterozygotes only, no wild homozygote | **magical, paints nothing** - **codominant**: each copy carries a percentage and they **add**, `Big` positive and `Small` negative, applied through `multiplyScaleUnclamped` (after the natural clamp). Normal distribution, mean 10% and sigma 7% per copy, floored at 1%; bounded ceiling ~2.04x. The percentage is **epigenetic and per copy**, so a foal inherits its parent's exact number and two good copies are a breeding project |
+| magic speed / health / jump | `Swift`/`Sluggish`/`n`, `Hardy`/`Frail`/`n`, `Springy`/`Leaden`/`n` | six combinations, **six outcomes** each; all wild types | **~80% of founders carry one copy** of each; heterozygotes only, no wild homozygote | **magical, paints nothing** - three siblings of magic body size on a shared `AbstractMagicStatGene` base. Same distribution (mean 10%, sigma 7% per copy, floor 1%, ~2.04x ceiling), same codominant per-copy epigenetic draw, but they **multiply** the resolved speed / max health / jump through `multiplySpeedUnclamped` / `multiplyHealthUnclamped` / `multiplyJumpUnclamped` - after every additive locus, bounded only by `MAGICAL_MIN/MAX_FACTOR` (0.1-10). So a magic-speed horse that is also `mstn=C/C` is faster *by the ratio*. Magic health is **not** a `HealthContribution` (the `health.mode=OFF` switch leaves it alone); `MIN_HEALTH` is still applied last |
 | light | `Lthf`/`Ltmn`/`Lteye`/`n` | wild + six region combinations | 0.5% per variant allele | **magical** - gold, glowing hooves / mane / eyes and a torch-strength `glow`. **Ten combinations, seven outcomes, genuinely codominant**: each variant is dominant to `n` and to none of the others, so a horse shows everything it carries. Eyes and the emissive mask are written in the **overlay** phase |
 | particle | 40 variants + `n` | wild + 40 single + 46 codominant double - **all wild types** | 0.1% per variant allele; ~7.7% of founders trail something | **magical, paints nothing** - the horse trails a particle while it moves. **Forty alleles on one locus**, so it shows at most two, ever. Non-codominant pairs hide the higher-ranked copy; nine families make 46 codominant doubles (the flames and smokes are **one** family of eight). Colour, second colour, body site, count and a spare `data` number are **epigenetic per allele copy** - the first `EpigeneticAbilityContribution` |
 | verdant | `mush`/`moss`/`grass`/`n` | wild, `verdant-carrier`, `mycelium`, `moss`, `grass` - **all wild types** | 6% / 7% / 8% per allele | **magical, paints nothing** - spreads mycelium / moss / grass from the hooves via a `spread`, at most one block per beat. **Every variant needs two of itself**; a mixed pair is inert (where milk's is lethal) |

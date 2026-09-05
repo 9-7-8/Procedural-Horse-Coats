@@ -85,6 +85,15 @@
             ]
         },
         {
+            title: "Magical body-stat genes",
+            items: [
+                { href: "gene-body-size.html", text: "Magic body size", kind: "magical" },
+                { href: "gene-magic-speed.html", text: "Magic speed", kind: "magical" },
+                { href: "gene-magic-health.html", text: "Magic health", kind: "magical" },
+                { href: "gene-magic-jump.html", text: "Magic jump", kind: "magical" }
+            ]
+        },
+        {
             title: "Magical genes",
             items: [
                 { href: "gene-pink-hair.html", text: "Pink hair", kind: "magical" },
@@ -93,7 +102,6 @@
                 { href: "gene-healer.html", text: "Healer", kind: "magical" },
                 { href: "gene-magic-zebra.html", text: "Magic zebra", kind: "magical" },
                 { href: "gene-milk.html", text: "Milk (water / lava)", kind: "magical" },
-                { href: "gene-body-size.html", text: "Magic body size", kind: "magical" },
                 { href: "gene-light.html", text: "Light", kind: "magical" },
                 { href: "gene-particle.html", text: "Particle", kind: "magical" },
                 { href: "gene-verdant.html", text: "Verdant", kind: "magical" },

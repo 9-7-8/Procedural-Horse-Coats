@@ -48,7 +48,7 @@
     <span class="label">What is and isn't open</span>
     <p>
         <code>Genes</code> is an <strong>open registry</strong> for data-driven genes:
-        <code>Genes.register(SpecGene)</code> appends after the eighteen built-ins,
+        <code>Genes.register(SpecGene)</code> appends after the forty-two built-ins,
         sorted by declared <code>priority</code> then key, so registration order never
         decides how a horse looks. A <em>Java</em> gene from another mod still has to
         be added to this repository &mdash; the mod-bus registration hook, the
@@ -639,6 +639,17 @@ public void contribute(AllelePair pair, Genotype genotype, AlleleRandomness epig
     <code>AlleleRandomness</code> lives in <code>common/genetics/</code> rather than
     <code>common/trait/</code>, because the <em>ability</em> side needs exactly the
     same thing and the two packages must not depend on each other.
+</p>
+
+<p>
+    The four <a href="gene-body-size.html">magical body-stat genes</a> (size, speed,
+    health, jump) are the worked example, sharing an
+    <code>AbstractMagicStatGene</code> base: a codominant percentage per copy that
+    <em>multiplies</em> the stat through <code>TraitBuilder.multiplyScaleUnclamped</code>
+    (or <code>multiplySpeedUnclamped</code> / <code>&hellip;Health&hellip;</code> /
+    <code>&hellip;Jump&hellip;</code>), applied after every addition and bounded only
+    by the <code>MAGICAL_*</code> guards &mdash; the trait-side counterpart of the
+    coat&rsquo;s uncapped phase-3 accumulator.
 </p>
 
 <h3>...and epigenetics on an ability</h3>

@@ -165,12 +165,25 @@ public interface HealthContribution extends TraitContribution { }</code></pre>
 </p>
 
 <p>
-    Multipliers exist for one reason: dwarfism is a <em>proportional</em> change. A
-    <a href="gene-hmga2.html">pony</a> with
+    Among the <em>natural</em> loci, multipliers exist for one reason: dwarfism is a
+    <em>proportional</em> change. A <a href="gene-hmga2.html">pony</a> with
     <a href="gene-acan.html">chondrodysplasia</a> should end up small twice over, not
-    be dragged to the same absolute height as a draught horse with it. Speed, health
-    and jump stay purely additive, which keeps a gene&rsquo;s weight readable as
-    &ldquo;this allele is worth two hearts&rdquo; rather than &ldquo;it depends&rdquo;.
+    be dragged to the same absolute height as a draught horse with it. The natural
+    speed, health and jump loci stay purely additive, which keeps a gene&rsquo;s
+    weight readable as &ldquo;this allele is worth two hearts&rdquo; rather than
+    &ldquo;it depends&rdquo;.
+</p>
+
+<p>
+    The four <a href="gene-body-size.html">magical body-stat genes</a> &mdash; size,
+    speed, health and jump &mdash; are the deliberate exception. Each carries a
+    per-copy percentage that has to <em>scale</em> whatever the natural loci
+    settled on, so a magically fast pony is still slower than a magically fast
+    racehorse. They go through <code>multiplyScaleUnclamped</code> and the three
+    siblings beside it (<code>multiplySpeedUnclamped</code>,
+    <code>multiplyHealthUnclamped</code>, <code>multiplyJumpUnclamped</code>), every
+    one applied after all additions and bounded only by the <code>MAGICAL_*</code>
+    guards.
 </p>
 
 <h3 id="epigenetic">The per-horse twin <span class="allele magical">2026-09-04</span></h3>
@@ -191,11 +204,11 @@ public interface AlleleRandomness {
 <p>
     The plain interface is a pure function of the genotype, and for every natural gene
     that is exactly right: <code>p/p</code> is one particular pony and always the same
-    one. It cannot express
-    <a href="gene-body-size.html">the magical size locus</a> at all, because the
-    <em>point</em> of that gene is that two horses can both be &ldquo;big&rdquo; and
-    one of them be twice the other &mdash; which needs a number that varies between
-    horses carrying identical alleles.
+    one. It cannot express the four
+    <a href="gene-body-size.html">magical body-stat genes</a> at all, because the
+    <em>point</em> of them is that two horses can both be &ldquo;big&rdquo; (or fast,
+    or hardy, or springy) and one of them be twice the other &mdash; which needs a
+    number that varies between horses carrying identical alleles.
 </p>
 
 <div class="note rule">
@@ -216,10 +229,10 @@ public interface AlleleRandomness {
 <p>
     <strong>Two accessors, because a codominant gene needs both copies.</strong>
     <code>expressed()</code> answers "what does this horse show at this locus",
-    which is right wherever one locus produces one result. The magical size gene
-    cannot use it: its two alleles each contribute a percentage and they
-    <em>add</em>, so asking for the expressed copy would count one allele twice
-    and the other not at all. That is the same split
+    which is right wherever one locus produces one result. The four magical
+    body-stat genes cannot use it: their two alleles each contribute a percentage
+    and they <em>add</em>, so asking for the expressed copy would count one allele
+    twice and the other not at all. That is the same split
     <a href="gene-mane-color.html">mane colour</a> needed on the coat side.
 </p>
 
@@ -254,11 +267,23 @@ public interface AlleleRandomness {
     draught horse.
 </p>
 
+<p>
+    <strong>Speed, health and jump work the same way</strong>, minus the natural
+    clamp they never had: <code>multiplySpeedUnclamped</code> /
+    <code>multiplyHealthUnclamped</code> / <code>multiplyJumpUnclamped</code> take
+    the additive result and scale it, bounded only by
+    <code>MAGICAL_MIN_FACTOR</code> / <code>MAGICAL_MAX_FACTOR</code> (0.1 &ndash;
+    10). The <code>MIN_HEALTH</code> floor is still applied last, so no combination
+    of <code>Frail</code> and a disorder can resolve a horse to zero hearts.
+</p>
+
 <h2 id="invisible">The non-coat genes cost the coat nothing</h2>
 
 <p>
-    All thirteen of them paint nothing &mdash; as do three of the
-    <a href="gene-milk.html">magical utility genes</a>, on the same terms: every
+    All thirteen of them paint nothing &mdash; as do seven magical genes
+    (<a href="gene-milk.html">milk</a>, <a href="gene-verdant.html">verdant</a>,
+    <a href="gene-particle.html">particle</a> and the four
+    <a href="gene-body-size.html">body-stat genes</a>), on the same terms: every
     combination is an
     <a href="genetics-model.html">expression</a> marked <code>wildType</code>. That is
     not a loophole, it is what <code>wildType</code> means &mdash; <em>changes nothing

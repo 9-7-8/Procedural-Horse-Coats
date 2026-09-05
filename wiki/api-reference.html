@@ -68,7 +68,7 @@ genetics/
   GeneCodeDisplay.java      shortForm / wrap - human-readable codes
   GeneticCodeCombiner.java  the string-level and Genome-level breeding seam
   CoatPhenotype.java        coarse CHESTNUT / BLACK / BAY / WHITE
-  genes/                    the eighteen shipped Gene implementations
+  genes/                    the forty-two shipped Gene implementations
   spec/                     DATA-DRIVEN genes - a gene as a JSON file
     GeneSpec.java             the format, as records (header + layers + effects)
     SpecSchema.java           what each mask / op accepts, and its default
@@ -400,7 +400,7 @@ static Allele allele(String alleleKey);   // "&lt;gene&gt;.&lt;token&gt;"</code>
 <pre><code class="language-java">static void register(SpecGene gene);              // throws on a duplicate key; warns if out of band
 static void registerAll(Collection&lt;SpecGene&gt;);
 static List&lt;SpecGene&gt; loaded();                   // the data-driven genes, in gene order
-static void clearLoaded();                        // back to the eighteen built-ins
+static void clearLoaded();                        // back to the forty-two built-ins
 static Gene byKeyOrNull(String geneKey);          // null (not throw) if unregistered - for tolerant parse</code></pre>
 </div>
 
@@ -832,9 +832,12 @@ final class TraitBuilder {
     TraitBuilder addJump(double d);
     TraitBuilder addScale(double d);       // the height loci
     TraitBuilder multiplyScale(double f);  // dwarfism, which is proportional
-    TraitBuilder multiplyScaleUnclamped(double f);  // magical: applied AFTER the
-                                           // natural clamp, bounded only by
-                                           // MAGICAL_MIN_SCALE / MAGICAL_MAX_SCALE
+    TraitBuilder multiplyScaleUnclamped(double f);   // magical size: applied AFTER the
+                                            // natural clamp, bounded only by
+                                            // MAGICAL_MIN_SCALE / MAGICAL_MAX_SCALE
+    TraitBuilder multiplySpeedUnclamped(double f);   // magical speed  }
+    TraitBuilder multiplyHealthUnclamped(double f);  // magical health } bounded by MAGICAL_MIN_FACTOR
+    TraitBuilder multiplyJumpUnclamped(double f);    // magical jump   } / MAGICAL_MAX_FACTOR (0.1 - 10)
     TraitBuilder condition(Condition c);   // de-duplicated on the condition id
 }
 

@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Magic health &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="nav.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow magical">Magical gene <span class="sep">/</span> no coat effect</p>
+<h1>Magic health</h1>
+<p class="lede">
+    The magical version of the hearts the natural loci trade around &mdash; <a href="gene-mstn.html">MSTN</a> spends them for speed, <a href="gene-hmga2.html">HMGA2</a> gives them for being small. One of the <strong>four magical
+    body-stat genes</strong> &mdash; <a href="gene-body-size.html">size</a>,
+    <a href="gene-magic-speed.html">speed</a>,
+    <a href="gene-magic-health.html">health</a> and
+    <a href="gene-magic-jump.html">jump</a> &mdash; and like the other three,
+    <strong>most wild horses carry a copy</strong>, worth about a tenth either
+    way. Two copies of the same kind <strong>add</strong>, and no wild horse is
+    ever born with two.
+</p>
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd>horsegenetics.magic_health</dd></div>
+    <div><dt>Priority</dt><dd>142 (magical band)</dd></div>
+    <div><dt>Alleles</dt><dd><span class="allele dom">Hardy</span> <span class="allele dom">Frail</span> <span class="allele wild">n</span></dd></div>
+    <div><dt>Combinations</dt><dd>6, all carryable &mdash; <strong>6 outcomes</strong>, one each</dd></div>
+    <div><dt>Inheritance</dt><dd><strong>codominant</strong> &mdash; both copies contribute and the percentages add</dd></div>
+    <div><dt>Default allele</dt><dd>n</dd></div>
+    <div><dt>In the wild</dt><dd><strong>heterozygotes only</strong> &mdash; 40% <code>Hardy/n</code>, 40% <code>Frail/n</code>, 20% <code>n/n</code></dd></div>
+    <div><dt>Founder draws</dt><dd>1 &times; nextFloat()</dd></div>
+    <div><dt>Epigenetic draws</dt><dd>12 &times; nextFloat() per copy (one <code>nextGaussian()</code>)</dd></div>
+    <div><dt>Per copy</dt><dd>normal, mean <strong>10%</strong>, &sigma; <strong>7%</strong>, floor 1%</dd></div>
+    <div><dt>Coat effect</dt><dd><strong>none, ever</strong></dd></div>
+</dl>
+
+<div class="note warn">
+    <span class="label">Built 2026-09-05, not yet play-tested</span>
+    <p>
+        Nothing about a health-shifted horse has been seen in game. Checklist on
+        <a href="verification.html">To be verified</a>.
+    </p>
+</div>
+
+<h2 id="family">One of a family of four</h2>
+
+<p>
+    This gene is a thin subclass of <code>AbstractMagicStatGene</code>, which is
+    the <a href="gene-body-size.html">magic body size</a> pattern generalised to
+    the three additive stats. Everything on this page is true of
+    <a href="gene-magic-speed.html">magic speed</a>,
+    <a href="gene-magic-health.html">magic health</a> and
+    <a href="gene-magic-jump.html">magic jump</a> alike; only the stat it moves
+    and the allele names change. Magic body size is the odd one out &mdash; it
+    multiplies <em>scale</em>, which carries its own two-stage natural clamp, so
+    it kept its own class.
+</p>
+
+<p>
+    Because most wild horses carry a copy of all four, a wild-caught horse has a
+    quiet, independent wobble on every axis at once, and a horse that is
+    <em>remarkable</em> on any one of them is a breeding result rather than a
+    catch.
+</p>
+
+<h2 id="table">The combination table</h2>
+
+<table class="data">
+    <thead><tr><th>Combination</th><th>Outcome</th><th>Max health</th><th>Typical</th></tr></thead>
+    <tbody>
+        <tr><td><code>n/n</code></td><td>wild</td><td>unchanged</td><td>&times;1.00</td></tr>
+        <tr><td><code>Hardy/n</code></td><td><code>more</code></td><td>one copy&rsquo;s percentage</td><td>&times;~1.10</td></tr>
+        <tr><td><code>Hardy/Hardy</code></td><td><code>double-more</code></td><td><strong>both</strong> percentages, added</td><td>&times;~1.20</td></tr>
+        <tr><td><code>Frail/n</code></td><td><code>less</code></td><td>one copy&rsquo;s percentage off</td><td>&times;~0.90</td></tr>
+        <tr><td><code>Frail/Frail</code></td><td><code>double-less</code></td><td>both percentages off</td><td>&times;~0.80</td></tr>
+        <tr><td><code>Hardy/Frail</code></td><td><code>balanced</code></td><td>the two nearly cancel</td><td>&times;~1.00</td></tr>
+    </tbody>
+</table>
+
+<p>
+    <strong>Six combinations, six outcomes.</strong> A codominant locus is the
+    case where every combination genuinely differs, so collapsing any two rows
+    would be a lie about the gene. The contribution is signed &mdash;
+    <code>Hardy</code> positive, <code>Frail</code> negative &mdash; so the whole
+    table falls out of one line and <code>Hardy/Frail</code> cancels because a
+    positive and a negative are added, not because anything checks for it.
+</p>
+
+<h2 id="multiply">It multiplies, it does not add</h2>
+
+<p>
+    The natural health loci <em>add</em> a weight per copy. This gene takes the
+    sum of its two copies&rsquo; percentages and <strong>multiplies</strong>
+    whatever those loci settled on, through
+    <code>TraitBuilder.multiplyHealthUnclamped</code>, applied after every addition and
+    bounded only by <code>HorseTraits.MAGICAL_MIN_FACTOR</code> /
+    <code>MAGICAL_MAX_FACTOR</code> (ten times either way).
+</p>
+
+<div class="codebox">
+<div class="filename">common/genetics/genes/AbstractMagicStatGene.java</div>
+<pre><code class="language-java">@Override
+public void contribute(AllelePair pair, Genotype genotype, AlleleRandomness epigenetics,
+                       TraitBuilder out) {
+    double sum = signedDelta(pair.first(),  epigenetics.copy(0))
+               + signedDelta(pair.second(), epigenetics.copy(1));
+    if (sum != 0.0) {
+        applyMagic(out, 1.0 + sum);   // multiplyHealthUnclamped(1.0 + sum)
+    }
+}</code></pre>
+</div>
+
+<p>
+    Multiplying is what makes it compose the way you would want: a magically
+    hardy pony is still frailer than a magically hardy draught horse,
+    because the natural loci settle the horse&rsquo;s own health first and the
+    magic scales whatever that turned out to be. The <code>MIN_HEALTH</code> floor (half a heart) is still applied last, so a doubled <code>Frail</code> horse stacked with disorders cannot resolve to zero hearts &mdash; killing a horse is the damage path&rsquo;s job.
+</p>
+
+<h2 id="copies">It needs <em>both</em> copies&rsquo; epigenetics</h2>
+
+<p>
+    Every non-codominant epigenetic gene asks for &ldquo;the copy that
+    expresses&rdquo;, because one locus produces one result. A codominant one
+    cannot: asking for the expressed copy would count one allele twice and the
+    other not at all. So this gene takes an <code>AlleleRandomness</code> and
+    asks it for <code>copy(0)</code> and <code>copy(1)</code> &mdash; the same
+    accessor <a href="gene-body-size.html">magic body size</a> and
+    <a href="gene-mane-color.html">mane colour</a> need, for the same reason.
+</p>
+
+<p>
+    Each copy&rsquo;s percentage is a bounded normal draw (mean <strong>10%</strong>,
+    &sigma; <strong>7%</strong>) off <em>that copy&rsquo;s</em> stored epigenetic
+    seed, floored at 1% so a <code>Hardy</code> allele can never come out
+    subtracting. The seed is rolled once for a founder and inherited verbatim
+    with the allele, so a foal that inherits the copy inherits the exact
+    percentage &mdash; which is what makes breeding two <em>good</em> copies
+    together a real project.
+</p>
+
+<table class="data">
+    <thead><tr><th>Draw</th><th>One copy</th><th>Two copies</th></tr></thead>
+    <tbody>
+        <tr><td>&minus;6&sigma; (the floor)</td><td>&times;1.01</td><td>&times;1.02</td></tr>
+        <tr><td>mean</td><td>&times;1.10</td><td>&times;1.20</td></tr>
+        <tr><td>+1&sigma;</td><td>&times;1.17</td><td>&times;1.34</td></tr>
+        <tr><td>+6&sigma; (the bound)</td><td>&times;1.52</td><td><strong>&times;2.04</strong></td></tr>
+    </tbody>
+</table>
+
+<p>
+    The bounded Gaussian keeps the real reach near <strong>&times;2</strong>
+    even at two maximal copies, so the ten-times <code>MAGICAL_*_FACTOR</code>
+    clamp is a guard that never actually fires &mdash; the same story as
+    <a href="gene-body-size.html">magic body size</a>. Asked about a genotype
+    with no epigenome to read (a wiki table, a punnett display), the gene
+    reports the <em>midpoint</em>: exactly &times;1.10 for one copy, &times;1.20
+    for two.
+</p>
+
+<h2 id="wild">Only heterozygotes are born wild</h2>
+
+<div class="codebox">
+<pre><code class="language-java">FounderTable.builder()
+        .weight(Hardy,   n, 40.0)
+        .weight(Frail, n, 40.0)
+        .weight(n,      n, 20.0)
+        .build();</code></pre>
+</div>
+
+<p>
+    Written out rather than derived from Hardy-Weinberg, because random mating
+    is exactly what this table is <em>not</em>: about <strong>80%</strong> of
+    wild horses carry one copy, and <strong>no</strong> wild horse carries two
+    of anything. Every doubled horse in the world, in either direction, is
+    something somebody bred &mdash; the health loci&rsquo;s rule, pointed at
+    something worth having.
+</p>
+
+<h2 id="not-a-disorder">Not a health disorder</h2>
+
+<p>
+    It is <strong>not</strong> a <code>HealthContribution</code>. That marker
+    is what the server config&rsquo;s &ldquo;off&rdquo; position switches off,
+    and it is meant for <em>disorders</em> &mdash; the dwarfisms, the lethal
+    foals. Turning those off must not also quietly strip a horse of its
+    magical vigour. A <code>Frail/Frail</code> horse here is a horse with
+    fewer hearts, not a sick one; it never reports a <code>Condition</code>
+    and is never suppressed.
+</p>
+
+<h2 id="only">Deliberately health only</h2>
+
+<p>
+    It moves no other number. Not speed, not jump, not size. The natural loci already own the
+    trade-offs between the stats; this gene is a clean multiplier on one axis so
+    that the four can be bred independently.
+</p>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="horse-body.html">The horse&rsquo;s body</a>
+        <a href="gene-body-size.html">Magic body size</a>
+        <a href="gene-hmga2.html">HMGA2 &mdash; hearts for being a pony</a>
+        <a href="verification.html">What to check in-game</a>
+    </div>
+    Source: <code>common/genetics/genes/MagicHealthGene.java</code>,
+    <code>common/genetics/genes/AbstractMagicStatGene.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

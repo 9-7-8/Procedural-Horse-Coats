@@ -34,6 +34,17 @@
 <h2 id="open-issues">Open issues</h2>
 <p>Seen in-game, not fixed.</p>
 
+<div class="note warn">
+    <span class="label">Magic speed / health / jump (built 2026-09-05, NOT play-tested)</span>
+    <p>
+        Three new genes on the <a href="gene-body-size.html">magic body size</a>
+        pattern &mdash; codominant, epigenetic, paint nothing, ~80% wild carrier
+        rate each, so most wild horses now carry all four body-stat genes. The
+        genotype code is <strong>44 segments</strong> in-game (old saves will not
+        parse). Full checklist at <a href="#body-stats">&sect;0d</a>.
+    </p>
+</div>
+
 <div class="note">
     <span class="label">Genome display omits data-driven genes &mdash; fixed 2026-09-03, unverified</span>
     <p>
@@ -456,6 +467,57 @@
         <code>nffs</code>.</li>
     <li>Breed two carriers repeatedly and check the affected rate looks like one in
         four.</li>
+</ul>
+
+<h2 id="body-stats">&sect;0d &mdash; magic speed / health / jump (new 2026-09-05, NOT play-tested)</h2>
+
+<p>
+    <strong>Three new genes on the <a href="gene-body-size.html">magic body
+    size</a> pattern &mdash; codominant, epigenetic, paint nothing.</strong> Pages:
+    <a href="gene-magic-speed.html">magic speed</a>,
+    <a href="gene-magic-health.html">magic health</a>,
+    <a href="gene-magic-jump.html">magic jump</a>. The genotype code went from 41
+    segments to <strong>44</strong> in-game &mdash; old saves will not parse, start
+    a fresh world. Like magic body size, <strong>about 80% of wild horses carry a
+    copy of each</strong>, so most wild horses now carry all four. Summon tokens:
+    <code>magic_speed=Swift/Swift</code>, <code>magic_health=Hardy/Hardy</code>,
+    <code>magic_jump=Springy/Springy</code> (and the mirrors
+    <code>Sluggish</code> / <code>Frail</code> / <code>Leaden</code>).
+</p>
+
+<ul>
+    <li><strong>Walk into a herd.</strong> Same test as magic body size: the
+        speed / jump spread should read as a spread across the paddock without any
+        one horse feeling wrong. If every wild horse runs at the same pace the
+        &sigma; is doing nothing; if a random wild horse bolts like a
+        double-<code>Swift</code> it is too wide.</li>
+    <li><strong><code>magic_speed=Swift/Swift</code>.</strong> Ride it next to an
+        ordinary horse &mdash; it should be about a fifth faster (mean), more when
+        the copies rolled well. Then spawn one that is <em>also</em>
+        <code>mstn=C/C</code>: it must be faster still, and by the <em>ratio</em>
+        &mdash; the magic multiplies the natural speed, it does not add a flat
+        amount.</li>
+    <li><strong><code>magic_jump=Springy/Springy</code>.</strong> Does it clear a
+        noticeably higher wall? <code>Leaden/Leaden</code> &mdash; does it visibly
+        struggle with a 1-block jump vanilla horses clear?</li>
+    <li><strong><code>magic_health=Hardy/Hardy</code>.</strong> The health bar in
+        the mounted GUI should show more hearts than a wild horse.
+        <code>Frail/Frail</code> stacked with a survivable disorder
+        (<code>b4galt7</code>) &mdash; confirm the horse still has at least half a
+        heart and does not die on spawn (the <code>MIN_HEALTH</code> floor).</li>
+    <li><strong>Config OFF.</strong> Set <code>health.mode = OFF</code> and confirm
+        a <code>Hardy/Hardy</code> horse <em>keeps</em> its extra hearts &mdash; it
+        is not a disorder, so the switch must not touch it. (Only
+        <code>b4galt7</code> / <code>acan</code> / the lethal foals should change.)</li>
+    <li>Confirm you <strong>never</strong> catch a wild homozygote or a wild
+        <code>Swift/Sluggish</code> &mdash; every doubled horse is one you bred.</li>
+    <li>Breed two <code>Swift/n</code> carriers: a quarter of the foals should be
+        <code>Swift/Swift</code> and faster than either parent, and a fast foal
+        should inherit its parent&rsquo;s <em>percentage</em>, not a fresh roll.</li>
+    <li>The info panel and paper genome dump gained no rows, but the resolved
+        speed / health / jump they already print should reflect the multiplier.</li>
+    <li>Reload the world and confirm every horse is still the speed / hardiness /
+        jump it was.</li>
 </ul>
 
 <h2 id="particle">&sect;0c &mdash; the particle locus (new 2026-09-04, NOT play-tested)</h2>
