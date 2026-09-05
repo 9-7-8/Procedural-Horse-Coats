@@ -1,6 +1,5 @@
 package com.example.horsegenetics.neoforge.client;
 
-import com.example.horsegenetics.common.genetics.GeneCodeDisplay;
 import com.example.horsegenetics.common.horse.HorseRecord;
 import com.example.horsegenetics.common.horse.ParentStats;
 import com.example.horsegenetics.common.trait.Condition;
@@ -45,6 +44,7 @@ public final class HorseScreenHooks {
     private static boolean panelOpen = true;
 
     private static Button tabButton;
+    private static Button viewGenesButton;
     private static Button familyTreeButton;
     private static Button setBarnButton;
     private static EditBox barnBox;
@@ -80,6 +80,10 @@ public final class HorseScreenHooks {
         tabButton = Button.builder(Component.literal(panelOpen ? "<" : "i"), b -> togglePanel())
                 .bounds(px + PANEL_W, py, 12, 20).build();
         event.addListener(tabButton);
+
+        viewGenesButton = Button.builder(Component.literal("View Genes"), b -> openGeneInspect())
+                .bounds(px + 6, py + PANEL_H - 70, PANEL_W - 12, 18).build();
+        event.addListener(viewGenesButton);
 
         familyTreeButton = Button.builder(Component.literal("View Family Tree"), b -> openFamilyTree())
                 .bounds(px + 6, py + PANEL_H - 48, PANEL_W - 12, 18).build();
@@ -152,12 +156,7 @@ public final class HorseScreenHooks {
         g.text(font, Component.literal(r.sex().label(adult) + "   gen " + r.generation()), tx, ty, LABEL, false);
         ty += 11;
         g.text(font, Component.literal(clip(r.lineage().displayName(), 22)), tx, ty, VALUE, false);
-        ty += 11;
-        for (String line : wrap(font, shortGenes(r), PANEL_W - 14)) {
-            g.text(font, Component.literal(line), tx, ty, VALUE, false);
-            ty += 10;
-        }
-        ty += 1;
+        ty += 12;
 
         // Speed and health come off the live entity's attributes, not off a
         // stored field - there is no stored field any more, and the entity is
@@ -292,6 +291,7 @@ public final class HorseScreenHooks {
     }
 
     private static void applyVisibility() {
+        if (viewGenesButton != null) viewGenesButton.visible = panelOpen;
         if (familyTreeButton != null) familyTreeButton.visible = panelOpen;
         if (setBarnButton != null) setBarnButton.visible = panelOpen;
         if (barnBox != null) barnBox.visible = panelOpen;
@@ -306,30 +306,6 @@ public final class HorseScreenHooks {
 
     private static String clip(String s, int max) {
         return s.length() <= max ? s : s.substring(0, max - 1) + "…";
-    }
-
-    /** The compact gene string (degrades gracefully if the stored code won't parse). */
-    private static String shortGenes(HorseRecord r) {
-        return GeneCodeDisplay.shortForm(r.geneticCode());
-    }
-
-    /** Greedy word-wrap to {@code maxWidth} pixels, so the gene line never spills out of the panel. */
-    private static java.util.List<String> wrap(Font font, String s, int maxWidth) {
-        java.util.List<String> lines = new java.util.ArrayList<>();
-        StringBuilder cur = new StringBuilder();
-        for (String word : s.split(" ")) {
-            String candidate = cur.length() == 0 ? word : cur + " " + word;
-            if (cur.length() > 0 && font.width(candidate) > maxWidth) {
-                lines.add(cur.toString());
-                cur = new StringBuilder(word);
-            } else {
-                cur = new StringBuilder(candidate);
-            }
-        }
-        if (cur.length() > 0) {
-            lines.add(cur.toString());
-        }
-        return lines;
     }
 
     private static HorseRecord currentRecord() {
@@ -348,6 +324,13 @@ public final class HorseScreenHooks {
         HorseRecord record = currentRecord();
         if (record != null) {
             Minecraft.getInstance().setScreen(new FamilyTreeScreen(record));
+        }
+    }
+
+    private static void openGeneInspect() {
+        HorseRecord record = currentRecord();
+        if (record != null) {
+            Minecraft.getInstance().setScreen(new GeneInspectScreen(record));
         }
     }
 

@@ -67,6 +67,22 @@ public interface Gene {
     }
 
     /**
+     * A short, human-readable summary of what this gene <i>is</i> - one to three
+     * plain sentences for the in-game gene browser and tooltips, describing the
+     * locus as a whole rather than any one combination (each combination has its
+     * own sentence on its {@link Expression#description()}).
+     *
+     * <p>The authoritative, full description of every gene still lives in
+     * {@code wiki/gene-*.html}; this is the glanceable version. The default
+     * defers to {@link GeneDescriptions}, a central table of the built-ins, and
+     * returns {@code ""} for a gene it does not cover (a data-driven gene, for
+     * now) - a caller should treat empty as "no summary available".
+     */
+    default String description() {
+        return GeneDescriptions.of(key());
+    }
+
+    /**
      * <b>Gene priority</b> - a fixed constant of the gene (never data on a
      * horse, never varies between horses) that decides <b>processing order</b>.
      * Every gene has to answer; there is no default.
