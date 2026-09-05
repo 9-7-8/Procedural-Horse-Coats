@@ -80,37 +80,19 @@ public final class HorseGeneticsEventHandler {
         }
     }
 
-    @SubscribeEvent
-    static void onHorseJoin(EntityJoinLevelEvent event) {
-        if (event.getLevel().isClientSide()) return;
-        if (!(event.getEntity() instanceof Horse horse)) return;
-        net.minecraft.server.MinecraftServer server = event.getLevel().getServer();
-        if (server == null) return;
-
-        // Deferred to the next server tick ON PURPOSE. This event can fire from
-        // deep inside the chunk system (a chunk promoting its stored entities
-        // during DistanceManager.updateFutures), and ensureRecordAndCoat sets
-        // Attributes.SCALE, whose refreshDimensions -> findFreePosition collision
-        // scan re-enters the chunk system and corrupts the ticket-set iterator
-        // - a hard server crash under heavy spawn load. One tick later the
-        // entity is settled and nothing is mid-iteration.
-        server.execute(() -> {
-            if (horse.isAlive() && !horse.isRemoved() && horse.level() instanceof ServerLevel) {
-                ensureRecordAndCoat(horse);
-            }
-        });
-    }
-
-    private static void ensureRecordAndCoat(Horse horse) {
+    /**
+     * A reloaded or freshly-bred horse that already has a record: register it in
+     * the ancestry DB, show its name, fill an epigenome if it predates one, and
+     * <b>re-resolve its body</b> onto the entity's attributes.
+     *
+     * <p>Called from {@link HorseFoundingTickHandler} on the entity tick, never
+     * from the join event or a {@code server.execute} task - the
+     * {@code Attributes.SCALE} write inside {@link HorseRecords#applyTraitsToEntity}
+     * re-enters the chunk system from those contexts and crashes
+     * {@code DistanceManager.runAllUpdates}. See that handler.
+     */
+    static void ensureExistingRecordResolved(Horse horse) {
         NeoRng rng = new NeoRng(horse.getRandom());
-
-        if (!HorseRecords.hasRealRecord(horse)) {
-            // wild / imported horse - found a new line, pick a breed, join or
-            // start a natural herd. All of that is HerdManager's job.
-            HerdManager.assignFounder(horse, rng);
-            return;
-        }
-        // From here on: a reloaded or freshly-bred horse that already has a record.
         if (horse.level() instanceof ServerLevel level) {
             // bred (BabyEntitySpawnEvent already set the attachment) or reloaded:
             // make sure the global DB knows it and the floating name is showing

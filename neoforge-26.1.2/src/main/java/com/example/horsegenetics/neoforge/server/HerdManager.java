@@ -22,8 +22,12 @@ import net.minecraft.world.entity.animal.equine.Horse;
 import net.minecraft.world.level.biome.Biome;
 import net.neoforged.neoforge.network.PacketDistributor;
 
+import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -31,25 +35,39 @@ import java.util.UUID;
  * one tick after it spawns (deferred from
  * {@code HorseGeneticsEventHandler.onHorseJoin} via {@code server.execute}).
  *
- * <h2>Herds by proximity</h2>
+ * <h2>Herds by connected clump, with a deterministic lead</h2>
  * {@code Horse.finalizeSpawn} clobbers any custom pack {@code SpawnGroupData},
- * so the herd is formed here instead: when a wild horse is processed it looks
- * at the untamed wild horses around it.
+ * so the herd is formed here instead. A single 32-block look is <b>not enough</b>:
+ * {@code NaturalSpawner} walks each pack member a cumulative +/-5 blocks from the
+ * last, so a pack of four routinely spans more than {@link #HERD_RADIUS}
+ * end-to-end, and the deferred tasks do not run in spatial order (least of all
+ * for a pack streamed back off disk). The previous "first task to run founds,
+ * everyone within 32 joins it" rule therefore let a spread pack <b>found two
+ * herds of two breeds</b> whenever a far member's task ran before it could see
+ * the near member that had already founded.
+ *
+ * <p>So a joining horse now walks the <b>whole connected clump</b> (a flood-fill
+ * over untamed pack-mates, each within {@code HERD_RADIUS} of the next), starting
+ * from itself:
  * <ul>
- *   <li>If one of them is <b>already in a wild herd</b>, it <b>joins</b> that
- *       herd &mdash; same breed, same band, same lead.</li>
- *   <li>Else if one of them is <b>also a fresh natural spawn</b> (a pack-mate
- *       still waiting its turn), this horse <b>founds</b> a herd and becomes its
- *       lead stallion; the pack-mates join it as they are processed.</li>
- *   <li>Else it is genuinely alone &mdash; a lone <b>Unknown</b>, no herd.</li>
+ *   <li>If any clump member is <b>already in a wild herd</b>, it <b>joins</b>
+ *       that herd - same breed, band and lead.</li>
+ *   <li>Else it elects the clump's <b>lowest-UUID member</b> as the lead and
+ *       derives the breed and band from a {@link RandomSource} <b>seeded by that
+ *       lead's UUID</b> and the lead's biome. Every member of the clump computes
+ *       the same lead, so they all land on the same herd of the same breed no
+ *       matter whose task runs first - the elected lead included, when its own
+ *       task finally runs.</li>
+ *   <li>A clump of one - a genuinely solitary horse - is a lone <b>Unknown</b>.</li>
  * </ul>
- * So <b>every clump of wild horses is one herd of one breed</b>, and only a
- * truly solitary horse is Unknown.
  */
 public final class HerdManager {
 
-    /** How far to look for herd-mates / pack-mates. */
+    /** How far to look for herd-mates / pack-mates, per flood-fill step. */
     public static final double HERD_RADIUS = 32.0;
+
+    /** Safety bound on a single flood-fill (a clump is a handful of packs at most). */
+    private static final int MAX_CLUMP = 64;
 
     private HerdManager() {
     }
@@ -70,22 +88,36 @@ public final class HerdManager {
         Sex sex;
         UUID lead;
 
-        Horse herdMate = wildSpawn ? nearestHerdedWildHorse(horse, level) : null;
-        if (herdMate != null) {
-            // JOIN an existing herd
-            HorseCareAttachment mate = herdMate.getData(ModAttachments.HORSE_CARE.get());
+        Horse herdedMate = wildSpawn ? herdedMemberOfClump(horse, level) : null;
+        if (herdedMate != null) {
+            // JOIN a herd that some clump-mate has already formed.
+            HorseCareAttachment mate = herdedMate.getData(ModAttachments.HORSE_CARE.get());
             breed = Breeds.get(mate.herdBreed().orElse(""));
             band = parseBand(mate.herdBand().orElse(BandType.TRADITIONAL.name()));
-            lead = mate.herd().orElse(herdMate.getUUID());
-            sex = joinerSex(horse, band, rng);
-        } else if (wildSpawn && hasPendingPackmate(horse, level)) {
-            // FOUND a herd - this horse is the lead
-            breed = pickHerdBreed(level.getBiome(horse.blockPosition()), horse.getRandom());
-            band = horse.getRandom().nextInt(10) < 7 ? BandType.TRADITIONAL : BandType.BACHELOR;
-            lead = horse.getUUID();
-            sex = horse.isBaby() ? coin(rng) : Sex.MALE; // the stallion / bachelor head
+            lead = mate.herd().orElse(herdedMate.getUUID());
+            sex = lead.equals(horse.getUUID()) ? leadSex(horse, rng) : joinerSex(horse, band, rng);
+        } else if (wildSpawn) {
+            List<Horse> clump = freshClump(horse, level);
+            if (clump.size() > 1) {
+                // FOUND: elect the clump's lowest-UUID member as the lead and
+                // derive everything from its UUID, so every member agrees.
+                Horse leader = clump.stream()
+                        .min(Comparator.comparing(Horse::getUUID))
+                        .orElse(horse);
+                lead = leader.getUUID();
+                RandomSource seeded = seededFor(lead);
+                breed = pickHerdBreed(level.getBiome(leader.blockPosition()), seeded);
+                band = seeded.nextInt(10) < 7 ? BandType.TRADITIONAL : BandType.BACHELOR;
+                sex = lead.equals(horse.getUUID()) ? leadSex(horse, rng) : joinerSex(horse, band, rng);
+            } else {
+                // genuinely alone -> a lone Unknown
+                breed = Breeds.UNKNOWN;
+                band = BandType.TRADITIONAL;
+                lead = null;
+                sex = coin(rng);
+            }
         } else {
-            // genuinely alone (or not a natural spawn) -> a lone Unknown
+            // not a natural spawn (/summon, an imported horse) -> a lone Unknown
             breed = Breeds.UNKNOWN;
             band = BandType.TRADITIONAL;
             lead = null;
@@ -116,21 +148,71 @@ public final class HerdManager {
 
     // ------------------------------------------------------------------
 
-    private static Horse nearestHerdedWildHorse(Horse horse, ServerLevel level) {
-        return level.getEntitiesOfClass(Horse.class, horse.getBoundingBox().inflate(HERD_RADIUS),
-                        h -> h != horse && h.isAlive() && !h.isTamed()
-                                && h.getData(ModAttachments.HORSE_CARE.get()).inWildHerd())
-                .stream()
-                .min(Comparator.comparingDouble(horse::distanceToSqr))
-                .orElse(null);
+    /**
+     * Walk the connected clump of fresh, untamed, still-unprocessed pack-mates
+     * (each within {@link #HERD_RADIUS} of the next), starting from {@code origin}
+     * and including it. Transitive, so a pack that spans more than one radius
+     * end-to-end is still one clump.
+     */
+    private static List<Horse> freshClump(Horse origin, ServerLevel level) {
+        List<Horse> found = new ArrayList<>();
+        Set<UUID> seen = new HashSet<>();
+        ArrayDeque<Horse> queue = new ArrayDeque<>();
+        queue.add(origin);
+        seen.add(origin.getUUID());
+        found.add(origin);
+        while (!queue.isEmpty() && found.size() < MAX_CLUMP) {
+            Horse h = queue.poll();
+            for (Horse n : level.getEntitiesOfClass(Horse.class, h.getBoundingBox().inflate(HERD_RADIUS),
+                    o -> !seen.contains(o.getUUID()) && o.isAlive() && !o.isTamed()
+                            && o.getPersistentData().getBooleanOr(BreedSpawnHandler.WILD_SPAWN_KEY, false)
+                            && !HorseRecords.hasRealRecord(o))) {
+                seen.add(n.getUUID());
+                found.add(n);
+                queue.add(n);
+            }
+        }
+        return found;
     }
 
-    /** Another fresh natural spawn nearby that hasn't been processed yet - i.e. a pack-mate. */
-    private static boolean hasPendingPackmate(Horse horse, ServerLevel level) {
-        return !level.getEntitiesOfClass(Horse.class, horse.getBoundingBox().inflate(HERD_RADIUS),
-                h -> h != horse && h.isAlive() && !h.isTamed()
-                        && h.getPersistentData().getBooleanOr(BreedSpawnHandler.WILD_SPAWN_KEY, false)
-                        && !HorseRecords.hasRealRecord(h)).isEmpty();
+    /**
+     * The first horse in {@code origin}'s connected clump that is already in a
+     * wild herd, or {@code null}. The traversal passes <i>through</i> fresh
+     * pack-mates (so a herd formed at the far end of a spread pack is still
+     * found) as well as reaching horses that are themselves already herded.
+     */
+    private static Horse herdedMemberOfClump(Horse origin, ServerLevel level) {
+        Set<UUID> seen = new HashSet<>();
+        ArrayDeque<Horse> queue = new ArrayDeque<>();
+        queue.add(origin);
+        seen.add(origin.getUUID());
+        int visited = 0;
+        while (!queue.isEmpty() && visited++ < MAX_CLUMP) {
+            Horse h = queue.poll();
+            for (Horse n : level.getEntitiesOfClass(Horse.class, h.getBoundingBox().inflate(HERD_RADIUS),
+                    o -> !seen.contains(o.getUUID()) && o != origin && o.isAlive() && !o.isTamed())) {
+                HorseCareAttachment c = n.getData(ModAttachments.HORSE_CARE.get());
+                if (c.inWildHerd()) {
+                    return n;
+                }
+                boolean freshMate = n.getPersistentData().getBooleanOr(BreedSpawnHandler.WILD_SPAWN_KEY, false)
+                        && !HorseRecords.hasRealRecord(n);
+                if (freshMate) {
+                    seen.add(n.getUUID());
+                    queue.add(n);
+                }
+            }
+        }
+        return null;
+    }
+
+    /** A stable per-lead randomness: every clump member derives the same herd from this. */
+    private static RandomSource seededFor(UUID id) {
+        return RandomSource.create(id.getMostSignificantBits() ^ id.getLeastSignificantBits());
+    }
+
+    private static Sex leadSex(Horse horse, Rng rng) {
+        return horse.isBaby() ? coin(rng) : Sex.MALE; // the stallion / bachelor head
     }
 
     private static Sex joinerSex(Horse horse, BandType band, Rng rng) {
