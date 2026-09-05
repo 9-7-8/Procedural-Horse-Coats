@@ -136,6 +136,8 @@ public final class SpecGene implements Gene {
 
     @Override public boolean hasMagicCarrot() { return spec.carrot().enabled(); }
 
+    @Override public boolean magicCarrotHomozygous() { return spec.carrot().homozygous(); }
+
     @Override
     public java.util.Optional<FounderTable> chaosTable() {
         if (spec.chaos().isEmpty()) {

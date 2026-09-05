@@ -19,6 +19,7 @@ public final class ClientLifecycleHandler {
         ClientCoatCache.clear();
         ClientHorseRecordCache.clear();
         ClientHorseCareCache.clear();
+        ClientGeneDatabase.clear();
         GeneticCoatTextureFactory.clear();
     }
 

@@ -1,8 +1,12 @@
 package com.example.horsegenetics.neoforge.data;
 
 import com.example.horsegenetics.neoforge.HorseGenetics;
+import com.mojang.serialization.Codec;
+import java.util.List;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
@@ -33,6 +37,26 @@ public final class ModDataComponents {
             TYPES.register("bound_horse", () -> DataComponentType.<BoundHorse>builder()
                     .persistent(BoundHorse.CODEC)
                     .networkSynchronized(BoundHorse.STREAM_CODEC)
+                    .build());
+
+    /**
+     * The breeding-carrot effects an item carries, as
+     * {@link com.example.horsegenetics.common.genetics.CarrotEffect#id()}
+     * tokens (roadmap &sect;14): the four base carrots carry one, a magic gene
+     * carrot carries its {@code magic:<gene>:het|hom}, a combination carrot
+     * carries the merged list.
+     */
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<List<String>>> CARROT_EFFECTS =
+            TYPES.register("carrot_effects", () -> DataComponentType.<List<String>>builder()
+                    .persistent(Codec.STRING.listOf())
+                    .networkSynchronized(ByteBufCodecs.STRING_UTF8.apply(ByteBufCodecs.list()))
+                    .build());
+
+    /** The gene a {@code research_paper} documents - a gene key ({@code <modid>.<gene>}). */
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<String>> RESEARCH_GENE =
+            TYPES.register("research_gene", () -> DataComponentType.<String>builder()
+                    .persistent(Codec.STRING)
+                    .networkSynchronized(ByteBufCodecs.STRING_UTF8)
                     .build());
 
     public static void register(IEventBus modEventBus) {

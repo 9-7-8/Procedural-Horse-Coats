@@ -2,9 +2,12 @@ package com.example.horsegenetics.neoforge.server;
 
 import com.example.horsegenetics.common.Rng;
 import com.example.horsegenetics.common.breed.BreedLineage;
+import com.example.horsegenetics.common.genetics.CarrotEffect;
+import com.example.horsegenetics.common.genetics.GameteBias;
 import com.example.horsegenetics.common.genetics.GeneticCodeCombiner;
 import com.example.horsegenetics.common.genetics.Genome;
 import com.example.horsegenetics.common.genetics.Genotype;
+import com.example.horsegenetics.neoforge.data.CarrotWindowAttachment;
 import com.example.horsegenetics.common.horse.HorseRecord;
 import com.example.horsegenetics.common.horse.ParentStats;
 import com.example.horsegenetics.common.horse.Sex;
@@ -86,10 +89,17 @@ public final class HorseBreedingHandler {
         Horse damHorse = aIsDam ? parentA : parentB;
         Horse sireHorse = aIsDam ? parentB : parentA;
 
+        Genome damGenome = genomeOf(damHorse, damRecord, rng);
+        Genome sireGenome = genomeOf(sireHorse, sireRecord, rng);
+
+        // Breeding-carrot windows (roadmap §14): fold each fed parent's live
+        // window into a GameteBias, then consume both windows.
+        GameteBias damBias = takeCarrotBias(damHorse, damGenome, rng);
+        GameteBias sireBias = takeCarrotBias(sireHorse, sireGenome, rng);
+
         boolean born = applyBredFoal(child, damHorse,
-                genomeOf(damHorse, damRecord, rng), damRecord,
-                genomeOf(sireHorse, sireRecord, rng), sireRecord,
-                event.getCausedByPlayer(), rng);
+                damGenome, damRecord, sireGenome, sireRecord,
+                event.getCausedByPlayer(), rng, damBias, sireBias);
         if (!born) {
             // the drawn genotype was an embryonic lethal - the embryo never
             // implants, so there is no foal to add to the world
@@ -119,7 +129,18 @@ public final class HorseBreedingHandler {
                                  Genome damGenome, HorseRecord damRecord,
                                  Genome sireGenome, HorseRecord sireRecord,
                                  @Nullable Player breeder, Rng rng) {
-        Genome childGenome = GeneticCodeCombiner.combine(damGenome, sireGenome, rng);
+        return applyBredFoal(child, damHorse, damGenome, damRecord, sireGenome, sireRecord, breeder, rng,
+                GameteBias.NONE,
+                GameteBias.NONE);
+    }
+
+    static boolean applyBredFoal(Horse child, Horse damHorse,
+                                 Genome damGenome, HorseRecord damRecord,
+                                 Genome sireGenome, HorseRecord sireRecord,
+                                 @Nullable Player breeder, Rng rng,
+                                 GameteBias damBias,
+                                 GameteBias sireBias) {
+        Genome childGenome = GeneticCodeCombiner.combine(damGenome, sireGenome, rng, damBias, sireBias);
 
         // The foal's breed label: same-breed -> that breed, two breeds -> a
         // "A x B cross", cross-of-the-same-pair stays that cross, anything
@@ -187,6 +208,11 @@ public final class HorseBreedingHandler {
         HorseRecords.apply(child, childRecord);
         HorseRecords.applyTraitsToEntity(child, childTraits, true);
 
+        // Breeding a foal with a gene discovers that gene for the breeder.
+        if (breeder != null) {
+            GeneDiscoveryHandler.discoverFrom(breeder, childGenome.genotype());
+        }
+
         if (childTraits.viability() == Viability.LETHAL_AT_BIRTH) {
             LethalFoalHandler.announceLethalBirth(child, childRecord, childTraits, breeder);
         }
@@ -205,6 +231,24 @@ public final class HorseBreedingHandler {
         Genome genome = Genome.of(record.genotype(), rng);
         HorseRecords.apply(parent, record.withGenome(genome));
         return genome;
+    }
+
+    /**
+     * Fold a fed parent's live breeding-carrot window into a {@link GameteBias}
+     * and <b>consume</b> the window. {@link GameteBias#NONE} for an unfed parent
+     * (or a {@code null} one - the seed-jar path has no live sire).
+     */
+    private static GameteBias takeCarrotBias(@Nullable Horse parent, Genome parentGenome, Rng rng) {
+        if (parent == null) {
+            return GameteBias.NONE;
+        }
+        long now = parent.level().getGameTime();
+        CarrotWindowAttachment window = parent.getData(ModAttachments.CARROT_WINDOW.get());
+        java.util.List<CarrotEffect> effects = window.activeEffects(now);
+        if (!window.effects().isEmpty()) {
+            parent.setData(ModAttachments.CARROT_WINDOW.get(), CarrotWindowAttachment.EMPTY);
+        }
+        return CarrotEffect.fold(effects, parentGenome.genotype(), rng);
     }
 
     /**

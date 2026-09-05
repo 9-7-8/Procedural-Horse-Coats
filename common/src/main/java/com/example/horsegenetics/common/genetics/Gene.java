@@ -109,6 +109,15 @@ public interface Gene {
     }
 
     /**
+     * Whether this gene's magic carrot makes the game treat the fed parent as
+     * <b>homozygous</b> ({@code <Gene><Gene>}) rather than the default
+     * <b>heterozygous</b> ({@code n<Gene>}) for that gamete (&sect;14.2).
+     */
+    default boolean magicCarrotHomozygous() {
+        return false;
+    }
+
+    /**
      * What the <b>chaos carrot</b> rolls when it lands on this gene (&sect;14.1)
      * - a distribution over this gene's own combinations, the same shape as
      * {@link #founderTable} and kept separate so the two can differ. An author

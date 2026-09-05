@@ -54,6 +54,15 @@ public final class ModAttachments {
                     .copyOnDeath()
                     .build());
 
+    // A live breeding-carrot window (roadmap §14): the effects fed to this
+    // horse and when they lapse. Stored only while active, consumed on
+    // breeding, part of the determinism input. NOT copyOnDeath.
+    public static final Supplier<AttachmentType<CarrotWindowAttachment>> CARROT_WINDOW =
+            ATTACHMENT_TYPES.register("carrot_window", () -> AttachmentType
+                    .builder(() -> CarrotWindowAttachment.EMPTY)
+                    .serialize(CarrotWindowAttachment.MAP_CODEC)
+                    .build());
+
     private ModAttachments() {
     }
 }

@@ -4,6 +4,7 @@ import com.example.horsegenetics.common.genetics.Allele;
 import com.example.horsegenetics.common.genetics.Expression;
 import com.example.horsegenetics.common.genetics.Gene;
 import com.example.horsegenetics.common.genetics.Genes;
+import com.example.horsegenetics.neoforge.network.WriteResearchPaperPayload;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
@@ -11,6 +12,7 @@ import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -23,15 +25,20 @@ import java.util.Locale;
  * single tab.
  *
  * <h2>Gene Database tab</h2>
- * In <b>creative</b>, every registered gene, alphabetically by display name.
- * Filter by typing part of a gene name <i>or</i> an allele (token or label);
- * click a gene to see its summary, every allele it defines, and the
- * plain-English description of every phenotype it can produce. Outside creative
- * the tab is a short note - it is a reference, not something the survival player
- * is meant to have memorised for them.
+ * Every registered gene is listed (nothing about a horse is hidden - the info
+ * panel and genotype code always show every gene it carries). A gene the player
+ * has <b>met</b> - by taming or breeding a horse that carries it, or reading a
+ * research paper - shows full detail: its summary, alleles, every phenotype, the
+ * variants seen, and whether its magic-carrot recipe is unlocked. An undiscovered
+ * gene shows only its name and a nudge. Creative sees every gene as discovered.
  *
- * <p>Pure client screen: all of this is in {@code common/} and already on the
- * client, so there is nothing to ask the server for.
+ * <p><b>Write research paper</b> - for a discovered gene with a magic carrot, a
+ * button spends one book for a {@code research_paper} on that gene (roadmap
+ * &sect;16.2), which is what makes knowledge shareable.
+ *
+ * <p>The known set comes from {@code ClientGeneDatabase} (a mirror of the
+ * server's per-player {@code GeneDatabaseData}); everything else is in
+ * {@code common/} already on the client.
  */
 public final class HorseBrowserScreen extends Screen {
 
@@ -77,6 +84,7 @@ public final class HorseBrowserScreen extends Screen {
     private float detailMaxScroll = 0f;
 
     private EditBox searchBox;
+    private Button writeButton;
     private final List<Gene> allGenes;
     private List<Gene> filtered = List.of();
 
@@ -98,6 +106,11 @@ public final class HorseBrowserScreen extends Screen {
     private boolean creative() {
         Minecraft mc = Minecraft.getInstance();
         return mc.player != null && mc.player.getAbilities().instabuild;
+    }
+
+    /** Full detail for a gene the player has met (creative sees everything). */
+    private boolean discovered(Gene g) {
+        return g != null && (creative() || ClientGeneDatabase.knows(g.key()));
     }
 
     // --- geometry ---
@@ -178,7 +191,24 @@ public final class HorseBrowserScreen extends Screen {
         searchBox.setValue(search);
         addRenderableWidget(searchBox);
 
+        // "Write research paper" - spend one book for a paper on the selected,
+        // discovered gene (roadmap §16.2). Positioned bottom-left of the detail
+        // pane; visibility is toggled each frame.
+        int bw = Math.min(200, detailRight() - detailLeft());
+        writeButton = Button.builder(Component.translatable("gui.horsegenetics.write_paper"),
+                        b -> writePaper())
+                .bounds(detailLeft(), panelBottom() - 24, bw, 18)
+                .build();
+        writeButton.visible = false;
+        addRenderableWidget(writeButton);
+
         applyFilter();
+    }
+
+    private void writePaper() {
+        if (!selectedKey.isEmpty()) {
+            ClientPacketDistributor.sendToServer(new WriteResearchPaperPayload(selectedKey));
+        }
     }
 
     private void applyFilter() {
@@ -238,7 +268,7 @@ public final class HorseBrowserScreen extends Screen {
             }
             return true;
         }
-        if (tab != Tab.GENE_DATABASE || !creative()) {
+        if (tab != Tab.GENE_DATABASE) {
             return false;
         }
         int idx = rowAt(event.x(), event.y());
@@ -281,7 +311,7 @@ public final class HorseBrowserScreen extends Screen {
 
     @Override
     public boolean mouseScrolled(double mx, double my, double sx, double sy) {
-        if (tab == Tab.GENE_DATABASE && creative()) {
+        if (tab == Tab.GENE_DATABASE) {
             if (mx >= listLeft() && mx <= listRight() && my >= listTop() && maxListScroll() > 0) {
                 listScroll = Math.max(0, Math.min(maxListScroll(), listScroll - (int) Math.signum(sy)));
                 return true;
@@ -305,10 +335,17 @@ public final class HorseBrowserScreen extends Screen {
             search = searchBox.getValue();
             applyFilter();
         }
-        boolean showSearch = tab == Tab.GENE_DATABASE && creative();
+        boolean showSearch = tab == Tab.GENE_DATABASE;
         if (searchBox != null) {
             searchBox.visible = showSearch;
             searchBox.active = showSearch;
+        }
+        if (writeButton != null) {
+            Gene sel = selected();
+            boolean canWrite = tab == Tab.GENE_DATABASE && sel != null
+                    && ClientGeneDatabase.knows(sel.key()) && sel.hasMagicCarrot();
+            writeButton.visible = canWrite;
+            writeButton.active = canWrite;
         }
 
         int pl = panelLeft();
@@ -349,25 +386,8 @@ public final class HorseBrowserScreen extends Screen {
         g.fill(pr - 1, pt + 18, pr, pb, BORDER);
 
         if (tab == Tab.GENE_DATABASE) {
-            if (creative()) {
-                drawGeneList(g, mouseX, mouseY);
-                drawGeneDetail(g);
-            } else {
-                drawNotCreative(g, pl, pr, pt, pb);
-            }
-        }
-    }
-
-    private void drawNotCreative(GuiGraphicsExtractor g, int pl, int pr, int pt, int pb) {
-        String[] lines = {
-                "The gene database is a creative-mode reference.",
-                "Switch to Creative to browse every gene, allele and phenotype."
-        };
-        int cy = (pt + 18 + pb) / 2 - lines.length * 6;
-        for (String line : lines) {
-            g.text(this.font, Component.literal(line),
-                    (pl + pr) / 2 - this.font.width(line) / 2, cy, NAME_DIM);
-            cy += 12;
+            drawGeneList(g, mouseX, mouseY);
+            drawGeneDetail(g);
         }
     }
 
@@ -391,7 +411,8 @@ public final class HorseBrowserScreen extends Screen {
             } else if (i == hovered) {
                 g.fill(l - 2, ry, r, ry + ROW_H, ROW_HOVER);
             }
-            drawFitted(g, gene.name(), l, ry + 3, r - l - 6, sel ? NAME : NAME_DIM);
+            int col = !discovered(gene) ? TAG : (sel ? NAME : NAME_DIM);
+            drawFitted(g, gene.name(), l, ry + 3, r - l - 6, col);
         }
         g.disableScissor();
 
@@ -418,7 +439,7 @@ public final class HorseBrowserScreen extends Screen {
         int l = detailLeft();
         int r = detailRight();
         int top = contentTop();
-        int bottom = panelBottom() - 8;
+        int bottom = panelBottom() - 8 - (writeButton != null && writeButton.visible ? 24 : 0);
         int w = r - l;
 
         if (gene == null) {
@@ -436,10 +457,25 @@ public final class HorseBrowserScreen extends Screen {
         y += lineH + 1;
 
         String tags = gene.key() + "   ·   " + (gene.isNatural() ? "natural" : "magical")
-                + "   ·   priority " + gene.priority()
+                + "   ·   " + gene.rarity().name().toLowerCase()
                 + (gene.affectsCoat() ? "" : "   ·   no coat effect");
         g.text(this.font, Component.literal(tags), l, y, TAG);
         y += lineH + 4;
+
+        if (!discovered(gene)) {
+            g.text(this.font, Component.literal("Not yet discovered"), l, y, EXPR_OFF);
+            y += lineH;
+            for (String line : GuiText.wrap(this.font,
+                    "Tame or breed a horse that carries this gene, or read a research paper, "
+                            + "to fill in its entry. Nothing about a horse is hidden - this list "
+                            + "only tracks what you have met.", w)) {
+                g.text(this.font, Component.literal(line), l, y, DESC);
+                y += lineH;
+            }
+            g.disableScissor();
+            detailMaxScroll = 0f;
+            return;
+        }
 
         String summary = gene.description();
         if (summary == null || summary.isBlank()) {
@@ -485,6 +521,19 @@ public final class HorseBrowserScreen extends Screen {
                 }
             }
             y += 3;
+        }
+
+        if (gene.hasMagicCarrot()) {
+            y += 4;
+            boolean unlocked = ClientGeneDatabase.carrotUnlocked(gene.key());
+            g.text(this.font, Component.literal("Magic carrot recipe: " + (unlocked ? "unlocked" : "locked")),
+                    l, y, unlocked ? EXPR_ON : EXPR_OFF);
+            y += lineH;
+            List<String> seen = ClientGeneDatabase.seenTokens(gene.key());
+            if (!creative() && !seen.isEmpty()) {
+                drawFitted(g, "Variants seen: " + String.join(", ", seen), l, y, w, DESC);
+                y += lineH;
+            }
         }
 
         g.disableScissor();

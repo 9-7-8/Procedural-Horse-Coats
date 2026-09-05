@@ -58,6 +58,68 @@ public sealed interface CarrotEffect {
     }
 
     // ------------------------------------------------------------------
+    // Serialisation - a flat string token, so the item component and the live
+    // carrot window are just a List<String>. No polymorphic codec needed.
+    // ------------------------------------------------------------------
+
+    static java.util.Optional<CarrotEffect> parse(String token) {
+        if (token == null) {
+            return java.util.Optional.empty();
+        }
+        switch (token) {
+            case "mutinogenic": return java.util.Optional.of(new Mutinogenic());
+            case "stabilizer": return java.util.Optional.of(new Stabilizer());
+            case "magnifier": return java.util.Optional.of(new Magnifier());
+            case "chaos": return java.util.Optional.of(new Chaos());
+            default:
+                if (token.startsWith("magic:")) {
+                    String[] p = token.split(":", 3);
+                    if (p.length == 3 && (p[2].equals("hom") || p[2].equals("het"))) {
+                        return java.util.Optional.of(new MagicGene(p[1], p[2].equals("hom")));
+                    }
+                }
+                return java.util.Optional.empty();
+        }
+    }
+
+    /** Parse a token list, silently dropping anything unrecognised (a retired gene, a bad edit). */
+    static List<CarrotEffect> parseList(List<String> tokens) {
+        List<CarrotEffect> out = new ArrayList<>();
+        for (String t : tokens) {
+            parse(t).ifPresent(out::add);
+        }
+        return List.copyOf(out);
+    }
+
+    static List<String> tokens(List<CarrotEffect> effects) {
+        List<String> out = new ArrayList<>(effects.size());
+        for (CarrotEffect e : effects) {
+            out.add(e.id());
+        }
+        return List.copyOf(out);
+    }
+
+    /** True if this list contains both a stabilizer and a magnifier, or two magic carrots that disagree. */
+    static boolean isContradictory(List<CarrotEffect> effects) {
+        boolean stab = false;
+        boolean magn = false;
+        Map<String, Boolean> magic = new LinkedHashMap<>();
+        for (CarrotEffect e : effects) {
+            if (e instanceof Stabilizer) {
+                stab = true;
+            } else if (e instanceof Magnifier) {
+                magn = true;
+            } else if (e instanceof MagicGene mg) {
+                Boolean prev = magic.putIfAbsent(mg.geneKey(), mg.homozygous());
+                if (prev != null && prev != mg.homozygous()) {
+                    return true;
+                }
+            }
+        }
+        return stab && magn;
+    }
+
+    // ------------------------------------------------------------------
 
     /**
      * Collapse a carrot's effect list into one {@link GameteBias} for this

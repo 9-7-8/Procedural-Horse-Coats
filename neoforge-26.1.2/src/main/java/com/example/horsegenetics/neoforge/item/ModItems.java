@@ -30,11 +30,12 @@ import net.neoforged.neoforge.registries.DeferredRegister;
  *   <li><b>Breeding carrots</b> ({@link #MUTINOGENIC_CARROT},
  *       {@link #CHAOS_CARROT}, {@link #STABILIZER_CARROT},
  *       {@link #MAGNIFIER_CARROT}) - the four general breeding modifiers.</li>
- *   <li><b>{@link #MAGIC_GENE_CARROT}</b> - one generic item (the roadmap's
- *       per-gene parameterisation needs a data component; deferred).</li>
- *   <li><b>{@link #PLACEHOLDER_GENE_BOOK}</b> - stand-in for the research paper
- *       that gates carrot recipes. Literally named "PLACEHOLDER GENE BOOK";
- *       to be replaced.</li>
+ *   <li><b>{@link #MAGIC_GENE_CARROT}</b> - one item parameterised by a
+ *       {@code carrot_effects} component holding a {@code magic:<gene>:het|hom}
+ *       token, produced by the paper-driven {@code MagicCarrotRecipe}.</li>
+ *   <li><b>{@link #RESEARCH_PAPER}</b> ({@link ResearchPaperItem}) - carries a
+ *       {@code gene} component; read to unlock that gene's carrot recipe, and
+ *       the ingredient {@code MagicCarrotRecipe} matches on.</li>
  *   <li><b>{@link #EMPTY_SEED_JAR} / {@link #STALLION_SEED_JAR}</b> - the
  *       assisted-reproduction vessels. Items only; no collection / pregnancy
  *       mechanic (owner: IVF is out of scope for now).</li>
@@ -90,8 +91,12 @@ public final class ModItems {
     // --- magic gene carrot (roadmap §14.2) - one generic item for now -----
     public static final DeferredItem<Item> MAGIC_GENE_CARROT = simple("magic_gene_carrot");
 
-    // --- knowledge (roadmap §16.2) - placeholder for the research paper ---
-    public static final DeferredItem<Item> PLACEHOLDER_GENE_BOOK = simple("placeholder_gene_book");
+    // --- knowledge (roadmap §16.2) - the research paper -------------------
+    // Carries a `gene` component. Reading it adds the gene to the player's
+    // database and unlocks that gene's magic-carrot recipe; it is also the
+    // ingredient the parameterised MagicCarrotRecipe matches on.
+    public static final DeferredItem<ResearchPaperItem> RESEARCH_PAPER =
+            register("research_paper", ResearchPaperItem::new);
 
     // --- assisted reproduction vessels (roadmap §15.1) -------------------
     // Empty jar: filled at a stallion. Stallion seed jar: carries a

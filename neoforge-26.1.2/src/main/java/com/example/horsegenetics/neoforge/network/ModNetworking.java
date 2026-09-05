@@ -72,6 +72,14 @@ public final class ModNetworking {
                         ClientHorseRecordCache.acceptTreeData(payload.records()))
         );
 
+        registrar.playToClient(
+                GeneDatabaseSyncPayload.TYPE,
+                GeneDatabaseSyncPayload.STREAM_CODEC,
+                (payload, context) -> context.enqueueWork(() ->
+                        com.example.horsegenetics.neoforge.client.ClientGeneDatabase.accept(
+                                payload.seenByGene(), payload.carrotUnlocked()))
+        );
+
         registrar.playToServer(
                 FamilyTreeRequestPayload.TYPE,
                 FamilyTreeRequestPayload.STREAM_CODEC,
@@ -121,6 +129,16 @@ public final class ModNetworking {
                     if (FMLEnvironment.isProduction()) return; // dev-only find-my-horses toggle
                     if (context.player() instanceof ServerPlayer serverPlayer) {
                         com.example.horsegenetics.neoforge.server.DebugHighlightHandler.toggle(serverPlayer);
+                    }
+                })
+        );
+
+        registrar.playToServer(
+                WriteResearchPaperPayload.TYPE,
+                WriteResearchPaperPayload.STREAM_CODEC,
+                (payload, context) -> context.enqueueWork(() -> {
+                    if (context.player() instanceof ServerPlayer serverPlayer) {
+                        com.example.horsegenetics.neoforge.server.ResearchPaperWriter.write(serverPlayer, payload.geneKey());
                     }
                 })
         );
