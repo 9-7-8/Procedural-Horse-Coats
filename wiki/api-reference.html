@@ -976,7 +976,7 @@ List&lt;String&gt; GeneCodeDisplay.wrap(Genotype genotype, int lines, int maxCha
     a wild spawn.
 </p>
 
-<h3><code>WhitePattern</code> &mdash; the two shapes white spotting comes in</h3>
+<h3><code>WhitePattern</code> &mdash; the two shapes white spotting comes in, and the face</h3>
 
 <div class="codebox">
 <pre><code class="language-java">public final class WhitePattern {
@@ -987,8 +987,36 @@ List&lt;String&gt; GeneCodeDisplay.wrap(Genotype genotype, int lines, int maxCha
     // the MITF / PAX3 shape: a sharply bounded waterline rising up the horse
     static PigmentField splash(CoatBuildContext ctx, PigmentView coat,
                                String geneKey, double strength);
+
+    // the face marking every white locus draws from - one long and eight
+    // floats off epi, always, whatever marking falls out
+    static FaceMarking faceMarking(Rng epi, Skin skin, double strength, double jag);
+
+    final class FaceMarking {
+        boolean covers(Part part, Face face, BodyPoint point);
+        boolean hasStar();
+        boolean hasStripe();
+        boolean hasSnip();
+        double  halfWidth();      // of the stripe, in body units
+        boolean isBald();
+        boolean marksAnything();
+        String  describe();       // "star and snip", "blaze", "bald face"
+    }
 }</code></pre>
 </div>
+
+<p>
+    <code>faceMarking</code> is the one call a white locus makes for the head: three
+    independent components &mdash; a patch on the forehead, a band down the nose, a patch at
+    the nostrils &mdash; plus a width, from which every named marking falls out.
+    <code>describe()</code> reads the horseman&rsquo;s term back off them; nothing ever chose
+    it. <code>strength</code> picks the <em>distribution</em> and <code>jag</code> is how far
+    the margin wanders in body units, which is how the same vocabulary gives
+    <code>KIT</code> a torn star and splash a clean blaze. Unlike the two body painters this
+    one is handed the <code>Rng</code> directly, because the caller is already inside its own
+    draw sequence. Full reference:
+    <a href="pipeline.html#face-markings">face markings</a>.
+</p>
 
 <p>
     One painter per <em>family</em>, not per gene and certainly not per allele: the

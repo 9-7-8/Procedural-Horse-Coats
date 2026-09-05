@@ -50,10 +50,20 @@ markings that live on the *same* gene can never appear together, while two on
 | Gene | In the wild | What it does |
 |------|-------------|--------------|
 | KIT | see below | The big one: **eight** versions of a single gene, from a horse with just a star and a sock, through **sabino** (tall jagged stockings, a belly patch, a wide blaze), up to **sabino-white** at ninety per cent white, and finally **dominant white** - solid white, no markings, hiding everything else the horse carries. Because they are all one gene, a horse gets **at most two** of them, and can never be both sabino-white and dominant white. |
-| Splash (two genes) | uncommon | White as if the horse were **dipped in paint from below**: high leg white with a clean, sharp edge, white up the belly, a broad blaze to a bald face. Splash comes from **two** different genes, so a horse can carry it twice over - and one that does is markedly whiter than one carrying either alone. |
+| Splash (two genes) | one of them on **most horses** | White as if the horse were **dipped in paint from below**: leg white with a clean, sharp edge, white up the belly, a broad blaze. Splash comes from **two** different genes, so a horse can carry it twice over - and one that does is markedly whiter than one carrying either alone. The milder of the two is on about **nine wild horses in ten**, the way a minimal splash allele really is: one copy is roughly what an ordinary horse looks like, and it is the *second* copy people notice. Breed two horses you caught wild and about **one foal in five** comes out bolder than either parent. |
 | Roan | uncommon | White hairs mixed evenly through the **body** while the head, mane, tail and lower legs stay solid - blue roan on a black, red roan on a chestnut. The density varies horse to horse. |
 | Tobiano | rare | Big, smooth-edged **white patches that cross the topline**, with white legs and a coloured head. Every tobiano's patches are different. |
 | Frame overo | rare | Ragged white on the **sides of the neck and barrel that stops short of the spine** - the mirror of tobiano - usually with a broad white face. Some carriers are marked so little you would never guess. **Careful with this one:** a foal that inherits frame from *both* parents is born pure white and does not survive. It happens one time in four when two carriers are bred. |
+
+**The face** gets its own vocabulary, shared by all of those genes, so a marking
+looks the same however the horse came by it. There are three pieces - a **star**
+on the forehead, a **stripe** down the nose, a **snip** at the nostrils - and
+every marking you can name is some combination of them: star and snip, star and
+stripe, a stripe widening into a **blaze**, and a blaze widening into a **bald
+face** that takes the eyes and the sides of the head. The more white a horse's
+genes carry, the further along that ladder it tends to land, but it is a
+tendency and not a rule: two horses with identical genes can wear a star and a
+blaze. Star and snip are *detached* patches, with coloured face all round them.
 
 And then there are the ones no real horse has:
 

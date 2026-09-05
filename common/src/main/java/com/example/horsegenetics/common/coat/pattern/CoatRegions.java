@@ -191,11 +191,13 @@ public final class CoatRegions {
      * {@code halfWidth} body-units either side of {@code z == 0}, up
      * {@code lengthFraction} of the head length from the nose.
      *
-     * <p><b>No built-in gene calls this any more</b> - the white-pattern loci
-     * draw their own face marking, because the width and length have to scale
-     * with the outcome. It is also the whole face-marking vocabulary the mod
-     * has: a star and a snip are <i>detached</i> patches, not short stripes, so
-     * neither this nor anything else can draw one yet.
+     * <p><b>Nothing calls this.</b> Face markings come from
+     * {@link WhitePattern#faceMarking} now - one shared vocabulary of a star, a
+     * stripe and a snip plus a width, which every white locus draws from, and
+     * which can express the <i>detached</i> patches this shape structurally
+     * cannot. Kept only so this warning has somewhere to live: a centreline
+     * stripe is not a face-marking vocabulary, and reaching for one here is how
+     * the loci ended up with four reinventions of the same wrong shape.
      */
     public static void whitenBlaze(Skin skin, PigmentField field, double halfWidth, double lengthFraction) {
         double back = 0;

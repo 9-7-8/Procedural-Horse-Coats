@@ -50,15 +50,85 @@
     </p>
 </div>
 
-<div class="note warn">
-    <span class="label">Face markings are still one shape everywhere</span>
+<div class="note">
+    <span class="label">PAX3 <code>SW2</code> is now the ordinary horse (built 2026-09-05, NOT play-tested)</span>
     <p>
-        Every white-pattern locus draws its face marking as a centreline stripe of some
-        width and length &mdash; wider and longer as the outcome gets stronger. That
-        covers stripe, blaze and bald face, and it does <em>not</em> cover
-        <strong>star</strong> or <strong>snip</strong>, which are detached patches rather
-        than a short stripe. Wants a shared <code>WhitePattern.face(kind, &hellip;)</code>
-        the loci call, not four reinventions.
+        <strong>90% of wild horses carry one copy of <code>SW2</code></strong> &mdash; the
+        founder table is written out as 90% <code>SW2/N</code>, 1% <code>SW4/N</code>, 9%
+        <code>N/N</code>, heterozygotes only. Measured over 20&nbsp;000 draws: horses showing
+        any white-pattern locus went <strong>33.3% &rarr; 93.6%</strong>, mean white coverage
+        of a wild horse <strong>32.5% &rarr; 49.5%</strong>, and a foal of two wild-caught
+        parents is <code>splash-bold</code> <strong>0.07% &rarr; 20.5%</strong>. See
+        <a href="gene-pax3.html">the gene page</a>.
+    </p>
+    <p>
+        <strong>What to look at.</strong> Spawn into a fresh world and ride past a herd: nine
+        horses in ten should have clean-edged leg white and a face marking, and they should
+        still look like a <em>population</em> rather than like one horse repeated &mdash;
+        every copy carries its own epigenetic waterline height and its own face marking, so
+        the question is whether that reads as variety at a glance. Then breed two wild-caught
+        horses a few times: about one foal in five should come out visibly bolder than either
+        parent, which is the moment this change exists for.
+    </p>
+    <div class="note warn">
+        <span class="label">Known to interact badly &mdash; check this first</span>
+        <p>
+            The white audit found that <code>WhitePattern.splash</code> measures its waterline
+            against the <strong>whole-horse</strong> height (hoof to ear tip) while the barrel
+            top is at 0.622 of that and the legs only reach 0.326. So <code>S_SPLASH</code> of
+            0.34 puts the line at 0.325&ndash;0.386 &mdash; <strong>all four legs entirely
+            white</strong> &mdash; and that is now what 90% of wild horses look like.
+            &ldquo;Minimal marking&rdquo; currently means four white legs. If the herd reads as
+            uniformly white-legged rather than as horses with socks, that is this bug and not
+            the frequency; the fix is in CLAUDE.md known gap #30.
+        </p>
+    </div>
+</div>
+
+<div class="note">
+    <span class="label">Face markings: star, stripe and snip (built 2026-09-05, NOT play-tested)</span>
+    <p>
+        All four white loci now draw their face marking from one shared vocabulary,
+        <code>WhitePattern.faceMarking(&hellip;)</code> &mdash; three components (a patch on
+        the forehead, a band down the nose, a patch at the nostrils) plus a width, from which
+        every named marking falls out. <strong>Star and snip are new</strong>: both are
+        detached patches, which the old centreline band structurally could not draw. See
+        <a href="pipeline.html#face-markings">the pipeline page</a>.
+    </p>
+    <p>
+        <strong>What to look at.</strong> Spawn-egg a horse with <code>kit=W20/N</code>
+        several times and re-roll the epigenetics: about a third should carry a plain
+        <strong>star</strong> and about a third nothing at all, with the odd
+        <strong>snip</strong> and star-and-snip. Then walk up the ladder &mdash;
+        <code>kit=W20/W20</code>, <code>kit=SB1/N</code>, <code>mitf=SW1/SW1</code>,
+        <code>ednrb=O/N</code>, <code>kit=SB1/SB1</code> &mdash; and check that it reads as
+        star &rarr; star and stripe &rarr; blaze &rarr; bald face. Specifically worth
+        confirming, because none of it has been seen on a model:
+    </p>
+    <ul>
+        <li>a <strong>star really reads as a star</strong> at 128px &mdash; it is only three
+            to five texels across, and the concern is that it reads as a smudge or is lost
+            in the template&rsquo;s own shading;</li>
+        <li>a <strong>snip</strong> lands on the nostrils rather than on the lip or the
+            chin;</li>
+        <li>the star sits <strong>above the eyes</strong> and not on top of the skull &mdash;
+            the head box is pitched 30&deg; and its bounds are the rest-pose AABB, so the
+            projection there is approximate;</li>
+        <li>a blaze <strong>no longer wraps under the jaw</strong> (it used to, on every
+            locus), and a bald face still does;</li>
+        <li>the <strong>foal</strong>, which has no separate muzzle box &mdash; the whole face
+            is one part, so face space is measured over the head alone and a snip has to
+            still land at the nose end of it;</li>
+        <li>the <code>KIT</code>-vs-splash <strong>margin difference</strong> is visible on
+            the face as well as the body: a <code>KIT</code> star should have torn edges and
+            a splash blaze clean ones.</li>
+    </ul>
+    <p>
+        <strong>Old saves.</strong> No format change &mdash; but every horse carrying a
+        <code>KIT</code>, <code>MITF</code>, <code>PAX3</code> or <code>EDNRB</code> variant
+        repaints, because the face draws replaced the old ones in those genes&rsquo; draw
+        order. 330 of the 450 golden rows are byte-identical; the 120 that moved are exactly
+        those four loci.
     </p>
     <p>
         The old &ldquo;splash leg edges are a perfect ring&rdquo; issue is <strong>gone

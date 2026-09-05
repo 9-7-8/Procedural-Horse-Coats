@@ -31,7 +31,7 @@
     <div><dt>Combinations</dt><dd>6, of which 5 a horse can carry, landing on 3 outcomes</dd></div>
     <div><dt>Outcomes</dt><dd>wild, <code>splash</code>, <code>splash-bold</code></dd></div>
     <div><dt>Default allele</dt><dd>N</dd></div>
-    <div><dt>Wild frequency</dt><dd><code>SW2</code> 2%, <code>SW4</code> 0.5%, rest <code>N</code></dd></div>
+    <div><dt>Wild frequency</dt><dd><strong>90% <code>SW2/N</code></strong>, 1% <code>SW4/N</code>, 9% <code>N/N</code> &mdash; heterozygotes only</dd></div>
     <div><dt>Founder draws</dt><dd>1 &times; nextFloat()</dd></div>
     <div><dt>Deterministic</dt><dd><strong>no</strong></dd></div>
     <div><dt>Epi draws</dt><dd>nextLong() seed, nextFloat() waterline, nextFloat() face width, nextFloat() face length</dd></div>
@@ -103,6 +103,69 @@
         read it from when that lands.
     </p>
 </div>
+
+<h2>The common one</h2>
+
+<p>
+    <strong>Nine wild horses in ten carry one copy of <code>SW2</code></strong>, which makes
+    this the only locus in the mod whose variant is the <em>ordinary</em> horse rather than
+    the exception. That is deliberate, and it is how minimal splash works in life: a mild
+    splash allele is near-ubiquitous, and what one copy buys a horse &mdash; clean-edged leg
+    white, a little belly white, a blaze &mdash; is roughly what most horses look like. The
+    pattern people notice is the <em>doubled</em> one.
+</p>
+
+<h3>Why the table is written out</h3>
+
+<p>
+    Two reasons, and either one on its own rules out
+    <code>FounderTable.hardyWeinberg</code>:
+</p>
+
+<ul>
+    <li><strong>90% heterozygous is arithmetically unreachable under Hardy-Weinberg.</strong>
+        The heterozygote share is <code>2pq</code>, which peaks at <strong>50%</strong> at
+        <code>p = q = 0.5</code>. No allele frequency anywhere makes nine horses in ten
+        heterozygous in a randomly-mating population. A table that says so has to say so
+        directly.</li>
+    <li><strong>The doubled combinations are the reward for breeding.</strong>
+        <code>SW2/SW2</code> is the bold outcome and must not turn up in a wild-caught
+        horse &mdash; the same rule the health loci and
+        <a href="gene-body-size.html">magic body size</a> follow. Left to Hardy-Weinberg,
+        one copy on nine horses in ten would have made <em>eighty-one per cent</em> of wild
+        horses bold splash, which is not a pattern any more; it is the base coat.</li>
+</ul>
+
+<h3>What it does to the population</h3>
+
+<table>
+<thead><tr><th></th><th>before (2%, Hardy-Weinberg)</th><th>now (90% het)</th></tr></thead>
+<tbody>
+<tr><td>wild horses showing any white-pattern locus</td><td>33.3%</td><td><strong>93.6%</strong></td></tr>
+<tr><td>mean white coverage of a wild-caught horse</td><td>32.5%</td><td><strong>49.5%</strong></td></tr>
+<tr><td>foal of two wild parents is <code>splash-bold</code></td><td>0.07%</td><td><strong>20.5%</strong></td></tr>
+</tbody>
+</table>
+
+<p>
+    Both consequences are the point rather than side effects. Bold splash becomes the
+    commonest thing a player breeds by accident and the first white pattern they meet. And
+    because both splash loci read the coat they are handed
+    (<a href="pipeline.html#white-finds-white">white finds white</a>), a horse that is
+    <em>also</em> <a href="gene-mitf.html"><code>MITF</code></a> splash is now the usual case
+    rather than a rarity &mdash; which is the interaction the two-locus split exists to show.
+</p>
+
+<h2>The face</h2>
+
+<p>
+    The same shared <a href="pipeline.html#face-markings">the shared face-marking vocabulary</a> that
+    <a href="gene-mitf.html"><code>MITF</code></a> uses, at the same <code>jag</code> of
+    <code>0.11</code> and at this locus&rsquo;s own strengths. That is the point of it being
+    shared: a horse carrying one copy at each splash locus draws two markings from one
+    vocabulary, and they compound the way the body white does, instead of two hand-written
+    blazes landing on top of each other and reading as one.
+</p>
 
 <h2>Deafness</h2>
 

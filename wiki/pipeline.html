@@ -561,6 +561,117 @@ double s = clamp01(strength + STACKING * alreadyWhite(coat, ctx.skin()));</code>
     irregularity comes from wobbling <em>where</em> the line falls instead.
 </p>
 
+<h2 id="face-markings">Face markings: star, stripe, snip</h2>
+
+<p>
+    Every white locus draws its face marking from <strong>one shared
+    vocabulary</strong>, <code>WhitePattern.faceMarking(&hellip;)</code>, so that a star is
+    the same shape whichever gene produced it. Before it, all four loci drew the same
+    thing &mdash; a centreline band starting at the nose and running some distance back,
+    wider and longer as the outcome got stronger. That covers stripe, blaze and bald face
+    and it <em>cannot</em> express a <strong>star</strong> or a <strong>snip</strong>,
+    because both of those are patches with coloured face on every side of them.
+</p>
+
+<h3>Three components, not eight named shapes</h3>
+
+<p>
+    Horsemen name eight or nine markings, but those are not eight shapes. They are
+    <strong>three independent components</strong> plus one width, and every named marking
+    is a combination of them:
+</p>
+
+<table>
+<thead><tr><th>Component</th><th>Where</th><th>Detached?</th></tr></thead>
+<tbody>
+<tr><td><strong>star</strong></td><td>the forehead, just above the eyes (<code>t&nbsp;=&nbsp;0.30</code>)</td><td>yes, unless a stripe runs out of it</td></tr>
+<tr><td><strong>stripe</strong></td><td>a band down the bridge of the nose; this is the component that becomes a blaze</td><td>&mdash;</td></tr>
+<tr><td><strong>snip</strong></td><td>the nostrils (<code>t&nbsp;=&nbsp;0.90</code>)</td><td>yes, unless the stripe reaches it</td></tr>
+</tbody>
+</table>
+
+<p>
+    A width on the stripe carries the rest: past <code>1.15</code> body units it reads as a
+    <strong>blaze</strong>, past <code>2.55</code> as a <strong>bald face</strong> &mdash;
+    which is also the point at which white reaches the sides of the head and takes the
+    eyes. <code>FaceMarking.describe()</code> reads the horseman&rsquo;s name back off the
+    components; nothing ever chose it, which is the check that three booleans and a width
+    really do span the vocabulary.
+</p>
+
+<h3>Face space</h3>
+
+<p>
+    <code>t</code> runs 0 at the poll to 1 at the nose tip, measured along body-space
+    <code>x</code> over the head and muzzle <em>together</em>, so the same numbers mean the
+    same anatomy on the adult (which has a separate <code>MUZZLE</code> box) and on the
+    foal (which does not). <code>z</code> is the distance off the centreline in body units.
+    The eyes sit near <code>t&nbsp;=&nbsp;0.4</code> on both meshes, which is what anchors
+    the star above them and the snip down at the nostrils.
+</p>
+
+<p>
+    The <strong>underside</strong> of the jaw and chin (<code>Face.BOTTOM</code>) is only
+    ever white on a true bald face. An ordinary blaze runs down the front of the face and
+    stops there; the old painter tested the centreline on every plane of the box, so every
+    blaze it drew wrapped under the jaw.
+</p>
+
+<h3>Strength picks the distribution, not the marking</h3>
+
+<p>
+    A locus does not decide that a horse has a snip. It decides how much white the horse
+    tends toward, and the marking falls out of that &mdash; which is the honest shape of it,
+    and what finally makes <a href="gene-kit.html"><code>KIT</code></a>&rsquo;s weak end
+    mean something. <code>W20/N</code> has always been described as &ldquo;a star and a
+    sock&rdquo;; now it can actually be one.
+</p>
+
+<table>
+<thead><tr><th>Strength</th><th>Typical outcome</th></tr></thead>
+<tbody>
+<tr><td><code>0.12</code> (<code>KIT</code> minimal)</td><td>star 37%, nothing at all 29%, snip 9%, star and snip 12%</td></tr>
+<tr><td><code>0.24</code> (<code>KIT</code> modest)</td><td>star and stripe 23%, star 21%, stripe 15%, nothing 13%</td></tr>
+<tr><td><code>0.42</code> (<code>KIT</code> sabino)</td><td>star and stripe 44%, with a snip 22%, stripe 22%; a bare face is essentially gone</td></tr>
+<tr><td><code>0.62</code> (<code>MITF</code> bold splash)</td><td>blaze 60%, blaze to the nostrils 40%</td></tr>
+<tr><td><code>0.80</code> (<code>EDNRB</code> frame)</td><td>blaze 49%, blaze to the nostrils 41%, bald face 10%</td></tr>
+<tr><td><code>0.93</code> (<code>KIT</code> near-white)</td><td>bald face 61%</td></tr>
+</tbody>
+</table>
+
+<p>
+    The one parameter a gene passes beside strength is <code>jag</code> &mdash; how far the
+    margin wanders, in body units. That is the sabino/splash difference carried onto the
+    face: <code>0.42</code> for <code>KIT</code>, <code>0.11</code> for the two splash loci,
+    <code>0.34</code> for frame. A <code>KIT</code> star has torn edges and a splash blaze
+    has clean ones, for the same reason their body margins do.
+</p>
+
+<h3>The draw order is fixed and unconditional</h3>
+
+<div class="codebox">
+<div class="filename">common/coat/pattern/WhitePattern.java</div>
+<pre><code class="language-java">long seed        = epi.nextLong();    // the margin wobble
+double starRoll  = epi.nextFloat();   // presence
+double stripeRoll= epi.nextFloat();
+double snipRoll  = epi.nextFloat();
+double widthRoll = epi.nextFloat();   // stripe -> blaze -> bald face
+double offsetRoll= epi.nextFloat();   // markings are rarely dead centre
+double reachRoll = epi.nextFloat();   // how far down the face the stripe runs
+double starSize  = epi.nextFloat();
+double snipSize  = epi.nextFloat();</code></pre>
+</div>
+
+<p>
+    <strong>One long and eight floats, every time</strong>, including for the components
+    that turn out absent. This is the lesson the particle locus paid for: a draw made only
+    when a flag is set silently repaints every horse in every save the first time that
+    flag&rsquo;s odds move. <code>FaceMarkingTest</code> pins it by running an empty marking
+    and a bald face through a <code>FakeRng</code> holding exactly nine values and asserting
+    both exhaust it.
+</p>
+
+
 <div class="page-foot">
     <div class="seealso">
         <a href="body-space.html">Body space &amp; regions</a>

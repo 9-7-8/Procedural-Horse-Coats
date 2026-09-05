@@ -132,6 +132,112 @@ project. Its shape:
 
 ## Status snapshot (keep this current)
 
+- **Built 2026-09-05, NOT yet play-tested: `PAX3` `SW2` is the ordinary horse -
+  90% of founders carry one copy.** Owner's call, and it is how minimal splash
+  works in life: a mild splash allele is near-ubiquitous, and what one copy buys
+  a horse is roughly what most horses look like. `Pax3Gene`'s founder table went
+  from `hardyWeinberg(SW2 2%, SW4 0.5%)` to a written-out
+  **90% `SW2/N` / 1% `SW4/N` / 9% `N/N`**.
+  - **It had to be written out, for two independent reasons.** Hardy-Weinberg's
+    heterozygote share is `2pq`, which **peaks at 50%** - there is no allele
+    frequency anywhere that makes 90% of a randomly-mating population
+    heterozygous, so the table has to say it directly. And left to HWE, one copy
+    on nine horses in ten would put **81% of wild horses at `SW2/SW2`**, the bold
+    outcome - not a pattern any more, the base coat. Heterozygotes only, baseline
+    last, the `MagicSizeGene` rule.
+  - **Measured effect on the wild population** (20 000 founder draws, 400 baked
+    coats): horses showing any white-pattern locus **33.3% -> 93.6%**; mean white
+    coverage of a wild-caught horse **32.5% -> 49.5%**; a foal of two wild-caught
+    parents is `splash-bold` **0.07% -> 20.5%**. Bold splash is now the commonest
+    thing a player breeds by accident, and a horse that is *also* `MITF` splash is
+    the usual case rather than a rarity - which is the interaction the two-locus
+    split exists to show.
+  - **It makes the splash calibration bug load-bearing.** The audit that opened
+    this session found that `WhitePattern.splash` measures its waterline against
+    the **whole-horse** height (hoof to ear tip, span 33.75) while the barrel top
+    is at 0.622 of that and the legs only reach 0.326. So `S_SPLASH = 0.34` puts
+    the line at frac 0.325-0.386 - i.e. **all four legs entirely white** - and
+    that is now what 90% of wild horses look like. "Minimal marking" currently
+    means four white legs. Fixing the mapping (`s = 1` should land at the crest,
+    not the ear tip) is no longer optional tuning; see the known-gaps entry.
+  - `:common:test` **333 green**. `coat-golden.txt` **untouched** - the golden
+    cases are explicit codes, not founder draws, so nothing about any individual
+    coat moved. No format change; old saves parse.
+  - **Deliberately not done:** the same treatment for the particle locus. It was
+    asked for on the premise that a heterozygote is silent, and it is not -
+    `ParticleGene.expressionOf` returns `singles[a]` when the second copy is `n`,
+    so **one variant copy visibly trails its particle**. At 90% het, 90% of wild
+    horses would trail something (today: 7.7%). Owner chose to skip it rather
+    than take that tonal shift.
+
+- **Built 2026-09-05, NOT yet play-tested: face markings become a family - star,
+  stripe and snip.** All four white loci now draw the head from one shared
+  vocabulary, `WhitePattern.faceMarking(epi, skin, strength, jag)` +
+  `WhitePattern.FaceMarking`, which closes the standing "every locus draws the
+  same centreline stripe" gap. Machinery is `wiki/pipeline.html#face-markings`;
+  the shape of it:
+  - **Three components, not eight named shapes.** Horsemen name eight or nine
+    markings, but they are **three independent components** - a patch on the
+    forehead, a band down the nose, a patch at the nostrils - plus one width, and
+    every named marking is a combination of them. `describe()` reads the term back
+    off the components ("star and snip", "blaze to the nostrils", "bald face");
+    nothing ever chose it, which is the check that three booleans and a width
+    really do span the vocabulary. `FaceMarkingTest` asserts every name is
+    reachable.
+  - **Star and snip are the point** - both are *detached* patches, white with
+    coloured face on every side, which the old painter structurally could not
+    draw: it was one centreline band starting at the nose and running back, so its
+    whole vocabulary was stripe / blaze / bald face. Measured: a star-only marking
+    is 12 texels on `HEAD.TOP` and **nothing on the muzzle**; a snip-only is 7
+    texels on `MUZZLE.TOP` and **nothing on the head**.
+  - **Face space is `t` from poll (0) to nose tip (1)**, measured along body-space
+    `x` over head *and* muzzle together, so the same numbers mean the same anatomy
+    on the adult (separate `MUZZLE` box) and the foal (no muzzle box at all). The
+    eyes sit near `t = 0.4` on both meshes, which is what anchors the star at 0.30
+    and the snip at 0.90.
+  - **Strength picks the distribution, not the marking.** A locus does not decide
+    a horse has a snip; it decides how much white the horse tends toward. At
+    `S_MINIMAL` 0.12 that is star 37% / nothing 29% / snip 9% / star+snip 12%; at
+    sabino 0.42 a bare face is essentially gone; at 0.62 it is a blaze; at 0.93 a
+    bald face three times in five. **This is what finally makes `W20/N` mean its
+    own description** - "a star and a sock" - which was prose nothing implemented.
+  - **`jag` carries the sabino/splash difference onto the face** - 0.42 for `KIT`,
+    0.11 for the two splash loci, 0.34 for frame. Same reason their body margins
+    differ, one parameter rather than two painters.
+  - **A blaze no longer wraps under the jaw.** `Face.BOTTOM` on the head and
+    muzzle only whitens at bald-face width. The old painter tested the centreline
+    on *every* plane of the box, so the underside of the jaw went white on every
+    blaze from every locus - a real bug, found while wiring this up.
+  - **The draw is fixed and unconditional: one long and eight floats, every
+    time**, including for components that turn out absent. The particle locus's
+    lesson, applied: a draw made only when a flag is set silently repaints every
+    horse in every save the first time that flag's odds move. `FaceMarkingTest`
+    runs an empty marking and a bald face through a nine-value `FakeRng` and
+    asserts both exhaust it.
+  - **`EdnrbGene` stopped hand-rolling its own face.** It was a bare
+    `|z| <= faceHalf` over the whole head with no top and no shape; it is now
+    `FACE_STRENGTH = 0.80` / `FACE_JAG = 0.34` on the shared vocabulary, which is
+    the bald-faced pattern frame is supposed to be. `FACE_HALF_MIN`/`_RANGE` and
+    `WhitePattern.withinFace` are gone.
+  - New `FaceMarkingTest` (12 tests). `:common:test` **333 green**,
+    `:neoforge-26.1.2:build` green, creator parity **3 832 checks / 48 cases**
+    (untouched - the creator only ports `KIT`'s dominant-white outcome, not
+    `WhitePattern`). `coat-golden.txt` regenerated: **330 of 450 rows
+    byte-identical**, and the 120 that moved are exactly the rows carrying a
+    `KIT` / `MITF` / `PAX3` / `EDNRB` variant. No format change, so old saves
+    still parse - those horses just repaint.
+  - **Deliberately not built:** giving tobiano a face marking (real tobianos
+    commonly carry a star or blaze, but the gene's documented behaviour is a
+    coloured head and that is a separate call); **medicine hat / war shield**,
+    which is not a face marking at all but a retention rule on a near-white horse
+    - logged in `wiki/roadmap.html` §4.2, and see gap #29 below; surfacing
+    `describe()` anywhere player-facing (it is a natural feed for the gene
+    dictionary and the info panel - gap #10).
+  - Docs: `wiki/pipeline.html` (new "Face markings" section),
+    `wiki/api-reference.html`, `wiki/gene-kit.html`, `wiki/gene-mitf.html`,
+    `wiki/gene-pax3.html`, `wiki/gene-ednrb.html`, `wiki/roadmap.html` §4.2.
+    Checklist: `wiki/verification.html`.
+
 - **Built 2026-09-04, NOT yet play-tested: the particle locus - forty alleles on
   one gene.** `ParticleGene` (`horsegenetics.particle`, priority 150), the largest
   gene in the mod by a wide margin: **40 variant alleles + `n`, 861 combinations,
@@ -917,7 +1023,7 @@ project. Its shape:
   Still unconfirmed: bred foal, seed-jar round-trip, a spec gene actually
   showing in the display (needs a horse carrying Suntouched/Waterborn) -
   `wiki/verification.html` §0.
-- **`common/`** - compiles; **321 JUnit tests pass** (`./gradlew :common:test`).
+- **`common/`** - compiles; **333 JUnit tests pass** (`./gradlew :common:test`).
   Covers `trait/` (the non-coat body: `HorseTraits` / `Traits` / `Condition` /
   `TraitBuilder` / `EpigeneticTraitContribution` -> `wiki/horse-body.html`) and
   `genetics/` (allele/gene model - **39 genes**, 21 that paint and 18 that never
@@ -1356,14 +1462,18 @@ project. Its shape:
   shutdown (and sweeps leftovers on the next start), so the button stops
   filling `run/saves`. See "Running the game".
 - **Open issues + NOT verified in-game:** see **`wiki/verification.html`**.
-  Open issues are grey, and the face-marking family (every white-pattern locus
-  draws the same centreline stripe; a star and a snip are detached patches, so
-  nothing can draw one); the top unverified item is now the **particle locus**
+  The two newest items are the top of the list, and they are the same play
+  session: **`PAX3` `SW2` on 90% of founders** (does a herd still read as a
+  population rather than one horse repeated - and does it read as *socks* or as
+  four white legs, which would be gap #30 rather than the frequency) and the
+  **face-marking family** (does a three-to-five-texel star read as a star at
+  128px, does a snip land on the nostrils, is the star above the eyes given the
+  head's approximate rest-pose projection). After those: the **particle locus**
   (§0c - forty particle ids, six body sites, none of it seen; the emitter-style
-  ones and the ten Bedrock substitutions are the likeliest to read badly), then
-  the **seven magical utility genes** (§0a - and inside that, the **walking
+  ones and the ten Bedrock substitutions are the likeliest to read badly), the
+  **seven magical utility genes** (§0a - and inside that, the **walking
   animation** of a scaled horse and whether the wild size spread reads right
-  across a herd), then the **trait / health layer** (§0b), the **random pens**
+  across a herd), the **trait / health layer** (§0b), the **random pens**
   and the **rebuilt spawn egg**, then **foals** (only spot-checked). Update it
   after each `runClient`.
 - **Machine caveat (this dev laptop):** hybrid graphics (NVIDIA RTX 3050 Ti +
@@ -1603,7 +1713,7 @@ gene); one-liners:
 | EDNRB (frame) | `O`/`N` | wild, `frame`, `lethal-white` **(masks)** | `O` 1/55; **no `O/O` founder** | flank patches that **never cross the topline** (noise × a spine→0 weight) + a bald face; legs coloured. **`O/O` is Overo Lethal White** - born, all white, and the model's first real lethal: it `canOccur`, it gets a pen, and the *death* waits on the health system (non-det for `frame`) |
 | KIT | `W22`/`W13`/`W10`/`W5`/`W23`/`SB1`/`W20`/`N` | wild, `minimal-white`, `modest-white`, `sabino`, `broad-white`, `extensive-white`, `near-white`, `dominant-white` **(masks)** | `W20` 6%, `SB1` 2.2%, the rest <1% | **eight alleles, 36 combinations, 32 carryable, 8 outcomes** - sabino and the `W` series are one gene, so a horse is one of them and never two. `W20` is a *booster* (subtle alone), `SB1` the one viable dose series, the strong `W`s "dominant with variable expression". Four homozygotes `canOccur = false` (embryonic lethal); compound heterozygotes are fine - the risk is *the same allele twice*. `WhitePattern.sabino` at a strength per outcome (non-det) |
 | MITF (splash) | `SW3`/`SW1`/`SW5`/`N` | wild, `splash`, `splash-bold`, `splash-extensive` | `SW1` 4%, `SW5` 0.6%, `SW3` 0.4% | dipped in white from below, **hard-edged** waterline. `SW1/SW1` is the documented viable dose step; no `SW3/SW3`. `SW6`-`SW8` folded into `SW5` (the source words them identically) (non-det) |
-| PAX3 (splash) | `SW2`/`SW4`/`N` | wild, `splash`, `splash-bold` | `SW2` 2%, `SW4` 0.5% | **the second splash locus** - same painter, different gene, so a horse can be splash twice over and comes out markedly whiter than either alone. No `SW4/SW4` (never detected). A homozygote is **deaf** (informational) (non-det) |
+| PAX3 (splash) | `SW2`/`SW4`/`N` | wild, `splash`, `splash-bold` | **90% `SW2/N`**, 1% `SW4/N`, 9% `N/N` - heterozygotes only, written out | **the second splash locus** - same painter, different gene, so a horse can be splash twice over and comes out markedly whiter than either alone. No `SW4/SW4` (never detected). A homozygote is **deaf** (informational) (non-det) |
 
 **The thirteen non-coat genes** (priority 80-92). Every one of their outcomes is
 a wild type, so **none of them paints anything** and none of them widens the
@@ -1994,8 +2104,10 @@ Coats are **generated** for every horse - adult *and* foal. Per-gene detail in
   `whitenLowerLeg` cuts at a hard `point.y() <= cutoff`, so every sock it draws
   ends in a perfect ring - which is why **no built-in gene calls it any more**;
   `WhitePattern` owns the margin now. `whitenBlaze` is likewise uncalled, and
-  the wider gap it stood for is still open: a centreline stripe is the mod's
-  whole face-marking vocabulary, and a star or a snip is a *detached* patch.
+  **the wider gap it stood for is closed** (2026-09-05):
+  `WhitePattern.faceMarking` is the shared face vocabulary, and a star and a
+  snip are real detached patches. Both helpers are now dead code kept only for
+  their javadoc's warning.
 - **`BayCoat`** - the bay generator. One **uniform** per-horse "point extent"
   off the `A` copy (`leg = 0.15 + extent*0.80`, `face = 0.04 + extent²*0.62`),
   then each of the four legs jittered `±14%` independently - so bays actually
@@ -2746,14 +2858,12 @@ gene: `MITF` and `PAX3` have real per-combination outcomes, and
 irregular by construction. `CoatRegions.whitenLowerLeg` / `whitenBlaze` now have
 no callers at all.
 
-**Still open, and now the whole face-marking story:**
-
-- **Every white-pattern locus draws the same face marking** - a centreline
-  stripe of some width and length, widening with the outcome. That covers
-  stripe, blaze and bald face and does **not** cover a **star** or a **snip**,
-  which are *detached* patches rather than short stripes. Wants a shared
-  `WhitePattern.face(kind, ...)` the four loci call, not four reinventions.
-  Do this before adding more `W` or `SW` alleles.
+**Closed 2026-09-05 (built, not play-tested): the face-marking family.** All
+four white loci draw the head from one shared vocabulary now -
+`WhitePattern.faceMarking` + `FaceMarking`, three components plus a width, with
+**star** and **snip** as real detached patches. See the status entry above and
+`wiki/pipeline.html#face-markings`. What is left of it is a play-test (does a
+three-to-five-texel star read as a star at 128px?) and the two follow-ups below.
 
 **The 2026-09-02 visual genes (2026-09-02, reworked once after owner feedback) -
 remaining follow-ups, none seen in-game:**
@@ -3094,6 +3204,52 @@ Design follow-ups (not just "go look at it"):
    `wiki/roadmap.html` §4.4. Also still absent: **CSNB** (rides on `LP/LP`, and
    the leopard complex does not exist), **DMRT3 / gait** (animation work), and
    **`TraitRule`** - two genes that only together trigger an outcome (§6.5).
+
+29. **Medicine hat and the war shield - reachable, and half-built by accident.**
+   A medicine hat is not a face marking and not a gene: it is a **retention**
+   rule on a near-white horse, which keeps colour as a bonnet over the ears
+   *and poll*, usually with a coloured shield on the chest.
+   `WhitePattern.sabino` already never paints the ears, so a near-white sabino
+   has coloured ones - but measured over five seeds, `kit=SB1/SB1` comes out
+   **ears 0% white, poll 100%, mane 98.6%, chest 100%**, so it reads as two
+   detached coloured ear boxes rather than a cap. The crest's `anchor` of 0.16
+   is nothing against a `bodyCut` of 0.05 at strength 0.93, which is the same
+   over-coverage the white audit found elsewhere. What it needs: the ear / poll
+   anchor to actually hold at the top of the strength ramp, and a chest region
+   to anchor beside it. Note `W22` dominant white and `O/O` lethal white are
+   `masking` outcomes that `restrictAll`, so they take the ears too -
+   correctly; those are not hats. `wiki/roadmap.html` §4.2.
+
+30. **The white-pattern audit (2026-09-05) found four calibration defects and
+   only one of them is fixed.** Fixed: face markings wrapped under the jaw
+   (gone with the shared vocabulary). Still open, all four measured:
+   - **`EdnrbGene`'s flank band does not bite on the barrel.** `BAND_LO` 0.28
+     and `BAND_HI` 0.74 are fractions of `bodyBounds` - the **whole-horse**
+     AABB, hoof to ear tip - but the barrel spans only 0.326-0.622 of that. So
+     `side` is exactly 1.0 for every BODY texel and the only thing the band ever
+     clips is the top fifth of the neck. Measured: **back 72.6% white**, flank
+     77.8%. The gene's javadoc, its outcome description and `wiki/gene-ednrb.html`
+     all say frame "never reaches the topline"; nothing implements that.
+   - **`TobianoGene`'s topline bias lands on the mane.** `topY = bb.yMax()` is
+     the **ear tip**, so the real topline (0.622) sits 35% up the ramp and gets
+     `0.35 x 0.18 = 0.063` of the bias while the mane gets the full `0.173`.
+     Measured on **every** seed: crest 93.9%, mane 80.2%, against 56.4% on the
+     flank - a permanent flat white band along the top of the neck.
+   - **`WhitePattern.splash` spends a third of its range above the horse's
+     back.** Same root cause; see the `PAX3` status entry above, where it is now
+     load-bearing rather than cosmetic.
+   - **`cover` is calibrated as if `PatchNoise.field` were uniform, and it is a
+     bell.** Measured over 67 200 texels x 12 seeds: p1 0.24, p50 0.51, p99 0.77.
+     So `EdnrbGene`'s `cover` 0.52-0.74 (threshold 0.48-0.26) actually delivers
+     **58%-98%** white, and `TobianoGene`'s 0.40-0.56 delivers **23%-68%** - a 3x
+     swing where a 1.4x one was written.
+
+   The shared fix is to give the painters a **topline reference**
+   (`bounds(skin, Part.BODY).yMax()`) instead of the whole-horse AABB and
+   re-express the constants against it, plus convert the `cover` knobs through
+   the measured quantiles. All four move existing coats, so they want one change
+   with a `coat-golden.txt` regeneration and the `WhitePatternGenesTest`
+   monotonicity ladder re-checked.
 
 ## License
 
