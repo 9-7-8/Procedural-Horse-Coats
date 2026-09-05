@@ -756,37 +756,25 @@
     <code>yield</code> verb cannot currently express:
 </p>
 
-<ul>
-    <li><strong>The mare must be tamed.</strong> An untamed mare is not a dairy animal.
-        A <code>tamed</code> condition flag already exists, so this one is a single
-        term added to the gene&rsquo;s <code>when</code> &mdash; the only cheap item on
-        the list.</li>
-    <li><strong>The mare must be at full health</strong> &mdash; at <em>its own</em>
-        max, so a genetically frail horse is milkable at 4 hearts, not the species max.
-        This is what ties milking to the healing gate. Needs a new condition flag
-        (<code>full_health</code>), which is the two-line change described on
-        <a href="gene-effects.html">gene effects</a>.</li>
-    <li><strong>Once per Minecraft day</strong> (24&nbsp;000 ticks &mdash; the
-        mod&rsquo;s standard time gate, §21). The verb has a <code>cooldown</code>, but
-        it lives in a <em>static map in the translator</em>, so it does not survive a
-        restart and is not per-horse state anyone can inspect. A real once-a-day gate
-        wants the small attachment this section always described, holding the
-        <em>game time</em> of the last milking.</li>
-    <li><strong>Milking a stallion gets you kicked</strong>: about half a heart of
-        damage. Better than a silent no-op, and it makes the sex of a horse something
-        the player learns by doing. Today a stallion simply yields nothing, because a
-        <code>yield</code> whose condition fails is a no-op &mdash; expressing
-        &ldquo;and do this instead&rdquo; needs a second verb or a real else-branch.</li>
-    <li><strong>Foals do nothing</strong> &mdash; but should say something, or it reads
-        as a bug. Same shape as the stallion case.</li>
-</ul>
-
-<p>
-    The interesting part of that list is that four of the five are limits of the
-    <em>effect vocabulary</em> rather than of the milking feature, so building them
-    buys something for every gene. That is an argument for doing them there rather
-    than special-casing milk in <code>HorseInteractionHandler</code>.
-</p>
+<div class="note">
+    <span class="label">Built 2026-09-05 &mdash; not play-tested</span>
+    <p>
+        All five rules landed as <code>effects</code>-vocabulary additions (so
+        every gene benefits): a <code>full_health</code> condition flag (own max);
+        <code>tamed</code> added to the milk yield&rsquo;s <code>when</code>;
+        <code>GeneAbility.Yield</code> gained <code>deniedDamage</code> /
+        <code>deniedMessage</code> &mdash; the else-branch &mdash; so a
+        <strong>stallion kicks you</strong> (half a heart) and a <strong>foal</strong>
+        says it has nothing; the milk cooldown is <strong>once per Minecraft
+        day</strong> on the new <code>HorseCooldownsAttachment</code>. A producing
+        yield on cooldown now sends a message instead of a silent cancel.
+    </p>
+    <p>
+        <strong>Left:</strong> a tamed mare below her own max health still gets
+        neither milk nor a mount and <em>no message</em> (no denial yield covers
+        that case &mdash; CLAUDE.md gap #25).
+    </p>
+</div>
 
 <hr>
 
@@ -974,29 +962,34 @@
 
 <h2 id="hair">12. Horse hair, shearing and the crafting economy</h2>
 
-<p>
-    The material floor for every recipe the two documents add. Cheap, self-contained,
-    and it blocks the carrots, the vials and the villager, so it goes early.
-</p>
+<div class="note">
+    <span class="label">Mostly built 2026-09-05 &mdash; not play-tested</span>
+    <p>
+        The <strong>mechanic</strong> shipped: <code>server/HorseShearHandler</code>
+        &mdash; shears on an adult horse &rarr; 1&ndash;3 <code>horse_hair</code>,
+        once per Minecraft day, gated by a stored game time on the new
+        <code>data/HorseCooldownsAttachment</code> (which also replaced
+        <code>GeneYieldHandler</code>&rsquo;s static cooldown map). <strong>+5
+        bond</strong> per shear via <code>HorseCareHandler.awardBondFor</code>. The
+        <strong>material chain</strong> is complete: hair &rarr; bundle &rarr;
+        braided rope / hair cloth, all reversible shapeless recipes.
+    </p>
+    <p>
+        <strong>Left:</strong> the sheared <em>look</em> (a low-fidelity
+        render-layer overlay, no bake &mdash; settled §21) is not built; the
+        <em>sleeping-nearby +1/night</em> bond source (§13) is not built; the
+        stated recipe-collision layer (§12.3, a paper-parameterised recipe) is
+        built for the <a href="#carrots">magic carrot</a> but <code>braided_rope</code>
+        / <code>hair_cloth</code> still need real textures. Original notes:
+    </p>
+</div>
 
 <h3>12.1 Shearing</h3>
 
 <ul>
-    <li><strong>Right-click an adult horse with shears, get 1&ndash;3 horse hair</strong>,
-        regrowing on a cooldown. It belongs in
-        <code>HorseInteractionHandler</code> beside milking (§7) and hits
-        <strong>the same trap that file already documents</strong>:
-        <code>EntityInteract</code> fires on both sides, and any item used on a tamed
-        horse is otherwise turned into a mount by vanilla. Cancel on the client too, do
-        the drop server-side.</li>
-    <li><strong>Regrowth is per-horse state</strong> &mdash; the same attachment shape
-        as milking&rsquo;s cooldown, and the same gate: <strong>once per Minecraft
-        day</strong> (§21). Store the <em>game time</em> of the last shear (a stored
-        timestamp gives the <code>shearProgress</code> ramp the documents want for
-        free).</li>
     <li><strong>The sheared look is a render-layer overlay</strong> (settled, §21)
         &mdash; it only has to read as vaguely different, not look good, so no
-        coat-variant texture and no extra bake cost.</li>
+        coat-variant texture and no extra bake cost. <strong>Not built.</strong></li>
     <li>Bond gives <strong>+5 per shear</strong> (§13), so shearing is the one
         interaction that is both an economy and a relationship input. This is one of the
         two unwired bond sources.</li>
@@ -1090,12 +1083,26 @@
 
 <h2 id="carrots">14. Breeding modifiers: the carrot family</h2>
 
-<p>
-    Three kinds of consumable, all fed to a parent <em>before</em> breeding: four
-    general breeding carrots, one magic carrot per gene, and combinations of both.
-    They are the mod&rsquo;s first mechanism for <strong>influencing inheritance</strong>,
-    which makes them the first thing to touch the determinism contract.
-</p>
+<div class="note">
+    <span class="label">Built 2026-09-05 &mdash; not play-tested. Machinery: <a href="carrots.html">the carrot family</a></span>
+    <p>
+        The gamete hook (<code>GameteBias</code> + a two-pass
+        <code>Genome.breedWith</code> overload, <code>NONE</code> bit-for-bit
+        identical to the plain draw), the four breeding carrots, the live
+        <code>CarrotWindowAttachment</code>, the parameterised
+        <code>MagicCarrotRecipe</code> (one recipe, paper-driven &mdash; a drop-in
+        gene gets its carrot free), <code>CarrotCombineRecipe</code> (rejects
+        contradictions at craft time), and the coloured-particle feedback all
+        shipped. Effects ride an item <code>carrot_effects</code> component.
+    </p>
+    <p>
+        <strong>Left:</strong> carrot effects captured on a <a href="#ivf">seed
+        jar</a> and applied at impregnation (§15.1); a database check inside the
+        recipe (the paper ingredient is the gate today); per-gene
+        <code>chaos</code> tables on the built-ins (all use the uniform
+        fallback). Original notes:
+    </p>
+</div>
 
 <div class="note warn">
     <span class="label">Where the effect is applied decides whether this is sound</span>
@@ -1244,6 +1251,25 @@
 <hr>
 
 <h2 id="database">16. Knowledge: the gene database and research papers</h2>
+
+<div class="note">
+    <span class="label">Built 2026-09-05 &mdash; not play-tested. Machinery: <a href="carrots.html#database">the carrot family</a></span>
+    <p>
+        <code>data/GeneDatabaseData</code> (server-global per-player SavedData:
+        seen variants, carrot-unlock flag, first-met time), filled on tame /
+        foal-birth / paper-read (<code>server/GeneDiscoveryHandler</code>). The
+        <code>research_paper</code> item (a <code>research_gene</code> component),
+        the browser&rsquo;s progressive Gene Database tab, the <strong>Write
+        research paper</strong> button (one book &rarr; a paper), and chest-loot
+        injection (<code>data/loot/AddResearchPaperModifier</code>, rarity
+        weighted) all shipped. It hides nothing &mdash; discovery gates only the
+        browser&rsquo;s carrot-line display.
+    </p>
+    <p>
+        <strong>Left:</strong> the gene sequencer view (§15.2); papers from the
+        villager (§18). Original notes:
+    </p>
+</div>
 
 <h3>16.1 The database</h3>
 
@@ -1407,13 +1433,26 @@
 
 <h2 id="gene-metadata">19. What a gene definition has to gain</h2>
 
-<p>
-    Almost everything in 12&ndash;18 reads metadata that no gene has. This is one change
-    to <a href="gene-format.html">the gene file format</a> and the
-    <a href="gene-creator/index.html">gene creator</a>, and it should land <strong>once,
-    before</strong> the systems that consume it &mdash; otherwise each of them invents
-    its own side table.
-</p>
+<div class="note">
+    <span class="label">Mostly built 2026-09-05</span>
+    <p>
+        <code>rarity</code>, <code>carrot</code> (enabled + het/hom behaviour +
+        flavour) and <code>chaos</code> landed as three <code>Gene</code> defaults
+        (<code>GeneRarity</code>, <code>hasMagicCarrot()</code> /
+        <code>magicCarrotHomozygous()</code>, <code>chaosTable()</code>) plus a
+        spec <strong>format 2 &rarr; 3</strong> bump with optional <code>blurb</code>
+        / <code>rarity</code> / <code>carrot</code> / <code>chaos</code> blocks.
+        The description block already existed (<code>Gene.description()</code> +
+        <code>GeneDescriptions</code>); a spec gene now fills it from
+        <code>blurb</code>. Full shapes on <a href="gene-format.html">the gene
+        format page</a>.
+    </p>
+    <p>
+        <strong>Left:</strong> the four new fields as <strong>gene-creator form
+        inputs</strong> (the creator emits <code>format: 3</code> but has no UI for
+        them &mdash; §19.1); attached model parts (§19.2). Original notes:
+    </p>
+</div>
 
 <div class="table-wrap">
 <table>

@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Breeding carrots &amp; the gene database &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="nav.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow magical">Gameplay <span class="sep">/</span> inheritance</p>
+<h1>Breeding carrots &amp; the gene database</h1>
+<p class="lede">
+    The mod&rsquo;s first mechanism for <strong>influencing inheritance</strong>,
+    and the knowledge layer that gates it. Built 2026-09-05,
+    <strong>not play-tested</strong> &mdash; checklist in
+    <a href="verification.html#carrots-db">verification &sect;0f</a>. Design
+    rationale is <a href="roadmap.html#carrots">roadmap &sect;14</a> and
+    <a href="roadmap.html#database">&sect;16</a>; this page is the machinery as
+    built.
+</p>
+
+<h2 id="rule">The one rule</h2>
+
+<div class="note warn">
+    <span class="label">A carrot biases the gamete, never the genotype</span>
+    <p>
+        A fed carrot changes only what a parent <em>draws and passes on</em> for
+        one foal. It never rewrites the parent&rsquo;s own alleles &mdash; that
+        would silently mutate a horse the player bred for generations, and make
+        its displayed code stop matching its history. Every effect below is a
+        modifier on the draw, expressed as
+        <code>common/genetics/GameteBias</code>.
+    </p>
+    <p>
+        <code>GameteBias.NONE</code> on both parents is <strong>bit-for-bit</strong>
+        the plain <code>Genome.breedWith</code> &mdash; no extra RNG draws &mdash;
+        so a carrot that is not fed changes nothing. That is pinned by a test and
+        by <code>coat-golden.txt</code> staying untouched.
+    </p>
+</div>
+
+<h2 id="window">The carrot window</h2>
+
+<p>
+    Feeding a carrot to a breedable adult horse
+    (<code>server/BreedingCarrotHandler</code>) puts a temporary
+    <code>CarrotWindowAttachment</code> on it &mdash; the carrot&rsquo;s effect
+    tokens plus a lapse time &mdash; and also sets the horse into breeding mode,
+    the same as a golden carrot. The window is <strong>30&nbsp;seconds</strong>
+    (vanilla love length), is stored on the horse and part of the breeding
+    draw&rsquo;s input while live, and is <strong>consumed</strong> when the pair
+    breeds. There is no permanent stored carrot state. Each type shows a
+    differently-coloured particle burst when fed.
+</p>
+
+<p>
+    On a foal, <code>HorseBreedingHandler</code> reads both parents&rsquo; live
+    windows, folds each into one <code>GameteBias</code>
+    (<code>CarrotEffect.fold</code>), threads them through
+    <code>GeneticCodeCombiner.combine</code>, and clears both windows.
+</p>
+
+<h2 id="four">The four breeding carrots</h2>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Carrot</th><th>What it does to the gamete</th></tr></thead>
+<tbody>
+<tr><td><strong>Mutinogenic</strong></td><td>Every allele copy this parent passes on gets a <strong>fresh epigenetic seed</strong> instead of the parent copy&rsquo;s own. The alleles are untouched &mdash; a mutinogenic foal has the same genotype an un-fed pairing would give, only re-rolled bay-point heights / grey dapples / splash edges. The re-roll runs in a <em>second pass</em>, after every allele is locked, so it can never move a foal&rsquo;s genotype.</td></tr>
+<tr><td><strong>Stabilizer</strong></td><td>At every <strong>heterozygous</strong> locus, contribute the <em>earlier-declared</em> allele (the variant / dominant one) rather than the 50/50 coin. A no-op at a homozygous locus &mdash; which is the &ldquo;does nothing when the parent has no dominant allele&rdquo; the carrot is documented to have; the feed handler says so.</td></tr>
+<tr><td><strong>Magnifier</strong></td><td>The mirror &mdash; contribute the later-declared (baseline / recessive) copy. Same no-op rule.</td></tr>
+<tr><td><strong>Chaos</strong></td><td>Pick one random gene and draw this parent&rsquo;s gamete for it from that gene&rsquo;s <a href="gene-format.html">chaos distribution</a> (or a uniform draw over its viable pairs if it declares none). The gene and the pair are rolled at breeding time off the foal&rsquo;s deterministic RNG. Never the sex locus.</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2 id="magic">Magic gene carrots</h2>
+
+<p>
+    One per gene. Feeding it makes the game treat that parent as
+    <code>n&lt;Gene&gt;</code> (heterozygous, the default) or
+    <code>&lt;Gene&gt;&lt;Gene&gt;</code> (homozygous, if the gene&rsquo;s
+    <code>carrot.behaviour</code> says so) for that one gene&rsquo;s gamete;
+    normal Mendelian rules apply from there, so two heterozygous-carrot parents
+    give the ordinary 25/50/25. If the homozygote cannot occur (a <code>KIT</code>
+    lethal, <code>met/met</code>) it falls back to heterozygous.
+</p>
+
+<p>
+    <strong>The recipe is one parameterised <code>CustomRecipe</code></strong>
+    (<code>server/recipe/MagicCarrotRecipe</code>), not N generated recipes:
+    golden carrot + a <a href="#database">research paper</a> + a hair item
+    (<code>horse_hair</code> or <code>hair_cloth</code>) + the rarity item for
+    that gene&rsquo;s tier + at least one flavour ingredient &rarr; a
+    <code>magic_gene_carrot</code> carrying <code>magic:&lt;geneKey&gt;:het|hom</code>.
+    The recipe reads the gene off the paper at craft time, so a drop-in gene
+    file gets its carrot the moment it registers &mdash; no datapack.
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Rarity tier</th><th>Item (<code>server/recipe/RarityItems</code>)</th></tr></thead>
+<tbody>
+<tr><td>common</td><td>iron ingot</td></tr>
+<tr><td>uncommon <em>(default &mdash; the gold-ingot tier)</em></td><td>gold ingot</td></tr>
+<tr><td>rare</td><td>diamond</td></tr>
+<tr><td>epic</td><td>emerald</td></tr>
+<tr><td>legendary</td><td>netherite ingot</td></tr>
+<tr><td>mythic</td><td>nether star</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    A gene <strong>opts out</strong> of having a magic carrot with
+    <code>carrot.enabled: false</code>. Built-in exceptions: the
+    <a href="gene-sex.html">sex locus</a>, the recessive disorders
+    (<code>RecessiveDisorderGene</code>), and extension + agouti.
+</p>
+
+<h2 id="combine">Combining carrots</h2>
+
+<p>
+    <code>server/recipe/CarrotCombineRecipe</code> &mdash; two or more breeding
+    carrots crafted together become one carrot carrying all their effects, as a
+    merged <code>carrot_effects</code> component list. No visual change, no cap
+    on count. <strong>Contradictions are rejected at craft time</strong> &mdash;
+    a stabilizer with a magnifier, or two magic carrots for the same gene that
+    disagree on het/hom &mdash; so the recipe simply does not resolve, which the
+    player can see, rather than a silent last-one-wins.
+</p>
+
+<h2 id="database">The gene database &amp; research papers</h2>
+
+<p>
+    <code>data/GeneDatabaseData</code> is a server-global, per-player
+    <code>SavedData</code>: per gene, the allele variants the player has seen,
+    when it was first met, and whether its magic-carrot recipe is unlocked. It
+    is filled by:
+</p>
+
+<ul>
+    <li><strong>Taming</strong> a horse that carries a non-baseline allele at a
+        gene (<code>server/GeneDiscoveryHandler</code>, on
+        <code>AnimalTameEvent</code>);</li>
+    <li><strong>Breeding</strong> a foal with one (from
+        <code>applyBredFoal</code>, credited to the breeder);</li>
+    <li><strong>Reading a research paper</strong>.</li>
+</ul>
+
+<div class="note">
+    <span class="label">The database hides nothing</span>
+    <p>
+        It is a plain progressive record. The info panel, the pen signs and the
+        genotype code keep showing <em>every</em> gene a horse carries, always.
+        The only thing discovery gates is the display of a gene&rsquo;s
+        magic-carrot line in the browser &mdash; and even the recipe itself is
+        gated only by needing a paper as an ingredient, not by a database check.
+    </p>
+</div>
+
+<p>
+    A <strong>research paper</strong> (<code>item/ResearchPaperItem</code>)
+    carries a <code>research_gene</code> component. Right-clicking it adds the
+    gene to the reader&rsquo;s database, unlocks its carrot line, and consumes
+    the paper. Three sources: <strong>chest loot</strong>
+    (<code>data/loot/AddResearchPaperModifier</code>, a global loot modifier that
+    seeds papers into ~8 chest tables weighted by <code>GeneRarity</code>),
+    other players, and <strong>writing one</strong> from your own database at the
+    cost of a book &mdash; the <em>Write research paper</em> button in the Horse
+    Browser&rsquo;s Gene Database tab
+    (<code>WriteResearchPaperPayload</code> &rarr;
+    <code>server/ResearchPaperWriter</code>).
+</p>
+
+<h2 id="metadata">The gene metadata it all reads</h2>
+
+<p>
+    Everything above reads fields that no gene had before this pass (roadmap
+    &sect;19). They are three defaults on <code>Gene</code> plus a spec format
+    bump &mdash; full shapes on <a href="gene-format.html">the gene format
+    page</a>:
+</p>
+
+<ul>
+    <li><code>rarity()</code> &mdash; a <code>GeneRarity</code> tier (default
+        <code>UNCOMMON</code>, the gold-ingot tier).</li>
+    <li><code>hasMagicCarrot()</code> / <code>magicCarrotHomozygous()</code>
+        &mdash; the opt-out flag and the het/hom behaviour.</li>
+    <li><code>chaosTable()</code> &mdash; an <code>Optional&lt;FounderTable&gt;</code>,
+        the chaos carrot&rsquo;s per-gene distribution.</li>
+    <li><code>description()</code> &mdash; already existed; a spec gene now fills
+        it from an optional <code>blurb</code>.</li>
+</ul>
+
+<h2 id="deferred">Deferred</h2>
+
+<p>
+    The Horse Master villager selling papers and carrots
+    (<a href="roadmap.html#villager">&sect;18</a>); the seed jar honouring the
+    carrot gate and a real gestation timer
+    (<a href="roadmap.html#ivf">&sect;15.1</a>); the &sect;19 fields as gene-creator
+    form inputs; a database check inside the carrot recipe itself; per-gene
+    <code>chaos</code> tables on any built-in gene.
+</p>
+
+</article>
+</main>
+</body>
+</html>

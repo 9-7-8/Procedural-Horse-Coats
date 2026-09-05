@@ -708,6 +708,115 @@
     </p>
 </div>
 
+<h2 id="carrots-db">&sect;0f &mdash; shearing, milking rules, carrots, the gene database (new 2026-09-05, NOT play-tested)</h2>
+
+<p>
+    A big multi-system pass (roadmap wiki &sect;&sect;7, 12, 14, 16, 19). Nothing
+    here has been seen in-game. Reference: <a href="carrots.html">the carrot
+    family</a>, <a href="gene-effects.html">gene effects</a> (the yield
+    else-branch + the <code>full_health</code> flag),
+    <a href="gene-format.html">the gene format</a> (format&nbsp;3).
+</p>
+
+<h3>Determinism &mdash; the thing to check first</h3>
+<ul>
+    <li><strong>An un-fed pairing must breed exactly as it did before.</strong>
+        <code>GameteBias.NONE</code> on both sides is asserted bit-for-bit
+        identical to the old <code>breedWith</code> and <code>coat-golden.txt</code>
+        is untouched, but confirm a foal from two carrot-free parents comes out
+        the way it used to (same coat, same stats, same odds).</li>
+</ul>
+
+<h3>Shearing (&sect;12)</h3>
+<ul>
+    <li>Right-click an <strong>adult</strong> horse with shears &rarr; 1&ndash;3
+        <code>horse_hair</code> drop, a shear sound, hair particles. Shears take
+        durability. A <strong>foal</strong> says &ldquo;no coat to shear yet&rdquo;.</li>
+    <li>Shearing the same horse again the same Minecraft day says &ldquo;hasn&rsquo;t
+        grown back&rdquo;; after a full day (24&nbsp;000 ticks) it works again. The
+        gate is a stored game time on <code>HorseCooldownsAttachment</code>, so it
+        survives a relog.</li>
+    <li>A <strong>tamed</strong> horse gains <strong>+5 bond</strong> per shear
+        (honours the daily cap); an untamed horse can still be sheared for hair.</li>
+    <li><strong>No sheared look yet</strong> &mdash; the horse looks unchanged.
+        Deferred (CLAUDE.md gap #33).</li>
+    <li>Craft chain: 4 hair &rarr; bundle; 3 bundle &rarr; braided rope; 4 bundle
+        &rarr; hair cloth; all reverse. <code>braided_rope</code> /
+        <code>hair_cloth</code> borrow the bundle texture &mdash; need art.</li>
+</ul>
+
+<h3>Milking rules (&sect;7)</h3>
+<ul>
+    <li>A <strong>tamed mare at her own full health</strong>, right-clicked with a
+        bucket, gives milk &mdash; <strong>once per Minecraft day</strong> now, not
+        every few seconds. On cooldown she says &ldquo;nothing to give yet&rdquo;
+        rather than silently eating the click.</li>
+    <li>An <strong>untamed</strong> mare: milking does nothing and you mount her
+        normally (the yield&rsquo;s <code>when</code> fails, nothing is cancelled).</li>
+    <li>A <strong>tamed mare below her own max health</strong>: currently gives
+        neither milk nor a mount and <em>no message</em> &mdash; a known gap
+        (CLAUDE.md #25). Heal her and it works.</li>
+    <li>Milking a <strong>stallion</strong> &rarr; a kick (half a heart) + &ldquo;the
+        stallion kicks you&rdquo;. Milking a <strong>foal</strong> &rarr; &ldquo;a
+        foal has no milk to give&rdquo;.</li>
+    <li>Water / lava milk (<code>milk=Watr/Watr</code> / <code>Lava/Lava</code>)
+        still work off any grown horse, on their own shorter cooldowns.</li>
+</ul>
+
+<h3>Breeding carrots (&sect;14)</h3>
+<ul>
+    <li>Feed a carrot to a breedable adult &rarr; a coloured particle burst
+        (purple mutinogenic / orange chaos / blue stabilizer / green magnifier /
+        gold magic) + the horse enters breeding mode like a golden carrot. A foal
+        says &ldquo;cannot be bred&rdquo;.</li>
+    <li><strong>Mutinogenic</strong>: breed a fed parent &rarr; the foal&rsquo;s
+        alleles are unchanged from an un-fed pairing (same seed), but its
+        <em>epigenetics</em> differ &mdash; check via the paper dump or a
+        re-rolled bay&rsquo;s leg heights.</li>
+    <li><strong>Stabilizer</strong> / <strong>Magnifier</strong>: feed one parent
+        that is heterozygous at a visible locus (say <code>E/e</code>), breed
+        against an <code>e/e</code> partner &mdash; stabilizer &rarr; the foal
+        always gets the dominant copy; magnifier &rarr; always the recessive. On
+        an all-homozygous horse the carrot says &ldquo;does nothing for it&rdquo;.</li>
+    <li><strong>Chaos</strong>: feed one parent, breed several times &mdash; a
+        different single locus should be re-rolled each time (off the foal RNG);
+        never the sex locus.</li>
+    <li><strong>Magic gene carrot</strong>: craft one &mdash; golden carrot +
+        research paper + horse hair (or hair cloth) + the gene&rsquo;s rarity item
+        (iron/gold/diamond/emerald/netherite ingot/nether star) + one flavour
+        item. The output names the gene in its tooltip. Feed it and breed &rarr;
+        that parent is treated as <code>n&lt;Gene&gt;</code> for that gamete
+        (25/50/25 when both parents carry the carrot).</li>
+    <li><strong>Combine</strong>: two or more carrots in the grid &rarr; one carrot
+        carrying all the effects. Stabilizer + magnifier, or two magic carrots for
+        the same gene that disagree, &rarr; the recipe simply does not resolve.</li>
+    <li>The window lapses (~30&nbsp;s, like love) if the pair doesn&rsquo;t breed;
+        it is consumed when they do.</li>
+</ul>
+
+<h3>Gene database &amp; papers (&sect;16)</h3>
+<ul>
+    <li>The Horse Browser&rsquo;s <strong>Gene Database</strong> tab now works
+        outside creative: an undiscovered gene is a dim name + a nudge; a
+        discovered one shows full detail, the variants seen, and &ldquo;Magic
+        carrot recipe: locked/unlocked&rdquo;. Creative shows everything.</li>
+    <li><strong>Tame</strong> a horse carrying a non-baseline allele, or
+        <strong>breed</strong> a foal with one &rarr; those genes appear in the
+        database. Confirm the sync fires (relog should keep them).</li>
+    <li>A <strong>research paper</strong> (from a loot chest, or written) &mdash;
+        right-click &rarr; &ldquo;added X to your gene database&rdquo; + the carrot
+        line unlocks; the paper is consumed.</li>
+    <li><strong>Write research paper</strong> button in the detail pane
+        (discovered genes with a carrot): with a book in your inventory &rarr; one
+        book spent, a paper for that gene handed back.</li>
+    <li><strong>Loot injection</strong>: open dungeon / mineshaft / stronghold /
+        village / mansion / outpost chests &mdash; a research paper turns up
+        ~18&nbsp;% of the time, gene weighted by rarity. If the boot log says
+        <code>Couldn&rsquo;t parse &hellip; loot_modifier</code>, the chest ids
+        drifted &mdash; the modifier file is at
+        <code>data/horsegenetics/loot_modifiers/</code> (plural, no index).</li>
+</ul>
+
 <h2>Wanted (not built yet)</h2>
 
 <div class="note warn" id="eyes">

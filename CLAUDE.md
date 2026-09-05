@@ -139,6 +139,119 @@ project. Its shape:
 
 ## Status snapshot (keep this current)
 
+- **Built 2026-09-05, NOT yet play-tested: shearing + milking rules + the whole
+  carrot family + the gene database + research papers** (roadmap wiki §§7, 12,
+  14, 16, 19). Big multi-system pass. `:common:test` **379 green**,
+  `:neoforge-26.1.2:build` green, parity **3832/48**, `runServer` boots clean
+  (**43 segments**, still - format 3 is additive). Shape of it:
+  - **Shearing** (§12) - right-click an adult horse with shears -> 1-3
+    `horse_hair`, **once per MC day**, gated by a new
+    `data/HorseCooldownsAttachment` (a stored `Map<String,Long>` game-time stamp
+    per key: `"shear"`, and `"yield:<geneKey>"` - which **replaces the static
+    cooldown map** `GeneYieldHandler` was criticised for). `+5` bond per shear
+    via a new `HorseCareHandler.awardBondFor`. New items `braided_rope` +
+    `hair_cloth` with reversible shapeless recipes, finishing the §12.2 chain.
+    **The sheared *look* (a low-fidelity render-layer overlay) is deferred** - a
+    verification item; the mechanic is complete.
+  - **Milking rules** (§7) - the interaction shipped with the milk gene; the
+    rules did not. Built as **`effects`-vocabulary** additions (buys it for every
+    gene): a `full_health` condition flag (own max, so a frail mare is milkable
+    at her own ceiling); `tamed` added to the milk yield's `when`;
+    **`GeneAbility.Yield` gained `deniedDamage` + `deniedMessage`** - the
+    else-branch a bare `yield` can't express, so milking a **stallion** now
+    kicks you (half a heart) and milking a **foal** says so. `MILK_COOLDOWN_TICKS`
+    is `24_000` (once a day) and lives on the cooldown attachment. Not
+    SpecSchema/parity (effects don't paint). `GeneYieldHandler`: a matched yield
+    with an empty `produces` is a denial branch; a producing yield on cooldown
+    now says "nothing to give yet" (closes gap #25's feedback complaint).
+  - **§19 gene metadata** - `common/genetics/GeneRarity` (6 tiers) + three `Gene`
+    defaults: `rarity()` (default `UNCOMMON` = the gold-ingot tier),
+    `hasMagicCarrot()` (false for `SexGene`, the recessive disorders via
+    `RecessiveDisorderGene`, and extension + agouti), `chaosTable()`
+    (`Optional<FounderTable>` - the chaos carrot's per-gene distribution) plus
+    `magicCarrotHomozygous()`. **Spec `FORMAT` 2 -> 3**: optional `blurb`,
+    `rarity`, `carrot` (`{enabled, behaviour, flavour}`) and `chaos` blocks
+    (`chaos` reuses the founder-weight parser). `SpecGene` surfaces all of them.
+    Every example + shipped gene file and the creator emit `format: 3`; the
+    parity fixtures regenerated with **no output change** (the §19 fields don't
+    touch the paint engine). The strict `format != FORMAT` check stays - dev only.
+  - **The gamete hook** (§14, the determinism-sensitive core) -
+    `common/genetics/GameteBias`: a per-parent breeding modifier
+    (`rerollEpigenetics` / `preferLowerOrder` (dominant vs recessive copy) /
+    `substitutePairs`). `Genome.breedWith` gained a `(bias, bias)` overload run
+    in **two passes**: pass 1 is the allele draw and consumes *exactly* what the
+    plain breed consumes (so `NONE`/`NONE` is bit-for-bit identical - asserted,
+    and `coat-golden.txt` is untouched); pass 2 does the epigenetic re-rolls
+    *after* every allele is locked, so a mutinogenic carrot never moves a foal's
+    genotype. `GeneticCodeCombiner.combine` got the matching overload. New
+    `GameteBiasTest` (5).
+  - **`common/genetics/CarrotEffect`** (sealed: `Mutinogenic` / `Stabilizer` /
+    `Magnifier` / `Chaos` / `MagicGene(geneKey, homozygous)`) with a flat string
+    `id()` for serialisation, `parse`/`parseList`/`tokens`/`isContradictory`, and
+    `fold(effects, parentGenotype, rng)` -> one `GameteBias`. Chaos rolls its
+    target gene + pair **at breeding time** off the foal RNG (deterministic per
+    foal; never the sex locus). Magic-carrot `homozygous` falls back to het when
+    the homozygote `canOccur` is false.
+  - **NeoForge, the carrot side** - `data/CarrotWindowAttachment`
+    (`List<String>` effect tokens + `expiresAt`; **not** `copyOnDeath`;
+    `WINDOW_TICKS` = 30 s, vanilla love length). `server/BreedingCarrotHandler`
+    (`EntityInteract`): a carrot on a breedable adult -> merge the window,
+    `horse.setInLove(player)`, a per-type coloured particle burst, consume 1;
+    stabilizer/magnifier on an all-homozygous horse messages "does nothing".
+    `HorseBreedingHandler.onBabySpawn` reads both live windows,
+    `CarrotEffect.fold`s each, threads the biases through `applyBredFoal` (new
+    overload; old arity delegates with `NONE`), then clears both windows.
+    `data/ModDataComponents` gained **`CARROT_EFFECTS`** (an item `List<String>`
+    component) and **`RESEARCH_GENE`** (a string).
+  - **Magic carrot recipe** (§14.2) - **`server/recipe/MagicCarrotRecipe`** is
+    **one parameterised `CustomRecipe`**: golden carrot + `research_paper` + a
+    hair item + the gene's rarity item (`RarityItems`: iron/gold/diamond/
+    emerald/netherite ingot/nether star) + >=1 flavour slot -> a
+    `magic_gene_carrot` carrying `magic:<geneKey>:het|hom`. One recipe, so a
+    drop-in gene gets its carrot free. **`CarrotCombineRecipe`** merges 2+
+    carrots into one and **rejects contradictions at craft time**
+    (stabilizer+magnifier; two magic carrots that disagree). Both are unit-codec
+    serializers registered via `server/recipe/ModRecipes` + one datapack JSON
+    each. `placeholder_gene_book` and its shapeless recipe are **deleted**.
+  - **Gene database** (§16.1) - `data/GeneDatabaseData`, server-global
+    per-player `SavedData` (seen tokens, carrot-unlock flag, first-met time per
+    gene). `server/GeneDiscoveryHandler` fills it on **tame** (`AnimalTameEvent`)
+    and on **foal birth** (from `applyBredFoal`, for the breeder) - one entry
+    per gene the horse carries a non-baseline allele at. It **hides nothing**:
+    the info panel + genotype code still show every gene; discovery only gates
+    the carrot-recipe *display* (the recipe itself is gated by needing a paper).
+    `network/GeneDatabaseSyncPayload` -> `client/ClientGeneDatabase` (browser
+    only; cleared on logout; re-synced on login).
+  - **Research papers** (§16.2) - `item/ResearchPaperItem` with a `research_gene`
+    component. Right-click -> adds the gene to the DB + unlocks its carrot line +
+    consumes; tooltip = name + rarity + blurb. **Chest-loot injection**:
+    `data/loot/AddResearchPaperModifier` (an `IGlobalLootModifier`, gene weighted
+    by `GeneRarity.lootWeight()`) + `data/horsegenetics/loot_modifiers/*.json`
+    targeting ~8 chest tables. **26.1.2 note:** the
+    `neoforge:loot_modifiers/global_loot_modifiers.json` *index file is gone* -
+    `LootModifierManager` is now a `SimpleJsonResourceReloadListener` that reads
+    every file in the `loot_modifiers/` folder directly.
+  - **Horse Browser rework** (Phase H) - the Gene Database tab is no longer
+    creative-only: it reads `ClientGeneDatabase`, shows a discovered gene in
+    full (blurb, alleles, phenotypes, variants seen, "Magic carrot recipe:
+    unlocked/locked") and an undiscovered one as a dim name + a nudge (creative
+    sees all). A **"Write research paper"** button spends one book for a paper on
+    the selected discovered gene (`WriteResearchPaperPayload` ->
+    `server/ResearchPaperWriter`).
+  - **Deliberately deferred** (owner call): the Horse Master villager (§18),
+    seed-jar gestation + carrot-on-jar effects (§15.1), attached model parts
+    (§19.2), the sheared render-layer look. Also not built: a DB check *inside*
+    `MagicCarrotRecipe.matches` (the paper ingredient is the gate); the §19
+    header fields as *creator form inputs* (the creator emits `format: 3` but has
+    no rarity/carrot/chaos fields yet); per-gene `chaos` tables on any built-in
+    (all fall back to the uniform draw).
+  - Docs: `wiki/carrots.html` (new), `wiki/nav.js`, `wiki/gene-effects.html`
+    (yield denial + `full_health`), `wiki/gene-format.html` (format 3),
+    `wiki/gene-milk.html`, `wiki/horse-care.html`, `wiki/genetics-model.html`,
+    `wiki/api-reference.html`, `wiki/modding.html`, `wiki/roadmap.html`
+    (§§7/12/14/16/19 trimmed to remainders). Checklist:
+    `wiki/verification.html` §0.
+
 - **Built 2026-09-05, NOT yet play-tested: the Horse Browser (H page), first
   slice, + a per-horse gene popup.** A new `common/genetics/GeneDescriptions`
   (a one-paragraph, plain-English summary of every one of the 41 built-in
@@ -1336,7 +1449,7 @@ project. Its shape:
   Still unconfirmed: bred foal, seed-jar round-trip, a spec gene actually
   showing in the display (needs a horse carrying Suntouched/Waterborn) -
   `wiki/verification.html` §0.
-- **`common/`** - compiles; **380 JUnit tests pass** (`./gradlew :common:test`).
+- **`common/`** - compiles; **379 JUnit tests pass** (`./gradlew :common:test`).
   Covers `breed/` (the breed system: `Breed` / `Breeds` (49) / `BreedFounder` /
   `BreedLineage` / `BreedStatCurve` / `Commonness` -> `wiki/breeds.html`),
   `trait/` (the non-coat body: `HorseTraits` / `Traits` / `Condition` /
@@ -1821,6 +1934,9 @@ Two-module Gradle project, split deliberately:
     **`AlleleRandomness`** (one gene's per-horse randomness, by expressing copy or
     by slot; it lives here rather than in `trait/` so both the trait and the
     ability sides can use it without the two packages depending on each other),
+    `GeneRarity` (the §19 tier enum), `GameteBias` (a per-parent modifier on
+    `Genome.breedWith` - what a breeding carrot does, roadmap §14) + `CarrotEffect`
+    (the sealed effect set + `fold` -> `GameteBias`),
     `CoatPhenotype`, `GeneticCodeCombiner`.
   - `coat/` - `CoatData`, `CoatGenerator`; `coat/pattern/` holds the
     pipeline (`CoatTextureComposer`, the `PigmentField` /
@@ -1871,15 +1987,20 @@ Two-module Gradle project, split deliberately:
   - `client/` - renderer, texture compositing (incl. `EmissiveCoatLayer` for a
     `glow` gene's full-bright coat parts), client caches, the inventory
     hooks + `FamilyTreeScreen`, keybind, lifecycle cleanup.
-  - `data/` - Data Attachments. **Two** on a horse: `horsegenetics:horse_record`
-    (a `HorseRecord`, which carries the whole genome - genotype *and*
-    epigenome - since 2026-09-03; there is no separate coat attachment) and
-    `horsegenetics:horse_care` (`HorseCareAttachment`, the non-genetic bond /
-    herd / daily-cap state). Plus the ancestry `SavedData`, codecs;
-    `ModDataComponents` (the item
-    data components: `stored_genome` / `StoredGenome` on the stallion seed
-    jar, `bound_horse` / `BoundHorse` on a bound stall sign); and `StallData`
-    / `StallRecord` (server-global SavedData of assigned stalls).
+  - `data/` - Data Attachments. **Four** on a horse now:
+    `horsegenetics:horse_record` (a `HorseRecord`, the whole genome),
+    `horsegenetics:horse_care` (`HorseCareAttachment`, bond / herd / daily-cap),
+    `horsegenetics:horse_cooldowns` (`HorseCooldownsAttachment`, a
+    `Map<String,Long>` of last-fired game times - `"shear"`, `"yield:<geneKey>"`;
+    replaced `GeneYieldHandler`'s static map) and `horsegenetics:carrot_window`
+    (`CarrotWindowAttachment`, a live breeding-carrot window - **not**
+    `copyOnDeath`). Plus the ancestry `SavedData` + `GeneDatabaseData`
+    (server-global per-player gene database, roadmap §16); codecs;
+    `ModDataComponents` (item data components: `stored_genome`, `bound_horse`,
+    **`carrot_effects`** (a `List<String>` of `CarrotEffect` ids) and
+    **`research_gene`** (a gene key on a `research_paper`)); `StallData` /
+    `StallRecord`; and `data/loot/` (`AddResearchPaperModifier` +
+    `ModLootModifiers` - the chest-loot paper injection).
   - `network/` - custom payloads + `ModNetworking`.
   - `server/` - event handlers, the horse-dimension builder, the portal
     manager, the record adapter (`HorseRecords`, which now also resolves and
@@ -1897,8 +2018,16 @@ Two-module Gradle project, split deliberately:
     stall trio `StallSignHandler` (bind / sign-break cleanup) + `StallDetector`
     (the enclosed-area flood-fill) + `StallDebug` (particle-outline overlay),
     and the **horse-care** pair `HorseCareHandler` (the one 30-tick scan for
-    gated healing + bond + tamed-horse herd formation) + `BondFollowGoal` (the
-    single bond-tier AI goal). See `wiki/horse-care.html`.
+    gated healing + bond + tamed-horse herd formation; also exposes
+    `awardBondFor` for one-off bond like shearing) + `BondFollowGoal` (the
+    single bond-tier AI goal). See `wiki/horse-care.html`. **Roadmap §§7/12/14/16:**
+    `HorseShearHandler` (shears -> hair, once/day); `GeneYieldHandler` (the
+    `yield` translator + the `deniedDamage`/`deniedMessage` else-branch);
+    `BreedingCarrotHandler` (feed a carrot -> a `CarrotWindowAttachment` +
+    love); `GeneDiscoveryHandler` (fill the gene DB on tame / breed);
+    `ResearchPaperWriter` (the browser "write paper" button's server side);
+    `recipe/` (`ModRecipes` + the parameterised `MagicCarrotRecipe` +
+    `CarrotCombineRecipe` + `RarityItems`).
   - `block/` - `ModBlocks` + `HayPortalBlock` (the only registered block),
     `ModBlockEntities` + `HayPortalBlockEntity` (drives the animated
     `hay_portal.png` slab renderer).
@@ -1907,9 +2036,12 @@ Two-module Gradle project, split deliberately:
     editor first; the editor screen is `client/CustomHorseSpawnScreen`, the
     spawn itself goes through `network/SpawnCustomHorsePayload` and is
     creative-gated on the server - plus the 17
-    **gameplay-layer items**, roadmap §§11-19 first slice; the two
-    `SeedJarItem`s, the three `WhistleItem`s and the two `StallSignItem`s have
-    behaviour, the rest don't yet), `SeedJarItem` (tooltip), `WhistleItem`
+    **gameplay-layer items**, roadmap §§11-19; the two `SeedJarItem`s, three
+    `WhistleItem`s, two `StallSignItem`s, the four breeding carrots + the
+    parameterised `MAGIC_GENE_CARROT`, `ResearchPaperItem` (right-click -> gene
+    DB + carrot unlock), `braided_rope` + `hair_cloth`, and `HORSE_HAIR` (from
+    shearing) all have behaviour; the tickets do not yet), `SeedJarItem`
+    (tooltip), `WhistleItem`
     (`use` -> recall your tamed horses in a radius), `StallSignItem` (`useOn` ->
     place an oak wall sign + flood-fill the stall behind it), and
     `ModCreativeTabs` (one **Horse Genetics** tab). Recipes are datapack JSON
@@ -2174,9 +2306,15 @@ Full inheritance detail: **`wiki/breeding.html`**.
 Java class. Drop it in `config/horsegenetics/genes/` and restart. Full format
 reference is **`wiki/gene-format.html`**; the machinery:
 
-- **`GeneSpec`** is the format as records (**`"format": 2`** since the
-  combination-table rewrite): a header (key, alleles, priority) plus an
-  **`expressions`** table and a **`founders`** table. Each expression names the
+- **`GeneSpec`** is the format as records (**`"format": 3`** since the §19
+  metadata pass - format 2 was the combination-table rewrite): a header (key,
+  alleles, priority) plus an **`expressions`** table and a **`founders`** table,
+  and the optional §19 blocks **`blurb`** (a gene-level summary),
+  **`rarity`** (a `GeneRarity` tier - default gold-ingot), **`carrot`**
+  (`{enabled, behaviour: heterozygous|homozygous, flavour: [...]}`) and
+  **`chaos`** (a founder-shaped distribution for the chaos carrot). All four are
+  optional; a format-2 file needs only its version number bumped. Each expression
+  names the
   combinations that land on it (`when`, a list or a token→count map; exactly one
   entry may omit it and catch the rest), carries `wildType` / `masks` /
   `varies` / a human-readable `description`, and holds **its own `layers` and
@@ -3496,16 +3634,18 @@ Design follow-ups (not just "go look at it"):
    healthy and an inbred line is not, and it is entirely possible a player never
    meets a lethal at those numbers.
 
-25. **Milk made an existing `yield` wart load-bearing.** A `yield` cancels the
-   interaction on both sides so vanilla doesn't also read it as a mount - fine
-   while the only yield in the game was Waterborn's, on a rare gene. **Every mare
-   now has one**, so right-clicking any grown mare with an empty bucket gives
-   milk rather than mounting, always; and while the 200-tick cooldown is running
-   `fulfil` returns early but the event is still cancelled, so you get neither
-   milk nor a mount and no feedback. Suspected from reading the code, not seen -
-   `wiki/verification.html` §0a. Fixes in order of size: don't cancel when the
-   cooldown blocks it; require sneak; or gate milking on `tamed`, which
-   `wiki/roadmap.html` §7 wants anyway.
+25. **Mostly fixed 2026-09-05 (not play-tested).** The milk yield now requires
+   `tamed` + `full_health`, so right-clicking a random wild mare with a bucket
+   no longer swallows the mount; a producing yield on cooldown sends a "nothing
+   to give yet" message instead of a silent cancel; and a stallion / foal now
+   gets the denial branch (kick / message) rather than a no-op. What is **still
+   open**: the interaction is still cancelled *before* the `tamed`/`full_health`
+   checks in `GeneYieldHandler` (the loop `continue`s to the next yield, but if
+   no yield matches nothing is cancelled - so an untamed mare mounts normally
+   now, good; a tamed but hurt mare gets neither milk nor a mount and *no*
+   message, because the milk yield's `when` fails and there is no denial yield
+   for "tamed mare, not full health"). A "you need to heal her first" denial
+   yield would close it. `wiki/verification.html` §0.
 
 26. **Two magical genes do something a player cannot see.** Milk and verdant
    both paint nothing, so a lava-bearing horse and a moss-spreading one are
@@ -3628,6 +3768,59 @@ Design follow-ups (not just "go look at it"):
    component** ("Friesian x Unknown cross" vs. making Unknown absorbing like
    Mixed) and the **cross stat rule** (per-axis average of the parents' bands
    vs. leaning toward the stronger parent).
+
+32. **The whole carrot / database / shearing / milking pass is unplayed.** None
+   of it has been seen in-game - not a carrot fed, not a biased foal, not a
+   sheared horse, not a paper read. `wiki/verification.html` §0 is the
+   checklist. The load-bearing unknowns:
+   - **Does `NONE`/`NONE` breeding really match the old draw in-game?** The unit
+     test pins byte-identity and `coat-golden.txt` is untouched, but a live foal
+     from two un-fed parents has not been checked against a pre-pass foal.
+   - **The magic carrot recipe.** `MagicCarrotRecipe` is a `CustomRecipe` built
+     against 26.1.2 sources without an in-game craft - the `matches` heuristic
+     (1 gold carrot, 1 paper, >=1 hair, the rarity item, >=5 filled slots) may
+     be too loose or too strict, and the recipe-book / JEI display of a
+     no-fixed-ingredients special recipe is unknown. Same for `CarrotCombineRecipe`.
+   - **Chaos determinism across a reload.** Chaos rolls its target gene at
+     breeding time off the foal RNG; two carriers bred repeatedly should give a
+     spread, not the same locus every time - unverified.
+   - **The gene database UI.** The browser tab now depends on
+     `ClientGeneDatabase` being synced (login + on discovery). If the sync
+     misfires the tab shows every gene as undiscovered. The "Write research
+     paper" button's book-scan + payload round-trip is untested.
+   - **Loot injection.** `add_research_paper.json` targets 8 chest tables by id;
+     whether those ids are still current in 26.1.2 and whether the modifier
+     fires at the `0.18` rate is unchecked. The folder is `loot_modifiers/`
+     (plural, no index file) - a boot with the wrong path logs "Couldn't parse"
+     but does not crash.
+   - **`AnimalTameEvent`** - is it the right event, and does `getTamer()` give a
+     `ServerPlayer` for a horse tamed by repeated mounting? If not, taming
+     discovers nothing and only breeding + papers fill the DB.
+   - **The stallion-kick damage source** (`horse.damageSources().mobAttack`) and
+     whether `player.hurtServer` is the right call for hurting a *player* here.
+
+33. **The sheared look is not built.** The shearing *mechanic* is complete
+   (hair, once/day cooldown, bond, sound, particles) but there is no visual
+   difference on a sheared horse. Settled §21 as a low-fidelity render-layer
+   overlay (no coat bake) driven off the `"shear"` cooldown stamp; it needs a
+   sync of a `sheared` bool (the `HorseCareSyncPayload` has 4 construction sites,
+   so extending it is the fiddly part) and a `client/ShearedHorseLayer` on the
+   `EmissiveCoatLayer` pattern. Deferred rather than done badly.
+
+34. **§19 metadata has no creator form.** The gene creator emits `format: 3`
+   files, but the new `blurb` / `rarity` / `carrot` / `chaos` blocks are not
+   editable in the tool - an author writes them by hand. They are optional and
+   not parity-checked (they don't paint), so this is a form-fields task, not a
+   correctness one. `wiki/gene-format.html` documents the shapes.
+
+35. **No built-in gene declares a `chaos` table.** Every built-in falls back to
+   the uniform draw over its viable pairs when the chaos carrot lands on it -
+   which for a 40-allele locus like particle is a near-guaranteed weird
+   outcome, and for a lethal-carrying locus can hand a foal a lethal genotype
+   (the draw is over `canOccur` pairs, so an *embryonic* lethal is excluded, but
+   a *birth* lethal like `O/O` is reachable). Whether that is a feature (chaos
+   is chaos) or wants a per-gene guard is a design call. `Gene.chaosTable()` is
+   the seam.
 
 ## License
 

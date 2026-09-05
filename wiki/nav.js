@@ -113,7 +113,8 @@
         {
             title: "Gameplay",
             items: [
-                { href: "horse-care.html", text: "Horse care: healing, bond, herds", kind: "core" }
+                { href: "horse-care.html", text: "Horse care: healing, bond, herds", kind: "core" },
+                { href: "carrots.html", text: "Breeding carrots & the gene database", kind: "magical" }
             ]
         },
         {

@@ -36,7 +36,9 @@
 <tr><td><code>Genotype</code></td><td>One <code>AllelePair</code> per registered gene. Round-trips through a code string.</td></tr>
 <tr><td><code>AlleleEpigenetics</code></td><td><code>(int priority, long epigeneticSeed)</code> &mdash; the heritable payload on <strong>one copy</strong> of one allele.</td></tr>
 <tr><td><code>Epigenome</code></td><td>One <code>AlleleEpigenetics</code> per copy, aligned slot-for-slot with the genotype&rsquo;s pairs.</td></tr>
-<tr><td><code>Genome</code></td><td><code>Genotype</code> + <code>Epigenome</code>. The thing a foal actually inherits.</td></tr>
+<tr><td><code>Genome</code></td><td><code>Genotype</code> + <code>Epigenome</code>. The thing a foal actually inherits. <code>breedWith</code> takes an optional per-parent <code>GameteBias</code> &mdash; what a <a href="carrots.html">breeding carrot</a> does.</td></tr>
+<tr><td><code>GameteBias</code> / <code>CarrotEffect</code></td><td>A per-parent modifier on the breeding draw (re-roll epigenetics / prefer the dominant or recessive copy / substitute a pair for one gene), and the sealed set of carrot effects that <code>fold</code> into one. <code>NONE</code> is bit-for-bit the plain draw.</td></tr>
+<tr><td><code>GeneRarity</code></td><td>Six tiers. <code>Gene.rarity()</code> (default <code>UNCOMMON</code>), <code>hasMagicCarrot()</code> and <code>chaosTable()</code> are the &sect;19 metadata the carrot economy and the gene database read.</td></tr>
 <tr><td><code>Genes</code></td><td>The registry. Three orderings: <code>codeOrder()</code>, <code>naturalOrder()</code>, <code>magicalOrder()</code>.</td></tr>
 <tr><td><code>GenotypeCatalog</code></td><td>Every <em>visually distinct</em> genotype the registry can produce, in a stable order.</td></tr>
 <tr><td><code>GeneSpec</code> / <code>SpecGene</code></td><td>A gene described as <a href="gene-format.html">a JSON file</a> rather than a class, and the <code>Gene</code> that answers everything from it. Indistinguishable from a hand-written gene everywhere below this table.</td></tr>

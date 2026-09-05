@@ -117,14 +117,6 @@
     <code>yield</code> per combination:
 </p>
 
-<div class="codebox">
-<div class="filename">common/genetics/genes/MilkGene.java</div>
-<pre><code class="language-java">private static GeneAbility bucketOf(String produces, int cooldown, Condition when) {
-    return new GeneAbility.Yield(new Trigger.OnInteract("minecraft:bucket"),
-            "minecraft:bucket", produces, cooldown, when, 1);
-}</code></pre>
-</div>
-
 <p>
     That is the same record a data-driven gene&rsquo;s <code>effects</code> block
     parses into, so the NeoForge translator
@@ -135,17 +127,46 @@
 <table class="data">
     <thead><tr><th>Outcome</th><th>Condition</th><th>Cooldown</th></tr></thead>
     <tbody>
-        <tr><td><code>mares-milk</code> / <code>milk-carrier</code></td><td>adult and female</td><td>200 ticks</td></tr>
+        <tr><td><code>mares-milk</code> / <code>milk-carrier</code></td><td>adult, female, <strong>tamed</strong>, <strong>at her own full health</strong></td><td>24 000 ticks (once a day)</td></tr>
         <tr><td><code>water-milk</code></td><td>adult</td><td>200 ticks</td></tr>
         <tr><td><code>lava-milk</code></td><td>adult</td><td>1200 ticks</td></tr>
     </tbody>
 </table>
 
 <p>
-    A renewable lava source that walks is worth a great deal more than a renewable
-    water source, so it recharges six times slower. That number is a first guess and
-    is exactly the sort of thing a play session should move.
+    Water and lava are a rare double-recessive novelty, not a dairy &mdash; a
+    renewable lava source that walks recharges six times slower than water, and
+    both stay on short cooldowns. <strong>Milking</strong> proper is
+    once-per-Minecraft-day now (the mod&rsquo;s standard time gate), on the
+    per-horse <code>HorseCooldownsAttachment</code>.
 </p>
+
+<div class="note rule">
+    <span class="label">The milking rules (roadmap &sect;7, built 2026-09-05)</span>
+    <p>
+        Every rule that used to be listed as unbuilt now is, as
+        <a href="gene-effects.html">effects-vocabulary</a> additions rather than a
+        special case in the interaction handler &mdash; so every gene gets them:
+    </p>
+    <ul>
+        <li><strong>Tamed + own-max health</strong> &mdash; the milk yield&rsquo;s
+            <code>when</code> is <code>{adult, sex_female, tamed, full_health}</code>.
+            The <code>full_health</code> flag measures against <em>this</em>
+            horse&rsquo;s max, so a genetically frail mare is milkable at 4 hearts.</li>
+        <li><strong>Milking a stallion kicks you</strong> &mdash; a second yield
+            with an empty <code>produces</code>, <code>deniedDamage 1</code> and a
+            message; the <code>deniedMessage</code>/<code>deniedDamage</code> pair
+            is the else-branch a bare <code>yield</code> could not express.</li>
+        <li><strong>A foal says it has nothing</strong> &mdash; the same shape,
+            <code>deniedDamage 0</code>.</li>
+        <li><strong>On cooldown</strong> the mare sends &ldquo;nothing to give
+            yet&rdquo; rather than eating the click silently.</li>
+    </ul>
+    <p>
+        Still open: a tamed but hurt mare gets neither milk nor a mount and no
+        message (no denial yield covers that case).
+    </p>
+</div>
 
 <h2 id="nothing">It paints nothing</h2>
 

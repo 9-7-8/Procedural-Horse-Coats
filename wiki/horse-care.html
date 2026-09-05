@@ -120,6 +120,7 @@
 <tr><td>Proximity</td><td>~+0.5 / min</td><td>Owner within 10 blocks at scan time &rarr; +15 ticks into <code>bondTicks</code></td></tr>
 <tr><td>Riding</td><td>~+1 / min</td><td>Owner is the controlling passenger &rarr; +30 ticks into <code>bondTicks</code></td></tr>
 <tr><td>Feeding</td><td>+2 each</td><td>Owner right-clicks with any <code>isFood</code> item (event not cancelled &mdash; vanilla feeding still happens)</td></tr>
+<tr><td>Shearing</td><td>+5 each</td><td>A tamed horse sheared with shears (<code>server/HorseShearHandler</code>, roadmap &sect;12), via the new <code>HorseCareHandler.awardBondFor</code> entry point. Honours the daily cap.</td></tr>
 </tbody>
 </table>
 </div>
@@ -130,8 +131,7 @@
     before the daily cap).
 </p>
 <div class="note"><span class="label">Not built yet</span>
-    <p>Shearing +5 (shearing itself is unbuilt, roadmap &sect;12) and
-    "sleeping nearby +1/night" are not wired. Proximity already covers the
+    <p>"Sleeping nearby +1/night" is not wired. Proximity already covers the
     common "near my owner" case.</p>
 </div>
 

@@ -327,6 +327,8 @@ Component  &rarr;  (Trigger, Condition, Selector, Effect)</code></pre>
 <p>
     <code>sex_female</code> &middot; <code>sex_male</code> &middot; <code>tamed</code> &middot;
     <code>untamed</code> &middot; <code>adult</code> &middot; <code>baby</code> &middot;
+    <code>full_health</code> (at the horse&rsquo;s <em>own</em> max, so a
+    genetically frail mare is milkable at 4 hearts) &middot;
     <code>has_rider</code> &middot; <code>in_water</code> &middot; <code>submerged</code> &middot;
     <code>on_ground</code> &middot; <code>on_fire</code> &middot; <code>day</code> &middot;
     <code>night</code> &middot; <code>raining</code> &middot; <code>thundering</code> &middot;
@@ -623,15 +625,33 @@ Component  &rarr;  (Trigger, Condition, Selector, Effect)</code></pre>
 <tr><td><code>trigger</code></td><td><code>on_interact</code> (any item)</td><td>An <code>{"on_interact": "item id"}</code> trigger. Bare <code>""</code> = any held item.</td></tr>
 <tr><td><code>consumes</code></td><td><code>""</code></td><td>Item id taken from the player&rsquo;s hand, or <code>""</code> for nothing.</td></tr>
 <tr><td><code>produces</code></td><td><code>""</code></td><td>Item id handed back. Recognised set: buckets, bottles, egg, slime ball.</td></tr>
-<tr><td><code>cooldown</code></td><td><code>0</code></td><td>Per-horse cooldown, ticks.</td></tr>
+<tr><td><code>cooldown</code></td><td><code>0</code></td><td>Per-horse cooldown, ticks. Stored on <code>HorseCooldownsAttachment</code> keyed <code>"yield:&lt;geneKey&gt;"</code> &mdash; a game time that survives a restart, not a static map.</td></tr>
+<tr><td><code>denied_damage</code></td><td><code>0</code></td><td>The <strong>else branch</strong>. When a matching interaction&rsquo;s <code>when</code> <em>fails</em>, a yield with an empty <code>produces</code> and a non-zero <code>denied_damage</code> hurts the player this much instead (a stallion&rsquo;s kick is <code>1</code>).</td></tr>
+<tr><td><code>denied_message</code></td><td><code>""</code></td><td>Shown with the denial (a foal&rsquo;s &ldquo;nothing to give&rdquo;). Fed through <code>Component.translatable</code>, so a built-in gene passes a lang key and an author passes literal text &mdash; both render.</td></tr>
 </tbody>
 </table>
-<p>The interaction is eaten so vanilla doesn&rsquo;t also read it as a mount; a non-creative player loses the consumed item.</p>
+<p>
+    The interaction is eaten so vanilla doesn&rsquo;t also read it as a mount; a
+    non-creative player loses the consumed item. A producing yield whose
+    cooldown is still running sends a &ldquo;nothing to give yet&rdquo; message
+    rather than a silent cancel.
+</p>
+<p>
+    <strong>The else branch</strong> is a second yield entry with an empty
+    <code>produces</code> and its own <code>when</code>: milk declares a
+    <code>{sex_male, adult}</code> yield with <code>denied_damage: 1</code> and a
+    <code>{baby}</code> yield with a message. This is what a bare <code>yield</code>
+    could not express &mdash; &ldquo;and do <em>this</em> instead&rdquo;.
+</p>
 <pre><code class="language-json">{ "type": "yield",
   "trigger": { "on_interact": "minecraft:bucket" },
   "consumes": "minecraft:bucket", "produces": "minecraft:water_bucket",
-  "cooldown": 2400,
-  "when": { "all": [ { "flag": "sex_female" }, { "flag": "tamed" } ] } }</code></pre>
+  "cooldown": 24000,
+  "when": { "all": [ { "flag": "sex_female" }, { "flag": "tamed" }, { "flag": "full_health" } ] } }
+{ "type": "yield",
+  "trigger": { "on_interact": "minecraft:bucket" },
+  "denied_damage": 1, "denied_message": "The stallion kicks you.",
+  "when": { "flag": "sex_male" } }</code></pre>
 <p>The spec&rsquo;s Yield is the same system with three fields the gene layer lacks:</p>
 <pre><code>Yield {
   trigger, condition, cooldown,
