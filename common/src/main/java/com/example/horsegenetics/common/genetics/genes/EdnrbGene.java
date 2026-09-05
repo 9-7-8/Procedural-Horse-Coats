@@ -6,6 +6,7 @@ import com.example.horsegenetics.common.coat.pattern.CoatRegions;
 import com.example.horsegenetics.common.coat.pattern.PatchNoise;
 import com.example.horsegenetics.common.coat.pattern.PigmentField;
 import com.example.horsegenetics.common.coat.pattern.PigmentView;
+import com.example.horsegenetics.common.coat.pattern.WhitePattern;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Axis;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Part;
@@ -85,9 +86,16 @@ public final class EdnrbGene implements Gene, HealthContribution {
     /** The flank band, as fractions of the body's height: above the belly, below the topline. */
     private static final double BAND_LO = 0.28;
     private static final double BAND_HI = 0.74;
-    /** Face-blaze half-width at z==0, body units: a floor (always a blaze) + a roll toward bald face. */
-    private static final double FACE_HALF_MIN = 0.9;
-    private static final double FACE_HALF_RANGE = 2.6;
+    /**
+     * How much white frame puts on the face, on {@link WhitePattern}'s shared
+     * scale. Frame is the classically <b>bald-faced</b> pattern - a broad blaze
+     * at the low end of the roll and an apron face at the high end - so it sits
+     * near the top of the ramp, and the marking itself is drawn from the same
+     * star / stripe / snip vocabulary every other white locus uses.
+     */
+    private static final double FACE_STRENGTH = 0.80;
+    /** Frame's margins are torn, on the face as much as on the flank. */
+    private static final double FACE_JAG = 0.34;
 
     /**
      * <b>Overo lethal white syndrome.</b> The all-white foal an {@code O/O}
@@ -183,10 +191,12 @@ public final class EdnrbGene implements Gene, HealthContribution {
         Rng epi = ctx.epigeneticsFor(KEY);
         long seed = epi.nextLong();
         double cover = COVER_MIN + epi.nextFloat() * COVER_RANGE;
-        double faceHalf = FACE_HALF_MIN + epi.nextFloat() * FACE_HALF_RANGE;
         double threshold = 1.0 - cover;
 
         Skin skin = ctx.skin();
+        WhitePattern.FaceMarking faceMark =
+                WhitePattern.faceMarking(epi, skin, FACE_STRENGTH, FACE_JAG);
+
         HorseSkinGeometry.Bounds bb = HorseSkinGeometry.bodyBounds(skin);
         double span = bb.span(Axis.Y);
         double bandLo = bb.yMin() + span * BAND_LO;
@@ -196,7 +206,7 @@ public final class EdnrbGene implements Gene, HealthContribution {
         PigmentField f = coat.mutableCopy();
         HorseSkinGeometry.forEachTexel(skin, (px, py, part, face, point) -> {
             if (part == Part.HEAD || part == Part.MUZZLE) {
-                if (Math.abs(point.z()) <= faceHalf) {
+                if (faceMark.covers(part, face, point)) {
                     f.setRed(px, py, 0f);
                     f.setBlack(px, py, 0f);
                 }

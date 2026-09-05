@@ -3,7 +3,9 @@ package com.example.horsegenetics.common.coat.pattern;
 import com.example.horsegenetics.common.Rng;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Axis;
+import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.BodyPoint;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Bounds;
+import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Face;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Part;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Skin;
 
@@ -102,9 +104,8 @@ public final class WhitePattern {
     private static final double BODY_SCALE = 0.17;
     private static final double BODY_JAG = 0.16;
     private static final double BODY_JAG_FREQ = 3.3;
-    /** Blaze half-width in body units, at strength 0 and at strength 1. */
-    private static final double FACE_HALF_MIN = 0.15;
-    private static final double FACE_HALF_MAX = 3.75;
+    /** How ragged a KIT face marking's margin is, in body units. */
+    private static final double SABINO_FACE_JAG = 0.42;
 
     /**
      * The {@code KIT} / sabino shape at {@code strength}, from a barely-marked
@@ -135,12 +136,10 @@ public final class WhitePattern {
             legH[i] = clamp01(s * 1.05 + (epi.nextFloat() - 0.5) * 2.0 * spread);
         }
         double bellyRoll = epi.nextFloat();
-        double faceRoll = epi.nextFloat();
-
-        double faceHalf = FACE_HALF_MIN + (FACE_HALF_MAX - FACE_HALF_MIN) * s * (0.75 + 0.25 * faceRoll);
-        double faceLength = clamp01(0.12 + 0.9 * s);
 
         Skin skin = ctx.skin();
+        FaceMarking faceMark = faceMarking(epi, skin, s, SABINO_FACE_JAG);
+
         Bounds body = HorseSkinGeometry.bodyBounds(skin);
         double span = body.span(Axis.Y);
         // The belly patch reaches this far up the horse; nothing at all below ~0.1.
@@ -165,7 +164,7 @@ public final class WhitePattern {
                 return;
             }
             if (part == Part.HEAD || part == Part.MUZZLE) {
-                if (Math.abs(point.z()) <= faceHalf && withinFace(skin, part, point, faceLength)) {
+                if (faceMark.covers(part, face, point)) {
                     whiten(f, px, py);
                 }
                 return;
@@ -239,10 +238,10 @@ public final class WhitePattern {
         Rng epi = ctx.epigeneticsFor(geneKey);
         long seed = epi.nextLong();
         double levelRoll = epi.nextFloat();
-        double faceRoll = epi.nextFloat();
-        double lengthRoll = epi.nextFloat();
 
         Skin skin = ctx.skin();
+        FaceMarking faceMark = faceMarking(epi, skin, s, SPLASH_FACE_JAG);
+
         Bounds body = HorseSkinGeometry.bodyBounds(skin);
         double span = body.span(Axis.Y);
         // Splash is measured from the ground up, so the fraction is of the whole
@@ -250,13 +249,10 @@ public final class WhitePattern {
         double level = body.yMin() + span * clamp01(0.06 + s * (0.78 + 0.18 * levelRoll));
         double wobble = span * LEVEL_WOBBLE;
 
-        double faceHalf = 0.75 + 3.1 * s * (0.7 + 0.3 * faceRoll);
-        double faceLength = clamp01(0.3 + 0.7 * s * (0.6 + 0.4 * lengthRoll));
-
         PigmentField f = coat.mutableCopy();
         HorseSkinGeometry.forEachTexel(skin, (px, py, part, face, point) -> {
             if (part == Part.HEAD || part == Part.MUZZLE) {
-                if (Math.abs(point.z()) <= faceHalf && withinFace(skin, part, point, faceLength)) {
+                if (faceMark.covers(part, face, point)) {
                     whiten(f, px, py);
                 }
                 return;
@@ -274,6 +270,287 @@ public final class WhitePattern {
             }
         });
         return f;
+    }
+
+    // ------------------------------------------------------------------
+    // Face markings: star, stripe, snip - and the names for their combinations
+    // ------------------------------------------------------------------
+
+    /** How ragged a splash face marking's margin is - splash edges are crisp. */
+    private static final double SPLASH_FACE_JAG = 0.11;
+
+    /**
+     * Half-width, in body units, at or above which a marking is a <b>bald
+     * face</b> rather than a blaze. The head box is 6 units across, so this is
+     * the point at which white reaches the sides and takes the eyes with it -
+     * and the point at which it is allowed onto the underside of the jaw.
+     */
+    private static final double BALD_HALF_WIDTH = 2.55;
+
+    /** Half-width below which a stripe is a stripe rather than a blaze. */
+    private static final double BLAZE_HALF_WIDTH = 1.15;
+
+    /** Body-space frequency of the margin wobble. About two texels per feature. */
+    private static final double FACE_WOBBLE_FREQ = 1.1;
+
+    /**
+     * How much of a blob's own radius the wobble may eat, per unit of
+     * {@code jag}. A blob is compared in normalised space, so its margin has to
+     * be wobbled as a <i>fraction</i> where the stripe's is wobbled in units.
+     */
+    private static final double BLOB_JAG_FRACTION = 0.55;
+
+    /** Where along the face each detached marking sits, as a fraction from poll to nose. */
+    private static final double STAR_T = 0.30;
+    private static final double SNIP_T = 0.90;
+
+    /**
+     * <b>A horse's face marking</b> - the one vocabulary all four white loci
+     * draw from, so that a star is the same shape whichever gene produced it.
+     *
+     * <h2>Three components, not eight named shapes</h2>
+     * Horsemen name eight or nine markings - star, snip, stripe, star and snip,
+     * star and stripe, blaze, bald face - but those are not eight shapes. They
+     * are <b>three independent components</b> (a patch on the forehead, a band
+     * down the nose, a patch at the nostrils) plus one width, and every named
+     * marking is a combination of them. Modelling the components rather than
+     * the names is what lets {@link #describe()} hand back the right word
+     * without anything ever having chosen it, and it is why a horse can come
+     * out with a marking nobody wrote down.
+     *
+     * <p>The two <b>detached</b> components are the point of this class. Before
+     * it, every white locus drew the same thing: a centreline band starting at
+     * the nose and running some distance back. That covers stripe, blaze and
+     * bald face and <i>cannot</i> express a star or a snip, because both of
+     * those are patches with coloured face on every side of them.
+     *
+     * <h2>Face space</h2>
+     * {@code t} runs 0 at the poll to 1 at the nose tip, measured along body-
+     * space {@code x} over the head and muzzle together, so the same numbers
+     * mean the same anatomy on the adult (which has a separate muzzle box) and
+     * on the foal (which does not). {@code z} is the distance off the
+     * centreline in body units. The eyes sit near {@code t = 0.4} on both
+     * meshes, which is what anchors {@link WhitePattern#STAR_T} above them and
+     * {@link WhitePattern#SNIP_T} down at the nostrils.
+     *
+     * <p>The <b>underside</b> of the jaw and chin ({@link Face#BOTTOM}) is only
+     * ever white on a true bald face. An ordinary blaze runs down the front of
+     * the face and stops there; letting the centreline test reach the bottom
+     * plane of the box - which is what the old painter did - wrapped every
+     * blaze under the jaw.
+     */
+    public static final class FaceMarking {
+
+        private final long seed;
+        private final boolean star;
+        private final boolean stripe;
+        private final boolean snip;
+        private final double faceMin;
+        private final double faceLen;
+        private final double halfWidth;
+        private final double offset;
+        private final double from;
+        private final double to;
+        private final double starT;
+        private final double starHalfT;
+        private final double starHalfZ;
+        private final double snipT;
+        private final double snipHalfT;
+        private final double snipHalfZ;
+        private final double jag;
+
+        private FaceMarking(long seed, boolean star, boolean stripe, boolean snip,
+                            double faceMin, double faceLen, double halfWidth, double offset,
+                            double from, double to,
+                            double starT, double starHalfT, double starHalfZ,
+                            double snipT, double snipHalfT, double snipHalfZ, double jag) {
+            this.seed = seed;
+            this.star = star;
+            this.stripe = stripe;
+            this.snip = snip;
+            this.faceMin = faceMin;
+            this.faceLen = faceLen;
+            this.halfWidth = halfWidth;
+            this.offset = offset;
+            this.from = from;
+            this.to = to;
+            this.starT = starT;
+            this.starHalfT = starHalfT;
+            this.starHalfZ = starHalfZ;
+            this.snipT = snipT;
+            this.snipHalfT = snipHalfT;
+            this.snipHalfZ = snipHalfZ;
+            this.jag = jag;
+        }
+
+        /** Does this marking cover the given head or muzzle texel? False for any other part. */
+        public boolean covers(Part part, Face face, BodyPoint point) {
+            if (part != Part.HEAD && part != Part.MUZZLE) {
+                return false;
+            }
+            if (face == Face.BOTTOM && halfWidth < BALD_HALF_WIDTH) {
+                return false;
+            }
+            double t = (point.x() - faceMin) / faceLen;
+            double z = point.z() - offset;
+            double wobble = (PatchNoise.fbm2(seed,
+                    point.x() * FACE_WOBBLE_FREQ, point.y() * FACE_WOBBLE_FREQ,
+                    point.z() * FACE_WOBBLE_FREQ) - 0.5) * 2.0;
+            if (stripe && t >= from && t <= to && Math.abs(z) <= halfWidth + jag * wobble) {
+                return true;
+            }
+            if (star && inBlob(t, z, starT, starHalfT, starHalfZ, wobble)) {
+                return true;
+            }
+            return snip && inBlob(t, z, snipT, snipHalfT, snipHalfZ, wobble);
+        }
+
+        private boolean inBlob(double t, double z, double centreT, double halfT, double halfZ,
+                               double wobble) {
+            double dt = (t - centreT) / halfT;
+            double dz = z / halfZ;
+            double edge = 1.0 + BLOB_JAG_FRACTION * jag * wobble;
+            return edge > 0 && dt * dt + dz * dz <= edge * edge;
+        }
+
+        /** Is there any white on this face at all? */
+        public boolean marksAnything() {
+            return star || stripe || snip;
+        }
+
+        /** A patch on the forehead, detached unless a stripe runs out of it. */
+        public boolean hasStar() {
+            return star;
+        }
+
+        /** A band down the bridge of the nose - the component that becomes a blaze. */
+        public boolean hasStripe() {
+            return stripe;
+        }
+
+        /** A patch at the nostrils, detached unless the stripe reaches it. */
+        public boolean hasSnip() {
+            return snip;
+        }
+
+        /** The stripe's half-width in body units; meaningless when there is no stripe. */
+        public double halfWidth() {
+            return halfWidth;
+        }
+
+        /** True once the marking is wide enough to take the eyes and the sides of the face. */
+        public boolean isBald() {
+            return stripe && halfWidth >= BALD_HALF_WIDTH;
+        }
+
+        /**
+         * The horseman's name for this combination - "star and snip", "blaze",
+         * "bald face". Nothing chose it: it is read back off the components,
+         * which is the check that they really do span the vocabulary.
+         */
+        public String describe() {
+            if (!marksAnything()) {
+                return "none";
+            }
+            if (isBald()) {
+                return "bald face";
+            }
+            if (stripe && halfWidth >= BLAZE_HALF_WIDTH) {
+                return snip ? "blaze to the nostrils" : "blaze";
+            }
+            StringBuilder sb = new StringBuilder();
+            if (star) {
+                sb.append("star");
+            }
+            if (stripe) {
+                sb.append(sb.isEmpty() ? "stripe" : " and stripe");
+            }
+            if (snip) {
+                if (sb.isEmpty()) {
+                    sb.append("snip");
+                } else if (star && stripe) {
+                    sb.append(", with a snip");
+                } else {
+                    sb.append(" and snip");
+                }
+            }
+            return sb.toString();
+        }
+    }
+
+    /**
+     * Draw a face marking for a gene of this {@code strength}, off the
+     * expressing allele copy's epigenetics.
+     *
+     * <p>Strength decides the <b>distribution</b>, not the marking: a
+     * barely-marked horse usually gets a star or a snip and sometimes nothing,
+     * a middling one a stripe, a strong one a blaze and then a bald face. That
+     * is the honest shape of it - a locus does not decide that a horse has a
+     * snip, it decides how much white the horse tends toward, and the marking
+     * falls out of that. It is also what finally makes {@code KIT}'s weak end
+     * mean something: {@code W20/N} is described as "a star and a sock", and
+     * now it can actually be one.
+     *
+     * <p><b>Draw order</b> - part of the determinism contract, so it is fixed
+     * and <b>unconditional</b>. Every one of these is drawn every time, for
+     * every marking, including the components that turn out absent; a draw made
+     * only when a flag is set would silently repaint every horse in every save
+     * the first time those odds moved. In order: {@code nextLong()} (the
+     * margin-wobble seed), then {@code nextFloat()} for the star's presence,
+     * the stripe's presence, the snip's presence, the width, the lateral
+     * offset, the stripe's reach down the face, the star's size and the snip's
+     * size - <b>one long and eight floats</b>.
+     *
+     * @param jag how far the margin wanders, in body units - the sabino/splash
+     *            difference, so a {@code KIT} star has torn edges and a splash
+     *            blaze has clean ones
+     */
+    public static FaceMarking faceMarking(Rng epi, Skin skin, double strength, double jag) {
+        double s = clamp01(strength);
+        long seed = epi.nextLong();
+        double starRoll = epi.nextFloat();
+        double stripeRoll = epi.nextFloat();
+        double snipRoll = epi.nextFloat();
+        double widthRoll = epi.nextFloat();
+        double offsetRoll = epi.nextFloat();
+        double reachRoll = epi.nextFloat();
+        double starSizeRoll = epi.nextFloat();
+        double snipSizeRoll = epi.nextFloat();
+
+        Bounds head = HorseSkinGeometry.bounds(skin, Part.HEAD);
+        double faceMin = head.xMin();
+        double faceMax = HorseSkinGeometry.hasPart(skin, Part.MUZZLE)
+                ? HorseSkinGeometry.bounds(skin, Part.MUZZLE).xMax()
+                : head.xMax();
+        double faceLen = Math.max(1e-6, faceMax - faceMin);
+
+        // A stripe is the component that tracks the gene: rare on a horse the
+        // locus has barely touched, certain once it is doing anything at all.
+        // A star and a snip are far less tied to it - which is exactly why an
+        // otherwise unmarked bay with one white spot between its eyes is such a
+        // common horse.
+        boolean stripe = stripeRoll < PatchNoise.smoothstep(0.02, 0.44, s);
+        boolean star = starRoll < 0.52 + 0.36 * s;
+        boolean snip = snipRoll < 0.20 + 0.32 * s;
+
+        // Width is the whole ladder from stripe to blaze to bald face, and it
+        // has to accelerate: the first half of the strength range is where the
+        // interesting small markings live, so spend it slowly.
+        double halfWidth = 0.22 + 3.4 * Math.pow(s, 1.5) * (0.62 + 0.38 * widthRoll);
+        double offset = (offsetRoll - 0.5) * 0.7;
+        double to = clamp01(0.52 + 0.62 * s + 0.22 * (reachRoll - 0.5));
+
+        double starHalfZ = 0.70 + 0.90 * s + 0.45 * starSizeRoll;
+        double starHalfT = (starHalfZ * 0.95) / faceLen;
+        // With a star present the stripe runs out of it; without one it starts
+        // lower down the nose, which is what a plain "stripe" looks like.
+        double from = star ? STAR_T : 0.42;
+
+        double snipHalfZ = 0.55 + 0.55 * s + 0.40 * snipSizeRoll;
+        double snipHalfT = (snipHalfZ * 0.95) / faceLen;
+
+        return new FaceMarking(seed, star, stripe, snip, faceMin, faceLen, halfWidth, offset,
+                from, to, STAR_T, starHalfT, starHalfZ, SNIP_T, snipHalfT, snipHalfZ, jag);
     }
 
     // ------------------------------------------------------------------
@@ -310,21 +587,6 @@ public final class WhitePattern {
             }
         });
         return tally[1] == 0 ? 0.0 : tally[0] / (double) tally[1];
-    }
-
-    /**
-     * Is this head / muzzle texel within {@code lengthFraction} of the head's
-     * length, measured back from the nose? The muzzle is always in - a face
-     * marking that stops short of the nose is a star, and stars are drawn by
-     * giving the fraction a small value on the head alone.
-     */
-    private static boolean withinFace(Skin skin, Part part, HorseSkinGeometry.BodyPoint point,
-                                      double lengthFraction) {
-        if (part == Part.MUZZLE) {
-            return true;
-        }
-        Bounds head = HorseSkinGeometry.bounds(skin, part);
-        return point.x() >= head.xMax() - head.span(Axis.X) * clamp01(lengthFraction);
     }
 
     private static void whiten(PigmentField f, int px, int py) {

@@ -11,9 +11,7 @@ import com.example.horsegenetics.common.genetics.Genotype;
 import com.example.horsegenetics.common.trait.HealthContribution;
 import com.example.horsegenetics.common.trait.TraitBuilder;
 
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * <b>{@code PAX3}</b> ({@code horsegenetics.pax3}) - the <b>second</b> splash
@@ -40,6 +38,23 @@ import java.util.Map;
  * player cannot perceive would be flavour text pretending to be a mechanic. It
  * is recorded in the outcome's description instead, which is where the gene
  * dictionary will read it.
+ *
+ * <h2>The common one</h2>
+ * <b>Nine wild horses in ten carry one copy of {@code SW2}</b>, which makes
+ * this the only locus in the mod whose variant is the ordinary horse rather
+ * than the exception. That is deliberate and it is how minimal splash works in
+ * life: a mild splash allele is near-ubiquitous, and what it buys a horse -
+ * clean-edged socks, a little belly white, a blaze - is what most horses look
+ * like. The pattern people notice is the <i>doubled</i> one.
+ *
+ * <p>Two consequences worth stating, because they are the point rather than
+ * side effects. Cross two wild-caught horses and about <b>one foal in five</b>
+ * is {@code SW2/SW2} - bold splash is the commonest thing a player will breed
+ * by accident, and the first white pattern they meet. And because both splash
+ * loci read the coat they are handed
+ * ({@linkplain WhitePattern#splash white finds white}), a horse that is also
+ * {@code MITF} splash is now the usual case rather than a rarity, which is the
+ * interaction the two-locus split exists to show.
  *
  * <p>Natural, <b>non-deterministic</b>, painted with the same
  * {@linkplain WhitePattern#splash dipped-from-below} shape as {@code MITF} -
@@ -77,15 +92,43 @@ public final class Pax3Gene implements Gene, HealthContribution {
 
     private final List<Expression> expressions = List.of(WILD, SPLASH, BOLD);
 
-    private final FounderTable founders = FounderTable.hardyWeinberg(frequencies(), this::canOccur);
+    /**
+     * How many founders carry <b>one</b> copy of {@code SW2}. This is the one
+     * locus in the mod where the minimal marking is the <i>ordinary</i> horse:
+     * a minimal-white splash allele is genuinely near-ubiquitous in live
+     * populations, so most horses you meet are carrying one and wearing the
+     * clean-edged socks and the blaze that come with it.
+     */
+    public static final double WILD_SW2_PERCENT = 90.0;
+    /** {@code SW4} stays rare - it is the loud one, not the ordinary one. */
+    public static final double WILD_SW4_PERCENT = 1.0;
 
-    private Map<Allele, Double> frequencies() {
-        Map<Allele, Double> p = new LinkedHashMap<>();
-        p.put(SW2, 0.020);
-        p.put(SW4, 0.005);
-        p.put(N, 0.975);
-        return p;
-    }
+    /**
+     * <b>Heterozygotes only, and written out rather than derived.</b> Two
+     * separate reasons, and both of them rule out
+     * {@link FounderTable#hardyWeinberg}:
+     * <ul>
+     *   <li><b>It is arithmetically unreachable.</b> Hardy-Weinberg's
+     *       heterozygote share is {@code 2pq}, which peaks at <b>50%</b> when
+     *       {@code p = q = 0.5}. There is no allele frequency anywhere that
+     *       makes 90% of a randomly-mating population heterozygous. A table
+     *       that says so has to say so directly.</li>
+     *   <li><b>The doubled combinations are the reward for breeding.</b>
+     *       {@code SW2/SW2} is the bold outcome; it must not turn up in a
+     *       wild-caught horse, the same rule the health loci and
+     *       {@link MagicSizeGene} follow. With one copy on nine horses in ten,
+     *       leaving the homozygote to Hardy-Weinberg would have made
+     *       <i>eighty-one per cent</i> of wild horses bold splash, which is not
+     *       a pattern any more - it is the base coat.</li>
+     * </ul>
+     * Baseline last, as every table in the mod does it, so a high founder roll
+     * is the plain horse.
+     */
+    private final FounderTable founders = FounderTable.builder()
+            .weight(SW2, N, WILD_SW2_PERCENT)
+            .weight(SW4, N, WILD_SW4_PERCENT)
+            .weight(N, N, 100.0 - WILD_SW2_PERCENT - WILD_SW4_PERCENT)
+            .build();
 
     @Override public String key() { return KEY; }
     @Override public String name() { return "PAX3 (splash white)"; }
