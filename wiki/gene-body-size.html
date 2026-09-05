@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Magic Body Size &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="nav.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow magical">Magical gene <span class="sep">/</span> no coat effect</p>
+<h1>Magic body size</h1>
+<p class="lede">
+    The magical version of <a href="gene-lcorl.html">LCORL</a> and
+    <a href="gene-hmga2.html">HMGA2</a>. <strong>Most horses in the world carry
+    it</strong>, with one copy, worth about a tenth either way &mdash; enough
+    that a paddock has a visible range of sizes and no single horse looks odd.
+    Two copies of the same kind <strong>add</strong>, and no wild horse is ever
+    born with two.
+</p>
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd>horsegenetics.body_size</dd></div>
+    <div><dt>Priority</dt><dd>140 (magical band)</dd></div>
+    <div><dt>Alleles</dt><dd><span class="allele dom">Big</span> <span class="allele dom">Small</span> <span class="allele wild">n</span></dd></div>
+    <div><dt>Combinations</dt><dd>6, all carryable &mdash; <strong>6 outcomes</strong>, one each</dd></div>
+    <div><dt>Inheritance</dt><dd><strong>codominant</strong> &mdash; both copies contribute and the percentages add</dd></div>
+    <div><dt>Default allele</dt><dd>n</dd></div>
+    <div><dt>In the wild</dt><dd><strong>heterozygotes only</strong> &mdash; 40% <code>Big/n</code>, 40% <code>Small/n</code>, 20% <code>n/n</code></dd></div>
+    <div><dt>Founder draws</dt><dd>1 &times; nextFloat()</dd></div>
+    <div><dt>Epigenetic draws</dt><dd>12 &times; nextFloat() per copy (one <code>nextGaussian()</code>)</dd></div>
+    <div><dt>Per copy</dt><dd>normal, mean <strong>10%</strong>, &sigma; <strong>7%</strong>, floor 1%</dd></div>
+    <div><dt>Coat effect</dt><dd><strong>none, ever</strong></dd></div>
+</dl>
+
+<div class="note warn">
+    <span class="label">Built 2026-09-04, not yet play-tested</span>
+    <p>
+        Nothing about a scaled horse has been seen: not the model, not the
+        hitbox, not the rider position. Checklist on
+        <a href="verification.html">To be verified</a>.
+    </p>
+</div>
+
+<h2 id="table">The combination table</h2>
+
+<table class="data">
+    <thead><tr><th>Combination</th><th>Outcome</th><th>Size</th><th>Typical</th></tr></thead>
+    <tbody>
+        <tr><td><code>n/n</code></td><td>wild</td><td>unchanged</td><td>1.00&times;</td></tr>
+        <tr><td><code>Big/n</code></td><td><code>giant</code></td><td>one copy's percentage</td><td>~1.10&times;</td></tr>
+        <tr><td><code>Big/Big</code></td><td><code>double-giant</code></td><td><strong>both</strong> percentages, added</td><td>~1.20&times;</td></tr>
+        <tr><td><code>Small/n</code></td><td><code>tiny</code></td><td>one copy's percentage off</td><td>~0.90&times;</td></tr>
+        <tr><td><code>Small/Small</code></td><td><code>double-tiny</code></td><td>both percentages off</td><td>~0.80&times;</td></tr>
+        <tr><td><code>Big/Small</code></td><td><code>balanced</code></td><td>the two nearly cancel</td><td>~1.00&times;</td></tr>
+    </tbody>
+</table>
+
+<p>
+    <strong>Six combinations, six outcomes.</strong> That is unusual in this
+    model &mdash; most genes collapse several combinations onto one row &mdash;
+    and it is exactly what codominance is: every combination genuinely differs,
+    so sharing any two rows would be a lie about the gene.
+</p>
+
+<h2 id="codominant">The percentages add</h2>
+
+<p>
+    Every allele copy carries a percentage, and <strong>both copies
+    contribute</strong>: the horse's size is one plus the sum of them,
+    <code>Big</code> counting positive and <code>Small</code> negative. Two big
+    copies of <code>+18%</code> and <code>+21%</code> make a horse nearly 40%
+    over &mdash; far outside anything the wild population contains.
+</p>
+
+<div class="codebox">
+<div class="filename">common/genetics/genes/MagicSizeGene.java</div>
+<pre><code class="language-java">@Override
+public void contribute(AllelePair pair, Genotype genotype, AlleleRandomness epigenetics,
+                       TraitBuilder out) {
+    double sum = signedDelta(pair.first(),  epigenetics.copy(0))
+               + signedDelta(pair.second(), epigenetics.copy(1));
+    if (sum != 0.0) {
+        out.multiplyScaleUnclamped(1.0 + sum);
+    }
+}</code></pre>
+</div>
+
+<p>
+    Signing the contribution rather than branching on the combination is what
+    makes the table fall out of one loop: <code>Big/Small</code> cancels because
+    a positive and a negative are added, not because anything checks for it.
+</p>
+
+<div class="note rule">
+    <span class="label"><code>Big/Small</code> is <em>near</em> 1.0, not exactly on it</span>
+    <p>
+        The two percentages are independent draws off two different allele
+        copies, so they cancel exactly only by coincidence. That is the honest
+        consequence of addition &mdash; forcing an exact zero would need a
+        special case that contradicts the rule &mdash; and the residual is worth
+        having: a horse a hair off ordinary size is usually carrying both
+        extremes.
+    </p>
+</div>
+
+<h2 id="copies">It needs <em>both</em> copies' epigenetics</h2>
+
+<p>
+    Every other epigenetic gene asks for "the copy that expresses", because one
+    locus produces one result. A codominant one cannot: asking for the expressed
+    copy would count one allele twice and the other not at all. So this gene
+    takes an <code>AlleleRandomness</code> and asks it for
+    <code>copy(0)</code> and <code>copy(1)</code> &mdash; the trait-side twin of
+    the accessor <a href="gene-mane-color.html">mane colour</a> needed for the
+    same reason on the coat side.
+</p>
+
+<h2 id="distribution">A normal distribution, centred on a tenth</h2>
+
+<p>
+    One copy's percentage is a normal draw with mean <strong>10%</strong> and
+    standard deviation <strong>7%</strong>. So about two thirds of carriers sit
+    between 1.03&times; and 1.17&times; (or 0.83&times; and 0.97&times;), and the
+    tails reach further.
+</p>
+
+<p>
+    The shape matters because <strong>almost every wild horse carries this
+    gene</strong>. If a single copy were dramatic then dramatic would be the
+    baseline and nothing would read as unusual. Instead the population has a
+    quiet, continuous spread of sizes &mdash; you notice it across a paddock
+    rather than on any one horse &mdash; and the striking animals are the ones
+    somebody bred.
+</p>
+
+<table class="data">
+    <thead><tr><th>Draw</th><th>One copy</th><th>Two copies</th></tr></thead>
+    <tbody>
+        <tr><td>&minus;6&sigma; (the floor)</td><td>1.01&times;</td><td>1.02&times;</td></tr>
+        <tr><td>&minus;1&sigma;</td><td>1.03&times;</td><td>1.06&times;</td></tr>
+        <tr><td>mean</td><td>1.10&times;</td><td>1.20&times;</td></tr>
+        <tr><td>+1&sigma;</td><td>1.17&times;</td><td>1.34&times;</td></tr>
+        <tr><td>+3&sigma;</td><td>1.31&times;</td><td>1.62&times;</td></tr>
+        <tr><td>+6&sigma; (the bound)</td><td>1.52&times;</td><td><strong>2.04&times;</strong></td></tr>
+    </tbody>
+</table>
+
+<div class="note rule">
+    <span class="label">The Gaussian is bounded, and that is deliberate</span>
+    <p>
+        <code>Rng.nextGaussian()</code> is the Irwin-Hall construction &mdash;
+        twelve uniform draws, minus six &mdash; rather than Box-Muller. Two
+        properties earn the twelve calls. Its tails stop at
+        <strong>&plusmn;6&sigma;</strong>, so a trait that decides how big a horse
+        is has a hard bound on absurdity and the guard clamps never actually
+        fire. And <strong>all-<code>0.5</code> inputs give exactly
+        <code>0</code></strong>, so <code>MidpointRng</code> &mdash; the "what
+        does this genotype do on average" source &mdash; lands on the mean.
+        Box-Muller would hand it a value 1.18&sigma; below the mean, which is not
+        a midpoint of anything.
+    </p>
+</div>
+
+<p>
+    A copy's percentage is also <strong>floored at 1%</strong>. A
+    <code>Big</code> allele that rolled negative would be a big allele making a
+    horse smaller &mdash; not a distribution tail, a bug in the reader's head.
+</p>
+
+<h2 id="wild">Only heterozygotes are born wild</h2>
+
+<p>
+    The founder table lists <code>Big/n</code>, <code>Small/n</code> and
+    <code>n/n</code> and nothing else. It is written out rather than derived from
+    Hardy-Weinberg, because random mating is exactly what this table is
+    <em>not</em>:
+</p>
+
+<div class="codebox">
+<pre><code class="language-java">private final FounderTable founders = FounderTable.builder()
+        .weight(Big,   n, 40.0)
+        .weight(Small, n, 40.0)
+        .weight(n,     n, 20.0)
+        .build();</code></pre>
+</div>
+
+<p>
+    So <strong>every doubled horse in the world, in either direction, is
+    something somebody bred</strong>. That is the same rule the
+    <a href="horse-body.html">health loci</a> use &mdash; nothing affected is
+    ever wild-caught &mdash; pointed at something worth having instead of
+    something to avoid. And since the percentage travels with the copy, breeding
+    two <em>good</em> copies together is a real project with a real result.
+</p>
+
+<h2 id="clamp">Past the natural clamp, on purpose</h2>
+
+<p>
+    <code>HorseTraits.MIN_SCALE</code> / <code>MAX_SCALE</code>
+    (0.45&ndash;1.75) exist so that no amount of stacking real size loci and
+    dwarfism can produce a horse that is not a horse. A magical gene is allowed
+    to produce exactly that, so it applies its factor <em>after</em> that clamp
+    through <code>TraitBuilder.multiplyScaleUnclamped</code>, bounded only by
+    <code>MAGICAL_MIN_SCALE</code> / <code>MAGICAL_MAX_SCALE</code>
+    (0.1&ndash;10).
+</p>
+
+<p>
+    With a bounded normal distribution the gene now reaches about
+    <strong>2.04&times;</strong> at the absolute limit rather than the 10&times;
+    of the first draft &mdash; and it takes <em>two</em> good copies to get past
+    even the natural clamp, which is the point of making it codominant. The
+    magical bounds stay as guards rather than as the design.
+</p>
+
+<p>
+    The two stages compose the way you would want: the natural loci settle the
+    horse's own size first and the magic multiplies whatever that turned out to
+    be, so a magically enormous pony is still smaller than a magically enormous
+    draught horse.
+</p>
+
+<h2 id="gait">It needed a rendering fix</h2>
+
+<p>
+    Vanilla advances a horse's leg-swing phase from the <strong>ground distance
+    it moved</strong> and nothing else. The only size compensation anywhere in it
+    is a hard-coded "a foal's legs cycle three times as fast"; nothing consults
+    <code>Attributes.SCALE</code>, because before this gene nothing changed it.
+</p>
+
+<p>
+    So a scaled horse walked with its feet sliding &mdash; longer legs swinging at
+    the ordinary rate over the ordinary ground. <code>GeneticHorseRenderer</code>
+    now divides <code>walkAnimationPos</code> by the render scale, which makes a
+    bigger horse take proportionally longer, slower strides. See
+    <code>stretchGaitToSize</code>.
+</p>
+
+<h2 id="only-size">Deliberately size only</h2>
+
+<p>
+    It moves no other number &mdash; not speed, not health, not jump. A large
+    horse is a spectacle and a stable problem, not a better horse, and the
+    natural loci already own the trade between size and everything else.
+</p>
+
+<p>
+    Everything visible about it comes free from one attribute:
+    <code>Attributes.SCALE</code> scales the model <em>and</em> the hitbox.
+</p>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="horse-body.html">The horse&rsquo;s body</a>
+        <a href="gene-lcorl.html">LCORL &mdash; the natural height locus</a>
+        <a href="gene-hmga2.html">HMGA2 &mdash; the pony locus</a>
+        <a href="verification.html">What to check in-game</a>
+    </div>
+    Source: <code>common/genetics/genes/MagicSizeGene.java</code>,
+    <code>common/trait/AlleleRandomness.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

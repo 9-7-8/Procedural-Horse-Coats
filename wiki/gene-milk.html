@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Milk &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="nav.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow magical">Magical gene <span class="sep">/</span> no coat effect</p>
+<h1>Milk</h1>
+<p class="lede">
+    What comes out when you put a bucket under the horse. Ordinarily milk, from a
+    mare, as everywhere else in the game &mdash; but two copies of one magical
+    allele and any grown horse fills the bucket with <strong>water</strong>, and
+    two of the other and it fills with <strong>lava</strong>. One of each and
+    there is no foal at all.
+</p>
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd>horsegenetics.milk</dd></div>
+    <div><dt>Priority</dt><dd>130 (magical band)</dd></div>
+    <div><dt>Alleles</dt><dd><span class="allele rec">Watr</span> <span class="allele rec">Lava</span> <span class="allele wild">n</span></dd></div>
+    <div><dt>Combinations</dt><dd>6 &mdash; 5 carryable, 5 outcomes</dd></div>
+    <div><dt>Outcomes</dt><dd><code>mares-milk</code>, <code>milk-carrier</code>, <code>water-milk</code>, <code>lava-milk</code>, <code>milk-lethal</code></dd></div>
+    <div><dt>Default allele</dt><dd>n</dd></div>
+    <div><dt>Wild frequency</dt><dd><code>Watr</code> 8%, <code>Lava</code> 6% per allele</dd></div>
+    <div><dt>Founder draws</dt><dd>1 &times; nextFloat()</dd></div>
+    <div><dt>Coat effect</dt><dd><strong>none, ever</strong> &mdash; every outcome is a wild type</dd></div>
+</dl>
+
+<div class="note warn">
+    <span class="label">Built 2026-09-04, not yet play-tested</span>
+    <p>
+        The combination table, the founder distribution and the embryonic lethal are
+        unit-tested; nothing about the actual bucket interaction has been seen
+        in-game. Checklist on <a href="verification.html">To be verified</a>.
+    </p>
+</div>
+
+<h2 id="table">The combination table</h2>
+
+<table class="data">
+    <thead><tr><th>Combination</th><th>Outcome</th><th>What a bucket gets</th></tr></thead>
+    <tbody>
+        <tr><td><code>n/n</code></td><td><code>mares-milk</code></td><td>Milk, from a grown mare</td></tr>
+        <tr><td><code>Watr/n</code>, <code>Lava/n</code></td><td><code>milk-carrier</code></td><td>Milk, from a grown mare &mdash; nothing else shows</td></tr>
+        <tr><td><code>Watr/Watr</code></td><td><code>water-milk</code></td><td><strong>Water</strong>, from any grown horse</td></tr>
+        <tr><td><code>Lava/Lava</code></td><td><code>lava-milk</code></td><td><strong>Lava</strong>, from any grown horse</td></tr>
+        <tr><td><code>Watr/Lava</code></td><td><code>milk-lethal</code></td><td>&mdash; the embryo never develops</td></tr>
+    </tbody>
+</table>
+
+<p>
+    Both magical alleles are recessive to the wild type <em>and to each other</em>,
+    which makes this the mod&rsquo;s cleanest double-carrier locus. About one wild
+    horse in seven carries <code>Watr</code> and one in nine <code>Lava</code>, and
+    <em>neither shows</em>. You cannot catch a lava horse. You have to notice that
+    two ordinary-looking mares threw one, or breed a line and find out &mdash; which
+    is the design of the <a href="horse-body.html">health loci</a> pointed at
+    something worth having instead of something to avoid.
+</p>
+
+<h2 id="lethal">The lethal</h2>
+
+<p>
+    <code>Watr/Lava</code> is an <strong>embryonic lethal</strong>: the pairing simply
+    produces no foal. It is the same code path as
+    <a href="gene-met.html">MET</a> &mdash; the Mendelian draw is untouched and the
+    breeding handler <em>reads</em> the genotype it drew and cancels the birth, so the
+    odds stay the ordinary one in four for two carriers and the check is one branch in
+    one place. Two consequences follow:
+</p>
+
+<ul>
+    <li><code>canOccur</code> is <strong>false</strong>, so the genotype gallery gives
+        it no pen and does not count it &mdash; the same rule that rules out a
+        <code>Y/Y</code> horse;</li>
+    <li><code>expressionOf</code> still answers for it, because parsing is tolerant
+        and a hand-written code string can name any combination.</li>
+</ul>
+
+<div class="note rule">
+    <span class="label">Not a health disorder, and deliberately not switchable</span>
+    <p>
+        Every other lethal in the mod is a <code>HealthContribution</code>, so the
+        server&rsquo;s <code>health.mode</code> setting can switch it off. This one is
+        <em>not</em>. That setting governs genetic <strong>disorders</strong>, and two
+        magical fluids refusing to share an embryo is not a disorder, it is the rule of
+        the gene. Turning the disorders off must not quietly make a water/lava horse
+        possible.
+    </p>
+</div>
+
+<h2 id="sex">Why milk is a mare&rsquo;s and lava is not</h2>
+
+<p>
+    The wild type keeps the ordinary rule: milk comes from a grown mare. Water and
+    lava are not milk, and come from <strong>any</strong> grown horse of either sex.
+    The asymmetry is deliberate &mdash; the ordinary reading of the locus stays
+    ordinary, and the magical readings are visibly not. It also makes a lava
+    <em>stallion</em> worth keeping, which matters for a locus whose only route to
+    the good outcomes is a breeding programme.
+</p>
+
+<h2 id="how">How it reaches the game</h2>
+
+<p>
+    Milk is one of the genes that does its whole job through
+    <a href="gene-effects.html">the effects vocabulary</a> rather than through the
+    coat. It implements <code>AbilityContribution</code> and hands back a single
+    <code>yield</code> per combination:
+</p>
+
+<div class="codebox">
+<div class="filename">common/genetics/genes/MilkGene.java</div>
+<pre><code class="language-java">private static GeneAbility bucketOf(String produces, int cooldown, Condition when) {
+    return new GeneAbility.Yield(new Trigger.OnInteract("minecraft:bucket"),
+            "minecraft:bucket", produces, cooldown, when, 1);
+}</code></pre>
+</div>
+
+<p>
+    That is the same record a data-driven gene&rsquo;s <code>effects</code> block
+    parses into, so the NeoForge translator
+    (<code>server/GeneYieldHandler</code>) needed nothing new but
+    <code>minecraft:lava_bucket</code> in its output table.
+</p>
+
+<table class="data">
+    <thead><tr><th>Outcome</th><th>Condition</th><th>Cooldown</th></tr></thead>
+    <tbody>
+        <tr><td><code>mares-milk</code> / <code>milk-carrier</code></td><td>adult and female</td><td>200 ticks</td></tr>
+        <tr><td><code>water-milk</code></td><td>adult</td><td>200 ticks</td></tr>
+        <tr><td><code>lava-milk</code></td><td>adult</td><td>1200 ticks</td></tr>
+    </tbody>
+</table>
+
+<p>
+    A renewable lava source that walks is worth a great deal more than a renewable
+    water source, so it recharges six times slower. That number is a first guess and
+    is exactly the sort of thing a play session should move.
+</p>
+
+<h2 id="nothing">It paints nothing</h2>
+
+<p>
+    Every one of the five outcomes is a <code>wildType</code>, which in this model
+    means &ldquo;changes nothing <em>about the coat</em>&rdquo; &mdash; the same trick
+    the <a href="horse-body.html">thirteen non-coat loci</a> and
+    <a href="gene-sex.html">sex</a> use. So <code>affectsCoat()</code> is false, the
+    locus is left out of a horse&rsquo;s texture key, and the genotype gallery
+    collapses it to a single entry. Three alleles, no growth in the catalogue at all.
+</p>
+
+<p>
+    The cost is that a lava horse is <strong>indistinguishable from an ordinary
+    one</strong> until somebody puts a bucket under it. That is a real gap and it is
+    logged as one &mdash; a marking allele would be the fix, and would want to be part
+    of the locus rather than bolted on.
+</p>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="gene-met.html">MET &mdash; the other embryonic lethal</a>
+        <a href="gene-effects.html">The yield verb</a>
+        <a href="gene-verdant.html">Verdant &mdash; the other three-recessive locus</a>
+        <a href="verification.html">What to check in-game</a>
+    </div>
+    Source: <code>common/genetics/genes/MilkGene.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

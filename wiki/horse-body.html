@@ -173,10 +173,93 @@ public interface HealthContribution extends TraitContribution { }</code></pre>
     &ldquo;this allele is worth two hearts&rdquo; rather than &ldquo;it depends&rdquo;.
 </p>
 
+<h3 id="epigenetic">The per-horse twin <span class="allele magical">2026-09-04</span></h3>
+
+<div class="codebox">
+<div class="filename">common/trait/EpigeneticTraitContribution.java</div>
+<pre><code class="language-java">public interface EpigeneticTraitContribution {
+    void contribute(AllelePair pair, Genotype genotype, AlleleRandomness epigenetics, TraitBuilder out);
+}
+
+/** The trait-side twin of CoatBuildContext's two epigenetics accessors. */
+public interface AlleleRandomness {
+    Rng expressed();        // one locus, one result - almost everything
+    Rng copy(int slot);     // a CODOMINANT gene, where both copies contribute
+}</code></pre>
+</div>
+
+<p>
+    The plain interface is a pure function of the genotype, and for every natural gene
+    that is exactly right: <code>p/p</code> is one particular pony and always the same
+    one. It cannot express
+    <a href="gene-body-size.html">the magical size locus</a> at all, because the
+    <em>point</em> of that gene is that two horses can both be &ldquo;big&rdquo; and
+    one of them be twice the other &mdash; which needs a number that varies between
+    horses carrying identical alleles.
+</p>
+
+<div class="note rule">
+    <span class="label">This does not weaken determinism</span>
+    <p>
+        The <code>Rng</code> handed in is <strong>not a fresh die roll</strong>. It is
+        a <code>SeededRng</code> on the epigenetic seed of the allele copy that
+        expresses at this gene &mdash; the same seed the coat pipeline draws its
+        per-horse variation from. That seed is rolled once for a founder, stored on
+        the record, and inherited verbatim with the allele. So the same horse resolves
+        to the same body every time it is asked, on the server, after a reload and in
+        a unit test; a foal that inherits the copy inherits the number; and nothing is
+        <em>stored</em> that could go stale, because the trait is still resolved on
+        demand from the genotype and epigenome that were already there.
+    </p>
+</div>
+
+<p>
+    <strong>Two accessors, because a codominant gene needs both copies.</strong>
+    <code>expressed()</code> answers "what does this horse show at this locus",
+    which is right wherever one locus produces one result. The magical size gene
+    cannot use it: its two alleles each contribute a percentage and they
+    <em>add</em>, so asking for the expressed copy would count one allele twice
+    and the other not at all. That is the same split
+    <a href="gene-mane-color.html">mane colour</a> needed on the coat side.
+</p>
+
+<p>
+    <code>HorseTraits.resolve</code> gained an epigenome parameter to feed it, and
+    <code>HorseRecord.traits()</code> / <code>HorseRecords.traitsOf</code> now pass
+    the record&rsquo;s own. Asking a bare genotype
+    (<code>resolve(genotype)</code>) still works and is still the right call for a
+    question about a <em>genotype</em> rather than a horse &mdash; a punnett display,
+    a wiki table, a test &mdash; and answers with the <strong>midpoint</strong> of
+    what the genotype can produce, via <code>MidpointRng</code>. It is not random and
+    is not pretending to be; inventing an epigenome there would answer about a horse
+    nobody owns.
+</p>
+
+<h3 id="magical-scale">Scale has two stages, and only one is clamped</h3>
+
+<p>
+    <code>MIN_SCALE</code> / <code>MAX_SCALE</code> (0.45 &ndash; 1.75) exist so that
+    no amount of stacking the real size loci and the dwarfisms can produce a horse
+    that is not a horse. A magical gene is allowed to produce exactly that, so
+    <code>multiplyScaleUnclamped</code> applies <em>after</em> that clamp and is
+    bounded only by <code>MAGICAL_MIN_SCALE</code> / <code>MAGICAL_MAX_SCALE</code>
+    (0.1 &ndash; 10) &mdash; a limit on absurdity rather than a limit on size, and the
+    exact counterpart of the coat&rsquo;s uncapped phase-3 accumulator.
+</p>
+
+<p>
+    The two stages compose the way you would want: the natural loci settle the
+    horse&rsquo;s own size first and the magic multiplies whatever that turned out to
+    be, so a magically enormous pony is still smaller than a magically enormous
+    draught horse.
+</p>
+
 <h2 id="invisible">The non-coat genes cost the coat nothing</h2>
 
 <p>
-    All thirteen of them paint nothing: every combination is an
+    All thirteen of them paint nothing &mdash; as do three of the
+    <a href="gene-milk.html">magical utility genes</a>, on the same terms: every
+    combination is an
     <a href="genetics-model.html">expression</a> marked <code>wildType</code>. That is
     not a loophole, it is what <code>wildType</code> means &mdash; <em>changes nothing
     about the coat</em>. Three things follow, and together they are why thirteen new
@@ -189,12 +272,15 @@ public interface HealthContribution extends TraitContribution { }</code></pre>
         <strong>one baked texture</strong>.</li>
     <li><code>GenotypeCatalog.distinctPairsOf</code> collapses every wild type into
         one group, so each locus contributes <strong>one</strong> catalogue entry however
-        many alleles it has. The catalogue stayed at <strong>2 064 387</strong>
-        distinct coats.</li>
-    <li>The <em>raw</em> genotype count multiplied by 5 314 410, to
-        <strong>292 822 943 423 500 800</strong>. Those are all real, heritable,
-        distinguishable horses &mdash; they just are not distinguishable by
-        <em>colour</em>.</li>
+        many alleles it has. Adding all thirteen left the catalogue of distinct
+        coats <strong>exactly where it was</strong> &mdash; the number itself has
+        moved since, but only ever because a gene that <em>does</em> paint was
+        added.</li>
+    <li>The <em>raw</em> genotype count multiplied by 5 314 410. Those are all
+        real, heritable, distinguishable horses &mdash; they just are not
+        distinguishable by <em>colour</em>. Current figures are on
+        <a href="genetics-model.html#noncoat">the genetics model</a>, which is
+        the one place they are kept.</li>
 </ul>
 
 <h2 id="conditions">Conditions</h2>

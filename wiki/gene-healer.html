@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Healer &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="nav.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow magical">Magical gene <span class="sep">/</span> phase 3</p>
+<h1>Healer</h1>
+<p class="lede">
+    A horse that mends the people standing next to it, and carries a red stripe
+    down the middle of its mane that says so. Recessive, so about one wild horse in
+    a hundred and twenty is one &mdash; and the sixth of the population carrying a
+    single copy looks like every other horse.
+</p>
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd>horsegenetics.healer</dd></div>
+    <div><dt>Priority</dt><dd>116 (after mane colour, before magic zebra)</dd></div>
+    <div><dt>Alleles</dt><dd><span class="allele rec">Hlr</span> <span class="allele wild">n</span></dd></div>
+    <div><dt>Outcomes</dt><dd>wild, <code>healer-carrier</code>, <code>healer</code></dd></div>
+    <div><dt>Shows when</dt><dd><code>Hlr/Hlr</code> only</dd></div>
+    <div><dt>Default allele</dt><dd>n</dd></div>
+    <div><dt>Wild frequency</dt><dd>9% per allele &rarr; ~0.8% of wild horses, ~16% carriers</dd></div>
+    <div><dt>Founder draws</dt><dd>1 &times; nextFloat()</dd></div>
+    <div><dt>Deterministic</dt><dd><strong>no</strong> &mdash; the stripe&rsquo;s opacity varies</dd></div>
+    <div><dt>Aura</dt><dd>1 health point every 40 ticks, players within 3 blocks</dd></div>
+</dl>
+
+<div class="note warn">
+    <span class="label">Built 2026-09-04, not yet play-tested</span>
+    <p>
+        The stripe reads correctly in sample bakes. The aura has never been stood
+        next to. Checklist on <a href="verification.html">To be verified</a>.
+    </p>
+</div>
+
+<h2 id="mark">The mark and the effect are the same fact</h2>
+
+<p>
+    The stripe is not decoration. It is the <em>only</em> way to tell a healer from an
+    ordinary horse without standing beside one and waiting, and it exists because of a
+    rule this mod holds to: a magical ability a player cannot see coming is a magical
+    ability nobody ever learns to breed for. Every gene that does something has to
+    look like it does something.
+</p>
+
+<div class="note rule">
+    <span class="label">The mark varies; the effect does not</span>
+    <p>
+        The stripe&rsquo;s <strong>opacity</strong> is this gene&rsquo;s one
+        epigenetic value, drawn off the expressing copy: a faint line on one horse,
+        a vivid one on another, inherited with the allele.
+    </p>
+    <p>
+        It says <em>nothing</em> about the strength of the healing. The aura is the
+        same on every healer. That is a deliberate choice: a mark that quietly
+        encoded a stat would make a horse&rsquo;s value legible from a screenshot,
+        and this model would rather make you keep a pedigree.
+    </p>
+</div>
+
+<h2 id="stripe">Drawing a line down a blade</h2>
+
+<p>
+    The mane is a thin column, rotated out of the world axes by its rest pose, so
+    neither &ldquo;a band in X&rdquo; nor &ldquo;a band in Y&rdquo; is right for it.
+    <code>HairPattern.centreStripe</code> works in the part&rsquo;s <em>own</em> axes
+    instead: it runs the stripe along the longest span and centres it across the
+    second, which on the mane&rsquo;s visible faces reads as a line straight down the
+    middle.
+</p>
+
+<div class="codebox">
+<div class="filename">common/coat/pattern/HairPattern.java</div>
+<pre><code class="language-java">public static double centreStripe(Skin skin, Part part, BodyPoint point, double halfWidth) {
+    Axis across = axesBySpan(skin, part)[1];
+    Bounds b = HorseSkinGeometry.bounds(skin, part);
+    double centre = (b.min(across) + b.max(across)) * 0.5;
+    double d = Math.abs(point.along(across) - centre) / b.span(across);
+    double edge = Math.max(0.03, halfWidth * 0.5);
+    return 1.0 - BodyStripes.smoothstep(halfWidth - edge, halfWidth + edge, d);
+}</code></pre>
+</div>
+
+<p>
+    Like every hair gene it paints <em>toward</em> the red rather than with it, so the
+    strand shading survives underneath and a faint stripe genuinely reads as faint
+    rather than as a thinner one.
+</p>
+
+<h2 id="order">Why it runs after mane colour</h2>
+
+<p>
+    Priority 116 puts it after <a href="gene-mane-color.html">mane colour</a> (112) so
+    the red sits <em>on top of</em> a coloured mane rather than under it, and before
+    <a href="gene-magic-zebra.html">magic zebra</a> (120) so stripes still black
+    everything out. A horse carrying both a solid mane and this gene shows the
+    colour with a red line down it, which is exactly what you would want to see.
+</p>
+
+<h2 id="aura">The aura</h2>
+
+<p>
+    Granted through a <a href="gene-effects.html#healing"><code>healing</code>
+    effect</a> &mdash; the first verb in the vocabulary that reaches anything other
+    than the horse and its rider:
+</p>
+
+<table class="data">
+    <thead><tr><th>Parameter</th><th>Value</th><th>Why</th></tr></thead>
+    <tbody>
+        <tr><td>target</td><td><code>players</code></td><td>People, not livestock &mdash; a healer that topped up every animal in a pen would be a farm tool</td></tr>
+        <tr><td>radius</td><td>3 blocks</td><td>A horse worth standing next to, not one that trivialises combat from across a field</td></tr>
+        <tr><td>amount</td><td>1 health point</td><td>Half a heart a beat</td></tr>
+        <tr><td>interval</td><td>40 ticks</td><td>Two seconds &mdash; noticeable while you wait, useless mid-fight</td></tr>
+        <tr><td>max_targets</td><td>8</td><td>The cap every radius effect carries; at three blocks it is unreachable in practice</td></tr>
+    </tbody>
+</table>
+
+<p>
+    Beats are counted off the horse&rsquo;s own tick count rather than the
+    world&rsquo;s, so a stable full of healers does not pulse in lockstep &mdash;
+    which matters less for the look than for not doing all of the work on one tick.
+    Every one of these numbers is a first guess and all of them are the sort of thing
+    a play session should move.
+</p>
+
+<h2 id="foal">A foal heals and shows nothing</h2>
+
+<p>
+    The stripe needs a mane, and the foal mesh has none, so a healer foal is
+    indistinguishable from any other &mdash; but it <em>heals</em>, because the aura
+    is a property of the genotype and not of the mane. That is the same split
+    <a href="gene-light.html">light</a> makes with its glowing mane, and it is worth
+    knowing about: a foal you cannot identify is still doing the work.
+</p>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="gene-effects.html#healing">The healing verb</a>
+        <a href="gene-mane-color.html">Mane colour</a>
+        <a href="horse-care.html">Horse care &mdash; the non-genetic healing gate</a>
+        <a href="verification.html">What to check in-game</a>
+    </div>
+    Source: <code>common/genetics/genes/HealerGene.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

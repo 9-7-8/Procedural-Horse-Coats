@@ -88,7 +88,14 @@
             title: "Magical genes",
             items: [
                 { href: "gene-pink-hair.html", text: "Pink hair", kind: "magical" },
+                { href: "gene-mane-color.html", text: "Mane colour", kind: "magical" },
+                { href: "gene-tail-color.html", text: "Tail colour", kind: "magical" },
+                { href: "gene-healer.html", text: "Healer", kind: "magical" },
                 { href: "gene-magic-zebra.html", text: "Magic zebra", kind: "magical" },
+                { href: "gene-milk.html", text: "Milk (water / lava)", kind: "magical" },
+                { href: "gene-body-size.html", text: "Magic body size", kind: "magical" },
+                { href: "gene-light.html", text: "Light", kind: "magical" },
+                { href: "gene-verdant.html", text: "Verdant", kind: "magical" },
                 { href: "gene-suntouched.html", text: "Suntouched", kind: "magical" },
                 { href: "gene-waterborn.html", text: "Waterborn", kind: "magical" },
                 { href: "gene-test.html", text: "Test (diagnostic)", kind: "magical" }

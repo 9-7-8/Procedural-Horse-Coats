@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tail Colour &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="nav.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow magical">Magical gene <span class="sep">/</span> phase 3</p>
+<h1>Tail colour</h1>
+<p class="lede">
+    <a href="gene-mane-color.html">Mane colour</a>&rsquo;s twin, one locus over:
+    the same three alleles, the same combination table, the same per-copy colour
+    &mdash; pointed at the tail. Two separate loci, because a horse with a red mane
+    and a blue tail is exactly the kind of horse this family of genes exists to
+    produce.
+</p>
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd>horsegenetics.tail_color</dd></div>
+    <div><dt>Priority</dt><dd>114 (magical band)</dd></div>
+    <div><dt>Alleles</dt><dd><span class="allele dom">Tlsld</span> <span class="allele dom">Tlstrp</span> <span class="allele wild">n</span></dd></div>
+    <div><dt>Combinations</dt><dd>6, all carryable &mdash; 4 outcomes</dd></div>
+    <div><dt>Outcomes</dt><dd>wild, <code>solid</code>, <code>striped</code>, <code>solid-striped</code></dd></div>
+    <div><dt>Default allele</dt><dd>n</dd></div>
+    <div><dt>Wild frequency</dt><dd><code>Tlsld</code> 2.0%, <code>Tlstrp</code> 1.5% per allele</dd></div>
+    <div><dt>Founder draws</dt><dd>1 &times; nextFloat()</dd></div>
+    <div><dt>Deterministic</dt><dd><strong>no</strong> &mdash; the colour is per-copy</dd></div>
+    <div><dt>Shows on a foal</dt><dd><strong>yes</strong></dd></div>
+    <div><dt>Twin locus</dt><dd><a href="gene-mane-color.html">Mane colour</a></dd></div>
+</dl>
+
+<div class="note warn">
+    <span class="label">Built 2026-09-04, not yet play-tested</span>
+    <p>
+        Same status as its twin. Checklist on
+        <a href="verification.html">To be verified</a>.
+    </p>
+</div>
+
+<h2 id="shared">Everything mechanical is on the mane page</h2>
+
+<p>
+    The two genes share one implementation (<code>HairColorGene</code>), so the
+    combination table, the per-copy colour, the
+    <code>epigeneticsForCopy</code> trick that makes the heterozygote work, and the
+    &ldquo;paint toward, not with&rdquo; rule are all documented once, on
+    <a href="gene-mane-color.html">mane colour</a>. This page is the differences.
+</p>
+
+<h2 id="why-separate">Why it is a separate locus</h2>
+
+<p>
+    Folding mane and tail into one gene would make a horse with a red mane and a blue
+    tail <strong>impossible to breed</strong>. It also halves what the family is
+    worth: two loci with two independent per-copy colours each is four colours across
+    one horse, before anything else it carries is considered, and that combinatorial
+    room is the whole reason these genes were designed as a set.
+</p>
+
+<p>
+    It is the same rule the <a href="gene-kit.html">white-pattern loci</a> follow from
+    the other direction: only alleles at the <em>same</em> locus compete for a slot.
+    Mane and tail plainly do not.
+</p>
+
+<h2 id="foal">It shows on a foal, and the mane does not</h2>
+
+<p>
+    The foal mesh has a <code>TAIL</code> part and no <code>MANE</code> part (see
+    <a href="body-space.html">body space</a>). So a coloured tail is visible from
+    birth and a coloured mane arrives with adulthood &mdash; which makes the tail the
+    earlier of the two to read off a young horse, and makes a foal with a striped tail
+    and no mane colour an entirely ordinary sight rather than a bug.
+</p>
+
+<h2 id="shape">The tail is a different shape, and the painter knows</h2>
+
+<p>
+    A mane is a long thin blade and a tail is a short fat one, and both are rotated
+    out of the world axes by their rest pose. Rather than hard-coding an axis per
+    gene, <code>HairPattern</code> works out the part&rsquo;s own axes from its bounds
+    and runs its bands across the longest one. That is why one painter serves both
+    loci, and why it will serve a third if the family grows.
+</p>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="gene-mane-color.html">Mane colour &mdash; the full mechanics</a>
+        <a href="body-space.html">Body space &amp; regions</a>
+        <a href="verification.html">What to check in-game</a>
+    </div>
+    Source: <code>common/genetics/genes/TailColorGene.java</code>,
+    <code>HairColorGene.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

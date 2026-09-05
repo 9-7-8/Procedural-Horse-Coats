@@ -18,7 +18,7 @@
     An <strong>effect</strong> is a Minecraft-specific thing a data-driven gene makes
     the horse <em>do</em> &mdash; walk on water, resist fire, trail particles, be
     milked for a fluid &mdash; as opposed to a coat pixel. This page is the complete
-    reference for the effect vocabulary: the six verbs that exist today, the whole
+    reference for the effect vocabulary: the eight verbs that exist today, the whole
     surface the <a href="horse-traits.html">architecture spec</a> defines around them,
     and the <a href="#adding">contract for adding a new one</a>. It is built to be as
     modular as a closed vocabulary can be: one declaration per effect, and the parser
@@ -35,9 +35,9 @@
 <div class="note warn">
     <span class="label">Status &mdash; partly owner-confirmed in-game (2026-09-02)</span>
     <p>
-        <code>common/</code> parses and validates all six verbs
+        <code>common/</code> parses and validates all eight verbs
         (<code>AbilityType</code>, <code>GeneAbility</code>, <code>GeneSpecParser</code>,
-        <code>SpecAbilities</code>; unit-tested). The NeoForge translator
+        <code>HorseAbilities</code>; unit-tested). The NeoForge translator
         (<code>server/GeneAbilityHandler</code>, <code>server/GeneYieldHandler</code>)
         runs <code>traversal</code>, <code>emitter</code>, <code>mob_effect</code>,
         <code>yield</code> and <code>glow</code> (dynamic light server-side;
@@ -55,6 +55,38 @@
         <strong>specified and unbuilt</strong>. It is documented here so the shipped
         slice can be read against the shape it is growing into, not because any of it
         runs.
+    </p>
+</div>
+
+<div class="note rule">
+    <span class="label">Both kinds of gene use this vocabulary (since 2026-09-04)</span>
+    <p>
+        This page used to say the effect path was <strong>spec-only</strong> &mdash;
+        that a hand-written Java gene wanting game behaviour would need a parallel
+        hook. It does not any more. A built-in gene implements
+        <code>AbilityContribution</code> and returns the same
+        <code>GeneAbility</code> records a gene file&rsquo;s <code>effects</code>
+        block parses into, and <code>HorseAbilities.activeFor</code> collects both.
+        <a href="gene-milk.html">Milk</a>, <a href="gene-light.html">light</a>,
+        <a href="gene-healer.html">healer</a> and
+        <a href="gene-verdant.html">verdant</a> all reach the game this way.
+    </p>
+    <p>
+        The alternative &mdash; a second vocabulary for built-ins &mdash; was worse in
+        every direction: the translator would have been written twice, a behaviour
+        available to a Java gene would silently not be available to a gene file, and
+        this page would have stopped being the single description of what a gene can
+        do. Sharing it means a new verb lands once and both kinds of gene get it,
+        which is exactly what happened with <a href="#healing"><code>healing</code></a>
+        and <a href="#spread"><code>spread</code></a>: both were written for built-in
+        genes and both are usable from JSON today.
+    </p>
+    <p>
+        One asymmetry survives. <code>minDose</code> exists because a gene file has no
+        expression language and needs <em>some</em> way to say &ldquo;only if
+        homozygous&rdquo;. A hand-written gene has the whole of Java and answers that
+        question directly, so it returns the list it means and leaves
+        <code>minDose</code> at 1.
     </p>
 </div>
 
@@ -125,7 +157,7 @@ Component  &rarr;  (Trigger, Condition, Selector, Effect)</code></pre>
 <thead><tr><th>Spec concept</th><th>Gene layer today</th><th>Note</th></tr></thead>
 <tbody>
 <tr><td>Trait</td><td>A gene's <code>effects</code> array</td><td>No trait ID, no <code>cost</code>, no relations. A gene is an implicit anonymous trait.</td></tr>
-<tr><td>Trait set on a horse</td><td><code>SpecAbilities.activeFor(genotype)</code></td><td>Assembled from visible gene pairs rather than from a stored trait list.</td></tr>
+<tr><td>Trait set on a horse</td><td><code>HorseAbilities.activeFor(genotype)</code></td><td>Assembled from visible gene pairs rather than from a stored trait list.</td></tr>
 <tr><td>Component</td><td>One entry in <code>effects</code></td><td>Carries its own <code>when</code> and trigger; there is no component grouping above it.</td></tr>
 <tr><td>State attachment</td><td><code>[[per-horse attachment class? &mdash; yield cooldowns are stored somewhere per horse]]</code></td><td>The spec's <code>State</code> is a full record; the gene layer stores far less. See <a href="#state">State</a>.</td></tr>
 <tr><td>Dose</td><td><code>minDose</code></td><td><strong>Not in the spec.</strong> Genetics-specific: the spec's trait model has no notion of allele copies.</td></tr>
@@ -397,12 +429,12 @@ Component  &rarr;  (Trigger, Condition, Selector, Effect)</code></pre>
 
 <p>
     <strong>Keep this list closed.</strong> It is the main lever on long-term
-    maintainability &mdash; everything else composes these. Six exist; the rest are
+    maintainability &mdash; everything else composes these. Eight exist; the rest are
     the spec&rsquo;s vocabulary, recorded here so a new verb is checked against them
     before it is written.
 </p>
 
-<h2 id="verbs-live">The six that exist</h2>
+<h2 id="verbs-live">The eight that exist</h2>
 
 <h3 id="traversal"><code>traversal</code></h3>
 <p>Holds a movement / survival flag up while <code>when</code> is true.</p>
@@ -595,6 +627,66 @@ Component  &rarr;  (Trigger, Condition, Selector, Effect)</code></pre>
     a body-region list.
 </p>
 
+<h3 id="healing"><code>healing</code></h3>
+<p>
+    An aura that mends what stands near the horse &mdash; the first verb in the
+    vocabulary that reaches anything other than the horse and its rider.
+</p>
+<table>
+<thead><tr><th>Field</th><th>Default</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr><td><code>target</code></td><td><code>players</code></td><td>Who the aura catches: <code>players</code>, <code>rider</code>, <code>self</code>, <code>animals</code>.</td></tr>
+<tr><td><code>radius</code></td><td><code>3</code></td><td>Reach in blocks, 1&ndash;16. A real sphere, not the scan box.</td></tr>
+<tr><td><code>amount</code></td><td><code>1</code></td><td>Health points restored per beat &mdash; two per heart.</td></tr>
+<tr><td><code>interval</code></td><td><code>40</code></td><td>Ticks between beats, at least 1.</td></tr>
+<tr><td><code>max_targets</code></td><td><code>8</code></td><td>Most entities one beat may reach, 1&ndash;64 &mdash; the cap every radius effect is required to carry.</td></tr>
+</tbody>
+</table>
+<pre><code class="language-json">{ "type": "healing", "target": "players", "radius": 3, "amount": 1, "interval": 40 }</code></pre>
+<p>
+    Beats are counted off the <em>horse&rsquo;s</em> tick count, not the
+    world&rsquo;s, so a stable full of healers does not pulse in lockstep &mdash;
+    which matters less for the look than for not doing all the work on one tick. A
+    target already at full health is skipped, and each heal spits one
+    <code>HEART</code> particle so the aura is visible while it works.
+</p>
+<p>
+    Built for <a href="gene-healer.html">healer</a>, which is a hand-written gene
+    &mdash; the verb is in the shared vocabulary rather than a private hook precisely
+    so a gene file can use it too.
+</p>
+
+<h3 id="spread"><code>spread</code></h3>
+<p>Ground cover creeping outward from the hooves.</p>
+<table>
+<thead><tr><th>Field</th><th>Default</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr><td><code>cover</code></td><td><em>required</em></td><td>One of <code>mycelium</code>, <code>moss</code>, <code>grass</code>.</td></tr>
+<tr><td><code>radius</code></td><td><code>2</code></td><td>Reach in blocks, 1&ndash;8.</td></tr>
+<tr><td><code>chance</code></td><td><code>0.5</code></td><td>Per-beat probability, in (0, 1].</td></tr>
+<tr><td><code>interval</code></td><td><code>40</code></td><td>Ticks between beats, at least 1.</td></tr>
+</tbody>
+</table>
+<pre><code class="language-json">{ "type": "spread", "cover": "moss", "radius": 2, "chance": 0.35, "interval": 60 }</code></pre>
+<p>
+    <strong><code>cover</code> is a vocabulary word, not a block id</strong>, and that
+    is the interesting decision. &ldquo;Spreading moss&rdquo; is not one conversion:
+    it is a small family of them plus a rule about what it will and will not eat, and
+    that judgement needs the block registry. So the gene says which of three, and the
+    translator owns the lists &mdash; which also means a pack cannot accidentally
+    write a gene that eats a block somebody built with.
+</p>
+<p>
+    At most <strong>one block per beat</strong>, and a random candidate near the horse
+    rather than the nearest eligible one. Both are design: this is a horse changing
+    the ground it walks over, not a terraforming tool, and picking randomly makes the
+    edge of a spread ragged instead of a perfect expanding disc. Skipped in the horse
+    dimension, like <code>glow</code>&rsquo;s light block.
+</p>
+<p>
+    Built for <a href="gene-verdant.html">verdant</a>.
+</p>
+
 <h2 id="verbs-spec">The full verb vocabulary</h2>
 <p>
     Everything not marked live is unbuilt. Before proposing a new verb, check it is
@@ -710,7 +802,7 @@ Component  &rarr;  (Trigger, Condition, Selector, Effect)</code></pre>
         trigger. <code>yield</code> runs from <code>GeneYieldHandler</code> on
         <code>PlayerInteractEvent.EntityInteract</code>.</li>
     <li><strong>Which abilities are in play</strong> is
-        <code>SpecAbilities.activeFor(genotype)</code> in <code>common/</code>: for
+        <code>HorseAbilities.activeFor(genotype)</code> in <code>common/</code>: for
         every loaded spec gene whose pair is visible, every effect whose
         <code>minDose</code> the horse meets. The translator then evaluates
         <code>when</code> per tick.</li>
@@ -719,7 +811,7 @@ Component  &rarr;  (Trigger, Condition, Selector, Effect)</code></pre>
         gene+attribute so they don&rsquo;t duplicate). Yields have independent
         per-horse cooldowns.</li>
     <li><strong>Cheap when idle.</strong> Both handlers return immediately if no
-        loaded gene declares any effect (<code>SpecAbilities.anyLoaded()</code>).</li>
+        loaded gene declares any effect (<code>HorseAbilities.anyLoaded()</code>).</li>
     <li><strong>Every effect must be perceivable.</strong> A trait a player
         can&rsquo;t observe is a bug (the architecture&rsquo;s rule). An
         <code>emitter</code> or a visible coat layer is the usual signature; a bare
@@ -1363,7 +1455,7 @@ record Sound(Trigger trigger, String sound, double volume, double pitch,
 
 <h3>4. A section on this page</h3>
 <p>
-    Add an <code>&lt;h3&gt;</code> under <a href="#verbs-live">The six that exist</a>
+    Add an <code>&lt;h3&gt;</code> under <a href="#verbs-live">The eight that exist</a>
     with the parameter table and a JSON example, bump the count in that heading, and
     update the verb&rsquo;s row in <a href="#verbs-spec">The full verb vocabulary</a>
     from <em>Unbuilt</em> to its new status. If the verb is <em>not</em> in the
@@ -1450,7 +1542,7 @@ record Sound(Trigger trigger, String sound, double volume, double pitch,
     Source: <code>common/genetics/spec/AbilityType.java</code>,
     <code>common/genetics/spec/GeneAbility.java</code>,
     <code>common/genetics/spec/GeneSpecParser.java</code> (<code>readAbility</code>),
-    <code>common/genetics/spec/SpecAbilities.java</code>,
+    <code>common/genetics/spec/HorseAbilities.java</code>,
     <code>neoforge-26.1.2/&hellip;/server/GeneAbilityHandler.java</code>,
     <code>&hellip;/server/GeneYieldHandler.java</code>.
     Unbuilt sections follow <em>Horse Trait System &mdash; Architecture

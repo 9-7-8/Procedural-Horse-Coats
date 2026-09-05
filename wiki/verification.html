@@ -106,12 +106,183 @@
     </p>
 </div>
 
+<h2 id="magical-utility">&sect;0a &mdash; the seven magical utility genes (new 2026-09-04, NOT play-tested)</h2>
+
+<p>
+    <strong>Seven new genes, a fourth coat phase, a new trait interface and two new
+    effect verbs, none of it seen in-game.</strong> Pages:
+    <a href="gene-milk.html">milk</a>,
+    <a href="gene-body-size.html">magic body size</a>,
+    <a href="gene-mane-color.html">mane colour</a>,
+    <a href="gene-tail-color.html">tail colour</a>,
+    <a href="gene-light.html">light</a>,
+    <a href="gene-healer.html">healer</a>,
+    <a href="gene-verdant.html">verdant</a>.
+    Old saves will not parse &mdash; the genotype code went from 33 segments to
+    <strong>40</strong> in-game. Start a fresh world.
+</p>
+
+<p>
+    The quickest way in is the custom spawn egg: every gene is a row, and adding one
+    defaults it to the first allele that <em>does</em> something, doubled &mdash; so
+    &ldquo;add Light, spawn&rdquo; is a one-click glowing horse. Summon tokens:
+    <code>milk=Watr/Watr</code>, <code>body_size=Big/n</code>,
+    <code>mane_color=Mnsld/Mnstrp</code>, <code>tail_color=Tlsld/n</code>,
+    <code>light=Lthf/Ltmn</code>, <code>healer=Hlr/Hlr</code>,
+    <code>verdant=grass/grass</code>.
+</p>
+
+<div class="note warn">
+    <span class="label">Magic body size &mdash; now on most horses in the world</span>
+    <p>
+        80% of wild horses carry a copy, so this is no longer a rare gene you go
+        looking for: <strong>it is the default experience of every horse</strong>.
+        Check the population effect first and the extremes second.
+    </p>
+    <ul>
+        <li><strong>Walk into a herd of wild horses.</strong> Is the size spread
+            visible as a spread, without any single horse looking wrong? That is the
+            whole design of the 1.1&times; / 0.9&times; centre. If they all look
+            identical the &sigma; is too small; if individuals look silly it is too
+            big.</li>
+        <li><strong>The walking animation.</strong> A previous build had scaled
+            horses sliding their feet along the ground &mdash; vanilla advances the
+            leg swing from ground distance and never consults
+            <code>Attributes.SCALE</code>. <code>GeneticHorseRenderer</code> now
+            divides the phase by the scale. Watch a large horse and a small one walk
+            and confirm the feet plant instead of sliding, and that an ordinary
+            1.0&times; horse is unchanged.</li>
+        <li>Spawn <code>body_size=Big/Big</code> several times: the percentages add,
+            so these should be clearly larger than any wild horse. The bounded
+            maximum is about <strong>2.04&times;</strong>.</li>
+        <li><code>Small/Small</code>, the same. Does the hitbox match? Where does the
+            rider sit on each?</li>
+        <li>Confirm you <strong>never</strong> catch a wild <code>Big/Big</code>,
+            <code>Small/Small</code> or <code>Big/Small</code> &mdash; every doubled
+            horse should be one you bred. (Unit-tested over 20 000 founders, but
+            worth an eye in the pens.)</li>
+        <li>Breed two <code>Big/n</code> carriers: a quarter of the foals should be
+            <code>Big/Big</code> and visibly larger than either parent. This is the
+            payoff the whole gene is arranged around.</li>
+        <li>Breed a large horse and confirm the foal inherits <em>that</em>
+            percentage rather than a new roll.</li>
+        <li>A <strong>scaled foal</strong>: <code>Skin.BABY</code>&rsquo;s projection
+            is already approximate, and a foal is small twice over.</li>
+        <li>Reload the world and confirm every horse is still the size it was.</li>
+    </ul>
+</div>
+
+<div class="note">
+    <span class="label">The spawn egg previews size now</span>
+    <p>
+        The preview applies the resolved body scale, so <strong>Reroll epi.</strong>
+        visibly resizes the horse, and a <code>size 1.14x</code> readout sits under
+        the panel whenever the horse is not ordinary size. The model is capped at
+        2.5&times; so an extreme draw stays a recognisable horse; past that the
+        readout says <code>(preview capped)</code> and the number is the truth.
+        Check the framing still looks right at both ends.
+    </p>
+</div>
+
+<div class="note warn">
+    <span class="label">Light &mdash; the first user of the overlay phase</span>
+    <ul>
+        <li>Each of <code>Lthf</code> / <code>Ltmn</code> / <code>Lteye</code> alone:
+            are the gold hooves / mane / eyes in the <strong>right places</strong>?
+            The hooves in particular were only ever checked on a UV sheet.</li>
+        <li>Do they <strong>glow in the dark</strong>? The emissive layer has never
+            drawn a gene-written texel mask &mdash; only Suntouched&rsquo;s whole-part
+            list.</li>
+        <li>Does the horse <strong>light the ground</strong> around it? Same trailing
+            <code>minecraft:light</code> block Suntouched uses, so expect it to lag a
+            gallop.</li>
+        <li>A heterozygote (<code>Lthf/Ltmn</code>): both regions, in full. That is
+            the codominance claim.</li>
+        <li>Gold eyes should keep a <strong>dark pupil</strong> &mdash; if the eye is
+            one flat gold rectangle, <code>shadeEyes</code> is not doing its job.</li>
+        <li>On a <a href="gene-kit.html">dominant-white</a> horse, and on a foal
+            (which has no mane, so a <code>Ltmn</code> foal should light the area and
+            show nothing).</li>
+    </ul>
+</div>
+
+<div class="note warn">
+    <span class="label">Mane / tail colour, and healer</span>
+    <ul>
+        <li>A solid mane and a striped one: do the bands read as bands on a 3D horse,
+            or as noise? They were tuned on a UV sheet.</li>
+        <li><code>Mnsld/Mnstrp</code>: <strong>two visibly different colours</strong>
+            on one mane. If they look like one colour, the per-copy epigenetics are
+            not being read.</li>
+        <li>Mane and tail loci together, in different colours.</li>
+        <li>Breed a coloured mane and confirm the foal gets the <em>same</em> colour.</li>
+        <li>Healer: is the red stripe recognisably <strong>down the centre</strong> of
+            the mane? Compare a faint one and a vivid one.</li>
+        <li>Healer + mane colour: red on top of the colour, not under it.</li>
+        <li>Stand within 3 blocks of a healer while hurt &mdash; do you mend, and do
+            the heart particles show?</li>
+    </ul>
+</div>
+
+<div class="note warn">
+    <span class="label">Milk and verdant &mdash; the two you cannot see</span>
+    <ul>
+        <li>Right-click a <code>Watr/Watr</code> horse with an empty bucket: water.
+            A <code>Lava/Lava</code> one: lava, and check the cooldown is a minute.</li>
+        <li>A plain horse: milk from a <strong>mare only</strong>. A stallion should
+            give nothing.</li>
+        <li>Water and lava should work on a <strong>stallion</strong> too.</li>
+        <li>Breed two <code>Watr/Lava</code>-capable carriers &mdash; actually, breed a
+            <code>Watr/Watr</code> to a <code>Lava/Lava</code>: <strong>every</strong>
+            foal is the clash, so the pairing should always refuse, with the chat line
+            naming the cause.</li>
+        <li>Verdant: leave a <code>grass/grass</code> horse standing on dirt and come
+            back. One block per beat, so it should be a patch, not a lawn.</li>
+        <li>The <strong>conversion lists</strong> are the risk: confirm a verdant horse
+            does not eat anything you built with. Try standing one on a cobblestone
+            path with <code>moss/moss</code>.</li>
+        <li>Nothing should spread in the horse dimension.</li>
+    </ul>
+</div>
+
+<div class="note warn">
+    <span class="label">Suspected: you may no longer be able to mount a mare while holding a bucket</span>
+    <p>
+        A <code>yield</code> cancels the interaction on both sides when it fires, so
+        vanilla does not also read it as a mount. That was harmless while the only
+        yield in the game was Waterborn&rsquo;s, on a rare gene. <strong>Every mare now
+        has one</strong> &mdash; so right-clicking any grown mare with an empty bucket
+        gives milk instead of mounting, always.
+    </p>
+    <p>
+        Worse on the cooldown: <code>fulfil</code> returns early when the horse is
+        still recharging, but the event is cancelled anyway, so for 200 ticks after
+        milking a mare you get <em>neither</em> milk nor a mount and no feedback at
+        all. Check how bad that feels. The fixes, in order of size: don&rsquo;t cancel
+        when the cooldown blocks it; require sneak; or gate milking on
+        <code>tamed</code> so wild mares are unaffected (<a href="roadmap.html">roadmap
+        §7</a> wants that rule anyway).
+    </p>
+</div>
+
+<div class="note">
+    <span class="label">Known and accepted, not bugs</span>
+    <p>
+        A milk horse and a verdant horse are <strong>indistinguishable</strong> from an
+        ordinary one until you put a bucket under them or watch the floor. That sits
+        awkwardly beside healer, which draws a stripe precisely so you can see what it
+        does, and it is logged as a gap rather than fixed &mdash; a marking would want
+        to be part of the locus rather than bolted on.
+    </p>
+</div>
+
 <h2 id="body">&sect;0b &mdash; the trait, size and health system (new 2026-09-04, NOT play-tested)</h2>
 
 <p>
     <strong>Thirteen new genes and a whole new subsystem, none of it seen in-game.</strong>
     Machinery: <a href="horse-body.html">the horse&rsquo;s body</a>. Old saves will not
-    parse &mdash; the genotype code went from 20 segments to <strong>33</strong>. Start a
+    parse &mdash; the genotype code went from 20 segments to 33, and then to <strong>40</strong>
+    with the magical utility genes (&sect;0a). Start a
     fresh world.
 </p>
 
@@ -516,8 +687,8 @@
     in a running game.
     <strong>Baseline note:</strong> as of 2026-09-02 <code>example.waterborn</code>
     <em>and</em> <code>example.suntouched</code> ship loaded (classpath index), so a
-    stock in-game genotype code is <strong>33 segments</strong> (31 built-ins + the
-    two shipped spec genes). Dropping one more gene in takes it to 34. To test the
+    stock in-game genotype code is <strong>40 segments</strong> (38 built-ins + the
+    two shipped spec genes). Dropping one more gene in takes it to 41. To test the
     drop-in path:
 </p>
 

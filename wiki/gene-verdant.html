@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Verdant &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="nav.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow magical">Magical gene <span class="sep">/</span> no coat effect</p>
+<h1>Verdant</h1>
+<p class="lede">
+    A horse that changes the ground it walks on: mycelium, moss or grass, creeping
+    outward from wherever it stands. Three variants at one locus, every one of them
+    needing <strong>two of itself</strong> &mdash; so a mycelium copy beside a moss
+    copy is not half of each, it is nothing at all.
+</p>
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd>horsegenetics.verdant</dd></div>
+    <div><dt>Priority</dt><dd>180 (magical band)</dd></div>
+    <div><dt>Alleles</dt><dd><span class="allele rec">mush</span> <span class="allele rec">moss</span> <span class="allele rec">grass</span> <span class="allele wild">n</span></dd></div>
+    <div><dt>Combinations</dt><dd>10, all carryable &mdash; 5 outcomes</dd></div>
+    <div><dt>Outcomes</dt><dd>wild, <code>verdant-carrier</code>, <code>mycelium</code>, <code>moss</code>, <code>grass</code></dd></div>
+    <div><dt>Default allele</dt><dd>n</dd></div>
+    <div><dt>Wild frequency</dt><dd><code>mush</code> 6%, <code>moss</code> 7%, <code>grass</code> 8% per allele</dd></div>
+    <div><dt>Founder draws</dt><dd>1 &times; nextFloat()</dd></div>
+    <div><dt>Coat effect</dt><dd><strong>none, ever</strong></dd></div>
+    <div><dt>Spread</dt><dd>at most one block per 60 ticks, within 2 blocks, 35% of the time</dd></div>
+</dl>
+
+<div class="note warn">
+    <span class="label">Built 2026-09-04, not yet play-tested</span>
+    <p>
+        Nothing has watched a horse change a floor. The conversion lists in
+        particular want a look: the risk is a horse eating something a player built
+        with, and the lists are narrow specifically to avoid that. Checklist on
+        <a href="verification.html">To be verified</a>.
+    </p>
+</div>
+
+<h2 id="table">The combination table</h2>
+
+<table class="data">
+    <thead><tr><th>Combination</th><th>Outcome</th><th>Effect</th></tr></thead>
+    <tbody>
+        <tr><td><code>n/n</code></td><td>wild</td><td>The ground is left alone</td></tr>
+        <tr><td>any single variant copy, and any two <em>different</em> variants</td><td><code>verdant-carrier</code></td><td>Nothing &mdash; inert, and passes both on</td></tr>
+        <tr><td><code>mush/mush</code></td><td><code>mycelium</code></td><td>Mycelium spreads</td></tr>
+        <tr><td><code>moss/moss</code></td><td><code>moss</code></td><td>Moss spreads</td></tr>
+        <tr><td><code>grass/grass</code></td><td><code>grass</code></td><td>Bare dirt greens over</td></tr>
+    </tbody>
+</table>
+
+<h2 id="recessive">Three recessives at one locus</h2>
+
+<p>
+    Every variant needs two of <em>itself</em>. That is a genuinely different shape
+    from the rest of the mod, and it is worth sitting next to its nearest relative:
+    <a href="gene-milk.html">milk</a>&rsquo;s two variants are also mutually
+    recessive, but the pairing of <em>them</em> is <strong>lethal</strong> where this
+    one is merely inert. Both are combination tables. Neither needs a word for what it
+    is doing, and no dominance ranking could tell the two situations apart.
+</p>
+
+<p>
+    The consequence is that a verdant horse takes real work. With the commonest
+    variant at 8%, about one wild horse in a hundred and fifty spreads grass, and the
+    two carriers who could throw one look exactly like every other horse. Three
+    variants at one locus also means a line bred toward one of them is
+    <em>drifting away</em> from the other two &mdash; which is the sort of decision
+    this model exists to create.
+</p>
+
+<h2 id="cover">A cover, not a block id</h2>
+
+<p>
+    The gene names one of three <strong>covers</strong> &mdash; <code>mycelium</code>,
+    <code>moss</code>, <code>grass</code> &mdash; and stops there. It does not name a
+    block, because &ldquo;spreading moss&rdquo; is not one conversion: it is a small
+    family of them, plus a rule about what it will and will not eat. That judgement
+    needs the game&rsquo;s block registry, so it lives in the translator, where the
+    lists are deliberately narrow:
+</p>
+
+<table class="data">
+    <thead><tr><th>Cover</th><th>Eats</th><th>Becomes</th></tr></thead>
+    <tbody>
+        <tr><td><code>mycelium</code></td><td>grass block, dirt, coarse dirt, podzol, rooted dirt</td><td>mycelium</td></tr>
+        <tr><td><code>moss</code></td><td>stone, cobblestone, andesite, gravel, dirt, coarse dirt, grass block</td><td>moss block</td></tr>
+        <tr><td><code>grass</code></td><td>dirt, coarse dirt, rooted dirt</td><td>grass block</td></tr>
+    </tbody>
+</table>
+
+<p>
+    Every entry is ground a player would expect to green over, and nothing on the
+    lists is a block anyone builds with. Grass is the gentlest of the three and the
+    only one that undoes damage rather than doing it.
+</p>
+
+<h2 id="rate">One block a beat, on purpose</h2>
+
+<p>
+    The translator converts <strong>at most one</strong> eligible block per beat, and
+    picks a random candidate near the horse rather than the nearest one. Both are
+    design rather than performance dodges: this is a horse changing the ground it
+    walks over, and a player who leaves one standing in a field should come back to a
+    patch rather than to a new biome. Picking randomly also makes the edge of a spread
+    ragged instead of a perfect expanding disc.
+</p>
+
+<p>
+    It is skipped entirely in the horse dimension, for the same reason the
+    <a href="gene-light.html">light</a> block is: nothing there should be able to
+    rewrite the floor.
+</p>
+
+<h2 id="invisible">It paints nothing, and that is a gap</h2>
+
+<p>
+    All five outcomes are wild types, so <code>affectsCoat()</code> is false, the
+    locus is out of the texture key, and the gallery collapses it to one entry &mdash;
+    four alleles for no catalogue growth at all, the same trick
+    <a href="gene-sex.html">sex</a> and the
+    <a href="horse-body.html">non-coat loci</a> use.
+</p>
+
+<p>
+    The cost is real, and it is the same one <a href="gene-milk.html">milk</a> has: a
+    verdant horse is <strong>indistinguishable</strong> from an ordinary one until you
+    watch the floor. It sits awkwardly beside <a href="gene-healer.html">healer</a>,
+    which draws a stripe precisely so a player can see what it does. A marking would
+    be the fix, and it would want to be part of the locus rather than bolted on.
+</p>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="gene-effects.html#spread">The spread verb</a>
+        <a href="gene-milk.html">Milk &mdash; the other mutually-recessive locus</a>
+        <a href="gene-healer.html">Healer &mdash; a magical effect you can see</a>
+        <a href="verification.html">What to check in-game</a>
+    </div>
+    Source: <code>common/genetics/genes/VerdantGene.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

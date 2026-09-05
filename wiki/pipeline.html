@@ -39,6 +39,7 @@
 <tr><td>3</td><td><strong>Magical (RGB)</strong></td><td>Every visible <em>magical</em> gene, in <code>Genes.magicalOrder()</code></td><td><code>ColorField</code> &mdash; signed <code>int</code> r/g/b + opacity</td><td>Signed, uncapped</td></tr>
 <tr><td>4</td><td><strong>Composite</strong></td><td>The composer</td><td>Alpha-aware multiply onto the white template</td><td>&mdash;</td></tr>
 <tr><td>5</td><td><strong>Eyes</strong></td><td>The composer</td><td><code>CoatRegions.redrawEyes</code> &mdash; copied verbatim</td><td>&mdash;</td></tr>
+<tr><td>6</td><td><strong>Overlay</strong></td><td>Every gene implementing <code>CoatOverlayContribution</code>, in <code>Genes.codeOrder()</code></td><td><code>CoatOverlay</code> &mdash; final ARGB writes + an <strong>emissive</strong> texel mask</td><td>Absolute; last writer wins</td></tr>
 </tbody>
 </table>
 </div>
@@ -348,9 +349,73 @@ default int visible(int px, int py, int channel);</code></pre>
 </p>
 
 <p>
-    There is no genetic eye colour yet; it is a
-    <a href="verification.html#eyes">wanted gene</a> and the classic hook is blue eyes on
-    cream double-dilutes.
+    There is no genetic eye <em>colour</em> gene yet &mdash; a real one is a
+    <a href="verification.html#eyes">wanted gene</a>, and the classic hook is blue eyes
+    on cream double-dilutes. <a href="gene-light.html">Light</a> gilds them, but it
+    does it from phase 6, not here.
+</p>
+
+<h2 id="overlay">Phase 6 &mdash; the overlay</h2>
+
+<p>
+    The last phase, added 2026-09-04, and the only one that writes <strong>finished
+    pixels</strong>: each gene implementing <code>CoatOverlayContribution</code> is
+    handed a <code>CoatOverlay</code> carrying the composed coat, and may replace
+    texels outright, tint them, or mark them <strong>emissive</strong>.
+</p>
+
+<p>
+    Almost nothing runs here, and it exists for exactly two things the earlier phases
+    structurally cannot do:
+</p>
+
+<ul>
+    <li><strong>The eyes.</strong> Phase 5 restores them from the template as the last
+        act of the bake &mdash; precisely so a gene painting a wide white pattern can
+        never blind a horse. A gene that wants to colour them <em>on purpose</em>
+        therefore has to run after that, or it is simply overwritten.</li>
+    <li><strong>Emissiveness.</strong> &ldquo;This texel glows&rdquo; is not a colour,
+        so there is no channel for it in either accumulator. It is carried here as its
+        own boolean mask and handed to the renderer, which draws exactly those texels
+        a second time at full brightness through
+        <code>client/EmissiveCoatLayer</code>.</li>
+</ul>
+
+<div class="note rule">
+    <span class="label">Why a texel mask and not a part list</span>
+    <p>
+        A data-driven gene&rsquo;s <a href="gene-effects.html#glow"><code>glow</code>
+        effect</a> names body <em>parts</em>, so the finest region it can light is a
+        whole leg. <a href="gene-light.html">Light</a> needs to glow four
+        <strong>hooves</strong> and two <strong>eyes</strong> &mdash; neither of which
+        is a part, and both of which the bake already knows exactly. So the mask is
+        per texel, and the renderer folds the two sources together.
+    </p>
+</div>
+
+<p>
+    <code>CoatTextureComposer.bake(&hellip;)</code> returns both halves as a
+    <code>Baked(int[] argb, boolean[] emissive)</code>; <code>compose(&hellip;)</code>
+    is the pixels alone and is what every caller but the emissive layer wants, so the
+    <a href="#golden">golden test</a> and every existing consumer were untouched by
+    the addition.
+</p>
+
+<p>
+    It is a <strong>sink</strong> rather than a returned contribution &mdash; the same
+    shape as <code>TraitBuilder</code>, and for the same reason: these are absolute
+    writes, not additions, so there is nothing to fold. Purity is kept where it
+    matters: <code>CoatOverlay.base</code> is the composed coat and never changes, so
+    no gene can read another&rsquo;s overlay, and the result does not depend on visit
+    order except where two genes deliberately claim the same texel.
+</p>
+
+<p>
+    Two blend modes, and the difference matters. <code>blendToward</code> is a
+    straight lerp toward a colour. <code>shadeToward</code> scales the target by the
+    texel&rsquo;s <em>own</em> brightness first, so dark detail stays dark &mdash;
+    which is what makes a gold eye read as an eye rather than as one gold rectangle
+    with the pupil painted out.
 </p>
 
 <h2>Texture identity and caching</h2>

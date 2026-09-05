@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Light &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="nav.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow magical">Magical gene <span class="sep">/</span> phase 3 + overlay</p>
+<h1>Light</h1>
+<p class="lede">
+    Gold hooves, a gold mane, gold eyes &mdash; and a horse that lights a stable
+    like a torch. Three variant alleles, each dominant to the wild type and to
+    <em>none of each other</em>, so a horse shows everything it carries. It is the
+    clearest demonstration in the mod of why this model has no dominance property.
+</p>
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd>horsegenetics.light</dd></div>
+    <div><dt>Priority</dt><dd>160 (magical band)</dd></div>
+    <div><dt>Alleles</dt><dd><span class="allele dom">Lthf</span> <span class="allele dom">Ltmn</span> <span class="allele dom">Lteye</span> <span class="allele wild">n</span></dd></div>
+    <div><dt>Combinations</dt><dd>10, all carryable &mdash; <strong>7 outcomes</strong></dd></div>
+    <div><dt>Default allele</dt><dd>n</dd></div>
+    <div><dt>Wild frequency</dt><dd>0.5% per variant allele &rarr; ~3% of wild horses glow</dd></div>
+    <div><dt>Founder draws</dt><dd>1 &times; nextFloat()</dd></div>
+    <div><dt>Deterministic</dt><dd>yes &mdash; one gold, no per-horse variation</dd></div>
+    <div><dt>Light level</dt><dd>14 (a torch)</dd></div>
+    <div><dt>Colour</dt><dd><code>#ffcf47</code>, the same gold <a href="gene-suntouched.html">Suntouched</a> uses</dd></div>
+</dl>
+
+<div class="note warn">
+    <span class="label">Built 2026-09-04, not yet play-tested</span>
+    <p>
+        The gold regions and the eye recolour are confirmed in sample bakes; the
+        emissive render and the trailing light block have not been seen at all.
+        Checklist on <a href="verification.html">To be verified</a>.
+    </p>
+</div>
+
+<h2 id="table">The combination table</h2>
+
+<table class="data">
+    <thead><tr><th>Combination</th><th>Outcome</th><th>What glows</th></tr></thead>
+    <tbody>
+        <tr><td><code>n/n</code></td><td>wild</td><td>Nothing</td></tr>
+        <tr><td><code>Lthf/Lthf</code>, <code>Lthf/n</code></td><td><code>hooves</code></td><td>All four hooves</td></tr>
+        <tr><td><code>Ltmn/Ltmn</code>, <code>Ltmn/n</code></td><td><code>mane</code></td><td>The mane</td></tr>
+        <tr><td><code>Lteye/Lteye</code>, <code>Lteye/n</code></td><td><code>eyes</code></td><td>The eyes</td></tr>
+        <tr><td><code>Lthf/Ltmn</code></td><td><code>hooves-mane</code></td><td>Both</td></tr>
+        <tr><td><code>Lthf/Lteye</code></td><td><code>hooves-eyes</code></td><td>Both</td></tr>
+        <tr><td><code>Ltmn/Lteye</code></td><td><code>mane-eyes</code></td><td>Both</td></tr>
+    </tbody>
+</table>
+
+<div class="note rule">
+    <span class="label">Three alleles that cannot be ranked</span>
+    <p>
+        Each variant is dominant to <code>n</code>. None of them is dominant to
+        either of the others &mdash; a horse carrying <code>Lthf</code> and
+        <code>Ltmn</code> shows <em>both</em>, in full. There is no ordering of three
+        alleles that describes that, and a &ldquo;codominant&rdquo; flag would still
+        have to say codominant <em>with what</em>. The table says all of it, one row
+        at a time, and needs no vocabulary at all.
+    </p>
+    <p>
+        The one thing the locus cannot make is all three at once &mdash; for the
+        honest reason that a horse has two copies of the chromosome and not three.
+    </p>
+</div>
+
+<h2 id="light">Where the alleles do <em>not</em> differ</h2>
+
+<p>
+    Every glowing combination emits the same torch-strength light. What the alleles
+    decide is where the glow <em>shows</em>, not how much of it there is: a horse with
+    one gold mane lights a stable exactly as well as one with four gold hooves,
+    because in both cases the horse is the light source. Doubling a copy adds nothing
+    either &mdash; <code>Lthf/Lthf</code> and <code>Lthf/n</code> are the same horse.
+</p>
+
+<p>
+    The world light is granted through the ordinary
+    <a href="gene-effects.html#glow"><code>glow</code> verb</a>, so it reuses the
+    trailing <code>minecraft:light</code> block the translator already maintained for
+    Suntouched &mdash; with all of that mechanism&rsquo;s known jank: it lags a
+    gallop, it needs air to sit in, and it is skipped in the horse dimension.
+</p>
+
+<h2 id="phases">Two halves, in two phases</h2>
+
+<p>
+    The gold on the <strong>mane and hooves</strong> is ordinary phase-3 paint, walked
+    toward the colour so the strands and the hoof shading survive.
+</p>
+
+<p>
+    The <strong>eyes</strong> cannot be. <code>CoatRegions.redrawEyes</code> copies
+    them back from the template as the last act of the bake, precisely so that a gene
+    painting a wide white pattern can never blind a horse &mdash; so a gene that wants
+    to colour them <em>on purpose</em> has to run after that. That is what the
+    <a href="pipeline.html#overlay">overlay phase</a> is for, and this gene is its
+    first inhabitant.
+</p>
+
+<div class="codebox">
+<div class="filename">common/genetics/genes/LightGene.java</div>
+<pre><code class="language-java">@Override
+public void overlay(AllelePair pair, CoatBuildContext ctx, CoatOverlay out) {
+    Set&lt;Region&gt; which = regionsOf(pair);
+    if (which.contains(Region.EYES)) {
+        out.shadeEyes(GOLD, EYE_STRENGTH);
+        out.markEmissiveEyes();
+    }
+    if (which.contains(Region.MANE)) {
+        out.markEmissivePart(Part.MANE);
+    }
+    if (which.contains(Region.HOOVES)) {
+        for (Part leg : CoatRegions.LEGS) {
+            out.markEmissiveLowerLeg(leg, HOOF_FRACTION);
+        }
+    }
+}</code></pre>
+</div>
+
+<p>
+    <code>shadeEyes</code> rather than a flat blend, because an eye is a bright sclera
+    and a dark pupil: a straight lerp turns both into one gold rectangle that stops
+    reading as an eye. Shading scales the target by the texel&rsquo;s own brightness,
+    so the sclera goes gold and the pupil stays black.
+</p>
+
+<h2 id="emissive">Emissiveness is not a colour</h2>
+
+<p>
+    &ldquo;This texel glows&rdquo; has no channel in either accumulator, so the
+    overlay phase carries it as its own mask &mdash; a boolean per texel, handed to
+    the renderer, which draws exactly those texels a second time at full brightness
+    through <code>EmissiveCoatLayer</code>.
+</p>
+
+<p>
+    A texel mask rather than a part list is the whole reason this gene can do what
+    Suntouched cannot. Suntouched&rsquo;s <code>glow</code> effect names body
+    <em>parts</em>, so the finest thing it can light is a whole leg. Light needs to
+    glow four <strong>hooves</strong> and two <strong>eyes</strong>, neither of which
+    is a part, and both of which the bake already knows exactly.
+</p>
+
+<h2 id="future">Not modelled yet</h2>
+
+<p>
+    One gold, no per-horse variation. An epigenetic colour is the obvious extension
+    &mdash; <a href="gene-mane-color.html">mane colour</a> already does exactly that
+    &mdash; but it runs straight into a question the game cannot answer: vanilla light
+    has no hue, so a blue-glowing horse would still cast plain white light. That is a
+    real limitation rather than an oversight, and it is why the gene commits to one
+    colour for now.
+</p>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="pipeline.html#overlay">The overlay phase</a>
+        <a href="gene-suntouched.html">Suntouched &mdash; the data-driven glow</a>
+        <a href="gene-effects.html#glow">The glow verb</a>
+        <a href="verification.html">What to check in-game</a>
+    </div>
+    Source: <code>common/genetics/genes/LightGene.java</code>,
+    <code>coat/pattern/CoatOverlay.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

@@ -267,7 +267,7 @@ public Expression expressionOf(AllelePair pair) {
     handing back a wild type that would make the bug invisible.
 </p>
 
-<h2 id="registry">The thirty-one registered genes</h2>
+<h2 id="registry">The thirty-eight registered genes</h2>
 
 <p>
     The table is in <strong><code>codeOrder()</code></strong> &mdash; the one
@@ -311,13 +311,28 @@ public Expression expressionOf(AllelePair pair) {
 <tr><td>79</td><td><a href="gene-pax3.html">PAX3 &mdash; splash</a></td><td><span class="allele dom">SW2</span> / <span class="allele dom">SW4</span> / <span class="allele wild">N</span></td><td>wild, splash, splash-bold</td><td><code>SW2</code> 2%, <code>SW4</code> 0.5%; no <code>SW4/SW4</code></td><td>natural</td></tr>
 <tr><td>80&ndash;92</td><td colspan="5"><strong>the thirteen non-coat genes</strong> &mdash; see the table below</td></tr>
 <tr><td>110</td><td><a href="gene-pink-hair.html">pink hair</a></td><td><span class="allele rec">Pihr</span> / <span class="allele wild">n</span></td><td>wild, pink-carrier, pink-hair</td><td>1/12 per allele</td><td>magical</td></tr>
+<tr><td>112</td><td><a href="gene-mane-color.html">mane colour</a></td><td><span class="allele dom">Mnsld</span> / <span class="allele dom">Mnstrp</span> / <span class="allele wild">n</span></td><td>wild, solid, striped, solid-striped&para;</td><td>2.0% / 1.5% per allele</td><td>magical</td></tr>
+<tr><td>114</td><td><a href="gene-tail-color.html">tail colour</a></td><td><span class="allele dom">Tlsld</span> / <span class="allele dom">Tlstrp</span> / <span class="allele wild">n</span></td><td>wild, solid, striped, solid-striped&para;</td><td>2.0% / 1.5% per allele</td><td>magical</td></tr>
+<tr><td>116</td><td><a href="gene-healer.html">healer</a></td><td><span class="allele rec">Hlr</span> / <span class="allele wild">n</span></td><td>wild, healer-carrier, healer</td><td>9% per allele</td><td>magical</td></tr>
 <tr><td>120</td><td><a href="gene-magic-zebra.html">magic zebra</a></td><td><span class="allele dom">Mzeb</span> / <span class="allele wild">n</span></td><td>wild, zebra</td><td>1/100 per allele</td><td>magical</td></tr>
+<tr><td>130</td><td><a href="gene-milk.html">milk</a></td><td><span class="allele rec">Watr</span> / <span class="allele rec">Lava</span> / <span class="allele wild">n</span></td><td>mares-milk, milk-carrier, water-milk, lava-milk, milk-lethal &mdash; <strong>all wild types</strong>&Dagger;</td><td>8% / 6% per allele; no <code>Watr/Lava</code></td><td>neither (paints nothing)</td></tr>
+<tr><td>140</td><td><a href="gene-body-size.html">magic body size</a></td><td><span class="allele dom">Big</span> / <span class="allele dom">Small</span> / <span class="allele wild">n</span></td><td>six combinations, <strong>six outcomes</strong> &mdash; codominant, and all wild types&Dagger;</td><td><strong>80% carry one copy</strong>; no homozygote is ever wild</td><td>neither (paints nothing)</td></tr>
+<tr><td>160</td><td><a href="gene-light.html">light</a></td><td><span class="allele dom">Lthf</span> / <span class="allele dom">Ltmn</span> / <span class="allele dom">Lteye</span> / <span class="allele wild">n</span></td><td>wild + six regions, codominant&#8225;&#8225;</td><td>0.5% per variant allele</td><td>magical</td></tr>
+<tr><td>180</td><td><a href="gene-verdant.html">verdant</a></td><td><span class="allele rec">mush</span> / <span class="allele rec">moss</span> / <span class="allele rec">grass</span> / <span class="allele wild">n</span></td><td>wild, verdant-carrier, mycelium, moss, grass &mdash; <strong>all wild types</strong>&Dagger;</td><td>6% / 7% / 8% per allele</td><td>neither (paints nothing)</td></tr>
 <tr><td>900</td><td><a href="gene-test.html">test</a></td><td><span class="allele dom">T</span> / <span class="allele wild">t</span></td><td>wild, test-overlay <strong>(masks)</strong></td><td>25% carriers, no homozygotes</td><td>magical</td></tr>
 </tbody>
 </table>
 </div>
 
 <p>
+    &para; <strong>Mane and tail colour are the model&rsquo;s first genes whose
+    heterozygote paints with <em>two</em> allele copies at once</strong>, one colour
+    each, which is why they need
+    <code>CoatBuildContext.epigeneticsForCopy</code> rather than "the copy that
+    expresses". &#8225;&#8225; <strong>Light is the clearest codominance in the
+    model</strong>: three variants, each dominant to the wild type and to none of
+    each other, so a horse shows everything it carries &mdash; ten combinations,
+    seven outcomes, and no ordering of three alleles that could describe it.
     * <strong><code>KIT</code> is the locus that broke the last of the old
     model.</strong> Eight alleles, thirty-six combinations, and four of them
     homozygotes that are thought nonviable &mdash; so <code>canOccur</code> rules
@@ -621,10 +636,13 @@ public boolean hasVisibleNonDeterministic();</code></pre>
 <h2 id="noncoat">Genes that never paint</h2>
 
 <p>
-    Fourteen of the registry&rsquo;s thirty-one built-in genes change nothing about a
-    horse&rsquo;s colour: the <a href="gene-sex.html">sex locus</a>, the six
-    performance and size loci, and the seven health loci. Every combination they can
-    produce is an <code>Expression</code> marked <code>wildType</code>.
+    Seventeen of the registry&rsquo;s thirty-eight built-in genes change nothing
+    about a horse&rsquo;s colour: the <a href="gene-sex.html">sex locus</a>, the six
+    performance and size loci, the seven health loci, and three of the magical
+    utility genes (<a href="gene-milk.html">milk</a>,
+    <a href="gene-body-size.html">magic body size</a> and
+    <a href="gene-verdant.html">verdant</a>). Every combination they can produce is
+    an <code>Expression</code> marked <code>wildType</code>.
 </p>
 
 <p>
@@ -637,8 +655,8 @@ public boolean hasVisibleNonDeterministic();</code></pre>
 </p>
 
 <p>
-    Three consequences follow, and together they are why fourteen non-painting genes
-    are nearly free:
+    Three consequences follow, and together they are why seventeen non-painting
+    genes are nearly free:
 </p>
 
 <ul>
@@ -648,11 +666,25 @@ public boolean hasVisibleNonDeterministic();</code></pre>
     <li><code>GenotypeCatalog.distinctPairsOf</code> collapses every wild type into one
         group, so each contributes <strong>one</strong> catalogue entry however many
         alleles it has &mdash; <a href="gene-acan.html">ACAN</a>&rsquo;s five alleles
-        and fifteen combinations included. The catalogue is unchanged at
-        <strong>2 064 387</strong> distinct coats.</li>
-    <li>The <em>raw</em> genotype count is <strong>292 822 943 423 500 800</strong>.
-        All real, all heritable, all distinguishable &mdash; just not by colour.</li>
+        and fifteen combinations included, and
+        <a href="gene-verdant.html">verdant</a>&rsquo;s four. The catalogue stands at
+        <strong>462 422 019</strong> distinct coats, every one of which was bought by
+        a gene that <em>does</em> paint.</li>
+    <li>The <em>raw</em> genotype count is
+        <strong>3 028 898 126 035 238 912</strong>. All real, all heritable, all
+        distinguishable &mdash; just not by colour.</li>
 </ul>
+
+<p>
+    <strong>The magical utility genes stretched the phrase further than the health
+    loci did, and it still holds.</strong> A lava-bearing horse is emphatically not
+    &ldquo;the same as an ordinary horse&rdquo;, and a ten-times giant is the most
+    visible thing on the field &mdash; but neither changes a coat <em>pixel</em>, and
+    the coat pipeline is the only thing that asks. The cost is real and is logged as
+    a gap: milk and verdant are invisible until you put a bucket under the horse or
+    watch the floor, where <a href="gene-healer.html">healer</a> deliberately draws a
+    stripe so you can see what it does.
+</p>
 
 <p>
     An expression still carries a name and a description when it is a wild type, which

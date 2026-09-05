@@ -53,6 +53,7 @@ genetics/
   Allele.java               one allele of one gene
   AllelePair.java           the two copies at one gene (canonicalized)
   Expression.java           ONE outcome a gene can produce, and its paint function
+  AbilityContribution.java  capability: this gene makes the horse DO something
   FounderTable.java         the wild-population weight per allele combination
   FounderContext.java       the genotype so far, for a context-aware founder table
   Genotype.java             one AllelePair per gene; parse / toCode / breedWith
@@ -78,7 +79,7 @@ genetics/
     AbilityType.java          one self-contained declaration per effect verb (name,
                               params, defaults, validation, record builder) + the
                               shared condition-flag / trigger vocab
-    SpecAbilities.java        which abilities a Genotype expresses (NeoForge reads this)
+    HorseAbilities.java        which abilities a Genotype expresses (NeoForge reads this)
     PartGroups.java           LEGS / HAIR / POINTS ... aliases for a parts list
     SpecFixtureTool.java      the bakeSpecFixtures task (creator parity)
     CreatorAssetTool.java     the bakeCreatorAssets task (creator's inlined assets)
@@ -88,16 +89,19 @@ coat/
   CoatGenerator.java        the FOUNDER path - the only place epigenetics are invented
   CoatTextureId.java        injective code -&gt; Identifier-legal path
   pattern/
-    CoatTextureComposer.java  the three-phase bake
+    CoatTextureComposer.java  the bake: 3 gene phases + composite + eyes + overlay
     PigmentField.java         phase 1 accumulator (writable)
     PigmentView.java          phase 1 accumulator (read-only) - what a gene gets
     ColorField.java           phase 3 accumulator (writable)
     ColorView.java            phase 3 accumulator (read-only) - what a gene gets
     CoatBuildContext.java     the horse: genotype, epigenome, skin, adult, rng
+    CoatOverlay.java          phase 6 sink: final pixels + the emissive texel mask
+    CoatOverlayContribution.java  capability: this gene writes finished pixels
     GradientLut.java          the red/black gradient lookup
     CoatRegions.java          reusable "paint / restrict this region" helpers
     BodyNoise.java            seamless body-space noise
     BodyStripes.java          seamless body-space stripe field
+    HairPattern.java          the mane / tail painter: bands, centre stripe, hues
     BayCoat.java              bay / seal generator
     GreyCoat.java             dapple grey generator
     TestCoatPattern.java      the diagnostic gradient
@@ -109,14 +113,26 @@ coat/
     HorseSkinGeometry.java    body space &lt;-&gt; texel, for ADULT and BABY
 
 horse/    Sex, HorseRecord, ParentStats, HorseDatabase, InMemoryHorseDatabase
-trait/    Traits, Condition, Severity, Viability, TraitBuilder,
-          TraitContribution, HealthContribution, HorseTraits
+trait/    Traits, Condition, Severity, Viability, TraitBuilder, TraitContribution,
+          EpigeneticTraitContribution, HealthContribution, HorseTraits
 name/     HorseNameGenerator, HorseNames</code></pre>
 </div>
 
 <h2>Core abstractions</h2>
 
 <h3><code>Rng</code> &mdash; the randomness seam</h3>
+
+<div class="note rule">
+    <span class="label"><code>nextGaussian()</code> is Irwin-Hall, not Box-Muller</span>
+    <p>
+        A default method: twelve uniform draws minus six, giving an approximately
+        standard normal with <b>bounded &plusmn;6&sigma; tails</b> and, crucially,
+        <b>exactly 0 for all-<code>0.5</code> inputs</b> - so
+        <code>MidpointRng</code> lands on the distribution's mean. Box-Muller
+        would hand it 1.18&sigma; below the mean. <code>GAUSSIAN_SAMPLES</code> is
+        part of a gene's draw-order contract.
+    </p>
+</div>
 
 <div class="codebox">
 <pre><code class="language-java">public interface Rng {
@@ -404,6 +420,19 @@ static Gene byKeyOrNull(String geneKey);          // null (not throw) if unregis
 
 <h2>Coat-pipeline abstractions</h2>
 
+<div class="note rule">
+    <span class="label">Six phases since 2026-09-04</span>
+    <p>
+        <code>CoatTextureComposer.bake(&hellip;)</code> returns a
+        <code>Baked(int[] argb, boolean[] emissive)</code>;
+        <code>compose(&hellip;)</code> is the pixels alone and is unchanged, which is
+        why the golden test and every existing caller were untouched. The extra
+        phase runs after the eyes are restored and lets a gene write finished pixels
+        and mark texels emissive &mdash; see
+        <a href="pipeline.html#overlay">the pipeline</a>.
+    </p>
+</div>
+
 <h3><code>CoatBuildContext</code> &mdash; the horse, immutable</h3>
 
 <div class="codebox">
@@ -416,7 +445,11 @@ boolean   isAdult();       // grey only greys adults
 int       size();          // sheet edge, 128
 
 /** This horse's randomness for one gene - a SeededRng on the EXPRESSING copy's seed. */
-Rng epigeneticsFor(String geneKey);</code></pre>
+Rng epigeneticsFor(String geneKey);
+
+/** ...and for ONE copy: slot 0 is pair.first(), 1 is pair.second(). For a gene whose
+ *  two alleles paint at the same time - see HairColorGene's heterozygote. */
+Rng epigeneticsForCopy(String geneKey, int slot);</code></pre>
 </div>
 
 <p>
@@ -594,6 +627,10 @@ public sealed interface GeneAbility {
                  int cooldownTicks, Condition when, int minDose)                  implements GeneAbility {}
     record Glow(int light, List&lt;HorseSkinGeometry.Part&gt; emissiveParts,
                 Condition when, int minDose)                                      implements GeneAbility {}
+    record Healing(String target, double radius, double amount, int intervalTicks,
+                   int maxTargets, Condition when, int minDose)                   implements GeneAbility {}
+    record Spread(String cover, double radius, double chance, int intervalTicks,
+                  Condition when, int minDose)                                    implements GeneAbility {}
     sealed interface Trigger   { /* Continuous, OnMove, Interval(ticks), OnInteract(item) */ }
     sealed interface Condition { /* Always, Flag(name,negate), All, Any, Not */ }
 }
@@ -607,16 +644,27 @@ public final class AbilityType {
     static AbilityType byName(String type);       // error lists all
     static Collection&lt;AbilityType&gt; all();
     List&lt;Param&gt; params();  List&lt;String&gt; allowedKeys();
-    // TRAVERSAL, ATTRIBUTE, EMITTER, MOB_EFFECT, YIELD, GLOW - the six, one field each.
+    // TRAVERSAL, ATTRIBUTE, EMITTER, MOB_EFFECT, YIELD, GLOW, HEALING, SPREAD -
+    // the eight, one field each.
     // Param.Kind adds PARTS for GLOW's body-region list (via PartGroups.expand).
 }
 
-// Which of a genotype's abilities are in play (visible gene, minDose met).
-public final class SpecAbilities {
+// Which of a genotype's abilities are in play. BOTH kinds of gene contribute:
+// a SpecGene's expression carries an effects block, and a built-in Gene may
+// implement AbilityContribution and return the same records.
+public final class HorseAbilities {
     record Active(String geneKey, GeneAbility ability) {}
     static List&lt;Active&gt; activeFor(Genotype genotype);
     static boolean anyLoaded();
 }
+
+/** The capability a built-in Gene implements to grant game behaviour.
+ *  Same vocabulary as a gene file's effects block - one translator, not two. */
+public interface AbilityContribution {
+    List&lt;GeneAbility&gt; abilitiesFor(AllelePair pair, Genotype genotype);
+}
+// (HorseAbilities was SpecAbilities until 2026-09-04; renamed when built-in genes
+//  started contributing, since it was no longer about the spec path.)
 
 public record Layer(String name, List&lt;Mask&gt; masks, Op op) {}
 public record Mask(MaskType type, Params params, Combine combine, boolean invert) {}
@@ -744,6 +792,19 @@ interface TraitContribution {
 /** Marker: this contribution is a disorder, so the server's health.mode can skip it. */
 interface HealthContribution extends TraitContribution { }
 
+/** The per-horse twin: how MUCH is written on the allele copy, not on the allele.
+ *  Every Rng here is a SeededRng on a stored, heritable copy seed, so this stays
+ *  inside the determinism contract. */
+interface EpigeneticTraitContribution {
+    void contribute(AllelePair pair, Genotype genotype, AlleleRandomness epigenetics, TraitBuilder out);
+}
+
+/** Trait-side twin of CoatBuildContext's two accessors. */
+interface AlleleRandomness {
+    Rng expressed();      // the copy this horse shows - one locus, one result
+    Rng copy(int slot);   // one particular copy - for a CODOMINANT gene
+}
+
 /** The sink. Additions are applied before multipliers, so gene order buys nothing. */
 final class TraitBuilder {
     TraitBuilder addSpeed(double d);
@@ -751,13 +812,18 @@ final class TraitBuilder {
     TraitBuilder addJump(double d);
     TraitBuilder addScale(double d);       // the height loci
     TraitBuilder multiplyScale(double f);  // dwarfism, which is proportional
+    TraitBuilder multiplyScaleUnclamped(double f);  // magical: applied AFTER the
+                                           // natural clamp, bounded only by
+                                           // MAGICAL_MIN_SCALE / MAGICAL_MAX_SCALE
     TraitBuilder condition(Condition c);   // de-duplicated on the condition id
 }
 
 /** One walk of Genes.codeOrder(). Pure: no Rng, no epigenetics, no entity. */
 final class HorseTraits {
-    static Traits resolve(Genotype g);                          // health genetics on
+    static Traits resolve(Genotype g);                          // no epigenome: MIDPOINTS
+    static Traits resolve(Genome g);                            // the real horse
     static Traits resolve(Genotype g, boolean healthGenetics);  // false = config "off"
+    static Traits resolve(Genotype g, Epigenome e, boolean healthGenetics);
     static Traits baseline();
 
     static final double BASE_SPEED  = 0.1875;

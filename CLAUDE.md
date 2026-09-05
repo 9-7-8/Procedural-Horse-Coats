@@ -132,6 +132,173 @@ project. Its shape:
 
 ## Status snapshot (keep this current)
 
+- **Built 2026-09-04, NOT yet play-tested: seven magical utility genes, designed
+  as a set.** The point of them is *combination* - broad epigenetic ranges and
+  independent loci, so that a ten-times healer with a striped mane that spreads
+  moss is a horse nobody wrote a line of code for. **38 built-in genes, 40
+  in-game.** Machinery is `wiki/gene-milk.html` and its six siblings; the shape
+  of it:
+  - **`MilkGene`** (`horsegenetics.milk`, priority 130, `Watr`/`Lava`/`n`) - a
+    bucket gets milk from a grown mare, **water** from any `Watr/Watr` horse,
+    **lava** from any `Lava/Lava` one. Both variants are recessive to the wild
+    type *and to each other*, so it is the cleanest double-carrier locus in the
+    mod: you cannot catch a lava horse, only breed one. **`Watr/Lava` is an
+    embryonic lethal** - the same path as `MET` (`canOccur` false, the breeding
+    handler reads the drawn genotype and cancels), but deliberately **not** a
+    `HealthContribution`: `health.mode` governs *disorders*, and turning them
+    off must not quietly make a water/lava horse possible.
+  - **`MagicSizeGene`** (`horsegenetics.body_size`, 140, `Big`/`Small`/`n`) -
+    **codominant, and revised 2026-09-04 after the first draft**. Every allele
+    copy carries a percentage and **both copies contribute**: the size is one
+    plus their sum, `Big` positive and `Small` negative. Six combinations, **six
+    outcomes** - the one locus in the mod where every combination genuinely
+    differs, which is what codominance is. `Big/Small` lands *near* 1.0 rather
+    than exactly on it, because the two percentages are independent draws;
+    forcing an exact zero would need a special case contradicting "the
+    percentages add", and the residual usefully says "this horse carries both
+    extremes".
+    - **The distribution is normal**, mean **10%** and sigma **7%** per copy,
+      floored at 1% so a `Big` allele can never come out making a horse smaller.
+      That shape is load-bearing: **80% of wild horses carry a copy**, so if one
+      copy were dramatic then dramatic would be the baseline and nothing would
+      read as unusual. Instead the population has a quiet continuous spread you
+      notice across a paddock rather than on any one horse.
+    - **Only heterozygotes are born wild** - the founder table is written out
+      (`Big/n` 40%, `Small/n` 40%, `n/n` 20%) rather than derived from
+      Hardy-Weinberg, because random mating is exactly what it is not. **Every
+      doubled horse in the world is one somebody bred**: the health loci's rule,
+      pointed at something worth having.
+    - It is the mod's first **`EpigeneticTraitContribution`**, and the first
+      caller of the new **`AlleleRandomness.copy(slot)`** - a codominant gene
+      cannot ask for "the copy that expresses", which would count one allele
+      twice and the other not at all.
+    - **`Rng.nextGaussian()`** is a new default method: Irwin-Hall (twelve
+      uniforms minus six) rather than Box-Muller, for two reasons that both
+      matter here. Its tails are **bounded at +/-6 sigma**, so a trait deciding how
+      big a horse is has a hard bound on absurdity and the guard clamps never
+      fire; and **all-0.5 inputs give exactly 0**, so `MidpointRng` lands on the
+      mean (Box-Muller would hand it 1.18 sigma below it).
+    - The practical ceiling is now about **2.04x** (two copies at +6 sigma), not the
+      first draft's 10x - and it takes *two* good copies to pass even the natural
+      `MAX_SCALE`, which is the point of making it codominant. The magical
+      bounds stay as guards rather than as the design.
+  - **`ManeColorGene`** / **`TailColorGene`** (112 / 114, `Mnsld`/`Mnstrp`/`n` and
+    `Tlsld`/`Tlstrp`/`n`, sharing `HairColorGene`) - solid or banded hair in any
+    colour, and the **heterozygote is both at once in two different colours**.
+    That is the first thing in the mod that needs *both* allele copies' seeds
+    rather than the expressing one, hence the new
+    **`CoatBuildContext.epigeneticsForCopy(key, slot)`**; asking for the expressed
+    copy would paint the stripes in the base colour. Two loci and not one, so a
+    red mane and a blue tail is breedable.
+  - **`LightGene`** (160, `Lthf`/`Ltmn`/`Lteye`/`n`) - gold hooves / mane / eyes,
+    each glowing, plus torch-strength world light. **Ten combinations, seven
+    outcomes, genuinely codominant**: three alleles each dominant to the wild type
+    and to *none of each other*, which no dominance ranking can express and the
+    combination table says in one row each. Any variant copy lights the horse; the
+    alleles decide only *where* it shows.
+  - **`HealerGene`** (116, `Hlr`/`n`, recessive) - players within 3 blocks mend,
+    and a red stripe runs down the centre of the mane so a player can *see* it.
+    The stripe's opacity is the gene's one epigenetic value; **it says nothing
+    about the healing**, deliberately - a mark that encoded a stat would make a
+    horse's value legible from a screenshot.
+  - **`VerdantGene`** (180, `mush`/`moss`/`grass`/`n`) - spreads mycelium, moss or
+    grass from the hooves. **Every variant needs two of itself**; `mush/moss` is
+    not half of each, it is nothing. A different shape from milk's mutually
+    recessive pair, whose clash is *lethal* where this one is merely inert.
+  - **The three that paint nothing** (milk, size, verdant) reuse the non-coat
+    trick: every outcome is a `wildType`, so `affectsCoat()` is false, they are
+    out of the texture key, and the gallery collapses each to one entry. **Seven
+    genes for four genes' worth of catalogue growth.** `GenotypeCatalog.size()` is
+    now **462 422 019** and `totalGenotypes()` **3 028 898 126 035 238 912**.
+  - **New machinery, four pieces, all in `common/`:**
+    - **`trait/EpigeneticTraitContribution`** + `HorseTraits.resolve(genotype,
+      epigenome, healthGenetics)` - a trait whose *magnitude* is on the allele
+      copy. Determinism is untouched: the `Rng` is a `SeededRng` on the expressing
+      copy's stored, heritable seed, exactly as the coat's is. `resolve(genotype)`
+      with no epigenome now answers with the **midpoint** (`MidpointRng`, new),
+      which is the honest answer to a question about a genotype rather than a horse.
+    - **`TraitBuilder.multiplyScaleUnclamped`** - applied *after* the natural
+      `MIN_SCALE`/`MAX_SCALE` clamp and bounded only by the new
+      `MAGICAL_MIN_SCALE`/`MAGICAL_MAX_SCALE` (0.1-10). The exact counterpart of
+      the coat's uncapped phase-3 accumulator, and it composes right: a magically
+      enormous pony is still smaller than a magically enormous draught horse.
+    - **`coat/pattern/CoatOverlay` + `CoatOverlayContribution`** - a **fourth coat
+      phase**, after the composite *and after `redrawEyes`*. It exists for exactly
+      two things the earlier phases structurally cannot do: colouring the **eyes**
+      (phase 5 restores them from the template, so a gene wanting them has to run
+      later) and carrying an **emissive texel mask** ("this glows" is not a
+      colour, so neither accumulator has a channel for it).
+      `CoatTextureComposer.bake` returns `Baked(argb, emissive)`; `compose` is the
+      pixels alone, so the golden test and every existing caller were untouched.
+    - **`genetics/AbilityContribution`** - a built-in gene can now grant game
+      behaviour, using the **same `GeneAbility` vocabulary** a data-driven gene's
+      `effects` block parses into. `SpecAbilities` was renamed **`HorseAbilities`**
+      because it stopped being about the spec path. The alternative - a second
+      vocabulary for built-ins - would have meant writing the translator twice and
+      would have let a behaviour exist for Java genes and not for gene files.
+  - **Two new effect verbs**, both written for a built-in gene and both usable
+    from JSON today, which is the property the shared vocabulary was chosen for:
+    **`healing`** (target / radius / amount / interval / `max_targets` - the cap
+    `wiki/gene-effects.html` requires of any radius effect) and **`spread`**
+    (`cover` / radius / chance / interval). `spread`'s `cover` is a **vocabulary
+    word, not a block id**: what "spreading moss" eats is a family of conversions
+    plus a rule, and that judgement needs the block registry, so it lives in the
+    translator.
+  - **The emissive path is now texel-level.** `getOrCreateEmissive` folds the
+    bake's own mask together with a spec `Glow`'s part list, and the renderer asks
+    for it every frame (a `NO_GLOW` sentinel is cached, because `computeIfAbsent`
+    will not store a `null` and would recompose the coat per frame for every
+    ordinary horse). That is what lets light glow four *hooves* and two *eyes*,
+    neither of which is a `Part`.
+  - **Gold eyes keep a pupil.** `CoatOverlay.shadeToward` scales the target colour
+    by the texel's own luma before blending, so the sclera goes gold and the pupil
+    stays black; a flat lerp turned the whole eye into one gold rectangle.
+  - **The size gene broke the walking animation, and the fix is one line.**
+    Vanilla advances the leg-swing phase (`walkAnimationPos`) from the **world
+    distance the entity moved** and nothing else; the only size compensation
+    anywhere in it is a hard-coded `isBaby() ? 3.0F : 1.0F`. Nothing consults
+    `Attributes.SCALE`, because before this mod nothing changed it - so a scaled
+    horse walked with its feet sliding, worse the bigger it got, and mirrored on
+    a small one. `GeneticHorseRenderer.stretchGaitToSize` divides the phase by
+    `renderState.scale` after `super.extractRenderState`, which makes a bigger
+    horse take proportionally longer, slower strides. Amplitude
+    (`walkAnimationSpeed`) is deliberately untouched - it is a 0-1 multiplier on
+    an angle, and an angle already scales with the model. No-op at scale 1.
+  - **The spawn egg previews size.** `CustomHorseSpawnScreen` resolves the
+    genome's `Traits` and scales the preview model by it, so **Reroll epi.**
+    visibly resizes the horse, with a `size 1.14x` readout under the panel
+    whenever it is not ordinary size. Framing is deliberately *not* refitted to
+    the result - fitting a big horse back into the panel would cancel exactly the
+    thing being previewed - so the model is capped at 2.5x and the readout says
+    `(preview capped)` past that. The number never caps.
+  - **Founder tables use a `LinkedHashMap`, baseline last** - `Map.of` iteration
+    order is salted per JVM start, so a multi-allele table built from one would
+    have made a world's founders **unreproducible**. Caught by
+    `GenotypeTest.randomDrawsOneFloatPerGeneInGeneOrder`.
+  - `coat-golden.txt` regenerated (**75 cases now**, up from 57): every row moved,
+    because the gene set moved and every derived epigenetic seed moved with it.
+    New `MagicalUtilityGenesTest` (32 tests). `:common:test` **300 green**,
+    `:neoforge-26.1.2:build` green, creator parity **3 832 checks / 48 cases**,
+    `runServer` boots clean (`40 segments`, `loaded 2 data-driven gene(s)`).
+  - **Old saves will not parse.** The genotype code went 33 -> 40 segments. Dev
+    only; start a fresh world.
+  - **Deliberately not built:** a coat marking for milk or verdant (both are
+    invisible until you put a bucket under the horse or watch the floor - logged
+    as a gap, and it sits awkwardly beside healer, which draws a stripe precisely
+    so you can see what it does); an epigenetic colour for light (vanilla light
+    has no hue, so a blue-glowing horse would still cast white light); any stat
+    change from the size locus (a ten-times horse is a spectacle, not a better
+    horse); milking's §7 *rules* - tamed, full health, once a day, the stallion
+    kick - four of which are limits of the effect vocabulary rather than of milk,
+    so they are logged in `wiki/roadmap.html` §7 rather than special-cased.
+  - Docs: seven new `wiki/gene-*.html`, `wiki/nav.js`, `wiki/gene-effects.html`
+    (the two verbs + the "both kinds of gene" note), `wiki/pipeline.html` (phase
+    6), `wiki/horse-body.html` (the epigenetic twin + the two-stage scale),
+    `wiki/genetics-model.html`, `wiki/api-reference.html`, `wiki/modding.html`
+    (walkthrough 4 + both-copies + epigenetic traits), `wiki/horse-traits.html`,
+    `wiki/roadmap.html` §7, `index.html`. Checklist:
+    `wiki/verification.html` §0a.
+
 - **Built 2026-09-04, NOT yet play-tested: the horse dimension goes back to
   random pens** (roadmap §8, done). The genotype gallery is retired before
   anyone ever walked it.
@@ -637,28 +804,32 @@ project. Its shape:
   Still unconfirmed: bred foal, seed-jar round-trip, a spec gene actually
   showing in the display (needs a horse carrying Suntouched/Waterborn) -
   `wiki/verification.html` §0.
-- **`common/`** - compiles; **268 JUnit tests pass** (`./gradlew :common:test`).
+- **`common/`** - compiles; **300 JUnit tests pass** (`./gradlew :common:test`).
   Covers `trait/` (the non-coat body: `HorseTraits` / `Traits` / `Condition` /
-  `TraitBuilder` -> `wiki/horse-body.html`) and
-  `genetics/` (allele/gene model - **31 genes**, 18 that paint and 13 that never
-  do: **sex** (the only gene
-  that paints nothing), the 15 natural ones (extension, agouti, champagne,
+  `TraitBuilder` / `EpigeneticTraitContribution` -> `wiki/horse-body.html`) and
+  `genetics/` (allele/gene model - **38 genes**, 21 that paint and 17 that never
+  do: **sex**, the 15 natural ones (extension, agouti, champagne,
   grey, **MATP** (cream + pearl, three alleles), **dun** (three alleles),
   **silver**, **mushroom**, **roan**, **tobiano**, and the four white-pattern
   loci **`KIT`** (eight alleles - sabino + the `W` series + dominant white),
   **`MITF`** and **`PAX3`** (splash, which really is two genes) and **`EDNRB`**
-  (frame + lethal white)), magic zebra + pink hair, and the **thirteen non-coat
+  (frame + lethal white)), magic zebra + pink hair, the **seven magical utility
+  genes** - **mane colour** + **tail colour** (three alleles each, a per-copy
+  hue), **healer**, **light** (four alleles, codominant), **milk** (three
+  alleles, one lethal pair), **magic body size** (codominant, epigenetic, on most
+  horses) and
+  **verdant** (four alleles) - and the **thirteen non-coat
   genes** - performance (**MSTN**, **PDK4**, **CKM**), jump (**RYR2**), size
   (**LCORL**, **HMGA2**) and health (**ACAN** with five alleles, **B4GALT7**,
   **PLOD1**, **RAPGEF5**, **ST14**, **SHOX**, **MET**);
   `Genotype` code round-trip, breeding, the `Epigenome` / `Genome` per-allele
   epigenetics + priority tie-break, `GenomeSample` - a genome detached from a
   horse, for the stallion seed jar - `Expression` + `FounderTable` + the
-  `GenotypeCatalog` reduction of 55 099 802 880 genotypes to 2 064 387 distinct
-  coats), `coat/` + `coat/pattern/` (the
-  three-phase pipeline - `CoatTextureComposer`, `PigmentField`, `ColorField`,
+  `GenotypeCatalog` reduction of 3 028 898 126 035 238 912 genotypes to
+  462 422 019 distinct coats), `coat/` + `coat/pattern/` (the
+  pipeline - `CoatTextureComposer`, `PigmentField`, `ColorField`, `CoatOverlay`,
   `GradientLut`, `BayCoat`, `GreyCoat`, `WhitePattern`, `BodyStripes`,
-  `CoatRegions`, the pure
+  `HairPattern`, `CoatRegions`, the pure
   gene hooks, the `coat-golden.txt` byte-identity net, `CoatTextureId`
   texture-id injectivity),
   `coat/skin/` (`HorseSkinGeometry`), `name/` (`breedNth`),
@@ -667,7 +838,7 @@ project. Its shape:
   `genetics/spec/` (the **data-driven gene** format: `GeneSpec`, `Json`,
   `GeneSpecParser`, `SpecSchema`, `SpecValues`, `SpecGene`, `GeneSpecLoader`,
   plus `coat/pattern/SpecPainter`; and the **gene `effects`** path -
-  `GeneAbility`, `AbilityType`, `SpecAbilities` - the Minecraft-specific
+  `GeneAbility`, `AbilityType`, `HorseAbilities` - the Minecraft-specific
   things a data-driven gene does beyond the coat - see below).
 - **`neoforge-26.1.2/`** - compiles and assembles (`./gradlew
   :neoforge-26.1.2:build` passes; only two `getGuiLeft/getGuiTop`
@@ -949,10 +1120,11 @@ project. Its shape:
   See "Data-driven genes" below; in-game checklist in `wiki/verification.html`.
 - **Built 2026-09-02, partly play-tested:** **gene `effects`** - a data-driven
   gene can carry Minecraft-specific behaviour alongside its coat `layers`.
-  Six verbs (`traversal`, `attribute`, `emitter`, `mob_effect`, `yield`,
-  `glow`), each with an optional boolean `when` and a `minDose`. `common/`
-  parses and validates all six (`GeneAbility` records / one `AbilityType`
-  per-verb declaration / a generic `GeneSpecParser.readAbility` / `SpecAbilities`,
+  Six verbs at the time, **eight since 2026-09-04** (`traversal`, `attribute`,
+  `emitter`, `mob_effect`, `yield`, `glow`, `healing`, `spread`), each with an
+  optional boolean `when` and a `minDose`. `common/`
+  parses and validates all of them (`GeneAbility` records / one `AbilityType`
+  per-verb declaration / a generic `GeneSpecParser.readAbility` / `HorseAbilities`,
   unit-tested); the NeoForge translator
   (`server/GeneAbilityHandler`, `server/GeneYieldHandler`) executes
   `traversal` + `emitter` + `mob_effect` + `yield` + `glow`. **`attribute` is
@@ -1071,9 +1243,11 @@ project. Its shape:
 - **Open issues + NOT verified in-game:** see **`wiki/verification.html`**.
   Open issues are grey, and the face-marking family (every white-pattern locus
   draws the same centreline stripe; a star and a snip are detached patches, so
-  nothing can draw one); the top unverified items are the **random pens** and
-  the **rebuilt spawn egg** (both new 2026-09-04), then **foals** (only
-  spot-checked). Update it after each `runClient`.
+  nothing can draw one); the top unverified items are the **seven magical
+  utility genes** (§0a - and inside that, the **walking animation** of a scaled
+  horse and whether the wild size spread reads right across a herd), then the
+  **trait / health layer** (§0b), the **random pens** and the **rebuilt spawn
+  egg**, then **foals** (only spot-checked). Update it after each `runClient`.
 - **Machine caveat (this dev laptop):** hybrid graphics (NVIDIA RTX 3050 Ti +
   AMD integrated). `java.exe`/`javaw.exe` are pinned to the NVIDIA GPU and the
   FML splash is disabled, or the JVM hard-crashes in the AMD GL driver. See
@@ -1095,14 +1269,20 @@ Two-module Gradle project, split deliberately:
     `GenomeSample` (a `Genome` frozen to code strings and taken off the horse -
     what the stallion seed jar carries; `breedInto(mareGenome, rng)` runs the
     ordinary draw), `ShowcaseGenotypes` (a founder draw with a floor under it -
-    the horse dimension's stock; see the pens section), `CoatPhenotype`,
-    `GeneticCodeCombiner`.
+    the horse dimension's stock; see the pens section), `AbilityContribution`
+    (the capability a built-in gene implements to grant *game behaviour*, using
+    the same `GeneAbility` vocabulary a data-driven gene's `effects` block parses
+    into), `CoatPhenotype`, `GeneticCodeCombiner`.
   - `coat/` - `CoatData`, `CoatGenerator`; `coat/pattern/` holds the
-    three-phase pipeline (`CoatTextureComposer`, the `PigmentField` /
+    pipeline (`CoatTextureComposer`, the `PigmentField` /
     `ColorField` accumulators and their read-only `PigmentView` / `ColorView`
-    faces) and the reusable body-space noise: `BodyNoise` (single-octave
-    value + Worley), `BodyStripes` (X-oriented stripe field) and `PatchNoise`
-    (warped 3-octave fractal for white-spotting patches - `field` + `fbm2`).
+    faces, plus `CoatOverlay` + `CoatOverlayContribution` - the phase-4 sink for
+    final pixels and the emissive texel mask) and the reusable body-space noise:
+    `BodyNoise` (single-octave
+    value + Worley), `BodyStripes` (X-oriented stripe field), `PatchNoise`
+    (warped 3-octave fractal for white-spotting patches - `field` + `fbm2`) and
+    `HairPattern` (the mane/tail painter: bands across a part's own longest
+    axis, a centre stripe, and the bright-hue draw).
   - `name/` - `HorseNameGenerator` + `HorseNames` (`breed` = one-half-each;
     `breedNth` = varied by a pairing's foal count) + word tables under
     `src/main/resources/horsegenetics/names/`.
@@ -1114,8 +1294,10 @@ Two-module Gradle project, split deliberately:
     same reason - `traits()` resolves them from the genotype.
   - `trait/` - the **non-coat body**: `HorseTraits` (the one walk),
     `Traits` / `Condition` / `Severity` / `Viability` (the result),
-    `TraitBuilder` (the sink), and the capability interfaces
-    `TraitContribution` / `HealthContribution`. Depends on `genetics/` and
+    `TraitBuilder` (the sink), `AlleleRandomness` (per-copy epigenetics for a
+    codominant gene), and the capability interfaces
+    `TraitContribution` / `EpigeneticTraitContribution` / `HealthContribution`.
+    Depends on `genetics/` and
     nothing depends on it except the genes that contribute - no cycle.
     -> `wiki/horse-body.html`.
   - `genetics/spec/` - the **data-driven gene** path: `GeneSpec` (the format as
@@ -1239,7 +1421,9 @@ then the **non-coat sub-band 80-99** (mstn 80, pdk4 81, ckm 82, ryr2 83,
 lcorl 84, hmga2 85, acan 86, b4galt7 87, plod1 88, rapgef5 89, st14 90,
 shox 91, met 92 - all of which paint nothing, so their order among themselves
 is arbitrary),
-pink hair 110, magic zebra 120, test 900. Within the natural band **low = sets pigment absolutely,
+pink hair 110, **mane colour 112, tail colour 114, healer 116**, magic zebra 120,
+**milk 130, body size 140, light 160, verdant 180**, test 900.
+Within the natural band **low = sets pigment absolutely,
 higher = dilution** (agouti's absolute points must precede
 `PigmentField.dilute`). `AlleleEpigenetics.priority` is unrelated - it picks a
 *seed*, never an order. `GenotypeCatalog` is lazy and invalidated on every
@@ -1248,16 +1432,26 @@ registration.
 `Genes.codeOrder()` (derived) = **sex**, extension, agouti, silver, mushroom, dun,
 MATP, champagne, grey, roan, tobiano, EDNRB, KIT, MITF, PAX3,
 **MSTN, PDK4, CKM, RYR2, LCORL, HMGA2, ACAN, B4GALT7, PLOD1, RAPGEF5, ST14,
-SHOX, MET**, pink hair, magic zebra, test. `naturalOrder()` (phase-1 pigment
-restriction) = the same list minus the three magical genes - silver / mushroom / dun sit
+SHOX, MET**, pink hair, **mane colour, tail colour, healer**, magic zebra,
+**milk, body size, light, verdant**, test. `naturalOrder()` (phase-1 pigment
+restriction) = the same list minus the magical genes - silver / mushroom / dun sit
 right after agouti so the points exist to dilute, and the six white-pattern
 genes run last. Their order among *themselves* barely matters (they all zero
 both pigments) with one exception: each reads how white the horse already is,
 so a later one paints harder - see `WhitePattern` below. Sex and the thirteen non-coat genes are *in* `naturalOrder()` (they declare
 `isNatural()`) but every one of their outcomes is a wild type, so the composer
-skips them: **fourteen of the thirty-one built-ins never paint**, and
+skips them - as do milk, body size and verdant on the magical side:
+**seventeen of the thirty-eight built-ins never paint**, and
 `Gene.affectsCoat()` is false for exactly those. What they do instead goes
-through `common/trait/` - see `wiki/horse-body.html`. **Full per-gene detail is in `wiki/gene-*.html`** (one page per
+through `common/trait/` (see `wiki/horse-body.html`) or
+`common/genetics/AbilityContribution`.
+
+**`magicalOrder()` is load-bearing**, and the utility genes tightened it:
+pink hair (110) < mane colour (112) < tail colour (114) < healer (116) < magic
+zebra (120). A coloured mane wins over a pink one; the healer's red stripe sits
+*on top of* a coloured mane; and zebra's stripes still black out everything,
+which is what its `-200%` was for. Light (160) paints in the **overlay** phase
+as well, which runs after all of this and after the eyes are restored. **Full per-gene detail is in `wiki/gene-*.html`** (one page per
 gene); one-liners:
 
 | gene | alleles | outcomes (per combination) | in the wild | coat effect |
@@ -1271,6 +1465,13 @@ gene); one-liners:
 | MATP | `Cr`/`prl`/`N` | wild (`N/N`), `pearl-carrier` (`prl/N`, a wild type), `single-cream` (`Cr/N`), `classic-pearl` (`prl/prl`), `double-dilute` (`Cr/Cr`, `Cr/prl`) | `Cr` 1/30, `prl` 1/22 | **three alleles, six combinations**: cream and pearl are one locus. Never leaves a pitch-black point. Was two genes + `CreamPearlDilution` |
 | magic zebra | `Mzeb`/`n` | wild, `zebra` | 1/100 per allele | **magical** - black stripes hung from the topline, `-200%` on all three channels so they read black over any coat incl. dominant white (non-det) |
 | pink hair | `Pihr`/`n` | wild, `pink-carrier` (a wild type), `pink-hair` | 1/12 per allele | **magical** - mane + tail walked 82% toward hot pink; reads what it paints over, so it keeps the strand shading (foal: tail only). The clearest carrier locus: two of three combinations are wild types |
+| mane colour | `Mnsld`/`Mnstrp`/`n` | wild, `solid`, `striped`, `solid-striped` | 2.0% / 1.5% per allele | **magical** - the mane in any colour, solid or banded. **The heterozygote is both at once in two different colours**, which is why it is the only gene needing `epigeneticsForCopy` (one hue per allele copy, inherited with it). Foal: nothing, the foal mesh has no mane (non-det) |
+| tail colour | `Tlsld`/`Tlstrp`/`n` | same four | 2.0% / 1.5% per allele | **magical** - mane colour's twin one locus over, sharing `HairColorGene`. Separate so a red mane and a blue tail is breedable. Shows on a foal (non-det) |
+| healer | `Hlr`/`n` | wild, `healer-carrier`, `healer` | 9% per allele | **magical** - `Hlr/Hlr` only: a red stripe down the centre of the mane (opacity is the one epigenetic value) and a `healing` aura, 1 HP / 40 t to players within 3 blocks. The mark deliberately says nothing about the strength (non-det) |
+| milk | `Watr`/`Lava`/`n` | `mares-milk`, `milk-carrier`, `water-milk`, `lava-milk`, `milk-lethal` - **all wild types** | `Watr` 8%, `Lava` 6%; no `Watr/Lava` | **magical, paints nothing** - a bucket gets milk (grown mare), water (`Watr/Watr`, any sex) or lava (`Lava/Lava`, any sex, 60 s cooldown) via a `yield`. Both variants recessive to the wild type *and each other*. `Watr/Lava` is an **embryonic lethal** (`canOccur` false), and deliberately not a `HealthContribution` |
+| magic body size | `Big`/`Small`/`n` | six combinations, **six outcomes** - `giant`, `double-giant`, `tiny`, `double-tiny`, `balanced`, wild; all wild types | **80% of founders carry one copy**; heterozygotes only, no wild homozygote | **magical, paints nothing** - **codominant**: each copy carries a percentage and they **add**, `Big` positive and `Small` negative, applied through `multiplyScaleUnclamped` (after the natural clamp). Normal distribution, mean 10% and sigma 7% per copy, floored at 1%; bounded ceiling ~2.04x. The percentage is **epigenetic and per copy**, so a foal inherits its parent's exact number and two good copies are a breeding project |
+| light | `Lthf`/`Ltmn`/`Lteye`/`n` | wild + six region combinations | 0.5% per variant allele | **magical** - gold, glowing hooves / mane / eyes and a torch-strength `glow`. **Ten combinations, seven outcomes, genuinely codominant**: each variant is dominant to `n` and to none of the others, so a horse shows everything it carries. Eyes and the emissive mask are written in the **overlay** phase |
+| verdant | `mush`/`moss`/`grass`/`n` | wild, `verdant-carrier`, `mycelium`, `moss`, `grass` - **all wild types** | 6% / 7% / 8% per allele | **magical, paints nothing** - spreads mycelium / moss / grass from the hooves via a `spread`, at most one block per beat. **Every variant needs two of itself**; a mixed pair is inert (where milk's is lethal) |
 | dun | `D`/`d1`/`d2` | wild (`d2/d2`), `primitive-marks` (`d1/d1`, `d1/d2`), `dun` (any `D`) | `D` 1/24, `d1` 1/10 | **three alleles, two dominance orders**: dilution is `D > d1 = d2`, marking is `D = d1 > d2`. `D` = mild body dilution + **primitive markings** (dorsal stripe + leg bars) that *skip* the dilution so they read dark; `d1` = the dorsal stripe with **no** dilution, done as countershading (it never touches black, and takes red only where there is red - so on a solid black it is a byte-exact no-op, as a real non-dun black is). `CoatRegions.dorsalStripe`/`legBar` |
 | silver | `Z`/`z` | wild, `silver` | 1/60 per allele | eumelanin-**only** dilution → chocolate body + near-flaxen mane/tail; chestnut carrier looks unchanged. Runs after agouti. Dapples are a follow-up |
 | mushroom | `Mu`/`mu` | wild, `mushroom-carrier` (a wild type), `mushroom` | 1/34 per allele | pheomelanin-**only** dilution, `Mu/Mu` only → chestnut becomes flat sepia; near-invisible on black/bay |
@@ -1337,6 +1538,13 @@ two-allele numbers the old "1 in N" meant.
 are wild types, so it never reaches the coat: `Gene.affectsCoat()` is false and
 `Genotype.coatCode()` (what `CoatData.textureKey()` runs on) leaves it out.
 `Gene.canOccur(AllelePair)` rules out `Y/Y` for `GenotypeCatalog`.
+
+**`Rng.nextGaussian()`** (default method) is the normal draw, built Irwin-Hall
+(twelve uniforms minus six) rather than Box-Muller so that its tails are
+**bounded at +/-6 sigma** and **all-0.5 inputs give exactly 0** - which is what lets
+`MidpointRng` land on a distribution's mean instead of 1.18 sigma below it. Magic
+body size is the only caller; `GAUSSIAN_SAMPLES` is part of a gene's draw-order
+contract.
 
 **Nothing about a horse is random any more except its founder draw.** Speed,
 health, jump and size come out of the genotype (`common/trait/`), and the
@@ -1450,21 +1658,23 @@ An **expression** may carry an **`effects`** array alongside its `layers` - the
 things a gene makes the horse *do*, not the pixels it paints. Because effects
 hang off the outcome, a homozygote and a heterozygote can grant entirely
 different behaviour by being different expressions, with nothing comparing
-doses. Closed set of six verbs
-(`traversal`, `attribute`, `emitter`, `mob_effect`, `yield`, `glow`); each takes an
+doses. Closed set of **eight** verbs
+(`traversal`, `attribute`, `emitter`, `mob_effect`, `yield`, `glow`, `healing`,
+`spread`); each takes an
 optional boolean **`when`** (flags + `all`/`any`/`not`) and a **`minDose`**
 (1 = any expressing copy, 2 = homozygous). `common/` owns the vocabulary and
 the parse (`GeneAbility` records, one `AbilityType` module per verb, a
   generic `GeneSpecParser.readAbility`,
-and `SpecAbilities.activeFor(Genotype)` which picks the expressed ones); it
+and `HorseAbilities.activeFor(Genotype)` which picks the expressed ones); it
 never touches Minecraft. The **NeoForge translator** is `server/`
 `GeneAbilityHandler` (an `EntityTickEvent.Post` that evaluates conditions and
 applies `traversal`, fires `emitter`s, keeps `mob_effect`s topped up via
 `applyMobEffect`, and reconciles `glow`'s light block via `reconcileGlow` +
 an `EntityLeaveLevelEvent` cleanup) and `server/GeneYieldHandler` (an
 `EntityInteract` handler for `yield`). Both short-circuit when
-`SpecAbilities.anyLoaded()` is false (true again only if both shipped genes are
-removed). `glow` also has a **client** half - `GeneticHorseRenderer` reads the
+`HorseAbilities.anyLoaded()` is false - which, since the magical utility
+genes were built in, it never is; the per-horse ability list is cached by
+genetic code instead, which is where the cost was. `glow` also has a **client** half - `GeneticHorseRenderer` reads the
 expressed `Glow.emissiveParts()`, `GeneticCoatTextureFactory.getOrCreateEmissive`
 bakes a full-bright mask, and `client/EmissiveCoatLayer` (a twin of vanilla's
 `HorseMarkingLayer`) draws it with `RenderTypes.eyes(...)`. It is the only verb
@@ -1474,8 +1684,13 @@ it once (and logs `mob_effect:<id>` once if an effect id fails to resolve).
 `walk_on_water` is surface buoyancy + "don't sink", not a real collision plane.
 **Not play-tested.** Full reference: `wiki/gene-effects.html`; worked examples
 `wiki/gene-waterborn.html` + `wiki/gene-suntouched.html`; the wider architecture
-`wiki/horse-traits.html`. **Built-in Java genes do not use this path** - it is
-spec-only.
+`wiki/horse-traits.html`. **Built-in Java genes use this path too** since
+2026-09-04: a `Gene` may implement `common/genetics/AbilityContribution` and
+return the same `GeneAbility` records, and `HorseAbilities` (renamed from
+`SpecAbilities`, which had stopped being about the spec path) collects both. One
+vocabulary, one translator - which is why `healing` and `spread`, both written
+for built-in genes, were usable from a gene file the day they landed. The verb
+set is now **eight**.
 
 ### The creator, and why it can be trusted
 
@@ -1508,7 +1723,7 @@ preview seed draws the numbers the game would).
   a file that plays differently from how it previewed - silently, and only for
   the settings you never touched).
 
-## The three-phase coat pipeline (`common/coat/pattern/` + `client/GeneticCoatTextureFactory`)
+## The coat pipeline (`common/coat/pattern/` + `client/GeneticCoatTextureFactory`)
 
 Coats are **generated** for every horse - adult *and* foal. Per-gene detail in
 **`wiki/gene-*.html`**; the machinery:
@@ -1577,6 +1792,21 @@ Coats are **generated** for every horse - adult *and* foal. Per-gene detail in
   5. **eyes** - `CoatRegions.redrawEyes(skin, …)` copies them verbatim (adult:
      2x2 pupil + 2x2 sclera at `{6,42}`/`{28,42}`; foal: 2x2 pupil at
      `{6,20}`/`{40,20}` - the head's L/R faces, not the front blob).
+  6. **overlay** (new 2026-09-04) - every gene implementing
+     `CoatOverlayContribution` gets a `CoatOverlay` carrying the finished coat
+     and may write **final pixels** and mark texels **emissive**. Almost nothing
+     runs here; it exists for the only two things the earlier phases
+     structurally cannot do. **The eyes**: step 5 restores them from the template
+     precisely so a wide white pattern can never blind a horse, so a gene that
+     wants to colour them *on purpose* has to run after it. **Emissiveness**:
+     "this texel glows" is not a colour, so neither accumulator has a channel
+     for it. `bake()` returns `Baked(argb, emissive)`; `compose()` is the pixels
+     alone, which is why the golden test and every existing caller were
+     untouched. A sink like `TraitBuilder` (absolute writes, nothing to fold);
+     `base` is fixed, so no gene reads another's overlay. Two blend modes -
+     `blendToward` (a lerp) and `shadeToward` (scaled by the texel's own luma
+     first, so a gold eye keeps a dark pupil instead of becoming one gold
+     rectangle).
 
   Natural genes only move the pigment sample → champagne / cream / pearl all
   read off whatever is underneath; anything on white is invisible.
@@ -1761,11 +1991,29 @@ approximate.
 
 **`wiki/horse-body.html` is the source of truth.** Summary:
 
-- `HorseTraits.resolve(genotype[, healthGenetics])` in `common/trait/` returns a
+- `HorseTraits.resolve(genotype[, epigenome][, healthGenetics])` in
+  `common/trait/` returns a
   `Traits(speed, health, jump, scale, conditions)` - a **pure function of the
-  genotype**, with no `Rng`, no epigenetics and no entity state. Baselines
+  genome**, with no entity state and no randomness beyond the stored epigenetic
+  seeds. Baselines
   `0.1875 / 22.0 / 0.5 / 1.0`; `MIN_HEALTH = 1.0` so a genetic health value
   never resolves to zero.
+- **A trait may be epigenetic** (`EpigeneticTraitContribution`, added
+  2026-09-04 for the magical size locus): the gene is handed an
+  `AlleleRandomness` offering `expressed()` (the copy the horse shows - right
+  wherever one locus gives one result) and `copy(slot)` (**for a codominant
+  gene**, where both copies contribute and asking for the expressed one would
+  count one allele twice and the other never). Both are `SeededRng`s on stored,
+  heritable copy seeds, exactly as the coat's are, so *how much* can vary between
+  horses with identical alleles while staying deterministic and heritable. `resolve(genotype)` with no epigenome answers with the **midpoint**
+  (`MidpointRng`) - the honest answer to a question about a genotype rather than
+  a horse. `HorseRecord.traits()` and `HorseRecords.traitsOf` pass the record's
+  own epigenome.
+- **Scale has two stages and only one is clamped.** `MIN_SCALE`/`MAX_SCALE`
+  (0.45-1.75) keep the natural loci honest; `TraitBuilder.multiplyScaleUnclamped`
+  applies *after* that clamp and is bounded only by `MAGICAL_MIN_SCALE` /
+  `MAGICAL_MAX_SCALE` (0.1-10). They compose right: a magically enormous pony is
+  still smaller than a magically enormous draught horse.
 - **Nothing is stored.** `HorseRecord` has no `speed` / `health` field, the same
   way it has no `sex` field; `record.traits()` resolves on demand. The old
   `HorseStats.rollFoalStat` (a uniform draw in `[0.75*min, 1.5*max]`) is
@@ -1957,6 +2205,22 @@ This SDK is further from mainline 1.21.x than the version numbers suggest.
   - **To restore the End-portal starfield:** put back `submitCube(
     state.facesToShow, RenderTypes.endPortal(), poseStack, submitNodeCollector)`
     in `submit` (git history).
+- **The walk animation ignores `Attributes.SCALE`, and that is a trap for any
+  mod that changes it.** `LivingEntity.calculateEntityAnimation` feeds the raw
+  world distance moved into `updateWalkAnimation`, which is
+  `min(distance * 4, 1)` into `walkAnimation.update(target, 0.4F, isBaby() ?
+  3.0F : 1.0F)`. That third argument is the *only* size compensation in the
+  whole path - a foal's legs cycle 3x faster because they are short - and
+  nothing anywhere consults the scale attribute. `LivingEntityRenderer` then
+  scales the model by `state.scale` (= `entity.getScale()`, the SCALE attribute
+  alone; `getAgeScale()` is separate). So a scaled entity swings ordinary-rate
+  legs over ordinary ground with longer limbs, and its feet slide. The fix
+  needs no mixin: divide `state.walkAnimationPos` in the renderer's
+  `extractRenderState` after `super` - the phase is a monotonic accumulator, so
+  scaling it after the fact is identical to having accumulated it slower. Leave
+  `walkAnimationSpeed` alone; it is an amplitude multiplier on an angle, and an
+  angle already scales with the model. See
+  `GeneticHorseRenderer.stretchGaitToSize`.
 - **Mojang un-typo'd** `BlockBehaviour.Properties.noCollission()` ->
   **`noCollision()`**.
 - **Spawn point**: no `Level#getSharedSpawnPos()`. Use
@@ -2212,8 +2476,10 @@ point of the revert: the corridor no longer grows when a gene is added.
   `buildStartCap`) on the last segment. Pens are still built lazily as you walk.
 - **`GenotypeCatalog` is untouched and still used** - by the tests, and by
   whatever punnett display gets built. It just no longer drives the dimension.
-  `size()` is still **2 064 387** and `totalGenotypes()` **292 822 943 423 500 800**;
-  see "the genetics model" for what those numbers mean.
+  `size()` is **462 422 019** and `totalGenotypes()`
+  **3 028 898 126 035 238 912**; see "the genetics model" for what those numbers
+  mean. (Both moved with the magical utility genes; the corridor did not, which
+  is the whole point of the revert.)
 
 ### Layout (`DebugPenManager`)
 
@@ -2498,6 +2764,17 @@ Design follow-ups (not just "go look at it"):
    second description of built behaviour. Both are fixed; **the lesson is that
    "mark it shipped" is not the same as "move it", and only moving it keeps one
    source of truth.**
+   **It happened again in the same session** the magical utility genes landed:
+   the end-of-session sweep found the gene count, the catalogue size, the raw
+   genotype count and the code-segment length all stale in four different files
+   (`roadmap.html` §10, `horse-body.html`, `verification.html`, and CLAUDE.md's
+   own pens section) - every one of them a *derived number written out by hand*.
+   That is the specific shape of this gap and it is now clear enough to act on:
+   the cheap fix is a `:common:test` that greps the docs for the handful of
+   numbers the code can compute (`Genes.codeOrder().size()`,
+   `GenotypeCatalog.size()`, `totalGenotypes()`) and fails when a page disagrees.
+   Prose about *how* a gene works survives a change; a number in prose almost
+   never does.
 14. **Data-driven genes cover markings and dilutions, not everything.** The
    format has no expression language and no way to read another gene, so the
    three built-ins that genuinely need one still can't be expressed as specs:
@@ -2511,7 +2788,11 @@ Design follow-ups (not just "go look at it"):
    script at the terminal, so the tool itself will happily show you a stale
    preview if you edit `js/` and don't run it. Loading `fixtures/expected.json`
    in the page and self-checking on boot would close that.
-16. **Gene `effects` are a thin slice and mostly untested.** `attribute` still
+16. **Gene `effects` are a thin slice and mostly untested** - though less thin
+   since 2026-09-04: the set is **eight verbs**, `healing` and `spread` joined
+   it, and **built-in genes use the same vocabulary** through
+   `AbilityContribution`, so the path is no longer spec-only.
+   `attribute` still
    parses but the translator doesn't apply it (logged once). `mob_effect` is
    wired (`applyMobEffect`). `glow` is wired both sides - the light half is a
    trailing `minecraft:light` block (janky vs a mixin-based dynamic light: lags
@@ -2522,9 +2803,14 @@ Design follow-ups (not just "go look at it"):
    `walk_on_water` is buoyancy, not a solid plane. Conditions are boolean, not
    the architecture's 0-1 scalars. There is no trait registry, no `on_change`,
    no selectors/auras/pools. The gene creator can't edit an `effects` block -
-   it's hand-written. Only Waterborn's coat + trail are confirmed in-game;
+   it's hand-written. `healing` and `spread` are both first drafts: `healing`
+   caps at `max_targets` and does a real sphere check, and `spread` converts at
+   most one block a beat off a narrow, hand-written block list - which is the
+   piece most likely to be wrong in play (the risk is a horse eating something a
+   player built with). Only Waterborn's coat + trail are confirmed in-game;
    Suntouched and every other effect verb are unverified
-   (`wiki/verification.html` §13). The full plan is `wiki/horse-traits.html`.
+   (`wiki/verification.html` §13, §0a). The full plan is
+   `wiki/horse-traits.html`.
 
 17. **Some gameplay-layer items still have no behaviour.** The seed jars,
    whistles and stall signs work; still unwired: shearing to get `horse_hair`,
@@ -2619,7 +2905,40 @@ Design follow-ups (not just "go look at it"):
    healthy and an inbred line is not, and it is entirely possible a player never
    meets a lethal at those numbers.
 
-25. **Two health genes are only half-drawn.** `B4GALT7`'s Friesian dwarfism
+25. **Milk made an existing `yield` wart load-bearing.** A `yield` cancels the
+   interaction on both sides so vanilla doesn't also read it as a mount - fine
+   while the only yield in the game was Waterborn's, on a rare gene. **Every mare
+   now has one**, so right-clicking any grown mare with an empty bucket gives
+   milk rather than mounting, always; and while the 200-tick cooldown is running
+   `fulfil` returns early but the event is still cancelled, so you get neither
+   milk nor a mount and no feedback. Suspected from reading the code, not seen -
+   `wiki/verification.html` §0a. Fixes in order of size: don't cancel when the
+   cooldown blocks it; require sneak; or gate milking on `tamed`, which
+   `wiki/roadmap.html` §7 wants anyway.
+
+26. **Two magical genes do something a player cannot see.** Milk and verdant
+   both paint nothing, so a lava-bearing horse and a moss-spreading one are
+   indistinguishable from an ordinary horse until you put a bucket under them or
+   watch the floor. That sits badly beside **healer**, which draws a red stripe
+   precisely so the ability is legible, and beside the rule in
+   `wiki/gene-effects.html` that an effect must be *perceivable*. The fix is a
+   marking allele in each locus rather than a mark bolted on beside it, which is
+   why it was not done in passing. `wiki/verification.html` §0a records it as
+   accepted-for-now rather than as a bug.
+
+27. **`GenotypeCatalog.size()` is an `int` and is now 462 million.** The
+   seven magical utility genes multiplied the catalogue by 224 (mane 4 x tail 4
+   x light 7 x healer 2). Nothing is materialised, so the memory cost is still
+   zero, and the arithmetic is done in `long` and **saturates** at
+   `Integer.MAX_VALUE` rather than wrapping - so the failure mode is a silently
+   *truncated* catalogue, not a nonsense one. Headroom is about **4.6x**, which
+   is roughly one more gene of light's shape. When it goes, `size()` and
+   `get(int)` want to be `long` together, and every caller that indexes them
+   wants re-checking in the same change. Nothing in play depends on it today -
+   the pen corridor is a fixed 2 000 random pens and no longer walks the
+   catalogue at all (gap #12).
+
+28. **Two health genes are only half-drawn.** `B4GALT7`'s Friesian dwarfism
    should shorten the limbs and ribs and leave the head, but `Attributes.SCALE`
    is one number for the whole entity - per-part scaling means owning the horse
    model rather than borrowing vanilla's, so it renders as an overall

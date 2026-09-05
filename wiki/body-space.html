@@ -236,6 +236,36 @@
     speckle (roan, sabino roaning).
 </p>
 
+<h2>HairPattern &mdash; the mane and tail painter</h2>
+
+<p>
+    <code>common/coat/pattern/HairPattern</code> is to the hair genes what
+    <code>WhitePattern</code> is to the white-marking loci: one shape family,
+    with the difference between two genes being its parameters rather than a
+    second copy of the code. It offers <code>bands</code> (stripes
+    <em>across</em> the hair), <code>centreStripe</code> (a line <em>along</em>
+    it, centred), and the bright-hue draw the per-copy colours come from.
+</p>
+
+<p>
+    Its one interesting trick is that it works in the <strong>part&rsquo;s own
+    axes</strong> rather than the world&rsquo;s. A mane is a long thin blade and
+    a tail a short fat one, and both are rotated out of the world axes by their
+    rest pose, so neither &ldquo;bands along X&rdquo; nor &ldquo;bands along
+    Y&rdquo; is right for both. <code>axesBySpan(skin, part)</code> sorts the
+    part&rsquo;s three axes by the span of its bounds, and the shapes run along
+    the longest and across the second. That is why one painter serves the mane
+    locus, the tail locus and the healer&rsquo;s stripe, and why it will serve a
+    fourth without changing.
+</p>
+
+<p>
+    Read by <a href="gene-mane-color.html">mane colour</a>,
+    <a href="gene-tail-color.html">tail colour</a>,
+    <a href="gene-healer.html">healer</a> and
+    <a href="gene-light.html">light</a>&rsquo;s gold mane.
+</p>
+
 <h2>BodyStripes &mdash; the shared stripe field</h2>
 
 <p>

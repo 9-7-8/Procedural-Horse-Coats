@@ -30,7 +30,7 @@
         <strong>Implemented:</strong> the <code>effects</code> block is parsed and
         validated in <code>common/</code> (<code>GeneAbility</code>,
         <code>AbilityType</code>, <code>GeneSpecParser</code>,
-        <code>SpecAbilities</code>; unit-tested). The NeoForge translator
+        <code>HorseAbilities</code>; unit-tested). The NeoForge translator
         (<code>server/GeneAbilityHandler</code>, <code>server/GeneYieldHandler</code>)
         executes <code>traversal</code>, <code>emitter</code>, <code>mob_effect</code>,
         <code>yield</code> and <code>glow</code> (a dynamic <code>minecraft:light</code>
@@ -48,14 +48,29 @@
 
 <p>
     A data-driven gene&rsquo;s JSON may carry an <code>effects</code> array alongside
-    its <code>layers</code>: a <strong>closed set of six verbs</strong> &mdash;
+    its <code>layers</code>: a <strong>closed set of eight verbs</strong> &mdash;
     <code>traversal</code> (a movement / survival flag), <code>attribute</code> (a
     condition-gated modifier), <code>emitter</code> (particles on a trigger),
     <code>mob_effect</code> (an aura on self or rider), <code>yield</code> (the
-    horse hands something back on a right-click), and <code>glow</code> (the horse
-    emits world light and/or renders some coat parts full-bright). Every entry also
+    horse hands something back on a right-click), <code>glow</code> (the horse
+    emits world light and/or renders some coat parts full-bright),
+    <code>healing</code> (an aura that mends what stands near it) and
+    <code>spread</code> (ground cover creeping out from the hooves). Every entry also
     takes an optional <code>when</code> condition and a <code>minDose</code>
     (<code>1</code> = any expressing copy, <code>2</code> = homozygous only).
+</p>
+
+<p>
+    <strong>Since 2026-09-04 this is not a data-driven-only path.</strong> A
+    hand-written gene implements <code>AbilityContribution</code> and returns the same
+    records, and <code>HorseAbilities.activeFor</code> collects both kinds together.
+    That matters for this document&rsquo;s argument rather than just for the
+    plumbing: the shipped slice is no longer &ldquo;the thing gene files can do&rdquo;
+    but &ldquo;the thing <em>any</em> gene can do&rdquo;, which is the shape the
+    architecture below always assumed. The last two verbs were both written for
+    built-in genes (<a href="gene-healer.html">healer</a>,
+    <a href="gene-verdant.html">verdant</a>) and are usable from JSON today, which is
+    the property the shared vocabulary was chosen for.
 </p>
 
 <p>
@@ -161,7 +176,7 @@
     The same split as the rest of the mod. <code>common/</code> owns the
     <strong>vocabulary and the parse</strong> &mdash; what a flag is called, which
     ops exist, turning JSON into <code>GeneAbility</code> records, and deciding which
-    abilities a genotype expresses (<code>SpecAbilities.activeFor</code>). It never
+    abilities a genotype expresses (<code>HorseAbilities.activeFor</code>). It never
     imports Minecraft, so it ports to 1.12.2 unchanged. The NeoForge module owns the
     <strong>execution</strong> &mdash; it reads that list every tick and evaluates
     conditions, spawns particles, holds flags, swaps items. A version bump rewrites
@@ -598,7 +613,7 @@ Component  -> (Trigger, Condition, Selector, Effect)</code></pre>
     </div>
     Source: <code>common/genetics/spec/GeneAbility.java</code>,
     <code>common/genetics/spec/AbilityType.java</code>,
-    <code>common/genetics/spec/SpecAbilities.java</code>,
+    <code>common/genetics/spec/HorseAbilities.java</code>,
     <code>neoforge-26.1.2/&hellip;/server/GeneAbilityHandler.java</code>,
     <code>&hellip;/server/GeneYieldHandler.java</code>
 </div>

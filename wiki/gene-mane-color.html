@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mane Colour &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="nav.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow magical">Magical gene <span class="sep">/</span> phase 3</p>
+<h1>Mane colour</h1>
+<p class="lede">
+    A mane in any colour there is &mdash; solid, or banded, or
+    <strong>both at once in two different colours</strong>. The colour is not a
+    property of the allele but of the <em>allele copy</em>, drawn from a continuous
+    hue circle, so it travels with the copy and a foal inherits its parent&rsquo;s
+    exact shade.
+</p>
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd>horsegenetics.mane_color</dd></div>
+    <div><dt>Priority</dt><dd>112 (magical band, before magic zebra)</dd></div>
+    <div><dt>Alleles</dt><dd><span class="allele dom">Mnsld</span> <span class="allele dom">Mnstrp</span> <span class="allele wild">n</span></dd></div>
+    <div><dt>Combinations</dt><dd>6, all carryable &mdash; 4 outcomes</dd></div>
+    <div><dt>Outcomes</dt><dd>wild, <code>solid</code>, <code>striped</code>, <code>solid-striped</code></dd></div>
+    <div><dt>Default allele</dt><dd>n</dd></div>
+    <div><dt>Wild frequency</dt><dd><code>Mnsld</code> 2.0%, <code>Mnstrp</code> 1.5% per allele &rarr; ~7% of wild horses</dd></div>
+    <div><dt>Founder draws</dt><dd>1 &times; nextFloat()</dd></div>
+    <div><dt>Deterministic</dt><dd><strong>no</strong> &mdash; the colour is per-copy</dd></div>
+    <div><dt>Strength</dt><dd>88% of the way to the colour</dd></div>
+    <div><dt>Twin locus</dt><dd><a href="gene-tail-color.html">Tail colour</a></dd></div>
+</dl>
+
+<div class="note warn">
+    <span class="label">Built 2026-09-04, not yet play-tested</span>
+    <p>
+        Sample bakes look right &mdash; solid manes read as one colour, bands are
+        wobbled rather than ruled, and the heterozygote shows two distinct colours.
+        Nothing has been seen on a 3D horse. Checklist on
+        <a href="verification.html">To be verified</a>.
+    </p>
+</div>
+
+<h2 id="table">The combination table</h2>
+
+<table class="data">
+    <thead><tr><th>Combination</th><th>Outcome</th><th>What the mane looks like</th></tr></thead>
+    <tbody>
+        <tr><td><code>n/n</code></td><td>wild</td><td>Its coat colour</td></tr>
+        <tr><td><code>Mnsld/n</code>, <code>Mnsld/Mnsld</code></td><td><code>solid</code></td><td>One bright colour, whole mane</td></tr>
+        <tr><td><code>Mnstrp/n</code>, <code>Mnstrp/Mnstrp</code></td><td><code>striped</code></td><td>Bands of one bright colour across the coat colour</td></tr>
+        <tr><td><code>Mnsld/Mnstrp</code></td><td><code>solid-striped</code></td><td><strong>Two</strong> colours: the solid copy&rsquo;s base with the striped copy&rsquo;s bands over it</td></tr>
+    </tbody>
+</table>
+
+<h2 id="heterozygote">The heterozygote is the interesting one</h2>
+
+<p>
+    <code>Mnsld/Mnstrp</code> is not a compromise between the two and it is not one of
+    them winning. It is <strong>both, at once, in two different colours</strong>
+    &mdash; a look neither allele can make on its own, which is exactly what earns it
+    its own row in the table.
+</p>
+
+<p>
+    It also needs something no other gene in the mod has needed: the epigenetics of
+    <em>each copy separately</em>. Every other non-deterministic gene asks
+    <code>ctx.epigeneticsFor(key)</code>, which answers &ldquo;what does this horse
+    show at this locus&rdquo; &mdash; one locus, one look, one seed. Here both copies
+    paint at the same time, and asking for the expressed one would paint the stripes
+    in the base colour, which is a horse with no stripes.
+</p>
+
+<div class="codebox">
+<div class="filename">common/genetics/genes/HairColorGene.java</div>
+<pre><code class="language-java">private ColorField paintBoth(CoatBuildContext ctx, PigmentView coat, ColorView accumulated) {
+    Hair base = draw(ctx.epigeneticsForCopy(key, 0));   // the solid allele - declared first
+    Hair band = draw(ctx.epigeneticsForCopy(key, 1));   // the striped one
+    ...
+}</code></pre>
+</div>
+
+<p>
+    The solid allele is declared first in <code>alleles()</code>, and an
+    <code>AllelePair</code> orders by declaration, so slot 0 <em>is</em> the solid
+    copy and slot 1 <em>is</em> the striped one. No guessing.
+</p>
+
+<h2 id="colour">Where the colour lives</h2>
+
+<p>
+    Each allele copy carries <strong>one</strong> epigenetic value: its colour, drawn
+    as a bright hue off that copy&rsquo;s seed. There is no palette and no list &mdash;
+    hue is uniform over the whole circle, and two unrelated horses agreeing on a
+    colour is essentially impossible.
+</p>
+
+<div class="codebox">
+<div class="filename">common/coat/pattern/HairPattern.java</div>
+<pre><code class="language-java">public static int randomBrightColour(Rng rng) {
+    float hue        = rng.nextFloat();
+    float saturation = 0.60f + rng.nextFloat() * 0.40f;
+    float value      = 0.62f + rng.nextFloat() * 0.38f;
+    return hsvToRgb(hue, saturation, value);
+}</code></pre>
+</div>
+
+<p>
+    Saturation and value are held well up on purpose. A magical mane that rolled a
+    muddy olive would read as a bug, and the whole point of the gene is that you can
+    see what a horse is carrying.
+</p>
+
+<p>
+    Because the colour is on the copy, it is <strong>heritable</strong>: breed a horse
+    with a mane you like and its foals get that exact colour, not a new roll. That is
+    what makes a particular horse worth keeping rather than just its genotype.
+</p>
+
+<h2 id="painting">Painting toward, not with</h2>
+
+<p>
+    The paint walks each texel 88% of the way from what it already looks like to the
+    target colour, the same manoeuvre <a href="gene-pink-hair.html">pink hair</a>
+    makes and for the same reason: flat paint throws away the strand shading the
+    natural phase and the template gave the mane and leaves a dead rectangle. Short of
+    the whole way, the mane is unmistakably the new colour and still reads as hair.
+</p>
+
+<p>
+    Bands run <em>across</em> the mane&rsquo;s longest axis, wobbled off straight by
+    <code>BodyNoise</code>. Which axis that is is worked out from the part&rsquo;s own
+    bounds rather than hard-coded, because a mane is a long thin box and a tail is a
+    short fat one and both are rotated out of the world axes by their rest pose &mdash;
+    see <code>HairPattern.axesBySpan</code>.
+</p>
+
+<h2 id="order">Where it sits in phase 3</h2>
+
+<p>
+    Priority 112: after <a href="gene-pink-hair.html">pink hair</a> (110), so a
+    coloured mane wins over a pink one; before
+    <a href="gene-magic-zebra.html">magic zebra</a> (120), so zebra stripes still
+    black out a coloured mane rather than the other way round. Both of those are
+    choices, not accidents &mdash; see
+    <a href="genetics-model.html">the magical ordering</a>.
+</p>
+
+<h2 id="foal">A foal shows nothing here</h2>
+
+<p>
+    The foal mesh has no <code>MANE</code> part at all (see
+    <a href="body-space.html">body space</a>), so the colour arrives with adulthood.
+    Its <a href="gene-tail-color.html">twin locus</a> does show on a foal, which makes
+    the tail the earlier of the two to read off a young horse.
+</p>
+
+<h2 id="future">Three alleles is a starting point</h2>
+
+<p>
+    A third pattern &mdash; dip-dyed, tipped, roots &mdash; is one more allele, one
+    more expression and one more painter, and every existing combination keeps its
+    meaning. That is the combination table doing its job: adding an allele to a
+    dominance-ranked gene would mean deciding where it ranks against the other two,
+    and there is no answer to that question here.
+</p>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="gene-tail-color.html">Tail colour</a>
+        <a href="gene-healer.html">Healer &mdash; the other mane gene</a>
+        <a href="gene-pink-hair.html">Pink hair</a>
+        <a href="verification.html">What to check in-game</a>
+    </div>
+    Source: <code>common/genetics/genes/ManeColorGene.java</code>,
+    <code>HairColorGene.java</code>, <code>coat/pattern/HairPattern.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

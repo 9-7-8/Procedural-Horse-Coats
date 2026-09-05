@@ -492,6 +492,56 @@ public void contribute(AllelePair pair, Genotype genotype, TraitBuilder out) {
     </p>
 </div>
 
+<h2 id="abilities">Walkthrough 4 &mdash; a gene that makes the horse <em>do</em> something</h2>
+
+<p>
+    Not a colour and not a stat: emit light, mend what stands near it, spread moss,
+    hand a player a bucket of lava. That is the third capability a gene can implement,
+    and it reuses the <a href="gene-effects.html">effect vocabulary</a> a data-driven
+    gene&rsquo;s <code>effects</code> block parses into.
+</p>
+
+<div class="codebox">
+<pre><code class="language-java">public final class BeaconGene implements Gene, AbilityContribution {
+
+    private final List&lt;GeneAbility&gt; glow = List.of(
+            new GeneAbility.Glow(10, List.of(), GeneAbility.Condition.ALWAYS, 1));
+
+    @Override
+    public List&lt;GeneAbility&gt; abilitiesFor(AllelePair pair, Genotype genotype) {
+        return pair.has(B) ? glow : List.of();
+    }
+}</code></pre>
+</div>
+
+<p>
+    Nothing else is needed. <code>HorseAbilities.activeFor</code> collects built-in and
+    data-driven contributions together, and the NeoForge translator has one switch for
+    both &mdash; so a verb that exists works for your gene the day you use it.
+</p>
+
+<ul>
+    <li><strong>Return the list you mean.</strong> <code>minDose</code> exists because
+        a gene <em>file</em> has no expression language and needs some way to say
+        &ldquo;only if homozygous&rdquo;. You have the whole of Java, so answer the
+        question in <code>abilitiesFor</code> and leave it at 1.</li>
+    <li><strong>Hold the records as constants.</strong> The method is called from a
+        per-tick path (cached by genetic code, but still), and an ability list is
+        immutable data &mdash; there is no reason to rebuild it per call.</li>
+    <li><strong>If the verb you want does not exist</strong>, add it &mdash; the
+        contract is four places and none of them is the parser. See
+        <a href="gene-effects.html">adding a new effect</a>. Adding it to the shared
+        vocabulary rather than hooking the game directly is what keeps
+        <code>common/</code> free of Minecraft and makes the behaviour available to
+        gene files too.</li>
+    <li><strong>Every effect must be perceivable.</strong> An ability a player cannot
+        see coming is one nobody learns to breed for. If yours has no natural
+        signature, pair it with a coat mark the way
+        <a href="gene-healer.html">healer</a> does &mdash; and note that
+        <a href="gene-milk.html">milk</a> and <a href="gene-verdant.html">verdant</a>
+        do not, which is logged as a gap rather than defended.</li>
+</ul>
+
 <h2>Randomness: the epigenome, and nothing else</h2>
 
 <p>
@@ -523,6 +573,67 @@ double reach   = 0.35 + epi.nextFloat() * 0.60;          // fraction of the drop
         <code>bodyBounds(skin)</code> rather than hard-coded numbers, so the effect
         works on the foal mesh too.</li>
 </ul>
+
+<h3>When you need <em>both</em> copies</h3>
+
+<p>
+    &ldquo;The copy that expresses&rdquo; is the right question almost everywhere: one
+    locus, one look, one seed. It is the wrong question for a gene whose two alleles
+    paint <em>at the same time</em> &mdash;
+    <a href="gene-mane-color.html">mane colour</a>&rsquo;s heterozygote is a solid
+    colour from one copy with the other copy&rsquo;s bands over it, and asking for the
+    expressed copy would paint the stripes in the base colour, which is a horse with no
+    stripes.
+</p>
+
+<div class="codebox">
+<pre><code class="language-java">Rng base = ctx.epigeneticsForCopy(KEY, 0);   // pair.first()
+Rng band = ctx.epigeneticsForCopy(KEY, 1);   // pair.second()</code></pre>
+</div>
+
+<p>
+    The slots follow your <code>alleles()</code> declaration order, since
+    <code>AllelePair</code> canonicalizes by it &mdash; so declare the allele whose
+    role you want in slot 0 <em>first</em>, and the mapping is fixed rather than
+    guessed. Reach for this only when both copies genuinely paint; for everything else
+    the single-copy form is what a reader expects.
+</p>
+
+<h3>Epigenetics on the body, not just the coat</h3>
+
+<p>
+    A trait can vary per horse the same way a coat can. Implement
+    <code>EpigeneticTraitContribution</code> and you are handed the same
+    expressing-copy <code>Rng</code>:
+</p>
+
+<div class="codebox">
+<pre><code class="language-java">@Override
+public void contribute(AllelePair pair, Genotype genotype, AlleleRandomness epigenetics,
+                       TraitBuilder out) {
+    // expressed() for a gene with one result per locus...
+    double weight = 1.0 + epigenetics.expressed().nextGaussian() * 0.1;
+
+    // ...copy(slot) for a CODOMINANT one, where both alleles contribute and
+    // asking for the expressed copy would count one twice and the other never.
+    double sum = signedDelta(pair.first(),  epigenetics.copy(0))
+               + signedDelta(pair.second(), epigenetics.copy(1));
+}</code></pre>
+</div>
+
+<p>
+    It is still deterministic and still heritable, for the same reason the coat is: the
+    seed is stored on the record and travels with the allele. <code>Rng</code> also
+    carries a <code>nextGaussian()</code> for a trait that wants a bell rather than a
+    flat spread &mdash; bounded at &plusmn;6&sigma;, and exactly 0 at the midpoint, so
+    both of the notes below still hold. Note the two
+    consequences. A caller asking a bare <em>genotype</em> for its body
+    (<code>HorseTraits.resolve(genotype)</code>) gets your contribution&rsquo;s
+    <strong>midpoint</strong>, via <code>MidpointRng</code> &mdash; so write your draw
+    so that its midpoint is a sensible answer. And a homozygote expresses whichever
+    copy has the higher epigenetic priority, so two copies are two chances at a good
+    number rather than a doubled effect.
+</p>
 
 <h2 id="contract">The contract</h2>
 
