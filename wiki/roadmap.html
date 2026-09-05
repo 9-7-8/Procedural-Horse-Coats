@@ -40,27 +40,31 @@
 
 <p>
     Section numbers are stable so cross-references keep working; a retired section keeps
-    its slot as a pointer. <strong>1</strong> (the three-phase pigment pipeline) shipped
-    &mdash; see <a href="pipeline.html">the pipeline page</a>. <strong>§2</strong>&rsquo;s
-    gene priority + derived orderings + genotype-as-list shipped 2026-09-03 (see
-    <a href="genetics-model.html#gene-priority">Genetics model</a>); what is left in §2
-    is the per-genotype founder-frequency tables. The first two
-    <strong>magical genes</strong> also shipped, with their own pages
-    (<a href="gene-magic-zebra.html">magic zebra</a>,
-    <a href="gene-pink-hair.html">pink hair</a>).
+    its slot as a pointer. <strong>What has shipped is not described here</strong> &mdash;
+    it is written up on its own page and deleted from this one. The big departures so far:
+    <strong>&sect;1</strong> (the three-phase pipeline) &rarr;
+    <a href="pipeline.html">the pipeline</a>; <strong>&sect;2</strong> (gene priority,
+    derived orderings, the genotype-as-list rewrite and the per-genotype founder table)
+    and <strong>&sect;5.1&ndash;5.2</strong> (the combination table and the physical-locus
+    merges) &rarr; <a href="genetics-model.html">the genetics model</a>;
+    <strong>&sect;6.1&ndash;6.4</strong> (traits, size and the whole health layer) &rarr;
+    <a href="horse-body.html">the horse&rsquo;s body</a>; <strong>&sect;7.2</strong>
+    (gated healing) and the core of <strong>&sect;13</strong> (bond and herds) &rarr;
+    <a href="horse-care.html">horse care</a>; <strong>&sect;8</strong> (the dimension back
+    to random pens) and <strong>&sect;9</strong> (the custom spawner) are pointers below.
     <strong>Read <a href="#impl-priority">Implementation priority</a> first</strong> for
     what to build in what order.
 </p>
 
 <ol start="2">
-    <li><a href="#priority">Gene priority and processing order</a></li>
+    <li><a href="#priority">Gene priority and processing order</a> &mdash; <strong>shipped bar one item</strong></li>
     <li><a href="#modder-api">Adding a gene: the modder-facing API</a> &mdash; <strong>partly built</strong></li>
     <li><a href="#gene-backlog">The gene backlog</a></li>
-    <li><a href="#multi-allele">Loci that are not one-gene-two-alleles</a></li>
-    <li><a href="#traits">Non-coat genes: performance, size, health</a></li>
+    <li><a href="#multi-allele">Loci that are not one-gene-two-alleles</a> &mdash; <strong>5.1 / 5.2 shipped; 5.3 partly built</strong></li>
+    <li><a href="#traits">Non-coat genes: performance, size, health</a> &mdash; <strong>partly built</strong></li>
     <li><a href="#care">Horse care: milking</a></li>
-    <li><a href="#random-pens">The horse dimension: back to random pens</a></li>
-    <li><a href="#spawner">The custom horse spawner</a></li>
+    <li><a href="#random-pens">The horse dimension: back to random pens</a> &mdash; <strong>done</strong></li>
+    <li><a href="#spawner">The custom horse spawner</a> &mdash; <strong>mostly done</strong></li>
     <li><a href="#scale">What breaks at scale</a></li>
     <li><a href="#gameplay">The gameplay layer &mdash; scope and ground rules</a></li>
     <li><a href="#hair">Horse hair, shearing and the crafting economy</a></li>
@@ -85,220 +89,99 @@
     work seen as a dependency chain &mdash; this is the same work seen as blast radius.
 </p>
 
-<h3>Tier 1 &mdash; the data-model rewrite (touches nearly everything)</h3>
+<div class="note good">
+    <span class="label">The whole data-model tier is done</span>
+    <p>
+        Gene priority and the derived orderings, the genotype-as-list rewrite, the
+        per-genotype <code>FounderTable</code>, multi-allele support and the
+        physical-locus merges, the trait framework and the health layer, the revert to
+        random pens and the custom spawner have all shipped. They are documented on
+        <a href="genetics-model.html">the genetics model</a>,
+        <a href="horse-body.html">the horse&rsquo;s body</a> and the gene pages, and are
+        deliberately <em>not</em> restated here. What follows is the work that is left.
+    </p>
+</div>
+
+<h3>Rank 1 &mdash; a decision, not code</h3>
 
 <ol>
-    <li><s><strong>Gene priority + derived orderings + the genotype-as-list
-        rewrite</strong> (§2)</s> &mdash; <strong>shipped 2026-09-03.</strong>
-        <code>int priority()</code> on every gene;
-        <code>naturalOrder()</code> / <code>magicalOrder()</code> /
-        <code>codeOrder()</code> derived by one sort on
-        <code>(priority, key)</code>; genotype and epigenome are gene-keyed,
-        tolerant code strings. NeoForge needed no changes (it delegates parsing
-        to <code>common/</code>); <code>coat-golden.txt</code> regenerated with
-        every deterministic coat byte-identical. Written up on
-        <a href="genetics-model.html">Genetics model</a>.</li>
-    <li><s><strong>The per-genotype founder table</strong> (§2, §5.1)</s> &mdash;
-        <strong>shipped 2026-09-03.</strong> <code>FounderTable</code> is the shared
-        weighted-draw helper: a weight per allele <em>combination</em>, sparse,
-        normalised with a warning, one <code>nextFloat()</code> per gene per founder,
-        and a <code>FounderContext</code> for a genome-aware distribution.
-        <code>Gene.randomPair(rng)</code> is gone.
-        <strong>Still open here: the chaos-carrot chance function</strong> (§14.1) &mdash;
-        the same shape and the same helper, kept separate so the two can differ.</li>
+    <li><strong>Decide the custom-entity question</strong> (§11) &mdash; a subclass vs
+        attachments on the vanilla <code>Horse</code>. It gates the <em>design</em> of
+        §§12&ndash;19, so make it before building any of them, and it invalidates a lot
+        of code if answered late.</li>
 </ol>
 
-<h3>Tier 2 &mdash; multi-area systems (each needs Tier 1)</h3>
+<h3>Rank 2 &mdash; multi-area foundations</h3>
 
-<ol start="3">
-    <li><s><strong>Multi-allele support</strong> (§5.1)</s> &mdash;
-        <strong>shipped 2026-09-03.</strong> <code>DominancePattern</code> is deleted;
-        a gene declares an <code>Expression</code> per distinct outcome and one
-        function mapping any combination to one of them, so any number of alleles
-        works with no special case. <strong>Cream/pearl &rarr;
-        <a href="gene-matp.html">MATP</a> landed with it</strong> as the proving case.
-        <strong>The remaining physical-locus merges shipped 2026-09-04</strong>
-        &mdash; <a href="gene-kit.html">KIT</a> (eight alleles, absorbing dominant
-        white and sabino), <a href="gene-mitf.html">MITF</a> and
-        <a href="gene-pax3.html">PAX3</a> (splash is two genes, not one) and
-        <a href="gene-ednrb.html">EDNRB</a> (frame, with the lethal-white outcome).
-        Tobiano and roan stayed their own genes; they are not <code>KIT</code>
-        variants. The combinatorial cost landed on §8 and §10 as predicted.</li>
-    <li><s><strong>The trait framework</strong> (§6.1)</s> &mdash;
-        <strong>shipped 2026-09-04.</strong> <code>HorseTraits</code> resolves a
-        <code>Traits</code> record out of the genotype; one capability interface
-        (<code>TraitContribution</code>, plus a <code>HealthContribution</code> marker
-        for the config toggle) instead of the four sketched below; the attribute
-        adapter writes four attributes including <code>SCALE</code> and
-        <code>JUMP_STRENGTH</code>. <strong>The random stat roll is deleted</strong> and
-        <code>HorseRecord</code> lost its <code>speed</code> / <code>health</code>
-        fields. All of §4.3, §4.4 and §6.4 landed with it &mdash; thirteen new genes.
-        Machinery: <a href="horse-body.html">the horse&rsquo;s body</a>.</li>
+<ol start="2">
     <li><strong>Gene metadata</strong> (§19) &mdash; rarity (default gold-ingot), the
         carrot block (opt-out + the chaos chance function), the description block, and
         the creator form. Prereq for the whole gameplay economy: carrots (§14), database
-        + papers (§16), browser (§17), villager (§18).</li>
-    <li><strong>Sex-linked scaffolding</strong> (§5.3) &mdash; the reserved-slot
-        storage and the two <code>breedWith</code> cases. <strong>The sex locus itself
-        is built</strong> (<a href="gene-sex.html">gene page</a>), which was the
-        prerequisite; what is left is X-linked / Y-linked inheritance and the
-        hemizygous surfaces. Unblocks brindle (§4.2) and any future sex-linked
-        gene.</li>
+        + papers (§16), browser (§17), villager (§18). Adding it later means
+        retrofitting every gene file.</li>
+    <li><strong>Sex-linked scaffolding</strong> (§5.3) &mdash; the inheritance mode on
+        <code>Gene</code>, the two <code>breedWith</code> cases, the reserved-slot
+        storage and the hemizygous surfaces. The sex locus itself is built
+        (<a href="gene-sex.html">gene page</a>), which was the prerequisite. Unblocks
+        brindle (§4.2) and any future sex-linked gene.</li>
 </ol>
 
-<h3>Tier 3 &mdash; enabling work (a couple of areas each)</h3>
+<h3>Rank 3 &mdash; enabling work</h3>
 
-<ol start="7">
-    <li><s><strong>Health, the cheap half + lethals</strong> (§6.4)</s> &mdash;
-        <strong>shipped 2026-09-04</strong>, all of it in one pass: the max-health
-        contribution, <a href="gene-met.html">MET</a>&rsquo;s conception check, the
-        born-and-dies handler with its own damage type, the default-on
-        <code>ServerConfig</code>, and <a href="gene-ednrb.html">EDNRB</a>&rsquo;s
-        <code>O/O</code> death. The lethal damage is a fraction of the foal&rsquo;s own
-        max health once a second, so it out-damages §7&rsquo;s regen at any health
-        value.</li>
+<ol start="4">
     <li><strong>The gene-authoring tiers + mod-bus hook</strong> (§3) &mdash; abstract
         base classes and <code>RegisterHorseGenesEvent</code>. Not strictly blocking, but
         it pays for itself on the next gene written.</li>
-    <li><s><strong>Revert the dimension to random pens</strong> (§8)</s> &mdash;
-        <strong>done 2026-09-04</strong>; the combinatorial blocker (§10) is gone, so
-        genes can be added freely.</li>
-    <li><s><strong>The custom horse spawner</strong> (§9)</s> &mdash; <strong>mostly
-        done 2026-09-04</strong>: gene list, live preview, epigenetics reroll, code
-        round-trip, creative gate. Only the per-allele seed editor is left.</li>
-    <li><strong>Decide the custom-entity question</strong> (§11) &mdash; a decision, not
-        code, but it gates the <em>design</em> of §§12&ndash;19. Make it before building
-        any of them.</li>
 </ol>
 
-<h3>Tier 4 &mdash; leaf features (mostly self-contained)</h3>
+<h3>Rank 4 &mdash; leaf features (mostly self-contained)</h3>
 
 <p>
     Each of these sits at the end of a dependency and touches little else. Rough order:
     hair &amp; shearing (§12) &rarr; the carrots (§14) &rarr; finish the seed jar
     (§15.1) &rarr; finish bond &amp; herds (§13) &rarr; database &amp; papers (§16)
     &rarr; the browser (§17) &rarr; the villager (§18) &rarr; milking (§7) &rarr; the
-    remaining pattern genes (LP, SW2&ndash;10) &rarr; eye colour &rarr; cutie marks
-    (§4.5) &rarr; IVF tiers 2&ndash;6 (§15.2) &rarr; attached model parts (§19.2).
+    leopard complex and the remaining pattern alleles (§4.2) &rarr; eye colour &rarr;
+    cutie marks (§4.5) &rarr; IVF tiers 2&ndash;6 (§15.2) &rarr; attached model parts
+    (§19.2).
 </p>
 
 <hr>
 
-<h2 id="priority">2. Gene priority and processing order</h2>
-
-<div class="note tip">
-    <span class="label">Shipped 2026-09-03 &mdash; gene priority, derived orderings, genotype-as-list</span>
-    <p>
-        Every <code>Gene</code> now declares <code>int priority()</code>;
-        <code>codeOrder()</code> / <code>naturalOrder()</code> /
-        <code>magicalOrder()</code> are all one derived sort on
-        <code>(priority, key)</code> over built-ins and <code>SpecGene</code>s
-        together; the genotype and epigenome are gene-keyed, tolerant code
-        strings (a missing gene reads as wild type, an unregistered gene is
-        dropped). The two-priorities distinction, the band convention, the
-        absolute-setter-before-dilution rule and the reserved built-in numbers
-        are written up on
-        <a href="genetics-model.html#gene-priority">Genetics model &sect; Gene
-        priority</a> and <a href="modding.html">Writing a gene</a>. Owner-verified
-        in-game (coats render, the paper genome dump works).
-    </p>
-    <p>
-        <strong>What is still open in this section:</strong> the per-genotype
-        founder-frequency / chaos-carrot chance tables below, and the future
-        priority slots for the multi-allele physical-locus merges (&sect;5.1) that
-        the reserved-number table anticipates.
-    </p>
-</div>
-
-<h3>Founder spawn chance &mdash; per-genotype percentages</h3>
-
-<div class="note tip">
-    <span class="label">Shipped 2026-09-03 &mdash; <code>FounderTable</code></span>
-    <p>
-        Everything below is built, bar the <strong>chaos-carrot</strong> variant
-        (§14.1), which reuses the same class.
-        <code>Gene.founderTable(FounderContext)</code> replaces
-        <code>randomPair(rng)</code>; the table is sparse (an unlisted combination
-        never occurs, which is how the test gene forbids its own homozygote); one
-        <code>nextFloat()</code> per gene per founder; genome-aware distributions get
-        a <code>FounderContext</code> that <em>throws</em> if asked about a gene not
-        yet rolled. See
-        <a href="genetics-model.html#founders">Genetics model &sect; Founder frequency</a>.
-    </p>
-</div>
+<h2 id="priority">2. Gene priority and processing order &mdash; <em>shipped</em></h2>
 
 <p>
-    <strong>Every gene declares the percentage of founder horses that carry each of its
-    genotypes.</strong> A two-allele gene declares three numbers &mdash; e.g. 50% wild
-    type, 40% <code>n/Pfwl</code>, 10% <code>Pfwl/Pfwl</code>; an <em>n</em>-allele
-    gene declares one per unordered pair. This replaces the &ldquo;1 in N per
-    allele&rdquo; frequency each gene hand-rolls today.
+    <strong>Built 2026-09-03.</strong> Every <code>Gene</code> declares
+    <code>int priority()</code>; <code>codeOrder()</code> / <code>naturalOrder()</code> /
+    <code>magicalOrder()</code> are one derived sort on <code>(priority, key)</code> over
+    built-ins and <code>SpecGene</code>s together; the genotype and epigenome are
+    gene-keyed, tolerant code strings. <code>Gene.randomPair(rng)</code> was replaced by
+    the per-genotype <code>FounderTable</code> in the same change &mdash; a weight per
+    allele <em>combination</em>, sparse, normalised with a warning, one
+    <code>nextFloat()</code> per gene per founder, with a <code>FounderContext</code> for
+    a genome-aware distribution.
 </p>
+
+<p class="muted">
+    All of it &mdash; the two-priorities distinction, the band convention, the
+    absolute-setter-before-dilution authoring rule, the numbers the built-ins occupy, and
+    why frequency is declared per combination rather than per allele &mdash; is on
+    <a href="genetics-model.html#gene-priority">Genetics model &sect; Gene priority</a>,
+    <a href="genetics-model.html#registry">&sect; The registered genes</a> and
+    <a href="genetics-model.html#founders">&sect; Founder frequency</a>, with the
+    authoring side on <a href="modding.html">Writing a gene</a>. The section number is
+    kept as a pointer so cross-references do not rot.
+</p>
+
+<h3>What is still open here</h3>
 
 <ul>
-    <li><strong>The percentages must sum to 100.</strong> If an author&rsquo;s numbers
-        do not, they are <strong>normalised proportionally</strong> &mdash; a warning,
-        not an error.</li>
-    <li>The draw is one weighted pick over the declared distribution, per founder, in
-        <strong>sorted gene order</strong> so it stays deterministic given the RNG
-        stream.</li>
-    <li>Declaring it per <em>genotype</em> rather than per allele means the author
-        controls the homozygote rate directly &mdash; no second question about whether a
-        draw is per-copy or per-horse.</li>
-    <li>The chance may still be <strong>genome-aware</strong> &mdash; a gene handed the
-        partial genome built so far can return a different distribution (&ldquo;champagne
-        twice as likely on a chestnut&rdquo;). Sound only because founders roll in
-        priority order, so a gene can read only lower-priority genes; asking about a
-        higher-priority one is a programming error the registry should catch.</li>
-    <li>This is what lets a tier-1 declarative gene exist without any probability code:
-        it is just a table.</li>
+    <li><strong>The chaos-carrot chance function</strong> (§14.1, §19) &mdash; a second
+        per-gene distribution over the gene&rsquo;s own genotypes, the same shape as the
+        founder table and reusing <code>FounderTable</code>, but declared separately so
+        the two can differ. A gene that omits it falls back to a uniform draw over its
+        pairs. Nothing consumes it until the carrots exist.</li>
 </ul>
-
-<h3>The reserved numbers</h3>
-
-<p>
-    The built-ins carry real priorities: <strong>sex 1</strong>, extension 10,
-    agouti 20, silver 30, mushroom 32, dun 34, <strong>MATP 40</strong>,
-    champagne 50, grey 55, roan 70, tobiano 72, <strong>EDNRB 74</strong>,
-    <strong>KIT 76</strong>, <strong>MITF 78</strong>, <strong>PAX3 79</strong>;
-    magical: pink hair 110, magic zebra 120, test 900. The physical-locus merges
-    (§5.1, §5.2) have all landed, so this is now the shipped order rather than a
-    target.
-</p>
-
-<div class="table-wrap">
-<table>
-<thead><tr><th>Priority</th><th>Gene</th><th>Why here</th></tr></thead>
-<tbody>
-<tr><td>1</td><td><strong>sex (X/Y)</strong> &mdash; <strong>shipped</strong></td><td>Must be first &mdash; every X-linked and Y-linked gene reads it (§5.3).</td></tr>
-<tr><td>10</td><td>extension</td><td>Decides which pigment exists at all.</td></tr>
-<tr><td>20</td><td>agouti</td><td>Restricts black to the points; <strong>sets pigment absolutely</strong>.</td></tr>
-<tr><td>40</td><td>MATP (cream + pearl) &mdash; <strong>shipped</strong></td><td>Dilutions &mdash; must run after the absolute set.</td></tr>
-<tr><td>40</td><td>champagne</td><td>Dilution.</td></tr>
-<tr><td>55</td><td>grey</td><td>Remaps onto the neutral column.</td></tr>
-<tr><td>70&ndash;72</td><td>roan, tobiano</td><td>White patterns near <code>KIT</code> but not of it.</td></tr>
-<tr><td>74&ndash;79</td><td>EDNRB, KIT, MITF, PAX3 &mdash; <strong>shipped</strong></td><td>The white-pattern loci. All set pigment to zero, so their order between themselves barely matters &mdash; except that each reads how white the horse already is, so a later one paints harder.</td></tr>
-</tbody>
-</table>
-</div>
-
-<div class="note warn">
-    <span class="label">The ordering constraint is an authoring rule, and needs writing down</span>
-    <p>
-        Phase 1 is multiplicative restriction, which is commutative &mdash;
-        <em>except</em> where a gene sets pigment absolutely.
-        <a href="gene-agouti.html#absolute"><code>BayCoat</code> sets its points
-        absolutely</a>, and the whole <code>PigmentField.dilute</code> design exists
-        because the dilutions have to run <strong>after</strong> that. So the reserved
-        band is not just a list of numbers, it is a dependency order:
-        <strong>absolute setters get low numbers, dilutions get higher ones.</strong>
-    </p>
-    <p>
-        The <code>Gene.priority()</code> Javadoc now states this; keep it on
-        <code>PigmentField</code> too, or the next gene added at the wrong number
-        will produce a bay whose mane does not dilute and nobody will know why.
-    </p>
-</div>
 
 <hr>
 
@@ -416,11 +299,11 @@
 
 <p>
     <strong>Status</strong>: <em>partial</em> = a gene with that name ships but this
-    entry is more than it does; <em>new</em> = nothing exists. Genes already finished
-    &mdash; extension, agouti, MATP (cream + pearl), champagne, grey, dun, silver,
-    mushroom, roan, tobiano, and the four white-pattern loci KIT, MITF, PAX3 and
-    EDNRB &mdash; are <strong>not listed</strong>; each has its own
-    <a href="gene-extension.html">gene page</a>, and any residual tuning lives there.
+    entry is more than it does; <em>new</em> = nothing exists. <strong>Finished genes are
+    not listed here</strong> &mdash; that is all thirty-one of them, the roster being on
+    <a href="genetics-model.html#registry">the genetics model</a> with a page each. Any
+    residual tuning lives on the gene&rsquo;s own page; what is below is only what no
+    gene does yet.
 </p>
 
 <p>
@@ -436,9 +319,9 @@
 <table>
 <thead><tr><th>Locus</th><th>Alleles</th><th>Status</th><th>What it needs</th></tr></thead>
 <tbody>
-<tr><td><strong>Red factor (MC1R)</strong></td><td><code>E</code>, <code>e</code>, <code>ea</code></td><td>partial</td><td>Add the third allele. First real 3-allele locus, so the natural place to prove multi-allele support. <code>ea</code> is phenotypically red like <code>e</code>; the interest is in the code string and the carrier display.</td></tr>
-<tr><td><strong>MATP &mdash; two more alleles</strong></td><td><code>Cr</code>, <code>prl</code>, <em><code>sun</code></em>, <em><code>sno</code></em>, <code>N</code></td><td>partial</td><td><strong>The merge shipped 2026-09-03</strong> &mdash; cream and pearl are one three-allele locus with six combinations and four outcomes (<a href="gene-matp.html">MATP</a>), and it was the case that proved §5.1. Left: the other two real alleles, <strong>sunshine</strong> (<code>sun</code>) and <strong>snowdrop</strong> (<code>sno</code>), which take it to five alleles and fifteen combinations. Purely additive now &mdash; two allele constants and the rows they need.</td></tr>
-<tr><td><strong>Dun (TBX3) &mdash; leg barring</strong></td><td><code>D</code>, <code>d1</code>, <code>d2</code></td><td>partial</td><td><strong>The third allele shipped 2026-09-03</strong> &mdash; three alleles, six combinations, three outcomes, with <code>d1</code> carrying the primitive markings and no dilution (<a href="gene-dun.html">Dun</a>). Left: leg barring is still a hand-rolled Y-phase and should move to <code>BodyStripes</code>; and <code>d1</code> shows only the dorsal stripe, where a real one can also carry faint bars and shoulder shadowing.</td></tr>
+<tr><td><strong>Red factor (MC1R)</strong></td><td><code>E</code>, <code>e</code>, <code>ea</code></td><td>partial</td><td>Add the third allele. Purely additive now that multi-allele support exists &mdash; <code>ea</code> is phenotypically red like <code>e</code>, so the interest is entirely in the code string and the carrier display.</td></tr>
+<tr><td><strong>MATP &mdash; two more alleles</strong></td><td><code>Cr</code>, <code>prl</code>, <em><code>sun</code></em>, <em><code>sno</code></em>, <code>N</code></td><td>partial</td><td>Three of the five alleles are modelled (<a href="gene-matp.html">MATP</a>). Left: <strong>sunshine</strong> (<code>sun</code>) and <strong>snowdrop</strong> (<code>sno</code>), which take the locus to five alleles and fifteen combinations. Purely additive &mdash; two allele constants and the expression rows they need.</td></tr>
+<tr><td><strong>Dun (TBX3) &mdash; leg barring</strong></td><td><code>D</code>, <code>d1</code>, <code>d2</code></td><td>partial</td><td>All three alleles are modelled (<a href="gene-dun.html">Dun</a>). Left: leg barring is a hand-rolled Y-phase and should move to <code>BodyStripes</code>, which runs on X; and <code>d1</code> draws only the dorsal stripe, where a real primitive-marked horse can also carry faint bars and shoulder shadowing.</td></tr>
 <tr><td><strong>Silver dapple &mdash; the dappling</strong></td><td><code>Z</code>, <code>z</code></td><td>partial</td><td>Ships as the dilution only. The dapples the gene is named for want a deterministic fixed-seed <code>BodyNoise</code> modulation (like grey&rsquo;s, lighter, per-genotype). Health: <code>Z/Z</code> &rarr; MCOA is <strong>built</strong> (impairing, two hearts). See <a href="gene-silver.html">its page</a>.</td></tr>
 <tr><td><strong>Tiger eye</strong></td><td><code>TE1</code>, <code>TE2</code>, wild</td><td>new</td><td>No coat effect at all &mdash; <strong>eye colour</strong>. Blocked on an eye-colour system: <code>redrawEyes</code> copies eye texels verbatim, so there is no colour channel to write to.</td></tr>
 </tbody>
@@ -448,15 +331,15 @@
 <h3>4.2 White spotting and patterns</h3>
 
 <p>
-    <strong>The white-pattern loci are done as loci.</strong> Sabino and the
-    <code>W</code> series merged into <a href="gene-kit.html"><code>KIT</code></a> (eight
-    alleles); splash became <a href="gene-mitf.html"><code>MITF</code></a> and
-    <a href="gene-pax3.html"><code>PAX3</code></a>, which is what lets a horse be splash
-    twice over; frame became <a href="gene-ednrb.html"><code>EDNRB</code></a> with its
-    <code>O/O</code> lethal-white coat. Tobiano and roan stay their own genes, because
-    neither is a <code>KIT</code> variant. What is left below is the two families that are
-    genuinely not built &mdash; the leopard complex and brindle &mdash; plus the alleles
-    each built locus does not yet carry.
+    <strong>The white-pattern loci are done as loci</strong> &mdash;
+    <a href="gene-kit.html"><code>KIT</code></a>,
+    <a href="gene-mitf.html"><code>MITF</code></a>,
+    <a href="gene-pax3.html"><code>PAX3</code></a> and
+    <a href="gene-ednrb.html"><code>EDNRB</code></a>, with tobiano and roan keeping their
+    own genes because neither is a <code>KIT</code> variant. What is left below is the
+    two families that are genuinely not built &mdash; the leopard complex and brindle
+    &mdash; plus the alleles each built locus does not yet carry, and the face-marking
+    vocabulary none of them has.
 </p>
 
 <div class="table-wrap">
@@ -464,10 +347,9 @@
 <thead><tr><th>Locus</th><th>Alleles</th><th>Status</th><th>What it needs</th></tr></thead>
 <tbody>
 <tr><td><strong>Leopard complex (TRPM1)</strong> + <strong>PATN1</strong></td><td><code>LP</code>, <code>lp</code>; <code>PATN1</code>, <code>N</code></td><td>new</td><td><strong>Deliberately left out of the white-pattern rewrite</strong>, and the largest single gene job remaining. It is not a pinto pattern and does not belong to any locus that rewrite touched: leopard, blanket, snowcap and varnish roan, plus white sclera, striped hooves and mottled skin. Wants a spot field <em>and</em> a separate blanket mask &mdash; neither of which <code>WhitePattern</code>&rsquo;s two shapes cover &mdash; and heterozygote vs homozygote <strong>must</strong> differ. <code>PATN1</code> is a second locus that only means anything on an <code>LP</code> horse, so it comes with it and is the model&rsquo;s first real modifier gene. Health: <code>LP/LP</code> &rarr; CSNB. Mottled skin and striped hooves also want the skin layer the coat does not have.</td></tr>
-<tr><td><strong>Overo lethal white &mdash; the death</strong></td><td><code>O</code>, <code>N</code></td><td><strong>built</strong> 2026-09-04</td><td>Both halves ship now. <code>O/O</code> has its own masking all-white outcome, occurs, gets a gallery pen &mdash; and the foal is born, named, filed in the pedigree, and then dies. See <a href="gene-ednrb.html">its page</a> and <a href="horse-body.html">the horse&rsquo;s body</a>. Not play-tested.</td></tr>
 <tr><td><strong>The rest of the <code>W</code> series</strong></td><td><code>W1</code>&ndash;<code>W4</code>, <code>W6</code>&ndash;<code>W9</code>, <code>W11</code>&ndash;<code>W19</code>, <code>W21</code>, <code>W24+</code></td><td>partial</td><td>Eight of the thirty-plus are modelled. The rest are not blocked on anything &mdash; each is a line in <code>alleles()</code>, a row in <code>expressionOf</code> and a frequency &mdash; they are simply <strong>not worth adding while their published descriptions do not separate them</strong> from the eight that are. Add one when the science gives it a phenotype a player could tell apart. Note the combinatorial cost: each allele adds <code>n</code> combinations to a locus that already has thirty-six.</td></tr>
 <tr><td><strong>The rest of the splash series</strong></td><td><code>SW6</code>&ndash;<code>SW10</code></td><td>partial</td><td><code>SW6</code>&ndash;<code>SW8</code> are folded into <a href="gene-mitf.html"><code>SW5</code></a> on purpose &mdash; the source describes all four in word-for-word identical terms, so four alleles would be four indistinguishable rows. Split them when they are distinguishable. <code>SW9</code>/<code>SW10</code> want a locus check first: the assignment of the higher numbers between <code>MITF</code> and <code>PAX3</code> is not settled in the reference used.</td></tr>
-<tr><td><strong>Face markings as their own thing</strong></td><td>&mdash;</td><td>new</td><td>Every white-pattern gene draws its face marking as a centreline stripe of some width and length. Real horses have a named family &mdash; star, snip, stripe, blaze, bald face &mdash; that is not simply &ldquo;a wider stripe&rdquo;, and a star in particular is a <em>detached</em> patch. Wants a shared <code>WhitePattern.face(kind, ...)</code> the loci call, not a per-gene reinvention.</td></tr>
+<tr><td><strong>Face markings as their own thing</strong></td><td>&mdash;</td><td>new</td><td>Every white-pattern gene draws its face marking as a centreline stripe of some width and length. Real horses have a named family &mdash; star, snip, stripe, blaze, bald face &mdash; that is not simply &ldquo;a wider stripe&rdquo;, and a star in particular is a <em>detached</em> patch. Wants a shared <code>WhitePattern.face(kind, ...)</code> the loci call, not a per-gene reinvention. <strong>Do this before adding more <code>W</code> or <code>SW</code> alleles.</strong></td></tr>
 <tr><td><strong>Brindle (MBTPS2)</strong></td><td><code>Br</code>, <code>br</code></td><td>new</td><td>Vertical striping in a darker or lighter shade of the base coat. <strong>The one sex-linked gene</strong> (§5.3), and the reason that scaffolding is needed at all. Pattern work shares <code>BodyStripes</code>; the interesting part is the inheritance. <strong>Build the scaffolding first, then this gene as its proof.</strong></td></tr>
 </tbody>
 </table>
@@ -478,30 +360,21 @@
 <div class="note good">
     <span class="label">Mostly shipped 2026-09-04</span>
     <p>
-        MSTN, PDK4, CKM, jumping and both height loci are built. What is left in this
-        section is <strong>DMRT3 (gait)</strong> and the two follow-ups called out
-        below. None of these genes touches the coat; the machinery is on
-        <a href="horse-body.html">the horse&rsquo;s body</a>.
+        MSTN, PDK4, CKM, jumping and both height loci are built, along with the trait
+        system that carries them and the <code>SCALE</code> / <code>JUMP_STRENGTH</code>
+        attribute writes. None of them touches the coat. The machinery is on
+        <a href="horse-body.html">the horse&rsquo;s body</a> and there is a page per
+        gene; <strong>polygenic inheritance is cut</strong> (§6.3, §21), so each of these
+        is one atomic gene rather than a marker set.
     </p>
 </div>
 
-<p>
-    <strong>Polygenic inheritance is cut</strong> (§6.3 / §21): every performance trait
-    that is really a QTL cluster became <strong>one atomic gene</strong> with a handful
-    of alleles and an additive weight &mdash; legible, breedable-for, and Mendelian.
-</p>
-
 <div class="table-wrap">
 <table>
-<thead><tr><th>Locus</th><th>Inheritance</th><th>Notes</th></tr></thead>
+<thead><tr><th>What is left</th><th>Status</th><th>Notes</th></tr></thead>
 <tbody>
-<tr><td><strong>MSTN (myostatin)</strong></td><td>codominant</td><td><strong>Built</strong> &mdash; <a href="gene-mstn.html">its page</a>. Each <code>C</code> copy buys speed and pays in hearts. With no stamina resource in the mod (§21), endurance is paid out as max health.</td></tr>
-<tr><td><strong>DMRT3</strong></td><td>dominant</td><td>Gait &mdash; a movement/animation change, not a stat. The only gene here needing renderer + movement work; lowest priority for that reason.</td></tr>
-<tr><td><strong>PDK4</strong>, <strong>CKM</strong></td><td>atomic (was polygenic)</td><td><strong>Built</strong> &mdash; <a href="gene-pdk4.html">PDK4</a>, <a href="gene-ckm.html">CKM</a>. One gene each, two alleles, an additive weight into speed. No marker set.</td></tr>
-<tr><td><strong>Jumping ability</strong> (RYR2 / ECA QTLs)</td><td>atomic (was polygenic)</td><td><strong>Built</strong> &mdash; <a href="gene-ryr2.html">RYR2</a>. Jump strength is tracked now: it was only ever blocked on there being nothing sensible to roll it from.</td></tr>
-<tr><td><strong>LCORL / NCAPG</strong></td><td>additive</td><td><strong>Built</strong> &mdash; <a href="gene-lcorl.html">its page</a>. <b>The scale question is answered</b>: <code>Attributes.SCALE</code> exists in 26.1.2 and is on every living entity, and vanilla scales the model <em>and</em> the hitbox from it. No renderer work, no hitbox work.</td></tr>
-<tr><td><strong>HMGA2</strong></td><td>additive</td><td><strong>Built</strong> &mdash; <a href="gene-hmga2.html">its page</a>. Pulls the other way, and pays for the loss in hearts so small is worth breeding toward.</td></tr>
-<tr><td><strong>Foal geometry vs scale</strong></td><td>&mdash;</td><td><strong>Unverified.</strong> A scaled foal has not been looked at in-game, and <code>Skin.BABY</code>&rsquo;s projection is already approximate. Check a <code>p/p</code> foal before adding anything else here.</td></tr>
+<tr><td><strong>DMRT3</strong> &mdash; gait</td><td>new</td><td>Dominant. A movement/animation change, not a stat &mdash; the only gene in this group needing renderer and movement work, which is why it is last.</td></tr>
+<tr><td><strong>Foal geometry vs scale</strong></td><td>unverified</td><td>A scaled foal has not been looked at in-game, and <code>Skin.BABY</code>&rsquo;s projection is already approximate. Check a <code>p/p</code> foal before adding anything else here.</td></tr>
 </tbody>
 </table>
 </div>
@@ -511,47 +384,38 @@
 <div class="note good">
     <span class="label">Shipped 2026-09-04</span>
     <p>
-        All seven are built, along with the health system they were blocked on. They
-        surface exactly as planned: a <strong>lethal</strong> foal is born and then
-        dies, and everything sub-lethal is <strong>fewer hearts</strong>. Machinery on
-        <a href="horse-body.html">the horse&rsquo;s body</a>; one page per gene in the
-        sidebar.
+        All seven disorder loci are built, along with the health system they were blocked
+        on: a <strong>lethal</strong> foal is born and then dies, everything sub-lethal is
+        <strong>fewer hearts</strong>, and no founder is ever affected. The health effects
+        riding on colour genes shipped with them &mdash; MCOA on
+        <a href="gene-silver.html">silver</a> <code>Z/Z</code>, LWFS on
+        <a href="gene-ednrb.html">EDNRB</a> <code>O/O</code>, and deafness on a homozygote
+        at either splash locus. Machinery on
+        <a href="horse-body.html">the horse&rsquo;s body</a>, the roster on
+        <a href="genetics-model.html#non-coat">the genetics model</a>, one page per gene
+        in the sidebar.
     </p>
 </div>
 
-<p>
-    All <strong>recessive</strong>, and none of them appears in a founder table as a
-    homozygote &mdash; a wild-caught horse is an adult that survived, so the only way
-    to see any of these is to breed two carriers.
-</p>
+<p><strong>What is left:</strong></p>
 
-<div class="table-wrap">
-<table>
-<thead><tr><th>Locus</th><th>Effect</th><th>Notes</th></tr></thead>
-<tbody>
-<tr><td><strong>ACAN</strong></td><td>chondrodysplastic dwarfism</td><td><strong>Built</strong> &mdash; <a href="gene-acan.html">its page</a>. Five alleles; the check is &ldquo;no working copy left&rdquo;, not &ldquo;homozygous&rdquo;, so <code>D1/D4</code> is affected. <code>D1/D1</code> is lethal, the rest are impairing. <em>Remaining:</em> the body-proportion change is an overall scale, not a proportion.</td></tr>
-<tr><td><strong>B4GALT7</strong></td><td>Friesian dwarfism</td><td><strong>Built</strong> &mdash; <a href="gene-b4galt7.html">its page</a>, and the one disorder a horse lives with. <em>Remaining:</em> <strong>per-part scaling</strong>. <code>Attributes.SCALE</code> is one number for the whole entity, so the limbs-and-ribs-but-not-the-head shape needs owning the horse model rather than borrowing vanilla&rsquo;s. It renders as an overall three-quarter horse today.</td></tr>
-<tr><td><strong>FFS1 (PLOD1)</strong></td><td>fragile foal syndrome</td><td><strong>Built</strong> &mdash; <a href="gene-plod1.html">its page</a>. Lethal at birth.</td></tr>
-<tr><td><strong>EFIH (RAPGEF5)</strong></td><td>no parathyroid glands</td><td><strong>Built</strong> &mdash; <a href="gene-rapgef5.html">its page</a>. Lethal at birth; the most severe and the rarest.</td></tr>
-<tr><td><strong>NFS (ST14)</strong></td><td>naked foal syndrome</td><td><strong>Partly built</strong> &mdash; <a href="gene-st14.html">its page</a>. The disorder ships; <em>the coat does not</em>. Phase 1 only removes pigment, and a de-pigmented mane reads as a <em>white</em> mane, which is a different horse. Wants a bare-skin template or a real phase-3 pass.</td></tr>
-<tr><td><strong>Skeletal atavism</strong></td><td>abnormal limb growth</td><td><strong>Built</strong> &mdash; <a href="gene-shox.html">its page</a>. Pseudoautosomal, so it segregates like an autosome and needs none of §5.3.</td></tr>
-<tr><td><strong>MET</strong></td><td>embryonic lethal</td><td><strong>Built</strong> &mdash; <a href="gene-met.html">its page</a>. Checked at conception; the pairing produces no foal. <code>canOccur</code> is false, so it gets no gallery pen &mdash; the opposite of lethal white, which is born.</td></tr>
-</tbody>
-</table>
-</div>
-
-<p>
-    The health effects riding on colour genes are built too:
-    <strong>MCOA</strong> on <a href="gene-silver.html">silver</a> <code>Z/Z</code>
-    (impairing, two hearts), <strong>LWFS</strong> on
-    <a href="gene-ednrb.html">EDNRB</a> <code>O/O</code> (lethal at birth), and
-    <strong>deafness</strong> on a homozygote at either splash locus
-    (<a href="gene-mitf.html">MITF</a> / <a href="gene-pax3.html">PAX3</a>) &mdash;
-    informational, because the mod has no hearing for a horse to lose.
-    <strong>CSNB</strong> rides on <code>LP/LP</code> and is still blocked on the
-    leopard complex not existing (§4.2). <strong>Melanoma in greys is parked with
-    aging.</strong>
-</p>
+<ul>
+    <li><strong>Per-part scaling</strong>, for both dwarfisms.
+        <a href="gene-b4galt7.html">B4GALT7</a>&rsquo;s Friesian dwarfism should shorten
+        the limbs and ribs and leave the head, and
+        <a href="gene-acan.html">ACAN</a>&rsquo;s is a proportion change too, but
+        <code>Attributes.SCALE</code> is one number for the whole entity. Doing it
+        properly means owning the horse model rather than borrowing vanilla&rsquo;s; both
+        render as an overall three-quarter horse today.</li>
+    <li><strong>The naked-foal coat.</strong> <a href="gene-st14.html">ST14</a>&rsquo;s
+        disorder ships; the coat does not. Phase 1 only <em>removes</em> pigment, and a
+        de-pigmented mane reads as a <em>white</em> mane, which is a different horse and a
+        worse lie than drawing nothing. Wants a bare-skin template or a real phase-3
+        pass.</li>
+    <li><strong>CSNB</strong> rides on <code>LP/LP</code> and is blocked on the leopard
+        complex not existing (§4.2). <strong>Melanoma in greys is parked with
+        aging</strong> (§21) and is not coming back.</li>
+</ul>
 
 <h3>4.5 Magical genes &mdash; the to-do list</h3>
 
@@ -610,173 +474,74 @@
     <strong>before</strong> the gene rollout rather than during it.
 </p>
 
-<h3>5.1 Three or more alleles per locus</h3>
-
-<div class="note tip">
-    <span class="label">Shipped 2026-09-03 &mdash; the combination table</span>
-    <p>
-        <code>DominancePattern</code> is <strong>deleted</strong>. A gene declares
-        its distinct outcomes as <code>Expression</code>s &mdash; each with a name, a
-        human-readable description, a <code>wildType</code> flag ("changes nothing"),
-        a <code>masks</code> flag and its own paint function &mdash; and one function
-        maps any <code>AllelePair</code> to one of them. Several pairs sharing an
-        expression <em>is</em> what "dominant" meant; only the double-variant landing
-        on a non-wild-type outcome <em>is</em> what "recessive" meant; two variant
-        alleles each with an outcome plus a third for the pair of them <em>is</em>
-        codominance. None of it needs a name or a special case, and it works for any
-        <em>n</em>.
-    </p>
-    <p>
-        The open detail this section flagged &mdash; how the gallery decides which
-        pairs look alike &mdash; answered itself: <code>distinctPairsOf</code> groups
-        pairs by the expression they land on (every wild type counting as one group,
-        since "changes nothing" is one look), which is exact rather than an
-        approximation. <code>randomPair(rng)</code> was replaced by the per-genotype
-        <code>FounderTable</code> in the same change (§2), and
-        <a href="breeding.html">breeding</a> updated in step.
-    </p>
-    <p>
-        Written up on
-        <a href="genetics-model.html#combinations">Genetics model &sect; Alleles,
-        combinations and expressions</a>, <a href="modding.html">Writing a gene</a>
-        and <a href="gene-format.html">the gene file format</a>.
-    </p>
-</div>
-
-<h3>5.2 One physical gene, several traits</h3>
+<h3>5.1 Three or more alleles per locus &mdash; <em>shipped</em></h3>
 
 <p>
-    <strong>KIT</strong> carries sabino 1 and the whole numbered <code>W</code> series.
-    <strong>MITF</strong> carries SW1, 3, 5, 6, 8; <strong>PAX3</strong> carries SW2 and 4.
-    <strong>MATP</strong> carries cream and pearl. <strong>EDNRB</strong> carries frame.
+    <strong>Built 2026-09-03.</strong> <code>DominancePattern</code> is deleted. A gene
+    declares its distinct outcomes as <code>Expression</code>s &mdash; each with a name, a
+    human-readable description, a <code>wildType</code> flag, a <code>masks</code> flag
+    and its own paint function &mdash; and one function maps any <code>AllelePair</code>
+    to one of them. Several pairs sharing an expression <em>is</em> what &ldquo;dominant&rdquo;
+    meant; only the double-variant landing off the wild type <em>is</em> what
+    &ldquo;recessive&rdquo; meant; MATP&rsquo;s three alleles <em>are</em> codominance.
+    None of it needs a name or a special case, and it works for any <em>n</em>.
 </p>
+
+<p class="muted">
+    Written up on
+    <a href="genetics-model.html#combinations">Genetics model &sect; Alleles, combinations
+    and expressions</a>, <a href="modding.html">Writing a gene</a> and
+    <a href="gene-format.html">the gene file format</a>. The open detail this section
+    flagged &mdash; how the catalogue decides which pairs look alike &mdash; answered
+    itself: <code>distinctPairsOf</code> groups by the expression a pair lands on, every
+    wild type counting as one group.
+</p>
+
+<h3>5.2 One physical gene, several traits &mdash; <em>shipped</em></h3>
 
 <p>
-    <strong>Tobiano is not one of them.</strong> It is a large inversion <em>near /
-    downstream of</em> <code>KIT</code>, not a <code>KIT</code> variant, and roan maps to
-    the region with an unresolved causal change &mdash; so both stay their own genes and
-    both can co-occur with anything at <code>KIT</code>. An earlier draft of this section
-    had all three sharing a locus; that would have been wrong, and would have made a
-    tobiano-plus-<code>W20</code> horse impossible.
+    <strong>Built 2026-09-03 and 2026-09-04.</strong> One <code>Gene</code> per physical
+    locus, many alleles: cream and pearl became <a href="gene-matp.html">MATP</a>; sabino
+    and the <code>W</code> series became <a href="gene-kit.html">KIT</a> (eight alleles,
+    thirty-six combinations); splash split into <a href="gene-mitf.html">MITF</a> and
+    <a href="gene-pax3.html">PAX3</a>, which is what lets a horse be splash twice over;
+    frame became <a href="gene-ednrb.html">EDNRB</a> with its lethal-white outcome. Each
+    merge killed genotypes biology does not allow &mdash; a horse cannot be homozygous
+    sabino <em>and</em> dominant white, because they compete for the same two slots.
 </p>
 
-<p>
-    <strong>Settled (§21): one <code>Gene</code> per physical locus, many alleles.</strong>
-    Biologically honest, kills the impossible genotypes, and shrinks the genotype.
-    There is <strong>no dominance-per-pair cost</strong> &mdash; the gene&rsquo;s own
-    expression table handles every allele combination directly (§5.1).
+<p class="muted">
+    <strong>Tobiano and roan are deliberately not part of it</strong> &mdash; tobiano is
+    an inversion <em>near</em> <code>KIT</code> rather than a <code>KIT</code> variant, and
+    roan maps to the region with an unresolved causal change, so both stay their own genes
+    and compose freely. The rule and the full roster are on
+    <a href="genetics-model.html#registry">Genetics model &sect; The registered genes</a>.
+    The combinatorial cost of the merges landed on §8 and §10, as predicted, and §8
+    answered it.
 </p>
-
-<div class="note tip">
-    <span class="label">MATP shipped 2026-09-03</span>
-    <p>
-        Cream and pearl are one locus with three alleles, six combinations and four
-        outcomes &mdash; see <a href="gene-matp.html">MATP</a>. A horse can no longer
-        be <code>Cr/Cr</code> <em>and</em> <code>prl/prl</code>;
-        <code>CreamPearlDilution</code> is gone (the dose table is a six-row
-        <code>switch</code> on the gene); the genotype code lost a segment and the
-        gallery lost 8,192 duplicate pens.
-    </p>
-</div>
-
-<div class="note tip">
-    <span class="label">KIT, MITF, PAX3 and EDNRB shipped 2026-09-04</span>
-    <p>
-        The white-pattern rewrite finished this section. <a href="gene-kit.html">KIT</a>
-        is one gene with <strong>eight</strong> alleles &mdash; sabino 1, five <code>W</code>
-        variants, the <code>W20</code> booster and <code>N</code> &mdash; thirty-six
-        combinations, eight outcomes, and four homozygotes ruled out by
-        <code>canOccur</code> as embryonic lethals. It absorbed the old
-        <code>horsegenetics.white</code> and <code>horsegenetics.sabino</code>, which had
-        been modelling two alleles of one gene as two independent genes and so allowed a
-        horse to be homozygous sabino and dominant white at once.
-    </p>
-    <p>
-        Splash split the other way, into <a href="gene-mitf.html">MITF</a> and
-        <a href="gene-pax3.html">PAX3</a>, because it really is two genes &mdash; and that
-        is a gain, not bookkeeping: a horse carrying one copy at each is markedly whiter
-        than either alone, a genotype the single splash gene could not express at all.
-        Frame became <a href="gene-ednrb.html">EDNRB</a> and gained its
-        <code>lethal-white</code> outcome.
-    </p>
-    <p>
-        <strong>Left over from the change:</strong> the catalogue is now 2,064,387 pens
-        &mdash; briefly capped, then answered outright by §8&rsquo;s revert to random
-        pens. <code>GenotypeCatalog</code> is still computed lazily rather than
-        materialised; see §10.
-    </p>
-</div>
 
 <h3 id="sex-linked">5.3 Sex-linked genes &mdash; the two non-autosomal exceptions</h3>
 
 <p>
-    <strong>Brindle (MBTPS2)</strong> is the driving case &mdash; a real coat gene, and
-    a real X-linked one. Mares are <code>X/X</code> and carry two copies; stallions are
-    <code>X/Y</code> and carry <strong>one</strong>. So a stallion is never a carrier,
-    and he passes his X to every daughter and no son. A mare shows a recessive X-linked
-    trait only when homozygous. That asymmetry is the whole appeal: a trait that runs
-    visibly down one side of a pedigree. <strong>Y-linked genes are also in</strong>
-    (settled, §21) &mdash; passed father to son only, never to a daughter, expressed by
-    every colt that carries one.
+    <strong>Partly built.</strong> <a href="gene-sex.html">The sex locus</a> shipped
+    2026-09-03 &mdash; <code>X</code> / <code>Y</code> at priority 1, both outcomes wild
+    types, <code>Y/Y</code> ruled out by <code>Gene.canOccur</code>, and
+    <code>HorseRecord.sex</code> derived from the code rather than stored. That was the
+    prerequisite, and it is what makes the rest cheap: <strong>a stallion carries a real
+    <code>X</code> and a real <code>Y</code></strong>, both slots occupied, so an X-linked
+    gene reads his X copy and a Y-linked gene reads his Y copy, and sex inheritance falls
+    out of the ordinary two-<code>nextBoolean()</code> draw with no special case.
+    <strong>What is left is the inheritance <em>mode</em>.</strong>
 </p>
-
-<h4>Sex itself becomes a gene &mdash; <strong>built</strong></h4>
-
-<div class="note">
-    <span class="label">Shipped 2026-09-03</span>
-    <p>
-        <code>SexGene</code> is registered at priority 1 with alleles <code>X</code> /
-        <code>Y</code>; a mare is <code>X/X</code>, a stallion <code>X/Y</code>, and
-        <code>Y/Y</code> is ruled out by a new <code>Gene.canOccur(AllelePair)</code>
-        that <code>GenotypeCatalog.allPairsOf</code> filters on. Both outcomes are
-        <strong>wild types</strong>, so the gallery does not widen at all; only
-        <code>totalGenotypes()</code> doubles. A new derived
-        <code>Gene.affectsCoat()</code> plus <code>Genotype.coatCode()</code> keep a
-        gene that never paints out of the texture key, so a mare and a stallion of the
-        same colour still share one baked texture.
-    </p>
-    <p>
-        <code>HorseRecord.sex</code> is <strong>gone as a field</strong> and derived
-        from the code (<code>Genotype.sexOf(String)</code>, which skips a full parse);
-        the <code>"sex"</code> codec key and <code>StoredGenome</code>&rsquo;s
-        <code>sex</code> component went with it, and
-        <code>HorseRecords.randomSex</code> is deleted &mdash; a foal&rsquo;s sex now
-        comes out of the ordinary <code>breedWith</code> draw. Founders that need a
-        chosen sex use <code>Genotype.withSex(Sex)</code>. Full write-up:
-        <a href="gene-sex.html">the sex gene page</a>.
-    </p>
-    <p>
-        <strong>Still to do below:</strong> everything from &ldquo;Hemizygous
-        notation&rdquo; on &mdash; the inheritance <em>mode</em> on <code>Gene</code>,
-        the two <code>breedWith</code> cases, the reserved-slot storage, and the
-        hemizygous surfaces.
-    </p>
-</div>
-
 
 <p>
-    Sex registered like any other locus, alleles <code>X</code> and <code>Y</code>, at
-    <strong>priority 1</strong> so it is always resolved first. <strong>A stallion
-    carries a real <code>X</code> and a real <code>Y</code></strong> &mdash; both slots
-    occupied, so an X-linked gene reads his X copy and a Y-linked gene reads his Y copy.
-    This is the change that makes the rest cheap:
+    <strong>Brindle (MBTPS2)</strong> is the driving case &mdash; a real coat gene, and a
+    real X-linked one. A stallion is never a carrier, and he passes his X to every
+    daughter and no son; a mare shows a recessive X-linked trait only when homozygous.
+    That asymmetry is the whole appeal: a trait that runs visibly down one side of a
+    pedigree. <strong>Y-linked genes are also in</strong> (settled, §21) &mdash; passed
+    father to son only, expressed by every colt that carries one.
 </p>
-
-<ul>
-    <li><strong>Sex inheritance falls out of ordinary Mendelian breeding</strong> with
-        no special case. A mare is <code>X/X</code> and can only pass <code>X</code>; a
-        stallion is <code>X/Y</code> and passes one or the other 50/50 &mdash; exactly
-        what the existing two <code>nextBoolean()</code> per gene already does.</li>
-    <li><strong>It resolves the ordering problem by construction.</strong> X-linked
-        genes need the foal&rsquo;s sex before they can segregate, and at priority 1 the
-        sex gene is already decided.</li>
-    <li><strong><code>HorseRecord.sex</code> should become derived</strong>, not stored
-        alongside the genotype. Two sources of truth for the same fact is a bug waiting
-        to happen. Keep <code>Sex</code> as the enum the rest of the code reads; compute
-        it from the locus.</li>
-    <li><strong>It gets sex into the genotype code</strong>, which the custom spawner
-        and the family tree both want anyway.</li>
-</ul>
 
 <h4>Hemizygous notation</h4>
 
@@ -807,7 +572,8 @@
 
 <ul>
     <li><strong><code>Gene</code> declares its inheritance mode</strong> &mdash;
-        autosomal (default), X-linked, or Y-linked.</li>
+        autosomal (default), X-linked, or Y-linked. There is no such declaration
+        today.</li>
     <li><strong><code>breedWith</code> grows two cases</strong>: an X-linked gene has the
         sire give his <code>X</code> to a filly and his <code>Y</code> to a colt; a
         Y-linked gene has him give his <code>Y</code> to a colt and his <code>X</code> to
@@ -816,14 +582,17 @@
         one real allele, so it expresses &mdash; no dominance question, no
         epigenetic-priority tie-break.</li>
     <li><strong><code>GenotypeCatalog</code></strong> would otherwise produce nonsense
-        pairs (<code>Y/Y</code>, or an <code>X/X</code> mare at a Y-linked locus).
-        <code>Gene.canOccur</code> is the seam and already rules out <code>Y/Y</code>;
-        the sex-linked cases need it to consult the mode as well.</li>
+        pairs (an <code>X/X</code> mare at a Y-linked locus).
+        <code>Gene.canOccur</code> is the seam and already rules out <code>Y/Y</code>,
+        but it does not consult a mode.</li>
     <li><strong>The founder percentage table</strong> has to respect sex: a colt at an
         X-linked locus draws one allele, a filly two; the reverse for Y-linked.</li>
     <li><strong>Surfaces</strong>: the info panel and paper dump want hemizygous wording
         and the <code>X-</code> / <code>Y-</code> prefix, not a fake homozygote; a
         punnett square for a sex-linked gene is a different square.</li>
+    <li><strong>Sexual dimorphism in the coat is not this</strong>, and is unbuilt. Sex
+        paints nothing and deliberately never will, so a stallion&rsquo;s crest would be
+        a separate gene <em>reading</em> this one.</li>
 </ul>
 
 <p>Not planned: imprinting, mosaicism.</p>
@@ -835,57 +604,32 @@
 <div class="note good">
     <span class="label">&sect;&sect;6.1&ndash;6.4 shipped 2026-09-04</span>
     <p>
-        The trait framework, the Mendelian stats, and the whole health layer are
-        built. <strong>The machinery is documented on
-        <a href="horse-body.html">the horse&rsquo;s body</a></strong>, not here &mdash;
-        a finished system belongs on its own page. What follows is the remainder:
-        where the built version deviated from the plan and why, and the two
-        sub-sections that are still entirely unbuilt.
+        The trait framework, the Mendelian stats and the whole health layer are built,
+        and the random stat roll is deleted with them. <strong>All of it &mdash; the one
+        capability interface, the baselines, conditions and severity, the two lethal
+        paths, the <code>ServerConfig</code> toggle and the four attributes it writes
+        &mdash; is documented on <a href="horse-body.html">the horse&rsquo;s body</a></strong>,
+        including the two places the built version deliberately departed from the sketch
+        this section used to carry. What follows is only what is left.
     </p>
 </div>
 
-<h3>6.1&ndash;6.2 The framework &mdash; where it landed differently</h3>
+<h3>6.1&ndash;6.2 The framework &mdash; <em>shipped</em></h3>
 
-<p>
-    Two deliberate deviations from the sketch, both worth recording because the sketch
-    is what a future reader would otherwise trust:
+<p class="muted">
+    See <a href="horse-body.html">the horse&rsquo;s body</a>. The section numbers are kept
+    so cross-references do not rot.
 </p>
-
-<ul>
-    <li><strong>One capability interface, not four.</strong>
-        <code>TraitContribution</code> replaced <code>StatContribution</code> /
-        <code>BodyContribution</code> / <code>ViabilityRule</code> /
-        <code>ConditionRule</code>. They all run in the same single walk of the
-        genotype, so four of them would be four sinks threaded through one loop; and
-        the genes that need any of them mostly need several at once
-        (<a href="gene-acan.html">ACAN</a> is a stat change <em>and</em> a size change
-        <em>and</em> a condition). <strong>Viability is not an interface at all</strong>
-        &mdash; it is derived from the severity of the conditions reported, so a gene
-        can never declare a horse lethal without saying what killed it. A
-        <code>HealthContribution</code> marker was added that the sketch did not have,
-        because the config toggle needs to know which contributions are disorders.</li>
-    <li><strong>The random roll did not survive as environmental noise.</strong> §6.2
-        left room for it. It is gone entirely: two horses with the same genotype are
-        the same horse. If the numbers ever feel too tidy, the place to reopen this is
-        <strong>epigenetic variation</strong> &mdash; inherited with the allele copy,
-        still deterministic, still reproducible &mdash; not a fresh die roll.</li>
-    <li><code>HorseRecord</code> lost its <code>speed</code> and <code>health</code>
-        fields rather than gaining jump / height ones. §6.2 predicted it would gain
-        fields; storing a derived value is what created the problem in the first
-        place.</li>
-</ul>
 
 <h3>6.3 Polygenic traits &mdash; cut</h3>
 
 <p>
     <strong>Settled (§21): the mod does Mendelian and sex-linked inheritance only.</strong>
     PDK4, CKM and the jumping QTLs are polygenic in reality; each became <strong>one
-    atomic gene</strong> with two alleles and an additive weight into a performance
-    stat. Atomic genes are legible &mdash; a player can breed <em>for</em> one &mdash;
-    where a hidden sum of anonymous markers reads as a dice roll, which is exactly what
-    the philosophy says not to do. No marker-set subsystem, no
-    <code>TraitRule</code>-with-a-sum. Group traits (§6.5) stay, because they are still
-    Mendelian epistasis, not polygenic weighting.
+    atomic gene</strong> with two alleles and an additive weight. Atomic genes are legible
+    &mdash; a player can breed <em>for</em> one &mdash; where a hidden sum of anonymous
+    markers reads as a dice roll. No marker-set subsystem. Group traits (§6.5) stay,
+    because they are Mendelian epistasis rather than polygenic weighting.
 </p>
 
 <h3>6.4 Health &mdash; what is left</h3>
@@ -893,36 +637,33 @@
 <div class="note rule">
     <span class="label">Aging is out &mdash; a firm no</span>
     <p>
-        Horses do not get older, do not grey out over time, do not accumulate
-        age-related conditions and never die of old age. This is not deferred &mdash; it
-        is settled (§21). Two consequences: <strong>grey&rsquo;s fixed progression is
-        the design, not a gap</strong>, and <strong>flea-bitten grey and melanoma are
-        cut with it</strong>.
+        Horses do not get older, do not grey out over time and never die of old age. This
+        is settled (§21), not deferred. Two consequences: <strong>grey&rsquo;s fixed
+        progression is the design, not a gap</strong>, and <strong>flea-bitten grey and
+        melanoma are cut with it</strong>.
     </p>
 </div>
 
-<p>
-    The sub-lethal half, both lethal paths and the three-position
-    <code>ServerConfig</code> all shipped. The remainder:
-</p>
-
 <ul>
     <li><strong>Nothing is play-tested.</strong> None of it has been seen in-game &mdash;
-        not a scaled horse, not a dying foal, not a refused pairing. The
-        <a href="verification.html">checklist</a> is where that lives.</li>
-    <li><strong>Per-part scaling</strong> for the two dwarfisms (see the §4.4 table).</li>
-    <li><strong>The naked-foal coat</strong> (see the §4.4 table).</li>
-    <li><strong>Carrier display is half done.</strong> The info panel and the paper
-        dump now show a horse&rsquo;s <em>expressed</em> conditions, which is the easy
-        half. What is still unread is the <code>Expression</code> table&rsquo;s carrier
-        wording &mdash; every disorder declares a sentence explaining what carrying one
-        copy means, and nothing shows it. A <strong>punnett / expected-foal
-        display</strong> reading the same table is the natural companion, and it is
-        what turns two carriers from a nasty surprise into a decision.</li>
-    <li><strong>Founder frequencies are guesses.</strong> Carrier rates run 1.4% to
-        4%, chosen so a wild horse is healthy and an inbred line is not. Whether a
-        player ever actually meets a lethal at those numbers is a play-test question,
-        and the answer may be that they are all too rare to matter.</li>
+        not a scaled horse, not a dying foal, not a refused pairing, not the config. The
+        <a href="verification.html">checklist</a> is where that lives, and the custom
+        spawn egg (§9) is the quickest way in: adding a health gene defaults it to the
+        affected genotype, so &ldquo;add PLOD1, pick Foal, spawn&rdquo; is a one-click
+        lethal foal.</li>
+    <li><strong>Per-part scaling</strong> and <strong>the naked-foal coat</strong> &mdash;
+        see the §4.4 list.</li>
+    <li><strong>Carrier display is half done.</strong> The info panel and the paper dump
+        now show a horse&rsquo;s <em>expressed</em> conditions, which was the easy half.
+        What is still unread is the <code>Expression</code> table&rsquo;s <em>carrier</em>
+        wording &mdash; every disorder declares a sentence explaining what one copy means,
+        and nothing shows it. A <strong>punnett / expected-foal display</strong> reading
+        the same table is the natural companion, and it is what turns two carriers from a
+        nasty surprise into a decision.</li>
+    <li><strong>Founder frequencies are guesses.</strong> Carrier rates run 1.4% to 4%,
+        chosen so a wild horse is healthy and an inbred line is not. Whether a player ever
+        actually meets a lethal at those numbers is a play-test question, and the answer
+        may be that they are all too rare to matter.</li>
 </ul>
 
 <h3>6.5 Traits that come from a <em>group</em> of genes</h3>
@@ -993,19 +734,18 @@
 <h2 id="care">7. Horse care: milking</h2>
 
 <p>
-    <strong>Gated healing shipped</strong> &mdash; a hurt horse regenerates only near
-    both water and food, sharing one slow tick with §13. Full machinery on
-    <a href="horse-care.html">horse care</a>. One of the two things it left for other
-    sections is done: <strong>a lethal foal out-damages the regen</strong> &mdash; the
-    damage is a fraction of the foal&rsquo;s own max health once a second, so a player
-    cannot save one by standing it next to a hay bale. Still open: an info-panel line
-    naming &ldquo;what is missing&rdquo; would beat particles alone.
+    <strong>Gated healing shipped</strong> &mdash; a hurt horse regenerates only near both
+    water and food, sharing one slow tick with §13. Full machinery on
+    <a href="horse-care.html">horse care</a>, and both things it left for other sections
+    are answered: a lethal foal out-damages the regen (§6.4), and the herd comfort buff is
+    that regen (§13). Still open: an info-panel line naming &ldquo;what is missing&rdquo;
+    would beat particles alone.
 </p>
 
 <p>
     <strong>Milking is not built.</strong> Right-click an adult mare with a bucket, get
-    milk. Neither genetic, but it hooks the genetics: it requires full health, and a
-    horse only reaches full health through the healing gate above.
+    milk. Not genetic, but it hooks the genetics: it requires full health, and a horse only
+    reaches full health through the healing gate above.
 </p>
 
 <ul>
@@ -1067,23 +807,15 @@
 
 <hr>
 
-<h2 id="spawner">9. The custom horse spawner (creative only)</h2>
+<h2 id="spawner">9. The custom horse spawner (creative only) &mdash; <em>mostly done</em></h2>
 
 <p>
-    A creative-mode screen for building a horse gene by gene and spawning it.
-</p>
-
-<p>
-    <strong>Mostly built (2026-09-04).</strong> The
-    <code>custom_horse_spawn_egg</code> opens <code>client/CustomHorseSpawnScreen</code>:
-    <strong>every registered gene in alphabetical order</strong> down the left &mdash;
-    click a name to put that gene on the horse, homozygous for the allele that does
-    something, after which it carries its two allele copies as buttons &mdash; a
-    <strong>live 3D preview</strong> in the middle, and age /
-    sex / <strong>reroll epigenetics</strong> / <strong>copy &amp; paste the genotype
-    code</strong> / spawn down the right. The spawn is <strong>creative-only, re-checked
-    on the server</strong>, and the <strong>epigenome travels with the genotype</strong>
-    so the horse that appears is the horse that was on screen.
+    <strong>Built 2026-09-04.</strong> The <code>custom_horse_spawn_egg</code> opens
+    <code>client/CustomHorseSpawnScreen</code>: every registered gene alphabetically down
+    the left as a catalogue you add from, a live 3D preview in the middle, and age / sex /
+    reroll epigenetics / copy &amp; paste the genotype code / spawn down the right. The
+    spawn is creative-only, re-checked on the server, and the <strong>epigenome travels
+    with the genotype</strong>, so the horse that appears is the horse that was on screen.
 </p>
 
 <p>
@@ -1098,10 +830,10 @@
 </p>
 
 <p class="muted">
-    The rest of the original section &mdash; the preview technique, the creative gate,
-    the code round-trip, scrolling to an unknown gene count &mdash; is built; see
-    <code>client/CustomHorseSpawnScreen</code>. The section number is kept so
-    cross-references do not rot.
+    The preview technique, the creative gate, the code round-trip and the scrolling gene
+    list are all built; see <code>client/CustomHorseSpawnScreen</code>. The section number
+    is kept so cross-references do not rot. What it is <em>for</em> now, beyond creative
+    play, is testing: see §20.
 </p>
 
 <hr>
@@ -1109,38 +841,34 @@
 <h2 id="scale">10. What breaks at scale</h2>
 
 <p>
-    The master table is ~27 loci against today&rsquo;s 11, several with many alleles,
-    and third-party genes make the count open-ended. That is not a linear change.
+    The master table is ~27 loci against today&rsquo;s 31 registered genes &mdash; but
+    only 18 of those paint, and several of the painting ones carry many alleles. Adding
+    the rest is not a linear change.
 </p>
 
 <ul>
-    <li><strong>The genotype space.</strong> Now <code>3^15 &times; 6 &times; 6 &times; 2 =
-        55,099,802,880</code> (twelve two-allele genes, three-allele MATP, dun and PAX3,
-        four-allele MITF, eight-allele KIT, and
-        the two-combination sex locus) &mdash;
+    <li><strong>The genotype space.</strong> Now <strong>292 822 943 423 500 800</strong>
+        raw genotypes, of which <strong>2 064 387</strong> are distinct to look at &mdash;
         it was <code>3^11 = 177,147</code> before the seven visual genes shipped, the
-        multiplier in miniature. With the full table the raw product is on the order
-        of <strong>10<sup>19</sup></strong>.</li>
-    <li><strong>The gallery died, and was reverted</strong> (&sect;8, done). The
-        white-pattern loci took the catalogue to <strong>2,064,387 pens</strong>, whose
-        corridor would have been about <strong>7.2 million blocks</strong> &mdash; a
-        quarter of the way to the world border, leaving room for four plots in the whole
-        dimension. A 20,000-pen cap held it for one session; the fix was to stop
-        enumerating at all, and the corridor is now a fixed <strong>2,000 random
-        pens</strong>. The catalogue survives as arithmetic &mdash; computed on demand
-        rather than materialised, because a two-million-entry
-        <code>List&lt;Genotype&gt;</code> is hundreds of megabytes &mdash; and is what
-        the tests and a future punnett display read. <strong>Still open:</strong> if a
-        <em>systematic</em> gallery is ever wanted again, the shape that scales is a
-        <strong>wing per locus</strong>: each gene&rsquo;s pairs on a fixed wild-type
-        background, bounded by alleles rather than by their product, extending naturally
-        to a modded gene adding its own wing.</li>
-    <li><strong>The genotype code string.</strong> 27+ segments with tokens like
-        <code>SW10</code> / <code>W36</code> puts a code in the low hundreds of
+        multiplier in miniature. With the full table the raw product is on the order of
+        <strong>10<sup>19</sup></strong> and beyond.</li>
+    <li><strong>The gallery died, and the dimension was reverted</strong> (§8, done). The
+        white-pattern loci took the catalogue to 2,064,387 pens, whose corridor would have
+        been about <strong>7.2 million blocks</strong> &mdash; a quarter of the way to the
+        world border. The corridor is now a fixed 2,000 random pens, so
+        <strong>the dimension has stopped being the thing that blocks adding genes</strong>.
+        <code>GenotypeCatalog</code> survives as arithmetic, computed on demand rather than
+        materialised, and is what the tests and a future punnett display read.
+        <strong>Still open:</strong> if a <em>systematic</em> gallery is ever wanted again,
+        the shape that scales is a <strong>wing per locus</strong> &mdash; each gene&rsquo;s
+        pairs on a fixed wild-type background, bounded by alleles rather than by their
+        product, extending naturally to a modded gene adding its own wing.</li>
+    <li><strong>The genotype code string.</strong> Already 33 segments; 27 more loci with
+        tokens like <code>SW10</code> / <code>W36</code> puts a code in the low hundreds of
         characters. Everything carrying it grows in step &mdash; the record, the
-        attachments, both sync payloads, and the epigenome code, which is already the
-        fatter of the two. Worth a compact binary encoding for the payloads at that
-        point; keep the string form for saves and debugging.</li>
+        attachment, both sync payloads, and the epigenome code, which is already the
+        fatter of the two. Worth a compact binary encoding for the payloads at that point;
+        keep the string form for saves and debugging.</li>
     <li><strong><code>CoatTextureId</code> and path length.</strong> The encoding
         <em>expands</em> (<code>A-Z</code> &rarr; 2 chars, anything else &rarr; 5), so a
         300-character code becomes a &gt;1,000-character path, which
@@ -1149,17 +877,16 @@
         <code>KEY_BY_ID</code> tripwire &mdash; which caught the original flat-white-horse
         bug and would become load-bearing rather than paranoid, so give it a real
         collision-resolution path (append a counter) instead of throwing.</li>
-    <li><strong>Wild-spawn frequency.</strong> With a dozen recessive lethals in the
-        pool, founder frequencies need a pass: rare enough that wild horses are healthy,
-        common enough that a breeder eventually meets one.</li>
-    <li><strong>Display.</strong> At 27 loci the sign approach caps out; the info panel
-        needs grouping (colour / pattern / performance / health) and probably
-        scrolling.</li>
-    <li><strong>Composer cost.</strong> Phase 1 is O(genes &times; texels) at 16,384
-        texels per sheet. 27 genes is still trivial; the pattern genes&rsquo;
-        <code>BodyNoise</code> sampling is the real cost. Coats are cached per texture
-        key, so this only bites on first bake &mdash; but the gallery bakes hundreds at
-        once.</li>
+    <li><strong>Wild-spawn frequency.</strong> With a dozen recessive lethals in the pool
+        already, founder frequencies need a pass: rare enough that wild horses are healthy,
+        common enough that a breeder eventually meets one (§6.4).</li>
+    <li><strong>Display.</strong> At 27 more loci the pen sign caps out; the info panel
+        needs grouping (colour / pattern / performance / health) and probably scrolling.
+        It already gained two rows and a condition list.</li>
+    <li><strong>Composer cost.</strong> Phase 1 is O(painting genes &times; texels) at
+        16,384 texels per sheet, and the thirteen non-coat genes cost it nothing. The
+        pattern genes&rsquo; <code>BodyNoise</code> sampling is the real cost. Coats are
+        cached per texture key, so this only bites on first bake.</li>
 </ul>
 
 <hr>
@@ -1215,7 +942,7 @@
 <table>
 <thead><tr><th>Thing</th><th>What is known</th><th>What is missing</th></tr></thead>
 <tbody>
-<tr><td><strong>Stalls, holding pens</strong></td><td>Stall <em>definition</em> is built: a <code>stall_sign</code> bound to a horse, placed on a wall, flood-fills the enclosed area behind it and stores it (<code>data/StallData</code>). Breaking the sign releases it.</td><td>What <em>uses</em> a stall: teleport-to-stall (the tickets), auto-return, &ldquo;recalled to a pen&rdquo;. Cleanup beyond breaking the sign. Holding pens as distinct from stalls. A real stall-sign block instead of a repurposed <code>oak_wall_sign</code>.</td></tr>
+<tr><td><strong>Stalls, holding pens</strong></td><td>Stall <em>definition</em> is built &mdash; a <code>stall_sign</code> bound to a horse, placed on a wall, flood-fills the enclosed area behind it and stores it (<code>data/StallData</code>). Breaking the sign releases it.</td><td>What <em>uses</em> a stall: teleport-to-stall (the tickets), auto-return, &ldquo;recalled to a pen&rdquo;. Cleanup beyond breaking the exact sign block &mdash; rebuilding a wall elsewhere, or removing the horse, leaves a stale record. Holding pens as distinct from stalls. A real stall-sign block instead of a repurposed <code>oak_wall_sign</code>. A persistent client wireframe rather than the F7 particle flash.</td></tr>
 <tr><td><strong>Double-wide gate</strong></td><td>Crafted via braided rope.</td><td>Presumably a two-block-wide fence gate. A vanilla-shaped block problem, unrelated to the genetics.</td></tr>
 <tr><td><strong>Tickets</strong> &mdash; blank, basic, bound, interdimensional</td><td>Four tiers, hair-based recipes. The items register; they are inert.</td><td>Stated intent is &ldquo;teleport a bound horse to its stall&rdquo; &mdash; now possible (<code>StallRecord.center()</code> exists), just unbuilt. &ldquo;Interdimensional&rdquo; presumably reaches the horse dimension (§8); if so it is the first survival-mode entry to it, which is a decision.</td></tr>
 <tr><td><strong>Whistles</strong> &mdash; basic, golden, echo</td><td>Built: right-click teleports every tamed horse <em>you own</em> within 16 / 32 / 64 blocks to a grid beside you, ~3&nbsp;s cooldown. The &ldquo;recall in an area&rdquo; reading.</td><td>Bond gating (§13); whether it should path rather than teleport; what &ldquo;echo&rdquo; adds beyond range &mdash; longer reach, or crossing dimensions.</td></tr>
@@ -1314,12 +1041,11 @@
 <h2 id="bond">13. Bond and herds</h2>
 
 <p>
-    <strong>Partly built.</strong> The core shipped: a per-horse bond number (0&ndash;100)
-    with four behaviour tiers driven by one <code>BondFollowGoal</code> (face / approach
-    / follow, real pathfinding), an emergent herd id, and the shared 30-tick scan §7
-    called for. Gains wired: proximity, riding, feeding; cap +15 per 24&nbsp;000-tick
-    day; a foal in a herd gains double. The tier table, the gain rates and the herd
-    formation rule are documented on <a href="horse-care.html">horse care</a>.
+    <strong>Partly built.</strong> The core shipped &mdash; a per-horse bond number
+    (0&ndash;100) with four behaviour tiers driven by one <code>BondFollowGoal</code>, an
+    emergent herd id, the shared 30-tick scan §7 called for, and the comfort buff as
+    passive regen. <strong>The tier table, the gain rates, the daily cap and the herd
+    formation rule are on <a href="horse-care.html">horse care</a></strong>, not here.
 </p>
 
 <h3>What is left</h3>
@@ -1328,18 +1054,17 @@
     <li><strong>Bond sources not yet wired</strong>: <strong>shearing +5</strong>
         (blocked on §12 &mdash; there is no shearing) and <strong>sleeping nearby
         +1/night</strong>.</li>
-    <li><strong>Nothing consumes the herd alpha.</strong> It is not stored &mdash; a
-        consumer would compute &ldquo;oldest or highest-bond, with an explicit
-        tiebreak&rdquo; on demand &mdash; but there is no consumer yet: no herd-wide
+    <li><strong>Nothing consumes the herd alpha.</strong> It is computed on demand rather
+        than stored, which is right; there is simply no consumer yet &mdash; no herd-wide
         behaviour, no alpha-follows, no display.</li>
-    <li><strong>The comfort buff stays as passive regen.</strong> The source documents
-        specify reduced stamina drain + faster regen; the mod is <strong>not</strong>
-        getting a stamina resource (§21), so herd members simply keep the
-        <strong>+1 extra passive regen</strong> they already have. Nothing more to
-        design here &mdash; it is done bar play-testing.</li>
-    <li><strong>Herd membership is invisible outside the inventory panel&rsquo;s
-        &ldquo;&bull; herd&rdquo; flag</strong> &mdash; no herd view (that is §17), no
-        world-side indication.</li>
+    <li><strong>Herd membership is invisible</strong> outside the inventory panel&rsquo;s
+        &ldquo;&bull; herd&rdquo; flag &mdash; no herd view (that is §17), no world-side
+        indication.</li>
+    <li><strong>There is no way to set bond for testing</strong> &mdash; no command, and
+        the only sources are slow ones, so exercising the tiers means grinding or
+        temporarily lowering the thresholds.</li>
+    <li><strong>Feeding is not dose- or temper-aware</strong>: any <code>isFood</code>
+        stack from the owner is +2, whatever it is.</li>
 </ul>
 
 <hr>
@@ -1434,16 +1159,17 @@
 <h3>15.1 The seed jar flow</h3>
 
 <p>
-    <strong>Partly built.</strong> A cut-down flow works: put a tamed stallion in
-    breeding mode, right-click with an <code>empty_seed_jar</code> &rarr; a filled jar
-    carrying a <code>GenomeSample</code> (genotype + epigenome) plus the donor&rsquo;s
-    sex / UUID / name / stats in the <code>stored_genome</code> data component;
-    right-click a breeding-mode mare with the jar &rarr; a foal, bred through the same
-    <code>applyBredFoal</code> path natural breeding uses, <strong>drawn at
-    impregnation from the stored genotype</strong> &mdash; which resolves the
-    &ldquo;genotype, not a frozen gamete&rdquo; question in this section&rsquo;s
-    favour. Code: <code>server/StallionSeedJarHandler</code>,
-    <code>data/StoredGenome</code>, <code>common/genetics/GenomeSample</code>.
+    <strong>Partly built.</strong> A cut-down flow works: put a tamed stallion in breeding
+    mode, right-click with an <code>empty_seed_jar</code> &rarr; a filled jar carrying a
+    <code>GenomeSample</code> plus the donor&rsquo;s details in the
+    <code>stored_genome</code> data component; right-click a breeding-mode mare with the
+    jar &rarr; a foal, bred through the same <code>applyBredFoal</code> path natural
+    breeding uses. The draw happens <strong>at impregnation, from the stored
+    genotype</strong>, which resolves the &ldquo;genotype, not a frozen gamete&rdquo;
+    question in this section&rsquo;s favour. Code:
+    <code>server/StallionSeedJarHandler</code>, <code>data/StoredGenome</code>,
+    <code>common/genetics/GenomeSample</code>; the breeding path itself is on
+    <a href="breeding.html">breeding</a>.
 </p>
 
 <h3>What is left</h3>
@@ -1462,10 +1188,11 @@
         carried today.</li>
     <li><strong>The donor cooldown</strong> &mdash; once per Minecraft day (§21) &mdash;
         is not applied; only the mare gets the vanilla breeding cooldown.</li>
-    <li><strong>The pedigree edge is settled</strong> (§21): the jar must store enough
-        of the sire&rsquo;s record &mdash; not just his UUID &mdash; that the family
-        tree can render his node. Today it stores name / sex / stats already; confirm
-        that is sufficient and wire it into the synthetic sire record.</li>
+    <li><strong>The pedigree edge.</strong> Settled (§21) that the jar must store enough
+        of the sire&rsquo;s record &mdash; not just his UUID &mdash; for the family tree
+        to render his node. It stores name and sex already, but the synthetic sire record
+        still uses the stored UUID as its pedigree edge, so the tree may not find the
+        node. Wire it through.</li>
     <li>A <code>collectedFrom</code> marker on the jar &mdash; player-made vs
         villager-sold (§18) &mdash; and the recipe restriction &ldquo;no magic carrot on
         a jar&rdquo; are both trivial once the above exists.</li>
@@ -1730,72 +1457,50 @@
 
 <h2 id="order">20. Suggested order of work</h2>
 
-<p>Each step is useful on its own and unblocks the next.</p>
-
 <p>
-    The three-phase pipeline and the first two magical genes are done and drop off the
-    front of this list; the rest, in order:
+    Each step is useful on its own and unblocks the next. The pipeline, the data-model
+    rewrite, multi-allele support, the trait and health layers, the random-pen revert and
+    the custom spawner have all shipped and drop off the front of this list; what is left,
+    in order:
 </p>
 
 <ol>
-    <li><strong>Gene priority + derived orderings</strong> (§2). Small, self-contained,
-        and it deletes the three hand-maintained lists that make every later step
-        annoying. Add the determinism tests alongside it.</li>
     <li><strong>The gene-authoring tiers</strong> (§3) &mdash; the abstract base classes
         and the mod-bus registration hook (the Java declarative builder is optional; the
-        file path covers the common case). Doing it here means every gene from the next
-        step onward is written the easy way instead of being rewritten later.</li>
-    <li><strong>Multi-allele support</strong> (§5.1) + <strong>merge cream and pearl
-        into MATP</strong>. Smallest real multi-allele locus, with an existing resolver
-        to fold in. Also unblocked dun&rsquo;s third allele, which shipped straight
-        after it.</li>
-    <li><strong>Health, the cheap half</strong> (§6.4): genetic contribution to max
-        health. No new subsystem, visible immediately as hearts, and it makes the health
-        genes worth carrying.</li>
-    <li><strong>Trait framework proper</strong> (§6.1) with <strong>MSTN</strong> as its
-        first consumer, then the size genes once the entity-scale question is
-        answered.</li>
-    <li><s><strong>Revert the dimension to random pens</strong> (§8)</s> &mdash;
-        <strong>done 2026-09-04</strong>. Genes can be added freely now.</li>
-    <li><strong>Lethals</strong> (§6.4) &mdash; <strong>MET</strong> first (a conception
-        check only, no death behaviour to design), then the born-and-dies path with its
-        config toggle and carrier display, then frame&rsquo;s <code>Ov/Ov</code>. Note
-        the ordering dependency on §7's healing gate: a lethal foal has to out-damage the shipped
-        regen.</li>
-    <li><strong>Sex as a gene, then sex-linked scaffolding, then brindle</strong>
-        (§5.3). Registering <code>X</code>/<code>Y</code> at priority 1 is small and
-        worth doing early. The scaffolding touches <code>breedWith</code> and
+        file path covers the common case). Doing it before the next gene means that gene
+        is written the easy way instead of being rewritten later.</li>
+    <li><strong>Sex-linked scaffolding, then brindle</strong> (§5.3). The sex locus is
+        registered; what is left is the inheritance mode, the two <code>breedWith</code>
+        cases and the hemizygous surfaces. It touches <code>breedWith</code> and
         <code>GenotypeCatalog</code>, so do it while the breeding tests are still small.
-        Brindle is its proof.</li>
-    <li><strong>LP (leopard complex) and PATN1</strong> &mdash; the one pattern family
-        the white-pattern rewrite deliberately left alone, and the largest gene job
-        remaining. It needs a spot field and a blanket mask, neither of which
-        <code>WhitePattern</code>&rsquo;s two shapes cover, and PATN1 is the model&rsquo;s
-        first modifier gene.</li>
-    <li><strong>Face markings as a shared family</strong> before adding more
+        Brindle (§4.2) is its proof.</li>
+    <li><strong>Face markings as a shared family</strong> (§4.2) before adding any more
         white-pattern alleles: every locus currently draws its own centreline stripe, and
         a star is not a narrow blaze.</li>
+    <li><strong>LP (leopard complex) and PATN1</strong> (§4.2) &mdash; the one pattern
+        family the white-pattern rewrite deliberately left alone, and the largest gene job
+        remaining. It needs a spot field and a blanket mask, neither of which
+        <code>WhitePattern</code>&rsquo;s two shapes cover, and PATN1 is the model&rsquo;s
+        first modifier gene. CSNB (§4.4) rides in with it.</li>
+    <li><strong>The remaining health follow-ups</strong> (§4.4, §6.4) &mdash; the carrier
+        display and the punnett square first, since they are what make the lethals a
+        decision rather than a surprise; per-part scaling and the naked-foal coat need
+        model work and can wait.</li>
 </ol>
 
 <div class="note">
-    <span class="label">Worth pulling early</span>
+    <span class="label">Independent of the whole chain</span>
     <p>
-        <s><strong>The custom horse spawner</strong> (§9)</s> &mdash; <strong>built
-        2026-09-04</strong>, and it did what it promised: the fastest way to look at any
-        genotype without breeding for it, so every gene after it is quicker to build and
-        check.
-    </p>
-    <p>
-        <strong>Independent of the whole chain</strong>, doable whenever: milking (§7).
-        It does not touch the genetics, and its full-health rule now has the shipped
-        healing gate to lean on.
+        <strong>Milking</strong> (§7) does not touch the genetics, and its full-health rule
+        now has the shipped healing gate to lean on. <strong>Eye colour as a channel</strong>
+        is likewise independent; it unblocks tiger eye (§4.1) and blue-eyed creams whenever
+        it is convenient. <strong>DMRT3 / gait</strong> (§4.3) is independent too, and last,
+        because it is animation work rather than gene work.
     </p>
     <p>
         <strong>Cut:</strong> aging and everything downstream of it &mdash; grey
-        progression over time, flea-bitten grey, melanoma (§21).
-        <strong>Eye colour as a channel</strong> is not cut, just independent of
-        everything above; it unblocks tiger eye and blue-eyed creams whenever it is
-        convenient.
+        progression over time, flea-bitten grey, melanoma (§21) &mdash; and polygenic
+        inheritance (§6.3).
     </p>
 </div>
 

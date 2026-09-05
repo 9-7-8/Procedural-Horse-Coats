@@ -249,6 +249,16 @@ public Expression expressionOf(AllelePair pair) {
 </p>
 
 <p>
+    <strong>The multi-allele overload is
+    <code>hardyWeinberg(Map&lt;Allele, Double&gt;, Predicate&lt;AllelePair&gt;)</code></strong>,
+    and <a href="gene-kit.html">KIT</a> is why it exists: thirty-six combinations, four
+    of them ruled out, is not a table anyone can hand-write without a typo nobody would
+    ever see. Excluded combinations are <strong>dropped and the rest rescaled</strong>,
+    which is also the biology &mdash; a lethal is absent from the adult population you
+    are observing.
+</p>
+
+<p>
     <code>FounderContext</code> carries the part of the genotype already rolled,
     so a gene&rsquo;s frequency may depend on what the horse already is
     (&ldquo;champagne twice as likely on a chestnut&rdquo;). Genes roll in
@@ -257,7 +267,15 @@ public Expression expressionOf(AllelePair pair) {
     handing back a wild type that would make the bug invisible.
 </p>
 
-<h2>The eighteen registered genes</h2>
+<h2 id="registry">The thirty-one registered genes</h2>
+
+<p>
+    The table is in <strong><code>codeOrder()</code></strong> &mdash; the one
+    <code>(priority, key)</code> sort every ordering is derived from &mdash; so it
+    doubles as the list of the numbers the built-ins occupy. Low numbers set pigment
+    absolutely, higher ones dilute; <strong>80&ndash;99 is the non-coat sub-band</strong>
+    and <strong>100+ is magical</strong>.
+</p>
 
 <p>
     Six of them are <strong>white-pattern loci</strong>, and they are six because
@@ -274,26 +292,27 @@ public Expression expressionOf(AllelePair pair) {
 
 <div class="table-wrap">
 <table>
-<thead><tr><th>Gene</th><th>Alleles</th><th>Outcomes</th><th>In the wild</th><th>Phase</th></tr></thead>
+<thead><tr><th>Pri.</th><th>Gene</th><th>Alleles</th><th>Outcomes</th><th>In the wild</th><th>Phase</th></tr></thead>
 <tbody>
-<tr><td><a href="gene-sex.html">sex</a></td><td><span class="allele wild">X</span> / <span class="allele dom">Y</span></td><td>mare, stallion &mdash; <strong>both wild types</strong>&Dagger;</td><td>50 / 50, no <code>Y/Y</code></td><td>neither (paints nothing)</td></tr>
-<tr><td><a href="gene-extension.html">extension</a></td><td><span class="allele dom">E</span> / <span class="allele rec">e</span></td><td>wild, chestnut</td><td>25 / 50 / 25</td><td>natural</td></tr>
-<tr><td><a href="gene-agouti.html">agouti</a></td><td><span class="allele dom">A</span> / <span class="allele rec">a</span></td><td>wild, bay</td><td>25 / 50 / 25</td><td>natural</td></tr>
-<tr><td><a href="gene-test.html">test</a></td><td><span class="allele dom">T</span> / <span class="allele wild">t</span></td><td>wild, test-overlay <strong>(masks)</strong></td><td>25% carriers, no homozygotes</td><td>magical</td></tr>
-<tr><td><a href="gene-champagne.html">champagne</a></td><td><span class="allele dom">Ch</span> / <span class="allele wild">c</span></td><td>wild, champagne</td><td>1/40 per allele</td><td>natural</td></tr>
-<tr><td><a href="gene-grey.html">grey</a></td><td><span class="allele dom">G</span> / <span class="allele wild">g</span></td><td>wild, grey</td><td>1/16 per allele</td><td>natural</td></tr>
-<tr><td><a href="gene-matp.html">MATP</a></td><td><span class="allele dom">Cr</span> / <span class="allele rec">prl</span> / <span class="allele wild">N</span></td><td>wild, pearl-carrier, single-cream, classic-pearl, double-dilute</td><td>1/30 <code>Cr</code>, 1/22 <code>prl</code></td><td>natural</td></tr>
-<tr><td><a href="gene-magic-zebra.html">magic zebra</a></td><td><span class="allele dom">Mzeb</span> / <span class="allele wild">n</span></td><td>wild, zebra</td><td>1/100 per allele</td><td>magical</td></tr>
-<tr><td><a href="gene-pink-hair.html">pink hair</a></td><td><span class="allele rec">Pihr</span> / <span class="allele wild">n</span></td><td>wild, pink-carrier, pink-hair</td><td>1/12 per allele</td><td>magical</td></tr>
-<tr><td><a href="gene-dun.html">dun</a></td><td><span class="allele dom">D</span> / <span class="allele dom">d1</span> / <span class="allele wild">d2</span></td><td>wild, primitive-marks, dun&sect;</td><td>1/24 <code>D</code>, 1/10 <code>d1</code></td><td>natural</td></tr>
-<tr><td><a href="gene-silver.html">silver</a></td><td><span class="allele dom">Z</span> / <span class="allele wild">z</span></td><td>wild, silver</td><td>1/60 per allele</td><td>natural</td></tr>
-<tr><td><a href="gene-mushroom.html">mushroom</a></td><td><span class="allele rec">Mu</span> / <span class="allele wild">mu</span></td><td>wild, mushroom-carrier, mushroom</td><td>1/34 per allele</td><td>natural</td></tr>
-<tr><td><a href="gene-roan.html">roan</a></td><td><span class="allele dom">Rn</span> / <span class="allele wild">rn</span></td><td>wild, roan</td><td>1/30 per allele</td><td>natural</td></tr>
-<tr><td><a href="gene-tobiano.html">tobiano</a></td><td><span class="allele dom">To</span> / <span class="allele wild">to</span></td><td>wild, tobiano</td><td>1/50 per allele</td><td>natural</td></tr>
-<tr><td><a href="gene-ednrb.html">EDNRB &mdash; frame</a></td><td><span class="allele dom">O</span> / <span class="allele wild">N</span></td><td>wild, frame, lethal-white <strong>(masks)</strong>&dagger;</td><td>1/55 per allele; no <code>O/O</code> founder</td><td>natural</td></tr>
-<tr><td><a href="gene-kit.html">KIT &mdash; white spotting</a></td><td><span class="allele dom">W22</span> / <span class="allele dom">W13</span> / <span class="allele dom">W10</span> / <span class="allele dom">W5</span> / <span class="allele dom">W23</span> / <span class="allele dom">SB1</span> / <span class="allele dom">W20</span> / <span class="allele wild">N</span></td><td>wild, minimal-white, modest-white, sabino, broad-white, extensive-white, near-white, dominant-white <strong>(masks)</strong>*</td><td><code>W20</code> 6%, <code>SB1</code> 2.2%, the rest under 1% each; four homozygotes cannot occur</td><td>natural</td></tr>
-<tr><td><a href="gene-mitf.html">MITF &mdash; splash</a></td><td><span class="allele dom">SW3</span> / <span class="allele dom">SW1</span> / <span class="allele dom">SW5</span> / <span class="allele wild">N</span></td><td>wild, splash, splash-bold, splash-extensive</td><td><code>SW1</code> 4%, <code>SW5</code> 0.6%, <code>SW3</code> 0.4%; no <code>SW3/SW3</code></td><td>natural</td></tr>
-<tr><td><a href="gene-pax3.html">PAX3 &mdash; splash</a></td><td><span class="allele dom">SW2</span> / <span class="allele dom">SW4</span> / <span class="allele wild">N</span></td><td>wild, splash, splash-bold</td><td><code>SW2</code> 2%, <code>SW4</code> 0.5%; no <code>SW4/SW4</code></td><td>natural</td></tr>
+<tr><td>1</td><td><a href="gene-sex.html">sex</a></td><td><span class="allele wild">X</span> / <span class="allele dom">Y</span></td><td>mare, stallion &mdash; <strong>both wild types</strong>&Dagger;</td><td>50 / 50, no <code>Y/Y</code></td><td>neither (paints nothing)</td></tr>
+<tr><td>10</td><td><a href="gene-extension.html">extension</a></td><td><span class="allele dom">E</span> / <span class="allele rec">e</span></td><td>wild, chestnut</td><td>25 / 50 / 25</td><td>natural</td></tr>
+<tr><td>20</td><td><a href="gene-agouti.html">agouti</a></td><td><span class="allele dom">A</span> / <span class="allele rec">a</span></td><td>wild, bay</td><td>25 / 50 / 25</td><td>natural</td></tr>
+<tr><td>30</td><td><a href="gene-silver.html">silver</a></td><td><span class="allele dom">Z</span> / <span class="allele wild">z</span></td><td>wild, silver</td><td>1/60 per allele</td><td>natural</td></tr>
+<tr><td>32</td><td><a href="gene-mushroom.html">mushroom</a></td><td><span class="allele rec">Mu</span> / <span class="allele wild">mu</span></td><td>wild, mushroom-carrier, mushroom</td><td>1/34 per allele</td><td>natural</td></tr>
+<tr><td>34</td><td><a href="gene-dun.html">dun</a></td><td><span class="allele dom">D</span> / <span class="allele dom">d1</span> / <span class="allele wild">d2</span></td><td>wild, primitive-marks, dun&sect;</td><td>1/24 <code>D</code>, 1/10 <code>d1</code></td><td>natural</td></tr>
+<tr><td>40</td><td><a href="gene-matp.html">MATP</a></td><td><span class="allele dom">Cr</span> / <span class="allele rec">prl</span> / <span class="allele wild">N</span></td><td>wild, pearl-carrier, single-cream, classic-pearl, double-dilute</td><td>1/30 <code>Cr</code>, 1/22 <code>prl</code></td><td>natural</td></tr>
+<tr><td>50</td><td><a href="gene-champagne.html">champagne</a></td><td><span class="allele dom">Ch</span> / <span class="allele wild">c</span></td><td>wild, champagne</td><td>1/40 per allele</td><td>natural</td></tr>
+<tr><td>55</td><td><a href="gene-grey.html">grey</a></td><td><span class="allele dom">G</span> / <span class="allele wild">g</span></td><td>wild, grey</td><td>1/16 per allele</td><td>natural</td></tr>
+<tr><td>70</td><td><a href="gene-roan.html">roan</a></td><td><span class="allele dom">Rn</span> / <span class="allele wild">rn</span></td><td>wild, roan</td><td>1/30 per allele</td><td>natural</td></tr>
+<tr><td>72</td><td><a href="gene-tobiano.html">tobiano</a></td><td><span class="allele dom">To</span> / <span class="allele wild">to</span></td><td>wild, tobiano</td><td>1/50 per allele</td><td>natural</td></tr>
+<tr><td>74</td><td><a href="gene-ednrb.html">EDNRB &mdash; frame</a></td><td><span class="allele dom">O</span> / <span class="allele wild">N</span></td><td>wild, frame, lethal-white <strong>(masks)</strong>&dagger;</td><td>1/55 per allele; no <code>O/O</code> founder</td><td>natural</td></tr>
+<tr><td>76</td><td><a href="gene-kit.html">KIT &mdash; white spotting</a></td><td><span class="allele dom">W22</span> / <span class="allele dom">W13</span> / <span class="allele dom">W10</span> / <span class="allele dom">W5</span> / <span class="allele dom">W23</span> / <span class="allele dom">SB1</span> / <span class="allele dom">W20</span> / <span class="allele wild">N</span></td><td>wild, minimal-white, modest-white, sabino, broad-white, extensive-white, near-white, dominant-white <strong>(masks)</strong>*</td><td><code>W20</code> 6%, <code>SB1</code> 2.2%, the rest under 1% each; four homozygotes cannot occur</td><td>natural</td></tr>
+<tr><td>78</td><td><a href="gene-mitf.html">MITF &mdash; splash</a></td><td><span class="allele dom">SW3</span> / <span class="allele dom">SW1</span> / <span class="allele dom">SW5</span> / <span class="allele wild">N</span></td><td>wild, splash, splash-bold, splash-extensive</td><td><code>SW1</code> 4%, <code>SW5</code> 0.6%, <code>SW3</code> 0.4%; no <code>SW3/SW3</code></td><td>natural</td></tr>
+<tr><td>79</td><td><a href="gene-pax3.html">PAX3 &mdash; splash</a></td><td><span class="allele dom">SW2</span> / <span class="allele dom">SW4</span> / <span class="allele wild">N</span></td><td>wild, splash, splash-bold</td><td><code>SW2</code> 2%, <code>SW4</code> 0.5%; no <code>SW4/SW4</code></td><td>natural</td></tr>
+<tr><td>80&ndash;92</td><td colspan="5"><strong>the thirteen non-coat genes</strong> &mdash; see the table below</td></tr>
+<tr><td>110</td><td><a href="gene-pink-hair.html">pink hair</a></td><td><span class="allele rec">Pihr</span> / <span class="allele wild">n</span></td><td>wild, pink-carrier, pink-hair</td><td>1/12 per allele</td><td>magical</td></tr>
+<tr><td>120</td><td><a href="gene-magic-zebra.html">magic zebra</a></td><td><span class="allele dom">Mzeb</span> / <span class="allele wild">n</span></td><td>wild, zebra</td><td>1/100 per allele</td><td>magical</td></tr>
+<tr><td>900</td><td><a href="gene-test.html">test</a></td><td><span class="allele dom">T</span> / <span class="allele wild">t</span></td><td>wild, test-overlay <strong>(masks)</strong></td><td>25% carriers, no homozygotes</td><td>magical</td></tr>
 </tbody>
 </table>
 </div>
@@ -307,13 +326,14 @@ public Expression expressionOf(AllelePair pair) {
     be homozygous sabino <em>or</em> dominant white, never both, because they
     are alleles of one gene competing for two slots. See
     <a href="gene-kit.html">its page</a>.
-    &dagger; <strong><code>O/O</code> is the model&rsquo;s first real lethal, and
-    a different kind from <code>KIT</code>&rsquo;s.</strong> An embryonic lethal
-    is a horse that never existed (<code>canOccur</code> false, no pen); lethal
-    white is a foal that <em>is</em> born, so it occurs, it has its own outcome
-    and it gets a pen &mdash; it is simply never a founder. What is not modelled
-    yet is the death, which waits on the health system (a
-    <a href="roadmap.html">roadmap</a> item). See
+    &dagger; <strong><code>O/O</code> is one of the model&rsquo;s two kinds of
+    lethal.</strong> An <em>embryonic</em> lethal is a horse that never existed
+    (<code>canOccur</code> false, no pen, no founder) &mdash; <code>KIT</code>&rsquo;s
+    four <code>W</code> homozygotes, and <a href="gene-met.html">MET</a>&rsquo;s
+    <code>met/met</code>. Lethal white is the other kind: the foal <em>is</em> born,
+    so it occurs, it has its own masking all-white outcome and it gets a pen &mdash;
+    it is simply never a founder, because a founder is an adult that survived. The
+    death is modelled; see <a href="horse-body.html">the horse&rsquo;s body</a> and
     <a href="gene-ednrb.html">its page</a>.
     &sect; <strong>Dun is the locus with two dominance orders.</strong>
     Dilution reads <code>D &gt; d1 = d2</code> but marking reads
@@ -321,12 +341,60 @@ public Expression expressionOf(AllelePair pair) {
     without diluting anything &mdash; a horse with primitive markings that is
     not a dun. No single dominance label covers both orders, which is the
     clearest case yet for the table. See <a href="gene-dun.html">its page</a>.
-    &Dagger; <strong>Sex is the one gene that never paints.</strong> Both its
-    outcomes are wild types, so it costs the catalogue nothing and is left out of
-    the texture key; it is registered at priority 1 so a future
-    <a href="roadmap.html#sex-linked">sex-linked gene</a> can read a sex that is
-    already resolved, and so a foal&rsquo;s sex is <em>inherited</em> rather
+    &Dagger; <strong>Sex was the first gene that never paints</strong>, and is no
+    longer the only one. Both its outcomes are wild types, so it costs the catalogue
+    nothing and is left out of the texture key; it is registered at priority 1 so a
+    future <a href="roadmap.html#sex-linked">sex-linked gene</a> can read a sex that
+    is already resolved, and so a foal&rsquo;s sex is <em>inherited</em> rather
     than rolled. See <a href="gene-sex.html">its page</a>.
+</p>
+
+<h3 id="non-coat">The thirteen that never paint</h3>
+
+<p>
+    Every outcome of every gene below is a <strong>wild type</strong>, which here means
+    &ldquo;changes nothing <em>about the coat</em>&rdquo;. So <code>affectsCoat()</code>
+    is false for all of them, they are out of the texture key, and the
+    <a href="#catalogue">catalogue</a> collapses each locus to a single entry &mdash;
+    thirteen genes for <strong>zero</strong> catalogue growth, which is the sex
+    locus&rsquo;s trick reused. What they do instead goes through
+    <code>common/trait/</code>: <strong>the machinery is on
+    <a href="horse-body.html">the horse&rsquo;s body</a></strong>, and each gene has its
+    own page. Their order among themselves is arbitrary, because none of them can
+    reach another through the coat.
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Pri.</th><th>Gene</th><th>Alleles</th><th>In the wild</th><th>What it moves</th></tr></thead>
+<tbody>
+<tr><td>80</td><td><a href="gene-mstn.html">MSTN</a></td><td><span class="allele dom">C</span> / <span class="allele wild">T</span></td><td>p(<code>C</code>) = 0.35</td><td><strong>codominant</strong>: each <code>C</code> is +0.020 speed and &minus;2 health</td></tr>
+<tr><td>81</td><td><a href="gene-pdk4.html">PDK4</a></td><td><span class="allele dom">A</span> / <span class="allele wild">G</span></td><td>p(<code>A</code>) = 0.25</td><td>+0.018 speed per copy</td></tr>
+<tr><td>82</td><td><a href="gene-ckm.html">CKM</a></td><td><span class="allele dom">T</span> / <span class="allele wild">C</span></td><td>p(<code>T</code>) = 0.20</td><td>+0.015 speed per copy</td></tr>
+<tr><td>83</td><td><a href="gene-ryr2.html">RYR2</a></td><td><span class="allele dom">J</span> / <span class="allele wild">n</span></td><td>p(<code>J</code>) = 0.20</td><td>+0.09 jump strength per copy</td></tr>
+<tr><td>84</td><td><a href="gene-lcorl.html">LCORL</a></td><td><span class="allele dom">L</span> / <span class="allele wild">n</span></td><td>p(<code>L</code>) = 0.30</td><td>height: +0.05 scale, +0.010 speed, +0.02 jump per copy</td></tr>
+<tr><td>85</td><td><a href="gene-hmga2.html">HMGA2</a></td><td><span class="allele rec">p</span> / <span class="allele wild">N</span></td><td>p(<code>p</code>) = 0.25</td><td>pony: &minus;0.06 scale, &minus;0.008 speed, &minus;0.02 jump, <strong>+2 health</strong> per copy</td></tr>
+<tr><td>86</td><td><a href="gene-acan.html">ACAN</a></td><td><span class="allele rec">D1</span> / <span class="allele rec">D2</span> / <span class="allele rec">D3</span> / <span class="allele rec">D4</span> / <span class="allele wild">N</span></td><td>0.4% per variant; affected combinations excluded</td><td>dwarfism. <strong>Five alleles, fifteen combinations</strong>; affected is &ldquo;no working copy left&rdquo;, so <code>D1/D4</code> counts. <code>D1/D1</code> is lethal at birth, every other <code>D/D</code> is scale &times;0.70 and &minus;6 health</td></tr>
+<tr><td>87</td><td><a href="gene-b4galt7.html">B4GALT7</a></td><td><span class="allele rec">d</span> / <span class="allele wild">N</span></td><td>4.0% carriers</td><td>Friesian dwarfism &mdash; scale &times;0.75, &minus;5 health. <strong>The one disorder a horse lives with</strong></td></tr>
+<tr><td>88</td><td><a href="gene-plod1.html">PLOD1</a></td><td><span class="allele rec">ffs</span> / <span class="allele wild">N</span></td><td>2.6% carriers</td><td>fragile foal syndrome &mdash; lethal at birth</td></tr>
+<tr><td>89</td><td><a href="gene-rapgef5.html">RAPGEF5</a></td><td><span class="allele rec">efih</span> / <span class="allele wild">N</span></td><td>1.4% carriers</td><td>EFIH &mdash; lethal at birth; the most severe and the rarest</td></tr>
+<tr><td>90</td><td><a href="gene-st14.html">ST14</a></td><td><span class="allele rec">nfs</span> / <span class="allele wild">N</span></td><td>1.8% carriers</td><td>naked foal syndrome &mdash; lethal at birth. The bare coat is <em>not</em> drawn</td></tr>
+<tr><td>91</td><td><a href="gene-shox.html">SHOX</a></td><td><span class="allele rec">sa</span> / <span class="allele wild">N</span></td><td>2.0% carriers</td><td>skeletal atavism &mdash; lethal at birth. Pseudoautosomal, so it segregates like an autosome</td></tr>
+<tr><td>92</td><td><a href="gene-met.html">MET</a></td><td><span class="allele rec">met</span> / <span class="allele wild">N</span></td><td>3.0% carriers</td><td><strong>lethal at conception</strong> &mdash; <code>canOccur</code> false, and the pairing produces no foal at all</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    <strong>No founder is ever affected.</strong> Every health founder table lists only
+    the clear horse and the carrier, because a wild-caught horse is an adult that
+    survived &mdash; so the <em>only</em> way to meet a disorder is to breed two
+    carriers. Four colour genes carry one as well:
+    <a href="gene-silver.html">silver</a> <code>Z/Z</code> is MCOA,
+    <a href="gene-ednrb.html">EDNRB</a> <code>O/O</code> is lethal white, and a
+    homozygote at either splash locus (<a href="gene-mitf.html">MITF</a> /
+    <a href="gene-pax3.html">PAX3</a>) is deaf &mdash; one condition with two causes,
+    de-duplicated by id.
 </p>
 
 <p>
@@ -487,7 +555,7 @@ public boolean hasVisibleNonDeterministic();</code></pre>
     </p>
 </div>
 
-<h2>The genotype catalogue</h2>
+<h2 id="catalogue">The genotype catalogue</h2>
 
 <p>
     <code>GenotypeCatalog</code> enumerates every <strong>visually distinct</strong>
@@ -506,7 +574,7 @@ public boolean hasVisibleNonDeterministic();</code></pre>
 <tr><th><code>distinctPairsOf(gene)</code></th><td>One representative per distinct <code>Expression</code> &mdash; the homozygous pair where the group has one. Every wild type is <em>one</em> group, because &ldquo;changes nothing&rdquo; is one look.</td></tr>
 <tr><th><code>totalGenotypes()</code></th><td>The raw product &mdash; every distinct heritable genotype.</td></tr>
 <tr><th><code>size()</code></th><td>The reduced catalogue &mdash; how many of them are distinct to <em>look</em> at.</td></tr>
-<tr><th><code>get(i)</code> / <code>entries()</code></th><td>Read the list, built once at class load.</td></tr>
+<tr><th><code>get(i)</code> / <code>entries()</code></th><td>Read an entry. <strong>Nothing is materialised</strong> &mdash; <code>size()</code> is arithmetic and <code>get(i)</code> reads a mixed-radix odometer, because a two-million-entry <code>List&lt;Genotype&gt;</code> is hundreds of megabytes. <code>entries()</code> is a <em>lazy view</em>: streaming it still walks all of them, so sample it or ask the arithmetic.</td></tr>
 </tbody>
 </table>
 </div>

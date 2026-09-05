@@ -81,13 +81,14 @@ project. Its shape:
   in the other docs are downstream of it. Keep it short and principled - no
   implementation detail, no status, no task lists.
 - **`wiki/roadmap.html`** is the **long-range backlog** - the gene wishlist and
-  the systems it needs (hard-coded gene priority, the modder-facing
-  gene-authoring API, multi-allele loci, non-coat and health genes), each with
-  notes on what would have to change - plus the non-gene features (mare milking,
-  the custom horse spawner). **Only not-yet-done work lives here**: a section is either
-  unbuilt or marked *partly built* with just the remainder; anything finished is
-  deleted and written up on its own page (`wiki/gene-*.html`,
-  `wiki/breeding.html`, `wiki/horse-care.html`, `wiki/pipeline.html`). Section
+  the systems it needs (the modder-facing gene-authoring API, sex-*linked*
+  inheritance, the leopard complex, face markings as a family, gene metadata),
+  each with notes on what would have to change - plus the whole unbuilt gameplay
+  layer (§§11-19) and mare milking. **Only not-yet-done work lives here**: a
+  section is either unbuilt or marked *partly built* with just the remainder;
+  anything finished is deleted and written up on its own page (`wiki/gene-*.html`,
+  `wiki/genetics-model.html`, `wiki/horse-body.html`, `wiki/breeding.html`,
+  `wiki/horse-care.html`, `wiki/pipeline.html`). Section
   numbers are stable (a retired section keeps its slot as a pointer) so
   cross-references don't rot. It is **work items only**; the reasoning lives in
   `wiki/philosophy.html`. Its §21 keeps a **settled** list so a later session
@@ -2403,8 +2404,8 @@ Design follow-ups (not just "go look at it"):
    epigenetics and fixed for life: one grey is a steel four-year-old, another
    near-white, neither changes. Flea-bitten grey and grey melanoma are parked
    with it. The option isn't foreclosed - reopening it means giving the
-   composer a real age input, which today only knows adult vs foal. See
-   `wiki/roadmap.html` §7.4.
+   composer a real age input, which today only knows adult vs foal. It is a
+   **settled** call - `wiki/roadmap.html` §21 and the §6.4 note.
 2. **Foal geometry is approximate** - `Skin.BABY` uses rest-pose AABBs and
    pre-resolved neck/head/ear pivots; markings on the foal face/neck can land
    loosely. Also the foal mesh has no MANE/MUZZLE part, so bay foal "black up
@@ -2488,6 +2489,15 @@ Design follow-ups (not just "go look at it"):
    cheap version elsewhere is a `:common:test` that greps the gene pages for the
    constants they quote. Until then the other pages are a discipline item, which
    is why they are in the session-end routine.
+   **Confirmed by the 2026-09-04 roadmap audit**: `wiki/genetics-model.html` had
+   drifted exactly this way - its gene table was headed "the eighteen registered
+   genes", omitted all thirteen non-coat loci, and still said lethal white's
+   death "waits on the health system" a day after that system shipped. The
+   roadmap itself was the other half of the same rot: shipped sections were
+   marked shipped rather than deleted, so `roadmap.html` had quietly become a
+   second description of built behaviour. Both are fixed; **the lesson is that
+   "mark it shipped" is not the same as "move it", and only moving it keeps one
+   source of truth.**
 14. **Data-driven genes cover markings and dilutions, not everything.** The
    format has no expression language and no way to read another gene, so the
    three built-ins that genuinely need one still can't be expressed as specs:
