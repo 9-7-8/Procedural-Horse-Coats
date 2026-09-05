@@ -20,11 +20,20 @@ import java.util.List;
  * between two genes as a priority number.
  *
  * <h2>Why multipliers exist at all</h2>
- * Only for body scale, and only because dwarfism is a <i>proportional</i>
- * change: a pony with chondrodysplasia should end up small twice over, not be
- * dragged to the same absolute height as a draught horse with it. Speed, health
- * and jump are purely additive, which keeps a gene's weight readable as "this
- * allele is worth two hearts" rather than "it depends".
+ * Among the <b>natural</b> loci, only body scale multiplies, and only because
+ * dwarfism is a <i>proportional</i> change: a pony with chondrodysplasia should
+ * end up small twice over, not be dragged to the same absolute height as a
+ * draught horse with it. The natural speed, health and jump loci are purely
+ * additive, which keeps a gene's weight readable as "this allele is worth two
+ * hearts" rather than "it depends".
+ *
+ * <p>The four <b>magical body-stat</b> genes are the exception, and they are
+ * built to be one: each carries a per-copy percentage that has to <i>scale</i>
+ * whatever the natural loci settled on, so a magically fast pony is still slower
+ * than a magically fast racehorse. They go through {@link #multiplyScaleUnclamped}
+ * and the three siblings added beside it, every one applied after all additions
+ * and bounded only by the {@code MAGICAL_*} guards - the exact counterpart of
+ * the coat's uncapped phase-3 accumulator.
  */
 public final class TraitBuilder {
 
@@ -34,6 +43,9 @@ public final class TraitBuilder {
     private double scale = HorseTraits.BASE_SCALE;
     private double scaleFactor = 1.0;
     private double magicalScaleFactor = 1.0;
+    private double magicalSpeedFactor = 1.0;
+    private double magicalHealthFactor = 1.0;
+    private double magicalJumpFactor = 1.0;
     private final List<Condition> conditions = new ArrayList<>();
 
     TraitBuilder() {
@@ -91,6 +103,30 @@ public final class TraitBuilder {
         return this;
     }
 
+    /**
+     * Movement speed <b>outside the natural range</b> - the magical escape
+     * hatch for speed, the exact shape of {@link #multiplyScaleUnclamped}. The
+     * natural speed loci add; a magical one multiplies whatever they produced,
+     * so it composes the way you would want and stays bounded only by
+     * {@link HorseTraits#MAGICAL_MIN_FACTOR} / {@link HorseTraits#MAGICAL_MAX_FACTOR}.
+     */
+    public TraitBuilder multiplySpeedUnclamped(double factor) {
+        magicalSpeedFactor *= factor;
+        return this;
+    }
+
+    /** Max health outside the natural range - see {@link #multiplySpeedUnclamped}. */
+    public TraitBuilder multiplyHealthUnclamped(double factor) {
+        magicalHealthFactor *= factor;
+        return this;
+    }
+
+    /** Jump strength outside the natural range - see {@link #multiplySpeedUnclamped}. */
+    public TraitBuilder multiplyJumpUnclamped(double factor) {
+        magicalJumpFactor *= factor;
+        return this;
+    }
+
     /** Report a disorder this horse expresses. Duplicates are ignored. */
     public TraitBuilder condition(Condition condition) {
         if (!conditions.contains(condition)) {
@@ -111,10 +147,21 @@ public final class TraitBuilder {
         double magical = Math.min(HorseTraits.MAGICAL_MAX_SCALE,
                 Math.max(HorseTraits.MAGICAL_MIN_SCALE, natural * magicalScaleFactor));
         return new Traits(
-                Math.max(HorseTraits.MIN_SPEED, speed),
-                Math.max(HorseTraits.MIN_HEALTH, health),
-                Math.max(HorseTraits.MIN_JUMP, jump),
+                Math.max(HorseTraits.MIN_SPEED, speed * magicFactor(magicalSpeedFactor)),
+                Math.max(HorseTraits.MIN_HEALTH, health * magicFactor(magicalHealthFactor)),
+                Math.max(HorseTraits.MIN_JUMP, jump * magicFactor(magicalJumpFactor)),
                 magical,
                 conditions);
+    }
+
+    /**
+     * A magical body-stat multiplier, clamped to the {@code MAGICAL_*_FACTOR}
+     * guard. The bounded Gaussian on the genes that call it keeps the real
+     * range near {@code 2x}, so this only ever catches a genuinely broken
+     * accumulation.
+     */
+    private static double magicFactor(double factor) {
+        return Math.min(HorseTraits.MAGICAL_MAX_FACTOR,
+                Math.max(HorseTraits.MAGICAL_MIN_FACTOR, factor));
     }
 }

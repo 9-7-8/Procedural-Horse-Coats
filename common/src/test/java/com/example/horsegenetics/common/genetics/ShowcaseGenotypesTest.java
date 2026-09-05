@@ -46,9 +46,14 @@ class ShowcaseGenotypesTest {
             }
         }
         double share = with / (double) DRAWS;
-        assertTrue(share > 0.44 && share < 0.60,
+        // MAGICAL_CHANCE is a floor, not a rate: every draw is force()d to a
+        // painting magical gene half the time, and the other half still lands
+        // one incidentally about a fifth of the time - so the true share sits
+        // above the coin, nearer 0.6, and the band only has to catch "never
+        // forced" (~0.1) and "always" (1.0).
+        assertTrue(share > 0.44 && share < 0.66,
                 "magical share drifted to " + share + " (expected about "
-                        + ShowcaseGenotypes.MAGICAL_CHANCE + ")");
+                        + ShowcaseGenotypes.MAGICAL_CHANCE + " plus an incidental tail)");
     }
 
     /** Expressing, and not by hiding everything else. */

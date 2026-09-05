@@ -275,11 +275,15 @@ class GenotypeCatalogTest {
 
     @Test
     void theCatalogueIsFarSmallerThanTheRawAlleleProduct() {
-        long raw = 1L;
+        // BigInteger, not long: the raw product passed 2^63 several genes ago
+        // (see wiki/roadmap.html gap on totalGenotypes()), and a wrapped long
+        // makes this comparison meaningless.
+        java.math.BigInteger raw = java.math.BigInteger.ONE;
         for (Gene gene : Genes.codeOrder()) {
-            raw *= GenotypeCatalog.allPairsOf(gene).size();
+            raw = raw.multiply(java.math.BigInteger.valueOf(GenotypeCatalog.allPairsOf(gene).size()));
         }
-        assertFalse(GenotypeCatalog.size() >= raw, "the same-expression reduction should have removed duplicates");
+        assertTrue(java.math.BigInteger.valueOf(GenotypeCatalog.size()).compareTo(raw) < 0,
+                "the same-expression reduction should have removed duplicates");
     }
 
     /** Can any combination of this gene hide every other gene? */

@@ -81,6 +81,19 @@ public final class HorseTraits {
     public static final double MAGICAL_MIN_SCALE = 0.1;
     public static final double MAGICAL_MAX_SCALE = 10.0;
 
+    /**
+     * Bounds for a <b>magical</b> speed / health / jump multiplier, applied
+     * after every additive locus has had its say - see
+     * {@link TraitBuilder#multiplySpeedUnclamped} and its two siblings. Ten
+     * times either way, the same shape as the scale bounds above: far enough
+     * that a magical stat gene is a real departure and near enough that the
+     * guard only exists to stop two absurd draws compounding into nonsense. The
+     * bounded Gaussian on those genes keeps the true reach near {@code 2x}, so
+     * this clamp never actually fires.
+     */
+    public static final double MAGICAL_MIN_FACTOR = 0.1;
+    public static final double MAGICAL_MAX_FACTOR = 10.0;
+
     private HorseTraits() {
     }
 

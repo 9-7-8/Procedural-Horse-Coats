@@ -13,7 +13,10 @@ import com.example.horsegenetics.common.genetics.genes.HealerGene;
 import com.example.horsegenetics.common.genetics.genes.Hmga2Gene;
 import com.example.horsegenetics.common.genetics.genes.LcorlGene;
 import com.example.horsegenetics.common.genetics.genes.LightGene;
+import com.example.horsegenetics.common.genetics.genes.MagicHealthGene;
+import com.example.horsegenetics.common.genetics.genes.MagicJumpGene;
 import com.example.horsegenetics.common.genetics.genes.MagicSizeGene;
+import com.example.horsegenetics.common.genetics.genes.MagicSpeedGene;
 import com.example.horsegenetics.common.genetics.genes.MagicZebraGene;
 import com.example.horsegenetics.common.genetics.genes.ManeColorGene;
 import com.example.horsegenetics.common.genetics.genes.MilkGene;
@@ -122,7 +125,8 @@ public final class Genes {
     /**
      * The <b>magical utility genes</b> - the second wave of magic, and the first
      * genes whose point is what the horse <i>does</i> rather than what it looks
-     * like. Four of them ({@link MilkGene}, {@link MagicSizeGene},
+     * like. Several of them ({@link MilkGene}, {@link MagicSizeGene},
+     * {@link MagicSpeedGene}, {@link MagicHealthGene}, {@link MagicJumpGene},
      * {@link LightGene}, {@link VerdantGene}, {@link HealerGene}) reach the game
      * through {@link AbilityContribution} or
      * {@link com.example.horsegenetics.common.trait.EpigeneticTraitContribution}
@@ -137,6 +141,9 @@ public final class Genes {
      */
     public static final MilkGene MILK = new MilkGene();
     public static final MagicSizeGene BODY_SIZE = new MagicSizeGene();
+    public static final MagicSpeedGene MAGIC_SPEED = new MagicSpeedGene();
+    public static final MagicHealthGene MAGIC_HEALTH = new MagicHealthGene();
+    public static final MagicJumpGene MAGIC_JUMP = new MagicJumpGene();
     public static final ManeColorGene MANE_COLOR = new ManeColorGene();
     public static final TailColorGene TAIL_COLOR = new TailColorGene();
     public static final ParticleGene PARTICLE = new ParticleGene();
@@ -187,7 +194,8 @@ public final class Genes {
             SEX, EXTENSION, AGOUTI, TEST, CHAMPAGNE, GREY, MATP,
             MAGIC_ZEBRA, PINK_HAIR, DUN, SILVER, MUSHROOM, ROAN, TOBIANO,
             EDNRB, KIT, MITF, PAX3,
-            MILK, BODY_SIZE, MANE_COLOR, TAIL_COLOR, PARTICLE, LIGHT, HEALER, VERDANT,
+            MILK, BODY_SIZE, MAGIC_SPEED, MAGIC_HEALTH, MAGIC_JUMP,
+            MANE_COLOR, TAIL_COLOR, PARTICLE, LIGHT, HEALER, VERDANT,
             MSTN, PDK4, CKM, RYR2, LCORL, HMGA2,
             ACAN, B4GALT7, PLOD1, RAPGEF5, ST14, SHOX, MET);
 
