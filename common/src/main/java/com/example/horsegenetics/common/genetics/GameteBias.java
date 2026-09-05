@@ -27,11 +27,11 @@ import java.util.Optional;
  *       recessive one) rather than the 50/50 coin. A no-op at a homozygous
  *       locus - which is exactly the "does nothing when the parent has no
  *       dominant allele" the carrot is documented to have.</li>
- *   <li><b>{@code substitutePairs}</b> - the <i>Unknown Gene Splice</i> carrot
- *       and every <i>magic gene carrot</i>: for the named gene, draw this
- *       parent's gamete from the substitute pair instead of its real one. Magic
- *       carrot for gene G &rarr; {@code {G: n/G}} (heterozygous) or
- *       {@code {G: G/G}} (homozygous); gene splice &rarr;
+ *   <li><b>{@code substitutePairs}</b> - the <i>Unknown Gene Splice</i> and
+ *       <i>Known Gene Splice</i> carrots: for the named gene, draw this parent's
+ *       gamete from the substitute pair instead of its real one. Known Gene
+ *       Splice for gene G &rarr; {@code {G: n/G}} (heterozygous) or
+ *       {@code {G: G/G}} (homozygous); Unknown Gene Splice &rarr;
  *       {@code {G: <the pair the splice table rolled>}}. A substituted copy
  *       always gets a fresh epigenetic seed - there is no real parent copy
  *       behind it.</li>

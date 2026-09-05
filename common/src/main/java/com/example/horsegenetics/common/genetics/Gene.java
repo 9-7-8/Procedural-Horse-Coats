@@ -98,7 +98,7 @@ public interface Gene {
     }
 
     /**
-     * Whether a <b>magic gene carrot</b> exists for this gene (&sect;14.2).
+     * Whether a <b>Known Gene Splice carrot</b> exists for this gene (&sect;14.2).
      * True for almost every gene; a handful turn it off because a carrot for
      * them is nonsense or hostile - the {@link com.example.horsegenetics.common.genetics.genes.SexGene
      * sex locus} and the recessive lethals. The parameterised carrot recipe

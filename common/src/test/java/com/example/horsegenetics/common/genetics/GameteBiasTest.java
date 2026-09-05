@@ -38,9 +38,9 @@ class GameteBiasTest {
         }
     }
 
-    /** A magic gene carrot forces the fed parent's gamete for that one gene. */
+    /** A Known Gene Splice carrot forces the fed parent's gamete for that one gene. */
     @Test
-    void magicGeneCarrotForcesTheGameteHomozygous() {
+    void knownGeneSpliceCarrotForcesTheGameteHomozygous() {
         Genome dam = withExtension("e/e", 10);   // dam has no E of her own
         Genome sire = withExtension("e/e", 11);
         GameteBias damBias = GameteBias.substituting(

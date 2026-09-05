@@ -88,7 +88,7 @@ public final class ModItems {
     public static final DeferredItem<Item> STABILIZER_CARROT = simple("stabilizer_carrot");
     public static final DeferredItem<Item> MAGNIFIER_CARROT = simple("magnifier_carrot");
 
-    // --- magic gene carrot (roadmap §14.2) - one generic item for now -----
+    // --- Known Gene Splice carrot (roadmap §14.2) - parameterised by a paper ---
     public static final DeferredItem<Item> KNOWN_GENE_SPLICE_CARROT = simple("known_gene_splice_carrot");
 
     // --- knowledge (roadmap §16.2) - the research paper -------------------

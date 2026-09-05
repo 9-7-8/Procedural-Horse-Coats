@@ -76,7 +76,7 @@ public record Genome(Genotype genotype, Epigenome epigenome) {
      *       recessive copy" (the {@code nextBoolean()} is still <i>consumed</i>,
      *       so the other parent's stream stays aligned);</li>
      *   <li>draw that parent's gamete for a named gene from a substitute pair
-     *       (magic gene carrot, gene-splice carrot);</li>
+     *       (Known Gene Splice carrot, Unknown Gene Splice carrot);</li>
      *   <li>hand the contributed copy a fresh epigenetic seed rather than the
      *       parent copy's own (epigenetic-splice carrot, and always for a substituted
      *       copy) - which consumes one {@code int} + one {@code long} extra.</li>

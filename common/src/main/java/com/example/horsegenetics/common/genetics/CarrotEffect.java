@@ -52,7 +52,7 @@ public sealed interface CarrotEffect {
     }
 
     /**
-     * A <i>magic gene carrot</i> - treat this parent as {@code n<gene>}
+     * A <i>Known Gene Splice carrot</i> - treat this parent as {@code n<gene>}
      * ({@code homozygous=false}, the default) or {@code <gene><gene>}
      * ({@code homozygous=true}) for that one gene's gamete. Normal Mendelian
      * rules apply from there.
