@@ -36,7 +36,7 @@ import java.util.function.Predicate;
  * {@link Genes#codeOrder()} - so a founder's genotype is reproducible from the
  * RNG stream. Founders only: breeding never consults this table.
  *
- * <p>The same shape serves the chaos carrot's per-gene distribution
+ * <p>The same shape serves the Unknown Gene Splice carrot's per-gene distribution
  * ({@code wiki/roadmap.html} §14.1) when that lands.
  */
 public final class FounderTable {

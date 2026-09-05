@@ -15,7 +15,7 @@ import net.minecraft.resources.Identifier;
 /**
  * The reader's whole {@link GeneDatabaseData} book, pushed on discovery / paper
  * read / login. {@code seenByGene} keys are the genes the player has met;
- * {@code carrotUnlocked} is the subset whose magic-carrot recipe is unlocked.
+ * {@code carrotUnlocked} is the subset whose gene-carrot recipe is unlocked.
  * Client-side it only drives the browser tab - the recipe gate is always
  * re-checked on the server.
  */

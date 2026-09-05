@@ -16,29 +16,29 @@ import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.Level;
 
 /**
- * The <b>one parameterised magic-carrot recipe</b> (roadmap wiki &sect;14.2):
+ * The <b>one parameterised gene-carrot recipe</b> (roadmap wiki &sect;14.2):
  * golden carrot + a {@code research_paper} + a hair item + the rarity item for
  * that gene's tier + at least one flavour ingredient &rarr; a
- * {@code magic_gene_carrot} carrying that gene's
- * {@code magic:<gene>:het|hom} effect.
+ * {@code known_gene_splice_carrot} carrying that gene's
+ * {@code known:<gene>:het|hom} effect.
  *
  * <p>One recipe rather than N generated per-gene recipes, so a drop-in gene
  * file gets its carrot the moment it registers - no datapack. The recipe reads
  * the gene off the paper at craft time.
  */
-public class MagicCarrotRecipe extends CustomRecipe {
+public class KnownGeneSpliceRecipe extends CustomRecipe {
 
-    public static final MapCodec<MagicCarrotRecipe> MAP_CODEC = MapCodec.unit(MagicCarrotRecipe::new);
-    public static final StreamCodec<RegistryFriendlyByteBuf, MagicCarrotRecipe> STREAM_CODEC =
-            StreamCodec.unit(new MagicCarrotRecipe());
-    public static final RecipeSerializer<MagicCarrotRecipe> SERIALIZER =
+    public static final MapCodec<KnownGeneSpliceRecipe> MAP_CODEC = MapCodec.unit(KnownGeneSpliceRecipe::new);
+    public static final StreamCodec<RegistryFriendlyByteBuf, KnownGeneSpliceRecipe> STREAM_CODEC =
+            StreamCodec.unit(new KnownGeneSpliceRecipe());
+    public static final RecipeSerializer<KnownGeneSpliceRecipe> SERIALIZER =
             new RecipeSerializer<>(MAP_CODEC, STREAM_CODEC);
 
     private static boolean isHair(ItemStack s) {
         return s.is(ModItems.HORSE_HAIR.get()) || s.is(ModItems.HAIR_CLOTH.get());
     }
 
-    /** The gene the paper in this grid documents, if the grid is otherwise a valid magic-carrot craft. */
+    /** The gene the paper in this grid documents, if the grid is otherwise a valid gene-carrot craft. */
     private static Gene resolve(CraftingInput input) {
         Gene gene = null;
         int gold = 0;
@@ -60,7 +60,7 @@ public class MagicCarrotRecipe extends CustomRecipe {
                 hair++;
             }
         }
-        if (gold != 1 || paper != 1 || hair < 1 || gene == null || !gene.hasMagicCarrot()) {
+        if (gold != 1 || paper != 1 || hair < 1 || gene == null || !gene.hasGeneCarrot()) {
             return null;
         }
         // rarity item + at least one flavour: gold carrot + paper + hair + rarity + >=1 more
@@ -88,14 +88,14 @@ public class MagicCarrotRecipe extends CustomRecipe {
         if (gene == null) {
             return ItemStack.EMPTY;
         }
-        ItemStack out = new ItemStack(ModItems.MAGIC_GENE_CARROT.get());
-        String token = "magic:" + gene.key() + (gene.magicCarrotHomozygous() ? ":hom" : ":het");
+        ItemStack out = new ItemStack(ModItems.KNOWN_GENE_SPLICE_CARROT.get());
+        String token = "known:" + gene.key() + (gene.geneCarrotHomozygous() ? ":hom" : ":het");
         out.set(ModDataComponents.CARROT_EFFECTS.get(), List.of(token));
         return out;
     }
 
     @Override
-    public RecipeSerializer<MagicCarrotRecipe> getSerializer() {
+    public RecipeSerializer<KnownGeneSpliceRecipe> getSerializer() {
         return SERIALIZER;
     }
 }

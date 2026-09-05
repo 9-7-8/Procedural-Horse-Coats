@@ -42,8 +42,8 @@ public final class ModDataComponents {
     /**
      * The breeding-carrot effects an item carries, as
      * {@link com.example.horsegenetics.common.genetics.CarrotEffect#id()}
-     * tokens (roadmap &sect;14): the four base carrots carry one, a magic gene
-     * carrot carries its {@code magic:<gene>:het|hom}, a combination carrot
+     * tokens (roadmap &sect;14): the four base carrots carry one, a Known Gene Splice
+     * carrot carries its {@code known:<gene>:het|hom}, a combination carrot
      * carries the merged list.
      */
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<List<String>>> CARROT_EFFECTS =

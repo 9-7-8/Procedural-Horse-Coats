@@ -4,9 +4,9 @@
   "ingredients": [
     "minecraft:golden_carrot",
     "horsegenetics:horse_hair",
-    "minecraft:gunpowder"
+    "minecraft:fermented_spider_eye"
   ],
   "result": {
-    "id": "horsegenetics:chaos_carrot"
+    "id": "horsegenetics:unknown_epigenetic_splice_carrot"
   }
 }

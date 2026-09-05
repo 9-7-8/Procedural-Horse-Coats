@@ -22,7 +22,7 @@ import net.neoforged.neoforge.event.entity.player.PlayerEvent;
  * {@link HorseBreedingHandler#applyBredFoal}). Reading a paper is the third
  * route and lives on {@link com.example.horsegenetics.neoforge.item.ResearchPaperItem}.
  *
- * <p>The database gates nothing but the magic-carrot recipe - every gene a
+ * <p>The database gates nothing but the gene-carrot recipe - every gene a
  * horse carries still shows on the info panel and the genotype code regardless.
  */
 @EventBusSubscriber

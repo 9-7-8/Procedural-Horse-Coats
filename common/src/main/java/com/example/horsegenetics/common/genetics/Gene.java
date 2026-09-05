@@ -87,7 +87,7 @@ public interface Gene {
     // ------------------------------------------------------------------
 
     /**
-     * How rare this gene is - the axis the magic-carrot recipe cost, the
+     * How rare this gene is - the axis the gene-carrot recipe cost, the
      * research-paper loot weighting and the villager stock all sort on. A real
      * enum; the tier&rarr;rarity-item mapping stays on the recipe side. The
      * default is {@link GeneRarity#DEFAULT}, the gold-ingot tier (settled,
@@ -104,28 +104,29 @@ public interface Gene {
      * sex locus} and the recessive lethals. The parameterised carrot recipe
      * simply refuses a research paper naming a gene that returns {@code false}.
      */
-    default boolean hasMagicCarrot() {
+    default boolean hasGeneCarrot() {
         return true;
     }
 
     /**
-     * Whether this gene's magic carrot makes the game treat the fed parent as
+     * Whether this gene's gene carrot makes the game treat the fed parent as
      * <b>homozygous</b> ({@code <Gene><Gene>}) rather than the default
      * <b>heterozygous</b> ({@code n<Gene>}) for that gamete (&sect;14.2).
      */
-    default boolean magicCarrotHomozygous() {
+    default boolean geneCarrotHomozygous() {
         return false;
     }
 
     /**
-     * What the <b>chaos carrot</b> rolls when it lands on this gene (&sect;14.1)
-     * - a distribution over this gene's own combinations, the same shape as
-     * {@link #founderTable} and kept separate so the two can differ. An author
-     * can make it guarantee a heterozygote, forbid a homozygote, keep it always
-     * wild type... A gene that declares none gets a <b>uniform draw over its
-     * viable combinations</b> (the caller builds that fallback).
+     * What the <b>Unknown Gene Splice carrot</b> rolls when it lands on this
+     * gene (&sect;14.1) - a distribution over this gene's own combinations, the
+     * same shape as {@link #founderTable} and kept separate so the two can
+     * differ. An author can make it guarantee a heterozygote, forbid a
+     * homozygote, keep it always wild type... A gene that declares none gets a
+     * <b>uniform draw over its viable combinations</b> (the caller builds that
+     * fallback). Authored as a spec gene's {@code splice} block.
      */
-    default java.util.Optional<FounderTable> chaosTable() {
+    default java.util.Optional<FounderTable> spliceTable() {
         return java.util.Optional.empty();
     }
 

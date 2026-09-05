@@ -22,9 +22,12 @@ public sealed interface CarrotEffect {
     /** A stable token for serialisation and tooltips. */
     String id();
 
-    /** <i>Mutinogenic</i> - re-roll the epigenetic seed of every copy this parent passes on. */
-    record Mutinogenic() implements CarrotEffect {
-        @Override public String id() { return "mutinogenic"; }
+    /**
+     * The <b>Unknown Epigenetic Splice</b> carrot - re-roll the epigenetic seed
+     * of every copy this parent passes on. The alleles are untouched.
+     */
+    record EpigeneticSplice() implements CarrotEffect {
+        @Override public String id() { return "epigenetic_splice"; }
     }
 
     /** <i>Stabilizer</i> - contribute the dominant (earlier-declared) copy at every heterozygous locus. */
@@ -38,13 +41,14 @@ public sealed interface CarrotEffect {
     }
 
     /**
-     * <i>Chaos</i> - pick one random gene and draw this parent's gamete for it
-     * from that gene's chaos distribution ({@link Gene#chaosTable()}, or a
-     * uniform draw over its viable pairs if it declares none). The gene and the
-     * pair are rolled at breeding time off the foal's own deterministic RNG.
+     * The <b>Unknown Gene Splice</b> carrot - pick one random gene and draw this
+     * parent's gamete for it from that gene's splice distribution
+     * ({@link Gene#spliceTable()}, or a uniform draw over its viable pairs if it
+     * declares none). The gene and the pair are rolled at breeding time off the
+     * foal's own deterministic RNG.
      */
-    record Chaos() implements CarrotEffect {
-        @Override public String id() { return "chaos"; }
+    record GeneSplice() implements CarrotEffect {
+        @Override public String id() { return "gene_splice"; }
     }
 
     /**
@@ -53,8 +57,8 @@ public sealed interface CarrotEffect {
      * ({@code homozygous=true}) for that one gene's gamete. Normal Mendelian
      * rules apply from there.
      */
-    record MagicGene(String geneKey, boolean homozygous) implements CarrotEffect {
-        @Override public String id() { return "magic:" + geneKey + (homozygous ? ":hom" : ":het"); }
+    record KnownGeneSplice(String geneKey, boolean homozygous) implements CarrotEffect {
+        @Override public String id() { return "known:" + geneKey + (homozygous ? ":hom" : ":het"); }
     }
 
     // ------------------------------------------------------------------
@@ -67,15 +71,15 @@ public sealed interface CarrotEffect {
             return java.util.Optional.empty();
         }
         switch (token) {
-            case "mutinogenic": return java.util.Optional.of(new Mutinogenic());
+            case "epigenetic_splice": return java.util.Optional.of(new EpigeneticSplice());
             case "stabilizer": return java.util.Optional.of(new Stabilizer());
             case "magnifier": return java.util.Optional.of(new Magnifier());
-            case "chaos": return java.util.Optional.of(new Chaos());
+            case "gene_splice": return java.util.Optional.of(new GeneSplice());
             default:
-                if (token.startsWith("magic:")) {
+                if (token.startsWith("known:")) {
                     String[] p = token.split(":", 3);
                     if (p.length == 3 && (p[2].equals("hom") || p[2].equals("het"))) {
-                        return java.util.Optional.of(new MagicGene(p[1], p[2].equals("hom")));
+                        return java.util.Optional.of(new KnownGeneSplice(p[1], p[2].equals("hom")));
                     }
                 }
                 return java.util.Optional.empty();
@@ -99,7 +103,7 @@ public sealed interface CarrotEffect {
         return List.copyOf(out);
     }
 
-    /** True if this list contains both a stabilizer and a magnifier, or two magic carrots that disagree. */
+    /** True if this list contains both a stabilizer and a magnifier, or two gene carrots that disagree. */
     static boolean isContradictory(List<CarrotEffect> effects) {
         boolean stab = false;
         boolean magn = false;
@@ -109,7 +113,7 @@ public sealed interface CarrotEffect {
                 stab = true;
             } else if (e instanceof Magnifier) {
                 magn = true;
-            } else if (e instanceof MagicGene mg) {
+            } else if (e instanceof KnownGeneSplice mg) {
                 Boolean prev = magic.putIfAbsent(mg.geneKey(), mg.homozygous());
                 if (prev != null && prev != mg.homozygous()) {
                     return true;
@@ -123,9 +127,9 @@ public sealed interface CarrotEffect {
 
     /**
      * Collapse a carrot's effect list into one {@link GameteBias} for this
-     * parent. {@code parentGenotype} is read only to size a uniform chaos draw;
-     * {@code rng} is the foal's breeding RNG, so the result is deterministic per
-     * foal. An empty list yields {@link GameteBias#NONE}.
+     * parent. {@code parentGenotype} is read only to size a uniform gene-splice
+     * draw; {@code rng} is the foal's breeding RNG, so the result is
+     * deterministic per foal. An empty list yields {@link GameteBias#NONE}.
      */
     static GameteBias fold(List<CarrotEffect> effects, Genotype parentGenotype, Rng rng) {
         if (effects.isEmpty()) {
@@ -136,18 +140,18 @@ public sealed interface CarrotEffect {
         Map<String, AllelePair> subs = new LinkedHashMap<>();
 
         for (CarrotEffect e : effects) {
-            if (e instanceof Mutinogenic) {
+            if (e instanceof EpigeneticSplice) {
                 reroll = true;
             } else if (e instanceof Stabilizer) {
                 prefer = Boolean.TRUE;
             } else if (e instanceof Magnifier) {
                 prefer = Boolean.FALSE;
-            } else if (e instanceof Chaos) {
-                Gene g = randomChaosGene(rng);
-                subs.put(g.key(), chaosPair(g, rng));
-            } else if (e instanceof MagicGene mg) {
+            } else if (e instanceof GeneSplice) {
+                Gene g = randomSpliceGene(rng);
+                subs.put(g.key(), splicePair(g, rng));
+            } else if (e instanceof KnownGeneSplice mg) {
                 Gene g = Genes.byKeyOrNull(mg.geneKey());
-                if (g != null && g.hasMagicCarrot()) {
+                if (g != null && g.hasGeneCarrot()) {
                     subs.put(g.key(), magicPair(g, mg.homozygous()));
                 }
             }
@@ -159,7 +163,7 @@ public sealed interface CarrotEffect {
     }
 
     /** Every gene except the sex locus - a carrot must not flip a foal's sex (that is roadmap §5.3). */
-    private static Gene randomChaosGene(Rng rng) {
+    private static Gene randomSpliceGene(Rng rng) {
         List<Gene> pool = new ArrayList<>();
         for (Gene g : Genes.codeOrder()) {
             if (!g.key().equals(Genes.SEX.key())) {
@@ -169,8 +173,8 @@ public sealed interface CarrotEffect {
         return pool.get(rng.nextInt(pool.size()));
     }
 
-    private static AllelePair chaosPair(Gene gene, Rng rng) {
-        return gene.chaosTable()
+    private static AllelePair splicePair(Gene gene, Rng rng) {
+        return gene.spliceTable()
                 .map(t -> t.draw(rng))
                 .orElseGet(() -> {
                     List<AllelePair> pairs = GenotypeCatalog.allPairsOf(gene);

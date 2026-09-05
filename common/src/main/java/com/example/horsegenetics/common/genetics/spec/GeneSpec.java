@@ -65,15 +65,15 @@ public record GeneSpec(
         String blurb,
         GeneRarity rarity,
         Carrot carrot,
-        List<FounderWeight> chaos) {
+        List<FounderWeight> splice) {
 
     /**
      * The current format version. <b>3</b> adds the gameplay-economy metadata
      * (roadmap wiki &sect;19): an optional {@code blurb} (a gene-level summary),
      * {@code rarity} (a tier enum), a {@code carrot} block (opt-out + behaviour
-     * + flavour ingredients) and an optional {@code chaos} table (what the
-     * chaos carrot rolls on this gene). All four are optional - a format-2 file
-     * that only bumps its version number still loads.
+     * + flavour ingredients) and an optional {@code splice} table (what the
+     * Unknown Gene Splice carrot rolls on this gene). All four are optional - a
+     * format-2 file that only bumps its version number still loads.
      *
      * <p><b>2</b> was the combination-table rewrite: {@code dominance} and
      * {@code wildOdds} gone, {@code layers} and {@code effects} moved inside an
@@ -82,8 +82,8 @@ public record GeneSpec(
     public static final int FORMAT = 3;
 
     /**
-     * The magic-carrot block (roadmap &sect;14.2). {@code enabled} is the
-     * opt-out flag surfaced as {@link com.example.horsegenetics.common.genetics.Gene#hasMagicCarrot()};
+     * The gene-carrot block (roadmap &sect;14.2). {@code enabled} is the
+     * opt-out flag surfaced as {@link com.example.horsegenetics.common.genetics.Gene#hasGeneCarrot()};
      * {@code homozygous} chooses whether feeding the carrot makes the game treat
      * the parent as {@code <Gene><Gene>} rather than {@code n<Gene>} for that
      * gamete; {@code flavour} is the extra recipe ingredients (item ids).

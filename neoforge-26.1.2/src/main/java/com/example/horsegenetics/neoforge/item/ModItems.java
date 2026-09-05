@@ -27,15 +27,15 @@ import net.neoforged.neoforge.registries.DeferredRegister;
  *       floor. Hair is sheared off a horse (mechanic not built); 4 hair craft
  *       a bundle and back (roadmap &sect;12.2, first two rungs only - rope and
  *       cloth are not built).</li>
- *   <li><b>Breeding carrots</b> ({@link #MUTINOGENIC_CARROT},
- *       {@link #CHAOS_CARROT}, {@link #STABILIZER_CARROT},
+ *   <li><b>Breeding carrots</b> ({@link #UNKNOWN_EPIGENETIC_SPLICE_CARROT},
+ *       {@link #UNKNOWN_GENE_SPLICE_CARROT}, {@link #STABILIZER_CARROT},
  *       {@link #MAGNIFIER_CARROT}) - the four general breeding modifiers.</li>
- *   <li><b>{@link #MAGIC_GENE_CARROT}</b> - one item parameterised by a
- *       {@code carrot_effects} component holding a {@code magic:<gene>:het|hom}
- *       token, produced by the paper-driven {@code MagicCarrotRecipe}.</li>
+ *   <li><b>{@link #KNOWN_GENE_SPLICE_CARROT}</b> - one item parameterised by a
+ *       {@code carrot_effects} component holding a {@code known:<gene>:het|hom}
+ *       token, produced by the paper-driven {@code KnownGeneSpliceRecipe}.</li>
  *   <li><b>{@link #RESEARCH_PAPER}</b> ({@link ResearchPaperItem}) - carries a
  *       {@code gene} component; read to unlock that gene's carrot recipe, and
- *       the ingredient {@code MagicCarrotRecipe} matches on.</li>
+ *       the ingredient {@code KnownGeneSpliceRecipe} matches on.</li>
  *   <li><b>{@link #EMPTY_SEED_JAR} / {@link #STALLION_SEED_JAR}</b> - the
  *       assisted-reproduction vessels. Items only; no collection / pregnancy
  *       mechanic (owner: IVF is out of scope for now).</li>
@@ -83,18 +83,18 @@ public final class ModItems {
     public static final DeferredItem<Item> HAIR_CLOTH = simple("hair_cloth");
 
     // --- the four breeding carrots (roadmap §14.1) -------------------------
-    public static final DeferredItem<Item> MUTINOGENIC_CARROT = simple("mutinogenic_carrot");
-    public static final DeferredItem<Item> CHAOS_CARROT = simple("chaos_carrot");
+    public static final DeferredItem<Item> UNKNOWN_EPIGENETIC_SPLICE_CARROT = simple("unknown_epigenetic_splice_carrot");
+    public static final DeferredItem<Item> UNKNOWN_GENE_SPLICE_CARROT = simple("unknown_gene_splice_carrot");
     public static final DeferredItem<Item> STABILIZER_CARROT = simple("stabilizer_carrot");
     public static final DeferredItem<Item> MAGNIFIER_CARROT = simple("magnifier_carrot");
 
     // --- magic gene carrot (roadmap §14.2) - one generic item for now -----
-    public static final DeferredItem<Item> MAGIC_GENE_CARROT = simple("magic_gene_carrot");
+    public static final DeferredItem<Item> KNOWN_GENE_SPLICE_CARROT = simple("known_gene_splice_carrot");
 
     // --- knowledge (roadmap §16.2) - the research paper -------------------
     // Carries a `gene` component. Reading it adds the gene to the player's
-    // database and unlocks that gene's magic-carrot recipe; it is also the
-    // ingredient the parameterised MagicCarrotRecipe matches on.
+    // database and unlocks that gene's carrot recipe; it is also the
+    // ingredient the parameterised KnownGeneSpliceRecipe matches on.
     public static final DeferredItem<ResearchPaperItem> RESEARCH_PAPER =
             register("research_paper", ResearchPaperItem::new);
 

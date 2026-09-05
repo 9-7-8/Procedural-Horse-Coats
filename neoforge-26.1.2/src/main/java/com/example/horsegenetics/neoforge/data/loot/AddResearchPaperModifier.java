@@ -58,7 +58,7 @@ public class AddResearchPaperModifier extends LootModifier {
         List<Gene> pool = new ArrayList<>();
         int total = 0;
         for (Gene g : Genes.codeOrder()) {
-            if (g.hasMagicCarrot()) {
+            if (g.hasGeneCarrot()) {
                 pool.add(g);
                 total += g.rarity().lootWeight();
             }

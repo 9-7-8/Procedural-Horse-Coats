@@ -29,10 +29,10 @@ import java.util.Locale;
  * panel and genotype code always show every gene it carries). A gene the player
  * has <b>met</b> - by taming or breeding a horse that carries it, or reading a
  * research paper - shows full detail: its summary, alleles, every phenotype, the
- * variants seen, and whether its magic-carrot recipe is unlocked. An undiscovered
+ * variants seen, and whether its gene-carrot recipe is unlocked. An undiscovered
  * gene shows only its name and a nudge. Creative sees every gene as discovered.
  *
- * <p><b>Write research paper</b> - for a discovered gene with a magic carrot, a
+ * <p><b>Write research paper</b> - for a discovered gene with a Known Gene Splice carrot, a
  * button spends one book for a {@code research_paper} on that gene (roadmap
  * &sect;16.2), which is what makes knowledge shareable.
  *
@@ -343,7 +343,7 @@ public final class HorseBrowserScreen extends Screen {
         if (writeButton != null) {
             Gene sel = selected();
             boolean canWrite = tab == Tab.GENE_DATABASE && sel != null
-                    && ClientGeneDatabase.knows(sel.key()) && sel.hasMagicCarrot();
+                    && ClientGeneDatabase.knows(sel.key()) && sel.hasGeneCarrot();
             writeButton.visible = canWrite;
             writeButton.active = canWrite;
         }
@@ -523,7 +523,7 @@ public final class HorseBrowserScreen extends Screen {
             y += 3;
         }
 
-        if (gene.hasMagicCarrot()) {
+        if (gene.hasGeneCarrot()) {
             y += 4;
             boolean unlocked = ClientGeneDatabase.carrotUnlocked(gene.key());
             g.text(this.font, Component.literal("Magic carrot recipe: " + (unlocked ? "unlocked" : "locked")),

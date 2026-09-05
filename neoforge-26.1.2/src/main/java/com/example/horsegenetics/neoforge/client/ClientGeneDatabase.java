@@ -8,7 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Client mirror of the player's {@code GeneDatabaseData} - only what the Horse
  * Browser's gene-database tab needs. Fed by {@code GeneDatabaseSyncPayload},
- * cleared on logout. Never trusted for crafting: the magic-carrot recipe gate
+ * cleared on logout. Never trusted for crafting: the gene-carrot recipe gate
  * is re-checked on the server.
  */
 public final class ClientGeneDatabase {

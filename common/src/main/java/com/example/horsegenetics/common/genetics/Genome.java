@@ -76,9 +76,9 @@ public record Genome(Genotype genotype, Epigenome epigenome) {
      *       recessive copy" (the {@code nextBoolean()} is still <i>consumed</i>,
      *       so the other parent's stream stays aligned);</li>
      *   <li>draw that parent's gamete for a named gene from a substitute pair
-     *       (magic gene carrot, chaos carrot);</li>
+     *       (magic gene carrot, gene-splice carrot);</li>
      *   <li>hand the contributed copy a fresh epigenetic seed rather than the
-     *       parent copy's own (mutinogenic carrot, and always for a substituted
+     *       parent copy's own (epigenetic-splice carrot, and always for a substituted
      *       copy) - which consumes one {@code int} + one {@code long} extra.</li>
      * </ul>
      */
@@ -131,8 +131,8 @@ public record Genome(Genotype genotype, Epigenome epigenome) {
             damIsFirst.put(g.key(), aFirst);
         }
 
-        // --- Pass 2: epigenetic re-rolls (mutinogenic, and every substituted
-        // copy - a chaos / magic-carrot gamete has no real parent copy behind
+        // --- Pass 2: epigenetic re-rolls (epigenetic splice, and every substituted
+        // copy - a gene-splice / gene-carrot gamete has no real parent copy behind
         // it). Runs AFTER every allele is locked, so its extra draws never move
         // a foal's genotype - only its seeds.
         boolean anyReroll = mineBias.rerollEpigenetics() || theirsBias.rerollEpigenetics()

@@ -15,9 +15,10 @@ import java.util.Optional;
  * draws <i>from</i> this parent for one foal:
  *
  * <ul>
- *   <li><b>{@code rerollEpigenetics}</b> - the <i>mutinogenic</i> carrot: every
- *       allele copy this parent passes on gets a fresh epigenetic seed instead
- *       of the parent copy's own (a foal normally inherits the seed verbatim).</li>
+ *   <li><b>{@code rerollEpigenetics}</b> - the <i>Unknown Epigenetic Splice</i>
+ *       carrot: every allele copy this parent passes on gets a fresh epigenetic
+ *       seed instead of the parent copy's own (a foal normally inherits the seed
+ *       verbatim).</li>
  *   <li><b>{@code preferLowerOrder}</b> - <i>stabilizer</i> ({@code true}) and
  *       <i>magnifier</i> ({@code false}): when this parent's two copies for a
  *       gene differ, contribute the earlier-declared allele
@@ -26,13 +27,14 @@ import java.util.Optional;
  *       recessive one) rather than the 50/50 coin. A no-op at a homozygous
  *       locus - which is exactly the "does nothing when the parent has no
  *       dominant allele" the carrot is documented to have.</li>
- *   <li><b>{@code substitutePairs}</b> - the <i>chaos</i> carrot and every
- *       <i>magic gene carrot</i>: for the named gene, draw this parent's gamete
- *       from the substitute pair instead of its real one. Magic carrot for gene
- *       G &rarr; {@code {G: n/G}} (heterozygous) or {@code {G: G/G}}
- *       (homozygous); chaos &rarr; {@code {G: <the pair the chaos table rolled>}}.
- *       A substituted copy always gets a fresh epigenetic seed - there is no
- *       real parent copy behind it.</li>
+ *   <li><b>{@code substitutePairs}</b> - the <i>Unknown Gene Splice</i> carrot
+ *       and every <i>magic gene carrot</i>: for the named gene, draw this
+ *       parent's gamete from the substitute pair instead of its real one. Magic
+ *       carrot for gene G &rarr; {@code {G: n/G}} (heterozygous) or
+ *       {@code {G: G/G}} (homozygous); gene splice &rarr;
+ *       {@code {G: <the pair the splice table rolled>}}. A substituted copy
+ *       always gets a fresh epigenetic seed - there is no real parent copy
+ *       behind it.</li>
  * </ul>
  *
  * <p>{@link #NONE} changes nothing, and a breed with {@code NONE} on both sides
@@ -66,7 +68,7 @@ public record GameteBias(boolean rerollEpigenetics,
 
     // --- builders for the common shapes -------------------------------
 
-    public static GameteBias mutinogenic() {
+    public static GameteBias epigeneticSplice() {
         return new GameteBias(true, Optional.empty(), Map.of());
     }
 

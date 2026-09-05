@@ -43,8 +43,8 @@ public final class BreedingCarrotHandler {
      * registration.
      */
     private static String baseTokenOf(Item item) {
-        if (item == ModItems.MUTINOGENIC_CARROT.get()) return "mutinogenic";
-        if (item == ModItems.CHAOS_CARROT.get()) return "chaos";
+        if (item == ModItems.UNKNOWN_EPIGENETIC_SPLICE_CARROT.get()) return "epigenetic_splice";
+        if (item == ModItems.UNKNOWN_GENE_SPLICE_CARROT.get()) return "gene_splice";
         if (item == ModItems.STABILIZER_CARROT.get()) return "stabilizer";
         if (item == ModItems.MAGNIFIER_CARROT.get()) return "magnifier";
         return null;
@@ -53,10 +53,10 @@ public final class BreedingCarrotHandler {
     /** Burst colour per carrot family, by first effect token. */
     private static int colourFor(List<String> tokens) {
         String first = tokens.isEmpty() ? "" : tokens.get(0);
-        if (first.startsWith("magic:")) return 0xFFCF47;
+        if (first.startsWith("known:")) return 0xFFCF47;
         return switch (first) {
-            case "mutinogenic" -> 0x9B59D0;
-            case "chaos" -> 0xE05B2B;
+            case "epigenetic_splice" -> 0x9B59D0;
+            case "gene_splice" -> 0xE05B2B;
             case "stabilizer" -> 0x3F8AE0;
             case "magnifier" -> 0x4CAF50;
             default -> 0xFFFFFF;

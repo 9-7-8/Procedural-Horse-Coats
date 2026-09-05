@@ -20,7 +20,7 @@ import net.minecraft.world.level.Level;
  * merged {@code carrot_effects} list. No visual change, no cap on count.
  *
  * <p><b>Contradictions are rejected at craft time</b> - a stabilizer with a
- * magnifier, or two magic carrots for the same gene that disagree on
+ * magnifier, or two gene carrots for the same gene that disagree on
  * het/hom - so the player sees the recipe simply not resolve rather than a
  * silent last-one-wins.
  */
@@ -67,9 +67,11 @@ public class CarrotCombineRecipe extends CustomRecipe {
         if (tokens == null) {
             return ItemStack.EMPTY;
         }
-        // The combined carrot keeps the magic-carrot skin if it carries one, else mutinogenic's.
-        boolean magic = tokens.stream().anyMatch(t -> t.startsWith("magic:"));
-        ItemStack out = new ItemStack(magic ? ModItems.MAGIC_GENE_CARROT.get() : ModItems.MUTINOGENIC_CARROT.get());
+        // The combined carrot keeps the gene-carrot skin if it carries one, else the epigenetic-splice one.
+        boolean magic = tokens.stream().anyMatch(t -> t.startsWith("known:"));
+        ItemStack out = new ItemStack(magic
+                ? ModItems.KNOWN_GENE_SPLICE_CARROT.get()
+                : ModItems.UNKNOWN_EPIGENETIC_SPLICE_CARROT.get());
         out.set(ModDataComponents.CARROT_EFFECTS.get(), List.copyOf(tokens));
         return out;
     }

@@ -176,7 +176,7 @@
 <h3>What is still open here</h3>
 
 <ul>
-    <li><strong>The chaos-carrot chance function</strong> (§14.1, §19) &mdash; a second
+    <li><strong>The splice chance function</strong> (§14.1, §19) &mdash; a second
         per-gene distribution over the gene&rsquo;s own genotypes, the same shape as the
         founder table and reusing <code>FounderTable</code>, but declared separately so
         the two can differ. A gene that omits it falls back to a uniform draw over its
@@ -979,7 +979,7 @@
         render-layer overlay, no bake &mdash; settled §21) is not built; the
         <em>sleeping-nearby +1/night</em> bond source (§13) is not built; the
         stated recipe-collision layer (§12.3, a paper-parameterised recipe) is
-        built for the <a href="#carrots">magic carrot</a> but <code>braided_rope</code>
+        built for the <a href="#carrots">Known Gene Splice carrot</a> but <code>braided_rope</code>
         / <code>hair_cloth</code> still need real textures. Original notes:
     </p>
 </div>
@@ -1090,7 +1090,7 @@
         <code>Genome.breedWith</code> overload, <code>NONE</code> bit-for-bit
         identical to the plain draw), the four breeding carrots, the live
         <code>CarrotWindowAttachment</code>, the parameterised
-        <code>MagicCarrotRecipe</code> (one recipe, paper-driven &mdash; a drop-in
+        <code>KnownGeneSpliceRecipe</code> (one recipe, paper-driven &mdash; a drop-in
         gene gets its carrot free), <code>CarrotCombineRecipe</code> (rejects
         contradictions at craft time), and the coloured-particle feedback all
         shipped. Effects ride an item <code>carrot_effects</code> component.
@@ -1099,7 +1099,7 @@
         <strong>Left:</strong> carrot effects captured on a <a href="#ivf">seed
         jar</a> and applied at impregnation (§15.1); a database check inside the
         recipe (the paper ingredient is the gate today); per-gene
-        <code>chaos</code> tables on the built-ins (all use the uniform
+        <code>splice</code> tables on the built-ins (all use the uniform
         fallback). Original notes:
     </p>
 </div>
@@ -1129,15 +1129,15 @@
 <table>
 <thead><tr><th>Carrot</th><th>Stated effect</th><th>What it means here</th></tr></thead>
 <tbody>
-<tr><td><strong>Mutinogenic</strong></td><td>Re-rolls epigenetics</td><td>A foal <a href="breeding.html">inherits each allele copy&rsquo;s seed verbatim</a>, so this is a genuine breeding carrot. <strong>Settled:</strong> it re-rolls the epigenetic seed of <em>every</em> allele copy the fed parent passes on &mdash; expressing and non-expressing. One parent fed &rarr; half the foal&rsquo;s copies get fresh seeds; both parents fed &rarr; all of them.</td></tr>
-<tr><td><strong>Chaos</strong></td><td>Adds one new gene with random alleles</td><td>There is no adding &mdash; every horse already carries a pair for every gene. So this <strong>picks a random gene and re-rolls that horse&rsquo;s allele pair for it</strong> through a <strong>per-gene chaos chance function</strong> (§19): the gene declares a distribution over its own genotypes, exactly like its founder-frequency table but a separate one. An author can make it guarantee a heterozygote, allow any pair, forbid the homozygote, keep it always wild type, &hellip; A gene with no chaos function declared falls back to a uniform draw over its pairs. Because every gene defines an outcome, there is no &ldquo;no eligible locus&rdquo; case.</td></tr>
+<tr><td><strong>Unknown Epigenetic Splice</strong></td><td>Re-rolls epigenetics</td><td>A foal <a href="breeding.html">inherits each allele copy&rsquo;s seed verbatim</a>, so this is a genuine breeding carrot. <strong>Settled:</strong> it re-rolls the epigenetic seed of <em>every</em> allele copy the fed parent passes on &mdash; expressing and non-expressing. One parent fed &rarr; half the foal&rsquo;s copies get fresh seeds; both parents fed &rarr; all of them.</td></tr>
+<tr><td><strong>Unknown Gene Splice</strong></td><td>Adds one new gene with random alleles</td><td>There is no adding &mdash; every horse already carries a pair for every gene. So this <strong>picks a random gene and re-rolls that horse&rsquo;s allele pair for it</strong> through a <strong>per-gene splice chance function</strong> (§19): the gene declares a distribution over its own genotypes, exactly like its founder-frequency table but a separate one. An author can make it guarantee a heterozygote, allow any pair, forbid the homozygote, keep it always wild type, &hellip; A gene with no splice function declared falls back to a uniform draw over its pairs. Because every gene defines an outcome, there is no &ldquo;no eligible locus&rdquo; case.</td></tr>
 <tr><td><strong>Stabilizer</strong></td><td>Forces dominant alleles</td><td>A bias on which copy the parent contributes. Cheap, and it does nothing when the parent has no dominant allele &mdash; which is stated, and should <em>say so</em> to the player rather than no-op.</td></tr>
 <tr><td><strong>Magnifier</strong></td><td>Forces recessive alleles</td><td>The mirror. Same path, same no-op rule.</td></tr>
 </tbody>
 </table>
 </div>
 
-<h3>14.2 Magic gene carrots</h3>
+<h3>14.2 Known Gene Splice carrots</h3>
 
 <p>
     One per gene. Feeding it makes the game treat that parent as
@@ -1155,7 +1155,7 @@
         so retuning the economy is a one-line change and a modded gene cannot invent its
         own currency. <strong>A gene that declares no rarity defaults to the gold-ingot
         tier</strong> (§21).</li>
-    <li><strong>A gene can opt out of having a magic carrot at all</strong> (settled,
+    <li><strong>A gene can opt out of having a Known Gene Splice carrot at all</strong> (settled,
         §21) &mdash; sex (§5.3) and the recessive lethals (§4.4) are genes for which one
         is nonsense or hostile. The built-ins&rsquo; existing exceptions (extension,
         agouti have no carrot) become that flag instead of a hard-code.</li>
@@ -1170,7 +1170,7 @@
         A <strong>component holding a list</strong>, no visual change, tooltip
         enumerating them, no cap on count.</li>
     <li><strong>Contradictory combinations are unspecified.</strong> Stabilizer plus
-        magnifier; two magic carrots for the same gene with different behaviours.
+        magnifier; two Known Gene Splice carrots for the same gene with different behaviours.
         Define the resolution &mdash; reject at craft time is clearer than
         last-one-wins, because the player can see it happen.</li>
     <li><strong>Expiry is settled</strong> (§21): a fed carrot lasts exactly as long as
@@ -1220,7 +1220,7 @@
         still uses the stored UUID as its pedigree edge, so the tree may not find the
         node. Wire it through.</li>
     <li>A <code>collectedFrom</code> marker on the jar &mdash; player-made vs
-        villager-sold (§18) &mdash; and the recipe restriction &ldquo;no magic carrot on
+        villager-sold (§18) &mdash; and the recipe restriction &ldquo;no Known Gene Splice carrot on
         a jar&rdquo; are both trivial once the above exists.</li>
 </ul>
 
@@ -1297,7 +1297,7 @@
         meets genes, which keeps a list of a hundred-plus genes from overwhelming a new
         player. It is <strong>not</strong> a fog of war &mdash; the info panel, the pen
         signs and the genotype code keep showing every gene a horse carries, always. The
-        only thing discovery actually gates is the <strong>magic-carrot recipe</strong>.
+        only thing discovery actually gates is the <strong>gene-carrot recipe</strong>.
     </p>
 </div>
 
@@ -1369,7 +1369,7 @@
 
 <p>
     <strong>It exists</strong> (settled, §21) &mdash; a villager profession with a
-    workstation, five tiers and sixteen trades, selling random magic carrots, research
+    workstation, five tiers and sixteen trades, selling random Known Gene Splice carrots, research
     papers and seed jars. It is a good way to get rare horse items to players; the
     &ldquo;removed as unthematic&rdquo; line in the older design document is dead. Cut /
     legendary / mythic genes are still never sold.
@@ -1382,7 +1382,7 @@
         Post: 3 hair cloth + 2 braided rope + 2 fence. Spawns where horses do &mdash;
         plains, savanna, meadow.</li>
     <li><strong>Random trades cannot be plain offers.</strong> A vanilla trade offer is a
-        fixed <code>ItemStack</code>. &ldquo;A random rare magic carrot&rdquo;, &ldquo;a
+        fixed <code>ItemStack</code>. &ldquo;A random rare Known Gene Splice carrot&rdquo;, &ldquo;a
         random paper&rdquo;, &ldquo;a vial with a rolled genotype&rdquo; each need a
         custom listing that rolls when the offer is <em>generated</em> &mdash; which
         means <strong>the roll is per restock, not per purchase</strong>. That is
@@ -1414,7 +1414,7 @@
 <tbody>
 <tr><td><strong>1</strong></td><td>16 horse hair &rarr; 1 emerald</td><td>Hair bundle, 1 emerald</td></tr>
 <tr><td><strong>2</strong></td><td>8 hair bundles &rarr; 1 emerald</td><td>Basic whistle 2; blank ticket &times;2 for 1</td></tr>
-<tr><td><strong>3</strong></td><td>4 braided rope &rarr; 1 emerald</td><td>Mutinogenic 3, Chaos 4, Stabilizer 3, Magnifier 3</td></tr>
+<tr><td><strong>3</strong></td><td>4 braided rope &rarr; 1 emerald</td><td>Unknown Epigenetic Splice 3, Unknown Gene Splice 4, Stabilizer 3, Magnifier 3</td></tr>
 <tr><td><strong>4</strong></td><td>2 hair cloth &rarr; 1 emerald</td><td>Common carrot 2, uncommon carrot 4, random vial (C/U) 3, paper (C/U) 5</td></tr>
 <tr><td><strong>5</strong></td><td>1 player-made vial &rarr; 5 emeralds</td><td>Rare carrot 8, epic carrot 12, random vial (R/E) 8, paper (R/E) 10</td></tr>
 </tbody>
@@ -1438,10 +1438,10 @@
     <p>
         <code>rarity</code>, <code>carrot</code> (enabled + het/hom behaviour +
         flavour) and <code>chaos</code> landed as three <code>Gene</code> defaults
-        (<code>GeneRarity</code>, <code>hasMagicCarrot()</code> /
-        <code>magicCarrotHomozygous()</code>, <code>chaosTable()</code>) plus a
+        (<code>GeneRarity</code>, <code>hasGeneCarrot()</code> /
+        <code>geneCarrotHomozygous()</code>, <code>spliceTable()</code>) plus a
         spec <strong>format 2 &rarr; 3</strong> bump with optional <code>blurb</code>
-        / <code>rarity</code> / <code>carrot</code> / <code>chaos</code> blocks.
+        / <code>rarity</code> / <code>carrot</code> / <code>splice</code> blocks.
         The description block already existed (<code>Gene.description()</code> +
         <code>GeneDescriptions</code>); a spec gene now fills it from
         <code>blurb</code>. Full shapes on <a href="gene-format.html">the gene
@@ -1459,8 +1459,8 @@
 <thead><tr><th>New field</th><th>Read by</th><th>Notes</th></tr></thead>
 <tbody>
 <tr><td><strong><code>rarity</code></strong> &mdash; common / uncommon / rare / epic / legendary / mythic</td><td>Carrot recipe cost, loot weighting, villager stock and pools, random jars</td><td>A real enum, not a string. A gene that omits it <strong>defaults to the gold-ingot tier</strong> (§21). The tier&rarr;rarity-item mapping stays in one table on the recipe side, not on the gene.</td></tr>
-<tr><td><strong><code>carrot</code></strong> &mdash; enabled, behaviour (heterozygous / homozygous), flavour ingredients</td><td>Magic carrot recipe and effect</td><td><strong>Opt-out-able</strong> (§14.2, §21) &mdash; sex and the recessive lethals turn it off. At least one flavour ingredient when enabled; defaults to the minimal recipe when the author defines none.</td></tr>
-<tr><td><strong><code>chaos</code></strong> &mdash; a distribution over this gene&rsquo;s own genotypes</td><td>The chaos carrot (§14.1)</td><td>What the chaos carrot rolls when it lands on this gene. Same shape as the founder-frequency table, kept separate so the two can differ. Optional &mdash; a gene that omits it gets a uniform draw over its pairs. Lets an author guarantee a heterozygote, forbid a homozygote, etc.</td></tr>
+<tr><td><strong><code>carrot</code></strong> &mdash; enabled, behaviour (heterozygous / homozygous), flavour ingredients</td><td>Known Gene Splice carrot recipe and effect</td><td><strong>Opt-out-able</strong> (§14.2, §21) &mdash; sex and the recessive lethals turn it off. At least one flavour ingredient when enabled; defaults to the minimal recipe when the author defines none.</td></tr>
+<tr><td><strong><code>splice</code></strong> &mdash; a distribution over this gene&rsquo;s own genotypes</td><td>The Unknown Gene Splice carrot (§14.1)</td><td>What the Unknown Gene Splice carrot rolls when it lands on this gene. Same shape as the founder-frequency table, kept separate so the two can differ. Optional &mdash; a gene that omits it gets a uniform draw over its pairs. Lets an author guarantee a heterozygote, forbid a homozygote, etc.</td></tr>
 <tr><td><strong>Description block</strong> &mdash; display name, blurb, visual effect, gameplay effect</td><td>Database, papers, tooltips, browser</td><td>The documents impose minimum character counts on gene authors. That is <strong>creator-side validation</strong>, not a runtime check &mdash; the runtime needs a fallback for a gene that arrives without text, not a crash.</td></tr>
 <tr><td><strong>Attached model parts</strong></td><td>Unicorn horn, wings</td><td>Below.</td></tr>
 </tbody>
@@ -1580,7 +1580,7 @@
         recipe type. It is the material floor for every other recipe, and shearing lands
         beside milking in a file that already documents the trap.</li>
     <li><strong>The carrots</strong> (§14) &mdash; the four breeding carrots first, since
-        they need only the gamete hook; magic carrots second, once §19 exists;
+        they need only the gamete hook; Known Gene Splice carrots second, once §19 exists;
         combination last.</li>
     <li><strong>Finish the seed jar</strong> (§15.1) after the carrots &mdash; the real
         carrot gate, then gestation (the genuinely new part), then carrot effects on the
@@ -1680,7 +1680,7 @@
         to 100; if they do not, they are <strong>normalised proportionally</strong>.
         This replaces the old &ldquo;1 in N&rdquo; per-allele frequency. Founder draws
         stay deterministic given the RNG stream (roll in sorted gene order).</li>
-    <li><strong>The chaos carrot has its own per-gene distribution</strong> &mdash; the
+    <li><strong>The Unknown Gene Splice carrot has its own per-gene distribution</strong> &mdash; the
         <code>chaos</code> chance function (§14.1, §19), the same shape as the founder
         table but separate, so an author can (say) let it only ever produce
         heterozygotes. Optional; omitted &rarr; uniform over the gene&rsquo;s pairs.</li>
@@ -1726,14 +1726,14 @@
     <li><strong>The gene database is a plain progressive record</strong>, not a fog of
         war. Entries populate as a player meets genes (which keeps a 100-gene list from
         overwhelming a new player); nothing is ever hidden in the info panel or the code.
-        Discovery gates only the magic-carrot recipe.</li>
-    <li>A <strong>magic carrot behaves like a vanilla golden carrot for timing</strong>:
+        Discovery gates only the gene-carrot recipe.</li>
+    <li>A <strong>Known Gene Splice carrot behaves like a vanilla golden carrot for timing</strong>:
         its effect is a temporary breeding-mode-style window on the fed horse, consumed
         on breed, gone when the window lapses &mdash; not a permanent stored effect.
         During the window it <em>is</em> on the horse and part of the determinism input.
         Different carrot types show <strong>differently-coloured heart particles</strong>
         as feedback.</li>
-    <li>The <strong>mutinogenic carrot re-rolls epigenetics for every allele copy the
+    <li>The <strong>Unknown Epigenetic Splice carrot re-rolls epigenetics for every allele copy the
         fed parent passes on</strong> &mdash; expressing <em>and</em> non-expressing. One
         parent fed &rarr; half the foal&rsquo;s copies re-rolled; both fed &rarr; all of
         them.</li>
@@ -1743,8 +1743,8 @@
         impregnation, exactly like natural breeding.</li>
     <li>A <strong>sheared horse gets a render-layer overlay</strong> &mdash; it only has
         to read as vaguely different, not look good; no coat-variant texture.</li>
-    <li>A gene that declares no magic-carrot rarity <strong>defaults to the gold-ingot
-        tier</strong>, and a gene <strong>can opt out of having a magic carrot</strong>
+    <li>A gene that declares no gene-carrot rarity <strong>defaults to the gold-ingot
+        tier</strong>, and a gene <strong>can opt out of having a Known Gene Splice carrot</strong>
         at all (sex, the recessive lethals).</li>
 </ul>
 

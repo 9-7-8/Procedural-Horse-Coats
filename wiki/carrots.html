@@ -67,37 +67,44 @@
 
 <h2 id="four">The four breeding carrots</h2>
 
+<p>
+    Two are <strong>random</strong> - "Unknown" - and one is <strong>targeted</strong>
+    (&sect;<a href="#known">below</a>) - "Known". Naming:
+</p>
+
 <div class="table-wrap">
 <table>
 <thead><tr><th>Carrot</th><th>What it does to the gamete</th></tr></thead>
 <tbody>
-<tr><td><strong>Mutinogenic</strong></td><td>Every allele copy this parent passes on gets a <strong>fresh epigenetic seed</strong> instead of the parent copy&rsquo;s own. The alleles are untouched &mdash; a mutinogenic foal has the same genotype an un-fed pairing would give, only re-rolled bay-point heights / grey dapples / splash edges. The re-roll runs in a <em>second pass</em>, after every allele is locked, so it can never move a foal&rsquo;s genotype.</td></tr>
+<tr><td><strong>Unknown Epigenetic Splice</strong></td><td>Every allele copy this parent passes on gets a <strong>fresh epigenetic seed</strong> instead of the parent copy&rsquo;s own. The alleles are untouched &mdash; the foal has the same genotype an un-fed pairing would give, only re-rolled bay-point heights / grey dapples / splash edges. The re-roll runs in a <em>second pass</em>, after every allele is locked, so it can never move a foal&rsquo;s genotype. (<code>CarrotEffect.EpigeneticSplice</code>.)</td></tr>
 <tr><td><strong>Stabilizer</strong></td><td>At every <strong>heterozygous</strong> locus, contribute the <em>earlier-declared</em> allele (the variant / dominant one) rather than the 50/50 coin. A no-op at a homozygous locus &mdash; which is the &ldquo;does nothing when the parent has no dominant allele&rdquo; the carrot is documented to have; the feed handler says so.</td></tr>
 <tr><td><strong>Magnifier</strong></td><td>The mirror &mdash; contribute the later-declared (baseline / recessive) copy. Same no-op rule.</td></tr>
-<tr><td><strong>Chaos</strong></td><td>Pick one random gene and draw this parent&rsquo;s gamete for it from that gene&rsquo;s <a href="gene-format.html">chaos distribution</a> (or a uniform draw over its viable pairs if it declares none). The gene and the pair are rolled at breeding time off the foal&rsquo;s deterministic RNG. Never the sex locus.</td></tr>
+<tr><td><strong>Unknown Gene Splice</strong></td><td>Pick <strong>one random gene</strong> and draw this parent&rsquo;s gamete for it from that gene&rsquo;s <a href="gene-format.html">splice distribution</a> (or a uniform draw over its viable pairs if it declares none). The gene and the pair are rolled at breeding time off the foal&rsquo;s deterministic RNG. Never the sex locus. (<code>CarrotEffect.GeneSplice</code>.)</td></tr>
 </tbody>
 </table>
 </div>
 
-<h2 id="magic">Magic gene carrots</h2>
+<h2 id="known">Known Gene Splice carrots</h2>
 
 <p>
-    One per gene. Feeding it makes the game treat that parent as
-    <code>n&lt;Gene&gt;</code> (heterozygous, the default) or
-    <code>&lt;Gene&gt;&lt;Gene&gt;</code> (homozygous, if the gene&rsquo;s
+    <strong>One per gene, and you pick which.</strong> Feeding it makes the game
+    treat that parent as <code>n&lt;Gene&gt;</code> (heterozygous, the default)
+    or <code>&lt;Gene&gt;&lt;Gene&gt;</code> (homozygous, if the gene&rsquo;s
     <code>carrot.behaviour</code> says so) for that one gene&rsquo;s gamete;
     normal Mendelian rules apply from there, so two heterozygous-carrot parents
     give the ordinary 25/50/25. If the homozygote cannot occur (a <code>KIT</code>
     lethal, <code>met/met</code>) it falls back to heterozygous.
+    (<code>CarrotEffect.KnownGeneSplice</code>, effect token
+    <code>known:&lt;geneKey&gt;:het|hom</code>.)
 </p>
 
 <p>
     <strong>The recipe is one parameterised <code>CustomRecipe</code></strong>
-    (<code>server/recipe/MagicCarrotRecipe</code>), not N generated recipes:
+    (<code>server/recipe/KnownGeneSpliceRecipe</code>), not N generated recipes:
     golden carrot + a <a href="#database">research paper</a> + a hair item
     (<code>horse_hair</code> or <code>hair_cloth</code>) + the rarity item for
     that gene&rsquo;s tier + at least one flavour ingredient &rarr; a
-    <code>magic_gene_carrot</code> carrying <code>magic:&lt;geneKey&gt;:het|hom</code>.
+    <code>known_gene_splice_carrot</code> carrying the paper&rsquo;s gene.
     The recipe reads the gene off the paper at craft time, so a drop-in gene
     file gets its carrot the moment it registers &mdash; no datapack.
 </p>
@@ -117,7 +124,7 @@
 </div>
 
 <p>
-    A gene <strong>opts out</strong> of having a magic carrot with
+    A gene <strong>opts out</strong> of having a Known Gene Splice carrot with
     <code>carrot.enabled: false</code>. Built-in exceptions: the
     <a href="gene-sex.html">sex locus</a>, the recessive disorders
     (<code>RecessiveDisorderGene</code>), and extension + agouti.
@@ -130,7 +137,7 @@
     carrots crafted together become one carrot carrying all their effects, as a
     merged <code>carrot_effects</code> component list. No visual change, no cap
     on count. <strong>Contradictions are rejected at craft time</strong> &mdash;
-    a stabilizer with a magnifier, or two magic carrots for the same gene that
+    a stabilizer with a magnifier, or two Known Gene Splice carrots for the same gene that
     disagree on het/hom &mdash; so the recipe simply does not resolve, which the
     player can see, rather than a silent last-one-wins.
 </p>
@@ -140,7 +147,7 @@
 <p>
     <code>data/GeneDatabaseData</code> is a server-global, per-player
     <code>SavedData</code>: per gene, the allele variants the player has seen,
-    when it was first met, and whether its magic-carrot recipe is unlocked. It
+    when it was first met, and whether its gene-carrot recipe is unlocked. It
     is filled by:
 </p>
 
@@ -159,7 +166,7 @@
         It is a plain progressive record. The info panel, the pen signs and the
         genotype code keep showing <em>every</em> gene a horse carries, always.
         The only thing discovery gates is the display of a gene&rsquo;s
-        magic-carrot line in the browser &mdash; and even the recipe itself is
+        gene-carrot line in the browser &mdash; and even the recipe itself is
         gated only by needing a paper as an ingredient, not by a database check.
     </p>
 </div>
@@ -190,10 +197,10 @@
 <ul>
     <li><code>rarity()</code> &mdash; a <code>GeneRarity</code> tier (default
         <code>UNCOMMON</code>, the gold-ingot tier).</li>
-    <li><code>hasMagicCarrot()</code> / <code>magicCarrotHomozygous()</code>
+    <li><code>hasGeneCarrot()</code> / <code>geneCarrotHomozygous()</code>
         &mdash; the opt-out flag and the het/hom behaviour.</li>
-    <li><code>chaosTable()</code> &mdash; an <code>Optional&lt;FounderTable&gt;</code>,
-        the chaos carrot&rsquo;s per-gene distribution.</li>
+    <li><code>spliceTable()</code> &mdash; an <code>Optional&lt;FounderTable&gt;</code>,
+        the Unknown Gene Splice carrot&rsquo;s per-gene distribution.</li>
     <li><code>description()</code> &mdash; already existed; a spec gene now fills
         it from an optional <code>blurb</code>.</li>
 </ul>
@@ -206,7 +213,7 @@
     carrot gate and a real gestation timer
     (<a href="roadmap.html#ivf">&sect;15.1</a>); the &sect;19 fields as gene-creator
     form inputs; a database check inside the carrot recipe itself; per-gene
-    <code>chaos</code> tables on any built-in gene.
+    <code>splice</code> tables on any built-in gene.
 </p>
 
 </article>

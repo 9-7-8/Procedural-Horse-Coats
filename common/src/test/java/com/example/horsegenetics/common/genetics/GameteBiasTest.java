@@ -73,16 +73,16 @@ class GameteBiasTest {
         }
     }
 
-    /** Mutinogenic leaves the alleles alone but re-rolls the epigenetic seeds from the fed parent. */
+    /** Epigenetic splice leaves the alleles alone but re-rolls the epigenetic seeds from the fed parent. */
     @Test
-    void mutinogenicRerollsEpigeneticsNotAlleles() {
+    void epigeneticSpliceRerollsEpigeneticsNotAlleles() {
         Genome dam = founder(30);
         Genome sire = founder(31);
         for (long s = 0; s < 15; s++) {
             Genome plain = dam.breedWith(sire, new SeededRng(s));
-            Genome muti = dam.breedWith(sire, new SeededRng(s), GameteBias.mutinogenic(), GameteBias.NONE);
-            assertEquals(plain.genotypeCode(), muti.genotypeCode(), "seed " + s + ": alleles unchanged");
-            assertNotEquals(plain.epigenomeCode(), muti.epigenomeCode(), "seed " + s + ": some seeds re-rolled");
+            Genome spliced = dam.breedWith(sire, new SeededRng(s), GameteBias.epigeneticSplice(), GameteBias.NONE);
+            assertEquals(plain.genotypeCode(), spliced.genotypeCode(), "seed " + s + ": alleles unchanged");
+            assertNotEquals(plain.epigenomeCode(), spliced.epigenomeCode(), "seed " + s + ": some seeds re-rolled");
         }
     }
 
@@ -92,15 +92,15 @@ class GameteBiasTest {
         assertEquals(GameteBias.NONE, CarrotEffect.fold(List.of(), Genotype.wildType(), new SeededRng(1)));
 
         GameteBias b = CarrotEffect.fold(
-                List.of(new CarrotEffect.Mutinogenic(), new CarrotEffect.Stabilizer()),
+                List.of(new CarrotEffect.EpigeneticSplice(), new CarrotEffect.Stabilizer()),
                 Genotype.wildType(), new SeededRng(1));
         assertTrue(b.rerollEpigenetics());
         assertEquals(Optional.of(Boolean.TRUE), b.preferLowerOrder());
 
-        GameteBias chaos = CarrotEffect.fold(
-                List.of(new CarrotEffect.Chaos()), Genotype.wildType(), new SeededRng(1));
-        assertEquals(1, chaos.substitutePairs().size(), "chaos substitutes exactly one gene");
-        assertTrue(chaos.substitutePairs().keySet().stream().noneMatch(k -> k.equals(Genes.SEX.key())),
-                "chaos never touches the sex locus");
+        GameteBias splice = CarrotEffect.fold(
+                List.of(new CarrotEffect.GeneSplice()), Genotype.wildType(), new SeededRng(1));
+        assertEquals(1, splice.substitutePairs().size(), "gene splice substitutes exactly one gene");
+        assertTrue(splice.substitutePairs().keySet().stream().noneMatch(k -> k.equals(Genes.SEX.key())),
+                "gene splice never touches the sex locus");
     }
 }

@@ -22,8 +22,8 @@ import net.minecraft.world.level.Level;
  * A <b>research paper</b> (roadmap wiki &sect;16.2). Carries a
  * {@code research_gene} component naming one gene. Right-clicking it adds that
  * gene to the reader's {@link GeneDatabaseData gene database} and unlocks the
- * gene's magic-carrot recipe; the paper is consumed. It is also the ingredient
- * the paper-parameterised {@code MagicCarrotRecipe} matches on.
+ * gene's gene-carrot recipe; the paper is consumed. It is also the ingredient
+ * the paper-parameterised {@code KnownGeneSpliceRecipe} matches on.
  *
  * <p>Three sources: chest loot ({@code AddResearchPaperModifier}), other
  * players, and writing one from your own database in the Horse Browser at the

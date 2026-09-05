@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "horsegenetics:item/mutinogenic_carrot"
+    "layer0": "horsegenetics:item/known_gene_splice_carrot"
   }
 }

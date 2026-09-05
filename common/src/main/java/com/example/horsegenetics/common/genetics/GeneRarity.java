@@ -4,7 +4,7 @@ import java.util.Locale;
 
 /**
  * How rare a gene is - the one axis the whole gameplay economy sorts on
- * (roadmap wiki &sect;19): the magic-carrot recipe cost, research-paper loot
+ * (roadmap wiki &sect;19): the gene-carrot recipe cost, research-paper loot
  * weighting, villager stock and pools, random jars.
  *
  * <p>Six tiers, in ascending rarity. The <b>tier &rarr; rarity-item</b> mapping

@@ -65,7 +65,7 @@ public final class GeneSpecParser {
     private static GeneSpec read(Map<String, Object> root) {
         expectKeys(root, "the file", "format", "key", "name", "phase",
                 "priority", "alleles", "knobs", "expressions", "founders",
-                "blurb", "rarity", "carrot", "chaos");
+                "blurb", "rarity", "carrot", "splice");
 
         int format = (int) number(root, "format", GeneSpec.FORMAT);
         if (format != GeneSpec.FORMAT) {
@@ -111,11 +111,11 @@ public final class GeneSpecParser {
         String blurb = string(root, "blurb", "");
         GeneRarity rarity = GeneRarity.fromString(string(root, "rarity", ""));
         GeneSpec.Carrot carrot = readCarrot(root);
-        List<FounderWeight> chaos = readWeightTable(root, "chaos", combinations, false);
+        List<FounderWeight> splice = readWeightTable(root, "splice", combinations, false);
 
         return new GeneSpec(key, name, natural, priority,
                 alleles, List.copyOf(knobs), expressions, founders,
-                blurb, rarity, carrot, chaos);
+                blurb, rarity, carrot, splice);
     }
 
     /** The optional {@code carrot} block - defaults to "enabled, heterozygous, no flavour". */
@@ -371,7 +371,7 @@ public final class GeneSpecParser {
      */
     /**
      * A weight-per-combination table: {@code "founders"} (required, the wild
-     * distribution) and {@code "chaos"} (optional, what the chaos carrot rolls
+     * distribution) and {@code "splice"} (optional, what the Unknown Gene Splice carrot rolls
      * on this gene - roadmap &sect;14.1) share the shape exactly, kept as two
      * keys so they can differ. An absent optional table returns an empty list.
      */

@@ -134,8 +134,8 @@ public abstract class RecessiveDisorderGene implements Gene, HealthContribution 
     @Override public List<Expression> expressions() { return expressions; }
     @Override public FounderTable founderTable(FounderContext context) { return founders; }
 
-    /** No magic carrot for a disorder locus - forcing one onto a line is hostile (roadmap §14.2). */
-    @Override public boolean hasMagicCarrot() { return false; }
+    /** No gene carrot for a disorder locus - forcing one onto a line is hostile (roadmap §14.2). */
+    @Override public boolean hasGeneCarrot() { return false; }
 
     @Override
     public Expression expressionOf(AllelePair pair) {

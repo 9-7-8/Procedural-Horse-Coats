@@ -106,16 +106,16 @@ project. Its shape:
   locus (KIT/MITF/MATP) with the gene's own `tint` handling every allele combo,
   **no dominance-per-pair table**; founder frequency declared **per genotype**
   (percentages, auto-normalised) not per allele, and a separate per-gene
-  **chaos-carrot chance function** of the same shape (§14.1/§19); the genotype
+  **splice chance function** of the same shape (§14.1/§19); the genotype
   stored as a **list keyed by gene**, each gene carrying its order number, so
   adding/removing a gene just triggers a coat regen (no padding, no back-compat);
   signed-unclamped `int` phase-3 with context-aware genes intended; **every time-gate is once per
   24 000-tick MC day**; herd comfort buff stays passive regen (no stamina); the
   villager **exists**; the gene DB is a plain progressive record (no fog of war,
-  nothing hidden); a magic carrot's timing = a vanilla golden carrot (temporary
-  window, coloured heart particles per type); mutinogenic re-rolls every allele
+  nothing hidden); a Known Gene Splice carrot's timing = a vanilla golden carrot (temporary
+  window, coloured heart particles per type); epigenetic-splice re-rolls every allele
   copy a fed parent passes on; the seed jar stores enough sire data for the
-  family tree; sheared look = render-layer overlay; magic-carrot rarity defaults
+  family tree; sheared look = render-layer overlay; gene-carrot rarity defaults
   to the gold-ingot tier and a gene can opt out. **Still open**: custom-entity
   subclass vs attachments (§11, owner wants to discuss), how a cutie mark is
   chosen, the 1.12.2 backport surface.
@@ -138,6 +138,26 @@ project. Its shape:
     changes shape, update `api-reference.html` in the same change.
 
 ## Status snapshot (keep this current)
+
+- **2026-09-05 follow-ups to the carrot pass, NOT yet play-tested:**
+  - **Carrots renamed** (owner's call, dev-only, no saves): "mutinogenic" ->
+    **Unknown Epigenetic Splice** carrot (`CarrotEffect.EpigeneticSplice`, token
+    `epigenetic_splice`); "chaos" -> **Unknown Gene Splice** carrot
+    (`CarrotEffect.GeneSplice`, token `gene_splice`); "magic gene carrot" ->
+    **Known Gene Splice** carrot (`CarrotEffect.KnownGeneSplice`, token
+    `known:<gene>:het|hom`, item `known_gene_splice_carrot`,
+    `server/recipe/KnownGeneSpliceRecipe`). `Gene.chaosTable()` ->
+    **`spliceTable()`**; the spec `chaos` block -> **`splice`**;
+    `Gene.hasMagicCarrot()` -> **`hasGeneCarrot()`**, `magicCarrotHomozygous()`
+    -> **`geneCarrotHomozygous()`**. Naming logic: "Unknown" = random,
+    "Known" = you pick the gene. Fixtures + parity regenerated (no output change).
+  - **Crash fix:** the `DistanceManager.runAllUpdates` re-entrancy trap, hit
+    going to the horse dimension. `GeneAbilityHandler.onEntityLeave` (a `glow`
+    light-block cleanup, from the 2026-09-04 magical-utility pass) called
+    `level.getBlockState` synchronously from inside the entity-untracking
+    callback -> `IllegalStateException: Entity is already tracked!`. Now it
+    queues a `PendingClear` and a `ServerTickEvent.Post` drains it next tick.
+    See the 26.1.2 API note.
 
 - **Built 2026-09-05, NOT yet play-tested: shearing + milking rules + the whole
   carrot family + the gene database + research papers** (roadmap wiki §§7, 12,
@@ -166,12 +186,12 @@ project. Its shape:
     now says "nothing to give yet" (closes gap #25's feedback complaint).
   - **§19 gene metadata** - `common/genetics/GeneRarity` (6 tiers) + three `Gene`
     defaults: `rarity()` (default `UNCOMMON` = the gold-ingot tier),
-    `hasMagicCarrot()` (false for `SexGene`, the recessive disorders via
-    `RecessiveDisorderGene`, and extension + agouti), `chaosTable()`
-    (`Optional<FounderTable>` - the chaos carrot's per-gene distribution) plus
-    `magicCarrotHomozygous()`. **Spec `FORMAT` 2 -> 3**: optional `blurb`,
-    `rarity`, `carrot` (`{enabled, behaviour, flavour}`) and `chaos` blocks
-    (`chaos` reuses the founder-weight parser). `SpecGene` surfaces all of them.
+    `hasGeneCarrot()` (false for `SexGene`, the recessive disorders via
+    `RecessiveDisorderGene`, and extension + agouti), `spliceTable()`
+    (`Optional<FounderTable>` - the Unknown Gene Splice carrot's per-gene distribution) plus
+    `geneCarrotHomozygous()`. **Spec `FORMAT` 2 -> 3**: optional `blurb`,
+    `rarity`, `carrot` (`{enabled, behaviour, flavour}`) and `splice` blocks
+    (`splice` reuses the founder-weight parser). `SpecGene` surfaces all of them.
     Every example + shipped gene file and the creator emit `format: 3`; the
     parity fixtures regenerated with **no output change** (the §19 fields don't
     touch the paint engine). The strict `format != FORMAT` check stays - dev only.
@@ -182,13 +202,13 @@ project. Its shape:
     in **two passes**: pass 1 is the allele draw and consumes *exactly* what the
     plain breed consumes (so `NONE`/`NONE` is bit-for-bit identical - asserted,
     and `coat-golden.txt` is untouched); pass 2 does the epigenetic re-rolls
-    *after* every allele is locked, so a mutinogenic carrot never moves a foal's
+    *after* every allele is locked, so a Unknown Epigenetic Splice carrot never moves a foal's
     genotype. `GeneticCodeCombiner.combine` got the matching overload. New
     `GameteBiasTest` (5).
-  - **`common/genetics/CarrotEffect`** (sealed: `Mutinogenic` / `Stabilizer` /
-    `Magnifier` / `Chaos` / `MagicGene(geneKey, homozygous)`) with a flat string
+  - **`common/genetics/CarrotEffect`** (sealed: `Unknown Epigenetic Splice` / `Stabilizer` /
+    `Magnifier` / `GeneSplice` / `KnownGeneSplice(geneKey, homozygous)`) with a flat string
     `id()` for serialisation, `parse`/`parseList`/`tokens`/`isContradictory`, and
-    `fold(effects, parentGenotype, rng)` -> one `GameteBias`. Chaos rolls its
+    `fold(effects, parentGenotype, rng)` -> one `GameteBias`. Gene splice rolls its
     target gene + pair **at breeding time** off the foal RNG (deterministic per
     foal; never the sex locus). Magic-carrot `homozygous` falls back to het when
     the homozygote `canOccur` is false.
@@ -203,14 +223,14 @@ project. Its shape:
     overload; old arity delegates with `NONE`), then clears both windows.
     `data/ModDataComponents` gained **`CARROT_EFFECTS`** (an item `List<String>`
     component) and **`RESEARCH_GENE`** (a string).
-  - **Magic carrot recipe** (§14.2) - **`server/recipe/MagicCarrotRecipe`** is
+  - **Magic carrot recipe** (§14.2) - **`server/recipe/KnownGeneSpliceRecipe`** is
     **one parameterised `CustomRecipe`**: golden carrot + `research_paper` + a
     hair item + the gene's rarity item (`RarityItems`: iron/gold/diamond/
     emerald/netherite ingot/nether star) + >=1 flavour slot -> a
-    `magic_gene_carrot` carrying `magic:<geneKey>:het|hom`. One recipe, so a
+    `known_gene_splice_carrot` carrying `known:<geneKey>:het|hom`. One recipe, so a
     drop-in gene gets its carrot free. **`CarrotCombineRecipe`** merges 2+
     carrots into one and **rejects contradictions at craft time**
-    (stabilizer+magnifier; two magic carrots that disagree). Both are unit-codec
+    (stabilizer+magnifier; two Known Gene Splice carrots that disagree). Both are unit-codec
     serializers registered via `server/recipe/ModRecipes` + one datapack JSON
     each. `placeholder_gene_book` and its shapeless recipe are **deleted**.
   - **Gene database** (§16.1) - `data/GeneDatabaseData`, server-global
@@ -241,9 +261,9 @@ project. Its shape:
   - **Deliberately deferred** (owner call): the Horse Master villager (§18),
     seed-jar gestation + carrot-on-jar effects (§15.1), attached model parts
     (§19.2), the sheared render-layer look. Also not built: a DB check *inside*
-    `MagicCarrotRecipe.matches` (the paper ingredient is the gate); the §19
+    `KnownGeneSpliceRecipe.matches` (the paper ingredient is the gate); the §19
     header fields as *creator form inputs* (the creator emits `format: 3` but has
-    no rarity/carrot/chaos fields yet); per-gene `chaos` tables on any built-in
+    no rarity/carrot/splice fields yet); per-gene `splice` tables on any built-in
     (all fall back to the uniform draw).
   - Docs: `wiki/carrots.html` (new), `wiki/nav.js`, `wiki/gene-effects.html`
     (yield denial + `full_health`), `wiki/gene-format.html` (format 3),
@@ -1561,8 +1581,8 @@ project. Its shape:
   (roadmap wiki §§11-19, first slice). 19 new `Item`s in `item/ModItems`:
   `horse_hair` + `horse_hair_bundle` (4 hair &harr; 1 bundle, roadmap §12.2's
   first two rungs), four breeding carrots
-  (`mutinogenic`/`chaos`/`stabilizer`/`magnifier`), one generic
-  `magic_gene_carrot` (per-gene parameterisation needs a data component -
+  (`epigenetic_splice`/`gene_splice`/`stabilizer`/`magnifier`), one generic
+  `known_gene_splice_carrot` (per-gene parameterisation needs a data component -
   deferred), `placeholder_gene_book` (literal name "PLACEHOLDER GENE BOOK",
   stands in for the research paper), `empty_seed_jar` + `stallion_seed_jar`
   (both `SeedJarItem`, tooltip from the `stored_genome` component), four tickets,
@@ -2026,7 +2046,7 @@ Two-module Gradle project, split deliberately:
     `BreedingCarrotHandler` (feed a carrot -> a `CarrotWindowAttachment` +
     love); `GeneDiscoveryHandler` (fill the gene DB on tame / breed);
     `ResearchPaperWriter` (the browser "write paper" button's server side);
-    `recipe/` (`ModRecipes` + the parameterised `MagicCarrotRecipe` +
+    `recipe/` (`ModRecipes` + the parameterised `KnownGeneSpliceRecipe` +
     `CarrotCombineRecipe` + `RarityItems`).
   - `block/` - `ModBlocks` + `HayPortalBlock` (the only registered block),
     `ModBlockEntities` + `HayPortalBlockEntity` (drives the animated
@@ -2038,7 +2058,7 @@ Two-module Gradle project, split deliberately:
     creative-gated on the server - plus the 17
     **gameplay-layer items**, roadmap §§11-19; the two `SeedJarItem`s, three
     `WhistleItem`s, two `StallSignItem`s, the four breeding carrots + the
-    parameterised `MAGIC_GENE_CARROT`, `ResearchPaperItem` (right-click -> gene
+    parameterised `KNOWN_GENE_SPLICE_CARROT`, `ResearchPaperItem` (right-click -> gene
     DB + carrot unlock), `braided_rope` + `hair_cloth`, and `HORSE_HAIR` (from
     shearing) all have behaviour; the tickets do not yet), `SeedJarItem`
     (tooltip), `WhistleItem`
@@ -2312,7 +2332,7 @@ reference is **`wiki/gene-format.html`**; the machinery:
   and the optional §19 blocks **`blurb`** (a gene-level summary),
   **`rarity`** (a `GeneRarity` tier - default gold-ingot), **`carrot`**
   (`{enabled, behaviour: heterozygous|homozygous, flavour: [...]}`) and
-  **`chaos`** (a founder-shaped distribution for the chaos carrot). All four are
+  **`splice`** (a founder-shaped distribution for the Unknown Gene Splice carrot). All four are
   optional; a format-2 file needs only its version number bumped. Each expression
   names the
   combinations that land on it (`when`, a list or a token→count map; exactly one
@@ -2762,6 +2782,22 @@ direction the rider steers (`rider.zza`/`xxa`, rotated the way vanilla's
 
 This SDK is further from mainline 1.21.x than the version numbers suggest.
 
+- **`EntityLeaveLevelEvent` fires from inside the chunk system - never touch
+  block state in its handler.** It is posted from
+  `ServerLevel$EntityCallbacks.onTrackingEnd` -> `PersistentEntitySectionManager
+  .stopTracking`, which runs **inside `DistanceManager.runAllUpdates`**. Any
+  `level.getBlockState(pos)` / `getChunk` there forces a chunk load that
+  **re-enters** the same update pass and blows up with
+  `IllegalStateException: Entity is already tracked!` (`ChunkMap.addEntity`).
+  The owner hit this going to the horse dimension: teleporting out of the
+  overworld unloads chunks, untracks every glowing horse in them, and
+  `GeneAbilityHandler.onEntityLeave` was calling `clearLight` (a `getBlockState`)
+  synchronously. **Fixed 2026-09-05**: `onEntityLeave` now just queues a
+  `PendingClear(dimension, pos)` and a `ServerTickEvent.Post` drains the queue
+  next tick (safe - not inside `runAllUpdates`). Same family as the
+  `applyTraitsToEntity` / `SCALE` crash the herd work fought (see the debug-pen
+  section); `server.execute` is **not** a safe deferral here either (it drains
+  next to `pollTask`).
 - **`ResourceLocation` is now `net.minecraft.resources.Identifier`** - same
   surface (`withDefaultNamespace`, `fromNamespaceAndPath`), different name.
 - **Horse classes moved** `net.minecraft.world.entity.animal.horse` ->
@@ -3009,6 +3045,11 @@ This SDK is further from mainline 1.21.x than the version numbers suggest.
 
 `build` only assembles the jar. `runClient` / `runServer` launch MC
 `26.1.2.100` with the mod. IntelliJ Gradle sync generates the run configs.
+
+**Crash reports** land in `neoforge-26.1.2/run/crash-reports/`
+(`crash-<timestamp>-{server,client,fml}.txt`) - most recent last. That is where
+the owner will point for any in-game crash; read the newest one. `hs_err_pid*`
+JVM-level dumps land in `neoforge-26.1.2/run/` (and are git-ignored).
 
 Two machine-specific launch blockers on this dev laptop (NVIDIA RTX 3050 Ti +
 AMD integrated, AMD driver from 2023):
@@ -3546,7 +3587,7 @@ Design follow-ups (not just "go look at it"):
    any carrot effect on the breeding draw, and **the tickets** - owner's intent
    is that a ticket teleports its bound horse back to its stall, which is now
    possible (stalls exist - `StallData` / `StallRecord.center()`), it's just not
-   built. The `magic_gene_carrot` is one generic item because per-gene targeting
+   built. The `known_gene_splice_carrot` is one generic item because per-gene targeting
    wants a data component (`wiki/roadmap.html` §14.2, §19);
    `placeholder_gene_book` replaces the real research paper. Tickets share one
    texture, whistles share one, stall signs borrow `oak_sign` - per-tier / real
@@ -3776,12 +3817,12 @@ Design follow-ups (not just "go look at it"):
    - **Does `NONE`/`NONE` breeding really match the old draw in-game?** The unit
      test pins byte-identity and `coat-golden.txt` is untouched, but a live foal
      from two un-fed parents has not been checked against a pre-pass foal.
-   - **The magic carrot recipe.** `MagicCarrotRecipe` is a `CustomRecipe` built
+   - **The Known Gene Splice carrot recipe.** `KnownGeneSpliceRecipe` is a `CustomRecipe` built
      against 26.1.2 sources without an in-game craft - the `matches` heuristic
      (1 gold carrot, 1 paper, >=1 hair, the rarity item, >=5 filled slots) may
      be too loose or too strict, and the recipe-book / JEI display of a
      no-fixed-ingredients special recipe is unknown. Same for `CarrotCombineRecipe`.
-   - **Chaos determinism across a reload.** Chaos rolls its target gene at
+   - **Gene-splice determinism across a reload.** It rolls its target gene at
      breeding time off the foal RNG; two carriers bred repeatedly should give a
      spread, not the same locus every time - unverified.
    - **The gene database UI.** The browser tab now depends on
@@ -3808,18 +3849,18 @@ Design follow-ups (not just "go look at it"):
    `EmissiveCoatLayer` pattern. Deferred rather than done badly.
 
 34. **§19 metadata has no creator form.** The gene creator emits `format: 3`
-   files, but the new `blurb` / `rarity` / `carrot` / `chaos` blocks are not
+   files, but the new `blurb` / `rarity` / `carrot` / `splice` blocks are not
    editable in the tool - an author writes them by hand. They are optional and
    not parity-checked (they don't paint), so this is a form-fields task, not a
    correctness one. `wiki/gene-format.html` documents the shapes.
 
-35. **No built-in gene declares a `chaos` table.** Every built-in falls back to
-   the uniform draw over its viable pairs when the chaos carrot lands on it -
+35. **No built-in gene declares a `splice` table.** Every built-in falls back to
+   the uniform draw over its viable pairs when the Unknown Gene Splice carrot lands on it -
    which for a 40-allele locus like particle is a near-guaranteed weird
    outcome, and for a lethal-carrying locus can hand a foal a lethal genotype
    (the draw is over `canOccur` pairs, so an *embryonic* lethal is excluded, but
-   a *birth* lethal like `O/O` is reachable). Whether that is a feature (chaos
-   is chaos) or wants a per-gene guard is a design call. `Gene.chaosTable()` is
+   a *birth* lethal like `O/O` is reachable). Whether that is a feature (gene splice
+   is gene splice) or wants a per-gene guard is a design call. `Gene.spliceTable()` is
    the seam.
 
 ## License

@@ -134,17 +134,17 @@ public final class SpecGene implements Gene {
 
     @Override public com.example.horsegenetics.common.genetics.GeneRarity rarity() { return spec.rarity(); }
 
-    @Override public boolean hasMagicCarrot() { return spec.carrot().enabled(); }
+    @Override public boolean hasGeneCarrot() { return spec.carrot().enabled(); }
 
-    @Override public boolean magicCarrotHomozygous() { return spec.carrot().homozygous(); }
+    @Override public boolean geneCarrotHomozygous() { return spec.carrot().homozygous(); }
 
     @Override
-    public java.util.Optional<FounderTable> chaosTable() {
-        if (spec.chaos().isEmpty()) {
+    public java.util.Optional<FounderTable> spliceTable() {
+        if (spec.splice().isEmpty()) {
             return java.util.Optional.empty();
         }
         FounderTable.Builder table = FounderTable.builder();
-        for (GeneSpec.FounderWeight w : spec.chaos()) {
+        for (GeneSpec.FounderWeight w : spec.splice()) {
             String[] tokens = w.combination().split("/");
             table.weight(fromToken(tokens[0]), fromToken(tokens[1]), w.percent());
         }

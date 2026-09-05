@@ -157,9 +157,9 @@
     // --- gameplay-economy metadata (§19); sensible defaults --------------
     default String       description()            { return GeneDescriptions.of(key()); }
     default GeneRarity   rarity()                 { return GeneRarity.DEFAULT; } // gold-ingot tier
-    default boolean      hasMagicCarrot()         { return true; }              // false: sex, disorders
-    default boolean      magicCarrotHomozygous()  { return false; }             // default n&lt;Gene&gt;
-    default Optional&lt;FounderTable&gt; chaosTable()  { return Optional.empty(); }   // else uniform draw
+    default boolean      hasGeneCarrot()         { return true; }              // false: sex, disorders
+    default boolean      geneCarrotHomozygous()  { return false; }             // default n&lt;Gene&gt;
+    default Optional&lt;FounderTable&gt; spliceTable()  { return Optional.empty(); }   // else uniform draw
 
     // --- override only if a combination genuinely cannot exist -------------
     // Almost every locus lets any two of its alleles pair up. Say otherwise and

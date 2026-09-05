@@ -91,7 +91,7 @@ public final class SexGene implements Gene {
     @Override public String key() { return KEY; }
     @Override public String name() { return "Sex"; }
     @Override public int priority() { return PRIORITY; }
-    @Override public boolean hasMagicCarrot() { return false; }
+    @Override public boolean hasGeneCarrot() { return false; }
     @Override public List<Allele> alleles() { return alleles; }
     @Override public List<Expression> expressions() { return expressions; }
     @Override public FounderTable founderTable(FounderContext context) { return founders; }

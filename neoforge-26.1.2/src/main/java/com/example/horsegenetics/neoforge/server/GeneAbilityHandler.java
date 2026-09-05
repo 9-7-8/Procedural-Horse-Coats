@@ -39,14 +39,18 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.minecraft.resources.ResourceKey;
 import net.neoforged.neoforge.event.entity.EntityLeaveLevelEvent;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
+import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * The <b>translator</b> for a data-driven gene's {@code effects} block - the
@@ -404,15 +408,39 @@ public final class GeneAbilityHandler {
         }
     }
 
-    /** Drop a glowing horse's light block when it dies, unloads or changes dimension. */
+    /**
+     * Light blocks whose glowing horse has left, to be removed on the next
+     * server tick. <b>Not</b> cleared inside {@link #onEntityLeave}:
+     * {@link EntityLeaveLevelEvent} fires from
+     * {@code PersistentEntitySectionManager.stopTracking}, which runs <i>inside</i>
+     * {@code DistanceManager.runAllUpdates} - and any {@code getBlockState} there
+     * forces a chunk load that re-enters that same pass ("Entity is already
+     * tracked!"). Deferring to {@link ServerTickEvent.Post} sidesteps it.
+     */
+    private record PendingClear(ResourceKey<Level> dimension, BlockPos pos) {}
+
+    private static final Queue<PendingClear> PENDING_LIGHT_CLEARS = new ConcurrentLinkedQueue<>();
+
+    /** Queue a glowing horse's light block for removal when it dies, unloads or changes dimension. */
     @SubscribeEvent
     static void onEntityLeave(EntityLeaveLevelEvent event) {
         if (!(event.getEntity() instanceof Horse horse)) {
             return;
         }
         BlockPos pos = GLOW_LIGHT.remove(horse.getUUID());
-        if (pos != null && !event.getLevel().isClientSide()) {
-            clearLight(event.getLevel(), pos);
+        if (pos != null && event.getLevel() instanceof ServerLevel level) {
+            PENDING_LIGHT_CLEARS.add(new PendingClear(level.dimension(), pos.immutable()));
+        }
+    }
+
+    @SubscribeEvent
+    static void drainPendingLightClears(ServerTickEvent.Post event) {
+        PendingClear pending;
+        while ((pending = PENDING_LIGHT_CLEARS.poll()) != null) {
+            ServerLevel level = event.getServer().getLevel(pending.dimension());
+            if (level != null && level.hasChunkAt(pending.pos())) {
+                clearLight(level, pending.pos());
+            }
         }
     }
 

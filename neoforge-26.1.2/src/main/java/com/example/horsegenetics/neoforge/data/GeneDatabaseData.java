@@ -23,14 +23,14 @@ import net.neoforged.neoforge.network.PacketDistributor;
 /**
  * The per-player <b>gene database</b> (roadmap wiki &sect;16.1) - which genes a
  * player has met, which allele variants they have seen, and whether each gene's
- * magic-carrot recipe is unlocked. Server-global {@link SavedData} keyed by
+ * gene-carrot recipe is unlocked. Server-global {@link SavedData} keyed by
  * player {@link UUID}, so it lives in {@code <save>/data/} and gates crafting;
  * a client mirror ({@code client/ClientGeneDatabase}) drives the browser tab
  * only.
  *
  * <p>It hides nothing (settled): the info panel, pen signs and genotype code
  * keep showing every gene a horse carries. The only thing discovery gates is
- * the magic-carrot recipe.
+ * the gene-carrot recipe.
  */
 public final class GeneDatabaseData extends SavedData {
 
