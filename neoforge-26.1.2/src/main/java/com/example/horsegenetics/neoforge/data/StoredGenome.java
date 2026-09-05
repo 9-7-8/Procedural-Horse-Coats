@@ -37,13 +37,14 @@ import net.minecraft.network.codec.StreamCodec;
  * argument.
  */
 public record StoredGenome(String genotypeCode, String epigenomeCode,
-                           UUID sourceId, String sourceName) {
+                           UUID sourceId, String sourceName, String breed) {
 
     public static final Codec<StoredGenome> CODEC = RecordCodecBuilder.create(i -> i.group(
             Codec.STRING.fieldOf("genotype").forGetter(StoredGenome::genotypeCode),
             Codec.STRING.fieldOf("epigenome").forGetter(StoredGenome::epigenomeCode),
             UUIDUtil.CODEC.fieldOf("source_id").forGetter(StoredGenome::sourceId),
-            Codec.STRING.optionalFieldOf("source_name", "").forGetter(StoredGenome::sourceName)
+            Codec.STRING.optionalFieldOf("source_name", "").forGetter(StoredGenome::sourceName),
+            Codec.STRING.optionalFieldOf("breed", "").forGetter(StoredGenome::breed)
     ).apply(i, StoredGenome::new));
 
     public static final StreamCodec<ByteBuf, StoredGenome> STREAM_CODEC = StreamCodec.composite(
@@ -51,6 +52,7 @@ public record StoredGenome(String genotypeCode, String epigenomeCode,
             ByteBufCodecs.STRING_UTF8, StoredGenome::epigenomeCode,
             UUIDUtil.STREAM_CODEC, StoredGenome::sourceId,
             ByteBufCodecs.STRING_UTF8, StoredGenome::sourceName,
+            ByteBufCodecs.STRING_UTF8, StoredGenome::breed,
             StoredGenome::new);
 
     /** The donor's sex, read off the stored genotype - a filled jar is always a stallion's. */

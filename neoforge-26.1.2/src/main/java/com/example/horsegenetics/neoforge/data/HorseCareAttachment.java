@@ -14,26 +14,23 @@ import java.util.UUID;
  *
  * <ul>
  *   <li><b>{@code bond}</b> - 0..100, the player-relationship number that
- *       {@code BondFollowGoal} reads to decide whether the horse looks at,
- *       walks toward, or follows its owner.</li>
- *   <li><b>{@code bondToday} / {@code dayStamp}</b> - the {@code +15 per day}
- *       cap. {@code dayStamp} is {@code level.getDayTime() / 24000}; when it
- *       rolls over, {@code bondToday} resets.</li>
- *   <li><b>{@code bondTicks}</b> - fractional-bond accumulator. Proximity and
- *       riding add ticks here; every {@link #TICKS_PER_BOND_POINT} it converts
- *       to one bond point (subject to the daily cap).</li>
- *   <li><b>{@code herd}</b> - the id of the herd this horse belongs to, if
- *       any. Minted by {@code HorseCareHandler} when two or more horses have
- *       been together long enough.</li>
- *   <li><b>{@code togetherTicks}</b> - the herd-formation counter: accumulates
- *       while another horse is nearby, decays otherwise. Crosses
- *       {@link #TICKS_TO_FORM_HERD} to join/form a herd; decays to 0 to leave
- *       one.</li>
+ *       {@code BondFollowGoal} reads.</li>
+ *   <li><b>{@code bondToday} / {@code dayStamp} / {@code bondTicks}</b> - the
+ *       {@code +15 per day} cap and its fractional accumulator.</li>
+ *   <li><b>{@code herd}</b> - the id of the herd this horse belongs to. For a
+ *       <b>natural wild herd</b> ({@code HerdManager}) this is the <b>lead
+ *       horse's UUID</b> - the lead points at itself. For a herd formed by
+ *       {@code HorseCareHandler}'s together-timer it is a minted id and
+ *       {@code herdBreed} / {@code herdBand} are absent.</li>
+ *   <li><b>{@code herdBreed}</b> - the breed id every member of a natural wild
+ *       herd shares.</li>
+ *   <li><b>{@code herdBand}</b> - {@code "TRADITIONAL"} or {@code "BACHELOR"}.</li>
+ *   <li><b>{@code togetherTicks}</b> - the together-timer for tamed-horse herd
+ *       formation.</li>
  * </ul>
  *
  * <p>Synced to the client (bond + in-herd flag only) via
- * {@code HorseCareSyncPayload} for the inventory-screen panel. Dev only: no
- * legacy handling, {@link #DEFAULT} is the attachment default.
+ * {@code HorseCareSyncPayload}. Dev only: no legacy handling.
  */
 public record HorseCareAttachment(
         int bond,
@@ -41,22 +38,25 @@ public record HorseCareAttachment(
         int bondToday,
         long dayStamp,
         long bondTicks,
-        long togetherTicks) {
+        long togetherTicks,
+        Optional<String> herdBreed,
+        Optional<String> herdBand) {
 
     public static final int MAX_BOND = 100;
     public static final int DAILY_CAP = 15;
 
-    /** A Minecraft day. Also the unit for the daily bond cap (roadmap &sect;21). */
     public static final long DAY_TICKS = 24_000L;
-
-    /** One (real) minute of proximity / riding = this many ticks. */
     public static final long TICKS_PER_BOND_POINT = 1_200L;
-
-    /** Ten minutes of company forms a herd; ten minutes alone dissolves it. */
     public static final long TICKS_TO_FORM_HERD = 12_000L;
 
     public static final HorseCareAttachment DEFAULT =
-            new HorseCareAttachment(0, Optional.empty(), 0, 0L, 0L, 0L);
+            new HorseCareAttachment(0, Optional.empty(), 0, 0L, 0L, 0L, Optional.empty(), Optional.empty());
+
+    public HorseCareAttachment {
+        herd = herd == null ? Optional.empty() : herd;
+        herdBreed = herdBreed == null ? Optional.empty() : herdBreed;
+        herdBand = herdBand == null ? Optional.empty() : herdBand;
+    }
 
     public static final MapCodec<HorseCareAttachment> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
             Codec.INT.optionalFieldOf("bond", 0).forGetter(HorseCareAttachment::bond),
@@ -64,7 +64,9 @@ public record HorseCareAttachment(
             Codec.INT.optionalFieldOf("bond_today", 0).forGetter(HorseCareAttachment::bondToday),
             Codec.LONG.optionalFieldOf("day_stamp", 0L).forGetter(HorseCareAttachment::dayStamp),
             Codec.LONG.optionalFieldOf("bond_ticks", 0L).forGetter(HorseCareAttachment::bondTicks),
-            Codec.LONG.optionalFieldOf("together_ticks", 0L).forGetter(HorseCareAttachment::togetherTicks)
+            Codec.LONG.optionalFieldOf("together_ticks", 0L).forGetter(HorseCareAttachment::togetherTicks),
+            Codec.STRING.optionalFieldOf("herd_breed").forGetter(HorseCareAttachment::herdBreed),
+            Codec.STRING.optionalFieldOf("herd_band").forGetter(HorseCareAttachment::herdBand)
     ).apply(i, HorseCareAttachment::new));
 
     public static final Codec<HorseCareAttachment> CODEC = MAP_CODEC.codec();
@@ -81,18 +83,31 @@ public record HorseCareAttachment(
         return herd.isPresent();
     }
 
+    /** This is a natural wild herd managed by {@code HerdManager} (has a breed + band). */
+    public boolean inWildHerd() {
+        return herd.isPresent() && herdBreed.isPresent();
+    }
+
     public HorseCareAttachment withBond(int newBond) {
-        return new HorseCareAttachment(clampBond(newBond), herd, bondToday, dayStamp, bondTicks, togetherTicks);
+        return new HorseCareAttachment(clampBond(newBond), herd, bondToday, dayStamp, bondTicks,
+                togetherTicks, herdBreed, herdBand);
     }
 
     public HorseCareAttachment withHerd(Optional<UUID> newHerd) {
-        return new HorseCareAttachment(bond, newHerd, bondToday, dayStamp, bondTicks, togetherTicks);
+        return new HorseCareAttachment(bond, newHerd, bondToday, dayStamp, bondTicks, togetherTicks,
+                herdBreed, herdBand);
+    }
+
+    /** Join (or found) a natural wild herd: {@code lead} is the lead horse's UUID. */
+    public HorseCareAttachment withWildHerd(UUID lead, String breedId, String band) {
+        return new HorseCareAttachment(bond, Optional.of(lead), bondToday, dayStamp, bondTicks,
+                togetherTicks, Optional.of(breedId), Optional.of(band));
     }
 
     public HorseCareAttachment with(int newBond, Optional<UUID> newHerd, int newBondToday,
                                     long newDayStamp, long newBondTicks, long newTogetherTicks) {
         return new HorseCareAttachment(clampBond(newBond), newHerd, Math.max(0, newBondToday),
-                newDayStamp, Math.max(0L, newBondTicks), Math.max(0L, newTogetherTicks));
+                newDayStamp, Math.max(0L, newBondTicks), Math.max(0L, newTogetherTicks), herdBreed, herdBand);
     }
 
     private static int clampBond(int b) {

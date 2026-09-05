@@ -342,8 +342,8 @@ class CoatTextureComposerTest {
     @Test
     void testGenePaintsItsGradientFlatOnTopOfAnyBase() {
         // flat paint on top - visible over chestnut AND over pure black
-        assertFalse(Arrays.equals(compose(CHESTNUT, 0L), compose(override("extension=e/e", "test=T/t"), 0L)));
-        assertFalse(Arrays.equals(compose(BLACK, 0L), compose(override("test=T/t"), 0L)));
+        assertFalse(Arrays.equals(compose(CHESTNUT, 0L), compose(override("extension=e/e", "magic_zebra=Mzeb/n"), 0L)));
+        assertFalse(Arrays.equals(compose(BLACK, 0L), compose(override("magic_zebra=Mzeb/n"), 0L)));
     }
 
     @Test

@@ -33,10 +33,45 @@
         sex, name, genetic code, parents, stats.</li>
     <li><strong>The ancestry database</strong> &mdash; a server-wide store of every
         record, queryable for a horse&rsquo;s ancestors.</li>
+    <li><strong>Breed inheritance</strong> &mdash; a foal&rsquo;s
+        <a href="breeds.html">breed label</a>: same-breed parents breed true, two
+        breeds make a named cross, and messier pairings collapse to
+        &ldquo;Mixed&rdquo;.</li>
     <li><strong>Integration</strong> &mdash; attaching a record to a live
         <code>Horse</code>, persisting it, pushing stats onto attributes, syncing to
         clients, and the in-game surfaces.</li>
 </ol>
+
+<h3>Breed labels combine (<code>BreedLineage.combine</code>)</h3>
+<p>
+    Every horse carries a breed token on its <code>HorseRecord</code>
+    (<code>breed</code>, optional). A wild herd is a pure breed; a lone spawn is
+    <code>unknown</code>. <code>HorseBreedingHandler.applyBredFoal</code> sets the
+    foal&rsquo;s from its two parents&rsquo;:
+</p>
+<ul>
+    <li><strong>Pure A &times; pure A</strong> &rarr; A.</li>
+    <li><strong>Pure A &times; pure B</strong> &rarr; <em>A &times; B cross</em>
+        (components sorted, so order never matters).</li>
+    <li><strong>The same cross &times; itself</strong>, or <strong>a cross &times;
+        one of its own two breeds</strong> &rarr; that same cross.</li>
+    <li><strong>A cross &times; anything else</strong> (a third breed, a different
+        cross) &rarr; <em>Mixed</em>. <strong>Mixed &times; anything</strong> &rarr;
+        Mixed.</li>
+    <li><strong>Unknown</strong> acts as an ordinary distinct breed in all of the
+        above (Friesian &times; Unknown &rarr; a cross; Unknown &times; Unknown
+        &rarr; Unknown).</li>
+</ul>
+<p>
+    A <strong>pure</strong> breed also pins the four magical body-stat genes to
+    the breed&rsquo;s <a href="breeds.html#stats">target bands</a>, so
+    <code>record.traits()</code> and <code>HorseRecords.traitsOf</code> resolve a
+    Thoroughbred near &times;2 speed and a Falabella near &times;0.45 scale. A
+    <strong>cross</strong> averages its two parents&rsquo; bands per axis (only
+    where both pin it); <strong>Mixed</strong> / <strong>Unknown</strong> pin
+    nothing and fall back to the ordinary bounded-Gaussian draw. Full detail:
+    <a href="breeds.html">the breeds page</a>.
+</p>
 
 <div class="note good">
     <span class="label">Verified in-game</span>

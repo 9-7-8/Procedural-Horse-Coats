@@ -16,6 +16,14 @@ public class GeneticHorseRenderState extends HorseRenderState {
     public CoatData coatData = CoatData.DEFAULT;
 
     /**
+     * The horse's breed label ({@code BreedLineage.displayName()}), or
+     * {@code null} if no record is cached yet. Purely for the dev-build
+     * {@code [coat]} chat line - the baked texture is keyed by genome, not by
+     * breed.
+     */
+    public String breedLabel = null;
+
+    /**
      * Full-bright mask texture for a {@code glow} gene's emissive coat regions,
      * or {@code null} when no expressed gene wants one. Drawn by
      * {@link EmissiveCoatLayer} on top of the base coat.

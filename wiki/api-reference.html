@@ -68,7 +68,7 @@ genetics/
   GeneCodeDisplay.java      shortForm / wrap - human-readable codes
   GeneticCodeCombiner.java  the string-level and Genome-level breeding seam
   CoatPhenotype.java        coarse CHESTNUT / BLACK / BAY / WHITE
-  genes/                    the forty-two shipped Gene implementations
+  genes/                    the forty-one shipped Gene implementations
   spec/                     DATA-DRIVEN genes - a gene as a JSON file
     GeneSpec.java             the format, as records (header + layers + effects)
     SpecSchema.java           what each mask / op accepts, and its default
@@ -106,7 +106,6 @@ coat/
     HairPattern.java          the mane / tail painter: bands, centre stripe, hues
     BayCoat.java              bay / seal generator
     GreyCoat.java             dapple grey generator
-    TestCoatPattern.java      the diagnostic gradient
     CoatPattern.java          (x,y,z) -&gt; ARGB, for the sample baker
     CoatSheetRasterizer.java  bake a CoatPattern to a sheet / PNG
     CoatSampleTool.java       the bakeCoatSamples gradle task
@@ -400,7 +399,7 @@ static Allele allele(String alleleKey);   // "&lt;gene&gt;.&lt;token&gt;"</code>
 <pre><code class="language-java">static void register(SpecGene gene);              // throws on a duplicate key; warns if out of band
 static void registerAll(Collection&lt;SpecGene&gt;);
 static List&lt;SpecGene&gt; loaded();                   // the data-driven genes, in gene order
-static void clearLoaded();                        // back to the forty-two built-ins
+static void clearLoaded();                        // back to the forty-one built-ins
 static Gene byKeyOrNull(String geneKey);          // null (not throw) if unregistered - for tolerant parse</code></pre>
 </div>
 
@@ -968,7 +967,7 @@ List&lt;String&gt; GeneCodeDisplay.wrap(Genotype genotype, int lines, int maxCha
     <strong>actually expresses in this genotype</strong>
     (<code>Genotype.shows</code>), so a chestnut is never handed an agouti it will not
     paint; and a combination that <code>masks</code> neither counts toward the floor
-    nor gets forced &mdash; a quarter of all founders carry the diagnostic test gene,
+    nor gets forced &mdash; a masking combination (KIT dominant white, EDNRB lethal white),
     which paints flat over everything, and letting that satisfy the floor would exempt
     a quarter of the corridor from it.
 </p>

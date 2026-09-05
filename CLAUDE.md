@@ -1,7 +1,7 @@
 # Horse Genetics - NeoForge 26.1.2 Mod
 
 Procedural horses: a Mendelian genotype of **allele objects** (extension,
-agouti + seal, the white-pattern loci, champagne, a `T` "Test" diagnostic)
+agouti + seal, the white-pattern loci, champagne)
 drives a
 **generated coat texture** - genes restrict red/black pigment per pixel, the
 survivors are looked up in a gradient and multiplied onto a white-horse
@@ -54,6 +54,13 @@ project. Its shape:
   record / pedigree / **stat-inheritance** system. Keep it current when you
   touch any of that; don't re-document it here or in README (a pointer is
   fine).
+- **`wiki/breeds.html`** is the single source of truth for the **breed system** -
+  the 49 built-in breeds, biome-weighted herd spawning, the Unknown/loner rule,
+  the geometric magic-gene draw, the score->multiplier stat curve, and the
+  cross/mixed breeding-label algebra. Update it in the same change as anything
+  under `common/breed/`, `common/trait/{StatAxis,TargetBand,BreedStatTargets}`,
+  `server/BreedSpawnHandler`, or the `biome_modifier/` JSON. CLAUDE.md keeps a
+  summary, not a copy.
 - **`wiki/gene-*.html`** is the single source of truth for **each gene** - alleles,
   generation function, wild frequency, dominance, natural/magical. Update
   it in the same change as any gene; CLAUDE.md keeps only the machinery + a
@@ -131,6 +138,175 @@ project. Its shape:
     changes shape, update `api-reference.html` in the same change.
 
 ## Status snapshot (keep this current)
+
+- **Built 2026-09-05, partly play-tested: breeds + herds + wild aggro; Test gene
+  removed.** A `common/breed/` package, 49 real-world breeds + `UNKNOWN`,
+  biome-weighted wild-herd spawning (traditional harems + bachelor bands),
+  cross/mixed breeding labels, wolf-style herd aggro, and a batch of dev tools.
+  **The Test gene was deleted** (`TestGene` + `TestCoatPattern` gone) - it had
+  served its purpose and looked ugly. Genotype code **44 -> 41 segments** (43
+  in-game with suntouched + waterborn), `coat-golden.txt` regenerated (the
+  three `test=T/t` golden cases dropped; `CoatTextureComposerTest` /
+  `GeneCodeDisplayTest` / `GenotypeTest` / `GeneticCodeCombinerTest` /
+  `SpecGeneTest` retargeted off `Genes.TEST`), `GenotypeCatalog.size()`
+  **462 422 019 -> 462 422 018**, `totalGenotypes()` `/3` to
+  **5 881 468 290 421 930 356 326 400 000**. Machinery is `wiki/breeds.html`
+  and `wiki/horse-care.html`; the shape of it:
+  - **A breed is a constrained founder roll.** `Breed` carries per-gene allele
+    pools (as tokens), a `BreedStatTargets` (per-axis multiplier bands), a
+    biome list, a `Commonness` -> spawn weight, a magic chance, and a notes
+    list. `BreedFounder.roll(breed, rng)` starts from `Genotype.random` and
+    overrides: every **coat gene the breed doesn't name -> wild** (so no stray
+    pattern), every **named gene -> the breed's pool**, the **four magical
+    body-stat loci -> homozygous for the pushing allele on any axis the breed
+    pins**, every **other magical gene -> wild, then a geometric draw**
+    (p=0.20, then 0.10, 0.05, ... halving, cap 10) switches a few back on.
+    `Breeds.UNKNOWN` skips all of it - the pre-breeds unconstrained roll.
+    Disorder genes keep their global rates unless the breed is `.hardy()`.
+  - **Stat targeting is a band, not the Gaussian.** The sheet scores
+    speed/jump/heartiness 1-10; `BreedStatCurve` maps 5 -> x1.0 and 10 -> the
+    sheet's ceiling (speed x2.02, health x2.24, jump x3.43), linear, with a
+    shared ~x0.2 floor at score 1. Height (hh range) -> scale band
+    `midHh / 15.75`. `HorseTraits.resolve` gained a
+    `resolve(genotype, epigenome, BreedStatTargets, healthGenetics)` overload;
+    `TraitBuilder` carries the targets and the four body-stat genes
+    (`AbstractMagicStatGene` + `MagicSizeGene`) read `out.breedBand(axis)` -
+    when a band is set and the horse carries a variant copy, they **lerp inside
+    the band from the two copies' epigenetic seeds** instead of the bounded
+    Gaussian. So a Thoroughbred reliably resolves near x2 speed (two `Swift`
+    copies on the Gaussian only reach ~x1.2) and within-breed spread is exactly
+    the band width. A near-baseline band (straddles 1.0) is dropped -> locus
+    left wild -> horse sits on the baseline. New: `common/trait/StatAxis`,
+    `TargetBand`, `BreedStatTargets`.
+  - **Spawn side - herds by proximity (3rd revision).** `BreedSpawnHandler`
+    (`FinalizeSpawnEvent`) does one thing: on a NATURAL / CHUNK_GENERATION /
+    SPAWNER spawn, set `horse.getPersistentData()` `horsegenetics:wild_spawn`.
+    **The `SpawnGroupData` route is dead** - `Horse.finalizeSpawn` replaces any
+    custom pack data with its own `Horse.HorseGroupData` between *every* member,
+    so the `BandData` approach silently made every horse "member 0" with its own
+    breed -> "herds are all mixed / groups of 4 solo Unknowns". `HerdManager`
+    forms the herd by **proximity** instead (deferred one tick). Non-natural
+    spawns (egg with a pre-set record; `/summon`) have no flag -> lone
+    `unknown`. Two `data/horsegenetics/neoforge/biome_modifier/` JSONs:
+    `add_horse_herds` (37 biomes, **weight 10, minCount 3, maxCount 6**) and
+    `add_horse_loners` (`#minecraft:is_overworld`, **weight 1, 1-1**) - a strong
+    bias to packs. **Horses now spawn in taiga, jungle, badlands, swamp, snowy
+    biomes and mushroom fields** - none vanilla.
+  - **Breed labels combine** (`BreedLineage.combine`, in `applyBredFoal`):
+    A x A -> A; A x B -> "A x B cross" (components sorted, order-free); same
+    cross x itself or x one of its own breeds -> that cross; cross x anything
+    else -> Mixed; Mixed x anything -> Mixed. **Unknown acts as an ordinary
+    distinct breed** (Friesian x Unknown -> a cross; owner may want it
+    absorbing like Mixed - flagged `wiki/roadmap.html` §22). A **cross**
+    averages its two components' stat bands per axis (only where both pin it);
+    Mixed/Unknown pin nothing.
+  - **`HorseRecord` gained `Optional<String> breed`** (position 7, after
+    `epigenomeCode`); codec `breed` optional field; `founder`/`bred` factories
+    gained a `breedToken` param (old arities kept, delegating to `unknown`);
+    `record.lineage()` -> `BreedLineage`, `record.traits()` is breed-aware.
+    `StoredGenome` (seed jar) gained a `breed` field so a seed-jar foal crosses
+    right.
+  - **Surfaces.** Info panel shows the breed under the sex/gen line (`PANEL_H`
+    164 -> 176). **Paper dump** (`HorsePaperInspectHandler`) prints a
+    `breed:` line. The dev-build **`[coat]` chat line**
+    (`GeneticCoatTextureFactory.debugLogCoat`) appends `[<breed>]` - threaded
+    from `GeneticHorseRenderer` via a new `GeneticHorseRenderState.breedLabel`
+    and `coatTextureFor(coat, baby, label)` / `getOrCreate(coat, baby, label)`
+    overloads (label is cosmetic only; the bake is genome-keyed). The **custom
+    spawn egg** gained a `Breed:` cycle button
+    (`CustomHorseSpawnScreen.cycleBreed` / `applyBreedPreset`): landing on a
+    breed rolls a fresh `BreedFounder.roll` of it into the editor (genotype +
+    epigenome + sex) and `SpawnCustomHorsePayload` carries the token so the
+    spawned horse is stamped (`ModNetworking.handleSpawnCustomHorse` ->
+    `record.withBreed`).
+  - **Referenced-but-not-built** (noted per-breed + `wiki/roadmap.html` §22):
+    leopard complex (Lp/PATN1 - already §4.2), Tiger Eye, HYPP (a
+    heart-reducing gene), pangare/mealy, flaxen, the early-lethal foal
+    disorders (SCID/CA/LFS/GBED/NNF/CVM/megaesophagus), gait (DMRT3),
+    mane-shape and feathering render layers. **Won't model**: metallic sheen,
+    curved ears, head profiles.
+  - **`server/HerdManager.assignFounder`** (deferred one tick from
+    `onHorseJoin` via `server.execute`) forms the herd by **proximity**
+    (`HERD_RADIUS` 32, `BandType` still TRADITIONAL 70% / BACHELOR 30%):
+    - if a nearby untamed wild horse is **already `inWildHerd()`** -> **JOIN**
+      it: its breed, its band, its lead, sex per band (traditional joiner =
+      mare, bachelor joiner = stallion);
+    - else if a nearby untamed horse is **also a fresh wild spawn** (has the
+      `wild_spawn` flag, no record yet - a pack-mate awaiting its turn) ->
+      **FOUND** a herd: this horse is the lead stallion, breed =
+      `pickHerdBreed(biome)` (weighted, Unknown only if the biome has no
+      breeds), band = a coin;
+    - else genuinely alone -> a lone **`UNKNOWN`**, no herd.
+    So **every clump of wild horses is one herd of one breed**, and only a
+    solitary horse is Unknown. A pack streaming over two ticks can still split
+    (edge, single-tick `NaturalSpawner` packs are the norm). `BandData` and the
+    band NBT keys are gone. **Traditional-band foals now spawn at vanilla's ~5%
+    rate** (the pack `AgeableMobGroupData` can't be overridden any more) - noted
+    as a follow-up.
+  - **`server/WildHerdGoal`** (new, added beside `BondFollowGoal` at priority
+    6): an untamed herd member paths to its lead (resolved via
+    `ServerLevel.getEntity(uuid)`) when >8 blocks away, re-path every ~15
+    ticks; if the lead is gone for 10s it promotes itself. `HorseCareHandler`'s
+    together-timer skips any horse `inWildHerd()`.
+  - **`HorseCareAttachment` gained `herdBreed` + `herdBand`** (`herd` is now
+    the lead horse's UUID for a natural herd; the lead points at itself).
+    `inWildHerd()` = `herd` + `herdBreed` both set. Codec fields
+    `herd_breed` / `herd_band`.
+  - **`server/HorseAggroHandler`** (new) - **wild horses aggro like wolves.**
+    `EntityAttributeModificationEvent` (mod bus) gives `EntityType.HORSE` an
+    `ATTACK_DAMAGE` of 4; every horse gets a `MeleeAttackGoal` (priority 3) and
+    a `WildHorseForgetTargetGoal` (targetSelector, priority 1) that clears the
+    target after 60 ticks with no line of sight ("break eyesight -> neutral").
+    `LivingIncomingDamageEvent`: an untamed victim + every herd-mate within 24
+    blocks target the living attacker. Tamed horses and debug-dim horses are
+    untouched.
+  - **Debug tools.** F8 (`RequestHighlightHorsesPayload` ->
+    `server/DebugHighlightHandler.toggle`) is a **toggle** now: press once to
+    keep every horse within 96 blocks glowing (refreshed every 40 ticks on
+    `ServerTickEvent.Post`), press again to stop. Per-player, dropped on logout.
+    The **stick / clock** shortcuts now also work anywhere in a dev build
+    (`!FMLEnvironment.isProduction()`), not just the horse dimension -
+    `HorseInteractionHandler`.
+  - **Paper dump** (`HorsePaperInspectHandler`) - **dropped `generation:` and
+    the ancestors block**, **added a `herd:` line**: band type, "this horse is
+    the lead" or "led by &lt;name&gt;", and the member count within 64 blocks.
+  - **Bigger big horses.** `BreedStatCurve.scaleBand` now runs the
+    **above-baseline** part of a height ratio through `BIG_GAMMA = 3.0`
+    (below-baseline untouched - small breeds already read fine). Real horse
+    heights barely differ (a Shire is ~10% over average) but a draught horse
+    should tower: Quarter Horse resolves ~x0.96, **Percheron ~x1.0-1.38**
+    (avg ~1.19), Shire/Clydesdale x1.14-1.43. Falabella etc. unchanged.
+  - **Surfaces.** The **custom spawn egg** gained a `Breed:` cycle button
+    (`CustomHorseSpawnScreen.cycleBreed` / `applyBreedPreset`): pick a breed and
+    it rolls a fresh wild individual of it (genotype + epigenome + sex) into the
+    editor; `SpawnCustomHorsePayload` carries the token so the spawned horse is
+    stamped (`ModNetworking` -> `record.withBreed`). The **paper dump** prints
+    a `breed:` line; the dev **`[coat]` chat line** appends `[<breed>]` (via a
+    new `GeneticHorseRenderState.breedLabel` + `coatTextureFor(coat, baby,
+    label)` / `getOrCreate(coat, baby, label)` overloads - label is cosmetic
+    only, the bake is genome-keyed).
+  - New tests: `BreedLineageTest` (11), `BreedStatCurveTest` (7), `BreedsTest`
+    (7), `BreedFounderTest` (8); `TestCoatPatternTest` deleted. `:common:test`
+    **374 green**, `:neoforge-26.1.2:build` green, `runServer` boots clean
+    (`43 segments`, biome modifiers load, `loaded 2 data-driven gene(s)`).
+    Checklist: `wiki/verification.html` §0e.
+  - **The `DistanceManager.runAllUpdates` crash came back** after the first fix
+    (moving work from `FinalizeSpawnEvent` to `onHorseJoin` was not enough -
+    `onHorseJoin` *also* fires inside the chunk system's `updateFutures` for
+    chunk-loaded entities, and `applyTraitsToEntity` sets `Attributes.SCALE`
+    whose `refreshDimensions` -> `findFreePosition` collision scan re-enters and
+    corrupts the ticket-set iterator). **Real fix: `onHorseJoin` now defers its
+    entire body to `server.execute(...)` (next tick).** Nothing this mod does
+    runs inside a chunk-holder update any more. Needs a `runClient` re-test - a
+    headless `runServer` can't reproduce it.
+  - Also confirmed in the same session: the frame/tobiano/splash "white over
+    the whole topline" defect (known gap #30) is real in-game; still deferred.
+  - Docs: `wiki/breeds.html` (new), `wiki/nav.js`, `wiki/breeding.html`,
+    `wiki/horse-body.html`, `wiki/roadmap.html` §22, `wiki/verification.html`
+    §0e, `README.md`.
+  - **Deliberately not built:** per-breed pool-rate balancing (all estimates),
+    the biome-density audit, sex-linked / gaited genes, and a "blended F1
+    toward the stronger parent" cross-stat rule.
 
 - **Built 2026-09-05, NOT yet play-tested: magic speed, magic health and magic
   jump - three more genes on the `MagicSizeGene` pattern.** `MagicSpeedGene`
@@ -1085,10 +1261,13 @@ project. Its shape:
   Still unconfirmed: bred foal, seed-jar round-trip, a spec gene actually
   showing in the display (needs a horse carrying Suntouched/Waterborn) -
   `wiki/verification.html` §0.
-- **`common/`** - compiles; **348 JUnit tests pass** (`./gradlew :common:test`).
-  Covers `trait/` (the non-coat body: `HorseTraits` / `Traits` / `Condition` /
-  `TraitBuilder` / `EpigeneticTraitContribution` -> `wiki/horse-body.html`) and
-  `genetics/` (allele/gene model - **42 genes**, 21 that paint and 21 that never
+- **`common/`** - compiles; **380 JUnit tests pass** (`./gradlew :common:test`).
+  Covers `breed/` (the breed system: `Breed` / `Breeds` (49) / `BreedFounder` /
+  `BreedLineage` / `BreedStatCurve` / `Commonness` -> `wiki/breeds.html`),
+  `trait/` (the non-coat body: `HorseTraits` / `Traits` / `Condition` /
+  `TraitBuilder` / `EpigeneticTraitContribution` / the breed `StatAxis` +
+  `TargetBand` + `BreedStatTargets` -> `wiki/horse-body.html`) and
+  `genetics/` (allele/gene model - **41 genes**, 20 that paint and 21 that never
   do: **sex**, the 15 natural ones (extension, agouti, champagne,
   grey, **MATP** (cream + pearl, three alleles), **dun** (three alleles),
   **silver**, **mushroom**, **roan**, **tobiano**, and the four white-pattern
@@ -1106,8 +1285,8 @@ project. Its shape:
   `Genotype` code round-trip, breeding, the `Epigenome` / `Genome` per-allele
   epigenetics + priority tie-break, `GenomeSample` - a genome detached from a
   horse, for the stallion seed jar - `Expression` + `FounderTable` + the
-  `GenotypeCatalog` reduction of 17 644 404 871 265 791 068 979 200 000 genotypes
-  to 462 422 019 distinct coats), `coat/` + `coat/pattern/` (the
+  `GenotypeCatalog` reduction of 5 881 468 290 421 930 356 326 400 000 genotypes
+  to 462 422 018 distinct coats), `coat/` + `coat/pattern/` (the
   pipeline - `CoatTextureComposer`, `PigmentField`, `ColorField`, `CoatOverlay`,
   `GradientLut`, `BayCoat`, `GreyCoat`, `WhitePattern`, `BodyStripes`,
   `HairPattern`, `CoatRegions`, the pure
@@ -1586,7 +1765,14 @@ Two-module Gradle project, split deliberately:
     **`Sex` is an enum the rest of the code reads, not a stored fact**:
     `HorseRecord` has no `sex` field and derives `sex()` from the sex locus in
     its genetic code. It has **no `speed` / `health` fields either**, for the
-    same reason - `traits()` resolves them from the genotype.
+    same reason - `traits()` resolves them from the genotype. It *does* store
+    `Optional<String> breed` (a `BreedLineage` token) - ancestry, not a derived
+    value - and `traits()` feeds `lineage().statTargets()` into `HorseTraits`.
+  - `breed/` - the **breed system**: `Breed` + its `Builder`, `Breeds` (49
+    built-ins + `UNKNOWN`), `Commonness`, `BreedStatCurve` (score/hh -> band),
+    `BreedFounder` (breed-aware founder roll), `BreedLineage` (the pure/cross/
+    mixed/unknown label + `combine` + `statTargets`). Depends on `genetics/` +
+    `trait/`; `horse/` depends on it. -> `wiki/breeds.html`.
   - `trait/` - the **non-coat body**: `HorseTraits` (the one walk),
     `Traits` / `Condition` / `Severity` / `Viability` (the result),
     `TraitBuilder` (the sink), and the capability interfaces
@@ -1624,13 +1810,20 @@ Two-module Gradle project, split deliberately:
     manager, the record adapter (`HorseRecords`, which now also resolves and
     writes the four body attributes); `LethalFoalHandler` (foals that do not
     make it - see `wiki/horse-body.html`); `HorseBreedingHandler`
-    (natural breeding + the shared `applyBredFoal`), `StallionSeedJarHandler`
-    (seed collection + mare impregnation, reusing `applyBredFoal`), the
+    (natural breeding + the shared `applyBredFoal`, now also combining the
+    parents' `BreedLineage`), `StallionSeedJarHandler`
+    (seed collection + mare impregnation, reusing `applyBredFoal`),
+    `BreedSpawnHandler` (a one-line `FinalizeSpawnEvent` hook - flag natural
+    spawns) + `HerdManager` (deferred: founder record + proximity herd
+    formation, every clump = one herd of one breed) + `WildHerdGoal` (a herd
+    member trails its lead) + `HorseAggroHandler` (wolf-style herd aggro + the horse
+    `ATTACK_DAMAGE` attribute) + `DebugHighlightHandler` (the F8 glow toggle),
+    the
     stall trio `StallSignHandler` (bind / sign-break cleanup) + `StallDetector`
     (the enclosed-area flood-fill) + `StallDebug` (particle-outline overlay),
     and the **horse-care** pair `HorseCareHandler` (the one 30-tick scan for
-    gated healing + bond + herd formation) + `BondFollowGoal` (the single
-    bond-tier AI goal). See `wiki/horse-care.html`.
+    gated healing + bond + tamed-horse herd formation) + `BondFollowGoal` (the
+    single bond-tier AI goal). See `wiki/horse-care.html`.
   - `block/` - `ModBlocks` + `HayPortalBlock` (the only registered block),
     `ModBlockEntities` + `HayPortalBlockEntity` (drives the animated
     `hay_portal.png` slab renderer).
@@ -1717,7 +1910,7 @@ shox 91, met 92 - all of which paint nothing, so their order among themselves
 is arbitrary),
 pink hair 110, **mane colour 112, tail colour 114, healer 116**, magic zebra 120,
 **milk 130, body size 140, magic speed 141, magic health 142, magic jump 143,
-particle 150, light 160, verdant 180**, test 900.
+particle 150, light 160, verdant 180**.
 Within the natural band **low = sets pigment absolutely,
 higher = dilution** (agouti's absolute points must precede
 `PigmentField.dilute`). `AlleleEpigenetics.priority` is unrelated - it picks a
@@ -1729,7 +1922,7 @@ MATP, champagne, grey, roan, tobiano, EDNRB, KIT, MITF, PAX3,
 **MSTN, PDK4, CKM, RYR2, LCORL, HMGA2, ACAN, B4GALT7, PLOD1, RAPGEF5, ST14,
 SHOX, MET**, pink hair, **mane colour, tail colour, healer**, magic zebra,
 **milk, body size, magic speed, magic health, magic jump, particle, light,
-verdant**, test. `naturalOrder()` (phase-1 pigment
+verdant**. `naturalOrder()` (phase-1 pigment
 restriction) = the same list minus the magical genes - silver / mushroom / dun sit
 right after agouti so the points exist to dilute, and the six white-pattern
 genes run last. Their order among *themselves* barely matters (they all zero
@@ -1738,7 +1931,7 @@ so a later one paints harder - see `WhitePattern` below. Sex and the thirteen no
 `isNatural()`) but every one of their outcomes is a wild type, so the composer
 skips them - as do milk, the four body-stat genes (size, magic speed, magic
 health, magic jump), particle and verdant on the magical side:
-**twenty-one of the forty-two built-ins never paint**, and
+**twenty-one of the forty-one built-ins never paint**, and
 `Gene.affectsCoat()` is false for exactly those. What they do instead goes
 through `common/trait/` (see `wiki/horse-body.html`) or
 `common/genetics/AbilityContribution`.
@@ -1756,7 +1949,6 @@ gene); one-liners:
 | sex | `X`/`Y` | `mare` (`X/X`), `stallion` (`X/Y`) - **both wild types**; `Y/Y` `canOccur` = false | 50/50 | **none, ever** - the only gene that paints nothing. Priority 1 so a future sex-linked gene reads a resolved sex; `HorseRecord.sex()` is derived from it |
 | extension | `E`/`e` | wild (`E_`), `chestnut` (`ee`) | 25/50/25 | `ee` = black restricted → chestnut |
 | agouti | `A`/`a` | wild (`aa`), `bay` (`A_`) | 25/50/25 | `A_` = bay; one uniform "point extent" off the `A` copy sets leg + face black, each leg jittered; a high roll = seal (non-det). Reports wild on a chestnut via `expressionIn` |
-| test | `T`/`t` | wild, `test-overlay` **(masks)** | **25% `T/t`, 0% `T/T`** | `T_` = paint the `TestCoatPattern` gradient **flat on top** in phase 3 (magical; visible on any base incl. white). Its founder table is why frequency is per *combination* |
 | champagne | `Ch`/`c` | wild, `champagne` | 1/40 per allele | dilute toward the gradient's gold; keeps bay's points chocolate (amber champagne) |
 | grey | `G`/`g` | wild, `grey` | 1/16 per allele | **adults only** - **dapple grey** (`GreyCoat`): remaps onto the gradient's neutral column, per-horse progression / dapple size / dapple strength / point retention (non-det); foal born base colour |
 | MATP | `Cr`/`prl`/`N` | wild (`N/N`), `pearl-carrier` (`prl/N`, a wild type), `single-cream` (`Cr/N`), `classic-pearl` (`prl/prl`), `double-dilute` (`Cr/Cr`, `Cr/prl`) | `Cr` 1/30, `prl` 1/22 | **three alleles, six combinations**: cream and pearl are one locus. Never leaves a pitch-black point. Was two genes + `CreamPearlDilution` |
@@ -3288,7 +3480,9 @@ Design follow-ups (not just "go look at it"):
 
 30. **The white-pattern audit (2026-09-05) found four calibration defects and
    only one of them is fixed.** Fixed: face markings wrapped under the jaw
-   (gone with the shared vocabulary). Still open, all four measured:
+   (gone with the shared vocabulary). Still open, all four measured -
+   **and the "white over the whole topline" ones (frame, tobiano, splash) were
+   confirmed in-game 2026-09-05 while play-testing breeds; still deferred**:
    - **`EdnrbGene`'s flank band does not bite on the barrel.** `BAND_LO` 0.28
      and `BAND_HI` 0.74 are fractions of `bodyBounds` - the **whole-horse**
      AABB, hoof to ear tip - but the barrel spans only 0.326-0.622 of that. So
@@ -3316,6 +3510,33 @@ Design follow-ups (not just "go look at it"):
    the measured quantiles. All four move existing coats, so they want one change
    with a `coat-golden.txt` regeneration and the `WhitePatternGenesTest`
    monotonicity ladder re-checked.
+
+31. **Breeds + herds + aggro are built but barely played, and the numbers are
+   estimates.** `wiki/verification.html` §0e is the checklist. The **crash**
+   (`DistanceManager.runAllUpdates` NPE) recurred once and was re-fixed by
+   deferring the *entire* `onHorseJoin` body to `server.execute` - needs a
+   sustained `runClient` flight to confirm it holds. **#6 (only Unknown
+   breeds)** should be fixed (chunk-gen spawns were bailing before the biome
+   lookup; `HerdManager` does it deferred now) - confirm real breeds appear.
+   The **herd** systems (`HerdManager` band formation, `WildHerdGoal`
+   cohesion, traditional vs bachelor composition) and **wild aggro**
+   (`HorseAggroHandler` - hit one, the herd kicks you; lose LOS, they calm)
+   have had zero play. The load-bearing unknowns:
+   whether **horses actually spawn** in the ~30 new biomes (the biome modifiers
+   parse at boot but nothing has flown to a taiga to look); whether a **herd
+   reads as one breed** on the info panel; whether **breed shows on the body**
+   (a Thoroughbred herd visibly faster, a Falabella herd visibly tiny - the
+   band -> `multiplySpeedUnclamped` / `multiplyScaleUnclamped` path is
+   unit-tested but never rendered); whether the **cross / mixed labels** come
+   out right through a few generations of breeding. The per-gene pool **rates**
+   in `Breeds.java` (how often a breed carries grey, sabino, cream, ...) are
+   eyeballed to "reads as that breed, not a monoculture" and have had no
+   balance pass. `add_horse_loners` targets `#minecraft:is_overworld`
+   wholesale, so total world horse density is unmeasured and may be too high.
+   Two design calls flagged in `wiki/roadmap.html` §22: **Unknown as a cross
+   component** ("Friesian x Unknown cross" vs. making Unknown absorbing like
+   Mixed) and the **cross stat rule** (per-axis average of the parents' bands
+   vs. leaning toward the stronger parent).
 
 ## License
 

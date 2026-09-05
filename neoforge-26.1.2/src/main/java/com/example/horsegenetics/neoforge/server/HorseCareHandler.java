@@ -105,6 +105,9 @@ public final class HorseCareHandler {
             }
         }
         horse.goalSelector.addGoal(GOAL_PRIORITY, new BondFollowGoal(horse));
+        // Wild herd cohesion: a member trails its herd lead so a spawned pack
+        // stays together and wanders as a unit (HerdManager sets the herd).
+        horse.goalSelector.addGoal(GOAL_PRIORITY + 2, new WildHerdGoal(horse));
     }
 
     // ------------------------------------------------------------------
@@ -234,6 +237,11 @@ public final class HorseCareHandler {
 
     private static HorseCareAttachment updateHerd(Horse horse, HorseCareAttachment care,
                                                   List<AbstractHorse> nearby) {
+        // A natural wild herd is owned by HerdManager - the together-timer must
+        // not dissolve it or re-home the horse.
+        if (care.inWildHerd()) {
+            return care;
+        }
         long together = care.togetherTicks();
         Optional<UUID> herd = care.herd();
 

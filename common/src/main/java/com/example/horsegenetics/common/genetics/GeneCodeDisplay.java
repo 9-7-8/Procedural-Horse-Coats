@@ -21,7 +21,7 @@ import java.util.List;
  *       {@code "nprl"}. Two real alleles print both tokens, so a MATP
  *       {@code Cr/Cr} is {@code "CrCr"} and a {@code Cr/prl} is
  *       {@code "Crprl"}.</li>
- *   <li>A gene that can mask the coat (KIT, EDNRB, test) and grey always print both
+ *   <li>A gene that can mask the coat (KIT, EDNRB) and grey always print both
  *       real tokens: {@code "Ww"}, {@code "Gg"}, {@code "Tt"}.</li>
  * </ul>
  *
@@ -41,7 +41,7 @@ public final class GeneCodeDisplay {
      * Does {@code gene}'s default allele mean "this trait is simply absent"
      * (so one variant copy shows {@code nXxx} and two show {@code XxxXxx})?
      * True for every gene except one that can <b>mask</b> the rest of the coat
-     * (KIT, EDNRB, test - which print both real tokens) and grey (which prints
+     * (KIT, EDNRB - which print both real tokens) and grey (which prints
      * {@code Gg}). Derived from the gene's {@link Expression} table, so a
      * data-driven pattern gene is covered for free.
      */
@@ -59,8 +59,7 @@ public final class GeneCodeDisplay {
 
     /**
      * Order the non-extension/agouti genes are listed in: a curated built-in
-     * order (white patterns, then dilutions, then grey, then the magical genes,
-     * then the diagnostic test gene), followed by any data-driven genes in
+     * order (white patterns, then dilutions, then grey, then the magical genes), followed by any data-driven genes in
      * their {@code (priority, key)} order.
      */
     private static List<Gene> trailingOrder() {
@@ -69,7 +68,7 @@ public final class GeneCodeDisplay {
                 Genes.DUN, Genes.SILVER, Genes.MUSHROOM, Genes.CHAMPAGNE, Genes.MATP,
                 Genes.GREY, Genes.MAGIC_ZEBRA, Genes.PINK_HAIR,
                 Genes.MANE_COLOR, Genes.TAIL_COLOR, Genes.HEALER, Genes.LIGHT,
-                Genes.BODY_SIZE, Genes.MILK, Genes.VERDANT, Genes.TEST,
+                Genes.BODY_SIZE, Genes.MILK, Genes.VERDANT,
                 // the non-coat loci, last: they never change what a horse looks
                 // like, so they belong after everything that does
                 Genes.MSTN, Genes.PDK4, Genes.CKM, Genes.RYR2, Genes.LCORL, Genes.HMGA2,

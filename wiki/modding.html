@@ -48,7 +48,7 @@
     <span class="label">What is and isn't open</span>
     <p>
         <code>Genes</code> is an <strong>open registry</strong> for data-driven genes:
-        <code>Genes.register(SpecGene)</code> appends after the forty-two built-ins,
+        <code>Genes.register(SpecGene)</code> appends after the forty-one built-ins,
         sorted by declared <code>priority</code> then key, so registration order never
         decides how a horse looks. A <em>Java</em> gene from another mod still has to
         be added to this repository &mdash; the mod-bus registration hook, the
@@ -355,7 +355,7 @@ private static int toward(ColorView colour, int px, int py, int channel, int tar
     <code>ColorField.set</code> <em>replaces</em> the accumulator instead of adding to
     it. It is reserved for a <code>masking</code> expression that must read
     identically on black, chestnut <em>or</em> white &mdash;
-    <a href="gene-test.html">Test</a> is the only one. Using it makes your gene
+    <a href="gene-magic-zebra.html">Magic zebra</a> is the clearest example. Using it makes your gene
     strictly order-dependent and erases every gene before it.
 </p>
 

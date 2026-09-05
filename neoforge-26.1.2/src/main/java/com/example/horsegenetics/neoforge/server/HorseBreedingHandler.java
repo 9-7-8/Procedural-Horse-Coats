@@ -1,6 +1,7 @@
 package com.example.horsegenetics.neoforge.server;
 
 import com.example.horsegenetics.common.Rng;
+import com.example.horsegenetics.common.breed.BreedLineage;
 import com.example.horsegenetics.common.genetics.GeneticCodeCombiner;
 import com.example.horsegenetics.common.genetics.Genome;
 import com.example.horsegenetics.common.genetics.Genotype;
@@ -120,11 +121,18 @@ public final class HorseBreedingHandler {
                                  @Nullable Player breeder, Rng rng) {
         Genome childGenome = GeneticCodeCombiner.combine(damGenome, sireGenome, rng);
 
+        // The foal's breed label: same-breed -> that breed, two breeds -> a
+        // "A x B cross", cross-of-the-same-pair stays that cross, anything
+        // messier -> "Mixed" (see BreedLineage.combine).
+        BreedLineage childLineage = BreedLineage.combine(damRecord.lineage(), sireRecord.lineage());
+
         // The draw happens first and is never conditioned on viability - it is
         // the ordinary Mendelian one, and this only reads its result. That is
         // what keeps the odds honest (one in four for two carriers) and keeps
-        // Genotype.breedWith free of any notion of a lethal.
+        // Genotype.breedWith free of any notion of a lethal. The breed's stat
+        // bands (a cross averages its parents') feed the magical body-stat genes.
         Traits childTraits = HorseTraits.resolve(childGenome.genotype(),
+                childGenome.epigenome(), childLineage.statTargets(),
                 ServerConfig.healthGeneticsActive());
         if (childTraits.viability() == Viability.LETHAL_AT_CONCEPTION && ServerConfig.lethalsActive()) {
             Condition cause = childTraits.lethalCondition().orElse(null);
@@ -154,6 +162,7 @@ public final class HorseBreedingHandler {
                 childName.first(),
                 childName.last(),
                 childGenome,
+                childLineage.toToken(),
                 damRecord.id(),
                 sireRecord.id(),
                 childGeneration)

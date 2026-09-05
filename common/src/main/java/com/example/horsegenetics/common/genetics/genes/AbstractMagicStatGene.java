@@ -11,6 +11,8 @@ import com.example.horsegenetics.common.genetics.Gene;
 import com.example.horsegenetics.common.genetics.Genotype;
 import com.example.horsegenetics.common.trait.EpigeneticTraitContribution;
 import com.example.horsegenetics.common.trait.HorseTraits;
+import com.example.horsegenetics.common.trait.StatAxis;
+import com.example.horsegenetics.common.trait.TargetBand;
 import com.example.horsegenetics.common.trait.TraitBuilder;
 
 import java.util.List;
@@ -127,6 +129,9 @@ public abstract class AbstractMagicStatGene implements Gene, EpigeneticTraitCont
     /** Push {@code factor} into this stat's unclamped magical multiplier on {@link TraitBuilder}. */
     protected abstract void applyMagic(TraitBuilder out, double factor);
 
+    /** Which body axis this gene drives - the axis a breed pins with a {@link TargetBand}. */
+    protected abstract StatAxis axis();
+
     @Override public String key() { return key; }
     @Override public String name() { return displayName; }
     @Override public int priority() { return priority; }
@@ -162,6 +167,21 @@ public abstract class AbstractMagicStatGene implements Gene, EpigeneticTraitCont
     @Override
     public void contribute(AllelePair pair, Genotype genotype, AlleleRandomness epigenetics,
                            TraitBuilder out) {
+        int variantCopies = pair.count(up) + pair.count(down);
+
+        // A breed that pins this axis has already made its wild founders
+        // homozygous for the pushing allele; land the horse somewhere in the
+        // breed's band from its own epigenetic seeds, so members of the breed
+        // vary only as much as the band is wide. No band, or a horse that is
+        // not carrying a variant copy (a cross that lost the allele) - fall
+        // back to the ordinary bounded-Gaussian draw below.
+        TargetBand band = out.breedBand(axis());
+        if (band != null && variantCopies > 0) {
+            double u = 0.5 * (epigenetics.copy(0).nextFloat() + epigenetics.copy(1).nextFloat());
+            applyMagic(out, band.lerp(u));
+            return;
+        }
+
         double sum = signedDelta(pair.first(), epigenetics.copy(0))
                 + signedDelta(pair.second(), epigenetics.copy(1));
         if (sum != 0.0) {

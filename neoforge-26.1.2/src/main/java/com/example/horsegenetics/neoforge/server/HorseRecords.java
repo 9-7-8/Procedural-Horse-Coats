@@ -1,6 +1,10 @@
 package com.example.horsegenetics.neoforge.server;
 
 import com.example.horsegenetics.common.Rng;
+import com.example.horsegenetics.common.breed.Breed;
+import com.example.horsegenetics.common.breed.BreedFounder;
+import com.example.horsegenetics.common.breed.BreedLineage;
+import com.example.horsegenetics.common.breed.Breeds;
 import com.example.horsegenetics.common.coat.CoatGenerator;
 import com.example.horsegenetics.common.genetics.Genome;
 import com.example.horsegenetics.common.genetics.Genotype;
@@ -64,7 +68,23 @@ public final class HorseRecords {
      * so {@link Genotype#random} draws it along with the rest.
      */
     public static HorseRecord newFounder(Horse horse, Rng rng) {
-        return newFounder(horse, rng, Genotype.random(rng));
+        return newFounder(horse, rng, Breeds.UNKNOWN);
+    }
+
+    /**
+     * A wild horse of a given <b>breed</b> - a herd member. The genome is rolled
+     * from the breed's constrained pool ({@link BreedFounder#roll}) and the
+     * record is stamped with the breed's {@link BreedLineage} token.
+     * {@link Breeds#UNKNOWN} rolls the ordinary unconstrained founder and stamps
+     * {@code "unknown"} - i.e. exactly the pre-breeds behaviour.
+     */
+    public static HorseRecord newFounder(Horse horse, Rng rng, Breed breed) {
+        Genome genome = BreedFounder.roll(breed, rng);
+        NameParts name = NAMES.generateParts(rng);
+        String token = breed == Breeds.UNKNOWN
+                ? BreedLineage.UNKNOWN.toToken()
+                : BreedLineage.pure(breed.id()).toToken();
+        return HorseRecord.founder(horse.getUUID(), name.first(), name.last(), genome, token);
     }
 
     /**
@@ -128,9 +148,11 @@ public final class HorseRecords {
 
     public static Traits traitsOf(HorseRecord record) {
         // The epigenome matters here: the magical size locus says "big", and how
-        // big is written on the allele copy the horse inherited.
+        // big is written on the allele copy the horse inherited. The breed
+        // matters too: a pure breed pins one or more body axes to a target band.
         return HorseTraits.resolve(record.genotype(),
                 record.hasGenome() ? record.epigenome() : null,
+                record.lineage().statTargets(),
                 ServerConfig.healthGeneticsActive());
     }
 

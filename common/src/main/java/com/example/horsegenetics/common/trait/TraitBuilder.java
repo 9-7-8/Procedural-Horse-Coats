@@ -48,7 +48,26 @@ public final class TraitBuilder {
     private double magicalJumpFactor = 1.0;
     private final List<Condition> conditions = new ArrayList<>();
 
+    /**
+     * The breed's per-axis {@link TargetBand}s, or {@link BreedStatTargets#NONE}
+     * for an Unknown / breedless horse. The four magical body-stat genes read
+     * this through {@link #breedBand}: when a band is present they land the
+     * horse inside it from its epigenetic seeds instead of taking their usual
+     * bounded-Gaussian draw.
+     */
+    private final BreedStatTargets breedTargets;
+
     TraitBuilder() {
+        this(BreedStatTargets.NONE);
+    }
+
+    TraitBuilder(BreedStatTargets breedTargets) {
+        this.breedTargets = breedTargets == null ? BreedStatTargets.NONE : breedTargets;
+    }
+
+    /** The breed target band for {@code axis}, or {@code null} if this horse's breed does not pin it. */
+    public TargetBand breedBand(StatAxis axis) {
+        return breedTargets.band(axis);
     }
 
     /** Movement speed, in attribute units (a vanilla horse is 0.1125 - 0.3375). */

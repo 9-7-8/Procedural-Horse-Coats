@@ -1,6 +1,11 @@
 package com.example.horsegenetics.neoforge.client;
 
+import com.example.horsegenetics.common.breed.Breed;
+import com.example.horsegenetics.common.breed.BreedFounder;
+import com.example.horsegenetics.common.breed.BreedLineage;
+import com.example.horsegenetics.common.breed.Breeds;
 import com.example.horsegenetics.common.coat.CoatData;
+import com.example.horsegenetics.common.genetics.Genome;
 import com.example.horsegenetics.common.genetics.Allele;
 import com.example.horsegenetics.common.genetics.AllelePair;
 import com.example.horsegenetics.common.genetics.Epigenome;
@@ -101,6 +106,10 @@ public final class CustomHorseSpawnScreen extends Screen {
     private boolean female = true;
     private int scroll = 0;
 
+    /** 0 = no preset; 1..N = Breeds.all().get(index-1). A preset also stamps the spawned horse's breed. */
+    private int breedIndex = 0;
+    private final java.util.List<Breed> breedChoices = Breeds.all();
+
     private final List<Row> rows = new ArrayList<>();
     private Epigenome epigenome;
 
@@ -153,6 +162,36 @@ public final class CustomHorseSpawnScreen extends Screen {
 
     private static Epigenome rollEpigenome() {
         return Epigenome.random(new NeoRng(RandomSource.create()));
+    }
+
+    /**
+     * Cycle the breed preset. Landing on a real breed rolls a fresh wild
+     * founder of it ({@link BreedFounder#roll}) straight into the editor -
+     * genotype, epigenome and sex - and stamps that breed on whatever is
+     * spawned (you can still hand-edit any locus afterwards). "(none)" leaves
+     * the current genome alone and spawns as Unknown.
+     */
+    private void cycleBreed() {
+        breedIndex = (breedIndex + 1) % (breedChoices.size() + 1);
+        if (breedIndex != 0) {
+            applyBreedPreset(breedChoices.get(breedIndex - 1));
+        }
+        rebuildWidgets();
+    }
+
+    private void applyBreedPreset(Breed breed) {
+        Genome g = BreedFounder.roll(breed, new NeoRng(RandomSource.create()));
+        Genotype gt = g.genotype();
+        female = gt.sex() == Sex.FEMALE;
+        for (Row row : rows) {
+            AllelePair pair = gt.pair(row.gene);
+            int def = indexOf(row.gene, row.gene.defaultAllele());
+            row.a = indexOf(row.gene, pair.first());
+            row.b = indexOf(row.gene, pair.second());
+            row.added = !(row.a == def && row.b == def);
+        }
+        epigenome = g.epigenome();
+        previewKey = "";
     }
 
     /**
@@ -296,6 +335,15 @@ public final class CustomHorseSpawnScreen extends Screen {
                         })
                 .bounds(rx, ry, RIGHT_W, 20).build());
         ry += RIGHT_STEP;
+        String breedName = breedIndex == 0 ? "(none)" : breedChoices.get(breedIndex - 1).name();
+        if (breedName.length() > 13) {
+            breedName = breedName.substring(0, 12) + "…";
+        }
+        addRenderableWidget(Button.builder(
+                        Component.literal("Breed: " + breedName),
+                        b -> cycleBreed())
+                .bounds(rx, ry, RIGHT_W, 20).build());
+        ry += RIGHT_STEP;
         addRenderableWidget(Button.builder(
                         Component.literal("Reroll epi."),
                         b -> {
@@ -421,8 +469,10 @@ public final class CustomHorseSpawnScreen extends Screen {
     }
 
     private void spawn() {
+        String breedTok = breedIndex == 0 ? ""
+                : BreedLineage.pure(breedChoices.get(breedIndex - 1).id()).toToken();
         ClientPacketDistributor.sendToServer(new SpawnCustomHorsePayload(
-                genotype().toCode(), epigenome.toCode(), baby, female));
+                genotype().toCode(), epigenome.toCode(), baby, female, breedTok));
         onClose();
     }
 

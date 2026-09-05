@@ -81,6 +81,9 @@ public class GeneticHorseRenderer extends AbstractHorseRenderer<Horse, HorseRend
                 geneticState.coatData = coatData;
             }
             geneticState.emissiveCoatId = emissiveCoatFor(geneticState.coatData, renderState.isBaby);
+            com.example.horsegenetics.common.horse.HorseRecord rec =
+                    ClientHorseRecordCache.get(horse.getId());
+            geneticState.breedLabel = rec == null ? null : rec.lineage().displayName();
         }
     }
 
@@ -148,11 +151,16 @@ public class GeneticHorseRenderer extends AbstractHorseRenderer<Horse, HorseRend
         CoatData coatData = (renderState instanceof GeneticHorseRenderState geneticState)
                 ? geneticState.coatData
                 : CoatData.DEFAULT;
-        return coatTextureFor(coatData, renderState.isBaby);
+        String breedLabel = (renderState instanceof GeneticHorseRenderState g) ? g.breedLabel : null;
+        return coatTextureFor(coatData, renderState.isBaby, breedLabel);
     }
 
     /** The generated coat texture for one horse - shared with the family-tree node. */
     public static Identifier coatTextureFor(CoatData coatData, boolean baby) {
-        return GeneticCoatTextureFactory.getOrCreate(coatData, baby);
+        return coatTextureFor(coatData, baby, null);
+    }
+
+    public static Identifier coatTextureFor(CoatData coatData, boolean baby, String breedLabel) {
+        return GeneticCoatTextureFactory.getOrCreate(coatData, baby, breedLabel);
     }
 }

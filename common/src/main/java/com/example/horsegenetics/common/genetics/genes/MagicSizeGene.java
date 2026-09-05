@@ -11,6 +11,8 @@ import com.example.horsegenetics.common.genetics.Genotype;
 import com.example.horsegenetics.common.genetics.AlleleRandomness;
 import com.example.horsegenetics.common.trait.EpigeneticTraitContribution;
 import com.example.horsegenetics.common.trait.HorseTraits;
+import com.example.horsegenetics.common.trait.StatAxis;
+import com.example.horsegenetics.common.trait.TargetBand;
 import com.example.horsegenetics.common.trait.TraitBuilder;
 
 import java.util.List;
@@ -197,6 +199,18 @@ public final class MagicSizeGene implements Gene, EpigeneticTraitContribution {
     @Override
     public void contribute(AllelePair pair, Genotype genotype, AlleleRandomness epigenetics,
                            TraitBuilder out) {
+        int variantCopies = pair.count(Big) + pair.count(Small);
+
+        // A breed that pins body scale has made its wild founders homozygous
+        // for Big or Small; land this horse inside the breed's height band from
+        // its own epigenetic seeds. See AbstractMagicStatGene for the shape.
+        TargetBand band = out.breedBand(StatAxis.SCALE);
+        if (band != null && variantCopies > 0) {
+            double u = 0.5 * (epigenetics.copy(0).nextFloat() + epigenetics.copy(1).nextFloat());
+            out.multiplyScaleUnclamped(band.lerp(u));
+            return;
+        }
+
         double sum = signedDelta(pair.first(), epigenetics.copy(0))
                 + signedDelta(pair.second(), epigenetics.copy(1));
         if (sum != 0.0) {

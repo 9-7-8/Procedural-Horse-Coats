@@ -1,5 +1,6 @@
 package com.example.horsegenetics.common.horse;
 
+import com.example.horsegenetics.common.breed.BreedLineage;
 import com.example.horsegenetics.common.genetics.Epigenome;
 import com.example.horsegenetics.common.genetics.Genome;
 import com.example.horsegenetics.common.genetics.Genotype;
@@ -25,29 +26,28 @@ import java.util.UUID;
  * {@link Genome} - which alleles it carries, and the priority + epigenetic seed
  * riding on each of those allele copies. <b>Both live here</b>, because both are
  * heritable facts about the animal in exactly the same sense: assigned once at
- * birth (rolled for a founder, inherited for a foal) and never re-rolled. Keeping
- * the epigenome on the entity instead meant a horse's record could describe an
- * ancestor's alleles but not its coat, so the family tree had to invent a
- * plausible stand-in from the record UUID.
+ * birth (rolled for a founder, inherited for a foal) and never re-rolled.
+ *
+ * <p>{@code breed} is the horse's <b>breed label</b> - a {@link BreedLineage}
+ * token. A wild herd is stamped with the breed it was rolled from; a lone wild
+ * horse, a {@code /summon} or a spawn-egg horse is {@code "unknown"}; a foal's
+ * label is {@link BreedLineage#combine} of its parents'. It is a fact about
+ * ancestry, not a derived value, so it is stored rather than resolved. It does,
+ * though, feed {@link #traits()}: a pure breed's horses are pinned to that
+ * breed's stat bands.
  *
  * <p>There is <b>no {@code sex} field</b>. Sex is a gene like any other
  * ({@code horsegenetics.sex}, {@code X}/{@code Y}), so it is already in
- * {@code geneticCode} and {@link #sex()} reads it from there. Storing it twice
- * would let a record disagree with the genome it carries, and would mean a
- * foal's sex was invented rather than inherited.
+ * {@code geneticCode} and {@link #sex()} reads it from there.
  *
- * <p>There are <b>no {@code speed} or {@code health} fields</b> either, for the
- * same reason. A horse's speed, max health, jump strength and body size are a
- * pure function of its genotype ({@link Traits}), so storing them would be
- * storing a derived value that could disagree with the alleles beside it - and
- * did, back when they were a uniform random roll off the two parents' numbers
- * with no genetics in it. {@link #traits()} resolves them on demand.
+ * <p>There are <b>no {@code speed} or {@code health} fields</b> either. A
+ * horse's speed, max health, jump strength and body size are a pure function of
+ * its genome and its breed ({@link Traits}); {@link #traits()} resolves them on
+ * demand.
  *
- * <p>{@code parentStats} survives that change and is worth more after it: it is
- * the low/high of the two parents' resolved speed and health at the moment of
- * birth, so the UI can say whether this foal came out above both its parents,
- * between them, or below - which is now a statement about which alleles it drew
- * rather than about how a die fell.
+ * <p>{@code parentStats} is the low/high of the two parents' resolved speed and
+ * health at the moment of birth, so the UI can say whether this foal came out
+ * above both its parents, between them, or below.
  */
 public record HorseRecord(
         UUID id,
@@ -56,6 +56,7 @@ public record HorseRecord(
         Optional<String> barnName,
         String geneticCode,
         String epigenomeCode,
+        Optional<String> breed,
         Optional<UUID> motherId,
         Optional<UUID> fatherId,
         Optional<String> tamedBy,
@@ -72,6 +73,7 @@ public record HorseRecord(
         Objects.requireNonNull(geneticCode, "geneticCode");
         Objects.requireNonNull(epigenomeCode, "epigenomeCode");
         barnName = clampBarnName(barnName);
+        breed = breed == null ? Optional.empty() : breed;
         motherId = motherId == null ? Optional.empty() : motherId;
         fatherId = fatherId == null ? Optional.empty() : fatherId;
         tamedBy = tamedBy == null ? Optional.empty() : tamedBy;
@@ -94,47 +96,59 @@ public record HorseRecord(
     /**
      * The "nothing assigned yet" sentinel: no name, the all-default genotype and
      * an <b>empty</b> epigenome code, which is what {@link #hasGenome()} tests.
-     * A spawn or breeding handler replaces it the moment a horse joins the
-     * world, so no real horse is ever seen or saved holding one.
      */
     public static HorseRecord unassigned(UUID id) {
         return new HorseRecord(id, "", "", Optional.empty(),
-                Genotype.wildType().toCode(), "",
+                Genotype.wildType().toCode(), "", Optional.empty(),
                 Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), 0,
                 Optional.empty());
     }
 
     /**
-     * A foundation horse - no recorded parents, generation 0.
-     * Its sex comes from {@code genome}; a caller that wants to <i>choose</i>
-     * one hands in {@link Genome#withSex}.
+     * A foundation horse - no recorded parents, generation 0. {@code breedToken}
+     * is a {@link BreedLineage} token ({@code null} / blank reads as
+     * {@code "unknown"}).
      */
-    public static HorseRecord founder(UUID id, String firstName, String lastName, Genome genome) {
+    public static HorseRecord founder(UUID id, String firstName, String lastName, Genome genome,
+                                      String breedToken) {
         return new HorseRecord(id, firstName, lastName, Optional.empty(),
-                genome.genotypeCode(), genome.epigenomeCode(),
+                genome.genotypeCode(), genome.epigenomeCode(), breedToken(breedToken),
                 Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), 0, Optional.empty());
+    }
+
+    /** A foundation horse with no breed identity ({@code "unknown"}). */
+    public static HorseRecord founder(UUID id, String firstName, String lastName, Genome genome) {
+        return founder(id, firstName, lastName, genome, BreedLineage.UNKNOWN.toToken());
     }
 
     /**
      * A horse bred from two known parents; {@code generation} is the caller's
-     * {@code 1 + max(parent gens)}. Its sex is <b>inherited</b> - whichever sex
-     * chromosome the Mendelian draw handed it - so there is nothing to pass.
+     * {@code 1 + max(parent gens)}, and {@code breedToken} the
+     * {@link BreedLineage#combine} of the two parents' labels.
      */
     public static HorseRecord bred(UUID id, String firstName, String lastName, Genome genome,
-                                   UUID motherId, UUID fatherId, int generation) {
+                                   String breedToken, UUID motherId, UUID fatherId, int generation) {
         return new HorseRecord(id, firstName, lastName, Optional.empty(),
-                genome.genotypeCode(), genome.epigenomeCode(),
+                genome.genotypeCode(), genome.epigenomeCode(), breedToken(breedToken),
                 Optional.of(motherId), Optional.of(fatherId), Optional.empty(), Optional.empty(), generation,
                 Optional.empty());
+    }
+
+    /** A bred foal with no breed identity carried through - test / legacy convenience. */
+    public static HorseRecord bred(UUID id, String firstName, String lastName, Genome genome,
+                                   UUID motherId, UUID fatherId, int generation) {
+        return bred(id, firstName, lastName, genome, BreedLineage.UNKNOWN.toToken(),
+                motherId, fatherId, generation);
+    }
+
+    private static Optional<String> breedToken(String token) {
+        return token == null || token.isBlank() ? Optional.empty() : Optional.of(token);
     }
 
     // --- the genome ---------------------------------------------------
 
     /**
-     * This horse's {@link Sex}, read off the sex locus in {@link #geneticCode}
-     * - the single source of truth. A code with no sex segment (the blank
-     * sentinel) reads as a mare, which is what this record's hard-coded default
-     * always was.
+     * This horse's {@link Sex}, read off the sex locus in {@link #geneticCode}.
      */
     public Sex sex() {
         return Genotype.sexOf(geneticCode);
@@ -155,6 +169,11 @@ public record HorseRecord(
         return Genome.parse(geneticCode, epigenomeCode);
     }
 
+    /** The horse's breed as a value object ({@code "unknown"} when unset). */
+    public BreedLineage lineage() {
+        return BreedLineage.parse(breed.orElse(null));
+    }
+
     /** Has a real genome been assigned yet, or is this still the blank sentinel? */
     public boolean hasGenome() {
         return !epigenomeCode.isEmpty();
@@ -162,8 +181,13 @@ public record HorseRecord(
 
     public HorseRecord withGenome(Genome genome) {
         return new HorseRecord(id, firstName, lastName, barnName,
-                genome.genotypeCode(), genome.epigenomeCode(),
+                genome.genotypeCode(), genome.epigenomeCode(), breed,
                 motherId, fatherId, tamedBy, bredBy, generation, parentStats);
+    }
+
+    public HorseRecord withBreed(String breedToken) {
+        return new HorseRecord(id, firstName, lastName, barnName, geneticCode, epigenomeCode,
+                breedToken(breedToken), motherId, fatherId, tamedBy, bredBy, generation, parentStats);
     }
 
     /** What to show in-game: the barn name if set, otherwise "first last". */
@@ -182,47 +206,43 @@ public record HorseRecord(
     }
 
     /**
-     * <b>The body this genotype describes</b> - speed, max health, jump
-     * strength, body scale and the disorders it expresses - resolved fresh from
-     * {@link #geneticCode} every time it is asked for.
+     * <b>The body this genome describes</b> - speed, max health, jump strength,
+     * body scale and the disorders it expresses - resolved fresh every time.
      *
-     * <p>Resolved from the <b>whole genome</b>, genotype and epigenome together,
-     * because a trait can be epigenetic - the magical size locus is "big by
-     * <i>this much</i>", and the amount is written on the allele copy. A record
-     * with no epigenome yet ({@link #hasGenome()} false) falls back to the
-     * genotype alone, where such a trait reports its midpoint.
-     *
-     * <p>Cheap enough to call per frame is <i>not</i> the claim: it parses the
-     * code. Callers that need it in a hot loop should hold on to the result.
+     * <p>Resolved from the whole genome <b>and the breed</b>: a pure breed pins
+     * one or more body axes to a target band, and the magical body-stat genes
+     * land the horse inside it from its epigenetic seeds. A cross uses the
+     * average of its two components' bands; a mixed or unknown horse pins
+     * nothing and its body stats take the ordinary bounded-Gaussian draw.
      */
     public Traits traits() {
         return hasGenome()
-                ? HorseTraits.resolve(genotype(), epigenome(), true)
+                ? HorseTraits.resolve(genotype(), epigenome(), lineage().statTargets(), true)
                 : HorseTraits.resolve(genotype());
     }
 
     public HorseRecord withNames(String newFirst, String newLast) {
-        return new HorseRecord(id, newFirst, newLast, barnName, geneticCode, epigenomeCode,
+        return new HorseRecord(id, newFirst, newLast, barnName, geneticCode, epigenomeCode, breed,
                 motherId, fatherId, tamedBy, bredBy, generation, parentStats);
     }
 
     public HorseRecord withBarnName(Optional<String> newBarnName) {
-        return new HorseRecord(id, firstName, lastName, newBarnName, geneticCode, epigenomeCode,
+        return new HorseRecord(id, firstName, lastName, newBarnName, geneticCode, epigenomeCode, breed,
                 motherId, fatherId, tamedBy, bredBy, generation, parentStats);
     }
 
     public HorseRecord withTamedBy(String username) {
-        return new HorseRecord(id, firstName, lastName, barnName, geneticCode, epigenomeCode,
+        return new HorseRecord(id, firstName, lastName, barnName, geneticCode, epigenomeCode, breed,
                 motherId, fatherId, Optional.of(username), bredBy, generation, parentStats);
     }
 
     public HorseRecord withBredBy(String username) {
-        return new HorseRecord(id, firstName, lastName, barnName, geneticCode, epigenomeCode,
+        return new HorseRecord(id, firstName, lastName, barnName, geneticCode, epigenomeCode, breed,
                 motherId, fatherId, tamedBy, Optional.of(username), generation, parentStats);
     }
 
     public HorseRecord withParentStats(ParentStats newParentStats) {
-        return new HorseRecord(id, firstName, lastName, barnName, geneticCode, epigenomeCode,
+        return new HorseRecord(id, firstName, lastName, barnName, geneticCode, epigenomeCode, breed,
                 motherId, fatherId, tamedBy, bredBy, generation, Optional.ofNullable(newParentStats));
     }
 

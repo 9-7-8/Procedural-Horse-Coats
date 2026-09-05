@@ -28,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 class SpecGeneTest {
 
-    private static final int BUILT_IN_GENES = 42;
+    private static final int BUILT_IN_GENES = 41;
 
     @AfterEach
     void unregister() {
@@ -63,18 +63,20 @@ class SpecGeneTest {
         assertTrue(code.contains("example.silver=z/z"), "the wild type gains a segment: " + code);
         assertEquals(Genotype.wildType(), Genotype.parse(code));
         // Every unmasked entry doubles; each masking combination (KIT's
-        // dominant white, EDNRB's lethal white, test) stays at one pen, because
+        // dominant white, EDNRB's lethal white) stays at one pen, because
         // while it shows nothing else is visible - including this gene.
         assertEquals((catalogueBefore - maskingBefore) * 2 + maskingBefore, GenotypeCatalog.size(),
                 "a dominant two-allele gene doubles every unmasked pen");
     }
 
     @Test
-    void magicalGenesLandBeforeTheMaskingBuiltIn() {
-        SpecGene aurora = register("aurora.json");
-        assertEquals(aurora, Genes.magicalOrder().get(Genes.magicalOrder().size() - 2));
-        assertEquals(Genes.TEST, Genes.magicalOrder().get(Genes.magicalOrder().size() - 1),
-                "Test paints flat and masks everything, so it stays last");
+    void magicalGenesInterleaveWithBuiltInsByPriority() {
+        SpecGene aurora = register("aurora.json"); // priority 200
+        // aurora sorts after the highest-priority built-in magical gene (verdant, 180)
+        assertEquals(aurora, Genes.magicalOrder().get(Genes.magicalOrder().size() - 1));
+        int iVerdant = Genes.magicalOrder().indexOf(Genes.VERDANT);
+        int iAurora = Genes.magicalOrder().indexOf(aurora);
+        assertTrue(iVerdant < iAurora, "priority 180 sorts before priority 200");
     }
 
     @Test

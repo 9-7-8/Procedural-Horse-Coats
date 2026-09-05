@@ -136,6 +136,22 @@
 </div>
 
 <h2>3. Herds (roadmap &sect;13)</h2>
+
+<div class="note">
+    <span class="label">Natural wild herds (2026-09-05)</span>
+    <p>
+        Wild horses now spawn into a <strong>natural herd</strong> right away
+        &mdash; a <a href="breeds.html#bands">traditional or bachelor band</a>
+        built by <code>server/HerdManager</code>, not the together-timer below.
+        Its members share a lead (<code>HorseCareAttachment.herd</code> = the
+        lead horse's UUID), a breed (<code>herdBreed</code>) and a band
+        (<code>herdBand</code>); <code>server/WildHerdGoal</code> keeps them
+        clumped and following the lead. The together-timer herd formation here
+        <strong>skips</strong> any horse that is <code>inWildHerd()</code>, so
+        it only ever applies to tamed horses now.
+    </p>
+</div>
+
 <ul>
     <li>Each scan, a horse looks for another live horse within <strong>10
         blocks</strong>. <code>togetherTicks</code> accumulates

@@ -8,6 +8,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 
 /**
@@ -43,7 +44,12 @@ public final class HorseInteractionHandler {
             return;
         }
 
-        if (!horse.level().dimension().equals(DebugPenManager.DEBUG_LEVEL)) {
+        // The stick / clock shortcuts work in the horse dimension always, and
+        // anywhere in a dev build (FMLEnvironment.isProduction() is false under
+        // runClient) - they make breeding tests bearable. In a real build they
+        // are dimension-only.
+        if (!horse.level().dimension().equals(DebugPenManager.DEBUG_LEVEL)
+                && FMLEnvironment.isProduction()) {
             return;
         }
 

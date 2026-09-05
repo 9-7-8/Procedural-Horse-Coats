@@ -119,7 +119,8 @@ public final class StallionSeedJarHandler {
                 genome.genotypeCode(),
                 genome.epigenomeCode(),
                 stallion.getUUID(),
-                record.displayName());
+                record.displayName(),
+                record.breed().orElse(""));
 
         ItemStack filled = new ItemStack(ModItems.STALLION_SEED_JAR.get());
         filled.set(ModDataComponents.STORED_GENOME.get(), stored);
@@ -181,7 +182,7 @@ public final class StallionSeedJarHandler {
 
         String[] name = splitName(stored.sourceName());
         HorseRecord sireRecord = HorseRecord
-                .founder(stored.sourceId(), name[0], name[1], sireGenome);
+                .founder(stored.sourceId(), name[0], name[1], sireGenome, stored.breed());
 
         Horse foal = EntityType.HORSE.create(level, EntitySpawnReason.BREEDING);
         if (foal == null) {

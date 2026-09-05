@@ -1,5 +1,6 @@
 package com.example.horsegenetics.common.genetics.genes;
 
+import com.example.horsegenetics.common.trait.StatAxis;
 import com.example.horsegenetics.common.trait.TraitBuilder;
 
 /**
@@ -61,6 +62,11 @@ public final class MagicHealthGene extends AbstractMagicStatGene {
                         "One hardy copy and one frail copy. Their percentages very nearly cancel, so "
                                 + "the horse keeps close to its ordinary number of hearts while carrying, "
                                 + "and passing on, both extremes."));
+    }
+
+    @Override
+    protected StatAxis axis() {
+        return StatAxis.HEALTH;
     }
 
     @Override

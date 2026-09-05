@@ -36,7 +36,6 @@ class GeneticCodeCombinerTest {
     void everyGeneSegregates() {
         String a = LegacyCode.keyed("E/e-A/a-W22/N-T/t-Ch/c-SW1/N-G/g-Cr/prl-n/n-n/n" + T);
         String child = GeneticCodeCombiner.combine(a, Genotype.wildType().toCode(), allFirst());
-        assertTrue(Genotype.parse(child).shows(Genes.TEST));
         assertTrue(Genotype.parse(child).shows(Genes.MITF));
         assertTrue(Genotype.parse(child).shows(Genes.GREY));
         assertTrue(Genotype.parse(child).shows(Genes.CHAMPAGNE));

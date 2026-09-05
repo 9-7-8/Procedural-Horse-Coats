@@ -26,7 +26,7 @@ class HorseRecordTest {
 
     private static HorseRecord raw(UUID id, String first, String last, String code) {
         return new HorseRecord(id, first, last, Optional.empty(), code, GENOME.epigenomeCode(),
-                Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), 0, Optional.empty());
+                Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), 0, Optional.empty());
     }
 
     /**
@@ -109,7 +109,7 @@ class HorseRecordTest {
     @Test
     void negativeGenerationClamped() {
         assertEquals(0, new HorseRecord(ID, "a", "b", null, "EeAa", "",
-                null, null, null, null, -9, null).generation());
+                null, null, null, null, null, -9, null).generation());
     }
 
     /**

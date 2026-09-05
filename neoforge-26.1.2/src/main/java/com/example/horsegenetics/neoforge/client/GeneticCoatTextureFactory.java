@@ -71,8 +71,13 @@ public final class GeneticCoatTextureFactory {
     }
 
     public static Identifier getOrCreate(CoatData coat, boolean baby) {
+        return getOrCreate(coat, baby, null);
+    }
+
+    /** {@code breedLabel} is dev-build cosmetic only - the [coat] chat line. */
+    public static Identifier getOrCreate(CoatData coat, boolean baby, String breedLabel) {
         String key = coat.textureKey() + (baby ? ":foal" : ":adult");
-        return CACHE.computeIfAbsent(key, k -> generate(coat, baby, k));
+        return CACHE.computeIfAbsent(key, k -> generate(coat, baby, k, breedLabel));
     }
 
     /**
@@ -170,14 +175,14 @@ public final class GeneticCoatTextureFactory {
         return id;
     }
 
-    private static Identifier generate(CoatData coat, boolean baby, String key) {
+    private static Identifier generate(CoatData coat, boolean baby, String key, String breedLabel) {
         ensureAssetsLoaded();
         Skin skin = baby ? Skin.BABY : Skin.ADULT;
         int[] template = baby ? babyTemplate : adultTemplate;
         int[] argb = CoatTextureComposer.compose(coat.genotype(), coat.epigenome(), skin, !baby, template, gradient);
 
         if (!FMLEnvironment.isProduction()) {
-            debugLogCoat(coat, baby, argb, template);
+            debugLogCoat(coat, baby, argb, template, breedLabel);
         }
 
         NativeImage image = new NativeImage(N, N, false);
@@ -203,7 +208,7 @@ public final class GeneticCoatTextureFactory {
      * whole overlay came out transparent and the horse will render as the bare
      * white template ("FLAT WHITE").
      */
-    private static void debugLogCoat(CoatData coat, boolean baby, int[] argb, int[] template) {
+    private static void debugLogCoat(CoatData coat, boolean baby, int[] argb, int[] template, String breedLabel) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null) {
             return;
@@ -213,6 +218,7 @@ public final class GeneticCoatTextureFactory {
                 + GeneCodeDisplay.shortForm(coat.genotype())
                 + " @" + Long.toUnsignedString(coat.epigenome().visibleFingerprint(coat.genotype()), 16)
                 + (coat.isDeterministic() ? "  det" : "  per-horse")
+                + (breedLabel == null ? "" : "  [" + breedLabel + "]")
                 + (bareTemplate ? "  >> FLAT WHITE (overlay fully transparent)" : "");
         mc.player.sendSystemMessage(Component.literal(msg));
     }

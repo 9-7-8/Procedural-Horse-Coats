@@ -63,6 +63,30 @@
     reaches horses that already exist.
 </p>
 
+<h3 id="breed-targets">The breed overload <span class="allele magical">2026-09-05</span></h3>
+<p>
+    <code>resolve</code> has a fourth form,
+    <code>resolve(genotype, epigenome, BreedStatTargets, healthGenetics)</code>. A
+    <a href="breeds.html">breed</a> pins one or more body axes to a
+    <code>TargetBand</code> (a closed multiplier range); the
+    <code>TraitBuilder</code> carries it, and the four
+    <a href="breeds.html#stats">magical body-stat genes</a> read it through
+    <code>TraitBuilder.breedBand(StatAxis)</code>. When a band is present and the
+    horse carries a variant copy at that locus, the gene lands the horse
+    <em>inside</em> the band from its allele copies&rsquo; epigenetic seeds
+    instead of taking its usual bounded-Gaussian draw &mdash; so a Thoroughbred
+    reliably resolves near &times;2 speed where two <code>Swift</code> copies on
+    the Gaussian would only reach &times;1.2, and within-breed spread is exactly
+    the band width. The <b>height</b> band additionally exaggerates its
+    above-baseline part (<code>BreedStatCurve.BIG_GAMMA = 3</code>) so a draught
+    breed genuinely towers &mdash; real horse heights differ by too little to
+    read (a Percheron ends up &times;1.0&ndash;1.38, a Quarter Horse &times;0.96).
+    <code>BreedStatTargets.NONE</code> (an Unknown or breedless
+    horse, and the shorter overloads) changes nothing: every body-stat gene falls
+    back to the Gaussian. <code>HorseRecord.traits()</code> and
+    <code>HorseRecords.traitsOf</code> pass <code>record.lineage().statTargets()</code>.
+</p>
+
 <h3>Determinism</h3>
 
 <p>

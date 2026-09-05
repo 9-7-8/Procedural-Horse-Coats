@@ -146,14 +146,44 @@ Every horse gets a generated two-part name (a first name and a last name).
 
 Open a tamed horse's inventory (**press E while riding**) for a grey panel on
 the left of the screen (toggle it with the tab button on its edge) showing
-the horse's name, sex, generation, genotype, speed, health, jump, size, any
-disorders it has, and who bred or tamed it - plus a **Family Tree** button that
-opens a clickable pedigree chart back to great-grandparents, with a little
-turning 3D model of each horse. A foal's speed and health are tinted **green**
-if they beat both parents, **amber** if they beat one, **red** if they trail
-both.
+the horse's name, sex, generation, **breed**, genotype, speed, health, jump,
+size, any disorders it has, and who bred or tamed it - plus a **Family Tree**
+button that opens a clickable pedigree chart back to great-grandparents, with a
+little turning 3D model of each horse. A foal's speed and health are tinted
+**green** if they beat both parents, **amber** if they beat one, **red** if they
+trail both.
 
-Right-click a horse with **paper** to print the same information to chat.
+Right-click a horse with **paper** to print its stats, its breed, and its
+herd (the lead's name, the band type, how many are nearby) to chat.
+
+### Breeds
+
+Wild horses now come in **breeds** - 49 of them, from the Arabian to the
+Shire. A herd that spawns together shares a breed, and which breeds you find
+depends on the biome: Icelandics and Fjords in the snow, Mustangs and Arabians
+in the badlands and deserts, drafts in the plains and forests, Marwari in the
+jungle. Horses appear in far more biomes than before - taiga, swamp, jungle,
+badlands, the snowy biomes, even mushroom fields. A breed sets the horse's
+build - a Thoroughbred is fast and lean, a Shire huge and slow, a Falabella
+tiny - and narrows its colours, so a Friesian herd is jet black and a Suffolk
+Punch herd is all chestnut. A lone horse that spawns by itself, or one from a
+spawn egg, has **no breed** ("Unknown") and its stats are rolled freely.
+
+Breeding two horses of the **same** breed gives a foal of that breed. Two
+**different** breeds give a **cross** ("Arabian × Friesian cross"); breed two
+of the same cross, or a cross back to one of its own breeds, and the cross
+holds. Anything more tangled than that - a cross with a third breed, two
+different crosses - gives a **Mixed** horse, and Mixed stays Mixed.
+
+Some real-world breed features aren't in the game yet - Appaloosa leopard
+spots, the Fjord's striped mane, draft-horse leg feathering - and a few never
+will be (the Marwari's curled ear tips, the Akhal-Teke's metallic shine).
+
+A wild herd spawns as either a **family band** - one stallion, his mares and
+their foals - or a **bachelor band** of young stallions, and the herd stays
+together and moves as a group behind its lead. **Wild horses defend their
+own**: hit one and its whole herd turns on you and kicks, wolf-style, until
+you break line of sight. Tamed horses never do this.
 
 ### Stats you can breed for
 

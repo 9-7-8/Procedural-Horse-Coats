@@ -50,7 +50,7 @@ public final class HorseScreenHooks {
     private static EditBox barnBox;
 
     private static final int PANEL_W = 128;
-    private static final int PANEL_H = 164;
+    private static final int PANEL_H = 176;
 
     // vanilla container-panel palette. Text is drawn WITHOUT a drop shadow
     // (see the `false` arg on every g.text call below) - on the light-grey
@@ -150,6 +150,8 @@ public final class HorseScreenHooks {
             ty += 10;
         }
         g.text(font, Component.literal(r.sex().label(adult) + "   gen " + r.generation()), tx, ty, LABEL, false);
+        ty += 11;
+        g.text(font, Component.literal(clip(r.lineage().displayName(), 22)), tx, ty, VALUE, false);
         ty += 11;
         for (String line : wrap(font, shortGenes(r), PANEL_W - 14)) {
             g.text(font, Component.literal(line), tx, ty, VALUE, false);

@@ -262,7 +262,7 @@ private static final float TRANSPARENT_EPS  = 0.001f;</code></pre>
 <tbody>
 <tr><td><code>add(px, py, dr, dg, db)</code></td><td>Signed integer addition into the accumulator.</td><td><strong>No</strong> &mdash; associative and exact.</td><td>Every ordinary magical gene.</td></tr>
 <tr><td><code>addOpacity(px, py, da)</code></td><td>Makes the texel more (or less) solid.</td><td>No</td><td>Painting where the coat is transparent.</td></tr>
-<tr><td><code>set(px, py, a, r, g, b)</code></td><td><strong>Flat paint</strong> that replaces the accumulator.</td><td><strong>Yes</strong></td><td>Only a <code>COMPLETE_DOMINANT</code> gene that must read identically on any base. <a href="gene-test.html">Test</a> is the only one.</td></tr>
+<tr><td><code>set(px, py, a, r, g, b)</code></td><td><strong>Flat paint</strong> that replaces the accumulator.</td><td><strong>Yes</strong></td><td>A magical gene that must read identically on any base &mdash; <a href="gene-magic-zebra.html">magic zebra</a> is the clearest, painting black over dominant white.</td></tr>
 </tbody>
 </table>
 </div>

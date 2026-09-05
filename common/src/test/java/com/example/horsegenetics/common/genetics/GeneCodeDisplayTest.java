@@ -52,7 +52,6 @@ class GeneCodeDisplayTest {
         assertEquals("EEaa W22N", sf("kit", "W22/N"));
         assertEquals("EEaa ON", sf("ednrb", "O/N"));
         assertEquals("EEaa Gg", sf("grey", "G/g"));
-        assertEquals("EEaa Tt", sf("test", "T/t"));
     }
 
     /**
@@ -67,9 +66,9 @@ class GeneCodeDisplayTest {
 
     @Test
     void everythingAtOnceUsesTheDisplayOrder() {
-        // KIT, MITF, champagne, MATP, grey, test
-        assertEquals("EeAa W22N nSW1 nCh nCr Gg Tt",
-                sf("extension", "E/e", "agouti", "A/a", "kit", "W22/N", "test", "T/t",
+        // KIT, MITF, champagne, MATP, grey
+        assertEquals("EeAa W22N nSW1 nCh nCr Gg",
+                sf("extension", "E/e", "agouti", "A/a", "kit", "W22/N",
                    "champagne", "Ch/c", "mitf", "SW1/N", "grey", "G/g", "matp", "Cr/N"));
     }
 

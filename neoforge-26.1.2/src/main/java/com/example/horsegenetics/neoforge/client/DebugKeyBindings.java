@@ -33,6 +33,9 @@ public final class DebugKeyBindings {
     /** Null in production - flashes the particle outline of nearby stalls. */
     public static KeyMapping showStalls;
 
+    /** Null in production - glows every nearby horse for 10 seconds so you can find them. */
+    public static KeyMapping highlightHorses;
+
     @SubscribeEvent
     static void register(RegisterKeyMappingsEvent event) {
         if (FMLEnvironment.isProduction()) {
@@ -58,6 +61,15 @@ public final class DebugKeyBindings {
                 KeyMapping.Category.MISC
         );
         event.register(showStalls);
+
+        highlightHorses = new KeyMapping(
+                "key.horsegenetics.highlight_horses",
+                KeyConflictContext.IN_GAME,
+                InputConstants.Type.KEYSYM,
+                GLFW.GLFW_KEY_F8,
+                KeyMapping.Category.MISC
+        );
+        event.register(highlightHorses);
     }
 
     private DebugKeyBindings() {

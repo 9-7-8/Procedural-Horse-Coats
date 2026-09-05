@@ -133,7 +133,20 @@ public final class HorseTraits {
      *        {@link HealthContribution}, as above.
      */
     public static Traits resolve(Genotype genotype, Epigenome epigenome, boolean healthGenetics) {
-        TraitBuilder out = new TraitBuilder();
+        return resolve(genotype, epigenome, BreedStatTargets.NONE, healthGenetics);
+    }
+
+    /**
+     * The full form with a <b>breed</b>. {@code breedTargets} pins one or more
+     * body axes to a {@link com.example.horsegenetics.common.trait.TargetBand}
+     * range; the four magical body-stat genes then land the horse inside the
+     * band from its epigenetic seeds rather than taking their default draw.
+     * Pass {@link BreedStatTargets#NONE} (or use the shorter overload) for an
+     * Unknown / breedless horse.
+     */
+    public static Traits resolve(Genotype genotype, Epigenome epigenome,
+                                 BreedStatTargets breedTargets, boolean healthGenetics) {
+        TraitBuilder out = new TraitBuilder(breedTargets == null ? BreedStatTargets.NONE : breedTargets);
         for (Gene gene : Genes.codeOrder()) {
             boolean plain = gene instanceof TraitContribution;
             boolean epigenetic = gene instanceof EpigeneticTraitContribution;

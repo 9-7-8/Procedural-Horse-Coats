@@ -300,7 +300,7 @@
 <p>
     <strong>Status</strong>: <em>partial</em> = a gene with that name ships but this
     entry is more than it does; <em>new</em> = nothing exists. <strong>Finished genes are
-    not listed here</strong> &mdash; that is all forty-two of them, the roster being on
+    not listed here</strong> &mdash; that is all forty-one of them, the roster being on
     <a href="genetics-model.html#registry">the genetics model</a> with a page each. Any
     residual tuning lives on the gene&rsquo;s own page; what is below is only what no
     gene does yet.
@@ -860,7 +860,7 @@
 <ul>
     <li><strong>The genotype space.</strong> Now
         <strong>81 687 059 589 193 477 171 200 000</strong> raw genotypes, of which
-        <strong>462 422 019</strong> are distinct to look at &mdash; it was
+        <strong>462 422 018</strong> are distinct to look at &mdash; it was
         <code>3^11 = 177,147</code> before the seven visual genes shipped, the
         multiplier in miniature. The raw product is past
         <strong>10<sup>25</sup></strong> and is a <code>BigInteger</code>: the
@@ -1721,6 +1721,75 @@
 </tbody>
 </table>
 </div>
+
+<h2 id="breeds">22. Breeds &mdash; what the breed sheet asks for that isn&rsquo;t built</h2>
+
+<p>
+    The <a href="breeds.html">breed system</a> shipped 2026-09-05 (49 breeds,
+    biome-weighted herd spawning, cross / mixed breeding labels, per-breed stat
+    bands feeding the four magical body-stat genes). <strong>No new gene was
+    added.</strong> The breed definitions reference genes and cosmetic features
+    this mod does not have; each is noted in the breed&rsquo;s
+    <code>notes()</code>, and the ones worth building are:
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Item</th><th>Breeds that want it</th><th>What it is / needs</th></tr></thead>
+<tbody>
+<tr><td><strong>HYPP</strong></td><td>Quarter Horse, American Paint</td><td>The one &ldquo;obvious genetic issue&rdquo; the owner wants as a real gene: a dominant allele that <strong>reduces the horse&rsquo;s hearts</strong> (a <code>TraitContribution</code> + <code>HealthContribution</code>, <em>not</em> a lethal). Fits the existing pattern; no new machinery.</td></tr>
+<tr><td><strong>Tiger Eye</strong> (<code>TE</code>)</td><td>Puerto Rican Paso Fino</td><td>Amber iris. Blocked on eye colour existing at all (§4.1 / §5.1); recessive, two alleles.</td></tr>
+<tr><td><strong>Pangare / mealy</strong></td><td>Exmoor Pony (and cross-refs Fjord, some duns)</td><td>Lightened muzzle, eye rings, flanks, belly. A natural pigment gene &mdash; phase 1, region-masked lightening. New.</td></tr>
+<tr><td><strong>Flaxen</strong></td><td>Haflinger, Belgian Draft</td><td>Pale mane and tail on a chestnut body. Natural, recessive, hair-only pigment pull. New; <code>HairPattern</code> is the seam.</td></tr>
+<tr><td><strong>Early-lethal foal disorders</strong></td><td>Arabian (SCID / CA / LFS), Akhal-Teke (NNF / CVM), Friesian (megaesophagus, dwarfism &mdash; dwarfism exists), Kiger / Mustang (GBED)</td><td>All fit <code>RecessiveDisorderGene</code> / the <code>LETHAL_AT_BIRTH</code> path exactly &mdash; a name, a carrier rate, a <code>Condition</code>. Batch them.</td></tr>
+<tr><td><strong>Gait</strong> (<code>DMRT3</code>)</td><td>Paso Fino &times;2, Tennessee Walking, Standardbred, Icelandic, Hackney</td><td>Already noted in §4.3. A gene is cheap; the value is the <strong>animation</strong> (an ambling / running-walk / pace cycle), which needs renderer work.</td></tr>
+<tr><td><strong>Mane shape</strong></td><td>Fjord (erect two-tone), Przewalski (upright, no forelock), Andalusian / Friesian / Gypsy (long flowing), Percheron</td><td>Render-layer / model work, not genetics. The Fjord&rsquo;s two-tone stripe is the most self-contained: a hard light/dark split down the mane centre.</td></tr>
+<tr><td><strong>Lower-leg feathering</strong></td><td>Clydesdale, Shire, Friesian, Gypsy Vanner, Dales, Dartmoor</td><td>A render-layer overlay on the lower legs (the sheared-look overlay is the precedent, §21). Cosmetic, breed- or gene-driven.</td></tr>
+<tr><td><strong>Leopard complex</strong> (<code>Lp</code> + <code>PATN1</code>)</td><td>Appaloosa, Knabstrupper, &ldquo;often lp&rdquo; on Mustang / Kiger / Shetland</td><td>Already §4.2 &mdash; the biggest single item, a new pattern family. The breeds are wired to accept it (light roan stands in for now).</td></tr>
+</tbody>
+</table>
+</div>
+
+<p><strong>Explicitly not modelling</strong>: the Akhal-Teke / Karabakh metallic
+coat sheen (a shader), the Marwari&rsquo;s inward-curving ear tips (a mesh
+change), and dished / convex / Roman head profiles. These are noted on the
+breeds and left there.</p>
+
+<h3>Breed-system follow-ups</h3>
+<ul>
+    <li>Per-gene pool <strong>rates</strong> across all 49 breeds are estimates,
+        never play-balanced &mdash; a herd should read as that breed without being a
+        monoculture, and that&rsquo;s eyeballed.</li>
+    <li>Biome assignments overlap heavily in the vanilla horse biomes (plains,
+        savanna, meadow) and the <code>add_horse_loners</code> modifier targets
+        <code>#minecraft:is_overworld</code> wholesale &mdash; total horse density
+        across the world is unmeasured.</li>
+    <li><strong>Unknown as a cross component</strong> (Friesian &times; Unknown
+        &rarr; &ldquo;Friesian &times; Unknown cross&rdquo;) is a judgement call the
+        sheet didn&rsquo;t cover &mdash; the alternative is to make Unknown absorbing
+        like Mixed. Flagged for the owner.</li>
+    <li>A cross&rsquo;s stat band is the <strong>per-axis average</strong> of its
+        two parents&rsquo; bands, only where both pin the axis. Simple; may want the
+        F1 to sit closer to the stronger parent.</li>
+    <li><strong>Herd formation is proximity-only</strong>
+        (<code>HerdManager</code>, deferred): a wild horse with a herded or
+        fresh-natural-spawn neighbour within 32 blocks joins/founds a herd, else
+        it is a lone Unknown. A pack vanilla scatters &gt;32 blocks, or that
+        streams over two ticks, can split. The <code>SpawnGroupData</code> route
+        is unusable (<code>Horse.finalizeSpawn</code> replaces it per member),
+        which is <em>also</em> why <strong>traditional-band foals spawn at
+        vanilla's ~5%</strong> instead of the intended "up to 3" &mdash; needs a
+        direct <code>setAge(-24000)</code> on a herd member or a mixin.</li>
+    <li><strong>Wild aggro is all-or-nothing</strong>
+        (<code>HorseAggroHandler</code>): 4 flat damage, no <code>ATTACK_DAMAGE</code>
+        scaling by breed/size, and horses are neutral until hit (no
+        <code>NearestAttackableTargetGoal</code> &mdash; deliberately, like a
+        wolf). The forget-on-line-of-sight timer is a fixed 3&nbsp;s.</li>
+    <li>The <strong>deferred join</strong> (<code>onHorseJoin</code> &rarr;
+        <code>server.execute</code>) means a wild horse renders as default black
+        with vanilla attributes for ~1 tick before <code>HerdManager</code>
+        runs. Imperceptible, but it is a frame of wrong.</li>
+</ul>
 
 <div class="page-foot">
     <div class="seealso">

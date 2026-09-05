@@ -35,12 +35,48 @@
 <p>Seen in-game, not fixed.</p>
 
 <div class="note warn">
+    <span class="label">White patterns still paint the whole top of the back (seen 2026-09-05) &mdash; NOT fixing yet</span>
+    <p>
+        Confirmed in-game while play-testing breeds. Three white genes wrap
+        colour&hellip;&nbsp;er, wrap <em>white</em> right over the topline and
+        along the whole spine / crest, when the pattern should stop short of it:
+    </p>
+    <ul>
+        <li><strong>EDNRB (frame overo)</strong> &mdash; frame is defined as
+            &ldquo;never crosses the topline&rdquo; and its own outcome
+            description says so, but nothing implements it: <code>BAND_LO</code>
+            / <code>BAND_HI</code> in <code>EdnrbGene</code> are fractions of the
+            <em>whole-horse</em> AABB (hoof to ear tip), and the barrel only
+            spans ~0.33&ndash;0.62 of that, so every <code>BODY</code> texel is
+            inside the band and the back goes white.</li>
+        <li><strong>Tobiano</strong> &mdash; the topline bias uses
+            <code>topY = bb.yMax()</code> (the ear tip), so the real topline sits
+            a third of the way up the ramp and the mane / crest get the strongest
+            pull instead of the least &mdash; a permanent white band along the top
+            of the neck.</li>
+        <li><strong>MITF / PAX3 (splash)</strong> &mdash; <code>WhitePattern.splash</code>&rsquo;s
+            waterline is measured against the same whole-horse height, so about a
+            third of its range is <em>above</em> the back; a bold splash floods
+            the spine.</li>
+    </ul>
+    <p>
+        Root cause and the fix (a <code>bounds(skin, Part.BODY).yMax()</code>
+        topline reference plus re-calibrating the <code>cover</code> knobs
+        through the measured <code>PatchNoise</code> quantiles) are written up in
+        <code>CLAUDE.md</code> known-gap&nbsp;#30. All four sub-fixes move
+        existing coats, so they want one change with a <code>coat-golden.txt</code>
+        regen &mdash; deferred deliberately.
+    </p>
+</div>
+
+<div class="note warn">
     <span class="label">Magic speed / health / jump (built 2026-09-05, NOT play-tested)</span>
     <p>
         Three new genes on the <a href="gene-body-size.html">magic body size</a>
         pattern &mdash; codominant, epigenetic, paint nothing, ~80% wild carrier
         rate each, so most wild horses now carry all four body-stat genes. The
-        genotype code is <strong>44 segments</strong> in-game (old saves will not
+        genotype code is <strong>43 segments</strong> in-game (41 built-in + the
+        two shipped spec genes; old saves will not
         parse). Full checklist at <a href="#body-stats">&sect;0d</a>.
     </p>
 </div>
@@ -518,6 +554,89 @@
         speed / health / jump they already print should reflect the multiplier.</li>
     <li>Reload the world and confirm every horse is still the speed / hardiness /
         jump it was.</li>
+</ul>
+
+<h2 id="breeds">&sect;0e &mdash; breeds, herds &amp; aggro (2026-09-05, partly play-tested)</h2>
+<p>
+    49 breeds, biome-weighted herd spawning, cross / mixed breeding labels, and
+    per-breed stat bands feeding the four magical body-stat genes. Full design:
+    <a href="breeds.html">breeds.html</a>. Nothing here has been seen in a play
+    session; the server boots clean with the biome modifiers loaded.
+</p>
+<ul>
+    <li><strong>Horses spawn, in herds.</strong> Fly to a taiga, jungle,
+        badlands, swamp, snowy biome, mushroom fields &mdash; none spawn horses
+        in vanilla. You should see <b>packs of 3&ndash;6</b> that read as one
+        breed, and only the rare truly-isolated horse.</li>
+    <li><strong>No server crash (the load-bearing one).</strong> A
+        <code>DistanceManager.runAllUpdates</code> NPE crashed the server twice
+        after a few minutes of fast flight through fresh chunks
+        (<code>Attributes.SCALE</code> &rarr; <code>refreshDimensions</code>
+        collision scan re-entering the chunk system). The fix: <b>the entire
+        <code>onHorseJoin</code> body is now deferred to <code>server.execute</code>
+        (next tick)</b>, so nothing this mod does runs inside a chunk-holder
+        update. Fly a long way through unexplored terrain and confirm it holds.</li>
+    <li><strong>A herd is one breed; solo horses are Unknown and never in a
+        clump.</strong> The <b>load-bearing check</b> &mdash; this is the third
+        attempt at herd formation. Every member of a pack must show the
+        <em>same</em> breed. A lone wild horse must read <em>Unknown</em>. You
+        must <b>not</b> see a group of four unrelated Unknown horses standing
+        together (that was the last two builds). Prior attempts died on
+        <code>Horse.finalizeSpawn</code> throwing away the custom pack data;
+        this one groups by proximity in <code>HerdManager</code>.</li>
+    <li><strong>Traditional vs bachelor bands.</strong> A <b>traditional</b>
+        herd is one stallion + mares (+ the odd foal at vanilla's ~5% rate);
+        a <b>bachelor</b> band is all stallions, no foals. Roughly 70/30.</li>
+    <li><strong>Herds move as a unit.</strong> A spawned pack should stay
+        clumped and wander together following one horse (the lead stallion, or
+        a random bachelor). They should not scatter to the horizon.</li>
+    <li><strong>Wild horses aggro like wolves.</strong> Hit one wild horse:
+        it and its whole herd should turn and kick you (4 damage). Run out of
+        sight for ~3 s and they go back to neutral. Tamed horses never do this.</li>
+    <li><strong>Dev conveniences.</strong> <kbd>F8</kbd> is a <b>toggle</b>
+        now &mdash; press once and nearby horses stay glowing until you press it
+        again (chat says ON / OFF). A <b>stick</b> tames / a <b>clock</b> ages a
+        foal <em>anywhere</em> in a dev build now (not just the horse
+        dimension).</li>
+    <li><strong>The info panel shows a breed.</strong> Mount a wild horse, open
+        the panel (E): a breed name sits under the &ldquo;mare / stallion &nbsp;
+        gen N&rdquo; line. A biome with assigned breeds should mostly show a real
+        breed; the odd one reads <em>Unknown</em>.</li>
+    <li><strong>Paper dump.</strong> Right-click a horse with paper: it now
+        prints a <code>breed:</code> line and a <code>herd:</code> line (band
+        type, "this horse is the lead" or "led by &lt;name&gt;", member count);
+        <b>generation and the ancestors list are gone</b>. The dev
+        <code>[coat]</code> chat line still gains a <code>[Breed Name]</code> tag.</li>
+    <li><strong>Custom spawn egg &ldquo;Breed:&rdquo; preset.</strong> The egg
+        editor has a <code>Breed:</code> cycle button (right column, under
+        Sex). Cycling to a breed should load a fresh wild individual of it -
+        genes, epigenetics and sex all change - and the spawned horse&rsquo;s
+        panel should show that breed. Cycle to <code>(none)</code> and it spawns
+        Unknown with whatever genome is in the editor.</li>
+    <li><strong>Breed reads on the body &mdash; big horses are bigger now.</strong>
+        A <b>Percheron / Shire / Clydesdale</b> should visibly <b>tower over the
+        player</b> (scale ~1.2&ndash;1.4); a Quarter Horse should look ordinary
+        (~0.96); the gap between them should be obvious. Falabella / Shetland
+        still tiny. Thoroughbred / Standardbred herd visibly faster than a draft
+        herd.</li>
+    <li><strong>Colour matches the breed.</strong> Friesian = jet black, no
+        white. Suffolk Punch / Haflinger = chestnut. Fjord / Przewalski = dun
+        with a dorsal stripe. Gypsy Vanner / Paint = tobiano pinto. Appaloosa /
+        Knabstrupper currently show only faint roan (leopard complex not built).</li>
+    <li><strong>Breeding labels.</strong> Same breed &times; same breed &rarr;
+        that breed. Two breeds &rarr; &ldquo;A &times; B cross&rdquo; (alphabetical,
+        order-free). Cross &times; a parent breed &rarr; same cross. Cross &times;
+        an outsider &rarr; &ldquo;Mixed&rdquo;. Check the foal&rsquo;s panel.</li>
+    <li><strong>Cross stats.</strong> A Thoroughbred &times; Arabian foal should
+        still be fast; a Thoroughbred &times; Friesian foal should regress toward
+        ordinary speed (Friesian pins no speed band).</li>
+    <li><strong>Seed jar.</strong> A stallion seed jar carries the donor&rsquo;s
+        breed; a seed-jar foal from a pure mare + a pure (different) sire should
+        read as their cross, not &ldquo;&hellip; &times; Unknown cross&rdquo;.</li>
+    <li><strong>Old worlds.</strong> The genotype code changed (44 &rarr; 41
+        segments &mdash; the <b>Test gene was removed</b> this session, and
+        there is no Test card in the wiki or gene picker any more). Pre-session
+        saved horses will not parse their old code; start a fresh world.</li>
 </ul>
 
 <h2 id="particle">&sect;0c &mdash; the particle locus (new 2026-09-04, NOT play-tested)</h2>
@@ -1052,9 +1171,10 @@
 
 <p>
     So: on the next <code>runClient</code> for any other reason, glance at a
-    <strong>Test (<code>T_</code>) horse</strong> &mdash; it should still be the flat
-    pink/blue/red/yellow field on any base, including white &mdash; and at any
-    <strong>dominant-white</strong> horse. Nothing else needs looking at.
+    <strong>magic-zebra</strong> horse (black stripes on any base, dominant white
+    included) and at any <strong>dominant-white</strong> horse. Nothing else needs
+    looking at. <span class="muted">(This item used to name the Test gene, which
+    was removed 2026-09-05.)</span>
 </p>
 
 <h3 id="spawn-egg-ui">6. The custom spawn egg, rebuilt (new 2026-09-04)</h3>

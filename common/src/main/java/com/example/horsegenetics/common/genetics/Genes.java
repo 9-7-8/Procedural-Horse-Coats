@@ -36,7 +36,6 @@ import com.example.horsegenetics.common.genetics.genes.ShoxGene;
 import com.example.horsegenetics.common.genetics.genes.SilverGene;
 import com.example.horsegenetics.common.genetics.genes.St14Gene;
 import com.example.horsegenetics.common.genetics.genes.MitfGene;
-import com.example.horsegenetics.common.genetics.genes.TestGene;
 import com.example.horsegenetics.common.genetics.genes.TailColorGene;
 import com.example.horsegenetics.common.genetics.genes.TobianoGene;
 import com.example.horsegenetics.common.genetics.genes.VerdantGene;
@@ -96,7 +95,6 @@ public final class Genes {
     public static final SexGene SEX = new SexGene();
     public static final ExtensionGene EXTENSION = new ExtensionGene();
     public static final AgoutiGene AGOUTI = new AgoutiGene();
-    public static final TestGene TEST = new TestGene();
     public static final ChampagneGene CHAMPAGNE = new ChampagneGene();
     public static final GreyGene GREY = new GreyGene();
     public static final MatpGene MATP = new MatpGene();
@@ -191,7 +189,7 @@ public final class Genes {
 
     /** The hand-written genes. Order here is irrelevant - the registry sorts. */
     private static final List<Gene> BUILTINS = List.of(
-            SEX, EXTENSION, AGOUTI, TEST, CHAMPAGNE, GREY, MATP,
+            SEX, EXTENSION, AGOUTI, CHAMPAGNE, GREY, MATP,
             MAGIC_ZEBRA, PINK_HAIR, DUN, SILVER, MUSHROOM, ROAN, TOBIANO,
             EDNRB, KIT, MITF, PAX3,
             MILK, BODY_SIZE, MAGIC_SPEED, MAGIC_HEALTH, MAGIC_JUMP,

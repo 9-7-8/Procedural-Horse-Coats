@@ -108,7 +108,6 @@ class GenotypeTest {
         Genotype x = Genotype.parse(LegacyCode.keyed("E/e-A/a-N/N-T/t-Ch/c-SW1/N-G/g-Cr/N-n/n-n/n" + T));
         assertTrue(x.hasBlackPigment());
         assertTrue(x.isAgouti());
-        assertTrue(x.shows(Genes.TEST));
         assertTrue(x.shows(Genes.CHAMPAGNE));
         assertTrue(x.shows(Genes.MITF));
         assertTrue(x.shows(Genes.GREY));
@@ -179,7 +178,6 @@ class GenotypeTest {
         rng.assertExhausted();
 
         assertTrue(x.isWhite());
-        assertTrue(x.shows(Genes.TEST));
         assertTrue(x.shows(Genes.CHAMPAGNE));
         assertTrue(x.shows(Genes.MITF));
         assertTrue(x.shows(Genes.PAX3));
@@ -213,9 +211,10 @@ class GenotypeTest {
             for (int i = 0; i < Genes.codeOrder().size(); i++) {
                 rng.floats(roll);
             }
-            AllelePair test = Genotype.random(rng).pair(Genes.TEST);
-            assertFalse(test.homozygousFor(Genes.TEST.T),
-                    "no founder should be T/T, got " + test.toTokens() + " at roll " + roll);
+            AllelePair pair = Genotype.random(rng).pair(Genes.BODY_SIZE);
+            assertFalse(pair.homozygousFor(Genes.BODY_SIZE.Big) || pair.homozygousFor(Genes.BODY_SIZE.Small),
+                    "no founder should be homozygous for a body-size allele, got "
+                            + pair.toTokens() + " at roll " + roll);
         }
     }
 
@@ -238,7 +237,6 @@ class GenotypeTest {
         boolean[] draws = new boolean[Genes.codeOrder().size() * 2];
         java.util.Arrays.fill(draws, true);
         Genotype child = a.breedWith(Genotype.wildType(), new FakeRng().booleans(draws));
-        assertTrue(child.shows(Genes.TEST));
         assertTrue(child.shows(Genes.MITF));
         assertTrue(child.shows(Genes.GREY));
         assertTrue(child.shows(Genes.CHAMPAGNE));

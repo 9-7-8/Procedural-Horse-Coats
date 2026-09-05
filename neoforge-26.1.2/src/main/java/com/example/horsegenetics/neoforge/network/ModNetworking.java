@@ -113,6 +113,17 @@ public final class ModNetworking {
                     }
                 })
         );
+
+        registrar.playToServer(
+                RequestHighlightHorsesPayload.TYPE,
+                RequestHighlightHorsesPayload.STREAM_CODEC,
+                (payload, context) -> context.enqueueWork(() -> {
+                    if (FMLEnvironment.isProduction()) return; // dev-only find-my-horses toggle
+                    if (context.player() instanceof ServerPlayer serverPlayer) {
+                        com.example.horsegenetics.neoforge.server.DebugHighlightHandler.toggle(serverPlayer);
+                    }
+                })
+        );
     }
 
     /**
@@ -173,11 +184,16 @@ public final class ModNetworking {
 
         // Record applied before the entity joins, so HorseGeneticsEventHandler
         // sees a real record and keeps this genome instead of rolling a random one.
-        HorseRecords.apply(horse, HorseRecords.newFounder(horse, new NeoRng(horse.getRandom()), genome));
+        HorseRecord record = HorseRecords.newFounder(horse, new NeoRng(horse.getRandom()), genome);
+        if (!payload.breed().isEmpty()) {
+            record = record.withBreed(payload.breed());
+        }
+        HorseRecords.apply(horse, record);
         level.addFreshEntity(horse);
 
         serverPlayer.sendSystemMessage(Component.literal("[Custom Horse] spawned "
-                + (payload.baby() ? "foal " : "") + sex.label(!payload.baby()) + " - "
+                + (payload.baby() ? "foal " : "") + sex.label(!payload.baby()) + " "
+                + record.lineage().displayName() + " - "
                 + GeneCodeDisplay.shortForm(genome.genotype())));
     }
 

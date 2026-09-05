@@ -18,6 +18,7 @@
                 { href: "philosophy.html", text: "Philosophy", kind: "core" },
                 { href: "genetics-model.html", text: "The genetics model", kind: "core" },
                 { href: "breeding.html", text: "Breeding & pedigree", kind: "core" },
+                { href: "breeds.html", text: "Breeds", kind: "core" },
                 { href: "horse-body.html", text: "The horse's body", kind: "core" }
             ]
         },
@@ -106,8 +107,7 @@
                 { href: "gene-particle.html", text: "Particle", kind: "magical" },
                 { href: "gene-verdant.html", text: "Verdant", kind: "magical" },
                 { href: "gene-suntouched.html", text: "Suntouched", kind: "magical" },
-                { href: "gene-waterborn.html", text: "Waterborn", kind: "magical" },
-                { href: "gene-test.html", text: "Test (diagnostic)", kind: "magical" }
+                { href: "gene-waterborn.html", text: "Waterborn", kind: "magical" }
             ]
         },
         {

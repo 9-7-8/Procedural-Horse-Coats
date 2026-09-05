@@ -1,5 +1,6 @@
 package com.example.horsegenetics.common.genetics.genes;
 
+import com.example.horsegenetics.common.trait.StatAxis;
 import com.example.horsegenetics.common.trait.TraitBuilder;
 
 /**
@@ -53,6 +54,11 @@ public final class MagicJumpGene extends AbstractMagicStatGene {
                         "One springy copy and one leaden copy. Their percentages very nearly cancel, so "
                                 + "the horse jumps close to its ordinary height while carrying, and "
                                 + "passing on, both extremes."));
+    }
+
+    @Override
+    protected StatAxis axis() {
+        return StatAxis.JUMP;
     }
 
     @Override

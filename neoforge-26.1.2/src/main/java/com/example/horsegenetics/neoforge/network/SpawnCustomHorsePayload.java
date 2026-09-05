@@ -22,6 +22,9 @@ import net.minecraft.resources.Identifier;
  *       preview a suggestion. Empty means "roll one", the old behaviour.</li>
  *   <li>{@code baby} - spawn as a foal.</li>
  *   <li>{@code female} - {@code Sex.FEMALE} if true, else {@code Sex.MALE}.</li>
+ *   <li>{@code breed} - a {@code BreedLineage} token to stamp on the spawned
+ *       horse (the editor's "Breed:" preset), or {@code ""} for Unknown. It is
+ *       only a label + stat bands; the genotype above is authoritative.</li>
  * </ul>
  *
  * The server applies the genome as a <b>founder record</b> before the entity
@@ -31,7 +34,7 @@ import net.minecraft.resources.Identifier;
  * with an arbitrary genome, so a client-side gate would be no gate at all.
  */
 public record SpawnCustomHorsePayload(String genotypeCode, String epigenomeCode,
-                                      boolean baby, boolean female)
+                                      boolean baby, boolean female, String breed)
         implements CustomPacketPayload {
 
     public static final Type<SpawnCustomHorsePayload> TYPE =
@@ -42,6 +45,7 @@ public record SpawnCustomHorsePayload(String genotypeCode, String epigenomeCode,
             ByteBufCodecs.stringUtf8(4096), SpawnCustomHorsePayload::epigenomeCode,
             ByteBufCodecs.BOOL, SpawnCustomHorsePayload::baby,
             ByteBufCodecs.BOOL, SpawnCustomHorsePayload::female,
+            ByteBufCodecs.stringUtf8(64), SpawnCustomHorsePayload::breed,
             SpawnCustomHorsePayload::new
     );
 
