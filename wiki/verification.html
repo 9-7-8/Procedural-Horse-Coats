@@ -567,23 +567,44 @@
     <li><strong>Horses spawn, in herds.</strong> Fly to a taiga, jungle,
         badlands, swamp, snowy biome, mushroom fields &mdash; none spawn horses
         in vanilla. You should see <b>packs of 3&ndash;6</b> that read as one
-        breed, and only the rare truly-isolated horse.</li>
-    <li><strong>No server crash (the load-bearing one).</strong> A
-        <code>DistanceManager.runAllUpdates</code> NPE crashed the server twice
-        after a few minutes of fast flight through fresh chunks
-        (<code>Attributes.SCALE</code> &rarr; <code>refreshDimensions</code>
-        collision scan re-entering the chunk system). The fix: <b>the entire
-        <code>onHorseJoin</code> body is now deferred to <code>server.execute</code>
-        (next tick)</b>, so nothing this mod does runs inside a chunk-holder
-        update. Fly a long way through unexplored terrain and confirm it holds.</li>
+        breed, and only the rare truly-isolated horse.
+        <em>Breed + herd assignment owner-confirmed 2026-09-05.</em></li>
+    <li><strong>No server crash (the load-bearing one) &mdash; NOT yet
+        re-confirmed.</strong> A <code>DistanceManager.runAllUpdates</code> NPE
+        has crashed the server three times after a few minutes of fast flight
+        through fresh chunks: <code>HorseRecords.applyTraitsToEntity</code>
+        writes <code>Attributes.SCALE</code>, a non-1.0 scale makes
+        <code>refreshDimensions</code> run a collision scan that can force-load a
+        chunk, and doing that from <code>EntityJoinLevelEvent</code> or a
+        <code>server.execute</code> task re-enters the chunk ticket pass.
+        <b>Breeds made it reliable</b> &mdash; a breed pins the body-size locus
+        homozygous, so every Fjord / Percheron / Falabella gets a real scale
+        change on its first resolve. <b>Fix (2026-09-05):</b> all record / coat /
+        trait / herd work now runs from <code>HorseFoundingTickHandler</code> on
+        <code>EntityTickEvent.Post</code> &mdash; after the tick's chunk updates,
+        with the horse's surroundings already loaded &mdash; and the
+        <code>onHorseJoin</code> <code>server.execute</code> deferral is gone.
+        Fly a long way through unexplored terrain, near lots of herds
+        (draft-heavy biomes especially), and confirm it holds.</li>
     <li><strong>A herd is one breed; solo horses are Unknown and never in a
-        clump.</strong> The <b>load-bearing check</b> &mdash; this is the third
-        attempt at herd formation. Every member of a pack must show the
+        clump.</strong> The <b>load-bearing check</b> &mdash; this is the
+        <b>fourth</b> attempt at herd formation (the owner confirmed the third
+        still produced mixed-breed herds). Every member of a pack must show the
         <em>same</em> breed. A lone wild horse must read <em>Unknown</em>. You
-        must <b>not</b> see a group of four unrelated Unknown horses standing
-        together (that was the last two builds). Prior attempts died on
-        <code>Horse.finalizeSpawn</code> throwing away the custom pack data;
-        this one groups by proximity in <code>HerdManager</code>.</li>
+        must <b>not</b> see a group of horses standing together with two or more
+        different breed labels. The 3rd revision founded on the join event, when
+        a spawned pack's other members are not query-visible yet &mdash; so every
+        horse founded a herd of one and came out <em>Unknown</em> (owner
+        confirmed). The 4th (2026-09-05) founds from
+        <code>HorseFoundingTickHandler</code> 20 ticks after spawn, once the pack
+        is loaded, and <code>HerdManager</code> flood-fills the whole connected
+        clump (a <code>NaturalSpawner</code> pack walks each member a
+        <em>cumulative</em> &plusmn;5 blocks, so four routinely span past 32
+        end-to-end) and elects a deterministic lowest-UUID lead whose UUID seeds
+        the breed draw, so every member lands on the same herd whatever order the
+        tick handler reaches them. <em>Owner-confirmed working 2026-09-05.</em>
+        Still watch: the <b>last horse of a very spread pack</b> must join the
+        herd, not fall out as a lone Unknown.</li>
     <li><strong>Traditional vs bachelor bands.</strong> A <b>traditional</b>
         herd is one stallion + mares (+ the odd foal at vanilla's ~5% rate);
         a <b>bachelor</b> band is all stallions, no foals. Roughly 70/30.</li>

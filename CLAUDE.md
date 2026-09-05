@@ -178,7 +178,7 @@ project. Its shape:
     the band width. A near-baseline band (straddles 1.0) is dropped -> locus
     left wild -> horse sits on the baseline. New: `common/trait/StatAxis`,
     `TargetBand`, `BreedStatTargets`.
-  - **Spawn side - herds by proximity (3rd revision).** `BreedSpawnHandler`
+  - **Spawn side - herds by connected clump (4th revision).** `BreedSpawnHandler`
     (`FinalizeSpawnEvent`) does one thing: on a NATURAL / CHUNK_GENERATION /
     SPAWNER spawn, set `horse.getPersistentData()` `horsegenetics:wild_spawn`.
     **The `SpawnGroupData` route is dead** - `Horse.finalizeSpawn` replaces any
@@ -225,24 +225,41 @@ project. Its shape:
     disorders (SCID/CA/LFS/GBED/NNF/CVM/megaesophagus), gait (DMRT3),
     mane-shape and feathering render layers. **Won't model**: metallic sheen,
     curved ears, head profiles.
-  - **`server/HerdManager.assignFounder`** (deferred one tick from
-    `onHorseJoin` via `server.execute`) forms the herd by **proximity**
-    (`HERD_RADIUS` 32, `BandType` still TRADITIONAL 70% / BACHELOR 30%):
-    - if a nearby untamed wild horse is **already `inWildHerd()`** -> **JOIN**
-      it: its breed, its band, its lead, sex per band (traditional joiner =
-      mare, bachelor joiner = stallion);
-    - else if a nearby untamed horse is **also a fresh wild spawn** (has the
-      `wild_spawn` flag, no record yet - a pack-mate awaiting its turn) ->
-      **FOUND** a herd: this horse is the lead stallion, breed =
-      `pickHerdBreed(biome)` (weighted, Unknown only if the biome has no
-      breeds), band = a coin;
-    - else genuinely alone -> a lone **`UNKNOWN`**, no herd.
-    So **every clump of wild horses is one herd of one breed**, and only a
-    solitary horse is Unknown. A pack streaming over two ticks can still split
-    (edge, single-tick `NaturalSpawner` packs are the norm). `BandData` and the
-    band NBT keys are gone. **Traditional-band foals now spawn at vanilla's ~5%
-    rate** (the pack `AgeableMobGroupData` can't be overridden any more) - noted
-    as a follow-up.
+  - **`server/HerdManager.assignFounder`** - called by
+    `server/HorseFoundingTickHandler` on `EntityTickEvent.Post`, **20 ticks
+    after the horse spawns** (`WILD_FOUND_DELAY_TICKS`), *not* from the join
+    event. Two reasons it had to move off the join path: (a) the join deferral
+    (`server.execute`) drains during chunk streaming only a few ms later, still
+    the same tick, so a scan for pack-mates saw an **empty clump** and every
+    horse founded a herd of one - **owner hit this: all wild horses Unknown, no
+    herds**; (b) `applyTraitsToEntity`'s `SCALE` write crashes from that context
+    (see the crash note below). Waiting 20 ticks on the entity tick fixes both -
+    the pack is loaded and query-visible, and nothing re-enters the chunk
+    system. It then forms the herd over the **whole connected clump**
+    (`HERD_RADIUS` 32 per flood-fill *step*, `BandType` TRADITIONAL 70% /
+    BACHELOR 30%):
+    - **why a clump and not a 32-block look:** `NaturalSpawner` walks each pack
+      member a *cumulative* ±5 blocks from the last, so a pack of four routinely
+      spans **more than 32 blocks end-to-end**, and the tick handler processes
+      horses in entity-iteration order, not spatial order. A single-radius rule
+      would let a spread pack **found two herds of two breeds**.
+    - `herdedMemberOfClump` - flood-fill the connected clump (untamed horses,
+      each within 32 of the next, hopping *through* fresh pack-mates); if any
+      member is **already `inWildHerd()`** -> **JOIN** it (its breed, band,
+      lead; `leadSex` if the lead UUID is this horse, else `joinerSex`);
+    - else `freshClump` (flood-fill of fresh `wild_spawn` pack-mates, incl.
+      self) has >1 member -> **FOUND**: elect the clump's **lowest-UUID member**
+      as the lead, and derive breed + band from `RandomSource` **seeded by that
+      lead's UUID** + the lead's biome (`pickHerdBreed`). Every clump member
+      computes the *same* lead and therefore the same herd, whatever the
+      processing order - the elected lead included, when its own tick runs (it
+      JOINs a mate whose `herd()` already points back at it);
+    - else a clump of one -> a lone **`UNKNOWN`**.
+    `BandData` and the band NBT keys are gone. **Traditional-band foals now
+    spawn at vanilla's ~5% rate** (the pack `AgeableMobGroupData` can't be
+    overridden any more) - noted as a follow-up. **Breed + herd assignment is
+    owner-confirmed working in-game 2026-09-05; the crash fix is not yet
+    play-tested.**
   - **`server/WildHerdGoal`** (new, added beside `BondFollowGoal` at priority
     6): an untamed herd member paths to its lead (resolved via
     `ServerLevel.getEntity(uuid)`) when >8 blocks away, re-path every ~15
@@ -290,15 +307,25 @@ project. Its shape:
     **374 green**, `:neoforge-26.1.2:build` green, `runServer` boots clean
     (`43 segments`, biome modifiers load, `loaded 2 data-driven gene(s)`).
     Checklist: `wiki/verification.html` §0e.
-  - **The `DistanceManager.runAllUpdates` crash came back** after the first fix
-    (moving work from `FinalizeSpawnEvent` to `onHorseJoin` was not enough -
-    `onHorseJoin` *also* fires inside the chunk system's `updateFutures` for
-    chunk-loaded entities, and `applyTraitsToEntity` sets `Attributes.SCALE`
-    whose `refreshDimensions` -> `findFreePosition` collision scan re-enters and
-    corrupts the ticket-set iterator). **Real fix: `onHorseJoin` now defers its
-    entire body to `server.execute(...)` (next tick).** Nothing this mod does
-    runs inside a chunk-holder update any more. Needs a `runClient` re-test - a
-    headless `runServer` can't reproduce it.
+  - **The `DistanceManager.runAllUpdates` crash - actually fixed 2026-09-05.**
+    History: `FinalizeSpawnEvent` -> `onHorseJoin` didn't help (`onHorseJoin`
+    *also* fires inside the chunk system's `updateFutures`), and deferring
+    `onHorseJoin`'s whole body to `server.execute` **also crashed** in
+    `runClient` - `server.execute` tasks drain in `MinecraftServer.waitUntilNextTick`
+    *right next to* `ServerChunkCache.pollTask` -> `runDistanceManagerUpdates`,
+    so `applyTraitsToEntity`'s `Attributes.SCALE` write there still re-enters the
+    ticket pass and NPEs. Breeds made it reliable: a breed pins the body-size
+    locus **homozygous**, so every Fjord / Percheron / Falabella gets a real
+    scale change on its first resolve. **Real fix: all record / coat / trait /
+    herd work now runs from `HorseFoundingTickHandler` on `EntityTickEvent.Post`**
+    - the settled entity-tick loop, after the tick's chunk updates, with the
+    horse's surroundings already loaded so `refreshDimensions` touches nothing
+    re-entrant. `onHorseJoin`'s `server.execute` deferral is **gone**;
+    `HorseGeneticsEventHandler` keeps only the debug-dimension guards +
+    `ensureExistingRecordResolved` (called by the tick handler). A wild horse
+    founds `WILD_FOUND_DELAY_TICKS` (20) after spawn so its pack is loaded and
+    query-visible first - the earlier "found on join" scan saw an empty clump
+    (pack-mates not indexed yet) and every horse came out a lone Unknown.
   - Also confirmed in the same session: the frame/tobiano/splash "white over
     the whole topline" defect (known gap #30) is real in-game; still deferred.
   - Docs: `wiki/breeds.html` (new), `wiki/nav.js`, `wiki/breeding.html`,
@@ -3518,7 +3545,15 @@ Design follow-ups (not just "go look at it"):
    sustained `runClient` flight to confirm it holds. **#6 (only Unknown
    breeds)** should be fixed (chunk-gen spawns were bailing before the biome
    lookup; `HerdManager` does it deferred now) - confirm real breeds appear.
-   The **herd** systems (`HerdManager` band formation, `WildHerdGoal`
+   **Mixed-breed herds** (owner-confirmed still broken after the 3rd revision)
+   got a **4th revision 2026-09-05**: `HerdManager` now flood-fills the whole
+   *connected clump* and elects a deterministic lowest-UUID lead whose UUID
+   seeds the breed/band draw, so task order and the >32-block spread of a
+   `NaturalSpawner` pack can no longer split one clump into two herds. **Not
+   yet re-tested in-game** - confirm a spread pack now reads as one breed, and
+   that the last member of a very spread pack doesn't fall out as a lone
+   Unknown.
+   The **herd** systems (`HerdManager` clump election, `WildHerdGoal`
    cohesion, traditional vs bachelor composition) and **wild aggro**
    (`HorseAggroHandler` - hit one, the herd kicks you; lose LOS, they calm)
    have had zero play. The load-bearing unknowns:
