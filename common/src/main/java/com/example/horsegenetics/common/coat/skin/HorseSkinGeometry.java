@@ -411,8 +411,12 @@ public final class HorseSkinGeometry {
         m.put(Face.LEFT, new FaceMap(u3, u2, true, v2, v1, false));
         m.put(Face.NOSE, new FaceMap(u2, u1, true, v2, v1, false));
         m.put(Face.TAIL, new FaceMap(u3, u4, true, v2, v1, false));
-        m.put(Face.TOP, new FaceMap(u2b, u2, false, v0, v1, true));
-        m.put(Face.BOTTOM, new FaceMap(u2, u1, false, v0, v1, true));
+        // TOP is the face at body-space yMax (the horse's spine / topline); BOTTOM
+        // is at yMin (the belly). These two UV patches were the wrong way round -
+        // a painter that whitened "from below" (splash, sabino belly, frame off
+        // the underline) was flooding the back, and the belly stayed coloured.
+        m.put(Face.TOP, new FaceMap(u2, u1, false, v0, v1, true));
+        m.put(Face.BOTTOM, new FaceMap(u2b, u2, false, v0, v1, true));
         return m;
     }
 

@@ -156,14 +156,17 @@ great-grandparents, with a little turning 3D model of each horse. A foal's speed
 and health are tinted **green** if they beat both parents, **amber** if they beat
 one, **red** if they trail both.
 
-Press **H** anywhere for the Horse Browser. Its **Gene DB** tab is a searchable
-reference: every gene you have met (in creative, all of them) with its alleles
-and a description of what every phenotype does; search by gene name or allele.
-Its **Crafting** tab is a small 3&times;3 grid that only makes this mod's own
-things - put a **book** in it and pick a gene you have discovered to write that
-gene's **research paper**, then turn the paper (plus a golden carrot, some horse
-hair, an ingot for the gene's rarity and a flavour or two) into a **Known Gene
-Splice carrot**. Your inventory shows on both tabs.
+Press **H** anywhere for the Horse Browser. Its **Gene database** tab is a
+searchable reference: every gene you have met (in creative, all of them) with
+its alleles and a description of what every phenotype does; search by gene name
+or allele. Pick a gene you have discovered and two buttons appear:
+**Craft research paper** spends one book for that gene's paper, and **View
+splice recipe** jumps to the **Crafting** tab and lays that gene's Known Gene
+Splice carrot out in the 3&times;3 grid - real items where you have them,
+faint placeholders where you don't. The Crafting grid only makes this mod's
+own recipes (a book + a picked gene &rarr; its research paper; the paper plus a
+golden carrot, horse hair, a rarity ingot and a flavour &rarr; the carrot;
+carrots combine). Your inventory shows on both tabs.
 
 Right-click a horse with **paper** to print its stats, its breed, and its
 herd (the lead's name, the band type, how many are nearby) to chat.

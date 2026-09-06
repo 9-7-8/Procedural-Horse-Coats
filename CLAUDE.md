@@ -139,6 +139,49 @@ project. Its shape:
 
 ## Status snapshot (keep this current)
 
+- **Built 2026-09-05, NOT yet play-tested: white top/bottom UV swap +
+  two Horse Browser gene buttons.** `:common:test` **386 green**,
+  `:neoforge-26.1.2:build` green.
+  - **The horse's top and bottom cube faces were UV-swapped** in
+    `HorseSkinGeometry.faceMapsOf` - `Face.TOP` (body-space yMax, the spine)
+    was mapped to the texture's *bottom* patch and `Face.BOTTOM` (the belly) to
+    the *top* patch. So any white painter that whitened "from below" (splash,
+    sabino belly, frame off the underline) was **flooding the topline** while
+    the belly stayed coloured - the standing "white over the whole back" gap.
+    Owner diagnosed it visually; the two `FaceMap` entries are now the right way
+    round. Measured (bold splash, per-BODY-texel): back white 90%+ -> ~35%,
+    belly -> 100% (a proper dipped-from-below coat). One `Face.BOTTOM` consumer
+    (`WhitePattern.covers`, "no blaze under the jaw") flips to the *correct*
+    face for free. `:common:test` still green (incl. `FaceMarkingTest`'s
+    `Face.BOTTOM` jaw assertions); `coat-golden.txt` **regenerated** - most
+    rows moved (any BODY/NECK top or bottom texel). **A secondary frame-band
+    calibration remains** (gap #30): `EdnrbGene`'s `BAND_LO`/`BAND_HI` are still
+    whole-horse-AABB fractions so frame still leans topline-ward (~75% back on
+    `O/N`); the per-part fix would also strip frame's legitimate neck-side white,
+    so it's deferred. Tobiano over the topline is *correct*.
+  - **Two gene buttons in the Horse Browser** (shown when a discovered carrot
+    gene is selected - detail-pane bottom on Gene database, right of the grid on
+    Crafting):
+    - **"Craft research paper"** - the existing `WriteResearchPaperPayload` /
+      `ResearchPaperWriter` flow (consume one book -> a `research_paper` for the
+      gene), just surfaced as its own button on both tabs. Still requires the
+      gene *discovered* (in the DB) even in creative, because the server writer
+      checks that.
+    - **"View splice recipe"** - new. `network/ViewSpliceRecipePayload` ->
+      `HorseBrowserMenu.fillSplicePreview(gene)`: empties the 3x3 grid back to
+      the inventory, then pulls one of each Known Gene Splice ingredient the
+      player actually has into the grid (golden carrot, this gene's paper via
+      `ResearchPaperItem.geneOf` match, `horse_hair`, the `RarityItems` ingot,
+      `sugar` as a flavour). `menu/SpliceRecipeDisplay.forGene` is the canonical
+      9-slot layout, client-safe so the screen shows the same list as
+      **ghosts** (dimmed `g.fakeItem`) in whatever slots the player couldn't
+      fill. It **never crafts** - with all five real, the result slot shows the
+      carrot to take normally. Ghosts clear on gene change / switching to Gene
+      database. Lang: `gui.horsegenetics.craft_paper`, `.view_recipe` (replaced
+      `.write_paper`).
+  - Checklist: `wiki/verification.html` §0-B (buttons) and the "Open issues"
+    note (white swap - main bug fixed, frame calibration deferred).
+
 - **Built 2026-09-05, NOT yet play-tested: the LUT gene + the Horse Browser
   becomes a container menu with a Crafting tab; plus two fixes on owner
   play-test feedback (browser UI redesigned, splash face-marking boosted).**
@@ -198,7 +241,7 @@ project. Its shape:
     - **Old saves will not parse** (code 41 -> 42 built-in segments). Dev only.
     - Docs: `wiki/gene-lut.html` (new), `wiki/nav.js`, `wiki/genetics-model.html`
       (table + counts), `wiki/pipeline.html` (phase 2 swap note),
-      `wiki/api-reference.html`. Checklist: `wiki/verification.html` §0-A.
+      `wiki/api-reference.html`. **LUT owner-verified in game 2026-09-05** (§0-A retired).
   - **The Horse Browser (H) is a real container menu now.** It was a client-only
     `Screen`; it is now `client/HorseBrowserScreen extends
     AbstractContainerScreen<HorseBrowserMenu>` over a new
@@ -1797,6 +1840,12 @@ project. Its shape:
   - **Not in this slice:** milking (§7.1), shearing/sleeping bond (shearing
     unbuilt), a stored herd alpha, any stamina resource.
 
+- **Owner-verified in-game (2026-09-05):**
+  - **The LUT gene** - `Blupnk/Blupnk` resolves against the blue/pink gradient
+    correctly, a carrier is indistinguishable from a plain horse, the alternate
+    texture loads from `common` resources at runtime. Working perfectly (owner's
+    word). The verification checklist item is retired.
+
 - **Owner-verified in-game (2026-09-04):**
   - **The white-pattern rewrite** - `KIT`, `MITF`, `PAX3` and `EDNRB` all render
     correctly: the eight-step `KIT` ladder reads as distinct steps, `KIT` body
@@ -2159,7 +2208,10 @@ Two-module Gradle project, split deliberately:
     a *discovered* gene -> that gene's `research_paper`, then the shared
     `KnownGeneSpliceRecipe` / `CarrotCombineRecipe`; **only this mod's
     recipes**, no vanilla lookup). `SelectBrowserGenePayload` carries the picked
-    gene from the client.
+    gene from the client; `SpliceRecipeDisplay` is the canonical 9-slot Known
+    Gene Splice layout (client-safe), and `ViewSpliceRecipePayload` ->
+    `HorseBrowserMenu.fillSplicePreview` pulls the ingredients a player has into
+    the grid and the screen ghosts the rest (never crafts).
   - `server/` - event handlers, the horse-dimension builder, the portal
     manager, the record adapter (`HorseRecords`, which now also resolves and
     writes the four body attributes); `LethalFoalHandler` (foals that do not
@@ -3894,26 +3946,25 @@ Design follow-ups (not just "go look at it"):
    `masking` outcomes that `restrictAll`, so they take the ears too -
    correctly; those are not hats. `wiki/roadmap.html` §4.2.
 
-30. **The white-pattern audit (2026-09-05) found four calibration defects and
-   only one of them is fixed.** Fixed: face markings wrapped under the jaw
-   (gone with the shared vocabulary). Still open, all four measured -
-   **and the "white over the whole topline" ones (frame, tobiano, splash) were
-   confirmed in-game 2026-09-05 while play-testing breeds; still deferred**:
+30. **The white-pattern audit (2026-09-05) - the big one is now fixed.**
+   **Root cause of "white over the whole topline" was a UV bug, not a
+   calibration one**: `HorseSkinGeometry.faceMapsOf` had `Face.TOP` and
+   `Face.BOTTOM` mapped to each other's texture patches, so a painter whitening
+   "from below" hit the spine and left the belly coloured. Swapped 2026-09-05
+   (owner diagnosed it); measured bold-splash back white ~90% -> ~35%, belly ->
+   100%. `coat-golden.txt` regenerated. Also already fixed: face markings under
+   the jaw (shared vocabulary). **Two residual calibration items remain**, both
+   about the *degree* of white now that it is in the right place, and both still
+   whole-horse-AABB rather than per-part:
    - **`EdnrbGene`'s flank band does not bite on the barrel.** `BAND_LO` 0.28
      and `BAND_HI` 0.74 are fractions of `bodyBounds` - the **whole-horse**
      AABB, hoof to ear tip - but the barrel spans only 0.326-0.622 of that. So
-     `side` is exactly 1.0 for every BODY texel and the only thing the band ever
-     clips is the top fifth of the neck. Measured: **back 72.6% white**, flank
-     77.8%. The gene's javadoc, its outcome description and `wiki/gene-ednrb.html`
-     all say frame "never reaches the topline"; nothing implements that.
-   - **`TobianoGene`'s topline bias lands on the mane.** `topY = bb.yMax()` is
-     the **ear tip**, so the real topline (0.622) sits 35% up the ramp and gets
-     `0.35 x 0.18 = 0.063` of the bias while the mane gets the full `0.173`.
-     Measured on **every** seed: crest 93.9%, mane 80.2%, against 56.4% on the
-     flank - a permanent flat white band along the top of the neck.
-   - **`WhitePattern.splash` spends a third of its range above the horse's
-     back.** Same root cause; see the `PAX3` status entry above, where it is now
-     load-bearing rather than cosmetic.
+     `side` is ~1.0 for every BODY texel and the band never really clips below
+     the spine (measured ~75% back white on `O/N`, post-swap). Fix is
+     `bounds(skin, Part.BODY)` - but that also zeroes frame's legitimate
+     neck-side white, so it needs a per-part reference (barrel band + a separate
+     neck rule). Deferred. (Splash and sabino, which were the loud offenders,
+     are fine now the top/bottom swap is in.)
    - **`cover` is calibrated as if `PatchNoise.field` were uniform, and it is a
      bell.** Measured over 67 200 texels x 12 seeds: p1 0.24, p50 0.51, p99 0.77.
      So `EdnrbGene`'s `cover` 0.52-0.74 (threshold 0.48-0.26) actually delivers

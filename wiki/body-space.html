@@ -80,11 +80,26 @@
 <p>So, concretely:</p>
 
 <ul>
-    <li>&ldquo;paint the topline black&rdquo; = the <code>TOP</code> faces;</li>
-    <li>&ldquo;black up the belly&rdquo; = <code>BOTTOM</code> faces;</li>
+    <li>&ldquo;paint the topline black&rdquo; = the <code>TOP</code> faces (body-space
+        <code>yMax</code>);</li>
+    <li>&ldquo;black up the belly&rdquo; = <code>BOTTOM</code> faces (<code>yMin</code>);</li>
     <li>&ldquo;a centreline blaze&rdquo; = texels with small <code>|z|</code> on the
         head&rsquo;s <code>TOP</code>/<code>RIGHT</code>/<code>LEFT</code> faces.</li>
 </ul>
+
+<div class="note warn">
+    <span class="label">Fixed 2026-09-05: TOP and BOTTOM were UV-swapped</span>
+    <p>
+        <code>faceMapsOf</code> had the <code>Face.TOP</code> and
+        <code>Face.BOTTOM</code> UV patches assigned to each other, so a
+        <code>forEachTexel</code> consumer that whitened low-<code>y</code>
+        (splash, sabino belly, frame off the underline) was painting the
+        <em>spine</em> and leaving the belly coloured &mdash; the long-standing
+        &ldquo;white over the whole back&rdquo; bug. The two <code>put()</code>
+        lines are now the right way round; <code>coat-golden.txt</code> moved
+        accordingly.
+    </p>
+</div>
 
 <h3>The part list</h3>
 

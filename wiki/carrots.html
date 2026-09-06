@@ -179,10 +179,22 @@
     (<code>data/loot/AddResearchPaperModifier</code>, a global loot modifier that
     seeds papers into ~8 chest tables weighted by <code>GeneRarity</code>),
     other players, and <strong>writing one</strong> from your own database at the
-    cost of a book &mdash; the <em>Write research paper</em> button in the Horse
-    Browser&rsquo;s Gene Database tab
+    cost of a book &mdash; the <em>Craft research paper</em> button on a
+    discovered gene in the Horse Browser
     (<code>WriteResearchPaperPayload</code> &rarr;
     <code>server/ResearchPaperWriter</code>).
+</p>
+
+<p>
+    The browser&rsquo;s <strong>Crafting</strong> tab is a 3&times;3 grid that only
+    makes this mod&rsquo;s recipes. A single book in it plus a discovered gene
+    picked in the list becomes that gene&rsquo;s research paper; the paper then
+    goes into the Known Gene Splice recipe above. A <em>View splice recipe</em>
+    button on a discovered gene fills the grid with the ingredients you have and
+    shows ghosts for the rest &mdash; it never crafts
+    (<code>ViewSpliceRecipePayload</code> &rarr;
+    <code>HorseBrowserMenu.fillSplicePreview</code>,
+    <code>menu/SpliceRecipeDisplay</code> for the layout).
 </p>
 
 <h2 id="metadata">The gene metadata it all reads</h2>

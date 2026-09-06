@@ -35,37 +35,28 @@
 <p>Seen in-game, not fixed.</p>
 
 <div class="note warn">
-    <span class="label">White patterns still paint the whole top of the back (seen 2026-09-05) &mdash; NOT fixing yet</span>
+    <span class="label">Frame overo still leans a bit topline-ward (built fix pending) &mdash; the main swap is done</span>
     <p>
-        Confirmed in-game while play-testing breeds. Three white genes wrap
-        colour&hellip;&nbsp;er, wrap <em>white</em> right over the topline and
-        along the whole spine / crest, when the pattern should stop short of it:
+        The big one is <strong>fixed</strong>: the horse&rsquo;s
+        <strong>top and bottom cube faces were UV-swapped</strong> in
+        <code>HorseSkinGeometry.faceMapsOf</code>, so a painter that whitened
+        &ldquo;from below&rdquo; (splash, sabino belly, frame off the underline)
+        was flooding the back and the belly stayed coloured. Owner diagnosed it,
+        the two <code>Face.TOP</code> / <code>Face.BOTTOM</code> maps are now the
+        right way round, and measured splash white went from <em>topline-heavy</em>
+        to <strong>belly 100%, back ~35%</strong> &mdash; a proper
+        dipped-from-below coat. <code>coat-golden.txt</code> regenerated.
     </p>
-    <ul>
-        <li><strong>EDNRB (frame overo)</strong> &mdash; frame is defined as
-            &ldquo;never crosses the topline&rdquo; and its own outcome
-            description says so, but nothing implements it: <code>BAND_LO</code>
-            / <code>BAND_HI</code> in <code>EdnrbGene</code> are fractions of the
-            <em>whole-horse</em> AABB (hoof to ear tip), and the barrel only
-            spans ~0.33&ndash;0.62 of that, so every <code>BODY</code> texel is
-            inside the band and the back goes white.</li>
-        <li><strong>Tobiano</strong> &mdash; the topline bias uses
-            <code>topY = bb.yMax()</code> (the ear tip), so the real topline sits
-            a third of the way up the ramp and the mane / crest get the strongest
-            pull instead of the least &mdash; a permanent white band along the top
-            of the neck.</li>
-        <li><strong>MITF / PAX3 (splash)</strong> &mdash; <code>WhitePattern.splash</code>&rsquo;s
-            waterline is measured against the same whole-horse height, so about a
-            third of its range is <em>above</em> the back; a bold splash floods
-            the spine.</li>
-    </ul>
     <p>
-        Root cause and the fix (a <code>bounds(skin, Part.BODY).yMax()</code>
-        topline reference plus re-calibrating the <code>cover</code> knobs
-        through the measured <code>PatchNoise</code> quantiles) are written up in
-        <code>CLAUDE.md</code> known-gap&nbsp;#30. All four sub-fixes move
-        existing coats, so they want one change with a <code>coat-golden.txt</code>
-        regen &mdash; deferred deliberately.
+        What&rsquo;s left is a secondary calibration on <strong>frame</strong>:
+        <code>EdnrbGene</code>&rsquo;s <code>BAND_LO</code> / <code>BAND_HI</code>
+        are still fractions of the <em>whole-horse</em> AABB, not the barrel, so
+        the flank band doesn&rsquo;t clip cleanly below the spine (measured back
+        ~75% on <code>O/N</code>). Using <code>bounds(skin, Part.BODY)</code> is
+        the fix but it also removes frame&rsquo;s legitimate neck-side white, so
+        it needs a per-part reference &mdash; deferred (<code>CLAUDE.md</code>
+        gap&nbsp;#30). Tobiano crossing the topline is <em>correct</em> for
+        tobiano.
     </p>
 </div>
 
@@ -832,45 +823,10 @@
 
 <h2>Still to verify</h2>
 
-<h3 id="lut">0-A. The LUT gene (built 2026-09-05, NOT play-tested)</h3>
-<p>
-    A magical gene (<code>horsegenetics.lut</code>, priority 190, alleles
-    <span class="allele wild">n</span> / <span class="allele rec">Blupnk</span>)
-    that swaps the phase-2 colour gradient for a horse homozygous for a variant
-    allele. The genotype code gains a segment (<strong>42 built-in genes</strong>,
-    44 in-game with the two shipped spec genes) &mdash; old saves will not parse.
-    <code>:common:test</code> 385 green; <code>coat-golden.txt</code> regenerated
-    (only the new <code>lut=</code> code segment moved on existing rows, plus four
-    new LUT cases). See <a href="gene-lut.html">gene-lut.html</a>.
-</p>
-<ul>
-    <li><strong>Spawn a <code>lut=Blupnk/Blupnk</code> horse</strong> (custom
-        spawn egg &rarr; add the LUT gene; it defaults to the variant homozygote):
-        every colour should read off the blue/pink gradient
-        (<code>textures/coat/lutbluepink.png</code>) rather than the red/black one
-        &mdash; a black is a cool blue-black, a chestnut a dusty pink, a bay
-        pink-over-blue. Try it over several base coats (chestnut, bay, black,
-        grey, cream) &mdash; the melanin genes should be doing exactly what they
-        always do, just against a different chart.</li>
-    <li><strong>A <code>Blupnk/n</code> carrier renders identically to a plain
-        horse</strong> &mdash; one copy does nothing (the golden test pins byte
-        identity; confirm visually).</li>
-    <li><strong>Breeding two carriers</strong> throws a <code>Blupnk/Blupnk</code>
-        foal about one time in four; a wild-caught horse is never a homozygote
-        (~1 in 60 carry a copy).</li>
-    <li><strong>The alternate texture loads</strong> &mdash; check the log has no
-        &ldquo;could not load alternate LUT&rdquo; warning; a missing texture
-        should fall back to the natural gradient, not crash.</li>
-    <li><strong>Texture cache</strong>: a bluepink horse and a plain horse of the
-        same melanin genotype get <em>different</em> baked textures (the LUT gene
-        is in <code>coatCode()</code>); two bluepink horses of the same genotype
-        share one (it is deterministic).</li>
-    <li><strong>Sample bakes</strong>: <code>./gradlew :common:bakeCoatSamples</code>
-        &rarr; the <code>lut_bluepink_black</code> / <code>_bay</code> /
-        <code>_chestnut</code> images.</li>
-</ul>
+<p><em>The LUT gene (was &sect;0-A) is owner-confirmed working in game &mdash; moved to
+<code>CLAUDE.md</code>&rsquo;s &ldquo;Owner-verified&rdquo; block.</em></p>
 
-<h3 id="browser-menu">0-B. Horse Browser is now a container menu + a Crafting tab (built 2026-09-05, redesigned same day, NOT play-tested)</h3>
+<h3 id="browser-menu">0-B. Horse Browser is now a container menu + a Crafting tab (built 2026-09-05, redesigned + two gene buttons added, NOT play-tested)</h3>
 <p>
     The Horse Browser was rebuilt from a client-only <code>Screen</code> into a
     server-synced <code>AbstractContainerScreen</code> over a new
@@ -901,9 +857,29 @@
         scale 2, 3 and 4.</li>
     <li><strong>Gene Database tab</strong>: list, filter (name / key / allele),
         selection-follows-filter, both scrollbars, the discovered vs
-        undiscovered styling, &ldquo;Write research paper&rdquo; for a discovered
-        carrot gene. No slots, no slot-highlight, no item tooltips anywhere on
-        this tab.</li>
+        undiscovered styling. No slots, no slot-highlight, no item tooltips
+        anywhere on this tab.</li>
+    <li><strong>Two gene buttons</strong> appear when a discovered carrot gene is
+        selected (bottom of the detail pane on Gene database, right of the grid on
+        Crafting):
+        <ul>
+            <li><strong>Craft research paper</strong> &mdash; consumes one book
+                from the inventory and gives a <code>research_paper</code> for
+                that gene (the old &ldquo;Write research paper&rdquo; flow;
+                still needs the gene <em>discovered</em>, i.e. in the DB, even in
+                creative). No book &rarr; a chat message, no consume.</li>
+            <li><strong>View splice recipe</strong> &mdash; switches to the
+                Crafting tab and fills the 3&times;3 grid with that gene&rsquo;s
+                Known Gene Splice ingredients: <em>real</em> items pulled from
+                your inventory where you have them (golden carrot, this
+                gene&rsquo;s paper, horse hair, the rarity ingot, sugar as a
+                flavour), <em>ghost</em> placeholders where you don&rsquo;t. It
+                empties the grid back to your inventory first. It does
+                <strong>not</strong> craft &mdash; but with all five real, the
+                result slot shows the carrot to take normally. Verify the ghosts
+                render dimmed in the empty slots and disappear as you supply the
+                real item.</li>
+        </ul></li>
     <li><strong>Crafting tab</strong>: the left list shows only
         <em>discovered</em>, carrot-bearing genes (creative: all with a carrot).
         The 3&times;3 grid + result slot + full inventory render and take items.</li>

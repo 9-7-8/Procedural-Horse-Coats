@@ -5,7 +5,9 @@ import com.example.horsegenetics.common.genetics.Expression;
 import com.example.horsegenetics.common.genetics.Gene;
 import com.example.horsegenetics.common.genetics.Genes;
 import com.example.horsegenetics.neoforge.menu.HorseBrowserMenu;
+import com.example.horsegenetics.neoforge.menu.SpliceRecipeDisplay;
 import com.example.horsegenetics.neoforge.network.SelectBrowserGenePayload;
+import com.example.horsegenetics.neoforge.network.ViewSpliceRecipePayload;
 import com.example.horsegenetics.neoforge.network.WriteResearchPaperPayload;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
@@ -91,9 +93,12 @@ public final class HorseBrowserScreen extends AbstractContainerScreen<HorseBrows
     private float detailMaxScroll = 0f;
 
     private EditBox searchBox;
-    private Button writeButton;
+    private Button craftPaperButton;
+    private Button viewRecipeButton;
     private final List<Gene> allGenes;
     private List<Gene> filtered = List.of();
+    /** Ghost stacks for the current "View splice recipe", in grid order; empty = none shown. */
+    private java.util.List<net.minecraft.world.item.ItemStack> spliceGhosts = java.util.List.of();
 
     public HorseBrowserScreen(HorseBrowserMenu menu, Inventory inventory, Component title) {
         super(menu, inventory, title, IMG_W, IMG_H);
@@ -181,19 +186,66 @@ public final class HorseBrowserScreen extends AbstractContainerScreen<HorseBrows
         addRenderableWidget(searchBox);
 
         int bw = Math.min(190, detailR() - detailX());
-        writeButton = Button.builder(Component.translatable("gui.horsegenetics.write_paper"), b -> writePaper())
+        craftPaperButton = Button.builder(Component.translatable("gui.horsegenetics.craft_paper"), b -> craftPaper())
+                .bounds(detailX(), contentBottom() - 42, bw, 18)
+                .build();
+        craftPaperButton.visible = false;
+        addRenderableWidget(craftPaperButton);
+
+        viewRecipeButton = Button.builder(Component.translatable("gui.horsegenetics.view_recipe"), b -> viewRecipe())
                 .bounds(detailX(), contentBottom() - 20, bw, 18)
                 .build();
-        writeButton.visible = false;
-        addRenderableWidget(writeButton);
+        viewRecipeButton.visible = false;
+        addRenderableWidget(viewRecipeButton);
 
         applyFilter();
     }
 
-    private void writePaper() {
+    private void craftPaper() {
         Gene g = selected();
         if (g != null && ClientGeneDatabase.knows(g.key())) {
             ClientPacketDistributor.sendToServer(new WriteResearchPaperPayload(g.key()));
+        }
+    }
+
+    private void viewRecipe() {
+        Gene g = selected();
+        if (g == null || !g.hasGeneCarrot() || !discovered(g)) {
+            return;
+        }
+        spliceGhosts = SpliceRecipeDisplay.forGene(g);
+        ClientPacketDistributor.sendToServer(new ViewSpliceRecipePayload(g.key()));
+        tab = Tab.CRAFTING;           // show the grid it just filled
+        listScroll = 0;
+        detailScroll = 0f;
+        applyFilter();
+    }
+
+    /** Show / hide / position the two gene-action buttons for the current tab. */
+    private void layoutGeneButtons() {
+        if (craftPaperButton == null || viewRecipeButton == null) {
+            return;
+        }
+        Gene sel = selected();
+        boolean carrot = sel != null && sel.hasGeneCarrot();
+        boolean known = sel != null && ClientGeneDatabase.knows(sel.key());
+        boolean disc = sel != null && discovered(sel);
+
+        craftPaperButton.visible = carrot && known;
+        craftPaperButton.active = carrot && known;
+        viewRecipeButton.visible = carrot && disc;
+        viewRecipeButton.active = carrot && disc;
+
+        if (tab == Tab.GENE_DATABASE) {
+            int x = detailX();
+            int w = Math.min(190, detailR() - detailX());
+            craftPaperButton.setRectangle(w, 18, x, contentBottom() - 42);
+            viewRecipeButton.setRectangle(w, 18, x, contentBottom() - 20);
+        } else {
+            int x = leftPos + HorseBrowserMenu.RESULT_X + 22;
+            int w = leftPos + IMG_W - 8 - x;
+            craftPaperButton.setRectangle(w, 16, x, topPos + 84);
+            viewRecipeButton.setRectangle(w, 16, x, topPos + 102);
         }
     }
 
@@ -240,6 +292,7 @@ public final class HorseBrowserScreen extends AbstractContainerScreen<HorseBrows
         if (!key.equals(selectedKey)) {
             selectedKey = key;
             detailScroll = 0f;
+            spliceGhosts = java.util.List.of(); // a preview is for the gene it was raised on
         }
         ClientPacketDistributor.sendToServer(new SelectBrowserGenePayload(key));
     }
@@ -254,6 +307,9 @@ public final class HorseBrowserScreen extends AbstractContainerScreen<HorseBrows
                 tab = hit;
                 listScroll = 0;
                 detailScroll = 0f;
+                if (hit == Tab.GENE_DATABASE) {
+                    spliceGhosts = java.util.List.of();
+                }
                 applyFilter();
             }
             return true;
@@ -345,13 +401,7 @@ public final class HorseBrowserScreen extends AbstractContainerScreen<HorseBrows
             searchBox.visible = showSearch;
             searchBox.active = showSearch;
         }
-        if (writeButton != null) {
-            Gene sel = selected();
-            boolean canWrite = tab == Tab.GENE_DATABASE && sel != null
-                    && ClientGeneDatabase.knows(sel.key()) && sel.hasGeneCarrot();
-            writeButton.visible = canWrite;
-            writeButton.active = canWrite;
-        }
+        layoutGeneButtons();
 
         drawTabStrip(g);
 
@@ -420,7 +470,8 @@ public final class HorseBrowserScreen extends AbstractContainerScreen<HorseBrows
         int l = detailX();
         int r = detailR();
         int top = contentTop();
-        int bottom = contentBottom() - (writeButton != null && writeButton.visible ? 26 : 0);
+        boolean buttons = craftPaperButton != null && (craftPaperButton.visible || viewRecipeButton.visible);
+        int bottom = contentBottom() - (buttons ? 48 : 0);
         int w = r - l;
 
         g.fill(l - 6, top - 2, r + 2, bottom + 2, PANEL_SOFT);
@@ -549,9 +600,18 @@ public final class HorseBrowserScreen extends AbstractContainerScreen<HorseBrows
         g.fill(px + IMG_W - 1, py, px + IMG_W, py + IMG_H, BORDER);
 
         // grid + result slot backdrops (slots render on top of these)
-        for (int row = 0; row < 3; row++) {
-            for (int col = 0; col < 3; col++) {
-                cell(g, px + HorseBrowserMenu.GRID_X + col * 18, py + HorseBrowserMenu.GRID_Y + row * 18, SLOT_BG);
+        for (int i = 0; i < 9; i++) {
+            int gx = px + HorseBrowserMenu.GRID_X + (i % 3) * 18;
+            int gy = py + HorseBrowserMenu.GRID_Y + (i / 3) * 18;
+            cell(g, gx, gy, SLOT_BG);
+            // "View splice recipe" ghost: an ingredient the player did not have.
+            // Drawn before the real slots, so a filled slot hides its ghost.
+            if (i < spliceGhosts.size()) {
+                net.minecraft.world.item.ItemStack ghost = spliceGhosts.get(i);
+                if (!ghost.isEmpty() && menu.slots.get(HorseBrowserMenu.GRID_START + i).getItem().isEmpty()) {
+                    g.fakeItem(ghost, gx, gy);
+                    g.fill(gx, gy, gx + 16, gy + 16, 0xA6202028); // knock it back to a placeholder
+                }
             }
         }
         cell(g, px + HorseBrowserMenu.RESULT_X, py + HorseBrowserMenu.RESULT_Y, SLOT_RESULT_BG);

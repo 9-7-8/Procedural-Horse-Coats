@@ -165,6 +165,21 @@ public final class ModNetworking {
                     }
                 })
         );
+
+        registrar.playToServer(
+                ViewSpliceRecipePayload.TYPE,
+                ViewSpliceRecipePayload.STREAM_CODEC,
+                (payload, context) -> context.enqueueWork(() -> {
+                    if (context.player() instanceof ServerPlayer serverPlayer
+                            && serverPlayer.containerMenu instanceof com.example.horsegenetics.neoforge.menu.HorseBrowserMenu menu) {
+                        com.example.horsegenetics.common.genetics.Gene gene =
+                                com.example.horsegenetics.common.genetics.Genes.byKeyOrNull(payload.geneKey());
+                        if (gene != null && gene.hasGeneCarrot()) {
+                            menu.fillSplicePreview(gene);
+                        }
+                    }
+                })
+        );
     }
 
     /**
