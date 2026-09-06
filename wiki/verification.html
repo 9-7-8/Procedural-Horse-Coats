@@ -32,6 +32,61 @@
     </p>
 </div>
 
+<h2 id="gene-carrot">&sect;0-K &mdash; the gene-carrot recipe card (new, NOT looked at)</h2>
+
+<p>
+    A <strong>browser</strong> checklist, and it is on <strong>every gene page</strong>,
+    under a new <em>Its gene carrot</em> heading above the see-also block. <code>wiki/gene-carrot/</code> draws the Known Gene Splice
+    recipe as a 3&times;3 grid (horse hair, this gene&rsquo;s research paper, a
+    golden carrot, the rarity item) plus what feeding the carrot does, and asks
+    the mod for everything that varies per gene. Same wasm as the preview window;
+    the two share one load. <strong>Nobody has opened it in a browser.</strong>
+</p>
+
+<div class="note good">
+    <span class="label">What was checked offline</span>
+    <p>
+        The export was driven over every gene page against the baked wasm: each
+        page&rsquo;s <code>data-gene</code> resolves to a registered gene (the two
+        that do not, <a href="gene-suntouched.html">suntouched</a> and
+        <a href="gene-waterborn.html">waterborn</a>, are <code>example.*</code>
+        spec genes and were deliberately left without a card); the loci with no
+        carrot come back saying so rather than drawing an empty grid, and the loci
+        outside the Unknown splice pool are marked. It also turned up
+        <a href="known-gaps.html#gap-43">gap #43</a>: every gene is the default
+        tier, so every card prints the same price.
+    </p>
+</div>
+
+<ul>
+    <li><strong>Does the grid read as a crafting grid?</strong> Four filled cells
+        top-left, five dashed empties, an arrow, the result. The two cells that
+        are this mod&rsquo;s own items are tinted green &mdash; that is the house
+        rule (<a href="items.html">at least one modded ingredient</a>) made
+        visible. <strong>No item icons</strong>, on purpose: the vanilla textures
+        are Mojang&rsquo;s and not ours to ship, and half a grid of icons beside
+        half a grid of text would read worse than text throughout. Worth a
+        second opinion on that call.</li>
+    <li><strong>The no-carrot pages.</strong> <a href="gene-sex.html">Sex</a>,
+        <a href="gene-extension.html">extension</a>,
+        <a href="gene-agouti.html">agouti</a>, <a href="gene-lut.html">LUT</a> and
+        the recessive disorders should each show the note rather than a recipe.</li>
+    <li><strong>Two widgets on one page.</strong> <a href="gene-tobiano.html">Tobiano</a>
+        is the only page carrying both the preview window and the card. They must
+        load <strong>one</strong> wasm between them (<code>HG.java.load()</code> is
+        memoised) &mdash; if the page fetches <code>web.wasm</code> twice, that
+        memo is not working.</li>
+    <li><strong>Does it fit at the bottom of the article?</strong> The card sits
+        above the see-also block. Four pages
+        (<a href="gene-brindle.html">brindle</a>,
+        <a href="gene-cutie-mark.html">cutie mark</a>,
+        <a href="gene-lut.html">LUT</a>,
+        <a href="gene-tiger-eye.html">tiger eye</a>) have no see-also block at
+        all, so on those it is the last thing on the page.</li>
+    <li><strong>Narrow window.</strong> Under 620px the result wraps under the
+        grid and the arrow turns to point at it.</li>
+</ul>
+
 <h2 id="gene-preview">&sect;0-J &mdash; the gene preview window (new, NOT looked at)</h2>
 
 <p>

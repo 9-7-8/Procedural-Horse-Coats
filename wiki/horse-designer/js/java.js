@@ -79,8 +79,20 @@ window.HG = window.HG || {};
   /**
    * Bring up the mod. Resolves with the exported API once the registry is
    * built and all four textures are in Java's hands.
+   *
+   * <p>Memoised, because a page may have more than one thing that wants the
+   * mod: a gene page carries a preview window and a gene-carrot card, and each
+   * asks for the API without knowing the other exists. Loading the wasm twice
+   * would work and would be two megabytes and two registries for no reason.
    */
+  var loading = null;
   function load() {
+    if (loading) return loading;
+    loading = boot();
+    return loading;
+  }
+
+  function boot() {
     return scriptTag(RUNTIME)
       .then(function () {
         if (!window.TeaVM || !window.TeaVM.wasmGC) {

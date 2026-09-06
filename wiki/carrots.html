@@ -193,6 +193,28 @@
     (<code>RecessiveDisorderGene</code>), and extension + agouti.
 </p>
 
+<div class="note">
+    <span class="label">Every gene page shows its own recipe</span>
+    <p>
+        <code>wiki/gene-carrot/</code> is a card that any gene page carries in one
+        line, and it <strong>asks the mod</strong> for the four things that differ
+        per gene: whether a carrot exists at all, the rarity tier that prices it,
+        heterozygous or homozygous, and whether the
+        <a href="#blacklist">Unknown splice</a> may land on the locus. It runs the
+        same wasm the <a href="horse-designer/index.html">horse designer</a> does,
+        so nothing about a gene is written into a page and there is no per-gene
+        recipe to keep in step.
+    </p>
+    <p>
+        Two things about the recipe are <em>not</em> per-gene and so are held in
+        the card itself: the four-slot layout, whose canonical form is
+        <code>menu/SpliceRecipeDisplay</code> (what the browser ghosts into the
+        grid), and the tier&rarr;item table above, whose authority is
+        <code>server/recipe/RarityItems</code>. <strong>Change either and
+        <code>wiki/gene-carrot/gene-carrot.js</code> changes with it.</strong>
+    </p>
+</div>
+
 <h2 id="combine">Combining carrots</h2>
 
 <p>

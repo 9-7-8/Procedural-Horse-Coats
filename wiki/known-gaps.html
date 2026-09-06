@@ -183,6 +183,8 @@
 </li>
 <li id="gap-42"><strong><code>:web:bakeDesignerAssets</code> is a step it is possible to forget.</strong> The wasm in <code>wiki/horse-designer/wasm/</code> is a checked-in build artefact, so a change to <code>common/</code> does not reach the page until it is re-baked - the designer would go on running yesterday's mod, confidently. It is the same shape as the creator's stale-fixture trap (gap #13's fourth instance) with one important difference: this artefact <strong>is</strong> the code rather than a snapshot of its output, so it cannot be subtly wrong, only wholesale old. A <code>git status</code> showing <code>common/</code> changed and <code>wiki/horse-designer/wasm/</code> unchanged is the tell. Worth wiring into the session-end routine, or into <code>:common:test</code> as a staleness assertion.
 </li>
+<li id="gap-43"><strong>Every gene is the same rarity, so every gene carrot costs the same.</strong> <code>GeneRarity</code> has six tiers and the recipe charges the matching item (<code>server/recipe/RarityItems</code>: iron / gold / diamond / emerald / netherite ingot / nether star), but <strong>no built-in gene overrides <code>Gene.rarity()</code></strong> - all of them fall through to <code>GeneRarity.DEFAULT</code>. So the whole economy is flat: a gold ingot buys a tobiano carrot and a gold ingot buys a magic-health carrot, and the research-paper loot weighting that sorts on the same axis is uniform too. Nothing is broken; the axis is simply unpopulated, and it was invisible until the wiki's per-gene carrot card started printing each gene's tier on its own page. Tiering the genes is the work - and it wants doing as one pass over the registry rather than gene by gene, because the tiers are relative to each other.
+</li>
 </ol>
 
 

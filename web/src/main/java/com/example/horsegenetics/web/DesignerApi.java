@@ -12,6 +12,7 @@ import com.example.horsegenetics.common.genetics.Allele;
 import com.example.horsegenetics.common.genetics.AllelePair;
 import com.example.horsegenetics.common.genetics.BaseCoats;
 import com.example.horsegenetics.common.genetics.EpigeneticAbilityContribution;
+import com.example.horsegenetics.common.genetics.CarrotEffect;
 import com.example.horsegenetics.common.genetics.Epigenome;
 import com.example.horsegenetics.common.genetics.GenotypeCatalog;
 import com.example.horsegenetics.common.genetics.genes.CutieMarkGene;
@@ -20,6 +21,7 @@ import com.example.horsegenetics.common.genetics.Gene;
 import com.example.horsegenetics.common.genetics.GeneCodeDisplay;
 import com.example.horsegenetics.common.genetics.Genes;
 import com.example.horsegenetics.common.genetics.Genotype;
+import com.example.horsegenetics.common.genetics.SpliceSafety;
 import com.example.horsegenetics.common.trait.Condition;
 import com.example.horsegenetics.common.trait.HorseTraits;
 import com.example.horsegenetics.common.trait.Traits;
@@ -622,6 +624,51 @@ public final class DesignerApi {
     @JSExport
     public static String newEpigenomeCode() {
         return Epigenome.random(RNG).toCode();
+    }
+
+    // ---- the gene carrot ---------------------------------------------------
+
+    /**
+     * A gene's <b>Known Gene Splice carrot</b>, as the wiki's per-gene recipe
+     * card needs it (wiki/gene-carrot/).
+     *
+     * <p>Every field here is the gene's own answer. The recipe is one
+     * parameterised {@code CustomRecipe} rather than N generated ones, so what
+     * varies from gene to gene is exactly this: whether a carrot exists at all,
+     * which rarity tier pays for it, whether feeding it makes the parent
+     * heterozygous or homozygous for that gamete, and whether the <i>Unknown</i>
+     * splice may land on the locus. A page that wrote any of those down would be
+     * wrong the next time a gene was re-tiered, and wrong silently across fifty
+     * pages at once.
+     *
+     * <p>The tier&rarr;item mapping is deliberately <b>not</b> here: it lives on
+     * the recipe side ({@code server/recipe/RarityItems}) so a third-party gene
+     * cannot invent its own currency, and {@code common/} must not know what an
+     * iron ingot is. The card names the tier and renders the item.
+     */
+    @JSExport
+    public static String geneCarrotJson(String geneKey) {
+        Gene g = Genes.byKeyOrNull(geneKey);
+        if (g == null) {
+            return new Json().obj().kv("missing", true).kv("key", geneKey).endObj().toString();
+        }
+        boolean hom = g.geneCarrotHomozygous();
+        return new Json().obj()
+                .kv("missing", false)
+                .kv("key", g.key())
+                .kv("name", g.name())
+                .kv("natural", g.isNatural())
+                .kv("hasCarrot", g.hasGeneCarrot())
+                .kv("rarity", g.rarity().name())
+                // How often a research paper for this gene turns up, relative to
+                // the other tiers - the same weight the loot modifier uses.
+                .kv("lootWeight", g.rarity().lootWeight())
+                .kv("homozygous", hom)
+                .kv("effect", new CarrotEffect.KnownGeneSplice(g.key(), hom).id())
+                // Whether the Unknown Gene Splice may roll this locus. Derived
+                // from what the gene does to the horse, never listed.
+                .kv("unknownSpliceable", SpliceSafety.isSafe(g))
+                .endObj().toString();
     }
 
     // ---- the live parity check ---------------------------------------------

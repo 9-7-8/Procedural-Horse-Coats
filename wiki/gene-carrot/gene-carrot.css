@@ -1,0 +1,145 @@
+/* The per-gene carrot recipe card. Loaded by gene-carrot.js, not by the page.
+
+   No item icons: the four slots name vanilla items whose textures are Mojang's
+   and not this repo's to ship, and half a grid of real icons beside half a grid
+   of text would read worse than a grid of text. Slots that are this mod's own
+   items are tinted instead - which is also the house rule the recipes obey
+   (every recipe has at least one modded ingredient; see items.html). */
+
+.gene-carrot {
+    margin: 1.4rem 0;
+}
+
+/* ---- the grid -------------------------------------------------------- */
+
+.gene-carrot .gc-craft {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    padding: 1rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--panel);
+}
+
+.gene-carrot .gc-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 6.4rem);
+    gap: 0.35rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.gene-carrot .gc-slot {
+    min-height: 4.1rem;
+    padding: 0.4rem 0.35rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.15rem;
+    text-align: center;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--bg-soft);
+}
+.gene-carrot .gc-slot.gc-empty {
+    background: rgba(148, 163, 184, 0.05);
+    border-style: dashed;
+    border-color: var(--border-soft);
+}
+/* This mod's own items, so the house rule is visible rather than stated. */
+.gene-carrot .gc-slot.gc-mod {
+    border-color: var(--natural);
+    background: rgba(74, 222, 128, 0.07);
+}
+
+.gene-carrot .gc-item {
+    font-size: 0.78rem;
+    line-height: 1.25;
+    color: var(--text);
+}
+.gene-carrot .gc-note {
+    font-size: 0.68rem;
+    line-height: 1.2;
+    color: var(--text-faint);
+}
+
+.gene-carrot .gc-arrow {
+    font-size: 1.5rem;
+    color: var(--text-faint);
+}
+
+.gene-carrot .gc-out {
+    min-width: 9rem;
+    padding: 0.6rem 0.7rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    text-align: center;
+    border: 1px solid var(--accent);
+    border-radius: 6px;
+    background: rgba(56, 189, 248, 0.08);
+}
+.gene-carrot .gc-out .gc-item { font-weight: 600; }
+
+@media (max-width: 620px) {
+    .gene-carrot .gc-craft { gap: 0.6rem; }
+    .gene-carrot .gc-grid { grid-template-columns: repeat(3, 5.4rem); }
+    /* The result wraps under the grid at this width, so the arrow turns with it
+       rather than pointing off the side of the card. */
+    .gene-carrot .gc-arrow {
+        width: 100%;
+        text-align: center;
+        transform: rotate(90deg);
+    }
+    .gene-carrot .gc-out { width: 100%; }
+}
+
+/* ---- what it says ---------------------------------------------------- */
+
+.gene-carrot .gc-say {
+    margin: 0.75rem 0 0 0;
+    font-size: 0.88rem;
+    color: var(--text-dim);
+}
+
+.gene-carrot .gc-facts {
+    margin: 0.75rem 0 0 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+    gap: 0.4rem 1.2rem;
+    font-size: 0.82rem;
+}
+.gene-carrot .gc-facts > div {
+    display: flex;
+    gap: 0.5rem;
+    padding: 0.3rem 0;
+    border-top: 1px solid var(--border-soft);
+}
+.gene-carrot .gc-facts dt {
+    flex: 0 0 9.5rem;
+    color: var(--text-faint);
+}
+.gene-carrot .gc-facts dd {
+    margin: 0;
+    color: var(--text-dim);
+}
+.gene-carrot .gc-dim { color: var(--text-faint); }
+.gene-carrot .gc-off { color: var(--warn); }
+
+/* ---- a locus with no carrot, and the failure states ------------------ */
+
+.gene-carrot .gc-none,
+.gene-carrot .gc-boot {
+    padding: 0.9rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--panel);
+    font-size: 0.88rem;
+    color: var(--text-dim);
+}
+.gene-carrot .gc-none strong { color: var(--text); }
+.gene-carrot .gc-boot { color: var(--text-faint); text-align: center; }
+.gene-carrot .gc-failed { color: var(--warn); border-color: var(--warn); }
