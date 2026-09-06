@@ -29,6 +29,19 @@ a 128px texture, so two horses with the same genes look the same, and an
 unusual combination produces a coat nothing else in the world has. There are
 functionally infinite possible coats.
 
+**Some traits run down one side of the family.** Brindle - irregular vertical
+striping - sits on the X chromosome, so a stallion carries one copy and can
+never be a hidden carrier, while a mare needs two. A brindle stallion throws no
+brindle sons at all and every daughter a carrier, so the pattern skips a
+generation and comes back through the mares. A brindle mare is a real breeding
+project.
+
+**Eye colour is inherited too.** A splashed white or dominant white horse has
+blue eyes; a horse carrying two copies of tiger eye - a gene essentially confined
+to the Puerto Rican Paso Fino - has a bright amber iris and an entirely ordinary
+coat. Blue wins over amber on a horse that is both, because there is no pigment
+left in the iris to be amber.
+
 **Breeding is Mendelian.** Foals inherit one allele from each parent at every
 gene, so recessive traits can hide for generations and surface unexpectedly,
 two ordinary-looking parents can throw a surprising foal, and a pedigree

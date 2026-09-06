@@ -704,6 +704,67 @@ public List&lt;GeneAbility&gt; abilitiesFor(AllelePair pair, Genotype genotype,
     well as the genotype, or one horse gets another horse&rsquo;s colours.
 </p>
 
+<h2 id="channels">Channels &mdash; the things a horse has exactly one of</h2>
+
+<p>
+    Some properties are not a gene's to own outright, because a horse has exactly one of
+    them and several genes want a say. Those are <strong>channels</strong>: one locus owns
+    the property and everything else reaches it through a capability interface. There are
+    three, and the pattern is worth learning because it is how the model absorbs a new
+    kind of effect without a new kind of gene.
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Channel</th><th>Owner</th><th>Hook</th><th>How claims resolve</th></tr></thead>
+<tbody>
+<tr>
+    <td>The colour LUT</td>
+    <td><a href="gene-lut.html">LUT locus</a></td>
+    <td><code>LutContribution</code></td>
+    <td><strong>Closed.</strong> Exactly one gene implements it, permanently &mdash; a new palette is a new <em>allele</em> there, never a new gene.</td>
+</tr>
+<tr>
+    <td>The cutie mark</td>
+    <td><a href="gene-cutie-mark.html">Cutie mark</a></td>
+    <td><code>CutieMarkContribution</code></td>
+    <td><strong>Open, folded.</strong> The owner draws the base emblem; every implementor then modifies it in <code>codeOrder()</code>. Order is stable and priority-driven.</td>
+</tr>
+<tr>
+    <td>The iris colour</td>
+    <td>&mdash; (the composer)</td>
+    <td><code>EyeColorContribution</code></td>
+    <td><strong>Open, ranked.</strong> Highest <code>EyeColor.rank()</code> wins, ties to the earlier gene. Blue (depigmented) beats amber (pigment).</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    The difference between <em>closed</em>, <em>folded</em> and <em>ranked</em> is not
+    arbitrary &mdash; it comes from what the property is:
+</p>
+<ul>
+    <li>The <strong>LUT</strong> is closed because a horse has two copies of one
+        chromosome, so it can shift its palette at most one way. There is nothing for a
+        second gene to add.</li>
+    <li>The <strong>cutie mark</strong> can afford an open fold because it is
+        <em>the last thing drawn</em> &mdash; nothing composes over it, nothing reads it
+        back, and it is not in the baked coat, so a modifier cannot corrupt an accumulator
+        or move a texture key.</li>
+    <li>The <strong>iris</strong> is ranked rather than folded because the claims are
+        different <em>kinds</em>: a pigment gene says what colour the iris is, a white
+        locus says there is no pigment in it. Those do not blend; one of them is simply
+        right.</li>
+</ul>
+
+<p class="muted">
+    If you find yourself wanting a fourth, the test is the same: does a horse have exactly
+    one of the thing, and would two genes both writing it produce nonsense rather than a
+    sum? If so it is a channel. If the contributions genuinely add up &mdash; as phase-3
+    colour deltas do &mdash; it is not, and it should be an ordinary accumulator.
+</p>
+
 <h2 id="contract">The contract</h2>
 
 <div class="note danger">

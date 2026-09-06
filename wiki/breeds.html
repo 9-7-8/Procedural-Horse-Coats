@@ -19,7 +19,7 @@
     metadata the spawn and breeding systems need. Wild <strong>herds</strong> are
     rolled from a breed so that a paddock of horses reads as a population rather
     than 47 unrelated animals; a lone wild horse, a <code>/summon</code> or a
-    spawn-egg horse is the <strong>Unknown</strong> breed and rolls every gene
+    spawn-egg horse is the <strong>Feral Mixed</strong> breed and rolls every gene
     unconstrained &mdash; the pre-breeds behaviour. This page is the readable
     version of <code>common/breed/</code>; the numbers there are a first pass.
 </p>
@@ -33,7 +33,7 @@
     custom pack data with its own <code>Horse.HorseGroupData</code> between every
     pack member, so that route can carry nothing (the earlier
     <code>BandData</code> attempt silently made every horse its own herd of one
-    &mdash; "herds are all mixed breeds", "groups of four solo Unknowns").
+    &mdash; "herds are all mixed breeds", "groups of four solo Feral Mixed").
 </p>
 <p>
     <code>HerdManager.assignFounder</code> forms the herd by <b>proximity</b>,
@@ -49,16 +49,16 @@
     <li>else if one is <b>also a fresh natural spawn</b> (a pack-mate still
         waiting its turn) &rarr; <b>found</b> a herd: this horse is the lead
         stallion, the breed is <code>pickHerdBreed</code> (weighted by
-        <a href="#commonness">commonness</a>, Unknown only if the biome has no
+        <a href="#commonness">commonness</a>, Feral Mixed only if the biome has no
         breeds), the band is a 70/30 coin;</li>
-    <li>else it is genuinely alone &rarr; a lone <b>Unknown</b>, no herd.</li>
+    <li>else it is genuinely alone &rarr; a lone <b>Feral Mixed</b>, no herd.</li>
 </ul>
 <p>
     So <b>every clump of wild horses is one herd of one breed</b>, and only a
-    solitary horse is Unknown &mdash; and because a lone horse near an existing
+    solitary horse is Feral Mixed &mdash; and because a lone horse near an existing
     herd <em>joins</em> it, you never see a knot of unrelated solo horses. A
     spawn-egg horse (record pre-set) or a <code>/summon</code> has no flag and
-    stays Unknown; breeding overrides that with the parents&rsquo; cross.
+    stays Feral Mixed; breeding overrides that with the parents&rsquo; cross.
 </p>
 <p>
     Which biomes spawn horses at all is data:
@@ -166,7 +166,7 @@
     Thoroughbred keeps no speed band (Friesian never had one) and its speed falls
     back to the ordinary Gaussian draw, while a Thoroughbred &times; Arabian keeps
     a speed band midway between the two. <strong>Mixed</strong> and
-    <strong>Unknown</strong> pin nothing.
+    <strong>Feral Mixed</strong> pin nothing.
 </p>
 
 <h2 id="magic">Magic-gene frequency</h2>
@@ -198,8 +198,8 @@
 <tr><td>(Arabian &times; Friesian cross) &times; Quarter Horse</td><td>Mixed</td></tr>
 <tr><td>(Arabian &times; Friesian cross) &times; (Friesian &times; Quarter Horse cross)</td><td>Mixed</td></tr>
 <tr><td>Mixed &times; anything</td><td>Mixed</td></tr>
-<tr><td>Friesian &times; Unknown</td><td>Friesian &times; Unknown cross <span class="muted">(Unknown is treated as an ordinary breed for the algebra)</span></td></tr>
-<tr><td>Unknown &times; Unknown</td><td>Unknown</td></tr>
+<tr><td>anything &times; <b>Feral Mixed</b></td><td><b>Mixed</b> <span class="muted">(Feral Mixed is absorbing &mdash; see below)</span></td></tr>
+<tr><td>Feral Mixed &times; Feral Mixed</td><td><b>Mixed</b> <span class="muted">(no back door to a &ldquo;pure feral&rdquo; line)</span></td></tr>
 </tbody>
 </table>
 <p>
@@ -222,7 +222,7 @@
     stamped on the spawned horse (<code>record.withBreed</code>), so the animal
     is labelled that breed and pinned to its stat bands even if you changed its
     colour genes. <code>(none)</code> leaves the current genome alone and spawns
-    Unknown.
+    Feral Mixed.
 </p>
 
 <h2>Not modelled (yet)</h2>
@@ -233,7 +233,6 @@
 </p>
 <ul>
     <li><s><strong>Leopard complex</strong> (<code>Lp</code> + <code>PATN1</code>)</s> &mdash; <strong>built 2026-09-06</strong> as <a href="gene-leopard.html">three loci</a>. Appaloosa / Knabstrupper roll it heavily, Kiger / Mustang / Shetland lightly. Striped hooves and white sclera are drawn; <em>mottled skin</em> is not (no skin layer).</li>
-    <li><strong>Tiger Eye</strong> (<code>TE</code>) &mdash; Puerto Rican Paso Fino&rsquo;s amber iris. Candidate eye-colour gene.</li>
     <li><strong>HYPP</strong> &mdash; Quarter Horse / Paint. Would be a heart-reducing gene (the one &ldquo;obvious genetic issue&rdquo; kind the owner wants built).</li>
     <li><strong>Pangare / mealy</strong> &mdash; Exmoor&rsquo;s mealy muzzle and eye rings. Candidate pigment gene.</li>
     <li><strong>Early-lethal foal disorders</strong> named on the sheet &mdash; SCID, CA, LFS, GBED, NNF, CVM, megaesophagus. Candidate genes on the recessive-disorder pattern.</li>
@@ -296,7 +295,7 @@
 <tr><td>Paso Fino</td><td>savanna, jungle, sparse / bamboo jungle</td><td>13.0&ndash;15.2</td><td>5</td><td>4</td><td>6</td><td>Moderate</td><td>any base; roan; can carry dominant white / <code>W20</code>. Smooth lateral gait not built.</td></tr>
 <tr><td>Percheron</td><td>plains, snowy plains, meadow, sunflower plains</td><td>15.2&ndash;17.3</td><td>4</td><td>3</td><td>6</td><td>Common</td><td>black-biased; heavy grey. Straight-profile draft.</td></tr>
 <tr><td>Przewalski&rsquo;s Horse</td><td>desert, badlands, savanna</td><td>12.0&ndash;14.0</td><td>6</td><td>3</td><td>10</td><td>Rare</td><td>near-fixed <code>E_</code> <code>A_</code> + fixed dun &rarr; stocky bay dun; no spotting. The true wild horse. Upright mane not built.</td></tr>
-<tr><td>Puerto Rican Paso Fino</td><td>jungle, savanna, beach, mangrove swamp</td><td>13.0&ndash;15.0</td><td>5</td><td>4</td><td>6</td><td>Rare</td><td>any base; occasional cream / dun. Tiger Eye (amber iris) NOT BUILT.</td></tr>
+<tr><td>Puerto Rican Paso Fino</td><td>jungle, savanna, beach, mangrove swamp</td><td>13.0&ndash;15.0</td><td>5</td><td>4</td><td>6</td><td>Rare</td><td>any base; occasional cream / dun. <strong><a href="gene-tiger-eye.html">Tiger eye</a></strong> &mdash; 26% carry a copy, 4% show the amber iris. The breed's signature, and essentially the only place to find the gene.</td></tr>
 <tr><td>Quarter Horse</td><td>plains, savanna, sunflower plains, meadow</td><td>14.2&ndash;16.0</td><td>8</td><td>5</td><td>7</td><td>Extremely common</td><td>any base + cream + nd1/nd2 + roan + sabino. The sprinter. HYPP not built.</td></tr>
 <tr><td>Shetland Pony</td><td>mushroom fields, snowy plains, taiga, grove</td><td>8.0&ndash;10.2</td><td>3</td><td>3</td><td>9</td><td>Very common</td><td>any base; tobiano; sabino; occasional dun / cream. Some carry the leopard complex.</td></tr>
 <tr><td>Shire</td><td>plains, river, meadow, swamp</td><td>16.2&ndash;17.3+</td><td>3</td><td>2</td><td>4</td><td>Uncommon</td><td>black-biased; heavy sabino + splash. Tallest breed &mdash; scale band at the draught ceiling. Feathering not built.</td></tr>
@@ -309,6 +308,28 @@
 </tbody>
 </table>
 </div>
+
+<h3 id="feral">Feral Mixed is absorbing</h3>
+<p>
+    A horse with no herd identity &mdash; a lone wild spawn, a <code>/summon</code>, a
+    spawn-egg horse &mdash; is <strong>Feral Mixed</strong>, and every cross involving one
+    produces a plain <strong>Mixed</strong> foal. Feral&nbsp;&times;&nbsp;Feral included,
+    so there is no back door to a &ldquo;pure feral&rdquo; line.
+</p>
+<p>
+    It used to be called <em>Unknown</em> and combined like an ordinary distinct breed, so
+    a Friesian bred to a wild loner produced a &ldquo;Friesian &times; Unknown cross&rdquo;.
+    That forced the model to answer a question it has no good answer to: is Unknown a
+    breed? Does it have a stat band, a gene pool, a purity? Can a line be bred back to
+    pure Unknown? Making it absorbing <strong>deletes the question instead of answering
+    it</strong>, and says the true thing &mdash; a horse of unrecorded ancestry
+    contributes unrecorded ancestry, and what comes out is a horse of mixed breeding.
+</p>
+<p class="muted">
+    The serialised token is <code>feral_mixed</code>. Like every other format change in
+    this mod there is no back-compatibility: a horse saved as <code>unknown</code> reads
+    as Feral Mixed anyway, since an unrecognised token has always fallen through to it.
+</p>
 
 <h2>Code map</h2>
 <ul>

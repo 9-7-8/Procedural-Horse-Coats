@@ -64,21 +64,22 @@
 </p>
 
 <ol>
-    <li><strong>The white-pattern calibration</strong>
-        (<a href="#defects">&sect;1</a>) &mdash; splash white climbs to the belly on
-        roughly nine wild horses in ten. It is the most-seen defect in the mod.</li>
-    <li><strong>Decide the custom-entity question</strong>
-        (<a href="#decisions">&sect;3</a>) &mdash; a decision, not code, and it gates
-        the design of the whole gameplay layer.</li>
-    <li><strong>Sex-linked inheritance, then brindle</strong>
-        (<a href="#sex-linked">&sect;4</a>) &mdash; touches
-        <code>breedWith</code> and <code>GenotypeCatalog</code>, so do it while the
-        breeding tests are still small.</li>
-    <li><strong>Eye colour as a channel</strong> (<a href="#eyes">&sect;5</a>) &mdash;
-        cheap, independent, and it unblocks tiger eye and blue-eyed creams.</li>
+    <li><strong>The rest of the white-pattern calibration</strong>
+        (<a href="#defects">&sect;1</a>) &mdash; the splash waterline is fixed, but
+        EDNRB's frame band and every <code>cover</code> knob are still measured against
+        the wrong reference.</li>
     <li><strong>The visual marking designer</strong> (<a href="#designer">&sect;9</a>)
         &mdash; the blocker for the complex 1.0 patterns, and the largest single job
         on this page.</li>
+    <li><strong>Epigenetic drift</strong> (<a href="#drift">&sect;6</a>) &mdash; a foal
+        copies a parent's per-allele seed exactly, so a closed line converges on one
+        look.</li>
+    <li><strong>The Java gene API and an open registry</strong>
+        (<a href="#gene-api">&sect;8</a>) &mdash; a third-party gene is the seam every
+        other mod should extend through, and it is not built.</li>
+    <li><strong>Play-test the backlog</strong> &mdash; a great deal is built and
+        unplayed. See <a href="verification.html">To be verified</a>; it is longer than
+        this page's top section.</li>
 </ol>
 
 <p class="muted">
@@ -96,33 +97,24 @@
 
 <p>
     All of these are built features behaving incorrectly, so they cost nothing to
-    schedule and everything to leave. The first three are one change: they all come
-    from measuring against the wrong reference, they all move existing coats, and they
-    all want <code>coat-golden.txt</code> regenerated and
+    schedule and everything to leave. The two remaining calibration items are one
+    change: they both come from measuring against the wrong reference, they both move
+    existing coats, and they both want <code>coat-golden.txt</code> regenerated and
     <code>WhitePatternGenesTest</code>&rsquo;s monotonicity ladder re-checked in the
     same commit.
 </p>
 
 <h3>1.1 The white-pattern calibration</h3>
 
-<div class="note danger">
-    <span class="label">Splash leg white climbs to the belly &mdash; owner-observed</span>
-    <p>
-        A real minimal splash is six inches of white round the coronet; the mod puts
-        the line at the barrel. <code>WhitePattern.splash</code> measures its waterline
-        against <code>bodyBounds</code> &mdash; the <strong>whole-horse AABB, hoof to
-        ear tip</strong> &mdash; but the barrel top is only 0.622 of that and the legs
-        reach 0.326, so a mid-range strength lands well above the knee.
-    </p>
-    <p>
-        This is load-bearing rather than cosmetic: <a href="gene-pax3.html">PAX3</a>
-        <code>SW2</code> is carried by <strong>90% of founders</strong>, so
-        &ldquo;minimal marking&rdquo; currently means four white legs on almost every
-        horse in the world. The fix is a <strong>topline reference</strong> &mdash;
-        <code>bounds(skin, Part.BODY).yMax()</code> &mdash; with the strength constants
-        re-expressed against it.
-    </p>
-</div>
+<p>
+    The splash waterline is <strong>fixed</strong> (2026-09-06): both painters now
+    measure against a <strong>topline reference</strong> &mdash;
+    <code>bounds(skin, Part.BODY).yMax()</code> &mdash; on a convex ramp, so a
+    single-copy splash reaches the upper cannon instead of the barrel. See
+    <a href="pipeline.html">the pipeline</a>. Two calibration items remain, both about
+    the <em>degree</em> of white rather than where the line sits, and both still using
+    the whole-horse AABB:
+</p>
 
 <div class="table-wrap">
 <table>
@@ -216,13 +208,8 @@
 <table>
 <thead><tr><th>Question</th><th>Where it stands</th></tr></thead>
 <tbody>
-<tr><td><strong>A custom horse entity, or attachments on the vanilla <code>Horse</code>?</strong></td><td>The source design documents assume an <code>EntityCustomHorse extends HorseEntity</code> with vanilla horse spawns zeroed by biome modifiers. <strong>The codebase does not work that way</strong> &mdash; it hangs the record, the attachments and both sync payloads off the vanilla <code>Horse</code> and injects the coat at render time. A subclass is far bigger than its table row implies: horses in existing worlds stay vanilla and never convert, the 1.12.2 backport gets harder, and spawn replacement is NeoForge-side where <code>common/</code> cannot see it. Nothing in &sect;&sect;13&ndash;20 actually <em>requires</em> a new entity type &mdash; the visual override the documents cite as the reason already works without one. <strong>Owner wants to discuss the implications before deciding.</strong> It gates the design of the whole gameplay layer, and it invalidates a lot of code if answered late.</td></tr>
 <tr><td><strong>Should <code>Condition</code> gain a severity / onset model?</strong></td><td>The mod&rsquo;s health model is binary: a locus is <code>LETHAL_AT_BIRTH</code> / <code>LETHAL_AT_CONCEPTION</code>, or a flat heart reduction. The <code>naturalgeneref.md</code> disorder table is richer &mdash; each gene carries a <strong>health %</strong>, a <strong>speed %</strong> and a <strong>jump %</strong>, and distinguishes <em>episodic</em>, <em>chronic</em> and <em>progressive-onset</em> conditions. HERDA, PSSM1, HYPP and CA (&sect;<a href="#health-genes">11</a>) all fit that shape and none fits &ldquo;fewer hearts&rdquo; cleanly. Two ways: <strong>(a)</strong> keep the binary model and render each as a flat heart cost plus a flat speed / jump multiplier &mdash; cheap, loses the &ldquo;flares up under exertion&rdquo; character; <strong>(b)</strong> give <code>Condition</code> a 0&ndash;1 magnitude and an <code>EPISODIC</code> / <code>CHRONIC</code> / <code>PROGRESSIVE</code> kind that the health resolve and a future status tick both read. (b) is the reference&rsquo;s model and the natural companion to the effect architecture (&sect;<a href="#trait-rules">7</a>). <strong>Flagged, not decided.</strong></td></tr>
-<tr><td><strong>How is a cutie mark chosen &mdash; and should the gene be polygenic?</strong></td><td><a href="gene-cutie-mark.html">The gene</a> ships with everything epigenetic. The owner wants to explore letting <em>other</em> genes and breeds bias the item pool &mdash; a <a href="gene-milk.html">milk</a> horse leaning toward bucket and bottle icons, a breed shipping its own pool. That is a <a href="#trait-rules">&sect;7</a>-shaped read: the gene stays one locus, but <code>markFor</code> consults other pairs before it picks. Also open: is mark <em>colour</em> its own gene? Wants more fictional breeds (&sect;<a href="#breeds">19</a>) to be worth doing.</td></tr>
-<tr><td><strong>Is Unknown an ordinary breed, or absorbing like Mixed?</strong></td><td>Today Friesian &times; Unknown gives &ldquo;Friesian &times; Unknown cross&rdquo;. The alternative is to make Unknown absorbing, so any cross with it is simply Mixed. A judgement call the breed sheet did not cover.</td></tr>
-<tr><td><strong>What should a cross&rsquo;s stat band be?</strong></td><td>Today it is the <strong>per-axis average</strong> of its two parents&rsquo; bands, only where both pin the axis. Simple, and defensible; the alternative is an F1 that sits closer to the stronger parent.</td></tr>
-<tr><td><strong>Can a player splice a horse into a lethal genotype?</strong></td><td>Gene splicing (&sect;<a href="#ivf">16</a>) is the first thing in the mod that writes an arbitrary genotype in survival, so it collides with the lethals in an obvious way. Related: the <a href="carrots.html">Unknown Gene Splice carrot</a>&rsquo;s uniform fallback already reaches birth-lethal pairs like <code>O/O</code> (embryonic lethals are excluded by <code>canOccur</code>). Whether that is a feature or wants a guard is undecided.</td></tr>
-<tr><td><strong>Should the horse dimension be reachable in survival?</strong></td><td>The &ldquo;interdimensional ticket&rdquo; (<a href="items.html#tickets">items</a>) presumably reaches <a href="horse-dimension.html">the horse dimension</a>. If so it is the first survival-mode entry to it, which is a design decision and not just a teleport.</td></tr>
+<tr><td><strong>How is a cutie mark chosen &mdash; and should the gene be polygenic?</strong></td><td><strong>The hook is built</strong> (2026-09-06): <code>CutieMarkContribution</code> lets any gene modify the mark, and <code>markFor</code> folds every implementor over the base emblem in code order &mdash; the <a href="gene-light.html">light</a> locus is the first user and makes the mark glow. What is still open is the <em>content</em>: which genes and breeds should bias the <strong>item pool</strong> (a <a href="gene-milk.html">milk</a> horse leaning toward bucket and bottle icons), and whether mark <em>colour</em> is worth having &mdash; a per-instance tint is not renderable through <code>ItemStackRenderState.submit</code>, so it would need a custom render type. Wants more fictional breeds (&sect;<a href="#breeds">19</a>) to be worth doing.</td></tr>
 <tr><td><strong>The 1.12.2 backport.</strong></td><td>Not a question so much as a standing constraint. Everything on this page is <code>common/</code>-side except entity scale, gait animation, the health tick handler and the gene registration hook &mdash; those four are the only places the backport goal should shape a design.</td></tr>
 </tbody>
 </table>
@@ -232,112 +219,81 @@
 
 <h2>Part 3 &mdash; Foundations that unblock the rest</h2>
 
-<h2 id="sex-linked">4. Sex-linked inheritance &mdash; and brindle, its proof</h2>
-
-<p>
-    <a href="gene-sex.html">The sex locus</a> is built &mdash; <code>X</code> /
-    <code>Y</code> at priority 1, both outcomes wild types, <code>Y/Y</code> ruled out
-    by <code>canOccur</code>, <code>HorseRecord.sex()</code> derived from the code
-    rather than stored. That was the prerequisite, and it is what makes the rest cheap:
-    <strong>a stallion carries a real <code>X</code> and a real <code>Y</code></strong>,
-    both slots occupied, so an X-linked gene reads his X copy and a Y-linked gene reads
-    his Y copy, and sex inheritance falls out of the ordinary two-<code>nextBoolean()</code>
-    draw with no special case. <strong>What is missing is the inheritance
-    <em>mode</em>.</strong>
-</p>
-
-<p>
-    <strong>Brindle (MBTPS2)</strong> is the driving case &mdash; a real coat gene and a
-    real X-linked one. A stallion is never a carrier; he passes his X to every daughter
-    and no son; a mare shows a recessive X-linked trait only when homozygous. That
-    asymmetry is the whole appeal: a trait that runs visibly down one side of a
-    pedigree. <strong>Build the scaffolding, then build brindle as its proof.</strong>
-    The pattern work is cheap &mdash; vertical striping in a darker or lighter shade of
-    the base coat, sharing <code>BodyStripes</code> with dun and the zebras.
-</p>
-
-<h3>What has to change</h3>
-
-<ul>
-    <li><strong><code>Gene</code> declares its inheritance mode</strong> &mdash;
-        autosomal (default), X-linked or Y-linked. There is no such declaration
-        today.</li>
-    <li><strong><code>breedWith</code> grows two cases.</strong> X-linked: the sire
-        gives his <code>X</code> to a filly and his <code>Y</code> to a colt. Y-linked:
-        the mirror. The dam is unchanged in both.</li>
-    <li><strong>Expression gets <em>simpler</em>.</strong> A hemizygous stallion has one
-        real allele, so it expresses &mdash; no dominance question, no epigenetic
-        priority tie-break.</li>
-    <li><strong><code>GenotypeCatalog</code> would otherwise enumerate nonsense</strong>
-        &mdash; an <code>X/X</code> mare at a Y-linked locus. <code>Gene.canOccur</code>
-        is the right seam and already rules out <code>Y/Y</code>, but it does not
-        consult a mode.</li>
-    <li><strong>The founder table has to respect sex</strong>: a colt draws one allele
-        at an X-linked locus and a filly two; the reverse for Y-linked.</li>
-    <li><strong>Surfaces</strong> want hemizygous wording rather than a fake homozygote,
-        and a punnett square for a sex-linked gene is a different square.</li>
-</ul>
+<h2 id="sex-linked">4. Sex-linked inheritance &mdash; what is left</h2>
 
 <div class="note">
-    <span class="label">Storage and notation &mdash; both settled</span>
+    <span class="label">Shipped 2026-09-06</span>
     <p>
-        For an <strong>X-linked</strong> gene a stallion&rsquo;s second slot holds the
-        reserved <code>Y</code> allele meaning &ldquo;this locus is not on the Y&rdquo;;
-        for a <strong>Y-linked</strong> gene the first slot holds a reserved
-        <code>X</code>. Either way <code>AllelePair</code> stays two-slotted &mdash;
-        <strong>no structural change</strong> to <code>Genotype</code>, and
-        <code>Epigenome</code> alignment is untouched, the reserved slot just carrying
-        epigenetics nothing reads.
-    </p>
-    <p>
-        A hemizygous allele <strong>displays</strong> with an <code>X-</code> or
-        <code>Y-</code> prefix &mdash; a stallion&rsquo;s brindle locus is
-        <code>Brn/Y</code>, shown as <code>X-Brn</code>. Because <code>-</code> is the
-        gene separator and can never appear inside an allele token, the prefix is
-        unambiguous on sight. <strong>The code string is unaffected</strong>: the token
-        stays <code>Brn</code>, and the game knows from the declared mode how to render
-        it.
+        The scaffolding and its proof are <strong>built</strong>.
+        <code>Gene.inheritance()</code> declares <code>AUTOSOMAL</code> /
+        <code>X_LINKED</code> / <code>Y_LINKED</code>;
+        <code>Genotype.breedWith</code> routes the sire's copy by the foal's own sex;
+        <code>Gene.sexConsistent</code> keeps impossible combinations out of the
+        catalogue; a hemizygous copy is stored in a reserved slot and displayed with an
+        <code>X-</code> prefix; founder tables are sex-aware. <strong>Brindle</strong>
+        is the gene that proves it. See <a href="gene-brindle.html">the brindle
+        page</a>.
     </p>
 </div>
 
-<p class="muted">
-    <strong>Sexual dimorphism in the coat is not this</strong>, and is unbuilt. Sex
-    paints nothing and deliberately never will, so a stallion&rsquo;s crest would be a
-    separate gene <em>reading</em> this one. Not planned at all: imprinting, mosaicism,
-    crossing over, linkage.
-</p>
-
-<hr>
-
-<h2 id="eyes">5. Eye colour &mdash; the missing channel</h2>
-
-<p>
-    <code>CoatRegions.redrawEyes</code> copies the template eye texels <em>verbatim</em>
-    at phase 5, precisely so a wide white pattern can never blind a horse. The
-    side-effect is that there is <strong>no colour channel for the iris</strong>, and
-    several things want one.
-</p>
+<p>What is still open here:</p>
 
 <ul>
-    <li><strong>The channel itself.</strong> An eye colour resolved from the genotype
-        and written in the <strong>overlay phase</strong> &mdash; which runs after the
-        restore, and is exactly where <a href="gene-light.html">light</a>&rsquo;s gold
-        eyes already go. Use <code>shadeToward</code>, which scales the target by the
-        texel&rsquo;s own luma, so the sclera takes the colour and the pupil stays
-        dark; a flat lerp turns the whole eye into one coloured rectangle.</li>
-    <li><strong>Tiger eye</strong> (<code>TE1</code> / <code>TE2</code>, recessive,
-        amber iris) &mdash; the first gene that is eye-colour-only, and the one the
-        Puerto Rican Paso Fino wants (&sect;<a href="#breeds">19</a>). Note the
-        reference mislabels it as a coat pattern; it is not.</li>
-    <li><strong>White genes should drive eye colour.</strong> A high-white horse
-        &mdash; splash, dominant white, large sabino &mdash; commonly has blue eyes,
-        and nothing links the white loci to the iris today. This is a read from the
-        resolved white coverage, not a new gene.</li>
-    <li>The <strong>foal sclera bug</strong> is a defect, not this work &mdash;
-        &sect;<a href="#defects">1.2</a>.</li>
+    <li><strong>Nothing is Y-linked yet.</strong> The mirror case is built and tested
+        through <code>Inheritance.Y_LINKED</code> &mdash; a mare's pair is two reserved
+        <code>X</code> placeholders &mdash; and is waiting for a gene that wants it.
+        A Y-linked locus travels down the male line untouched by any mare, which is a
+        different and equally legible pedigree shape.</li>
+    <li><strong>A punnett square for a sex-linked gene is a different square</strong>,
+        and the punnett display (&sect;17) does not exist yet in any form.</li>
+    <li><strong>Hemizygous wording beyond the short form.</strong> The genotype short
+        form prints <code>X-Brn</code>; the gene-inspect popup and the paper dump still
+        print the pair as-is, so a stallion's brindle locus reads
+        <code>Brn / No copy (Y chromosome)</code> there.</li>
+    <li><strong>Sexual dimorphism in the coat</strong> is a different thing entirely and
+        is unbuilt. Sex paints nothing and deliberately never will, so a stallion's
+        crest would be a separate gene <em>reading</em> this one.</li>
 </ul>
 
-<hr>
+<p class="muted">
+    Not planned at all: imprinting, mosaicism, crossing over, linkage.
+</p>
+
+<h2 id="eyes">5. Eye colour &mdash; what is left</h2>
+
+<div class="note">
+    <span class="label">Shipped 2026-09-06</span>
+    <p>
+        The channel is <strong>built</strong>. <code>EyeColorContribution</code> is a
+        gene capability, <code>CoatOverlay.tintIris</code> colours the iris texels (the
+        <em>dark</em> ones &mdash; the sclera stays white), and the composer resolves the
+        highest-ranked claim once in the overlay phase.
+        <a href="gene-tiger-eye.html">Tiger eye</a> is built and wired into the
+        <a href="breeds.html">Puerto Rican Paso Fino</a>; the four white loci claim a
+        blue eye, and <strong>blue out-ranks amber</strong> because a depigmented iris
+        has nothing left to recolour.
+    </p>
+</div>
+
+<p>What is still open here:</p>
+
+<ul>
+    <li><strong>Blue-eyed creams.</strong> A double-dilute cream (cremello, perlino) has
+        blue eyes in life, and <a href="gene-matp.html">MATP</a> does not claim one. It
+        is a two-line <code>EyeColorContribution</code>; the only question is which blue,
+        since a cream's is paler and glassier than a splash's.</li>
+    <li><strong>Champagne's amber eye.</strong> Champagne foals are born with blue eyes
+        that darken to amber. With <a href="philosophy.html">aging out of scope</a> the
+        darkening cannot be modelled, so this is a choice between the adult colour and
+        nothing.</li>
+    <li><strong>One blue eye, not two.</strong> Splash horses very often have exactly one
+        blue eye, and the channel currently resolves a single colour for both. Making it
+        per-eye is a real change: the claim would have to carry a side, and it would want
+        to be epigenetic, which would put the locus back in the per-horse fingerprint.</li>
+    <li><strong>The foal sclera bug</strong> is a defect, not this work &mdash;
+        <a href="#defects">&sect;1.2</a>.</li>
+</ul>
+
 
 <h2 id="drift">6. Epigenetic drift</h2>
 
@@ -598,7 +554,7 @@
 <h2>Part 4 &mdash; Genes still to build</h2>
 
 <p>
-    <strong>Finished genes are not listed here</strong> &mdash; that is all forty-six of
+    <strong>Finished genes are not listed here</strong> &mdash; that is all forty-eight of
     them, rostered on <a href="genetics-model.html#registry">the genetics model</a> with
     a page each, and any residual tuning lives on the gene&rsquo;s own page. What
     follows is only what no gene does yet. Natural genes all exist in real life, so they
@@ -642,7 +598,6 @@
 <tr><td><strong>Natural zebra striping</strong></td><td>The <em>natural</em> counterpart of <a href="gene-magic-zebra.html">magic zebra</a>: the light stripes of a real zebra.</td><td><strong>Stripes of removed pigment in phase 1</strong>, not black added in phase 3. <strong>Codominant</strong> &mdash; one copy halves the striped texels&rsquo; darkness, two take them to white. Reuses <code>BodyStripes</code> with its chevron slant; the phase-1 hook only lerps pigment toward zero inside a stripe. A horse could carry natural <em>and</em> magic zebra and show both.</td></tr>
 <tr><td><strong>Brindle (MBTPS2)</strong></td><td>Vertical striping in a darker or lighter shade of the base coat.</td><td>The one <strong>sex-linked</strong> gene &mdash; see &sect;<a href="#sex-linked">4</a>, which it is the proof of. Pattern work shares <code>BodyStripes</code>; the interesting part is the inheritance.</td></tr>
 <tr><td><strong>DMRT3</strong> &mdash; gait</td><td>Dominant. Ambling / running-walk / pace.</td><td>The gene is trivial; the value is the <strong>animation</strong>, which is renderer and movement work. That is why it is last in this group. Wanted by both Paso Finos, Tennessee Walking, Standardbred, Icelandic and Hackney.</td></tr>
-<tr><td><strong>Tiger eye</strong> (<code>TE1</code>, <code>TE2</code>)</td><td>Amber iris, recessive. No coat effect at all.</td><td>Blocked entirely on eye colour existing &mdash; &sect;<a href="#eyes">5</a>.</td></tr>
 </tbody>
 </table>
 </div>
@@ -960,7 +915,7 @@
 
 <p>
     The <a href="carrots.html">mechanism is complete</a>. What is missing is
-    <strong>content across ~46 genes</strong>, not machinery.
+    <strong>content across ~48 genes</strong>, not machinery.
 </p>
 
 <div class="note warn">
@@ -1325,7 +1280,7 @@
 <ul>
     <li><strong>The genotype space.</strong> Now
         <strong>1,429,196,794,572,529,076,587,315,200,000</strong> raw genotypes, of
-        which <strong>1,849,688,066</strong> are distinct to look at. It was
+        which <strong>11,098,128,386</strong> are distinct to look at. It was
         <code>3<sup>11</sup> = 177,147</code> before the seven visual genes shipped
         &mdash; the multiplier in miniature. Two things this has already broken:
         <code>totalGenotypes()</code> is a <code>BigInteger</code> because the
@@ -1346,7 +1301,7 @@
         becomes load-bearing rather than paranoid, so give it a real collision-resolution
         path (append a counter) instead of throwing. <strong>Do this before the
         <code>W</code>-series expansion</strong> (&sect;<a href="#natural-genes">10.2</a>).</li>
-    <li><strong>The genotype code string.</strong> Already 48 segments; the backlog above
+    <li><strong>The genotype code string.</strong> Already 50 segments; the backlog above
         with tokens like <code>SW10</code> / <code>W36</code> puts a code in the low
         hundreds of characters. Everything carrying it grows in step &mdash; the record,
         both sync payloads, and the epigenome code, which is already the fatter of the
@@ -1390,6 +1345,67 @@
 <p>
     Kept here so a later session does not relitigate them. These are answers, not work.
 </p>
+
+<h3>Settled 2026-09-06</h3>
+
+<ul>
+    <li><strong>Attachments on the vanilla <code>Horse</code>, never a subclass.</strong>
+        <code>EntityCustomHorse extends HorseEntity</code> is <em>dead</em> and is not
+        coming back. Everything hangs off the vanilla horse and the coat is injected at
+        render time. It keeps horses in existing worlds working, keeps the 1.12.2
+        backport cheap, and avoids spawn replacement &mdash; the fragile part &mdash;
+        entirely. The cost is that only one mod can own the horse renderer; that trade
+        and the rest of the compatibility surface are written up on
+        <a href="compatibility.html">Mod compatibility</a>.</li>
+
+    <li><strong>&ldquo;Unknown&rdquo; is now <em>Feral Mixed</em>, and it is
+        absorbing.</strong> Any cross involving a Feral Mixed horse produces a plain
+        <strong>Mixed</strong> foal &mdash; Feral&nbsp;&times;&nbsp;Feral included, so
+        there is no back door to a &ldquo;pure feral&rdquo; line. As Unknown it combined
+        like an ordinary distinct breed, which forced the model to answer whether a wild
+        loner had a stat band, a gene pool and a claim to purity. Making it absorbing
+        deletes the question instead of answering it, and says the true thing: a horse of
+        unrecorded ancestry contributes unrecorded ancestry.</li>
+
+    <li><strong>A cross's stat band stays the per-axis average.</strong> The alternative
+        &mdash; an F1 leaning toward the stronger parent &mdash; was rejected because
+        <em>the Mendelian draw is already doing that work</em>. The band only sets the
+        <em>range</em>; whether a cross foal carries a variant copy at all is inherited
+        allele by allele, and which point inside the band it lands on comes from its own
+        epigenetic seeds. A foal that inherits no <code>Swift</code> copy sits on the
+        baseline whatever its label says. Weighting the band as well would be putting a
+        thumb on a scale that is already loaded.</li>
+
+    <li><strong>A player may splice a horse into a lethal genotype &mdash; but only on
+        purpose.</strong> The <em>Known</em> Gene Splice carrot names the gene, and what
+        the player does with it is their business. The <em>Unknown</em> Gene Splice
+        carrot has a <strong>blacklist</strong>: it may never roll a locus that kills or
+        costs hearts. The list is <strong>derived</strong>, not typed &mdash; every
+        combination the carrot could roll is resolved through <code>HorseTraits</code> and
+        the locus is dropped if any of them is lethal, impairing, or short of baseline
+        health &mdash; so a health gene added later is excluded by having done its job.
+        Hearts are the line: a pony allele or a <code>Sluggish</code> copy makes a slower
+        horse, not a damaged one, and a surprise you did not want is what the carrot is
+        for. See <code>SpliceSafety</code>.</li>
+
+    <li><strong>The horse dimension is reachable in survival.</strong> That is what the
+        no-break / no-harm rules in it are <em>for</em> &mdash; they are what stop it
+        becoming an infinite meat and brick dimension, and they were written with survival
+        access in mind. Hay-bale portals already work in any build; the interdimensional
+        ticket is a convenience on top, not the gate.</li>
+
+    <li><strong>Cutie mark is a channel with a modifier hook</strong>, like the LUT.
+        Other genes reach it through <code>CutieMarkContribution</code> rather than
+        growing their own copy of it. It can afford the hook precisely because the emblem
+        is <em>the last thing drawn</em> &mdash; nothing composes over it, nothing reads
+        it back, and it is not in the baked coat at all, so a modifier cannot corrupt an
+        accumulator or move a texture key.</li>
+
+    <li><strong>Eye colour is a channel with ranked claims</strong>, and the iris is the
+        <strong>dark</strong> texels &mdash; the sclera stays white. Blue out-ranks any
+        pigment colour, because a depigmented iris has nothing left to recolour. The blue
+        eye belongs to the white loci and is <em>not</em> a gene of its own.</li>
+</ul>
 
 <h3>Coat pipeline</h3>
 <ul>

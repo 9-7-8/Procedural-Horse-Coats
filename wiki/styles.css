@@ -574,3 +574,9 @@ body.landing .content { margin-left: 0; padding: 0; }
     .doc h1 { font-size: 1.8rem; }
     .hero h1 { font-size: 2rem; }
 }
+
+/* Verdict cells - wiki/compatibility.html. Colour-coded, but the words carry
+   the meaning on their own so colour-blindness and print both stay readable. */
+td.ok   { color: var(--natural); font-weight: 600; }
+td.warn { color: var(--warn);    font-weight: 600; }
+td.bad  { color: var(--danger);  font-weight: 600; }

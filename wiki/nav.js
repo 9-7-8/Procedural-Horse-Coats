@@ -48,7 +48,9 @@
                 { href: "gene-grey.html", text: "Grey (dapple)", kind: "natural" },
                 { href: "gene-dun.html", text: "Dun", kind: "natural" },
                 { href: "gene-silver.html", text: "Silver dapple", kind: "natural" },
-                { href: "gene-mushroom.html", text: "Mushroom", kind: "natural" }
+                { href: "gene-mushroom.html", text: "Mushroom", kind: "natural" },
+                { href: "gene-brindle.html", text: "Brindle (X-linked)", kind: "natural" },
+                { href: "gene-tiger-eye.html", text: "Tiger eye", kind: "natural" }
             ]
         },
         {
@@ -126,6 +128,7 @@
             title: "Project",
             items: [
                 { href: "verification.html", text: "To be verified", kind: "core" },
+                { href: "compatibility.html", text: "Mod compatibility", kind: "core" },
                 { href: "roadmap.html", text: "Roadmap / backlog", kind: "core" }
             ]
         },

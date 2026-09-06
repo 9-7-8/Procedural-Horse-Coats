@@ -79,10 +79,64 @@
 <tr><td><strong>Unknown Epigenetic Splice</strong></td><td>Every allele copy this parent passes on gets a <strong>fresh epigenetic seed</strong> instead of the parent copy&rsquo;s own. The alleles are untouched &mdash; the foal has the same genotype an un-fed pairing would give, only re-rolled bay-point heights / grey dapples / splash edges. The re-roll runs in a <em>second pass</em>, after every allele is locked, so it can never move a foal&rsquo;s genotype. (<code>CarrotEffect.EpigeneticSplice</code>.)</td></tr>
 <tr><td><strong>Stabilizer</strong></td><td>At every <strong>heterozygous</strong> locus, contribute the <em>earlier-declared</em> allele (the variant / dominant one) rather than the 50/50 coin. A no-op at a homozygous locus &mdash; which is the &ldquo;does nothing when the parent has no dominant allele&rdquo; the carrot is documented to have; the feed handler says so.</td></tr>
 <tr><td><strong>Magnifier</strong></td><td>The mirror &mdash; contribute the later-declared (baseline / recessive) copy. Same no-op rule.</td></tr>
-<tr><td><strong>Unknown Gene Splice</strong></td><td>Pick <strong>one random gene</strong> and draw this parent&rsquo;s gamete for it from that gene&rsquo;s <a href="gene-format.html">splice distribution</a> (or a uniform draw over its viable pairs if it declares none). The gene and the pair are rolled at breeding time off the foal&rsquo;s deterministic RNG. Never the sex locus. (<code>CarrotEffect.GeneSplice</code>.)</td></tr>
+<tr><td><strong>Unknown Gene Splice</strong></td><td>Pick <strong>one random gene</strong> and draw this parent&rsquo;s gamete for it from that gene&rsquo;s <a href="gene-format.html">splice distribution</a> (or a uniform draw over its viable pairs if it declares none). The gene and the pair are rolled at breeding time off the foal&rsquo;s deterministic RNG. The pool is <a href="#blacklist">filtered</a>: never the sex locus, and never a locus that could kill the foal or cost it hearts. (<code>CarrotEffect.GeneSplice</code>.)</td></tr>
 </tbody>
 </table>
 </div>
+
+<h3 id="blacklist">The Unknown Gene Splice blacklist</h3>
+
+<p>
+    A player feeding a random-splice carrot has chosen a <strong>surprise</strong>. They
+    have not chosen to kill the foal. So the carrot may never roll a locus that makes a
+    horse worse off:
+</p>
+<ul>
+    <li>nothing that kills &mdash; the four recessive foal lethals, <code>MET</code>&rsquo;s
+        lethal-at-conception, <a href="gene-milk.html">milk</a>&rsquo;s
+        <code>Watr/Lava</code>, <a href="gene-ednrb.html">EDNRB</a>&rsquo;s overo lethal
+        white;</li>
+    <li>nothing that costs hearts &mdash; the dwarfisms,
+        <a href="gene-silver.html">silver</a>&rsquo;s MCOA, and
+        <a href="gene-mstn.html">MSTN</a>, which trades health for speed and carries no
+        <code>Condition</code> at all;</li>
+    <li>nothing merely <em>impairing</em> either. &ldquo;It only takes two hearts&rdquo; is
+        still a horse the player did not ask to damage.</li>
+</ul>
+<p>
+    It stops there, deliberately. A <em>slower</em> horse is not a damaged one &mdash;
+    <a href="gene-hmga2.html">HMGA2</a>&rsquo;s pony allele and magic speed&rsquo;s
+    <code>Sluggish</code> both come out of the carrot, because a surprise you did not want
+    is exactly what a random splice is for. <strong>Hearts are the line.</strong>
+</p>
+
+<div class="note">
+    <span class="label">It is derived, not typed</span>
+    <p>
+        A hand-written list of gene keys is wrong the day someone adds a gene and forgets
+        it, and wrong <em>silently</em> &mdash; the failure is a dead foal in someone&rsquo;s
+        world, not a build error. So <code>SpliceSafety</code> works the pool out from
+        what the genes actually do: every combination the carrot could roll is resolved
+        through <code>HorseTraits</code> on an otherwise wild-type horse, and the locus is
+        dropped if any of them produces a condition worse than
+        <code>INFORMATIONAL</code> or leaves the horse short of baseline health. A new
+        health gene is excluded the moment it is registered, by having done its job.
+    </p>
+    <p>
+        Informational conditions are <strong>kept</strong>: splash deafness and the
+        leopard complex&rsquo;s night blindness cost the horse nothing, and excluding them
+        would delete most of the white-pattern loci from the carrot for no protection at
+        all. As of this writing the rule drops <strong>13 of the 48</strong> built-in
+        loci, and none of them is named anywhere in the file.
+    </p>
+</div>
+
+<p>
+    The <strong>Known</strong> Gene Splice carrot is deliberately <em>not</em> filtered.
+    There the player names the gene, has researched it and has read what it does &mdash;
+    splicing a horse into a lethal genotype on purpose is allowed, and is the player&rsquo;s
+    business. The blacklist is about the random draw only.
+</p>
 
 <h2 id="known">Known Gene Splice carrots</h2>
 
@@ -238,9 +292,9 @@
         <code>carrot</code> flavour list.</strong> Every one falls back to the
         minimal recipe and a uniform draw over its viable pairs &mdash; which on a
         forty-allele locus like <a href="gene-particle.html">particle</a> is a
-        near-guaranteed oddity, and on a lethal-carrying locus can hand a foal a
-        birth-lethal genotype. Whether that is a feature or wants a guard is
-        undecided.</li>
+        near-guaranteed oddity. That is now the <em>only</em> remaining complaint:
+        the &ldquo;hands a foal a birth-lethal genotype&rdquo; half is
+        <a href="#blacklist">fixed</a>.</li>
     <li><strong>An Epigenetic Stabilizer carrot</strong> &mdash; the opposite end of
         the dial from Unknown Epigenetic Splice, forcing every passed-on copy to be
         inherited verbatim. Only meaningful once epigenetic drift exists.</li>

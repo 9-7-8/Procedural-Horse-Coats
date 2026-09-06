@@ -31,6 +31,105 @@
     </p>
 </div>
 
+<h2 id="new">&sect;0-G &mdash; this session&rsquo;s work (built 2026-09-06, NOT play-tested)</h2>
+
+<p>
+    Six changes, none of them seen in the world. They are listed most-worth-looking-at
+    first.
+</p>
+
+<h3 id="white-belly">The white recalibration &mdash; look at a herd</h3>
+<p>
+    Both white painters now measure against the <strong>topline</strong>
+    (<code>bounds(skin, Part.BODY).yMax()</code>) on a convex ramp, instead of against the
+    whole-horse box. This is the biggest visible change in the session because
+    <a href="gene-pax3.html">PAX3</a>&rsquo;s <code>SW2</code> is on <strong>90% of
+    founders</strong> &mdash; it changes what an ordinary horse looks like.
+</p>
+<ul>
+    <li><strong>Does a single-copy splash read as socks?</strong> Measured: 41% of the
+        legs white, <strong>0% belly, 0% back</strong>, line at the upper cannon. It used
+        to put the line above the underline. Catch a few wild horses and see whether
+        &ldquo;minimal marking&rdquo; now looks minimal.</li>
+    <li><strong>Does the ladder still read as distinct steps?</strong> Bold splash should
+        be past the elbow and onto the barrel (measured 95% legs, 31% belly); extensive
+        should be nearly everything below the topline (100% / 100%, 11% back).</li>
+    <li><strong>Do the two splash loci still visibly stack?</strong> The stacking signal
+        is saturating now (<code>w / (w + 0.10)</code>). An <code>SW1/N</code> +
+        <code>SW2/N</code> horse should read as a bold splash, not as a slightly whiter
+        minimal one.</li>
+    <li><strong>Does a splash allele on a tobiano still leave a tobiano?</strong> That is
+        the case the saturation exists to protect &mdash; it must not go near-white.</li>
+    <li><strong>Sabino&rsquo;s belly patch</strong> is anchored at the underline now.
+        A classic <code>SB1</code> should reach the underline and a hand up the flank, and
+        even sabino-white should keep a coloured topline.</li>
+</ul>
+<p class="muted">
+    Not fixed, and still open above: frame&rsquo;s band and the <code>cover</code> knobs.
+</p>
+
+<h3 id="brindle">Brindle &mdash; the X-linked gene</h3>
+<ul>
+    <li><strong>Does it read as brindle?</strong> Broad irregular vertical bands in a
+        lighter shade, heaviest on barrel and quarters, fading on neck and legs, nothing
+        on the head. The first tuning baked out as wood grain (warp wider than the
+        spacing); this is the second. Spawn one with the custom egg &mdash; add brindle
+        and it defaults to the expressing genotype.</li>
+    <li><strong>Is the untouched head a visible seam?</strong> The neck is striped at 0.55
+        weight and the head not at all. Look at the poll.</li>
+    <li><strong>Does <code>X-Brn</code> show correctly?</strong> Info panel and paper dump
+        on a brindle stallion. A <em>plain</em> stallion must show nothing at this locus,
+        not <code>X-n</code>.</li>
+    <li><strong>The crosses.</strong> Unit-tested to textbook ratios over 4,000 foals
+        each, but worth one real pairing: a brindle stallion &times; plain mare should
+        throw <strong>no brindle colts at all</strong> and every filly a carrier.</li>
+    <li><strong>Frequency in a herd.</strong> 2% of wild stallions, 0.04% of wild mares.
+        Does meeting the occasional brindle stallion feel right, or too often?</li>
+</ul>
+
+<h3 id="eyes">Eye colour</h3>
+<ul>
+    <li><strong>Does a two-texel amber iris read as an amber eye</strong> on a horse at
+        riding distance, or does it need to be brighter? This is the main open question.
+        <a href="gene-tiger-eye.html">Tiger eye</a> is on the Puerto Rican Paso Fino
+        (26% carriers) &mdash; or spawn one with the egg.</li>
+    <li><strong>The sclera must stay white.</strong> Asserted in the pipeline, but confirm
+        it does not read as a solid coloured block at 128px.</li>
+    <li><strong>Blue eyes on splash</strong> &mdash; and check a plain sabino still has
+        <em>dark</em> eyes, which is the line <code>KIT</code> draws.</li>
+    <li><strong>Blue beats amber</strong> on a horse that is both.</li>
+    <li><strong>The foal.</strong> A foal&rsquo;s eye is the black block alone with no
+        sclera beside it, so the tint covers the whole eye. Check it still reads as an
+        eye.</li>
+</ul>
+
+<h3 id="cutie-glow">A glowing cutie mark</h3>
+<p>
+    A <code>Cutmrk/Cutmrk</code> horse that also carries any
+    <a href="gene-light.html">light</a> allele wears a full-bright emblem. Both are rare,
+    so this is a custom-egg check: add cutie mark and light, and look at the flank in the
+    dark. It should glow like the mane does.
+</p>
+
+<h3 id="feral">Feral Mixed</h3>
+<ul>
+    <li>A lone wild horse&rsquo;s info panel should read <strong>Feral Mixed</strong>,
+        not Unknown.</li>
+    <li>Breeding a Friesian to a Feral Mixed horse should give a <strong>Mixed</strong>
+        foal, not a &ldquo;Friesian &times; Feral Mixed cross&rdquo;.</li>
+    <li>The custom egg&rsquo;s Breed dropdown should list it correctly.</li>
+</ul>
+
+<h3 id="splice-blacklist">The Unknown Gene Splice blacklist</h3>
+<p>
+    Hard to check directly &mdash; the point is a <em>negative</em>. Breed a few dozen
+    foals with an Unknown Gene Splice carrot and confirm none of them dies, none is a
+    dwarf, and none comes out with fewer hearts than its parents. 13 of the 48 loci are
+    excluded, derived rather than listed.
+</p>
+
+<hr>
+
 <h2 id="open-issues">Open issues</h2>
 <p>Seen in-game, not fixed.</p>
 
@@ -46,6 +145,12 @@
         right way round, and measured splash white went from <em>topline-heavy</em>
         to <strong>belly 100%, back ~35%</strong> &mdash; a proper
         dipped-from-below coat. <code>coat-golden.txt</code> regenerated.
+    </p>
+    <p>
+        <strong>And splash&rsquo;s own calibration is fixed too (2026-09-06)</strong> -
+        both painters now measure against the topline rather than the whole-horse box, so
+        a single-copy splash stops at the upper cannon instead of the belly. See
+        <a href="#white-belly">&sect;0-G</a> for what to look at.
     </p>
     <p>
         What&rsquo;s left is a secondary calibration on <strong>frame</strong>:
@@ -640,15 +745,15 @@
         <code>onHorseJoin</code> <code>server.execute</code> deferral is gone.
         Fly a long way through unexplored terrain, near lots of herds
         (draft-heavy biomes especially), and confirm it holds.</li>
-    <li><strong>A herd is one breed; solo horses are Unknown and never in a
+    <li><strong>A herd is one breed; solo horses are Feral Mixed and never in a
         clump.</strong> The <b>load-bearing check</b> &mdash; this is the
         <b>fourth</b> attempt at herd formation (the owner confirmed the third
         still produced mixed-breed herds). Every member of a pack must show the
-        <em>same</em> breed. A lone wild horse must read <em>Unknown</em>. You
+        <em>same</em> breed. A lone wild horse must read <em>Feral Mixed</em>. You
         must <b>not</b> see a group of horses standing together with two or more
         different breed labels. The 3rd revision founded on the join event, when
         a spawned pack's other members are not query-visible yet &mdash; so every
-        horse founded a herd of one and came out <em>Unknown</em> (owner
+        horse founded a herd of one and came out <em>Feral Mixed</em> (owner
         confirmed). The 4th (2026-09-05) founds from
         <code>HorseFoundingTickHandler</code> 20 ticks after spawn, once the pack
         is loaded, and <code>HerdManager</code> flood-fills the whole connected
@@ -658,7 +763,7 @@
         the breed draw, so every member lands on the same herd whatever order the
         tick handler reaches them. <em>Owner-confirmed working 2026-09-05.</em>
         Still watch: the <b>last horse of a very spread pack</b> must join the
-        herd, not fall out as a lone Unknown.</li>
+        herd, not fall out as a lone Feral Mixed.</li>
     <li><strong>Traditional vs bachelor bands.</strong> A <b>traditional</b>
         herd is one stallion + mares (+ the odd foal at vanilla's ~5% rate);
         a <b>bachelor</b> band is all stallions, no foals. Roughly 70/30.</li>
@@ -676,7 +781,7 @@
     <li><strong>The info panel shows a breed.</strong> Mount a wild horse, open
         the panel (E): a breed name sits under the &ldquo;mare / stallion &nbsp;
         gen N&rdquo; line. A biome with assigned breeds should mostly show a real
-        breed; the odd one reads <em>Unknown</em>.</li>
+        breed; the odd one reads <em>Feral Mixed</em>.</li>
     <li><strong>Paper dump.</strong> Right-click a horse with paper: it now
         prints a <code>breed:</code> line and a <code>herd:</code> line (band
         type, "this horse is the lead" or "led by &lt;name&gt;", member count);
@@ -687,7 +792,7 @@
         Sex). Cycling to a breed should load a fresh wild individual of it -
         genes, epigenetics and sex all change - and the spawned horse&rsquo;s
         panel should show that breed. Cycle to <code>(none)</code> and it spawns
-        Unknown with whatever genome is in the editor.</li>
+        Feral Mixed with whatever genome is in the editor.</li>
     <li><strong>Breed reads on the body &mdash; big horses are bigger now.</strong>
         A <b>Percheron / Shire / Clydesdale</b> should visibly <b>tower over the
         player</b> (scale ~1.2&ndash;1.4); a Quarter Horse should look ordinary
@@ -707,7 +812,7 @@
         ordinary speed (Friesian pins no speed band).</li>
     <li><strong>Seed jar.</strong> A stallion seed jar carries the donor&rsquo;s
         breed; a seed-jar foal from a pure mare + a pure (different) sire should
-        read as their cross, not &ldquo;&hellip; &times; Unknown cross&rdquo;.</li>
+        read as their cross, not &ldquo;&hellip; &times; Feral Mixed cross&rdquo; &mdash; and a seed-jar foal from a <em>feral</em> donor should read plain <b>Mixed</b>.</li>
     <li><strong>Old worlds.</strong> The genotype code changed (44 &rarr; 41
         segments &mdash; the <b>Test gene was removed</b> this session, and
         there is no Test card in the wiki or gene picker any more). Pre-session

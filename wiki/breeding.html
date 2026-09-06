@@ -58,9 +58,11 @@
     <li><strong>A cross &times; anything else</strong> (a third breed, a different
         cross) &rarr; <em>Mixed</em>. <strong>Mixed &times; anything</strong> &rarr;
         Mixed.</li>
-    <li><strong>Unknown</strong> acts as an ordinary distinct breed in all of the
-        above (Friesian &times; Unknown &rarr; a cross; Unknown &times; Unknown
-        &rarr; Unknown).</li>
+    <li><strong>Feral Mixed</strong> &mdash; a lone wild spawn, a
+        <code>/summon</code>, a spawn-egg horse &mdash; is <strong>absorbing</strong>,
+        exactly like Mixed: any cross involving one produces a plain
+        <em>Mixed</em> foal, feral &times; feral included. See
+        <a href="breeds.html#feral">why</a>.</li>
 </ul>
 <p>
     A <strong>pure</strong> breed also pins the four magical body-stat genes to
@@ -68,7 +70,7 @@
     <code>record.traits()</code> and <code>HorseRecords.traitsOf</code> resolve a
     Thoroughbred near &times;2 speed and a Falabella near &times;0.45 scale. A
     <strong>cross</strong> averages its two parents&rsquo; bands per axis (only
-    where both pin it); <strong>Mixed</strong> / <strong>Unknown</strong> pin
+    where both pin it); <strong>Mixed</strong> / <strong>Feral Mixed</strong> pin
     nothing and fall back to the ordinary bounded-Gaussian draw. Full detail:
     <a href="breeds.html">the breeds page</a>.
 </p>
@@ -95,7 +97,7 @@
     Mendelian segregation: for <strong>each gene</strong> the child takes one allele
     from each parent, drawn 50/50 within that parent&rsquo;s pair. That is
     <strong>2 <code>nextBoolean()</code> per gene</strong>, genes in
-    <code>codeOrder()</code> &mdash; 36 draws for the 18 built-in genes;
+    <code>codeOrder()</code> &mdash; 96 draws for the 48 built-in genes;
     <code>true</code> means that parent&rsquo;s first allele.
 </p>
 
@@ -103,6 +105,28 @@
     Each resulting pair is put in <code>AllelePair</code>&rsquo;s canonical slot
     order, so <code>breedWith</code> is <strong>symmetric</strong>:
     <code>E/E-A/A-… &times; e/e-a/a-…</code> always gives <code>E/e-A/a-…</code>.
+</p>
+
+<h4>Sex-linked loci are the one exception</h4>
+<p>
+    A gene that declares <code>X_LINKED</code> or <code>Y_LINKED</code>
+    (<a href="genetics-model.html#sex-linked">the mode</a>; today only
+    <a href="gene-brindle.html">brindle</a>) does not get the sire&rsquo;s copy by a
+    coin flip &mdash; it is <strong>decided by the foal&rsquo;s own sex</strong>. On an
+    <code>X</code>-linked locus the sire gives his <code>X</code>-borne allele to a
+    filly and his <code>Y</code> &mdash; i.e. nothing &mdash; to a colt;
+    <code>Y</code>-linked is the mirror. The dam is unchanged in both. The sex locus is
+    priority 1, so the foal&rsquo;s sex is always already drawn by the time any other
+    gene is reached.
+</p>
+<p>
+    <strong>The second coin is still flipped and thrown away.</strong> Two
+    <code>nextBoolean()</code> per gene is an invariant a great deal leans on &mdash;
+    the golden coats, the gamete-bias equivalence test, every claim that adding a gene
+    shifts the random stream by a known amount &mdash; and a locus that quietly
+    consumed one would make the stream depend on a foal&rsquo;s sex. Which parent is
+    the dam is read off the parents&rsquo; own sex loci, since <code>breedWith</code>
+    is otherwise symmetric and nothing else has ever needed to know.
 </p>
 
 <p>

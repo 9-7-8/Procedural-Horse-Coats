@@ -509,6 +509,81 @@ default int visible(int px, int py, int channel);</code></pre>
     </p>
 </div>
 
+<h2 id="eye-colour">Eye colour &mdash; a channel with ranked claims</h2>
+
+<p>
+    A horse has one iris colour, so &ldquo;what colour are its eyes&rdquo; has exactly
+    one answer and several genes have a claim on it. It is therefore a
+    <strong>channel with a single owner</strong> rather than a gene that other genes
+    fight with &mdash; the same shape as the <a href="gene-lut.html">LUT</a> and the
+    <a href="gene-cutie-mark.html">cutie mark</a>.
+</p>
+<p>
+    A gene implements <code>EyeColorContribution</code> and returns an
+    <code>EyeColor</code> claim; the composer collects them in
+    <code>Genes.codeOrder()</code> at the top of the overlay phase, takes the
+    highest-ranked one, and applies it once with
+    <code>CoatOverlay.tintIris</code>. Ties go to the earlier gene.
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Rank</th><th>Claimants</th><th>Kind of claim</th></tr></thead>
+<tbody>
+<tr><td>20 &mdash; <code>RANK_DEPIGMENTED</code></td><td><a href="gene-mitf.html">MITF</a>, <a href="gene-pax3.html">PAX3</a>, <a href="gene-ednrb.html">EDNRB</a>, <a href="gene-kit.html">KIT</a> (broad white and up)</td><td>The white loci take the pigment out of the iris exactly as they take it out of the coat &mdash; the blue eye those patterns are known for</td></tr>
+<tr><td>10 &mdash; <code>RANK_PIGMENT</code></td><td><a href="gene-tiger-eye.html">Tiger eye</a></td><td>Changes what colour the iris <em>is</em></td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    <strong>Blue beats amber</strong>, and it has to: a depigmented iris has no pigment
+    left for a pigment gene to recolour. That is the one ordering the ranking exists to
+    settle. The blue eye is <em>not</em> a gene of its own and never should be &mdash; it
+    is a property the white loci already have, and a &ldquo;blue eyes&rdquo; locus that
+    mysteriously only ever appeared on white horses would be a worse model of the same
+    fact.
+</p>
+
+<h3>The iris is the dark texels</h3>
+<p>
+    On the coat sheet an adult eye is a 2&times;2 block of <strong>pure black</strong>
+    &mdash; the iris and pupil together, there being no room for both at 128px &mdash;
+    beside a 2&times;2 block of near-white sclera. A foal's is the black block alone. So
+    eye colour means <strong>colouring the black texels and leaving the white ones
+    white</strong>. <code>tintIris</code> weights each texel by how dark it already is
+    (<code>1 - luma</code>): black takes the colour outright, white is untouched, and the
+    grey between them takes a proportional share, which keeps the eye's shape.
+</p>
+
+<div class="note warn">
+    <span class="label">The obvious tool is the wrong one</span>
+    <p>
+        <code>shadeToward</code> scales its target by the texel's own
+        <em>brightness</em>, so a gold hoof keeps the template's shading. Pointed at an
+        eye it colours the <strong>sclera</strong> and leaves the iris black &mdash;
+        exactly backwards for an iris. It is the right blend for
+        <a href="gene-light.html">light</a>'s glowing gold eye and the
+        <a href="gene-leopard.html">leopard complex</a>'s white sclera rim, and it must
+        not be used for eye colour.
+    </p>
+</div>
+
+<h3>Who gets a blue eye</h3>
+<p>Two ways, and a horse needs only one:</p>
+<ul>
+    <li><strong>Its own allele says so.</strong> Splash is <em>the</em> blue-eyed pattern,
+        diagnostic even when the white is modest, so any expressing <code>MITF</code> or
+        <code>PAX3</code> combination qualifies, and so does frame. <code>KIT</code>
+        qualifies only from <code>broad-white</code> upward &mdash; a sabino with four
+        socks and a blaze has ordinary dark eyes.</li>
+    <li><strong>The horse is broadly white however it got there.</strong> Past 55%
+        coverage the eyes follow. The composer measures this from the <em>resolved</em>
+        pigment field and passes it to every claimant, which is what covers the case no
+        per-locus test can see: a horse white from two mild alleles stacking has exactly
+        the same claim as one white from a single bold allele.</li>
+</ul>
+
 <h2 id="golden">The golden test</h2>
 
 <p>
@@ -541,6 +616,77 @@ default int visible(int px, int py, int channel);</code></pre>
 </tbody>
 </table>
 </div>
+
+<h2 id="topline">How high white climbs: the topline reference</h2>
+
+<p>
+    Every vertical constant in <code>WhitePattern</code> is expressed as a fraction of
+    the <strong>topline</strong> &mdash; <code>bounds(skin, Part.BODY).yMax()</code>,
+    which on the adult mesh is 20.99 units of a whole-horse box 33.75 tall. Against that
+    reference the fractions mean something anatomical:
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Fraction of topline</th><th>Anatomy</th></tr></thead>
+<tbody>
+<tr><td>0.05</td><td>coronet</td></tr>
+<tr><td>0.10</td><td>fetlock</td></tr>
+<tr><td>0.26</td><td>knee and hock</td></tr>
+<tr><td>0.52</td><td>underline / elbow</td></tr>
+<tr><td>1.00</td><td>spine</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="note">
+    <span class="label">Fixed 2026-09-06 &mdash; it was a defect, not a tuning miss</span>
+    <p>
+        Both painters used to measure against <code>bodyBounds</code>, the
+        <em>whole-horse</em> AABB &mdash; hoof to <strong>ear tip</strong> &mdash; on
+        which the legs reach only 0.326 and the belly 0.326. A splash waterline written
+        as &ldquo;0.35 of the horse&rdquo; therefore landed at 0.35&times;33.75 = 11.8
+        units: <em>above the underline</em>, so four entirely white legs and white onto
+        the barrel, for what the gene calls a minimal marking. With
+        <a href="gene-pax3.html">PAX3</a>'s <code>SW2</code> on <strong>90% of
+        founders</strong>, that was most horses in the world.
+    </p>
+</div>
+
+<h3>The ramp is convex</h3>
+<p>
+    White spotting does not grow linearly with allele dose: one copy of a mild allele
+    buys a sock, and the jump to a belly-deep horse happens at the top of the range. The
+    splash waterline rises as <code>s<sup>1.7</sup></code> off a coronet floor, which
+    puts each outcome at the anatomy its own description names:
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Outcome</th><th>Strength</th><th>Line</th><th>Measured white</th></tr></thead>
+<tbody>
+<tr><td>PAX3 <code>SW2/N</code> &mdash; 90% of founders</td><td>0.34</td><td>upper cannon</td><td>14% overall, 41% of the legs, <strong>0% belly, 0% back</strong></td></tr>
+<tr><td>MITF <code>SW1/N</code> splash</td><td>0.38</td><td>just under the knee</td><td>17% / 48% legs</td></tr>
+<tr><td><code>splash-bold</code></td><td>0.62</td><td>past the elbow, onto the barrel</td><td>41% / 95% legs / 31% belly</td></tr>
+<tr><td><code>splash-extensive</code></td><td>0.86</td><td>well up the barrel</td><td>69% / 100% legs / 100% belly / 11% back</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    Sabino's belly patch uses the same reference but is anchored at the
+    <strong>underline</strong> (0.44) rather than at the ground, because sabino draws its
+    leg white per leg and this component is the belly spot alone. A classic
+    <code>SB1</code> reaches 0.62 &mdash; the underline and a hand up the flank &mdash;
+    and even sabino-white stops at 0.83, short of the spine, so a near-white sabino keeps
+    a coloured topline rather than becoming a dominant white.
+</p>
+
+<p class="muted">
+    Two calibration items are still outstanding and both are the same mistake elsewhere:
+    <a href="gene-ednrb.html">EDNRB</a>'s frame band and every <code>cover</code> knob are
+    still whole-horse fractions. See <a href="roadmap.html#defects">the roadmap</a>.
+</p>
 
 <h2 id="white-finds-white">White finds white</h2>
 
@@ -576,12 +722,35 @@ default int visible(int px, int py, int channel);</code></pre>
         horse that is also splash is louder than either.</li>
 </ul>
 
+<p>
+    Splash reads the signal through a <strong>saturating</strong> curve,
+    <code>w / (w + 0.10)</code>, rather than using the coverage directly &mdash; and that
+    became necessary the moment the waterline ramp went convex. The two cases the rule has
+    to serve differ by more than three times in coverage and should differ far less in
+    response: a second splash locus arrives with the horse only ~14% white (socks) and
+    must lift the line to belly-deep, while a splash allele on a tobiano or a frame
+    arrives with the horse 45&ndash;70% white already and must <em>not</em> take the rest.
+    A straight multiple of coverage cannot do both &mdash; tuned for the first it turns
+    every tobiano into a white horse, and tuned for the second it makes the two splash
+    loci indistinguishable from one.
+</p>
+
+
 <div class="codebox">
 <div class="filename">common/coat/pattern/WhitePattern.java</div>
-<pre><code class="language-java">private static final double SPLASH_STACKING = 0.55;
+<pre><code class="language-java">private static final double SPLASH_STACKING = 0.50;
 private static final double SABINO_STACKING = 0.35;
+private static final double STACKING_HALF  = 0.10;
 
-double s = clamp01(strength + STACKING * alreadyWhite(coat, ctx.skin()));</code></pre>
+// sabino - the coverage directly
+double s = clamp01(strength + SABINO_STACKING * alreadyWhite(coat, ctx.skin()));
+
+// splash - through the saturating signal
+double s = clamp01(strength + SPLASH_STACKING * stackingSignal(alreadyWhite(coat, ctx.skin())));
+
+private static double stackingSignal(double white) {
+    return white / (white + STACKING_HALF);
+}</code></pre>
 </div>
 
 <p>

@@ -91,6 +91,14 @@ project. Its shape:
   the same change as `server/DebugPenManager`, `server/HorsePortalManager`,
   `server/PortalEventHandler`, `block/HayPortalBlock` or
   `common/genetics/ShowcaseGenotypes`. **CLAUDE.md keeps a summary, not a copy.**
+- **`wiki/compatibility.html`** (new 2026-09-06) is the single source of truth
+  for **how this mod gets along with other mods** - the settled
+  "attachments on the vanilla `Horse`, never an `EntityCustomHorse` subclass"
+  decision and why, the full surface we touch (renderer, attributes, AI goals,
+  spawning, interactions), which kinds of mod are fine and which are
+  structurally incompatible, and third-party genes as the intended extension
+  seam. **Nothing on it has been tested against another mod** and it says so.
+  Update it in the same change as anything that widens that surface.
 - **`wiki/verification.html`** is the rolling **`runClient` checklist** - what's
   built but not yet confirmed in-game. Update after every play session.
 - **`wiki/philosophy.html`** is the **why** - Mendelian breeding as a game of
@@ -168,6 +176,233 @@ project. Its shape:
     changes shape, update `api-reference.html` in the same change.
 
 ## Status snapshot (keep this current)
+
+- **Built 2026-09-06, NOT yet play-tested: sex-linked inheritance + brindle, the
+  eye-colour channel + tiger eye, a cutie-mark modifier hook, the splice
+  blacklist, the Feral Mixed rename, and the white-belly recalibration.**
+  `:common:test` **436 green** (+20 `BrindleGeneTest`, +11 `EyeColorTest`,
+  +6 `SpliceSafetyTest`, +4 `CutieMarkGeneTest`), `:neoforge-26.1.2:build`
+  green, creator parity **3832/48** untouched, `runServer` boots clean
+  (**50 segments**, 48 built-in + the 2 shipped spec genes). Old saves will not
+  parse (50 vs 48). Seven pieces:
+
+  - **The white climbing the belly is fixed** (`wiki/roadmap.html#defects`
+    defect 1, the most-seen defect in the mod). Both painters in `WhitePattern`
+    measured against `bodyBounds` - the **whole-horse** AABB, hoof to *ear tip* -
+    on which the legs reach only 0.326 and the belly 0.326. So a splash waterline
+    written as "0.35 of the horse" landed at 11.8 units, **above the underline**:
+    four white legs and white onto the barrel, for what the gene calls a minimal
+    marking. With `PAX3`'s `SW2` on 90% of founders that was most horses alive.
+    New `WhitePattern.toplineHeight(skin)` = `bounds(skin, BODY).yMax()`
+    (20.99 of 33.75 on the adult), and every vertical constant re-expressed
+    against it, so the fractions mean something anatomical (0.05 coronet, 0.10
+    fetlock, 0.26 knee, 0.52 underline, 1.0 spine).
+    - The splash ramp is **convex**, `s^SPLASH_GAMMA` (1.7) off a coronet floor
+      of 0.035, which puts each outcome where its own `describe()` says it should
+      be. Measured, single-copy `SW2/N`: **14% overall, 41% legs, 0% belly, 0%
+      back** (it was a dipped horse); bold **41% / 95% legs / 31% belly** ("past
+      the elbow"); extensive **69% / 100% / 100% / 11% back** ("almost everything
+      below the topline"). A plain square was tried first and put *bold* below
+      the elbow, contradicting its own prose.
+    - Sabino's belly patch is anchored at the **underline** (`BELLY_ANCHOR` 0.44
+      + `BELLY_REACH` 0.42) rather than at the ground - it is the belly spot
+      alone, the leg white being drawn per leg. `SB1` reaches 0.62, sabino-white
+      stops at 0.83, so a near-white sabino keeps a coloured topline.
+    - **"White finds white" had to change with it.** The stacking bonus is a
+      linear read of `alreadyWhite`, and once the ramp is convex a small `s`
+      addition buys almost no height - measured, `SW1/N + SW2/N` came out 0.156
+      against 0.136 alone, i.e. the two-locus split had become invisible, which
+      is the exact thing it exists to show. Splash now reads the signal through
+      a **saturating** curve, `w / (w + STACKING_HALF)` (0.10), because the two
+      cases differ by 3x in coverage and should differ far less in response: a
+      second splash locus arrives at ~14% white and must reach belly-deep, while
+      a splash allele on a tobiano arrives at 45-70% and must **not** take the
+      rest. Sabino keeps the plain linear read - its coverage did not move.
+    - **Still open, same root cause:** `EdnrbGene`'s `BAND_LO`/`BAND_HI` and
+      every `cover` knob are still whole-horse fractions (gap #30).
+
+  - **Sex-linked inheritance, and brindle as its proof.** New
+    `common/genetics/Inheritance` (`AUTOSOMAL` / `X_LINKED` / `Y_LINKED`) and
+    five `Gene` defaults: `inheritance()`, `hemizygousPlaceholder()`,
+    `isPlaceholder()`, `realAlleles(pair)`, `sexConsistent(pair)`.
+    - **The genotype does not change shape.** A hemizygous horse fills the slot
+      it does not have with a **reserved placeholder allele** the gene declares
+      (`Y` on an X-linked gene, meaning "this locus is not on the Y"). So
+      `Genotype` is untouched, `Epigenome` alignment is untouched, the code
+      string keeps its shape, and parsing needs no special case - the placeholder
+      is a declared allele like any other.
+    - **The placeholder must be declared at the right end of `alleles()`** (`Y`
+      last, `X` first), because `AllelePair` canonicalises on declaration order.
+      `Genes.register` -> `validateInheritance` refuses one that is not, and it
+      runs from `rebuild()` so it covers built-ins too. The failure it catches is
+      not an exception: a mis-declared placeholder sorts into slot 0, so the
+      horse's real allele lands where the epigenome and every `expressionOf`
+      treat it as the second copy, and the gene misbehaves for exactly one sex.
+    - **`breedWith` grew two cases.** The sire's copy is *decided by the foal's
+      own sex* rather than drawn - sex is priority 1, so it is always resolved
+      first. **The second coin is still flipped and thrown away**: two booleans
+      per gene is an invariant the golden coats, `GameteBiasTest` and every
+      "adding a gene shifts the stream by N" claim lean on, and a locus that
+      quietly consumed one would make the random stream depend on a foal's sex.
+      Which parent is the dam is read off the parents' own sex loci, since
+      `breedWith` is otherwise symmetric.
+    - **`BrindleGene`** (`horsegenetics.brindle`, `MBTPS2`, priority 36 with the
+      dilutions, natural, non-deterministic). `Brn`/`n`/`Y`, 6 combinations of
+      which 5 occur, 3 outcomes. `expressionOf` counts `realAlleles` - "every
+      real copy is `Brn`" covers *recessive in mares* and *always shows in
+      stallions* in one sentence, no special case. The founder table is
+      **sex-aware**: a stallion's is written out (`Brn/Y` 2%, `n/Y` 98%) because
+      Hardy-Weinberg is a statement about diploid loci and this one is not.
+    - **Measured over 4 000 foals per pairing**: brindle stallion x plain mare ->
+      **0% brindle colts, 100% carrier fillies**; carrier mare x plain stallion ->
+      50% / 0% / 50%; brindle mare x plain stallion -> **100% brindle colts**;
+      carrier mare x brindle stallion -> 50% / 50%. Over 200 000 founders:
+      **2.000% of stallions, 0.049% of mares - 40:1**.
+    - **It paints a banded dilution**, not a second colour - which is what makes
+      it expressible as a *natural* gene at all, phase 1 being downward-only.
+      `BodyStripes`, shared with magic zebra, so it gets the chevron slant free.
+      Part weights barrel 1.0 / neck 0.55 / legs 0.40 / tail 0.30 / head 0.
+      **Retuned once**: the first constants ran a warp of 1.6-3.0 against a
+      spacing of 1.5-2.8, so adjacent stripes bent into each other and it baked
+      out as convincing wood grain. The warp has to stay well under half the
+      spacing.
+    - **`Y_LINKED` is built and has no gene.** The mirror case works and is
+      waiting for one.
+
+  - **Eye colour is a channel** - `common/genetics/EyeColor` (a ranked claim) +
+    `EyeColorContribution`, resolved once by the composer at the top of the
+    overlay phase and applied with a new `CoatOverlay.tintIris`.
+    - **The iris is the DARK texels, not the sclera** (owner's rule, and it is
+      what the template actually holds: an adult eye is a 2x2 block of pure black
+      beside a 2x2 near-white block; a foal's is the black block alone).
+      `tintIris` weights by `1 - luma`. **The obvious tool is exactly backwards**:
+      `shadeToward` weights by *brightness* so a gold hoof keeps its shading, and
+      pointed at an eye it colours the sclera and leaves the iris black. It stays
+      right for `light`'s glowing eye and the leopard complex's white rim.
+    - **Ranked, not blended**, because the claims are different kinds: a pigment
+      gene says what colour the iris *is*, a white locus says there is no pigment
+      in it. `RANK_DEPIGMENTED` (20) > `RANK_PIGMENT` (10) - **blue beats amber**,
+      because a depigmented iris has nothing left to recolour.
+    - **The white loci claim blue, and it is not a new gene.** `MITF` / `PAX3`
+      claim on *any* expressing combination (splash is diagnostic even when the
+      white is modest); `EDNRB` likewise; **`KIT` only from `broad-white` up** -
+      a plain sabino has dark eyes. Plus a shared fallback in
+      `WhitePatternEyes`: past **55%** resolved coverage the eyes follow however
+      the horse got there, which is the case no per-locus test can see (two mild
+      alleles stacking). The composer measures that from the resolved pigment
+      field and passes it to every claimant.
+    - **`TigerEyeGene`** (`horsegenetics.tiger_eye`, `SLC24A5`, priority 60,
+      natural, **deterministic**). `TE1`/`TE2`/`N`, recessive; `TE1`-bearing ->
+      amber `#C8811E`, `TE2/TE2` -> yellow `#D6B341`. Its expressing outcomes are
+      `Expression.marker()`s, **not** wild types - the eyes are baked into the
+      texture, so it belongs in `coatCode()`; being deterministic it costs the
+      cache one entry per outcome, not one per horse. Wired into the **Puerto
+      Rican Paso Fino** (26% carriers, ~4% expressing) against ~1 wild horse in
+      5 000. The breed reference filed tiger eye under coat patterns; it is not
+      one.
+
+  - **Cutie mark is a modifiable channel** (owner request). New
+    `common/genetics/CutieMarkContribution`; `CutieMarkGene.markFor` draws the
+    base emblem then folds every implementor over it in `codeOrder()`. `Mark`
+    gained `emissive` and six `with*` helpers.
+    - **It can afford an open hook precisely because the emblem is the last
+      thing drawn** - nothing composes over it, nothing reads it back, and it is
+      not in the baked coat at all, so a modifier cannot corrupt an accumulator,
+      surprise a later painter or move a texture key. That is the argument the
+      cross-locus discouragement elsewhere turns on.
+    - **The fold is deliberately NOT gated on `expressionIn(...).wildType()`**:
+      most of the magical genes that would want to reach the mark - particle,
+      milk, the body-stat loci - paint nothing and so declare every outcome a
+      wild type, and that filter would exclude exactly the genes the hook is for.
+      The implementor is handed its own pair and decides.
+    - **`LightGene` is the first user**: any variant copy makes the mark glow,
+      and `CutieMarkLayer` draws it at `FULL_BRIGHT`. It is the case that makes
+      the hook obviously right rather than merely general - a horse with four
+      burning gold hooves wearing the one dull thing on its body reads as a bug.
+    - **A `tint` field was considered and dropped**: `ItemStackRenderState.submit`
+      has no per-instance colour, so a tint would need a custom render type. The
+      standing rule is that every `Mark` field is one the layer honours - a field
+      nothing draws is a promise the game does not keep.
+
+  - **The Unknown Gene Splice carrot has a blacklist** (owner request), and it is
+    **derived, not typed** - `common/genetics/SpliceSafety`. A hand-written list
+    of gene keys is wrong the day someone adds a gene and forgets it, and wrong
+    *silently*: the failure is a dead foal in someone's world, not a build error.
+    So every combination the carrot could roll is resolved through `HorseTraits`
+    on an otherwise wild-type horse, and the locus is dropped if any produces a
+    condition worse than `INFORMATIONAL` or leaves the horse short of baseline
+    health.
+    - **Hearts are the line**, exactly as asked: a *slower* horse is not a
+      damaged one, so `HMGA2`'s pony allele and magic speed's `Sluggish` stay in
+      - a surprise you did not want is what the carrot is for.
+    - **It evaluates ALL combinations, including `!canOccur` ones**, and that is
+      the subtlety: `MET` and `KIT` both declare `canOccur` false for a
+      homozygote, but `met/met` is a real lethal genotype the model refuses to
+      create (and declares a lethal `Condition`) while `W22/W22` simply never
+      existed (and declares nothing). Reading conditions over all combinations
+      drops MET - whose allele would silently poison a breeding line - and keeps
+      sabino and dominant white in the carrot.
+    - Drops **13 of 48**: sex, the seven disorder loci, `MET` and `MILK` (both
+      embryonic lethals), `EDNRB`, `SILVER`, `MSTN` and magic health. **None is
+      named in the file.** `Gene.spliceable()` is the manual override for harm
+      resolution cannot see. The **Known** Gene Splice carrot is deliberately
+      unfiltered - the player names the gene, and roadmap `#settled` now records
+      that a player may splice into a lethal genotype on purpose.
+
+  - **`Breeds.UNKNOWN` -> `Breeds.FERAL_MIXED`, and it is absorbing** (owner
+    request). Token `unknown` -> `feral_mixed`, display "Feral Mixed",
+    `BreedLineage.Kind.UNKNOWN` -> `FERAL`, `getOrUnknown` -> `getOrFeral`.
+    **Every cross involving it is plain `MIXED`**, Feral x Feral included, so
+    there is no back door to a "pure feral" line. As Unknown it combined like an
+    ordinary distinct breed, which forced the model to answer whether a wild
+    loner had a stat band, a pool and a claim to purity; absorbing it **deletes
+    the question instead of answering it**. Closes that roadmap decision.
+
+  - **`GeneCodeDisplay.trailingOrder()` is self-maintaining now**, and it had
+    already rotted: it was a hand-written list plus `Genes.loaded()`, so every
+    *built-in* gene added after it was written vanished from the short form
+    silently - by the time it was noticed it had swallowed the leopard complex,
+    the LUT locus, the cutie mark, the particle locus and the three magical
+    body-stat genes. `GenotypeCatalogTest.noTwoEntriesShareADisplayLabel` finally
+    tripped on it when tiger eye added a third coat outcome. It now appends every
+    other registered gene in `(priority, key)` order after the curated head, so a
+    new gene shows up on its own - **known gap #13's cheap fix, applied to one
+    list**. Also: a hemizygous copy prints with its `X-` / `Y-` prefix
+    (`X-Brn`), and a *plain* stallion prints nothing at the locus rather than
+    `X-n`.
+
+  - **Numbers moved.** 46 -> **48** built-in genes (50 in-game), code segments
+    48 -> **50**, `GenotypeCatalog.size()` 1 849 688 066 ->
+    **11 098 128 386**, `totalGenotypes()` ->
+    **42 875 903 837 175 872 297 619 456 000 000**. Genes that paint 22 -> **24**
+    (both new ones do; tiger eye through a marker); genes that never paint stays
+    **24**. `coat-golden.txt` regenerated - **558 rows**, +48 for 8 new brindle /
+    tiger-eye cases; every row moved, because two genes inserted at priorities 36
+    and 60 shift `Epigenome.fromSeed`'s positional per-gene seed stream.
+  - **Two brittle tests widened rather than re-pinned.**
+    `CoatTextureComposerTest.howFarGreyingHasGoneIsPerHorse` compared two named
+    seeds and became a coin flip the moment the stream moved; it now measures the
+    *range* over eight seeds, which is the actual claim.
+    `GenotypeCatalogTest.allPairsOfIsEveryUnorderedPairAHorseCanCarry` learned
+    about `sexConsistent`.
+  - **Deliberately not built:** a Y-linked gene; per-eye colour (one blue eye,
+    which splash horses often have - it would want to be epigenetic and would put
+    the locus back in the per-horse fingerprint); blue-eyed creams and
+    champagne's amber (both two-line `EyeColorContribution`s, on the roadmap); a
+    cutie-mark tint; item-pool biasing; hemizygous wording in the gene-inspect
+    popup and the paper dump (only the short form has it).
+  - Docs: `wiki/gene-brindle.html`, `wiki/gene-tiger-eye.html`,
+    **`wiki/compatibility.html`** (new - the mod-compatibility surface, and the
+    settled "attachments, never a subclass" decision), `wiki/nav.js`,
+    `wiki/genetics-model.html` (new sex-linked section + 2 table rows + counts),
+    `wiki/pipeline.html` (new eye-colour and topline-reference sections),
+    `wiki/modding.html` (new "Channels" section), `wiki/api-reference.html`,
+    `wiki/carrots.html` (the blacklist), `wiki/breeds.html` (Feral Mixed + the
+    Paso Fino), `wiki/gene-cutie-mark.html`, `wiki/gene-light.html`,
+    `wiki/gene-{kit,mitf,pax3,ednrb}.html` (blue eyes), `wiki/roadmap.html`
+    (§4 and §5 rewritten to remainders, five decisions moved to `#settled`,
+    "Where to start" rewritten), `wiki/verification.html` (§0-G), `index.html`.
+    All 68 wiki pages validated: **zero broken links or anchors**.
 
 - **Docs 2026-09-06, no behaviour change: the roadmap was rewritten and
   renumbered, and the built work moved onto its own pages.** No Java touched;
@@ -1931,10 +2166,11 @@ project. Its shape:
   `trait/` (the non-coat body: `HorseTraits` / `Traits` / `Condition` /
   `TraitBuilder` / `EpigeneticTraitContribution` / the breed `StatAxis` +
   `TargetBand` + `BreedStatTargets` -> `wiki/horse-body.html`) and
-  `genetics/` (allele/gene model - **46 genes**, 22 that paint and 24 that never
-  do: **sex**, the 16 natural ones (extension, agouti, champagne,
+  `genetics/` (allele/gene model - **48 genes**, 24 that paint and 24 that never
+  do: **sex**, the 18 natural ones (extension, agouti, champagne,
   grey, **MATP** (cream + pearl, three alleles), **dun** (three alleles),
-  **silver**, **mushroom**, **roan**, **tobiano**, the four white-pattern
+  **silver**, **mushroom**, **brindle** (the one **X-linked** gene), **tiger
+  eye** (eyes only), **roan**, **tobiano**, the four white-pattern
   loci **`KIT`** (eight alleles - sabino + the `W` series + dominant white),
   **`MITF`** and **`PAX3`** (splash, which really is two genes) and **`EDNRB`**
   (frame + lethal white), and the **leopard complex** - **`LP`** plus the two
@@ -1954,9 +2190,12 @@ project. Its shape:
   `Genotype` code round-trip, breeding, the `Epigenome` / `Genome` per-allele
   epigenetics + priority tie-break, `GenomeSample` - a genome detached from a
   horse, for the stallion seed jar - `Expression` + `FounderTable` + the
-  `GenotypeCatalog` reduction of 1 429 196 794 572 529 076 587 315 200 000
-  genotypes to 1 849 688 066 distinct coats - `size()`/`get()` are `long` now,
-  the leopard complex doubled it past `Integer.MAX_VALUE`), `coat/` +
+  `GenotypeCatalog` reduction of 42 875 903 837 175 872 297 619 456 000 000
+  genotypes to 11 098 128 386 distinct coats - `size()`/`get()` are `long` now,
+  the leopard complex doubled it past `Integer.MAX_VALUE`), `Inheritance` +
+  the sex-linked machinery, `EyeColor` + `EyeColorContribution` (the ranked iris
+  channel), `CutieMarkContribution` (the mark's modifier hook) and
+  `SpliceSafety` (the derived random-splice blacklist), `coat/` +
   `coat/pattern/` (the
   pipeline - `CoatTextureComposer`, `PigmentField`, `ColorField`, `CoatOverlay`,
   `GradientLut`, `BayCoat`, `GreyCoat`, `WhitePattern`, `BodyStripes`,
@@ -2627,7 +2866,8 @@ a data-driven natural gene at priority 45 lands *between* the built-in MATP
 convention: `0-99` natural, `100+` magical; `Genes.register` logs a warning for
 a gene outside its phase's band (via `System.getLogger`) but carries on. Ties
 break alphabetically by key. Built-in priorities: **sex 1**, extension 10, agouti 20,
-silver 30, mushroom 32, dun 34, **MATP 40**, champagne 50, grey 55,
+silver 30, mushroom 32, dun 34, **brindle 36**, **MATP 40**, champagne 50,
+grey 55, **tiger eye 60**,
 roan 70, tobiano 72, **leopard complex 73**, **EDNRB 74**, **KIT 76**,
 **MITF 78**, **PAX3 79**, then the **non-coat / modifier sub-band 80-99**
 (mstn 80, pdk4 81, ckm 82, ryr2 83, lcorl 84, hmga2 85, acan 86, b4galt7 87,
@@ -2643,7 +2883,8 @@ higher = dilution** (agouti's absolute points must precede
 registration.
 
 `Genes.codeOrder()` (derived) = **sex**, extension, agouti, silver, mushroom, dun,
-MATP, champagne, grey, roan, tobiano, **leopard**, EDNRB, KIT, MITF, PAX3,
+**brindle**, MATP, champagne, grey, **tiger eye**, roan, tobiano, **leopard**,
+EDNRB, KIT, MITF, PAX3,
 **MSTN, PDK4, CKM, RYR2, LCORL, HMGA2, ACAN, B4GALT7, PLOD1, RAPGEF5, ST14,
 SHOX, MET, PATN1, PATN2**, pink hair, **mane colour, tail colour, healer**, magic zebra,
 **milk, body size, magic speed, magic health, magic jump, particle, light,
@@ -2655,11 +2896,16 @@ both pigments) with one exception: each reads how white the horse already is,
 so a later one paints harder - see `WhitePattern` below. The **leopard
 complex** runs at 73 (before the four white loci); it reads **PATN1 / PATN2**
 via `expressionIn` regardless of order, and `coatDependsOn()` folds their
-alleles into the coat code. Sex, the thirteen non-coat genes and the two PATN
+alleles into the coat code. **Brindle is the one X-linked gene** - see
+`Inheritance` and `wiki/gene-brindle.html`; **tiger eye paints only the iris**,
+in the overlay phase, through the ranked eye-colour channel (see
+`wiki/pipeline.html#eye-colour`), so it declares `marker()` outcomes rather than
+wild types and stays in the texture key. Sex, the thirteen non-coat genes and
+the two PATN
 modifiers are *in* `naturalOrder()` (they declare `isNatural()`) but every one
 of their outcomes is a wild type, so the composer skips them - as do milk, the
 four body-stat genes (size, magic speed, magic health, magic jump), particle
-and verdant on the magical side: **twenty-four of the forty-six built-ins
+and verdant on the magical side: **twenty-four of the forty-eight built-ins
 never paint** (LUT does - it repaints; the leopard complex does), and
 `Gene.affectsCoat()` is false for exactly those. What they do instead goes
 through `common/trait/` (see `wiki/horse-body.html`) or
@@ -2697,6 +2943,8 @@ gene); one-liners:
 | dun | `D`/`d1`/`d2` | wild (`d2/d2`), `primitive-marks` (`d1/d1`, `d1/d2`), `dun` (any `D`) | `D` 1/24, `d1` 1/10 | **three alleles, two dominance orders**: dilution is `D > d1 = d2`, marking is `D = d1 > d2`. `D` = mild body dilution + **primitive markings** (dorsal stripe + leg bars) that *skip* the dilution so they read dark; `d1` = the dorsal stripe with **no** dilution, done as countershading (it never touches black, and takes red only where there is red - so on a solid black it is a byte-exact no-op, as a real non-dun black is). `CoatRegions.dorsalStripe`/`legBar` |
 | silver | `Z`/`z` | wild, `silver` | 1/60 per allele | eumelanin-**only** dilution → chocolate body + near-flaxen mane/tail; chestnut carrier looks unchanged. Runs after agouti. Dapples are a follow-up |
 | mushroom | `Mu`/`mu` | wild, `mushroom-carrier` (a wild type), `mushroom` | 1/34 per allele | pheomelanin-**only** dilution, `Mu/Mu` only → chestnut becomes flat sepia; near-invisible on black/bay |
+| brindle | `Brn`/`n`/`Y`&dagger; | wild, `brindle-carrier` (a wild type, mares only), `brindle` | **2% per `X`** - so 2% of stallions and 0.04% of mares | **the model's only X-linked gene.** Irregular vertical stripes of a lighter shade of the horse's own colour - a banded *dilution*, which is what makes it expressible as a natural gene at all. `BodyStripes`, shared with magic zebra, so it gets the chevron slant free; barrel 1.0 / neck 0.55 / legs 0.40 / tail 0.30 / head 0. A stallion has one copy and **can never be a carrier**, so a brindle stallion throws no brindle sons and every daughter a carrier (non-det). &dagger;`Y` is the reserved placeholder, not a real allele
+| tiger eye | `TE1`/`TE2`/`N` | wild, `tiger-eye-carrier` (a wild type), `tiger-eye-amber` (`TE1`-bearing), `tiger-eye-yellow` (`TE2/TE2`) | 1/70 per allele - but **26% of Puerto Rican Paso Finos** | **the only gene that changes just the eyes.** Amber `#C8811E` / yellow `#D6B341` iris, coat untouched. Its outcomes are `marker()`s, not wild types - the eyes are baked into the texture so it belongs in `coatCode()` - and **deterministic**, so it costs the cache one entry per outcome rather than one per horse. Loses to a white locus's blue (see the eye-colour channel) |
 | roan | `Rn`/`rn` | wild, `roan` | 1/30 per allele | high-freq `BodyNoise` white-hair dither on the barrel + upper legs; head / mane / tail / lower legs stay solid (non-det) |
 | tobiano | `To`/`to` | wild, `tobiano` | 1/50 per allele | big smooth-edged white patches from a low-freq noise field **biased toward the topline** so they cross the back; white legs, coloured head (non-det) |
 | leopard complex | `LP`/`lp` &middot; `PATN1`/`n` &middot; `PATN2`/`n` | `LP`: wild, `mottled`, `varnish-roan`, `leopard`, `fewspot`, `blanket`, `snowcap`, `semi-leopard`. PATN1/PATN2: **wild only** | `LP` 1/40 per allele; PATN **only on an `LP` founder** | **three loci, the model's only cross-locus gene.** `LP` alone = the appaloosa characteristics (roaning that spares the bony parts, a scatter of spots) + the always-on triad (striped hooves + white sclera, overlay phase); **mottled skin not built**. `PATN1` &rarr; leopard / fewspot (spots), `PATN2` &rarr; blanket / snowcap (a hip sheet), both &rarr; semi-leopard. Zygosity of `LP` flips spot-heavy &harr; near-white. `LeopardGene.expressionIn` reads the modifier pairs; `coatDependsOn()` = `[patn1, patn2]` folds them into `coatCode()` (only when `LP` paints). `LP/LP` &rarr; **CSNB** (informational). "White finds white" not applied (non-det for every `LP` outcome) |
@@ -3728,10 +3976,10 @@ point of the revert: the corridor no longer grows when a gene is added.
   `buildStartCap`) on the last segment. Pens are still built lazily as you walk.
 - **`GenotypeCatalog` is untouched and still used** - by the tests, and by
   whatever punnett display gets built. It just no longer drives the dimension.
-  `size()` is **924 844 034** and `totalGenotypes()`
-  **52 933 214 613 797 373 206 937 600 000**; see "the genetics model" for what
-  those numbers mean. (`size()` last moved with the LUT locus, which doubled the
-  unmasked entries; the particle locus and the four body-stat genes did not
+  `size()` is **11 098 128 386** and `totalGenotypes()`
+  **42 875 903 837 175 872 297 619 456 000 000**; see "the genetics model" for
+  what those numbers mean. (`size()` last moved with brindle and tiger eye, two
+  more coat genes; the particle locus and the four body-stat genes did not
   touch it. `totalGenotypes()` is a `BigInteger` since the particle locus. The
   corridor moved with none of them, which is the whole point of the revert.)
 
@@ -3944,9 +4192,17 @@ Design follow-ups (not just "go look at it"):
    pre-resolved neck/head/ear pivots; markings on the foal face/neck can land
    loosely. Also the foal mesh has no MANE/MUZZLE part, so bay foal "black up
    the face" is coarse. Foals are also the top **unverified** item.
-3. **Genetic eye colour** - the eyes render correctly but are copied verbatim
-   from the template (`CoatRegions.redrawEyes`). Wants its own gene; the
-   classic hook is blue eyes on cream double-dilutes.
+3. **Closed 2026-09-06: eye colour is a channel.** `EyeColorContribution` +
+   `EyeColor` (a ranked claim) + `CoatOverlay.tintIris`, resolved once by the
+   composer in the overlay phase. Tiger eye claims amber, the four white loci
+   claim blue, and **blue out-ranks amber** because a depigmented iris has no
+   pigment left to recolour. **The iris is the *dark* texels** - the sclera stays
+   white - which is the opposite of what `shadeToward` does, and was the trap.
+   What is left is content, not machinery: **blue-eyed creams** (a double-dilute
+   cream has blue eyes and MATP does not claim one - two lines), **champagne's
+   amber**, and **one** blue eye rather than two, which splash horses often have
+   and which would want to be epigenetic - putting the locus back in the
+   per-horse texture fingerprint for four texels. `wiki/roadmap.html#eyes`.
 4. **White markings beyond splash** - the framework is ready (natural +
    non-deterministic gene); sock distributions, roan and rabicano slot in the
    same way.
@@ -4176,18 +4432,21 @@ Design follow-ups (not just "go look at it"):
    fluid check, not the block tag. Feed-bond fires on `EntityInteract` for any
    `isFood` stack and is **not** dose/temper-aware.
 
-22. **Sex is a gene, but nothing is sex-*linked* yet** (`roadmap.html#sex-linked`, second
-   half). The locus is built and `HorseRecord.sex` is derived from it, which was
-   the prerequisite; what's left is the inheritance *mode*. Specifically:
-   `Gene` has no autosomal / X-linked / Y-linked declaration; `breedWith` has no
-   two extra cases (sire gives his `X` to a filly and his `Y` to a colt, mirrored
-   for Y-linked); `Gene.canOccur` is the seam the catalogue already filters on
-   but it doesn't consult a mode, so an `X/X` mare at a Y-linked locus would
-   still be enumerated; a founder table can't yet say "a colt draws one allele
-   here, a filly two"; and no surface writes the hemizygous `X-`/`Y-` prefix.
-   **Brindle** (§4.2) is the gene that wants all of it. Also unbuilt: any
-   *sexual dimorphism* in the coat - sex paints nothing and deliberately never
-   will, so a stallion's crest would be a separate gene reading this one.
+22. **Closed 2026-09-06: sex-linked inheritance is built, and brindle proves
+   it.** `Gene.inheritance()` declares the mode; `breedWith` routes the sire's
+   copy by the foal's own sex (and still throws the second coin away, so two
+   booleans per gene holds); `Gene.sexConsistent` keeps impossible combinations
+   out of the catalogue and out of the random splice; a hemizygous copy lives in
+   a reserved placeholder slot and displays as `X-Brn`; founder tables are
+   sex-aware. `wiki/gene-brindle.html` and `wiki/genetics-model.html#sex-linked`.
+   **What is left:** nothing is `Y_LINKED` yet (the mirror case is built and
+   waiting for a gene); a punnett square for a sex-linked gene is a different
+   square and the punnett display does not exist at all; and the **gene-inspect
+   popup and the paper dump still print the raw pair**, so a stallion's brindle
+   locus reads `Brn / No copy (Y chromosome)` there - only the short form has the
+   prefix. Also still unbuilt, and a different thing entirely: any *sexual
+   dimorphism* in the coat. Sex paints nothing and deliberately never will, so a
+   stallion's crest would be a separate gene reading this one.
 
 23. **The whole trait / size / health layer is unplayed.** Thirteen genes, a new
    subsystem, four attributes and a death handler, and none of it has been seen
@@ -4281,9 +4540,13 @@ Design follow-ups (not just "go look at it"):
    "from below" hit the spine and left the belly coloured. Swapped 2026-09-05
    (owner diagnosed it); measured bold-splash back white ~90% -> ~35%, belly ->
    100%. `coat-golden.txt` regenerated. Also already fixed: face markings under
-   the jaw (shared vocabulary). **Two residual calibration items remain**, both
-   about the *degree* of white now that it is in the right place, and both still
-   whole-horse-AABB rather than per-part:
+   the jaw (shared vocabulary). **And splash's own calibration is fixed too
+   (2026-09-06)**: both painters measure against a topline reference
+   (`WhitePattern.toplineHeight` = `bounds(skin, BODY).yMax()`) on a convex ramp,
+   so a single-copy splash stops at the upper cannon (41% legs, **0% belly, 0%
+   back**) instead of over the barrel - see the status snapshot. **Two residual
+   calibration items remain**, both about the *degree* of white now that it is in
+   the right place, and both still whole-horse-AABB rather than per-part:
    - **`EdnrbGene`'s flank band does not bite on the barrel.** `BAND_LO` 0.28
      and `BAND_HI` 0.74 are fractions of `bodyBounds` - the **whole-horse**
      AABB, hoof to ear tip - but the barrel spans only 0.326-0.622 of that. So
@@ -4390,9 +4653,13 @@ Design follow-ups (not just "go look at it"):
    which for a 40-allele locus like particle is a near-guaranteed weird
    outcome, and for a lethal-carrying locus can hand a foal a lethal genotype
    (the draw is over `canOccur` pairs, so an *embryonic* lethal is excluded, but
-   a *birth* lethal like `O/O` is reachable). Whether that is a feature (gene splice
-   is gene splice) or wants a per-gene guard is a design call. `Gene.spliceTable()` is
-   the seam.
+   a *birth* lethal like `O/O` was reachable). **The lethal half is closed
+   2026-09-06**: `SpliceSafety` filters the pool to loci that cannot kill or cost
+   hearts, derived by resolving every combination through `HorseTraits` rather
+   than from a typed list, so a health gene added later is excluded by having
+   done its job. What is left is the *flavour* complaint - a uniform draw over a
+   40-allele locus like particle is a near-guaranteed oddity, and a per-gene
+   `Gene.spliceTable()` is still the seam for that.
 
 36. **The LUT gene is unplayed.** No horse has been seen rendered against the
    blue/pink gradient in game. Unknowns: does `lutbluepink.png` read as intended
@@ -4420,6 +4687,46 @@ Design follow-ups (not just "go look at it"):
    nothing else, a discovered carrot-bearing gene selected" gate is the fiddly
    part). Server side booted clean (`MenuType` + both payloads register).
    `wiki/verification.html` §0-B, and re-run §0 inside the new window.
+
+38. **Brindle, tiger eye and the recalibrated white are all unplayed**, and the
+   white one is the widest-reaching thing this project has shipped in a while:
+   `PAX3`'s `SW2` is on 90% of founders, so the topline recalibration changes
+   what an *ordinary* horse looks like. The measurements are in the status
+   snapshot and the checklist is `wiki/verification.html` §0-G. The specific
+   unknowns worth naming: whether the eight-step `KIT` ladder still reads as
+   eight steps now that the low end is genuinely low; whether the **saturating**
+   stacking signal still lets the two splash loci visibly stack (it is tuned so
+   `SW1/N + SW2/N` reads as a bold splash) while *not* turning a tobiano
+   near-white; whether brindle's untouched head is a visible seam at the poll;
+   and whether **a two-texel amber iris reads as an amber eye at riding
+   distance** - which is the single most likely thing to need another pass.
+
+39. **`GeneCodeDisplay.trailingOrder()` was rotten and is now the template for
+   fixing gap #13.** It was a hand-written gene list plus `Genes.loaded()`, so
+   every *built-in* gene added after it was written vanished from the short form
+   **silently** - by the time it was caught it had swallowed the leopard complex,
+   the LUT locus, the cutie mark, the particle locus and the three magical
+   body-stat genes, and nothing failed until a catalogue test happened to find
+   two entries with the same label. It now appends every other registered gene in
+   `(priority, key)` order after the curated head. **The lesson is the general
+   one:** a derived list written by hand rots, and it rots without an error.
+   The remaining instances of the same shape are the ones gap #13 names -
+   `wiki/api-reference.html`'s hand-transcribed signatures and every derived
+   number typed into prose - and the cheap fix there is still unwritten: a
+   `:common:test` that greps the docs for `Genes.codeOrder().size()`,
+   `GenotypeCatalog.size()` and `totalGenotypes()` and fails when a page
+   disagrees. **Three sessions in a row have now found stale derived numbers by
+   hand.**
+
+40. **`wiki/compatibility.html` is entirely unverified against another mod.**
+   Every claim on it is read off this mod's own source and off how NeoForge's
+   registries and events work - not off a play session with a modpack. The
+   renderer conflict is a certainty (only one mod can own
+   `EntityType.HORSE`'s renderer); everything marked "fine" is a prediction. The
+   page says so, but it is worth repeating here: it is a map of where to look
+   when something breaks, not a compatibility report. The one thing that would
+   make it real is installing this beside a tack mod and a performance mod and
+   seeing what happens.
 
 ## License
 

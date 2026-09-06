@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Compatibility &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="nav.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow core">Project <span class="sep">/</span> living alongside other mods</p>
+<h1>Compatibility</h1>
+<p class="lede">
+    This mod does not add a horse. It takes the <strong>vanilla</strong>
+    <code>minecraft:horse</code> and hangs everything &mdash; the genome, the coat, the
+    body stats, the herd &mdash; off it as data attachments and a render override. That
+    one decision is the single biggest thing determining how it gets along with other
+    mods, and this page is about what it buys and what it costs.
+</p>
+
+<h2 id="decision">The decision: attachments, not a custom entity</h2>
+<p>
+    The source design documents this mod grew out of assumed an
+    <code>EntityCustomHorse extends HorseEntity</code>, with vanilla horse spawns zeroed
+    out by biome modifiers and replaced with the mod's own. <strong>That approach is
+    dead and is not coming back.</strong> The codebase has never worked that way and
+    now deliberately never will: the record, the attachments, both sync payloads, the
+    trait resolution and the coat all attach to the vanilla <code>Horse</code>, and the
+    visual override the documents cited as the reason for a subclass already works
+    without one.
+</p>
+<p>What the attachment approach buys, and why the call went this way:</p>
+<ul>
+    <li><strong>Horses in existing worlds just work.</strong> A subclass can only
+        apply to horses spawned after it exists; every horse in every world already
+        saved stays a vanilla horse forever, or needs a conversion pass that is its own
+        source of bugs. With attachments a horse acquires a genome the first time it is
+        ticked, whenever that is.</li>
+    <li><strong>The 1.12.2 backport stays cheap.</strong> Registering an entity type,
+        replacing spawns and porting a renderer is version-specific work three times
+        over; an attachment is a capability there and a data attachment here.</li>
+    <li><strong>Spawn replacement is the fragile part, and we skip it.</strong>
+        Zeroing vanilla horse spawns and adding your own is exactly the mechanism that
+        breaks when another mod does the same thing, changes biome spawn lists, or adds
+        horses of its own.</li>
+    <li><strong>Nothing needs it.</strong> Nothing in the gameplay layer &mdash; stalls,
+        carrots, whistles, the browser, the dimension &mdash; requires a new entity
+        type.</li>
+</ul>
+<p>
+    The cost is real and worth stating: a mod that <em>replaces</em> the horse renderer,
+    or that spawns horses with its own baked variant, will collide (see below). We take
+    that trade because the alternative collides with a much larger set of things and
+    breaks every existing save as well.
+</p>
+
+<h2 id="surface">What this mod actually touches</h2>
+<p>
+    The honest compatibility surface, so a conflict can be reasoned about rather than
+    guessed at.
+</p>
+<table class="data">
+    <thead><tr><th>Area</th><th>What we do</th><th>Conflict risk</th></tr></thead>
+    <tbody>
+    <tr>
+        <td>Entity registry</td>
+        <td><strong>Nothing.</strong> No new entity type, no spawn-egg-driven entity, no
+            replacement of <code>minecraft:horse</code>.</td>
+        <td class="ok">None</td>
+    </tr>
+    <tr>
+        <td>Entity renderer</td>
+        <td>Replace the renderer for <code>EntityType.HORSE</code> with
+            <code>GeneticHorseRenderer</code>, using our own 128px models
+            (<code>HdHorseModel</code> / <code>HdBabyHorseModel</code>) and a generated
+            texture per genome.</td>
+        <td class="bad">High &mdash; only one mod can own a renderer</td>
+    </tr>
+    <tr>
+        <td>Data attachments</td>
+        <td>Four on a horse: the record (genome + pedigree + breed), horse care
+            (bond / herd), cooldowns, and the live breeding-carrot window.</td>
+        <td class="ok">None &mdash; namespaced, additive</td>
+    </tr>
+    <tr>
+        <td>Attributes</td>
+        <td>Write the <em>base</em> values of <code>MOVEMENT_SPEED</code>,
+            <code>MAX_HEALTH</code>, <code>JUMP_STRENGTH</code> and <code>SCALE</code>
+            from the genotype, on every horse join.</td>
+        <td class="warn">Medium &mdash; we overwrite, see below</td>
+    </tr>
+    <tr>
+        <td>AI goals</td>
+        <td>Add three goals to every horse: bond-follow, wild-herd, and a melee attack
+            (plus a target goal). Vanilla goals are left alone.</td>
+        <td class="warn">Medium &mdash; goal priority collisions</td>
+    </tr>
+    <tr>
+        <td>Spawning</td>
+        <td>Two biome modifiers that <em>add</em> horse spawns (herds and loners). We
+            remove nothing.</td>
+        <td class="warn">Medium &mdash; additive, so densities stack</td>
+    </tr>
+    <tr>
+        <td>Interactions</td>
+        <td>Cancel <code>EntityInteract</code> for: name tags, shears, buckets on a
+            milk-gene horse, breeding carrots, seed jars, stall signs, and the dev
+            stick / clock.</td>
+        <td class="warn">Medium &mdash; first handler wins</td>
+    </tr>
+    <tr>
+        <td>Recipes / items / blocks</td>
+        <td>All namespaced under <code>horsegenetics</code>. One block
+            (<code>hay_portal</code>), one menu, one dimension.</td>
+        <td class="ok">None</td>
+    </tr>
+    <tr>
+        <td>Loot tables</td>
+        <td>A global loot modifier injecting research papers into ~8 vanilla chest
+            tables.</td>
+        <td class="ok">None &mdash; GLMs compose</td>
+    </tr>
+    </tbody>
+</table>
+
+<h2 id="renderer">The renderer is the real conflict</h2>
+<p>
+    <strong>Only one mod can own the renderer for <code>EntityType.HORSE</code>.</strong>
+    Whichever registers last wins, and if it is not us, every horse renders as a plain
+    white horse &mdash; the genome is still there, still inherited, still correct, and
+    completely invisible. If it is us, the other mod's textures are ignored.
+</p>
+<p>Concretely, that means we are incompatible with:</p>
+<ul>
+    <li><strong>Horse texture packs implemented as mods</strong> that swap the horse
+        renderer or model rather than shipping resources.</li>
+    <li><strong>Other horse-genetics mods</strong> (Realistic Horse Genetics, Swem's
+        coat system, and their kin). Two mods both generating a coat from their own
+        genome is not a conflict that can be reconciled &mdash; they are two answers to
+        the same question.</li>
+    <li><strong>Model-replacement mods</strong> that give the horse a new mesh. Our coat
+        generator projects into <em>our</em> UV layout
+        (<code>HorseSkinGeometry</code>); a different mesh means every pattern lands in
+        the wrong place.</li>
+</ul>
+<p>
+    A <em>resource pack</em> that retextures horses is a different matter and is simply
+    ignored: we never sample the vanilla horse textures. Our template is
+    <code>horse_white.png</code> in this mod's own namespace.
+</p>
+
+<h2 id="attributes">Attributes: we overwrite, and that is deliberate</h2>
+<p>
+    A horse's speed, health, jump and scale are resolved from its genotype and written
+    as attribute <strong>base</strong> values every time it joins the world &mdash; not
+    only at birth. That is on purpose: it is what lets a re-tuned gene, or a change to
+    the health config, reach horses that already exist, and it is what stops vanilla's
+    own randomisation from surviving.
+</p>
+<p>
+    The consequence for other mods is narrow but sharp. Anything that sets a horse's
+    <em>base</em> speed or health will be overwritten on the next join. Anything that
+    applies an <code>AttributeModifier</code> &mdash; which is how well-behaved mods,
+    potions, and equipment do it &mdash; composes correctly on top of ours and is
+    unaffected. If a mod's horse buff stops working, that is the distinction to check
+    first.
+</p>
+
+<h2 id="ai">AI goals and interactions</h2>
+<p>
+    We add goals at priorities 3 (melee), 4 (bond follow) and 6 (wild herd), and give
+    <code>EntityType.HORSE</code> an <code>ATTACK_DAMAGE</code> attribute it does not
+    normally have. A mod adding its own horse goals at those priorities will interleave
+    unpredictably rather than crash; a mod that <em>clears</em> the goal selector will
+    silently disable herding and bond-following.
+</p>
+<p>
+    Interaction handlers are first-come. We cancel the event on both sides for the
+    items we claim, so a mod that also wants to do something with shears or a bucket on
+    a horse will find that only one of us runs. There is no priority negotiation here
+    and adding one is not planned.
+</p>
+
+<h2 id="spawning">Spawning stacks</h2>
+<p>
+    Our biome modifiers are purely additive &mdash; we add herd spawns to 37 biomes and
+    loner spawns across the overworld, and we remove nothing. So installing this
+    alongside another mod that also adds horse spawns gives you the sum of both, which
+    is usually more horses than either author intended. If a world feels overrun, that
+    is the first thing to check, and the fix is a datapack overriding
+    <code>add_horse_herds</code> / <code>add_horse_loners</code>.
+</p>
+
+<h2 id="third-party-genes">Third-party genes are supported, and are the right seam</h2>
+<p>
+    The intended way for another mod (or a pack author) to extend this one is
+    <strong>not</strong> to touch our classes. It is to add a gene:
+</p>
+<ul>
+    <li>a <a href="gene-format.html">gene file</a> dropped in
+        <code>config/horsegenetics/genes/</code>, or shipped on the classpath in a mod's
+        own <code>horsegenetics/genes/index.json</code> &mdash; no Java, no rebuild;</li>
+    <li>or, for something the file format cannot express, a Java
+        <a href="modding.html"><code>Gene</code></a> registered from a mod constructor.</li>
+</ul>
+<p>
+    Both interleave into the registry by <a href="genetics-model.html">priority</a>, so a
+    third-party natural gene lands in the right place in the paint order without anyone
+    editing a list. <strong>Register from the mod constructor</strong>: every
+    registration lengthens the genotype code by a segment, so a gene registered after
+    something has parsed a code invalidates it.
+</p>
+<p>
+    A gene added or removed changes the code string, and this mod keeps <strong>no
+    back-compatibility</strong> for that &mdash; adding or removing a gene means existing
+    horses regenerate their coats, and a saved code with a different segment count will
+    not parse. Adding a gene mod mid-world is therefore a fresh-world operation for now.
+</p>
+
+<h2 id="known">Known-good and known-bad</h2>
+<table class="data">
+    <thead><tr><th>Kind of mod</th><th>Verdict</th></tr></thead>
+    <tbody>
+    <tr><td>Resource packs retexturing horses</td><td class="ok">Fine &mdash; ignored, we generate our own texture</td></tr>
+    <tr><td>Mods adding tack, saddles, armour, storage</td><td class="ok">Fine &mdash; we touch none of it</td></tr>
+    <tr><td>Mods adding horse-adjacent items or food</td><td class="ok">Fine</td></tr>
+    <tr><td>Mods adding <em>new</em> equine entity types (donkeys, unicorns, their own mob)</td><td class="ok">Fine &mdash; we only claim <code>minecraft:horse</code></td></tr>
+    <tr><td>Performance / rendering mods (Sodium and friends)</td><td class="warn">Should be fine; the coat is a <code>DynamicTexture</code> upload, nothing exotic</td></tr>
+    <tr><td>Mods that add horse spawns</td><td class="warn">Works, but densities stack</td></tr>
+    <tr><td>Mods that set horse base attributes</td><td class="warn">Overwritten on join; use modifiers instead</td></tr>
+    <tr><td>Other horse-genetics / coat-generation mods</td><td class="bad">Incompatible &mdash; two answers to one question</td></tr>
+    <tr><td>Mods replacing the horse model or renderer</td><td class="bad">Incompatible</td></tr>
+    <tr><td>Mods replacing <code>minecraft:horse</code> with a subclass</td><td class="bad">Incompatible &mdash; our attachments never reach it</td></tr>
+    </tbody>
+</table>
+
+<h2 id="unverified">Unverified</h2>
+<p>
+    <strong>None of this has been tested against another mod.</strong> Every claim above
+    is read off this mod's own source and off how NeoForge's registries and events work,
+    not off a play session with a modpack. The rows marked "fine" are predictions, and
+    the renderer row is the only one that is a certainty. Treat this page as the map of
+    where to look when something breaks, not as a compatibility report.
+</p>
+
+</article>
+</main>
+</body>
+</html>

@@ -270,7 +270,7 @@ public Expression expressionOf(AllelePair pair) {
     handing back a wild type that would make the bug invisible.
 </p>
 
-<h2 id="registry">The forty-six registered genes</h2>
+<h2 id="registry">The forty-eight registered genes</h2>
 
 <p>
     The table is in <strong><code>codeOrder()</code></strong> &mdash; the one
@@ -303,9 +303,11 @@ public Expression expressionOf(AllelePair pair) {
 <tr><td>30</td><td><a href="gene-silver.html">silver</a></td><td><span class="allele dom">Z</span> / <span class="allele wild">z</span></td><td>wild, silver</td><td>1/60 per allele</td><td>natural</td></tr>
 <tr><td>32</td><td><a href="gene-mushroom.html">mushroom</a></td><td><span class="allele rec">Mu</span> / <span class="allele wild">mu</span></td><td>wild, mushroom-carrier, mushroom</td><td>1/34 per allele</td><td>natural</td></tr>
 <tr><td>34</td><td><a href="gene-dun.html">dun</a></td><td><span class="allele dom">D</span> / <span class="allele dom">d1</span> / <span class="allele wild">d2</span></td><td>wild, primitive-marks, dun&sect;</td><td>1/24 <code>D</code>, 1/10 <code>d1</code></td><td>natural</td></tr>
+<tr><td>36</td><td><a href="gene-brindle.html">brindle</a></td><td><span class="allele rec">Brn</span> / <span class="allele wild">n</span> / <span class="allele wild">Y</span>&#9679;</td><td>wild, brindle-carrier, brindle</td><td>2% per <code>X</code> &mdash; 2% of stallions, 0.04% of mares</td><td>natural</td></tr>
 <tr><td>40</td><td><a href="gene-matp.html">MATP</a></td><td><span class="allele dom">Cr</span> / <span class="allele rec">prl</span> / <span class="allele wild">N</span></td><td>wild, pearl-carrier, single-cream, classic-pearl, double-dilute</td><td>1/30 <code>Cr</code>, 1/22 <code>prl</code></td><td>natural</td></tr>
 <tr><td>50</td><td><a href="gene-champagne.html">champagne</a></td><td><span class="allele dom">Ch</span> / <span class="allele wild">c</span></td><td>wild, champagne</td><td>1/40 per allele</td><td>natural</td></tr>
 <tr><td>55</td><td><a href="gene-grey.html">grey</a></td><td><span class="allele dom">G</span> / <span class="allele wild">g</span></td><td>wild, grey</td><td>1/16 per allele</td><td>natural</td></tr>
+<tr><td>60</td><td><a href="gene-tiger-eye.html">tiger eye</a></td><td><span class="allele rec">TE1</span> / <span class="allele rec">TE2</span> / <span class="allele wild">N</span></td><td>wild, tiger-eye-carrier, tiger-eye-amber, tiger-eye-yellow</td><td>1/70 per allele &mdash; but 26% of Puerto Rican Paso Finos</td><td>natural (eyes only)</td></tr>
 <tr><td>70</td><td><a href="gene-roan.html">roan</a></td><td><span class="allele dom">Rn</span> / <span class="allele wild">rn</span></td><td>wild, roan</td><td>1/30 per allele</td><td>natural</td></tr>
 <tr><td>72</td><td><a href="gene-tobiano.html">tobiano</a></td><td><span class="allele dom">To</span> / <span class="allele wild">to</span></td><td>wild, tobiano</td><td>1/50 per allele</td><td>natural</td></tr>
 <tr><td>73</td><td><a href="gene-leopard.html">leopard complex</a></td><td><span class="allele dom">LP</span> / <span class="allele wild">lp</span></td><td>wild, mottled, varnish-roan, leopard, fewspot, blanket, snowcap, semi-leopard&para;&para;</td><td>1/40 per allele</td><td>natural</td></tr>
@@ -336,6 +338,13 @@ public Expression expressionOf(AllelePair pair) {
 </div>
 
 <p>
+    &#9679; <strong>Brindle is the model&rsquo;s only sex-linked gene.</strong>
+    Its <code>Y</code> is not an allele a horse can express &mdash; it is the
+    <em>reserved placeholder</em> a hemizygous stallion&rsquo;s spare slot holds, meaning
+    &ldquo;this locus is not on the Y&rdquo;. That is what lets a genotype stay one
+    two-slotted <code>AllelePair</code> per gene with no structural change, and it is why
+    a stallion carrying brindle displays as <code>X-Brn</code> rather than beside a fake
+    second copy. See <a href="gene-brindle.html">its page</a>.
     &para; <strong>Mane and tail colour are the model&rsquo;s first genes whose
     heterozygote paints with <em>two</em> allele copies at once</strong>, one colour
     each, which is why they need
@@ -444,6 +453,82 @@ public Expression expressionOf(AllelePair pair) {
     <a href="gene-matp.html">its page</a>. <strong>Dun is the other
     three-allele locus</strong>, and the one that shows why a dominance label
     could never have worked: see <a href="gene-dun.html">its page</a>.
+</p>
+
+<h2 id="sex-linked">Sex-linked inheritance</h2>
+
+<p>
+    Every gene in the model is <strong>autosomal</strong> except one.
+    <code>Gene.inheritance()</code> declares <code>AUTOSOMAL</code> (the default),
+    <code>X_LINKED</code> or <code>Y_LINKED</code>, and
+    <a href="gene-brindle.html">brindle</a> is the gene that made it worth building: a
+    stallion has one <code>X</code>, so he carries one copy and <strong>can never be a
+    carrier</strong>, while a mare needs two. That asymmetry produces pedigree shapes no
+    autosomal gene can.
+</p>
+
+<h3>The reserved slot</h3>
+<p>
+    A genotype stays <strong>one <code>AllelePair</code> per gene, two slots,
+    always</strong>. A hemizygous horse fills the slot it does not really have with a
+    <strong>reserved placeholder allele</strong> the gene declares:
+</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Mode</th><th>Mare <code>X/X</code></th><th>Stallion <code>X/Y</code></th></tr></thead>
+<tbody>
+<tr><td><code>AUTOSOMAL</code></td><td>two real alleles</td><td>two real alleles</td></tr>
+<tr><td><code>X_LINKED</code></td><td>two real alleles</td><td>one real allele + reserved <code>Y</code></td></tr>
+<tr><td><code>Y_LINKED</code></td><td>two reserved <code>X</code></td><td>reserved <code>X</code> + one real allele</td></tr>
+</tbody>
+</table>
+</div>
+<p>
+    That is what keeps the change small. <code>Genotype</code> is untouched,
+    <a href="#epigenetics">epigenome alignment</a> is untouched (the reserved slot simply
+    carries epigenetics nothing reads), the code string keeps its shape, and parsing needs
+    no special case because the placeholder is a declared allele like any other.
+</p>
+<p>
+    The placeholder must be declared at the <em>end</em> of <code>alleles()</code> that
+    its slot sorts to &mdash; <code>Y</code> <strong>last</strong> on an
+    <code>X</code>-linked gene, <code>X</code> <strong>first</strong> on a
+    <code>Y</code>-linked one &mdash; because <code>AllelePair</code> canonicalises on
+    declaration order. <code>Genes.register</code> refuses a gene that gets this wrong,
+    since the failure otherwise is not an exception but a gene that quietly misbehaves for
+    exactly one sex.
+</p>
+
+<h3>What changes in breeding</h3>
+<ul>
+    <li>The sire's copy is <strong>decided by the foal's own sex</strong> rather than
+        drawn. The sex locus is priority 1, so it is always already resolved by the time
+        any other gene is reached. On an <code>X</code>-linked locus the sire gives his
+        <code>X</code>-borne allele to a filly and his <code>Y</code> &mdash; nothing
+        &mdash; to a colt; <code>Y</code>-linked is the mirror. The dam is unchanged in
+        both.</li>
+    <li><strong>The second coin is still flipped and thrown away.</strong> Two
+        <code>nextBoolean()</code> per gene is an invariant a great deal leans on
+        &mdash; the golden coats, the gamete-bias equivalence test, every claim that
+        adding a gene shifts the stream by a known amount &mdash; and a locus that
+        quietly consumed one would make the random stream depend on a foal's sex.</li>
+    <li><code>Gene.sexConsistent</code> drops combinations no horse of <em>either</em>
+        sex could carry, so the <a href="#catalogue">catalogue</a> does not enumerate
+        them and the random splice cannot roll them.</li>
+    <li><code>Gene.realAlleles(pair)</code> &mdash; two for a diploid horse, one for a
+        hemizygous one, none for a mare at a <code>Y</code>-linked locus &mdash; is what
+        a sex-linked gene's <code>expressionOf</code> counts. &ldquo;Every real copy is
+        <code>Brn</code>&rdquo; covers <em>recessive in mares</em> and <em>always shows in
+        stallions</em> in one sentence.</li>
+    <li>The founder table has to be sex-aware, and a hemizygous one is written out
+        rather than derived from Hardy-Weinberg &mdash; Hardy-Weinberg is a statement
+        about diploid loci and this one is not.</li>
+</ul>
+<p>
+    On screen a hemizygous copy carries an <code>X-</code> / <code>Y-</code> prefix
+    (<code>X-Brn</code>), unambiguous on sight because <code>-</code> is the <em>gene</em>
+    separator in a code string and can never appear inside an allele token. The code
+    string itself is unaffected.
 </p>
 
 <h2 id="epigenetics">Epigenetics ride on the allele, not on the horse</h2>
@@ -657,7 +742,7 @@ public boolean hasVisibleNonDeterministic();</code></pre>
 <h2 id="noncoat">Genes that never paint</h2>
 
 <p>
-    Twenty-four of the registry&rsquo;s forty-six built-in genes change nothing
+    Twenty-four of the registry&rsquo;s forty-eight built-in genes change nothing
     about a horse&rsquo;s colour: the <a href="gene-sex.html">sex locus</a>, the six
     performance and size loci, the seven health loci, the two
     <a href="gene-leopard.html">leopard-complex modifiers</a>
@@ -698,7 +783,7 @@ public boolean hasVisibleNonDeterministic();</code></pre>
         861 combinations collapsing to one entry &mdash; and each
         <a href="gene-leopard.html">leopard-complex modifier</a>&rsquo;s three
         combinations collapsing to one. The catalogue stands at
-        <strong>1 849 688 066</strong> distinct coats. The particle locus and the four
+        <strong>11 098 128 386</strong> distinct coats. The particle locus and the four
         body-stat genes left it untouched; the two genes that <em>do</em> change the
         coat &mdash; the two-outcome <a href="gene-lut.html">LUT</a> locus and now the
         <a href="gene-leopard.html">leopard complex</a> (coarse
@@ -707,7 +792,7 @@ public boolean hasVisibleNonDeterministic();</code></pre>
         <code>Integer.MAX_VALUE</code>, so it (and <code>get()</code>) are
         <code>long</code> now; nothing in production indexes the catalogue.</li>
     <li>The <em>raw</em> genotype count is
-        <strong>1 429 196 794 572 529 076 587 315 200 000</strong>. All real, all heritable,
+        <strong>42 875 903 837 175 872 297 619 456 000 000</strong>. All real, all heritable,
         all distinguishable &mdash; just not by colour. (The leopard complex&rsquo;s
         three loci, three combinations each, multiplied it by 27.)
         <strong>It is a <code>BigInteger</code> now, and has to be</strong>: the

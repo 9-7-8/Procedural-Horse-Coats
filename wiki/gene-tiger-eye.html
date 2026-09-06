@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tiger eye &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="nav.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow natural">Natural gene <span class="sep">/</span> eyes only</p>
+<h1>Tiger eye (SLC24A5)</h1>
+<p class="lede">
+    A bright amber iris in a horse whose coat is entirely ordinary. It is the first gene
+    in the mod that changes <strong>only the eyes</strong>, and the reason the
+    <a href="#channel">eye-colour channel</a> exists at all. Essentially confined to the
+    Puerto Rican Paso Fino, in life and here.
+</p>
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd>horsegenetics.tiger_eye</dd></div>
+    <div><dt>Priority</dt><dd>60 (natural band, after grey, before the white loci)</dd></div>
+    <div><dt>Alleles</dt><dd><span class="allele rec">TE1</span> <span class="allele rec">TE2</span> <span class="allele wild">N</span></dd></div>
+    <div><dt>Combinations</dt><dd>6, all carryable &mdash; 4 outcomes</dd></div>
+    <div><dt>Outcomes</dt><dd>wild, <code>tiger-eye-carrier</code> (a wild type), <code>tiger-eye-amber</code>, <code>tiger-eye-yellow</code></dd></div>
+    <div><dt>Default allele</dt><dd>N</dd></div>
+    <div><dt>Wild frequency</dt><dd>~1 in 70 per <code>TE1</code>, rarer for <code>TE2</code> &mdash; but <strong>26% of Puerto Rican Paso Finos carry a copy</strong></dd></div>
+    <div><dt>Founder draws</dt><dd>1 &times; nextFloat()</dd></div>
+    <div><dt>Coat effect</dt><dd>the iris texels only &mdash; deterministic, so it is out of the per-horse texture fingerprint</dd></div>
+</dl>
+
+<div class="note warn">
+    <span class="label">Built 2026-09-06, not yet play-tested</span>
+    <p>
+        The iris colour is asserted through the real pipeline in
+        <code>EyeColorTest</code> &mdash; a bay's black iris comes out
+        <code>#C8811E</code> and its sclera stays white. What is unknown is whether a
+        two-texel amber iris <em>reads</em> as an amber eye on a horse at riding distance,
+        or whether it needs to be brighter. Checklist on
+        <a href="verification.html">To be verified</a>.
+    </p>
+</div>
+
+<h2 id="table">The combination table</h2>
+<table class="data">
+    <thead><tr><th>Combination</th><th>Outcome</th><th>Effect</th></tr></thead>
+    <tbody>
+        <tr><td><code>N/N</code></td><td>wild</td><td>Ordinary dark eyes</td></tr>
+        <tr><td><code>TE1/N</code>, <code>TE2/N</code></td><td><code>tiger-eye-carrier</code></td><td>Nothing at all &mdash; not in the eyes, not in the coat</td></tr>
+        <tr><td><code>TE1/TE1</code>, <code>TE1/TE2</code></td><td><code>tiger-eye-amber</code></td><td>A bright amber iris, <code>#C8811E</code></td></tr>
+        <tr><td><code>TE2/TE2</code></td><td><code>tiger-eye-yellow</code></td><td>The paler, more yellow shade, <code>#D6B341</code></td></tr>
+    </tbody>
+</table>
+<p>
+    Recessive: one wild-type copy and nothing shows, so two carriers bred together is the
+    only way amber eyes appear. The two variants are the same trait a stop apart in shade
+    &mdash; which is what a combination table is for, and cheaper than inventing two
+    genes.
+</p>
+
+<h2 id="not-a-pattern">It is not a coat pattern</h2>
+<p>
+    Worth saying, because the breed reference this mod was built from files tiger eye
+    under coat patterns and it is not one. The coat is completely unaffected; only the
+    iris changes. That is precisely why it could not be built until the eye-colour
+    channel existed &mdash; there was nowhere for it to write.
+</p>
+<p>
+    It does still <strong>affect the baked coat texture</strong>, because the eyes are
+    drawn into it. So unlike the mod's other "paints nothing" genes, its expressing
+    outcomes are real markers rather than wild types: they stay in
+    <code>Genotype.coatCode()</code>, and two horses that differ only here do not share a
+    cached texture. They are <strong>deterministic</strong> &mdash; every amber eye is the
+    same amber &mdash; so the cache pays one entry per outcome and not one per horse.
+</p>
+
+<h2 id="channel">The eye-colour channel</h2>
+<p>
+    A horse has one iris colour, so "what colour are its eyes" has exactly one answer and
+    several genes have a claim on it. That makes it a <strong>channel</strong> with a
+    single owner and a contribution hook, like the <a href="gene-lut.html">LUT</a> and the
+    <a href="gene-cutie-mark.html">cutie mark</a> &mdash; not a gene that other genes
+    fight with. A gene implements <code>EyeColorContribution</code> and returns an
+    <code>EyeColor</code> claim; the composer collects them in code order during the
+    overlay phase and applies the highest-ranked one once.
+</p>
+<table class="data">
+    <thead><tr><th>Rank</th><th>Claimants</th><th>What kind of claim</th></tr></thead>
+    <tbody>
+        <tr><td>20 &mdash; depigmented</td><td>MITF, PAX3, EDNRB, KIT (broad white and up)</td><td>The white loci take the pigment out of the iris the same way they take it out of the coat &mdash; the blue eye those patterns are known for</td></tr>
+        <tr><td>10 &mdash; pigment</td><td>Tiger eye</td><td>Changes what colour the iris <em>is</em></td></tr>
+    </tbody>
+</table>
+<p>
+    <strong>Blue beats amber</strong>, and it has to: a depigmented iris has no pigment
+    left for a pigment gene to recolour. So a splashed white horse that also carries tiger
+    eye has blue eyes. This is the one ordering the ranking exists to settle.
+</p>
+<p>
+    Note the blue eye is <strong>not a new gene</strong> and never should be. It is a
+    property the white loci already have &mdash; the same failure of pigment cells to
+    reach the skin leaves them out of the iris &mdash; and a "blue eyes" locus that
+    mysteriously only ever appeared on white horses would be a worse model of the same
+    fact. See <a href="#blue">below</a> for who qualifies.
+</p>
+
+<h2 id="iris">The iris is the dark texels, not the sclera</h2>
+<p>
+    On the coat sheet an adult eye is a 2&times;2 block of <strong>pure black</strong>
+    &mdash; the iris and pupil together, there being no room for both at 128px &mdash;
+    beside a 2&times;2 block of near-white sclera. A foal's is the black block alone. So
+    eye colour means <strong>colouring the black texels and leaving the white ones
+    white</strong>, which is what <code>CoatOverlay.tintIris</code> does: it weights each
+    texel by how dark it already is (<code>1 - luma</code>), so black takes the colour
+    outright, white is untouched, and the antialiased grey between them takes a share,
+    which keeps the eye's shape.
+</p>
+<div class="note warn">
+    <span class="label">The obvious tool is the wrong one</span>
+    <p>
+        <code>shadeToward</code> scales its target by the texel's own <em>brightness</em>,
+        so that a gold hoof keeps the template's shading. Pointed at an eye it colours the
+        <strong>sclera</strong> and leaves the iris black &mdash; exactly backwards. It is
+        the right blend for <a href="gene-light.html">light</a>'s glowing gold eye and the
+        <a href="gene-leopard.html">leopard complex</a>'s white sclera rim, and it must
+        not be used for an iris.
+    </p>
+</div>
+<p>
+    All of this runs in the <a href="pipeline.html">overlay phase</a>, after
+    <code>CoatRegions.redrawEyes</code> has copied the template's eyes back &mdash; which
+    is the only point in the bake where an eye survives being written, and is exactly why
+    that phase exists.
+</p>
+
+<h2 id="blue">Who gets a blue eye</h2>
+<p>Two ways a horse qualifies, and it needs only one:</p>
+<ul>
+    <li><strong>Its own allele says so.</strong> Splash is <em>the</em> blue-eyed pattern,
+        diagnostic even when the white itself is modest, so any expressing
+        <a href="gene-mitf.html">MITF</a> or <a href="gene-pax3.html">PAX3</a> combination
+        qualifies. <a href="gene-ednrb.html">Frame</a> does too.
+        <a href="gene-kit.html">KIT</a> qualifies only from <code>broad-white</code>
+        upward &mdash; a sabino with four socks and a blaze has ordinary dark eyes,
+        because the white on it never reached the head.</li>
+    <li><strong>The horse is broadly white however it got there.</strong> Past 55% of the
+        coat depigmented, the eyes go with it. This covers the case no per-locus test can
+        see: a horse white from <em>two</em> mild alleles stacking has exactly the same
+        claim as one white from a single bold allele.</li>
+</ul>
+
+<h2 id="breed">Where to find it</h2>
+<p>
+    <code>SLC24A5</code> is a <a href="breeds.html">Puerto Rican Paso Fino</a> gene,
+    essentially confined to that breed in life, and it is distributed that way here: a
+    quarter of Paso Finos carry a copy and about one in twenty-five has the amber eyes,
+    against roughly one wild horse in five thousand. It is the clearest case in the mod of
+    a gene you find by knowing which breed to look in &mdash; and since the breed is
+    <code>RARE</code> and spawns in jungle, savanna, beach and mangrove swamp, finding one
+    is a trip rather than a wait.
+</p>
+
+</article>
+</main>
+</body>
+</html>
