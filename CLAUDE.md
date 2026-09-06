@@ -139,6 +139,20 @@ project. Its shape:
 
 ## Status snapshot (keep this current)
 
+- **Built 2026-09-05, NOT yet play-tested: name-tag rename window.** Right-clicking
+  a horse (with a real record) with **any** name tag - not just an anvil-renamed
+  one - now opens `client/HorseRenameScreen`: two fields (first / last name)
+  prefilled from `ClientHorseRecordCache`, a Rename + Cancel button. Confirm ->
+  `RenameHorsePayload` -> server re-checks range + a tag still in hand + not
+  both-blank, then `HorseRecords.rename` and consumes one tag (creative
+  exempt); Cancel consumes nothing. `HorseInteractionHandler`'s name-tag branch
+  now fires for any `Items.NAME_TAG`, cancels on both sides (no vanilla custom
+  name), and server-side sends `OpenHorseRenamePayload` (playToClient ->
+  `HorseRenameScreen.open`). The old `handleNameTag` (split-on-first-space,
+  needed `CUSTOM_NAME`) is deleted. Lang: `gui.horsegenetics.rename_horse` /
+  `.rename_confirm`. `:neoforge-26.1.2:build` green, `runServer` boots clean
+  (both payloads register). Checklist: `wiki/verification.html` §0-E.
+
 - **Built 2026-09-05, NOT yet play-tested: the cutie-mark gene + Horse Browser
   splice-recipe rework.** `:common:test` **391 green**,
   `:neoforge-26.1.2:build` green, `runServer` boots clean (**45 segments**, no

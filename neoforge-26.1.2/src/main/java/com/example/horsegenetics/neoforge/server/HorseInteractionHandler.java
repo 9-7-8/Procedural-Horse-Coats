@@ -1,6 +1,5 @@
 package com.example.horsegenetics.neoforge.server;
 
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.animal.equine.Horse;
 import net.minecraft.world.entity.player.Player;
@@ -15,8 +14,10 @@ import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
  * Right-click interactions on horses:
  *
  * <ul>
- *   <li>a <b>renamed name tag</b> sets the horse's registered first / last
- *       name (split on the first space) and is consumed;</li>
+ *   <li><b>any name tag</b> (not just an anvil-renamed one) opens the rename
+ *       window ({@code client/HorseRenameScreen}); confirming sets the horse's
+ *       registered first / last name and consumes one tag
+ *       (see {@code RenameHorsePayload});</li>
  *   <li>in the debug-pen dimension only: a <b>stick</b> instantly tames an
  *       untamed horse, a <b>clock</b> instantly ages a foal to an adult.</li>
  * </ul>
@@ -37,9 +38,16 @@ public final class HorseInteractionHandler {
         Player player = event.getEntity();
         boolean client = event.getLevel().isClientSide();
 
-        if (stack.is(Items.NAME_TAG) && stack.has(DataComponents.CUSTOM_NAME)) {
-            if (!client) {
-                handleNameTag(event, horse, player, stack);
+        // Any name tag - enchanted / anvil-renamed or not - opens the rename
+        // window; vanilla's "set the entity's custom name" is suppressed. The
+        // tag is consumed only when the player confirms (see RenameHorsePayload).
+        if (stack.is(Items.NAME_TAG)) {
+            if (HorseRecords.hasRealRecord(horse)) {
+                if (!client && player instanceof net.minecraft.server.level.ServerPlayer serverPlayer) {
+                    net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(serverPlayer,
+                            new com.example.horsegenetics.neoforge.network.OpenHorseRenamePayload(horse.getId()));
+                }
+                consume(event, InteractionResult.SUCCESS);
             }
             return;
         }
@@ -72,31 +80,6 @@ public final class HorseInteractionHandler {
         }
     }
 
-    private static void handleNameTag(PlayerInteractEvent.EntityInteract event, Horse horse, Player player, ItemStack stack) {
-        if (!HorseRecords.hasRealRecord(horse)) {
-            return; // let onHorseJoin assign the initial name first
-        }
-        String text = stack.getHoverName().getString().strip();
-        String first;
-        String last;
-        int space = text.indexOf(' ');
-        if (space < 0) {
-            first = text;
-            last = "";
-        } else {
-            first = text.substring(0, space).strip();
-            last = text.substring(space + 1).strip();
-        }
-        if (first.isEmpty() && last.isEmpty()) {
-            return; // first and last cannot both be blank
-        }
-
-        HorseRecords.rename(horse, first, last);
-        if (!player.getAbilities().instabuild) {
-            stack.shrink(1);
-        }
-        consume(event, InteractionResult.SUCCESS);
-    }
 
     private static void consume(PlayerInteractEvent.EntityInteract event, InteractionResult result) {
         event.setCanceled(true);

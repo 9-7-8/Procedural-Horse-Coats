@@ -80,6 +80,13 @@ public final class ModNetworking {
                                 payload.seenByGene(), payload.carrotUnlocked()))
         );
 
+        registrar.playToClient(
+                OpenHorseRenamePayload.TYPE,
+                OpenHorseRenamePayload.STREAM_CODEC,
+                (payload, context) -> context.enqueueWork(() ->
+                        com.example.horsegenetics.neoforge.client.HorseRenameScreen.open(payload.entityId()))
+        );
+
         registrar.playToServer(
                 FamilyTreeRequestPayload.TYPE,
                 FamilyTreeRequestPayload.STREAM_CODEC,
@@ -90,6 +97,12 @@ public final class ModNetworking {
                 SetBarnNamePayload.TYPE,
                 SetBarnNamePayload.STREAM_CODEC,
                 (payload, context) -> context.enqueueWork(() -> handleSetBarnName(payload, context.player()))
+        );
+
+        registrar.playToServer(
+                RenameHorsePayload.TYPE,
+                RenameHorsePayload.STREAM_CODEC,
+                (payload, context) -> context.enqueueWork(() -> handleRenameHorse(payload, context.player()))
         );
 
         registrar.playToServer(
@@ -255,6 +268,41 @@ public final class ModNetworking {
         Entity target = serverPlayer.level().getEntity(payload.entityId());
         if (target instanceof Horse horse && horse.closerThan(serverPlayer, 8.0)) {
             HorseRecords.setBarnName(horse, payload.barnName());
+        }
+    }
+
+    /**
+     * Apply a first / last name from the rename window and consume one name tag.
+     * Re-checks range, that a real record exists, that a name tag is still in
+     * hand, and that the two parts are not both blank.
+     */
+    private static void handleRenameHorse(RenameHorsePayload payload, net.minecraft.world.entity.player.Player player) {
+        if (!(player instanceof ServerPlayer serverPlayer)) {
+            return;
+        }
+        Entity target = serverPlayer.level().getEntity(payload.entityId());
+        if (!(target instanceof Horse horse) || !horse.closerThan(serverPlayer, 8.0)
+                || !HorseRecords.hasRealRecord(horse)) {
+            return;
+        }
+        String first = payload.firstName().strip();
+        String last = payload.lastName().strip();
+        if (first.isEmpty() && last.isEmpty()) {
+            return;
+        }
+        InteractionHand tagHand = null;
+        for (InteractionHand hand : InteractionHand.values()) {
+            if (serverPlayer.getItemInHand(hand).is(net.minecraft.world.item.Items.NAME_TAG)) {
+                tagHand = hand;
+                break;
+            }
+        }
+        if (tagHand == null) {
+            return;
+        }
+        HorseRecords.rename(horse, first, last);
+        if (!serverPlayer.getAbilities().instabuild) {
+            serverPlayer.getItemInHand(tagHand).shrink(1);
         }
     }
 

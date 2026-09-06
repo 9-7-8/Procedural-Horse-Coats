@@ -29,6 +29,8 @@
   "death.attack.horsegenetics.genetic_defect": "%1$s did not survive a genetic defect",
   "gui.horsegenetics.craft_paper": "Craft research paper",
   "gui.horsegenetics.horse_browser": "Horse Browser",
+  "gui.horsegenetics.rename_horse": "Name this horse",
+  "gui.horsegenetics.rename_confirm": "Rename",
   "message.horsegenetics.shear.foal": "This foal has no coat to shear yet.",
   "message.horsegenetics.shear.regrowing": "This horse's coat hasn't grown back yet.",
   "message.horsegenetics.milk.stallion": "The stallion kicks you.",

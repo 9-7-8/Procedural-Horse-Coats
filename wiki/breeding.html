@@ -625,11 +625,16 @@ int     offspringCount(UUID a, UUID b);</code></pre>
 <h3>D. Name-tag rename</h3>
 
 <p>
-    A <strong>renamed</strong> name tag on a horse with a real record: the text is
-    split on the <strong>first space</strong> &mdash; before is the new first name,
-    the rest is the last name. Either may be blank but not both. The tag is consumed
-    (unless creative) and the event cancelled, so vanilla does not also name the entity
-    with the raw string.
+    Right-clicking a horse with a real record with <strong>any</strong> name tag
+    &mdash; enchanted, anvil-renamed, or plain &mdash; opens the
+    <strong>rename window</strong> (<code>client/HorseRenameScreen</code>): two
+    fields, <em>first name</em> and <em>last name</em>, prefilled with the
+    horse&rsquo;s current registered name. Confirming sends
+    <code>RenameHorsePayload</code>; the server re-checks range, that a name tag
+    is still in hand and that the two parts are not both blank, then applies the
+    name and consumes <strong>one</strong> tag (unless creative). Cancelling
+    consumes nothing. The interaction is cancelled on both sides so vanilla does
+    not also set the entity&rsquo;s custom name.
 </p>
 
 <h3>E. Barn name</h3>

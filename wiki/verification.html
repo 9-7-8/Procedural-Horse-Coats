@@ -963,6 +963,33 @@
         layer resolves up to 6 item models per marked horse per frame).</li>
 </ul>
 
+<h3 id="rename">0-E. Name-tag rename window (built 2026-09-05, NOT play-tested)</h3>
+<p>
+    Right-clicking a horse with <strong>any</strong> name tag (plain, enchanted,
+    or anvil-renamed) opens <code>HorseRenameScreen</code> instead of doing the
+    vanilla thing.
+</p>
+<ul>
+    <li><strong>Plain name tag</strong> off the creative menu on a tamed horse
+        &rarr; the window opens, both fields prefilled with the current
+        registered name. <strong>Anvil-renamed tag</strong> &rarr; same window
+        (the tag's text is ignored now).</li>
+    <li><strong>Confirm</strong> with an edited name &rarr; the horse's shown
+        name changes, and <strong>one</strong> name tag leaves the stack (nothing
+        consumed in creative). The paper dump (<kbd>right-click with paper</kbd>)
+        and the info panel show the new first / last name.</li>
+    <li><strong>Cancel</strong> (or <kbd>Esc</kbd>) &rarr; no tag consumed, name
+        unchanged.</li>
+    <li>Both fields blank &rarr; the Rename button does nothing.</li>
+    <li>Walk away from the horse before confirming &rarr; the server rejects it
+        (out of range), nothing consumed.</li>
+    <li>Vanilla did <em>not</em> also set the entity's custom name (the
+        floating-nametag string) &mdash; the interaction is cancelled both
+        sides.</li>
+    <li>A wild horse with no record yet: right-click does nothing (it waits for
+        the join handler to assign the initial name).</li>
+</ul>
+
 <h3 id="gene-browser">0. The Horse Browser (H) &amp; the per-horse gene popup (new 2026-09-05)</h3>
 
 <p>

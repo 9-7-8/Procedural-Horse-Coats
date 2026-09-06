@@ -134,9 +134,11 @@ anything else.
 
 Every horse gets a generated two-part name (a first name and a last name).
 
-- **Rename** with a **name tag**: the text before the first space becomes the
-  first name, the rest becomes the last name. The name tag is consumed. One
-  of the two halves may be left blank, but not both.
+- **Rename** by right-clicking the horse with **any name tag** (it doesn't have
+  to be renamed on an anvil first). A little window opens with the horse's
+  current **first** and **last** name; change either or both and confirm, and
+  one name tag is spent. Cancel and you keep the tag. One of the two halves may
+  be left blank, but not both.
 - **Barn name**: an optional short nickname (up to 16 characters) you can set
   and change at any time from the horse's inventory screen. If set, it's what
   shows above the horse.
