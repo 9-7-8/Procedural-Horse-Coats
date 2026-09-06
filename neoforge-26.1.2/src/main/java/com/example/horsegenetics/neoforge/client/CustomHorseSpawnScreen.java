@@ -14,6 +14,7 @@ import com.example.horsegenetics.common.genetics.Gene;
 import com.example.horsegenetics.common.genetics.GeneCodeDisplay;
 import com.example.horsegenetics.common.genetics.Genes;
 import com.example.horsegenetics.common.genetics.Genotype;
+import com.example.horsegenetics.common.genetics.Inheritance;
 import com.example.horsegenetics.common.genetics.spec.GeneAbility;
 import com.example.horsegenetics.common.genetics.spec.HorseAbilities;
 import com.example.horsegenetics.common.horse.Sex;
@@ -320,6 +321,7 @@ public final class CustomHorseSpawnScreen extends Screen {
                 } else {
                     ddRow.b = idx;
                 }
+                enforceSexLinkage(ddRow);
             }
         }
         closeDropdown();
@@ -355,6 +357,55 @@ public final class CustomHorseSpawnScreen extends Screen {
             }
         }
         return new AllelePair(base, base);
+    }
+
+    /**
+     * Keep a sex-linked row honest against the current {@link #female} flag -
+     * a stallion has one {@code X} and cannot carry two real copies of an
+     * {@code X}-linked gene (a {@code Brn/Brn} stallion, say), and the mirror
+     * holds for a {@code Y}-linked one. Neither allele button nor the Sex
+     * button knows about the other on its own, so this runs after every edit
+     * to either. A no-op on an autosomal gene.
+     */
+    private void enforceSexLinkage(Row row) {
+        Inheritance mode = row.gene.inheritance();
+        if (!mode.sexLinked()) {
+            return;
+        }
+        int placeholderIdx = indexOf(row.gene, row.gene.hemizygousPlaceholder());
+        int defaultIdx = indexOf(row.gene, row.gene.defaultAllele());
+        boolean aReal = row.a != placeholderIdx;
+        boolean bReal = row.b != placeholderIdx;
+        int allowedReal = mode.copiesIn(female ? Sex.FEMALE : Sex.MALE);
+        int haveReal = (aReal ? 1 : 0) + (bReal ? 1 : 0);
+        if (haveReal == allowedReal) {
+            return;
+        }
+        switch (allowedReal) {
+            case 2 -> {
+                // both slots must hold a real allele
+                if (!aReal) {
+                    row.a = bReal ? row.b : defaultIdx;
+                }
+                if (!bReal) {
+                    row.b = aReal ? row.a : defaultIdx;
+                }
+            }
+            case 1 -> {
+                // exactly one real allele, the other slot the placeholder
+                if (haveReal == 0) {
+                    row.a = defaultIdx;
+                    row.b = placeholderIdx;
+                } else {
+                    row.b = placeholderIdx; // keep a's real allele
+                }
+            }
+            default -> {
+                // 0 real allowed (a mare at a Y-linked locus) - both placeholder
+                row.a = placeholderIdx;
+                row.b = placeholderIdx;
+            }
+        }
     }
 
     @Override
@@ -439,6 +490,7 @@ public final class CustomHorseSpawnScreen extends Screen {
                                     openDropdown(row, 0, aX, ry);
                                 } else {
                                     row.a = (row.a + 1) % as.size();
+                                    enforceSexLinkage(row);
                                     rebuildWidgets();
                                 }
                             })
@@ -450,6 +502,7 @@ public final class CustomHorseSpawnScreen extends Screen {
                                     openDropdown(row, 1, bX, ry);
                                 } else {
                                     row.b = (row.b + 1) % as.size();
+                                    enforceSexLinkage(row);
                                     rebuildWidgets();
                                 }
                             })
@@ -477,6 +530,11 @@ public final class CustomHorseSpawnScreen extends Screen {
                         Component.literal(female ? "Sex: Mare" : "Sex: Stallion"),
                         b -> {
                             female = !female;
+                            for (Row row : rows) {
+                                if (row.added) {
+                                    enforceSexLinkage(row);
+                                }
+                            }
                             rebuildWidgets();
                         })
                 .bounds(rx, ry, RIGHT_W, 20).build());
@@ -603,6 +661,7 @@ public final class CustomHorseSpawnScreen extends Screen {
         row.a = indexOf(row.gene, pair.first());
         row.b = indexOf(row.gene, pair.second());
         row.added = true;
+        enforceSexLinkage(row); // variantPair doesn't know the screen's sex
     }
 
     private void remove(Row row) {
@@ -663,6 +722,9 @@ public final class CustomHorseSpawnScreen extends Screen {
             row.added = !pair.homozygousFor(row.gene.defaultAllele());
         }
         female = parsed.sex() == Sex.FEMALE;
+        for (Row row : rows) {
+            enforceSexLinkage(row); // a hand-edited or stale clipboard code may not be sex-consistent
+        }
         rebuildWidgets();
     }
 

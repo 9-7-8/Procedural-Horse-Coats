@@ -177,6 +177,51 @@ project. Its shape:
 
 ## Status snapshot (keep this current)
 
+- **Fixed 2026-09-06, from the first play session against the sex-linked +
+  eye-colour + white-recalibration work: one eye rendered backwards, and the
+  custom spawn egg could build a `Brn/Brn` stallion.** `:common:test`
+  **436 green**, `:neoforge-26.1.2:build` green, creator parity **3832/48**.
+  Two independent bugs, both owner-caught inspecting the new eye-colour work:
+  - **The adult eye-colour rect was two texels short, and that flipped one
+    eye.** `CoatRegions.EYE_RECTS_ADULT`'s east-face rect was `{28, 42, 4, 2}`;
+    the real pupil+sclera pixels sit at `{30, 42, 4, 2}` - the declared rect
+    grabbed 2 background texels plus the pupil and **missed the sclera
+    entirely**. The template's raw column order is *deliberately* mirrored
+    between the two eyes (white-then-black on the west face, black-then-white
+    on the east - inherited unmodified from vanilla's own `horse.png`), which
+    is what makes the pupil land nose-side on **both** faces once the standard
+    Minecraft box-UV unwrap reverses one face's U-axis relative to the other.
+    Cropping two texels short broke that compensation: the west eye rendered
+    correctly (full 4-texel match) while the east one, missing its true white
+    half, effectively read with the wrong raw order and rendered **backwards**
+    - pupil toward the ear instead of the nose. Fixed by moving the rect to
+    `{30, 42, 4, 2}`; the JS parity port (`wiki/gene-creator/js/fields.js`)
+    moved with it (`node .../check-parity.mjs` still 3832/48). This also feeds
+    `CoatOverlay.tintIris` (the eye-colour channel reads the same
+    `CoatRegions.eyeRects`), so the blue/amber tinting was landing on the wrong
+    2 of the 4 east-eye texels too. `coat-golden.txt` regenerated (every row's
+    eye texels moved). **Not yet re-verified in-game.**
+  - **The custom horse spawn egg let a stallion carry two real copies of an
+    `X`-linked gene** (a `Brn/Brn` stallion, which cannot exist - a stallion
+    has one `X`). `CustomHorseSpawnScreen` built every row's pair from two
+    freely-cycled allele slots with no notion of sex or inheritance mode.
+    New `CustomHorseSpawnScreen.enforceSexLinkage(Row)` reads
+    `Gene.inheritance().copiesIn(sex)` and snaps a sex-linked row back into
+    shape - a stallion's second slot is forced to the gene's
+    `hemizygousPlaceholder()`, a mare's placeholder slot is replaced with a
+    real allele - called after every allele-button/dropdown edit, after
+    adding a row, after the Sex: Mare/Stallion toggle, and after a clipboard
+    paste. Brindle is the only `X`-linked gene today, so this is currently a
+    one-gene fix, but it is written generically off `Gene.inheritance()` so a
+    future `Y`-linked gene needs no screen change. **Not yet re-verified
+    in-game.**
+  - **Owner-confirmed in-game the same session**: the topline recalibration's
+    single-copy splash now reads as **socks** (white confined to the legs, no
+    belly/back bleed) - `wiki/roadmap.html#defects` defect 1 and the
+    `PAX3`/`SW2`-on-90%-of-founders change both read correctly now. **Tiger
+    eye reads well on the Puerto Rican Paso Fino.** Both close verification
+    items - see `wiki/verification.html` §0-G.
+
 - **Built 2026-09-06, NOT yet play-tested: sex-linked inheritance + brindle, the
   eye-colour channel + tiger eye, a cutie-mark modifier hook, the splice
   blacklist, the Feral Mixed rename, and the white-belly recalibration.**
@@ -3267,7 +3312,7 @@ Coats are **generated** for every horse - adult *and* foal. Per-gene detail in
      are **not** a gene failing to dilute; check the `PigmentField` values, not
      the composed pixels, when chasing one.
   5. **eyes** - `CoatRegions.redrawEyes(skin, …)` copies them verbatim (adult:
-     2x2 pupil + 2x2 sclera at `{6,42}`/`{28,42}`; foal: 2x2 pupil at
+     2x2 pupil + 2x2 sclera at `{6,42}`/`{30,42}`; foal: 2x2 pupil at
      `{6,20}`/`{40,20}` - the head's L/R faces, not the front blob).
   6. **overlay** (new 2026-09-04) - every gene implementing
      `CoatOverlayContribution` gets a `CoatOverlay` carrying the finished coat

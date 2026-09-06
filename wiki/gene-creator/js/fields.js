@@ -169,7 +169,7 @@ window.HG = window.HG || {};
   var TRANSPARENT_EPS = 0.001;
 
   var EYE_RECTS = {
-    ADULT: [[6, 42, 4, 2], [28, 42, 4, 2]],
+    ADULT: [[6, 42, 4, 2], [30, 42, 4, 2]],
     BABY: [[6, 20, 2, 2], [40, 20, 2, 2]]
   };
 

@@ -360,9 +360,17 @@ default int visible(int px, int py, int channel);</code></pre>
 <p>
     <code>CoatRegions.redrawEyes(skin, out, template)</code> copies the eye texels
     back verbatim. Adult: 2&times;2 pupil + 2&times;2 sclera at <code>{6,42}</code>
-    and <code>{28,42}</code> &mdash; the head&rsquo;s L/R faces. Foal: 2&times;2 pupil
+    and <code>{30,42}</code> &mdash; the head&rsquo;s L/R faces. Foal: 2&times;2 pupil
     at <code>{6,20}</code> and <code>{40,20}</code> (the baby texture has no bright
     sclera), and again the head&rsquo;s side faces, not the front blob.
+    <b>Fixed 2026-09-06</b>: the east-face rect was two texels short of the true
+    pixels (<code>{28,42}</code> instead of <code>{30,42}</code>), grabbing 2
+    background texels and only the pupil. The template's raw column order is
+    deliberately mirrored between the two eyes (inherited from vanilla's own
+    <code>horse.png</code>), which is what makes the pupil land nose-side on
+    both faces once the standard box-UV unwrap reverses one face's U-axis
+    relative to the other; cropping short broke that compensation and rendered
+    the east eye backwards.
 </p>
 
 <p>

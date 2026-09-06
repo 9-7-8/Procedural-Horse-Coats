@@ -47,10 +47,6 @@
     founders</strong> &mdash; it changes what an ordinary horse looks like.
 </p>
 <ul>
-    <li><strong>Does a single-copy splash read as socks?</strong> Measured: 41% of the
-        legs white, <strong>0% belly, 0% back</strong>, line at the upper cannon. It used
-        to put the line above the underline. Catch a few wild horses and see whether
-        &ldquo;minimal marking&rdquo; now looks minimal.</li>
     <li><strong>Does the ladder still read as distinct steps?</strong> Bold splash should
         be past the elbow and onto the barrel (measured 95% legs, 31% belly); extensive
         should be nearly everything below the topline (100% / 100%, 11% back).</li>
@@ -69,6 +65,19 @@
 </p>
 
 <h3 id="brindle">Brindle &mdash; the X-linked gene</h3>
+<div class="note warn">
+    <span class="label">Custom egg allowed a Brn/Brn stallion &mdash; fixed 2026-09-06, NOT yet re-verified</span>
+    <p>
+        Owner-caught: the custom horse spawn egg let you build a stallion carrying
+        two real <code>Brn</code> copies, which cannot exist (a stallion has one
+        <code>X</code>). <code>CustomHorseSpawnScreen.enforceSexLinkage</code> now
+        snaps a sex-linked row's second slot to the gene's placeholder whenever the
+        current sex only has one real copy at that locus, and back to a real allele
+        when it doesn't &mdash; called after every allele edit and after the Sex
+        button. Confirm: add brindle, set Stallion, and cycle both allele buttons -
+        it should be impossible to land on two real copies.
+    </p>
+</div>
 <ul>
     <li><strong>Does it read as brindle?</strong> Broad irregular vertical bands in a
         lighter shade, heaviest on barrel and quarters, fading on neck and legs, nothing
@@ -88,11 +97,22 @@
 </ul>
 
 <h3 id="eyes">Eye colour</h3>
+<div class="note warn">
+    <span class="label">One eye rendered backwards &mdash; fixed 2026-09-06, NOT yet re-verified</span>
+    <p>
+        Owner-caught inspecting this: the dark pupil should sit toward the nose and
+        the white sclera toward the ears on <strong>both</strong> eyes, but the east
+        eye had it backwards. Cause: <code>CoatRegions.EYE_RECTS_ADULT</code>'s east
+        rect was two texels short of the true pixels, so it grabbed 2 background
+        texels plus the pupil and missed the sclera &mdash; which broke the
+        deliberate west/east mirroring the raw template relies on to compensate for
+        the box-UV unwrap's own left/right reversal. Fixed (moved the rect from
+        <code>{28,42}</code> to <code>{30,42}</code>, which also feeds
+        <code>tintIris</code>); <code>coat-golden.txt</code> regenerated. Look at
+        both eyes on a horse and confirm the pupil sits nose-side on both.
+    </p>
+</div>
 <ul>
-    <li><strong>Does a two-texel amber iris read as an amber eye</strong> on a horse at
-        riding distance, or does it need to be brighter? This is the main open question.
-        <a href="gene-tiger-eye.html">Tiger eye</a> is on the Puerto Rican Paso Fino
-        (26% carriers) &mdash; or spawn one with the egg.</li>
     <li><strong>The sclera must stay white.</strong> Asserted in the pipeline, but confirm
         it does not read as a solid coloured block at 128px.</li>
     <li><strong>Blue eyes on splash</strong> &mdash; and check a plain sabino still has

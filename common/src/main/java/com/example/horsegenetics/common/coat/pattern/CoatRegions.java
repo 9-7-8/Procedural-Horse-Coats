@@ -22,10 +22,22 @@ public final class CoatRegions {
     public static final List<Part> LEGS = List.of(
             Part.LEFT_FRONT_LEG, Part.RIGHT_FRONT_LEG, Part.LEFT_HIND_LEG, Part.RIGHT_HIND_LEG);
 
-    /** Adult eyes: 2x2 pupil + 2x2 sclera per eye, verbatim from the template. {x,y,w,h}. */
+    /**
+     * Adult eyes: 2x2 pupil + 2x2 sclera per eye, verbatim from the template.
+     * {x,y,w,h}. <b>Fixed 2026-09-06</b>: the left eye's rect was {@code {28,
+     * 42, 4, 2}}, two texels short of where its pixels actually sit
+     * ({@code x30-33}) - it grabbed 2 background pixels plus the pupil and
+     * missed the sclera entirely. The template's raw column order is
+     * <i>intentionally</i> mirrored between the two eyes (white-then-black on
+     * the west face, black-then-white on the east - inherited unmodified from
+     * vanilla's own {@code horse.png}), which is what makes the pupil land
+     * nose-side on both faces once the standard box-UV unwrap reverses one
+     * face's U-axis relative to the other. Cropping 2 columns short broke that
+     * compensation and rendered the east eye's pupil on the wrong side.
+     */
     private static final int[][] EYE_RECTS_ADULT = {
             {6, 42, 4, 2},   // right eye - head WEST face
-            {28, 42, 4, 2},  // left eye  - head EAST face
+            {30, 42, 4, 2},  // left eye  - head EAST face
     };
 
     /**
