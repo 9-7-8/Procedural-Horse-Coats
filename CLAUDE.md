@@ -75,6 +75,22 @@ project. Its shape:
   horse-care systems** - gated healing, bond tiers, herd formation, the shared
   slow tick and the block tags. Update it in the same change as
   `HorseCareHandler` / `BondFollowGoal` / `HorseCareAttachment`.
+- **`wiki/items.html`** (new 2026-09-06) is the single source of truth for
+  **every mod item and every recipe** - the horse-hair material chain and
+  **shearing**, the five breeding carrots' recipes, research papers, seed jars,
+  whistles, **stall signs**, the inert tickets and the **custom horse spawn
+  egg**. Update it in the same change as `item/ModItems`, anything in
+  `data/horsegenetics/recipe/`, `HorseShearHandler`, `WhistleItem`,
+  `StallSignItem` / `StallDetector` or `CustomHorseSpawnScreen`. The *mechanics*
+  of the carrots stay on `wiki/carrots.html`; this page owns the recipes.
+- **`wiki/horse-dimension.html`** (new 2026-09-06) is the single source of truth
+  for the **hay-bale portals and the horse dimension** - lighting a portal, the
+  dwell teleport, the roped-horse shortcut, evacuating tamed horses, the
+  per-visit disposable plot, `ShowcaseGenotypes`' floor, the pen layout and the
+  house rules, plus why the catalogue-driven gallery was retired. Update it in
+  the same change as `server/DebugPenManager`, `server/HorsePortalManager`,
+  `server/PortalEventHandler`, `block/HayPortalBlock` or
+  `common/genetics/ShowcaseGenotypes`. **CLAUDE.md keeps a summary, not a copy.**
 - **`wiki/verification.html`** is the rolling **`runClient` checklist** - what's
   built but not yet confirmed in-game. Update after every play session.
 - **`wiki/philosophy.html`** is the **why** - Mendelian breeding as a game of
@@ -87,18 +103,29 @@ project. Its shape:
   two goals conflict. **Read it before making a design call**; most arguments
   in the other docs are downstream of it. Keep it short and principled - no
   implementation detail, no status, no task lists.
-- **`wiki/roadmap.html`** is the **long-range backlog** - the gene wishlist and
-  the systems it needs (the modder-facing gene-authoring API, sex-*linked*
-  inheritance, the leopard complex, face markings as a family, gene metadata),
-  each with notes on what would have to change - plus the whole unbuilt gameplay
-  layer (§§11-19) and mare milking. **Only not-yet-done work lives here**: a
-  section is either unbuilt or marked *partly built* with just the remainder;
-  anything finished is deleted and written up on its own page (`wiki/gene-*.html`,
-  `wiki/genetics-model.html`, `wiki/horse-body.html`, `wiki/breeding.html`,
-  `wiki/horse-care.html`, `wiki/pipeline.html`). Section
-  numbers are stable (a retired section keeps its slot as a pointer) so
-  cross-references don't rot. It is **work items only**; the reasoning lives in
-  `wiki/philosophy.html`. Its §21 keeps a **settled** list so a later session
+- **`wiki/roadmap.html`** is the **long-range backlog**, **rewritten and
+  renumbered 2026-09-06**. It is now **ordered by priority - most urgent at the
+  top, endgame at the bottom** - in six parts: **§1-2** things that are wrong
+  now (coat/marking defects, what resizing broke), **§3** decisions to make,
+  **§4-9** foundations that unblock the rest (sex-linked inheritance, eye
+  colour, epigenetic drift, `TraitRule` + the effect architecture, the Java gene
+  API, the visual marking designer), **§10-12** genes still to build (natural,
+  health, magical), **§13-20** the gameplay layer, **§21-22** scale and the
+  settled list. A **"Where to start"** block at the top names the five
+  highest-blast-radius items.
+  **Only not-yet-done work lives here** - anything finished is deleted and
+  written up on its own page (`wiki/gene-*.html`, `wiki/genetics-model.html`,
+  `wiki/horse-body.html`, `wiki/breeding.html`, `wiki/horse-care.html`,
+  `wiki/pipeline.html`, `wiki/carrots.html`, `wiki/items.html`,
+  `wiki/horse-dimension.html`). **"Marked shipped" is not the same as "moved",
+  and only moving it keeps one source of truth.**
+  **Section numbers are NOT stable any more** - the 2026-09-06 renumber broke
+  them deliberately, so **link by anchor, not by number** (`#defects`,
+  `#sex-linked`, `#health-genes`, `#settled`, ...). Any `§N` in a *dated status
+  entry below* refers to the pre-2026-09-06 page and should not be chased; the
+  forward-looking references in "Known gaps" are current.
+  It is **work items only**; the reasoning lives in
+  `wiki/philosophy.html`. Its **§22** keeps a **settled** list so a later session
   doesn't reopen those calls - the load-bearing ones: **Mendelian + X-linked +
   Y-linked only** (polygenic cut; a stallion carries a real `X` *and* `Y`);
   **aging out entirely** (flea-bitten grey / melanoma cut with it); health =
@@ -106,7 +133,7 @@ project. Its shape:
   locus (KIT/MITF/MATP) with the gene's own `tint` handling every allele combo,
   **no dominance-per-pair table**; founder frequency declared **per genotype**
   (percentages, auto-normalised) not per allele, and a separate per-gene
-  **splice chance function** of the same shape (§14.1/§19); the genotype
+  **splice chance function** of the same shape; the genotype
   stored as a **list keyed by gene**, each gene carrying its order number, so
   adding/removing a gene just triggers a coat regen (no padding, no back-compat);
   signed-unclamped `int` phase-3 with context-aware genes intended; **every time-gate is once per
@@ -117,8 +144,11 @@ project. Its shape:
   copy a fed parent passes on; the seed jar stores enough sire data for the
   family tree; sheared look = render-layer overlay; gene-carrot rarity defaults
   to the gold-ingot tier and a gene can opt out. **Still open**: custom-entity
-  subclass vs attachments (§11, owner wants to discuss), how a cutie mark is
-  chosen, the 1.12.2 backport surface.
+  subclass vs attachments (owner wants to discuss), how a cutie mark is
+  chosen, whether `Condition` should gain a severity/onset model, Unknown as a
+  cross component, the cross stat rule, whether the horse dimension should be
+  survival-reachable, whether a player may splice into a lethal genotype, and
+  the 1.12.2 backport surface. Roadmap **§3** is the live list.
 - **New with the wiki conversion**, and not derived from any old markdown -
   keep them current too:
   - **`wiki/genetics-model.html`** - the Mendelian model as implemented:
@@ -138,6 +168,52 @@ project. Its shape:
     changes shape, update `api-reference.html` in the same change.
 
 ## Status snapshot (keep this current)
+
+- **Docs 2026-09-06, no behaviour change: the roadmap was rewritten and
+  renumbered, and the built work moved onto its own pages.** No Java touched;
+  `:common:test` **405 green**, `:neoforge-26.1.2:build` green. Shape of it:
+  - **`wiki/roadmap.html` is 2 370 -> 1 532 lines and contains only unbuilt
+    work.** Every shipped section was **deleted** rather than annotated - the
+    page had become a second description of built behaviour, which is known gap
+    #13's exact failure mode. Reordered by **priority** into six parts and
+    **renumbered 1-22 in reading order**; the old numbers are gone. See the
+    docs-split entry above for the new shape and the anchor rule.
+  - **Audited every claim against the source, not the prose.** Confirmed
+    genuinely absent: `RegisterHorseGenesEvent`, `AbstractNaturalGene` /
+    `AbstractMagicalGene`, `TraitRule`, any inheritance-mode declaration, eye
+    colour, gestation, the villager, a `Breed` JSON spec, bareback steering, a
+    brush item, the owned-horse index, the per-copy epigenetics editor,
+    hash-keyed `CoatTextureId`, the split corridor, the sleeping bond source and
+    saddle scale-inheritance. `attribute` still hits `warnUntranslated`; **no
+    built-in overrides `spliceTable()`**.
+  - **Two new pages** for built systems that had no home outside CLAUDE.md:
+    **`wiki/items.html`** (all 20 items + every recipe; shearing, the hair
+    chain, whistles, stall signs, tickets, seed jars, papers, the spawn egg) and
+    **`wiki/horse-dimension.html`** (hay portals, the disposable plot,
+    `ShowcaseGenotypes`, the pen layout, why the gallery died). Both added to
+    `wiki/nav.js` under Gameplay.
+  - **`wiki/carrots.html` extended, not duplicated** - it already covered the
+    magic carrots in full. **Two real drifts fixed:** the Known Gene Splice
+    recipe takes **exactly four items** (`KnownGeneSpliceRecipe` requires
+    `filled == 4`), not the documented ">= 5 with a flavour ingredient"; and the
+    **"View splice recipe" button is gone** - selecting a gene auto-ghosts the
+    recipe, and `ViewSpliceRecipePayload` / `fillSplicePreview` no longer exist.
+  - **`index.html` was three genes' worth of stale and missing nine pages**:
+    38 -> **46** genes, 3.0x10^18 -> **1.4x10^30** genotypes, 462 422 018 ->
+    **1 849 688 066** distinct coats, plus a new **Gameplay** section and cards
+    for breeds, horse care, carrots, items, the dimension, gene effects, the
+    trait architecture, Suntouched and Waterborn. **Every wiki page is now
+    reachable from the index.**
+  - **~50 cross-references re-pointed across 15 files** rather than left to rot
+    - dead anchors (`#polymorphism`, `#random-pens`, `#priority`,
+    `#modder-api`, `#care`, `#traits`, `#multi-allele`, `#third-party`) now go
+    to the page that owns the content, and stale `§N` prose was replaced with
+    names. **Two more shipped-but-documented-as-planned claims fell out**:
+    `gene-silver.html` said `Z/Z` MCOA awaited the health system, and
+    `modding.html` said status effects were "not built yet" - both shipped
+    2026-09-04.
+  - Validated: all **63** wiki pages well-formed, **zero** broken links or
+    anchors.
 
 - **Built 2026-09-06, NOT yet play-tested: the leopard complex (appaloosa) -
   three new loci + a cross-locus-read hook; plus the custom-egg Breed button
@@ -164,7 +240,7 @@ project. Its shape:
     with no LP still shares its texture (golden test asserts byte-identity).
     `BreedFounder` also treats a `coatDependsOn` gene like a coat gene (forced
     wild unless the breed names it). **It is the model's only cross-locus gene**,
-    and `wiki/roadmap.html` §5.4 discourages it for third-party genes.
+    and `wiki/roadmap.html#settled` discourages it for third-party genes.
   - **Painters** (all phase 1, off the expressing LP copy's seed):
     `paintSpotted` (whole horse white, round base-colour spots from
     `BodyNoise.cellDistance` Worley - fewspot = wider spacing, smaller radius),
@@ -184,7 +260,7 @@ project. Its shape:
   - **`LeopardGene implements HealthContribution`** - `LP/LP` adds
     `LeopardGene.CSNB`, an **informational** `Condition` (night blindness; no
     heart cost, no mechanic - the deafness precedent). Closes the CSNB gap in
-    `wiki/roadmap.html` §4.4.
+    `wiki/roadmap.html#health-genes`.
   - **Founder rates**: `LP` `hardyWeinberg(LP, lp, 1/40)` - ~4.9% carriers,
     ~0.06% `LP/LP`. **PATN is conditional on LP**: `AppaloosaModifierGene.founderTable`
     returns `always(n,n)` unless the `FounderContext` shows the founder already
@@ -225,7 +301,7 @@ project. Its shape:
     resolves or dismisses it. Client-only, NOT play-tested.
   - **Deliberately not built:** mottled skin (§4.4 - no skin layer); "white
     finds white" for leopard; a per-outcome epigenetic *branch* into visibly
-    different sub-patterns (`wiki/roadmap.html` §5.4 - the enumerated-expression
+    different sub-patterns (the enumerated-expression
     approach covered the family without it); PATN2's own zygosity mattering
     (any `PATN2` copy = "present").
   - Docs: `wiki/gene-leopard.html` (new), `wiki/nav.js`,
@@ -759,7 +835,7 @@ project. Its shape:
     cross x itself or x one of its own breeds -> that cross; cross x anything
     else -> Mixed; Mixed x anything -> Mixed. **Unknown acts as an ordinary
     distinct breed** (Friesian x Unknown -> a cross; owner may want it
-    absorbing like Mixed - flagged `wiki/roadmap.html` §22). A **cross**
+    absorbing like Mixed - flagged `wiki/roadmap.html#decisions`). A **cross**
     averages its two components' stat bands per axis (only where both pin it);
     Mixed/Unknown pin nothing.
   - **`HorseRecord` gained `Optional<String> breed`** (position 7, after
@@ -781,7 +857,7 @@ project. Its shape:
     epigenome + sex) and `SpawnCustomHorsePayload` carries the token so the
     spawned horse is stamped (`ModNetworking.handleSpawnCustomHorse` ->
     `record.withBreed`).
-  - **Referenced-but-not-built** (noted per-breed + `wiki/roadmap.html` §22):
+  - **Referenced-but-not-built** (noted per-breed + `wiki/roadmap.html#breeds`):
     leopard complex (Lp/PATN1 - already §4.2), Tiger Eye, HYPP (a
     heart-reducing gene), pangare/mealy, flaxen, the early-lethal foal
     disorders (SCID/CA/LFS/GBED/NNF/CVM/megaesophagus), gait (DMRT3),
@@ -1057,7 +1133,7 @@ project. Its shape:
     commonly carry a star or blaze, but the gene's documented behaviour is a
     coloured head and that is a separate call); **medicine hat / war shield**,
     which is not a face marking at all but a retention rule on a near-white horse
-    - logged in `wiki/roadmap.html` §4.2, and see gap #29 below; surfacing
+    - logged in `wiki/roadmap.html#natural-genes`, and see gap #29 below; surfacing
     `describe()` anywhere player-facing (it is a natural feed for the gene
     dictionary and the info panel - gap #10).
   - Docs: `wiki/pipeline.html` (new "Face markings" section),
@@ -1336,7 +1412,7 @@ project. Its shape:
     change from the size locus (a ten-times horse is a spectacle, not a better
     horse); milking's §7 *rules* - tamed, full health, once a day, the stallion
     kick - four of which are limits of the effect vocabulary rather than of milk,
-    so they are logged in `wiki/roadmap.html` §7 rather than special-cased.
+    so they are logged in `wiki/roadmap.html` rather than special-cased.
   - Docs: seven new `wiki/gene-*.html`, `wiki/nav.js`, `wiki/gene-effects.html`
     (the two verbs + the "both kinds of gene" note), `wiki/pipeline.html` (phase
     6), `wiki/horse-body.html` (the epigenetic twin + the two-stage scale),
@@ -1588,7 +1664,7 @@ project. Its shape:
     so it occurs, has its own masking all-white outcome and gets a pen; it is
     simply absent from the founder table, because a founder is an adult horse.
     **The death is not modelled** (no health system) - the foal lives. Deliberate;
-    `wiki/roadmap.html` §6.4.
+    `wiki/roadmap.html#health-genes`.
   - **Two shared painters, `coat/pattern/WhitePattern`** - `sabino` (the `KIT`
     shape: ragged margins growing inward from legs, belly, face, then torn body
     patches) and `splash` (the `MITF`/`PAX3` shape: a hard, wobbled waterline
@@ -1657,7 +1733,7 @@ project. Its shape:
     mottled skin), not an overhaul of the white markings that exist: it needs a
     spot field *and* a blanket mask, neither of which `WhitePattern`'s two
     shapes cover, and `PATN1` would be the model's first modifier gene. Logged
-    in `wiki/roadmap.html` §4.2.
+    in `wiki/roadmap.html#natural-genes`.
   - **Owner-verified in-game 2026-09-04**, as a general confirmation that it
     all renders correctly rather than an item-by-item walk of the checklist.
     The one thing left in `wiki/verification.html` is the **lethal-white
@@ -2263,7 +2339,7 @@ project. Its shape:
   those pointed at a `CreamPearlGene.java` that has never existed). Two pages
   are new rather than converted: **`wiki/modding.html`** (how to write a gene)
   and **`wiki/api-reference.html`** (class abstractions), which is the
-  modder-facing documentation `wiki/roadmap.html` §3 assumed would exist.
+  modder-facing documentation the roadmap assumed would exist.
   `wiki/nav.js` builds every sidebar from one array, so a new page is one line.
   **No Java behaviour changed** - only Javadoc text - and `:common:test` (153)
   and `:neoforge-26.1.2:build` are both green. Nothing to play-test.
@@ -2351,7 +2427,7 @@ Two-module Gradle project, split deliberately:
     by slot; it lives here rather than in `trait/` so both the trait and the
     ability sides can use it without the two packages depending on each other),
     `GeneRarity` (the §19 tier enum), `GameteBias` (a per-parent modifier on
-    `Genome.breedWith` - what a breeding carrot does, roadmap §14) + `CarrotEffect`
+    `Genome.breedWith` - what a breeding carrot does, `wiki/carrots.html`) + `CarrotEffect`
     (the sealed effect set + `fold` -> `GameteBias`), **`LutContribution`** (the
     capability a gene implements to swap the phase-2 colour LUT - **exactly one
     gene, the LUT locus, and permanently so**; a new palette is a new allele,
@@ -2423,7 +2499,7 @@ Two-module Gradle project, split deliberately:
     replaced `GeneYieldHandler`'s static map) and `horsegenetics:carrot_window`
     (`CarrotWindowAttachment`, a live breeding-carrot window - **not**
     `copyOnDeath`). Plus the ancestry `SavedData` + `GeneDatabaseData`
-    (server-global per-player gene database, roadmap §16); codecs;
+    (server-global per-player gene database, `wiki/carrots.html#database`); codecs;
     `ModDataComponents` (item data components: `stored_genome`, `bound_horse`,
     **`carrot_effects`** (a `List<String>` of `CarrotEffect` ids) and
     **`research_gene`** (a gene key on a `research_paper`)); `StallData` /
@@ -3785,7 +3861,8 @@ The **`runClient` checklist lives in `wiki/verification.html`** - both the
 **open issues** found in-game and what's still unconfirmed. Keep that file
 current after each session. The **long-range** backlog (the full gene wishlist,
 per-allele stack priority, the modder-facing gene API, non-coat and health
-genes) lives in **`wiki/roadmap.html`**; this list stays near-term.
+genes) lives in **`wiki/roadmap.html`**, which is priority-ordered and keyed
+by anchor rather than by section number; this list stays near-term.
 
 **Fixed since that session:** grey (was "flat near-white, wants a rework") is
 now the `GreyCoat` dapple grey - built, unit-tested and sample-baked, **not yet
@@ -3822,7 +3899,8 @@ often near zero) to 125-166; `SW1/SW1` and two-locus splash fill the muzzle
 **The 2026-09-02 visual genes (2026-09-02, reworked once after owner feedback) -
 remaining follow-ups, none seen in-game:**
 
-- **Dun** leg barring is a hand-rolled Y-phase; roadmap §4.1 wants it to reuse
+- **Dun** leg barring is a hand-rolled Y-phase and **does not render in-game at
+  all** (owner-observed); `roadmap.html#defects` wants it to reuse
   `BodyStripes` (which runs on X). The third allele **is built** (2026-09-03);
   what is left there is that `d1` shows only the dorsal stripe, where a real
   non-dun-1 horse can also carry faint bars and shoulder shadowing. (Grullo
@@ -3833,7 +3911,7 @@ remaining follow-ups, none seen in-game:**
   flaxen mane currently reads a little gold rather than pale.
 - **`EDNRB` paints lethal white but doesn't kill.** `O/O` has its own
   all-white masking outcome and gets a pen, which is the honest half; the foal
-  then lives, because there is no health system (roadmap §6.4). The *coat* half
+  then lives, because there is no health system. The *coat* half
   is done, so this is now waiting on that system rather than on gene work.
   Frame coverage is deliberately bold (0.52-0.74); may want trimming in-game.
 - **Every white-pattern threshold is eyeballed off sample bakes**, not
@@ -3861,7 +3939,7 @@ Design follow-ups (not just "go look at it"):
    near-white, neither changes. Flea-bitten grey and grey melanoma are parked
    with it. The option isn't foreclosed - reopening it means giving the
    composer a real age input, which today only knows adult vs foal. It is a
-   **settled** call - `wiki/roadmap.html` §21 and the §6.4 note.
+   **settled** call - `wiki/roadmap.html#settled`.
 2. **Foal geometry is approximate** - `Skin.BABY` uses rest-pose AABBs and
    pre-resolved neck/head/ear pivots; markings on the foal face/neck can land
    loosely. Also the foal mesh has no MANE/MUZZLE part, so bay foal "black up
@@ -3886,8 +3964,7 @@ Design follow-ups (not just "go look at it"):
    texel toward its target. So: *straight signed add* stays the blend, but the
    useful magical genes will read first, and `magicalOrder()` matters more than
    §1 assumed. `naturalOrder()` / `magicalOrder()` are still hand-written lists
-   - making them *derived* is the gene-priority work (`wiki/roadmap.html`
-   §2), not done here.
+   - making them *derived* is the gene-priority work, since shipped.
 8. **`breedNth` foal names past foal 1** / **`FamilyTreeScreen` scroll mode** /
    **stats surfaces** / **water-riding feel** / **the epigenome across a
    save-reload** - see `wiki/verification.html`.
@@ -3934,7 +4011,8 @@ Design follow-ups (not just "go look at it"):
    `List<Genotype>` is hundreds of megabytes. That was half the answer; the
    other half was that a corridor of that many pens is ~7.2 million blocks. A
    20 000-pen cap held it for one session and the revert to **random pens**
-   (roadmap §8) closed it properly - the corridor is a fixed 2 000 pens and does
+   (`wiki/horse-dimension.html`) closed it properly - the corridor is a fixed
+   2 000 pens and does
    not grow when a gene is added. What is left is a caller note, not a gap:
    `entries()` is a **lazy view**, so `entries().stream()` still walks and builds
    all two million - sample it, or ask the arithmetic. Three catalogue tests are
@@ -3965,7 +4043,7 @@ Design follow-ups (not just "go look at it"):
    **It happened again in the same session** the magical utility genes landed:
    the end-of-session sweep found the gene count, the catalogue size, the raw
    genotype count and the code-segment length all stale in four different files
-   (`roadmap.html` §10, `horse-body.html`, `verification.html`, and CLAUDE.md's
+   (`roadmap.html`, `horse-body.html`, `verification.html`, and CLAUDE.md's
    own pens section) - every one of them a *derived number written out by hand*.
    That is the specific shape of this gap and it is now clear enough to act on:
    the cheap fix is a `:common:test` that greps the docs for the handful of
@@ -3984,6 +4062,21 @@ Design follow-ups (not just "go look at it"):
    reproduces the lie. The proposed test - grep the docs for the numbers the code
    can compute - would not have caught this one; what would is asserting the
    arithmetic cannot overflow.
+   **It happened a third time, and the 2026-09-06 docs pass measured it.** The
+   roadmap itself was the biggest offender: shipped sections had been *marked*
+   shipped instead of *moved*, so the backlog had quietly become a second
+   description of built behaviour - which is how `carrots.html` came to document
+   a splice recipe rule (">= 5 items with a flavour") that the code had replaced
+   with `filled == 4`, and a "View splice recipe" button whose payload and
+   handler no longer exist. Also found stale in the same sweep:
+   `gene-silver.html` said `Z/Z` MCOA was waiting on the health system,
+   `modding.html` said status effects were "not built yet" (both shipped
+   2026-09-04), and `index.html` still advertised 38 genes and a genotype count
+   twelve orders of magnitude low. **The rule that came out of it: "marked
+   shipped" is not "moved", and a page that describes both built and unbuilt
+   work will always drift on the built half.** The roadmap now contains only
+   unbuilt work and is deleted from, not annotated. The grep-the-docs-for-derived-
+   numbers test is still unwritten and is still the cheap fix.
 14. **Data-driven genes cover markings and dilutions, not everything.** The
    format has no expression language and no way to read another gene, so the
    three built-ins that genuinely need one still can't be expressed as specs:
@@ -4024,17 +4117,19 @@ Design follow-ups (not just "go look at it"):
    (`wiki/verification.html` §13, §0a). The full plan is
    `wiki/horse-traits.html`.
 
-17. **Some gameplay-layer items still have no behaviour.** The seed jars,
-   whistles and stall signs work; still unwired: shearing to get `horse_hair`,
-   any carrot effect on the breeding draw, and **the tickets** - owner's intent
-   is that a ticket teleports its bound horse back to its stall, which is now
-   possible (stalls exist - `StallData` / `StallRecord.center()`), it's just not
-   built. The `known_gene_splice_carrot` is one generic item because per-gene targeting
-   wants a data component (`wiki/roadmap.html` §14.2, §19);
-   `placeholder_gene_book` replaces the real research paper. Tickets share one
-   texture, whistles share one, stall signs borrow `oak_sign` - per-tier / real
-   art is a follow-up (`wiki/verification.html` §15).
-18. **The stallion seed jar is a first slice, not the §15.1 flow.** Collection
+17. **The tickets are the last inert item, and the art is provisional.**
+   Everything else in `item/ModItems` now does something - seed jars, whistles,
+   stall signs, shearing to get `horse_hair`, all five carrots, research papers.
+   **The four tickets craft and do nothing**: owner's intent is that a ticket
+   teleports its bound horse back to its stall, which is now possible (stalls
+   exist - `StallData` / `StallRecord.center()`), it's just not built. The
+   `known_gene_splice_carrot` is still **one generic item** parameterised by a
+   component, so every gene's carrot looks the same in the inventory. Art:
+   tickets share one texture, whistles share one, stall signs borrow
+   `oak_sign`, and `braided_rope` / `hair_cloth` have recipes but no textures.
+   Full roster + every recipe: **`wiki/items.html`**; art follow-up
+   `wiki/verification.html` §15.
+18. **The stallion seed jar is a first slice, not the full IVF flow.** Collection
    and impregnation are wired (`StallionSeedJarHandler` + the `stored_genome`
    component + `GenomeSample` + `HorseBreedingHandler.applyBredFoal`). The gate
    is **vanilla love** (`isInLove()`), not one of this mod's breeding carrots
@@ -4042,8 +4137,8 @@ Design follow-ups (not just "go look at it"):
    immediately, like vanilla breeding), and the jar carries **no carrot
    effects**. The synthetic sire record uses the stored donor UUID as its
    pedigree edge, so the family tree may not find the sire node. Gestation is
-   the "genuinely new" piece per the roadmap; the real carrot gate waits on
-   §14. Owner tests 2026-09-02: (a) held jar didn't change in creative -> fixed,
+   the "genuinely new" piece per the roadmap; the real carrot gate is now
+   buildable (the carrots shipped 2026-09-05). Owner tests 2026-09-02: (a) held jar didn't change in creative -> fixed,
    transforms in hand now; (b) worked with no breeding-mode requirement ->
    fixed, both ends now require `isInLove()` and consume it.
    `wiki/verification.html` §16.
@@ -4081,7 +4176,7 @@ Design follow-ups (not just "go look at it"):
    fluid check, not the block tag. Feed-bond fires on `EntityInteract` for any
    `isFood` stack and is **not** dose/temper-aware.
 
-22. **Sex is a gene, but nothing is sex-*linked* yet** (roadmap §5.3, second
+22. **Sex is a gene, but nothing is sex-*linked* yet** (`roadmap.html#sex-linked`, second
    half). The locus is built and `HorseRecord.sex` is derived from it, which was
    the prerequisite; what's left is the inheritance *mode*. Specifically:
    `Gene` has no autosomal / X-linked / Y-linked declaration; `breedWith` has no
@@ -4159,7 +4254,7 @@ Design follow-ups (not just "go look at it"):
    three-quarter horse. `ST14`'s naked foal is reported and not drawn: phase 1
    can only push pigment *down*, and a de-pigmented mane reads as a *white* mane,
    which is a different horse and a worse lie than drawing nothing. Both are in
-   `wiki/roadmap.html` §4.4. Also still absent: **DMRT3 / gait** (animation
+   `wiki/roadmap.html#health-genes`. Also still absent: **DMRT3 / gait** (animation
    work), and **`TraitRule`** - two genes that only together trigger an outcome
    (§6.5). **CSNB shipped 2026-09-06** with the leopard complex (informational
    on `LP/LP`).
@@ -4177,7 +4272,7 @@ Design follow-ups (not just "go look at it"):
    anchor to actually hold at the top of the strength ramp, and a chest region
    to anchor beside it. Note `W22` dominant white and `O/O` lethal white are
    `masking` outcomes that `restrictAll`, so they take the ears too -
-   correctly; those are not hats. `wiki/roadmap.html` §4.2.
+   correctly; those are not hats. `wiki/roadmap.html#defects`.
 
 30. **The white-pattern audit (2026-09-05) - the big one is now fixed.**
    **Root cause of "white over the whole topline" was a UV bug, not a
@@ -4241,7 +4336,7 @@ Design follow-ups (not just "go look at it"):
    eyeballed to "reads as that breed, not a monoculture" and have had no
    balance pass. `add_horse_loners` targets `#minecraft:is_overworld`
    wholesale, so total world horse density is unmeasured and may be too high.
-   Two design calls flagged in `wiki/roadmap.html` §22: **Unknown as a cross
+   Two design calls flagged in `wiki/roadmap.html#decisions`: **Unknown as a cross
    component** ("Friesian x Unknown cross" vs. making Unknown absorbing like
    Mixed) and the **cross stat rule** (per-axis average of the parents' bands
    vs. leaning toward the stronger parent).
@@ -4355,8 +4450,16 @@ its licence is compatible.
   `wiki/api-reference.html`; the **non-genetic horse-care systems** (gated
   healing, bond, herds) **only** in `wiki/horse-care.html`; the **trait / size /
   health system** (speed, health, jump, size, disorders, the two lethal paths,
-  `ServerConfig`) **only** in `wiki/horse-body.html`. Update the relevant
+  `ServerConfig`) **only** in `wiki/horse-body.html`; **every item and every
+  recipe** (plus shearing, whistles, stalls, tickets, the spawn egg) **only** in
+  `wiki/items.html`; the **hay portals and the horse dimension** **only** in
+  `wiki/horse-dimension.html`; the **breeding carrots and the gene database**
+  **only** in `wiki/carrots.html`. Update the relevant
   file in the same change - a pointer from CLAUDE.md is fine, a copy is not.
+- **Link the roadmap by anchor, never by `§` number.** It was renumbered
+  2026-09-06 and will be renumbered again whenever priorities move; the anchors
+  (`#defects`, `#sex-linked`, `#health-genes`, `#settled`, ...) are what stay
+  put.
 - **The wiki has one nav.** A new page goes in the `SECTIONS` array in
   `wiki/nav.js` and nowhere else; never hand-write a sidebar into a page.
   (`wiki/gene-creator/` is the one exception - it is an app, not a page, and
