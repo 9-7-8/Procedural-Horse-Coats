@@ -2,7 +2,7 @@ package com.example.horsegenetics.common.genetics;
 
 import com.example.horsegenetics.common.Rng;
 
-import java.lang.System.Logger;
+import com.example.horsegenetics.common.CommonLog;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -40,8 +40,6 @@ import java.util.function.Predicate;
  * ({@code wiki/roadmap.html} §14.1) when that lands.
  */
 public final class FounderTable {
-
-    private static final Logger LOG = System.getLogger("horsegenetics.genetics");
 
     /**
      * How far the declared percentages may miss 100 before it is worth a
@@ -142,7 +140,7 @@ public final class FounderTable {
             sum += p;
         }
         if (Math.abs(sum - 1.0) > 1e-6) {
-            LOG.log(Logger.Level.WARNING, "allele frequencies sum to {0}, not 1 - normalising", sum);
+            CommonLog.warn("allele frequencies sum to {0}, not 1 - normalising", sum);
         }
 
         List<Allele> alleles = new ArrayList<>(frequencies.keySet());
@@ -212,7 +210,7 @@ public final class FounderTable {
                 total += w;
             }
             if (Math.abs(total - 100.0) > TOTAL_EPSILON) {
-                LOG.log(Logger.Level.WARNING,
+                CommonLog.warn(
                         "founder weights for {0} sum to {1}, not 100 - normalising proportionally",
                         weights.keySet().iterator().next().geneKey(), total);
             }

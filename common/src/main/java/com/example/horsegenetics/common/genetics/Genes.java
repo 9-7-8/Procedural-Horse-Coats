@@ -50,7 +50,7 @@ import com.example.horsegenetics.common.genetics.genes.ParticleGene;
 import com.example.horsegenetics.common.genetics.genes.Pax3Gene;
 import com.example.horsegenetics.common.genetics.spec.SpecGene;
 
-import java.lang.System.Logger;
+import com.example.horsegenetics.common.CommonLog;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -92,8 +92,6 @@ import java.util.Map;
 public final class Genes {
 
     public static final String NS = "horsegenetics";
-
-    private static final Logger LOG = System.getLogger("horsegenetics.genetics");
 
     /** The lowest priority in the magical band - below this a gene is "natural" by convention. */
     public static final int MAGICAL_BAND_START = 100;
@@ -293,10 +291,10 @@ public final class Genes {
     private static void checkBand(Gene gene) {
         boolean magicalByNumber = gene.priority() >= MAGICAL_BAND_START;
         if (gene.isNatural() && magicalByNumber) {
-            LOG.log(Logger.Level.WARNING, "gene {0} is natural but its priority {1} is in the magical band (>= {2})",
+            CommonLog.warn("gene {0} is natural but its priority {1} is in the magical band (>= {2})",
                     gene.key(), gene.priority(), MAGICAL_BAND_START);
         } else if (!gene.isNatural() && !magicalByNumber) {
-            LOG.log(Logger.Level.WARNING, "gene {0} is magical but its priority {1} is in the natural band (< {2})",
+            CommonLog.warn("gene {0} is magical but its priority {1} is in the natural band (< {2})",
                     gene.key(), gene.priority(), MAGICAL_BAND_START);
         }
     }

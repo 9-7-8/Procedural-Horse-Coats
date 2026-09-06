@@ -2,6 +2,7 @@ rootProject.name = "horse-genetics"
 
 include(":common")
 include(":neoforge-26.1.2")
+include(":web")
 
 pluginManagement {
     repositories {
