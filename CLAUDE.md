@@ -243,8 +243,25 @@ where the session actually landed rather than narrating it mid-change.
    is newly unplayed *and where to look*), `wiki/known-gaps.html` (delete what
    closed, add what was discovered), plus any gene or system page the session
    moved, and `wiki/nav.js` if a page was added.
-5. **Audit this file.** Did anything land here that belongs in the wiki? Is it
-   still under 300 lines? Move whatever fails the test at the top.
+5. **Audit this file and put it back under budget.** Not "did I add anything" -
+   that is too easy to answer *no* to without looking. Actually run it:
+
+   ```bash
+   wc -l CLAUDE.md                            # must be <= 300
+   git diff HEAD~1 -- CLAUDE.md               # what did this session add?
+   grep -nE '20[0-9]{2}-[0-9]{2}-[0-9]{2}|[0-9]{3,}' CLAUDE.md   # dates + derived numbers
+   ```
+
+   Then take **every line the session added here**, run it through the test and
+   the routing table at the top of this file, and move what fails. The two
+   greps above catch the usual offenders: a date means it is session-log
+   material, and a long number is almost always a derived value that should be
+   an accessor name instead.
+
+   Over 300 lines is not a nudge, it is the signal to **move a whole section
+   out** - the way the first audit moved four. Trimming words to squeeze under
+   the line misses the point: the budget exists so the hard rules stay findable,
+   and a file that is 299 lines of history has already failed.
 6. **Commit and push the doc update as its own commit.** Step 4 always leaves
    the tree dirty; a session must not end with unpushed doc changes.
 7. **Verify clean**: `git status --short` empty and `git log origin/main..HEAD`
