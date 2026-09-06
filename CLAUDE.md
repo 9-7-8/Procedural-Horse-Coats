@@ -177,6 +177,109 @@ project. Its shape:
 
 ## Status snapshot (keep this current)
 
+- **Fixed 2026-09-06: the gene creator was dead on open, drawing bounding boxes
+  instead of a horse, and had been previewing every coat with the spine and belly
+  texture patches swapped.** `:common:test` **439 green** (+3
+  `CreatorMetadataRoundTripTest`), `:neoforge-26.1.2:build` green, parity
+  **3868/48** (up from 3832 - the effect vocabulary is checked now too). No game
+  code changed; `coat-golden.txt` untouched. Six pieces:
+
+  - **It threw on load.** `js/preview.js` exported `expresses: expresses` and
+    there is no such function - a leftover from the combination-table rewrite
+    (080054a) that deleted it and left the export line behind. A `ReferenceError`
+    at script-evaluation time killed the whole `HG.preview` module, so
+    `HG.ui.start()` then died on `HG.preview.load` and the page rendered nothing.
+    One dead line; every other symptom the owner saw was downstream of it.
+
+  - **The JS geometry port had missed the 2026-09-05 top/bottom UV swap, and the
+    parity net could not see it because the fixtures were stale too.**
+    `HorseSkinGeometry.faceMapsOf` had `Face.TOP` and `Face.BOTTOM` exchanged and
+    was fixed in Java that day; `wiki/gene-creator/js/geometry.js` was not, and
+    `fixtures/expected.json` was never re-baked. **`expected.json` is a
+    checked-in snapshot of the Java**, so a stale one makes `check-parity.mjs`
+    green *by definition* - it was comparing the JS against a record of the Java
+    as it used to be. Re-baking turned up **313 mismatches**, i.e. the creator had
+    been drawing every horse with its spine and belly patches swapped since
+    2026-09-05, confidently. Swapping the two JS entries restores 3832/48 green.
+    **This is known gap #13's failure mode with a new twist: not a hand-written
+    number that rotted, but a *generated* one nobody regenerated.** The lesson is
+    in "Build & test": re-baking is part of the check, not a chore beside it.
+
+  - **The 3D preview drew each part's rest-pose AABB, not the part.**
+    `HorseSkinGeometry` stores every part as an axis-aligned bounding box,
+    because the coat pipeline only ever projects texels onto a box and never asks
+    what shape the horse is. For a part with a pitch that box is far bigger than
+    the part: measured, the **mane came out 4.5x its true volume**, the tail
+    2.6x, the neck 2.0x, the head and muzzle ~1.9x. So the preview was a pile of
+    oversized blocks rather than a horse. `js/model3d.js` now walks the **raw
+    cuboid** (origin + size, rotated about the pivot) exactly as `HdHorseModel`
+    poses it and only then flips into body space, via a new additive
+    `geometry.toBody(skin, mx, my, mz)` + `mesh.modelMax` (no computed value
+    moves, so parity is untouched). Verified two ways: an offline round-trip that
+    takes each face's UV centre back through `geo.sample` and gets the right part
+    on **all 72 adult and 60 foal quads**, and an orthographic render of the
+    result, which reads as a horse.
+    - **The model doc's three-box leg is the *classic* model and was not
+      followed.** `javahorsemodelinfo.md` gives upper `4x9x4` + shin `3x5x3` +
+      hoof `4x3x4`; vanilla 26.1.2 - and so `HdHorseModel`, which copies its
+      `texOffs` and box numbers verbatim - uses **one `4x11x4` box per leg**.
+      Drawing the trio would have made the preview disagree with the game, which
+      is the one thing this tool must never do. Everything else the doc gives
+      (the 30-degree head pitch, the pivots, the mane's `5.01` offset, the tail's
+      stepped hang) is what the rewrite restores.
+    - The camera is framed from the built model rather than fixed, so an adult
+      and a foal are both in shot and both stand on the grid.
+
+  - **Typing was one character per click.** Every edit calls `changed()`, which
+    rebuilds both panels from scratch and destroys the focused input. Rather than
+    make the render incremental, `focusPath` / `restoreFocus` remember the caret
+    by its **position in the panel's own tree** and put it back - a text edit does
+    not change that tree's shape, so the path still names the same field.
+
+  - **The format-3 metadata has forms now** (roadmap `#designer` §9.1): `blurb`,
+    `rarity` (the six `GeneRarity` tiers), the `carrot` block (enabled,
+    one-copy / two-copies, flavour item ids) and an optional `splice` table
+    seeded from the founder shares. `tidy()` **drops anything still at its
+    default**, so a gene that ignores all of it still exports a short file, and
+    `retoken` carries the splice table through an allele rename exactly as it
+    carries founders - it is keyed by combination too, and orphaning it would
+    only show up as a load error.
+
+  - **The `effects` block has an editor** (same §9.1): one card per effect, all
+    eight verbs, every parameter, the four trigger shapes, `minDose`, and a
+    `when` built from the condition flags. **`js/schema.js` gained an `EFFECTS`
+    table mirroring `AbilityType`**, and `SpecFixtureTool` now bakes the ability
+    vocabulary into the fixtures so **parity compares it** - kinds, defaults,
+    choices, required-ness and the flag list - which is the only net effects have,
+    since they do not paint and the probe cases say nothing about them. The
+    `when` form covers a flat `all`/`any` of optionally-negated flags; a
+    **nested** condition is preserved byte-for-byte and shown read-only rather
+    than silently flattened.
+
+  - **The parity check runs in the page.** `js/parity.js` is now the single
+    implementation and both callers run it: `check-parity.mjs` (which lost its
+    duplicate copy of the logic) and the creator itself, on boot, printing the
+    verdict under the coat sheet. `SpecFixtureTool` also emits
+    `fixtures/expected.js` - the same fixtures as a classic script, because a
+    `file://` page cannot fetch the `.json` beside it, the same reason the
+    textures and examples are inlined.
+
+  - **Two things the parity gate structurally cannot cover** are covered by a new
+    `CreatorMetadataRoundTripTest` instead: the metadata and the `effects` block
+    never paint, so they are exported by
+    `tools/bake-export-fixtures.mjs` and **parsed by the real
+    `GeneSpecParser`**. It asserts the metadata reads back as typed, that
+    re-exporting **Waterborn** through the creator leaves its abilities
+    *equal* (the export is textually shorter - every dropped key equals a game
+    default - so a string comparison would be the wrong test), and that a gene
+    using **every verb** parses and that the verb count still equals
+    `AbilityType.all().size()`.
+
+  - Docs: `wiki/roadmap.html` §9.1 (all three items deleted, one honest
+    remainder left), `wiki/gene-effects.html` + `wiki/gene-format.html` (the
+    creator writes these now), `wiki/verification.html` §0-H (new - and it is a
+    **browser** checklist, since none of this has been looked at).
+
 - **Fixed 2026-09-06, from the first play session against the sex-linked +
   eye-colour + white-recalibration work: one eye rendered backwards, and the
   custom spawn egg could build a `Brn/Brn` stallion.** `:common:test`
@@ -2874,13 +2977,25 @@ NeoForge module thin. That's what makes a future `forge-1.12.2/` module cheap.
 ./gradlew :common:bakeSpecFixtures   # what the real Java spec engine produces
 node wiki/gene-creator/tools/check-parity.mjs   # ...and does the creator's JS agree?
 ./gradlew :common:bakeCreatorAssets  # regenerate the creator's inlined textures + examples
+node wiki/gene-creator/tools/bake-export-fixtures.mjs   # what the creator EXPORTS,
+                                     # for CreatorMetadataRoundTripTest to parse
 ```
 
 **Run the parity check whenever you touch `SpecPainter`, `SpecSchema`,
-`BodyNoise`/`BodyStripes`, or any of `wiki/gene-creator/js/`.** It is the only
-thing standing between the creator and quietly previewing a horse the game will
-not breed - it has already caught a wrong `nextLong()` port and four schema
-defaults that had drifted apart.
+`AbilityType`, `HorseSkinGeometry`, `BodyNoise`/`BodyStripes`, or any of
+`wiki/gene-creator/js/`.** It is the only thing standing between the creator and
+quietly previewing a horse the game will not breed - it has already caught a
+wrong `nextLong()` port, four schema defaults that had drifted apart, and (2026-09-06)
+a missed top/bottom UV swap.
+
+**Re-bake the fixtures before trusting a green run.** `expected.json` is a
+*checked-in snapshot of the Java*, so a stale one makes the check green by
+definition. That is exactly how the UV swap hid for a day: the Java changed, the
+fixture was never re-baked, and the JS port was never updated. **`bakeSpecFixtures`
+is part of the check, not a separate chore.** The creator now also runs
+`js/parity.js` **on itself at boot** and prints the verdict under the coat sheet,
+so a stale port is visible in the tool rather than only at a terminal someone
+forgot to open.
 
 Run `:common:test` first when iterating on genetics/stats - it doesn't touch
 Minecraft. Requires JDK 25; `foojay-resolver-convention` in
@@ -4385,6 +4500,19 @@ Design follow-ups (not just "go look at it"):
    work will always drift on the built half.** The roadmap now contains only
    unbuilt work and is deleted from, not annotated. The grep-the-docs-for-derived-
    numbers test is still unwritten and is still the cheap fix.
+   **A fourth instance, 2026-09-06, and it is a new shape of the same rot: a
+   *generated* artefact nobody regenerated.** `wiki/gene-creator/fixtures/expected.json`
+   is a checked-in snapshot of the Java spec engine, and `check-parity.mjs`
+   compares the JS port against it - so when `HorseSkinGeometry`'s top/bottom UV
+   swap landed on 2026-09-05 and the fixture was not re-baked, the check went on
+   reporting **3832/48 green while comparing the port against a record of the
+   Java as it used to be**. Re-baking surfaced 313 mismatches. The JS port had
+   been a day behind the whole time, drawing every previewed horse with its spine
+   and belly patches exchanged. **A snapshot used as an oracle is only an oracle
+   while it is current**, and unlike a stale number in prose it fails *silently
+   green*, which is worse. The creator now runs the check on itself at boot, but
+   that shares the same fixture - the real discipline is that re-baking is part
+   of the check.
 14. **Data-driven genes cover markings and dilutions, not everything.** The
    format has no expression language and no way to read another gene, so the
    three built-ins that genuinely need one still can't be expressed as specs:
@@ -4394,10 +4522,18 @@ Design follow-ups (not just "go look at it"):
    **bay**'s exact face-follows-legs coupling. Those stay Java, which is fine -
    the tiers were always meant to bottom out at a real class. What would move
    the line: a `dose` mask on another gene, and a `REMAP` op.
-15. **The creator has no in-page parity button.** Parity is checked by a Node
-   script at the terminal, so the tool itself will happily show you a stale
-   preview if you edit `js/` and don't run it. Loading `fixtures/expected.json`
-   in the page and self-checking on boot would close that.
+15. **Closed 2026-09-06: the creator self-checks parity on boot**, and it was
+   built because the gap had already bitten. `js/parity.js` is the single
+   implementation of the check; `check-parity.mjs` and the page both run it, and
+   the page prints the verdict under the coat sheet. `SpecFixtureTool` emits
+   `fixtures/expected.js` beside the `.json` because a `file://` page cannot
+   fetch a sibling file.
+   **What the exercise found is the more useful half**: the terminal check had
+   been green against a *stale fixture* while the JS port was a day behind the
+   Java on the top/bottom UV swap. So the residual risk is no longer "nobody ran
+   the script" but **"nobody re-baked the snapshot the script compares against"**
+   - `expected.json` is checked-in Java output, and a stale one is green by
+   definition. `bakeSpecFixtures` belongs to the check; see "Build & test".
 16. **Gene `effects` are a thin slice and mostly untested** - though less thin
    since 2026-09-04: the set is **eight verbs**, `healing` and `spread` joined
    it, `emitter` grew a second colour / a count / a `data` number / five
@@ -4415,8 +4551,10 @@ Design follow-ups (not just "go look at it"):
    particles; `yield` recognises a fixed handful of output items;
    `walk_on_water` is buoyancy, not a solid plane. Conditions are boolean, not
    the architecture's 0-1 scalars. There is no trait registry, no `on_change`,
-   no selectors/auras/pools. The gene creator can't edit an `effects` block -
-   it's hand-written. `healing` and `spread` are both first drafts: `healing`
+   no selectors/auras/pools. **The gene creator edits an `effects` block since
+   2026-09-06** (all eight verbs, triggers, `minDose`, and a flat `all`/`any`
+   condition; a nested `when` is preserved read-only), and its verb table is
+   parity-checked against `AbilityType`. `healing` and `spread` are both first drafts: `healing`
    caps at `max_targets` and does a real sphere check, and `spread` converts at
    most one block a beat off a narrow, hand-written block list - which is the
    piece most likely to be wrong in play (the risk is a horse eating something a
@@ -4694,11 +4832,17 @@ Design follow-ups (not just "go look at it"):
    so extending it is the fiddly part) and a `client/ShearedHorseLayer` on the
    `EmissiveCoatLayer` pattern. Deferred rather than done badly.
 
-34. **§19 metadata has no creator form.** The gene creator emits `format: 3`
-   files, but the new `blurb` / `rarity` / `carrot` / `splice` blocks are not
-   editable in the tool - an author writes them by hand. They are optional and
-   not parity-checked (they don't paint), so this is a form-fields task, not a
-   correctness one. `wiki/gene-format.html` documents the shapes.
+34. **Closed 2026-09-06: the §19 metadata has creator forms.** `blurb`,
+   `rarity`, `carrot` (enabled / het-hom / flavour) and `splice` are all editable,
+   and `tidy()` drops whatever is still at its default so a gene that ignores
+   them still exports a short file. They do not paint, so `check-parity.mjs` says
+   nothing about them; they are guarded instead by
+   `CreatorMetadataRoundTripTest`, which parses the creator's own export with the
+   real `GeneSpecParser`.
+   **Still hand-edited**: a gene with more than two alleles, or more than one
+   visible outcome. The creator authors the two-allele / one-outcome case and
+   says so on screen rather than pretending otherwise - the format allows any
+   number of both.
 
 35. **No built-in gene declares a `splice` table.** Every built-in falls back to
    the uniform draw over its viable pairs when the Unknown Gene Splice carrot lands on it -

@@ -59,6 +59,29 @@
 </div>
 
 <div class="note rule">
+    <span class="label">The creator writes this block (since 2026-09-06)</span>
+    <p>
+        Every <code>effects</code> block used to be hand-written JSON. The
+        <a href="gene-creator/index.html">gene creator</a> now has a form for it:
+        one card per effect, every verb and every parameter on this page, the four
+        trigger shapes, a <code>minDose</code> toggle, and a <code>when</code> built
+        from the condition flags below. Its verb table is a <strong>mirror of
+        <code>AbilityType</code></strong> and is compared against the real one by
+        <code>check-parity.mjs</code>, on the same terms as the mask and op tables
+        &mdash; so a verb, a parameter, a default or a condition flag that changes
+        here and not there is a build failure rather than a gene that plays
+        differently from how it was authored.
+    </p>
+    <p>
+        The one thing the form declines to edit is a <strong>nested</strong>
+        <code>when</code>. It handles a flat <code>all</code> / <code>any</code> of
+        (optionally negated) flags, which is every condition any shipped gene uses;
+        anything deeper is preserved byte-for-byte and shown read-only, because
+        silently flattening a condition is worse than not editing it.
+    </p>
+</div>
+
+<div class="note rule">
     <span class="label">Both kinds of gene use this vocabulary (since 2026-09-04)</span>
     <p>
         This page used to say the effect path was <strong>spec-only</strong> &mdash;

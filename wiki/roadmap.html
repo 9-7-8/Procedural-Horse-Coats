@@ -517,23 +517,27 @@
         game will not breed, convincingly.</li>
 </ul>
 
-<h3>9.1 The smaller creator work, worth doing first</h3>
+<h3>9.1 The smaller creator work</h3>
 
-<ul>
-    <li><strong>The gene-metadata form fields.</strong> The creator emits
-        <code>format: 3</code> but has no UI for <code>blurb</code>,
-        <code>rarity</code>, <code>carrot</code> (enabled / het-hom / flavour) or
-        <code>splice</code>, so an author writes those by hand. Small, and it unblocks
-        the carrot content pass (&sect;<a href="#carrot-content">15</a>).</li>
-    <li><strong>An <code>effects</code> editor.</strong> Gameplay effects already have a
-        home &mdash; the <a href="gene-effects.html"><code>effects</code> block</a> and
-        its verbs. The editor should emit <em>that</em>, not a parallel format. Today
-        every <code>effects</code> block is hand-written.</li>
-    <li><strong>An in-page parity check.</strong> Parity is a Node script run at the
-        terminal, so the tool will happily show a stale preview if you edit
-        <code>js/</code> and forget. Loading <code>fixtures/expected.json</code> in the
-        page and self-checking on boot closes that.</li>
-</ul>
+<p>
+    The three items that used to sit here &mdash; the gene-metadata form fields, an
+    <code>effects</code> editor, and an in-page parity check &mdash; all shipped
+    2026-09-06, along with a fix for the reason they mattered: the creator&rsquo;s
+    geometry port had silently missed the <strong>top/bottom UV swap</strong> and the
+    committed parity fixtures predated it too, so the terminal check had been reporting
+    green against a stale baseline while the preview drew every horse with its spine
+    and belly texture patches exchanged. The in-page check is exactly what makes that
+    class of rot visible.
+</p>
+
+<p>
+    <strong>What is left of them</strong> is one honest limit rather than a task list:
+    the <code>when</code> form edits a flat <em>all</em> / <em>any</em> of (optionally
+    negated) condition flags, which is every condition any shipped gene uses. A nested
+    condition is preserved byte-for-byte and shown read-only, because silently
+    flattening someone&rsquo;s tree is worse than declining to edit it. A real
+    tree editor is only worth building once a gene needs one.
+</p>
 
 <div class="note">
     <span class="label">Breed creation in the editor &mdash; ship breeds as packages</span>
