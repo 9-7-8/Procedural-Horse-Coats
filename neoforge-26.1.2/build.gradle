@@ -67,3 +67,16 @@ processResources {
 dependencies {
     implementation project(":common")
 }
+
+// A jar dropped into a real `mods/` folder must be self-contained. Gradle only
+// puts :common on the classpath for the dev runs (runClient/runServer) - it is
+// NOT folded into the jar by `implementation project(":common")`. Pull :common's
+// compiled classes and its classpath-only resources (the horsegenetics/names/**
+// word tables, which HorseRecords loads on class-init and throws without) into
+// the jar here. `assets/**` is already merged by processResources above, so
+// exclude it to avoid duplicate entries.
+tasks.named('jar', Jar) {
+    from(project(':common').sourceSets.main.output) {
+        exclude 'assets/**'
+    }
+}
