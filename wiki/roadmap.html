@@ -492,8 +492,10 @@
     <p>
         The <a href="horse-designer/index.html">horse designer</a> exports a horse
         as JSON &mdash; <code>DesignerApi.horseJson()</code>, behind the
-        <b>Export JSON</b> button. <strong>Nothing in game reads it.</strong> So a
-        horse you design in the browser has to be brought over by copying its
+        <b>Export JSON</b> button, and reads it back through <b>Import</b> - so
+        the format is proven to round-trip a horse exactly (genotype, epigenome,
+        name, sex, breed). <strong>Nothing in game reads it.</strong> So a horse
+        you design in the browser still has to be brought over by copying its
         genotype code into the custom horse spawn egg by hand, which loses the
         epigenome, the name, the sex and the breed.
     </p>

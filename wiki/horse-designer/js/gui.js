@@ -312,7 +312,11 @@ window.HG = window.HG || {};
       // own, and the only controls here with no counterpart in game.
       button(rx, vh - 92, RIGHT_W, 20, "Reroll name",
         function () { opts.edit("rerollName", 3); }, true);
-      button(rx, vh - 70, RIGHT_W, 20, "Export JSON", function () { opts.exportJson(); }, true);
+      // Export and Import share a row - two halves of one idea, and the column
+      // has no space to spare.
+      var halfW = (RIGHT_W - 4) / 2;
+      button(rx, vh - 70, halfW, 20, "Export", function () { opts.exportJson(); }, true);
+      button(rx + halfW + 4, vh - 70, halfW, 20, "Import", function () { opts.importJson(); }, true);
       button(rx, vh - 48, RIGHT_W, 20, state.wander ? "Wander: on" : "Wander: off",
         function () { opts.toggleWander(); }, true);
       button(rx, vh - 26, RIGHT_W, 20, "Reset view", function () { opts.resetView(); }, true);

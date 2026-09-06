@@ -103,6 +103,47 @@ public final class HorseEditor {
         return last;
     }
 
+    void setName(String firstName, String lastName) {
+        this.first = firstName == null ? "" : firstName;
+        this.last = lastName == null ? "" : lastName;
+    }
+
+    /**
+     * Read an epigenome code back. Separate from {@link #paste} because a
+     * genotype code and an epigenome code are two independent facts - a pasted
+     * genotype keeps the epigenome you were looking at, while an imported horse
+     * brings its own.
+     */
+    boolean setEpigenome(String code) {
+        try {
+            this.epigenome = Epigenome.parse(code.trim());
+            return true;
+        } catch (RuntimeException e) {
+            return false;
+        }
+    }
+
+    /**
+     * Set the breed <b>label</b> without rolling a horse of it. Picking a breed
+     * from the dropdown is a request for a new horse; importing one is not -
+     * the genotype in the file already is that horse, and re-rolling would
+     * throw away the thing being imported.
+     */
+    boolean stampBreed(String name) {
+        if (name == null || name.isEmpty()) {
+            breedIndex = 0;
+            return true;
+        }
+        for (int i = 0; i < breeds.size(); i++) {
+            if (breeds.get(i).name().equalsIgnoreCase(name)) {
+                breedIndex = i + 1;
+                return true;
+            }
+        }
+        breedIndex = 0;
+        return false;
+    }
+
     /** @param halves bit 1 the first name, bit 2 the last - so 3 is both. */
     void rerollName(int halves, Rng rng) {
         if (names == null) {

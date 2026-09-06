@@ -141,7 +141,36 @@ public final class Epigenome {
         }
         return new AlleleEpigenetics(
                 Integer.parseInt(s.substring(0, sep)),
-                Long.parseUnsignedLong(s.substring(sep + 1), 16));
+                parseUnsignedHex(s.substring(sep + 1)));
+    }
+
+    /**
+     * A seed, read back from the 16 hex digits {@link #appendCopy} wrote.
+     *
+     * <p>This is {@code Long.parseUnsignedLong(s, 16)} written out. That method
+     * is not in TeaVM's class library, and the wiki's
+     * <a href="../../../../../../../wiki/horse-designer/">horse designer</a>
+     * compiles this module to WebAssembly - so using it would mean the browser
+     * could bake a horse but never read one back. It is also one fewer JDK
+     * method between {@code common/} and the Java 8 backport.
+     *
+     * <p>The shift is what makes it <i>unsigned</i>: a seed uses the full 64-bit
+     * range, so the top bit is data, not a sign. Sixteen digits is exactly 64
+     * bits, hence the length guard.
+     */
+    private static long parseUnsignedHex(String s) {
+        if (s.isEmpty() || s.length() > 16) {
+            throw new IllegalArgumentException("epigenetic seed must be 1-16 hex digits, got: " + s);
+        }
+        long value = 0;
+        for (int i = 0; i < s.length(); i++) {
+            int digit = Character.digit(s.charAt(i), 16);
+            if (digit < 0) {
+                throw new IllegalArgumentException("epigenetic seed is not hex: " + s);
+            }
+            value = (value << 4) | digit;
+        }
+        return value;
     }
 
     public String toCode() {

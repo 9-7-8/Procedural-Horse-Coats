@@ -401,13 +401,29 @@ window.HG = window.HG || {};
       return m;
     }
 
-    box(4, 12, 4, -2, 0, 0, TROUSERS);   // right leg
-    box(4, 12, 4, 2, 0, 0, TROUSERS);    // left leg
-    box(8, 12, 4, 0, 12, 0, SHIRT);      // body
-    box(4, 12, 4, -6, 12, 0, SKIN);      // right arm
-    box(4, 12, 4, 6, 12, 0, SKIN);       // left arm
-    box(8, 8, 8, 0, 24, 0, SKIN);        // head
-    box(8.4, 3, 8.4, 0, 29, 0, HAIR);    // a suggestion of hair, so it reads as a person
+    // Limbs BUTT the torso, as vanilla's own model does - two boxes meeting at a
+    // plane hide each other's shared face, and the depth test settles it. What
+    // does not work is two boxes of different colours *overlapping* at a plane,
+    // which is what the hair used to do.
+    //
+    // The small lateral offsets keep the arms off the shirt's side planes and
+    // the legs off each other, because those faces really would be visible
+    // together. They are hundredths of a model unit; nothing you can see.
+    box(4, 12, 4, -2.05, 0, 0, TROUSERS);      // right leg  - 0.1 apart at the crotch
+    box(4, 12, 4, 2.05, 0, 0, TROUSERS);       // left leg
+    box(8, 12, 4, 0, 12, 0, SHIRT);            // body
+    box(4, 12, 4, -6.05, 12, 0, SKIN);         // right arm  - clear of the shirt's side
+    box(4, 12, 4, 6.05, 12, 0, SKIN);          // left arm
+    box(8, 8, 8, 0, 24, 0, SKIN);              // head
+    // THE FIX: the hair WRAPS the scalp instead of capping it. It used to be
+    // 8.4 x 3 sitting at y 29-32, so its top face was coplanar with the head's
+    // top face - two different colours competing for the same plane, which is
+    // the scalp-through-hair flicker. Now it is wider than the head on every
+    // side AND its top sits 0.2 proud, so no face of it shares a plane with any
+    // face of the head; its underside is buried inside the skull where nothing
+    // can see it. Same trick as the horse mane's deliberate z = 5.01
+    // (wiki/body-space.html#vanilla-model).
+    box(8.4, 3.4, 8.4, 0, 28.8, 0, HAIR);
     return g;
   }
 

@@ -394,6 +394,27 @@ public final class DesignerApi {
     }
 
     /**
+     * The other half of an import. The page parses the JSON (that is a browser
+     * format and JavaScript reads it for free) and calls these; everything
+     * genetic still happens here.
+     */
+    @JSExport
+    public static boolean setEpigenomeCode(String code) {
+        return editor().setEpigenome(code);
+    }
+
+    @JSExport
+    public static void setName(String first, String last) {
+        editor().setName(first, last);
+    }
+
+    /** @return false if no breed by that name - the label is dropped, the horse is not. */
+    @JSExport
+    public static boolean setBreedByName(String name) {
+        return editor().stampBreed(name);
+    }
+
+    /**
      * The horse as a file: enough to rebuild it exactly, plus enough for a
      * person to tell what it is.
      *

@@ -261,6 +261,34 @@ project. Its shape:
     exported horse - it just says you will not see it. This is gap #39's lesson
     applied before the fact: a hand-written list would have been wrong the first
     time a gene was added.
+  - **Import JSON** joined Export, so the page round-trips its own format. The
+    JSON is parsed in JavaScript (a browser format, free there) but every field
+    is *applied* through Java - `pasteCode`, `setEpigenomeCode`, `setName`,
+    `setBaby`, `setSex`, `setBreedByName` - so nothing genetic is decided in
+    JS. It is deliberately tolerant: an unknown gene drops, a missing gene reads
+    as its wild type, an unrecognised breed loses only its label, and each is
+    reported rather than refused. **`stampBreed` is not `setBreed`**: picking a
+    breed from the dropdown is a request for a *new* horse, importing one is
+    not, so the import stamps the label without rolling. Verified by exporting a
+    Falabella, wiping genes/name/sex/epigenome/breed, importing it back, and
+    getting an identical genotype, epigenome, name, sex, breed, short form,
+    scale and epigenetic fingerprint.
+  - **A second TeaVM gap, found by that work:** `Long.parseUnsignedLong(s, 16)`
+    is not in TeaVM's class library, and `Epigenome.parse` needs it. It had
+    compiled fine until now only because **the wasm build compiles the reachable
+    graph** - nothing had called `parse` before, so it was eliminated. Replaced
+    with a written-out `parseUnsignedHex` in `Epigenome` (the shift is what
+    makes it unsigned; a seed uses the full 64 bits). Same shape as the
+    `System.getLogger` fix, and the same side benefit for the Java 8 backport.
+    **The lesson worth keeping: adding an export can surface a gap that was
+    always there**, so a new `@JSExport` deserves a build, not an assumption.
+  - **The scale figure's hair was z-fighting its scalp** - the hair box's top
+    face sat at exactly the head's top, two different colours competing for one
+    plane. It now *wraps* the scalp: wider on every side and 0.2 proud on top,
+    with its underside buried inside the skull. Same trick as the horse mane's
+    deliberate `z = 5.01`. The limb joints are left butted, which is vanilla's
+    own arrangement - sinking them turned out worse, exposing coplanar slivers
+    down the sides.
   - **Toasts dismiss themselves after 30 s**, and hovering one holds it.
   - **The roadmap was renumbered** by the insertion (1-23). Numbers there are
     explicitly not stable; link by anchor.
@@ -5345,12 +5373,41 @@ The routine to run when the owner says **"end the session"** (or "wrap up",
 code is pushed, so it's a review of where the session actually landed rather
 than a running commentary written mid-change.
 
-**0. Pre-flight.** `./gradlew :common:test`, `./gradlew
-:neoforge-26.1.2:build`, and - if anything under `common/genetics/spec/`,
-`SpecPainter` or `wiki/gene-creator/js/` was touched -
-`node wiki/gene-creator/tools/check-parity.mjs`. Don't push red. If something fails and can't be fixed
-in the time left, still push - but say so in the commit message and put it at
-the top of `wiki/verification.html`.
+**0. Regenerate whatever the session invalidated.** These are all *derived
+artefacts checked into the repo*, and every one of them fails silently when
+stale - the tool goes on using yesterday's answer, confidently. Work down the
+list by what was touched:
+
+| If the session touched&hellip; | Re-run | Commit the result |
+|---|---|---|
+| **any gene** (added, removed, or its constants changed) | `./gradlew :common:test` and, when a coat deliberately moved, delete `common/src/test/resources/coat-golden.txt`, re-run, copy `common/build/coat-golden.txt` back | `coat-golden.txt` |
+| **anything in `common/`** | `./gradlew :web:bakeDesignerAssets` | `wiki/horse-designer/wasm/web.wasm` |
+| `common/genetics/spec/`, `SpecSchema`, `AbilityType`, `HorseSkinGeometry`, `BodyNoise`/`BodyStripes` | `./gradlew :common:bakeSpecFixtures` **then** `node wiki/gene-creator/tools/check-parity.mjs` | `wiki/gene-creator/fixtures/expected.json` |
+| the mod's coat PNGs or the name tables | `./gradlew :common:bakeCreatorAssets` and `:web:bakeDesignerAssets` | the regenerated assets |
+| a gene file example, or the creator's export shape | `node wiki/gene-creator/tools/bake-export-fixtures.mjs` | the fixtures |
+
+**The gene case is the one that bites**, because a new gene changes the genotype
+code length, the registry, the catalogue counts *and* both browser tools. A
+`git status` showing `common/` changed and `wiki/horse-designer/wasm/`
+unchanged means the designer is running the old mod - see known gap #42.
+
+**0b. If `CustomHorseSpawnScreen` changed, change its twin** - and vice versa.
+They are the in-game and in-browser gene testers and are meant to behave
+identically (`wiki/horse-designer/`; the note is on both files). Most of a
+change is Java either way: `web/HorseEditor.java` mirrors the screen's
+`variantPair` / `enforceSexLinkage` / `applyGenome` / `randomizeGenes` under the
+same names, and `wiki/horse-designer/js/gui.js` copies the screen's layout
+constants and colours **by value**. Walk both and check: the gene list order and
+what a row shows, the allele buttons and the dropdown-past-three-alleles rule,
+the right column's contents *and order*, the short-form line. A divergence that
+is deliberate (the browser cannot spawn, cannot draw item icons or particles)
+belongs in the comment on both files, not left to be discovered.
+
+**0c. Then the build.** `./gradlew :common:test`, `./gradlew
+:neoforge-26.1.2:build`, and `node wiki/gene-creator/tools/check-parity.mjs`.
+Don't push red. If something fails and can't be fixed in the time left, still
+push - but say so in the commit message and put it at the top of
+`wiki/verification.html`.
 
 **1. Commit and push the session's code.**
 
@@ -5391,6 +5448,10 @@ the doc-split rules under "Conventions":
   `node wiki/gene-creator/tools/check-parity.mjs`, and commit the regenerated
   `wiki/gene-creator/fixtures/expected.json`.
 - **`wiki/nav.js`** - if any page was added or renamed.
+- **`wiki/verification.html` &sect;0-I** - if the horse designer changed at all.
+  It is the only record of what that page can and cannot show, and the "struck
+  through" table there is a *derived* split that moves whenever a gene is
+  added.
 - **`README.md`** - only if the *player-facing* experience changed. It stays
   user-facing: no status, no architecture, no API notes.
 

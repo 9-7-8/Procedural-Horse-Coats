@@ -23,6 +23,7 @@ window.HG = window.HG || {};
       toggleWander: function () { wander = !wander; refresh(); },
       resetView: function () { if (scene) scene.resetView(); },
       exportJson: exportJson,
+      importJson: importJson,
       notShown: notShown
     });
 
@@ -163,6 +164,75 @@ window.HG = window.HG || {};
         + "<strong>Nothing in game loads this yet</strong> — it is on the roadmap. "
         + "Until then, <em>Copy code</em> and the custom horse spawn egg are the way in.",
         "info");
+    }
+
+    /**
+     * Read a horse file back. The JSON is parsed here - that is a browser format
+     * and JavaScript reads it for free - but every field is *applied* through
+     * Java, so nothing genetic is decided in this file.
+     *
+     * <p>Deliberately tolerant: a file that names a gene this build does not
+     * have loads with that locus dropped (Genotype.parse already does that), a
+     * missing gene reads as its wild type, and an unrecognised breed loses only
+     * its label. Say what was dropped rather than refusing the horse.
+     */
+    function importJson() {
+      var input = document.createElement("input");
+      input.type = "file";
+      input.accept = ".json,application/json";
+      input.addEventListener("change", function () {
+        var file = input.files && input.files[0];
+        if (!file) return;
+        var reader = new FileReader();
+        reader.onload = function () { applyHorseFile(String(reader.result), file.name); };
+        reader.readAsText(file);
+      });
+      input.click();
+    }
+
+    function applyHorseFile(text, label) {
+      var horse;
+      try {
+        horse = JSON.parse(text);
+      } catch (err) {
+        toast("That is not valid JSON", String(err.message || err), "bad");
+        return;
+      }
+      if (!horse || typeof horse.genotype !== "string") {
+        toast("That is not a horse file",
+          "A horse file needs a <code>genotype</code> code. Export one to see the shape.",
+          "bad");
+        return;
+      }
+      if (!api.pasteCode(horse.genotype)) {
+        toast("The genotype did not parse",
+          "The file's <code>genotype</code> is not a code this build can read. Nothing "
+          + "was changed.", "bad");
+        return;
+      }
+
+      var notes = [];
+      if (typeof horse.epigenome === "string" && horse.epigenome) {
+        if (!api.setEpigenomeCode(horse.epigenome)) {
+          notes.push("its epigenome did not parse, so this horse has a fresh one "
+            + "— the coat will differ wherever a gene varies per horse");
+        }
+      }
+      if (horse.name && (horse.name.first || horse.name.last)) {
+        api.setName(horse.name.first || "", horse.name.last || "");
+      }
+      if (typeof horse.baby === "boolean") api.setBaby(horse.baby);
+      if (horse.sex === "MARE" || horse.sex === "STALLION") api.setSex(horse.sex === "MARE");
+      if (horse.breed && !api.setBreedByName(horse.breed)) {
+        notes.push("there is no breed called “" + horse.breed + "” in this build, "
+          + "so the label was dropped");
+      }
+      refresh();
+      var st = JSON.parse(api.stateJson());
+      toast("Loaded " + (st.first + " " + st.last).trim(),
+        "From <code>" + label + "</code>."
+        + (notes.length ? " Two things to know: " + notes.join("; ") + "." : ""),
+        notes.length ? "warn" : "info");
     }
 
     function copyCode() {

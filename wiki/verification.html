@@ -114,11 +114,16 @@
         halves: <strong>click either half to reroll just that one</strong>, or
         use <b>Reroll name</b> in the right column for both. Picking a breed or
         hitting Randomize renames the horse, because it is a different horse.</li>
-    <li><strong>Export JSON</strong> downloads the horse as a file &mdash; two
-        code strings plus a readable summary. <strong>Nothing in game loads it
-        yet</strong>; that is <a href="roadmap.html#horse-files">roadmap
-        &sect;9</a>. Until then <b>Copy code</b> into the spawn egg is the route
-        in.</li>
+    <li><strong>Export</strong> and <strong>Import</strong> round-trip a horse
+        file &mdash; two code strings plus a readable summary. Export one,
+        Randomize, then import it back: name, sex, breed, coat and the
+        epigenetic fingerprint should all return exactly (that round-trip passes
+        offline; what is unchecked is the file picker and the download in a real
+        browser). Import is tolerant on purpose &mdash; an unknown gene drops, an
+        unrecognised breed loses only its label, and it says which. <strong>Nothing
+        in game loads it yet</strong>; that is
+        <a href="roadmap.html#horse-files">roadmap &sect;9</a>, and until then
+        <b>Copy code</b> into the spawn egg is the route in.</li>
     <li><strong>Does it open at all?</strong> A boot overlay, then sky, grass, a
         horse, and the panel over it.</li>
     <li><strong>Is the horse in the gap?</strong> The camera is shifted sideways so
@@ -134,10 +139,11 @@
         multiplied down by <code>GROUND_TINT</code> in <code>scene.js</code> -
         one constant, easy to re-tune. The horse's own lighting is untouched.</li>
     <li><strong>The player beside the block</strong> is a scale reference: vanilla
-        proportions at the renderer's 0.9375, so 1.875 blocks tall against the
+        proportions at the renderer's 0.9375, so ~1.89 blocks tall against the
         cube's 1.0 and an adult horse's 2.11 to the ear tip. Untextured on
-        purpose - the default skin is Mojang's asset, not this repo's to
-        ship.</li>
+        purpose - the default skin is Mojang's asset, not this repo's to ship.
+        <strong>Its hair used to z-fight its scalp</strong> and now wraps it;
+        confirm there is no flicker on the crown as the camera moves.</li>
     <li><strong>Controls.</strong> Drag the empty middle to spin,
         <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> and
         <kbd>Q</kbd><kbd>E</kbd> to move, scroll to zoom. A drag <em>on a panel</em>
