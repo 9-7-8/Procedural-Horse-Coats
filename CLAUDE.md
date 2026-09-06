@@ -215,12 +215,8 @@ project. Its shape:
     one-gene fix, but it is written generically off `Gene.inheritance()` so a
     future `Y`-linked gene needs no screen change. **Not yet re-verified
     in-game.**
-  - **Owner-confirmed in-game the same session**: the topline recalibration's
-    single-copy splash now reads as **socks** (white confined to the legs, no
-    belly/back bleed) - `wiki/roadmap.html#defects` defect 1 and the
-    `PAX3`/`SW2`-on-90%-of-founders change both read correctly now. **Tiger
-    eye reads well on the Puerto Rican Paso Fino.** Both close verification
-    items - see `wiki/verification.html` §0-G.
+  - Two more items from the same play session are confirmed and closed - see
+    the **Owner-verified in-game (2026-09-06)** block below.
 
 - **Built 2026-09-06, NOT yet play-tested: sex-linked inheritance + brindle, the
   eye-colour channel + tiger eye, a cutie-mark modifier hook, the splice
@@ -2429,6 +2425,17 @@ project. Its shape:
     `wiki/verification.html` §0; machinery: `wiki/horse-care.html`.
   - **Not in this slice:** milking (§7.1), shearing/sleeping bond (shearing
     unbuilt), a stored herd alpha, any stamina resource.
+
+- **Owner-verified in-game (2026-09-06):**
+  - **The topline recalibration's single-copy splash reads as socks** - white
+    confined to the legs, no belly/back bleed. Closes the
+    `wiki/roadmap.html#defects` defect-1 / `PAX3`-`SW2`-on-90%-of-founders
+    verification question; the ladder-step, stacking and sabino-underline
+    questions the same recalibration raised are still open.
+  - **Tiger eye reads well on the Puerto Rican Paso Fino.** Closes the
+    two-texel-amber-iris verification question for that case; the sclera,
+    blue-beats-amber and foal-eye questions the eye-colour channel raised are
+    still open.
 
 - **Owner-verified in-game (2026-09-05):**
   - **The LUT gene** - `Blupnk/Blupnk` resolves against the blue/pink gradient
