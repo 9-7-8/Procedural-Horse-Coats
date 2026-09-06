@@ -128,8 +128,7 @@ window.HG = window.HG || {};
       f.setRed(px, py, red * redKeep * keep);
     });
   }
-
-  // ---- the presets -----------------------------------------------------
+  // ---- the loci, as a config ------------------------------------------
 
   // keepRed, keepBlack, blackTint - CreamPearlDilution's four modes plus
   // champagne, verbatim.
@@ -142,6 +141,7 @@ window.HG = window.HG || {};
 
   function dilute(skin, f, mode) {
     var d = DILUTIONS[mode];
+    if (!d) return;
     restrictAll(skin, f, function (field, px, py) { field.dilute(px, py, d[0], d[1], d[2]); });
   }
 
@@ -149,65 +149,112 @@ window.HG = window.HG || {};
     restrictAll(skin, f, function (field, px, py) { field.setBlack(px, py, 0); });
   }
 
+  function white(skin, f) {
+    restrictAll(skin, f, function (field, px, py) {
+      field.setRed(px, py, 0);
+      field.setBlack(px, py, 0);
+    });
+  }
+
+  var GREY_SEED = "00000000000001a3";
+
+  var GREY_DEFAULTS = {
+    seed: GREY_SEED, progress: 0.5, spacing: 3.4, dappleStrength: 1.0, pointRetention: 0.6
+  };
+
   /**
-   * Each preset is a function(skin, pigmentField) run before the gene under
-   * test - the same position ordinary genes occupy in Genes.naturalOrder().
+   * Run a base coat described as a genotype rather than as a named preset:
+   *
+   *   { extension: "wild" | "chestnut",
+   *     agouti:    null | { leg, face },          // BayCoat's two point extents
+   *     dilution:  null | one of DILUTIONS,        // MATP / champagne
+   *     grey:      null | { seed, progress, spacing, dappleStrength, pointRetention },
+   *     white:     false | true }                  // KIT's dominant-white outcome
+   *
+   * The order is Genes.naturalOrder(): extension, agouti, the dilutions, grey,
+   * then the white loci. It matters - agouti's points are set absolutely and
+   * the dilutions scale them, so swapping those two gives a horse with jet
+   * black points on a gold body, which is the bug the `blackTint` term exists
+   * to prevent.
+   *
+   * This is the one implementation. PRESETS below are configs, and the horse
+   * designer's per-locus controls build the same object, so the creator's "Bay"
+   * and the designer's "Bay" cannot drift apart.
    */
-  var PRESETS = [
-    { id: "black", label: "Black", build: function () {} },
-    { id: "chestnut", label: "Chestnut", build: chestnut },
-    { id: "bay", label: "Bay", build: function (s, f) { bay(s, f, 0.45, 0.22); } },
-    { id: "bay_low", label: "Bay, low points", build: function (s, f) { bay(s, f, 0.2, 0.05); } },
-    { id: "seal", label: "Seal brown", build: function (s, f) { bay(s, f, 0.92, 0.6); } },
-    {
-      id: "buckskin", label: "Buckskin",
-      build: function (s, f) { bay(s, f, 0.45, 0.22); dilute(s, f, "singleCream"); }
-    },
-    {
-      id: "palomino", label: "Palomino",
-      build: function (s, f) { chestnut(s, f); dilute(s, f, "singleCream"); }
-    },
-    {
-      id: "perlino", label: "Perlino",
-      build: function (s, f) { bay(s, f, 0.45, 0.22); dilute(s, f, "doubleDilute"); }
-    },
-    {
-      id: "cremello", label: "Cremello",
-      build: function (s, f) { chestnut(s, f); dilute(s, f, "doubleDilute"); }
-    },
-    {
-      id: "pearl_bay", label: "Pearl bay",
-      build: function (s, f) { bay(s, f, 0.45, 0.22); dilute(s, f, "doublePearl"); }
-    },
-    {
-      id: "champagne_bay", label: "Amber champagne",
-      build: function (s, f) { bay(s, f, 0.45, 0.22); dilute(s, f, "champagne"); }
-    },
+  function compose(skin, f, config) {
+    var c = config || {};
+    if (c.extension === "chestnut") chestnut(skin, f);
+    if (c.agouti) bay(skin, f, c.agouti.leg, c.agouti.face);
+    if (c.dilution) dilute(skin, f, c.dilution);
+    if (c.grey) {
+      var g = c.grey;
+      grey(skin, f,
+        noise.fromHex(g.seed || GREY_DEFAULTS.seed),
+        num(g.progress, GREY_DEFAULTS.progress),
+        num(g.spacing, GREY_DEFAULTS.spacing),
+        num(g.dappleStrength, GREY_DEFAULTS.dappleStrength),
+        num(g.pointRetention, GREY_DEFAULTS.pointRetention));
+    }
+    if (c.white) white(skin, f);
+  }
+
+  function num(v, fallback) { return typeof v === "number" && isFinite(v) ? v : fallback; }
+
+  // ---- the presets -----------------------------------------------------
+
+  var BAY = { leg: 0.45, face: 0.22 };
+
+  /**
+   * Each preset is a config run before the gene under test - the same position
+   * ordinary genes occupy in Genes.naturalOrder(). `build(skin, field)` is kept
+   * as the calling convention so nothing downstream had to change.
+   */
+  var PRESET_CONFIGS = [
+    { id: "black", label: "Black", config: {} },
+    { id: "chestnut", label: "Chestnut", config: { extension: "chestnut" } },
+    { id: "bay", label: "Bay", config: { agouti: BAY } },
+    { id: "bay_low", label: "Bay, low points", config: { agouti: { leg: 0.2, face: 0.05 } } },
+    { id: "seal", label: "Seal brown", config: { agouti: { leg: 0.92, face: 0.6 } } },
+    { id: "buckskin", label: "Buckskin", config: { agouti: BAY, dilution: "singleCream" } },
+    { id: "palomino", label: "Palomino", config: { extension: "chestnut", dilution: "singleCream" } },
+    { id: "perlino", label: "Perlino", config: { agouti: BAY, dilution: "doubleDilute" } },
+    { id: "cremello", label: "Cremello", config: { extension: "chestnut", dilution: "doubleDilute" } },
+    { id: "pearl_bay", label: "Pearl bay", config: { agouti: BAY, dilution: "doublePearl" } },
+    { id: "champagne_bay", label: "Amber champagne", config: { agouti: BAY, dilution: "champagne" } },
     {
       id: "grey_steel", label: "Grey, steel",
-      build: function (s, f) { grey(s, f, noise.fromHex("00000000000001a3"), 0.15, 3.4, 0.8, 0.5); }
+      config: { grey: { seed: GREY_SEED, progress: 0.15, spacing: 3.4, dappleStrength: 0.8, pointRetention: 0.5 } }
     },
     {
       id: "grey_dapple", label: "Grey, dappled",
-      build: function (s, f) { grey(s, f, noise.fromHex("00000000000001a3"), 0.5, 3.4, 1.0, 0.6); }
+      config: { grey: { seed: GREY_SEED, progress: 0.5, spacing: 3.4, dappleStrength: 1.0, pointRetention: 0.6 } }
     },
     {
       id: "grey_old", label: "Grey, near-white",
-      build: function (s, f) { grey(s, f, noise.fromHex("00000000000001a3"), 0.88, 3.4, 0.7, 0.2); }
+      config: { grey: { seed: GREY_SEED, progress: 0.88, spacing: 3.4, dappleStrength: 0.7, pointRetention: 0.2 } }
     },
-    {
-      id: "white", label: "Dominant white",
-      build: function (s, f) {
-        restrictAll(s, f, function (field, px, py) { field.setRed(px, py, 0); field.setBlack(px, py, 0); });
-      }
-    }
+    { id: "white", label: "Dominant white", config: { white: true } }
   ];
+
+  var PRESETS = PRESET_CONFIGS.map(function (p) {
+    return {
+      id: p.id,
+      label: p.label,
+      config: p.config,
+      build: function (skin, field) { compose(skin, field, p.config); }
+    };
+  });
 
   HG.baseCoats = {
     presets: PRESETS,
     byId: function (id) {
       for (var i = 0; i < PRESETS.length; i++) if (PRESETS[i].id === id) return PRESETS[i];
       return PRESETS[0];
-    }
+    },
+    // The loci, for a caller that wants to drive them one at a time.
+    compose: compose,
+    DILUTIONS: DILUTIONS,
+    GREY_DEFAULTS: GREY_DEFAULTS,
+    loci: { chestnut: chestnut, bay: bay, dilute: dilute, grey: grey, white: white }
   };
 })(window.HG);

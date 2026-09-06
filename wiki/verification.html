@@ -31,6 +31,98 @@
     </p>
 </div>
 
+<h2 id="designer">&sect;0-I &mdash; the horse designer (new 2026-09-06, NOT looked at)</h2>
+
+<p>
+    A <strong>browser</strong> checklist, not a <code>runClient</code> one:
+    <a href="horse-designer/index.html">wiki/horse-designer/</a> is a new page that
+    stands a horse in a grass field and lets you set its coat genes and its size. It
+    shares the <a href="gene-creator/index.html">gene creator</a>&rsquo;s whole
+    pipeline &mdash; geometry, noise, the three-phase composer, the LUT, the spec
+    engine and the base-coat genes &mdash; so a change to how the creator draws a
+    horse changes this one too. <strong>Nobody has opened it.</strong>
+</p>
+
+<div class="note good">
+    <span class="label">What was checked offline</span>
+    <p>
+        Three things, all in node against the real ported code, none of them in a
+        browser. <code>buildParts</code> is <strong>byte-identical</strong> to the
+        creator&rsquo;s <code>build</code> in every vertex position and UV on both
+        meshes (288 and 240 vertices). The 15 base-coat presets bake
+        <strong>byte-identical</strong> pigment fields to the builders they replaced,
+        adult and foal &mdash; 30 of 30. And an offline orthographic render of the
+        posed rig, textured with a real bake, comes out a recognisable bay, a
+        palomino foal, a dapple grey, and a Waterborn horse with its blue mane and
+        tail streaks.
+    </p>
+</div>
+
+<ul>
+    <li><strong>Does it open at all?</strong> The creator shipped dead-on-open once
+        for a one-line <code>ReferenceError</code>. Load the page: sky, grass, a
+        horse, two toasts top-right.</li>
+
+    <li><strong>The grass.</strong> It is the owner&rsquo;s own
+        <code>grass.jpg</code>, inlined as a data URI and tiled <strong>one tile per
+        block</strong> with a nearest filter. Confirm it reads as Minecraft grass and
+        not as mush, and that the plane fades into the sky rather than ending in a
+        hard edge.</li>
+
+    <li><strong>Size reads correctly.</strong> This is the reason the world is
+        measured in blocks. Drag the Size slider and check the horse grows
+        <em>against the one-block reference cube</em>, that the HUD figure moves with
+        it, and that a foal is visibly a foal. The chips (0.45 / 1.00 / 1.75 / 2.50)
+        are the natural clamp&rsquo;s ends and one magical size.</li>
+
+    <li><strong>The controls.</strong> Drag to spin, <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd>
+        to move and <kbd>Q</kbd><kbd>E</kbd> for height, scroll to zoom. Keys need the
+        viewport focused &mdash; <strong>check that a click focuses it</strong>, and
+        that using WASD switches &ldquo;camera follows the horse&rdquo; off rather
+        than fighting it.</li>
+
+    <li><strong>The wander.</strong> It should walk, stop, and turn, stay inside the
+        field, and never skate &mdash; the leg phase advances with distance, so feet
+        should stay planted at any speed and any size. Turn Wander off and it should
+        settle to a stand rather than snapping.</li>
+
+    <li><strong>The gait is an approximation and is expected to look wrong-ish.</strong>
+        It is not a port of <code>AbstractEquineModel.setupAnim</code> and the page
+        says so in a toast. Worth an opinion on whether it is good enough to judge a
+        coat against, or whether it distracts.</li>
+
+    <li><strong>Every locus.</strong> Extension, agouti (with both point extents),
+        the four dilutions, grey (four knobs), dominant white. Cross-check one
+        against the creator&rsquo;s base-coat picker &mdash; the same preset must give
+        the same horse in both tools, which is the whole point of sharing the code.</li>
+
+    <li><strong>A data-driven gene.</strong> Open
+        <code>neoforge-26.1.2/src/main/resources/horsegenetics/genes/waterborn.json</code>:
+        the mane and tail streaks should appear, the Copies slider should make
+        <code>0</code> a silent carrier, and a toast should say its
+        <code>effects</code> are not simulated.</li>
+
+    <li><strong>The toasts.</strong> They should stack top-right, be dismissible, and
+        not cover the horse at a narrow window.</li>
+</ul>
+
+<div class="note warn">
+    <span class="label">It is not a whole horse, and it must keep saying so</span>
+    <p>
+        Only <strong>six</strong> genes exist in the JavaScript port &mdash; extension,
+        agouti, MATP, champagne, grey, and <code>KIT</code>&rsquo;s dominant white. The
+        other forty-odd built-ins are Java-only: every other white-pattern locus, the
+        leopard complex, dun, silver, roan, tobiano, brindle, tiger eye and all the
+        magical ones. Nothing renders <code>effects</code>, emissive texels,
+        particles, the cutie-mark item icons, or eye-colour tinting. The page admits
+        all of this in an opening toast and behind &ldquo;Show the full list&rdquo;
+        &mdash; <strong>check that it still does</strong>, because a preview tool that
+        quietly omits things teaches the wrong horse.
+    </p>
+</div>
+
+<hr>
+
 <h2 id="creator">&sect;0-H &mdash; the gene creator (rebuilt 2026-09-06, partly owner-verified)</h2>
 
 <div class="note">

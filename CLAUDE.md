@@ -31,6 +31,16 @@ project. Its shape:
   the coat pipeline, previews a gene on a 3D horse over any base coat, and
   exports the JSON the game loads. It does **not** use the wiki's `styles.css` /
   `nav.js` - it owns the whole window.
+- **`wiki/horse-designer/`** (new 2026-09-06) is the second browser tool: set a
+  horse's coat genes and its size, watch it walk a grass field. Same shape as the
+  creator (`index.html` + `designer.css` + `js/*` + a generated `assets/`), same
+  "owns the whole window" rule. **It shares the creator's pipeline by `<script
+  src="../gene-creator/js/...">`, not by copying it** - geometry, noise, fields,
+  schema, spec-engine, base-coats, model3d and preview are the same files, so a
+  change to how the creator draws a horse changes this one. Only `scene.js`
+  (the world + camera), `animation.js` (the gait, an approximation) and
+  `designer.js` (the panel) are its own. Details + what it cannot show:
+  `wiki/verification.html` §0-I.
 - **`wiki/gene-format.html`** is the single source of truth for the **data-driven
   gene file format** - the header, the knobs, every mask and every op, and the
   `effects` block's shape. When a mask, an op or an effect verb changes shape,
@@ -168,7 +178,14 @@ project. Its shape:
     golden test). This is where the coat machinery is documented now; CLAUDE.md
     keeps a summary.
   - **`wiki/body-space.html`** - `HorseSkinGeometry`, `CoatRegions`,
-    `BodyNoise`, `BodyStripes`, `PatchNoise`.
+    `BodyNoise`, `BodyStripes`, `PatchNoise`, **and (since 2026-09-06) the
+    vanilla model underneath**: Minecraft model space vs body space, the
+    model->body flip, the full 26.1.2 part table (pivot / origin / size /
+    `texOffs` / rest pitch, read off `HdHorseModel`), the part hierarchy, the
+    `5.01` mane offset, the rest-pose-AABB caveat, and the correction that a
+    26.1.2 leg is **one 4x11x4 box**, not the classic upper/shin/hoof trio.
+    That replaced a loose `javahorsemodelinfo.md` at the repo root, which is
+    deleted - it gave the pre-1.13 geometry as if it were current.
   - **`wiki/modding.html`** + **`wiki/api-reference.html`** - the
     **modder-facing** docs: how to write a gene (two worked walkthroughs, the
     allele rules, the determinism contract, the pitfalls table) and the
@@ -176,6 +193,102 @@ project. Its shape:
     changes shape, update `api-reference.html` in the same change.
 
 ## Status snapshot (keep this current)
+
+- **Built 2026-09-06, NOT yet looked at in a browser: `wiki/horse-designer/` -
+  a second browser tool that stands a horse in a grass field; plus the vanilla
+  model tables folded into `wiki/body-space.html` and the loose
+  `javahorsemodelinfo.md` deleted.** No Java changed: `:common:test`
+  **439 green**, `:neoforge-26.1.2:build` green, creator parity **3868/48**,
+  `coat-golden.txt` untouched. Four pieces:
+
+  - **The docs half.** `javahorsemodelinfo.md` sat at the repo root giving "the
+    Java horse model" as a `4x9x4` upper leg + `3x5x3` shin + `4x3x4` hoof.
+    That is the **pre-1.13 `ModelHorse`**; vanilla 26.1.2 uses **one `4x11x4`
+    box per leg**, and following the doc is what nearly made the gene creator's
+    preview disagree with the game about which texel is a hoof (the 2026-09-06
+    rebuild caught it). So the content is now a **`wiki/body-space.html`
+    section** - the two coordinate systems and the flip between them, the full
+    26.1.2 part table read off `HdHorseModel` (pivot / origin / size /
+    `texOffs` / rest pitch), the hierarchy, why the mane sits at `z = 5.01`,
+    the rest-pose-AABB caveat with its measured ratios, the atlas-not-a-wrap
+    point, and the model-is-not-the-hitbox point - with the leg correction as a
+    `danger` box rather than a footnote. The markdown file is deleted; the two
+    markdown files in the repo are `README.md` and `CLAUDE.md` again. Fixed in
+    passing on the same page: a stale note saying `whitenBlaze` "is the only
+    face marking there is", which shipped a day before the face-marking family
+    did.
+
+  - **The designer runs the mod's own coat pipeline, and it does it by sharing
+    the creator's files rather than copying them.** `wiki/horse-designer/index.html`
+    pulls `../gene-creator/js/{geometry,noise,fields,schema,spec-engine,
+    base-coats,model3d,preview}.js` and `../gene-creator/assets/textures.js`
+    with plain `<script src>`. **That is the load-bearing decision**: a second
+    copy of the pipeline is a second thing to keep in step with the Java, and
+    known gap #13's whole lesson is that the second copy silently rots. Only
+    three files are the designer's own - `scene.js` (world + camera),
+    `animation.js` (the gait) and `designer.js` (the panel).
+
+  - **Three additive changes to the shared code**, each verified not to move
+    the creator:
+    - **`model3d.buildParts`** - the same quads as `build`, split per part and
+      measured from each part's own pivot, so a leg can be swung. Both callers
+      now go through one `emitPart`. A model-space pitch is a body-space **z**
+      rotation, negated (model y and z both run backwards against body y and
+      x); the derivation is in the javadoc. Checked: `buildParts` is
+      **byte-identical to `build`** in every vertex position and UV, 288
+      vertices adult and 240 foal, max delta `0.00e+0`.
+    - **`baseCoats.compose(skin, field, config)`** - the base coats as a
+      per-locus config (`extension` / `agouti{leg,face}` / `dilution` / `grey{4
+      knobs}` / `white`) run in `naturalOrder()`, with the 15 presets rewritten
+      as configs on top of it. So the creator's "Bay" and the designer's "Bay"
+      are one code path. Checked: all **30** preset bakes (15 x adult/foal) are
+      **byte-identical** to the builders they replaced.
+    - **`preview.bake` tolerates `spec: null`** and takes a `baseCoatConfig`.
+      The designer's ordinary case is *no gene under test* - it is looking at
+      genes the mod already has - which the creator's bake could not express.
+  - **It renders size honestly, which is why the world is measured in blocks.**
+    One scene unit is one block, the grass tiles one tile per block, and there
+    is a one-block reference cube beside the horse. The rig scales model units
+    by `sizeScale/16` and nothing else - no normalising scale hidden in the
+    mesh builder, which is exactly what `model3d.build` does for the creator and
+    would have made the size slider meaningless here. Adult reads 2.11 blocks
+    hoof-to-ear-tip, foal 1.60. The slider spans 0.1-3 and names the natural
+    clamp (0.45-1.75) so a magical size is visibly outside it.
+
+  - **The gait is an approximation and says so.** Vanilla's swing is
+    `AbstractEquineModel.setupAnim` driven by `walkAnimationPos` /
+    `walkAnimationSpeed`, neither of which exists outside Minecraft, so
+    `animation.js` is a hand-tuned diagonal-pair swing on the real pivots. The
+    one thing it borrows deliberately is that **phase advances with distance,
+    not time, and stride scales with the horse** - which is what
+    `GeneticHorseRenderer.stretchGaitToSize` buys in game, and what stops the
+    feet skating when speed or size changes. A toast says all of this on open.
+
+  - **What it cannot show, it says out loud.** Toasts, dismissible, upper right:
+    only **six** genes exist in the JS port (extension, agouti, MATP, champagne,
+    grey, `KIT` dominant white) against 48 built-ins; `effects` are not
+    simulated, and a loaded gene's verbs are **named back** at you; emissive /
+    `glow` texels are not drawn; particles, cutie-mark item icons and
+    eye-colour tinting have no port. A "Show the full list" button prints the
+    lot. The alternative - a tool that silently omits half a horse - teaches
+    the wrong thing confidently, which is this repo's recurring failure mode.
+
+  - **Verified offline, in node, against the real ported code** (there is no
+    headless browser here): the two byte-identity checks above, plus an
+    orthographic render of the posed rig textured with a real bake, which comes
+    out a recognisable **bay** (black points, mane, tail, muzzle), a
+    **palomino foal** (no mane - the foal mesh has no `MANE` part), a **dapple
+    grey**, and **Waterborn** with its blue mane and tail streaks. Same
+    technique the creator's rebuild used. What that cannot cover is three.js,
+    the CSS, and every input - hence `wiki/verification.html` §0-I.
+
+  - `minecraftgrass.jpg` moved to `wiki/horse-designer/assets/grass.jpg` and is
+    inlined to `assets/grass.js` by a new `tools/bake-grass.mjs` - the same
+    `file://` constraint that makes the creator inline its templates. The
+    `.jpg` stays checked in as the source; `grass.js` is generated.
+
+  - Docs: `wiki/body-space.html` (the new section + one stale note fixed),
+    `wiki/verification.html` §0-I (new), `wiki/nav.js`, `index.html`.
 
 - **Fixed 2026-09-06: the gene creator was dead on open, drawing bounding boxes
   instead of a horse, and had been previewing every coat with the spine and belly
@@ -2991,7 +3104,16 @@ node wiki/gene-creator/tools/check-parity.mjs   # ...and does the creator's JS a
 ./gradlew :common:bakeCreatorAssets  # regenerate the creator's inlined textures + examples
 node wiki/gene-creator/tools/bake-export-fixtures.mjs   # what the creator EXPORTS,
                                      # for CreatorMetadataRoundTripTest to parse
+
+# horse-designer tooling (see the docs split)
+node wiki/horse-designer/tools/bake-grass.mjs   # re-inline assets/grass.jpg
 ```
+
+The **horse designer shares the creator's JS**, so `check-parity.mjs` covers its
+pipeline too - run it after touching anything under `wiki/gene-creator/js/`, and
+remember the designer is a second caller of `model3d`, `base-coats` and
+`preview`. What parity does **not** cover is the designer's own three files
+(`scene.js`, `animation.js`, `designer.js`); those have no automated net at all.
 
 **Run the parity check whenever you touch `SpecPainter`, `SpecSchema`,
 `AbilityType`, `HorseSkinGeometry`, `BodyNoise`/`BodyStripes`, or any of
@@ -4936,6 +5058,31 @@ Design follow-ups (not just "go look at it"):
    make it real is installing this beside a tack mod and a performance mod and
    seeing what happens.
 
+41. **The horse designer has never been opened, and two of its three own files
+   are unguarded.** `wiki/horse-designer/` shares the creator's whole pipeline,
+   which is parity-checked against the Java; what it adds on top is not. The
+   **gait** is an approximation by construction (vanilla's `setupAnim` needs
+   `walkAnimationPos`, which does not exist in a browser) and the page says so
+   in a toast - but "approximate" and "wrong enough to be misleading" are not
+   the same thing and only a look can tell them apart. The **scene** - camera
+   rig, WASD focus movement, grass tiling, the reference cube - has no check at
+   all beyond reading it. Verified offline instead: `buildParts` is
+   byte-identical to `build` (288/240 vertices), the 30 preset bakes are
+   byte-identical to the builders they replaced, and an orthographic render of
+   the posed rig comes out a bay, a palomino foal, a dapple grey and a
+   Waterborn. That covers the shared half and none of the new half.
+   `wiki/verification.html` §0-I.
+   **The honest limit worth repeating**: only **six** genes exist in the JS
+   port, so a horse here is never a whole horse, and the page's opening toast is
+   load-bearing rather than decorative. The way to widen it is to port more
+   genes into `base-coats.js` - the white loci first, since they are the ones
+   with live calibration questions (gap #30) and the ones a designer would most
+   want to eyeball. That is real work, not a config change: `WhitePattern` is
+   several hundred lines of Java and a port of it is a fifth thing to keep in
+   step with the Java, which is exactly the cost `check-parity.mjs` exists to
+   pay down. **If it is ported, it needs fixtures and a parity case**, or it
+   becomes gap #13 again with a new face.
+
 ## License
 
 CC BY-NC 4.0 (see `LICENSE`). Forks/derivatives are welcome without asking
@@ -4977,8 +5124,17 @@ its licence is compatible.
   put.
 - **The wiki has one nav.** A new page goes in the `SECTIONS` array in
   `wiki/nav.js` and nowhere else; never hand-write a sidebar into a page.
-  (`wiki/gene-creator/` is the one exception - it is an app, not a page, and
-  owns its own chrome.)
+  (`wiki/gene-creator/` and `wiki/horse-designer/` are the two exceptions -
+  they are apps, not pages, and own their own chrome.)
+- **The two browser tools share one pipeline, and it lives in
+  `wiki/gene-creator/js/`.** `wiki/horse-designer/` loads those files by
+  relative `<script src>`; it must never grow its own copy of the geometry, the
+  noise, the fields, the composer, the spec engine or the base coats. When a
+  shared file needs something only one tool wants, **add to it** (the way
+  `model3d.buildParts` and `baseCoats.compose` were added) and prove the other
+  tool's output did not move - both of those were checked byte-for-byte before
+  landing. A second copy is a second thing to keep in step with the Java, which
+  is known gap #13 with extra steps.
 - **The data-driven gene format** is documented **only** in
   `wiki/gene-format.html`. A new mask or op has to land in four places in the
   same change: `SpecSchema.java`, `SpecPainter.java`,

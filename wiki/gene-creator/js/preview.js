@@ -44,37 +44,46 @@ window.HG = window.HG || {};
   }
 
   /**
-   * opts: { spec, skin, baseCoatId, seed, dose, coverageLayer }
+   * opts: { spec, skin, baseCoatId | baseCoatConfig, seed, dose, coverageLayer }
    * Returns the composed sheet plus the intermediate fields, so the UI can show
    * pigment and coverage as well as the finished coat.
+   *
+   * `spec` may be null - then there is no gene under test and what comes back is
+   * the base coat alone. That is the horse designer's ordinary case: it is
+   * looking at the genes the mod already has, not at one being written.
+   *
+   * The base coat is either a named preset (`baseCoatId`) or a per-locus config
+   * (`baseCoatConfig`); both go through HG.baseCoats, so they cannot disagree.
    */
   function bake(opts) {
-    var spec = opts.spec;
+    var spec = opts.spec || null;
     var skin = opts.skin;
-    var base = HG.baseCoats.byId(opts.baseCoatId);
+    var baseConfig = opts.baseCoatConfig || null;
+    var base = baseConfig ? null : HG.baseCoats.byId(opts.baseCoatId);
     var seedLow = opts.seed >>> 0;
     // Which outcome this copy count lands on - the gene's own combination
     // table decides, exactly as it does in the game. A wild-type outcome paints
     // nothing, which is how a carrier previews as an ordinary horse.
-    var expression = HG.specEngine.expressionForDose(spec, opts.dose) || {};
+    var expression = spec ? (HG.specEngine.expressionForDose(spec, opts.dose) || {}) : {};
     var layers = expression.layers || [];
-    var showsGene = !expression.wildType && layers.length > 0;
+    var showsGene = !!spec && !expression.wildType && layers.length > 0;
 
     // Seed the draw the way the game does: SeededRng(seed, geneKey).
     var s = HG.noise.xor(HG.noise.u64(0, seedLow),
-      HG.noise.mul(HG.noise.fromInt(javaHashCode(spec.key || "")), HG.noise.K1));
-    var values = HG.specEngine.drawValues(spec, s.h, s.l, opts.dose);
+      HG.noise.mul(HG.noise.fromInt(javaHashCode(spec ? (spec.key || "") : "")), HG.noise.K1));
+    var values = spec ? HG.specEngine.drawValues(spec, s.h, s.l, opts.dose) : {};
 
     var coverage = null;
     var pigmentBeforeGene = null;
 
     var naturals = [function (field) {
       var f = field.mutableCopy();
-      base.build(skin, f);
+      if (baseConfig) HG.baseCoats.compose(skin, f, baseConfig);
+      else base.build(skin, f);
       return f;
     }];
 
-    if (spec.phase === "natural") {
+    if (spec && spec.phase === "natural") {
       naturals.push(function (field) {
         pigmentBeforeGene = field.mutableCopy();
         if (opts.coverageLayer >= 0 && layers[opts.coverageLayer]) {
@@ -85,7 +94,7 @@ window.HG = window.HG || {};
     }
 
     var magicals = [];
-    if (spec.phase === "magical") {
+    if (spec && spec.phase === "magical") {
       magicals.push(function (pigment, colour) {
         pigmentBeforeGene = pigment;
         if (opts.coverageLayer >= 0 && layers[opts.coverageLayer]) {

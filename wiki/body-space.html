@@ -191,15 +191,15 @@
 </div>
 
 <div class="note warn">
-    <span class="label">Open issue: hard edges</span>
+    <span class="label">Both hard-edged helpers are dead code now</span>
     <p>
         <code>whitenLowerLeg</code> cuts at a hard <code>point.y() &lt;= cutoff</code>,
-        so every splash sock ends in a <strong>perfect ring</strong>. And
-        <code>whitenBlaze</code> is the only face marking there is &mdash; star, snip,
-        stripe and bald face are not built. Both are logged on the
-        <a href="verification.html">to-be-verified</a> list. The fix wants per-texel
-        epigenetic jitter, or the smoothstep treatment <code>BayCoat.fade</code>
-        already uses.
+        so every sock it drew ended in a <strong>perfect ring</strong>; and
+        <code>whitenBlaze</code> could only ever draw a centreline band, never a
+        detached star or snip. <strong>Neither has a caller.</strong> The white loci
+        went to <a href="pipeline.html#face-markings"><code>WhitePattern</code></a>
+        instead, which owns the margin and the whole face vocabulary. Both helpers
+        survive only for the warning in their javadoc &mdash; do not reach for them.
     </p>
 </div>
 
@@ -322,7 +322,212 @@ public static double smoothstep(double edge0, double edge1, double v);</code></p
     horse the stripes reach, what colour they are &mdash; in the gene.
 </p>
 
+<h2 id="vanilla-model">The vanilla model underneath</h2>
+
+<p>
+    Every number in <code>HorseSkinGeometry</code> is read off
+    <code>HdHorseModel</code> / <code>HdBabyHorseModel</code>, which are in turn
+    structural copies of vanilla&rsquo;s <code>AbstractEquineModel.createBodyMesh</code>.
+    So there are <strong>two coordinate systems in play</strong>, and it is worth
+    being explicit about both &mdash; most confusion about this engine is really
+    confusion about which one a number is written in.
+</p>
+
+<h3>Minecraft model space</h3>
+
+<p>
+    The convention vanilla&rsquo;s mesh builders use, and the one the tables below
+    are in. Units are <strong>model units</strong>, 16 to a block &mdash; the same
+    unit body space uses.
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Axis</th><th>+ direction</th><th>Note</th></tr></thead>
+<tbody>
+<tr><td><strong>x</strong></td><td>the horse&rsquo;s <strong>left</strong></td><td>the left legs pivot at <code>x = +4</code>, the right at <code>&minus;4</code></td></tr>
+<tr><td><strong>y</strong></td><td><strong>down</strong></td><td>the barrel sits at <code>y</code> 3&ndash;13, the hooves near <code>y = 25</code></td></tr>
+<tr><td><strong>z</strong></td><td>toward the <strong>tail</strong></td><td>the horse faces <code>&minus;z</code>; the muzzle reaches <code>z = &minus;19</code></td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    A cube is declared as a <strong>pivot</strong> (<code>PartPose.offset</code>)
+    plus an <code>addBox(originX, originY, originZ, width, height, depth)</code>
+    whose origin is the box&rsquo;s minimum corner <em>relative to that pivot</em>.
+    <code>PartPose.offsetAndRotation</code> additionally gives a part a rest
+    rotation about its pivot; on the horse only the neck group and the tail have
+    one, both a pitch of <code>&pi;/6</code>.
+</p>
+
+<h3>&hellip;and the flip into body space</h3>
+
+<p>
+    Body space is model space turned the right way up and measured from the horse
+    rather than from an arbitrary pivot. Both axes that reverse do so about the
+    mesh&rsquo;s own maxima, so the origins land on real anatomy:
+</p>
+
+<div class="codebox">
+<div class="filename">common/coat/skin/HorseSkinGeometry &mdash; the model &rarr; body flip</div>
+<pre><code class="language-java">bodyX =  modelMax.z - mz;   // 0 at the backmost tail texel, + toward the nose
+bodyY =  modelMax.y - my;   // 0 at the hoof undersides,     + up
+bodyZ = -mx;                // 0 on the centre plane,        + to the horse's right</code></pre>
+</div>
+
+<p>
+    Two axes swap and all three negate, so the map is orientation-preserving
+    &mdash; a face wound outward in model space is still wound outward in body
+    space, which is what lets the <a href="gene-creator/index.html">gene
+    creator</a>&rsquo;s 3D preview build its mesh straight out of these tables.
+</p>
+
+<h3>The adult parts, as 26.1.2 declares them</h3>
+
+<p>
+    Pivot and origin in model space; <code>texOffs</code> in vanilla&rsquo;s
+    64-space (the HD sheet lands each at 2&times;). Parts listed as children carry
+    the neck group&rsquo;s <code>&pi;/6</code> pitch.
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr>
+    <th><code>Part</code></th><th>vanilla name</th><th>Pivot</th>
+    <th>Box origin</th><th>W&times;H&times;D</th><th><code>texOffs</code></th><th>Rest pitch</th>
+</tr></thead>
+<tbody>
+<tr><td><code>BODY</code></td><td><code>body</code></td><td>(0, 11, 5)</td><td>(&minus;5, &minus;8, &minus;17)</td><td>10&times;10&times;22</td><td>(0, 32)</td><td>&mdash;</td></tr>
+<tr><td><code>NECK</code></td><td><code>head_parts</code></td><td>(0, 4, &minus;12)</td><td>(&minus;2.05, &minus;6, &minus;2)</td><td>4&times;12&times;7</td><td>(0, 35)</td><td><code>&pi;/6</code></td></tr>
+<tr><td><code>HEAD</code></td><td><code>head</code></td><td>child of neck</td><td>(&minus;3, &minus;11, &minus;2)</td><td>6&times;5&times;7</td><td>(0, 13)</td><td>inherits</td></tr>
+<tr><td><code>MUZZLE</code></td><td><code>upper_mouth</code></td><td>child of neck</td><td>(&minus;2, &minus;11, &minus;7)</td><td>4&times;5&times;5</td><td>(0, 25)</td><td>inherits</td></tr>
+<tr><td><code>MANE</code></td><td><code>mane</code></td><td>child of neck</td><td>(&minus;1, &minus;11, <strong>5.01</strong>)</td><td>2&times;16&times;2</td><td>(56, 36)</td><td>inherits</td></tr>
+<tr><td><code>LEFT_EAR</code></td><td><code>left_ear</code></td><td>child of head</td><td>(0.55, &minus;13, 4)</td><td>2&times;3&times;1</td><td>(19, 0)</td><td>inherits</td></tr>
+<tr><td><code>RIGHT_EAR</code></td><td><code>right_ear</code></td><td>child of head</td><td>(&minus;2.55, &minus;13, 4)</td><td>2&times;3&times;1</td><td>(19, 16)</td><td>inherits</td></tr>
+<tr><td><code>TAIL</code></td><td><code>tail</code></td><td>(0, 6, 7)</td><td>(&minus;1.5, 0, 0)</td><td>3&times;14&times;4</td><td>(42, 36)</td><td><code>&pi;/6</code></td></tr>
+<tr><td><code>LEFT_FRONT_LEG</code></td><td><code>left_front_leg</code></td><td>(4, 14, &minus;10)</td><td>(&minus;3, &minus;1.01, &minus;1.9)</td><td>4&times;11&times;4</td><td>(26, 16)</td><td>&mdash;</td></tr>
+<tr><td><code>RIGHT_FRONT_LEG</code></td><td><code>right_front_leg</code></td><td>(&minus;4, 14, &minus;10)</td><td>(&minus;1, &minus;1.01, &minus;1.9)</td><td>4&times;11&times;4</td><td>(48, 0)</td><td>&mdash;</td></tr>
+<tr><td><code>LEFT_HIND_LEG</code></td><td><code>left_hind_leg</code></td><td>(4, 14, 7)</td><td>(&minus;3, &minus;1.01, &minus;1)</td><td>4&times;11&times;4</td><td>(26, 0)</td><td>&mdash;</td></tr>
+<tr><td><code>RIGHT_HIND_LEG</code></td><td><code>right_hind_leg</code></td><td>(&minus;4, 14, 7)</td><td>(&minus;1, &minus;1.01, &minus;1)</td><td>4&times;11&times;4</td><td>(48, 21)</td><td>&mdash;</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>The hierarchy those poses imply:</p>
+
+<div class="codebox">
+<pre><code>root
+├─ body
+│  └─ tail                     pose (0, -5, 2), pitch π/6
+├─ head_parts   (the NECK)     pivot (0, 4, -12), pitch π/6
+│  ├─ head
+│  │  ├─ left_ear
+│  │  └─ right_ear
+│  ├─ mane
+│  └─ upper_mouth  (the MUZZLE)
+├─ left_front_leg              ├─ right_front_leg
+└─ left_hind_leg               └─ right_hind_leg</code></pre>
+</div>
+
+<p>
+    Note that the neck group is a child of the <em>root</em>, not of the body:
+    it shares no transform with the barrel, which is why a horse can drop its head
+    to graze without the torso following. The four legs are likewise siblings, each
+    swinging about its own pivot.
+</p>
+
+<div class="note danger">
+    <span class="label">Each leg is ONE box, not the classic upper / shin / hoof trio</span>
+    <p>
+        Older write-ups of &ldquo;the Java horse model&rdquo; give a
+        <code>4&times;9&times;4</code> upper leg, a <code>3&times;5&times;3</code>
+        shin and a <code>4&times;3&times;4</code> hoof meeting exactly at
+        <code>y = 8</code> and <code>y = 13</code>. That is the <strong>pre-1.13
+        <code>ModelHorse</code></strong>. Vanilla 26.1.2 &mdash; and therefore
+        <code>HdHorseModel</code>, which copies its <code>texOffs</code> and box
+        numbers verbatim &mdash; uses a <strong>single
+        <code>4&times;11&times;4</code> box per leg</strong>, unwrapped 16&times;15
+        in 64-space.
+    </p>
+    <p>
+        This is not trivia. Drawing the trio in a preview tool makes the tool
+        disagree with the game about which texel is a hoof, which is the one thing
+        the gene creator must never do &mdash; and it was very nearly built that
+        way once, off exactly those numbers.
+    </p>
+</div>
+
+<div class="note">
+    <span class="label">Why the mane sits at <code>z = 5.01</code></span>
+    <p>
+        The <code>.01</code> is deliberate: it lifts the mane a hundredth of a unit
+        clear of the neck&rsquo;s rear face so the two are not coplanar and cannot
+        z-fight. Same trick as the ears&rsquo;
+        <code>CubeDeformation(-0.001F)</code>, one direction over. It also puts the
+        mane&rsquo;s body-space <code>x</code> a hair behind the neck&rsquo;s, which
+        no coat rule is remotely fine enough to notice.
+    </p>
+</div>
+
+<div class="note warn">
+    <span class="label">The stored box is the rest-pose AABB, not the cuboid</span>
+    <p>
+        <code>HorseSkinGeometry</code> keeps each part as its
+        <strong>axis-aligned bounding box after the rest rotation</strong>, because
+        that is all the coat pipeline needs &mdash; it projects texels onto a box
+        and never asks what shape the horse is. For a pitched part that box is much
+        bigger than the part: the neck is a <code>4&times;12&times;7</code> cuboid
+        tilted 30&deg;, whose AABB is <code>4&times;13.9&times;12.1</code>.
+        Measured, the mane&rsquo;s AABB is <strong>4.5&times;</strong> its true
+        volume, the tail 2.6&times;, the neck 2.0&times;, the head and muzzle
+        ~1.9&times;.
+    </p>
+    <p>
+        Harmless for painting, fatal for drawing: the gene creator&rsquo;s 3D
+        preview once rendered the AABBs and came out a pile of oversized blocks
+        rather than a horse. It now walks the <em>raw</em> cuboid (origin + size,
+        rotated about the pivot) through
+        <code>geometry.toBody(skin, mx, my, mz)</code> and only then flips into
+        body space &mdash; an additive read, so no computed value moves and parity
+        is untouched.
+    </p>
+</div>
+
+<h3>The texture is an atlas, not a wrap</h3>
+
+<p>
+    Every cuboid gets six independently UV-mapped faces packed onto the sheet;
+    there is no continuous unwrap of a horse-shaped mesh anywhere. That is exactly
+    what makes <code>forEachTexel</code> necessary &mdash; two texels that are
+    neighbours <em>on the horse</em> are routinely nowhere near each other
+    <em>on the sheet</em>, so a coat rule written in texture space would seam at
+    every box edge, and one written in body space cannot.
+</p>
+
+<p>
+    Vanilla points all four legs at one patch (the left pair additionally
+    <code>.mirror()</code>ed) and both ears at another.
+    <code>HdHorseModel</code> gives each its own patch in what was empty space on
+    the vanilla layout, which is what lets this mod paint four legs and two ears
+    independently &mdash; <strong>a horse with one white sock is not expressible on
+    the vanilla sheet at all</strong>.
+</p>
+
+<div class="note">
+    <span class="label">The model is not the hitbox</span>
+    <p>
+        The visual boxes run to 22 model units (1.375 blocks) long; the adult
+        horse&rsquo;s gameplay collision box is separately defined at roughly 1.4
+        blocks wide and 1.6 high. Nothing in the coat engine touches the hitbox
+        &mdash; but the <a href="horse-body.html">size genes</a> do, because
+        vanilla scales the model <em>and</em> the hitbox off the one
+        <code>Attributes.SCALE</code> number.
+    </p>
+</div>
+
 <h2>The HD models the geometry describes</h2>
+
 
 <p>
     <code>HdHorseModel</code> and <code>HdBabyHorseModel</code> are 128px, per-part
@@ -348,9 +553,11 @@ public static double smoothstep(double edge0, double edge1, double v);</code></p
         <a href="api-reference.html">Class abstractions</a>
         <a href="gene-grey.html">Grey (uses BodyNoise)</a>
         <a href="gene-magic-zebra.html">Magic zebra (uses BodyStripes)</a>
+        <a href="horse-designer/index.html">Horse designer</a>
     </div>
     Source: <code>common/coat/skin/HorseSkinGeometry.java</code>,
-    <code>common/coat/pattern/{CoatRegions,BodyNoise,BodyStripes}.java</code>
+    <code>common/coat/pattern/{CoatRegions,BodyNoise,BodyStripes}.java</code>,
+    <code>neoforge-26.1.2/client/{HdHorseModel,HdBabyHorseModel}.java</code>
 </div>
 
 </article>
