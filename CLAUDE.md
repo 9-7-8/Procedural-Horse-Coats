@@ -140,6 +140,12 @@ Two multi-file contracts worth knowing before you start:
   `wiki/gene-effects.html`. A verb with a client-render component also needs a
   `RenderLayer`. None of it touches `SpecSchema` or the parity check - effects
   do not paint.
+- **The gene-carrot recipe** lands in four: `KnownGeneSpliceRecipe` (what it
+  requires), `SpliceRecipeDisplay` (the canonical slot layout), `RarityItems`
+  (the tier->item table, deliberately off `common/`), and
+  `wiki/gene-carrot/gene-carrot.js`, which redraws both for the wiki. The wiki
+  cannot read the last two - they are Minecraft-side - so a change there is
+  silent on the pages until it is made here too.
 
 ---
 
@@ -186,7 +192,7 @@ and fails *silently* when stale:
 | If you touched | Re-run | Commit |
 |---|---|---|
 | any gene, or a coat deliberately moved | `:common:test`, then delete and regenerate the golden file | `common/src/test/resources/coat-golden.txt` |
-| **anything in `common/`** | `:web:bakeDesignerAssets` | `wiki/horse-designer/wasm/web.wasm` |
+| **anything in `common/` or `web/`** | `:web:bakeDesignerAssets` | `wiki/horse-designer/wasm/web.wasm` |
 | `spec/`, `SpecSchema`, `AbilityType`, `HorseSkinGeometry`, the noise classes | `:common:bakeSpecFixtures` **then** `check-parity.mjs` | `wiki/gene-creator/fixtures/expected.json` |
 | the coat PNGs or the name tables | `:common:bakeCreatorAssets` + `:web:bakeDesignerAssets` | the regenerated assets |
 

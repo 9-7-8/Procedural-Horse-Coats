@@ -25,6 +25,39 @@
 </p>
 
 <h2 id="d2026-09-06">2026-09-06</h2>
+<h3 id="gene-page-widgets-2026-09-06">Built 2026-09-06, NOT yet opened in a browser: gene pages show the gene, and how to make its carrot.</h3>
+
+<p>Two drop-in widgets, each one <code>&lt;div&gt;</code> and one <code>&lt;script&gt;</code> on a page, both running the same wasm the horse designer does. <code>:common:test</code> green, <code>:neoforge-26.1.2:build</code> green, parity <strong>3868/48</strong>, <code>coat-golden.txt</code> untouched. Three commits, in that order.</p>
+
+<ul>
+<li><strong>The preview window</strong> (<code>wiki/gene-preview/</code>): this gene on a black, a bay and a chestnut, as a horse you can spin, with a dice that rerolls the epigenetics. <strong>Almost none of it is new code.</strong> The coat is <code>common/</code> compiled to wasm - the bytes the game bakes - the horse is the gene creator's own <code>model3d.js</code> over the game's geometry tables, and it is shown in the creator's own <code>viewport.js</code>, which gained a backdrop option, a grid option and a <code>resetView</code> and is otherwise unchanged. What this file adds is three buttons, a dice and the wiring, which is the only part that is about previewing a gene.
+</li>
+<li><strong>Nothing about a gene is written into a page.</strong> The window takes a gene key and asks the registry for the rest: display name, one button per outcome that <em>looks</em> different (<code>GenotypeCatalog.distinctPairsOf</code>), and any <code>Condition</code> the genotype resolves. Tobiano gets one outcome because <code>To/to</code> and <code>To/To</code> paint the same; <code>KIT</code> gets seven; <code>EDNRB</code>'s <code>O/O</code> shows its lethal-white chip with nobody listing it. A gene that gains an allele gains a button and no page is edited; a stale key says so instead of drawing a plain horse.
+</li>
+<li><strong><code>BaseCoats</code></strong> is the new common class: black, bay and chestnut as genotypes, built from the <code>Allele</code> objects rather than parsed from tokens, so a renamed allele breaks the compile. <code>DesignerApi</code> grew a <strong>stateless half</strong> - <code>coatOf</code>, <code>traitsOfJson</code>, <code>previewGenotypeCode</code>, <code>withGene</code>, <code>newEpigenomeCode</code> - that takes a genotype and hands back a coat without touching the editor. Two callers sharing one mutable editor is how a wiki page ends up showing the designer's last horse.
+</li>
+<li><strong>The gene-carrot recipe card</strong> (<code>wiki/gene-carrot/</code>), now on <strong>every</strong> gene page: the 3&times;3 grid in <code>menu/SpliceRecipeDisplay</code>'s slot order, the arrow, the carrot that comes out, and what feeding it does. There is one parameterised recipe rather than N generated ones, so what differs per gene is exactly four things - carrot or no carrot, the rarity tier that prices it, heterozygous or homozygous, and whether the Unknown splice may land on the locus - and all four are asked of the mod. <strong>A tier written into fifty pages would be a wrong price the first time a gene was re-tiered</strong>, and wrong silently.
+</li>
+<li><strong>Two things about that recipe are <em>not</em> per-gene and are held in the card</strong>: the four-slot layout, canonically <code>SpliceRecipeDisplay</code>, and the tier&rarr;item table, canonically <code>server/recipe/RarityItems</code>, which lives on the recipe side where <code>common/</code> cannot see it. <code>carrots.html</code> names both authorities, and <code>CLAUDE.md</code> now carries it as a third multi-file contract.
+</li>
+<li><strong>No item icons on the card, on purpose.</strong> The vanilla textures are Mojang's and not this repo's to ship, and half a grid of real icons beside half a grid of text reads worse than text throughout. The two slots that are this mod's own items are tinted instead, which makes the house rule - every recipe has a modded ingredient - visible rather than stated.
+</li>
+<li><strong>Which pages get a preview is the designer's own answer, not a list.</strong> <code>DesignerApi.showsAs</code> already classifies every gene, so the window went on the ones that say <code>coat</code> and the ability, stat, size and condition loci got none. A window that draws a plain horse under a gene's name is worse than no window.
+</li>
+<li><strong>The leopard complex forced a real addition.</strong> Its own <code>expressionOf</code> sees one pair and answers <em>varnish roan</em> for every <code>LP</code> horse; the pattern you actually get is one of eight and turns on <code>PATN1</code> and <code>PATN2</code>, which it names in <code>coatDependsOn()</code>. A window offering the leopard locus alone would have shown one corner of that table and called it the gene. So <code>genePreviewJson</code> reports the <strong>modifier loci a gene declares it reads</strong>, with every combination each can take, and the window renders a button row per locus. Walked offline it reaches <strong>all seven distinct looks</strong> in that page's eight-cell table. Two consequences of the same fact: a gene that reads modifiers lists its own combinations rather than collapsing them by expression (collapsing was discarding <code>LP/lp</code>, half the table), and <code>withGene</code> exists so the page can compose three loci without ever assembling a code itself.
+</li>
+<li><strong><code>PATN1</code> and <code>PATN2</code> have no pages</strong> - they are written up on the leopard page - so they get no window, and are reachable through leopard's instead.
+</li>
+<li><strong><code>java.js</code> stopped being the designer's.</strong> It derives its wasm and asset paths from its own <code>script.src</code> rather than from the document, because the includer is now a different page every time, and <code>HG.java.load()</code> is memoised so a page carrying both widgets loads one wasm rather than two.
+</li>
+<li><strong>What was checked, since none of it has been looked at.</strong> The baked wasm was driven from node with the four PNGs decoded and handed in exactly as the page hands them: the three bases build the genotypes they claim, every coat gene's outcomes and modifier options resolve and paint something different from the base coat, the patches move on a dice roll and <em>not</em> when the base changes, bad keys and bad allele tokens refuse rather than falling back, and every gene page's <code>data-gene</code> resolves to a registered gene. That is the logic. <strong>Everything visual is unlooked-at</strong> - <code>wiki/verification.html</code> &sect;0-J and &sect;0-K.
+</li>
+<li><strong>A handful of genes are correctly invisible on one base</strong>, and it wants to read as informative rather than broken: mushroom dilutes red and cannot touch a black, dun's markings-only allele draws a black stripe on a black horse, and agouti and extension are invisible on the base coats that are made of them. That is what three bases are for.
+</li>
+<li><strong>It turned up a real gap</strong> (<a href="known-gaps.html#gap-43">#43</a>): <strong>no built-in gene overrides <code>Gene.rarity()</code></strong>, so all six tiers are unpopulated, every carrot costs a gold ingot and the research-paper loot weighting that sorts on the same axis is flat. Nothing is broken - the axis is simply unused - and it was invisible until each gene's tier started appearing on its own page. Tiering wants doing as one pass over the registry, because the tiers are relative to each other.
+</li>
+</ul>
+
 <h3 id="follow-ups-2026-09-06-on-the-designer-from-the-owner-s-first">Follow-ups 2026-09-06 on the designer, from the owner's first look.</h3>
 
 <p>Seven items; <code>:common:test</code> <strong>439 green</strong>, <code>:neoforge-26.1.2:build</code> green, parity <strong>3868/48</strong>.</p>
