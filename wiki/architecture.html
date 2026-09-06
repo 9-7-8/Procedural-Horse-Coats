@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Architecture &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="nav.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow core">Project <span class="sep">/</span> how the code is laid out</p>
+<h1>Architecture &amp; the build</h1>
+<p class="lede">
+    Where the code lives and why it lives there: the three-module split that keeps a
+    1.12.2 backport cheap, the package layout inside each, how a genome gets from the
+    server to a pixel, and what it takes to build and run the thing.
+    <strong>The load-bearing rule is the first one:</strong> <code>common/</code> has no
+    Minecraft imports and no Java&nbsp;9+ APIs, because it has three targets &mdash;
+    NeoForge, a browser, and one day Java&nbsp;8.
+</p>
+
+<h2 id="modules">Three modules, split deliberately</h2>
+<p><strong>Three-module</strong> Gradle project, split deliberately:</p>
+
+<ul>
+<li><strong><code>common/</code></strong> - pure Java, <strong>zero</strong> Minecraft/NeoForge imports (not even DFU <code>Codec</code>s). Since 2026-09-06 it is also <strong>kept free of Java 9+ APIs</strong>, because it now has two targets that lack them: the intended Java 8 1.12.2 backport, and TeaVM, which compiles it for the browser. <code>System.getLogger</code> and <code>Long.parseUnsignedLong</code> have both been removed for that reason - see <code>CommonLog</code> and <code>Epigenome.parseUnsignedHex</code>. Subpackages by concern:
+
+<ul>
+<li><code>genetics/</code> - <code>Gene</code> + <code>Allele</code> + <code>AllelePair</code>, <code>Expression</code> (one outcome a gene can produce, with its own paint function - what replaced <code>DominancePattern</code>), <code>FounderTable</code> + <code>FounderContext</code> (the wild-population weight per allele combination - what replaced <code>Gene.randomPair</code>), <code>Genotype</code> (+ <code>breedWith</code>), <code>Epigenome</code> / <code>AlleleEpigenetics</code> (the priority + seed on each allele copy), <code>Genome</code> (the two together, and the breeding that keeps them aligned), <code>GenomeSample</code> (a <code>Genome</code> frozen to code strings and taken off the horse - what the stallion seed jar carries; <code>breedInto(mareGenome, rng)</code> runs the ordinary draw), <code>ShowcaseGenotypes</code> (a founder draw with a floor under it - the horse dimension's stock; see the pens section), <code>AbilityContribution</code> (the capability a built-in gene implements to grant <em>game behaviour</em>, using the same <code>GeneAbility</code> vocabulary a data-driven gene's <code>effects</code> block parses into) and its per-horse twin <strong><code>EpigeneticAbilityContribution</code></strong> (the effect's <em>magnitude</em> is on the allele copy - the particle locus), <strong><code>AlleleRandomness</code></strong> (one gene's per-horse randomness, by expressing copy or by slot; it lives here rather than in <code>trait/</code> so both the trait and the ability sides can use it without the two packages depending on each other), <code>GeneRarity</code> (the §19 tier enum), <code>GameteBias</code> (a per-parent modifier on <code>Genome.breedWith</code> - what a breeding carrot does, <code>wiki/carrots.html</code>) + <code>CarrotEffect</code> (the sealed effect set + <code>fold</code> -&gt; <code>GameteBias</code>), <strong><code>LutContribution</code></strong> (the capability a gene implements to swap the phase-2 colour LUT - <strong>exactly one gene, the LUT locus, and permanently so</strong>; a new palette is a new allele, never a new gene), <code>CoatPhenotype</code>, <code>GeneticCodeCombiner</code>.
+</li>
+<li><code>coat/</code> - <code>CoatData</code>, <code>CoatGenerator</code>; <code>coat/pattern/</code> holds the pipeline (<code>CoatTextureComposer</code>, the <code>PigmentField</code> / <code>ColorField</code> accumulators and their read-only <code>PigmentView</code> / <code>ColorView</code> faces, plus <code>CoatOverlay</code> + <code>CoatOverlayContribution</code> - the phase-4 sink for final pixels and the emissive texel mask, and <code>LutSet</code> - the base <code>GradientLut</code> + keyed alternates the LUT locus resolves phase 2 against) and the reusable body-space noise: <code>BodyNoise</code> (single-octave value + Worley), <code>BodyStripes</code> (X-oriented stripe field), <code>PatchNoise</code> (warped 3-octave fractal for white-spotting patches - <code>field</code> + <code>fbm2</code>) and <code>HairPattern</code> (the mane/tail painter: bands across a part's own longest axis, a centre stripe, and the bright-hue draw).
+</li>
+<li><code>name/</code> - <code>HorseNameGenerator</code> + <code>HorseNames</code> (<code>breed</code> = one-half-each; <code>breedNth</code> = varied by a pairing's foal count) + word tables under <code>src/main/resources/horsegenetics/names/</code>.
+</li>
+<li><code>horse/</code> - the pedigree domain model (<code>Sex</code>, <code>HorseRecord</code>, <code>ParentStats</code>, <code>HorseDatabase</code>, <code>InMemoryHorseDatabase</code>) -&gt; <code>wiki/breeding.html</code>. <strong><code>Sex</code> is an enum the rest of the code reads, not a stored fact</strong>: <code>HorseRecord</code> has no <code>sex</code> field and derives <code>sex()</code> from the sex locus in its genetic code. It has <strong>no <code>speed</code> / <code>health</code> fields either</strong>, for the same reason - <code>traits()</code> resolves them from the genotype. It <em>does</em> store <code>Optional&lt;String&gt; breed</code> (a <code>BreedLineage</code> token) - ancestry, not a derived value - and <code>traits()</code> feeds <code>lineage().statTargets()</code> into <code>HorseTraits</code>.
+</li>
+<li><code>breed/</code> - the <strong>breed system</strong>: <code>Breed</code> + its <code>Builder</code>, <code>Breeds</code> (49 built-ins + <code>UNKNOWN</code>), <code>Commonness</code>, <code>BreedStatCurve</code> (score/hh -&gt; band), <code>BreedFounder</code> (breed-aware founder roll), <code>BreedLineage</code> (the pure/cross/ mixed/unknown label + <code>combine</code> + <code>statTargets</code>). Depends on <code>genetics/</code> + <code>trait/</code>; <code>horse/</code> depends on it. -&gt; <code>wiki/breeds.html</code>.
+</li>
+<li><code>trait/</code> - the <strong>non-coat body</strong>: <code>HorseTraits</code> (the one walk), <code>Traits</code> / <code>Condition</code> / <code>Severity</code> / <code>Viability</code> (the result), <code>TraitBuilder</code> (the sink), and the capability interfaces <code>TraitContribution</code> / <code>EpigeneticTraitContribution</code> / <code>HealthContribution</code>. Depends on <code>genetics/</code> and nothing depends on it except the genes that contribute - no cycle. -&gt; <code>wiki/horse-body.html</code>.
+</li>
+<li><code>genetics/spec/</code> - the <strong>data-driven gene</strong> path: <code>GeneSpec</code> (the format as records), <code>Json</code> (a hand-rolled parser - <code>common/</code> takes no dependencies), <code>GeneSpecParser</code>, <code>SpecSchema</code> (the one declaration of what each mask and op accepts), <code>SpecValues</code> (the per-horse knob draw), <code>SpecGene</code> (a <code>Gene</code> that reads a spec), <code>GeneSpecLoader</code>, and the two dev tools <code>SpecFixtureTool</code> / <code>CreatorAssetTool</code>. The painting is <code>coat/pattern/SpecPainter</code>.
+</li>
+<li><code>Rng</code> - the randomness seam (<code>nextFloat</code> / <code>nextBoolean</code> / <code>nextInt(bound)</code> / <code>nextLong</code>), implemented by <code>NeoRng</code> (wraps <code>RandomSource</code>) and, in tests, <code>FakeRng</code>.
+</li>
+<li><code>CommonLog</code> - the one way <code>common/</code> says something went wrong. Four warnings use it. It exists because <code>System.getLogger</code> is Java 9+ and this module has to run on Java 8 and in a browser; a host may take the messages over with <code>setSink</code>.
+</li>
+</ul>
+</li>
+</ul>
+
+<p>This is the part that survives a version port unchanged. If you want to import anything Minecraft-related here, stop.</p>
+
+<ul>
+<li><strong><code>neoforge-26.1.2/</code></strong> - everything Minecraft-specific, by concern:
+
+<ul>
+<li><code>client/</code> - renderer, texture compositing (incl. <code>EmissiveCoatLayer</code> for a <code>glow</code> gene's full-bright coat parts, and the LUT locus's alternate gradients loaded into a <code>LutSet</code> in <code>GeneticCoatTextureFactory</code>), <code>CutieMarkLayer</code> + <code>FlatItemCatalog</code> (the cutie-mark emblem - item models on the flanks, drawn last so it beats every white pattern; the catalog is every non-<code>BlockItem</code> item, built once per session), client caches, the inventory hooks + <code>FamilyTreeScreen</code>, keybind, lifecycle cleanup. <code>HorseBrowserScreen</code> is now an <code>AbstractContainerScreen&lt;HorseBrowserMenu&gt;</code> (was a plain <code>Screen</code>) with a Gene DB tab and a Crafting tab; <code>ClientSetup</code> binds it via <code>RegisterMenuScreensEvent</code>.
+</li>
+<li><code>data/</code> - Data Attachments. <strong>Four</strong> on a horse now: <code>horsegenetics:horse_record</code> (a <code>HorseRecord</code>, the whole genome), <code>horsegenetics:horse_care</code> (<code>HorseCareAttachment</code>, bond / herd / daily-cap), <code>horsegenetics:horse_cooldowns</code> (<code>HorseCooldownsAttachment</code>, a <code>Map&lt;String,Long&gt;</code> of last-fired game times - <code>"shear"</code>, <code>"yield:&lt;geneKey&gt;"</code>; replaced <code>GeneYieldHandler</code>'s static map) and <code>horsegenetics:carrot_window</code> (<code>CarrotWindowAttachment</code>, a live breeding-carrot window - <strong>not</strong> <code>copyOnDeath</code>). Plus the ancestry <code>SavedData</code> + <code>GeneDatabaseData</code> (server-global per-player gene database, <code>wiki/carrots.html#database</code>); codecs; <code>ModDataComponents</code> (item data components: <code>stored_genome</code>, <code>bound_horse</code>, <strong><code>carrot_effects</code></strong> (a <code>List&lt;String&gt;</code> of <code>CarrotEffect</code> ids) and <strong><code>research_gene</code></strong> (a gene key on a <code>research_paper</code>)); <code>StallData</code> / <code>StallRecord</code>; and <code>data/loot/</code> (<code>AddResearchPaperModifier</code> + <code>ModLootModifiers</code> - the chest-loot paper injection).
+</li>
+<li><code>network/</code> - custom payloads + <code>ModNetworking</code>.
+</li>
+<li><code>menu/</code> - the mod's one container menu. <code>ModMenus</code> (a <code>DeferredRegister&lt;MenuType&lt;?&gt;&gt;</code>), <code>HorseBrowserMenu</code> (the <strong>Horse Browser</strong>, opened with the H key via <code>OpenHorseBrowserPayload</code> - a 3x3 <code>TransientCraftingContainer</code> + a <code>ResultContainer</code> + the player inventory; <strong>every</strong> slot goes inactive off the Crafting tab via <code>setCraftingVisible</code>, so the full-window Gene database tab shows none), and <code>HorseBrowserRecipes</code> (the result logic - book + a <em>discovered</em> gene -&gt; that gene's <code>research_paper</code>, then the shared <code>KnownGeneSpliceRecipe</code> / <code>CarrotCombineRecipe</code>; <strong>only this mod's recipes</strong>, no vanilla lookup). <code>SelectBrowserGenePayload</code> carries the picked gene from the client; <code>SpliceRecipeDisplay</code> is the canonical 9-slot Known Gene Splice layout (client-safe), and <code>ViewSpliceRecipePayload</code> -&gt; <code>HorseBrowserMenu.fillSplicePreview</code> pulls the ingredients a player has into the grid and the screen ghosts the rest (never crafts).
+</li>
+<li><code>server/</code> - event handlers, the horse-dimension builder, the portal manager, the record adapter (<code>HorseRecords</code>, which now also resolves and writes the four body attributes); <code>LethalFoalHandler</code> (foals that do not make it - see <code>wiki/horse-body.html</code>); <code>HorseBreedingHandler</code> (natural breeding + the shared <code>applyBredFoal</code>, now also combining the parents' <code>BreedLineage</code>), <code>StallionSeedJarHandler</code> (seed collection + mare impregnation, reusing <code>applyBredFoal</code>), <code>BreedSpawnHandler</code> (a one-line <code>FinalizeSpawnEvent</code> hook - flag natural spawns) + <code>HerdManager</code> (deferred: founder record + proximity herd formation, every clump = one herd of one breed) + <code>WildHerdGoal</code> (a herd member trails its lead) + <code>HorseAggroHandler</code> (wolf-style herd aggro + the horse <code>ATTACK_DAMAGE</code> attribute) + <code>DebugHighlightHandler</code> (the F8 glow toggle), the stall trio <code>StallSignHandler</code> (bind / sign-break cleanup) + <code>StallDetector</code> (the enclosed-area flood-fill) + <code>StallDebug</code> (particle-outline overlay), and the <strong>horse-care</strong> pair <code>HorseCareHandler</code> (the one 30-tick scan for gated healing + bond + tamed-horse herd formation; also exposes <code>awardBondFor</code> for one-off bond like shearing) + <code>BondFollowGoal</code> (the single bond-tier AI goal). See <code>wiki/horse-care.html</code>. <strong>Roadmap §§7/12/14/16:</strong> <code>HorseShearHandler</code> (shears -&gt; hair, once/day); <code>GeneYieldHandler</code> (the <code>yield</code> translator + the <code>deniedDamage</code>/<code>deniedMessage</code> else-branch); <code>BreedingCarrotHandler</code> (feed a carrot -&gt; a <code>CarrotWindowAttachment</code> + love); <code>GeneDiscoveryHandler</code> (fill the gene DB on tame / breed); <code>ResearchPaperWriter</code> (the browser "write paper" button's server side); <code>recipe/</code> (<code>ModRecipes</code> + the parameterised <code>KnownGeneSpliceRecipe</code> + <code>CarrotCombineRecipe</code> + <code>RarityItems</code>).
+</li>
+<li><code>block/</code> - <code>ModBlocks</code> + <code>HayPortalBlock</code> (the only registered block), <code>ModBlockEntities</code> + <code>HayPortalBlockEntity</code> (drives the animated <code>hay_portal.png</code> slab renderer).
+</li>
+<li><code>item/</code> - <code>ModItems</code> (the <strong>custom horse spawn egg</strong> - a creative tool, a reskin of the horse spawn egg that opens a gene-list / preview / genome editor first; the editor screen is <code>client/CustomHorseSpawnScreen</code>, the spawn itself goes through <code>network/SpawnCustomHorsePayload</code> and is creative-gated on the server - plus the 17 <strong>gameplay-layer items</strong>, roadmap §§11-19; the two <code>SeedJarItem</code>s, three <code>WhistleItem</code>s, two <code>StallSignItem</code>s, the four breeding carrots + the parameterised <code>KNOWN_GENE_SPLICE_CARROT</code>, <code>ResearchPaperItem</code> (right-click -&gt; gene DB + carrot unlock), <code>braided_rope</code> + <code>hair_cloth</code>, and <code>HORSE_HAIR</code> (from shearing) all have behaviour; the tickets do not yet), <code>SeedJarItem</code> (tooltip), <code>WhistleItem</code> (<code>use</code> -&gt; recall your tamed horses in a radius), <code>StallSignItem</code> (<code>useOn</code> -&gt; place an oak wall sign + flood-fill the stall behind it), and <code>ModCreativeTabs</code> (one <strong>Horse Genetics</strong> tab). Recipes are datapack JSON under <code>resources/data/horsegenetics/recipe/</code>.
+</li>
+</ul>
+</li>
+</ul>
+
+<p>Its job is to <strong>translate</strong> - build/read <code>common</code> types and shuttle them in and out of Minecraft's systems; the logic stays in <code>common/</code>.</p>
+
+<ul>
+<li><strong><code>web/</code></strong> (new 2026-09-06) - <code>common/</code> compiled to <strong>WebAssembly</strong> by TeaVM, for the wiki's <a href="horse-designer/index.html">horse designer</a>. Three classes and no logic: <code>DesignerApi</code> (the <code>@JSExport</code> facade - JSON out for structure, <code>int[]</code> out for coats, ints in for edits), <code>HorseEditor</code> (a deliberate twin of <code>CustomHorseSpawnScreen</code>'s state machine - <strong>keep them in step</strong>) and <code>Json</code> (a writer; <code>common/</code> has no dependency to borrow one from). <code>./gradlew :web:bakeDesignerAssets</code> builds it and copies the artefacts into <code>wiki/horse-designer/</code>. <strong>It is not shipped in the mod</strong> and nothing in <code>neoforge-26.1.2/</code> depends on it.
+</li>
+</ul>
+
+<p>It reads no resources: the page decodes the coat PNGs and the name tables and hands them in, which is TeaVM's weak spot avoided and the better boundary anyway. Note that TeaVM compiles the <strong>reachable</strong> graph, so adding an <code>@JSExport</code> can surface a missing JDK method that was always there - build after adding one.</p>
+
+<p>When adding a feature, put as much as possible in <code>common/</code> and keep the NeoForge module thin. That's what makes a future <code>forge-1.12.2/</code> module cheap.</p>
+
+<h2 id="data-flow">Data flow: server &rarr; client &rarr; pixels</h2>
+<ol>
+<li><strong>Wild spawn / <code>/summon</code> / a dimension pen horse</strong> -&gt; one <code>HorseRecord</code> attachment carrying <strong>both</strong> the genotype code and the epigenome code (<code>HorseRecords.newFounder</code> -&gt; <code>CoatGenerator.generate</code> -&gt; a founder <code>Epigenome.random</code>). There is <strong>no separate coat attachment</strong> any more; the record default is <code>HorseRecord.unassigned(uuid)</code>, whose empty <code>epigenomeCode</code> is the <code>hasGenome()</code> sentinel the join handler tests. <strong>Breeding is different</strong>: <code>HorseBreedingHandler</code> builds the foal's genome itself from <code>damGenome.breedWith(sireGenome)</code> and writes it into the foal's record, because the inherited epigenetics can only be read while both parents are in hand - the join handler would re-roll them. It then sees <code>hasGenome()</code> true and leaves it alone. <strong>The custom horse spawn egg</strong> is a third path: <code>ModNetworking</code>'s <code>SpawnCustomHorsePayload</code> handler applies a founder record with the player-picked code + sex <strong>before</strong> <code>addFreshEntity</code>, so the join handler takes its "already has a real record" branch and keeps the genome. Since 2026-09-04 the <strong>epigenome comes with it</strong> rather than being rolled: the editor previews a live 3D horse, and a preview the spawn re-rolls is not a preview. That is the one founder path that does not call <code>CoatGenerator.generate</code>. <strong>The stallion seed jar</strong> is a fourth path, and it behaves like breeding: <code>StallionSeedJarHandler</code> builds the foal <code>Horse</code> itself, reads the mare's genome live and the sire's from the jar's <code>StoredGenome</code>, and calls the same <code>HorseBreedingHandler.applyBredFoal</code> - which writes the coat attachment before <code>addFreshEntity</code>, so the join handler leaves it alone.
+</li>
+<li>Not auto-synced -&gt; the handler sends <code>CoatSyncPayload</code> <code>{entityId, code, epigenome}</code> and <code>HorseRecordSyncPayload</code> to trackers (on every join, plus <code>StartTracking</code>).
+</li>
+<li>Client caches in <code>ClientCoatCache</code> (<code>CoatData</code>) / <code>ClientHorseRecordCache</code>, cleared on <code>LoggingOut</code>.
+</li>
+<li><code>GeneticHorseRenderer.extractRenderState</code> reads <code>ClientCoatCache</code> -&gt; <code>GeneticHorseRenderState.coatData</code>; <code>getTextureLocation</code> -&gt; <code>GeneticCoatTextureFactory.getOrCreate(coatData, renderState.isBaby)</code> - generated for adult and foal alike (<code>HdHorseModel</code> / <code>HdBabyHorseModel</code> handed to the super ctor; no per-entity model swap).
+</li>
+</ol>
+
+<h2 id="hd-models">The HD horse models</h2>
+<p>128px, per-part UV - structural copies of vanilla <code>AbstractEquineModel. createBodyMesh</code> / <code>BabyHorseModel.createBabyMesh</code> with every cube at <code>texScale = 0.5</code> and the layer baked at 128x128 (<code>ClientSetup.HD_HORSE</code> / <code>HD_HORSE_BABY</code>), so <code>CubeDefinition.bake</code> → effective texture size <code>128*0.5 = 64</code> and <strong>every normalized UV is identical to vanilla</strong> - the 2x sheet just gives each face 2x the texels. The adult model additionally re-<code>texOffs</code>'s the four legs / two ears onto their own patches and drops <code>.mirror()</code>; the baby model already has per-leg patches so it's a straight 2x pass. <code>horse_white.png</code> / <code>horse_white_baby.png</code> (in <code>common/.../assets/</code>, with <code>*_vanilla64.png</code> references) are the vanilla white sheets scaled 2x. <code>GeneticHorseRenderer</code> hands both models to its super ctor as adult / baby - no per-entity model swap. It deliberately <strong>does not add vanilla's <code>HorseMarkingLayer</code></strong>: that layer paints <code>horse_markings_white.png</code> etc. over the whole texture, so any horse (wild spawn or foal) that rolled <code>Markings.WHITE</code> rendered as a <strong>flat white horse</strong> on top of a correct generated coat. All white markings here come from the white-pattern loci, inside the generated coat texture.</p>
+
+<h2 id="water-riding">Riding through water</h2>
+<p>Vanilla already floats a <strong>ridden</strong> horse at the water surface (horses are in the <code>minecraft:can_float_while_ridden</code> entity tag) and there is <strong>no</strong> water-triggered auto-dismount - the only dismount is sneak (<code>Player#wantsToStopRiding</code> = <code>isShiftKeyDown</code>). What's missing is usable speed: in-water <code>travelInWater</code> gives ~0.02 b/t.</p>
+
+<p>The handler, on <code>EntityTickEvent.Post</code> for a tamed, player-ridden <code>AbstractHorse</code> that <code>isInWater()</code> and <code>isLocalInstanceAuthoritative()</code> (so it runs on the controlling client, where movement is simulated, and on the server for non-player control): adds a small upward <code>deltaMovement</code> when the horse is submerged (keeps the rider's head out), and blends horizontal <code>deltaMovement</code> toward a capped <code>WATER_RIDE_SPEED</code> (0.09 b/t) in the direction the rider steers (<code>rider.zza</code>/<code>xxa</code>, rotated the way vanilla's <code>moveRelative</code> does). <strong>Feel is a first guess - unverified in-game.</strong></p>
+
+<h2 id="build">Build &amp; test, in full</h2>
+<div class="codebox">
+<pre><code class="language-bash">./gradlew :common:test               # pure-Java logic, no Minecraft - fastest loop
+./gradlew :neoforge-26.1.2:build     # full compile + jar; slow first run (downloads the SDK)
+./gradlew :neoforge-26.1.2:runClient # launch the game with the mod
+./gradlew :neoforge-26.1.2:runServer # headless dedicated server (DEBUG logging - huge log)
+
+# gene-creator tooling (see "Data-driven genes")
+./gradlew :common:bakeSpecFixtures   # what the real Java spec engine produces
+node wiki/gene-creator/tools/check-parity.mjs   # ...and does the creator's JS agree?
+./gradlew :common:bakeCreatorAssets  # regenerate the creator's inlined textures + examples
+node wiki/gene-creator/tools/bake-export-fixtures.mjs   # what the creator EXPORTS,
+                                     # for CreatorMetadataRoundTripTest to parse
+
+# horse-designer tooling (see the docs split)
+./gradlew :web:generateWasmGC       # compile common/ to WebAssembly
+./gradlew :web:bakeDesignerAssets   # ...and copy it + the coat PNGs into wiki/horse-designer/
+python -m http.server                # the designer needs a server; file:// cannot fetch wasm</code></pre>
+</div>
+
+<p><strong>Re-run <code>:web:bakeDesignerAssets</code> whenever <code>common/</code> changes</strong>, or the designer is running yesterday's mod. It is the designer's equivalent of re-baking the creator's fixtures, with the crucial difference that it cannot drift <em>silently</em>: the artefact is the code, not a snapshot of its output.</p>
+
+<p>The designer borrows only <code>geometry.js</code> and <code>model3d.js</code> from the creator, so <code>check-parity.mjs</code> still covers those - and <code>js/java.js</code> additionally re-checks them against the compiled Java on every page load. Its own files (<code>gui.js</code>, <code>scene.js</code>, <code>animation.js</code>, <code>designer.js</code>) have no automated net.</p>
+
+<p><strong>Run the parity check whenever you touch <code>SpecPainter</code>, <code>SpecSchema</code>, <code>AbilityType</code>, <code>HorseSkinGeometry</code>, <code>BodyNoise</code>/<code>BodyStripes</code>, or any of <code>wiki/gene-creator/js/</code>.</strong> It is the only thing standing between the creator and quietly previewing a horse the game will not breed - it has already caught a wrong <code>nextLong()</code> port, four schema defaults that had drifted apart, and (2026-09-06) a missed top/bottom UV swap.</p>
+
+<p><strong>Re-bake the fixtures before trusting a green run.</strong> <code>expected.json</code> is a <em>checked-in snapshot of the Java</em>, so a stale one makes the check green by definition. That is exactly how the UV swap hid for a day: the Java changed, the fixture was never re-baked, and the JS port was never updated. <strong><code>bakeSpecFixtures</code> is part of the check, not a separate chore.</strong> The creator now also runs <code>js/parity.js</code> <strong>on itself at boot</strong> and prints the verdict under the coat sheet, so a stale port is visible in the tool rather than only at a terminal someone forgot to open.</p>
+
+<p>Run <code>:common:test</code> first when iterating on genetics/stats - it doesn't touch Minecraft. Requires JDK 25; <code>foojay-resolver-convention</code> in <code>settings.gradle.kts</code> auto-provisions it.</p>
+
+<p><code>runServer</code> here does not auto-stop - it sits at the console after <code>Done</code>. Kill it (<code>taskkill</code>, or a PowerShell <code>Stop-Process</code> on the recent <code>java</code> pids) when the smoke test has printed <code>Done (...)! For help</code>.</p>
+
+<h2 id="gradle">Build setup notes</h2>
+<ul>
+<li><code>common/build.gradle.kts</code> declares its own <code>repositories { mavenCentral() }</code> and <code>testRuntimeOnly("org.junit.platform:junit-platform-launcher")</code> - both required under Gradle 9.
+</li>
+<li>Mod metadata is <code>src/main/resources/META-INF/neoforge.mods.toml</code>; <code>minecraft</code> dependency <code>versionRange = "[26.1.2,)"</code> (the MDK's <code>[1.26.1,1.27)</code> does not match the version string <code>26.1.2</code> and makes FML refuse the mod). There's a stray un-packaged duplicate at <code>src/main/neoforge.mods.toml</code> (wrong dir, from a <code>git mv</code>) - delete it or move it under <code>resources/META-INF/</code>; don't let the two drift.
+</li>
+<li><strong>Config</strong>: <code>ClientConfig</code> (<code>net.neoforged.neoforge.common.ModConfigSpec</code>, <code>ModConfig.Type.CLIENT</code>) registered from the <code>HorseGenetics(IEventBus, ModContainer)</code> constructor. One key so far: <code>familyTree.scrollBar</code> (default <code>false</code> = shrink the Family Tree to fit; <code>true</code> = full-size + scroll). Read via <code>ClientConfig.familyTreeScrollBar()</code> which swallows the not-yet-loaded <code>IllegalStateException</code>.
+</li>
+<li><strong><code>.gitignore</code></strong> (repo root) covers <code>build/</code>, <code>.gradle/</code>, <code>.idea/</code>, <code>**/run/*</code>, any <code>saves/</code>, and the JVM's <code>hs_err_pid*.log</code> droppings - the tracked tree is down from 2 446 files to 148 (source, docs, the gradle wrapper). The <strong>one deliberate exception</strong> is <code>run/config/fml.toml</code>, kept tracked by a <code>!**/run/config/fml.toml</code> negation because it carries this laptop's <code>earlyWindowControl = false</code> launch fix; the negation needs the <code>!**/run/config/</code> + <code>**/run/config/*</code> pair above it to work, so don't collapse those three lines.
+</li>
+<li><code>generate_file_list.py</code> and the README file-tree block were removed this session (README is user-facing now).
+</li>
+</ul>
+
+<h2 id="running">Running the game</h2>
+<p><code>build</code> only assembles the jar. <code>runClient</code> / <code>runServer</code> launch MC <code>26.1.2.100</code> with the mod. IntelliJ Gradle sync generates the run configs.</p>
+
+<p><strong>Crash reports</strong> land in <code>neoforge-26.1.2/run/crash-reports/</code> (<code>crash-&lt;timestamp&gt;-{server,client,fml}.txt</code>) - most recent last. That is where the owner will point for any in-game crash; read the newest one. <code>hs_err_pid*</code> JVM-level dumps land in <code>neoforge-26.1.2/run/</code> (and are git-ignored).</p>
+
+<p>Two machine-specific launch blockers on this dev laptop (NVIDIA RTX 3050 Ti + AMD integrated, AMD driver from 2023):</p>
+
+<ul>
+<li><strong>JVM hard-crash (<code>EXCEPTION_ACCESS_VIOLATION</code> in <code>atio6axx.dll</code>) at <code>glfwCreateWindow</code></strong> - the process ran on the old AMD integrated driver. Fix: Windows per-app GPU preference pinning <code>java.exe</code> / <code>javaw.exe</code> to "High performance" (<code>HKCU\Software\Microsoft\DirectX\UserGpuPreferences</code>, <code>GpuPreference=2;</code>). Durable; a driver update would also fix it.
+</li>
+<li><strong>FML early-loading splash window</strong> hits the same crash one step earlier. <code>run/config/fml.toml</code> has <code>earlyWindowControl = false</code>. <code>run/</code> is otherwise git-ignored, but <strong>that one file is deliberately still tracked</strong> (see "Build setup notes") so a <code>git clean</code> can't reset it to <code>true</code>.
+</li>
+</ul>
+
+<h3 id="the-spawn-test-horse-world-button-cleans-up-after-itself">The "Spawn Test Horse World" button cleans up after itself</h3>
+
+<p><code>client/DebugTitleScreenButton</code> (dev only) creates a throwaway creative world named by <code>DebugTestWorldCleanup.newDirectoryName()</code> = <code>test_horse_&lt;millis&gt;</code>. <code>client/DebugTestWorldCleanup</code> deletes those worlds again, in two sweeps over <code>saves/</code>, both matching <strong>only</strong> <code>test_horse_</code> + digits so a hand-made world is never a candidate:</p>
+
+<ul>
+<li><strong><code>ClientStoppedEvent</code></strong> - the normal path. It's posted on the game bus from <code>Minecraft#destroy</code> <em>after</em> the disconnect has halted the integrated server and spun waiting for it to finish saving, and after <code>close()</code> - so nothing still holds the save folder, and it's the last hook before <code>System.exit</code>. (<code>ClientStoppingEvent</code> would be too early: the server is still running.)
+</li>
+<li><strong><code>ClientStartedEvent</code></strong> - the safety net, for a crash, a <code>taskkill</code>, or a delete Windows refused because a handle lingered. Runs before anything opens a world.
+</li>
+</ul>
+
+<p>Both are <code>ClientLifecycleEvent</code> subclasses, which do <strong>not</strong> implement <code>IModBusEvent</code>, so <code>@EventBusSubscriber(value = Dist.CLIENT)</code> routes them to the game bus. A failed delete only warns - the next launch retries.</p>
+
+
+</article>
+</main>
+</body>
+</html>

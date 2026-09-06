@@ -238,6 +238,45 @@
         as you walk (<code>DebugPenTickHandler</code>).</li>
 </ul>
 
+<h3 id="constants">The constants, by name</h3>
+
+<p>
+    Every one of these is a field on <code>server/DebugPenManager</code>. They are worth
+    naming because the geometry is <em>fixed</em>: an X slot handed back to the free list
+    is rebuilt byte-identically on top of the old one, which is what lets teardown be
+    O(entities) instead of O(blocks walked).
+</p>
+
+<table>
+<thead><tr><th>Constant</th><th>Value</th><th>What it is</th></tr></thead>
+<tbody>
+<tr><td><code>PEN_COUNT</code></td><td>2&nbsp;000</td><td>Pens per corridor &mdash; an arbitrary number, deliberately <strong>not</strong> derived from the genotype space. Adding a gene must not lengthen the corridor.</td></tr>
+<tr><td><code>PERIOD</code></td><td>7</td><td><code>PEN_LEN_X</code> (6) + 1. <code>LAST_SEGMENT_INDEX</code> is 999, so the corridor is about 7&nbsp;000 blocks.</td></tr>
+<tr><td><code>PLOT_SPACING_X</code></td><td>8&nbsp;007</td><td>The corridor + 1&nbsp;000. Plots never share chunks, so &ldquo;two players never land in the same place&rdquo; holds with no per-player-dimension work.</td></tr>
+<tr><td><code>PLOT_BASE_Y</code></td><td>128</td><td>The grass surface. Fixed, which is half of why a recycled slot rebuilds identically.</td></tr>
+<tr><td><code>PEN_DEPTH_Z</code> / <code>PEN_FAR_Z</code></td><td>20 / &plusmn;23</td><td>Pen depth, and the back edge the E/W walls sit flush against &mdash; no grass gap.</td></tr>
+<tr><td><code>GRAVEL_STRIP_Z</code></td><td>&plusmn;24</td><td>Gravel, with a glowstone line floating directly above at <code>baseY + 10</code>.</td></tr>
+<tr><td><code>WALL_PLANK_Z</code></td><td>&plusmn;25</td><td>A <em>single</em> oak-plank wall, <code>baseY</code> to <code>baseY + 9</code>.</td></tr>
+<tr><td><code>WALL_BEDROCK_Z</code></td><td>&plusmn;26</td><td>The bedrock core, <code>baseY - 3</code> to <code>baseY + 9</code>. Past it: open void.</td></tr>
+<tr><td><code>LOOKAHEAD_PENS</code></td><td>30</td><td>Built up front; the rest are laid as the player walks.</td></tr>
+<tr><td><code>HERD_RADIUS</code> equivalent&nbsp;&mdash; n/a here</td><td>&mdash;</td><td>The corridor has no herds; wild herd formation is <a href="breeds.html">a breeds concern</a>.</td></tr>
+</tbody>
+</table>
+
+<p>
+    <strong>The wall behind the return portal</strong> (<code>buildStartCap</code>) is the
+    same sandwich turned ninety degrees, pushed two blocks back to <code>originX - 3</code>:
+    bedrock core at <code>originX - 3</code>, a single oak-plank wall at
+    <code>originX - 2</code> on a bedrock/dirt base, and a gravel <em>floor strip</em> at
+    <code>originX - 1</code> with the glowstone line floating above it. The E/W walls are
+    carried out to <code>originX - 1</code> so the corner has no gap. An earlier version
+    made <code>originX - 1</code> a full-height gravel column with no base; it fell into
+    the void and left a hole, which is why everything now stands on bedrock and dirt. The
+    return portal itself (hay frame + <code>hay_portal</code>, axis Z) is at
+    <code>originX + 1</code>, and the entrance sign three blocks in front of it at
+    <code>originX + 4</code>.
+</p>
+
 <h3>House rules inside the dimension</h3>
 
 <ul>

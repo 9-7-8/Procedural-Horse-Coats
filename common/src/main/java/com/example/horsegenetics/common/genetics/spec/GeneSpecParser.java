@@ -27,8 +27,8 @@ import java.util.Map;
  * <p>Validation is deliberately strict - unknown keys are errors, not warnings.
  * The gene creator writes these files, so an unknown key almost always means the
  * tool and the game are on different versions, and that is exactly the failure
- * you want loud (see {@code CLAUDE.md}, "the wiki is now load-bearing, so it can
- * rot").
+ * you want loud (see {@code wiki/known-gaps.html}, "the wiki is now load-bearing,
+ * so it can rot").
  *
  * <h2>Knobs</h2>
  * A numeric parameter can be written three ways:

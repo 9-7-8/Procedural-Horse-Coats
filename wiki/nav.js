@@ -127,9 +127,13 @@
         {
             title: "Project",
             items: [
+                { href: "architecture.html", text: "Architecture & the build", kind: "core" },
+                { href: "api-notes.html", text: "NeoForge 26.1.2 API notes", kind: "core" },
                 { href: "verification.html", text: "To be verified", kind: "core" },
+                { href: "known-gaps.html", text: "Known gaps & lessons", kind: "core" },
                 { href: "compatibility.html", text: "Mod compatibility", kind: "core" },
-                { href: "roadmap.html", text: "Roadmap / backlog", kind: "core" }
+                { href: "roadmap.html", text: "Roadmap / backlog", kind: "core" },
+                { href: "session-log.html", text: "Session log", kind: "core" }
             ]
         },
         {

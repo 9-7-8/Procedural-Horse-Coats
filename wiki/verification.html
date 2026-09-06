@@ -18,8 +18,9 @@
     The rolling <code>runClient</code> checklist. <strong>Open issues</strong> are
     reproducible in-game and not yet fixed; <strong>still to verify</strong> is built
     but not yet confirmed in a play session. Confirmed items are
-    <strong>deleted</strong>, not ticked &mdash; <code>CLAUDE.md</code>&rsquo;s
-    &ldquo;Owner-verified in-game&rdquo; block is the permanent record.
+    <strong>deleted</strong>, not ticked &mdash; the
+    <a href="session-log.html">session log</a>&rsquo;s &ldquo;Owner-verified in-game&rdquo;
+    entries are the permanent record.
 </p>
 
 <div class="note">
@@ -27,7 +28,7 @@
     <p>
         This dev laptop needs <code>java.exe</code> / <code>javaw.exe</code> pinned to
         the NVIDIA GPU and the FML splash disabled, or the JVM hard-crashes in the AMD
-        GL driver. See <code>CLAUDE.md</code>, &ldquo;Running the game&rdquo;.
+        GL driver. See <a href="architecture.html#running">Running the game</a>.
     </p>
 </div>
 
@@ -404,8 +405,8 @@
         the flank band doesn&rsquo;t clip cleanly below the spine (measured back
         ~75% on <code>O/N</code>). Using <code>bounds(skin, Part.BODY)</code> is
         the fix but it also removes frame&rsquo;s legitimate neck-side white, so
-        it needs a per-part reference &mdash; deferred (<code>CLAUDE.md</code>
-        gap&nbsp;#30). Tobiano crossing the topline is <em>correct</em> for
+        it needs a per-part reference &mdash; deferred
+        (<a href="known-gaps.html#gap-30">gap&nbsp;#30</a>). Tobiano crossing the topline is <em>correct</em> for
         tobiano.
     </p>
 </div>
@@ -468,7 +469,7 @@
             white</strong> &mdash; and that is now what 90% of wild horses look like.
             &ldquo;Minimal marking&rdquo; currently means four white legs. If the herd reads as
             uniformly white-legged rather than as horses with socks, that is this bug and not
-            the frequency; the fix is in CLAUDE.md known gap #30.
+            the frequency; the fix is <a href="known-gaps.html#gap-30">known gap&nbsp;#30</a>.
         </p>
     </div>
 </div>
@@ -536,8 +537,8 @@
     <a href="gene-mitf.html">MITF</a>, <a href="gene-pax3.html">PAX3</a> and
     <a href="gene-ednrb.html">EDNRB</a> replacing the old white / splash / sabino /
     frame genes &mdash; is <strong>confirmed rendering correctly in-game</strong>. The
-    eleven-item checklist that was here has moved to <code>CLAUDE.md</code>&rsquo;s
-    owner-verified block, which is the permanent record.
+    eleven-item checklist that was here has moved to the
+    <a href="session-log.html">session log</a>, which is the permanent record.
 </p>
 
 <p>
@@ -1144,7 +1145,7 @@
     <li>A <strong>tamed</strong> horse gains <strong>+5 bond</strong> per shear
         (honours the daily cap); an untamed horse can still be sheared for hair.</li>
     <li><strong>No sheared look yet</strong> &mdash; the horse looks unchanged.
-        Deferred (CLAUDE.md gap #33).</li>
+        Deferred (<a href="known-gaps.html#gap-33">gap&nbsp;#33</a>).</li>
     <li>Craft chain: 4 hair &rarr; bundle; 3 bundle &rarr; braided rope; 4 bundle
         &rarr; hair cloth; all reverse. <code>braided_rope</code> /
         <code>hair_cloth</code> borrow the bundle texture &mdash; need art.</li>
@@ -1160,7 +1161,7 @@
         normally (the yield&rsquo;s <code>when</code> fails, nothing is cancelled).</li>
     <li>A <strong>tamed mare below her own max health</strong>: currently gives
         neither milk nor a mount and <em>no message</em> &mdash; a known gap
-        (CLAUDE.md #25). Heal her and it works.</li>
+        (<a href="known-gaps.html#gap-25">gap&nbsp;#25</a>). Heal her and it works.</li>
     <li>Milking a <strong>stallion</strong> &rarr; a kick (half a heart) + &ldquo;the
         stallion kicks you&rdquo;. Milking a <strong>foal</strong> &rarr; &ldquo;a
         foal has no milk to give&rdquo;.</li>
@@ -1238,7 +1239,7 @@
 <h2>Still to verify</h2>
 
 <p><em>The LUT gene (was &sect;0-A) is owner-confirmed working in game &mdash; moved to
-<code>CLAUDE.md</code>&rsquo;s &ldquo;Owner-verified&rdquo; block.</em></p>
+the <a href="session-log.html">session log</a>.</em></p>
 
 <h3 id="browser-menu">0-B. Horse Browser is now a container menu + a Crafting tab (built 2026-09-05, redesigned + two gene buttons added, NOT play-tested)</h3>
 <p>

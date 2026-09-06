@@ -71,8 +71,8 @@ public final class GeneCodeDisplay {
      * two catalogue entries differing only in one of them read as the same
      * horse. Appending the remainder means a new gene shows up on its own, in a
      * defensible place, without anyone remembering to come here - which is the
-     * general fix for the derived-lists-written-by-hand problem in
-     * {@code CLAUDE.md}'s known gaps.
+     * general fix for the derived-lists-written-by-hand problem recorded in
+     * {@code wiki/known-gaps.html}.
      *
      * <p>Three deliberate omissions: extension and agouti, which
      * {@link #shortForm(Genotype)} always prints first as the head, and the sex
