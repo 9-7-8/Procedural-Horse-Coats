@@ -204,6 +204,14 @@ a:hover { color: #7dd3fc; }
     color: var(--text);
 }
 
+.doc h5 {
+    margin: 1.2rem 0 0.35rem 0;
+    font-size: 0.82rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-dim);
+}
+
 .doc p { margin: 0 0 1rem 0; max-width: 52rem; }
 .doc ul, .doc ol { margin: 0 0 1.1rem 0; padding-left: 1.35rem; max-width: 52rem; }
 .doc li { margin-bottom: 0.42rem; }

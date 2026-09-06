@@ -214,6 +214,69 @@
     </p>
 </div>
 
+<h2 id="leopard">&sect;0-F &mdash; the leopard complex (new 2026-09-06, NOT play-tested)</h2>
+
+<p>
+    Three new loci &mdash; <a href="gene-leopard.html"><code>LP</code></a>,
+    <code>PATN1</code>, <code>PATN2</code> &mdash; the appaloosa spotting family, and
+    the model&rsquo;s first cross-locus-reading gene.
+    <code>:common:test</code> <strong>405 green</strong>,
+    <code>:neoforge-26.1.2:build</code> green, <code>runServer</code> boots clean
+    (<strong>48 segments</strong>). Old saves will not parse (48 vs 45 code segments).
+</p>
+
+<h3>The custom spawn egg &mdash; the fastest way in</h3>
+<ul>
+    <li>The egg&rsquo;s gene list now has <strong>&ldquo;Leopard complex (appaloosa)&rdquo;</strong>,
+        <strong>&ldquo;PATN1 (leopard pattern)&rdquo;</strong> and
+        <strong>&ldquo;PATN2 (blanket pattern)&rdquo;</strong> rows.
+        The <strong>Breed button is now a dropdown</strong> (was a cycle button) &mdash;
+        check it scrolls all 49 breeds + &ldquo;(none)&rdquo;, that a pick rolls that
+        breed into the editor, and that clicking off it dismisses it.</li>
+    <li>Add Leopard complex &rarr; <code>LP/lp</code>; add PATN1 &rarr; <code>PATN1/n</code>
+        &rarr; <strong>leopard</strong> (white body, round dark spots).</li>
+    <li><code>LP/LP</code> + PATN1 &rarr; <strong>fewspot</strong> (near-solid white).</li>
+    <li><code>LP/lp</code> + PATN2 &rarr; <strong>spotted blanket</strong> (white over
+        the hips only, legs coloured); <code>LP/LP</code> + PATN2 &rarr;
+        <strong>snowcap</strong> (same blanket, no spots).</li>
+    <li>Bare <code>LP/lp</code> (no PATN) &rarr; <strong>mottled</strong> &mdash; light
+        roaning + a few white flecks; <code>LP/LP</code> &rarr; <strong>varnish roan</strong>,
+        heavier and reaching the head.</li>
+</ul>
+
+<h3>What to look at</h3>
+<ul>
+    <li><strong>Spots.</strong> Do the leopard spots read as round spots at
+        128&nbsp;px on a 3D horse, or as noise? Spacing / size are first-guess.</li>
+    <li><strong>The blanket.</strong> Does it actually sit on the hindquarters at the
+        right height, or does it read as a mid-body band? The X-cut is whole-<code>BODY</code>-span
+        and un-tuned.</li>
+    <li><strong>Striped hooves + white sclera</strong> &mdash; drawn in the overlay
+        phase for <em>every</em> <code>LP</code> horse. Are the hoof stripes visible?
+        Does the eye rim read as white sclera without eating the pupil? Both are
+        first-guess constants.</li>
+    <li><strong>Foals.</strong> The baby mesh has no muzzle and approximate geometry
+        &mdash; check a leopard foal.</li>
+    <li><strong>Multi-pattern.</strong> A horse that is leopard <em>and</em> sabino:
+        &ldquo;white finds white&rdquo; is <em>not</em> applied to leopard, so the
+        sabino white just adds on top. Does that muddy the spots?</li>
+    <li><strong>CSNB.</strong> An <code>LP/LP</code> horse&rsquo;s info panel / paper
+        dump should list &ldquo;Congenital stationary night blindness&rdquo; &mdash;
+        informational, no heart loss.</li>
+    <li><strong>Breeds.</strong> Spawn a <strong>Knabstrupper</strong> (or Appaloosa)
+        herd &mdash; most should show a pattern. A <strong>Mustang</strong> / Shetland
+        should show one only occasionally. A non-appaloosa breed should never leak a
+        PATN modifier onto a leopard-free horse.</li>
+    <li><strong>Cache.</strong> A <code>PATN1/PATN1</code> horse with no <code>LP</code>
+        must render identically to a plain horse (it shares the texture). A fewspot and
+        a snowcap of the same base colour must look different (they key apart).</li>
+</ul>
+
+<p>
+    <strong>Not built:</strong> mottled skin (the coat has no skin layer). Deferred with
+    a note on <a href="gene-leopard.html">the gene page</a>.
+</p>
+
 <h2 id="magical-utility">&sect;0a &mdash; the seven magical utility genes (new 2026-09-04, NOT play-tested)</h2>
 
 <p>

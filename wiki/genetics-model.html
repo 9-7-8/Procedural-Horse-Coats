@@ -270,7 +270,7 @@ public Expression expressionOf(AllelePair pair) {
     handing back a wild type that would make the bug invisible.
 </p>
 
-<h2 id="registry">The forty-three registered genes</h2>
+<h2 id="registry">The forty-six registered genes</h2>
 
 <p>
     The table is in <strong><code>codeOrder()</code></strong> &mdash; the one
@@ -308,11 +308,14 @@ public Expression expressionOf(AllelePair pair) {
 <tr><td>55</td><td><a href="gene-grey.html">grey</a></td><td><span class="allele dom">G</span> / <span class="allele wild">g</span></td><td>wild, grey</td><td>1/16 per allele</td><td>natural</td></tr>
 <tr><td>70</td><td><a href="gene-roan.html">roan</a></td><td><span class="allele dom">Rn</span> / <span class="allele wild">rn</span></td><td>wild, roan</td><td>1/30 per allele</td><td>natural</td></tr>
 <tr><td>72</td><td><a href="gene-tobiano.html">tobiano</a></td><td><span class="allele dom">To</span> / <span class="allele wild">to</span></td><td>wild, tobiano</td><td>1/50 per allele</td><td>natural</td></tr>
+<tr><td>73</td><td><a href="gene-leopard.html">leopard complex</a></td><td><span class="allele dom">LP</span> / <span class="allele wild">lp</span></td><td>wild, mottled, varnish-roan, leopard, fewspot, blanket, snowcap, semi-leopard&para;&para;</td><td>1/40 per allele</td><td>natural</td></tr>
 <tr><td>74</td><td><a href="gene-ednrb.html">EDNRB &mdash; frame</a></td><td><span class="allele dom">O</span> / <span class="allele wild">N</span></td><td>wild, frame, lethal-white <strong>(masks)</strong>&dagger;</td><td>1/55 per allele; no <code>O/O</code> founder</td><td>natural</td></tr>
 <tr><td>76</td><td><a href="gene-kit.html">KIT &mdash; white spotting</a></td><td><span class="allele dom">W22</span> / <span class="allele dom">W13</span> / <span class="allele dom">W10</span> / <span class="allele dom">W5</span> / <span class="allele dom">W23</span> / <span class="allele dom">SB1</span> / <span class="allele dom">W20</span> / <span class="allele wild">N</span></td><td>wild, minimal-white, modest-white, sabino, broad-white, extensive-white, near-white, dominant-white <strong>(masks)</strong>*</td><td><code>W20</code> 6%, <code>SB1</code> 2.2%, the rest under 1% each; four homozygotes cannot occur</td><td>natural</td></tr>
 <tr><td>78</td><td><a href="gene-mitf.html">MITF &mdash; splash</a></td><td><span class="allele dom">SW3</span> / <span class="allele dom">SW1</span> / <span class="allele dom">SW5</span> / <span class="allele wild">N</span></td><td>wild, splash, splash-bold, splash-extensive</td><td><code>SW1</code> 4%, <code>SW5</code> 0.6%, <code>SW3</code> 0.4%; no <code>SW3/SW3</code></td><td>natural</td></tr>
 <tr><td>79</td><td><a href="gene-pax3.html">PAX3 &mdash; splash</a></td><td><span class="allele dom">SW2</span> / <span class="allele dom">SW4</span> / <span class="allele wild">N</span></td><td>wild, splash, splash-bold</td><td><strong>90% <code>SW2/N</code></strong>, 1% <code>SW4/N</code>; heterozygotes only</td><td>natural</td></tr>
 <tr><td>80&ndash;92</td><td colspan="5"><strong>the thirteen non-coat genes</strong> &mdash; see the table below</td></tr>
+<tr><td>93</td><td><a href="gene-leopard.html">PATN1</a></td><td><span class="allele dom">PATN1</span> / <span class="allele wild">n</span></td><td>wild only &mdash; a silent modifier&para;&para;</td><td>0 unless the founder rolled <code>LP</code></td><td>neither (paints nothing)</td></tr>
+<tr><td>94</td><td><a href="gene-leopard.html">PATN2</a></td><td><span class="allele dom">PATN2</span> / <span class="allele wild">n</span></td><td>wild only &mdash; a silent modifier&para;&para;</td><td>0 unless the founder rolled <code>LP</code></td><td>neither (paints nothing)</td></tr>
 <tr><td>110</td><td><a href="gene-pink-hair.html">pink hair</a></td><td><span class="allele rec">Pihr</span> / <span class="allele wild">n</span></td><td>wild, pink-carrier, pink-hair</td><td>1/12 per allele</td><td>magical</td></tr>
 <tr><td>112</td><td><a href="gene-mane-color.html">mane colour</a></td><td><span class="allele dom">Mnsld</span> / <span class="allele dom">Mnstrp</span> / <span class="allele wild">n</span></td><td>wild, solid, striped, solid-striped&para;</td><td>2.0% / 1.5% per allele</td><td>magical</td></tr>
 <tr><td>114</td><td><a href="gene-tail-color.html">tail colour</a></td><td><span class="allele dom">Tlsld</span> / <span class="allele dom">Tlstrp</span> / <span class="allele wild">n</span></td><td>wild, solid, striped, solid-striped&para;</td><td>2.0% / 1.5% per allele</td><td>magical</td></tr>
@@ -358,6 +361,16 @@ public Expression expressionOf(AllelePair pair) {
     it is simply never a founder, because a founder is an adult that survived. The
     death is modelled; see <a href="horse-body.html">the horse&rsquo;s body</a> and
     <a href="gene-ednrb.html">its page</a>.
+    &para;&para; <strong>The leopard complex is the model&rsquo;s only cross-locus
+    gene.</strong> <a href="gene-leopard.html"><code>LP</code></a> reads
+    <code>PATN1</code> and <code>PATN2</code> in <code>expressionIn</code> to pick
+    one of eight outcomes (leopard, fewspot, spotted blanket, snowcap, semi-leopard,
+    or the plain <code>LP</code> looks). The modifiers paint nothing on their own, so
+    they carry <code>Gene.affectsCoat()</code> false and would be left out of the
+    texture key &mdash; <code>LP.coatDependsOn()</code> names them and
+    <code>coatCode()</code> folds their alleles in, but only for a horse that actually
+    has <code>LP</code>. A founder draws a variant <code>PATN</code> copy only if it
+    already rolled <code>LP</code>. See <a href="gene-leopard.html">its page</a>.
     &sect; <strong>Dun is the locus with two dominance orders.</strong>
     Dilution reads <code>D &gt; d1 = d2</code> but marking reads
     <code>D = d1 &gt; d2</code>, so <code>d1</code> draws the dorsal stripe
@@ -644,9 +657,12 @@ public boolean hasVisibleNonDeterministic();</code></pre>
 <h2 id="noncoat">Genes that never paint</h2>
 
 <p>
-    Twenty-two of the registry&rsquo;s forty-three built-in genes change nothing
+    Twenty-four of the registry&rsquo;s forty-six built-in genes change nothing
     about a horse&rsquo;s colour: the <a href="gene-sex.html">sex locus</a>, the six
-    performance and size loci, the seven health loci, and seven magical genes
+    performance and size loci, the seven health loci, the two
+    <a href="gene-leopard.html">leopard-complex modifiers</a>
+    (<code>PATN1</code>, <code>PATN2</code> &mdash; read by <code>LP</code>, but
+    never painting themselves), and seven magical genes
     &mdash; <a href="gene-milk.html">milk</a>,
     <a href="gene-verdant.html">verdant</a>,
     <a href="gene-particle.html">particle</a>, and the four
@@ -665,7 +681,7 @@ public boolean hasVisibleNonDeterministic();</code></pre>
 </p>
 
 <p>
-    Three consequences follow, and together they are why twenty-one non-painting
+    Three consequences follow, and together they are why the non-painting
     genes are nearly free:
 </p>
 
@@ -679,14 +695,21 @@ public boolean hasVisibleNonDeterministic();</code></pre>
         and fifteen combinations included, and
         <a href="gene-verdant.html">verdant</a>&rsquo;s four &mdash; and
         <a href="gene-particle.html">particle</a>&rsquo;s <strong>forty</strong>,
-        861 combinations collapsing to one entry. The catalogue stands at
-        <strong>924 844 034</strong> distinct coats. The particle locus and the four
-        body-stat genes left it untouched; the two-outcome <a href="gene-lut.html">LUT</a>
-        locus, which <em>does</em> change the coat, doubled it &mdash; every entry it
-        added was bought by a gene that paints (or, in LUT&rsquo;s case, repaints).</li>
+        861 combinations collapsing to one entry &mdash; and each
+        <a href="gene-leopard.html">leopard-complex modifier</a>&rsquo;s three
+        combinations collapsing to one. The catalogue stands at
+        <strong>1 849 688 066</strong> distinct coats. The particle locus and the four
+        body-stat genes left it untouched; the two genes that <em>do</em> change the
+        coat &mdash; the two-outcome <a href="gene-lut.html">LUT</a> locus and now the
+        <a href="gene-leopard.html">leopard complex</a> (coarse
+        <code>expressionOf</code>: wild or <code>varnish-roan</code>) &mdash; each
+        doubled it. That tipped <code>GenotypeCatalog.size()</code> past
+        <code>Integer.MAX_VALUE</code>, so it (and <code>get()</code>) are
+        <code>long</code> now; nothing in production indexes the catalogue.</li>
     <li>The <em>raw</em> genotype count is
-        <strong>52 933 214 613 797 373 206 937 600 000</strong>. All real, all heritable,
-        all distinguishable &mdash; just not by colour.
+        <strong>1 429 196 794 572 529 076 587 315 200 000</strong>. All real, all heritable,
+        all distinguishable &mdash; just not by colour. (The leopard complex&rsquo;s
+        three loci, three combinations each, multiplied it by 27.)
         <strong>It is a <code>BigInteger</code> now, and has to be</strong>: the
         particle locus pushed the product past 2<sup>63</sup>, and the figure this
         page carried until then &mdash; 3 028 898 126 035 238 912 &mdash; was a

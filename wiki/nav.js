@@ -59,7 +59,8 @@
                 { href: "gene-pax3.html", text: "PAX3 (splash white)", kind: "natural" },
                 { href: "gene-ednrb.html", text: "EDNRB (frame overo)", kind: "natural" },
                 { href: "gene-tobiano.html", text: "Tobiano", kind: "natural" },
-                { href: "gene-roan.html", text: "Roan", kind: "natural" }
+                { href: "gene-roan.html", text: "Roan", kind: "natural" },
+                { href: "gene-leopard.html", text: "Leopard complex (appaloosa)", kind: "natural" }
             ]
         },
         {

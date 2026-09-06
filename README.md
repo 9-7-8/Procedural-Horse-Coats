@@ -54,6 +54,7 @@ markings that live on the *same* gene can never appear together, while two on
 | Roan | uncommon | White hairs mixed evenly through the **body** while the head, mane, tail and lower legs stay solid - blue roan on a black, red roan on a chestnut. The density varies horse to horse. |
 | Tobiano | rare | Big, smooth-edged **white patches that cross the topline**, with white legs and a coloured head. Every tobiano's patches are different. |
 | Frame overo | rare | Ragged white on the **sides of the neck and barrel that stops short of the spine** - the mirror of tobiano - usually with a broad white face. Some carriers are marked so little you would never guess. **Careful with this one:** a foal that inherits frame from *both* parents is born pure white and does not survive. It happens one time in four when two carriers are bred. |
+| Leopard complex (appaloosa) | rare | One gene, `LP`, gives the appaloosa **look** - roaning that spares the face and legs, a scatter of white spots, **striped hooves** and a **white-rimmed eye**. Two **modifier genes** decide the pattern: with `PATN1` you get a **leopard** (a white horse covered in dark spots), or a **fewspot** (nearly solid white) from two `LP` copies; with `PATN2` a **spotted blanket** over the hips, or a **snowcap** with no spots. The modifiers do nothing on a horse without `LP`, so a wild spotted appaloosa is a real find - but the pattern breeds up fast. |
 
 **The face** gets its own vocabulary, shared by all of those genes, so a marking
 looks the same however the horse came by it. There are three pieces - a **star**
@@ -193,8 +194,8 @@ of the same cross, or a cross back to one of its own breeds, and the cross
 holds. Anything more tangled than that - a cross with a third breed, two
 different crosses - gives a **Mixed** horse, and Mixed stays Mixed.
 
-Some real-world breed features aren't in the game yet - Appaloosa leopard
-spots, the Fjord's striped mane, draft-horse leg feathering - and a few never
+Some real-world breed features aren't in the game yet - the Fjord's striped
+mane, draft-horse leg feathering - and a few never
 will be (the Marwari's curled ear tips, the Akhal-Teke's metallic shine).
 
 A wild herd spawns as either a **family band** - one stallion, his mares and

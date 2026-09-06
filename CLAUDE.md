@@ -139,6 +139,101 @@ project. Its shape:
 
 ## Status snapshot (keep this current)
 
+- **Built 2026-09-06, NOT yet play-tested: the leopard complex (appaloosa) -
+  three new loci + a cross-locus-read hook; plus the custom-egg Breed button
+  becomes a dropdown.** `:common:test` **405 green** (+14 `LeopardComplexGeneTest`),
+  `:neoforge-26.1.2:build` green, `runServer` boots clean (**48 segments**).
+  Old saves will not parse (48 vs 45 code segments). Shape of it:
+  - **`LeopardGene`** (`horsegenetics.leopard`, `LP`/`lp`, priority 73, natural,
+    non-deterministic) + **`Patn1Gene`** (`horsegenetics.patn1`, priority 93) +
+    **`Patn2Gene`** (`horsegenetics.patn2`, priority 94) - both extending
+    `AppaloosaModifierGene`, both **all-wild** (paint nothing themselves).
+    **46 built-in genes** (48 in-game). Full detail: `wiki/gene-leopard.html`.
+  - **Eight LP outcomes**, chosen by `expressionIn(pair, genotype)` reading the
+    two modifier pairs + LP zygosity: `mottled` / `varnish-roan` (LP alone,
+    het/hom), `leopard` / `fewspot` (+PATN1), `blanket` / `snowcap` (+PATN2),
+    `semi-leopard` (both). `expressionOf(pair)` is deliberately **coarse** -
+    `WILD` or `VARNISH_ROAN` for any LP pair - so the catalogue keeps two
+    leopard pens, not eight.
+  - **New `Gene.coatDependsOn() -> List<String>`** (default empty). The PATN
+    modifiers have `affectsCoat()` false, so they'd be dropped from
+    `Genotype.coatCode()` and a `LP/LP PATN1/PATN1` horse would collide in the
+    texture cache with a plain `LP/LP` one. `LeopardGene.coatDependsOn()` names
+    both; `coatCode()` folds their alleles in **only when LP actually paints on
+    that horse** (checked via `expressionIn(...).wildType()`), so a PATN carrier
+    with no LP still shares its texture (golden test asserts byte-identity).
+    `BreedFounder` also treats a `coatDependsOn` gene like a coat gene (forced
+    wild unless the breed names it). **It is the model's only cross-locus gene**,
+    and `wiki/roadmap.html` §5.4 discourages it for third-party genes.
+  - **Painters** (all phase 1, off the expressing LP copy's seed):
+    `paintSpotted` (whole horse white, round base-colour spots from
+    `BodyNoise.cellDistance` Worley - fewspot = wider spacing, smaller radius),
+    `paintBlanket` (white from the rump forward to a `coverage` fraction of the
+    `BODY` X-span, wobbled edge, Worley spots inside; snowcap sets density 0;
+    a big blanket creeps onto the hind legs), `paintVarnish` (a hair-by-hair
+    white mix weighted 1 on the barrel/neck, ~½ on the head, 0 on mane/tail/ears,
+    slightly asymmetric; mottled also drops a few crisp snowflake spots).
+    **"White finds white" is NOT applied** - leopard composes at priority 73
+    (early), so leopard+sabino just stacks. Flagged.
+  - **`LeopardGene implements CoatOverlayContribution`** - striped hooves
+    (vertical light/dark bands over the bottom `HOOF_FRACTION` of each leg,
+    light bands blended toward a horn colour) + a white-rimmed eye
+    (`out.shadeEyes` toward a cool near-white, luma-scaled so the pupil stays
+    dark). Drawn for **every** LP horse. **Mottled skin is NOT built** (the coat
+    has no skin layer) - a settled deferral.
+  - **`LeopardGene implements HealthContribution`** - `LP/LP` adds
+    `LeopardGene.CSNB`, an **informational** `Condition` (night blindness; no
+    heart cost, no mechanic - the deafness precedent). Closes the CSNB gap in
+    `wiki/roadmap.html` §4.4.
+  - **Founder rates**: `LP` `hardyWeinberg(LP, lp, 1/40)` - ~4.9% carriers,
+    ~0.06% `LP/LP`. **PATN is conditional on LP**: `AppaloosaModifierGene.founderTable`
+    returns `always(n,n)` unless the `FounderContext` shows the founder already
+    rolled a non-wild LP (priority 93/94 > 73, so LP is in hand). A 20k-draw
+    sweep test pins that no founder ever carries PATN without LP.
+  - **`GenotypeCatalog.size()` and `get()` widened `int` -> `long`.** The
+    two-outcome coat gene doubled the reduced catalogue to
+    **1 849 688 066**, past `Integer.MAX_VALUE` (gap #27 come due). No
+    production caller indexes the catalogue (random pens), so it was a free
+    widening; `entries()` stays a `List` and truncates at `MAX_VALUE`. Tests
+    updated (`SpecGeneTest` `long` arithmetic, `GenotypeCatalogTest` `long`
+    loop vars, `sampleIndices` -> `long[]`). `totalGenotypes()`
+    **-> 1 429 196 794 572 529 076 587 315 200 000** (×27: three loci, three
+    combinations each). `size()` last figure 924 844 034.
+  - **Breeds wired**: Appaloosa (~75% LP, PATN1-dominant), Knabstrupper (~82%
+    LP, PATN1-heavy), Kiger Mustang / Mustang / Shetland (light). Stale
+    "NOT BUILT" notes removed. `Breeds.java` class javadoc updated.
+  - **`coat-golden.txt` regenerated** (510 rows, +60 for 10 new leopard cases ×
+    3 seeds × adult/foal). Every non-deterministic `kit=` / `mitf=` / `pax3=` /
+    `ednrb=` row moved - inserting LEOPARD at priority 73 shifts
+    `Epigenome.random`'s per-gene seed stream for every gene after it (the
+    stream is positional; the "keyed by gene, not position" claim only holds
+    for a gene inserted *after* every painter). Deterministic coats byte-identical.
+  - **`WhitePatternGenesTest.averageWhite` widened from 3 seeds to 8** -
+    `sabinoWhiteIsAtLeastNinetyPerCentWhite` was a knife-edge (the 3-seed mean
+    landed at 0.898 after the seed reshuffle; the true SB1/SB1 mean is 0.913).
+    Not a KIT regression - a too-tight test. `SpecGeneTest.BUILT_IN_GENES`
+    43 -> 46; `HorseTraitsTest` trait-contributor count 18 -> 19 (CSNB).
+  - **`CoatSampleTool`**: 8 new `lp_*` samples; also removed the long-broken
+    `chestnut_test` sample (referenced the deleted `test` gene, so
+    `:common:bakeCoatSamples` had been failing).
+  - **The custom-egg Breed button is a dropdown now** (owner request).
+    `CustomHorseSpawnScreen`: `cycleBreed()` deleted; `openBreedDropdown` /
+    `pickBreedFromDropdown` / `drawBreedDropdown` added, a parallel of the
+    existing many-allele `ddRow` overlay (shares the `DD_*` geometry, own
+    `breedDd` flag and wider `BREED_DD_W` = 118). `breedDd` is checked ahead of
+    `ddRow` in `mouseClicked` / `mouseScrolled` / the render override; any click
+    resolves or dismisses it. Client-only, NOT play-tested.
+  - **Deliberately not built:** mottled skin (§4.4 - no skin layer); "white
+    finds white" for leopard; a per-outcome epigenetic *branch* into visibly
+    different sub-patterns (`wiki/roadmap.html` §5.4 - the enumerated-expression
+    approach covered the family without it); PATN2's own zygosity mattering
+    (any `PATN2` copy = "present").
+  - Docs: `wiki/gene-leopard.html` (new), `wiki/nav.js`,
+    `wiki/genetics-model.html` (registry + counts), `wiki/pipeline.html`
+    (cross-locus note), `wiki/api-reference.html` (`coatDependsOn`, `long`
+    `size()`), `wiki/breeds.html`, `wiki/roadmap.html` (§4.2 / §5.4 shipped,
+    §4.4 CSNB, §10), `wiki/verification.html` §0-F, `index.html`, `README.md`.
+
 - **Built 2026-09-05, NOT yet play-tested: spawn-egg preview controls + a
   many-allele dropdown + a Randomize button; cutie-mark placement/rotation
   tuned.** `:common:test` unaffected (391), `:neoforge-26.1.2:build` green.
@@ -1451,9 +1546,8 @@ project. Its shape:
   - **Deliberately not built:** DMRT3 (gait - needs animation work); per-part
     scaling for the two dwarfisms (`SCALE` is one number for the whole entity);
     ST14's near-hairless coat (phase 1 only *removes* pigment, and a de-pigmented
-    mane reads as a *white* mane); CSNB (rides on `LP/LP`, and the leopard complex
-    does not exist); environmental noise on the stats (deliberately zero - see
-    the gaps list).
+    mane reads as a *white* mane); environmental noise on the stats (deliberately
+    zero - see the gaps list). *(CSNB shipped 2026-09-06 with the leopard complex.)*
   - Docs: `wiki/horse-body.html` (new, the machinery), thirteen new
     `wiki/gene-*.html`, `wiki/nav.js`, `wiki/breeding.html`,
     `wiki/genetics-model.html`, `wiki/api-reference.html`, `wiki/modding.html`
@@ -1761,13 +1855,15 @@ project. Its shape:
   `trait/` (the non-coat body: `HorseTraits` / `Traits` / `Condition` /
   `TraitBuilder` / `EpigeneticTraitContribution` / the breed `StatAxis` +
   `TargetBand` + `BreedStatTargets` -> `wiki/horse-body.html`) and
-  `genetics/` (allele/gene model - **43 genes**, 21 that paint and 22 that never
-  do: **sex**, the 15 natural ones (extension, agouti, champagne,
+  `genetics/` (allele/gene model - **46 genes**, 22 that paint and 24 that never
+  do: **sex**, the 16 natural ones (extension, agouti, champagne,
   grey, **MATP** (cream + pearl, three alleles), **dun** (three alleles),
-  **silver**, **mushroom**, **roan**, **tobiano**, and the four white-pattern
+  **silver**, **mushroom**, **roan**, **tobiano**, the four white-pattern
   loci **`KIT`** (eight alleles - sabino + the `W` series + dominant white),
   **`MITF`** and **`PAX3`** (splash, which really is two genes) and **`EDNRB`**
-  (frame + lethal white)), magic zebra + pink hair, the **magical utility +
+  (frame + lethal white), and the **leopard complex** - **`LP`** plus the two
+  silent modifiers **`PATN1`** / **`PATN2`** it reads via `expressionIn`, eight
+  outcomes, the model's only cross-locus gene), magic zebra + pink hair, the **magical utility +
   body-stat genes** - **mane colour** + **tail colour** (three alleles each, a per-copy
   hue), **healer**, **light** (four alleles, codominant), **milk** (three
   alleles, one lethal pair), **magic body size** (codominant, epigenetic, on most
@@ -1782,8 +1878,10 @@ project. Its shape:
   `Genotype` code round-trip, breeding, the `Epigenome` / `Genome` per-allele
   epigenetics + priority tie-break, `GenomeSample` - a genome detached from a
   horse, for the stallion seed jar - `Expression` + `FounderTable` + the
-  `GenotypeCatalog` reduction of 52 933 214 613 797 373 206 937 600 000 genotypes
-  to 924 844 034 distinct coats), `coat/` + `coat/pattern/` (the
+  `GenotypeCatalog` reduction of 1 429 196 794 572 529 076 587 315 200 000
+  genotypes to 1 849 688 066 distinct coats - `size()`/`get()` are `long` now,
+  the leopard complex doubled it past `Integer.MAX_VALUE`), `coat/` +
+  `coat/pattern/` (the
   pipeline - `CoatTextureComposer`, `PigmentField`, `ColorField`, `CoatOverlay`,
   `GradientLut`, `BayCoat`, `GreyCoat`, `WhitePattern`, `BodyStripes`,
   `HairPattern`, `CoatRegions`, the pure
@@ -2454,11 +2552,11 @@ convention: `0-99` natural, `100+` magical; `Genes.register` logs a warning for
 a gene outside its phase's band (via `System.getLogger`) but carries on. Ties
 break alphabetically by key. Built-in priorities: **sex 1**, extension 10, agouti 20,
 silver 30, mushroom 32, dun 34, **MATP 40**, champagne 50, grey 55,
-roan 70, tobiano 72, **EDNRB 74**, **KIT 76**, **MITF 78**, **PAX3 79**,
-then the **non-coat sub-band 80-99** (mstn 80, pdk4 81, ckm 82, ryr2 83,
-lcorl 84, hmga2 85, acan 86, b4galt7 87, plod1 88, rapgef5 89, st14 90,
-shox 91, met 92 - all of which paint nothing, so their order among themselves
-is arbitrary),
+roan 70, tobiano 72, **leopard complex 73**, **EDNRB 74**, **KIT 76**,
+**MITF 78**, **PAX3 79**, then the **non-coat / modifier sub-band 80-99**
+(mstn 80, pdk4 81, ckm 82, ryr2 83, lcorl 84, hmga2 85, acan 86, b4galt7 87,
+plod1 88, rapgef5 89, st14 90, shox 91, met 92, **PATN1 93**, **PATN2 94** -
+all of which paint nothing, so their order among themselves is arbitrary),
 pink hair 110, **mane colour 112, tail colour 114, healer 116**, magic zebra 120,
 **milk 130, body size 140, magic speed 141, magic health 142, magic jump 143,
 particle 150, light 160, verdant 180, LUT 190, cutie mark 196**.
@@ -2469,20 +2567,24 @@ higher = dilution** (agouti's absolute points must precede
 registration.
 
 `Genes.codeOrder()` (derived) = **sex**, extension, agouti, silver, mushroom, dun,
-MATP, champagne, grey, roan, tobiano, EDNRB, KIT, MITF, PAX3,
+MATP, champagne, grey, roan, tobiano, **leopard**, EDNRB, KIT, MITF, PAX3,
 **MSTN, PDK4, CKM, RYR2, LCORL, HMGA2, ACAN, B4GALT7, PLOD1, RAPGEF5, ST14,
-SHOX, MET**, pink hair, **mane colour, tail colour, healer**, magic zebra,
+SHOX, MET, PATN1, PATN2**, pink hair, **mane colour, tail colour, healer**, magic zebra,
 **milk, body size, magic speed, magic health, magic jump, particle, light,
 verdant, LUT, cutie mark**. `naturalOrder()` (phase-1 pigment
 restriction) = the same list minus the magical genes - silver / mushroom / dun sit
 right after agouti so the points exist to dilute, and the six white-pattern
 genes run last. Their order among *themselves* barely matters (they all zero
 both pigments) with one exception: each reads how white the horse already is,
-so a later one paints harder - see `WhitePattern` below. Sex and the thirteen non-coat genes are *in* `naturalOrder()` (they declare
-`isNatural()`) but every one of their outcomes is a wild type, so the composer
-skips them - as do milk, the four body-stat genes (size, magic speed, magic
-health, magic jump), particle and verdant on the magical side:
-**twenty-two of the forty-three built-ins never paint** (LUT does - it repaints), and
+so a later one paints harder - see `WhitePattern` below. The **leopard
+complex** runs at 73 (before the four white loci); it reads **PATN1 / PATN2**
+via `expressionIn` regardless of order, and `coatDependsOn()` folds their
+alleles into the coat code. Sex, the thirteen non-coat genes and the two PATN
+modifiers are *in* `naturalOrder()` (they declare `isNatural()`) but every one
+of their outcomes is a wild type, so the composer skips them - as do milk, the
+four body-stat genes (size, magic speed, magic health, magic jump), particle
+and verdant on the magical side: **twenty-four of the forty-six built-ins
+never paint** (LUT does - it repaints; the leopard complex does), and
 `Gene.affectsCoat()` is false for exactly those. What they do instead goes
 through `common/trait/` (see `wiki/horse-body.html`) or
 `common/genetics/AbilityContribution`.
@@ -2521,6 +2623,7 @@ gene); one-liners:
 | mushroom | `Mu`/`mu` | wild, `mushroom-carrier` (a wild type), `mushroom` | 1/34 per allele | pheomelanin-**only** dilution, `Mu/Mu` only → chestnut becomes flat sepia; near-invisible on black/bay |
 | roan | `Rn`/`rn` | wild, `roan` | 1/30 per allele | high-freq `BodyNoise` white-hair dither on the barrel + upper legs; head / mane / tail / lower legs stay solid (non-det) |
 | tobiano | `To`/`to` | wild, `tobiano` | 1/50 per allele | big smooth-edged white patches from a low-freq noise field **biased toward the topline** so they cross the back; white legs, coloured head (non-det) |
+| leopard complex | `LP`/`lp` &middot; `PATN1`/`n` &middot; `PATN2`/`n` | `LP`: wild, `mottled`, `varnish-roan`, `leopard`, `fewspot`, `blanket`, `snowcap`, `semi-leopard`. PATN1/PATN2: **wild only** | `LP` 1/40 per allele; PATN **only on an `LP` founder** | **three loci, the model's only cross-locus gene.** `LP` alone = the appaloosa characteristics (roaning that spares the bony parts, a scatter of spots) + the always-on triad (striped hooves + white sclera, overlay phase); **mottled skin not built**. `PATN1` &rarr; leopard / fewspot (spots), `PATN2` &rarr; blanket / snowcap (a hip sheet), both &rarr; semi-leopard. Zygosity of `LP` flips spot-heavy &harr; near-white. `LeopardGene.expressionIn` reads the modifier pairs; `coatDependsOn()` = `[patn1, patn2]` folds them into `coatCode()` (only when `LP` paints). `LP/LP` &rarr; **CSNB** (informational). "White finds white" not applied (non-det for every `LP` outcome) |
 | EDNRB (frame) | `O`/`N` | wild, `frame`, `lethal-white` **(masks)** | `O` 1/55; **no `O/O` founder** | flank patches that **never cross the topline** (noise × a spine→0 weight) + a bald face; legs coloured. **`O/O` is Overo Lethal White** - born, all white, and the model's first real lethal: it `canOccur`, it gets a pen, and the *death* waits on the health system (non-det for `frame`) |
 | KIT | `W22`/`W13`/`W10`/`W5`/`W23`/`SB1`/`W20`/`N` | wild, `minimal-white`, `modest-white`, `sabino`, `broad-white`, `extensive-white`, `near-white`, `dominant-white` **(masks)** | `W20` 6%, `SB1` 2.2%, the rest <1% | **eight alleles, 36 combinations, 32 carryable, 8 outcomes** - sabino and the `W` series are one gene, so a horse is one of them and never two. `W20` is a *booster* (subtle alone), `SB1` the one viable dose series, the strong `W`s "dominant with variable expression". Four homozygotes `canOccur = false` (embryonic lethal); compound heterozygotes are fine - the risk is *the same allele twice*. `WhitePattern.sabino` at a strength per outcome (non-det) |
 | MITF (splash) | `SW3`/`SW1`/`SW5`/`N` | wild, `splash`, `splash-bold`, `splash-extensive` | `SW1` 4%, `SW5` 0.6%, `SW3` 0.4% | dipped in white from below, **hard-edged** waterline. `SW1/SW1` is the documented viable dose step; no `SW3/SW3`. `SW6`-`SW8` folded into `SW5` (the source words them identically) (non-det) |
@@ -4037,23 +4140,17 @@ Design follow-ups (not just "go look at it"):
    why it was not done in passing. `wiki/verification.html` §0a records it as
    accepted-for-now rather than as a bug.
 
-27. **`GenotypeCatalog.size()` is an `int` and is now 462 million.** The
-   seven magical utility genes multiplied the catalogue by 224 (mane 4 x tail 4
-   x light 7 x healer 2). Nothing is materialised, so the memory cost is still
-   zero, and the arithmetic is done in `long` and **saturates** at
-   `Integer.MAX_VALUE` rather than wrapping - so the failure mode is a silently
-   *truncated* catalogue, not a nonsense one. Headroom is about **4.6x**, which
-   is roughly one more gene of light's shape. When it goes, `size()` and
-   `get(int)` want to be `long` together, and every caller that indexes them
-   wants re-checking in the same change. Nothing in play depends on it today -
-   the pen corridor is a fixed 2 000 random pens and no longer walks the
-   catalogue at all (gap #12). **The particle locus did not touch it** (forty
-   alleles, one catalogue entry), so the headroom is unchanged.
-   **The sibling problem is fixed**: `totalGenotypes()` was a `long` and had
-   already wrapped; it is a `BigInteger` now. `size()` was deliberately left
-   saturating, because it is an index bound callers loop over and a cap is a real
-   safety property there - but that means the two now fail differently, and
-   whoever widens `size()` should say so here.
+27. **Closed 2026-09-06: `GenotypeCatalog.size()` / `get()` are `long` now.**
+   The leopard complex is a two-outcome coat gene, so it doubled the reduced
+   catalogue to **1 849 688 066**, past `Integer.MAX_VALUE` - the widening this
+   gap predicted. It was cheap: **no production caller indexes the catalogue**
+   (the pen corridor is fixed random pens, gap #12), so only tests needed
+   updating - `SpecGeneTest` to `long` arithmetic, `GenotypeCatalogTest` to
+   `long` loop vars, `sampleIndices` -> `long[]`. `entries()` still returns a
+   `List<Genotype>` (int-indexed) and now *truncates* at `Integer.MAX_VALUE` -
+   documented, and fine, since callers that need the full range use
+   `get(long)` / `size()` directly. `totalGenotypes()` (already `BigInteger`)
+   went to **1 429 196 794 572 529 076 587 315 200 000**.
 
 28. **Two health genes are only half-drawn.** `B4GALT7`'s Friesian dwarfism
    should shorten the limbs and ribs and leave the head, but `Attributes.SCALE`
@@ -4062,9 +4159,10 @@ Design follow-ups (not just "go look at it"):
    three-quarter horse. `ST14`'s naked foal is reported and not drawn: phase 1
    can only push pigment *down*, and a de-pigmented mane reads as a *white* mane,
    which is a different horse and a worse lie than drawing nothing. Both are in
-   `wiki/roadmap.html` §4.4. Also still absent: **CSNB** (rides on `LP/LP`, and
-   the leopard complex does not exist), **DMRT3 / gait** (animation work), and
-   **`TraitRule`** - two genes that only together trigger an outcome (§6.5).
+   `wiki/roadmap.html` §4.4. Also still absent: **DMRT3 / gait** (animation
+   work), and **`TraitRule`** - two genes that only together trigger an outcome
+   (§6.5). **CSNB shipped 2026-09-06** with the leopard complex (informational
+   on `LP/LP`).
 
 29. **Medicine hat and the war shield - reachable, and half-built by accident.**
    A medicine hat is not a face marking and not a gene: it is a **retention**

@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Leopard complex &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="nav.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow natural">Natural gene <span class="sep">/</span> phase 1 + overlay</p>
+<h1>The leopard complex (appaloosa)</h1>
+<p class="lede">
+    Real-horse <strong>TRPM1</strong> (<code>LP</code>) plus two modifier loci,
+    <strong>PATN1</strong> and <strong>PATN2</strong>, and the <b>only gene in the
+    model that reads other loci to decide what it paints</b>. <code>LP</code> alone
+    gives the appaloosa <em>characteristics</em> &mdash; roaning that spares the bony
+    parts, a scatter of white spots, striped hooves, a white-rimmed eye. The bold
+    patterns &mdash; leopard, fewspot, spotted blanket, snowcap &mdash; come from the
+    modifiers, which mean nothing on a horse with no <code>LP</code>.
+</p>
+
+<dl class="spec">
+    <div><dt>Gene keys</dt><dd>horsegenetics.leopard, horsegenetics.patn1, horsegenetics.patn2</dd></div>
+    <div><dt>Alleles</dt><dd><span class="allele dom">LP</span> <span class="allele wild">lp</span> &nbsp;&middot;&nbsp; <span class="allele dom">PATN1</span> <span class="allele wild">n</span> &nbsp;&middot;&nbsp; <span class="allele dom">PATN2</span> <span class="allele wild">n</span></dd></div>
+    <div><dt>Outcomes (LP)</dt><dd>wild, <code>mottled</code>, <code>varnish-roan</code>, <code>leopard</code>, <code>fewspot</code>, <code>blanket</code>, <code>snowcap</code>, <code>semi-leopard</code></dd></div>
+    <div><dt>Outcomes (PATN1/PATN2)</dt><dd>wild only &mdash; pure modifiers, they never paint</dd></div>
+    <div><dt>Priority</dt><dd>leopard 73 (white band), PATN1 93, PATN2 94 (paints-nothing band)</dd></div>
+    <div><dt>Default alleles</dt><dd>lp, n, n</dd></div>
+    <div><dt>Wild frequency</dt><dd><code>LP</code> ~1 in 40 per allele; PATN <b>only drawn onto an <code>LP</code> founder</b></dd></div>
+    <div><dt>Deterministic</dt><dd><strong>no</strong> &mdash; every visible LP outcome varies per horse</dd></div>
+    <div><dt>Epi draws</dt><dd>off the expressing <code>LP</code> copy: <code>nextLong()</code> seed + 2&ndash;3 <code>nextFloat()</code> jitters per painter</dd></div>
+    <div><dt>Health</dt><dd><code>LP/LP</code> &rarr; CSNB (night blindness), informational &mdash; costs nothing</dd></div>
+    <div><dt>Reads</dt><dd><code>coatDependsOn()</code> = [<code>patn1</code>, <code>patn2</code>]</dd></div>
+</dl>
+
+<h2>The outcome grid</h2>
+
+<p>
+    The visible pattern is a function of this locus's zygosity <b>and</b> the two
+    modifier pairs. <code>expressionOf(pair)</code> &mdash; which only sees the
+    <code>LP</code> pair &mdash; can only give a coarse answer
+    (<code>varnish-roan</code> for any <code>LP</code> horse, which keeps the gallery
+    to two leopard-complex pens). The pipeline calls
+    <code>expressionIn(pair, genotype)</code>, which reads <code>PATN1</code> and
+    <code>PATN2</code> and returns the real one of eight:
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th><code>LP</code></th><th>no PATN</th><th>+ PATN1</th><th>+ PATN2</th><th>+ both</th></tr></thead>
+<tbody>
+<tr><td><code>LP/lp</code></td><td><code>mottled</code></td><td><code>leopard</code></td><td><code>blanket</code></td><td><code>semi-leopard</code></td></tr>
+<tr><td><code>LP/LP</code></td><td><code>varnish-roan</code></td><td><code>fewspot</code></td><td><code>snowcap</code></td><td><code>semi-leopard</code></td></tr>
+<tr><td><code>lp/lp</code></td><td colspan="4">wild type &mdash; a solid coat, whatever PATN says</td></tr>
+</tbody>
+</table>
+</div>
+
+<ul>
+    <li><b><code>mottled</code></b> &mdash; light roaning that spares the face and legs,
+        a few small white spots, plus the always-on triad. The appaloosa
+        &ldquo;look&rdquo; without a bold pattern.</li>
+    <li><b><code>varnish-roan</code></b> &mdash; heavier, uneven roaning over the body
+        and neck that <em>reaches the head</em>, leaving darker &ldquo;varnish
+        marks&rdquo; on the bony parts. Distinct from true <a href="gene-roan.html">roan</a>.</li>
+    <li><b><code>leopard</code></b> &mdash; a white body carrying round dark spots of the
+        base colour, head to hoof.</li>
+    <li><b><code>fewspot</code></b> &mdash; almost solid white, a handful of spots left.</li>
+    <li><b><code>blanket</code></b> &mdash; a solid white sheet over the hips with dark
+        spots inside it; the rest of the horse its ordinary colour, legs coloured.</li>
+    <li><b><code>snowcap</code></b> &mdash; the same blanket with no spots.</li>
+    <li><b><code>semi-leopard</code></b> &mdash; a spotted blanket that reaches forward
+        over the barrel, between blanket and full leopard.</li>
+</ul>
+
+<h2>Why the modifiers are separate genes</h2>
+
+<p>
+    <code>LP</code> is one locus (TRPM1). <code>PATN1</code> and <code>PATN2</code> are
+    real, independently inherited modifier loci, so they have to be separate genes &mdash;
+    a breeder works toward &ldquo;this line carries PATN1&rdquo; the same way they work
+    toward any other allele. They just have no phenotype of their own: a
+    <code>PATN1</code> carrier with no <code>LP</code> looks like any other horse.
+</p>
+
+<p>
+    That creates a texture-cache problem. A gene is left out of a horse's
+    <a href="genetics-model.html">coat code</a> unless
+    <code>affectsCoat()</code> is true, and every one of PATN's own combinations is a
+    wild type &mdash; so a <code>LP/LP&nbsp;PATN1/PATN1</code> horse and a plain
+    <code>LP/LP</code> one would collide in the cache and render identically. The fix
+    is a new hook, <code>Gene.coatDependsOn()</code>: <code>LeopardGene</code> names
+    both modifiers, and <code>Genotype.coatCode()</code> folds their alleles into the
+    texture key &mdash; <b>but only for a horse that actually carries <code>LP</code></b>,
+    so a PATN carrier with no leopard complex still shares its texture. <code>BreedFounder</code>
+    likewise treats a named modifier like a coat gene (forced wild unless the breed lists it).
+</p>
+
+<div class="note warn">
+    <span class="label">Not a pattern for third-party genes</span>
+    <p>
+        Cross-locus reads make a gene hard to reason about, hard to show in a punnett
+        square and hard to breed toward. The built-in leopard complex earns the
+        exception because it is a real, famous pattern that genuinely works this way.
+        See <a href="roadmap.html#polymorphism">roadmap &sect;5.4</a>.
+    </p>
+</div>
+
+<h2>The painters</h2>
+
+<p>
+    All phase 1, like the other white genes &mdash; they only ever push pigment toward
+    zero, so the bald white template shows through. Every number comes from the
+    expressing <code>LP</code> copy's epigenetic seed, so a foal that inherits the copy
+    reproduces the exact pattern.
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>outcome</th><th>painter</th><th>shape</th></tr></thead>
+<tbody>
+<tr><td>leopard, fewspot</td><td><code>paintSpotted</code></td><td>the whole horse white; round base-colour spots punched back in from a <a href="body-space.html"><code>BodyNoise.cellDistance</code></a> (Worley) field &mdash; a spot where the distance to the nearest jittered cell centre is under a radius. Fewspot uses a wider spacing and a smaller radius.</td></tr>
+<tr><td>blanket, snowcap, semi-leopard</td><td><code>paintBlanket</code></td><td>white from the rump forward to a <code>coverage</code> fraction of the <code>BODY</code> X-span, the front edge wobbled with value noise; spots inside via the same Worley field (snowcap sets density to zero). A large blanket creeps onto the top of the hind legs.</td></tr>
+<tr><td>mottled, varnish-roan</td><td><code>paintVarnish</code></td><td>a hair-by-hair white mix from a two-octave fractal, weighted 1 over the barrel and neck, ~&frac12; over the head, fading to nothing at the hooves and zero on the mane / tail / ears. Slightly asymmetric (LP varnish is). Mottled also drops a few crisp white snowflake spots.</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    &ldquo;White finds white&rdquo; is not applied here yet &mdash; leopard composes
+    with the other white loci at priority 73 (early), so a leopard horse that is also
+    sabino simply gets sabino white added on top. Multi-pattern appaloosas want an
+    in-game look; flagged in <a href="verification.html">verification</a>.
+</p>
+
+<h2>The always-on triad</h2>
+
+<p>
+    Every <code>LP</code> horse &mdash; any non-wild outcome &mdash; also gets, in the
+    <a href="pipeline.html">overlay phase</a> (so the eye redraw cannot wipe them):
+</p>
+
+<ul>
+    <li><b>Striped hooves</b> &mdash; vertical light/dark bands over the bottom
+        <code>HOOF_FRACTION</code> of each leg, from a body-space phase; the light bands
+        blend toward a pale horn colour.</li>
+    <li><b>A white-rimmed eye</b> &mdash; <code>shadeEyes</code> toward a cool near-white.
+        Because the shade is luma-scaled, the bright sclera lifts while the dark pupil
+        stays dark.</li>
+</ul>
+
+<p>
+    <b>Mottled skin</b> &mdash; the third member of the triad &mdash; is not drawn; the
+    coat has no skin layer, only hair. Flagged in the roadmap.
+</p>
+
+<h2>CSNB</h2>
+
+<p>
+    Every <code>LP/LP</code> horse has <b>congenital stationary night blindness</b> &mdash;
+    the same TRPM1 change that makes the pattern also stops the retina resetting in the
+    dark. The mod has no night vision for a horse to lose, so like deafness on a splash
+    homozygote it is <b>informational</b>: shown on the info panel and the paper dump,
+    costing the horse nothing. One copy carries the pattern with none of the defect,
+    which is why the pairing worth breeding for is also the one that hides it.
+</p>
+
+<h2>In the wild, and in breeds</h2>
+
+<p>
+    <code>LP</code> founders are ~1 in 40 per allele &mdash; a bit under 5% carriers,
+    well under 1% <code>LP/LP</code> &mdash; and a wild founder only draws a variant
+    <code>PATN</code> copy if it already rolled <code>LP</code> at
+    <code>LeopardGene</code> (which sorts earlier, so the founder context has it). So a
+    wild spotted appaloosa is a genuine find; the pattern is common once you breed for it.
+</p>
+
+<p>
+    <a href="breeds.html">Appaloosa</a>, <a href="breeds.html">Knabstrupper</a>, Kiger
+    Mustang, Mustang and Shetland Pony roll real <code>LP</code> + <code>PATN</code>
+    pools &mdash; the Appaloosa and Knabstrupper heavily, so most of a herd shows a
+    pattern; the mustangs and the Shetland lightly.
+</p>
+
+<div class="note">
+    <span class="label">First-guess constants</span>
+    <p>
+        Spot size and spacing, blanket coverage, roaning strength, the hoof-stripe
+        frequency and the eye-rim tint are all eyeballed off sample bakes. Whether a
+        blanket sits on the hindquarters at the right height, whether the spots read as
+        spots on a 3D horse, and whether the hoof stripes are visible are the open
+        in-game questions &mdash; <a href="verification.html">verification &sect;0</a>.
+    </p>
+</div>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="gene-kit.html">KIT (white spotting)</a>
+        <a href="gene-ednrb.html">EDNRB (frame overo)</a>
+        <a href="gene-tobiano.html">Tobiano</a>
+        <a href="gene-roan.html">Roan</a>
+        <a href="genetics-model.html">Genetics model</a>
+    </div>
+    Source: <code>common/genetics/genes/LeopardGene.java</code>,
+    <code>Patn1Gene.java</code>, <code>Patn2Gene.java</code>,
+    <code>AppaloosaModifierGene.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

@@ -188,7 +188,8 @@ name/     HorseNameGenerator, HorseNames</code></pre>
 <tr><td><code>isVisible(pair, genotype)</code></td><td>Derived: <code>!expressionIn(...).wildType()</code>.</td></tr>
 <tr><td><code>isDeterministic(pair, genotype)</code></td><td>Derived: <code>expressionIn(...).deterministic()</code>. <strong>Cache correctness depends on this.</strong></td></tr>
 <tr><td><code>canOccur(pair)</code></td><td>Can a horse actually carry this combination? <code>true</code> by default. <code>GenotypeCatalog.allPairsOf</code> filters on it, so a combination that cannot happen gets no pen and is not counted, and an author should leave it out of the founder table too. Overridden by the <a href="gene-sex.html">sex locus</a> (no <code>Y/Y</code>), <a href="gene-kit.html"><code>KIT</code></a> (four nonviable <code>W</code> homozygotes), <a href="gene-mitf.html"><code>MITF</code></a> (<code>SW3/SW3</code>) and <a href="gene-pax3.html"><code>PAX3</code></a> (<code>SW4/SW4</code>). It means <em>embryonic</em> lethal: a foal that is born and then dies, like <a href="gene-ednrb.html"><code>O/O</code></a>, stays <code>true</code> and keeps its outcome. <code>expressionOf</code> must still answer for a combination this rules out &mdash; parsing is tolerant.</td></tr>
-<tr><td><code>affectsCoat()</code></td><td>Derived: does <em>any</em> outcome fail to be a wild type? <code>false</code> means the gene never paints, and <code>Genotype.coatCode()</code> leaves it out of the texture key. Only the sex locus is false today.</td></tr>
+<tr><td><code>affectsCoat()</code></td><td>Derived: does <em>any</em> outcome fail to be a wild type? <code>false</code> means the gene never paints, and <code>Genotype.coatCode()</code> leaves it out of the texture key &mdash; the sex locus, the non-coat genes, and the two <a href="gene-leopard.html">leopard-complex modifiers</a>.</td></tr>
+<tr><td><code>coatDependsOn()</code></td><td>Gene keys whose alleles change <em>this</em> gene&rsquo;s coat output although those genes paint nothing themselves. Default empty. <code>Genotype.coatCode()</code> folds them into the texture key when this gene actually paints on the horse; <code>BreedFounder</code> forces a named modifier wild unless the breed lists it. <strong>Only the <a href="gene-leopard.html">leopard complex</a> uses it</strong> (reads <code>PATN1</code>/<code>PATN2</code>); the <a href="roadmap.html#polymorphism">roadmap</a> discourages it for third-party genes.</td></tr>
 <tr><td><code>fromToken(token)</code></td><td>Code-string token &rarr; allele. Defaults to a scan of <code>alleles()</code>.</td></tr>
 <tr><td><code>rarity()</code></td><td>&sect;19 metadata. A <code>GeneRarity</code> tier (default <code>UNCOMMON</code>, the gold-ingot tier) &mdash; drives the gene-carrot recipe cost and research-paper loot weight. Tier&rarr;item table is on the recipe side, not here. A spec gene reads it from an optional <code>rarity</code> field.</td></tr>
 <tr><td><code>hasGeneCarrot()</code> / <code>geneCarrotHomozygous()</code></td><td>Whether a <a href="carrots.html#known">Known Gene Splice carrot</a> exists for this gene (default <code>true</code>; false for sex, the recessive disorders, extension, agouti) and whether feeding it treats the parent as homozygous rather than the default heterozygous.</td></tr>
@@ -944,11 +945,12 @@ List&lt;String&gt; GeneCodeDisplay.wrap(Genotype genotype, int lines, int maxCha
     static List&lt;AllelePair&gt; allPairsOf(Gene gene);       // minus what canOccur rejects
     static List&lt;AllelePair&gt; distinctPairsOf(Gene gene);  // one per Expression; all wild types are one group
 
-    static int        size();            // the reduced catalogue; SATURATES at MAX_VALUE
+    static long       size();            // the reduced catalogue - a long since the
+    //   leopard complex doubled it past Integer.MAX_VALUE (2026-09-06)
     static BigInteger totalGenotypes();  // the raw product, before the reduction.
     //   A BigInteger since 2026-09-04: the particle locus pushed the product past
     //   2^63 and the long WRAPPED - to a smaller, entirely plausible-looking number.
-    static Genotype get(int index);    // built on the spot, not fetched from a list
+    static Genotype get(long index);   // built on the spot, not fetched from a list
     static List&lt;Genotype&gt; entries();   // a LAZY view - iterate it, don't collect it
 }</code></pre>
 </div>
@@ -959,7 +961,7 @@ List&lt;String&gt; GeneCodeDisplay.wrap(Genotype genotype, int lines, int maxCha
     pairs; the one entry each masking combination owns is appended after all of them, in
     gene order. It used to be an eagerly built <code>List&lt;Genotype&gt;</code>, which was
     fine at a few thousand entries and stopped being fine the moment the white-pattern loci
-    took the catalogue past two million &mdash; that list is hundreds of megabytes of
+    took the catalogue past two million (it is now 1.85 billion) took the catalogue past two million &mdash; that list is hundreds of megabytes ofmdash; that list is hundreds of megabytes of
     genotype nobody reads more than a few hundred of.
 </p>
 

@@ -396,7 +396,29 @@ default int visible(int px, int py, int channel);</code></pre>
         own boolean mask and handed to the renderer, which draws exactly those texels
         a second time at full brightness through
         <code>client/EmissiveCoatLayer</code>.</li>
+    <li><strong>The appaloosa triad.</strong> The
+        <a href="gene-leopard.html">leopard complex</a> draws striped hooves and a
+        white-rimmed eye here &mdash; the hoof stripes as a phase-1 pigment change
+        would be lost under the leopard white, and the eye rim has the same
+        after-the-redraw requirement as light&rsquo;s gold eyes.</li>
 </ul>
+
+<div class="note">
+    <span class="label">Cross-locus reads &mdash; phase 1, one gene only</span>
+    <p>
+        The phase-1 hook the pipeline calls is
+        <code>gene.expressionIn(pair, genotype)</code>, and the genotype is complete
+        by then, so a gene <em>can</em> read another locus. Exactly one does: the
+        <a href="gene-leopard.html">leopard complex</a> reads <code>PATN1</code> and
+        <code>PATN2</code> to pick which of eight painters runs. Because those
+        modifiers paint nothing themselves they are not in
+        <code>Genotype.coatCode()</code> by default &mdash; <code>LP</code>&rsquo;s
+        new <code>Gene.coatDependsOn()</code> declaration folds their alleles into the
+        texture key, but only for a horse that actually carries <code>LP</code>. The
+        <a href="roadmap.html#polymorphism">roadmap</a> steers third-party genes away
+        from this.
+    </p>
+</div>
 
 <div class="note rule">
     <span class="label">Why a texel mask and not a part list</span>

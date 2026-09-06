@@ -347,27 +347,109 @@
 <p>
     <code>naturalgeneref.md</code> in the repo root is a cleaned extract of another
     horse game&rsquo;s natural-genetics guide &mdash; base colours, dilutes and
-    modifiers, plus a white-patterning / appaloosa section &mdash; and it is the
-    reference the natural side should be complete against. It already carries a level
-    of game-ready abstraction, which is why it is worth diffing against rather than
-    primary sources. <strong>Standing task: a session run that reads it end to end,
-    diffs it against the registered genes, and turns each gap into a row here.</strong>
-    The gaps it names that nothing covers today:
+    modifiers, a white-patterning / appaloosa section, and a disorder / trait table
+    &mdash; and it is the reference the natural side should be complete against. It
+    already carries a level of game-ready abstraction, which is why it is worth
+    diffing against rather than primary sources. <strong>Standing task: a session run
+    that reads it end to end, diffs it against the registered genes, and turns each
+    gap into a row here.</strong>
 </p>
+
+<p>
+    <strong>Audit run 2026-09-06.</strong> The natural coat side is closer than the
+    disorder side. Every base colour and dilute in the reference is modelled at least
+    in mechanism &mdash; extension, agouti (two-allele + epigenetic seal), champagne
+    (one rule covers gold / classic / amber), MATP (<code>Cr</code> / <code>prl</code>
+    merged, the biologically correct call), dun (three alleles), grey, silver, roan,
+    tobiano, and the four white-pattern loci. What the audit turns up is (a) six
+    modifier / base genes with <strong>no gene at all</strong>, (b) several shipped
+    genes whose <strong>variation vocabulary is narrower</strong> than the reference
+    describes, (c) the reference&rsquo;s <strong>base-aware phenotype naming</strong>
+    that the mod has no surface for, and (d) a <strong>disorder table</strong> whose
+    severity model is richer than &ldquo;lethal or fewer hearts&rdquo; and two of
+    whose genes are genuinely missing. Rows below.
+</p>
+
+<h5>Missing genes and under-built genes</h5>
 
 <div class="table-wrap">
 <table>
 <thead><tr><th>Gene</th><th>Status</th><th>What it is / needs</th></tr></thead>
 <tbody>
-<tr><td><strong>Sooty</strong></td><td>new</td><td>Dark shading concentrated along the topline / points, sun-bleached toward the belly. Natural, phase 1, a region-weighted darkening (the mirror of pangare). Named in &sect;6 as the &ldquo;no sooty shading&rdquo; gap and as a &sect;4.5 capability test; make it a real gene. <code>BodyNoise</code> + a dorsal weight.</td></tr>
-<tr><td><strong>Flaxen</strong></td><td>new</td><td>Pale mane and tail on a chestnut body; recessive, hair-only pigment pull. <code>HairPattern</code> is the seam. Wanted by Haflinger / Belgian (&sect;22).</td></tr>
-<tr><td><strong>Pangare / mealy</strong></td><td>new</td><td>Lightened muzzle, eye rings, flanks, belly, inner legs. Natural pigment gene, phase 1, region-masked lightening. Wanted by Exmoor / Fjord (&sect;22).</td></tr>
-<tr><td><strong>Wild bay</strong></td><td>new</td><td>An agouti variant that pushes the black points <em>down</em> &mdash; black only to the fetlock rather than the hock. Cleanest as a third agouti allele (<code>A+</code>) or, if it should stay continuous, as an epigenetic band on the existing <code>A</code> copy rather than a distinct outcome.</td></tr>
-<tr><td><strong>Seal bay &mdash; exhibit it properly</strong></td><td>partial</td><td>Seal has no gene &mdash; it is the top of agouti&rsquo;s epigenetic distribution (<a href="gene-agouti.html">agouti</a>). The reference treats seal bay as its own base that <strong>sable champagne</strong> rides on, so the mod needs a way to <em>name</em> a seal horse (info panel, paper dump, the gene dictionary) even though no allele distinguishes it, and champagne needs to read &ldquo;is this horse seal&rdquo; off the agouti epigenetics to paint sable rather than amber.</td></tr>
-<tr><td><strong>Rabicano</strong></td><td>new</td><td>White ticking at the flank and tail base (&ldquo;coon tail&rdquo;), distinct from roan. Named once in &sect;4.2 as slotting in like roan; it wants its own high-frequency, region-biased white-hair field.</td></tr>
+<tr><td><strong>Sooty</strong></td><td>new</td><td>Dark shading concentrated along the topline / points, sun-bleached toward the belly. Natural, phase 1, a region-weighted darkening (the mirror of pangare). Named in &sect;6 as the &ldquo;no sooty shading&rdquo; gap and as a &sect;4.5 capability test; make it a real gene. <code>BodyNoise</code> + a dorsal weight. Reference notes it can reach the mane / tail at high density and does not show on a &ldquo;pure&rdquo; black.</td></tr>
+<tr><td><strong>Flaxen</strong></td><td>new</td><td>Pale mane and tail on a chestnut body; recessive, hair-only pigment pull, root-to-tip gradient (dark roots, pale ends). Shows only on <code>ee</code> &mdash; a non-chestnut is a silent carrier, so it is a second locus that reads the base like silver&rsquo;s inverse. <code>HairPattern</code> is the seam. Wanted by Haflinger / Belgian (&sect;22).</td></tr>
+<tr><td><strong>Pangare / mealy</strong></td><td>new</td><td>Lightened muzzle, eye rings, flanks, belly, inner legs, underside of the neck. Natural pigment gene, phase 1, region-masked lightening with <em>blended</em> edges (no hard line). Dominant. Does not show on a pure black &mdash; needs another modifier on the base first, so <code>nP</code> / <code>PP</code> on black is a carrier. Wanted by Exmoor / Fjord (&sect;22).</td></tr>
+<tr><td><strong>Wild bay</strong></td><td>new</td><td>An agouti variant that pushes the black points <em>down</em> &mdash; black only to the fetlock rather than the hock, with a <em>gap</em> between the knee/hock point and any fetlock point, and a generally more yellow body. Cleanest as a third agouti allele (<code>A+</code>, dominant to <code>A</code>) or, if it should stay continuous, as an epigenetic band on the existing <code>A</code> copy. If <code>A+</code> becomes an allele, <code>At</code> (seal) should too &mdash; then agouti is the reference&rsquo;s four-allele <code>A+ &gt; A &gt; At &gt; a</code> and seal stops being an epigenetic edge case (next row).</td></tr>
+<tr><td><strong>Seal bay &mdash; exhibit it properly</strong></td><td>partial</td><td>Seal has no gene &mdash; it is the top of agouti&rsquo;s epigenetic distribution (<a href="gene-agouti.html">agouti</a>). The reference treats seal bay as its own base that <strong>sable champagne</strong> rides on, so the mod needs a way to <em>name</em> a seal horse (info panel, paper dump, the gene dictionary) even though no allele distinguishes it, and champagne needs to read &ldquo;is this horse seal&rdquo; off the agouti epigenetics to paint sable rather than amber. Making <code>At</code> a real allele (row above) removes the whole problem.</td></tr>
+<tr><td><strong>Rabicano</strong></td><td>new</td><td>White ticking at the flank and tail base (&ldquo;coon tail&rdquo; / white tail-base banding), distinct from roan &mdash; it never makes large patches and does not touch the mane. Polygenic / dominant in the reference. Named once in &sect;4.2 as slotting in like roan; it wants its own high-frequency, region-biased white-hair field concentrated at the flank / groin / underbelly, feathering forward and up.</td></tr>
+<tr><td><strong>Dun &mdash; the rest of the primitive markings</strong></td><td>partial</td><td>Leg barring does not render (owner-observed, also in &sect;4.1) and only the dorsal stripe is drawn. The reference&rsquo;s dun also has <strong>face webbing / cobwebbing</strong>, a <strong>shoulder stripe / transverse shoulder barring</strong> branching off the dorsal, and optional <strong>guard hairs</strong> (pale hairs at the mane and tail base). <code>d1</code> should carry faint bars and shoulder shading too, not the dorsal alone.</td></tr>
+<tr><td><strong>Grey &mdash; the rest of the greying vocabulary</strong></td><td>partial</td><td>Ships as dapples only, one fixed progression per horse. Aging / flea-bitten / melanoma are a settled <strong>no</strong> (&sect;21) &mdash; but <strong>chubari (light-to-white) spots</strong>, <strong>bloody-shoulder patches of retained base colour</strong>, <strong>uneven greying</strong> (some regions lighter or more saturated than others) and a <strong>mane / tail gradient</strong> are variation <em>within</em> the current fixed progression, not aging, and none of them are drawn. Extra epigenetic knobs on the <code>G</code> copy.</td></tr>
+<tr><td><strong>Roan &mdash; corn spots</strong></td><td>partial</td><td>The reference explicitly calls out <strong>corn spots</strong> &mdash; small islands of solid base colour left inside the roan field. <a href="gene-roan.html">Roan</a>&rsquo;s per-texel dither has no notion of them; wants a second, low-frequency mask that pins a few texels fully coloured.</td></tr>
+<tr><td><strong>Natural (polygenic) face and leg white</strong></td><td>new</td><td>The reference is explicit that a plain horse with <em>no</em> paint gene can still carry a star, stripe, snip, blaze, coronet, sock or stocking &mdash; these are polygenic, not one locus. The mod only draws face / leg white as part of a <code>KIT</code> / <code>MITF</code> / <code>PAX3</code> / <code>EDNRB</code> outcome, so a bay with no white gene is always cleanly solid. Wants a small always-on marking draw (a handful of epigenetic values, no allele) feeding the shared <code>WhitePattern.faceMarking</code> / leg vocabulary at low strength &mdash; the same shape as the cut-but-analogous &ldquo;natural markings&rdquo; idea, now with a concrete reference behind it.</td></tr>
+<tr><td><strong>Champagne / pearl &mdash; base-aware phenotype naming</strong></td><td>partial</td><td>The mechanism is right (one champagne rule, MATP for pearl). The reference names <strong>gold / amber / sable / classic</strong> champagne and <strong>chestnut / bay / black / cream</strong> pearl as distinct phenotypes by base, and expects the cream&times;champagne and cream&times;pearl combinations to read differently again (blue eyes, near-white at double dose). The mod has no surface that resolves &ldquo;this genotype is an amber champagne&rdquo; for the info panel / paper dump / gene dictionary. Same category as seal-bay naming; a base-aware phenotype resolver would serve all of them.</td></tr>
 </tbody>
 </table>
 </div>
+
+<h5>The disorder / trait table (reference Part 3)</h5>
+
+<p>
+    The reference ends with a table of disease genes carrying a <strong>Health Effect
+    %</strong> (100 = lethal), a <strong>Speed %</strong> and a <strong>Jump %</strong>,
+    and distinguishing <em>episodic</em>, <em>chronic</em> and <em>progressive-onset</em>
+    conditions. The mod&rsquo;s health model is binary &mdash; a locus is either
+    <code>LETHAL_AT_BIRTH</code> / <code>LETHAL_AT_CONCEPTION</code> or a flat
+    <code>HealthContribution</code> of fewer hearts. Mapping the table:
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Reference gene</th><th>Status</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td><strong>PLOD1</strong> (FFS), <strong>RAPGEF5</strong> (EFIH), <strong>SHOX</strong> (skeletal atavism), <strong>MET</strong> (embryonic lethal)</td><td>shipped</td><td>All four built, on the two lethal paths. Match the reference&rsquo;s 100%.</td></tr>
+<tr><td><strong>SCN4A</strong> &mdash; HYPP</td><td>new</td><td>Already wanted in &sect;22 as &ldquo;the one obvious genetic issue&rdquo;. The reference makes it concrete: <strong>dominant</strong>, <code>H/n</code> is episodic (&asymp;30% health, 60% speed / jump), <code>H/H</code> is lethal. So it is a <code>TraitContribution</code> + <code>HealthContribution</code> that is <em>also</em> a homozygous lethal &mdash; the first gene that is both.</td></tr>
+<tr><td><strong>PPIB</strong> &mdash; HERDA</td><td>new</td><td>Not named anywhere in the roadmap before this audit. Recessive <code>h/h</code>, chronic (fragile skin, &asymp;50% health, 70% speed / jump). Fits <code>RecessiveDisorderGene</code> as a heart reduction; the &ldquo;chronic pain&rdquo; flavour is cosmetic unless the severity model below lands. Quarter Horse working lines.</td></tr>
+<tr><td><strong>GYS1</strong> &mdash; PSSM1</td><td>new</td><td>Also not named before. <strong>Dominant</strong> (<code>P/n</code> or <code>P/P</code> both affected), episodic tying-up, &asymp;40% health, 50% speed / jump. A dominant sub-lethal disorder is a new shape &mdash; every mod disorder today is recessive &mdash; and it is common across many breeds, so its founder rate wants care.</td></tr>
+<tr><td><strong>DNA-PKcs</strong> (SCID), <strong>TOE1</strong> (CA), <strong>MYO5A</strong> (LFS)</td><td>new</td><td>Arabian disorders, already batched in &sect;22 under &ldquo;early-lethal foal disorders&rdquo;. SCID and LFS are 100% (the <code>LETHAL_AT_BIRTH</code> path); CA is progressive ataxia at &asymp;60% &mdash; a heart reduction, or a movement penalty if the severity model lands.</td></tr>
+<tr><td><strong>TRPM1</strong> &mdash; CSNB</td><td><strong>shipped 2026-09-06</strong></td><td>Built with the <a href="gene-leopard.html">leopard complex</a> &mdash; <code>LP/LP</code> carries it as an <strong>informational</strong> <code>Condition</code> (like splash-homozygote deafness): shown on the info panel / paper dump, no heart cost, no mechanic (there is no night vision to take away).</td></tr>
+<tr><td><strong>nd1</strong> / <strong>nd2</strong></td><td>covered</td><td>The reference lists these as separate &ldquo;dun-like dilution&rdquo; entries; biologically they are non-functional alleles at the <em>same</em> TBX3 locus as <code>D</code>, which is exactly how <a href="gene-dun.html">dun</a> models them (<code>d1</code> / <code>d2</code>). No change &mdash; the semantic mismatch is that real <code>nd1</code> can dilute slightly where the mod&rsquo;s <code>d1</code> never does; folded into the dun row above.</td></tr>
+<tr><td><strong>TE</strong> &mdash; &ldquo;Paso Fino coat pattern&rdquo;</td><td>covered</td><td>The reference mislabels this &mdash; real <em>Tiger Eye</em> (<code>TE</code>) is an amber-iris gene, not a coat pattern. Already tracked as an eye-colour gene in &sect;4.1 / &sect;4.6 / &sect;22, blocked on the iris channel.</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="note">
+    <span class="label">Design question the disorder table raises</span>
+    <p>
+        HERDA, PSSM1 and HYPP are <em>episodic</em> or <em>chronic</em> conditions with
+        partial speed / jump penalties &mdash; they do not fit &ldquo;fewer hearts&rdquo;
+        cleanly. Two ways to take it: (a) keep the binary model and render each as a
+        flat heart reduction plus a flat <code>TraitContribution</code> speed / jump
+        multiplier (cheap, loses the &ldquo;flares up under exertion&rdquo; character),
+        or (b) add a <strong>severity / onset</strong> field to <code>Condition</code>
+        &mdash; a 0&ndash;1 magnitude and an <code>EPISODIC</code> / <code>CHRONIC</code>
+        / <code>PROGRESSIVE</code> kind &mdash; that the health resolve and a future
+        status-effect tick both read. (b) is the reference&rsquo;s model and the natural
+        companion to &sect;6.6; it is also what CA (progressive) and a melanoma-free
+        grey aging story would want if either ever came back. Flagged, not decided.
+    </p>
+</div>
+
+<h5>Appaloosa detail (reference Part 2)</h5>
+
+<p>
+    The reference splits the leopard complex into named patterns by modifier:
+    <strong>PATN1</strong> drives leopard / fewspot, <strong>PATN2</strong> drives
+    spotted-blanket / snowcap, and <code>LP</code> alone gives snowflake / frosted /
+    varnish roan, with heterozygote vs homozygote changing the pattern. &sect;4.2 only
+    names <code>LP</code> + <code>PATN1</code> today &mdash; add <strong>PATN2</strong>
+    as a second modifier locus when the complex is built, and note that the reference
+    wants <em>seven</em> distinguishable outcomes (snowflake, frosted, varnish roan,
+    leopard, fewspot, spotted blanket, snowcap, semi-leopard) from the
+    <code>LP</code> &times; <code>PATN1</code> &times; <code>PATN2</code> &times;
+    zygosity grid, plus the always-on white sclera / striped hooves / mottled skin
+    triad (which needs the skin layer the coat does not have).
+</p>
 
 <h3>4.2 White spotting and patterns</h3>
 
@@ -403,7 +485,7 @@
 <table>
 <thead><tr><th>Locus</th><th>Alleles</th><th>Status</th><th>What it needs</th></tr></thead>
 <tbody>
-<tr><td><strong>Leopard complex (TRPM1)</strong> + <strong>PATN1</strong></td><td><code>LP</code>, <code>lp</code>; <code>PATN1</code>, <code>N</code></td><td>new</td><td><strong>Deliberately left out of the white-pattern rewrite</strong>, and the largest single gene job remaining. It is not a pinto pattern and does not belong to any locus that rewrite touched: leopard, blanket, snowcap and varnish roan, plus white sclera, striped hooves and mottled skin. Wants a spot field <em>and</em> a separate blanket mask &mdash; neither of which <code>WhitePattern</code>&rsquo;s two shapes cover &mdash; and heterozygote vs homozygote <strong>must</strong> differ. <code>PATN1</code> is a second locus that only means anything on an <code>LP</code> horse, so it comes with it and is the model&rsquo;s first real modifier gene. Health: <code>LP/LP</code> &rarr; CSNB. Mottled skin and striped hooves also want the skin layer the coat does not have. <strong>Owner has accepted this needs true polymorphism and cross-locus reads</strong> &mdash; see the new &sect;5.4, which also carries the spec note discouraging third-party genes from doing the same.</td></tr>
+<tr><td><strong>Leopard complex (TRPM1)</strong> + <strong>PATN1</strong> + <strong>PATN2</strong></td><td><code>LP</code>/<code>lp</code>; <code>PATN1</code>/<code>n</code>; <code>PATN2</code>/<code>n</code></td><td><strong>shipped 2026-09-06</strong></td><td>Built as <a href="gene-leopard.html">three loci</a> &mdash; <code>LeopardGene</code> reads <code>PATN1</code>/<code>PATN2</code> in <code>expressionIn</code> for one of eight outcomes (mottled, varnish-roan, leopard, fewspot, blanket, snowcap, semi-leopard). New <code>Gene.coatDependsOn()</code> hook folds the silent modifiers into the texture key; <code>PATN</code> founders are conditional on <code>LP</code>. Striped hooves + white sclera in the overlay phase; <code>LP/LP</code> &rarr; CSNB (informational). Appaloosa / Knabstrupper / Kiger / Mustang / Shetland roll it. <strong>Still open</strong>: <em>mottled skin</em> (the coat has no skin layer); &ldquo;white finds white&rdquo; is not applied, so multi-pattern appaloosas are unverified; the spot / blanket / hoof-stripe constants are first-guess and want a play session (<a href="verification.html">verification &sect;0</a>).</td></tr>
 <tr><td><strong>The rest of the <code>W</code> series</strong></td><td><code>W1</code>&ndash;<code>W4</code>, <code>W6</code>&ndash;<code>W9</code>, <code>W11</code>&ndash;<code>W19</code>, <code>W21</code>, <code>W24+</code></td><td>partial</td><td>Eight of the thirty-plus are modelled. <strong>Owner wants the full set mapped eventually</strong> &mdash; as a completeness goal, redundant alleles included &mdash; so this is now a &ldquo;do it&rdquo; item rather than a &ldquo;not worth it&rdquo; one. Each is a line in <code>alleles()</code>, a row in <code>expressionOf</code> and a frequency; the ones whose published phenotype is indistinguishable from a modelled allele collapse onto that allele&rsquo;s outcome (the <code>SW6</code>&ndash;<code>SW8</code> precedent) rather than getting their own. Watch the combinatorial cost: each allele adds <code>n</code> combinations to a locus already at thirty-six, so this wants the hash-keyed texture id (&sect;10) done first.</td></tr>
 <tr><td><strong>The rest of the splash series</strong></td><td><code>SW6</code>&ndash;<code>SW10</code></td><td>partial</td><td><code>SW6</code>&ndash;<code>SW8</code> are folded into <a href="gene-mitf.html"><code>SW5</code></a> on purpose &mdash; the source describes all four in word-for-word identical terms, so four alleles would be four indistinguishable rows. Split them when they are distinguishable. <code>SW9</code>/<code>SW10</code> want a locus check first: the assignment of the higher numbers between <code>MITF</code> and <code>PAX3</code> is not settled in the reference used.</td></tr>
 <tr><td><strong>Medicine hat / war shield</strong></td><td>&mdash;</td><td>new</td><td>Not a gene and not a face marking: a <em>retention</em> rule on a near-white horse, which keeps colour as a bonnet over the ears <strong>and poll</strong> and often a coloured shield on the chest. Half of it exists by accident &mdash; <code>WhitePattern.sabino</code> never paints the ears, so a near-white sabino already has coloured ones, and the owner <strong>confirms this shows in-game 2026-09-05</strong> &mdash; but the poll goes 100% white beside them (the crest&rsquo;s <code>anchor</code> of 0.16 is nothing against a <code>bodyCut</code> of 0.05), so it reads as two detached ear boxes rather than a cap, and nothing draws a chest shield at all. Wants the anchor to hold at the top of the strength ramp and a chest region to anchor beside it. Note that <code>W22</code> dominant white and <code>O/O</code> lethal white are <code>masking</code> outcomes that <code>restrictAll</code>, so they take the ears too &mdash; correctly; those are not hats.</td></tr>
@@ -470,9 +552,20 @@
         de-pigmented mane reads as a <em>white</em> mane, which is a different horse and a
         worse lie than drawing nothing. Wants a bare-skin template or a real phase-3
         pass.</li>
-    <li><strong>CSNB</strong> rides on <code>LP/LP</code> and is blocked on the leopard
-        complex not existing (§4.2). <strong>Melanoma in greys is parked with
+    <li><strong>CSNB</strong> ships with the <a href="gene-leopard.html">leopard
+        complex</a> (2026-09-06) &mdash; informational on <code>LP/LP</code>. <strong>Melanoma in greys is parked with
         aging</strong> (§21) and is not coming back.</li>
+    <li><strong>Disorder genes the <code>naturalgeneref.md</code> table names that
+        nothing covers</strong> (audit 2026-09-06, §4.1.1): <strong>HERDA</strong>
+        (<code>PPIB</code>, recessive, chronic) and <strong>PSSM1</strong>
+        (<code>GYS1</code>, <strong>dominant</strong> sub-lethal &mdash; a new shape,
+        every current disorder is recessive) are genuinely new; <strong>HYPP</strong>
+        (<code>SCN4A</code>) is a dominant heart-reducer that is <em>also</em> a
+        homozygous lethal (§22); <strong>SCID / CA / LFS</strong> are the Arabian
+        batch already in §22. The reference gives each a health / speed / jump
+        percentage &mdash; see the §4.1.1 note on whether <code>Condition</code>
+        should gain a severity / onset field to represent episodic and progressive
+        conditions rather than flattening them to fewer hearts.</li>
 </ul>
 
 <h3>4.5 Magical genes &mdash; the to-do list</h3>
@@ -716,28 +809,32 @@
 
 <p>Not planned: imprinting, mosaicism.</p>
 
-<h3 id="polymorphism">5.4 Multi-locus genes and true polymorphism</h3>
+<h3 id="polymorphism">5.4 Multi-locus genes and true polymorphism &mdash; <em>shipped, lighter than planned</em></h3>
 
 <p>
-    <strong>The leopard complex forces this</strong> (&sect;4.2). Owner&rsquo;s call:
-    &ldquo;I just have to implement polymorphism, and multiple-locus genes. There&rsquo;s
-    no getting around it.&rdquo; The two things it needs that nothing in the model does
-    yet:
+    <strong>Built 2026-09-06 with the <a href="gene-leopard.html">leopard complex</a>.</strong>
+    It turned out to need neither of the two big pieces this section expected:
 </p>
 
 <ul>
-    <li><strong>A gene that reads more than its own pair.</strong> <code>PATN1</code>
-        only means anything on an <code>LP</code> horse. &sect;6.5&rsquo;s
-        <code>TraitRule</code> (a pseudo-gene that declares which gene keys it reads and
-        is handed those pairs, same delta function / ordering / determinism as a gene) is
-        the shape &mdash; build <code>TraitRule</code> first and <code>PATN1</code> is
-        its proof, the way brindle is sex-linkage&rsquo;s proof.</li>
-    <li><strong>True polymorphism in one outcome.</strong> A leopard-complex horse is not
-        one look per combination &mdash; the same <code>LP/LP PATN1/PATN1</code> genotype
-        covers fewspot through to a heavy blanket, decided by epigenetics, not by the
-        allele pair. The <code>Expression</code> for the outcome has to be allowed to
-        branch on an epigenetic knob into visibly different sub-patterns, not just vary a
-        threshold. This is more than the &ldquo;varies&rdquo; flag does today.</li>
+    <li><strong>A gene that reads more than its own pair</strong> &mdash; already
+        possible. <code>gene.expressionIn(pair, genotype)</code> is handed the whole
+        genotype and is what the pipeline calls, so <code>LeopardGene</code> just reads
+        <code>PATN1</code>/<code>PATN2</code> there. No <code>TraitRule</code> pseudo-gene
+        was needed. What <em>was</em> needed is a texture-key fix: a modifier that paints
+        nothing is not in <code>coatCode()</code>, so a new <code>Gene.coatDependsOn()</code>
+        declaration folds its alleles in &mdash; only for a horse that actually carries
+        <code>LP</code>. <code>BreedFounder</code> treats a named modifier like a coat
+        gene too.</li>
+    <li><strong>True polymorphism in one outcome</strong> &mdash; not built, and not
+        missed. The eight looks are eight <code>Expression</code>s (each
+        <code>varies()</code> for spot density / blanket extent), selected by
+        <code>expressionIn</code> from LP zygosity &times; PATN. The coarse pair-only
+        <code>expressionOf</code> returns <code>varnish-roan</code> for any <code>LP</code>
+        horse, which keeps the gallery to two leopard pens. If a single outcome ever
+        needs to branch into visibly different sub-patterns on an epigenetic knob, that
+        is still unbuilt &mdash; but the enumerated-expression approach covered the
+        appaloosa family without it.</li>
 </ul>
 
 <div class="note warn">
@@ -1001,17 +1098,17 @@
 
 <ul>
     <li><strong>The genotype space.</strong> Now
-        <strong>81 687 059 589 193 477 171 200 000</strong> raw genotypes, of which
-        <strong>462 422 018</strong> are distinct to look at &mdash; it was
+        <strong>1 429 196 794 572 529 076 587 315 200 000</strong> raw genotypes, of which
+        <strong>1 849 688 066</strong> are distinct to look at &mdash; it was
         <code>3^11 = 177,147</code> before the seven visual genes shipped, the
         multiplier in miniature. The raw product is past
-        <strong>10<sup>25</sup></strong> and is a <code>BigInteger</code>: the
+        <strong>10<sup>30</sup></strong> and is a <code>BigInteger</code>: the
         <a href="gene-particle.html">particle</a> locus pushed it beyond
         2<sup>63</sup>, and the figure recorded here until then had already
-        wrapped. Meanwhile
-        <code>GenotypeCatalog.size()</code> is an <code>int</code> with about
-        4.6&times; of headroom left (it saturates rather than wraps, so the
-        failure is a truncated catalogue, not a nonsense one).</li>
+        wrapped. <code>GenotypeCatalog.size()</code> and <code>get()</code> became
+        <code>long</code> on 2026-09-06 &mdash; the <a href="gene-leopard.html">leopard
+        complex</a> doubled the reduced catalogue past <code>Integer.MAX_VALUE</code>.
+        Nothing in production indexes the catalogue, so it was a free widening.</li>
     <li><strong>The gallery died, and the dimension was reverted</strong> (§8, done). The
         white-pattern loci took the catalogue to 2,064,387 pens (462 million today),
         whose corridor would have
@@ -1823,11 +1920,12 @@
         cases and the hemizygous surfaces. It touches <code>breedWith</code> and
         <code>GenotypeCatalog</code>, so do it while the breeding tests are still small.
         Brindle (§4.2) is its proof.</li>
-    <li><strong>LP (leopard complex) and PATN1</strong> (§4.2) &mdash; the one pattern
-        family the white-pattern rewrite deliberately left alone, and the largest gene job
-        remaining. It needs a spot field and a blanket mask, neither of which
-        <code>WhitePattern</code>&rsquo;s two shapes cover, and PATN1 is the model&rsquo;s
-        first modifier gene. CSNB (§4.4) rides in with it.</li>
+    <li><s><strong>LP (leopard complex) and PATN1</strong></s> &mdash;
+        <strong>shipped 2026-09-06</strong> as three loci
+        (<a href="gene-leopard.html">LP + PATN1 + PATN2</a>), with the
+        <code>coatDependsOn()</code> hook, striped hooves / white sclera, and CSNB.
+        Follow-ups: mottled skin, &ldquo;white finds white&rdquo; on multi-pattern
+        appaloosas, and the first-guess tuning constants.</li>
     <li><strong>The remaining health follow-ups</strong> (§4.4, §6.4) &mdash; the carrier
         display and the punnett square first, since they are what make the lethals a
         decision rather than a surprise; per-part scaling and the naked-foal coat need
@@ -2069,7 +2167,8 @@
 <table>
 <thead><tr><th>Item</th><th>Breeds that want it</th><th>What it is / needs</th></tr></thead>
 <tbody>
-<tr><td><strong>HYPP</strong></td><td>Quarter Horse, American Paint</td><td>The one &ldquo;obvious genetic issue&rdquo; the owner wants as a real gene: a dominant allele that <strong>reduces the horse&rsquo;s hearts</strong> (a <code>TraitContribution</code> + <code>HealthContribution</code>, <em>not</em> a lethal). Fits the existing pattern; no new machinery.</td></tr>
+<tr><td><strong>HYPP</strong> (<code>SCN4A</code>)</td><td>Quarter Horse, American Paint</td><td>The one &ldquo;obvious genetic issue&rdquo; the owner wants as a real gene: a dominant allele that <strong>reduces the horse&rsquo;s hearts</strong> (a <code>TraitContribution</code> + <code>HealthContribution</code>, <em>not</em> a lethal). The <code>naturalgeneref.md</code> disorder table (&sect;4.1.1) adds that <code>H/H</code> <em>is</em> lethal &mdash; so it is the first gene that is a sub-lethal heart-reducer <em>and</em> a homozygous lethal. Otherwise fits the existing pattern.</td></tr>
+<tr><td><strong>HERDA</strong> (<code>PPIB</code>), <strong>PSSM1</strong> (<code>GYS1</code>)</td><td>Quarter Horse (cutting / working lines); PSSM1 also draughts, warmbloods, paints, appaloosas</td><td>From the same disorder table. HERDA is a recessive chronic condition (fragile skin); PSSM1 is <strong>dominant</strong> and sub-lethal (episodic tying-up), which no current disorder is. Both are heart reductions under the binary model; see the &sect;4.1.1 severity-model note.</td></tr>
 <tr><td><strong>Tiger Eye</strong> (<code>TE</code>)</td><td>Puerto Rican Paso Fino</td><td>Amber iris. Blocked on eye colour existing at all (§4.1 / §5.1); recessive, two alleles.</td></tr>
 <tr><td><strong>Pangare / mealy</strong></td><td>Exmoor Pony (and cross-refs Fjord, some duns)</td><td>Lightened muzzle, eye rings, flanks, belly. A natural pigment gene &mdash; phase 1, region-masked lightening. New.</td></tr>
 <tr><td><strong>Flaxen</strong></td><td>Haflinger, Belgian Draft</td><td>Pale mane and tail on a chestnut body. Natural, recessive, hair-only pigment pull. New; <code>HairPattern</code> is the seam.</td></tr>
@@ -2077,7 +2176,7 @@
 <tr><td><strong>Gait</strong> (<code>DMRT3</code>)</td><td>Paso Fino &times;2, Tennessee Walking, Standardbred, Icelandic, Hackney</td><td>Already noted in §4.3. A gene is cheap; the value is the <strong>animation</strong> (an ambling / running-walk / pace cycle), which needs renderer work.</td></tr>
 <tr><td><strong>Mane shape</strong></td><td>Fjord (erect two-tone), Przewalski (upright, no forelock), Andalusian / Friesian / Gypsy (long flowing), Percheron</td><td>Render-layer / model work, not genetics. The Fjord&rsquo;s two-tone stripe is the most self-contained: a hard light/dark split down the mane centre.</td></tr>
 <tr><td><strong>Lower-leg feathering</strong></td><td>Clydesdale, Shire, Friesian, Gypsy Vanner, Dales, Dartmoor</td><td>A render-layer overlay on the lower legs (the sheared-look overlay is the precedent, §21). Cosmetic, breed- or gene-driven.</td></tr>
-<tr><td><strong>Leopard complex</strong> (<code>Lp</code> + <code>PATN1</code>)</td><td>Appaloosa, Knabstrupper, &ldquo;often lp&rdquo; on Mustang / Kiger / Shetland</td><td>Already §4.2 &mdash; the biggest single item, a new pattern family. The breeds are wired to accept it (light roan stands in for now).</td></tr>
+<tr><td><strong>Leopard complex</strong> (<code>LP</code> + <code>PATN1</code> + <code>PATN2</code>)</td><td>Appaloosa, Knabstrupper, Kiger, Mustang, Shetland</td><td><strong>Shipped 2026-09-06</strong> (&sect;4.2). All five roll real <code>LP</code>/<code>PATN</code> pools now &mdash; the light-roan stand-in is gone.</td></tr>
 </tbody>
 </table>
 </div>
