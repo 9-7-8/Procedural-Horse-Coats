@@ -13,10 +13,12 @@ import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Part;
 import com.example.horsegenetics.common.genetics.AbilityContribution;
 import com.example.horsegenetics.common.genetics.Allele;
 import com.example.horsegenetics.common.genetics.AllelePair;
+import com.example.horsegenetics.common.genetics.CutieMarkContribution;
 import com.example.horsegenetics.common.genetics.Expression;
 import com.example.horsegenetics.common.genetics.FounderContext;
 import com.example.horsegenetics.common.genetics.FounderTable;
 import com.example.horsegenetics.common.genetics.Gene;
+import com.example.horsegenetics.common.genetics.Epigenome;
 import com.example.horsegenetics.common.genetics.Genotype;
 import com.example.horsegenetics.common.genetics.spec.GeneAbility;
 
@@ -71,7 +73,8 @@ import java.util.Set;
  * the light block's colour becomes a question the game cannot answer, since
  * vanilla light has no hue.
  */
-public final class LightGene implements Gene, CoatOverlayContribution, AbilityContribution {
+public final class LightGene implements Gene, CoatOverlayContribution, AbilityContribution,
+        CutieMarkContribution {
 
     public static final String KEY = "horsegenetics.light";
     public static final int PRIORITY = 160;
@@ -281,4 +284,24 @@ public final class LightGene implements Gene, CoatOverlayContribution, AbilityCo
     public List<GeneAbility> abilitiesFor(AllelePair pair, Genotype genotype) {
         return regionsOf(pair).isEmpty() ? List.of() : glow;
     }
+
+    /**
+     * <b>A glowing horse's cutie mark glows.</b> The first user of
+     * {@link CutieMarkContribution}, and the case that makes the hook obviously
+     * right rather than merely general: this locus is the one that decides a
+     * horse emits light, and a horse with four gold burning hooves wearing the
+     * one dull thing on its body would read as a bug.
+     *
+     * <p>Any variant copy does it - the same rule as the light itself, where
+     * <i>where</i> the glow shows is the alleles' business and <i>whether the
+     * horse is a light source</i> is not. Nothing else about the emblem moves,
+     * so a light horse and its non-light full sibling wear the same mark, lit
+     * differently.
+     */
+    @Override
+    public CutieMarkGene.Mark modifyCutieMark(AllelePair pair, Genotype genotype, Epigenome epigenome,
+                                              CutieMarkGene.Mark mark) {
+        return pair.count(n) == 2 ? mark : mark.withEmissive(true);
+    }
+
 }

@@ -23,7 +23,7 @@ import net.minecraft.resources.Identifier;
  *   <li>{@code baby} - spawn as a foal.</li>
  *   <li>{@code female} - {@code Sex.FEMALE} if true, else {@code Sex.MALE}.</li>
  *   <li>{@code breed} - a {@code BreedLineage} token to stamp on the spawned
- *       horse (the editor's "Breed:" preset), or {@code ""} for Unknown. It is
+ *       horse (the editor's "Breed:" preset), or {@code ""} for Feral Mixed. It is
  *       only a label + stat bands; the genotype above is authoritative.</li>
  * </ul>
  *

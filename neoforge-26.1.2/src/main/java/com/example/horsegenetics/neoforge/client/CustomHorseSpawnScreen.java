@@ -223,7 +223,7 @@ public final class CustomHorseSpawnScreen extends Screen {
      * ({@link BreedFounder#roll}) straight into the editor - genotype,
      * epigenome and sex - and stamps that breed on whatever is spawned (you can
      * still hand-edit any locus afterwards). {@code "(none)"} leaves the current
-     * genome alone and spawns as Unknown.
+     * genome alone and spawns as Feral Mixed.
      */
     private void openBreedDropdown(int anchorX, int anchorY) {
         breedDd = true;

@@ -72,7 +72,7 @@ class GeneCoatHookTest {
     @Test
     void noNaturalExpressionWritesThroughTheFieldItWasHanded() {
         for (Gene gene : Genes.naturalOrder()) {
-            if (!expressesAlone(gene)) {
+            if (!expressesAlone(gene) || paintsNothingItself(gene)) {
                 continue;
             }
             Genotype gt = homozygousVariant(gene);
@@ -90,7 +90,7 @@ class GeneCoatHookTest {
     @Test
     void everyNaturalExpressionIsAFunctionOfItsInputs() {
         for (Gene gene : Genes.naturalOrder()) {
-            if (!expressesAlone(gene)) {
+            if (!expressesAlone(gene) || paintsNothingItself(gene)) {
                 continue;
             }
             Genotype gt = homozygousVariant(gene);
@@ -126,7 +126,7 @@ class GeneCoatHookTest {
             // The LUT locus is magical and its variant homozygote is a real
             // coat change, but it makes it by swapping the phase-2 gradient out
             // of band, not by returning a phase-3 tint. LutGeneTest covers it.
-            if (gene instanceof LutContribution) {
+            if (paintsNothingItself(gene)) {
                 continue;
             }
             Genotype gt = homozygousVariant(gene);
@@ -182,4 +182,20 @@ class GeneCoatHookTest {
         assertEquals(Genes.codeOrder().size(), Genes.naturalOrder().size() + Genes.magicalOrder().size(),
                 "every registered gene belongs to exactly one phase");
     }
+
+    /**
+     * <b>A gene whose non-wild outcome is a {@code marker()}</b> - it really
+     * does change the coat, so it is not a wild type and stays in the texture
+     * key, but it makes the change <i>out of band</i> rather than by returning a
+     * pigment field or a colour delta, so the two phase hooks hand back
+     * {@code null} for it by design.
+     *
+     * <p>Two loci: {@code LUT}, which swaps the phase-2 gradient, and
+     * {@code tiger eye}, whose whole effect is an iris colour written in the
+     * overlay phase. Their own tests cover what they do.
+     */
+    private static boolean paintsNothingItself(Gene gene) {
+        return gene instanceof LutContribution || gene instanceof EyeColorContribution;
+    }
+
 }

@@ -3,6 +3,8 @@ package com.example.horsegenetics.common.genetics.genes;
 import com.example.horsegenetics.common.coat.pattern.WhitePattern;
 import com.example.horsegenetics.common.genetics.Allele;
 import com.example.horsegenetics.common.genetics.AllelePair;
+import com.example.horsegenetics.common.genetics.EyeColor;
+import com.example.horsegenetics.common.genetics.EyeColorContribution;
 import com.example.horsegenetics.common.genetics.Expression;
 import com.example.horsegenetics.common.genetics.FounderContext;
 import com.example.horsegenetics.common.genetics.FounderTable;
@@ -62,7 +64,7 @@ import java.util.Map;
  *
  * <p>Natural, <b>non-deterministic</b>. See {@code wiki/gene-mitf.html}.
  */
-public final class MitfGene implements Gene, HealthContribution {
+public final class MitfGene implements Gene, HealthContribution, EyeColorContribution {
 
     public static final String KEY = "horsegenetics.mitf";
 
@@ -187,4 +189,16 @@ public final class MitfGene implements Gene, HealthContribution {
             out.condition(DEAFNESS);
         }
     }
+
+    /**
+     * <b>Splash is the blue-eyed pattern.</b> Diagnostic even when the white is
+     * modest - a horse with one blue eye and white to the knee is how a splash
+     * carrier is spotted in the field - so any expressing combination qualifies,
+     * not only the bold ones. See {@link WhitePatternEyes}.
+     */
+    @Override
+    public java.util.Optional<EyeColor> eyeColor(AllelePair pair, Genotype genotype, double whiteCoverage) {
+        return WhitePatternEyes.blueIf(isSplash(pair), whiteCoverage);
+    }
+
 }

@@ -26,7 +26,7 @@ class BreedsTest {
             assertTrue(ids.add(b.id()), "duplicate id " + b.id());
             assertTrue(names.add(b.name()), "duplicate name " + b.name());
         }
-        assertFalse(ids.contains("unknown"), "UNKNOWN must not be in all()");
+        assertFalse(ids.contains("feral_mixed"), "FERAL_MIXED must not be in all()");
     }
 
     @Test
@@ -54,9 +54,9 @@ class BreedsTest {
     @Test
     void lookupHelpers() {
         assertEquals("Friesian", Breeds.get("friesian").name());
-        assertEquals("Unknown", Breeds.displayName("unknown"));
-        assertEquals("Unknown", Breeds.displayName(null));
-        assertEquals(Breeds.UNKNOWN, Breeds.get("no_such_breed"));
+        assertEquals("Feral Mixed", Breeds.displayName("feral_mixed"));
+        assertEquals("Feral Mixed", Breeds.displayName(null));
+        assertEquals(Breeds.FERAL_MIXED, Breeds.get("no_such_breed"));
 
         List<Breed> plains = Breeds.forBiome("minecraft:plains");
         assertFalse(plains.isEmpty());

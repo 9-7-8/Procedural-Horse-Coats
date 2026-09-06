@@ -68,21 +68,21 @@ public final class HorseRecords {
      * so {@link Genotype#random} draws it along with the rest.
      */
     public static HorseRecord newFounder(Horse horse, Rng rng) {
-        return newFounder(horse, rng, Breeds.UNKNOWN);
+        return newFounder(horse, rng, Breeds.FERAL_MIXED);
     }
 
     /**
      * A wild horse of a given <b>breed</b> - a herd member. The genome is rolled
      * from the breed's constrained pool ({@link BreedFounder#roll}) and the
      * record is stamped with the breed's {@link BreedLineage} token.
-     * {@link Breeds#UNKNOWN} rolls the ordinary unconstrained founder and stamps
-     * {@code "unknown"} - i.e. exactly the pre-breeds behaviour.
+     * {@link Breeds#FERAL_MIXED} rolls the ordinary unconstrained founder and stamps
+     * {@code "feral_mixed"} - i.e. exactly the pre-breeds behaviour.
      */
     public static HorseRecord newFounder(Horse horse, Rng rng, Breed breed) {
         Genome genome = BreedFounder.roll(breed, rng);
         NameParts name = NAMES.generateParts(rng);
-        String token = breed == Breeds.UNKNOWN
-                ? BreedLineage.UNKNOWN.toToken()
+        String token = breed == Breeds.FERAL_MIXED
+                ? BreedLineage.FERAL.toToken()
                 : BreedLineage.pure(breed.id()).toToken();
         return HorseRecord.founder(horse.getUUID(), name.first(), name.last(), genome, token);
     }

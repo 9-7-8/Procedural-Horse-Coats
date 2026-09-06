@@ -73,7 +73,9 @@ public final class GenotypeCatalog {
      * Every unordered {@link AllelePair} of {@code gene} a horse can actually
      * carry - all {@code n(n+1)/2} of them for {@code n} alleles, minus any the
      * gene rules out with {@link Gene#canOccur} (the sex locus has no
-     * {@code Y/Y}; {@code KIT} has no homozygote of a nonviable {@code W}) -
+     * {@code Y/Y}; {@code KIT} has no homozygote of a nonviable {@code W}) or
+     * with {@link Gene#sexConsistent} (a sex-linked locus has no combination
+     * with the wrong number of real alleles) -
      * walking {@link Gene#alleles()} backwards, so the last-declared allele (by
      * convention the population's baseline) comes first.
      */
@@ -83,7 +85,12 @@ public final class GenotypeCatalog {
         for (int i = alleles.size() - 1; i >= 0; i--) {
             for (int j = alleles.size() - 1; j >= i; j--) {
                 AllelePair pair = new AllelePair(alleles.get(i), alleles.get(j));
-                if (gene.canOccur(pair)) {
+                // sexConsistent drops the combinations no horse of EITHER sex
+                // could have - two placeholders at an X-linked locus (every
+                // horse has an X), two real alleles at a Y-linked one. Without
+                // it the catalogue would enumerate, and the random splice could
+                // roll, a genotype that cannot exist.
+                if (gene.canOccur(pair) && gene.sexConsistent(pair)) {
                     pairs.add(pair);
                 }
             }

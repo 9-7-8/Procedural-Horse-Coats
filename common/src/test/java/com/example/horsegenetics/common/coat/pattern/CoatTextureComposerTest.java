@@ -220,11 +220,27 @@ class CoatTextureComposerTest {
         assertTrue(warmth < 25, "grey body should read neutral, red-minus-blue was " + warmth);
     }
 
+    /**
+     * Greying progression is epigenetic, so a paddock of greys shows a spread
+     * from steel to near-white.
+     *
+     * <p>Measured as the <b>range over several seeds</b> rather than the gap
+     * between two named ones. Two arbitrary seeds can legitimately land on
+     * neighbouring stages, and every time a gene is inserted the derived
+     * epigenetic stream moves and a two-seed test becomes a coin flip - which is
+     * exactly how this one failed when brindle and tiger eye were added.
+     */
     @Test
     void howFarGreyingHasGoneIsPerHorse() {
-        double a = greyBodyBrightness(55L);
-        double b = greyBodyBrightness(8L);
-        assertTrue(Math.abs(a - b) > 20, "two greys should be at different stages, got " + a + " / " + b);
+        double lo = Double.MAX_VALUE;
+        double hi = -Double.MAX_VALUE;
+        for (long seed : new long[]{0L, 3L, 8L, 12L, 21L, 33L, 55L, 89L}) {
+            double v = greyBodyBrightness(seed);
+            lo = Math.min(lo, v);
+            hi = Math.max(hi, v);
+        }
+        assertTrue(hi - lo > 20,
+                "greys should span several stages, but the range over 8 seeds was " + (hi - lo));
     }
 
     /** Mean body brightness of a grey adult rolled from {@code seed}. */

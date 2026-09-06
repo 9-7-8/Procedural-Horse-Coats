@@ -19,7 +19,7 @@ import java.util.Set;
  * One horse breed: a constrained slice of the gene pool plus the metadata the
  * spawn and breeding systems need. A wild <b>herd</b> of a breed is rolled by
  * {@link BreedFounder} from these fields; a lone wild horse, a {@code /summon}
- * or a spawn-egg horse is {@link Breeds#UNKNOWN} instead and rolls the ordinary
+ * or a spawn-egg horse is {@link Breeds#FERAL_MIXED} instead and rolls the ordinary
  * unconstrained founder.
  *
  * <h2>What a breed pins, and what it leaves alone</h2>

@@ -6,9 +6,12 @@ import com.example.horsegenetics.common.coat.pattern.WhitePattern;
 import com.example.horsegenetics.common.genetics.Allele;
 import com.example.horsegenetics.common.genetics.AllelePair;
 import com.example.horsegenetics.common.genetics.Expression;
+import com.example.horsegenetics.common.genetics.EyeColor;
+import com.example.horsegenetics.common.genetics.EyeColorContribution;
 import com.example.horsegenetics.common.genetics.FounderContext;
 import com.example.horsegenetics.common.genetics.FounderTable;
 import com.example.horsegenetics.common.genetics.Gene;
+import com.example.horsegenetics.common.genetics.Genotype;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -88,7 +91,7 @@ import java.util.Map;
  * <p>Natural. Every outcome but the wild type and dominant white is
  * <b>non-deterministic</b>. See {@code wiki/gene-kit.html}.
  */
-public final class KitGene implements Gene {
+public final class KitGene implements Gene, EyeColorContribution {
 
     public static final String KEY = "horsegenetics.kit";
 
@@ -279,4 +282,19 @@ public final class KitGene implements Gene {
     public boolean isDominantWhite(AllelePair pair) {
         return pair.has(W22);
     }
+
+    /**
+     * {@code KIT} qualifies for a blue eye only from {@code broad-white} upward.
+     * A sabino with four socks and a blaze has ordinary dark eyes - the white on
+     * it never reached the head - which is the difference between this locus and
+     * splash, where even a modest marking comes with blue. See
+     * {@link WhitePatternEyes}.
+     */
+    @Override
+    public java.util.Optional<EyeColor> eyeColor(AllelePair pair, Genotype genotype, double whiteCoverage) {
+        Expression e = expressionOf(pair);
+        boolean broad = e == BROAD || e == EXTENSIVE || e == NEAR_WHITE || e == DOMINANT_WHITE;
+        return WhitePatternEyes.blueIf(broad, whiteCoverage);
+    }
+
 }

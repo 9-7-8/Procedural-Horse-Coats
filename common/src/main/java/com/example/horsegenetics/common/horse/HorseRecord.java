@@ -30,7 +30,7 @@ import java.util.UUID;
  *
  * <p>{@code breed} is the horse's <b>breed label</b> - a {@link BreedLineage}
  * token. A wild herd is stamped with the breed it was rolled from; a lone wild
- * horse, a {@code /summon} or a spawn-egg horse is {@code "unknown"}; a foal's
+ * horse, a {@code /summon} or a spawn-egg horse is {@code "feral_mixed"}; a foal's
  * label is {@link BreedLineage#combine} of its parents'. It is a fact about
  * ancestry, not a derived value, so it is stored rather than resolved. It does,
  * though, feed {@link #traits()}: a pure breed's horses are pinned to that
@@ -107,7 +107,7 @@ public record HorseRecord(
     /**
      * A foundation horse - no recorded parents, generation 0. {@code breedToken}
      * is a {@link BreedLineage} token ({@code null} / blank reads as
-     * {@code "unknown"}).
+     * {@code "feral_mixed"}).
      */
     public static HorseRecord founder(UUID id, String firstName, String lastName, Genome genome,
                                       String breedToken) {
@@ -116,9 +116,9 @@ public record HorseRecord(
                 Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), 0, Optional.empty());
     }
 
-    /** A foundation horse with no breed identity ({@code "unknown"}). */
+    /** A foundation horse with no breed identity ({@code "feral_mixed"}). */
     public static HorseRecord founder(UUID id, String firstName, String lastName, Genome genome) {
-        return founder(id, firstName, lastName, genome, BreedLineage.UNKNOWN.toToken());
+        return founder(id, firstName, lastName, genome, BreedLineage.FERAL.toToken());
     }
 
     /**
@@ -137,7 +137,7 @@ public record HorseRecord(
     /** A bred foal with no breed identity carried through - test / legacy convenience. */
     public static HorseRecord bred(UUID id, String firstName, String lastName, Genome genome,
                                    UUID motherId, UUID fatherId, int generation) {
-        return bred(id, firstName, lastName, genome, BreedLineage.UNKNOWN.toToken(),
+        return bred(id, firstName, lastName, genome, BreedLineage.FERAL.toToken(),
                 motherId, fatherId, generation);
     }
 
@@ -169,7 +169,7 @@ public record HorseRecord(
         return Genome.parse(geneticCode, epigenomeCode);
     }
 
-    /** The horse's breed as a value object ({@code "unknown"} when unset). */
+    /** The horse's breed as a value object ({@code "feral_mixed"} when unset). */
     public BreedLineage lineage() {
         return BreedLineage.parse(breed.orElse(null));
     }

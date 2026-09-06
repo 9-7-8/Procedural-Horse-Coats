@@ -90,7 +90,7 @@ public final class HorseFoundingTickHandler {
         }
 
         // No record, not a natural spawn (/summon, an imported horse): a lone
-        // Unknown, founded immediately - there is no pack coming for it.
+        // Feral Mixed, founded immediately - there is no pack coming for it.
         HANDLED.add(horse.getId());
         HerdManager.assignFounder(horse, new NeoRng(horse.getRandom()));
     }

@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * The built-in breed registry - 47 real-world breeds plus {@link #UNKNOWN}, the
+ * The built-in breed registry - 47 real-world breeds plus {@link #FERAL_MIXED}, the
  * label a lone wild horse / {@code /summon} / spawn-egg horse carries.
  *
  * <p>Every breed here is a first pass: the biome assignments and stat scores
@@ -39,12 +39,27 @@ public final class Breeds {
     private static final String PAX3 = "horsegenetics.pax3";
     private static final String EDNRB = "horsegenetics.ednrb";
     private static final String LEOP = "horsegenetics.leopard";
+    private static final String TE = "horsegenetics.tiger_eye";
     private static final String PATN1 = "horsegenetics.patn1";
     private static final String PATN2 = "horsegenetics.patn2";
 
-    /** The "no herd identity" breed. Its founder is the ordinary unconstrained roll. */
-    public static final Breed UNKNOWN = Breed.of("unknown", "Unknown")
+    /**
+     * The <b>Feral Mixed</b> breed - the label a horse with no herd identity
+     * carries: a lone wild spawn, a {@code /summon}, a spawn-egg horse. Its
+     * founder is the ordinary unconstrained roll.
+     *
+     * <p>It is <b>not</b> a breed a player can breed toward. {@link
+     * BreedLineage#combine} treats it as <b>absorbing</b>: anything crossed with
+     * a Feral Mixed horse is plain {@link BreedLineage#MIXED}, Feral Mixed
+     * included. That is what the rename bought - as "Unknown" it behaved like an
+     * ordinary distinct breed, so a Friesian bred to a wild loner produced a
+     * "Friesian x Unknown cross" and the model had to answer whether Unknown was
+     * a breed with a stat band, a pool and a claim to purity. Absorbing it into
+     * Mixed makes the question disappear rather than answering it.
+     */
+    public static final Breed FERAL_MIXED = Breed.of("feral_mixed", "Feral Mixed")
             .note("Lone wild spawns, /summon and spawn-egg horses. Every gene rolled unconstrained - the pre-breeds behaviour.")
+            .note("Absorbing: any cross involving a Feral Mixed horse produces a Mixed foal.")
             .build();
 
     private static final List<Breed> ALL = new ArrayList<>();
@@ -117,16 +132,16 @@ public final class Breeds {
     }
 
     public static Breed get(String id) {
-        return BY_ID.getOrDefault(id, UNKNOWN);
+        return BY_ID.getOrDefault(id, FERAL_MIXED);
     }
 
-    public static Breed getOrUnknown(java.util.Optional<String> id) {
-        return id.map(Breeds::get).orElse(UNKNOWN);
+    public static Breed getOrFeral(java.util.Optional<String> id) {
+        return id.map(Breeds::get).orElse(FERAL_MIXED);
     }
 
     public static String displayName(String id) {
-        if (id == null || id.isBlank() || id.equals("unknown")) {
-            return "Unknown";
+        if (id == null || id.isBlank() || id.equals("feral_mixed")) {
+            return "Feral Mixed";
         }
         Breed b = BY_ID.get(id);
         if (b != null) {
@@ -654,14 +669,23 @@ public final class Breeds {
                 .build();
     }
 
+    /**
+     * <b>The tiger-eye breed.</b> {@code SLC24A5} is essentially confined to
+     * this one breed in life, and it is distributed that way here: a quarter of
+     * Puerto Rican Paso Finos carry a copy and about one in twenty-five has the
+     * amber eyes, against roughly one wild horse in five thousand. It is the
+     * clearest case in the mod of a gene you find by knowing where to look.
+     */
     private static Breed puertoRicanPasoFino() {
         return Breed.of("puerto_rican_paso_fino", "Puerto Rican Paso Fino").commonness(Commonness.RARE)
                 .biomes("minecraft:jungle", "minecraft:savanna", "minecraft:beach", "minecraft:mangrove_swamp")
                 .extensionAny().agoutiAny()
                 .gene(MATP, "Cr", "N", 10).gene(MATP, "N", "N", 90)
                 .gene(DUN, "D", "d2", 6).gene(DUN, "d2", "d2", 94)
+                .gene(TE, "TE1", "TE1", 3).gene(TE, "TE1", "TE2", 1)
+                .gene(TE, "TE1", "N", 16).gene(TE, "TE2", "N", 6).gene(TE, "N", "N", 74)
                 .height(hh(13, 0), hh(15, 0)).speed(5).jump(4).health(6)
-                .note("Tiger Eye (TE) - amber/yellow iris - NOT BUILT. Candidate eye-colour gene, roadmap.")
+                .note("Tiger eye (SLC24A5) - amber or yellow iris, no coat change. The breed's signature.")
                 .note("Naturally smooth gait - roadmap item (DMRT3). EMS, DSLD: age-related.")
                 .build();
     }

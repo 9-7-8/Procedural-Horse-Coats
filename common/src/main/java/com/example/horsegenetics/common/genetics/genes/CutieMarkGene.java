@@ -4,11 +4,13 @@ import com.example.horsegenetics.common.Rng;
 import com.example.horsegenetics.common.genetics.Allele;
 import com.example.horsegenetics.common.genetics.AllelePair;
 import com.example.horsegenetics.common.genetics.AlleleRandomness;
+import com.example.horsegenetics.common.genetics.CutieMarkContribution;
 import com.example.horsegenetics.common.genetics.Epigenome;
 import com.example.horsegenetics.common.genetics.Expression;
 import com.example.horsegenetics.common.genetics.FounderContext;
 import com.example.horsegenetics.common.genetics.FounderTable;
 import com.example.horsegenetics.common.genetics.Gene;
+import com.example.horsegenetics.common.genetics.Genes;
 import com.example.horsegenetics.common.genetics.Genotype;
 
 import java.util.List;
@@ -75,10 +77,54 @@ public final class CutieMarkGene implements Gene {
 
     private final FounderTable founders = FounderTable.hardyWeinberg(Cutmrk, n, WILD_CUTMRK_FREQUENCY);
 
-    /** The emblem to draw, resolved by the client against its flat-item list. */
-    public record Mark(int count, boolean triangle, double[] picks, double scale, double tilt) {
+    /**
+     * The emblem to draw, resolved by the client against its flat-item list.
+     *
+     * <p>Every field here is something {@code CutieMarkLayer} actually honours -
+     * see {@link CutieMarkContribution} for why that is a rule and not a
+     * coincidence - and every field is <b>modifiable by another gene</b> through
+     * that hook. The {@code with*} helpers exist so a modifier reads as one
+     * statement about the one thing it changes.
+     *
+     * @param count    how many icons, 1-3
+     * @param triangle three icons arranged as a triangle rather than a row
+     * @param picks    three normalised {@code [0,1)} picks into the client's
+     *                 flat-item list; always three, whatever {@code count} says
+     * @param scale    per-emblem size multiplier
+     * @param tilt     in-plane rotation, radians
+     * @param emissive drawn full-bright, so the mark glows in the dark. Set by
+     *                 the light locus rather than by this one - a horse whose
+     *                 hooves or mane already glow should not wear the one dull
+     *                 thing on its body.
+     */
+    public record Mark(int count, boolean triangle, double[] picks, double scale, double tilt,
+                       boolean emissive) {
         public Mark {
             picks = picks.clone();
+        }
+
+        public Mark withCount(int n) {
+            return new Mark(Math.max(1, Math.min(3, n)), triangle, picks, scale, tilt, emissive);
+        }
+
+        public Mark withTriangle(boolean t) {
+            return new Mark(count, t, picks, scale, tilt, emissive);
+        }
+
+        public Mark withPicks(double[] p) {
+            return new Mark(count, triangle, p, scale, tilt, emissive);
+        }
+
+        public Mark withScale(double s) {
+            return new Mark(count, triangle, picks, s, tilt, emissive);
+        }
+
+        public Mark withTilt(double t) {
+            return new Mark(count, triangle, picks, scale, t, emissive);
+        }
+
+        public Mark withEmissive(boolean e) {
+            return new Mark(count, triangle, picks, scale, tilt, e);
         }
     }
 
@@ -108,6 +154,20 @@ public final class CutieMarkGene implements Gene {
      * The emblem for this horse, or empty if it is not {@code Cutmrk/Cutmrk}.
      * Deterministic and heritable: everything is drawn off the expressing
      * copy's epigenetic seed.
+     *
+     * <h2>Two steps: this locus draws it, other genes modify it</h2>
+     * The base mark comes from this gene alone. Every registered gene that
+     * additionally implements {@link CutieMarkContribution} and is
+     * <b>expressing</b> then gets a turn at it, in {@link Genes#codeOrder()}
+     * order, and may hand back a changed one. That is what makes cutie mark a
+     * <b>channel</b> rather than a closed gene: like the LUT locus it owns the
+     * one thing a horse has one of, and everything else reaches it through a
+     * hook instead of growing its own copy.
+     *
+     * <p>It can afford the hook because the emblem is the <b>last thing drawn</b>
+     * - nothing composes over it and nothing reads it back - so a modifier
+     * cannot corrupt an accumulator, surprise a later painter, or move the coat
+     * texture key. See {@link CutieMarkContribution}.
      */
     public Optional<Mark> markFor(Genotype genotype, Epigenome epigenome) {
         if (genotype.pair(this).count(Cutmrk) != 2) {
@@ -119,6 +179,23 @@ public final class CutieMarkGene implements Gene {
         double[] picks = {r.nextFloat(), r.nextFloat(), r.nextFloat()};
         double scale = 0.7 + r.nextFloat() * 0.6;
         double tilt = (r.nextFloat() - 0.5) * 0.7;
-        return Optional.of(new Mark(count, triangle, picks, scale, tilt));
+        Mark mark = new Mark(count, triangle, picks, scale, tilt, false);
+
+        for (Gene gene : Genes.codeOrder()) {
+            if (!(gene instanceof CutieMarkContribution modifier) || gene == this) {
+                continue;
+            }
+            // Deliberately NOT gated on expressionIn(...).wildType(): most of
+            // the magical genes that would want to modify a mark - particle,
+            // milk, the body-stat loci - declare every outcome a wild type
+            // because they paint nothing, so that test would silently exclude
+            // exactly the genes this hook is for. The implementor is handed its
+            // own pair and decides.
+            Mark next = modifier.modifyCutieMark(genotype.pair(gene), genotype, epigenome, mark);
+            if (next != null) {
+                mark = next;
+            }
+        }
+        return Optional.of(mark);
     }
 }

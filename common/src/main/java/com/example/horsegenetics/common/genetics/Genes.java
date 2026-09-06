@@ -18,6 +18,8 @@ import com.example.horsegenetics.common.genetics.genes.CutieMarkGene;
 import com.example.horsegenetics.common.genetics.genes.Patn1Gene;
 import com.example.horsegenetics.common.genetics.genes.Patn2Gene;
 import com.example.horsegenetics.common.genetics.genes.LutGene;
+import com.example.horsegenetics.common.genetics.genes.BrindleGene;
+import com.example.horsegenetics.common.genetics.genes.TigerEyeGene;
 import com.example.horsegenetics.common.genetics.genes.MagicHealthGene;
 import com.example.horsegenetics.common.genetics.genes.MagicJumpGene;
 import com.example.horsegenetics.common.genetics.genes.MagicSizeGene;
@@ -157,6 +159,17 @@ public final class Genes {
      * doubling of what a breeder can aim at.
      */
     public static final MilkGene MILK = new MilkGene();
+    /**
+     * Brindle - the model's one <b>X-linked</b> gene, and the proof of the
+     * sex-linked scaffolding. A stallion carries one copy and can never be a
+     * carrier; a mare needs two.
+     */
+    public static final BrindleGene BRINDLE = new BrindleGene();
+    /**
+     * Tiger eye - amber irises and nothing else. The first gene in the mod that
+     * changes only the eyes, and the reason the eye-colour channel exists.
+     */
+    public static final TigerEyeGene TIGER_EYE = new TigerEyeGene();
     public static final MagicSizeGene BODY_SIZE = new MagicSizeGene();
     public static final MagicSpeedGene MAGIC_SPEED = new MagicSpeedGene();
     public static final MagicHealthGene MAGIC_HEALTH = new MagicHealthGene();
@@ -213,7 +226,7 @@ public final class Genes {
     /** The hand-written genes. Order here is irrelevant - the registry sorts. */
     private static final List<Gene> BUILTINS = List.of(
             SEX, EXTENSION, AGOUTI, CHAMPAGNE, GREY, MATP,
-            MAGIC_ZEBRA, PINK_HAIR, DUN, SILVER, MUSHROOM, ROAN, TOBIANO,
+            MAGIC_ZEBRA, PINK_HAIR, DUN, SILVER, MUSHROOM, BRINDLE, TIGER_EYE, ROAN, TOBIANO,
             LEOPARD, EDNRB, KIT, MITF, PAX3,
             MILK, BODY_SIZE, MAGIC_SPEED, MAGIC_HEALTH, MAGIC_JUMP,
             MANE_COLOR, TAIL_COLOR, PARTICLE, LIGHT, HEALER, VERDANT, LUT, CUTIE_MARK,
@@ -316,7 +329,14 @@ public final class Genes {
         byKey = Map.copyOf(keys);
         alleleByKey = Map.copyOf(alleles);
 
+        // Built-ins never pass through register(SpecGene), so the sex-linked
+        // declaration check has to live here to cover both.
+        for (Gene g : order) {
+            validateInheritance(g);
+        }
+
         GenotypeCatalog.invalidate();
+        SpliceSafety.invalidate();
     }
 
     // ------------------------------------------------------------------
@@ -363,4 +383,35 @@ public final class Genes {
         }
         return a;
     }
+
+    /**
+     * A sex-linked gene has to declare its reserved placeholder allele, and
+     * declare it at the end of {@link Gene#alleles()} that the placeholder slot
+     * sorts to - the {@code Y} <b>last</b> on an {@code X}-linked gene, the
+     * {@code X} <b>first</b> on a {@code Y}-linked one, because
+     * {@link AllelePair} canonicalises on declaration order.
+     *
+     * <p>Checked at registration rather than left to the author, because the
+     * failure mode is not an exception: a placeholder declared in the wrong
+     * place produces pairs that sort the wrong way round, so a stallion's
+     * hemizygous allele lands in the slot the epigenome and every
+     * {@code expressionOf} treat as the second copy, and the gene quietly
+     * misbehaves for exactly one sex.
+     */
+    private static void validateInheritance(Gene gene) {
+        Inheritance mode = gene.inheritance();
+        if (!mode.sexLinked()) {
+            return;
+        }
+        Allele placeholder = gene.hemizygousPlaceholder(); // throws if undeclared
+        List<Allele> alleles = gene.alleles();
+        int expected = mode == Inheritance.X_LINKED ? alleles.size() - 1 : 0;
+        if (placeholder.order() != expected) {
+            throw new IllegalArgumentException(gene.key() + " is " + mode + " so its reserved '"
+                    + placeholder.token() + "' allele must be declared "
+                    + (expected == 0 ? "first" : "last") + " in alleles(), not at index "
+                    + placeholder.order());
+        }
+    }
+
 }

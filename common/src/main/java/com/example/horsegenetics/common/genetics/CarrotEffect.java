@@ -148,7 +148,9 @@ public sealed interface CarrotEffect {
                 prefer = Boolean.FALSE;
             } else if (e instanceof GeneSplice) {
                 Gene g = randomSpliceGene(rng);
-                subs.put(g.key(), splicePair(g, rng));
+                if (g != null) {
+                    subs.put(g.key(), splicePair(g, rng));
+                }
             } else if (e instanceof KnownGeneSplice mg) {
                 Gene g = Genes.byKeyOrNull(mg.geneKey());
                 if (g != null && g.hasGeneCarrot()) {
@@ -162,15 +164,23 @@ public sealed interface CarrotEffect {
                 subs);
     }
 
-    /** Every gene except the sex locus - a carrot must not flip a foal's sex (that is roadmap §5.3). */
+    /**
+     * The locus the Unknown Gene Splice carrot lands on - drawn from
+     * {@link SpliceSafety#pool()}, which is every gene except the sex locus
+     * (a carrot must not flip a foal's sex) and every gene that could make the
+     * foal <b>worse off</b>: lethal, impairing, or simply short of hearts.
+     *
+     * <p>A player feeding a random-splice carrot has chosen a surprise, not a
+     * dead foal. The deliberate route into a lethal genotype is the
+     * <i>Known</i> Gene Splice carrot, where the gene is named and researched
+     * first - that one is not filtered.
+     *
+     * <p>Returns {@code null} if nothing is safe, which cannot happen with any
+     * real registry but must not throw if it does.
+     */
     private static Gene randomSpliceGene(Rng rng) {
-        List<Gene> pool = new ArrayList<>();
-        for (Gene g : Genes.codeOrder()) {
-            if (!g.key().equals(Genes.SEX.key())) {
-                pool.add(g);
-            }
-        }
-        return pool.get(rng.nextInt(pool.size()));
+        List<Gene> pool = SpliceSafety.pool();
+        return pool.isEmpty() ? null : pool.get(rng.nextInt(pool.size()));
     }
 
     private static AllelePair splicePair(Gene gene, Rng rng) {

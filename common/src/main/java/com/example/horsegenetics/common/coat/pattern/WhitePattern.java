@@ -106,6 +106,13 @@ public final class WhitePattern {
     private static final double BODY_JAG_FREQ = 3.3;
     /** How ragged a KIT face marking's margin is, in body units. */
     private static final double SABINO_FACE_JAG = 0.42;
+    /**
+     * Where the sabino belly patch sits at zero strength, and how far it climbs
+     * over the full ramp - both as fractions of {@link #toplineHeight}.
+     * {@value #BELLY_ANCHOR} is the underline.
+     */
+    private static final double BELLY_ANCHOR = 0.44;
+    private static final double BELLY_REACH = 0.42;
 
     /**
      * The {@code KIT} / sabino shape at {@code strength}, from a barely-marked
@@ -141,9 +148,17 @@ public final class WhitePattern {
         FaceMarking faceMark = faceMarking(epi, skin, s, SABINO_FACE_JAG);
 
         Bounds body = HorseSkinGeometry.bodyBounds(skin);
-        double span = body.span(Axis.Y);
-        // The belly patch reaches this far up the horse; nothing at all below ~0.1.
-        double bellyLine = body.yMin() + span * (s * (0.62 + 0.16 * bellyRoll));
+        double topline = toplineHeight(skin);
+        // How far up the flank the belly patch reaches, as a fraction of the
+        // TOPLINE (see toplineHeight). Unlike splash's waterline this one is
+        // anchored at the underline (0.52) rather than at the ground: sabino's
+        // leg white is drawn separately per leg, so this component is the belly
+        // spot alone and has no business below the elbow. A classic SB1 sabino
+        // (0.42) reaches 0.58 - the underline and a hand up the flank; even
+        // sabino-white (0.93) stops at 0.84, short of the spine, so a near-white
+        // sabino keeps a coloured topline rather than becoming a dominant white.
+        double bellyLine = body.yMin() + topline
+                * clamp01(BELLY_ANCHOR + BELLY_REACH * s * (0.85 + 0.30 * bellyRoll));
         // Body white only begins once the extremities are already white, then
         // takes over quickly - the ladder from "a few belly spots" to
         // "sabino-white" is short in real horses too.
@@ -175,7 +190,7 @@ public final class WhitePattern {
             if (point.y() < bellyLine) {
                 // A soft-bottomed patch rising off the underline.
                 double n = PatchNoise.field(seed ^ 0x7EL, point.x(), point.y(), point.z(), 0.12);
-                double rise = 1.0 - PatchNoise.smoothstep(bellyLine - span * 0.18, bellyLine, point.y());
+                double rise = 1.0 - PatchNoise.smoothstep(bellyLine - topline * 0.22, bellyLine, point.y());
                 if (n * (0.4 + 0.6 * rise) > 1.0 - 0.66 * s) {
                     whiten(f, px, py);
                     return;
@@ -202,9 +217,21 @@ public final class WhitePattern {
     // The MITF / PAX3 shape: dipped in white from below
     // ------------------------------------------------------------------
 
-    /** How far the waterline wobbles, as a fraction of body height. */
-    private static final double LEVEL_WOBBLE = 0.055;
+    /** How far the waterline wobbles, as a fraction of {@link #toplineHeight}. */
+    private static final double LEVEL_WOBBLE = 0.085;
     private static final double LEVEL_FREQ = 0.9;
+    /**
+     * The lowest the splash waterline ever sits, as a fraction of the topline -
+     * a coronet band. Even a barely-expressing splash allele leaves the hoof
+     * white; that is the marking it is named for.
+     */
+    private static final double SPLASH_FLOOR = 0.035;
+    /**
+     * The convexity of the splash ramp. Chosen so that each {@code MITF} /
+     * {@code PAX3} outcome lands at the anatomy its own {@code describe()} text
+     * names; see {@link #splash}.
+     */
+    private static final double SPLASH_GAMMA = 1.7;
     /**
      * The waterline is a <b>hard</b> cut, not a fade. Two reasons, and they
      * point the same way: splash margins are sharply bounded in life, and the
@@ -235,7 +262,7 @@ public final class WhitePattern {
      * {@link #SPLASH_FACE_BOOST}) but consumes exactly the same numbers.
      */
     public static PigmentField splash(CoatBuildContext ctx, PigmentView coat, String geneKey, double strength) {
-        double s = clamp01(strength + SPLASH_STACKING * alreadyWhite(coat, ctx.skin()));
+        double s = clamp01(strength + SPLASH_STACKING * stackingSignal(alreadyWhite(coat, ctx.skin())));
         Rng epi = ctx.epigeneticsFor(geneKey);
         long seed = epi.nextLong();
         double levelRoll = epi.nextFloat();
@@ -251,11 +278,26 @@ public final class WhitePattern {
                 clamp01(s + SPLASH_FACE_BOOST), SPLASH_FACE_JAG);
 
         Bounds body = HorseSkinGeometry.bodyBounds(skin);
-        double span = body.span(Axis.Y);
-        // Splash is measured from the ground up, so the fraction is of the whole
-        // horse, not of the barrel: 0.35 already means high stockings and belly.
-        double level = body.yMin() + span * clamp01(0.06 + s * (0.78 + 0.18 * levelRoll));
-        double wobble = span * LEVEL_WOBBLE;
+        double topline = toplineHeight(skin);
+        // How far up the horse the waterline sits, as a fraction of the
+        // TOPLINE (see toplineHeight) - so 1.0 is the spine, not the ear tips.
+        //
+        // The ramp is CONVEX, and that is what makes a minimal splash minimal.
+        // White spotting does not grow linearly with allele dose: one copy of a
+        // mild allele buys a sock, and the jump to a belly-deep horse happens
+        // at the top of the range. The exponent puts each outcome where its own
+        // prose says it should be - 0.34 (one PAX3 copy) at 0.21 of the
+        // topline, upper cannon; 0.38 (MITF splash, "just above the knee") at
+        // 0.24; 0.62 ("well past the elbow") at 0.51, onto the barrel; 0.86
+        // ("almost the whole horse below the topline") at 0.87; 1.0 at the
+        // spine. The old LINEAR map put even 0.34 above the underline.
+        double rise = clamp01(SPLASH_FLOOR
+                + (1.0 - SPLASH_FLOOR) * Math.pow(s, SPLASH_GAMMA) * (1.0 + 0.22 * levelRoll));
+        double level = body.yMin() + topline * rise;
+        // The wobble tapers with the line. A coronet band torn by a full
+        // barrel-scale wobble is not a coronet band any more - it is a hoof
+        // that is white on one side.
+        double wobble = topline * LEVEL_WOBBLE * (0.45 + 0.55 * rise);
 
         PigmentField f = coat.mutableCopy();
         HorseSkinGeometry.forEachTexel(skin, (px, py, part, face, point) -> {
@@ -578,8 +620,41 @@ public final class WhitePattern {
      * exists for; the {@code KIT} ramp is more conservative, since a sabino
      * over a tobiano should read as a loud pinto and not as a white horse.
      */
-    private static final double SPLASH_STACKING = 0.55;
+    private static final double SPLASH_STACKING = 0.50;
     private static final double SABINO_STACKING = 0.35;
+
+    /**
+     * The coverage at which the splash stacking signal is half spent - see
+     * {@link #stackingSignal}.
+     */
+    private static final double STACKING_HALF = 0.10;
+
+    /**
+     * <b>How loudly "white finds white" speaks</b>, given the fraction of the
+     * horse an earlier locus has already whitened.
+     *
+     * <p>Splash reads this through a saturating curve rather than using the
+     * coverage directly, and the reason is that coverage is a <i>terrible</i>
+     * linear signal once the waterline ramp is quadratic. The two cases it has
+     * to serve differ by more than three times in coverage and should differ
+     * far less in response:
+     * <ul>
+     *   <li>a second splash locus, which arrives with the horse only ~14% white
+     *       (socks) and must lift the line to belly-deep - the whole reason
+     *       splash is modelled as two genes;</li>
+     *   <li>a splash allele on a tobiano or a frame, which arrives with the
+     *       horse 45-70% white already and must <i>not</i> take the rest.</li>
+     * </ul>
+     * A straight multiple of coverage cannot do both: tuned for the first it
+     * turns every tobiano into a white horse, and tuned for the second it makes
+     * the two splash loci indistinguishable from one - which is exactly what
+     * measurement showed after the topline recalibration. {@code w / (w + k)}
+     * answers 0.58 to the first and 0.82 to the second, so a doubling of the
+     * signal buys the second case a third more, not three times more.
+     */
+    private static double stackingSignal(double white) {
+        return white / (white + STACKING_HALF);
+    }
 
     /**
      * Below this a pigment counts as gone. The same threshold the composer uses
@@ -604,6 +679,31 @@ public final class WhitePattern {
             }
         });
         return tally[1] == 0 ? 0.0 : tally[0] / (double) tally[1];
+    }
+
+    /**
+     * <b>How high white is allowed to climb</b>, in body units above the hoof:
+     * the top of the barrel ({@code bounds(skin, BODY).yMax()}), which on the
+     * adult mesh is 20.99 of a whole-horse AABB 33.75 tall.
+     *
+     * <p>This is the reference every vertical constant in this class is
+     * expressed against, and getting it wrong was a real defect rather than a
+     * tuning miss. Both painters used to measure against
+     * {@link HorseSkinGeometry#bodyBounds} - the <i>whole-horse</i> box, hoof
+     * to <b>ear tip</b> - on which the legs reach only 0.326 and the belly
+     * 0.326. A splash waterline written as "0.35 of the horse" therefore landed
+     * at 0.35&times;33.75 = 11.8 units, <i>above the underline</i>: four
+     * entirely white legs and white onto the barrel, for what the gene calls a
+     * minimal marking. With {@code PAX3}'s {@code SW2} on ninety per cent of
+     * founders, that was most horses in the world.
+     *
+     * <p>Against the topline the fractions mean something anatomical:
+     * {@code 0.05} is the coronet, {@code 0.10} the fetlock, {@code 0.26} the
+     * knee and hock, {@code 0.52} the underline, {@code 1.0} the spine.
+     */
+    private static double toplineHeight(Skin skin) {
+        Bounds body = HorseSkinGeometry.bodyBounds(skin);
+        return HorseSkinGeometry.bounds(skin, Part.BODY).yMax() - body.yMin();
     }
 
     private static void whiten(PigmentField f, int px, int py) {

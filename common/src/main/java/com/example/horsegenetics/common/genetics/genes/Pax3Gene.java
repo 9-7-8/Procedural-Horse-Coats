@@ -3,6 +3,8 @@ package com.example.horsegenetics.common.genetics.genes;
 import com.example.horsegenetics.common.coat.pattern.WhitePattern;
 import com.example.horsegenetics.common.genetics.Allele;
 import com.example.horsegenetics.common.genetics.AllelePair;
+import com.example.horsegenetics.common.genetics.EyeColor;
+import com.example.horsegenetics.common.genetics.EyeColorContribution;
 import com.example.horsegenetics.common.genetics.Expression;
 import com.example.horsegenetics.common.genetics.FounderContext;
 import com.example.horsegenetics.common.genetics.FounderTable;
@@ -61,7 +63,7 @@ import java.util.List;
  * the two loci produce the same pattern, which is exactly why they were
  * mistaken for one gene. See {@code wiki/gene-pax3.html}.
  */
-public final class Pax3Gene implements Gene, HealthContribution {
+public final class Pax3Gene implements Gene, HealthContribution, EyeColorContribution {
 
     public static final String KEY = "horsegenetics.pax3";
 
@@ -169,4 +171,11 @@ public final class Pax3Gene implements Gene, HealthContribution {
             out.condition(MitfGene.DEAFNESS);
         }
     }
+
+    /** The second splash locus, and the same rule - see {@link MitfGene#eyeColor}. */
+    @Override
+    public java.util.Optional<EyeColor> eyeColor(AllelePair pair, Genotype genotype, double whiteCoverage) {
+        return WhitePatternEyes.blueIf(!expressionOf(pair).wildType(), whiteCoverage);
+    }
+
 }

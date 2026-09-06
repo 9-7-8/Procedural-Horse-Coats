@@ -10,7 +10,7 @@ import net.neoforged.neoforge.event.entity.living.FinalizeSpawnEvent;
  * The <b>only</b> thing done at spawn time: mark a horse that came from a
  * <b>natural</b> spawn (or chunk generation, or a mob spawner) so that
  * {@link HerdManager}, a tick later, knows to try to build it into a herd
- * rather than leave it a lone Unknown.
+ * rather than leave it a lone Feral Mixed.
  *
  * <p>It does not touch the pack {@link net.minecraft.world.entity.SpawnGroupData}
  * &mdash; {@code Horse.finalizeSpawn} replaces any custom one with its own

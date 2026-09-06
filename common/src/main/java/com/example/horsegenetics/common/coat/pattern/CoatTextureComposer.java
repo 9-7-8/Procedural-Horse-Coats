@@ -5,6 +5,8 @@ import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Skin;
 import com.example.horsegenetics.common.genetics.AllelePair;
 import com.example.horsegenetics.common.genetics.Epigenome;
 import com.example.horsegenetics.common.genetics.Expression;
+import com.example.horsegenetics.common.genetics.EyeColor;
+import com.example.horsegenetics.common.genetics.EyeColorContribution;
 import com.example.horsegenetics.common.genetics.Gene;
 import com.example.horsegenetics.common.genetics.Genes;
 import com.example.horsegenetics.common.genetics.Genotype;
@@ -168,6 +170,13 @@ public final class CoatTextureComposer {
         // 5. overlay phase - final pixels and emissive texels, over the finished
         // coat. Runs after the eyes precisely so a gene can colour them.
         CoatOverlay overlay = new CoatOverlay(skin, out.clone());
+
+        // 5a. Eye colour, before the general overlay pass, so a gene that wants
+        // the whole eye (light's glowing gold, the leopard complex's white rim)
+        // still gets the last word over the iris tint.
+        eyeColorOf(genotype, whiteCoverage(pigment, skin))
+                .ifPresent(eye -> overlay.tintIris(eye.rgb(), eye.strength()));
+
         for (Gene gene : Genes.codeOrder()) {
             if (!(gene instanceof CoatOverlayContribution contribution)) {
                 continue;
@@ -210,4 +219,55 @@ public final class CoatTextureComposer {
         int v = Math.round(templateCh * factor);
         return v < 0 ? 0 : (v > 255 ? 255 : v);
     }
+
+    // ------------------------------------------------------------------
+    // Eye colour - one channel, several claimants
+    // ------------------------------------------------------------------
+
+    /**
+     * The winning {@link EyeColor} claim for this horse, or empty for the
+     * template's own dark eye.
+     *
+     * <p>A horse has one iris colour, so the claims are <b>ranked, not
+     * blended</b>: highest {@link EyeColor#rank()} wins and a tie goes to the
+     * earlier gene in {@link Genes#codeOrder()}. See
+     * {@link EyeColorContribution} for why the white loci are claimants at all
+     * and why blue out-ranks a pigment colour.
+     */
+    static Optional<EyeColor> eyeColorOf(Genotype genotype, double whiteCoverage) {
+        EyeColor best = null;
+        for (Gene gene : Genes.codeOrder()) {
+            if (!(gene instanceof EyeColorContribution contribution)) {
+                continue;
+            }
+            Optional<EyeColor> claim =
+                    contribution.eyeColor(genotype.pair(gene), genotype, whiteCoverage);
+            if (claim.isPresent() && (best == null || best.losesTo(claim.get()))) {
+                best = claim.get();
+            }
+        }
+        return Optional.ofNullable(best);
+    }
+
+    /**
+     * The fraction of mapped texels the white loci have left with <b>no pigment
+     * at all</b> - the signal {@link EyeColorContribution} reads to decide
+     * whether a horse is white enough for a blue eye.
+     *
+     * <p>Measured on the resolved pigment field rather than per locus on
+     * purpose: a horse that is broadly white because two mild alleles stacked
+     * has exactly the same claim on a blue eye as one that is white from a
+     * single bold allele, and no per-locus test can see that.
+     */
+    private static double whiteCoverage(PigmentView coat, Skin skin) {
+        int[] tally = new int[2];
+        HorseSkinGeometry.forEachTexel(skin, (px, py, part, face, point) -> {
+            tally[1]++;
+            if (coat.red(px, py) <= TRANSPARENT_EPS && coat.black(px, py) <= TRANSPARENT_EPS) {
+                tally[0]++;
+            }
+        });
+        return tally[1] == 0 ? 0.0 : tally[0] / (double) tally[1];
+    }
+
 }

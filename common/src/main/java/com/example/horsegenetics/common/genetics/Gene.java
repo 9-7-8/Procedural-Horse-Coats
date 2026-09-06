@@ -131,6 +131,120 @@ public interface Gene {
     }
 
     /**
+     * <b>May the Unknown Gene Splice carrot roll this locus at all?</b> - the
+     * manual half of the blacklist.
+     *
+     * <p>Almost no gene should override this. The rule the carrot enforces -
+     * never hand an unborn foal something that kills it or costs it hearts - is
+     * <b>derived</b> from what the genes do, in {@link SpliceSafety}: every
+     * combination the carrot could roll is resolved through
+     * {@link com.example.horsegenetics.common.trait.HorseTraits} and the locus
+     * is dropped if any of them is lethal, impairing, or simply leaves the horse
+     * with fewer hearts. A hand-written list would be wrong the first time
+     * someone added a health gene and forgot it, and wrong silently.
+     *
+     * <p>This is the override for harm that resolution cannot see - a gene whose
+     * damage is in an {@code effects} block or a render layer rather than in its
+     * {@link com.example.horsegenetics.common.trait.TraitContribution}. Returning
+     * {@code false} takes the locus out of the random draw and out of nothing
+     * else: the gene is still inherited normally, still rollable by a founder,
+     * and still reachable through its own <i>Known</i> Gene Splice carrot, where
+     * the player names it deliberately.
+     */
+    default boolean spliceable() {
+        return true;
+    }
+
+    /**
+     * <b>Which chromosome this gene sits on.</b> Autosomal by default, which is
+     * every gene in the mod but brindle.
+     *
+     * <p>Declaring {@link Inheritance#X_LINKED} or {@link Inheritance#Y_LINKED}
+     * changes three things and nothing else: {@link Genotype#breedWith} routes
+     * the sire's copy by the <i>foal's</i> sex rather than drawing it,
+     * {@link GenotypeCatalog} stops enumerating combinations no horse of either
+     * sex could have, and a hemizygous horse's single allele is displayed with
+     * an {@link Inheritance#displayPrefix() X- / Y- prefix} instead of beside a
+     * fake second copy. The genotype is still one {@link AllelePair} per gene -
+     * see {@link Inheritance} for the reserved-slot scheme that buys that.
+     *
+     * <p>A sex-linked gene must additionally <b>declare the reserved
+     * placeholder allele</b> named by {@link Inheritance#placeholderToken()},
+     * at the end of {@link #alleles()} that the placeholder slot sorts to.
+     * {@link Genes#register} refuses one that does not.
+     */
+    default Inheritance inheritance() {
+        return Inheritance.AUTOSOMAL;
+    }
+
+    /**
+     * The reserved allele a hemizygous horse's spare slot holds, for a
+     * sex-linked gene.
+     *
+     * @throws IllegalStateException on an autosomal gene, or on a sex-linked one
+     *         that failed to declare it (which {@link Genes#register} should
+     *         already have caught)
+     */
+    default Allele hemizygousPlaceholder() {
+        String token = inheritance().placeholderToken();
+        if (token == null) {
+            throw new IllegalStateException(key() + " is autosomal and has no placeholder allele");
+        }
+        for (Allele a : alleles()) {
+            if (a.token().equals(token)) {
+                return a;
+            }
+        }
+        throw new IllegalStateException(key() + " is " + inheritance() + " but declares no reserved '"
+                + token + "' allele");
+    }
+
+    /** Is {@code allele} this gene's reserved placeholder rather than a real allele? */
+    default boolean isPlaceholder(Allele allele) {
+        return inheritance().sexLinked() && allele.equals(hemizygousPlaceholder());
+    }
+
+    /**
+     * The horse's <b>real</b> alleles here - two for a diploid horse, one for a
+     * hemizygous one, none for a mare at a {@code Y}-linked locus. This is what
+     * a sex-linked gene's {@code expressionOf} counts instead of reading the
+     * pair's two slots directly.
+     */
+    default List<Allele> realAlleles(AllelePair pair) {
+        if (!inheritance().sexLinked()) {
+            return List.of(pair.first(), pair.second());
+        }
+        Allele placeholder = hemizygousPlaceholder();
+        List<Allele> out = new java.util.ArrayList<>(2);
+        if (!pair.first().equals(placeholder)) {
+            out.add(pair.first());
+        }
+        if (!pair.second().equals(placeholder)) {
+            out.add(pair.second());
+        }
+        return List.copyOf(out);
+    }
+
+    /**
+     * Could a horse of <b>some</b> sex carry this combination at all? A pair of
+     * placeholders at an {@code X}-linked locus could not - every horse has an
+     * {@code X} - and neither could two real alleles at a {@code Y}-linked one.
+     * Combined with {@link #canOccur} by {@link GenotypeCatalog}.
+     */
+    default boolean sexConsistent(AllelePair pair) {
+        Inheritance mode = inheritance();
+        if (!mode.sexLinked()) {
+            return true;
+        }
+        int real = realAlleles(pair).size();
+        return switch (mode) {
+            case X_LINKED -> real == 1 || real == 2;   // stallion, mare
+            case Y_LINKED -> real == 0 || real == 1;   // mare, stallion
+            case AUTOSOMAL -> true;
+        };
+    }
+
+    /**
      * <b>Gene priority</b> - a fixed constant of the gene (never data on a
      * horse, never varies between horses) that decides <b>processing order</b>.
      * Every gene has to answer; there is no default.

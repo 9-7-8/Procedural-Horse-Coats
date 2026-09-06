@@ -162,19 +162,81 @@ public final class Genotype {
 
     /**
      * Mendelian: for each gene the child takes one allele from each parent,
-     * drawn 50/50 within that parent's pair. Two {@link Rng#nextBoolean()}
-     * draws per gene, genes in {@link Genes#codeOrder()}.
+     * drawn 50/50 within that parent's pair. <b>Two {@link Rng#nextBoolean()}
+     * draws per gene</b>, genes in {@link Genes#codeOrder()}.
+     *
+     * <h2>Sex-linked loci</h2>
+     * A gene that declares {@link Inheritance#X_LINKED} or
+     * {@link Inheritance#Y_LINKED} does not get the sire's copy by a coin flip -
+     * it is <b>decided by the foal's own sex</b>, which the sex locus (priority
+     * 1, so always first in {@code codeOrder()}) has already drawn by the time
+     * any other gene is reached. On an {@code X}-linked locus the sire gives his
+     * {@code X}-borne allele to a filly and his {@code Y} - i.e. nothing - to a
+     * colt; a {@code Y}-linked locus is the mirror. The dam is unchanged in both
+     * cases.
+     *
+     * <p><b>The second coin is still flipped and thrown away.</b> Two booleans
+     * per gene is an invariant a lot of things lean on - the golden coats, the
+     * gamete-bias equivalence test, every claim that adding a gene shifts the
+     * stream by a known amount - and a locus that quietly consumed one would
+     * make the stream depend on a foal's sex. The particle locus's fixed draw
+     * order, applied one layer up.
      */
     public Genotype breedWith(Genotype other, Rng rng) {
         Map<String, AllelePair> m = new LinkedHashMap<>();
+        Sex childSex = null;
         for (Gene g : Genes.codeOrder()) {
             AllelePair mine = pair(g);
             AllelePair theirs = other.pair(g);
             Allele c1 = rng.nextBoolean() ? mine.first() : mine.second();
             Allele c2 = rng.nextBoolean() ? theirs.first() : theirs.second();
-            m.put(g.key(), new AllelePair(c1, c2));
+            AllelePair drawn = g.inheritance().sexLinked() && childSex != null
+                    ? sexLinkedPair(g, this, other, childSex, c1, c2)
+                    : new AllelePair(c1, c2);
+            m.put(g.key(), drawn);
+            if (g == Genes.SEX) {
+                childSex = Genes.SEX.sexOf(drawn);
+            }
         }
         return new Genotype(m);
+    }
+
+    /**
+     * One sex-linked locus for a foal of {@code childSex}. {@code aPick} and
+     * {@code bPick} are the two coins already flipped - one inside each parent's
+     * own pair - so this method spends no randomness of its own and the
+     * two-booleans-per-gene invariant holds.
+     *
+     * <p>Which parent is the dam is read off the parents' own sex loci rather
+     * than from the call site, because {@code breedWith} is otherwise symmetric
+     * and nothing else in the model has ever needed to know. If both read as the
+     * same sex - which the breeding handlers do not allow, but a hand-written
+     * genotype could - {@code a} is treated as the dam, the same tolerance
+     * {@link #parse} shows everywhere else.
+     */
+    private static AllelePair sexLinkedPair(Gene gene, Genotype a, Genotype b, Sex childSex,
+                                            Allele aPick, Allele bPick) {
+        boolean aIsDam = a.sex() == Sex.FEMALE || b.sex() != Sex.FEMALE;
+        Genotype sire = aIsDam ? b : a;
+        Allele damPick = aIsDam ? aPick : bPick;
+        Allele placeholder = gene.hemizygousPlaceholder();
+        List<Allele> sireReal = gene.realAlleles(sire.pair(gene));
+
+        if (gene.inheritance() == Inheritance.X_LINKED) {
+            // The dam is diploid here, so her half is the ordinary coin flip.
+            // A filly gets the sire's one X-borne allele; a colt gets his Y,
+            // which is to say she gets the locus and he does not.
+            Allele fromSire = childSex == Sex.FEMALE && !sireReal.isEmpty()
+                    ? sireReal.get(0)
+                    : placeholder;
+            return new AllelePair(damPick, fromSire);
+        }
+
+        // Y-linked: the dam contributes nothing at all, and a filly has no copy.
+        Allele fromSire = childSex == Sex.FEMALE || sireReal.isEmpty()
+                ? placeholder
+                : sireReal.get(0);
+        return new AllelePair(placeholder, fromSire);
     }
 
     // ------------------------------------------------------------------

@@ -30,6 +30,12 @@ import net.minecraft.world.level.Level;
  * seed; the normalised item picks are resolved against
  * {@link FlatItemCatalog}.
  *
+ * <p>The mark is <b>modifiable by other genes</b>: {@code markFor} folds every
+ * {@link com.example.horsegenetics.common.genetics.CutieMarkContribution} over
+ * the base emblem before handing it back, which is how a light-locus horse
+ * comes to wear a glowing one. Every field of {@code Mark} must be honoured
+ * here - a field this layer ignores is a promise the game does not keep.
+ *
  * <p>Placement is an approximation - a fixed offset out from the animated body
  * part, aimed at the upper hindquarter - and wants tuning against a live horse.
  */
@@ -43,6 +49,8 @@ public class CutieMarkLayer extends RenderLayer<HorseRenderState, HorseModel> {
     private static final float DEPTH_STEP = 0.012f;
     /** Degrees each icon is fanned in-plane, for a "stacked stickers" read. */
     private static final float FAN_DEG = 5.0f;
+    /** Packed block+sky light for a mark another gene has made emissive. */
+    private static final int FULL_BRIGHT = 0x00F000F0;
 
     private final ItemStackRenderState[] itemStates = {
             new ItemStackRenderState(), new ItemStackRenderState(), new ItemStackRenderState()
@@ -65,6 +73,9 @@ public class CutieMarkLayer extends RenderLayer<HorseRenderState, HorseModel> {
         }
         CutieMarkGene.Mark mark = maybe.get();
         int count = Math.min(mark.count(), itemStates.length);
+        // A mark another gene has lit (today: the light locus) is drawn
+        // full-bright, the same way EmissiveCoatLayer draws a glowing mane.
+        int light = mark.emissive() ? FULL_BRIGHT : lightCoords;
 
         Minecraft mc = Minecraft.getInstance();
         ItemModelResolver resolver = mc.getItemModelResolver();
@@ -104,7 +115,7 @@ public class CutieMarkLayer extends RenderLayer<HorseRenderState, HorseModel> {
                 poseStack.translate(xy[0] * SPACING, xy[1] * SPACING, i * DEPTH_STEP);
                 poseStack.mulPose(Axis.ZP.rotationDegrees((i - (count - 1) / 2.0f) * FAN_DEG));
                 poseStack.scale(scale, scale, scale);
-                itemStates[i].submit(poseStack, submitNodeCollector, lightCoords,
+                itemStates[i].submit(poseStack, submitNodeCollector, light,
                         OverlayTexture.NO_OVERLAY, state.outlineColor);
                 poseStack.popPose();
             }

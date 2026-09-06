@@ -112,10 +112,10 @@ class BreedFounderTest {
     }
 
     @Test
-    void unknownBreedIsTheUnconstrainedRoll() {
+    void feralMixedIsTheUnconstrainedRoll() {
         // two different seeds diverge -> nothing is being pinned
-        Genotype a = roll("unknown", 1);
-        Genotype b = roll("unknown", 2);
+        Genotype a = roll("feral_mixed", 1);
+        Genotype b = roll("feral_mixed", 2);
         assertFalse(a.toCode().equals(b.toCode()));
     }
 }

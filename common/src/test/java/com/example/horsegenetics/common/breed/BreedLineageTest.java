@@ -56,28 +56,34 @@ class BreedLineageTest {
         assertSame(BreedLineage.MIXED, BreedLineage.combine(BreedLineage.MIXED, BreedLineage.MIXED));
     }
 
+    /**
+     * Feral Mixed is <b>absorbing</b>, exactly like Mixed. It used to combine as
+     * an ordinary distinct breed ("Friesian x Unknown cross"), which forced the
+     * model to answer whether a wild loner was a breed with a band, a pool and a
+     * purity. Every cross involving it is now plain Mixed - including feral with
+     * feral, so there is no back door to a "pure feral" line.
+     */
     @Test
-    void unknownActsLikeAnOrdinaryBreed() {
-        // pure breed + unknown -> a cross with "Unknown"
-        BreedLineage c = BreedLineage.combine(FRIESIAN, BreedLineage.UNKNOWN);
-        assertEquals(Kind.CROSS, c.kind());
-        assertEquals("Friesian × Unknown cross", c.displayName());
-        // unknown + unknown -> unknown
-        assertEquals(Kind.UNKNOWN, BreedLineage.combine(BreedLineage.UNKNOWN, BreedLineage.UNKNOWN).kind());
+    void feralIsAbsorbingLikeMixed() {
+        assertSame(BreedLineage.MIXED, BreedLineage.combine(FRIESIAN, BreedLineage.FERAL));
+        assertSame(BreedLineage.MIXED, BreedLineage.combine(BreedLineage.FERAL, FRIESIAN));
+        assertSame(BreedLineage.MIXED, BreedLineage.combine(FR_AR, BreedLineage.FERAL));
+        assertSame(BreedLineage.MIXED, BreedLineage.combine(BreedLineage.FERAL, BreedLineage.FERAL));
+        assertEquals("Feral Mixed", BreedLineage.FERAL.displayName());
     }
 
     @Test
     void tokensRoundTrip() {
-        for (BreedLineage l : new BreedLineage[]{FRIESIAN, FR_AR, BreedLineage.MIXED, BreedLineage.UNKNOWN}) {
+        for (BreedLineage l : new BreedLineage[]{FRIESIAN, FR_AR, BreedLineage.MIXED, BreedLineage.FERAL}) {
             assertEquals(l, BreedLineage.parse(l.toToken()), l.toToken());
         }
         assertEquals("cross:arabian+friesian", FR_AR.toToken());
     }
 
     @Test
-    void blankAndNullParseToUnknown() {
-        assertEquals(Kind.UNKNOWN, BreedLineage.parse(null).kind());
-        assertEquals(Kind.UNKNOWN, BreedLineage.parse("").kind());
-        assertEquals(Kind.UNKNOWN, BreedLineage.parse("unknown").kind());
+    void blankAndNullParseToFeral() {
+        assertEquals(Kind.FERAL, BreedLineage.parse(null).kind());
+        assertEquals(Kind.FERAL, BreedLineage.parse("").kind());
+        assertEquals(Kind.FERAL, BreedLineage.parse("feral_mixed").kind());
     }
 }

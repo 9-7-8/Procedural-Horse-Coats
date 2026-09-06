@@ -137,7 +137,23 @@ class CoatPipelineGoldenTest {
             override("agouti=A/a", "leopard=LP/lp", "patn1=PATN1/n", "patn2=PATN2/n"),
             override("extension=e/e", "leopard=LP/lp", "patn1=PATN1/n"),
             // PATN with no LP paints nothing - must hash identical to plain
-            override("agouti=A/a", "patn1=PATN1/PATN1", "patn2=PATN2/n"));
+            override("agouti=A/a", "patn1=PATN1/PATN1", "patn2=PATN2/n"),
+
+            // brindle - the X-linked locus. Both the hemizygous stallion form
+            // and the homozygous mare form, and the carrier mare that must be
+            // byte-identical to a plain horse.
+            override("agouti=A/a", "brindle=Brn/Y", "sex=X/Y"),
+            override("agouti=A/a", "brindle=Brn/Brn"),
+            override("agouti=A/a", "brindle=Brn/n"),
+            override("extension=e/e", "brindle=Brn/Brn"),
+
+            // tiger eye - paints nothing but the iris, so these pin that the
+            // coat is unmoved and the eye is not.
+            override("agouti=A/a", "tiger_eye=TE1/TE1"),
+            override("agouti=A/a", "tiger_eye=TE2/TE2"),
+            override("agouti=A/a", "tiger_eye=TE1/N"),
+            // blue beats amber
+            override("agouti=A/a", "tiger_eye=TE1/TE1", "mitf=SW1/N"));
 
     private static final long[] SEEDS = {0L, 3L, 4242L};
 

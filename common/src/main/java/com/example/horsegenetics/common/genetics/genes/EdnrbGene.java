@@ -13,6 +13,8 @@ import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Part;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Skin;
 import com.example.horsegenetics.common.genetics.Allele;
 import com.example.horsegenetics.common.genetics.AllelePair;
+import com.example.horsegenetics.common.genetics.EyeColor;
+import com.example.horsegenetics.common.genetics.EyeColorContribution;
 import com.example.horsegenetics.common.genetics.Expression;
 import com.example.horsegenetics.common.genetics.FounderContext;
 import com.example.horsegenetics.common.genetics.FounderTable;
@@ -70,7 +72,7 @@ import java.util.Map;
  * <p>Natural. {@code frame} is <b>non-deterministic</b>; {@code lethal-white}
  * is deterministic (it is total). See {@code wiki/gene-ednrb.html}.
  */
-public final class EdnrbGene implements Gene, HealthContribution {
+public final class EdnrbGene implements Gene, HealthContribution, EyeColorContribution {
 
     public static final String KEY = "horsegenetics.ednrb";
     /** Founder frequency of {@code O}: one allele copy in this many. */
@@ -245,4 +247,14 @@ public final class EdnrbGene implements Gene, HealthContribution {
             out.condition(LETHAL_WHITE_SYNDROME).addHealth(-14.0).addSpeed(-0.05).addJump(-0.2);
         }
     }
+
+    /**
+     * Frame overos are commonly blue-eyed, and a lethal white foal always is -
+     * it has no pigment anywhere at all. See {@link WhitePatternEyes}.
+     */
+    @Override
+    public java.util.Optional<EyeColor> eyeColor(AllelePair pair, Genotype genotype, double whiteCoverage) {
+        return WhitePatternEyes.blueIf(!expressionOf(pair).wildType(), whiteCoverage);
+    }
+
 }

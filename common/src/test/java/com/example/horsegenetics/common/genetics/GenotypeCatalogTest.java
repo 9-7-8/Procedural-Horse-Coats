@@ -24,7 +24,11 @@ class GenotypeCatalogTest {
             int impossible = 0;
             for (Allele a : gene.alleles()) {
                 for (Allele b : gene.alleles()) {
-                    if (a.order() <= b.order() && !gene.canOccur(new AllelePair(a, b))) {
+                    AllelePair pair = new AllelePair(a, b);
+                    // sexConsistent drops what canOccur cannot see: a sex-linked
+                    // locus has combinations no horse of EITHER sex could carry
+                    // (brindle's Y/Y - every horse has an X).
+                    if (a.order() <= b.order() && !(gene.canOccur(pair) && gene.sexConsistent(pair))) {
                         impossible++;
                     }
                 }

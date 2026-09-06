@@ -58,9 +58,26 @@ public final class GeneCodeDisplay {
     }
 
     /**
-     * Order the non-extension/agouti genes are listed in: a curated built-in
-     * order (white patterns, then dilutions, then grey, then the magical genes), followed by any data-driven genes in
-     * their {@code (priority, key)} order.
+     * Order the non-extension/agouti genes are listed in: a <b>curated</b>
+     * reading order for the genes named below - white patterns, then dilutions,
+     * then grey, then the magical genes, then the non-coat loci - followed by
+     * <b>every other registered gene</b> in its {@code (priority, key)} order.
+     *
+     * <p>The tail is the important half. This used to be a hand-written list
+     * plus {@code Genes.loaded()}, which meant every <i>built-in</i> gene added
+     * after it was written vanished from the short form silently - by the time
+     * that was noticed it had swallowed the leopard complex, the LUT locus, the
+     * cutie mark, the particle locus and the three magical body-stat genes, and
+     * two catalogue entries differing only in one of them read as the same
+     * horse. Appending the remainder means a new gene shows up on its own, in a
+     * defensible place, without anyone remembering to come here - which is the
+     * general fix for the derived-lists-written-by-hand problem in
+     * {@code CLAUDE.md}'s known gaps.
+     *
+     * <p>Three deliberate omissions: extension and agouti, which
+     * {@link #shortForm(Genotype)} always prints first as the head, and the sex
+     * locus, which paints nothing and is shown in words beside every short form
+     * anyway.
      */
     private static List<Gene> trailingOrder() {
         List<Gene> out = new ArrayList<>(List.of(
@@ -74,8 +91,8 @@ public final class GeneCodeDisplay {
                 Genes.MSTN, Genes.PDK4, Genes.CKM, Genes.RYR2, Genes.LCORL, Genes.HMGA2,
                 Genes.ACAN, Genes.B4GALT7, Genes.PLOD1, Genes.RAPGEF5, Genes.ST14,
                 Genes.SHOX, Genes.MET));
-        for (Gene g : Genes.loaded()) {
-            if (!out.contains(g)) {
+        for (Gene g : Genes.codeOrder()) {
+            if (g != Genes.SEX && g != Genes.EXTENSION && g != Genes.AGOUTI && !out.contains(g)) {
                 out.add(g);
             }
         }
@@ -123,9 +140,21 @@ public final class GeneCodeDisplay {
             if (firstBaseline && secondBaseline) {
                 continue; // nothing but the population baseline - not worth showing
             }
+            if (gene.inheritance().sexLinked() && allBaseline(gene, pair, baseline)) {
+                // A hemizygous horse's spare slot holds the reserved placeholder,
+                // which is not the baseline allele - so the test above misses a
+                // plain stallion and he would read as "X-n", a horse announcing
+                // that it is ordinary.
+                continue;
+            }
 
             String token;
-            if (absenceWildtype(gene) && (firstBaseline || secondBaseline)) {
+            if (gene.inheritance().sexLinked() && gene.realAlleles(pair).size() == 1) {
+                // A hemizygous horse has ONE copy, and writing it beside its own
+                // placeholder ("BrnY") would read as a homozygote of something.
+                // The prefix says which chromosome it is on instead: X-Brn.
+                token = gene.inheritance().displayPrefix() + gene.realAlleles(pair).get(0).token();
+            } else if (absenceWildtype(gene) && (firstBaseline || secondBaseline)) {
                 // exactly one baseline copy - write it as "none"
                 token = "n" + (firstBaseline ? pair.second() : pair.first()).token();
             } else {
@@ -175,4 +204,15 @@ public final class GeneCodeDisplay {
     private static String twoTokens(AllelePair pair) {
         return pair.first().token() + pair.second().token();
     }
+
+    /** Are all of this horse's <b>real</b> copies here the population baseline? */
+    private static boolean allBaseline(Gene gene, AllelePair pair, Allele baseline) {
+        for (Allele a : gene.realAlleles(pair)) {
+            if (!a.equals(baseline)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
 }

@@ -1,6 +1,7 @@
 package com.example.horsegenetics.neoforge.server;
 
 import com.example.horsegenetics.neoforge.data.HorseCareAttachment;
+import com.example.horsegenetics.common.breed.BreedLineage;
 import com.example.horsegenetics.neoforge.data.ModAttachments;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
@@ -101,7 +102,7 @@ public final class WildHerdGoal extends Goal {
         if (++this.leadMissingTicks >= LOST_LEAD_GRACE) {
             this.leadMissingTicks = 0;
             horse.setData(ModAttachments.HORSE_CARE.get(), c.withWildHerd(horse.getUUID(),
-                    c.herdBreed().orElse("unknown"), c.herdBand().orElse("TRADITIONAL")));
+                    c.herdBreed().orElse(BreedLineage.FERAL_ID), c.herdBand().orElse("TRADITIONAL")));
         }
     }
 

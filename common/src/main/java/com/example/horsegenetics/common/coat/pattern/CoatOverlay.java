@@ -161,6 +161,34 @@ public final class CoatOverlay {
         forEachEyeTexel((px, py) -> shadeToward(px, py, rgb, strength));
     }
 
+    /**
+     * <b>Colour the iris</b> - the dark texels of the eye - and leave the sclera
+     * white. This is what eye colour means; {@link #shadeEyes} is the opposite
+     * operation and is for something else.
+     *
+     * <p>On the coat sheet an adult eye is a 2&times;2 block of pure black beside
+     * a 2&times;2 block of near-white, and a foal's is the black block alone. So
+     * a texel is weighted by <b>how dark it already is</b> ({@code 1 - luma}):
+     * black takes the colour outright, white is untouched, and the antialiased
+     * grey between them takes a proportional share, which keeps the eye's shape.
+     *
+     * <p>Contrast {@link #shadeToward}, which weights by <i>brightness</i> so a
+     * gold hoof keeps the template's shading. Pointed at an eye that colours the
+     * sclera and leaves the iris black - right for a glowing eye or the leopard
+     * complex's white rim, wrong for an iris.
+     */
+    public void tintIris(int rgb, double strength) {
+        forEachEyeTexel((px, py) -> {
+            int b = base(px, py);
+            if ((b >>> 24) == 0) {
+                return;
+            }
+            double luma = (0.299 * ((b >> 16) & 0xFF) + 0.587 * ((b >> 8) & 0xFF)
+                    + 0.114 * (b & 0xFF)) / 255.0;
+            blendToward(px, py, rgb, strength * (1.0 - luma));
+        });
+    }
+
     // ------------------------------------------------------------------
     // Emissiveness
     // ------------------------------------------------------------------

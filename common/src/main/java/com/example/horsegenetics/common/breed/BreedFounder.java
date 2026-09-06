@@ -38,7 +38,7 @@ import java.util.Set;
  * (so a bred line can still surface a carrier); a {@link Breed#hardy() hardy}
  * breed clears them too.
  *
- * <p>{@link Breeds#UNKNOWN} skips all of this and returns the base roll
+ * <p>{@link Breeds#FERAL_MIXED} skips all of this and returns the base roll
  * untouched - the pre-breeds behaviour, exactly.
  *
  * <p>This is a <b>founder</b> path: the {@link Rng} is the wild spawn's, not a
@@ -65,7 +65,7 @@ public final class BreedFounder {
 
     public static Genome roll(Breed breed, Rng rng) {
         Genotype base = Genotype.random(rng);
-        if (breed == Breeds.UNKNOWN) {
+        if (breed == Breeds.FERAL_MIXED) {
             return Genome.of(base, rng);
         }
 

@@ -58,7 +58,7 @@ import java.util.UUID;
  *       the same lead, so they all land on the same herd of the same breed no
  *       matter whose task runs first - the elected lead included, when its own
  *       task finally runs.</li>
- *   <li>A clump of one - a genuinely solitary horse - is a lone <b>Unknown</b>.</li>
+ *   <li>A clump of one - a genuinely solitary horse - is a lone <b>Feral Mixed</b>.</li>
  * </ul>
  */
 public final class HerdManager {
@@ -110,23 +110,23 @@ public final class HerdManager {
                 band = seeded.nextInt(10) < 7 ? BandType.TRADITIONAL : BandType.BACHELOR;
                 sex = lead.equals(horse.getUUID()) ? leadSex(horse, rng) : joinerSex(horse, band, rng);
             } else {
-                // genuinely alone -> a lone Unknown
-                breed = Breeds.UNKNOWN;
+                // genuinely alone -> a lone Feral Mixed
+                breed = Breeds.FERAL_MIXED;
                 band = BandType.TRADITIONAL;
                 lead = null;
                 sex = coin(rng);
             }
         } else {
-            // not a natural spawn (/summon, an imported horse) -> a lone Unknown
-            breed = Breeds.UNKNOWN;
+            // not a natural spawn (/summon, an imported horse) -> a lone Feral Mixed
+            breed = Breeds.FERAL_MIXED;
             band = BandType.TRADITIONAL;
             lead = null;
             sex = coin(rng);
         }
 
         Genome genome = BreedFounder.roll(breed, rng, sex);
-        String token = breed == Breeds.UNKNOWN
-                ? BreedLineage.UNKNOWN.toToken()
+        String token = breed == Breeds.FERAL_MIXED
+                ? BreedLineage.FERAL.toToken()
                 : BreedLineage.pure(breed.id()).toToken();
         NameParts name = HorseRecords.newNameParts(rng);
         HorseRecord record = HorseRecord.founder(horse.getUUID(), name.first(), name.last(), genome, token);
@@ -235,14 +235,14 @@ public final class HerdManager {
     }
 
     /**
-     * A herd's breed: weighted by the biome's breeds only. Unknown only when the
+     * A herd's breed: weighted by the biome's breeds only. Feral Mixed only when the
      * biome has no assigned breed at all.
      */
     public static Breed pickHerdBreed(Holder<Biome> biome, RandomSource rng) {
         String biomeId = biome.unwrapKey().map(k -> k.identifier().toString()).orElse("");
         List<Breed> candidates = Breeds.forBiome(biomeId);
         if (candidates.isEmpty()) {
-            return Breeds.UNKNOWN;
+            return Breeds.FERAL_MIXED;
         }
         double total = 0.0;
         for (Breed b : candidates) {

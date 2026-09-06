@@ -105,6 +105,16 @@ public final class CoatSampleTool {
             {"lp_snowcap_bay", "agouti=A/a leopard=LP/LP patn2=PATN2/n"},
             {"lp_semi_leopard_bay", "agouti=A/a leopard=LP/lp patn1=PATN1/n patn2=PATN2/n"},
             {"lp_leopard_black", "leopard=LP/lp patn1=PATN1/n"},
+
+            // brindle - the X-linked locus, both the stallion and the mare form
+            {"brindle_stallion_bay", "sex=X/Y agouti=A/a brindle=Brn/Y"},
+            {"brindle_mare_bay", "agouti=A/a brindle=Brn/Brn"},
+            {"brindle_chestnut", "extension=e/e brindle=Brn/Brn"},
+            {"brindle_black", "brindle=Brn/Brn"},
+
+            // tiger eye - the coat is untouched; only the two iris texels move
+            {"tiger_eye_amber_bay", "agouti=A/a tiger_eye=TE1/TE1"},
+            {"tiger_eye_yellow_bay", "agouti=A/a tiger_eye=TE2/TE2"},
     };
 
     /**
@@ -124,7 +134,10 @@ public final class CoatSampleTool {
             9, 2, 9,
             0, 0, 0, 0, 0,
             0, 0, 0,
-            1, 7, 3, 5, 2, 9, 4, 6};
+            1, 7, 3, 5, 2, 9, 4, 6,
+            // brindle x4, tiger eye x2
+            5, 2, 7, 3,
+            0, 0};
 
     private CoatSampleTool() {}
 

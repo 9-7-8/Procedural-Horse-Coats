@@ -18,9 +18,9 @@ import java.util.TreeSet;
  *   <li><b>cross</b> - exactly two breed ids ({@code "cross:arabian+friesian"},
  *       components always sorted so order never matters);</li>
  *   <li><b>mixed</b> - three or more lines tangled together ({@code "mixed"});</li>
- *   <li><b>unknown</b> - a horse with no herd identity, i.e. a lone wild spawn,
- *       a {@code /summon}, or a spawn-egg horse ({@code "unknown"}). For the
- *       combination rules Unknown behaves as an ordinary distinct breed.</li>
+ *   <li><b>feral</b> - a horse with no herd identity, i.e. a lone wild spawn,
+ *       a {@code /summon}, or a spawn-egg horse ({@code "feral_mixed"},
+ *       displayed <b>Feral Mixed</b>).</li>
  * </ul>
  *
  * <h2>Combination</h2>
@@ -33,14 +33,29 @@ import java.util.TreeSet;
  *   cross S + pure Z, Z not in S-> mixed
  *   cross S + cross T (S != T)  -> mixed
  *   mixed   + anything          -> mixed
+ *   feral   + anything          -> mixed              (feral included)
  * </pre>
+ *
+ * <h2>Why feral is absorbing</h2>
+ * A wild loner used to be labelled "Unknown" and combined as though it were an
+ * ordinary distinct breed, so a Friesian bred to one produced a
+ * "Friesian &times; Unknown cross". That forced the model to answer a question
+ * it has no good answer to: is Unknown a breed? Does it have a stat band, a
+ * gene pool, a purity? Can a line be bred back to pure Unknown? Making it
+ * <b>absorbing</b> - every cross involving it is simply {@link #MIXED} -
+ * deletes the question instead of answering it, and says the true thing: a horse
+ * of unrecorded ancestry contributes unrecorded ancestry, and what comes out is
+ * a horse of mixed breeding.
  */
 public record BreedLineage(Kind kind, List<String> components) {
 
-    public enum Kind { PURE, CROSS, MIXED, UNKNOWN }
+    public enum Kind { PURE, CROSS, MIXED, FERAL }
+
+    /** The serialised id of the {@link #FERAL} label. */
+    public static final String FERAL_ID = "feral_mixed";
 
     public static final BreedLineage MIXED = new BreedLineage(Kind.MIXED, List.of());
-    public static final BreedLineage UNKNOWN = new BreedLineage(Kind.UNKNOWN, List.of("unknown"));
+    public static final BreedLineage FERAL = new BreedLineage(Kind.FERAL, List.of(FERAL_ID));
 
     public BreedLineage {
         Objects.requireNonNull(kind, "kind");
@@ -48,8 +63,8 @@ public record BreedLineage(Kind kind, List<String> components) {
     }
 
     public static BreedLineage pure(String breedId) {
-        if (breedId == null || breedId.isBlank() || breedId.equals("unknown")) {
-            return UNKNOWN;
+        if (breedId == null || breedId.isBlank() || breedId.equals(FERAL_ID)) {
+            return FERAL;
         }
         return new BreedLineage(Kind.PURE, List.of(breedId));
     }
@@ -66,10 +81,10 @@ public record BreedLineage(Kind kind, List<String> components) {
 
     // --- parse / serialise ------------------------------------------------
 
-    /** The empty / null token, an unknown token, or an unrecognised shape all read as {@link #UNKNOWN}. */
+    /** The empty / null token, a feral token, or an unrecognised shape all read as {@link #FERAL}. */
     public static BreedLineage parse(String token) {
-        if (token == null || token.isBlank() || token.equals("unknown")) {
-            return UNKNOWN;
+        if (token == null || token.isBlank() || token.equals(FERAL_ID)) {
+            return FERAL;
         }
         if (token.equals("mixed")) {
             return MIXED;
@@ -89,14 +104,17 @@ public record BreedLineage(Kind kind, List<String> components) {
             case PURE -> components.get(0);
             case CROSS -> "cross:" + String.join("+", components); // already sorted
             case MIXED -> "mixed";
-            case UNKNOWN -> "unknown";
+            case FERAL -> FERAL_ID;
         };
     }
 
     // --- combination ---------------------------------------------------
 
     public static BreedLineage combine(BreedLineage a, BreedLineage b) {
-        if (a.kind == Kind.MIXED || b.kind == Kind.MIXED) {
+        // Mixed and Feral are both absorbing, and for the same reason: neither
+        // names an ancestry a foal could inherit half of.
+        if (a.kind == Kind.MIXED || b.kind == Kind.MIXED
+                || a.kind == Kind.FERAL || b.kind == Kind.FERAL) {
             return MIXED;
         }
         Set<String> sa = a.idSet();
@@ -124,7 +142,7 @@ public record BreedLineage(Kind kind, List<String> components) {
 
     private BreedLineage asPureLike(Set<String> ids) {
         String id = one(ids);
-        return id.equals("unknown") ? UNKNOWN : new BreedLineage(Kind.PURE, List.of(id));
+        return id.equals(FERAL_ID) ? FERAL : new BreedLineage(Kind.PURE, List.of(id));
     }
 
     private BreedLineage asCrossLike(Set<String> ids) {
@@ -141,7 +159,7 @@ public record BreedLineage(Kind kind, List<String> components) {
      * The magical body-stat targets this label pins. A <b>pure</b> breed uses
      * its own; a <b>cross</b> uses the per-axis average of its two components
      * ({@link com.example.horsegenetics.common.trait.BreedStatTargets#average});
-     * <b>mixed</b> and <b>unknown</b> pin nothing, so their body stats fall back
+     * <b>mixed</b> and <b>feral</b> pin nothing, so their body stats fall back
      * to the ordinary bounded-Gaussian draw.
      */
     public com.example.horsegenetics.common.trait.BreedStatTargets statTargets() {
@@ -150,7 +168,7 @@ public record BreedLineage(Kind kind, List<String> components) {
             case CROSS -> com.example.horsegenetics.common.trait.BreedStatTargets.average(
                     Breeds.get(components.get(0)).statTargets(),
                     Breeds.get(components.get(1)).statTargets());
-            case MIXED, UNKNOWN -> com.example.horsegenetics.common.trait.BreedStatTargets.NONE;
+            case MIXED, FERAL -> com.example.horsegenetics.common.trait.BreedStatTargets.NONE;
         };
     }
 
@@ -163,7 +181,7 @@ public record BreedLineage(Kind kind, List<String> components) {
                     .sorted(Comparator.naturalOrder())
                     .reduce((x, y) -> x + " × " + y).orElse("Cross") + " cross";
             case MIXED -> "Mixed";
-            case UNKNOWN -> "Unknown";
+            case FERAL -> "Feral Mixed";
         };
     }
 }

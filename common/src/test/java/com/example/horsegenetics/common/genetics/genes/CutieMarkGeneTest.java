@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -94,4 +95,75 @@ class CutieMarkGeneTest {
         assertTrue(hom > 60 && hom < 350, "homozygote rate off: " + hom + " / " + n);
         assertTrue(carriers > 4000 && carriers < 7500, "carrier rate off: " + carriers + " / " + n);
     }
+
+    // ------------------------------------------------------------------
+    // The modifier hook - cutie mark as a channel other genes reach into
+    // ------------------------------------------------------------------
+
+    /**
+     * A horse whose light locus is switched on wears a <b>glowing</b> mark. The
+     * first real user of {@code CutieMarkContribution}, and the proof the fold
+     * runs at all.
+     */
+    @Test
+    void aLightHorseWearsAGlowingMark() {
+        Genotype plain = Genotype.parse(Codes.of("cutie_mark", "Cutmrk/Cutmrk"));
+        Genotype lit = Genotype.parse(Codes.of("cutie_mark", "Cutmrk/Cutmrk", "light", "Ltmn/n"));
+        Epigenome epi = Epigenome.fromSeed(11);
+        assertFalse(GENE.markFor(plain, epi).orElseThrow().emissive());
+        assertTrue(GENE.markFor(lit, epi).orElseThrow().emissive());
+    }
+
+    /**
+     * A modifier only ever <b>changes</b> a mark - it can never grant one. A
+     * light horse that is not {@code Cutmrk/Cutmrk} has no emblem to light.
+     */
+    @Test
+    void aModifierCannotGrantAMark() {
+        Genotype lit = Genotype.parse(Codes.of("light", "Ltmn/n"));
+        assertTrue(GENE.markFor(lit, Epigenome.fromSeed(3)).isEmpty());
+        Genotype litCarrier = Genotype.parse(Codes.of("cutie_mark", "Cutmrk/n", "light", "Ltmn/n"));
+        assertTrue(GENE.markFor(litCarrier, Epigenome.fromSeed(3)).isEmpty());
+    }
+
+    /**
+     * The modifiers leave everything they do not claim alone, so a light horse
+     * and its unlit full sibling wear the <b>same emblem</b>, lit differently.
+     * That is what keeps the mark a heritable identity rather than something
+     * the rest of the genotype scrambles.
+     */
+    @Test
+    void aModifierChangesOnlyWhatItClaims() {
+        Genotype plain = Genotype.parse(Codes.of("cutie_mark", "Cutmrk/Cutmrk"));
+        Genotype lit = Genotype.parse(Codes.of("cutie_mark", "Cutmrk/Cutmrk", "light", "Lthf/Lteye"));
+        for (long seed : new long[]{0L, 1L, 7L, 4242L}) {
+            Epigenome epi = Epigenome.fromSeed(seed);
+            CutieMarkGene.Mark a = GENE.markFor(plain, epi).orElseThrow();
+            CutieMarkGene.Mark b = GENE.markFor(lit, epi).orElseThrow();
+            assertEquals(a.count(), b.count());
+            assertEquals(a.triangle(), b.triangle());
+            assertEquals(a.scale(), b.scale());
+            assertEquals(a.tilt(), b.tilt());
+            assertArrayEquals(a.picks(), b.picks());
+            assertFalse(a.emissive());
+            assertTrue(b.emissive());
+        }
+    }
+
+    /**
+     * The {@code with*} helpers are what a modifier is written in, so they have
+     * to leave the rest of the record alone - and {@code withCount} has to clamp,
+     * because the render layer only carries three item states.
+     */
+    @Test
+    void theWithHelpersChangeOneFieldAndCountClamps() {
+        CutieMarkGene.Mark m = new CutieMarkGene.Mark(2, false, new double[]{0.1, 0.2, 0.3}, 1.0, 0.0, false);
+        assertEquals(3, m.withCount(9).count());
+        assertEquals(1, m.withCount(0).count());
+        assertEquals(2, m.withScale(2.5).count(), "withScale must not touch count");
+        assertEquals(2.5, m.withScale(2.5).scale());
+        assertTrue(m.withEmissive(true).emissive());
+        assertFalse(m.withEmissive(true).triangle());
+    }
+
 }
