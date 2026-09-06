@@ -31,16 +31,19 @@ project. Its shape:
   the coat pipeline, previews a gene on a 3D horse over any base coat, and
   exports the JSON the game loads. It does **not** use the wiki's `styles.css` /
   `nav.js` - it owns the whole window.
-- **`wiki/horse-designer/`** (new 2026-09-06) is the second browser tool: set a
-  horse's coat genes and its size, watch it walk a grass field. Same shape as the
-  creator (`index.html` + `designer.css` + `js/*` + a generated `assets/`), same
-  "owns the whole window" rule. **It shares the creator's pipeline by `<script
-  src="../gene-creator/js/...">`, not by copying it** - geometry, noise, fields,
-  schema, spec-engine, base-coats, model3d and preview are the same files, so a
-  change to how the creator draws a horse changes this one. Only `scene.js`
-  (the world + camera), `animation.js` (the gait, an approximation) and
-  `designer.js` (the panel) are its own. Details + what it cannot show:
-  `wiki/verification.html` §0-I.
+- **`wiki/horse-designer/`** (new 2026-09-06) is the **browser twin of the
+  custom horse spawn egg** - all 48 genes over a horse walking a grass field.
+  Same "owns the whole window" rule as the creator, and nothing else in common:
+  it runs **`common/` compiled to WebAssembly** (`wasm/web.wasm`, built by the
+  `:web` module), so the coat is the game's own code rather than a port, and
+  there is no parity to keep. **Its UI is a deliberate redraw of
+  `CustomHorseSpawnScreen` and the two must stay in step** - see the convention
+  below. The JavaScript holds no genetics: `js/gui.js` draws, `js/designer.js`
+  forwards clicks, `js/java.js` loads the wasm, and every rule lives in
+  `web/HorseEditor.java`. It borrows only `geometry.js` + `model3d.js` from the
+  creator, for the mesh, and re-checks them against the Java on every load.
+  **It cannot run from `file://`** (loading wasm is a fetch); serve the repo or
+  use the published wiki. Checklist: `wiki/verification.html` §0-I.
 - **`wiki/gene-format.html`** is the single source of truth for the **data-driven
   gene file format** - the header, the knobs, every mask and every op, and the
   `effects` block's shape. When a mask, an op or an effect verb changes shape,
@@ -193,6 +196,91 @@ project. Its shape:
     changes shape, update `api-reference.html` in the same change.
 
 ## Status snapshot (keep this current)
+
+- **Built 2026-09-06, NOT yet opened in a browser: the horse designer runs the
+  mod itself.** `wiki/horse-designer/` is now the **browser twin of the custom
+  horse spawn egg**, and it runs `common/` compiled to WebAssembly by TeaVM -
+  not a port of it, the actual bytecode - so **all 48 genes** are live and the
+  coat is byte-identical to the game's. `:common:test` **439 green**,
+  `:neoforge-26.1.2:build` green, creator parity **3868/48**, `coat-golden.txt`
+  untouched. Six pieces:
+
+  - **Why compiling and not porting.** The page is on GitHub Pages, which is
+    static, so there is no server to run the pipeline on; and the owner's rule
+    is that a subset of pre-baked coats is not acceptable, because the premise
+    of the mod is a functionally infinite space (`GenotypeCatalog.size()` is
+    11 098 128 386). That leaves compiling. **The spike is in the previous
+    entry**: TeaVM swallowed all 151 files, and the same class run on the JVM,
+    as JavaScript and as wasm gives twenty identical coat digests.
+    **Use the wasm backend**: `BodyNoise`'s hash is 64-bit integer maths, which
+    JavaScript emulates with 32-bit pairs at ~100x cost (dapple grey 521 ms vs
+    the JVM's 7); in wasm a `long` is a native i64 and it drops to **4 ms**.
+
+  - **The UI is a deliberate redraw of `CustomHorseSpawnScreen`** (owner
+    request): same gene list alphabetically by display name with the sex locus
+    absent, same click-a-row-to-add, same two allele buttons and `x`, same
+    dropdown past three alleles, same right column in the same order (Age, Sex,
+    Breed, Randomize, Reroll epi., Copy code, Paste code, Clear genes), same
+    green-when-expressing row with its outcome underneath, same short-form line
+    and epigenetic fingerprint below the list, same `size 1.14x` readout under
+    the preview. **Every layout constant and colour in `js/gui.js` is copied
+    from the Java by name and value**, which is why it is drawn on a canvas
+    rather than built from DOM widgets - the two layouts can be diffed.
+    - **The keep-in-step note the owner asked for is in three places**: the
+      class javadoc of `CustomHorseSpawnScreen` ("This screen has a twin -
+      change both"), the top of `web/HorseEditor.java`, and the top of
+      `js/gui.js`. Plus the convention below.
+    - **Two deliberate divergences**: there is nothing to spawn in a browser, so
+      **Spawn / Cancel** are **Wander / Reset view**; and cutie marks and
+      particle emitters cannot be drawn, because both come out of the game's own
+      registries.
+
+  - **The model is Java, not JavaScript, and that is the whole trick.**
+    `web/HorseEditor.java` is a twin of the screen's *state machine* -
+    `variantPair`, `enforceSexLinkage`, `applyGenome`, `randomize`, `paste`, all
+    under the same names. So "keep them in step" is a comparison between two
+    Java files in the same language, and **the JavaScript contains no genetics
+    at all**: it draws, and forwards clicks as a method name and some ints.
+    `web/DesignerApi.java` is the `@JSExport` facade; structured answers cross as
+    JSON, coats cross as `int[]` (which arrives as an `Int32Array`).
+
+  - **Nothing is read from a resource.** The page decodes the four real PNGs and
+    hands the pixels in, which sidesteps TeaVM's known weak spot and is the
+    better design anyway. **The gradient is the real 500x500 chart**, not the
+    creator's 256px downsample - the creator only has to look right, this has to
+    be exact. `lutbluepink.png` goes in too, keyed as
+    `LutContribution.lutResources()` keys it, so the LUT locus resolves properly.
+
+  - **A new `:web` Gradle module** with `bakeDesignerAssets`, which copies the
+    wasm, its loader and the four PNGs into `wiki/horse-designer/` - checked in
+    and regenerated, the same arrangement as `textures.js` and `expected.json`.
+    **The page cannot run from a `file://` path**: loading wasm is a fetch and a
+    local file is its own opaque origin. Serve the repo (`python -m http.server`)
+    or use the published wiki. The gene creator is unaffected and still opens
+    from disk.
+
+  - **The last JS port on the page is guarded live.** The 3D mesh is still built
+    by `geometry.js` + `model3d.js` (a mesh builder is view code), so
+    `DesignerApi.geometryProbeJson` walks 262 texels through the real
+    `HorseSkinGeometry` and `js/java.js` compares them **on every load** - a
+    drifted port is now visible in the tool rather than only at a terminal
+    someone forgot to open. That is known gap #13's failure mode, closed for
+    this page.
+
+  - **What went away with the rewrite:** the six-gene JavaScript base-coat
+    fallback, and the opening toast that had to admit it. The honest limits are
+    now three Minecraft-side things - cutie-mark item icons, particle emitters,
+    emissive texels - and nothing genetic.
+
+  - **Also fixed, from the owner's first look**: the `hidden` attribute does
+    nothing against an author `display:` rule (author origin beats the UA
+    stylesheet regardless of specificity), so `.nowebgl`'s `display: grid` kept
+    a full-window "No WebGL" panel painted over a perfectly good horse on every
+    machine. `[hidden] { display: none !important; }` is in both stylesheets now,
+    with a comment saying why it must stay.
+
+  - Docs: `wiki/verification.html` §0-I (rewritten), `CustomHorseSpawnScreen`
+    javadoc, `wiki/nav.js`, `index.html`.
 
 - **Built 2026-09-06, NOT yet looked at in a browser: `wiki/horse-designer/` -
   a second browser tool that stands a horse in a grass field; plus the vanilla
@@ -3106,14 +3194,20 @@ node wiki/gene-creator/tools/bake-export-fixtures.mjs   # what the creator EXPOR
                                      # for CreatorMetadataRoundTripTest to parse
 
 # horse-designer tooling (see the docs split)
-node wiki/horse-designer/tools/bake-grass.mjs   # re-inline assets/grass.jpg
+./gradlew :web:generateWasmGC       # compile common/ to WebAssembly
+./gradlew :web:bakeDesignerAssets   # ...and copy it + the coat PNGs into wiki/horse-designer/
+python -m http.server                # the designer needs a server; file:// cannot fetch wasm
 ```
 
-The **horse designer shares the creator's JS**, so `check-parity.mjs` covers its
-pipeline too - run it after touching anything under `wiki/gene-creator/js/`, and
-remember the designer is a second caller of `model3d`, `base-coats` and
-`preview`. What parity does **not** cover is the designer's own three files
-(`scene.js`, `animation.js`, `designer.js`); those have no automated net at all.
+**Re-run `:web:bakeDesignerAssets` whenever `common/` changes**, or the designer
+is running yesterday's mod. It is the designer's equivalent of re-baking the
+creator's fixtures, with the crucial difference that it cannot drift *silently*:
+the artefact is the code, not a snapshot of its output.
+
+The designer borrows only `geometry.js` and `model3d.js` from the creator, so
+`check-parity.mjs` still covers those - and `js/java.js` additionally re-checks
+them against the compiled Java on every page load. Its own files (`gui.js`,
+`scene.js`, `animation.js`, `designer.js`) have no automated net.
 
 **Run the parity check whenever you touch `SpecPainter`, `SpecSchema`,
 `AbilityType`, `HorseSkinGeometry`, `BodyNoise`/`BodyStripes`, or any of
@@ -5058,30 +5152,37 @@ Design follow-ups (not just "go look at it"):
    make it real is installing this beside a tack mod and a performance mod and
    seeing what happens.
 
-41. **The horse designer has never been opened, and two of its three own files
-   are unguarded.** `wiki/horse-designer/` shares the creator's whole pipeline,
-   which is parity-checked against the Java; what it adds on top is not. The
-   **gait** is an approximation by construction (vanilla's `setupAnim` needs
-   `walkAnimationPos`, which does not exist in a browser) and the page says so
-   in a toast - but "approximate" and "wrong enough to be misleading" are not
-   the same thing and only a look can tell them apart. The **scene** - camera
-   rig, WASD focus movement, grass tiling, the reference cube - has no check at
-   all beyond reading it. Verified offline instead: `buildParts` is
-   byte-identical to `build` (288/240 vertices), the 30 preset bakes are
-   byte-identical to the builders they replaced, and an orthographic render of
-   the posed rig comes out a bay, a palomino foal, a dapple grey and a
-   Waterborn. That covers the shared half and none of the new half.
-   `wiki/verification.html` §0-I.
-   **The honest limit worth repeating**: only **six** genes exist in the JS
-   port, so a horse here is never a whole horse, and the page's opening toast is
-   load-bearing rather than decorative. The way to widen it is to port more
-   genes into `base-coats.js` - the white loci first, since they are the ones
-   with live calibration questions (gap #30) and the ones a designer would most
-   want to eyeball. That is real work, not a config change: `WhitePattern` is
-   several hundred lines of Java and a port of it is a fifth thing to keep in
-   step with the Java, which is exactly the cost `check-parity.mjs` exists to
-   pay down. **If it is ported, it needs fixtures and a parity case**, or it
-   becomes gap #13 again with a new face.
+41. **The horse designer has never been opened, and its GUI has no automated
+   net.** The genetics are as safe as they can be - the page runs `common/`
+   compiled to wasm, byte-identical to the JVM, so there is nothing to drift.
+   What is unguarded is everything on top: `js/gui.js` (a canvas redraw of
+   `CustomHorseSpawnScreen`, ~450 lines of layout maths), `js/scene.js` (camera
+   rig, WASD, the sideways framing offset that puts the horse in the gap between
+   the panels) and `js/animation.js` (the gait, an approximation by construction
+   - vanilla's `setupAnim` needs `walkAnimationPos`, which no browser has).
+   Checked headlessly instead: the exported API end to end, and the GUI driven
+   against the real wasm - every right-column button fires its method, a row
+   adds, `KIT`'s eight alleles open a dropdown and a pick lands. That is logic,
+   not looks. `wiki/verification.html` §0-I.
+   **The sharpest test when it is opened** is to copy a genotype code out of the
+   page and paste it into the spawn egg in game: the two horses must be
+   identical, and that single check exercises the compile, the facade, the
+   editor model and both UIs at once.
+   **What it still cannot show** is three Minecraft-side things - cutie-mark item
+   icons and particle emitters (both come out of the game's own registries, and
+   the spawn egg previews both) and emissive `glow` texels. Nothing genetic is
+   missing any more.
+
+42. **`:web:bakeDesignerAssets` is a step it is possible to forget.** The wasm
+   in `wiki/horse-designer/wasm/` is a checked-in build artefact, so a change to
+   `common/` does not reach the page until it is re-baked - the designer would
+   go on running yesterday's mod, confidently. It is the same shape as the
+   creator's stale-fixture trap (gap #13's fourth instance) with one important
+   difference: this artefact **is** the code rather than a snapshot of its
+   output, so it cannot be subtly wrong, only wholesale old. A `git status`
+   showing `common/` changed and `wiki/horse-designer/wasm/` unchanged is the
+   tell. Worth wiring into the session-end routine, or into `:common:test` as a
+   staleness assertion.
 
 ## License
 
@@ -5126,15 +5227,23 @@ its licence is compatible.
   `wiki/nav.js` and nowhere else; never hand-write a sidebar into a page.
   (`wiki/gene-creator/` and `wiki/horse-designer/` are the two exceptions -
   they are apps, not pages, and own their own chrome.)
-- **The two browser tools share one pipeline, and it lives in
-  `wiki/gene-creator/js/`.** `wiki/horse-designer/` loads those files by
-  relative `<script src>`; it must never grow its own copy of the geometry, the
-  noise, the fields, the composer, the spec engine or the base coats. When a
-  shared file needs something only one tool wants, **add to it** (the way
-  `model3d.buildParts` and `baseCoats.compose` were added) and prove the other
-  tool's output did not move - both of those were checked byte-for-byte before
-  landing. A second copy is a second thing to keep in step with the Java, which
-  is known gap #13 with extra steps.
+- **Never port a gene to JavaScript.** The horse designer compiles `common/`
+  to WebAssembly instead (`:web`), so the browser runs the real thing. The
+  hand-written ports under `wiki/gene-creator/js/` are legacy the creator still
+  depends on - do not extend them, and do not add a second one. If something in
+  the browser seems to need genetics, it needs an `@JSExport` on
+  `web/DesignerApi`. **Nor pre-generate a subset of coats and render only
+  those**: the premise of the mod is a space of 11 098 128 386 distinct coats,
+  and a tool that shows 900 of them quietly asserts otherwise (owner's call,
+  2026-09-06).
+- **`wiki/horse-designer/` and `CustomHorseSpawnScreen` are one screen in two
+  places - change both.** They are the in-game and in-browser gene testers and
+  are meant to behave identically. Most of a change is Java either way: the
+  designer's model is `web/HorseEditor.java`, which mirrors the screen's
+  `variantPair` / `enforceSexLinkage` / `applyGenome` / `randomizeGenes` under
+  the same names. Only the drawing is JavaScript (`js/gui.js`), and it copies
+  the screen's layout constants and colours **by value**, so a moved widget is
+  a two-line change. The note is on all three files.
 - **The data-driven gene format** is documented **only** in
   `wiki/gene-format.html`. A new mask or op has to land in four places in the
   same change: `SpecSchema.java`, `SpecPainter.java`,

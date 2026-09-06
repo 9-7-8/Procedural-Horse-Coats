@@ -49,8 +49,7 @@ window.HG = window.HG || {};
    * pigment and coverage as well as the finished coat.
    *
    * `spec` may be null - then there is no gene under test and what comes back is
-   * the base coat alone. That is the horse designer's ordinary case: it is
-   * looking at the genes the mod already has, not at one being written.
+   * the base coat alone, which is what "show me this base coat" wants.
    *
    * The base coat is either a named preset (`baseCoatId`) or a per-locus config
    * (`baseCoatConfig`); both go through HG.baseCoats, so they cannot disagree.

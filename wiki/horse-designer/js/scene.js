@@ -70,7 +70,7 @@ window.HG = window.HG || {};
     ground.rotation.x = -Math.PI / 2;
     scene.add(ground);
 
-    if (HG.designerAssets && HG.designerAssets.GRASS_JPG) {
+    (function () {
       var img = new Image();
       img.onload = function () {
         grassTex = new THREE.Texture(img);
@@ -85,8 +85,10 @@ window.HG = window.HG || {};
         grassTex.needsUpdate = true;
         ground.material = new THREE.MeshLambertMaterial({ map: grassTex });
       };
-      img.src = HG.designerAssets.GRASS_JPG;
-    }
+      // A plain fetch: this page is served over HTTP (the wasm needs it), so
+      // there is nothing to inline and nothing to keep in step.
+      img.src = "assets/grass.jpg";
+    })();
 
     // A one-block cube, off to the side, so "how big is this horse" has an
     // answer you can see rather than one you have to read off a slider.
@@ -273,6 +275,15 @@ window.HG = window.HG || {};
       return true;
     }
 
+    // How far right of window centre the horse should appear, in CSS pixels.
+    // The GUI's two panels are not symmetric, so centring the horse in the
+    // window would bury it behind the gene list; this slides the whole view
+    // sideways instead, which is a shift rather than a rotation and so leaves
+    // the horse un-skewed.
+    var screenOffsetPx = 0;
+
+    function setScreenOffset(px) { screenOffsetPx = px || 0; }
+
     function placeCamera() {
       var cp = Math.cos(cam.pitch), sp = Math.sin(cam.pitch);
       camera.position.set(
@@ -280,7 +291,18 @@ window.HG = window.HG || {};
         cam.focus.y + cam.dist * sp,
         cam.focus.z + cam.dist * cp * Math.cos(cam.yaw)
       );
-      camera.lookAt(cam.focus);
+      var target = cam.focus;
+      if (screenOffsetPx) {
+        var h = container.clientHeight || 1;
+        var perPixel = 2 * cam.dist * Math.tan(camera.fov * Math.PI / 360) / h;
+        var world = -screenOffsetPx * perPixel;
+        // right = (cos yaw, 0, -sin yaw) for this spherical rig
+        var rx = Math.cos(cam.yaw) * world, rz = -Math.sin(cam.yaw) * world;
+        camera.position.x += rx;
+        camera.position.z += rz;
+        target = new THREE.Vector3(cam.focus.x + rx, cam.focus.y, cam.focus.z + rz);
+      }
+      camera.lookAt(target);
     }
 
     function resize() {
@@ -323,9 +345,13 @@ window.HG = window.HG || {};
       parts: function () { return partGroups; },
       focus: cam.focus,
       camera: cam,
-      setReferenceCube: function (on) { refCube.visible = on; refEdges.visible = on; },
-      setShadow: function (on) { shadow.visible = on; },
       onFrame: function (fn) { onFrame = fn; },
+      setScreenOffset: setScreenOffset,
+      resetView: function () {
+        cam.yaw = Math.PI * 0.25;
+        cam.pitch = 0.30;
+        cam.dist = 5.5;
+      },
       onManualMove: function (fn) { onMove = fn; },
       lookAt: function (x, y, z, snap) {
         if (snap) cam.focus.set(x, y, z);

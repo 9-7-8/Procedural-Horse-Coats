@@ -81,6 +81,28 @@ import java.util.List;
  * that appears is the horse that was on screen; the server used to roll its
  * own, which made the preview a suggestion.
  *
+ * <h2>This screen has a twin - change both</h2>
+ * <b>{@code wiki/horse-designer/} is the browser version of this screen</b>, and
+ * the two are meant to behave identically: same gene list, same click-to-add,
+ * same allele buttons and dropdown-past-three-alleles, same right-hand column in
+ * the same order, same short-form line and epigenetic fingerprint underneath.
+ * It exists so a coat can be looked at without launching the game, which only
+ * works if what it shows is what this shows.
+ *
+ * <p><b>A change here belongs there in the same commit.</b> Most of it will be
+ * a change in Java either way: the designer's model is
+ * {@code web/HorseEditor.java}, a deliberate twin of the state and the rules on
+ * this class - {@code variantPair}, {@code enforceSexLinkage},
+ * {@code applyGenome} and {@code randomizeGenes} are all mirrored there under
+ * the same names. Only the drawing is JavaScript
+ * ({@code wiki/horse-designer/js/gui.js}), and it copies the layout constants
+ * and colours below by value, so a moved widget is a two-line change.
+ *
+ * <p>The two deliberate divergences: the browser has nothing to spawn, so
+ * <b>Spawn</b> and <b>Cancel</b> are replaced by <b>Wander</b> and <b>Reset
+ * view</b>; and it cannot draw the cutie-mark item icons or the particle
+ * emitters, which come from the game's own registries.
+ *
  * <h2>Notes</h2>
  * Everything here is client-only, and the spawn is <b>creative-only, re-checked
  * on the server</b> ({@code ModNetworking.handleSpawnCustomHorse}).

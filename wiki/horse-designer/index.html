@@ -8,212 +8,39 @@
 </head>
 <body>
 
-<header class="topbar">
-  <a class="back" href="../../index.html">&larr; wiki</a>
-  <h1>Horse Designer</h1>
-  <p class="tagline">Build a horse, watch it in a field &mdash; without booting Minecraft.</p>
-  <div class="topbar-actions">
-    <button type="button" class="btn small" id="btn-random">Randomise</button>
-    <button type="button" class="btn small" id="btn-reset-view">Reset view</button>
+<!-- The field. Full window, with the GUI over it - the same arrangement a
+     Minecraft screen has, where the world carries on behind the panels. -->
+<div id="field"></div>
+
+<!-- The GUI: a redraw of CustomHorseSpawnScreen. See js/gui.js. -->
+<canvas id="gui"></canvas>
+
+<div class="toasts" id="toasts"></div>
+
+<div class="boot" id="boot">
+  <div class="boot-inner">
+    <h1>Horse Designer</h1>
+    <p>Loading the mod&hellip;</p>
+    <p class="sub">
+      <code>common/</code> compiled to WebAssembly &mdash; all 48 genes, the real
+      coat pipeline, no server.
+    </p>
   </div>
-</header>
+</div>
 
-<main class="workspace">
-
-  <!-- LEFT THIRD: the settings -->
-  <section class="panel" id="panel">
-
-    <fieldset>
-      <legend>The horse</legend>
-
-      <div class="field">
-        <label for="skin">Age</label>
-        <select id="skin">
-          <option value="ADULT" selected>Adult</option>
-          <option value="BABY">Foal</option>
-        </select>
-      </div>
-
-      <div class="field">
-        <label for="size">Size <span class="val" id="size-val">1.00&times;</span></label>
-        <input type="range" id="size" min="0.1" max="3" step="0.01" value="1" />
-        <p class="hint" id="size-note"></p>
-      </div>
-
-      <div class="field row-tight">
-        <button type="button" class="chip" data-size="0.45">0.45 min natural</button>
-        <button type="button" class="chip" data-size="1">1.00 baseline</button>
-        <button type="button" class="chip" data-size="1.75">1.75 max natural</button>
-        <button type="button" class="chip" data-size="2.5">2.50 magical</button>
-      </div>
-
-      <div class="field">
-        <label class="check"><input type="checkbox" id="wander" checked /> Wander the field</label>
-        <label class="check"><input type="checkbox" id="follow" checked /> Camera follows the horse</label>
-      </div>
-
-      <div class="field">
-        <label for="walk-speed">Walk speed <span class="val" id="walk-val">1.10</span> blocks/s</label>
-        <input type="range" id="walk-speed" min="0.4" max="2.5" step="0.05" value="1.1" />
-      </div>
-    </fieldset>
-
-    <fieldset>
-      <legend>Coat genes</legend>
-      <p class="hint">
-        These are the mod&rsquo;s real natural genes, ported to JavaScript and run
-        through the real pipeline &mdash; the same ports the
-        <a href="../gene-creator/index.html">gene creator</a> previews against.
-        <strong>They are not the whole registry</strong>; see the note at the
-        bottom.
-      </p>
-
-      <div class="field">
-        <label for="preset">Preset</label>
-        <select id="preset"></select>
-      </div>
-
-      <div class="field">
-        <label for="extension">Extension <code>MC1R</code></label>
-        <select id="extension">
-          <option value="wild">Wild type &mdash; black pigment intact</option>
-          <option value="chestnut">ee &mdash; chestnut</option>
-        </select>
-      </div>
-
-      <div class="field">
-        <label class="check"><input type="checkbox" id="agouti" /> Agouti <code>A_</code> &mdash; bay</label>
-        <div class="sub" id="agouti-sub">
-          <label for="agouti-leg">Leg point extent <span class="val" id="agouti-leg-val">0.45</span></label>
-          <input type="range" id="agouti-leg" min="0" max="1" step="0.01" value="0.45" />
-          <label for="agouti-face">Face point extent <span class="val" id="agouti-face-val">0.22</span></label>
-          <input type="range" id="agouti-face" min="0" max="1" step="0.01" value="0.22" />
-          <p class="hint">High on both is what the mod calls <em>seal</em> &mdash; there is no seal gene.</p>
-        </div>
-      </div>
-
-      <div class="field">
-        <label for="dilution">Dilution <code>MATP</code> / champagne</label>
-        <select id="dilution">
-          <option value="">None</option>
-          <option value="singleCream">Single cream &mdash; Cr/N</option>
-          <option value="doubleDilute">Double dilute &mdash; Cr/Cr, Cr/prl</option>
-          <option value="doublePearl">Classic pearl &mdash; prl/prl</option>
-          <option value="champagne">Champagne &mdash; Ch_</option>
-        </select>
-      </div>
-
-      <div class="field">
-        <label class="check"><input type="checkbox" id="grey" /> Grey <code>G_</code></label>
-        <div class="sub" id="grey-sub">
-          <label for="grey-progress">Progression <span class="val" id="grey-progress-val">0.50</span></label>
-          <input type="range" id="grey-progress" min="0" max="1" step="0.01" value="0.5" />
-          <label for="grey-spacing">Dapple spacing <span class="val" id="grey-spacing-val">3.40</span></label>
-          <input type="range" id="grey-spacing" min="2.8" max="5" step="0.05" value="3.4" />
-          <label for="grey-strength">Dapple strength <span class="val" id="grey-strength-val">1.00</span></label>
-          <input type="range" id="grey-strength" min="0" max="1" step="0.01" value="1" />
-          <label for="grey-retention">Point retention <span class="val" id="grey-retention-val">0.60</span></label>
-          <input type="range" id="grey-retention" min="0" max="1" step="0.01" value="0.6" />
-          <p class="hint">
-            Four epigenetic values off the <code>G</code> copy. Grey is
-            <strong>adults only</strong> in game &mdash; a foal is born its base colour.
-          </p>
-        </div>
-      </div>
-
-      <div class="field">
-        <label class="check"><input type="checkbox" id="white" /> <code>KIT</code> dominant white</label>
-      </div>
-    </fieldset>
-
-    <fieldset>
-      <legend>A data-driven gene</legend>
-      <p class="hint">
-        Drop in a gene file from <code>config/horsegenetics/genes/</code> &mdash; or one
-        the <a href="../gene-creator/index.html">gene creator</a> exported &mdash; and it
-        paints on top of the base coat, through the real spec engine.
-      </p>
-      <div class="field row-tight">
-        <label class="btn small file-btn">Open file<input type="file" id="gene-file" accept=".json" /></label>
-        <button type="button" class="btn small" id="btn-gene-paste">Paste JSON</button>
-        <button type="button" class="btn small" id="btn-gene-clear">Clear</button>
-      </div>
-      <div class="field" id="gene-loaded" hidden>
-        <div class="loaded-name" id="gene-name"></div>
-        <label for="gene-dose">Copies <span class="val" id="gene-dose-val">2</span></label>
-        <input type="range" id="gene-dose" min="0" max="2" step="1" value="2" />
-        <div class="row-tight">
-          <label for="gene-seed" class="inline">Seed</label>
-          <input type="number" id="gene-seed" value="1" />
-          <button type="button" class="btn small" id="btn-gene-reseed">Reroll</button>
-        </div>
-        <p class="hint" id="gene-status"></p>
-      </div>
-    </fieldset>
-
-    <fieldset>
-      <legend>View</legend>
-      <label class="check"><input type="checkbox" id="ref-cube" checked /> One-block reference cube</label>
-      <label class="check"><input type="checkbox" id="shadow" checked /> Ground shadow</label>
-      <label class="check"><input type="checkbox" id="show-sheet" checked /> Show the 128px coat sheet</label>
-    </fieldset>
-
-    <fieldset>
-      <legend>What this page can and cannot show</legend>
-      <p class="hint">
-        The <strong>coat</strong> is the game&rsquo;s own pipeline, ported and
-        parity-checked. The <strong>gait</strong> is not &mdash; it is a hand-tuned
-        approximation. And only the genes listed above exist in JavaScript; the other
-        forty-odd built-ins are Java-only, so a horse here is never a whole horse.
-      </p>
-      <button type="button" class="btn small" id="btn-limits">Show the full list</button>
-    </fieldset>
-
-  </section>
-
-  <!-- RIGHT TWO THIRDS: the field -->
-  <section class="stage">
-    <div id="viewport" class="viewport"></div>
-
-    <div class="toasts" id="toasts"></div>
-
-    <div class="hud" id="hud">
-      <span id="hud-size">&hellip;</span>
-      <span class="sep">&middot;</span>
-      <span class="keys">drag to spin &middot; <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> to move,
-        <kbd>Q</kbd><kbd>E</kbd> for height &middot; scroll to zoom</span>
-    </div>
-
-    <div class="sheet-wrap" id="sheet-wrap">
-      <canvas id="sheet-canvas" width="128" height="128"></canvas>
-      <span class="caption">the coat sheet</span>
-    </div>
-
-    <div class="nowebgl" id="nowebgl" hidden>
-      <p><strong>No WebGL.</strong> The field needs three.js; the coat sheet on the
-      right is still baked for real, so the flat texture is trustworthy even here.</p>
-    </div>
-  </section>
-
-</main>
+<a class="back" href="../../index.html">&larr; wiki</a>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
-<!-- Classic scripts, not modules: ES modules are blocked over file://, and the
-     wiki has to work from a local checkout with no server. Everything under
-     ../gene-creator/ is SHARED, deliberately - this page must never grow its own
-     copy of the coat pipeline, or the two tools will quietly disagree. -->
-<script src="../gene-creator/assets/textures.js"></script>
+<!-- Shared with the gene creator: the geometry tables and the mesh builder.
+     A mesh builder is view code, and js/java.js re-checks the tables against
+     the compiled Java on every load. Nothing genetic is loaded here - the
+     genes come out of the wasm. -->
 <script src="../gene-creator/js/geometry.js"></script>
-<script src="../gene-creator/js/noise.js"></script>
-<script src="../gene-creator/js/fields.js"></script>
-<script src="../gene-creator/js/schema.js"></script>
-<script src="../gene-creator/js/spec-engine.js"></script>
-<script src="../gene-creator/js/base-coats.js"></script>
 <script src="../gene-creator/js/model3d.js"></script>
-<script src="../gene-creator/js/preview.js"></script>
 
-<script src="assets/grass.js"></script>
+<script src="js/java.js"></script>
+<script src="js/gui.js"></script>
 <script src="js/scene.js"></script>
 <script src="js/animation.js"></script>
 <script src="js/designer.js"></script>

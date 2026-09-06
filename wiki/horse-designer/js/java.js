@@ -1,0 +1,131 @@
+// Loads the mod itself into the page.
+//
+// web.wasm is common/ compiled by TeaVM - not a port of it, not a retelling of
+// it, the actual bytecode. So the coat this page shows is the coat the game
+// bakes, byte for byte, and there is no parity to keep. Regenerate it with
+// `./gradlew :web:bakeDesignerAssets`.
+//
+// This file's whole job is to get the four PNGs the pipeline needs across the
+// boundary as int[] and then get out of the way. Nothing here knows what a gene
+// is; ask HG.java.api.
+//
+// NOTE: this page cannot run from a file:// path. Loading wasm is a fetch, and
+// a local file is its own opaque origin, so the browser refuses. Serve the repo
+// with any static server, or use the published wiki.
+window.HG = window.HG || {};
+(function (HG) {
+  "use strict";
+
+  var WASM = "wasm/web.wasm";
+  var RUNTIME = "wasm/web.wasm-runtime.js";
+
+  var ASSETS = {
+    gradient: "assets/redblackgradient.png",
+    bluepink: "assets/lutbluepink.png",
+    adult: "assets/horse_white.png",
+    baby: "assets/horse_white_baby.png"
+  };
+
+  var api = null;
+
+  /** Decode a PNG into ARGB ints, the layout every int[] in the pipeline uses. */
+  function decode(url) {
+    return new Promise(function (resolve, reject) {
+      var img = new Image();
+      img.onload = function () {
+        var c = document.createElement("canvas");
+        c.width = img.width;
+        c.height = img.height;
+        var g = c.getContext("2d", { willReadFrequently: true });
+        g.drawImage(img, 0, 0);
+        var d = g.getImageData(0, 0, img.width, img.height).data;
+        var out = new Int32Array(img.width * img.height);
+        for (var i = 0; i < out.length; i++) {
+          out[i] = (d[i * 4 + 3] << 24) | (d[i * 4] << 16) | (d[i * 4 + 1] << 8) | d[i * 4 + 2];
+        }
+        resolve({ pixels: out, width: img.width, height: img.height });
+      };
+      img.onerror = function () { reject(new Error("could not load " + url)); };
+      img.src = url;
+    });
+  }
+
+  function scriptTag(src) {
+    return new Promise(function (resolve, reject) {
+      var s = document.createElement("script");
+      s.src = src;
+      s.onload = resolve;
+      s.onerror = function () { reject(new Error("could not load " + src)); };
+      document.head.appendChild(s);
+    });
+  }
+
+  /**
+   * Bring up the mod. Resolves with the exported API once the registry is
+   * built and all four textures are in Java's hands.
+   */
+  function load() {
+    return scriptTag(RUNTIME)
+      .then(function () {
+        if (!window.TeaVM || !window.TeaVM.wasmGC) {
+          throw new Error("the wasm runtime did not install itself");
+        }
+        return window.TeaVM.wasmGC.load(WASM);
+      })
+      .then(function (app) {
+        api = app.exports;
+        api.main([]);
+        return Promise.all([
+          decode(ASSETS.gradient), decode(ASSETS.bluepink),
+          decode(ASSETS.adult), decode(ASSETS.baby)
+        ]);
+      })
+      .then(function (imgs) {
+        api.setGradient(imgs[0].pixels, imgs[0].width, imgs[0].height);
+        // Keyed exactly as LutContribution.lutResources() keys it, so the LUT
+        // locus resolves against the right chart.
+        api.setAlternateGradient("bluepink", imgs[1].pixels, imgs[1].width, imgs[1].height);
+        api.setTemplate(true, imgs[2].pixels);
+        api.setTemplate(false, imgs[3].pixels);
+        if (!api.ready()) {
+          throw new Error("the pipeline did not accept its textures");
+        }
+        return api;
+      });
+  }
+
+  /**
+   * Confirm the JavaScript geometry port still agrees with the Java it was
+   * copied from, on every load rather than whenever someone remembers to run
+   * check-parity.mjs. The mesh builder is view code and stays in JS; the tables
+   * it reads are the game's, and this is what says so.
+   *
+   * @return null when they agree, or a description of the first disagreement
+   */
+  function checkGeometry(adult) {
+    if (!HG.geometry) return null;
+    var skin = adult ? "ADULT" : "BABY";
+    var probe = JSON.parse(api.geometryProbeJson(adult));
+    for (var i = 0; i < probe.length; i++) {
+      var want = probe[i];
+      var got = HG.geometry.sample(skin, want.px, want.py);
+      if (!got) return "texel " + want.px + "," + want.py + " maps to nothing in JS";
+      if (got.part !== want.part || got.face !== want.face) {
+        return "texel " + want.px + "," + want.py + ": Java says " + want.part + "/" + want.face
+          + ", JS says " + got.part + "/" + got.face;
+      }
+      if (Math.abs(got.point.x - want.x) > 0.01
+        || Math.abs(got.point.y - want.y) > 0.01
+        || Math.abs(got.point.z - want.z) > 0.01) {
+        return "texel " + want.px + "," + want.py + " lands at a different body point";
+      }
+    }
+    return null;
+  }
+
+  HG.java = {
+    load: load,
+    checkGeometry: checkGeometry,
+    get api() { return api; }
+  };
+})(window.HG);
