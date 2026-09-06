@@ -20,6 +20,15 @@
 
 * { box-sizing: border-box; }
 
+/* The `hidden` attribute only carries `display:none` from the UA stylesheet, and
+   ANY author `display:` rule beats it - author origin wins over UA regardless of
+   specificity. Three rules below set display on elements this page hides by
+   attribute (.nowebgl grid, .sheet-wrap flex, .field block), so `hidden` did
+   nothing: the full-window "No WebGL" panel sat over a perfectly good horse.
+   Do not delete this line, and do not hide anything with a bare attribute
+   without it. */
+[hidden] { display: none !important; }
+
 html, body {
   margin: 0;
   height: 100%;

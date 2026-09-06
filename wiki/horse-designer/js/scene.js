@@ -36,7 +36,14 @@ window.HG = window.HG || {};
 
     var camera = new THREE.PerspectiveCamera(55, 1, 0.02, 400);
 
-    var renderer = new THREE.WebGLRenderer({ antialias: true });
+    // A machine with no usable WebGL throws here rather than returning null, and
+    // an uncaught throw would take the whole panel down with the field.
+    var renderer;
+    try {
+      renderer = new THREE.WebGLRenderer({ antialias: true });
+    } catch (err) {
+      return null;
+    }
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     container.appendChild(renderer.domElement);
     renderer.domElement.setAttribute("tabindex", "0");
