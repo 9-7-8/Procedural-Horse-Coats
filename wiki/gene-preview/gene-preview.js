@@ -132,6 +132,7 @@ window.HG = window.HG || {};
       + '<button type="button" class="gp-dice" title="Reroll this horse&rsquo;s epigenetics"'
       + ' aria-label="Reroll epigenetics">' + DICE + '</button>'
       + '</div>'
+      + (gene.modifiers.length ? '<div class="gp-mods"></div>' : "")
       + '<div class="gp-stage"><div class="gp-view"></div></div>'
       + '<div class="gp-foot">'
       + '<span class="gp-conditions"></span>'
@@ -160,6 +161,9 @@ window.HG = window.HG || {};
     var state = {
       base: bases[0].key,
       outcome: 0,
+      // One selected option per modifier locus this gene reads, all starting at
+      // the baseline - so the first thing shown is the gene on its own.
+      modifiers: gene.modifiers.map(function () { return 0; }),
       epigenome: api.newEpigenomeCode()
     };
 
@@ -193,6 +197,22 @@ window.HG = window.HG || {};
         + ' paints nothing &mdash; this is the base coat alone</span>';
     }
 
+    // A gene that reads other loci (the leopard complex reads PATN1 and PATN2)
+    // gets one row per locus. Without them a leopard preview would show one of
+    // its eight patterns and call it the gene - see genePreviewJson.modifiers.
+    var modButtons = gene.modifiers.map(function (mod, m) {
+      var row = document.createElement("div");
+      row.className = "gp-mod";
+      row.innerHTML = '<span class="gp-modname">' + escapeHtml(mod.name) + '</span>';
+      host.querySelector(".gp-mods").appendChild(row);
+      return buttons(row, mod.options.map(function (o) {
+        return { label: o.baseline ? "off" : o.tokens, title: mod.name + " " + o.tokens };
+      }), function (i) {
+        state.modifiers[m] = i;
+        render();
+      });
+    });
+
     host.querySelector(".gp-dice").addEventListener("click", function () {
       state.epigenome = api.newEpigenomeCode();
       render();
@@ -204,6 +224,13 @@ window.HG = window.HG || {};
     function render() {
       var tokens = gene.outcomes.length ? gene.outcomes[state.outcome].tokens : "";
       var code = api.previewGenotypeCode(state.base, gene.key, tokens);
+      var extras = [];
+      gene.modifiers.forEach(function (mod, m) {
+        var option = mod.options[state.modifiers[m]];
+        if (!code) return;
+        code = api.withGene(code, mod.key, option.tokens);
+        if (!option.baseline) extras.push(option.tokens);
+      });
       if (!code) {
         codeEl.textContent = "that combination did not resolve";
         return;
@@ -211,8 +238,8 @@ window.HG = window.HG || {};
       view.setImage(toImageData(api.coatOf(code, state.epigenome, true)));
 
       var baseIndex = indexOfBase(bases, state.base);
-      codeEl.textContent = tokens ? bases[baseIndex].name + " · " + tokens
-        : bases[baseIndex].name;
+      codeEl.textContent = [bases[baseIndex].name, tokens]
+        .concat(extras).filter(Boolean).join(" · ");
 
       // Conditions, because a preview window is also where a reader meets the
       // homozygote that kills the foal - EDNRB's lethal white, KIT's nonviable
@@ -225,6 +252,7 @@ window.HG = window.HG || {};
 
       baseButtons.select(baseIndex);
       if (outcomeButtons) outcomeButtons.select(state.outcome);
+      modButtons.forEach(function (row, m) { row.select(state.modifiers[m]); });
     }
 
     render();

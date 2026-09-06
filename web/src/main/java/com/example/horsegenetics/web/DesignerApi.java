@@ -517,18 +517,66 @@ public final class DesignerApi {
                 .kv("natural", g.isNatural())
                 .kv("paints", g.affectsCoat())
                 .key("outcomes").arr();
-        for (AllelePair pair : GenotypeCatalog.distinctPairsOf(g)) {
+        // A gene that reads modifier loci says so, and its own expressionOf -
+        // which sees one pair and nothing else - is coarse by its own admission:
+        // the leopard complex answers "varnish roan" for every LP horse and
+        // leaves the real one of eight to expressionIn. Collapsing by expression
+        // would then throw away LP/lp, half the table, so such a gene lists its
+        // combinations instead and labels them by their tokens.
+        boolean coarse = !g.coatDependsOn().isEmpty();
+        for (AllelePair pair : coarse ? GenotypeCatalog.allPairsOf(g)
+                : GenotypeCatalog.distinctPairsOf(g)) {
             Expression x = g.expressionOf(pair);
-            if (x.wildType()) {
+            if (coarse ? pair.count(g.defaultAllele()) == 2 : x.wildType()) {
                 continue;
             }
             j.obj().kv("tokens", pair.toTokens())
-                    .kv("name", x.name())
+                    .kv("name", coarse ? pair.toTokens() : x.name())
                     .kv("description", x.description())
                     .kv("varies", !x.deterministic())
                     .endObj();
         }
-        return j.endArr().endObj().toString();
+        j.endArr();
+        modifiers(j, g);
+        return j.endObj().toString();
+    }
+
+    /**
+     * The other loci this gene <b>reads</b> when it paints, each with every
+     * combination a preview could set it to.
+     *
+     * <p>The leopard complex is the case this exists for. Its own
+     * {@link Gene#expressionOf} sees one pair and can only answer
+     * {@code varnish-roan} for any {@code LP} horse; the real outcome is one of
+     * eight and turns on {@code PATN1} and {@code PATN2}, which
+     * {@link Gene#coatDependsOn} names. A preview offering the leopard locus
+     * alone would show one corner of that table and call it the gene.
+     *
+     * <p>Combinations come from {@link GenotypeCatalog#allPairsOf}, <b>not</b>
+     * the distinct-by-expression list: a modifier paints nothing on its own, so
+     * its whole expression table is wild type and collapsing by expression
+     * would leave one entry and hide the thing being modified. The baseline
+     * pair is flagged - that is what "off" means.
+     *
+     * <p>The relationship is <b>declared</b>, so this reads the declaration
+     * back; nothing here knows what an appaloosa is.
+     */
+    private static void modifiers(Json j, Gene g) {
+        j.key("modifiers").arr();
+        for (String key : g.coatDependsOn()) {
+            Gene mod = Genes.byKeyOrNull(key);
+            if (mod == null) {
+                continue;   // a modifier no longer registered simply drops
+            }
+            j.obj().kv("key", mod.key()).kv("name", mod.name()).key("options").arr();
+            for (AllelePair pair : GenotypeCatalog.allPairsOf(mod)) {
+                j.obj().kv("tokens", pair.toTokens())
+                        .kv("baseline", pair.count(mod.defaultAllele()) == 2)
+                        .endObj();
+            }
+            j.endArr().endObj();
+        }
+        j.endArr();
     }
 
     /**
@@ -566,6 +614,34 @@ public final class DesignerApi {
             }
         }
         return gt.toCode();
+    }
+
+    /**
+     * One more gene set on an existing genotype code - the composable half of
+     * {@link #previewGenotypeCode}, so a page that needs two loci at once (a
+     * painter plus a modifier it reads) still never assembles a code itself.
+     *
+     * @return the new code, or {@code ""} if anything did not resolve
+     */
+    @JSExport
+    public static String withGene(String genotypeCode, String geneKey, String tokens) {
+        Gene g = Genes.byKeyOrNull(geneKey);
+        if (g == null || tokens == null) {
+            return "";
+        }
+        int slash = tokens.indexOf('/');
+        if (slash < 0) {
+            return "";
+        }
+        try {
+            return Genotype.parse(genotypeCode)
+                    .with(new AllelePair(
+                            g.fromToken(tokens.substring(0, slash)),
+                            g.fromToken(tokens.substring(slash + 1))))
+                    .toCode();
+        } catch (RuntimeException bad) {
+            return "";
+        }
     }
 
     /**

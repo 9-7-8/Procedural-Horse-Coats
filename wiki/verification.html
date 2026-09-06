@@ -90,9 +90,13 @@
 <h2 id="gene-preview">&sect;0-J &mdash; the gene preview window (new, NOT looked at)</h2>
 
 <p>
-    A <strong>browser</strong> checklist, and the first place to look is
-    <a href="gene-tobiano.html">the Tobiano page</a> &mdash; the only page
-    carrying one so far. <code>wiki/gene-preview/</code> is a drop-in window that
+    A <strong>browser</strong> checklist. It is now on <strong>every gene the
+    horse designer says it can show a coat for</strong> &mdash; the designer's own
+    <code>showsAs</code> classification, so the ability, stat, size and condition
+    loci are deliberately left without one. <a href="gene-tobiano.html">Tobiano</a>
+    is the one that has been looked at; <a href="gene-leopard.html">the leopard
+    complex</a> and <a href="gene-kit.html">KIT</a> are the two worth looking at
+    next. <code>wiki/gene-preview/</code> is a drop-in window that
     shows <strong>one gene on a black, a bay and a chestnut</strong>, as a horse
     you can spin, with a dice in the corner that rerolls the epigenetics. It runs
     the same wasm the <a href="horse-designer/index.html">horse designer</a> does,
@@ -151,9 +155,31 @@
         figure in the page, not as an embedded tool &mdash; it borrows the wiki's
         own colours. 340px tall, 250px under 700px wide.</li>
     <li><strong>The outcome row.</strong> Tobiano has one outcome, so it is a
-        label rather than buttons. The row only becomes a button group on a gene
-        with more than one distinct look &mdash; <a href="gene-kit.html">KIT</a>
-        would show seven. That path is unexercised in a browser.</li>
+        label rather than buttons. The row becomes a button group on a gene with
+        more than one distinct look &mdash; <a href="gene-kit.html">KIT</a> shows
+        seven, <a href="gene-light.html">Light</a> six. <strong>That path has
+        never been seen in a browser</strong>, and it is now on most of the
+        pages.</li>
+    <li><strong>The modifier strip</strong>, which only
+        <a href="gene-leopard.html">the leopard complex</a> has: a row for
+        <code>PATN1</code> and a row for <code>PATN2</code> under the main bar,
+        each starting at <em>off</em>. It exists because leopard's own
+        <code>expressionOf</code> answers &ldquo;varnish roan&rdquo; for every
+        <code>LP</code> horse and the real pattern is one of eight. Offline, the
+        window reaches <strong>every distinct look in the page&rsquo;s own
+        table</strong> &mdash; what wants checking is that they <em>look</em> like
+        mottled, leopard, blanket, snowcap and the rest, against the table on
+        that page. <code>PATN1</code> and <code>PATN2</code> have no pages of
+        their own and get no window; they are reachable here instead.</li>
+    <li><strong>Genes that do nothing on one of the three bases.</strong> Several
+        are correctly invisible somewhere and it should read as informative
+        rather than broken: <a href="gene-mushroom.html">mushroom</a> dilutes red
+        and does nothing on a black, <a href="gene-dun.html">dun</a>&rsquo;s
+        primitive-markings-only allele draws a black stripe on a black horse,
+        <a href="gene-agouti.html">agouti</a> is invisible on the bay base
+        (which <em>is</em> agouti) and on a chestnut, and
+        <a href="gene-extension.html">extension</a> is invisible on the chestnut
+        base for the same reason. That is what three bases are for.</li>
     <li><strong>The footer condition chip.</strong> Unexercised on Tobiano, which
         has no conditions. It is the reason to put the second preview on
         <a href="gene-ednrb.html">EDNRB</a>.</li>

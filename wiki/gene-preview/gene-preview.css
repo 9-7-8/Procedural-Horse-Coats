@@ -98,6 +98,37 @@
     .gene-preview .gp-view { height: 250px; }
 }
 
+/* ---- the modifier strip --------------------------------------------- */
+
+/* A gene that reads other loci gets a row per locus, under the main bar rather
+   than in it: they are a second axis, and crowding them onto the same line
+   would read as more base coats. */
+.gene-preview .gp-mods {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    padding: 0.5rem 0.7rem;
+    border-bottom: 1px solid var(--border-soft);
+    background: rgba(148, 163, 184, 0.05);
+}
+.gene-preview .gp-mod {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+}
+.gene-preview .gp-modname {
+    min-width: 9.5rem;
+    font-size: 0.75rem;
+    color: var(--text-faint);
+}
+/* Smaller than the base buttons - this is the secondary axis. */
+.gene-preview .gp-mod .gp-btn {
+    font-size: 0.74rem;
+    padding: 0.3rem 0.55rem;
+    font-family: var(--mono);
+}
+
 /* ---- the foot -------------------------------------------------------- */
 
 .gene-preview .gp-foot {
