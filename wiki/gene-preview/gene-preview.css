@@ -1,0 +1,157 @@
+/* The per-gene preview window. Loaded by gene-preview.js, not by the page, so
+   adding a preview to a gene page stays one <div> and one <script>.
+
+   Everything here reads the wiki's own custom properties (styles.css), so the
+   window is part of the article rather than a tool embedded in it. */
+
+.gene-preview {
+    margin: 1.6rem 0;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--panel);
+    overflow: hidden;
+}
+
+/* ---- the bar --------------------------------------------------------- */
+
+.gene-preview .gp-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    padding: 0.6rem 0.7rem;
+    border-bottom: 1px solid var(--border-soft);
+    background: var(--panel-2);
+}
+
+.gene-preview .gp-group {
+    display: flex;
+    gap: 0.3rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.gene-preview .gp-btn {
+    font: inherit;
+    font-size: 0.82rem;
+    line-height: 1;
+    padding: 0.42rem 0.7rem;
+    color: var(--text-dim);
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    cursor: pointer;
+}
+.gene-preview .gp-btn:hover { color: var(--text); border-color: var(--accent); }
+.gene-preview .gp-btn.is-on {
+    color: var(--bg);
+    background: var(--accent);
+    border-color: var(--accent);
+    font-weight: 600;
+}
+
+/* The outcome row when there is nothing to choose - a label, not a control. */
+.gene-preview .gp-single {
+    font-size: 0.8rem;
+    color: var(--text-faint);
+}
+.gene-preview .gp-single em {
+    font-style: normal;
+    font-family: var(--mono);
+    color: var(--text-dim);
+}
+
+/* The dice sits at the far end of the bar, which is the window's own corner. */
+.gene-preview .gp-dice {
+    margin-left: auto;
+    width: 2.1rem;
+    height: 2.1rem;
+    display: grid;
+    place-items: center;
+    padding: 0;
+    color: var(--text-dim);
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    cursor: pointer;
+}
+.gene-preview .gp-dice svg { width: 1.15rem; height: 1.15rem; display: block; }
+.gene-preview .gp-dice:hover { color: var(--accent); border-color: var(--accent); }
+.gene-preview .gp-dice:active { transform: rotate(-18deg); }
+
+/* ---- the stage ------------------------------------------------------- */
+
+.gene-preview .gp-stage {
+    position: relative;
+    background: var(--bg-soft);
+}
+
+.gene-preview .gp-view {
+    height: 340px;
+    /* The canvas takes pointer gestures the page would otherwise scroll on:
+       a wheel over the horse is a zoom, and a drag is an orbit. */
+    touch-action: none;
+}
+.gene-preview .gp-view canvas { display: block; width: 100%; height: 100%; }
+
+@media (max-width: 700px) {
+    .gene-preview .gp-view { height: 250px; }
+}
+
+/* ---- the foot -------------------------------------------------------- */
+
+.gene-preview .gp-foot {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+    padding: 0.5rem 0.7rem;
+    border-top: 1px solid var(--border-soft);
+    background: var(--panel-2);
+    font-size: 0.78rem;
+    color: var(--text-faint);
+}
+
+/* Plain mono text, not the article's inline-code chip: this is a caption
+   under a picture, and .doc code would give it a border and a background it
+   does not want. Everything else here is scoped under .gene-preview for the
+   same reason - a gene page's own styles must not reach into the window, and
+   the window must not reach out. */
+.gene-preview .gp-code {
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    color: var(--text-dim);
+    background: none;
+    border: none;
+    border-radius: 0;
+    padding: 0;
+    white-space: normal;
+}
+
+.gene-preview .gp-hint { margin-left: auto; }
+
+.gene-preview .gp-cond {
+    display: inline-block;
+    margin-right: 0.35rem;
+    padding: 0.12rem 0.45rem;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    border: 1px solid currentColor;
+}
+/* Severity, lower-cased. An unknown severity still gets a chip - the border
+   colour just falls back to the foot's own text colour. */
+.gene-preview .gp-informational       { color: var(--accent); }
+.gene-preview .gp-impairing           { color: var(--warn); }
+.gene-preview .gp-lethal_at_birth     { color: var(--danger); }
+.gene-preview .gp-lethal_at_conception { color: var(--danger); }
+
+/* ---- before it is up, and when it cannot come up --------------------- */
+
+.gene-preview .gp-boot {
+    padding: 1.4rem 1rem;
+    text-align: center;
+    color: var(--text-faint);
+    font-size: 0.85rem;
+}
+.gene-preview .gp-failed { color: var(--warn); }
+.gene-preview .gp-failed code { color: var(--text-dim); }

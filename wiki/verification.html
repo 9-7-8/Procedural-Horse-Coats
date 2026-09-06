@@ -32,6 +32,83 @@
     </p>
 </div>
 
+<h2 id="gene-preview">&sect;0-J &mdash; the gene preview window (new, NOT looked at)</h2>
+
+<p>
+    A <strong>browser</strong> checklist, and the first place to look is
+    <a href="gene-tobiano.html">the Tobiano page</a> &mdash; the only page
+    carrying one so far. <code>wiki/gene-preview/</code> is a drop-in window that
+    shows <strong>one gene on a black, a bay and a chestnut</strong>, as a horse
+    you can spin, with a dice in the corner that rerolls the epigenetics. It runs
+    the same wasm the <a href="horse-designer/index.html">horse designer</a> does,
+    draws with the gene creator's mesh emitter and its orbit viewport, and adds
+    only the three buttons and the wiring. <strong>Nobody has opened it in a
+    browser.</strong>
+</p>
+
+<div class="note warn">
+    <span class="label">It needs a server &mdash; <code>file://</code> will not work</span>
+    <p>
+        Same reason as the designer: loading the wasm is a <code>fetch</code>.
+        Every gene page carrying a preview joins the designer in being
+        un-double-clickable. The window says so itself rather than sitting blank.
+        Serve the repo with <code>python -m http.server</code> and open
+        <code>/wiki/gene-tobiano.html</code>, or read it on the published wiki.
+    </p>
+</div>
+
+<div class="note good">
+    <span class="label">What was checked offline</span>
+    <p>
+        The new exports were driven end to end against the baked wasm in node,
+        with the four PNGs decoded and handed in exactly as the page hands them:
+        the three bases build the genotypes they claim to
+        (<code>E/E a/a</code>, <code>E/E A/A</code>, <code>e/e a/a</code>),
+        tobiano offers the one outcome the model says is distinct
+        (<code>To/To</code> &mdash; the heterozygote paints the same),
+        <code>KIT</code> offers one per white outcome without the page knowing
+        anything about <code>KIT</code>, a stale gene key and a bad allele token
+        both come back as a refusal rather than a plain horse, and the coats bake
+        with white patches over each of the three bases and move when the
+        epigenome is rerolled. <code>EDNRB</code>&rsquo;s <code>O/O</code> resolves
+        the lethal-white condition the window puts in its footer.
+    </p>
+</div>
+
+<h3>What has not been looked at at all &mdash; everything visual</h3>
+
+<ul>
+    <li><strong>Does it come up?</strong> &ldquo;Loading the coat pipeline&rdquo;,
+        then a bar of three base buttons, a horse, and a footer. It pulls
+        three.js and OrbitControls off a CDN and the wasm off this site, so the
+        first paint is not instant.</li>
+    <li><strong>Black, Bay, Chestnut</strong> should each change the coat under
+        the same white patches &mdash; the patches are the epigenome's and must
+        <em>not</em> move when the base changes. The dice is the only thing that
+        moves them.</li>
+    <li><strong>Drag to spin, scroll to zoom.</strong> Panning is off on purpose:
+        an article is not a workspace. Check that a scroll over the horse zooms
+        rather than scrolling the page past it &mdash; and, more importantly,
+        that a scroll <em>beside</em> it still scrolls the page.</li>
+    <li><strong>The dice</strong> rerolls epigenetics only. The horse is the same
+        horse: same genotype line in the footer, different patches.</li>
+    <li><strong>Does it sit in the article?</strong> It is meant to read as a
+        figure in the page, not as an embedded tool &mdash; it borrows the wiki's
+        own colours. 340px tall, 250px under 700px wide.</li>
+    <li><strong>The outcome row.</strong> Tobiano has one outcome, so it is a
+        label rather than buttons. The row only becomes a button group on a gene
+        with more than one distinct look &mdash; <a href="gene-kit.html">KIT</a>
+        would show seven. That path is unexercised in a browser.</li>
+    <li><strong>The footer condition chip.</strong> Unexercised on Tobiano, which
+        has no conditions. It is the reason to put the second preview on
+        <a href="gene-ednrb.html">EDNRB</a>.</li>
+</ul>
+
+<p class="muted">
+    One page carries it. Rolling it out to the rest of the coat genes is
+    deliberately waiting on somebody actually looking at this one.
+</p>
+
 <h2 id="designer">&sect;0-I &mdash; the horse designer (new 2026-09-06, NOT looked at)</h2>
 
 <p>

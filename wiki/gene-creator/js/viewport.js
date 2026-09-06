@@ -1,4 +1,11 @@
 // The 3D preview: orbit the horse, click it to find out where you clicked.
+//
+// TWO CALLERS. The gene creator built this, and the wiki's per-gene preview
+// window (wiki/gene-preview/) uses it as-is - same mesh, same framing, same
+// orbit - so a fix to how a horse is shown reaches both. That is why the few
+// things the two disagree about (the backdrop, the ground grid, whether a click
+// means anything) are options with the creator's behaviour as the default,
+// rather than a second copy of this file.
 window.HG = window.HG || {};
 (function (HG) {
   "use strict";
@@ -7,11 +14,13 @@ window.HG = window.HG || {};
   var N = geo.SHEET_SIZE;
 
   function create(container, opts) {
+    opts = opts || {};
     var THREE = window.THREE;
     if (!THREE) return null;
 
     var scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x11161f);
+    scene.background = new THREE.Color(
+      opts.background === undefined ? 0x11161f : opts.background);
 
     var camera = new THREE.PerspectiveCamera(42, 1, 0.1, 100);
     // Re-aimed by frame() once the horse is built; these are only a first pose
@@ -38,9 +47,11 @@ window.HG = window.HG || {};
     fill.position.set(-5, 2, -4);
     scene.add(fill);
     // The horse stands on y = 0 (see model3d), so the grid is the ground.
-    var grid = new THREE.GridHelper(6, 12, 0x2a3444, 0x1b2230);
-    grid.position.y = 0;
-    scene.add(grid);
+    if (opts.grid !== false) {
+      var grid = new THREE.GridHelper(6, 12, 0x2a3444, 0x1b2230);
+      grid.position.y = 0;
+      scene.add(grid);
+    }
 
     var sheet = document.createElement("canvas");
     sheet.width = N;
@@ -60,6 +71,7 @@ window.HG = window.HG || {};
     });
 
     var mesh = null;
+    var built = null;
     var currentSkin = null;
 
     function setSkin(skin) {
@@ -69,7 +81,7 @@ window.HG = window.HG || {};
         scene.remove(mesh);
         mesh.geometry.dispose();
       }
-      var built = HG.model3d.build(THREE, skin);
+      built = HG.model3d.build(THREE, skin);
       mesh = new THREE.Mesh(built.geometry, material);
       scene.add(mesh);
       frame(built);
@@ -150,7 +162,16 @@ window.HG = window.HG || {};
     window.addEventListener("resize", resize);
     if (window.ResizeObserver) new ResizeObserver(resize).observe(container);
 
-    return { setSkin: setSkin, setImage: setImage, resize: resize, available: true };
+    return {
+      setSkin: setSkin,
+      setImage: setImage,
+      resize: resize,
+      available: true,
+      /** The OrbitControls instance, or null - so a caller can set its limits. */
+      controls: controls,
+      /** Back to the pose frame() chose for the horse that is loaded. */
+      resetView: function () { if (built) frame(built); }
+    };
   }
 
   HG.viewport = { create: create };

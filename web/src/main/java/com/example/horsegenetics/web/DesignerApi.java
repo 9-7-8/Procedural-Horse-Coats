@@ -10,6 +10,7 @@ import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Skin;
 import com.example.horsegenetics.common.genetics.AbilityContribution;
 import com.example.horsegenetics.common.genetics.Allele;
 import com.example.horsegenetics.common.genetics.AllelePair;
+import com.example.horsegenetics.common.genetics.BaseCoats;
 import com.example.horsegenetics.common.genetics.EpigeneticAbilityContribution;
 import com.example.horsegenetics.common.genetics.Epigenome;
 import com.example.horsegenetics.common.genetics.GenotypeCatalog;
@@ -17,6 +18,7 @@ import com.example.horsegenetics.common.genetics.genes.CutieMarkGene;
 import com.example.horsegenetics.common.genetics.Expression;
 import com.example.horsegenetics.common.genetics.Gene;
 import com.example.horsegenetics.common.genetics.GeneCodeDisplay;
+import com.example.horsegenetics.common.genetics.Genes;
 import com.example.horsegenetics.common.genetics.Genotype;
 import com.example.horsegenetics.common.trait.Condition;
 import com.example.horsegenetics.common.trait.HorseTraits;
@@ -254,7 +256,7 @@ public final class DesignerApi {
      * The relationship is declared, so read it rather than special-case them.
      */
     private static boolean readByAPainter(Gene g) {
-        for (Gene other : com.example.horsegenetics.common.genetics.Genes.codeOrder()) {
+        for (Gene other : Genes.codeOrder()) {
             if (other != g && other.affectsCoat() && other.coatDependsOn().contains(g.key())) {
                 return true;
             }
@@ -469,6 +471,159 @@ public final class DesignerApi {
         return (name.isEmpty() ? "horse" : name) + ".json";
     }
 
+    // ---- gene previews -----------------------------------------------------
+    //
+    // What the wiki's per-gene preview window (wiki/gene-preview/) asks for.
+    // Everything here is STATELESS - it takes a genotype and hands back a coat,
+    // and never touches the editor above. A wiki page is not editing a horse;
+    // it is showing one gene on three known backgrounds, and two callers
+    // sharing one mutable editor is exactly how a page ends up displaying the
+    // designer's last horse.
+
+    /** Black, bay and chestnut, each as a genotype code. */
+    @JSExport
+    public static String baseCoatsJson() {
+        Json j = new Json().arr();
+        for (BaseCoats.BaseCoat b : BaseCoats.all()) {
+            j.obj().kv("key", b.key()).kv("name", b.name()).kv("code", b.genotype().toCode()).endObj();
+        }
+        return j.endArr().toString();
+    }
+
+    /**
+     * What a preview of one gene can offer: its display name, and one entry per
+     * combination that <b>looks different</b> -
+     * {@link GenotypeCatalog#distinctPairsOf}, minus the wild type, which is
+     * what the base coat on its own already shows. So tobiano yields one
+     * ({@code To/to} and {@code To/To} paint the same), KIT yields one per
+     * white outcome, and a page needs to know none of that.
+     *
+     * @return {@code {"missing":true}} if no gene is registered under that key -
+     *         a wiki page carrying a stale key says so rather than drawing a
+     *         plain horse and calling it the gene
+     */
+    @JSExport
+    public static String genePreviewJson(String geneKey) {
+        Gene g = Genes.byKeyOrNull(geneKey);
+        if (g == null) {
+            return new Json().obj().kv("missing", true).kv("key", geneKey).endObj().toString();
+        }
+        Json j = new Json().obj()
+                .kv("missing", false)
+                .kv("key", g.key())
+                .kv("name", g.name())
+                .kv("natural", g.isNatural())
+                .kv("paints", g.affectsCoat())
+                .key("outcomes").arr();
+        for (AllelePair pair : GenotypeCatalog.distinctPairsOf(g)) {
+            Expression x = g.expressionOf(pair);
+            if (x.wildType()) {
+                continue;
+            }
+            j.obj().kv("tokens", pair.toTokens())
+                    .kv("name", x.name())
+                    .kv("description", x.description())
+                    .kv("varies", !x.deterministic())
+                    .endObj();
+        }
+        return j.endArr().endObj().toString();
+    }
+
+    /**
+     * One base coat carrying one combination of one gene.
+     *
+     * <p>The page hands back the strings this class gave it and gets a genotype
+     * code; it never assembles one itself. The code format is a documented
+     * string and JavaScript could concatenate it, but then the wiki would hold a
+     * second opinion about what a black horse is, and hard rule 3 exists
+     * because second opinions drift.
+     *
+     * @param tokens {@code <a>/<b>} from {@link #genePreviewJson}, or empty for
+     *               the bare base coat
+     * @return the code, or {@code ""} if anything did not resolve
+     */
+    @JSExport
+    public static String previewGenotypeCode(String baseKey, String geneKey, String tokens) {
+        BaseCoats.BaseCoat base = BaseCoats.byKey(baseKey);
+        if (base == null) {
+            return "";
+        }
+        Genotype gt = base.genotype();
+        Gene g = Genes.byKeyOrNull(geneKey);
+        if (g != null && tokens != null && !tokens.isEmpty()) {
+            int slash = tokens.indexOf('/');
+            if (slash < 0) {
+                return "";
+            }
+            try {
+                gt = gt.with(new AllelePair(
+                        g.fromToken(tokens.substring(0, slash)),
+                        g.fromToken(tokens.substring(slash + 1))));
+            } catch (RuntimeException bad) {
+                return "";
+            }
+        }
+        return gt.toCode();
+    }
+
+    /**
+     * Bake any horse at all - the same pipeline {@link #coat} runs, with the
+     * genotype and epigenome given rather than taken from the editor.
+     *
+     * @return the 128x128 ARGB sheet, or a transparent one if either code failed
+     *         to parse
+     */
+    @JSExport
+    public static int[] coatOf(String genotypeCode, String epigenomeCode, boolean adult) {
+        int blank = HorseSkinGeometry.SHEET_SIZE * HorseSkinGeometry.SHEET_SIZE;
+        if (!ready()) {
+            return new int[blank];
+        }
+        try {
+            return CoatTextureComposer.compose(
+                    Genotype.parse(genotypeCode), Epigenome.parse(epigenomeCode),
+                    adult ? Skin.ADULT : Skin.BABY, adult,
+                    adult ? adultTemplate : babyTemplate,
+                    new LutSet(baseLut, altLuts));
+        } catch (RuntimeException bad) {
+            return new int[blank];
+        }
+    }
+
+    /**
+     * The resolved body of any horse, so a preview can size the model it draws.
+     * A coat gene leaves {@code scale} at 1, but the preview window is meant for
+     * every gene that shows, and a size locus that did not visibly resize the
+     * horse would be a window showing nothing.
+     */
+    @JSExport
+    public static String traitsOfJson(String genotypeCode, String epigenomeCode) {
+        try {
+            Traits t = HorseTraits.resolve(
+                    Genotype.parse(genotypeCode), Epigenome.parse(epigenomeCode), true);
+            Json j = new Json().obj()
+                    .kv("speed", t.speed()).kv("health", t.health())
+                    .kv("jump", t.jump()).kv("scale", t.scale())
+                    .key("conditions").arr();
+            for (Condition c : t.conditions()) {
+                j.obj().kv("name", c.name()).kv("severity", c.severity().name()).endObj();
+            }
+            return j.endArr().endObj().toString();
+        } catch (RuntimeException bad) {
+            return new Json().obj().kv("scale", 1.0).key("conditions").arr().endArr().endObj().toString();
+        }
+    }
+
+    /**
+     * A fresh epigenome - the dice in the corner of the preview window. Every
+     * copy of every allele gets a new priority and seed, which is what moves a
+     * tobiano's patches without touching what the horse is.
+     */
+    @JSExport
+    public static String newEpigenomeCode() {
+        return Epigenome.random(RNG).toCode();
+    }
+
     // ---- the live parity check ---------------------------------------------
 
     /**
@@ -516,7 +671,7 @@ public final class DesignerApi {
     public static String selfTest() {
         int genes = 0;
         int paints = 0;
-        for (Gene g : com.example.horsegenetics.common.genetics.Genes.codeOrder()) {
+        for (Gene g : Genes.codeOrder()) {
             genes++;
             if (g.affectsCoat()) {
                 paints++;

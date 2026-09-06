@@ -870,6 +870,20 @@ private static final List&lt;Gene&gt; BUILTINS = List.of(
     <li><strong>Write the gene up.</strong> Add a page under <code>wiki/</code>
         modelled on an existing gene page, and add it to the
         <code>SECTIONS</code> array in <code>wiki/nav.js</code>.</li>
+    <li><strong>Give the page a preview window</strong>, if the gene paints. Two
+        lines, and no third:
+<div class="codebox">
+<pre><code class="language-html">&lt;div class="gene-preview" data-gene="horsegenetics.yourgene"&gt;&lt;/div&gt;
+&lt;script defer src="gene-preview/gene-preview.js"&gt;&lt;/script&gt;</code></pre>
+</div>
+        It shows the gene on a black, a bay and a chestnut, spinnable, with a
+        dice that rerolls the epigenetics. Everything it draws it asks the
+        registry for at run time &mdash; the gene's name, one button per
+        outcome that <em>looks</em> different, any condition the genotype
+        resolves &mdash; so there is nothing in the page to keep in step with
+        the gene, and nothing to update when it gains an allele. It runs the
+        same wasm the horse designer does, so it needs the wiki served over
+        http; see <code>wiki/gene-preview/gene-preview.js</code>.</li>
     <li><strong>Bake samples</strong>: <code>./gradlew :common:bakeCoatSamples</code>
         writes <code>build/coat-samples/*.png</code> without launching the game.</li>
     <li><strong>Run the tests</strong>: <code>./gradlew :common:test</code>.</li>

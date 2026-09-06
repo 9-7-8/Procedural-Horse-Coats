@@ -16,19 +16,31 @@ window.HG = window.HG || {};
 (function (HG) {
   "use strict";
 
-  var WASM = "wasm/web.wasm";
-  var RUNTIME = "wasm/web.wasm-runtime.js";
+  // Where the wasm and its four PNGs live, worked out from THIS FILE's own URL
+  // rather than from the page's. The designer is not the only page that loads
+  // the mod any more - every gene page's preview window does too (see
+  // wiki/gene-preview/), and it sits one directory up, so a path relative to
+  // the document would resolve somewhere else on every caller. The script's own
+  // src is the one thing that is the same wherever it is included from.
+  var BASE = (function () {
+    var self = document.currentScript;
+    if (!self || !self.src) return "";       // inlined or bundled - assume alongside
+    return self.src.replace(/js\/java\.js(\?.*)?$/, "");
+  })();
+
+  var WASM = BASE + "wasm/web.wasm";
+  var RUNTIME = BASE + "wasm/web.wasm-runtime.js";
 
   var ASSETS = {
-    gradient: "assets/redblackgradient.png",
-    bluepink: "assets/lutbluepink.png",
-    adult: "assets/horse_white.png",
-    baby: "assets/horse_white_baby.png"
+    gradient: BASE + "assets/redblackgradient.png",
+    bluepink: BASE + "assets/lutbluepink.png",
+    adult: BASE + "assets/horse_white.png",
+    baby: BASE + "assets/horse_white_baby.png"
   };
 
   // The two name word tables, for the same reason the textures are handed in
   // as pixels: TeaVM is weakest at reading its own classpath.
-  var NAMES = ["assets/horse-names-alpha.txt", "assets/horse-names-beta.txt"];
+  var NAMES = [BASE + "assets/horse-names-alpha.txt", BASE + "assets/horse-names-beta.txt"];
 
   var api = null;
 
