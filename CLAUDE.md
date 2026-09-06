@@ -2601,7 +2601,7 @@ project. Its shape:
   Still unconfirmed: bred foal, seed-jar round-trip, a spec gene actually
   showing in the display (needs a horse carrying Suntouched/Waterborn) -
   `wiki/verification.html` §0.
-- **`common/`** - compiles; **391 JUnit tests pass** (`./gradlew :common:test`).
+- **`common/`** - compiles; **439 JUnit tests pass** (`./gradlew :common:test`).
   Covers `breed/` (the breed system: `Breed` / `Breeds` (49) / `BreedFounder` /
   `BreedLineage` / `BreedStatCurve` / `Commonness` -> `wiki/breeds.html`),
   `trait/` (the non-coat body: `HorseTraits` / `Traits` / `Condition` /
@@ -3107,10 +3107,14 @@ project. Its shape:
 
 ## Architecture - read this before editing anything
 
-Two-module Gradle project, split deliberately:
+**Three-module** Gradle project, split deliberately:
 
 - **`common/`** - pure Java, **zero** Minecraft/NeoForge imports (not even DFU
-  `Codec`s). Subpackages by concern:
+  `Codec`s). Since 2026-09-06 it is also **kept free of Java 9+ APIs**, because
+  it now has two targets that lack them: the intended Java 8 1.12.2 backport,
+  and TeaVM, which compiles it for the browser. `System.getLogger` and
+  `Long.parseUnsignedLong` have both been removed for that reason - see
+  `CommonLog` and `Epigenome.parseUnsignedHex`. Subpackages by concern:
   - `genetics/` - `Gene` + `Allele` + `AllelePair`, `Expression` (one outcome a
     gene can produce, with its own paint function - what replaced
     `DominancePattern`), `FounderTable` + `FounderContext` (the wild-population
@@ -3180,6 +3184,10 @@ Two-module Gradle project, split deliberately:
   - `Rng` - the randomness seam (`nextFloat` / `nextBoolean` /
     `nextInt(bound)` / `nextLong`), implemented by `NeoRng` (wraps
     `RandomSource`) and, in tests, `FakeRng`.
+  - `CommonLog` - the one way `common/` says something went wrong. Four warnings
+    use it. It exists because `System.getLogger` is Java 9+ and this module has
+    to run on Java 8 and in a browser; a host may take the messages over with
+    `setSink`.
 
   This is the part that survives a version port unchanged. If you want to
   import anything Minecraft-related here, stop.
@@ -3270,6 +3278,21 @@ Two-module Gradle project, split deliberately:
 
   Its job is to **translate** - build/read `common` types and shuttle them in
   and out of Minecraft's systems; the logic stays in `common/`.
+- **`web/`** (new 2026-09-06) - `common/` compiled to **WebAssembly** by TeaVM,
+  for the wiki's [horse designer](wiki/horse-designer/index.html). Three
+  classes and no logic: `DesignerApi` (the `@JSExport` facade - JSON out for
+  structure, `int[]` out for coats, ints in for edits), `HorseEditor` (a
+  deliberate twin of `CustomHorseSpawnScreen`'s state machine - **keep them in
+  step**) and `Json` (a writer; `common/` has no dependency to borrow one from).
+  `./gradlew :web:bakeDesignerAssets` builds it and copies the artefacts into
+  `wiki/horse-designer/`. **It is not shipped in the mod** and nothing in
+  `neoforge-26.1.2/` depends on it.
+
+  It reads no resources: the page decodes the coat PNGs and the name tables and
+  hands them in, which is TeaVM's weak spot avoided and the better boundary
+  anyway. Note that TeaVM compiles the **reachable** graph, so adding an
+  `@JSExport` can surface a missing JDK method that was always there - build
+  after adding one.
 
 When adding a feature, put as much as possible in `common/` and keep the
 NeoForge module thin. That's what makes a future `forge-1.12.2/` module cheap.
