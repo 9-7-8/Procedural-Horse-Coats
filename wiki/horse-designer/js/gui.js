@@ -33,7 +33,7 @@ window.HG = window.HG || {};
 
   // ---- colours, the same ARGB the screen fills with ---------------------
   var PANEL = "rgba(0,0,0,0.565)";        // 0x90000000
-  var NAME_BG = "rgba(0,0,0,0.533)";      // 0x88000000
+  var NAME_BG = "rgba(0,0,0,0.88)";       // 0xE0000000 - opaque enough to read over grass
   var ROW_BG = "rgba(32,40,56,0.2)";      // 0x33202838
   var HOVER = "rgba(255,255,255,0.2)";    // 0x33FFFFFF
   var C_HEADER = "#9098A8";
@@ -50,6 +50,7 @@ window.HG = window.HG || {};
   var DD_BORDER = "#5A6478";
   var DD_SEL = "rgba(112,136,255,0.33)";
   var DD_TEXT = "#C0C4D0";
+  var C_UNSHOWN = "#6B7182";   // a gene this page cannot draw at all
 
   function create(canvas, opts) {
     var ctx = canvas.getContext("2d");
@@ -125,6 +126,22 @@ window.HG = window.HG || {};
       ctx.restore();
     }
 
+    /**
+     * Can this page show anything of the gene at all? Java decides
+     * (DesignerApi.showsAs), derived from the gene rather than from a list here
+     * - so a gene added later classifies itself.
+     */
+    function viewable(gene) {
+      return gene.shows !== "ability" && gene.shows !== "stats";
+    }
+
+    /** A name with a line through it: real gene, nothing to see. */
+    function struck(label, x, y, maxW, colour) {
+      fitted(label, x, y, maxW, colour);
+      var w = Math.min(widthOf(label), maxW);
+      fill(x, y + 4, x + w, y + 5, colour);
+    }
+
     function centred(s, x0, x1, y, colour) {
       text(s, (x0 + x1) / 2 - widthOf(s) / 2, y, colour);
     }
@@ -156,9 +173,11 @@ window.HG = window.HG || {};
       var hovered = dd ? -1 : rowAt(mouse.x, mouse.y);
       var shown = Math.min(genes.length, scroll + visibleRows()) - scroll;
 
-      // header band
+      // Header band. The screen puts its title here; a horse has a better one,
+      // so this is the name - and each half is its own button, which is where
+      // "reroll either half" lives without costing a widget in the column.
       fill(0, 6, vw, 32, PANEL);
-      centred("Custom Horse", 0, vw, 10, "#FFFFFF");
+      drawName();
 
       // the name column only - stop short of an added row's allele buttons
       fill(LIST_X - 4, LIST_TOP - 14, LIST_X + nameWidth(true) + 2, LIST_TOP + shown * ROW_H, NAME_BG);
@@ -169,6 +188,27 @@ window.HG = window.HG || {};
       drawRightColumn();
       drawGenomeLine();
       if (dd) drawDropdown();
+    }
+
+    /** The name, in two clickable halves. */
+    function drawName() {
+      var first = state.first || "?";
+      var last = state.last || "?";
+      var gap = 5;
+      var wf = widthOf(first), wl = widthOf(last);
+      var x = vw / 2 - (wf + gap + wl) / 2;
+      half(first, x, wf, 1);
+      half(last, x + wf + gap, wl, 2);
+      text("click a half to reroll it", vw / 2 - widthOf("click a half to reroll it") / 2, 22, C_SUB);
+    }
+
+    function half(word, x, w, bit) {
+      var y = 9;
+      var over = mouse.x >= x - 2 && mouse.x < x + w + 2 && mouse.y >= y - 1 && mouse.y < y + 11;
+      if (over) fill(x - 2, y - 1, x + w + 2, y + 11, HOVER);
+      text(word, x, y, over ? "#FFFFFF" : "#E8EEF8");
+      widgets.push({ x: x - 2, y: y - 1, w: w + 4, h: 12,
+        click: function () { opts.edit("rerollName", bit); } });
     }
 
     function drawRows(hovered) {
@@ -182,19 +222,24 @@ window.HG = window.HG || {};
         var row = state.rows[i];
         var ry = LIST_TOP + (i - scroll) * ROW_H;
 
+        var canShow = viewable(gene);
+
         if (!row.added) {
           // off the horse: a plain name, the whole row clickable
           if (i === hovered) fill(LIST_X - 4, ry, LIST_X + listW, ry + ROW_H - 2, HOVER);
-          fitted(gene.name, LIST_X, ry + 6, nameWidth(false),
-            i === hovered ? C_NAME_ON : C_NAME_OFF);
+          var offColour = canShow ? (i === hovered ? C_NAME_ON : C_NAME_OFF) : C_UNSHOWN;
+          if (canShow) fitted(gene.name, LIST_X, ry + 6, nameWidth(false), offColour);
+          else struck(gene.name, LIST_X, ry + 6, nameWidth(false), offColour);
           widgets.push({ x: LIST_X - 4, y: ry, w: listW + 4, h: ROW_H - 2, click: add(i) });
           continue;
         }
 
         // on the horse: name, what it expresses, and its two allele buttons
         fill(LIST_X - 4, ry, LIST_X + nameWidth(true) + 2, ry + ROW_H - 2, ROW_BG);
-        fitted(gene.name, LIST_X, ry + 1, nameWidth(true), row.expressing ? C_EXPRESSING : C_ADDED);
-        fitted(row.expression, LIST_X, ry + 10, nameWidth(true), C_SUB);
+        var onColour = !canShow ? C_UNSHOWN : (row.expressing ? C_EXPRESSING : C_ADDED);
+        if (canShow) fitted(gene.name, LIST_X, ry + 1, nameWidth(true), onColour);
+        else struck(gene.name, LIST_X, ry + 1, nameWidth(true), onColour);
+        fitted(canShow ? row.expression : "not shown here", LIST_X, ry + 10, nameWidth(true), C_SUB);
 
         var many = gene.alleles.length > 3;
         button(aX, ry, ALLELE_W, ROW_H - 2, gene.alleles[row.a].token, slot(i, 0, many, aX, ry));
@@ -203,7 +248,14 @@ window.HG = window.HG || {};
       }
     }
 
-    function add(i) { return function () { opts.edit("addGene", i); }; }
+    // Clicking a struck-through gene still adds it - it is a real gene and it
+    // belongs in an exported horse - but says out loud that you will not see it.
+    function add(i) {
+      return function () {
+        if (!viewable(genes[i])) opts.notShown(i);
+        opts.edit("addGene", i);
+      };
+    }
     function remove(i) { return function () { opts.edit("removeGene", i); }; }
 
     function slot(i, s, many, x, y) {
@@ -256,8 +308,11 @@ window.HG = window.HG || {};
       button(rx, ry, RIGHT_W, 20, "Clear genes", function () { opts.edit("clearGenes"); });
 
       // Where the screen has Spawn / Cancel there is nothing to spawn - the
-      // horse is already standing in the field. These are the browser's
-      // equivalents, and the only two controls with no counterpart in game.
+      // horse is already standing in the field. These four are the browser's
+      // own, and the only controls here with no counterpart in game.
+      button(rx, vh - 92, RIGHT_W, 20, "Reroll name",
+        function () { opts.edit("rerollName", 3); }, true);
+      button(rx, vh - 70, RIGHT_W, 20, "Export JSON", function () { opts.exportJson(); }, true);
       button(rx, vh - 48, RIGHT_W, 20, state.wander ? "Wander: on" : "Wander: off",
         function () { opts.toggleWander(); }, true);
       button(rx, vh - 26, RIGHT_W, 20, "Reset view", function () { opts.resetView(); }, true);

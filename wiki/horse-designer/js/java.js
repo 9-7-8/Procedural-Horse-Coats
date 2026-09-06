@@ -26,6 +26,10 @@ window.HG = window.HG || {};
     baby: "assets/horse_white_baby.png"
   };
 
+  // The two name word tables, for the same reason the textures are handed in
+  // as pixels: TeaVM is weakest at reading its own classpath.
+  var NAMES = ["assets/horse-names-alpha.txt", "assets/horse-names-beta.txt"];
+
   var api = null;
 
   /** Decode a PNG into ARGB ints, the layout every int[] in the pipeline uses. */
@@ -77,10 +81,13 @@ window.HG = window.HG || {};
         api.main([]);
         return Promise.all([
           decode(ASSETS.gradient), decode(ASSETS.bluepink),
-          decode(ASSETS.adult), decode(ASSETS.baby)
+          decode(ASSETS.adult), decode(ASSETS.baby),
+          fetch(NAMES[0]).then(function (r) { return r.text(); }),
+          fetch(NAMES[1]).then(function (r) { return r.text(); })
         ]);
       })
       .then(function (imgs) {
+        api.setNameWords(imgs[4], imgs[5]);
         api.setGradient(imgs[0].pixels, imgs[0].width, imgs[0].height);
         // Keyed exactly as LutContribution.lutResources() keys it, so the LUT
         // locus resolves against the right chart.

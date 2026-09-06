@@ -22,6 +22,7 @@ window.HG = window.HG || {};
   var UNITS_PER_BLOCK = 16;
   var FIELD_BLOCKS = 160;          // the grass plane, a side
   var SKY = 0x8fc3f0;
+  var GROUND_TINT = 0x7c7c7c;   // multiplies the grass texture - see below
   var HORIZON = 0xcfe4f5;
 
   function create(container) {
@@ -65,7 +66,7 @@ window.HG = window.HG || {};
     var grassTex = null;
     var ground = new THREE.Mesh(
       new THREE.PlaneGeometry(FIELD_BLOCKS, FIELD_BLOCKS),
-      new THREE.MeshLambertMaterial({ color: 0x74a83f })
+      new THREE.MeshLambertMaterial({ color: 0x4a6b2a })
     );
     ground.rotation.x = -Math.PI / 2;
     scene.add(ground);
@@ -83,7 +84,12 @@ window.HG = window.HG || {};
         grassTex.anisotropy = renderer.capabilities.getMaxAnisotropy
           ? renderer.capabilities.getMaxAnisotropy() : 1;
         grassTex.needsUpdate = true;
-        ground.material = new THREE.MeshLambertMaterial({ map: grassTex });
+        // GROUND_TINT multiplies the texture down. The grass PNG is a bright
+        // top-face texture authored to be read under Minecraft's own baked
+        // lighting; put under a hemisphere light plus a key light it comes out
+        // luminous. Darkening the material rather than the lights is deliberate
+        // - the horse is lit correctly and must stay that way.
+        ground.material = new THREE.MeshLambertMaterial({ map: grassTex, color: GROUND_TINT });
       };
       // A plain fetch: this page is served over HTTP (the wasm needs it), so
       // there is nothing to inline and nothing to keep in step.
@@ -104,6 +110,14 @@ window.HG = window.HG || {};
     );
     refEdges.position.copy(refCube.position);
     scene.add(refEdges);
+
+    // A player standing beside it. One block tells you a length; a person tells
+    // you whether a horse is a horse - which is the question the size locus
+    // actually raises.
+    var player = makePlayer(THREE);
+    player.position.set(1.3, 0, 2.6);
+    player.rotation.y = -0.5;
+    scene.add(player);
 
     // ---- the coat sheet, as a texture ----------------------------------
 
@@ -346,6 +360,8 @@ window.HG = window.HG || {};
       focus: cam.focus,
       camera: cam,
       onFrame: function (fn) { onFrame = fn; },
+      /** Where the horse wanders back to: the reference block. */
+      homePoint: function () { return { x: refCube.position.x, z: refCube.position.z }; },
       setScreenOffset: setScreenOffset,
       resetView: function () {
         cam.yaw = Math.PI * 0.25;
@@ -358,6 +374,41 @@ window.HG = window.HG || {};
         else cam.focus.lerp(new THREE.Vector3(x, y, z), 0.12);
       }
     };
+  }
+
+  /**
+   * A default-proportioned Minecraft player, built from boxes.
+   *
+   * <p>Vanilla numbers, in model units: legs and arms 4x12x4, body 8x12x4, head
+   * 8x8x8, stacked to 32 - then the 0.9375 the player renderer applies, which
+   * lands it at 1.875 blocks. It is untextured on purpose: the default skin is
+   * Mojang's asset and not this repo's to ship, so these are flat colours in
+   * roughly its palette. It is a ruler, not a character.
+   */
+  function makePlayer(THREE) {
+    var U = 0.9375 / 16;          // model units -> blocks, with the renderer's scale
+    var SKIN = 0xC69C6D, SHIRT = 0x00A8A8, TROUSERS = 0x3B44A0, HAIR = 0x3F2E1E;
+    var g = new THREE.Group();
+
+    function box(w, h, d, x, y, z, colour) {
+      var m = new THREE.Mesh(
+        new THREE.BoxGeometry(w * U, h * U, d * U),
+        new THREE.MeshLambertMaterial({ color: colour })
+      );
+      // y is given as the box's BOTTOM, in model units off the ground.
+      m.position.set(x * U, (y + h / 2) * U, z * U);
+      g.add(m);
+      return m;
+    }
+
+    box(4, 12, 4, -2, 0, 0, TROUSERS);   // right leg
+    box(4, 12, 4, 2, 0, 0, TROUSERS);    // left leg
+    box(8, 12, 4, 0, 12, 0, SHIRT);      // body
+    box(4, 12, 4, -6, 12, 0, SKIN);      // right arm
+    box(4, 12, 4, 6, 12, 0, SKIN);       // left arm
+    box(8, 8, 8, 0, 24, 0, SKIN);        // head
+    box(8.4, 3, 8.4, 0, 29, 0, HAIR);    // a suggestion of hair, so it reads as a person
+    return g;
   }
 
   /** A soft dark ellipse under the horse - cheaper and calmer than a shadow map. */

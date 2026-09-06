@@ -12,6 +12,8 @@ window.HG = window.HG || {};
 
   var $ = function (id) { return document.getElementById(id); };
 
+  var TOAST_LIFE_MS = 30000;
+
   function start() {
     var scene = HG.designerScene.create($("field"));
     var gui = HG.gui.create($("gui"), {
@@ -19,7 +21,9 @@ window.HG = window.HG || {};
       copyCode: copyCode,
       pasteCode: pasteCode,
       toggleWander: function () { wander = !wander; refresh(); },
-      resetView: function () { if (scene) scene.resetView(); }
+      resetView: function () { if (scene) scene.resetView(); },
+      exportJson: exportJson,
+      notShown: notShown
     });
 
     var anim = scene ? HG.designerAnimation.create(scene) : null;
@@ -48,6 +52,7 @@ window.HG = window.HG || {};
           + "<code>check-parity.mjs</code>.", "bad");
       }
       refresh();
+      if (anim) anim.reset();       // start beside the reference block
       if (scene) {
         scene.onFrame(function (dt) {
           anim.update(dt, { wander: wander, walkSpeed: 1.1, sizeScale: state ? state.scale : 1 });
@@ -132,6 +137,34 @@ window.HG = window.HG || {};
       });
     }
 
+    /**
+     * The horse as a file. Two code strings are the whole of it - everything
+     * else in there is for a person reading it, and a loader must re-resolve
+     * traits rather than trust them.
+     *
+     * <p>Nothing loads this yet; see the roadmap. It exists so that designing a
+     * horse here and bringing it into a world is one step away rather than a
+     * retyped genotype code.
+     */
+    function exportJson() {
+      var json = api.horseJson();
+      var name = api.horseFileName();
+      var blob = new Blob([json], { type: "application/json" });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement("a");
+      a.href = url;
+      a.download = name;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+      toast("Exported " + name,
+        "Genotype and epigenome codes, plus the name, sex, breed and a readable summary. "
+        + "<strong>Nothing in game loads this yet</strong> — it is on the roadmap. "
+        + "Until then, <em>Copy code</em> and the custom horse spawn egg are the way in.",
+        "info");
+    }
+
     function copyCode() {
       var code = api.genotypeCode();
       if (navigator.clipboard) {
@@ -157,6 +190,29 @@ window.HG = window.HG || {};
       refresh();
     }
 
+    /**
+     * A gene the page cannot draw. Java worked out which those are
+     * (DesignerApi.showsAs, derived from the gene itself), and there are two
+     * honest reasons - so say the right one rather than a vague one.
+     */
+    var shownUnshowable = {};
+    function notShown(i) {
+      var gene = genes[i];
+      if (shownUnshowable[gene.key]) return;
+      shownUnshowable[gene.key] = true;
+      if (gene.shows === "ability") {
+        toast(gene.name + " is only viewable in game",
+          "That gene relies on Minecraft's own assets — particle types, item icons, "
+          + "world blocks — so there is nothing here to draw it with. It is still on "
+          + "the horse and still in <em>Export JSON</em>; you just cannot see it.", "warn");
+      } else {
+        toast(gene.name + " changes numbers, not looks",
+          "That gene moves the horse's speed, health or jump and nothing else, so there "
+          + "is nothing to draw. It is still on the horse, and the figures ride along in "
+          + "<em>Export JSON</em>.", "warn");
+      }
+    }
+
     // ---- toasts ----------------------------------------------------------
 
     function toast(title, html, kind) {
@@ -176,6 +232,14 @@ window.HG = window.HG || {};
       box.appendChild(h);
       box.appendChild(p);
       $("toasts").appendChild(box);
+      // Everything here is an aside, not a decision - so nothing waits on being
+      // dismissed. Hovering holds it, because a toast that vanishes while you
+      // are reading it is worse than one that lingers.
+      var life = setTimeout(function () { box.remove(); }, TOAST_LIFE_MS);
+      box.addEventListener("pointerenter", function () { clearTimeout(life); });
+      box.addEventListener("pointerleave", function () {
+        life = setTimeout(function () { box.remove(); }, TOAST_LIFE_MS);
+      });
     }
   }
 

@@ -993,8 +993,12 @@ public final class CustomHorseSpawnScreen extends Screen {
         g.text(this.font, this.title, this.width / 2 - this.font.width(this.title) / 2, 14, 0xFFFFFFFF);
 
         // the name column only - stop short of an added row's allele buttons
+        // 0xE0 rather than 0x88: the gene names sit over the world (and over
+        // grass, on the browser twin) and a half-transparent backing made them
+        // hard to read. Keep this and wiki/horse-designer/js/gui.js NAME_BG the
+        // same value.
         g.fill(LIST_X - 4, LIST_TOP - 14, LIST_X + nameWidth(true) + 2,
-                LIST_TOP + shown * ROW_H, 0x88000000);
+                LIST_TOP + shown * ROW_H, 0xE0000000);
         Component header = Component.literal(maxScroll() > 0
                 ? "Genes - click to add  (scroll)"
                 : "Genes - click to add");
@@ -1025,7 +1029,7 @@ public final class CustomHorseSpawnScreen extends Screen {
         drawPreview(g, mouseX, mouseY);
 
         // the genome as text, under the list
-        g.fill(LIST_X - 4, this.height - 42, LIST_X + listW, this.height - 14, 0x88000000);
+        g.fill(LIST_X - 4, this.height - 42, LIST_X + listW, this.height - 14, 0xE0000000);
         drawFitted(g, GeneCodeDisplay.shortForm(genotype), LIST_X, this.height - 39, listW - 4, 0xFF88CC88);
         drawFitted(g, "epigenetics #" + Long.toHexString(epigenome.visibleFingerprint(genotype)),
                 LIST_X, this.height - 26, listW - 4, 0xFF8890A8);

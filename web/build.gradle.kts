@@ -79,4 +79,11 @@ tasks.register<Copy>("bakeDesignerAssets") {
         eachFile { path = "assets/" + name }
         includeEmptyDirs = false
     }
+    // The name word tables, for the same reason the textures come across as
+    // pixels: TeaVM is weakest at getResourceAsStream, and HorseNameGenerator
+    // has a public constructor that takes the lists directly.
+    from(project(":common").layout.projectDirectory.dir("src/main/resources/horsegenetics/names")) {
+        include("*.txt")
+        into("assets")
+    }
 }

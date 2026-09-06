@@ -14,6 +14,10 @@
 // relationship - stride length scales with the horse, which is exactly what
 // stretchGaitToSize buys in game (a bigger horse takes proportionally longer,
 // slower strides rather than skating).
+//
+// The horse stays near the reference block on purpose: a coat you have to chase
+// across a field is a coat you are not looking at, and the block and the player
+// beside it are only a scale reference if the horse is standing next to them.
 window.HG = window.HG || {};
 (function (HG) {
   "use strict";
@@ -28,34 +32,44 @@ window.HG = window.HG || {};
 
   var SWING = 0.42;          // radians at full stride
   var STRIDE_BLOCKS = 1.15;  // ground covered per half-cycle, at scale 1
-  var FIELD_RADIUS = 24;     // how far the horse is allowed to wander, in blocks
+  var HOME_RADIUS = 8;       // how far it strays before it is walking home
+  var TURN_RATE = 1.3;       // radians/second - how fast it comes round to a heading
 
   function create(scene) {
     var horse = scene.horse;
 
     var s = {
       x: 0, z: 0, yaw: 0,
+      targetYaw: 0,
       phase: 0,
       gait: 0,          // 0 standing .. 1 walking, eased so legs settle rather than snap
       mode: "stand",
-      timer: 1.5,
-      yawRate: 0
+      timer: 1.5
     };
+
+    /**
+     * Where to head next, pulled toward home the further out it has strayed.
+     *
+     * <p>Right by the block it may go anywhere; at the edge of its range the
+     * spread has closed to nothing and the only heading on offer is straight
+     * back. So it drifts around the block rather than away from it, and no
+     * hard fence is ever needed.
+     */
+    function heading() {
+      var home = scene.homePoint();
+      var dx = home.x - s.x, dz = home.z - s.z;
+      var toHome = Math.atan2(dx, dz);
+      var t = Math.min(1, Math.hypot(dx, dz) / HOME_RADIUS);
+      var spread = (1 - t) * Math.PI;
+      return toHome + (Math.random() * 2 - 1) * spread;
+    }
 
     function pick() {
       var r = Math.random();
-      if (r < 0.42) { s.mode = "walk"; s.timer = 2 + Math.random() * 5; s.yawRate = (Math.random() - 0.5) * 0.35; }
-      else if (r < 0.72) { s.mode = "stand"; s.timer = 1.2 + Math.random() * 3.5; s.yawRate = 0; }
-      else { s.mode = "turn"; s.timer = 0.6 + Math.random() * 1.6; s.yawRate = (Math.random() < 0.5 ? -1 : 1) * (0.6 + Math.random() * 0.9); }
-    }
-
-    function headHome() {
-      // Turn toward the middle of the field, the short way round.
-      var want = Math.atan2(-s.x, -s.z);
-      var d = wrapPi(want - s.yaw);
-      s.mode = "turn";
-      s.timer = Math.min(2.5, Math.abs(d) / 1.1 + 0.2);
-      s.yawRate = (d >= 0 ? 1 : -1) * 1.1;
+      if (r < 0.55) { s.mode = "walk"; s.timer = 2 + Math.random() * 5; }
+      else if (r < 0.85) { s.mode = "stand"; s.timer = 1.2 + Math.random() * 3.5; }
+      else { s.mode = "turn"; s.timer = 0.6 + Math.random() * 1.4; }
+      s.targetYaw = heading();
     }
 
     /**
@@ -69,9 +83,18 @@ window.HG = window.HG || {};
       if (opts.wander) {
         s.timer -= dt;
         if (s.timer <= 0) pick();
-        if (Math.hypot(s.x, s.z) > FIELD_RADIUS && s.mode !== "turn") headHome();
 
-        s.yaw += s.yawRate * dt;
+        // Come round to the heading, and never past it. Turning is a rate
+        // rather than a fixed spin with a timer, which is what stops the horse
+        // pirouetting: there is always a heading it is turning *to*, and
+        // reaching it ends the turn.
+        var off = wrapPi(s.targetYaw - s.yaw);
+        var step = Math.min(Math.abs(off), TURN_RATE * dt);
+        s.yaw += (off >= 0 ? 1 : -1) * step;
+        if (s.mode === "turn" && Math.abs(off) < 0.06) {
+          s.mode = "walk";                 // a turn always resolves into going somewhere
+          s.timer = Math.max(s.timer, 1.5);
+        }
 
         var target = s.mode === "walk" ? 1 : 0;
         s.gait += (target - s.gait) * Math.min(1, dt * 3.5);
@@ -113,11 +136,13 @@ window.HG = window.HG || {};
     }
 
     function reset() {
-      s.x = s.z = s.yaw = s.phase = 0;
+      var home = scene.homePoint();
+      s.x = home.x;
+      s.z = home.z;
+      s.yaw = s.targetYaw = s.phase = 0;
       s.mode = "stand";
       s.timer = 1.5;
-      s.yawRate = 0;
-      horse.position.set(0, 0, 0);
+      horse.position.set(s.x, 0, s.z);
     }
 
     /** Where the camera should look: the middle of the barrel, at this size. */
@@ -134,5 +159,5 @@ window.HG = window.HG || {};
     return a;
   }
 
-  HG.designerAnimation = { create: create, FIELD_RADIUS: FIELD_RADIUS };
+  HG.designerAnimation = { create: create, HOME_RADIUS: HOME_RADIUS };
 })(window.HG);

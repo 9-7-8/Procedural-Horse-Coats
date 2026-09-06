@@ -73,15 +73,29 @@ final class Json {
         return this;
     }
 
-    /** Doubles are rounded to four places - this feeds a readout, not a computation. */
+    /**
+     * Doubles are rounded to four places - this feeds a readout, not a
+     * computation.
+     *
+     * <p>The sign is written out separately and the magnitude formatted from
+     * {@code Math.abs}, because integer division truncates toward zero:
+     * {@code -7500 / 10000} is {@code 0}, so a naive
+     * "whole part, dot, fraction" loses the minus on everything between -1 and
+     * 0. That shipped once and made the page's live geometry check report a
+     * mesh mismatch that did not exist - every body-space z of -0.75 read back
+     * as 0.75.
+     */
     Json val(double v) {
         comma();
         if (Double.isNaN(v) || Double.isInfinite(v)) {
             out.append("null");
         } else {
-            long scaled = Math.round(v * 10000.0);
+            long scaled = Math.round(Math.abs(v) * 10000.0);
+            if (scaled != 0 && (v < 0 || 1 / v < 0)) {
+                out.append('-');
+            }
             out.append(scaled / 10000L).append('.');
-            long frac = Math.abs(scaled % 10000L);
+            long frac = scaled % 10000L;
             if (frac < 1000) {
                 out.append('0');
             }

@@ -13,6 +13,7 @@ import com.example.horsegenetics.common.genetics.Genome;
 import com.example.horsegenetics.common.genetics.Genotype;
 import com.example.horsegenetics.common.genetics.Inheritance;
 import com.example.horsegenetics.common.horse.Sex;
+import com.example.horsegenetics.common.name.HorseNameGenerator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -61,6 +62,15 @@ public final class HorseEditor {
     private int breedIndex = 0;
     private Epigenome epigenome;
 
+    /**
+     * Every horse has a name, the way every horse in game does - it is rolled
+     * once here rather than left blank, because an unnamed horse reads as a
+     * placeholder and this page is meant to show you a horse.
+     */
+    private HorseNameGenerator names;
+    private String first = "";
+    private String last = "";
+
     public HorseEditor(Rng rng) {
         // Every registered gene is a row, alphabetically by display name - and
         // the sex locus is excluded, because the Sex button owns it. Same rule,
@@ -72,6 +82,39 @@ public final class HorseEditor {
             rows.add(new Row(g));
         }
         this.epigenome = Epigenome.random(rng);
+    }
+
+    /**
+     * Hand in the two word tables. They arrive from the page rather than from
+     * the classpath because {@code getResourceAsStream} is the one thing TeaVM
+     * is weakest at - and the same reason the coat textures arrive as pixels.
+     * {@link HorseNameGenerator} has a public constructor for exactly this.
+     */
+    void setNameWords(List<String> alpha, List<String> beta, Rng rng) {
+        this.names = new HorseNameGenerator(alpha, beta);
+        rerollName(3, rng);
+    }
+
+    public String first() {
+        return first;
+    }
+
+    public String last() {
+        return last;
+    }
+
+    /** @param halves bit 1 the first name, bit 2 the last - so 3 is both. */
+    void rerollName(int halves, Rng rng) {
+        if (names == null) {
+            return;
+        }
+        HorseNameGenerator.NameParts parts = names.generateParts(rng);
+        if ((halves & 1) != 0) {
+            first = parts.first();
+        }
+        if ((halves & 2) != 0) {
+            last = parts.last();
+        }
     }
 
     // ---- reading ---------------------------------------------------------
@@ -192,6 +235,7 @@ public final class HorseEditor {
     public void setBreed(int index, Rng rng) {
         this.breedIndex = Math.max(0, Math.min(index, breeds.size()));
         if (breedIndex != 0) {
+            rerollName(3, rng);
             applyGenome(BreedFounder.roll(breeds.get(breedIndex - 1), rng), true);
         }
     }
@@ -203,6 +247,7 @@ public final class HorseEditor {
      * kept either way.
      */
     public void randomize(Rng rng) {
+        rerollName(3, rng);   // a different horse deserves a different name
         Genome g = breedIndex == 0
                 ? Genome.random(rng)
                 : BreedFounder.roll(breeds.get(breedIndex - 1), rng, female ? Sex.FEMALE : Sex.MALE);

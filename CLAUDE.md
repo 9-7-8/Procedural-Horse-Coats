@@ -197,6 +197,74 @@ project. Its shape:
 
 ## Status snapshot (keep this current)
 
+- **Follow-ups 2026-09-06 on the designer, from the owner's first look.** Seven
+  items; `:common:test` **439 green**, `:neoforge-26.1.2:build` green, parity
+  **3868/48**.
+  - **The "3D mesh disagrees with the game" error was my JSON writer, not the
+    mesh.** `Json.val(double)` printed the whole part with `scaled / 10000L`,
+    and **integer division truncates toward zero** - so every value between -1
+    and 0 lost its minus sign, and the live geometry check read a body-space
+    `z` of `-0.75` back as `0.75`. The JS port and the Java agree on **every**
+    probed texel (262 adult, 133 foal), and did all along. The lesson is the
+    ordinary one about a checker being code too: a false alarm from a watchdog
+    costs the watchdog its credibility, so the fix carries a comment naming the
+    trap.
+  - **The horse got stuck spinning**, and it was the same bug as "make it come
+    back to the block". Past `FIELD_RADIUS` the old `headHome()` fired again
+    every time the state timer expired, so the horse re-entered `turn` forever
+    and `gait` never rose. Rewritten: there is no fence and no fixed-duration
+    spin. A heading is chosen with a **spread that narrows with distance from
+    the block** - free to go anywhere beside it, straight back at the edge - and
+    turning is a *rate toward that heading* which ends when it arrives. So a
+    turn always resolves into a walk, and the horse circles the reference block
+    instead of leaving.
+  - **The ground was radioactive.** The grass PNG is a bright top-face texture
+    authored to be read under Minecraft's own baked lighting; under a hemisphere
+    plus a key light it glowed. `GROUND_TINT` multiplies it down. **Darkening
+    the material rather than the lights** was the point - the horse was lit
+    correctly and had to stay that way. No new texture needed.
+  - **Every horse has a name now**, rolled from the real `HorseNameGenerator`.
+    The word tables come in from the page like the textures do, because
+    `getResourceAsStream` is TeaVM's weakest spot and the generator has a public
+    constructor taking the lists. **The name is the header**, in two halves, and
+    each half is its own button - so "reroll either half" costs no widget in the
+    column; **Reroll name** does both. A breed pick or a Randomize renames, since
+    that is a different horse.
+  - **Export JSON** (`DesignerApi.horseJson`) writes the horse as a file: the two
+    code strings, which are the whole horse, plus name/sex/breed and a
+    `readable` block that is explicitly **for a person, not for a loader** - a
+    loader must re-resolve traits or a re-tuned gene could never reach a saved
+    horse. Nothing in game reads it yet; that is the new
+    `wiki/roadmap.html#horse-files`, which argues for an **Import horse file**
+    button beside the spawn egg's existing *Paste code* (a Minecraft screen has
+    no file picker, so the clipboard is the route).
+  - **A vanilla-proportioned player stands beside the reference block** - 1.875
+    blocks against the cube's 1.0 and an adult horse's 2.11 to the ear tip.
+    Untextured on purpose: the default skin is Mojang's asset, not this repo's
+    to ship, so it is flat colours in roughly its palette. A ruler, not a
+    character.
+  - **The gene list background went from `0x88` to `0xE0`** (owner request) -
+    and **the same change went into `CustomHorseSpawnScreen`**, because the two
+    are twins and the names sit over a busy world in both.
+  - **Genes the page cannot draw are struck through**, and clicking one toasts
+    (owner request). **Which genes those are is derived, never typed** -
+    `DesignerApi.showsAs` asks each gene whether it paints, whether any pair
+    moves its scale, whether any pair declares a `Condition`, whether it is a
+    `CutieMarkGene` producing a `Mark`, and whether another gene names it in
+    `coatDependsOn()`. That last check is what keeps `PATN1` / `PATN2` out of the
+    struck list: they paint nothing themselves but the leopard complex folds
+    them in, so a horse carrying them does look different. Verdicts:
+    **coat 26, size 6, condition 3** (all shown) against **ability 4** (cutie
+    mark, particle, milk, verdant - item icons, particle types, world blocks)
+    and **stats 8** (CKM, MET, MSTN, PDK4, RYR2, magic speed/health/jump). A
+    struck gene is **still added** when clicked - it is real and belongs in an
+    exported horse - it just says you will not see it. This is gap #39's lesson
+    applied before the fact: a hand-written list would have been wrong the first
+    time a gene was added.
+  - **Toasts dismiss themselves after 30 s**, and hovering one holds it.
+  - **The roadmap was renumbered** by the insertion (1-23). Numbers there are
+    explicitly not stable; link by anchor.
+
 - **Built 2026-09-06, NOT yet opened in a browser: the horse designer runs the
   mod itself.** `wiki/horse-designer/` is now the **browser twin of the custom
   horse spawn egg**, and it runs `common/` compiled to WebAssembly by TeaVM -

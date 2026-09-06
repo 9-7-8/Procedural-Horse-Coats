@@ -107,14 +107,37 @@
     <strong>Wander</strong> and <strong>Reset view</strong>.
 </p>
 
-<h3>The field</h3>
+<h3>The name, the export, and the field</h3>
 
 <ul>
+    <li><strong>Every horse is named.</strong> The name is the header, in two
+        halves: <strong>click either half to reroll just that one</strong>, or
+        use <b>Reroll name</b> in the right column for both. Picking a breed or
+        hitting Randomize renames the horse, because it is a different horse.</li>
+    <li><strong>Export JSON</strong> downloads the horse as a file &mdash; two
+        code strings plus a readable summary. <strong>Nothing in game loads it
+        yet</strong>; that is <a href="roadmap.html#horse-files">roadmap
+        &sect;9</a>. Until then <b>Copy code</b> into the spawn egg is the route
+        in.</li>
     <li><strong>Does it open at all?</strong> A boot overlay, then sky, grass, a
         horse, and the panel over it.</li>
     <li><strong>Is the horse in the gap?</strong> The camera is shifted sideways so
         the horse frames into the space between the two panels rather than behind
         the gene list.</li>
+    <li><strong>Does it stay near the block?</strong> The wander is pulled toward
+        the reference block &mdash; the further out it strays the narrower the
+        spread of headings it will pick, so it should circle the block rather
+        than leave. It must also <strong>never spin on the spot indefinitely</strong>:
+        a turn now resolves into a walk when it reaches its heading, which the
+        old fixed-duration spin did not.</li>
+    <li><strong>Is the ground still too bright?</strong> The grass texture is
+        multiplied down by <code>GROUND_TINT</code> in <code>scene.js</code> -
+        one constant, easy to re-tune. The horse's own lighting is untouched.</li>
+    <li><strong>The player beside the block</strong> is a scale reference: vanilla
+        proportions at the renderer's 0.9375, so 1.875 blocks tall against the
+        cube's 1.0 and an adult horse's 2.11 to the ear tip. Untextured on
+        purpose - the default skin is Mojang's asset, not this repo's to
+        ship.</li>
     <li><strong>Controls.</strong> Drag the empty middle to spin,
         <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> and
         <kbd>Q</kbd><kbd>E</kbd> to move, scroll to zoom. A drag <em>on a panel</em>
@@ -129,18 +152,41 @@
         distracts.</li>
 </ul>
 
-<h3>What it still cannot show</h3>
+<h3>What it still cannot show &mdash; and says so</h3>
 
-<div class="note warn">
-    <span class="label">Three things, and they are all Minecraft-side</span>
-    <p>
-        <strong>Cutie marks</strong> (the emblem is item icons out of the game's
-        item registry), <strong>particle emitters</strong>, and
-        <strong>emissive/glow</strong> texels. The spawn egg previews the first
-        two and this cannot. Everything genetic &mdash; every gene, every allele,
-        breeds, traits, conditions, the size locus &mdash; is live.
-    </p>
+<p>
+    <strong>12 of the 47 rows are struck through.</strong> Clicking one still
+    adds the gene (it is real, and it belongs in an exported horse) but raises a
+    toast saying you will not see it. Which genes those are is
+    <strong>derived, not typed</strong> &mdash; <code>DesignerApi.showsAs</code>
+    asks each gene whether it paints, moves the horse&rsquo;s scale, declares a
+    condition, or is read by a painter, so a gene added later classifies itself.
+    Worth checking the split still reads right:
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Verdict</th><th>Genes</th><th>Struck?</th></tr></thead>
+<tbody>
+<tr><td><code>coat</code></td><td>26 &mdash; everything that paints, plus <code>PATN1</code> / <code>PATN2</code>, which paint nothing themselves but are named in the leopard complex&rsquo;s <code>coatDependsOn()</code></td><td>no</td></tr>
+<tr><td><code>size</code></td><td>6 &mdash; ACAN, B4GALT7, HMGA2, LCORL, SHOX, magic body size</td><td>no</td></tr>
+<tr><td><code>condition</code></td><td>3 &mdash; PLOD1, RAPGEF5, ST14 (the page raises the condition as a toast)</td><td>no</td></tr>
+<tr><td><code>ability</code></td><td><strong>4</strong> &mdash; cutie mark, particle, milk, verdant. Item icons, particle types and world blocks: nothing outside Minecraft to draw them with</td><td><strong>yes</strong></td></tr>
+<tr><td><code>stats</code></td><td><strong>8</strong> &mdash; CKM, MET, MSTN, PDK4, RYR2, magic speed / health / jump. Real and invisible; the figures ride along in the JSON export</td><td><strong>yes</strong></td></tr>
+</tbody>
+</table>
 </div>
+
+<p class="muted">
+    Also not drawn, on genes that are otherwise fine: <strong>emissive / glow</strong>
+    texels (light&rsquo;s gold mane paints, but does not shine).
+</p>
+
+<p>
+    <strong>Toasts dismiss themselves after 30 seconds</strong>, and hovering one
+    holds it &mdash; check that a toast you are mid-way through reading does not
+    vanish.
+</p>
 
 <hr>
 

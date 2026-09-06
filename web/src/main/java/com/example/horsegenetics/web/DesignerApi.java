@@ -7,7 +7,13 @@ import com.example.horsegenetics.common.coat.pattern.GradientLut;
 import com.example.horsegenetics.common.coat.pattern.LutSet;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Skin;
+import com.example.horsegenetics.common.genetics.AbilityContribution;
 import com.example.horsegenetics.common.genetics.Allele;
+import com.example.horsegenetics.common.genetics.AllelePair;
+import com.example.horsegenetics.common.genetics.EpigeneticAbilityContribution;
+import com.example.horsegenetics.common.genetics.Epigenome;
+import com.example.horsegenetics.common.genetics.GenotypeCatalog;
+import com.example.horsegenetics.common.genetics.genes.CutieMarkGene;
 import com.example.horsegenetics.common.genetics.Expression;
 import com.example.horsegenetics.common.genetics.Gene;
 import com.example.horsegenetics.common.genetics.GeneCodeDisplay;
@@ -18,7 +24,9 @@ import com.example.horsegenetics.common.trait.Traits;
 
 import org.teavm.jso.JSExport;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -94,6 +102,35 @@ public final class DesignerApi {
         }
     }
 
+    /**
+     * The two name word tables, newline-separated, fetched by the page. They
+     * come in rather than being read off the classpath because
+     * {@code getResourceAsStream} is TeaVM's weakest spot - the same reason the
+     * textures do.
+     */
+    @JSExport
+    public static void setNameWords(String alpha, String beta) {
+        editor().setNameWords(lines(alpha), lines(beta), RNG);
+    }
+
+    private static List<String> lines(String text) {
+        List<String> out = new ArrayList<>();
+        // Split on the newline char itself - no regex, no escape to mangle.
+        for (String line : text.split(String.valueOf((char) 10))) {
+            String trimmed = line.trim();
+            if (!trimmed.isEmpty()) {
+                out.add(trimmed);
+            }
+        }
+        return out;
+    }
+
+    /** @param halves bit 1 the first name, bit 2 the last - so 3 is both. */
+    @JSExport
+    public static void rerollName(int halves) {
+        editor().rerollName(halves, RNG);
+    }
+
     @JSExport
     public static boolean ready() {
         return baseLut != null && adultTemplate != null && babyTemplate != null;
@@ -145,6 +182,7 @@ public final class DesignerApi {
                     .kv("paints", g.affectsCoat())
                     .kv("sexLinked", g.inheritance().sexLinked())
                     .kv("defaultIndex", HorseEditor.indexOf(g, g.defaultAllele()))
+                    .kv("shows", showsAs(g))
                     .key("alleles").arr();
             for (Allele a : g.alleles()) {
                 j.obj().kv("token", a.token()).kv("label", a.label()).endObj();
@@ -152,6 +190,76 @@ public final class DesignerApi {
             j.endArr().endObj();
         }
         return j.endArr().toString();
+    }
+
+    /**
+     * What, if anything, this page can show of a gene - <b>derived, never
+     * typed</b>.
+     *
+     * <p>A hand-written list of "genes you cannot see in a browser" is wrong the
+     * day someone adds a gene and forgets it, and wrong <i>silently</i>: the
+     * page would go on offering a row that does nothing. So this asks the gene
+     * itself, the way {@code SpliceSafety} asks whether a locus can hurt a
+     * horse.
+     *
+     * <ul>
+     *   <li>{@code "coat"} - it paints. {@link Gene#affectsCoat()} is exactly
+     *       "is any of my outcomes not a wild type", so this is free.</li>
+     *   <li>{@code "size"} - it moves the horse's scale, which the field
+     *       draws.</li>
+     *   <li>{@code "condition"} - it declares a {@link Condition}, which the
+     *       page raises as a toast.</li>
+     *   <li>{@code "ability"} - it grants game behaviour and nothing else:
+     *       particles, item icons, world blocks, mob effects. <b>Nothing about
+     *       it exists outside Minecraft.</b></li>
+     *   <li>{@code "stats"} - it moves speed, health or jump and no more. Real,
+     *       and invisible: the numbers ride along in the JSON export.</li>
+     * </ul>
+     */
+    private static String showsAs(Gene g) {
+        if (g.affectsCoat() || readByAPainter(g)) {
+            return "coat";
+        }
+        Epigenome epi = Epigenome.fromSeed(0x5EEDL);
+        // The cutie mark paints nothing and moves nothing, but it is not a
+        // stat either: the emblem is item icons out of the game's registry,
+        // drawn by a client render layer. markFor is the one API in common/
+        // that produces one, so asking it is still asking the model rather
+        // than keeping a list.
+        if (g instanceof CutieMarkGene mark) {
+            for (AllelePair pair : GenotypeCatalog.allPairsOf(g)) {
+                if (mark.markFor(Genotype.wildType().with(pair), epi).isPresent()) {
+                    return "ability";
+                }
+            }
+        }
+        for (AllelePair pair : GenotypeCatalog.allPairsOf(g)) {
+            Traits t = HorseTraits.resolve(Genotype.wildType().with(pair), epi, true);
+            if (Math.abs(t.scale() - 1.0) > 0.005) {
+                return "size";
+            }
+            if (!t.conditions().isEmpty()) {
+                return "condition";
+            }
+        }
+        return (g instanceof AbilityContribution || g instanceof EpigeneticAbilityContribution)
+                ? "ability" : "stats";
+    }
+
+    /**
+     * Does some other gene fold this one's alleles into the coat?
+     * {@code PATN1} and {@code PATN2} paint nothing on their own and would
+     * otherwise look invisible, but the leopard complex names them in
+     * {@link Gene#coatDependsOn()} and a horse carrying them looks different.
+     * The relationship is declared, so read it rather than special-case them.
+     */
+    private static boolean readByAPainter(Gene g) {
+        for (Gene other : com.example.horsegenetics.common.genetics.Genes.codeOrder()) {
+            if (other != g && other.affectsCoat() && other.coatDependsOn().contains(g.key())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /** "(none)" plus every breed, in {@link com.example.horsegenetics.common.breed.Breeds#all()} order. */
@@ -183,6 +291,8 @@ public final class DesignerApi {
         Traits traits = HorseTraits.resolve(gt, e.epigenome(), true);
 
         Json j = new Json().obj()
+                .kv("first", e.first())
+                .kv("last", e.last())
                 .kv("female", e.female())
                 .kv("baby", e.baby())
                 .kv("breedIndex", e.breedIndex())
@@ -281,6 +391,61 @@ public final class DesignerApi {
     @JSExport
     public static boolean pasteCode(String code) {
         return editor().paste(code);
+    }
+
+    /**
+     * The horse as a file: enough to rebuild it exactly, plus enough for a
+     * person to tell what it is.
+     *
+     * <p>The two code strings are the whole of it - a genotype code and an
+     * epigenome code reconstruct the horse completely, which is the same
+     * guarantee {@code HorseRecord} leans on. Everything else here is
+     * derived and is written out for the reader, not for the loader: a
+     * <b>loader must re-resolve traits rather than trust these</b>, or a
+     * re-tuned gene would be unable to reach a saved horse.
+     *
+     * <p>Nothing loads this yet - see the roadmap. It exists so that designing a
+     * horse here and bringing it into a world is one step away rather than a
+     * retyped genotype code.
+     */
+    @JSExport
+    public static String horseJson() {
+        HorseEditor e = editor();
+        Genotype gt = e.genotype();
+        Traits traits = HorseTraits.resolve(gt, e.epigenome(), true);
+        Json j = new Json().obj()
+                .kv("format", 1)
+                .kv("generator", "horse designer (wiki/horse-designer)")
+                .key("name").obj().kv("first", e.first()).kv("last", e.last()).endObj()
+                .kv("sex", e.female() ? "MARE" : "STALLION")
+                .kv("baby", e.baby())
+                .kv("breed", e.breedIndex() == 0 ? null : e.breeds().get(e.breedIndex() - 1).name())
+                .kv("genotype", gt.toCode())
+                .kv("epigenome", e.epigenome().toCode())
+                .key("readable").obj()
+                .kv("shortForm", GeneCodeDisplay.shortForm(gt))
+                .kv("speed", traits.speed())
+                .kv("health", traits.health())
+                .kv("jump", traits.jump())
+                .kv("scale", traits.scale())
+                .key("conditions").arr();
+        for (Condition c : traits.conditions()) {
+            j.val(c.name());
+        }
+        return j.endArr().endObj().endObj().toString();
+    }
+
+    /** A filename for it, from the horse's own name. */
+    @JSExport
+    public static String horseFileName() {
+        String raw = (editor().first() + "-" + editor().last()).toLowerCase();
+        StringBuilder out = new StringBuilder();
+        for (int i = 0; i < raw.length(); i++) {
+            char c = raw.charAt(i);
+            out.append((c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') ? c : '-');
+        }
+        String name = out.toString().replaceAll("-+", "-").replaceAll("^-|-$", "");
+        return (name.isEmpty() ? "horse" : name) + ".json";
     }
 
     // ---- the live parity check ---------------------------------------------
