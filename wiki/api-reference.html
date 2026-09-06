@@ -55,6 +55,7 @@ genetics/
   Expression.java           ONE outcome a gene can produce, and its paint function
   AbilityContribution.java  capability: this gene makes the horse DO something
   EpigeneticAbilityContribution.java  ...and what it looks like is on the allele copy
+  LutContribution.java      capability: swap the phase-2 gradient (the LUT locus, and ONLY it)
   AlleleRandomness.java     one gene's per-horse randomness, by copy or by expression
   FounderTable.java         the wild-population weight per allele combination
   FounderContext.java       the genotype so far, for a context-aware founder table
@@ -92,6 +93,7 @@ coat/
   CoatTextureId.java        injective code -&gt; Identifier-legal path
   pattern/
     CoatTextureComposer.java  the bake: 3 gene phases + composite + eyes + overlay
+    LutSet.java               base GradientLut + keyed alternates (the LUT locus)
     PigmentField.java         phase 1 accumulator (writable)
     PigmentView.java          phase 1 accumulator (read-only) - what a gene gets
     ColorField.java           phase 3 accumulator (writable)
@@ -691,6 +693,21 @@ public final class HorseAbilities {
 public interface AbilityContribution {
     List&lt;GeneAbility&gt; abilitiesFor(AllelePair pair, Genotype genotype);
 }
+
+/** The capability a Gene implements to swap the phase-2 colour LUT. EXACTLY ONE
+ *  gene implements this (the LUT locus) and always will - a horse has two copies
+ *  of the chromosome, so it shifts its palette at most one way; a new palette is
+ *  a new ALLELE on that gene, never a new gene. */
+public interface LutContribution {
+    Optional&lt;String&gt; alternateLut(AllelePair pair, Genotype genotype); // key, or empty
+    Map&lt;String,String&gt; lutResources();   // key -&gt; "textures/coat/....png" (plain strings; common names no Identifier)
+}
+// CoatTextureComposer.bake/compose gained a (LutSet luts) overload; the old
+// (GradientLut lut) one delegates with LutSet.of(lut). The game module loads
+// redblackgradient.png + every lutResources() texture into the LutSet.
+
+// Expression.Builder.marker() finishes an outcome that is NOT a wild type but
+// has no painter of its own - the LUT swap is applied out of band by the composer.
 
 /** ...and its per-horse twin, for a gene whose effect VARIES between horses
  *  carrying the same alleles. Exactly EpigeneticTraitContribution one layer

@@ -8,6 +8,9 @@ import com.example.horsegenetics.common.genetics.Expression;
 import com.example.horsegenetics.common.genetics.Gene;
 import com.example.horsegenetics.common.genetics.Genes;
 import com.example.horsegenetics.common.genetics.Genotype;
+import com.example.horsegenetics.common.genetics.LutContribution;
+
+import java.util.Optional;
 
 /**
  * The three-phase coat pipeline. Turns a {@link Genotype} + its
@@ -75,17 +78,34 @@ public final class CoatTextureComposer {
     /** {@link #bake}'s pixels alone - what every caller but the emissive layer wants. */
     public static int[] compose(Genotype genotype, Epigenome epigenome, Skin skin, boolean adult,
                                 int[] template, GradientLut lut) {
-        return bake(genotype, epigenome, skin, adult, template, lut).argb();
+        return bake(genotype, epigenome, skin, adult, template, LutSet.of(lut)).argb();
+    }
+
+    /** {@link #compose} with a {@link LutSet}, so the {@code LUT} locus can swap the phase-2 gradient. */
+    public static int[] compose(Genotype genotype, Epigenome epigenome, Skin skin, boolean adult,
+                                int[] template, LutSet luts) {
+        return bake(genotype, epigenome, skin, adult, template, luts).argb();
     }
 
     public static Baked bake(Genotype genotype, Epigenome epigenome, Skin skin, boolean adult,
                              int[] template, GradientLut lut) {
+        return bake(genotype, epigenome, skin, adult, template, LutSet.of(lut));
+    }
+
+    public static Baked bake(Genotype genotype, Epigenome epigenome, Skin skin, boolean adult,
+                             int[] template, LutSet luts) {
         int n = HorseSkinGeometry.SHEET_SIZE;
         if (template.length != n * n) {
             throw new IllegalArgumentException("template must be " + (n * n) + " ARGB pixels, got " + template.length);
         }
 
         CoatBuildContext ctx = new CoatBuildContext(genotype, epigenome, skin, adult);
+
+        // The LUT locus (magical, phase-2): a horse homozygous for a variant
+        // allele resolves its pigment against an unnatural gradient instead of
+        // the red/black one. Selected here, out of band, because the swap is not
+        // a phase-1 restriction or a phase-3 tint.
+        GradientLut lut = luts.resolve(selectAlternateLut(genotype));
 
         // 1. natural phase - each gene's expression folds the pigment field further down.
         PigmentField pigment = new PigmentField(n);
@@ -161,6 +181,28 @@ public final class CoatTextureComposer {
         overlay.applyTo(out);
 
         return new Baked(out, overlay.emissiveMask());
+    }
+
+    /**
+     * The alternate-LUT key the {@code LUT} locus selects for this genotype, or
+     * {@code null} for the natural gradient. The first gene implementing
+     * {@link LutContribution} with a non-wild, non-empty answer wins - there is
+     * only one such gene, so "first" is just defensiveness.
+     */
+    private static String selectAlternateLut(Genotype genotype) {
+        for (Gene gene : Genes.codeOrder()) {
+            if (!(gene instanceof LutContribution lut)) {
+                continue;
+            }
+            if (gene.expressionIn(genotype.pair(gene), genotype).wildType()) {
+                continue;
+            }
+            Optional<String> key = lut.alternateLut(genotype.pair(gene), genotype);
+            if (key.isPresent()) {
+                return key.get();
+            }
+        }
+        return null;
     }
 
     private static int blend(int templateCh, int overlayCh, float a) {

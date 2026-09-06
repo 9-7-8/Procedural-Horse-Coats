@@ -93,6 +93,10 @@ public final class CoatSampleTool {
             {"light_eyes_chestnut", "extension=e/e light=Lteye/n"},
             {"light_hooves_mane_bay", "agouti=A/a light=Lthf/Ltmn"},
             {"light_mane_eyes_white", "kit=W22/N light=Ltmn/Lteye"},
+            // LUT: same melanin genotypes, resolved against the blue/pink gradient
+            {"lut_bluepink_black", "lut=Blupnk/Blupnk"},
+            {"lut_bluepink_bay", "agouti=A/a lut=Blupnk/Blupnk"},
+            {"lut_bluepink_chestnut", "extension=e/e lut=Blupnk/Blupnk"},
     };
 
     /**
@@ -110,7 +114,8 @@ public final class CoatSampleTool {
             3, 3, 3,
             4, 19, 6, 6, 2, 8, 12,
             9, 2, 9,
-            0, 0, 0, 0, 0};
+            0, 0, 0, 0, 0,
+            0, 0, 0};
 
     private CoatSampleTool() {}
 
@@ -121,10 +126,11 @@ public final class CoatSampleTool {
         int n = HorseSkinGeometry.SHEET_SIZE;
         int[] adultTemplate = readArgb("/assets/horsegenetics/textures/entity/horse/horse_white.png");
         int[] babyTemplate = readArgb("/assets/horsegenetics/textures/entity/horse/horse_white_baby.png");
-        int gw = lastReadWidth, gh = lastReadHeight;
         int[] g = readArgb("/assets/horsegenetics/textures/coat/redblackgradient.png");
-        GradientLut lut = new GradientLut(g, lastReadWidth, lastReadHeight);
-        // gw/gh above were overwritten; not needed further
+        GradientLut base = new GradientLut(g, lastReadWidth, lastReadHeight);
+        int[] bp = readArgb("/assets/horsegenetics/textures/coat/lutbluepink.png");
+        GradientLut bluepink = new GradientLut(bp, lastReadWidth, lastReadHeight);
+        LutSet lut = new LutSet(base, java.util.Map.of("bluepink", bluepink));
 
         for (int i = 0; i < SAMPLES.length; i++) {
             Genotype gt = build(SAMPLES[i][1]);

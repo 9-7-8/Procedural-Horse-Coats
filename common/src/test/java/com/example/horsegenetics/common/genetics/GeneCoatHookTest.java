@@ -123,6 +123,12 @@ class GeneCoatHookTest {
             if (!expressesAlone(gene)) {
                 continue;
             }
+            // The LUT locus is magical and its variant homozygote is a real
+            // coat change, but it makes it by swapping the phase-2 gradient out
+            // of band, not by returning a phase-3 tint. LutGeneTest covers it.
+            if (gene instanceof LutContribution) {
+                continue;
+            }
             Genotype gt = homozygousVariant(gene);
             ColorField accumulator = new ColorField(N);
             accumulator.setArgb(0, 0, 0xFF123456);

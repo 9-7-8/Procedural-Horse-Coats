@@ -151,7 +151,7 @@ default ColorField tint(AllelePair pair, CoatBuildContext ctx,
     </p>
 </div>
 
-<h2>Phase 2 &mdash; resolve through the gradient</h2>
+<h2 id="phase2">Phase 2 &mdash; resolve through the gradient</h2>
 
 <p>
     <code>GradientLut</code> wraps
@@ -160,6 +160,23 @@ default ColorField tint(AllelePair pair, CoatBuildContext ctx,
     <code>sample(red, black)</code> reads
     <code>x = (1-red)·(w-1)</code>, <code>y = black·(h-1)</code>.
 </p>
+
+<div class="note">
+    <span class="label">The LUT is swappable &mdash; one locus, and only one</span>
+    <p>
+        Before it samples, the composer asks whether any
+        <code>LutContribution</code> gene reports a <strong>homozygous variant</strong>.
+        Exactly one gene &mdash; <a href="gene-lut.html">LUT</a> &mdash; ever answers,
+        and only when the horse carries two identical copies of a variant allele; it
+        then resolves this horse&rsquo;s pigment against that variant&rsquo;s own
+        <code>GradientLut</code> (e.g. <code>lutbluepink.png</code>) instead of the
+        red/black one. Everything else about the phase is unchanged &mdash; the
+        <code>(red, black)</code> pair is exactly what the melanin genes produced; it
+        just lands on a different chart. The composer takes a
+        <code>LutSet</code> (base gradient + keyed alternates); a missing alternate
+        falls back to the base.
+    </p>
+</div>
 
 <div class="table-wrap">
 <table>

@@ -832,6 +832,86 @@
 
 <h2>Still to verify</h2>
 
+<h3 id="lut">0-A. The LUT gene (built 2026-09-05, NOT play-tested)</h3>
+<p>
+    A magical gene (<code>horsegenetics.lut</code>, priority 190, alleles
+    <span class="allele wild">n</span> / <span class="allele rec">Blupnk</span>)
+    that swaps the phase-2 colour gradient for a horse homozygous for a variant
+    allele. The genotype code gains a segment (<strong>42 built-in genes</strong>,
+    44 in-game with the two shipped spec genes) &mdash; old saves will not parse.
+    <code>:common:test</code> 385 green; <code>coat-golden.txt</code> regenerated
+    (only the new <code>lut=</code> code segment moved on existing rows, plus four
+    new LUT cases). See <a href="gene-lut.html">gene-lut.html</a>.
+</p>
+<ul>
+    <li><strong>Spawn a <code>lut=Blupnk/Blupnk</code> horse</strong> (custom
+        spawn egg &rarr; add the LUT gene; it defaults to the variant homozygote):
+        every colour should read off the blue/pink gradient
+        (<code>textures/coat/lutbluepink.png</code>) rather than the red/black one
+        &mdash; a black is a cool blue-black, a chestnut a dusty pink, a bay
+        pink-over-blue. Try it over several base coats (chestnut, bay, black,
+        grey, cream) &mdash; the melanin genes should be doing exactly what they
+        always do, just against a different chart.</li>
+    <li><strong>A <code>Blupnk/n</code> carrier renders identically to a plain
+        horse</strong> &mdash; one copy does nothing (the golden test pins byte
+        identity; confirm visually).</li>
+    <li><strong>Breeding two carriers</strong> throws a <code>Blupnk/Blupnk</code>
+        foal about one time in four; a wild-caught horse is never a homozygote
+        (~1 in 60 carry a copy).</li>
+    <li><strong>The alternate texture loads</strong> &mdash; check the log has no
+        &ldquo;could not load alternate LUT&rdquo; warning; a missing texture
+        should fall back to the natural gradient, not crash.</li>
+    <li><strong>Texture cache</strong>: a bluepink horse and a plain horse of the
+        same melanin genotype get <em>different</em> baked textures (the LUT gene
+        is in <code>coatCode()</code>); two bluepink horses of the same genotype
+        share one (it is deterministic).</li>
+    <li><strong>Sample bakes</strong>: <code>./gradlew :common:bakeCoatSamples</code>
+        &rarr; the <code>lut_bluepink_black</code> / <code>_bay</code> /
+        <code>_chestnut</code> images.</li>
+</ul>
+
+<h3 id="browser-menu">0-B. Horse Browser is now a container menu + a Crafting tab (built 2026-09-05, NOT play-tested)</h3>
+<p>
+    The Horse Browser was rebuilt from a client-only <code>Screen</code> into a
+    server-synced <code>AbstractContainerScreen</code> over a new
+    <code>HorseBrowserMenu</code> (<code>menu/</code> package, new
+    <code>MenuType</code>). Pressing <kbd>H</kbd> now sends
+    <code>OpenHorseBrowserPayload</code> and the server opens the menu. The Gene
+    Database tab (&sect;0 below) is unchanged in content but re-laid-out into the
+    fixed panel; a new <strong>Crafting</strong> tab adds a private 3&times;3
+    grid.
+</p>
+<ul>
+    <li><strong>Press <kbd>H</kbd></strong> &rarr; the browser opens (via the
+        server round-trip now). <kbd>Esc</kbd> closes. The player inventory shows
+        on both tabs.</li>
+    <li><strong>Gene Database tab</strong>: re-verify everything in &sect;0 &mdash;
+        list, filter, detail pane, scrollbars, &ldquo;Write research paper&rdquo;
+        &mdash; now that it lives inside a narrower container window. Check the
+        detail text does not collide with the inventory or the tab strip.</li>
+    <li><strong>Crafting tab</strong>: the gene list on the left shows only
+        <em>discovered</em>, carrot-bearing genes (creative: all with a carrot).
+        The 3&times;3 grid + result slot render; on the Gene Database tab they are
+        gone (slots inactive) &mdash; confirm no ghost slot highlight or tooltip
+        bleeds through on that tab.</li>
+    <li><strong>Book &rarr; gene paper</strong>: put a single book in the grid,
+        pick a discovered gene &rarr; the result is a <code>research_paper</code>
+        for that gene. Take it &rarr; one book consumed. Pick an undiscovered gene
+        (survival) &rarr; no result. Anything other than exactly one book in the
+        grid &rarr; no result.</li>
+    <li><strong>Known Gene Splice carrot</strong>: golden carrot + the gene paper
+        + a hair item + the rarity ingot + &ge;1 flavour &rarr; the carrot, via
+        the existing <code>KnownGeneSpliceRecipe</code>. <strong>Combining
+        carrots</strong>: 2+ breeding carrots &rarr; one merged carrot
+        (<code>CarrotCombineRecipe</code>); contradictory pairs give no result.</li>
+    <li><strong>No vanilla recipes</strong>: a normal crafting pattern (planks
+        &rarr; sticks, etc.) in the grid produces nothing.</li>
+    <li><strong>Shift-click / drag / number keys</strong> behave in the grid and
+        inventory; closing the screen returns any grid items to the player.</li>
+    <li><strong>Switching tabs while holding a picked-up stack</strong> is blocked
+        (you must put the stack down first) &mdash; confirm that is not annoying.</li>
+</ul>
+
 <h3 id="gene-browser">0. The Horse Browser (H) &amp; the per-horse gene popup (new 2026-09-05)</h3>
 
 <p>

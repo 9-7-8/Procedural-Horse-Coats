@@ -9,6 +9,7 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
+import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 
 @EventBusSubscriber(value = Dist.CLIENT)
 public final class ClientSetup {
@@ -33,6 +34,12 @@ public final class ClientSetup {
     static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerEntityRenderer(EntityType.HORSE, GeneticHorseRenderer::new);
         event.registerBlockEntityRenderer(ModBlockEntities.HAY_PORTAL.get(), ctx -> new HayPortalRenderer());
+    }
+
+    @SubscribeEvent
+    static void registerMenuScreens(RegisterMenuScreensEvent event) {
+        event.register(com.example.horsegenetics.neoforge.menu.ModMenus.HORSE_BROWSER.get(),
+                HorseBrowserScreen::new);
     }
 
     private ClientSetup() {

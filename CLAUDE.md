@@ -139,6 +139,104 @@ project. Its shape:
 
 ## Status snapshot (keep this current)
 
+- **Built 2026-09-05, NOT yet play-tested: the LUT gene + the Horse Browser
+  becomes a container menu with a Crafting tab.** `:common:test` **385 green**,
+  `:neoforge-26.1.2:build` green, `runServer` boots clean (**44 segments**,
+  `loaded 2 data-driven gene(s)`, menu type + payloads register with no error).
+  Two independent pieces:
+  - **`LutGene`** (`horsegenetics.lut`, priority **190**, magical, alleles
+    `n` / `Blupnk`) - a gene that **swaps the phase-2 colour gradient** instead
+    of painting. A horse **homozygous for a variant allele** resolves its
+    surviving red/black pigment against an *unnatural* LUT
+    (`Blupnk/Blupnk` -> `assets/horsegenetics/textures/coat/lutbluepink.png`,
+    a blue/pink palette); one copy, or two *different* variants, is a silent
+    carrier (`bluepink-carrier`, a wild type). **42 built-in genes** (44
+    in-game). It is `affectsCoat()` true (the swap is a real coat change) and
+    **deterministic**, so it is in `Genotype.coatCode()` / the texture key but
+    out of the per-horse fingerprint. Machinery:
+    - **`common/genetics/LutContribution`** - a new gene capability interface
+      (the fourth thing a gene can be, beside `Expression` / `TraitContribution`
+      / `AbilityContribution`): `alternateLut(pair, genotype)` -> `Optional<String>`
+      (non-empty only for a true variant homozygote) + `lutResources()` ->
+      `Map<key, "textures/coat/....png">` (plain strings - `common` names no
+      `Identifier`). **Exactly one gene implements it and always will** - owner's
+      rule, mirroring KIT: a new palette is a new *allele* on this gene, never a
+      new gene, because a horse has two chromosome copies and shows at most one
+      alternate palette.
+    - **`common/coat/pattern/LutSet`** - `record LutSet(GradientLut base,
+      Map<String,GradientLut> alternates)` + `LutSet.of(base)` + `resolve(key)`
+      (unknown/null key -> base). `CoatTextureComposer.bake` / `compose` gained a
+      `(LutSet luts)` overload; the old `(GradientLut lut)` one delegates with
+      `LutSet.of(lut)`, so every pre-LUT caller (`CoatSampleTool`, the golden
+      test's synthetic LUT path) is untouched. The composer's
+      `selectAlternateLut(genotype)` walks `Genes.codeOrder()` for a
+      `LutContribution` with a non-wild, non-empty answer and resolves phase 2
+      against that LUT.
+    - **`Expression.Builder.marker()`** - finishes an outcome that is **not** a
+      wild type but has **no painter of its own** (both `restrict` and `tint`
+      null). The LUT swap is applied out of band; `bluepink` is the first user.
+      `GeneCoatHookTest.aMagicalExpressionReturnsADeltaAndLeavesTheAccumulatorAlone`
+      now skips `LutContribution` genes.
+    - **`client/GeneticCoatTextureFactory`** - loads `redblackgradient.png` as
+      the base plus every `LutContribution` gene's `lutResources()` textures into
+      a `LutSet` (a failed alternate logs a warning and falls back to base), and
+      threads it through `compose` / `bake`.
+    - Founder table: **carriers only** (`Blupnk/n` ~1.7%, `n/n` the rest); a
+      variant homozygote is **never a founder**. No gene carrot
+      (`hasGeneCarrot()` false).
+    - `coat-golden.txt` regenerated: every existing row gained a `lut=n/n` code
+      segment but **no hash moved** (per-gene epigenetic seeds are keyed by gene,
+      not stream position - the magic-speed precedent); four new `lut=Blupnk/*`
+      cases added, with a synthetic blue/pink alt LUT built in the test.
+      `SpecGeneTest.BUILT_IN_GENES` 41 -> 42. New `LutGeneTest` (6).
+      `GenotypeCatalog.size()` **462 422 018 -> 924 844 034** (LUT is a
+      two-outcome coat gene, so it doubles the unmasked entries);
+      `totalGenotypes()` `x3` to
+      **17 644 404 871 265 791 068 979 200 000**. `bakeCoatSamples` gained three
+      `lut_bluepink_*` samples.
+    - **Old saves will not parse** (code 41 -> 42 built-in segments). Dev only.
+    - Docs: `wiki/gene-lut.html` (new), `wiki/nav.js`, `wiki/genetics-model.html`
+      (table + counts), `wiki/pipeline.html` (phase 2 swap note),
+      `wiki/api-reference.html`. Checklist: `wiki/verification.html` §0-A.
+  - **The Horse Browser (H) is a real container menu now.** It was a client-only
+    `Screen`; it is now `client/HorseBrowserScreen extends
+    AbstractContainerScreen<HorseBrowserMenu>` over a new
+    **`neoforge-26.1.2/menu/`** package: `ModMenus` (a `DeferredRegister<
+    MenuType<?>>`, registered from the mod ctor), `HorseBrowserMenu`
+    (`AbstractContainerMenu` - a 3x3 `TransientCraftingContainer` = slots 1-9, a
+    `ResultContainer` = slot 0, the 36 inventory slots via
+    `addStandardInventorySlots`), and `HorseBrowserRecipes` (the result logic).
+    Pressing **H** now sends `network/OpenHorseBrowserPayload` and the server
+    `openMenu`s a `SimpleMenuProvider`; `ClientSetup` binds the screen via
+    `RegisterMenuScreensEvent`. `HorseBrowserKeyHandler` sends the payload
+    instead of `setScreen`.
+    - **Two tabs**: "Gene DB" (the existing gene reference, re-laid into the
+      fixed 316x244 panel - list + filter + detail pane, "Write research paper"
+      button unchanged) and **"Crafting"** (new).
+    - **Crafting tab** - a private 3x3 grid that makes **only this mod's
+      recipes** (no vanilla recipe lookup anywhere): (1) a single **book** in the
+      grid + a **discovered** gene picked in the left list -> that gene's
+      `research_paper` (creative sees every carrot-bearing gene); (2) the
+      paper-parameterised `KnownGeneSpliceRecipe`; (3) `CarrotCombineRecipe`.
+      `HorseBrowserRecipes.resultFor` / `.consume` implement it; the shared
+      `KnownGeneSpliceRecipe` / `CarrotCombineRecipe` instances are stateless.
+      Gene selection is menu state set from the client by
+      `network/SelectBrowserGenePayload` (sent on every list click, so the two
+      tabs stay in sync); `slotsChanged` recomputes the result server-side and
+      pushes a `ClientboundContainerSetSlotPacket`.
+    - **The player inventory shows on both tabs** (normal for a container
+      screen). On the Gene DB tab the grid + result slots go **inactive**
+      (`HorseBrowserMenu.setCraftingVisible`, an `isActive()` override the screen
+      toggles each frame) so they don't render, hover or take clicks;
+      `slotClicked` is also guarded. Switching away from Crafting while holding a
+      picked-up stack is blocked.
+    - Lang: `gui.horsegenetics.horse_browser`. No new items, no datapack changes.
+    - **Not done / risks** (untested GUI against the 26.1.2 retained-mode
+      screen API): exact slot/label geometry in the fixed panel, ghost
+      slot-highlight bleed on the Gene DB tab, quick-move edge cases, the
+      `book -> paper` result-slot consume path. Checklist:
+      `wiki/verification.html` §0-B (and re-run §0 inside the new window).
+
 - **2026-09-05 follow-ups to the carrot pass, NOT yet play-tested:**
   - **Carrots renamed** (owner's call, dev-only, no saves): "mutinogenic" ->
     **Unknown Epigenetic Splice** carrot (`CarrotEffect.EpigeneticSplice`, token
@@ -1469,13 +1567,13 @@ project. Its shape:
   Still unconfirmed: bred foal, seed-jar round-trip, a spec gene actually
   showing in the display (needs a horse carrying Suntouched/Waterborn) -
   `wiki/verification.html` §0.
-- **`common/`** - compiles; **379 JUnit tests pass** (`./gradlew :common:test`).
+- **`common/`** - compiles; **385 JUnit tests pass** (`./gradlew :common:test`).
   Covers `breed/` (the breed system: `Breed` / `Breeds` (49) / `BreedFounder` /
   `BreedLineage` / `BreedStatCurve` / `Commonness` -> `wiki/breeds.html`),
   `trait/` (the non-coat body: `HorseTraits` / `Traits` / `Condition` /
   `TraitBuilder` / `EpigeneticTraitContribution` / the breed `StatAxis` +
   `TargetBand` + `BreedStatTargets` -> `wiki/horse-body.html`) and
-  `genetics/` (allele/gene model - **41 genes**, 20 that paint and 21 that never
+  `genetics/` (allele/gene model - **42 genes**, 21 that paint and 21 that never
   do: **sex**, the 15 natural ones (extension, agouti, champagne,
   grey, **MATP** (cream + pearl, three alleles), **dun** (three alleles),
   **silver**, **mushroom**, **roan**, **tobiano**, and the four white-pattern
@@ -1485,16 +1583,17 @@ project. Its shape:
   body-stat genes** - **mane colour** + **tail colour** (three alleles each, a per-copy
   hue), **healer**, **light** (four alleles, codominant), **milk** (three
   alleles, one lethal pair), **magic body size** (codominant, epigenetic, on most
-  horses), **particle** (**forty alleles**, epigenetic, paints nothing) and
-  **verdant** (four alleles) - and the **thirteen non-coat
+  horses), **particle** (**forty alleles**, epigenetic, paints nothing),
+  **verdant** (four alleles) and **LUT** (swaps the phase-2 gradient for a
+  variant homozygote - the only gene that can) - and the **thirteen non-coat
   genes** - performance (**MSTN**, **PDK4**, **CKM**), jump (**RYR2**), size
   (**LCORL**, **HMGA2**) and health (**ACAN** with five alleles, **B4GALT7**,
   **PLOD1**, **RAPGEF5**, **ST14**, **SHOX**, **MET**);
   `Genotype` code round-trip, breeding, the `Epigenome` / `Genome` per-allele
   epigenetics + priority tie-break, `GenomeSample` - a genome detached from a
   horse, for the stallion seed jar - `Expression` + `FounderTable` + the
-  `GenotypeCatalog` reduction of 5 881 468 290 421 930 356 326 400 000 genotypes
-  to 462 422 018 distinct coats), `coat/` + `coat/pattern/` (the
+  `GenotypeCatalog` reduction of 17 644 404 871 265 791 068 979 200 000 genotypes
+  to 924 844 034 distinct coats), `coat/` + `coat/pattern/` (the
   pipeline - `CoatTextureComposer`, `PigmentField`, `ColorField`, `CoatOverlay`,
   `GradientLut`, `BayCoat`, `GreyCoat`, `WhitePattern`, `BodyStripes`,
   `HairPattern`, `CoatRegions`, the pure
@@ -1523,7 +1622,10 @@ project. Its shape:
   flagged as unverified now works). Re-verified again 2026-09-02 after the
   **horse-care** attachment (`horse_care`), the `care_sync` payload and the
   `horse_water` / `horse_food` block tags were added - still boots clean to
-  `Done`.
+  `Done`. **Re-verified 2026-09-05** after the LUT gene + the
+  `horsegenetics:horse_browser` `MenuType` + `open_horse_browser` /
+  `select_browser_gene` payloads were added: boots to `Done`, **44 segments**
+  (42 built-in + the two shipped spec genes), no errors.
 - **`runClient`** - actively play-tested over the 2026-08-30, 2026-09-01 and
   2026-09-02 sessions; see below.
 
@@ -1956,13 +2058,18 @@ Two-module Gradle project, split deliberately:
     ability sides can use it without the two packages depending on each other),
     `GeneRarity` (the §19 tier enum), `GameteBias` (a per-parent modifier on
     `Genome.breedWith` - what a breeding carrot does, roadmap §14) + `CarrotEffect`
-    (the sealed effect set + `fold` -> `GameteBias`),
+    (the sealed effect set + `fold` -> `GameteBias`), **`LutContribution`** (the
+    capability a gene implements to swap the phase-2 colour LUT - **exactly one
+    gene, the LUT locus, and permanently so**; a new palette is a new allele,
+    never a new gene),
     `CoatPhenotype`, `GeneticCodeCombiner`.
   - `coat/` - `CoatData`, `CoatGenerator`; `coat/pattern/` holds the
     pipeline (`CoatTextureComposer`, the `PigmentField` /
     `ColorField` accumulators and their read-only `PigmentView` / `ColorView`
     faces, plus `CoatOverlay` + `CoatOverlayContribution` - the phase-4 sink for
-    final pixels and the emissive texel mask) and the reusable body-space noise:
+    final pixels and the emissive texel mask, and `LutSet` - the base
+    `GradientLut` + keyed alternates the LUT locus resolves phase 2 against) and
+    the reusable body-space noise:
     `BodyNoise` (single-octave
     value + Worley), `BodyStripes` (X-oriented stripe field), `PatchNoise`
     (warped 3-octave fractal for white-spotting patches - `field` + `fbm2`) and
@@ -2005,8 +2112,13 @@ Two-module Gradle project, split deliberately:
   import anything Minecraft-related here, stop.
 - **`neoforge-26.1.2/`** - everything Minecraft-specific, by concern:
   - `client/` - renderer, texture compositing (incl. `EmissiveCoatLayer` for a
-    `glow` gene's full-bright coat parts), client caches, the inventory
-    hooks + `FamilyTreeScreen`, keybind, lifecycle cleanup.
+    `glow` gene's full-bright coat parts, and the LUT locus's alternate
+    gradients loaded into a `LutSet` in `GeneticCoatTextureFactory`), client
+    caches, the inventory hooks + `FamilyTreeScreen`, keybind, lifecycle
+    cleanup. `HorseBrowserScreen` is now an
+    `AbstractContainerScreen<HorseBrowserMenu>` (was a plain `Screen`) with a
+    Gene DB tab and a Crafting tab; `ClientSetup` binds it via
+    `RegisterMenuScreensEvent`.
   - `data/` - Data Attachments. **Four** on a horse now:
     `horsegenetics:horse_record` (a `HorseRecord`, the whole genome),
     `horsegenetics:horse_care` (`HorseCareAttachment`, bond / herd / daily-cap),
@@ -2022,6 +2134,16 @@ Two-module Gradle project, split deliberately:
     `StallRecord`; and `data/loot/` (`AddResearchPaperModifier` +
     `ModLootModifiers` - the chest-loot paper injection).
   - `network/` - custom payloads + `ModNetworking`.
+  - `menu/` - the mod's one container menu. `ModMenus` (a
+    `DeferredRegister<MenuType<?>>`), `HorseBrowserMenu` (the **Horse Browser**,
+    opened with the H key via `OpenHorseBrowserPayload` - a 3x3
+    `TransientCraftingContainer` + a `ResultContainer` + the player inventory;
+    the result + grid slots go inactive off the Crafting tab via
+    `setCraftingVisible`), and `HorseBrowserRecipes` (the result logic - book +
+    a *discovered* gene -> that gene's `research_paper`, then the shared
+    `KnownGeneSpliceRecipe` / `CarrotCombineRecipe`; **only this mod's
+    recipes**, no vanilla lookup). `SelectBrowserGenePayload` carries the picked
+    gene from the client.
   - `server/` - event handlers, the horse-dimension builder, the portal
     manager, the record adapter (`HorseRecords`, which now also resolves and
     writes the four body attributes); `LethalFoalHandler` (foals that do not
@@ -2137,7 +2259,7 @@ shox 91, met 92 - all of which paint nothing, so their order among themselves
 is arbitrary),
 pink hair 110, **mane colour 112, tail colour 114, healer 116**, magic zebra 120,
 **milk 130, body size 140, magic speed 141, magic health 142, magic jump 143,
-particle 150, light 160, verdant 180**.
+particle 150, light 160, verdant 180, LUT 190**.
 Within the natural band **low = sets pigment absolutely,
 higher = dilution** (agouti's absolute points must precede
 `PigmentField.dilute`). `AlleleEpigenetics.priority` is unrelated - it picks a
@@ -2149,7 +2271,7 @@ MATP, champagne, grey, roan, tobiano, EDNRB, KIT, MITF, PAX3,
 **MSTN, PDK4, CKM, RYR2, LCORL, HMGA2, ACAN, B4GALT7, PLOD1, RAPGEF5, ST14,
 SHOX, MET**, pink hair, **mane colour, tail colour, healer**, magic zebra,
 **milk, body size, magic speed, magic health, magic jump, particle, light,
-verdant**. `naturalOrder()` (phase-1 pigment
+verdant, LUT**. `naturalOrder()` (phase-1 pigment
 restriction) = the same list minus the magical genes - silver / mushroom / dun sit
 right after agouti so the points exist to dilute, and the six white-pattern
 genes run last. Their order among *themselves* barely matters (they all zero
@@ -2158,7 +2280,7 @@ so a later one paints harder - see `WhitePattern` below. Sex and the thirteen no
 `isNatural()`) but every one of their outcomes is a wild type, so the composer
 skips them - as do milk, the four body-stat genes (size, magic speed, magic
 health, magic jump), particle and verdant on the magical side:
-**twenty-one of the forty-one built-ins never paint**, and
+**twenty-one of the forty-two built-ins never paint** (LUT does - it repaints), and
 `Gene.affectsCoat()` is false for exactly those. What they do instead goes
 through `common/trait/` (see `wiki/horse-body.html`) or
 `common/genetics/AbilityContribution`.
@@ -2190,6 +2312,7 @@ gene); one-liners:
 | light | `Lthf`/`Ltmn`/`Lteye`/`n` | wild + six region combinations | 0.5% per variant allele | **magical** - gold, glowing hooves / mane / eyes and a torch-strength `glow`. **Ten combinations, seven outcomes, genuinely codominant**: each variant is dominant to `n` and to none of the others, so a horse shows everything it carries. Eyes and the emissive mask are written in the **overlay** phase |
 | particle | 40 variants + `n` | wild + 40 single + 46 codominant double - **all wild types** | 0.1% per variant allele; ~7.7% of founders trail something | **magical, paints nothing** - the horse trails a particle while it moves. **Forty alleles on one locus**, so it shows at most two, ever. Non-codominant pairs hide the higher-ranked copy; nine families make 46 codominant doubles (the flames and smokes are **one** family of eight). Colour, second colour, body site, count and a spare `data` number are **epigenetic per allele copy** - the first `EpigeneticAbilityContribution` |
 | verdant | `mush`/`moss`/`grass`/`n` | wild, `verdant-carrier`, `mycelium`, `moss`, `grass` - **all wild types** | 6% / 7% / 8% per allele | **magical, paints nothing** - spreads mycelium / moss / grass from the hooves via a `spread`, at most one block per beat. **Every variant needs two of itself**; a mixed pair is inert (where milk's is lethal) |
+| LUT | `n`/`Blupnk` | wild, `bluepink-carrier` (a wild type), `bluepink` | ~1 in 60 carry a copy; **no homozygote is ever a founder** | **magical, swaps the phase-2 gradient** - `Blupnk/Blupnk` resolves every melanin genotype against `lutbluepink.png` (blue/pink) instead of the red/black LUT; the melanin genes are unchanged, only the chart moves. One copy / two different variants = silent carrier. Paints nothing in phase 1 or 3 (`Expression.Builder.marker()`); the swap is out of band via `LutContribution` + `LutSet`. Deterministic. **The only locus that can change the LUT** - a new palette is a new allele here, never a new gene |
 | dun | `D`/`d1`/`d2` | wild (`d2/d2`), `primitive-marks` (`d1/d1`, `d1/d2`), `dun` (any `D`) | `D` 1/24, `d1` 1/10 | **three alleles, two dominance orders**: dilution is `D > d1 = d2`, marking is `D = d1 > d2`. `D` = mild body dilution + **primitive markings** (dorsal stripe + leg bars) that *skip* the dilution so they read dark; `d1` = the dorsal stripe with **no** dilution, done as countershading (it never touches black, and takes red only where there is red - so on a solid black it is a byte-exact no-op, as a real non-dun black is). `CoatRegions.dorsalStripe`/`legBar` |
 | silver | `Z`/`z` | wild, `silver` | 1/60 per allele | eumelanin-**only** dilution → chocolate body + near-flaxen mane/tail; chestnut carrier looks unchanged. Runs after agouti. Dapples are a follow-up |
 | mushroom | `Mu`/`mu` | wild, `mushroom-carrier` (a wild type), `mushroom` | 1/34 per allele | pheomelanin-**only** dilution, `Mu/Mu` only → chestnut becomes flat sepia; near-invisible on black/bay |
@@ -3223,13 +3346,12 @@ point of the revert: the corridor no longer grows when a gene is added.
   `buildStartCap`) on the last segment. Pens are still built lazily as you walk.
 - **`GenotypeCatalog` is untouched and still used** - by the tests, and by
   whatever punnett display gets built. It just no longer drives the dimension.
-  `size()` is **462 422 019** and `totalGenotypes()`
-  **81 687 059 589 193 477 171 200 000**; see "the genetics model" for what those
-  numbers mean. (`size()` last moved with the magical utility genes and the
-  particle locus did not touch it, having only one catalogue entry;
-  `totalGenotypes()` is a `BigInteger` since the particle locus, and the figure
-  recorded here before was a wrapped `long`. The corridor moved with neither,
-  which is the whole point of the revert.)
+  `size()` is **924 844 034** and `totalGenotypes()`
+  **17 644 404 871 265 791 068 979 200 000**; see "the genetics model" for what
+  those numbers mean. (`size()` last moved with the LUT locus, which doubled the
+  unmasked entries; the particle locus and the four body-stat genes did not
+  touch it. `totalGenotypes()` is a `BigInteger` since the particle locus. The
+  corridor moved with none of them, which is the whole point of the revert.)
 
 ### Layout (`DebugPenManager`)
 
@@ -3862,6 +3984,33 @@ Design follow-ups (not just "go look at it"):
    a *birth* lethal like `O/O` is reachable). Whether that is a feature (gene splice
    is gene splice) or wants a per-gene guard is a design call. `Gene.spliceTable()` is
    the seam.
+
+36. **The LUT gene is unplayed.** No horse has been seen rendered against the
+   blue/pink gradient in game. Unknowns: does `lutbluepink.png` read as intended
+   over the full range of base coats (a black should be a cool blue-black, a
+   chestnut a dusty pink), does the alternate texture actually load from
+   `common` resources at runtime the way `redblackgradient.png` does (the log
+   should have no "could not load alternate LUT" warning), and does the texture
+   cache correctly key a bluepink horse separately from a plain one of the same
+   melanin genotype. `wiki/verification.html` §0-A. The gene itself is
+   deliberately minimal: one variant, no gene carrot, no epigenetic variation
+   (a fixed swap), and it is the **only** locus that can touch the LUT - a
+   second palette is a second allele here, per owner's rule.
+
+37. **The Horse Browser crafting tab is an untested GUI.** The browser was
+   rebuilt from a client `Screen` into an `AbstractContainerScreen` +
+   `HorseBrowserMenu` against the 26.1.2 retained-mode screen API, with no way
+   to play-test here. Risks: the fixed-panel slot/label geometry (the Gene DB
+   detail pane now shares a much narrower window and could collide with the
+   inventory or tab strip), a ghost slot-highlight sprite bleeding through on
+   the Gene DB tab (the grid slots are made `isActive() == false` there, which
+   should suppress hover/render/click, but the highlight path is `private` and
+   only partly reachable), `quickMoveStack` edge cases, and the
+   `book -> research_paper` result path (result computed in
+   `HorseBrowserRecipes.resultFor`, consumed in `.consume` - the "one book,
+   nothing else, a discovered carrot-bearing gene selected" gate is the fiddly
+   part). Server side booted clean (`MenuType` + both payloads register).
+   `wiki/verification.html` §0-B, and re-run §0 inside the new window.
 
 ## License
 

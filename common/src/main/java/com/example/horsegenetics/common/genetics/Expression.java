@@ -183,6 +183,18 @@ public final class Expression {
             return new Expression(id, name, description, false, masks, deterministic,
                     null, Objects.requireNonNull(painter, "painter"));
         }
+
+        /**
+         * Finish an outcome that <b>paints nothing in either phase</b> but still
+         * changes the horse another way - the {@code LUT} locus, whose visible
+         * effect is a phase-2 gradient swap the composer applies out of band
+         * (see {@link com.example.horsegenetics.common.genetics.LutContribution}).
+         * It is not a wild type - it does alter the coat - it just has no
+         * painter of its own, so the composer skips it in both painting loops.
+         */
+        public Expression marker() {
+            return new Expression(id, name, description, false, masks, deterministic, null, null);
+        }
     }
 
     // ------------------------------------------------------------------

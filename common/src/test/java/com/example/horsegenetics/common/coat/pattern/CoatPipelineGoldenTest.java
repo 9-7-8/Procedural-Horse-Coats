@@ -119,7 +119,13 @@ class CoatPipelineGoldenTest {
             override("light=Ltmn/Lteye"),
             override("light=Lthf/Lteye"),
             override("kit=W22/N", "light=Ltmn/n"),
-            override("agouti=A/a", "light=Lthf/Ltmn", "mane_color=Mnstrp/n"));
+            override("agouti=A/a", "light=Lthf/Ltmn", "mane_color=Mnstrp/n"),
+            // LUT: one copy is a wild-type carrier (natural gradient), two swap
+            // phase-2 to the alternate LUT - so these two must hash differently
+            override("lut=Blupnk/n"),
+            override("lut=Blupnk/Blupnk"),
+            override("agouti=A/a", "lut=Blupnk/Blupnk"),
+            override("extension=e/e", "grey=G/g", "lut=Blupnk/Blupnk"));
 
     private static final long[] SEEDS = {0L, 3L, 4242L};
 
@@ -138,7 +144,7 @@ class CoatPipelineGoldenTest {
     }
 
     private static String render() {
-        GradientLut lut = lut();
+        LutSet luts = new LutSet(lut(), java.util.Map.of("bluepink", altLut()));
         int[] adultTemplate = template(Skin.ADULT);
         int[] foalTemplate = template(Skin.BABY);
         StringBuilder sb = new StringBuilder();
@@ -147,10 +153,10 @@ class CoatPipelineGoldenTest {
                 Genotype gt = Genotype.parse(code);
                 Epigenome epi = Epigenome.fromSeed(seed);
                 sb.append(code).append(' ').append(seed).append(" adult ")
-                        .append(sha256(CoatTextureComposer.compose(gt, epi, Skin.ADULT, true, adultTemplate, lut)))
+                        .append(sha256(CoatTextureComposer.compose(gt, epi, Skin.ADULT, true, adultTemplate, luts)))
                         .append('\n');
                 sb.append(code).append(' ').append(seed).append(" foal  ")
-                        .append(sha256(CoatTextureComposer.compose(gt, epi, Skin.BABY, false, foalTemplate, lut)))
+                        .append(sha256(CoatTextureComposer.compose(gt, epi, Skin.BABY, false, foalTemplate, luts)))
                         .append('\n');
             }
         }
@@ -226,6 +232,26 @@ class CoatPipelineGoldenTest {
                 float redLevel = 1f - x / (float) (s - 1);
                 float blackLevel = y / (float) (s - 1);
                 a[y * s + x] = lerp(lerp(white, red, redLevel), black, blackLevel);
+            }
+        }
+        return new GradientLut(a, s, s);
+    }
+
+    /**
+     * A synthetic <i>alternate</i> LUT for the {@code LUT} locus - same layout
+     * (left redder, bottom blacker) but cool blues and pinks, so a
+     * {@code Blupnk/Blupnk} horse hashes differently from its natural-gradient
+     * carrier.
+     */
+    private static GradientLut altLut() {
+        int s = 16;
+        int[] a = new int[s * s];
+        int white = 0xFFF2ECF6, pink = 0xFFD86AA8, blueBlack = 0xFF10122A;
+        for (int y = 0; y < s; y++) {
+            for (int x = 0; x < s; x++) {
+                float redLevel = 1f - x / (float) (s - 1);
+                float blackLevel = y / (float) (s - 1);
+                a[y * s + x] = lerp(lerp(white, pink, redLevel), blueBlack, blackLevel);
             }
         }
         return new GradientLut(a, s, s);

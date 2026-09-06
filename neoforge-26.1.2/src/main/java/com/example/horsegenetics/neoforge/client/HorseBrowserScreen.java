@@ -4,14 +4,17 @@ import com.example.horsegenetics.common.genetics.Allele;
 import com.example.horsegenetics.common.genetics.Expression;
 import com.example.horsegenetics.common.genetics.Gene;
 import com.example.horsegenetics.common.genetics.Genes;
+import com.example.horsegenetics.neoforge.menu.HorseBrowserMenu;
+import com.example.horsegenetics.neoforge.network.SelectBrowserGenePayload;
 import com.example.horsegenetics.neoforge.network.WriteResearchPaperPayload;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
-import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.Slot;
 import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 
 import java.util.ArrayList;
@@ -20,31 +23,33 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * The <b>Horse Browser</b> - opened with the configurable key (default
- * <kbd>H</kbd>). A tabbed reference window; this is the first slice, with a
- * single tab.
+ * The <b>Horse Browser</b> - a tabbed reference/crafting window, opened with the
+ * browser key (default <kbd>H</kbd>). It is an {@link AbstractContainerScreen}
+ * over {@link HorseBrowserMenu} so its Crafting tab can carry a live 3x3 grid
+ * and show the player inventory.
  *
  * <h2>Gene Database tab</h2>
- * Every registered gene is listed (nothing about a horse is hidden - the info
- * panel and genotype code always show every gene it carries). A gene the player
- * has <b>met</b> - by taming or breeding a horse that carries it, or reading a
- * research paper - shows full detail: its summary, alleles, every phenotype, the
- * variants seen, and whether its gene-carrot recipe is unlocked. An undiscovered
- * gene shows only its name and a nudge. Creative sees every gene as discovered.
+ * Every registered gene, filterable, with full detail for a gene the player has
+ * met (creative sees all) and a nudge for one they have not. A
+ * <b>Write research paper</b> button spends one book for a paper on the selected
+ * discovered gene.
  *
- * <p><b>Write research paper</b> - for a discovered gene with a Known Gene Splice carrot, a
- * button spends one book for a {@code research_paper} on that gene (roadmap
- * &sect;16.2), which is what makes knowledge shareable.
+ * <h2>Crafting tab</h2>
+ * A private 3x3 grid that only makes this mod's outputs (see
+ * {@code HorseBrowserRecipes}): drop a book in and pick a discovered gene on the
+ * left to craft its <b>research paper</b>, then combine that paper with a golden
+ * carrot, hair, the rarity item and flavours into a <b>Known Gene Splice
+ * carrot</b>; two or more carrots combine into one.
  *
- * <p>The known set comes from {@code ClientGeneDatabase} (a mirror of the
- * server's per-player {@code GeneDatabaseData}); everything else is in
- * {@code common/} already on the client.
+ * <p>The player inventory is shown on both tabs. On the Gene Database tab the
+ * grid + result slots go inactive ({@link HorseBrowserMenu#setCraftingVisible})
+ * so they neither render nor take clicks.
  */
-public final class HorseBrowserScreen extends Screen {
+public final class HorseBrowserScreen extends AbstractContainerScreen<HorseBrowserMenu> {
 
-    /** Tabs of the browser. Only one is built; the strip is drawn so more slot in cleanly. */
     private enum Tab {
-        GENE_DATABASE("Gene Database");
+        GENE_DATABASE("Gene DB"),
+        CRAFTING("Crafting");
 
         final String label;
 
@@ -53,9 +58,12 @@ public final class HorseBrowserScreen extends Screen {
         }
     }
 
-    private static final int DIM = 0xD0101014;
+    // --- palette (matches the old flat look) ---
     private static final int PANEL = 0xF00E0E12;
     private static final int BORDER = 0xFF3A3A48;
+    private static final int LIST_BG = 0xFF141419;
+    private static final int SLOT_BG = 0xFF262630;
+    private static final int SLOT_RESULT_BG = 0xFF3A3320;
     private static final int TAB_ON = 0xFF2A2A38;
     private static final int TAB_OFF = 0xFF17171E;
     private static final int TAB_TEXT_ON = 0xFFFFFFFF;
@@ -72,10 +80,21 @@ public final class HorseBrowserScreen extends Screen {
     private static final int TAG = 0xFF7C84A0;
     private static final int ALLELE_TOK = 0xFFE0C070;
 
-    private static final int ROW_H = 14;
+    // --- geometry, LOCAL to leftPos / topPos ---
+    private static final int IMG_W = 316;
+    private static final int IMG_H = 244;
+    private static final int TAB_H = 15;
+    private static final int LIST_X = 8;
+    private static final int LIST_W = 116;
+    private static final int LIST_TOP = 40;
+    private static final int LIST_BOTTOM = 150;
+    private static final int ROW_H = 13;
+    private static final int DETAIL_X = 130;
+    private static final int DETAIL_TOP = 21;
+    private static final int DETAIL_BOTTOM = 150;
+    private static final int SEARCH_Y = 21;
+    private static final int SEARCH_H = 14;
 
-    // Preserved across init() (resize / reopen within a session is not expected,
-    // but resize is) - selection, filter text, scroll offsets.
     private Tab tab = Tab.GENE_DATABASE;
     private String search = "";
     private String selectedKey = "";
@@ -88,8 +107,8 @@ public final class HorseBrowserScreen extends Screen {
     private final List<Gene> allGenes;
     private List<Gene> filtered = List.of();
 
-    public HorseBrowserScreen() {
-        super(Component.literal("Horse Browser"));
+    public HorseBrowserScreen(HorseBrowserMenu menu, Inventory inventory, Component title) {
+        super(menu, inventory, title, IMG_W, IMG_H);
         List<Gene> genes = new ArrayList<>(Genes.codeOrder());
         genes.sort(Comparator.comparing(Gene::name, String.CASE_INSENSITIVE_ORDER));
         this.allGenes = List.copyOf(genes);
@@ -98,81 +117,17 @@ public final class HorseBrowserScreen extends Screen {
         }
     }
 
-    @Override
-    public boolean isPauseScreen() {
-        return false;
-    }
-
     private boolean creative() {
-        Minecraft mc = Minecraft.getInstance();
-        return mc.player != null && mc.player.getAbilities().instabuild;
+        return minecraft != null && minecraft.player != null && minecraft.player.getAbilities().instabuild;
     }
 
-    /** Full detail for a gene the player has met (creative sees everything). */
     private boolean discovered(Gene g) {
         return g != null && (creative() || ClientGeneDatabase.knows(g.key()));
     }
 
-    // --- geometry ---
-
-    private int panelLeft() {
-        return Math.max(8, this.width / 2 - 300);
-    }
-
-    private int panelRight() {
-        return Math.min(this.width - 8, this.width / 2 + 300);
-    }
-
-    private int panelTop() {
-        return 22;
-    }
-
-    private int panelBottom() {
-        return this.height - 30;
-    }
-
-    private int contentTop() {
-        return panelTop() + 22;
-    }
-
-    private int listLeft() {
-        return panelLeft() + 8;
-    }
-
-    private int listWidth() {
-        return Math.max(140, (panelRight() - panelLeft()) * 30 / 100);
-    }
-
-    private int listRight() {
-        return listLeft() + listWidth();
-    }
-
-    private int searchBoxTop() {
-        return contentTop() + 2;
-    }
-
-    private int searchBoxBottom() {
-        return searchBoxTop() + 16;
-    }
-
-    private int listTop() {
-        return contentTop() + 34;
-    }
-
-    private int detailLeft() {
-        return listRight() + 12;
-    }
-
-    private int detailRight() {
-        return panelRight() - 10;
-    }
-
-    private int visibleRows() {
-        return Math.max(1, (panelBottom() - 8 - listTop()) / ROW_H);
-    }
-
-    private int maxListScroll() {
-        return Math.max(0, filtered.size() - visibleRows());
+    /** Genes eligible for the Crafting tab list: carrot-bearing and discovered (creative: all). */
+    private boolean craftable(Gene g) {
+        return g.hasGeneCarrot() && discovered(g);
     }
 
     // --- widgets ---
@@ -180,24 +135,20 @@ public final class HorseBrowserScreen extends Screen {
     @Override
     protected void init() {
         super.init();
+        this.titleLabelY = -100; // we draw our own title in the tab strip
+        this.inventoryLabelX = LIST_X;
+        this.inventoryLabelY = IMG_H - 84;
 
-        addRenderableWidget(Button.builder(Component.literal("Done"), b -> onClose())
-                .bounds(this.width / 2 - 50, this.height - 26, 100, 20).build());
-
-        searchBox = new EditBox(this.font, listLeft(), searchBoxTop(), listWidth(), 16,
+        searchBox = new EditBox(this.font, leftPos + LIST_X, topPos + SEARCH_Y, LIST_W, SEARCH_H,
                 Component.literal("Filter"));
         searchBox.setMaxLength(48);
-        searchBox.setHint(Component.literal("filter: gene or allele"));
+        searchBox.setHint(Component.literal("filter genes"));
         searchBox.setValue(search);
         addRenderableWidget(searchBox);
 
-        // "Write research paper" - spend one book for a paper on the selected,
-        // discovered gene (roadmap §16.2). Positioned bottom-left of the detail
-        // pane; visibility is toggled each frame.
-        int bw = Math.min(200, detailRight() - detailLeft());
-        writeButton = Button.builder(Component.translatable("gui.horsegenetics.write_paper"),
-                        b -> writePaper())
-                .bounds(detailLeft(), panelBottom() - 24, bw, 18)
+        int bw = IMG_W - DETAIL_X - 10;
+        writeButton = Button.builder(Component.translatable("gui.horsegenetics.write_paper"), b -> writePaper())
+                .bounds(leftPos + DETAIL_X, topPos + DETAIL_BOTTOM - 18, bw, 16)
                 .build();
         writeButton.visible = false;
         addRenderableWidget(writeButton);
@@ -206,8 +157,9 @@ public final class HorseBrowserScreen extends Screen {
     }
 
     private void writePaper() {
-        if (!selectedKey.isEmpty()) {
-            ClientPacketDistributor.sendToServer(new WriteResearchPaperPayload(selectedKey));
+        Gene g = selected();
+        if (g != null && ClientGeneDatabase.knows(g.key())) {
+            ClientPacketDistributor.sendToServer(new WriteResearchPaperPayload(g.key()));
         }
     }
 
@@ -215,30 +167,27 @@ public final class HorseBrowserScreen extends Screen {
         String q = search.trim().toLowerCase(Locale.ROOT);
         List<Gene> out = new ArrayList<>();
         for (Gene g : allGenes) {
+            if (tab == Tab.CRAFTING && !craftable(g)) {
+                continue;
+            }
             if (q.isEmpty() || matches(g, q)) {
                 out.add(g);
             }
         }
         filtered = out;
         listScroll = Math.max(0, Math.min(listScroll, maxListScroll()));
-        // keep the selection if it survived the filter; otherwise take the first hit
         boolean stillThere = filtered.stream().anyMatch(g -> g.key().equals(selectedKey));
         if (!stillThere && !filtered.isEmpty()) {
-            selectedKey = filtered.get(0).key();
-            detailScroll = 0f;
+            select(filtered.get(0).key());
         }
     }
 
     private static boolean matches(Gene g, String q) {
-        if (g.name().toLowerCase(Locale.ROOT).contains(q)) {
-            return true;
-        }
-        if (g.key().toLowerCase(Locale.ROOT).contains(q)) {
+        if (g.name().toLowerCase(Locale.ROOT).contains(q) || g.key().toLowerCase(Locale.ROOT).contains(q)) {
             return true;
         }
         for (Allele a : g.alleles()) {
-            if (a.token().toLowerCase(Locale.ROOT).contains(q)
-                    || a.label().toLowerCase(Locale.ROOT).contains(q)) {
+            if (a.token().toLowerCase(Locale.ROOT).contains(q) || a.label().toLowerCase(Locale.ROOT).contains(q)) {
                 return true;
             }
         }
@@ -254,42 +203,51 @@ public final class HorseBrowserScreen extends Screen {
         return null;
     }
 
+    private void select(String key) {
+        if (!key.equals(selectedKey)) {
+            selectedKey = key;
+            detailScroll = 0f;
+        }
+        // keep the server's gene selection in sync so the book -> paper craft works
+        ClientPacketDistributor.sendToServer(new SelectBrowserGenePayload(key));
+    }
+
+    private int visibleRows() {
+        return Math.max(1, (LIST_BOTTOM - LIST_TOP) / ROW_H);
+    }
+
+    private int maxListScroll() {
+        return Math.max(0, filtered.size() - visibleRows());
+    }
+
     // --- input ---
 
     @Override
     public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
-        if (super.mouseClicked(event, doubleClick)) {
-            return true;
-        }
-        Tab hitTab = tabAt(event.x(), event.y());
-        if (hitTab != null) {
-            if (hitTab != tab) {
-                tab = hitTab;
+        double mx = event.x();
+        double my = event.y();
+
+        Tab hit = tabAt(mx, my);
+        if (hit != null) {
+            if (hit != tab && menu.getCarried().isEmpty()) {
+                tab = hit;
+                applyFilter();
             }
             return true;
         }
-        if (tab != Tab.GENE_DATABASE) {
-            return false;
-        }
-        int idx = rowAt(event.x(), event.y());
-        if (idx >= 0) {
-            Gene g = filtered.get(idx);
-            if (!g.key().equals(selectedKey)) {
-                selectedKey = g.key();
-                detailScroll = 0f;
-            }
+        int row = rowAt(mx, my);
+        if (row >= 0) {
+            select(filtered.get(row).key());
             return true;
         }
-        return false;
+        return super.mouseClicked(event, doubleClick);
     }
 
-    /** The tab whose strip button is under {@code (mx, my)}, or {@code null}. */
     private Tab tabAt(double mx, double my) {
-        int pt = panelTop();
-        if (my < pt || my > pt + 18) {
+        if (my < topPos || my > topPos + TAB_H) {
             return null;
         }
-        int tx = panelLeft();
+        int tx = leftPos;
         for (Tab t : Tab.values()) {
             int w = this.font.width(t.label) + 16;
             if (mx >= tx && mx <= tx + w) {
@@ -301,45 +259,112 @@ public final class HorseBrowserScreen extends Screen {
     }
 
     private int rowAt(double mx, double my) {
-        if (mx < listLeft() || mx > listRight() || my < listTop()
-                || my >= listTop() + visibleRows() * ROW_H) {
+        double lx = mx - leftPos;
+        double ly = my - topPos;
+        if (lx < LIST_X || lx > LIST_X + LIST_W || ly < LIST_TOP || ly >= LIST_TOP + visibleRows() * ROW_H) {
             return -1;
         }
-        int i = listScroll + (int) ((my - listTop()) / ROW_H);
+        int i = listScroll + (int) ((ly - LIST_TOP) / ROW_H);
         return i >= 0 && i < filtered.size() ? i : -1;
     }
 
     @Override
     public boolean mouseScrolled(double mx, double my, double sx, double sy) {
-        if (tab == Tab.GENE_DATABASE) {
-            if (mx >= listLeft() && mx <= listRight() && my >= listTop() && maxListScroll() > 0) {
-                listScroll = Math.max(0, Math.min(maxListScroll(), listScroll - (int) Math.signum(sy)));
-                return true;
-            }
-            if (mx >= detailLeft() && mx <= detailRight() && detailMaxScroll > 0) {
-                detailScroll = Math.max(0f, Math.min(detailMaxScroll, detailScroll - (float) sy * 16f));
-                return true;
-            }
+        double lx = mx - leftPos;
+        double ly = my - topPos;
+        if (lx >= LIST_X && lx <= LIST_X + LIST_W && ly >= LIST_TOP && ly <= LIST_BOTTOM && maxListScroll() > 0) {
+            listScroll = Math.max(0, Math.min(maxListScroll(), listScroll - (int) Math.signum(sy)));
+            return true;
+        }
+        if (tab == Tab.GENE_DATABASE && lx >= DETAIL_X && ly >= DETAIL_TOP && ly <= DETAIL_BOTTOM && detailMaxScroll > 0) {
+            detailScroll = Math.max(0f, Math.min(detailMaxScroll, detailScroll - (float) sy * 14f));
+            return true;
         }
         return super.mouseScrolled(mx, my, sx, sy);
+    }
+
+    /** No slot interaction while the grid is hidden. */
+    @Override
+    protected void slotClicked(Slot slot, int slotId, int buttonNum, net.minecraft.world.inventory.ContainerInput input) {
+        if (tab != Tab.CRAFTING && slot != null && slotId >= 0 && slotId < HorseBrowserMenu.INV_START) {
+            return;
+        }
+        super.slotClicked(slot, slotId, buttonNum, input);
     }
 
     // --- drawing ---
 
     @Override
-    public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
-        super.extractRenderState(g, mouseX, mouseY, partialTick);
-        g.fill(0, 0, this.width, this.height, DIM);
+    public void extractBackground(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
+        menu.setCraftingVisible(tab == Tab.CRAFTING);
+        super.extractBackground(g, mouseX, mouseY, partialTick);
 
         if (searchBox != null && !searchBox.getValue().equals(search)) {
             search = searchBox.getValue();
             applyFilter();
         }
-        boolean showSearch = tab == Tab.GENE_DATABASE;
-        if (searchBox != null) {
-            searchBox.visible = showSearch;
-            searchBox.active = showSearch;
+
+        int l = leftPos;
+        int t = topPos;
+        int r = l + IMG_W;
+        int b = t + IMG_H;
+
+        g.fill(l, t + TAB_H, r, b, PANEL);
+        g.fill(l, t + TAB_H, r, t + TAB_H + 1, BORDER);
+        g.fill(l, b - 1, r, b, BORDER);
+        g.fill(l, t + TAB_H, l + 1, b, BORDER);
+        g.fill(r - 1, t + TAB_H, r, b, BORDER);
+
+        int tx = l;
+        for (Tab tb : Tab.values()) {
+            int w = this.font.width(tb.label) + 16;
+            boolean on = tb == tab;
+            g.fill(tx, t, tx + w, t + TAB_H, on ? TAB_ON : TAB_OFF);
+            g.fill(tx, t, tx + w, t + 1, BORDER);
+            tx += w + 2;
         }
+
+        g.fill(l + LIST_X - 2, t + LIST_TOP - 2, l + LIST_X + LIST_W + 2, t + LIST_BOTTOM + 2, LIST_BG);
+
+        if (tab == Tab.CRAFTING) {
+            for (int row = 0; row < 3; row++) {
+                for (int col = 0; col < 3; col++) {
+                    int sx = l + HorseBrowserMenu.GRID_X + col * 18;
+                    int sy = t + HorseBrowserMenu.GRID_Y + row * 18;
+                    g.fill(sx - 1, sy - 1, sx + 17, sy + 17, SLOT_BG);
+                }
+            }
+            int rx = l + HorseBrowserMenu.RESULT_X;
+            int ry = t + HorseBrowserMenu.RESULT_Y;
+            g.fill(rx - 1, ry - 1, rx + 17, ry + 17, SLOT_RESULT_BG);
+            // arrow
+            g.fill(rx - 22, ry + 7, rx - 6, ry + 9, 0xFF6A6A78);
+        }
+
+        // player inventory cells (always visible)
+        for (int i = 0; i < 27; i++) {
+            int sx = l + HorseBrowserMenu.INV_X + (i % 9) * 18;
+            int sy = t + HorseBrowserMenu.INV_Y + (i / 9) * 18;
+            g.fill(sx - 1, sy - 1, sx + 17, sy + 17, SLOT_BG);
+        }
+        for (int i = 0; i < 9; i++) {
+            int sx = l + HorseBrowserMenu.INV_X + i * 18;
+            int sy = t + HorseBrowserMenu.INV_Y + 58;
+            g.fill(sx - 1, sy - 1, sx + 17, sy + 17, SLOT_BG);
+        }
+        g.fill(l + 6, t + IMG_H - 88, r - 6, t + IMG_H - 87, BORDER);
+    }
+
+    @Override
+    protected void extractLabels(GuiGraphicsExtractor g, int mouseX, int mouseY) {
+        // (matrix is translated by leftPos/topPos here; mouse coords are absolute)
+        int tx = 0;
+        for (Tab tb : Tab.values()) {
+            int w = this.font.width(tb.label) + 16;
+            g.text(this.font, Component.literal(tb.label), tx + 8, 4, tb == tab ? TAB_TEXT_ON : TAB_TEXT_OFF, false);
+            tx += w + 2;
+        }
+
         if (writeButton != null) {
             Gene sel = selected();
             boolean canWrite = tab == Tab.GENE_DATABASE && sel != null
@@ -348,128 +373,123 @@ public final class HorseBrowserScreen extends Screen {
             writeButton.active = canWrite;
         }
 
-        int pl = panelLeft();
-        int pr = panelRight();
-        int pt = panelTop();
-        int pb = panelBottom();
-
-        g.text(this.font, this.title, this.width / 2 - this.font.width(this.title) / 2, 8, HEADING);
-
-        // tab strip
-        int tx = pl;
-        for (Tab t : Tab.values()) {
-            int w = this.font.width(t.label) + 16;
-            boolean on = t == tab;
-            g.fill(tx, pt, tx + w, pt + 18, on ? TAB_ON : TAB_OFF);
-            g.fill(tx, pt, tx + w, pt + 1, BORDER);
-            g.text(this.font, Component.literal(t.label), tx + 8, pt + 5, on ? TAB_TEXT_ON : TAB_TEXT_OFF);
-            tx += w + 2;
-        }
-
-        // panel body. Widgets (the search box) are drawn by super BEFORE this
-        // method's body, so the fill is carved around the box rather than drawn
-        // over it - the same lesson CustomHorseSpawnScreen records.
-        if (showSearch) {
-            int sx0 = listLeft();
-            int sx1 = listLeft() + listWidth();
-            int sy0 = searchBoxTop();
-            int sy1 = searchBoxBottom();
-            g.fill(pl, pt + 18, pr, sy0, PANEL);
-            g.fill(pl, sy0, sx0, sy1, PANEL);
-            g.fill(sx1, sy0, pr, sy1, PANEL);
-            g.fill(pl, sy1, pr, pb, PANEL);
-        } else {
-            g.fill(pl, pt + 18, pr, pb, PANEL);
-        }
-        g.fill(pl, pb - 1, pr, pb, BORDER);
-        g.fill(pl, pt + 18, pl + 1, pb, BORDER);
-        g.fill(pr - 1, pt + 18, pr, pb, BORDER);
-
+        drawGeneList(g, mouseX, mouseY);
         if (tab == Tab.GENE_DATABASE) {
-            drawGeneList(g, mouseX, mouseY);
             drawGeneDetail(g);
+        } else {
+            drawCraftingInfo(g);
         }
+
+        g.text(this.font, Component.translatable("container.inventory"), LIST_X, IMG_H - 84, LABEL, false);
     }
 
     private void drawGeneList(GuiGraphicsExtractor g, int mouseX, int mouseY) {
-        int l = listLeft();
-        int r = listRight();
-        int top = listTop();
-        int bottom = panelBottom() - 8;
+        g.text(this.font, Component.literal(filtered.size() + (filtered.size() == 1 ? " gene" : " genes")),
+                LIST_X, LIST_TOP - 11, LABEL, false);
 
-        g.text(this.font, Component.literal(filtered.size()
-                + (filtered.size() == 1 ? " gene" : " genes")), l, top - 11, LABEL);
-
-        g.enableScissor(l, top, r, bottom);
+        int sx0 = leftPos + LIST_X;
+        int sy0 = topPos + LIST_TOP;
+        int sx1 = leftPos + LIST_X + LIST_W;
+        int sy1 = topPos + LIST_BOTTOM;
+        g.enableScissor(sx0, sy0, sx1, sy1);
         int hovered = rowAt(mouseX, mouseY);
         for (int i = listScroll; i < filtered.size() && i < listScroll + visibleRows(); i++) {
             Gene gene = filtered.get(i);
-            int ry = top + (i - listScroll) * ROW_H;
+            int ry = LIST_TOP + (i - listScroll) * ROW_H;
             boolean sel = gene.key().equals(selectedKey);
             if (sel) {
-                g.fill(l - 2, ry, r, ry + ROW_H, ROW_SEL);
+                g.fill(LIST_X - 2, ry, LIST_X + LIST_W, ry + ROW_H, ROW_SEL);
             } else if (i == hovered) {
-                g.fill(l - 2, ry, r, ry + ROW_H, ROW_HOVER);
+                g.fill(LIST_X - 2, ry, LIST_X + LIST_W, ry + ROW_H, ROW_HOVER);
             }
             int col = !discovered(gene) ? TAG : (sel ? NAME : NAME_DIM);
-            drawFitted(g, gene.name(), l, ry + 3, r - l - 6, col);
+            drawFitted(g, gene.name(), LIST_X, ry + 3, LIST_W - 6, col);
         }
         g.disableScissor();
-
-        drawListScrollbar(g, r, top, bottom);
+        drawListScrollbar(g);
     }
 
-    private void drawListScrollbar(GuiGraphicsExtractor g, int r, int top, int bottom) {
+    private void drawListScrollbar(GuiGraphicsExtractor g) {
         int max = maxListScroll();
         if (max <= 0) {
             return;
         }
-        int trackH = bottom - top;
-        int rows = filtered.size();
-        int x1 = r - 1;
+        int trackH = LIST_BOTTOM - LIST_TOP;
+        int x1 = LIST_X + LIST_W;
         int x0 = x1 - 3;
-        g.fill(x0, top, x1, bottom, 0x33FFFFFF);
-        int thumbH = Math.max(16, trackH * visibleRows() / rows);
-        int thumbY = top + (trackH - thumbH) * listScroll / max;
+        g.fill(x0, LIST_TOP, x1, LIST_BOTTOM, 0x33FFFFFF);
+        int thumbH = Math.max(16, trackH * visibleRows() / filtered.size());
+        int thumbY = LIST_TOP + (trackH - thumbH) * listScroll / max;
         g.fill(x0, thumbY, x1, thumbY + thumbH, 0xAAFFFFFF);
+    }
+
+    private void drawCraftingInfo(GuiGraphicsExtractor g) {
+        int x = HorseBrowserMenu.GRID_X;
+        int y = HorseBrowserMenu.GRID_Y + 60;
+        Gene sel = selected();
+
+        g.text(this.font, Component.literal("Selected gene"), x, y, LABEL, false);
+        y += 11;
+        if (sel == null) {
+            g.text(this.font, Component.literal("- none -"), x, y, NAME_DIM, false);
+        } else {
+            boolean ok = sel.hasGeneCarrot() && discovered(sel);
+            g.text(this.font, Component.literal(sel.name()), x, y, ok ? EXPR_ON : EXPR_OFF, false);
+            y += 10;
+            String note = !sel.hasGeneCarrot() ? "no gene carrot for this gene"
+                    : !discovered(sel) ? "not discovered yet - read a paper or meet a horse"
+                    : "put a book in the grid to write its paper";
+            for (String line : GuiText.wrap(this.font, note, IMG_W - x - 8)) {
+                g.text(this.font, Component.literal(line), x, y, DESC, false);
+                y += 10;
+            }
+        }
+
+        y = HorseBrowserMenu.RESULT_Y + 24;
+        for (String line : GuiText.wrap(this.font,
+                "This grid only makes Horse Genetics recipes: gene papers, Known Gene Splice "
+                        + "carrots, and combined carrots.", IMG_W - HorseBrowserMenu.GRID_X - 8)) {
+            g.text(this.font, Component.literal(line), HorseBrowserMenu.GRID_X, y, TAG, false);
+            y += 10;
+        }
     }
 
     private void drawGeneDetail(GuiGraphicsExtractor g) {
         Gene gene = selected();
-        int l = detailLeft();
-        int r = detailRight();
-        int top = contentTop();
-        int bottom = panelBottom() - 8 - (writeButton != null && writeButton.visible ? 24 : 0);
+        int l = DETAIL_X;
+        int r = IMG_W - 10;
+        int top = DETAIL_TOP;
+        int bottom = DETAIL_BOTTOM - (writeButton != null && writeButton.visible ? 22 : 0);
         int w = r - l;
 
         if (gene == null) {
-            g.text(this.font, Component.literal("No genes match \"" + search + "\"."), l, top + 4, NAME_DIM);
+            g.text(this.font, Component.literal("No genes match \"" + search + "\"."), l, top + 4, NAME_DIM, false);
             detailMaxScroll = 0f;
             return;
         }
 
-        g.enableScissor(l, top, r, bottom);
+        g.enableScissor(leftPos + l, topPos + top, leftPos + r, topPos + bottom);
         int lineH = this.font.lineHeight + 2;
         int y = top - (int) detailScroll;
         int startY = y;
 
-        g.text(this.font, Component.literal(gene.name()), l, y, HEADING);
+        g.text(this.font, Component.literal(gene.name()), l, y, HEADING, false);
         y += lineH + 1;
 
-        String tags = gene.key() + "   ·   " + (gene.isNatural() ? "natural" : "magical")
-                + "   ·   " + gene.rarity().name().toLowerCase()
-                + (gene.affectsCoat() ? "" : "   ·   no coat effect");
-        g.text(this.font, Component.literal(tags), l, y, TAG);
+        String tags = gene.key() + "   " + (gene.isNatural() ? "natural" : "magical")
+                + "   " + gene.rarity().name().toLowerCase()
+                + (gene.affectsCoat() ? "" : "   no coat effect");
+        g.text(this.font, Component.literal(tags), l, y, TAG, false);
         y += lineH + 4;
 
         if (!discovered(gene)) {
-            g.text(this.font, Component.literal("Not yet discovered"), l, y, EXPR_OFF);
+            g.text(this.font, Component.literal("Not yet discovered"), l, y, EXPR_OFF, false);
             y += lineH;
             for (String line : GuiText.wrap(this.font,
-                    "Tame or breed a horse that carries this gene, or read a research paper, "
-                            + "to fill in its entry. Nothing about a horse is hidden - this list "
-                            + "only tracks what you have met.", w)) {
-                g.text(this.font, Component.literal(line), l, y, DESC);
+                    "Tame or breed a horse carrying this gene, or read a research paper, to fill in "
+                            + "its entry. Nothing about a horse is hidden - this list only tracks what "
+                            + "you have met.", w)) {
+                g.text(this.font, Component.literal(line), l, y, DESC, false);
                 y += lineH;
             }
             g.disableScissor();
@@ -479,27 +499,27 @@ public final class HorseBrowserScreen extends Screen {
 
         String summary = gene.description();
         if (summary == null || summary.isBlank()) {
-            summary = "No summary available yet — see the wiki gene page.";
+            summary = "No summary available yet - see the wiki gene page.";
         }
         for (String line : GuiText.wrap(this.font, summary, w)) {
-            g.text(this.font, Component.literal(line), l, y, DESC);
+            g.text(this.font, Component.literal(line), l, y, DESC, false);
             y += lineH;
         }
         y += 6;
 
         List<Allele> alleles = gene.alleles();
-        g.text(this.font, Component.literal("Alleles (" + alleles.size() + ")"), l, y, LABEL);
+        g.text(this.font, Component.literal("Alleles (" + alleles.size() + ")"), l, y, LABEL, false);
         y += lineH + 2;
         for (Allele a : alleles) {
-            g.text(this.font, Component.literal(a.token()), l, y, ALLELE_TOK);
+            g.text(this.font, Component.literal(a.token()), l, y, ALLELE_TOK, false);
             int tw = this.font.width(a.token());
-            drawFitted(g, "— " + a.label(), l + tw + 6, y, w - tw - 6, DESC);
+            drawFitted(g, "- " + a.label(), l + tw + 6, y, w - tw - 6, DESC);
             y += lineH;
         }
         y += 6;
 
         List<Expression> exprs = gene.expressions();
-        g.text(this.font, Component.literal("Phenotypes (" + exprs.size() + ")"), l, y, LABEL);
+        g.text(this.font, Component.literal("Phenotypes (" + exprs.size() + ")"), l, y, LABEL, false);
         y += lineH + 2;
         for (Expression e : exprs) {
             StringBuilder head = new StringBuilder(e.name());
@@ -510,13 +530,12 @@ public final class HorseBrowserScreen extends Screen {
             if (!flags.isEmpty()) {
                 head.append("   (").append(String.join(", ", flags)).append(')');
             }
-            g.text(this.font, Component.literal(head.toString()), l, y,
-                    e.wildType() ? EXPR_OFF : EXPR_ON);
+            g.text(this.font, Component.literal(head.toString()), l, y, e.wildType() ? EXPR_OFF : EXPR_ON, false);
             y += lineH;
             String d = e.description();
             if (d != null && !d.isBlank()) {
                 for (String line : GuiText.wrap(this.font, d, w - 8)) {
-                    g.text(this.font, Component.literal(line), l + 8, y, DESC);
+                    g.text(this.font, Component.literal(line), l + 8, y, DESC, false);
                     y += lineH;
                 }
             }
@@ -526,8 +545,8 @@ public final class HorseBrowserScreen extends Screen {
         if (gene.hasGeneCarrot()) {
             y += 4;
             boolean unlocked = ClientGeneDatabase.carrotUnlocked(gene.key());
-            g.text(this.font, Component.literal("Magic carrot recipe: " + (unlocked ? "unlocked" : "locked")),
-                    l, y, unlocked ? EXPR_ON : EXPR_OFF);
+            g.text(this.font, Component.literal("Splice carrot recipe: " + (unlocked ? "unlocked" : "locked")),
+                    l, y, unlocked ? EXPR_ON : EXPR_OFF, false);
             y += lineH;
             List<String> seen = ClientGeneDatabase.seenTokens(gene.key());
             if (!creative() && !seen.isEmpty()) {
@@ -556,14 +575,14 @@ public final class HorseBrowserScreen extends Screen {
     private void drawFitted(GuiGraphicsExtractor g, String text, int x, int y, int maxW, int color) {
         float fw = this.font.width(text);
         if (fw <= maxW || fw <= 0) {
-            g.text(this.font, Component.literal(text), x, y, color);
+            g.text(this.font, Component.literal(text), x, y, color, false);
             return;
         }
         var pose = g.pose();
         pose.pushMatrix();
         pose.translate(x, y);
         pose.scale(maxW / fw);
-        g.text(this.font, Component.literal(text), 0, 0, color);
+        g.text(this.font, Component.literal(text), 0, 0, color, false);
         pose.popMatrix();
     }
 }

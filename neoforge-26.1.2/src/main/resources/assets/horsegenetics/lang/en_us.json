@@ -28,6 +28,7 @@
   "item.horsegenetics.echo_whistle": "Echo Whistle",
   "death.attack.horsegenetics.genetic_defect": "%1$s did not survive a genetic defect",
   "gui.horsegenetics.write_paper": "Write research paper (1 book)",
+  "gui.horsegenetics.horse_browser": "Horse Browser",
   "message.horsegenetics.shear.foal": "This foal has no coat to shear yet.",
   "message.horsegenetics.shear.regrowing": "This horse's coat hasn't grown back yet.",
   "message.horsegenetics.milk.stallion": "The stallion kicks you.",

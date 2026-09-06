@@ -4,7 +4,11 @@ import com.example.horsegenetics.common.coat.CoatData;
 import com.example.horsegenetics.common.coat.CoatTextureId;
 import com.example.horsegenetics.common.coat.pattern.CoatTextureComposer;
 import com.example.horsegenetics.common.coat.pattern.GradientLut;
+import com.example.horsegenetics.common.coat.pattern.LutSet;
 import com.example.horsegenetics.common.genetics.GeneCodeDisplay;
+import com.example.horsegenetics.common.genetics.Gene;
+import com.example.horsegenetics.common.genetics.Genes;
+import com.example.horsegenetics.common.genetics.LutContribution;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Part;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Skin;
@@ -19,6 +23,7 @@ import net.neoforged.fml.loading.FMLEnvironment;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -65,7 +70,8 @@ public final class GeneticCoatTextureFactory {
 
     private static volatile int[] adultTemplate;
     private static volatile int[] babyTemplate;
-    private static volatile GradientLut gradient;
+    /** The natural red/black gradient plus every alternate LUT the LUT locus can select. */
+    private static volatile LutSet lutSet;
 
     private GeneticCoatTextureFactory() {
     }
@@ -121,7 +127,7 @@ public final class GeneticCoatTextureFactory {
         Skin skin = baby ? Skin.BABY : Skin.ADULT;
         int[] template = baby ? babyTemplate : adultTemplate;
         CoatTextureComposer.Baked baked =
-                CoatTextureComposer.bake(coat.genotype(), coat.epigenome(), skin, !baby, template, gradient);
+                CoatTextureComposer.bake(coat.genotype(), coat.epigenome(), skin, !baby, template, lutSet);
         int[] argb = baked.argb();
         boolean[] byGene = baked.emissive();
 
@@ -179,7 +185,7 @@ public final class GeneticCoatTextureFactory {
         ensureAssetsLoaded();
         Skin skin = baby ? Skin.BABY : Skin.ADULT;
         int[] template = baby ? babyTemplate : adultTemplate;
-        int[] argb = CoatTextureComposer.compose(coat.genotype(), coat.epigenome(), skin, !baby, template, gradient);
+        int[] argb = CoatTextureComposer.compose(coat.genotype(), coat.epigenome(), skin, !baby, template, lutSet);
 
         if (!FMLEnvironment.isProduction()) {
             debugLogCoat(coat, baby, argb, template, breedLabel);
@@ -224,13 +230,43 @@ public final class GeneticCoatTextureFactory {
     }
 
     private static synchronized void ensureAssetsLoaded() {
-        if (adultTemplate != null && babyTemplate != null && gradient != null) {
+        if (adultTemplate != null && babyTemplate != null && lutSet != null) {
             return;
         }
         adultTemplate = loadArgb(ADULT_TEMPLATE, N, N);
         babyTemplate = loadArgb(BABY_TEMPLATE, N, N);
 
-        try (InputStream in = Minecraft.getInstance().getResourceManager().getResourceOrThrow(GRADIENT).open();
+        GradientLut base = loadLut(GRADIENT);
+
+        // The LUT locus (horsegenetics.lut) names one texture per variant
+        // allele; a horse homozygous for that allele resolves against it in
+        // phase 2 instead of the red/black gradient. Any gene may in principle
+        // implement LutContribution, so we walk them all.
+        Map<String, GradientLut> alternates = new HashMap<>();
+        for (Gene gene : Genes.codeOrder()) {
+            if (!(gene instanceof LutContribution lut)) {
+                continue;
+            }
+            lut.lutResources().forEach((key, path) -> {
+                if (alternates.containsKey(key)) {
+                    return;
+                }
+                Identifier id = Identifier.fromNamespaceAndPath(HorseGenetics.MOD_ID, path);
+                try {
+                    alternates.put(key, loadLut(id));
+                } catch (RuntimeException e) {
+                    // A missing alternate LUT falls back to the base gradient
+                    // (LutSet.resolve does), so a bad path is a warning, not a crash.
+                    HorseGenetics.LOGGER.warn("could not load alternate LUT '{}' ({}) - "
+                            + "horses homozygous for it will render with the natural gradient", key, id, e);
+                }
+            });
+        }
+        lutSet = new LutSet(base, alternates);
+    }
+
+    private static GradientLut loadLut(Identifier location) {
+        try (InputStream in = Minecraft.getInstance().getResourceManager().getResourceOrThrow(location).open();
              NativeImage img = NativeImage.read(in)) {
             int w = img.getWidth();
             int h = img.getHeight();
@@ -240,9 +276,9 @@ public final class GeneticCoatTextureFactory {
                     px[y * w + x] = img.getPixel(x, y);
                 }
             }
-            gradient = new GradientLut(px, w, h);
+            return new GradientLut(px, w, h);
         } catch (IOException e) {
-            throw new RuntimeException("failed to load coat gradient " + GRADIENT, e);
+            throw new RuntimeException("failed to load coat LUT " + location, e);
         }
     }
 
@@ -282,6 +318,6 @@ public final class GeneticCoatTextureFactory {
         EMISSIVE_KEY_BY_ID.clear();
         adultTemplate = null;
         babyTemplate = null;
-        gradient = null;
+        lutSet = null;
     }
 }

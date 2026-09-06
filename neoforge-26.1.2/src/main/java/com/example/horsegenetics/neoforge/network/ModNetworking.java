@@ -142,6 +142,29 @@ public final class ModNetworking {
                     }
                 })
         );
+
+        registrar.playToServer(
+                OpenHorseBrowserPayload.TYPE,
+                OpenHorseBrowserPayload.STREAM_CODEC,
+                (payload, context) -> context.enqueueWork(() -> {
+                    if (context.player() instanceof ServerPlayer serverPlayer) {
+                        serverPlayer.openMenu(new net.minecraft.world.SimpleMenuProvider(
+                                (id, inv, p) -> new com.example.horsegenetics.neoforge.menu.HorseBrowserMenu(id, inv),
+                                Component.translatable("gui.horsegenetics.horse_browser")));
+                    }
+                })
+        );
+
+        registrar.playToServer(
+                SelectBrowserGenePayload.TYPE,
+                SelectBrowserGenePayload.STREAM_CODEC,
+                (payload, context) -> context.enqueueWork(() -> {
+                    if (context.player() instanceof ServerPlayer serverPlayer
+                            && serverPlayer.containerMenu instanceof com.example.horsegenetics.neoforge.menu.HorseBrowserMenu menu) {
+                        menu.selectGene(payload.geneKey());
+                    }
+                })
+        );
     }
 
     /**

@@ -172,6 +172,12 @@ public final class GeneDescriptions {
                     "A magical gene that paints nothing: spreads mycelium, moss or grass from the "
                             + "hooves, at most one block at a time. Every variant needs two copies "
                             + "of itself - a mixed pair (say moss and grass) does nothing at all."),
+            Map.entry("horsegenetics.lut",
+                    "A magical gene that swaps the colour lookup the natural genes resolve "
+                            + "through. Only a horse with two identical variant copies is affected: "
+                            + "Blupnk/Blupnk resolves every melanin genotype against a blue-and-pink "
+                            + "gradient instead of the warm red/black one, for dreamier coats. One "
+                            + "copy, or two different variants, shows nothing."),
             Map.entry("horsegenetics.mstn",
                     "MSTN (myostatin), the sprint / stamina trade-off. Codominant: each C copy "
                             + "adds a little speed and costs two hearts of health. Endurance is "

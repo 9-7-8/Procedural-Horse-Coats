@@ -82,6 +82,7 @@ And then there are the ones no real horse has:
 | Milk | **hidden** | Put a bucket under a mare and get milk, as usual. But two copies of one hidden version and **any** horse fills the bucket with **water**; two of the other and it fills with **lava**. Neither shows in a single copy, so the only way to find one is to breed for it - and a water horse and a lava horse can never have a foal together. |
 | Verdant | **hidden** | A horse that changes the ground it walks on: **mycelium**, **moss** or **grass** creeping out from its hooves, a block at a time. Three hidden versions, and each one needs **both** parents to pass on the *same* one. |
 | Particle | rare | A horse that **trails something as it moves** - flames, souls, snowflakes, hearts, portal motes, drifting glyphs. There are **forty versions of this one gene**, so a horse can carry two of them and never more, and most pairs mean one of the two is hidden and only its foals will tell you it was there. Some pairs *do* show both at once. The **colour**, **where on the horse it comes from** - the head, the back, the hooves, the tail - and **how much** of it there is all belong to the copy that carries them, so no two horses of the same kind look alike, and a foal that inherits the copy inherits the exact look. About one wild horse in thirteen trails something; any *particular* one is far rarer than that. |
+| LUT | **hidden** | Trades the whole warm palette a horse's colour is drawn from for an unnatural one. Right now there is one version, **blue and pink** - a horse with **two** copies of it comes out in dreamy blues and pinks instead of the usual browns and blacks, its actual colour genes doing exactly what they always do. One copy shows nothing; you breed two carriers together. More palettes are planned, and they will all be versions of this one gene. |
 
 Wild horses roll a random genotype when they spawn. Bred foals inherit one
 allele from each parent at every gene, so colour passes down the way it does
@@ -155,9 +156,14 @@ great-grandparents, with a little turning 3D model of each horse. A foal's speed
 and health are tinted **green** if they beat both parents, **amber** if they beat
 one, **red** if they trail both.
 
-Press **H** anywhere for the gene browser. In creative it's a searchable
-reference to every gene in the mod - each one's alleles and a description of what
-every phenotype does; search by gene name or by an allele.
+Press **H** anywhere for the Horse Browser. Its **Gene DB** tab is a searchable
+reference: every gene you have met (in creative, all of them) with its alleles
+and a description of what every phenotype does; search by gene name or allele.
+Its **Crafting** tab is a small 3&times;3 grid that only makes this mod's own
+things - put a **book** in it and pick a gene you have discovered to write that
+gene's **research paper**, then turn the paper (plus a golden carrot, some horse
+hair, an ingot for the gene's rarity and a flavour or two) into a **Known Gene
+Splice carrot**. Your inventory shows on both tabs.
 
 Right-click a horse with **paper** to print its stats, its breed, and its
 herd (the lead's name, the band type, how many are nearby) to chat.
