@@ -107,6 +107,7 @@
                 { href: "gene-particle.html", text: "Particle", kind: "magical" },
                 { href: "gene-verdant.html", text: "Verdant", kind: "magical" },
                 { href: "gene-lut.html", text: "LUT (palette swap)", kind: "magical" },
+                { href: "gene-cutie-mark.html", text: "Cutie mark", kind: "magical" },
                 { href: "gene-suntouched.html", text: "Suntouched", kind: "magical" },
                 { href: "gene-waterborn.html", text: "Waterborn", kind: "magical" }
             ]

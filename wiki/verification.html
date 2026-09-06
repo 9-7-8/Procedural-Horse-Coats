@@ -926,6 +926,43 @@
         was boosted.</li>
 </ul>
 
+<h3 id="cutie-mark">0-D. The cutie-mark gene (built 2026-09-05, NOT play-tested)</h3>
+<p>
+    A magical, recessive gene (<code>horsegenetics.cutie_mark</code>, priority
+    196, <span class="allele rec">Cutmrk</span> / <span class="allele wild">n</span>).
+    <code>Cutmrk/Cutmrk</code> wears an emblem of 1&ndash;3 flat items on both
+    flanks, drawn by a client render layer (<code>CutieMarkLayer</code>) on top
+    of the coat and every white pattern. Paints nothing in the bake (all
+    outcomes wild types, like particle), so the genotype code gains a segment
+    (<strong>43 built-in genes</strong>, 45 in-game) but the catalogue is
+    unchanged; old saves won't parse. <code>:common:test</code> 391 green. See
+    <a href="gene-cutie-mark.html">gene-cutie-mark.html</a>.
+</p>
+<ul>
+    <li><strong>Spawn a <code>cutie_mark=Cutmrk/Cutmrk</code> horse</strong>
+        (custom spawn egg &rarr; add the gene; it defaults to the homozygote):
+        an emblem of item icons should appear on <em>both</em> flanks, and it
+        should still show over a dominant-white or heavily-splashed horse.</li>
+    <li><strong>Placement / scale</strong> &mdash; the offset is a first guess
+        (fixed offset out from the animated body part). Check it sits on the
+        barrel, not floating off it or buried in it, at rest and while walking,
+        adult and foal, and at different <code>SCALE</code> (a magic-size horse).
+        Report where it actually lands so the constants can be tuned.</li>
+    <li><strong>Row vs triangle</strong>: re-roll epigenetics (spawn egg button)
+        to cycle count 1&rarr;3 and the row/triangle layout.</li>
+    <li><strong>The item pool</strong>: block items should never appear (they'd
+        be little 3D cubes); modded flat items should be in the mix. A couple of
+        odd flat items (spyglass, trident, fishing rod) may read poorly &mdash;
+        note any that look broken.</li>
+    <li><strong>Determinism / inheritance</strong>: two <code>Cutmrk/Cutmrk</code>
+        horses of the same epigenetic seed wear the identical mark; a foal that
+        inherits the <code>Cutmrk</code> copy inherits its parent's mark exactly.</li>
+    <li><strong>Carrier</strong> (<code>Cutmrk/n</code>) shows nothing; breeding
+        two carriers throws a marked foal ~1 in 4.</li>
+    <li><strong>Perf</strong>: a paddock of marked horses shouldn't stutter (the
+        layer resolves up to 6 item models per marked horse per frame).</li>
+</ul>
+
 <h3 id="gene-browser">0. The Horse Browser (H) &amp; the per-horse gene popup (new 2026-09-05)</h3>
 
 <p>

@@ -42,6 +42,9 @@ public class GeneticHorseRenderer extends AbstractHorseRenderer<Horse, HorseRend
         // The emissive layer, on the other hand, IS ours: it redraws a glow
         // gene's emissive coat regions (Suntouched's mane) at full brightness.
         this.addLayer(new EmissiveCoatLayer(this));
+        // The cutie-mark emblem, drawn last so it sits on top of the coat and
+        // every white pattern (a no-op unless the horse is Cutmrk/Cutmrk).
+        this.addLayer(new CutieMarkLayer(this));
         this.addLayer(
             new SimpleEquipmentLayer<>(
                 this,

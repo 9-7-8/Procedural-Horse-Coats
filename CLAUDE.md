@@ -139,6 +139,57 @@ project. Its shape:
 
 ## Status snapshot (keep this current)
 
+- **Built 2026-09-05, NOT yet play-tested: the cutie-mark gene + Horse Browser
+  splice-recipe rework.** `:common:test` **391 green**,
+  `:neoforge-26.1.2:build` green, `runServer` boots clean (**45 segments**, no
+  errors). Two pieces:
+  - **`CutieMarkGene`** (`horsegenetics.cutie_mark`, priority 196, magical,
+    **recessive** `Cutmrk`/`n`). `Cutmrk/Cutmrk` wears an **emblem of 1-3 flat
+    item icons on both flanks**, drawn *over everything* including white
+    patterns. **43 built-in genes** (45 in-game). Owner-approved approach: use
+    the game's own item icons, restricted to flat (non-`BlockItem`) items,
+    modded ones included; cross-install determinism is explicitly not a goal.
+    - **Paints nothing in the pipeline** - all three outcomes are wild types
+      (the particle pattern), so `affectsCoat()` is false, it's out of the
+      texture key, and the catalogue is unchanged (924 844 034).
+      `totalGenotypes()` `x3` to **52 933 214 613 797 373 206 937 600 000**.
+    - **`CutieMarkGene.markFor(genotype, epigenome)`** (`common/`) draws the
+      spec off the expressing copy's seed, fixed order: `nextInt(3)` count,
+      `nextBoolean()` triangle (count 3 only), 3x `nextFloat()` normalised item
+      picks (always 3 - the draw-order contract), `nextFloat()` scale,
+      `nextFloat()` tilt. Returns `Optional<Mark>`, empty unless homozygous.
+      `common/` names no item - the picks are `[0,1)` and resolved on the client.
+    - **`client/FlatItemCatalog`** - every registered item that is not a
+      `BlockItem`, built once per session off the frozen registry (a new mod /
+      version is a new session = rebuild, which is all the gene needs).
+    - **`client/CutieMarkLayer`** - a `RenderLayer<HorseRenderState, HorseModel>`
+      twin of `EmissiveCoatLayer`, added after it in `GeneticHorseRenderer` so it
+      draws last. Reads `CutieMarkGene.markFor` off `coatData`, resolves each
+      pick to an item, `updateForTopItem` -> `ItemStackRenderState.submit` at a
+      per-item offset out from the animated `body` part (`root().getChild("body")`,
+      `translateAndRotate`), rotated to face outward, scaled small, row or
+      triangle. **Placement is a first-guess fixed offset and wants tuning
+      against a live horse** - flagged in `wiki/verification.html` §0-D.
+    - `coat-golden.txt` regenerated (only the new `cutie_mark=n/n` segment;
+      hashes unmoved). New `CutieMarkGeneTest` (5). `SpecGeneTest.BUILT_IN_GENES`
+      42 -> 43. Old saves won't parse. Docs: `wiki/gene-cutie-mark.html` (new),
+      `wiki/nav.js`, `wiki/genetics-model.html`, `wiki/api-reference.html`,
+      `index.html`, `README.md`.
+  - **Horse Browser splice recipe** - removed the "View splice recipe" button;
+    selecting a gene now **auto-ghosts** its Known Gene Splice recipe into the
+    Crafting grid's empty slots (client-only, no inventory movement), and
+    hovering a ghost shows the real item's tooltip
+    (`extractTooltip` -> `setTooltipForNextFrame`). "Craft research paper" stays
+    (both tabs) and no longer self-hides when the gene isn't in the client DB.
+    **The default splice recipe is now exactly four items**: horse hair + the
+    gene's research paper + a golden carrot + the rarity ingot (gold at the
+    default tier). `KnownGeneSpliceRecipe` requires exactly those (`filled == 4`,
+    one of each), dropping the old ">= 5 with a flavour" rule; `SpliceRecipeDisplay`
+    matches. Deleted `ViewSpliceRecipePayload` + `HorseBrowserMenu.fillSplicePreview`.
+    Lang: dropped `gui.horsegenetics.view_recipe`.
+
+- **LUT is owner-verified in game 2026-09-05** (see the Owner-verified block).
+
 - **Built 2026-09-05, NOT yet play-tested: white top/bottom UV swap +
   two Horse Browser gene buttons.** `:common:test` **386 green**,
   `:neoforge-26.1.2:build` green.
@@ -1625,13 +1676,13 @@ project. Its shape:
   Still unconfirmed: bred foal, seed-jar round-trip, a spec gene actually
   showing in the display (needs a horse carrying Suntouched/Waterborn) -
   `wiki/verification.html` §0.
-- **`common/`** - compiles; **386 JUnit tests pass** (`./gradlew :common:test`).
+- **`common/`** - compiles; **391 JUnit tests pass** (`./gradlew :common:test`).
   Covers `breed/` (the breed system: `Breed` / `Breeds` (49) / `BreedFounder` /
   `BreedLineage` / `BreedStatCurve` / `Commonness` -> `wiki/breeds.html`),
   `trait/` (the non-coat body: `HorseTraits` / `Traits` / `Condition` /
   `TraitBuilder` / `EpigeneticTraitContribution` / the breed `StatAxis` +
   `TargetBand` + `BreedStatTargets` -> `wiki/horse-body.html`) and
-  `genetics/` (allele/gene model - **42 genes**, 21 that paint and 21 that never
+  `genetics/` (allele/gene model - **43 genes**, 21 that paint and 22 that never
   do: **sex**, the 15 natural ones (extension, agouti, champagne,
   grey, **MATP** (cream + pearl, three alleles), **dun** (three alleles),
   **silver**, **mushroom**, **roan**, **tobiano**, and the four white-pattern
@@ -1642,15 +1693,17 @@ project. Its shape:
   hue), **healer**, **light** (four alleles, codominant), **milk** (three
   alleles, one lethal pair), **magic body size** (codominant, epigenetic, on most
   horses), **particle** (**forty alleles**, epigenetic, paints nothing),
-  **verdant** (four alleles) and **LUT** (swaps the phase-2 gradient for a
-  variant homozygote - the only gene that can) - and the **thirteen non-coat
+  **verdant** (four alleles), **LUT** (swaps the phase-2 gradient for a
+  variant homozygote - the only gene that can) and **cutie mark** (recessive,
+  epigenetic; a client layer stamps 1-3 item icons on both flanks) - and the
+  **thirteen non-coat
   genes** - performance (**MSTN**, **PDK4**, **CKM**), jump (**RYR2**), size
   (**LCORL**, **HMGA2**) and health (**ACAN** with five alleles, **B4GALT7**,
   **PLOD1**, **RAPGEF5**, **ST14**, **SHOX**, **MET**);
   `Genotype` code round-trip, breeding, the `Epigenome` / `Genome` per-allele
   epigenetics + priority tie-break, `GenomeSample` - a genome detached from a
   horse, for the stallion seed jar - `Expression` + `FounderTable` + the
-  `GenotypeCatalog` reduction of 17 644 404 871 265 791 068 979 200 000 genotypes
+  `GenotypeCatalog` reduction of 52 933 214 613 797 373 206 937 600 000 genotypes
   to 924 844 034 distinct coats), `coat/` + `coat/pattern/` (the
   pipeline - `CoatTextureComposer`, `PigmentField`, `ColorField`, `CoatOverlay`,
   `GradientLut`, `BayCoat`, `GreyCoat`, `WhitePattern`, `BodyStripes`,
@@ -2177,11 +2230,13 @@ Two-module Gradle project, split deliberately:
 - **`neoforge-26.1.2/`** - everything Minecraft-specific, by concern:
   - `client/` - renderer, texture compositing (incl. `EmissiveCoatLayer` for a
     `glow` gene's full-bright coat parts, and the LUT locus's alternate
-    gradients loaded into a `LutSet` in `GeneticCoatTextureFactory`), client
-    caches, the inventory hooks + `FamilyTreeScreen`, keybind, lifecycle
-    cleanup. `HorseBrowserScreen` is now an
-    `AbstractContainerScreen<HorseBrowserMenu>` (was a plain `Screen`) with a
-    Gene DB tab and a Crafting tab; `ClientSetup` binds it via
+    gradients loaded into a `LutSet` in `GeneticCoatTextureFactory`),
+    `CutieMarkLayer` + `FlatItemCatalog` (the cutie-mark emblem - item models on
+    the flanks, drawn last so it beats every white pattern; the catalog is every
+    non-`BlockItem` item, built once per session), client caches, the inventory
+    hooks + `FamilyTreeScreen`, keybind, lifecycle cleanup. `HorseBrowserScreen`
+    is now an `AbstractContainerScreen<HorseBrowserMenu>` (was a plain `Screen`)
+    with a Gene DB tab and a Crafting tab; `ClientSetup` binds it via
     `RegisterMenuScreensEvent`.
   - `data/` - Data Attachments. **Four** on a horse now:
     `horsegenetics:horse_record` (a `HorseRecord`, the whole genome),
@@ -2327,7 +2382,7 @@ shox 91, met 92 - all of which paint nothing, so their order among themselves
 is arbitrary),
 pink hair 110, **mane colour 112, tail colour 114, healer 116**, magic zebra 120,
 **milk 130, body size 140, magic speed 141, magic health 142, magic jump 143,
-particle 150, light 160, verdant 180, LUT 190**.
+particle 150, light 160, verdant 180, LUT 190, cutie mark 196**.
 Within the natural band **low = sets pigment absolutely,
 higher = dilution** (agouti's absolute points must precede
 `PigmentField.dilute`). `AlleleEpigenetics.priority` is unrelated - it picks a
@@ -2339,7 +2394,7 @@ MATP, champagne, grey, roan, tobiano, EDNRB, KIT, MITF, PAX3,
 **MSTN, PDK4, CKM, RYR2, LCORL, HMGA2, ACAN, B4GALT7, PLOD1, RAPGEF5, ST14,
 SHOX, MET**, pink hair, **mane colour, tail colour, healer**, magic zebra,
 **milk, body size, magic speed, magic health, magic jump, particle, light,
-verdant, LUT**. `naturalOrder()` (phase-1 pigment
+verdant, LUT, cutie mark**. `naturalOrder()` (phase-1 pigment
 restriction) = the same list minus the magical genes - silver / mushroom / dun sit
 right after agouti so the points exist to dilute, and the six white-pattern
 genes run last. Their order among *themselves* barely matters (they all zero
@@ -2348,7 +2403,7 @@ so a later one paints harder - see `WhitePattern` below. Sex and the thirteen no
 `isNatural()`) but every one of their outcomes is a wild type, so the composer
 skips them - as do milk, the four body-stat genes (size, magic speed, magic
 health, magic jump), particle and verdant on the magical side:
-**twenty-one of the forty-two built-ins never paint** (LUT does - it repaints), and
+**twenty-two of the forty-three built-ins never paint** (LUT does - it repaints), and
 `Gene.affectsCoat()` is false for exactly those. What they do instead goes
 through `common/trait/` (see `wiki/horse-body.html`) or
 `common/genetics/AbilityContribution`.
@@ -2381,6 +2436,7 @@ gene); one-liners:
 | particle | 40 variants + `n` | wild + 40 single + 46 codominant double - **all wild types** | 0.1% per variant allele; ~7.7% of founders trail something | **magical, paints nothing** - the horse trails a particle while it moves. **Forty alleles on one locus**, so it shows at most two, ever. Non-codominant pairs hide the higher-ranked copy; nine families make 46 codominant doubles (the flames and smokes are **one** family of eight). Colour, second colour, body site, count and a spare `data` number are **epigenetic per allele copy** - the first `EpigeneticAbilityContribution` |
 | verdant | `mush`/`moss`/`grass`/`n` | wild, `verdant-carrier`, `mycelium`, `moss`, `grass` - **all wild types** | 6% / 7% / 8% per allele | **magical, paints nothing** - spreads mycelium / moss / grass from the hooves via a `spread`, at most one block per beat. **Every variant needs two of itself**; a mixed pair is inert (where milk's is lethal) |
 | LUT | `n`/`Blupnk` | wild, `bluepink-carrier` (a wild type), `bluepink` | ~1 in 60 carry a copy; **no homozygote is ever a founder** | **magical, swaps the phase-2 gradient** - `Blupnk/Blupnk` resolves every melanin genotype against `lutbluepink.png` (blue/pink) instead of the red/black LUT; the melanin genes are unchanged, only the chart moves. One copy / two different variants = silent carrier. Paints nothing in phase 1 or 3 (`Expression.Builder.marker()`); the swap is out of band via `LutContribution` + `LutSet`. Deterministic. **The only locus that can change the LUT** - a new palette is a new allele here, never a new gene |
+| cutie mark | `Cutmrk`/`n` | wild, `cutie-mark-carrier`, `cutie-mark` - **all wild types** | 6% per allele (recessive) - ~0.36% homozygous wild, ~11% carriers | **magical, paints nothing in the bake** - `Cutmrk/Cutmrk` wears an emblem of **1-3 flat item icons on both flanks**, drawn by a client `RenderLayer` (`CutieMarkLayer`) on top of the coat and every white pattern. Count, row-vs-triangle, which items (normalised picks into `FlatItemCatalog` = every non-`BlockItem`), scale and tilt are all **epigenetic per copy** and heritable. Priority (196) is only a code-order slot; the layer draws last regardless. `CutieMarkGene.markFor(gt, epi)` is the spec; `common/` never names an item |
 | dun | `D`/`d1`/`d2` | wild (`d2/d2`), `primitive-marks` (`d1/d1`, `d1/d2`), `dun` (any `D`) | `D` 1/24, `d1` 1/10 | **three alleles, two dominance orders**: dilution is `D > d1 = d2`, marking is `D = d1 > d2`. `D` = mild body dilution + **primitive markings** (dorsal stripe + leg bars) that *skip* the dilution so they read dark; `d1` = the dorsal stripe with **no** dilution, done as countershading (it never touches black, and takes red only where there is red - so on a solid black it is a byte-exact no-op, as a real non-dun black is). `CoatRegions.dorsalStripe`/`legBar` |
 | silver | `Z`/`z` | wild, `silver` | 1/60 per allele | eumelanin-**only** dilution → chocolate body + near-flaxen mane/tail; chestnut carrier looks unchanged. Runs after agouti. Dapples are a follow-up |
 | mushroom | `Mu`/`mu` | wild, `mushroom-carrier` (a wild type), `mushroom` | 1/34 per allele | pheomelanin-**only** dilution, `Mu/Mu` only → chestnut becomes flat sepia; near-invisible on black/bay |
@@ -3415,7 +3471,7 @@ point of the revert: the corridor no longer grows when a gene is added.
 - **`GenotypeCatalog` is untouched and still used** - by the tests, and by
   whatever punnett display gets built. It just no longer drives the dimension.
   `size()` is **924 844 034** and `totalGenotypes()`
-  **17 644 404 871 265 791 068 979 200 000**; see "the genetics model" for what
+  **52 933 214 613 797 373 206 937 600 000**; see "the genetics model" for what
   those numbers mean. (`size()` last moved with the LUT locus, which doubled the
   unmasked entries; the particle locus and the four body-stat genes did not
   touch it. `totalGenotypes()` is a `BigInteger` since the particle locus. The

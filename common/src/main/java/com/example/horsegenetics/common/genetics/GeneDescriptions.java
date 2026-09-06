@@ -178,6 +178,12 @@ public final class GeneDescriptions {
                             + "Blupnk/Blupnk resolves every melanin genotype against a blue-and-pink "
                             + "gradient instead of the warm red/black one, for dreamier coats. One "
                             + "copy, or two different variants, shows nothing."),
+            Map.entry("horsegenetics.cutie_mark",
+                    "A magical, recessive gene: Cutmrk/Cutmrk stamps a little emblem of one to "
+                            + "three items on both flanks, on top of every other coat gene. Which "
+                            + "items, how many, whether they sit in a row or a triangle, and how big "
+                            + "they are are all epigenetic and inherited with the allele. One copy "
+                            + "shows nothing."),
             Map.entry("horsegenetics.mstn",
                     "MSTN (myostatin), the sprint / stamina trade-off. Codominant: each C copy "
                             + "adds a little speed and costs two hearts of health. Endurance is "

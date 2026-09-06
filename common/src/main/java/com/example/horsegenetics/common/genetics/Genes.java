@@ -13,6 +13,7 @@ import com.example.horsegenetics.common.genetics.genes.HealerGene;
 import com.example.horsegenetics.common.genetics.genes.Hmga2Gene;
 import com.example.horsegenetics.common.genetics.genes.LcorlGene;
 import com.example.horsegenetics.common.genetics.genes.LightGene;
+import com.example.horsegenetics.common.genetics.genes.CutieMarkGene;
 import com.example.horsegenetics.common.genetics.genes.LutGene;
 import com.example.horsegenetics.common.genetics.genes.MagicHealthGene;
 import com.example.horsegenetics.common.genetics.genes.MagicJumpGene;
@@ -149,6 +150,8 @@ public final class Genes {
     public static final LightGene LIGHT = new LightGene();
     /** LUT - swaps the natural red/black gradient for an unnatural palette when homozygous for a variant. */
     public static final LutGene LUT = new LutGene();
+    /** Cutie mark - a recessive epigenetic emblem of 1-3 items on both flanks, drawn over everything. */
+    public static final CutieMarkGene CUTIE_MARK = new CutieMarkGene();
     public static final HealerGene HEALER = new HealerGene();
     public static final VerdantGene VERDANT = new VerdantGene();
 
@@ -196,7 +199,7 @@ public final class Genes {
             MAGIC_ZEBRA, PINK_HAIR, DUN, SILVER, MUSHROOM, ROAN, TOBIANO,
             EDNRB, KIT, MITF, PAX3,
             MILK, BODY_SIZE, MAGIC_SPEED, MAGIC_HEALTH, MAGIC_JUMP,
-            MANE_COLOR, TAIL_COLOR, PARTICLE, LIGHT, HEALER, VERDANT, LUT,
+            MANE_COLOR, TAIL_COLOR, PARTICLE, LIGHT, HEALER, VERDANT, LUT, CUTIE_MARK,
             MSTN, PDK4, CKM, RYR2, LCORL, HMGA2,
             ACAN, B4GALT7, PLOD1, RAPGEF5, ST14, SHOX, MET);
 
