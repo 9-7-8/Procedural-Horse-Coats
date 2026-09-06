@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Items, recipes &amp; the hair economy &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="nav.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow">Gameplay <span class="sep">/</span> items</p>
+<h1>Items, recipes &amp; the hair economy</h1>
+<p class="lede">
+    Every item the mod registers, how you get it, and what it does. Twenty items in
+    one <strong>Horse Genetics</strong> creative tab, all built on one material
+    &mdash; <strong>horse hair</strong>, which you get by shearing a horse. This page
+    is the source of truth for the item roster and the recipes; the systems the items
+    plug into are documented on their own pages and linked from each row.
+</p>
+
+<div class="note">
+    <span class="label">House rules for every recipe here</span>
+    <ul>
+        <li><strong>Shapeless</strong>, always &mdash; the shapes are not the puzzle.</li>
+        <li><strong>At least one modded ingredient</strong> in every recipe, and every
+            output is a modded item, so nothing can collide with a vanilla or
+            third-party recipe.</li>
+        <li>The material chain is <strong>reversible</strong> &mdash; a bundle goes back
+            to four hairs, a rope back to three bundles &mdash; so nothing is a trap.</li>
+    </ul>
+</div>
+
+<h2 id="hair">The material chain</h2>
+
+<p>
+    <strong>Horse hair is the floor of the whole economy.</strong> Every other recipe on
+    this page takes hair, a hair product, or something crafted from one, which is what
+    makes shearing worth doing more than once.
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Item</th><th>Recipe (shapeless)</th><th>Reverses to</th></tr></thead>
+<tbody>
+<tr><td><strong>Horse hair</strong></td><td>Shear an adult horse &rarr; 1&ndash;3 (see below)</td><td>&mdash;</td></tr>
+<tr><td><strong>Hair bundle</strong></td><td>4 &times; horse hair</td><td>4 &times; horse hair</td></tr>
+<tr><td><strong>Braided rope</strong></td><td>3 &times; hair bundle</td><td>3 &times; hair bundle</td></tr>
+<tr><td><strong>Hair cloth</strong></td><td>4 &times; hair bundle</td><td>4 &times; hair bundle</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3 id="shearing">Shearing</h3>
+
+<p>
+    Right-click an <strong>adult</strong> horse with shears
+    (<code>server/HorseShearHandler</code>): 1&ndash;3 <code>horse_hair</code> drop, the
+    shears take a point of durability, and the horse gains <strong>+5 bond</strong>
+    through <code>HorseCareHandler.awardBondFor</code> &mdash; so shearing is the one
+    interaction that is both an economy input and a relationship input
+    (<a href="horse-care.html">horse care</a>).
+</p>
+
+<p>
+    It is gated to <strong>once per 24&nbsp;000-tick Minecraft day</strong>, which is the
+    mod-wide rule for every time-gated action. The gate is a stored game-time stamp under
+    the key <code>"shear"</code> on <code>data/HorseCooldownsAttachment</code> &mdash; a
+    plain <code>Map&lt;String,&nbsp;Long&gt;</code> on the horse, shared with the
+    <a href="gene-effects.html"><code>yield</code></a> verb&rsquo;s per-gene cooldowns
+    (<code>"yield:&lt;geneKey&gt;"</code>). Because it is stored on the horse rather than
+    in a static map, it survives a reload and cannot leak between worlds.
+</p>
+
+<div class="note warn">
+    <span class="label">A sheared horse does not look sheared</span>
+    <p>
+        The mechanic is complete; the <em>visual</em> is not built. It is settled as a
+        low-fidelity <strong>render-layer overlay</strong> &mdash; it only has to read as
+        vaguely different, so no coat variant and no extra bake &mdash; driven off the same
+        <code>"shear"</code> cooldown stamp. See <a href="roadmap.html">the roadmap</a>.
+    </p>
+</div>
+
+<h2 id="carrots">Breeding carrots</h2>
+
+<p>
+    Five carrot items. Four are crafted from a golden carrot, horse hair and one
+    signature reagent; the fifth is parameterised by a research paper.
+    <strong>What each one does to a foal is on
+    <a href="carrots.html">the carrot family</a></strong> &mdash; this table is the
+    recipes only.
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Item</th><th>Recipe (shapeless)</th></tr></thead>
+<tbody>
+<tr><td><strong>Unknown Epigenetic Splice carrot</strong></td><td>golden carrot + horse hair + fermented spider eye</td></tr>
+<tr><td><strong>Unknown Gene Splice carrot</strong></td><td>golden carrot + horse hair + gunpowder</td></tr>
+<tr><td><strong>Stabilizer carrot</strong></td><td>golden carrot + horse hair + nether quartz</td></tr>
+<tr><td><strong>Magnifier carrot</strong></td><td>golden carrot + horse hair + glowstone dust</td></tr>
+<tr><td><strong>Known Gene Splice carrot</strong></td><td>A <strong>custom recipe type</strong>, not a JSON shapeless one: golden carrot + a <a href="#papers">research paper</a> + horse hair + the rarity item for that paper&rsquo;s gene, and <strong>nothing else</strong> &mdash; exactly four filled slots. The gene is read off the paper at craft time, so a drop-in gene file gets its carrot the moment it registers. (<code>server/recipe/KnownGeneSpliceRecipe</code>.)</td></tr>
+<tr><td><em>Combining carrots</em></td><td>Two or more breeding carrots in the grid merge into one carrying every effect (<code>server/recipe/CarrotCombineRecipe</code>). Contradictory combinations simply do not resolve.</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2 id="papers">Research papers</h2>
+
+<p>
+    <code>research_paper</code> carries a <code>research_gene</code> data component naming
+    one gene. Right-click it to add that gene to your
+    <a href="carrots.html#database">gene database</a> and unlock its carrot line; the
+    tooltip shows the gene&rsquo;s name, rarity tier and blurb.
+</p>
+
+<ul>
+    <li><strong>Chest loot</strong> &mdash; injected into ~8 vanilla chest tables by a
+        global loot modifier, with the gene weighted by its rarity tier
+        (<code>data/loot/AddResearchPaperModifier</code>).</li>
+    <li><strong>Written by hand</strong> &mdash; in the <strong>Horse Browser</strong>
+        (<code>H</code>), pick a gene you have already discovered and put a single book in
+        the crafting grid. One book &rarr; one paper for that gene. There is no JSON
+        recipe for this; it is <code>menu/HorseBrowserRecipes</code>, because the result
+        depends on which gene is selected in the screen.</li>
+    <li><strong>Traded from another player</strong> &mdash; which is the point of the
+        second route: knowledge is shareable rather than hoardable.</li>
+</ul>
+
+<h2 id="jars">Seed jars</h2>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Item</th><th>How you get it</th><th>What it does</th></tr></thead>
+<tbody>
+<tr><td><strong>Empty seed jar</strong></td><td>glass bottle + horse hair</td><td>Right-click a tamed adult <strong>stallion who is in breeding mode</strong> &rarr; it becomes a stallion seed jar stamped with his genome. Consumes the breeding-mode state.</td></tr>
+<tr><td><strong>Stallion seed jar</strong></td><td>The above</td><td>Right-click a tamed adult <strong>mare in breeding mode</strong> &rarr; a foal is bred immediately from her live genome and the jar&rsquo;s stored one, through the ordinary <code>applyBredFoal</code> path. The jar is consumed and the mare takes the vanilla breeding cooldown. Tooltip shows the stored sire&rsquo;s name and sex.</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    The jar stores a <code>GenomeSample</code> &mdash; a genotype <em>and</em> an epigenome
+    frozen to code strings &mdash; in a <code>stored_genome</code> data component, and the
+    allele draw happens <strong>at impregnation</strong>, exactly like natural breeding.
+    Full flow on <a href="breeding.html">breeding &amp; pedigree</a>. Gestation, a donor
+    cooldown and carrot effects on the jar are not built.
+</p>
+
+<h2 id="whistles">Whistles</h2>
+
+<p>
+    Right-click anywhere: every <strong>tamed horse you own</strong> within range, in the
+    same dimension, not currently ridden, teleports to a grid of spots beside you. A
+    leashed horse is unleashed and comes; a horse already within 3 blocks, or the one you
+    are riding, is left alone. A chime plays and a chat line counts what answered.
+    ~3&nbsp;second use cooldown.
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Item</th><th>Recipe (shapeless)</th><th>Range</th></tr></thead>
+<tbody>
+<tr><td><strong>Basic whistle</strong></td><td>horse hair + iron nugget + stick</td><td>16 blocks</td></tr>
+<tr><td><strong>Golden whistle</strong></td><td>basic whistle + gold ingot</td><td>32 blocks</td></tr>
+<tr><td><strong>Echo whistle</strong></td><td>golden whistle + echo shard</td><td>64 blocks</td></tr>
+</tbody>
+</table>
+</div>
+
+<p class="muted">
+    This is the &ldquo;area recall&rdquo; reading of the design. Bond gating, pathing
+    instead of teleporting, and what &ldquo;echo&rdquo; should add beyond range are all
+    still open (<a href="roadmap.html">roadmap</a>).
+</p>
+
+<h2 id="stalls">Stall signs</h2>
+
+<p>
+    A two-step item. <strong>Right-click a horse with a blank
+    <code>stall_sign</code></strong> and it becomes a <code>bound_stall_sign</code>
+    carrying that horse&rsquo;s UUID and name in a <code>bound_horse</code> data
+    component. <strong>Right-click the outside face of a wall with the bound sign</strong>
+    and three things happen at once (<code>item/StallSignItem</code>):
+</p>
+
+<ol>
+    <li>A real <code>oak_wall_sign</code> is placed, with the horse&rsquo;s name written
+        on it.</li>
+    <li><code>server/StallDetector</code> flood-fills the air <em>behind</em> that wall
+        &mdash; this layer &plusmn;1, air only, capped at <strong>512 blocks</strong>. An
+        enclosed area becomes that horse&rsquo;s stall.</li>
+    <li>The stall is stored in <code>data/StallData</code>, a server-global
+        <code>SavedData</code> of <code>StallRecord</code>s, one per bound horse, and its
+        outline is flashed with <code>HAPPY_VILLAGER</code> particles.</li>
+</ol>
+
+<p>
+    Breaking the sign block releases the stall. In a dev build, <strong>F7</strong>
+    re-flashes the outline of every stall near you and prints a summary
+    (<code>server/StallDebug</code>).
+</p>
+
+<div class="note warn">
+    <span class="label">Definition and storage only</span>
+    <p>
+        <strong>Nothing consumes a stall yet.</strong> There is no teleport-to-stall, no
+        auto-return, no &ldquo;assigned pen&rdquo; behaviour &mdash; the
+        <a href="#tickets">tickets</a> are the intended consumer and they are inert.
+        Cleanup is thin too: only breaking the exact sign block releases a stall, so
+        rebuilding the wall elsewhere or removing the horse leaves a stale record.
+    </p>
+</div>
+
+<h2 id="tickets">Tickets &mdash; registered, inert</h2>
+
+<p>
+    Four tiers craft correctly and do <strong>nothing</strong>. The stated intent is
+    &ldquo;teleport a bound horse to its stall&rdquo;, which is now possible
+    (<code>StallRecord.center()</code> exists) and simply unbuilt. All four share one
+    texture.
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Item</th><th>Recipe (shapeless)</th></tr></thead>
+<tbody>
+<tr><td><strong>Blank ticket</strong></td><td>paper + horse hair</td></tr>
+<tr><td><strong>Basic ticket</strong></td><td>blank ticket + horse hair</td></tr>
+<tr><td><strong>Bound ticket</strong></td><td>basic ticket + horse hair + ender pearl</td></tr>
+<tr><td><strong>Interdimensional ticket</strong></td><td>bound ticket + horse hair + eye of ender + blaze powder</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2 id="egg">The custom horse spawn egg</h2>
+
+<p>
+    <strong>Creative only.</strong> A reskin of the vanilla horse spawn egg &mdash; same
+    icon, and it shows in the vanilla Spawn Eggs tab as well as this mod&rsquo;s. It has
+    no recipe and it does not spawn anything directly: right-clicking it opens
+    <code>client/CustomHorseSpawnScreen</code>, a full genome editor with a gene list down
+    the left, a live orbitable 3D horse in the middle, and controls on the right.
+</p>
+
+<ul>
+    <li>Every registered gene is a row, alphabetically <strong>by display name</strong>.
+        A gene starts <em>off</em> the horse; clicking the row adds it, homozygous for the
+        first allele that does something, and only then does it grow allele buttons.
+        Genes with more than three alleles get a dropdown instead of a cycle button.</li>
+    <li><strong>Reroll epi.</strong> re-rolls the epigenome and the preview redraws, which
+        is the only surface anywhere that makes per-allele epigenetics visible &mdash;
+        bay leg heights, grey dapples, splash edges.</li>
+    <li><strong>Breed</strong> picks one of the 49 <a href="breeds.html">breeds</a> and
+        rolls a real founder of it into the editor; <strong>Randomize</strong> rolls
+        inside the selected breed&rsquo;s pools, or unconstrained with no breed.</li>
+    <li><strong>Copy code / Paste code</strong> round-trip the genotype code through the
+        clipboard, which turns a bug report into something reproducible.</li>
+    <li>The <strong>epigenome travels with the genotype</strong> to the server, so the
+        horse that spawns is the horse you were looking at. The server re-checks creative
+        mode <em>and</em> that you are holding the egg.</li>
+</ul>
+
+<p class="muted">
+    It is the fastest way to test any unplayed system: adding a health gene defaults it to
+    the affected genotype, so &ldquo;add PLOD1, pick Foal, spawn&rdquo; is a one-click
+    lethal foal.
+</p>
+
+<h2 id="creative-tab">The creative tab</h2>
+
+<p>
+    <code>item/ModCreativeTabs</code> registers one <strong>Horse Genetics</strong> tab
+    holding all twenty items. The custom spawn egg additionally appears in vanilla&rsquo;s
+    Spawn Eggs tab. In a dev build, the <em>Spawn Test Horse World</em> button&rsquo;s
+    starting inventory contains one of every item.
+</p>
+
+<h2 id="gaps">Known gaps</h2>
+
+<ul>
+    <li><strong>Art.</strong> The four tickets share one texture, the three whistles share
+        one, both stall signs borrow <code>minecraft:item/oak_sign</code>, and
+        <code>braided_rope</code> / <code>hair_cloth</code> have recipes but no real
+        textures.</li>
+    <li><strong>The tickets do nothing</strong>, and the stall system they would consume
+        has no other consumer either.</li>
+    <li><strong>The sheared look</strong> is unbuilt (above).</li>
+    <li>There is no <strong>double-wide gate</strong> block, which the design document
+        lists as a braided-rope product.</li>
+    <li>The <code>known_gene_splice_carrot</code> is <strong>one generic item</strong>
+        parameterised by a component, so every gene&rsquo;s carrot looks the same in the
+        inventory.</li>
+</ul>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="carrots.html">The carrot family &amp; gene database</a>
+        <a href="horse-care.html">Horse care &mdash; bond &amp; herds</a>
+        <a href="breeding.html">Breeding &amp; pedigree</a>
+        <a href="horse-dimension.html">The horse dimension</a>
+        <a href="roadmap.html">Roadmap &mdash; what is still missing</a>
+    </div>
+    Recipes live in <code>neoforge-26.1.2/src/main/resources/data/horsegenetics/recipe/</code>;
+    the item objects in <code>neoforge-26.1.2/&hellip;/item/ModItems.java</code>. When you
+    add an item or change a recipe, update this page in the same change.
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

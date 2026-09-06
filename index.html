@@ -18,10 +18,10 @@
             engine, and how to add genes of your own.
         </p>
         <div class="stats">
-            <div><span>38</span><small>genes</small></div>
-            <div><span>3</span><small>gene paint phases</small></div>
-            <div><span>3.0&times;10<sup>18</sup></span><small>genotypes</small></div>
-            <div><span>462,422,018</span><small>visually distinct</small></div>
+            <div><span>46</span><small>genes</small></div>
+            <div><span>49</span><small>breeds</small></div>
+            <div><span>1.4&times;10<sup>30</sup></span><small>genotypes</small></div>
+            <div><span>1,849,688,066</span><small>visually distinct</small></div>
         </div>
     </div>
 </header>
@@ -52,6 +52,11 @@
             <h3>The horse&rsquo;s body</h3>
             <p>Speed, health, jump and size resolved from the genotype; the disorders a horse carries, and the foals that do not make it.</p>
             <span class="tag">common/trait/</span>
+        </a>
+        <a href="wiki/breeds.html" class="card">
+            <h3>Breeds</h3>
+            <p>Forty-nine real-world breeds as constrained founder rolls, biome-weighted wild herds, and the cross / mixed label algebra.</p>
+            <span class="tag">common/breed/</span>
         </a>
     </div>
 
@@ -92,6 +97,18 @@
             <p>Every header field, mask and op a data-driven gene can use &mdash; the file the
                creator writes and the game loads.</p>
             <span class="tag">reference</span>
+        </a>
+        <a href="wiki/gene-effects.html" class="card tool">
+            <h3>Gene effects</h3>
+            <p>The eight <code>effects</code> verbs a gene can carry beyond the coat &mdash; and the
+               contract for adding a ninth.</p>
+            <span class="tag">reference</span>
+        </a>
+        <a href="wiki/horse-traits.html" class="card magical">
+            <h3>Trait &amp; effect architecture</h3>
+            <p>The wider behaviour system <code>effects</code> is a first slice of: selectors, auras,
+               pools and goals.</p>
+            <span class="tag">mostly unbuilt</span>
         </a>
         <a href="wiki/gene-creator/index.html" class="card tool">
             <h3>Gene creator</h3>
@@ -263,6 +280,18 @@
             <p>Swaps the whole colour gradient for an unnatural one. Two matching variant copies turn a horse blue and pink; one copy is a silent carrier.</p>
             <span class="tag">n / Blupnk &middot; homozygous-only</span>
         </a>
+        <a href="wiki/gene-suntouched.html" class="card magical">
+            <h3>Suntouched</h3>
+            <p>A data-driven gene shipped as a JSON file: an emissive gold mane and tail, a gold-dust aura,
+               and enough light to walk by.</p>
+            <span class="tag">Sntch / n &middot; gene file</span>
+        </a>
+        <a href="wiki/gene-waterborn.html" class="card magical">
+            <h3>Waterborn</h3>
+            <p>The other shipped gene file: neon-blue streaks through the mane and tail, a blue trail at the
+               hooves, and walking on water.</p>
+            <span class="tag">Wtbn / n &middot; gene file</span>
+        </a>
         <a href="wiki/gene-cutie-mark.html" class="card magical">
             <h3>Cutie mark</h3>
             <p>A recessive emblem of 1&ndash;3 item icons stamped on both flanks, over everything. Which items, how many, and the layout are all epigenetic and breed true.</p>
@@ -343,6 +372,37 @@
     </div>
 
     <div class="section-head">
+        <h2>Gameplay</h2>
+        <p>The layer on top of the genetics &mdash; care, items, breeding aids and the world</p>
+    </div>
+    <div class="cards">
+        <a href="wiki/horse-care.html" class="card">
+            <h3>Horse care</h3>
+            <p>Gated healing, the bond ladder and its four behaviour tiers, and how a herd forms &mdash; all
+               on one shared slow tick.</p>
+            <span class="tag">bond &middot; herds &middot; healing</span>
+        </a>
+        <a href="wiki/carrots.html" class="card magical">
+            <h3>Breeding carrots &amp; the gene database</h3>
+            <p>Carrots that bias the gamete a parent contributes, the research papers that unlock them, and
+               the progressive gene database behind both.</p>
+            <span class="tag">influencing inheritance</span>
+        </a>
+        <a href="wiki/items.html" class="card">
+            <h3>Items, recipes &amp; the hair economy</h3>
+            <p>Every item the mod adds and how you get it &mdash; shearing, the hair chain, whistles, stall
+               signs, seed jars and the creative spawn egg.</p>
+            <span class="tag">20 items &middot; every recipe</span>
+        </a>
+        <a href="wiki/horse-dimension.html" class="card">
+            <h3>Hay portals &amp; the horse dimension</h3>
+            <p>Light a hay-bale frame with a golden carrot and walk a private corridor of 2,000 pens, each
+               one a rolled genotype with its genome on the sign.</p>
+            <span class="tag">the showroom</span>
+        </a>
+    </div>
+
+    <div class="section-head">
         <h2>Project</h2>
         <p>What is unproven, and what is coming</p>
     </div>
@@ -354,8 +414,9 @@
         </a>
         <a href="wiki/roadmap.html" class="card">
             <h3>Roadmap &amp; backlog</h3>
-            <p>The full gene wishlist, the systems each one needs, and the decisions still open.</p>
-            <span class="tag">not built at all</span>
+            <p>Everything still to do, ordered by priority &mdash; the defects, the decisions, the gene
+               wishlist and the gameplay layer that is not built yet.</p>
+            <span class="tag">nothing here is built</span>
         </a>
     </div>
 

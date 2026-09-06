@@ -189,7 +189,7 @@ name/     HorseNameGenerator, HorseNames</code></pre>
 <tr><td><code>isDeterministic(pair, genotype)</code></td><td>Derived: <code>expressionIn(...).deterministic()</code>. <strong>Cache correctness depends on this.</strong></td></tr>
 <tr><td><code>canOccur(pair)</code></td><td>Can a horse actually carry this combination? <code>true</code> by default. <code>GenotypeCatalog.allPairsOf</code> filters on it, so a combination that cannot happen gets no pen and is not counted, and an author should leave it out of the founder table too. Overridden by the <a href="gene-sex.html">sex locus</a> (no <code>Y/Y</code>), <a href="gene-kit.html"><code>KIT</code></a> (four nonviable <code>W</code> homozygotes), <a href="gene-mitf.html"><code>MITF</code></a> (<code>SW3/SW3</code>) and <a href="gene-pax3.html"><code>PAX3</code></a> (<code>SW4/SW4</code>). It means <em>embryonic</em> lethal: a foal that is born and then dies, like <a href="gene-ednrb.html"><code>O/O</code></a>, stays <code>true</code> and keeps its outcome. <code>expressionOf</code> must still answer for a combination this rules out &mdash; parsing is tolerant.</td></tr>
 <tr><td><code>affectsCoat()</code></td><td>Derived: does <em>any</em> outcome fail to be a wild type? <code>false</code> means the gene never paints, and <code>Genotype.coatCode()</code> leaves it out of the texture key &mdash; the sex locus, the non-coat genes, and the two <a href="gene-leopard.html">leopard-complex modifiers</a>.</td></tr>
-<tr><td><code>coatDependsOn()</code></td><td>Gene keys whose alleles change <em>this</em> gene&rsquo;s coat output although those genes paint nothing themselves. Default empty. <code>Genotype.coatCode()</code> folds them into the texture key when this gene actually paints on the horse; <code>BreedFounder</code> forces a named modifier wild unless the breed lists it. <strong>Only the <a href="gene-leopard.html">leopard complex</a> uses it</strong> (reads <code>PATN1</code>/<code>PATN2</code>); the <a href="roadmap.html#polymorphism">roadmap</a> discourages it for third-party genes.</td></tr>
+<tr><td><code>coatDependsOn()</code></td><td>Gene keys whose alleles change <em>this</em> gene&rsquo;s coat output although those genes paint nothing themselves. Default empty. <code>Genotype.coatCode()</code> folds them into the texture key when this gene actually paints on the horse; <code>BreedFounder</code> forces a named modifier wild unless the breed lists it. <strong>Only the <a href="gene-leopard.html">leopard complex</a> uses it</strong> (reads <code>PATN1</code>/<code>PATN2</code>); the <a href="roadmap.html#settled">roadmap</a> discourages it for third-party genes.</td></tr>
 <tr><td><code>fromToken(token)</code></td><td>Code-string token &rarr; allele. Defaults to a scan of <code>alleles()</code>.</td></tr>
 <tr><td><code>rarity()</code></td><td>&sect;19 metadata. A <code>GeneRarity</code> tier (default <code>UNCOMMON</code>, the gold-ingot tier) &mdash; drives the gene-carrot recipe cost and research-paper loot weight. Tier&rarr;item table is on the recipe side, not here. A spec gene reads it from an optional <code>rarity</code> field.</td></tr>
 <tr><td><code>hasGeneCarrot()</code> / <code>geneCarrotHomozygous()</code></td><td>Whether a <a href="carrots.html#known">Known Gene Splice carrot</a> exists for this gene (default <code>true</code>; false for sex, the recessive disorders, extension, agouti) and whether feeding it treats the parent as homozygous rather than the default heterozygous.</td></tr>
@@ -200,7 +200,7 @@ name/     HorseNameGenerator, HorseNames</code></pre>
 
 <h3><code>GameteBias</code> and <code>CarrotEffect</code> (<code>common/genetics/</code>)</h3>
 <p>
-    A breeding carrot (<a href="carrots.html">roadmap &sect;14</a>) is data:
+    A breeding carrot (<a href="carrots.html">a breeding carrot</a>) is data:
     <code>GameteBias</code> is a per-parent modifier passed into
     <code>Genome.breedWith(other, rng, mineBias, theirsBias)</code> &mdash;
     <code>rerollEpigenetics</code> (epigenetic-splice), <code>preferLowerOrder</code>
@@ -973,7 +973,7 @@ List&lt;String&gt; GeneCodeDisplay.wrap(Genotype genotype, int lines, int maxCha
 
 <p>
     The catalogue no longer drives the horse dimension &mdash; that corridor is
-    <a href="roadmap.html#random-pens">random pens</a> now, a fixed
+    <a href="horse-dimension.html#pens">random pens</a> now, a fixed
     <code>DebugPenManager.PEN_COUNT</code> of them. What still reads the catalogue is
     the test suite, and whatever punnett display gets built.
 </p>

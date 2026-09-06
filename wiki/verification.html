@@ -765,7 +765,8 @@
 <h2 id="carrots-db">&sect;0f &mdash; shearing, milking rules, carrots, the gene database (new 2026-09-05, NOT play-tested)</h2>
 
 <p>
-    A big multi-system pass (roadmap wiki &sect;&sect;7, 12, 14, 16, 19). Nothing
+    A big multi-system pass &mdash; milking rules, shearing, the carrot family, the
+    gene database and gene metadata. Nothing
     here has been seen in-game. Reference: <a href="carrots.html">the carrot
     family</a>, <a href="gene-effects.html">gene effects</a> (the yield
     else-branch + the <code>full_health</code> flag),
@@ -1194,7 +1195,7 @@
 <h3 id="sex-gene">0.1 Sex is a gene (new 2026-09-03)</h3>
 
 <p>
-    <a href="roadmap.html#sex-linked">Roadmap &sect;5.3</a>, first half:
+    <a href="roadmap.html#sex-linked">Sex-linked genes</a>, first half:
     <a href="gene-sex.html"><code>horsegenetics.sex</code></a> is registered at priority
     1 with alleles <code>X</code> / <code>Y</code>. <code>HorseRecord.sex</code> is no
     longer a field &mdash; it is read off the genetic code &mdash; and
@@ -1251,7 +1252,7 @@
 <h3 id="expressions">0.2 The combination-table rewrite &mdash; no more dominance (new 2026-09-03)</h3>
 
 <p>
-    <a href="roadmap.html#multi-allele">Roadmap &sect;5.1 / &sect;5.2 / &sect;2</a>:
+    <a href="genetics-model.html#combinations">The combination table</a>:
     <code>DominancePattern</code> is deleted; every gene declares an
     <code>Expression</code> per distinct outcome and one function mapping any allele
     combination to one of them; <code>randomPair</code> is replaced by a per-combination
@@ -1335,7 +1336,7 @@
 <h3 id="data-model">0.3 The data-model rewrite &mdash; gene priority + gene-keyed codes (2026-09-03)</h3>
 
 <p>
-    <a href="roadmap.html#priority">Roadmap Tier&nbsp;1</a>: every gene has
+    <a href="genetics-model.html#gene-priority">Gene priority</a>: every gene has
     <code>int priority()</code>; all orderings derived by sorting on
     <code>(priority, key)</code>; genotype / epigenome code strings are now
     gene-keyed (<code>&lt;geneKey&gt;=&hellip;</code>) and tolerant. 195
@@ -1364,8 +1365,7 @@
 <h3 id="horse-care">0.4 Horse care &mdash; gated healing, bond &amp; herds (new 2026-09-02)</h3>
 
 <p>
-    First slice of <a href="roadmap.html#care">roadmap &sect;7</a> and
-    <a href="roadmap.html#bond">&sect;13</a>, all in
+    First slice of <a href="horse-care.html">horse care</a>, all in
     <code>server/HorseCareHandler</code> + <code>server/BondFollowGoal</code>.
     Nothing seen in a running game. Full machinery:
     <a href="horse-care.html">horse-care</a>.
@@ -1889,7 +1889,7 @@ gold-dust <code>emitter</code> shows, and the horse lights the area around it
     path, since the spawn is creative-only.
 </p>
 
-<h3 id="gameplay-items">15. The gameplay-layer items &mdash; roadmap &sect;&sect;12&ndash;19</h3>
+<h3 id="gameplay-items">15. The gameplay-layer items</h3>
 
 <p>
     Built 2026-09-02: <strong>17 items</strong> for the gameplay layer. Most are

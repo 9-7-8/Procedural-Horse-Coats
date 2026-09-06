@@ -22,9 +22,8 @@
     a horse behaves toward its owner, and an emergent <strong>herd</strong>
     grouping. First slice built 2026-09-02, <strong>not play-tested</strong> &mdash;
     checklist in <a href="verification.html">verification</a>. This page is the
-    single source of truth for the machinery; the design rationale is
-    <a href="roadmap.html#care">roadmap &sect;7</a> and
-    <a href="roadmap.html#bond">&sect;13</a>.
+    single source of truth for the machinery; what is still missing is on
+    <a href="roadmap.html#bond">the roadmap</a>.
 </p>
 
 <h2>Where it lives</h2>
@@ -51,7 +50,7 @@
         and <code>horse_food.json</code>.</li>
 </ul>
 
-<h2>1. Gated healing (roadmap &sect;7)</h2>
+<h2>1. Gated healing</h2>
 <p>
     Vanilla horses have <strong>no passive regeneration</strong> &mdash; they
     heal only from being hand-fed. This <em>adds</em> a gated regen mechanic on
@@ -85,12 +84,12 @@
         has a full water cauldron and a hay bale.</li>
 </ul>
 <div class="note"><span class="label">Not built yet</span>
-    <p>Milking (roadmap &sect;7) &mdash; the other half of that section &mdash; is
+    <p>Milking &mdash; the other half of the original design &mdash; is
     <strong>not</strong> in this slice. When it lands, its "mare must be at full
     health" rule is the hook back into this system.</p>
 </div>
 
-<h2>2. Bond (roadmap &sect;13)</h2>
+<h2>2. Bond</h2>
 <div class="table-wrap">
 <table>
 <thead><tr><th>Bond</th><th>Tier</th><th>Behaviour (<code>BondFollowGoal</code>)</th></tr></thead>
@@ -111,7 +110,7 @@
     A "day" is <strong>24 000 game ticks</strong> (<code>DAY_TICKS</code>);
     <code>dayStamp = getGameTime() / 24000</code>, monotonic and reload-safe.
     <code>bondToday</code> resets when it rolls over. This answers
-    <a href="roadmap.html">roadmap &sect;21</a>'s "which day" for the bond side.
+    the <a href="roadmap.html#settled">once-per-Minecraft-day rule</a> for the bond side.
 </p>
 <div class="table-wrap">
 <table>
@@ -120,7 +119,7 @@
 <tr><td>Proximity</td><td>~+0.5 / min</td><td>Owner within 10 blocks at scan time &rarr; +15 ticks into <code>bondTicks</code></td></tr>
 <tr><td>Riding</td><td>~+1 / min</td><td>Owner is the controlling passenger &rarr; +30 ticks into <code>bondTicks</code></td></tr>
 <tr><td>Feeding</td><td>+2 each</td><td>Owner right-clicks with any <code>isFood</code> item (event not cancelled &mdash; vanilla feeding still happens)</td></tr>
-<tr><td>Shearing</td><td>+5 each</td><td>A tamed horse sheared with shears (<code>server/HorseShearHandler</code>, roadmap &sect;12), via the new <code>HorseCareHandler.awardBondFor</code> entry point. Honours the daily cap.</td></tr>
+<tr><td>Shearing</td><td>+5 each</td><td>A tamed horse sheared with shears (<code>server/HorseShearHandler</code>, see <a href="items.html#shearing">items</a>), via the new <code>HorseCareHandler.awardBondFor</code> entry point. Honours the daily cap.</td></tr>
 </tbody>
 </table>
 </div>
@@ -135,7 +134,7 @@
     common "near my owner" case.</p>
 </div>
 
-<h2>3. Herds (roadmap &sect;13)</h2>
+<h2>3. Herds</h2>
 
 <div class="note">
     <span class="label">Natural wild herds (2026-09-05)</span>

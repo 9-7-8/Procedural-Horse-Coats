@@ -18,10 +18,10 @@
     The mod&rsquo;s first mechanism for <strong>influencing inheritance</strong>,
     and the knowledge layer that gates it. Built 2026-09-05,
     <strong>not play-tested</strong> &mdash; checklist in
-    <a href="verification.html#carrots-db">verification &sect;0f</a>. Design
-    rationale is <a href="roadmap.html#carrots">roadmap &sect;14</a> and
-    <a href="roadmap.html#database">&sect;16</a>; this page is the machinery as
-    built.
+    <a href="verification.html#carrots-db">verification &sect;0f</a>. This page is
+    the source of truth for the mechanism; the <em>recipes</em> are on
+    <a href="items.html#carrots">items</a>, and what is still missing is on
+    <a href="roadmap.html">the roadmap</a>.
 </p>
 
 <h2 id="rule">The one rule</h2>
@@ -101,12 +101,21 @@
 <p>
     <strong>The recipe is one parameterised <code>CustomRecipe</code></strong>
     (<code>server/recipe/KnownGeneSpliceRecipe</code>), not N generated recipes:
-    golden carrot + a <a href="#database">research paper</a> + a hair item
-    (<code>horse_hair</code> or <code>hair_cloth</code>) + the rarity item for
-    that gene&rsquo;s tier + at least one flavour ingredient &rarr; a
-    <code>known_gene_splice_carrot</code> carrying the paper&rsquo;s gene.
-    The recipe reads the gene off the paper at craft time, so a drop-in gene
-    file gets its carrot the moment it registers &mdash; no datapack.
+    <strong>exactly four items</strong> &mdash; golden carrot + a
+    <a href="#database">research paper</a> + a hair item (<code>horse_hair</code>
+    or <code>hair_cloth</code>) + the rarity item for that gene&rsquo;s tier
+    &rarr; a <code>known_gene_splice_carrot</code> carrying the paper&rsquo;s
+    gene. The recipe reads the gene off the paper at craft time, so a drop-in
+    gene file gets its carrot the moment it registers &mdash; no datapack.
+</p>
+
+<p class="muted">
+    The design originally called for a fifth &ldquo;flavour&rdquo; slot, letting each
+    gene name an ingredient that <em>reads</em> as it. The recipe now requires
+    exactly the four, and per-gene flavour lists are still unwritten &mdash; a
+    <code>carrot.flavour</code> block exists in the
+    <a href="gene-format.html">gene format</a> and no built-in fills it. See
+    <a href="roadmap.html">the roadmap</a>.
 </p>
 
 <div class="table-wrap">
@@ -189,12 +198,12 @@
     The browser&rsquo;s <strong>Crafting</strong> tab is a 3&times;3 grid that only
     makes this mod&rsquo;s recipes. A single book in it plus a discovered gene
     picked in the list becomes that gene&rsquo;s research paper; the paper then
-    goes into the Known Gene Splice recipe above. A <em>View splice recipe</em>
-    button on a discovered gene fills the grid with the ingredients you have and
-    shows ghosts for the rest &mdash; it never crafts
-    (<code>ViewSpliceRecipePayload</code> &rarr;
-    <code>HorseBrowserMenu.fillSplicePreview</code>,
-    <code>menu/SpliceRecipeDisplay</code> for the layout).
+    goes into the Known Gene Splice recipe above. <strong>Selecting a gene
+    auto-ghosts its splice recipe</strong> into the grid&rsquo;s empty slots
+    &mdash; dimmed placeholder items, client-side only, nothing moves in your
+    inventory &mdash; and hovering a ghost shows the real item&rsquo;s tooltip.
+    <code>menu/SpliceRecipeDisplay</code> is the canonical layout, shared by the
+    screen and the recipe so the two can never disagree.
 </p>
 
 <h2 id="metadata">The gene metadata it all reads</h2>
@@ -220,13 +229,44 @@
 <h2 id="deferred">Deferred</h2>
 
 <p>
-    The Horse Master villager selling papers and carrots
-    (<a href="roadmap.html#villager">&sect;18</a>); the seed jar honouring the
-    carrot gate and a real gestation timer
-    (<a href="roadmap.html#ivf">&sect;15.1</a>); the &sect;19 fields as gene-creator
-    form inputs; a database check inside the carrot recipe itself; per-gene
-    <code>splice</code> tables on any built-in gene.
+    The mechanism is complete; what is missing is <strong>content and reach</strong>.
+    All of it is on <a href="roadmap.html">the roadmap</a>:
 </p>
+
+<ul>
+    <li><strong>No built-in gene declares a <code>splice</code> table or a
+        <code>carrot</code> flavour list.</strong> Every one falls back to the
+        minimal recipe and a uniform draw over its viable pairs &mdash; which on a
+        forty-allele locus like <a href="gene-particle.html">particle</a> is a
+        near-guaranteed oddity, and on a lethal-carrying locus can hand a foal a
+        birth-lethal genotype. Whether that is a feature or wants a guard is
+        undecided.</li>
+    <li><strong>An Epigenetic Stabilizer carrot</strong> &mdash; the opposite end of
+        the dial from Unknown Epigenetic Splice, forcing every passed-on copy to be
+        inherited verbatim. Only meaningful once epigenetic drift exists.</li>
+    <li><strong>Carrot effects on a <a href="items.html#jars">seed jar</a></strong>,
+        captured at collection and applied at impregnation. None are carried today.</li>
+    <li><strong>The Horse Master villager</strong> selling papers and carrots.</li>
+    <li><strong>The &sect;19 metadata fields as gene-creator form inputs</strong>
+        &mdash; the creator emits <code>format: 3</code> but has no UI for
+        <code>rarity</code> / <code>carrot</code> / <code>splice</code> / <code>blurb</code>.</li>
+    <li>A <strong>database check inside the recipe itself</strong>; today the paper
+        ingredient is the whole gate.</li>
+</ul>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="items.html">Items &amp; recipes</a>
+        <a href="breeding.html">Breeding &amp; pedigree</a>
+        <a href="gene-format.html">The gene file format</a>
+        <a href="verification.html">To be verified</a>
+        <a href="roadmap.html">Roadmap</a>
+    </div>
+    Code: <code>common/genetics/CarrotEffect</code>,
+    <code>common/genetics/GameteBias</code>,
+    <code>server/BreedingCarrotHandler</code>,
+    <code>server/recipe/</code>, <code>data/GeneDatabaseData</code>.
+</div>
 
 </article>
 </main>

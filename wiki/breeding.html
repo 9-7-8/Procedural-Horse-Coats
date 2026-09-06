@@ -572,7 +572,7 @@ int     offspringCount(UUID a, UUID b);</code></pre>
     <code>HorseBreedingHandler.applyBredFoal(child, damHorse, damGenome, damRecord,
     sireGenome, sireRecord, breeder, rng)</code> so a second entry point can reuse
     them: the <strong>stallion seed jar</strong>
-    (<code>server/StallionSeedJarHandler</code>, roadmap &sect;15.1) builds the foal
+    (<code>server/StallionSeedJarHandler</code>) builds the foal
     <code>Horse</code> itself, passes the mare&rsquo;s live genome and a
     <em>synthetic</em> sire <code>HorseRecord</code> reconstructed from the jar&rsquo;s
     <code>stored_genome</code> component (a <code>GenomeSample</code> + the donor&rsquo;s
@@ -743,7 +743,7 @@ int     offspringCount(UUID a, UUID b);</code></pre>
         loci yet</strong> &mdash; genes combine independently. The
         <a href="gene-sex.html">sex locus itself is built</a>, which was the
         prerequisite; X-linked and Y-linked inheritance
-        (<a href="roadmap.html#sex-linked">&sect;5.3</a>) is the remaining half and the
+        (<a href="roadmap.html#sex-linked">the roadmap</a>) is the remaining half and the
         one planned exception to independent assortment.</li>
     <li>Name-generation output is rough and slated for a rework. The rule &mdash;
         <code>&lt;alpha&gt; &lt;space&gt; &lt;beta&gt;</code> &mdash; is fixed.</li>
@@ -773,7 +773,7 @@ int     offspringCount(UUID a, UUID b);</code></pre>
         <a href="genetics-model.html">The genetics model</a>
         <a href="pipeline.html">Three-phase pipeline</a>
         <a href="verification.html">To be verified</a>
-        <a href="roadmap.html#traits">Planned Mendelian stats</a>
+        <a href="horse-body.html">The horse&rsquo;s body</a>
     </div>
     Source: <code>common/genetics/</code>, <code>common/horse/</code>,
     <code>common/name/</code>, <code>neoforge-26.1.2/{data,server,client,network}/</code>

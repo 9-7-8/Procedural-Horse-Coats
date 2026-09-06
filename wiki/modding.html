@@ -53,7 +53,7 @@
         decides how a horse looks. A <em>Java</em> gene from another mod still has to
         be added to this repository &mdash; the mod-bus registration hook, the
         declarative builder and the abstract base classes are
-        <a href="roadmap.html#modder-api">designed and on the roadmap</a>. Everything
+        <a href="roadmap.html#gene-api">designed and on the roadmap</a>. Everything
         else on this page &mdash; the interface, the contract, the pipeline, the
         determinism rules &mdash; is live and applies to both kinds of gene.
     </p>
@@ -75,8 +75,7 @@
         effect" contract in <a href="gene-effects.html">Gene effects</a>.
         (<code>attribute</code> and <code>mob_effect</code> parse but are not
         executed yet.)</li>
-    <li><strong>Status effects</strong> &mdash; stats, body size, health. <em>Not
-        built yet</em>; sketched in <a href="roadmap.html#traits">Roadmap §6</a>.</li>
+    <li><strong>Status effects</strong> &mdash; stats, body size, health. <strong>Built</strong> &mdash; see <a href="horse-body.html">the horse&rsquo;s body</a>.</li>
 </ol>
 
 <div class="note rule">
@@ -868,7 +867,7 @@ PigmentField after  = new SilverGene().restrict(pair, ctx, before);
         <a href="pipeline.html">Three-phase pipeline</a>
         <a href="body-space.html">Body space &amp; regions</a>
         <a href="philosophy.html">Philosophy</a>
-        <a href="roadmap.html#modder-api">The planned authoring tiers</a>
+        <a href="roadmap.html#gene-api">The planned authoring tiers</a>
     </div>
     Every shipped gene is a worked example:
     <a href="gene-champagne.html">champagne</a> is the simplest natural one,

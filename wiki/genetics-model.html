@@ -84,7 +84,7 @@
         token</em> on a known gene is still a hard error. So adding or removing a
         gene is just a coat regeneration &mdash; no padding, no version field, no
         positional / legacy fallback. What happens when a <em>player</em>
-        installs a gene mod is <a href="roadmap.html#third-party">still an open
+        installs a gene mod is <a href="roadmap.html#gene-api">still an open
         question</a>.
     </p>
 </div>
@@ -497,7 +497,7 @@ public Expression expressionOf(AllelePair pair) {
         order is a separate per-gene constant, <code>Gene.priority()</code>
         (<code>Genes</code> sorts on <code>(priority, key)</code>). See
         <a href="philosophy.html">Philosophy §2</a> and
-        <a href="roadmap.html#priority">Roadmap §2</a>.
+        <a href="#gene-priority">§ Gene priority</a> above.
     </p>
 </div>
 
@@ -627,7 +627,7 @@ public boolean hasVisibleNonDeterministic();</code></pre>
 <p>
     <strong>Nothing in the game reads it any more.</strong> It used to drive the horse
     dimension, one pen per entry; that corridor
-    <a href="roadmap.html#random-pens">went back to random pens</a> on 2026-09-04,
+    <a href="horse-dimension.html#catalogue">went back to random pens</a> on 2026-09-04,
     because at two million entries the corridor was longer than the world. The
     catalogue stays because the tests read it and a punnett display will &mdash; the
     reduction is a statement about the genes, not about the dimension.

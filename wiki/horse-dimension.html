@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hay portals &amp; the horse dimension &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="nav.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow">Gameplay <span class="sep">/</span> world</p>
+<h1>Hay portals &amp; the horse dimension</h1>
+<p class="lede">
+    Build a hay-bale frame, light it with a golden carrot, and stand in it for ten
+    seconds. You arrive in a private, disposable corridor of <strong>2,000
+    pens</strong>, each holding a mare and a stallion of one randomly rolled genotype,
+    each signed with the genome they carry. It is the mod&rsquo;s showroom &mdash; a
+    place to see what the genes actually do without breeding for a week.
+</p>
+
+<div class="note">
+    <span class="label">The names still say &ldquo;debug&rdquo;</span>
+    <p>
+        The dimension is a <strong>normal feature</strong> now, reachable by portal in any
+        build. Only the <strong>F6</strong> shortcut is dev-gated. The class and registry
+        names &mdash; <code>DebugPenManager</code>, <code>DEBUG_LEVEL</code>,
+        <code>horsegenetics:debug_pens</code> &mdash; are legacy from when it was
+        debug-only; a rename is deferred because it would break existing save data.
+    </p>
+</div>
+
+<h2 id="portals">Hay-bale portals</h2>
+
+<h3>Lighting one</h3>
+
+<p>
+    Build a <strong>vertical</strong> frame of hay bales around an empty rectangle, at
+    nether-portal inner sizes (2&ndash;21 wide, 3&ndash;21 tall), <em>outside</em> the
+    horse dimension. Right-click any frame block with a <strong>golden carrot</strong>.
+</p>
+
+<p>
+    <code>server/HorsePortalManager.findFrame</code> tries <em>every</em> in-plane air
+    neighbour of the clicked bale as a flood-fill seed &mdash; taking only the first is
+    what used to make a corner click silently do nothing &mdash; floods the enclosed air
+    in the frame plane (X first, then Z), requires a filled rectangle fully bounded by
+    hay, and fills it with <code>horsegenetics:hay_portal</code>. The carrot is consumed,
+    and you get a chat line either way; on failure it states the size rule.
+</p>
+
+<h3>The portal block</h3>
+
+<p>
+    <code>hay_portal</code> is a cosmetic, indestructible <code>BaseEntityBlock</code>
+    &mdash; no collision, light level 11, no loot, <code>RenderShape.INVISIBLE</code>. Its
+    look is a <strong>half-block-thick opaque slab</strong> drawn by
+    <code>HayPortalRenderer</code>, inset along the axis the portal plane <em>doesn&rsquo;t</em>
+    run along, so it faces the player rather than being edge-on.
+</p>
+
+<ul>
+    <li>Two draw passes per face: an <strong>opaque black</strong> pass
+        (<code>entitySolid</code>, which writes depth and has no alpha discard, so sky,
+        clouds and water can never show through) and then the <strong>animated
+        swirl</strong> (<code>entityTranslucentEmissive</code>, full-bright).</li>
+    <li>The texture is a 64-wide vertical strip of <strong>36 frames</strong>. The frame
+        rate <strong>ramps 12&nbsp;&rarr;&nbsp;48&nbsp;fps</strong> as a client-estimated
+        &ldquo;charge&rdquo; builds while you stand in it (~10&nbsp;s ramp, ~2&nbsp;s
+        decay), so the portal visibly winds up around you.</li>
+    <li>A multi-block portal only renders its outer shell &mdash; a face adjoining another
+        <code>hay_portal</code> is skipped.</li>
+</ul>
+
+<h3>Going through</h3>
+
+<p>
+    <code>server/PortalEventHandler</code> counts ticks an entity spends standing in a
+    portal block (feet and <code>y+0.9</code>):
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Who</th><th>Dwell</th><th>What happens</th></tr></thead>
+<tbody>
+<tr><td><strong>Player, overworld portal</strong></td><td>200 ticks (10&nbsp;s)</td><td>A fresh plot is allocated and you are dropped at its entrance, facing the corridor, with a paper in the first free hotbar slot. The return is wired back to <em>this</em> portal.</td></tr>
+<tr><td><strong>Player, dimension portal</strong></td><td>200 ticks</td><td>Back to where you came from &mdash; <strong>and your tamed horses come with you</strong> (below).</td></tr>
+<tr><td><strong>Horse</strong></td><td>60 ticks (3&nbsp;s)</td><td>Goes through on its own.</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    While the counter runs, the entity is ringed with <strong>gold dust particles</strong>
+    (denser as it nears zero &mdash; vanilla has no gold portal particle), and a player
+    gets a one-time &ldquo;grabs hold&rdquo; line plus a per-second countdown for the last
+    five seconds. A 100-tick cooldown blocks instant re-triggering.
+</p>
+
+<h3>The roped-horse shortcut</h3>
+
+<p>
+    Right-click a <code>hay_portal</code> while <em>leading</em> horses and every leashed
+    horse within 12 blocks is snapped to the portal block, has its lead dropped, and has
+    its dwell counter seeded so it goes through in about three seconds. Owner-verified.
+</p>
+
+<h3>Coming back</h3>
+
+<p>
+    As a player&rsquo;s exit dwell starts they are warned in chat that anything left
+    behind is lost and that tamed horses come with them. At teleport,
+    <code>evacuateTamedHorses</code> takes <em>your</em> tamed horses &mdash; or
+    <em>every</em> tamed horse, if you are the last player out. Each is dropped about two
+    blocks above the return portal on a 3-wide grid with <strong>10&nbsp;seconds of
+    invulnerability</strong>, so the short fall cannot hurt it, and is parked in the portal
+    cooldown so it cannot be sucked straight back through. No terrain is carved.
+</p>
+
+<h2 id="plots">One private plot per visit</h2>
+
+<p>
+    The dimension generates <strong>nothing</strong> &mdash; <code>the_void</code> biome,
+    a single <code>air</code> layer. Every visit gets its own
+    <code>DebugPenManager.Plot</code>: a corridor built at a unique world X, with plots
+    <strong>8,007 blocks apart</strong> (the corridor length plus a thousand) and X slots
+    recycled through a free list, all at a fixed <code>PLOT_BASE_Y</code> of 128. Plots
+    never share chunks, so &ldquo;two players never land in the same place&rdquo; holds
+    with no per-player-dimension machinery.
+</p>
+
+<p>
+    <code>PLOTS</code> is strictly one plot per player: entering makes a new one and tears
+    down your previous one, so a revisit always regenerates and nothing you left behind
+    survives.
+</p>
+
+<h3>Leaving clears entities, not blocks</h3>
+
+<p>
+    The <em>geometry</em> is fixed, so an X slot handed back to the free list is rebuilt
+    byte-identically on top of the old one. Teardown is therefore
+    <strong>O(entities)</strong>, not O(blocks walked): it discards non-player entities in
+    the plot&rsquo;s AABB and <code>forget</code>s each one from the ancestry database, or
+    every visit would leave hundreds of throwaway pen records in the save forever. The AABB
+    covers the <strong>whole</strong> X slot, not just what this visit built, or a slot
+    where a previous visitor walked further would accumulate horses indefinitely.
+</p>
+
+<p class="muted">
+    A record that <em>references</em> a forgotten horse as a parent is left alone &mdash;
+    <code>ancestorsOf</code> already skips ancestors it cannot find, so a foal bred in the
+    dimension and taken home keeps working with a missing parent node.
+</p>
+
+<h2 id="pens">What is in the pens</h2>
+
+<p>
+    <strong>Each pen is one random genotype, shown by two horses.</strong> The corridor is
+    a fixed <code>PEN_COUNT</code> of <strong>2,000</strong> &mdash; an arbitrary number,
+    deliberately <em>not</em> derived from the genotype space, so adding a gene does not
+    lengthen the corridor. Both horses in a pen share the genotype but not the epigenome,
+    so they are two examples rather than two copies.
+</p>
+
+<h3><code>ShowcaseGenotypes</code> &mdash; a founder draw with a floor under it</h3>
+
+<p>
+    An honest wild draw is mostly plain horses: every founder table is weighted hard toward
+    its baseline, which is correct for a wild spawn and useless for a corridor whose job is
+    to show what the genes do. So <code>common/genetics/ShowcaseGenotypes.random</code>
+    rolls an ordinary <code>Genotype.random</code> and then guarantees a floor:
+</p>
+
+<ul>
+    <li><strong>At least one natural coat gene beyond extension and agouti is
+        expressing</strong>, always.</li>
+    <li>With <code>MAGICAL_CHANCE</code> = <strong>0.5</strong>, a magical gene too.</li>
+    <li>A draw that already clears the floor is <strong>left exactly as it fell</strong>
+        &mdash; only an all-baseline draw gets a gene forced in.</li>
+</ul>
+
+<p>
+    Two rules keep it honest. Forcing only ever keeps a combination that actually expresses
+    <em>in this genotype</em> (<code>Genotype.shows</code>), so a chestnut is never handed
+    an agouti it will not paint. And a combination that <strong><code>masks</code></strong>
+    &mdash; one that hides everything else &mdash; neither counts toward the floor nor is
+    ever forced, or a masking gene would quietly exempt part of the corridor from the
+    guarantee. Candidates are derived from the registry, so a drop-in gene joins the pool
+    on its own.
+</p>
+
+<div class="note warn">
+    <span class="label">The floor guarantees <em>expressed</em>, not <em>perceptible</em></span>
+    <p>
+        Mushroom on a black horse is a real expression that looks like nothing. Nothing in
+        the model can currently answer &ldquo;would a player see this&rdquo;, so this is
+        accepted rather than special-cased.
+    </p>
+</div>
+
+<h3>Signs</h3>
+
+<ul>
+    <li><strong>Per pen</strong>, on the road one block out from the wall and to the right
+        of the gate as you face the pen (so the two sides of the road mirror): the pen
+        number, then <code>GeneCodeDisplay.shortForm</code> &mdash; the same compact genome
+        string the info panel and paper dump use &mdash; greedily wrapped over three lines.
+        The wrap deliberately <strong>overflows its last line rather than dropping a
+        gene</strong>, so a busy horse reads very wide.</li>
+    <li><strong>At the entrance</strong>, three blocks in front of the return portal:
+        <em>Horse Pens / 2,000 pens / random genome / mare + stallion</em>.</li>
+</ul>
+
+<h2 id="layout">Layout</h2>
+
+<p>Cross-section from the road outward, mirrored on both sides:</p>
+
+<div class="codebox">
+<pre><code>road (gravel, z -3..3) | pen 6 x 20, brick walls | gravel strip + glowstone above (z 24) | oak-plank wall (z 25) | bedrock core (z 26) | VOID</code></pre>
+</div>
+
+<ul>
+    <li><strong>Floor</strong> &mdash; the generator makes none, so
+        <code>DebugPenManager</code> lays bedrock / dirt / dirt / grass itself, only for
+        <code>z</code> in [&minus;26, 26]. Past the bedrock core: open void.</li>
+    <li><strong>Pens</strong> are 6 &times; 20 with a <strong>two-wide</strong>
+        oak-fence-gate opening onto the road &mdash; a one-wide gate lets horses escape
+        &mdash; and torches on the four corner posts.</li>
+    <li><strong>Amenities</strong> sit in the two gate-side interior corners, one block in
+        from the road wall and <strong>sunk one block</strong> so their tops are flush with
+        the grass: a full water cauldron and a hay block. At full height they were a step
+        the horses hopped the wall from.</li>
+    <li>Pens repeat every 7 blocks; 30 are built ahead of the player and more are laid down
+        as you walk (<code>DebugPenTickHandler</code>).</li>
+</ul>
+
+<h3>House rules inside the dimension</h3>
+
+<ul>
+    <li><strong>Horses take no damage.</strong></li>
+    <li><strong>No block breaking or placing</strong>, in survival or creative.</li>
+    <li><strong>Non-horse mobs are refused entry.</strong></li>
+    <li>In a dev build: a <strong>stick</strong> tames an untamed horse and a
+        <strong>clock</strong> ages a foal to adult.</li>
+    <li>A pen is built once per plot, so anything already standing in it belongs to a
+        previous occupant of that recycled X slot. <code>buildPen</code> discards untamed
+        leftovers before stocking, and leaves tamed ones alone &mdash; a player may have
+        ridden one ahead of the build frontier.</li>
+</ul>
+
+<h2 id="catalogue">The genotype catalogue, and why the corridor stopped using it</h2>
+
+<p>
+    The corridor was once <strong>one pen per visually distinct genotype</strong>, driven
+    by <code>GenotypeCatalog</code>. The white-pattern rewrite took that to 2,064,387 pens
+    &mdash; a corridor of about <strong>7.2 million blocks</strong>, a quarter of the way
+    to the world border &mdash; and it has grown by three orders of magnitude since. The
+    gallery was retired before anyone ever walked it.
+</p>
+
+<p>
+    <code>GenotypeCatalog</code> survives, but as <strong>arithmetic rather than a
+    list</strong>: <code>size()</code> is computed, and <code>get(i)</code> reads an
+    odometer over each gene&rsquo;s distinct pairs. Nothing in production indexes it &mdash;
+    it is there for the tests and for a future punnett display. Its
+    <code>entries()</code> is a lazy view, so streaming it still walks the whole space;
+    sample it, or ask the arithmetic.
+</p>
+
+<h2 id="limits">Known limitations</h2>
+
+<ul>
+    <li><code>PLOTS</code> is <strong>in memory</strong>, so a server restart orphans a
+        dead plot&rsquo;s blocks and horses in the void. Harmless: the next plot at that X
+        rebuilds identical geometry over them, <code>buildPen</code> sees the survivors and
+        does not double-spawn, and a player logging in to a plotless dimension is bounced to
+        the overworld spawn. Their ancestry records are the one thing that leaks on a crash.</li>
+    <li>The dimension is <strong>not reachable in survival</strong> by design decision
+        &mdash; the &ldquo;interdimensional ticket&rdquo;
+        (<a href="items.html#tickets">items</a>) would be the first survival entry, and
+        whether it should be is undecided.</li>
+    <li>Whether the 10-second player dwell <em>feels</em> right is unverified.</li>
+</ul>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="items.html">Items &amp; recipes</a>
+        <a href="genetics-model.html">The genetics model</a>
+        <a href="breeds.html">Breeds</a>
+        <a href="roadmap.html">Roadmap &mdash; the planned split corridor</a>
+    </div>
+    Code: <code>server/DebugPenManager</code>, <code>server/HorsePortalManager</code>,
+    <code>server/PortalEventHandler</code>, <code>block/HayPortalBlock</code>,
+    <code>common/genetics/ShowcaseGenotypes</code>.
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>
