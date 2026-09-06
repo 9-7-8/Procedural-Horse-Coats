@@ -14,6 +14,8 @@ import com.example.horsegenetics.common.genetics.Gene;
 import com.example.horsegenetics.common.genetics.GeneCodeDisplay;
 import com.example.horsegenetics.common.genetics.Genes;
 import com.example.horsegenetics.common.genetics.Genotype;
+import com.example.horsegenetics.common.genetics.spec.GeneAbility;
+import com.example.horsegenetics.common.genetics.spec.HorseAbilities;
 import com.example.horsegenetics.common.horse.Sex;
 import com.example.horsegenetics.common.trait.HorseTraits;
 import com.example.horsegenetics.common.trait.Traits;
@@ -26,6 +28,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
+import net.minecraft.client.renderer.entity.state.EquineRenderState;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.RandomSource;
@@ -102,9 +105,54 @@ public final class CustomHorseSpawnScreen extends Screen {
     private static final int RIGHT_STEP = 22;
     private static final int PANEL = 0x90000000;
 
+    /** Many-allele genes (particle, KIT, ...) get a scrollable list instead of a cycle button. */
+    private static final int DD_ROW_H = 12;
+    private static final int DD_VISIBLE = 8;
+    private static final int DD_W = 76;
+
     private boolean baby = false;
     private boolean female = true;
     private int scroll = 0;
+
+    /** Preview view: click-drag orbits, wheel zooms; the horse always walks in place. */
+    private float previewYaw = -30f;
+    private float previewPitch = 8f;
+    private float previewZoom = 1f;
+    private boolean draggingPreview = false;
+    private final long screenOpenedAt = System.currentTimeMillis();
+
+    /** The open many-allele dropdown, or {@code null}. Anchored at ({@link #ddX}, {@link #ddY}). */
+    private Row ddRow;
+    private int ddSlot;
+    private int ddScroll;
+    private int ddX;
+    private int ddY;
+
+    /**
+     * GUI-space "dust" motes for the particle-locus preview. The real emitter
+     * is server-side ({@code GeneAbilityHandler}, {@code EntityTickEvent.Post},
+     * client-guarded) and the preview horse is a throwaway entity that never
+     * ticks, so nothing would show otherwise. This is a rough stand-in - a
+     * cloud round the horse in the emitter's colour, not a placed-in-world
+     * particle - enough to preview "this horse trails something, in this
+     * colour".
+     */
+    private final java.util.List<Mote> motes = new java.util.ArrayList<>();
+    private final java.util.Random previewRng = new java.util.Random();
+    private long lastFrameNanos = System.nanoTime();
+    private double emitAccumulator = 0.0;
+    private static final int MOTE_CAP = 160;
+
+    private static final class Mote {
+        float x;
+        float y;
+        float vx;
+        float vy;
+        float age;
+        float life;
+        float size;
+        int rgb;
+    }
 
     /** 0 = no preset; 1..N = Breeds.all().get(index-1). A preset also stamps the spawned horse's breed. */
     private int breedIndex = 0;
@@ -180,9 +228,19 @@ public final class CustomHorseSpawnScreen extends Screen {
     }
 
     private void applyBreedPreset(Breed breed) {
-        Genome g = BreedFounder.roll(breed, new NeoRng(RandomSource.create()));
+        applyGenome(BreedFounder.roll(breed, new NeoRng(RandomSource.create())), true);
+    }
+
+    /**
+     * Stamp a whole rolled genome onto the editor - every locus, the epigenome,
+     * optionally the sex. A locus the roll left at its baseline drops off the
+     * list, so a mostly-plain roll does not come back as 40 rows of {@code N/N}.
+     */
+    private void applyGenome(Genome g, boolean adoptSex) {
         Genotype gt = g.genotype();
-        female = gt.sex() == Sex.FEMALE;
+        if (adoptSex) {
+            female = gt.sex() == Sex.FEMALE;
+        }
         for (Row row : rows) {
             AllelePair pair = gt.pair(row.gene);
             int def = indexOf(row.gene, row.gene.defaultAllele());
@@ -192,6 +250,60 @@ public final class CustomHorseSpawnScreen extends Screen {
         }
         epigenome = g.epigenome();
         previewKey = "";
+    }
+
+    /**
+     * <b>Randomize genes.</b> With a breed selected this is a fresh
+     * {@link BreedFounder#roll} of it (so the alleles stay inside that breed's
+     * pools and stat targets); with "(none)" it is an unconstrained
+     * {@link Genome#random}. The chosen sex is kept either way.
+     */
+    private void randomizeGenes() {
+        NeoRng rng = new NeoRng(RandomSource.create());
+        Genome g = breedIndex == 0
+                ? Genome.random(rng)
+                : BreedFounder.roll(breedChoices.get(breedIndex - 1), rng,
+                        female ? Sex.FEMALE : Sex.MALE);
+        applyGenome(g, false);
+        closeDropdown();
+        rebuildWidgets();
+    }
+
+    private void openDropdown(Row row, int slot, int anchorX, int anchorY) {
+        ddRow = row;
+        ddSlot = slot;
+        ddX = anchorX;
+        int h = DD_VISIBLE * DD_ROW_H;
+        ddY = Math.max(LIST_TOP, Math.min(anchorY, this.height - h - 4));
+        int cur = slot == 0 ? row.a : row.b;
+        int max = Math.max(0, row.gene.alleles().size() - DD_VISIBLE);
+        ddScroll = Math.max(0, Math.min(cur - DD_VISIBLE / 2, max));
+    }
+
+    private void closeDropdown() {
+        ddRow = null;
+    }
+
+    private void pickFromDropdown(double mx, double my) {
+        List<Allele> as = ddRow.gene.alleles();
+        int h = DD_VISIBLE * DD_ROW_H;
+        if (mx >= ddX && mx < ddX + DD_W && my >= ddY && my < ddY + h) {
+            int idx = ddScroll + (int) ((my - ddY) / DD_ROW_H);
+            if (idx >= 0 && idx < as.size()) {
+                if (ddSlot == 0) {
+                    ddRow.a = idx;
+                } else {
+                    ddRow.b = idx;
+                }
+            }
+        }
+        closeDropdown();
+        rebuildWidgets();
+    }
+
+    private boolean inPreview(double mx, double my) {
+        return mx >= previewLeft() && mx <= previewRight()
+                && my >= LIST_TOP && my <= this.height - 30;
     }
 
     /**
@@ -293,19 +405,28 @@ public final class CustomHorseSpawnScreen extends Screen {
                 continue; // a gene not on the horse is a plain name; the row itself is the button
             }
             final List<Allele> as = row.gene.alleles();
-            int ry = LIST_TOP + (i - scroll) * ROW_H;
+            final int ry = LIST_TOP + (i - scroll) * ROW_H;
+            final boolean dropdown = as.size() > 3;
             addRenderableWidget(Button.builder(
                             Component.literal(as.get(row.a).token()),
                             b -> {
-                                row.a = (row.a + 1) % as.size();
-                                rebuildWidgets();
+                                if (dropdown) {
+                                    openDropdown(row, 0, aX, ry);
+                                } else {
+                                    row.a = (row.a + 1) % as.size();
+                                    rebuildWidgets();
+                                }
                             })
                     .bounds(aX, ry, ALLELE_W, ROW_H - 2).build());
             addRenderableWidget(Button.builder(
                             Component.literal(as.get(row.b).token()),
                             b -> {
-                                row.b = (row.b + 1) % as.size();
-                                rebuildWidgets();
+                                if (dropdown) {
+                                    openDropdown(row, 1, bX, ry);
+                                } else {
+                                    row.b = (row.b + 1) % as.size();
+                                    rebuildWidgets();
+                                }
                             })
                     .bounds(bX, ry, ALLELE_W, ROW_H - 2).build());
             addRenderableWidget(Button.builder(
@@ -345,6 +466,11 @@ public final class CustomHorseSpawnScreen extends Screen {
                 .bounds(rx, ry, RIGHT_W, 20).build());
         ry += RIGHT_STEP;
         addRenderableWidget(Button.builder(
+                        Component.literal("Randomize"),
+                        b -> randomizeGenes())
+                .bounds(rx, ry, RIGHT_W, 20).build());
+        ry += RIGHT_STEP;
+        addRenderableWidget(Button.builder(
                         Component.literal("Reroll epi."),
                         b -> {
                             epigenome = rollEpigenome();
@@ -374,6 +500,10 @@ public final class CustomHorseSpawnScreen extends Screen {
      */
     @Override
     public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+        if (ddRow != null) {
+            pickFromDropdown(event.x(), event.y()); // any click resolves or dismisses it
+            return true;
+        }
         if (super.mouseClicked(event, doubleClick)) {
             return true;
         }
@@ -383,11 +513,43 @@ public final class CustomHorseSpawnScreen extends Screen {
             rebuildWidgets();
             return true;
         }
+        if (event.button() == 0 && inPreview(event.x(), event.y())) {
+            draggingPreview = true;
+            return true;
+        }
         return false;
     }
 
     @Override
+    public boolean mouseReleased(MouseButtonEvent event) {
+        if (draggingPreview && event.button() == 0) {
+            draggingPreview = false;
+            return true;
+        }
+        return super.mouseReleased(event);
+    }
+
+    @Override
+    public boolean mouseDragged(MouseButtonEvent event, double dx, double dy) {
+        if (draggingPreview) {
+            previewYaw += (float) dx;
+            previewPitch = Math.max(-80f, Math.min(80f, previewPitch + (float) dy));
+            return true;
+        }
+        return super.mouseDragged(event, dx, dy);
+    }
+
+    @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+        if (ddRow != null) {
+            int max = Math.max(0, ddRow.gene.alleles().size() - DD_VISIBLE);
+            ddScroll = Math.max(0, Math.min(max, ddScroll - (int) Math.signum(scrollY)));
+            return true;
+        }
+        if (inPreview(mouseX, mouseY)) {
+            previewZoom = Math.max(0.3f, Math.min(4.0f, previewZoom * (scrollY > 0 ? 1.1f : 0.9f)));
+            return true;
+        }
         if (maxScroll() > 0 && mouseX < LIST_X + listWidth()) {
             scroll = Math.max(0, Math.min(maxScroll(), scroll - (int) Math.signum(scrollY)));
             rebuildWidgets();
@@ -546,8 +708,6 @@ public final class CustomHorseSpawnScreen extends Screen {
             return;
         }
         drawSizeReadout(g, x0, x1, y1);
-        int cx = (x0 + x1) / 2;
-        int cy = y0 + h * 2 / 3;
         // Same framing ratio the family tree uses (a 50x78 viewport at scale 16).
         float mScale = Math.min(w / 3.1F, h / 4.9F);
 
@@ -559,6 +719,7 @@ public final class CustomHorseSpawnScreen extends Screen {
         // horse rather than a wall of pixels - the readout below never caps.
         double bodyScale = previewTraits().scale();
         mScale *= (float) Math.min(bodyScale, PREVIEW_SCALE_CAP);
+        mScale *= previewZoom;
 
         try {
             EntityRenderer<? super Horse, ?> renderer =
@@ -569,23 +730,127 @@ public final class CustomHorseSpawnScreen extends Screen {
             if (state instanceof GeneticHorseRenderState gs) {
                 gs.coatData = coat;
             }
-            float xAngle = (float) Math.atan((cx - mouseX) / 40.0F);
-            float yAngle = (float) Math.atan((cy - mouseY) / 40.0F);
+            float pitch = Math.max(-80.0F, Math.min(80.0F, previewPitch));
+            float t = (System.currentTimeMillis() - screenOpenedAt) / 1000.0F;
             if (state instanceof LivingEntityRenderState ls) {
-                ls.bodyRot = 180.0F + xAngle * 42.0F;
-                ls.yRot = xAngle * 42.0F;
-                ls.xRot = -yAngle * 22.0F;
+                ls.bodyRot = 180.0F + previewYaw;
+                ls.yRot = 180.0F + previewYaw; // head in line with the body - no mouse tracking
+                ls.xRot = 0.0F;
                 ls.boundingBoxWidth = ls.boundingBoxWidth / ls.scale;
                 ls.boundingBoxHeight = ls.boundingBoxHeight / ls.scale;
                 ls.scale = 1.0F;
+                // Always mid-stride: the legs swing, and on a real (server-ticked)
+                // horse this is also when the particle locus emits. setupAnim only
+                // swings the legs once walkAnimationSpeed clears 0.2.
+                ls.walkAnimationSpeed = 1.0F;
+                ls.walkAnimationPos = t * 6.0F;
+                ls.ageInTicks = t * 20.0F;
+            }
+            if (state instanceof EquineRenderState es) {
+                es.animateTail = true;
             }
             Quaternionf rotation = new Quaternionf().rotateZ((float) Math.PI);
-            Quaternionf xRotation = new Quaternionf().rotateX(yAngle * 22.0F * ((float) Math.PI / 180.0F));
+            Quaternionf xRotation = new Quaternionf().rotateX(pitch * ((float) Math.PI / 180.0F));
             rotation.mul(xRotation);
             Vector3f translation = new Vector3f(0.0F, state.boundingBoxHeight / 2.0F + 0.0625F, 0.0F);
             g.entity(state, mScale, translation, rotation, xRotation, x0 + 1, y0 + 1, x1 - 1, y1 - 1);
         } catch (RuntimeException ignored) {
             // a coat that will not bake should not take the editor down with it
+        }
+        drawPreviewParticles(g, x0, y0, x1, y1);
+    }
+
+    /**
+     * Advance and draw the preview's particle cloud - one pass per frame,
+     * wall-clock timed. Spawns from every {@code particle}-kind {@code emitter}
+     * the current genome expresses (epigenetic colour resolved through the
+     * screen's live epigenome), in a band matched loosely to the emitter's
+     * body anchor. Motes are clipped to the preview panel.
+     */
+    private void drawPreviewParticles(GuiGraphicsExtractor g, int x0, int y0, int x1, int y1) {
+        long now = System.nanoTime();
+        float dt = Math.min(0.1f, (now - lastFrameNanos) / 1_000_000_000f);
+        lastFrameNanos = now;
+
+        motes.removeIf(m -> {
+            m.age += dt;
+            m.x += m.vx * dt;
+            m.y += m.vy * dt;
+            m.vy += 14f * dt;            // gentle gravity (px/s^2)
+            m.vx *= (1f - Math.min(1f, 0.9f * dt)); // drag
+            return m.age >= m.life;
+        });
+
+        java.util.List<HorseAbilities.Active> abilities =
+                HorseAbilities.activeFor(genotype(), epigenome);
+        boolean anyEmitter = false;
+        for (HorseAbilities.Active a : abilities) {
+            if (a.ability() instanceof GeneAbility.Emitter e && "particle".equals(e.kind())) {
+                anyEmitter = true;
+                break;
+            }
+        }
+        if (anyEmitter) {
+            emitAccumulator += dt;
+            float period = 0.10f;       // seconds between spawn ticks in the preview
+            int guard = 0;
+            while (emitAccumulator >= period && guard++ < 8) {
+                emitAccumulator -= period;
+                for (HorseAbilities.Active a : abilities) {
+                    if (!(a.ability() instanceof GeneAbility.Emitter e) || !"particle".equals(e.kind())) {
+                        continue;
+                    }
+                    if (previewRng.nextFloat() > Math.max(0.05, e.chance())) {
+                        continue;
+                    }
+                    spawnMotes(e, x0, y0, x1, y1);
+                }
+            }
+        }
+
+        for (Mote m : motes) {
+            float k = 1f - (m.age / m.life);
+            int alpha = Math.max(0, Math.min(255, Math.round(k * 210)));
+            int col = (alpha << 24) | (m.rgb & 0xFFFFFF);
+            int px = Math.round(m.x);
+            int py = Math.round(m.y);
+            if (px < x0 || px > x1 || py < y0 || py > y1) {
+                continue;
+            }
+            int sz = Math.max(1, Math.round(m.size * (0.5f + 0.5f * k)));
+            g.fill(px, py, px + sz, py + sz, col);
+        }
+    }
+
+    private void spawnMotes(GeneAbility.Emitter e, int x0, int y0, int x1, int y1) {
+        if (motes.size() >= MOTE_CAP) {
+            return;
+        }
+        int cx = (x0 + x1) / 2;
+        int hgt = y1 - y0;
+        float yFrac = switch (e.anchor()) {
+            case "head", "eyes" -> 0.42f;
+            case "body" -> 0.58f;
+            case "spine" -> 0.50f;
+            case "tail" -> 0.55f;
+            default -> 0.80f;           // feet / hooves
+        };
+        float baseY = y0 + hgt * yFrac;
+        float spreadX = 26f * previewZoom;
+        float spreadY = 10f * previewZoom;
+        int rgb = (e.color() & 0xFFFFFF) == 0 ? 0xFFFFFF : (e.color() & 0xFFFFFF);
+        int n = Math.max(1, Math.min(6, e.count()));
+        for (int i = 0; i < n && motes.size() < MOTE_CAP; i++) {
+            Mote m = new Mote();
+            m.x = cx + (previewRng.nextFloat() - 0.5f) * 2f * spreadX;
+            m.y = baseY + (previewRng.nextFloat() - 0.5f) * 2f * spreadY;
+            m.vx = (previewRng.nextFloat() - 0.5f) * 20f;
+            m.vy = -6f - previewRng.nextFloat() * 14f;   // drift up, then gravity pulls it down
+            m.age = 0f;
+            m.life = 0.7f + previewRng.nextFloat() * 0.8f;
+            m.size = 1.6f + previewRng.nextFloat() * 1.4f;
+            m.rgb = rgb;
+            motes.add(m);
         }
     }
 
@@ -644,6 +909,41 @@ public final class CustomHorseSpawnScreen extends Screen {
         drawFitted(g, GeneCodeDisplay.shortForm(genotype), LIST_X, this.height - 39, listW - 4, 0xFF88CC88);
         drawFitted(g, "epigenetics #" + Long.toHexString(epigenome.visibleFingerprint(genotype)),
                 LIST_X, this.height - 26, listW - 4, 0xFF8890A8);
+
+        if (ddRow != null) {
+            drawDropdown(g, mouseX, mouseY);
+        }
+    }
+
+    /** The open many-allele picker, drawn last so it sits over the widgets it covers. */
+    private void drawDropdown(GuiGraphicsExtractor g, int mouseX, int mouseY) {
+        List<Allele> as = ddRow.gene.alleles();
+        int h = DD_VISIBLE * DD_ROW_H;
+        g.fill(ddX - 1, ddY - 1, ddX + DD_W + 1, ddY + h + 1, 0xF00E0E16);
+        g.fill(ddX - 1, ddY - 1, ddX + DD_W + 1, ddY, 0xFF5A6478);
+        int cur = ddSlot == 0 ? ddRow.a : ddRow.b;
+        for (int i = 0; i < DD_VISIBLE; i++) {
+            int idx = ddScroll + i;
+            if (idx >= as.size()) {
+                break;
+            }
+            int ry = ddY + i * DD_ROW_H;
+            boolean hov = mouseX >= ddX && mouseX < ddX + DD_W && mouseY >= ry && mouseY < ry + DD_ROW_H;
+            if (idx == cur) {
+                g.fill(ddX, ry, ddX + DD_W, ry + DD_ROW_H, 0x557088FF);
+            } else if (hov) {
+                g.fill(ddX, ry, ddX + DD_W, ry + DD_ROW_H, 0x33FFFFFF);
+            }
+            drawFitted(g, as.get(idx).token(), ddX + 3, ry + 2, DD_W - 10,
+                    idx == cur ? 0xFFFFFFFF : 0xFFC0C4D0);
+        }
+        int max = Math.max(0, as.size() - DD_VISIBLE);
+        if (max > 0) {
+            int barH = Math.max(6, h * DD_VISIBLE / as.size());
+            int barY = ddY + Math.round((h - barH) * (ddScroll / (float) max));
+            g.fill(ddX + DD_W - 2, ddY, ddX + DD_W, ddY + h, 0x40FFFFFF);
+            g.fill(ddX + DD_W - 2, barY, ddX + DD_W, barY + barH, 0xFF8890A8);
+        }
     }
 
     /**

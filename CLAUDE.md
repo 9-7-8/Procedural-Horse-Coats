@@ -139,6 +139,71 @@ project. Its shape:
 
 ## Status snapshot (keep this current)
 
+- **Built 2026-09-05, NOT yet play-tested: spawn-egg preview controls + a
+  many-allele dropdown + a Randomize button; cutie-mark placement/rotation
+  tuned.** `:common:test` unaffected (391), `:neoforge-26.1.2:build` green.
+  Client-only, `CustomHorseSpawnScreen` + `CutieMarkLayer`.
+  - **The preview no longer follows the cursor.** Click-drag over the preview
+    orbits the horse (`previewYaw` / `previewPitch`, pitch clamped
+    &plusmn;80&deg;); scroll-wheel over it zooms (`previewZoom` 0.3&ndash;4x, on
+    top of the size-locus scaling). New `mouseDragged` / `mouseReleased`
+    overrides + a `draggingPreview` flag; `mouseScrolled` gained a preview-zoom
+    branch and a dropdown-scroll branch ahead of the existing list-scroll one.
+  - **The preview horse is always mid-stride** - `walkAnimationSpeed = 1`,
+    `walkAnimationPos` / `ageInTicks` advanced off wall-clock, `animateTail`
+    true.
+  - **Particle emitters now preview.** The real `emitter` translator is
+    server-side (`GeneAbilityHandler`, `EntityTickEvent.Post`, client-guarded)
+    and the preview entity never ticks, so the screen runs its own tiny
+    GUI-space mote system: `drawPreviewParticles` reads every `particle`-kind
+    `emitter` from `HorseAbilities.activeFor(genotype(), epigenome)` (epigenetic
+    colour resolved through the live editor epigenome), spawns coloured 2px
+    motes on a ~0.1s beat in a band keyed loosely to the emitter's body anchor
+    (hooves low, body/spine mid, head high), drifts + fades + clips them to the
+    preview panel, capped at 160. It is a stand-in - a colour-correct cloud
+    round the horse, not world-placed particles - enough to preview "this horse
+    trails something, in this colour". `Mote` is a private nested class;
+    `previewRng` + `lastFrameNanos` + `emitAccumulator` drive it.
+  - **Genes with more than 3 alleles get a dropdown** instead of a cycle button
+    (particle 41, KIT 8, ACAN 5, MITF 4). An in-screen overlay (`ddRow` /
+    `ddSlot` / `ddScroll` / `ddX` / `ddY`, `DD_VISIBLE` 8, `DD_ROW_H` 12,
+    `DD_W` 76), drawn last in `extractRenderState` so it sits over the widgets,
+    with clicks/scroll intercepted at the top of `mouseClicked` / `mouseScrolled`
+    while open. Any click resolves or dismisses it. Genes with &le;3 alleles
+    still cycle.
+  - **`Randomize` button** (right column, under Breed). `applyBreedPreset` was
+    refactored to a shared `applyGenome(Genome, boolean adoptSex)`;
+    `randomizeGenes()` rolls `Genome.random` with **Breed: (none)** or
+    `BreedFounder.roll(breed, rng, sex)` with a breed selected, so the draw
+    stays inside the breed's pools/targets. Keeps the chosen sex; baseline loci
+    don't become added rows.
+  - **Cutie-mark emblem repositioned + de-cluttered.** `CutieMarkLayer` was
+    stamping at body-local `z = -6` (the *centre* of the body box, z&isin;[-17,+5]);
+    it now anchors mid-haunch (`z = 0`), high on the flank (`y = -4`), a touch
+    proud of the `x = &plusmn;5.6/16` side face. Multi-icon marks were
+    overlapping with co-planar **z-fighting** ("weird clipping") and the row was
+    wide enough to spill past the rump: `SPACING` `0.16 -> 0.085` blocks, icons
+    now shrink with the count (`countScale = 1/(1+0.28*(count-1))`), each
+    successive icon steps `DEPTH_STEP = 0.012` blocks toward the viewer so the
+    stack order is unambiguous, and each is fanned `5&deg;` in-plane for a
+    "stacked stickers" read. `layout()` widened its slot pitch to 1.1 and
+    centres the row/triangle on the anchor. Also **the icons were upside down**:
+    entity-model space is drawn rotated 180&deg; about Z, so an item submitted in
+    `ItemDisplayContext.FIXED` came out inverted - a `+ (float) Math.PI` on the
+    existing `Axis.ZP` tilt rotation spins it upright in its own plane
+    (rotation, not reflection, so no mirroring). Still first-guess constants;
+    checklist `wiki/verification.html` &sect;0-D.
+  - **Not done: baking the cutie mark into the coat texture.** The owner asked
+    whether the emblem could be stamped into the 128px coat bake instead of the
+    3D item render. Left as the render layer: per-frame it is not a measured
+    problem (cutie-mark horses are ~0.36% of the population), and a 16px item
+    icon stamped onto the ~14-texel flank region would be lower fidelity than
+    the current item models; the bake path also needs a new cache-key branch
+    (the gene is a wild type, out of `textureKey()`) and item-atlas pixel
+    extraction (multi-layer item models, per-side mirroring) that can't be
+    verified without a play session. A follow-up if the stamp look is wanted
+    after the reposition is seen in-game.
+
 - **Built 2026-09-05, NOT yet play-tested: name-tag rename window.** Right-clicking
   a horse (with a real record) with **any** name tag - not just an anvil-renamed
   one - now opens `client/HorseRenameScreen`: two fields (first / last name)

@@ -943,11 +943,28 @@
         (custom spawn egg &rarr; add the gene; it defaults to the homozygote):
         an emblem of item icons should appear on <em>both</em> flanks, and it
         should still show over a dominant-white or heavily-splashed horse.</li>
-    <li><strong>Placement / scale</strong> &mdash; the offset is a first guess
-        (fixed offset out from the animated body part). Check it sits on the
-        barrel, not floating off it or buried in it, at rest and while walking,
-        adult and foal, and at different <code>SCALE</code> (a magic-size horse).
-        Report where it actually lands so the constants can be tuned.</li>
+    <li><strong>Placement / scale</strong> &mdash; reworked twice on 2026-09-05.
+        Now anchored <strong>mid-haunch</strong> (body-local
+        <code>z&nbsp;&asymp;&nbsp;0</code>), high on the flank
+        (<code>y&nbsp;&asymp;&nbsp;-4</code>). Check it sits on the hindquarter
+        &mdash; not mid-barrel, not floating off it or buried in it, and
+        <strong>nothing spilling past the rump or the belly line</strong> &mdash;
+        at rest and while walking, adult and foal, and at different
+        <code>SCALE</code> (a magic-size horse). Report where it actually lands.</li>
+    <li><strong>Multi-icon layout</strong> (2&ndash;3 items) &mdash; icons now
+        <strong>shrink with the count</strong>, sit closer together
+        (<code>SPACING</code> 0.16&nbsp;&rarr;&nbsp;0.085), each steps a little
+        toward the viewer (<code>DEPTH_STEP</code>) and is fanned 5&deg;, so it
+        should read as a clean <strong>stack of stickers</strong> with an obvious
+        top one &mdash; not the old co-planar z-fighting / clipping. Re-roll
+        epigenetics to see 1&rarr;3 and row vs triangle.</li>
+    <li><strong>Orientation</strong> &mdash; the icons were rendering
+        <em>upside down</em>; a <code>+PI</code> in-plane spin was added
+        (2026-09-05) to counter entity-model space being drawn rotated 180&deg;
+        about Z. Confirm the item icons now read upright (and not
+        mirrored/back-to-front) on <em>both</em> flanks. If the stack order looks
+        <em>reversed</em> (top icon at the back), the <code>DEPTH_STEP</code>
+        sign needs flipping.</li>
     <li><strong>Row vs triangle</strong>: re-roll epigenetics (spawn egg button)
         to cycle count 1&rarr;3 and the row/triangle layout.</li>
     <li><strong>The item pool</strong>: block items should never appear (they'd
@@ -1560,8 +1577,25 @@
         &ldquo;Dominant white&rdquo;) and the name turns green; cycle it back to
         baseline and it reads <code>no effect</code>. That is the expression prose
         finally being read by something.</li>
-    <li><strong>The preview redraws as you edit</strong>, turns to follow the cursor,
-        and switches between the adult and foal model with the Age button.</li>
+    <li><strong>The preview redraws as you edit</strong> and switches between the
+        adult and foal model with the Age button. <strong>Controls changed
+        2026-09-05</strong>: the horse no longer follows the cursor &mdash;
+        <strong>click-drag over the preview to orbit</strong> it (yaw + pitch,
+        pitch clamped &plusmn;80&deg;) and <strong>scroll-wheel over the preview
+        to zoom</strong> (0.3&ndash;4&times;, on top of the size-locus scaling).
+        The horse is <strong>always mid-stride</strong> now &mdash; legs swinging,
+        tail animating.</li>
+    <li><strong>Particle emitters preview</strong> (new 2026-09-05). Add a
+        <code>particle</code> gene (or spawn Waterborn / Suntouched) and a cloud
+        of coloured motes should drift round the horse in the emitter's colour
+        &mdash; low round the hooves for a feet anchor, mid-body for
+        <code>body</code>/<code>spine</code>. It is a <strong>GUI stand-in</strong>,
+        not a real particle (the emitter translator is server-side and the
+        preview horse never ticks): check the <em>colour</em> is right (the
+        particle locus draws it from the epigenome &mdash; Reroll epi. should
+        change it) and that it does not leak outside the preview panel or tank
+        the frame rate. It does not track the model when you orbit/zoom &mdash;
+        it stays a band round the panel centre.</li>
     <li><strong>Reroll epi.</strong> changes the preview <em>without</em> changing the
         genotype &mdash; watch bay leg heights, grey dapples or a splash edge move. The
         <code>epigenetics #</code> line under the list changes with it.</li>
@@ -1577,8 +1611,21 @@
     <li><strong>Creative only, server-checked.</strong> In survival, Spawn must do
         nothing but print &ldquo;the custom spawn egg is a creative-mode tool&rdquo;.
         The egg is no longer consumed in survival, because it no longer works there.</li>
-    <li>A gene with many alleles (KIT has eight) cycles through all of them on repeat
-        clicks &mdash; tedious by design, but confirm it wraps rather than sticking.</li>
+    <li><strong>Many-allele genes use a dropdown</strong> (new 2026-09-05). A gene
+        with <strong>more than 3 alleles</strong> (particle&nbsp;41, KIT&nbsp;8,
+        ACAN&nbsp;5, MITF&nbsp;4) &mdash; clicking either allele button opens a
+        scrollable list (8 visible, wheel to scroll, thin scrollbar) anchored at
+        the button; click a token to set it, click anywhere else to dismiss.
+        Genes with 3 or fewer alleles still cycle on click. Check the particle
+        list is usable (was 41 clicks) and that the panel clamps on-screen for a
+        gene low in the list.</li>
+    <li><strong>Randomize</strong> button (new 2026-09-05, right column under
+        Breed). With <strong>Breed: (none)</strong> it rolls a fully random
+        genome (<code>Genome.random</code>); with a breed selected it rolls a
+        fresh founder of that breed (<code>BreedFounder.roll</code>) so the
+        alleles stay inside the breed's pools. The chosen Mare/Stallion is kept.
+        Loci left at baseline don't appear as added rows. The epigenetics number
+        changes too.</li>
 </ul>
 
 <h3>7. The old spawn-egg follow-ups, re-check after the rebuild</h3>
