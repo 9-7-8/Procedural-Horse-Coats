@@ -41,8 +41,36 @@ window.HG = window.HG || {};
         },
         { id: "wild", name: "Wild type", description: "No effect.", wildType: true }
       ],
-      founders: { "My/My": 0.5, "My/my": 4.5, "my/my": 95.0 }
+      founders: { "My/My": 0.5, "My/my": 4.5, "my/my": 95.0 },
+      // Format-3 gameplay metadata. Held at the documented defaults so the
+      // forms have something to bind to; tidy() drops whatever is still
+      // default, so a gene that ignores all of this still exports a short file.
+      blurb: "",
+      rarity: DEFAULT_RARITY,
+      carrot: defaultCarrot(),
+      splice: null
     };
+  }
+
+  /** The six GeneRarity tiers, ascending. A gene that declares none is UNCOMMON. */
+  var RARITIES = ["common", "uncommon", "rare", "epic", "legendary", "mythic"];
+  var DEFAULT_RARITY = "uncommon";
+
+  function defaultCarrot() {
+    return { enabled: true, behaviour: "heterozygous", flavour: [] };
+  }
+
+  function carrotIsDefault(c) {
+    return !c || (c.enabled !== false
+      && (c.behaviour || "heterozygous") === "heterozygous"
+      && !(c.flavour || []).length);
+  }
+
+  /** Does this splice table say anything, or is it an empty form? */
+  function spliceIsSet(spec) {
+    var t = spec.splice;
+    if (!t) return false;
+    return Object.keys(t).some(function (c) { return Number(t[c]) > 0; });
   }
 
   /** The one outcome the forms edit - the first non-wild-type entry. */
@@ -106,8 +134,9 @@ window.HG = window.HG || {};
     if (a.length < 2) return;
     var mode = showsWhen(spec);
     var weights = {};
+    var oldCombos = null;
     if (oldTokens && oldTokens.length === a.length) {
-      var oldCombos = HG.specEngine.combinations({
+      oldCombos = HG.specEngine.combinations({
         alleles: oldTokens.map(function (t) { return { token: t }; })
       });
       var newCombos = combinations(spec);
@@ -121,6 +150,18 @@ window.HG = window.HG || {};
       out[c] = weights[c] === undefined ? 0 : weights[c];
     });
     spec.founders = out;
+    // The splice table is keyed by combination too, so a rename orphans it the
+    // same way - and silently, since it is optional and the game would just
+    // reject the file.
+    if (spec.splice) {
+      var moved = {};
+      combinations(spec).forEach(function (c, i) {
+        var was = oldCombos ? oldCombos[i] : undefined;
+        moved[c] = (was !== undefined && spec.splice[was] !== undefined)
+          ? spec.splice[was] : 0;
+      });
+      spec.splice = moved;
+    }
   }
 
   function newLayer(phase) {
@@ -154,6 +195,104 @@ window.HG = window.HG || {};
     return p.initial === undefined ? p.fallback : p.initial;
   }
 
+  // ---- effects ----------------------------------------------------------
+  //
+  // The gameplay half of an outcome: what a horse carrying it DOES. Effects
+  // hang off the expression, not off the gene, so a homozygote and a carrier
+  // can grant entirely different behaviour with nothing comparing doses.
+
+  function effectsOf(spec) {
+    var e = visible(spec);
+    if (e && !e.effects) e.effects = [];
+    return e ? e.effects : [];
+  }
+
+  function newEffect(verb) {
+    var effect = { type: verb };
+    (schema.EFFECTS[verb].params || []).forEach(function (p) {
+      // A required parameter has no default the game could fall back on, so it
+      // starts at the first legal choice rather than blank - a fresh effect
+      // should export as something the game will load.
+      if (p.required && p.choices) effect[p.name] = p.choices[0];
+      else if (p.required) effect[p.name] = "";
+      else if (p.kind === "PARTS") effect[p.name] = [];
+      else if (p.kind === "TRIGGER") effect[p.name] = cloneValue(p.fallback);
+      else effect[p.name] = p.fallback;
+    });
+    return effect;
+  }
+
+  function cloneValue(v) {
+    return (v && typeof v === "object") ? JSON.parse(JSON.stringify(v)) : v;
+  }
+
+  /**
+   * Can the simple form edit this condition? It handles a single flag and a
+   * flat all/any of flags, each optionally negated - which is every condition
+   * any shipped gene uses. A nested tree is preserved verbatim and shown
+   * read-only rather than silently flattened.
+   */
+  function simpleCondition(when) {
+    if (!when || !Object.keys(when).length) return { mode: "all", flags: [] };
+    if (when.flag) return { mode: "all", flags: [{ flag: when.flag, negate: !!when.negate }] };
+    var key = when.all ? "all" : (when.any ? "any" : null);
+    if (!key || !Array.isArray(when[key])) return null;
+    var flags = [];
+    for (var i = 0; i < when[key].length; i++) {
+      var t = when[key][i];
+      if (!t || !t.flag) return null;
+      var extra = Object.keys(t).filter(function (k) { return k !== "flag" && k !== "negate"; });
+      if (extra.length) return null;
+      flags.push({ flag: t.flag, negate: !!t.negate });
+    }
+    return { mode: key, flags: flags };
+  }
+
+  /** The simple form back to the file's shape - and to nothing at all when empty. */
+  function buildCondition(simple) {
+    var flags = (simple.flags || []).filter(function (f) { return f.flag; });
+    if (!flags.length) return undefined;
+    function term(f) {
+      var t = { flag: f.flag };
+      if (f.negate) t.negate = true;
+      return t;
+    }
+    if (flags.length === 1 && simple.mode !== "any") return term(flags[0]);
+    var out = {};
+    out[simple.mode === "any" ? "any" : "all"] = flags.map(term);
+    return out;
+  }
+
+  function tidyEffect(effect) {
+    var def = schema.EFFECTS[effect.type];
+    var out = { type: effect.type };
+    if (!def) return Object.assign(out, effect);
+    def.params.forEach(function (p) {
+      var v = effect[p.name];
+      if (v === undefined || v === null) return;
+      if (p.kind === "PARTS") {
+        if (v.length) out[p.name] = v.slice();
+        return;
+      }
+      if (p.kind === "TRIGGER") {
+        // Only when it differs from the verb's own default trigger.
+        if (JSON.stringify(v) !== JSON.stringify(p.fallback)) out[p.name] = cloneValue(v);
+        return;
+      }
+      if (p.kind === "NUMBER") {
+        if (!p.required && Math.abs(Number(v) - Number(p.fallback)) < 1e-12) return;
+        out[p.name] = num(v);
+        return;
+      }
+      if (!p.required && String(v) === String(p.fallback)) return;
+      if (v === "" && !p.required) return;
+      out[p.name] = v;
+    });
+    if (effect.when && Object.keys(effect.when).length) out.when = cloneValue(effect.when);
+    if (Number(effect.minDose) === 2) out.minDose = 2;
+    return out;
+  }
+
   function newKnob(spec, type) {
     var base = type === "seed" ? "seed" : "amount";
     var name = base, i = 2;
@@ -178,11 +317,15 @@ window.HG = window.HG || {};
       key: spec.key,
       name: spec.name,
       phase: spec.phase,
-      priority: Number(spec.priority),
-      alleles: alleles.map(function (a) {
-        return a.label ? { token: a.token, label: a.label } : { token: a.token };
-      })
+      priority: Number(spec.priority)
     };
+    // Header metadata, emitted only when it says something the game would not
+    // already assume - a gene that leaves the economy alone stays a short file.
+    if (spec.blurb && spec.blurb.trim()) out.blurb = spec.blurb.trim();
+    if (spec.rarity && spec.rarity !== DEFAULT_RARITY) out.rarity = spec.rarity;
+    out.alleles = alleles.map(function (a) {
+      return a.label ? { token: a.token, label: a.label } : { token: a.token };
+    });
     if (knobs.length) {
       out.knobs = knobs.map(function (k) {
         if (k.type === "seed") return { name: k.name, type: "seed" };
@@ -207,7 +350,7 @@ window.HG = window.HG || {};
             op: tidyOp(layer.op)
           };
         });
-        if (e.effects && e.effects.length) entry.effects = e.effects;
+        if (e.effects && e.effects.length) entry.effects = e.effects.map(tidyEffect);
       }
       return entry;
     });
@@ -215,6 +358,22 @@ window.HG = window.HG || {};
     Object.keys(spec.founders || {}).forEach(function (c) {
       out.founders[c] = num(spec.founders[c]);
     });
+    // What the Unknown Gene Splice carrot rolls on this gene. Same shape as
+    // founders and kept as its own key so the two can differ; omitted entirely
+    // when the author left it alone, which means "draw uniformly".
+    if (spliceIsSet(spec)) {
+      out.splice = {};
+      combinations(spec).forEach(function (c) {
+        out.splice[c] = num((spec.splice || {})[c] || 0);
+      });
+    }
+    if (!carrotIsDefault(spec.carrot)) {
+      var c = spec.carrot;
+      out.carrot = { enabled: c.enabled !== false };
+      if ((c.behaviour || "heterozygous") !== "heterozygous") out.carrot.behaviour = c.behaviour;
+      var flavour = (c.flavour || []).filter(function (f) { return f && f.trim(); });
+      if (flavour.length) out.carrot.flavour = flavour.map(function (f) { return f.trim(); });
+    }
     return out;
   }
 
@@ -327,6 +486,52 @@ window.HG = window.HG || {};
     names.forEach(function (n, i) {
       if (names.indexOf(n) !== i) out.push("Two knobs are named \"" + n + "\".");
     });
+    effectsOf(spec).forEach(function (effect, i) {
+      var where = "Effect " + (i + 1) + " (" + effect.type + ")";
+      var def = schema.EFFECTS[effect.type];
+      if (!def) {
+        out.push(where + ": there is no such effect verb.");
+        return;
+      }
+      def.params.forEach(function (p) {
+        if (!p.required) return;
+        var v = effect[p.name];
+        if (v === undefined || v === null || String(v).trim() === "") {
+          out.push(where + ": " + p.name + " is required and has no default.");
+        } else if (p.choices && p.choices.indexOf(v) < 0) {
+          out.push(where + ": " + p.name + " must be one of " + p.choices.join(", ") + ".");
+        }
+      });
+      // A yield with nothing to give and no denial is a no-op that also
+      // swallows the interaction - the shape gap #25 was about.
+      if (effect.type === "yield" && !String(effect.produces || "").trim()
+        && !Number(effect.denied_damage) && !String(effect.denied_message || "").trim()) {
+        out.push(where + ": it produces nothing and has no denial damage or message, so "
+          + "right-clicking the horse would do nothing at all - and still not mount it.");
+      }
+      if (effect.type === "glow" && !Number(effect.light) && !(effect.parts || []).length) {
+        out.push(where + ": light is 0 and no parts glow, so it does nothing.");
+      }
+      if (simpleCondition(effect.when) === null) {
+        out.push(where + ": its \"when\" is a nested condition this editor cannot show. "
+          + "It is preserved exactly as loaded - edit it in the JSON.");
+      }
+    });
+    if (spec.rarity && RARITIES.indexOf(spec.rarity) < 0) {
+      out.push("Rarity must be one of " + RARITIES.join(", ") + " - got \"" + spec.rarity + "\".");
+    }
+    // An all-zero splice table is a load error, not a no-op: the game reads the
+    // key as present and then finds no combination it may roll.
+    if (spec.splice && Object.keys(spec.splice).length && !spliceIsSet(spec)) {
+      out.push("Every splice share is zero, so the splice carrot could never land on this "
+        + "gene. Give one combination a share, or turn the splice table off.");
+    }
+    (((spec.carrot || {}).flavour) || []).forEach(function (f, i) {
+      if (f && f.trim() && !/^[a-z0-9_.-]+:[a-z0-9_./-]+$/.test(f.trim())) {
+        out.push("Carrot flavour " + (i + 1) + " (\"" + f + "\") is not an item id - "
+          + "it wants \"namespace:path\", e.g. \"minecraft:sugar\".");
+      }
+    });
     return out;
   }
 
@@ -360,6 +565,16 @@ window.HG = window.HG || {};
     toJson: toJson,
     fileName: fileName,
     problems: problems,
-    knobUses: knobUses
+    knobUses: knobUses,
+    effectsOf: effectsOf,
+    newEffect: newEffect,
+    tidyEffect: tidyEffect,
+    simpleCondition: simpleCondition,
+    buildCondition: buildCondition,
+    RARITIES: RARITIES,
+    DEFAULT_RARITY: DEFAULT_RARITY,
+    defaultCarrot: defaultCarrot,
+    carrotIsDefault: carrotIsDefault,
+    spliceIsSet: spliceIsSet
   };
 })(window.HG);

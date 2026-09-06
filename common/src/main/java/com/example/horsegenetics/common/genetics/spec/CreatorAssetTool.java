@@ -96,6 +96,16 @@ public final class CreatorAssetTool {
             entries.add("  " + quote(example[1]) + ": " + json.replace("\n", "\n  "));
         }
         sb.append(String.join(",\n", entries)).append("\n};\n");
+        // Which file each example came from. The parity fixtures name a gene by
+        // its file name and the menu above is keyed by label, so the in-page
+        // self-check needs the two joined up.
+        sb.append("\n// Example label by source file - the key the parity fixtures use.\n");
+        sb.append("window.HG.exampleFiles = {\n");
+        List<String> sources = new ArrayList<>();
+        for (String[] example : EXAMPLES) {
+            sources.add("  " + quote(example[0]) + ": " + quote(example[1]));
+        }
+        sb.append(String.join(",\n", sources)).append("\n};\n");
         Files.writeString(out, sb.toString(), StandardCharsets.UTF_8);
         System.out.println("wrote " + out.toAbsolutePath() + " (" + EXAMPLES.length + " examples)");
     }

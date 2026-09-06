@@ -105,8 +105,12 @@ window.HG = window.HG || {};
       LEFT: { u0: u3, u1: u2, uUsesA: true, v0: v2, v1: v1, vUsesA: false },
       NOSE: { u0: u2, u1: u1, uUsesA: true, v0: v2, v1: v1, vUsesA: false },
       TAIL: { u0: u3, u1: u4, uUsesA: true, v0: v2, v1: v1, vUsesA: false },
-      TOP: { u0: u2b, u1: u2, uUsesA: false, v0: v0, v1: v1, vUsesA: true },
-      BOTTOM: { u0: u2, u1: u1, uUsesA: false, v0: v0, v1: v1, vUsesA: true }
+      // TOP is the face at body-space yMax (the horse's spine / topline); BOTTOM
+      // is at yMin (the belly). These two UV patches were the wrong way round -
+      // a painter that whitened "from below" (splash, sabino belly, frame off
+      // the underline) was flooding the back, and the belly stayed coloured.
+      TOP: { u0: u2, u1: u1, uUsesA: false, v0: v0, v1: v1, vUsesA: true },
+      BOTTOM: { u0: u2b, u1: u2, uUsesA: false, v0: v0, v1: v1, vUsesA: true }
     };
   }
 
@@ -149,6 +153,12 @@ window.HG = window.HG || {};
       parts: parts,
       bodyBounds: boundsOf(lo, hi),
       partNames: rows.map(function (r) { return r.part; }),
+      // The two model-space maxima the model -> body flip is measured from:
+      // bodyX = modelMax.z - mz, bodyY = modelMax.y - my, bodyZ = -mx. The
+      // bounds above already have this applied; keeping the constants lets the
+      // 3D preview put the *unflattened* cuboid corners in the same space,
+      // which the rest-pose AABB cannot express for a pitched part.
+      modelMax: { y: myMaxAll, z: mzMaxAll },
       grid: null
     };
     mesh.grid = buildGrid(mesh);
@@ -218,6 +228,17 @@ window.HG = window.HG || {};
     },
 
     bodyBounds: function (skin) { return this.mesh(skin).bodyBounds; },
+
+    /**
+     * Model space -> body space for a single point, the same flip buildMesh
+     * applies to every part's AABB. The pipeline never needs this (it works in
+     * body space throughout); the 3D preview does, because it draws the real
+     * rotated cuboid rather than the box that encloses it.
+     */
+    toBody: function (skin, mx, my, mz) {
+      var m = this.mesh(skin).modelMax;
+      return { x: m.z - mz, y: m.y - my, z: -mx };
+    },
 
     /** The sample at a texel, or null where this skin maps nothing. */
     sample: function (skin, px, py) {

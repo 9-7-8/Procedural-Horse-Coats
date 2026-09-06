@@ -218,3 +218,11 @@ window.HG.examples = {
     }
   }
 };
+
+// Example label by source file - the key the parity fixtures use.
+window.HG.exampleFiles = {
+  "silver.json": "Silver dapple (dilution, no randomness)",
+  "dun.json": "Dun (dilution + dorsal stripe + leg bars)",
+  "tobiano.json": "Tobiano (white patches, dose-sensitive)",
+  "aurora.json": "Aurora (magical, recessive)"
+};

@@ -83,6 +83,69 @@ window.HG = window.HG || {};
     return el("button", { type: "button", class: cls || "btn", text: label, onclick: onClick });
   }
 
+  function textarea(value, onChange, rows) {
+    var box = el("textarea", { rows: rows || 3, spellcheck: "false" });
+    box.value = value || "";
+    box.addEventListener("input", function () { onChange(box.value); });
+    return box;
+  }
+
+  /**
+   * An editable list of strings - one row each, plus an add button. Used for
+   * the carrot's flavour ingredients, which is a list of item ids.
+   */
+  function stringList(list, placeholder, onChange) {
+    var wrap = el("div", { class: "stack" });
+    list.forEach(function (item, i) {
+      var input = el("input", { type: "text", value: item || "", placeholder: placeholder });
+      input.addEventListener("input", function () { list[i] = input.value; onChange(); });
+      wrap.appendChild(el("div", { class: "row" }, [
+        input,
+        button("x", function () { list.splice(i, 1); onChange(); }, "btn small danger")
+      ]));
+    });
+    wrap.appendChild(button("+ add", function () { list.push(""); onChange(); }, "btn small"));
+    return wrap;
+  }
+
+  // ---- keeping the caret ------------------------------------------------
+  //
+  // Every edit re-renders both panels from scratch, which destroys the input
+  // the user is typing into - so a text field used to accept exactly one
+  // character per click. Rather than make the render incremental, remember
+  // where the caret was by its position in the panel's own tree and put it
+  // back: a pure text edit does not change that tree's shape, so the path
+  // still names the same field.
+
+  function focusPath(root) {
+    var active = document.activeElement;
+    if (!root || !active || !root.contains(active)) return null;
+    var path = [], node = active;
+    while (node && node !== root) {
+      path.unshift(Array.prototype.indexOf.call(node.parentNode.childNodes, node));
+      node = node.parentNode;
+    }
+    if (node !== root) return null;
+    var start = null, end = null;
+    // A number input throws on selectionStart in some browsers; the caret in
+    // one is not worth a broken render.
+    try { start = active.selectionStart; end = active.selectionEnd; } catch (e) { /* not text */ }
+    return { path: path, start: start, end: end };
+  }
+
+  function restoreFocus(root, saved) {
+    if (!root || !saved) return;
+    var node = root;
+    for (var i = 0; i < saved.path.length; i++) {
+      node = node.childNodes[saved.path[i]];
+      if (!node) return;
+    }
+    if (typeof node.focus !== "function") return;
+    node.focus();
+    if (saved.start === null || !node.setSelectionRange) return;
+    try { node.setSelectionRange(saved.start, saved.end); } catch (e) { /* not text */ }
+  }
+
   // ---- value editor ----------------------------------------------------
   //
   // Every numeric parameter can be four things. Rather than hide that, the
@@ -286,6 +349,8 @@ window.HG = window.HG || {};
       text: "Total: " + (Math.round(total * 1000) / 1000) + "%"
     }));
 
+    renderGameplay(root, spec);
+
     root.appendChild(el("h3", { text: "Alleles" }));
     root.appendChild(el("p", {
       class: "hint",
@@ -348,6 +413,96 @@ window.HG = window.HG || {};
       button("+ range knob", function () { spec.knobs.push(model.newKnob(spec, "range")); changed(); }, "btn small"),
       button("+ seed knob", function () { spec.knobs.push(model.newKnob(spec, "seed")); changed(); }, "btn small")
     ]));
+  }
+
+  /**
+   * The format-3 gameplay metadata: what the gene database says about this
+   * gene, how rare it is, and what the two splice carrots do with it. All of it
+   * is optional - the export drops anything still at its default - but it used
+   * to be hand-written JSON only, which is why a drop-in gene shipped without
+   * a blurb and at whatever rarity the game assumed.
+   */
+  function renderGameplay(root, spec) {
+    root.appendChild(el("h3", { text: "Gameplay" }));
+    root.appendChild(el("p", {
+      class: "hint",
+      text: "Everything here is optional and everything here has a sensible "
+        + "default, so a gene that ignores it still exports a short file."
+    }));
+
+    root.appendChild(field("Blurb",
+      textarea(spec.blurb || "", function (v) { spec.blurb = v; changed(); }, 3),
+      "a paragraph the Horse Browser's gene database shows once the gene is discovered"));
+
+    root.appendChild(field("Rarity", select(
+      model.RARITIES.map(function (r) {
+        return { value: r, label: r.charAt(0).toUpperCase() + r.slice(1)
+          + (r === model.DEFAULT_RARITY ? " (default)" : "") };
+      }), spec.rarity || model.DEFAULT_RARITY,
+      function (v) { spec.rarity = v; changed(); }),
+      "sets the gene carrot's rarity ingredient and how often a research paper "
+        + "for it turns up in loot"));
+
+    // ---- the Known Gene Splice carrot ----------------------------------
+    var carrot = spec.carrot = spec.carrot || model.defaultCarrot();
+    root.appendChild(field("Has a gene carrot",
+      checkbox(carrot.enabled !== false, function (v) { carrot.enabled = v; changed(); }),
+      "off means the Known Gene Splice carrot cannot be made for this gene at all"));
+
+    if (carrot.enabled !== false) {
+      root.appendChild(field("The carrot gives", select([
+        { value: "heterozygous", label: "one copy" },
+        { value: "homozygous", label: "two copies" }
+      ], carrot.behaviour || "heterozygous", function (v) { carrot.behaviour = v; changed(); }),
+        carrot.behaviour === "homozygous"
+          ? "a foal fed this gets the gene expressing outright"
+          : "a foal fed this becomes a carrier"));
+
+      carrot.flavour = carrot.flavour || [];
+      root.appendChild(field("Extra recipe items",
+        stringList(carrot.flavour, "minecraft:sugar", changed),
+        "item ids added to this gene's carrot recipe on top of the four the "
+          + "recipe always takes; leave empty for none"));
+    }
+
+    // ---- the Unknown Gene Splice carrot --------------------------------
+    //
+    // Absent means "draw uniformly over every combination this gene can have",
+    // which for a gene with a nasty homozygote is not what you want.
+    var hasSplice = !!spec.splice;
+    root.appendChild(field("Own splice distribution",
+      checkbox(hasSplice, function (v) {
+        if (!v) { spec.splice = null; changed(); return; }
+        // Start from the founder shares: the honest first guess, and it makes
+        // the shape of the table obvious.
+        var seeded = {};
+        model.combinations(spec).forEach(function (c) {
+          seeded[c] = Number((spec.founders || {})[c]) || 0;
+        });
+        spec.splice = seeded;
+        changed();
+      }),
+      hasSplice
+        ? "what the Unknown Gene Splice carrot rolls when it lands on this gene"
+        : "off means the random splice draws evenly over every combination this "
+          + "gene can carry"));
+
+    if (hasSplice) {
+      var spliceTotal = 0;
+      model.combinations(spec).forEach(function (c) {
+        spliceTotal += Number(spec.splice[c]) || 0;
+        root.appendChild(field(c, number(spec.splice[c] || 0, function (v) {
+          spec.splice[c] = Number(v);
+          changed();
+        }, { min: 0, step: 0.001 }), "% of splices"));
+      });
+      root.appendChild(el("p", {
+        class: spliceTotal > 0 ? "hint" : "hint warn",
+        text: spliceTotal > 0
+          ? "Total: " + (Math.round(spliceTotal * 1000) / 1000) + "%"
+          : "Every share is zero - the game will refuse the file."
+      }));
+    }
   }
 
   function renderLayers() {
@@ -427,6 +582,178 @@ window.HG = window.HG || {};
     }, "btn"));
   }
 
+  // ---- effects ----------------------------------------------------------
+
+  function renderEffects() {
+    var spec = state.spec;
+    var root = $("effects-panel");
+    root.innerHTML = "";
+    var effects = model.effectsOf(spec);
+
+    effects.forEach(function (effect, i) {
+      var def = schema.EFFECTS[effect.type];
+      var card = el("div", { class: "layer" });
+      card.appendChild(el("div", { class: "layer-head" }, [
+        el("strong", { text: effect.type }),
+        button("x", function () { effects.splice(i, 1); changed(); }, "btn small danger")
+      ]));
+      if (def) card.appendChild(el("p", { class: "hint", text: def.doc }));
+
+      card.appendChild(field("Effect", select(
+        Object.keys(schema.EFFECTS).map(function (v) { return { value: v, label: v }; }),
+        effect.type, function (v) {
+          if (v === effect.type) return;
+          effects[i] = model.newEffect(v);
+          changed();
+        })));
+
+      (def ? def.params : []).forEach(function (p) {
+        card.appendChild(effectParamRow(effect, p));
+      });
+
+      card.appendChild(field("Needs two copies",
+        checkbox(Number(effect.minDose) === 2, function (v) {
+          effect.minDose = v ? 2 : 1;
+          changed();
+        }),
+        "off means any expressing copy grants it"));
+
+      card.appendChild(conditionEditor(effect));
+      root.appendChild(card);
+    });
+
+    var picker = select(
+      [{ value: "", label: "+ add an effect…" }].concat(
+        Object.keys(schema.EFFECTS).map(function (v) { return { value: v, label: v }; })),
+      "", function (v) {
+        if (!v) return;
+        effects.push(model.newEffect(v));
+        changed();
+      });
+    root.appendChild(picker);
+  }
+
+  function effectParamRow(effect, p) {
+    if (p.kind === "PARTS") {
+      return field(p.name, partsEditor(effect, changed), p.doc);
+    }
+    if (p.kind === "TRIGGER") {
+      return triggerEditor(effect, p);
+    }
+    if (p.kind === "CHOICE") {
+      return field(p.name, select(p.choices, effect[p.name] === undefined ? p.fallback : effect[p.name],
+        function (v) { effect[p.name] = v; changed(); }), p.doc);
+    }
+    if (p.kind === "COLOR") {
+      var picker = el("input", { type: "color", value: effect[p.name] || p.fallback });
+      picker.addEventListener("input", function () { effect[p.name] = picker.value; changed(); });
+      return field(p.name, picker, p.doc);
+    }
+    if (p.kind === "NUMBER") {
+      var ui = p.ui || { min: 0, max: 100, step: 1 };
+      return field(p.name, number(effect[p.name] === undefined ? p.fallback : effect[p.name],
+        function (v) { effect[p.name] = v === "" ? p.fallback : Number(v); changed(); },
+        { min: ui.min, max: ui.max, step: ui.step }), p.doc);
+    }
+    return field(p.name, text(effect[p.name] === undefined ? p.fallback : effect[p.name],
+      function (v) { effect[p.name] = v; changed(); }), p.doc);
+  }
+
+  /**
+   * A trigger is one of four shapes, two of which carry a value. Written as a
+   * kind picker plus the value that kind needs, so the file's union type does
+   * not leak into the form as raw JSON.
+   */
+  function triggerEditor(effect, p) {
+    var current = effect[p.name] || p.fallback || { on_move: true };
+    var kind = typeof current === "string" ? current : Object.keys(current)[0];
+    var wrap = el("div", { class: "row" });
+    wrap.appendChild(select(schema.TRIGGER_KINDS.map(function (k) { return { value: k, label: k }; }),
+      kind, function (v) {
+        if (v === "interval") effect[p.name] = { interval: 40 };
+        else if (v === "on_interact") effect[p.name] = { on_interact: "" };
+        else { effect[p.name] = {}; effect[p.name][v] = true; }
+        changed();
+      }));
+    if (kind === "interval") {
+      wrap.appendChild(number(current.interval, function (v) {
+        effect[p.name] = { interval: Math.max(1, Number(v) || 1) };
+        changed();
+      }, { min: 1, step: 1, class: "narrow" }));
+      wrap.appendChild(el("span", { class: "hint", text: "ticks" }));
+    } else if (kind === "on_interact") {
+      var box = el("input", { type: "text", value: current.on_interact || "",
+        placeholder: "minecraft:bucket (empty = any item)" });
+      box.addEventListener("input", function () {
+        effect[p.name] = { on_interact: box.value };
+        changed();
+      });
+      wrap.appendChild(box);
+    }
+    return field(p.name, wrap, p.doc);
+  }
+
+  /**
+   * The "when" gate. The full format is a recursive tree; this form covers a
+   * flat ALL/ANY of (optionally negated) flags, which is every condition any
+   * shipped gene actually uses. Anything more nested is left exactly as loaded
+   * and shown read-only, because silently flattening someone's condition is
+   * worse than declining to edit it.
+   */
+  function conditionEditor(effect) {
+    var simple = model.simpleCondition(effect.when);
+    if (simple === null) {
+      return field("Only when", el("div", {}, [
+        el("code", { class: "frozen", text: JSON.stringify(effect.when) }),
+        el("span", { class: "hint", text: "a nested condition - kept exactly as loaded; "
+          + "edit it in the JSON" })
+      ]));
+    }
+    var wrap = el("div", { class: "stack" });
+    if (simple.flags.length > 1) {
+      wrap.appendChild(select([
+        { value: "all", label: "all of these hold" },
+        { value: "any", label: "any of these holds" }
+      ], simple.mode, function (v) {
+        simple.mode = v;
+        effect.when = model.buildCondition(simple);
+        changed();
+      }));
+    }
+    simple.flags.forEach(function (f, i) {
+      var row = el("div", { class: "row" });
+      row.appendChild(select(schema.CONDITION_FLAGS.map(function (c) {
+        return { value: c, label: c };
+      }), f.flag, function (v) {
+        simple.flags[i].flag = v;
+        effect.when = model.buildCondition(simple);
+        changed();
+      }));
+      var neg = el("label", { class: "inline" }, [
+        checkbox(f.negate, function (v) {
+          simple.flags[i].negate = v;
+          effect.when = model.buildCondition(simple);
+          changed();
+        }),
+        el("span", { text: "not" })
+      ]);
+      row.appendChild(neg);
+      row.appendChild(button("x", function () {
+        simple.flags.splice(i, 1);
+        effect.when = model.buildCondition(simple);
+        changed();
+      }, "btn small danger"));
+      wrap.appendChild(row);
+    });
+    wrap.appendChild(button("+ condition", function () {
+      simple.flags.push({ flag: schema.CONDITION_FLAGS[0], negate: false });
+      effect.when = model.buildCondition(simple);
+      changed();
+    }, "btn small"));
+    return field("Only when", wrap,
+      simple.flags.length ? "" : "no conditions - it is always on while the gene expresses");
+  }
+
   function maskCard(layer, mask, mi) {
     var card = el("div", { class: "mask" });
     card.appendChild(el("div", { class: "row mask-head" }, [
@@ -485,8 +812,15 @@ window.HG = window.HG || {};
   var rebakeTimer = null;
 
   function changed() {
+    var gene = focusPath($("gene-panel"));
+    var layers = focusPath($("layers-panel"));
+    var effects = focusPath($("effects-panel"));
     renderGenePanel();
     renderLayers();
+    renderEffects();
+    restoreFocus($("gene-panel"), gene);
+    restoreFocus($("layers-panel"), layers);
+    restoreFocus($("effects-panel"), effects);
     renderExport();
     rebake();
   }
@@ -678,6 +1012,11 @@ window.HG = window.HG || {};
           op: Object.assign({}, layer.op)
         };
       });
+      // Effects are deep-copied so editing one cannot reach back into the
+      // example that was loaded, and so a nested "when" survives untouched.
+      entry.effects = (e.effects || []).map(function (fx) {
+        return JSON.parse(JSON.stringify(fx));
+      });
       return entry;
     });
     // The forms need one visible outcome and one wild type to bind to; a file
@@ -692,6 +1031,13 @@ window.HG = window.HG || {};
       model.visible(out).layers = [model.newLayer(out.phase)];
     }
     out.founders = Object.assign({}, spec.founders || model.blank().founders);
+    // The metadata blocks are optional and may arrive partial, so merge rather
+    // than let Object.assign above replace the defaults wholesale.
+    out.blurb = spec.blurb || "";
+    out.rarity = spec.rarity || model.DEFAULT_RARITY;
+    out.carrot = Object.assign(model.defaultCarrot(), spec.carrot || {});
+    out.carrot.flavour = ((spec.carrot || {}).flavour || []).slice();
+    out.splice = spec.splice ? Object.assign({}, spec.splice) : null;
     return out;
   }
 
@@ -732,9 +1078,64 @@ window.HG = window.HG || {};
 
   // ---- boot ------------------------------------------------------------
 
+  /**
+   * Run the port against the baked Java fixtures, right here, every time the
+   * tool opens. Parity used to be a Node script at the terminal, so editing
+   * js/ and forgetting to run it left the creator happily previewing a horse
+   * the game would not breed - convincingly, which is the whole danger. Now
+   * the tool refuses to look trustworthy when it is not.
+   */
+  function runParitySelfCheck() {
+    var box = $("parity-status");
+    if (!box) return;
+    if (!HG.parity || !HG.fixtures || !HG.exampleFiles) {
+      box.className = "status warnish";
+      box.textContent = "parity self-check unavailable - fixtures/expected.js did not load "
+        + "(run ./gradlew :common:bakeSpecFixtures)";
+      return;
+    }
+    // The fixtures name a gene by file; the examples are keyed by menu label.
+    var specs = {};
+    Object.keys(HG.exampleFiles).forEach(function (file) {
+      var spec = HG.examples[HG.exampleFiles[file]];
+      if (spec) specs[file] = spec;
+    });
+
+    var result;
+    try {
+      result = HG.parity.run({ fixtures: HG.fixtures, specs: specs });
+    } catch (e) {
+      box.className = "status bad";
+      box.textContent = "parity self-check crashed: " + e.message;
+      return;
+    }
+
+    if (!result.failures.length) {
+      box.className = "status ok";
+      box.textContent = "engine matches the game - " + result.checked
+        + " checks across " + result.cases + " cases";
+      return;
+    }
+    box.className = "status bad";
+    box.innerHTML = "";
+    box.appendChild(el("strong", {
+      text: "PREVIEW IS NOT TRUSTWORTHY - " + result.failures.length
+        + " mismatch(es) against the game out of " + result.checked + " checks"
+    }));
+    result.failures.slice(0, 5).forEach(function (f) {
+      box.appendChild(el("div", { class: "problem", text: f }));
+    });
+    if (result.failures.length > 5) {
+      box.appendChild(el("div", { class: "hint", text: "...and "
+        + (result.failures.length - 5) + " more - see check-parity.mjs for the full list" }));
+    }
+    console.error("gene-creator parity failures:", result.failures);
+  }
+
   function start() {
     renderToolbar();
     wireActions();
+    runParitySelfCheck();
     HG.preview.load(function () {
       state.viewport = HG.viewport.create($("viewport"), { onPick: onPick });
       if (!state.viewport) {

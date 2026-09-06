@@ -41,6 +41,7 @@
       </div>
       <div class="readouts">
         <div id="bake-status" class="status">…</div>
+        <div id="parity-status" class="status"></div>
         <div class="readout-block">
           <h4>Clicked</h4>
           <div id="pick-readout" class="pick"><span class="hint">click the horse to inspect a spot</span></div>
@@ -62,6 +63,14 @@
       <em>MAX</em> to widen it.
     </p>
     <div id="layers-panel"></div>
+
+    <h2>Effects</h2>
+    <p class="hint">
+      What a horse carrying this outcome <strong>does</strong>, as opposed to what it
+      looks like. Effects hang off the outcome, so a two-copy horse and a carrier can
+      grant completely different behaviour.
+    </p>
+    <div id="effects-panel"></div>
 
     <h2>Export</h2>
     <div id="problems"></div>
@@ -103,6 +112,9 @@
 <script src="js/fields.js"></script>
 <script src="js/schema.js"></script>
 <script src="js/spec-engine.js"></script>
+<script src="js/parity.js"></script>
+<!-- GENERATED: the baked Java fixtures the parity self-check runs against. -->
+<script src="fixtures/expected.js"></script>
 <script src="js/base-coats.js"></script>
 <script src="js/spec-model.js"></script>
 <script src="js/model3d.js"></script>

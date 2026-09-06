@@ -1,0 +1,125 @@
+{
+  "format": 3,
+  "key": "mymod.every_effect",
+  "name": "My gene",
+  "phase": "natural",
+  "priority": 100,
+  "alleles": [
+    {
+      "token": "My",
+      "label": "My gene (My)"
+    },
+    {
+      "token": "my",
+      "label": "Wild-type (my)"
+    }
+  ],
+  "expressions": [
+    {
+      "id": "my_gene",
+      "name": "My gene",
+      "description": "What a horse carrying this looks like.",
+      "when": [
+        "My/My",
+        "My/my"
+      ],
+      "layers": [
+        {
+          "name": "new layer",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "LEGS"
+              ]
+            }
+          ],
+          "op": {
+            "type": "SET_PIGMENT",
+            "red": 0,
+            "black": 0
+          }
+        }
+      ],
+      "effects": [
+        {
+          "type": "traversal",
+          "flag": "walk_on_water",
+          "when": {
+            "flag": "adult"
+          }
+        },
+        {
+          "type": "attribute",
+          "attribute": "movement_speed",
+          "op": "multiply_base",
+          "amount": 0.2
+        },
+        {
+          "type": "emitter",
+          "trigger": {
+            "interval": 6
+          },
+          "color": "#ffcf47",
+          "count": 4
+        },
+        {
+          "type": "mob_effect",
+          "effect": "minecraft:dolphins_grace",
+          "target": "rider"
+        },
+        {
+          "type": "yield",
+          "trigger": {
+            "on_interact": "minecraft:bucket"
+          },
+          "produces": "minecraft:milk_bucket",
+          "cooldown": 24000,
+          "denied_damage": 1,
+          "denied_message": "He kicks you.",
+          "when": {
+            "all": [
+              {
+                "flag": "sex_female"
+              },
+              {
+                "flag": "tamed"
+              },
+              {
+                "flag": "baby",
+                "negate": true
+              }
+            ]
+          }
+        },
+        {
+          "type": "glow",
+          "light": 12,
+          "parts": [
+            "HAIR"
+          ]
+        },
+        {
+          "type": "healing",
+          "target": "rider"
+        },
+        {
+          "type": "spread",
+          "cover": "mycelium",
+          "minDose": 2
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "No effect.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "My/My": 0.5,
+    "My/my": 4.5,
+    "my/my": 95
+  }
+}

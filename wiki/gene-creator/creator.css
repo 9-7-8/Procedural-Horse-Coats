@@ -275,6 +275,30 @@ input[type="color"] { width: 46px; height: 26px; padding: 1px; background: #0c13
 .status { font-size: 0.75rem; color: var(--muted); }
 .status.warnish { color: var(--warn); }
 .status.bad { color: var(--bad); }
+.status.ok { color: var(--good); }
+
+/* The parity self-check: quiet one line when the port agrees with the game,
+   and impossible to miss when it does not - a preview that lies is the one
+   failure this tool must never look calm about. */
+#parity-status.bad {
+  border: 1px solid var(--bad);
+  border-radius: 4px;
+  padding: 6px 8px;
+  margin-top: 4px;
+}
+#parity-status.bad strong { display: block; margin-bottom: 4px; }
+
+/* A vertical list of text rows - the carrot's flavour ingredients. */
+.stack { display: flex; flex-direction: column; gap: 4px; width: 100%; }
+.stack .row { margin-bottom: 0; }
+
+/* The blurb field wants room to be a paragraph. */
+.field textarea {
+  width: 100%;
+  resize: vertical;
+  font: inherit;
+  font-size: 0.8rem;
+}
 
 /* ---- export ---- */
 
@@ -305,4 +329,18 @@ input[type="color"] { width: 46px; height: 26px; padding: 1px; background: #0c13
   .workspace { grid-template-columns: 1fr; height: auto; }
   .column { overflow: visible; border: none; border-bottom: 1px solid var(--line); }
   .column.centre { height: 70vh; }
+}
+
+/* An effect's negate toggle, sitting beside its flag picker. */
+.inline { display: inline-flex; align-items: center; gap: 4px; font-size: 0.76rem; }
+
+/* A condition the simple form cannot edit: shown as-is, never rewritten. */
+.frozen {
+  display: block;
+  background: rgba(0, 0, 0, 0.25);
+  padding: 4px 6px;
+  border-radius: 3px;
+  font-size: 0.72rem;
+  word-break: break-all;
+  margin-bottom: 3px;
 }

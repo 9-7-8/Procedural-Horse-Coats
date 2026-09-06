@@ -1,0 +1,71 @@
+{
+  "format": 3,
+  "key": "mymod.my_gene",
+  "name": "My gene",
+  "phase": "natural",
+  "priority": 100,
+  "blurb": "A gene that does a thing.",
+  "rarity": "legendary",
+  "alleles": [
+    {
+      "token": "My",
+      "label": "My gene (My)"
+    },
+    {
+      "token": "my",
+      "label": "Wild-type (my)"
+    }
+  ],
+  "expressions": [
+    {
+      "id": "my_gene",
+      "name": "My gene",
+      "description": "What a horse carrying this looks like.",
+      "when": [
+        "My/My",
+        "My/my"
+      ],
+      "layers": [
+        {
+          "name": "new layer",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "LEGS"
+              ]
+            }
+          ],
+          "op": {
+            "type": "SET_PIGMENT",
+            "red": 0,
+            "black": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "No effect.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "My/My": 0.5,
+    "My/my": 4.5,
+    "my/my": 95
+  },
+  "splice": {
+    "My/My": 10,
+    "My/my": 40,
+    "my/my": 50
+  },
+  "carrot": {
+    "enabled": true,
+    "behaviour": "homozygous",
+    "flavour": [
+      "minecraft:sugar"
+    ]
+  }
+}

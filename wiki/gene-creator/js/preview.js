@@ -144,7 +144,6 @@ window.HG = window.HG || {};
     load: load,
     bake: bake,
     toImageData: toImageData,
-    expresses: expresses,
     SHEET: N
   };
 })(window.HG);

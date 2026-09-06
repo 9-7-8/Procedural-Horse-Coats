@@ -14,7 +14,9 @@ window.HG = window.HG || {};
     scene.background = new THREE.Color(0x11161f);
 
     var camera = new THREE.PerspectiveCamera(42, 1, 0.1, 100);
-    camera.position.set(2.6, 1.1, 2.6);
+    // Re-aimed by frame() once the horse is built; these are only a first pose
+    // so the first frame is not looking at nothing.
+    camera.position.set(3.2, 2.2, 3.6);
 
     var renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -25,7 +27,7 @@ window.HG = window.HG || {};
       controls = new THREE.OrbitControls(camera, renderer.domElement);
       controls.enableDamping = true;
       controls.dampingFactor = 0.08;
-      controls.target.set(0, 0, 0);
+      controls.target.set(0, 1, 0);
     }
 
     scene.add(new THREE.AmbientLight(0xffffff, 0.75));
@@ -35,8 +37,9 @@ window.HG = window.HG || {};
     var fill = new THREE.DirectionalLight(0x93b7ff, 0.35);
     fill.position.set(-5, 2, -4);
     scene.add(fill);
-    var grid = new THREE.GridHelper(4, 12, 0x2a3444, 0x1b2230);
-    grid.position.y = -1.05;
+    // The horse stands on y = 0 (see model3d), so the grid is the ground.
+    var grid = new THREE.GridHelper(6, 12, 0x2a3444, 0x1b2230);
+    grid.position.y = 0;
     scene.add(grid);
 
     var sheet = document.createElement("canvas");
@@ -66,8 +69,30 @@ window.HG = window.HG || {};
         scene.remove(mesh);
         mesh.geometry.dispose();
       }
-      mesh = new THREE.Mesh(HG.model3d.build(THREE, skin), material);
+      var built = HG.model3d.build(THREE, skin);
+      mesh = new THREE.Mesh(built.geometry, material);
       scene.add(mesh);
+      frame(built);
+    }
+
+    /**
+     * Point the camera at the horse that was actually built. A foal is a third
+     * the size of an adult, so a fixed camera pose either buries it in the grid
+     * or clips the adult's head - the framing has to come from the model.
+     */
+    function frame(built) {
+      var eye = built.height * 0.55;
+      var dist = Math.max(built.length, built.height) * 1.45;
+      camera.position.set(dist * 0.62, eye + built.height * 0.35, dist * 0.72);
+      camera.near = dist / 50;
+      camera.far = dist * 20;
+      camera.updateProjectionMatrix();
+      if (controls) {
+        controls.target.set(0, eye, 0);
+        controls.update();
+      } else {
+        camera.lookAt(0, eye, 0);
+      }
     }
 
     function setImage(imageData) {
