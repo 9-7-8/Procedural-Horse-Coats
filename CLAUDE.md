@@ -140,10 +140,11 @@ project. Its shape:
 ## Status snapshot (keep this current)
 
 - **Built 2026-09-05, NOT yet play-tested: the LUT gene + the Horse Browser
-  becomes a container menu with a Crafting tab.** `:common:test` **385 green**,
-  `:neoforge-26.1.2:build` green, `runServer` boots clean (**44 segments**,
-  `loaded 2 data-driven gene(s)`, menu type + payloads register with no error).
-  Two independent pieces:
+  becomes a container menu with a Crafting tab; plus two fixes on owner
+  play-test feedback (browser UI redesigned, splash face-marking boosted).**
+  `:common:test` **386 green**, `:neoforge-26.1.2:build` green, `runServer`
+  boots clean (**44 segments**, `loaded 2 data-driven gene(s)`, menu type +
+  payloads register with no error). Pieces:
   - **`LutGene`** (`horsegenetics.lut`, priority **190**, magical, alleles
     `n` / `Blupnk`) - a gene that **swaps the phase-2 colour gradient** instead
     of painting. A horse **homozygous for a variant allele** resolves its
@@ -204,15 +205,21 @@ project. Its shape:
     **`neoforge-26.1.2/menu/`** package: `ModMenus` (a `DeferredRegister<
     MenuType<?>>`, registered from the mod ctor), `HorseBrowserMenu`
     (`AbstractContainerMenu` - a 3x3 `TransientCraftingContainer` = slots 1-9, a
-    `ResultContainer` = slot 0, the 36 inventory slots via
-    `addStandardInventorySlots`), and `HorseBrowserRecipes` (the result logic).
+    `ResultContainer` = slot 0, the 36 inventory slots added by hand so they
+    too can go inactive), and `HorseBrowserRecipes` (the result logic).
     Pressing **H** now sends `network/OpenHorseBrowserPayload` and the server
     `openMenu`s a `SimpleMenuProvider`; `ClientSetup` binds the screen via
     `RegisterMenuScreensEvent`. `HorseBrowserKeyHandler` sends the payload
     instead of `setScreen`.
-    - **Two tabs**: "Gene DB" (the existing gene reference, re-laid into the
-      fixed 316x244 panel - list + filter + detail pane, "Write research paper"
-      button unchanged) and **"Crafting"** (new).
+    - **Two tabs**, drawn from a strip at the top-centre of the window.
+      **"Gene database"** is a **full-window** reference (list left, scrolling
+      detail right, "Write research paper" button) with **no slots** - every
+      menu slot goes inactive here. **"Crafting"** is a **compact centred
+      panel** (3x3 grid + result + player inventory) with the gene list still
+      down the left. *(The first attempt crammed everything into one 316x244
+      panel and overlapped badly - owner feedback - so it was redrawn this way
+      the same day. All custom drawing is in screen coords: `extractLabels`
+      undoes the container `leftPos/topPos` translate first.)*
     - **Crafting tab** - a private 3x3 grid that makes **only this mod's
       recipes** (no vanilla recipe lookup anywhere): (1) a single **book** in the
       grid + a **discovered** gene picked in the left list -> that gene's
@@ -224,18 +231,26 @@ project. Its shape:
       `network/SelectBrowserGenePayload` (sent on every list click, so the two
       tabs stay in sync); `slotsChanged` recomputes the result server-side and
       pushes a `ClientboundContainerSetSlotPacket`.
-    - **The player inventory shows on both tabs** (normal for a container
-      screen). On the Gene DB tab the grid + result slots go **inactive**
-      (`HorseBrowserMenu.setCraftingVisible`, an `isActive()` override the screen
-      toggles each frame) so they don't render, hover or take clicks;
-      `slotClicked` is also guarded. Switching away from Crafting while holding a
-      picked-up stack is blocked.
+    - **On the Gene database tab every slot** (grid, result, and the player
+      inventory) goes **inactive** via an `isActive()` override tied to
+      `HorseBrowserMenu.setCraftingVisible`, which the screen toggles each frame
+      - so that tab renders no slots, no highlights, no tooltips; `slotClicked`
+      is guarded too. Switching away from Crafting while holding a picked-up
+      stack is blocked.
     - Lang: `gui.horsegenetics.horse_browser`. No new items, no datapack changes.
-    - **Not done / risks** (untested GUI against the 26.1.2 retained-mode
-      screen API): exact slot/label geometry in the fixed panel, ghost
-      slot-highlight bleed on the Gene DB tab, quick-move edge cases, the
-      `book -> paper` result-slot consume path. Checklist:
-      `wiki/verification.html` §0-B (and re-run §0 inside the new window).
+    - **Not done / risks** (still an untested GUI against the 26.1.2
+      retained-mode screen API): the redraw's geometry is verified only on
+      paper - check for overlap at GUI scale 2/3/4; `quickMoveStack` edge cases;
+      the `book -> paper` result-slot consume path. Checklist:
+      `wiki/verification.html` §0-B.
+  - **Splash face fix** - `WhitePattern.splash` was scaling its face marking
+    with its body strength (~0.35 for one copy), which on the shared face
+    ladder is star/snip/nothing, so splash horses came out bare-faced (owner
+    feedback). It now boosts the face strength by `SPLASH_FACE_BOOST = 0.34`:
+    one copy -> a blaze, homozygote / two-locus -> a bald face. Same RNG draw
+    count. `coat-golden.txt` regenerated (splash rows moved); `KIT`/`EDNRB`
+    untouched. New `WhitePatternGenesTest` case. Checklist:
+    `wiki/verification.html` §0-C.
 
 - **2026-09-05 follow-ups to the carrot pass, NOT yet play-tested:**
   - **Carrots renamed** (owner's call, dev-only, no saves): "mutinogenic" ->
@@ -1567,7 +1582,7 @@ project. Its shape:
   Still unconfirmed: bred foal, seed-jar round-trip, a spec gene actually
   showing in the display (needs a horse carrying Suntouched/Waterborn) -
   `wiki/verification.html` §0.
-- **`common/`** - compiles; **385 JUnit tests pass** (`./gradlew :common:test`).
+- **`common/`** - compiles; **386 JUnit tests pass** (`./gradlew :common:test`).
   Covers `breed/` (the breed system: `Breed` / `Breeds` (49) / `BreedFounder` /
   `BreedLineage` / `BreedStatCurve` / `Commonness` -> `wiki/breeds.html`),
   `trait/` (the non-coat body: `HorseTraits` / `Traits` / `Condition` /
@@ -2138,8 +2153,9 @@ Two-module Gradle project, split deliberately:
     `DeferredRegister<MenuType<?>>`), `HorseBrowserMenu` (the **Horse Browser**,
     opened with the H key via `OpenHorseBrowserPayload` - a 3x3
     `TransientCraftingContainer` + a `ResultContainer` + the player inventory;
-    the result + grid slots go inactive off the Crafting tab via
-    `setCraftingVisible`), and `HorseBrowserRecipes` (the result logic - book +
+    **every** slot goes inactive off the Crafting tab via `setCraftingVisible`,
+    so the full-window Gene database tab shows none), and `HorseBrowserRecipes`
+    (the result logic - book +
     a *discovered* gene -> that gene's `research_paper`, then the shared
     `KnownGeneSpliceRecipe` / `CarrotCombineRecipe`; **only this mod's
     recipes**, no vanilla lookup). `SelectBrowserGenePayload` carries the picked
@@ -3498,6 +3514,20 @@ four white loci draw the head from one shared vocabulary now -
 **star** and **snip** as real detached patches. See the status entry above and
 `wiki/pipeline.html#face-markings`. What is left of it is a play-test (does a
 three-to-five-texel star read as a star at 128px?) and the two follow-ups below.
+
+**Fixed 2026-09-05 (built, not play-tested): splash was coming out bare-faced.**
+The face-marking rework made `MITF`/`PAX3` splash scale its face marking with
+its *body* strength like `KIT` does, and a single-copy splash sits near body
+strength 0.35 - star / snip / nothing territory - so splash horses lost their
+blaze. `WhitePattern.splash` now runs the face marking at
+`clamp01(s + SPLASH_FACE_BOOST)` (`SPLASH_FACE_BOOST = 0.34`): one copy -> a
+**blaze**, a homozygote or two loci -> a **bald face**, which is the splash
+phenotype. Same RNG draw count (only thresholds move), so alignment holds;
+`coat-golden.txt` regenerated (splash rows moved). `KIT` and `EDNRB` face
+markings are untouched. New `WhitePatternGenesTest.everySplashHorseWearsAFaceMarking`.
+Measured: `mitf=SW1/N` head coverage went from 0-66 texels (seed-dependent,
+often near zero) to 125-166; `SW1/SW1` and two-locus splash fill the muzzle
+(bald face). Checklist: `wiki/verification.html` §0-C.
 
 **The 2026-09-02 visual genes (2026-09-02, reworked once after owner feedback) -
 remaining follow-ups, none seen in-game:**

@@ -870,46 +870,84 @@
         <code>_chestnut</code> images.</li>
 </ul>
 
-<h3 id="browser-menu">0-B. Horse Browser is now a container menu + a Crafting tab (built 2026-09-05, NOT play-tested)</h3>
+<h3 id="browser-menu">0-B. Horse Browser is now a container menu + a Crafting tab (built 2026-09-05, redesigned same day, NOT play-tested)</h3>
 <p>
     The Horse Browser was rebuilt from a client-only <code>Screen</code> into a
     server-synced <code>AbstractContainerScreen</code> over a new
     <code>HorseBrowserMenu</code> (<code>menu/</code> package, new
     <code>MenuType</code>). Pressing <kbd>H</kbd> now sends
-    <code>OpenHorseBrowserPayload</code> and the server opens the menu. The Gene
-    Database tab (&sect;0 below) is unchanged in content but re-laid-out into the
-    fixed panel; a new <strong>Crafting</strong> tab adds a private 3&times;3
-    grid.
+    <code>OpenHorseBrowserPayload</code> and the server opens the menu.
+</p>
+<p>
+    <strong>The first layout was cramped and overlapping; it was redrawn.</strong>
+    The Gene Database tab is now a <strong>full-window</strong> reference again
+    (list left, scrolling detail right, no slots &mdash; <em>every</em> menu slot
+    goes inactive on this tab). The Crafting tab is a <strong>compact centered
+    panel</strong> (a 3&times;3 grid + result + the player inventory) with the
+    gene list still down the left. A tab strip sits at the top-centre of the
+    window on both. All custom drawing is in screen coords (the container's
+    <code>leftPos/topPos</code> translate is undone in <code>extractLabels</code>).
 </p>
 <ul>
-    <li><strong>Press <kbd>H</kbd></strong> &rarr; the browser opens (via the
-        server round-trip now). <kbd>Esc</kbd> closes. The player inventory shows
-        on both tabs.</li>
-    <li><strong>Gene Database tab</strong>: re-verify everything in &sect;0 &mdash;
-        list, filter, detail pane, scrollbars, &ldquo;Write research paper&rdquo;
-        &mdash; now that it lives inside a narrower container window. Check the
-        detail text does not collide with the inventory or the tab strip.</li>
-    <li><strong>Crafting tab</strong>: the gene list on the left shows only
+    <li><strong>Press <kbd>H</kbd></strong> &rarr; the browser opens (server
+        round-trip). <kbd>Esc</kbd> closes.</li>
+    <li><strong>Layout sanity</strong> (the point of the redraw): nothing
+        overlapping. The filter box, the &ldquo;N genes&rdquo; count and the
+        first list row are clear of each other; the detail heading / tags /
+        summary / alleles / phenotypes stack without collision and scroll as one;
+        the &ldquo;Write research paper&rdquo; button sits below the detail text,
+        not under it; on the Crafting tab the grid, the result slot, the
+        &ldquo;Gene paper&rdquo; note and the inventory do not touch. Check at GUI
+        scale 2, 3 and 4.</li>
+    <li><strong>Gene Database tab</strong>: list, filter (name / key / allele),
+        selection-follows-filter, both scrollbars, the discovered vs
+        undiscovered styling, &ldquo;Write research paper&rdquo; for a discovered
+        carrot gene. No slots, no slot-highlight, no item tooltips anywhere on
+        this tab.</li>
+    <li><strong>Crafting tab</strong>: the left list shows only
         <em>discovered</em>, carrot-bearing genes (creative: all with a carrot).
-        The 3&times;3 grid + result slot render; on the Gene Database tab they are
-        gone (slots inactive) &mdash; confirm no ghost slot highlight or tooltip
-        bleeds through on that tab.</li>
-    <li><strong>Book &rarr; gene paper</strong>: put a single book in the grid,
-        pick a discovered gene &rarr; the result is a <code>research_paper</code>
-        for that gene. Take it &rarr; one book consumed. Pick an undiscovered gene
-        (survival) &rarr; no result. Anything other than exactly one book in the
-        grid &rarr; no result.</li>
+        The 3&times;3 grid + result slot + full inventory render and take items.</li>
+    <li><strong>Book &rarr; gene paper</strong>: a single book in the grid + a
+        discovered gene selected &rarr; the result is that gene's
+        <code>research_paper</code>. Take it &rarr; one book consumed. Undiscovered
+        gene (survival), or anything besides exactly one book &rarr; no result.</li>
     <li><strong>Known Gene Splice carrot</strong>: golden carrot + the gene paper
-        + a hair item + the rarity ingot + &ge;1 flavour &rarr; the carrot, via
-        the existing <code>KnownGeneSpliceRecipe</code>. <strong>Combining
-        carrots</strong>: 2+ breeding carrots &rarr; one merged carrot
-        (<code>CarrotCombineRecipe</code>); contradictory pairs give no result.</li>
-    <li><strong>No vanilla recipes</strong>: a normal crafting pattern (planks
-        &rarr; sticks, etc.) in the grid produces nothing.</li>
-    <li><strong>Shift-click / drag / number keys</strong> behave in the grid and
-        inventory; closing the screen returns any grid items to the player.</li>
-    <li><strong>Switching tabs while holding a picked-up stack</strong> is blocked
-        (you must put the stack down first) &mdash; confirm that is not annoying.</li>
+        + a hair item + the rarity ingot + &ge;1 flavour &rarr; the carrot
+        (<code>KnownGeneSpliceRecipe</code>). <strong>Combining carrots</strong>:
+        2+ breeding carrots &rarr; one merged carrot; contradictory pairs give
+        nothing.</li>
+    <li><strong>No vanilla recipes</strong>: planks&rarr;sticks etc. in the grid
+        produce nothing.</li>
+    <li><strong>Shift-click / drag / number keys</strong> behave; closing returns
+        grid items to the player. Switching tabs while holding a picked-up stack
+        is blocked.</li>
+</ul>
+
+<h3 id="splash-face">0-C. Splash white now always wears a bold face marking (built 2026-09-05, NOT play-tested)</h3>
+<p>
+    Regression fix. After the 2026-09-05 face-marking-family rework,
+    <code>MITF</code> / <code>PAX3</code> splash at single-copy strength
+    (~0.35) mostly landed on a small star, a snip, or nothing &mdash; splash
+    horses were coming out bare-faced. <code>WhitePattern.splash</code> now runs
+    its face marking at a boosted strength
+    (<code>SPLASH_FACE_BOOST = 0.34</code>): a single-copy splash reads as a
+    <strong>blaze</strong>, and a homozygote or a two-locus splash as a
+    <strong>bald face</strong> &mdash; the splash phenotype (dipped from below
+    <em>and</em> a bold blaze). Same RNG draw count, so alignment is preserved;
+    <code>coat-golden.txt</code> regenerated (splash rows moved). New
+    <code>WhitePatternGenesTest.everySplashHorseWearsAFaceMarking</code>.
+</p>
+<ul>
+    <li><strong>Spawn a single-copy splash</strong> (<code>mitf=SW1/N</code> or
+        <code>pax3=SW2/N</code>) over a few seeds &mdash; every one should have a
+        clear blaze (not a star, not nothing).</li>
+    <li><strong>Homozygous / two-locus splash</strong>
+        (<code>mitf=SW1/SW1</code>, or <code>mitf=SW1/N pax3=SW2/N</code>) &rarr;
+        a bald face taking the eyes and the sides of the head.</li>
+    <li>Confirm the blaze is <strong>crisp-edged</strong> (splash jag 0.11), not
+        torn like a <code>KIT</code> sabino face.</li>
+    <li>The KIT and EDNRB face markings are <em>unchanged</em> &mdash; only splash
+        was boosted.</li>
 </ul>
 
 <h3 id="gene-browser">0. The Horse Browser (H) &amp; the per-horse gene popup (new 2026-09-05)</h3>

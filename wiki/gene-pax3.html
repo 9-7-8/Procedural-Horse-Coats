@@ -34,7 +34,7 @@
     <div><dt>Wild frequency</dt><dd><strong>90% <code>SW2/N</code></strong>, 1% <code>SW4/N</code>, 9% <code>N/N</code> &mdash; heterozygotes only</dd></div>
     <div><dt>Founder draws</dt><dd>1 &times; nextFloat()</dd></div>
     <div><dt>Deterministic</dt><dd><strong>no</strong></dd></div>
-    <div><dt>Epi draws</dt><dd>nextLong() seed, nextFloat() waterline, nextFloat() face width, nextFloat() face length</dd></div>
+    <div><dt>Epi draws</dt><dd>nextLong() waterline seed, nextFloat() waterline height, then the shared face-marking draw (1 long + 8 floats)</dd></div>
     <div><dt>Painter</dt><dd><code>WhitePattern.splash</code> &mdash; the same shape <code>MITF</code> uses</dd></div>
 </dl>
 
@@ -159,12 +159,14 @@
 <h2>The face</h2>
 
 <p>
-    The same shared <a href="pipeline.html#face-markings">the shared face-marking vocabulary</a> that
+    The same shared <a href="pipeline.html#face-markings">face-marking vocabulary</a> that
     <a href="gene-mitf.html"><code>MITF</code></a> uses, at the same <code>jag</code> of
-    <code>0.11</code> and at this locus&rsquo;s own strengths. That is the point of it being
-    shared: a horse carrying one copy at each splash locus draws two markings from one
-    vocabulary, and they compound the way the body white does, instead of two hand-written
-    blazes landing on top of each other and reading as one.
+    <code>0.11</code> and with the same <strong>face boost</strong>
+    (<code>SPLASH_FACE_BOOST</code> = 0.34) &mdash; so a single-copy <code>PAX3</code> splash
+    is a blaze, not a star, and <code>splash-bold</code> is a bald face. That the vocabulary
+    is shared is the point: a horse carrying one copy at each splash locus draws two bold
+    markings from one vocabulary, compounding the way the body white does, instead of two
+    hand-written blazes landing on top of each other and reading as one.
 </p>
 
 <h2>Deafness</h2>

@@ -229,9 +229,10 @@ public final class WhitePattern {
      * it is the reason splash is two genes here rather than one.
      *
      * <p><b>Draw order</b>, off {@code ctx.epigeneticsFor(geneKey)}:
-     * {@code nextLong()} (the noise seed), then {@code nextFloat()} for how high
-     * the waterline sits, {@code nextFloat()} for the face's width and
-     * {@code nextFloat()} for its length.
+     * {@code nextLong()} (the waterline noise seed), {@code nextFloat()} for how
+     * high the waterline sits, then the shared {@link #faceMarking} draw (one
+     * long and eight floats) - which runs at a boosted strength (see
+     * {@link #SPLASH_FACE_BOOST}) but consumes exactly the same numbers.
      */
     public static PigmentField splash(CoatBuildContext ctx, PigmentView coat, String geneKey, double strength) {
         double s = clamp01(strength + SPLASH_STACKING * alreadyWhite(coat, ctx.skin()));
@@ -240,7 +241,14 @@ public final class WhitePattern {
         double levelRoll = epi.nextFloat();
 
         Skin skin = ctx.skin();
-        FaceMarking faceMark = faceMarking(epi, skin, s, SPLASH_FACE_JAG);
+        // Splash's face runs much hotter than its waterline. A splashed white
+        // horse is defined as much by a bold blaze - often a bald face - as by
+        // the white climbing its legs, so even a single-copy splash (body
+        // strength ~0.35) should read as a blaze, not a star, and a
+        // homozygote or a two-locus horse as a bald face. Same draw count, so
+        // the RNG stays aligned - only the thresholds move.
+        FaceMarking faceMark = faceMarking(epi, skin,
+                clamp01(s + SPLASH_FACE_BOOST), SPLASH_FACE_JAG);
 
         Bounds body = HorseSkinGeometry.bodyBounds(skin);
         double span = body.span(Axis.Y);
@@ -278,6 +286,15 @@ public final class WhitePattern {
 
     /** How ragged a splash face marking's margin is - splash edges are crisp. */
     private static final double SPLASH_FACE_JAG = 0.11;
+
+    /**
+     * How much hotter a splash face marking runs than the splash body strength.
+     * A single-copy splash sits near body strength 0.35, which on the shared
+     * face ladder is star / snip territory; +{@value} lifts it into a blaze, and
+     * a homozygous or two-locus splash into a bald face - which is the splash
+     * phenotype (dipped from below <b>and</b> a bold blaze).
+     */
+    private static final double SPLASH_FACE_BOOST = 0.34;
 
     /**
      * Half-width, in body units, at or above which a marking is a <b>bald

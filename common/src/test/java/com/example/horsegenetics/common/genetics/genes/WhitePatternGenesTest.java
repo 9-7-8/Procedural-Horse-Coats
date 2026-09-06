@@ -255,6 +255,59 @@ class WhitePatternGenesTest {
         assertTrue(g.shows(Genes.ROAN));
     }
 
+    /**
+     * A splash horse always wears a bold face marking. The shared face
+     * vocabulary at plain splash strength lands on stars and snips; splash
+     * boosts it (see {@code WhitePattern.SPLASH_FACE_BOOST}) so even a
+     * single-copy splash reads as a blaze, and a homozygote as a bald face -
+     * the splash phenotype. Regression guard for "splash puts nothing on the
+     * face".
+     */
+    @Test
+    void everySplashHorseWearsAFaceMarking() {
+        for (String code : new String[]{Codes.of("mitf", "SW1/N"), Codes.of("pax3", "SW2/N")}) {
+            for (long seed : new long[]{0L, 1L, 2L, 3L, 7L, 42L, 99L, 4242L}) {
+                double f = faceWhite(code, seed);
+                assertTrue(f > 0.08,
+                        "single-copy splash left the face nearly bare (" + f + ") for " + code + " seed " + seed);
+            }
+        }
+        // homozygous / two-locus splash goes bald-faced - much more than one copy
+        double one = faceWhite(Codes.of("mitf", "SW1/N"), 3L);
+        double hom = faceWhite(Codes.of("mitf", "SW1/SW1"), 3L);
+        double both = faceWhite(Codes.of("mitf", "SW1/N", "pax3", "SW2/N"), 3L);
+        assertTrue(hom > one + 0.15, "SW1/SW1 face (" + hom + ") not much bolder than SW1/N (" + one + ")");
+        assertTrue(both > one + 0.10, "two-locus splash face (" + both + ") not bolder than one copy (" + one + ")");
+    }
+
+    /** White fraction over the head + muzzle only, one epigenetic seed. */
+    private static double faceWhite(String code, long seed) {
+        int n = HorseSkinGeometry.SHEET_SIZE;
+        int[] template = new int[n * n];
+        HorseSkinGeometry.forEachTexel(Skin.ADULT, (px, py, part, face, point) ->
+                template[py * n + px] = 0xFFFFFFFF);
+        int[] lut = new int[16 * 16];
+        for (int y = 0; y < 16; y++) {
+            for (int x = 0; x < 16; x++) {
+                int shade = 255 - Math.round(y / 15f * 255);
+                lut[y * 16 + x] = 0xFF000000 | (shade << 16) | (shade << 8) | shade;
+            }
+        }
+        int[] img = CoatTextureComposer.compose(Genotype.parse(code), Epigenome.fromSeed(seed),
+                Skin.ADULT, true, template, new GradientLut(lut, 16, 16));
+        int[] tally = new int[2];
+        HorseSkinGeometry.forEachTexel(Skin.ADULT, (px, py, part, face, point) -> {
+            if (part != HorseSkinGeometry.Part.HEAD && part != HorseSkinGeometry.Part.MUZZLE) {
+                return;
+            }
+            tally[1]++;
+            if ((img[py * n + px] & 0xFFFFFF) > 0xE0E0E0) {
+                tally[0]++;
+            }
+        });
+        return tally[1] == 0 ? 0 : tally[0] / (double) tally[1];
+    }
+
     // ------------------------------------------------------------------
 
     private static AllelePair pairOf(Gene gene, String tokens) {

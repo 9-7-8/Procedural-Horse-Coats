@@ -16,8 +16,10 @@ import net.minecraft.world.item.ItemStack;
  * The <b>Horse Browser</b> menu. The screen has two tabs - a gene reference and
  * a crafting surface - but only the crafting tab uses slots: a private 3x3 grid
  * ({@link #craft}, slots 1-9), a result slot ({@link #result}, slot 0) and the
- * player inventory (slots 10-45). The result is computed by
- * {@link HorseBrowserRecipes}, which only ever makes this mod's own outputs.
+ * player inventory (slots 10-45), <b>all</b> of which go inactive on the Gene
+ * Database tab, which is a full-window reference with no slots. The result is
+ * computed by {@link HorseBrowserRecipes}, which only ever makes this mod's own
+ * outputs.
  *
  * <p>The selected gene (for the book &rarr; gene-paper craft) is menu state set
  * from the client by {@code SelectBrowserGenePayload}; changing it recomputes
@@ -31,13 +33,13 @@ public final class HorseBrowserMenu extends AbstractContainerMenu {
     public static final int INV_START = 10;
     public static final int INV_END = 46; // exclusive
 
-    // Slot geometry, relative to the screen's leftPos / topPos.
-    public static final int GRID_X = 152;
-    public static final int GRID_Y = 40;
-    public static final int RESULT_X = 224;
-    public static final int RESULT_Y = 58;
+    // Slot geometry, relative to the Crafting panel's leftPos / topPos.
+    public static final int GRID_X = 30;
+    public static final int GRID_Y = 28;
+    public static final int RESULT_X = 108;
+    public static final int RESULT_Y = 46;
     public static final int INV_X = 8;
-    public static final int INV_Y = 162;
+    public static final int INV_Y = 124;
 
     private final Player player;
     private final CraftingContainer craft = new TransientCraftingContainer(this, 3, 3);
@@ -60,18 +62,33 @@ public final class HorseBrowserMenu extends AbstractContainerMenu {
         addSlot(new ResultSlot(player, this, result, RESULT_X, RESULT_Y));
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 3; col++) {
-                addSlot(new Slot(craft, col + row * 3, GRID_X + col * 18, GRID_Y + row * 18) {
-                    @Override
-                    public boolean isActive() {
-                        return craftingVisible;
-                    }
-                });
+                addSlot(tabSlot(craft, col + row * 3, GRID_X + col * 18, GRID_Y + row * 18));
             }
         }
-        addStandardInventorySlots(inventory, INV_X, INV_Y);
+        // The player inventory is added by hand (not addStandardInventorySlots)
+        // so it too can go inactive on the Gene Database tab - that tab is a
+        // full-window reference and shows no slots at all.
+        for (int row = 0; row < 3; row++) {
+            for (int col = 0; col < 9; col++) {
+                addSlot(tabSlot(inventory, col + row * 9 + 9, INV_X + col * 18, INV_Y + row * 18));
+            }
+        }
+        for (int col = 0; col < 9; col++) {
+            addSlot(tabSlot(inventory, col, INV_X + col * 18, INV_Y + 58));
+        }
     }
 
-    /** Screen-driven: hide/show the result + grid slots when the tab changes. */
+    /** A slot that is only active (rendered / hoverable / clickable) while the Crafting tab shows. */
+    private Slot tabSlot(Container container, int index, int x, int y) {
+        return new Slot(container, index, x, y) {
+            @Override
+            public boolean isActive() {
+                return craftingVisible;
+            }
+        };
+    }
+
+    /** Screen-driven: hide/show every slot when the tab changes. */
     public void setCraftingVisible(boolean visible) {
         this.craftingVisible = visible;
     }
