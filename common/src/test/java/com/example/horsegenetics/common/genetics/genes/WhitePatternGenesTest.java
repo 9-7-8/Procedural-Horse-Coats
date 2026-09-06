@@ -316,8 +316,20 @@ class WhitePatternGenesTest {
     }
 
     /** Mean white coverage over three epigenetic seeds, so one unlucky roll cannot decide a rung. */
+    /**
+     * Mean white fraction over a spread of epigenetic seeds. Eight rather than
+     * a handful because the non-deterministic white painters vary a few per
+     * cent seed to seed, and a three-seed mean can sit a knife-edge off a real
+     * threshold purely on which seeds were picked (it did, once the gene set
+     * shifted the seed stream).
+     */
     private static double averageWhite(String code) {
-        return (whiteFraction(code, 0L) + whiteFraction(code, 3L) + whiteFraction(code, 4242L)) / 3.0;
+        long[] seeds = {0L, 1L, 2L, 3L, 5L, 8L, 13L, 4242L};
+        double sum = 0;
+        for (long s : seeds) {
+            sum += whiteFraction(code, s);
+        }
+        return sum / seeds.length;
     }
 
     /**

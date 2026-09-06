@@ -6,10 +6,12 @@ import com.example.horsegenetics.common.horse.Sex;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * A horse's full genotype: one {@link AllelePair} per registered {@link Gene}
@@ -233,17 +235,33 @@ public final class Genotype {
 
     /**
      * {@link #toCode()} restricted to the genes that can paint something
-     * ({@link Gene#affectsCoat()}) - the part of the genotype a texture depends
-     * on, and so the basis of {@code CoatData.textureKey()}. Two horses with the
-     * same {@code coatCode} are painted identically (epigenetics aside), which
-     * is why a mare and a stallion of the same colour share one baked texture
-     * rather than doubling the cache.
+     * ({@link Gene#affectsCoat()}), <b>plus</b> any modifier gene a painting
+     * gene declares it reads ({@link Gene#coatDependsOn()} - the leopard
+     * complex's {@code PATN1} / {@code PATN2}). This is the part of the
+     * genotype a texture depends on, and so the basis of
+     * {@code CoatData.textureKey()}: two horses with the same {@code coatCode}
+     * are painted identically (epigenetics aside), which is why a mare and a
+     * stallion of the same colour share one baked texture rather than doubling
+     * the cache.
      *
      * <p>Not a persistence format - it is lossy on purpose and nothing parses
      * it back.
      */
     public String coatCode() {
-        return code(Gene::affectsCoat);
+        Set<String> depended = new HashSet<>();
+        for (Gene g : Genes.codeOrder()) {
+            if (!g.affectsCoat() || g.coatDependsOn().isEmpty()) {
+                continue;
+            }
+            // Only fold a modifier's alleles into the key when the gene that
+            // reads them actually paints on *this* horse - a PATN carrier with
+            // no LP looks like any other horse and must share its texture.
+            if (g.expressionIn(byGene.get(g.key()), this).wildType()) {
+                continue;
+            }
+            depended.addAll(g.coatDependsOn());
+        }
+        return code(g -> g.affectsCoat() || depended.contains(g.key()));
     }
 
     // ------------------------------------------------------------------

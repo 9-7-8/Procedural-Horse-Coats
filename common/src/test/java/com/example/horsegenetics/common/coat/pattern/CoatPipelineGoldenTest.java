@@ -125,7 +125,19 @@ class CoatPipelineGoldenTest {
             override("lut=Blupnk/n"),
             override("lut=Blupnk/Blupnk"),
             override("agouti=A/a", "lut=Blupnk/Blupnk"),
-            override("extension=e/e", "grey=G/g", "lut=Blupnk/Blupnk"));
+            override("extension=e/e", "grey=G/g", "lut=Blupnk/Blupnk"),
+            // the leopard complex - each PATN combination is a different painter,
+            // and LP zygosity flips leopard<->fewspot / blanket<->snowcap
+            override("agouti=A/a", "leopard=LP/lp"),
+            override("agouti=A/a", "leopard=LP/LP"),
+            override("agouti=A/a", "leopard=LP/lp", "patn1=PATN1/n"),
+            override("agouti=A/a", "leopard=LP/LP", "patn1=PATN1/n"),
+            override("agouti=A/a", "leopard=LP/lp", "patn2=PATN2/n"),
+            override("agouti=A/a", "leopard=LP/LP", "patn2=PATN2/n"),
+            override("agouti=A/a", "leopard=LP/lp", "patn1=PATN1/n", "patn2=PATN2/n"),
+            override("extension=e/e", "leopard=LP/lp", "patn1=PATN1/n"),
+            // PATN with no LP paints nothing - must hash identical to plain
+            override("agouti=A/a", "patn1=PATN1/PATN1", "patn2=PATN2/n"));
 
     private static final long[] SEEDS = {0L, 3L, 4242L};
 

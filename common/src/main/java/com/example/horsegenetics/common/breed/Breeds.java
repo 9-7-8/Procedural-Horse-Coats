@@ -15,11 +15,12 @@ import java.util.Map;
  * {@code wiki/breeds.html} is the readable version of this file.
  *
  * <h2>Referenced-but-unbuilt</h2>
- * Genes and features the sheet asks for that this mod does not have yet - the
- * leopard complex ({@code Lp} / {@code PATN1}), Tiger Eye ({@code TE}), HYPP,
- * pangare / mealy muzzle, the Fjord's two-tone erect mane, lower-leg feathering
- * - are recorded in each breed's {@link Breed#notes()} and collected in
- * {@code wiki/roadmap.html}. No new gene was added in this pass.
+ * Genes and features the sheet asks for that this mod does not have yet -
+ * Tiger Eye ({@code TE}), HYPP, pangare / mealy muzzle, the Fjord's two-tone
+ * erect mane, lower-leg feathering - are recorded in each breed's
+ * {@link Breed#notes()} and collected in {@code wiki/roadmap.html}. The
+ * <b>leopard complex</b> ({@code LP} / {@code PATN1} / {@code PATN2}) is built,
+ * and Appaloosa, Knabstrupper, Kiger Mustang, Mustang and Shetland now roll it.
  */
 public final class Breeds {
 
@@ -37,6 +38,9 @@ public final class Breeds {
     private static final String MITF = "horsegenetics.mitf";
     private static final String PAX3 = "horsegenetics.pax3";
     private static final String EDNRB = "horsegenetics.ednrb";
+    private static final String LEOP = "horsegenetics.leopard";
+    private static final String PATN1 = "horsegenetics.patn1";
+    private static final String PATN2 = "horsegenetics.patn2";
 
     /** The "no herd identity" breed. Its founder is the ordinary unconstrained roll. */
     public static final Breed UNKNOWN = Breed.of("unknown", "Unknown")
@@ -225,10 +229,13 @@ public final class Breeds {
         return Breed.of("appaloosa", "Appaloosa").commonness(Commonness.MODERATE)
                 .biomes("minecraft:taiga", "minecraft:forest", "minecraft:windswept_hills")
                 .extensionAny().agoutiAny()
-                .gene(ROAN, "Rn", "rn", 10).gene(ROAN, "rn", "rn", 90)
+                .gene(ROAN, "Rn", "rn", 8).gene(ROAN, "rn", "rn", 92)
+                // the defining breed: most Appaloosas show a pattern
+                .gene(LEOP, "LP", "lp", 55).gene(LEOP, "LP", "LP", 20).gene(LEOP, "lp", "lp", 25)
+                .gene(PATN1, "PATN1", "n", 45).gene(PATN1, "PATN1", "PATN1", 8).gene(PATN1, "n", "n", 47)
+                .gene(PATN2, "PATN2", "n", 20).gene(PATN2, "n", "n", 80)
                 .height(hh(14, 2), hh(16, 0)).speed(6).jump(7).health(7)
-                .note("Leopard complex (Lp + PATN1): NOT BUILT - leopard spots, striped hooves, white sclera, mottled skin. Roadmap 4.2.")
-                .note("CSNB rides on Lp/Lp; ERU is age-related. Both fold into heartiness for now.")
+                .note("ERU (equine recurrent uveitis) is age-related; folded into heartiness. CSNB on LP/LP is modelled (informational).")
                 .build();
     }
 
@@ -509,8 +516,11 @@ public final class Breeds {
                 .extensionAny().agoutiBayBias()
                 .gene(MATP, "Cr", "N", 12).gene(MATP, "N", "N", 88)
                 .gene(DUN, "D", "d2", 55).gene(DUN, "D", "D", 20).gene(DUN, "d1", "d2", 10).gene(DUN, "d2", "d2", 15)
+                .gene(LEOP, "LP", "lp", 22).gene(LEOP, "LP", "LP", 3).gene(LEOP, "lp", "lp", 75)
+                .gene(PATN1, "PATN1", "n", 25).gene(PATN1, "n", "n", 75)
+                .gene(PATN2, "PATN2", "n", 12).gene(PATN2, "n", "n", 88)
                 .height(hh(13, 0), hh(14, 2)).speed(7).jump(5).health(10)
-                .note("Strongly dun (dorsal stripe + leg bars) - the near-fixed dun does this. 'Often lp, To' - leopard complex NOT BUILT (roadmap 4.2).")
+                .note("Strongly dun (dorsal stripe + leg bars) - the near-fixed dun does this. Some carry the leopard complex.")
                 .note("HERDA, GBED: GBED is early-lethal (candidate gene); HERDA is age-related.")
                 .build();
     }
@@ -520,9 +530,12 @@ public final class Breeds {
                 .biomes("minecraft:plains", "minecraft:birch_forest", "minecraft:forest", "minecraft:meadow")
                 .extensionAny().agoutiAny()
                 .gene(MATP, "Cr", "N", 6).gene(MATP, "N", "N", 94)
+                // bred hard for bold leopard - very high LP, PATN1-dominant
+                .gene(LEOP, "LP", "lp", 50).gene(LEOP, "LP", "LP", 32).gene(LEOP, "lp", "lp", 18)
+                .gene(PATN1, "PATN1", "n", 58).gene(PATN1, "PATN1", "PATN1", 16).gene(PATN1, "n", "n", 26)
+                .gene(PATN2, "PATN2", "n", 10).gene(PATN2, "n", "n", 90)
                 .height(hh(14, 2), hh(15, 2)).speed(6).jump(7).health(6)
-                .note("Bold leopard spots on white or base colour - leopard complex (Lp + PATN1) NOT BUILT. Roadmap 4.2.")
-                .note("CSNB rides on Lp/Lp; ERU is age-related.")
+                .note("ERU is age-related; folded into heartiness. CSNB on LP/LP is modelled (informational).")
                 .build();
     }
 
@@ -584,8 +597,11 @@ public final class Breeds {
                 .gene(ROAN, "Rn", "rn", 16).gene(ROAN, "rn", "rn", 84)
                 .gene(TOB, "To", "to", 16).gene(TOB, "to", "to", 84)
                 .gene(KIT, "SB1", "N", 16).gene(KIT, "N", "N", 84)
+                .gene(LEOP, "LP", "lp", 16).gene(LEOP, "LP", "LP", 2).gene(LEOP, "lp", "lp", 82)
+                .gene(PATN1, "PATN1", "n", 25).gene(PATN1, "n", "n", 75)
+                .gene(PATN2, "PATN2", "n", 12).gene(PATN2, "n", "n", 88)
                 .height(hh(13, 2), hh(15, 2)).speed(7).jump(5).health(10)
-                .note("Wild-type diversity: every colour, compact build, hard feet. 'Often lp' - leopard complex NOT BUILT (roadmap 4.2).")
+                .note("Wild-type diversity: every colour, compact build, hard feet. Some carry the leopard complex.")
                 .note("HERDA, GBED: GBED is early-lethal (candidate gene); HERDA is age-related.")
                 .build();
     }
@@ -673,8 +689,11 @@ public final class Breeds {
                 .gene(MATP, "Cr", "N", 8).gene(MATP, "N", "N", 92)
                 .gene(TOB, "To", "to", 30).gene(TOB, "to", "to", 70)
                 .gene(KIT, "SB1", "N", 14).gene(KIT, "N", "N", 86)
+                .gene(LEOP, "LP", "lp", 14).gene(LEOP, "LP", "LP", 2).gene(LEOP, "lp", "lp", 84)
+                .gene(PATN1, "PATN1", "n", 22).gene(PATN1, "n", "n", 78)
+                .gene(PATN2, "PATN2", "n", 14).gene(PATN2, "n", "n", 86)
                 .height(hh(8, 0), hh(10, 2)).speed(3).jump(3).health(9)
-                .note("Very small, thick coat, short legs, heavy head - pound for pound the strongest breed. 'Often lp' - leopard complex NOT BUILT.")
+                .note("Very small, thick coat, short legs, heavy head - pound for pound the strongest breed. Some carry the leopard complex.")
                 .note("Hyperlipidemia, EMS: age-related, folded into heartiness.")
                 .build();
     }

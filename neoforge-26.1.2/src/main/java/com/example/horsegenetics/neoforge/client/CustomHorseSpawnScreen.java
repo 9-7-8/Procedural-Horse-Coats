@@ -109,6 +109,8 @@ public final class CustomHorseSpawnScreen extends Screen {
     private static final int DD_ROW_H = 12;
     private static final int DD_VISIBLE = 8;
     private static final int DD_W = 76;
+    /** The breed picker's dropdown is wider - breed names are long. */
+    private static final int BREED_DD_W = 118;
 
     private boolean baby = false;
     private boolean female = true;
@@ -127,6 +129,8 @@ public final class CustomHorseSpawnScreen extends Screen {
     private int ddScroll;
     private int ddX;
     private int ddY;
+    /** True while the breed picker's dropdown is open (mutually exclusive with {@link #ddRow}). */
+    private boolean breedDd;
 
     /**
      * GUI-space "dust" motes for the particle-locus preview. The real emitter
@@ -213,17 +217,36 @@ public final class CustomHorseSpawnScreen extends Screen {
     }
 
     /**
-     * Cycle the breed preset. Landing on a real breed rolls a fresh wild
-     * founder of it ({@link BreedFounder#roll}) straight into the editor -
-     * genotype, epigenome and sex - and stamps that breed on whatever is
-     * spawned (you can still hand-edit any locus afterwards). "(none)" leaves
-     * the current genome alone and spawns as Unknown.
+     * Open the breed picker - a scrollable dropdown of {@code "(none)"} plus
+     * every {@link Breeds#all() breed}, anchored at the Breed button.
+     * Choosing a real breed rolls a fresh wild founder of it
+     * ({@link BreedFounder#roll}) straight into the editor - genotype,
+     * epigenome and sex - and stamps that breed on whatever is spawned (you can
+     * still hand-edit any locus afterwards). {@code "(none)"} leaves the current
+     * genome alone and spawns as Unknown.
      */
-    private void cycleBreed() {
-        breedIndex = (breedIndex + 1) % (breedChoices.size() + 1);
-        if (breedIndex != 0) {
-            applyBreedPreset(breedChoices.get(breedIndex - 1));
+    private void openBreedDropdown(int anchorX, int anchorY) {
+        breedDd = true;
+        ddRow = null;
+        int h = DD_VISIBLE * DD_ROW_H;
+        ddX = anchorX;
+        ddY = Math.max(LIST_TOP, Math.min(anchorY, this.height - h - 4));
+        int max = Math.max(0, breedChoices.size() + 1 - DD_VISIBLE);
+        ddScroll = Math.max(0, Math.min(breedIndex - DD_VISIBLE / 2, max));
+    }
+
+    private void pickBreedFromDropdown(double mx, double my) {
+        int h = DD_VISIBLE * DD_ROW_H;
+        if (mx >= ddX && mx < ddX + BREED_DD_W && my >= ddY && my < ddY + h) {
+            int idx = ddScroll + (int) ((my - ddY) / DD_ROW_H);
+            if (idx >= 0 && idx <= breedChoices.size()) {
+                breedIndex = idx;
+                if (idx != 0) {
+                    applyBreedPreset(breedChoices.get(idx - 1));
+                }
+            }
         }
+        closeDropdown();
         rebuildWidgets();
     }
 
@@ -270,6 +293,7 @@ public final class CustomHorseSpawnScreen extends Screen {
     }
 
     private void openDropdown(Row row, int slot, int anchorX, int anchorY) {
+        breedDd = false;
         ddRow = row;
         ddSlot = slot;
         ddX = anchorX;
@@ -282,6 +306,7 @@ public final class CustomHorseSpawnScreen extends Screen {
 
     private void closeDropdown() {
         ddRow = null;
+        breedDd = false;
     }
 
     private void pickFromDropdown(double mx, double my) {
@@ -457,12 +482,14 @@ public final class CustomHorseSpawnScreen extends Screen {
                 .bounds(rx, ry, RIGHT_W, 20).build());
         ry += RIGHT_STEP;
         String breedName = breedIndex == 0 ? "(none)" : breedChoices.get(breedIndex - 1).name();
-        if (breedName.length() > 13) {
-            breedName = breedName.substring(0, 12) + "…";
+        if (breedName.length() > 12) {
+            breedName = breedName.substring(0, 11) + "…";
         }
+        final int breedBtnX = rx;
+        final int breedBtnY = ry;
         addRenderableWidget(Button.builder(
-                        Component.literal("Breed: " + breedName),
-                        b -> cycleBreed())
+                        Component.literal("Breed: " + breedName + " ▾"),
+                        b -> openBreedDropdown(breedBtnX, breedBtnY))
                 .bounds(rx, ry, RIGHT_W, 20).build());
         ry += RIGHT_STEP;
         addRenderableWidget(Button.builder(
@@ -500,6 +527,10 @@ public final class CustomHorseSpawnScreen extends Screen {
      */
     @Override
     public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+        if (breedDd) {
+            pickBreedFromDropdown(event.x(), event.y()); // any click resolves or dismisses it
+            return true;
+        }
         if (ddRow != null) {
             pickFromDropdown(event.x(), event.y()); // any click resolves or dismisses it
             return true;
@@ -541,6 +572,11 @@ public final class CustomHorseSpawnScreen extends Screen {
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+        if (breedDd) {
+            int max = Math.max(0, breedChoices.size() + 1 - DD_VISIBLE);
+            ddScroll = Math.max(0, Math.min(max, ddScroll - (int) Math.signum(scrollY)));
+            return true;
+        }
         if (ddRow != null) {
             int max = Math.max(0, ddRow.gene.alleles().size() - DD_VISIBLE);
             ddScroll = Math.max(0, Math.min(max, ddScroll - (int) Math.signum(scrollY)));
@@ -912,6 +948,39 @@ public final class CustomHorseSpawnScreen extends Screen {
 
         if (ddRow != null) {
             drawDropdown(g, mouseX, mouseY);
+        } else if (breedDd) {
+            drawBreedDropdown(g, mouseX, mouseY);
+        }
+    }
+
+    /** The open breed picker, drawn last so it sits over the widgets it covers. */
+    private void drawBreedDropdown(GuiGraphicsExtractor g, int mouseX, int mouseY) {
+        int count = breedChoices.size() + 1;
+        int h = DD_VISIBLE * DD_ROW_H;
+        g.fill(ddX - 1, ddY - 1, ddX + BREED_DD_W + 1, ddY + h + 1, 0xF00E0E16);
+        g.fill(ddX - 1, ddY - 1, ddX + BREED_DD_W + 1, ddY, 0xFF5A6478);
+        for (int i = 0; i < DD_VISIBLE; i++) {
+            int idx = ddScroll + i;
+            if (idx >= count) {
+                break;
+            }
+            int ry = ddY + i * DD_ROW_H;
+            boolean hov = mouseX >= ddX && mouseX < ddX + BREED_DD_W && mouseY >= ry && mouseY < ry + DD_ROW_H;
+            if (idx == breedIndex) {
+                g.fill(ddX, ry, ddX + BREED_DD_W, ry + DD_ROW_H, 0x557088FF);
+            } else if (hov) {
+                g.fill(ddX, ry, ddX + BREED_DD_W, ry + DD_ROW_H, 0x33FFFFFF);
+            }
+            String label = idx == 0 ? "(none)" : breedChoices.get(idx - 1).name();
+            drawFitted(g, label, ddX + 3, ry + 2, BREED_DD_W - 10,
+                    idx == breedIndex ? 0xFFFFFFFF : 0xFFC0C4D0);
+        }
+        int max = Math.max(0, count - DD_VISIBLE);
+        if (max > 0) {
+            int barH = Math.max(6, h * DD_VISIBLE / count);
+            int barY = ddY + Math.round((h - barH) * (ddScroll / (float) max));
+            g.fill(ddX + BREED_DD_W - 2, ddY, ddX + BREED_DD_W, ddY + h, 0x40FFFFFF);
+            g.fill(ddX + BREED_DD_W - 2, barY, ddX + BREED_DD_W, barY + barH, 0xFF8890A8);
         }
     }
 

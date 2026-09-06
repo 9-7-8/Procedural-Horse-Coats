@@ -121,11 +121,18 @@ public final class GenotypeCatalog {
      * How many visually distinct genotypes exist. Epigenetics are <b>not</b>
      * counted - two horses with the same genotype and different epigenetic
      * seeds are one entry.
+     *
+     * <p><b>A {@code long}</b>: the leopard complex took the true count past
+     * {@code Integer.MAX_VALUE} (a two-outcome coat gene doubles it, and it was
+     * already near the ceiling - see {@code wiki/roadmap.html} §10). The old
+     * {@code int} form saturated, which is fine for a bound a loop stays under
+     * but silently makes {@link #get(long)} unreachable past ~2.1 billion.
+     * Nothing in production indexes the catalogue - the gallery went to random
+     * pens - so this is a widening with no caller cost.
      */
-    public static int size() {
+    public static long size() {
         Layout l = layoutOrBuild();
-        long total = l.plainCombinations + l.masked.size();
-        return (int) Math.min(total, Integer.MAX_VALUE);
+        return l.plainCombinations + l.masked.size();
     }
 
     /**
@@ -152,7 +159,7 @@ public final class GenotypeCatalog {
     }
 
     /** The genotype at {@code index} in {@code [0, size())}. Built on the spot. */
-    public static Genotype get(int index) {
+    public static Genotype get(long index) {
         Layout l = layoutOrBuild();
         if (index < 0 || index >= size()) {
             throw new IndexOutOfBoundsException("index " + index + " outside catalogue of " + size());
@@ -174,9 +181,14 @@ public final class GenotypeCatalog {
      * fine, holding on to it costs nothing, and calling something like
      * {@code toList()} on a multi-million-entry catalogue is the caller's
      * problem to avoid.
+     *
+     * <p><b>Truncated at {@code Integer.MAX_VALUE}</b> - a {@link List} is
+     * {@code int}-indexed and the catalogue is now larger than that. Callers
+     * that need the full range use {@link #get(long)} and {@link #size()}
+     * directly; {@code entries()} is a convenience for the first ~2.1 billion.
      */
     public static List<Genotype> entries() {
-        int n = size();
+        int n = (int) Math.min(size(), Integer.MAX_VALUE);
         return new AbstractList<>() {
             @Override public Genotype get(int index) {
                 return GenotypeCatalog.get(index);

@@ -265,6 +265,31 @@ public interface Gene {
         return false;
     }
 
+    /**
+     * <b>Other genes whose alleles change <i>this</i> gene's coat output</b>,
+     * even though those genes paint nothing on their own - the leopard
+     * complex's {@code PATN1} / {@code PATN2} modifiers, which only mean
+     * anything on an {@code LP} horse and are read here through
+     * {@link #expressionIn(AllelePair, Genotype)}.
+     *
+     * <p>A modifier like that has {@link #affectsCoat()} {@code false} - every
+     * one of its own combinations is a wild type - so without this it would be
+     * left out of a horse's texture key and a {@code LP/LP PATN1/PATN1} horse
+     * would collide in the coat cache with a plain {@code LP/LP} one.
+     * {@code Genotype.coatCode()} unions these keys in for any gene that does
+     * paint, and {@code BreedFounder} treats a named modifier like a coat gene
+     * (forced wild unless the breed lists it).
+     *
+     * <p>Empty for almost every gene. <b>Discouraged for third-party genes</b> -
+     * a cross-locus read is hard to reason about and hard to breed toward; the
+     * built-in leopard complex earns the exception because it is a real,
+     * famous pattern that genuinely works this way. See
+     * {@code wiki/roadmap.html} §5.4.
+     */
+    default List<String> coatDependsOn() {
+        return List.of();
+    }
+
     // --- founder population ----------------------------------------------
 
     /**

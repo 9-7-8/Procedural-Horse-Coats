@@ -143,7 +143,7 @@ class GenotypeCatalogTest {
      */
     @Test
     void eachMaskingCombinationContributesExactlyOneWildTypeEntry() {
-        int size = GenotypeCatalog.size();
+        long size = GenotypeCatalog.size();
         int maskingCombinations = 0;
         for (Gene gene : Genes.codeOrder()) {
             for (AllelePair pair : GenotypeCatalog.distinctPairsOf(gene)) {
@@ -154,7 +154,7 @@ class GenotypeCatalogTest {
         }
         assertTrue(maskingCombinations > 0, "the model should still have masking combinations to check");
 
-        for (int i = size - maskingCombinations; i < size; i++) {
+        for (long i = size - maskingCombinations; i < size; i++) {
             Genotype only = GenotypeCatalog.get(i);
             Gene masker = null;
             for (Gene gene : Genes.codeOrder()) {
@@ -176,7 +176,7 @@ class GenotypeCatalogTest {
         Random rng = new Random(20260903L);
         long plain = size - maskingCombinations;
         for (int n = 0; n < 4000; n++) {
-            Genotype g = GenotypeCatalog.get((int) (rng.nextDouble() * plain));
+            Genotype g = GenotypeCatalog.get((long) (rng.nextDouble() * plain));
             for (Gene gene : Genes.codeOrder()) {
                 assertFalse(gene.expressionOf(g.pair(gene)).masks(),
                         "an unmasked entry carries a masking combination: " + g.toCode());
@@ -194,7 +194,7 @@ class GenotypeCatalogTest {
     @Test
     void everyEntryIsDistinctAndRoundTripsThroughTheCode() {
         Set<String> codes = new HashSet<>();
-        for (int i : sampleIndices(6000)) {
+        for (long i : sampleIndices(6000)) {
             Genotype g = GenotypeCatalog.get(i);
             String code = g.toCode();
             assertTrue(codes.add(code), "duplicate genotype at index " + i + ": " + code);
@@ -206,7 +206,7 @@ class GenotypeCatalogTest {
     @Test
     void noTwoEntriesShareADisplayLabel() {
         Set<String> labels = new HashSet<>();
-        for (int i : sampleIndices(6000)) {
+        for (long i : sampleIndices(6000)) {
             String label = GeneCodeDisplay.shortForm(GenotypeCatalog.get(i));
             assertTrue(labels.add(label), "duplicate label: " + label);
         }
@@ -229,7 +229,7 @@ class GenotypeCatalogTest {
     @Test
     void everyLabelWrapsOntoThreeSignLinesWithoutLosingAnything() {
         int widestLast = 0;
-        for (int i : sampleIndices(6000)) {
+        for (long i : sampleIndices(6000)) {
             Genotype g = GenotypeCatalog.get(i);
             List<String> lines = GeneCodeDisplay.wrap(g, 3, 15);
             assertTrue(lines.size() <= 3, "too many lines for " + GeneCodeDisplay.shortForm(g) + ": " + lines);
@@ -247,21 +247,21 @@ class GenotypeCatalogTest {
      * odometer's low digits and the masked tail live - plus a seeded random
      * spread over everything in between.
      */
-    private static int[] sampleIndices(int n) {
-        int size = GenotypeCatalog.size();
-        Set<Integer> picked = new LinkedHashSet<>();
-        int ends = Math.min(size / 2, n / 6);
-        for (int i = 0; i < ends; i++) {
+    private static long[] sampleIndices(int n) {
+        long size = GenotypeCatalog.size();
+        Set<Long> picked = new LinkedHashSet<>();
+        int ends = (int) Math.min(size / 2, n / 6);
+        for (long i = 0; i < ends; i++) {
             picked.add(i);
             picked.add(size - 1 - i);
         }
         Random rng = new Random(4242L);
         while (picked.size() < Math.min(n, size)) {
-            picked.add((int) (rng.nextDouble() * size));
+            picked.add((long) (rng.nextDouble() * size));
         }
-        int[] out = new int[picked.size()];
+        long[] out = new long[picked.size()];
         int k = 0;
-        for (int i : picked) {
+        for (long i : picked) {
             out[k++] = i;
         }
         return out;

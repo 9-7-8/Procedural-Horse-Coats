@@ -28,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 class SpecGeneTest {
 
-    private static final int BUILT_IN_GENES = 43;
+    private static final int BUILT_IN_GENES = 46;
 
     @AfterEach
     void unregister() {
@@ -44,7 +44,7 @@ class SpecGeneTest {
     @Test
     void aLoadedGeneJoinsTheRegistryAndTheCode() {
         assertEquals(BUILT_IN_GENES, Genes.codeOrder().size());
-        int catalogueBefore = GenotypeCatalog.size();
+        long catalogueBefore = GenotypeCatalog.size();
         int maskingBefore = maskingCombinations();
 
         SpecGene silver = register("silver.json"); // example.silver, priority 45
@@ -65,7 +65,7 @@ class SpecGeneTest {
         // Every unmasked entry doubles; each masking combination (KIT's
         // dominant white, EDNRB's lethal white) stays at one pen, because
         // while it shows nothing else is visible - including this gene.
-        assertEquals((catalogueBefore - maskingBefore) * 2 + maskingBefore, GenotypeCatalog.size(),
+        assertEquals((catalogueBefore - maskingBefore) * 2L + maskingBefore, GenotypeCatalog.size(),
                 "a dominant two-allele gene doubles every unmasked pen");
     }
 

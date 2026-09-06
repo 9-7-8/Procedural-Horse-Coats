@@ -83,8 +83,8 @@ public final class BreedFounder {
                 g = g.with(breed.founderTable(key).draw(rng));
                 continue;
             }
-            if (gene.affectsCoat()) {
-                g = g.with(wild(gene)); // visually unified - no unnamed pattern
+            if (gene.affectsCoat() || dependedOnByACoatGene(key)) {
+                g = g.with(wild(gene)); // visually unified - no unnamed pattern, no stray modifier
                 continue;
             }
             if (isMagical(gene)) {
@@ -161,6 +161,22 @@ public final class BreedFounder {
 
     private static boolean isMagical(Gene gene) {
         return Genes.magicalOrder().contains(gene);
+    }
+
+    /**
+     * Is {@code key} a modifier that some painting gene reads
+     * ({@link Gene#coatDependsOn()})? Such a gene paints nothing itself, so it
+     * would otherwise fall through to "keep the base roll" and could leak onto
+     * a breed that does not name it - the leopard complex's {@code PATN1} /
+     * {@code PATN2} on a non-Appaloosa. Forced wild here just like a coat gene.
+     */
+    private static boolean dependedOnByACoatGene(String key) {
+        for (Gene g : Genes.codeOrder()) {
+            if (g.affectsCoat() && g.coatDependsOn().contains(key)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static AllelePair wild(Gene gene) {

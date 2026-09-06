@@ -43,7 +43,6 @@ public final class CoatSampleTool {
             {"bay_low", "agouti=A/a"},          // same gene as bay/bay_seal, low extent
             {"kit_dominant_white", "kit=W22/N"},
             {"bay_splash", "agouti=A/a mitf=SW1/N"},
-            {"chestnut_test", "extension=e/e test=T/t"},
             {"zebra_bay", "agouti=A/a magic_zebra=Mzeb/n"},          // stripes over a bay
             {"zebra_bay_long", "agouti=A/a magic_zebra=Mzeb/n"},     // same gene, stripes reaching further down
             {"zebra_palomino", "extension=e/e matp=Cr/N magic_zebra=Mzeb/n"},
@@ -97,6 +96,15 @@ public final class CoatSampleTool {
             {"lut_bluepink_black", "lut=Blupnk/Blupnk"},
             {"lut_bluepink_bay", "agouti=A/a lut=Blupnk/Blupnk"},
             {"lut_bluepink_chestnut", "extension=e/e lut=Blupnk/Blupnk"},
+            // the leopard complex - LP zygosity x PATN1 x PATN2, all on a bay
+            {"lp_mottled_bay", "agouti=A/a leopard=LP/lp"},
+            {"lp_varnish_roan_bay", "agouti=A/a leopard=LP/LP"},
+            {"lp_leopard_bay", "agouti=A/a leopard=LP/lp patn1=PATN1/n"},
+            {"lp_fewspot_bay", "agouti=A/a leopard=LP/LP patn1=PATN1/n"},
+            {"lp_blanket_bay", "agouti=A/a leopard=LP/lp patn2=PATN2/n"},
+            {"lp_snowcap_bay", "agouti=A/a leopard=LP/LP patn2=PATN2/n"},
+            {"lp_semi_leopard_bay", "agouti=A/a leopard=LP/lp patn1=PATN1/n patn2=PATN2/n"},
+            {"lp_leopard_black", "leopard=LP/lp patn1=PATN1/n"},
     };
 
     /**
@@ -115,7 +123,8 @@ public final class CoatSampleTool {
             4, 19, 6, 6, 2, 8, 12,
             9, 2, 9,
             0, 0, 0, 0, 0,
-            0, 0, 0};
+            0, 0, 0,
+            1, 7, 3, 5, 2, 9, 4, 6};
 
     private CoatSampleTool() {}
 

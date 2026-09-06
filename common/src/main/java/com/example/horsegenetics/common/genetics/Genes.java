@@ -12,8 +12,11 @@ import com.example.horsegenetics.common.genetics.genes.GreyGene;
 import com.example.horsegenetics.common.genetics.genes.HealerGene;
 import com.example.horsegenetics.common.genetics.genes.Hmga2Gene;
 import com.example.horsegenetics.common.genetics.genes.LcorlGene;
+import com.example.horsegenetics.common.genetics.genes.LeopardGene;
 import com.example.horsegenetics.common.genetics.genes.LightGene;
 import com.example.horsegenetics.common.genetics.genes.CutieMarkGene;
+import com.example.horsegenetics.common.genetics.genes.Patn1Gene;
+import com.example.horsegenetics.common.genetics.genes.Patn2Gene;
 import com.example.horsegenetics.common.genetics.genes.LutGene;
 import com.example.horsegenetics.common.genetics.genes.MagicHealthGene;
 import com.example.horsegenetics.common.genetics.genes.MagicJumpGene;
@@ -123,6 +126,20 @@ public final class Genes {
     public static final Pax3Gene PAX3 = new Pax3Gene();
 
     /**
+     * <b>The leopard complex</b> - the appaloosa spotting family. Three loci:
+     * {@link LeopardGene} ({@code LP}, the one that patterns and the one a coat
+     * depends on) plus the two silent modifiers {@link Patn1Gene} and
+     * {@link Patn2Gene} that only mean anything on an {@code LP} horse. The
+     * modifiers paint nothing themselves - {@code LeopardGene.expressionIn}
+     * reads them, and {@code Gene.coatDependsOn()} folds them into the texture
+     * key. It is deliberately the model's <b>only</b> cross-locus-reading gene
+     * (see {@code wiki/roadmap.html} §5.4).
+     */
+    public static final LeopardGene LEOPARD = new LeopardGene();
+    public static final Patn1Gene PATN1 = new Patn1Gene();
+    public static final Patn2Gene PATN2 = new Patn2Gene();
+
+    /**
      * The <b>magical utility genes</b> - the second wave of magic, and the first
      * genes whose point is what the horse <i>does</i> rather than what it looks
      * like. Several of them ({@link MilkGene}, {@link MagicSizeGene},
@@ -197,10 +214,10 @@ public final class Genes {
     private static final List<Gene> BUILTINS = List.of(
             SEX, EXTENSION, AGOUTI, CHAMPAGNE, GREY, MATP,
             MAGIC_ZEBRA, PINK_HAIR, DUN, SILVER, MUSHROOM, ROAN, TOBIANO,
-            EDNRB, KIT, MITF, PAX3,
+            LEOPARD, EDNRB, KIT, MITF, PAX3,
             MILK, BODY_SIZE, MAGIC_SPEED, MAGIC_HEALTH, MAGIC_JUMP,
             MANE_COLOR, TAIL_COLOR, PARTICLE, LIGHT, HEALER, VERDANT, LUT, CUTIE_MARK,
-            MSTN, PDK4, CKM, RYR2, LCORL, HMGA2,
+            MSTN, PDK4, CKM, RYR2, LCORL, HMGA2, PATN1, PATN2,
             ACAN, B4GALT7, PLOD1, RAPGEF5, ST14, SHOX, MET);
 
     /** Ordering: lower priority first, ties broken alphabetically by key. */

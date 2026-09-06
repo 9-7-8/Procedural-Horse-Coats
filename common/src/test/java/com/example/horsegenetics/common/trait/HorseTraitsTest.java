@@ -196,8 +196,9 @@ class HorseTraitsTest {
                 contributors++;
             }
         }
-        // 13 non-coat genes, the four colour loci that carry a disorder, and
-        // milk (whose water/lava heterozygote is an embryonic lethal)
-        assertEquals(18, contributors);
+        // 13 non-coat genes, the four colour loci that carry a disorder, milk
+        // (whose water/lava heterozygote is an embryonic lethal) and the
+        // leopard complex (LP/LP carries CSNB)
+        assertEquals(19, contributors);
     }
 }
