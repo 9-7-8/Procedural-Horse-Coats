@@ -31,73 +31,62 @@
     </p>
 </div>
 
-<h2 id="creator">&sect;0-H &mdash; the gene creator (rebuilt 2026-09-06, NOT opened in a browser)</h2>
+<h2 id="creator">&sect;0-H &mdash; the gene creator (rebuilt 2026-09-06, partly owner-verified)</h2>
+
+<div class="note">
+    <span class="label">Owner-verified in the browser (2026-09-06)</span>
+    <p>
+        &ldquo;That looks correct.&rdquo; A <strong>general</strong> confirmation off
+        the live page, not an item-by-item walk &mdash; so it closes the three things
+        you cannot miss on opening it: the page <strong>loads</strong> at all (the
+        <code>expresses</code> <code>ReferenceError</code> is gone), the
+        <strong>parity line reads green</strong>, and the 3D preview
+        <strong>reads as a horse</strong> instead of the pile of bounding boxes it was.
+    </p>
+</div>
 
 <p>
-    The creator was broken outright &mdash; a dead reference in
-    <code>js/preview.js</code> threw on load, which took <code>HG.preview</code> with it
-    and left the page blank. That is fixed, and a good deal was rebuilt on top. None of
-    it has been <strong>looked at in a browser</strong>; it is verified by a stubbed-DOM
-    harness, the parity gate and the Java parser, which between them prove it does not
-    throw and does not lie &mdash; not that it looks right.
+    What a look cannot confirm is everything you have to <em>interact</em> with. Still
+    open:
 </p>
 
 <ul>
-    <li><strong>It opens at all.</strong> Load
-        <code>wiki/gene-creator/index.html</code> straight off disk. The console should
-        be clean, the gene panel and layers panel populated, and the flat 128px sheet
-        baked.</li>
-
-    <li><strong>The parity line under the sheet reads green.</strong> It should say
-        &ldquo;engine matches the game &mdash; 3868 checks across 48 cases&rdquo;. If it
-        is red the preview is not to be trusted and the message names what drifted;
-        if it says the fixtures did not load, run
-        <code>./gradlew :common:bakeSpecFixtures</code>.</li>
-
-    <li><strong>The horse looks like a horse.</strong> This is the one most worth a
-        real look. The preview used to draw each part&rsquo;s rest-pose <em>bounding
-        box</em>, which for a pitched part is far bigger than the part &mdash; the mane
-        was drawn at 4.5&times; its true volume, the tail 2.6&times;, the neck
-        2.0&times; &mdash; so it came out a pile of blocks. It now draws the real
-        pivoted cuboids. Check: the neck rises forward at its 30&deg; tilt, the head
-        and muzzle sit on the end of it, the ears stand up, the mane is a thin strip
-        behind the neck and not a slab, the tail angles down and back, and the four
-        legs are single boxes standing on the grid rather than floating or sunk.</li>
-
-    <li><strong>Framing follows the model.</strong> Switch Age between Adult and Foal:
-        the camera should re-frame, both should sit on the grid, and neither should be
-        clipped or lost in the distance. Orbit and zoom should still work.</li>
-
-    <li><strong>Clicking the horse still reports the right spot.</strong> The pick path
-        goes UV &rarr; texel &rarr; the pipeline&rsquo;s own sampler, so it should name
-        the part you clicked. A round-trip check over every face of both meshes passes
-        offline; confirm it by eye on a leg and on the barrel.</li>
-
-    <li><strong>Typing works.</strong> Every edit used to re-render the panel and
-        destroy the focused input, so a text field took one character per click. Type a
-        few words into Display name, the blurb and a layer name: the caret should stay
+    <li><strong>Typing.</strong> Every edit used to re-render the panel and destroy the
+        focused input, so a text field took one character per click. Type a few words
+        into Display name, the blurb and a layer name &mdash; the caret should stay
         put.</li>
 
     <li><strong>The Gameplay section</strong> (left panel, under &ldquo;What it
         does&rdquo;): blurb, rarity, the gene-carrot toggle with its one-copy /
-        two-copies choice and flavour-item list, and an optional splice table seeded
-        from the founder shares. Everything at its default should stay <em>out</em> of
-        the exported JSON &mdash; watch the Export box as you change them.</li>
+        two-copies choice and flavour-item list, and the optional splice table seeded
+        from the founder shares. Everything left at its default should stay
+        <em>out</em> of the exported JSON &mdash; watch the Export box as you change
+        them.</li>
 
     <li><strong>The Effects section</strong> (right panel, under Layers): add each of
-        the eight verbs, check the trigger picker grows a ticks box for
+        the eight verbs; check the trigger picker grows a ticks box for
         <code>interval</code> and an item box for <code>on_interact</code>, and that
-        &ldquo;Only when&rdquo; builds a flag list. Load the shipped
+        &ldquo;Only when&rdquo; builds a flag list. Then load the shipped
         <a href="gene-waterborn.html">Waterborn</a> or
-        <a href="gene-suntouched.html">Suntouched</a> gene file and confirm its effects
-        come back intact.</li>
+        <a href="gene-suntouched.html">Suntouched</a> file and confirm its effects come
+        back intact.</li>
+
+    <li><strong>Clicking the horse.</strong> The pick path goes UV &rarr; texel &rarr;
+        the pipeline&rsquo;s own sampler. A round-trip over every face of both meshes
+        passes offline; confirm by eye on a leg and on the barrel that it names the
+        part you clicked.</li>
+
+    <li><strong>Foal framing.</strong> Switch Age to Foal: the camera should re-frame,
+        the foal should stand on the grid, and it should be neither clipped nor lost in
+        the distance.</li>
 </ul>
 
 <p class="muted">
-    Not checked anywhere: how any of it <em>looks</em> &mdash; panel widths, whether the
-    effects cards crowd the export box, whether the parity banner is legible. And the
-    3D view needs three.js from a CDN; with no connection the page falls back to the
-    flat sheet, which is still a real bake.
+    Owner&rsquo;s note on 2026-09-06: it wants a <strong>usability pass</strong> next
+    &mdash; see <a href="roadmap.html#designer">roadmap &sect;9.1</a>. Also still
+    unchecked anywhere: how it behaves with <strong>no connection</strong>, where
+    three.js does not load and the page falls back to the flat sheet (which is still a
+    real bake).
 </p>
 
 <hr>

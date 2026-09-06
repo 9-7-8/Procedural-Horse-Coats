@@ -539,6 +539,50 @@
     tree editor is only worth building once a gene needs one.
 </p>
 
+<h3 id="creator-ux">9.2 A usability pass on the creator</h3>
+
+<div class="note">
+    <span class="label">Owner asked for this 2026-09-06, right after confirming the rebuild</span>
+    <p>
+        &ldquo;We&rsquo;ll edit it more to make it a little more user-friendly
+        later.&rdquo; The tool is <em>correct</em> now &mdash; it loads, it previews a
+        real horse, it writes every part of the format, and it proves its own engine
+        against the game&rsquo;s on boot. What it has never had is a pass for whether
+        it is pleasant to use.
+    </p>
+</div>
+
+<p>
+    Nothing here is specified yet, deliberately &mdash; the point of the pass is to
+    look at it with fresh eyes rather than to implement a list written in advance.
+    Known rough edges to start from:
+</p>
+
+<ul>
+    <li><strong>The three columns are dense and fixed.</strong> Gene, horse and
+        layers-plus-effects-plus-export all compete for width, and the right column now
+        carries three stacked sections. Nothing collapses, so a gene with several
+        layers and several effects pushes the export box a long way down.</li>
+    <li><strong>Effects and layers look alike.</strong> They share the
+        <code>.layer</code> card, which is honest about them being peers but makes the
+        right column read as one long undifferentiated stack.</li>
+    <li><strong>The forms are flat.</strong> Every parameter of every mask, op and
+        effect is always visible at the same weight; nothing is folded away behind
+        &ldquo;advanced&rdquo;, and the common case is not faster than the rare
+        one.</li>
+    <li><strong>Errors are a list at the bottom.</strong> The validator names the
+        problem well but does not point at the field that caused it.</li>
+    <li><strong>No undo</strong>, and no warning before &ldquo;New gene&rdquo; discards
+        what you have.</li>
+</ul>
+
+<p class="muted">
+    The constraint that does not move: it has to keep working from
+    <code>file://</code>. That is why every script is a classic one and every asset is
+    inlined &mdash; see <a href="gene-format.html">the format</a>. A UI framework that
+    needs a bundler or a dev server is out.
+</p>
+
 <div class="note">
     <span class="label">Breed creation in the editor &mdash; ship breeds as packages</span>
     <p>

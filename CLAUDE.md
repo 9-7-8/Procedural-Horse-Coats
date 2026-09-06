@@ -2529,6 +2529,18 @@ project. Its shape:
   - **Not in this slice:** milking (§7.1), shearing/sleeping bond (shearing
     unbuilt), a stored herd alpha, any stamina resource.
 
+- **Owner-verified in the browser (2026-09-06): the gene creator opens and
+  renders correctly on the live wiki page.** Owner's words: "that looks
+  correct". Taken as a **general confirmation that the tool loads and the horse
+  reads right**, not an item-by-item walk of the checklist - the same standing
+  the white-pattern rewrite got on 2026-09-04. So it closes: **it opens at all**
+  (the `expresses` ReferenceError is gone), **the parity line reads green** in
+  the page, and **the 3D preview reads as a horse** rather than the pile of
+  bounding boxes it was. What that cannot cover, and what stays open in
+  `wiki/verification.html` §0-H, is everything you have to *interact* with -
+  typing into a field, the Gameplay forms, adding the eight effect verbs, and
+  loading Waterborn to confirm its effects survive the round-trip.
+
 - **Owner-verified in-game (2026-09-06):**
   - **The topline recalibration's single-copy splash reads as socks** - white
     confined to the legs, no belly/back bleed. Closes the
