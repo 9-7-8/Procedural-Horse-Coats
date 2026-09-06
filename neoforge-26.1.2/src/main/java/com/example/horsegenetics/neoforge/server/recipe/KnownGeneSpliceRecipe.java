@@ -60,18 +60,18 @@ public class KnownGeneSpliceRecipe extends CustomRecipe {
                 hair++;
             }
         }
-        if (gold != 1 || paper != 1 || hair < 1 || gene == null || !gene.hasGeneCarrot()) {
+        if (gold != 1 || paper != 1 || hair != 1 || gene == null || !gene.hasGeneCarrot()) {
             return null;
         }
-        // rarity item + at least one flavour: gold carrot + paper + hair + rarity + >=1 more
-        boolean hasRarity = false;
+        // The default recipe is exactly four items: golden carrot + this gene's
+        // paper + a hair item + the gene's rarity ingot. Nothing else in the grid.
+        int rarity = 0;
         for (int i = 0; i < input.size(); i++) {
             if (input.getItem(i).is(RarityItems.forRarity(gene.rarity()))) {
-                hasRarity = true;
-                break;
+                rarity++;
             }
         }
-        if (!hasRarity || filled < 5) {
+        if (rarity != 1 || filled != 4) {
             return null;
         }
         return gene;

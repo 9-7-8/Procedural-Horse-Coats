@@ -132,55 +132,6 @@ public final class HorseBrowserMenu extends AbstractContainerMenu {
         }
     }
 
-    /**
-     * "View splice recipe": empty the grid back to the inventory, then pull one
-     * of each Known Gene Splice ingredient the player actually has into the grid.
-     * Anything they don't have is left empty (the screen ghosts it). Never
-     * crafts - the result slot recomputes as normal afterwards.
-     */
-    public void fillSplicePreview(com.example.horsegenetics.common.genetics.Gene gene) {
-        net.minecraft.world.entity.player.Inventory inv = player.getInventory();
-        // clear the grid first
-        for (int i = 0; i < craft.getContainerSize(); i++) {
-            ItemStack held = craft.removeItemNoUpdate(i);
-            if (!held.isEmpty() && !inv.add(held)) {
-                player.drop(held, false);
-            }
-        }
-        java.util.List<ItemStack> want = SpliceRecipeDisplay.forGene(gene);
-        for (int i = 0; i < want.size() && i < craft.getContainerSize(); i++) {
-            ItemStack ing = want.get(i);
-            if (ing.isEmpty()) {
-                continue;
-            }
-            int found = findIngredient(inv, ing);
-            if (found >= 0) {
-                ItemStack src = inv.getItem(found);
-                craft.setItem(i, src.split(1));
-            }
-        }
-        slotsChanged(craft);
-    }
-
-    private static int findIngredient(net.minecraft.world.entity.player.Inventory inv, ItemStack ing) {
-        boolean paper = ing.getItem() instanceof com.example.horsegenetics.neoforge.item.ResearchPaperItem;
-        String wantGene = paper ? ing.get(com.example.horsegenetics.neoforge.data.ModDataComponents.RESEARCH_GENE.get()) : null;
-        for (int s = 0; s < inv.getContainerSize(); s++) {
-            ItemStack stack = inv.getItem(s);
-            if (stack.isEmpty() || !stack.is(ing.getItem())) {
-                continue;
-            }
-            if (paper) {
-                String g = stack.get(com.example.horsegenetics.neoforge.data.ModDataComponents.RESEARCH_GENE.get());
-                if (g == null || !g.equals(wantGene)) {
-                    continue;
-                }
-            }
-            return s;
-        }
-        return -1;
-    }
-
     /** Called by {@link ResultSlot} once the player has taken the crafted stack. */
     void onResultTaken() {
         assembling = true;

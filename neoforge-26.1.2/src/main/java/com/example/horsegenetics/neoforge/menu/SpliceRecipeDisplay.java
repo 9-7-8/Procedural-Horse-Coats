@@ -11,12 +11,15 @@ import net.minecraft.world.item.Items;
 
 /**
  * The canonical 3x3 layout of a gene's <b>Known Gene Splice carrot</b> recipe,
- * for the Horse Browser's &ldquo;View splice recipe&rdquo; button - what
- * {@link com.example.horsegenetics.neoforge.server.recipe.KnownGeneSpliceRecipe}
- * needs, one representative stack per ingredient, in grid-slot order.
+ * shown as ghosts in the Horse Browser's Crafting grid when a gene is selected -
+ * exactly what {@link com.example.horsegenetics.neoforge.server.recipe.KnownGeneSpliceRecipe}
+ * requires, in grid-slot order.
  *
- * <p>Client-safe: it only names vanilla items and this mod's own, so the screen
- * can build the same list the server fills the grid from.
+ * <p>The default recipe is four items and nothing else: horse hair, this
+ * gene's research paper, a golden carrot, and the rarity ingot (gold at the
+ * default tier).
+ *
+ * <p>Client-safe: it only names vanilla items and this mod's own.
  */
 public final class SpliceRecipeDisplay {
 
@@ -26,11 +29,10 @@ public final class SpliceRecipeDisplay {
     /** Nine stacks in grid order (row-major); trailing slots are {@link ItemStack#EMPTY}. */
     public static List<ItemStack> forGene(Gene gene) {
         List<ItemStack> out = new ArrayList<>(9);
-        out.add(new ItemStack(Items.GOLDEN_CARROT));
-        out.add(researchPaper(gene));
         out.add(new ItemStack(ModItems.HORSE_HAIR.get()));
+        out.add(researchPaper(gene));
+        out.add(new ItemStack(Items.GOLDEN_CARROT));
         out.add(new ItemStack(RarityItems.forRarity(gene.rarity())));
-        out.add(new ItemStack(Items.SUGAR)); // one representative "flavour"
         while (out.size() < 9) {
             out.add(ItemStack.EMPTY);
         }
