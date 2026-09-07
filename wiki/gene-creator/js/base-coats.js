@@ -150,11 +150,21 @@ window.HG = window.HG || {};
   // ---- GreyCoat --------------------------------------------------------
 
   var KEEP_YOUNG = 0.46, KEEP_OLD = 0.10, RED_YOUNG = 0.22, RED_OLD = 0.02, DAPPLE_DEPTH = 0.42;
+  var HEAD_LEAD = 0.34;
+
+  // The head greys FIRST, so it takes a lead rather than a point boost. Java
+  // adds EYE_LEAD on a radial falloff from the forehead; CoatRegions.faceMask
+  // is not ported, so this backdrop carries the flat half only.
+  function headLead(part) {
+    switch (part) {
+      case "HEAD": case "MUZZLE": case "LEFT_EAR": case "RIGHT_EAR": return HEAD_LEAD;
+      default: return 0;
+    }
+  }
 
   function pointWeight(skin, part, point) {
     switch (part) {
       case "MANE": case "TAIL": case "LEFT_EAR": case "RIGHT_EAR": case "MUZZLE": return 1;
-      case "HEAD": return 0.5;
       default:
         if (geo.LEGS.indexOf(part) < 0) return 0;
         var b = geo.bounds(skin, part);
@@ -182,6 +192,8 @@ window.HG = window.HG || {};
         (point.z + (n - m) * warp) * dappleScale);
       var web = noise.smoothstep(0.35, 0.78, d);
       var keep = lerp(keepDapple, keepWeb, web);
+      var lead = headLead(part);
+      if (lead > 0) keep *= 1 - lead;
       var boost = pointBoost * pointWeight(skin, part, point);
       if (boost > 0) keep = Math.min(1, keep * (1 + boost));
 

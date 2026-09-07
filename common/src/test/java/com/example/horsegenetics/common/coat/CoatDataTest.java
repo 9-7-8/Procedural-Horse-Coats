@@ -16,7 +16,7 @@ class CoatDataTest {
     private static final String BLACK = Genotype.wildType().toCode();
     private static final String BAY = Codes.of("extension", "E/e", "agouti", "A/a");
     /** Same bay, but also carrying grey - whose epigenetics are invisible on a foal-free adult check. */
-    private static final String BAY_GREY = Codes.of("extension", "E/e", "agouti", "A/a", "grey", "G/g");
+    private static final String BAY_GREY = Codes.of("extension", "E/e", "agouti", "A/a", "grey", "G3/N");
 
     private static CoatData coat(String code, long seed) {
         return new CoatData(Genotype.parse(code), Epigenome.fromSeed(seed));

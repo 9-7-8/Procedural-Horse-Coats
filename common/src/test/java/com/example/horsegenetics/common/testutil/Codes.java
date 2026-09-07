@@ -9,7 +9,7 @@ import com.example.horsegenetics.common.genetics.Genotype;
  * segments (which change whenever a gene is added).
  *
  * <pre>{@code
- *   Codes.of("agouti", "A/a", "grey", "G/g")
+ *   Codes.of("agouti", "A/a", "grey", "G3/N")
  * }</pre>
  *
  * matches a gene by the suffix after the last {@code .} of its key.

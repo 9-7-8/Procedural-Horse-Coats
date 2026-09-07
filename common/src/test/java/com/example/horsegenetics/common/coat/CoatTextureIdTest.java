@@ -118,8 +118,8 @@ class CoatTextureIdTest {
     @Test
     void roundTrips() {
         for (String key : List.of(
-                "E/e-A/a-w/w-t/t-c/c-spl/spl-g/g-Cr/N-N/N-n/n-n/n:adult",
-                "e/e-a/a-W/W-T/t-Ch/c-Spl/spl-G/g-N/N-prl/N-n/n-n/n@18446744073709551615:foal",
+                "E/e-A/a-w/w-t/t-c/c-spl/spl-N/N-Cr/N-N/N-n/n-n/n:adult",
+                "e/e-a/a-W/W-T/t-Ch/c-Spl/spl-G3/N-N/N-prl/N-n/n-n/n@18446744073709551615:foal",
                 "",
                 "..__@:/-")) {
             assertEquals(key, CoatTextureId.decode(CoatTextureId.encode(key)));

@@ -58,7 +58,7 @@ class CoatTextureComposerTest {
     private static final String CHAMPAGNE_BLACK = override("champagne=Ch/c");
     private static final String CHAMPAGNE_BAY = override("agouti=A/a", "champagne=Ch/c");
     private static final String SPLASH = override("agouti=A/a", "mitf=SW1/N");
-    private static final String GREY_BLACK = override("grey=G/g");
+    private static final String GREY_BLACK = override("grey=G3/N");
     private static final String BUCKSKIN = override("agouti=A/a", "matp=Cr/N");
     private static final String PERLINO = override("agouti=A/a", "matp=Cr/Cr");
     private static final String PEARL_BAY = override("agouti=A/a", "matp=prl/prl");
@@ -452,6 +452,6 @@ class CoatTextureComposerTest {
                 "bay foal tail should be black-ish vs the body");
         assertFalse(Arrays.equals(composeFoal(BLACK, 0L), foal), "foal coats vary by genotype");
         // grey does not touch a foal
-        assertArrayEquals(composeFoal(BAY, 12345L), composeFoal(override("agouti=A/a", "grey=G/g"), 12345L));
+        assertArrayEquals(composeFoal(BAY, 12345L), composeFoal(override("agouti=A/a", "grey=G3/N"), 12345L));
     }
 }

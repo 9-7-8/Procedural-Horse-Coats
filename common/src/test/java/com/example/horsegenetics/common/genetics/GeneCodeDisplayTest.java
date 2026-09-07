@@ -51,7 +51,7 @@ class GeneCodeDisplayTest {
     void maskingGenesAndGreyPrintBothRealTokensDominantFirst() {
         assertEquals("EEaa W22N", sf("kit", "W22/N"));
         assertEquals("EEaa ON", sf("ednrb", "O/N"));
-        assertEquals("EEaa Gg", sf("grey", "G/g"));
+        assertEquals("EEaa G3N", sf("grey", "G3/N"));
     }
 
     /**
@@ -67,9 +67,9 @@ class GeneCodeDisplayTest {
     @Test
     void everythingAtOnceUsesTheDisplayOrder() {
         // KIT, MITF, champagne, MATP, grey
-        assertEquals("EeAa W22N nSW1 nCh nCr Gg",
+        assertEquals("EeAa W22N nSW1 nCh nCr G3N",
                 sf("extension", "E/e", "agouti", "A/a", "kit", "W22/N",
-                   "champagne", "Ch/c", "mitf", "SW1/N", "grey", "G/g", "matp", "Cr/N"));
+                   "champagne", "Ch/c", "mitf", "SW1/N", "grey", "G3/N", "matp", "Cr/N"));
     }
 
     @Test

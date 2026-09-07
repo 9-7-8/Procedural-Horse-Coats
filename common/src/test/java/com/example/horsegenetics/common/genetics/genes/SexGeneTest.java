@@ -53,7 +53,7 @@ class SexGeneTest {
         for (String code : new String[]{
                 Codes.of("sex", "X/X"),
                 Codes.of("sex", "X/Y"),
-                Codes.of("sex", "X/Y", "agouti", "A/a", "grey", "G/g"),
+                Codes.of("sex", "X/Y", "agouti", "A/a", "grey", "G3/N"),
                 Genotype.wildType().toCode(),
                 ""}) {
             assertEquals(Genotype.parse(code).sex(), Genotype.sexOf(code), code);

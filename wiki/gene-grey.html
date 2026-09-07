@@ -13,13 +13,16 @@
 <article class="doc">
 
 <p class="eyebrow natural">Natural gene <span class="sep">/</span> phase 1</p>
-<h1>Grey &mdash; dapple grey</h1>
+<h1>Grey &mdash; the coat that goes white</h1>
 <p class="lede">
-    <span class="allele dom">G_</span> renders an adult as a <strong>dapple
-    grey</strong>: a neutral coat with rounded dapples, at a stage that varies from
-    dark steel to nearly white. A foal is born whatever colour it would be without
-    grey. It is the only gene that reads age &mdash; and the only one that is a
-    <em>remap</em> rather than a restriction.
+    A horse is born its ordinary colour and then progressively grows white hairs
+    until it is a steel, a dapple, a light or a near-white grey. Grey is a
+    <strong>copy number</strong>, not a point mutation, and the number of copies is
+    the <em>rate</em>: <span class="allele dom">G3</span> is a triplication and fast,
+    <span class="allele dom">G2</span> a duplication and slow, and the four grey
+    dosages are drawn at four different stages. It is the only gene that reads age,
+    the only one that is a <em>remap</em> rather than a restriction, and the only
+    coat gene that is also a health gene.
 </p>
 
 <!-- The gene, on the three base coats, as a horse you can spin. One div and one
@@ -29,25 +32,132 @@
 
 <dl class="spec">
     <div><dt>Gene key</dt><dd>horsegenetics.grey</dd></div>
-    <div><dt>Alleles</dt><dd><span class="allele dom">G</span> <span class="allele wild">g</span></dd></div>
-    <div><dt>Outcomes</dt><dd>wild, <code>grey</code></dd></div>
-    <div><dt>Shows when</dt><dd><code>G/g</code>, <code>G/G</code> &mdash; painted on adults only</dd></div>
-    <div><dt>Default allele</dt><dd>g</dd></div>
-    <div><dt>Wild frequency</dt><dd>1 in 16 per allele</dd></div>
+    <div><dt>Alleles</dt><dd><span class="allele dom">G3</span> <span class="allele dom">G2</span> <span class="allele wild">N</span></dd></div>
+    <div><dt>Outcomes</dt><dd>wild, <code>grey-slow</code>, <code>grey</code>, <code>grey-fast</code>, <code>grey-rapid</code></dd></div>
+    <div><dt>Shows when</dt><dd><code>GreyGene.dosage</code> &ge; 1 &mdash; painted on adults only</dd></div>
+    <div><dt>Default allele</dt><dd>N</dd></div>
+    <div><dt>Wild frequency</dt><dd>1 in <code>GreyGene.WILD_G3_ONE_IN</code> per <span class="allele dom">G3</span>, 1 in <code>WILD_G2_ONE_IN</code> per <span class="allele dom">G2</span>; Hardy&ndash;Weinberg over the three</dd></div>
     <div><dt>Founder draws</dt><dd>1 &times; nextFloat()</dd></div>
     <div><dt>Deterministic</dt><dd><strong>no</strong> when expressed</dd></div>
-    <div><dt>Epigenetic draws</dt><dd>1 long + 4 nextFloat</dd></div>
+    <div><dt>Epi draws</dt><dd>1 long + 8 &times; nextFloat</dd></div>
+    <div><dt>Health</dt><dd>an <strong>informational</strong> melanoma-risk condition, in three tiers</dd></div>
     <div><dt>Generator</dt><dd>coat.pattern.GreyCoat</dd></div>
 </dl>
 
 <div class="note warn">
     <span class="label">Built, not yet seen in-game</span>
     <p>
-        The <code>GreyCoat</code> rework replaced a flat near-white pass. It compiles,
-        is unit-tested and sample-baked, but has not been play-tested &mdash; the
-        checklist is on <a href="verification.html">To be verified</a>.
+        The three-allele rework replaced a two-allele <code>G</code>/<code>g</code>
+        grey with one flat progression roll. It compiles, is unit-tested and in the
+        golden file, but no grey of any dosage has been looked at in a game &mdash;
+        the checklist is on <a href="verification.html#grey">To be verified</a>.
     </p>
 </div>
+
+<h2 id="alleles">Three alleles, because the locus is a copy number</h2>
+
+<p>
+    Grey is a <strong>copy-number variation</strong> in and around intron 6 of
+    <em>STX17</em> (syntaxin 17), with regulatory effects reaching neighbouring genes
+    such as <em>NR4A3</em>. What varies between horses is how many copies of that
+    stretch they carry, and a commercial copy-number test reports exactly that.
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Allele</th><th>Copy state</th><th>Greying</th><th>Melanoma</th></tr></thead>
+<tbody>
+<tr><td><span class="allele wild">N</span></td><td>normal</td><td>none</td><td>baseline</td></tr>
+<tr><td><span class="allele dom">G2</span></td><td>duplication</td><td>slower</td><td>lower</td></tr>
+<tr><td><span class="allele dom">G3</span></td><td>triplication</td><td>faster</td><td>higher</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    Either copy-bearing allele makes a horse grey, so in ordinary inheritance terms
+    grey is <strong>autosomal dominant</strong> &mdash; not recessive, not
+    codominant. But <strong>dominant does not mean the genotypes look alike</strong>.
+    They differ in <em>rate</em>, and rate is dosage:
+    <span class="allele dom">G3</span> counts two,
+    <span class="allele dom">G2</span> counts one, and the sum runs 0 to 4.
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Pair</th><th><code>dosage</code></th><th>Outcome</th><th>Drawn as</th></tr></thead>
+<tbody>
+<tr><td><code>N/N</code></td><td>0</td><td>wild</td><td>its base colour, for life</td></tr>
+<tr><td><code>N/G2</code></td><td>1</td><td><code>grey-slow</code></td><td>dark steel to mid dapple</td></tr>
+<tr><td><code>N/G3</code>, <code>G2/G2</code></td><td>2</td><td><code>grey</code></td><td>the ordinary dapple grey</td></tr>
+<tr><td><code>G2/G3</code></td><td>3</td><td><code>grey-fast</code></td><td>light grey</td></tr>
+<tr><td><code>G3/G3</code></td><td>4</td><td><code>grey-rapid</code></td><td>near white</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    Inheritance is then just Mendel on three alleles. A horse carrying two grey
+    alleles &mdash; <code>G2/G2</code>, <code>G2/G3</code> or <code>G3/G3</code>
+    &mdash; passes one to every foal, so every foal is grey; a heterozygote passes it
+    half the time. What the pedigree carries is not <em>grey yes/no</em> but
+    <em>which copy number</em>, which is why the gene stores an allele pair and not a
+    flag: a <code>G2</code> line greys slowly and carries the lower risk, a
+    <code>G3</code> line greys fast and carries the higher one, and choosing between
+    them is a real breeding decision.
+</p>
+
+<h2 id="rate">A rate, without a clock</h2>
+
+<div class="note rule">
+    <span class="label">Settled</span>
+    <p>
+        <strong>Horse aging is deliberately out of scope</strong> &mdash; it risks
+        feeling bad for a player attached to a horse. Greying, though, is a
+        <em>rate</em>, and a rate needs a timeline before it is a picture.
+    </p>
+    <p>
+        So the mod draws each dosage class at the stage that rate would plausibly
+        have reached on an ordinary adult, and <strong>fixes it for life</strong>. A
+        slow grey is a steel or dapple grey forever; a rapid grey is the near-white
+        one. Nothing evolves in real time, and the horse a player bonded with does
+        not change under them.
+    </p>
+    <p>
+        The option is not foreclosed. Reopening it means giving the composer a real
+        age input, which today knows only adult vs foal &mdash; the windows below
+        would become a rate and the age would pick the point on it. Nothing else in
+        the design would have to move.
+    </p>
+</div>
+
+<p>
+    The dosage picks a <strong>window</strong> and the horse&rsquo;s own epigenetics
+    pick where inside it the horse sits. The windows <strong>overlap on
+    purpose</strong>: individual variation inside a real genotype class is large
+    enough that a slow grey and a fast one genuinely can meet in the middle. What is
+    reliably true is the ordering of the means, and that is what
+    <code>GreyCoat.WINDOW</code> encodes.
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th><code>dosage</code></th><th>Window</th><th>Reads as</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>0.06 &hellip; 0.52</td><td>dark steel &rarr; mid dapple</td></tr>
+<tr><td>2</td><td>0.28 &hellip; 0.74</td><td>the ordinary dapple grey</td></tr>
+<tr><td>3</td><td>0.50 &hellip; 0.90</td><td>light grey, dapples fading</td></tr>
+<tr><td>4</td><td>0.68 &hellip; 1.00</td><td>near white</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    Even the least-greyed adult keeps well short of its birth colour
+    (<code>KEEP_YOUNG</code> = 0.46). With no age input, every grey <em>adult</em>
+    has to read as a grey; a horse indistinguishable from a plain bay would just be a
+    bay with a hidden flag on it.
+</p>
 
 <h2 id="remap">Grey is a remap, and that is the whole point</h2>
 
@@ -82,25 +192,102 @@
 
 <p>
     What was underneath still shows: a greying chestnut ends lighter than a greying
-    black, and a barely-greyed horse keeps a rose or steel cast.
+    black, and a barely-greyed horse keeps a rose or steel cast. The stored base
+    colour is untouched &mdash; grey is a display layer over a bay or a chestnut that
+    remains a bay or a chestnut in its genotype, its code and its foals.
 </p>
 
-<h2>The four knobs</h2>
+<h2 id="regions">Regions do not grey together</h2>
 
 <p>
-    Drawn off the expressing <span class="allele dom">G</span> copy&rsquo;s
-    epigenetics, in this order: <code>nextLong()</code> for the dapple field&rsquo;s
-    seed, then four <code>nextFloat()</code>s.
+    A uniform mask over the whole horse is the thing that makes a rendered grey look
+    like a recoloured decal. Real greying is regional, and the regions are
+    correlated rather than independent &mdash; they all move with the same
+    progression, but each has its own offset.
 </p>
 
 <div class="table-wrap">
 <table>
-<thead><tr><th>Knob</th><th>Range</th><th>What it does</th></tr></thead>
+<thead><tr><th>Region</th><th>What the coat does</th><th>How it is drawn</th></tr></thead>
 <tbody>
-<tr><td><strong>progression</strong></td><td>0 &hellip; 1</td><td>keep = <code>lerp(0.46, 0.10, p)</code> &mdash; dark steel grey through to nearly white. <strong>Fixed for life</strong> (there is no age input). This is what makes one grey different from the next.</td></tr>
+<tr>
+    <td><strong>Head</strong></td>
+    <td>White hairs round the eyes are the usual first sign, and the head stays
+        among the palest areas the whole way through.</td>
+    <td><code>headLead</code>: a flat <code>HEAD_LEAD</code> = 0.34 over head, muzzle
+        and ears, plus <code>EYE_LEAD</code> = 0.30 more on a radial falloff from the
+        forehead (<code>CoatRegions.faceMask</code>, reach 3.2). A standing offset,
+        not one that fades out.</td>
+</tr>
+<tr>
+    <td><strong>Legs</strong></td>
+    <td>Grey along with the body but hold visible base colour longer.</td>
+    <td>A ramp that is full at the hoof and gone by mid-cannon, scaled by
+        <code>1 - progression</code> &mdash; so it is the <em>young</em> greys that
+        show dark legs under a light body.</td>
+</tr>
+<tr>
+    <td><strong>Mane and tail</strong></td>
+    <td>Depigment on their own timing, ahead of or behind the body, and along their
+        length.</td>
+    <td>An independent stage, swung up to <code>HAIR_STAGE_SWING</code> = &plusmn;0.26
+        either way, plus a root-to-tip ramp (<code>HAIR_ROOT_LEAD</code> = 0.30).</td>
+</tr>
+<tr>
+    <td><strong>Barrel, shoulder, hip</strong></td>
+    <td>The main readable surface, with regional variation.</td>
+    <td>The body&rsquo;s own stage, varied by the dapple field.</td>
+</tr>
+<tr>
+    <td><strong>Skin, eyes, hooves</strong></td>
+    <td>Stay dark. A grey is not a dominant white and not a double cream.</td>
+    <td><strong>Untouched.</strong> Grey writes to no other gene&rsquo;s channel.</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="note">
+    <span class="label">A bug worth naming</span>
+    <p>
+        The head used to be on the <em>point-retention</em> list &mdash; it took half
+        a boost, holding colour on the one region a greying horse loses it from
+        <strong>first</strong>. The sign was inverted. It now takes a
+        <code>headLead</code> instead, and <code>pointWeight</code> covers only mane,
+        tail, ears, muzzle and the lower legs.
+    </p>
+</div>
+
+<h3 id="root">Why the mane greys from the root</h3>
+
+<p>
+    Greying is a change to hairs <em>as they are produced</em>, so the new hair at the
+    root is whiter than the old hair further down. On a body texel that has nowhere to
+    show; on a mane or a tail it has the whole length of the hair. The ramp runs along
+    <code>HairPattern.axesBySpan(skin, part)[1]</code> &mdash; the same
+    root-to-tip axis the <a href="gene-dun.html#midtstol">midtstol</a> is centred in.
+</p>
+
+<h2 id="knobs">The nine draws</h2>
+
+<p>
+    Off the expressing grey copy&rsquo;s epigenetics, in this order:
+    <code>nextLong()</code> for the dapple field&rsquo;s seed, then eight
+    <code>nextFloat()</code>s.
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Draw</th><th>Range</th><th>What it does</th></tr></thead>
+<tbody>
+<tr><td><strong>where in the window</strong></td><td>0 &hellip; 1</td><td>Position inside the dosage&rsquo;s window, giving <code>progress</code>; <code>keep = lerp(0.46, 0.10, p)</code>. Fixed for life. This is what makes one grey different from the next <em>within</em> a genotype class.</td></tr>
 <tr><td><strong>dapple spacing</strong></td><td>2.8 &hellip; 5.0 body units</td><td>Size of the dapples. The body is about 22 units long.</td></tr>
 <tr><td><strong>dapple strength</strong></td><td>0.5 &hellip; 1</td><td>Contrast between a dapple centre and the web around it, up to <code>DAPPLE_DEPTH</code> = 0.42. Scaled to <strong>peak mid-greying</strong> &mdash; a barely-started or almost-finished horse has little pigment left to vary.</td></tr>
-<tr><td><strong>point retention</strong></td><td>0 &hellip; 1</td><td>How much longer mane / tail / ears / muzzle (full), head (half) and the lower legs (ramped, gone by mid-cannon) hold their colour. Scaled by <code>1 - progression</code>, so it is the <em>young</em> greys that show dark points on a light body.</td></tr>
+<tr><td><strong>point retention</strong></td><td>0 &hellip; 1</td><td>How much longer mane / tail / ears / muzzle (full) and the lower legs (ramped) hold their colour. Scaled by <code>1 - progression</code>.</td></tr>
+<tr><td><strong>hair stage swing</strong></td><td>&minus;0.26 &hellip; +0.26</td><td>Whether the mane and tail run ahead of or behind the body.</td></tr>
+<tr><td><strong>chubari roll</strong></td><td><code>&lt; 0.18</code></td><td>Whether this horse carries chubari spots.</td></tr>
+<tr><td><strong>chubari seed offset</strong></td><td>&mdash;</td><td>Their own lattice, so the spots are not the dapples in disguise.</td></tr>
+<tr><td><strong>bloody roll</strong></td><td><code>&lt; 0.07</code></td><td>Whether this horse carries a bloody shoulder.</td></tr>
 </tbody>
 </table>
 </div>
@@ -113,7 +300,7 @@
     nearly-white one.
 </p>
 
-<h2>The dapples</h2>
+<h2 id="dapples">The dapples</h2>
 
 <p>
     Dapples come from <a href="body-space.html"><code>BodyNoise.cellDistance</code></a>
@@ -138,7 +325,144 @@ float  web = (float) smoothstep(0.35, 0.78, d);   // 0 at a dapple centre -&gt; 
 float  keep = lerp(keepDapple, keepWeb, web);</code></pre>
 </div>
 
-<h2>Foals</h2>
+<h2 id="variants">Chubari spots and the bloody shoulder</h2>
+
+<p>
+    Two bounded variations on a fixed grey. Both are <strong>visual modifiers
+    only</strong> &mdash; neither alters the genotype, the risk tier or what the horse
+    passes on. They sit after the main grey pass in the same painter.
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th></th><th>Chance</th><th>What it is</th><th>How it is drawn</th></tr></thead>
+<tbody>
+<tr>
+    <td><strong>Chubari spots</strong></td>
+    <td>18%</td>
+    <td>Rounded <em>white</em> patches scattered over a light grey.</td>
+    <td>The dapples&rsquo; cellular field at a much larger cell size
+        (<code>CHUBARI_SPACING</code> = 7), with a separate low-frequency selector
+        picking which third of the cells are spots. Not drawn below
+        <code>CHUBARI_MIN_PROGRESS</code> = 0.55: on a steel grey a white patch is
+        just a dapple.</td>
+</tr>
+<tr>
+    <td><strong>Bloody shoulder</strong></td>
+    <td>7%</td>
+    <td>A patch of retained base colour over the shoulder that never greys.</td>
+    <td>An ellipse in barrel-fraction space with a noise-wandered edge, so it is a
+        stain and not a decal. It <em>lerps back</em> toward the pigment that was
+        there rather than painting over the grey &mdash; a bloody shoulder on a bay
+        is bay, on a chestnut chestnut.</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    The selector for the chubari spots is deliberately sampled at a much lower
+    frequency than the cells themselves. Sample it at the cells&rsquo; own frequency
+    and it varies <em>inside</em> each cell and cuts it in half &mdash; which is
+    exactly how <a href="gene-manchado.html">manchado</a>&rsquo;s islands first came
+    out as slivers.
+</p>
+
+<h2 id="melanoma">Melanoma: reported, never simulated</h2>
+
+<p>
+    The same <em>STX17</em> change that removes pigment from hair drives melanocyte
+    proliferation, which is why the two travel together. Grey horses carry a markedly
+    raised lifetime risk of dermal melanoma &mdash; UC Davis reports over 70% of greys
+    past fifteen, and published reviews commonly cite around 80%. In life the tail
+    dock and perineum, the sheath or udder, the lips and the eyelids are where it
+    shows. <span class="allele dom">G3</span> carries more risk than
+    <span class="allele dom">G2</span>, and a grey that is genetically non-agouti
+    &mdash; black-based, where extension permits black pigment &mdash; carries more
+    again.
+</p>
+
+<p>
+    <code>GreyGene</code> implements <code>HealthContribution</code> and emits one
+    <code>Condition.informational</code>, with a tier from the copy number raised one
+    step on a black-based coat:
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Tier</th><th>Reached by</th></tr></thead>
+<tbody>
+<tr><td><code>melanoma-risk-1</code> &mdash; raised</td><td>dosage 1&ndash;2 on a red or agouti coat</td></tr>
+<tr><td><code>melanoma-risk-2</code> &mdash; high</td><td>dosage 3&ndash;4, <em>or</em> dosage 1&ndash;2 on a black-based coat</td></tr>
+<tr><td><code>melanoma-risk-3</code> &mdash; highest</td><td>dosage 3&ndash;4 on a black-based coat</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="note rule">
+    <span class="label">The line, and why it is there</span>
+    <p>
+        It is <strong>informational and nothing else</strong>: no stat is docked, no
+        lesion is drawn, no horse dies of it, and it is not one of the
+        <a href="horse-body.html">two lethal paths</a>.
+    </p>
+    <p>
+        That is the design, not a stub. Melanoma in life is a <em>lifetime
+        probability</em> that mostly resolves as benign nodules on an old horse, and
+        this mod has no age to hang a probability on. Docking health from every grey
+        would assert a disease four greys in ten never get; drawing lesions would be
+        worse, and the owner ruled painted melanoma out with aging. So the mod says
+        what the DNA test says &mdash; this horse is in a raised-risk group, and here
+        is how raised &mdash; and stops.
+    </p>
+    <p>
+        And <strong>whiteness is never a diagnosis</strong>. The tier is read off the
+        copy number and the base coat, not off how pale the horse came out; a very
+        light <code>N/G2</code> and a dark <code>G3/G3</code> both exist, and the risk
+        follows the genotype.
+    </p>
+</div>
+
+<h2 id="not">What grey is not</h2>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Not to be confused with</th><th>Difference</th></tr></thead>
+<tbody>
+<tr><td><a href="gene-kit.html">Dominant white</a></td><td>Present from birth, and pink skin under the white.</td></tr>
+<tr><td><a href="gene-matp.html">Double cream</a></td><td>Born cream, blue eyes, pink skin.</td></tr>
+<tr><td><a href="gene-roan.html">Roan</a></td><td>A <em>stable</em> mix of white and coloured hairs, not a progressive one.</td></tr>
+<tr><td><a href="gene-silver.html">Silver</a></td><td>Dilutes black; the pale mane is there from birth.</td></tr>
+<tr><td>Dapple grey</td><td>A <em>stage</em> of grey, not a locus. It is the middle of the window above.</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2 id="breeds">Where it is common</h2>
+
+<p>
+    Breed changes the <strong>frequency of the alleles</strong> in the founder pool
+    and nothing about what grey does once present &mdash; a <code>G3</code>
+    Andalusian and a <code>G3</code> Quarter Horse follow the same rule.
+    <a href="breeds.html">Breeds</a> holds the tables; the wild pool outside a breed
+    uses Hardy&ndash;Weinberg over the three alleles.
+</p>
+
+<p>
+    <span class="allele dom">G3</span> is the broadly prevalent one and dominates the
+    grey breeds: the <strong>Lipizzan</strong> and the <strong>Camargue</strong>
+    (fixed grey), the <strong>Percheron</strong>, the
+    <strong>Andalusian</strong> and <strong>Lusitano</strong>, the
+    <strong>Arabian</strong>. <span class="allele dom">G2</span> is real but
+    <strong>breed-clustered</strong>, so only the populations the duplication was
+    actually reported in carry it: the <strong>Andalusian</strong>,
+    <strong>Connemara Pony</strong>, <strong>American Miniature</strong>,
+    <strong>Mustang</strong>, <strong>Quarter Horse</strong>, <strong>Tennessee
+    Walking Horse</strong> and <strong>Welsh Pony</strong>. (The reference also names
+    the Mangalarga Marchador, which this mod&rsquo;s catalogue does not carry.)
+</p>
+
+<h2 id="foals">Foals</h2>
 
 <p>
     <code>restrict</code> no-ops when <code>!ctx.isAdult()</code>, so a grey foal is
@@ -149,24 +473,22 @@ float  keep = lerp(keepDapple, keepWeb, web);</code></pre>
     non-grey foal&rsquo;s. Harmless &mdash; just a few extra cache entries.
 </p>
 
-<h2 id="age">No age, and that is now a decision</h2>
+<h2 id="declined">What was in the reference and is not here</h2>
 
-<div class="note rule">
-    <span class="label">Settled</span>
-    <p>
-        <strong>Horse aging is deliberately out of scope</strong> &mdash; it risks
-        feeling bad for a player attached to a horse. So grey&rsquo;s progression is
-        drawn once from the <span class="allele dom">G</span> copy&rsquo;s epigenetics
-        and fixed for life: one grey is a steel four-year-old, another near-white, and
-        neither changes. <strong>Flea-bitten grey and grey melanoma are parked with
-        it.</strong>
-    </p>
-    <p>
-        The option is not foreclosed. Reopening it means giving the composer a real
-        age input, which today only knows adult vs foal &mdash; and nothing else in
-        the design would have to change.
-    </p>
-</div>
+<p>
+    The source note proposed a five-stage health pipeline &mdash; genotype, then
+    appearance, then susceptibility, then an <em>age-related chance of lesion
+    onset</em>, then <em>lesion burden and severity with health effects</em>. Stages 4
+    and 5 need an age clock and a per-horse disease-progression system, neither of
+    which exists, so they are not built and are not stubbed. The
+    <code>Condition</code> is the whole of it.
+</p>
+
+<p>
+    It also suggested vitiligo-like depigmentation round the eyes and mouth, and
+    flea-bitten grey. Both are parked with aging: see
+    <a href="roadmap.html#settled">the settled list</a>.
+</p>
 
 <h2 id="carrot">Its gene carrot</h2>
 
@@ -180,7 +502,8 @@ float  keep = lerp(keepDapple, keepWeb, web);</code></pre>
         <a href="body-space.html">BodyNoise</a>
         <a href="pipeline.html">The gradient and the neutral column</a>
         <a href="gene-agouti.html">Agouti</a>
-        <a href="verification.html">What to check in-game</a>
+        <a href="horse-body.html">Conditions and health</a>
+        <a href="verification.html#grey">What to check in-game</a>
     </div>
     Source: <code>common/genetics/genes/GreyGene.java</code>,
     <code>common/coat/pattern/GreyCoat.java</code>

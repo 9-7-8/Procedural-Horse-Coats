@@ -32,6 +32,101 @@
     </p>
 </div>
 
+<h2 id="grey">&sect;0-Z &mdash; grey, rebuilt as a copy number (2026-09-07, NOT looked at)</h2>
+
+<p>
+    <a href="gene-grey.html">Grey</a> is no longer one <code>G</code> allele and one
+    progression roll. It is now three alleles &mdash; <span class="allele dom">G3</span>
+    (triplication), <span class="allele dom">G2</span> (duplication),
+    <span class="allele wild">N</span> &mdash; and the <strong>dosage</strong> 1&ndash;4
+    picks the progression window, so a <code>N/G2</code> horse is a steel or mid dapple
+    grey for life and a <code>G3/G3</code> is near white. The painter gained a head lead,
+    an independent mane / tail stage with a root-to-tip ramp, chubari spots, a bloody
+    shoulder, and a fixed inverted region rule. The gene also emits an informational
+    melanoma-risk condition. Six new golden cases; nothing seen in a game.
+</p>
+
+<ul>
+    <li><strong>Line the four dosages up.</strong> Spawn a bay with each of
+        <code>G2/N</code>, <code>G3/N</code>, <code>G2/G3</code> and <code>G3/G3</code>
+        from the spawn screen. They should read as four <em>clearly different</em>
+        horses: steel, dapple, light, near white. If two of them look the same the
+        windows overlap too much.</li>
+    <li><strong>Check the head really is ahead now.</strong> This was an outright bug
+        &mdash; the head used to be given a colour-<em>holding</em> boost, the opposite
+        of life. On a mid grey the face, and especially the forehead round the eyes,
+        should be the palest part of the horse. A dark face on a light body is the bug
+        back.</li>
+    <li><strong>Dark legs, light body, on the slow greys only.</strong> The leg ramp is
+        scaled by <code>1 - progression</code>, so a <code>G2/N</code> should show
+        coloured lower legs under a grey body and a <code>G3/G3</code> should not.</li>
+    <li><strong>Look at the mane and tail against the body.</strong> They carry their own
+        stage (&plusmn;0.26) plus a root-to-tip ramp, so some horses should have a mane
+        clearly lighter than the body and some clearly darker, and in both cases the
+        roots should be paler than the tips. A mane that always matches the body means
+        the swing is not reaching the texture.</li>
+    <li><strong>Find a chubari.</strong> 18% of greys, and only above progression 0.55 -
+        so look at light and near-white horses. They should be rounded
+        <em>white</em> patches, obviously bigger and harder-edged than the dapples. If
+        they come out as slivers, the selector frequency is wrong (that is exactly how
+        manchado's islands failed).</li>
+    <li><strong>Find a bloody shoulder.</strong> 7%, so this needs a herd. It should be a
+        soft-edged patch of the horse's own base colour over the shoulder &mdash; bay on
+        a bay, red on a chestnut &mdash; that looks like a stain, not a decal.</li>
+    <li><strong>Spawn a Lipizzan herd, then a Camargue one.</strong> Grey is heavy in one
+        and fixed in the other; this is the fastest way to see many at once and to check
+        the dapple spacing does not read as a repeating grid across a paddock.</li>
+    <li><strong>A grey foal must be its base colour</strong>, and must grey on growing
+        up. Unchanged behaviour, but the painter moved under it.</li>
+    <li><strong>Read the melanoma flag on a horse.</strong> A black <code>G3/G3</code>
+        should show &ldquo;highest&rdquo;, a chestnut <code>G2/N</code>
+        &ldquo;raised&rdquo;. It must dock <strong>no</strong> hearts and draw
+        <strong>nothing</strong>.</li>
+</ul>
+
+<div class="note">
+    <span class="label">Questions for the owner</span>
+    <ol>
+        <li><strong>Are the four windows spread far enough apart, or too far?</strong>
+            They are 0.06&ndash;0.52 / 0.28&ndash;0.74 / 0.50&ndash;0.90 /
+            0.68&ndash;1.00. Overlapping is deliberate &mdash; real variation inside a
+            genotype class is large &mdash; but it does mean an unlucky
+            <code>G3/G3</code> and a lucky <code>N/G2</code> can land close together. If
+            you would rather each dosage be instantly identifiable, narrow them; the
+            table is one constant in <code>GreyCoat</code>.</li>
+        <li><strong>Is <code>KEEP_YOUNG</code> = 0.46 dark enough for a &ldquo;slow&rdquo;
+            grey?</strong> With no age input, every grey <em>adult</em> has to read as a
+            grey, so even the least-greyed one is a long way from its birth colour. The
+            alternative is letting a <code>N/G2</code> look almost like a plain bay with
+            a hidden flag on it, which seemed worse. Say if you want the range to start
+            darker.</li>
+        <li><strong>Melanoma is reported and never simulated &mdash; is that the line you
+            wanted?</strong> The settled call was &ldquo;melanoma is cut with aging&rdquo;.
+            What is built is an <em>informational</em> condition only: a risk tier off the
+            copy number, raised one step on a black-based coat, with no lesions drawn, no
+            stat docked and no death. It seemed to be the honest half &mdash; it is what
+            the real DNA test reports &mdash; but it is a step past &ldquo;cut&rdquo;, so
+            it is your call. Deleting it is one method in <code>GreyGene</code>.</li>
+        <li><strong>Chubari at 18% and bloody shoulder at 7% &mdash; too common?</strong>
+            A bloody shoulder in life is genuinely rare and slightly legendary; 7% of
+            greys may make it ordinary. Both are single constants.</li>
+        <li><strong>The five-stage health pipeline was declined.</strong> The reference
+            asked for melanoma susceptibility, then an age-related chance of lesion
+            onset, then lesion burden and severity with health effects. The last two need
+            an age clock and a disease-progression system, neither of which exists, so
+            they are not built and not stubbed.</li>
+        <li><strong>G2 is only in the seven breeds the reference names.</strong>
+            Andalusian, Connemara, American Miniature, Mustang, Quarter Horse, Tennessee
+            Walking Horse, Welsh Pony &mdash; plus a small share in the wild pool. The
+            reference also names the Mangalarga Marchador, which the catalogue does not
+            carry. Everywhere else greys are pure <code>G3</code>, so the Lipizzan and
+            Camargue are all fast greys.</li>
+        <li><strong>The seeds moved again.</strong> Grey now draws 1 long + 8 floats
+            where it drew 1 long + 4, so every grey horse from an older world greys
+            differently. Known gap #47.</li>
+    </ol>
+</div>
+
 <h2 id="midtstol">&sect;0-Y &mdash; the <em>midtstol</em>: dun&rsquo;s two-tone mane (2026-09-07, NOT looked at)</h2>
 
 <p>

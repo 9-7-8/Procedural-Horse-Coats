@@ -729,7 +729,6 @@
 <thead><tr><th>Gene</th><th>What the reference describes that is not drawn</th></tr></thead>
 <tbody>
 <tr><td><a href="gene-dun.html"><strong>Dun</strong></a></td><td><strong>Guard hairs</strong> &mdash; the pale hairs at the base of a dun&rsquo;s mane and tail &mdash; which want a hair-level treatment the mane box does not have. And <code>d1</code> should carry faint bars and shoulder shading, not the dorsal stripe alone; the blocker is that <code>d1</code> does not dilute, so there is nothing on a leg to countershade a bar against. (The <strong>dilution, points, leg bars, shoulder bar and face mask / cobwebbing</strong> all ship &mdash; see <a href="gene-dun.html">the gene page</a>.)</td></tr>
-<tr><td><a href="gene-grey.html"><strong>Grey</strong></a></td><td>Ships as dapples only, one fixed progression per horse. Aging, flea-bitten and melanoma are a settled <strong>no</strong> &mdash; but <strong>chubari spots</strong>, <strong>bloody-shoulder patches of retained base colour</strong>, <strong>uneven greying</strong> (some regions lighter or more saturated) and a <strong>mane / tail gradient</strong> are variation <em>within</em> the fixed progression, not aging, and none of them are drawn. Extra epigenetic knobs on the <code>G</code> copy.</td></tr>
 <tr><td><a href="gene-flaxen.html"><strong>Flaxen</strong></a></td><td>Ships as a uniform lightening with <strong>strand mixing</strong> - a fixed noise field spares some hairs. What it does <em>not</em> draw is the <strong>root-to-tip gradient</strong> the reference describes: dark at the roots, palest at the ends. That wants a coordinate along the hair rather than across it, which is what <code>HairPattern.axesBySpan</code> already finds for the magical mane colours, so the seam exists.</td></tr>
 <tr><td><a href="gene-silver.html"><strong>Silver dapple</strong></a></td><td>Ships as the dilution only &mdash; <strong>the dapples the gene is named for are not drawn.</strong> Wants a deterministic fixed-seed <code>BodyNoise</code> modulation, like grey&rsquo;s but lighter and per-genotype. The flaxen mane also currently reads a little gold rather than pale.</td></tr>
 <tr><td><a href="gene-roan.html"><strong>Roan</strong></a></td><td><strong>Corn spots</strong> &mdash; small islands of solid base colour left inside the roan field. The per-texel dither has no notion of them; wants a second, low-frequency mask pinning a few texels fully coloured.</td></tr>
@@ -1617,7 +1616,10 @@
     <li><strong>Aging is out entirely.</strong> No coats that change over time, no death
         of old age. This is a firm no, not a deferral. Two consequences:
         <strong>grey&rsquo;s fixed progression is the design, not a gap</strong>, and
-        <strong>flea-bitten grey and melanoma are cut with it</strong>.</li>
+        <strong>flea-bitten grey is cut with it</strong>. Grey&rsquo;s melanoma risk
+        is <em>reported</em> and never simulated &mdash; an informational condition
+        off the copy number, with no lesion drawn and no stat docked; see
+        <a href="gene-grey.html#melanoma">the gene page</a>.</li>
     <li><strong>Health is fewer hearts</strong> plus lethal foals. <strong>All</strong>
         the health genetics get built; the deaths sit behind a config toggle that is
         <strong>on by default</strong>. Three positions: full genetics + deaths (default),

@@ -67,7 +67,7 @@ public final class CoatSpike {
                 {"chestnut", "horsegenetics.extension=e/e"},
                 {"bay", "horsegenetics.agouti=A/a"},
                 {"buckskin", "horsegenetics.agouti=A/a-horsegenetics.matp=Cr/N"},
-                {"dapple grey", "horsegenetics.grey=G/g"},
+                {"dapple grey", "horsegenetics.grey=G3/N"},
                 {"sabino", "horsegenetics.kit=SB1/N"},
                 {"splash x2", "horsegenetics.mitf=SW1/N-horsegenetics.pax3=SW2/N"},
                 {"tobiano", "horsegenetics.tobiano=To/to"},
@@ -89,9 +89,9 @@ public final class CoatSpike {
         //    three times per texel and that hash is 64-bit integer maths -
         //    which a JavaScript number cannot do natively.
         bench("bay", "horsegenetics.agouti=A/a", template, lut);
-        bench("dapple grey", "horsegenetics.grey=G/g", template, lut);
+        bench("dapple grey", "horsegenetics.grey=G3/N", template, lut);
         bench("grey bay + sabino",
-                "horsegenetics.agouti=A/a-horsegenetics.grey=G/g-horsegenetics.kit=SB1/N", template, lut);
+                "horsegenetics.agouti=A/a-horsegenetics.grey=G3/N-horsegenetics.kit=SB1/N", template, lut);
 
         say("SPIKE OK - common/ ran in JavaScript");
     }

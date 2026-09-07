@@ -38,8 +38,8 @@ class GenotypeTest {
 
     @Test
     void parseIsCanonicalAndOrderIndependent() {
-        Genotype a = Genotype.parse(LegacyCode.keyed("e/E-a/A-N/W22-t/T-c/Ch-N/SW1-g/G-Cr/prl-n/n-n/n" + T));
-        Genotype b = Genotype.parse(LegacyCode.keyed("E/e-A/a-W22/N-T/t-Ch/c-SW1/N-G/g-Cr/prl-n/n-n/n" + T));
+        Genotype a = Genotype.parse(LegacyCode.keyed("e/E-a/A-N/W22-t/T-c/Ch-N/SW1-N/G3-Cr/prl-n/n-n/n" + T));
+        Genotype b = Genotype.parse(LegacyCode.keyed("E/e-A/a-W22/N-T/t-Ch/c-SW1/N-G3/N-Cr/prl-n/n-n/n" + T));
         assertEquals(b, a);
         assertEquals(b.toCode(), a.toCode());
     }
@@ -58,7 +58,7 @@ class GenotypeTest {
 
     @Test
     void multiCharTokensParse() {
-        Genotype x = Genotype.parse(LegacyCode.keyed("E/e-A/a-N/N-t/t-c/c-SW1/N-g/g-Cr/Cr-n/n-n/n" + T));
+        Genotype x = Genotype.parse(LegacyCode.keyed("E/e-A/a-N/N-t/t-c/c-SW1/N-N/N-Cr/Cr-n/n-n/n" + T));
         assertTrue(x.shows(Genes.MITF));
         assertTrue(x.pair(Genes.MATP).homozygous());
         assertTrue(x.pair(Genes.MATP).homozygous());
@@ -99,13 +99,13 @@ class GenotypeTest {
         // champagne / grey / cream / pearl / test / splash never move the coarse phenotype
         assertEquals(CoatPhenotype.BLACK, g(p(Genes.EXTENSION.E, Genes.EXTENSION.e),
                 p(Genes.CHAMPAGNE.Ch, Genes.CHAMPAGNE.c),
-                p(Genes.GREY.G, Genes.GREY.g),
+                p(Genes.GREY.G3, Genes.GREY.N),
                 p(Genes.MATP.Cr, Genes.MATP.N)).phenotype());
     }
 
     @Test
     void predicates() {
-        Genotype x = Genotype.parse(LegacyCode.keyed("E/e-A/a-N/N-T/t-Ch/c-SW1/N-G/g-Cr/N-n/n-n/n" + T));
+        Genotype x = Genotype.parse(LegacyCode.keyed("E/e-A/a-N/N-T/t-Ch/c-SW1/N-G3/N-Cr/N-n/n-n/n" + T));
         assertTrue(x.hasBlackPigment());
         assertTrue(x.isAgouti());
         assertTrue(x.shows(Genes.CHAMPAGNE));
@@ -125,7 +125,7 @@ class GenotypeTest {
         assertFalse(g(p(Genes.EXTENSION.E, Genes.EXTENSION.e),
                 p(Genes.AGOUTI.A, Genes.AGOUTI.a)).isDeterministic());                  // bay
         assertFalse(g(p(Genes.MITF.SW1, Genes.MITF.N)).isDeterministic());              // splash
-        assertFalse(g(p(Genes.GREY.G, Genes.GREY.g)).isDeterministic());                // grey - dapples vary
+        assertFalse(g(p(Genes.GREY.G3, Genes.GREY.N)).isDeterministic());                // grey - dapples vary
         // Champagne's coat is deterministic but its iris is not: the shade runs
         // from amber through hazel to a rare olive, off the expressing copy's
         // seed, and the eye is baked into the coat texture.
@@ -223,7 +223,7 @@ class GenotypeTest {
 
     @Test
     void breedWithIsMendelianAndSymmetric() {
-        Genotype dad = Genotype.parse(LegacyCode.keyed("E/E-A/A-N/N-t/t-c/c-N/N-g/g-N/N-n/n-n/n" + T));
+        Genotype dad = Genotype.parse(LegacyCode.keyed("E/E-A/A-N/N-t/t-c/c-N/N-N/N-N/N-n/n-n/n" + T));
         Genotype mom = Genotype.wildType();
         boolean[] allFirst = new boolean[Genes.codeOrder().size() * 2];
         java.util.Arrays.fill(allFirst, true);
@@ -236,7 +236,7 @@ class GenotypeTest {
 
     @Test
     void breedInheritsEveryGene() {
-        Genotype a = Genotype.parse(LegacyCode.keyed("E/e-A/a-W22/N-T/t-Ch/c-SW1/N-G/g-Cr/prl-n/n-n/n" + T));
+        Genotype a = Genotype.parse(LegacyCode.keyed("E/e-A/a-W22/N-T/t-Ch/c-SW1/N-G3/N-Cr/prl-n/n-n/n" + T));
         boolean[] draws = new boolean[Genes.codeOrder().size() * 2];
         java.util.Arrays.fill(draws, true);
         Genotype child = a.breedWith(Genotype.wildType(), new FakeRng().booleans(draws));

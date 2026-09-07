@@ -106,14 +106,19 @@ class CoatPipelineGoldenTest {
             override("agouti=A/a", "champagne=Ch/c"),
             override("mitf=SW1/N"),
             override("agouti=A/a", "mitf=SW1/N"),
-            override("grey=G/g"),
-            override("extension=e/e", "grey=G/g"),
+            override("grey=G3/N"),
+            override("extension=e/e", "grey=G3/N"),
+            override("agouti=A/a", "grey=G2/N"),          // dosage 1 - the slowest grey
+            override("agouti=A/a", "grey=G2/G2"),         // dosage 2 the other way round
+            override("agouti=A/a", "grey=G2/G3"),         // dosage 3
+            override("agouti=A/a", "grey=G3/G3"),         // dosage 4 - near white
+            override("extension=e/e", "grey=G3/G3"),
             override("agouti=A/a", "matp=Cr/N"),
             override("agouti=A/a", "matp=Cr/Cr"),
             override("agouti=A/a", "matp=prl/prl"),
             override("agouti=A/a", "matp=Cr/prl"),
-            override("extension=e/e", "grey=G/g", "matp=Cr/Cr"),
-            override("agouti=A/a", "champagne=Ch/c", "mitf=SW1/N", "grey=G/g", "matp=Cr/N"),
+            override("extension=e/e", "grey=G3/N", "matp=Cr/Cr"),
+            override("agouti=A/a", "champagne=Ch/c", "mitf=SW1/N", "grey=G3/N", "matp=Cr/N"),
             override("magic_zebra=Mzeb/n"),
             override("magic_zebra=Mzeb/Mzeb"),
             override("natural_zebra=Zeb/n"),
@@ -192,7 +197,7 @@ class CoatPipelineGoldenTest {
             override("lut=Blupnk/n"),
             override("lut=Blupnk/Blupnk"),
             override("agouti=A/a", "lut=Blupnk/Blupnk"),
-            override("extension=e/e", "grey=G/g", "lut=Blupnk/Blupnk"),
+            override("extension=e/e", "grey=G3/N", "lut=Blupnk/Blupnk"),
             // the leopard complex - each PATN combination is a different painter,
             // and LP zygosity flips leopard<->fewspot / blanket<->snowcap
             override("agouti=A/a", "leopard=LP/lp"),
