@@ -2,13 +2,14 @@ package com.example.horsegenetics.neoforge.server;
 
 import com.example.horsegenetics.common.Rng;
 import com.example.horsegenetics.common.name.PersonNameGenerator;
-import com.example.horsegenetics.common.name.PersonNameGenerator.PersonName;
 import com.example.horsegenetics.neoforge.NeoRng;
 import com.example.horsegenetics.neoforge.entity.Cowboy;
 import com.example.horsegenetics.neoforge.village.ModVillagerProfessions;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
+import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.phys.AABB;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -16,24 +17,17 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
 import org.jspecify.annotations.Nullable;
 
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * Names the <b>horseman</b> when a villager takes the job at a Horseman's Table:
  * a first name of his own, and the family name of the nearest cowboy in town.
  *
  * <h2>One family per village</h2>
- * A cowboy takes a surname no other cowboy in town has ({@link #uniqueName});
- * every horseman that follows takes the nearest one's. So a village reads as one
- * family in the horse trade - Wade Hargreave at the hitch and Frank Hargreave
- * behind the table - and a second cowboy somewhere across town founds the
- * Adamses.
- *
- * <p>The <b>nearest</b> cowboy rather than a paired one, because the horseman is
- * nobody's property: a player can put a table anywhere, and the horseman across
- * the square should still belong to the family that village buys horses from.
- * No cowboy within {@link #TOWN} blocks and he keeps the plain profession name.
+ * Whoever is hired first names the family, and everyone after joins it - see
+ * {@link #familySurname}. It does not matter whether that is the cowboy or the
+ * horseman, which is the point: the hitch and the table hand out their jobs
+ * independently and in whatever order the villagers get round to them, so
+ * neither can be the one that decides.
  *
  * <h2>Why a poll and not an event</h2>
  * Taking a job is not something NeoForge fires an event for. It happens deep in
@@ -55,9 +49,6 @@ public final class HorsemanHandler {
     /** How far counts as "this town", for the surname. */
     private static final int TOWN = 128;
 
-    /** Attempts at a surname nobody in town already has. */
-    private static final int NAME_TRIES = 12;
-
     private static final PersonNameGenerator NAMES = PersonNameGenerator.cowboys();
 
     private HorsemanHandler() {
@@ -74,56 +65,69 @@ public final class HorsemanHandler {
         if (!villager.getVillagerData().profession().is(ModVillagerProfessions.HORSEMAN.getKey())) {
             return;
         }
-        Cowboy family = nearestCowboy(level, villager);
-        if (family == null) {
-            return; // no horse family here yet; he stays "Horseman" until there is one
-        }
         Rng rng = new NeoRng(villager.getRandom());
-        villager.setCustomName(Component.literal(
-                NAMES.generateParts(rng).first() + " " + family.lastName()));
+        String surname = familySurname(level, villager.blockPosition(), villager, rng);
+        villager.setCustomName(Component.literal(NAMES.generateParts(rng).first() + " " + surname));
         villager.setCustomNameVisible(true);
         DebugAnnounce.sayAt(level, "Horseman",
-                villager.getName().getString() + " took the table, of the " + family.lastName() + " family",
+                villager.getName().getString() + " took the table, of the " + surname + " family",
                 villager.blockPosition(), ChatFormatting.AQUA);
     }
 
     /**
-     * A first and last name no cowboy in this town is already using.
+     * <b>The surname this village's horse trade already uses</b>, or a new one if
+     * it has not got one yet.
      *
-     * <p>Surnames are the half that matters - they are what says two people are
-     * the same outfit - so two families in one village sharing one would make
-     * that meaningless. Called from {@link CowboyHandler} when it founds him.
+     * <p>Asked by <i>both</i> handlers, and that is the whole design. The hitch
+     * and the table hand out their jobs independently, in whatever order the
+     * villagers get round to claiming them - so neither role can be the one that
+     * owns the name. Whoever is hired first looks round, finds nobody, and coins
+     * one; everybody after finds him and joins.
+     *
+     * <p>The <b>nearest</b> namesake wins, which only matters in a village with
+     * two outfits in it: a second hitch across town founds the Adamses, and a
+     * table put up beside it joins the Adamses rather than the Hargreaves at the
+     * far end.
+     *
+     * <p>It counts the two roles this mod names and nothing else. A player who
+     * renames his own farmer "Bob" has not founded a horse family.
      */
-    public static PersonName uniqueName(ServerLevel level, Cowboy cowboy, Rng rng) {
-        Set<String> taken = new HashSet<>();
-        for (Cowboy other : level.getEntitiesOfClass(
-                Cowboy.class, new AABB(cowboy.blockPosition()).inflate(TOWN))) {
-            if (other != cowboy && !other.lastName().isEmpty()) {
-                taken.add(other.lastName());
-            }
-        }
-        PersonName name = NAMES.generateParts(rng);
-        for (int attempt = 0; attempt < NAME_TRIES && taken.contains(name.last()); attempt++) {
-            name = NAMES.generateParts(rng);
-        }
-        return name;
-    }
-
-    /** The closest founded cowboy within {@link #TOWN}, or {@code null}. */
-    private static @Nullable Cowboy nearestCowboy(ServerLevel level, Villager villager) {
-        Cowboy nearest = null;
+    public static String familySurname(ServerLevel level, BlockPos at, @Nullable Entity except, Rng rng) {
+        AABB town = new AABB(at).inflate(TOWN);
+        String nearest = null;
         double best = Double.MAX_VALUE;
-        AABB town = new AABB(villager.blockPosition()).inflate(TOWN);
+
         for (Cowboy cowboy : level.getEntitiesOfClass(Cowboy.class, town)) {
-            if (!cowboy.isFounded() || cowboy.lastName().isEmpty()) {
+            if (cowboy == except || cowboy.lastName().isEmpty()) {
                 continue;
             }
-            double distance = cowboy.distanceToSqr(villager);
+            double distance = cowboy.distanceToSqr(at.getX() + 0.5, at.getY() + 0.5, at.getZ() + 0.5);
             if (distance < best) {
                 best = distance;
-                nearest = cowboy;
+                nearest = cowboy.lastName();
             }
         }
-        return nearest;
+        for (Villager villager : level.getEntitiesOfClass(Villager.class, town)) {
+            if (villager == except || villager.getCustomName() == null
+                    || !villager.getVillagerData().profession().is(ModVillagerProfessions.HORSEMAN.getKey())) {
+                continue;
+            }
+            String surname = lastWordOf(villager.getName().getString());
+            if (surname.isEmpty()) {
+                continue;
+            }
+            double distance = villager.distanceToSqr(at.getX() + 0.5, at.getY() + 0.5, at.getZ() + 0.5);
+            if (distance < best) {
+                best = distance;
+                nearest = surname;
+            }
+        }
+        return nearest != null ? nearest : NAMES.generateParts(rng).last();
+    }
+
+    /** The family half of "Wade Hargreave". */
+    private static String lastWordOf(String name) {
+        int space = name.lastIndexOf(' ');
+        return space < 0 ? name : name.substring(space + 1);
     }
 }

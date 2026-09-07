@@ -206,9 +206,11 @@ public final class CowboyHandler {
 
     private static void found(Cowboy cowboy, ServerLevel level) {
         Rng rng = new NeoRng(cowboy.getRandom());
-        // Unique in town, because the surname is what pairs him with his
-        // horseman - see server/HorsemanHandler.
-        cowboy.setCustomName(Component.literal(HorsemanHandler.uniqueName(level, cowboy, rng).joined()));
+        // The village's horse family, if it has one already - the hitch and the
+        // table hand out their jobs in whatever order, so whoever is hired first
+        // coins the surname and the other joins it. See server/HorsemanHandler.
+        String surname = HorsemanHandler.familySurname(level, cowboy.blockPosition(), cowboy, rng);
+        cowboy.setCustomName(Component.literal(NAMES.generateParts(rng).first() + " " + surname));
         cowboy.setCustomNameVisible(true);
 
         // Home is where the structure put him - the middle of the barn - and it

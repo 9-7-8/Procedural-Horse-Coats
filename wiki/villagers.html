@@ -593,18 +593,46 @@
 <h3 id="family-names">One family per village</h3>
 
 <p>
-    A cowboy takes a first and last name <strong>no other cowboy in town has</strong>;
-    every horseman takes the nearest cowboy&rsquo;s surname and a first name of his own.
-    So a village reads as one family in the horse trade &mdash; Wade Hargreave at the
-    hitch, Frank Hargreave behind the table &mdash; and a second cowboy across town
-    founds the Adamses.
+    <strong>Whoever is hired first names the family, and everyone after joins it.</strong>
+    Both handlers ask the same question &mdash;
+    <code>HorsemanHandler.familySurname</code> &mdash; which looks round the village for
+    a cowboy or a horseman who already has a surname and takes his; finding nobody, it
+    coins a new one. So a village reads as one outfit in the horse trade: Wade Hargreave
+    at the hitch, Frank Hargreave behind the table.
 </p>
 
 <p>
-    Surnames are the half that matters, because they are what says two people are the
-    same outfit, so the cowboy&rsquo;s is the one retried until it is unique
-    (<code>HorsemanHandler.uniqueName</code>). No cowboy within 128 blocks and the
-    horseman keeps the plain profession name until there is one.
+    <strong>Order-independent on purpose.</strong> The hitch and the table hand out their
+    jobs entirely separately, and which villager gets round to which first is down to
+    where they happen to be standing &mdash; so neither role can be the one that owns the
+    name. An earlier version had the cowboy coin it and the horseman inherit, which is
+    fine right up until the horseman is hired first and there is nobody to inherit from.
+</p>
+
+<p>
+    The <em>nearest</em> namesake wins, which only matters in a village with two outfits
+    in it: a second hitch across town founds the Adamses, and a table put up beside it
+    joins the Adamses rather than the Hargreaves at the far end. It counts the two roles
+    this mod names and nothing else &mdash; a player who renames his own farmer
+    &ldquo;Bob&rdquo; has not founded a horse family.
+</p>
+
+<h3 id="horseman-nights">The horseman keeps vanilla's brain, and a bed</h3>
+
+<p>
+    Nothing in this mod touches how the horseman behaves. He is a completely ordinary
+    villager with a profession, so going indoors at night, panicking in a raid, hiding
+    from a zombie, restocking and gossiping are all <strong>free</strong> &mdash; that is
+    the whole reason he is a profession where the <a href="#cowboy">cowboy</a> is not.
+</p>
+
+<p>
+    What that brain needs is a <strong>bed POI to claim</strong>, and a barn on the
+    outskirts can easily be out of range of the nearest house's. So the barn has two of
+    its own, in the back corners out of the doorway path: he lives over the shop. The
+    cowboy will not use one &mdash; an <code>AbstractVillager</code> has no schedule at
+    all &mdash; which is why he gets ten times the health and hostile mobs that ignore
+    him instead.
 </p>
 
 <h3 id="trade-table">The trade table</h3>
