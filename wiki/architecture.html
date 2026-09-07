@@ -135,7 +135,9 @@ python -m http.server                # the designer needs a server; file:// cann
 
 # the cowboy's barn (see wiki/villagers.html#rebaking)
 python neoforge-26.1.2/tools/barn/bake-barn.py   # re-export from a structure block, then
-                                     # this adds the jigsaw connector and the cowboy</code></pre>
+                                     # this adds the jigsaw connector and the cowboy
+                                     # (byte-reproducible: a clean `git status`
+                                     #  after a bake proves it is current)</code></pre>
 </div>
 
 <p><strong>Re-run <code>:web:bakeDesignerAssets</code> whenever <code>common/</code> changes</strong>, or the designer is running yesterday's mod. It is the designer's equivalent of re-baking the creator's fixtures, with the crucial difference that it cannot drift <em>silently</em>: the artefact is the code, not a snapshot of its output.</p>

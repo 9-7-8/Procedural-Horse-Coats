@@ -45,6 +45,20 @@
     </p>
 </div>
 
+<h3 id="testworld-village-2026-09-07">Built 2026-09-07, NOT yet looked at: the test world lands you in a plains village, and the cowboy says hello.</h3>
+
+<p>Tooling for the entry below, written straight after it, because testing the two villagers started with a hike and that was most of the cost of testing them at all.</p>
+
+<ul>
+<li><strong>&ldquo;Spawn Test Horse World&rdquo; now teleports into the nearest plains village on login</strong> and moves the world spawn there, so dying does not undo it. <em>Plains</em> only, because no other village kind grows a cowboy and a savanna hit would be a wasted trip; the <em>middle</em> rather than the edge, even though the barn is on the outskirts, because from the bell you can see which way the streets run and can walk out along each of them - from a random point on the perimeter you cannot tell which side of the village you are on. The bell is also what the cowboy&rsquo;s own routine navigates by, so it is the origin of his map.</li>
+
+<li><strong>It is a synchronous 100-chunk structure search</strong>, which is a thing to do exactly here and nowhere else: the handler fires once, in a throwaway dev world, on the one login that created it. A miss is reported in chat rather than silently leaving the player at spawn.</li>
+
+<li><strong>A cowboy now announces himself in chat when he founds</strong> (dev builds only, <code>FMLEnvironment</code>-gated). He founds the moment his chunk starts ticking, which is usually before the player is near enough to see the barn - so &ldquo;did one generate in this village?&rdquo; used to be a question answered by reading a server log while it scrolled past. The <em>absence</em> of a yellow line is now the answer, and a present one carries his coordinates.</li>
+
+<li><strong>The barn bake is byte-reproducible now</strong> (<code>gzip.compress(..., mtime=0)</code>). It was not: gzip stamps the current time into its header, so every run of <code>bake-barn.py</code> rewrote <code>cowboy_barn.nbt</code> with identical content and different bytes. That is <a href="known-gaps.html#gap-45">gap #45</a>&rsquo;s defect in a second place, and it mattered more here, because <code>git status</code> is the barn&rsquo;s <em>only</em> staleness signal - nothing else compares the checked-in structure to the source save it came from. Found by running the end-of-session re-bake and watching a file change that should not have.</li>
+</ul>
+
 <h3 id="villagers-2026-09-07">Built 2026-09-07, NOT yet looked at: the cowboy rides out &mdash; two villagers, and papers that sell a horse.</h3>
 
 <p>The roadmap&rsquo;s &sect;19 villager, a second character the owner asked for alongside it, and the item that connects them. Design: <a href="villagers.html">Villagers &amp; transfer papers</a>. Checklist <a href="verification.html#villagers">&sect;0-AC</a>.</p>
