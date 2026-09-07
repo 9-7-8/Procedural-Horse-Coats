@@ -121,13 +121,10 @@
 double n = BodyNoise.value(seed, x * FREQ, y * FREQ, z * FREQ * 1.6);
 // a texel is a white hair OR a coloured hair - the *fraction* white is what
 // region sets. Near-binary with a ~1px soft edge, so the flecks read crisp but
-// not aliased, and never through the gradient's warm mid-tones.
+// not aliased. The part-white texels on that edge are the horse's GREY hairs.
 double threshold = 1.0 - region * (WHITE_FRACTION + density);
 double w = smoothstep(threshold - EDGE, threshold + EDGE, n);
-// on the soft edge pull red down faster than black, so a partial texel greys
-// out instead of going gold.
-f.setRed(px, py,  red   * (1 - w) * (1 - 0.6 * w));
-f.setBlack(px, py, black * (1 - w));</code></pre>
+f.whiten(px, py, (float) w);</code></pre>
 </div>
 
 <div class="note">
@@ -135,12 +132,24 @@ f.setBlack(px, py, black * (1 - w));</code></pre>
     <p>
         Scaling both pigment channels toward <code>(0, 0)</code> walks the sample
         <em>down the gradient's gold diagonal</em> - a half-whitened black texel comes
-        out orange, not grey. So roan keeps the decision <b>per-texel binary</b> (white
-        hair or coloured hair) with only a ~1px soft edge, and biases that edge toward
-        the neutral axis. A fully white texel is <code>setRed(0)</code> /
-        <code>setBlack(0)</code> exactly - the same "resolve to transparent" path
+        out orange, not grey. Roan carried its own lopsided approximation of a fix for a
+        while (<code>red *= (1 - w) * (1 - 0.6w)</code>), which narrowed the problem
+        without solving it: a blue roan still put <code>#6C4413</code> and
+        <code>#754914</code> - milk chocolate - through its flecks, 194 warm texels on a
+        side view of a horse whose only warm texels should be the 64 the template's own
+        hoof and nostril shading contributes.
+    </p>
+    <p>
+        <a href="pipeline.html#whiten"><code>PigmentField.whiten</code></a> is the fix
+        and now the only verb roan uses. It holds the <em>visible</em> red constant
+        rather than the stored red, which on a black horse is zero, so the fade runs
+        down the gradient's neutral <code>red = 0</code> column and a half-white texel
+        is <code>#414142</code>. A blue roan's side view is back to 65 warm texels. A
+        fully white texel is <code>whiten(1)</code>, which lands on exactly
+        <code>(0, 0)</code> - the same "resolve to transparent" path
         <a href="gene-mitf.html">splash</a> and <a href="gene-kit.html">dominant
-        white</a> use.
+        white</a> use. On a chestnut the op collapses to <code>red * keep</code>, so
+        strawberry roan did not move.
     </p>
     <p>
         <b>One octave, not two.</b> The mix was <code>PatchNoise.fbm2</code>, whose

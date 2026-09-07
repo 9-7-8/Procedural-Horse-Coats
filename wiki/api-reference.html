@@ -513,6 +513,7 @@ public final class PigmentField implements PigmentView {
     void setRed / setBlack(int px, int py, float value);
     void restrictRed / restrictBlack(int px, int py, float amount);  // *= (1 - amount)
     void dilute(int px, int py, float keepRed, float keepBlack, float blackTint);
+    void whiten(int px, int py, float amount);   // 1 = bald white; every white marking
     void forEach(PixelOp op);
 }</code></pre>
 </div>

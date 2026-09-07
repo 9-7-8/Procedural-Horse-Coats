@@ -283,6 +283,13 @@
     <li>Use <code>dilute</code>, not a bare <code>restrictBlack</code>, whenever the
         effect is a dilution &mdash;
         <a href="pipeline.html#dilute">the zero-red column is a trap</a>.</li>
+    <li>Use <code>whiten</code>, never a scaling of both channels, whenever the effect
+        is <em>white hair</em> &mdash; a marking, its soft edge, a roan fleck, a bald
+        patch. Scaling <code>red</code> and <code>black</code> together unmasks the red
+        a black horse was hiding and the fade browns;
+        <a href="pipeline.html#whiten">the gold diagonal is the same trap from the
+        other side</a>. <code>whiten(1)</code> is exactly <code>(0, 0)</code>, so it is
+        also the right verb for a hard-edged marking.</li>
     <li>Override <code>expressionIn(pair, genotype)</code> and return a wild type
         when a gene should decline to run on a base that has nothing for it to do
         &mdash; that is how agouti stays silent on a chestnut.</li>

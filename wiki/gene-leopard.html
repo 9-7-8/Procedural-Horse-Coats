@@ -127,6 +127,16 @@
     reproduces the exact pattern.
 </p>
 
+<p>
+    All four go through one private <code>whiten(f, px, py, amount)</code>, which is
+    <a href="pipeline.html#whiten"><code>PigmentField.whiten</code></a> and nothing else.
+    That matters most for <code>paintVarnish</code>, which is <em>all</em> partial
+    whitening: on a black-based appaloosa the old per-gene approximation left a side
+    view carrying 211 warm texels &mdash; the varnish reading tan rather than grey
+    &mdash; against the 64 a plain black horse gets from the template's own shading.
+    It is 59 now.
+</p>
+
 <div class="table-wrap">
 <table>
 <thead><tr><th>outcome</th><th>painter</th><th>shape</th></tr></thead>

@@ -58,7 +58,7 @@ sort(scores);  threshold = scores[n - round(cover * n)];
 
 // pass two
 if (score(part, point) &lt; threshold) return;
-f.setRed(px, py, 0f); f.setBlack(px, py, 0f);   // hard edge, no gold fringe</code></pre>
+f.whiten(px, py, 1f);                          // hard edge; whiten(1) is exactly (0, 0)</code></pre>
 </div>
 
 <p>

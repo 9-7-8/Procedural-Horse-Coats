@@ -326,9 +326,26 @@
 <tbody>
 <tr><td><code>DILUTE</code></td><td><code>keepRed</code> 1, <code>keepBlack</code> 1, <code>blackTint</code> 0</td><td>The dilution move. <code>blackTint</code> feeds a share of the removed eumelanin back in as red &mdash; without it a "diluted" black point stays on the gradient's jet-black column and reads as a void. Cream, champagne, pearl and silver are all this one op.</td></tr>
 <tr><td><code>RESTRICT</code></td><td><code>red</code> 0, <code>black</code> 0</td><td>Take a share of one pigment away, leaving the other alone.</td></tr>
-<tr><td><code>SET_PIGMENT</code></td><td><code>red</code>, <code>black</code></td><td>Drive pigment to a level. <code>(0, 0)</code> is a white marking; <code>(0, 1)</code> is a black point. Omit a channel to leave it alone.</td></tr>
+<tr><td><code>SET_PIGMENT</code></td><td><code>red</code>, <code>black</code></td><td>Drive pigment to a level. <code>(0, 1)</code> is a black point. Omit a channel to leave it alone. For a <em>white</em> marking reach for <code>WHITEN</code> instead &mdash; see below.</td></tr>
+<tr><td><code>WHITEN</code></td><td><code>amount</code> 1</td><td>Mix white hair in: <code>1</code> is bald white and the transparent path, a fraction is a roan fleck. Multiplied by the mask coverage, so a soft-edged mask fades correctly on its own.</td></tr>
 </tbody>
 </table>
+
+<div class="note">
+<p><b>Why white has an op of its own, and <code>SET_PIGMENT</code> to <code>(0, 0)</code> does not do.</b>
+A black horse is <code>(red&nbsp;=&nbsp;1, black&nbsp;=&nbsp;1)</code>: it stores a full load of red
+pigment that the black is simply <em>masking</em> &mdash; the gradient's whole bottom row is
+<code>#000000</code>, so at <code>black&nbsp;=&nbsp;1</code> the red cannot be seen and nowhere
+else is that true. Driving both channels to zero together unmasks it on the way out and walks the
+sample down the gradient's gold diagonal, so the soft edge of every patch comes out
+<code>#5F330B</code> then <code>#885517</code> &mdash; chocolate and tan, around a marking on an
+otherwise jet-black horse.</p>
+<p><code>WHITEN</code> holds the <em>visible</em> red constant instead of the stored red, and on a
+black horse that is zero, so the fade runs down the gradient's <code>red&nbsp;=&nbsp;0</code>
+column &mdash; the one neutral ramp in the chart. Shades of grey, which is what white hairs
+through black hairs look like. On a chestnut nothing was masked and the op collapses to
+<code>red&nbsp;*&nbsp;keep</code>, so strawberry roan is unchanged.</p>
+</div>
 
 <h3>Magical</h3>
 

@@ -969,7 +969,7 @@
         same question and is the case the saturating stacking signal exists for.</li>
 </ul>
 
-<h2 id="roans">&sect;0-F3 &mdash; the two roans, rebuilt (2026-09-06, NOT looked at)</h2>
+<h2 id="roans">&sect;0-F3 &mdash; the two roans, rebuilt + regreyed (2026-09-06, NOT looked at)</h2>
 
 <p>
     Classic roan and the leopard complex's varnish roan were both re-derived from a
@@ -1003,6 +1003,20 @@
         plus white hairs reads as a dark horse with white through it. If it looks like a
         <a href="gene-grey.html">grey</a>, the white fraction is too high and the two
         genes are competing for the same look.</li>
+    <li><strong>Is there any warmth left in a blue roan or a black leopard?</strong>
+        Changed 2026-09-06, and the first thing to look at here. Partial whitening now
+        goes through <a href="pipeline.html#whiten"><code>PigmentField.whiten</code></a>,
+        so the grey hairs on a black base should be <em>neutral</em> grey - the flecks,
+        the fleck edges, and the whole varnish mix. Offline a side view is down from 194
+        warm texels to 65, which is what a plain black horse measures from the
+        template's own hoof and nostril shading. On a screen the question is simply
+        whether a blue roan or a black-based varnish reads black-and-white or still has
+        a brown cast to it, especially where the white is thickest.</li>
+    <li><strong>And is a red-based roan still red?</strong> The other half of the same
+        change: a strawberry roan (<code>extension=e/e roan=Rn/rn</code>) and a bay roan
+        should be exactly as warm as before - the op is a no-op on a base with no black
+        pigment to unmask. If a chestnut roan has gone pale or grey, the correction is
+        firing where it should not.</li>
     <li><strong>The inverted V.</strong> Half-way up each leg the middle of the face
         should still be base-coloured while the edges have roaned. This is a
         <strong>three-or-four-texel</strong> feature on a leg face, so the honest

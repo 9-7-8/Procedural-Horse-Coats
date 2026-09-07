@@ -106,6 +106,7 @@ default ColorField tint(AllelePair pair, CoatBuildContext ctx,
 <tr><th><code>setRed / setBlack(px, py, v)</code></th><td>Clamp a texel to an absolute value.</td></tr>
 <tr><th><code>restrictRed / restrictBlack(px, py, amount)</code></th><td><code>value *= (1 - amount)</code>. 0 keeps it, 1 removes it.</td></tr>
 <tr><th><code>dilute(px, py, keepRed, keepBlack, blackTint)</code></th><td>The shared dilution move &mdash; see below.</td></tr>
+<tr><th><code>whiten(px, py, amount)</code></th><td>The shared <b>whitening</b> move &mdash; see below. Every white marking goes through it.</td></tr>
 <tr><th><code>forEach(op)</code></th><td>Visit every texel, mapped or not.</td></tr>
 <tr><th><code>mutableCopy()</code></th><td>A private, writable copy. This is how a gene starts.</td></tr>
 </tbody>
@@ -148,6 +149,70 @@ default ColorField tint(AllelePair pair, CoatBuildContext ctx,
         <strong>No cream horse keeps a pitch-black point.</strong> Dark brown is as
         far as it goes &mdash; so single cream carries a full tint, not the token
         amount a real-world buckskin&rsquo;s black points would argue for.
+    </p>
+</div>
+
+<h3 id="whiten">Why <code>whiten</code> exists, and why scaling both channels was not enough</h3>
+
+<div class="codebox">
+<div class="filename">common/coat/pattern/PigmentField.java</div>
+<pre><code class="language-java">public void whiten(int px, int py, float amount) {
+    if (amount &lt;= 0f) return;
+    int i = py * size + px;
+    float keep       = 1.0f - clamp01(amount);
+    float b          = black[i];
+    float visibleRed = red[i] * (1.0f - b);     // red only shows where black isn't
+    float newBlack   = b * keep;
+    float room       = 1.0f - newBlack;
+    red[i]   = room &lt;= 1e-4f ? 0f : clamp01(visibleRed * keep / room);
+    black[i] = clamp01(newBlack);
+}</code></pre>
+</div>
+
+<p>
+    A black horse is <code>(red = 1, black = 1)</code>. It carries a <em>full load</em>
+    of pheomelanin that is simply <b>masked</b>: the gradient's entire bottom row is
+    <code>#000000</code>, so at <code>black = 1</code> the red level cannot be seen, and
+    at no other black level is that true. Take the black away and the red is unmasked
+    on the way out &mdash; and because the diagonal of this chart runs through the
+    golds, the sample lands in the browns. The old ramp put <code>#5F330B</code> and
+    <code>#885517</code>, chocolate and tan, through the soft edge of every white
+    marking on an otherwise jet-black horse.
+</p>
+
+<p>
+    So what <code>whiten</code> holds constant is the <b>visible</b> red,
+    <code>red&nbsp;&times;&nbsp;(1&nbsp;&minus;&nbsp;black)</code>, not the stored red.
+    It scales that by <code>keep</code> alongside the black, and stores whatever
+    reproduces it against the black that is left. On a black horse the visible red is
+    zero, so the stored red drops straight to zero and the fade runs down the
+    <code>red = 0</code> column &mdash; the chart's one neutral ramp. Shades of grey,
+    which is what white hairs through black hairs look like.
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>base, whitened 25 / 50 / 75%</th><th>scaling both channels</th><th><code>whiten</code></th></tr></thead>
+<tbody>
+<tr><th>black <code>(1, 1)</code></th><td><code>#5F330B</code> <code>#73522C</code> <code>#9C958D</code></td><td><code>#080808</code> <code>#414142</code> <code>#A6A6A7</code></td></tr>
+<tr><th>chestnut <code>(1, 0)</code></th><td colspan="2">unchanged &mdash; nothing was masked, and the op collapses to <code>red &times; keep</code></td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="note good">
+    <span class="label">Two properties worth keeping</span>
+    <p>
+        <b>It is an identity at <code>amount = 0</code></b>, which is what lets a soft
+        edge meet unmarked coat without a seam &mdash; and it is why the correction has
+        to be expressed against the black that is <em>there</em> rather than applied
+        flat to every marked texel.
+    </p>
+    <p>
+        <b><code>whiten(1)</code> lands on exactly <code>(0, 0)</code></b>, so the hard
+        white markings &mdash; tobiano, splash, sabino, frame, dominant white &mdash;
+        use the same verb and still take the composer's transparent path. That is worth
+        one line each: there should be one way to make a horse white, not seven.
     </p>
 </div>
 
