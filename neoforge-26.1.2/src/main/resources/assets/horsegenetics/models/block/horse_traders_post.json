@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/cube_bottom_top",
+  "textures": {
+    "top": "horsegenetics:block/horse_traders_post_top",
+    "side": "horsegenetics:block/horse_traders_post_side",
+    "bottom": "horsegenetics:block/horse_traders_post_bottom"
+  }
+}

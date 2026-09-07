@@ -1,0 +1,10 @@
+{
+  "amount": 3.0,
+  "trades": [
+    "horsegenetics:horseman/level_2/buy_hair_bundles",
+    "horsegenetics:horseman/level_2/sell_basic_whistle",
+    "horsegenetics:horseman/level_2/sell_blank_tickets",
+    "horsegenetics:horseman/level_2/sell_horse_armor"
+  ],
+  "random_sequence": "horsegenetics:trade_set/horseman/level_2"
+}

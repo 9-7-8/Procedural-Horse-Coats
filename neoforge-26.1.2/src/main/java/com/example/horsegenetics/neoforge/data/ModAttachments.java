@@ -63,6 +63,19 @@ public final class ModAttachments {
                     .serialize(CarrotWindowAttachment.MAP_CODEC)
                     .build());
 
+    // Whose horse this is while it is nobody's: the cowboy who bred it and has
+    // not sold it yet (data/CowboyBrand). Read by CowboyHerdGoal to find the man
+    // to follow and by TransferPaperHandler to refuse free taming. Synced,
+    // because refusing an interaction only on the server makes the client
+    // predict a mount it then has to take back - see CowboyBrand.STREAM_CODEC.
+    // NOT copyOnDeath - a re-summoned horse is not still his.
+    public static final Supplier<AttachmentType<CowboyBrand>> COWBOY_BRAND =
+            ATTACHMENT_TYPES.register("cowboy_brand", () -> AttachmentType
+                    .builder(() -> CowboyBrand.NONE)
+                    .serialize(CowboyBrand.MAP_CODEC)
+                    .sync(CowboyBrand.STREAM_CODEC)
+                    .build());
+
     private ModAttachments() {
     }
 }

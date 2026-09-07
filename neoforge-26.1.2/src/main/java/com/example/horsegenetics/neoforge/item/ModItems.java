@@ -72,6 +72,14 @@ public final class ModItems {
         return item;
     }
 
+    private static DeferredItem<net.minecraft.world.item.BlockItem> registerBlockItem(
+            String name, net.neoforged.neoforge.registries.DeferredBlock<?> block) {
+        DeferredItem<net.minecraft.world.item.BlockItem> item =
+                ITEMS.registerItem(name, p -> new net.minecraft.world.item.BlockItem(block.get(), p));
+        TAB_ITEMS.add(item);
+        return item;
+    }
+
     // Dev/testing tool - opens an age/sex/genome editor before spawning. Not a
     // real SpawnEggItem; see client/CustomHorseSpawnEggClient.
     public static final DeferredItem<Item> CUSTOM_HORSE_SPAWN_EGG = simple("custom_horse_spawn_egg");
@@ -114,6 +122,24 @@ public final class ModItems {
     // --- stall signs (roadmap §11) - bind a horse, place on a stall wall ---
     public static final DeferredItem<StallSignItem> STALL_SIGN = register("stall_sign", StallSignItem::new);
     public static final DeferredItem<StallSignItem> BOUND_STALL_SIGN = register("bound_stall_sign", StallSignItem::new);
+
+    // --- transfer papers - how a horse changes hands --------------------
+    // A blank is bound to whoever crafted it and can only be signed against a
+    // horse that player currently owns; signing it produces a signed paper,
+    // which is a bearer claim on that one animal - tradeable, and redeemed by
+    // right-clicking the horse itself. The cowboy sells his stock as signed
+    // papers. Mechanics: server/TransferPaperHandler.
+    public static final DeferredItem<TransferPaperItem> BLANK_TRANSFER_PAPER =
+            register("blank_transfer_paper", TransferPaperItem::new);
+    // One horse per paper, so they never stack: two of these are never the
+    // same item, and a stack of them could not show you which horse is which.
+    public static final DeferredItem<SignedTransferPaperItem> SIGNED_TRANSFER_PAPER =
+            register("signed_transfer_paper", p -> new SignedTransferPaperItem(p.stacksTo(1)));
+
+    // --- the horseman's workstation (roadmap §19) ------------------------
+    public static final DeferredItem<net.minecraft.world.item.BlockItem> HORSE_TRADERS_POST =
+            registerBlockItem("horse_traders_post",
+                    com.example.horsegenetics.neoforge.block.ModBlocks.HORSE_TRADERS_POST);
 
     // --- whistles (roadmap §11) - recall your tamed horses in a radius ---
     public static final DeferredItem<WhistleItem> BASIC_WHISTLE =

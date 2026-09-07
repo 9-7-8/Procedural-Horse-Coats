@@ -1,0 +1,247 @@
+package com.example.horsegenetics.neoforge.server;
+
+import com.example.horsegenetics.neoforge.entity.Cowboy;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.ai.util.DefaultRandomPos;
+import net.minecraft.world.entity.animal.equine.AbstractHorse;
+import net.minecraft.world.phys.Vec3;
+
+import java.util.EnumSet;
+
+/**
+ * <b>The cowboy's horse does the walking.</b>
+ *
+ * <p>A rider that is not a player cannot steer a horse - vanilla only hands
+ * control to a saddled mount's player passenger - so a mounted mob is dead
+ * weight and the animal keeps running its own stroll goal. Rather than fight
+ * that from the rider's side, this puts the itinerary on the horse: while a
+ * {@link Cowboy} is aboard, this goal holds {@link Flag#MOVE} continuously,
+ * which starves every other movement goal the horse has, and rides to whatever
+ * {@link CowboyRoutine} says the pair should be doing.
+ *
+ * <p>It keeps running even when there is nowhere to go, and simply stops the
+ * navigation - that is the difference between "the cowboy is standing at his
+ * barn" and "the horse has decided to wander off with him on it".
+ *
+ * <h2>Doors</h2>
+ * The rider is the only one of the pair with hands, so this opens what the
+ * horse walks into ({@link CowboyDoors}), and shuts the barn behind them once
+ * everybody is in. Both leaves, always - see that class for why one is useless.
+ *
+ * <h2>Night</h2>
+ * Home at dusk, doors shut, and if that fails - never got inside, or something
+ * got in with him - he runs, at a speed no ordinary goal uses, and does not
+ * settle again until it is light.
+ */
+public final class CowboyMountGoal extends Goal {
+
+    private static final double TRAVEL_SPEED = 1.1;
+    private static final double AMBLE_SPEED = 0.7;
+
+    /** Riding for his life. Deliberately faster than anything else he does. */
+    private static final double FLEE_SPEED = 1.9;
+
+    /** Re-path this often while travelling - cheaper than every tick, still responsive. */
+    private static final int REPATH_INTERVAL = 30;
+
+    /** Re-path far more often while fleeing; the thing chasing him is moving too. */
+    private static final int FLEE_REPATH_INTERVAL = 8;
+
+    /** Roughly how often an idling pair picks a new spot to amble to. */
+    private static final int IDLE_STROLL_INTERVAL = 200;
+
+    /** How far an idle amble goes. */
+    private static final int IDLE_STROLL_RANGE = 12;
+
+    /** How far ahead of the barn he starts opening up. */
+    private static final int DOOR_OPEN_RANGE = 16;
+
+    /** Ticks between passes over the barn's doors. Cheap, but not free. */
+    private static final int DOOR_SCAN_INTERVAL = 10;
+
+    private final AbstractHorse horse;
+    private int repathCooldown;
+    private int strollCooldown;
+    private int doorScanCooldown;
+
+    /** The barn is standing open for the night run-in and we have not shut it yet. */
+    private boolean barnStandingOpen;
+
+    /** We shut the barn behind us, so we owe it an opening at first light. */
+    private boolean barnShutForNight;
+
+    public CowboyMountGoal(AbstractHorse horse) {
+        this.horse = horse;
+        // MOVE only. Holding JUMP as well would starve the horse's own FloatGoal,
+        // which is the goal that keeps it - and the man on it - from drowning.
+        setFlags(EnumSet.of(Flag.MOVE));
+    }
+
+    private Cowboy rider() {
+        for (Entity passenger : horse.getPassengers()) {
+            if (passenger instanceof Cowboy cowboy && cowboy.isAlive()) {
+                return cowboy;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public boolean canUse() {
+        return rider() != null;
+    }
+
+    @Override
+    public boolean canContinueToUse() {
+        return rider() != null;
+    }
+
+    @Override
+    public boolean requiresUpdateEveryTick() {
+        return false;
+    }
+
+    @Override
+    public void start() {
+        repathCooldown = 0;
+        strollCooldown = 0;
+        doorScanCooldown = 0;
+    }
+
+    @Override
+    public void stop() {
+        horse.getNavigation().stop();
+    }
+
+    @Override
+    public void tick() {
+        Cowboy cowboy = rider();
+        if (cowboy == null || !(horse.level() instanceof ServerLevel level)) {
+            return;
+        }
+        if (cowboy.isTrading()) {
+            horse.getNavigation().stop();   // stand still while a customer is at the window
+            return;
+        }
+
+        if (repathCooldown > 0) {
+            repathCooldown--;
+        }
+        if (strollCooldown > 0) {
+            strollCooldown--;
+        }
+        if (doorScanCooldown > 0) {
+            doorScanCooldown--;
+        }
+
+        CowboyRoutine.Plan plan = CowboyRoutine.plan(cowboy, level, horse.blockPosition());
+        switch (plan.duty()) {
+            case FLEE -> flee(level, plan);
+            case SHELTER -> shelter(cowboy, level, plan);
+            case PATROL -> patrol(cowboy, level, plan);
+        }
+    }
+
+    // ------------------------------------------------------------------
+
+    private void flee(ServerLevel level, CowboyRoutine.Plan plan) {
+        // Running means the barn is no use tonight; leave it however it stands.
+        barnStandingOpen = false;
+        if (repathCooldown > 0 && !horse.getNavigation().isDone()) {
+            return;
+        }
+        repathCooldown = FLEE_REPATH_INTERVAL;
+        if (!(horse instanceof PathfinderMob mob) || plan.threat() == null) {
+            return;
+        }
+        Vec3 away = DefaultRandomPos.getPosAway(mob, 20, 8, plan.threat().position());
+        if (away != null) {
+            horse.getNavigation().moveTo(away.x, away.y, away.z, FLEE_SPEED);
+        }
+    }
+
+    private void shelter(Cowboy cowboy, ServerLevel level, CowboyRoutine.Plan plan) {
+        BlockPos barn = cowboy.home().orElse(horse.blockPosition());
+
+        // Open up on the approach so the whole herd can pour in behind him,
+        // rather than piling against a shut door while he squeezes through.
+        if (!barnStandingOpen && horse.blockPosition().closerThan(barn, DOOR_OPEN_RANGE)) {
+            CowboyDoors.setBarnDoors(level, barn, true, cowboy);
+            barnStandingOpen = true;
+            barnShutForNight = false;
+        }
+
+        if (plan.goal().isPresent()) {
+            moveTo(plan.goal().get(), TRAVEL_SPEED, REPATH_INTERVAL);
+            return;
+        }
+
+        horse.getNavigation().stop();
+        // In, and everyone who is coming is in: shut up for the night.
+        if (barnStandingOpen && herdIsHome(cowboy, level, barn)) {
+            CowboyDoors.setBarnDoors(level, barn, false, cowboy);
+            barnStandingOpen = false;
+            barnShutForNight = true;
+        }
+    }
+
+    private void patrol(Cowboy cowboy, ServerLevel level, CowboyRoutine.Plan plan) {
+        BlockPos barn = cowboy.home().orElse(horse.blockPosition());
+        // Morning: whatever we shut last night, we open. Tracked as a flag
+        // rather than re-read off the world, so the common case - a cowboy out
+        // on his rounds all day - costs nothing at all.
+        if (barnShutForNight) {
+            CowboyDoors.setBarnDoors(level, barn, true, cowboy);
+            barnShutForNight = false;
+        }
+        barnStandingOpen = false;
+
+        // And a standing guarantee that he can never be sealed in: while he is
+        // inside the barn in daylight, its doors get opened. This is what saves
+        // him from a player who shuts them on him, or from a night that ended
+        // with the flag lost to a world reload - neither of which the flag
+        // above can see.
+        if (doorScanCooldown == 0 && CowboyRoutine.insideBarn(barn, horse.blockPosition())) {
+            doorScanCooldown = DOOR_SCAN_INTERVAL;
+            CowboyDoors.setBarnDoors(level, barn, true, cowboy);
+        }
+
+        if (plan.goal().isPresent()) {
+            moveTo(plan.goal().get(), TRAVEL_SPEED, REPATH_INTERVAL);
+            return;
+        }
+
+        // Arrived. Amble about now and then so the pair does not stand like a
+        // statue, but never far enough to leave the patch.
+        if (strollCooldown == 0 && horse.getNavigation().isDone()) {
+            strollCooldown = IDLE_STROLL_INTERVAL + horse.getRandom().nextInt(IDLE_STROLL_INTERVAL);
+            BlockPos spot = barn.offset(
+                    horse.getRandom().nextInt(IDLE_STROLL_RANGE * 2 + 1) - IDLE_STROLL_RANGE,
+                    0,
+                    horse.getRandom().nextInt(IDLE_STROLL_RANGE * 2 + 1) - IDLE_STROLL_RANGE);
+            horse.getNavigation().moveTo(spot.getX() + 0.5, spot.getY(), spot.getZ() + 0.5, AMBLE_SPEED);
+        }
+    }
+
+    /**
+     * Everybody who <i>can</i> be home is home. Only loaded, living herd members
+     * count: a horse that wandered out of render distance, or one a wolf ate,
+     * must not hold the doors open till dawn.
+     */
+    private boolean herdIsHome(Cowboy cowboy, ServerLevel level, BlockPos barn) {
+        return cowboy.liveHerd(level).stream()
+                .allMatch(member -> CowboyRoutine.insideBarn(barn, member.blockPosition()));
+    }
+
+    private void moveTo(BlockPos target, double speed, int interval) {
+        if (repathCooldown > 0 && !horse.getNavigation().isDone()) {
+            return;
+        }
+        repathCooldown = interval;
+        horse.getNavigation().moveTo(target.getX() + 0.5, target.getY(), target.getZ() + 0.5, speed);
+    }
+}

@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "PPP",
+    "PHP",
+    "PPP"
+  ],
+  "key": {
+    "P": "minecraft:paper",
+    "H": "horsegenetics:horse_hair"
+  },
+  "result": {
+    "id": "horsegenetics:blank_transfer_paper"
+  }
+}

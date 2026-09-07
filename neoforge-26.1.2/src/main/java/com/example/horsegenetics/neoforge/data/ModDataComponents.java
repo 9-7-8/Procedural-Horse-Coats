@@ -59,6 +59,31 @@ public final class ModDataComponents {
                     .networkSynchronized(ByteBufCodecs.STRING_UTF8)
                     .build());
 
+    /**
+     * Who a {@code blank_transfer_paper} was crafted by ({@link PaperBearer}).
+     * Only that player may sign it, and only against a horse they own.
+     */
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<PaperBearer>> PAPER_BEARER =
+            TYPES.register("paper_bearer", () -> DataComponentType.<PaperBearer>builder()
+                    .persistent(PaperBearer.CODEC)
+                    .networkSynchronized(PaperBearer.STREAM_CODEC)
+                    .build());
+
+    /**
+     * The horse a {@code signed_transfer_paper} is a claim on
+     * ({@link com.example.horsegenetics.common.horse.TransferDeed}) - written
+     * when a player signs a blank against their own horse, or when the cowboy
+     * sells one out of his herd. Redeeming it moves that horse's ownership to
+     * whoever right-clicks the animal with it.
+     */
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<
+            com.example.horsegenetics.common.horse.TransferDeed>> HORSE_DEED =
+            TYPES.register("horse_deed", () -> DataComponentType
+                    .<com.example.horsegenetics.common.horse.TransferDeed>builder()
+                    .persistent(TransferDeedCodecs.CODEC)
+                    .networkSynchronized(TransferDeedCodecs.STREAM_CODEC)
+                    .build());
+
     public static void register(IEventBus modEventBus) {
         TYPES.register(modEventBus);
     }

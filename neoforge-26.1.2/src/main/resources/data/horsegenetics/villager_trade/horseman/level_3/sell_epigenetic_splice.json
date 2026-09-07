@@ -1,0 +1,12 @@
+{
+  "wants": {
+    "id": "minecraft:emerald",
+    "count": 3
+  },
+  "gives": {
+    "id": "horsegenetics:unknown_epigenetic_splice_carrot",
+    "count": 1
+  },
+  "max_uses": 6,
+  "xp": 5
+}

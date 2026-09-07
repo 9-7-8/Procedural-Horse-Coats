@@ -1,0 +1,19 @@
+{
+  "wants": {
+    "id": "minecraft:emerald",
+    "count": 24
+  },
+  "gives": {
+    "id": "horsegenetics:research_paper"
+  },
+  "max_uses": 2,
+  "xp": 15,
+  "given_item_modifiers": [
+    {
+      "function": "horsegenetics:set_random_gene",
+      "target": "paper",
+      "min_rarity": "rare",
+      "max_rarity": "epic"
+    }
+  ]
+}

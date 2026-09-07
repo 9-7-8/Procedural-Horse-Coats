@@ -19,4 +19,27 @@ public enum Commonness {
     Commonness(double weight) {
         this.weight = weight;
     }
+
+    /**
+     * The tier whose {@link #weight} is closest to {@code spawnWeight} - the
+     * inverse of the builder's {@code commonness(...)} call, for the things that
+     * want to sort breeds by rarity rather than draw them.
+     *
+     * <p>{@link Breed} stores only the weight, because that is the only form
+     * the herd roll ever needs. Anything that wants the <i>tier</i> back - the
+     * cowboy pricing his horses, a UI grouping a breed list - asks here rather
+     * than each inventing its own thresholds.
+     */
+    public static Commonness forWeight(double spawnWeight) {
+        Commonness best = MODERATE;
+        double bestGap = Double.MAX_VALUE;
+        for (Commonness c : values()) {
+            double gap = Math.abs(c.weight - spawnWeight);
+            if (gap < bestGap) {
+                bestGap = gap;
+                best = c;
+            }
+        }
+        return best;
+    }
 }

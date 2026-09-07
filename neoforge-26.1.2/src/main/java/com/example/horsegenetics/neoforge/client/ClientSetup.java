@@ -33,6 +33,8 @@ public final class ClientSetup {
     @SubscribeEvent
     static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerEntityRenderer(EntityType.HORSE, GeneticHorseRenderer::new);
+        event.registerEntityRenderer(
+                com.example.horsegenetics.neoforge.entity.ModEntities.COWBOY.get(), CowboyRenderer::new);
         event.registerBlockEntityRenderer(ModBlockEntities.HAY_PORTAL.get(), ctx -> new HayPortalRenderer());
     }
 

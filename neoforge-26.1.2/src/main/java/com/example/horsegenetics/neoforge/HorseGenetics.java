@@ -32,9 +32,13 @@ public final class HorseGenetics {
         ModBlocks.register(modEventBus);
         ModBlockEntities.register(modEventBus);
         ModItems.register(modEventBus);
+        com.example.horsegenetics.neoforge.entity.ModEntities.register(modEventBus);
+        com.example.horsegenetics.neoforge.village.ModPoiTypes.register(modEventBus);
+        com.example.horsegenetics.neoforge.village.ModVillagerProfessions.register(modEventBus);
         com.example.horsegenetics.neoforge.menu.ModMenus.register(modEventBus);
         com.example.horsegenetics.neoforge.server.recipe.ModRecipes.register(modEventBus);
         com.example.horsegenetics.neoforge.data.loot.ModLootModifiers.register(modEventBus);
+        com.example.horsegenetics.neoforge.data.loot.ModLootFunctions.register(modEventBus);
         modContainer.registerConfig(ModConfig.Type.CLIENT, ClientConfig.SPEC);
         // Server-side: how much of the health genetics this world plays with.
         // Whether a foal dies has to be one answer for everyone on a server.
