@@ -32,6 +32,84 @@
     </p>
 </div>
 
+<h2 id="lut-lab">&sect;0-L &mdash; the LUT lab (new, NOT looked at)</h2>
+
+<p>
+    A <strong>browser</strong> checklist, and a whole new page:
+    <a href="lut-lab.html">wiki/lut-lab.html</a>. Upload a colour gradient and see the
+    horses the real pipeline bakes against it &mdash; a chart on the left, a spinnable
+    horse on the right, a base-coat row and one row per dilution locus plus tobiano.
+    It runs the same wasm the <a href="horse-designer/index.html">designer</a> does and
+    draws with the gene creator's mesh emitter and orbit viewport; the only thing it
+    adds is <code>DesignerApi.setGradient</code> pointed at a file off your disk.
+    <strong>Nobody has opened it in a browser.</strong>
+</p>
+
+<div class="note warn">
+    <span class="label">It needs a server &mdash; <code>file://</code> will not work</span>
+    <p>
+        Same reason as the designer and the preview window: loading the wasm is a
+        <code>fetch</code>. The panel says so itself rather than sitting blank. Serve the
+        repo with <code>python -m http.server</code> and open <code>/wiki/lut-lab.html</code>.
+    </p>
+</div>
+
+<div class="note good">
+    <span class="label">What was checked offline</span>
+    <p>
+        The lab's exact call sequence was driven end to end against the baked wasm in
+        node, the way &sect;0-J's was, with the PNGs decoded and handed in as the page
+        hands them. Confirmed: the pipeline accepts its textures; the three bases come
+        back Black / Bay / Chestnut; all six gene keys resolve and yield buttons
+        (<code>Ch/Ch</code>; <code>d1/d1</code>, <code>D/D</code>; <code>prl/prl</code>,
+        <code>Cr/N</code>, <code>Cr/Cr</code>; <code>Mu/Mu</code>; <code>Z/Z</code>;
+        <code>To/To</code>); all six stack onto one genotype; a stale gene key reports
+        missing and a bad allele token refuses. The load-bearing one:
+        <strong>swapping the gradient really does redraw every horse</strong> &mdash; a
+        synthetic 64&times;64 chart moved 4 791 texels on the dilution-stacked horse and
+        11 776 on a plain bay, an odd-sized LUT is accepted (<code>GradientLut</code>
+        normalises), and going back to Natural is <strong>byte-identical</strong>.
+    </p>
+</div>
+
+<h3>What has not been looked at at all &mdash; everything visual</h3>
+
+<ul>
+    <li><strong>Does it come up?</strong> &ldquo;Loading the coat pipeline&hellip;&rdquo;,
+        then a two-column panel: chart left, horse right. On a narrow window the columns
+        stack (860px breakpoint) &mdash; that media query has never been rendered.</li>
+    <li><strong>Is the chart the right way up?</strong> The three corner labels are
+        positioned by CSS over the canvas and claim chestnut top-left, white top-right,
+        black bottom-left. Compare against the art. If they disagree, the labels are
+        wrong, not the pipeline &mdash; but a mislabelled axis on this page would send
+        someone editing the wrong corner of a gradient.</li>
+    <li><strong>The rotated Y-axis caption</strong> (&ldquo;more black pigment&rdquo;) is
+        a <code>rotate(90deg)</code> with a <code>right top</code> origin. Most likely
+        thing on the page to be sitting somewhere silly.</li>
+    <li><strong>Does the hover readout track the cursor?</strong> A swatch and a hex
+        should follow the mouse across the chart and reset on leave.</li>
+    <li><strong>Both upload paths.</strong> The &ldquo;Upload a LUT&hellip;&rdquo; button
+        and dragging a file onto the left panel (which should highlight while dragging).
+        Each should add a button marked <code>&#9650;</code>, select it, and update the
+        size line underneath. Dropping several at once should add several.</li>
+    <li><strong>Does the horse visibly change?</strong> Proven in the bytes, not in the
+        canvas &mdash; the texture upload path through three.js is the untested half.</li>
+    <li><strong>The two shipped buttons</strong>, Natural and Blue / pink, and switching
+        back and forth between them and an upload.</li>
+    <li><strong>Stacking.</strong> Champagne on cream on dun should be one horse, and the
+        caption under the viewport should list every active token.</li>
+    <li><strong><code>Cr/prl</code>, the dashed button.</strong> It should look identical
+        to <code>Cr/Cr</code> apart from the eyes &mdash; and the eye is a 2&times;2 block
+        on a 128px sheet, so it may not be visible at all at normal zoom. If it is not,
+        that is expected and the note on the page explains it.</li>
+    <li><strong>The dice</strong> rerolls the epigenetics and should move the tobiano
+        patches without changing the colours.</li>
+    <li><strong>What &ldquo;Natural&rdquo; actually is.</strong> It reads the designer's
+        <em>copy</em> of the gradient, which is currently out of sync with
+        <code>common/</code> &mdash; see <a href="known-gaps.html#gap-48">gap #48</a>. Until
+        that is re-baked, the button is not showing the game's gradient.</li>
+</ul>
+
 <h2 id="gene-carrot">&sect;0-K &mdash; the gene-carrot recipe card (new, NOT looked at)</h2>
 
 <p>

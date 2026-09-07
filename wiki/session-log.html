@@ -26,6 +26,28 @@
 
 <h2 id="d2026-09-06">2026-09-06</h2>
 
+<h3 id="lut-lab-2026-09-06">Built 2026-09-06, NOT yet looked at: a page for trying a gradient on the real pipeline before shipping it.</h3>
+
+<p>Owner: a page to &ldquo;upload and view different LUTs&rdquo;, with pre-built buttons for the base coats, then the dilutions, then one white gene. <a href="lut-lab.html">wiki/lut-lab.html</a>, plus the widget under <code>wiki/lut-lab/</code>. Checklist <a href="verification.html#lut-lab">&sect;0-L</a>.</p>
+
+<ul>
+<li><strong>It is the answer to a bug from earlier the same day.</strong> The near-black regression below was an art edit to the gradient silently switching off a rendering rule, and the only way to have caught it was to launch the game and go looking at a bay. The lab makes that loop a page refresh: <code>DesignerApi.setGradient</code> already existed for boot, nothing caches a baked coat, so pointing it at a file off the reader's disk redraws every horse on the page against the new chart. That is the entire mechanism &mdash; one export, already exported.
+</li>
+<li><strong>Almost none of it is new, on purpose.</strong> It stands on the same three files the per-gene preview window does &mdash; the creator's geometry tables, mesh emitter and orbit viewport, plus <code>common/</code> as wasm &mdash; so the coats are the game's bytes and there is no second opinion about what a champagne looks like. <code>java.js</code> grew exactly one export, its PNG decoder, rather than the lab holding its own view of channel order.
+</li>
+<li><strong>The page names six gene keys and an order, and nothing else.</strong> Every button, label and token inside a locus row is asked of <code>genePreviewJson</code> at run time, so a locus that gains an allele gains a button with no edit here. The rows <em>stack</em> rather than being exclusive, because champagne-on-cream is a different path across the chart than either alone and that is exactly where a palette fails. One white pattern only: every white locus paints unpigmented white, which is off the chart entirely, so a second would be a second copy of the same answer.
+</li>
+<li><strong>Driving it in node found the one thing it had promised and could not deliver.</strong> MATP's buttons came back <code>prl/prl</code>, <code>Cr/N</code>, <code>Cr/Cr</code> &mdash; no <code>Cr/prl</code>, which had been asked for by name. Not a bug: <code>Cr/prl</code> shares the <code>double-dilute</code> expression with <code>Cr/Cr</code>, so <code>distinctPairsOf</code> collapses them and a coat preview is right to. But MATP also contributes an <em>eye</em> colour, and there <code>Cr/prl</code> has a constant of its own. Measured over all three bases, the two bakes differ in <strong>exactly eight texels</strong> &mdash; the two eye blocks, at <code>CREAM_PEARL_GREEN</code> <code>#59A08F</code> &mdash; and the body is byte-identical. The button was added explicitly, drawn dashed, and labelled with why it looks the same; it is added only when the registry genuinely lacks it, so the day the mod tells the two apart it will not double.
+</li>
+<li><strong>An eye colour is the one thing on that page a LUT cannot move</strong>, which is worth saying out loud on a page about palettes: it is a fixed constant, not a gradient lookup. Same for every white patch. The dilutions are the rows that actually exercise a chart.
+</li>
+<li><strong>Verified offline, the way &sect;0-J was, because there is no browser here.</strong> The full call sequence ran against the baked wasm in node: textures accepted, three bases, all six keys resolving and stacking, a stale key reporting missing, a bad token refusing. The load-bearing check is that a synthetic 64&times;64 chart moved 4&nbsp;791 texels on a dilution-stacked horse and 11&nbsp;776 on a plain bay, that an odd-sized LUT is accepted at all, and that switching back to Natural is byte-identical. <strong>Everything visual is unlooked-at</strong>, including a rotated axis caption and an 860px breakpoint.
+</li>
+<li><strong>And it surfaced a live inconsistency in the tree.</strong> The gradient has a generated second copy under <code>wiki/horse-designer/assets/</code>, and at the close of the session the two were 118&nbsp;614 and 6&nbsp;113 bytes, both edited, neither committed. So the lab's &ldquo;Natural&rdquo; button &mdash; and every gene preview on the wiki &mdash; is currently drawing against a chart the game has never used. Left alone rather than re-baked over, because it is uncommitted owner work and could not be told apart from a deliberate test palette. <a href="known-gaps.html#gap-48">Gap #48</a>; note the golden test cannot ever catch this, as it composes against a synthetic gradient by design.
+</li>
+</ul>
+
+
 <h3 id="stripes-2026-09-06">Built 2026-09-06, NOT yet looked at: two striped genes stopped sharing a painter, and a third one was written.</h3>
 
 <p>Owner: the zebra and brindle genes &ldquo;shouldn&rsquo;t use the same painter, and they both currently look awful.&rdquo; Both true, and the two halves are the same fact. <a href="gene-brindle.html">Brindle</a> is white now; <a href="gene-magic-zebra.html">magic zebra</a> reads a real zebra&rsquo;s body map; and the natural counterpart it had been promising since 2026-09-02, <a href="gene-natural-zebra.html">zebra striping</a>, exists. Checklists <a href="verification.html#natural-zebra">&sect;0-Z</a> and <a href="verification.html#brindle">&sect;0-G</a>.</p>
