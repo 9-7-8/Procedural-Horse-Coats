@@ -16,7 +16,7 @@ import java.util.Map;
  *
  * <h2>Referenced-but-unbuilt</h2>
  * Genes and features the sheet asks for that this mod does not have yet -
- * Tiger Eye ({@code TE}), HYPP, pangare / mealy muzzle, the Fjord's two-tone
+ * Tiger Eye ({@code TE}), HYPP, the Fjord's two-tone
  * erect mane, lower-leg feathering - are recorded in each breed's
  * {@link Breed#notes()} and collected in {@code wiki/roadmap.html}. The
  * <b>leopard complex</b> ({@code LP} / {@code PATN1} / {@code PATN2}) is built,
@@ -32,6 +32,7 @@ public final class Breeds {
     private static final String CHAMP = "horsegenetics.champagne";
     private static final String SILVER = "horsegenetics.silver";
     private static final String FLAXEN = "horsegenetics.flaxen";
+    private static final String PANGARE = "horsegenetics.pangare";
     private static final String GREY = "horsegenetics.grey";
     private static final String ROAN = "horsegenetics.roan";
     private static final String TOB = "horsegenetics.tobiano";
@@ -391,8 +392,12 @@ public final class Breeds {
                 .gene(EXT, "E", "E", 70).gene(EXT, "E", "e", 26).gene(EXT, "e", "e", 4)
                 .agoutiBayBias()
                 .gene(DUN, "d1", "d2", 30).gene(DUN, "d2", "d2", 70)
+                // Near-fixed. The mealy muzzle and eye rings are the breed
+                // standard, and the 2018 marker sat at 98% here.
+                .gene(PANGARE, "Pa2", "Pa2", 52).gene(PANGARE, "Pa2", "Pa1", 34)
+                .gene(PANGARE, "Pa1", "Pa1", 12).gene(PANGARE, "Pa1", "pa", 2)
                 .height(hh(11, 2), hh(12, 3)).speed(4).jump(4).health(10)
-                .note("Mealy muzzle and eye rings (pangare) - NOT BUILT, roadmap pigment gene. Double-layered winter coat - cosmetic, out of scope.")
+                .note("Mealy muzzle and eye rings - the breed standard, and near-fixed here. Double-layered winter coat - cosmetic, out of scope.")
                 .note("An ancient, exceptionally hardy landrace - no white, no dilutions.")
                 .build();
     }
@@ -420,6 +425,9 @@ public final class Breeds {
                 .gene(EXT, "E", "E", 75).gene(EXT, "E", "e", 25)
                 .agoutiBlack()
                 .gene(DUN, "D", "d2", 40).gene(DUN, "D", "D", 55).gene(DUN, "d1", "d2", 5)
+                // Near-fixed - the 2018 marker was at 99% in Fjords.
+                .gene(PANGARE, "Pa2", "Pa2", 48).gene(PANGARE, "Pa2", "Pa1", 36)
+                .gene(PANGARE, "Pa1", "Pa1", 14).gene(PANGARE, "Pa1", "pa", 2)
                 .height(hh(13, 2), hh(14, 2)).speed(4).jump(3).health(9)
                 .note("Erect two-tone mane (dark centre, light outer) - NOT BUILT, roadmap mane render. Primitive stripes come from the near-fixed dun.")
                 .note("Almost every Fjord is a dun (brown/red/grey/white/yellow dun); E_ a/a + D drives the classic brown dun.")
@@ -504,6 +512,8 @@ public final class Breeds {
                 .gene(DUN, "D", "d2", 12).gene(DUN, "d2", "d2", 88)
                 .gene(TOB, "To", "to", 20).gene(TOB, "to", "to", 80)
                 .gene(PAX3, "SW2", "N", 30).gene(PAX3, "N", "N", 70)
+                .gene(PANGARE, "Pa2", "Pa1", 18).gene(PANGARE, "Pa1", "Pa1", 26)
+                .gene(PANGARE, "Pa1", "pa", 34).gene(PANGARE, "pa", "pa", 22)
                 .height(hh(13, 0), hh(14, 0)).speed(5).jump(4).health(10)
                 .note("Thick double coat, short legs, long back - the tölt (extra gait) is a roadmap item (DMRT3). Extremely varied colours; extremely hardy.")
                 .build();
@@ -730,6 +740,8 @@ public final class Breeds {
                 .gene(LEOP, "LP", "lp", 14).gene(LEOP, "LP", "LP", 2).gene(LEOP, "lp", "lp", 84)
                 .gene(PATN1, "PATN1", "n", 22).gene(PATN1, "n", "n", 78)
                 .gene(PATN2, "PATN2", "n", 14).gene(PATN2, "n", "n", 86)
+                .gene(PANGARE, "Pa1", "Pa1", 16).gene(PANGARE, "Pa1", "pa", 38)
+                .gene(PANGARE, "pa", "pa", 46)
                 .height(hh(8, 0), hh(10, 2)).speed(3).jump(3).health(9)
                 .note("Very small, thick coat, short legs, heavy head - pound for pound the strongest breed. Some carry the leopard complex.")
                 .note("Hyperlipidemia, EMS: age-related, folded into heartiness.")
@@ -766,6 +778,8 @@ public final class Breeds {
         return Breed.of("suffolk_punch", "Suffolk Punch").commonness(Commonness.RARE)
                 .biomes("minecraft:plains", "minecraft:forest", "minecraft:meadow", "minecraft:sunflower_plains")
                 .extensionChestnut().agoutiAny()
+                .gene(PANGARE, "Pa1", "Pa1", 20).gene(PANGARE, "Pa1", "pa", 40)
+                .gene(PANGARE, "pa", "pa", 40)
                 .height(hh(16, 0), hh(17, 2)).speed(3).jump(2).health(5)
                 .note("Always chestnut ('Suffolk sorrel'), wide barrel-bodied, no feathering. Fixed e/e, no white or dilution genes.")
                 .note("Anhidrosis, obesity: age-related, folded into heartiness. Rare - one of the most endangered breeds.")

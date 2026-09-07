@@ -87,6 +87,9 @@ public final class BayCoat {
     private static final double SOFT_EYE_REACH = 2.6;
     /** How much of the muzzle's mealiness is left where it meets the head. */
     private static final double MUZZLE_BACK = 0.45;
+    /** The inner leg's share of a soft point, and how far down the leg it reaches. */
+    private static final double INNER_LEG = 0.70;
+    private static final double INNER_LEG_REACH = 0.55;
 
     private BayCoat() {}
 
@@ -240,17 +243,21 @@ public final class BayCoat {
      * {@code strength} 0 - which is every bay short of the darkest - this whole
      * pass does nothing.
      *
-     * <p>The legs are left alone deliberately. A seal brown's legs <i>are</i>
-     * black; the light areas people identify one by are on the barrel and the
-     * head. (The inner limb is the one classic soft point not drawn here - see
-     * {@code wiki/known-gaps.html}.)
+     * <p>The <b>outside</b> of the legs is left alone deliberately: a seal
+     * brown's legs read as black, and it is the inner surface that keeps the
+     * tan. That is the fifth classic soft point and it went undrawn for a while
+     * because "the inside of a leg" is a <i>face</i> of a part rather than a
+     * part, which nothing here could address -
+     * {@link CoatRegions#medial} is that, and this and
+     * {@link com.example.horsegenetics.common.genetics.genes.PangareGene} are
+     * its two users.
      */
     private static void paintSoftPoints(Skin skin, PigmentField f, double strength) {
         if (strength <= 0) {
             return;
         }
         HorseSkinGeometry.forEachTexel(skin, (px, py, part, face, point) -> {
-            float k = (float) (strength * softWeight(skin, part, point));
+            float k = (float) (strength * softWeight(skin, part, face, point));
             if (k > 0f) {
                 f.setBlack(px, py, lerp(f.black(px, py), SOFT_BLACK, k));
                 f.setRed(px, py, lerp(f.red(px, py), 1.0f, k));
@@ -259,7 +266,17 @@ public final class BayCoat {
     }
 
     /** How much of a soft point sits at this texel, {@code 0}-{@code 1}. */
-    private static double softWeight(Skin skin, Part part, BodyPoint point) {
+    private static double softWeight(Skin skin, Part part, HorseSkinGeometry.Face face,
+                                     BodyPoint point) {
+        if (CoatRegions.LEGS.contains(part)) {
+            // The inner surface of the upper leg, and nothing on the outside.
+            // It fades out downward: the tan is on the thigh and the forearm,
+            // not on the cannon, which is solidly black on any seal brown.
+            Bounds b = HorseSkinGeometry.bounds(skin, part);
+            double fy = (point.y() - b.yMin()) / b.span(Axis.Y);
+            double up = smooth01((fy - (1.0 - INNER_LEG_REACH)) / INNER_LEG_REACH);
+            return INNER_LEG * CoatRegions.medial(skin, part, face) * up;
+        }
         switch (part) {
             case MUZZLE: {
                 // Strongest at the nose and weakening toward the head, so the

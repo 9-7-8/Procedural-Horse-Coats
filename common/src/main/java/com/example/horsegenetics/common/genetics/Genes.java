@@ -18,6 +18,7 @@ import com.example.horsegenetics.common.genetics.genes.LightGene;
 import com.example.horsegenetics.common.genetics.genes.CutieMarkGene;
 import com.example.horsegenetics.common.genetics.genes.DhampirGene;
 import com.example.horsegenetics.common.genetics.genes.DietGene;
+import com.example.horsegenetics.common.genetics.genes.PangareGene;
 import com.example.horsegenetics.common.genetics.genes.Patn1Gene;
 import com.example.horsegenetics.common.genetics.genes.Patn2Gene;
 import com.example.horsegenetics.common.genetics.genes.LutGene;
@@ -155,6 +156,13 @@ public final class Genes {
      * buckskins the evidence says nothing about.
      */
     public static final SootyGene SOOTY = new SootyGene();
+    /**
+     * <b>Pangare</b> (mealy) - the pale muzzle, belly and inner legs of an
+     * Exmoor or a Fjord, and {@link SootyGene}'s exact mirror: sooty keeps
+     * black on the topline, this takes red off the underside. Between them they
+     * are the two halves of countershading, and they sit next to each other.
+     */
+    public static final PangareGene PANGARE = new PangareGene();
     public static final MushroomGene MUSHROOM = new MushroomGene();
     /**
      * Natural zebra striping - the real-world half of the zebra pair, and
@@ -295,7 +303,7 @@ public final class Genes {
     /** The hand-written genes. Order here is irrelevant - the registry sorts. */
     private static final List<Gene> BUILTINS = List.of(
             SEX, DIET, EXTENSION, AGOUTI, SHADE, CHAMPAGNE, GREY, MATP,
-            MAGIC_ZEBRA, PINK_HAIR, DUN, SILVER, FLAXEN, SOOTY, MUSHROOM, BRINDLE, TIGER_EYE,
+            MAGIC_ZEBRA, PINK_HAIR, DUN, SILVER, FLAXEN, SOOTY, PANGARE, MUSHROOM, BRINDLE, TIGER_EYE,
             NATURAL_ZEBRA, ROAN, TOBIANO,
             LEOPARD, EDNRB, KIT, MITF, PAX3,
             MILK, BODY_SIZE, MAGIC_SPEED, MAGIC_HEALTH, MAGIC_JUMP,

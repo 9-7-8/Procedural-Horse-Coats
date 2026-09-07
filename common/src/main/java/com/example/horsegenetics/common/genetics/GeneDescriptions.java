@@ -72,6 +72,13 @@ public final class GeneDescriptions {
                             + "to lose, so it shows most on the colours with the most to keep and "
                             + "does nothing at all on a plain black. A dosage of two variant "
                             + "alleles; no confirmed real-world inheritance exists."),
+            Map.entry("horsegenetics.pangare",
+                    "Mealy: the pale muzzle, eye rings, belly, flanks and inner legs of an Exmoor "
+                            + "pony or a Fjord. It takes red pigment off the soft parts of the "
+                            + "horse, which is why it shows brightest on a chestnut, spares a bay's "
+                            + "black points entirely, and is invisible on a black. A dosage of two "
+                            + "variant alleles; near-fixed in some pony and draft breeds and no "
+                            + "confirmed mutation anywhere."),
             Map.entry("horsegenetics.champagne",
                     "A dilution that ignores its own dose - one copy or two give the same result. "
                             + "It keeps most red, cuts black hard and feeds some removed black back "

@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pangare &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="nav.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow natural">Natural gene <span class="sep">/</span> phase 1</p>
+<h1>Pangar&eacute; &mdash; the pale underside</h1>
+<p class="lede">
+    Also called <strong>mealy</strong>. The pale muzzle, eye rings, belly, flanks
+    and inner legs of an Exmoor pony, a Fjord or a Haflinger: the soft parts of
+    the horse go cream and the topline does not.
+</p>
+
+<div class="gene-preview" data-gene="horsegenetics.pangare"></div>
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd>horsegenetics.pangare</dd></div>
+    <div><dt>Alleles</dt><dd><span class="allele dom">Pa2</span> <span class="allele dom">Pa1</span> <span class="allele wild">pa</span></dd></div>
+    <div><dt>Outcomes</dt><dd>wild, <code>trace-pangare</code>, <code>mild-pangare</code>, <code>pangare</code>, <code>strong-pangare</code></dd></div>
+    <div><dt>Default allele</dt><dd>pa</dd></div>
+    <div><dt>Priority</dt><dd><code>PangareGene.PRIORITY</code> &mdash; immediately after sooty, its mirror</dd></div>
+    <div><dt>Founder draws</dt><dd>1 &times; nextFloat()</dd></div>
+    <div><dt>Deterministic</dt><dd><strong>no</strong> when expressed</dd></div>
+    <div><dt>Epi draws</dt><dd>1 &times; nextFloat &mdash; the expression roll</dd></div>
+    <div><dt>Health</dt><dd><strong>none established</strong></dd></div>
+</dl>
+
+<div class="note">
+    <span class="label">Unplayed</span>
+    <p>
+        Covered by <code>PangareGeneTest</code> and the golden file, and eyeballed as
+        side views. Not seen in a game. See
+        <a href="verification.html#pangare">verification &sect;0-U</a>.
+    </p>
+</div>
+
+<h2 id="mirror">The exact mirror of sooty</h2>
+
+<p>
+    <a href="gene-sooty.html">Sooty</a> <em>keeps</em> black along the topline;
+    pangar&eacute; <strong>takes red away</strong> from the underside. Both are
+    one region-weighted move on one pigment, they sit next to each other in the
+    order, and between them they are the two halves of countershading. A horse
+    carrying both is the textbook version: dark back, pale belly.
+</p>
+
+<div class="note good">
+    <span class="label">Working on red is why there is no per-colour table</span>
+    <p>
+        The reference gives a long list of rules for how pangar&eacute; should
+        render on each base. <strong>Every one of them falls out of removing red
+        rather than removing lightness</strong>, and none of them is a special
+        case in the gene:
+    </p>
+    <ul>
+        <li><strong>Chestnut</strong> &mdash; maximum visibility. Nothing masks
+            the red, so taking it walks the sample toward cream and pale gold.</li>
+        <li><strong>Bay</strong> &mdash; the red-brown body lightens and the
+            <strong>black points do not</strong>. A point is stored as red 0 and
+            black 1: there is no red on it to take.</li>
+        <li><strong>Black</strong> &mdash; nothing visible at all. A black
+            horse&rsquo;s red is entirely masked by its black, and the
+            gradient&rsquo;s bottom row is one colour whatever the red says. The
+            reference calls pangar&eacute; hard to recognise on black; here it is
+            invisible, exactly.</li>
+        <li><strong>Double dilute</strong> &mdash; visually redundant, because
+            the coat is already nearly out of red.</li>
+    </ul>
+</div>
+
+<h2 id="evidence">What is actually known</h2>
+
+<p>
+    <strong>No confirmed causal mutation and no test.</strong> Breeders have
+    treated pangar&eacute; as heritable for as long as anyone has kept records
+    &mdash; it is near-fixed in several breeds &mdash; but its inheritance mode is
+    unresolved, and the very wide range of intensity points at several loci
+    rather than one.
+</p>
+
+<p>
+    The nearest thing to evidence is a 2018 population study of a region on
+    chromosome 22 about 50&nbsp;kb downstream of <em>EDN3</em>, whose allele
+    frequencies split sharply between athletic breeds and the pony and draft
+    breeds where mealy is pervasive:
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Marker at</th><th>Breeds</th></tr></thead>
+<tbody>
+<tr><td>99&ndash;98%</td><td>Fjord, Haflinger, Exmoor</td></tr>
+<tr><td>90&ndash;74%</td><td>North Swedish Draught, Gotlandsruss, Ardennes, Icelandic</td></tr>
+<tr><td>58%</td><td>Shetland</td></tr>
+<tr><td>8&ndash;1%</td><td>Quarter Horse, Swedish Warmblood, Shire, Thoroughbred</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    That is an association between a marker and a <em>breed group</em>, not a
+    cause, and the authors said so. So the locus here is a <strong>dosage with a
+    per-horse roll</strong> &mdash; the same shape as
+    <a href="gene-flaxen.html">flaxen</a>, <a href="gene-sooty.html">sooty</a> and
+    <a href="gene-shade.html#score">the bay shade score</a> &mdash; and the
+    population evidence lands where it actually belongs, in
+    <a href="breeds.html">the breed frequencies</a>.
+</p>
+
+<h2 id="dosage">The dosage</h2>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Combination</th><th>Dosage</th><th>Outcome</th><th>What shows</th></tr></thead>
+<tbody>
+<tr><td><code>pa/pa</code></td><td>0</td><td>wild type</td><td>nothing</td></tr>
+<tr><td><code>Pa1/pa</code></td><td>1</td><td><code>trace-pangare</code></td><td>a pale lower muzzle and faint eye rings</td></tr>
+<tr><td><code>Pa1/Pa1</code>, <code>Pa2/pa</code></td><td>2</td><td><code>mild-pangare</code></td><td>pale muzzle and eye rings, a light underline, soft patches behind the elbows</td></tr>
+<tr><td><code>Pa2/Pa1</code></td><td>3</td><td><code>pangare</code></td><td>the familiar mealy horse &mdash; pale jaw, belly, groin, flank and inner legs</td></tr>
+<tr><td><code>Pa2/Pa2</code></td><td>4</td><td><code>strong-pangare</code></td><td>broad cream soft areas climbing the barrel; outer legs and black points still dark</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    A pale muzzle alone does not identify the trait &mdash; ordinary shade
+    variation looks the same, which is what <code>trace-pangare</code> is for.
+</p>
+
+<h2 id="regions">Where it sits</h2>
+
+<p>
+    The weights are the reference&rsquo;s own region table; what the gene adds is
+    the shapes they hang on. Muzzle 1.00, eye rings 0.90, belly 0.92, groin 0.82,
+    behind the elbow 0.74, jaw 0.72, flank 0.70, inner leg 0.70, lower neck 0.30,
+    outer leg 0.12, and <strong>nothing at all</strong> on the mane, tail, ears or
+    dorsal line &mdash; a horse with a pale mane has
+    <a href="gene-flaxen.html">flaxen</a>, <a href="gene-silver.html">silver</a>
+    or cream instead.
+</p>
+
+<h2 id="medial">The inside of a leg &mdash; a helper that did not exist</h2>
+
+<div class="note good">
+    <span class="label">Closes known gap #51</span>
+    <p>
+        Every other region helper in <code>CoatRegions</code> addresses a
+        <strong>part</strong>. &ldquo;The inside of a leg&rdquo; is a
+        <strong>face</strong> of a part, which is a different question, and it is
+        why this went undrawn: a leg is a box, its four sides are all at the same
+        distance from its own axis, and nothing about a body point distinguishes
+        the inner side from the outer. The information was in the
+        <code>Face</code> the visitor is already handed, and was simply going
+        unused.
+    </p>
+    <p>
+        <code>CoatRegions.medial</code> is that, and the reason it is a shared
+        helper rather than eight lines in this file is the per-leg mirror: a leg
+        on the horse&rsquo;s right faces inward on its <em>left</em> side and a
+        leg on the left faces inward on its <em>right</em>. Written out per gene,
+        that is exactly the kind of thing one of the four legs quietly gets
+        backwards.
+    </p>
+    <p>
+        It has two users, which is what the gap asked for before it was built:
+        this, and the <a href="gene-agouti.html#soft">seal brown&rsquo;s</a> soft
+        points, whose fifth and last one is the pale inner limb.
+    </p>
+</div>
+
+<h2>Health</h2>
+
+<div class="note warn">
+    <span class="label">None &mdash; and there is a specific trap here</span>
+    <p>
+        There is no established pangar&eacute;-associated disease, defect or
+        welfare problem, and the mod gives it no
+        <code>TraitContribution</code>.
+    </p>
+    <p>
+        The trap is that the <em>EDN3</em> region has been tied, in later work, to
+        exercise blood pressure and harness-racing performance in coldblooded
+        trotters. That is a regulatory haplotype under study in a racing
+        population, not a pangar&eacute; test: a mealy Fjord is not hypertensive
+        and is not athletically limited.
+    </p>
+    <p>
+        And it is <strong>not <a href="gene-ednrb.html">frame overo</a></strong>,
+        whose lethal white foal syndrome comes from <em>EDNRB</em> &mdash; a
+        different gene with a confusingly similar name.
+    </p>
+</div>
+
+<h2>Breeds</h2>
+
+<p>
+    Five breeds name the locus, at rates that follow the study&rsquo;s marker
+    frequencies rather than being invented: <strong>Exmoor Pony</strong> and
+    <strong>Norwegian Fjord</strong> near-fixed, <strong>Icelandic Horse</strong>
+    common, <strong>Shetland Pony</strong> and <strong>Suffolk Punch</strong>
+    moderate. Every other breed is <code>pa/pa</code>, because a breed that does
+    not name a coat locus gets it wild; the feral population carries the full
+    spread.
+</p>
+
+<h2 id="carrot">Its gene carrot</h2>
+
+<div class="gene-carrot" data-gene="horsegenetics.pangare"></div>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="gene-sooty.html">Sooty &mdash; the other half of countershading</a>
+        <a href="gene-dun.html">Dun</a>
+        <a href="gene-agouti.html#soft">The seal brown&rsquo;s soft points</a>
+        <a href="body-space.html">Body space &amp; regions</a>
+    </div>
+    Source: <code>common/genetics/genes/PangareGene.java</code>,
+    <code>common/coat/pattern/CoatRegions.medial</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+<script defer src="gene-preview/gene-preview.js"></script>
+<script defer src="gene-carrot/gene-carrot.js"></script>
+</body>
+</html>

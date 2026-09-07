@@ -142,6 +142,14 @@ public final class CoatSampleTool {
             {"sooty_chestnut", "extension=e/e sooty=S1/S1"},
             {"sooty_black", "sooty=S2/S2"},
 
+            // pangare - sooty's mirror, over the same bases
+            {"pangare_bay", "agouti=A/a pangare=Pa2/Pa2"},
+            {"pangare_chestnut", "extension=e/e pangare=Pa2/Pa2"},
+            {"pangare_mild_chestnut", "extension=e/e pangare=Pa1/pa"},
+            {"pangare_black", "pangare=Pa2/Pa2"},
+            {"pangare_dun_bay", "agouti=A/a dun=D/d2 pangare=Pa2/Pa2"},
+            {"pangare_and_sooty_bay", "agouti=A/a sooty=S2/S2 pangare=Pa2/Pa2"},
+
             // dhampir - the carrier is the eyes alone, the homozygote is white
             {"dhampir_trace_bay", "agouti=A/a dhampir=Dhmp/n"},
             {"dhampir", "dhampir=Dhmp/Dhmp"},
@@ -180,9 +188,10 @@ public final class CoatSampleTool {
             1, 4, 6, 2, 8,
             0, 0,
             2,
-            // flaxen x4, sooty x5, dhampir x3
+            // flaxen x4, sooty x5, pangare x6, dhampir x3
             3, 1, 5, 0,
             0, 0, 0, 2, 0,
+            0, 0, 4, 0, 0, 0,
             4, 0, 0};
 
     private CoatSampleTool() {}

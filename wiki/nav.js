@@ -53,6 +53,7 @@
                 { href: "gene-silver.html", text: "Silver dapple", kind: "natural" },
                 { href: "gene-flaxen.html", text: "Flaxen", kind: "natural" },
                 { href: "gene-sooty.html", text: "Sooty", kind: "natural" },
+                { href: "gene-pangare.html", text: "Pangare (mealy)", kind: "natural" },
                 { href: "gene-mushroom.html", text: "Mushroom", kind: "natural" },
                 { href: "gene-natural-zebra.html", text: "Zebra striping", kind: "natural" },
                 { href: "gene-brindle.html", text: "Brindle (X-linked)", kind: "natural" },

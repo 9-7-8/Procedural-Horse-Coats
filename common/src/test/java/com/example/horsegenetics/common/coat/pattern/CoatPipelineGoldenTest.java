@@ -76,6 +76,13 @@ class CoatPipelineGoldenTest {
             override("extension=e/e", "sooty=S2/S2"),
             override("sooty=S2/S2"),                                     // a plain black - unchanged
             override("agouti=A/a", "dun=D/d2", "sooty=S2/S2"),
+            // pangare: sooty inverted, and the black points it must spare
+            override("agouti=A/a", "pangare=Pa1/pa"),
+            override("agouti=A/a", "pangare=Pa2/Pa2"),
+            override("extension=e/e", "pangare=Pa2/Pa2"),
+            override("pangare=Pa2/Pa2"),                                 // a black - unchanged
+            override("agouti=A/a", "sooty=S2/S2", "pangare=Pa2/Pa2"),    // both halves at once
+            override("agouti=A/A", "shade=ShD/ShD", "extension=E/E"),    // seal - the inner limb
             override("kit=W22/N"),
             override("champagne=Ch/c"),
             override("agouti=A/a", "champagne=Ch/c"),

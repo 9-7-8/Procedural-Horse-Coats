@@ -241,6 +241,52 @@ public final class CoatRegions {
         }
     }
 
+    /**
+     * <b>How far round the <i>inside</i> of a limb this texel is</b>: {@code 1}
+     * on the face turned toward the horse's centreline, {@code 0} on the face
+     * turned away from it, and {@code 0.5} on the front and back, which face
+     * neither way.
+     *
+     * <p>Every other region helper here addresses a <b>part</b>. This one
+     * addresses a <b>face</b> of a part, which is a different question and the
+     * reason it did not exist for a long time: a leg is a box, its four sides
+     * are at the same distance from its own axis, and nothing about a
+     * {@link BodyPoint} distinguishes the inner side from the outer. The
+     * information is in the {@link Face} the visitor is already handed, and it
+     * was simply going unused.
+     *
+     * <p><b>Which face is medial is a per-leg mirror</b>, which is the part
+     * worth getting from one place rather than three: a leg standing on the
+     * horse's right ({@code z > 0}) faces inward on its {@link Face#LEFT} side
+     * and a leg on the left faces inward on its {@link Face#RIGHT}. Written out
+     * per gene, that mirror is the kind of thing one of the four legs quietly
+     * gets backwards.
+     *
+     * <p>Wanted by everything that has ever needed a pale or dark <i>inside</i>
+     * of a leg: a pangare's inner-thigh lightening, a seal brown's soft points,
+     * a dun's inner-leg pallor. Returns {@code 0} for anything that is not a
+     * leg.
+     */
+    public static double medial(Skin skin, Part part, HorseSkinGeometry.Face face) {
+        if (!LEGS.contains(part) || !HorseSkinGeometry.hasPart(skin, part)) {
+            return 0;
+        }
+        Bounds b = HorseSkinGeometry.bounds(skin, part);
+        double zCentre = (b.zMin() + b.zMax()) * 0.5;
+        boolean rightSide = zCentre > 0;
+        switch (face) {
+            case LEFT:
+                return rightSide ? 1.0 : 0.0;
+            case RIGHT:
+                return rightSide ? 0.0 : 1.0;
+            case NOSE:
+            case TAIL:
+                return 0.5;     // the front and back of the cannon face neither way
+            default:
+                return 0.0;     // the top and bottom of a leg box are not a side at all
+        }
+    }
+
     // ---- primitive markings (dun) ----------------------------------
 
     /**
