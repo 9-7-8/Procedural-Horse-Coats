@@ -23,8 +23,9 @@ compensate (see `worldgen/BarnPoolInjector`).
 
 What the bake adds that a structure-block save cannot carry:
 
-  * a jigsaw block on the barn's west face at y=0, so the village generator can
-    attach the piece to a plains-village street connector,
+  * a ground course under the whole homestead, carrying the path at road level,
+  * a jigsaw block on the barn's west face in the foundation course, so the
+    village generator can attach the piece to a plains-village street connector,
   * headroom over the barn's doorways, so a big horse can path through them,
   * the house beside the barn - widened, re-furnished, jigsaws resolved,
   * the two work posts and the two villagers at the house's front door, and
@@ -281,9 +282,12 @@ for pos, (state, nbt) in list(house.items()):
 # Interior is x=2..5, z=2..4 now. The beds take the middle two columns and run
 # away from the door, so walking in you get the length of them rather than the
 # ends; the chests take the columns either side of the pair.
+#
+# Heads to the back wall, feet to the door - which is the way round a bed is put
+# in a room, and the way round these two were not.
 for x in (3, 4):
-    put(house, (x, 1, 2), 'minecraft:white_bed[facing=south,occupied=false,part=foot]')
-    put(house, (x, 1, 3), 'minecraft:white_bed[facing=south,occupied=false,part=head]')
+    put(house, (x, 1, 2), 'minecraft:white_bed[facing=north,occupied=false,part=head]')
+    put(house, (x, 1, 3), 'minecraft:white_bed[facing=north,occupied=false,part=foot]')
 
 CHEST_LOOT = 'horsegenetics:chests/cowboy_house'
 for x in (2, 5):
@@ -305,58 +309,99 @@ put(house, (0, 0, 2), 'horsegenetics:cowboy_hitch')
 put(house, (0, 0, 4), 'horsegenetics:horsemans_table')
 
 # ============================================== compose the two buildings
-# The house goes behind the barn along z with a lane between them, and both
-# front faces stay on x=0 - which is the face the village street attaches to, so
-# the street reaches the whole homestead and not just the stable.
-HOUSE_AT = (0, 0, 8)
-LANE_Z = 7
+# The house goes behind the barn along z, and both front faces stay on the same
+# x - which is the side the village street attaches to, so the street reaches
+# the whole homestead and not just the stable.
+#
+# Neither building starts at x=0. The westernmost column of the piece is left
+# empty for the walk that runs along the front of both of them, because the walk
+# has to be *in front of* the steps and there is nowhere else for it to go: one
+# column further west is the street's own connector block, and a piece whose box
+# reaches over that overlaps the street piece and is thrown out by the placer, so
+# the homestead would simply never generate.
+WALK_X = 0
+BUILDINGS_X = WALK_X + 1
+HOUSE_AT = (BUILDINGS_X, 0, 8)
 
-grid = dict(barn)
+grid = {(x + BUILDINGS_X, y, z): cell for (x, y, z), cell in barn.items()}
 for (x, y, z), cell in house.items():
     grid[(x + HOUSE_AT[0], y + HOUSE_AT[1], z + HOUSE_AT[2])] = cell
 
 size = [
-    max(barn_size[0], house_size[0] + HOUSE_AT[0]),
+    max(barn_size[0] + BUILDINGS_X, house_size[0] + HOUSE_AT[0]),
     max(barn_size[1], house_size[1] + HOUSE_AT[1]),
     max(barn_size[2], house_size[2] + HOUSE_AT[2]),
 ]
 
-# ---- the lane between them -----------------------------------------------
-# One row of dirt path, the same block the village's own streets are made of.
-# Two buildings side by side with nothing between them read as two things that
-# happen to be near each other. It runs the width of the house and then turns up
-# the front of it, so the street, the stable and the front door are one walk.
+# ---- a ground course under both buildings --------------------------------
+# Both buildings are drawn with their foundation on layer 0, and that layer is
+# the one that ends up resting *on* the ground - the street's road block is the
+# layer below it, outside the piece entirely (see the jigsaw note further down).
+# So layer 0 is not the ground, it is the first course of the building, and
+# anything laid there that is meant to be walked on ends up a block-high curb.
+#
+# The lane was exactly that. To put a block at road level the piece needs a
+# layer below the foundation, and a structure cannot have a negative one - so
+# everything moves up by one and the new layer 0 becomes the ground the
+# homestead stands on. Nothing about where the piece lands changes: the jigsaw
+# rides up with the rest, so the foundation is still the course that meets the
+# street.
+GROUND = 1
+grid = {(x, y + GROUND, z): cell for (x, y, z), cell in grid.items()}
+size[1] += GROUND
+
+# ---- the walk along the front ---------------------------------------------
+# One column of dirt path, the same block the village's own streets are made of,
+# laid in that ground course so you walk on it rather than over it. It runs the
+# whole length of the piece down the empty column, which puts it at the foot of
+# the barn's stair skirt, in front of the house's doorstep, and in front of both
+# work posts - one walk from the street to the front door, past everything.
+#
+# There was a second run of it between the two buildings once. It is gone: the
+# gap between them is a yard, not a corridor, and a path down it only led from
+# the front of the homestead back to the front of the homestead.
+#
+# The column has clear sky the whole way, which it has to have.
+# `DirtPathBlock.canSurvive` is false with a solid block overhead, so a path
+# block under a step or a post would be scheduled to tick straight back to plain
+# dirt - laying dirt into the world under the guise of laying a path. In front
+# of the steps rather than under them, nothing is covered and nothing converts.
 PATH = 'minecraft:dirt_path'
-for x in range(house_size[0]):
-    put(grid, (x, 0, LANE_Z), PATH)
-for z in range(LANE_Z, size[2]):
-    if at(grid, (0, 0, z)) == AIR:
-        put(grid, (0, 0, z), PATH)
+for z in range(size[2]):
+    assert at(grid, (WALK_X, GROUND, z)) == AIR, 'the walk column must stay clear'
+    put(grid, (WALK_X, 0, z), PATH)
 
 # ================================================= the barn's own fixings
 # ---- the jigsaw connector -------------------------------------------------
-# The barn's west face (x=0) is the step in front of the north pair of doors;
-# the generator rotates the whole piece so this ends up facing back at whichever
-# street connector it attached to.
+# It sits in the walk column, level with the barn's north pair of doors; the
+# generator rotates the whole piece so this ends up facing back at whichever
+# street connector it attached to. It used to sit in the barn's west face, and
+# moved out with the walk - the position it needs is the piece's own west edge,
+# which is now this column rather than the building.
 #
-# y=0 - the barn's own foundation course - and NOT y=1. A jigsaw pair lands the
-# two blocks at the same world height, and the street connector it meets sits at
-# the street piece's y=1, one *above* the road block. So whatever local layer
-# carries this jigsaw is the layer that ends up resting on the ground. Vanilla
-# houses put their `building_entrance` jigsaw in their foundation layer for
-# exactly that reason, and they are the shape to copy: a plains house sits one
-# block proud of the road with a step up into the doorway.
+# The barn's foundation course, and nothing else. A jigsaw pair lands the two
+# blocks at the same world height, and the street connector it meets sits at the
+# street piece's y=1, one *above* the road block. So whatever local layer carries
+# this jigsaw is the layer that ends up resting on the ground. Vanilla houses put
+# their `building_entrance` jigsaw in their foundation layer for exactly that
+# reason, and they are the shape to copy: a plains house sits one block proud of
+# the road with a step up into the doorway.
 #
-# It was y=1 once, which sank the whole homestead a block: the foundation landed
-# in the road's own layer, the stair skirt round the doors was buried level with
-# the ground instead of stepping up onto it, and the building read as
-# half-dug-in.
+# It was a course too low once, which sank the whole homestead a block: the
+# foundation landed in the road's own layer, the stair skirt round the doors was
+# buried level with the ground instead of stepping up onto it, and the building
+# read as half-dug-in. So this tracks GROUND rather than naming a number - the
+# foundation is wherever the lift left it.
 #
 # final_state is the block the jigsaw replaces itself with once the piece is
-# placed - read straight out of the source so the step is put back exactly as it
-# was drawn, and so re-exporting the barn with something else there just works.
-JIGSAW_POS = (0, 0, 2)
+# placed - read straight back out of the grid, so whatever occupies the spot is
+# what is put there. In the walk column that is air, one block above the path,
+# and it has to stay air: `JigsawReplacementProcessor` swaps the jigsaw out
+# during placement, so a solid final_state here would be a block sitting on the
+# walk and would tick the path under it back to dirt.
+JIGSAW_POS = (WALK_X, GROUND, 2)
 final_state = at(grid, JIGSAW_POS)
+assert final_state == AIR, 'final_state would cover the walk'
 put(grid, JIGSAW_POS, 'minecraft:jigsaw[orientation=west_up]', T_cmp({
     'id': T_str('minecraft:jigsaw'),
     'name': T_str('minecraft:street'),
@@ -389,8 +434,8 @@ put(grid, JIGSAW_POS, 'minecraft:jigsaw[orientation=west_up]', T_cmp({
 # to read as a lintel is solid enough to stop a horse, so the answer is nothing
 # at all. A horse over 1.43 needs a three-wide doorway, which is a change to the
 # building rather than to its trim.
-CLEAR_ABOVE_DOORS = 3
-door_columns = {(x, z) for (x, y, z) in barn if '_door' in at(barn, (x, y, z))}
+CLEAR_ABOVE_DOORS = 3 + GROUND
+door_columns = {(x + BUILDINGS_X, z) for (x, y, z) in barn if '_door' in at(barn, (x, y, z))}
 cleared = 0
 for (x, z) in door_columns:
     if at(grid, (x, CLEAR_ABOVE_DOORS, z)) != AIR:
@@ -398,7 +443,9 @@ for (x, z) in door_columns:
         cleared += 1
 
 # ============================================================== the people
-# Two plain villagers on the path in front of the house, one at each work post.
+# Two plain villagers on the walk in front of the house, one facing each work
+# post across it - on the path itself rather than on top of the post, which is
+# where they stood while the path was a course too high and a column too far in.
 # Neither is given a profession: one claims the table the ordinary way and
 # becomes the horseman, the other is taken on by the hitch and becomes the
 # cowboy. Letting them take the jobs themselves is the only test there is of the
@@ -407,7 +454,7 @@ for (x, z) in door_columns:
 # real answer to a real question.
 entities = []
 for z in (2, 4):
-    stand = (0, 1, HOUSE_AT[2] + z)
+    stand = (WALK_X, GROUND, HOUSE_AT[2] + z)
     entities.append(T_cmp({
         'pos': T_dlist([stand[0] + 0.5, float(stand[1]), stand[2] + 0.5]),
         'blockPos': T_ilist(list(stand)),

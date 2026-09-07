@@ -53,12 +53,13 @@ import java.util.List;
  * <h2>Frequency</h2>
  * Weight 3 against the four vanilla terminators of weight 1 each, so roughly
  * three terminator slots in seven. That is not how often it appears: a village
- * has a handful of terminator slots, and the piece is 15x15 where a terminator
- * is 2x3, so most of the draws that pick it then fail the bounding-box check
- * and fall through to a small terminator instead. The weight is set high to
- * compensate for exactly that - it was 1 when the piece was 15x7 and carried
- * the barn alone, and doubling the depth to take the house in doubled the
- * ground it has to find. The net effect aimed at is "most plains villages,
+ * has a handful of terminator slots, and the piece is the better part of a
+ * chunk square where a terminator is 2x3, so most of the draws that pick it
+ * then fail the bounding-box check and fall through to a small terminator
+ * instead. The weight is set high to compensate for exactly that - it was 1
+ * when the piece carried the barn alone, and taking the house in roughly
+ * doubled the ground it has to find. It has since gained a column for the
+ * walk along the front, which costs it a little more again. The net effect aimed at is "most plains villages,
  * where there was room". A village that rolls two barns gets two barns; only
  * the first grows a cowboy (see {@code CowboyHandler}).
  */

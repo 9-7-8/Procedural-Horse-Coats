@@ -4,6 +4,7 @@ import com.example.horsegenetics.common.horse.HorseRecord;
 import com.example.horsegenetics.common.horse.TransferDeed;
 import com.example.horsegenetics.neoforge.data.ModDataComponents;
 import com.example.horsegenetics.neoforge.item.ModItems;
+import com.example.horsegenetics.neoforge.server.CowboyDoorGoal;
 import com.example.horsegenetics.neoforge.server.CowboyHandler;
 import com.example.horsegenetics.neoforge.server.HorsePrices;
 import com.example.horsegenetics.neoforge.server.HorseRecords;
@@ -158,8 +159,30 @@ public class Cowboy extends AbstractVillager {
         this.goalSelector.addGoal(1, new TradeWithPlayerGoal(this));
         this.goalSelector.addGoal(1, new LookAtTradingPlayerGoal(this));
         this.goalSelector.addGoal(2, new PanicGoal(this, 0.6));
+        this.goalSelector.addGoal(3, new CowboyDoorGoal(this));
         this.goalSelector.addGoal(8, new WaterAvoidingRandomStrollGoal(this, 0.4));
         this.goalSelector.addGoal(10, new LookAtPlayerGoal(this, Player.class, 8.0F));
+    }
+
+    /**
+     * Doors, in daylight only.
+     *
+     * <p>{@link CowboyDoorGoal} is the half that swings them; this is the half
+     * that lets him route through one in the first place. {@code canOpenDoors}
+     * is what makes the pathfinder score a shut wooden door as passable rather
+     * than as wall, so it has to rise and fall with the goal - on its own it
+     * would send him at a door he has no behaviour to open, and off on its own
+     * it would leave him unable to plan a way through a door he is perfectly
+     * able to open.
+     *
+     * <p>Set every tick rather than on a schedule change, because there is no
+     * event for "it got dark" and a path already in flight is re-planned often
+     * enough that a stale flag would strand him at the barn door either way.
+     */
+    @Override
+    protected void customServerAiStep(ServerLevel level) {
+        super.customServerAiStep(level);
+        getNavigation().setCanOpenDoors(level.isBrightOutside());
     }
 
     // --- identity -------------------------------------------------------
