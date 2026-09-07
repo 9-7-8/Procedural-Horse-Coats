@@ -16,10 +16,11 @@
 // WHICH HORSES. The base coats come from BaseCoats.all(); the dilution rows come
 // from the registry, one button per combination the mod says looks different
 // (genePreviewJson, the same call the gene pages make). So this file names six
-// gene KEYS and an order to show them in - an editorial choice about what is
-// worth looking at when you are judging a palette - and nothing else. A locus
-// that gains an allele gains a button here without this file being touched, and
-// a key the mod no longer has says so instead of quietly showing a plain horse.
+// gene KEYS, an order to show them in, and one combination the registry
+// deliberately collapses - all editorial choices about what is worth looking at
+// when you are judging a palette - and nothing else. A locus that gains an
+// allele gains a button here without this file being touched, and a key the mod
+// no longer has says so instead of quietly showing a plain horse.
 //
 // It needs the wiki served over http: loading the wasm is a fetch, and a file://
 // page is its own opaque origin. The panel says so rather than failing silently.
@@ -48,15 +49,29 @@ window.HG = window.HG || {};
      pattern. Only the keys are written here - every button, label and token in
      these rows is asked of the registry at run time. */
   var LOCI = [
-    "horsegenetics.champagne",
-    "horsegenetics.dun",
-    "horsegenetics.matp",       // cream / pearl - Cr/N, Cr/Cr, prl/prl, Cr/prl
-    "horsegenetics.mushroom",
-    "horsegenetics.silver",
+    { key: "horsegenetics.champagne" },
+    { key: "horsegenetics.dun" },
+    {
+      key: "horsegenetics.matp",
+      /* Cr/prl is asked for by name, and the registry does not offer it: it
+         shares the DOUBLE_DILUTE expression with Cr/Cr, so distinctPairsOf
+         collapses the two and a coat-only preview is right to. Measured, the
+         two bakes differ in exactly eight texels - the eye blocks, at MATP's
+         CREAM_PEARL_GREEN - and the body is byte-identical. So the button is
+         worth having and worth labelling: that difference is a fixed constant
+         and is the one thing on this page a gradient cannot move. */
+      also: [{
+        tokens: "Cr/prl",
+        name: "Cream + pearl",
+        note: "same coat as Cr/Cr - only the eyes differ, and the LUT cannot move them"
+      }]
+    },
+    { key: "horsegenetics.mushroom" },
+    { key: "horsegenetics.silver" },
     // One white pattern and no more. Every white locus paints the same colour -
     // unpigmented white, which is off the chart entirely - so a second one would
     // be a second copy of the same answer about the LUT.
-    "horsegenetics.tobiano"
+    { key: "horsegenetics.tobiano" }
   ];
 
   /* The gradients the mod ships, so there is something to look at before the
@@ -157,12 +172,26 @@ window.HG = window.HG || {};
     // dropped with a note rather than silently - the page is then naming a gene
     // that does not exist, and that is worth seeing.
     var missing = [];
-    var loci = LOCI.map(function (key) {
-      var g = JSON.parse(api.genePreviewJson(key));
+    var loci = LOCI.map(function (spec) {
+      var g = JSON.parse(api.genePreviewJson(spec.key));
       if (g.missing || !g.outcomes.length) {
-        missing.push(key);
+        missing.push(spec.key);
         return null;
       }
+      // A combination this page asks for by name that the registry collapsed.
+      // Only added if it is genuinely absent, so the day the mod starts telling
+      // them apart the button does not appear twice.
+      (spec.also || []).forEach(function (extra) {
+        var already = g.outcomes.some(function (o) { return o.tokens === extra.tokens; });
+        if (!already) {
+          g.outcomes.push({
+            tokens: extra.tokens,
+            name: extra.name,
+            description: extra.note,
+            collapsed: true
+          });
+        }
+      });
       return g;
     }).filter(Boolean);
 
@@ -382,7 +411,8 @@ window.HG = window.HG || {};
         locus.outcomes.map(function (o) {
           return {
             label: o.tokens,
-            title: o.name + (o.description ? " - " + o.description : "")
+            title: o.name + (o.description ? " - " + o.description : ""),
+            className: o.collapsed ? "is-collapsed" : ""
           };
         }));
       return buttons(row, items, function (i) {

@@ -60,6 +60,23 @@
     says look different, so a locus that gains an allele gains a button here without
     this page being edited.
 </p>
+<div class="note">
+    <span class="label">Why <code>Cr/prl</code> is drawn with a dashed border</span>
+    <p>
+        Every other button is a combination the mod itself says looks different.
+        <code>Cr/prl</code> is not: it shares the <code>double-dilute</code> expression
+        with <code>Cr/Cr</code>, so the registry collapses the two and a coat preview is
+        right to. It has a button here anyway because it is a real breeding target &mdash;
+        but measured against the baked sheet, a <code>Cr/prl</code> horse differs from a
+        <code>Cr/Cr</code> one in <strong>exactly eight texels</strong>: the two eye
+        blocks, at MATP's <code>CREAM_PEARL_GREEN</code> (<code>#59A08F</code>). The body
+        is byte-identical. And that eye colour is a fixed constant rather than a gradient
+        lookup, so it is the one thing on this page a LUT <em>cannot</em> change. The
+        dashed border means &ldquo;this button is here for completeness, not because the
+        palette does something new to it&rdquo;.
+    </p>
+</div>
+
 <p>
     Only one white pattern is offered, deliberately. Every white locus paints the same
     thing &mdash; unpigmented white, which is off the chart entirely and cannot respond

@@ -235,6 +235,12 @@
     font-family: var(--mono);
 }
 
+/* A combination the registry collapsed and this page asks for anyway. Dashed,
+   because it is a button whose horse is deliberately near-identical to its
+   neighbour's - the title says which and why. */
+.lut-lab .ll-btn.is-collapsed { border-style: dashed; }
+.lut-lab .ll-btn.is-collapsed.is-on { border-style: solid; }
+
 .lut-lab .ll-stage {
     position: relative;
     background: var(--bg-soft);
