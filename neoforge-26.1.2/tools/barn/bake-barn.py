@@ -13,6 +13,9 @@ commit both files. It adds the two things a structure-block save cannot carry:
     to put villagers in village/plains/villagers/*.nbt. He is placed bare;
     CowboyHandler builds him on his first server tick.
 
+It also takes one thing away: the blocks directly above the doors, so a big
+horse can path through them (see CLEAR_ABOVE_DOORS).
+
 The output is what ships. The input is kept only so the barn can be edited in
 game and re-baked - do not point the mod at it.
 """
@@ -208,7 +211,52 @@ blocks.append(T_cmp({
     'state': T_int(post_state),
 }))
 
-# ---- 3. the people ------------------------------------------------------
+# ---- 3. headroom over the doors ----------------------------------------
+# Minecraft's ground pathfinder does not measure a mob, it rounds it up:
+# WalkNodeEvaluator asks for floor(width + 1) blocks across and floor(height + 1)
+# blocks up, and refuses a route that has not got them.  A vanilla-sized horse is
+# 1.40 x 1.60, so it wants 2 x 2 - which is exactly what a double door with a
+# solid block over it provides, and exactly why the barn worked for ordinary
+# horses and jammed for big ones.
+#
+# The scale attribute multiplies both numbers, so the thresholds are sharp:
+#
+#     scale < 1.25   2 wide, 2 tall   fits as drawn
+#     scale 1.25-1.43   2 wide, 3 tall   needs this
+#     scale >= 1.43     3 wide, 3 tall   will not fit a double door at all
+#
+# So the course of blocks over each doorway is cleared to air, which buys every
+# horse up to about 1.43.  It was oak fence, which is the worst possible choice
+# there twice over - it is a full pathfinding blocker in its own right, and it
+# held the opening to two blocks.  There is no "better block": anything solid
+# enough to read as a lintel is solid enough to stop a horse, so the answer is
+# nothing at all.  A horse over 1.43 needs a three-wide doorway, which is a
+# change to the building rather than to its trim.
+#
+# Done here rather than in the source so the barn can still be drawn in game with
+# whatever header looks right; the bake is what turns "what it looks like" into
+# "what a horse can walk through".
+CLEAR_ABOVE_DOORS = 3   # the y course immediately over a two-block doorway
+
+door_columns = set()
+for b in blocks:
+    entry = palette[b.v['state'].v]
+    if entry.v['Name'].v.endswith('_door'):
+        x, y, z = [t.v for t in b.v['pos'].v[1]]
+        door_columns.add((x, z))
+
+palette.append(T_cmp({'Name': T_str('minecraft:air')}))
+air_state = len(palette) - 1
+
+cleared = 0
+for b in blocks:
+    x, y, z = [t.v for t in b.v['pos'].v[1]]
+    if y == CLEAR_ABOVE_DOORS and (x, z) in door_columns:
+        if palette[b.v['state'].v].v['Name'].v != 'minecraft:air':
+            b.v['state'] = T_int(air_state)
+            cleared += 1
+
+# ---- 4. the people ------------------------------------------------------
 # The cowboy is placed bare: CowboyHandler gives him his name, his mount and his
 # herd on his first tick, the same deferred-founding shape the wild horses use.
 #
@@ -236,4 +284,5 @@ out.write(struct.pack('>B', roottype)); w_str(out, rootname); w_payload(out, roo
 open(DST, 'wb').write(gzip.compress(out.getvalue(), mtime=0))
 print('wrote', DST, 'palette', len(palette), 'blocks', len(blocks),
       'jigsaw at', JIGSAW_POS, 'final_state', final_state,
-      'post at', POST_POS)
+      'post at', POST_POS,
+      'cleared', cleared, 'blocks over', len(door_columns), 'door columns')

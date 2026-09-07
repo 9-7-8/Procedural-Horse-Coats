@@ -200,6 +200,16 @@
     <li><strong>CONFIRMED: he rides home at dusk and takes shelter.</strong> Seen
         2026-09-07 after the disabled-<code>MOVE</code>-flag fix. What is left of this
         is below.</li>
+    <li><strong>Does he ride to the back of the barn?</strong> New: he parks five
+        blocks up the long axis rather than in the middle, to leave the doorway clear.
+        Found by bearing from the village bell, so the thing to watch for is him parking
+        at the <em>wrong</em> end &mdash; outside the door he came in by &mdash; which
+        would mean the bearing is backwards for that rotation.</li>
+    <li><strong>Do big horses fit through the doors now?</strong> The course of blocks
+        over each doorway is cleared to air by the bake, taking each opening from two
+        blocks tall to three. That covers every horse up to about scale 1.43; above
+        that they need a three-wide door and will be left outside, which is expected.
+        Check the barn still looks right with an open header.</li>
     <li><strong>Does the whole string get through the door?</strong> New: while he is
         home with the doors open, the outfit joins a
         <code>CollisionRule.NEVER</code> scoreboard team so they can walk through each
@@ -300,12 +310,12 @@
         villager standing one step along beside it. Check it survived the jigsaw (a
         modded block in a vanilla-pool piece is the thing that could quietly fail) and
         that it looks deliberate rather than like a missing stair.</li>
-    <li><strong>Has the horseman got the cowboy's surname?</strong> Once he takes the
-        job he should be renamed to a new first name plus the cowboy's family name, with
-        the name tag showing. If the cowboy is <em>Wade Hargreave</em>, the horseman
-        should be <em>&lt;someone&gt; Hargreave</em>. A horseman still showing
-        &ldquo;Horseman&rdquo; means the naming pass never found him &mdash; check he is
-        within 16 blocks of the barn's centre.</li>
+    <li><strong>Has the horseman got a cowboy's surname?</strong> The moment he takes
+        the job he should be renamed to a new first name plus the surname of the nearest
+        cowboy within 128 blocks, with the name tag showing. If the cowboy is <em>Wade
+        Hargreave</em>, the horseman should be <em>&lt;someone&gt; Hargreave</em>. Worth
+        testing the other case too: craft a post and employ a villager in a village with
+        <em>no</em> cowboy, and he should stay plain &ldquo;Horseman&rdquo;.</li>
     <li><strong>Does that villager take the job?</strong> He is placed unemployed on
         purpose. A dev build prints an aqua <code>[Horseman] &lt;name&gt; took the job
         at x, y, z</code> the first time it sees one

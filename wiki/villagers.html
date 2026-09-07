@@ -321,7 +321,9 @@
 <tr>
     <td><strong><code>SHELTER</code></strong></td>
     <td>Dark, and safe</td>
-    <td>Five steps, in order: he gets in, the outfit stops shoving
+    <td>Five steps, in order: he gets in &mdash; <strong>all the way to the far
+        end</strong>, so the doorway and the floor in front of it are left for the
+        string &mdash; the outfit stops shoving
         (<a href="#doorway">below</a>), the string files in behind him, all four
         double doors shut, shoving resumes. The doors are opened from 16 blocks out
         on the approach and <strong>stay shut</strong> once shut, until first light.
@@ -461,6 +463,22 @@
     him if he bolts.
 </p>
 
+<h3 id="parking">He parks at the back</h3>
+
+<p>
+    The doorway is the scarce thing in this building, so the man on the horse gets out
+    of the way of it: his shelter destination is <code>CowboyRoutine.farEndOf</code>,
+    five blocks up the barn's long axis from its centre, which is the back wall.
+</p>
+
+<p>
+    Found by <strong>bearing</strong> and not by local coordinates, because the jigsaw
+    rotates the building any of four ways and nothing at runtime knows which. The barn's
+    connector attaches to a village street, so the direction from the bell to the barn
+    is the direction from its door end to its far end. No bell, no bearing, and he parks
+    in the middle as he used to.
+</p>
+
 <h3 id="doorway">Eleven horses and a two-block gap</h3>
 
 <p>
@@ -489,6 +507,46 @@
     well, because &ldquo;they can walk through each other&rdquo; must not outlive the
     reason for it &mdash; a herd still on that team at noon is a herd standing inside
     itself in a field.
+</p>
+
+<p>
+    <strong>Block collision is a separate problem, and a harder one.</strong> Minecraft's
+    ground pathfinder does not measure a mob, it rounds it up: it asks for
+    <code>floor(width + 1)</code> blocks across and <code>floor(height + 1)</code> up,
+    and refuses a route without them. A vanilla-sized horse is 1.40&times;1.60 and so
+    wants 2&times;2 &mdash; exactly what a double door with a solid block over it gives,
+    which is why the barn worked for ordinary horses and jammed for big ones. The size
+    gene multiplies both numbers, so the thresholds are sharp:
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>scale</th><th>box</th><th>needs</th><th></th></tr></thead>
+<tbody>
+<tr><td>&lt; 1.25</td><td>up to 1.75 &times; 2.00</td><td>2 wide, 2 tall</td><td>fits as drawn</td></tr>
+<tr><td>1.25 &ndash; 1.43</td><td>up to 2.00 &times; 2.29</td><td>2 wide, <strong>3 tall</strong></td><td>fixed by clearing the header</td></tr>
+<tr><td>&ge; 1.43</td><td>up to 2.44 &times; 2.80</td><td><strong>3 wide</strong>, 3 tall</td><td>cannot use a double door at all</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    So the bake clears the course of blocks directly over each doorway to <em>air</em>
+    (<code>CLEAR_ABOVE_DOORS</code>). It was oak fence, which is the worst possible
+    choice there twice over: a fence is a full pathfinding blocker in its own right,
+    <em>and</em> it held the opening to two blocks. <strong>There is no better
+    block</strong> &mdash; anything solid enough to read as a lintel is solid enough to
+    stop a horse, so the answer is nothing at all. It is done in the bake rather than in
+    the source so the barn can still be drawn in game with whatever header looks right;
+    the bake is what turns "what it looks like" into "what a horse can walk through".
+</p>
+
+<p>
+    That buys every horse up to about 1.43, which is most of the range
+    (<code>MAX_SCALE</code> is 1.75). Above it the animal needs a three-wide doorway,
+    which is a change to the building and not to its trim &mdash; and leaving the
+    biggest horse in the string outside for a night is an accepted outcome, because
+    nothing hunts a horse.
 </p>
 
 <p>
@@ -676,12 +734,20 @@
 </p>
 
 <p>
-    <strong>He has the cowboy's family name.</strong> Once he has taken the job,
-    <code>CowboyHandler.nameTheHorseman</code> gives him a first name of his own and
-    the surname of the cowboy whose barn he is standing outside &mdash; they run the
-    place together, and two names that share a half say so without a line of dialogue.
-    It waits for the profession rather than naming the nearest villager, which would
-    eventually name somebody's librarian.
+    <strong>He has a cowboy's family name.</strong> The moment a villager takes the
+    job, <code>server/HorsemanHandler</code> gives him a first name of his own and the
+    surname of the <strong>nearest cowboy in town</strong> &mdash; within 128 blocks,
+    which is a village. Two names that share a half say "these people are the horse
+    family here" without a line of dialogue.
+</p>
+
+<p>
+    The <em>nearest</em> one rather than the one whose barn he is standing outside,
+    because he is not the barn's property: a player can craft a second post and put it
+    anywhere, and a horseman across the square should still be the family everyone in
+    that village buys horses from. For the post baked into the barn those two answers
+    are the same man anyway. No cowboy within range and he keeps the plain profession
+    name &mdash; a horseman in a village with no horse family is nobody's relative.
 </p>
 
 <p>

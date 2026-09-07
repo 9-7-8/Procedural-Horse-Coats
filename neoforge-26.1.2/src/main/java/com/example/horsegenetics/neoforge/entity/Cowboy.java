@@ -135,7 +135,6 @@ public class Cowboy extends AbstractVillager {
     private int stockTarget;
     private @Nullable String preferredBreed;
     private int restockCooldown;
-    private boolean horsemanNamed;
 
     public Cowboy(EntityType<? extends Cowboy> type, Level level) {
         super(type, level);
@@ -182,15 +181,6 @@ public class Cowboy extends AbstractVillager {
         String full = cowboyName();
         int space = full.lastIndexOf(' ');
         return space < 0 ? full : full.substring(space + 1);
-    }
-
-    /** Has the horseman next door been given his name yet? */
-    public boolean hasNamedHorseman() {
-        return horsemanNamed;
-    }
-
-    public void markHorsemanNamed() {
-        this.horsemanNamed = true;
     }
 
     public boolean isFounded() {
@@ -462,7 +452,6 @@ public class Cowboy extends AbstractVillager {
     protected void addAdditionalSaveData(ValueOutput output) {
         super.addAdditionalSaveData(output);
         output.putBoolean("Founded", founded);
-        output.putBoolean("HorsemanNamed", horsemanNamed);
         output.putInt("StockTarget", stockTarget);
         output.putString("PreferredBreed", preferredBreed == null ? "" : preferredBreed);
         output.storeNullable("Home", BlockPos.CODEC, home);
@@ -474,7 +463,6 @@ public class Cowboy extends AbstractVillager {
     protected void readAdditionalSaveData(ValueInput input) {
         super.readAdditionalSaveData(input);
         this.founded = input.getBooleanOr("Founded", false);
-        this.horsemanNamed = input.getBooleanOr("HorsemanNamed", false);
         this.stockTarget = input.getIntOr("StockTarget", 0);
         String breed = input.getStringOr("PreferredBreed", "");
         this.preferredBreed = breed.isEmpty() ? null : breed;

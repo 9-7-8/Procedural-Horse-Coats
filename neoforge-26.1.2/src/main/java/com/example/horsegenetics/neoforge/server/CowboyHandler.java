@@ -15,7 +15,6 @@ import com.example.horsegenetics.neoforge.data.CowboyBrand;
 import com.example.horsegenetics.neoforge.data.HorseCareAttachment;
 import com.example.horsegenetics.neoforge.data.ModAttachments;
 import com.example.horsegenetics.neoforge.entity.Cowboy;
-import com.example.horsegenetics.neoforge.village.ModVillagerProfessions;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -34,7 +33,6 @@ import net.minecraft.world.entity.ai.goal.RandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.TemptGoal;
 import net.minecraft.world.entity.animal.equine.AbstractHorse;
 import net.minecraft.world.entity.animal.equine.Horse;
-import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -161,9 +159,6 @@ public final class CowboyHandler {
      */
     private static final int RESTOCK_PER_LOOK = 1;
 
-    /** How far from the barn to look for the horseman when giving him his name. */
-    private static final int HORSEMAN_SEARCH = 16;
-
     /** Ticks between the cowboy's own state line, and between attempts to get him back on. */
     private static final int COWBOY_REPORT_INTERVAL = 20;
 
@@ -196,7 +191,6 @@ public final class CowboyHandler {
         if (cowboy.tickRestockClock()) {
             cowboy.setRestockCooldown(RESTOCK_INTERVAL + cowboy.getRandom().nextInt(RESTOCK_JITTER));
             restock(cowboy, level);
-            nameTheHorseman(cowboy, level);
         }
     }
 
@@ -340,37 +334,6 @@ public final class CowboyHandler {
                 || goal instanceof FollowParentGoal;
     }
 
-    /**
-     * Give the horseman at the post his name: <b>a first name of his own and the
-     * cowboy's family name</b>.
-     *
-     * <p>They run the place together, and two names that share a half say that
-     * without a line of dialogue. It waits until he has actually taken the job -
-     * before that he is an unemployed villager, and naming whichever villager
-     * happens to be nearest would eventually name somebody's librarian.
-     */
-    private static void nameTheHorseman(Cowboy cowboy, ServerLevel level) {
-        if (cowboy.hasNamedHorseman()) {
-            return;
-        }
-        BlockPos barn = cowboy.home().orElse(cowboy.blockPosition());
-        for (Villager villager : level.getEntitiesOfClass(
-                Villager.class, new AABB(barn).inflate(HORSEMAN_SEARCH))) {
-            if (villager.getCustomName() != null
-                    || !villager.getVillagerData().profession().is(ModVillagerProfessions.HORSEMAN.getKey())) {
-                continue;
-            }
-            Rng rng = new NeoRng(villager.getRandom());
-            villager.setCustomName(Component.literal(
-                    NAMES.generateParts(rng).first() + " " + cowboy.lastName()));
-            villager.setCustomNameVisible(true);
-            cowboy.markHorsemanNamed();
-            DebugAnnounce.sayAt(level, "Horseman", villager.getName().getString() + " took the name",
-                    villager.blockPosition(), ChatFormatting.AQUA);
-            return;
-        }
-    }
-
     private static void found(Cowboy cowboy, ServerLevel level) {
         if (hasNeighbouringCowboy(cowboy, level)) {
             cowboy.discard();
@@ -379,7 +342,7 @@ public final class CowboyHandler {
 
         Rng rng = new NeoRng(cowboy.getRandom());
         // Generated as parts, because the horseman at the post outside takes the
-        // family half of it - see nameTheHorseman.
+        // family half of it - see server/HorsemanHandler.
         cowboy.setCustomName(Component.literal(NAMES.generateParts(rng).joined()));
         cowboy.setCustomNameVisible(true);
 

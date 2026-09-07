@@ -136,15 +136,29 @@ public final class CowboyRoutine {
      * Half-span of "in the building" for the <b>shelter</b> test, which is a
      * stricter question than the one {@link #INSIDE_RADIUS} answers.
      *
-     * <p>That one asks "is this horse home enough to shut the doors on?", and
-     * wants to be generous - a horse in a far corner should not hold the barn
-     * open. This one asks "is this man behind a wall?", and being generous there
-     * is how he ends up ignoring a zombie stood next to him. The barn's interior
-     * is only about two blocks either side of centre along its short axis, and
-     * he parks within {@link #ARRIVED} of home, so three is the tightest box that
-     * still reliably contains a parked cowboy.
+     * <p>That one asks "is this horse home enough to shut the doors on?" and
+     * wants to be generous. This one asks "is this man behind a wall?" - and it
+     * only has to contain a cowboy standing anywhere inside his own barn, which
+     * since he started parking at {@link #FAR_END} means most of the long axis.
+     *
+     * <p>Being generous here used to be dangerous, because "inside a box around
+     * home" was the whole of the test and a man parked <i>outside</i> his barn
+     * passed it. It is not any more: {@link #sheltered} also requires the doors
+     * to be shut, and they are only ever shut at night with him inside. The box
+     * is the loose half of an and.
      */
-    private static final int SHELTER_RADIUS = 3;
+    private static final int SHELTER_RADIUS = 6;
+
+    /**
+     * How far up the barn he parks from its centre, toward the far end.
+     *
+     * <p>He goes <b>all the way to the back</b>. The doorway is the scarce thing
+     * in this building - eleven horses have to come through a two-block gap - and
+     * a man sitting on a horse in the middle of the floor is one horse's worth of
+     * the room they need. The barn's interior is about eleven blocks along its
+     * long axis, so five from the middle is the far wall.
+     */
+    private static final int FAR_END = 5;
 
     /** How far above and below home "in the building" reaches. */
     private static final int INSIDE_HEIGHT = 3;
@@ -218,8 +232,9 @@ public final class CowboyRoutine {
             if (threat != null && !barnIsRefuge(level, cowboy, barn, from)) {
                 return new Plan(Duty.FLEE, Optional.empty(), threat);
             }
+            BlockPos stall = farEndOf(level, barn);
             return new Plan(Duty.SHELTER,
-                    from.closerThan(barn, ARRIVED) ? Optional.empty() : Optional.of(barn),
+                    from.closerThan(stall, ARRIVED) ? Optional.empty() : Optional.of(stall),
                     threat);
         }
 
@@ -243,6 +258,37 @@ public final class CowboyRoutine {
             return Plan.arrived(Duty.PATROL);
         }
         return Plan.going(Duty.PATROL, standoffPoint(from, centre));
+    }
+
+    /**
+     * The back of the barn - where he parks, so the doorway and the floor in
+     * front of it are left for the string.
+     *
+     * <p>Found by <b>bearing</b> and not by local coordinates, because the jigsaw
+     * rotates the building any of four ways and nothing at runtime knows which.
+     * The barn's road-facing end is the end its connector is on, and that
+     * connector attaches to a village street - so the direction from the village
+     * bell to the barn is the direction from its door end to its far end, and
+     * {@link #FAR_END} blocks along it is the back wall.
+     *
+     * <p>No bell, no bearing: he parks in the middle, which is where he used to
+     * park anyway.
+     */
+    public static BlockPos farEndOf(ServerLevel level, BlockPos barn) {
+        Optional<BlockPos> centre = villageCentre(level, barn);
+        if (centre.isEmpty()) {
+            return barn;
+        }
+        double dx = barn.getX() - centre.get().getX();
+        double dz = barn.getZ() - centre.get().getZ();
+        double distance = Math.sqrt(dx * dx + dz * dz);
+        if (distance < 1.0) {
+            return barn;
+        }
+        return barn.offset(
+                Mth.floor(dx / distance * FAR_END + 0.5),
+                0,
+                Mth.floor(dz / distance * FAR_END + 0.5));
     }
 
     /**
