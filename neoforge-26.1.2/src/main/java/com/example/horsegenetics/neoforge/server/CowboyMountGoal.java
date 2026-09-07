@@ -3,16 +3,13 @@ package com.example.horsegenetics.neoforge.server;
 import com.example.horsegenetics.neoforge.entity.Cowboy;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.util.DefaultRandomPos;
 import net.minecraft.world.entity.animal.equine.AbstractHorse;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.fml.loading.FMLEnvironment;
 import org.jspecify.annotations.Nullable;
 
 import java.util.EnumSet;
@@ -235,21 +232,16 @@ public final class CowboyMountGoal extends Goal {
      * routine's rules are what is wrong, and total silence means the goal never
      * starts and nothing in {@link CowboyRoutine} matters yet.
      *
-     * <p>Costs nothing in a real build, where {@code isProduction()} is true and
-     * this returns immediately. Delete it once the answer is known.
+     * <p>Costs nothing in a real build - see {@link DebugAnnounce}. Delete it once
+     * the answer is known.
      */
     private void announceDutyChange(Cowboy cowboy, ServerLevel level, CowboyRoutine.Plan plan) {
-        if (FMLEnvironment.isProduction() || plan.duty() == lastDuty) {
+        if (!DebugAnnounce.enabled() || plan.duty() == lastDuty) {
             return;
         }
         lastDuty = plan.duty();
-        Component message = Component.literal("[Cowboy] ").withStyle(ChatFormatting.GRAY)
-                .append(Component.literal(cowboy.cowboyName() + ": " + plan.duty())
-                        .withStyle(plan.duty() == CowboyRoutine.Duty.FLEE
-                                ? ChatFormatting.RED : ChatFormatting.GRAY));
-        for (ServerPlayer player : level.players()) {
-            player.sendSystemMessage(message);
-        }
+        DebugAnnounce.say(level, "Cowboy", cowboy.cowboyName() + ": " + plan.duty(),
+                plan.duty() == CowboyRoutine.Duty.FLEE ? ChatFormatting.RED : ChatFormatting.GRAY);
     }
 
     /**

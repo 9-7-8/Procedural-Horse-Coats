@@ -19,7 +19,6 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.goal.WrappedGoal;
@@ -28,7 +27,6 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
 import org.jspecify.annotations.Nullable;
@@ -85,7 +83,37 @@ public final class CowboyHandler {
     private static final double PADDOCK_ARC = Math.PI;
 
     /** Attempts to find an open paddock before giving up and founding at the barn. */
-    private static final int PADDOCK_TRIES = 40;
+    private static final int PADDOCK_TRIES = 60;
+
+    /**
+     * Fraction of {@link #PADDOCK_TRIES} spent in the out-of-town fan before the
+     * search gives up on the bearing and samples the whole circle. A barn on the
+     * shore of a lake has no open ground on its outward side and would otherwise
+     * fall all the way through to founding in the building.
+     */
+    private static final double PADDOCK_FAN_SHARE = 0.7;
+
+    /**
+     * How far the paddock may sit above or below the barn's own floor.
+     *
+     * <p>The <b>roof rule</b>, half of it. The surface heightmap answers "what is
+     * the highest solid block in this column", and in a village that is very
+     * often somebody's roof - which is where the first cowboy to try this ended
+     * up standing, on a house that was not even his. A paddock is meant to be the
+     * field the barn stands in, so it has to be at about the barn's own level.
+     */
+    private static final int PADDOCK_RISE = 3;
+
+    /**
+     * How deep the ground under a paddock has to be solid.
+     *
+     * <p>The other half of the roof rule, and the half that catches a roof the
+     * height test cannot - a porch, a wall top, a haystack. Standing on a roof
+     * means one solid block underfoot and then the room; standing on ground means
+     * solid all the way down. Three blocks is enough to tell them apart and cheap
+     * enough to run sixty times.
+     */
+    private static final int PADDOCK_GROUND_DEPTH = 3;
 
     /** Ticks between two looks over his string - about a minute. */
     private static final int RESTOCK_INTERVAL = 1200;
@@ -197,25 +225,17 @@ public final class CowboyHandler {
     /**
      * In a dev build, say in chat that a cowboy just founded and where.
      *
-     * <p>Founding happens the moment his chunk starts ticking, which is
-     * usually before the player is close enough to see the barn - so without
-     * this, "did one generate?" is a question you answer by reading the server
-     * log, and the answer scrolls past. Costs nothing in a real build, where
-     * {@code isProduction()} is true and this never fires.
+     * <p>Founding happens the moment his chunk starts ticking, which is usually
+     * before the player is close enough to see the barn - so without this, "did
+     * one generate?" is a question you answer by reading the server log, and the
+     * answer scrolls past. See {@link DebugAnnounce} for the rest of the reasoning
+     * and for why it costs nothing in a real build.
      */
     private static void announce(Cowboy cowboy, ServerLevel level) {
-        if (FMLEnvironment.isProduction()) {
-            return;
-        }
-        BlockPos at = cowboy.blockPosition();
-        Component message = Component.literal("[Cowboy] ").withStyle(ChatFormatting.GRAY)
-                .append(Component.literal(cowboy.cowboyName() + " set up at "
-                                + at.getX() + ", " + at.getY() + ", " + at.getZ()
-                                + " with " + (cowboy.herdIds().size() - 1) + " horses for sale")
-                        .withStyle(ChatFormatting.YELLOW));
-        for (ServerPlayer player : level.players()) {
-            player.sendSystemMessage(message);
-        }
+        DebugAnnounce.sayAt(level, "Cowboy",
+                cowboy.cowboyName() + " set up with "
+                        + (cowboy.herdIds().size() - 1) + " horses for sale",
+                cowboy.blockPosition(), ChatFormatting.YELLOW);
     }
 
     /**
@@ -345,17 +365,21 @@ public final class CowboyHandler {
      * <p>The bearing is taken from the village bell to the barn, and candidates
      * are sampled in a {@link #PADDOCK_ARC} fan around it - so "out of town" is
      * literal, and he sets up on the grass past the last house rather than in
-     * somebody's turnip field. A village with no findable bell falls back to a
-     * random bearing, which is the same answer with less justification.
+     * somebody's turnip field. Past {@link #PADDOCK_FAN_SHARE} of the attempts the
+     * search widens to the whole circle rather than fail, and a village with no
+     * findable bell starts from a random bearing.
      *
-     * <p>Each candidate is dropped onto the surface heightmap before it is tested,
-     * so rolling ground gives a spot on the grass rather than one buried in the
-     * hill or hanging over it.
+     * <p>Each candidate is dropped onto the surface heightmap and then has to pass
+     * {@link #standingOnGround}, which is what keeps him off the rooftops - see
+     * {@link #PADDOCK_RISE} and {@link #PADDOCK_GROUND_DEPTH} for why a heightmap
+     * position on its own is not enough in a village.
      */
     private static @Nullable BlockPos findPaddock(ServerLevel level, BlockPos barn) {
         double outward = outwardHeading(level, barn);
+        int fanTries = (int) (PADDOCK_TRIES * PADDOCK_FAN_SHARE);
         for (int attempt = 0; attempt < PADDOCK_TRIES; attempt++) {
-            double angle = outward + (level.getRandom().nextDouble() - 0.5) * PADDOCK_ARC;
+            double arc = attempt < fanTries ? PADDOCK_ARC : Math.PI * 2.0;
+            double angle = outward + (level.getRandom().nextDouble() - 0.5) * arc;
             int distance = PADDOCK_MIN + level.getRandom().nextInt(PADDOCK_MAX - PADDOCK_MIN + 1);
             BlockPos ground = level.getHeightmapPos(
                     Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
@@ -365,11 +389,31 @@ public final class CowboyHandler {
             if (CowboyRoutine.insideBarn(barn, ground)) {
                 continue;
             }
-            if (roomForAHorse(level, ground)) {
+            if (standingOnGround(level, barn, ground) && roomForAHorse(level, ground)) {
                 return ground;
             }
         }
         return null;
+    }
+
+    /**
+     * Is this the field, or is it a roof?
+     *
+     * <p>Two tests, because either alone is fooled. The height test alone passes
+     * a low porch or a wall top; the depth test alone passes the flat top of a
+     * hill fifteen blocks above the village. Together they say "ground, at about
+     * the height the barn is at", which is what a paddock means.
+     */
+    private static boolean standingOnGround(ServerLevel level, BlockPos barn, BlockPos pos) {
+        if (Math.abs(pos.getY() - barn.getY()) > PADDOCK_RISE) {
+            return false;
+        }
+        for (int depth = 1; depth <= PADDOCK_GROUND_DEPTH; depth++) {
+            if (!level.getBlockState(pos.below(depth)).isSolidRender()) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /** Which way is out of town: the bearing from the village bell to the barn. */

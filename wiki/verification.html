@@ -63,13 +63,15 @@
         thing to judge is whether it looks worse than standing on top did, and whether
         half a block is the right amount (<code>Cowboy.SADDLE_SINK</code>). His hitbox
         moved with him, so check he is still clickable where he appears.</li>
-    <li><strong>Does the whole outfit start outside, in the open?</strong> He used to
-        found where the structure put him, in the middle of the barn, and his horses
-        spawned round him half-inside the walls. He now walks out to a paddock 12&ndash;24
-        blocks away on the far side of the barn from the village bell, and the herd is
-        made there. Nothing should be clipped into a wall, a fence or a house, and the
-        barn should still be his <em>home</em> &mdash; watch him ride back to it at
-        dusk.</li>
+    <li><strong>Does the whole outfit start outside, in the open, and on the
+        ground?</strong> He used to found where the structure put him, in the middle of
+        the barn, with his horses half-inside the walls. He now walks out to a paddock
+        12&ndash;24 blocks away on the far side of the barn from the village bell. The
+        first attempt at that put him <strong>on the roof of somebody else's
+        house</strong> &mdash; the surface heightmap in a village is very often a roof
+        &mdash; so a paddock must now also be within 3 blocks of the barn's own height
+        and have 3 blocks of solid ground under it. Check he is standing in a field, not
+        on a building, and that nothing is clipped into a wall or a fence.</li>
     <li><strong>Does a signed paper draw as the horse it names?</strong> New, and the
         largest untested thing here: the item is a small 3D horse in that horse's coat,
         in the merchant window and everywhere else. Check the merchant screen shows six
@@ -98,7 +100,8 @@
     <li><strong>Did it work, and how long did it take?</strong> You should get a grey
         <code>[Test world]</code> line naming the village's coordinates, with the
         <code>/tp</code> in aqua &mdash; clicking it should put the command in the chat
-        box, not run it. It is a synchronous structure search over 100 chunks, so a
+        box, not run it. It aims at <strong>y=100</strong>, so you arrive in the air over
+        the village and fly down rather than materialising inside a roof. It is a synchronous structure search over 100 chunks, so a
         noticeable pause on world creation is expected; a <em>long</em> one (or a red
         &ldquo;no plains village within 1600 blocks&rdquo;) means the search radius wants
         raising, or that seed genuinely has no plains nearby - make a second world before
@@ -219,7 +222,14 @@
 <ul>
     <li><strong>Place a Horse Trader's Post near an unemployed villager.</strong> Does he
         take the job? This is the single point of failure for the whole profession: if
-        the POI tag did not merge, nothing else about him is reachable.</li>
+        the POI tag did not merge, nothing else about him is reachable. He needs no
+        house, bed or custom structure &mdash; a profession comes from a job site and
+        nothing else &mdash; so any vanilla village will do, and so will a post on bare
+        ground next to a villager you brought there. <strong>Watch chat</strong>: a dev
+        build prints an aqua <code>[Horseman] &lt;name&gt; took the job at x, y, z</code>
+        the first time it sees one (<code>DebugHorsemanWatch</code>). Silence after a
+        minute or two means he did not take it, which is the POI registration or the
+        <code>acquirable_job_site</code> tag &mdash; not patience.</li>
     <li><strong>Do all five tiers have trades?</strong> Level him up and check each tier
         offers three. A tier that comes up empty means its
         <code>trade_set</code> or one of its <code>villager_trade</code> files failed to
@@ -235,8 +245,8 @@
 <h3 id="villagers-art">Placeholder art</h3>
 
 <p>
-    Both transfer papers reuse <code>research_paper.png</code>; the Horse Trader's Post
-    wears vanilla's barrel textures. The cowboy and the horseman share one overlay,
+    The blank transfer paper reuses <code>research_paper.png</code>. The cowboy and the
+    horseman share one overlay,
     <code>textures/entity/villager/profession/horseman.png</code> (the owner's recolour
     of the farmer hat) over a plains-villager body &mdash; check the cowboy reads as the
     same trade as the horseman, since that shared file is the only thing making it so.

@@ -169,7 +169,24 @@
     So he walks out first, to a paddock 12&ndash;24 blocks off, and the herd is made
     around him there. The bearing is taken from the village bell to the barn and
     sampled in a half-plane around it, so &ldquo;out of town&rdquo; is literal: he sets
-    up on the grass past the last house rather than in somebody's turnip field. Every
+    up on the grass past the last house rather than in somebody's turnip field. If that
+    half-plane has no room in it the search widens to the whole circle rather than fall
+    back to the barn.
+</p>
+
+<p>
+    A candidate has to be <strong>ground</strong>, and the surface heightmap is not
+    enough to know that: in a village the highest solid block in a column is very often
+    a roof, which is where the first cowboy to walk out ended up standing &mdash; on a
+    house that was not even his. So a paddock must also sit within 3 blocks of the
+    barn's own height and have 3 blocks of solid ground beneath it. Either test alone
+    is fooled: the height test passes a low porch or a wall top, and the depth test
+    passes the flat top of a hill fifteen blocks up. Together they mean &ldquo;ground,
+    at about the height the barn is at&rdquo;, which is what a paddock is.
+</p>
+
+<p>
+    Every
     placement &mdash; his and every horse's, at founding and at every restock &mdash;
     now asks the level whether a <em>horse-sized box</em> fits, rather than whether a
     one-block column is clear. A clear column next to a wall still puts a horse's

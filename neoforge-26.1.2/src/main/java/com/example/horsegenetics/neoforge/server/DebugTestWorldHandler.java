@@ -61,7 +61,15 @@ public final class DebugTestWorldHandler {
      */
     private static final int VILLAGE_SEARCH_CHUNKS = 100;
 
-    /** How far above the village's surface the offered {@code /tp} aims. */
+    /**
+     * The altitude the offered {@code /tp} aims at. <b>An absolute y, not an
+     * offset</b> - you arrive in the air over the village and fly down, which is
+     * the right arrival in a creative dev world and beats materialising inside
+     * whatever happens to be standing on the block the structure search named.
+     *
+     * <p>Clamped up to the local surface, so a village on a mountainside cannot
+     * hand you a command that buries you.
+     */
     private static final int TP_ALTITUDE = 100;
 
     private DebugTestWorldHandler() {
@@ -137,18 +145,13 @@ public final class DebugTestWorldHandler {
         }
 
         BlockPos surface = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, found);
-        // Aimed well above the rooftops, not at them. The structure search reports
-        // a chunk-ish position, and its surface height is the ground *there* - a
-        // few blocks out it can be a hillside, and this is a creative-mode dev
-        // world where you arrive flying. Dropping in from above the village beats
-        // landing inside whatever happens to be standing at that column.
-        String command = "/tp @s " + surface.getX() + " "
-                + (surface.getY() + TP_ALTITUDE) + " " + surface.getZ();
+        int altitude = Math.max(TP_ALTITUDE, surface.getY() + 2);
+        String command = "/tp @s " + surface.getX() + " " + altitude + " " + surface.getZ();
         HorseGenetics.LOGGER.info("Test world: nearest plains village at {}", surface);
 
         tell(player, Component.literal("Plains village at "
                         + surface.getX() + ", " + surface.getY() + ", " + surface.getZ()
-                        + " (tp is " + TP_ALTITUDE + " up). ")
+                        + " (tp drops you in at y=" + altitude + "). ")
                 .withStyle(ChatFormatting.YELLOW)
                 .append(Component.literal("[" + command + "]")
                         .withStyle(style -> style
