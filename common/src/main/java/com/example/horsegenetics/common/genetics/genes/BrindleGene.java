@@ -1,12 +1,13 @@
 package com.example.horsegenetics.common.genetics.genes;
 
 import com.example.horsegenetics.common.Rng;
-import com.example.horsegenetics.common.coat.pattern.BodyStripes;
+import com.example.horsegenetics.common.coat.pattern.BlaschkoStripes;
 import com.example.horsegenetics.common.coat.pattern.CoatBuildContext;
 import com.example.horsegenetics.common.coat.pattern.PigmentField;
 import com.example.horsegenetics.common.coat.pattern.PigmentView;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Part;
+import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Skin;
 import com.example.horsegenetics.common.genetics.Allele;
 import com.example.horsegenetics.common.genetics.AllelePair;
 import com.example.horsegenetics.common.genetics.Expression;
@@ -53,18 +54,21 @@ import java.util.List;
  * </ul>
  *
  * <h2>What it paints</h2>
- * Irregular <b>vertical stripes</b> of a lighter shade of whatever the horse
- * already is - not a second colour, a dilution in bands. That is what makes it
- * expressible as a <b>natural</b> gene at all: phase 1 only ever takes pigment
- * away, so a lighter stripe is a stripe that is diluted and a darker one would
- * have to be countershading, as {@code dun}'s {@code d1} does it.
+ * Irregular <b>white streaks</b> - not a dilution of the horse's own colour, and
+ * not stripes of a second one. A brindle streak goes to white hair and stops
+ * there, whatever the horse underneath it is, so the pattern reads the same on a
+ * black, a bay, a palomino or a grey. That keeps it inside phase 1's
+ * restrict-only contract with room to spare: white is what is left when
+ * <i>all</i> the pigment is taken away, which is the one thing phase 1 is always
+ * allowed to do.
  *
- * <p>The striping is {@link BodyStripes}, shared with magic zebra and (once
- * {@code wiki/roadmap.html#defects} is done) dun's leg bars - so brindle
- * inherits for free the <b>chevron slant</b> that keeps a stripe from rendering
- * as a flat band on every face perpendicular to {@code X}. Brindle's stripes are
- * deliberately narrower, closer together and more warped than a zebra's; real
- * brindle is a smeared, drippy pattern rather than a ruled one.
+ * <p>The streaks are {@link BlaschkoStripes}, which is brindle's own field and
+ * deliberately <b>not</b> the zebra one. The two patterns share nothing but the
+ * word "stripe": a zebra's bands are crisp, matched side to side and organised
+ * round a body map, and brindle's are soft-edged, broken, unequal in width, and
+ * <b>different on the two sides of the same horse</b> - because they are a
+ * record of which X chromosome each patch of skin happened to silence. Sharing
+ * one field between them is what made both of them wrong.
  *
  * <p>Natural, <b>non-deterministic</b>. See {@code wiki/gene-brindle.html}.
  */
@@ -97,10 +101,11 @@ public final class BrindleGene implements Gene {
                     + "a brindle stallion.");
 
     private final Expression BRINDLE = Expression.of("brindle", "Brindle")
-            .describe("Irregular vertical stripes of a lighter shade of the horse's own colour, "
-                    + "smeared and drippy rather than ruled, heaviest over the barrel and quarters "
-                    + "and fading out on the neck and legs. Every stallion carrying the allele shows "
-                    + "it; a mare needs two copies.")
+            .describe("Irregular white streaks, soft-edged and broken, running down from the topline "
+                    + "over the barrel, quarters and neck and turning crosswise on the upper legs. "
+                    + "They are white on any base colour, and they do not match from one side of the "
+                    + "horse to the other. Every stallion carrying the allele shows it; a mare needs "
+                    + "two copies.")
             .varies()
             .restrict(this::paint);
 
@@ -176,82 +181,95 @@ public final class BrindleGene implements Gene {
     // ------------------------------------------------------------------
 
     /**
-     * Centre-to-centre stripe distance in body units. The adult barrel is 22
-     * long, so this puts six to nine stripes along it - which is what brindle
-     * looks like, and is a long way from the first attempt.
+     * Centre-to-centre streak distance in body units. The adult barrel is 22
+     * long, so this puts six to ten streaks along it before the break field and
+     * the per-side roll take some of them away - which is what brindle looks
+     * like, and is a long way from the first attempt.
      */
-    private static final double SPACING_MIN = 2.6;
-    private static final double SPACING_RANGE = 1.8;
-    /** Fraction of each period that is stripe. Brindle stripes are thinner than the gaps. */
+    private static final double SPACING_MIN = 2.2;
+    private static final double SPACING_RANGE = 1.4;
+    /** Fraction of each period that is streak. Brindle streaks are thinner than the gaps. */
     private static final double DUTY_MIN = 0.30;
     private static final double DUTY_RANGE = 0.16;
     /**
-     * How far, in body units, the noise may bend a stripe off its plane.
+     * How far, in body units, the noise may bend a streak off its plane.
      *
      * <p><b>It has to stay well under half the spacing.</b> Brindle is a smeared
      * pattern and the temptation is to warp it hard, but once the warp exceeds
-     * the gap between two stripes they bend into each other and the whole thing
+     * the gap between two streaks they bend into each other and the whole thing
      * stops being stripes: the first attempt at 1.6-3.0 against a spacing of
      * 1.5-2.8 baked out as wood grain.
      */
     private static final double WARP_MIN = 0.5;
     private static final double WARP_RANGE = 0.7;
-    /** How much pigment a stripe keeps at full coverage - lower is a louder pattern. */
-    private static final double KEEP_MIN = 0.40;
-    private static final double KEEP_RANGE = 0.22;
     /**
-     * How much of the removed black comes back as red. The same trick every
-     * dilution here uses: the gradient's zero-red column is jet black a long way
-     * down, so scaling black alone barely changes the colour - walking the
-     * sample sideways is what turns a black stripe into a warm brown one.
+     * Gain on the streak coverage before it is whitened. <b>A brindle streak is
+     * white</b>, so the core of one has to reach {@code 1} - and the raw
+     * coverage rarely does, because the field multiplies the soft edge profile
+     * by a per-side presence roll and a break field. Saturating above 1 takes
+     * the core all the way while leaving the edge, and the streaks the two
+     * rolls have genuinely damped, soft. Without it every streak came out as a
+     * tan smear - a diluted stripe, which is the thing this is not.
      */
-    private static final double BLACK_TINT = 0.30;
+    private static final double WHITE_GAIN = 1.7;
 
     /**
-     * Vertical stripes, strongest over the barrel and quarters and fading out
-     * forward along the neck and down the legs - which is where brindle sits on
-     * a real horse, and it also keeps the pattern off the head, where the
-     * rest-pose projection is only approximate.
+     * White streaks, strongest over the barrel and quarters, still strong on the
+     * neck, and reduced to a few crosswise strokes on the upper legs - which is
+     * where BR1 sits on a real horse. Nothing at all on the head, which is not a
+     * defining location for it and is where the rest-pose projection is only
+     * approximate.
+     *
+     * <p>The streak goes to <b>white</b> at its core, through
+     * {@link PigmentField#whiten}, so it is white hair over any base colour
+     * rather than a paler version of one. {@code whiten} is the shared move
+     * every white marking in the mod uses, and using it here is what keeps a
+     * streak through a black horse on the gradient's neutral column - fading
+     * through greys rather than walking sideways into the browns, which is what
+     * scaling the two pigments together would do.
      *
      * <p><b>Draw order</b>, off {@code ctx.epigeneticsFor(geneKey)}:
-     * {@code nextLong()} (the stripe seed), then four {@code nextFloat()}s -
-     * spacing, duty, warp, strength.
+     * {@code nextLong()} (the streak seed), then three {@code nextFloat()}s -
+     * spacing, duty, warp.
      */
     private PigmentField paint(CoatBuildContext ctx, PigmentView coat) {
         Rng epi = ctx.epigeneticsFor(KEY);
-        long seed = epi.nextLong();
-        double spacing = SPACING_MIN + SPACING_RANGE * epi.nextFloat();
-        double duty = DUTY_MIN + DUTY_RANGE * epi.nextFloat();
-        double warp = WARP_MIN + WARP_RANGE * epi.nextFloat();
-        double keep = KEEP_MIN + KEEP_RANGE * epi.nextFloat();
+        BlaschkoStripes.Pattern pat = new BlaschkoStripes.Pattern(
+                epi.nextLong(),
+                SPACING_MIN + SPACING_RANGE * epi.nextFloat(),
+                DUTY_MIN + DUTY_RANGE * epi.nextFloat(),
+                WARP_MIN + WARP_RANGE * epi.nextFloat());
 
+        Skin skin = ctx.skin();
         PigmentField f = coat.mutableCopy();
-        HorseSkinGeometry.forEachTexel(ctx.skin(), (px, py, part, face, point) -> {
+        HorseSkinGeometry.forEachTexel(skin, (px, py, part, face, point) -> {
             double weight = partWeight(part);
             if (weight <= 0.0) {
                 return;
             }
-            double c = BodyStripes.coverage(seed, point.x(), point.y(), point.z(), spacing, duty, warp)
-                    * weight;
+            double c = BlaschkoStripes.coverage(skin, part, point, pat) * weight;
             if (c <= 0.0) {
                 return;
             }
-            // Lerp toward the stripe's keep factor by coverage, so a stripe's
-            // own soft edge is a soft edge in the coat rather than a hard band.
-            float keepAll = (float) (1.0 - c * (1.0 - keep));
-            f.dilute(px, py, keepAll, keepAll, (float) (BLACK_TINT * c));
+            // Lerp toward white by coverage, so a streak's own soft edge is a
+            // soft edge in the coat rather than a hard margin.
+            f.whiten(px, py, (float) Math.min(1.0, c * WHITE_GAIN));
         });
         return f;
     }
 
-    /** How hard brindle paints on each part - barrel and quarters full, extremities not at all. */
+    /**
+     * How hard brindle paints on each part. The <i>shape</i> per part is
+     * {@link BlaschkoStripes}' business - it is what turns a body streak into a
+     * crosswise stroke on a limb, and what leaves the head, muzzle, ears, mane
+     * and tail alone - so this is only the strength.
+     */
     private static double partWeight(Part part) {
         return switch (part) {
             case BODY -> 1.0;
-            case NECK -> 0.55;
-            case LEFT_FRONT_LEG, RIGHT_FRONT_LEG, LEFT_HIND_LEG, RIGHT_HIND_LEG -> 0.40;
-            case TAIL -> 0.30;
-            default -> 0.0; // head, muzzle, mane, ears
+            case NECK -> 0.90;
+            case LEFT_FRONT_LEG, RIGHT_FRONT_LEG, LEFT_HIND_LEG, RIGHT_HIND_LEG -> 0.75;
+            default -> 0.0;
         };
     }
 }

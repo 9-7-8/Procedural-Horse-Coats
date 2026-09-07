@@ -44,7 +44,7 @@ public final class CoatSampleTool {
             {"kit_dominant_white", "kit=W22/N"},
             {"bay_splash", "agouti=A/a mitf=SW1/N"},
             {"zebra_bay", "agouti=A/a magic_zebra=Mzeb/n"},          // stripes over a bay
-            {"zebra_bay_long", "agouti=A/a magic_zebra=Mzeb/n"},     // same gene, stripes reaching further down
+            {"zebra_bay_long", "agouti=A/a magic_zebra=Mzeb/n"},     // same gene, rings further down the legs
             {"zebra_palomino", "extension=e/e matp=Cr/N magic_zebra=Mzeb/n"},
             {"zebra_white", "kit=W22/N magic_zebra=Mzeb/n"},        // magical paints over dominant white
             {"pink_hair_black", "pink_hair=Pihr/Pihr"},
@@ -112,6 +112,13 @@ public final class CoatSampleTool {
             {"brindle_chestnut", "extension=e/e brindle=Brn/Brn"},
             {"brindle_black", "brindle=Brn/Brn"},
 
+            // natural zebra - the same body map, made by taking pigment out
+            {"natural_zebra_black", "natural_zebra=Zeb/Zeb"},            // the classic: black and white
+            {"natural_zebra_bay", "agouti=A/a natural_zebra=Zeb/Zeb"},
+            {"natural_zebra_chestnut", "extension=e/e natural_zebra=Zeb/Zeb"},  // red and white
+            {"natural_zebra_palomino", "extension=e/e matp=Cr/N natural_zebra=Zeb/Zeb"},
+            {"natural_zebra_shadow_bay", "agouti=A/a natural_zebra=Zeb/n"},     // one copy - shadow stripes
+
             // tiger eye - the coat is untouched; only the two iris texels move
             {"tiger_eye_amber_bay", "agouti=A/a tiger_eye=TE1/TE1"},
             {"tiger_eye_yellow_bay", "agouti=A/a tiger_eye=TE2/TE2"},
@@ -135,8 +142,9 @@ public final class CoatSampleTool {
             0, 0, 0, 0, 0,
             0, 0, 0,
             1, 7, 3, 5, 2, 9, 4, 6,
-            // brindle x4, tiger eye x2
+            // brindle x4, natural zebra x5, tiger eye x2
             5, 2, 7, 3,
+            1, 4, 6, 2, 8,
             0, 0};
 
     private CoatSampleTool() {}

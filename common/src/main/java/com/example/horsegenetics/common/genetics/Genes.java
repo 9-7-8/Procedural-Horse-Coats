@@ -29,6 +29,7 @@ import com.example.horsegenetics.common.genetics.genes.MagicZebraGene;
 import com.example.horsegenetics.common.genetics.genes.ManeColorGene;
 import com.example.horsegenetics.common.genetics.genes.MilkGene;
 import com.example.horsegenetics.common.genetics.genes.MushroomGene;
+import com.example.horsegenetics.common.genetics.genes.NaturalZebraGene;
 import com.example.horsegenetics.common.genetics.genes.MatpGene;
 import com.example.horsegenetics.common.genetics.genes.MetGene;
 import com.example.horsegenetics.common.genetics.genes.MstnGene;
@@ -109,6 +110,14 @@ public final class Genes {
     public static final DunGene DUN = new DunGene();
     public static final SilverGene SILVER = new SilverGene();
     public static final MushroomGene MUSHROOM = new MushroomGene();
+    /**
+     * Natural zebra striping - the real-world half of the zebra pair, and
+     * the last natural gene to touch the base coat before the white-spotting
+     * loci. It <b>whitens the gaps</b> between the bands rather than painting
+     * black ones, which is how a real zebra is made; {@link MagicZebraGene}
+     * paints the same body map in the opposite direction.
+     */
+    public static final NaturalZebraGene NATURAL_ZEBRA = new NaturalZebraGene();
     public static final RoanGene ROAN = new RoanGene();
     public static final TobianoGene TOBIANO = new TobianoGene();
 
@@ -232,7 +241,8 @@ public final class Genes {
     /** The hand-written genes. Order here is irrelevant - the registry sorts. */
     private static final List<Gene> BUILTINS = List.of(
             SEX, EXTENSION, AGOUTI, CHAMPAGNE, GREY, MATP,
-            MAGIC_ZEBRA, PINK_HAIR, DUN, SILVER, MUSHROOM, BRINDLE, TIGER_EYE, ROAN, TOBIANO,
+            MAGIC_ZEBRA, PINK_HAIR, DUN, SILVER, MUSHROOM, BRINDLE, TIGER_EYE,
+            NATURAL_ZEBRA, ROAN, TOBIANO,
             LEOPARD, EDNRB, KIT, MITF, PAX3,
             MILK, BODY_SIZE, MAGIC_SPEED, MAGIC_HEALTH, MAGIC_JUMP,
             MANE_COLOR, TAIL_COLOR, PARTICLE, LIGHT, HEALER, SECTORAL_EYES, VERDANT, LUT, CUTIE_MARK,

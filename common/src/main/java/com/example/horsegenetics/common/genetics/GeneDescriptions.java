@@ -56,10 +56,29 @@ public final class GeneDescriptions {
                             + "full double dilute (cremello / perlino). A single pearl copy is an "
                             + "invisible carrier."),
             Map.entry("horsegenetics.magic_zebra",
-                    "A magical (invented) gene: bold black stripes hung from the topline. It "
-                            + "subtracts hard from every colour channel, so the stripes read black "
-                            + "over any coat at all - cremello, chestnut, grey or dominant white - "
-                            + "and their placement and spacing vary per horse."),
+                    "A magical (invented) gene: a zebra's stripe map painted in hard black - "
+                            + "vertical bands off the spine, arcs round the hip, rings down the "
+                            + "legs. It subtracts hard from every colour channel, so the stripes "
+                            + "read black over any coat at all - cremello, chestnut, grey or "
+                            + "dominant white - and their spacing, bend and leg reach vary per "
+                            + "horse. The natural zebra locus draws the same map by taking pigment "
+                            + "out of the gaps instead."),
+            Map.entry("horsegenetics.brindle",
+                    "The one X-linked locus. Irregular white streaks running down from the "
+                            + "topline over the barrel, quarters and neck, turning crosswise on "
+                            + "the upper legs, and deliberately not matching from one side of the "
+                            + "horse to the other - they are a record of which X chromosome each "
+                            + "patch of skin silenced. A stallion has one copy and can never be a "
+                            + "carrier; a mare needs two, so brindle skips the male line for a "
+                            + "generation and comes back through the mares."),
+            Map.entry("horsegenetics.natural_zebra",
+                    "Real zebra striping, done the way a zebra does it: the dark bands are the "
+                            + "horse's own colour and the gaps have the pigment taken out of them, "
+                            + "so a striped black is black and white and a striped chestnut is red "
+                            + "and white. Codominant - one copy gives faint shadow stripes, two "
+                            + "take the gaps to white. Vertical bands off the spine, arcs round the "
+                            + "hip, rings down the legs, a dark dorsal stripe and muzzle, and a "
+                            + "pale belly."),
             Map.entry("horsegenetics.pink_hair",
                     "A magical gene, and the clearest carrier locus in the mod: only two copies do "
                             + "anything, turning the mane and tail hot pink. The pink is blended "

@@ -1,10 +1,9 @@
 package com.example.horsegenetics.common.genetics.genes;
 
 import com.example.horsegenetics.common.Rng;
-import com.example.horsegenetics.common.coat.pattern.BodyStripes;
 import com.example.horsegenetics.common.coat.pattern.ColorField;
+import com.example.horsegenetics.common.coat.pattern.ZebraStripes;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry;
-import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Part;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Skin;
 import com.example.horsegenetics.common.genetics.Allele;
 import com.example.horsegenetics.common.genetics.AllelePair;
@@ -22,13 +21,21 @@ import java.util.List;
  * <table>
  *   <tr><th>combination</th><th>outcome</th></tr>
  *   <tr><td>{@code n/n}</td><td>wild type</td></tr>
- *   <tr><td>{@code Mzeb/n}, {@code Mzeb/Mzeb}</td><td>{@code zebra} - black stripes hung from the topline</td></tr>
+ *   <tr><td>{@code Mzeb/n}, {@code Mzeb/Mzeb}</td><td>{@code zebra} - black bands over any coat at all</td></tr>
  * </table>
  *
- * <p><b>Not the natural zebra gene.</b> A real-world zebra-striping locus is a
- * separate, later, <i>natural</i> gene; this one is invented, runs in phase 3,
- * and paints over whatever the melanin genes produced rather than restricting
- * pigment.
+ * <h2>The same map as the natural gene, in the opposite direction</h2>
+ * {@link NaturalZebraGene} is the real-world locus: it runs in phase 1 and
+ * <b>takes pigment away</b> between the bands, so the horse's own colour
+ * survives as the stripes. This one is invented, runs in phase 3, and
+ * <b>adds black</b> on the bands themselves - which is the only way to stripe a
+ * cremello or a dominant white, because those horses have no pigment left to
+ * take.
+ *
+ * <p>Both read the same {@link ZebraStripes} body map, which is why the field
+ * returns the <i>dark</i> band coverage rather than the pale one: this gene
+ * blackens {@code coverage}, the natural gene whitens {@code 1 - coverage}, and
+ * the shape they draw is identical. A horse can carry both and show both.
  *
  * <p><b>It subtracts {@value #STRIPE_PERCENT}%</b> from all three channels. That
  * is deliberate overkill and is the whole point of the unclamped signed
@@ -38,10 +45,10 @@ import java.util.List;
  * raises opacity, so the stripes show on a dominant-white horse too.
  *
  * <p><b>Non-deterministic.</b> Five knobs come off the expressing {@code Mzeb}
- * copy, in this order: {@code nextLong()} (the stripe field's seed), then
- * {@code nextFloat()} for stripe <b>spacing</b>, <b>width</b>, how far the
- * stripes <b>bend</b>, and how far down the horse they <b>reach</b>. A foal
- * that inherits the copy inherits the pattern.
+ * copy, in this order: {@code nextLong()} (the band field's seed), then
+ * {@code nextFloat()} for band <b>spacing</b>, <b>width</b>, how far the bands
+ * <b>bend</b>, and how far down the legs the rings <b>reach</b>. A foal that
+ * inherits the copy inherits the pattern.
  *
  * <p>Founder frequency {@code 1/}{@value #WILD_MZEB_ONE_IN} per allele.
  */
@@ -54,18 +61,25 @@ public final class MagicZebraGene implements Gene {
     public static final int STRIPE_PERCENT = -200;
 
     // Body units (1 = 1/16 block); the adult barrel is 22 long, a foal's 14.
-    private static final double SPACING_MIN = 2.2;
-    private static final double SPACING_RANGE = 2.0;
-    private static final double WIDTH_MIN = 0.32;
-    private static final double WIDTH_RANGE = 0.24;
-    private static final double BEND_MIN = 0.6;
-    private static final double BEND_RANGE = 1.6;
+    private static final double SPACING_MIN = 2.0;
+    private static final double SPACING_RANGE = 1.8;
+    /**
+     * Narrower than the natural gene's, and deliberately. This one <i>adds</i>
+     * black on the band, so at an even duty the horse simply reads as a black
+     * horse; the natural gene takes colour out of the gap, where an even duty is
+     * exactly right.
+     */
+    private static final double WIDTH_MIN = 0.34;
+    private static final double WIDTH_RANGE = 0.16;
+    private static final double BEND_MIN = 0.4;
+    private static final double BEND_RANGE = 1.0;
 
-    /** How far below the topline the stripes die out, as a fraction of the drop to the hooves. */
-    private static final double REACH_MIN = 0.35;
-    private static final double REACH_RANGE = 0.60;
-    /** The fraction of the reach spent fading out, so stripes don't stop on a line. */
-    private static final double REACH_FADE = 0.25;
+    /** How far down each leg the rings reach, as a fraction of the leg. */
+    private static final double REACH_MIN = 0.45;
+    private static final double REACH_RANGE = 0.55;
+
+    /** Half-width of the dorsal stripe, in body units. */
+    private static final double DORSAL_HALF_WIDTH = 1.3;
 
     public final Allele Mzeb = new Allele(KEY, 0, "Mzeb", "Magic zebra (Mzeb)");
     public final Allele n = new Allele(KEY, 1, "n", "Wild-type (n)");
@@ -74,9 +88,11 @@ public final class MagicZebraGene implements Gene {
     private final Expression WILD = Expression.wildType("No stripes.");
 
     private final Expression ZEBRA = Expression.of("zebra", "Magic zebra")
-            .describe("Hard black stripes hung from the topline and reaching down the sides, per-horse "
-                    + "in spacing, width, bend and reach. They read black over any coat at all, "
-                    + "including a cremello or a dominant white.")
+            .describe("A zebra's own stripe map painted in hard black: vertical bands off the spine, "
+                    + "arcs round the hip, rings down the legs, narrow bands on the neck and face, a "
+                    + "black dorsal stripe and muzzle, and an unstriped belly. Per-horse in spacing, "
+                    + "width, bend and leg reach. They read black over any coat at all, including a "
+                    + "cremello or a dominant white.")
             .varies()
             .tint(MagicZebraGene::paintStripes);
 
@@ -107,27 +123,18 @@ public final class MagicZebraGene implements Gene {
             com.example.horsegenetics.common.coat.pattern.PigmentView coat,
             com.example.horsegenetics.common.coat.pattern.ColorView accumulated) {
         Rng epi = ctx.epigeneticsFor(KEY);
-        long seed = epi.nextLong();
-        double spacing = SPACING_MIN + epi.nextFloat() * SPACING_RANGE;
-        double width = WIDTH_MIN + epi.nextFloat() * WIDTH_RANGE;
-        double bend = BEND_MIN + epi.nextFloat() * BEND_RANGE;
-        double reach = REACH_MIN + epi.nextFloat() * REACH_RANGE;
+        ZebraStripes.Pattern pat = new ZebraStripes.Pattern(
+                epi.nextLong(),
+                SPACING_MIN + epi.nextFloat() * SPACING_RANGE,
+                WIDTH_MIN + epi.nextFloat() * WIDTH_RANGE,
+                BEND_MIN + epi.nextFloat() * BEND_RANGE,
+                REACH_MIN + epi.nextFloat() * REACH_RANGE,
+                DORSAL_HALF_WIDTH);
 
         Skin skin = ctx.skin();
-        // The topline is the back, not the ear tips: everything above it - head,
-        // neck, mane, ears - is inside the stripes at full strength.
-        double topline = HorseSkinGeometry.bounds(skin, Part.BODY).yMax();
-        double hooves = HorseSkinGeometry.bodyBounds(skin).yMin();
-        double drop = topline - hooves;
-
         ColorField delta = ColorField.deltaLike(accumulated);
         HorseSkinGeometry.forEachTexel(skin, (px, py, part, face, point) -> {
-            double below = (topline - point.y()) / drop;
-            double vertical = 1.0 - BodyStripes.smoothstep(reach * (1 - REACH_FADE), reach, below);
-            if (vertical <= 0) {
-                return;
-            }
-            double c = BodyStripes.coverage(seed, point.x(), point.y(), point.z(), spacing, width, bend) * vertical;
+            double c = ZebraStripes.coverage(skin, part, point, pat);
             if (c <= 0) {
                 return;
             }

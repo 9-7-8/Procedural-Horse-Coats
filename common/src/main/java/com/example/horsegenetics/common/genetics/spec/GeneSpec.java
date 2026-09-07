@@ -268,7 +268,7 @@ public record GeneSpec(
         AXIS,
         /** A stripe down the centreline - the blaze shape. */
         CENTERLINE,
-        /** {@code BodyStripes} - zebra bars, dun leg barring, brindle. */
+        /** {@code BodyStripes} - parallel bands with a chevron slant. */
         STRIPES,
         /** {@code BodyNoise.cellDistance} - the dapple / rosette field. */
         DAPPLES,
