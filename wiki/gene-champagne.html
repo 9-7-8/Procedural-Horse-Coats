@@ -68,9 +68,9 @@ public PigmentField restrict(AllelePair pair, CoatBuildContext ctx, PigmentView 
 <table>
 <thead><tr><th>Base</th><th>Name</th><th>Body</th><th>Points</th></tr></thead>
 <tbody>
-<tr><td>chestnut (<code>ee</code>)</td><td><strong>gold champagne</strong></td><td><code>#D1CBC2</code> &mdash; <strong>currently grey, see below</strong></td><td>same &mdash; no black to dilute</td></tr>
-<tr><td>black (<code>E_ aa</code>)</td><td><strong>classic champagne</strong></td><td>bronze <code>#A6732A</code></td><td>same</td></tr>
-<tr><td>bay (<code>E_ A_</code>)</td><td><strong>amber champagne</strong></td><td>tan <code>#C8AB86</code></td><td>warm grey <code>#77716B</code></td></tr>
+<tr><td>chestnut (<code>ee</code>)</td><td><strong>gold champagne</strong></td><td>pale cream <code>#E9E4D8</code></td><td>same &mdash; no black to dilute</td></tr>
+<tr><td>black (<code>E_ aa</code>)</td><td><strong>classic champagne</strong></td><td>taupe <code>#726654</code></td><td>same</td></tr>
+<tr><td>bay (<code>E_ A_</code>)</td><td><strong>amber champagne</strong></td><td>cream <code>#C1B9A9</code></td><td>warm grey <code>#77736B</code></td></tr>
 </tbody>
 </table>
 </div>
@@ -82,32 +82,25 @@ public PigmentField restrict(AllelePair pair, CoatBuildContext ctx, PigmentView 
     <p>An amber champagne keeps its chocolate points over a gold body.</p>
 </div>
 
-<div class="note warn">
-    <span class="label">Gold champagne is grey right now, and it is the gradient, not the gene</span>
+<div class="note">
+    <span class="label">These are the gradient's colours, not the gene's</span>
     <p>
         <code>KEEP_RED</code> went 0.55 &rarr; 0.32 on 2026-09-06 (owner: champagne should
-        reduce much more red than it does). That is the right direction &mdash; at 0.55 a
-        gold champagne resolved barely a third of the way across the chart from a plain
-        chestnut. But it moves the outcome to <strong>chart X&nbsp;68%</strong>, and the
-        current <code>redblackgradient.png</code> has no warmth there.
+        reduce much more red than it does), putting the outcome at <strong>chart
+        X&nbsp;68%</strong>. What that <em>looks like</em> then depends entirely on the
+        chart, and the default gradient was replaced the same day.
     </p>
     <p>
-        Measured off the raw top row of the art: saturation holds around 65&ndash;70% from
-        the red edge out to <strong>X&nbsp;50%</strong> (peaking gold at
-        <code>#EAB74A</code>), then collapses &mdash; 43% at X&nbsp;55%, 25% at
-        X&nbsp;60%, <strong>3% by X&nbsp;70%</strong>. Everything right of about
-        X&nbsp;55% is neutral grey running to white. So any dilution asked to be
-        <em>paler</em> lands in grey rather than cream, and that is why the old constants
-        were what they were: 0.55 put champagne at X&nbsp;45%, exactly on the
-        <code>#E3B045</code> this table used to quote.
-    </p>
-    <p>
-        <strong>The fix is in the artwork</strong>: extend the warm cream ramp from ending
-        at X&nbsp;55% out to roughly X&nbsp;85%, so the top row runs chestnut &rarr; gold
-        &rarr; cream &rarr; ivory &rarr; white instead of chestnut &rarr; gold &rarr; grey.
-        Every dilution benefits, not just this one. Check it in the
-        <a href="lut-lab.html">LUT lab</a>, which draws exactly where each outcome lands.
-        See <a href="known-gaps.html#gap-49">gap #49</a>.
+        The swatches above are read off the current one. It is a smooth, fairly
+        desaturated ramp &mdash; the top row runs <code>#965C3F</code> at the red edge to
+        white, with saturation falling steadily from 58% to nothing and <strong>no
+        saturated gold anywhere</strong>. So gold champagne is a pale cream rather than the
+        gold its name suggests. That is a property of the artwork, not of this gene: the
+        levels in the spec block are what champagne <em>does</em>, and the colours follow
+        from whatever chart they are resolved against. If gold champagne should be golder,
+        the change is a warmer band in the gradient's upper middle, not a constant here.
+        Check it in the <a href="lut-lab.html">LUT lab</a>. See
+        <a href="known-gaps.html#gap-49">gap #49</a>.
     </p>
 </div>
 

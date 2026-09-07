@@ -26,6 +26,26 @@
 
 <h2 id="d2026-09-06">2026-09-06</h2>
 
+<h3 id="new-default-lut-2026-09-06">Built 2026-09-06, NOT yet looked at: a new default gradient, and the coat palette changed under every gene at once.</h3>
+
+<p>Owner supplied <code>horselut.png</code> and asked for it as the new default LUT. Installed into all three places the chart lives; <a href="known-gaps.html#gap-49">gap #49</a> restated against it. Checklist <a href="verification.html#dilution-retune">&sect;0-M</a>.</p>
+
+<ul>
+<li><strong>The chart lives in three places, not two.</strong> The source is <code>common/src/main/resources/.../coat/redblackgradient.png</code>; <code>:web:bakeDesignerAssets</code> copies it to <code>wiki/horse-designer/assets/</code> for the designer, the gene previews and the LUT lab; and <code>:common:bakeCreatorAssets</code> <em>inlines</em> it, downsampled to 256px, as a data URI in <code>wiki/gene-creator/assets/textures.js</code>, because the creator has to work with no network. Miss the third and the creator draws every horse against the old palette while everything else has moved.
+</li>
+<li><strong>The filename did not change, and that was deliberate.</strong> <code>redblackgradient.png</code> is referenced from six places across three modules and the build; the name is the default-LUT <em>slot</em>, and the contents are what the art is. Renaming it would have been churn in <code>GeneticCoatTextureFactory</code>, <code>CoatSampleTool</code>, <code>CreatorAssetTool</code>, <code>java.js</code> and <code>web/build.gradle.kts</code> for no behavioural gain.
+</li>
+<li><strong>The golden file did not move, and that is correct rather than suspicious.</strong> <code>CoatPipelineGoldenTest</code> composes against a <em>synthetic</em> gradient by design, so swapping the shipped art cannot turn it red - which is exactly the blind spot <a href="known-gaps.html#gap-48">gap #48</a> describes. The whole coat palette of the mod changed and the test suite stayed green at 478.
+</li>
+<li><strong>The near-black ramp held.</strong> The new chart's bottom-left is <code>#161515</code>, not <code>#000000</code> - which is precisely the shape of the bug that made every bay go dead flat earlier the same day, when the rule was an equality against the art. It is a ramp now, and it degraded gracefully: a black horse still bakes 27 distinct colours over a 0&ndash;255 luma spread, so the template's hair shading survives the multiply instead of being crushed to a slab.
+</li>
+<li><strong>The palette is much more desaturated, and the golds are what went.</strong> The old chart peaked at 68&ndash;70% saturation across its whole gold ramp; the new one starts at 58% at the red edge and only declines. There is no gold band at any X, so palomino reads <code>#E5DBC7</code>, buckskin body <code>#B1A590</code> and gold champagne <code>#E9E4D8</code> - creams and greiges where the names say gold. Left as delivered: the gene constants are unchanged, this is an art choice, and a naturalistic chart is a defensible one.
+</li>
+<li><strong>Two comments claiming a "champagne-gold column near the horizontal middle" were deleted</strong> - one in <code>GradientLut</code>'s javadoc, one on the LUT lab page. Both were true of the old art and false of this one, and both were the kind of description that goes stale in silence. Replaced with a pointer at the tool that measures it rather than a new claim that will rot the same way.
+</li>
+</ul>
+
+
 <h3 id="dilution-retune-2026-09-06">Built 2026-09-06, NOT yet looked at: three dilutions retuned off the footprint overlay, and the gradient turns out to be the real constraint.</h3>
 
 <p>Owner, reading the new overlay: <code>prl/prl</code> should sit &ldquo;basically all the way at the top of the lut &hellip; nearly to white&rdquo;, cream should be &ldquo;MUCH closer to the top&rdquo;, and champagne &ldquo;should reduce much more red than it does&rdquo;. Retuned in <a href="gene-matp.html">MATP</a> and <a href="gene-champagne.html">champagne</a>; <a href="known-gaps.html#gap-49">gap #49</a> is what the exercise uncovered.</p>

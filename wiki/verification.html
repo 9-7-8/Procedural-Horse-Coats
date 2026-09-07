@@ -32,6 +32,36 @@
     </p>
 </div>
 
+<h2 id="new-lut">&sect;0-N &mdash; the new default gradient (2026-09-06, NOT looked at)</h2>
+
+<p>
+    <code>horselut.png</code> replaced the default chart, so <strong>every coat in the mod
+    changed colour at once</strong> and none of it has been seen. The golden test cannot
+    help here &mdash; it composes against a synthetic gradient by design
+    (<a href="known-gaps.html#gap-48">gap #48</a>) &mdash; so eyes are the only check
+    there is. Fastest route is the <a href="lut-lab.html">LUT lab</a>, then a herd in game.
+</p>
+
+<ul>
+    <li><strong>The whole palette is more desaturated.</strong> Plain coats bake to
+        chestnut <code>#794A33</code>, bay <code>#4C2E21</code>, black <code>#262525</code>.
+        Judge whether the base three still read as the right horses before judging any
+        dilution.</li>
+    <li><strong>Black horses keep their hair shading.</strong> Measured, a black bakes 27
+        distinct colours across a 0&ndash;255 luma spread rather than a flat slab &mdash; the
+        new chart's black corner is <code>#161515</code> rather than <code>#000000</code>,
+        which is the exact shape of the bug that flattened every bay earlier the same day.
+        The ramp handled it. Worth confirming by eye anyway, on a black and on a bay's
+        points.</li>
+    <li><strong>The gene creator has its own inlined copy</strong> of the chart
+        (<code>wiki/gene-creator/assets/textures.js</code>, 256px data URI). It was
+        re-baked; check a creator horse matches a designer horse rather than showing the
+        old palette.</li>
+    <li><strong>Everything on &sect;0-M below</strong> was written against the previous
+        chart and re-measured against this one. The dilution levels did not move; their
+        colours did.</li>
+</ul>
+
 <h2 id="dilution-retune">&sect;0-M &mdash; the retuned dilutions (2026-09-06, NOT looked at)</h2>
 
 <p>
@@ -43,21 +73,23 @@
 
 <ul>
     <li><strong>Classic pearl</strong> is the big move &mdash; it should now read as a pale,
-        bright coat close to white rather than the apricot it was. On a black horse it went
-        from chart 17%,52% to 70%,16%.</li>
+        bright coat close to white (<code>#EDEFEB</code> on a chestnut) rather than the
+        apricot it was. On a black horse it went from chart 17%,52% to 70%,16%.</li>
     <li><strong>Cremello / perlino / smoky cream</strong> should be convincingly near-white
-        (<code>#F3F8FB</code> on a chestnut), not the mid-tone they were.</li>
-    <li><strong>Palomino and buckskin should still be gold</strong> &mdash;
-        <code>#DFBB81</code> and <code>#D19D3B</code>. Single cream's red was left alone
-        precisely to protect this, so if either looks washed out or grey, that is the
-        thing to report.</li>
+        (<code>#F1F7FA</code> on a chestnut), not the mid-tone they were.</li>
+    <li><strong>Palomino and buckskin are no longer gold</strong> &mdash;
+        <code>#E5DBC7</code> and <code>#B1A590</code>, creams rather than golds. Single
+        cream's red was left alone specifically to keep them gold, and on the previous
+        chart it did (<code>#DFBB81</code>); the new default has no saturated gold at any
+        point, so they moved anyway. <strong>This is the main thing to judge by eye</strong>
+        &mdash; if a cream palomino is wrong, the fix is a warmer band in the gradient,
+        not a change to this gene (<a href="known-gaps.html#gap-49">gap #49</a>).</li>
     <li><strong>Smoky black</strong> moved up the chart (black 0.62 &rarr; 0.44) and should
-        be a warm brown-black rather than near-black.</li>
-    <li><strong>Gold champagne is expected to look wrong</strong> &mdash; grey
-        (<code>#D1CBC2</code>) rather than gold. That is <a href="known-gaps.html#gap-49">gap
-        #49</a>, the gradient's warm ramp ending at chart X&nbsp;55%, and it is an art fix
-        rather than a gene one. Classic champagne (<code>#A6732A</code>) and amber
-        champagne's body (<code>#C8AB86</code>) should be fine.</li>
+        be a warm brown-black <code>#5A4B3B</code> rather than near-black.</li>
+    <li><strong>Gold champagne</strong> is a pale cream <code>#E9E4D8</code>; classic
+        champagne <code>#726654</code> taupe, amber champagne's body <code>#C1B9A9</code>.
+        The X&nbsp;55% cliff that made this a grey is gone with the new chart, but so is
+        the gold it used to fall off.</li>
     <li><strong>Buckskin and amber champagne points</strong> are the other thing to judge:
         they sit at chart X&nbsp;70% where the art is neutral, so they come out warm-grey
         rather than chocolate. Whether that reads as &ldquo;smoky&rdquo; or as
