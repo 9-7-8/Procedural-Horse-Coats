@@ -1138,6 +1138,15 @@ List&lt;String&gt; GeneCodeDisplay.wrap(Genotype genotype, int lines, int maxCha
     // floats off epi, always, whatever marking falls out
     static FaceMarking faceMarking(Rng epi, Skin skin, double strength, double jag);
 
+    // THE reference height for every vertical constant in every white locus:
+    // the top of the barrel, in body units above the hoof. On it 0.05 is the
+    // coronet, 0.10 the fetlock, 0.26 the knee and hock, 0.52 the underline
+    // and 1.0 the spine - so a number in a painter says something anatomical.
+    // Measuring against HorseSkinGeometry.bodyBounds instead (the whole-horse
+    // box, hoof to EAR TIP) is a defect, not a tuning miss: it has bitten
+    // splash, sabino and frame, each time by letting white over the spine.
+    public static double toplineHeight(Skin skin);
+
     final class FaceMarking {
         boolean covers(Part part, Face face, BodyPoint point);
         boolean hasStar();
