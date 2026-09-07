@@ -197,36 +197,29 @@ public final class CowboyHandler {
     /**
      * Put him back on his horse if he has come off it.
      *
-     * <p><b>Everything about this character is downstream of him being mounted</b>
-     * - the itinerary lives on the horse, so a cowboy on the ground has no
-     * routine at all: no ride home at dusk, no bolting from a zombie, and a lead
-     * horse that reverts to an ordinary animal wandering its patch. That is
-     * exactly the report this was written for, and the logs showed
-     * {@code CowboyMountGoal} never starting, which can only mean it never found
-     * a rider.
+     * <p><b>He rides by day and walks by night.</b> Riding through a night meant
+     * shepherding eleven horses through a two-block barn door, and a day of
+     * trying established that it cannot be made to work - so at dusk he simply
+     * gets off, and spends the night as an ordinary villager running the
+     * ordinary villager goals he has always had. He survives it on
+     * {@link Cowboy#HEALTH} rather than on shelter.
      *
-     * <p>He can come off in more ways than the design admits: the bucking goal
-     * ejects passengers and was only taken off the mount recently, a chunk can
-     * unload the pair unevenly, and a founding that failed to place a mount at
-     * all leaves him standing in his paddock for ever with a herd he does not
-     * lead. {@link Cowboy#stopRiding()} refuses to dismount him, but refusing is
-     * not the same as recovering, and nothing was recovering.
-     *
-     * <p>So: once a second, if he is on foot and his lead horse is alive and
-     * loaded, he gets back on. Cheap, idempotent, and it repairs a world that is
-     * already wrong rather than only preventing the next one.
+     * <p>Getting back on is {@link CowboyRemountGoal}'s job rather than this
+     * one's, because it should look like a man fetching his horse:
+     * {@code startRiding} works at any range, so doing it here would teleport
+     * him onto the animal from across the village.
      */
     private static void keepHimMounted(Cowboy cowboy, ServerLevel level) {
-        if (cowboy.isPassenger()) {
+        if (level.isDarkOutside()) {
+            if (cowboy.isPassenger()) {
+                cowboy.letHimDown();
+                DebugAnnounce.say(level, "Cowboy", cowboy.cowboyName()
+                        + " got down for the night", ChatFormatting.GRAY);
+            }
             return;
         }
-        AbstractHorse mount = cowboy.mount(level);
-        if (mount == null || !mount.isAlive()) {
-            return;
-        }
-        boolean mounted = cowboy.startRiding(mount, true, false);
-        DebugAnnounce.log("Cowboy", cowboy.cowboyName() + " was on foot; remount "
-                + mount.getUUID() + " = " + mounted);
+        // Daylight and on foot: CowboyRemountGoal walks him back to the animal,
+        // so there is nothing to do here but let it.
     }
 
     /**

@@ -194,95 +194,40 @@
         not riding into the square.</li>
 </ul>
 
-<h3 id="villagers-night">The night &mdash; the most likely thing to be broken</h3>
+<h3 id="villagers-night">The night &mdash; now that there is not one</h3>
+
+<p>
+    The whole sheltering subsystem is <strong>gone</strong>. He dismounts at dusk,
+    spends the night as an ordinary villager with no custom code at all, and is walked
+    back to his horse at first light; he survives it on ten times a villager's health
+    rather than on a barn. See <a href="known-gaps.html#gap-55">gap 55</a> for why.
+</p>
 
 <ul>
-    <li><strong>CONFIRMED: he rides home at dusk and takes shelter.</strong> Seen
-        2026-09-07 after the disabled-<code>MOVE</code>-flag fix. What is left of this
-        is below.</li>
-    <li><strong>Does he ride to the back of the barn &mdash; and is he inside it?</strong>
-        He parks four blocks up the long axis. The first attempt used the bell bearing raw
-        and sent him diagonally into a corner six blocks out, which put him outside the
-        radius the door logic measures by; the bearing is snapped to a cardinal now. Watch
-        for him parking at the <em>wrong</em> end, outside the door he came in by, which
-        would mean the bearing is backwards for that rotation.</li>
-    <li><strong>Are villagers put out of the barn at dusk?</strong> Anyone inside gets
-        dropped in front of the doors while he waits &mdash; a villager in that room is a
-        cork the horses cannot get past. A grey <code>put &lt;name&gt; out of the
-        barn</code> line says it happened. Check they do not simply walk back in.</li>
-    <li><strong>Do big horses fit through the doors now?</strong> The course of blocks
-        over each doorway is cleared to air by the bake, taking each opening from two
-        blocks tall to three. That covers every horse up to about scale 1.43; above
-        that they need a three-wide door and will be left outside, which is expected.
-        Check the barn still looks right with an open header.</li>
-    <li><strong>Does the whole string get through the door?</strong> New: while he is
-        home with the doors open, the outfit joins a
-        <code>CollisionRule.NEVER</code> scoreboard team so they can walk through each
-        other instead of jamming the entrance. Watch the doorway at dusk &mdash; it
-        should file rather than scrum. They should <em>not</em> be able to walk through
-        the walls, and they should go back to shoving normally the moment the doors
-        shut.</li>
-    <li><strong>Do the doors actually shut, and stay shut?</strong> The whole point of
-        the round. You should get one chat line: <code>[Cowboy] &lt;name&gt; shut the
-        barn (whole string in, 7/7 in)</code> &mdash; or <code>gave up waiting; some are
-        out</code> after 15 seconds, which is an accepted outcome. No line at all means
-        the shutting is still gated on something he never reaches.</li>
-    <li><strong>Is anybody left standing inside another horse at dawn?</strong> That is
-        the no-push team leaking past the night. Both other duties clear it, so it would
-        mean a duty is never being reached.</li>
-    <li><strong>Does he keep his distance from a zombie at noon?</strong> By day there
-        is nothing to shut himself into, so a daytime monster is still a plain run-away.
-        He should start moving at about 16 blocks and not settle until it is nearly 30
-        off &mdash; one clean departure, not a dozen little dashes.</li>
-    <li><strong>Watch the chat while you do all three.</strong> A dev build prints a grey
-        <code>[Cowboy] &lt;name&gt;: PATROL / SHELTER</code> line on every duty change
-        and a red <code>FLEE</code> one when he bolts. A sane night is one
-        <code>SHELTER</code> at dusk and one <code>PATROL</code> at dawn.</li>
-    <li><strong>Read the log, not the chat.</strong> Everything below is in
-        <code>run/logs/latest.log</code> as well as in chat, and the log is the thing to
-        paste into a report. Four fixes for &ldquo;he never goes to his barn&rdquo; have
-        now been derived by reading the code and none has been confirmed, so this round
-        is instrumented rather than argued (<a href="known-gaps.html#gap-59">gap 59</a>).
-        <ul>
-            <li><code>[Debug] chat+log diagnostics ENABLED=true, FMLEnvironment.isProduction()=...</code>
-                is printed once when the class loads. <strong>If this line is missing,
-                nothing else here can appear</strong> and the problem is that the code
-                never ran, not that the horse misbehaved. The old gate was
-                <code>!isProduction()</code>; the value is printed so a past session of
-                silent debug output can be explained.</li>
-            <li><code>goals attached to horse &lt;uuid&gt;</code> &mdash; the mount goal
-                was installed.</li>
-            <li><code>startRiding(&lt;uuid&gt;) = true</code> &mdash; he is actually a
-                passenger. <code>false</code> would explain everything at once.</li>
-            <li><code>mount goal START / STOP</code> &mdash; if START never appears, the
-                goal is never winning its slot.</li>
-            <li>One line a second: <code>duty=SHELTER goal=... urgent=... dark=...
-                sheltered=... barnShut=... dist=... trading=... | pos=... speed=...
-                nav=... immobile=... standing=... running=[...]</code>. <strong>The
-                <code>running=[...]</code> list is the one that matters</strong>: if the
-                mount is wandering, some other goal is in it, and it is named
-                there.</li>
-            <li><code>drive to x,y,z at 1.90 -&gt; pathed</code> / <code>no path, using
-                move control</code> &mdash; whether the navigator could build a route.</li>
-        </ul></li>
-    <li><strong>At dusk, do all four double doors open, and does the herd go in?</strong>
-        Then do all four shut behind them? This is a lot of pathfinding through a
-        two-block gap and it is the part most likely to half-work. <strong>Partial
-        success is acceptable</strong> and worth recording precisely: does <em>he</em>
-        get in? Do most of them? Does one stand outside all night? <strong>The doors
-        must shut either way</strong> &mdash; there is now a 30-second deadline on
-        waiting for stragglers, so a barn still standing open five minutes after he
-        parked in it means the deadline is not being reached at all.</li>
-    <li><strong>Do the doors open again at dawn?</strong> And can he get out?</li>
-    <li><strong>Shut the doors on him by hand at noon.</strong> He should open them again
-        within a second. If he does not, he can be sealed in permanently.</li>
-    <li><strong>Put a zombie in the barn with him.</strong> He should bolt &mdash;
-        visibly faster than he ever moves otherwise &mdash; and keep running until it
-        is out of range, then come home no matter how far he got. A monster
-        <em>outside</em> the shut barn should not spook him.</li>
-    <li><strong>Do village doors stay shut?</strong> He is supposed to have keys to his
-        own barn and nothing else. If riding past a house opens its door, the door code
-        is not staying in its box.</li>
+    <li><strong>Does he get off his horse at dusk, and back on at dawn?</strong> Watch
+        the changeover both ways. A grey <code>got down for the night</code> line and a
+        grey <code>is back on his horse</code> line say it happened.</li>
+    <li><strong>Does he survive the night?</strong> Ten times the health and no shelter
+        at all is the trade. If zombies still kill him the number is the fix
+        (<code>Cowboy.HEALTH</code>), not a barn.</li>
+    <li><strong>Does he <em>walk</em> to his horse in the morning?</strong> He should
+        path over and mount when he arrives. Blinking onto it from across the village
+        would mean something is calling <code>startRiding</code> directly rather than
+        going through <code>CowboyRemountGoal</code>.</li>
+    <li><strong>Does he find the <em>same</em> horse?</strong> Herd slot 0. If he comes
+        back on a different animal, or on none, check <code>mountId</code> in the
+        log.</li>
+    <li><strong>Where does the string spend the night?</strong> Nothing shelters, so
+        they should simply be standing around him in the field at dawn.</li>
+    <li><strong>Does he keep his distance from a zombie by day?</strong> The one piece of
+        monster behaviour that is left, and still unconfirmed. He should start moving at
+        about 16 blocks and not settle until it is nearly 30 off &mdash; one clean
+        departure, not a dozen little dashes. After dark he is on foot and it is his own
+        <code>PanicGoal</code> and his health doing the work.</li>
+    <li><strong>Watch the chat.</strong> A dev build prints a grey <code>[Cowboy]
+        &lt;name&gt;: PATROL</code> line on every duty change and a red
+        <code>FLEE</code> one when he bolts. There is no <code>SHELTER</code> any
+        more.</li>
 </ul>
 
 <h3 id="villagers-papers">Transfer papers</h3>

@@ -5,6 +5,7 @@ import com.example.horsegenetics.common.horse.TransferDeed;
 import com.example.horsegenetics.neoforge.data.ModDataComponents;
 import com.example.horsegenetics.neoforge.item.ModItems;
 import com.example.horsegenetics.neoforge.server.CowboyHandler;
+import com.example.horsegenetics.neoforge.server.CowboyRemountGoal;
 import com.example.horsegenetics.neoforge.server.HorsePrices;
 import com.example.horsegenetics.neoforge.server.HorseRecords;
 import net.minecraft.core.BlockPos;
@@ -135,14 +136,28 @@ public class Cowboy extends AbstractVillager {
     private int stockTarget;
     private @Nullable String preferredBreed;
     private int restockCooldown;
+    /** True for exactly the length of a deliberate dismount - see letHimDown. */
+    private boolean steppingDown;
 
     public Cowboy(EntityType<? extends Cowboy> type, Level level) {
         super(type, level);
         setPersistenceRequired();
     }
 
+    /**
+     * Ten times a villager's health.
+     *
+     * <p>He spends the night on foot in a field now (see {@link #letHimDown}),
+     * and a villager on foot in a field at night is a zombie's supper. The
+     * alternative was a barn he could reliably get into, and a day of trying
+     * established that a mounted man's bedtime costs more than it is worth.
+     * Owner's call, and the right one: this is one number against a subsystem.
+     */
+    public static final double HEALTH = 200.0;
+
     public static AttributeSupplier.Builder createAttributes() {
         return Mob.createMobAttributes()
+                .add(Attributes.MAX_HEALTH, HEALTH)
                 .add(Attributes.MOVEMENT_SPEED, 0.5)
                 .add(Attributes.FOLLOW_RANGE, 48.0);
     }
@@ -153,7 +168,9 @@ public class Cowboy extends AbstractVillager {
         this.goalSelector.addGoal(1, new TradeWithPlayerGoal(this));
         this.goalSelector.addGoal(1, new LookAtTradingPlayerGoal(this));
         this.goalSelector.addGoal(2, new PanicGoal(this, 0.6));
-        // Only ever used on foot - the day his horse is killed. While he is
+        // Fetching his horse back at first light, after a night on foot.
+        this.goalSelector.addGoal(3, new CowboyRemountGoal(this));
+        // On foot: overnight, and the day his horse is killed. While he is
         // mounted, CowboyMountGoal on the horse does all the moving and these
         // never get the chance to path anywhere.
         this.goalSelector.addGoal(8, new WaterAvoidingRandomStrollGoal(this, 0.4));
@@ -394,16 +411,35 @@ public class Cowboy extends AbstractVillager {
     }
 
     /**
-     * He never gets off by choice. Vanilla dismounts a passenger whose vehicle
-     * it thinks is unsuitable, and a player can shake a rider loose; this makes
-     * the horse the only thing that can end the ride, by dying.
+     * He never gets off <b>by accident</b>. Vanilla dismounts a passenger whose
+     * vehicle it thinks is unsuitable, and a player can shake a rider loose;
+     * this makes the horse and {@link #letHimDown} the only two things that can
+     * end the ride.
      */
     @Override
     public void stopRiding() {
-        if (getVehicle() instanceof AbstractHorse horse && horse.isAlive() && !isRemoved()) {
+        if (!steppingDown && getVehicle() instanceof AbstractHorse horse && horse.isAlive() && !isRemoved()) {
             return;
         }
         super.stopRiding();
+    }
+
+    /**
+     * Get off, on purpose. The only way down that {@link #stopRiding()} honours,
+     * and the one {@code CowboyHandler} uses at dusk.
+     *
+     * <p>He rides by day and walks by night, because riding through a night
+     * meant getting a string of horses through a two-block barn door and that
+     * was never made to work. {@link CowboyRemountGoal} walks him back to the
+     * animal at first light.
+     */
+    public void letHimDown() {
+        steppingDown = true;
+        try {
+            stopRiding();
+        } finally {
+            steppingDown = false;
+        }
     }
 
     /** Nothing shoves a mounted man off his horse. */

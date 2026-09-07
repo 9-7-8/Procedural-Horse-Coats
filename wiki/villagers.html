@@ -298,10 +298,35 @@
     without bound over a long world.
 </p>
 
-<h3 id="routine">His day</h3>
+<h3 id="routine">His day &mdash; and only his day</h3>
+
+<div class="note rule">
+    <span class="label">He rides by day and walks by night</span>
+    <p>
+        At dusk <code>CowboyHandler</code> takes him <strong>off</strong> his horse.
+        He spends the night as an ordinary villager, running the ordinary villager
+        goals he has always had, with no custom code of any kind; at first light
+        <code>CowboyRemountGoal</code> walks him back to the animal and he gets on.
+        He survives the night on <strong>ten times a villager's health</strong>
+        (<code>Cowboy.HEALTH</code>) rather than on shelter.
+    </p>
+    <p>
+        <strong>There used to be a whole night.</strong> He rode home at dusk, opened
+        four double doors, waited for eleven horses to file through a two-block gap
+        and shut up behind them. Every part of it worked in isolation and the whole
+        never did. A horse over about 1.43 scale <em>cannot path through a two-block
+        doorway at all</em>; a villager who wanders in is a cork, because a village
+        brain has no reason to leave a building at night; the string shoved each
+        other back out of the entrance; and each fix for one of those exposed the
+        next. The owner's call, after a day of it, was that a mounted man's bedtime
+        is not worth a subsystem. Removing it deleted <code>CowboyDoors</code>,
+        <code>HerdCollision</code>, the <code>SHELTER</code> duty and about five
+        hundred lines, and the night stopped being a problem that needs solving.
+    </p>
+</div>
 
 <p>
-    All of it is decided in one place, <code>CowboyRoutine.plan</code>, which both
+    What is left is decided in one place, <code>CowboyRoutine.plan</code>, which both
     goals read &mdash; so the man and his animals cannot disagree about the plan.
 </p>
 
@@ -311,91 +336,50 @@
 <tbody>
 <tr>
     <td><strong><code>PATROL</code></strong></td>
-    <td>Daylight</td>
+    <td>Mounted, nothing hostile near</td>
     <td>Wanders freely within 40 blocks of the barn. Past that he drifts toward the
         <strong>village centre</strong> &mdash; not into it; he pulls up 22 blocks
         short of the bell, so he reads as a man riding the ring road rather than one
         parked in the square. Past 64 blocks he gives up on the patrol and rides
-        straight home, which is what brings him back after a night spent running.</td>
-</tr>
-<tr>
-    <td><strong><code>SHELTER</code></strong></td>
-    <td>Dark, and safe</td>
-    <td>Five steps, in order: he gets in &mdash; <strong>all the way to the far
-        end</strong>, so the doorway and the floor in front of it are left for the
-        string &mdash; the outfit stops shoving
-        (<a href="#doorway">below</a>), the string files in behind him, all four
-        double doors shut, shoving resumes. The doors are opened from 16 blocks out
-        on the approach and <strong>stay shut</strong> once shut, until first light.
-        A <strong>15-second deadline</strong> caps the wait for stragglers, and
-        leaving one outside is an accepted outcome &mdash; nothing hunts a horse.
-        <strong>A monster does not change this destination, only the pace</strong>:
-        the plan carries the threat and the ride home is made at the bolting
-        speed.</td>
+        straight home.</td>
 </tr>
 <tr>
     <td><strong><code>FLEE</code></strong></td>
-    <td>Not safe, monster within 16 blocks, and <strong>home is no use</strong>
-        &mdash; daylight, or no barn, or too far from it, or something already
-        inside it</td>
+    <td>Mounted, monster within 16 blocks</td>
     <td>Rides hard and randomly away from the nearest monster, faster than he moves
-        for any other reason, re-pathing every 8 ticks. If nothing in the sampled
-        arc is pathable he aims straight down the line away from it rather than
-        standing still. He does not settle until the thing is <strong>28</strong>
-        blocks off, not 16.</td>
+        for any other reason, re-pathing every 10 ticks. If nothing in the sampled arc
+        is pathable he aims straight down the line away from it rather than standing
+        still. He does not settle until the thing is <strong>28</strong> blocks off,
+        not 16 &mdash; with one radius he bolted, stopped dead the instant he was
+        clear, turned round and ambled back towards it.</td>
+</tr>
+<tr>
+    <td><em>nothing</em></td>
+    <td>On foot, after dark</td>
+    <td>His own goals, which are a villager's: float, trade, panic, stroll, look. No
+        duty is computed at all, because <code>CowboyMountGoal</code> only runs while
+        he is a passenger.</td>
 </tr>
 </tbody>
 </table>
 </div>
 
 <p>
-    &ldquo;Safe&rdquo; is one test: <strong>inside the barn with nothing hostile
-    inside it with him</strong>. That single rule covers both of the ways the night
-    goes wrong &mdash; he never made it in, or the barn got breached &mdash; because
-    in either case the true thing is the same: he is exposed with a monster near him.
-    While he <em>is</em> sheltered, a zombie on the other side of the wall is not his
-    problem.
-</p>
-
-<p>
-    <strong>Reacting to a monster is not a night rule</strong>, though it was one, and
-    being one was the first bug: the check sat inside an <code>isDarkOutside()</code>
-    branch, so a zombie that walked out of a cave mouth at noon, a skeleton in the
-    shade of the barn or a husk in the open all stood next to a man who ignored them.
-    What makes him move is a monster near him and no walls around him, and neither of
-    those has anything to do with the clock.
-</p>
-
-<p>
-    <strong>But getting away is not always running away</strong>, and making it so was
-    the second bug &mdash; the one that read as two. An unconditional &ldquo;monster
-    near, therefore <code>FLEE</code>&rdquo; is <em>always</em> true on an open plain
-    after dark, so the ride home never got a look in: he never went to his barn, and
-    what running he did was a dash away from one zombie straight towards the next.
-    After dark the barn <em>is</em> the escape, so a threat now makes him ride for it
-    at the bolting speed rather than away from it; he only runs blind when home is no
-    use to him. By day, with the barn standing open, there is nothing to shut himself
-    into and keeping his distance is the whole plan.
-</p>
-
-<p>
-    Two smaller things came out of the same report. He <strong>starts moving at 16
-    blocks and does not settle until 28</strong>, because with one radius he bolted,
-    stopped dead the instant he was clear, turned round and ambled back towards the
-    thing chasing him &mdash; a short dash repeated forever, which is what &ldquo;he
-    barely flees&rdquo; looked like. And the barn's doors used to
-    <strong>flap</strong>: shutting up cleared the same flag the opening branch tested,
-    so the next tick opened them again, all night. He never read as having gone in, and
-    because an open doorway is not a wall he never counted as sheltered either, which
-    fed straight back into the monster check.
+    Reacting to a monster is <strong>not</strong> a night rule, though it was one, and
+    being one was a bug: the check sat inside an <code>isDarkOutside()</code> branch, so
+    a zombie that walked out of a cave mouth at noon stood next to a man who ignored it.
+    What makes him move is a monster near him, and that has nothing to do with the clock
+    &mdash; it just happens that after dark he is on foot and it is his own
+    <code>PanicGoal</code> and his health doing the work instead.
 </p>
 
 <p>
     The <em>centre</em> of the village is its <code>minecraft:meeting</code> POI, i.e.
     its bell. That is the one part of a generated village reliably at its middle and
-    reliably findable at runtime, which beats trying to recover the structure's
-    bounding box after the fact.
+    reliably findable at runtime, which beats trying to recover the structure's bounding
+    box after the fact.
 </p>
+
 
 <h3 id="riding">The horse does the walking</h3>
 
@@ -462,149 +446,6 @@
     is both what gets them through the barn doors behind him and what keeps them with
     him if he bolts.
 </p>
-
-<h3 id="parking">He parks at the back</h3>
-
-<p>
-    The doorway is the scarce thing in this building, so the man on the horse gets out
-    of the way of it: his shelter destination is <code>CowboyRoutine.farEndOf</code>,
-    five blocks up the barn's long axis from its centre, which is the back wall.
-</p>
-
-<p>
-    Found by <strong>bearing</strong> and not by local coordinates, because the jigsaw
-    rotates the building any of four ways and nothing at runtime knows which. The barn's
-    connector attaches to a village street, so the direction from the bell to the barn
-    is the direction from its door end to its far end. No bell, no bearing, and he parks
-    in the middle as he used to.
-</p>
-
-<p>
-    <strong>The bearing is snapped to a cardinal</strong>, and that is not a detail. Used
-    raw it is a real angle, and the first version walked him diagonally &mdash; four along
-    the length <em>and</em> two across the width, into a corner six blocks from the middle
-    of a building whose middle is the only thing the rest of the night measures from. He
-    parked there, <code>insideBarn</code> said he was not home, the door timer reset every
-    tick and the barn stood open all night with him wedged against the far wall. The
-    building is axis-aligned however the jigsaw turned it, so the answer has to be too.
-    He also stops <em>four</em> blocks out rather than five, so the stall is a block clear
-    of the radius everything else is measured by.
-</p>
-
-<p>
-    While he waits, any <strong>villager inside the barn is put out the front</strong>.
-    One of them in an eleven-by-five room with a single two-block door is a cork: a
-    village brain has no reason to leave a building at night, so he stands there and the
-    string mills about in the field outside. They are moved, not hurt &mdash; dropped on
-    the ground in front of the doors, from where they go and find their own beds. The
-    blunt instrument is the right one here; the alternative is teaching vanilla's brain
-    about somebody else's barn.
-</p>
-
-<h3 id="doorway">Eleven horses and a two-block gap</h3>
-
-<p>
-    Mobs in Minecraft do not block each other, they <strong>shove</strong> each other
-    &mdash; and a shove is exactly the wrong answer to &ldquo;the animal in front of me
-    is also trying to get through this door&rdquo;. The string arrives at the barn
-    together, jams the entrance and shoulders itself back out into the field. The logs
-    caught the cowboy himself stuck four blocks short of his own barn with a clear path
-    and nothing in his way but his own horses &mdash; and because his plan therefore
-    never read <em>arrived</em>, the door timer reset every tick and the barn stood open
-    all night. One jam, two symptoms.
-</p>
-
-<p>
-    So for the length of that queue, <code>HerdCollision</code> puts the cowboy and his
-    horses on a <strong>scoreboard team with <code>CollisionRule.NEVER</code></strong>.
-    That rule is checked at both ends by <code>EntitySelector.pushableBy</code>, so a
-    member neither pushes nor is pushed, and the jam becomes a queue that walks through
-    itself. No mixin and no subclass &mdash; and nothing about <em>block</em> collision
-    changes, so they still cannot walk through the wall, only through each other.
-</p>
-
-<p>
-    It is on for one part of one night: from the moment he is home with the doors open
-    behind him until the moment they shut. Both of the other duties turn it back off as
-    well, because &ldquo;they can walk through each other&rdquo; must not outlive the
-    reason for it &mdash; a herd still on that team at noon is a herd standing inside
-    itself in a field.
-</p>
-
-<p>
-    <strong>Block collision is a separate problem, and a harder one.</strong> Minecraft's
-    ground pathfinder does not measure a mob, it rounds it up: it asks for
-    <code>floor(width + 1)</code> blocks across and <code>floor(height + 1)</code> up,
-    and refuses a route without them. A vanilla-sized horse is 1.40&times;1.60 and so
-    wants 2&times;2 &mdash; exactly what a double door with a solid block over it gives,
-    which is why the barn worked for ordinary horses and jammed for big ones. The size
-    gene multiplies both numbers, so the thresholds are sharp:
-</p>
-
-<div class="table-wrap">
-<table>
-<thead><tr><th>scale</th><th>box</th><th>needs</th><th></th></tr></thead>
-<tbody>
-<tr><td>&lt; 1.25</td><td>up to 1.75 &times; 2.00</td><td>2 wide, 2 tall</td><td>fits as drawn</td></tr>
-<tr><td>1.25 &ndash; 1.43</td><td>up to 2.00 &times; 2.29</td><td>2 wide, <strong>3 tall</strong></td><td>fixed by clearing the header</td></tr>
-<tr><td>&ge; 1.43</td><td>up to 2.44 &times; 2.80</td><td><strong>3 wide</strong>, 3 tall</td><td>cannot use a double door at all</td></tr>
-</tbody>
-</table>
-</div>
-
-<p>
-    So the bake clears the course of blocks directly over each doorway to <em>air</em>
-    (<code>CLEAR_ABOVE_DOORS</code>). It was oak fence, which is the worst possible
-    choice there twice over: a fence is a full pathfinding blocker in its own right,
-    <em>and</em> it held the opening to two blocks. <strong>There is no better
-    block</strong> &mdash; anything solid enough to read as a lintel is solid enough to
-    stop a horse, so the answer is nothing at all. It is done in the bake rather than in
-    the source so the barn can still be drawn in game with whatever header looks right;
-    the bake is what turns "what it looks like" into "what a horse can walk through".
-</p>
-
-<p>
-    That buys every horse up to about 1.43, which is most of the range
-    (<code>MAX_SCALE</code> is 1.75). Above it the animal needs a three-wide doorway,
-    which is a change to the building and not to its trim &mdash; and leaving the
-    biggest horse in the string outside for a night is an accepted outcome, because
-    nothing hunts a horse.
-</p>
-
-<p>
-    The door-shutting is keyed on <strong>where he is, not on what the plan says</strong>,
-    for the same reason: <em>arrived</em> means within three blocks of the barn's centre,
-    which a cowboy jammed in his own doorway never manages. Being <em>home</em> is the
-    looser test, and the one his herd is already measured by.
-</p>
-
-<h3 id="doors">Doors</h3>
-
-<p>
-    The rider is the only one of the pair with hands. <code>CowboyDoors</code> opens
-    and shuts doors <strong>by area, never one at a time</strong>, and that is the
-    whole design: a door opened one leaf at a time leaves a one-block gap, and a
-    horse's hitbox will not fit through one. Acting on every door in a box gets both
-    leaves of a double door, and all four of the barn's, without having to work out
-    which leaf pairs with which.
-</p>
-
-<p>
-    <strong>It only ever touches his own barn.</strong> An earlier version opened
-    whatever was in front of the horse, which does let him through any door he meets
-    &mdash; and also leaves a trail of open front doors through a village he rides
-    past every day, which is a good way to get its inhabitants eaten. The barn is the
-    only building he has to get into, so it is the only one he has the keys to.
-</p>
-
-<p>
-    A standing guarantee sits alongside the dusk/dawn schedule: while he is inside the
-    barn in daylight, its doors get opened every half-second or so. That is what saves
-    him from a player who shuts them on him, and from a night that ended with the
-    schedule flag lost to a world reload.
-</p>
-
-<hr>
 
 <h2 id="barn">The barn, and how it lands on the outskirts</h2>
 

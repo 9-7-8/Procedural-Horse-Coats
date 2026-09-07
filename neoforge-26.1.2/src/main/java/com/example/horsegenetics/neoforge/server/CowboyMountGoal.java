@@ -10,8 +10,6 @@ import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.WrappedGoal;
 import net.minecraft.world.entity.ai.util.DefaultRandomPos;
 import net.minecraft.world.entity.animal.equine.AbstractHorse;
-import net.minecraft.world.entity.npc.villager.Villager;
-import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.entity.ai.control.MoveControl;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
@@ -33,17 +31,12 @@ import java.util.EnumSet;
  * navigation - that is the difference between "the cowboy is standing at his
  * barn" and "the horse has decided to wander off with him on it".
  *
- * <h2>Doors</h2>
- * The rider is the only one of the pair with hands, so this opens what the
- * horse walks into ({@link CowboyDoors}), and shuts the barn behind them once
- * everybody is in. Both leaves, always - see that class for why one is useless.
- *
- * <h2>Night</h2>
- * Home at dusk, doors shut. A monster on the way home does not change the
- * destination, only the pace - {@link CowboyRoutine} hands back a
- * {@link CowboyRoutine.Plan#urgent() urgent} shelter plan and the ride is made
- * at {@link #FLEE_SPEED}. He only runs blind when home is no use to him, and
- * does not settle again until the thing chasing him is well out of range.
+ * <h2>Daytime only</h2>
+ * There is no night here any more. {@link CowboyHandler} takes him off the horse
+ * at dusk and {@link CowboyRemountGoal} walks him back to it at dawn, so this
+ * goal simply stops running when he stops being a passenger. The barn, its
+ * doors and the whole business of getting a string of horses through them are
+ * gone with it - see {@link CowboyRoutine} for why.
  */
 public final class CowboyMountGoal extends Goal {
 
@@ -74,41 +67,9 @@ public final class CowboyMountGoal extends Goal {
     /** How far an idle amble goes. */
     private static final int IDLE_STROLL_RANGE = 12;
 
-    /** How far ahead of the barn he starts opening up. */
-    private static final int DOOR_OPEN_RANGE = 16;
-
-    /** Ticks between passes over the barn's doors. Cheap, but not free. */
-    private static final int DOOR_SCAN_INTERVAL = 10;
-
-    /**
-     * How long he holds the doors for stragglers once he is home himself.
-     *
-     * <p>There has to be a deadline, because "everybody is in" is a condition
-     * that can simply never come true: a horse pinned behind a fence a villager
-     * built, one that pathed onto the far side of a hill, one standing in a
-     * doorway it cannot fit through. Without this, one such horse holds all four
-     * doors open until dawn and the barn is a shed with the lights on.
-     *
-     * <p>Fifteen seconds, and short on purpose: with {@link HerdCollision} off
-     * the doorway they were jamming in, a string that is coming is in within a
-     * few seconds, and one that is not is not coming. Leaving a straggler outside
-     * is an accepted outcome (owner's call) - nothing hunts a horse.
-     */
-    private static final int DOOR_HOLD_TICKS = 300;
-
     private final AbstractHorse horse;
     private int repathCooldown;
     private int strollCooldown;
-    private int doorScanCooldown;
-
-    /** The barn is standing open for the night run-in and we have not shut it yet. */
-    private boolean barnStandingOpen;
-
-    /** We shut the barn behind us, so we owe it an opening at first light. */
-    private boolean barnShutForNight;
-
-    /** Ticks he has been standing at home with the doors still open. */
-    private int doorHeldTicks;
 
     /** What he was doing last tick, for the dev-build announcement below. */
     private CowboyRoutine.@Nullable Duty lastDuty;
@@ -215,8 +176,6 @@ public final class CowboyMountGoal extends Goal {
         DebugAnnounce.log("Cowboy", "mount goal START on horse " + horse.getUUID() + " - " + horseState());
         repathCooldown = 0;
         strollCooldown = 0;
-        doorScanCooldown = 0;
-        doorHeldTicks = 0;
         wasUrgent = false;
         stuckTicks = 0;
         lastDistance = Double.MAX_VALUE;
@@ -254,9 +213,6 @@ public final class CowboyMountGoal extends Goal {
         if (strollCooldown > 0) {
             strollCooldown--;
         }
-        if (doorScanCooldown > 0) {
-            doorScanCooldown--;
-        }
 
         CowboyRoutine.Plan plan = CowboyRoutine.plan(
                 cowboy, level, horse.blockPosition(), wasUrgent);
@@ -266,7 +222,6 @@ public final class CowboyMountGoal extends Goal {
         report(cowboy, level, plan);
         switch (plan.duty()) {
             case FLEE -> flee(level, plan);
-            case SHELTER -> shelter(cowboy, level, plan);
             case PATROL -> patrol(cowboy, level, plan);
         }
     }
@@ -274,10 +229,6 @@ public final class CowboyMountGoal extends Goal {
     // ------------------------------------------------------------------
 
     private void flee(ServerLevel level, CowboyRoutine.Plan plan) {
-        // Running means the barn is no use tonight; leave it however it stands.
-        barnStandingOpen = false;
-        doorHeldTicks = 0;
-        restoreShoving(level);
         if (repathCooldown > 0 && !horse.getNavigation().isDone()) {
             return;
         }
@@ -307,141 +258,6 @@ public final class CowboyMountGoal extends Goal {
     }
 
     /**
-     * The night, in five steps and in this order: he gets in, the outfit stops
-     * shoving each other, the string files in behind him, the doors shut, and
-     * shoving resumes.
-     *
-     * <p>Steps two and five are {@link HerdCollision} - eleven horses and a
-     * two-block gap is a jam, and a jam is what left a cowboy stuck four blocks
-     * short of his own barn with nothing in his way but his own horses.
-     *
-     * <p><b>The door-shutting is keyed on where he is, not on what the plan
-     * says.</b> It used to wait for a plan with no goal in it - "arrived" - and
-     * arriving means being within {@code ARRIVED} of the barn's centre, which a
-     * cowboy jammed in his own doorway never manages. So the timer reset every
-     * tick and the doors stood open all night. Being <i>home</i> is the looser
-     * and more honest test, and it is the one the herd is measured by too.
-     */
-    private void shelter(Cowboy cowboy, ServerLevel level, CowboyRoutine.Plan plan) {
-        BlockPos barn = cowboy.home().orElse(horse.blockPosition());
-
-        // Open up on the approach so the whole herd can pour in behind him,
-        // rather than piling against a shut door while he squeezes through.
-        //
-        // `!barnShutForNight` is load-bearing and was missing. Shutting up sets
-        // barnStandingOpen back to false, and this branch only ever asked whether
-        // the doors were standing open - so the very next tick, still on the
-        // SHELTER duty and still well within DOOR_OPEN_RANGE, it opened them
-        // again. The barn spent the night flapping: he read as never having gone
-        // in, the doors read as never having shut, and because an open doorway is
-        // not a wall he never counted as sheltered either, which fed straight back
-        // into the monster check. Once shut, they stay shut until patrol() opens
-        // them at first light.
-        if (!barnStandingOpen && !barnShutForNight
-                && horse.blockPosition().closerThan(barn, DOOR_OPEN_RANGE)) {
-            CowboyDoors.setBarnDoors(level, barn, true, cowboy);
-            barnStandingOpen = true;
-            barnShutForNight = false;
-        }
-
-        if (plan.goal().isPresent()) {
-            // Same destination either way; a threat behind him only changes the pace.
-            if (plan.urgent()) {
-                moveTo(plan.goal().get(), FLEE_SPEED, FLEE_REPATH_INTERVAL);
-            } else {
-                moveTo(plan.goal().get(), TRAVEL_SPEED, REPATH_INTERVAL);
-            }
-        } else {
-            horse.getNavigation().stop();
-        }
-
-        if (!barnStandingOpen || !CowboyRoutine.insideBarn(barn, horse.blockPosition())) {
-            doorHeldTicks = 0;
-            return;
-        }
-
-        // He is home with the doors open behind him. Let the string walk through
-        // each other until it is in, then shut up and give them their edges back.
-        HerdCollision.off(level, cowboy);
-        if (doorScanCooldown == 0) {
-            doorScanCooldown = DOOR_SCAN_INTERVAL;
-            clearTheFloor(level, cowboy, barn);
-        }
-        doorHeldTicks += ticksSinceLastCall();
-        boolean everyoneIn = herdIsHome(cowboy, level, barn);
-        if (!everyoneIn && doorHeldTicks < DOOR_HOLD_TICKS) {
-            return;
-        }
-        CowboyDoors.setBarnDoors(level, barn, false, cowboy);
-        barnStandingOpen = false;
-        barnShutForNight = true;
-        doorHeldTicks = 0;
-        HerdCollision.on(level, cowboy);
-        DebugAnnounce.say(level, "Cowboy", cowboy.cowboyName() + " shut the barn ("
-                + (everyoneIn ? "whole string in" : "gave up waiting; some are out")
-                + ", " + horsesHome(cowboy, level, barn) + "/" + cowboy.liveHerd(level).size()
-                + " in)", ChatFormatting.GRAY);
-    }
-
-    /**
-     * Put out any villager who has wandered into the barn.
-     *
-     * <p>A villager standing in an eleven-by-five room with one two-block door is
-     * a cork. He is not going anywhere - a village brain has no reason to leave a
-     * building at night, which is the whole problem - and the horses cannot get
-     * past him, so the string ends up milling in the field outside a barn that has
-     * a bed-seeking farmer standing in the middle of it.
-     *
-     * <p>They are moved, not hurt: dropped on the ground in front of the doors,
-     * outside, from where they will go and find their own beds. Owner's call, and
-     * the blunt instrument is the right one here - the alternative is teaching
-     * vanilla's brain about somebody else's barn.
-     *
-     * <p>Includes the <b>horseman</b>. His post is outside the road-facing end and
-     * he has no business in here either.
-     */
-    private void clearTheFloor(ServerLevel level, Cowboy cowboy, BlockPos barn) {
-        var inside = level.getEntitiesOfClass(Villager.class, CowboyRoutine.barnBox(barn));
-        if (inside.isEmpty()) {
-            return;
-        }
-        BlockPos front = level.getHeightmapPos(
-                Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, CowboyRoutine.frontOf(level, barn));
-        for (Villager villager : inside) {
-            villager.teleportTo(front.getX() + 0.5, front.getY(), front.getZ() + 0.5);
-            DebugAnnounce.sayAt(level, "Cowboy",
-                    cowboy.cowboyName() + " put " + villager.getName().getString()
-                            + " out of the barn", front, ChatFormatting.GRAY);
-        }
-    }
-
-    /**
-     * Give the outfit its edges back, whatever else is going on.
-     *
-     * <p>Called from both of the other duties rather than only where it is
-     * turned on, because "they can walk through each other" is a state that must
-     * not survive the reason for it - a herd that is still on the no-push team at
-     * noon is a herd standing inside itself in a field.
-     */
-    private void restoreShoving(ServerLevel level) {
-        Cowboy cowboy = rider();
-        if (cowboy != null) {
-            HerdCollision.on(level, cowboy);
-        }
-    }
-
-    /** How many of his live, loaded horses are home. For the door line only. */
-    private static int horsesHome(Cowboy cowboy, ServerLevel level, BlockPos barn) {
-        int home = 0;
-        for (var member : cowboy.liveHerd(level)) {
-            if (CowboyRoutine.insideBarn(barn, member.blockPosition())) {
-                home++;
-            }
-        }
-        return home;
-    }
-
-    /**
      * One line a second to the log, saying what he is trying to do and what the
      * horse under him is actually doing about it.
      *
@@ -457,13 +273,11 @@ public final class CowboyMountGoal extends Goal {
         reportCooldown = REPORT_INTERVAL;
         BlockPos barn = cowboy.home().orElse(horse.blockPosition());
         DebugAnnounce.log("Cowboy", String.format(
-                "%s duty=%s goal=%s urgent=%s dark=%s sheltered=%s barnShut=%s "
+                "%s duty=%s goal=%s urgent=%s dark=%s "
                         + "barn=%d,%d,%d dist=%.1f trading=%s | %s",
                 cowboy.cowboyName(), plan.duty(),
                 plan.goal().map(g -> g.getX() + "," + g.getY() + "," + g.getZ()).orElse("-"),
                 plan.urgent(), level.isDarkOutside(),
-                CowboyRoutine.sheltered(level, barn, horse.blockPosition()),
-                CowboyDoors.barnIsShut(level, barn),
                 barn.getX(), barn.getY(), barn.getZ(),
                 Math.sqrt(horse.blockPosition().distSqr(barn)),
                 cowboy.isTrading(), horseState()));
@@ -530,39 +344,8 @@ public final class CowboyMountGoal extends Goal {
                 plan.duty() == CowboyRoutine.Duty.FLEE ? ChatFormatting.RED : ChatFormatting.GRAY);
     }
 
-    /**
-     * How many game ticks one call of {@link #tick()} stands for. One, now that
-     * {@link #requiresUpdateEveryTick()} is true - kept as a named thing rather
-     * than a bare {@code 1} because it was {@code 2} and the difference silently
-     * doubled every duration in this class.
-     */
-    private static int ticksSinceLastCall() {
-        return 1;
-    }
-
     private void patrol(Cowboy cowboy, ServerLevel level, CowboyRoutine.Plan plan) {
         BlockPos barn = cowboy.home().orElse(horse.blockPosition());
-        // Morning: whatever we shut last night, we open. Tracked as a flag
-        // rather than re-read off the world, so the common case - a cowboy out
-        // on his rounds all day - costs nothing at all.
-        if (barnShutForNight) {
-            CowboyDoors.setBarnDoors(level, barn, true, cowboy);
-            barnShutForNight = false;
-        }
-        barnStandingOpen = false;
-        doorHeldTicks = 0;
-        restoreShoving(level);
-
-        // And a standing guarantee that he can never be sealed in: while he is
-        // inside the barn in daylight, its doors get opened. This is what saves
-        // him from a player who shuts them on him, or from a night that ended
-        // with the flag lost to a world reload - neither of which the flag
-        // above can see.
-        if (doorScanCooldown == 0 && CowboyRoutine.insideBarn(barn, horse.blockPosition())) {
-            doorScanCooldown = DOOR_SCAN_INTERVAL;
-            CowboyDoors.setBarnDoors(level, barn, true, cowboy);
-        }
-
         if (plan.goal().isPresent()) {
             moveTo(plan.goal().get(), TRAVEL_SPEED, REPATH_INTERVAL);
             return;
@@ -578,16 +361,6 @@ public final class CowboyMountGoal extends Goal {
                     horse.getRandom().nextInt(IDLE_STROLL_RANGE * 2 + 1) - IDLE_STROLL_RANGE);
             drive(spot.getX() + 0.5, spot.getY(), spot.getZ() + 0.5, AMBLE_SPEED);
         }
-    }
-
-    /**
-     * Everybody who <i>can</i> be home is home. Only loaded, living herd members
-     * count: a horse that wandered out of render distance, or one a wolf ate,
-     * must not hold the doors open till dawn.
-     */
-    private boolean herdIsHome(Cowboy cowboy, ServerLevel level, BlockPos barn) {
-        return cowboy.liveHerd(level).stream()
-                .allMatch(member -> CowboyRoutine.insideBarn(barn, member.blockPosition()));
     }
 
     private void moveTo(BlockPos target, double speed, int interval) {
