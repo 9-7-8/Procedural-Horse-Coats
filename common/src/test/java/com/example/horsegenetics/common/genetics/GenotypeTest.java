@@ -120,13 +120,16 @@ class GenotypeTest {
         assertTrue(Genotype.wildType().isDeterministic());                             // black
         assertTrue(g(p(Genes.EXTENSION.e, Genes.EXTENSION.e)).isDeterministic());       // chestnut
         assertTrue(g(p(Genes.KIT.W22, Genes.KIT.N)).isDeterministic());                 // dominant white
-        assertTrue(g(p(Genes.CHAMPAGNE.Ch, Genes.CHAMPAGNE.c)).isDeterministic());      // champagne
         assertTrue(g(p(Genes.MATP.Cr, Genes.MATP.Cr)).isDeterministic());             // perlino-on-black
 
         assertFalse(g(p(Genes.EXTENSION.E, Genes.EXTENSION.e),
                 p(Genes.AGOUTI.A, Genes.AGOUTI.a)).isDeterministic());                  // bay
         assertFalse(g(p(Genes.MITF.SW1, Genes.MITF.N)).isDeterministic());              // splash
         assertFalse(g(p(Genes.GREY.G, Genes.GREY.g)).isDeterministic());                // grey - dapples vary
+        // Champagne's coat is deterministic but its iris is not: the shade runs
+        // from amber through hazel to a rare olive, off the expressing copy's
+        // seed, and the eye is baked into the coat texture.
+        assertFalse(g(p(Genes.CHAMPAGNE.Ch, Genes.CHAMPAGNE.c)).isDeterministic());
 
         // chestnut masks agouti -> deterministic
         assertTrue(g(p(Genes.EXTENSION.e, Genes.EXTENSION.e),

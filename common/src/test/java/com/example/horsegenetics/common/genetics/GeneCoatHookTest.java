@@ -190,12 +190,15 @@ class GeneCoatHookTest {
      * pigment field or a colour delta, so the two phase hooks hand back
      * {@code null} for it by design.
      *
-     * <p>Two loci: {@code LUT}, which swaps the phase-2 gradient, and
-     * {@code tiger eye}, whose whole effect is an iris colour written in the
-     * overlay phase. Their own tests cover what they do.
+     * <p>Three kinds: {@code LUT}, which swaps the phase-2 gradient; the
+     * eye-colour claimants such as {@code tiger eye}, whose whole effect is an
+     * iris colour written in the overlay phase; and the eye-patch painters.
+     * Their own tests cover what they do.
      */
     private static boolean paintsNothingItself(Gene gene) {
-        return gene instanceof LutContribution || gene instanceof EyeColorContribution;
+        return gene instanceof LutContribution
+                || gene instanceof EyeColorContribution
+                || gene instanceof EyePatchContribution;
     }
 
 }

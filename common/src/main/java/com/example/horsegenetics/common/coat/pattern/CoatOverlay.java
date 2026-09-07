@@ -189,6 +189,85 @@ public final class CoatOverlay {
         });
     }
 
+    /**
+     * {@link #tintIris} over <b>part of one iris</b> - the primitive both kinds
+     * of heterochromia are drawn with.
+     *
+     * <p>An iris is a 2&times;2 block, so {@code quadrants} is a four-bit mask
+     * over it ({@link com.example.horsegenetics.common.genetics.EyePatch}).
+     * Which texels those are is worked out from the coat itself rather than
+     * hard-coded: the eye rect is a strip of iris beside a strip of sclera and
+     * the two eyes' faces are <b>mirrored on the sheet</b>, so the iris sits at
+     * a different offset in each. The dark texels are found, their bounding box
+     * halved both ways, and each texel assigned to the quadrant it lands in.
+     * A sclera texel that falls inside a selected quadrant is harmless - the
+     * {@code 1 - luma} weighting leaves it alone, the same as it does in
+     * {@link #tintIris}.
+     *
+     * <p>Like every blend in this phase, it walks from the <b>unmodified</b>
+     * coat rather than from an earlier patch, so overlapping patches do not
+     * accumulate: use {@code strength} 1 unless blending with the template's own
+     * iris is what you meant.
+     *
+     * @param eye       index into {@link CoatRegions#eyeRects} - 0 is the head's
+     *                  west face, 1 the east
+     * @param quadrants the mask; 0 paints nothing
+     */
+    public void tintIrisSector(int eye, int quadrants, int rgb, double strength) {
+        int[][] rects = CoatRegions.eyeRects(skin);
+        if (quadrants == 0 || eye < 0 || eye >= rects.length) {
+            return;
+        }
+        int[] r = rects[eye];
+        int[] box = irisBounds(r);
+        double midX = (box[0] + box[2] + 1) / 2.0;
+        double midY = (box[1] + box[3] + 1) / 2.0;
+        for (int y = r[1]; y < r[1] + r[3]; y++) {
+            for (int x = r[0]; x < r[0] + r[2]; x++) {
+                int q = (x < midX ? 0 : 1) + (y < midY ? 0 : 2);
+                if ((quadrants & (1 << q)) == 0) {
+                    continue;
+                }
+                int b = base(x, y);
+                if ((b >>> 24) == 0) {
+                    continue;
+                }
+                double luma = (0.299 * ((b >> 16) & 0xFF) + 0.587 * ((b >> 8) & 0xFF)
+                        + 0.114 * (b & 0xFF)) / 255.0;
+                blendToward(x, y, rgb, strength * (1.0 - luma));
+            }
+        }
+    }
+
+    /**
+     * {@code {xMin, yMin, xMax, yMax}} of the dark texels inside an eye rect -
+     * the iris, as opposed to the sclera beside it. Falls back to the whole rect
+     * if nothing in it is dark, which cannot happen on either shipped template
+     * but keeps a hand-made one from dividing by a degenerate box.
+     */
+    private int[] irisBounds(int[] r) {
+        int xMin = Integer.MAX_VALUE, yMin = Integer.MAX_VALUE, xMax = -1, yMax = -1;
+        for (int y = r[1]; y < r[1] + r[3]; y++) {
+            for (int x = r[0]; x < r[0] + r[2]; x++) {
+                int b = base(x, y);
+                if ((b >>> 24) == 0) {
+                    continue;
+                }
+                double luma = (0.299 * ((b >> 16) & 0xFF) + 0.587 * ((b >> 8) & 0xFF)
+                        + 0.114 * (b & 0xFF)) / 255.0;
+                if (luma < 0.5) {
+                    xMin = Math.min(xMin, x);
+                    yMin = Math.min(yMin, y);
+                    xMax = Math.max(xMax, x);
+                    yMax = Math.max(yMax, y);
+                }
+            }
+        }
+        return xMax < 0
+                ? new int[]{r[0], r[1], r[0] + r[2] - 1, r[1] + r[3] - 1}
+                : new int[]{xMin, yMin, xMax, yMax};
+    }
+
     // ------------------------------------------------------------------
     // Emissiveness
     // ------------------------------------------------------------------

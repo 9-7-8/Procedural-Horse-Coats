@@ -253,7 +253,8 @@ public final class EdnrbGene implements Gene, HealthContribution, EyeColorContri
      * it has no pigment anywhere at all. See {@link WhitePatternEyes}.
      */
     @Override
-    public java.util.Optional<EyeColor> eyeColor(AllelePair pair, Genotype genotype, double whiteCoverage) {
+    public java.util.Optional<EyeColor> eyeColor(AllelePair pair, Genotype genotype,
+            com.example.horsegenetics.common.genetics.Epigenome epigenome, double whiteCoverage) {
         return WhitePatternEyes.blueIf(!expressionOf(pair).wildType(), whiteCoverage);
     }
 

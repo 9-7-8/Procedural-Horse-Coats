@@ -353,27 +353,52 @@ public final class HorseEditor {
     // ---- the two rules worth stating twice --------------------------------
 
     /**
-     * The pair a gene is added at: homozygous for the first allele that is not
-     * the baseline and that the horse can actually carry, else one copy of it
-     * against the baseline, else plain baseline. {@code KIT}'s four nonviable
-     * {@code W} homozygotes and {@code MET}'s {@code met/met} are what the
-     * {@code canOccur} checks are for.
+     * The pair a gene is added at: <b>a combination that actually shows</b>.
+     * Candidates in order of how obvious they are - each variant allele
+     * homozygous, then two <i>different</i> variant alleles, then one variant
+     * against the baseline - and the first that both {@code canOccur} and is
+     * not a wild type wins; failing that, the first carryable one; failing
+     * that, the baseline. {@code KIT}'s four nonviable {@code W} homozygotes
+     * and {@code MET}'s {@code met/met} are what the {@code canOccur} checks
+     * are for, and magic sectoral heterochromia - every one of whose
+     * homozygotes is silent by design - is what the wild-type test is for.
      */
     private static AllelePair variantPair(Gene gene) {
         Allele base = gene.defaultAllele();
-        for (Allele a : gene.alleles()) {
-            AllelePair homozygous = new AllelePair(a, a);
-            if (!a.equals(base) && gene.canOccur(homozygous)) {
-                return homozygous;
+        List<Allele> alleles = gene.alleles();
+        List<AllelePair> candidates = new ArrayList<>();
+        for (Allele a : alleles) {
+            if (!a.equals(base)) {
+                candidates.add(new AllelePair(a, a));
             }
         }
-        for (Allele a : gene.alleles()) {
-            AllelePair heterozygous = new AllelePair(a, base);
-            if (!a.equals(base) && gene.canOccur(heterozygous)) {
-                return heterozygous;
+        for (int i = 0; i < alleles.size(); i++) {
+            for (int j = i + 1; j < alleles.size(); j++) {
+                Allele a = alleles.get(i);
+                Allele b = alleles.get(j);
+                if (!a.equals(base) && !b.equals(base)) {
+                    candidates.add(new AllelePair(a, b));
+                }
             }
         }
-        return new AllelePair(base, base);
+        for (Allele a : alleles) {
+            if (!a.equals(base)) {
+                candidates.add(new AllelePair(a, base));
+            }
+        }
+        AllelePair carryable = null;
+        for (AllelePair pair : candidates) {
+            if (!gene.canOccur(pair)) {
+                continue;
+            }
+            if (carryable == null) {
+                carryable = pair;
+            }
+            if (!gene.expressionOf(pair).wildType()) {
+                return pair;
+            }
+        }
+        return carryable != null ? carryable : new AllelePair(base, base);
     }
 
     /**

@@ -51,6 +51,17 @@ public final class CoatRegions {
             {40, 20, 2, 2},
     };
 
+    /**
+     * Index into {@link #eyeRects} of the eye on the head's <b>west</b> face.
+     * The two eyes are addressed by index rather than by name because that is
+     * all the sheet knows about them; "right" is the side of the horse the west
+     * face is, not a side of the texture.
+     */
+    public static final int RIGHT_EYE = 0;
+
+    /** Index into {@link #eyeRects} of the eye on the head's <b>east</b> face. */
+    public static final int LEFT_EYE = 1;
+
     public static int[][] eyeRects(Skin skin) {
         return skin == Skin.BABY ? EYE_RECTS_BABY : EYE_RECTS_ADULT;
     }

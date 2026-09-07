@@ -174,7 +174,8 @@ public final class Pax3Gene implements Gene, HealthContribution, EyeColorContrib
 
     /** The second splash locus, and the same rule - see {@link MitfGene#eyeColor}. */
     @Override
-    public java.util.Optional<EyeColor> eyeColor(AllelePair pair, Genotype genotype, double whiteCoverage) {
+    public java.util.Optional<EyeColor> eyeColor(AllelePair pair, Genotype genotype,
+            com.example.horsegenetics.common.genetics.Epigenome epigenome, double whiteCoverage) {
         return WhitePatternEyes.blueIf(!expressionOf(pair).wildType(), whiteCoverage);
     }
 

@@ -356,29 +356,59 @@ public final class CustomHorseSpawnScreen extends Screen {
     }
 
     /**
-     * What a freshly added gene lands on: <b>homozygous for the first allele
-     * that is not the baseline</b> - you added the row to see the gene, not to
-     * leave it silent. A pair the gene rules out with {@link Gene#canOccur} is
-     * skipped (KIT's four nonviable {@code W} homozygotes), and if no variant
-     * homozygote is carryable at all it falls back to one copy against the
-     * baseline.
+     * What a freshly added gene lands on: <b>a combination that actually
+     * shows</b> - you added the row to see the gene, not to leave it silent.
+     *
+     * <p>Candidates are tried in order of how obvious they are - each variant
+     * allele homozygous, then two <i>different</i> variant alleles, then one
+     * variant against the baseline - and the first that both
+     * {@link Gene#canOccur} and is not a wild type wins. A pair the gene rules
+     * out is skipped (KIT's four nonviable {@code W} homozygotes, MET's
+     * {@code met/met}); if nothing in the list expresses, the first carryable
+     * candidate is used anyway, and if there is no variant at all the row stays
+     * on the baseline.
+     *
+     * <p>The wild-type test is what the two-different-alleles rung is for.
+     * Magic sectoral heterochromia is the gene that needs it: every one of its
+     * homozygotes is silent by design, so the old "first variant homozygote"
+     * rule would have added the row and shown nothing.
      */
     private static AllelePair variantPair(Gene gene) {
         Allele base = gene.defaultAllele();
         List<Allele> alleles = gene.alleles();
+        List<AllelePair> candidates = new ArrayList<>();
         for (Allele a : alleles) {
-            AllelePair homozygous = new AllelePair(a, a);
-            if (!a.equals(base) && gene.canOccur(homozygous)) {
-                return homozygous;
+            if (!a.equals(base)) {
+                candidates.add(new AllelePair(a, a));
+            }
+        }
+        for (int i = 0; i < alleles.size(); i++) {
+            for (int j = i + 1; j < alleles.size(); j++) {
+                Allele a = alleles.get(i);
+                Allele b = alleles.get(j);
+                if (!a.equals(base) && !b.equals(base)) {
+                    candidates.add(new AllelePair(a, b));
+                }
             }
         }
         for (Allele a : alleles) {
-            AllelePair heterozygous = new AllelePair(a, base);
-            if (!a.equals(base) && gene.canOccur(heterozygous)) {
-                return heterozygous;
+            if (!a.equals(base)) {
+                candidates.add(new AllelePair(a, base));
             }
         }
-        return new AllelePair(base, base);
+        AllelePair carryable = null;
+        for (AllelePair pair : candidates) {
+            if (!gene.canOccur(pair)) {
+                continue;
+            }
+            if (carryable == null) {
+                carryable = pair;
+            }
+            if (!gene.expressionOf(pair).wildType()) {
+                return pair;
+            }
+        }
+        return carryable != null ? carryable : new AllelePair(base, base);
     }
 
     /**

@@ -22,6 +22,7 @@ import com.example.horsegenetics.common.genetics.genes.BrindleGene;
 import com.example.horsegenetics.common.genetics.genes.TigerEyeGene;
 import com.example.horsegenetics.common.genetics.genes.MagicHealthGene;
 import com.example.horsegenetics.common.genetics.genes.MagicJumpGene;
+import com.example.horsegenetics.common.genetics.genes.MagicSectoralHeterochromiaGene;
 import com.example.horsegenetics.common.genetics.genes.MagicSizeGene;
 import com.example.horsegenetics.common.genetics.genes.MagicSpeedGene;
 import com.example.horsegenetics.common.genetics.genes.MagicZebraGene;
@@ -181,6 +182,13 @@ public final class Genes {
     /** Cutie mark - a recessive epigenetic emblem of 1-3 items on both flanks, drawn over everything. */
     public static final CutieMarkGene CUTIE_MARK = new CutieMarkGene();
     public static final HealerGene HEALER = new HealerGene();
+    /**
+     * Magic sectoral heterochromia - two different colour alleles and the horse
+     * shows both, one wedge of each iris apiece. The only gene in the mod whose
+     * <b>heterozygote</b> is the expressing combination: matched pairs and
+     * anything carrying the wild type show nothing.
+     */
+    public static final MagicSectoralHeterochromiaGene SECTORAL_EYES = new MagicSectoralHeterochromiaGene();
     public static final VerdantGene VERDANT = new VerdantGene();
 
     /**
@@ -227,7 +235,7 @@ public final class Genes {
             MAGIC_ZEBRA, PINK_HAIR, DUN, SILVER, MUSHROOM, BRINDLE, TIGER_EYE, ROAN, TOBIANO,
             LEOPARD, EDNRB, KIT, MITF, PAX3,
             MILK, BODY_SIZE, MAGIC_SPEED, MAGIC_HEALTH, MAGIC_JUMP,
-            MANE_COLOR, TAIL_COLOR, PARTICLE, LIGHT, HEALER, VERDANT, LUT, CUTIE_MARK,
+            MANE_COLOR, TAIL_COLOR, PARTICLE, LIGHT, HEALER, SECTORAL_EYES, VERDANT, LUT, CUTIE_MARK,
             MSTN, PDK4, CKM, RYR2, LCORL, HMGA2, PATN1, PATN2,
             ACAN, B4GALT7, PLOD1, RAPGEF5, ST14, SHOX, MET);
 

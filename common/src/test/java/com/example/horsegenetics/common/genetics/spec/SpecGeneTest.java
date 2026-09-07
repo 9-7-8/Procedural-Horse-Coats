@@ -28,8 +28,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 class SpecGeneTest {
 
-    private static final int BUILT_IN_GENES = 48;
-
     @AfterEach
     void unregister() {
         Genes.clearLoaded();
@@ -43,13 +41,16 @@ class SpecGeneTest {
 
     @Test
     void aLoadedGeneJoinsTheRegistryAndTheCode() {
-        assertEquals(BUILT_IN_GENES, Genes.codeOrder().size());
+        // Derived, never quoted: writing the built-in count in here makes this
+        // test go stale every time a gene is added (CLAUDE.md, "a derived
+        // number belongs in the code that computes it").
+        int builtIns = Genes.codeOrder().size();
         long catalogueBefore = GenotypeCatalog.size();
         int maskingBefore = maskingCombinations();
 
         SpecGene silver = register("silver.json"); // example.silver, priority 45
 
-        assertEquals(BUILT_IN_GENES + 1, Genes.codeOrder().size());
+        assertEquals(builtIns + 1, Genes.codeOrder().size());
         assertEquals(silver, Genes.byKey("example.silver"));
         // priority 45 sorts it into the one unified order, between the built-in
         // MATP (40) and champagne (50) - not appended after the built-ins.

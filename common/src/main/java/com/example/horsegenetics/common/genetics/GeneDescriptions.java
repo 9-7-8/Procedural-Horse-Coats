@@ -40,7 +40,9 @@ public final class GeneDescriptions {
                     "A dilution that ignores its own dose - one copy or two give the same result. "
                             + "It keeps most red, cuts black hard and feeds some removed black back "
                             + "as red, so it reads off the current colour: gold on chestnut, taupe "
-                            + "on black, chocolate points over a gold body on bay. Invisible on white."),
+                            + "on black, chocolate points over a gold body on bay. Invisible on white - "
+                            + "except the eye, which it dilutes to anything from amber through "
+                            + "hazel to a rare olive green, per horse and inherited with the allele."),
             Map.entry("horsegenetics.grey",
                     "Progressive dapple grey, adults only - it lightens the coat toward neutral "
                             + "without shifting hue. How far along the greying is, the dapple size "
@@ -232,6 +234,14 @@ public final class GeneDescriptions {
                     "SHOX, skeletal atavism - a recessive lethal at birth. It sits on the "
                             + "pseudoautosomal region, so it is inherited like an ordinary "
                             + "autosomal gene."),
+            Map.entry("horsegenetics.magic_sectoral_heterochromia",
+                    "A magical gene that only exists in the heterozygote: six colour alleles "
+                            + "(green, blue, brown, hazel, gold, chaos) plus a wild type, and a "
+                            + "horse carrying two DIFFERENT colours shows both at once, in a "
+                            + "randomly shaped wedge of each iris. Two of the same colour, or "
+                            + "anything with a wild-type copy, shows nothing and leaves the horse's "
+                            + "own eye colour alone. Chaos takes its colour from its own copy's "
+                            + "epigenetics, so it is different on almost every horse."),
             Map.entry("horsegenetics.met",
                     "MET, lethal at conception: when two carriers would produce an affected foal, "
                             + "the pairing simply yields no foal at all. The opposite of Overo "

@@ -2,6 +2,7 @@ package com.example.horsegenetics.common.genetics.genes;
 
 import com.example.horsegenetics.common.genetics.Allele;
 import com.example.horsegenetics.common.genetics.AllelePair;
+import com.example.horsegenetics.common.genetics.Epigenome;
 import com.example.horsegenetics.common.genetics.Expression;
 import com.example.horsegenetics.common.genetics.EyeColor;
 import com.example.horsegenetics.common.genetics.EyeColorContribution;
@@ -126,7 +127,8 @@ public final class TigerEyeGene implements Gene, EyeColorContribution {
      * pigment left in a depigmented iris for this gene to colour.
      */
     @Override
-    public Optional<EyeColor> eyeColor(AllelePair pair, Genotype genotype, double whiteCoverage) {
+    public Optional<EyeColor> eyeColor(AllelePair pair, Genotype genotype, Epigenome epigenome,
+                                      double whiteCoverage) {
         if (pair.has(N)) {
             return Optional.empty();
         }

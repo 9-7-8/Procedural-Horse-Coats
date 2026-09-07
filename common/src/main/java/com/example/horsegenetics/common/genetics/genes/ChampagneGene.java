@@ -2,14 +2,21 @@ package com.example.horsegenetics.common.genetics.genes;
 
 import com.example.horsegenetics.common.coat.pattern.CoatRegions;
 import com.example.horsegenetics.common.coat.pattern.PigmentField;
+import com.example.horsegenetics.common.Rng;
 import com.example.horsegenetics.common.genetics.Allele;
 import com.example.horsegenetics.common.genetics.AllelePair;
+import com.example.horsegenetics.common.genetics.AlleleRandomness;
+import com.example.horsegenetics.common.genetics.Epigenome;
 import com.example.horsegenetics.common.genetics.Expression;
+import com.example.horsegenetics.common.genetics.EyeColor;
+import com.example.horsegenetics.common.genetics.EyeColorContribution;
 import com.example.horsegenetics.common.genetics.FounderContext;
 import com.example.horsegenetics.common.genetics.FounderTable;
 import com.example.horsegenetics.common.genetics.Gene;
+import com.example.horsegenetics.common.genetics.Genotype;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * <b>Champagne</b> ({@code horsegenetics.champagne}) - a dilution that does not
@@ -29,10 +36,20 @@ import java.util.List;
  * (on bay) keeps <b>chocolate points</b> over a gold body instead of washing
  * the points out to the body colour. Champagne on a white horse is invisible.
  *
- * <p>Deterministic. Founder frequency {@code 1/}{@value #WILD_CHAMPAGNE_ONE_IN}
- * per allele.
+ * <h2>The eye is the one thing about it that varies</h2>
+ * Champagne dilutes the iris along with everything else, and the shade it
+ * settles on in an adult is famously not one colour: amber, golden, hazel,
+ * light brown, or - occasionally - a greenish olive. So the coat is
+ * deterministic and the <b>iris is epigenetic</b>, rolled from the expressing
+ * copy's seed and inherited with it, which makes an olive-eyed champagne
+ * something a breeder can chase rather than something the game hands out.
+ *
+ * <p>It is also the mod's ordinary source of a <b>hazel</b> eye, and its only
+ * source of a green one that is not magical.
+ *
+ * <p>Founder frequency {@code 1/}{@value #WILD_CHAMPAGNE_ONE_IN} per allele.
  */
-public final class ChampagneGene implements Gene {
+public final class ChampagneGene implements Gene, EyeColorContribution {
 
     public static final String KEY = "horsegenetics.champagne";
     public static final int WILD_CHAMPAGNE_ONE_IN = 40;
@@ -49,6 +66,20 @@ public final class ChampagneGene implements Gene {
      */
     private static final float BLACK_TINT = 0.30f;
 
+    /**
+     * The iris shades, commonest first, with the cumulative share of champagne
+     * horses that reach each one. Straight off the reference table's champagne
+     * row; the ordering is what makes olive a find.
+     */
+    public static final int AMBER = 0xB07A2E;
+    public static final int HAZEL = 0x8E7238;
+    public static final int LIGHT_BROWN = 0x9A7B5E;
+    public static final int OLIVE = 0x6B7F44;
+
+    private static final float P_AMBER = 0.40f;
+    private static final float P_HAZEL = 0.75f;
+    private static final float P_LIGHT_BROWN = 0.92f;
+
     public final Allele Ch = new Allele(KEY, 0, "Ch", "Champagne (Ch)");
     public final Allele c = new Allele(KEY, 1, "c", "Wild-type (c)");
     private final List<Allele> alleles = List.of(Ch, c);
@@ -58,7 +89,10 @@ public final class ChampagneGene implements Gene {
     private final Expression CHAMPAGNE = Expression.of("champagne", "Champagne")
             .describe("Red mostly kept and black cut hard, with some of the removed black fed back as "
                     + "red - gold champagne on a chestnut, classic taupe on a black, amber with "
-                    + "chocolate points on a bay. One copy and two look the same.")
+                    + "chocolate points on a bay. One copy and two look the same. The eye is "
+                    + "diluted too, landing anywhere from amber through hazel to a rare olive "
+                    + "green, and which one is inherited with the allele.")
+            .varies()
             .restrict((ctx, coat) -> {
                 PigmentField f = coat.mutableCopy();
                 CoatRegions.restrictAll(ctx.skin(), f,
@@ -85,5 +119,33 @@ public final class ChampagneGene implements Gene {
 
     public boolean isChampagne(AllelePair pair) {
         return pair.has(Ch);
+    }
+
+    /**
+     * The diluted iris, at {@link EyeColor#RANK_DILUTION} - so tiger eye, which
+     * is aimed at the eye and nothing else, over-rides it, and a splashed white
+     * champagne has blue eyes.
+     *
+     * <p>One {@code nextFloat}, from the expressing copy: the whole draw-order
+     * contract of this gene.
+     */
+    @Override
+    public Optional<EyeColor> eyeColor(AllelePair pair, Genotype genotype, Epigenome epigenome,
+                                       double whiteCoverage) {
+        if (!pair.has(Ch)) {
+            return Optional.empty();
+        }
+        Rng r = AlleleRandomness.forGene(this, genotype, epigenome).expressed();
+        float roll = r.nextFloat();
+        if (roll < P_AMBER) {
+            return Optional.of(EyeColor.dilution("champagne-amber", "Champagne amber", AMBER));
+        }
+        if (roll < P_HAZEL) {
+            return Optional.of(EyeColor.dilution("champagne-hazel", "Champagne hazel", HAZEL));
+        }
+        if (roll < P_LIGHT_BROWN) {
+            return Optional.of(EyeColor.dilution("champagne-light-brown", "Champagne light brown", LIGHT_BROWN));
+        }
+        return Optional.of(EyeColor.dilution("champagne-olive", "Champagne olive", OLIVE));
     }
 }

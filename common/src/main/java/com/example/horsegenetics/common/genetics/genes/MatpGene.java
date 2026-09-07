@@ -4,12 +4,17 @@ import com.example.horsegenetics.common.coat.pattern.CoatRegions;
 import com.example.horsegenetics.common.coat.pattern.PigmentField;
 import com.example.horsegenetics.common.genetics.Allele;
 import com.example.horsegenetics.common.genetics.AllelePair;
+import com.example.horsegenetics.common.genetics.Epigenome;
 import com.example.horsegenetics.common.genetics.Expression;
+import com.example.horsegenetics.common.genetics.EyeColor;
+import com.example.horsegenetics.common.genetics.EyeColorContribution;
 import com.example.horsegenetics.common.genetics.FounderContext;
 import com.example.horsegenetics.common.genetics.FounderTable;
 import com.example.horsegenetics.common.genetics.Gene;
+import com.example.horsegenetics.common.genetics.Genotype;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * <b>MATP</b> ({@code horsegenetics.matp}) - the cream / pearl locus, and the
@@ -55,8 +60,19 @@ import java.util.List;
  * #WILD_CREAM_ONE_IN} for {@code Cr} and {@code 1/}{@value #WILD_PEARL_ONE_IN}
  * for {@code prl} - the same numbers the two old genes carried, so the wild
  * population is unchanged apart from the impossible genotypes disappearing.
+ *
+ * <h2>The eye follows the same six rows</h2>
+ * A double dilute's pale blue eye is the famous one, and it is not the blue of a
+ * splashed white horse: the iris has all its pigment cells, they are simply not
+ * handling enough melanin to colour it, so it claims at
+ * {@link EyeColor#RANK_DILUTION} and loses to the depigmented blue rather than
+ * competing with it. The compound heterozygote {@code Cr/prl} is the one row
+ * where cream and pearl do not agree about the eye - it comes out
+ * <b>blue-green</b>, which is the mod's ordinary source of a green eye - and two
+ * pearls alone give the pale, bright iris pearl is described by. A single cream
+ * copy does not touch the eye at all.
  */
-public final class MatpGene implements Gene {
+public final class MatpGene implements Gene, EyeColorContribution {
 
     public static final String KEY = "horsegenetics.matp";
 
@@ -81,6 +97,13 @@ public final class MatpGene implements Gene {
     private static final float SINGLE_CREAM_TINT = 0.30f;
     private static final float CLASSIC_PEARL_TINT = 0.28f;
     private static final float DOUBLE_DILUTE_TINT = 0.33f;
+
+    /** {@code Cr/Cr} - the cremello / perlino pale blue. */
+    public static final int DOUBLE_CREAM_BLUE = 0x93C4E4;
+    /** {@code Cr/prl} - the compound heterozygote, where the two dilutions disagree. */
+    public static final int CREAM_PEARL_GREEN = 0x59A08F;
+    /** {@code prl/prl} - light and bright rather than blue. */
+    public static final int PEARL_LIGHT = 0xB99B5E;
 
     public final Allele Cr = new Allele(KEY, 0, "Cr", "Cream (Cr)");
     public final Allele prl = new Allele(KEY, 1, "prl", "Pearl (prl)");
@@ -164,6 +187,28 @@ public final class MatpGene implements Gene {
     /** How many pearl copies. */
     public int pearlDose(AllelePair pair) {
         return pair.count(prl);
+    }
+
+    /**
+     * The iris, read off the same dose count as the coat. Deterministic - every
+     * cremello has the same pale blue eye - so this locus costs the coat cache
+     * one entry per outcome and not one per horse.
+     */
+    @Override
+    public Optional<EyeColor> eyeColor(AllelePair pair, Genotype genotype, Epigenome epigenome,
+                                       double whiteCoverage) {
+        int cream = pair.count(Cr);
+        int pearl = pair.count(prl);
+        if (cream == 2) {
+            return Optional.of(EyeColor.dilution("cream-blue", "Cream blue", DOUBLE_CREAM_BLUE));
+        }
+        if (cream == 1 && pearl == 1) {
+            return Optional.of(EyeColor.dilution("cream-pearl-green", "Blue-green", CREAM_PEARL_GREEN));
+        }
+        if (pearl == 2) {
+            return Optional.of(EyeColor.dilution("pearl-light", "Pale pearl", PEARL_LIGHT));
+        }
+        return Optional.empty();
     }
 
     private static Expression.Pigment dilution(float keepRed, float keepBlack, float blackTint) {

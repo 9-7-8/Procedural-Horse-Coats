@@ -15,11 +15,14 @@ import java.util.Optional;
  *
  * <h2>Why the iris is a channel and not a gene</h2>
  * A horse has one iris colour, so "what colour are its eyes" has exactly one
- * answer and several genes have a claim on it. Two kinds, and they are not the
- * same kind of claim:
+ * answer and several genes have a claim on it. Three kinds, which are the three
+ * routes a real horse's eye changes colour by, and {@link EyeColor#rank()}
+ * orders them:
  * <ul>
- *   <li><b>pigment genes</b> - tiger eye, which changes what colour the iris
- *       <i>is</i>;</li>
+ *   <li><b>whole-body dilutions</b> - cream, pearl, champagne - which dilute
+ *       every pigment the horse has, iris included;</li>
+ *   <li><b>iris-specific pigment genes</b> - tiger eye, which changes what
+ *       colour the iris <i>is</i> and touches nothing else;</li>
  *   <li><b>white-spotting genes</b> - splash, dominant white, broad sabino,
  *       frame - which take the pigment out of the iris the same way they take it
  *       out of the coat, and produce the blue eye those patterns are known for.
@@ -27,17 +30,24 @@ import java.util.Optional;
  *       loci already have, and the alternative is a "blue eyes" locus that
  *       mysteriously only ever appears on white horses.</li>
  * </ul>
- * {@link EyeColor#rank()} orders them, and the ordering that matters is settled
- * there: <b>blue beats amber</b>, because a depigmented iris has nothing left
- * for a pigment gene to recolour.
+ * The ordering that matters is settled in {@link EyeColor}: <b>blue beats
+ * amber</b>, because a depigmented iris has nothing left for a pigment gene to
+ * recolour.
  *
  * <h2>The contract</h2>
  * <ul>
- *   <li>Pure: a pair, the genotype and the horse's resolved white coverage in;
- *       a claim or {@link Optional#empty()} out.</li>
- *   <li><b>Deterministic.</b> The eye is written into the baked coat texture, so
- *       a claim that varied per horse would fork the texture cache for four
- *       texels. Every implementor so far answers from alleles alone.</li>
+ *   <li>Pure: a pair, the genotype, the horse's epigenome and its resolved white
+ *       coverage in; a claim or {@link Optional#empty()} out.</li>
+ *   <li>{@code epigenome} may be {@code null} - the question was asked about a
+ *       genotype rather than about a horse. {@link AlleleRandomness#forGene}
+ *       handles that by handing back midpoints, which is the honest answer.</li>
+ *   <li>A claim <b>may vary per horse</b> - champagne's iris runs from amber
+ *       through hazel to olive - but only if every number comes from
+ *       {@link AlleleRandomness}, so it is inherited with the allele copy, and
+ *       only if the outcome declares itself
+ *       {@link Expression.Builder#varies()}. The eye is baked into the coat
+ *       texture, so an undeclared variation would let two visibly different
+ *       horses share one cached texture.</li>
  *   <li>{@code whiteCoverage} is the fraction of the horse's mapped texels that
  *       the white loci have left with <b>no pigment at all</b>, measured on the
  *       finished coat. It is passed rather than recomputed because it is the
@@ -46,6 +56,16 @@ import java.util.Optional;
  *       same claim as one that is white from a single bold allele, and no
  *       per-locus test can see that.</li>
  *   <li>A gene with nothing to say returns empty. Most do.</li>
+ * </ul>
+ *
+ * <h2>What this channel does not answer</h2>
+ * Two things, both of which are asymmetric and so cannot be one colour:
+ * <ul>
+ *   <li>{@link EyeSpread} - how much of each iris a <i>depigmenting</i> claim
+ *       actually reached. One blue eye and the blue wedge come from there, not
+ *       from a second claim here.</li>
+ *   <li>{@link EyePatchContribution} - a gene painting part of an iris its own
+ *       colour, over the top of whatever won here.</li>
  * </ul>
  *
  * <p>The composer collects the claims in {@link Genes#codeOrder()} during the
@@ -61,7 +81,10 @@ public interface EyeColorContribution {
      *
      * @param pair          this gene's combination on the horse
      * @param genotype      the whole genotype, for a genotype-context read
+     * @param epigenome     the horse's epigenetics, or {@code null} for a
+     *                      genotype-only question
      * @param whiteCoverage fraction of the finished coat left unpigmented, {@code [0,1]}
      */
-    Optional<EyeColor> eyeColor(AllelePair pair, Genotype genotype, double whiteCoverage);
+    Optional<EyeColor> eyeColor(AllelePair pair, Genotype genotype, Epigenome epigenome,
+                                double whiteCoverage);
 }

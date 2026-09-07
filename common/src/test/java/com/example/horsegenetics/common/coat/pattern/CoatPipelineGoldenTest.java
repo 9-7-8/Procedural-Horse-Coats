@@ -153,7 +153,27 @@ class CoatPipelineGoldenTest {
             override("agouti=A/a", "tiger_eye=TE2/TE2"),
             override("agouti=A/a", "tiger_eye=TE1/N"),
             // blue beats amber
-            override("agouti=A/a", "tiger_eye=TE1/TE1", "mitf=SW1/N"));
+            override("agouti=A/a", "tiger_eye=TE1/TE1", "mitf=SW1/N"),
+
+            // the dilutions' irises - cream blue, the compound heterozygote's
+            // blue-green, pearl's pale eye, and champagne's epigenetic shade
+            // (three seeds, so more than one of its four shades is pinned)
+            override("agouti=A/a", "matp=Cr/Cr", "tiger_eye=TE1/TE1"), // iris-specific beats dilution
+            override("extension=e/e", "champagne=Ch/Ch"),
+
+            // heterochromia. The spread is rolled off the winning white locus's
+            // seed, so the three seeds below pin three different answers to
+            // "how much of each iris did the blue actually reach".
+            override("agouti=A/a", "mitf=SW1/N", "champagne=Ch/c"),
+            override("agouti=A/a", "kit=W22/N", "tiger_eye=TE2/TE2"),
+
+            // magic sectoral heterochromia - the expressing heterozygote, the
+            // chaos allele, and the two combinations that must paint nothing
+            override("agouti=A/a", "magic_sectoral_heterochromia=green/gold"),
+            override("agouti=A/a", "magic_sectoral_heterochromia=blue/chaos"),
+            override("agouti=A/a", "magic_sectoral_heterochromia=chaos/chaos"),
+            override("agouti=A/a", "magic_sectoral_heterochromia=green/n"),
+            override("agouti=A/a", "mitf=SW1/N", "magic_sectoral_heterochromia=hazel/brown"));
 
     private static final long[] SEEDS = {0L, 3L, 4242L};
 

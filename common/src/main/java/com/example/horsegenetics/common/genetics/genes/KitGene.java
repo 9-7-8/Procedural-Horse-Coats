@@ -291,7 +291,8 @@ public final class KitGene implements Gene, EyeColorContribution {
      * {@link WhitePatternEyes}.
      */
     @Override
-    public java.util.Optional<EyeColor> eyeColor(AllelePair pair, Genotype genotype, double whiteCoverage) {
+    public java.util.Optional<EyeColor> eyeColor(AllelePair pair, Genotype genotype,
+            com.example.horsegenetics.common.genetics.Epigenome epigenome, double whiteCoverage) {
         Expression e = expressionOf(pair);
         boolean broad = e == BROAD || e == EXTENSIVE || e == NEAR_WHITE || e == DOMINANT_WHITE;
         return WhitePatternEyes.blueIf(broad, whiteCoverage);

@@ -5,8 +5,13 @@ import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Skin;
 import com.example.horsegenetics.common.genetics.AllelePair;
 import com.example.horsegenetics.common.genetics.Epigenome;
 import com.example.horsegenetics.common.genetics.Expression;
+import com.example.horsegenetics.common.genetics.AlleleRandomness;
 import com.example.horsegenetics.common.genetics.EyeColor;
 import com.example.horsegenetics.common.genetics.EyeColorContribution;
+import com.example.horsegenetics.common.genetics.EyePatch;
+import com.example.horsegenetics.common.genetics.EyePatchContribution;
+import com.example.horsegenetics.common.genetics.EyePatches;
+import com.example.horsegenetics.common.genetics.EyeSpread;
 import com.example.horsegenetics.common.genetics.Gene;
 import com.example.horsegenetics.common.genetics.Genes;
 import com.example.horsegenetics.common.genetics.Genotype;
@@ -174,8 +179,7 @@ public final class CoatTextureComposer {
         // 5a. Eye colour, before the general overlay pass, so a gene that wants
         // the whole eye (light's glowing gold, the leopard complex's white rim)
         // still gets the last word over the iris tint.
-        eyeColorOf(genotype, whiteCoverage(pigment, skin))
-                .ifPresent(eye -> overlay.tintIris(eye.rgb(), eye.strength()));
+        paintEyes(genotype, epigenome, overlay, whiteCoverage(pigment, skin));
 
         for (Gene gene : Genes.codeOrder()) {
             if (!(gene instanceof CoatOverlayContribution contribution)) {
@@ -224,29 +228,101 @@ public final class CoatTextureComposer {
     // Eye colour - one channel, several claimants
     // ------------------------------------------------------------------
 
+    /** The gene that won the iris, and what it claimed. */
+    record EyeClaim(Gene gene, EyeColor color) {}
+
     /**
-     * The winning {@link EyeColor} claim for this horse, or empty for the
-     * template's own dark eye.
+     * <b>Draw both irises.</b> Three layers, and the order between them is the
+     * whole model:
+     *
+     * <ol>
+     *   <li>the winning <b>pigment</b> claim - cream, champagne, tiger eye -
+     *       over the whole of both eyes;</li>
+     *   <li>the winning <b>depigmenting</b> claim, if any, over as much of each
+     *       eye as {@link EyeSpread} says it reached. That is what makes one
+     *       blue eye and the blue wedge possible at all: a depigmented iris is
+     *       not a colour painted over the pigment, it is pigment that never
+     *       arrived, so what shows where the blue stops is the horse's own eye
+     *       and it has to still be there underneath;</li>
+     *   <li>every {@link EyePatchContribution}'s patches, in code order.</li>
+     * </ol>
+     */
+    private static void paintEyes(Genotype genotype, Epigenome epigenome, CoatOverlay overlay,
+                                  double whiteCoverage) {
+        EyeClaim winner = eyeClaimOf(genotype, epigenome, whiteCoverage, Integer.MAX_VALUE);
+        if (winner != null && winner.color().depigmented()) {
+            EyeClaim under = eyeClaimOf(genotype, epigenome, whiteCoverage, EyeColor.RANK_DEPIGMENTED);
+            if (under != null) {
+                overlay.tintIris(under.color().rgb(), under.color().strength());
+            }
+            EyeColor blue = winner.color();
+            EyeSpread spread = EyeSpread.roll(
+                    AlleleRandomness.forGene(winner.gene(), genotype, epigenome).expressed());
+            overlay.tintIrisSector(CoatRegions.RIGHT_EYE, spread.right(), blue.rgb(), blue.strength());
+            overlay.tintIrisSector(CoatRegions.LEFT_EYE, spread.left(), blue.rgb(), blue.strength());
+        } else if (winner != null) {
+            overlay.tintIris(winner.color().rgb(), winner.color().strength());
+        }
+
+        for (Gene gene : Genes.codeOrder()) {
+            if (!(gene instanceof EyePatchContribution contribution)) {
+                continue;
+            }
+            contribution.eyePatches(genotype.pair(gene), genotype, epigenome, whiteCoverage)
+                    .ifPresent(patches -> {
+                        paint(overlay, CoatRegions.RIGHT_EYE, patches.right());
+                        paint(overlay, CoatRegions.LEFT_EYE, patches.left());
+                    });
+        }
+    }
+
+    private static void paint(CoatOverlay overlay, int eye, java.util.List<EyePatch> patches) {
+        for (EyePatch patch : patches) {
+            if (!patch.empty()) {
+                overlay.tintIrisSector(eye, patch.quadrants(),
+                        patch.color().rgb(), patch.color().strength());
+            }
+        }
+    }
+
+    /**
+     * The winning {@link EyeColor} claim for this horse below {@code maxRank},
+     * or {@code null} for the template's own dark eye.
      *
      * <p>A horse has one iris colour, so the claims are <b>ranked, not
      * blended</b>: highest {@link EyeColor#rank()} wins and a tie goes to the
      * earlier gene in {@link Genes#codeOrder()}. See
      * {@link EyeColorContribution} for why the white loci are claimants at all
      * and why blue out-ranks a pigment colour.
+     *
+     * <p>{@code maxRank} is exclusive, and exists for exactly one caller: the
+     * eye painter asks a second time, capped below
+     * {@link EyeColor#RANK_DEPIGMENTED}, to find out what colour the horse's
+     * iris would have been if the white loci had left it alone.
      */
-    static Optional<EyeColor> eyeColorOf(Genotype genotype, double whiteCoverage) {
-        EyeColor best = null;
+    static EyeClaim eyeClaimOf(Genotype genotype, Epigenome epigenome, double whiteCoverage,
+                               int maxRank) {
+        EyeClaim best = null;
         for (Gene gene : Genes.codeOrder()) {
             if (!(gene instanceof EyeColorContribution contribution)) {
                 continue;
             }
             Optional<EyeColor> claim =
-                    contribution.eyeColor(genotype.pair(gene), genotype, whiteCoverage);
-            if (claim.isPresent() && (best == null || best.losesTo(claim.get()))) {
-                best = claim.get();
+                    contribution.eyeColor(genotype.pair(gene), genotype, epigenome, whiteCoverage);
+            if (claim.isEmpty() || claim.get().rank() >= maxRank) {
+                continue;
+            }
+            if (best == null || best.color().losesTo(claim.get())) {
+                best = new EyeClaim(gene, claim.get());
             }
         }
-        return Optional.ofNullable(best);
+        return best;
+    }
+
+    /** The winning claim's colour - what a caller that does not care who made it wants. */
+    static Optional<EyeColor> eyeColorOf(Genotype genotype, Epigenome epigenome, double whiteCoverage) {
+        EyeClaim claim = eyeClaimOf(genotype, epigenome, whiteCoverage, Integer.MAX_VALUE);
+        return Optional.ofNullable(claim == null ? null : claim.color());
     }
 
     /**

@@ -197,7 +197,8 @@ public final class MitfGene implements Gene, HealthContribution, EyeColorContrib
      * not only the bold ones. See {@link WhitePatternEyes}.
      */
     @Override
-    public java.util.Optional<EyeColor> eyeColor(AllelePair pair, Genotype genotype, double whiteCoverage) {
+    public java.util.Optional<EyeColor> eyeColor(AllelePair pair, Genotype genotype,
+            com.example.horsegenetics.common.genetics.Epigenome epigenome, double whiteCoverage) {
         return WhitePatternEyes.blueIf(isSplash(pair), whiteCoverage);
     }
 
