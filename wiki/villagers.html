@@ -41,6 +41,18 @@
     items and three moments.
 </p>
 
+<p>
+    <strong>A signed paper is drawn as the horse it names</strong> &mdash; the mod's HD
+    horse mesh in that horse's own coat, shrunk into an item slot
+    (<code>client/TransferDeedRenderer</code>), in the merchant window and everywhere
+    else the item appears. That is what makes a bearer instrument usable: the paper is
+    a claim you have to walk out and collect, and six papers that differ only by a name
+    in a tooltip are six papers you cannot tell apart from the animals they name. The
+    deed carries the horse's genetic and epigenome codes for it, so the picture needs
+    neither the horse loaded nor the server asked, and survives the horse being sold on
+    or shot.
+</p>
+
 <div class="table-wrap">
 <table>
 <thead><tr><th>Moment</th><th>What happens</th><th>Where</th></tr></thead>
@@ -141,15 +153,50 @@
     goes to bed is exactly what that brain is for.
 </p>
 
+<h3 id="founding">Where he sets up</h3>
+
+<p>
+    The structure places him bare in the middle of the barn and
+    <code>CowboyHandler</code> builds him on his first server tick. His
+    <strong>home</strong> is that spot &mdash; the block his routine rides back to and
+    the centre of the box the door code works on &mdash; but he does not
+    <em>found</em> there. The barn's interior is eleven blocks by five with walls on
+    every side and a horse is nearly a block and a half wide, so a string of them made
+    around the barn's centre came out with half its members standing in the walls.
+</p>
+
+<p>
+    So he walks out first, to a paddock 12&ndash;24 blocks off, and the herd is made
+    around him there. The bearing is taken from the village bell to the barn and
+    sampled in a half-plane around it, so &ldquo;out of town&rdquo; is literal: he sets
+    up on the grass past the last house rather than in somebody's turnip field. Every
+    placement &mdash; his and every horse's, at founding and at every restock &mdash;
+    now asks the level whether a <em>horse-sized box</em> fits, rather than whether a
+    one-block column is clear. A clear column next to a wall still puts a horse's
+    shoulders through it, which is exactly how the barn filled up with embedded horses.
+</p>
+
 <h3 id="herd">His herd</h3>
 
 <ul>
     <li><strong>Four to ten horses, plus the one he rides.</strong> All are made on
-        his first server tick, in the barn.</li>
+        his first server tick, in the barn. That roll is also his
+        <code>stockTarget</code> &mdash; the number he is
+        <a href="#restock">restocked</a> back up to for the rest of the world's
+        life, so one cowboy is a four-horse outfit and the next is a ten-horse one,
+        for good.</li>
     <li><strong>Every one is a foundation horse of a real breed</strong> &mdash; no
-        parents, generation 0, and never <code>feral_mixed</code>. The breed is drawn
-        from the biome's pool, weighted the way a wild herd is weighted, so most of
-        his string is workaday and a rare one is worth the ride out.</li>
+        parents, generation 0, and never <code>feral_mixed</code>.</li>
+    <li><strong>Half his string is one breed &mdash; the one he is known for.</strong>
+        A <code>preferredBreed</code> is settled at founding (drawn from the biome's
+        pool, weighted the way a wild herd is weighted) and the horse he rides is one
+        of them. Every horse he breeds after that is his breed until half the target
+        is his breed, and drawn from the biome pool after that &mdash; so a breeder's
+        yard reads as a yard with a speciality rather than as a random sample of the
+        county. <code>CowboyHandler.nextBreedFor</code> counts rather than flips a
+        coin, because a coin flip on a string of six lands on six-out-of-six often
+        enough to be seen, and it self-corrects: sell three of his Fjords and the
+        next three he breeds are Fjords.</li>
     <li><strong>Every one carries <code>bredBy = his name</code>.</strong></li>
     <li><strong>The horse he rides is the herd lead.</strong> It is herd slot 0, and
         every other member carries its UUID as their
@@ -168,22 +215,70 @@
 <h3 id="trades">What he sells</h3>
 
 <p>
-    One offer per herd horse, priced in emeralds by the breed's
-    <code>Commonness</code> tier &mdash; the same axis the wild herd roll uses, so the
-    horse you would have to search half a continent for is the one that costs most to
-    buy. The table lives in <code>server/HorsePrices</code>, deliberately on the
-    Minecraft side and off <code>common/</code>, for the same reason
-    <code>RarityItems</code> is: a price is a gameplay-economy decision, not a fact
-    about a breed.
+    One offer per herd horse. A horse costs <strong>one to three emeralds</strong>
+    &mdash; <code>HorsePrices.DEFAULT_PRICE</code>, and what almost every horse in the
+    game costs. He is the <strong>early-game</strong> purchase this mod is built
+    around: you buy a horse before you have a farm, not after you have a trading hall.
+</p>
+
+<p>
+    A breed that should be dear may name its own range with
+    <code>Breed.Builder#price(min, max)</code>; anything that does not gets the
+    default. A <strong>range</strong> rather than a number, because two horses of a
+    breed are not worth the same and a stall listing six papers at exactly two
+    emeralds each reads as a vending machine &mdash; the roll inside the range is
+    taken from the horse's own UUID, so it is stable across every look at the merchant
+    screen. The default and the roll live in <code>server/HorsePrices</code>,
+    deliberately on the Minecraft side and off <code>common/</code>, for the same
+    reason <code>RarityItems</code> is: how much a horse costs in emeralds is a
+    gameplay-economy decision. What a breed gets to say is only
+    &ldquo;mine are dear&rdquo;.
+</p>
+
+<p>
+    This replaced a table priced off the breed's <code>Commonness</code> tier that ran
+    from ten emeralds to forty, which made the cowboy a shop you walked past for a
+    week. No breed sets a range yet, so every horse he sells is currently 1&ndash;3.
 </p>
 
 <p>
     The offer list is rebuilt every time someone looks at him, because the herd is a
     live thing &mdash; a horse can be killed by a wolf between one customer and the
     next. A horse leaves the list <strong>for good</strong> the moment its paper is
-    bought, whether or not that paper is ever redeemed. <strong>His herd is a fixed
-    cast, not a restocking shop</strong>, and he is not a levelling villager: no XP,
-    no tiers, no restock.
+    bought, whether or not that paper is ever redeemed. He is not a levelling
+    villager: no XP, no tiers, no vanilla restock timer &mdash; what he does instead
+    is <a href="#restock">breed replacements</a>.
+</p>
+
+<h3 id="restock">Restocking and rotation</h3>
+
+<p>
+    <code>CowboyHandler.restock</code> looks over his string about once a minute
+    (jittered, so two cowboys loaded on the same tick do not stay in lockstep) and
+    does two slow things.
+</p>
+
+<ul>
+    <li><strong>Tops up</strong> to <code>stockTarget</code>, one horse per look.
+        Horses leave &mdash; bought, tamed, eaten by a wolf &mdash; and without this a
+        cowboy you have traded with once is a man standing next to an empty
+        field.</li>
+    <li><strong>Rotates</strong> a <em>full</em> string: roughly one look in seven,
+        one horse retires and the top-up replaces it next time round. Without it a
+        player who did not like the six horses on offer never has a reason to come
+        back, because they would be the same six horses forever.</li>
+</ul>
+
+<p>
+    A horse is never retired with a player within 48 blocks of it &mdash; the rotation
+    is meant to be something you notice by coming back to a different string, not
+    something you watch happen; a horse vanishing in front of you reads as a bug
+    however well it is documented. And &ldquo;his string&rdquo; here is exactly the
+    set the merchant screen offers (alive, loaded, untamed, not his mount, not already
+    papered), because &ldquo;how many has he got?&rdquo; and &ldquo;how many can you
+    buy?&rdquo; have to be the same number or he restocks to fill a shelf nobody can
+    see. Tamed horses are dropped from the herd list entirely, so it cannot grow
+    without bound over a long world.
 </p>
 
 <h3 id="routine">His day</h3>
@@ -211,13 +306,20 @@
     <td>Dark, and safe</td>
     <td>Rides to the barn, opening all four double doors from 16 blocks out so the
         herd can pour in behind him. Once he is in and every loaded herd member is
-        too, he shuts them all. They open again at first light.</td>
+        too, he shuts them all. They open again at first light. There is a
+        <strong>30-second deadline</strong> on waiting for stragglers: &ldquo;everybody
+        is in&rdquo; is a condition that can never come true &mdash; a horse pinned
+        behind a fence a villager built, one that pathed onto the far side of a hill
+        &mdash; and without a deadline one such horse holds all four doors open until
+        dawn and the barn is a shed with the lights on.</td>
 </tr>
 <tr>
     <td><strong><code>FLEE</code></strong></td>
-    <td>Dark, and not safe</td>
+    <td><strong>Any hour</strong>, not safe, monster within 12 blocks</td>
     <td>Rides hard and randomly away from the nearest monster, faster than he moves
-        for any other reason, re-pathing every 8 ticks, until morning.</td>
+        for any other reason, re-pathing every 8 ticks, until it is out of range.
+        This is asked <em>first</em> and outranks both the patrol and the ride
+        home.</td>
 </tr>
 </tbody>
 </table>
@@ -230,6 +332,15 @@
     in either case the true thing is the same: he is exposed with a monster near him.
     While he <em>is</em> sheltered, a zombie on the other side of the wall is not his
     problem.
+</p>
+
+<p>
+    <strong>Fleeing is not a night rule</strong>, though it was one, and being one was
+    the bug: the monster check sat inside an <code>isDarkOutside()</code> branch, so a
+    zombie that walked out of a cave mouth at noon, a skeleton in the shade of the
+    barn or a husk in the open all stood next to a man who ignored them. What makes
+    him run is a monster near him and no walls around him, and neither of those has
+    anything to do with the clock.
 </p>
 
 <p>
@@ -316,10 +427,36 @@
 
 <p>
     The barn's own connector is a <code>minecraft:street</code> jigsaw on its west
-    face at <code>y=1</code>, which is the relationship the vanilla terminators have to
-    a road &mdash; their jigsaw sits one above their <code>y=0</code> ground block
-    &mdash; so the barn's floor lands level with the street's surface. The generator
-    rotates the whole piece so that connector faces back at whatever it attached to.
+    face, in the step in front of the north pair of doors. The generator rotates the
+    whole piece so that connector faces back at whatever it attached to.
+</p>
+
+<p>
+    It sits at <strong><code>y=0</code></strong> &mdash; the barn's own foundation
+    course &mdash; and getting that wrong is what sank the building. A jigsaw pair
+    lands its two blocks at the <em>same world height</em>, and the street connector
+    it meets is at the street piece's <code>y=1</code>, one <em>above</em> the road
+    block. So whichever local layer carries this jigsaw is the layer that ends up
+    resting on the ground. It was <code>y=1</code> at first, on the reasoning that
+    vanilla terminators put theirs one above their ground block &mdash; which is true
+    of terminators and the wrong piece to copy. The result was the foundation landing
+    <em>in</em> the road's own layer: the stair skirt round both doorways was buried
+    flush with the ground instead of stepping up onto it, and the barn read as
+    half-dug-in.
+</p>
+
+<p>
+    Vanilla <em>houses</em> are the shape to copy. A plains house puts its
+    <code>building_entrance</code> jigsaw in its own foundation layer, and so sits one
+    block proud of the road with a step up into the doorway. At <code>y=0</code> the
+    barn does the same, and its steps are steps again.
+</p>
+
+<p>
+    The jigsaw block replaces one of those step blocks, so the bake reads whatever
+    was drawn there out of the source and writes it back as the jigsaw's
+    <code>final_state</code> &mdash; no hand-copied block state to go stale, and
+    re-exporting the barn with something else in that spot just works.
 </p>
 
 <p>

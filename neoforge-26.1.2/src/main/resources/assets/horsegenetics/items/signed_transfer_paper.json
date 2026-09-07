@@ -1,6 +1,9 @@
 {
   "model": {
-    "type": "minecraft:model",
-    "model": "horsegenetics:item/signed_transfer_paper"
+    "type": "minecraft:special",
+    "base": "horsegenetics:item/signed_transfer_paper",
+    "model": {
+      "type": "horsegenetics:transfer_deed_horse"
+    }
   }
 }

@@ -29,10 +29,13 @@ import java.util.List;
  * and owning terrain fitting ourselves.
  *
  * <p>The barn's own connector (baked into {@code cowboy_barn.nbt}) is a
- * {@code minecraft:street} jigsaw on its west face at y=1, which is the
- * relationship the vanilla terminators have to a road: their jigsaw sits one
- * above their y=0 ground block, so the barn's floor lands level with the
- * street's surface.
+ * {@code minecraft:street} jigsaw on its west face at <b>y=0</b> - its own
+ * foundation course. A jigsaw pair lands both blocks at the same world height,
+ * and the street connector it meets is one above the road block, so the layer
+ * carrying the jigsaw is the layer that rests on the ground. That is the
+ * relationship vanilla <i>houses</i> have to a street, and it is what puts the
+ * barn one block proud of the road with steps up to its doors. See
+ * {@code tools/barn/bake-barn.py} for what it looked like when this was y=1.
  *
  * <h2>Why this is code and not a datapack file</h2>
  * A datapack can only <b>replace</b> {@code terminators.json}, never add to it.

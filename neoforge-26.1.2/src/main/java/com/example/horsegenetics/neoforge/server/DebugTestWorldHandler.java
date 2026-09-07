@@ -2,22 +2,28 @@ package com.example.horsegenetics.neoforge.server;
 
 import com.example.horsegenetics.neoforge.HorseGenetics;
 import com.example.horsegenetics.neoforge.item.ModItems;
+import com.mojang.datafixers.util.Pair;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderSet;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.tags.StructureTags;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraft.world.level.storage.LevelData;
-import net.minecraft.world.level.storage.ServerLevelData;
+import net.minecraft.world.level.levelgen.structure.BuiltinStructures;
+import net.minecraft.world.level.levelgen.structure.Structure;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Dev-only: when the "Spawn Test Horse World" title-screen button
@@ -34,10 +40,10 @@ import net.neoforged.neoforge.event.entity.player.PlayerEvent;
  *       breeding + gene carrots, the placeholder gene book, the seed jars, the
  *       tickets, the whistles and the transfer papers - so their icons,
  *       tooltips and behaviour can be checked without crafting them.</li>
- *   <li><b>Position</b>: the middle of the nearest <b>plains village</b>
- *       ({@link #moveToPlainsVillage}), because that is where both villagers
- *       live and hunting for one on foot is most of the cost of testing
- *       them.</li>
+ *   <li><b>Directions</b>: where the nearest <b>plains village</b> is, and the
+ *       {@code /tp} that gets you there ({@link #locatePlainsVillage}) - because
+ *       that is where both villagers live and hunting for one on foot is most of
+ *       the cost of testing them.</li>
  * </ul>
  *
  * Inert in production (nothing sets the flag).
@@ -55,6 +61,9 @@ public final class DebugTestWorldHandler {
      */
     private static final int VILLAGE_SEARCH_CHUNKS = 100;
 
+    /** How far above the village's surface the offered {@code /tp} aims. */
+    private static final int TP_ALTITUDE = 100;
+
     private DebugTestWorldHandler() {
     }
 
@@ -65,7 +74,7 @@ public final class DebugTestWorldHandler {
         }
         pendingHotbarFill = false;
         fillInventory(player);
-        moveToPlainsVillage(player);
+        locatePlainsVillage(player);
     }
 
     private static void fillInventory(ServerPlayer player) {
@@ -91,50 +100,80 @@ public final class DebugTestWorldHandler {
     }
 
     /**
-     * Drop the player in the middle of the nearest plains village, and make
-     * that the world spawn so dying does not send them back to an empty
-     * meadow.
+     * Say where the nearest plains village is, and hand over the {@code /tp}
+     * that goes there. <b>Does not move the player.</b>
      *
-     * <p><b>The middle, not the edge</b>, even though the cowboy's barn is on
-     * the outskirts: from the town centre you can see which way the streets
-     * run and walk out along each of them, where from a random point on the
-     * edge you cannot even tell which side of the village you are on. The bell
-     * is also the landmark the cowboy's own routine navigates by, so standing
-     * at it is standing at the origin of his map.
+     * <p>Teleporting them on login was the first version of this and it was the
+     * wrong shape: it threw away spawn - the one place you can reliably get back
+     * to - to put you somewhere you had not asked to be, before you had seen
+     * anything of the world. A line of chat with a command in it costs one click
+     * when you want it and nothing at all when you do not, and it leaves the
+     * test world a normal world.
      *
-     * <p>Plains villages only, because that is the only kind the {@link com.example.horsegenetics.neoforge.entity.Cowboy cowboy} spawns with ({@code wiki/villagers.html}) - a savanna or desert
-     * village is a wasted trip.
+     * <p>The search is the same one {@code /locate structure minecraft:village_plains}
+     * runs, aimed at that one structure rather than the
+     * {@code #on_plains_village_maps} tag, so what is reported is what the
+     * command would report. Plains only, because that is the only village kind
+     * the {@link com.example.horsegenetics.neoforge.entity.Cowboy cowboy} spawns
+     * with ({@code wiki/villagers.html}) - a savanna or desert hit is a wasted
+     * trip.
      *
-     * <p>This runs a synchronous structure search, which generates chunks and
-     * can take a moment on a fresh world. That is acceptable here and nowhere
-     * else: this handler only ever fires once, in a throwaway dev world, on the
-     * one login that created it.
+     * <p>It is a synchronous structure search, which generates chunks and can
+     * take a moment on a fresh world. That is acceptable here and nowhere else:
+     * this handler only ever fires once, in a throwaway dev world, on the one
+     * login that created it.
      */
-    private static void moveToPlainsVillage(ServerPlayer player) {
+    private static void locatePlainsVillage(ServerPlayer player) {
         if (!(player.level() instanceof ServerLevel level)) {
             return;
         }
-        BlockPos found = level.findNearestMapStructure(
-                StructureTags.ON_PLAINS_VILLAGE_MAPS, player.blockPosition(), VILLAGE_SEARCH_CHUNKS, false);
+        BlockPos found = nearestPlainsVillage(level, player.blockPosition());
         if (found == null) {
             HorseGenetics.LOGGER.warn("Test world: no plains village within {} chunks of spawn", VILLAGE_SEARCH_CHUNKS);
             tell(player, Component.literal("No plains village within "
-                            + (VILLAGE_SEARCH_CHUNKS * 16) + " blocks - you are at world spawn.")
+                            + (VILLAGE_SEARCH_CHUNKS * 16) + " blocks of spawn.")
                     .withStyle(ChatFormatting.RED));
             return;
         }
 
         BlockPos surface = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, found);
-        player.teleportTo(surface.getX() + 0.5, surface.getY(), surface.getZ() + 0.5);
-        if (level.getLevelData() instanceof ServerLevelData data) {
-            data.setSpawn(LevelData.RespawnData.of(level.dimension(), surface, 0.0F, 0.0F));
-        }
+        // Aimed well above the rooftops, not at them. The structure search reports
+        // a chunk-ish position, and its surface height is the ground *there* - a
+        // few blocks out it can be a hillside, and this is a creative-mode dev
+        // world where you arrive flying. Dropping in from above the village beats
+        // landing inside whatever happens to be standing at that column.
+        String command = "/tp @s " + surface.getX() + " "
+                + (surface.getY() + TP_ALTITUDE) + " " + surface.getZ();
+        HorseGenetics.LOGGER.info("Test world: nearest plains village at {}", surface);
 
-        HorseGenetics.LOGGER.info("Test world: dropped the player at the plains village at {}", surface);
         tell(player, Component.literal("Plains village at "
-                        + surface.getX() + ", " + surface.getZ()
-                        + " - walk out along each street to find the cowboy's barn.")
-                .withStyle(ChatFormatting.YELLOW));
+                        + surface.getX() + ", " + surface.getY() + ", " + surface.getZ()
+                        + " (tp is " + TP_ALTITUDE + " up). ")
+                .withStyle(ChatFormatting.YELLOW)
+                .append(Component.literal("[" + command + "]")
+                        .withStyle(style -> style
+                                .withColor(ChatFormatting.AQUA)
+                                .withUnderlined(true)
+                                .withClickEvent(new ClickEvent.SuggestCommand(command))
+                                .withHoverEvent(new HoverEvent.ShowText(
+                                        Component.literal("Click to put this in the chat box"))))));
+    }
+
+    /**
+     * The nearest {@code minecraft:village_plains}, or {@code null}.
+     *
+     * <p>{@code ServerLevel.findNearestMapStructure} only takes a structure
+     * <i>tag</i>, so this goes to the generator directly with a one-element
+     * {@link HolderSet} - which is exactly what {@code /locate structure} does
+     * with a single-structure argument.
+     */
+    private static @Nullable BlockPos nearestPlainsVillage(ServerLevel level, BlockPos from) {
+        Holder<Structure> village = level.registryAccess()
+                .lookupOrThrow(Registries.STRUCTURE)
+                .getOrThrow(BuiltinStructures.VILLAGE_PLAINS);
+        Pair<BlockPos, Holder<Structure>> hit = level.getChunkSource().getGenerator()
+                .findNearestMapStructure(level, HolderSet.direct(village), from, VILLAGE_SEARCH_CHUNKS, false);
+        return hit == null ? null : hit.getFirst();
     }
 
     private static void tell(ServerPlayer player, Component message) {

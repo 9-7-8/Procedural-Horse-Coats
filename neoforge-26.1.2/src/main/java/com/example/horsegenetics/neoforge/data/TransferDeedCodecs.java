@@ -16,7 +16,8 @@ import net.minecraft.network.codec.StreamCodec;
  *
  * <p>This one really does have to cross the wire, unlike most components -
  * the paper's tooltip names the horse, its breed and its breeder, and the
- * tooltip is drawn on the client.
+ * paper itself is drawn as a model of that horse in that horse's coat, all of
+ * it on the client.
  */
 public final class TransferDeedCodecs {
 
@@ -25,7 +26,9 @@ public final class TransferDeedCodecs {
             Codec.STRING.fieldOf("horse_name").forGetter(TransferDeed::horseName),
             Codec.STRING.optionalFieldOf("breed").forGetter(TransferDeed::breed),
             Codec.STRING.optionalFieldOf("bred_by").forGetter(TransferDeed::bredBy),
-            Codec.STRING.optionalFieldOf("issued_by", "").forGetter(TransferDeed::issuedBy)
+            Codec.STRING.optionalFieldOf("issued_by", "").forGetter(TransferDeed::issuedBy),
+            Codec.STRING.fieldOf("genetic_code").forGetter(TransferDeed::geneticCode),
+            Codec.STRING.fieldOf("epigenome_code").forGetter(TransferDeed::epigenomeCode)
     ).apply(i, TransferDeed::new));
 
     public static final StreamCodec<ByteBuf, TransferDeed> STREAM_CODEC = ByteBufCodecs.fromCodec(CODEC);

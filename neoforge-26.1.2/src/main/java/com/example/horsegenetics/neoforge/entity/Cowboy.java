@@ -42,6 +42,7 @@ import net.minecraft.world.item.trading.MerchantOffers;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -76,8 +77,16 @@ import java.util.UUID;
  * onward - it is a claim someone else can still collect.
  *
  * <p>A horse he has written a paper for leaves the offer list for good
- * ({@link #hasSold}), whether or not the paper was ever redeemed. His herd is a
- * fixed cast, not a restocking shop.
+ * ({@link #hasSold}), whether or not the paper was ever redeemed - the animal
+ * is spoken for even if the buyer never walks out to collect it.
+ *
+ * <h2>Restocking</h2>
+ * What he does <b>not</b> do is run out. {@code CowboyHandler} breeds him back
+ * up to {@link #stockTarget} - the number he had for sale the day he set up -
+ * and now and then retires a horse nobody is looking at and breeds a
+ * replacement. So a player who comes back a week later finds a different string
+ * of the same size, rather than the same six horses he was not interested in
+ * the first time.
  *
  * <h2>State</h2>
  * <ul>
@@ -86,6 +95,12 @@ import java.util.UUID;
  *   <li>{@code herd} - the horses he bred, in the order they were made. The
  *       first is his own mount and is never for sale.</li>
  *   <li>{@code sold} - herd members he has already issued a paper for.</li>
+ *   <li>{@code stockTarget} - how many horses he had for sale on the day he
+ *       set up, and the number {@code CowboyHandler} breeds him back up to. A
+ *       fixed cast no longer, but a fixed <i>size</i> of cast.</li>
+ *   <li>{@code preferredBreed} - the breed he is known for. Half his string is
+ *       it and the rest is whatever else the country round him produces, which
+ *       is how a real breeder's yard looks.</li>
  *   <li>{@code founded} - has {@code CowboyHandler} given him his name, his
  *       mount and his herd yet? He is baked into {@code cowboy_barn.nbt} bare;
  *       everything about him is built on his first server tick.</li>
@@ -98,10 +113,28 @@ public class Cowboy extends AbstractVillager {
     /** Most horses in the herd, on top of the one he rides. */
     public static final int MAX_HERD = 10;
 
+    /**
+     * How far into the saddle he is drawn, in blocks.
+     *
+     * <p>A villager has no sitting pose - vanilla's own villagers stand bolt
+     * upright in boats and minecarts - so a cowboy placed properly on a horse's
+     * back is a man standing on it. Sinking him until the horse's barrel takes
+     * his legs reads as riding from any normal distance. It is a bandaid and
+     * knowingly so: the real fix is a villager mesh with a seated leg pose, and
+     * this is what it costs until there is one.
+     *
+     * <p>Applied to the <b>attachment point</b> and not to the renderer, so his
+     * hitbox goes down with the picture and you click him where you see him.
+     */
+    private static final double SADDLE_SINK = 0.5;
+
     private @Nullable BlockPos home;
     private final List<UUID> herd = new ArrayList<>();
     private final Set<UUID> sold = new LinkedHashSet<>();
     private boolean founded;
+    private int stockTarget;
+    private @Nullable String preferredBreed;
+    private int restockCooldown;
 
     public Cowboy(EntityType<? extends Cowboy> type, Level level) {
         super(type, level);
@@ -143,6 +176,28 @@ public class Cowboy extends AbstractVillager {
         this.founded = true;
     }
 
+    /**
+     * How many horses he keeps for sale. Set once, at founding, from the roll
+     * that made his first string - so one cowboy is a four-horse outfit and the
+     * next is a ten-horse one, for good.
+     */
+    public int stockTarget() {
+        return stockTarget;
+    }
+
+    public void setStockTarget(int target) {
+        this.stockTarget = Math.max(0, target);
+    }
+
+    /** The breed he is known for, if he has been founded. */
+    public Optional<String> preferredBreed() {
+        return Optional.ofNullable(preferredBreed);
+    }
+
+    public void setPreferredBreed(String breedId) {
+        this.preferredBreed = breedId;
+    }
+
     // --- home and herd --------------------------------------------------
 
     /** The barn, if he has been founded. */
@@ -163,6 +218,37 @@ public class Cowboy extends AbstractVillager {
         if (!herd.contains(horseId)) {
             herd.add(horseId);
         }
+    }
+
+    /**
+     * Forget a horse entirely - it was retired in a restock, or it has been
+     * tamed and is somebody else's now. <b>Never slot 0</b>: that id is the
+     * herd's lead, every other member carries it, and dropping it would orphan
+     * the string even if the mount is dead.
+     */
+    public void removeFromHerd(UUID horseId) {
+        if (!herd.isEmpty() && herd.get(0).equals(horseId)) {
+            return;
+        }
+        herd.remove(horseId);
+        sold.remove(horseId);
+    }
+
+    /**
+     * Count down to the next look over his string; true on the tick it comes
+     * due. Deliberately <b>not saved</b> - a reload simply brings the next look
+     * forward, which is the harmless direction to be wrong in.
+     */
+    public boolean tickRestockClock() {
+        if (restockCooldown > 0) {
+            restockCooldown--;
+            return false;
+        }
+        return true;
+    }
+
+    public void setRestockCooldown(int ticks) {
+        this.restockCooldown = Math.max(0, ticks);
     }
 
     /**
@@ -311,6 +397,19 @@ public class Cowboy extends AbstractVillager {
         return !isPassenger();
     }
 
+    /**
+     * Sit him <i>into</i> the horse rather than on top of it - see
+     * {@link #SADDLE_SINK} for why that is the best a villager mesh can do.
+     *
+     * <p>The vehicle attachment is subtracted from the saddle position by
+     * {@code Entity.positionRider}, so adding to its Y moves him down.
+     */
+    @Override
+    public Vec3 getVehicleAttachmentPoint(Entity vehicle) {
+        Vec3 point = super.getVehicleAttachmentPoint(vehicle);
+        return vehicle instanceof AbstractHorse ? point.add(0.0, SADDLE_SINK, 0.0) : point;
+    }
+
     @Override
     protected SoundEvent getAmbientSound() {
         return isTrading() ? SoundEvents.WANDERING_TRADER_TRADE : SoundEvents.WANDERING_TRADER_AMBIENT;
@@ -338,6 +437,8 @@ public class Cowboy extends AbstractVillager {
     protected void addAdditionalSaveData(ValueOutput output) {
         super.addAdditionalSaveData(output);
         output.putBoolean("Founded", founded);
+        output.putInt("StockTarget", stockTarget);
+        output.putString("PreferredBreed", preferredBreed == null ? "" : preferredBreed);
         output.storeNullable("Home", BlockPos.CODEC, home);
         output.store("Herd", UUIDUtil.CODEC.listOf(), List.copyOf(herd));
         output.store("Sold", UUIDUtil.CODEC.listOf(), List.copyOf(sold));
@@ -347,6 +448,9 @@ public class Cowboy extends AbstractVillager {
     protected void readAdditionalSaveData(ValueInput input) {
         super.readAdditionalSaveData(input);
         this.founded = input.getBooleanOr("Founded", false);
+        this.stockTarget = input.getIntOr("StockTarget", 0);
+        String breed = input.getStringOr("PreferredBreed", "");
+        this.preferredBreed = breed.isEmpty() ? null : breed;
         this.home = input.read("Home", BlockPos.CODEC).orElse(null);
         this.herd.clear();
         this.herd.addAll(input.read("Herd", UUIDUtil.CODEC.listOf()).orElse(List.of()));

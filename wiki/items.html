@@ -261,7 +261,9 @@
 <tr>
     <td><strong>Signed transfer paper</strong></td>
     <td>Right-click a horse you own with a blank; or buy one from the cowboy</td>
-    <td><code>horse_deed</code> &mdash; the horse's id, name, breed and breeder</td>
+    <td><code>horse_deed</code> &mdash; the horse's id, name, breed, breeder, and its
+        <strong>genetic and epigenome codes</strong>, which are what let the item draw
+        as the horse (below)</td>
 </tr>
 </tbody>
 </table>
@@ -270,6 +272,16 @@
 <ul>
     <li><strong>One blank per craft.</strong> Eight paper and a hair is a deliberate
         act, not a stack you carry around.</li>
+    <li><strong>A signed paper is drawn as the horse it names</strong>, not as a
+        paper: the mod's HD horse mesh in that horse's own generated coat, shrunk into
+        the slot (<code>client/TransferDeedRenderer</code>). It is the same picture in
+        the cowboy's merchant window, in your inventory, in your hand and on the
+        ground. The point is matching a paper to an animal: a stall of six papers is
+        six identical pictures with different names in the tooltip, and walking out to
+        collect one meant reading a name and then reading names off horses. A dun in
+        the slot and a dun in the paddock is one glance. It works off the deed's own
+        snapshot of the genome, so a paper for a horse that is unloaded, sold on twice
+        or dead still draws the animal it was written for.</li>
     <li><strong>A signed paper never stacks.</strong> Two of them are never the same
         item, and a stack could not show you which horse is which. Its
         <em>name</em> is the horse's name, so a cowboy's merchant window reads as a
@@ -348,8 +360,10 @@
     <li><strong>The tickets do nothing</strong>, and the stall system they would consume
         has no other consumer either.</li>
     <li><strong>The sheared look</strong> is unbuilt (above).</li>
-    <li><strong>Art.</strong> Both transfer papers reuse the research-paper texture, and
-        the Horse Trader's Post wears vanilla's barrel.</li>
+    <li><strong>Art.</strong> The blank transfer paper reuses the research-paper
+        texture and the Horse Trader's Post wears vanilla's barrel. The signed paper no
+        longer needs art at all &mdash; it draws as the horse &mdash; but its sprite is
+        still what the game throws as particles when one breaks.</li>
     <li>There is no <strong>double-wide gate</strong> block, which the design document
         lists as a braided-rope product.</li>
     <li>The <code>known_gene_splice_carrot</code> is <strong>one generic item</strong>

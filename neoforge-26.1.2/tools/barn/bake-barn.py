@@ -5,7 +5,7 @@
 Re-run this after re-exporting the barn from a structure block in game, then
 commit both files. It adds the two things a structure-block save cannot carry:
 
-  * a jigsaw block on the west face at y=1, so the village generator can attach
+  * a jigsaw block on the west face at y=0, so the village generator can attach
     the barn to a plains-village street connector (see BarnPoolInjector), and
   * the cowboy himself as a structure entity - the same mechanism vanilla uses
     to put villagers in village/plains/villagers/*.nbt. He is placed bare;
@@ -129,18 +129,45 @@ palette = root.v['palette'].v[1]
 blocks = root.v['blocks'].v[1]
 
 # ---- 1. the jigsaw connector -------------------------------------------
-# The barn's west face (x=0) is the open column in front of the north pair of
-# doors; the generator rotates the whole piece so this ends up facing back at
-# whichever street connector it attached to.  y=1 puts the barn's floor block
-# level with the road's surface block, the same relationship the vanilla
-# terminators have (their jigsaw is at y=1 over a y=0 road).
+# The barn's west face (x=0) is the step in front of the north pair of doors;
+# the generator rotates the whole piece so this ends up facing back at whichever
+# street connector it attached to.
+#
+# y=0 - the barn's own foundation course - and NOT y=1.  A jigsaw pair lands the
+# two blocks at the same world height, and the street connector it meets sits at
+# the street piece's y=1, one *above* the road block.  So whatever local layer
+# carries this jigsaw is the layer that ends up resting on the ground.  Vanilla
+# houses put their `building_entrance` jigsaw in their foundation layer for
+# exactly that reason, and they are the shape to copy: a plains house sits one
+# block proud of the road with a step up into the doorway.
+#
+# It was y=1 once, which sank the whole barn a block: the foundation landed in
+# the road's own layer, the stair skirt round the doors was buried level with the
+# ground instead of stepping up onto it, and the building read as half-dug-in.
+#
+# final_state is the block the jigsaw replaces itself with once the piece is
+# placed - read straight out of the source so the step is put back exactly as it
+# was drawn, and so re-exporting the barn with something else there just works.
+JIGSAW_POS = (0, 0, 2)
+
+def state_string(entry):
+    """A block-state string ('minecraft:oak_stairs[facing=east,...]') for a palette entry."""
+    name = entry.v['Name'].v
+    props = entry.v.get('Properties')
+    if not props:
+        return name
+    pairs = ','.join('%s=%s' % (k, v.v) for k, v in sorted(props.v.items()))
+    return '%s[%s]' % (name, pairs)
+
+replaced = [b for b in blocks if tuple(x.v for x in b.v['pos'].v[1]) == JIGSAW_POS]
+final_state = state_string(palette[replaced[0].v['state'].v]) if replaced else 'minecraft:air'
+
 palette.append(T_cmp({
     'Name': T_str('minecraft:jigsaw'),
     'Properties': T_cmp({'orientation': T_str('west_up')}),
 }))
 jigsaw_state = len(palette) - 1
 
-JIGSAW_POS = (0, 1, 2)
 blocks[:] = [b for b in blocks if tuple(x.v for x in b.v['pos'].v[1]) != JIGSAW_POS]
 blocks.append(T_cmp({
     'pos': T_ilist(list(JIGSAW_POS)),
@@ -151,7 +178,7 @@ blocks.append(T_cmp({
         'target': T_str('minecraft:street'),
         'pool': T_str('minecraft:empty'),
         'joint': T_str('aligned'),
-        'final_state': T_str('minecraft:air'),
+        'final_state': T_str(final_state),
         'selection_priority': T_int(0),
         'placement_priority': T_int(0),
     }),
@@ -173,4 +200,5 @@ out.write(struct.pack('>B', roottype)); w_str(out, rootname); w_payload(out, roo
 # `git status` stops being able to tell you the barn is stale - which is
 # the only staleness signal a checked-in derived artefact has.
 open(DST, 'wb').write(gzip.compress(out.getvalue(), mtime=0))
-print('wrote', DST, 'palette', len(palette), 'blocks', len(blocks))
+print('wrote', DST, 'palette', len(palette), 'blocks', len(blocks),
+      'jigsaw at', JIGSAW_POS, 'final_state', final_state)

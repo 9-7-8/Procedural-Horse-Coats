@@ -1,14 +1,19 @@
 package com.example.horsegenetics.neoforge.server;
 
 import com.example.horsegenetics.neoforge.entity.Cowboy;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.util.DefaultRandomPos;
 import net.minecraft.world.entity.animal.equine.AbstractHorse;
 import net.minecraft.world.phys.Vec3;
+import net.neoforged.fml.loading.FMLEnvironment;
+import org.jspecify.annotations.Nullable;
 
 import java.util.EnumSet;
 
@@ -35,7 +40,7 @@ import java.util.EnumSet;
  * <h2>Night</h2>
  * Home at dusk, doors shut, and if that fails - never got inside, or something
  * got in with him - he runs, at a speed no ordinary goal uses, and does not
- * settle again until it is light.
+ * settle again until the thing chasing him is out of range.
  */
 public final class CowboyMountGoal extends Goal {
 
@@ -63,6 +68,20 @@ public final class CowboyMountGoal extends Goal {
     /** Ticks between passes over the barn's doors. Cheap, but not free. */
     private static final int DOOR_SCAN_INTERVAL = 10;
 
+    /**
+     * How long he holds the doors for stragglers once he is home himself.
+     *
+     * <p>There has to be a deadline, because "everybody is in" is a condition
+     * that can simply never come true: a horse pinned behind a fence a villager
+     * built, one that pathed onto the far side of a hill, one standing in a
+     * doorway it cannot fit through. Without this, one such horse holds all four
+     * doors open until dawn and the barn is a shed with the lights on. Half a
+     * minute is long enough for a string that is merely strung out, and short
+     * enough that a string that is stuck does not cost the rest of them the
+     * night.
+     */
+    private static final int DOOR_HOLD_TICKS = 600;
+
     private final AbstractHorse horse;
     private int repathCooldown;
     private int strollCooldown;
@@ -73,6 +92,12 @@ public final class CowboyMountGoal extends Goal {
 
     /** We shut the barn behind us, so we owe it an opening at first light. */
     private boolean barnShutForNight;
+
+    /** Ticks he has been standing at home with the doors still open. */
+    private int doorHeldTicks;
+
+    /** What he was doing last tick, for the dev-build announcement below. */
+    private CowboyRoutine.@Nullable Duty lastDuty;
 
     public CowboyMountGoal(AbstractHorse horse) {
         this.horse = horse;
@@ -110,6 +135,7 @@ public final class CowboyMountGoal extends Goal {
         repathCooldown = 0;
         strollCooldown = 0;
         doorScanCooldown = 0;
+        doorHeldTicks = 0;
     }
 
     @Override
@@ -139,6 +165,7 @@ public final class CowboyMountGoal extends Goal {
         }
 
         CowboyRoutine.Plan plan = CowboyRoutine.plan(cowboy, level, horse.blockPosition());
+        announceDutyChange(cowboy, level, plan);
         switch (plan.duty()) {
             case FLEE -> flee(level, plan);
             case SHELTER -> shelter(cowboy, level, plan);
@@ -151,6 +178,7 @@ public final class CowboyMountGoal extends Goal {
     private void flee(ServerLevel level, CowboyRoutine.Plan plan) {
         // Running means the barn is no use tonight; leave it however it stands.
         barnStandingOpen = false;
+        doorHeldTicks = 0;
         if (repathCooldown > 0 && !horse.getNavigation().isDone()) {
             return;
         }
@@ -176,17 +204,63 @@ public final class CowboyMountGoal extends Goal {
         }
 
         if (plan.goal().isPresent()) {
+            doorHeldTicks = 0;
             moveTo(plan.goal().get(), TRAVEL_SPEED, REPATH_INTERVAL);
             return;
         }
 
         horse.getNavigation().stop();
-        // In, and everyone who is coming is in: shut up for the night.
-        if (barnStandingOpen && herdIsHome(cowboy, level, barn)) {
+        if (!barnStandingOpen) {
+            return;
+        }
+        // He is in. Shut up once everyone who is coming is in - or once he has
+        // waited DOOR_HOLD_TICKS for one who never will.
+        doorHeldTicks += ticksSinceLastCall();
+        if (herdIsHome(cowboy, level, barn) || doorHeldTicks >= DOOR_HOLD_TICKS) {
             CowboyDoors.setBarnDoors(level, barn, false, cowboy);
             barnStandingOpen = false;
             barnShutForNight = true;
+            doorHeldTicks = 0;
         }
+    }
+
+    /**
+     * In a dev build, say in chat every time he changes what he is doing.
+     *
+     * <p>Here because "he does not flee from zombies" was reported twice and could
+     * not be told apart, from outside, from "this goal is not running at all" -
+     * and the two want completely different fixes. One line per change answers
+     * that in the first minute of a playthrough: a stream of
+     * <code>PATROL</code>/<code>SHELTER</code> means the goal is alive and the
+     * routine's rules are what is wrong, and total silence means the goal never
+     * starts and nothing in {@link CowboyRoutine} matters yet.
+     *
+     * <p>Costs nothing in a real build, where {@code isProduction()} is true and
+     * this returns immediately. Delete it once the answer is known.
+     */
+    private void announceDutyChange(Cowboy cowboy, ServerLevel level, CowboyRoutine.Plan plan) {
+        if (FMLEnvironment.isProduction() || plan.duty() == lastDuty) {
+            return;
+        }
+        lastDuty = plan.duty();
+        Component message = Component.literal("[Cowboy] ").withStyle(ChatFormatting.GRAY)
+                .append(Component.literal(cowboy.cowboyName() + ": " + plan.duty())
+                        .withStyle(plan.duty() == CowboyRoutine.Duty.FLEE
+                                ? ChatFormatting.RED : ChatFormatting.GRAY));
+        for (ServerPlayer player : level.players()) {
+            player.sendSystemMessage(message);
+        }
+    }
+
+    /**
+     * How many game ticks one call of {@link #tick()} stands for.
+     *
+     * <p>{@link #requiresUpdateEveryTick()} is false, so the goal selector runs
+     * this every <b>other</b> tick. Anything here counting toward a duration in
+     * seconds has to know that, or it waits twice as long as it reads.
+     */
+    private static int ticksSinceLastCall() {
+        return 2;
     }
 
     private void patrol(Cowboy cowboy, ServerLevel level, CowboyRoutine.Plan plan) {
@@ -199,6 +273,7 @@ public final class CowboyMountGoal extends Goal {
             barnShutForNight = false;
         }
         barnStandingOpen = false;
+        doorHeldTicks = 0;
 
         // And a standing guarantee that he can never be sealed in: while he is
         // inside the barn in daylight, its doors get opened. This is what saves

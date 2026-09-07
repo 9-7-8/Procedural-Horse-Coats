@@ -13,6 +13,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -54,10 +55,29 @@ public record Breed(
         Set<String> magicWhitelist,
         Set<String> magicBlacklist,
         boolean hardy,
-        List<String> notes) {
+        List<String> notes,
+        Optional<PriceRange> price) {
 
     /** One weighted allele combination in a breed's pool for a gene, as tokens. */
     public record Combo(String a, String b, double weight) {}
+
+    /**
+     * What one horse of this breed fetches, in emeralds: an inclusive range,
+     * rolled per horse rather than fixed, so two of a breeder's Fjords are not
+     * the same price to the copper.
+     *
+     * <p>A breed that names no range is priced at the default - see
+     * {@code HorsePrices}, which owns that number, because how much a horse
+     * costs in emeralds is an economy decision and not a fact about the breed.
+     * What a breed <i>does</i> get to say is "mine are dear", and that is what
+     * this is for.
+     */
+    public record PriceRange(int min, int max) {
+        public PriceRange {
+            min = Math.max(1, min);
+            max = Math.max(min, max);
+        }
+    }
 
     public Breed {
         biomes = List.copyOf(biomes);
@@ -65,6 +85,7 @@ public record Breed(
         magicWhitelist = Set.copyOf(magicWhitelist);
         magicBlacklist = Set.copyOf(magicBlacklist);
         notes = List.copyOf(notes);
+        price = price == null ? Optional.empty() : price;
     }
 
     public boolean constrains(String geneKey) {
@@ -108,6 +129,7 @@ public record Breed(
         private final Set<String> blacklist = new LinkedHashSet<>();
         private boolean hardy = false;
         private final List<String> notes = new ArrayList<>();
+        private Optional<PriceRange> price = Optional.empty();
 
         private Builder(String id, String name) {
             this.id = id;
@@ -252,9 +274,19 @@ public record Breed(
             return this;
         }
 
+        /**
+         * What a breeder asks for one, in emeralds, inclusive. Leave it unset
+         * and {@code HorsePrices} uses its default - which is what almost every
+         * breed should do. Set it for the handful whose reputation is the point.
+         */
+        public Builder price(int minEmeralds, int maxEmeralds) {
+            this.price = Optional.of(new PriceRange(minEmeralds, maxEmeralds));
+            return this;
+        }
+
         public Breed build() {
             return new Breed(id, name, biomes, spawnWeight, pools, targets.build(),
-                    magicChance, whitelist, blacklist, hardy, notes);
+                    magicChance, whitelist, blacklist, hardy, notes, price);
         }
     }
 }

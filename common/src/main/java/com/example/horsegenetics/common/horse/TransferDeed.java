@@ -23,6 +23,20 @@ import java.util.UUID;
  * animal comes from, and is <b>never written back</b> on redemption - a
  * transfer changes who owns a horse, not who bred it.
  *
+ * <h2>Why it carries the horse's genome</h2>
+ * A paper does not draw as a paper. It draws as a <b>small model of the horse
+ * it names, in that horse's own coat</b> ({@code client/TransferDeedRenderer}),
+ * which is the whole point: a cowboy's stall is six papers that look alike, and
+ * a buyer walking out to collect one has to be able to match the paper in his
+ * hand to an animal in a field. So the deed snapshots
+ * {@link #geneticCode} and {@link #epigenomeCode} - between them everything the
+ * coat pipeline needs - and the client can paint the horse without the animal
+ * being loaded, or even alive.
+ *
+ * <p>A snapshot like the rest, and with the same rule: it decides what the
+ * paper <i>shows</i>, never what the horse <i>is</i>. Nothing is ever written
+ * back from here.
+ *
  * <p>Layer-1: no game dependency. The item component codec that carries this on
  * an {@code ItemStack} lives in the NeoForge module next to the other item
  * component types, the same way {@code HorseRecordCodecs} sits beside
@@ -33,12 +47,16 @@ public record TransferDeed(
         String horseName,
         Optional<String> breed,
         Optional<String> bredBy,
-        String issuedBy) {
+        String issuedBy,
+        String geneticCode,
+        String epigenomeCode) {
 
     public TransferDeed {
         Objects.requireNonNull(horseId, "horseId");
         Objects.requireNonNull(horseName, "horseName");
         Objects.requireNonNull(issuedBy, "issuedBy");
+        Objects.requireNonNull(geneticCode, "geneticCode");
+        Objects.requireNonNull(epigenomeCode, "epigenomeCode");
         breed = breed == null ? Optional.empty() : breed;
         bredBy = bredBy == null ? Optional.empty() : bredBy;
     }
@@ -48,7 +66,13 @@ public record TransferDeed(
      * Everything but the issuer is copied off the horse's own record.
      */
     public static TransferDeed forHorse(HorseRecord horse, String issuer) {
-        return new TransferDeed(horse.id(), horse.displayName(), horse.breed(), horse.bredBy(), issuer);
+        return new TransferDeed(horse.id(), horse.displayName(), horse.breed(), horse.bredBy(),
+                issuer, horse.geneticCode(), horse.epigenomeCode());
+    }
+
+    /** The coat the paper draws: the horse as it was when the paper was signed. */
+    public com.example.horsegenetics.common.genetics.Genome genome() {
+        return com.example.horsegenetics.common.genetics.Genome.parse(geneticCode, epigenomeCode);
     }
 
     /** Does this deed name {@code horse}? The one question redemption asks. */

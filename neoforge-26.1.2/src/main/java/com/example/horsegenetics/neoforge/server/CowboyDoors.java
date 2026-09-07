@@ -51,6 +51,46 @@ public final class CowboyDoors {
         setDoors(level, home, BARN_RADIUS, BARN_BELOW, BARN_ABOVE, open, opener);
     }
 
+    /**
+     * Is the barn actually shut? Every door near home closed, and at least one
+     * door there to be closed.
+     *
+     * <p>This is what makes {@code CowboyRoutine.sheltered} mean something. Being
+     * <i>inside</i> a building is only shelter if the building is shut: an open
+     * doorway is not a wall, and a man standing in his own barn at noon with all
+     * four doors folded back is as exposed as a man standing in the field. Asking
+     * the world rather than trusting a flag also survives the cases a flag cannot
+     * see - a player who opened them, a creeper who removed them, a reload that
+     * lost the flag.
+     *
+     * <p>The "at least one" clause matters: a barn whose doors have been broken
+     * off would otherwise pass vacuously, and report the safest possible state at
+     * exactly the moment it is the least true.
+     */
+    public static boolean barnIsShut(ServerLevel level, BlockPos home) {
+        boolean sawADoor = false;
+        BlockPos.MutableBlockPos cursor = new BlockPos.MutableBlockPos();
+        for (int dx = -BARN_RADIUS; dx <= BARN_RADIUS; dx++) {
+            for (int dy = -BARN_BELOW; dy <= BARN_ABOVE; dy++) {
+                for (int dz = -BARN_RADIUS; dz <= BARN_RADIUS; dz++) {
+                    cursor.set(home.getX() + dx, home.getY() + dy, home.getZ() + dz);
+                    BlockState state = level.getBlockState(cursor);
+                    if (!(state.getBlock() instanceof DoorBlock door)) {
+                        continue;
+                    }
+                    if (state.getValue(DoorBlock.HALF) != DoubleBlockHalf.LOWER) {
+                        continue;
+                    }
+                    sawADoor = true;
+                    if (door.isOpen(state)) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return sawADoor;
+    }
+
     private static void setDoors(ServerLevel level, BlockPos centre, int radius,
                                  int below, int above, boolean open, Entity opener) {
         BlockPos.MutableBlockPos cursor = new BlockPos.MutableBlockPos();

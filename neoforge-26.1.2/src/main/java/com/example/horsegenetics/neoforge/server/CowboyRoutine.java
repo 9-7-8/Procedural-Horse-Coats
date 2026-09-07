@@ -37,17 +37,35 @@ import java.util.function.Predicate;
  * findable at runtime, which beats trying to recover the structure's bounding
  * box after the fact.
  *
- * <h2>The night: shelter, or run</h2>
- * At dusk everything goes to the barn and the doors shut behind them. He is
- * {@link #sheltered} once he is inside the barn box with nothing hostile in
- * there with him - and while he is sheltered, a zombie on the other side of the
- * wall is not his problem.
+ * <h2>Running, at any hour</h2>
+ * If he is not {@link #sheltered} and something hostile is within
+ * {@link #DANGER_RADIUS}, he runs - and that outranks both the patrol and the
+ * ride home. He is {@link #sheltered} when he is <b>in the building with the
+ * doors shut</b> and nothing hostile in there with him, and while he is
+ * sheltered a zombie on the other side of the wall is not his problem.
  *
- * <p>If he is <b>not</b> sheltered and something hostile is within
- * {@link #DANGER_RADIUS}, he runs. One rule covers both of the ways that
- * happens - he never made it inside, or the barn got breached - because in
- * either case what is true is the same thing: he is out in the open with a
- * monster near him, so he rides hard and does not stop until morning.
+ * <p><b>Not a night rule</b>, though it used to be, and being one was half the
+ * bug: a zombie that walked out of a cave mouth at noon, a skeleton in the shade
+ * of the barn, a husk in the open - all of them stood next to a man who ignored
+ * them, because the check sat inside an {@code isDarkOutside()} branch. What
+ * makes him run is a monster near him and no walls around him, and neither of
+ * those has anything to do with the clock.
+ *
+ * <p>The other half of the bug was {@link #sheltered} itself, which used to be
+ * "inside a box around home". He <b>parks</b> at home - {@code ARRIVED} is three
+ * blocks and his idle amble is measured from the barn - so for most of every day
+ * he was inside that box with the doors standing wide open, counted as safe, and
+ * ignored anything that walked up to him. Two things fixed it: shelter now needs
+ * the doors <i>shut</i> ({@link CowboyDoors#barnIsShut}), because an open doorway
+ * is not a wall; and it uses {@link #SHELTER_RADIUS} rather than the looser
+ * {@link #INSIDE_RADIUS} the herd check wants, because "near the barn" and "in
+ * the barn" are not the same claim and only one of them stops a zombie.
+ *
+ * <h2>The night: shelter</h2>
+ * At dusk everything goes to the barn and the doors shut behind them. Nothing
+ * else about the night is special - if something is after him out there, the
+ * rule above already has him running, and it had him running an hour before
+ * sunset too.
  */
 public final class CowboyRoutine {
 
@@ -80,6 +98,20 @@ public final class CowboyRoutine {
      */
     private static final int INSIDE_RADIUS = 5;
 
+    /**
+     * Half-span of "in the building" for the <b>shelter</b> test, which is a
+     * stricter question than the one {@link #INSIDE_RADIUS} answers.
+     *
+     * <p>That one asks "is this horse home enough to shut the doors on?", and
+     * wants to be generous - a horse in a far corner should not hold the barn
+     * open. This one asks "is this man behind a wall?", and being generous there
+     * is how he ends up ignoring a zombie stood next to him. The barn's interior
+     * is only about two blocks either side of centre along its short axis, and
+     * he parks within {@link #ARRIVED} of home, so three is the tightest box that
+     * still reliably contains a parked cowboy.
+     */
+    private static final int SHELTER_RADIUS = 3;
+
     /** How far above and below home "in the building" reaches. */
     private static final int INSIDE_HEIGHT = 3;
 
@@ -97,7 +129,7 @@ public final class CowboyRoutine {
         SHELTER,
         /** Working his patch by day. */
         PATROL,
-        /** Out in the dark with something after him. */
+        /** Out in the open with something after him. */
         FLEE
     }
 
@@ -125,13 +157,16 @@ public final class CowboyRoutine {
     public static Plan plan(Cowboy cowboy, ServerLevel level, BlockPos from) {
         BlockPos barn = cowboy.home().orElse(from);
 
-        if (level.isDarkOutside()) {
-            if (!sheltered(level, barn, from)) {
-                Monster threat = nearestMonster(level, from, DANGER_RADIUS);
-                if (threat != null) {
-                    return new Plan(Duty.FLEE, Optional.empty(), threat);
-                }
+        // Out in the open with something hostile near him: first question asked,
+        // whatever the hour. See the class comment.
+        if (!sheltered(level, barn, from)) {
+            Monster threat = nearestMonster(level, from, DANGER_RADIUS);
+            if (threat != null) {
+                return new Plan(Duty.FLEE, Optional.empty(), threat);
             }
+        }
+
+        if (level.isDarkOutside()) {
             return from.closerThan(barn, ARRIVED)
                     ? Plan.arrived(Duty.SHELTER)
                     : Plan.going(Duty.SHELTER, barn);
@@ -146,27 +181,32 @@ public final class CowboyRoutine {
             return Plan.arrived(Duty.PATROL); // inside his patch: free to wander
         }
 
-        BlockPos centre = level.getPoiManager()
-                .findClosest(MEETING, barn, BELL_SEARCH, PoiManager.Occupancy.ANY)
-                .orElse(barn);
+        BlockPos centre = villageCentre(level, barn).orElse(barn);
         if (from.closerThan(centre, CENTRE_STANDOFF)) {
             return Plan.arrived(Duty.PATROL);
         }
         return Plan.going(Duty.PATROL, standoffPoint(from, centre));
     }
 
-    /** Inside the barn, with nothing hostile inside it with him. */
+    /** In the barn, doors shut, nothing hostile in there with him. */
     public static boolean sheltered(ServerLevel level, BlockPos barn, BlockPos from) {
-        if (!insideBarn(barn, from)) {
+        if (!within(barn, from, SHELTER_RADIUS)) {
             return false;
         }
-        AABB box = barnBox(barn);
-        return level.getEntitiesOfClass(Monster.class, box).isEmpty();
+        if (!CowboyDoors.barnIsShut(level, barn)) {
+            return false; // an open doorway is not a wall - see the class comment
+        }
+        return level.getEntitiesOfClass(Monster.class, barnBox(barn)).isEmpty();
     }
 
+    /** Home enough to count toward "the whole string is in". */
     public static boolean insideBarn(BlockPos barn, BlockPos pos) {
-        return Math.abs(pos.getX() - barn.getX()) <= INSIDE_RADIUS
-                && Math.abs(pos.getZ() - barn.getZ()) <= INSIDE_RADIUS
+        return within(barn, pos, INSIDE_RADIUS);
+    }
+
+    private static boolean within(BlockPos barn, BlockPos pos, int radius) {
+        return Math.abs(pos.getX() - barn.getX()) <= radius
+                && Math.abs(pos.getZ() - barn.getZ()) <= radius
                 && Math.abs(pos.getY() - barn.getY()) <= INSIDE_HEIGHT;
     }
 
@@ -188,6 +228,15 @@ public final class CowboyRoutine {
             }
         }
         return nearest;
+    }
+
+    /**
+     * The village's bell, which is the origin of his whole map - the patrol
+     * measures its standoff from it, and the founding code takes the bearing
+     * from it to the barn as "which way is out of town".
+     */
+    public static Optional<BlockPos> villageCentre(ServerLevel level, BlockPos barn) {
+        return level.getPoiManager().findClosest(MEETING, barn, BELL_SEARCH, PoiManager.Occupancy.ANY);
     }
 
     /**

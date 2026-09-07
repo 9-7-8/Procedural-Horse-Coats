@@ -10,6 +10,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
+import net.neoforged.neoforge.client.event.RegisterSpecialModelRendererEvent;
 
 @EventBusSubscriber(value = Dist.CLIENT)
 public final class ClientSetup {
@@ -36,6 +37,18 @@ public final class ClientSetup {
         event.registerEntityRenderer(
                 com.example.horsegenetics.neoforge.entity.ModEntities.COWBOY.get(), CowboyRenderer::new);
         event.registerBlockEntityRenderer(ModBlockEntities.HAY_PORTAL.get(), ctx -> new HayPortalRenderer());
+    }
+
+    /**
+     * The signed transfer paper draws as a small model of the horse it names
+     * rather than as a picture of a paper - see {@link TransferDeedRenderer}.
+     * An item model can only reach a special renderer by id, so the id has to be
+     * registered here before {@code items/signed_transfer_paper.json} can name
+     * it.
+     */
+    @SubscribeEvent
+    static void registerSpecialModelRenderers(RegisterSpecialModelRendererEvent event) {
+        event.register(TransferDeedRenderer.ID, TransferDeedRenderer.Unbaked.MAP_CODEC);
     }
 
     @SubscribeEvent

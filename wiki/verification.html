@@ -32,32 +32,77 @@
     </p>
 </div>
 
-<h2 id="villagers">&sect;0-AC &mdash; The cowboy, the horseman &amp; transfer papers (2026-09-07, NOT looked at)</h2>
+<h2 id="villagers">&sect;0-AC &mdash; The cowboy, the horseman &amp; transfer papers (2026-09-07, partly looked at)</h2>
 
 <p>
-    A whole gameplay subsystem, none of it seen in a world. It compiles, registers, and
-    boots a dedicated server clean &mdash; and the log line
-    <code>Cowboy barn added to minecraft:village/plains/terminators (1 of 5 draws)</code>
-    proves only that the pool append ran, not that a barn ever generates. Full design:
+    A whole gameplay subsystem, most of it still unseen. The barn <em>does</em> generate
+    and the cowboy <em>does</em> found &mdash; that much the owner has now watched
+    happen &mdash; and five things were wrong when he did: the barn was sunk a block, he
+    had no face, he stood on his horse rather than sat, his horses spawned inside the
+    walls, and they cost ten to forty emeralds. All five have been changed and
+    <strong>none of the fixes has been looked at</strong>. Full design:
     <a href="villagers.html">Villagers &amp; transfer papers</a>.
 </p>
 
-<h3 id="villagers-testworld">Start here: the test world now lands you in a village</h3>
+<h3 id="villagers-fixes">Start here: the fixes from the first playthrough</h3>
+
+<ul>
+    <li><strong>Is the barn sitting on the ground with steps up to the doors?</strong>
+        The connector moved from the piece's <code>y=1</code> to its <code>y=0</code>,
+        which raises the whole building one block relative to the street. Expect the
+        stair skirt at both door ends to be a visible step you walk <em>up</em>. If it
+        is now a block too <em>high</em> &mdash; a gap under the foundation &mdash; the
+        move overshot and it belongs back at <code>y=1</code>.</li>
+    <li><strong>Has he got a face?</strong> The base skin was
+        <code>villager/type/plains.png</code>, which is an overlay with a hole where the
+        head goes, not a skin; it is now <code>villager/villager.png</code> with the
+        plains robe as a layer over it. He should look like an ordinary plains villager
+        wearing the horseman's hat &mdash; nose, eyes, brow, brown robe.</li>
+    <li><strong>Does he read as riding rather than standing?</strong> He is sunk half a
+        block into the saddle. A villager has no seated pose, so this is a bandaid: the
+        thing to judge is whether it looks worse than standing on top did, and whether
+        half a block is the right amount (<code>Cowboy.SADDLE_SINK</code>). His hitbox
+        moved with him, so check he is still clickable where he appears.</li>
+    <li><strong>Does the whole outfit start outside, in the open?</strong> He used to
+        found where the structure put him, in the middle of the barn, and his horses
+        spawned round him half-inside the walls. He now walks out to a paddock 12&ndash;24
+        blocks away on the far side of the barn from the village bell, and the herd is
+        made there. Nothing should be clipped into a wall, a fence or a house, and the
+        barn should still be his <em>home</em> &mdash; watch him ride back to it at
+        dusk.</li>
+    <li><strong>Does a signed paper draw as the horse it names?</strong> New, and the
+        largest untested thing here: the item is a small 3D horse in that horse's coat,
+        in the merchant window and everywhere else. Check the merchant screen shows six
+        <em>different</em> horses, that the one you buy is the one you saw, and that
+        the horse in the slot is the horse you find in the field. Then judge the
+        framing - it is fitted by three constants in
+        <code>TransferDeedRenderer</code> and a display block in
+        <code>models/item/signed_transfer_paper.json</code>, all of them arithmetic
+        rather than observation. Clipped by the slot edge, sunk into the bottom of it,
+        too small to read, or facing the wrong way are all one-line fixes.</li>
+    <li><strong>Do his horses cost 1&ndash;3 emeralds?</strong> Every horse, since no
+        breed names a range yet. The price should be <em>stable</em> &mdash; close the
+        merchant screen and open it again and each paper must cost the same as before;
+        it is rolled from the horse's UUID precisely so it cannot drift.</li>
+</ul>
+
+<h3 id="villagers-testworld">The test world tells you where a village is</h3>
 
 <p>
-    The &ldquo;Spawn Test Horse World&rdquo; button teleports you into the middle of the
-    nearest plains village on login and moves the world spawn there, so testing these two
-    villagers no longer starts with a hike. Two things to confirm the first time:
+    The &ldquo;Spawn Test Horse World&rdquo; button no longer teleports you. On login it
+    runs the same search <code>/locate structure minecraft:village_plains</code> does and
+    prints the coordinates plus a clickable <code>/tp</code>. Two things to confirm:
 </p>
 
 <ul>
     <li><strong>Did it work, and how long did it take?</strong> You should get a grey
-        <code>[Test world]</code> line naming the village's coordinates. It is a
-        synchronous structure search over 100 chunks, so a noticeable pause on world
-        creation is expected; a <em>long</em> one (or a red &ldquo;no plains village
-        within 1600 blocks&rdquo;) means the search radius wants raising, or that seed
-        genuinely has no plains nearby - make a second world before concluding
-        anything.</li>
+        <code>[Test world]</code> line naming the village's coordinates, with the
+        <code>/tp</code> in aqua &mdash; clicking it should put the command in the chat
+        box, not run it. It is a synchronous structure search over 100 chunks, so a
+        noticeable pause on world creation is expected; a <em>long</em> one (or a red
+        &ldquo;no plains village within 1600 blocks&rdquo;) means the search radius wants
+        raising, or that seed genuinely has no plains nearby - make a second world before
+        concluding anything.</li>
     <li><strong>Watch for a yellow <code>[Cowboy]</code> line.</strong> In a dev build he
         announces himself when he founds, which happens the moment his chunk starts
         ticking - usually before you can see the barn. <strong>No line means no cowboy in
@@ -78,11 +123,10 @@
     <li><strong>Is it at the edge?</strong> That is the whole claim of the placement. If
         it keeps landing in the middle of town, the terminator theory is wrong and the
         section needs rethinking, not tuning.</li>
-    <li><strong>Is it level with the street, and not floating or buried?</strong> The
-        jigsaw connector is at <code>y=1</code> on the assumption that a plains street's
-        surface is its own <code>y=0</code>. If the barn sits one block high or one low,
-        that assumption is off by one and the fix is in
-        <code>tools/barn/bake-barn.py</code>.</li>
+    <li><strong>Is it sitting on the street rather than in it?</strong> It was buried
+        a block on the first playthrough; the connector moved to the piece's
+        <code>y=0</code> to raise it. See the fixes list above &mdash; the fix is one
+        constant in <code>tools/barn/bake-barn.py</code> either way.</li>
     <li><strong>Two barns in one village</strong> is expected occasionally. Only one
         should have a cowboy. If both do, the lowest-UUID tie-break in
         <code>CowboyHandler</code> is not firing.</li>
@@ -97,6 +141,16 @@
         all named, all with a real breed on the info panel, all with
         <strong>Bred by &lt;his name&gt;</strong>. If any reads <em>Feral Mixed</em>, the
         breed pick fell through.</li>
+    <li><strong>Is about half the string one breed?</strong> New: he has a
+        <code>preferredBreed</code>, his own mount is one, and roughly half his stock
+        should be it. All-of-one or none-of-one means
+        <code>CowboyHandler.nextBreedFor</code> is not counting what it thinks it is.</li>
+    <li><strong>Does he restock?</strong> Kill or buy a couple of his horses, then leave
+        and come back. He looks over his string about once a minute and breeds
+        <em>one</em> replacement per look, up to the number he started with. Over a
+        longer stay a full string should also quietly turn over &mdash; but never while
+        you are within 48 blocks, so if you ever <em>watch</em> a horse vanish, the
+        privacy check in <code>retireOne</code> is not firing.</li>
     <li><strong>Do the horses follow the one he is riding?</strong> They should trail it
         at a loose distance and graze, not stack on it. The mount is the herd lead, so
         the horse browser should show them as one herd.</li>
@@ -109,18 +163,31 @@
 <h3 id="villagers-night">The night &mdash; the most likely thing to be broken</h3>
 
 <ul>
+    <li><strong>Does he run from a zombie at noon?</strong> The reported failure, twice,
+        and the second report was against a build that already had the first fix &mdash;
+        so <strong>watch the chat, not the horse</strong>. A dev build now prints a grey
+        <code>[Cowboy] &lt;name&gt;: PATROL / SHELTER</code> line every time he changes
+        what he is doing, and a red <code>FLEE</code> one when he bolts. A stream of
+        those means the goal is alive and the routine's rules are what is wrong;
+        <strong>total silence means the goal never runs at all</strong>, which is a
+        different bug and would also explain the barn and the doors. Spawn a zombie 10
+        blocks from him in the open at midday and report which of the two you see
+        (<a href="known-gaps.html#gap-59">gap 59</a>).</li>
     <li><strong>At dusk, do all four double doors open, and does the herd go in?</strong>
         Then do all four shut behind them? This is a lot of pathfinding through a
         two-block gap and it is the part most likely to half-work. <strong>Partial
         success is acceptable</strong> and worth recording precisely: does <em>he</em>
-        get in? Do most of them? Does one stand outside all night?</li>
+        get in? Do most of them? Does one stand outside all night? <strong>The doors
+        must shut either way</strong> &mdash; there is now a 30-second deadline on
+        waiting for stragglers, so a barn still standing open five minutes after he
+        parked in it means the deadline is not being reached at all.</li>
     <li><strong>Do the doors open again at dawn?</strong> And can he get out?</li>
     <li><strong>Shut the doors on him by hand at noon.</strong> He should open them again
         within a second. If he does not, he can be sealed in permanently.</li>
     <li><strong>Put a zombie in the barn with him.</strong> He should bolt &mdash;
-        visibly faster than he ever moves otherwise &mdash; and keep running until
-        sunrise, then come home no matter how far he got. A monster <em>outside</em> the
-        shut barn should not spook him.</li>
+        visibly faster than he ever moves otherwise &mdash; and keep running until it
+        is out of range, then come home no matter how far he got. A monster
+        <em>outside</em> the shut barn should not spook him.</li>
     <li><strong>Do village doors stay shut?</strong> He is supposed to have keys to his
         own barn and nothing else. If riding past a house opens its door, the door code
         is not staying in its box.</li>
@@ -173,6 +240,9 @@
     <code>textures/entity/villager/profession/horseman.png</code> (the owner's recolour
     of the farmer hat) over a plains-villager body &mdash; check the cowboy reads as the
     same trade as the horseman, since that shared file is the only thing making it so.
+    The cowboy assembles that himself in <code>CowboyOverlayLayer</code> rather than
+    going through vanilla's profession layer, so the two can in principle diverge:
+    stand them next to each other once and confirm they have not.
 </p>
 
 <h2 id="kit-boosters">&sect;0-AB &mdash; KIT gains the boosters (2026-09-07, NOT looked at)</h2>

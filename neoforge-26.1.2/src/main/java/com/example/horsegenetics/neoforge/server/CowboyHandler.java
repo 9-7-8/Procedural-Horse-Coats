@@ -24,6 +24,7 @@ import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.goal.WrappedGoal;
 import net.minecraft.world.entity.animal.equine.Horse;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -32,6 +33,7 @@ import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
 import org.jspecify.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -45,6 +47,9 @@ import java.util.UUID;
  * it but its id - a structure template can only place an entity, not roll one.
  * So his name, his home, his mount and his herd are all made here, on his first
  * server tick.
+ *
+ * <p>He is also <b>restocked</b> from here, on the same tick handler and for
+ * the same reason - see {@link #restock}.
  *
  * <p>The tick and not {@link EntityJoinLevelEvent} for exactly the reason
  * {@link HorseFoundingTickHandler} documents at length: founding spawns horses,
@@ -69,8 +74,49 @@ public final class CowboyHandler {
     /** Attempts to find a standable spot for one new horse before giving up. */
     private static final int PLACEMENT_TRIES = 24;
 
-    /** How far from the barn centre a herd horse may be placed. */
+    /** How far from the cowboy a herd horse may be placed. */
     private static final int PLACEMENT_RADIUS = 5;
+
+    /** Nearest and furthest the founding paddock may be from the barn. */
+    private static final int PADDOCK_MIN = 12;
+    private static final int PADDOCK_MAX = 24;
+
+    /** How wide a fan of directions out of town the paddock search samples, in radians. */
+    private static final double PADDOCK_ARC = Math.PI;
+
+    /** Attempts to find an open paddock before giving up and founding at the barn. */
+    private static final int PADDOCK_TRIES = 40;
+
+    /** Ticks between two looks over his string - about a minute. */
+    private static final int RESTOCK_INTERVAL = 1200;
+
+    /**
+     * Spread on {@link #RESTOCK_INTERVAL}, so two cowboys loaded in the same
+     * tick do not go on restocking on the same tick for the rest of the world's
+     * life. Costs nothing and keeps the work smeared out.
+     */
+    private static final int RESTOCK_JITTER = 600;
+
+    /** Chance, per look, that one horse is retired to make room for a new one. */
+    private static final float ROTATE_CHANCE = 0.15F;
+
+    /**
+     * A horse with a player this close is never quietly removed.
+     *
+     * <p>The rotation is meant to be something you notice by coming back to a
+     * different string, not something you watch happen. A horse vanishing in
+     * front of you reads as a bug however well it is documented.
+     */
+    private static final int ROTATE_PRIVACY = 48;
+
+    /**
+     * At most one new horse per look.
+     *
+     * <p>A cowboy who has just sold his whole string gets it back over several
+     * minutes rather than in one tick - which paces better in play, and keeps
+     * the spawn work per tick where founding already proved it is safe.
+     */
+    private static final int RESTOCK_PER_LOOK = 1;
 
     private static final PersonNameGenerator NAMES = PersonNameGenerator.cowboys();
 
@@ -86,10 +132,17 @@ public final class CowboyHandler {
         if (!(event.getEntity() instanceof Cowboy cowboy)) {
             return;
         }
-        if (!(cowboy.level() instanceof ServerLevel level) || cowboy.isFounded()) {
+        if (!(cowboy.level() instanceof ServerLevel level)) {
             return;
         }
-        found(cowboy, level);
+        if (!cowboy.isFounded()) {
+            found(cowboy, level);
+            return;
+        }
+        if (cowboy.tickRestockClock()) {
+            cowboy.setRestockCooldown(RESTOCK_INTERVAL + cowboy.getRandom().nextInt(RESTOCK_JITTER));
+            restock(cowboy, level);
+        }
     }
 
     private static void found(Cowboy cowboy, ServerLevel level) {
@@ -101,18 +154,39 @@ public final class CowboyHandler {
         Rng rng = new NeoRng(cowboy.getRandom());
         cowboy.setCustomName(Component.literal(NAMES.generate(rng)));
         cowboy.setCustomNameVisible(true);
-        cowboy.setHome(cowboy.blockPosition());
+
+        // Home is where the structure put him - the middle of the barn - and it
+        // stays that whatever happens next: it is the place he rides back to at
+        // dusk and the box the door code works on.
+        BlockPos barn = cowboy.blockPosition();
+        cowboy.setHome(barn);
         cowboy.markFounded();
 
+        // But he does not found *in* it. The barn interior is eleven blocks by
+        // five with walls on every side, and a horse is nearly a block and a half
+        // wide: placing a string of them in there put half of them in the walls.
+        // He walks out to open ground first and the herd is made around him.
+        BlockPos paddock = findPaddock(level, barn);
+        if (paddock != null) {
+            cowboy.snapTo(paddock, cowboy.getYRot(), 0.0F);
+        }
+
+        // The breed he is known for, settled before the first horse is made so
+        // that horse can be one - a breeder rides his own stock.
+        Breed favourite = pickBreed(cowboy, level);
+        cowboy.setPreferredBreed(favourite.id());
+
+        int herdSize = Cowboy.MIN_HERD + cowboy.getRandom().nextInt(Cowboy.MAX_HERD - Cowboy.MIN_HERD + 1);
+        cowboy.setStockTarget(herdSize);
+
         // His own horse first: herd slot 0 is the one he rides and never sells.
-        Horse mount = breedHorse(cowboy, level, rng);
+        Horse mount = breedHorse(cowboy, level, rng, favourite);
         if (mount != null) {
             cowboy.startRiding(mount, true, false);
         }
 
-        int herdSize = Cowboy.MIN_HERD + cowboy.getRandom().nextInt(Cowboy.MAX_HERD - Cowboy.MIN_HERD + 1);
         for (int i = 0; i < herdSize; i++) {
-            breedHorse(cowboy, level, rng);
+            breedHorse(cowboy, level, rng, nextBreedFor(cowboy, level));
         }
 
         HorseGenetics.LOGGER.info("{} set up at {} with {} horses",
@@ -182,7 +256,7 @@ public final class CowboyHandler {
      * after the horse has changed hands twice the family tree still says who
      * bred it, and transferring ownership never touches it.
      */
-    private static @Nullable Horse breedHorse(Cowboy cowboy, ServerLevel level, Rng rng) {
+    private static @Nullable Horse breedHorse(Cowboy cowboy, ServerLevel level, Rng rng, Breed breed) {
         BlockPos spot = findPlacement(cowboy, level);
         if (spot == null) {
             return null;
@@ -195,7 +269,6 @@ public final class CowboyHandler {
         horse.setAge(0);                 // an adult; he does not sell foals
         horse.setPersistenceRequired();  // his stock does not despawn
 
-        Breed breed = pickBreed(cowboy, level);
         Genome genome = BreedFounder.roll(breed, rng);
         NameParts name = HorseRecords.newNameParts(rng);
         HorseRecord record = HorseRecord
@@ -235,6 +308,9 @@ public final class CowboyHandler {
      * weighted - so most of his string is workaday and the rare one is worth
      * the ride out. Never {@link Breeds#FERAL_MIXED}: a horse of unrecorded
      * ancestry is precisely what a breeder does not have.
+     *
+     * <p>This is the <b>random half</b> of his string. Which half a given horse
+     * falls in is {@link #nextBreedFor}'s call.
      */
     private static Breed pickBreed(Cowboy cowboy, ServerLevel level) {
         Breed breed = HerdManager.pickHerdBreed(
@@ -262,7 +338,54 @@ public final class CowboyHandler {
         return all.get(all.size() - 1);
     }
 
-    /** A block near the barn with solid ground under it and room to stand. */
+    /**
+     * An open patch of ground for the outfit to start on: near the barn, out of
+     * it, and on the far side of it from the village.
+     *
+     * <p>The bearing is taken from the village bell to the barn, and candidates
+     * are sampled in a {@link #PADDOCK_ARC} fan around it - so "out of town" is
+     * literal, and he sets up on the grass past the last house rather than in
+     * somebody's turnip field. A village with no findable bell falls back to a
+     * random bearing, which is the same answer with less justification.
+     *
+     * <p>Each candidate is dropped onto the surface heightmap before it is tested,
+     * so rolling ground gives a spot on the grass rather than one buried in the
+     * hill or hanging over it.
+     */
+    private static @Nullable BlockPos findPaddock(ServerLevel level, BlockPos barn) {
+        double outward = outwardHeading(level, barn);
+        for (int attempt = 0; attempt < PADDOCK_TRIES; attempt++) {
+            double angle = outward + (level.getRandom().nextDouble() - 0.5) * PADDOCK_ARC;
+            int distance = PADDOCK_MIN + level.getRandom().nextInt(PADDOCK_MAX - PADDOCK_MIN + 1);
+            BlockPos ground = level.getHeightmapPos(
+                    Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                    barn.offset((int) Math.round(Math.cos(angle) * distance),
+                            0,
+                            (int) Math.round(Math.sin(angle) * distance)));
+            if (CowboyRoutine.insideBarn(barn, ground)) {
+                continue;
+            }
+            if (roomForAHorse(level, ground)) {
+                return ground;
+            }
+        }
+        return null;
+    }
+
+    /** Which way is out of town: the bearing from the village bell to the barn. */
+    private static double outwardHeading(ServerLevel level, BlockPos barn) {
+        Optional<BlockPos> centre = CowboyRoutine.villageCentre(level, barn);
+        if (centre.isPresent()) {
+            double dx = barn.getX() - centre.get().getX();
+            double dz = barn.getZ() - centre.get().getZ();
+            if (dx != 0.0 || dz != 0.0) {
+                return Math.atan2(dz, dx);
+            }
+        }
+        return level.getRandom().nextDouble() * Math.PI * 2.0;
+    }
+
+    /** A block near the cowboy with solid ground under it and room for a horse. */
     private static @Nullable BlockPos findPlacement(Cowboy cowboy, ServerLevel level) {
         BlockPos origin = cowboy.blockPosition();
         for (int attempt = 0; attempt < PLACEMENT_TRIES; attempt++) {
@@ -270,17 +393,176 @@ public final class CowboyHandler {
                     level.getRandom().nextInt(PLACEMENT_RADIUS * 2 + 1) - PLACEMENT_RADIUS,
                     0,
                     level.getRandom().nextInt(PLACEMENT_RADIUS * 2 + 1) - PLACEMENT_RADIUS);
-            if (standable(level, candidate)) {
+            if (roomForAHorse(level, candidate)) {
                 return candidate;
             }
         }
-        return standable(level, origin) ? origin : null;
+        return roomForAHorse(level, origin) ? origin : null;
     }
 
-    private static boolean standable(ServerLevel level, BlockPos pos) {
-        return level.getBlockState(pos.below()).isSolidRender()
-                && level.getBlockState(pos).isAir()
-                && level.getBlockState(pos.above()).isAir();
+    /**
+     * Ground to stand on, and <b>a horse's worth of room above it</b>.
+     *
+     * <p>This used to test one column - air here, air above, solid below - which
+     * is the right test for a villager and the wrong one for a horse. A horse is
+     * about a block and a half wide, so a column that is clear can still put its
+     * shoulders through the wall beside it; that is exactly how a barn full of
+     * horses ended up with half of them embedded in the walls. Asking the level
+     * whether the horse's own spawn box collides with anything is the same
+     * question the game asks, and it cannot disagree with the game.
+     */
+    private static boolean roomForAHorse(ServerLevel level, BlockPos pos) {
+        if (!level.getBlockState(pos.below()).isSolidRender()) {
+            return false;
+        }
+        if (level.getBlockState(pos).liquid()) {
+            return false;
+        }
+        return level.noCollision(EntityType.HORSE.getSpawnAABB(
+                pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5));
+    }
+
+    // ------------------------------------------------------------------
+    // restocking
+    // ------------------------------------------------------------------
+
+    /**
+     * Keep his string worth walking out to see.
+     *
+     * <p>Two things happen here, both slowly and both on the same clock:
+     *
+     * <ul>
+     *   <li><b>Topping up.</b> Horses leave - bought, tamed, eaten by a wolf -
+     *       and without this a cowboy the player has traded with once is a man
+     *       standing next to an empty field for the rest of the world's life.
+     *       He breeds back up to {@link Cowboy#stockTarget()}, the number he had
+     *       the day he set up, one horse per look.</li>
+     *   <li><b>Rotation.</b> A <i>full</i> string turns over now and then: one
+     *       horse retires and the top-up replaces it next look. Without it a
+     *       player who did not like the six horses on offer never has a reason
+     *       to come back, because they would be the same six horses forever.</li>
+     * </ul>
+     *
+     * <p>Only ever the horses he can still sell. His mount is not stock, a horse
+     * somebody has already bought the papers for is spoken for, and one that has
+     * been tamed has left his hands entirely - {@link #forgetTamed} drops those
+     * from the herd so they stop counting against the target they no longer fill.
+     */
+    private static void restock(Cowboy cowboy, ServerLevel level) {
+        if (cowboy.stockTarget() <= 0) {
+            return; // never founded a string, or founded before there was a target
+        }
+        forgetTamed(cowboy, level);
+
+        List<Horse> stock = sellableStock(cowboy, level);
+        if (stock.size() >= cowboy.stockTarget()
+                && !stock.isEmpty()
+                && level.getRandom().nextFloat() < ROTATE_CHANCE) {
+            retireOne(cowboy, level, stock);
+            stock = sellableStock(cowboy, level);
+        }
+
+        Rng rng = new NeoRng(cowboy.getRandom());
+        for (int bred = 0; bred < RESTOCK_PER_LOOK && stock.size() < cowboy.stockTarget(); bred++) {
+            Horse horse = breedHorse(cowboy, level, rng, nextBreedFor(cowboy, level));
+            if (horse == null) {
+                break; // nowhere to stand it - try again next look
+            }
+            stock = sellableStock(cowboy, level);
+        }
+    }
+
+    /**
+     * The horses he could write a paper for right now: alive, loaded, untamed,
+     * not his mount, not already sold.
+     *
+     * <p>The same test {@code Cowboy.updateTrades} applies when it builds the
+     * offer list, and deliberately so - "how many has he got?" and "how many can
+     * you buy?" have to be the same number, or he restocks to fill a shelf the
+     * merchant screen cannot see.
+     *
+     * <p><b>Loaded only.</b> An unloaded horse is indistinguishable from a dead
+     * one through {@code getEntity}, so it does not count - which is safe in the
+     * direction that matters, because this only ever runs on a cowboy whose own
+     * chunk is ticking, and his string is by construction standing around him.
+     */
+    private static List<Horse> sellableStock(Cowboy cowboy, ServerLevel level) {
+        List<UUID> ids = cowboy.herdIds();
+        List<Horse> out = new ArrayList<>();
+        for (int i = 1; i < ids.size(); i++) { // 0 is his own mount
+            UUID id = ids.get(i);
+            if (cowboy.hasSold(id)) {
+                continue;
+            }
+            if (level.getEntity(id) instanceof Horse horse && horse.isAlive() && !horse.isTamed()) {
+                out.add(horse);
+            }
+        }
+        return out;
+    }
+
+    /**
+     * Drop tamed horses out of the herd for good. A redeemed paper tames the
+     * horse and clears its brand, so it has stopped following him and stopped
+     * being his - leaving the id in the list would only make {@code herd} grow
+     * without bound over a long world.
+     */
+    private static void forgetTamed(Cowboy cowboy, ServerLevel level) {
+        for (UUID id : cowboy.herdIds()) {
+            if (level.getEntity(id) instanceof Horse horse && horse.isTamed()) {
+                cowboy.removeFromHerd(id);
+            }
+        }
+    }
+
+    /**
+     * Retire one horse at random - unless somebody is stood near enough to watch
+     * it happen ({@link #ROTATE_PRIVACY}), in which case nothing happens and the
+     * next look tries again.
+     */
+    private static void retireOne(Cowboy cowboy, ServerLevel level, List<Horse> stock) {
+        Horse horse = stock.get(level.getRandom().nextInt(stock.size()));
+        if (level.getNearestPlayer(horse, ROTATE_PRIVACY) != null) {
+            return;
+        }
+        cowboy.removeFromHerd(horse.getUUID());
+        clearBrand(horse);
+        horse.discard();
+    }
+
+    /**
+     * Which breed the next horse he breeds should be: <b>his own until half the
+     * string is it</b>, and something the country round him produces after that.
+     *
+     * <p>Counted rather than coin-flipped, because a coin flip on a string of
+     * six lands on eight-out-of-eight often enough to be seen, and "the man who
+     * only has Fjords" is a different character from "the Fjord man". Counting
+     * also self-corrects: sell three of his Fjords and the next three he breeds
+     * are Fjords.
+     */
+    private static Breed nextBreedFor(Cowboy cowboy, ServerLevel level) {
+        Optional<String> preferred = cowboy.preferredBreed();
+        if (preferred.isEmpty()) {
+            return pickBreed(cowboy, level);
+        }
+        Breed favourite = Breeds.get(preferred.get());
+        if (favourite == Breeds.FERAL_MIXED) {
+            return pickBreed(cowboy, level);
+        }
+        int wanted = (cowboy.stockTarget() + 1) / 2;
+        int have = 0;
+        for (Horse horse : sellableStock(cowboy, level)) {
+            if (favourite.id().equals(pureBreedOf(horse))) {
+                have++;
+            }
+        }
+        return have < wanted ? favourite : pickBreed(cowboy, level);
+    }
+
+    /** The breed id of a horse of one pure breed, or {@code null} for anything else. */
+    private static @Nullable String pureBreedOf(Horse horse) {
+        BreedLineage lineage = HorseRecords.of(horse).lineage();
+        return lineage.kind() == BreedLineage.Kind.PURE ? lineage.components().get(0) : null;
     }
 
     // ------------------------------------------------------------------

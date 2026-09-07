@@ -1,6 +1,47 @@
 {
-  "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "horsegenetics:item/signed_transfer_paper"
+    "particle": "horsegenetics:item/signed_transfer_paper"
+  },
+  "display": {
+    "gui": {
+      "rotation": [ 8, 100, 0 ],
+      "translation": [ 0, 0, 0 ],
+      "scale": [ 1, 1, 1 ]
+    },
+    "fixed": {
+      "rotation": [ 0, 90, 0 ],
+      "translation": [ 0, 0, 0 ],
+      "scale": [ 1, 1, 1 ]
+    },
+    "ground": {
+      "rotation": [ 0, 0, 0 ],
+      "translation": [ 0, 2, 0 ],
+      "scale": [ 0.5, 0.5, 0.5 ]
+    },
+    "on_shelf": {
+      "rotation": [ 0, 0, 0 ],
+      "translation": [ 0, 8, 0 ],
+      "scale": [ 1.5, 1.5, 1.5 ]
+    },
+    "thirdperson_righthand": {
+      "rotation": [ 0, 90, 0 ],
+      "translation": [ 0, 2, 0 ],
+      "scale": [ 0.55, 0.55, 0.55 ]
+    },
+    "thirdperson_lefthand": {
+      "rotation": [ 0, 90, 0 ],
+      "translation": [ 0, 2, 0 ],
+      "scale": [ 0.55, 0.55, 0.55 ]
+    },
+    "firstperson_righthand": {
+      "rotation": [ 0, 120, 0 ],
+      "translation": [ 0, 2, 0 ],
+      "scale": [ 0.7, 0.7, 0.7 ]
+    },
+    "firstperson_lefthand": {
+      "rotation": [ 0, 120, 0 ],
+      "translation": [ 0, 2, 0 ],
+      "scale": [ 0.7, 0.7, 0.7 ]
+    }
   }
 }
