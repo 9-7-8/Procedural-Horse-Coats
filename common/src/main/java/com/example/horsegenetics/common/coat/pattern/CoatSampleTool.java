@@ -150,6 +150,12 @@ public final class CoatSampleTool {
             {"pangare_dun_bay", "agouti=A/a dun=D/d2 pangare=Pa2/Pa2"},
             {"pangare_and_sooty_bay", "agouti=A/a sooty=S2/S2 pangare=Pa2/Pa2"},
 
+            // rabicano - tail and flank first, and never the head or legs
+            {"rabicano_bay", "agouti=A/a rabicano=Rb/rb"},
+            {"rabicano_strong_bay", "agouti=A/a rabicano=Rb/Rb"},
+            {"rabicano_chestnut", "extension=e/e rabicano=Rb/Rb"},
+            {"rabicano_black", "rabicano=Rb/Rb"},
+
             // dhampir - the carrier is the eyes alone, the homozygote is white
             {"dhampir_trace_bay", "agouti=A/a dhampir=Dhmp/n"},
             {"dhampir", "dhampir=Dhmp/Dhmp"},
@@ -188,10 +194,11 @@ public final class CoatSampleTool {
             1, 4, 6, 2, 8,
             0, 0,
             2,
-            // flaxen x4, sooty x5, pangare x6, dhampir x3
+            // flaxen x4, sooty x5, pangare x6, rabicano x4, dhampir x3
             3, 1, 5, 0,
             0, 0, 0, 2, 0,
             0, 0, 4, 0, 0, 0,
+            2, 1, 6, 3,
             4, 0, 0};
 
     private CoatSampleTool() {}

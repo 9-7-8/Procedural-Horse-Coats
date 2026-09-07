@@ -40,6 +40,7 @@ import com.example.horsegenetics.common.genetics.genes.MstnGene;
 import com.example.horsegenetics.common.genetics.genes.Pdk4Gene;
 import com.example.horsegenetics.common.genetics.genes.PinkHairGene;
 import com.example.horsegenetics.common.genetics.genes.Plod1Gene;
+import com.example.horsegenetics.common.genetics.genes.RabicanoGene;
 import com.example.horsegenetics.common.genetics.genes.Rapgef5Gene;
 import com.example.horsegenetics.common.genetics.genes.RoanGene;
 import com.example.horsegenetics.common.genetics.genes.KitGene;
@@ -173,6 +174,15 @@ public final class Genes {
      */
     public static final NaturalZebraGene NATURAL_ZEBRA = new NaturalZebraGene();
     public static final RoanGene ROAN = new RoanGene();
+    /**
+     * <b>Rabicano</b> - the other white-hair pattern, and nothing like the first
+     * one: it starts at the tail dock and the flank rather than covering the
+     * trunk evenly, and it has a coon tail, which roan never does. Its allele is
+     * dominant and what it <i>shows</i> is a roll that can come out at nothing,
+     * which is the only way to model a trait whose parents are routinely
+     * recorded as solid.
+     */
+    public static final RabicanoGene RABICANO = new RabicanoGene();
     public static final TobianoGene TOBIANO = new TobianoGene();
 
     /**
@@ -304,7 +314,7 @@ public final class Genes {
     private static final List<Gene> BUILTINS = List.of(
             SEX, DIET, EXTENSION, AGOUTI, SHADE, CHAMPAGNE, GREY, MATP,
             MAGIC_ZEBRA, PINK_HAIR, DUN, SILVER, FLAXEN, SOOTY, PANGARE, MUSHROOM, BRINDLE, TIGER_EYE,
-            NATURAL_ZEBRA, ROAN, TOBIANO,
+            NATURAL_ZEBRA, ROAN, RABICANO, TOBIANO,
             LEOPARD, EDNRB, KIT, MITF, PAX3,
             MILK, BODY_SIZE, MAGIC_SPEED, MAGIC_HEALTH, MAGIC_JUMP,
             MANE_COLOR, TAIL_COLOR, PARTICLE, LIGHT, HEALER, SECTORAL_EYES, VERDANT, LUT, CUTIE_MARK,

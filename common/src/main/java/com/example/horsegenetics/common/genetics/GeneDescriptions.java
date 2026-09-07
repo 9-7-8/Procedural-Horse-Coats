@@ -79,6 +79,14 @@ public final class GeneDescriptions {
                             + "black points entirely, and is invisible on a black. A dosage of two "
                             + "variant alleles; near-fixed in some pony and draft breeds and no "
                             + "confirmed mutation anywhere."),
+            Map.entry("horsegenetics.rabicano",
+                    "White ticking that starts at the tail dock and the flank and works forward - "
+                            + "a frosted, banded coon tail, a scatter of white hairs over the rear "
+                            + "barrel and belly, and broken vertical rib bars on the strongest "
+                            + "ones. The allele is dominant but how much shows is a per-horse roll "
+                            + "that can come out at almost nothing, so a horse recorded as solid "
+                            + "can throw a heavily ticked foal. Not classic roan: the tail tells "
+                            + "them apart."),
             Map.entry("horsegenetics.champagne",
                     "A dilution that ignores its own dose - one copy or two give the same result. "
                             + "It keeps most red, cuts black hard and feeds some removed black back "

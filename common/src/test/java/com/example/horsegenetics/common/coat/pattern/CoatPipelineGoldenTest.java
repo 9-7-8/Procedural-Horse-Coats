@@ -83,6 +83,11 @@ class CoatPipelineGoldenTest {
             override("pangare=Pa2/Pa2"),                                 // a black - unchanged
             override("agouti=A/a", "sooty=S2/S2", "pangare=Pa2/Pa2"),    // both halves at once
             override("agouti=A/A", "shade=ShD/ShD", "extension=E/E"),    // seal - the inner limb
+            // rabicano: tail and flank first, and not classic roan
+            override("agouti=A/a", "rabicano=Rb/rb"),
+            override("agouti=A/a", "rabicano=Rb/Rb"),
+            override("extension=e/e", "rabicano=Rb/Rb"),
+            override("agouti=A/a", "roan=Rn/rn", "rabicano=Rb/Rb"),
             override("kit=W22/N"),
             override("champagne=Ch/c"),
             override("agouti=A/a", "champagne=Ch/c"),

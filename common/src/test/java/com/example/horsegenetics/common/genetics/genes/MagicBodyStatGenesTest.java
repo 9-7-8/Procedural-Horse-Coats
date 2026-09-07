@@ -208,11 +208,22 @@ class MagicBodyStatGenesTest {
     @Test
     void theStatIsStableForOneGenome() {
         for (Locus l : LOCI) {
-            String code = Codes.of(l.codeName(), up(l) + "/n");
+            // Stable: the same genome always gives the same stat.
             assertEquals(statWith(l, up(l) + "/n", Epigenome.fromSeed(42L)),
                     statWith(l, up(l) + "/n", Epigenome.fromSeed(42L)), 0.0);
-            assertNotEquals(statWith(l, up(l) + "/n", Epigenome.fromSeed(42L)),
-                    statWith(l, up(l) + "/n", Epigenome.fromSeed(43L)));
+
+            // ...and it varies between horses. Over a set of seeds rather than
+            // between one pair of them: two seeds landing on the same rolled
+            // value is a coincidence, not a bug, and registering any gene
+            // reshuffles which pairs collide (known gap #47). The property is
+            // "this stat is per-horse", and a set is what says that.
+            java.util.Set<Double> seen = new java.util.HashSet<>();
+            for (long seed = 40; seed < 60; seed++) {
+                seen.add(statWith(l, up(l) + "/n", Epigenome.fromSeed(seed)));
+            }
+            assertTrue(seen.size() > 10,
+                    l.gene().key() + ": the stat should vary per horse, saw " + seen.size()
+                            + " values across 20 seeds");
         }
     }
 

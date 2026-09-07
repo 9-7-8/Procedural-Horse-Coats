@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rabicano &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="nav.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow natural">Natural gene <span class="sep">/</span> phase 1</p>
+<h1>Rabicano &mdash; the coon tail</h1>
+<p class="lede">
+    White ticking that starts at the <strong>tail dock</strong> and the
+    <strong>flank</strong> and works forward: a frosted, banded tail, a scatter of
+    white hairs over the rear barrel and belly, and at full strength a set of
+    broken vertical <strong>rib bars</strong>. It is not classic roan and the tail
+    is how you tell.
+</p>
+
+<div class="gene-preview" data-gene="horsegenetics.rabicano"></div>
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd>horsegenetics.rabicano</dd></div>
+    <div><dt>Alleles</dt><dd><span class="allele dom">Rb</span> <span class="allele wild">rb</span></dd></div>
+    <div><dt>Outcomes</dt><dd>wild, <code>rabicano</code>, <code>strong-rabicano</code></dd></div>
+    <div><dt>Shows when</dt><dd><code>Rb/rb</code> or <code>Rb/Rb</code> &mdash; and <strong>how much</strong> is a roll</dd></div>
+    <div><dt>Default allele</dt><dd>rb</dd></div>
+    <div><dt>Priority</dt><dd><code>RabicanoGene.PRIORITY</code> &mdash; beside roan, the other white-hair pattern</dd></div>
+    <div><dt>Founder draws</dt><dd>1 &times; nextFloat()</dd></div>
+    <div><dt>Deterministic</dt><dd><strong>no</strong> when expressed</dd></div>
+    <div><dt>Epi draws</dt><dd>nextLong() seed, then 3 &times; nextFloat &mdash; expression, tail emphasis, side bias</dd></div>
+    <div><dt>Health</dt><dd><strong>none</strong> &mdash; and see below, because every other white pattern here has one</dd></div>
+</dl>
+
+<div class="note">
+    <span class="label">Unplayed</span>
+    <p>
+        Covered by <code>RabicanoGeneTest</code> and the golden file, and eyeballed as
+        side views against a classic roan. Not seen in a game. See
+        <a href="verification.html#rabicano">verification &sect;0-V</a>.
+    </p>
+</div>
+
+<h2 id="model">Inheritance and appearance are two different things</h2>
+
+<div class="note good">
+    <span class="label">This separation is the whole gene</span>
+    <p>
+        Pedigrees behave <em>as if</em> rabicano were a simple autosomal dominant:
+        a visibly rabicano foal usually has a visibly rabicano parent. But
+        <strong>no causal variant has been identified, there is no test</strong>,
+        and the expression varies from a few frosted hairs at the dock to
+        something that reads almost roan &mdash; so a parent can be minimal enough
+        to have been recorded as solid.
+    </p>
+    <p>
+        So the <strong>allele is dominant and inherits like one</strong>, and what
+        it <strong>shows</strong> is a per-horse roll that can come out at
+        practically nothing. A plain-looking horse carrying it can throw a
+        strongly ticked foal, which in a real barn is the commonest thing
+        rabicano does and is impossible to model with a locus whose phenotype is
+        fixed by its genotype.
+    </p>
+</div>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Model</th><th>Status</th></tr></thead>
+<tbody>
+<tr><td>Dominant</td><td>The best working hypothesis, from pedigrees in some families. Unconfirmed molecularly.</td></tr>
+<tr><td>Recessive</td><td>Not supported.</td></tr>
+<tr><td>Codominant</td><td>No evidence of two independently identifiable phenotypes.</td></tr>
+<tr><td>Dosage</td><td>Plausible and undemonstrated &mdash; there are no confirmed <code>RR</code> horses to compare.</td></tr>
+<tr><td>Polygenic / modifier-driven</td><td>Entirely possible. The huge variation may be modifiers, other ticking genes, or more than one mechanism producing rabicano-like white.</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    &ldquo;Dominant-looking inheritance&rdquo; does not prove a one-locus dominant
+    allele, and this page does not claim it does. What the mod ships is a
+    <em>provisional</em> model, chosen because it reproduces the behaviour
+    breeders actually observe.
+</p>
+
+<h3>The homozygote raises the floor</h3>
+
+<p>
+    <code>Rb/Rb</code> shifts the <em>mean</em> upward rather than forcing the
+    maximum, and the two ranges overlap most of the way. A homozygote never comes
+    out entirely plain; a heterozygote often does. That is offered as the
+    game&rsquo;s hypothesis about dosage, not as a fact &mdash; nobody has ever
+    compared confirmed <code>RR</code> and <code>Rr</code> horses, because nobody
+    can identify one.
+</p>
+
+<h2 id="shape">The four layers</h2>
+
+<p>
+    Rabicano is <strong>hair-level density</strong>, not white polygons. It uses
+    the same near-binary dither <a href="gene-roan.html">classic roan</a> does
+    &mdash; a texel is a white hair or a coloured one, and the region weight sets
+    what fraction are white &mdash; over four overlaid fields.
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Layer</th><th>What it draws</th></tr></thead>
+<tbody>
+<tr><td><strong>Tail frosting</strong></td><td>The hallmark. White concentrated at the dock and fading down the hairs, with pale transverse bands through it &mdash; the &ldquo;coon tail&rdquo; or &ldquo;skunk tail&rdquo;. It has its own per-horse emphasis, so some horses are mostly tail and little else.</td></tr>
+<tr><td><strong>Flank ticking</strong></td><td>A soft field centred just ahead of the hip and above the groin, feathering outward. The most diagnostic area after the tail.</td></tr>
+<tr><td><strong>Belly spread</strong></td><td>White along the lower barrel and rear belly, connecting visually to the flank rather than forming an edge of its own.</td></tr>
+<tr><td><strong>Rib bars</strong></td><td>Broken, roughly vertical concentrations on the rear and lower barrel, and only once the expression is high enough for them to be part of something. A second noise field frozen to the bar index decides how much of each one is actually there &mdash; they are <em>broken</em>, not painted.</td></tr>
+</tbody>
+</table>
+</div>
+
+<ul>
+    <li><strong>The two sides are related and not mirrored.</strong> One flank
+        always carries a little more than the other, which is what a real coat
+        pattern does.</li>
+    <li><strong>The head, neck, mane and legs get nothing.</strong> Rabicano makes
+        no face white and no stockings &mdash; those are the white-marking loci,
+        and their absence is one of the things that separates it from
+        <a href="gene-kit.html">sabino</a> and <a href="gene-mitf.html">splash</a>.</li>
+    <li><strong>The topline is nearly spared.</strong> Rabicano reads as
+        flank-originating; a horse whitening evenly across its back is a roan.</li>
+</ul>
+
+<h2 id="not-roan">Not classic roan</h2>
+
+<p>
+    They share &ldquo;white hairs mixed through the coat&rdquo; and nothing else.
+    <code>RabicanoGeneTest</code> asserts the difference against the real roan
+    painter rather than describing it.
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th></th><th><a href="gene-roan.html">Classic roan</a></th><th>Rabicano</th></tr></thead>
+<tbody>
+<tr><td><strong>Distribution</strong></td><td>Broad and even over the whole trunk</td><td>Tail and flank first, radiating forward; the shoulder is last</td></tr>
+<tr><td><strong>Head</strong></td><td>Dark &mdash; the mask is diagnostic</td><td>Untouched</td></tr>
+<tr><td><strong>Lower legs</strong></td><td>Dark below an inverted-V boundary</td><td>Untouched</td></tr>
+<tr><td><strong>Tail</strong></td><td>Base colour, always</td><td><strong>Frosted and banded</strong> &mdash; the single best clue</td></tr>
+<tr><td><strong>Rib bars</strong></td><td>Never</td><td>At higher expression</td></tr>
+<tr><td><strong>Expression</strong></td><td>Varies in density, always present</td><td>Varies from invisible to roan-like</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    A heavily ticked rabicano genuinely can be mistaken for a roan at a distance.
+    The honest label for it is <em>extensive rabicano</em>, not roan &mdash; and
+    the tail settles it.
+</p>
+
+<h2>Health</h2>
+
+<div class="note warn">
+    <span class="label">None &mdash; and this one is worth saying loudly</span>
+    <p>
+        No lethal homozygote, no deafness, no eye or hoof effect, no fertility or
+        neurological association. <code>Rb/Rb</code> is a perfectly ordinary
+        horse and the mod gives the locus no <code>TraitContribution</code> at all
+        &mdash; <code>RabicanoGeneTest</code> asserts a rabicano horse resolves to
+        exactly the same body as a plain one.
+    </p>
+    <p>
+        It matters because <em>every other</em> white pattern here carries
+        something: <a href="gene-ednrb.html">frame</a>&rsquo;s homozygous lethal
+        white, <a href="gene-leopard.html">LP/LP</a>&rsquo;s night blindness,
+        <a href="gene-silver.html">silver</a>&rsquo;s eye defect,
+        <a href="gene-grey.html">grey</a>&rsquo;s melanoma risk, and deafness with
+        extensive <a href="gene-mitf.html">splash</a>. None of that transfers to a
+        horse merely because it has white hairs.
+    </p>
+</div>
+
+<h2>Breeds</h2>
+
+<p>
+    Reported across many breeds and quantified in none &mdash; there is no test,
+    so there are no population frequencies to copy. It is familiar to
+    <strong>Arabian</strong> and <strong>American Quarter Horse</strong> breeders
+    in particular, and reported in Morgans, Thoroughbreds, Standardbreds,
+    warmbloods, Mangalargas and Criollo-type horses. No breed in this mod names
+    the locus, so it comes only from the wild founder table, at a rate that makes
+    it uncommon rather than rare.
+</p>
+
+<h2 id="carrot">Its gene carrot</h2>
+
+<div class="gene-carrot" data-gene="horsegenetics.rabicano"></div>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="gene-roan.html">Classic roan &mdash; the one it is mistaken for</a>
+        <a href="gene-kit.html">KIT (sabino)</a>
+        <a href="gene-leopard.html">Leopard complex (varnish roan)</a>
+        <a href="pipeline.html#whiten">PigmentField.whiten</a>
+    </div>
+    Source: <code>common/genetics/genes/RabicanoGene.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+<script defer src="gene-preview/gene-preview.js"></script>
+<script defer src="gene-carrot/gene-carrot.js"></script>
+</body>
+</html>
