@@ -1,5 +1,6 @@
 package com.example.horsegenetics.common.genetics.genes;
 
+import com.example.horsegenetics.common.Rng;
 import com.example.horsegenetics.common.coat.pattern.CoatRegions;
 import com.example.horsegenetics.common.coat.pattern.PigmentField;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry;
@@ -29,43 +30,56 @@ import java.util.List;
  *   <tr><th>combination</th><th>outcome</th></tr>
  *   <tr><td>{@code d2/d2}</td><td>wild type - no dilution, no markings</td></tr>
  *   <tr><td>{@code d1/d2}, {@code d1/d1}</td><td>{@code primitive-marks} - undiluted, but a dorsal stripe</td></tr>
- *   <tr><td>{@code D/d2}, {@code D/d1}, {@code D/D}</td><td>{@code dun} - diluted body, dorsal stripe <i>and</i> leg bars</td></tr>
+ *   <tr><td>{@code D/d2}, {@code D/d1}, {@code D/D}</td><td>{@code dun} - diluted body, and the full marking set</td></tr>
  * </table>
  *
- * <h2>Which allele draws the stripe</h2>
- * The dorsal stripe belongs to <b>{@code D} and {@code d1} alike</b> - it is
- * the marking half of the locus, and it is the whole of what {@code d1} does.
- * {@code d2} is the only allele that draws nothing, which is why it, and not
- * the old catch-all {@code d}, is this gene's {@linkplain #defaultAllele()
- * baseline}.
+ * <h2>One idea: the dilution is what everything else is made of</h2>
+ * Phase 1 is <b>downward-only</b> - a natural gene may never add pigment back -
+ * so nothing here can literally paint a dark line onto a coat. It does not need
+ * to. A primitive marking is <i>countershading</i>: "a stripe darker than the
+ * body" and "a body lighter than the stripe" are the same picture. So the whole
+ * gene is <b>one dilution and one mask</b>. The mask says, per texel, how much
+ * of the dilution to lerp back off, and <i>every</i> dark thing a dun has is a
+ * region where that number is high:
  *
- * <h2>How an undiluted horse can show a darker stripe</h2>
- * Phase 1 is <b>downward-only</b> - a natural gene may never add pigment back,
- * so {@code d1} cannot literally paint a dark line onto an undiluted coat. It
- * does not need to: a primitive marking is <i>countershading</i>, and "a stripe
- * darker than the body" and "a body lighter than the stripe" are the same
- * picture. So both marked outcomes run the <b>same painter</b> and differ only
- * in their constants - {@code D} takes a real bite out of the body, {@code d1}
- * takes a little red off whatever has red to spare - and in both cases the
- * marking is the region that <i>skips</i> the dilution. That keeps the whole
- * locus inside the restrict-only contract with no special case.
+ * <ul>
+ *   <li>the <b>points</b> - mane, tail, ears, muzzle and the lower half of each
+ *       leg - which a dun keeps at full base colour, and which are why a bay
+ *       dun has black points over a tan body and a grullo black ones over a
+ *       blue-grey one;</li>
+ *   <li>the <b>dorsal stripe</b>, poll to dock and into the tail, on both
+ *       marked outcomes;</li>
+ *   <li>and, on {@code D} only, the accessory markings - <b>leg bars</b>, a
+ *       <b>shoulder bar</b>, and a <b>face mask</b> or <b>cobwebbing</b>.</li>
+ * </ul>
  *
- * <p><b>Body dilution.</b> A mild, roughly hue-keeping lightening. On a black
- * base it must land on the gradient's <b>neutral column</b> (grullo is a
- * mouse-grey, not a warm brown), so the dilution feeds <b>no</b> black back in
- * as red; a red or bay base already carries red and comes out a paler tan.
+ * <p>Both marked outcomes therefore run the <b>same painter</b> and differ only
+ * in their constants and in how much of that list they draw. That keeps the
+ * whole locus inside the restrict-only contract with no special case anywhere.
  *
- * <p><b>Primitive markings.</b> A full-length <b>dorsal stripe</b> from poll to
- * tail ({@link CoatRegions#dorsalStripe}), on both marked outcomes; and faint
- * horizontal <b>leg barring</b> ({@link CoatRegions#legBar}), on {@code dun}
- * only - bars are the marking a real non-dun almost never shows, and a
- * {@code d1} horse's legs are usually the part of it with no red left to take.
+ * <h2>Grullo, and the order the two pigments come off in</h2>
+ * The dilution is {@link PigmentField#diluteNeutral}, not the warm
+ * {@code dilute} that cream and champagne use: <b>red down to nothing first,
+ * then black</b>. A black horse carries {@code red = 1} that its eumelanin
+ * hides, so a dilution that takes the black off first unmasks that red and
+ * walks the sample into the browns - and grullo is a <i>blue-grey</i>, on the
+ * gradient's neutral column, not a mouse-brown. Scaling the <i>visible</i> red
+ * instead is what puts it there, and it fixes the leg bars for free: a bar on a
+ * grullo leg is now just "less diluted", where the old painter had to keep
+ * black alone or the bar came back as a warm patch.
  *
- * <p>Natural, deterministic. Founder allele frequencies
- * {@code 1/}{@value #WILD_DUN_ONE_IN} for {@code D} - unchanged, so the wild
- * population has exactly as many duns as before - and
- * {@code 1/}{@value #WILD_MARKED_ONE_IN} for {@code d1}, carved out of what
- * used to be one undifferentiated {@code d}. See {@code wiki/gene-dun.html}.
+ * <h2>The markings are incomplete on purpose</h2>
+ * The dorsal stripe is the diagnostic one - a true dun essentially always has
+ * it, and it reaches the tail. Everything else "sometimes": leg barring,
+ * shoulder bars and forehead rings each occur on some duns and not others, one
+ * foreleg can carry three bars while the other shows a smudge, and a strong
+ * face mask tends to replace the finer cobwebbing rather than join it. So the
+ * accessories are rolled per horse off the expressing copy's epigenetic seed
+ * (see {@link #roll}), and the leg bars are rolled and seeded <b>per leg</b>.
+ *
+ * <p>Founder allele frequencies {@code 1/}{@value #WILD_DUN_ONE_IN} for
+ * {@code D} and {@code 1/}{@value #WILD_MARKED_ONE_IN} for {@code d1}. See
+ * {@code wiki/gene-dun.html}.
  */
 public final class DunGene implements Gene {
 
@@ -76,49 +90,76 @@ public final class DunGene implements Gene {
     public static final int WILD_MARKED_ONE_IN = 10;
 
     /**
-     * Body dilution under {@code D}. {@code keepRed} is <b>not a constant</b>:
-     * a black horse still carries {@code red = 1} (its blackness is all
-     * eumelanin), so keeping any of that red would land grullo in the warm
-     * browns instead of on the gradient's neutral column. So keepRed is
-     * interpolated by how much <i>black</i> the texel has - a chestnut (no
-     * black) keeps almost all its red and comes out a pale red dun, a black one
-     * loses nearly all of it and comes out a mouse-grey grullo, a bay body sits
-     * between.
+     * Body dilution under {@code D}, through
+     * {@link PigmentField#diluteNeutral}: {@code keepRed} is applied to the red
+     * that is actually <i>showing</i>, so a chestnut keeps most of its and
+     * comes out a pale red dun while a black one has none to keep and slides
+     * down the gradient's neutral column into grullo. {@code KEEP_BLACK} is the
+     * number that decides how light that grullo is - low enough to read as a
+     * body colour rather than a black horse, high enough that a black mane and
+     * a black dorsal stripe still show against it.
      */
-    private static final float KEEP_RED_CHESTNUT = 0.85f;
-    private static final float KEEP_RED_BLACK = 0.0f;
-    private static final float KEEP_BLACK = 0.48f;
+    private static final float KEEP_RED = 0.72f;
+    private static final float KEEP_BLACK = 0.42f;
 
     /**
-     * The same three numbers for {@code d1} - the <i>undiluted</i> outcome, so
+     * The same two numbers for {@code d1} - the <i>undiluted</i> outcome, so
      * they are chosen to move as little as possible while still letting the
-     * stripe read. Two deliberate choices:
-     * <ul>
-     *   <li><b>Black is never touched</b> ({@code MARKED_KEEP_BLACK = 1}). The
-     *       gradient's whole {@code black = 1} row is pure black, and the
-     *       composer gives a texel that resolves to pure black
-     *       <i>80% opacity</i> - so nudging a black texel off that row makes it
-     *       fully opaque and therefore <b>darker</b>, and a body darker than
-     *       its own dorsal stripe is worse than no stripe at all.</li>
-     *   <li><b>Red is taken only where there is red to take</b> - keepRed runs
-     *       <i>up</i> to 1 as the texel's black rises, the mirror image of
-     *       {@code D}'s ramp <i>down</i> to 0. So a chestnut lightens a little,
-     *       a bay body a little less, and a true black or a bay's points not at
-     *       all. That last one is not a gap: a real non-dun black shows no
-     *       primitive markings either.</li>
-     * </ul>
+     * stripe read.
+     *
+     * <p><b>Black is never touched</b> ({@code MARKED_KEEP_BLACK = 1}). The
+     * gradient's whole {@code black = 1} row is pure black, and the composer
+     * gives a texel that resolves to pure black <i>80% opacity</i> - so nudging
+     * a black texel off that row makes it fully opaque and therefore
+     * <b>darker</b>, and a body darker than its own dorsal stripe is worse than
+     * no stripe at all. What is left is a small bite out of the visible red,
+     * which is nothing at all on a true black or a bay's points: not a gap, but
+     * the answer - a real non-dun black shows no primitive markings either.
      */
-    private static final float MARKED_KEEP_RED_CHESTNUT = 0.86f;
-    private static final float MARKED_KEEP_RED_BLACK = 1.0f;
+    private static final float MARKED_KEEP_RED = 0.86f;
     private static final float MARKED_KEEP_BLACK = 1.0f;
 
-    private static final double DORSAL_HALF_WIDTH = 1.5;   // body units either side of the spine
-    private static final double BAR_SPACING = 4.2;         // few, well-spaced bars
-    private static final double BAR_DUTY = 0.28;           // thin
-    private static final double BAR_REACH = 0.60;          // bars fade out above this fraction of the leg
-    /** A leg bar keeps this much of its <i>black</i> (only) - so it reads as a dark band on the grullo
-     *  grey, not as a re-saturated warm patch (which is what re-introducing red on a black base does). */
-    private static final float BAR_KEEP_BLACK = 0.82f;
+    /** Mean half-width of the dorsal stripe, in body units; jittered per horse. */
+    private static final double DORSAL_HALF_WIDTH = 1.5;
+
+    /**
+     * Fraction of each leg that is a <b>point</b> - undiluted, so a dun's lower
+     * legs stay dark - fading out over the {@link #POINT_LEG_FADE} above it.
+     * The bars then sit on the pale leg above the fade, which is where a real
+     * dun's read best and why the two numbers belong together.
+     */
+    private static final double POINT_LEG_SOLID = 0.20;
+    private static final double POINT_LEG_FADE = 0.22;
+
+    /** Leg bars: strongest at the knee / hock, reaching this far either side. */
+    private static final double BAR_JOINT = 0.56;
+    private static final double BAR_SPREAD = 0.48;
+    private static final double BAR_SPACING = 3.2;      // body units, centre to centre
+    private static final double BAR_DUTY = 0.42;
+    /** How much of the dilution a bar at full coverage takes back off. */
+    private static final double BAR_DEPTH = 1.0;
+
+    /** Shoulder bar: one stroke, well forward on the barrel, leaning back as it drops. */
+    private static final double SHOULDER_CENTRE = 0.80;
+    private static final double SHOULDER_HALF_WIDTH = 0.085;
+    private static final double SHOULDER_LEAN = 0.22;
+    private static final double SHOULDER_DEPTH = 0.90;
+
+    /** Face: a broad forehead mask, and the finer rings drawn inside it. */
+    private static final double FACE_REACH = 3.4;       // body units from the forehead
+    private static final double COBWEB_RING_SPACING = 1.5;
+    private static final double MASK_DEPTH = 0.45;
+    private static final double COBWEB_DEPTH = 0.70;
+
+    /**
+     * How often each accessory marking shows at all. The dorsal stripe has no
+     * entry here because a true dun essentially always has one; these are the
+     * "sometimes" list, and a horse that rolls none of them is a perfectly
+     * ordinary dun with a stripe and nothing else.
+     */
+    private static final double BAR_CHANCE = 0.82;      // per leg, rolled four times
+    private static final double SHOULDER_CHANCE = 0.55;
+    private static final double COBWEB_CHANCE = 0.40;
 
     public final Allele D = new Allele(KEY, 0, "D", "Dun (D)");
     public final Allele d1 = new Allele(KEY, 1, "d1", "Non-dun, marked (d1)");
@@ -131,13 +172,15 @@ public final class DunGene implements Gene {
             .describe("No real dilution - the horse is its base colour - but a dorsal stripe still runs "
                     + "from poll to tail, a shade darker than the body around it. One d1 copy is "
                     + "enough; it is how a plain bay or black ends up with a spine line and no dun.")
-            .restrict(primitive(MARKED_KEEP_RED_CHESTNUT, MARKED_KEEP_RED_BLACK, MARKED_KEEP_BLACK, false));
+            .varies()
+            .restrict(primitive(MARKED_KEEP_RED, MARKED_KEEP_BLACK, false));
 
     private final Expression DUN = Expression.of("dun", "Dun")
-            .describe("The body lightens - dun on a bay, red dun on a chestnut, mouse-grey grullo on a "
-                    + "black - while a dorsal stripe from poll to tail and faint horizontal bars on "
-                    + "the legs skip the dilution and stay dark.")
-            .restrict(primitive(KEEP_RED_CHESTNUT, KEEP_RED_BLACK, KEEP_BLACK, true));
+            .describe("The body lightens - dun on a bay, red dun on a chestnut, blue-grey grullo on a "
+                    + "black - while the points, a dorsal stripe from poll to tail, and whichever "
+                    + "primitive markings this horse drew skip the dilution and stay dark.")
+            .varies()
+            .restrict(primitive(KEEP_RED, KEEP_BLACK, true));
 
     private final List<Expression> expressions = List.of(WILD, MARKED, DUN);
 
@@ -145,9 +188,9 @@ public final class DunGene implements Gene {
      * The six combinations at their Hardy-Weinberg shares given
      * {@code p(D) = 1/24} and {@code p(d1) = 1/10}. Written out rather than
      * computed so an author can retune one row without disturbing the others.
-     * The three {@code D} rows still sum to the 8.16% of founders the old
-     * two-allele table gave, so adding {@code d1} split the non-dun population
-     * without making duns any rarer.
+     * The three {@code D} rows still sum to the share the old two-allele table
+     * gave, so adding {@code d1} split the non-dun population without making
+     * duns any rarer.
      */
     private final FounderTable founders = FounderTable.builder()
             .weight(D, D, 0.173611)
@@ -185,46 +228,144 @@ public final class DunGene implements Gene {
     }
 
     /**
-     * The one painter both marked outcomes use. The dilution is what makes the
-     * markings visible: the marking regions are simply where it is lerped back
-     * off, so a marking keeps whatever colour the horse would otherwise be.
+     * Which primitive markings <b>this</b> horse drew, and how strongly. Rolled
+     * off the expressing copy's epigenetic seed, so a horse regenerates the
+     * same set every session and a foal that inherits the copy inherits its
+     * dam's markings.
      *
-     * @param legBars whether to draw leg barring as well as the dorsal stripe
+     * <p>The draw order is a contract: <b>one {@code nextLong()} then seven
+     * {@code nextFloat()}s</b> - the marking seed, the dorsal-width jitter, the
+     * shoulder bar, the face, then one per leg. Both marked outcomes draw all
+     * eight even though {@code d1} only uses the first two, so the two share
+     * one order and a {@code d1} horse that later gains a {@code D} copy keeps
+     * the stripe it had.
      */
-    private static Expression.Pigment primitive(float keepRedChestnut, float keepRedBlack,
-                                                float keepBlackBody, boolean legBars) {
+    private record Markings(long seed, double dorsalHalfWidth, double shoulder, double face,
+                            boolean cobweb, double[] bars) {}
+
+    private static Markings roll(Rng epi) {
+        long seed = epi.nextLong();
+        double dorsal = DORSAL_HALF_WIDTH * (0.80 + 0.50 * epi.nextFloat());
+        double shoulder = accessory(epi.nextFloat(), SHOULDER_CHANCE);
+        double face = accessory(epi.nextFloat(), COBWEB_CHANCE);
+        double[] bars = new double[CoatRegions.LEGS.size()];
+        for (int i = 0; i < bars.length; i++) {
+            bars[i] = accessory(epi.nextFloat(), BAR_CHANCE);
+        }
+        // "A full dark mask can replace the more delicate web effect visually" -
+        // so the same roll picks which of the two this horse shows, the stronger
+        // half of the range going to the plain mask.
+        return new Markings(seed, dorsal, shoulder, face, face < 0.6, bars);
+    }
+
+    /**
+     * One accessory roll: absent on {@code 1 - chance} of horses, and on the
+     * rest ramping from a faint smudge up to full strength. Deliberately not a
+     * plain uniform - most of the duns that have a shoulder bar have a hint of
+     * one, not a painted stripe.
+     */
+    private static double accessory(float roll, double chance) {
+        if (roll >= chance) {
+            return 0;
+        }
+        double t = (chance - roll) / (chance * 0.55);
+        return t > 1 ? 1 : t;
+    }
+
+    /**
+     * The one painter both marked outcomes use: dilute everything, then lerp
+     * the dilution back off wherever the marking mask says so.
+     *
+     * @param accessories whether to draw the {@code D}-only markings - leg bars,
+     *                    the shoulder bar and the face - as well as the points
+     *                    and the dorsal stripe
+     */
+    private static Expression.Pigment primitive(float keepRedBody, float keepBlackBody, boolean accessories) {
         return (ctx, coat) -> {
             Skin skin = ctx.skin();
+            Markings m = roll(ctx.epigeneticsFor(KEY));
             PigmentField f = coat.mutableCopy();
             HorseSkinGeometry.forEachTexel(skin, (px, py, part, face, point) -> {
-                float r = f.red(px, py);
-                float b = f.black(px, py);
-                float keepRed = lerp(keepRedChestnut, keepRedBlack, b);
-                float keepBlack = keepBlackBody;
-
-                // dorsal stripe: skip the dilution entirely, so it keeps the base
-                // colour (a near-black stripe on a grullo, a red one on a red dun).
-                float dorsal = (float) CoatRegions.dorsalStripe(skin, part, point, DORSAL_HALF_WIDTH);
-                keepRed = lerp(keepRed, 1f, dorsal);
-                keepBlack = lerp(keepBlack, 1f, dorsal);
-
-                // leg bars: keep extra *black* only - re-introducing red here would
-                // turn a bar on a black leg into a warm patch instead of a dark band.
-                if (legBars && isLeg(part)) {
-                    float bar = (float) CoatRegions.legBar(skin, part, point, BAR_SPACING, BAR_DUTY, BAR_REACH);
-                    keepBlack = Math.max(keepBlack, lerp(keepBlackBody, BAR_KEEP_BLACK, bar));
+                double mark = CoatRegions.dorsalStripe(skin, part, point, m.dorsalHalfWidth());
+                mark = Math.max(mark, pointRegion(skin, part, point));
+                mark = Math.max(mark, alreadyAPoint(f.red(px, py), f.black(px, py)));
+                if (accessories) {
+                    mark = Math.max(mark, m.shoulder() * SHOULDER_DEPTH * CoatRegions.shoulderBar(
+                            skin, part, point, m.seed(), SHOULDER_CENTRE, SHOULDER_HALF_WIDTH, SHOULDER_LEAN));
+                    mark = Math.max(mark, m.face() * faceMarking(skin, part, point, m));
+                    int leg = CoatRegions.LEGS.indexOf(part);
+                    if (leg >= 0 && m.bars()[leg] > 0) {
+                        mark = Math.max(mark, m.bars()[leg] * BAR_DEPTH * CoatRegions.legBar(
+                                skin, part, point, m.seed() + leg * 0x9E3779B97F4A7C15L,
+                                BAR_JOINT, BAR_SPREAD, BAR_SPACING, BAR_DUTY));
+                    }
                 }
-
-                f.setRed(px, py, r * keepRed);
-                f.setBlack(px, py, b * keepBlack);
+                if (mark >= 1.0) {
+                    return;
+                }
+                f.diluteNeutral(px, py,
+                        lerp(keepRedBody, 1f, (float) mark),
+                        lerp(keepBlackBody, 1f, (float) mark));
             });
             return f;
         };
     }
 
-    private static boolean isLeg(Part part) {
-        return part == Part.LEFT_FRONT_LEG || part == Part.RIGHT_FRONT_LEG
-                || part == Part.LEFT_HIND_LEG || part == Part.RIGHT_HIND_LEG;
+    /**
+     * <b>Is this texel already a point?</b> - {@code black * (1 - red)}, and the
+     * one line that lets a bay dun keep the black its agouti copy climbed up
+     * its legs and face.
+     *
+     * <p>The pigment model says it exactly. A gene that paints a point paints it
+     * <i>absolutely</i>: {@code BayCoat} sets {@code red = 0, black = 1}, and
+     * that pair - black with no red under it - occurs nowhere else. A black
+     * <i>horse</i> is {@code (1, 1)}: black with a full load of masked
+     * pheomelanin, which is what makes it a body colour and not a point, and
+     * which is what dun is supposed to dilute into grullo. Multiply and the two
+     * separate cleanly - 1 for a point, 0 for a black body, 0 for a chestnut,
+     * and the partial values through a bay's leg ramp turn out to be exactly
+     * the fade the marking mask wants.
+     *
+     * <p>Without it, the top of a seal bay's black leg - mostly black hair, a
+     * little red - diluted to a grey cuff between the tan body and the black
+     * point, and no real horse has one of those. The square root is there for
+     * the same reason: it pushes a half-and-half texel most of the way to
+     * "point", because the grey a half dilution makes out of one is not a
+     * colour a leg has either, and the fade wants to be short.
+     */
+    private static double alreadyAPoint(float red, float black) {
+        return Math.sqrt(black * (1.0 - red));
+    }
+
+    /**
+     * The <b>points</b>: 1 where a dun keeps its base colour outright. Mane,
+     * tail, ears and muzzle are points in full; a leg is a point up to
+     * {@link #POINT_LEG_SOLID} and then fades out, so the dark lower leg
+     * dissolves into the diluted upper leg instead of ending in a ring.
+     */
+    private static double pointRegion(Skin skin, Part part, HorseSkinGeometry.BodyPoint point) {
+        switch (part) {
+            case MANE, TAIL, LEFT_EAR, RIGHT_EAR, MUZZLE -> {
+                return 1.0;
+            }
+            case LEFT_FRONT_LEG, RIGHT_FRONT_LEG, LEFT_HIND_LEG, RIGHT_HIND_LEG -> {
+                HorseSkinGeometry.Bounds b = HorseSkinGeometry.bounds(skin, part);
+                double frac = (point.y() - b.yMin()) / b.span(HorseSkinGeometry.Axis.Y);
+                double t = (frac - POINT_LEG_SOLID) / POINT_LEG_FADE;
+                return t <= 0 ? 1.0 : (t >= 1 ? 0.0 : 1.0 - t * t * (3 - 2 * t));
+            }
+            default -> {
+                return 0.0;
+            }
+        }
+    }
+
+    /** Either a broad forehead mask or the finer cobwebbing inside it, never both. */
+    private static double faceMarking(Skin skin, Part part, HorseSkinGeometry.BodyPoint point, Markings m) {
+        return m.cobweb()
+                ? COBWEB_DEPTH * CoatRegions.faceCobweb(skin, part, point, m.seed(),
+                        COBWEB_RING_SPACING, FACE_REACH)
+                : MASK_DEPTH * CoatRegions.faceMask(skin, part, point, FACE_REACH);
     }
 
     private static float lerp(float a, float b, float t) {

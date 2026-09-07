@@ -97,6 +97,51 @@ public final class PigmentField implements PigmentView {
     }
 
     /**
+     * The <b>cool</b> dilution, and the exact opposite move to {@link #dilute}:
+     * take the red down <i>first</i> - all of it, wherever black was masking it
+     * - and only then take the black down. Where {@link #dilute} deliberately
+     * walks a diluted black into the warm browns, this one keeps it on the
+     * gradient's neutral column, which is where a real grullo lives: a
+     * blue-grey mouse colour, not a mouse-brown one.
+     *
+     * <p>The order is the whole of it. A black horse is {@code (red = 1,
+     * black = 1)} - a full load of pheomelanin that the eumelanin above it
+     * hides, visible nowhere but on the gradient's bottom row. Scale the two
+     * together and the black comes off <i>first</i>, unmasking that red on the
+     * way out and walking the sample diagonally into the golds; a "grullo"
+     * built that way is a milk-chocolate horse. So this scales the
+     * <b>visible</b> red - {@code red * (1 - black)} - and stores back whatever
+     * reproduces it against the black that is left:
+     *
+     * <pre>{@code black' = black * keepBlack
+     * red'   = red * (1 - black) * keepRed / (1 - black')}</pre>
+     *
+     * <p>It is the same invariant {@link #whiten} keeps, for the same reason,
+     * with the two pigments free to move by different amounts. On a chestnut
+     * ({@code black = 0}) nothing is masked and it collapses to
+     * {@code red * keepRed}; on a black horse the numerator is 0, red goes
+     * straight to 0 and the sample slides <i>down</i> the neutral column. Every
+     * base in between keeps exactly as much warmth as was showing before.
+     *
+     * <p>It is an identity at {@code keepRed = keepBlack = 1}. On a texel
+     * already at {@code black = 1} that is left undiluted there is no room to
+     * store red at all - and none is needed, since the gradient's bottom row is
+     * black whatever the red says - so the stored value is left alone rather
+     * than flushed to 0, and the identity holds there too.
+     */
+    public void diluteNeutral(int px, int py, float keepRed, float keepBlack) {
+        int i = py * size + px;
+        float b = black[i];
+        float visibleRed = red[i] * (1.0f - b);
+        float newBlack = clamp01(b * keepBlack);
+        float room = 1.0f - newBlack;
+        black[i] = newBlack;
+        if (room > 1e-4f) {
+            red[i] = clamp01(visibleRed * keepRed / room);
+        }
+    }
+
+    /**
      * The shared <b>whitening</b> move: mix white hair into this texel by
      * {@code amount}, 0 leaving it alone and 1 taking it to bald white. Every
      * white marking - a soft patch edge, a roan fleck, a varnished appaloosa

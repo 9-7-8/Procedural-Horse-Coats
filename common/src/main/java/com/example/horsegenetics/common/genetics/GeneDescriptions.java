@@ -66,10 +66,13 @@ public final class GeneDescriptions {
                             + "onto the existing strand shading rather than painted flat. One copy "
                             + "is invisible and worth breeding toward."),
             Map.entry("horsegenetics.dun",
-                    "Real-horse TBX3, three alleles with two dominance orders. D dilutes the body "
-                            + "and adds primitive markings (a dorsal stripe and leg bars); d1 adds "
-                            + "the dorsal stripe with no dilution at all; d2 does neither. So a "
-                            + "horse can carry primitive markings without being a dun."),
+                    "Real-horse TBX3, three alleles with two dominance orders. D lightens the body "
+                            + "coat while leaving the points dark - tan on a bay, blue-grey grullo "
+                            + "on a black, pale red on a chestnut - and adds primitive markings: a "
+                            + "dorsal stripe into the tail, and, on some horses, leg bars, a "
+                            + "shoulder bar and a face mask. d1 adds the dorsal stripe with no "
+                            + "dilution at all; d2 does neither. So a horse can carry primitive "
+                            + "markings without being a dun."),
             Map.entry("horsegenetics.silver",
                     "Silver dapple (PMEL17): dilutes black pigment only, toward chocolate on the "
                             + "body and near-flaxen on the mane and tail, while leaving red "

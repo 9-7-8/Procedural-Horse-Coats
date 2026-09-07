@@ -248,14 +248,21 @@ public final class CoatRegions {
      * centreline, smoothly fading to {@code 0} by {@code halfWidth} body-units
      * to either side of {@code z == 0}, and - on the barrel and neck - further
      * weighted so it only lands on the <b>upper</b> part of the box and not the
-     * belly (the belly also runs along {@code z ~ 0}). The mane, tail, head and
-     * muzzle get the full width (the stripe carries up the crest and down the
-     * face, and hangs in the tail).
+     * belly (the belly also runs along {@code z ~ 0}). The mane and the tail
+     * get the full width: a real dun stripe carries up the crest and hangs in
+     * the tail, and reaching the tail is the single most diagnostic thing about
+     * it.
+     *
+     * <p><b>The head and the muzzle are not on this list.</b> They used to be,
+     * which drew a dark line straight down a dun face. A real dorsal stripe
+     * runs withers to dock; what a dun has on its face is a mask or
+     * {@linkplain #faceCobweb cobwebbing}, a different shape from a different
+     * cause, and giving both to one function is how the face ended up striped.
      */
     public static double dorsalStripe(Skin skin, Part part, BodyPoint point, double halfWidth) {
         double topWeight;
         switch (part) {
-            case MANE, TAIL, HEAD, MUZZLE -> topWeight = 1.0;
+            case MANE, TAIL -> topWeight = 1.0;
             case BODY, NECK -> {
                 Bounds b = HorseSkinGeometry.bounds(skin, part);
                 double frac = (point.y() - b.yMin()) / b.span(Axis.Y);
@@ -273,27 +280,181 @@ public final class CoatRegions {
         return lateral * topWeight;
     }
 
+    /** How far, in body units, noise may bend a leg bar off its plane. */
+    private static final double BAR_WARP = 0.55;
+    private static final double BAR_WARP_SCALE = 0.22;
+    /** Soft edge as a fraction of the half-period - dun bars feather, they do not draw. */
+    private static final double BAR_EDGE = 0.22;
+    /** Below this much round-the-limb noise a band simply is not there. */
+    private static final double BAR_BREAK = 0.34;
+    private static final double BAR_BREAK_SOFT = 0.26;
+    private static final double BAR_ROUND_SCALE = 0.45;
+
     /**
-     * Coverage of horizontal <b>leg barring</b> at a texel on a leg part:
-     * near-constant-{@code y} bands repeating every {@code spacing} body-units,
-     * each band {@code duty} of the period wide with a soft edge, and the whole
-     * field fading out over the top {@code (1 - reach)} of the leg so the bars
-     * sit on the cannon and gaskin, not the stifle.
+     * Coverage of dun <b>leg barring</b> at a texel on a leg part.
+     *
+     * <p><b>Not bracelets.</b> The field here used to be a plain function of
+     * {@code y} - evenly spaced, equally strong, and identical the whole way
+     * round the limb - so every leg wore the same three rings, low down on the
+     * cannon. Real bars are short transverse <i>strokes</i>: uneven in spacing,
+     * thickness and strength, frequently broken part-way round the leg,
+     * concentrated at and just above the knee and the hock rather than spread
+     * down to the hoof, and often nearly absent on one leg while another
+     * carries three. So the field is built out of four separate irregularities:
+     *
+     * <ul>
+     *   <li>a band phase in {@code y} <b>warped by 3D noise</b>, so a band
+     *       wanders and reads slightly diagonal instead of ruler-flat;</li>
+     *   <li>a per-band <b>thickness and strength</b> hash - no two bars alike;</li>
+     *   <li>a second noise sample <b>frozen to the band index</b>, so it varies
+     *       as you walk <i>round</i> the limb and not as you walk up it: that is
+     *       what turns a ring into a slash, and one band into two fragments;</li>
+     *   <li>a <b>window</b> that peaks at the joint and dies out at the pastern
+     *       and again where the leg meets the body.</li>
+     * </ul>
+     *
+     * <p>Pass a different {@code seed} per leg and the set stops matching, which
+     * is the last of the four: real barring is not symmetric.
+     *
+     * @param seed    randomness for this leg
+     * @param joint   height up the leg box, {@code [0, 1]}, where barring is
+     *                strongest - the knee / hock
+     * @param spread  how far either side of {@code joint} a bar can still reach
+     * @param spacing centre-to-centre band distance in body units
+     * @param duty    mean fraction of a period that is bar, before the per-band
+     *                thickness hash varies it
      */
-    public static double legBar(Skin skin, Part leg, BodyPoint point, double spacing, double duty, double reach) {
-        if (!HorseSkinGeometry.hasPart(skin, leg)) {
+    public static double legBar(Skin skin, Part leg, BodyPoint point, long seed,
+                                double joint, double spread, double spacing, double duty) {
+        if (!HorseSkinGeometry.hasPart(skin, leg) || spacing <= 0) {
             return 0;
         }
         Bounds b = HorseSkinGeometry.bounds(skin, leg);
-        double frac = (point.y() - b.yMin()) / b.span(Axis.Y);
-        double fade = 1.0 - smooth01((frac - reach) / Math.max(1e-4, 1 - reach));
-        if (fade <= 0) {
+        double span = b.span(Axis.Y);
+        if (span <= 0) {
             return 0;
         }
-        double phase = (point.y() - b.yMin()) / spacing;
-        double off = phase - Math.floor(phase);
-        double d = Math.abs(off - 0.5) * 2.0;      // 0 mid-bar .. 1 mid-gap
-        return (1.0 - smooth01((d - (duty - 0.12)) / 0.24)) * fade;
+        double up = point.y() - b.yMin();
+        double window = 1.0 - smooth01(Math.abs(up / span - joint) / Math.max(1e-4, spread));
+        if (window <= 0) {
+            return 0;
+        }
+
+        double warp = (BodyNoise.value(seed, point.x() * BAR_WARP_SCALE, point.y() * BAR_WARP_SCALE,
+                point.z() * BAR_WARP_SCALE) - 0.5) * 2.0 * BAR_WARP;
+        double phase = (up + warp) / spacing;
+        int band = (int) Math.floor(phase);
+        double d = Math.abs((phase - band) - 0.5) * 2.0;      // 0 mid-bar .. 1 mid-gap
+
+        double width = duty * (0.55 + 0.90 * bandHash(seed, band, 1));
+        double strength = 0.55 + 0.45 * bandHash(seed, band, 2);
+        double core = 1.0 - smooth01((d - (width - BAR_EDGE)) / (2.0 * BAR_EDGE));
+        if (core <= 0) {
+            return 0;
+        }
+
+        // Frozen in y to this band, free in x and z: the break runs round the
+        // limb, not up it.
+        double round = BodyNoise.value(seed ^ 0x51ED270155AA33CCL,
+                point.x() * BAR_ROUND_SCALE, band * 4.0, point.z() * BAR_ROUND_SCALE);
+        double presence = smooth01((round - BAR_BREAK) / BAR_BREAK_SOFT);
+
+        return core * presence * strength * window;
+    }
+
+    /**
+     * Coverage of a dun <b>shoulder bar</b>: one soft stroke crossing the
+     * shoulder, leaning back and down from the withers - transverse or
+     * diagonal, unlike the dorsal stripe head-to-tail run. It lives on the
+     * front of the barrel and never reaches the belly.
+     *
+     * <p>Deliberately <b>one</b> smudged stroke rather than the fan of fine
+     * lines some horses carry: at two texels to the body unit a fan is three
+     * pixels of noise, and the common case a field guide describes is anyway
+     * "a smudgy shadow".
+     *
+     * @param centre    where along the barrel the stroke sits, {@code 0} at the
+     *                  rump and {@code 1} at the shoulder
+     * @param halfWidth half the stroke width, in the same fraction-of-barrel units
+     * @param lean      how far back the foot of the stroke is from its top
+     */
+    public static double shoulderBar(Skin skin, Part part, BodyPoint point, long seed,
+                                     double centre, double halfWidth, double lean) {
+        if (part != Part.BODY || halfWidth <= 0) {
+            return 0;
+        }
+        Bounds b = HorseSkinGeometry.bounds(skin, part);
+        double fx = (point.x() - b.xMin()) / b.span(Axis.X);   // 0 rump .. 1 shoulder
+        double fy = (point.y() - b.yMin()) / b.span(Axis.Y);   // 0 belly .. 1 topline
+        double window = smooth01((fx - 0.52) / 0.20) * smooth01((fy - 0.10) / 0.32);
+        if (window <= 0) {
+            return 0;
+        }
+        double warp = (BodyNoise.value(seed ^ 0x5A0FDE1277C3B901L, point.x() * 0.20,
+                point.y() * 0.20, point.z() * 0.20) - 0.5) * 2.0 * 0.05;
+        double u = fx + lean * (1.0 - fy) + warp;
+        return (1.0 - smooth01(Math.abs(u - centre) / halfWidth)) * window;
+    }
+
+    /**
+     * Coverage of a dun <b>face mask</b>: a broad darkening centred on the
+     * forehead and falling off with distance, over the head box only. It is
+     * what a strongly masked dun shows instead of the finer
+     * {@linkplain #faceCobweb cobwebbing}, and the base that cobwebbing is
+     * drawn on.
+     *
+     * @param reach radius in body units at which the mask has faded to nothing
+     */
+    public static double faceMask(Skin skin, Part part, BodyPoint point, double reach) {
+        if (part != Part.HEAD || reach <= 0 || !HorseSkinGeometry.hasPart(skin, part)) {
+            return 0;
+        }
+        return 1.0 - smooth01(foreheadDistance(skin, part, point) / reach);
+    }
+
+    /**
+     * Coverage of <b>cobwebbing</b>: fine darker rings radiating from the
+     * forehead, warped by noise so they branch and break rather than sitting as
+     * clean circles. Multiplied by {@link #faceMask}, so it fades out with the
+     * same reach - cobwebbing is the detail inside the mask, not a separate
+     * marking somewhere else on the head.
+     *
+     * @param ringSpacing centre-to-centre ring distance in body units
+     */
+    public static double faceCobweb(Skin skin, Part part, BodyPoint point, long seed,
+                                    double ringSpacing, double reach) {
+        double mask = faceMask(skin, part, point, reach);
+        if (mask <= 0 || ringSpacing <= 0) {
+            return 0;
+        }
+        double r = foreheadDistance(skin, part, point);
+        double warp = (BodyNoise.value(seed, point.x() * 0.55, point.y() * 0.55, point.z() * 0.55) - 0.5)
+                * ringSpacing * 0.9;
+        double phase = (r + warp) / ringSpacing;
+        double d = Math.abs((phase - Math.floor(phase)) - 0.5) * 2.0;
+        return (1.0 - smooth01((d - 0.18) / 0.26)) * mask;
+    }
+
+    /** Body-unit distance from a head texel to the middle of the forehead. */
+    private static double foreheadDistance(Skin skin, Part part, BodyPoint point) {
+        Bounds b = HorseSkinGeometry.bounds(skin, part);
+        double dx = point.x() - (b.xMax() - b.span(Axis.X) * 0.30);
+        double dy = point.y() - (b.yMax() - b.span(Axis.Y) * 0.22);
+        return Math.sqrt(dx * dx + dy * dy + point.z() * point.z());
+    }
+
+    /**
+     * A stable number in {@code [0, 1)} for one band of one leg - the per-band
+     * thickness and strength jitter. {@link BodyNoise} interpolates, which is
+     * the wrong shape here: two adjacent bands should be unrelated, not a
+     * gradient between neighbours.
+     */
+    private static double bandHash(long seed, int band, int salt) {
+        long h = seed ^ (band * 0x9E3779B97F4A7C15L) ^ (salt * 0xC2B2AE3D27D4EB4FL);
+        h = (h ^ (h >>> 30)) * 0xBF58476D1CE4E5B9L;
+        h = (h ^ (h >>> 27)) * 0x94D049BB133111EBL;
+        h ^= h >>> 31;
+        return (h >>> 11) / (double) (1L << 53);
     }
 
     private static double smooth01(double t) {
