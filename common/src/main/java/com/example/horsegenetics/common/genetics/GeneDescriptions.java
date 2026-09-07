@@ -27,6 +27,13 @@ public final class GeneDescriptions {
                             + "inherited rather than rolled: X/X is a mare, X/Y a stallion, and Y/Y "
                             + "cannot occur. It never touches the coat; it sits first so a future "
                             + "sex-linked gene can read an already-decided sex."),
+            Map.entry("horsegenetics.dhampir",
+                    "A magical recessive whose carrier is not silent: one copy gives red eyes with "
+                            + "glowing whites and nothing else, which is what makes the locus worth "
+                            + "hunting. Two copies give a white, red-eyed animal that burns in "
+                            + "daylight and runs for shade or water, with three times the health, "
+                            + "half again the speed and twice the jump - and which cannot be fed by "
+                            + "any means. It heals only by biting something living."),
             Map.entry("horsegenetics.diet",
                     "What the horse will eat. Twelve narrow diets - raw meat, fish, wheat, cake, "
                             + "potions, lava, one metal, one gem and the rest - each of which needs "

@@ -15,6 +15,7 @@ import com.example.horsegenetics.common.genetics.genes.LcorlGene;
 import com.example.horsegenetics.common.genetics.genes.LeopardGene;
 import com.example.horsegenetics.common.genetics.genes.LightGene;
 import com.example.horsegenetics.common.genetics.genes.CutieMarkGene;
+import com.example.horsegenetics.common.genetics.genes.DhampirGene;
 import com.example.horsegenetics.common.genetics.genes.DietGene;
 import com.example.horsegenetics.common.genetics.genes.Patn1Gene;
 import com.example.horsegenetics.common.genetics.genes.Patn2Gene;
@@ -220,6 +221,14 @@ public final class Genes {
      */
     public static final MagicSectoralHeterochromiaGene SECTORAL_EYES = new MagicSectoralHeterochromiaGene();
     public static final VerdantGene VERDANT = new VerdantGene();
+    /**
+     * <b>Dhampir</b> - the magical recessive whose <i>carrier</i> is visible:
+     * one copy gives red eyes and glowing scleras and nothing else, two gives a
+     * white, sun-shy animal with triple health that cannot be fed and heals
+     * only by hunting. It sorts after {@link #DIET} on purpose - the diet
+     * channel keeps the last claim, so this one's {@code NOTHING} wins.
+     */
+    public static final DhampirGene DHAMPIR = new DhampirGene();
 
     /**
      * The <b>non-coat genes</b> - performance, size and health. They occupy the
@@ -267,6 +276,7 @@ public final class Genes {
             LEOPARD, EDNRB, KIT, MITF, PAX3,
             MILK, BODY_SIZE, MAGIC_SPEED, MAGIC_HEALTH, MAGIC_JUMP,
             MANE_COLOR, TAIL_COLOR, PARTICLE, LIGHT, HEALER, SECTORAL_EYES, VERDANT, LUT, CUTIE_MARK,
+            DHAMPIR,
             MSTN, PDK4, CKM, RYR2, LCORL, HMGA2, PATN1, PATN2,
             ACAN, B4GALT7, PLOD1, RAPGEF5, ST14, SHOX, MET);
 

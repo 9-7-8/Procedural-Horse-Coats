@@ -32,6 +32,71 @@
     </p>
 </div>
 
+<h2 id="dhampir">&sect;0-R &mdash; the dhampir (2026-09-07, NOT looked at)</h2>
+
+<p>
+    A new magical recessive, <a href="gene-dhampir.html">dhampir</a>. The
+    <strong>genetics</strong> are covered by <code>DhampirGeneTest</code> and the golden
+    file, and the coat has been eyeballed as baked sheets: white, red-eyed, and the red
+    survives even under the leopard complex. <strong>None of the behaviour has been run
+    at all</strong> - three hand-written pieces (<code>DhampirHandler</code> and two
+    goals) against 26.1.2 sources, and behaviour is the half no test in this repo can
+    reach.
+</p>
+
+<ul>
+    <li><strong>Spawn a carrier first.</strong> <code>Dhmp/n</code> should be an
+        <em>entirely ordinary horse</em> with red eyes and glowing whites - ordinary coat,
+        ordinary stats, eats hay, does not burn. If a carrier burns or refuses food, the
+        homozygous check is wrong somewhere and everything below is moot.</li>
+    <li><strong>The scleras should glow and the iris should not.</strong> Look at one in
+        the dark. A glowing iris reads as a lamp; that is the failure to watch for.</li>
+    <li><strong>Then a full dhampir, at night.</strong> White, red-eyed, and calm. Check
+        the health bar in the horse screen is about three times an ordinary horse's, and
+        that it is genuinely faster and jumps higher.</li>
+    <li><strong>Then let the sun come up.</strong> It should start smoking and losing half
+        a heart every couple of seconds, and <em>run</em> - for a tree, a doorway, an
+        overhang or a pond. Water should stop the burning outright.</li>
+    <li><strong>The fence.</strong> Pen one in the open with a one-block fence between it
+        and shade. It presses jump whenever it is blocked while fleeing, so a strong horse
+        should clear it and a weak one should not. This is the crudest piece of the whole
+        gene and the most likely to look silly - watch for it juddering against the fence
+        rather than jumping, or jumping constantly for no reason.</li>
+    <li><strong>The hunt.</strong> Hurt one, then put a cow near it after dark. It should
+        walk over, bite once (half a heart of damage to the cow, three hearts back to
+        itself), and then <em>leave that cow alone</em> - it should move to a second animal
+        rather than draining the first. Come back the next in-game day and it should be
+        willing to bite the first cow again.</li>
+    <li><strong>It must not bite the player, and must not bite other horses.</strong></li>
+    <li><strong>It cannot be fed and does not passively heal.</strong> Try every food in
+        the game on it; try leaving it hurt beside hay and water, which heals every other
+        horse in the mod. Neither should do anything.</li>
+    <li><strong>Riding.</strong> The shade and hunt goals both bow out while it is ridden
+        or leashed. Confirm a ridden dhampir does not fight the player for control - that
+        is the failure mode of a top-priority goal.</li>
+</ul>
+
+<div class="note">
+    <span class="label">Questions for the owner</span>
+    <ol>
+        <li><strong>Is the burn rate right?</strong> Half a heart every two seconds against
+            triple health is a long, losing argument with the weather rather than an
+            execution - deliberately, so it survives the run to the treeline. It may be
+            far too gentle to feel like a vampire.</li>
+        <li><strong>Should it be rideable in daylight at all?</strong> Right now the goals
+            stand down for a rider, so a player can simply ride one across a desert while
+            it burns. That is either a nice tension or a bug.</li>
+        <li><strong>Should the white be absolute?</strong> It is painted absolutely in
+            phase 3, so no pigment gene shows through - but the <em>overlay</em> phase
+            still draws over it, so a dhampir carrying the leopard complex has spots and
+            one with a cutie mark keeps it. That is the same layering dominant white
+            already has, so it was left alone rather than special-cased.</li>
+        <li><strong>Other horses are excluded from the hunt.</strong> That means a dhampir
+            alone in a paddock of horses has nothing to live on. Intended, or should it
+            bite them too?</li>
+    </ol>
+</div>
+
 <h2 id="diet">&sect;0-Q &mdash; the diet locus (2026-09-07, NOT looked at)</h2>
 
 <p>

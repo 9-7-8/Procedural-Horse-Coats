@@ -149,11 +149,25 @@ public final class HorseDietHandler {
     }
 
     /**
+     * <b>Can this horse regenerate at all?</b> False for a
+     * {@link Diet#NOTHING} horse - a dhampir - and that is the whole reason the
+     * value exists: "cannot be fed" has to mean the gated regen in
+     * {@link HorseCareHandler} too, or a horse that nothing in the world can
+     * feed would still quietly heal itself standing beside a hay bale.
+     *
+     * <p>Stated once, here, in terms of the diet rather than in terms of the
+     * gene: any future gene that claims {@code NOTHING} inherits it.
+     */
+    public static boolean canRegenerate(Horse horse) {
+        return dietOf(horse).diet() != Diet.NOTHING;
+    }
+
+    /**
      * This horse's diet, or {@link HorseDiet#NORMAL} for anything without a
      * real record - an unconverted vanilla horse, or one whose codes do not
      * parse. Same defensive shape as {@link GeneYieldHandler}.
      */
-    private static HorseDiet dietOf(Horse horse) {
+    public static HorseDiet dietOf(Horse horse) {
         if (!HorseRecords.hasRealRecord(horse)) {
             return HorseDiet.NORMAL;
         }

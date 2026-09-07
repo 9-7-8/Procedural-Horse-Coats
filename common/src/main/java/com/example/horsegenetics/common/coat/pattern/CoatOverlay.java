@@ -300,6 +300,39 @@ public final class CoatOverlay {
         forEachEyeTexel(this::markEmissive);
     }
 
+    /**
+     * Mark only the <b>sclera</b> - the light texels of the eye - leaving the
+     * iris alone. The exact complement of {@link #tintIris}, and weighted the
+     * same way and for the same reason: an adult eye is a block of near-white
+     * beside a block of pure black, so "the sclera" is "the texels that are
+     * already bright", worked out from the coat rather than hard-coded.
+     *
+     * <p>A glowing iris and a glowing sclera are very different faces. Light's
+     * gold eye wants the whole thing ({@link #markEmissiveEyes}); a dhampir
+     * wants the white to burn and the pupil to stay a hole in it.
+     */
+    public void markEmissiveSclera() {
+        forEachEyeTexel((px, py) -> {
+            int b = base(px, py);
+            if ((b >>> 24) == 0) {
+                return;
+            }
+            double luma = (0.299 * ((b >> 16) & 0xFF) + 0.587 * ((b >> 8) & 0xFF)
+                    + 0.114 * (b & 0xFF)) / 255.0;
+            if (luma > SCLERA_LUMA) {
+                markEmissive(px, py);
+            }
+        });
+    }
+
+    /**
+     * Above this luma an eye texel is sclera rather than iris. Half-way: the
+     * template's sclera is near-white and its iris is pure black, so anything
+     * in between is the antialiased boundary and belongs to whichever side it
+     * is closer to.
+     */
+    private static final double SCLERA_LUMA = 0.5;
+
     // ------------------------------------------------------------------
 
     private interface TexelVisitor {

@@ -128,6 +128,11 @@ public final class CoatSampleTool {
             {"bay_liver", "agouti=A/A shade=Sh/ShD"},           // one dark copy - mahogany
             {"bay_seal_het_agouti", "agouti=A/a shade=ShD/ShD"},// the darkest a bay gets
             {"chestnut_dark_shade", "extension=e/e shade=ShD/ShD"},
+
+            // dhampir - the carrier is the eyes alone, the homozygote is white
+            {"dhampir_trace_bay", "agouti=A/a dhampir=Dhmp/n"},
+            {"dhampir", "dhampir=Dhmp/Dhmp"},
+            {"dhampir_over_leopard", "agouti=A/a leopard=LP/lp patn1=PATN1/n dhampir=Dhmp/Dhmp"},
     };
 
     /**
@@ -161,7 +166,9 @@ public final class CoatSampleTool {
             5, 2, 7, 3,
             1, 4, 6, 2, 8,
             0, 0,
-            2};
+            2,
+            // dhampir x3
+            4, 0, 0};
 
     private CoatSampleTool() {}
 

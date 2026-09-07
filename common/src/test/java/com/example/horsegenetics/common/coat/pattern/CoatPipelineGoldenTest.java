@@ -55,6 +55,11 @@ class CoatPipelineGoldenTest {
             override("agouti=A/A", "shade=ShD/ShD"),
             override("agouti=A/a", "shade=Sh/ShD", "extension=E/e"),
             override("extension=e/e", "shade=ShD/ShD"),   // silent on a chestnut
+            // dhampir: the carrier is the eyes alone, the homozygote is white
+            override("agouti=A/a", "dhampir=Dhmp/n"),
+            override("dhampir=Dhmp/Dhmp"),
+            override("agouti=A/a", "dhampir=Dhmp/Dhmp"),
+            override("kit=W22/N", "dhampir=Dhmp/n"),      // red must beat the depigmented blue
             override("kit=W22/N"),
             override("champagne=Ch/c"),
             override("agouti=A/a", "champagne=Ch/c"),

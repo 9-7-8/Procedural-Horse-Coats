@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dhampir &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="nav.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow magical">Magical gene <span class="sep">/</span> phase 3</p>
+<h1>Dhampir &mdash; the recessive you can see coming</h1>
+<p class="lede">
+    One copy gives <strong>red eyes with glowing whites</strong> and nothing
+    else. Two give a white, sun-shy animal with three times the health of an
+    ordinary horse, which cannot be fed by any means and heals only by biting
+    something living.
+</p>
+
+<div class="gene-preview" data-gene="horsegenetics.dhampir"></div>
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd>horsegenetics.dhampir</dd></div>
+    <div><dt>Alleles</dt><dd><span class="allele rec">Dhmp</span> <span class="allele dom">n</span></dd></div>
+    <div><dt>Outcomes</dt><dd>wild, <code>dhampir-trace</code>, <code>dhampir</code></dd></div>
+    <div><dt>Shows when</dt><dd><code>Dhmp/n</code> &mdash; the eyes; <code>Dhmp/Dhmp</code> &mdash; everything</dd></div>
+    <div><dt>Default allele</dt><dd>n</dd></div>
+    <div><dt>Priority</dt><dd><code>DhampirGene.PRIORITY</code> &mdash; magical band, after every gene that paints</dd></div>
+    <div><dt>Founders</dt><dd>carriers only &mdash; no wild horse is ever one</dd></div>
+    <div><dt>Random splice</dt><dd><strong>never</strong> &mdash; <code>spliceable()</code> is false</dd></div>
+    <div><dt>Model</dt><dd>genetics.genes.DhampirGene; neoforge/server/DhampirHandler and its two goals</dd></div>
+</dl>
+
+<div class="note">
+    <span class="label">Unplayed</span>
+    <p>
+        The coat, the eyes, the body multipliers and the diet override are covered
+        by <code>DhampirGeneTest</code> and by <code>coat-golden.txt</code>, and the
+        coat has been eyeballed as baked sheets. <strong>None of the behaviour has
+        been run in a game</strong> &mdash; not the burning, not the run for shade,
+        not the hunt. See <a href="verification.html#dhampir">verification &sect;0-R</a>.
+    </p>
+</div>
+
+<h2 id="carrier">The carrier is the point of the gene</h2>
+
+<p>
+    Almost every recessive in this mod is silent in the heterozygote &mdash; that
+    is what makes the <a href="gene-acan.html">health loci</a> worth a pedigree.
+    This one is not, and deliberately: a carrier has the red eyes and the glowing
+    scleras, and pays <em>nothing</em> for them. No sun damage, no stat change,
+    an ordinary appetite, an ordinary coat.
+</p>
+
+<p>
+    That single decision is what makes the locus findable. Two red-eyed horses in
+    a field are a <strong>promise</strong>, not a lottery ticket, and a breeder
+    who spots one knows exactly what to do with it. A silent dhampir carrier
+    would be a gene nobody would ever meet.
+</p>
+
+<h2 id="animal">What the homozygote is</h2>
+
+<div class="table-wrap">
+<table class="facts">
+<tbody>
+<tr><th>Coat</th><td><strong>Pure white</strong>, painted <em>absolutely</em> in phase 3 over whatever the melanin genes made &mdash; <code>ColorField.set</code>, not <code>add</code>, so a black horse, a cremello and a leopard all come out the same white. It <a href="genetics-model.html">masks</a>, like dominant white, and the coat underneath is still in the genome for a foal to inherit.</td></tr>
+<tr><th>Eyes</th><td>Red, at <code>EyeColor.RANK_MAGICAL</code> &mdash; above even a depigmented blue, because this is paint rather than pigment. The <strong>scleras glow</strong> and the iris does not.</td></tr>
+<tr><th>Body</th><td><code>HEALTH_MULTIPLIER</code>, <code>SPEED_MULTIPLIER</code> and <code>JUMP_MULTIPLIER</code>, all <em>unclamped</em> &mdash; it is genuinely a different animal, not a nudge inside the ordinary band. Size is untouched.</td></tr>
+<tr><th>Appetite</th><td><a href="gene-diet.html"><code>Diet.NOTHING</code></a>. It cannot be fed, and it does not regenerate beside hay and water either &mdash; the gated healing checks the diet.</td></tr>
+<tr><th>Daylight</th><td>Half a heart every two seconds while the sky is clear above it. Not vanilla's ignite: a horse set alight burns down far too fast, and the point of the animal is that it survives the run to the treeline.</td></tr>
+<tr><th>Healing</th><td>One bite of one living thing: half a heart dealt, three hearts healed, then it leaves that animal alone for a day.</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2 id="override">How &ldquo;cannot be fed&rdquo; is expressed</h2>
+
+<p>
+    Not as a special case. The <a href="gene-diet.html">diet</a> channel resolves
+    the <strong>last</strong> <code>DietContribution</code> claim in
+    <code>Genes.codeOrder()</code>, and this gene sorts after the diet locus, so
+    its <code>NOTHING</code> simply wins &mdash; even over a horse that is also
+    homozygous for the lava diet. <code>DhampirGeneTest</code> pins that, because
+    it is the kind of thing that would be silently wrong: with the channel
+    keeping the <em>first</em> claim instead, a lava-eating dhampir would have
+    eaten lava and the whole cost of the gene would have quietly gone.
+</p>
+
+<p>
+    The same value carries one step further: <code>HorseCareHandler</code>'s
+    gated regen asks <code>HorseDietHandler.canRegenerate</code>, which is false
+    for a <code>NOTHING</code> horse. &ldquo;Cannot be fed&rdquo; had to include
+    &ldquo;does not quietly heal itself standing next to a hay bale&rdquo;, and
+    it is stated once, in terms of the diet rather than of this gene, so any
+    future gene claiming <code>NOTHING</code> inherits it.
+</p>
+
+<h2 id="behaviour">The behaviour, and why it is hand-written</h2>
+
+<p>
+    Burning, running for shade and hunting are three things, and none of them is
+    an <a href="gene-effects.html"><code>effects</code> verb</a>. Each would be a
+    verb with exactly one user, and that vocabulary is meant to be things a
+    <em>data-driven</em> gene would reach for. The herd, aggro and lethal-foal
+    behaviours are all hand-written handlers for the same reason, and this
+    follows them.
+</p>
+
+<ul>
+    <li><strong><code>DhampirShadeGoal</code></strong>, at the top goal priority
+        &mdash; a burning horse has nothing more urgent to do. It searches a box
+        around itself for the nearest square that is either out of the sky or in
+        water and runs for it, re-looking as it goes so it takes a doorway it
+        passes rather than the tree it first saw. <strong>Water counts as
+        shelter</strong>, which is what makes &ldquo;run to water&rdquo; a real
+        answer rather than flavour.</li>
+    <li><strong>Fences.</strong> There is no pathfinding-with-jumps in vanilla
+        horse AI, so while it is running for shelter and its horizontal movement
+        is blocked, it presses jump. A horse's jump strength is a real stat with
+        a real range, so a strong one clears a fence and a Falabella does not
+        &mdash; which is the right answer to &ldquo;up to and including jumping
+        fences if they can&rdquo;. It is an approximation of intent, not a
+        pathfinder.</li>
+    <li><strong><code>DhampirHuntGoal</code></strong> &mdash; below full health,
+        and only once it is out of the sun. It bites anything living and
+        <strong>not undead</strong>: the passive animals, creepers and spiders,
+        never a zombie or a skeleton. Two exclusions on top: <strong>players</strong>
+        (a horse that bit its owner to heal would be a hostile mob wearing a
+        saddle) and <strong>other horses</strong> (so a herd of them does not eat
+        each other, and one alone in a paddock of horses genuinely has nothing to
+        live on).</li>
+</ul>
+
+<div class="note">
+    <span class="label">It is not a predator, and that is the balance</span>
+    <p>
+        One bite per animal per day, half a heart, against a cow with five: the
+        cow lives, walks off, and is bitten again tomorrow. So a dhampir kept
+        beside a pen of livestock sustains itself without emptying the pen, and
+        one kept alone starves slowly. The triple health is paid for by needing a
+        herd of something else nearby.
+    </p>
+    <p>
+        The day is counted <strong>on the prey</strong>, in
+        <code>HorseCooldownsAttachment</code> under
+        <code>DhampirHuntGoal.BITTEN_KEY</code> &mdash; storing it on the horse
+        would mean a growing map of every animal it has ever met, and storing it
+        on the animal is one number that goes away with the animal. It also makes
+        the rule &ldquo;one bite per animal per day&rdquo; rather than
+        &ldquo;per pair&rdquo;, which keeps two dhampirs from double-draining one
+        cow.
+    </p>
+</div>
+
+<h2 id="eyes">The eyes are claimed twice, on purpose</h2>
+
+<p>
+    The gene implements <code>EyeColorContribution</code>, which is the
+    <em>declaration</em>: it is what the eye channel ranks, and what the info
+    panel reads. But the overlay phase runs after the eye channel and is
+    explicitly allowed the last word over the iris &mdash; right for the genes
+    it was built for (<a href="gene-light.html">light</a>'s glowing eye, the
+    <a href="gene-leopard.html">leopard complex</a>'s white sclera rim), wrong
+    here. A dhampir that also carried the leopard complex came out with the
+    rim's ordinary black eye.
+</p>
+
+<p>
+    So the gene's own overlay paints the iris again. It sorts after every gene
+    that paints, so that is the <em>enforcement</em> of the claim the eye channel
+    makes. Then it marks only the <strong>sclera</strong> emissive: a glowing
+    iris reads as a lamp, and a glowing white with a hole in it reads as a
+    dhampir. <code>CoatOverlay.markEmissiveSclera</code> works out which texels
+    those are from the coat, the exact complement of <code>tintIris</code>.
+</p>
+
+<div class="note">
+    <span class="label">One rank was quietly wrong until this gene existed</span>
+    <p>
+        <code>EyeColor.depigmented()</code> was <code>rank &gt;= RANK_DEPIGMENTED</code>,
+        which is indistinguishable from equality while nothing outranks the
+        depigmented blue. The composer branches on it to run
+        <a href="eye-colour.html">the spread roll</a> &mdash; &ldquo;how much of
+        each iris did the depigmentation actually reach&rdquo; &mdash; so a
+        magical claim answering yes would have given a dhampir <strong>one red eye
+        and one ordinary one</strong>. Plausible enough that nobody would have
+        called it a bug. It is equality now.
+    </p>
+</div>
+
+<h2>Where it comes from</h2>
+
+<ul>
+    <li><strong>Founders carry, never express.</strong> A wild-caught horse is an
+        adult that survived, and an animal that burns in daylight and starves
+        unless it hunts would not have. The founder table lists the carrier and
+        <span class="allele dom">n/n</span> and nothing else &mdash; the same rule
+        the health loci use, for a different reason.</li>
+    <li><strong>The random splice cannot roll it.</strong>
+        <code>SpliceSafety</code> derives its blacklist from what a combination
+        does to the <em>body</em>, and this one <em>raises</em> every stat it
+        touches &mdash; so nothing there would have stopped it handing an unborn
+        foal a horse that cannot be fed. This is exactly the "harm resolution
+        cannot see" that <code>Gene.spliceable()</code> exists to override.</li>
+    <li><strong>The known carrot hands over one copy</strong>, never two. The
+        animal is the reward for breeding two carriers; a carrot that produced
+        one outright would skip the whole gene.</li>
+</ul>
+
+<h2 id="carrot">Its gene carrot</h2>
+
+<div class="gene-carrot" data-gene="horsegenetics.dhampir"></div>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="gene-diet.html">Diet &mdash; the channel it overrides</a>
+        <a href="eye-colour.html">Eye colour</a>
+        <a href="horse-care.html">Horse care</a>
+        <a href="horse-body.html">Speed, health, jump</a>
+    </div>
+    Source: <code>common/genetics/genes/DhampirGene.java</code>,
+    <code>neoforge/server/DhampirHandler.java</code>,
+    <code>neoforge/server/DhampirShadeGoal.java</code>,
+    <code>neoforge/server/DhampirHuntGoal.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+<script defer src="gene-preview/gene-preview.js"></script>
+<script defer src="gene-carrot/gene-carrot.js"></script>
+</body>
+</html>

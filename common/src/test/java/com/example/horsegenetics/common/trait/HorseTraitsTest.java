@@ -187,18 +187,51 @@ class HorseTraitsTest {
         assertEquals(plain.coatCode(), loaded.coatCode());
     }
 
-    /** Every gene that contributes a trait is reachable from the one walk. */
+    /**
+     * Every gene that contributes a trait is reachable from the one walk.
+     *
+     * <p><b>Named, not counted.</b> This used to assert a total, which is a
+     * derived number written into a test - it says nothing about <i>which</i>
+     * gene went missing, and it goes red every time a gene is added for reasons
+     * that have nothing to do with traits. What it is actually protecting is
+     * that a gene which contributes to the body is still declaring it, so it
+     * names them: the performance, size and health loci, the colour loci that
+     * carry a disorder, milk's embryonic lethal, the leopard complex's CSNB, and
+     * the dhampir's multipliers.
+     */
     @Test
     void everyTraitGeneIsVisitedInCodeOrder() {
-        int contributors = 0;
+        List<Gene> expected = List.of(
+                // performance and size
+                Genes.MSTN, Genes.PDK4, Genes.CKM, Genes.RYR2, Genes.LCORL, Genes.HMGA2,
+                // the health loci
+                Genes.ACAN, Genes.B4GALT7, Genes.PLOD1, Genes.RAPGEF5, Genes.ST14,
+                Genes.SHOX, Genes.MET,
+                // colour loci that carry a disorder, milk's embryonic lethal,
+                // the leopard complex's CSNB
+                Genes.EDNRB, Genes.MITF, Genes.PAX3, Genes.SILVER, Genes.MILK, Genes.LEOPARD,
+                // the dhampir's multiplier set. The four magical body-stat loci
+                // are NOT here - they go through EpigeneticTraitContribution,
+                // because their magnitude is on the allele copy rather than on
+                // the allele.
+                Genes.DHAMPIR);
+
+        List<Gene> found = new ArrayList<>();
         for (Gene g : Genes.codeOrder()) {
             if (g instanceof TraitContribution) {
-                contributors++;
+                found.add(g);
             }
         }
-        // 13 non-coat genes, the four colour loci that carry a disorder, milk
-        // (whose water/lava heterozygote is an embryonic lethal) and the
-        // leopard complex (LP/LP carries CSNB)
-        assertEquals(19, contributors);
+        for (Gene g : expected) {
+            assertTrue(found.contains(g), g.key() + " should contribute a trait and does not");
+        }
+        List<String> unexpected = new ArrayList<>();
+        for (Gene g : found) {
+            if (!expected.contains(g)) {
+                unexpected.add(g.key());
+            }
+        }
+        assertTrue(unexpected.isEmpty(),
+                "these genes contribute a trait and are not named here: " + unexpected);
     }
 }

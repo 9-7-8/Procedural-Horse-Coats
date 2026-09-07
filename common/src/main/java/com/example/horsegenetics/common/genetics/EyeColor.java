@@ -77,6 +77,21 @@ public record EyeColor(String id, String name, int rgb, int rank, double strengt
     public static final int RANK_DEPIGMENTED = 30;
 
     /**
+     * <b>Not one of the three routes at all.</b> A magical gene that simply
+     * paints the iris a colour no horse's pigment can make - the dhampir's red.
+     * Above {@link #RANK_DEPIGMENTED} because the three ranks below it are an
+     * argument about melanin, and this one is not participating in that
+     * argument: an absence of pigment cannot be overpainted <i>by pigment</i>,
+     * and this is not pigment.
+     *
+     * <p>It is deliberately the only rank above the real ones, and it should
+     * stay that way. Two magical genes both claiming the iris would need an
+     * order of their own, and the answer to that is the same as everywhere else
+     * in this mod - one channel, one owner - not a fifth number.
+     */
+    public static final int RANK_MAGICAL = 40;
+
+    /**
      * The blue of a splashed white or dominant white horse's eye. Pale and cool,
      * and deliberately not saturated: at two texels a bright cyan stops reading
      * as an eye.
@@ -104,9 +119,21 @@ public record EyeColor(String id, String name, int rgb, int rank, double strengt
         return new EyeColor(id, name, rgb, RANK_PIGMENT, 1.0);
     }
 
-    /** Is this claim an absence of pigment rather than a colour of it? */
+    /**
+     * Is this claim an <b>absence</b> of pigment rather than a colour of it?
+     * Only the depigmented rank is, and the test is equality rather than
+     * {@code >=} on purpose.
+     *
+     * <p>It used to be {@code >=}, which was indistinguishable from equality
+     * while nothing outranked the depigmented blue and became wrong the moment
+     * something did. The composer branches on this to run
+     * {@link EyeSpread} - "how much of each iris did the depigmentation
+     * actually reach" - so a {@link #RANK_MAGICAL} claim answering yes would
+     * have come out as one red eye and one ordinary one, which is a plausible
+     * enough look that nobody would have called it a bug.
+     */
     public boolean depigmented() {
-        return rank >= RANK_DEPIGMENTED;
+        return rank == RANK_DEPIGMENTED;
     }
 
     /** Does {@code other} out-rank this claim? */

@@ -104,6 +104,7 @@
         {
             title: "Magical genes",
             items: [
+                { href: "gene-dhampir.html", text: "Dhampir", kind: "magical" },
                 { href: "gene-pink-hair.html", text: "Pink hair", kind: "magical" },
                 { href: "gene-mane-color.html", text: "Mane colour", kind: "magical" },
                 { href: "gene-tail-color.html", text: "Tail colour", kind: "magical" },

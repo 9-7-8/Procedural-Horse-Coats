@@ -60,7 +60,7 @@
     <em>on purpose</em> has to run after it. See <a href="pipeline.html">the pipeline</a>.
 </p>
 
-<h2 id="ranks">Three ranks, because there are three routes</h2>
+<h2 id="ranks">Three ranks, because there are three routes &mdash; and one that is not a route</h2>
 <p>
     A horse has one iris colour, so "what colour are its eyes" has exactly one answer and
     several genes have a claim on it. That makes it a <strong>channel</strong> with a
@@ -78,6 +78,17 @@
 <table class="data">
     <thead><tr><th>Rank</th><th>Route</th><th>Claimants</th><th>Why it sits there</th></tr></thead>
     <tbody>
+        <tr>
+            <td>40 &mdash; magical</td>
+            <td>Not a route at all: a magical gene painting the iris a colour no
+                horse&rsquo;s pigment can make</td>
+            <td><a href="gene-dhampir.html">Dhampir</a> (red)</td>
+            <td>The three ranks below are an argument about melanin, and this one is not
+                participating in it. Deliberately the <em>only</em> rank above the real
+                ones: two magical genes both claiming the iris would need an order of
+                their own, and the answer to that is one channel, one owner &mdash; not a
+                fifth number.</td>
+        </tr>
         <tr>
             <td>30 &mdash; depigmented</td>
             <td>The iris never got enough melanocytes at all</td>
@@ -163,7 +174,7 @@
 </table>
 <p>
     This is why the pigment layer has to be painted <strong>first and in full</strong>,
-    with the blue laid over as much of it as the spread says. A depigmented iris is not a
+    with the blue laid over as much of it as the spread says. <strong>Only rank 30 takes this branch</strong> - <code>EyeColor.depigmented()</code> is an equality test, not <code>&gt;=</code>, which was indistinguishable until rank 40 existed and would have given a dhampir one red eye and one ordinary one. A depigmented iris is not a
     colour painted over the pigment, it is pigment that never arrived &mdash; so what
     shows where the blue stops is the horse's own eye, and it has to still be there
     underneath. A splashed white tiger-eye horse with one blue eye has an <em>amber</em>
