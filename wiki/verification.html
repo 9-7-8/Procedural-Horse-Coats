@@ -200,11 +200,16 @@
     <li><strong>CONFIRMED: he rides home at dusk and takes shelter.</strong> Seen
         2026-09-07 after the disabled-<code>MOVE</code>-flag fix. What is left of this
         is below.</li>
-    <li><strong>Does he ride to the back of the barn?</strong> New: he parks five
-        blocks up the long axis rather than in the middle, to leave the doorway clear.
-        Found by bearing from the village bell, so the thing to watch for is him parking
-        at the <em>wrong</em> end &mdash; outside the door he came in by &mdash; which
+    <li><strong>Does he ride to the back of the barn &mdash; and is he inside it?</strong>
+        He parks four blocks up the long axis. The first attempt used the bell bearing raw
+        and sent him diagonally into a corner six blocks out, which put him outside the
+        radius the door logic measures by; the bearing is snapped to a cardinal now. Watch
+        for him parking at the <em>wrong</em> end, outside the door he came in by, which
         would mean the bearing is backwards for that rotation.</li>
+    <li><strong>Are villagers put out of the barn at dusk?</strong> Anyone inside gets
+        dropped in front of the doors while he waits &mdash; a villager in that room is a
+        cork the horses cannot get past. A grey <code>put &lt;name&gt; out of the
+        barn</code> line says it happened. Check they do not simply walk back in.</li>
     <li><strong>Do big horses fit through the doors now?</strong> The course of blocks
         over each doorway is cleared to air by the bake, taking each opening from two
         blocks tall to three. That covers every horse up to about scale 1.43; above

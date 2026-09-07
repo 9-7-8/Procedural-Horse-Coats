@@ -2,6 +2,7 @@ package com.example.horsegenetics.neoforge.server;
 
 import com.example.horsegenetics.neoforge.entity.Cowboy;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Vec3i;
 import net.minecraft.server.level.ServerLevel;
@@ -152,13 +153,21 @@ public final class CowboyRoutine {
     /**
      * How far up the barn he parks from its centre, toward the far end.
      *
-     * <p>He goes <b>all the way to the back</b>. The doorway is the scarce thing
-     * in this building - eleven horses have to come through a two-block gap - and
-     * a man sitting on a horse in the middle of the floor is one horse's worth of
-     * the room they need. The barn's interior is about eleven blocks along its
-     * long axis, so five from the middle is the far wall.
+     * <p>He goes <b>nearly all the way to the back</b>. The doorway is the scarce
+     * thing in this building - eleven horses have to come through a two-block gap
+     * - and a man sitting on a horse in the middle of the floor is one horse's
+     * worth of the room they need. The interior is about eleven blocks along its
+     * long axis, so four from the middle is a block short of the far wall.
+     *
+     * <p>Four and not five, and that block of margin is load-bearing: everything
+     * else about the night is measured from the barn's <i>centre</i> with
+     * {@link #INSIDE_RADIUS}, and a stall parked exactly on that radius is a
+     * cowboy who is at home for one test and not at home for the next.
      */
-    private static final int FAR_END = 5;
+    private static final int FAR_END = 4;
+
+    /** How far in front of the barn's doors villagers are moved at dusk. */
+    private static final int FRONT_STANDOFF = 6;
 
     /** How far above and below home "in the building" reaches. */
     private static final int INSIDE_HEIGHT = 3;
@@ -275,20 +284,43 @@ public final class CowboyRoutine {
      * park anyway.
      */
     public static BlockPos farEndOf(ServerLevel level, BlockPos barn) {
+        Direction axis = longAxis(level, barn);
+        return axis == null ? barn : barn.relative(axis, FAR_END);
+    }
+
+    /** Open ground in front of the barn's doors - where villagers in the way get put. */
+    public static BlockPos frontOf(ServerLevel level, BlockPos barn) {
+        Direction axis = longAxis(level, barn);
+        return axis == null ? barn : barn.relative(axis.getOpposite(), FRONT_STANDOFF);
+    }
+
+    /**
+     * Which way the barn's long axis runs: from its door end toward its back
+     * wall, as one of the four cardinals.
+     *
+     * <p><b>Snapped to a cardinal, and that is the whole point.</b> The bearing
+     * from the bell to the barn is a real angle, and using it raw walked the
+     * cowboy diagonally: five blocks along the length <i>and</i> two across the
+     * width, into a corner six blocks from the middle of a building whose middle
+     * is the only thing the rest of the night measures from. He parked there, the
+     * "is he home?" test said no, the door timer reset every tick and the barn
+     * stood open all night with him wedged against the far wall. The building is
+     * axis-aligned however the jigsaw turned it, so the answer has to be too.
+     */
+    private static @Nullable Direction longAxis(ServerLevel level, BlockPos barn) {
         Optional<BlockPos> centre = villageCentre(level, barn);
         if (centre.isEmpty()) {
-            return barn;
+            return null;
         }
-        double dx = barn.getX() - centre.get().getX();
-        double dz = barn.getZ() - centre.get().getZ();
-        double distance = Math.sqrt(dx * dx + dz * dz);
-        if (distance < 1.0) {
-            return barn;
+        int dx = barn.getX() - centre.get().getX();
+        int dz = barn.getZ() - centre.get().getZ();
+        if (dx == 0 && dz == 0) {
+            return null;
         }
-        return barn.offset(
-                Mth.floor(dx / distance * FAR_END + 0.5),
-                0,
-                Mth.floor(dz / distance * FAR_END + 0.5));
+        if (Math.abs(dx) >= Math.abs(dz)) {
+            return dx > 0 ? Direction.EAST : Direction.WEST;
+        }
+        return dz > 0 ? Direction.SOUTH : Direction.NORTH;
     }
 
     /**
@@ -327,7 +359,8 @@ public final class CowboyRoutine {
                 && Math.abs(pos.getY() - barn.getY()) <= INSIDE_HEIGHT;
     }
 
-    private static AABB barnBox(BlockPos barn) {
+    /** The box that counts as "in the building" - for anything that has to look inside it. */
+    public static AABB barnBox(BlockPos barn) {
         return new AABB(barn).inflate(INSIDE_RADIUS, INSIDE_HEIGHT, INSIDE_RADIUS);
     }
 

@@ -10,6 +10,8 @@ import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.WrappedGoal;
 import net.minecraft.world.entity.ai.util.DefaultRandomPos;
 import net.minecraft.world.entity.animal.equine.AbstractHorse;
+import net.minecraft.world.entity.npc.villager.Villager;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.entity.ai.control.MoveControl;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
@@ -361,6 +363,10 @@ public final class CowboyMountGoal extends Goal {
         // He is home with the doors open behind him. Let the string walk through
         // each other until it is in, then shut up and give them their edges back.
         HerdCollision.off(level, cowboy);
+        if (doorScanCooldown == 0) {
+            doorScanCooldown = DOOR_SCAN_INTERVAL;
+            clearTheFloor(level, cowboy, barn);
+        }
         doorHeldTicks += ticksSinceLastCall();
         boolean everyoneIn = herdIsHome(cowboy, level, barn);
         if (!everyoneIn && doorHeldTicks < DOOR_HOLD_TICKS) {
@@ -375,6 +381,38 @@ public final class CowboyMountGoal extends Goal {
                 + (everyoneIn ? "whole string in" : "gave up waiting; some are out")
                 + ", " + horsesHome(cowboy, level, barn) + "/" + cowboy.liveHerd(level).size()
                 + " in)", ChatFormatting.GRAY);
+    }
+
+    /**
+     * Put out any villager who has wandered into the barn.
+     *
+     * <p>A villager standing in an eleven-by-five room with one two-block door is
+     * a cork. He is not going anywhere - a village brain has no reason to leave a
+     * building at night, which is the whole problem - and the horses cannot get
+     * past him, so the string ends up milling in the field outside a barn that has
+     * a bed-seeking farmer standing in the middle of it.
+     *
+     * <p>They are moved, not hurt: dropped on the ground in front of the doors,
+     * outside, from where they will go and find their own beds. Owner's call, and
+     * the blunt instrument is the right one here - the alternative is teaching
+     * vanilla's brain about somebody else's barn.
+     *
+     * <p>Includes the <b>horseman</b>. His post is outside the road-facing end and
+     * he has no business in here either.
+     */
+    private void clearTheFloor(ServerLevel level, Cowboy cowboy, BlockPos barn) {
+        var inside = level.getEntitiesOfClass(Villager.class, CowboyRoutine.barnBox(barn));
+        if (inside.isEmpty()) {
+            return;
+        }
+        BlockPos front = level.getHeightmapPos(
+                Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, CowboyRoutine.frontOf(level, barn));
+        for (Villager villager : inside) {
+            villager.teleportTo(front.getX() + 0.5, front.getY(), front.getZ() + 0.5);
+            DebugAnnounce.sayAt(level, "Cowboy",
+                    cowboy.cowboyName() + " put " + villager.getName().getString()
+                            + " out of the barn", front, ChatFormatting.GRAY);
+        }
     }
 
     /**
