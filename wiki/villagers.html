@@ -423,11 +423,16 @@
 </p>
 
 <p>
-    It goes in at weight 1 against the four vanilla terminators of weight 1 each, so
-    roughly one terminator slot in five. A village has a handful, and the barn is
-    15&times;7 where a terminator is 2&times;3 &mdash; so most of the draws that pick
+    It goes in at weight <strong>3</strong> against the four vanilla terminators of
+    weight 1 each, so roughly three terminator slots in seven. That is not how often it
+    appears. A village has a handful of terminator slots, and the piece is
+    15&times;15 where a terminator is 2&times;3 &mdash; so most of the draws that pick
     it then fail the bounding-box check and fall through to a small terminator
-    instead. The net effect is &ldquo;most plains villages, where there was room&rdquo;.
+    instead. The weight is set high to compensate for exactly that: it was 1 while the
+    piece was 15&times;7 and carried the barn alone, and
+    <a href="#horseman-nights">taking the house in</a> doubled the depth, and so doubled
+    the ground it has to find. The effect aimed at is &ldquo;most plains villages, where
+    there was room&rdquo;.
 </p>
 
 <h3 id="pool-injection">Why the pool is edited in code</h3>
@@ -442,7 +447,7 @@
     <a href="api-notes.html#access-transformer">access transformer</a> is for.
 </p>
 
-<h3 id="entity-in-structure">The cowboy rides in with the building</h3>
+<h3 id="entity-in-structure">The cowboy comes with the building</h3>
 
 <p>
     He is carried in the structure template's <code>entities</code> list, which is the
@@ -450,7 +455,7 @@
     <code>village/plains/villagers/*.nbt</code>. A template can only place an entity,
     not roll one, so he arrives <strong>bare</strong> &mdash; nothing but his id
     &mdash; and <code>CowboyHandler</code> builds him on his first server tick: name,
-    home, mount, herd.
+    home, herd.
 </p>
 
 <p>
@@ -476,20 +481,24 @@
     the others.
 </p>
 
-<h3 id="rebaking">Re-baking the barn</h3>
+<h3 id="rebaking">Re-baking the piece</h3>
 
 <p>
-    <code>neoforge-26.1.2/tools/barn/cowboy_barn.source.nbt</code> is the raw
-    structure-block save. It is kept only so the building can be edited in game and
-    re-exported; the mod never reads it. After a re-export, run:
+    <strong>Two sources, one output.</strong>
+    <code>tools/barn/cowboy_barn.source.nbt</code> is the raw structure-block save of the
+    stable; <code>tools/barn/cowboy_house.source.nbt</code> is a byte copy of vanilla's
+    <code>village/plains/houses/plains_small_house_1</code>. Both are kept only so the
+    buildings can be edited in game and re-exported; the mod never reads either. After a
+    re-export, run:
 </p>
 
 <pre><code class="language-bash">python neoforge-26.1.2/tools/barn/bake-barn.py</code></pre>
 
 <p>
-    which adds the two things a structure-block save cannot carry &mdash; the jigsaw
-    connector and the cowboy entity &mdash; and writes
-    <code>data/horsegenetics/structure/cowboy_barn.nbt</code>. Commit both.
+    which adds everything a structure-block save cannot carry &mdash; the jigsaw
+    connector, the headroom over the doorways, the reshaped house, the path between the
+    two buildings, the work posts and the villagers &mdash; and writes
+    <code>data/horsegenetics/structure/cowboy_barn.nbt</code>. Commit all three.
 </p>
 
 <hr>
@@ -570,21 +579,23 @@
     he died.
 </p>
 
-<h3 id="post-at-the-barn">Both of them come with the barn</h3>
+<h3 id="post-at-the-barn">Both of them stand at the house</h3>
 
 <p>
-    The barn carries the pair <strong>stacked</strong> in the middle of its road-facing
-    end, between the two door pairs: the hitch low and the table above it, which is the
-    way round they read &mdash; you tie a horse to the low one. A villager stands either
-    side. One claims the table and becomes the horseman; the other is taken on by the
-    hitch and becomes the cowboy.
+    They flank the <a href="#horseman-nights">house's</a> front step, one either side of
+    it, with a villager standing on each. A villager takes the post he is standing on
+    &mdash; one becomes the horseman, the other the cowboy.
 </p>
 
 <p>
-    They sit <strong>on</strong> the step rather than in it. They used to replace the
-    middle stair of the skirt, which left a hole in the run of steps up to the doors
-    &mdash; and that skirt is what makes the barn read as standing on the ground rather
-    than dug into it, so a gap in the middle of it is the first thing the eye finds.
+    <strong>They were on the barn, and moving them is what fixed the house.</strong> Not a
+    question of where they look right: the house has to exist before either post does, and
+    while the house was built at runtime <em>by the cowboy</em>, the posts had to be
+    somewhere the cowboy already was. That ordering is what finally sank the runtime house
+    &mdash; the posts are what make a cowboy, so a cowboy cannot be what builds the thing
+    the posts stand on. With both buildings in one baked piece there is no order left to
+    get wrong, and the posts can go where they belong: on the doorstep of the house whose
+    family works them.
 </p>
 
 <p>
@@ -643,49 +654,55 @@
 </p>
 
 <p>
-    So he gets a house. <code>server/CowboyHouseBuilder</code> stands one up when the
-    cowboy founds: <code>horsegenetics:cowboy_house</code>, a copy of vanilla's
-    <code>plains_small_house_1</code>, copied rather than referenced because it needs
-    changing and because a vanilla template is not ours to rely on keeping its shape.
-    <code>tools/barn/bake-house.py</code> makes five changes:
+    So he gets a house, and it is <strong>part of the same structure piece as the
+    barn</strong>. It is a copy of vanilla's <code>plains_small_house_1</code>, copied
+    rather than referenced because it needs changing and because a vanilla template is not
+    ours to rely on keeping its shape. <code>tools/barn/bake-barn.py</code> reshapes it:
 </p>
 
 <ul>
     <li><strong>The two jigsaw blocks come out.</strong> They are placement machinery and
-        nothing resolves them when a template is placed by hand, so left in they would
-        stand in the finished building as jigsaw blocks. The one in the doorway becomes
-        air, the one in the floor becomes floor.</li>
-    <li><strong>A second bed</strong>, alongside the first rather than across the room -
-        a bunkhouse, not a waiting room. One is all the horseman needs; the second is for
-        the look of the place.</li>
-    <li><strong>The stair beside them comes out.</strong> It is a chair in the vanilla
+        nothing resolves them for a template read straight out of the data pack, so left
+        in they would stand in the finished building as jigsaw blocks. The one in the
+        doorway becomes air, the one in the floor becomes floor.</li>
+    <li><strong>The interior is widened to four blocks</strong>, by duplicating a column
+        of the plan &mdash; walls, floor, roof and all, so nothing has to be redrawn.
+        Vanilla's three across is a bedroom; four is a bunkhouse with room to walk past
+        the beds.</li>
+    <li><strong>Two beds, pushed together</strong> against the back wall. One is all the
+        horseman needs; the second is for the look of the place.</li>
+    <li><strong>A chest either side of them</strong>, drawing on
+        <code>horsegenetics:chests/cowboy_house</code>: feed by the armful, a lead or a
+        saddle now and then, and one roll in four or so at a piece of this mod's own kit,
+        so a chest can teach you an item exists. Nothing in it should make a player feel
+        he can skip the horseman &mdash; the saddle is the only real prize.</li>
+    <li><strong>The stair beside the beds comes out.</strong> It is a chair in the vanilla
         house and it reads as a headboard once there are two beds against that wall.</li>
-    <li><strong>A step outside the front door.</strong> The house sits a block proud of
-        the ground the way every vanilla plains house does, so without one the threshold
-        is a ledge you jump at.</li>
+    <li><strong>A step outside the front door</strong>, with the
+        <a href="#post-at-the-barn">two work posts</a> either side of it. The house sits a
+        block proud of the ground the way every vanilla plains house does, so without the
+        step the threshold is a ledge you jump at.</li>
     <li><strong>Bark back on the corner posts.</strong> They are stripped oak in vanilla;
         nothing else about a homestead beside a stable is planed.</li>
 </ul>
 
 <p>
-    Then a <strong>path</strong> is trodden from the barn to it, in the same
-    <code>dirt_path</code> the village's own streets are made of. Two buildings on the
-    edge of a village with nothing between them read as two things that happen to be near
-    each other. It walks straight from one to the other and paves only what is
-    <em>already ground</em>, which does all the work at once: the columns under the two
-    buildings report planks and cobble rather than dirt, so the path stops at each
-    doorstep without anyone working out where the walls are &mdash; and a player's floor
-    is not dirt either, so it will not draw itself across somebody's build.
+    It is set down beside the barn with a lane of <code>dirt_path</code> between them, the
+    same block the village's own streets are made of, running along the front of both and
+    up to each door. Two buildings on the edge of a village with nothing between them read
+    as two things that happen to be near each other.
 </p>
 
 <p>
-    It goes on the far side of the barn from the village, 10&ndash;22 blocks out, on a
-    patch that is <strong>flat, clear and untouched</strong>: every column of the
-    footprint has to agree on its surface height and be open above it. That is a strict
-    test and it fails often, which is the intended trade &mdash; a run of candidates that
-    all fail means no house, and <strong>no house is a great deal better than a house
-    dropped through somebody's roof</strong>. It is also what stops a hitch planted in the
-    middle of a player's base from building on it.
+    <strong>It used to be built at runtime and it never once appeared.</strong>
+    <code>CowboyHouseBuilder</code> hunted the far side of the barn for a patch that was
+    flat, clear and untouched &mdash; every column of the footprint agreeing on its
+    surface height &mdash; on the reasoning that no house is a great deal better than a
+    house dropped through somebody's roof. In a real village that test never passed once.
+    Baking the house into the piece answers the same worry better than the test did: the
+    jigsaw generator's own bounding-box check is a far more careful version of &ldquo;is
+    there room here&rdquo;, and it runs before anything is placed at all. The price is a
+    piece twice as deep, paid for in <a href="#pool-injection">pool weight</a>.
 </p>
 
 <p>

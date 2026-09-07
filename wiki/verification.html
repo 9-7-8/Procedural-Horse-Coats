@@ -66,58 +66,16 @@
 <h2 id="villagers">&sect;0-AC &mdash; The cowboy, the horseman &amp; transfer papers (2026-09-07, partly looked at)</h2>
 
 <p>
-    A whole gameplay subsystem, most of it still unseen. The barn <em>does</em> generate
-    and the cowboy <em>does</em> found &mdash; that much the owner has now watched
-    happen &mdash; and five things were wrong when he did: the barn was sunk a block, he
-    had no face, he stood on his horse rather than sat, his horses spawned inside the
-    walls, and they cost ten to forty emeralds. All five have been changed and
-    <strong>none of the fixes has been looked at</strong>. Full design:
+    <strong>Confirmed in game:</strong> the barn generates and sits on the ground with
+    steps up to it, the cowboy founds and has a face, both posts hand out their jobs, the
+    two share a surname, the horseman keeps vanilla's brain, and transfer papers work end
+    to end. <strong>What is new and unseen is the homestead.</strong> The house is no
+    longer built at runtime &mdash; it is baked into the same structure piece as the barn,
+    and the two work posts moved onto its front step. That is one change to a piece the
+    village generator places, so the first question below is whether the piece still
+    generates at all. Full design:
     <a href="villagers.html">Villagers &amp; transfer papers</a>.
 </p>
-
-<h3 id="villagers-fixes">Start here: the fixes from the first playthrough</h3>
-
-<ul>
-    <li><strong>Is the barn sitting on the ground with steps up to the doors?</strong>
-        The connector moved from the piece's <code>y=1</code> to its <code>y=0</code>,
-        which raises the whole building one block relative to the street. Expect the
-        stair skirt at both door ends to be a visible step you walk <em>up</em>. If it
-        is now a block too <em>high</em> &mdash; a gap under the foundation &mdash; the
-        move overshot and it belongs back at <code>y=1</code>.</li>
-    <li><strong>Has he got a face?</strong> The base skin was
-        <code>villager/type/plains.png</code>, which is an overlay with a hole where the
-        head goes, not a skin; it is now <code>villager/villager.png</code> with the
-        plains robe as a layer over it. He should look like an ordinary plains villager
-        wearing the horseman's hat &mdash; nose, eyes, brow, brown robe.</li>
-    <li><strong>Does he read as riding rather than standing?</strong> He is sunk half a
-        block into the saddle. A villager has no seated pose, so this is a bandaid: the
-        thing to judge is whether it looks worse than standing on top did, and whether
-        half a block is the right amount (<code>Cowboy.SADDLE_SINK</code>). His hitbox
-        moved with him, so check he is still clickable where he appears.</li>
-    <li><strong>Does the whole outfit start outside, in the open, and on the
-        ground?</strong> He used to found where the structure put him, in the middle of
-        the barn, with his horses half-inside the walls. He now walks out to a paddock
-        12&ndash;24 blocks away on the far side of the barn from the village bell. The
-        first attempt at that put him <strong>on the roof of somebody else's
-        house</strong> &mdash; the surface heightmap in a village is very often a roof
-        &mdash; so a paddock must now also be within 3 blocks of the barn's own height
-        and have 3 blocks of solid ground under it. Check he is standing in a field, not
-        on a building, and that nothing is clipped into a wall or a fence.</li>
-    <li><strong>Does a signed paper draw as the horse it names?</strong> New, and the
-        largest untested thing here: the item is a small 3D horse in that horse's coat,
-        in the merchant window and everywhere else. Check the merchant screen shows six
-        <em>different</em> horses, that the one you buy is the one you saw, and that
-        the horse in the slot is the horse you find in the field. Then judge the
-        framing - it is fitted by three constants in
-        <code>TransferDeedRenderer</code> and a display block in
-        <code>models/item/signed_transfer_paper.json</code>, all of them arithmetic
-        rather than observation. Clipped by the slot edge, sunk into the bottom of it,
-        too small to read, or facing the wrong way are all one-line fixes.</li>
-    <li><strong>Do his horses cost 1&ndash;3 emeralds?</strong> Every horse, since no
-        breed names a range yet. The price should be <em>stable</em> &mdash; close the
-        merchant screen and open it again and each paper must cost the same as before;
-        it is rolled from the horse's UUID precisely so it cannot drift.</li>
-</ul>
 
 <h3 id="villagers-testworld">The test world tells you where a village is</h3>
 
@@ -149,18 +107,24 @@
 <ul>
     <li><strong>Start here, because everything else depends on it.</strong>
         <code>/locate structure minecraft:village_plains</code>, fly out, and look for a
-        15&times;7 oak-and-cobble barn at the <em>end of a street</em>. Expect it in
-        <strong>most</strong> plains villages but not all &mdash; it is one draw in five
-        at each terminator slot, and the barn is big enough that many draws lose the
-        bounding-box check. Check three or four villages before concluding it is
-        broken.</li>
+        barn and a house side by side at the <em>end of a street</em>, with a path between
+        them. Expect them in <strong>most</strong> plains villages but not all &mdash; the
+        piece is three draws in seven at each terminator slot, and at 15&times;15 many of
+        those draws lose the bounding-box check anyway. Check three or four villages before
+        concluding it is broken.</li>
+    <li><strong>Is it appearing <em>less</em> than it used to?</strong> That is the risk
+        the piece took on when the house went into it: the footprint doubled in depth, and
+        the pool weight went 1 &rarr; 3 to compensate by arithmetic rather than by
+        measurement. If several villages in a row have no barn, the weight wants raising
+        again &mdash; it is one number in
+        <code>data/horsegenetics/worldgen/template_pool/cowboy_barn.json</code>.</li>
     <li><strong>Is it at the edge?</strong> That is the whole claim of the placement. If
         it keeps landing in the middle of town, the terminator theory is wrong and the
         section needs rethinking, not tuning.</li>
-    <li><strong>Is it sitting on the street rather than in it?</strong> It was buried
-        a block on the first playthrough; the connector moved to the piece's
-        <code>y=0</code> to raise it. See the fixes list above &mdash; the fix is one
-        constant in <code>tools/barn/bake-barn.py</code> either way.</li>
+    <li><strong>Do the barn and the house sit at the <em>same</em> height?</strong>
+        They are one rigid piece now, so terrain that slopes across it will leave one of
+        them cut into the hill or standing on a lip. Some of that is unavoidable and
+        normal for a village; a house buried to the windows is not.</li>
     <li><strong>Two barns in one village</strong> is expected occasionally. Only one
         should have a cowboy. If both do, the lowest-UUID tie-break in
         <code>CowboyHandler</code> is not firing.</li>
@@ -169,15 +133,22 @@
 <h3 id="villagers-cowboy">The cowboy himself</h3>
 
 <ul>
-    <li><strong>Is he mounted, and does he stay mounted?</strong> Try to shove him off;
-        try to hit the horse. He should only ever end up on foot if the horse dies.</li>
-    <li><strong>Has he got a name and a herd?</strong> Four to ten horses plus his mount,
+    <li><strong>Does the whole outfit start outside, in the open, and on the
+        ground?</strong> He used to found where the structure put him, with his horses
+        half-inside the walls. He now walks out to a paddock 12&ndash;24 blocks away on
+        the far side of the barn from the village bell. The first attempt at that put him
+        <strong>on the roof of somebody else's house</strong> &mdash; the surface heightmap
+        in a village is very often a roof &mdash; so a paddock must also be within 3 blocks
+        of the barn's own height with 3 blocks of solid ground under it. Check he is
+        standing in a field, not on a building, and that nothing is clipped into a
+        wall.</li>
+    <li><strong>Has he got a name and a herd?</strong> Four to ten horses,
         all named, all with a real breed on the info panel, all with
         <strong>Bred by &lt;his name&gt;</strong>. If any reads <em>Feral Mixed</em>, the
         breed pick fell through.</li>
-    <li><strong>Is about half the string one breed?</strong> New: he has a
-        <code>preferredBreed</code>, his own mount is one, and roughly half his stock
-        should be it. All-of-one or none-of-one means
+    <li><strong>Is about half the string one breed?</strong> He has a
+        <code>preferredBreed</code> and roughly half his stock should be it.
+        All-of-one or none-of-one means
         <code>CowboyHandler.nextBreedFor</code> is not counting what it thinks it is.</li>
     <li><strong>Does he restock?</strong> Kill or buy a couple of his horses, then leave
         and come back. He looks over his string about once a minute and breeds
@@ -185,31 +156,23 @@
         longer stay a full string should also quietly turn over &mdash; but never while
         you are within 48 blocks, so if you ever <em>watch</em> a horse vanish, the
         privacy check in <code>retireOne</code> is not firing.</li>
-    <li><strong>Do the horses follow the one he is riding?</strong> They should trail it
-        at a loose distance and graze, not stack on it. The mount is the herd lead, so
-        the horse browser should show them as one herd.</li>
-    <li><strong>Does he ride, and does he stay near home?</strong> Watch him for a day.
-        He should amble round the barn, and if he strays past about 40 blocks he should
-        head back toward the village bell &mdash; stopping around 22 blocks short of it,
-        not riding into the square.</li>
 </ul>
 
-<h3 id="villagers-post">The post hands out both trades</h3>
+<h3 id="villagers-post">Two posts, and the house they stand on</h3>
 
 <p>
-    The mounted cowboy is <strong>gone entirely</strong> &mdash; no riding, no routine,
-    no barn shelter. A Horseman's Table now produces a cowboy first and a horseman
-    second and keeps alternating, and the barn's structure file carries only the post and
-    one villager. Design: <a href="villagers.html#post-at-the-barn">One block, two
-    trades</a>.
+    The mounted cowboy is <strong>gone entirely</strong> &mdash; no riding, no routine, no
+    barn shelter. A Cowboy Hitch makes the cowboy and a Horseman's Table makes the
+    horseman, and both now stand at the door of a house baked into the same structure
+    piece as the barn. Design:
+    <a href="villagers.html#post-at-the-barn">Both of them stand at the house</a>.
 </p>
 
 <ul>
-    <li><strong>Are both posts in the barn, stacked, and is the step under them
-        whole?</strong> Cowboy Hitch low with the Horseman's Table above it, in the middle
-        of the road-facing end, standing <em>on</em> an unbroken run of stairs rather than
-        in a gap in it. A villager either side. Both are modded blocks in a piece appended
-        to a vanilla pool, which is the thing that could quietly fail.</li>
+    <li><strong>Are both posts at the house's front door, one either side of the
+        step?</strong> New: they used to be stacked on the barn. A villager should be
+        standing on each. Both are modded blocks in a piece appended to a vanilla pool,
+        which is the thing that could quietly fail.</li>
     <li><strong>Does the hitch make a cowboy?</strong> A yellow <code>a villager took the
         hitch and became a cowboy</code> line, within a couple of seconds of a spare
         villager standing near it. Then place a second hitch 40 blocks away and confirm it
@@ -225,29 +188,29 @@
         table first &mdash; because the point of the change is that neither role owns the
         name. A second outfit across town should be a different family, not a second
         Hargreave.</li>
-    <li><strong>Did a house go up near the barn?</strong> New: beds in the barn were a
-        mistake &mdash; it is a building made of doors and a villager only shuts the one
-        he came through &mdash; so a copy of a vanilla plains house is placed 10&ndash;22
-        blocks out on the country side when the cowboy founds. A grey <code>a house went
-        up for the horseman</code> line says it happened. <strong>No line is an accepted
-        outcome</strong>: the site test wants a flat, clear, untouched footprint and
-        rough ground fails it, which is deliberate.</li>
-    <li><strong>Is the house intact and sitting on the ground?</strong> No jigsaw blocks
-        anywhere in it - one visible in a wall means the bake did not resolve them - and
-        no corner floating or buried. Inside: <strong>two beds side by side</strong> with
-        no stair beside them, and corner posts with bark on rather than stripped oak.
-        Outside: a step up to the front door, so the threshold is not a ledge.</li>
+    <li><strong>Is the house there at all?</strong> This is the headline. The runtime
+        builder is gone &mdash; it never once found ground it liked &mdash; and the house
+        now arrives with the barn. If the barn is there and the house is not, the bake or
+        the composition is wrong, not the terrain.</li>
+    <li><strong>Is the house intact?</strong> No jigsaw blocks anywhere in it &mdash; one
+        visible in a wall means the bake did not resolve them &mdash; and no corner
+        floating. Inside: an interior <strong>four blocks across</strong>, two beds side
+        by side against the back wall with no stair beside them, and corner posts with
+        bark on rather than stripped oak. Outside: a step up to the front door with a work
+        post either side, so the threshold is not a ledge.</li>
+    <li><strong>Do the two chests have anything in them?</strong> One either side of the
+        beds, drawing <code>horsegenetics:chests/cowboy_house</code>. Expect feed in
+        quantity every time, a lead or a saddle fairly often, and one of this mod's own
+        items now and then. An <em>empty</em> chest every time means the loot table failed
+        to parse, which is logged. Open several before judging the balance &mdash; a
+        saddle in the first chest you find is one roll in four, not a bug.</li>
     <li><strong>Is there a path between the barn and the house?</strong>
-        <code>dirt_path</code>, the same block the village streets use. It should stop at
-        both doorsteps of its own accord, because it only paves ground and the buildings
-        are not ground. A path drawn <em>through</em> a building means that test is
-        wrong.</li>
-    <li><strong>Does the horseman claim a bed and sleep in it?</strong> Watch him at dusk.
-        If he stands outside, either no house went up or he has claimed a bed in the
-        village instead &mdash; which is also fine.</li>
-    <li><strong>Does a hitch in a built-up area leave it alone?</strong> Plant one inside
-        a base and confirm nothing is built over. The flatness test is the only guard, so
-        this is worth trying once.</li>
+        <code>dirt_path</code>, the same block the village streets use, running along the
+        front of both and up to each door.</li>
+    <li><strong>Does the horseman claim one of the beds and sleep in it?</strong> Watch
+        him at dusk. He should walk to the house rather than the barn. If he claims a bed
+        elsewhere in the village that is also fine &mdash; the point is that he sleeps
+        somewhere.</li>
     <li><strong>Do the horses follow the man?</strong> All of them, at a loose distance by
         day and tightly after dark. He is the herd lead now, so the browser should show
         them as one herd led by him.</li>
@@ -292,29 +255,11 @@
 <h3 id="villagers-horseman">The horseman</h3>
 
 <ul>
-    <li><strong>Is the post built into the barn's road-facing end?</strong> New: the
-        Horseman's Table is now a block in the structure, in the middle of the end
-        you approach from the street, in place of the centre step &mdash; with a plain
-        villager standing one step along beside it. Check it survived the jigsaw (a
-        modded block in a vanilla-pool piece is the thing that could quietly fail) and
-        that it looks deliberate rather than like a missing stair.</li>
-    <li><strong>Has the horseman got a cowboy's surname?</strong> The moment he takes
-        the job he should be renamed to a new first name plus the surname of the nearest
-        cowboy within 128 blocks, with the name tag showing. If the cowboy is <em>Wade
-        Hargreave</em>, the horseman should be <em>&lt;someone&gt; Hargreave</em>. Worth
-        testing the other case too: craft a post and employ a villager in a village with
-        <em>no</em> cowboy, and he should stay plain &ldquo;Horseman&rdquo;.</li>
-    <li><strong>Does that villager take the job?</strong> He is placed unemployed on
-        purpose. A dev build prints an aqua <code>[Horseman] &lt;name&gt; took the job
-        at x, y, z</code> the first time it sees one
-        (<code>DebugHorsemanWatch</code>). <strong>No line after a minute or two is the
-        finding</strong>: it means the POI did not register or the
-        <code>acquirable_job_site</code> tag did not merge, not that he is being slow.
-        Standing him next to the post and watching him ignore it is the entire test of
-        that wiring.</li>
-    <li><strong>Or place a post yourself near an unemployed villager.</strong> Same
-        test, anywhere. He needs no house, bed or custom structure &mdash; a profession
-        comes from a job site and nothing else &mdash; so bare ground works.</li>
+    <li><strong>Place a table yourself near an unemployed villager.</strong> He needs
+        no house, bed or custom structure &mdash; a profession comes from a job site and
+        nothing else &mdash; so bare ground works. He should take it within a minute; a
+        villager who ignores it means the POI did not register or the
+        <code>acquirable_job_site</code> tag did not merge.</li>
     <li><strong>Does a clock promote him?</strong> Right-click him with the clock from
         the debug hotbar: he should go up a tier, his trades should be re-rolled to
         include the new one, and the trade screen should <em>not</em> open on that
