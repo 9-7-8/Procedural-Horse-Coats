@@ -2,6 +2,7 @@ package com.example.horsegenetics.common.genetics.genes;
 
 import com.example.horsegenetics.common.coat.pattern.CoatBuildContext;
 import com.example.horsegenetics.common.coat.pattern.CoatRegions;
+import com.example.horsegenetics.common.coat.pattern.HairPattern;
 import com.example.horsegenetics.common.coat.pattern.PigmentField;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Axis;
@@ -125,6 +126,60 @@ class DunGeneTest {
     }
 
     /**
+     * A <b>bay</b>'s mane arrives at the dun painter as absolute black, and for
+     * a long time that made it invisible: {@code alreadyAPoint} returned 1 for
+     * every texel of it, the painter took its early exit, and a bay dun's mane
+     * came out indistinguishable from a plain bay's while a grullo got a
+     * perfectly good midtstol. On the long hair the marking mask is the
+     * authority and caps the point term rather than losing to it, so the pale
+     * guard hairs are drawn on every base colour.
+     */
+    @Test
+    void aBayDunGetsPaleGuardHairsEitherSideOfItsMane() {
+        PigmentField out = painted("D/d2", bayPoints());
+        for (Part part : new Part[]{Part.MANE, Part.TAIL}) {
+            Axis across = HairPattern.axesBySpan(Skin.ADULT, part)[1];
+            Bounds b = HorseSkinGeometry.bounds(Skin.ADULT, part);
+            double centre = (b.min(across) + b.max(across)) * 0.5;
+            double span = b.span(across);
+            float[] acc = {0f, 0f, 0f, 0f};
+            HorseSkinGeometry.forEachTexel(Skin.ADULT, (px, py, p2, face, point) -> {
+                if (p2 != part) {
+                    return;
+                }
+                double d = Math.abs(point.along(across) - centre) / span;
+                int i = d < 0.20 ? 0 : (d > 0.30 ? 2 : -1);
+                if (i >= 0) {
+                    acc[i] += out.black(px, py);
+                    acc[i + 1]++;
+                }
+            });
+            assertTrue(acc[1] > 0 && acc[3] > 0, part + " has both a centre and an outside");
+            assertTrue(acc[0] / acc[1] > 0.90f,
+                    "the centre of a bay dun's " + part + " is still a black point");
+            assertTrue(acc[2] / acc[3] < 0.60f,
+                    "the guard hair outside the midtstol on a bay dun's " + part
+                            + " is paler than the point it frames");
+        }
+    }
+
+    /**
+     * A <b>bay</b> coat as the dun painter sees one: a red body with the mane,
+     * the tail, the ears and the muzzle already painted absolute black by
+     * agouti. The base every "does this survive a black point" claim needs.
+     */
+    private static PigmentField bayPoints() {
+        PigmentField f = new PigmentField(N);
+        HorseSkinGeometry.forEachTexel(Skin.ADULT, (px, py, part, face, point) -> {
+            boolean pointed = part == Part.MANE || part == Part.TAIL
+                    || part == Part.LEFT_EAR || part == Part.RIGHT_EAR || part == Part.MUZZLE;
+            f.setRed(px, py, pointed ? 0f : 1f);
+            f.setBlack(px, py, pointed ? 1f : 0f);
+        });
+        return f;
+    }
+
+    /**
      * The stripe is the region that keeps its pigment while everything around
      * it loses some - so on a chestnut, a spine texel must end up redder than a
      * flank texel. True for both marked outcomes; that is what makes them
@@ -163,15 +218,27 @@ class DunGeneTest {
     @Test
     void theDorsalStripeCarriesIntoTheTail() {
         PigmentField out = painted("D/d2", chestnut());
-        float[] tail = {0f, 0f};
+        Axis across = HairPattern.axesBySpan(Skin.ADULT, Part.TAIL)[1];
+        Bounds bounds = HorseSkinGeometry.bounds(Skin.ADULT, Part.TAIL);
+        double centre = (bounds.min(across) + bounds.max(across)) * 0.5;
+        double span = bounds.span(across);
+        float[] acc = {0f, 0f, 0f, 0f};   // centre sum, centre n, outer sum, outer n
         HorseSkinGeometry.forEachTexel(Skin.ADULT, (px, py, part, face, point) -> {
-            if (part == Part.TAIL) {
-                tail[0] += out.red(px, py);
-                tail[1]++;
+            if (part != Part.TAIL) {
+                return;
+            }
+            double d = Math.abs(point.along(across) - centre) / span;
+            int i = d < 0.10 ? 0 : (d > 0.30 ? 2 : -1);
+            if (i >= 0) {
+                acc[i] += out.red(px, py);
+                acc[i + 1]++;
             }
         });
-        assertTrue(tail[1] > 0, "the adult mesh has a tail");
-        assertEquals(1.0f, tail[0] / tail[1], 1e-6, "the tail is a point - the dilution never reaches it");
+        assertTrue(acc[1] > 0 && acc[3] > 0, "the adult tail has both a centre and an outside");
+        assertEquals(1.0f, acc[0] / acc[1], 1e-6,
+                "the midtstol is a point - the dilution never reaches the centre of the tail");
+        assertTrue(acc[2] / acc[3] < 0.98f,
+                "the guard hair outside the midtstol is diluted past the dark centre");
     }
 
     /**

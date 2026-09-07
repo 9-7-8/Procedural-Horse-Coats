@@ -32,6 +32,71 @@
     </p>
 </div>
 
+<h2 id="midtstol">&sect;0-Y &mdash; the <em>midtstol</em>: dun&rsquo;s two-tone mane (2026-09-07, NOT looked at)</h2>
+
+<p>
+    <a href="gene-dun.html#midtstol">Dun</a>&rsquo;s mane and tail are no longer flat
+    points. They now carry a dark band down the centre with pale guard hair either side
+    &mdash; the Fjord <em>midtstol</em>, which is a feature of every true dun and only
+    famous on the Fjord because that breed clips the mane upright to show it off. Covered
+    by <code>DunGeneTest</code> and three new golden cases; not seen in a game.
+</p>
+
+<ul>
+    <li><strong>Look at a grullo and a bay dun side by side.</strong> Both should have a
+        near-black centre line down the mane and the tail with visibly paler hair outside
+        it. The <strong>bay dun is the one that matters</strong> &mdash; its mane was
+        byte-identical to a plain bay&rsquo;s until this change, so if any horse still
+        shows a flat black mane it will be that one.</li>
+    <li><strong>Check the tail as well as the mane.</strong> The band runs through both
+        (<em>midtstol</em> in the mane, <em>halefj&aelig;r</em> in the tail) and they
+        should read as one system with the dorsal stripe, not three unrelated dark
+        patches.</li>
+    <li><strong>Spawn a Fjord herd.</strong> Dun is near-fixed in the breed, so nearly
+        every horse in the herd should show it. This is the breed the feature exists for
+        and the fastest way to see a lot of them at once.</li>
+    <li><strong>A red dun should be subtle.</strong> Dun barely touches red, so a red
+        dun&rsquo;s centre line is dark-red-on-lighter-red rather than black-on-cream.
+        Faint is correct; invisible is not.</li>
+    <li><strong>A <code>d1</code> horse must show none of it.</strong> <code>d1</code>
+        does not dilute, so its painter is meant to be a byte-for-byte no-op on a black
+        coat &mdash; no pale mane edges at all. A <code>d1</code> horse with a frosted
+        mane means the guard-hair scaling is wrong.</li>
+    <li><strong>A cream-diluted dun should be the showiest.</strong> Pale body, pale
+        guard hair, dark centre. If any horse looks like a photograph of a Fjord it
+        should be this one.</li>
+</ul>
+
+<div class="note">
+    <span class="label">Questions for the owner</span>
+    <ol>
+        <li><strong>Is <code>GUARD_HAIR</code> (0.28) too strong?</strong> On a grullo
+            the outer mane comes out around a third of the black the centre keeps, which
+            is a big jump for four texels to cover. It reads as the reference&rsquo;s
+            &ldquo;cream, silver-white or yellowish&rdquo; and it may read as a bug at
+            close range instead. Easy to halve.</li>
+        <li><strong>The reference asked for a whole new system and I declined.</strong>
+            It proposed a fictional <code>F</code> &ldquo;Fjord mane pattern&rdquo;
+            allele plus three hidden quantitative modifier loci, with the mane stripe
+            visible only on <code>D/_ F/_</code>. That would let a genuine dun show no
+            mane stripe, which the same document says is not how dun works, and it is a
+            new system rather than an existing one. Drawn on every dun instead. Say if
+            you want the modifier locus anyway &mdash; the
+            <a href="gene-shade.html">shade</a> / <a href="gene-sooty.html">sooty</a>
+            dosage pattern would fit it exactly.</li>
+        <li><strong>The mane cannot show a true cross-section.</strong> A real clipped
+            Fjord mane reads pale-dark-pale <em>across its width</em> when you look at it
+            head-on. The mane box is four texels wide and its two big faces are its
+            sides, so what is drawn is the band down the middle of the side face. From
+            the side &mdash; which is where a player looks at a horse &mdash; that is the
+            same picture. Head-on it is not, and there is no mesh to fix it with.</li>
+        <li><strong>Should the forelock join in?</strong> The reference is emphatic that
+            the axis starts at the forehead. There is no forelock box on the vanilla
+            mesh, so the chain currently starts at the crest. The dun face mask is the
+            nearest thing and it is a separate rolled accessory.</li>
+    </ol>
+</div>
+
 <h2 id="matp-recessives">&sect;0-X &mdash; sunshine and snowdrop (2026-09-07, NOT looked at)</h2>
 
 <p>

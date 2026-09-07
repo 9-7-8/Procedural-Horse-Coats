@@ -1,6 +1,7 @@
 package com.example.horsegenetics.common.genetics.genes;
 
 import com.example.horsegenetics.common.Rng;
+import com.example.horsegenetics.common.coat.pattern.HairPattern;
 import com.example.horsegenetics.common.coat.pattern.CoatRegions;
 import com.example.horsegenetics.common.coat.pattern.PigmentField;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry;
@@ -215,6 +216,30 @@ public final class DunGene implements Gene {
             .weight(d2, d2, 73.673611)
             .build();
 
+    /**
+     * Half the width of the dark band down the mane and the tail, as a fraction
+     * of the part's second-longest span - the same axis
+     * {@link HairPattern#centreStripe} puts the healer's line down, which on the
+     * big side faces of both parts reads as a stripe straight down the middle
+     * with paler hair either side of it.
+     *
+     * <p>The value is set by the mesh, not by taste. A mane is four texels
+     * across, so the only two distances that exist are an eighth of the span
+     * and three eighths of it; {@link HairPattern#centreStripe} feathers over
+     * {@code halfWidth +/- halfWidth/2}, and {@code 0.25} puts those two edges
+     * exactly on the two texel rows. Anything narrower feathers the dark centre
+     * as well, which is how a bay dun ended up with a mane 3% off black instead
+     * of black.
+     *
+     * <p>Fixed rather than rolled: the dorsal-width jitter already varies the
+     * stripe on the <i>body</i>, and another epigenetic draw here would move
+     * every dun in the golden file for a difference nobody could see.
+     */
+    private static final double MIDSTOL_HALF_WIDTH = 0.25;
+
+    /** How much further than the body the pale guard hairs are taken down. */
+    private static final float GUARD_HAIR = 0.28f;
+
     @Override public String key() { return KEY; }
     @Override public String name() { return "Dun"; }
     @Override public int priority() { return 34; }
@@ -314,12 +339,36 @@ public final class DunGene implements Gene {
                                 BAR_JOINT, BAR_SPREAD, BAR_SPACING, BAR_DUTY));
                     }
                 }
+                if (part == Part.MANE || part == Part.TAIL) {
+                    // On the long hair the midtstol is the AUTHORITY, so cap
+                    // rather than take a maximum. A bay's mane arrives here as
+                    // absolute black, which makes alreadyAPoint return 1 and
+                    // would protect the whole mane from the marking - which is
+                    // how a bay dun ended up with a mane indistinguishable from
+                    // a plain bay's while a black dun got its stripe. Every
+                    // other part still wants the maximum: a leg is a point
+                    // because it is already black, not because a mask said so.
+                    mark = Math.min(mark, midtstol(skin, part, point));
+                }
                 if (mark >= 1.0) {
                     return;
                 }
+                // The guard hairs either side of the midtstol go paler than the
+                // body, not merely as pale: the reference calls them cream,
+                // silver-white or yellowish, and a mane diluted only as far as
+                // the barrel reads as one colour at riding distance.
+                //
+                // The overshoot is scaled by how far this channel is being
+                // diluted at all, which is what keeps it a DUN feature. A
+                // non-dun d1 horse takes no black off anything, so its guard
+                // factor is exactly 1 and the painter stays the byte-for-byte
+                // no-op that DunGeneTest pins - guard hair is pale because the
+                // dilution is stronger there, not for its own reasons.
+                boolean hair = part == Part.MANE || part == Part.TAIL;
+                float over = hair ? (float) (GUARD_HAIR * (1.0 - mark)) : 0f;
                 f.diluteNeutral(px, py,
-                        lerp(keepRedBody, 1f, (float) mark),
-                        lerp(keepBlackBody, 1f, (float) mark));
+                        lerp(keepRedBody, 1f, (float) mark) * (1f - over * (1f - keepRedBody)),
+                        lerp(keepBlackBody, 1f, (float) mark) * (1f - over * (1f - keepBlackBody)));
             });
             return f;
         };
@@ -352,6 +401,19 @@ public final class DunGene implements Gene {
     }
 
     /**
+     * The <b>midtstol</b>: the dark band down the centre of the mane and the
+     * tail, with paler guard hair either side of it. A dun's primitive
+     * markings are one continuous system - forelock, crest, spine, tail dock -
+     * and this is the stretch of it the long hair carries. It is what makes a
+     * Fjord mane read as a pale-dark-pale ridge, and it is on every dun here,
+     * not only the Fjord: the breed is famous for it because the mane is
+     * clipped upright to show it off, not because the breed alone has it.
+     */
+    private static double midtstol(Skin skin, Part part, HorseSkinGeometry.BodyPoint point) {
+        return HairPattern.centreStripe(skin, part, point, MIDSTOL_HALF_WIDTH);
+    }
+
+    /**
      * The <b>points</b>: 1 where a dun keeps its base colour outright. Mane,
      * tail, ears and muzzle are points in full; a leg is a point up to
      * {@link #POINT_LEG_SOLID} and then fades out, so the dark lower leg
@@ -359,7 +421,10 @@ public final class DunGene implements Gene {
      */
     private static double pointRegion(Skin skin, Part part, HorseSkinGeometry.BodyPoint point) {
         switch (part) {
-            case MANE, TAIL, LEFT_EAR, RIGHT_EAR, MUZZLE -> {
+            case MANE, TAIL -> {
+                return midtstol(skin, part, point);
+            }
+            case LEFT_EAR, RIGHT_EAR, MUZZLE -> {
                 return 1.0;
             }
             case LEFT_FRONT_LEG, RIGHT_FRONT_LEG, LEFT_HIND_LEG, RIGHT_HIND_LEG -> {

@@ -133,6 +133,11 @@ class CoatPipelineGoldenTest {
             override("agouti=A/a", "dun=D/d2"),
             override("dun=d1/d2"),
             override("agouti=A/a", "dun=d1/d1"),
+            // the midtstol: a dark band down the mane and tail with pale guard
+            // hair either side, on every base a dun can sit on
+            override("extension=e/e", "dun=D/d2"),
+            override("agouti=A/A", "shade=ShD/ShD", "dun=D/d2"),
+            override("extension=e/e", "dun=d1/d2"),
             override("silver=Z/z"),
             override("agouti=A/a", "silver=Z/z"),
             override("extension=e/e", "mushroom=Mu/Mu"),

@@ -16,8 +16,7 @@ import java.util.Map;
  *
  * <h2>Referenced-but-unbuilt</h2>
  * Genes and features the sheet asks for that this mod does not have yet -
- * Tiger Eye ({@code TE}), HYPP, the Fjord's two-tone
- * erect mane, lower-leg feathering - are recorded in each breed's
+ * Tiger Eye ({@code TE}), HYPP, lower-leg feathering - are recorded in each breed's
  * {@link Breed#notes()} and collected in {@code wiki/roadmap.html}. The
  * <b>leopard complex</b> ({@code LP} / {@code PATN1} / {@code PATN2}) is built,
  * and Appaloosa, Knabstrupper, Kiger Mustang, Mustang and Shetland now roll it.
@@ -429,7 +428,7 @@ public final class Breeds {
                 .gene(PANGARE, "Pa2", "Pa2", 48).gene(PANGARE, "Pa2", "Pa1", 36)
                 .gene(PANGARE, "Pa1", "Pa1", 14).gene(PANGARE, "Pa1", "pa", 2)
                 .height(hh(13, 2), hh(14, 2)).speed(4).jump(3).health(9)
-                .note("Erect two-tone mane (dark centre, light outer) - NOT BUILT, roadmap mane render. Primitive stripes come from the near-fixed dun.")
+                .note("The two-tone mane (dark midtstol, pale guard hair) and the primitive stripes both come from the near-fixed dun; the erect clip that shows them off is grooming, and is not modelled.")
                 .note("Almost every Fjord is a dun (brown/red/grey/white/yellow dun); E_ a/a + D drives the classic brown dun.")
                 .note("EMS: age-related, folded into heartiness.")
                 .build();

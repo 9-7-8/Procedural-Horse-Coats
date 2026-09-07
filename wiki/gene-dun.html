@@ -90,7 +90,7 @@
 <div class="codebox">
 <div class="filename">common/genetics/genes/DunGene.java</div>
 <pre><code class="language-java">double mark = CoatRegions.dorsalStripe(skin, part, point, m.dorsalHalfWidth());
-mark = Math.max(mark, pointRegion(skin, part, point));            // mane, tail, ears, muzzle, lower leg
+mark = Math.max(mark, pointRegion(skin, part, point));            // midtstol, ears, muzzle, lower leg
 mark = Math.max(mark, alreadyAPoint(f.red(px, py), f.black(px, py)));   // a bay&#39;s black, wherever it climbed
 if (accessories) {
     mark = Math.max(mark, m.shoulder() * SHOULDER_DEPTH * CoatRegions.shoulderBar(...));
@@ -204,10 +204,10 @@ red&#39;   = red * (1 - black) * keepRed / (1 - black&#39;)</code></pre>
 <p>
     A dun dilutes the <em>body coat</em>. The points do not go with it &mdash; that is what
     makes a bay dun a tan horse with black legs rather than a uniformly faded one, and a
-    grullo a blue-grey horse with a black mane. So the mask is 1 on the mane, tail, ears and
-    muzzle outright, and 1 up the bottom <code>POINT_LEG_SOLID</code> of each leg before
-    fading out over the next <code>POINT_LEG_FADE</code> &mdash; a soft transition rather than
-    a ring.
+    grullo a blue-grey horse with a black mane. So the mask is 1 on the ears and muzzle
+    outright, 1 down the <a href="#midtstol">centre</a> of the mane and the tail, and 1 up the
+    bottom <code>POINT_LEG_SOLID</code> of each leg before fading out over the next
+    <code>POINT_LEG_FADE</code> &mdash; a soft transition rather than a ring.
 </p>
 
 <p>
@@ -234,6 +234,102 @@ red&#39;   = red * (1 - black) * keepRed / (1 - black&#39;)</code></pre>
     be exactly the fade the mask wants. The square root shortens that fade &mdash; without it
     the top of a seal bay&rsquo;s black leg diluted to a <strong>grey cuff</strong> between
     the tan body and the black point, and no real horse has one of those.
+</p>
+
+<h2 id="midtstol">The <em>midtstol</em>: why the mane is not a flat point</h2>
+
+<p>
+    The dorsal stripe does not stop where the hair starts. Forelock, mane centre, spine and
+    tail centre are <strong>one continuous system</strong> on a dun &mdash; the Norwegian name
+    for the mane's share of it is the <em>midtstol</em>, and the tail's is the
+    <em>halefj&aelig;r</em>. So the mane and the tail get a dark band down the middle with
+    <strong>pale guard hairs</strong> either side, not a rectangle of undiluted base colour.
+</p>
+
+<div class="codebox">
+<div class="filename">common/genetics/genes/DunGene.java</div>
+<pre><code class="language-java">private static double midtstol(Skin skin, Part part, BodyPoint point) {
+    return HairPattern.centreStripe(skin, part, point, MIDSTOL_HALF_WIDTH);
+}</code></pre>
+</div>
+
+<p>
+    It reuses <a href="api-reference.html"><code>HairPattern.centreStripe</code></a>, the shape
+    the healer's red line down the mane already uses, so the band lands on the part's own axes
+    rather than the world's &mdash; a mane and a tail are both rotated out of true by their
+    rest pose, and neither &ldquo;stripes along X&rdquo; nor &ldquo;along Y&rdquo; is right for
+    both.
+</p>
+
+<h3>The half-width is set by the mesh</h3>
+
+<p>
+    <code>MIDSTOL_HALF_WIDTH</code> is <strong>0.25</strong> and that is arithmetic, not taste.
+    A mane is <strong>four texels</strong> across, so the only two distances from the centre
+    that exist are an eighth of the span and three eighths of it. <code>centreStripe</code>
+    feathers over <code>halfWidth &plusmn; halfWidth/2</code>, and 0.25 puts those two edges
+    exactly on those two rows: the inner pair is fully dark, the outer pair is fully pale.
+    At 0.20 the feather caught the dark rows too and a bay dun's mane came out at 97&nbsp;%
+    black instead of black &mdash; invisible in a screenshot, wrong in the pigment field.
+</p>
+
+<h3>The guard hair is an overshoot, scaled by the dilution</h3>
+
+<p>
+    The reference calls the outer hairs <em>cream, silver-white or yellowish</em>. A mane
+    diluted only as far as the barrel reads as one colour at riding distance, so the guard hair
+    is diluted <strong>past</strong> the body by <code>GUARD_HAIR</code> &mdash; but scaled by
+    how far that channel is being diluted at all:
+</p>
+
+<div class="codebox">
+<div class="filename">common/genetics/genes/DunGene.java</div>
+<pre><code class="language-java">float over = hair ? (float) (GUARD_HAIR * (1.0 - mark)) : 0f;
+f.diluteNeutral(px, py,
+        lerp(keepRedBody,   1f, (float) mark) * (1f - over * (1f - keepRedBody)),
+        lerp(keepBlackBody, 1f, (float) mark) * (1f - over * (1f - keepBlackBody)));</code></pre>
+</div>
+
+<p>
+    That scaling is what keeps it a <em>dun</em> feature. A <a href="#d1"><code>d1</code></a>
+    horse takes no black off anything, so its guard factor is exactly 1 and the painter stays
+    the byte-for-byte no-op the tests pin. Guard hair is pale because the dilution is stronger
+    there &mdash; it has no reason of its own.
+</p>
+
+<div class="note">
+    <span class="label">A bay dun had no mane stripe at all for a while</span>
+    <p>
+        On the long hair the marking mask <strong>caps</strong>
+        <a href="#points"><code>alreadyAPoint</code></a> instead of losing to it, and that one
+        line is the whole fix. A bay's mane arrives at the dun painter as
+        <code>red = 0, black = 1</code>, so <code>alreadyAPoint</code> returned 1 for every
+        texel of it, the painter took its early exit, and a bay dun's mane came out
+        <em>byte-identical to a plain bay's</em> while a grullo got a perfectly good midtstol.
+        Everywhere else the maximum is still right: a leg is a point because it is already
+        black, not because a mask said so.
+    </p>
+</div>
+
+<h3>Every dun, not only the Fjord</h3>
+
+<p>
+    The Fjord is famous for this because the breed clips the mane upright so the pale-dark-pale
+    cross-section is unmissable, and because a pale body makes a dark centre shout. The
+    <em>marking</em> is not breed-specific and it is not a separate locus &mdash; a dun is a
+    dun. So it is drawn on every <code>D</code> horse here, at a contrast that follows the base
+    colour: near-black down a grullo's mane, dark red down a red dun's, and most dramatic on a
+    cream-diluted dun, exactly as the field guides describe. The upright clip itself is
+    <strong>grooming</strong>, and grooming is not modelled.
+</p>
+
+<p class="muted">
+    The reference this came from proposed a fictional <code>F</code> &ldquo;Fjord mane
+    pattern&rdquo; modifier plus three hidden quantitative loci gating the effect. That is a
+    new system for a marking every true dun already has, and it would have let a
+    <code>D/_</code> horse with the wrong modifiers show <em>no</em> mane stripe &mdash; which
+    the same reference says is not how dun works. Declined; see
+    <a href="philosophy.html">philosophy</a> on inventing loci.
 </p>
 
 <h2 id="markings">The marking checklist, region by region</h2>
@@ -271,12 +367,19 @@ red&#39;   = red * (1 - black) * keepRed / (1 - black&#39;)</code></pre>
 <tr>
     <td><strong>Neck</strong></td>
     <td>A darker crest, sometimes fine marks running up from the withers.</td>
-    <td>The dorsal stripe already runs the length of the neck box and the mane is a point, so the crest comes out darker with no extra code. No separate neck bars.</td>
+    <td>The dorsal stripe already runs the length of the neck box and the mane centre is a point, so the crest comes out darker with no extra code. No separate neck bars.</td>
 </tr>
 <tr>
-    <td><strong>Mane, tail, ears, muzzle</strong></td>
+    <td><strong>Ears, muzzle</strong></td>
     <td>Dark, in the base colour &mdash; black on a bay dun or grullo, red-brown on a red dun.</td>
     <td><a href="#points">Points</a>: the mask is 1, so the dilution never reaches them.</td>
+</tr>
+<tr>
+    <td><strong>Mane, tail</strong></td>
+    <td>A dark band down the <em>centre</em>, with paler hair either side of it &mdash; the
+        <a href="#midtstol"><em>midtstol</em></a>, continuous with the dorsal stripe at both ends.</td>
+    <td>A <a href="#midtstol">centre stripe</a> rather than a flat point, and the guard hair
+        outside it diluted <em>past</em> the body.</td>
 </tr>
 <tr>
     <td><strong>Belly, flank</strong></td>
@@ -358,7 +461,7 @@ private static double accessory(float roll, double chance) {
     copy keeps the stripe it had.
 </p>
 
-<h2><code>d1</code>: a marking with no dilution</h2>
+<h2 id="d1"><code>d1</code>: a marking with no dilution</h2>
 
 <p>
     A non-dun horse is by definition undiluted, so <code>d1</code> cannot paint a dark line on
@@ -393,8 +496,8 @@ private static double accessory(float roll, double chance) {
 <table>
 <thead><tr><th>Base</th><th>With <code>D</code></th><th>With <code>d1</code> only</th></tr></thead>
 <tbody>
-<tr><td>bay (<code>E_ A_</code>)</td><td><strong>bay dun / zebra dun</strong> &mdash; tan body (all of it the black coming off, none of it the red moving), black points that survive the dilution intact, dark dorsal stripe, bars where there is pale leg to show them on</td><td>ordinary bay, slightly lighter through the barrel, with a deeper line down the spine</td></tr>
-<tr><td>black (<code>E_ aa</code>)</td><td><strong>grullo</strong> &mdash; a blue-grey slate body on the gradient&rsquo;s neutral column, black mane, tail and lower legs, near-black dorsal stripe and bars</td><td>plain black &mdash; nothing visible</td></tr>
+<tr><td>bay (<code>E_ A_</code>)</td><td><strong>bay dun / zebra dun</strong> &mdash; tan body (all of it the black coming off, none of it the red moving), black points that survive the dilution intact, a black-centred mane and tail with pale guard hair either side, dark dorsal stripe, bars where there is pale leg to show them on</td><td>ordinary bay, slightly lighter through the barrel, with a deeper line down the spine</td></tr>
+<tr><td>black (<code>E_ aa</code>)</td><td><strong>grullo</strong> &mdash; a blue-grey slate body on the gradient&rsquo;s neutral column, black lower legs, a black-centred mane and tail, near-black dorsal stripe and bars</td><td>plain black &mdash; nothing visible</td></tr>
 <tr><td>chestnut (<code>ee</code>)</td><td><strong>red dun</strong> &mdash; a chestnut, very slightly lifted, carrying red-brown rather than black points and markings. The subtlest of the three by a long way.</td><td>ordinary chestnut with a faintly redder dorsal line</td></tr>
 </tbody>
 </table>
@@ -442,10 +545,10 @@ private static double accessory(float roll, double chance) {
     </p>
     <p>
         Not drawn at all: <strong>flank mottling and rib shading</strong> (see the checklist
-        above), <strong>ear edging</strong> beyond the ears being points, and
-        <strong>guard hairs</strong> &mdash; the pale hairs at the base of a dun&rsquo;s mane
-        and tail &mdash; which need a hair-level treatment the mane box does not have. See
-        <a href="roadmap.html#natural-genes">roadmap</a>.
+        above) and <strong>ear edging</strong> beyond the ears being points. See
+        <a href="roadmap.html#natural-genes">roadmap</a>. <strong>Guard hairs</strong> used to
+        be on this list and are not any more &mdash; see
+        <a href="#midtstol">the midtstol</a>.
     </p>
 </div>
 
