@@ -584,23 +584,31 @@
 
 <p>
     Before this he only existed where a <em>player</em> had crafted a post and waited,
-    which meant an entire trade could be in a world and never be met. So
-    <code>CowboyHandler.raiseThePost</code> plants a post 6&ndash;9 blocks from the
-    cowboy's barn when the cowboy founds, and stands an unemployed adult villager
-    beside it. The barn is the obvious address: it is already where the horses are, the
-    two characters already share an overlay, and putting them together is what makes
-    &ldquo;the horse people are over there&rdquo; something a village says rather than
-    something the wiki says.
+    which meant an entire trade could be in a world and never be met. Now the post is
+    <strong>part of the barn</strong>: it is a block in
+    <code>cowboy_barn.nbt</code> at local <code>(0, 0, 3)</code> &mdash; the middle of
+    the road-facing end, between the two door pairs, in place of the step that was
+    drawn there &mdash; and a plain villager stands one step along the skirt beside it.
+    Both are baked in by <code>tools/barn/bake-barn.py</code>. So the first thing you
+    walk up to on the way in from the street is his counter.
 </p>
 
 <p>
-    He <strong>takes</strong> the job rather than being handed it. Setting the
-    profession by hand would be a line shorter and would skip the only part of the
+    <strong>Structure and not runtime code</strong>, deliberately. A job-site POI is
+    indexed off the block, so putting the block in the world <em>is</em> the whole
+    mechanism &mdash; there is nothing for a handler to do that the template cannot &mdash;
+    and a shop front is architecture rather than behaviour. It also means the post
+    cannot land somewhere silly: an earlier version searched for open ground near the
+    barn at runtime, which is one more thing to get wrong for no gain.
+</p>
+
+<p>
+    He <strong>takes</strong> the job rather than being handed it. Baking the
+    profession onto the villager would be no harder and would skip the only part of the
     wiring that has ever been in doubt &mdash; whether the POI registered and whether
     the <code>acquirable_job_site</code> tag merged. If the villager beside the post
     stays a nitwit, that is the answer to a real question, and it is worth being told
-    it. Nothing about the post is required to succeed either: no ground for it means a
-    village with one trader instead of two, not a broken one.
+    it.
 </p>
 
 <div class="note rule">

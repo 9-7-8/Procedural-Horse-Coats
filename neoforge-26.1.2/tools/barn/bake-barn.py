@@ -6,7 +6,9 @@ Re-run this after re-exporting the barn from a structure block in game, then
 commit both files. It adds the two things a structure-block save cannot carry:
 
   * a jigsaw block on the west face at y=0, so the village generator can attach
-    the barn to a plains-village street connector (see BarnPoolInjector), and
+    the barn to a plains-village street connector (see BarnPoolInjector),
+  * a horse trader's post in the middle of that same road-facing end, and a
+    villager stood beside it who will take the job off it, and
   * the cowboy himself as a structure entity - the same mechanism vanilla uses
     to put villagers in village/plains/villagers/*.nbt. He is placed bare;
     CowboyHandler builds him on his first server tick.
@@ -184,14 +186,46 @@ blocks.append(T_cmp({
     }),
 }))
 
-# ---- 2. the cowboy ------------------------------------------------------
-# Placed bare: CowboyHandler gives him his name, his mount and his herd on his
-# first tick, the same deferred-founding shape the wild horses use.
-root.v['entities'] = Tag(9, (10, [T_cmp({
-    'pos': T_dlist([7.5, 1.0, 3.5]),
-    'blockPos': T_ilist([7, 1, 3]),
-    'nbt': T_cmp({'id': T_str('horsegenetics:cowboy')}),
-})]))
+# ---- 2. the horseman's post --------------------------------------------
+# The middle of the road-facing end (x=0), between the two door pairs, in place
+# of the step that was drawn there.  It is the first thing you walk up to.
+#
+# Baked into the structure rather than placed at runtime because a job-site POI
+# is indexed off the block, so putting the block in the world *is* the whole
+# mechanism - and because a shop front is architecture.  The villager beside it
+# is not given the profession: he takes it off the post the ordinary way, which
+# is the only part of the wiring that has ever been in doubt (whether the POI
+# registered, whether the acquirable_job_site tag merged).  A nitwit standing
+# there for ever is a real answer to a real question.
+POST_POS = (0, 0, 3)
+
+palette.append(T_cmp({'Name': T_str('horsegenetics:horse_traders_post')}))
+post_state = len(palette) - 1
+
+blocks[:] = [b for b in blocks if tuple(x.v for x in b.v['pos'].v[1]) != POST_POS]
+blocks.append(T_cmp({
+    'pos': T_ilist(list(POST_POS)),
+    'state': T_int(post_state),
+}))
+
+# ---- 3. the people ------------------------------------------------------
+# The cowboy is placed bare: CowboyHandler gives him his name, his mount and his
+# herd on his first tick, the same deferred-founding shape the wild horses use.
+#
+# The horseman is placed as a plain villager, one step along the skirt from the
+# post so he is not standing in it.  Vanilla employs him.
+root.v['entities'] = Tag(9, (10, [
+    T_cmp({
+        'pos': T_dlist([7.5, 1.0, 3.5]),
+        'blockPos': T_ilist([7, 1, 3]),
+        'nbt': T_cmp({'id': T_str('horsegenetics:cowboy')}),
+    }),
+    T_cmp({
+        'pos': T_dlist([0.5, 1.0, 4.5]),
+        'blockPos': T_ilist([0, 1, 4]),
+        'nbt': T_cmp({'id': T_str('minecraft:villager')}),
+    }),
+]))
 
 out = io.BytesIO()
 out.write(struct.pack('>B', roottype)); w_str(out, rootname); w_payload(out, root)
@@ -201,4 +235,5 @@ out.write(struct.pack('>B', roottype)); w_str(out, rootname); w_payload(out, roo
 # the only staleness signal a checked-in derived artefact has.
 open(DST, 'wb').write(gzip.compress(out.getvalue(), mtime=0))
 print('wrote', DST, 'palette', len(palette), 'blocks', len(blocks),
-      'jigsaw at', JIGSAW_POS, 'final_state', final_state)
+      'jigsaw at', JIGSAW_POS, 'final_state', final_state,
+      'post at', POST_POS)

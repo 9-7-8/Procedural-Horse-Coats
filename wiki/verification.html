@@ -32,34 +32,35 @@
     </p>
 </div>
 
-<h2 id="speed-floor">&sect;0-AD &mdash; No horse moves slower than a cow (2026-09-07, NOT looked at)</h2>
+<h2 id="speed-floor">&sect;0-AD &mdash; No horse too slow to escape a zombie (2026-09-07, NOT looked at)</h2>
 
 <p>
     Some horses were resolving to speeds slow enough to be unusable. The genetics are
     unchanged &mdash; <code>MIN_SPEED</code> is still <code>0.02</code> &mdash; and
     <code>server/HorseSpeedFloor</code> clamps the <strong>attribute</strong> instead,
-    at the one place it is written. Design:
+    at the one place it is written, to vanilla's own slowest horse
+    (<code>0.1125</code>). Design:
     <a href="horse-body.html">Speed, health, jump &amp; size</a>.
 </p>
 
 <ul>
-    <li><strong>Find or breed a slow horse and ride it.</strong> It should be visibly
-        slow and still be a horse. Nothing should now be slower than a cow standing next
-        to it &mdash; which is the test, literally: put one beside a cow and race
-        them.</li>
-    <li><strong>Does the info panel agree with your legs?</strong> The panel reads the
-        live attribute, so it should show the clamped number, never below
-        <code>0.200</code>.</li>
+    <li><strong>Race a floored horse against a zombie.</strong> The literal test, and
+        the one the number was chosen for. Breed or find a horse whose panel reads
+        <code>0.113</code>, ride it, and let a zombie chase you on flat ground. It
+        should pull away. If it does not, the mob and rider movement scales are further
+        apart than they look and the floor wants multiplying up &mdash; one expression
+        in <code>HorseSpeedFloor.floor()</code>.</li>
+    <li><strong>Does the info panel bottom out at <code>0.113</code>?</strong> The panel
+        reads the live attribute, so it should never show less than that however awful
+        the genetics are.</li>
     <li><strong>Do the genetics still say the true number?</strong> The family tree and
         the browser designer show what the alleles resolve to, which for a very slow
-        horse should still be well under <code>0.200</code>. If those got clamped too,
+        horse should still be well under <code>0.113</code>. If those got clamped too,
         the floor leaked into <code>common/</code> and it should not have.</li>
-    <li><strong>Is the flattening acceptable?</strong> The honest question. A cow is
-        <code>0.2</code> and a wild-type horse here is <code>0.1875</code>, so the whole
-        slower half of the range now reads the same. If ordinary horses have stopped
-        feeling different from each other, the fix is one expression in
-        <code>HorseSpeedFloor.floor()</code> &mdash; a fraction of a cow, or vanilla's
-        own <code>0.1125</code> minimum.</li>
+    <li><strong>Do ordinary horses still differ from each other?</strong> The floor sits
+        below this mod's wild-type <code>0.1875</code>, so the natural range should be
+        untouched and only the genuinely broken horses should have moved. If everything
+        feels the same speed, something clamped harder than intended.</li>
 </ul>
 
 <h2 id="villagers">&sect;0-AC &mdash; The cowboy, the horseman &amp; transfer papers (2026-09-07, partly looked at)</h2>
@@ -250,17 +251,20 @@
 <h3 id="villagers-horseman">The horseman</h3>
 
 <ul>
-    <li><strong>Is there a post beside the cowboy's barn, with a villager at it?</strong>
-        New: founding a cowboy now also plants a Horse Trader's Post 6&ndash;9 blocks
-        off and stands an unemployed villager beside it, so you should not have to
-        craft one to meet a horseman at all. A dev build prints an aqua
-        <code>[Horseman] a post is up ...</code> when it is planted, and a second aqua
-        line naming him when he <em>takes</em> the job
-        (<code>DebugHorsemanWatch</code>). <strong>Those two lines are the test.</strong>
-        The first with no second, after a minute or two, means the POI did not register
-        or the <code>acquirable_job_site</code> tag did not merge &mdash; not that he is
-        being slow. Neither line means no ground was found for the post, which is
-        allowed but should be rare.</li>
+    <li><strong>Is the post built into the barn's road-facing end?</strong> New: the
+        Horse Trader's Post is now a block in the structure, in the middle of the end
+        you approach from the street, in place of the centre step &mdash; with a plain
+        villager standing one step along beside it. Check it survived the jigsaw (a
+        modded block in a vanilla-pool piece is the thing that could quietly fail) and
+        that it looks deliberate rather than like a missing stair.</li>
+    <li><strong>Does that villager take the job?</strong> He is placed unemployed on
+        purpose. A dev build prints an aqua <code>[Horseman] &lt;name&gt; took the job
+        at x, y, z</code> the first time it sees one
+        (<code>DebugHorsemanWatch</code>). <strong>No line after a minute or two is the
+        finding</strong>: it means the POI did not register or the
+        <code>acquirable_job_site</code> tag did not merge, not that he is being slow.
+        Standing him next to the post and watching him ignore it is the entire test of
+        that wiring.</li>
     <li><strong>Or place a post yourself near an unemployed villager.</strong> Same
         test, anywhere. He needs no house, bed or custom structure &mdash; a profession
         comes from a job site and nothing else &mdash; so bare ground works.</li>
