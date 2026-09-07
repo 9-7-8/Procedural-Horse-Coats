@@ -33,11 +33,11 @@
     <div><dt>Priority</dt><dd>74</dd></div>
     <div><dt>Alleles</dt><dd><span class="allele dom">O</span> <span class="allele wild">N</span></dd></div>
     <div><dt>Combinations</dt><dd>3, all of which occur, landing on 3 outcomes</dd></div>
-    <div><dt>Outcomes</dt><dd>wild, <code>frame</code>, <code>lethal-white</code> (masks)</dd></div>
+    <div><dt>Outcomes</dt><dd>wild, <code>frame-overo</code>, <code>lethal-white</code> (masks)</dd></div>
     <div><dt>Default allele</dt><dd>N</dd></div>
     <div><dt>Wild frequency</dt><dd><code>O</code> 1 in 55 per allele &mdash; but <strong>no founder is <code>O/O</code></strong></dd></div>
     <div><dt>Founder draws</dt><dd>1 &times; nextFloat()</dd></div>
-    <div><dt>Deterministic</dt><dd><code>frame</code> <strong>no</strong>; <code>lethal-white</code> yes</dd></div>
+    <div><dt>Deterministic</dt><dd><code>frame-overo</code> <strong>no</strong>; <code>lethal-white</code> yes</dd></div>
     <div><dt>Epi draws</dt><dd>nextLong() seed, nextFloat() body cover, nextFloat() face width</dd></div>
 </dl>
 
@@ -58,7 +58,7 @@
 <thead><tr><th>Combination</th><th>Outcome</th><th>Look</th></tr></thead>
 <tbody>
 <tr><td><code>N/N</code></td><td>wild type</td><td>nothing</td></tr>
-<tr><td><code>O/N</code></td><td><code>frame</code></td><td>irregular horizontal white on the sides of neck and barrel that never reaches the topline, framed by colour above and below, plus a broad white face. Legs stay coloured.</td></tr>
+<tr><td><code>O/N</code></td><td><code>frame-overo</code></td><td>sharp, jagged white spreading sideways along the belly, barrel, flank and lower neck, never crossing the back, so colour is left framing it above and below. Broad white face, dark legs but for the odd coronet, and the two sides need not match. Anything from cryptic to textbook.</td></tr>
 <tr><td><code>O/O</code></td><td><code>lethal-white</code> <em>(masks)</em></td><td>an all-white foal with pink skin</td></tr>
 </tbody>
 </table>
@@ -107,39 +107,102 @@
     </p>
 </div>
 
-<h2>How frame paints</h2>
+<h2 id="paints">How frame overo paints</h2>
 
-<p>
-    A warped fractal field turned white where it clears a threshold, with the threshold
-    <strong>lowered on the mid-height flank</strong> &mdash; a weight that is zero at the
-    spine <em>and</em> at the belly &mdash; and wobbled at a fine scale so the margins are
-    ragged. The band is measured in <b>absolute body-space Y</b>, not per part, so it does
-    not depend on which face a texel is on; an earlier per-part <code>sideWeight</code>
-    version left the barrel untouched and produced almost nothing.
-</p>
-
-<div class="codebox">
-<div class="filename">common/genetics/genes/EdnrbGene.java</div>
-<pre><code class="language-java">private static final double BAND_LO = 0.28;   // above the belly
-private static final double BAND_HI = 0.74;   // below the topline
-private static final double COVER_MIN = 0.52, COVER_RANGE = 0.22;
-private static final double JAG = 0.15, JAG_FREQ = 3.1;</code></pre>
+<div class="note warn">
+    <span class="label">Rebuilt 2026-09-06 against the reference, NOT yet looked at</span>
+    <p>
+        The shape was re-derived from a locus-by-locus description of the real pattern
+        and every constant below moved. The load-bearing fix is the
+        <strong>reference height</strong>: the band used to be measured against
+        <code>HorseSkinGeometry.bodyBounds</code>, the whole-horse box that runs to the
+        <em>ear tips</em>, on which the old ceiling of <code>0.74</code> sits at
+        <strong>1.19 of the topline</strong> &mdash; so frame white could cross the spine,
+        which is the one thing frame never does. It is measured against
+        <a href="#topline"><code>WhitePattern.toplineHeight</code></a> now, where the
+        fractions mean something anatomical.
+    </p>
 </div>
 
 <p>
-    The <strong>face</strong> is <a href="pipeline.html#face-markings">the shared face-marking vocabulary</a> every white locus
-    shares, at <code>FACE_STRENGTH = 0.80</code> and <code>FACE_JAG = 0.34</code>. Frame is
-    the classically <strong>bald-faced</strong> pattern, so it sits near the top of the ramp:
-    a broad blaze about half the time, a blaze carried to the nostrils most of the rest, and
-    a full apron face one time in ten. It used to be a bare
-    <code>|z| &lt;= faceHalf</code> test over the whole head, which had no top to it and
-    wrapped under the jaw.
+    Frame is identified by the <strong>distribution and outline</strong> of its white, not
+    by any single marking, so the painter is a list of those properties rather than one
+    shape function. Each row below is a claim the reference makes about real frame horses
+    and the thing in <code>EdnrbGene.paintFrame</code> that answers it.
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>The pattern</th><th>How it is drawn</th></tr></thead>
+<tbody>
+<tr>
+    <td><strong>Horizontal spread.</strong> White runs along the sides &mdash; barrel, flank, shoulder, lower neck &mdash; rather than vertically from the feet or over the back.</td>
+    <td>The patch field is sampled with <code>x</code> squashed and <code>y</code> stretched (<code>X_SQUASH</code> / <code>Y_STRETCH</code>), so one patch is about five times longer along the horse than it is tall. Sampled isotropically it read as a paint splat, which is every white gene.</td>
+</tr>
+<tr>
+    <td><strong>A dark back.</strong> Viewed from the side the white does not cross the dorsal midline.</td>
+    <td>A per-horse ceiling, a fraction of the topline, that never reaches 1.0 &mdash; <code>CEILING_MIN</code> (the low barrel only) to <code>CEILING_MIN + CEILING_RANGE</code> (up through the flank toward the hip). The withers, spine and croup are dark either way.</td>
+</tr>
+<tr>
+    <td><strong>A white belly.</strong> The lower barrel goes substantially white and pushes upward into the sides in separate tongues.</td>
+    <td><code>BODY_FLOOR</code> sits <em>below</em> the underline, so the belly is fully in band. The previous version started above it &mdash; drawing the one part of a frame horse that is reliably dark and skipping the part that is reliably white.</td>
+</tr>
+<tr>
+    <td><strong>Lower and middle neck white; the upper crest dark.</strong> Sometimes the neck white joins the face to the body.</td>
+    <td>The neck gets a band of its own, measured against the <em>neck's</em> height. It has to: the neck stands above the barrel, so against the barrel's ceiling it was entirely out of range and a frame horse had a completely dark neck.</td>
+</tr>
+<tr>
+    <td><strong>Dark legs.</strong> A frame horse commonly has four dark legs; a coronet band or a white hoof can occur, but tall stockings are not frame alone.</td>
+    <td>The legs are excluded from the body pass outright. <code>paintCoronets</code> then gives each leg a <code>CORONET_CHANCE</code> of a band no taller than <code>CORONET_MAX</code> of the leg, with a wobbled edge &mdash; <code>CoatRegions.whitenLowerLeg</code> would have drawn a perfect ring, and nothing else on a frame horse has a clean margin.</td>
+</tr>
+<tr>
+    <td><strong>Irregular, sharp-edged patches</strong> &mdash; jagged, angular, zig-zagged, not the smooth rounded fields of tobiano.</td>
+    <td>A hard threshold (so the edge is crisp, never feathered) wobbled at a fine scale by <code>JAG</code> / <code>JAG_FREQ</code>.</td>
+</tr>
+<tr>
+    <td><strong>Asymmetry.</strong> One side can carry a bold hip patch while the other is largely dark.</td>
+    <td>A per-horse <code>SIDE_LEAN</code> added to the threshold across the width. The field is sampled in 3D so it was already mildly asymmetric; this is what makes a horse genuinely whiter on one side.</td>
+</tr>
+<tr>
+    <td><strong>A bold face</strong> &mdash; bald face, apron face, broad blaze &mdash; even when the body spotting is modest.</td>
+    <td><a href="pipeline.html#face-markings">The shared face-marking vocabulary</a> at a strength rolled between <code>FACE_MIN</code> and <code>FACE_MIN + FACE_RANGE</code>, near the top of the ramp, and rolled <strong>independently of the body cover</strong> &mdash; face-body contrast is part of the phenotype.</td>
+</tr>
+<tr>
+    <td><strong>Cryptic expression.</strong> A carrier may show little more than facial white and a blue eye, which is why the locus is DNA-tested and not eyeballed.</td>
+    <td>The cover roll reaches low enough that nothing clears the threshold, skewed toward the bold end by <code>COVER_GAMMA</code> so about one frame horse in five is near-invisible and the rest look like the pattern. The blue eye is claimed by the allele, not by the coverage, so a cryptic frame still has one.</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<h3 id="topline">Measured against the topline, not the horse</h3>
+<p>
+    <code>WhitePattern.toplineHeight</code> is the top of the barrel, and it is the
+    reference every vertical constant in every white locus is expressed against. On it
+    <code>0.05</code> is the coronet, <code>0.10</code> the fetlock, <code>0.26</code> the
+    knee and hock, <code>0.52</code> the underline and <code>1.0</code> the spine &mdash;
+    so a number in the source says something anatomical rather than something about a
+    bounding box. It was made public for this gene, which was the last one still measuring
+    against the whole-horse AABB; the splash and sabino painters were moved off it a
+    session earlier for exactly the same reason, and it was a real defect there too.
 </p>
 
 <p>
     <code>lethal-white</code> is a different painter: both pigments to zero everywhere,
     and it <code>masks</code>, so it takes exactly one catalogue entry however much else the
-    horse carries. Measured coverage: <code>O/N</code> 42%, <code>O/O</code> 100%.
+    horse carries. <code>O/O</code> is 100% white by construction; a single copy runs from
+    a few per cent to a bit over a quarter of the horse, which sounds low for a bold paint
+    horse and is not &mdash; four dark legs, a dark back, a dark mane and a dark tail are
+    most of a horse's surface, and leaving them coloured is the pattern.
+</p>
+
+<p>
+    The measurements above are pinned in <code>WhitePatternGenesTest</code>, which asserts
+    the spine is white-free at every seed, that the belly is whiter than the flank (frame
+    climbs <em>from</em> the belly), that the legs and crest stay dark, that the patches
+    are measurably wider than they are tall, and that the range reaches both cryptic and
+    textbook. None of it has been looked at in game &mdash;
+    <a href="verification.html">To be verified</a>.
 </p>
 
 <h2>The death &mdash; built 2026-09-04</h2>

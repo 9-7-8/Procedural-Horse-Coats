@@ -445,7 +445,9 @@
         even sabino-white should keep a coloured topline.</li>
 </ul>
 <p class="muted">
-    Not fixed, and still open above: frame&rsquo;s band and the <code>cover</code> knobs.
+    Not fixed, and still open above: <a href="known-gaps.html#gap-30">tobiano&rsquo;s
+    <code>cover</code> knob</a>, which is still calibrated as if the patch field were
+    uniform. Frame&rsquo;s band is fixed &mdash; <a href="#frame-overo">&sect;0-F2</a>.
 </p>
 
 <h3 id="brindle">Brindle &mdash; the X-linked gene</h3>
@@ -580,7 +582,7 @@
 <p>Seen in-game, not fixed.</p>
 
 <div class="note warn">
-    <span class="label">Frame overo still leans a bit topline-ward (built fix pending) &mdash; the main swap is done</span>
+    <span class="label">The top/bottom UV swap, splash&rsquo;s calibration and frame&rsquo;s band &mdash; all fixed</span>
     <p>
         The big one is <strong>fixed</strong>: the horse&rsquo;s
         <strong>top and bottom cube faces were UV-swapped</strong> in
@@ -599,15 +601,13 @@
         <a href="#white-belly">&sect;0-G</a> for what to look at.
     </p>
     <p>
-        What&rsquo;s left is a secondary calibration on <strong>frame</strong>:
-        <code>EdnrbGene</code>&rsquo;s <code>BAND_LO</code> / <code>BAND_HI</code>
-        are still fractions of the <em>whole-horse</em> AABB, not the barrel, so
-        the flank band doesn&rsquo;t clip cleanly below the spine (measured back
-        ~75% on <code>O/N</code>). Using <code>bounds(skin, Part.BODY)</code> is
-        the fix but it also removes frame&rsquo;s legitimate neck-side white, so
-        it needs a per-part reference &mdash; deferred
-        (<a href="known-gaps.html#gap-30">gap&nbsp;#30</a>). Tobiano crossing the topline is <em>correct</em> for
-        tobiano.
+        <strong>And frame is fixed too (2026-09-06)</strong>, with the per-part
+        reference it needed: a barrel band against the topline plus a separate rule for
+        the neck&rsquo;s own height. Measured spine white went from ~75% to
+        <strong>0.00 at every seed</strong>. The whole pattern was re-derived from a
+        locus-by-locus reference in the same pass &mdash; see
+        <a href="#frame-overo">&sect;0-F2</a>. Tobiano crossing the topline is
+        <em>correct</em> for tobiano.
     </p>
 </div>
 
@@ -827,6 +827,67 @@
     <strong>Not built:</strong> mottled skin (the coat has no skin layer). Deferred with
     a note on <a href="gene-leopard.html">the gene page</a>.
 </p>
+
+<h2 id="frame-overo">&sect;0-F2 &mdash; frame overo, rebuilt (2026-09-06, NOT looked at)</h2>
+
+<p>
+    The pattern was re-derived from a locus-by-locus reference and <strong>every constant
+    moved</strong>. The whole account is on
+    <a href="gene-ednrb.html#paints">the EDNRB page</a>; what matters here is that
+    <em>nothing below has been seen on a horse</em>, and that the numbers quoted are
+    offline measurements over eleven epigenetic seeds, not observations.
+</p>
+
+<div class="note good">
+    <span class="label">What was measured offline, and is now pinned</span>
+    <p>
+        Asserted in <code>WhitePatternGenesTest</code> at every seed rather than left as a
+        number in prose: spine white <strong>0.00</strong> (it was ~75%, the bug this
+        closes), the belly whiter than the flank because frame climbs <em>from</em> the
+        belly, the legs under 10% and the upper crest under 15%, the patches measurably
+        wider than they are tall, and the range reaching both cryptic and textbook.
+    </p>
+</div>
+
+<p>Spawn a handful of <code>ednrb=O/N</code> horses from the custom egg and look for:</p>
+
+<ul>
+    <li><strong>Does the back stay dark?</strong> The one thing frame never does is cross
+        the topline. Walk behind a frame horse and look along the spine from the withers
+        to the croup: it should be solid colour on every horse, with the white stopping
+        somewhere on the flank.</li>
+    <li><strong>Does the white read as <em>horizontal</em>?</strong> This is the change
+        most likely to be wrong. Patches are sampled about five times longer along the
+        horse than tall, which measures as elongated and may still read as a blotch at
+        128px. Compare a frame side-on against a <a href="gene-tobiano.html">tobiano</a>:
+        frame should look like a band running along the barrel, tobiano like something
+        poured over the back.</li>
+    <li><strong>Is the belly actually white?</strong> Look underneath. The lower barrel
+        should be substantially white on a well-marked horse, pushing up into the sides in
+        separate tongues rather than as one clean edge.</li>
+    <li><strong>The neck.</strong> New, and it had none before: white along the lower and
+        middle neck, sometimes joining the face white to the body white, with the
+        <strong>crest dark</strong>. Check the crest specifically &mdash; a white crest
+        would mean the neck band's ceiling is too high.</li>
+    <li><strong>Dark legs, with the odd coronet.</strong> Roughly one leg in six gets a
+        small white band at the hoof. Confirm it reads as a coronet and not as a stray
+        pixel, and that no frame horse comes out with tall stockings from this gene
+        alone.</li>
+    <li><strong>Asymmetry.</strong> Walk around the horse. One flank should sometimes be
+        visibly whiter than the other &mdash; if both sides always match, the side lean is
+        too weak to see.</li>
+    <li><strong>The cryptic end.</strong> About one frame horse in five should be marked
+        so lightly you would not call it frame &mdash; a bold face, a blue eye, and almost
+        nothing on the body. Confirm that reads as a lightly marked horse and not as a
+        <em>broken</em> one. This is deliberate; it is why frame is DNA-tested.</li>
+    <li><strong>The bold end.</strong> And confirm the other tail still looks like a paint
+        horse. Total white on a bold frame is around a quarter of the horse, which is low
+        for a paint and correct: four dark legs, a dark back, a dark mane and tail are most
+        of the surface.</li>
+    <li><strong>Stacked.</strong> Frame has its locus to itself, so try it with splash and
+        with sabino. A frame-plus-splash horse should be louder than either alone (white
+        finds white) without becoming a white blob.</li>
+</ul>
 
 <h2 id="magical-utility">&sect;0a &mdash; the seven magical utility genes (new 2026-09-04, NOT play-tested)</h2>
 
