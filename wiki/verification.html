@@ -447,9 +447,10 @@
 <p class="muted">
     Not fixed, and still open above: <a href="known-gaps.html#gap-30">tobiano&rsquo;s
     <code>cover</code> knob</a>, which is still calibrated as if the patch field were
-    uniform &mdash; and it is the same defect frame turned out to have, so the two-pass
-    quantile <code>EdnrbGene</code> now uses is the shape of that fix. Frame&rsquo;s own
-    band is rebuilt &mdash; <a href="#frame-overo">&sect;0-F2</a>.
+    uniform. <strong>Both are fixed now</strong> &mdash; the same two-pass quantile in
+    both genes. Frame&rsquo;s band is rebuilt (<a href="#frame-overo">&sect;0-F2</a>) and
+    tobiano&rsquo;s calibration is corrected without changing how it looks
+    (<a href="#tobiano-calibration">&sect;0-F4</a>).
 </p>
 
 <h3 id="brindle">Brindle &mdash; the X-linked gene</h3>
@@ -920,6 +921,52 @@
     <li><strong>Stacked.</strong> Frame has its locus to itself, so try it with splash and
         with sabino. A frame-plus-splash horse should be louder than either alone (white
         finds white) without becoming a white blob.</li>
+</ul>
+
+<h2 id="tobiano-calibration">&sect;0-F4 &mdash; tobiano recalibrated (2026-09-06, NOT looked at)</h2>
+
+<div class="note good">
+    <span class="label">This one is meant to look identical &mdash; that is the check</span>
+    <p>
+        Unlike frame, tobiano was <strong>not</strong> visibly broken and was not
+        redesigned. Its <code>cover</code> knob was lying &mdash; a range that read as a
+        1.4&times; swing delivered a 2.8&times; one &mdash; and its topline bias was
+        measured against the whole-horse box, so it landed on the mane instead of the
+        back. Both are fixed the way frame's were; the constants were then re-declared as
+        the range the old code actually produced and the biases re-tuned to hold the back
+        and legs where they were. Full account:
+        <a href="gene-tobiano.html#quantile">the tobiano page</a>.
+    </p>
+    <p>
+        Over 400 seeds, before against after: markable surface
+        <strong>0.31&ndash;0.86</strong> both ways, back median <strong>0.64</strong> both
+        ways, legs median <strong>0.74</strong> against <strong>0.76</strong>. Individual
+        horses moved, the population did not.
+    </p>
+</div>
+
+<p>Spawn a handful of <code>tobiano=To/to</code> horses and confirm nothing got worse:</p>
+
+<ul>
+    <li><strong>Does it still cross the back?</strong> The defining tobiano shape and the
+        thing that tells it from <a href="gene-ednrb.html">frame</a>. Patches should run
+        up and over the topline, unbroken. The bias that does this now lands on the
+        barrel rather than the mane, so if anything changed visibly it is most likely
+        here.</li>
+    <li><strong>White legs, coloured head.</strong> Both unchanged in intent. The head is
+        skipped outright by the painter, so any white on it would be a real bug.</li>
+    <li><strong>Are the patches still large and smooth-edged?</strong> Tobiano's edges are
+        a hard binary cut &mdash; a half-scaled black texel reads gold, not grey &mdash;
+        so watch for any gold fringing along a patch margin.</li>
+    <li><strong>The foal.</strong> Genuinely new: patch size is measured along the
+        barrel now, so a foal should carry the same <em>relative</em> patch scale as an
+        adult instead of a coarser version. Breed one and compare it beside its parent.</li>
+    <li><strong>The loud end.</strong> A bold tobiano is ~86% white on everything but the
+        head. Confirm that still reads as a loud paint horse rather than as a white horse
+        with a coloured head.</li>
+    <li><strong>Stacked with splash.</strong> A splash allele on a tobiano must still
+        leave a tobiano &mdash; see <a href="#white-belly">&sect;0-G</a>, which asks the
+        same question and is the case the saturating stacking signal exists for.</li>
 </ul>
 
 <h2 id="roans">&sect;0-F3 &mdash; the two roans, rebuilt (2026-09-06, NOT looked at)</h2>

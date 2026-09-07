@@ -38,8 +38,9 @@
     <div><dt>Founder draws</dt><dd>1 &times; nextFloat()</dd></div>
     <div><dt>Deterministic</dt><dd><strong>no</strong></dd></div>
     <div><dt>Epi draws</dt><dd>nextLong() seed, nextFloat() coverage, nextFloat() patch scale</dd></div>
-    <div><dt>Patch field</dt><dd>PatchNoise.field (warped 3-octave), scale ~0.15&ndash;0.22</dd></div>
-    <div><dt>Topline bias</dt><dd>0.18; extra lift low on each leg (white legs)</dd></div>
+    <div><dt>Patch field</dt><dd>PatchNoise.field (warped 3-octave), <code>PATCHES_MIN</code>&ndash;<code>+RANGE</code> periods along the barrel</dd></div>
+    <div><dt>Coverage</dt><dd><code>COVER_MIN</code>&ndash;<code>+RANGE</code> of the markable surface, cut as a <a href="#quantile">quantile</a></dd></div>
+    <div><dt>Topline bias</dt><dd><code>TOPLINE_BIAS</code> up the barrel's own height; extra lift low on each leg (white legs)</dd></div>
     <div><dt>Edges</dt><dd>hard binary &mdash; tobiano reads crisp, and a half-scaled black texel would read gold</dd></div>
 </dl>
 
@@ -47,10 +48,16 @@
 
 <div class="codebox">
 <div class="filename">common/genetics/genes/TobianoGene.java</div>
-<pre><code class="language-java">double v = PatchNoise.field(seed, x, y, z, scale);                 // warped 3-octave, body space
-v += TOPLINE_BIAS * clamp01((y - midY) / (topY - midY));           // lift toward the spine
-if (isLeg(part)) v += LEG_LIFT * (1 - smoothstep(0.35, 0.8, legFrac));  // white legs
-if (v &lt;= 1.0 - cover) return;
+<pre><code class="language-java">// score(): the same function both passes read
+double v = PatchNoise.field(seed, x, y, z, patches / barrelLength);   // warped 3-octave, body space
+v += TOPLINE_BIAS * clamp01((y - biasFrom) / (barrelTop - biasFrom)); // lift toward the spine
+if (isLeg(part)) v += LEG_LIFT * (1 - smoothstep(0.35, 0.8, legFrac));// white legs
+
+// pass one: what does THIS horse's field look like?
+sort(scores);  threshold = scores[n - round(cover * n)];
+
+// pass two
+if (score(part, point) &lt; threshold) return;
 f.setRed(px, py, 0f); f.setBlack(px, py, 0f);   // hard edge, no gold fringe</code></pre>
 </div>
 
@@ -65,6 +72,84 @@ f.setRed(px, py, 0f); f.setBlack(px, py, 0f);   // hard edge, no gold fringe</co
     on each leg gives the white legs. The white decision is <b>hard binary</b> &mdash;
     a partial (half-scaled) black texel resolves <em>gold</em> on the gradient, not
     grey, so tobiano cannot afford a soft edge.
+</p>
+
+<h2 id="quantile">The threshold is a quantile, not a constant</h2>
+
+<div class="note warn">
+    <span class="label">Fixed 2026-09-06 &mdash; the coverage knob was lying, and tobiano looks the same</span>
+    <p>
+        <code>cover</code> used to feed a bare <code>1 - cover</code> cut on the patch
+        field. That field is an average of three octaves, so it concentrates hard around
+        <code>0.5</code> and rarely leaves <code>[0.25,&nbsp;0.70]</code> &mdash; and a
+        range written as <code>0.40</code> to <code>0.56</code>, which reads like a
+        <strong>1.4&times;</strong> swing, therefore straddled the steepest part of that
+        bell and delivered <strong>31% to 86%</strong> coverage. A
+        <strong>2.8&times;</strong> swing behind a knob that claimed 1.4.
+    </p>
+    <p>
+        This is the same defect <a href="gene-ednrb.html#paints">frame overo</a> had,
+        differing only in <em>where</em> on the bell the range landed: frame's sat
+        outside the field's spread and came out blank-or-flooded, tobiano's sat across
+        the middle and came out over-sensitive. Frame's produced a visibly broken horse;
+        tobiano's did not, which is exactly why it survived longer.
+    </p>
+</div>
+
+<p>
+    <code>paintTobiano</code> runs <strong>two passes</strong> now. The first scores every
+    texel tobiano may mark; the second whitens the top <code>cover</code> fraction of
+    them. Scoring twice costs two noise evaluations per texel and buys a threshold that is
+    a quantile of <em>this horse's own field</em> rather than a constant hoped to sit
+    somewhere inside it, so <code>cover</code> is an area fraction by construction and
+    stays one if the field or the geometry moves underneath it.
+</p>
+
+<p>
+    It also separates two things that were one knob. <code>cover</code> decides
+    <strong>how much</strong> white there is; <code>TOPLINE_BIAS</code> and
+    <code>LEG_LIFT</code> decide <strong>where it pools</strong> &mdash; and because a
+    bias that only re-ranks texels cannot change how many of them clear a quantile, the
+    back and the legs can be tuned without moving the total.
+</p>
+
+<p>
+    The vertical reference moved at the same time. The topline bias used to ramp across
+    <code>HorseSkinGeometry.bodyBounds</code>, the whole-horse box that runs to the
+    <em>ear tips</em> &mdash; on which the barrel's spine sits only 35% of the way up, so
+    the bias meant for the <strong>back</strong> was delivering about a third of its
+    nominal strength there and its full strength on the <strong>mane</strong>. It ramps up
+    the barrel's own height now and saturates above it, which is what a bias toward the
+    topline should do: the crest and mane are over the topline, not beyond it. Patch size
+    is expressed the same way, as periods along the barrel rather than as an absolute
+    frequency, so a <strong>foal</strong> is marked at the same relative scale as the
+    adult it grows into instead of inheriting a coarser version of the same field.
+</p>
+
+<div class="note good">
+    <span class="label">Deliberately not a redesign</span>
+    <p>
+        The new constants are the measured range the old code actually produced, and the
+        two biases were re-tuned to hold the back and the legs at the coverage they had.
+        Over 400 epigenetic seeds, before against after: markable surface
+        <strong>0.31&ndash;0.86</strong> against <strong>0.31&ndash;0.86</strong>, back
+        median <strong>0.64</strong> against <strong>0.64</strong>, legs median
+        <strong>0.74</strong> against <strong>0.76</strong>. Individual horses moved (the
+        threshold is computed differently, so <code>coat-golden.txt</code> was
+        regenerated) but the population did not. What changed is that the knob now says
+        what it does.
+    </p>
+</div>
+
+<p>
+    None of this was pinned by anything: tobiano had <strong>no shape tests at all</strong>
+    before this pass, only a check that the gene composes with <code>KIT</code>. It has
+    four now &mdash; that the coverage lands in the band its knob declares and reaches
+    both ends of it (which fails against the old bare threshold, so it is a real
+    regression test), that the white crosses the topline, that the legs go white, and that
+    the head stays coloured. The topline test is the deliberate mirror of frame's
+    <code>frameWhiteIsFramedAboveAndBelow</code>: tobiano runs over the back, frame is
+    framed by colour above and below.
 </p>
 
 <h2 id="carrot">Its gene carrot</h2>

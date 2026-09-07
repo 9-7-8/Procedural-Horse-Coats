@@ -473,6 +473,130 @@ class WhitePatternGenesTest {
         return tally[1] == 0 ? 0 : tally[0] / (double) tally[1];
     }
 
+    // ------------------------------------------------------------------
+    // Tobiano's shape
+    // ------------------------------------------------------------------
+
+    /**
+     * Tobiano is measured over a wider seed set than frame because the claims
+     * below are about the <b>population</b> - an individual tobiano can carry a
+     * little more white on its side than over its back without being wrong.
+     */
+    private static final long[] TOBIANO_SEEDS = new long[24];
+
+    static {
+        for (int i = 0; i < TOBIANO_SEEDS.length; i++) {
+            TOBIANO_SEEDS[i] = i;
+        }
+    }
+
+    private static final String TOBIANO = Codes.of("agouti", "A/a", "tobiano", "To/to");
+
+    /**
+     * <b><code>cover</code> is an area fraction, and this is the test that says
+     * so.</b> The knob rolls between {@code TobianoGene.COVER_MIN} and
+     * {@code COVER_MIN + COVER_RANGE}; the coat that comes out has to land in
+     * that band and has to reach both ends of it.
+     *
+     * <p>It did not, and nothing here noticed. The roll used to feed a bare
+     * {@code 1 - cover} threshold on {@link PatchNoise#field}, which concentrates
+     * near {@code 0.5}, so a range written as {@code 0.40}-{@code 0.56} - which
+     * reads like a 1.4x swing - delivered <b>31% to 86%</b> coverage. The
+     * threshold is a quantile of the horse's own field now, which makes the
+     * relationship an identity rather than a hope; this test is what keeps it
+     * one when the field or the geometry moves underneath.
+     *
+     * <p>The same defect in {@link EdnrbGene} produced a horse dipped in white,
+     * and the same absence of a test let it ship twice.
+     */
+    @Test
+    void tobianoCoverIsAnAreaFractionAndNotAThresholdGuess() {
+        double lo = TobianoGene.COVER_MIN;
+        double hi = TobianoGene.COVER_MIN + TobianoGene.COVER_RANGE;
+        double slack = 0.03;   // one texel's worth of rounding, not a swing
+        double least = 1;
+        double most = 0;
+        for (long seed : TOBIANO_SEEDS) {
+            double w = eligibleWhite(TOBIANO, seed);
+            assertTrue(w > lo - slack && w < hi + slack,
+                    "tobiano coverage escaped the band its knob declares (" + lo + ".." + hi
+                            + ") at seed " + seed + ": " + w);
+            least = Math.min(least, w);
+            most = Math.max(most, w);
+        }
+        // and the range is actually exercised, not merely respected
+        assertTrue(least < lo + 0.20, "no modestly marked tobiano (least was " + least + ")");
+        assertTrue(most > hi - 0.15, "no loudly marked tobiano (most was " + most + ")");
+    }
+
+    /**
+     * <b>Tobiano crosses the topline.</b> This is the shape that tells it from
+     * frame overo at a glance, and the two tests are deliberate mirrors:
+     * frame's white is <em>framed</em> by colour above and below
+     * ({@link #frameWhiteIsFramedAboveAndBelow}), tobiano's runs up and over the
+     * back.
+     *
+     * <p>The comparison is over means because it is a claim about the pattern
+     * and not about every horse: a given tobiano can be a little whiter on the
+     * barrel than over the spine. What no tobiano does is have a
+     * <em>dark</em> back, so that part is asserted per seed.
+     */
+    @Test
+    void tobianoCrossesTheTopline() {
+        double top = 0;
+        double middle = 0;
+        for (long seed : TOBIANO_SEEDS) {
+            double t = bodyBandWhite(TOBIANO, seed, 0.90, 1.01);
+            assertTrue(t > 0.15, "tobiano left the back dark at seed " + seed + ": " + t);
+            top += t;
+            middle += bodyBandWhite(TOBIANO, seed, 0.62, 0.85);
+        }
+        top /= TOBIANO_SEEDS.length;
+        middle /= TOBIANO_SEEDS.length;
+        assertTrue(top > 0.50, "tobiano's back should be substantially white, got " + top);
+        assertTrue(top > middle + 0.06,
+                "tobiano is topline-weighted: back " + top + " against middle " + middle);
+    }
+
+    /**
+     * <b>White legs, coloured head.</b> The other half of the tobiano template.
+     * The head is excluded from the painter outright, so the tolerance is for
+     * the white of the eye in the template rather than for any patch.
+     */
+    @Test
+    void tobianoWhitensTheLegsAndLeavesTheHeadColoured() {
+        double legs = 0;
+        for (long seed : TOBIANO_SEEDS) {
+            double l = partWhite(TOBIANO, seed, CoatRegions.LEGS.toArray(new Part[0]));
+            assertTrue(l > 0.30, "tobiano's legs tend to white, got " + l + " at seed " + seed);
+            legs += l;
+            double head = partWhite(TOBIANO, seed, Part.HEAD, Part.MUZZLE,
+                    Part.LEFT_EAR, Part.RIGHT_EAR);
+            assertTrue(head < 0.05,
+                    "tobiano keeps the head coloured, got " + head + " at seed " + seed);
+        }
+        legs /= TOBIANO_SEEDS.length;
+        assertTrue(legs > 0.55, "tobiano's legs should be mostly white, got " + legs);
+    }
+
+    /** White fraction of everything tobiano is allowed to mark - all but the head. */
+    private static double eligibleWhite(String code, long seed) {
+        int[] img = composeAdult(code, seed);
+        int[] tally = new int[2];
+        int n = HorseSkinGeometry.SHEET_SIZE;
+        HorseSkinGeometry.forEachTexel(Skin.ADULT, (px, py, part, face, point) -> {
+            if (part == Part.HEAD || part == Part.MUZZLE
+                    || part == Part.LEFT_EAR || part == Part.RIGHT_EAR) {
+                return;
+            }
+            tally[1]++;
+            if ((img[py * n + px] & 0xFFFFFF) > 0xE0E0E0) {
+                tally[0]++;
+            }
+        });
+        return tally[1] == 0 ? 0 : tally[0] / (double) tally[1];
+    }
+
     /** White fraction of the BODY part between two fractions of the topline. */
     private static double bodyBandWhite(String code, long seed, double lo, double hi) {
         int[] img = composeAdult(code, seed);
