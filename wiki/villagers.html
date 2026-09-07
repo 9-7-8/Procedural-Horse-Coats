@@ -574,10 +574,17 @@
 
 <p>
     The barn carries the pair <strong>stacked</strong> in the middle of its road-facing
-    end, between the two door pairs: the hitch on the ground and the table on top of it,
-    which is the way round they read &mdash; you tie a horse to the low one. A villager
-    stands either side. One claims the table and becomes the horseman; the other is taken
-    on by the hitch and becomes the cowboy.
+    end, between the two door pairs: the hitch low and the table above it, which is the
+    way round they read &mdash; you tie a horse to the low one. A villager stands either
+    side. One claims the table and becomes the horseman; the other is taken on by the
+    hitch and becomes the cowboy.
+</p>
+
+<p>
+    They sit <strong>on</strong> the step rather than in it. They used to replace the
+    middle stair of the skirt, which left a hole in the run of steps up to the doors
+    &mdash; and that skirt is what makes the barn read as standing on the ground rather
+    than dug into it, so a gap in the middle of it is the first thing the eye finds.
 </p>
 
 <p>
@@ -638,11 +645,37 @@
 <p>
     So he gets a house. <code>server/CowboyHouseBuilder</code> stands one up when the
     cowboy founds: <code>horsegenetics:cowboy_house</code>, a copy of vanilla's
-    <code>plains_small_house_1</code> with its jigsaw blocks resolved and a second bed
-    added (<code>tools/barn/bake-house.py</code>). Copied rather than referenced because
-    both of those changes are needed, and because a vanilla template is not ours to rely
-    on keeping its shape. One bed is all he needs; the second is for the look of the
-    place.
+    <code>plains_small_house_1</code>, copied rather than referenced because it needs
+    changing and because a vanilla template is not ours to rely on keeping its shape.
+    <code>tools/barn/bake-house.py</code> makes five changes:
+</p>
+
+<ul>
+    <li><strong>The two jigsaw blocks come out.</strong> They are placement machinery and
+        nothing resolves them when a template is placed by hand, so left in they would
+        stand in the finished building as jigsaw blocks. The one in the doorway becomes
+        air, the one in the floor becomes floor.</li>
+    <li><strong>A second bed</strong>, alongside the first rather than across the room -
+        a bunkhouse, not a waiting room. One is all the horseman needs; the second is for
+        the look of the place.</li>
+    <li><strong>The stair beside them comes out.</strong> It is a chair in the vanilla
+        house and it reads as a headboard once there are two beds against that wall.</li>
+    <li><strong>A step outside the front door.</strong> The house sits a block proud of
+        the ground the way every vanilla plains house does, so without one the threshold
+        is a ledge you jump at.</li>
+    <li><strong>Bark back on the corner posts.</strong> They are stripped oak in vanilla;
+        nothing else about a homestead beside a stable is planed.</li>
+</ul>
+
+<p>
+    Then a <strong>path</strong> is trodden from the barn to it, in the same
+    <code>dirt_path</code> the village's own streets are made of. Two buildings on the
+    edge of a village with nothing between them read as two things that happen to be near
+    each other. It walks straight from one to the other and paves only what is
+    <em>already ground</em>, which does all the work at once: the columns under the two
+    buildings report planks and cobble rather than dirt, so the path stops at each
+    doorstep without anyone working out where the walls are &mdash; and a player's floor
+    is not dirt either, so it will not draw itself across somebody's build.
 </p>
 
 <p>

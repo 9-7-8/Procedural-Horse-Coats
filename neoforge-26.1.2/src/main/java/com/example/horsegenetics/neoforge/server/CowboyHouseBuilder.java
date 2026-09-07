@@ -6,8 +6,11 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
@@ -84,8 +87,56 @@ public final class CowboyHouseBuilder {
         house.placeInWorld(level, corner, corner,
                 new StructurePlaceSettings().setRotation(rotation).setIgnoreEntities(true),
                 level.getRandom(), Block.UPDATE_CLIENTS);
+        layPath(level, barn, corner.offset(size.getX() / 2, 0, size.getZ() / 2));
         DebugAnnounce.sayAt(level, "Cowboy", "a house went up for the horseman",
                 corner, ChatFormatting.GRAY);
+    }
+
+    /**
+     * Tread a path from the barn to the house.
+     *
+     * <p>Two buildings on the edge of a village with nothing between them read as
+     * two things that happen to be near each other. A line of
+     * {@code dirt_path} - the same block the village's own streets are made of -
+     * is what says they belong to the same people, and it costs one block per
+     * step.
+     *
+     * <p>It walks straight from one to the other and paves only what is
+     * <b>already ground</b>. That single test does all the work: the columns
+     * under the barn and the house report planks and cobble rather than dirt and
+     * are skipped, so the path stops at each doorstep without anyone having to
+     * work out where the walls are; and a player's floor is not dirt either, so
+     * it will not draw itself across somebody's build. Anything growing on the
+     * ground - grass, a flower - is trodden down, which is what a path does.
+     */
+    private static void layPath(ServerLevel level, BlockPos from, BlockPos to) {
+        double dx = to.getX() - from.getX();
+        double dz = to.getZ() - from.getZ();
+        int steps = (int) Math.ceil(Math.sqrt(dx * dx + dz * dz));
+        for (int step = 0; step <= steps; step++) {
+            double along = steps == 0 ? 0.0 : (double) step / steps;
+            pave(level, new BlockPos(
+                    from.getX() + (int) Math.round(dx * along),
+                    from.getY(),
+                    from.getZ() + (int) Math.round(dz * along)));
+        }
+    }
+
+    /** One step of the path, if this column is ground and nothing solid is on it. */
+    private static void pave(ServerLevel level, BlockPos column) {
+        BlockPos top = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, column);
+        BlockPos ground = top.below();
+        if (!level.getBlockState(ground).is(BlockTags.DIRT)) {
+            return; // a floor, a roof, a road already, or water
+        }
+        BlockState standing = level.getBlockState(top);
+        if (!standing.isAir() && !standing.canBeReplaced()) {
+            return; // a fence, a wall, somebody's chest
+        }
+        if (!standing.isAir()) {
+            level.setBlock(top, Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS);
+        }
+        level.setBlock(ground, Blocks.DIRT_PATH.defaultBlockState(), Block.UPDATE_CLIENTS);
     }
 
     /**

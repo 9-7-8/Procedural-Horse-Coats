@@ -19,8 +19,16 @@ What the bake changes:
     once the piece is placed by hand at runtime, and left in they would sit in
     the finished building as jigsaw blocks. Each becomes whatever belongs there:
     the one in the doorway becomes air, the one in the floor becomes floor.
-  * A second bed goes in. One is all the horseman needs; the second is for the
-    look of the place, and for the day something else wants a bed there.
+  * A second bed goes in, alongside the first rather than across the room. One
+    is all the horseman needs; the second is for the look of the place, and for
+    the day something else wants a bed there.
+  * The stair beside the beds comes out. It was a chair in a one-room cottage
+    and it reads as a headboard once there are two beds against that wall.
+  * The corner posts stop being stripped logs. A barn and a bunkhouse are not
+    a joinery: bark on.
+  * A step goes down outside the front door, because the house sits a block
+    proud of the ground like every vanilla house does, and without one the
+    doorway is a ledge you jump at.
 
 Placement is `server/CowboyHouseBuilder`, at runtime, next to the barn.
 """
@@ -178,16 +186,40 @@ for b in list(blocks):
         put((x, y, z), FLOOR if inside else AIR)
         replaced += 1
 
-# ---- 2. a second bed ----------------------------------------------------
-# The house ships with one, at (3,1,2)-(4,1,2) facing east. The far corner of
-# the same room is clear, so the pair sits along the same wall.
+# ---- 2. a second bed, alongside the first -------------------------------
+# The house ships with one at (3,1,2)-(4,1,2) facing east. The second goes in
+# the next row along, so the two are side by side against the same wall rather
+# than one in each corner - a bunkhouse, not a waiting room.
 BED = 'minecraft:white_bed'
 SECOND_BED = {
-    (2, 1, 4): 'foot',
-    (3, 1, 4): 'head',
+    (3, 1, 3): 'foot',
+    (4, 1, 3): 'head',
 }
 for pos, part in SECOND_BED.items():
     put(pos, add_state(BED, {'facing': 'east', 'part': part, 'occupied': 'false'}))
+
+# ---- 3. the stair beside the beds comes out -----------------------------
+# It is a chair, and with two beds against that wall it reads as a headboard
+# for one of them. The room is three by three; it can spare the furniture.
+put((4, 1, 4), AIR)
+
+# ---- 4. a step up to the front door -------------------------------------
+# The house sits a block proud of the ground, the way every vanilla plains
+# house does, so the threshold is a ledge. The block outside the door is the
+# one the jigsaw used to occupy and is air by the time we get here.
+put((0, 0, 3), add_state('minecraft:oak_stairs', {
+    'facing': 'east', 'half': 'bottom', 'shape': 'straight', 'waterlogged': 'false',
+}))
+
+# ---- 5. bark on the corner posts ----------------------------------------
+# The corners are stripped oak in the vanilla house. Nothing else about this
+# building is planed, and a homestead beside a stable should not be the tidiest
+# thing in the village.
+stripped = 0
+for entry in palette:
+    if entry.v['Name'].v == 'minecraft:stripped_oak_log':
+        entry.v['Name'] = T_str('minecraft:oak_log')
+        stripped += 1
 
 out = io.BytesIO()
 out.write(struct.pack('>B', roottype)); w_str(out, rootname); w_payload(out, root)
@@ -195,4 +227,5 @@ out.write(struct.pack('>B', roottype)); w_str(out, rootname); w_payload(out, roo
 # matters for a checked-in derived artefact.
 open(DST, 'wb').write(gzip.compress(out.getvalue(), mtime=0))
 print('wrote', DST, 'size', size, 'palette', len(palette),
-      'jigsaws replaced', replaced, 'beds', 1 + len(SECOND_BED) // 2)
+      'jigsaws replaced', replaced, 'beds', 1 + len(SECOND_BED) // 2,
+      'log states unstripped', stripped)

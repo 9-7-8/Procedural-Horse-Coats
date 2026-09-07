@@ -191,12 +191,17 @@ blocks.append(T_cmp({
 
 # ---- 2. the two work posts ---------------------------------------------
 # Stacked in the middle of the road-facing end (x=0), between the two door
-# pairs, in place of the step that was drawn there.  They are the first thing
-# you walk up to.
+# pairs.  They are the first thing you walk up to.
 #
-# The hitch on the ground and the table above it, which is the way round they
-# read: you tie a horse to the low one.  Two blocks and not one because one
-# could never hand out both trades - see server/CowboyHitchHandler.
+# They sit *on* the step rather than in it.  They used to replace the middle
+# stair, which left a gap in the run of steps up to the doors - the skirt is
+# what makes the barn read as standing on the ground rather than dug into it,
+# and a hole in the middle of it is the first thing the eye finds.  So the stair
+# stays where it was drawn and the pair stacks above it.
+#
+# The hitch low and the table above it, which is the way round they read: you
+# tie a horse to the low one.  Two blocks and not one because one could never
+# hand out both trades - see server/CowboyHitchHandler.
 #
 # Baked into the structure rather than placed at runtime because a job-site POI
 # is indexed off the block, so putting the block in the world *is* the whole
@@ -207,8 +212,8 @@ blocks.append(T_cmp({
 # hitch.  Two nitwits standing there for ever is a real answer to a real
 # question.
 POSTS = {
-    (0, 0, 3): 'horsegenetics:cowboy_hitch',
-    (0, 1, 3): 'horsegenetics:horsemans_table',
+    (0, 1, 3): 'horsegenetics:cowboy_hitch',
+    (0, 2, 3): 'horsegenetics:horsemans_table',
 }
 
 for pos, block_id in POSTS.items():

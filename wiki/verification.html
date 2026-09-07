@@ -205,10 +205,11 @@
 </p>
 
 <ul>
-    <li><strong>Are both posts in the barn, stacked?</strong> Cowboy Hitch on the ground
-        with the Horseman's Table on top, in the middle of the road-facing end, and a
-        villager either side. Both are modded blocks in a piece appended to a vanilla
-        pool, which is the thing that could quietly fail.</li>
+    <li><strong>Are both posts in the barn, stacked, and is the step under them
+        whole?</strong> Cowboy Hitch low with the Horseman's Table above it, in the middle
+        of the road-facing end, standing <em>on</em> an unbroken run of stairs rather than
+        in a gap in it. A villager either side. Both are modded blocks in a piece appended
+        to a vanilla pool, which is the thing that could quietly fail.</li>
     <li><strong>Does the hitch make a cowboy?</strong> A yellow <code>a villager took the
         hitch and became a cowboy</code> line, within a couple of seconds of a spare
         villager standing near it. Then place a second hitch 40 blocks away and confirm it
@@ -231,9 +232,16 @@
         up for the horseman</code> line says it happened. <strong>No line is an accepted
         outcome</strong>: the site test wants a flat, clear, untouched footprint and
         rough ground fails it, which is deliberate.</li>
-    <li><strong>Is the house intact and sitting on the ground?</strong> Two beds inside,
-        no jigsaw blocks anywhere in it, no corner floating or buried. A jigsaw block
-        visible in the wall means the bake did not resolve them.</li>
+    <li><strong>Is the house intact and sitting on the ground?</strong> No jigsaw blocks
+        anywhere in it - one visible in a wall means the bake did not resolve them - and
+        no corner floating or buried. Inside: <strong>two beds side by side</strong> with
+        no stair beside them, and corner posts with bark on rather than stripped oak.
+        Outside: a step up to the front door, so the threshold is not a ledge.</li>
+    <li><strong>Is there a path between the barn and the house?</strong>
+        <code>dirt_path</code>, the same block the village streets use. It should stop at
+        both doorsteps of its own accord, because it only paves ground and the buildings
+        are not ground. A path drawn <em>through</em> a building means that test is
+        wrong.</li>
     <li><strong>Does the horseman claim a bed and sleep in it?</strong> Watch him at dusk.
         If he stands outside, either no house went up or he has claimed a bed in the
         village instead &mdash; which is also fine.</li>
