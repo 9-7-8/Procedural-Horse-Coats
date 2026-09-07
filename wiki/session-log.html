@@ -26,6 +26,26 @@
 
 <h2 id="d2026-09-06">2026-09-06</h2>
 
+<h3 id="dilution-retune-2026-09-06">Built 2026-09-06, NOT yet looked at: three dilutions retuned off the footprint overlay, and the gradient turns out to be the real constraint.</h3>
+
+<p>Owner, reading the new overlay: <code>prl/prl</code> should sit &ldquo;basically all the way at the top of the lut &hellip; nearly to white&rdquo;, cream should be &ldquo;MUCH closer to the top&rdquo;, and champagne &ldquo;should reduce much more red than it does&rdquo;. Retuned in <a href="gene-matp.html">MATP</a> and <a href="gene-champagne.html">champagne</a>; <a href="known-gaps.html#gap-49">gap #49</a> is what the exercise uncovered.</p>
+
+<ul>
+<li><strong>The overlay paid for itself in one sitting.</strong> These constants had never been measured against the chart, only eyeballed on horses, and the numbers were plainly wrong once drawn: a &ldquo;near-white&rdquo; cremello resolving at black 0.38, half way down a chart whose bottom half is dark, and classic pearl at black 0.52 - barely lighter than the horse it started from.
+</li>
+<li><strong>Every <code>keepBlack</code> came down hard</strong>, because the black axis is what pins a dilution to the dark end: single cream 0.62 &rarr; 0.44, classic pearl 0.52 &rarr; 0.16, double dilute 0.38 &rarr; 0.09. Pearl's red came down with it, 0.55 &rarr; 0.17, which is the &ldquo;nearly to white&rdquo; part. On a black horse pearl moved from chart 17%,52% to <strong>70%,16%</strong> and double dilute from 59%,38% to <strong>85%,9%</strong>.
+</li>
+<li><strong>Reading the ask precisely mattered.</strong> &ldquo;Closer to the top&rdquo; was said of cream with &ldquo;top is whiter, bottom is blacker&rdquo; attached - the <em>black</em> axis. Cutting cream's red as well, which a looser reading invited, walked palomino off the gradient's warm ramp and turned it grey; its <code>keepRed</code> was put back to 0.45 and only the black moved. Champagne's ask named red explicitly, so red is what moved there.
+</li>
+<li><strong>And then the real finding.</strong> Champagne at <code>KEEP_RED</code> 0.32 lands at chart X&nbsp;68% and comes out <code>#D1CBC2</code> - a grey. Not a bug in the gene: measured off the raw top row of the gradient, saturation holds at 65&ndash;70% out to X&nbsp;50% (gold peaks <code>#EAB74A</code>), then collapses to 43% at X&nbsp;55%, 25% at X&nbsp;60% and <strong>3% by X&nbsp;70%</strong>. <strong>The right half of the chart is greyscale.</strong> A dilution is a move rightward, so there is nothing warm to move into.
+</li>
+<li><strong>Which retroactively explains the old constants.</strong> They look timid until you notice they were calibrated to that ramp - champagne's 0.55 put it at X&nbsp;45%, exactly the <code>#E3B045</code> the wiki page quoted as its gold. The genes were not badly tuned so much as tuned to a chart that has no pale warmth in it. Extending the cream ramp out to about X&nbsp;85% is an art change that would free every dilution at once, and is now the blocking item for this line of work.
+</li>
+<li><strong>Golden regenerated, and its diff is the proof of blast radius:</strong> 66 rows moved and <strong>zero</strong> of them carry anything but a champagne or MATP variant allele. Parity re-baked to no diff, wasm re-baked, <code>:common:test</code> green at 478.
+</li>
+</ul>
+
+
 <h3 id="lut-footprint-2026-09-06">Built 2026-09-06, NOT yet looked at: the LUT chart shows which part of itself a coat reads.</h3>
 
 <p>Owner, on the lab below: draw on the gradient &ldquo;where it shows what area of the LUT it's pulling from for that specific coat &hellip; that'll also help me tune all the other genes.&rdquo; It does now. <a href="lut-lab.html#overlay">The overlay</a>; checklist <a href="verification.html#lut-lab">&sect;0-L</a>.</p>

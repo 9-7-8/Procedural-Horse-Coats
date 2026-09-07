@@ -27,6 +27,29 @@
      See wiki/gene-preview/gene-preview.js. -->
 <div class="gene-preview" data-gene="horsegenetics.matp"></div>
 
+<div class="note">
+    <span class="label">Retuned 2026-09-06 &mdash; measured, not guessed</span>
+    <p>
+        The three dilutions were sitting far too low on the gradient. Read off the
+        <a href="lut-lab.html">LUT lab</a>'s footprint overlay, a &ldquo;near-white&rdquo;
+        cremello was resolving at black&nbsp;0.38 &mdash; half way down a chart whose
+        bottom half is dark &mdash; and classic pearl was barely lighter than the horse it
+        started from. Every <code>keepBlack</code> came down hard, because the black axis
+        is what pins a dilution to the dark end, and classic pearl's red came down with it
+        (owner: two pearls lighten a coat <em>substantially</em>, nearly to white).
+    </p>
+    <p>
+        <strong>Single cream's red was deliberately left alone.</strong> The ask was for
+        cream to sit closer to the <em>top</em>, which is the black axis; cutting its red
+        as well walked palomino off the gradient's warm ramp and turned it grey. On the
+        current gradient the outcomes now resolve to palomino <code>#DFBB81</code>,
+        buckskin body <code>#D19D3B</code>, smoky black <code>#885522</code>, classic
+        pearl on a chestnut <code>#D9E2E7</code>, and cremello <code>#F3F8FB</code> &mdash;
+        but those are the <em>gradient's</em> colours, not the gene's, and they move
+        whenever the art does. The levels in the table are the gene.
+    </p>
+</div>
+
 <dl class="spec">
     <div><dt>Gene key</dt><dd>horsegenetics.matp</dd></div>
     <div><dt>Alleles</dt><dd><span class="allele dom">Cr</span> <span class="allele rec">prl</span> <span class="allele wild">N</span></dd></div>
@@ -56,7 +79,7 @@
 <tr><td><code>N/N</code></td><td><code>wild</code></td><td>No dilution.</td></tr>
 <tr><td><code>prl/N</code></td><td><code>pearl-carrier</code> <span class="tag">wild type</span></td><td>One pearl copy does nothing on its own &mdash; the horse looks undiluted and only its descendants show it. Breeding two carriers is how classic pearl appears.</td></tr>
 <tr><td><code>Cr/N</code></td><td><code>single-cream</code></td><td>Red cut hard and black cut a little &mdash; palomino on a chestnut, buckskin on a bay, smoky black on a black. The points go dark brown, never jet black.</td></tr>
-<tr><td><code>prl/prl</code></td><td><code>classic-pearl</code></td><td>Both pigments diluted mildly and evenly &mdash; an apricot body with sepia points.</td></tr>
+<tr><td><code>prl/prl</code></td><td><code>classic-pearl</code></td><td>Both pigments cut hard and evenly &mdash; a pale, bright coat close to white, over softly tinted points.</td></tr>
 <tr><td><code>Cr/prl</code></td><td><code>double-dilute</code></td><td>The two complement: one of each acts as a double cream.</td></tr>
 <tr><td><code>Cr/Cr</code></td><td><code>double-dilute</code></td><td>Cremello, perlino or smoky cream &mdash; a near-white body over rusty points.</td></tr>
 </tbody>
@@ -109,9 +132,9 @@
 <table>
 <thead><tr><th>Outcome</th><th>keepRed</th><th>keepBlack</th><th>blackTint</th></tr></thead>
 <tbody>
-<tr><td><code>single-cream</code></td><td>0.45</td><td>0.62</td><td>0.30</td></tr>
-<tr><td><code>classic-pearl</code></td><td>0.55</td><td>0.52</td><td>0.28</td></tr>
-<tr><td><code>double-dilute</code></td><td>0.08</td><td>0.38</td><td>0.33</td></tr>
+<tr><td><code>single-cream</code></td><td>0.45</td><td>0.44</td><td>0.30</td></tr>
+<tr><td><code>classic-pearl</code></td><td>0.17</td><td>0.16</td><td>0.13</td></tr>
+<tr><td><code>double-dilute</code></td><td>0.05</td><td>0.09</td><td>0.10</td></tr>
 </tbody>
 </table>
 </div>
@@ -131,7 +154,8 @@
         <em>No</em> cream horse keeps a pitch-black point. A single-cream point
         may be a very dark brown but never a void &mdash; so its tint is a full
         one, not the token amount a real-world buckskin would argue for. Classic
-        pearl gets sepia points, perlino rusty ones.
+        pearl and perlino both land pale enough that the tint is a small one -
+        it is sized against how much black is <em>left</em>.
     </p>
 </div>
 
