@@ -32,6 +32,90 @@
     </p>
 </div>
 
+<h2 id="splash">&sect;0-AA &mdash; the splash loci swap roles (2026-09-07, NOT looked at)</h2>
+
+<p>
+    The two splash loci were overhauled against the reference, and the headline change is
+    a <strong>swap</strong>: <a href="gene-mitf.html#sw1"><code>SW1</code></a> on
+    <code>MITF</code> is now the widespread, minimally-expressed allele the reference says
+    it is, and <code>SW2</code> on <a href="gene-pax3.html#rare"><code>PAX3</code></a> is
+    rare and breed-clustered. <code>SW1/N</code> also gained an outcome of its own,
+    <code>splash-minimal</code>, painted over a <em>range</em> rather than at a strength.
+    Every wild-caught horse&rsquo;s markings changed as a result.
+</p>
+
+<ul>
+    <li><strong>Spawn a large mixed herd and just look at the markings.</strong> Most horses
+        should have modest, ordinary-looking white &mdash; a star, a sock or two, sometimes a
+        blaze &mdash; and a minority should have none at all. If nearly every horse is bare,
+        or nearly every horse is dipped to the belly, the carriage rate is wrong.</li>
+    <li><strong>The same genotype must not look the same twice.</strong> Spawn several
+        <code>mitf=SW1/N</code> horses. The point of the range is that one is a snip and a
+        sock and another is a proper blue-eyed splash. If they all look alike the range is
+        not reaching the painter.</li>
+    <li><strong>Check the ladder still climbs.</strong> <code>SW1/N</code> &rarr;
+        <code>SW5/N</code> &rarr; <code>SW1/SW1</code> &rarr; <code>SW3/N</code> &rarr;
+        <code>SW3/SW1</code> should be visibly whiter at every step.</li>
+    <li><strong>A horse splash at both loci.</strong> <code>mitf=SW1/N pax3=SW2/N</code>
+        should be clearly whiter than either alone &mdash; that is the whole reason splash
+        is two genes here. Easiest found on a Quarter Horse or an American Paint, which now
+        carry both.</li>
+    <li><strong>Blue eyes should track the markings, not outnumber them.</strong> They used
+        to come from a locus 90% of horses carried. Now they come mostly from
+        <code>SW1</code>, and a blue eye should read as a hint that a horse is carrying
+        something.</li>
+    <li><strong>Spawn an Appaloosa herd.</strong> It is the only breed carrying
+        <code>SW4</code>, at a low rate, on top of its leopard complex.</li>
+    <li><strong>A Cleveland Bay should still be almost unmarked.</strong> The breed standard
+        is minimal white and its table was left deliberately low; it is the check that a
+        breed can opt out of the new baseline.</li>
+</ul>
+
+<div class="note">
+    <span class="label">Questions for the owner</span>
+    <ol>
+        <li><strong>The big one: is 55% carrying <code>SW1</code> the right number?</strong>
+            The previous design put a minimal splash allele on <em>90%</em> of founders so
+            ordinary horses would have socks and blazes. The reasoning was good; the allele
+            was wrong, so it moved to <code>MITF</code>, where the reference actually puts
+            the widespread one. But I also dropped the rate, because the same reference is
+            emphatic that ordinary markings are mostly <em>not</em> splash &mdash; no splash
+            allele at all was found in 112 deliberately minimally-marked horses. 55% is a
+            compromise between a defensible allele frequency and a world where most horses
+            have some white. It is one constant, <code>MitfGene.WILD_SW1_PERCENT</code>.</li>
+        <li><strong>The honest fix is a markings system, and I did not build one.</strong>
+            Ordinary white is polygenic. A small per-horse markings score, drawn from the
+            shared face-marking vocabulary and running before the white loci, would let
+            <code>SW1</code>&rsquo;s frequency fall to what its evidence supports. That is a
+            new system, so it is on <a href="roadmap.html#ordinary-markings">the roadmap</a>
+            rather than in this change.</li>
+        <li><strong>Is <code>splash-minimal</code>&rsquo;s range (0.10&ndash;0.44) wide
+            enough?</strong> The reference&rsquo;s claim is strong &mdash; a single
+            <code>SW1</code> copy can be indistinguishable from ordinary markings
+            <em>or</em> a classic splash. The low end is a coronet band and a star; the top
+            overlaps <code>splash</code> proper. Widening it further makes the outcome name
+            less honest, narrowing it makes the allele predictable, which is the one thing
+            it is documented not to be.</li>
+        <li><strong>Breed numbers are my judgement, not the reference&rsquo;s.</strong> The
+            source names which breeds carry which allele and never how often. I put the
+            breeds it names at 55&ndash;65% <code>SW1</code>, the ones it does not at
+            40&ndash;55%, and Cleveland Bay at 10% because its standard forbids white.
+            Quarter Horse, American Paint and Lipizzan carry <code>SW2</code>; Appaloosa
+            carries <code>SW4</code>.</li>
+        <li><strong><code>PAX3</code>&rsquo;s page said deafness was not modelled. It
+            was.</strong> The code has emitted the shared informational
+            <code>splash-deafness</code> condition from both loci for some time; only the
+            javadoc and the wiki still said otherwise. Corrected, no behaviour change.</li>
+        <li><strong>The Mangalarga Marchador is not in the catalogue.</strong> The reference
+            names it for both <code>SW1</code> and the grey duplication. Worth adding as a
+            breed, or worth leaving out?</li>
+        <li><strong>Every splash horse&rsquo;s markings moved.</strong> Not just the
+            frequencies &mdash; <code>WhitePattern.splash</code> now derives its strength
+            from the same roll that sets the waterline, so even a fixed-strength outcome
+            renders slightly differently. The golden file was regenerated for it.</li>
+    </ol>
+</div>
+
 <h2 id="grey">&sect;0-Z &mdash; grey, rebuilt as a copy number (2026-09-07, NOT looked at)</h2>
 
 <p>

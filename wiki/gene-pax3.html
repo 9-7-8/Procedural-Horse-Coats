@@ -18,7 +18,10 @@
     The <strong>second</strong> splash white locus, carrying <code>SW2</code> and
     <code>SW4</code>. Its twin is <a href="gene-mitf.html"><code>MITF</code></a>, and it
     exists to make one point that a single splash gene could not:
-    <strong>a horse can be splash twice over.</strong>
+    <strong>a horse can be splash twice over.</strong> <code>SW2</code> is the
+    <em>rare</em>, breed-clustered splash allele &mdash; Quarter Horses and American Paints
+    above all &mdash; not the common one. The common one is
+    <a href="gene-mitf.html#sw1"><code>SW1</code></a>, next door.
 </p>
 
 <!-- The gene, on the three base coats, as a horse you can spin. One div and one
@@ -36,7 +39,7 @@
     <div><dt>Combinations</dt><dd>6, of which 5 a horse can carry, landing on 3 outcomes</dd></div>
     <div><dt>Outcomes</dt><dd>wild, <code>splash</code>, <code>splash-bold</code></dd></div>
     <div><dt>Default allele</dt><dd>N</dd></div>
-    <div><dt>Wild frequency</dt><dd><strong>90% <code>SW2/N</code></strong>, 1% <code>SW4/N</code>, 9% <code>N/N</code> &mdash; heterozygotes only</dd></div>
+    <div><dt>Wild frequency</dt><dd><code>Pax3Gene.WILD_SW2_PERCENT</code> carry one <code>SW2</code>, <code>WILD_SW4_PERCENT</code> one <code>SW4</code> &mdash; heterozygotes only. The breed tables carry most of it</dd></div>
     <div><dt>Founder draws</dt><dd>1 &times; nextFloat()</dd></div>
     <div><dt>Deterministic</dt><dd><strong>no</strong></dd></div>
     <div><dt>Epi draws</dt><dd>nextLong() waterline seed, nextFloat() waterline height, then the shared face-marking draw (1 long + 8 floats)</dd></div>
@@ -57,17 +60,24 @@
     In this model that falls out for free. Both genes paint, one after the other, and
     <a href="pipeline.html">white finds white</a>: each painter raises its own strength by
     how much of the horse is already de-pigmented. There is no interaction rule anywhere,
-    and the measured result is <strong>70%</strong> white for
-    <code>SW1/N&nbsp;+&nbsp;SW2/N</code> against 45% and 42% for the two on their own.
+    and the measured result is <strong>38%</strong> white for
+    <code>SW1/N&nbsp;+&nbsp;SW2/N</code> against 12% and 14% for the two on their own
+    &mdash; more than either, and more than the two simply added, because each raises the
+    other&rsquo;s strength.
 </p>
 
 <div class="note">
     <span class="label">Painted blindly, this would be wrong</span>
     <p>
         Before the stacking rule, two waterlines drawn at roughly the same height came out
-        at 45% versus 43.7% &mdash; the two-gene split would have been an architectural
+        barely whiter than one &mdash; the two-gene split would have been an architectural
         gesture with nothing visible behind it. Reading the coat is what makes the split
         mean something on the horse.
+    </p>
+    <p>
+        It is also the one part of this that was measured in a live population: in a
+        Quarter Horse study, horses carrying both <code>SW1</code> and <code>SW2</code> had
+        more facial white on average than horses carrying either alone.
     </p>
 </div>
 
@@ -98,67 +108,71 @@
 </table>
 </div>
 
-<div class="note">
-    <span class="label">Deafness is not modelled</span>
-    <p>
-        <code>SW2/SW2</code> carries a real hearing risk in live horses. The mod has no
-        hearing, and inventing a penalty the player cannot perceive would be flavour text
-        pretending to be a mechanic. It is recorded in the outcome&rsquo;s
-        <code>description</code> instead &mdash; which is where the gene dictionary will
-        read it from when that lands.
-    </p>
-</div>
-
-<h2>The common one</h2>
-
 <p>
-    <strong>Nine wild horses in ten carry one copy of <code>SW2</code></strong>, which makes
-    this the only locus in the mod whose variant is the <em>ordinary</em> horse rather than
-    the exception. That is deliberate, and it is how minimal splash works in life: a mild
-    splash allele is near-ubiquitous, and what one copy buys a horse &mdash; clean-edged leg
-    white, a little belly white, a blaze &mdash; is roughly what most horses look like. The
-    pattern people notice is the <em>doubled</em> one.
+    <code>SW4</code> is an Appaloosa allele: it was described in one Appaloosa family and
+    nowhere else, and one copy can be a splash or little more than a broad blaze. Its
+    homozygote has never been detected, so the model does not let one occur &mdash; the
+    same precaution <code>MITF</code> applies to <code>SW3/SW3</code>, and for the same
+    reason. &ldquo;Never seen&rdquo; is a weaker claim than &ldquo;lethal&rdquo;, and it is
+    a breeding hazard either way.
 </p>
 
-<h3>Why the table is written out</h3>
+<h2 id="rare">SW2 is the rare one &mdash; and it used not to be</h2>
 
 <p>
-    Two reasons, and either one on its own rules out
+    This locus used to carry the mod&rsquo;s near-ubiquitous minimal splash allele: 90% of
+    founders were <code>SW2/N</code>, on the reasoning that a mild splash allele is what
+    gives an ordinary horse its socks and its blaze, so most horses should have one.
+</p>
+
+<p>
+    <strong>The reasoning was right and the allele was wrong.</strong> The widespread,
+    several-hundred-year-old, minimally-expressed splash allele is
+    <a href="gene-mitf.html#sw1"><code>SW1</code></a>, on <code>MITF</code>.
+    <code>SW2</code> is a coding change &mdash; <em>PAX3</em> p.Cys70Tyr &mdash; with a much
+    narrower distribution: Quarter Horses and American Paints above all, with reports in
+    Lipizzaners and Norikers. So the common-allele job moved next door, and this locus is
+    now what its own evidence says it is.
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Allele</th><th>The common one?</th><th>Wild carriage</th><th>Where the rest of it lives</th></tr></thead>
+<tbody>
+<tr><td><a href="gene-mitf.html"><code>SW1</code></a> (<code>MITF</code>)</td><td><strong>yes</strong></td><td><code>MitfGene.WILD_SW1_PERCENT</code></td><td>most breeds, at or above the wild rate</td></tr>
+<tr><td><code>SW2</code> (<code>PAX3</code>)</td><td>no</td><td><code>Pax3Gene.WILD_SW2_PERCENT</code></td><td>Quarter Horse, American Paint, Lipizzan</td></tr>
+<tr><td><code>SW4</code> (<code>PAX3</code>)</td><td>no</td><td><code>WILD_SW4_PERCENT</code></td><td>Appaloosa, and nowhere else</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3>Why the table is still written out</h3>
+
+<p>
+    Both splash loci list their heterozygotes explicitly rather than deriving a table from
+    allele frequencies. Two reasons, and either one on its own rules out
     <code>FounderTable.hardyWeinberg</code>:
 </p>
 
 <ul>
-    <li><strong>90% heterozygous is arithmetically unreachable under Hardy-Weinberg.</strong>
-        The heterozygote share is <code>2pq</code>, which peaks at <strong>50%</strong> at
-        <code>p = q = 0.5</code>. No allele frequency anywhere makes nine horses in ten
-        heterozygous in a randomly-mating population. A table that says so has to say so
-        directly.</li>
     <li><strong>The doubled combinations are the reward for breeding.</strong>
-        <code>SW2/SW2</code> is the bold outcome and must not turn up in a wild-caught
-        horse &mdash; the same rule the health loci and
-        <a href="gene-body-size.html">magic body size</a> follow. Left to Hardy-Weinberg,
-        one copy on nine horses in ten would have made <em>eighty-one per cent</em> of wild
-        horses bold splash, which is not a pattern any more; it is the base coat.</li>
+        <code>SW2/SW2</code> is the bold outcome and it is deaf; it must not turn up in a
+        wild-caught horse &mdash; the same rule the health loci and
+        <a href="gene-body-size.html">magic body size</a> follow.</li>
+    <li><strong>Hardy-Weinberg cannot state a carriage rate.</strong> Its heterozygote
+        share is <code>2pq</code>, which peaks at 50% at <code>p = q = 0.5</code>, so a
+        table that says &ldquo;this many founders carry one copy&rdquo; has to say it
+        directly rather than derive it. That mattered most when this locus held the common
+        allele; <a href="gene-mitf.html"><code>MITF</code></a> holds it now, and uses the
+        same shape of table for the same reason.</li>
 </ul>
 
-<h3>What it does to the population</h3>
-
-<table>
-<thead><tr><th></th><th>before (2%, Hardy-Weinberg)</th><th>now (90% het)</th></tr></thead>
-<tbody>
-<tr><td>wild horses showing any white-pattern locus</td><td>33.3%</td><td><strong>93.6%</strong></td></tr>
-<tr><td>mean white coverage of a wild-caught horse</td><td>32.5%</td><td><strong>49.5%</strong></td></tr>
-<tr><td>foal of two wild parents is <code>splash-bold</code></td><td>0.07%</td><td><strong>20.5%</strong></td></tr>
-</tbody>
-</table>
-
 <p>
-    Both consequences are the point rather than side effects. Bold splash becomes the
-    commonest thing a player breeds by accident and the first white pattern they meet. And
-    because both splash loci read the coat they are handed
-    (<a href="pipeline.html#white-finds-white">white finds white</a>), a horse that is
-    <em>also</em> <a href="gene-mitf.html"><code>MITF</code></a> splash is now the usual case
-    rather than a rarity &mdash; which is the interaction the two-locus split exists to show.
+    What the split still buys is what it was built for. Because both splash loci read the
+    coat they are handed (<a href="pipeline.html#white-finds-white">white finds white</a>),
+    a horse carrying <code>SW1</code> <em>and</em> <code>SW2</code> is whiter than either
+    alone with no interaction rule anywhere &mdash; and in the Quarter Horse and the
+    American Paint, which carry both, that horse is common enough to meet.
 </p>
 
 <h2>The face</h2>
@@ -213,8 +227,9 @@
     <p>
         Like <a href="gene-mitf.html">MITF</a>, any expressing combination here claims a
         blue iris through the shared <a href="eye-colour.html">eye-colour
-        channel</a>. Since <code>SW2</code> is carried by 90% of founders, a blue-eyed
-        horse is not rare &mdash; a bold splash is.
+        channel</a>. Blue eyes in the wild pool now come overwhelmingly from
+        <a href="gene-mitf.html"><code>SW1</code></a> next door; a blue eye traceable to
+        <em>this</em> locus belongs to a Quarter Horse, a Paint or a Lipizzan.
     </p>
     <p>
         <strong>One or two blue eyes.</strong> A depigmenting claim frequently fails to

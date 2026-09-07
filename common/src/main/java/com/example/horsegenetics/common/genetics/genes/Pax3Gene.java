@@ -35,28 +35,31 @@ import java.util.List;
  *   <tr><td>{@code SW4}</td><td>splash-type face, leg and belly white</td><td><b>never detected</b> - not modelled as occurring</td></tr>
  * </table>
  *
- * <p><b>Deafness is not modelled.</b> {@code SW2/SW2} carries a real hearing
- * risk in live horses; the mod has no hearing, and inventing a penalty the
- * player cannot perceive would be flavour text pretending to be a mechanic. It
- * is recorded in the outcome's description instead, which is where the gene
- * dictionary will read it.
+ * <p><b>Deafness is reported.</b> Two variant copies at this locus and the
+ * horse is deaf - the same {@link MitfGene#DEAFNESS} condition its twin emits,
+ * de-duplicated so a horse doubled at both loci is told once. It is
+ * informational and costs the horse nothing: the mod has no hearing to lose,
+ * and inventing a penalty the player cannot perceive would be flavour text
+ * pretending to be a mechanic.
  *
- * <h2>The common one</h2>
- * <b>Nine wild horses in ten carry one copy of {@code SW2}</b>, which makes
- * this the only locus in the mod whose variant is the ordinary horse rather
- * than the exception. That is deliberate and it is how minimal splash works in
- * life: a mild splash allele is near-ubiquitous, and what it buys a horse -
- * clean-edged socks, a little belly white, a blaze - is what most horses look
- * like. The pattern people notice is the <i>doubled</i> one.
+ * <h2>{@code SW2} is the <i>rare</i> one - see {@link MitfGene}</h2>
+ * This locus used to carry the mod's near-ubiquitous minimal splash allele, on
+ * the reasoning that a mild splash allele is what gives an ordinary horse its
+ * socks and its blaze. The reasoning was right and the allele was wrong.
+ * {@code SW1}, on {@code MITF}, is the widespread, several-hundred-year-old,
+ * minimally-expressed one; {@code SW2} is a coding change in {@code PAX3} with
+ * a much narrower distribution - Quarter Horses and American Paints above all,
+ * with reports in Lipizzaners and Norikers. So the common-allele job moved to
+ * {@code MITF}, and {@code SW2} is now rare in the wild pool and concentrated
+ * in the breeds that actually have it.
  *
- * <p>Two consequences worth stating, because they are the point rather than
- * side effects. Cross two wild-caught horses and about <b>one foal in five</b>
- * is {@code SW2/SW2} - bold splash is the commonest thing a player will breed
- * by accident, and the first white pattern they meet. And because both splash
- * loci read the coat they are handed
- * ({@linkplain WhitePattern#splash white finds white}), a horse that is also
- * {@code MITF} splash is now the usual case rather than a rarity, which is the
- * interaction the two-locus split exists to show.
+ * <p>What the split still buys is the thing it was built for: because both
+ * splash loci read the coat they are handed
+ * ({@linkplain WhitePattern#splash white finds white}), a horse carrying
+ * {@code SW1} <i>and</i> {@code SW2} is whiter than either alone, with no
+ * interaction rule anywhere. In a Quarter Horse study that is exactly what was
+ * measured - horses with both had more facial white on average than horses with
+ * either.
  *
  * <p>Natural, <b>non-deterministic</b>, painted with the same
  * {@linkplain WhitePattern#splash dipped-from-below} shape as {@code MITF} -
@@ -87,41 +90,37 @@ public final class Pax3Gene implements Gene, HealthContribution, EyeColorContrib
 
     private final Expression BOLD = Expression.of("splash-bold", "Bold splash white")
             .describe("White carried well up the barrel and over the face. Two copies of SW2 are "
-                    + "viable and land here; in live horses that genotype also carries a real risk "
-                    + "of deafness, which this mod does not model.")
+                    + "viable and land here - and, like any doubled splash, deaf: the pigment "
+                    + "cells that never reached the coat never reached the inner ear either.")
             .varies()
             .restrict((ctx, coat) -> WhitePattern.splash(ctx, coat, KEY, S_BOLD));
 
     private final List<Expression> expressions = List.of(WILD, SPLASH, BOLD);
 
     /**
-     * How many founders carry <b>one</b> copy of {@code SW2}. This is the one
-     * locus in the mod where the minimal marking is the <i>ordinary</i> horse:
-     * a minimal-white splash allele is genuinely near-ubiquitous in live
-     * populations, so most horses you meet are carrying one and wearing the
-     * clean-edged socks and the blaze that come with it.
+     * How many founders carry <b>one</b> copy of {@code SW2}. Rare in the wild
+     * pool: this allele's distribution is a handful of breeds, not a species,
+     * and the breeds that have it say so in their own tables.
      */
-    public static final double WILD_SW2_PERCENT = 90.0;
-    /** {@code SW4} stays rare - it is the loud one, not the ordinary one. */
-    public static final double WILD_SW4_PERCENT = 1.0;
+    public static final double WILD_SW2_PERCENT = 3.0;
+    /** {@code SW4} is rarer still - one Appaloosa family is the whole of it. */
+    public static final double WILD_SW4_PERCENT = 0.5;
 
     /**
      * <b>Heterozygotes only, and written out rather than derived.</b> Two
      * separate reasons, and both of them rule out
      * {@link FounderTable#hardyWeinberg}:
      * <ul>
-     *   <li><b>It is arithmetically unreachable.</b> Hardy-Weinberg's
-     *       heterozygote share is {@code 2pq}, which peaks at <b>50%</b> when
-     *       {@code p = q = 0.5}. There is no allele frequency anywhere that
-     *       makes 90% of a randomly-mating population heterozygous. A table
-     *       that says so has to say so directly.</li>
      *   <li><b>The doubled combinations are the reward for breeding.</b>
-     *       {@code SW2/SW2} is the bold outcome; it must not turn up in a
-     *       wild-caught horse, the same rule the health loci and
-     *       {@link MagicSizeGene} follow. With one copy on nine horses in ten,
-     *       leaving the homozygote to Hardy-Weinberg would have made
-     *       <i>eighty-one per cent</i> of wild horses bold splash, which is not
-     *       a pattern any more - it is the base coat.</li>
+     *       {@code SW2/SW2} is the bold outcome and it is deaf; it must not turn
+     *       up in a wild-caught horse, the same rule the health loci and
+     *       {@link MagicSizeGene} follow.</li>
+     *   <li><b>Hardy-Weinberg cannot express a carriage rate directly.</b> Its
+     *       heterozygote share is {@code 2pq}, which peaks at 50%, so any table
+     *       stating "this many founders carry one copy" has to state it rather
+     *       than derive it. That mattered more when this locus carried the
+     *       common allele - {@link MitfGene} carries it now, and uses the same
+     *       shape of table for the same reason.</li>
      * </ul>
      * Baseline last, as every table in the mod does it, so a high founder roll
      * is the plain horse.

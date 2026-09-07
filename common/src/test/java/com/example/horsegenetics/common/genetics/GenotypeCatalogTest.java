@@ -90,8 +90,10 @@ class GenotypeCatalogTest {
         assertEquals(List.of("NN", "W20N", "W20W20", "SB1N", "SB1W20", "SB1SB1", "W23SB1",
                         "W4W4", "W22N"),
                 tokens(GenotypeCatalog.distinctPairsOf(Genes.KIT)));
-        // the two splash loci: MITF has four outcomes, PAX3 three
-        assertEquals(List.of("NN", "SW5N", "SW5SW5", "SW3SW5"),
+        // the two splash loci: MITF has five outcomes, PAX3 three. SW1N is its
+        // own pen now - one SW1 copy is the minimal outcome, not the splash
+        // one, which is the whole point of the widespread allele.
+        assertEquals(List.of("NN", "SW5N", "SW5SW5", "SW1N", "SW3SW5"),
                 tokens(GenotypeCatalog.distinctPairsOf(Genes.MITF)));
         assertEquals(List.of("NN", "SW4N", "SW2SW2"),
                 tokens(GenotypeCatalog.distinctPairsOf(Genes.PAX3)));

@@ -169,8 +169,10 @@ class CoatPipelineGoldenTest {
             override("mitf=SW1/SW1"),
             override("mitf=SW3/N"),
             override("mitf=SW3/SW1"),
+            override("mitf=SW5/N"),
             override("pax3=SW2/N"),
             override("pax3=SW2/SW2"),
+            override("pax3=SW4/N"),
             override("agouti=A/a", "mitf=SW1/N", "pax3=SW2/N"),
             override("agouti=A/a", "kit=SB1/N", "tobiano=To/to", "ednrb=O/N"),
             // the magical utility genes that paint: hair colour, healer, light

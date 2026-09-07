@@ -19,7 +19,9 @@
     <code>SW3</code> and <code>SW5</code>. Splash is caused by variants in two different
     genes &mdash; this one and <a href="gene-pax3.html"><code>PAX3</code></a> &mdash; and
     that is the whole reason the old single <code>horsegenetics.splash</code> gene had to
-    go.
+    go. <code>SW1</code> is the <strong>widespread</strong> splash allele and the one that
+    <strong>hides in plain sight</strong>: one copy is usually a star and a sock, and
+    occasionally a blue-eyed splash, on the same genotype.
 </p>
 
 <!-- The gene, on the three base coats, as a horse you can spin. One div and one
@@ -34,14 +36,14 @@
         <span class="allele dom">SW3</span> <span class="allele dom">SW1</span>
         <span class="allele dom">SW5</span> <span class="allele wild">N</span>
     </dd></div>
-    <div><dt>Combinations</dt><dd>10, of which 9 a horse can carry, landing on 4 outcomes</dd></div>
-    <div><dt>Outcomes</dt><dd>wild, <code>splash</code>, <code>splash-bold</code>, <code>splash-extensive</code></dd></div>
+    <div><dt>Combinations</dt><dd>10, of which 9 a horse can carry, landing on 5 outcomes</dd></div>
+    <div><dt>Outcomes</dt><dd>wild, <code>splash-minimal</code>, <code>splash</code>, <code>splash-bold</code>, <code>splash-extensive</code></dd></div>
     <div><dt>Default allele</dt><dd>N</dd></div>
-    <div><dt>Wild frequency</dt><dd><code>SW1</code> 4%, <code>SW5</code> 0.6%, <code>SW3</code> 0.4%, rest <code>N</code></dd></div>
+    <div><dt>Wild frequency</dt><dd>founders carrying <em>one</em> copy: <code>MitfGene.WILD_SW1_PERCENT</code>, <code>WILD_SW5_PERCENT</code>, <code>WILD_SW3_PERCENT</code>. Heterozygotes only &mdash; a doubled splash is bred, not caught</dd></div>
     <div><dt>Founder draws</dt><dd>1 &times; nextFloat()</dd></div>
     <div><dt>Deterministic</dt><dd><strong>no</strong></dd></div>
     <div><dt>Epi draws</dt><dd>nextLong() waterline seed, nextFloat() waterline height, then the shared face-marking draw (1 long + 8 floats)</dd></div>
-    <div><dt>Painter</dt><dd><code>WhitePattern.splash</code>, at a strength per outcome</dd></div>
+    <div><dt>Painter</dt><dd><code>WhitePattern.splash</code>, at a strength per outcome &mdash; and over a <em>range</em> for <code>SW1/N</code></dd></div>
 </dl>
 
 <h2>Why splash is two genes</h2>
@@ -66,7 +68,7 @@
 <thead><tr><th>Allele</th><th>One copy</th><th>Two copies</th></tr></thead>
 <tbody>
 <tr><td><code>N</code></td><td>&mdash;</td><td>wild type</td></tr>
-<tr><td><code>SW1</code></td><td>subtle to bold splash</td><td><strong>viable</strong>, and reliably whiter &mdash; the best-established viable splash homozygote there is</td></tr>
+<tr><td><code>SW1</code></td><td><strong>usually subtle</strong> &mdash; a snip, a sock, sometimes a blue eye; occasionally a full splash</td><td><strong>viable</strong>, and reliably whiter &mdash; the best-established viable splash homozygote there is</td></tr>
 <tr><td><code>SW3</code></td><td>usually a more obvious splash</td><td><strong>cannot occur</strong> &mdash; unconfirmed, likely embryonic lethal</td></tr>
 <tr><td><code>SW5</code></td><td>splash-type, variable</td><td>viability not established &mdash; <strong>allowed</strong></td></tr>
 </tbody>
@@ -93,7 +95,8 @@
 <tbody>
 <tr><td><code>SW3/SW1</code>, <code>SW3/SW5</code></td><td><code>splash-extensive</code></td><td>everything below the topline white; colour only along the spine and over the ears</td></tr>
 <tr><td><code>SW3/N</code>, <code>SW1/SW1</code>, <code>SW1/SW5</code>, <code>SW5/SW5</code></td><td><code>splash-bold</code></td><td>white well past elbow and stifle, bald face, topline and quarters coloured</td></tr>
-<tr><td><code>SW1/N</code>, <code>SW5/N</code></td><td><code>splash</code></td><td>high leg white with a clean edge, belly white, broad blaze</td></tr>
+<tr><td><code>SW5/N</code></td><td><code>splash</code></td><td>high leg white with a clean edge, belly white, broad blaze</td></tr>
+<tr><td><code>SW1/N</code></td><td><code>splash-minimal</code></td><td>usually a star or a snip and a clean-edged sock or two &mdash; but the same genotype sometimes draws the full splash above</td></tr>
 <tr><td><code>N/N</code></td><td>wild type</td><td>nothing</td></tr>
 <tr><td><code>SW3/SW3</code></td><td colspan="2"><em>cannot occur</em></td></tr>
 </tbody>
@@ -105,6 +108,70 @@
     homozygote is a step up rather than more of the same; <code>SW3</code> is the strong
     one, so any second variant beside it tips the horse into the extensive outcome.
 </p>
+
+<h2 id="sw1">SW1 is the common one, and it is usually invisible</h2>
+
+<p>
+    <code>SW1</code> is a 10-base-pair insertion in <em>MITF</em>&rsquo;s
+    melanocyte-specific promoter &mdash; a regulatory change, an alteration to the switch
+    rather than to the protein. Three things follow, and together they make it unlike
+    every other allele on this page.
+</p>
+
+<ol>
+    <li><strong>It is old.</strong> Several hundred years, predating most modern breed
+        formations, which is why it turns up across stock horses, ponies, warmbloods and
+        gaited breeds alike rather than tracing to one stallion the way
+        <code>SW5</code>&ndash;<code>SW8</code> do.</li>
+    <li><strong>It is widespread.</strong> In a 2022 survey it was the splash allele found
+        in by far the most horses and the most breeds; the others are rare and
+        family-limited.</li>
+    <li><strong>It is the most variably expressed thing in the white loci.</strong> One
+        copy can be a snip and one white foot, or ordinary-looking face white beside a
+        single blue eye, or a full blue-eyed splash &mdash; <em>on the same genotype, in
+        the same family</em>.</li>
+</ol>
+
+<p>
+    The paper that identified it says the third point outright: in a minimally expressed
+    horse, splashed white cannot be told from common white markings by eye. So
+    <code>SW1</code> is the allele that <strong>hides in plain sight</strong>, and the one
+    worth testing for when a horse&rsquo;s markings look unremarkable.
+</p>
+
+<h3>Which is why <code>SW1/N</code> is painted over a range</h3>
+
+<p>
+    Every other outcome in the white loci passes <code>WhitePattern.splash</code> a single
+    strength. <code>SW1/N</code> passes a <strong>pair</strong>, and the horse&rsquo;s own
+    epigenetic roll picks a point between them &mdash; the same roll that then decides how
+    high the waterline sits, so a horse that drew a strong splash draws it high too. It
+    costs no extra draws; only what they are used for changes.
+</p>
+
+<p>
+    Modelling the widespread splash allele at a fixed strength would make it the one thing
+    it is documented not to be: predictable. The outcome is named
+    <code>splash-minimal</code> after the usual case, and its description says so.
+</p>
+
+<div class="note warn">
+    <span class="label">This allele is doing two jobs, and only one of them is its own</span>
+    <p>
+        Because one copy is subtle, <code>SW1</code> also carries the mod&rsquo;s
+        population of <em>ordinary-looking marked horses</em> &mdash; the stars, the socks,
+        the blazes. Most founders have one copy for exactly that reason.
+    </p>
+    <p>
+        <strong>In life that is not where ordinary markings come from.</strong> They are
+        largely polygenic, and the same study that identified <code>SW1</code> found no
+        splash allele at all in 112 horses deliberately selected for minimal white. The mod
+        has no polygenic markings system, so the one allele that genuinely does hide in
+        plain sight is standing in for one. The honest fix is a markings system of its own;
+        it is on <a href="roadmap.html#ordinary-markings">the roadmap</a> and it is a new system, not
+        a tuning change.
+    </p>
+</div>
 
 <h2>How it paints</h2>
 
@@ -127,17 +194,22 @@
 
 <div class="codebox">
 <div class="filename">common/genetics/genes/MitfGene.java</div>
-<pre><code class="language-java">private static final double S_SPLASH    = 0.38;
-private static final double S_BOLD      = 0.62;
-private static final double S_EXTENSIVE = 0.86;</code></pre>
+<pre><code class="language-java">private static final double S_MINIMAL_LOW  = 0.10;   // SW1/N is a RANGE...
+private static final double S_MINIMAL_HIGH = 0.44;   // ...not a value
+
+private static final double S_SPLASH       = 0.38;
+private static final double S_BOLD         = 0.62;
+private static final double S_EXTENSIVE    = 0.86;</code></pre>
 </div>
 
 <p>
-    Measured coverage, averaged over three seeds: <code>SW1/N</code> 45%,
-    <code>SW1/SW1</code> 72%, <code>SW3/N</code> 71%, <code>SW3/SW1</code> 91%. One copy
-    each of <code>SW1</code> and <a href="gene-pax3.html"><code>SW2</code></a> comes out at
-    <strong>70%</strong> &mdash; well past either alone, which is the claim the split
-    exists to make and which <code>WhitePatternGenesTest</code> pins.
+    Measured white coverage over the standard seed set (the same
+    <code>averageWhite</code> helper <code>WhitePatternGenesTest</code> uses):
+    <code>SW1/N</code> 12%, <code>SW5/N</code> 17%, <code>SW1/SW1</code> 38%,
+    <code>SW3/N</code> 39%, <code>SW3/SW1</code> 69%. One copy each of <code>SW1</code>
+    and <a href="gene-pax3.html"><code>SW2</code></a> comes out at <strong>38%</strong>
+    &mdash; well past either alone, which is the claim the split exists to make and which
+    that test pins as a threshold rather than a number.
 </p>
 
 <div class="note">
@@ -170,10 +242,13 @@ private static final double S_EXTENSIVE = 0.86;</code></pre>
     diagnostic, carried onto the face. But splash runs its face <strong>much hotter than its
     body</strong>: the marking strength is the outcome&rsquo;s strength plus
     <code>SPLASH_FACE_BOOST</code> (0.34), because a splashed white horse is defined as much
-    by a bold blaze as by the white climbing its legs. So even <code>splash</code> (one
-    copy) reads as a <strong>blaze</strong>, and <code>splash-bold</code> / a two-locus
-    horse as a <strong>bald face</strong>. (Without the boost, single-copy splash landed on
-    stars and snips and horses came out bare-faced &mdash; the regression this fixes.)
+    by a bold blaze as by the white climbing its legs. So <code>splash</code> reads as a
+    <strong>blaze</strong>, and <code>splash-bold</code> / a two-locus horse as a
+    <strong>bald face</strong>. (Without the boost, single-copy splash landed on stars and
+    snips and horses came out bare-faced &mdash; the regression this fixes.)
+    <code>splash-minimal</code> is the exception and deliberately so: it runs the ladder
+    from a star at the bottom of its range to a blaze at the top, which is what
+    &ldquo;you cannot tell it from ordinary markings&rdquo; has to look like.
     <a href="gene-pax3.html"><code>PAX3</code></a> draws from the same vocabulary with the
     same boost, so a horse splash at both loci gets one bold marking per locus rather than
     two competing conventions.

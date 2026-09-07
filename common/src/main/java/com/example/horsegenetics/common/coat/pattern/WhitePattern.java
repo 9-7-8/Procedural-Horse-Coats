@@ -262,10 +262,34 @@ public final class WhitePattern {
      * {@link #SPLASH_FACE_BOOST}) but consumes exactly the same numbers.
      */
     public static PigmentField splash(CoatBuildContext ctx, PigmentView coat, String geneKey, double strength) {
-        double s = clamp01(strength + SPLASH_STACKING * stackingSignal(alreadyWhite(coat, ctx.skin())));
+        return splash(ctx, coat, geneKey, strength, strength);
+    }
+
+    /**
+     * The splash shape over a <b>range</b> of strengths, for a genotype whose
+     * expression genuinely varies rather than one that lands on a fixed
+     * pattern. The horse's own roll picks a point in {@code [minStrength,
+     * maxStrength]}, and the same roll then nudges the waterline, so a horse
+     * that drew a strong splash draws it high too.
+     *
+     * <p>This exists for {@code N/SW1}, and it is the one place in the white
+     * loci where the reference insists on a range rather than a value: a single
+     * {@code SW1} copy can be a snip and one sock, or a classic blue-eyed
+     * splash, <i>on the same genotype</i>. Modelling that as a fixed strength
+     * would make the widespread splash allele the one thing it is documented
+     * not to be - predictable. Every other outcome passes one number, which the
+     * four-argument overload above does by handing the same value twice.
+     *
+     * <p>Consumes exactly the draws the fixed-strength form does; only what
+     * they are used for changes.
+     */
+    public static PigmentField splash(CoatBuildContext ctx, PigmentView coat, String geneKey,
+                                      double minStrength, double maxStrength) {
         Rng epi = ctx.epigeneticsFor(geneKey);
         long seed = epi.nextLong();
         double levelRoll = epi.nextFloat();
+        double strength = minStrength + (maxStrength - minStrength) * levelRoll;
+        double s = clamp01(strength + SPLASH_STACKING * stackingSignal(alreadyWhite(coat, ctx.skin())));
 
         Skin skin = ctx.skin();
         // Splash's face runs much hotter than its waterline. A splashed white
