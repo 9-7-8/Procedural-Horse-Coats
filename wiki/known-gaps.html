@@ -40,8 +40,7 @@
 <p><strong>The 2026-09-02 visual genes (2026-09-02, reworked once after owner feedback) - remaining follow-ups, none seen in-game:</strong></p>
 
 <ul>
-<li><strong>Dun</strong> leg barring is a hand-rolled Y-phase and <strong>does not render in-game at all</strong> (owner-observed); <code>roadmap.html#defects</code> wants it to reuse <code>BodyStripes</code> (which runs on X). The third allele <strong>is built</strong> (2026-09-03); what is left there is that <code>d1</code> shows only the dorsal stripe, where a real non-dun-1 horse can also carry faint bars and shoulder shadowing. (Grullo lands on the LUT neutral column - <code>keepRed</code> scales to 0 by the texel's black content.)
-</li>
+<li><strong>Dun</strong> leg barring was a hand-rolled, evenly spaced Y-phase that <strong>did not render in-game at all</strong> (owner-observed). <strong>Rewritten</strong>: noise-warped band phase, per-band thickness and strength, a round-the-limb break that turns a ring into a slash, a window centred on the knee / hock, and a separate seed and presence roll per leg. <strong>Unverified in-game</strong> - see <a href="verification.html#dun">verification &sect;0-D</a>. What is left is that <code>d1</code> shows only the dorsal stripe, where a real non-dun-1 horse can also carry faint bars and shoulder shadowing.</li>
 <li><strong>Silver</strong> has no dapples yet - v1 is the dilution only. A deterministic (fixed-seed) <code>BodyNoise</code> dapple modulation is the obvious next step. The flaxen mane currently reads a little gold rather than pale.
 </li>
 <li><strong><code>EDNRB</code> paints lethal white but doesn't kill.</strong> <code>O/O</code> has its own all-white masking outcome and gets a pen, which is the honest half; the foal then lives, because there is no health system. The <em>coat</em> half is done, so this is now waiting on that system rather than on gene work.

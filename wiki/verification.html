@@ -923,6 +923,67 @@
         finds white) without becoming a white blob.</li>
 </ul>
 
+<h2 id="dun">&sect;0-D &mdash; dun rebuilt, and grullo made blue (2026-09-06, NOT looked at)</h2>
+
+<div class="note good">
+    <span class="label">What changed, and why it should look different</span>
+    <p>
+        The whole locus was re-derived from a field guide. The dilution is a new
+        <strong>red-first, then black</strong> move (<code>PigmentField.diluteNeutral</code>)
+        so grullo lands on the LUT&rsquo;s neutral column instead of unmasking a black
+        horse&rsquo;s hidden red on the way out; the <strong>points</strong> now skip the
+        dilution outright; and the <strong>leg bars</strong> are a new field entirely.
+        There is also a <strong>shoulder bar</strong> and a <strong>face mask /
+        cobwebbing</strong>, rolled per horse. Full account:
+        <a href="gene-dun.html">the dun page</a>.
+    </p>
+    <p>
+        The default LUT was also edited (owner) to cool its low-red column toward
+        blue-grey, which is what makes grullo a blue rather than a neutral grey. Every
+        desaturated colour in the mod moved a little with it &mdash; worth a glance at
+        <a href="gene-grey.html">grey</a> and the <a href="gene-roan.html">roans</a> while
+        you are in there.
+    </p>
+</div>
+
+<p>
+    Spawn <code>dun=D/d2</code> on all three bases plus <code>dun=d1/d2</code>, and a few
+    of each so the per-horse rolls show:
+</p>
+
+<ul>
+    <li><strong>Grullo is a blue-grey.</strong> The headline. A <code>dun=D/d2</code> black
+        should be a slate mouse colour with black mane, tail and lower legs &mdash; not a
+        milk-chocolate brown, which is what the old dilution produced, and not a flat
+        neutral grey either.</li>
+    <li><strong>Leg bars render at all.</strong> They did not, before. Look at the leg
+        <em>above</em> the dark lower leg: short, uneven, soft-edged horizontal strokes
+        around and just above the knee and hock, most of them breaking part-way round the
+        limb. If they read as evenly spaced bracelets low on the cannon, the old field is
+        somehow still in play.</li>
+    <li><strong>The four legs disagree.</strong> Three bars on one foreleg and a smudge on
+        the other is the intended look; a matching set on all four is a bug. About one leg
+        in five should carry none.</li>
+    <li><strong>Bay dun keeps black points.</strong> Tan body, black mane, tail and legs,
+        and <em>no grey cuff</em> where the black leg meets the tan body &mdash; that cuff
+        is the specific thing <code>alreadyAPoint</code> exists to prevent.</li>
+    <li><strong>The dorsal stripe reaches the tail.</strong> It only reads from above or
+        from a low angle; walk the camera over the back. It must run withers to dock and
+        carry into the tail hair, and it must <em>not</em> run down the face any more.</li>
+    <li><strong>The shoulder bar.</strong> On roughly half the duns: one soft diagonal
+        smudge across the front of the barrel, leaning back as it drops. It should read as
+        a shadow, not as a painted stripe, and never as a second dorsal stripe.</li>
+    <li><strong>The face.</strong> On roughly two duns in five: a darker forehead, either a
+        broad mask or a few faint rings around it. At two texels to the body unit this is
+        subtle &mdash; the check is that it does not read as dirt or as a white marking.</li>
+    <li><strong>Red dun.</strong> A pale clay-gold body with red-brown &mdash; not black
+        &mdash; points and markings.</li>
+    <li><strong><code>d1</code> on a black horse is invisible.</strong> That is correct and
+        deliberate. On a chestnut or a bay it should be a spine line and nothing else.</li>
+    <li><strong>The foal.</strong> The foal mesh has no mane or muzzle, so its points are
+        the tail, ears and lower legs only. Confirm a dun foal still reads as a dun.</li>
+</ul>
+
 <h2 id="tobiano-calibration">&sect;0-F4 &mdash; tobiano recalibrated (2026-09-06, NOT looked at)</h2>
 
 <div class="note good">
