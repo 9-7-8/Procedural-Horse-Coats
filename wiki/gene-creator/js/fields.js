@@ -87,6 +87,8 @@ window.HG = window.HG || {};
     this.b = new Int32Array(n);
     this.a = new Int32Array(n);
     this.absolute = new Uint8Array(n);
+    // Texels an apply()d delta has written - what liftShadows is allowed to touch.
+    this.painted = new Uint8Array(n);
   }
 
   ColorField.prototype.redAt = function (px, py) { return this.r[py * this.size + px]; };
@@ -127,11 +129,43 @@ window.HG = window.HG || {};
         this.g[i] = delta.g[i];
         this.b[i] = delta.b[i];
         this.absolute[i] = 1;
+        this.painted[i] = 1;
       } else {
+        if ((delta.r[i] | delta.g[i] | delta.b[i] | delta.a[i]) === 0) continue;
         this.r[i] += delta.r[i];
         this.g[i] += delta.g[i];
         this.b[i] += delta.b[i];
         this.a[i] += delta.a[i];
+        this.painted[i] = 1;
+      }
+    }
+  };
+
+  /**
+   * The shadow pass - mirrors ColorField.liftShadows. Raise every texel a
+   * magical gene painted at or below `floor` in all three channels so its
+   * brightest channel lands exactly on `floor`, keeping its hue. The composite
+   * below is a multiply, so a texel painted pure black scales the template to
+   * nothing and takes its hair shading with it.
+   *
+   * Only texels apply() wrote are considered: phase 2 has its own answer to the
+   * same problem (PURE_BLACK_ALPHA) and lifting a texel with both puts a black
+   * mane above the brightness of the dark bay body under it.
+   */
+  ColorField.prototype.liftShadows = function (floor) {
+    function cap(v) { return v < 0 ? 0 : (v > 255 ? 255 : v); }
+    function scale(v, max) { return ((v * floor + ((max / 2) | 0)) / max) | 0; }
+    for (var i = 0; i < this.r.length; i++) {
+      if (!this.painted[i] || this.a[i] <= 0) continue;
+      var rr = cap(this.r[i]), gg = cap(this.g[i]), bb = cap(this.b[i]);
+      var max = Math.max(rr, Math.max(gg, bb));
+      if (max >= floor) continue;
+      if (max <= 0) {
+        this.r[i] = this.g[i] = this.b[i] = floor;
+      } else {
+        this.r[i] = scale(rr, max);
+        this.g[i] = scale(gg, max);
+        this.b[i] = scale(bb, max);
       }
     }
   };
@@ -188,6 +222,7 @@ window.HG = window.HG || {};
 
   var PURE_BLACK_ALPHA = 0xCC;
   var TRANSPARENT_EPS = 0.001;
+  var SHADOW_FLOOR = 0x15;
 
   var EYE_RECTS = {
     ADULT: [[6, 42, 4, 2], [30, 42, 4, 2]],
@@ -231,6 +266,9 @@ window.HG = window.HG || {};
       if (delta) colour.apply(delta);
     });
 
+    // the shadow pass - nothing phase 3 painted leaves it true black
+    colour.liftShadows(SHADOW_FLOOR);
+
     var out = new Uint32Array(N * N);
     for (var i = 0; i < out.length; i++) {
       var t = template[i];
@@ -260,6 +298,7 @@ window.HG = window.HG || {};
     ColorField: ColorField,
     GradientLut: GradientLut,
     compose: compose,
-    TRANSPARENT_EPS: TRANSPARENT_EPS
+    TRANSPARENT_EPS: TRANSPARENT_EPS,
+    SHADOW_FLOOR: SHADOW_FLOOR
   };
 })(window.HG);

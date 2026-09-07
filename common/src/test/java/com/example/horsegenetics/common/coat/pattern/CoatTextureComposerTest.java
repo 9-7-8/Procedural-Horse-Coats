@@ -362,6 +362,43 @@ class CoatTextureComposerTest {
         assertFalse(Arrays.equals(compose(BLACK, 0L), compose(override("magic_zebra=Mzeb/n"), 0L)));
     }
 
+    /**
+     * The shadow pass, seen where it matters. A magical zebra makes its stripe
+     * black by subtracting more than any coat can hold, at full opacity - so
+     * before the pass the stripe composited to {@code #000000} and the multiply
+     * took the template's hair shading with it, one flat slab per stripe. The
+     * floor keeps the multiply small but non-zero, so the strands come back.
+     *
+     * <p>Needs a <b>shaded</b> template: the one the rest of this class uses is
+     * flat white, and a flat template cannot show the difference between a coat
+     * that preserves shading and one that erases it.
+     */
+    @Test
+    void magicZebraStripesKeepTheTemplateShadingInsteadOfGoingFlatBlack() {
+        int[] shaded = new int[N * N];
+        HorseSkinGeometry.forEachTexel(Skin.ADULT, (px, py, part, face, point) ->
+                shaded[py * N + px] = 0xFF000000 | (0x010101 * (200 + ((px * 7 + py * 13) % 56))));
+        int[] img = CoatTextureComposer.compose(
+                Genotype.parse(override("magic_zebra=Mzeb/n")), Epigenome.fromSeed(7L),
+                Skin.ADULT, true, shaded, lut());
+
+        int darkest = 255;
+        var levels = new java.util.HashSet<Integer>();
+        for (int i = 0; i < img.length; i++) {
+            if ((img[i] >>> 24) == 0) {
+                continue;
+            }
+            int v = img[i] & 0xFF;
+            darkest = Math.min(darkest, v);
+            if (v < 0x20) {
+                levels.add(v);
+            }
+        }
+        assertTrue(darkest > 0, "no texel may composite to pure black, darkest was " + darkest);
+        assertTrue(levels.size() > 1,
+                "the stripes should still carry the template's shading, got " + levels);
+    }
+
     @Test
     void deterministicCoatsIgnoreTheSeedNonDeterministicOnesReplay() {
         assertArrayEquals(compose(BLACK, 1L), compose(BLACK, 9999L));

@@ -37,7 +37,10 @@ import java.util.Optional;
  *   <li><b>magical (RGB) phase</b> - each visible magical gene (in
  *       {@link Genes#magicalOrder()}) returns a signed RGB delta, folded into
  *       that colour field by integer addition (or, for flat paint, a replace).
- *       Nothing is capped to 0-255 until the field is converted.</li>
+ *       Nothing is capped to 0-255 until the field is converted. A final
+ *       <b>shadow pass</b> then lifts any texel this phase painted true black
+ *       up to {@link #SHADOW_FLOOR}, because the composite below is a multiply
+ *       and black multiplies the template's shading away.</li>
  *   <li><b>composite</b> onto the template, alpha-aware, keeping template
  *       alpha.</li>
  *   <li><b>eyes</b> - copied verbatim from the template.</li>
@@ -84,6 +87,23 @@ public final class CoatTextureComposer {
      * where it crosses.
      */
     private static final int NEAR_BLACK = 0x30;
+
+    /**
+     * <b>The shadow floor.</b> Nothing phase 3 paints is darker than this in
+     * every channel; the shadow pass lifts anything that is, keeping its hue.
+     * See {@link ColorField#liftShadows} for why a black texel is a rendering
+     * problem and not just a dark colour - the composite is a multiply, and
+     * multiplying by zero takes the template's hair shading with it.
+     *
+     * <p>{@link #NEAR_BLACK} is the phase-2 answer to the same concern, and the
+     * two are kept off each other's texels on purpose: that one softens the
+     * <i>alpha</i> of a coat the gradient resolved dark, this one floors the
+     * <i>colour</i> a magical gene painted - including flat paint, which sets
+     * its own opacity and so never meets the alpha ramp at all. Applying both
+     * to one texel lifts it twice, which put a black mane above the brightness
+     * of the dark bay body under it.
+     */
+    private static final int SHADOW_FLOOR = 0x15;
 
     /**
      * A texel goes fully transparent (bald white template shows through) only
@@ -174,6 +194,9 @@ public final class CoatTextureComposer {
                 colour.apply(delta);
             }
         }
+
+        // 3a. shadow pass - nothing phase 3 painted leaves it true black.
+        colour.liftShadows(SHADOW_FLOOR);
 
         // 4. composite onto the template, alpha-aware multiply.
         int[] out = new int[n * n];

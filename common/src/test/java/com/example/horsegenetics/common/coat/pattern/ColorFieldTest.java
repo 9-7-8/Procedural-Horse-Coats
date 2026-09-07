@@ -114,6 +114,50 @@ class ColorFieldTest {
         }
     }
 
+    @Test
+    void theShadowPassLiftsBlackPaintOffZeroAndKeepsItsHue() {
+        ColorField f = new ColorField(SIZE);
+        f.setArgb(1, 1, 0xFF204060);
+        f.setArgb(2, 2, 0xFF000400);
+        ColorField delta = ColorField.deltaLike(f);
+        delta.add(1, 1, -5000, -5000, -5000);   // a zebra stripe: black over anything
+        delta.add(2, 2, -5000, 0, -5000);       // driven to a near-black green
+        delta.set(3, 3, 0xFF, 0, 0, 4);         // flat paint, near-black blue
+        f.apply(delta);
+
+        f.liftShadows(0x15);
+        assertEquals(0xFF151515, f.argb(1, 1), "no hue left to keep, so a neutral grey");
+        assertEquals(0xFF001500, f.argb(2, 2), "green survives at the floor");
+        int blue = f.argb(3, 3);
+        assertEquals(0x15, blue & 0xFF, "the brightest channel lands exactly on the floor");
+        assertEquals(0, (blue >> 16) & 0xFF, "and the empty ones stay empty");
+    }
+
+    @Test
+    void theShadowPassLeavesAloneWhatPhaseThreeDidNotPaint() {
+        ColorField f = new ColorField(SIZE);
+        f.setArgb(1, 1, 0xCC000000);   // phase 2's own black, softened by alpha instead
+        f.setArgb(4, 4, 0x00000000);   // and a bald texel
+        ColorField delta = ColorField.deltaLike(f);
+        delta.add(4, 4, 2, 2, 2);      // colour with no opacity shows nothing
+        f.apply(delta);
+
+        f.liftShadows(0x15);
+        assertEquals(0xCC000000, f.argb(1, 1), "the natural layer has its own answer");
+        assertEquals(0x00020202, f.argb(4, 4), "and a transparent texel has no paint to lift");
+    }
+
+    @Test
+    void theShadowPassIgnoresAnythingAlreadyAboveTheFloor() {
+        ColorField f = new ColorField(SIZE);
+        f.setArgb(1, 1, 0xFF204060);
+        ColorField delta = ColorField.deltaLike(f);
+        delta.add(1, 1, -0x10, -0x10, -0x10);
+        f.apply(delta);
+        f.liftShadows(0x15);
+        assertEquals(0xFF103050, f.argb(1, 1));
+    }
+
     /** A field with one seeded texel, as phase 2 would leave it. */
     private static ColorField seeded() {
         ColorField f = new ColorField(SIZE);

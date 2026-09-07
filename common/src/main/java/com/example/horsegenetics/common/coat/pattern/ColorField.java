@@ -45,6 +45,8 @@ public final class ColorField implements ColorView {
     private final int[] b;
     private final int[] a;
     private final boolean[] absolute;
+    /** Texels some {@link #apply}d delta has written - what {@link #liftShadows} is allowed to touch. */
+    private final boolean[] painted;
 
     /** An all-zero field: as an accumulator, fully transparent; as a delta, a no-op. */
     public ColorField(int size) {
@@ -54,6 +56,7 @@ public final class ColorField implements ColorView {
         this.b = new int[size * size];
         this.a = new int[size * size];
         this.absolute = new boolean[size * size];
+        this.painted = new boolean[size * size];
     }
 
     /** An all-zero delta of the same shape as {@code like} - what a gene fills in. */
@@ -110,6 +113,58 @@ public final class ColorField implements ColorView {
     }
 
     /**
+     * <b>The shadow pass.</b> Raise every texel a magical gene has painted at
+     * (or below) {@code floor} in all three channels so it lands exactly on
+     * {@code floor} at its brightest channel. Hue is kept: the channels are
+     * scaled, not floored one by one, so a near-black blue stays blue and only
+     * a texel with nothing in any channel comes out a neutral grey.
+     *
+     * <p><b>Why the composer runs this at the end of phase 3.</b> The composite
+     * onto the template is a multiply, so the darker a texel is painted the
+     * less of the template's hair shading survives it - and at pure black the
+     * multiply is by zero and <i>all</i> of it is gone, leaving a flat void
+     * where the strand detail should be. A magical zebra is the case that needs
+     * it: subtract-everything is how a stripe is made black over any coat, and
+     * that bottoms out at {@code #000000} at full opacity, so the stripes came
+     * out as dead slabs.
+     *
+     * <p><b>Only texels {@link #apply} has written are considered</b>, which is
+     * to say only what phase 3 painted - not what the gradient resolved. Phase 2
+     * has its own, older answer to the same problem (it softens the
+     * <i>alpha</i> of a coat that resolves dark, so the template shows through
+     * a black horse), and running both over the same texel lifts it twice: a
+     * black mane came out <i>brighter</i> than the dark bay body it sits on.
+     * One mechanism per layer.
+     *
+     * <p>Texels carrying no opacity are skipped too - they show the bald
+     * template and there is no paint there to lift.
+     */
+    public void liftShadows(int floor) {
+        for (int i = 0; i < r.length; i++) {
+            if (!painted[i] || a[i] <= 0) {
+                continue;
+            }
+            int rr = cap(r[i]), gg = cap(g[i]), bb = cap(b[i]);
+            int max = Math.max(rr, Math.max(gg, bb));
+            if (max >= floor) {
+                continue;
+            }
+            if (max <= 0) {
+                r[i] = g[i] = b[i] = floor;
+            } else {
+                r[i] = scale(rr, floor, max);
+                g[i] = scale(gg, floor, max);
+                b[i] = scale(bb, floor, max);
+            }
+        }
+    }
+
+    /** {@code v * floor / max}, rounded - and exactly {@code floor} when {@code v == max}. */
+    private static int scale(int v, int floor, int max) {
+        return (v * floor + max / 2) / max;
+    }
+
+    /**
      * Fold one gene's {@code delta} into this accumulator: absolute texels
      * replace, every other texel adds.
      */
@@ -121,9 +176,16 @@ public final class ColorField implements ColorView {
             for (int px = 0; px < size; px++) {
                 if (delta.isAbsolute(px, py)) {
                     set(px, py, delta.opacity(px, py), delta.red(px, py), delta.green(px, py), delta.blue(px, py));
+                    painted[py * size + px] = true;
                 } else {
-                    add(px, py, delta.red(px, py), delta.green(px, py), delta.blue(px, py));
-                    addOpacity(px, py, delta.opacity(px, py));
+                    int dr = delta.red(px, py), dg = delta.green(px, py), db = delta.blue(px, py);
+                    int da = delta.opacity(px, py);
+                    if ((dr | dg | db | da) == 0) {
+                        continue;
+                    }
+                    add(px, py, dr, dg, db);
+                    addOpacity(px, py, da);
+                    painted[py * size + px] = true;
                 }
             }
         }
@@ -144,6 +206,7 @@ public final class ColorField implements ColorView {
         System.arraycopy(b, 0, copy.b, 0, b.length);
         System.arraycopy(a, 0, copy.a, 0, a.length);
         System.arraycopy(absolute, 0, copy.absolute, 0, absolute.length);
+        System.arraycopy(painted, 0, copy.painted, 0, painted.length);
         return copy;
     }
 
