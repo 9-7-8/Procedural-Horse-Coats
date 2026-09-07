@@ -24,6 +24,185 @@
     <em>current</em> behaviour. For that, follow the page each entry names.
 </p>
 
+<h2 id="d2026-09-07">2026-09-07</h2>
+
+<div class="note">
+    <span class="label">An unattended session</span>
+    <p>
+        The owner queued a run of gene references and left: <em>&ldquo;don&rsquo;t ask
+        questions or interrupt this session &hellip; use your best judgement, and try to
+        adhere to existing systems as much as possible. Put questions in the verification
+        file.&rdquo;</em> Every entry below therefore has a <strong>Questions for the
+        owner</strong> block in its <a href="verification.html">verification</a> section,
+        and every one of them is a real open call rather than a summary.
+    </p>
+    <p>
+        The standing rule for the whole run: each <code>process/*info.md</code> reference
+        was absorbed into that gene&rsquo;s wiki page and the file deleted, and anything a
+        reference proposed that would have needed a <strong>new system</strong> was
+        declined and written down as declined. <code>process/</code> is now empty and gone.
+        Nothing here has been seen in a game.
+    </p>
+</div>
+
+<h3 id="kit-boosters-2026-09-07">Built 2026-09-07, NOT yet looked at: KIT gains the booster group, and it is the common part of the locus.</h3>
+
+<p>Four new alleles at <a href="gene-kit.html#boosters"><code>KIT</code></a>, taking it from eight to twelve. Checklist <a href="verification.html#kit-boosters">&sect;0-AB</a>.</p>
+
+<ul>
+<li><strong><code>W35</code>, <code>W32</code> and <code>W34</code> are the same kind of allele as <code>W20</code></strong> - mild, viable homozygous, ranging from no visible white through frank sabino-like spotting, additive beside anything else at the locus. The mod modelled <code>W20</code> as a one-off special case and filed the rest of the <code>W</code> series as rare founder curiosities. In the one large commercial dataset that measured them, <strong><code>W35</code> is commoner than <code>W20</code></strong> (0.168 against 0.34 in Thoroughbreds but far lower elsewhere), with <code>W32</code> at 0.061 behind it. Between the four they are most of what this locus does to a population, and the mod had one of them.</li>
+<li><strong>So the cascade has a booster <em>group</em> rather than four <code>pair.has(W20)</code> branches.</strong> One booster copy is <code>minimal-white</code>, two - the same one twice or two different ones - is <code>modest-white</code>, and any booster lifts a stronger allele one step. The three new alleles therefore cost the table nothing.</li>
+<li><strong><code>W15</code> is the one strong allele with a homozygote actually on record</strong>, and it is all white. It matters that the locus can distinguish &ldquo;no homozygote has been found&rdquo; from &ldquo;a homozygote has been found&rdquo;; every other strong allele here is on the first side of that. <strong><code>W23</code> moved the other way</strong>: it was the locus's &ldquo;viability unknown, therefore allowed&rdquo; example at <code>broad-white</code>, but its source row reads all-white or near-all-white with a suspected lethal homozygote. It is a strong allele now and cannot double.</li>
+<li><strong>Founder frequencies are the reference's ordering at roughly half its magnitude</strong>, because its dataset is horses whose owners paid for a colour test - a population selected for having something to find. Breed tables carry the rest, and the Thoroughbred gets the 34% <code>W20</code> the survey actually measured plus traces of <code>W5</code> and <code>W22</code>, being the breed most of the rare series was first described in.</li>
+<li><strong>Declined:</strong> haplotype <em>phase</em> (several <code>KIT</code> changes can sit on one chromosome, and a 2024 dataset found six across one horse's two copies - but an allele pair is the model and linkage is a system); <code>W34</code>&rsquo;s <em>possibly</em> stronger effect on chestnut, which would cost it an outcome of its own for a &ldquo;may be&rdquo;; and the remaining twenty-odd named alleles, which stay on the roadmap where the owner already wants the full set eventually.</li>
+<li><code>WhitePatternGenesTest</code>&rsquo;s count assertion now reads <code>KitGene.nonviableHomozygotes()</code> instead of quoting four. A test that quotes a derived number goes red for the wrong reason the next time the locus grows - the same lesson <code>W4</code> taught this morning.</li>
+</ul>
+
+<h3 id="splash-swap-2026-09-07">Built 2026-09-07, NOT yet looked at: the two splash loci swap roles - the common allele was on the wrong gene.</h3>
+
+<p><a href="gene-mitf.html#sw1"><code>MITF</code></a> and <a href="gene-pax3.html#rare"><code>PAX3</code></a>. Checklist <a href="verification.html#splash">&sect;0-AA</a>.</p>
+
+<ul>
+<li><strong>The two genes were right and the two alleles were the wrong way round.</strong> <code>PAX3</code> carried the mod's near-ubiquitous minimal splash allele - 90% of founders were <code>SW2/N</code> - on the reasoning that a mild splash allele is what gives an ordinary horse its socks and its blaze. The reasoning was right and the allele was wrong. <code>SW1</code> on <code>MITF</code> is the widespread one: a several-hundred-year-old promoter change predating most modern breeds, found across a dozen of them. <code>SW2</code> is a <em>PAX3</em> coding change found chiefly in Quarter Horses and American Paints. So the common-allele job moved next door and <code>PAX3</code> became rare and breed-clustered.</li>
+<li><strong><code>SW1/N</code> is painted over a <em>range</em>, and it is the only outcome in the white loci that is.</strong> That is the reference's central claim about the allele: one copy can be a snip and one white foot, or a full blue-eyed splash, <em>on the same genotype</em> - the paper that identified it says a minimally expressed splash cannot be told from common white markings by eye. Painting it at a fixed strength would make the widespread splash allele the one thing it is documented not to be, which is predictable. <code>WhitePattern.splash</code> gained a two-strength overload; the horse's roll picks a point in the range and then sets the waterline, so it costs no extra draws.</li>
+<li><strong>Being honest about the cost: <code>SW1</code> is now doing two jobs.</strong> Ordinary markings in life are polygenic, and the same study found no splash allele at all in 112 horses picked for minimal white. The mod has no markings system, so the one allele that genuinely does hide in plain sight is standing in for one. The honest fix is a small markings contribution running before the white loci - <a href="roadmap.html#ordinary-markings">roadmap &sect;10.2b</a>, and a new system, which is why it is there and not in the gene.</li>
+<li><strong><code>PAX3</code>&rsquo;s javadoc and wiki page both still said deafness was not modelled.</strong> It has been for some time - the shared informational <code>splash-deafness</code> condition comes from both loci. Corrected; no behaviour change. A mangled paragraph in <code>genetics-model.html</code> about founder tables was repaired while it was being updated.</li>
+</ul>
+
+<h3 id="grey-copy-number-2026-09-07">Built 2026-09-07, NOT yet looked at: grey becomes a copy number, and gets four rates instead of one.</h3>
+
+<p><a href="gene-grey.html">Grey</a> - three alleles, and the mod's first coat gene that is also a health gene. Checklist <a href="verification.html#grey">&sect;0-Z</a>.</p>
+
+<ul>
+<li><strong>Grey is not a point mutation.</strong> It is a copy-number variation in and around intron 6 of <em>STX17</em>, and what varies is how many copies a horse carries: <code>G3</code> a triplication, <code>G2</code> a duplication, <code>N</code> normal. Either makes a horse grey, so grey stays dominant - but dosage (<code>G3</code> counts two, <code>G2</code> one) runs 0 to 4, and <strong>that is the greying rate</strong>.</li>
+<li><strong>A rate needs a clock and there isn't one, so the dosage picks a <em>window</em>.</strong> Aging stays out; instead each dosage class is drawn at the stage that rate would plausibly have reached on an ordinary adult, and the horse's own epigenetics pick where inside its window it sits - fixed for life. The windows overlap on purpose, because individual variation inside a real genotype class is large and what is reliably true is only the ordering of the means.</li>
+<li><strong>An inverted region rule, found and fixed.</strong> The head used to take a <em>point-retention boost</em> - it held colour on the one region a greying horse loses it from first. White hairs round the eyes are the usual first sign. The head now takes a <em>lead</em>, the opposite sign, strongest at the forehead.</li>
+<li><strong>The mane and tail grey from the root.</strong> Greying changes hairs as they are produced, so new hair at the root is whiter than old hair at the tip - and long hair is the only place that has room to show. They also carry an independent stage that can run ahead of or behind the body. Plus chubari spots (18%, light greys only) and a bloody shoulder (7%), which are the bounded variation the reference asks for and are visual only.</li>
+<li><strong>Melanoma is reported and never simulated.</strong> The same <em>STX17</em> change drives melanocyte proliferation, so grey emits one <code>Condition.informational</code>, tiered by copy number and raised a step on a black-based coat, and nothing else: no lesions, no stat docked, no death. Melanoma in life is a lifetime probability that mostly resolves as benign nodules on an old horse, and there is no age here to hang one on. The mod says what the DNA test says and stops. <strong>Whiteness is never a diagnosis</strong> - the tier reads the genotype, not how pale the horse came out.</li>
+<li><strong>Declined:</strong> the reference's five-stage health pipeline, whose last two stages (age-related lesion onset, then lesion burden and severity with health effects) need an age clock and a disease-progression system that do not exist.</li>
+</ul>
+
+<h3 id="midtstol-2026-09-07">Built 2026-09-07, NOT yet looked at: dun's mane and tail get the midtstol.</h3>
+
+<p><a href="gene-dun.html#midtstol">Dun</a> - a dark band down the centre of the long hair with pale guard hair either side. Checklist <a href="verification.html#midtstol">&sect;0-Y</a>.</p>
+
+<ul>
+<li>A dun's primitive markings are <strong>one continuous system</strong> - forelock, crest, spine, tail dock - and the mane and tail were the one stretch of it drawn as a flat point. The marking is not breed-specific: every true dun has it, and the Fjord is only famous for it because the breed clips the mane upright so the cross-section is unmissable.</li>
+<li><strong>The value is set by the mesh, not by taste.</strong> The band reuses <code>HairPattern.centreStripe</code>, so it lands on the part's own axes; <code>MIDSTOL_HALF_WIDTH</code> is 0.25 because a mane is four texels across and that puts the feather exactly between the two texel rows. At 0.20 it caught the dark rows and left the centre 3% off black.</li>
+<li><strong>A bay dun had no mane stripe at all, and the cause was an early exit.</strong> <code>alreadyAPoint(red, black)</code> returns 1 for a bay's absolute-black mane, so the painter bailed before drawing anything - a grullo got a perfect stripe and a bay dun was byte-identical to a plain bay. On the long hair the mask now <strong>caps</strong> the point term instead of losing to it. Everywhere else the maximum is still right: a leg is a point because it is already black, not because a mask said so.</li>
+<li>The guard hair is an overshoot <strong>scaled by how far each channel is being diluted at all</strong>, which is what keeps it a dun feature - a non-dun <code>d1</code> horse dilutes nothing, so its guard factor is exactly 1 and its painter stays the byte-for-byte no-op the test pins.</li>
+<li><strong>Declined:</strong> the reference's fictional <code>F</code> &ldquo;Fjord mane pattern&rdquo; allele plus three hidden quantitative modifier loci gating the effect. A new system for a marking every dun already has, and it would have let a genuine dun show no mane stripe - which the same document says is not how dun works.</li>
+</ul>
+
+<h3 id="matp-recessives-2026-09-07">Built 2026-09-07, NOT yet looked at: sunshine and snowdrop, two more dilution alleles at MATP.</h3>
+
+<p><a href="gene-matp.html">MATP</a> gains <code>sun</code> and <code>sno</code>. Checklist <a href="verification.html#matp-recessives">&sect;0-X</a>.</p>
+
+<ul>
+<li>Both found in 2019, both recessive, both <strong>at the same locus as cream and pearl</strong> - which is the consequential part, because it means they compete for a horse's two slots and can compound with cream.</li>
+<li><code>sun/sun</code> reads closer to <strong>champagne</strong> than to a double cream, so its numbers sit near champagne's rather than at a point between pearl and the double dilute. What shows is the black: sunshine leaves enough for real taupe points on a bay where a double dilute leaves almost none, and it keeps a pale amber eye rather than the double-dilute blue.</li>
+<li><strong>The look-alike trap is the reason the alleles are worth having.</strong> <code>Cr/sun</code> and <code>Cr/sno</code> look like a cremello or perlino and carry <em>one</em> cream allele. A true <code>Cr/Cr</code> passes cream to every foal, a compound heterozygote to half - two identical-looking pale horses, completely different breeding propositions, and no amount of looking separates them.</li>
+<li>Two undocumented compounds had to be decided and both say so on the page: <code>prl/sun</code> resolves to classic pearl (the milder of the two claims) and <code>sun/sno</code> to a double dilute.</li>
+<li><strong>Tried and reverted:</strong> declaring cream last would have made the gallery's double-dilute pen read <code>Cr/Cr</code> rather than <code>sno/sno</code>, because <code>allPairsOf</code> walks the allele list backwards - but declaration order is also what a genotype code prints, and <code>prlCr</code> everywhere a horse is inspected is a worse trade than one pen label.</li>
+</ul>
+
+<h3 id="manchado-2026-09-07">Built 2026-09-07, NOT yet looked at: manchado - white with islands in it, and its own locus.</h3>
+
+<p>The rare Argentine pattern: <a href="gene-manchado.html">broad clean white over the topline with rounded islands of base colour inside it</a>. Checklist <a href="verification.html#manchado">&sect;0-W</a>.</p>
+
+<ul>
+<li><strong>Close to the inverse of a leopard</strong> - a leopard puts dark spots <em>on</em> a white horse; this leaves dark islands <em>in</em> a white field. Head, belly and lower legs stay dark; the tail is mostly white.</li>
+<li><strong>Its own locus on purpose.</strong> Manchado is not a leopard-complex modifier and not a <code>KIT</code> allele - it is not one of the mapped white-spotting pathways at all, and no white-pattern panel can confirm it. Filing it under an existing locus would have claimed something nobody has earned.</li>
+<li>Modelled as the long-proposed <strong>rare recessive</strong>, the hypothesis that explains the observations: it turns up sporadically out of solid-looking parents across several Argentine populations without spreading like a dominant pinto gene. Carriers only in the wild (~1.2%) and no affected founder, so the only way to see one is to breed two carriers.</li>
+<li><strong>The islands came out as slivers first</strong>, and the cause was arithmetic rather than art: <em>which</em> cells are islands was sampled at the cells' own frequency, so it varied inside each one and cut it in half. Sampled far lower it picks island-rich regions and leaves the ovals whole. (Grey's chubari spots reused the fix later the same day.)</li>
+</ul>
+
+<h3 id="rabicano-2026-09-07">Built 2026-09-07, NOT yet looked at: rabicano - dominant to inherit, a roll to see.</h3>
+
+<p><a href="gene-rabicano.html">White ticking from the tail dock and flank forward</a>. Checklist <a href="verification.html#rabicano">&sect;0-V</a>.</p>
+
+<ul>
+<li><strong>The design is the separation of inheritance from appearance.</strong> Pedigrees behave as if rabicano were a simple autosomal dominant, but no causal variant is identified, there is no test, and expression runs from a few frosted hairs to something that reads almost roan - so a parent can be minimal enough to have been recorded as solid. The allele inherits like a dominant and what it <em>shows</em> is a per-horse roll that can come out at practically nothing. A plain horse throwing a heavily ticked foal is the commonest thing rabicano does, and a locus whose phenotype is fixed by its genotype cannot model it.</li>
+<li>The homozygote <strong>raises the floor</strong> rather than forcing the maximum, with the ranges deliberately overlapping - a dosage effect has never been demonstrated because nobody can identify an <code>RR</code> horse.</li>
+<li>Head, neck, mane and legs get nothing. Rabicano makes no blaze and no socks, and <strong>that absence is diagnostic</strong> against sabino and splash.</li>
+<li><strong>No health association of any kind</strong>, stated at length because every other white pattern in this mod carries something - and asserted through the trait resolver rather than an <code>instanceof</code>: a rabicano horse resolves to exactly the same body as a plain one.</li>
+</ul>
+
+<h3 id="pangare-2026-09-07">Built 2026-09-07, NOT yet looked at: pangare, sooty's mirror - and the medial helper gap #51 asked for.</h3>
+
+<p>The pale muzzle, eye rings, belly, flanks and inner legs of an Exmoor or a Fjord. <a href="gene-pangare.html">Pangar&eacute;</a>; checklist <a href="verification.html#pangare">&sect;0-U</a>.</p>
+
+<ul>
+<li><strong>Working on <em>red</em> rather than on lightness is the whole design</strong>, because it makes every base-colour rule in the reference fall out of the arithmetic instead of needing a table: a chestnut shows it brightest, a bay's black points are spared automatically (a point is red 0, black 1 - there is no red on it to take), a black horse shows nothing at all, and a double dilute is visually redundant. None of those is a special case in the gene.</li>
+<li>No confirmed mutation and no test - the nearest evidence is a 2018 population study of an <em>EDN3</em>-adjacent region whose marker sat at 99% in Fjords, 98% in Exmoors and 1% in Thoroughbreds. That is an association with a breed group rather than a cause, so it is a dosage with a roll and <strong>the population evidence lands in the breed frequencies</strong>, which is where it belongs.</li>
+<li><strong><code>CoatRegions.medial</code> closes known gap #51.</strong> Every other region helper addresses a <em>part</em>; &ldquo;the inside of a leg&rdquo; is a <em>face</em> of a part, which is why it went undrawn - a leg is a box and all four sides are the same distance from its axis. The <code>Face</code> was in the visitor's hand the whole time and unused. It is a shared helper because the medial face is mirrored left-to-right, which is exactly the thing one of four legs quietly gets backwards.</li>
+</ul>
+
+<h3 id="sooty-2026-09-07">Built 2026-09-07, NOT yet looked at: sooty - a dark cape, made by declining to remove pigment.</h3>
+
+<p><a href="gene-sooty.html">Sooty</a>; checklist <a href="verification.html#sooty">&sect;0-T</a>.</p>
+
+<ul>
+<li><strong>Phase 1 only ever pushes pigment down</strong>, so a gene that <em>adds</em> black cannot exist here. Sooty adds none: it declines to remove what agouti and the dilutions were about to take, and the painter walks the black level back up toward - never past - the load the texel began with. That is the honest mechanical description and it happens to be what the biology is thought to be, since the region sits beside <em>ASIP</em>, whose job is telling a follicle to stop. The test asserts the ceiling directly, because if it breaks the pipeline's downward-only guarantee goes with it.</li>
+<li>Two consequences fall out rather than being coded: the same dosage looks different on every base (black over a bay, bronze over a palomino, liver over a chestnut, because the chart's warm edge stays brown a long way down), and it does <em>nothing</em> on a plain black, which has had nothing removed to keep.</li>
+<li><strong>Deliberately not the shade locus</strong>, though they model the same 2020 paper. Shade is scoped to bays, where the evidence is; sooty is scoped to the phenotype, which turns up on palominos the evidence says nothing about. Folding them together would have claimed one mutation causes both.</li>
+</ul>
+
+<h3 id="flaxen-2026-09-07">Built 2026-09-07, NOT yet looked at: flaxen - a chestnut's pale mane, as a dosage rather than as folklore.</h3>
+
+<p><a href="gene-flaxen.html">Flaxen</a>; checklist <a href="verification.html#flaxen">&sect;0-S</a>.</p>
+
+<ul>
+<li><strong>There is no identified flaxen mutation and no DNA test for it</strong>, and that is the single most important fact about the gene. Breeders have modelled it as a simple recessive for a century on pedigree evidence, which has never been confirmed: there is no demonstrated one-copy-versus-two dose series and the intensity varies far too widely for a two-allele locus. So it is three alleles at 0/1/2, summed - a simulated polygenic modifier that says so in its own description. One strong copy and two mild ones are the same horse, which is what lets two mild carriers throw something paler than either.</li>
+<li>Chestnut only, so a bay or a black carries the whole dosage silently. It takes red away and leaves black alone, which on a chestnut is the whole move: the chart's top row runs brick red to white without passing through grey, so a pale mane lands blond <strong>with no tint term</strong> - which is exactly what silver cannot do and why silver has one.</li>
+<li><strong><code>Genotype.coatCode()</code> now asks whether a gene paints <em>on this horse</em></strong> rather than whether it can ever paint. About half the population carries flaxen and it is invisible on every non-chestnut, so the old key would have multiplied the bay textures by six for six identical bakes.</li>
+</ul>
+
+<h3 id="w4-2026-09-07">Built 2026-09-07, NOT yet looked at: W4, the Camarillo white - a second all-white allele at KIT.</h3>
+
+<ul>
+<li>It paints the identical horse <code>W22</code> does - pure white, pink skin, everything else hidden - and it is <strong>a separate outcome anyway</strong>, because the two differ in the only thing a breeder can act on: <code>W22</code>&rsquo;s homozygote is thought nonviable and <code>W4</code>&rsquo;s is not known to be.</li>
+<li>It is a <strong>named line</strong> rather than a generic white horse - one stallion, Sultan, 1912, bought at the California State Fair in 1921 and bred to Morgan mares - so the gene dictionary says &ldquo;Camarillo white&rdquo;, and the Morgan is the one breed carrying it. That makes it the only breed here that throws an all-white foal rather than a grey.</li>
+<li><strong>A test restated rather than renumbered.</strong> &ldquo;<code>KIT</code> has eight alleles, thirty-two carryable combinations and eight outcomes&rdquo; went red on an addition that broke nothing, and a reader cannot tell that from a regression. It became two <em>relationships</em> instead - and survived the locus growing twice more the same day.</li>
+<li><strong>Roan:</strong> <code>roaninfo.md</code> turned out to be the reference the page was already rebuilt from, so the only thing left in it was the seasonal half - real roan reads strongest in a short summer coat and washes out in a faded winter one. Written down as explicitly <em>not</em> modelled, because it is the commonest reason a photograph disagrees with the page.</li>
+</ul>
+
+<h3 id="dhampir-2026-09-07">Built 2026-09-07, NOT yet looked at: the dhampir, a recessive whose carrier is the advertisement.</h3>
+
+<p><a href="gene-dhampir.html">Dhampir</a>; checklist <a href="verification.html#dhampir">&sect;0-R</a>.</p>
+
+<ul>
+<li><strong>One copy gives red eyes with glowing scleras and costs nothing at all.</strong> That is the point of the gene: two red-eyed horses in a field are a promise rather than a lottery ticket, and a silent dhampir carrier would be a locus nobody would ever meet. Two copies give the animal - white nose to tail, red eyes, triple health, 1.5&times; speed, double jump, and it cannot be fed.</li>
+<li><strong>&ldquo;Cannot be fed&rdquo; is not a special case.</strong> It is <code>Diet.NOTHING</code> through the diet channel built earlier the same day, which keeps the <em>last</em> claim in <code>codeOrder()</code> - so this gene sorting after the diet locus wins even over a horse homozygous for the lava diet. The same value carries one step further: gated regen now asks the diet handler, so a horse nothing can feed does not quietly heal beside a hay bale either.</li>
+<li>Behaviour is three hand-written pieces in the game module, not <code>effects</code> verbs - each would be a verb with exactly one user, and that vocabulary is for data-driven genes. It burns in open daylight at half a heart every two seconds (vanilla ignite would kill it before the treeline), runs for shade at the top goal priority, and bites one living non-undead thing a day for half a heart. One bite a day against a five-heart cow means <strong>a dhampir sustains itself beside livestock and starves alone</strong>.</li>
+<li>Two bugs it found: <code>EyeColor.depigmented()</code> was <code>rank &gt;= RANK_DEPIGMENTED</code>, indistinguishable from equality until something outranked blue - a magical claim would have given a dhampir one red eye and one ordinary one. And the overlay phase having the last word over the iris is right for the light gene and the leopard sclera rim and wrong here, so a dhampir carrying <code>LP</code> came out black-eyed.</li>
+</ul>
+
+<h3 id="diet-2026-09-07">Built 2026-09-07, NOT yet looked at: a diet locus - twelve narrow appetites, and a channel other genes override.</h3>
+
+<p><a href="gene-diet.html">Diet</a>; checklist <a href="verification.html#diet">&sect;0-Q</a>.</p>
+
+<ul>
+<li>Thirteen alleles: an ordinary wild type and twelve narrow diets. Each needs two identical copies, so two <em>different</em> narrow alleles is an ordinary horse carrying both surprises - the same rule the LUT locus uses. <strong>The trade is breadth for efficiency:</strong> eating anything gains least per item, the single-family diets a hay bale's worth, and cake, potions, lava, one metal and one gem take the horse to full health off one item. Which metal and which gem is a per-horse roll off the expressing copy's seed, fixed for life and inherited with the allele.</li>
+<li><code>HorseDiet.resolve</code> keeps the <strong>last</strong> claim in <code>codeOrder()</code>, which is why the locus sits at priority 5, ahead of everything that paints: a later gene saying &ldquo;this horse cannot be fed at all&rdquo; wins with no special case. <code>Diet.NOTHING</code> exists for that and is not an allele.</li>
+<li>The handler intervenes only for a special diet, ignores anything that is not a feed attempt (a saddle must still saddle), and lets vanilla love items through - <strong>the locus governs healing, not breeding</strong>, so a narrow-diet line is not a dead end.</li>
+<li><strong>Wild only, and never a carrier</strong>: new <code>Gene.feralOnly()</code>. The founder table lists <code>n/n</code> and the twelve homozygotes with nothing between; the splice table is its mirror image, because an unasked-for horse that only eats gold is a trap and a carrier is a gift.</li>
+<li>Four tests moved, all of them <a href="known-gaps.html">gap #47</a> - registering a locus at priority 5 renumbers every epigenetic seed after it, and four assertions were calibrated against a specific draw rather than a property. All four restated as properties.</li>
+</ul>
+
+<h3 id="bay-shade-2026-09-07">Built 2026-09-07, NOT yet looked at: bay is a shade continuum - blood, bay, liver and seal off one score.</h3>
+
+<p><a href="gene-shade.html">Shade</a>, a new locus that paints nothing; <a href="gene-agouti.html">agouti</a> rewritten. Checklist <a href="verification.html#bay-shade">&sect;0-P</a>.</p>
+
+<ul>
+<li>Bay used to be one expression whose darkness was a bare uniform roll on the <code>A</code> copy, with a constant body colour - so &ldquo;seal brown&rdquo; meant nothing but &ldquo;the black climbed high&rdquo;, and a liver bay could not be drawn at all.</li>
+<li><strong>Blood bay, bay, liver bay and seal brown are phenotype descriptions, not loci</strong> - they all test as the same <code>E_A_</code> foundation and no validated allele separates them. What the evidence supports is a regulatory region on chromosome 22 between <em>ASIP</em> and <em>RALY</em>, causal mutation unidentified, plus <em>MC1R</em> and <em>ASIP</em> dosage effects and a polygenic tail. So: three haplotypes at &minus;1.5 / 0 / +1.5, summed, plus an <code>E/E</code> bonus, an <code>A/a</code> bonus and a per-horse roll narrower than a band.</li>
+<li><strong>Band edges are placed so every <code>Sh/Sh</code> bay is an ordinary bay whatever the dosage terms do</strong> - otherwise <code>E/E</code> would read as a test for liver bay, which is exactly the claim the research does not support.</li>
+<li>Every horse carries shade, chestnuts included, so a chestnut line can throw a seal brown two generations out; agouti names it in <code>coatDependsOn()</code>, which folds it into a bay's texture key and leaves it out of a chestnut's.</li>
+<li>Two fixes found in passing: the hoof floor raised the whole leg band to 0.4, so every bay whose black did not reach the knee had four identical socks; and <code>CoatSampleTool</code>&rsquo;s <code>SEEDS</code> had drifted two entries past <code>SAMPLES</code>, silently handing every sample after the gap someone else's seed.</li>
+</ul>
+
+
 <h2 id="d2026-09-06">2026-09-06</h2>
 
 <h3 id="shadow-pass-2026-09-06">Built 2026-09-06, NOT yet looked at: a shadow pass at the end of phase 3 - nothing magical is painted true black.</h3>
