@@ -15,10 +15,11 @@
 <p class="eyebrow natural">Natural gene <span class="sep">/</span> X-linked</p>
 <h1>Brindle (MBTPS2)</h1>
 <p class="lede">
-    Irregular vertical stripes of a lighter shade of the horse's own colour. It is the
-    mod's <strong>only sex-linked gene</strong>, and that is the point of it: a stallion
-    has one <code>X</code>, so he carries one copy and can never be a carrier, while a
-    mare needs two. The trait runs visibly down one side of a pedigree in a way no
+    Irregular <strong>white streaks</strong>, soft-edged and broken, running down from the
+    topline and <strong>not matching from one side of the horse to the other</strong>. It
+    is the mod's <strong>only sex-linked gene</strong>, and that is the point of it: a
+    stallion has one <code>X</code>, so he carries one copy and can never be a carrier,
+    while a mare needs two. The trait runs visibly down one side of a pedigree in a way no
     autosomal gene can.
 </p>
 
@@ -37,17 +38,18 @@
     <div><dt>Default allele</dt><dd>n</dd></div>
     <div><dt>Wild frequency</dt><dd>2% per <code>X</code> &mdash; so <strong>2% of wild stallions</strong> and <strong>0.04% of wild mares</strong></dd></div>
     <div><dt>Founder draws</dt><dd>1 &times; nextFloat() (from a sex-aware table)</dd></div>
-    <div><dt>Coat effect</dt><dd>banded dilution over barrel, quarters, neck and legs &mdash; non-deterministic</dd></div>
+    <div><dt>Coat effect</dt><dd>white streaks over barrel, quarters, neck and upper legs &mdash; non-deterministic</dd></div>
+    <div><dt>Field</dt><dd>coat.pattern.BlaschkoStripes</dd></div>
+    <div><dt>Epigenetic draws</dt><dd>1 long + 3 nextFloat</dd></div>
     <div><dt>Notation</dt><dd>a stallion's single copy displays as <code>X-Brn</code></dd></div>
 </dl>
 
 <div class="note warn">
-    <span class="label">Built 2026-09-06, not yet play-tested</span>
+    <span class="label">Rebuilt, still not play-tested</span>
     <p>
         The inheritance is unit-tested to textbook ratios and the sample bakes
         (<code>:common:bakeCoatSamples</code>, the <code>brindle_*</code> images) read as
-        brindle after one round of retuning &mdash; the first attempt's stripes were
-        narrower than the warp that bent them and baked out as wood grain. What has not
+        brindle in an orthographic unwrap &mdash; asymmetric, broken, white. What has not
         been seen is a brindle horse in the world, at any distance. Checklist on
         <a href="verification.html">To be verified</a>.
     </p>
@@ -125,46 +127,182 @@
 
 <h2 id="draw">What it paints</h2>
 <p>
-    Vertical stripes of a lighter shade of whatever the horse already is &mdash; not a
-    second colour, a <strong>dilution in bands</strong>. That is what makes brindle
-    expressible as a natural gene at all: phase 1 only ever takes pigment away, so a
-    lighter stripe is a stripe that is diluted, and a darker one would have to be
-    countershading the way <a href="gene-dun.html">dun</a>'s <code>d1</code> does it.
+    <strong>White streaks.</strong> Not a dilution of the horse's own colour and not
+    stripes of a second one &mdash; a brindle streak goes to white hair and stops there,
+    so the pattern reads the same on a black, a bay, a palomino or a grey. It goes through
+    <code>PigmentField.whiten</code>, the shared move every white marking in the mod uses,
+    which is what keeps a streak through a black horse on the gradient's neutral column:
+    it fades through greys rather than walking sideways into the browns, which is what
+    scaling the two pigments together would do.
 </p>
 <p>
-    The striping is <code>BodyStripes</code>, shared with
-    <a href="gene-magic-zebra.html">magic zebra</a> &mdash; so brindle gets the
-    <strong>chevron slant</strong> for free, which is what stops a stripe rendering as a
-    flat band on every face perpendicular to <code>X</code>. Brindle's bands are broader
-    and less regular than a zebra's, and it never touches the head.
+    That also keeps brindle inside phase 1's restrict-only contract with room to spare.
+    White is what is left when <em>all</em> the pigment is taken away, which is the one
+    thing <a href="pipeline.html">phase 1</a> is always allowed to do &mdash; where a
+    <em>darker</em> stripe would have to be countershading, the way
+    <a href="gene-dun.html">dun</a>'s <code>d1</code> does it.
 </p>
+
+<h3 id="own-field">Why it does not share the zebra field</h3>
+<p>
+    Brindle and zebra look superficially alike &mdash; &ldquo;stripes on a horse&rdquo;
+    &mdash; and for one build they shared <code>BodyStripes</code>. That is what made both
+    of them wrong. They are not the same picture and they do not come from the same place.
+</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th></th><th><a href="gene-natural-zebra.html">Zebra</a> (<code>ZebraStripes</code>)</th><th>Brindle (<code>BlaschkoStripes</code>)</th></tr></thead>
+<tbody>
+<tr><td><strong>cause</strong></td><td>a patterning system laid over a body map</td><td><strong>X-inactivation mosaicism</strong> &mdash; which cell clone won, where</td></tr>
+<tr><td><strong>edges</strong></td><td>crisp</td><td><strong>soft, wavy, tapered</strong></td></tr>
+<tr><td><strong>symmetry</strong></td><td>roughly matched side to side</td><td><strong>none</strong> &mdash; a streak on the right need not exist on the left</td></tr>
+<tr><td><strong>continuity</strong></td><td>a band runs the whole way</td><td><strong>broken</strong>: streaks fork, fade out and reappear</td></tr>
+<tr><td><strong>width</strong></td><td>fairly even along a band</td><td>varies <strong>within one streak</strong> &mdash; narrow at the back, broad on the barrel</td></tr>
+<tr><td><strong>shape</strong></td><td>vertical, arcing over the hip</td><td>a lazy <strong>S</strong> down the side</td></tr>
+<tr><td><strong>legs</strong></td><td>rings all the way round</td><td>a few <strong>crosswise strokes</strong>, upper leg only</td></tr>
+<tr><td><strong>head</strong></td><td>striped, dark muzzle</td><td><strong>nothing</strong></td></tr>
+</tbody>
+</table>
+</div>
+
+<h3 id="mosaic">The asymmetry is the gene, not a garnish</h3>
+<p>
+    A plain stripe field phases on <code>|z|</code>, so whatever it draws on the right it
+    draws on the left. A brindle mare is a <strong>functional mosaic</strong>: early in
+    development each patch of her skin randomly silenced one of her two <code>X</code>
+    chromosomes (lyonisation), and as those clones expanded over the foetus they wrote the
+    pattern. The two sides of her were coloured in by different draws. That is the whole
+    reason the pattern exists, and a field that cannot express it is drawing something
+    else.
+</p>
+<p>
+    So each band is rolled <strong>twice</strong> &mdash; once for the horse's right, once
+    for its left &mdash; and the texel reads whichever side it is on, blended over two
+    body units either side of the spine so the two meet without a cut down the topline.
+    Two copies of the same allele, two independent answers.
+</p>
+
+<h3 id="blaschko">Blaschko lines, and the shape they make</h3>
+<p>
+    BR1's streaks broadly follow <strong>Blaschko lines</strong> &mdash; the developmental
+    paths skin-cell clones trace as they proliferate and migrate. They are not a fixed
+    tiger-stripe layout: they flow in different directions on different body regions. The
+    useful mental sketch is
+</p>
+<p style="text-align:center">
+    <em>a V at the topline &rarr; long descending S-like streaks on the barrel &rarr;
+    shorter vertical streaks on neck, shoulder and hip &rarr; irregular transverse strokes
+    on the upper limbs.</em>
+</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Region</th><th>What BR1 looks like there</th><th>What the field draws</th></tr></thead>
+<tbody>
+<tr>
+    <td><strong>Back / topline</strong></td>
+    <td>The visual source of most of the pattern; on the dorsal midline the arrangement tends toward <strong>V-shaped or chevron-like</strong>, with streaks descending from there onto each side.</td>
+    <td>A slant on <code>|z|</code> &mdash; the same chevron that stops a constant-X face rendering as one flat band.</td>
+</tr>
+<tr>
+    <td><strong>Barrel / flank</strong></td>
+    <td>The clearest area. Mostly vertical to slightly diagonal, descending toward the belly; on the barrel they curve, taper, split or merge rather than staying parallel.</td>
+    <td>A phase in X plus a <strong>sway</strong> that pushes the middle of a streak forward and lets both ends trail &mdash; the S &mdash; plus a noise warp.</td>
+</tr>
+<tr>
+    <td><strong>Belly / underline</strong></td>
+    <td>Fades or becomes fragmentary; streaks terminate, soften or taper before reaching the lowest belly. They never make neat horizontal belly bands.</td>
+    <td>Coverage faded out below the bottom third of the barrel box.</td>
+</tr>
+<tr>
+    <td><strong>Neck</strong></td>
+    <td>A common and often highly visible location &mdash; a mane-to-shoulder waterfall of streaks running lengthwise from the crest toward the throat, uneven in width, with blurred jagged borders.</td>
+    <td>The same field at 0.90 strength, without the sway: the neck is too short for an S to be anything but a wobble.</td>
+</tr>
+<tr>
+    <td><strong>Upper legs</strong></td>
+    <td>Where the limbs are involved it is the <strong>upper</strong> leg, and the pattern wraps more horizontally than the body's &mdash; irregular partial bands, broken rings, short transverse streaks.</td>
+    <td>A phase in <code>y</code> instead of <code>x</code>, windowed to the forearm and gaskin at 0.75 strength.</td>
+</tr>
+<tr>
+    <td><strong>Head, mane, tail</strong></td>
+    <td>The head is not a defining location and can be nearly unaffected; a normal mane and tail do not rule BR1 out.</td>
+    <td>Nothing at all &mdash; which also keeps the pattern off the head, where the rest-pose projection is only approximate.</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<h2 id="knobs">The knobs, and the one that bites</h2>
 <table class="data">
     <thead><tr><th>Knob</th><th>Range</th><th>What it does</th></tr></thead>
     <tbody>
-        <tr><td>spacing</td><td>2.6&ndash;4.4 body units</td><td>Six to nine stripes along the 22-unit barrel</td></tr>
-        <tr><td>duty</td><td>0.30&ndash;0.46</td><td>Fraction of each period that is stripe &mdash; thinner than the gaps</td></tr>
-        <tr><td>warp</td><td>0.5&ndash;1.2 body units</td><td>How far the noise bends a stripe off its plane</td></tr>
-        <tr><td>keep</td><td>0.40&ndash;0.62</td><td>Pigment a stripe retains &mdash; lower is a louder pattern</td></tr>
+        <tr><td><code>nextLong()</code></td><td>&mdash;</td><td>The warp, break and per-band field's seed</td></tr>
+        <tr><td>spacing</td><td>2.2&ndash;3.6 body units</td><td>Six to ten streaks along the 22-unit barrel, before the break field and the per-side roll take some away</td></tr>
+        <tr><td>duty</td><td>0.30&ndash;0.46</td><td>Mean fraction of each period that is streak, before the per-band width hash varies it &mdash; thinner than the gaps</td></tr>
+        <tr><td>warp</td><td>0.5&ndash;1.2 body units</td><td>How far the noise bends a streak off its plane</td></tr>
     </tbody>
 </table>
 <p>
     <strong>The warp has to stay well under half the spacing.</strong> Brindle is a
     smeared pattern and the temptation is to warp it hard, but once the warp exceeds the
-    gap between two stripes they bend into each other and the whole thing stops being
+    gap between two streaks they bend into each other and the whole thing stops being
     stripes. The first build ran a warp of 1.6&ndash;3.0 against a spacing of
     1.5&ndash;2.8 and baked out as convincing wood grain.
 </p>
 <p>
-    Part weights: barrel 1.0, neck 0.55, legs 0.40, tail 0.30, and the head, muzzle, mane
-    and ears not at all &mdash; which is where brindle sits on a real horse, and also
-    keeps the pattern off the head, where the rest-pose projection is only approximate.
+    A fourth number is a constant rather than a knob: the coverage is <strong>gained
+    above 1 before it is whitened</strong>. A brindle streak is white, so the core of one
+    has to reach white &mdash; and the raw coverage rarely does, because the field
+    multiplies the soft edge profile by a per-side presence roll and a break field.
+    Saturating takes the core all the way while leaving both the edge and the streaks the
+    rolls have genuinely damped, soft. Without it every streak came out a tan smear, which
+    is to say a diluted stripe, which is the thing this deliberately is not.
 </p>
 <p>
     <strong>Draw order</strong> (part of the determinism contract), off the expressing
-    copy's epigenetic seed: <code>nextLong()</code> for the stripe seed, then four
-    <code>nextFloat()</code>s &mdash; spacing, duty, warp, keep.
+    copy's epigenetic seed: <code>nextLong()</code> for the streak seed, then three
+    <code>nextFloat()</code>s &mdash; spacing, duty, warp.
 </p>
 
+<h2 id="biology">The biology, and what is deliberately left out</h2>
+<p>
+    BR1 is an intronic splice-site change in <strong><code>MBTPS2</code></strong>
+    (originally reported as <code>c.1437+4T&gt;C</code>), inherited <strong>X-linked
+    semidominant</strong>. <code>MBTPS2</code> is a skin and hair gene, so real BR1 is
+    best understood as a <em>hair-texture</em> trait that is sometimes accompanied by
+    lighter or darker pigmentation &mdash; stripe hairs are reported as less straight and
+    more unruly than the surrounding coat, and in some horses the texture difference is
+    more obvious than any colour shift. Expression also changes with the season: a winter
+    coat can look diffuse or moth-eaten rather than sharply striped.
+</p>
+<p>
+    None of that is modelled, and the reasons are the same reason: <strong>the mod has one
+    channel, and it is colour.</strong> There is no hair-direction or hair-quality
+    attribute for a texture difference to live in, no seasons, and no ageing. So the gene
+    draws the pigment half of the trait at its most legible &mdash; white &mdash; and the
+    texture half is a line in this paragraph.
+</p>
+<p>
+    Two further real-world details are deliberately absent:
+</p>
+<ul>
+    <li><strong>The homozygous mare and the hemizygous stallion are supposed to lack the
+        stripes.</strong> In the original pedigree, <code>X<sup>BR1</sup>Y</code> males and
+        <code>X<sup>BR1</sup>X<sup>BR1</sup></code> mares showed <em>sparse mane and
+        tail</em> and not the classic striped coat &mdash; because the classic pattern
+        needs a <em>mixture</em> of normal-X-active and BR1-X-active clones, and neither of
+        those genotypes has one. The mod inverts this: those are exactly the combinations
+        that show. It is a deliberate trade &mdash; the real rule makes the visible
+        phenotype an exclusively heterozygous-mare affair, which is a locus with no
+        breeding target and nothing for a stallion to carry visibly. What is kept is the
+        part that makes the pedigree interesting: one copy for a stallion, two for a mare,
+        and a pattern that skips the male line.</li>
+    <li><strong>Chimerism.</strong> Many brindled-looking horses are not BR1 at all: two
+        genetically distinct cell populations, often from fused early embryos, whose
+        boundaries read as streaks. It can affect either sex and is not predictably
+        heritable &mdash; which is precisely why it is not here. There would be nothing to
+        breed.</li>
+</ul>
 <h2 id="scaffolding">The scaffolding it proves</h2>
 <p>
     Brindle is the first user of <code>Inheritance</code>, and everything it needed is
@@ -200,10 +338,16 @@
 <p>
     Sexual dimorphism in the coat is a different thing entirely and is unbuilt: the sex
     locus paints nothing and deliberately never will, so a stallion's crest would be a
-    separate gene <em>reading</em> this one. Also not planned at all: imprinting,
-    mosaicism, crossing over, linkage. Brindle in real horses is sometimes chimerism
-    rather than <code>MBTPS2</code>; this models the heritable version, because the other
-    one is not heritable and there would be nothing to breed.
+    separate gene <em>reading</em> this one. Also not planned at all: imprinting, crossing
+    over, linkage.
+</p>
+<p>
+    <strong>Mosaicism is a special case and needs saying carefully.</strong> There is no
+    general mosaicism in the model &mdash; a genotype is one pair per gene and every texel
+    reads the same one. What this gene has is the <em>look</em> of a mosaic, painted:
+    <code>BlaschkoStripes</code> rolls each band independently per side, which produces the
+    asymmetry X-inactivation produces without any of the machinery. It is a drawing of the
+    phenomenon and not an implementation of it, and nothing else in the mod can reach it.
 </p>
 
 <h2 id="carrot">Its gene carrot</h2>

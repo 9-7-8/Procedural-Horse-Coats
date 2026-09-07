@@ -281,6 +281,50 @@
     <a href="gene-light.html">light</a>&rsquo;s gold mane.
 </p>
 
+<h2 id="stripe-fields">Three stripe fields, and why they are three</h2>
+
+<p>
+    There are three fields in <code>coat/pattern/</code> that draw bands in body space,
+    and the temptation to collapse them into one is exactly the mistake that produced a
+    zebra with bars up its face and a brindle horse that matched left to right.
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Field</th><th>Shape</th><th>Used by</th></tr></thead>
+<tbody>
+<tr>
+    <td><code>BodyStripes</code></td>
+    <td>One function of X for the whole animal: parallel bands, chevron-slanted, noise-warped. Generic and orientation-free.</td>
+    <td>The data-driven <code>STRIPES</code> mask (<a href="gene-format.html">gene format</a>). <strong>No built-in gene uses it any more.</strong></td>
+</tr>
+<tr>
+    <td><code>ZebraStripes</code></td>
+    <td>A <strong>body map</strong>: vertical on the barrel, arcing round the hip, ringing the legs, tightening on neck and face, solid on the dorsal stripe, muzzle and tail, pale at the belly. Returns the <em>dark</em> coverage.</td>
+    <td><a href="gene-natural-zebra.html">Natural zebra</a> (whitens <code>1 - c</code>) and <a href="gene-magic-zebra.html">magic zebra</a> (blackens <code>c</code>).</td>
+</tr>
+<tr>
+    <td><code>BlaschkoStripes</code></td>
+    <td>Soft-edged, broken, unequal streaks in a lazy S down the side, crosswise on the upper leg, nothing on the head &mdash; and <strong>rolled independently per side</strong>, so the two halves of one horse disagree.</td>
+    <td><a href="gene-brindle.html">Brindle</a>.</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="note rule">
+    <span class="label">The asymmetry is the one a shared field cannot fake</span>
+    <p>
+        Every generic stripe field phases on <code>|z|</code>, because that is what keeps
+        a horse from looking lopsided and what stops a constant-X face rendering as one
+        flat band. It is therefore <em>structurally</em> symmetric &mdash; and brindle is
+        a record of X-inactivation mosaicism, whose whole point is that the two sides were
+        coloured in by different draws. A field that cannot say that is drawing a
+        different animal, which is why <code>BlaschkoStripes</code> hashes each band once
+        per side and blends the two across the spine.
+    </p>
+</div>
+
 <h2>BodyStripes &mdash; the shared stripe field</h2>
 
 <p>
@@ -316,10 +360,18 @@ public static double smoothstep(double edge0, double edge1, double v);</code></p
 
 <p>
     <a href="gene-magic-zebra.html">Magic zebra</a> is the first caller.
-    <code>BodyStripes</code> is deliberately generic: a natural <strong>dun</strong>&rsquo;s
-    leg barring and <strong>brindle</strong>&rsquo;s striping should reuse it rather
-    than reinvent the maths. Keep gene-specific decisions &mdash; how far down the
-    horse the stripes reach, what colour they are &mdash; in the gene.
+    <code>BodyStripes</code> is deliberately generic, and that turned out to be a
+    reason to stop reaching for it rather than a reason to keep doing so. Dun&rsquo;s leg
+    barring went to <code>CoatRegions.legBar</code>, zebra to <code>ZebraStripes</code>
+    and brindle to <code>BlaschkoStripes</code>, because in each case what the gene
+    actually wanted was a <em>different shape</em>, not the same shape somewhere else
+    &mdash; and &ldquo;where you apply it and what colour you make it&rdquo; was never
+    the difference between them.
+</p>
+<p>
+    What it is still exactly right for is the data-driven <code>STRIPES</code> mask, where
+    a gene author has no Java and wants parallel bands with a chevron: one field, four
+    numbers, no geometry knowledge required. That is now its only caller.
 </p>
 
 <h2 id="vanilla-model">The vanilla model underneath</h2>
@@ -552,11 +604,13 @@ bodyZ = -mx;                // 0 on the centre plane,        + to the horse's ri
         <a href="modding.html">Writing a gene</a>
         <a href="api-reference.html">Class abstractions</a>
         <a href="gene-grey.html">Grey (uses BodyNoise)</a>
-        <a href="gene-magic-zebra.html">Magic zebra (uses BodyStripes)</a>
+        <a href="gene-natural-zebra.html">Natural zebra (uses ZebraStripes)</a>
+        <a href="gene-magic-zebra.html">Magic zebra (uses ZebraStripes)</a>
+        <a href="gene-brindle.html">Brindle (uses BlaschkoStripes)</a>
         <a href="horse-designer/index.html">Horse designer</a>
     </div>
     Source: <code>common/coat/skin/HorseSkinGeometry.java</code>,
-    <code>common/coat/pattern/{CoatRegions,BodyNoise,BodyStripes}.java</code>,
+    <code>common/coat/pattern/{CoatRegions,BodyNoise,BodyStripes,ZebraStripes,BlaschkoStripes}.java</code>,
     <code>neoforge-26.1.2/client/{HdHorseModel,HdBabyHorseModel}.java</code>
 </div>
 

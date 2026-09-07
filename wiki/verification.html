@@ -468,13 +468,23 @@
     </p>
 </div>
 <ul>
-    <li><strong>Does it read as brindle?</strong> Broad irregular vertical bands in a
-        lighter shade, heaviest on barrel and quarters, fading on neck and legs, nothing
-        on the head. The first tuning baked out as wood grain (warp wider than the
-        spacing); this is the second. Spawn one with the custom egg &mdash; add brindle
-        and it defaults to the expressing genotype.</li>
-    <li><strong>Is the untouched head a visible seam?</strong> The neck is striped at 0.55
-        weight and the head not at all. Look at the poll.</li>
+    <li><strong>Does it read as brindle, and is it white?</strong> Rebuilt onto its own
+        field: irregular <strong>white</strong> streaks, soft-edged and broken, heaviest
+        on barrel and quarters, strong on the neck, a few crosswise strokes on the
+        forearm and gaskin, nothing on the head. The first tuning baked out as wood grain
+        (warp wider than the spacing) and the second came out a tan smear rather than
+        white; this is the third. Spawn one with the custom egg &mdash; add brindle and it
+        defaults to the expressing genotype.</li>
+    <li><strong>Walk round it.</strong> The single most important check on this gene:
+        <strong>the two sides must not match.</strong> A streak on the right need not
+        exist on the left, and that is the mosaicism the whole locus is about. If the
+        horse looks the same from both sides, <code>BlaschkoStripes.side</code> is not
+        doing its job.</li>
+    <li><strong>Is there a seam down the spine?</strong> The per-side rolls are blended
+        over two body units either side of <code>z = 0</code>. Look straight down the
+        topline for a cut.</li>
+    <li><strong>Is the untouched head a visible seam?</strong> The neck is streaked at
+        0.90 weight and the head not at all. Look at the poll.</li>
     <li><strong>Does <code>X-Brn</code> show correctly?</strong> Info panel and paper dump
         on a brindle stallion. A <em>plain</em> stallion must show nothing at this locus,
         not <code>X-n</code>.</li>
@@ -2312,6 +2322,49 @@ the <a href="session-log.html">session log</a>.</em></p>
     </p>
 </div>
 
+<h3 id="natural-zebra">1b. Natural zebra striping (new, NOT looked at)</h3>
+
+<p>
+    Codominant and 1 in 60 per allele, so shadow-striped horses (<code>Zeb/n</code>) are
+    around 3% of wild ones and a full <code>Zeb/Zeb</code> is a breeding project &mdash;
+    summon one with <code>natural_zebra=Zeb/Zeb</code>, or breed two shadow horses. It
+    shares its painter with magic zebra, so a lot of what follows verifies both.
+</p>
+
+<ul>
+    <li><strong>Is the horse its own colour, striped white?</strong> The whole claim.
+        Check a <strong>black</strong> (should be black and white), a
+        <strong>chestnut</strong> (red and white) and a <strong>palomino</strong> (gold
+        and white). If any of them comes out grey-and-white, <code>whiten</code> is
+        unmasking red it should not be.</li>
+    <li><strong>Does the pattern change direction with the body?</strong> The point of
+        <code>ZebraStripes</code>. In order of how badly a one-axis field gets them wrong:
+        <strong>rings on the legs</strong> (not vertical bars), <strong>arcs round the
+        hip</strong> (not vertical bars across the rump), <strong>a dark dorsal
+        stripe</strong> the side bands meet rather than cross, a <strong>dark
+        muzzle</strong>, and a <strong>pale belly</strong>.</li>
+    <li><strong>Is the head noise or stripes?</strong> The facial bands are at 0.60&times;
+        the barrel spacing, which is close to the floor a 2-texel-per-unit sheet can
+        carry. If the face reads as static rather than striping, raise
+        <code>HEAD_TIGHT</code>.</li>
+    <li><strong>Do two striped horses look like different animals?</strong> Spacing, duty,
+        bend and leg reach are all per-horse; the leg-reach range deliberately spans a
+        plains zebra (plain lower legs) to a Gr&eacute;vy's (ringed to the hoof).</li>
+    <li><strong>Are the shadow stripes visible but clearly not the full thing?</strong>
+        One copy paints the same map at 45%. It has to be spottable in a herd &mdash; that
+        is the point of making the locus codominant &mdash; without being mistakable for
+        <code>Zeb/Zeb</code>.</li>
+    <li><strong>A horse carrying both zebra loci.</strong> <code>natural_zebra=Zeb/Zeb
+        magic_zebra=Mzeb/n</code>. They draw the same map from opposite directions with
+        <em>independent</em> epigenetic seeds, so the two patterns will not line up. Is
+        that a mess or is it interesting? If it is a mess, that is an argument for magic
+        zebra reading the natural gene's seed, and it should be recorded as a gap rather
+        than fixed on the spot.</li>
+    <li><strong>The foal.</strong> The barrel is 14 units instead of 22, so a foal wears
+        fewer bands at the same spacing. Confirm it still reads as a zebra and not as a
+        striped blob.</li>
+</ul>
+
 <h3 id="zebra">2. Magic zebra</h3>
 
 <p>
@@ -2326,18 +2379,25 @@ the <a href="session-log.html">session log</a>.</em></p>
         <strong>cremello / perlino</strong> and one on a <strong>dominant-white</strong>
         horse &mdash; that is the &minus;200% claim, and the whole reason phase 3 is an
         unclamped signed <code>int</code>.</li>
-    <li><strong>They hang from the topline and fade out partway down</strong>, and the
-        reach is per-horse: two zebras should differ, one striped just over the back,
-        another nearly to the hooves.</li>
-    <li><strong>The chevron over the back, and the stripes on the chest, rump and leg
-        fronts.</strong> These come from <code>BodyStripes</code>&rsquo; <code>|z|</code>
-        slant, added precisely because those faces rendered as flat bands. They looked
-        right in a sample bake but have <em>never been seen on the actual 3D model</em>,
-        which is where a body-space pattern usually goes wrong. <strong>This is the one
-        that most needs real eyes.</strong></li>
-    <li><strong>Stripe density and width</strong> are a first guess (spacing 2.2&ndash;4.2
-        body units, width 0.32&ndash;0.56 of a period). If it reads more brindle than
-        zebra, widen <code>SPACING_MIN</code> / <code>SPACING_RANGE</code>.</li>
+    <li><strong>Repainted onto the shared body map</strong> &mdash; it no longer hangs
+        parallel bars from the topline. Everything under
+        <a href="#natural-zebra">&sect;0-Z</a> applies to this gene too, in black:
+        vertical bands off the spine, <strong>arcs round the hip</strong>,
+        <strong>rings on the legs</strong>, tighter bands on neck and face, a black dorsal
+        stripe and muzzle, and an unstriped belly. The leg reach is per-horse, so two
+        zebras should differ &mdash; one with plain lower legs, one ringed to the
+        hoof.</li>
+    <li><strong>The chevron over the back, and the bands on the chest, rump and leg
+        fronts.</strong> These come from the <code>|z|</code> slant, added precisely
+        because those faces rendered as flat bands. They have looked right in a sample
+        bake through two different painters now and have <em>never been seen on the actual
+        3D model</em>, which is where a body-space pattern usually goes wrong.
+        <strong>This is the one that most needs real eyes.</strong></li>
+    <li><strong>Is the horse still readably its own colour?</strong> The band width is
+        deliberately narrower than the natural gene's (0.34&ndash;0.50 of a period against
+        0.42&ndash;0.60), because this one <em>adds</em> black and an even duty just makes
+        a black horse. If a magic zebra bay reads as a black horse with a few red slots,
+        drop <code>WIDTH_MIN</code> further.</li>
 </ul>
 
 <h3 id="pink">3. Pink hair</h3>

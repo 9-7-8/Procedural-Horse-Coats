@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Natural zebra &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="nav.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow natural">Natural gene <span class="sep">/</span> codominant</p>
+<h1>Zebra striping</h1>
+<p class="lede">
+    A real zebra&rsquo;s pattern, made the way a real zebra makes it: the dark bands are
+    the horse&rsquo;s own colour and the <strong>gaps have the pigment taken out of
+    them</strong>. So a striped black is black and white, a striped chestnut is red and
+    white, and a striped palomino is gold and white &mdash; and none of that needed a
+    line of code, because the gene never picks a colour. It only decides where there is
+    less of one.
+</p>
+
+<!-- The gene, on the three base coats, as a horse you can spin. One div and one
+     script: everything in here is asked of the mod at run time.
+     See wiki/gene-preview/gene-preview.js. -->
+<div class="gene-preview" data-gene="horsegenetics.natural_zebra"></div>
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd>horsegenetics.natural_zebra</dd></div>
+    <div><dt>Priority</dt><dd>68 &mdash; after every gene that decides the base colour, before the white-spotting loci</dd></div>
+    <div><dt>Alleles</dt><dd><span class="allele dom">Zeb</span> <span class="allele wild">n</span></dd></div>
+    <div><dt>Outcomes</dt><dd>wild, <code>shadow-striped</code>, <code>zebra-striped</code></dd></div>
+    <div><dt>Inheritance</dt><dd><strong>codominant</strong> &mdash; one copy is visible, two are louder</dd></div>
+    <div><dt>Default allele</dt><dd>n</dd></div>
+    <div><dt>Wild frequency</dt><dd>1 in 60 per allele &mdash; so about 3% of wild horses are shadow-striped and 0.03% fully striped</dd></div>
+    <div><dt>Founder draws</dt><dd>1 &times; nextFloat()</dd></div>
+    <div><dt>Deterministic</dt><dd><strong>no</strong> when expressed</dd></div>
+    <div><dt>Epigenetic draws</dt><dd>1 long + 4 nextFloat</dd></div>
+    <div><dt>Field</dt><dd>coat.pattern.ZebraStripes</dd></div>
+</dl>
+
+<div class="note warn">
+    <span class="label">Built, not yet play-tested</span>
+    <p>
+        The sample bakes read as a zebra from every angle in an orthographic unwrap, and
+        the foal mesh carries the same map at its own scale. What has not been seen is a
+        striped horse on the actual 3D model, in the world, at distance &mdash; which is
+        where a body-space pattern usually goes wrong. Checklist on
+        <a href="verification.html">To be verified</a>.
+    </p>
+</div>
+
+<h2 id="direction">Which way round a zebra is</h2>
+
+<p>
+    Ask which of a zebra&rsquo;s two colours is the animal and which is the marking, and
+    the biology answers plainly. Hair follicles carry melanocytes; in the dark bands they
+    deposit melanin into the growing hair, and in the white ones signalling suppresses
+    that. <strong>The white stripe is not a white pigment &mdash; it is an absence of the
+    dark one</strong>, and the dark state is the default. A zebra is a dark animal with
+    the colour taken out in bands.
+</p>
+
+<p>
+    That is exactly the shape of <a href="pipeline.html">phase 1</a>, which may only ever
+    take pigment away, and it is why this gene can be natural at all. It whitens the
+    <em>gaps</em> through <code>PigmentField.whiten</code> and never touches the bands.
+    The horse underneath &mdash; whatever <a href="gene-extension.html">extension</a>,
+    <a href="gene-agouti.html">agouti</a>, the dilutions and <a href="gene-grey.html">grey</a>
+    have made of it by priority 68 &mdash; <em>is</em> the striping.
+</p>
+
+<div class="note rule">
+    <span class="label">The contrast with magic zebra is not stylistic</span>
+    <p>
+        <a href="gene-magic-zebra.html">Magic zebra</a> runs in phase 3 and
+        <strong>adds black</strong> on the bands. That is the only way to stripe a
+        cremello or a <a href="gene-kit.html">dominant white</a>, which have no pigment
+        left to remove &mdash; and it is the only way an <em>invented</em> gene could
+        work, because phase 1 cannot add. The two read the same body map from opposite
+        directions: this one whitens <code>1 - coverage</code>, that one blackens
+        <code>coverage</code>. A horse can carry both and show both.
+    </p>
+</div>
+
+<h2 id="codominant">Codominant, and the carrier is not invisible</h2>
+
+<table class="data">
+    <thead><tr><th>Combination</th><th>Outcome</th><th>Effect</th></tr></thead>
+    <tbody>
+        <tr><td><code>n/n</code></td><td>wild</td><td>Nothing</td></tr>
+        <tr><td><code>Zeb/n</code></td><td><code>shadow-striped</code></td><td>The full map at <strong>45%</strong> &mdash; faint bands a shade off the body colour</td></tr>
+        <tr><td><code>Zeb/Zeb</code></td><td><code>zebra-striped</code></td><td>The same map, gaps taken all the way to white</td></tr>
+    </tbody>
+</table>
+
+<p>
+    One copy suppresses melanin part of the way rather than all of it, which is what a
+    plains zebra&rsquo;s <strong>shadow stripes</strong> look like: faint brownish bands
+    between the strong ones, on some southern populations. So the locus has three
+    phenotypes you can tell apart on sight, and a player can see that a horse is worth
+    breeding before they have the pair. Both outcomes run the <em>same</em> painter and
+    draw the <em>same</em> five epigenetic knobs, differing only in the strength &mdash;
+    so a shadow-striped mare and her fully striped foal wear the same pattern at two
+    intensities, and the two expressions cannot drift apart.
+</p>
+
+<h2 id="map">The stripe map, region by region</h2>
+
+<p>
+    A zebra&rsquo;s stripes are <strong>not one field of parallel bars</strong>. They are
+    a developmental map expressed over a three-dimensional body: the same patterning
+    machinery lands differently on differently-shaped anatomy, so the direction changes
+    with the region. A dark dorsal stripe along the spine acts as the central organiser,
+    and most torso stripes descend from it, changing direction, width and density as they
+    pass over curved anatomy.
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Region</th><th>What a real zebra has</th><th>What <code>ZebraStripes</code> draws</th></tr></thead>
+<tbody>
+<tr>
+    <td><strong>Back / topline</strong></td>
+    <td>A narrow continuous dark <strong>dorsal stripe</strong> from mane to tail. Side stripes meet it at near-right angles rather than crossing it.</td>
+    <td><code>CoatRegions.dorsalStripe</code>, taken as a <code>max</code> against the band field so it always wins &mdash; the organiser, shared with <a href="gene-dun.html">dun</a>.</td>
+</tr>
+<tr>
+    <td><strong>Barrel / flank</strong></td>
+    <td>Broad vertical or gently rear-slanting bands running down from the spine, bending with the ribs, forking and tapering at the lower end.</td>
+    <td>A phase in body-space X, warped by <code>BodyNoise</code> and width-modulated so bands swell, taper and fork.</td>
+</tr>
+<tr>
+    <td><strong>Rump / hindquarters</strong></td>
+    <td>The most species-diagnostic area: transverse arcs, chevrons, or a concentric bull&rsquo;s-eye. The stripes wrap the thigh rather than continuing as straight torso bars.</td>
+    <td>The phase is <strong>lerped from X to a radius about the hip</strong> over the rear third &mdash; see below.</td>
+</tr>
+<tr>
+    <td><strong>Belly / underside</strong></td>
+    <td>Reduced, tapered or absent; many plains forms have a plainly white belly, Gr&eacute;vy&rsquo;s a white-to-ash one.</td>
+    <td>Coverage is faded to zero over the bottom fifth of the barrel box, so the bands taper out instead of banding the underside.</td>
+</tr>
+<tr>
+    <td><strong>Neck</strong></td>
+    <td>Narrower, denser and more sharply contrasting than farther back; they curve round the throat as the column tapers.</td>
+    <td>The same field at 0.72&times; the spacing, with the foot of each band trailing 1.6 units behind its top.</td>
+</tr>
+<tr>
+    <td><strong>Head</strong></td>
+    <td>Narrow vertical and diagonal facial stripes shaped around eyes, forehead and nostrils; a dark nose.</td>
+    <td>0.60&times; the spacing, plus a solid dark muzzle. The curving round the eye is <strong>not</strong> modelled &mdash; see the note on resolution.</td>
+</tr>
+<tr>
+    <td><strong>Legs</strong></td>
+    <td>Torso bands reorganise into <strong>horizontal rings</strong> round the limb. The inside of the leg is much less striped.</td>
+    <td>A phase in <code>y</code> rather than <code>x</code>, damped to 45% on the inner face, fading out below the per-horse <code>legReach</code>.</td>
+</tr>
+<tr>
+    <td><strong>Ears, tail</strong></td>
+    <td>Ears carry their own striping; the tail ends in a dark tuft.</td>
+    <td>A band or two across the ear; the tail returns solid dark.</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<h2 id="arcs">The rump is one lerp, and no special case</h2>
+
+<p>
+    The hardest thing on that list is the hindquarters, because a field of parallel planes
+    structurally cannot produce an arc. It turns out not to need a second field:
+</p>
+
+<div class="codebox">
+<div class="filename">common/coat/pattern/ZebraStripes.java</div>
+<pre><code class="language-java">double radial = Math.sqrt(dx * dx + dy * dy);          // distance from a point on the hip
+double toArcs = 1.0 - smooth01(fx / RUMP_END);         // 1 at the rump, 0 by the flank
+double along  = point.x() + (radial - point.x()) * toArcs;</code></pre>
+</div>
+
+<p>
+    A vertical band is a plane of constant <code>x</code>. An arc round the hip is a
+    circle of constant radius from a point on it. <strong>Both are a phase</strong>, so
+    the two are simply lerped &mdash; and every intermediate value between them is one of
+    the angled, curving bands a real zebra wears over the flank, which is the part that a
+    field built out of planes and a field built out of circles both get wrong on their
+    own.
+</p>
+
+<h2 id="knobs">The five epigenetic knobs</h2>
+
+<p>
+    Drawn off the expressing copy, in this order. A foal that inherits the copy inherits
+    the pattern exactly.
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>#</th><th>Knob</th><th>Range</th><th>Effect</th></tr></thead>
+<tbody>
+<tr><td>1</td><td><code>nextLong()</code></td><td>&mdash;</td><td>The band field&rsquo;s warp and width seed.</td></tr>
+<tr><td>2</td><td><strong>spacing</strong></td><td>2.0 &ndash; 3.6 body units</td><td>Centre-to-centre on the barrel. The adult barrel is 22 units long, a foal&rsquo;s 14 &mdash; so a foal wears fewer, and that is right.</td></tr>
+<tr><td>3</td><td><strong>duty</strong></td><td>0.42 &ndash; 0.60 of a period</td><td>How much of each period is dark band. Around a half is even stripe and gap.</td></tr>
+<tr><td>4</td><td><strong>bend</strong></td><td>0.4 &ndash; 1.3 units of warp</td><td>How far the noise may bend a band off its plane.</td></tr>
+<tr><td>5</td><td><strong>leg reach</strong></td><td>0.45 &ndash; 1.00 of each leg</td><td>How far down the rings go. The low end is a plains zebra, whose lower legs go plain; the high end is a Gr&eacute;vy&rsquo;s, ringed to the hoof.</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    Those last two are where the real species differences live. A <strong>plains
+    zebra</strong> has moderately broad bands, often reduced on the lower leg and belly.
+    <strong>Gr&eacute;vy&rsquo;s</strong> has the narrowest, densest striping of the
+    living zebras, continued to the hooves. A <strong>mountain zebra</strong> sits
+    between, with cleaner high-contrast bands. Rather than model three species, the gene
+    draws from a range that spans them, so two striped horses can look like different
+    animals.
+</p>
+
+<div class="note">
+    <span class="label">The floor on the spacing is the sheet, not the animal</span>
+    <p>
+        A real zebra&rsquo;s facial stripes are finer than anything here, and its stripes
+        curve purposefully around the eyes and nostrils. The coat is
+        <strong>two texels to the body unit</strong>: below about half a unit per band the
+        pattern stops being stripes and starts being noise, which is what the first pass
+        at the head did. The narrow spacing and the dark muzzle are what carry the read;
+        anything finer is below the resolution of the sheet.
+    </p>
+</div>
+
+<h2 id="chevron">The chevron is load-bearing</h2>
+
+<p>
+    The phase carries a small slant on <code>|z|</code>, bending each band into a shallow
+    chevron over the back. This is the same trick <a href="body-space.html">BodyStripes</a>
+    uses and for the same reason: without it, every face perpendicular to X &mdash; the
+    chest, the rump, the front and back of every leg &mdash; sits at <strong>one
+    phase</strong> and renders as a flat band of solid stripe or solid coat. It is
+    symmetric left to right, so the horse does not look lopsided.
+</p>
+
+<p>
+    Symmetry is the right answer <em>here</em> and the wrong one for
+    <a href="gene-brindle.html">brindle</a>, which is why the two genes do not share a
+    field. A zebra&rsquo;s two sides broadly match; a brindle horse&rsquo;s deliberately
+    do not.
+</p>
+
+<h2 id="not">Not modelled</h2>
+
+<ul>
+    <li><strong>Species.</strong> There is one locus, not a plains / mountain /
+        Gr&eacute;vy&rsquo;s trichotomy &mdash; the knob ranges span them instead.</li>
+    <li><strong>Facial stripes that curve round the eye and nostril.</strong> Below the
+        sheet&rsquo;s resolution; the head gets narrow bands and a dark muzzle.</li>
+    <li><strong>A reaction&ndash;diffusion simulation.</strong> Zebra striping is usually
+        modelled as a Turing pattern &mdash; local chemical signals producing repeated
+        spacing without any gene specifying &ldquo;stripe number 17 here&rdquo;. What that
+        buys visually at this resolution is spacing and contrast, both of which are knobs
+        here, so the coat is drawn directly rather than simulated. The
+        <em>consequence</em> of the Turing account that does matter is modelled: the
+        pattern changes shape with body geometry, which is the whole point of
+        <code>ZebraStripes</code> being a body map.</li>
+    <li><strong>Stripes as an individual fingerprint.</strong> They are, in the sense that
+        every horse&rsquo;s epigenetic seed gives it its own arrangement &mdash; but
+        nothing in the mod identifies a horse by them.</li>
+</ul>
+
+<h2 id="carrot">Its gene carrot</h2>
+
+<!-- The recipe, read off the mod at run time - the rarity tier is the recipe's
+     price, and a price written into fifty pages goes stale silently.
+     See wiki/gene-carrot/gene-carrot.js. -->
+<div class="gene-carrot" data-gene="horsegenetics.natural_zebra"></div>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="gene-magic-zebra.html">Magic zebra (the same map, inverted)</a>
+        <a href="gene-brindle.html">Brindle (the other striped gene)</a>
+        <a href="body-space.html">ZebraStripes</a>
+        <a href="pipeline.html">Phase 1</a>
+        <a href="verification.html">What to check in-game</a>
+    </div>
+    Source: <code>common/genetics/genes/NaturalZebraGene.java</code>,
+    <code>common/coat/pattern/ZebraStripes.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+<script defer src="gene-preview/gene-preview.js"></script>
+<script defer src="gene-carrot/gene-carrot.js"></script>
+</body>
+</html>

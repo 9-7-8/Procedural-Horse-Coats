@@ -134,7 +134,7 @@
 <thead><tr><th>Gene</th><th>Problem</th><th>Fix</th></tr></thead>
 <tbody>
 <tr><td><strong>Foal eyes</strong></td><td><strong>The coat overwrites the sclera</strong> (owner-observed). On the foal mesh <code>redrawEyes</code> targets the head&rsquo;s L/R faces at <code>{6,20}</code>/<code>{40,20}</code>, but a wide coat pattern is painting over them.</td><td>Check the foal eye coordinates against <code>Skin.BABY</code>&rsquo;s actual projection, and that the restore runs after every white painter on the baby skin.</td></tr>
-<tr><td><a href="gene-magic-zebra.html"><strong>Magic zebra</strong></a></td><td>The stripes read as <strong>prison bars</strong> &mdash; too regular, too vertical, too evenly spaced.</td><td>Irregular spacing, more taper, the chevron slant carried harder over the back and haunch. <strong>And make it codominant</strong>: one copy sparse ticking at the points, two the full body pattern &mdash; the same shape as the natural zebra locus (&sect;<a href="#natural-genes">10</a>) so the two share a code path.</td></tr>
+<tr><td><a href="gene-magic-zebra.html"><strong>Magic zebra</strong></a></td><td><strong>It is not codominant.</strong> One <code>Mzeb</code> copy draws the whole pattern, so the locus has nothing between wild type and the full horse. (The &ldquo;prison bars&rdquo; half of this is <em>done</em> &mdash; it reads <a href="gene-natural-zebra.html#map">the body map</a> now.)</td><td>Follow <a href="gene-natural-zebra.html#codominant">natural zebra</a>, which is already codominant and already shares the painter: one copy at part strength, two at full. That is one strength argument and two expressions, not a second painter.</td></tr>
 <tr><td><a href="gene-light.html"><strong>Light</strong></a></td><td>The <strong>glowing-hooves</strong> case looks missing or not emitting.</td><td>Confirm <code>Lthf</code> both tints the hooves gold <em>and</em> marks them emissive in the overlay phase, as the mane and eye alleles do. If a light-<em>emitting</em> half is wanted for hooves specifically, add a <code>parts</code> anchor for them.</td></tr>
 <tr><td><a href="gene-particle.html"><strong>Particle</strong></a></td><td><strong>Codominant alleles show against wild type.</strong> A <code>-flm</code> flame allele paired with <code>n</code> trails its particle; it should not.</td><td>A codominant allele shows <strong>only when the other copy is another allele of the same family</strong> &mdash; and then the horse shows <em>both</em> particles, which is the whole meaning of the pairing. Against wild type or a non-family allele it is a silent carrier like any other. Update <a href="gene-particle.html">the particle page</a> in the same change.</td></tr>
 <tr><td><a href="gene-leopard.html"><strong>Leopard complex</strong></a></td><td><strong>&ldquo;White finds white&rdquo; is not applied.</strong> Leopard composes at priority 73, before the four white loci, so leopard + sabino simply stacks rather than compounding.</td><td>Decide whether the appaloosa patterns should read the coat they are handed like the other white painters do. Multi-pattern appaloosas are unverified either way. The spot / blanket / hoof-stripe constants are also first-guess and want a play session.</td></tr>
@@ -708,8 +708,6 @@
 <tr><td><strong>Wild bay</strong> (and <code>At</code> as a real allele)</td><td>An agouti variant pushing the black points <em>down</em> &mdash; black only to the fetlock rather than the hock, with a <em>gap</em> between the knee/hock point and any fetlock point, and a more yellow body.</td><td>Cleanest as a third agouti allele (<code>A+</code>, dominant to <code>A</code>). <strong>And if <code>A+</code> becomes an allele, <code>At</code> (seal) should too</strong> &mdash; then agouti is the reference&rsquo;s four-allele <code>A+ &gt; A &gt; At &gt; a</code>, and seal stops being an epigenetic edge case (next row).</td></tr>
 <tr><td><strong>Rabicano</strong></td><td>White ticking at the flank and tail base &mdash; &ldquo;coon tail&rdquo; banding &mdash; distinct from roan: it never makes large patches and never touches the mane.</td><td>Its own high-frequency, region-biased white-hair field concentrated at the flank / groin / underbelly, feathering forward and up. Slots in beside roan.</td></tr>
 <tr><td><strong>Natural (polygenic) face and leg white</strong></td><td>The reference is explicit that a horse with <em>no</em> paint gene can still carry a star, stripe, snip, blaze, coronet, sock or stocking. The mod only draws face and leg white as part of a <code>KIT</code> / <code>MITF</code> / <code>PAX3</code> / <code>EDNRB</code> outcome, so a bay with no white gene is always cleanly solid.</td><td>A small <strong>always-on</strong> marking draw &mdash; a handful of epigenetic values, no allele &mdash; feeding the shared <code>WhitePattern.faceMarking</code> and leg vocabulary at low strength. The vocabulary already exists; this is a caller, not a painter.</td></tr>
-<tr><td><strong>Natural zebra striping</strong></td><td>The <em>natural</em> counterpart of <a href="gene-magic-zebra.html">magic zebra</a>: the light stripes of a real zebra.</td><td><strong>Stripes of removed pigment in phase 1</strong>, not black added in phase 3. <strong>Codominant</strong> &mdash; one copy halves the striped texels&rsquo; darkness, two take them to white. Reuses <code>BodyStripes</code> with its chevron slant; the phase-1 hook only lerps pigment toward zero inside a stripe. A horse could carry natural <em>and</em> magic zebra and show both.</td></tr>
-<tr><td><strong>Brindle (MBTPS2)</strong></td><td>Vertical striping in a darker or lighter shade of the base coat.</td><td>The one <strong>sex-linked</strong> gene &mdash; see &sect;<a href="#sex-linked">4</a>, which it is the proof of. Pattern work shares <code>BodyStripes</code>; the interesting part is the inheritance.</td></tr>
 <tr><td><strong>DMRT3</strong> &mdash; gait</td><td>Dominant. Ambling / running-walk / pace.</td><td>The gene is trivial; the value is the <strong>animation</strong>, which is renderer and movement work. That is why it is last in this group. Wanted by both Paso Finos, Tennessee Walking, Standardbred, Icelandic and Hackney.</td></tr>
 </tbody>
 </table>
@@ -1462,6 +1460,33 @@
 <h3>Settled 2026-09-06</h3>
 
 <ul>
+    <li><strong>A zebra and a brindle horse do not share a stripe painter.</strong> They
+        did, on the grounds that both are &ldquo;stripes on a horse&rdquo;, and it is why
+        both of them looked wrong: a zebra&rsquo;s bands are crisp, symmetric and
+        organised round a <em>body map</em> &mdash; vertical on the barrel, arcing over
+        the hip, ringing the legs, tightening on the neck and face &mdash; while
+        brindle&rsquo;s are soft, broken, unequal in width and <em>deliberately different
+        on the two sides of one horse</em>, because they are a record of X-inactivation
+        mosaicism. A generic stripe field phases on <code>|z|</code> and is therefore
+        structurally symmetric, so it cannot express brindle at all. They have a field
+        each: <code>ZebraStripes</code> and <code>BlaschkoStripes</code>. See
+        <a href="body-space.html#stripe-fields">Body space</a>.</li>
+
+    <li><strong>A zebra is dark with the colour taken out, not white with black added
+        on.</strong> The dark hair is the default state and a white stripe is locally
+        suppressed melanin, so <code>ZebraStripes</code> returns the <em>dark</em> band
+        coverage and <a href="gene-natural-zebra.html">natural zebra</a> whitens
+        <code>1 - c</code> in phase 1. <a href="gene-magic-zebra.html">Magic zebra</a>
+        blackens <code>c</code> in phase 3 &mdash; the only way to stripe a horse with no
+        pigment left to remove, and the reason the magical one exists at all.</li>
+
+    <li><strong>Brindle is white, not a dilution.</strong> A brindle streak goes to white
+        hair whatever the horse under it is. The original &ldquo;a lighter shade of the
+        base colour&rdquo; reading is defensible from the literature &mdash; real BR1 is
+        as much a hair-<em>texture</em> trait as a pigment one &mdash; but the mod has one
+        channel and it is colour, so the pigment half is drawn at its most legible and the
+        texture half is a paragraph on <a href="gene-brindle.html#biology">the gene
+        page</a>.</li>
     <li><strong>Attachments on the vanilla <code>Horse</code>, never a subclass.</strong>
         <code>EntityCustomHorse extends HorseEntity</code> is <em>dead</em> and is not
         coming back. Everything hangs off the vanilla horse and the coat is injected at

@@ -15,8 +15,8 @@
 <p class="eyebrow magical">Magical gene <span class="sep">/</span> phase 3</p>
 <h1>Magic zebra</h1>
 <p class="lede">
-    Black stripes hung from the topline, reaching down the horse&rsquo;s sides. It
-    subtracts <strong>200%</strong> from all three channels &mdash; deliberate
+    A zebra&rsquo;s own stripe map, painted in hard black over whatever the horse already
+    is. It subtracts <strong>200%</strong> from all three channels &mdash; deliberate
     overkill, and the clearest demonstration of why the phase-3 accumulator is an
     unclamped signed <code>int</code>: a stripe lands hard on zero and reads black
     over <em>any</em> coat, without the gene knowing what else the horse carries.
@@ -38,15 +38,18 @@
     <div><dt>Deterministic</dt><dd><strong>no</strong> when expressed</dd></div>
     <div><dt>Epigenetic draws</dt><dd>1 long + 4 nextFloat</dd></div>
     <div><dt>Strength</dt><dd>&minus;200% per channel</dd></div>
-    <div><dt>Field</dt><dd>coat.pattern.BodyStripes</dd></div>
+    <div><dt>Field</dt><dd>coat.pattern.ZebraStripes</dd></div>
 </dl>
 
 <div class="note warn">
-    <span class="label">Built 2026-09-02, not yet play-tested &mdash; and it is the top item</span>
+    <span class="label">Repainted, still not play-tested</span>
     <p>
-        The chevron over the back and the stripes on the chest, rump and leg fronts
-        looked right in a sample bake but have <strong>never been seen on the actual
-        3D model</strong>, which is where a body-space pattern usually goes wrong. See
+        It used to hang parallel bars from the topline and fade them out partway down,
+        which put vertical bars across the rump and up the face &mdash; the two things
+        every field guide says a zebra does not have. It now reads
+        <a href="gene-natural-zebra.html">the shared body map</a>. Neither the old shape
+        nor the new one has <strong>ever been seen on the actual 3D model</strong>, which
+        is where a body-space pattern usually goes wrong. See
         <a href="verification.html">To be verified</a>.
     </p>
 </div>
@@ -54,9 +57,12 @@
 <div class="note">
     <span class="label">This is not the natural zebra gene</span>
     <p>
-        A real-world zebra-striping locus is a separate, later, <em>natural</em> gene
-        that would restrict pigment in phase 1. This one is invented, runs in phase 3,
-        and paints over whatever the melanin genes produced.
+        <a href="gene-natural-zebra.html">Natural zebra</a> is the real-world locus: it
+        runs in phase 1 and <strong>takes pigment away between the bands</strong>, so the
+        horse&rsquo;s own colour survives as the stripes &mdash; which is how a real zebra
+        is made. This one is invented, runs in phase 3, and <strong>adds black on the
+        bands</strong>, which is the only way to stripe a cremello or a dominant white.
+        A horse can carry both and show both.
     </p>
 </div>
 
@@ -104,41 +110,28 @@ delta.addOpacity(px, py, (int) Math.round(255.0 * c));   // shows on a white hor
 <thead><tr><th>#</th><th>Knob</th><th>Range</th><th>Effect</th></tr></thead>
 <tbody>
 <tr><td>1</td><td><code>nextLong()</code></td><td>&mdash;</td><td>The stripe field&rsquo;s seed.</td></tr>
-<tr><td>2</td><td><strong>spacing</strong></td><td>2.2 &ndash; 4.2 body units</td><td>Centre-to-centre distance. The adult barrel is 22 units long, a foal&rsquo;s 14.</td></tr>
-<tr><td>3</td><td><strong>width</strong></td><td>0.32 &ndash; 0.56 of a period</td><td>How much of each period is stripe.</td></tr>
-<tr><td>4</td><td><strong>bend</strong></td><td>0.6 &ndash; 2.2 units of warp</td><td>How far the noise field may bend a stripe off its plane.</td></tr>
-<tr><td>5</td><td><strong>reach</strong></td><td>0.35 &ndash; 0.95 of the drop</td><td>How far below the topline the stripes die out, with the last quarter spent fading.</td></tr>
+<tr><td>2</td><td><strong>spacing</strong></td><td>2.0 &ndash; 3.8 body units</td><td>Centre-to-centre on the barrel. The adult barrel is 22 units long, a foal&rsquo;s 14.</td></tr>
+<tr><td>3</td><td><strong>width</strong></td><td>0.34 &ndash; 0.50 of a period</td><td>How much of each period is band. <strong>Narrower than the natural gene&rsquo;s</strong>, and deliberately: this one adds black on the band, so at an even duty the horse simply reads as a black horse.</td></tr>
+<tr><td>4</td><td><strong>bend</strong></td><td>0.4 &ndash; 1.4 units of warp</td><td>How far the noise field may bend a band off its plane.</td></tr>
+<tr><td>5</td><td><strong>leg reach</strong></td><td>0.45 &ndash; 1.00 of each leg</td><td>How far down the legs the rings go &mdash; the plains-zebra to Gr&eacute;vy&rsquo;s range.</td></tr>
 </tbody>
 </table>
 </div>
 
 <p>
-    So one magic zebra is striped just over the back and another nearly to the hooves.
-    If it reads more brindle than zebra in-game, widen <code>SPACING_MIN</code> /
+    So one magic zebra has plain lower legs and another is ringed to the hoof. If it reads
+    more brindle than zebra in-game, widen <code>SPACING_MIN</code> /
     <code>SPACING_RANGE</code>.
 </p>
-
-<h2>Geometry: hung from the topline</h2>
-
-<div class="codebox">
-<pre><code class="language-java">// The topline is the BACK, not the ear tips: everything above it - head, neck,
-// mane, ears - is inside the stripes at full strength.
-double topline = HorseSkinGeometry.bounds(skin, Part.BODY).yMax();
-double hooves  = HorseSkinGeometry.bodyBounds(skin).yMin();
-double drop    = topline - hooves;
-
-double below    = (topline - point.y()) / drop;
-double vertical = 1.0 - BodyStripes.smoothstep(reach * (1 - REACH_FADE), reach, below);</code></pre>
-</div>
 
 <h2 id="slant">The chevron is load-bearing</h2>
 
 <p>
     The stripe field is
-    <a href="body-space.html"><code>BodyStripes</code></a>: bands of near-constant
+    <a href="body-space.html"><code>ZebraStripes</code></a>: on the barrel, bands of near-constant
     body-space X, warped by <code>BodyNoise</code> so they wiggle and taper. The phase
     also carries a small <strong>slant on <code>|z|</code></strong>, which bends each
-    stripe into a shallow chevron over the back.
+    band into a shallow chevron over the back.
 </p>
 
 <div class="note rule">
@@ -152,12 +145,44 @@ double vertical = 1.0 - BodyStripes.smoothstep(reach * (1 - REACH_FADE), reach, 
     </p>
 </div>
 
+<h2 id="shared">One map, two directions</h2>
+
 <p>
-    <code>BodyStripes</code> is deliberately generic. A natural <strong>dun</strong>&rsquo;s
-    leg barring and <strong>brindle</strong>&rsquo;s striping should reuse it rather
-    than reinvent the maths &mdash; they differ in <em>where</em> they apply it and
-    what they do with it, not in the field itself.
+    <code>ZebraStripes</code> returns the <strong>dark</strong> band coverage &mdash; 1
+    inside a band, 0 in the pale gap &mdash; because that is the way round the biology has
+    it, and because it is what lets the two zebra genes share one field while doing
+    opposite things with it:
 </p>
+
+<div class="codebox">
+<pre><code class="language-java">// MagicZebraGene, phase 3 - black on the band
+int amount = (int) Math.round(255.0 * STRIPE_PERCENT / 100.0 * c);
+
+// NaturalZebraGene, phase 1 - white in the gap
+f.whiten(px, py, (float) ((1.0 - c) * strength));</code></pre>
+</div>
+
+<p>
+    Regions a real zebra keeps solid dark &mdash; the dorsal stripe, the muzzle, the tail
+    &mdash; come back as coverage 1, so neither gene has to special-case them and the
+    natural one does not whiten them by accident. The full region-by-region map is
+    documented once, on <a href="gene-natural-zebra.html#map">the natural gene&rsquo;s
+    page</a>.
+</p>
+
+<div class="note rule">
+    <span class="label">Generic is not the same as shared</span>
+    <p>
+        <code>BodyStripes</code> was reused by magic zebra and
+        <a href="gene-brindle.html">brindle</a> on the grounds that both wanted
+        &ldquo;stripes&rdquo;, and that is what made both of them wrong: a zebra&rsquo;s
+        bands are crisp, symmetric and organised round a body map, and brindle&rsquo;s are
+        soft, broken and deliberately different on the two sides of one horse. They now
+        have a field each. <code>BodyStripes</code> stays as the data-driven
+        <code>STRIPES</code> mask &mdash; see <a href="gene-format.html">the gene
+        format</a>.
+    </p>
+</div>
 
 <h2>What it settled</h2>
 
@@ -187,12 +212,13 @@ double vertical = 1.0 - BodyStripes.smoothstep(reach * (1 - REACH_FADE), reach, 
 <div class="page-foot">
     <div class="seealso">
         <a href="gene-pink-hair.html">Pink hair</a>
-        <a href="body-space.html">BodyStripes</a>
+        <a href="gene-natural-zebra.html">Natural zebra</a>
+        <a href="body-space.html">ZebraStripes</a>
         <a href="pipeline.html">Phase 3</a>
         <a href="verification.html">What to check in-game</a>
     </div>
     Source: <code>common/genetics/genes/MagicZebraGene.java</code>,
-    <code>common/coat/pattern/BodyStripes.java</code>
+    <code>common/coat/pattern/ZebraStripes.java</code>
 </div>
 
 </article>
