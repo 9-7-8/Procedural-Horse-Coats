@@ -527,76 +527,39 @@ default int visible(int px, int py, int channel);</code></pre>
     <a href="gene-cutie-mark.html">cutie mark</a>.
 </p>
 <p>
-    A gene implements <code>EyeColorContribution</code> and returns an
-    <code>EyeColor</code> claim; the composer collects them in
-    <code>Genes.codeOrder()</code> at the top of the overlay phase, takes the
-    highest-ranked one, and applies it once with
-    <code>CoatOverlay.tintIris</code>. Ties go to the earlier gene.
+    Where it sits in the bake is the part that belongs on this page. It runs at the
+    <strong>top of the overlay phase</strong>, after
+    <code>CoatRegions.redrawEyes</code> has copied the template's eyes back over the
+    finished coat &mdash; the only point in the bake where an eye survives being written
+    &mdash; and before the general overlay pass, so a gene that wants the whole eye
+    (<a href="gene-light.html">light</a>'s glowing gold, the
+    <a href="gene-leopard.html">leopard complex</a>'s white sclera rim) still gets the
+    last word over the iris tint.
 </p>
-
-<div class="table-wrap">
-<table>
-<thead><tr><th>Rank</th><th>Claimants</th><th>Kind of claim</th></tr></thead>
-<tbody>
-<tr><td>20 &mdash; <code>RANK_DEPIGMENTED</code></td><td><a href="gene-mitf.html">MITF</a>, <a href="gene-pax3.html">PAX3</a>, <a href="gene-ednrb.html">EDNRB</a>, <a href="gene-kit.html">KIT</a> (broad white and up)</td><td>The white loci take the pigment out of the iris exactly as they take it out of the coat &mdash; the blue eye those patterns are known for</td></tr>
-<tr><td>10 &mdash; <code>RANK_PIGMENT</code></td><td><a href="gene-tiger-eye.html">Tiger eye</a></td><td>Changes what colour the iris <em>is</em></td></tr>
-</tbody>
-</table>
-</div>
-
 <p>
-    <strong>Blue beats amber</strong>, and it has to: a depigmented iris has no pigment
-    left for a pigment gene to recolour. That is the one ordering the ranking exists to
-    settle. The blue eye is <em>not</em> a gene of its own and never should be &mdash; it
-    is a property the white loci already have, and a &ldquo;blue eyes&rdquo; locus that
-    mysteriously only ever appeared on white horses would be a worse model of the same
-    fact.
+    Three layers, in this order: the winning pigment claim over both whole irises; the
+    winning depigmenting claim over as much of each iris as it actually reached; then
+    every <code>EyePatchContribution</code>'s patches, in code order.
 </p>
 
-<h3>The iris is the dark texels</h3>
-<p>
-    On the coat sheet an adult eye is a 2&times;2 block of <strong>pure black</strong>
-    &mdash; the iris and pupil together, there being no room for both at 128px &mdash;
-    beside a 2&times;2 block of near-white sclera. A foal's is the black block alone. So
-    eye colour means <strong>colouring the black texels and leaving the white ones
-    white</strong>. <code>tintIris</code> weights each texel by how dark it already is
-    (<code>1 - luma</code>): black takes the colour outright, white is untouched, and the
-    grey between them takes a proportional share, which keeps the eye's shape.
-</p>
-
-<div class="note warn">
-    <span class="label">The obvious tool is the wrong one</span>
+<div class="note">
+    <span class="label">The rest is one page</span>
     <p>
-        <code>shadeToward</code> scales its target by the texel's own
-        <em>brightness</em>, so a gold hoof keeps the template's shading. Pointed at an
-        eye it colours the <strong>sclera</strong> and leaves the iris black &mdash;
-        exactly backwards for an iris. It is the right blend for
-        <a href="gene-light.html">light</a>'s glowing gold eye and the
-        <a href="gene-leopard.html">leopard complex</a>'s white sclera rim, and it must
-        not be used for eye colour.
+        The three ranks and why they are the three biological routes, which locus claims
+        which colour, where green and hazel come from, complete and sectoral
+        heterochromia, the wedge shapes, what it costs the coat cache, and how to write a
+        gene that changes eyes &mdash; all of it lives on
+        <a href="eye-colour.html">Eye colour &amp; heterochromia</a>, which is the single
+        source of truth for the channel.
     </p>
 </div>
 
-<h3>Who gets a blue eye</h3>
-<p>Two ways, and a horse needs only one:</p>
-<ul>
-    <li><strong>Its own allele says so.</strong> Splash is <em>the</em> blue-eyed pattern,
-        diagnostic even when the white is modest, so any expressing <code>MITF</code> or
-        <code>PAX3</code> combination qualifies, and so does frame. <code>KIT</code>
-        qualifies only from <code>broad-white</code> upward &mdash; a sabino with four
-        socks and a blaze has ordinary dark eyes.</li>
-    <li><strong>The horse is broadly white however it got there.</strong> Past 55%
-        coverage the eyes follow. The composer measures this from the <em>resolved</em>
-        pigment field and passes it to every claimant, which is what covers the case no
-        per-locus test can see: a horse white from two mild alleles stacking has exactly
-        the same claim as one white from a single bold allele.</li>
-</ul>
 
 <h2 id="golden">The golden test</h2>
 
 <p>
-    <code>CoatPipelineGoldenTest</code> hashes <strong>20 genotypes &times; 3 seeds
-    &times; adult/foal</strong> and compares against
+    <code>CoatPipelineGoldenTest</code> hashes every genotype in its own <code>CODES</code>
+    list <strong>&times; 3 seeds &times; adult/foal</strong> and compares against
     <code>common/src/test/resources/coat-golden.txt</code>. It exists to prove that a
     change to the <em>pipeline</em> leaves every horse byte-identical &mdash; which is
     how the three-phase refactor shipped with no coat moving at all.

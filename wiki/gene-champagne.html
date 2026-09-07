@@ -112,20 +112,71 @@ field.restrictBlack(px, py, 0.82f);          // black *= 0.18</code></pre>
     red, goes gold. One term, three distinct colours.
 </p>
 
-<h2>What makes it the simplest gene</h2>
+<h2 id="eye">The eye is the one thing about it that varies</h2>
+
+<p>
+    Champagne dilutes the iris along with everything else, and the shade an adult settles
+    on is famously not one colour: amber, golden, hazel, light brown, or &mdash;
+    occasionally &mdash; a greenish olive. So the coat is deterministic and the
+    <strong>iris is epigenetic</strong>, rolled once from the expressing copy's seed and
+    inherited with it.
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Iris</th><th>Share of champagne horses</th></tr></thead>
+<tbody>
+<tr><td>Amber</td><td>40%</td></tr>
+<tr><td><strong>Hazel</strong></td><td>35%</td></tr>
+<tr><td>Light brown</td><td>17%</td></tr>
+<tr><td><strong>Olive green</strong></td><td>8%</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    This is the mod's ordinary source of a <strong>hazel</strong> eye and its only source
+    of a <strong>green</strong> one that is not magical, and because it is epigenetic an
+    olive-eyed champagne is something a breeder can chase rather than something the game
+    hands out. It claims at <code>RANK_DILUTION</code>, the lowest of the three, so
+    <a href="gene-tiger-eye.html">tiger eye</a> over-rides it and a splashed white
+    champagne has blue eyes &mdash; see
+    <a href="eye-colour.html">Eye colour &amp; heterochromia</a>.
+</p>
+
+<div class="note warn">
+    <span class="label">The cost, and why it is small</span>
+    <p>
+        Champagne used to be the mod's one fully deterministic dilution, so every
+        champagne of a given genotype shared one baked texture. The rolled iris ends that:
+        the outcome now declares <code>varies()</code>, because the eye is drawn into the
+        coat texture and an undeclared variation would let two visibly different horses
+        share one cache entry. It looks like a real cost and is not &mdash; almost every
+        horse already carries something that varies (bay's black climb, grey's dapples),
+        so the marginal number of forked textures is small.
+    </p>
+    <p>
+        A real champagne <em>foal</em> is born blue-green and matures to amber or hazel.
+        Here it is the adult colour from birth: the eye-colour hook is not told which skin
+        it is baking, and with <a href="philosophy.html">aging out of scope</a> there is
+        nothing to mature through. <a href="roadmap.html#eyes">Roadmap</a>.
+    </p>
+</div>
+
+<h2>What makes it nearly the simplest gene</h2>
 
 <ul>
     <li>No dose &mdash; <code>Ch/c</code> and <code>Ch/Ch</code> are the same
         horse.</li>
-    <li>No epigenetics &mdash; fully deterministic, so every champagne of a given
-        genotype shares one baked texture.</li>
+    <li>No epigenetics <em>in the coat</em> &mdash; the pigment work is fully
+        deterministic; only the iris is rolled.</li>
     <li>No cross-gene reading &mdash; <code>isVisible</code> is just
         <code>pair.has(Ch)</code>.</li>
     <li>No geometry &mdash; one <code>restrictAll</code> over every texel.</li>
 </ul>
 
 <p>
-    It is almost exactly the shape the planned
+    The coat half is almost exactly the shape the planned
     <a href="roadmap.html#gene-api">tier-1 declarative builder</a> is meant to cover
     in five lines.
 </p>

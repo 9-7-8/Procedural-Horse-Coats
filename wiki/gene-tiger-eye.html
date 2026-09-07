@@ -89,74 +89,35 @@
     several genes have a claim on it. That makes it a <strong>channel</strong> with a
     single owner and a contribution hook, like the <a href="gene-lut.html">LUT</a> and the
     <a href="gene-cutie-mark.html">cutie mark</a> &mdash; not a gene that other genes
-    fight with. A gene implements <code>EyeColorContribution</code> and returns an
-    <code>EyeColor</code> claim; the composer collects them in code order during the
-    overlay phase and applies the highest-ranked one once.
-</p>
-<table class="data">
-    <thead><tr><th>Rank</th><th>Claimants</th><th>What kind of claim</th></tr></thead>
-    <tbody>
-        <tr><td>20 &mdash; depigmented</td><td>MITF, PAX3, EDNRB, KIT (broad white and up)</td><td>The white loci take the pigment out of the iris the same way they take it out of the coat &mdash; the blue eye those patterns are known for</td></tr>
-        <tr><td>10 &mdash; pigment</td><td>Tiger eye</td><td>Changes what colour the iris <em>is</em></td></tr>
-    </tbody>
-</table>
-<p>
-    <strong>Blue beats amber</strong>, and it has to: a depigmented iris has no pigment
-    left for a pigment gene to recolour. So a splashed white horse that also carries tiger
-    eye has blue eyes. This is the one ordering the ranking exists to settle.
+    fight with. Tiger eye is why it exists: it was the first gene in the mod with nowhere
+    else to write.
 </p>
 <p>
-    Note the blue eye is <strong>not a new gene</strong> and never should be. It is a
-    property the white loci already have &mdash; the same failure of pigment cells to
-    reach the skin leaves them out of the iris &mdash; and a "blue eyes" locus that
-    mysteriously only ever appeared on white horses would be a worse model of the same
-    fact. See <a href="#blue">below</a> for who qualifies.
+    The channel is now the whole account of a horse's eyes &mdash; the three ranks, the
+    dilutions' green and hazel, the white loci's blue, complete and sectoral
+    heterochromia, and how a gene joins in &mdash; and it lives on
+    <a href="eye-colour.html">Eye colour &amp; heterochromia</a>. Only what is about
+    <em>this</em> gene is repeated here.
 </p>
-
-<h2 id="iris">The iris is the dark texels, not the sclera</h2>
 <p>
-    On the coat sheet an adult eye is a 2&times;2 block of <strong>pure black</strong>
-    &mdash; the iris and pupil together, there being no room for both at 128px &mdash;
-    beside a 2&times;2 block of near-white sclera. A foal's is the black block alone. So
-    eye colour means <strong>colouring the black texels and leaving the white ones
-    white</strong>, which is what <code>CoatOverlay.tintIris</code> does: it weights each
-    texel by how dark it already is (<code>1 - luma</code>), so black takes the colour
-    outright, white is untouched, and the antialiased grey between them takes a share,
-    which keeps the eye's shape.
+    Tiger eye claims at <strong>rank 20, iris-specific pigment</strong>: above the
+    whole-body dilutions (<a href="gene-matp.html">cream / pearl</a>,
+    <a href="gene-champagne.html">champagne</a>), because a gene aimed at the eye beats
+    one that reached it on the way past &mdash; a cremello that also carries tiger eye has
+    amber eyes, not cream blue ones. And below the depigmented rank, because
+    <strong>blue beats amber</strong> and has to: a depigmented iris has no pigment left
+    for a pigment gene to recolour, so a splashed white tiger-eye horse has blue eyes.
 </p>
-<div class="note warn">
-    <span class="label">The obvious tool is the wrong one</span>
+<div class="note">
+    <span class="label">One blue eye and one amber one</span>
     <p>
-        <code>shadeToward</code> scales its target by the texel's own <em>brightness</em>,
-        so that a gold hoof keeps the template's shading. Pointed at an eye it colours the
-        <strong>sclera</strong> and leaves the iris black &mdash; exactly backwards. It is
-        the right blend for <a href="gene-light.html">light</a>'s glowing gold eye and the
-        <a href="gene-leopard.html">leopard complex</a>'s white sclera rim, and it must
-        not be used for an iris.
+        That last rule now has a visible middle. A depigmenting claim frequently fails to
+        reach the whole of both irises, and where the blue stops the horse's own colour
+        shows &mdash; so a splashed white tiger-eye horse may well come out with one blue
+        eye and one amber one, or with a blue wedge in an amber iris. See
+        <a href="eye-colour.html#spread">the spread</a>.
     </p>
 </div>
-<p>
-    All of this runs in the <a href="pipeline.html">overlay phase</a>, after
-    <code>CoatRegions.redrawEyes</code> has copied the template's eyes back &mdash; which
-    is the only point in the bake where an eye survives being written, and is exactly why
-    that phase exists.
-</p>
-
-<h2 id="blue">Who gets a blue eye</h2>
-<p>Two ways a horse qualifies, and it needs only one:</p>
-<ul>
-    <li><strong>Its own allele says so.</strong> Splash is <em>the</em> blue-eyed pattern,
-        diagnostic even when the white itself is modest, so any expressing
-        <a href="gene-mitf.html">MITF</a> or <a href="gene-pax3.html">PAX3</a> combination
-        qualifies. <a href="gene-ednrb.html">Frame</a> does too.
-        <a href="gene-kit.html">KIT</a> qualifies only from <code>broad-white</code>
-        upward &mdash; a sabino with four socks and a blaze has ordinary dark eyes,
-        because the white on it never reached the head.</li>
-    <li><strong>The horse is broadly white however it got there.</strong> Past 55% of the
-        coat depigmented, the eyes go with it. This covers the case no per-locus test can
-        see: a horse white from <em>two</em> mild alleles stacking has exactly the same
-        claim as one white from a single bold allele.</li>
-</ul>
 
 <h2 id="breed">Where to find it</h2>
 <p>

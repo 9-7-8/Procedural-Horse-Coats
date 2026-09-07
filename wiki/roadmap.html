@@ -261,35 +261,39 @@
 
 <h2 id="eyes">5. Eye colour &mdash; what is left</h2>
 
-<div class="note">
+<div class="note good">
     <span class="label">Shipped 2026-09-06</span>
     <p>
-        The channel is <strong>built</strong>. <code>EyeColorContribution</code> is a
-        gene capability, <code>CoatOverlay.tintIris</code> colours the iris texels (the
-        <em>dark</em> ones &mdash; the sclera stays white), and the composer resolves the
-        highest-ranked claim once in the overlay phase.
-        <a href="gene-tiger-eye.html">Tiger eye</a> is built and wired into the
-        <a href="breeds.html">Puerto Rican Paso Fino</a>; the four white loci claim a
-        blue eye, and <strong>blue out-ranks amber</strong> because a depigmented iris
-        has nothing left to recolour.
+        Everything this section used to list is built, and the channel now has its own
+        page: <a href="eye-colour.html">Eye colour &amp; heterochromia</a>. Green and
+        hazel irises (<a href="gene-champagne.html">champagne</a>'s epigenetic shade and
+        <a href="gene-matp.html">cream&ndash;pearl</a>'s blue-green), the blue-eyed
+        creams, <strong>complete heterochromia</strong> (one blue eye) and
+        <strong>sectoral heterochromia</strong> (a blue wedge) off a per-horse
+        <code>EyeSpread</code>, and the magical
+        <a href="gene-magic-sectoral-heterochromia.html">sectoral heterochromia</a> locus.
     </p>
 </div>
 
 <p>What is still open here:</p>
 
 <ul>
-    <li><strong>Blue-eyed creams.</strong> A double-dilute cream (cremello, perlino) has
-        blue eyes in life, and <a href="gene-matp.html">MATP</a> does not claim one. It
-        is a two-line <code>EyeColorContribution</code>; the only question is which blue,
-        since a cream's is paler and glassier than a splash's.</li>
-    <li><strong>Champagne's amber eye.</strong> Champagne foals are born with blue eyes
-        that darken to amber. With <a href="philosophy.html">aging out of scope</a> the
-        darkening cannot be modelled, so this is a choice between the adult colour and
-        nothing.</li>
-    <li><strong>One blue eye, not two.</strong> Splash horses very often have exactly one
-        blue eye, and the channel currently resolves a single colour for both. Making it
-        per-eye is a real change: the claim would have to carry a side, and it would want
-        to be epigenetic, which would put the locus back in the per-horse fingerprint.</li>
+    <li><strong>Champagne foals' blue-green eyes.</strong> A real champagne foal is born
+        blue-green and matures to amber or hazel. Here it is the adult colour from birth:
+        <code>EyeColorContribution</code> is not told which skin is being baked, and with
+        <a href="philosophy.html">aging out of scope</a> there is nothing to mature
+        through. Adding a <code>boolean adult</code> to the hook is a five-implementor
+        change and would be cheap; the open question is whether a foal that is
+        <em>permanently</em> blue-green is better or worse than one that never was.</li>
+    <li><strong>Filmy and blind eyes.</strong> Deliberately not started: cloudiness is
+        cornea, lens or inflammation rather than iris pigment, and is not an inherited
+        eye-colour category at all. It would want to be a
+        <a href="horse-body.html">condition</a>, not a claim on this channel.</li>
+    <li><strong>The wedge shapes may be too fine.</strong> Twelve masks over four texels
+        includes single corners and three-corner shapes; whether those read as
+        heterochromia at riding distance or as a stray pixel is the first thing to look at
+        in game. Restricting <code>EyePatch.WEDGES</code> to the four halves is a one-line
+        retreat if they do not. <a href="verification.html">To be verified</a>.</li>
     <li><strong>The foal sclera bug</strong> is a defect, not this work &mdash;
         <a href="#defects">&sect;1.2</a>.</li>
 </ul>

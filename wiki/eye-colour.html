@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Eye colour &amp; heterochromia &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="nav.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow">The coat engine <span class="sep">/</span> one channel, five claimants</p>
+<h1>Eye colour &amp; heterochromia</h1>
+<p class="lede">
+    A horse has two eyes, and this is the single source of truth for what colour they
+    come out. Three genetic routes change an iris, they are ranked in that order, and
+    two more layers on top produce the eyes that are not one flat colour: <strong>one
+    blue eye</strong>, <strong>a wedge of blue in a brown one</strong>, and the magical
+    locus that splits an iris between two colours outright.
+</p>
+
+<div class="note warn">
+    <span class="label">Built 2026-09-06, not yet play-tested</span>
+    <p>
+        Every colour and every split below is asserted through the real pipeline in
+        <code>EyeColorTest</code>. What is unknown is whether a four-texel iris split in
+        two <em>reads</em> as heterochromia on a horse at riding distance, or whether the
+        wedge shapes need to be restricted to the halves. Checklist on
+        <a href="verification.html">To be verified</a>.
+    </p>
+</div>
+
+<h2 id="iris">The iris is the dark texels, not the sclera</h2>
+<p>
+    On the coat sheet an adult eye is a <strong>2&times;2 block of pure black</strong>
+    &mdash; the iris and pupil together, there being no room for both at 128px &mdash;
+    beside a 2&times;2 block of near-white sclera. A foal's is the black block alone. So
+    eye colour means <strong>colouring the black texels</strong> and leaving the white
+    ones white: <code>CoatOverlay.tintIris</code> weights each texel by how dark it
+    already is (<code>1 - luma</code>), so black takes the colour outright, white is
+    untouched, and the antialiased grey between them takes a proportional share.
+</p>
+<p>
+    Worth stating because the obvious tool is the wrong one.
+    <code>shadeToward</code> scales its target by the texel's own <em>brightness</em> so
+    that a gold hoof keeps the template's shading &mdash; which on an eye means the
+    <em>sclera</em> takes the colour and the iris, being black, comes out black. It is
+    the right blend for <a href="gene-light.html">light</a>'s glowing gold eye and the
+    <a href="gene-leopard.html">leopard complex</a>'s white sclera rim, and exactly
+    backwards for an iris.
+</p>
+<p>
+    It all happens in the <strong>overlay phase</strong>, after
+    <code>CoatRegions.redrawEyes</code> has copied the template's eyes back over the
+    finished coat &mdash; which it does precisely so a gene painting a wide white pattern
+    can never blind a horse. That copy is why anything wanting to colour an eye
+    <em>on purpose</em> has to run after it. See <a href="pipeline.html">the pipeline</a>.
+</p>
+
+<h2 id="ranks">Three ranks, because there are three routes</h2>
+<p>
+    A horse has one iris colour, so "what colour are its eyes" has exactly one answer and
+    several genes have a claim on it. That makes it a <strong>channel</strong> with a
+    single owner and a contribution hook, like the <a href="gene-lut.html">LUT</a> and
+    the <a href="gene-cutie-mark.html">cutie mark</a> &mdash; not a gene that other genes
+    fight with. A gene implements <code>EyeColorContribution</code> and returns an
+    <code>EyeColor</code> claim; the composer collects them in code order and applies the
+    highest-ranked one.
+</p>
+<p>
+    The ranks are not priority numbers pulled out of the air. They are the
+    <strong>three ways a real horse's iris changes colour</strong>, and they nest for a
+    reason.
+</p>
+<table class="data">
+    <thead><tr><th>Rank</th><th>Route</th><th>Claimants</th><th>Why it sits there</th></tr></thead>
+    <tbody>
+        <tr>
+            <td>30 &mdash; depigmented</td>
+            <td>The iris never got enough melanocytes at all</td>
+            <td><a href="gene-mitf.html">MITF</a>, <a href="gene-pax3.html">PAX3</a>,
+                <a href="gene-ednrb.html">EDNRB</a>, <a href="gene-kit.html">KIT</a>
+                (broad white and up)</td>
+            <td>An absence cannot be overpainted. There is nothing left in a depigmented
+                iris for a pigment gene to recolour, so blue beats everything.</td>
+        </tr>
+        <tr>
+            <td>20 &mdash; iris-specific pigment</td>
+            <td>A gene that changes what colour the iris <em>is</em>, and nothing else</td>
+            <td><a href="gene-tiger-eye.html">Tiger eye</a></td>
+            <td>A gene aimed at the eye beats one that reached it on the way past.</td>
+        </tr>
+        <tr>
+            <td>10 &mdash; whole-body dilution</td>
+            <td>Every pigment the horse has is diluted, iris included</td>
+            <td><a href="gene-matp.html">MATP</a> (cream / pearl),
+                <a href="gene-champagne.html">champagne</a></td>
+            <td>The least specific claim anything can make on an eye.</td>
+        </tr>
+    </tbody>
+</table>
+<p>
+    Ties &mdash; two dilutions, say &mdash; go to the earlier gene in
+    <code>Genes.codeOrder()</code>, which puts MATP (priority 40) ahead of champagne (50).
+    A cremello that is also champagne has a cremello's eye.
+</p>
+<p>
+    Note the blue eye is <strong>not a new gene</strong> and never should be. It is a
+    property the white loci already have &mdash; the same failure of pigment cells to
+    reach the skin leaves them out of the iris &mdash; and a "blue eyes" locus that
+    mysteriously only ever appeared on white horses would be a worse model of the same
+    fact.
+</p>
+
+<h2 id="palette">What each locus claims</h2>
+<table class="data">
+    <thead><tr><th>Locus</th><th>Combination</th><th>Iris</th></tr></thead>
+    <tbody>
+        <tr><td rowspan="3"><a href="gene-matp.html">MATP</a></td><td><code>Cr/Cr</code></td><td>Pale cream blue</td></tr>
+        <tr><td><code>Cr/prl</code></td><td><strong>Blue-green</strong> &mdash; the compound heterozygote is the one row where cream and pearl disagree, and the mod's ordinary green eye</td></tr>
+        <tr><td><code>prl/prl</code></td><td>Pale and bright rather than blue</td></tr>
+        <tr><td><a href="gene-champagne.html">Champagne</a></td><td>any <code>Ch</code></td><td><strong>Epigenetic</strong>: amber (40%), <strong>hazel</strong> (35%), light brown (17%), <strong>olive green</strong> (8%)</td></tr>
+        <tr><td rowspan="2"><a href="gene-tiger-eye.html">Tiger eye</a></td><td><code>TE1/TE1</code>, <code>TE1/TE2</code></td><td>Bright amber</td></tr>
+        <tr><td><code>TE2/TE2</code></td><td>The paler yellow</td></tr>
+        <tr><td>The four white loci</td><td>see each page</td><td>Blue &mdash; over as much of each iris as the <a href="#spread">spread</a> reached</td></tr>
+    </tbody>
+</table>
+<p>
+    A single cream copy does not touch the eye, and neither does a pearl carrier. The
+    exact hex values live on the genes that own them
+    (<code>MatpGene.CREAM_PEARL_GREEN</code>, <code>ChampagneGene.HAZEL</code>,
+    <code>TigerEyeGene.AMBER</code>) rather than being quoted here, where they would go
+    stale. <code>EyeColor.BLUE</code> is the one shared constant, because four loci claim
+    the identical colour for the identical reason.
+</p>
+
+<h2 id="spread">Complete and sectoral heterochromia, from the white loci</h2>
+<p>
+    One <code>MITF</code> copy produces "anything from subtle facial white or one blue eye
+    to extensive splash". <strong>One blue eye is not a separate trait</strong>: it is the
+    same failure of melanocyte colonisation as two blue eyes, stopped one iris earlier. A
+    blue <em>wedge</em> in an otherwise coloured iris is the same thing again, stopped
+    part-way across one eye.
+</p>
+<p>
+    So the white loci answer two separate questions. <em>Is</em> this horse blue-eyed is
+    an allele question, answered by <code>EyeColorContribution</code> on each locus and
+    documented on its page. <em>How far did the blue get</em> is not an allele question at
+    all, and it is rolled once as an <code>EyeSpread</code> off the epigenetic seed of the
+    locus that won the claim &mdash; inherited with that allele copy, stable for the life
+    of the horse.
+</p>
+<table class="data">
+    <thead><tr><th>Outcome</th><th>Share of blue-eyed horses</th><th>What you see</th></tr></thead>
+    <tbody>
+        <tr><td>Both whole</td><td>62%</td><td>The two blue eyes splash is known for</td></tr>
+        <tr><td>One whole</td><td>22%</td><td><strong>Complete heterochromia</strong> &mdash; one blue eye, the other whatever the horse's pigment genes gave it</td></tr>
+        <tr><td>A wedge somewhere</td><td>16%</td><td><strong>Sectoral heterochromia</strong> &mdash; part of an iris blue and the rest its own colour; sometimes a wedge in each eye, and then never the same shape twice</td></tr>
+    </tbody>
+</table>
+<p>
+    This is why the pigment layer has to be painted <strong>first and in full</strong>,
+    with the blue laid over as much of it as the spread says. A depigmented iris is not a
+    colour painted over the pigment, it is pigment that never arrived &mdash; so what
+    shows where the blue stops is the horse's own eye, and it has to still be there
+    underneath. A splashed white tiger-eye horse with one blue eye has an <em>amber</em>
+    other one.
+</p>
+<p>
+    It is deliberately <strong>one</strong> roll rather than one per white locus. A horse
+    carrying splash and frame at once would otherwise stack two independent masks and end
+    up unable to have a single blue eye at all, which is backwards.
+</p>
+
+<h2 id="wedges">Four quadrants, twelve shapes</h2>
+<p>
+    An iris is four texels, so a sector is a <strong>four-bit mask</strong> over them
+    (<code>EyePatch</code>):
+</p>
+<pre><code>bit 0   bit 1        0b0011  the top half
+bit 2   bit 3        0b0101  the left half
+                     0b1000  one corner
+                     0b0111  three corners</code></pre>
+<p>
+    <code>EyePatch.WEDGES</code> lists every mask that is neither empty nor the whole iris
+    <em>except</em> the two diagonals. At four texels a diagonal does not read as a wedge
+    of colour in an eye, it reads as two stray pixels &mdash; which is a rendering fact
+    about a 2&times;2 block, not a claim about horses. That leaves twelve: four halves,
+    four single corners, four three-corner shapes.
+</p>
+<p>
+    The quadrants are in <em>texture</em> space, and the two eyes' faces are mirrored on
+    the sheet (see <a href="body-space.html">body space</a>), so "left half" is not the
+    same side of the horse on both eyes. That does not matter for a randomly placed wedge
+    and it is not worth un-mirroring for. Which texels are iris at all is worked out from
+    the coat itself &mdash; the dark texels in the eye rect, bounding-boxed and halved
+    both ways &mdash; rather than hard-coded, because the iris sits at a different offset
+    in each of the two mirrored eyes.
+</p>
+
+<h2 id="patches">The second layer: genes that paint an iris</h2>
+<p>
+    <code>EyePatchContribution</code> is the companion hook, and the difference between
+    the two is the difference between the two things an eye can be. The colour channel is
+    <strong>ranked</strong>, because a horse has one eye colour and several genes claim
+    it. Patches <strong>compose</strong>: they are absolute writes over the finished iris,
+    applied in code order, last writer to a quadrant wins &mdash; the same rule the rest
+    of the overlay phase runs on.
+</p>
+<p>
+    One gene implements it: <a href="gene-magic-sectoral-heterochromia.html">magic
+    sectoral heterochromia</a>, whose whole point is two colours in one iris. Because
+    patches paint over the channel rather than competing with it, a splashed white horse
+    carrying two colour alleles shows the two colours.
+</p>
+<div class="note">
+    <span class="label">Patches do not stack</span>
+    <p>
+        Every blend in the overlay phase walks from the <strong>unmodified</strong> coat,
+        not from the patch beneath it, so two overlapping patches do not accumulate. Use
+        <code>strength</code> 1 unless blending with the template's own iris is what you
+        meant.
+    </p>
+</div>
+
+<h2 id="cache">What it costs the coat cache</h2>
+<p>
+    The eyes are drawn into the baked coat texture, so a locus that changes them is in the
+    horse's texture key &mdash; its expressing outcomes are real
+    <code>marker()</code>s rather than wild types, and two horses that differ only there
+    do not share a cached texture. Whether it costs <em>one entry per outcome</em> or
+    <em>one per horse</em> then depends on whether the locus varies:
+</p>
+<table class="data">
+    <thead><tr><th>Locus</th><th>Varies?</th><th>Cache cost</th></tr></thead>
+    <tbody>
+        <tr><td>Tiger eye, MATP</td><td>No &mdash; every amber eye is the same amber</td><td>One entry per outcome</td></tr>
+        <tr><td>Champagne</td><td><strong>Yes</strong> &mdash; the iris shade is rolled</td><td>One per horse</td></tr>
+        <tr><td>The white loci</td><td>Already did &mdash; their patterns vary</td><td>Unchanged</td></tr>
+        <tr><td>Magic sectoral heterochromia</td><td><strong>Yes</strong> &mdash; shapes and chaos colour</td><td>One per horse</td></tr>
+    </tbody>
+</table>
+<p>
+    Champagne going non-deterministic is the one that looks like a real cost and is not:
+    almost every horse already carries something that varies (bay's black climb, grey's
+    dapples), so the marginal number of forked textures is small.
+</p>
+
+<h2 id="writing">Writing a gene that changes eyes</h2>
+<p>Implement one of the two hooks on your <code>Gene</code>:</p>
+<table class="data">
+    <thead><tr><th>Hook</th><th>Return</th><th>Use it when</th></tr></thead>
+    <tbody>
+        <tr>
+            <td><code>EyeColorContribution</code></td>
+            <td><code>Optional&lt;EyeColor&gt;</code></td>
+            <td>Your gene says what colour the whole iris is. Pick your rank from the
+                three routes above; <code>EyeColor.dilution</code> and
+                <code>EyeColor.pigment</code> are the two factories.</td>
+        </tr>
+        <tr>
+            <td><code>EyePatchContribution</code></td>
+            <td><code>Optional&lt;EyePatches&gt;</code></td>
+            <td>Your gene paints part of an iris, or wants the two eyes to differ from
+                each other in a way the spread does not describe.</td>
+        </tr>
+    </tbody>
+</table>
+<p>
+    Both are handed the pair, the whole genotype, the horse's <code>Epigenome</code> (which
+    may be <code>null</code> &mdash; a question asked about a genotype rather than about a
+    horse) and the horse's resolved white coverage. Both may vary per horse, and if yours
+    does, take every number from <code>AlleleRandomness</code> so it is inherited with the
+    allele copy, and declare the outcome <code>varies()</code> or two visibly different
+    horses will share one cached texture.
+</p>
+<p>
+    <code>whiteCoverage</code> is the fraction of the horse's mapped texels the white loci
+    left with no pigment at all, measured on the finished coat. It is passed rather than
+    recomputed because it is the honest signal for "is this horse white enough to have blue
+    eyes": a horse broadly white from <em>two</em> mild loci stacking has the same claim as
+    one white from a single bold allele, and no per-locus test can see that. The threshold
+    is <code>WhitePatternEyes.COVERAGE_THRESHOLD</code>.
+</p>
+
+<h2 id="not-modelled">What is deliberately not modelled</h2>
+<ul>
+    <li><strong>Champagne foals' blue-green eyes.</strong> A real champagne foal is born
+        blue-green and matures to amber or hazel; here it is the adult colour from birth.
+        The pipeline knows whether it is baking a foal, but the eye-colour hook is not
+        told, and there is no aging in this mod for it to mature through. On
+        <a href="roadmap.html">the roadmap</a>.</li>
+    <li><strong>Filmy and blind eyes.</strong> Cloudiness is cornea, lens or inflammation
+        rather than iris pigment, and is not an inherited eye-colour category at all.</li>
+    <li><strong>The leopard complex's white sclera.</strong> It is drawn, but as a sclera
+        rim in the overlay phase, not through this channel &mdash; <code>LP</code> changes
+        what is <em>around</em> the iris, not the iris. See
+        <a href="gene-leopard.html">the leopard complex</a>.</li>
+</ul>
+
+</article>
+</main>
+</body>
+</html>

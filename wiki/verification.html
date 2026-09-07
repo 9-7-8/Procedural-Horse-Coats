@@ -507,6 +507,48 @@
         eye.</li>
 </ul>
 
+<div class="note warn">
+    <span class="label">Green, hazel and heterochromia &mdash; built 2026-09-06, NOT looked at</span>
+    <p>
+        All of it is asserted through the real pipeline in <code>EyeColorTest</code>, and
+        <strong>none of it has been seen on a horse</strong>. The whole subject is
+        <a href="eye-colour.html">Eye colour &amp; heterochromia</a>; what wants looking
+        at, in the order it is most likely to be wrong:
+    </p>
+    <ul>
+        <li><strong>Does a split iris read as heterochromia at all?</strong> This is the
+            load-bearing unknown. The iris is <strong>four texels</strong>, so a "wedge"
+            is one, two or three of them. Twelve shapes are in
+            <code>EyePatch.WEDGES</code> &mdash; four halves, four single corners, four
+            three-corner shapes &mdash; and the single corners in particular may read as
+            a stray pixel rather than as a sector. If they do, restricting
+            <code>WEDGES</code> to the four halves is a one-line retreat.</li>
+        <li><strong>One blue eye.</strong> 22% of blue-eyed horses. Spawn a few
+            <code>SW1/N</code> splashes and confirm some come out with one blue eye and
+            one dark one, and that the dark one looks deliberate rather than like a
+            half-applied tint.</li>
+        <li><strong>Champagne's iris.</strong> Amber 40%, hazel 35%, light brown 17%,
+            olive 8% &mdash; spawn a handful and confirm the four are actually
+            distinguishable at riding distance. If amber and light brown are the same
+            eye in practice, the palette wants spreading. Also: a champagne horse now has
+            its <em>own</em> baked texture where it used to share one, so watch for any
+            coat-cache churn on a herd of them.</li>
+        <li><strong>Cream and pearl.</strong> <code>Cr/Cr</code> pale blue,
+            <code>Cr/prl</code> blue-green, <code>prl/prl</code> pale. Confirm the
+            blue-green reads as green and not as "the blue one but wrong", since it is
+            the mod's only natural green eye besides champagne's olive.</li>
+        <li><strong>Magic sectoral heterochromia.</strong> Custom egg, two different
+            colour alleles. Confirm both colours show, the two eyes have different
+            shapes, and that <code>green/green</code> and <code>gold/n</code> genuinely
+            change nothing &mdash; including on a horse that already has a champagne or
+            cream eye, which they must not overwrite. Then try <code>chaos</code> on a
+            few horses and see whether the rolled colours are ever muddy.</li>
+        <li><strong>The foal again.</strong> A foal iris is the 2&times;2 pupil with no
+            sclera, so a wedge is a quarter of a very small block. Check a splash foal
+            with a sectoral eye still reads as a horse and not as a smudge.</li>
+    </ul>
+</div>
+
 <h3 id="cutie-glow">A glowing cutie mark</h3>
 <p>
     A <code>Cutmrk/Cutmrk</code> horse that also carries any

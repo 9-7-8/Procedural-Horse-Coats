@@ -26,7 +26,8 @@
             title: "The coat engine",
             items: [
                 { href: "pipeline.html", text: "Three-phase pipeline", kind: "core" },
-                { href: "body-space.html", text: "Body space & regions", kind: "core" }
+                { href: "body-space.html", text: "Body space & regions", kind: "core" },
+                { href: "eye-colour.html", text: "Eye colour & heterochromia", kind: "core" }
             ]
         },
         {
@@ -107,6 +108,7 @@
                 { href: "gene-magic-zebra.html", text: "Magic zebra", kind: "magical" },
                 { href: "gene-milk.html", text: "Milk (water / lava)", kind: "magical" },
                 { href: "gene-light.html", text: "Light", kind: "magical" },
+                { href: "gene-magic-sectoral-heterochromia.html", text: "Magic sectoral heterochromia", kind: "magical" },
                 { href: "gene-particle.html", text: "Particle", kind: "magical" },
                 { href: "gene-verdant.html", text: "Verdant", kind: "magical" },
                 { href: "gene-lut.html", text: "LUT (palette swap)", kind: "magical" },

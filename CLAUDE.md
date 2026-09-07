@@ -59,6 +59,7 @@ the same change as the code, and never copy it back into here.
 | The Mendelian model as implemented; the gene registry + priorities | `wiki/genetics-model.html` |
 | **Each individual gene** - alleles, painter, frequency, outcomes | `wiki/gene-*.html` |
 | The three-phase coat pipeline | `wiki/pipeline.html` |
+| Eye colour, the two hooks, both heterochromias | `wiki/eye-colour.html` |
 | Body space, `HorseSkinGeometry`, the vanilla model tables | `wiki/body-space.html` |
 | Breeding, pedigree, horse records, stat inheritance | `wiki/breeding.html` |
 | Breeds, herd spawning, the stat curve, cross/mixed labels | `wiki/breeds.html` |

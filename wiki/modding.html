@@ -734,7 +734,13 @@ public List&lt;GeneAbility&gt; abilitiesFor(AllelePair pair, Genotype genotype,
     <td>The iris colour</td>
     <td>&mdash; (the composer)</td>
     <td><code>EyeColorContribution</code></td>
-    <td><strong>Open, ranked.</strong> Highest <code>EyeColor.rank()</code> wins, ties to the earlier gene. Blue (depigmented) beats amber (pigment).</td>
+    <td><strong>Open, ranked.</strong> Highest <code>EyeColor.rank()</code> wins, ties to the earlier gene. The three ranks are the three biological routes: a whole-body dilution loses to a gene aimed at the iris, which loses to an iris with no pigment cells at all. See <a href="eye-colour.html">Eye colour</a>.</td>
+</tr>
+<tr>
+    <td>Part of an iris</td>
+    <td>&mdash; (the composer)</td>
+    <td><code>EyePatchContribution</code></td>
+    <td><strong>Open, composed.</strong> Not a channel at all: patches are absolute writes over the finished iris, applied in <code>codeOrder()</code>, last writer to a quadrant wins. It exists because a horse has one eye <em>colour</em> but can have two colours <em>in</em> an eye.</td>
 </tr>
 </tbody>
 </table>
@@ -756,10 +762,16 @@ public List&lt;GeneAbility&gt; abilitiesFor(AllelePair pair, Genotype genotype,
         different <em>kinds</em>: a pigment gene says what colour the iris is, a white
         locus says there is no pigment in it. Those do not blend; one of them is simply
         right.</li>
+    <li><strong>Part of an iris</strong> is the one that is <em>not</em> a channel, and
+        the pair is worth studying before you add a channel of your own. &ldquo;What
+        colour are this horse's eyes&rdquo; has one answer and needs a rank. &ldquo;Paint
+        this over part of them&rdquo; has as many answers as there are genes, and they
+        stack like paint. Splitting the two was what let one blue eye, a blue wedge and a
+        two-coloured magical iris all exist without any of them fighting the others.</li>
 </ul>
 
 <p class="muted">
-    If you find yourself wanting a fourth, the test is the same: does a horse have exactly
+    If you find yourself wanting another, the test is the same: does a horse have exactly
     one of the thing, and would two genes both writing it produce nonsense rather than a
     sum? If so it is a channel. If the contributions genuinely add up &mdash; as phase-3
     colour deltas do &mdash; it is not, and it should be an ordinary accumulator.
