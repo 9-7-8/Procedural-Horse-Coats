@@ -26,6 +26,28 @@
 
 <h2 id="d2026-09-07">2026-09-07</h2>
 
+<h3 id="homestead-walk-2026-09-07">Built 2026-09-07, NOT yet looked at: the walk moves to road level and out in front of the steps, and the cowboy learns to open a door.</h3>
+
+<p>Owner-driven, from what he could see in game: the path was in the wrong place, the beds faced the wrong way, and the man could not get into his own barn. Design: <a href="villagers.html#barn">Villagers &sect; the barn</a> and <a href="villagers.html#doors">&sect; he can work a door</a>. Checklist <a href="verification.html#villagers">&sect;0-AC</a>.</p>
+
+<ul>
+<li><strong>Layer 0 of a building is not the ground, and that is the whole bug.</strong> It is the course that <em>rests</em> on the ground &mdash; the street's road block is the layer below it, outside the piece &mdash; so the lane laid in layer 0 was a block-high curb you walked over rather than a walk you walked on. A structure cannot have a negative layer, so the piece gained a <strong>ground course</strong>: everything lifts by one and the jigsaw lifts with it, which means nothing about where the homestead lands changes and the new bottom layer falls in the road's own course. Verified by diffing the old and new bakes with the jigsaw as origin &mdash; measured from it, not one block of either building moved.</li>
+
+<li><strong>The walk got a column of its own, and the first answer to "move it forwards" was wrong.</strong> It was refused on the grounds that x=0 was the piece's west edge and one column further west is the street's own connector block, which is true &mdash; a box reaching over that overlaps the street piece and the placer throws it out, so the homestead would never generate. What that missed is that the <em>barn</em> did not have to own the west edge. Both buildings moved one east, the walk took the vacated column, and the jigsaw stayed put resolving to air above it. The walk now runs the full length of the front, at the foot of the barn's steps and in front of the doorstep and both work posts. The lane between the buildings is gone: that gap is a yard, not a corridor.</li>
+
+<li><strong>A path under a step is not a path.</strong> <code>DirtPathBlock.canSurvive</code> is false with a solid block overhead and schedules a tick that turns it to dirt, and structure placement runs the neighbour-shape update that fires it. The first attempt ran the walk under the barn's stair skirt and the two posts, which would have laid ten blocks of dirt into the world while the NBT still said <code>dirt_path</code>. Caught by auditing the bake rather than by playing it, which is the only way it <em>could</em> have been caught &mdash; nothing warns you and the file looks right.</li>
+
+<li><strong>The cowboy could not open a door, and needed two unrelated things to.</strong> He is an <code>AbstractVillager</code> running goals rather than a villager brain, so he had neither a goal to swing one nor a navigator that would route through one. <code>CowboyDoorGoal</code> is both halves: it opens <strong>both leaves</strong> of a double door &mdash; one leaf is a one-block gap and the pathfinder rounds a mob up to <code>floor(width + 1)</code> across, so a single leaf is no use to a horse &mdash; and only in daylight, with <code>PathNavigation.setCanOpenDoors</code> rising and falling alongside it. Vanilla's <code>OpenDoorGoal</code> was not usable: with <code>closeDoorAfter=false</code> its <code>canContinueToUse</code> is false immediately and its unconditional <code>stop()</code> shuts the door it just opened. He closes nothing, deliberately &mdash; the herd is following him through.</li>
+
+<li><strong>The partner-leaf rule, because getting it backwards fails silently.</strong> A double door's other half is the neighbour along the wall with the same <code>FACING</code> and the opposite <code>HINGE</code>, and <em>both</em> perpendicular sides have to be tried: the hinge says which way a leaf swings, not which side its partner is on. Checked offline against the baked barn &mdash; all four openings resolve to two leaves, symmetrically both ways, and the house's single door correctly resolves to none.</li>
+
+<li><strong>Beds turned round</strong> so the heads are at the back wall and the feet toward the door. Four blocks.</li>
+
+<li><strong>Two stale claims fixed while passing.</strong> <code>BarnPoolInjector</code>'s frequency note still quoted the old footprint, and <code>CowboyHandler</code> still described home as &ldquo;the place he rides back to at dusk and the box the door code works on&rdquo; &mdash; both the dusk ride and that door code were deleted with the mounted cowboy, and the sentence had become actively misleading now that there is door code again.</li>
+
+<li><strong>Nothing here has been seen in a game.</strong> The piece is a column wider than the one that has never been confirmed to generate either, which is <a href="known-gaps.html#gap-62">gap 62</a>; the door behaviour is <a href="known-gaps.html#gap-63">gap 63</a>.</li>
+</ul>
+
 <div class="note">
     <span class="label">An unattended session</span>
     <p>

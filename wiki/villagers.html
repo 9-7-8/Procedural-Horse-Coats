@@ -325,9 +325,46 @@
 
 <p>
     So there is no routine to document. He floats, trades, panics, strolls and looks at
-    players &mdash; the goals every villager has. His horses trail him at
-    <strong>14 blocks</strong> and settle at 7 by day, tightening to 4 after dark so the
-    string gathers on him rather than strung out across a field.
+    players &mdash; the goals every villager has, plus one of his own below. His horses
+    trail him at <strong>14 blocks</strong> and settle at 7 by day, tightening to 4 after
+    dark so the string gathers on him rather than strung out across a field.
+</p>
+
+<h3 id="doors">He can work a door, in daylight, with both hands</h3>
+
+<p>
+    <code>CowboyDoorGoal</code>. Until it existed he could not open a door at all &mdash;
+    not for want of trying, but because a mob needs <em>two</em> unrelated things to use
+    one and he had neither. The goal is what swings it; the navigator's
+    <code>canOpenDoors</code> is what makes the pathfinder score a shut wooden door as a
+    way through rather than as wall. On its own, either is useless: no goal and he plans a
+    route he cannot take, no flag and he never plans the route at all.
+</p>
+
+<ul>
+    <li><strong>Both leaves.</strong> Vanilla's <code>OpenDoorGoal</code> opens the one
+        door block the path runs through, and every opening in the barn is a
+        <em>pair</em>. One leaf is a one-block gap, and the ground pathfinder rounds a mob
+        up to <code>floor(width + 1)</code> blocks across &mdash; so a one-block gap is not
+        a gap at all to a horse, and the whole point of the man walking to the barn is the
+        string walking in behind him. The partner leaf is the neighbour along the wall with
+        the same facing and the opposite hinge.</li>
+    <li><strong>Daylight only</strong>, on <code>Level.isBrightOutside()</code> &mdash; the
+        same test the gene effects use for their <code>day</code> trigger, so the mod has
+        one definition of daytime. It reads sky darkening rather than the clock, so a
+        thunderstorm counts as night.</li>
+    <li><strong>He never closes anything.</strong> <code>OpenDoorGoal</code>'s
+        close-behind would be wrong here twice over: the herd is following him and would be
+        shut out, and the barn doors standing open is what the doorway headroom in
+        <code>bake-barn.py</code> was cleared for.</li>
+</ul>
+
+<p>
+    None of it is a routine &mdash; he opens a door he has walked into, which is vanilla's
+    own cheap trigger, and nothing sends him at one on purpose. What it buys is that the
+    barn is now a building the outfit can actually get inside.
+    <a href="known-gaps.html#gap-63">Gap 63</a> is the part that is designed rather than
+    measured.
 </p>
 
 <h3 id="nights">He does not go indoors, and does not need to</h3>
@@ -370,10 +407,40 @@
 <h2 id="barn">The barn, and how it lands on the outskirts</h2>
 
 <p>
-    <code>cowboy_barn.nbt</code> is a hand-built 15&times;6&times;7 structure &mdash;
-    hay-bedded floor, water cauldrons, two double doors at each end &mdash; with the
-    cowboy generated at its centre.
+    <code>cowboy_barn.nbt</code> is the whole homestead in one piece: a hand-built stable
+    &mdash; hay-bedded floor, water cauldrons, two double doors at each end, the cowboy
+    generated at its centre &mdash; with the <a href="#horseman-nights">house</a> behind it
+    along the street, and a <strong>walk</strong> running down the front of both.
 </p>
+
+<div class="note">
+    <span class="label">The walk, and the course it lies in</span>
+    <p>
+        Worth knowing before editing the bake, because it is the one thing about the
+        piece's geometry that is not obvious from looking at it. <strong>Layer 0 of a
+        building is not the ground</strong> &mdash; it is the course that <em>rests</em> on
+        the ground. The street's road block is the layer below it, outside the piece
+        entirely, which is why a plains house sits one block proud of the road with a step
+        up into the doorway.
+    </p>
+    <p>
+        So a path laid in layer 0 is a block-high curb you walk over, which is what the
+        lane between the two buildings was. The piece now carries a <strong>ground
+        course</strong> beneath the foundation: everything lifts by one and the jigsaw
+        lifts with it, so nothing about where the homestead lands changes, and the new
+        bottom layer falls in the road's own course. The walk runs down it.
+    </p>
+    <p>
+        It has a <strong>column of its own</strong>, west of both buildings, because it has
+        to be <em>in front of</em> the steps and there is nowhere else for it to go. One
+        column further west is the street's own connector block; a piece whose box reaches
+        over that overlaps the street piece and is thrown out by the placer, so the
+        homestead would simply never generate. And it cannot run <em>under</em> the steps
+        either: <code>DirtPathBlock</code> will not survive a solid block overhead and
+        ticks back to plain dirt, so a walk beneath the stair skirt would be a walk made of
+        dirt. In front of the steps, nothing is covered and nothing converts.
+    </p>
+</div>
 
 <h3 id="jigsaw">Terminators are the edge of the village</h3>
 
@@ -495,9 +562,9 @@
 <pre><code class="language-bash">python neoforge-26.1.2/tools/barn/bake-barn.py</code></pre>
 
 <p>
-    which adds everything a structure-block save cannot carry &mdash; the jigsaw
-    connector, the headroom over the doorways, the reshaped house, the path between the
-    two buildings, the work posts and the villagers &mdash; and writes
+    which adds everything a structure-block save cannot carry &mdash; the ground course,
+    the jigsaw connector, the headroom over the doorways, the reshaped house, the walk
+    along the front, the work posts and the villagers &mdash; and writes
     <code>data/horsegenetics/structure/cowboy_barn.nbt</code>. Commit all three.
 </p>
 
@@ -583,8 +650,8 @@
 
 <p>
     They flank the <a href="#horseman-nights">house's</a> front step, one either side of
-    it, with a villager standing on each. A villager takes the post he is standing on
-    &mdash; one becomes the horseman, the other the cowboy.
+    it, with a villager on the <a href="#barn">walk</a> in front of each. A villager takes
+    the post he is standing on &mdash; one becomes the horseman, the other the cowboy.
 </p>
 
 <p>

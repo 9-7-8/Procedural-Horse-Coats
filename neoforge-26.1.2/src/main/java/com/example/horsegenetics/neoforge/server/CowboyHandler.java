@@ -214,8 +214,11 @@ public final class CowboyHandler {
         cowboy.setCustomNameVisible(true);
 
         // Home is where the structure put him - the middle of the barn - and it
-        // stays that whatever happens next: it is the place he rides back to at
-        // dusk and the box the door code works on.
+        // stays that whatever happens next. Nothing walks him back to it any
+        // more: the dusk ride and the door sweep that used to read this both
+        // went with the mounted cowboy. It is a remembered address now, not a
+        // routine. (CowboyDoorGoal opens doors he bumps into; it does not know
+        // about this.)
         BlockPos barn = cowboy.blockPosition();
         cowboy.setHome(barn);
         cowboy.markFounded();

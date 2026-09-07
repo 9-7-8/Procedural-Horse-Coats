@@ -71,9 +71,12 @@
     two share a surname, the horseman keeps vanilla's brain, and transfer papers work end
     to end. <strong>What is new and unseen is the homestead.</strong> The house is no
     longer built at runtime &mdash; it is baked into the same structure piece as the barn,
-    and the two work posts moved onto its front step. That is one change to a piece the
-    village generator places, so the first question below is whether the piece still
-    generates at all. Full design:
+    and the two work posts moved onto its front step. The piece has since gained a
+    <strong>ground course</strong> carrying a walk along the front of both buildings, lost
+    the lane that ran between them, and turned the beds round; and the cowboy has gained
+    the ability to <strong>open a door</strong>, which he has never had before. Those are
+    all changes to a piece the village generator places, so the first question below is
+    still whether the piece generates at all. Full design:
     <a href="villagers.html">Villagers &amp; transfer papers</a>.
 </p>
 
@@ -107,17 +110,28 @@
 <ul>
     <li><strong>Start here, because everything else depends on it.</strong>
         <code>/locate structure minecraft:village_plains</code>, fly out, and look for a
-        barn and a house side by side at the <em>end of a street</em>, with a path between
-        them. Expect them in <strong>most</strong> plains villages but not all &mdash; the
-        piece is three draws in seven at each terminator slot, and at 15&times;15 many of
-        those draws lose the bounding-box check anyway. Check three or four villages before
-        concluding it is broken.</li>
+        barn and a house side by side at the <em>end of a street</em>, with a walk running
+        down the front of both. Expect them in <strong>most</strong> plains villages but
+        not all &mdash; the piece is three draws in seven at each terminator slot, and at
+        the better part of a chunk square many of those draws lose the bounding-box check
+        anyway. Check three or four villages before concluding it is broken.</li>
     <li><strong>Is it appearing <em>less</em> than it used to?</strong> That is the risk
-        the piece took on when the house went into it: the footprint doubled in depth, and
-        the pool weight went 1 &rarr; 3 to compensate by arithmetic rather than by
-        measurement. If several villages in a row have no barn, the weight wants raising
-        again &mdash; it is one number in
+        the piece took on when the house went into it: the footprint roughly doubled in
+        depth, the walk has since added a column and a layer on top of that, and the pool
+        weight went 1 &rarr; 3 to compensate by arithmetic rather than by measurement. If
+        several villages in a row have no barn, the weight wants raising again &mdash; it
+        is one number in
         <code>data/horsegenetics/worldgen/template_pool/cowboy_barn.json</code>.</li>
+    <li><strong>Is the walk flush with the road, or a curb?</strong> This is the specific
+        thing the ground course was added for. Standing on the street you should be able to
+        walk straight onto the dirt path in front of the barn's steps without stepping
+        <em>up</em> onto it, and follow it past both work posts to the house's doorstep.
+        A path you have to climb means the lift did not take and the whole piece is sitting
+        a block high. <strong>Look for stray dirt too</strong> &mdash; every path block
+        should still be path. Any plain dirt in the walk means something is sitting on top
+        of it that should not be.</li>
+    <li><strong>Are the beds the right way round?</strong> Heads to the back wall, feet
+        toward the door.</li>
     <li><strong>Is it at the edge?</strong> That is the whole claim of the placement. If
         it keeps landing in the middle of town, the terminator theory is wrong and the
         section needs rethinking, not tuning.</li>
@@ -128,6 +142,41 @@
     <li><strong>Two barns in one village</strong> is expected occasionally. Only one
         should have a cowboy. If both do, the lowest-UUID tie-break in
         <code>CowboyHandler</code> is not firing.</li>
+</ul>
+
+<h3 id="villagers-doors">Does he open the barn doors, and only by day?</h3>
+
+<p>
+    <strong>Entirely new and completely unseen</strong> &mdash; he has never been able to
+    open a door before, so there is no &ldquo;it used to work&rdquo; to fall back on.
+    Design: <a href="villagers.html#doors">Villagers &sect; He can work a door</a>. Gap:
+    <a href="known-gaps.html#gap-63">63</a>. The cheapest test is to stand at the barn in
+    the morning and shut all four doors on him.
+</p>
+
+<ul>
+    <li><strong>Does he open one at all?</strong> He opens a door he walks into, so he has
+        to be heading somewhere through it &mdash; his stroll goal is what will eventually
+        take him at one. Give it a minute rather than expecting it on cue.</li>
+    <li><strong>Does he open <em>both</em> leaves?</strong> This is the one that matters
+        and the one most likely to be subtly wrong. One leaf open is a one-block gap, and
+        a horse cannot use it &mdash; so if you see him step through a half-open doorway
+        with the string stuck outside, the partner-leaf lookup is picking the wrong side.
+        Both leaves standing open is the pass.</li>
+    <li><strong>Do the horses follow him in?</strong> The point of the whole thing. A
+        vanilla-sized horse should manage a two-block opening; anything much over about
+        1.43 scale will not, and that is <a href="known-gaps.html#gap-55">gap 55</a>
+        rather than a new defect &mdash; check the size on the info panel before blaming
+        the doors.</li>
+    <li><strong>Does he stop after dark?</strong> Shut the doors on him at night and he
+        should leave them shut and not stand there shoving. If he opens one, the navigator
+        flag and the goal have come out of step.</li>
+    <li><strong>Thunderstorm check, if one happens.</strong> He treats a storm as night
+        and will wait it out at a shut door. That is a consequence of sharing the mod's
+        definition of &ldquo;day&rdquo;, not a bug &mdash; but if it looks daft in play it
+        is one line to change.</li>
+    <li><strong>Doors stay open.</strong> He never closes one. Expected; noted here so it
+        is not reported as a defect.</li>
 </ul>
 
 <h3 id="villagers-cowboy">The cowboy himself</h3>
