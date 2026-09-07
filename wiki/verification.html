@@ -62,38 +62,47 @@
         colours did.</li>
 </ul>
 
-<h2 id="dilution-retune">&sect;0-M &mdash; the retuned dilutions (2026-09-06, NOT looked at)</h2>
+<h2 id="dilution-retune">&sect;0-M &mdash; the dilutions, set to measured targets (2026-09-06, NOT looked at)</h2>
 
 <p>
     <a href="gene-matp.html">MATP</a>'s three outcomes and
-    <a href="gene-champagne.html">champagne</a> were retuned off the LUT lab's footprint
-    overlay. The chart positions are measured and right; <strong>what no one has done is
-    look at a horse.</strong> Fastest route is the lab itself, then the spawn egg.
+    <a href="gene-champagne.html">champagne</a> are set to the owner's restriction targets,
+    measured against the gradient installed the same day. The numbers are exact &mdash;
+    verified on a chestnut, where a constant reads back directly because there is no black
+    for the tint term to act on. <strong>What nobody has done is look at a horse.</strong>
 </p>
 
+<table class="data">
+    <thead><tr><th>Outcome</th><th>Red restricted</th><th>Black restricted</th><th>On a chestnut</th></tr></thead>
+    <tbody>
+        <tr><td><code>Cr/N</code> single cream</td><td>20%</td><td>29%</td><td><code>#B69679</code></td></tr>
+        <tr><td><code>prl/prl</code> classic pearl</td><td>20%</td><td>60%</td><td><code>#B69679</code></td></tr>
+        <tr><td><code>Cr/Cr</code> double dilute</td><td>47%</td><td>95%</td><td><code>#DFD3BB</code></td></tr>
+        <tr><td><code>Ch/_</code> champagne</td><td>31%</td><td>80%</td><td><code>#C6AF94</code></td></tr>
+    </tbody>
+</table>
+
 <ul>
-    <li><strong>Classic pearl</strong> is the big move &mdash; it should now read as a pale,
-        bright coat close to white (<code>#EDEFEB</code> on a chestnut) rather than the
-        apricot it was. On a black horse it went from chart 17%,52% to 70%,16%.</li>
-    <li><strong>Cremello / perlino / smoky cream</strong> should be convincingly near-white
-        (<code>#F1F7FA</code> on a chestnut), not the mid-tone they were.</li>
-    <li><strong>Palomino and buckskin are no longer gold</strong> &mdash;
-        <code>#E5DBC7</code> and <code>#B1A590</code>, creams rather than golds. Single
-        cream's red was left alone specifically to keep them gold, and on the previous
-        chart it did (<code>#DFBB81</code>); the new default has no saturated gold at any
-        point, so they moved anyway. <strong>This is the main thing to judge by eye</strong>
-        &mdash; if a cream palomino is wrong, the fix is a warmer band in the gradient,
-        not a change to this gene (<a href="known-gaps.html#gap-49">gap #49</a>).</li>
-    <li><strong>Smoky black</strong> moved up the chart (black 0.62 &rarr; 0.44) and should
-        be a warm brown-black <code>#5A4B3B</code> rather than near-black.</li>
-    <li><strong>Gold champagne</strong> is a pale cream <code>#E9E4D8</code>; classic
-        champagne <code>#726654</code> taupe, amber champagne's body <code>#C1B9A9</code>.
-        The X&nbsp;55% cliff that made this a grey is gone with the new chart, but so is
-        the gold it used to fall off.</li>
-    <li><strong>Buckskin and amber champagne points</strong> are the other thing to judge:
-        they sit at chart X&nbsp;70% where the art is neutral, so they come out warm-grey
-        rather than chocolate. Whether that reads as &ldquo;smoky&rdquo; or as
-        &ldquo;wrong&rdquo; is a question only looking can answer.</li>
+    <li><strong>Single cream and classic pearl are identical on a chestnut</strong> &mdash;
+        both restrict 20% of red, and a chestnut has no black for them to differ over, so
+        <code>#B69679</code> twice is correct rather than a bug. They separate on anything
+        carrying black: on a bay body <code>#795944</code> against <code>#93745B</code>, on a
+        black <code>#271C18</code> against <code>#563D2D</code>. Worth confirming they are
+        told apart in play, since a chestnut palomino and a chestnut pearl now match.</li>
+    <li><strong>Champagne is the big visible move</strong> &mdash; gold champagne is a warm
+        tan <code>#C6AF94</code> and classic champagne a chocolate <code>#734833</code>, where
+        an hour earlier they were pale creams.</li>
+    <li><strong>Double dilute is the only one taking most of both pigments</strong>, which keeps
+        it the strongest row however the others move: on a black horse chart 37%,5% against
+        pearl's 7%,40% and single cream's 0%,71%.</li>
+    <li><strong>Single cream's red clamps on a black horse.</strong> <code>0.80</code> kept plus
+        a <code>0.30</code> tint is <code>1.10</code>, so a smoky black keeps 100% of its red
+        rather than 80% &mdash; the 20% target holds on a chestnut and not on a black. Probably
+        fine, since a smoky black belongs on the chart's red edge, but it is a real divergence
+        and the lever is <code>SINGLE_CREAM_TINT</code>.</li>
+    <li><strong>Buckskin and amber champagne points</strong> sit at chart X&nbsp;70%, neutral on
+        this chart: <code>#2A2823</code> and <code>#A7A399</code>. The amber champagne point is
+        a pale grey against a tan body, a big contrast that may or may not read as champagne.</li>
 </ul>
 
 <h2 id="lut-lab">&sect;0-L &mdash; the LUT lab (new, NOT looked at)</h2>

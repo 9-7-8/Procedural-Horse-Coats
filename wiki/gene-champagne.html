@@ -16,8 +16,8 @@
 <h1>Champagne</h1>
 <p class="lede">
     One outcome for both variant combinations &mdash; <strong>it does not read its
-    own dose</strong>: it cuts red hard,
-    cuts black hard, and feeds part of the removed black back in as red. Because it
+    own dose</strong>: it cuts black hard,
+    barely touches red, and feeds part of the removed black back in as red. Because it
     reads the <em>current</em> pigment rather than a colour name, one rule gives gold,
     classic and amber champagne for free. It is also the simplest gene in the mod
     &mdash; a good first read.
@@ -37,8 +37,8 @@
     <div><dt>Wild frequency</dt><dd>1 in 40 per allele</dd></div>
     <div><dt>Founder draws</dt><dd>1 &times; nextFloat()</dd></div>
     <div><dt>Deterministic</dt><dd>yes</dd></div>
-    <div><dt>keep red</dt><dd>0.32</dd></div>
-    <div><dt>keep black</dt><dd>0.36</dd></div>
+    <div><dt>keep red</dt><dd>0.69</dd></div>
+    <div><dt>keep black</dt><dd>0.20</dd></div>
     <div><dt>black tint</dt><dd>0.30</dd></div>
 </dl>
 
@@ -46,8 +46,8 @@
 
 <div class="codebox">
 <div class="filename">common/genetics/genes/ChampagneGene.java</div>
-<pre><code class="language-java">private static final float KEEP_RED   = 0.32f;  // cuts red hard - retuned 2026-09-06
-private static final float KEEP_BLACK = 0.36f;  // hard, but not so hard a black horse goes gold
+<pre><code class="language-java">private static final float KEEP_RED   = 0.69f;  // 31% of red restricted
+private static final float KEEP_BLACK = 0.20f;  // 80% of black restricted - the bulk of it
 private static final float BLACK_TINT = 0.30f;  // removed eumelanin, fed back as pheomelanin
 
 @Override
@@ -68,9 +68,9 @@ public PigmentField restrict(AllelePair pair, CoatBuildContext ctx, PigmentView 
 <table>
 <thead><tr><th>Base</th><th>Name</th><th>Body</th><th>Points</th></tr></thead>
 <tbody>
-<tr><td>chestnut (<code>ee</code>)</td><td><strong>gold champagne</strong></td><td>pale cream <code>#E9E4D8</code></td><td>same &mdash; no black to dilute</td></tr>
-<tr><td>black (<code>E_ aa</code>)</td><td><strong>classic champagne</strong></td><td>taupe <code>#726654</code></td><td>same</td></tr>
-<tr><td>bay (<code>E_ A_</code>)</td><td><strong>amber champagne</strong></td><td>cream <code>#C1B9A9</code></td><td>warm grey <code>#77736B</code></td></tr>
+<tr><td>chestnut (<code>ee</code>)</td><td><strong>gold champagne</strong></td><td>warm tan <code>#C6AF94</code></td><td>same &mdash; no black to dilute</td></tr>
+<tr><td>black (<code>E_ aa</code>)</td><td><strong>classic champagne</strong></td><td>chocolate <code>#734833</code></td><td>same</td></tr>
+<tr><td>bay (<code>E_ A_</code>)</td><td><strong>amber champagne</strong></td><td>tan <code>#A98D72</code></td><td>pale grey <code>#A7A399</code></td></tr>
 </tbody>
 </table>
 </div>
@@ -83,24 +83,21 @@ public PigmentField restrict(AllelePair pair, CoatBuildContext ctx, PigmentView 
 </div>
 
 <div class="note">
-    <span class="label">These are the gradient's colours, not the gene's</span>
+    <span class="label">Set to a measured target, 2026-09-06</span>
     <p>
-        <code>KEEP_RED</code> went 0.55 &rarr; 0.32 on 2026-09-06 (owner: champagne should
-        reduce much more red than it does), putting the outcome at <strong>chart
-        X&nbsp;68%</strong>. What that <em>looks like</em> then depends entirely on the
-        chart, and the default gradient was replaced the same day.
+        <strong>31% of red restricted, 80% of black</strong> &mdash; which is to say
+        champagne is overwhelmingly a <em>eumelanin</em> dilution, and that ratio is what
+        leaves a champagne warm rather than washed out. The constants are written as
+        pigment <em>kept</em>, so those targets are <code>0.69</code> and <code>0.20</code>.
     </p>
     <p>
-        The swatches above are read off the current one. It is a smooth, fairly
-        desaturated ramp &mdash; the top row runs <code>#965C3F</code> at the red edge to
-        white, with saturation falling steadily from 58% to nothing and <strong>no
-        saturated gold anywhere</strong>. So gold champagne is a pale cream rather than the
-        gold its name suggests. That is a property of the artwork, not of this gene: the
-        levels in the spec block are what champagne <em>does</em>, and the colours follow
-        from whatever chart they are resolved against. If gold champagne should be golder,
-        the change is a warmer band in the gradient's upper middle, not a constant here.
-        Check it in the <a href="lut-lab.html">LUT lab</a>. See
-        <a href="known-gaps.html#gap-49">gap #49</a>.
+        <code>KEEP_RED</code> has now moved twice in one day and in opposite directions
+        &mdash; 0.55, then 0.32 when the old chart made champagne barely distinguishable
+        from a chestnut, then back up to 0.69 once the gradient itself was replaced. That
+        is the lesson rather than the number: <strong>a constant here is only meaningful
+        against a particular chart</strong>, and this one is calibrated to the gradient
+        installed the same day. Re-measure in the <a href="lut-lab.html">LUT lab</a> before
+        moving it, rather than reasoning about it from the value alone.
     </p>
 </div>
 

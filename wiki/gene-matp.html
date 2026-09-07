@@ -28,29 +28,32 @@
 <div class="gene-preview" data-gene="horsegenetics.matp"></div>
 
 <div class="note">
-    <span class="label">Retuned 2026-09-06 &mdash; measured, not guessed</span>
+    <span class="label">Set to measured targets, 2026-09-06 &mdash; and read the units</span>
     <p>
-        The three dilutions were sitting far too low on the gradient. Read off the
-        <a href="lut-lab.html">LUT lab</a>'s footprint overlay, a &ldquo;near-white&rdquo;
-        cremello was resolving at black&nbsp;0.38 &mdash; half way down a chart whose
-        bottom half is dark &mdash; and classic pearl was barely lighter than the horse it
-        started from. Every <code>keepBlack</code> came down hard, because the black axis
-        is what pins a dilution to the dark end, and classic pearl's red came down with it
-        (owner: two pearls lighten a coat <em>substantially</em>, nearly to white).
+        The table below is <strong>pigment kept</strong>, so <code>0.80</code> means
+        <em>20% restricted</em>. The owner's targets were given the other way round and
+        are, per outcome: single cream <strong>20% red / 29% black</strong> restricted,
+        classic pearl <strong>20% / 60%</strong>, double dilute <strong>47% / 95%</strong>.
+        All three are exact on a chestnut, which is where a constant can be read directly
+        because a chestnut carries no black for the tint term to act on.
     </p>
     <p>
-        <strong>Single cream's red was deliberately left alone.</strong> The ask was for
-        cream to sit closer to the <em>top</em>, which is the black axis; cutting its red
-        as well walked palomino off the gradient's warm ramp and turned it grey. On the
-        gradient &mdash; installed as the default on 2026-09-06, and a markedly more
-        desaturated chart than the one these were tuned against &mdash; the outcomes
-        resolve to palomino <code>#E5DBC7</code>, buckskin body <code>#B1A590</code>,
-        smoky black <code>#5A4B3B</code>, classic pearl on a chestnut
-        <code>#EDEFEB</code>, and cremello <code>#F1F7FA</code>. Those are the
-        <em>gradient's</em> colours, not the gene's, and they moved the moment the art
-        did &mdash; palomino was <code>#DFBB81</code> gold on the previous chart and is a
-        pale cream on this one. The levels in the table are the gene; the hues are the
-        chart's, and the <a href="lut-lab.html">LUT lab</a> is where to see them.
+        <strong>These were recalibrated against the gradient installed the same day</strong>,
+        and had moved twice in opposite directions before that &mdash; a value here means
+        nothing except against a particular chart. Classic pearl is the clearest case: it
+        was pushed nearly to white to read as a dilution at all on the previous gradient,
+        and on this one it is a mild, mostly-eumelanin lightening that keeps its warmth.
+        On the current chart the outcomes resolve to single cream <code>#B69679</code>,
+        classic pearl <code>#B69679</code> and double dilute <code>#DFD3BB</code> on a
+        chestnut. Those are the <em>gradient's</em> colours; the levels are the gene.
+    </p>
+    <p>
+        <strong>One consequence worth knowing.</strong> Single cream's red now clamps on a
+        base that already carries maximum red: <code>0.80 + 0.30</code> tint is
+        <code>1.10</code>, so a <em>black</em> horse keeps 100% of its red rather than the
+        intended 80%. Harmless as it stands &mdash; a smoky black is meant to sit on the
+        chart's red edge &mdash; but it means the 20% target holds on a chestnut and not on
+        a black, and lowering <code>SINGLE_CREAM_TINT</code> is the lever if that matters.
     </p>
 </div>
 
@@ -83,7 +86,7 @@
 <tr><td><code>N/N</code></td><td><code>wild</code></td><td>No dilution.</td></tr>
 <tr><td><code>prl/N</code></td><td><code>pearl-carrier</code> <span class="tag">wild type</span></td><td>One pearl copy does nothing on its own &mdash; the horse looks undiluted and only its descendants show it. Breeding two carriers is how classic pearl appears.</td></tr>
 <tr><td><code>Cr/N</code></td><td><code>single-cream</code></td><td>Red cut hard and black cut a little &mdash; palomino on a chestnut, buckskin on a bay, smoky black on a black. The points go dark brown, never jet black.</td></tr>
-<tr><td><code>prl/prl</code></td><td><code>classic-pearl</code></td><td>Both pigments cut hard and evenly &mdash; a pale, bright coat close to white, over softly tinted points.</td></tr>
+<tr><td><code>prl/prl</code></td><td><code>classic-pearl</code></td><td>Black cut hard and red barely touched &mdash; a warm, lightened coat that keeps its colour rather than washing out.</td></tr>
 <tr><td><code>Cr/prl</code></td><td><code>double-dilute</code></td><td>The two complement: one of each acts as a double cream.</td></tr>
 <tr><td><code>Cr/Cr</code></td><td><code>double-dilute</code></td><td>Cremello, perlino or smoky cream &mdash; a near-white body over rusty points.</td></tr>
 </tbody>
@@ -136,9 +139,9 @@
 <table>
 <thead><tr><th>Outcome</th><th>keepRed</th><th>keepBlack</th><th>blackTint</th></tr></thead>
 <tbody>
-<tr><td><code>single-cream</code></td><td>0.45</td><td>0.44</td><td>0.30</td></tr>
-<tr><td><code>classic-pearl</code></td><td>0.17</td><td>0.16</td><td>0.13</td></tr>
-<tr><td><code>double-dilute</code></td><td>0.05</td><td>0.09</td><td>0.10</td></tr>
+<tr><td><code>single-cream</code></td><td>0.80</td><td>0.71</td><td>0.30</td></tr>
+<tr><td><code>classic-pearl</code></td><td>0.80</td><td>0.40</td><td>0.13</td></tr>
+<tr><td><code>double-dilute</code></td><td>0.53</td><td>0.05</td><td>0.10</td></tr>
 </tbody>
 </table>
 </div>
