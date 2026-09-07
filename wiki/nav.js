@@ -42,6 +42,7 @@
             title: "Natural genes",
             items: [
                 { href: "gene-sex.html", text: "Sex (X / Y)", kind: "natural" },
+                { href: "gene-diet.html", text: "Diet", kind: "natural" },
                 { href: "gene-extension.html", text: "Extension", kind: "natural" },
                 { href: "gene-agouti.html", text: "Agouti (bay / seal)", kind: "natural" },
                 { href: "gene-shade.html", text: "Shade (bay shade)", kind: "natural" },

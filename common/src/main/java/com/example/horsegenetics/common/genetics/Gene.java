@@ -156,6 +156,29 @@ public interface Gene {
     }
 
     /**
+     * <b>Wild-only: no named breed carries this at all.</b> False for almost
+     * every gene, and it is a statement about the <i>breeds</i>, not about the
+     * gene - a locus that is a curiosity of the unbred population rather than
+     * anything a registry ever selected for or tolerated.
+     *
+     * <p>{@link com.example.horsegenetics.common.breed.BreedFounder} forces a
+     * gene declaring this to its wild type on every breed, and leaves it out of
+     * the geometric magic draw, so it survives only on
+     * {@link com.example.horsegenetics.common.breed.Breeds#FERAL_MIXED} - which
+     * skips the breed path entirely and takes the base
+     * {@link Genotype#random} roll. A breed that <i>does</i> want it simply
+     * names the locus in its own pool, which is checked first.
+     *
+     * <p>It exists because the alternative is a hard-coded key list in
+     * {@code BreedFounder} beside the body-stat one, which is wrong the first
+     * time someone adds a gene like this and forgets it, and wrong silently:
+     * the failure is a Shire that eats lava, and nothing goes red.
+     */
+    default boolean feralOnly() {
+        return false;
+    }
+
+    /**
      * <b>Which chromosome this gene sits on.</b> Autosomal by default, which is
      * every gene in the mod but brindle.
      *

@@ -15,6 +15,7 @@ import com.example.horsegenetics.common.genetics.genes.LcorlGene;
 import com.example.horsegenetics.common.genetics.genes.LeopardGene;
 import com.example.horsegenetics.common.genetics.genes.LightGene;
 import com.example.horsegenetics.common.genetics.genes.CutieMarkGene;
+import com.example.horsegenetics.common.genetics.genes.DietGene;
 import com.example.horsegenetics.common.genetics.genes.Patn1Gene;
 import com.example.horsegenetics.common.genetics.genes.Patn2Gene;
 import com.example.horsegenetics.common.genetics.genes.LutGene;
@@ -101,6 +102,15 @@ public final class Genes {
 
     /** Sex, at priority 1 - the first gene resolved, and the only one that paints nothing. */
     public static final SexGene SEX = new SexGene();
+    /**
+     * <b>Diet</b> - what the horse will eat, at priority 5, ahead of every gene
+     * that paints. The order is the point: {@link HorseDiet#resolve} keeps the
+     * <b>last</b> {@link DietContribution} claim in {@link #codeOrder()}, so a
+     * later gene that says "this one cannot be fed at all" overrides the locus
+     * with no special case anywhere. {@link Gene#feralOnly()} keeps all twelve
+     * of its narrow diets out of every named breed.
+     */
+    public static final DietGene DIET = new DietGene();
     public static final ExtensionGene EXTENSION = new ExtensionGene();
     public static final AgoutiGene AGOUTI = new AgoutiGene();
     /**
@@ -251,7 +261,7 @@ public final class Genes {
 
     /** The hand-written genes. Order here is irrelevant - the registry sorts. */
     private static final List<Gene> BUILTINS = List.of(
-            SEX, EXTENSION, AGOUTI, SHADE, CHAMPAGNE, GREY, MATP,
+            SEX, DIET, EXTENSION, AGOUTI, SHADE, CHAMPAGNE, GREY, MATP,
             MAGIC_ZEBRA, PINK_HAIR, DUN, SILVER, MUSHROOM, BRINDLE, TIGER_EYE,
             NATURAL_ZEBRA, ROAN, TOBIANO,
             LEOPARD, EDNRB, KIT, MITF, PAX3,

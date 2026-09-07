@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diet &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="nav.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow natural">Natural gene <span class="sep">/</span> paints nothing</p>
+<h1>Diet &mdash; what the horse will eat</h1>
+<p class="lede">
+    Thirteen alleles. Twelve of them are <strong>narrow diets</strong> &mdash;
+    raw meat, fish, wheat, cake, potions, lava, one metal, one gem &mdash; each
+    needing <strong>two identical copies</strong> to show, against a wild type
+    that eats what any horse eats. A narrow diet refuses almost everything, and
+    what it does accept feeds it far better: a single gold bar takes a
+    metal-eater to full health however hurt it was.
+</p>
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd>horsegenetics.diet</dd></div>
+    <div><dt>Alleles</dt><dd>12 diets + <span class="allele">n</span> &mdash; see <code>DietGene</code></dd></div>
+    <div><dt>Outcomes</dt><dd>13, and <strong>all of them wild type</strong> &mdash; it paints nothing</dd></div>
+    <div><dt>Shows when</dt><dd>homozygous for one diet allele, and only then</dd></div>
+    <div><dt>Default allele</dt><dd>n</dd></div>
+    <div><dt>Priority</dt><dd><code>DietGene.PRIORITY</code> &mdash; ahead of every gene that paints</dd></div>
+    <div><dt>Founders</dt><dd>feral only, and <strong>never carriers</strong></dd></div>
+    <div><dt>Epigenetic draws</dt><dd>1 &times; nextFloat, and only for a variant diet</dd></div>
+    <div><dt>Model</dt><dd>genetics.Diet, genetics.HorseDiet, genetics.DietContribution</dd></div>
+    <div><dt>Items</dt><dd><code>neoforge/server/DietFoods</code> &mdash; deliberately off <code>common/</code></dd></div>
+</dl>
+
+<div class="note">
+    <span class="label">Unplayed</span>
+    <p>
+        The locus, its inheritance and the resolution channel are covered by
+        <code>DietGeneTest</code>. The <em>feeding</em> half &mdash; refusing an
+        apple, healing off a bar of gold, leaving a bucket behind &mdash; has
+        never been run in a game. See <a href="verification.html">verification</a>.
+    </p>
+</div>
+
+<h2>The trade</h2>
+
+<p>
+    A narrow diet is a genuine cost. Almost nothing on the ground will feed the
+    horse, and the mod&rsquo;s
+    <a href="horse-care.html">gated healing</a> is untouched by it, so a
+    lava-eater in a paddock still needs its lava carried to it. What it buys is
+    <strong>efficiency</strong>, and the numbers grade by breadth &mdash; the
+    only axis that makes the bargain legible.
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Diet</th><th>Roughly</th><th>Per item</th></tr></thead>
+<tbody>
+<tr><td>Anything edible</td><td>every food item there is</td><td>the least of any diet</td></tr>
+<tr><td>Cooked food</td><td>bread, cooked meat, stews, pies, cake</td><td>a moderate amount</td></tr>
+<tr><td>Raw meat / fish / raw vegetables / wheat</td><td>one food family each</td><td>a hay bale&rsquo;s worth</td></tr>
+<tr><td>Water</td><td>a water bucket</td><td>a hay bale&rsquo;s worth</td></tr>
+<tr><td>Cake / potions / lava</td><td>one item</td><td><strong>full health</strong></td></tr>
+<tr><td>One metal / one gem</td><td>one <em>particular</em> item</td><td><strong>full health</strong></td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    The values themselves live on <code>Diet</code> and are not repeated here.
+    <code>DietGene</code> builds each outcome&rsquo;s description <em>from</em>
+    them, so the sentence in the gene browser and the number it is about cannot
+    drift apart.
+</p>
+
+<h2 id="which">Which metal, which gem</h2>
+
+<p>
+    An ingot-eater does not eat metal in general &mdash; it wants
+    <em>one</em> metal, and a gem-eater one gem.
+    <code>Diet.variants()</code> says how many there are and the choice is a
+    single <code>nextFloat()</code> off the <strong>expressing copy&rsquo;s
+    epigenetic seed</strong>, so it is fixed for the horse&rsquo;s life and a
+    foal that inherits the copy inherits the craving. Two ingot-eating siblings
+    can want different bars.
+</p>
+
+<p>
+    <code>common/</code> names no item, so the count is the contract between the
+    two sides: <code>DietFoods</code> must list exactly
+    <code>variants()</code> items for each, and
+    <code>DietFoods.verify()</code> runs at startup and throws if it does not.
+    That check is there because the failure is <em>silent</em> &mdash; an
+    out-of-range index would give you a horse that never accepts anything and no
+    error anywhere.
+</p>
+
+<h2 id="wild">Feral only, and never a carrier</h2>
+
+<ul>
+    <li><strong>No named breed has any of it.</strong> <code>DietGene</code>
+        returns true from <code>Gene.feralOnly()</code>, which is new with this
+        gene: <code>BreedFounder</code> forces such a locus to its wild type on
+        every breed, and leaves it out of the geometric magic draw. A lava-eating
+        Shire is not a breed trait. A breed that genuinely wanted one could still
+        name the locus in its own pool &mdash; that check runs first.</li>
+    <li><strong>A founder is never a carrier.</strong> The founder table lists
+        <span class="allele">n/n</span> and the twelve <em>homozygotes</em> and
+        nothing between, so a feral horse that rolls into this gene has the diet
+        outright. The heterozygote exists only as something you breed.</li>
+    <li><strong>The random splice carrot cannot hand one to a foal.</strong> Its
+        <code>spliceTable()</code> is the mirror image &mdash;
+        <span class="allele">n/n</span> and the twelve <em>carriers</em>. An
+        unasked-for horse that only eats gold is a trap; a carrier is a gift.
+        The named Known Gene Splice carrot is heterozygous too, so a player who
+        wants the diet still has to breed for it.</li>
+</ul>
+
+<h2 id="override">Early on purpose, so it can be overridden</h2>
+
+<p>
+    A horse has one diet, so several genes may have a claim on it and exactly one
+    answer comes out. <code>HorseDiet.resolve</code> walks
+    <code>Genes.codeOrder()</code>, asks every <code>DietContribution</code> on
+    the way, and keeps the <strong>last</strong> claim &mdash; which is the
+    opposite of <a href="eye-colour.html">the eye channel&rsquo;s</a> ranked
+    contest, and is the point.
+</p>
+
+<p>
+    That is the whole reason this locus sits at priority
+    <code>DietGene.PRIORITY</code>, ahead of every gene that paints. Nothing
+    about the coat needs it there. What needs it is that a later gene saying
+    &ldquo;and <em>this</em> horse cannot be fed at all&rdquo; wins by sorting
+    after it, with no special case anywhere and nothing to register.
+    <code>Diet.NOTHING</code> exists for exactly that and is <strong>not</strong>
+    an allele of this locus.
+</p>
+
+<h2>What the game module does with it</h2>
+
+<p>
+    <code>HorseDietHandler</code> intercepts
+    <code>PlayerInteractEvent.EntityInteract</code> and does nothing at all
+    unless the horse has a special diet:
+</p>
+
+<div class="table-wrap">
+<table class="facts">
+<tbody>
+<tr><th>Not a feed attempt</th><td>Left alone entirely &mdash; a saddle, a lead, an empty hand. A special diet must never stop a horse being ridden.</td></tr>
+<tr><th>A vanilla love item</th><td>Left alone. <strong>The locus governs healing, not breeding</strong>; a horse that could never be bred would be a dead end rather than a curiosity. This is the one deliberate leak: a golden carrot heals a little on the way past.</td></tr>
+<tr><th>Something it eats</th><td>Heals, consumes the item (leaving a bucket or a bottle where there was one), awards double the ordinary feed bond, and cancels so vanilla does not also feed it.</td></tr>
+<tr><th>Anything else edible</th><td>Refused &mdash; smoke, no healing, and a message naming what the horse actually wants. A diet nobody can see is a guessing game; this one is a puzzle with a solution.</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="note">
+    <span class="label">Natural or magical? An open call</span>
+    <p>
+        The locus is declared <strong>natural</strong>. It paints in neither
+        phase, so the flag chooses nothing about the coat; it is declared that
+        way because dietary preference is a real heritable thing, and because a
+        magical gene would be thrown into <code>BreedFounder</code>&rsquo;s
+        magic lottery &mdash; which would hand breeds the very alleles
+        <code>feralOnly()</code> exists to keep off them. The lava and ingot
+        ends of it are frank fantasy, so if the natural/magical split ever means
+        more than which coat pass a gene paints in, this is the first gene to
+        revisit. It is a question on
+        <a href="verification.html">verification</a>.
+    </p>
+</div>
+
+<h2 id="carrot">Its gene carrot</h2>
+
+<div class="gene-carrot" data-gene="horsegenetics.diet"></div>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="horse-care.html">Horse care &mdash; gated healing and bond</a>
+        <a href="items.html">Items</a>
+        <a href="carrots.html">Carrots &amp; splices</a>
+        <a href="genetics-model.html">The genetics model</a>
+    </div>
+    Source: <code>common/genetics/genes/DietGene.java</code>,
+    <code>common/genetics/Diet.java</code>,
+    <code>common/genetics/HorseDiet.java</code>,
+    <code>neoforge/server/DietFoods.java</code>,
+    <code>neoforge/server/HorseDietHandler.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+<script defer src="gene-carrot/gene-carrot.js"></script>
+</body>
+</html>

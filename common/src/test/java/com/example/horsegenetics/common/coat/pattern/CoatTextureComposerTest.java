@@ -38,6 +38,22 @@ class CoatTextureComposerTest {
 
     private static final String CHESTNUT = override("extension=e/e");
     private static final String BAY = override("agouti=A/a");
+    /**
+     * A bay pinned to the <b>light</b> end of the shade range, for the two
+     * tests that compare a black point against the body.
+     *
+     * <p>This file's synthetic LUT has a pure-black corner, and the composer
+     * lifts pure black to about 80% opacity (see
+     * {@link #pureBlackIsLiftedToAbout80PercentOpacity}), so on <em>this</em>
+     * chart a black point renders at luma ~51 while a dark bay's body renders
+     * below it - the point is measurably lighter than the coat around it. On
+     * the real gradient it is not: black bakes to <code>#161515</code> and even
+     * a near-black bay body stays above it. So the claim "a bay has a black
+     * mane" is true of the mod and false of the fixture past about two thirds
+     * of the shade range, and the fixture is what is wrong. Pinning the shade
+     * keeps the assertion about the mane rather than about the chart.
+     */
+    private static final String BLOOD_BAY = override("agouti=A/a", "shade=ShL/ShL");
     private static final String WHITE = override("kit=W22/N");
     private static final String CHAMPAGNE_BLACK = override("champagne=Ch/c");
     private static final String CHAMPAGNE_BAY = override("agouti=A/a", "champagne=Ch/c");
@@ -351,7 +367,7 @@ class CoatTextureComposerTest {
 
     @Test
     void bayHasBlackManeAndDarkerLegBottoms() {
-        int[] img = compose(BAY, 12345L);
+        int[] img = compose(BLOOD_BAY, 12345L);
         assertTrue(brightness(img, Skin.ADULT, Part.MANE) < brightness(img, Skin.ADULT, Part.BODY));
         Bounds leg = HorseSkinGeometry.bounds(Part.LEFT_FRONT_LEG);
         long[] low = {0, 0};
@@ -431,7 +447,7 @@ class CoatTextureComposerTest {
 
     @Test
     void foalGetsTheSameTreatments() {
-        int[] foal = composeFoal(BAY, 12345L);
+        int[] foal = composeFoal(BLOOD_BAY, 12345L);
         assertTrue(brightness(foal, Skin.BABY, Part.TAIL) < brightness(foal, Skin.BABY, Part.BODY),
                 "bay foal tail should be black-ish vs the body");
         assertFalse(Arrays.equals(composeFoal(BLACK, 0L), foal), "foal coats vary by genotype");

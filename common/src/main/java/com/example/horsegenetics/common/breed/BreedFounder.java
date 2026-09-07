@@ -83,6 +83,13 @@ public final class BreedFounder {
                 g = g.with(breed.founderTable(key).draw(rng));
                 continue;
             }
+            if (gene.feralOnly()) {
+                // A curiosity of the unbred population - no registry ever kept
+                // it. Checked after the breed's own pool, so a breed that
+                // genuinely wants one can still name it.
+                g = g.with(wild(gene));
+                continue;
+            }
             if (gene.affectsCoat() || dependedOnByACoatGene(key)) {
                 g = g.with(wild(gene)); // visually unified - no unnamed pattern, no stray modifier
                 continue;
@@ -109,6 +116,9 @@ public final class BreedFounder {
             String key = gene.key();
             if (BODY_STAT_KEYS.contains(key)) {
                 continue;
+            }
+            if (gene.feralOnly()) {
+                continue;   // the loop above forced it wild; do not hand it back
             }
             if (breed.magicBlacklist().contains(key)) {
                 continue;

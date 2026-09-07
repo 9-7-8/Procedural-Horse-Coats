@@ -27,6 +27,13 @@ public final class GeneDescriptions {
                             + "inherited rather than rolled: X/X is a mare, X/Y a stallion, and Y/Y "
                             + "cannot occur. It never touches the coat; it sits first so a future "
                             + "sex-linked gene can read an already-decided sex."),
+            Map.entry("horsegenetics.diet",
+                    "What the horse will eat. Twelve narrow diets - raw meat, fish, wheat, cake, "
+                            + "potions, lava, one metal, one gem and the rest - each of which needs "
+                            + "two identical copies to show, against a wild type that eats ordinary "
+                            + "horse feed. A narrow diet refuses almost everything, and what it does "
+                            + "accept feeds it far better: a single gold bar takes a metal-eater to "
+                            + "full health. No breed carries any of it."),
             Map.entry("horsegenetics.extension",
                     "Whether the horse can make black pigment at all. E lets black through; e/e "
                             + "removes it entirely, leaving only red - a chestnut - on which every "

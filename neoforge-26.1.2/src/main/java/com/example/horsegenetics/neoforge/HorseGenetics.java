@@ -23,6 +23,10 @@ public final class HorseGenetics {
         // adds a segment to that code, so registering one late would invalidate
         // codes already read. See ModGeneSpecs.
         ModGeneSpecs.load();
+        // The diet locus names categories in common/ and items here; this is
+        // the only thing that checks the two agree, and the failure it catches
+        // is silent (a horse that would simply never accept anything).
+        com.example.horsegenetics.neoforge.server.DietFoods.verify();
         ModAttachments.ATTACHMENT_TYPES.register(modEventBus);
         ModDataComponents.register(modEventBus);
         ModBlocks.register(modEventBus);

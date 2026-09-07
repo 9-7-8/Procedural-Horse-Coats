@@ -32,6 +32,64 @@
     </p>
 </div>
 
+<h2 id="diet">&sect;0-Q &mdash; the diet locus (2026-09-07, NOT looked at)</h2>
+
+<p>
+    A new locus, <a href="gene-diet.html">diet</a>, with twelve narrow diets against an
+    ordinary wild type. <strong>Nothing about it has been run in a game.</strong> The
+    genetics half is covered by <code>DietGeneTest</code>; the feeding half is a new
+    handler (<code>HorseDietHandler</code>) written against 26.1.2 sources, and every item
+    id in <code>DietFoods</code> was read off those sources rather than seen in a hand.
+</p>
+
+<ul>
+    <li><strong>An ordinary horse must be completely unaffected.</strong> This is the
+        first thing to check and the only one that would be a regression rather than a
+        gap: feed a plain horse wheat, an apple, a golden carrot. Healing, temper, love
+        mode and bond should all behave exactly as they did yesterday. The handler returns
+        early for a <code>NORMAL</code> diet, so it should &mdash; but the ordering of
+        <code>EntityInteract</code> subscribers is worth confirming rather than assuming.</li>
+    <li><strong>Spawning one to test.</strong> No breed carries a diet allele, so the
+        custom spawn egg is the route: set the locus homozygous for the diet you want.
+        A wild feral-mixed herd carries them at about one in a hundred per diet.</li>
+    <li><strong>The refusal.</strong> Offer a special-diet horse an apple: smoke, no
+        healing, and a chat line naming what it does eat. Then offer it the right thing:
+        hearts, a horse-eating sound, and the item consumed.</li>
+    <li><strong>Buckets and bottles come back.</strong> A lava-eater fed a lava bucket
+        should leave an empty bucket in hand; a potion-eater a glass bottle. In creative
+        neither the item nor the container should move.</li>
+    <li><strong>Full heals really are full.</strong> Hurt a metal-eater badly, feed it one
+        bar of the metal it wants, and it should go straight to full &mdash; not heal by
+        some amount.</li>
+    <li><strong>Riding and saddling still work.</strong> The handler only intervenes for
+        something it recognises as food, but a special-diet horse that could not be
+        saddled would be the worst failure here and the easiest to miss.</li>
+    <li><strong>Breeding still works.</strong> Golden apples and golden carrots are
+        deliberately let through. Two special-diet horses should still breed.</li>
+</ul>
+
+<div class="note">
+    <span class="label">Questions for the owner</span>
+    <ol>
+        <li><strong>Should the diet be visible before you find out the hard way?</strong>
+            Right now the refusal message names the food, so the answer is discoverable
+            in one wasted apple. The gene browser also names it outright. Is that too
+            generous, or not generous enough (a tooltip on the horse screen)?</li>
+        <li><strong>Is one in a hundred per diet the right feral rate?</strong> Twelve
+            diets at 1% each means about one wild horse in eight has one. That is common
+            enough to meet on purpose and rare enough to be a find; it may be too common.</li>
+        <li><strong>Is the locus natural or magical?</strong> It is declared natural, and
+            <a href="gene-diet.html">its page</a> says why. A lava-eating horse is not
+            natural in any other sense; the flag currently decides only which coat pass a
+            gene paints in, and this one paints in neither.</li>
+        <li><strong>Should a narrow diet do anything but healing?</strong> It governs
+            healing only. Breeding is deliberately exempt so a special-diet line is not a
+            dead end, and the mod's own gated healing (water + food blocks nearby) is
+            untouched &mdash; which means a lava-eater still regenerates in a paddock with
+            hay in it. That may want revisiting.</li>
+    </ol>
+</div>
+
 <h2 id="bay-shade">&sect;0-P &mdash; the bay shade overhaul (2026-09-06, NOT looked at)</h2>
 
 <p>
