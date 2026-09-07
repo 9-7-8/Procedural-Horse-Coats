@@ -9,7 +9,6 @@ commit both files. It adds the two things a structure-block save cannot carry:
     the barn to a plains-village street connector (see BarnPoolInjector),
   * the two work posts stacked in the middle of that same road-facing end, and a
     villager either side of them - one becomes the cowboy, one the horseman,
-  * two beds in the back corners, so the horseman has somewhere to sleep, and
   * one villager beside that post, the same mechanism vanilla uses to put
     villagers in village/plains/villagers/*.nbt. He claims the post and becomes
     the cowboy; the next villager to claim it becomes the horseman.
@@ -265,42 +264,7 @@ for b in blocks:
             b.v['state'] = T_int(air_state)
             cleared += 1
 
-# ---- 4. beds ------------------------------------------------------------
-# The horseman is a completely ordinary villager and his brain already knows how
-# to go indoors at night, panic at a raid and hide - all of that is free.  What
-# it needs is a bed POI to claim, and a barn on the outskirts of a village can
-# easily be out of range of the nearest house's.  So the barn has its own:
-# he lives over the shop.
-#
-# The cowboy will not use one - he is an AbstractVillager, the same base as a
-# wandering trader, and has no schedule at all - which is why he gets ten times
-# the health and hostile mobs that ignore him instead.
-#
-# Two of them, in the back corners out of the doorway path, so a second horseman
-# has one too.  Foot then head, facing east: the head block is the one at +x.
-BEDS = {
-    (11, 1, 1): ('minecraft:red_bed', 'east', 'foot'),
-    (12, 1, 1): ('minecraft:red_bed', 'east', 'head'),
-    (11, 1, 5): ('minecraft:red_bed', 'east', 'foot'),
-    (12, 1, 5): ('minecraft:red_bed', 'east', 'head'),
-}
-
-for pos, (block_id, facing, part) in BEDS.items():
-    palette.append(T_cmp({
-        'Name': T_str(block_id),
-        'Properties': T_cmp({
-            'facing': T_str(facing),
-            'part': T_str(part),
-            'occupied': T_str('false'),
-        }),
-    }))
-    blocks[:] = [b for b in blocks if tuple(x.v for x in b.v['pos'].v[1]) != pos]
-    blocks.append(T_cmp({
-        'pos': T_ilist(list(pos)),
-        'state': T_int(len(palette) - 1),
-    }))
-
-# ---- 5. the people ------------------------------------------------------
+# ---- 4. the people ------------------------------------------------------
 # Two plain villagers, one either side of the stacked posts so neither is
 # standing in them.  Nothing else: one claims the table the ordinary way and
 # becomes the horseman, the other is taken on by the hitch and becomes the
@@ -329,5 +293,5 @@ out.write(struct.pack('>B', roottype)); w_str(out, rootname); w_payload(out, roo
 open(DST, 'wb').write(gzip.compress(out.getvalue(), mtime=0))
 print('wrote', DST, 'palette', len(palette), 'blocks', len(blocks),
       'jigsaw at', JIGSAW_POS, 'final_state', final_state,
-      'posts at', sorted(POSTS), 'beds', len(BEDS) // 2,
+      'posts at', sorted(POSTS),
       'cleared', cleared, 'blocks over', len(door_columns), 'door columns')

@@ -224,10 +224,16 @@ public final class CowboyHandler {
         // five with walls on every side, and a horse is nearly a block and a half
         // wide: placing a string of them in there put half of them in the walls.
         // He walks out to open ground first and the herd is made around him.
+        double outward = outwardHeading(level, barn);
         BlockPos paddock = findPaddock(level, barn);
         if (paddock != null) {
             cowboy.snapTo(paddock, cowboy.getYRot(), 0.0F);
         }
+
+        // Somewhere for the horseman to sleep that is not the barn - a stable
+        // with four double doors is a poor bedroom, and a villager only shuts
+        // the one he came through. See CowboyHouseBuilder.
+        CowboyHouseBuilder.raise(level, barn, outward);
 
         // The breed he is known for, settled before the first horse is made so
         // that horse can be one.

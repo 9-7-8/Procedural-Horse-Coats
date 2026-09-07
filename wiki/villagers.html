@@ -617,7 +617,7 @@
     &ldquo;Bob&rdquo; has not founded a horse family.
 </p>
 
-<h3 id="horseman-nights">The horseman keeps vanilla's brain, and a bed</h3>
+<h3 id="horseman-nights">The horseman keeps vanilla's brain, and gets a house</h3>
 
 <p>
     Nothing in this mod touches how the horseman behaves. He is a completely ordinary
@@ -628,10 +628,36 @@
 
 <p>
     What that brain needs is a <strong>bed POI to claim</strong>, and a barn on the
-    outskirts can easily be out of range of the nearest house's. So the barn has two of
-    its own, in the back corners out of the doorway path: he lives over the shop. The
-    cowboy will not use one &mdash; an <code>AbstractVillager</code> has no schedule at
-    all &mdash; which is why he gets ten times the health and hostile mobs that ignore
+    outskirts can easily be out of range of the nearest house's. Beds went into the barn
+    first and came straight back out: <strong>the barn is a building made of doors.</strong>
+    Four double doors and a two-block gap at either end, and a villager only ever shuts
+    the one he walked through &mdash; so a bed in there is a bed in a corridor with three
+    doors standing open.
+</p>
+
+<p>
+    So he gets a house. <code>server/CowboyHouseBuilder</code> stands one up when the
+    cowboy founds: <code>horsegenetics:cowboy_house</code>, a copy of vanilla's
+    <code>plains_small_house_1</code> with its jigsaw blocks resolved and a second bed
+    added (<code>tools/barn/bake-house.py</code>). Copied rather than referenced because
+    both of those changes are needed, and because a vanilla template is not ours to rely
+    on keeping its shape. One bed is all he needs; the second is for the look of the
+    place.
+</p>
+
+<p>
+    It goes on the far side of the barn from the village, 10&ndash;22 blocks out, on a
+    patch that is <strong>flat, clear and untouched</strong>: every column of the
+    footprint has to agree on its surface height and be open above it. That is a strict
+    test and it fails often, which is the intended trade &mdash; a run of candidates that
+    all fail means no house, and <strong>no house is a great deal better than a house
+    dropped through somebody's roof</strong>. It is also what stops a hitch planted in the
+    middle of a player's base from building on it.
+</p>
+
+<p>
+    The cowboy will not use a bed &mdash; an <code>AbstractVillager</code> has no schedule
+    at all &mdash; which is why he gets ten times the health and hostile mobs that ignore
     him instead.
 </p>
 
