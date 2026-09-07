@@ -88,6 +88,33 @@
     </p>
 </div>
 
+<h2 id="probe">Reading a point off the chart</h2>
+<p>
+    <strong>Click anywhere on the gradient</strong> and an amber mark pins that spot,
+    with the pigment pair that resolves there: how much red and black is
+    <em>left</em>, and how much a gene would have had to <em>restrict</em> to land
+    on it. The two are complements &mdash; 35% restricted is 65% left &mdash; and both
+    are shown because a gene's constants are written in what is kept while the
+    thing being reasoned about is usually what was taken away.
+</p>
+<p>
+    The box above it goes the other way. <strong>Type a colour</strong>
+    (<code>#B0A08A</code>, <code>B0A08A</code> and <code>#BA8</code> all work) and it
+    finds the nearest point on the chart and pins it the same way &mdash; so a colour
+    lifted off reference art becomes the pigment pair a gene would have to leave
+    behind to hit it. The search runs over whichever gradient is loaded, uploads
+    included, and it is honest about a miss: a chart that simply does not contain the
+    colour asked for says so rather than pinning a confident-looking point. Matching
+    is by <a href="https://en.wikipedia.org/wiki/Color_difference#sRGB">redmean</a>
+    rather than raw RGB distance, which matters on a desaturated chart where most of
+    the useful range is browns a plain Euclidean metric cannot tell apart.
+</p>
+<p>
+    The amber mark and the white crosshair answer different questions and will often
+    sit near each other: the white one is where the current horse's coat averages
+    out, the amber one is wherever you last pointed.
+</p>
+
 <h2 id="rows">The rows</h2>
 <p>
     <strong>Base coat</strong> is the three coats every other gene starts from &mdash;

@@ -26,6 +26,26 @@
 
 <h2 id="d2026-09-06">2026-09-06</h2>
 
+<h3 id="lut-probe-2026-09-06">Built 2026-09-06, NOT yet looked at: the LUT chart can be clicked, and searched by colour.</h3>
+
+<p>Owner: clicking the chart should show &ldquo;the amount of restriction of red and black in that location&rdquo;, and a box to type a colour code into that finds the closest point on the LUT and reports the same thing. Both mark the spot. <a href="lut-lab.html#probe">On the lab</a>; checklist <a href="verification.html#lut-lab">&sect;0-L</a>.</p>
+
+<ul>
+<li><strong>The inverse of the axis mapping went next to the mapping</strong>, not into the page. <code>GradientLut</code> already owned <code>chartX</code>/<code>chartY</code>; it now owns <code>redAtChartX</code>/<code>blackAtChartY</code> as well. Working the inversion out at the call site would have been a second statement of one fact, free to disagree - and it would disagree by <em>mirroring the chart</em>, which is the most plausible way to get this wrong and the hardest to catch, because a mirrored answer is still a plausible number in range. There is now a test for exactly that: more red must be to the left, more black must be downward.
+</li>
+<li><strong>Both numbers are shown, because a gene is written in one and reasoned about in the other.</strong> Constants like <code>keepRed</code> say what is <em>kept</em>; the question being asked while tuning is usually how much was <em>taken away</em>. They are complements, so the panel prints both rather than making the reader do it.
+</li>
+<li><strong>Colour &rarr; position is a search, not arithmetic, and the page says so.</strong> The chart is a painted image: the mapping is not invertible and not one-to-one, and a desaturated chart has whole regions of near-identical greys. So <code>GradientLut.nearest</code> scans and returns a <em>distance</em> along with the position, and a poor match is reported as a poor match instead of a confident pin. Pure green against the current chart comes back at distance 372 and is refused; a colour genuinely on the chart round-trips to within 4%.
+</li>
+<li><strong>Matching is redmean rather than raw RGB distance</strong> - three extra multiplies, and much better at the thing this is actually for. The new default gradient is largely low-saturation browns and greys, which is precisely where a plain Euclidean metric stops agreeing with an eye.
+</li>
+<li><strong>The amber mark is deliberately the same shape as the footprint's white crosshair.</strong> They answer different questions and will often sit close together - one is where this horse's coat averages out, the other is wherever the reader just pointed - so they are distinguished by colour rather than by form, and the amber one carries a dark halo so it survives on the pale corner of a chart.
+</li>
+<li><strong>Verified offline</strong>: all four corners invert exactly, restriction complements what is left, the mapping is not mirrored on either axis, three positions round-trip through the colour search, and every input form is handled - <code>#RRGGBB</code>, bare hex, <code>#RGB</code>, whitespace, lower case, junk, empty. The drawing is unlooked-at, as ever.
+</li>
+</ul>
+
+
 <h3 id="new-default-lut-2026-09-06">Built 2026-09-06, NOT yet looked at: a new default gradient, and the coat palette changed under every gene at once.</h3>
 
 <p>Owner supplied <code>horselut.png</code> and asked for it as the new default LUT. Installed into all three places the chart lives; <a href="known-gaps.html#gap-49">gap #49</a> restated against it. Checklist <a href="verification.html#dilution-retune">&sect;0-M</a>.</p>

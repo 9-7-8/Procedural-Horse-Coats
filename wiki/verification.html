@@ -190,6 +190,19 @@
         gradient with no residue.</li>
     <li><strong>A fully white horse</strong> (stack enough white) should say &ldquo;no
         pigment anywhere&rdquo; rather than drawing a box round nothing.</li>
+    <li><strong>Click the chart.</strong> An amber mark should pin exactly where the
+        pointer was &mdash; check it lands under the cursor and not offset, since the
+        canvas is drawn at a different size than its backing store and that is where a
+        click-mapping bug would show. The panel should then give red / black pigment left
+        and restricted.</li>
+    <li><strong>The colour box.</strong> Type <code>#B0A08A</code> and press Enter; a mark
+        should appear on a plausibly matching part of the chart. Try a colour the chart
+        cannot have (<code>#00FF00</code>) &mdash; it should warn that the match is a long
+        way off rather than pinning a confident point. Junk (<code>nonsense</code>) should
+        say it is not a colour.</li>
+    <li><strong>The two marks together.</strong> Amber (clicked) and white (centre of mass)
+        should be distinguishable where they overlap, and the amber one should survive on
+        a pale corner of the chart &mdash; it is drawn with a dark halo for that reason.</li>
     <li><strong>What &ldquo;Natural&rdquo; actually is.</strong> It reads the designer's
         <em>copy</em> of the gradient, which is currently out of sync with
         <code>common/</code> &mdash; see <a href="known-gaps.html#gap-48">gap #48</a>. Until
