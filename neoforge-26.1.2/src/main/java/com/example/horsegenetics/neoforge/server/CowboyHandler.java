@@ -15,9 +15,11 @@ import com.example.horsegenetics.neoforge.data.CowboyBrand;
 import com.example.horsegenetics.neoforge.data.HorseCareAttachment;
 import com.example.horsegenetics.neoforge.data.ModAttachments;
 import com.example.horsegenetics.neoforge.entity.Cowboy;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.goal.WrappedGoal;
@@ -25,6 +27,7 @@ import net.minecraft.world.entity.animal.equine.Horse;
 import net.minecraft.world.phys.AABB;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
 import org.jspecify.annotations.Nullable;
@@ -114,6 +117,31 @@ public final class CowboyHandler {
 
         HorseGenetics.LOGGER.info("{} set up at {} with {} horses",
                 cowboy.cowboyName(), cowboy.blockPosition(), cowboy.herdIds().size());
+        announce(cowboy, level);
+    }
+
+    /**
+     * In a dev build, say in chat that a cowboy just founded and where.
+     *
+     * <p>Founding happens the moment his chunk starts ticking, which is
+     * usually before the player is close enough to see the barn - so without
+     * this, "did one generate?" is a question you answer by reading the server
+     * log, and the answer scrolls past. Costs nothing in a real build, where
+     * {@code isProduction()} is true and this never fires.
+     */
+    private static void announce(Cowboy cowboy, ServerLevel level) {
+        if (FMLEnvironment.isProduction()) {
+            return;
+        }
+        BlockPos at = cowboy.blockPosition();
+        Component message = Component.literal("[Cowboy] ").withStyle(ChatFormatting.GRAY)
+                .append(Component.literal(cowboy.cowboyName() + " set up at "
+                                + at.getX() + ", " + at.getY() + ", " + at.getZ()
+                                + " with " + (cowboy.herdIds().size() - 1) + " horses for sale")
+                        .withStyle(ChatFormatting.YELLOW));
+        for (ServerPlayer player : level.players()) {
+            player.sendSystemMessage(message);
+        }
     }
 
     /**

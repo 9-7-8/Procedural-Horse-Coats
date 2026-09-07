@@ -42,6 +42,29 @@
     <a href="villagers.html">Villagers &amp; transfer papers</a>.
 </p>
 
+<h3 id="villagers-testworld">Start here: the test world now lands you in a village</h3>
+
+<p>
+    The &ldquo;Spawn Test Horse World&rdquo; button teleports you into the middle of the
+    nearest plains village on login and moves the world spawn there, so testing these two
+    villagers no longer starts with a hike. Two things to confirm the first time:
+</p>
+
+<ul>
+    <li><strong>Did it work, and how long did it take?</strong> You should get a grey
+        <code>[Test world]</code> line naming the village's coordinates. It is a
+        synchronous structure search over 100 chunks, so a noticeable pause on world
+        creation is expected; a <em>long</em> one (or a red &ldquo;no plains village
+        within 1600 blocks&rdquo;) means the search radius wants raising, or that seed
+        genuinely has no plains nearby - make a second world before concluding
+        anything.</li>
+    <li><strong>Watch for a yellow <code>[Cowboy]</code> line.</strong> In a dev build he
+        announces himself when he founds, which happens the moment his chunk starts
+        ticking - usually before you can see the barn. <strong>No line means no cowboy in
+        that village</strong>, which is expected some of the time (see below) and is the
+        cheapest possible way to tell. If you get one, it carries his coordinates.</li>
+</ul>
+
 <h3 id="villagers-barn">Does the barn generate at all?</h3>
 
 <ul>
@@ -3970,7 +3993,9 @@ gold-dust <code>emitter</code> shows, and the horse lights the area around it
     <li><strong>Debug world.</strong> The &ldquo;Spawn Test Horse World&rdquo;
         title-screen button puts the <strong>custom horse spawn egg on hotbar slot
         0</strong> (tools hay/carrot/stick/clock/paper/lead shifted to 1&ndash;6) and
-        <strong>one of every new item in the main inventory</strong> (slots 9+).</li>
+        <strong>one of every new item in the main inventory</strong> (slots 9+). Since
+        2026-09-07 it also drops you <strong>in the middle of the nearest plains
+        village</strong> - see &sect;<a href="#villagers-testworld">0-AC</a>.</li>
     <li><strong>Recipes.</strong> All shapeless, each takes at least one modded item.
         Spot-check in a crafting table:
         <ul>
