@@ -7,6 +7,7 @@ import com.example.horsegenetics.common.trait.Traits;
 import com.example.horsegenetics.common.trait.Viability;
 import com.example.horsegenetics.neoforge.data.HorseAncestryData;
 import com.example.horsegenetics.neoforge.data.HorseCareAttachment;
+import com.example.horsegenetics.neoforge.data.CowboyBrand;
 import com.example.horsegenetics.neoforge.data.ModAttachments;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -76,10 +77,32 @@ public final class HorsePaperInspectHandler {
             sb.append("\n *** this foal will not survive ***");
         }
         sb.append("\n bred by: ").append(record.bredBy().orElse("(wild)"));
-        sb.append("\n tamed by: ").append(record.tamedBy().orElse("(untamed)"));
+        sb.append("\n ").append(ownershipLine(horse, record));
         sb.append("\n sire: ").append(parentLabel(player, record.fatherId()));
         sb.append("\n dam: ").append(parentLabel(player, record.motherId()));
         return Component.literal(sb.toString());
+    }
+
+    /**
+     * Who this horse belongs to.
+     *
+     * <p>A <b>branded</b> horse is the cowboy's stock: nobody has ever put a rope
+     * on it, so {@code tamedBy} is legitimately empty - but reading "tamed by:
+     * (untamed)" beside a barn full of a named man's horses is wrong in the way
+     * that matters, because the animal plainly does have an owner and you plainly
+     * cannot take it. A branded horse reports <b>owned by</b> its breeder instead,
+     * which is the same person by construction: he only ever sells what he bred.
+     *
+     * <p>{@code tamedBy} itself is left alone. It means "who first got a rope on
+     * it", it is filled in for the buyer when a transfer paper is redeemed, and
+     * writing the cowboy into it would take that away from whoever actually did.
+     */
+    private static String ownershipLine(Horse horse, HorseRecord record) {
+        CowboyBrand brand = horse.getData(ModAttachments.COWBOY_BRAND.get());
+        if (brand != null && brand.cowboy().isPresent()) {
+            return "owned by: " + record.bredBy().orElse("a cowboy");
+        }
+        return "tamed by: " + record.tamedBy().orElse("(untamed)");
     }
 
     /** The natural-herd line: who leads it, what band it is, how big it is. */

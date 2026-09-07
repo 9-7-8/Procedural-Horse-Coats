@@ -20,16 +20,19 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.goal.WrappedGoal;
 import net.minecraft.world.entity.ai.goal.BreedGoal;
+import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.FollowParentGoal;
 import net.minecraft.world.entity.ai.goal.PanicGoal;
 import net.minecraft.world.entity.ai.goal.RandomStandGoal;
 import net.minecraft.world.entity.ai.goal.RunAroundLikeCrazyGoal;
 import net.minecraft.world.entity.ai.goal.RandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.TemptGoal;
+import net.minecraft.world.entity.animal.equine.AbstractHorse;
 import net.minecraft.world.entity.animal.equine.Horse;
 import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.level.levelgen.Heightmap;
@@ -161,6 +164,9 @@ public final class CowboyHandler {
     /** How far from the barn to look for the horseman when giving him his name. */
     private static final int HORSEMAN_SEARCH = 16;
 
+    /** Ticks between the cowboy's own state line, and between attempts to get him back on. */
+    private static final int COWBOY_REPORT_INTERVAL = 20;
+
     private static final PersonNameGenerator NAMES = PersonNameGenerator.cowboys();
 
     private CowboyHandler() {
@@ -183,11 +189,78 @@ public final class CowboyHandler {
             return;
         }
         clearTheMountsRivals(cowboy);
+        if (cowboy.tickCount % COWBOY_REPORT_INTERVAL == 0) {
+            keepHimMounted(cowboy, level);
+            reportCowboy(cowboy, level);
+        }
         if (cowboy.tickRestockClock()) {
             cowboy.setRestockCooldown(RESTOCK_INTERVAL + cowboy.getRandom().nextInt(RESTOCK_JITTER));
             restock(cowboy, level);
             nameTheHorseman(cowboy, level);
         }
+    }
+
+    /**
+     * Put him back on his horse if he has come off it.
+     *
+     * <p><b>Everything about this character is downstream of him being mounted</b>
+     * - the itinerary lives on the horse, so a cowboy on the ground has no
+     * routine at all: no ride home at dusk, no bolting from a zombie, and a lead
+     * horse that reverts to an ordinary animal wandering its patch. That is
+     * exactly the report this was written for, and the logs showed
+     * {@code CowboyMountGoal} never starting, which can only mean it never found
+     * a rider.
+     *
+     * <p>He can come off in more ways than the design admits: the bucking goal
+     * ejects passengers and was only taken off the mount recently, a chunk can
+     * unload the pair unevenly, and a founding that failed to place a mount at
+     * all leaves him standing in his paddock for ever with a herd he does not
+     * lead. {@link Cowboy#stopRiding()} refuses to dismount him, but refusing is
+     * not the same as recovering, and nothing was recovering.
+     *
+     * <p>So: once a second, if he is on foot and his lead horse is alive and
+     * loaded, he gets back on. Cheap, idempotent, and it repairs a world that is
+     * already wrong rather than only preventing the next one.
+     */
+    private static void keepHimMounted(Cowboy cowboy, ServerLevel level) {
+        if (cowboy.isPassenger()) {
+            return;
+        }
+        AbstractHorse mount = cowboy.mount(level);
+        if (mount == null || !mount.isAlive()) {
+            return;
+        }
+        boolean mounted = cowboy.startRiding(mount, true, false);
+        DebugAnnounce.log("Cowboy", cowboy.cowboyName() + " was on foot; remount "
+                + mount.getUUID() + " = " + mounted);
+    }
+
+    /**
+     * One line a second about the man himself, whether or not he is on a horse.
+     *
+     * <p>{@code CowboyMountGoal}'s own report only runs while that goal is
+     * running, so it is silent in precisely the case that needs explaining. This
+     * one runs off the cowboy's tick, which is the same tick that founds him, so
+     * it cannot be silent for a cowboy that exists at all.
+     */
+    private static void reportCowboy(Cowboy cowboy, ServerLevel level) {
+        if (!DebugAnnounce.enabled()) {
+            return;
+        }
+        Entity vehicle = cowboy.getVehicle();
+        AbstractHorse mount = cowboy.mount(level);
+        DebugAnnounce.log("Cowboy", String.format(
+                "%s founded=%s pos=%d,%d,%d home=%s vehicle=%s mountId=%s mountLoaded=%s "
+                        + "herd=%d live=%d stock=%d target=%d trading=%s",
+                cowboy.cowboyName(), cowboy.isFounded(),
+                cowboy.blockPosition().getX(), cowboy.blockPosition().getY(), cowboy.blockPosition().getZ(),
+                cowboy.home().map(Object::toString).orElse("none"),
+                vehicle == null ? "NONE" : vehicle.getType() + "/" + vehicle.getUUID(),
+                cowboy.mountId().map(Object::toString).orElse("none"),
+                mount != null,
+                cowboy.herdIds().size(), cowboy.liveHerd(level).size(),
+                sellableStock(cowboy, level).size(), cowboy.stockTarget(),
+                cowboy.isTrading()));
     }
 
     /**
@@ -224,6 +297,16 @@ public final class CowboyHandler {
         if (!(cowboy.getVehicle() instanceof Horse mount)) {
             return;
         }
+        // Something is stopping CowboyMountGoal while its rider is plainly still
+        // aboard, which leaves exactly one vanilla mechanism unaccounted for: a
+        // disabled control flag. GoalSelector stops any running goal whose flags
+        // are disabled, without consulting canContinueToUse - so a single stray
+        // disableControlFlag(MOVE) anywhere would look exactly like this. Vanilla
+        // only does it from the leash handling, which should not apply to a horse
+        // nobody has leashed, but re-enabling it costs a set removal a tick and
+        // takes the possibility off the table.
+        mount.goalSelector.enableControlFlag(Goal.Flag.MOVE);
+
         int before = mount.goalSelector.getAvailableGoals().size();
         mount.goalSelector.removeAllGoals(CowboyHandler::isRivalToTheItinerary);
         int removed = before - mount.goalSelector.getAvailableGoals().size();
@@ -247,7 +330,7 @@ public final class CowboyHandler {
      * <p>{@code FloatGoal} stays, because it is the goal that stops the pair
      * drowning, and the two look goals stay because they only turn his head.
      */
-    private static boolean isRivalToTheItinerary(net.minecraft.world.entity.ai.goal.Goal goal) {
+    private static boolean isRivalToTheItinerary(Goal goal) {
         return goal instanceof RunAroundLikeCrazyGoal   // bucks, and ejects the rider
                 || goal instanceof RandomStandGoal      // rears - and a rearing horse is isImmobile()
                 || goal instanceof TemptGoal            // anyone with wheat could walk off with him

@@ -188,6 +188,12 @@ node wiki/gene-creator/tools/check-parity.mjs  # ...and does the creator's JS ag
 Requires JDK 25 (auto-provisioned). Crash reports land in
 `neoforge-26.1.2/run/crash-reports/` - read the newest.
 
+**The owner's last play session is on disk - read it rather than asking.**
+`neoforge-26.1.2/run/logs/latest.log`, and `debug.log` beside it for more.
+A bug report of the shape "it still doesn't work" is usually answerable from
+there directly, and `server/DebugAnnounce` writes this mod's own diagnostics to
+both the log and chat so they survive the chat scrolling away.
+
 **Regenerate what you invalidate.** Every artefact below is derived, checked in,
 and fails *silently* when stale:
 

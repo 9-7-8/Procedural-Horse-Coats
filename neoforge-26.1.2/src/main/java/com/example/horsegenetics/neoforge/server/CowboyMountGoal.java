@@ -153,6 +153,16 @@ public final class CowboyMountGoal extends Goal {
         return rider() != null;
     }
 
+    /** Is this goal still in the horse's goal set at all? */
+    private boolean isRegisteredOn(AbstractHorse subject) {
+        for (WrappedGoal wrapped : subject.goalSelector.getAvailableGoals()) {
+            if (wrapped.getGoal() == this) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
      * Everything the goal selector will let us know about the horse, in one
      * line. The single most useful diagnostic there is for "why is it not going
@@ -211,8 +221,15 @@ public final class CowboyMountGoal extends Goal {
 
     @Override
     public void stop() {
+        // Both halves of GoalSelector's stop condition, spelled out. If the rider
+        // is non-null the goal wanted to keep going, and the selector stopped it
+        // anyway - which can only be a disabled control flag, and says so here
+        // rather than leaving it to be inferred from a log three days later.
         DebugAnnounce.log("Cowboy", "mount goal STOP on horse " + horse.getUUID()
-                + " (rider=" + rider() + ") - " + horseState());
+                + " canContinueToUse=" + canContinueToUse()
+                + " rider=" + rider()
+                + " stillRegistered=" + isRegisteredOn(horse)
+                + " - " + horseState());
         horse.getNavigation().stop();
     }
 
