@@ -197,16 +197,25 @@
 <h3 id="villagers-night">The night &mdash; the most likely thing to be broken</h3>
 
 <ul>
-    <li><strong>Does he run from a zombie at noon?</strong> The reported failure, twice,
-        and the second report was against a build that already had the first fix &mdash;
-        so <strong>watch the chat, not the horse</strong>. A dev build now prints a grey
-        <code>[Cowboy] &lt;name&gt;: PATROL / SHELTER</code> line every time he changes
-        what he is doing, and a red <code>FLEE</code> one when he bolts. A stream of
-        those means the goal is alive and the routine's rules are what is wrong;
-        <strong>total silence means the goal never runs at all</strong>, which is a
-        different bug and would also explain the barn and the doors. Spawn a zombie 10
-        blocks from him in the open at midday and report which of the two you see
-        (<a href="known-gaps.html#gap-59">gap 59</a>).</li>
+    <li><strong>At dusk, with zombies about, does he actually ride home?</strong> The
+        reported failure, third round. He used to treat any nearby monster as a reason
+        to run <em>away</em>, which after dark on an open plain is always true &mdash;
+        so the ride home never happened and the running was a dash from one zombie
+        towards the next. Now a threat at night makes him ride <em>for the barn</em> at
+        the bolting speed. Watch him from dusk: he should cross the ground fast, get in,
+        and the doors should shut <strong>once</strong> and stay shut.</li>
+    <li><strong>Do the doors stay shut all night?</strong> They used to flap every tick.
+        Stand outside and watch them for a minute after he is in.</li>
+    <li><strong>Does he keep his distance from a zombie at noon?</strong> By day there
+        is nothing to shut himself into, so a daytime monster is still a plain run-away.
+        He should start moving at about 16 blocks and not settle until it is nearly 30
+        off &mdash; one clean departure, not a dozen little dashes.</li>
+    <li><strong>Watch the chat while you do all three.</strong> A dev build prints a grey
+        <code>[Cowboy] &lt;name&gt;: PATROL / SHELTER</code> line on every duty change
+        and a red <code>FLEE</code> one when he bolts. A sane night is one
+        <code>SHELTER</code> at dusk and one <code>PATROL</code> at dawn; a stream of
+        them is the twitching coming back, and total silence would mean the goal is not
+        running at all (<a href="known-gaps.html#gap-59">gap 59</a>).</li>
     <li><strong>At dusk, do all four double doors open, and does the herd go in?</strong>
         Then do all four shut behind them? This is a lot of pathfinding through a
         two-block gap and it is the part most likely to half-work. <strong>Partial

@@ -39,10 +39,26 @@ import java.util.function.Predicate;
  *
  * <h2>Running, at any hour</h2>
  * If he is not {@link #sheltered} and something hostile is within
- * {@link #DANGER_RADIUS}, he runs - and that outranks both the patrol and the
- * ride home. He is {@link #sheltered} when he is <b>in the building with the
- * doors shut</b> and nothing hostile in there with him, and while he is
- * sheltered a zombie on the other side of the wall is not his problem.
+ * {@link #DANGER_RADIUS}, he gets away from it, and that outranks the patrol.
+ * He is {@link #sheltered} when he is <b>in the building with the doors
+ * shut</b> and nothing hostile in there with him, and while he is sheltered a
+ * zombie on the other side of the wall is not his problem.
+ *
+ * <p><b>Getting away is not always running away.</b> After dark the barn is the
+ * best cover there is, so a threat makes him ride <i>for it</i>, hard - the
+ * {@link Duty#SHELTER} plan simply carries the {@link Plan#threat} and the mount
+ * goal moves at its bolting speed. Only when home is no use - no home, too far
+ * to reach, or something already inside it - does he run blind.
+ *
+ * <p>That distinction is the fix for a bug that read as two: an unconditional
+ * "monster near, therefore {@link Duty#FLEE}" is <i>always</i> true on an open
+ * plain at night, so the ride home never got a look in. He never went to his
+ * barn, and what running he did was a dash away from one zombie straight
+ * towards the next. Both symptoms, one cause.
+ *
+ * <p>By <b>day</b> there is nothing to shut himself into - the barn stands open
+ * from dawn - so a daytime threat is plain {@link Duty#FLEE}: he keeps his
+ * distance and gets on with it when the thing has gone.
  *
  * <p><b>Not a night rule</b>, though it used to be, and being one was half the
  * bug: a zombie that walked out of a cave mouth at noon, a skeleton in the shade
@@ -78,8 +94,26 @@ public final class CowboyRoutine {
     /** He closes on the village centre only until he is this near the bell. */
     public static final int CENTRE_STANDOFF = 22;
 
-    /** How near a monster has to be, when he is not sheltered, to set him running. */
-    public static final int DANGER_RADIUS = 12;
+    /**
+     * How near a monster has to be, when he is not sheltered, to set him moving.
+     *
+     * <p>Deliberately further than a monster can reach him: he should be leaving
+     * before anything has touched him, which is what a man on a horse would do
+     * and what makes him read as wary rather than as slow to react.
+     */
+    public static final int DANGER_RADIUS = 16;
+
+    /**
+     * How far a monster has to get before he stops treating it as a threat.
+     *
+     * <p><b>Hysteresis, and the reason he used to twitch.</b> With one radius,
+     * crossing it in either direction flips the plan - so he bolted twelve
+     * blocks, stopped dead the instant he was clear, turned round, ambled back
+     * towards the thing chasing him and bolted again. A short dash repeated
+     * forever reads as "he barely flees". Leaving needs
+     * {@link #DANGER_RADIUS}; settling needs this.
+     */
+    public static final int SAFE_RADIUS = 28;
 
     /** How far to look for the village bell from the barn. */
     private static final int BELL_SEARCH = 96;
@@ -138,7 +172,10 @@ public final class CowboyRoutine {
      * @param goal  where to go, or empty when he is already where he wants to be
      *              (for {@link Duty#FLEE} this is always empty - the mount goal
      *              picks a direction away from {@link #threat})
-     * @param threat the monster to run from, only ever set for {@link Duty#FLEE}
+     * @param threat the monster he is getting away from, or {@code null}. Set on
+     *              {@link Duty#FLEE} always, and on {@link Duty#SHELTER} when the
+     *              ride home <i>is</i> the escape - which is what tells the mount
+     *              goal to make it at a gallop rather than a walk.
      */
     public record Plan(Duty duty, Optional<BlockPos> goal, @Nullable Monster threat) {
         static Plan going(Duty duty, BlockPos target) {
@@ -148,28 +185,48 @@ public final class CowboyRoutine {
         static Plan arrived(Duty duty) {
             return new Plan(duty, Optional.empty(), null);
         }
+
+        /** Is he moving because of something, rather than merely moving? */
+        public boolean urgent() {
+            return threat != null;
+        }
     }
 
     /**
      * @param from where he actually is - his mount's position while he is
      *             riding, which is a block or two off his own
+     * @param wasFleeing was the last plan a {@link Plan#urgent() urgent} one?
+     *             Only the hysteresis reads it - see {@link #SAFE_RADIUS}. The
+     *             mount goal remembers it, because the routine itself is
+     *             deliberately stateless.
      */
-    public static Plan plan(Cowboy cowboy, ServerLevel level, BlockPos from) {
+    public static Plan plan(Cowboy cowboy, ServerLevel level, BlockPos from, boolean wasFleeing) {
         BlockPos barn = cowboy.home().orElse(from);
+        boolean dark = level.isDarkOutside();
 
-        // Out in the open with something hostile near him: first question asked,
-        // whatever the hour. See the class comment.
-        if (!sheltered(level, barn, from)) {
-            Monster threat = nearestMonster(level, from, DANGER_RADIUS);
-            if (threat != null) {
+        // Something hostile, and no walls: the first question asked, whatever the
+        // hour. What he does about it is the second question, and it has two
+        // different answers - see the class comment.
+        Monster threat = sheltered(level, barn, from)
+                ? null
+                : nearestMonster(level, from, wasFleeing ? SAFE_RADIUS : DANGER_RADIUS);
+
+        if (dark) {
+            // Home is the answer to the night, threat or no threat - and a threat
+            // only makes him ride for it harder. He runs blind only when home is
+            // no use to him.
+            if (threat != null && !barnIsRefuge(level, cowboy, barn, from)) {
                 return new Plan(Duty.FLEE, Optional.empty(), threat);
             }
+            return new Plan(Duty.SHELTER,
+                    from.closerThan(barn, ARRIVED) ? Optional.empty() : Optional.of(barn),
+                    threat);
         }
 
-        if (level.isDarkOutside()) {
-            return from.closerThan(barn, ARRIVED)
-                    ? Plan.arrived(Duty.SHELTER)
-                    : Plan.going(Duty.SHELTER, barn);
+        // Daylight: the barn stands open, so there is nothing to shut himself
+        // into and keeping his distance is the whole of the plan.
+        if (threat != null) {
+            return new Plan(Duty.FLEE, Optional.empty(), threat);
         }
 
         // Daylight. Strayed a long way - a night of running, most likely - so
@@ -186,6 +243,20 @@ public final class CowboyRoutine {
             return Plan.arrived(Duty.PATROL);
         }
         return Plan.going(Duty.PATROL, standoffPoint(from, centre));
+    }
+
+    /**
+     * Is riding home a way out of this, or just a way to somewhere else?
+     *
+     * <p>Three things have to hold: he has a barn at all, it is near enough to
+     * be worth crossing open ground for, and there is nothing hostile in it
+     * already. The third is the one that matters - galloping home into a barn a
+     * zombie is standing in is the worst of both plans.
+     */
+    private static boolean barnIsRefuge(ServerLevel level, Cowboy cowboy, BlockPos barn, BlockPos from) {
+        return cowboy.home().isPresent()
+                && from.closerThan(barn, RETURN_RADIUS)
+                && level.getEntitiesOfClass(Monster.class, barnBox(barn)).isEmpty();
     }
 
     /** In the barn, doors shut, nothing hostile in there with him. */

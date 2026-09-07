@@ -323,20 +323,25 @@
     <td>Dark, and safe</td>
     <td>Rides to the barn, opening all four double doors from 16 blocks out so the
         herd can pour in behind him. Once he is in and every loaded herd member is
-        too, he shuts them all. They open again at first light. There is a
-        <strong>30-second deadline</strong> on waiting for stragglers: &ldquo;everybody
-        is in&rdquo; is a condition that can never come true &mdash; a horse pinned
-        behind a fence a villager built, one that pathed onto the far side of a hill
-        &mdash; and without a deadline one such horse holds all four doors open until
-        dawn and the barn is a shed with the lights on.</td>
+        too, he shuts them all, and <strong>they stay shut</strong> until first
+        light. There is a <strong>30-second deadline</strong> on waiting for
+        stragglers &mdash; &ldquo;everybody is in&rdquo; is a condition that can
+        never come true (a horse pinned behind a fence a villager built, one that
+        pathed onto the far side of a hill) and without a deadline one such horse
+        holds all four doors open until dawn. <strong>A monster does not change
+        this destination, only the pace</strong>: the plan carries the threat and
+        the ride home is made at the bolting speed.</td>
 </tr>
 <tr>
     <td><strong><code>FLEE</code></strong></td>
-    <td><strong>Any hour</strong>, not safe, monster within 12 blocks</td>
+    <td>Not safe, monster within 16 blocks, and <strong>home is no use</strong>
+        &mdash; daylight, or no barn, or too far from it, or something already
+        inside it</td>
     <td>Rides hard and randomly away from the nearest monster, faster than he moves
-        for any other reason, re-pathing every 8 ticks, until it is out of range.
-        This is asked <em>first</em> and outranks both the patrol and the ride
-        home.</td>
+        for any other reason, re-pathing every 8 ticks. If nothing in the sampled
+        arc is pathable he aims straight down the line away from it rather than
+        standing still. He does not settle until the thing is <strong>28</strong>
+        blocks off, not 16.</td>
 </tr>
 </tbody>
 </table>
@@ -352,12 +357,36 @@
 </p>
 
 <p>
-    <strong>Fleeing is not a night rule</strong>, though it was one, and being one was
-    the bug: the monster check sat inside an <code>isDarkOutside()</code> branch, so a
-    zombie that walked out of a cave mouth at noon, a skeleton in the shade of the
-    barn or a husk in the open all stood next to a man who ignored them. What makes
-    him run is a monster near him and no walls around him, and neither of those has
-    anything to do with the clock.
+    <strong>Reacting to a monster is not a night rule</strong>, though it was one, and
+    being one was the first bug: the check sat inside an <code>isDarkOutside()</code>
+    branch, so a zombie that walked out of a cave mouth at noon, a skeleton in the
+    shade of the barn or a husk in the open all stood next to a man who ignored them.
+    What makes him move is a monster near him and no walls around him, and neither of
+    those has anything to do with the clock.
+</p>
+
+<p>
+    <strong>But getting away is not always running away</strong>, and making it so was
+    the second bug &mdash; the one that read as two. An unconditional &ldquo;monster
+    near, therefore <code>FLEE</code>&rdquo; is <em>always</em> true on an open plain
+    after dark, so the ride home never got a look in: he never went to his barn, and
+    what running he did was a dash away from one zombie straight towards the next.
+    After dark the barn <em>is</em> the escape, so a threat now makes him ride for it
+    at the bolting speed rather than away from it; he only runs blind when home is no
+    use to him. By day, with the barn standing open, there is nothing to shut himself
+    into and keeping his distance is the whole plan.
+</p>
+
+<p>
+    Two smaller things came out of the same report. He <strong>starts moving at 16
+    blocks and does not settle until 28</strong>, because with one radius he bolted,
+    stopped dead the instant he was clear, turned round and ambled back towards the
+    thing chasing him &mdash; a short dash repeated forever, which is what &ldquo;he
+    barely flees&rdquo; looked like. And the barn's doors used to
+    <strong>flap</strong>: shutting up cleared the same flag the opening branch tested,
+    so the next tick opened them again, all night. He never read as having gone in, and
+    because an open doorway is not a wall he never counted as sheltered either, which
+    fed straight back into the monster check.
 </p>
 
 <p>

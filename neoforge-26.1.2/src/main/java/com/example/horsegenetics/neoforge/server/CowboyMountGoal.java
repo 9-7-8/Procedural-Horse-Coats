@@ -35,9 +35,11 @@ import java.util.EnumSet;
  * everybody is in. Both leaves, always - see that class for why one is useless.
  *
  * <h2>Night</h2>
- * Home at dusk, doors shut, and if that fails - never got inside, or something
- * got in with him - he runs, at a speed no ordinary goal uses, and does not
- * settle again until the thing chasing him is out of range.
+ * Home at dusk, doors shut. A monster on the way home does not change the
+ * destination, only the pace - {@link CowboyRoutine} hands back a
+ * {@link CowboyRoutine.Plan#urgent() urgent} shelter plan and the ride is made
+ * at {@link #FLEE_SPEED}. He only runs blind when home is no use to him, and
+ * does not settle again until the thing chasing him is well out of range.
  */
 public final class CowboyMountGoal extends Goal {
 
@@ -52,6 +54,9 @@ public final class CowboyMountGoal extends Goal {
 
     /** Re-path far more often while fleeing; the thing chasing him is moving too. */
     private static final int FLEE_REPATH_INTERVAL = 8;
+
+    /** How far the straight-line fallback aims when no sampled position pathed. */
+    private static final double FLEE_DISTANCE = 16.0;
 
     /** Roughly how often an idling pair picks a new spot to amble to. */
     private static final int IDLE_STROLL_INTERVAL = 200;
@@ -96,6 +101,15 @@ public final class CowboyMountGoal extends Goal {
     /** What he was doing last tick, for the dev-build announcement below. */
     private CowboyRoutine.@Nullable Duty lastDuty;
 
+    /**
+     * Was the last plan an urgent one? Fed back into
+     * {@link CowboyRoutine#plan} so a monster he has already started getting
+     * away from has to get properly clear before he settles - see
+     * {@link CowboyRoutine#SAFE_RADIUS}. Held here because the routine is a pure
+     * function and this is the one thing it needs remembered for it.
+     */
+    private boolean wasUrgent;
+
     public CowboyMountGoal(AbstractHorse horse) {
         this.horse = horse;
         // MOVE only. Holding JUMP as well would starve the horse's own FloatGoal,
@@ -133,6 +147,7 @@ public final class CowboyMountGoal extends Goal {
         strollCooldown = 0;
         doorScanCooldown = 0;
         doorHeldTicks = 0;
+        wasUrgent = false;
     }
 
     @Override
@@ -161,7 +176,9 @@ public final class CowboyMountGoal extends Goal {
             doorScanCooldown--;
         }
 
-        CowboyRoutine.Plan plan = CowboyRoutine.plan(cowboy, level, horse.blockPosition());
+        CowboyRoutine.Plan plan = CowboyRoutine.plan(
+                cowboy, level, horse.blockPosition(), wasUrgent);
+        wasUrgent = plan.urgent();
         announceDutyChange(cowboy, level, plan);
         switch (plan.duty()) {
             case FLEE -> flee(level, plan);
@@ -179,14 +196,32 @@ public final class CowboyMountGoal extends Goal {
         if (repathCooldown > 0 && !horse.getNavigation().isDone()) {
             return;
         }
-        repathCooldown = FLEE_REPATH_INTERVAL;
         if (!(horse instanceof PathfinderMob mob) || plan.threat() == null) {
             return;
         }
-        Vec3 away = DefaultRandomPos.getPosAway(mob, 20, 8, plan.threat().position());
-        if (away != null) {
-            horse.getNavigation().moveTo(away.x, away.y, away.z, FLEE_SPEED);
+        Vec3 threat = plan.threat().position();
+        Vec3 away = DefaultRandomPos.getPosAway(mob, 20, 8, threat);
+        if (away == null) {
+            // Nowhere pathable in the arc it sampled. Rather than stand still for
+            // another interval - which is most of what "he barely flees" looked
+            // like - aim straight down the line away from the thing and let the
+            // navigator get as far along it as it can.
+            away = straightAwayFrom(threat);
         }
+        if (horse.getNavigation().moveTo(away.x, away.y, away.z, FLEE_SPEED)) {
+            repathCooldown = FLEE_REPATH_INTERVAL;
+        }
+        // A failed path deliberately leaves the cooldown alone, so the next tick
+        // tries again instead of waiting out an interval it did nothing with.
+    }
+
+    /** A point {@link #FLEE_DISTANCE} blocks directly away from a threat. */
+    private Vec3 straightAwayFrom(Vec3 threat) {
+        Vec3 heading = horse.position().subtract(threat);
+        if (heading.horizontalDistanceSqr() < 1.0E-4) {
+            heading = new Vec3(1.0, 0.0, 0.0); // standing on top of it; any way will do
+        }
+        return horse.position().add(heading.normalize().scale(FLEE_DISTANCE));
     }
 
     private void shelter(Cowboy cowboy, ServerLevel level, CowboyRoutine.Plan plan) {
@@ -194,7 +229,18 @@ public final class CowboyMountGoal extends Goal {
 
         // Open up on the approach so the whole herd can pour in behind him,
         // rather than piling against a shut door while he squeezes through.
-        if (!barnStandingOpen && horse.blockPosition().closerThan(barn, DOOR_OPEN_RANGE)) {
+        //
+        // `!barnShutForNight` is load-bearing and was missing. Shutting up sets
+        // barnStandingOpen back to false, and this branch only ever asked whether
+        // the doors were standing open - so the very next tick, still on the
+        // SHELTER duty and still well within DOOR_OPEN_RANGE, it opened them
+        // again. The barn spent the night flapping: he read as never having gone
+        // in, the doors read as never having shut, and because an open doorway is
+        // not a wall he never counted as sheltered either, which fed straight back
+        // into the monster check. Once shut, they stay shut until patrol() opens
+        // them at first light.
+        if (!barnStandingOpen && !barnShutForNight
+                && horse.blockPosition().closerThan(barn, DOOR_OPEN_RANGE)) {
             CowboyDoors.setBarnDoors(level, barn, true, cowboy);
             barnStandingOpen = true;
             barnShutForNight = false;
@@ -202,7 +248,12 @@ public final class CowboyMountGoal extends Goal {
 
         if (plan.goal().isPresent()) {
             doorHeldTicks = 0;
-            moveTo(plan.goal().get(), TRAVEL_SPEED, REPATH_INTERVAL);
+            // Same destination either way; a threat behind him only changes the pace.
+            if (plan.urgent()) {
+                moveTo(plan.goal().get(), FLEE_SPEED, FLEE_REPATH_INTERVAL);
+            } else {
+                moveTo(plan.goal().get(), TRAVEL_SPEED, REPATH_INTERVAL);
+            }
             return;
         }
 
