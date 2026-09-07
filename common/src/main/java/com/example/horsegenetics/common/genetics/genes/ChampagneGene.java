@@ -55,15 +55,18 @@ public final class ChampagneGene implements Gene, EyeColorContribution {
     public static final int WILD_CHAMPAGNE_ONE_IN = 40;
 
     /**
-     * Pheomelanin kept. Champagne cuts red <b>hard</b> - it was 0.55 until
-     * 2026-09-06, on the reasoning that gold champagne should stay gold, and the
-     * LUT lab's footprint showed what that actually meant: a gold champagne
-     * resolving barely a third of the way across the chart from a plain
-     * chestnut, which is not a dilution anyone would name.
+     * Pheomelanin kept: <b>31% of red restricted</b>. Champagne is mostly a
+     * eumelanin dilution - it takes four fifths of the black and only a third of
+     * the red, which is what leaves a champagne warm rather than washed out.
+     *
+     * <p>Set to the owner's measured target against the gradient installed on
+     * 2026-09-06. It has moved twice in a day and in opposite directions, which
+     * is worth knowing before moving it again: a value here is only meaningful
+     * against a particular chart, and the chart changed under it.
      */
-    private static final float KEEP_RED = 0.32f;
-    /** Eumelanin kept - hard, but not so hard that a black horse ends up gold. */
-    private static final float KEEP_BLACK = 0.36f;
+    private static final float KEEP_RED = 0.69f;
+    /** Eumelanin kept: <b>80% of black restricted</b>, which is the bulk of what champagne does. */
+    private static final float KEEP_BLACK = 0.20f;
     /**
      * Fraction of a texel's eumelanin fed back in as pheomelanin. This is what
      * gives an <b>amber champagne</b> its chocolate points: bay's black points
