@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LUT lab &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="nav.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow">Tool <span class="sep">/</span> try a gradient on the real pipeline</p>
+<h1>LUT lab</h1>
+<p class="lede">
+    Drop a gradient in and see the horses the mod bakes against it. Every coat
+    below comes out of <code>common/</code> compiled to WebAssembly &mdash; the same
+    bytecode the game runs &mdash; with one thing changed: the colour lookup the
+    composer resolves pigment against is <strong>yours</strong>. Nothing is
+    uploaded anywhere; the file never leaves the browser.
+</p>
+
+<!-- The lab. One div and one script: everything in it - the base coats, which
+     combinations of each locus are worth a button, what each is called - is
+     asked of the mod at run time. See wiki/lut-lab/lut-lab.js. -->
+<div class="lut-lab"></div>
+
+<h2 id="how">What you are looking at</h2>
+<p>
+    A LUT is a 2D chart, not a ramp. <a href="pipeline.html#phase2">Phase&nbsp;2</a>
+    of the coat pipeline arrives at every pixel holding a pair of numbers &mdash; how
+    much red pigment survived phase&nbsp;1, and how much black &mdash; and reads the
+    colour off the chart at that coordinate. More red samples further
+    <strong>left</strong>; more black samples further <strong>down</strong>. So the
+    bottom-left corner is a true black, the top-left is the reddest chestnut, and the
+    top-right is unpigmented white. Sampling is bilinear, so the chart is a continuous
+    surface rather than a palette of swatches, and a hard edge in the artwork becomes a
+    hard edge on a horse.
+</p>
+<p>
+    Everything a dilution gene does, it does <em>before</em> this lookup. A cream
+    horse is not "a bay with cream painted over it"; it is a bay whose red pigment was
+    turned down, landing somewhere else on the same chart. That is why the dilution
+    rows are the useful ones here: they are the paths across the gradient that the
+    corner colours alone will not tell you about. A palette can have a beautiful black
+    and a beautiful chestnut and still fall apart in the middle, where every buckskin,
+    palomino, champagne and dun in the world lives.
+</p>
+
+<h2 id="rows">The rows</h2>
+<p>
+    <strong>Base coat</strong> is the three coats every other gene starts from &mdash;
+    black, bay and chestnut, straight from <code>BaseCoats.all()</code>. The
+    <strong>locus rows</strong> under it are the five dilution loci and one white
+    pattern, and they <em>stack</em>: champagne on a cream crosses the chart
+    differently than either does alone, and a gradient that survives one but not the
+    other is worth catching. Each row's buttons are whichever combinations the mod
+    says look different, so a locus that gains an allele gains a button here without
+    this page being edited.
+</p>
+<p>
+    Only one white pattern is offered, deliberately. Every white locus paints the same
+    thing &mdash; unpigmented white, which is off the chart entirely and cannot respond
+    to a palette &mdash; so tobiano stands in for all of them and a second one would be
+    a second copy of the same answer. Use it to check that your gradient's whites sit
+    happily next to a real white rather than reading as a dirty patch.
+</p>
+
+<h2 id="format">What makes a usable LUT</h2>
+<ul>
+    <li><strong>Any size.</strong> <code>GradientLut</code> normalises the coordinates,
+        so a 64&times;64 chart and a 2048&times;2048 one both work. The mod's own is
+        500&times;500.</li>
+    <li><strong>Any image the browser can decode</strong> &mdash; PNG is what the mod
+        ships and what a gene expects, but the lab will take whatever
+        <code>&lt;img&gt;</code> accepts.</li>
+    <li><strong>Corners matter most.</strong> Bottom-left is every black horse, top-left
+        every chestnut. The top-right is white and should stay near-white: it is where
+        an unpigmented pixel resolves, and a tinted corner there discolours every horse
+        on the page at once.</li>
+    <li><strong>The middle is where the work is.</strong> The mod's own gradient carries
+        a champagne-gold column near the horizontal centre; that is not decoration, it
+        is what a champagne resolves against.</li>
+</ul>
+
+<h2 id="shipping">Turning one into a real palette</h2>
+<p>
+    The lab swaps the gradient <em>in this page only</em> &mdash; it is a viewer, and
+    closing the tab is the undo. Shipping a palette to the game is the
+    <a href="gene-lut.html">LUT locus</a>: one more row in
+    <code>LutGene.VARIANTS</code> (an allele, a LUT key, and the texture laid out the
+    way the chart above is), and the expression table, carrier wording and wiring all
+    follow from that list. There is no per-gene "use this gradient" hook and there is
+    not going to be one &mdash; a horse has two copies of that chromosome and can shift
+    its palette at most one way at a time.
+</p>
+<p>
+    Replacing the <em>natural</em> gradient instead means editing
+    <code>redblackgradient.png</code> &mdash; and there are two copies of it. The real
+    one is
+    <code>common/src/main/resources/assets/horsegenetics/textures/coat/redblackgradient.png</code>;
+    the one under <code>wiki/horse-designer/assets/</code> is a <strong>copy</strong>,
+    written by <code>:web:bakeDesignerAssets</code>. Edit the wiki's copy and you will
+    change every horse on every wiki page, change no horse in the game, and lose the
+    edit the next time anyone re-bakes. Edit the one in <code>common/</code>, then
+    re-bake.
+</p>
+
+</article>
+</main>
+<script defer src="lut-lab/lut-lab.js"></script>
+</body>
+</html>

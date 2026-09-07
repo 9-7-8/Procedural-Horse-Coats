@@ -1,0 +1,297 @@
+/* The LUT lab. Loaded by lut-lab.js, not by the page, so dropping the lab
+   somewhere else stays one <div> and one <script>.
+
+   Everything here reads the wiki's own custom properties (styles.css) and is
+   scoped under .lut-lab, for the same reason the gene preview window is: an
+   article's styles must not reach into the lab, and the lab must not reach out. */
+
+.lut-lab {
+    margin: 1.6rem 0;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--panel);
+    overflow: hidden;
+}
+
+/* The chart beside the horse: you are comparing them, so they share a row until
+   there is no longer room for both. */
+.lut-lab .ll-grid {
+    display: grid;
+    grid-template-columns: 20rem minmax(0, 1fr);
+}
+
+@media (max-width: 860px) {
+    .lut-lab .ll-grid { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* ---- the chart panel -------------------------------------------------- */
+
+.lut-lab .ll-chart-panel {
+    padding: 0.7rem;
+    border-right: 1px solid var(--border-soft);
+    background: var(--panel-2);
+}
+
+@media (max-width: 860px) {
+    .lut-lab .ll-chart-panel {
+        border-right: none;
+        border-bottom: 1px solid var(--border-soft);
+    }
+}
+
+.lut-lab .ll-chart-panel.is-dropping {
+    background: rgba(148, 163, 184, 0.12);
+    outline: 2px dashed var(--accent);
+    outline-offset: -6px;
+}
+
+.lut-lab .ll-chart-head {
+    font-size: 0.75rem;
+    color: var(--text-faint);
+    margin-bottom: 0.45rem;
+}
+
+/* The corner labels sit on the chart rather than beside it - the whole point is
+   which colour is in which corner, and a legend three inches away breaks that. */
+.lut-lab .ll-chart-wrap {
+    position: relative;
+    line-height: 0;
+}
+
+.lut-lab .ll-chart {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    cursor: crosshair;
+}
+
+.lut-lab .ll-corner {
+    position: absolute;
+    font-size: 0.62rem;
+    line-height: 1;
+    padding: 0.15rem 0.3rem;
+    border-radius: 3px;
+    color: var(--text);
+    background: rgba(15, 23, 42, 0.72);
+    pointer-events: none;
+}
+.lut-lab .ll-tl { top: 0.3rem; left: 0.3rem; }
+.lut-lab .ll-tr { top: 0.3rem; right: 0.3rem; }
+.lut-lab .ll-bl { bottom: 0.3rem; left: 0.3rem; }
+
+.lut-lab .ll-axis {
+    position: absolute;
+    font-size: 0.6rem;
+    line-height: 1;
+    color: var(--text-faint);
+    pointer-events: none;
+}
+.lut-lab .ll-axis-x { bottom: -1rem; left: 0; }
+.lut-lab .ll-axis-y {
+    top: 0;
+    right: -0.35rem;
+    transform-origin: right top;
+    transform: rotate(90deg) translateX(0);
+}
+
+.lut-lab .ll-readout {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin: 1.5rem 0 0.6rem;
+}
+.lut-lab .ll-swatch {
+    width: 1rem;
+    height: 1rem;
+    border-radius: 3px;
+    border: 1px solid var(--border);
+    background: transparent;
+}
+.lut-lab .ll-hex {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    color: var(--text-dim);
+    background: none;
+    border: none;
+    padding: 0;
+}
+
+.lut-lab .ll-luts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+}
+
+/* An uploaded gradient is marked, so "is this the mod's or mine?" is never a
+   question you have to answer by remembering. */
+.lut-lab .ll-btn.is-uploaded::before {
+    content: "▲";
+    font-size: 0.6em;
+    margin-right: 0.3em;
+    opacity: 0.7;
+}
+
+.lut-lab .ll-upload {
+    display: block;
+    margin-top: 0.5rem;
+    text-align: center;
+    font-size: 0.78rem;
+    padding: 0.5rem;
+    color: var(--text-dim);
+    border: 1px dashed var(--border);
+    border-radius: 6px;
+    cursor: pointer;
+}
+.lut-lab .ll-upload:hover { color: var(--text); border-color: var(--accent); }
+.lut-lab .ll-upload input { display: none; }
+
+.lut-lab .ll-dims {
+    margin: 0.45rem 0 0;
+    font-size: 0.7rem;
+    color: var(--text-faint);
+}
+
+/* ---- the horse panel -------------------------------------------------- */
+
+.lut-lab .ll-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    padding: 0.6rem 0.7rem;
+    border-bottom: 1px solid var(--border-soft);
+    background: var(--panel-2);
+}
+
+.lut-lab .ll-group {
+    display: flex;
+    gap: 0.3rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.lut-lab .ll-btn {
+    font: inherit;
+    font-size: 0.82rem;
+    line-height: 1;
+    padding: 0.42rem 0.7rem;
+    color: var(--text-dim);
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    cursor: pointer;
+}
+.lut-lab .ll-btn:hover { color: var(--text); border-color: var(--accent); }
+.lut-lab .ll-btn.is-on {
+    color: var(--bg);
+    background: var(--accent);
+    border-color: var(--accent);
+    font-weight: 600;
+}
+
+.lut-lab .ll-dice {
+    margin-left: auto;
+    width: 2.1rem;
+    height: 2.1rem;
+    display: grid;
+    place-items: center;
+    padding: 0;
+    color: var(--text-dim);
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    cursor: pointer;
+}
+.lut-lab .ll-dice svg { width: 1.15rem; height: 1.15rem; display: block; }
+.lut-lab .ll-dice:hover { color: var(--accent); border-color: var(--accent); }
+.lut-lab .ll-dice:active { transform: rotate(-18deg); }
+
+/* The locus rows, under the base coats rather than in with them: they are a
+   second axis, and crowding them onto one line would read as more base coats. */
+.lut-lab .ll-mods {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    padding: 0.5rem 0.7rem;
+    border-bottom: 1px solid var(--border-soft);
+    background: rgba(148, 163, 184, 0.05);
+}
+.lut-lab .ll-mod {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+}
+.lut-lab .ll-modname {
+    min-width: 9.5rem;
+    font-size: 0.75rem;
+    color: var(--text-faint);
+}
+.lut-lab .ll-mod .ll-btn {
+    font-size: 0.74rem;
+    padding: 0.3rem 0.55rem;
+    font-family: var(--mono);
+}
+
+.lut-lab .ll-stage {
+    position: relative;
+    background: var(--bg-soft);
+}
+.lut-lab .ll-view {
+    height: 360px;
+    /* The canvas takes gestures the page would otherwise scroll on: a wheel over
+       the horse is a zoom, a drag is an orbit. */
+    touch-action: none;
+}
+.lut-lab .ll-view canvas { display: block; width: 100%; height: 100%; }
+
+@media (max-width: 700px) {
+    .lut-lab .ll-view { height: 260px; }
+}
+
+.lut-lab .ll-foot {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+    padding: 0.5rem 0.7rem;
+    border-top: 1px solid var(--border-soft);
+    background: var(--panel-2);
+    font-size: 0.78rem;
+    color: var(--text-faint);
+}
+
+/* Plain mono text, not the article's inline-code chip: this is a caption under
+   a picture, and .doc code would give it a border it does not want. */
+.lut-lab .ll-code {
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    color: var(--text-dim);
+    background: none;
+    border: none;
+    border-radius: 0;
+    padding: 0;
+    white-space: normal;
+}
+.lut-lab .ll-hint { margin-left: auto; }
+
+/* ---- before it is up, and when it cannot come up ---------------------- */
+
+.lut-lab .ll-boot {
+    padding: 1.4rem 1rem;
+    text-align: center;
+    color: var(--text-faint);
+    font-size: 0.85rem;
+}
+.lut-lab .ll-failed { color: var(--warn); }
+.lut-lab .ll-failed code { color: var(--text-dim); }
+
+.lut-lab .ll-missing {
+    margin: 0;
+    padding: 0.5rem 0.7rem;
+    border-top: 1px solid var(--border-soft);
+    font-size: 0.78rem;
+    color: var(--warn);
+}

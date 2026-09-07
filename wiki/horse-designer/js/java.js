@@ -44,7 +44,14 @@ window.HG = window.HG || {};
 
   var api = null;
 
-  /** Decode a PNG into ARGB ints, the layout every int[] in the pipeline uses. */
+  /**
+   * Decode a PNG into ARGB ints, the layout every int[] in the pipeline uses.
+   *
+   * <p>Exposed as HG.java.decode because the LUT lab (wiki/lut-lab/) hands the
+   * pipeline a gradient the reader picked off their own disk, and a second
+   * opinion about channel order is exactly the kind of thing that renders a
+   * whole page of horses blue and looks deliberate.
+   */
   function decode(url) {
     return new Promise(function (resolve, reject) {
       var img = new Image();
@@ -156,6 +163,7 @@ window.HG = window.HG || {};
 
   HG.java = {
     load: load,
+    decode: decode,
     checkGeometry: checkGeometry,
     get api() { return api; }
   };
