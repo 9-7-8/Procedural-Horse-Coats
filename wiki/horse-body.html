@@ -135,6 +135,40 @@
     </p>
 </div>
 
+<div class="note rule">
+    <span class="label">And no horse actually moves slower than a cow</span>
+    <p>
+        The genetic floor, <code>MIN_SPEED = 0.02</code>, is about a tenth of the
+        slowest vanilla horse &mdash; not a slow horse, a statue you can sit on. So
+        there is a second, entirely separate floor
+        (<code>server/HorseSpeedFloor</code>) applied to the
+        <strong>attribute</strong> and nowhere else, at the moment
+        <code>applyTraitsToEntity</code> writes it: a horse never presents with less
+        than a <strong>cow&rsquo;s</strong> walking speed, read off
+        <code>EntityType.COW</code> rather than written down, so it follows Minecraft
+        and any mod that retunes cows.
+    </p>
+    <p>
+        <strong>The genetics are untouched.</strong> A horse that resolves to
+        <code>0.02</code> still resolves to <code>0.02</code>, the family tree still
+        shows what its parents passed on, and the browser designer still shows the
+        genetic number &mdash; it is showing genetics. Only what the animal in the
+        world can be made to do changes. That separation is the point: the genome is
+        a model of inheritance and should not be bent to make the game playable, and
+        the attribute is the game and should not be allowed to become unplayable.
+    </p>
+    <p>
+        It is not a small floor, and that is a known trade rather than an oversight.
+        A cow is <code>0.2</code>; an all-wild-type horse here is
+        <code>BASE_SPEED = 0.1875</code>; vanilla rolls horses between
+        <code>0.1125</code> and <code>0.3375</code>. So the floor sits <em>above</em>
+        the average horse and flattens roughly the slower half of the range onto one
+        value. Breeding <em>away</em> from a slow line still takes work in the
+        genetics; what you no longer get is an animal you cannot ride. Retuning is
+        one expression in <code>HorseSpeedFloor.floor()</code>.
+    </p>
+</div>
+
 <h2 id="contributing">How a gene contributes</h2>
 
 <div class="codebox">
@@ -489,7 +523,7 @@ public interface AlleleRandomness {
 <table>
 <thead><tr><th>trait</th><th>attribute</th><th>notes</th></tr></thead>
 <tbody>
-<tr><td>speed</td><td><code>MOVEMENT_SPEED</code></td><td>base value</td></tr>
+<tr><td>speed</td><td><code>MOVEMENT_SPEED</code></td><td>base value, floored at a cow's walking speed &mdash; the only place that clamp is applied</td></tr>
 <tr><td>health</td><td><code>MAX_HEALTH</code></td><td>current HP clamped down, never healed for free on a reload</td></tr>
 <tr><td>jump</td><td><code>JUMP_STRENGTH</code></td><td>tracked for the first time</td></tr>
 <tr><td>scale</td><td><code>SCALE</code></td><td>vanilla scales the <b>model and the hitbox</b> from it</td></tr>

@@ -165,6 +165,11 @@ public final class HorseRecords {
      * it, so a pony is genuinely a smaller target and a dwarf genuinely a
      * shorter one, with no renderer work at all.
      *
+     * <p>Speed goes through {@link HorseSpeedFloor} on the way out, and it is the
+     * <b>only</b> place that clamp is applied. The genetics keep whatever they
+     * resolved to - see that class for why the two are deliberately different
+     * numbers.
+     *
      * @param fullHeal set current HP to the new max (a newborn foal). When
      *                 {@code false} - a reload, or a re-resolve after a config
      *                 change - current HP is only clamped <i>down</i>, so an
@@ -172,7 +177,7 @@ public final class HorseRecords {
      *                 with four hearts does not quietly gain any.
      */
     public static void applyTraitsToEntity(Horse horse, Traits traits, boolean fullHeal) {
-        setBase(horse, Attributes.MOVEMENT_SPEED, traits.speed());
+        setBase(horse, Attributes.MOVEMENT_SPEED, HorseSpeedFloor.clamp(traits.speed()));
         setBase(horse, Attributes.JUMP_STRENGTH, traits.jump());
         setBase(horse, Attributes.SCALE, traits.scale());
 

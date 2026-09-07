@@ -570,6 +570,61 @@
     post, as every vanilla job site is.
 </p>
 
+<p>
+    <strong>It is his only workstation and there is no second block.</strong> Worth
+    saying because the names do not: &ldquo;horse trader's post&rdquo; and
+    &ldquo;horseman&rdquo; are one trade, so a separate <em>horseman post</em> would be
+    a duplicate block claiming the same job. And he needs <strong>no house, no bed and
+    no structure of his own</strong> &mdash; a profession comes from a job site and
+    nothing else, so a post on bare ground next to an unemployed villager is the whole
+    of how one comes to exist.
+</p>
+
+<h3 id="post-at-the-barn">He comes with the barn</h3>
+
+<p>
+    Before this he only existed where a <em>player</em> had crafted a post and waited,
+    which meant an entire trade could be in a world and never be met. So
+    <code>CowboyHandler.raiseThePost</code> plants a post 6&ndash;9 blocks from the
+    cowboy's barn when the cowboy founds, and stands an unemployed adult villager
+    beside it. The barn is the obvious address: it is already where the horses are, the
+    two characters already share an overlay, and putting them together is what makes
+    &ldquo;the horse people are over there&rdquo; something a village says rather than
+    something the wiki says.
+</p>
+
+<p>
+    He <strong>takes</strong> the job rather than being handed it. Setting the
+    profession by hand would be a line shorter and would skip the only part of the
+    wiring that has ever been in doubt &mdash; whether the POI registered and whether
+    the <code>acquirable_job_site</code> tag merged. If the villager beside the post
+    stays a nitwit, that is the answer to a real question, and it is worth being told
+    it. Nothing about the post is required to succeed either: no ground for it means a
+    village with one trader instead of two, not a broken one.
+</p>
+
+<div class="note rule">
+    <span class="label">Dev shortcut: a clock levels him up</span>
+    <p>
+        His interesting trades are tiers 4 and 5, and the honest route to them is
+        several hundred emeralds of trading per horseman per test world. In a dev build
+        (<code>server/DebugHorsemanLevelUp</code>), right-clicking him with a
+        <strong>clock</strong> promotes him one tier and re-rolls his trades; five
+        clicks reach Master. The clock because it is already in the debug hotbar and
+        has no vanilla villager interaction to shadow. It is not consumed, and the
+        interaction is cancelled so the trade screen does not open on the same click.
+    </p>
+    <p>
+        This is the mod's only <a href="api-notes.html#access-transformer">access
+        transformer</a> line outside the pool append, and it is needed because the
+        obvious public route is a trap: raising the level with
+        <code>setVillagerData</code> works and re-rolling the trades to match does not
+        &mdash; <code>updateTrades</code> is protected and <code>getOffers</code> only
+        rebuilds a null list &mdash; so a &ldquo;Master&rdquo; would still be offering
+        Novice trades.
+    </p>
+</div>
+
 <h3 id="trade-table">The trade table</h3>
 
 <div class="table-wrap">

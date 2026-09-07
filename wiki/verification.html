@@ -32,6 +32,36 @@
     </p>
 </div>
 
+<h2 id="speed-floor">&sect;0-AD &mdash; No horse moves slower than a cow (2026-09-07, NOT looked at)</h2>
+
+<p>
+    Some horses were resolving to speeds slow enough to be unusable. The genetics are
+    unchanged &mdash; <code>MIN_SPEED</code> is still <code>0.02</code> &mdash; and
+    <code>server/HorseSpeedFloor</code> clamps the <strong>attribute</strong> instead,
+    at the one place it is written. Design:
+    <a href="horse-body.html">Speed, health, jump &amp; size</a>.
+</p>
+
+<ul>
+    <li><strong>Find or breed a slow horse and ride it.</strong> It should be visibly
+        slow and still be a horse. Nothing should now be slower than a cow standing next
+        to it &mdash; which is the test, literally: put one beside a cow and race
+        them.</li>
+    <li><strong>Does the info panel agree with your legs?</strong> The panel reads the
+        live attribute, so it should show the clamped number, never below
+        <code>0.200</code>.</li>
+    <li><strong>Do the genetics still say the true number?</strong> The family tree and
+        the browser designer show what the alleles resolve to, which for a very slow
+        horse should still be well under <code>0.200</code>. If those got clamped too,
+        the floor leaked into <code>common/</code> and it should not have.</li>
+    <li><strong>Is the flattening acceptable?</strong> The honest question. A cow is
+        <code>0.2</code> and a wild-type horse here is <code>0.1875</code>, so the whole
+        slower half of the range now reads the same. If ordinary horses have stopped
+        feeling different from each other, the fix is one expression in
+        <code>HorseSpeedFloor.floor()</code> &mdash; a fraction of a cow, or vanilla's
+        own <code>0.1125</code> minimum.</li>
+</ul>
+
 <h2 id="villagers">&sect;0-AC &mdash; The cowboy, the horseman &amp; transfer papers (2026-09-07, partly looked at)</h2>
 
 <p>
@@ -220,18 +250,27 @@
 <h3 id="villagers-horseman">The horseman</h3>
 
 <ul>
-    <li><strong>Place a Horse Trader's Post near an unemployed villager.</strong> Does he
-        take the job? This is the single point of failure for the whole profession: if
-        the POI tag did not merge, nothing else about him is reachable. He needs no
-        house, bed or custom structure &mdash; a profession comes from a job site and
-        nothing else &mdash; so any vanilla village will do, and so will a post on bare
-        ground next to a villager you brought there. <strong>Watch chat</strong>: a dev
-        build prints an aqua <code>[Horseman] &lt;name&gt; took the job at x, y, z</code>
-        the first time it sees one (<code>DebugHorsemanWatch</code>). Silence after a
-        minute or two means he did not take it, which is the POI registration or the
-        <code>acquirable_job_site</code> tag &mdash; not patience.</li>
-    <li><strong>Do all five tiers have trades?</strong> Level him up and check each tier
-        offers three. A tier that comes up empty means its
+    <li><strong>Is there a post beside the cowboy's barn, with a villager at it?</strong>
+        New: founding a cowboy now also plants a Horse Trader's Post 6&ndash;9 blocks
+        off and stands an unemployed villager beside it, so you should not have to
+        craft one to meet a horseman at all. A dev build prints an aqua
+        <code>[Horseman] a post is up ...</code> when it is planted, and a second aqua
+        line naming him when he <em>takes</em> the job
+        (<code>DebugHorsemanWatch</code>). <strong>Those two lines are the test.</strong>
+        The first with no second, after a minute or two, means the POI did not register
+        or the <code>acquirable_job_site</code> tag did not merge &mdash; not that he is
+        being slow. Neither line means no ground was found for the post, which is
+        allowed but should be rare.</li>
+    <li><strong>Or place a post yourself near an unemployed villager.</strong> Same
+        test, anywhere. He needs no house, bed or custom structure &mdash; a profession
+        comes from a job site and nothing else &mdash; so bare ground works.</li>
+    <li><strong>Does a clock promote him?</strong> Right-click him with the clock from
+        the debug hotbar: he should go up a tier, his trades should be re-rolled to
+        include the new one, and the trade screen should <em>not</em> open on that
+        click. Five clicks reach Master. If the tier number goes up but the offer list
+        does not grow, the access transformer did not apply.</li>
+    <li><strong>Do all five tiers have trades?</strong> Clock him to Master and check
+        each tier offers three. A tier that comes up empty means its
         <code>trade_set</code> or one of its <code>villager_trade</code> files failed to
         parse &mdash; which is logged, so check the server log.</li>
     <li><strong>Do the random gene trades produce a real carrot / paper?</strong> Buy one

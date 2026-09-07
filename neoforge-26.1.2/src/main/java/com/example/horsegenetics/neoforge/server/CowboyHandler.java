@@ -15,14 +15,18 @@ import com.example.horsegenetics.neoforge.data.CowboyBrand;
 import com.example.horsegenetics.neoforge.data.HorseCareAttachment;
 import com.example.horsegenetics.neoforge.data.ModAttachments;
 import com.example.horsegenetics.neoforge.entity.Cowboy;
+import com.example.horsegenetics.neoforge.block.ModBlocks;
+import com.example.horsegenetics.neoforge.village.ModVillagerProfessions;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.goal.WrappedGoal;
 import net.minecraft.world.entity.animal.equine.Horse;
+import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -47,7 +51,8 @@ import java.util.UUID;
  * server tick.
  *
  * <p>He is also <b>restocked</b> from here, on the same tick handler and for
- * the same reason - see {@link #restock}.
+ * the same reason - see {@link #restock}, and he founds with a
+ * {@linkplain #raiseThePost horseman next door}.
  *
  * <p>The tick and not {@link EntityJoinLevelEvent} for exactly the reason
  * {@link HorseFoundingTickHandler} documents at length: founding spawns horses,
@@ -84,6 +89,13 @@ public final class CowboyHandler {
 
     /** Attempts to find an open paddock before giving up and founding at the barn. */
     private static final int PADDOCK_TRIES = 60;
+
+    /** Nearest and furthest the horseman's post may be planted from the barn. */
+    private static final int POST_MIN = 6;
+    private static final int POST_MAX = 9;
+
+    /** Attempts to find ground for the post before giving up on having a horseman. */
+    private static final int POST_TRIES = 40;
 
     /**
      * Fraction of {@link #PADDOCK_TRIES} spent in the out-of-town fan before the
@@ -216,6 +228,8 @@ public final class CowboyHandler {
         for (int i = 0; i < herdSize; i++) {
             breedHorse(cowboy, level, rng, nextBreedFor(cowboy, level));
         }
+
+        raiseThePost(level, barn);
 
         HorseGenetics.LOGGER.info("{} set up at {} with {} horses",
                 cowboy.cowboyName(), cowboy.blockPosition(), cowboy.herdIds().size());
@@ -464,6 +478,102 @@ public final class CowboyHandler {
         }
         return level.noCollision(EntityType.HORSE.getSpawnAABB(
                 pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5));
+    }
+
+    // ------------------------------------------------------------------
+    // the horseman next door
+    // ------------------------------------------------------------------
+
+    /**
+     * Plant a <b>Horse Trader's Post</b> beside the barn and stand a villager at
+     * it, so a generated barn comes with a horseman as well as a cowboy.
+     *
+     * <h2>Why here</h2>
+     * The horseman is a profession, not a structure, so before this he existed
+     * only where a player crafted a post and waited - which meant the entire
+     * trade could be in a world and never be met. The barn is the obvious place
+     * for him: it is already where the horses are, the two characters already
+     * share a look, and standing them together is what makes "the horse people
+     * are over there" a thing a village says rather than a thing the wiki says.
+     *
+     * <h2>How he gets the job</h2>
+     * By <b>taking it</b>, the ordinary way. This places the block and spawns an
+     * unemployed adult villager next to it; vanilla's brain notices the POI,
+     * claims a ticket and assigns the profession within a few seconds. Setting
+     * the profession by hand here would be one line shorter and would skip the
+     * only part of the wiring that has ever been in doubt - whether the POI
+     * registered and whether the {@code acquirable_job_site} tag merged. If the
+     * villager stays a nitwit, that is the answer, and it is worth being told.
+     *
+     * <p>Nothing here is required to succeed. No ground for the post means no
+     * horseman at this barn, which is a village with one trader instead of two,
+     * not a broken one.
+     */
+    private static void raiseThePost(ServerLevel level, BlockPos barn) {
+        BlockPos spot = findPostSpot(level, barn);
+        if (spot == null) {
+            HorseGenetics.LOGGER.info("No ground for a horse trader's post near the barn at {}", barn);
+            return;
+        }
+        level.setBlockAndUpdate(spot, ModBlocks.HORSE_TRADERS_POST.get().defaultBlockState());
+
+        BlockPos stand = standingRoomBeside(level, spot);
+        if (stand == null) {
+            return; // the post is there; a villager will find it if one wanders by
+        }
+        Villager villager = EntityType.VILLAGER.create(level, EntitySpawnReason.STRUCTURE);
+        if (villager == null) {
+            return;
+        }
+        villager.snapTo(stand, level.getRandom().nextFloat() * 360.0F, 0.0F);
+        villager.setPersistenceRequired(); // he belongs to the barn, not to the wandering population
+        level.addFreshEntity(villager);
+
+        DebugAnnounce.sayAt(level, "Horseman", "a post is up, waiting for someone to take the job",
+                spot, ChatFormatting.AQUA);
+    }
+
+    /**
+     * Ground for the post: clear of the barn, at about its height, and with room
+     * for a villager to stand on at least one side of it.
+     *
+     * <p>Same ground test the paddock uses, and for the same reason - a heightmap
+     * in a village hits rooftops. A post on a roof would be a post no villager
+     * could ever reach.
+     */
+    private static @Nullable BlockPos findPostSpot(ServerLevel level, BlockPos barn) {
+        for (int attempt = 0; attempt < POST_TRIES; attempt++) {
+            double angle = level.getRandom().nextDouble() * Math.PI * 2.0;
+            int distance = POST_MIN + level.getRandom().nextInt(POST_MAX - POST_MIN + 1);
+            BlockPos ground = level.getHeightmapPos(
+                    Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                    barn.offset((int) Math.round(Math.cos(angle) * distance),
+                            0,
+                            (int) Math.round(Math.sin(angle) * distance)));
+            if (CowboyRoutine.insideBarn(barn, ground)) {
+                continue;
+            }
+            if (!standingOnGround(level, barn, ground) || !level.getBlockState(ground).isAir()) {
+                continue;
+            }
+            if (standingRoomBeside(level, ground) != null) {
+                return ground;
+            }
+        }
+        return null;
+    }
+
+    /** A block next to the post a villager can stand in, or {@code null}. */
+    private static @Nullable BlockPos standingRoomBeside(ServerLevel level, BlockPos post) {
+        for (Direction side : Direction.Plane.HORIZONTAL) {
+            BlockPos candidate = post.relative(side);
+            if (level.getBlockState(candidate.below()).isSolidRender()
+                    && level.getBlockState(candidate).isAir()
+                    && level.getBlockState(candidate.above()).isAir()) {
+                return candidate;
+            }
+        }
+        return null;
     }
 
     // ------------------------------------------------------------------
