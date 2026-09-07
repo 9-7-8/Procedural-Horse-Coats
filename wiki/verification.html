@@ -32,6 +32,126 @@
     </p>
 </div>
 
+<h2 id="villagers">&sect;0-AC &mdash; The cowboy, the horseman &amp; transfer papers (2026-09-07, NOT looked at)</h2>
+
+<p>
+    A whole gameplay subsystem, none of it seen in a world. It compiles, registers, and
+    boots a dedicated server clean &mdash; and the log line
+    <code>Cowboy barn added to minecraft:village/plains/terminators (1 of 5 draws)</code>
+    proves only that the pool append ran, not that a barn ever generates. Full design:
+    <a href="villagers.html">Villagers &amp; transfer papers</a>.
+</p>
+
+<h3 id="villagers-barn">Does the barn generate at all?</h3>
+
+<ul>
+    <li><strong>Start here, because everything else depends on it.</strong>
+        <code>/locate structure minecraft:village_plains</code>, fly out, and look for a
+        15&times;7 oak-and-cobble barn at the <em>end of a street</em>. Expect it in
+        <strong>most</strong> plains villages but not all &mdash; it is one draw in five
+        at each terminator slot, and the barn is big enough that many draws lose the
+        bounding-box check. Check three or four villages before concluding it is
+        broken.</li>
+    <li><strong>Is it at the edge?</strong> That is the whole claim of the placement. If
+        it keeps landing in the middle of town, the terminator theory is wrong and the
+        section needs rethinking, not tuning.</li>
+    <li><strong>Is it level with the street, and not floating or buried?</strong> The
+        jigsaw connector is at <code>y=1</code> on the assumption that a plains street's
+        surface is its own <code>y=0</code>. If the barn sits one block high or one low,
+        that assumption is off by one and the fix is in
+        <code>tools/barn/bake-barn.py</code>.</li>
+    <li><strong>Two barns in one village</strong> is expected occasionally. Only one
+        should have a cowboy. If both do, the lowest-UUID tie-break in
+        <code>CowboyHandler</code> is not firing.</li>
+</ul>
+
+<h3 id="villagers-cowboy">The cowboy himself</h3>
+
+<ul>
+    <li><strong>Is he mounted, and does he stay mounted?</strong> Try to shove him off;
+        try to hit the horse. He should only ever end up on foot if the horse dies.</li>
+    <li><strong>Has he got a name and a herd?</strong> Four to ten horses plus his mount,
+        all named, all with a real breed on the info panel, all with
+        <strong>Bred by &lt;his name&gt;</strong>. If any reads <em>Feral Mixed</em>, the
+        breed pick fell through.</li>
+    <li><strong>Do the horses follow the one he is riding?</strong> They should trail it
+        at a loose distance and graze, not stack on it. The mount is the herd lead, so
+        the horse browser should show them as one herd.</li>
+    <li><strong>Does he ride, and does he stay near home?</strong> Watch him for a day.
+        He should amble round the barn, and if he strays past about 40 blocks he should
+        head back toward the village bell &mdash; stopping around 22 blocks short of it,
+        not riding into the square.</li>
+</ul>
+
+<h3 id="villagers-night">The night &mdash; the most likely thing to be broken</h3>
+
+<ul>
+    <li><strong>At dusk, do all four double doors open, and does the herd go in?</strong>
+        Then do all four shut behind them? This is a lot of pathfinding through a
+        two-block gap and it is the part most likely to half-work. <strong>Partial
+        success is acceptable</strong> and worth recording precisely: does <em>he</em>
+        get in? Do most of them? Does one stand outside all night?</li>
+    <li><strong>Do the doors open again at dawn?</strong> And can he get out?</li>
+    <li><strong>Shut the doors on him by hand at noon.</strong> He should open them again
+        within a second. If he does not, he can be sealed in permanently.</li>
+    <li><strong>Put a zombie in the barn with him.</strong> He should bolt &mdash;
+        visibly faster than he ever moves otherwise &mdash; and keep running until
+        sunrise, then come home no matter how far he got. A monster <em>outside</em> the
+        shut barn should not spook him.</li>
+    <li><strong>Do village doors stay shut?</strong> He is supposed to have keys to his
+        own barn and nothing else. If riding past a house opens its door, the door code
+        is not staying in its box.</li>
+</ul>
+
+<h3 id="villagers-papers">Transfer papers</h3>
+
+<ul>
+    <li><strong>Craft a blank</strong> (8 paper round a horse hair) and check the tooltip
+        says <em>Bound to &lt;you&gt;</em>. A blank picked up any other way &mdash;
+        creative tab, <code>/give</code> &mdash; is <em>unbound</em> and should refuse to
+        sign; that is correct, not a bug.</li>
+    <li><strong>Sign one of your own horses</strong>, and confirm it refuses on a horse
+        you do not own.</li>
+    <li><strong>Redeem it on a second account, or give it back to yourself.</strong> The
+        horse should change owner and <strong>keep its breeder</strong>. Check the family
+        tree afterwards: attribution must still name whoever bred it.</li>
+    <li><strong>Try to tame one of the cowboy's horses the ordinary way</strong> &mdash;
+        climb on it repeatedly. It must refuse, with a message naming him, and
+        <strong>must not rubber-band you</strong>: the brand is synced so the client
+        refuses too. If you see yourself mount and then snap off, the sync is not
+        arriving.</li>
+    <li><strong>Buy a paper, then walk out and redeem it.</strong> Then check he no
+        longer offers that horse &mdash; even if you never redeem the paper.</li>
+</ul>
+
+<h3 id="villagers-horseman">The horseman</h3>
+
+<ul>
+    <li><strong>Place a Horse Trader's Post near an unemployed villager.</strong> Does he
+        take the job? This is the single point of failure for the whole profession: if
+        the POI tag did not merge, nothing else about him is reachable.</li>
+    <li><strong>Do all five tiers have trades?</strong> Level him up and check each tier
+        offers three. A tier that comes up empty means its
+        <code>trade_set</code> or one of its <code>villager_trade</code> files failed to
+        parse &mdash; which is logged, so check the server log.</li>
+    <li><strong>Do the random gene trades produce a real carrot / paper?</strong> Buy one
+        at tier 4 and confirm the carrot names a specific gene and actually works when
+        fed. Confirm across a few restocks that no <strong>legendary or mythic</strong>
+        gene ever appears.</li>
+    <li><strong>Saddle and lead</strong> at tier 1 &mdash; the reason a player walks into
+        a village looking for him at all.</li>
+</ul>
+
+<h3 id="villagers-art">Placeholder art</h3>
+
+<p>
+    Both transfer papers reuse <code>research_paper.png</code>; the Horse Trader's Post
+    wears vanilla's barrel textures. The cowboy and the horseman share one overlay,
+    <code>textures/entity/villager/profession/horseman.png</code> (the owner's recolour
+    of the farmer hat) over a plains-villager body &mdash; check the cowboy reads as the
+    same trade as the horseman, since that shared file is the only thing making it so.
+</p>
+
 <h2 id="kit-boosters">&sect;0-AB &mdash; KIT gains the boosters (2026-09-07, NOT looked at)</h2>
 
 <p>

@@ -1123,6 +1123,13 @@
     <li>A <code>collectedFrom</code> marker (player-made vs villager-sold) and the
         &ldquo;no Known Gene Splice carrot on a jar&rdquo; recipe restriction are both
         trivial once the above exists.</li>
+    <li><strong>This is what the <a href="villagers.html#horseman">horseman</a> is
+        missing.</strong> His trade table shipped without the two rows that wanted a
+        vial &mdash; selling a random rolled genotype, and buying a player-made one back
+        &mdash; because both need <code>collectedFrom</code> and a vial worth rolling.
+        His tier-5 buy row takes a stallion seed jar instead. Adding the rows later is
+        two JSON files and, for the buy-back, a <code>components</code> predicate on the
+        <code>wants</code> block, which the trade format already supports.</li>
 </ul>
 
 <h3>16.2 The later tiers</h3>
@@ -1221,70 +1228,6 @@
         one validator, one code path.
     </p>
 </div>
-
-<hr>
-
-<h2 id="villager">19. The Horse Master villager</h2>
-
-<p>
-    <strong>Settled that it exists</strong> &mdash; a villager profession with a
-    workstation, five tiers and sixteen trades, selling random Known Gene Splice carrots,
-    research papers and seed jars. <strong>Nothing is built.</strong> It is a good way to
-    get rare horse items to players; the &ldquo;removed as unthematic&rdquo; line in the
-    older design document is dead. Cut, legendary and mythic genes are never sold.
-</p>
-
-<h3>What it needs</h3>
-
-<ul>
-    <li><strong>A profession, a workstation and a POI.</strong> Horse Trader&rsquo;s
-        Post: 3 hair cloth + 2 braided rope + 2 fence. Spawns where horses do &mdash;
-        plains, savanna, meadow.</li>
-    <li><strong>Random trades cannot be plain offers.</strong> A vanilla trade offer is a
-        fixed <code>ItemStack</code>. &ldquo;A random rare carrot&rdquo;, &ldquo;a random
-        paper&rdquo;, &ldquo;a vial with a rolled genotype&rdquo; each need a custom
-        listing that rolls when the offer is <em>generated</em> &mdash; which means
-        <strong>the roll is per restock, not per purchase</strong>. That is already what
-        the documents want: their &ldquo;stock refreshes every in-game day&rdquo; is
-        vanilla restock. Say so and delete the separate stock system.</li>
-    <li><strong>Buying back player-made vials needs component matching</strong> on
-        <code>collectedFrom</code> (&sect;<a href="#ivf">16</a>), which a vanilla trade
-        cannot express either &mdash; the same custom listing does it.</li>
-    <li><strong>Random vials and papers need a pool per rarity tier</strong> that a
-        third-party gene joins automatically. Legendary and mythic are never sold, which
-        is a rarity check in the listing &mdash; and the reason the tier has to be a real
-        enum rather than a display string.</li>
-    <li><strong>The custom gossip type</strong> (<code>HORSE_TRADER</code>, for
-        discounts) is <em>unverified</em> &mdash; gossip types are not obviously
-        extensible. Check before designing around it, and fall back to vanilla gossip if
-        not.</li>
-    <li><strong>Use vanilla&rsquo;s tier names.</strong> The document&rsquo;s ladder is
-        Apprentice (Novice) / Journeyman / Adept / Expert / Master; vanilla&rsquo;s is
-        Novice / Apprentice / Journeyman / Expert / Master. Five either way, so it is a
-        naming fix &mdash; but &ldquo;Adept&rdquo; does not exist.</li>
-</ul>
-
-<h3>The trade table as specified</h3>
-
-<div class="table-wrap">
-<table>
-<thead><tr><th>Tier</th><th>Buys</th><th>Sells</th></tr></thead>
-<tbody>
-<tr><td><strong>1</strong></td><td>16 horse hair &rarr; 1 emerald</td><td>Hair bundle, 1 emerald</td></tr>
-<tr><td><strong>2</strong></td><td>8 hair bundles &rarr; 1 emerald</td><td>Basic whistle 2; blank ticket &times;2 for 1</td></tr>
-<tr><td><strong>3</strong></td><td>4 braided rope &rarr; 1 emerald</td><td>Unknown Epigenetic Splice 3, Unknown Gene Splice 4, Stabilizer 3, Magnifier 3</td></tr>
-<tr><td><strong>4</strong></td><td>2 hair cloth &rarr; 1 emerald</td><td>Common carrot 2, uncommon carrot 4, random vial (C/U) 3, paper (C/U) 5</td></tr>
-<tr><td><strong>5</strong></td><td>1 player-made vial &rarr; 5 emeralds</td><td>Rare carrot 8, epic carrot 12, random vial (R/E) 8, paper (R/E) 10</td></tr>
-</tbody>
-</table>
-</div>
-
-<p class="muted">
-    Prices, stock sizes and the &ldquo;more expensive than finding it&rdquo; balance
-    argument belong to <a href="philosophy.html">Philosophy</a>. What belongs here is
-    that <strong>hair buying is the early-game emerald tap</strong> and therefore the
-    number most likely to need retuning after the fact &mdash; keep it in config.
-</p>
 
 <hr>
 
@@ -1479,6 +1422,35 @@
 <p>
     Kept here so a later session does not relitigate them. These are answers, not work.
 </p>
+
+<h3>Settled 2026-09-07</h3>
+
+<ul>
+    <li><strong>The village horse trader is two people, not one.</strong> &sect;19
+        described one villager profession that would sell items. It shipped as a
+        <strong>horseman</strong> (that profession, exactly) and a <strong>cowboy</strong>
+        who is not a profession at all, because everything that makes the cowboy himself
+        &mdash; always mounted, home is a barn rather than a bed, stock is a live herd
+        rather than a trade table &mdash; is a fight with vanilla's villager brain, which
+        would dismount him every morning to stand at a workstation. Splitting them lets
+        each use the machinery it actually wants. See
+        <a href="villagers.html#not-a-profession">Villagers</a>.</li>
+
+    <li><strong>A horse is sold as a paper, not handed over.</strong> The alternative was
+        &ldquo;pay the trader, receive a horse&rdquo;, which is one click and leaves
+        nothing behind. A <a href="villagers.html#bearer">signed transfer paper</a> is a
+        bearer claim on one named animal that is still standing where it was: the buyer
+        has to go and collect it, and until they do the claim is an object they can trade
+        onward, sell at a markup, or lose. That is the entire reason the item exists in
+        this shape, and it is also what makes an in-village horse market possible between
+        <em>players</em>, which no amount of villager trading would have.</li>
+
+    <li><strong>Ownership moves; breeding does not.</strong> Every transfer path leaves
+        <code>bredBy</code> alone, so a horse bred by a cowboy still says so after four
+        owners and <code>HorseRecord.attribution()</code> keeps naming him in the family
+        tree. <code>tamedBy</code> is only ever written when blank, because it records
+        who first got a rope on the animal - also not a thing a sale changes.</li>
+</ul>
 
 <h3>Settled 2026-09-06</h3>
 

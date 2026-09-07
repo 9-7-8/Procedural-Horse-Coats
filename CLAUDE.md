@@ -67,6 +67,7 @@ the same change as the code, and never copy it back into here.
 | Gated healing, bond tiers, herds, the shared slow tick | `wiki/horse-care.html` |
 | Every item and every recipe; shearing; the spawn egg | `wiki/items.html` |
 | Breeding carrots, splices, the gene database, research papers | `wiki/carrots.html` |
+| The cowboy, the horseman, transfer papers, the barn | `wiki/villagers.html` |
 | Hay portals, the horse dimension, the pens | `wiki/horse-dimension.html` |
 | The data-driven gene file format (masks, ops, header) | `wiki/gene-format.html` |
 | The `effects` block - every verb, trigger, flag, and how to add one | `wiki/gene-effects.html` |
@@ -196,6 +197,7 @@ and fails *silently* when stale:
 | **anything in `common/` or `web/`** | `:web:bakeDesignerAssets` | `wiki/horse-designer/wasm/web.wasm` |
 | `spec/`, `SpecSchema`, `AbilityType`, `HorseSkinGeometry`, the noise classes | `:common:bakeSpecFixtures` **then** `check-parity.mjs` | `wiki/gene-creator/fixtures/expected.json` |
 | the coat PNGs or the name tables | `:common:bakeCreatorAssets` + `:web:bakeDesignerAssets` | the regenerated assets |
+| `tools/barn/cowboy_barn.source.nbt` | `python neoforge-26.1.2/tools/barn/bake-barn.py` | `data/horsegenetics/structure/cowboy_barn.nbt` |
 
 **Re-baking is part of the parity check, not a chore beside it.**
 `expected.json` is a checked-in snapshot of the Java, so a stale one makes

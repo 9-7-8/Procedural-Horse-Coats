@@ -15,8 +15,9 @@
 <p class="eyebrow">Gameplay <span class="sep">/</span> items</p>
 <h1>Items, recipes &amp; the hair economy</h1>
 <p class="lede">
-    Every item the mod registers, how you get it, and what it does. Twenty items in
-    one <strong>Horse Genetics</strong> creative tab, all built on one material
+    Every item the mod registers, how you get it, and what it does. One
+    <strong>Horse Genetics</strong> creative tab holds all of them
+    (<code>ModItems.TAB_ITEMS</code>), and nearly all are built on one material
     &mdash; <strong>horse hair</strong>, which you get by shearing a horse. This page
     is the source of truth for the item roster and the recipes; the systems the items
     plug into are documented on their own pages and linked from each row.
@@ -25,7 +26,10 @@
 <div class="note">
     <span class="label">House rules for every recipe here</span>
     <ul>
-        <li><strong>Shapeless</strong>, always &mdash; the shapes are not the puzzle.</li>
+        <li><strong>Shapeless</strong>, with exactly one exception: the
+            <a href="#transfer-papers">blank transfer paper</a> is a ring of eight paper
+            around a horse hair, and the ring <em>is</em> the idea. Everywhere else the
+            shapes are not the puzzle.</li>
         <li><strong>At least one modded ingredient</strong> in every recipe, and every
             output is a modded item, so nothing can collide with a vanilla or
             third-party recipe.</li>
@@ -237,6 +241,59 @@
 </table>
 </div>
 
+<h2 id="transfer-papers">Transfer papers</h2>
+
+<p>
+    How a horse changes hands. Full mechanics on
+    <a href="villagers.html#papers">Villagers &amp; transfer papers</a>; this is the
+    item roster.
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Item</th><th>Recipe</th><th>What it carries</th></tr></thead>
+<tbody>
+<tr>
+    <td><strong>Blank transfer paper</strong></td>
+    <td><strong>Shaped:</strong> 8 &times; paper around 1 &times; horse hair</td>
+    <td><code>paper_bearer</code> &mdash; the crafter, stamped on at the bench</td>
+</tr>
+<tr>
+    <td><strong>Signed transfer paper</strong></td>
+    <td>Right-click a horse you own with a blank; or buy one from the cowboy</td>
+    <td><code>horse_deed</code> &mdash; the horse's id, name, breed and breeder</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<ul>
+    <li><strong>One blank per craft.</strong> Eight paper and a hair is a deliberate
+        act, not a stack you carry around.</li>
+    <li><strong>A signed paper never stacks.</strong> Two of them are never the same
+        item, and a stack could not show you which horse is which. Its
+        <em>name</em> is the horse's name, so a cowboy's merchant window reads as a
+        list of horses rather than a list of identical papers.</li>
+    <li><strong>The blank is bound; the signed one is not.</strong> Only the bound
+        player can sign, and only against a horse they currently own. After that it is
+        a bearer instrument and anyone may redeem it.</li>
+</ul>
+
+<h2 id="post">Horse Trader's Post</h2>
+
+<p>
+    The <a href="villagers.html#horseman">horseman's</a> workstation, and the only
+    block on this page. <strong>3 hair cloth + 2 braided rope + 2 fence</strong>
+    (shapeless; any <code>#minecraft:fences</code>). Placing one near an unemployed
+    villager gets you a horseman; one villager per post.
+</p>
+
+<p>
+    It is a plain block with no behaviour of its own &mdash; everything happens because
+    it backs the <code>horsegenetics:horse_traders_post</code> POI. Its texture is
+    vanilla's barrel, as a placeholder.
+</p>
+
 <h2 id="egg">The custom horse spawn egg</h2>
 
 <p>
@@ -275,7 +332,8 @@
 
 <p>
     <code>item/ModCreativeTabs</code> registers one <strong>Horse Genetics</strong> tab
-    holding all twenty items. The custom spawn egg additionally appears in vanilla&rsquo;s
+    holding every item in <code>ModItems.TAB_ITEMS</code>. The custom spawn egg
+    additionally appears in vanilla&rsquo;s
     Spawn Eggs tab. In a dev build, the <em>Spawn Test Horse World</em> button&rsquo;s
     starting inventory contains one of every item.
 </p>
@@ -290,6 +348,8 @@
     <li><strong>The tickets do nothing</strong>, and the stall system they would consume
         has no other consumer either.</li>
     <li><strong>The sheared look</strong> is unbuilt (above).</li>
+    <li><strong>Art.</strong> Both transfer papers reuse the research-paper texture, and
+        the Horse Trader's Post wears vanilla's barrel.</li>
     <li>There is no <strong>double-wide gate</strong> block, which the design document
         lists as a braided-rope product.</li>
     <li>The <code>known_gene_splice_carrot</code> is <strong>one generic item</strong>

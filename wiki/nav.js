@@ -132,6 +132,7 @@
                 { href: "horse-care.html", text: "Horse care: healing, bond, herds", kind: "core" },
                 { href: "carrots.html", text: "Breeding carrots & the gene database", kind: "magical" },
                 { href: "items.html", text: "Items, recipes & the hair economy", kind: "core" },
+                { href: "villagers.html", text: "Villagers & transfer papers", kind: "core" },
                 { href: "horse-dimension.html", text: "Hay portals & the horse dimension", kind: "core" }
             ]
         },

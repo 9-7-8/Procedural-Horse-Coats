@@ -1,16 +1,15 @@
 {
-  "type": "minecraft:crafting_shaped",
+  "type": "minecraft:crafting_shapeless",
   "category": "misc",
-  "pattern": [
-    "CCC",
-    "RFR",
-    "RFR"
+  "ingredients": [
+    "horsegenetics:hair_cloth",
+    "horsegenetics:hair_cloth",
+    "horsegenetics:hair_cloth",
+    "horsegenetics:braided_rope",
+    "horsegenetics:braided_rope",
+    "#minecraft:fences",
+    "#minecraft:fences"
   ],
-  "key": {
-    "C": "horsegenetics:hair_cloth",
-    "R": "horsegenetics:braided_rope",
-    "F": "#minecraft:fences"
-  },
   "result": {
     "id": "horsegenetics:horse_traders_post"
   }

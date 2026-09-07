@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Villagers &amp; transfer papers &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="nav.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow">Gameplay <span class="sep">/</span> villagers</p>
+<h1>Villagers &amp; transfer papers</h1>
+<p class="lede">
+    Two people who trade in horses, and the item that lets a horse be sold without
+    either of them touching it. The <strong>cowboy</strong> lives in a barn on the
+    edge of a plains village, never gets off his horse, and sells his herd as
+    <strong>transfer papers</strong>; the <strong>horseman</strong> is an ordinary
+    villager profession selling tack and gene goods from a workstation. This page is
+    the source of truth for all three. The items themselves are listed on
+    <a href="items.html">Items &amp; recipes</a>; the genetics of the horses the
+    cowboy breeds are ordinary <a href="breeds.html">breed founders</a>.
+</p>
+
+<div class="note">
+    <span class="label">Not verified in game</span>
+    <p>
+        Everything on this page compiles, registers, and boots a dedicated server
+        clean. <strong>None of it has been seen in a world.</strong> The checklist is
+        <a href="verification.html#villagers">verification &sect;0-AC</a>.
+    </p>
+</div>
+
+<h2 id="papers">Transfer papers</h2>
+
+<p>
+    A horse changes hands by <strong>paper, not by proximity</strong>. There are two
+    items and three moments.
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Moment</th><th>What happens</th><th>Where</th></tr></thead>
+<tbody>
+<tr>
+    <td><strong>Crafted</strong></td>
+    <td>Eight paper around one horse hair makes <strong>one</strong> blank transfer
+        paper, and the bench stamps the crafter's name and UUID onto it.</td>
+    <td><code>TransferPaperHandler.onCrafted</code></td>
+</tr>
+<tr>
+    <td><strong>Signed</strong></td>
+    <td>The <em>bound</em> player right-clicks a horse they <em>currently own</em>;
+        the blank becomes a <strong>signed</strong> paper naming that horse.</td>
+    <td><code>TransferPaperHandler.sign</code></td>
+</tr>
+<tr>
+    <td><strong>Redeemed</strong></td>
+    <td>Whoever is holding the signed paper right-clicks the horse it names. The
+        horse becomes theirs; the paper is spent.</td>
+    <td><code>TransferPaperHandler.redeem</code></td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<h3 id="bearer">Why redemption is a walk, not a click</h3>
+
+<p>
+    A signed paper is a <strong>bearer instrument</strong>. It carries no binding at
+    all &mdash; the binding is on the <em>blank</em>, so that only someone with the
+    standing to write a paper can write one &mdash; and redeeming it does not require
+    being the person who signed it, or the person who bought it. Buying one from the
+    cowboy moves nothing: the horse is still standing in his paddock, and you have to
+    go out and find it.
+</p>
+
+<p>
+    That is the whole reason the item exists in this shape rather than as
+    &ldquo;pay the cowboy, receive a horse&rdquo;. A claim the bearer has not
+    collected yet is <strong>an object worth trading</strong> &mdash; it can be handed
+    to another player, sold on at a markup, or lost in a creeper hole with the horse
+    still standing there waiting for whoever picks it up.
+</p>
+
+<h3 id="bred-by">What a transfer never changes</h3>
+
+<p>
+    <strong><code>bredBy</code> is untouched by every path in the system.</strong> A
+    horse bred by <em>Jesse Calloway</em> is still bred by Jesse Calloway after four
+    owners, and <code>HorseRecord.attribution()</code> &mdash; which prefers the
+    breeder over the tamer &mdash; keeps saying so in the
+    <a href="breeding.html">family tree</a>. The signed paper carries a snapshot of
+    the breeder purely so a buyer can read whose line the animal comes from; it is
+    never written back.
+</p>
+
+<p>
+    <strong><code>tamedBy</code> is only ever filled in when it is blank.</strong> It
+    records who first got a rope on the animal, which also does not change when the
+    animal is sold. In practice the only horses it gets written to are the cowboy's,
+    because his stock has never been tamed by anyone.
+</p>
+
+<p>
+    The genome, the names, the pedigree, the generation and the breed label are not
+    touched either. <strong>Ownership is the only thing that moves.</strong>
+</p>
+
+<hr>
+
+<h2 id="cowboy">The cowboy</h2>
+
+<p>
+    A horse breeder who is generated with a barn on the outskirts of a plains
+    village, and who <strong>is always on a horse</strong>. His name is drawn from
+    frontier given and family name tables
+    (<code>PersonNameGenerator.cowboys()</code>), and that name is what the game says
+    when it says who bred one of his horses.
+</p>
+
+<h3 id="not-a-profession">Why he is not a villager profession</h3>
+
+<p>
+    He is a custom <code>AbstractVillager</code>, not a
+    <code>VillagerProfession</code>. A profession is acquired from a job site by a
+    villager whose brain runs vanilla's daily schedule, and that schedule would
+    dismount him every morning to go and stand at a workstation. Everything that makes
+    this character himself &mdash; always mounted, home is a barn and not a bed, stock
+    is a live herd and not a trade table &mdash; is a fight with that brain. Extending
+    <code>AbstractVillager</code> keeps the parts that are worth keeping (the merchant
+    screen, the villager silhouette, the trading goals) and none of the schedule.
+</p>
+
+<p>
+    The <a href="#horseman">horseman</a> <em>is</em> a real profession, for the
+    opposite reason: a shopkeeper who walks to a workstation, restocks, gossips and
+    goes to bed is exactly what that brain is for.
+</p>
+
+<h3 id="herd">His herd</h3>
+
+<ul>
+    <li><strong>Four to ten horses, plus the one he rides.</strong> All are made on
+        his first server tick, in the barn.</li>
+    <li><strong>Every one is a foundation horse of a real breed</strong> &mdash; no
+        parents, generation 0, and never <code>feral_mixed</code>. The breed is drawn
+        from the biome's pool, weighted the way a wild herd is weighted, so most of
+        his string is workaday and a rare one is worth the ride out.</li>
+    <li><strong>Every one carries <code>bredBy = his name</code>.</strong></li>
+    <li><strong>The horse he rides is the herd lead.</strong> It is herd slot 0, and
+        every other member carries its UUID as their
+        <code>HorseCareAttachment.herd</code> &mdash; so the browser and the info
+        panel see an ordinary herd with an ordinary lead horse, and the man on top is
+        a detail. It is never for sale.</li>
+    <li><strong>They are branded, not owned.</strong> A <code>CowboyBrand</code>
+        attachment holds the cowboy's id. Vanilla lets a player tame any untamed horse
+        by climbing on it until it stops bucking, and his whole herd standing there
+        untamed would otherwise be a free stable rather than a shop &mdash; so a
+        branded horse refuses every interaction except a transfer paper. Kill the
+        cowboy and the brand is cleared: his horses go feral and can be tamed the hard
+        way, while keeping his name as their breeder.</li>
+</ul>
+
+<h3 id="trades">What he sells</h3>
+
+<p>
+    One offer per herd horse, priced in emeralds by the breed's
+    <code>Commonness</code> tier &mdash; the same axis the wild herd roll uses, so the
+    horse you would have to search half a continent for is the one that costs most to
+    buy. The table lives in <code>server/HorsePrices</code>, deliberately on the
+    Minecraft side and off <code>common/</code>, for the same reason
+    <code>RarityItems</code> is: a price is a gameplay-economy decision, not a fact
+    about a breed.
+</p>
+
+<p>
+    The offer list is rebuilt every time someone looks at him, because the herd is a
+    live thing &mdash; a horse can be killed by a wolf between one customer and the
+    next. A horse leaves the list <strong>for good</strong> the moment its paper is
+    bought, whether or not that paper is ever redeemed. <strong>His herd is a fixed
+    cast, not a restocking shop</strong>, and he is not a levelling villager: no XP,
+    no tiers, no restock.
+</p>
+
+<h3 id="routine">His day</h3>
+
+<p>
+    All of it is decided in one place, <code>CowboyRoutine.plan</code>, which both
+    goals read &mdash; so the man and his animals cannot disagree about the plan.
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Duty</th><th>When</th><th>What he does</th></tr></thead>
+<tbody>
+<tr>
+    <td><strong><code>PATROL</code></strong></td>
+    <td>Daylight</td>
+    <td>Wanders freely within 40 blocks of the barn. Past that he drifts toward the
+        <strong>village centre</strong> &mdash; not into it; he pulls up 22 blocks
+        short of the bell, so he reads as a man riding the ring road rather than one
+        parked in the square. Past 64 blocks he gives up on the patrol and rides
+        straight home, which is what brings him back after a night spent running.</td>
+</tr>
+<tr>
+    <td><strong><code>SHELTER</code></strong></td>
+    <td>Dark, and safe</td>
+    <td>Rides to the barn, opening all four double doors from 16 blocks out so the
+        herd can pour in behind him. Once he is in and every loaded herd member is
+        too, he shuts them all. They open again at first light.</td>
+</tr>
+<tr>
+    <td><strong><code>FLEE</code></strong></td>
+    <td>Dark, and not safe</td>
+    <td>Rides hard and randomly away from the nearest monster, faster than he moves
+        for any other reason, re-pathing every 8 ticks, until morning.</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    &ldquo;Safe&rdquo; is one test: <strong>inside the barn with nothing hostile
+    inside it with him</strong>. That single rule covers both of the ways the night
+    goes wrong &mdash; he never made it in, or the barn got breached &mdash; because
+    in either case the true thing is the same: he is exposed with a monster near him.
+    While he <em>is</em> sheltered, a zombie on the other side of the wall is not his
+    problem.
+</p>
+
+<p>
+    The <em>centre</em> of the village is its <code>minecraft:meeting</code> POI, i.e.
+    its bell. That is the one part of a generated village reliably at its middle and
+    reliably findable at runtime, which beats trying to recover the structure's
+    bounding box after the fact.
+</p>
+
+<h3 id="riding">The horse does the walking</h3>
+
+<p>
+    A rider that is not a player <strong>cannot steer a horse</strong> &mdash; vanilla
+    only hands control to a saddled mount's player passenger &mdash; so a mounted mob
+    is dead weight and the animal keeps running its own stroll goal. Rather than fight
+    that from the rider's side, the itinerary lives on the mount:
+    <code>CowboyMountGoal</code> sits at <strong>priority 0</strong> and holds
+    <code>Flag.MOVE</code> continuously while a cowboy is aboard, which starves every
+    other movement goal the horse has.
+</p>
+
+<p>
+    It holds <code>MOVE</code> and <em>not</em> <code>JUMP</code>, which matters: the
+    horse's own <code>FloatGoal</code> is what keeps it &mdash; and the man on it
+    &mdash; from drowning.
+</p>
+
+<p>
+    The rest of the herd runs <code>CowboyHerdGoal</code>, which trails the lead horse
+    with hysteresis (set off at 14 blocks, stop at 7) so they spread out and graze
+    instead of stacking on him. After dark it tightens to 4 blocks and quickens, which
+    is both what gets them through the barn doors behind him and what keeps them with
+    him if he bolts.
+</p>
+
+<h3 id="doors">Doors</h3>
+
+<p>
+    The rider is the only one of the pair with hands. <code>CowboyDoors</code> opens
+    and shuts doors <strong>by area, never one at a time</strong>, and that is the
+    whole design: a door opened one leaf at a time leaves a one-block gap, and a
+    horse's hitbox will not fit through one. Acting on every door in a box gets both
+    leaves of a double door, and all four of the barn's, without having to work out
+    which leaf pairs with which.
+</p>
+
+<p>
+    <strong>It only ever touches his own barn.</strong> An earlier version opened
+    whatever was in front of the horse, which does let him through any door he meets
+    &mdash; and also leaves a trail of open front doors through a village he rides
+    past every day, which is a good way to get its inhabitants eaten. The barn is the
+    only building he has to get into, so it is the only one he has the keys to.
+</p>
+
+<p>
+    A standing guarantee sits alongside the dusk/dawn schedule: while he is inside the
+    barn in daylight, its doors get opened every half-second or so. That is what saves
+    him from a player who shuts them on him, and from a night that ended with the
+    schedule flag lost to a world reload.
+</p>
+
+<hr>
+
+<h2 id="barn">The barn, and how it lands on the outskirts</h2>
+
+<p>
+    <code>cowboy_barn.nbt</code> is a hand-built 15&times;6&times;7 structure &mdash;
+    hay-bedded floor, water cauldrons, two double doors at each end &mdash; with the
+    cowboy generated at its centre.
+</p>
+
+<h3 id="jigsaw">Terminators are the edge of the village</h3>
+
+<p>
+    The barn is appended to <code>minecraft:village/plains/terminators</code>. A
+    terminator is what the village generator places when a street connector has
+    nowhere left to go: both <code>village/plains/streets</code> and
+    <code>village/plains/houses</code> name it as their <code>fallback</code>. So the
+    terminator slots <em>are</em>, by construction, the ends of the village &mdash;
+    the last piece on a road that ran out of room. Putting the barn there is the
+    closest the jigsaw system comes to expressing &ldquo;on the outskirts&rdquo;
+    without hand-placing the building and owning terrain fitting ourselves.
+</p>
+
+<p>
+    The barn's own connector is a <code>minecraft:street</code> jigsaw on its west
+    face at <code>y=1</code>, which is the relationship the vanilla terminators have to
+    a road &mdash; their jigsaw sits one above their <code>y=0</code> ground block
+    &mdash; so the barn's floor lands level with the street's surface. The generator
+    rotates the whole piece so that connector faces back at whatever it attached to.
+</p>
+
+<p>
+    It goes in at weight 1 against the four vanilla terminators of weight 1 each, so
+    roughly one terminator slot in five. A village has a handful, and the barn is
+    15&times;7 where a terminator is 2&times;3 &mdash; so most of the draws that pick
+    it then fail the bounding-box check and fall through to a small terminator
+    instead. The net effect is &ldquo;most plains villages, where there was room&rdquo;.
+</p>
+
+<h3 id="pool-injection">Why the pool is edited in code</h3>
+
+<p>
+    A datapack can only <strong>replace</strong> <code>terminators.json</code>, never
+    add to it. Replacing it would freeze today's four vanilla terminators into this
+    mod and silently delete any other mod's additions to the same pool.
+    <code>BarnPoolInjector</code> appends instead, on
+    <code>ServerAboutToStartEvent</code>, which needs the live pool object's element
+    lists &mdash; and that is what this repo's first
+    <a href="api-notes.html#access-transformer">access transformer</a> is for.
+</p>
+
+<h3 id="entity-in-structure">The cowboy rides in with the building</h3>
+
+<p>
+    He is carried in the structure template's <code>entities</code> list, which is the
+    same mechanism vanilla uses to put villagers in
+    <code>village/plains/villagers/*.nbt</code>. A template can only place an entity,
+    not roll one, so he arrives <strong>bare</strong> &mdash; nothing but his id
+    &mdash; and <code>CowboyHandler</code> builds him on his first server tick: name,
+    home, mount, herd.
+</p>
+
+<p>
+    That founding runs on <code>EntityTickEvent.Post</code> and <em>not</em> on the
+    join event, for exactly the reason
+    <a href="architecture.html">HorseFoundingTickHandler</a> documents at length:
+    founding spawns horses, spawning a horse ends in an <code>Attributes.SCALE</code>
+    write, and a scale write runs a collision scan that can force-load a chunk. Doing
+    that from the join event or a <code>server.execute</code> task re-enters the chunk
+    system's ticket pass and crashes it.
+</p>
+
+<h3 id="one-per-village">One cowboy per village</h3>
+
+<p>
+    The jigsaw generator has no way to say &ldquo;at most one of this element per
+    structure&rdquo;, so a village that rolls two barns gets two barns. The second one
+    is just a barn: of the cowboys within 128 blocks of each other exactly one founds,
+    and the rest discard themselves before spawning anything. The tie-break is the
+    <strong>lowest UUID</strong> &mdash; the same rule
+    <a href="breeds.html">HerdManager</a> uses to elect a wild herd's lead, and for
+    the same reason: every candidate has to reach the same answer without talking to
+    the others.
+</p>
+
+<h3 id="rebaking">Re-baking the barn</h3>
+
+<p>
+    <code>neoforge-26.1.2/tools/barn/cowboy_barn.source.nbt</code> is the raw
+    structure-block save. It is kept only so the building can be edited in game and
+    re-exported; the mod never reads it. After a re-export, run:
+</p>
+
+<pre><code class="language-bash">python neoforge-26.1.2/tools/barn/bake-barn.py</code></pre>
+
+<p>
+    which adds the two things a structure-block save cannot carry &mdash; the jigsaw
+    connector and the cowboy entity &mdash; and writes
+    <code>data/horsegenetics/structure/cowboy_barn.nbt</code>. Commit both.
+</p>
+
+<hr>
+
+<h2 id="horseman">The horseman</h2>
+
+<p>
+    The roadmap's &ldquo;Horse Master&rdquo;: an ordinary villager profession that
+    sells horse tack and horse-genetics goods from a <strong>Horse Trader's
+    Post</strong>. Five tiers on <em>vanilla's</em> ladder &mdash; Novice, Apprentice,
+    Journeyman, Expert, Master &mdash; not the design document's, which invented an
+    &ldquo;Adept&rdquo; rung that does not exist.
+</p>
+
+<h3 id="workstation">The workstation</h3>
+
+<p>
+    A plain block (3 hair cloth + 2 braided rope + 2 fence, shapeless) whose only job
+    is to exist somewhere the POI system can index. The profession is bound to the
+    <code>horsegenetics:horse_traders_post</code> POI, and the POI is added to the
+    vanilla <code>minecraft:acquirable_job_site</code> and <code>minecraft:village</code>
+    tags &mdash; tags <em>merge</em> across datapacks, so adding to vanilla's is
+    additive and safe where overriding a worldgen file would not be. One villager per
+    post, as every vanilla job site is.
+</p>
+
+<h3 id="trade-table">The trade table</h3>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Tier</th><th>Buys</th><th>Sells</th></tr></thead>
+<tbody>
+<tr><td><strong>1 Novice</strong></td><td>16 horse hair</td><td>Hair bundle, saddle, leads</td></tr>
+<tr><td><strong>2 Apprentice</strong></td><td>8 hair bundles</td><td>Basic whistle, blank tickets, iron horse armour</td></tr>
+<tr><td><strong>3 Journeyman</strong></td><td>4 braided rope</td><td>The four general breeding carrots</td></tr>
+<tr><td><strong>4 Expert</strong></td><td>2 hair cloth</td><td>A random common gene carrot, a random uncommon one, a random common/uncommon research paper</td></tr>
+<tr><td><strong>5 Master</strong></td><td>1 stallion seed jar</td><td>A random rare gene carrot, a random epic one, a random rare/epic paper, diamond horse armour</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    Each tier draws <strong>three</strong> of its pool, so two horsemen in different
+    villages are not the same shop. <strong>Hair buying is the early-game emerald
+    tap</strong> and therefore the number most likely to want retuning; it is one JSON
+    file per trade.
+</p>
+
+<h3 id="random-trades">A random carrot, without a custom listing</h3>
+
+<p>
+    Villager trades are <strong>datapack registries</strong> in 26.1.2
+    (<code>minecraft:villager_trade</code> and <code>minecraft:trade_set</code>), and a
+    trade's <code>given_item_modifiers</code> are loot functions that run when the
+    <em>offer is generated</em>. That is exactly the semantics the roadmap argued for:
+    &ldquo;a random rare carrot&rdquo; is rolled once per restock and then sits in the
+    window at a fixed price, rather than re-rolling under the player's cursor. So the
+    whole &ldquo;custom listing that rolls when the offer is generated&rdquo;
+    requirement is met by a stock vanilla mechanism plus one loot function:
+</p>
+
+<pre><code class="language-json">{ "function": "horsegenetics:set_random_gene",
+  "target": "carrot",          // or "paper"
+  "min_rarity": "uncommon",
+  "max_rarity": "uncommon" }</code></pre>
+
+<p>
+    The pool is computed, not listed: a gene is a candidate if it is registered, has a
+    gene carrot, and its <code>GeneRarity</code> falls inside the window. A
+    third-party gene therefore joins automatically, and <strong>legendary and mythic
+    are never sold</strong> because no window reaches them &mdash; a comparison rather
+    than a blacklist that can go stale. Within a window, draws are weighted by
+    <code>GeneRarity.lootWeight()</code>, the same weighting the chest-loot papers
+    use, so the price ladder and the find-it-in-the-wild ladder agree.
+</p>
+
+<p>
+    An empty window returns an empty stack, which <code>VillagerTrade.getOffer</code>
+    reads as &ldquo;no offer&rdquo; and drops &mdash; so a rarity tier with no genes
+    in it costs a trade slot rather than putting a blank item on sale.
+</p>
+
+<h3 id="not-built">What the roadmap asked for and this does not do</h3>
+
+<ul>
+    <li><strong>No random genotype vials, and no buying player-made ones back.</strong>
+        Both need the assisted-reproduction / <code>collectedFrom</code> work that is
+        <a href="roadmap.html#ivf">still unbuilt</a>. Tier 5's buy row is a
+        <em>stallion seed jar</em> instead, which is a real player-made item today.</li>
+    <li><strong>No custom gossip type.</strong> <code>HORSE_TRADER</code> was flagged
+        as unverified; the horseman uses vanilla gossip, which costs nothing and
+        works.</li>
+</ul>
+
+</article>
+</main>
+</body>
+</html>
