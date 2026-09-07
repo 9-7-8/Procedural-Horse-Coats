@@ -134,7 +134,7 @@ window.HG.examples = {
               { "type": "PATCHES", "seed": "$patchSeed", "scale": "$patchScale",
                 "threshold": { "perDose": [ 1.0, 0.62, 0.44 ] }, "softness": 0.07 }
             ],
-            "op": { "type": "SET_PIGMENT", "red": 0.0, "black": 0.0 }
+            "op": { "type": "WHITEN", "amount": 1.0 }
           },
           {
             "name": "white socks",
@@ -142,7 +142,7 @@ window.HG.examples = {
               { "type": "AXIS", "parts": [ "LEGS" ], "axis": "Y", "space": "part",
                 "from": 0.0, "to": "$sock", "softness": 0.12 }
             ],
-            "op": { "type": "SET_PIGMENT", "red": 0.0, "black": 0.0 }
+            "op": { "type": "WHITEN", "amount": 1.0 }
           }
         ]
       },

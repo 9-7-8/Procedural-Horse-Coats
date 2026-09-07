@@ -326,8 +326,7 @@ public final class EdnrbGene implements Gene, HealthContribution, EyeColorContri
             .restrict((ctx, coat) -> {
                 PigmentField f = coat.mutableCopy();
                 CoatRegions.restrictAll(ctx.skin(), f, (field, px, py, p) -> {
-                    field.setRed(px, py, 0f);
-                    field.setBlack(px, py, 0f);
+                    field.whiten(px, py, 1f);
                 });
                 return f;
             });
@@ -599,9 +598,9 @@ public final class EdnrbGene implements Gene, HealthContribution, EyeColorContri
         }
     }
 
+    /** Bald white - the transparent path. The shared move, at full strength. */
     private static void whiten(PigmentField f, int px, int py) {
-        f.setRed(px, py, 0f);
-        f.setBlack(px, py, 0f);
+        f.whiten(px, py, 1f);
     }
 
     /**

@@ -57,8 +57,9 @@ public final class CoatTextureComposer {
     /**
      * A texel goes fully transparent (bald white template shows through) only
      * when <i>both</i> pigments are essentially <b>zero</b> - i.e. dominant
-     * white ({@code W_}) or a splash marking, both of which {@code setRed(0)} /
-     * {@code setBlack(0)} exactly. This must stay far below any value a
+     * white ({@code W_}) or a splash marking, both of which
+     * {@link PigmentField#whiten} at full strength, which lands on exactly
+     * zero. This must stay far below any value a
      * <i>dilution</i> can legitimately leave behind: grey keeps 0.15, and grey
      * stacked on a double-dilute cream still lands near 0.012 - a near-white
      * coat that must resolve in the gradient, not vanish. (A 0.02 cutoff here

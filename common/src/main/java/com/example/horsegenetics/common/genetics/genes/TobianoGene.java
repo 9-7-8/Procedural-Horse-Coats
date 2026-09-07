@@ -200,8 +200,7 @@ public final class TobianoGene implements Gene {
         PigmentField f = coat.mutableCopy();
         HorseSkinGeometry.forEachTexel(skin, (px, py, part, face, point) -> {
             if (shape.score(part, point) >= threshold) {
-                f.setRed(px, py, 0f);
-                f.setBlack(px, py, 0f);
+                f.whiten(px, py, 1f);
             }
         });
         return f;

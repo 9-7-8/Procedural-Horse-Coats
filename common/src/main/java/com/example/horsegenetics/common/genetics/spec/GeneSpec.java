@@ -292,8 +292,14 @@ public record GeneSpec(
         DILUTE,
         /** Natural: multiply red / black down by an amount. */
         RESTRICT,
-        /** Natural: move red / black toward explicit levels (whiten, blacken, body colour). */
+        /** Natural: move red / black toward explicit levels (blacken, body colour). */
         SET_PIGMENT,
+        /**
+         * Natural: {@code PigmentField.whiten} - mix white hair in. The op every
+         * white marking wants; {@code SET_PIGMENT} to {@code (0, 0)} reaches the
+         * same place but browns the soft edge on a black horse getting there.
+         */
+        WHITEN,
         /** Magical: add signed RGB (and opacity) - the zebra move. */
         TINT,
         /** Magical: walk what the texel <i>looks</i> like toward a colour - the pink-hair move. */
@@ -302,7 +308,7 @@ public record GeneSpec(
         FLAT;
 
         public boolean isNatural() {
-            return this == DILUTE || this == RESTRICT || this == SET_PIGMENT;
+            return this == DILUTE || this == RESTRICT || this == SET_PIGMENT || this == WHITEN;
         }
     }
 

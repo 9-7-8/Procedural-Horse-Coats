@@ -714,9 +714,9 @@ public final class WhitePattern {
         return HorseSkinGeometry.bounds(skin, Part.BODY).yMax() - body.yMin();
     }
 
+    /** Bald white - the transparent path. The shared move, at full strength. */
     private static void whiten(PigmentField f, int px, int py) {
-        f.setRed(px, py, 0f);
-        f.setBlack(px, py, 0f);
+        f.whiten(px, py, 1f);
     }
 
     private static double clamp01(double v) {

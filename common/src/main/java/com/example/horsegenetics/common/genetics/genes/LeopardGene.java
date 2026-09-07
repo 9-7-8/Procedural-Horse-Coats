@@ -621,19 +621,13 @@ public final class LeopardGene implements Gene, CoatOverlayContribution, HealthC
     }
 
     /**
-     * Whiten one texel by {@code amount} in {@code [0, 1]}: 1 is bald white
-     * ({@code setRed}/{@code setBlack} to 0, the transparent path), a fraction
-     * is a white-hair mix with the red pulled down a little faster than the
-     * black so the ~1px soft edge greys out instead of going gold (the roan
-     * lesson).
+     * Whiten one texel by {@code amount} in {@code [0, 1]}: 1 is bald white (the
+     * transparent path), a fraction is the white-hair mix a varnished or
+     * snowflake texel wants. Both cases are
+     * {@link PigmentField#whiten}, which is what stops the partial ones - the
+     * spot edges and the varnish - reading as tan on a black-based appaloosa.
      */
     private static void whiten(PigmentField f, int px, int py, double amount) {
-        if (amount <= 0) {
-            return;
-        }
-        double a = amount > 1 ? 1 : amount;
-        double keep = 1.0 - a;
-        f.setRed(px, py, f.red(px, py) * (float) (keep * (1.0 - 0.6 * a)));
-        f.setBlack(px, py, f.black(px, py) * (float) keep);
+        f.whiten(px, py, (float) amount);
     }
 }

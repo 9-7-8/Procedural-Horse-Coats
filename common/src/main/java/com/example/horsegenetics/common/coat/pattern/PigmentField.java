@@ -8,7 +8,8 @@ package com.example.horsegenetics.common.coat.pattern;
  * pigmented black horse. Natural genes then knock pigment down
  * ({@link #restrictRed}/{@link #restrictBlack} multiply it toward 0,
  * {@link #setRed}/{@link #setBlack} clamp it, {@link #dilute} does both and
- * walks the sample sideways). Pigment only ever comes off; nothing here can
+ * walks the sample sideways, {@link #whiten} mixes in white hair). Pigment only
+ * ever comes off; nothing here can
  * add colour, which is what the magical {@link ColorField} is for.
  *
  * <p>{@link CoatTextureComposer} then resolves each texel through the
@@ -93,6 +94,56 @@ public final class PigmentField implements PigmentView {
         float b = black[i];
         red[i] = clamp01(red[i] * keepRed + b * blackTint);
         black[i] = clamp01(b * keepBlack);
+    }
+
+    /**
+     * The shared <b>whitening</b> move: mix white hair into this texel by
+     * {@code amount}, 0 leaving it alone and 1 taking it to bald white. Every
+     * white marking - a soft patch edge, a roan fleck, a varnished appaloosa
+     * texel - goes through here rather than scaling the two pigments itself.
+     *
+     * <p><b>Why it is not just {@code red *= keep; black *= keep}.</b> A black
+     * horse is {@code (red = 1, black = 1)}: it carries a full load of
+     * pheomelanin that is simply <i>masked</i> - the gradient's whole bottom row
+     * is {@code #000000}, so the red is invisible at {@code black = 1} and
+     * nowhere else. Scaling both pigments together unmasks it on the way out,
+     * and the sample walks the diagonal through the golds: the old roan ramp
+     * put {@code #5F330B} and {@code #885517} - milk chocolate and tan - around
+     * the edge of every marking on an otherwise jet-black horse.
+     *
+     * <p>So the invariant this keeps is the <b>visible</b> red, not the stored
+     * red. Red only shows through where black is absent, i.e.
+     * {@code visible = red * (1 - black)}; whitening scales <i>that</i> by
+     * {@code keep} alongside the black, and the stored red is whatever
+     * reproduces it against the black that is left:
+     *
+     * <pre>{@code black' = black * keep
+     * red'   = red * (1 - black) * keep / (1 - black')}</pre>
+     *
+     * On a black horse the numerator is 0, so red drops straight to 0 and the
+     * fade runs down the gradient's {@code red = 0} column - the one neutral
+     * ramp in the chart, {@code #212121 -> #414142 -> #A6A6A7 -> #FFFFFF}.
+     * Shades of grey, which is what white hairs through black hairs look like.
+     * On a chestnut ({@code black = 0}) nothing is masked, the expression
+     * collapses to {@code red * keep}, and strawberry roan is untouched. Every
+     * base in between - a bay's body, a smoky black, a diluted point - keeps
+     * exactly as much warmth as was showing before.
+     *
+     * <p>It is an identity at {@code amount = 0}, which is what lets a soft edge
+     * meet unmarked coat without a seam.
+     */
+    public void whiten(int px, int py, float amount) {
+        if (amount <= 0f) {
+            return;
+        }
+        int i = py * size + px;
+        float keep = 1.0f - clamp01(amount);
+        float b = black[i];
+        float visibleRed = red[i] * (1.0f - b);
+        float newBlack = b * keep;
+        float room = 1.0f - newBlack;
+        red[i] = room <= 1e-4f ? 0f : clamp01(visibleRed * keep / room);
+        black[i] = clamp01(newBlack);
     }
 
     /** Visit every texel (mapped or not). */

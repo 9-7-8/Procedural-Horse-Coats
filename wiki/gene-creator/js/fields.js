@@ -48,6 +48,27 @@ window.HG = window.HG || {};
     this.black[i] = clamp01(this.black[i] * (1 - amount));
   };
 
+  /**
+   * Mix white hair in by `amount`. Mirrors PigmentField.whiten - and the reason
+   * it is not `red *= keep; black *= keep` is that a black horse stores a full
+   * load of red that only the black is masking, so scaling both together
+   * unmasks it and the soft edge of every marking goes tan. What is held
+   * constant is the VISIBLE red, red * (1 - black); on a black horse that is 0,
+   * so the fade runs down the gradient's neutral red = 0 column and the edge
+   * greys out. On a chestnut (black = 0) it collapses to red * keep.
+   */
+  PigmentField.prototype.whiten = function (px, py, amount) {
+    if (amount <= 0) return;
+    var i = py * this.size + px;
+    var keep = 1 - clamp01(amount);
+    var b = this.black[i];
+    var visibleRed = this.red[i] * (1 - b);
+    var newBlack = b * keep;
+    var room = 1 - newBlack;
+    this.red[i] = room <= 1e-4 ? 0 : clamp01(visibleRed * keep / room);
+    this.black[i] = clamp01(newBlack);
+  };
+
   /** black *= keepBlack; red = red * keepRed + blackBefore * blackTint. */
   PigmentField.prototype.dilute = function (px, py, keepRed, keepBlack, blackTint) {
     var i = py * this.size + px;

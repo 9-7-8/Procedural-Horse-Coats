@@ -96,6 +96,7 @@ public final class SpecPainter {
                     f.setBlack(px, py, (float) lerp(f.black(px, py), v.get(p.value("black", 0.0), leg), k));
                 }
             }
+            case WHITEN -> f.whiten(px, py, (float) (v.get(p.value("amount", 1.0), leg) * k));
             default -> throw new IllegalStateException("not a pigment op: " + op.type());
         }
     }

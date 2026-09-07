@@ -262,6 +262,9 @@ window.HG = window.HG || {};
         if (op.red !== undefined) f.setRed(px, py, lerp(f.redAt(px, py), get(values, op.red, 0, legIndex), k));
         if (op.black !== undefined) f.setBlack(px, py, lerp(f.blackAt(px, py), get(values, op.black, 0, legIndex), k));
         break;
+      case "WHITEN":
+        f.whiten(px, py, get(values, op.amount, 1, legIndex) * k);
+        break;
     }
   }
 

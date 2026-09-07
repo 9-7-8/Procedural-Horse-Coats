@@ -168,18 +168,16 @@ public final class RoanGene implements Gene {
             double n = BodyNoise.value(seed, point.x() * FREQ, point.y() * FREQ, point.z() * FREQ * 1.6);
             // A texel is a white hair or a coloured hair; the *fraction* that are
             // white is what the region weight sets. Near-binary with a narrow soft
-            // edge, so the flecks read crisp but not aliased - and never through
-            // the gradient's warm mid-tones (a half-scaled black texel is orange,
-            // not grey).
+            // edge, so the flecks read crisp but not aliased. The part-white texels
+            // on that edge are the horse's grey hairs, and PigmentField.whiten is
+            // what keeps them grey: a blue roan's half-white texel is #414142, not
+            // the tan a plain scaling of both pigments used to give it.
             double threshold = 1.0 - region * (WHITE_FRACTION + density);
             double w = PatchNoise.smoothstep(threshold - EDGE, threshold + EDGE, n);
             if (w <= 0) {
                 return;
             }
-            // on the soft edge, pull red down faster than black so the 1px
-            // transition greys out instead of going gold.
-            f.setRed(px, py, f.red(px, py) * (float) ((1.0 - w) * (1.0 - 0.6 * w)));
-            f.setBlack(px, py, f.black(px, py) * (float) (1.0 - w));
+            f.whiten(px, py, (float) w);
         });
         return f;
     }

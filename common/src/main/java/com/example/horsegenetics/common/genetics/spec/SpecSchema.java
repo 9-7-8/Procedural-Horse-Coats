@@ -151,6 +151,12 @@ public final class SpecSchema {
                 Param.value("red", 0.0, "red pigment level to move toward"),
                 Param.value("black", 0.0, "black pigment level to move toward")));
 
+        OPS.put(OpType.WHITEN, List.of(
+                Param.value("amount", 1.0,
+                        "share of white hair mixed in - 1 is bald white, a fraction is a roan "
+                                + "fleck. Multiplied by the mask coverage, so a soft-edged mask "
+                                + "greys out rather than browning on its way to white")));
+
         OPS.put(OpType.TINT, List.of(
                 Param.value("red", 0.0, "signed percent of full scale added to red"),
                 Param.value("green", 0.0, "signed percent added to green"),

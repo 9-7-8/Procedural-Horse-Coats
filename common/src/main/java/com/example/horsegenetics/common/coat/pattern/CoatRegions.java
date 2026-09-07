@@ -203,8 +203,7 @@ public final class CoatRegions {
         double cutoff = b.yMin() + b.span(Axis.Y) * clamp01(heightFraction);
         HorseSkinGeometry.forEachTexel(skin, leg, (px, py, part, face, point) -> {
             if (point.y() <= cutoff) {
-                field.setRed(px, py, 0f);
-                field.setBlack(px, py, 0f);
+                field.whiten(px, py, 1f);
             }
         });
     }
@@ -236,8 +235,7 @@ public final class CoatRegions {
             double b = back;
             HorseSkinGeometry.forEachTexel(skin, part, (px, py, pp, face, point) -> {
                 if (Math.abs(point.z()) <= halfWidth && (isMuzzle || point.x() >= b)) {
-                    field.setRed(px, py, 0f);
-                    field.setBlack(px, py, 0f);
+                    field.whiten(px, py, 1f);
                 }
             });
         }

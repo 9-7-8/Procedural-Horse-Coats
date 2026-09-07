@@ -154,8 +154,13 @@ window.HG = window.HG || {};
     },
     SET_PIGMENT: {
       phase: "natural",
-      blurb: "Drive pigment to a level: (0, 0) is a white marking, (0, 1) is a black point.",
+      blurb: "Drive pigment to a level: (0, 1) is a black point. For white, use WHITEN.",
       params: [v("red", 0.0, "red level to move toward"), v("black", 0.0, "black level to move toward")]
+    },
+    WHITEN: {
+      phase: "natural",
+      blurb: "Mix white hair in - the op every white marking wants. 1 is bald white, a fraction is a roan fleck, and a soft-edged mask greys out instead of browning on its way there.",
+      params: [v("amount", 1.0, "share of white hair mixed in")]
     },
     TINT: {
       phase: "magical",

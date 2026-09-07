@@ -180,8 +180,7 @@ public final class KitGene implements Gene, EyeColorContribution {
             .restrict((ctx, coat) -> {
                 PigmentField f = coat.mutableCopy();
                 CoatRegions.restrictAll(ctx.skin(), f, (field, px, py, p) -> {
-                    field.setRed(px, py, 0f);
-                    field.setBlack(px, py, 0f);
+                    field.whiten(px, py, 1f);
                 });
                 return f;
             });
