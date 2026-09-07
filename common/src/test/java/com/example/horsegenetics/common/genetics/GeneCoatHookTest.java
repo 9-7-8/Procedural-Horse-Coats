@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -201,4 +202,66 @@ class GeneCoatHookTest {
                 || gene instanceof EyePatchContribution;
     }
 
+    /**
+     * <b>A wild-type combination claims nothing on the eye either</b>, and
+     * {@link Genotype#coatCode()} depends on it.
+     *
+     * <p>Every channel the composer runs skips a wild type first - the two
+     * phase loops, the overlay pass, the LUT swap - <i>except</i> the
+     * eye-colour and eye-patch channels, which ask every implementor
+     * unconditionally. That is the one hole through which a gene reporting "I
+     * change nothing" could still change the horse, and the texture key leaves
+     * such a gene out. So it must not happen, and this is the assertion that
+     * says so: if a gene ever does claim an iris while wild type, this goes red
+     * rather than two differently-eyed horses quietly sharing one bake.
+     */
+    @Test
+    void aWildTypeCombinationClaimsNothingOnTheEye() {
+        for (Gene gene : Genes.codeOrder()) {
+            boolean eyes = gene instanceof EyeColorContribution;
+            boolean patches = gene instanceof EyePatchContribution;
+            if (!eyes && !patches) {
+                continue;
+            }
+            for (AllelePair pair : GenotypeCatalog.allPairsOf(gene)) {
+                Genotype gt = Genotype.wildType().with(pair);
+                if (!gene.expressionIn(pair, gt).wildType()) {
+                    continue;
+                }
+                if (eyes) {
+                    assertTrue(((EyeColorContribution) gene)
+                                    .eyeColor(pair, gt, null, 0.0).isEmpty(),
+                            gene.key() + " " + pair.toTokens()
+                                    + " is a wild type but claims an iris colour");
+                }
+                if (patches) {
+                    assertTrue(((EyePatchContribution) gene)
+                                    .eyePatches(pair, gt, null, 0.0).isEmpty(),
+                            gene.key() + " " + pair.toTokens()
+                                    + " is a wild type but claims an eye patch");
+                }
+            }
+        }
+    }
+
+    /**
+     * The consequence, stated directly: a gene that does nothing on <i>this</i>
+     * horse is out of its texture key, so two horses differing only in a locus
+     * neither of them shows share one baked coat.
+     */
+    @Test
+    void aGeneThatShowsNothingHereIsOutOfTheTextureKey() {
+        // flaxen is invisible on anything that makes black hair
+        Genotype bay = Genotype.wildType().with(new AllelePair(Genes.AGOUTI.A, Genes.AGOUTI.a));
+        assertEquals(bay.coatCode(),
+                bay.with(new AllelePair(Genes.FLAXEN.Fl2, Genes.FLAXEN.Fl2)).coatCode());
+        // and agouti is invisible on a chestnut
+        Genotype chestnut = Genotype.wildType()
+                .with(new AllelePair(Genes.EXTENSION.e, Genes.EXTENSION.e));
+        assertEquals(chestnut.coatCode(),
+                chestnut.with(new AllelePair(Genes.AGOUTI.A, Genes.AGOUTI.A)).coatCode());
+        // ...but a locus that does show still splits them
+        assertNotEquals(chestnut.coatCode(),
+                chestnut.with(new AllelePair(Genes.FLAXEN.Fl2, Genes.FLAXEN.Fl2)).coatCode());
+    }
 }

@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flaxen &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="nav.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow natural">Natural gene <span class="sep">/</span> phase 1</p>
+<h1>Flaxen &mdash; the chestnut&rsquo;s pale mane</h1>
+<p class="lede">
+    A graded lightening of the <strong>mane, tail and forelock</strong> on a
+    chestnut horse, from a few gold strands to a near-white fall of hair over a
+    red body. It touches nothing else, and it is completely invisible on any
+    horse that makes black hair &mdash; which carries it and hands it on
+    regardless.
+</p>
+
+<div class="gene-preview" data-gene="horsegenetics.flaxen"></div>
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd>horsegenetics.flaxen</dd></div>
+    <div><dt>Alleles</dt><dd><span class="allele dom">Fl2</span> <span class="allele dom">Fl1</span> <span class="allele wild">f</span></dd></div>
+    <div><dt>Outcomes</dt><dd>wild, <code>mild-flaxen</code>, <code>flaxen</code>, <code>strong-flaxen</code>, <code>extreme-flaxen</code></dd></div>
+    <div><dt>Shows when</dt><dd>dosage above <code>FlaxenGene.PLAIN_MAX</code> &mdash; and only on a chestnut</dd></div>
+    <div><dt>Default allele</dt><dd>f</dd></div>
+    <div><dt>Priority</dt><dd><code>FlaxenGene.PRIORITY</code> &mdash; immediately after silver</dd></div>
+    <div><dt>Founder draws</dt><dd>1 &times; nextFloat()</dd></div>
+    <div><dt>Deterministic</dt><dd><strong>no</strong> when expressed</dd></div>
+    <div><dt>Epi draws</dt><dd>2 &times; nextFloat &mdash; the mane&rsquo;s score, then the tail&rsquo;s offset</dd></div>
+    <div><dt>Health</dt><dd><strong>none</strong> &mdash; and that matters; see below</dd></div>
+</dl>
+
+<div class="note">
+    <span class="label">Unplayed</span>
+    <p>
+        Covered by <code>FlaxenGeneTest</code> and the golden file, and the range has
+        been eyeballed as baked sheets. Not seen in a game. See
+        <a href="verification.html#flaxen">verification &sect;0-S</a>.
+    </p>
+</div>
+
+<h2 id="phenotype">It is a phenotype, and this is a simulation of one</h2>
+
+<p>
+    There is <strong>no identified flaxen mutation and no DNA test for it</strong>.
+    That is the single most important fact about this gene and the reason it is
+    shaped the way it is.
+</p>
+
+<p>
+    Breeders have modelled flaxen as a simple recessive for a century, written
+    <code>f/f</code> or <code>fl/fl</code>, on pedigree evidence &mdash; flaxen
+    bred to flaxen tends to give flaxen, and Morgan pedigrees in particular were
+    studied for exactly this. That is a useful breeding observation and it is not
+    proof of a locus. The veterinary-genetics resources list no flaxen variant
+    and no commercial test, and they are explicit that a great deal of equine
+    shade variation remains unexplained.
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Model</th><th>Status</th></tr></thead>
+<tbody>
+<tr><td>Dominant</td><td>No identified allele one copy of which reliably produces flaxen.</td></tr>
+<tr><td>Recessive</td><td>Historical and pedigree support. Unconfirmed.</td></tr>
+<tr><td>Codominant</td><td>No validated heterozygote distinct from either homozygote.</td></tr>
+<tr><td>Incomplete dominant</td><td>No demonstrated one-copy-versus-two dose series, unlike <a href="gene-matp.html">cream</a>.</td></tr>
+<tr><td><strong>Polygenic</strong></td><td>The best fit for what is actually observed: the degree of lightening varies enormously, and mane and tail colour move with age, season, sun, nutrition and clipping.</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    So this locus is a <strong>simulated polygenic modifier</strong>, and it says
+    so in its own description in the gene browser. It is the same shape the
+    <a href="gene-shade.html">bay shade</a> score takes, and for the same reason:
+    a graded, heritable, additive quantity is what the evidence describes, and
+    one locus with a dosage plus an expression roll says that in a genotype code
+    a player can actually read. Three to six separate polygenes would say it too,
+    at the cost of six segments in every horse&rsquo;s code and six loci nobody
+    could reason about.
+</p>
+
+<h2 id="dosage">The dosage</h2>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Combination</th><th>Dosage</th><th>Outcome</th><th>The long hair</th></tr></thead>
+<tbody>
+<tr><td><code>f/f</code></td><td>0</td><td>wild type</td><td>the colour of the body</td></tr>
+<tr><td><code>Fl1/f</code></td><td>1</td><td><code>mild-flaxen</code></td><td>red, shot through with gold and cream strands</td></tr>
+<tr><td><code>Fl1/Fl1</code>, <code>Fl2/f</code></td><td>2</td><td><code>flaxen</code></td><td>clearly blond &mdash; the classic flaxen chestnut</td></tr>
+<tr><td><code>Fl2/Fl1</code></td><td>3</td><td><code>strong-flaxen</code></td><td>pale cream, hard contrast</td></tr>
+<tr><td><code>Fl2/Fl2</code></td><td>4</td><td><code>extreme-flaxen</code></td><td>near-white, a few darker strands left</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    <strong>One strong copy and two mild ones are the same horse.</strong> That
+    is what an additive dosage means, it is the whole reason for three alleles
+    where the folklore model has two, and it is what lets two mild carriers throw
+    something paler than either of them.
+</p>
+
+<p>
+    On top of the dosage each horse rolls an <strong>expression offset</strong>
+    &mdash; <code>FlaxenGene.EXPRESSION_RANGE</code> either way &mdash; standing
+    in for the season, age, sun and condition variation that is one of the
+    reasons a single-locus model never convinced anyone. It is deliberately
+    narrower than a band, so a horse never contradicts the name its genotype was
+    given. Like every other per-horse number here it rides on the expressing
+    copy&rsquo;s epigenetic seed, so it is fixed for life and inherited with the
+    allele.
+</p>
+
+<h2 id="chestnut">Chestnut only, and carried by everything</h2>
+
+<p>
+    Flaxen is a <strong>red</strong>-pigment trait: it shows on a horse that
+    makes no black hair at all, which is <code>e/e</code> at
+    <a href="gene-extension.html">extension</a>.
+    <code>FlaxenGene.expressionIn</code> reports the wild type on anything else
+    &mdash; the same suppression <a href="gene-agouti.html">agouti</a> does on a
+    chestnut, in the opposite direction.
+</p>
+
+<p>
+    A bay or a black carries the whole dosage silently and hands it on, and that
+    is the satisfying part of the gene: two plain-looking chestnuts can throw a
+    flaxen foal, and a black stallion can be the reason a line has it at all.
+</p>
+
+<div class="note good">
+    <span class="label">And it costs the texture cache nothing</span>
+    <p>
+        About half the population carries some flaxen, so keying every bay on its
+        six flaxen combinations would have multiplied the bay textures by six for
+        six identical bakes. <code>Genotype.coatCode()</code> asks whether a gene
+        paints <em>on this horse</em> rather than whether it can ever paint, so a
+        locus that shows nothing here is out of the key. That was changed with
+        this gene and it fixed the milder version of the same waste that agouti
+        had been doing to chestnuts. It is sound because a wild type has no
+        painter &mdash; and <code>GeneCoatHookTest</code> pins the one hole in
+        that argument, the eye channel, which is asked unconditionally.
+    </p>
+</div>
+
+<h2 id="paint">How it paints</h2>
+
+<ul>
+    <li><strong>The mane and the tail are rolled separately.</strong> Real flaxen
+        manes and tails are frequently not the same shade, and one being paler
+        than the other is the commonest thing to notice about a mixed-hair
+        chestnut. <code>FlaxenGene.TAIL_OFFSET</code> is how far apart they can
+        land.</li>
+    <li><strong>Strand mixing.</strong> A fixed noise field spares some hairs, so
+        a flaxen mane keeps darker strands in it. A uniform wash reads as paint
+        rather than as hair.</li>
+    <li><strong>It takes red away and leaves black alone</strong>, which on the
+        chestnut it only ever runs on is the whole move. The chart&rsquo;s top
+        row runs from a warm brick red to white <em>without passing through
+        grey</em>, so a mane at the pale end lands blond with no tint term at
+        all. That is exactly what <a href="gene-silver.html">silver</a> cannot do
+        &mdash; it works on black pigment, off a column where scaling alone
+        leaves a point jet &mdash; and why silver has a
+        <code>blackTint</code> term and this does not.</li>
+    <li><strong>Nothing else moves.</strong> Not the body, the legs, the ear
+        rims, the skin, the eyes or the hooves. The reference is unusually firm
+        about it: flaxen is a long-hair modifier, and every gene that also
+        lightens a body is a different gene.</li>
+</ul>
+
+<div class="note">
+    <span class="label">The palest end is cream rather than gold</span>
+    <p>
+        A near-white flaxen mane bakes to about <code>#AFA89A</code> &mdash; a
+        pale warm cream. It is not the <em>gold</em> the word &ldquo;blond&rdquo;
+        suggests, and that is the chart rather than the gene: the default
+        gradient&rsquo;s warm row peaks at 58% saturation at the red edge and
+        only declines (<a href="known-gaps.html">gap #49</a>), so there is no
+        gold band anywhere for a pale red to land in. If flaxen should be more
+        golden, the fix is the chart's warm zone in the
+        <a href="lut-lab.html">LUT lab</a>, not a constant here.
+    </p>
+</div>
+
+<h2 id="lookalikes">Not the look-alikes</h2>
+
+<p>
+    Five things give a horse pale long hair. Telling them apart is most of what
+    identifying flaxen consists of, and one of them matters for a reason that is
+    not cosmetic.
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Looks like flaxen</th><th>Actually</th><th>Tell</th></tr></thead>
+<tbody>
+<tr><td>Palomino</td><td><a href="gene-matp.html">Cream</a> on a chestnut</td><td>The <em>body</em> is gold too. A palomino is not automatically flaxen and a flaxen chestnut keeps a recognisably red body.</td></tr>
+<tr><td>Cremello</td><td>Two cream copies</td><td>Very pale cream all over, pink skin, usually blue eyes.</td></tr>
+<tr><td>Silver black / silver bay</td><td><a href="gene-silver.html">Silver</a></td><td>Works on <em>black</em> pigment, so it is a black or bay trait and is invisible on a chestnut. Chocolate body under the pale hair.</td></tr>
+<tr><td>Mushroom chestnut</td><td><a href="gene-mushroom.html">Mushroom</a></td><td>Taupe or sepia body, not a red one.</td></tr>
+<tr><td>Grey</td><td><a href="gene-grey.html">Grey</a></td><td>Progressive. A grey was born coloured; flaxen is a stable pale mane on a coloured horse.</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="note warn">
+    <span class="label">Flaxen has no health association &mdash; and silver does</span>
+    <p>
+        There is no disorder, welfare problem, vision issue or performance cost
+        attached to flaxen. It is cosmetic, and the mod gives it no
+        <code>TraitContribution</code> at all.
+    </p>
+    <p>
+        The caveat is worth writing down because two of the look-alikes are not
+        cosmetic: <a href="gene-silver.html">silver</a> carries <strong>multiple
+        congenital ocular anomalies</strong>, and homozygous
+        <a href="gene-leopard.html">leopard complex</a> carries night blindness.
+        Assigning a cost to flaxen because a silver looks similar would be
+        exactly the mistake the reference warns against, and the reverse &mdash;
+        assuming a pale-maned horse is harmless because flaxen is &mdash; is the
+        one that actually hurts a horse.
+    </p>
+</div>
+
+<h2>Breeds</h2>
+
+<p>
+    Because the cause is unknown, &ldquo;the flaxen allele occurs in breed
+    X&rdquo; can only ever mean &ldquo;the visible phenotype is common
+    there&rdquo;. Two breeds here name the locus:
+</p>
+
+<ul>
+    <li><strong><a href="breeds.html">Haflinger</a></strong> &mdash; the breed the
+        numbers are calibrated against, and its whole look: fixed
+        <code>e/e</code> for chestnut, with the flaxen pool pushed to the top of
+        the range. A Haflinger without a white mane is not much of a
+        Haflinger.</li>
+    <li><strong>Morgan</strong> &mdash; the breed flaxen pedigrees were actually
+        studied in, at a moderate share.</li>
+</ul>
+
+<p>
+    The reference also names the Black Forest Horse, Breton, Frederiksborger,
+    Jutland and the South German Coldblood; none of those is in
+    <a href="breeds.html">the breed list</a> yet. Every other breed is
+    <code>f/f</code>, because a breed that does not name a coat locus gets it
+    wild &mdash; the feral population is where the full spread lives.
+</p>
+
+<h2 id="carrot">Its gene carrot</h2>
+
+<div class="gene-carrot" data-gene="horsegenetics.flaxen"></div>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="gene-extension.html">Extension &mdash; what makes a chestnut</a>
+        <a href="gene-silver.html">Silver dapple</a>
+        <a href="gene-matp.html">MATP (cream / pearl)</a>
+        <a href="gene-shade.html">Shade &mdash; the same shape, on bays</a>
+    </div>
+    Source: <code>common/genetics/genes/FlaxenGene.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+<script defer src="gene-preview/gene-preview.js"></script>
+<script defer src="gene-carrot/gene-carrot.js"></script>
+</body>
+</html>

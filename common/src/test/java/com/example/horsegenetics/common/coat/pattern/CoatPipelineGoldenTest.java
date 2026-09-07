@@ -62,6 +62,12 @@ class CoatPipelineGoldenTest {
             override("kit=W22/N", "dhampir=Dhmp/n"),      // red must beat the depigmented blue
             override("kit=W4/N"),                        // Camarillo white, one copy
             override("agouti=A/a", "kit=W4/W4"),         // ...and the viable homozygote
+            // flaxen: a chestnut long-hair dosage, silent on anything else
+            override("extension=e/e", "flaxen=Fl1/f"),
+            override("extension=e/e", "flaxen=Fl1/Fl1"),
+            override("extension=e/e", "flaxen=Fl2/Fl2"),
+            override("extension=e/e", "flaxen=Fl2/Fl2", "matp=Cr/N"),   // a flaxen palomino
+            override("agouti=A/a", "flaxen=Fl2/Fl2"),                   // carried, invisible
             override("kit=W22/N"),
             override("champagne=Ch/c"),
             override("agouti=A/a", "champagne=Ch/c"),

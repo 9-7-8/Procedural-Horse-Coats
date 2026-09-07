@@ -8,6 +8,7 @@ import com.example.horsegenetics.common.genetics.genes.DunGene;
 import com.example.horsegenetics.common.genetics.genes.EdnrbGene;
 import com.example.horsegenetics.common.genetics.genes.ChampagneGene;
 import com.example.horsegenetics.common.genetics.genes.ExtensionGene;
+import com.example.horsegenetics.common.genetics.genes.FlaxenGene;
 import com.example.horsegenetics.common.genetics.genes.GreyGene;
 import com.example.horsegenetics.common.genetics.genes.HealerGene;
 import com.example.horsegenetics.common.genetics.genes.Hmga2Gene;
@@ -131,6 +132,15 @@ public final class Genes {
     public static final PinkHairGene PINK_HAIR = new PinkHairGene();
     public static final DunGene DUN = new DunGene();
     public static final SilverGene SILVER = new SilverGene();
+    /**
+     * <b>Flaxen</b> - the pale mane and tail of a chestnut, as a simulated
+     * polygenic dosage rather than the unconfirmed recessive folklore models it
+     * as. Sits immediately after {@link SilverGene}: the two are constantly
+     * mistaken for each other, they do the same job on the long hair, and they
+     * work on opposite pigments - which is why a silver is invisible on a
+     * chestnut and this is invisible on everything else.
+     */
+    public static final FlaxenGene FLAXEN = new FlaxenGene();
     public static final MushroomGene MUSHROOM = new MushroomGene();
     /**
      * Natural zebra striping - the real-world half of the zebra pair, and
@@ -271,7 +281,7 @@ public final class Genes {
     /** The hand-written genes. Order here is irrelevant - the registry sorts. */
     private static final List<Gene> BUILTINS = List.of(
             SEX, DIET, EXTENSION, AGOUTI, SHADE, CHAMPAGNE, GREY, MATP,
-            MAGIC_ZEBRA, PINK_HAIR, DUN, SILVER, MUSHROOM, BRINDLE, TIGER_EYE,
+            MAGIC_ZEBRA, PINK_HAIR, DUN, SILVER, FLAXEN, MUSHROOM, BRINDLE, TIGER_EYE,
             NATURAL_ZEBRA, ROAN, TOBIANO,
             LEOPARD, EDNRB, KIT, MITF, PAX3,
             MILK, BODY_SIZE, MAGIC_SPEED, MAGIC_HEALTH, MAGIC_JUMP,

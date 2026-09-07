@@ -323,7 +323,33 @@ public final class Genotype {
             }
             depended.addAll(g.coatDependsOn());
         }
-        return code(g -> g.affectsCoat() || depended.contains(g.key()));
+        return code(g -> paintsOnThisHorse(g) || depended.contains(g.key()));
+    }
+
+    /**
+     * Does {@code gene} paint anything <b>on this horse</b>? Not just "can this
+     * gene ever paint" ({@link Gene#affectsCoat()}) but "does the combination
+     * this horse carries do something", which is the question the texture key
+     * actually wants.
+     *
+     * <p>It is the difference between a cache that is right and a cache that is
+     * <i>six times bigger than it needs to be</i>. Flaxen is invisible on any
+     * horse that makes black hair and about half the population carries some,
+     * so keying every bay on its six flaxen combinations would have multiplied
+     * the bay textures by six for six identical bakes; agouti already did the
+     * same thing more mildly to chestnuts.
+     *
+     * <p><b>Sound because a wild type has no painter.</b> Every channel the
+     * composer runs skips a wild-type combination first - the phase-1 loop, the
+     * phase-3 loop, the overlay pass and the LUT swap all test it - with
+     * exactly two exceptions, the eye-colour and eye-patch channels, which ask
+     * every implementor unconditionally. {@code GeneCoatHookTest} pins that no
+     * gene claims an eye while wild type, which is what keeps this safe; if one
+     * ever does, that test goes red rather than two differently-eyed horses
+     * quietly sharing a texture.
+     */
+    private boolean paintsOnThisHorse(Gene gene) {
+        return gene.affectsCoat() && !gene.expressionIn(byGene.get(gene.key()), this).wildType();
     }
 
     // ------------------------------------------------------------------

@@ -31,6 +31,7 @@ public final class Breeds {
     private static final String DUN = "horsegenetics.dun";
     private static final String CHAMP = "horsegenetics.champagne";
     private static final String SILVER = "horsegenetics.silver";
+    private static final String FLAXEN = "horsegenetics.flaxen";
     private static final String GREY = "horsegenetics.grey";
     private static final String ROAN = "horsegenetics.roan";
     private static final String TOB = "horsegenetics.tobiano";
@@ -284,8 +285,10 @@ public final class Breeds {
                 .extensionChestnut().agoutiAny()
                 .gene(MATP, "Cr", "N", 8).gene(MATP, "prl", "N", 5).gene(MATP, "N", "N", 87)
                 .gene(ROAN, "Rn", "rn", 28).gene(ROAN, "rn", "rn", 72)
+                .gene(FLAXEN, "Fl2", "Fl1", 20).gene(FLAXEN, "Fl1", "Fl1", 34)
+                .gene(FLAXEN, "Fl1", "f", 36).gene(FLAXEN, "f", "f", 10)
                 .height(hh(16, 0), hh(17, 0)).speed(3).jump(2).health(6)
-                .note("Flaxen mane/tail on a chestnut body, heavy muscling - flaxen is a roadmap gene; muscling reads through MSTN.")
+                .note("Flaxen mane and tail on a chestnut body, heavy muscling - the muscling reads through MSTN.")
                 .note("CPL, EMS, anhidrosis: age-related, folded into heartiness.")
                 .build();
     }
@@ -468,8 +471,13 @@ public final class Breeds {
                 .biomes("minecraft:cherry_grove", "minecraft:meadow", "minecraft:windswept_hills", "minecraft:grove")
                 .extensionChestnut().agoutiAny()
                 .gene(ROAN, "Rn", "rn", 10).gene(ROAN, "rn", "rn", 90)
+                // The breed's whole look. Fixed e/e keeps it chestnut, and the
+                // flaxen pool is pushed to the top of the range: a Haflinger
+                // without a white mane is not much of a Haflinger.
+                .gene(FLAXEN, "Fl2", "Fl2", 46).gene(FLAXEN, "Fl2", "Fl1", 38)
+                .gene(FLAXEN, "Fl1", "Fl1", 14).gene(FLAXEN, "Fl1", "f", 2)
                 .height(hh(13, 2), hh(15, 0)).speed(5).jump(5).health(8)
-                .note("Chestnut body with a striking flaxen (white) mane and tail - flaxen is a roadmap gene. Fixed e/e keeps it chestnut.")
+                .note("Chestnut body with a striking flaxen mane and tail, and the breed the flaxen locus is calibrated against. Fixed e/e keeps it chestnut.")
                 .note("EMS / laminitis: age-related, folded into heartiness.")
                 .build();
     }
@@ -596,6 +604,9 @@ public final class Breeds {
                 .gene(DUN, "D", "d2", 5).gene(DUN, "d2", "d2", 95)
                 .gene(ROAN, "Rn", "rn", 12).gene(ROAN, "rn", "rn", 88)
                 .gene(KIT, "SB1", "N", 16).gene(KIT, "W4", "N", 2).gene(KIT, "N", "N", 82)
+                // The breed flaxen pedigrees were actually studied in.
+                .gene(FLAXEN, "Fl2", "Fl1", 6).gene(FLAXEN, "Fl1", "Fl1", 12)
+                .gene(FLAXEN, "Fl1", "f", 34).gene(FLAXEN, "f", "f", 48)
                 .height(hh(14, 1), hh(15, 2)).speed(6).jump(6).health(8)
                 .note("Slightly crested neck, expressive eyes, compact and refined - a versatile foundation American breed.")
                 .note("Cushing's, EMS: age-related, folded into heartiness.")

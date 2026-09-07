@@ -129,6 +129,12 @@ public final class CoatSampleTool {
             {"bay_seal_het_agouti", "agouti=A/a shade=ShD/ShD"},// the darkest a bay gets
             {"chestnut_dark_shade", "extension=e/e shade=ShD/ShD"},
 
+            // flaxen - a chestnut long-hair dosage, invisible on anything else
+            {"flaxen_mild", "extension=e/e flaxen=Fl1/f"},
+            {"flaxen", "extension=e/e flaxen=Fl1/Fl1"},
+            {"flaxen_extreme", "extension=e/e flaxen=Fl2/Fl2"},
+            {"flaxen_on_a_bay", "agouti=A/a flaxen=Fl2/Fl2"},
+
             // dhampir - the carrier is the eyes alone, the homozygote is white
             {"dhampir_trace_bay", "agouti=A/a dhampir=Dhmp/n"},
             {"dhampir", "dhampir=Dhmp/Dhmp"},
@@ -167,7 +173,8 @@ public final class CoatSampleTool {
             1, 4, 6, 2, 8,
             0, 0,
             2,
-            // dhampir x3
+            // flaxen x4, dhampir x3
+            3, 1, 5, 0,
             4, 0, 0};
 
     private CoatSampleTool() {}

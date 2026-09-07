@@ -57,6 +57,13 @@ public final class GeneDescriptions {
                             + "chestnut can hand a seal brown to a grandfoal - but on a bay its "
                             + "dosage, plus whether extension is E/E and whether agouti is A/a, "
                             + "chooses between a bright blood bay and a near-black seal brown."),
+            Map.entry("horsegenetics.flaxen",
+                    "The pale mane and tail of a chestnut horse - from a few gold strands to a "
+                            + "near-white fall of hair - as a dosage of two variant alleles rather "
+                            + "than the simple recessive folklore models it as, because no flaxen "
+                            + "mutation has ever been identified. It touches the long hair and "
+                            + "nothing else, and it is invisible on any horse that makes black "
+                            + "hair, which carries and transmits it regardless."),
             Map.entry("horsegenetics.champagne",
                     "A dilution that ignores its own dose - one copy or two give the same result. "
                             + "It keeps most red, cuts black hard and feeds some removed black back "
