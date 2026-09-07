@@ -70,6 +70,16 @@
         11 776 on a plain bay, an odd-sized LUT is accepted (<code>GradientLut</code>
         normalises), and going back to Natural is <strong>byte-identical</strong>.
     </p>
+    <p>
+        The footprint overlay was checked the same way, across all three bases and eight
+        combinations. It agrees with the model everywhere it was asked: black lands
+        bottom-left (red 100%, black 100%), chestnut top-left, champagne on a chestnut at
+        chart X 45% and cremello at 92%, mushroom on a black at 88%/100%, dun spreading
+        over 29 histogram cells where a flat dilution occupies one, and a tobiano reading
+        the chart at <strong>4 160 texels against a solid black's 11 904</strong> - white
+        is off the chart rather than a colour on it. Bounds stay inside [0,1] and no cell
+        index exceeds the bin count.
+    </p>
 </div>
 
 <h3>What has not been looked at at all &mdash; everything visual</h3>
@@ -104,6 +114,18 @@
         that is expected and the note on the page explains it.</li>
     <li><strong>The dice</strong> rerolls the epigenetics and should move the tobiano
         patches without changing the colours.</li>
+    <li><strong>The footprint overlay</strong> &mdash; the numbers are proven, the drawing
+        is not. The chart should dim everywhere the horse does not sample and show the art
+        through where it does; a dashed box round the range; solid bars on the bottom and
+        right edges; a white crosshair at the centre of mass. Check the crosshair lands
+        where the <em>centre of mass</em> line underneath says it does, since that is the
+        one number tied directly to a mark on the canvas.</li>
+    <li><strong>Does the overlay track?</strong> Switching <code>Ch/Ch</code> to
+        <code>Cr/Cr</code> on a chestnut should walk the crosshair from 45% to 92% across
+        the chart. Unticking <em>Show what this coat reads</em> should leave the bare
+        gradient with no residue.</li>
+    <li><strong>A fully white horse</strong> (stack enough white) should say &ldquo;no
+        pigment anywhere&rdquo; rather than drawing a box round nothing.</li>
     <li><strong>What &ldquo;Natural&rdquo; actually is.</strong> It reads the designer's
         <em>copy</em> of the gradient, which is currently out of sync with
         <code>common/</code> &mdash; see <a href="known-gaps.html#gap-48">gap #48</a>. Until

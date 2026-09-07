@@ -26,6 +26,28 @@
 
 <h2 id="d2026-09-06">2026-09-06</h2>
 
+<h3 id="lut-footprint-2026-09-06">Built 2026-09-06, NOT yet looked at: the LUT chart shows which part of itself a coat reads.</h3>
+
+<p>Owner, on the lab below: draw on the gradient &ldquo;where it shows what area of the LUT it's pulling from for that specific coat &hellip; that'll also help me tune all the other genes.&rdquo; It does now. <a href="lut-lab.html#overlay">The overlay</a>; checklist <a href="verification.html#lut-lab">&sect;0-L</a>.</p>
+
+<ul>
+<li><strong>It had to come from phase 1, and that is the whole design decision.</strong> The obvious implementation &mdash; match each baked pixel back to the nearest colour on the chart &mdash; cannot work, and not merely imprecisely: by the time a texel is a pixel its colour has been <em>multiplied by the hair template</em> and moved again by any phase-3 tint, so the position read back is a position the pipeline never sampled. The pigment pair is the thing phase 2 is actually handed, so the pair is the thing to export.
+</li>
+<li><strong><code>CoatTextureComposer.pigmentField()</code></strong> is phase 1 on its own, and <code>bake()</code> now calls the same extracted helper instead of holding a copy of the loop &mdash; so the overlay and the horse beside it cannot drift apart the first time a gene changes how it restricts. <code>coat-golden.txt</code> did not move, which is what says the extraction was behaviour-preserving.
+</li>
+<li><strong>The axis convention now lives in one place.</strong> <code>GradientLut</code> gained <code>chartX</code>/<code>chartY</code>, which <code>sample()</code> scales up and which the new export reports in. Nothing in JavaScript restates the mapping, because an overlay that mirrored the gradient it was explaining would be worse than no overlay at all &mdash; and this is the same page that has to warn people about editing the wrong corner of a PNG.
+</li>
+<li><strong>What it draws.</strong> The chart is dimmed everywhere the genotype does not sample and the art shows through where it does, brightness carrying density; then a dashed bounding box for the range, a solid bar on the bottom and right edges so X and Y read on their own, and a crosshair at the texel-weighted centre of mass. Underneath, the same span twice &mdash; in pigment levels, which is what a gene tunes, and in chart X/Y, which is where to click in an image editor.
+</li>
+<li><strong>The numbers turn out to be a good description of what a dilution</strong> <em>is</em>. On a chestnut, champagne sits at chart X 45% and cremello at 92%: same lookup, read further right. A gene occupying one histogram cell is painting one flat colour; dun occupies 29, which is its dorsal stripe and leg bars sitting at different depths. A gene landing somewhere the gradient has nothing interesting now shows up before a horse does.
+</li>
+<li><strong>White is off the chart, and the overlay says so out loud.</strong> Unpigmented texels are excluded exactly as phase 2 excludes them, so a tobiano reads the chart at 4&nbsp;160 texels against a solid black's 11&nbsp;904. Same for an eye colour and for anything painting in phase 3: they do not read the gradient, so they do not appear. That is a limit worth knowing before using the page to tune a magical gene.
+</li>
+<li><strong>And re-baking demonstrated <a href="known-gaps.html#gap-48">gap #48</a> rather than arguing it.</strong> <code>:web:bakeDesignerAssets</code> copies the coat PNGs as well as the wasm, so the run that shipped the export also overwrote an uncommitted gradient edit sitting in the generated location &mdash; which is precisely what that location cannot safely hold. The two copies are back in step and both committed; the gap stays open, because nothing checks that they match.
+</li>
+</ul>
+
+
 <h3 id="lut-lab-2026-09-06">Built 2026-09-06, NOT yet looked at: a page for trying a gradient on the real pipeline before shipping it.</h3>
 
 <p>Owner: a page to &ldquo;upload and view different LUTs&rdquo;, with pre-built buttons for the base coats, then the dilutions, then one white gene. <a href="lut-lab.html">wiki/lut-lab.html</a>, plus the widget under <code>wiki/lut-lab/</code>. Checklist <a href="verification.html#lut-lab">&sect;0-L</a>.</p>
