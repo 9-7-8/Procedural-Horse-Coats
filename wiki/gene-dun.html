@@ -16,8 +16,8 @@
 <h1>Dun</h1>
 <p class="lede">
     Real-horse <code>TBX3</code>, and the mod&rsquo;s second <strong>three-allele</strong>
-    locus. Two effects that come apart: a <strong>body dilution</strong> that lightens the
-    coat and leaves the points dark, and <strong>primitive markings</strong> &mdash; a dorsal
+    locus. Two effects that come apart: a <strong>body dilution</strong> that thins black
+    pigment and leaves red almost alone, and <strong>primitive markings</strong> &mdash; a dorsal
     stripe into the tail, plus leg bars, a shoulder bar and a face mask on the horses that
     draw them &mdash; that read dark because everything around them got lighter. The third
     allele is the one that carries the markings <em>without</em> the dilution.
@@ -39,8 +39,8 @@
     <div><dt>Deterministic</dt><dd><strong>no</strong> &mdash; the markings are rolled per horse</dd></div>
     <div><dt>Epigenetic draws</dt><dd>1 &times; nextLong() + 7 &times; nextFloat(), on both marked outcomes</dd></div>
     <div><dt>Dilution</dt><dd><code>PigmentField.diluteNeutral</code> &mdash; red first, then black</dd></div>
-    <div><dt>keep red / black (<code>D</code>)</dt><dd>0.72 of the <em>visible</em> red; 0.42 of the black</dd></div>
-    <div><dt>keep red / black (<code>d1</code>)</dt><dd>0.86 of the visible red; black never touched</dd></div>
+    <div><dt>keep red / black (<code>D</code>)</dt><dd>0.93 of the <em>visible</em> red; 0.42 of the black</dd></div>
+    <div><dt>keep red / black (<code>d1</code>)</dt><dd>0.95 of the visible red; black never touched</dd></div>
     <div><dt>dorsal half-width</dt><dd>1.5 body units, &times;0.80&ndash;1.30 per horse</dd></div>
     <div><dt>leg bars</dt><dd>joint 0.56, spread 0.48, spacing 3.2, duty 0.42 &mdash; <code>D</code> only, per leg</dd></div>
     <div><dt>accessory chances</dt><dd>bars 0.82 per leg, shoulder bar 0.55, face 0.40</dd></div>
@@ -150,6 +150,52 @@ red&#39;   = red * (1 - black) * keepRed / (1 - black&#39;)</code></pre>
         re-introducing red on a black leg turned the bar into a warm patch. That was the same
         unmasking bug seen from the other side. With <code>diluteNeutral</code> a bar is just
         &ldquo;less diluted&rdquo; like every other marking, and the special case is gone.
+    </p>
+</div>
+
+<h2 id="asymmetry">Dun takes black off. It barely touches red.</h2>
+
+<p>
+    That one asymmetry is what makes the three bases come out as different as they do from a
+    single pair of numbers &mdash; and it is why <code>keepRed</code> sits so close to 1.
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Base</th><th>What the dilution has to work with</th><th>Result</th></tr></thead>
+<tbody>
+<tr>
+    <td>black</td>
+    <td>No <em>visible</em> red at all &mdash; it is all masked &mdash; so only
+        <code>keepBlack</code> applies.</td>
+    <td>The sample slides straight down the neutral column. <strong>Grullo</strong>, and the
+        largest colour change of the three.</td>
+</tr>
+<tr>
+    <td>bay</td>
+    <td>Mostly red under about a third of a load of black.</td>
+    <td>Taking that black off unmasks the red it was damping and the body swings red-brown to
+        tan. <strong>Bay dun</strong> &mdash; a big, obvious change, and <em>none</em> of it is
+        the red moving.</td>
+</tr>
+<tr>
+    <td>chestnut</td>
+    <td>No black to take.</td>
+    <td><strong>Red dun is almost the same colour as chestnut.</strong> What
+        <code>keepRed</code> buys is not a dilution, it is just enough countershade to let the
+        markings read at all.</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="note">
+    <span class="label">A red dun is a chestnut with primitive markings</span>
+    <p>
+        Not a pale horse. If a red dun&rsquo;s body reads as a distinctly lighter, more golden
+        colour than a plain chestnut beside it, <code>KEEP_RED</code> has been turned down too
+        far &mdash; the visible effect of dun on a chestnut is a couple of very subtle markings
+        and almost nothing else.
     </p>
 </div>
 
@@ -321,13 +367,13 @@ private static double accessory(float roll, double chance) {
 </p>
 
 <ul>
-    <li><strong>Black is never touched</strong> (<code>keepBlack = 1</code>). The whole
-        <code>black = 1</code> row of the gradient is pure black, and the composer gives a
-        texel resolving to pure black <em>80% opacity</em> (<code>PURE_BLACK_ALPHA</code>).
-        Nudging a black texel off that row therefore makes it <em>fully opaque</em> &mdash; and
-        so <em>darker</em>. A body darker than its own dorsal stripe is worse than no stripe.</li>
-    <li><strong>Only the visible red is taken</strong>, and only 14% of it. A chestnut lightens
-        a little, a bay body less, a true black or a bay&rsquo;s points not at all.</li>
+    <li><strong>Black is never touched</strong> (<code>keepBlack = 1</code>), which is the
+        whole of what &ldquo;non-dun&rdquo; means here. Taking black off is the half of the
+        dilution that <a href="#asymmetry">actually changes a horse&rsquo;s colour</a>, so an
+        allele that does not dilute must not do it.</li>
+    <li><strong>Only the visible red is taken</strong>, and only 5% of it &mdash; less than
+        <code>D</code>&rsquo;s 7%, which is itself barely anything. A chestnut lightens a
+        whisper, a bay body less, a true black or a bay&rsquo;s points not at all.</li>
 </ul>
 
 <div class="note">
@@ -347,9 +393,9 @@ private static double accessory(float roll, double chance) {
 <table>
 <thead><tr><th>Base</th><th>With <code>D</code></th><th>With <code>d1</code> only</th></tr></thead>
 <tbody>
-<tr><td>bay (<code>E_ A_</code>)</td><td><strong>bay dun / zebra dun</strong> &mdash; golden tan body, black points that survive the dilution intact, dark dorsal stripe, bars where there is pale leg to show them on</td><td>ordinary bay, slightly lighter through the barrel, with a deeper line down the spine</td></tr>
+<tr><td>bay (<code>E_ A_</code>)</td><td><strong>bay dun / zebra dun</strong> &mdash; tan body (all of it the black coming off, none of it the red moving), black points that survive the dilution intact, dark dorsal stripe, bars where there is pale leg to show them on</td><td>ordinary bay, slightly lighter through the barrel, with a deeper line down the spine</td></tr>
 <tr><td>black (<code>E_ aa</code>)</td><td><strong>grullo</strong> &mdash; a blue-grey slate body on the gradient&rsquo;s neutral column, black mane, tail and lower legs, near-black dorsal stripe and bars</td><td>plain black &mdash; nothing visible</td></tr>
-<tr><td>chestnut (<code>ee</code>)</td><td><strong>red dun</strong> &mdash; pale clay-gold body with red-brown rather than black points and markings</td><td>ordinary chestnut with a distinctly redder dorsal line</td></tr>
+<tr><td>chestnut (<code>ee</code>)</td><td><strong>red dun</strong> &mdash; a chestnut, very slightly lifted, carrying red-brown rather than black points and markings. The subtlest of the three by a long way.</td><td>ordinary chestnut with a faintly redder dorsal line</td></tr>
 </tbody>
 </table>
 </div>

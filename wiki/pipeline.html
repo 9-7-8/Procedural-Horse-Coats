@@ -267,11 +267,12 @@ default ColorField tint(AllelePair pair, CoatBuildContext ctx,
     </p>
 </div>
 
-<h3>Transparency and pure black</h3>
+<h3 id="near-black">Transparency and near black</h3>
 
 <div class="codebox">
 <div class="filename">common/coat/pattern/CoatTextureComposer.java</div>
 <pre><code class="language-java">private static final int   PURE_BLACK_ALPHA = 0xCC;    // 80%
+private static final int   NEAR_BLACK       = 0x30;    // ...ramping out by here
 private static final float TRANSPARENT_EPS  = 0.001f;</code></pre>
 </div>
 
@@ -280,9 +281,30 @@ private static final float TRANSPARENT_EPS  = 0.001f;</code></pre>
         shows through) only when <em>both</em> pigments are essentially zero &mdash;
         i.e. a white-pattern gene, all of which <code>setRed(0)</code> /
         <code>setBlack(0)</code> exactly.</li>
-    <li>A texel that resolves to <strong>pure black</strong> gets 80% opacity, so
-        black is not a flat void.</li>
+    <li>A texel that resolves to <strong>black</strong> composites at 80% opacity,
+        ramping to fully opaque by <code>NEAR_BLACK</code>. The composite is a
+        multiply, so an opaque black texel scales the template to nothing and the
+        coat loses its hair shading exactly where the horse is darkest. Letting a
+        fifth of the template through is what gives a black horse its
+        <code>#2C2C2C</code>-ish strand detail.</li>
 </ul>
+
+<div class="note">
+    <span class="label">Why that is a ramp and not <code>rgb == 0</code></span>
+    <p>
+        It was an equality test, which quietly made a <em>rendering</em> rule depend
+        on one pixel of the gradient art being exactly zero. Both bottom corners of
+        the chart were black, so a black horse (<code>red 1, black 1</code>) and a
+        <a href="gene-agouti.html">bay</a>&rsquo;s points (<code>red 0, black 1</code>)
+        both softened. Then the chart&rsquo;s low-red column was recoloured toward
+        blue-grey, its corner moved to <code>#000104</code>, and every bay, seal brown
+        and <a href="gene-dun.html">bay dun</a> started wearing dead-flat black points
+        while a plain black horse kept its shading &mdash; a rule switched off by an
+        art edit, with nothing to say so. The ramp is wide enough that the effective
+        multiply is near-constant across it (0.200 at black, dipping to 0.184 around
+        <code>#202020</code>), so nothing gets a visible step where it crosses.
+    </p>
+</div>
 
 <p>
     The cutoff is deliberately far below any <em>dilution</em> floor: grey keeps
@@ -365,7 +387,8 @@ private static final float TRANSPARENT_EPS  = 0.001f;</code></pre>
  *
  * A transparent texel reads as WHITE here - because that is what a viewer
  * sees, the bald template - not as the black that argb() reports. A texel
- * that resolved to pure black reads as 20% grey, for the same reason.
+ * that resolved to NEAR BLACK reads as roughly 20% grey, for the same
+ * reason - black composites at less than full opacity.
  */
 default int visible(int px, int py, int channel);</code></pre>
 </div>

@@ -967,6 +967,19 @@
     <li><strong>Bay dun keeps black points.</strong> Tan body, black mane, tail and legs,
         and <em>no grey cuff</em> where the black leg meets the tan body &mdash; that cuff
         is the specific thing <code>alreadyAPoint</code> exists to prevent.</li>
+    <li><strong>Black points are dark, not dead.</strong> Owner-reported and fixed: a bay's
+        points had gone flat <code>#000000</code> with no strand shading, because the LUT
+        edit moved the chart's low-red corner off exactly zero and switched off the
+        composer's black-softening (see <a href="pipeline.html#near-black">the pipeline
+        page</a>). A bay's mane should now carry the same visible hair detail a plain black
+        horse's does &mdash; check the two side by side. <strong>This is every dark horse in
+        the mod, not just dun</strong>: plain bay, seal brown, and anything else whose points
+        sit on the <code>red = 0</code> column.</li>
+    <li><strong>Red dun is a chestnut, near enough.</strong> Also owner-reported: the
+        dilution was making it a distinctly paler, more golden horse. Dun takes <em>black</em>
+        off and barely touches red, and a chestnut has no black &mdash; so a red dun beside a
+        plain chestnut should differ by a couple of subtle markings and almost nothing else.
+        If it reads as a different colour, <code>KEEP_RED</code> is still too low.</li>
     <li><strong>The dorsal stripe reaches the tail.</strong> It only reads from above or
         from a low angle; walk the camera over the back. It must run withers to dock and
         carry into the tail hair, and it must <em>not</em> run down the face any more.</li>
