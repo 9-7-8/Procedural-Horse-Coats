@@ -85,12 +85,14 @@ public final class CowboyMountGoal extends Goal {
      * that can simply never come true: a horse pinned behind a fence a villager
      * built, one that pathed onto the far side of a hill, one standing in a
      * doorway it cannot fit through. Without this, one such horse holds all four
-     * doors open until dawn and the barn is a shed with the lights on. Half a
-     * minute is long enough for a string that is merely strung out, and short
-     * enough that a string that is stuck does not cost the rest of them the
-     * night.
+     * doors open until dawn and the barn is a shed with the lights on.
+     *
+     * <p>Fifteen seconds, and short on purpose: with {@link HerdCollision} off
+     * the doorway they were jamming in, a string that is coming is in within a
+     * few seconds, and one that is not is not coming. Leaving a straggler outside
+     * is an accepted outcome (owner's call) - nothing hunts a horse.
      */
-    private static final int DOOR_HOLD_TICKS = 600;
+    private static final int DOOR_HOLD_TICKS = 300;
 
     private final AbstractHorse horse;
     private int repathCooldown;
@@ -273,6 +275,7 @@ public final class CowboyMountGoal extends Goal {
         // Running means the barn is no use tonight; leave it however it stands.
         barnStandingOpen = false;
         doorHeldTicks = 0;
+        restoreShoving(level);
         if (repathCooldown > 0 && !horse.getNavigation().isDone()) {
             return;
         }
@@ -301,6 +304,22 @@ public final class CowboyMountGoal extends Goal {
         return horse.position().add(heading.normalize().scale(FLEE_DISTANCE));
     }
 
+    /**
+     * The night, in five steps and in this order: he gets in, the outfit stops
+     * shoving each other, the string files in behind him, the doors shut, and
+     * shoving resumes.
+     *
+     * <p>Steps two and five are {@link HerdCollision} - eleven horses and a
+     * two-block gap is a jam, and a jam is what left a cowboy stuck four blocks
+     * short of his own barn with nothing in his way but his own horses.
+     *
+     * <p><b>The door-shutting is keyed on where he is, not on what the plan
+     * says.</b> It used to wait for a plan with no goal in it - "arrived" - and
+     * arriving means being within {@code ARRIVED} of the barn's centre, which a
+     * cowboy jammed in his own doorway never manages. So the timer reset every
+     * tick and the doors stood open all night. Being <i>home</i> is the looser
+     * and more honest test, and it is the one the herd is measured by too.
+     */
     private void shelter(Cowboy cowboy, ServerLevel level, CowboyRoutine.Plan plan) {
         BlockPos barn = cowboy.home().orElse(horse.blockPosition());
 
@@ -324,29 +343,64 @@ public final class CowboyMountGoal extends Goal {
         }
 
         if (plan.goal().isPresent()) {
-            doorHeldTicks = 0;
             // Same destination either way; a threat behind him only changes the pace.
             if (plan.urgent()) {
                 moveTo(plan.goal().get(), FLEE_SPEED, FLEE_REPATH_INTERVAL);
             } else {
                 moveTo(plan.goal().get(), TRAVEL_SPEED, REPATH_INTERVAL);
             }
+        } else {
+            horse.getNavigation().stop();
+        }
+
+        if (!barnStandingOpen || !CowboyRoutine.insideBarn(barn, horse.blockPosition())) {
+            doorHeldTicks = 0;
             return;
         }
 
-        horse.getNavigation().stop();
-        if (!barnStandingOpen) {
+        // He is home with the doors open behind him. Let the string walk through
+        // each other until it is in, then shut up and give them their edges back.
+        HerdCollision.off(level, cowboy);
+        doorHeldTicks += ticksSinceLastCall();
+        boolean everyoneIn = herdIsHome(cowboy, level, barn);
+        if (!everyoneIn && doorHeldTicks < DOOR_HOLD_TICKS) {
             return;
         }
-        // He is in. Shut up once everyone who is coming is in - or once he has
-        // waited DOOR_HOLD_TICKS for one who never will.
-        doorHeldTicks += ticksSinceLastCall();
-        if (herdIsHome(cowboy, level, barn) || doorHeldTicks >= DOOR_HOLD_TICKS) {
-            CowboyDoors.setBarnDoors(level, barn, false, cowboy);
-            barnStandingOpen = false;
-            barnShutForNight = true;
-            doorHeldTicks = 0;
+        CowboyDoors.setBarnDoors(level, barn, false, cowboy);
+        barnStandingOpen = false;
+        barnShutForNight = true;
+        doorHeldTicks = 0;
+        HerdCollision.on(level, cowboy);
+        DebugAnnounce.say(level, "Cowboy", cowboy.cowboyName() + " shut the barn ("
+                + (everyoneIn ? "whole string in" : "gave up waiting; some are out")
+                + ", " + horsesHome(cowboy, level, barn) + "/" + cowboy.liveHerd(level).size()
+                + " in)", ChatFormatting.GRAY);
+    }
+
+    /**
+     * Give the outfit its edges back, whatever else is going on.
+     *
+     * <p>Called from both of the other duties rather than only where it is
+     * turned on, because "they can walk through each other" is a state that must
+     * not survive the reason for it - a herd that is still on the no-push team at
+     * noon is a herd standing inside itself in a field.
+     */
+    private void restoreShoving(ServerLevel level) {
+        Cowboy cowboy = rider();
+        if (cowboy != null) {
+            HerdCollision.on(level, cowboy);
         }
+    }
+
+    /** How many of his live, loaded horses are home. For the door line only. */
+    private static int horsesHome(Cowboy cowboy, ServerLevel level, BlockPos barn) {
+        int home = 0;
+        for (var member : cowboy.liveHerd(level)) {
+            if (CowboyRoutine.insideBarn(barn, member.blockPosition())) {
+                home++;
+            }
+        }
+        return home;
     }
 
     /**
@@ -459,6 +513,7 @@ public final class CowboyMountGoal extends Goal {
         }
         barnStandingOpen = false;
         doorHeldTicks = 0;
+        restoreShoving(level);
 
         // And a standing guarantee that he can never be sealed in: while he is
         // inside the barn in daylight, its doors get opened. This is what saves

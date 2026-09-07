@@ -197,15 +197,24 @@
 <h3 id="villagers-night">The night &mdash; the most likely thing to be broken</h3>
 
 <ul>
-    <li><strong>At dusk, with zombies about, does he actually ride home?</strong> The
-        reported failure, third round. He used to treat any nearby monster as a reason
-        to run <em>away</em>, which after dark on an open plain is always true &mdash;
-        so the ride home never happened and the running was a dash from one zombie
-        towards the next. Now a threat at night makes him ride <em>for the barn</em> at
-        the bolting speed. Watch him from dusk: he should cross the ground fast, get in,
-        and the doors should shut <strong>once</strong> and stay shut.</li>
-    <li><strong>Do the doors stay shut all night?</strong> They used to flap every tick.
-        Stand outside and watch them for a minute after he is in.</li>
+    <li><strong>CONFIRMED: he rides home at dusk and takes shelter.</strong> Seen
+        2026-09-07 after the disabled-<code>MOVE</code>-flag fix. What is left of this
+        is below.</li>
+    <li><strong>Does the whole string get through the door?</strong> New: while he is
+        home with the doors open, the outfit joins a
+        <code>CollisionRule.NEVER</code> scoreboard team so they can walk through each
+        other instead of jamming the entrance. Watch the doorway at dusk &mdash; it
+        should file rather than scrum. They should <em>not</em> be able to walk through
+        the walls, and they should go back to shoving normally the moment the doors
+        shut.</li>
+    <li><strong>Do the doors actually shut, and stay shut?</strong> The whole point of
+        the round. You should get one chat line: <code>[Cowboy] &lt;name&gt; shut the
+        barn (whole string in, 7/7 in)</code> &mdash; or <code>gave up waiting; some are
+        out</code> after 15 seconds, which is an accepted outcome. No line at all means
+        the shutting is still gated on something he never reaches.</li>
+    <li><strong>Is anybody left standing inside another horse at dawn?</strong> That is
+        the no-push team leaking past the night. Both other duties clear it, so it would
+        mean a duty is never being reached.</li>
     <li><strong>Does he keep his distance from a zombie at noon?</strong> By day there
         is nothing to shut himself into, so a daytime monster is still a plain run-away.
         He should start moving at about 16 blocks and not settle until it is nearly 30
