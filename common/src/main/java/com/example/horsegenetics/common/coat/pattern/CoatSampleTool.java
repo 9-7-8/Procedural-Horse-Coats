@@ -161,6 +161,14 @@ public final class CoatSampleTool {
             {"manchado_black", "manchado=ma/ma"},
             {"manchado_chestnut", "extension=e/e manchado=ma/ma"},
 
+            // sunshine and snowdrop - the two 2019 MATP recessives, and the
+            // look-alikes that are the point of them
+            {"sunshine_bay", "agouti=A/a matp=sun/sun"},
+            {"sunshine_chestnut", "extension=e/e matp=sun/sun"},
+            {"snowdrop_bay", "agouti=A/a matp=sno/sno"},
+            {"cream_sunshine_bay", "agouti=A/a matp=Cr/sun"},
+            {"cream_snowdrop_chestnut", "extension=e/e matp=Cr/sno"},
+
             // dhampir - the carrier is the eyes alone, the homozygote is white
             {"dhampir_trace_bay", "agouti=A/a dhampir=Dhmp/n"},
             {"dhampir", "dhampir=Dhmp/Dhmp"},
@@ -199,12 +207,13 @@ public final class CoatSampleTool {
             1, 4, 6, 2, 8,
             0, 0,
             2,
-            // flaxen x4, sooty x5, pangare x6, rabicano x4, manchado x3, dhampir x3
+            // flaxen x4, sooty x5, pangare x6, rabicano x4, manchado x3, MATP recessives x5, dhampir x3
             3, 1, 5, 0,
             0, 0, 0, 2, 0,
             0, 0, 4, 0, 0, 0,
             2, 1, 6, 3,
             0, 4, 2,
+            0, 3, 0, 0, 0,
             4, 0, 0};
 
     private CoatSampleTool() {}

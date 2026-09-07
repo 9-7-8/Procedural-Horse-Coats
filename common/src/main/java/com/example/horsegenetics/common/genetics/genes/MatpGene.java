@@ -13,7 +13,9 @@ import com.example.horsegenetics.common.genetics.FounderTable;
 import com.example.horsegenetics.common.genetics.Gene;
 import com.example.horsegenetics.common.genetics.Genotype;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -80,6 +82,10 @@ public final class MatpGene implements Gene, EyeColorContribution {
     public static final int WILD_CREAM_ONE_IN = 30;
     /** Founder frequency of {@code prl}: one allele copy in this many. */
     public static final int WILD_PEARL_ONE_IN = 22;
+    /** Founder frequency of {@code sun}: one allele copy in this many. */
+    public static final int WILD_SUNSHINE_ONE_IN = 320;
+    /** Founder frequency of {@code sno}: one allele copy in this many. */
+    public static final int WILD_SNOWDROP_ONE_IN = 360;
 
     // Pigment kept (multiplied), per outcome - so a value of 0.80 is "20% of this
     // pigment restricted away". Set to the owner's measured targets against the
@@ -116,6 +122,17 @@ public final class MatpGene implements Gene, EyeColorContribution {
     private static final float SINGLE_CREAM_TINT = 0.30f;
     private static final float CLASSIC_PEARL_TINT = 0.13f;
     private static final float DOUBLE_DILUTE_TINT = 0.10f;
+    // Sunshine, homozygous: reported as reading closer to CHAMPAGNE than to a
+    // double cream, so these are deliberately near champagne own numbers rather
+    // than a point somewhere between pearl and the double dilute. The
+    // difference that actually shows is the black: sunshine leaves enough of it
+    // for real taupe points on a bay, where a double dilute leaves almost none
+    // and the points go rusty-white. On a chestnut, which has no black to keep,
+    // the two are nearly the same colour - and so are a gold champagne and a
+    // cremello already, for the same reason (known gap #49).
+    private static final float SUNSHINE_RED = 0.58f;
+    private static final float SUNSHINE_BLACK = 0.38f;
+    private static final float SUNSHINE_TINT = 0.26f;
 
     /** {@code Cr/Cr} - the cremello / perlino pale blue. */
     public static final int DOUBLE_CREAM_BLUE = 0x93C4E4;
@@ -123,11 +140,43 @@ public final class MatpGene implements Gene, EyeColorContribution {
     public static final int CREAM_PEARL_GREEN = 0x59A08F;
     /** {@code prl/prl} - light and bright rather than blue. */
     public static final int PEARL_LIGHT = 0xB99B5E;
+    /** {@code sun/sun} - lighter than an undiluted eye and nowhere near the double-cream blue. */
+    public static final int SUNSHINE_AMBER = 0xA98A55;
 
+    /**
+     * <b>Declaration order is not a dominance ranking.</b> It is
+     * {@link AllelePair}s canonical slot order, which is what a genotype code
+     * prints and what {@code first()} means - so cream stays first, and a
+     * {@code Cr/prl} horse still reads "Crprl" rather than "prlCr".
+     *
+     * <p>It has one other consequence, and it was worth trying the other way
+     * round to find out: {@code GenotypeCatalog.allPairsOf} walks this list
+     * <b>backwards</b>, so the <i>last</i>-declared allele is met first and the
+     * first homozygote in an outcome group gets that outcome pen in the
+     * gallery. With cream first, the double-dilute pen is labelled
+     * {@code sno/sno} rather than {@code Cr/Cr}. Both really are double
+     * dilutes - that is the whole point of snowdrop - and a slightly odd pen
+     * label is a much smaller cost than a genotype code that prints its cream
+     * allele second everywhere it is shown.
+     */
     public final Allele Cr = new Allele(KEY, 0, "Cr", "Cream (Cr)");
     public final Allele prl = new Allele(KEY, 1, "prl", "Pearl (prl)");
-    public final Allele N = new Allele(KEY, 2, "N", "Wild-type (N)");
-    private final List<Allele> alleles = List.of(Cr, prl, N);
+    /**
+     * <b>Sunshine</b> - a rare recessive dilution at this same locus, found in
+     * 2019. Two copies read closer to champagne than to a double cream; one
+     * beside a cream copy reads as a double cream, which is the trap: a
+     * {@code Cr/sun} horse looks like a cremello and carries only one cream
+     * allele, so it passes cream to half its foals rather than all of them.
+     */
+    public final Allele sun = new Allele(KEY, 2, "sun", "Sunshine (sun)");
+    /**
+     * <b>Snowdrop</b> - the other 2019 recessive here, found in a Gypsy horse
+     * born pale out of two visibly undiluted parents. It dilutes both pigments
+     * hard when homozygous and is indistinguishable from a double cream by eye.
+     */
+    public final Allele sno = new Allele(KEY, 3, "sno", "Snowdrop (sno)");
+    public final Allele N = new Allele(KEY, 4, "N", "Wild-type (N)");
+    private final List<Allele> alleles = List.of(Cr, prl, sun, sno, N);
 
     private final Expression WILD = Expression.wildType("No dilution.");
 
@@ -153,8 +202,20 @@ public final class MatpGene implements Gene, EyeColorContribution {
                     + "does one cream with one pearl.")
             .restrict(dilution(DOUBLE_DILUTE_RED, DOUBLE_DILUTE_BLACK, DOUBLE_DILUTE_TINT));
 
-    private final List<Expression> expressions =
-            List.of(WILD, PEARL_CARRIER, SINGLE_CREAM, CLASSIC_PEARL, DOUBLE_DILUTE);
+    private final Expression DILUTION_CARRIER = Expression.wildType(
+            "dilution-carrier", "Dilution carrier",
+            "One copy of sunshine or snowdrop, and nothing to see. Both are recessive and both "
+                    + "look exactly like a horse carrying neither - which is how the first "
+                    + "snowdrop foal was born pale out of two apparently undiluted parents.");
+
+    private final Expression SUNSHINE = Expression.of("sunshine", "Sunshine")
+            .describe("Two sunshine copies. A whole-coat dilution that reads closer to champagne "
+                    + "than to a cremello - warm and light rather than washed out - and, unlike "
+                    + "the double dilutes, it does not give the horse a pale blue eye.")
+            .restrict(dilution(SUNSHINE_RED, SUNSHINE_BLACK, SUNSHINE_TINT));
+
+    private final List<Expression> expressions = List.of(WILD, PEARL_CARRIER, DILUTION_CARRIER,
+            SINGLE_CREAM, CLASSIC_PEARL, SUNSHINE, DOUBLE_DILUTE);
 
     /**
      * The six combinations at their Hardy-Weinberg shares given
@@ -162,14 +223,25 @@ public final class MatpGene implements Gene, EyeColorContribution {
      * computed so the numbers are readable and an author can retune one row
      * without touching the others.
      */
-    private final FounderTable founders = FounderTable.builder()
-            .weight(Cr, Cr, 0.111111)
-            .weight(Cr, prl, 0.303030)
-            .weight(Cr, N, 6.141414)
-            .weight(prl, prl, 0.206612)
-            .weight(prl, N, 8.374656)
-            .weight(N, N, 84.863177)
-            .build();
+    private final FounderTable founders = FounderTable.hardyWeinberg(frequencies(), pair -> true);
+
+    /**
+     * Population frequency per allele. Cream and pearl keep the numbers the two
+     * old genes carried; sunshine and snowdrop are <b>very</b> much rarer - each
+     * was found once, in one horse, in 2019 - so they sit an order of magnitude
+     * below pearl and a homozygote is something a player breeds rather than
+     * meets.
+     */
+    private Map<Allele, Double> frequencies() {
+        Map<Allele, Double> p = new LinkedHashMap<>();
+        p.put(Cr, 1.0 / WILD_CREAM_ONE_IN);
+        p.put(prl, 1.0 / WILD_PEARL_ONE_IN);
+        p.put(sun, 1.0 / WILD_SUNSHINE_ONE_IN);
+        p.put(sno, 1.0 / WILD_SNOWDROP_ONE_IN);
+        p.put(N, 1.0 - 1.0 / WILD_CREAM_ONE_IN - 1.0 / WILD_PEARL_ONE_IN
+                - 1.0 / WILD_SUNSHINE_ONE_IN - 1.0 / WILD_SNOWDROP_ONE_IN);
+        return p;
+    }
 
     @Override public String key() { return KEY; }
     @Override public String name() { return "MATP (cream / pearl)"; }
@@ -187,16 +259,42 @@ public final class MatpGene implements Gene, EyeColorContribution {
     public Expression expressionOf(AllelePair pair) {
         int cream = pair.count(Cr);
         int pearl = pair.count(prl);
-        if (cream == 2 || (cream == 1 && pearl == 1)) {
+        int sunshine = pair.count(sun);
+        int snowdrop = pair.count(sno);
+        int recessives = pearl + sunshine + snowdrop;
+
+        // Cream is the only allele here that shows on its own, so it is read
+        // first. Beside ANY of the three recessives it lands on the double
+        // dilute - Cr/prl was already that row, and Cr/sun and Cr/sno are
+        // reported as looking like a double cream, which is the whole reason
+        // the two new alleles matter: a cremello-looking horse carrying one
+        // cream allele passes cream to only half its foals.
+        if (cream == 2 || (cream == 1 && recessives == 1)) {
             return DOUBLE_DILUTE;
         }
         if (cream == 1) {
             return SINGLE_CREAM;
         }
-        if (pearl == 2) {
+        // Snowdrop dilutes both pigments hard and is indistinguishable from a
+        // double cream by eye, whether doubled or compounded with another
+        // recessive - so it takes the same row rather than a near-identical one
+        // nobody could tell apart.
+        if (snowdrop == 2 || (snowdrop == 1 && recessives == 2)) {
+            return DOUBLE_DILUTE;
+        }
+        if (sunshine == 2) {
+            return SUNSHINE;
+        }
+        // prl/sun is the one compound nobody has documented. It resolves to
+        // classic pearl - the milder of the two claims - rather than to
+        // something invented for it.
+        if (pearl == 2 || (pearl == 1 && sunshine == 1)) {
             return CLASSIC_PEARL;
         }
-        return pearl == 1 ? PEARL_CARRIER : WILD;
+        if (recessives == 1) {
+            return pearl == 1 ? PEARL_CARRIER : DILUTION_CARRIER;
+        }
+        return WILD;
     }
 
     /** How many cream copies - for the wiki and anything that wants the dose. */
@@ -219,14 +317,23 @@ public final class MatpGene implements Gene, EyeColorContribution {
                                        double whiteCoverage) {
         int cream = pair.count(Cr);
         int pearl = pair.count(prl);
-        if (cream == 2) {
-            return Optional.of(EyeColor.dilution("cream-blue", "Cream blue", DOUBLE_CREAM_BLUE));
-        }
+        Expression coat = expressionOf(pair);
         if (cream == 1 && pearl == 1) {
+            // The one row where cream and pearl disagree about the eye, and the
+            // mod ordinary source of a green iris.
             return Optional.of(EyeColor.dilution("cream-pearl-green", "Blue-green", CREAM_PEARL_GREEN));
         }
-        if (pearl == 2) {
+        if (coat == DOUBLE_DILUTE) {
+            // Every route to a double dilute gives the pale blue - two creams,
+            // a cream beside a recessive, or two snowdrops. That is the point of
+            // the look-alikes: the eye does not tell them apart either.
+            return Optional.of(EyeColor.dilution("cream-blue", "Cream blue", DOUBLE_CREAM_BLUE));
+        }
+        if (coat == CLASSIC_PEARL) {
             return Optional.of(EyeColor.dilution("pearl-light", "Pale pearl", PEARL_LIGHT));
+        }
+        if (coat == SUNSHINE) {
+            return Optional.of(EyeColor.dilution("sunshine-amber", "Pale amber", SUNSHINE_AMBER));
         }
         return Optional.empty();
     }

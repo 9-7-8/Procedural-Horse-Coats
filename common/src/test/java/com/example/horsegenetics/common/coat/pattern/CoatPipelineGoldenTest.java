@@ -93,6 +93,14 @@ class CoatPipelineGoldenTest {
             override("manchado=ma/ma"),
             override("extension=e/e", "manchado=ma/ma"),
             override("agouti=A/a", "manchado=ma/Ma"),                    // a silent carrier
+            // sunshine and snowdrop: two more MATP recessives and their look-alikes
+            override("agouti=A/a", "matp=sun/sun"),
+            override("extension=e/e", "matp=sun/sun"),
+            override("agouti=A/a", "matp=sno/sno"),
+            override("agouti=A/a", "matp=Cr/sun"),
+            override("extension=e/e", "matp=Cr/sno"),
+            override("agouti=A/a", "matp=prl/sun"),
+            override("agouti=A/a", "matp=sun/N"),
             override("kit=W22/N"),
             override("champagne=Ch/c"),
             override("agouti=A/a", "champagne=Ch/c"),

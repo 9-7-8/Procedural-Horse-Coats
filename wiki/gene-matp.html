@@ -59,24 +59,64 @@
 
 <dl class="spec">
     <div><dt>Gene key</dt><dd>horsegenetics.matp</dd></div>
-    <div><dt>Alleles</dt><dd><span class="allele dom">Cr</span> <span class="allele rec">prl</span> <span class="allele wild">N</span></dd></div>
-    <div><dt>Combinations</dt><dd>6</dd></div>
-    <div><dt>Outcomes</dt><dd>4 (plus a carrier wild type)</dd></div>
+    <div><dt>Alleles</dt><dd><span class="allele dom">Cr</span> <span class="allele rec">prl</span> <span class="allele rec">sun</span> <span class="allele rec">sno</span> <span class="allele wild">N</span></dd></div>
+    <div><dt>Combinations</dt><dd>15</dd></div>
+    <div><dt>Outcomes</dt><dd>5, plus two carrier wild types</dd></div>
     <div><dt>Default allele</dt><dd>N</dd></div>
     <div><dt>Priority</dt><dd>40</dd></div>
     <div><dt>Founder draws</dt><dd>1 &times; nextFloat()</dd></div>
     <div><dt>Deterministic</dt><dd>yes</dd></div>
 </dl>
 
+<h2 id="four-alleles">Four dilutions at one locus</h2>
+
+<p>
+    <code>SLC45A2</code> carries four known dilution alleles, and they are alleles
+    of the <em>same gene</em> &mdash; which is the single most consequential fact
+    about it, because it means they compete for the two slots a horse has and can
+    compound with each other.
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Allele</th><th>Found</th><th>On its own</th></tr></thead>
+<tbody>
+<tr><td><span class="allele dom">Cr</span> cream</td><td>long known, testable</td><td>One copy already shows &mdash; palomino, buckskin, smoky black</td></tr>
+<tr><td><span class="allele rec">prl</span> pearl</td><td>long known, testable</td><td>Recessive. One copy is invisible</td></tr>
+<tr><td><span class="allele rec">sun</span> sunshine</td><td><strong>2019</strong></td><td>Recessive. Two copies read closer to champagne than to a double cream</td></tr>
+<tr><td><span class="allele rec">sno</span> snowdrop</td><td><strong>2019</strong>, in one Gypsy horse</td><td>Recessive. Two copies dilute both pigments hard &mdash; indistinguishable from a double cream</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="note warn">
+    <span class="label">The look-alike trap, and why the two new alleles matter</span>
+    <p>
+        A <code>Cr/sun</code> or <code>Cr/sno</code> horse <strong>looks like a
+        cremello or a perlino and carries only one cream allele</strong>. A true
+        <code>Cr/Cr</code> horse passes cream to <em>every</em> foal; a compound
+        heterozygote passes it to half. Two apparently identical pale horses are
+        therefore completely different breeding propositions, and no amount of
+        looking will tell them apart.
+    </p>
+    <p>
+        The same trap runs the other way: the first snowdrop foal was born pale out
+        of two visibly undiluted parents, both <code>N/sno</code> carriers. In real
+        life the standard cream test detects only the cream mutation, so a pale
+        horse has to be tested for snowdrop specifically. Here, the genome display
+        is that test.
+    </p>
+</div>
+
 <h2>The combination table</h2>
 
 <p>
     This is the table no single word describes. <code>Cr</code> on its own is a
     partial dilution; <code>prl</code> on its own is nothing; two <code>prl</code>
-    is a different dilution again; and one of each is the <em>strongest</em> of
-    the three. &ldquo;Incomplete dominant&rdquo; was never going to say that,
-    which is why there is no dominance property any more &mdash; the six rows
-    below are the whole model.
+    is a different dilution again; and one of each is <em>stronger</em> than either.
+    &ldquo;Incomplete dominant&rdquo; was never going to say that, which is why
+    there is no dominance property any more &mdash; the rows below are the whole
+    model.
 </p>
 
 <div class="table-wrap">
@@ -89,6 +129,11 @@
 <tr><td><code>prl/prl</code></td><td><code>classic-pearl</code></td><td>Black cut hard and red barely touched &mdash; a warm, lightened coat that keeps its colour rather than washing out.</td></tr>
 <tr><td><code>Cr/prl</code></td><td><code>double-dilute</code></td><td>The two complement: one of each acts as a double cream.</td></tr>
 <tr><td><code>Cr/Cr</code></td><td><code>double-dilute</code></td><td>Cremello, perlino or smoky cream &mdash; a near-white body over rusty points.</td></tr>
+<tr><td><code>sun/N</code>, <code>sno/N</code></td><td><code>dilution-carrier</code> <span class="tag">wild type</span></td><td>Nothing to see. Both are recessive and both look exactly like a horse carrying neither.</td></tr>
+<tr><td><code>sun/sun</code></td><td><code>sunshine</code></td><td>A whole-coat dilution that reads closer to <a href="gene-champagne.html">champagne</a> than to a cremello &mdash; warm and light rather than washed out. Its numbers are deliberately near champagne&rsquo;s own.</td></tr>
+<tr><td><code>sno/sno</code>, <code>Cr/sun</code>, <code>Cr/sno</code></td><td><code>double-dilute</code></td><td>The same row as <code>Cr/Cr</code>, because they are the same horse to look at. That is the point of both alleles.</td></tr>
+<tr><td><code>prl/sun</code></td><td><code>classic-pearl</code></td><td>The one compound nobody has documented. It resolves to the milder of the two claims rather than to something invented for it.</td></tr>
+<tr><td><code>prl/sno</code>, <code>sun/sno</code></td><td><code>double-dilute</code></td><td>Snowdrop dilutes hard whatever it is beside.</td></tr>
 </tbody>
 </table>
 </div>
@@ -105,7 +150,7 @@
     </p>
 </div>
 
-<h2 id="eye">The eye follows the same six rows</h2>
+<h2 id="eye">The eye follows the same rows</h2>
 
 <p>
     A double dilute's pale blue eye is the famous one, and it is <em>not</em> the blue of a
@@ -118,10 +163,12 @@
 <table>
 <thead><tr><th>Combination</th><th>Iris</th></tr></thead>
 <tbody>
-<tr><td><code>N/N</code>, <code>prl/N</code>, <code>Cr/N</code></td><td>Untouched &mdash; a single cream copy does not reach the eye</td></tr>
+<tr><td><code>N/N</code>, <code>prl/N</code>, <code>sun/N</code>, <code>sno/N</code>, <code>Cr/N</code></td><td>Untouched &mdash; a single cream copy does not reach the eye, and a single recessive copy does nothing at all</td></tr>
 <tr><td><code>Cr/Cr</code></td><td>Pale cream blue &mdash; the cremello / perlino eye</td></tr>
 <tr><td><code>Cr/prl</code></td><td><strong>Blue-green.</strong> The compound heterozygote is the one row where cream and pearl disagree about the eye, and it is the mod's ordinary source of a green iris</td></tr>
 <tr><td><code>prl/prl</code></td><td>Pale and bright rather than blue &mdash; the light eye pearl is described by</td></tr>
+<tr><td><code>sun/sun</code></td><td><strong>Pale amber.</strong> Not blue, which is the one thing that separates a sunshine from the double dilutes it otherwise resembles</td></tr>
+<tr><td>every other route to <code>double-dilute</code></td><td>The same pale cream blue. The eye does not tell the look-alikes apart either &mdash; only the genotype does</td></tr>
 </tbody>
 </table>
 </div>

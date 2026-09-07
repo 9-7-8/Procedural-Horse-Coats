@@ -108,11 +108,14 @@ public final class GeneDescriptions {
                             + "and are fixed for life (there is no aging). A foal is born its base "
                             + "colour."),
             Map.entry("horsegenetics.matp",
-                    "The cream / pearl locus - one gene, three alleles (Cr, prl, N). One cream copy "
-                            + "is a partial dilution (palomino / buckskin / smoky black); two pearl "
-                            + "is a milder uniform dilution; cream plus pearl, or two cream, is a "
-                            + "full double dilute (cremello / perlino). A single pearl copy is an "
-                            + "invisible carrier."),
+                    "The dilution locus - one gene, five alleles (Cr, prl, sun, sno, N). One cream "
+                            + "copy is a partial dilution (palomino / buckskin / smoky black); two "
+                            + "cream, or cream beside any of the three recessives, is a full double "
+                            + "dilute. Pearl needs two copies for a milder uniform dilution; "
+                            + "sunshine needs two and reads like champagne; snowdrop needs two and "
+                            + "is indistinguishable from a double cream. That last part is the "
+                            + "point: a horse that looks like a cremello may carry one cream allele "
+                            + "or none, and only its genotype says which."),
             Map.entry("horsegenetics.magic_zebra",
                     "A magical (invented) gene: a zebra's stripe map painted in hard black - "
                             + "vertical bands off the spine, arcs round the hip, rings down the "

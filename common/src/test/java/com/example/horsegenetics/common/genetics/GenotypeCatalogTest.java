@@ -69,9 +69,17 @@ class GenotypeCatalogTest {
         // EDNRB: three combinations, three outcomes - the carrier and the
         // homozygous lethal white are not the same horse
         assertEquals(List.of("NN", "ON", "OO"), tokens(GenotypeCatalog.distinctPairsOf(Genes.EDNRB)));
-        // three alleles, six combinations. Five outcomes, but "wild" and the
-        // pearl carrier are both wild types and look the same, so four pens.
-        assertEquals(List.of("NN", "prlprl", "CrN", "CrCr"),
+        // Five alleles, fifteen combinations, seven outcomes - and five pens,
+        // because the wild type, the pearl carrier and the sunshine / snowdrop
+        // carrier all look identical and collapse into one. The double dilute
+        // is represented by sno/sno rather than by Cr/Cr, which looks wrong and
+        // is not: allPairsOf walks the allele list backwards, snowdrop is
+        // declared after cream, and a sno/sno horse genuinely is a double
+        // dilute - that is the entire point of the allele. Cream stays declared
+        // first because declaration order is what a genotype code prints, and
+        // "Crprl" reading before "prlCr" everywhere a horse is inspected is
+        // worth more than one gallery pen label.
+        assertEquals(List.of("NN", "snosno", "sunsun", "prlprl", "CrN"),
                 tokens(GenotypeCatalog.distinctPairsOf(Genes.MATP)));
         // pink hair's carrier likewise folds into its wild type
         assertEquals(List.of("PihrPihr", "nn"), tokens(GenotypeCatalog.distinctPairsOf(Genes.PINK_HAIR)));
