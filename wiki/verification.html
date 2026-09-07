@@ -889,6 +889,66 @@
         finds white) without becoming a white blob.</li>
 </ul>
 
+<h2 id="roans">&sect;0-F3 &mdash; the two roans, rebuilt (2026-09-06, NOT looked at)</h2>
+
+<p>
+    Classic roan and the leopard complex's varnish roan were both re-derived from a
+    region-by-region reference, and the point of the pass was that they had drifted into
+    being the <em>same pattern at two strengths</em>. They are told apart by shape, not
+    by how much white there is. Full accounts on
+    <a href="gene-roan.html#shape">the roan page</a> and
+    <a href="gene-leopard.html#varnish-marks">the leopard page</a>.
+</p>
+
+<div class="note good">
+    <span class="label">What was measured offline, and is now pinned</span>
+    <p>
+        <code>RoanPatternsTest</code> is the reference's own identification checklist run
+        against the pipeline: classic roan even across the trunk (five zones within 0.08
+        luma), no shoulder shield (within 0.06), solid head / mane / tail / lower leg, a
+        roaned neck that thins toward the poll, and the inverted V. Varnish: dark
+        shields over the shoulder and hip (0.36&ndash;0.54 luma darker than the barrel),
+        a whitened head where classic roan's is dark, and measurably patchier.
+    </p>
+</div>
+
+<p>Spawn <code>roan=Rn/rn</code> and <code>leopard=LP/LP</code> horses and look for:</p>
+
+<ul>
+    <li><strong>Does classic roan read as one even coat?</strong> The old gene faded
+        front-to-back and left a nearly-unroaned shoulder, so the horse looked like it
+        was wearing a dark cape. Walk down the side: shoulder, barrel and hip should all
+        look the same.</li>
+    <li><strong>Is a blue roan slate, not grey?</strong> The density is tuned so black
+        plus white hairs reads as a dark horse with white through it. If it looks like a
+        <a href="gene-grey.html">grey</a>, the white fraction is too high and the two
+        genes are competing for the same look.</li>
+    <li><strong>The inverted V.</strong> Half-way up each leg the middle of the face
+        should still be base-coloured while the edges have roaned. This is a
+        <strong>three-or-four-texel</strong> feature on a leg face, so the honest
+        question is whether it reads as a point at all or just as a ragged line. If it
+        does not, it is not worth keeping.</li>
+    <li><strong>The dark mask.</strong> A solid head against a roaned neck. Roughly one
+        roan in three also gets a little forehead white &mdash; confirm that reads as a
+        few white hairs and not as a <a href="pipeline.html#face-markings">star</a>.</li>
+    <li><strong>Varnish marks.</strong> The headline change. A varnish horse should look
+        outlined by its own skeleton: darker over the shoulder blade, the point of the
+        hip, the elbow, stifle, knee and hock, and over the cheekbones. Check the
+        shields do not read as <em>patches</em> &mdash; they are meant to be shaded
+        regions with ragged edges, and a hard-edged dark oval over the shoulder would be
+        worse than the gradient it replaced.</li>
+    <li><strong>Do the two roans look like different patterns?</strong> The whole
+        purpose of the pass. Put a <code>Rn/rn</code> next to an <code>LP/LP</code> and
+        confirm nobody would call them the same gene. If they still read alike, the
+        varnish mottle wants to be coarser still.</li>
+    <li><strong>Both at once.</strong> <code>roan=Rn/rn</code> plus
+        <code>leopard=LP/LP</code> is in the golden set now. Confirm it does not come out
+        white &mdash; two roaning genes stacking is the case most likely to over-shoot.</li>
+    <li><strong>The foal.</strong> A foal has no <code>MANE</code> or
+        <code>MUZZLE</code> part and its legs are short, so the chevron and the leg
+        marks have very little room. Check a roan foal still has dark legs.</li>
+</ul>
+
 <h2 id="magical-utility">&sect;0a &mdash; the seven magical utility genes (new 2026-09-04, NOT play-tested)</h2>
 
 <p>

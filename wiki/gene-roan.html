@@ -15,11 +15,12 @@
 <p class="eyebrow natural">Natural gene <span class="sep">/</span> phase 1</p>
 <h1>Roan</h1>
 <p class="lede">
-    White hairs mixed evenly through the <strong>body coat</strong> while the head,
-    mane, tail and lower legs stay solid. At 128&nbsp;px that is a high-frequency
-    dither &mdash; each body texel is either a white hair or a coloured one &mdash;
-    from a <a href="body-space.html"><code>BodyNoise</code></a> field sampled in body
-    space so the mix carries across part seams. The cheapest pattern gene in the mod.
+    <strong>Classic</strong> or <strong>true</strong> roan: an even salt-and-pepper of
+    white hairs through the whole trunk, over a base colour it does not change. Black
+    plus white hairs is a <strong>blue roan</strong>, chestnut plus white a
+    <strong>strawberry</strong>, bay plus white a <strong>bay roan</strong>. The
+    leopard complex's <a href="gene-leopard.html">varnish roan</a> shares the word and
+    almost nothing else.
 </p>
 
 <!-- The gene, on the three base coats, as a horse you can spin. One div and one
@@ -31,25 +32,96 @@
     <div><dt>Gene key</dt><dd>horsegenetics.roan</dd></div>
     <div><dt>Alleles</dt><dd><span class="allele dom">Rn</span> <span class="allele wild">rn</span></dd></div>
     <div><dt>Outcomes</dt><dd>wild, <code>roan</code></dd></div>
-    <div><dt>Shows when</dt><dd><code>Rn/rn</code>, <code>Rn/Rn</code></dd></div>
+    <div><dt>Shows when</dt><dd><code>Rn/rn</code>, <code>Rn/Rn</code> &mdash; and the two are not reliably distinguishable, here or in life</dd></div>
     <div><dt>Default allele</dt><dd>rn</dd></div>
     <div><dt>Wild frequency</dt><dd>1 in 30 per allele</dd></div>
     <div><dt>Founder draws</dt><dd>1 &times; nextFloat()</dd></div>
     <div><dt>Deterministic</dt><dd><strong>no</strong> &mdash; the dither seed rides on the <code>Rn</code> copy</dd></div>
-    <div><dt>Epi draws</dt><dd>nextLong() seed, then nextFloat() extra density</dd></div>
-    <div><dt>White fraction</dt><dd>~0.42 of body texels at the rear, tapering forward</dd></div>
-    <div><dt>Noise</dt><dd>PatchNoise.fbm2, ~2.6 per body unit</dd></div>
+    <div><dt>Epi draws</dt><dd>nextLong() seed, nextFloat() density, nextFloat() forehead</dd></div>
+    <div><dt>Coat effect</dt><dd>the whole trunk evenly; the head, mane, tail and lower legs are spared</dd></div>
 </dl>
 
-<h2>The whole gene</h2>
+<div class="note warn">
+    <span class="label">Rebuilt 2026-09-06 against the reference, NOT yet looked at</span>
+    <p>
+        The distribution was re-derived from a region-by-region description of real
+        classic roan and it moved a long way. The gene used to fade
+        <strong>front-to-back</strong> from the hindquarters, which left the shoulder
+        nearly unroaned &mdash; measured 0.27 against 0.80 at the hip &mdash; and a
+        strongly defined dark shoulder is a <em>varnish</em> trait that classic roan
+        specifically does not have. It also drew the leg boundary as a level band where
+        the real thing ends in a point. Both are fixed, and both are pinned in
+        <code>RoanPatternsTest</code>.
+    </p>
+</div>
+
+<h2 id="shape">The shape is what identifies it</h2>
+<p>
+    Classic roan is recognised by its <strong>distribution</strong>, and as much by what
+    it spares as by what it covers. Each row is a claim the reference makes and the
+    thing in <code>RoanGene.regionWeight</code> that answers it.
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Region</th><th>What classic roan does</th><th>How it is drawn</th></tr></thead>
+<tbody>
+<tr>
+    <td><strong>The whole trunk</strong></td>
+    <td>Broad, relatively even mixture over barrel, shoulder, back, flank, belly and hip. No front-to-back gradient, and no dark &ldquo;shoulder shield&rdquo;.</td>
+    <td>Weight 1.0 across the entire <code>BODY</code> part. The test asserts the five zones land within 0.08 luma of each other.</td>
+</tr>
+<tr>
+    <td><strong>Neck</strong></td>
+    <td>Roaned, often substantially, most so low and mid; it blends into the shoulder.</td>
+    <td>Full at the base, thinning to <code>NECK_TAPER</code> toward the poll, measured along the neck's own height so it does not depend on the barrel.</td>
+</tr>
+<tr>
+    <td><strong>Head</strong></td>
+    <td>Solid or nearly solid &mdash; the <strong>dark mask</strong>. Some individuals carry a little white on the forehead.</td>
+    <td>Zero, except a rolled forehead amount that is zero on about two horses in three and small when it fires.</td>
+</tr>
+<tr>
+    <td><strong>Lower legs</strong></td>
+    <td>Predominantly base-coloured, with the dark rising into the roaned limb in a pointed, <strong>inverted-V</strong> boundary &mdash; roan's most characteristic edge.</td>
+    <td><a href="#chevron"><code>chevronWeight</code></a>.</td>
+</tr>
+<tr>
+    <td><strong>Mane and tail</strong></td>
+    <td>Keep the base colour. An extensively whitening mane is not the classic-roan template.</td>
+    <td>Excluded outright, along with the ears.</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<h2 id="chevron">The inverted V, and the bug it replaced</h2>
+<p>
+    The dark distal leg does not end on a level line: it rises into the roaning in a
+    point, highest in the middle of the leg and lowest at its edges. It is the edge a
+    photograph is read for when the body alone is ambiguous, so it is worth drawing
+    properly.
+</p>
+<p>
+    <strong>Measured across the face being painted, not from the leg's axis.</strong> A
+    leg is a box, so every texel sits on one of its flat sides and is therefore
+    <em>always</em> at the surface &mdash; a cone measured from the axis comes out at
+    its outer radius everywhere and draws exactly the level line it was meant to
+    replace. That was the first attempt, and it measured as a perfectly flat boundary.
+    <code>Face.spanA()</code> is the horizontal axis of whichever side is being
+    painted, so the point rises in the middle of each face and the V reads from any
+    angle.
+</p>
+
+<h2>The pigment trick</h2>
 
 <div class="codebox">
 <div class="filename">common/genetics/genes/RoanGene.java</div>
-<pre><code class="language-java">double region = regionWeight(skin, part, point, frontStart, frontEnd); // 1 rear .. 0 head
-double n = PatchNoise.fbm2(seed, x * FREQ, y * FREQ, z * FREQ * 1.6);
-// a texel is a white hair OR a coloured hair - the *fraction* white varies
-// smoothly with region. Near-binary with a ~1px soft edge, so the flecks read
-// crisp but not aliased, and never through the gradient's warm mid-tones.
+<pre><code class="language-java">double region = regionWeight(skin, part, face, point, neck, head, forehead);
+double n = BodyNoise.value(seed, x * FREQ, y * FREQ, z * FREQ * 1.6);
+// a texel is a white hair OR a coloured hair - the *fraction* white is what
+// region sets. Near-binary with a ~1px soft edge, so the flecks read crisp but
+// not aliased, and never through the gradient's warm mid-tones.
 double threshold = 1.0 - region * (WHITE_FRACTION + density);
 double w = smoothstep(threshold - EDGE, threshold + EDGE, n);
 // on the soft edge pull red down faster than black, so a partial texel greys
@@ -70,21 +142,41 @@ f.setBlack(px, py, black * (1 - w));</code></pre>
         <a href="gene-mitf.html">splash</a> and <a href="gene-kit.html">dominant
         white</a> use.
     </p>
+    <p>
+        <b>One octave, not two.</b> The mix was <code>PatchNoise.fbm2</code>, whose
+        low octave carries most of the weight and clumps the white into flecks. Classic
+        roan is a <em>distribution of individual hairs</em>, so it is a single
+        <code>BodyNoise.value</code> octave at about one lattice cell per texel, which
+        makes neighbouring texels near-independent. Patchiness is varnish's job.
+    </p>
 </div>
-
-<p>
-    <code>regionWeight</code> is <b>1 over the hindquarters</b>, tapering forward from
-    mid-barrel and feathering out across the neck, so the roan never ends on a hard
-    line against the solid face; on the legs it fades to nothing toward the hoof. The
-    head, mane, tail and ears are excluded outright.
-</p>
 
 <h2>Result</h2>
 <p>
-    Blue roan on a black base, red roan on a chestnut, bay roan on a bay &mdash; the
-    body reads as a lighter, hazier version of the base colour with a solid-coloured
-    head and points. Density varies horse to horse from the second epigenetic draw.
+    Blue roan on a black base, strawberry on a chestnut, bay roan on a bay &mdash; the
+    trunk reads as a lighter, hazier version of the base colour with a solid head and
+    points. The density varies horse to horse, and is tuned so a blue roan comes out
+    <strong>slate</strong> rather than grey: a mixture that reaches three quarters white
+    has stopped being one.
 </p>
+
+<h2 id="not-varnish">Not varnish roan</h2>
+<p>
+    The two share a word and are told apart by shape, not by how much white there is.
+    <code>RoanPatternsTest</code> is that comparison, run against the real pipeline.
+</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th></th><th>Classic roan (this gene)</th><th><a href="gene-leopard.html">Varnish roan</a></th></tr></thead>
+<tbody>
+<tr><td><strong>Distribution</strong></td><td>Even salt-and-pepper across the trunk</td><td>Irregular pale areas &mdash; measurably patchier</td></tr>
+<tr><td><strong>Head</strong></td><td>Dark. The mask is diagnostic.</td><td>Whitens too, keeping colour only over facial bone</td></tr>
+<tr><td><strong>Shoulder / hip</strong></td><td>Roaned like the rest &mdash; no shield</td><td>Dark anatomical shields</td></tr>
+<tr><td><strong>Legs</strong></td><td>Dark below an inverted-V boundary</td><td>Colour kept over the knee and hock themselves, not a uniform lower-leg exclusion</td></tr>
+<tr><td><strong>Locus</strong></td><td>Its own, near <code>KIT</code></td><td><code>TRPM1</code>, with the rest of the leopard complex</td></tr>
+</tbody>
+</table>
+</div>
 
 <h2 id="carrot">Its gene carrot</h2>
 
@@ -92,6 +184,7 @@ f.setBlack(px, py, black * (1 - w));</code></pre>
      price, and a price written into fifty pages goes stale silently.
      See wiki/gene-carrot/gene-carrot.js. -->
 <div class="gene-carrot" data-gene="horsegenetics.roan"></div>
+
 
 <div class="page-foot">
     <div class="seealso">

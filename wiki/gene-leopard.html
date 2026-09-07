@@ -67,12 +67,14 @@
 </div>
 
 <ul>
-    <li><b><code>mottled</code></b> &mdash; light roaning that spares the face and legs,
-        a few small white spots, plus the always-on triad. The appaloosa
+    <li><b><code>mottled</code></b> &mdash; light, uneven roaning that keeps its colour
+        over the bones, a few small white spots, plus the always-on triad. The appaloosa
         &ldquo;look&rdquo; without a bold pattern.</li>
-    <li><b><code>varnish-roan</code></b> &mdash; heavier, uneven roaning over the body
-        and neck that <em>reaches the head</em>, leaving darker &ldquo;varnish
-        marks&rdquo; on the bony parts. Distinct from true <a href="gene-roan.html">roan</a>.</li>
+    <li><b><code>varnish-roan</code></b> &mdash; heavy, uneven whitening that
+        <em>reaches the head</em> and leaves darker <a href="#varnish-marks">varnish
+        marks</a> over the horse&rsquo;s bony prominences, so it ends up outlined by its
+        own anatomy. <a href="#varnish-marks">Not true <code>roan</code></a>, and not a
+        stronger version of it.</li>
     <li><b><code>leopard</code></b> &mdash; a white body carrying round dark spots of the
         base colour, head to hoof.</li>
     <li><b><code>fewspot</code></b> &mdash; almost solid white, a handful of spots left.</li>
@@ -131,7 +133,65 @@
 <tbody>
 <tr><td>leopard, fewspot</td><td><code>paintSpotted</code></td><td>the whole horse white; round base-colour spots punched back in from a <a href="body-space.html"><code>BodyNoise.cellDistance</code></a> (Worley) field &mdash; a spot where the distance to the nearest jittered cell centre is under a radius. Fewspot uses a wider spacing and a smaller radius.</td></tr>
 <tr><td>blanket, snowcap, semi-leopard</td><td><code>paintBlanket</code></td><td>white from the rump forward to a <code>coverage</code> fraction of the <code>BODY</code> X-span, the front edge wobbled with value noise; spots inside via the same Worley field (snowcap sets density to zero). A large blanket creeps onto the top of the hind legs.</td></tr>
-<tr><td>mottled, varnish-roan</td><td><code>paintVarnish</code></td><td>a hair-by-hair white mix from a two-octave fractal, weighted 1 over the barrel and neck, ~&frac12; over the head, fading to nothing at the hooves and zero on the mane / tail / ears. Slightly asymmetric (LP varnish is). Mottled also drops a few crisp white snowflake spots.</td></tr>
+<tr><td>mottled, varnish-roan</td><td><code>paintVarnish</code></td><td>a <strong>coarse</strong> white mix from a two-octave fractal &mdash; deliberately far patchier than <a href="gene-roan.html">classic roan</a>&rsquo;s near-per-texel mix &mdash; at near-full strength over the barrel, neck, head and legs, with pigment retained over the <a href="#varnish-marks">bony prominences</a> and nothing on the mane / tail / ears. Slightly asymmetric (LP varnish is). Mottled also drops a few crisp white snowflake spots.</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2 id="varnish-marks">Varnish marks &mdash; the horse outlined by its own skeleton</h2>
+
+<div class="note warn">
+    <span class="label">Rebuilt 2026-09-06 against the reference, NOT yet looked at</span>
+    <p>
+        Varnish roan used to be drawn as classic roan with a different weighting: the
+        same noise frequency, a front-to-back gradient, and a flat half-strength over
+        the head. That made it a <em>weaker roan</em>, when the whole point is that the
+        two look fundamentally different. It now has the trait it is actually recognised
+        by.
+    </p>
+</div>
+
+<p>
+    A varnish horse whitens <strong>around</strong> its bones without erasing them.
+    Pigment persists over the cheekbones, shoulder blades, elbows, hips, stifles and
+    knees, and those residual darker zones are what the pattern is named for. So
+    <code>paintVarnish</code> subtracts a retention field before it roans anything:
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Mark</th><th>Where it is derived from</th><th>Shape</th></tr></thead>
+<tbody>
+<tr><td>Shoulder blade, point of hip</td><td>The <code>BODY</code> box, one per side</td><td>Wide and shallow &mdash; a <em>shield</em>, dark at the core and fading out</td></tr>
+<tr><td>Elbow / stifle, knee / hock</td><td>Each leg&rsquo;s own box, at its top and part-way down</td><td>Small and deep, so the joint reads as outlined</td></tr>
+<tr><td>Cheekbone</td><td>The <code>HEAD</code> box, one per side</td><td>Small and deep</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    Every mark is derived from the mesh&rsquo;s own part boxes rather than written down
+    as coordinates, so a mesh change moves them with it. The strongest mark wins rather
+    than the sum &mdash; two overlapping marks must not add up to a solid patch &mdash;
+    and the distance is wobbled by a noise field so the island&rsquo;s outline is
+    ragged. A real varnish mark follows the bone loosely, not exactly. How deeply the
+    marks hold is rolled per horse, because &ldquo;varnishing out&rdquo; is a process
+    and different horses are at different points along it.
+</p>
+
+<h3>Against classic roan</h3>
+<p>
+    <code>RoanPatternsTest</code> pins the comparison through the real pipeline, and it
+    is the reference&rsquo;s own identification checklist:
+</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th></th><th>Varnish roan</th><th><a href="gene-roan.html">Classic roan</a></th></tr></thead>
+<tbody>
+<tr><td><strong>Head</strong></td><td>Whitens, keeping colour over facial bone</td><td>Dark &mdash; the mask is diagnostic</td></tr>
+<tr><td><strong>Shoulder / hip</strong></td><td>Dark shields; measured 0.36&ndash;0.54 luma darker than the barrel around them</td><td>No shield at all &mdash; measured within 0.06</td></tr>
+<tr><td><strong>Distribution</strong></td><td>Irregular pale areas; measurably patchier</td><td>Even salt-and-pepper</td></tr>
+<tr><td><strong>Legs</strong></td><td>Colour kept over the joints themselves</td><td>Dark below an inverted-V boundary</td></tr>
 </tbody>
 </table>
 </div>

@@ -25,6 +25,33 @@
 </p>
 
 <h2 id="d2026-09-06">2026-09-06</h2>
+<h3 id="two-roans-2026-09-06">Built 2026-09-06, NOT yet looked at: the two roans stopped being the same pattern at two strengths.</h3>
+
+<p>A region-by-region reference on classic roan and varnish roan, read against the code, said the same thing about both: they had converged. Classic roan had a front-to-back gradient that left a dark shoulder, which is a <em>varnish</em> trait; varnish had the same noise frequency and the same gradient and no anatomy at all, which made it a weaker classic roan. The two are told apart by shape, not by how much white there is, and now they are. <code>:common:test</code> green, <code>:neoforge-26.1.2:build</code> green, parity green, <code>coat-golden.txt</code> regenerated with three new roan cases, wasm re-baked.</p>
+
+<ul>
+<li><strong>Classic roan is even over the whole trunk now, and that removed a shoulder shield nobody had noticed.</strong> The intensity used to fall from the hindquarters forward starting at mid-barrel: measured shoulder 0.27 luma against hip 0.80 on a black horse, a 3x gradient where the reference asks for "broad, relatively even distribution". Worse, "a strongly defined shoulder shield of dark hair" is the thing a classic roan is confirmed by <em>not</em> having - it is a varnish trait - so the gene was drawing the wrong pattern's diagnostic. The body weight is a flat 1.0 now and the five trunk zones measure within 0.08 of each other.
+</li>
+<li><strong>The taper moved to the neck, where it belongs.</strong> Something had to fade or the roaning would end on a hard line against the solid head, but the reference puts the neck in the pattern ("roaned, often substantially, especially at its lower and middle portions") and the head out of it. So the neck thins toward the poll, measured against its own height rather than the barrel's, and the head/neck contrast is the "dark mask" classic roan is spotted by across a field.
+</li>
+<li><strong>The inverted V, and the version of it that did not work.</strong> Roan's most characteristic edge is the dark lower leg rising into the roaning in a point rather than on a level line. The first attempt was a cone measured from the leg's axis, and it drew a perfectly flat boundary: <strong>a leg is a box</strong>, so every texel is on one of its flat sides and is always at the outer radius. Measured across the face being painted instead (<code>Face.spanA()</code> is the horizontal axis of whichever side you are looking at) it comes out as a real V - mid-face still base-dark at 0.20 while the face edges have roaned to 0.35-0.58.
+</li>
+<li><strong>One noise octave, not two.</strong> Classic roan is "a distribution of individual white hairs, not necessarily a collection of white patches". <code>PatchNoise.fbm2</code> carries most of its weight in the low octave, which clumps the white into flecks; a single <code>BodyNoise.value</code> octave at about one lattice cell per texel makes neighbouring texels near-independent. Measured patchiness fell from 0.15-0.27 to 0.07-0.10. Patchiness is varnish's job.
+</li>
+<li><strong>And the density came down.</strong> Making the body uniform made every roan much whiter, because the old average was a gradient. Retuned so a blue roan reads <strong>slate</strong> - a dark horse with white through it - rather than grey: a mixture that reaches three quarters white has stopped being one, and it would have collided with <a href="gene-grey.html">grey</a>.
+</li>
+<li><strong>Varnish roan got the trait it is actually recognised by.</strong> A varnish horse whitens <em>around</em> its bones without erasing them, and the residual dark zones - cheekbones, shoulder blades, elbows, hips, stifles, knees - are what the pattern is named for. <code>varnishMarks</code> derives a set of body-space spheres from the mesh's own part boxes (so a mesh change moves them), and <code>paintVarnish</code> subtracts that retention before it roans anything. Measured: the shoulder and hip shields come out 0.36-0.54 luma darker than the barrel around them, against 0.02-0.09 for classic roan, which is the difference the reference leads with.
+</li>
+<li><strong>Two details that keep the marks from looking drawn.</strong> The strongest mark wins rather than the sum, so two overlapping marks cannot add up to a solid patch; and the distance test is wobbled by a noise field, so the island's outline is ragged - a real varnish mark follows the bone loosely. How deeply the marks hold is rolled per horse, because "varnishing out" is a process and different horses are at different points along it.
+</li>
+<li><strong>Varnish's own gradient went, and its mottle got coarser.</strong> The front-to-back taper was doing the shaping; the marks do it now, so the region weight is nearly flat and all the structure is anatomical. The mottle frequency dropped from 2.4 to 1.15, roughly half classic roan's, so varnish reads as irregular pale areas where roan reads as salt-and-pepper - which is what "uneven or incomplete roaning" means when a real horse is being assessed.
+</li>
+<li><strong>Varnish reaches the head now.</strong> It was at a flat half strength and measured barely above the base colour; it is at 0.85 with the cheekbones carved out. A dark head over a roaned body is <em>the</em> classic-roan tell, so a varnish horse having one was the loudest way the two could be confused.
+</li>
+<li><strong>The tests are the reference's identification checklist.</strong> <code>RoanPatternsTest</code> asks, in order, what a person assessing a photograph asks: check the head and distal legs, look at the body distribution, look for the inverted V, look for the anatomical shields. Eight assertions across six seeds, all measured as mean luma on a black horse so "darker" and "more roaned" are one number.
+</li>
+</ul>
+
 <h3 id="frame-overo-2026-09-06">Built 2026-09-06, NOT yet looked at: frame overo re-derived from the reference, and it closes a real defect.</h3>
 
 <p>The owner supplied a locus-by-locus description of what frame overo actually looks like on a horse. Read against it, the painter got two things right (jagged margins, a bold face) and most of the rest wrong. Every constant moved, the outcome id is <code>frame-overo</code> rather than <code>frame</code>, and the shape is now written as a list of the reference's claims with the code that answers each &mdash; <a href="gene-ednrb.html#paints">gene-ednrb.html#paints</a>. <code>:common:test</code> green, <code>:neoforge-26.1.2:build</code> green, parity green, <code>coat-golden.txt</code> regenerated, wasm re-baked.</p>
