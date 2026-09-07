@@ -203,7 +203,7 @@ and fails *silently* when stale:
 | **anything in `common/` or `web/`** | `:web:bakeDesignerAssets` | `wiki/horse-designer/wasm/web.wasm` |
 | `spec/`, `SpecSchema`, `AbilityType`, `HorseSkinGeometry`, the noise classes | `:common:bakeSpecFixtures` **then** `check-parity.mjs` | `wiki/gene-creator/fixtures/expected.json` |
 | the coat PNGs or the name tables | `:common:bakeCreatorAssets` + `:web:bakeDesignerAssets` | the regenerated assets |
-| `tools/barn/cowboy_barn.source.nbt` | `python neoforge-26.1.2/tools/barn/bake-barn.py` | `data/horsegenetics/structure/cowboy_barn.nbt` |
+| either `tools/barn/*.source.nbt` | `python neoforge-26.1.2/tools/barn/bake-barn.py` | `data/horsegenetics/structure/cowboy_barn.nbt` |
 | `tools/barn/cowboy_house.source.nbt` | `python neoforge-26.1.2/tools/barn/bake-house.py` | `data/horsegenetics/structure/cowboy_house.nbt` |
 
 **Re-baking is part of the parity check, not a chore beside it.**

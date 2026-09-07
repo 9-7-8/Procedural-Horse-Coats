@@ -1,0 +1,44 @@
+{
+  "_comment": "The chests either side of the beds in the cowboy's house. Low-value horse kit and feed - the tack a small outfit actually keeps indoors. Nothing here should make a player feel they can skip the horseman: the saddle is the only real prize and it is one roll in four.",
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "_comment": "Feed. Always something, usually a lot of it.",
+      "rolls": { "min": 2, "max": 4 },
+      "entries": [
+        { "type": "minecraft:item", "name": "minecraft:wheat", "weight": 10,
+          "functions": [{ "function": "minecraft:set_count", "count": { "min": 3, "max": 9 } }] },
+        { "type": "minecraft:item", "name": "minecraft:carrot", "weight": 10,
+          "functions": [{ "function": "minecraft:set_count", "count": { "min": 2, "max": 7 } }] },
+        { "type": "minecraft:item", "name": "minecraft:apple", "weight": 6,
+          "functions": [{ "function": "minecraft:set_count", "count": { "min": 1, "max": 4 } }] },
+        { "type": "minecraft:item", "name": "minecraft:hay_block", "weight": 3,
+          "functions": [{ "function": "minecraft:set_count", "count": { "min": 1, "max": 2 } }] },
+        { "type": "minecraft:item", "name": "minecraft:wheat_seeds", "weight": 5,
+          "functions": [{ "function": "minecraft:set_count", "count": { "min": 2, "max": 6 } }] }
+      ]
+    },
+    {
+      "_comment": "Tack. A lead most of the time, a saddle now and then, and sometimes nothing at all.",
+      "rolls": { "min": 1, "max": 2 },
+      "entries": [
+        { "type": "minecraft:item", "name": "minecraft:lead", "weight": 8 },
+        { "type": "minecraft:item", "name": "minecraft:saddle", "weight": 4 },
+        { "type": "minecraft:item", "name": "minecraft:leather", "weight": 6,
+          "functions": [{ "function": "minecraft:set_count", "count": { "min": 1, "max": 3 } }] },
+        { "type": "minecraft:empty", "weight": 6 }
+      ]
+    },
+    {
+      "_comment": "One in four or so: a piece of the mod's own kit, so a chest can teach you the item exists.",
+      "rolls": 1,
+      "entries": [
+        { "type": "minecraft:item", "name": "horsegenetics:horse_hair", "weight": 6,
+          "functions": [{ "function": "minecraft:set_count", "count": { "min": 1, "max": 3 } }] },
+        { "type": "minecraft:item", "name": "horsegenetics:blank_transfer_paper", "weight": 2 },
+        { "type": "minecraft:item", "name": "minecraft:golden_carrot", "weight": 2 },
+        { "type": "minecraft:empty", "weight": 14 }
+      ]
+    }
+  ]
+}

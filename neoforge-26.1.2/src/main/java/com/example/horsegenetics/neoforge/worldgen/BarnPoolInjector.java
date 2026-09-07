@@ -51,13 +51,16 @@ import java.util.List;
  * already asked.
  *
  * <h2>Frequency</h2>
- * One weight against the four vanilla terminators of weight 1 each, so roughly
- * one terminator slot in five. A village has a handful of them, and the barn is
- * 15x7 where a terminator is 2x3 - so most of the draws that pick it then fail
- * the bounding-box check and fall through to a small terminator instead. The
- * net effect is "most plains villages, where there was room". A village that
- * rolls two barns gets two barns; only the first grows a cowboy (see
- * {@code CowboyHandler}).
+ * Weight 3 against the four vanilla terminators of weight 1 each, so roughly
+ * three terminator slots in seven. That is not how often it appears: a village
+ * has a handful of terminator slots, and the piece is 15x15 where a terminator
+ * is 2x3, so most of the draws that pick it then fail the bounding-box check
+ * and fall through to a small terminator instead. The weight is set high to
+ * compensate for exactly that - it was 1 when the piece was 15x7 and carried
+ * the barn alone, and doubling the depth to take the house in doubled the
+ * ground it has to find. The net effect aimed at is "most plains villages,
+ * where there was room". A village that rolls two barns gets two barns; only
+ * the first grows a cowboy (see {@code CowboyHandler}).
  */
 @EventBusSubscriber
 public final class BarnPoolInjector {
