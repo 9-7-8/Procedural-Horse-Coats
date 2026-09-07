@@ -23,8 +23,12 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.goal.WrappedGoal;
+import net.minecraft.world.entity.ai.goal.BreedGoal;
+import net.minecraft.world.entity.ai.goal.FollowParentGoal;
+import net.minecraft.world.entity.ai.goal.PanicGoal;
 import net.minecraft.world.entity.ai.goal.RandomStandGoal;
 import net.minecraft.world.entity.ai.goal.RunAroundLikeCrazyGoal;
+import net.minecraft.world.entity.ai.goal.RandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.TemptGoal;
 import net.minecraft.world.entity.animal.equine.Horse;
 import net.minecraft.world.entity.npc.villager.Villager;
@@ -220,9 +224,37 @@ public final class CowboyHandler {
         if (!(cowboy.getVehicle() instanceof Horse mount)) {
             return;
         }
-        mount.goalSelector.removeAllGoals(goal -> goal instanceof RunAroundLikeCrazyGoal
-                || goal instanceof RandomStandGoal
-                || goal instanceof TemptGoal);
+        int before = mount.goalSelector.getAvailableGoals().size();
+        mount.goalSelector.removeAllGoals(CowboyHandler::isRivalToTheItinerary);
+        int removed = before - mount.goalSelector.getAvailableGoals().size();
+        if (removed > 0) {
+            DebugAnnounce.log("Cowboy", cowboy.cowboyName() + "'s mount " + mount.getUUID()
+                    + ": removed " + removed + " rival goals, " + before + " -> "
+                    + mount.goalSelector.getAvailableGoals().size());
+        }
+    }
+
+    /**
+     * Does this vanilla goal have any business steering the cowboy's mount?
+     *
+     * <p>Everything that can <b>move</b> or <b>freeze</b> the horse comes off, so
+     * {@code CowboyMountGoal} is the only thing on the animal with an opinion
+     * about where it goes. Holding {@code Flag.MOVE} was supposed to be enough
+     * and demonstrably was not - the mount was seen wandering at night exactly as
+     * it does by day, which is a stroll goal winning - and rather than keep
+     * reasoning about goal-flag arbitration, this takes the argument away.
+     *
+     * <p>{@code FloatGoal} stays, because it is the goal that stops the pair
+     * drowning, and the two look goals stay because they only turn his head.
+     */
+    private static boolean isRivalToTheItinerary(net.minecraft.world.entity.ai.goal.Goal goal) {
+        return goal instanceof RunAroundLikeCrazyGoal   // bucks, and ejects the rider
+                || goal instanceof RandomStandGoal      // rears - and a rearing horse is isImmobile()
+                || goal instanceof TemptGoal            // anyone with wheat could walk off with him
+                || goal instanceof RandomStrollGoal     // the aimless wandering, day and night
+                || goal instanceof PanicGoal            // bolts at random when hurt, fighting the flee
+                || goal instanceof BreedGoal
+                || goal instanceof FollowParentGoal;
     }
 
     /**
@@ -295,7 +327,11 @@ public final class CowboyHandler {
         // His own horse first: herd slot 0 is the one he rides and never sells.
         Horse mount = breedHorse(cowboy, level, rng, favourite);
         if (mount != null) {
-            cowboy.startRiding(mount, true, false);
+            boolean mounted = cowboy.startRiding(mount, true, false);
+            DebugAnnounce.log("Cowboy", cowboy.cowboyName() + " startRiding(" + mount.getUUID()
+                    + ") = " + mounted + "; vehicle is now " + cowboy.getVehicle());
+        } else {
+            DebugAnnounce.log("Cowboy", cowboy.cowboyName() + " got no mount - nowhere to stand one");
         }
 
         for (int i = 0; i < herdSize; i++) {
@@ -718,6 +754,8 @@ public final class CowboyHandler {
         // stroll, panic and follow goal the horse has.
         horse.goalSelector.addGoal(0, new CowboyMountGoal(horse));
         horse.goalSelector.addGoal(3, new CowboyHerdGoal(horse));
+        DebugAnnounce.log("Cowboy", "goals attached to horse " + horse.getUUID()
+                + " (" + horse.goalSelector.getAvailableGoals().size() + " goals total)");
     }
 
     // ------------------------------------------------------------------

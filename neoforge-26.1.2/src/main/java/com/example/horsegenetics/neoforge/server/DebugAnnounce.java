@@ -1,44 +1,75 @@
 package com.example.horsegenetics.neoforge.server;
 
+import com.example.horsegenetics.neoforge.HorseGenetics;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.fml.loading.FMLEnvironment;
 
 /**
- * Says something in chat, in a dev build only.
+ * Says something in chat <b>and</b> writes it to the server log.
  *
  * <h2>Why this exists</h2>
  * Most of what this mod does happens where nobody is looking. A cowboy founds
  * the moment his chunk starts ticking, usually before the barn is on screen; a
  * villager takes the horseman job silently; a mounted man changes what he is
  * doing without changing what he looks like. All three were previously
- * questions you answered by reading a server log while it scrolled, and the
- * answer to "is this working?" was several minutes of flying about.
+ * questions you answered by reading a server log while it scrolled.
  *
- * <p>So: a grey tag, a coloured message, and nothing at all in a real build -
- * {@link FMLEnvironment#isProduction()} is true there and every method here
- * returns immediately. These lines are <b>test scaffolding</b>: each one exists
- * to answer a specific open question in {@code wiki/known-gaps.html}, and
- * should be deleted with the question.
+ * <h2>Both channels, every time</h2>
+ * Chat is what you see while you play; the log is what you can paste into a bug
+ * report afterwards, and it survives the chat scrolling away. A line that only
+ * went to one of them always turned out to be the line that mattered.
+ *
+ * <h2>{@link #ENABLED} is a constant, and deliberately not an environment check</h2>
+ * It used to be {@code !FMLEnvironment.isProduction()}. That is almost certainly
+ * correct - a dev run logs {@code DEV} at startup - but "almost certainly" is
+ * how a whole session went by with the owner reporting that no debug line ever
+ * printed, and no way to tell whether that meant the gate was shut or the code
+ * path was never reached. Those are opposite bugs and they looked identical.
+ *
+ * <p>So the gate is now a boolean you can read. This mod is a dev build with one
+ * tester and is not shipped; when it is, this becomes a config flag or these
+ * lines go away with {@code wiki/known-gaps.html} gap 59.
  */
 public final class DebugAnnounce {
+
+    /** Flip to {@code false} to silence every line below. See the class comment. */
+    public static final boolean ENABLED = true;
+
+    static {
+        // Says, once, both what this class decided and what the old gate would
+        // have decided. If a future report is "no debug lines printed", this line
+        // is the first thing to look for: present means the class loaded and the
+        // switch is on, absent means nothing here ever ran.
+        HorseGenetics.LOGGER.info("[Debug] chat+log diagnostics ENABLED={}, FMLEnvironment.isProduction()={}",
+                ENABLED, productionOrUnknown());
+    }
+
+    /** {@code isProduction()} throws if no loader is active; never let that break loading. */
+    private static String productionOrUnknown() {
+        try {
+            return String.valueOf(net.neoforged.fml.loading.FMLEnvironment.isProduction());
+        } catch (Throwable t) {
+            return "unavailable (" + t.getClass().getSimpleName() + ")";
+        }
+    }
 
     private DebugAnnounce() {
     }
 
     /** Is this a build where the lines below do anything? */
     public static boolean enabled() {
-        return !FMLEnvironment.isProduction();
+        return ENABLED;
     }
 
-    /** One line to everyone in this level: {@code [tag] message}. */
+    /** One line to everyone in this level, and one to the log: {@code [tag] message}. */
     public static void say(ServerLevel level, String tag, String message, ChatFormatting colour) {
-        if (!enabled()) {
+        if (!ENABLED) {
             return;
         }
+        HorseGenetics.LOGGER.info("[{}] {}", tag, message);
         Component line = Component.literal("[" + tag + "] ").withStyle(ChatFormatting.GRAY)
                 .append(Component.literal(message).withStyle(colour));
         for (ServerPlayer player : level.players()) {
@@ -49,5 +80,15 @@ public final class DebugAnnounce {
     /** The same, with a position written out the way you would type it into {@code /tp}. */
     public static void sayAt(ServerLevel level, String tag, String message, BlockPos at, ChatFormatting colour) {
         say(level, tag, message + " at " + at.getX() + ", " + at.getY() + ", " + at.getZ(), colour);
+    }
+
+    /**
+     * Log only, no chat. For the lines that are too frequent or too wide to read
+     * in a chat box but are exactly what you want in a pasted log.
+     */
+    public static void log(String tag, String message) {
+        if (ENABLED) {
+            HorseGenetics.LOGGER.info("[{}] {}", tag, message);
+        }
     }
 }

@@ -7,6 +7,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.ai.goal.WrappedGoal;
 import net.minecraft.world.entity.ai.util.DefaultRandomPos;
 import net.minecraft.world.entity.animal.equine.AbstractHorse;
 import net.minecraft.world.entity.ai.control.MoveControl;
@@ -61,6 +62,9 @@ public final class CowboyMountGoal extends Goal {
 
     /** Ticks of having somewhere to be and not getting nearer before the dev build complains. */
     private static final int STUCK_TICKS = 100;
+
+    /** Ticks between full state reports to the log. One a second. */
+    private static final int REPORT_INTERVAL = 20;
 
     /** Roughly how often an idling pair picks a new spot to amble to. */
     private static final int IDLE_STROLL_INTERVAL = 200;
@@ -120,6 +124,9 @@ public final class CowboyMountGoal extends Goal {
     /** How close he was to that somewhere last time it was measured. */
     private double lastDistance = Double.MAX_VALUE;
 
+    /** Countdown to the next full state report. */
+    private int reportCooldown;
+
     public CowboyMountGoal(AbstractHorse horse) {
         this.horse = horse;
         // MOVE only. Holding JUMP as well would starve the horse's own FloatGoal,
@@ -147,6 +154,34 @@ public final class CowboyMountGoal extends Goal {
     }
 
     /**
+     * Everything the goal selector will let us know about the horse, in one
+     * line. The single most useful diagnostic there is for "why is it not going
+     * where I told it": if the mount is wandering, some other goal is
+     * <b>running</b>, and this says which.
+     */
+    private String horseState() {
+        StringBuilder running = new StringBuilder();
+        for (WrappedGoal wrapped : horse.goalSelector.getAvailableGoals()) {
+            if (wrapped.isRunning()) {
+                if (running.length() > 0) {
+                    running.append(", ");
+                }
+                running.append(wrapped.getGoal().getClass().getSimpleName())
+                        .append('#').append(wrapped.getPriority());
+            }
+        }
+        return String.format(
+                "pos=%d,%d,%d speed=%.3f nav=%s immobile=%s standing=%s eating=%s "
+                        + "vehicle=%s tamed=%s running=[%s]",
+                horse.blockPosition().getX(), horse.blockPosition().getY(), horse.blockPosition().getZ(),
+                horse.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED),
+                horse.getNavigation().isDone() ? "idle" : "pathing",
+                horse.isImmobile(), horse.isStanding(), horse.isEating(),
+                horse.isVehicle(), horse.isTamed(),
+                running.length() == 0 ? "none" : running.toString());
+    }
+
+    /**
      * Every tick, not every other one.
      *
      * <p>A goal that returns {@code false} here is run by
@@ -163,6 +198,7 @@ public final class CowboyMountGoal extends Goal {
 
     @Override
     public void start() {
+        DebugAnnounce.log("Cowboy", "mount goal START on horse " + horse.getUUID() + " - " + horseState());
         repathCooldown = 0;
         strollCooldown = 0;
         doorScanCooldown = 0;
@@ -170,10 +206,13 @@ public final class CowboyMountGoal extends Goal {
         wasUrgent = false;
         stuckTicks = 0;
         lastDistance = Double.MAX_VALUE;
+        reportCooldown = 0;
     }
 
     @Override
     public void stop() {
+        DebugAnnounce.log("Cowboy", "mount goal STOP on horse " + horse.getUUID()
+                + " (rider=" + rider() + ") - " + horseState());
         horse.getNavigation().stop();
     }
 
@@ -203,6 +242,7 @@ public final class CowboyMountGoal extends Goal {
         wasUrgent = plan.urgent();
         announceDutyChange(cowboy, level, plan);
         announceIfStuck(cowboy, level, plan);
+        report(cowboy, level, plan);
         switch (plan.duty()) {
             case FLEE -> flee(level, plan);
             case SHELTER -> shelter(cowboy, level, plan);
@@ -290,6 +330,34 @@ public final class CowboyMountGoal extends Goal {
             barnShutForNight = true;
             doorHeldTicks = 0;
         }
+    }
+
+    /**
+     * One line a second to the log, saying what he is trying to do and what the
+     * horse under him is actually doing about it.
+     *
+     * <p>Log only, not chat - it is one line a second per cowboy, which is a
+     * paste-into-a-report volume rather than a read-while-you-play one. The
+     * short version goes to chat via {@link #announceDutyChange} and
+     * {@link #announceIfStuck}.
+     */
+    private void report(Cowboy cowboy, ServerLevel level, CowboyRoutine.Plan plan) {
+        if (!DebugAnnounce.enabled() || --reportCooldown > 0) {
+            return;
+        }
+        reportCooldown = REPORT_INTERVAL;
+        BlockPos barn = cowboy.home().orElse(horse.blockPosition());
+        DebugAnnounce.log("Cowboy", String.format(
+                "%s duty=%s goal=%s urgent=%s dark=%s sheltered=%s barnShut=%s "
+                        + "barn=%d,%d,%d dist=%.1f trading=%s | %s",
+                cowboy.cowboyName(), plan.duty(),
+                plan.goal().map(g -> g.getX() + "," + g.getY() + "," + g.getZ()).orElse("-"),
+                plan.urgent(), level.isDarkOutside(),
+                CowboyRoutine.sheltered(level, barn, horse.blockPosition()),
+                CowboyDoors.barnIsShut(level, barn),
+                barn.getX(), barn.getY(), barn.getZ(),
+                Math.sqrt(horse.blockPosition().distSqr(barn)),
+                cowboy.isTrading(), horseState()));
     }
 
     /**
@@ -442,9 +510,13 @@ public final class CowboyMountGoal extends Goal {
         if (horse.isStanding()) {
             horse.clearStanding();
         }
-        if (!horse.getNavigation().moveTo(x, y, z, speed)) {
+        boolean pathed = horse.getNavigation().moveTo(x, y, z, speed);
+        if (!pathed) {
             MoveControl control = horse.getMoveControl();
             control.setWantedPosition(x, y, z, speed);
         }
+        DebugAnnounce.log("Cowboy", String.format(
+                "drive to %.1f,%.1f,%.1f at %.2f -> %s",
+                x, y, z, speed, pathed ? "pathed" : "no path, using move control"));
     }
 }

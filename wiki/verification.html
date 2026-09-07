@@ -214,17 +214,33 @@
         <code>[Cowboy] &lt;name&gt;: PATROL / SHELTER</code> line on every duty change
         and a red <code>FLEE</code> one when he bolts. A sane night is one
         <code>SHELTER</code> at dusk and one <code>PATROL</code> at dawn.</li>
-    <li><strong>The important line is the red &ldquo;stuck&rdquo; one.</strong> When he
-        has somewhere to be and has not got closer to it for five seconds, a dev build
-        now prints <code>[Cowboy] &lt;name&gt; stuck on SHELTER: 23.4 blocks off, nav
-        idle, immobile=true standing=true eating=false</code>. <strong>That line names
-        the culprit</strong>, and it is the whole point of this round: three fixes for
-        &ldquo;he never goes to his barn&rdquo; have been derived by reading the code
-        and none of them has been confirmed. Copy the line out verbatim if it appears
-        &mdash; <code>nav idle</code> means no path was built, <code>standing=true</code>
-        means something is still rearing him, <code>nav pathing</code> with the distance
-        not falling means he is walking into something
-        (<a href="known-gaps.html#gap-59">gap 59</a>).</li>
+    <li><strong>Read the log, not the chat.</strong> Everything below is in
+        <code>run/logs/latest.log</code> as well as in chat, and the log is the thing to
+        paste into a report. Four fixes for &ldquo;he never goes to his barn&rdquo; have
+        now been derived by reading the code and none has been confirmed, so this round
+        is instrumented rather than argued (<a href="known-gaps.html#gap-59">gap 59</a>).
+        <ul>
+            <li><code>[Debug] chat+log diagnostics ENABLED=true, FMLEnvironment.isProduction()=...</code>
+                is printed once when the class loads. <strong>If this line is missing,
+                nothing else here can appear</strong> and the problem is that the code
+                never ran, not that the horse misbehaved. The old gate was
+                <code>!isProduction()</code>; the value is printed so a past session of
+                silent debug output can be explained.</li>
+            <li><code>goals attached to horse &lt;uuid&gt;</code> &mdash; the mount goal
+                was installed.</li>
+            <li><code>startRiding(&lt;uuid&gt;) = true</code> &mdash; he is actually a
+                passenger. <code>false</code> would explain everything at once.</li>
+            <li><code>mount goal START / STOP</code> &mdash; if START never appears, the
+                goal is never winning its slot.</li>
+            <li>One line a second: <code>duty=SHELTER goal=... urgent=... dark=...
+                sheltered=... barnShut=... dist=... trading=... | pos=... speed=...
+                nav=... immobile=... standing=... running=[...]</code>. <strong>The
+                <code>running=[...]</code> list is the one that matters</strong>: if the
+                mount is wandering, some other goal is in it, and it is named
+                there.</li>
+            <li><code>drive to x,y,z at 1.90 -&gt; pathed</code> / <code>no path, using
+                move control</code> &mdash; whether the navigator could build a route.</li>
+        </ul></li>
     <li><strong>At dusk, do all four double doors open, and does the herd go in?</strong>
         Then do all four shut behind them? This is a lot of pathfinding through a
         two-block gap and it is the part most likely to half-work. <strong>Partial
