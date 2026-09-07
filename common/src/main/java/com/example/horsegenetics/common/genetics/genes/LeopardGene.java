@@ -27,6 +27,7 @@ import com.example.horsegenetics.common.trait.Condition;
 import com.example.horsegenetics.common.trait.HealthContribution;
 import com.example.horsegenetics.common.trait.TraitBuilder;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -105,12 +106,61 @@ public final class LeopardGene implements Gene, CoatOverlayContribution, HealthC
     private static final double BLANKET_EDGE_WOBBLE = 0.12;
     private static final double BLANKET_EDGE_SOFT = 0.06;
 
-    /** Varnish roaning: body-space frequency of the hair mottle, and per-outcome strength. */
-    private static final double VARNISH_FREQ = 2.4;
+    /**
+     * Varnish roaning: body-space frequency of the hair mottle, and per-outcome
+     * strength. The frequency is deliberately <b>low</b> - far coarser than
+     * {@code RoanGene}'s near-per-texel mix - because that is the difference the
+     * two patterns are told apart by: classic roan is an even salt-and-pepper,
+     * varnish is uneven pale areas.
+     */
+    private static final double VARNISH_FREQ = 1.15;
     private static final double MOTTLED_STRENGTH = 0.32;
     private static final double VARNISH_STRENGTH = 0.58;
     /** Varnish never takes a body texel all the way to white - it is a mix, not a patch. */
     private static final double VARNISH_MAX_WHITE = 0.9;
+
+    /**
+     * <b>Varnish marks</b> - the pigment a varnish horse keeps over its bony
+     * prominences, and the trait it is actually recognised by. How deeply the
+     * marks hold is rolled per horse, because "varnishes out" is a process and
+     * different horses are at different points along it.
+     */
+    private static final double MARK_MIN = 0.55;
+    private static final double MARK_RANGE = 0.40;
+    /** The two wide, shallow shields; and the small, deep joints. */
+    private static final double SHIELD_DEPTH = 0.85;
+    private static final double JOINT_DEPTH = 1.0;
+    /** How far a mark's edge wanders, as a fraction of its own radius. */
+    private static final double MARK_WOBBLE = 0.42;
+    private static final double MARK_WOBBLE_FREQ = 1.7;
+
+    /** Where each mark sits, as fractions of the part box it is derived from. */
+    private static final double SHOULDER_X = 0.76;
+    private static final double SHOULDER_Y = 0.56;
+    private static final double SHOULDER_RADIUS = 0.17;
+    private static final double HIP_X = 0.15;
+    private static final double HIP_Y = 0.70;
+    private static final double HIP_RADIUS = 0.15;
+    private static final double UPPER_JOINT_Y = 0.86;
+    private static final double LOWER_JOINT_Y = 0.40;
+    private static final double JOINT_RADIUS = 0.085;
+    private static final double CHEEK_X = 0.30;
+    private static final double CHEEK_Y = 0.55;
+    private static final double CHEEK_RADIUS = 0.075;
+    /** How far out toward each flank the two-sided marks sit. */
+    private static final double SIDE_Z = 0.92;
+
+    /**
+     * How much of the body's roaning strength the head, muzzle and legs get.
+     * Varnish <b>reaches the head</b>, which is the loudest single difference
+     * from classic roan - a dark head over a roaned body is the classic-roan
+     * tell - and it does not exclude the lower leg wholesale either; the knee
+     * and hock keep their colour through {@link #varnishMark} instead.
+     */
+    private static final double HEAD_REGION = 0.85;
+    private static final double MUZZLE_REGION = 0.55;
+    private static final double LEG_REGION = 0.80;
+
     /** Snowflake spots on a mottled horse: sparse, small, crisp. */
     private static final double SNOWFLAKE_SPACING = 6.0;
     private static final double SNOWFLAKE_RADIUS = 0.12;
@@ -150,16 +200,19 @@ public final class LeopardGene implements Gene, CoatOverlayContribution, HealthC
     private final Expression WILD = Expression.wildType("No leopard complex - a solid-coloured coat.");
 
     private final Expression MOTTLED = Expression.of("mottled", "Mottled (LP characteristics)")
-            .describe("One leopard-complex copy and no pattern modifier: light roaning that spares "
-                    + "the face and legs, a scatter of small white spots, striped hooves and a "
-                    + "white-rimmed eye. The appaloosa “look” without a bold pattern.")
+            .describe("One leopard-complex copy and no pattern modifier: light, uneven roaning that "
+                    + "keeps its colour over the cheekbones, shoulders, hips and knees, a scatter of "
+                    + "small white spots, striped hooves and a white-rimmed eye. The appaloosa "
+                    + "“look” without a bold pattern.")
             .varies()
             .restrict((ctx, coat) -> paintVarnish(ctx, coat, MOTTLED_STRENGTH, true));
 
     private final Expression VARNISH_ROAN = Expression.of("varnish-roan", "Varnish roan")
-            .describe("Two leopard-complex copies and no modifier: heavier, uneven roaning over the "
-                    + "body and neck, leaving darker “varnish marks” on the bony parts of "
-                    + "the face and legs. Distinct from true roan - patchier, and it reaches the head.")
+            .describe("Two leopard-complex copies and no modifier: heavy, uneven whitening that "
+                    + "leaves darker “varnish marks” over the horse's bones - cheekbones, "
+                    + "shoulder blades, elbows, hips, stifles and knees - so it ends up outlined by "
+                    + "its own anatomy. Not true roan and not a stronger version of it: patchy where "
+                    + "classic roan is even, and it whitens the head, which classic roan never does.")
             .varies()
             .restrict((ctx, coat) -> paintVarnish(ctx, coat, VARNISH_STRENGTH, false));
 
@@ -366,34 +419,64 @@ public final class LeopardGene implements Gene, CoatOverlayContribution, HealthC
         return f;
     }
 
-    /** A mottled / varnish-roan coat: a hair-by-hair white mix that spares the bony parts. */
+    /**
+     * A mottled / varnish-roan coat: an uneven white mix that <b>whitens around
+     * the horse's bones without erasing them</b>.
+     *
+     * <p>This is the half of the leopard complex that is not a spot, and it is
+     * not "roan but more". The two look fundamentally different, and both halves
+     * of that matter:
+     * <ul>
+     *   <li><b>It is patchy where classic roan is even.</b> The mottle runs at
+     *       {@value #VARNISH_FREQ} against roan's much finer mix, so varnish
+     *       reads as irregular pale areas rather than as a uniform salt-and-pepper.
+     *       "Uneven or incomplete roaning" is what a real horse is looked at for
+     *       when classic roan is in doubt.</li>
+     *   <li><b>It leaves varnish marks.</b> Pigment persists over bony
+     *       prominences - cheekbones, shoulder blades, elbows, hips, stifles,
+     *       knees - so the horse ends up outlined by its own anatomy. That is
+     *       the single most recognisable varnish trait and it is what
+     *       {@link #varnishMark} draws.</li>
+     *   <li><b>It reaches the head</b>, which classic roan famously does not.
+     *       A dark head over a roaned body is the classic-roan tell; a varnish
+     *       horse whitens the face too and keeps colour only over the facial
+     *       bone.</li>
+     *   <li><b>The legs are not a uniform dark exclusion.</b> Classic roan stops
+     *       above the knee on a level-ish line; varnish keeps colour over the
+     *       knee and hock themselves and whitens around them.</li>
+     * </ul>
+     */
     private static PigmentField paintVarnish(CoatBuildContext ctx, PigmentView coat,
                                              double strength, boolean snowflakes) {
         Rng epi = ctx.epigeneticsFor(KEY);
         long seed = epi.nextLong();
         double densityJitter = 0.85 + 0.30 * epi.nextFloat();
         double asymmetry = (epi.nextFloat() - 0.5) * 0.5;   // one side roans a little more
+        double markStrength = MARK_MIN + epi.nextFloat() * MARK_RANGE;
 
         Skin skin = ctx.skin();
-        Bounds body = HorseSkinGeometry.bounds(skin, Part.BODY);
-        Bounds neck = HorseSkinGeometry.bounds(skin, Part.NECK);
-        double frontStart = body.xMin() + body.span(Axis.X) * 0.12;
-        double frontEnd = neck.xMax();
+        Mark[] marks = varnishMarks(skin);
 
         PigmentField f = coat.mutableCopy();
         HorseSkinGeometry.forEachTexel(skin, (px, py, part, face, point) -> {
-            double region = varnishRegion(skin, part, point, frontStart, frontEnd);
-            if (region <= 0) {
-                return;
+            double region = varnishRegion(skin, part, point);
+            if (region > 0) {
+                // Pigment kept over the bone. Its edge is wobbled by the same
+                // seed, so a varnish mark is a ragged anatomical island rather
+                // than an airbrushed oval.
+                double keep = markStrength * varnishMark(marks, point, seed);
+                region *= 1.0 - keep;
             }
-            double n = PatchNoise.fbm2(seed,
-                    point.x() * VARNISH_FREQ,
-                    point.y() * VARNISH_FREQ,
-                    point.z() * VARNISH_FREQ * 0.6 + point.z() * asymmetry);
-            double threshold = 1.0 - region * strength * densityJitter;
-            double w = PatchNoise.smoothstep(threshold - 0.06, threshold + 0.06, n);
-            if (w > 0) {
-                whiten(f, px, py, w * VARNISH_MAX_WHITE);
+            if (region > 0) {
+                double n = PatchNoise.fbm2(seed,
+                        point.x() * VARNISH_FREQ,
+                        point.y() * VARNISH_FREQ,
+                        point.z() * VARNISH_FREQ * 0.6 + point.z() * asymmetry);
+                double threshold = 1.0 - region * strength * densityJitter;
+                double w = PatchNoise.smoothstep(threshold - 0.06, threshold + 0.06, n);
+                if (w > 0) {
+                    whiten(f, px, py, w * VARNISH_MAX_WHITE);
+                }
             }
             if (snowflakes) {
                 double d = BodyNoise.cellDistance(seed ^ 0x5107L,
@@ -408,39 +491,133 @@ public final class LeopardGene implements Gene, CoatOverlayContribution, HealthC
         return f;
     }
 
-    /** 1 deep inside a round cell, 0 between cells - the shape of an appaloosa spot. */
-    private static double spotStrength(long seed, BodyPoint p, double spacing, double radiusFrac) {
-        double d = BodyNoise.cellDistance(seed, p.x() / spacing, p.y() / spacing, p.z() / spacing);
-        return 1.0 - PatchNoise.smoothstep(radiusFrac - SPOT_EDGE, radiusFrac + SPOT_EDGE, d);
+    /**
+     * One <b>varnish mark</b>: a body-space sphere over a bony prominence, inside
+     * which pigment is retained.
+     *
+     * @param x      centre, in the same model units every texel is handed in
+     * @param radius how far the retention reaches, in the same units
+     * @param depth  how much pigment is kept at the centre, {@code [0,1]}
+     */
+    private record Mark(double x, double y, double z, double radius, double depth) {}
+
+    /**
+     * <b>Where a varnish horse keeps its colour</b> - the bony prominences,
+     * derived from the mesh's own part boxes rather than written down as
+     * coordinates, so a mesh change moves them with it.
+     *
+     * <p>The list is the one the literature gives: cheekbones, shoulder blades,
+     * elbows, hips, stifles and knees. The two shields (shoulder and hip) are
+     * wide and shallow; the joints are small and deep, which is what makes a
+     * varnish horse look outlined at the knee and shaded at the shoulder rather
+     * than uniformly blotchy.
+     */
+    private static Mark[] varnishMarks(Skin skin) {
+        List<Mark> marks = new ArrayList<>();
+        Bounds body = HorseSkinGeometry.bounds(skin, Part.BODY);
+        double bw = body.span(Axis.X);
+        double bh = body.span(Axis.Y);
+        double bz = body.span(Axis.Z) * 0.5;
+        double zc = (body.zMin() + body.zMax()) * 0.5;
+
+        // Shoulder blade and point of hip, one per side. Larger x is toward the
+        // nose, so the shoulder is the high-x end of the barrel and the hip the low.
+        for (int s = -1; s <= 1; s += 2) {
+            marks.add(new Mark(body.xMin() + bw * SHOULDER_X, body.yMin() + bh * SHOULDER_Y,
+                    zc + s * bz * SIDE_Z, bw * SHOULDER_RADIUS, SHIELD_DEPTH));
+            marks.add(new Mark(body.xMin() + bw * HIP_X, body.yMin() + bh * HIP_Y,
+                    zc + s * bz * SIDE_Z, bw * HIP_RADIUS, SHIELD_DEPTH));
+        }
+
+        // Elbow / stifle at the top of each leg, knee / hock part-way down it.
+        for (Part leg : CoatRegions.LEGS) {
+            if (!HorseSkinGeometry.hasPart(skin, leg)) {
+                continue;
+            }
+            Bounds b = HorseSkinGeometry.bounds(skin, leg);
+            double lx = (b.xMin() + b.xMax()) * 0.5;
+            double lz = (b.zMin() + b.zMax()) * 0.5;
+            double lh = b.span(Axis.Y);
+            marks.add(new Mark(lx, b.yMin() + lh * UPPER_JOINT_Y, lz, bw * JOINT_RADIUS, JOINT_DEPTH));
+            marks.add(new Mark(lx, b.yMin() + lh * LOWER_JOINT_Y, lz, bw * JOINT_RADIUS, JOINT_DEPTH));
+        }
+
+        // Cheekbone, one per side. The head's low-x end is the poll end.
+        if (HorseSkinGeometry.hasPart(skin, Part.HEAD)) {
+            Bounds h = HorseSkinGeometry.bounds(skin, Part.HEAD);
+            double hz = h.span(Axis.Z) * 0.5;
+            double hzc = (h.zMin() + h.zMax()) * 0.5;
+            for (int s = -1; s <= 1; s += 2) {
+                marks.add(new Mark(h.xMin() + h.span(Axis.X) * CHEEK_X,
+                        h.yMin() + h.span(Axis.Y) * CHEEK_Y,
+                        hzc + s * hz * SIDE_Z, bw * CHEEK_RADIUS, JOINT_DEPTH));
+            }
+        }
+        return marks.toArray(new Mark[0]);
     }
 
     /**
-     * How hard varnish roaning bites: full over the barrel and neck, tapering
-     * forward, roughly half over the head (varnish leaves dark marks there
-     * rather than sparing it whole), fading out toward the hooves, and nothing
-     * on the mane, tail and ears.
+     * How much pigment this texel keeps because it sits over a bone, in
+     * {@code [0,1]}. The strongest mark wins rather than the sum, so two
+     * overlapping marks do not add up to a solid patch, and the distance is
+     * wobbled by a noise field so the island's outline is ragged - a real
+     * varnish mark follows the bone loosely, not exactly.
      */
-    private static double varnishRegion(Skin skin, Part part, BodyPoint point,
-                                        double frontStart, double frontEnd) {
+    private static double varnishMark(Mark[] marks, BodyPoint p, long seed) {
+        if (marks.length == 0) {
+            return 0;
+        }
+        double wobble = MARK_WOBBLE * (PatchNoise.fbm2(seed ^ 0x8A2EL,
+                p.x() * MARK_WOBBLE_FREQ, p.y() * MARK_WOBBLE_FREQ, p.z() * MARK_WOBBLE_FREQ) - 0.5);
+        double best = 0;
+        for (Mark m : marks) {
+            double dx = p.x() - m.x();
+            double dy = p.y() - m.y();
+            double dz = p.z() - m.z();
+            double d = Math.sqrt(dx * dx + dy * dy + dz * dz) + wobble * m.radius();
+            double v = m.depth() * (1.0 - PatchNoise.smoothstep(m.radius() * 0.35, m.radius(), d));
+            if (v > best) {
+                best = v;
+            }
+        }
+        return best > 1 ? 1 : best;
+    }
+
+    /**
+     * How hard varnish roaning bites <b>before</b> the marks are subtracted:
+     * near-full over the barrel, neck and head, a little less on the legs, and
+     * nothing on the mane, tail and ears.
+     *
+     * <p>Deliberately almost flat. The old version had a front-to-back gradient,
+     * which made varnish read as a weaker classic roan; the difference between
+     * the two patterns is not how much white there is, it is that varnish's white
+     * is <b>shaped by the skeleton</b> and classic roan's is shaped by nothing at
+     * all. All the shaping lives in {@link #varnishMark} now.
+     */
+    private static double varnishRegion(Skin skin, Part part, BodyPoint point) {
         switch (part) {
             case BODY, NECK -> {
-                return 1.0 - 0.65 * PatchNoise.smoothstep(frontStart, frontEnd, point.x());
+                return 1.0;
             }
             case HEAD -> {
-                return 0.5;
+                return HEAD_REGION;
             }
             case MUZZLE -> {
-                return 0.2;
+                return MUZZLE_REGION;
             }
             case LEFT_FRONT_LEG, RIGHT_FRONT_LEG, LEFT_HIND_LEG, RIGHT_HIND_LEG -> {
-                Bounds b = HorseSkinGeometry.bounds(skin, part);
-                double frac = (point.y() - b.yMin()) / Math.max(1e-6, b.span(Axis.Y));
-                return 0.8 * PatchNoise.smoothstep(0.20, 0.55, frac);
+                return LEG_REGION;
             }
             default -> {
                 return 0.0;
             }
         }
+    }
+
+    /** 1 deep inside a round cell, 0 between cells - the shape of an appaloosa spot. */
+    private static double spotStrength(long seed, BodyPoint p, double spacing, double radiusFrac) {
+        double d = BodyNoise.cellDistance(seed, p.x() / spacing, p.y() / spacing, p.z() / spacing);
+        return 1.0 - PatchNoise.smoothstep(radiusFrac - SPOT_EDGE, radiusFrac + SPOT_EDGE, d);
     }
 
     /**

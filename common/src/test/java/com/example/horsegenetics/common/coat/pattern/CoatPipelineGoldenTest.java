@@ -79,6 +79,10 @@ class CoatPipelineGoldenTest {
             override("agouti=A/a", "silver=Z/z"),
             override("extension=e/e", "mushroom=Mu/Mu"),
             override("roan=Rn/rn"),
+            // the two roans, apart and on one horse - they are different
+            // patterns and must not collapse into each other
+            override("extension=e/e", "roan=Rn/rn"),
+            override("agouti=A/a", "roan=Rn/rn", "leopard=LP/LP"),
             override("tobiano=To/to"),
             // EDNRB: the carrier, and the homozygous lethal white it can throw
             override("ednrb=O/N"),

@@ -81,11 +81,13 @@ public final class GeneDescriptions {
                             + "walking a chestnut's red body toward a flat sepia. A black or bay "
                             + "horse carries it almost invisibly, having little red to lose."),
             Map.entry("horsegenetics.roan",
-                    "White hairs mixed evenly through the body coat while the head, mane, tail and "
-                            + "lower legs stay solid. It is a soft intimate mix, not a hard "
-                            + "on/off dither, and it fades from strong over the hindquarters to "
-                            + "nothing by the face. The exact roaning varies per horse and is "
-                            + "inherited whole."),
+                    "Classic roan: an even salt-and-pepper of white hairs through the whole trunk - "
+                            + "shoulder, barrel, back, flank and hip alike - over a base colour it "
+                            + "does not change, so a black goes blue roan and a chestnut "
+                            + "strawberry. The head stays dark (the roan mask), the mane and tail "
+                            + "stay solid, and the dark lower leg rises into the roaning in a "
+                            + "point. Not the leopard complex's varnish roan, which is patchy and "
+                            + "whitens the face. The density varies per horse and is inherited whole."),
             Map.entry("horsegenetics.tobiano",
                     "Large, smooth-edged white patches that cross the topline - the shape that "
                             + "tells tobiano from frame overo. Patches flow unbroken from the "
