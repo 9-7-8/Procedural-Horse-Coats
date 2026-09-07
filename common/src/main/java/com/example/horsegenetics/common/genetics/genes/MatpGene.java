@@ -81,22 +81,40 @@ public final class MatpGene implements Gene, EyeColorContribution {
     /** Founder frequency of {@code prl}: one allele copy in this many. */
     public static final int WILD_PEARL_ONE_IN = 22;
 
-    // pigment kept (multiplied), per outcome
+    // Pigment kept (multiplied), per outcome. Retuned 2026-09-06 off the LUT
+    // lab's footprint overlay, which showed all three outcomes sitting far too
+    // low on the chart: a "near-white" cremello was resolving at black 0.38,
+    // half way down a gradient whose bottom half is dark, and classic pearl was
+    // barely lighter than the horse it started from. Every keepBlack came down
+    // hard, because the black axis is what pins a dilution to the dark end.
+    // Single cream's RED is deliberately unchanged: the ask was for cream to sit
+    // closer to the *top* of the chart, which is the black axis. Cutting its red
+    // as well walked palomino off the gradient's warm ramp and turned it grey.
     private static final float SINGLE_CREAM_RED = 0.45f;   // copper -> golden
-    // Single cream keeps most - but not all - of the black. Bay never *adds*
-    // black anywhere; the points / lower legs are just black it declined to
-    // restrict, so a real pigment dilution has to reach them too (a smoky /
+    // Single cream keeps a good deal - but not most - of the black. Bay never
+    // *adds* black anywhere; the points / lower legs are just black it declined
+    // to restrict, so a real pigment dilution has to reach them too (a smoky /
     // sooty buckskin), not leave them jet black.
-    private static final float SINGLE_CREAM_BLACK = 0.62f;
-    private static final float CLASSIC_PEARL_RED = 0.55f;
-    private static final float CLASSIC_PEARL_BLACK = 0.52f;
-    private static final float DOUBLE_DILUTE_RED = 0.08f;   // body -> pale cream
-    private static final float DOUBLE_DILUTE_BLACK = 0.38f; // points -> smoky rust
+    private static final float SINGLE_CREAM_BLACK = 0.44f;
+    // Classic pearl is a *substantial* lightening, not the mild even one this
+    // used to be - two pearls take a coat nearly to white (owner, 2026-09-06).
+    private static final float CLASSIC_PEARL_RED = 0.17f;
+    private static final float CLASSIC_PEARL_BLACK = 0.16f;
+    private static final float DOUBLE_DILUTE_RED = 0.05f;   // body -> pale cream
+    private static final float DOUBLE_DILUTE_BLACK = 0.09f; // points -> pale rust
 
     // Removed eumelanin fed back in as pheomelanin - see PigmentField#dilute.
+    //
+    // These came down with the keepBlack values, and had to. The tint exists to
+    // walk a diluted point off the gradient's zero-red column, which reads
+    // visually black all the way down to about black 0.4 - so it is sized
+    // against how much black is *left*. At the old 0.38 double dilute needed a
+    // third of the removed eumelanin back to escape that column; at 0.09 it is
+    // nowhere near it, and the same tint would only make a near-white horse
+    // orange.
     private static final float SINGLE_CREAM_TINT = 0.30f;
-    private static final float CLASSIC_PEARL_TINT = 0.28f;
-    private static final float DOUBLE_DILUTE_TINT = 0.33f;
+    private static final float CLASSIC_PEARL_TINT = 0.13f;
+    private static final float DOUBLE_DILUTE_TINT = 0.10f;
 
     /** {@code Cr/Cr} - the cremello / perlino pale blue. */
     public static final int DOUBLE_CREAM_BLUE = 0x93C4E4;
@@ -123,8 +141,8 @@ public final class MatpGene implements Gene, EyeColorContribution {
             .restrict(dilution(SINGLE_CREAM_RED, SINGLE_CREAM_BLACK, SINGLE_CREAM_TINT));
 
     private final Expression CLASSIC_PEARL = Expression.of("classic-pearl", "Classic pearl")
-            .describe("Both pigments diluted mildly and evenly - an apricot body with sepia points. "
-                    + "Only two pearl copies and no cream produce it.")
+            .describe("Both pigments cut hard and evenly - a pale, bright coat close to white, "
+                    + "over softly tinted points. Only two pearl copies and no cream produce it.")
             .restrict(dilution(CLASSIC_PEARL_RED, CLASSIC_PEARL_BLACK, CLASSIC_PEARL_TINT));
 
     private final Expression DOUBLE_DILUTE = Expression.of("double-dilute", "Double dilute")

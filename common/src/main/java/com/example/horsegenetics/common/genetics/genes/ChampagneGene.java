@@ -54,10 +54,16 @@ public final class ChampagneGene implements Gene, EyeColorContribution {
     public static final String KEY = "horsegenetics.champagne";
     public static final int WILD_CHAMPAGNE_ONE_IN = 40;
 
-    /** Pheomelanin kept - champagne barely touches red (gold champagne stays gold). */
-    private static final float KEEP_RED = 0.55f;
+    /**
+     * Pheomelanin kept. Champagne cuts red <b>hard</b> - it was 0.55 until
+     * 2026-09-06, on the reasoning that gold champagne should stay gold, and the
+     * LUT lab's footprint showed what that actually meant: a gold champagne
+     * resolving barely a third of the way across the chart from a plain
+     * chestnut, which is not a dilution anyone would name.
+     */
+    private static final float KEEP_RED = 0.32f;
     /** Eumelanin kept - hard, but not so hard that a black horse ends up gold. */
-    private static final float KEEP_BLACK = 0.42f;
+    private static final float KEEP_BLACK = 0.36f;
     /**
      * Fraction of a texel's eumelanin fed back in as pheomelanin. This is what
      * gives an <b>amber champagne</b> its chocolate points: bay's black points
