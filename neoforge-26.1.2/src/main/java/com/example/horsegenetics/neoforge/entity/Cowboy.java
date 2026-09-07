@@ -135,6 +135,7 @@ public class Cowboy extends AbstractVillager {
     private int stockTarget;
     private @Nullable String preferredBreed;
     private int restockCooldown;
+    private boolean horsemanNamed;
 
     public Cowboy(EntityType<? extends Cowboy> type, Level level) {
         super(type, level);
@@ -166,6 +167,30 @@ public class Cowboy extends AbstractVillager {
     public String cowboyName() {
         Component name = getCustomName();
         return name == null ? "" : name.getString();
+    }
+
+    /**
+     * His family name. The <b>horseman</b> at the post outside his barn is given
+     * this too, with a first name of his own - the two of them are the family
+     * that runs the place, which is the shortest way to say so.
+     *
+     * <p>Split back out of the full name rather than stored beside it: the name
+     * is generated as two parts and immediately joined, and a second copy of the
+     * half of it that never changes would be one more thing to keep in step.
+     */
+    public String lastName() {
+        String full = cowboyName();
+        int space = full.lastIndexOf(' ');
+        return space < 0 ? full : full.substring(space + 1);
+    }
+
+    /** Has the horseman next door been given his name yet? */
+    public boolean hasNamedHorseman() {
+        return horsemanNamed;
+    }
+
+    public void markHorsemanNamed() {
+        this.horsemanNamed = true;
     }
 
     public boolean isFounded() {
@@ -437,6 +462,7 @@ public class Cowboy extends AbstractVillager {
     protected void addAdditionalSaveData(ValueOutput output) {
         super.addAdditionalSaveData(output);
         output.putBoolean("Founded", founded);
+        output.putBoolean("HorsemanNamed", horsemanNamed);
         output.putInt("StockTarget", stockTarget);
         output.putString("PreferredBreed", preferredBreed == null ? "" : preferredBreed);
         output.storeNullable("Home", BlockPos.CODEC, home);
@@ -448,6 +474,7 @@ public class Cowboy extends AbstractVillager {
     protected void readAdditionalSaveData(ValueInput input) {
         super.readAdditionalSaveData(input);
         this.founded = input.getBooleanOr("Founded", false);
+        this.horsemanNamed = input.getBooleanOr("HorsemanNamed", false);
         this.stockTarget = input.getIntOr("StockTarget", 0);
         String breed = input.getStringOr("PreferredBreed", "");
         this.preferredBreed = breed.isEmpty() ? null : breed;

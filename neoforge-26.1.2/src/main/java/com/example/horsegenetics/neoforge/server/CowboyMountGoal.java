@@ -9,6 +9,7 @@ import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.util.DefaultRandomPos;
 import net.minecraft.world.entity.animal.equine.AbstractHorse;
+import net.minecraft.world.entity.ai.control.MoveControl;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
@@ -50,13 +51,16 @@ public final class CowboyMountGoal extends Goal {
     private static final double FLEE_SPEED = 1.9;
 
     /** Re-path this often while travelling - cheaper than every tick, still responsive. */
-    private static final int REPATH_INTERVAL = 30;
+    private static final int REPATH_INTERVAL = 40;
 
     /** Re-path far more often while fleeing; the thing chasing him is moving too. */
-    private static final int FLEE_REPATH_INTERVAL = 8;
+    private static final int FLEE_REPATH_INTERVAL = 10;
 
     /** How far the straight-line fallback aims when no sampled position pathed. */
     private static final double FLEE_DISTANCE = 16.0;
+
+    /** Ticks of having somewhere to be and not getting nearer before the dev build complains. */
+    private static final int STUCK_TICKS = 100;
 
     /** Roughly how often an idling pair picks a new spot to amble to. */
     private static final int IDLE_STROLL_INTERVAL = 200;
@@ -110,6 +114,12 @@ public final class CowboyMountGoal extends Goal {
      */
     private boolean wasUrgent;
 
+    /** How long he has had somewhere to be without getting closer to it. */
+    private int stuckTicks;
+
+    /** How close he was to that somewhere last time it was measured. */
+    private double lastDistance = Double.MAX_VALUE;
+
     public CowboyMountGoal(AbstractHorse horse) {
         this.horse = horse;
         // MOVE only. Holding JUMP as well would starve the horse's own FloatGoal,
@@ -136,9 +146,19 @@ public final class CowboyMountGoal extends Goal {
         return rider() != null;
     }
 
+    /**
+     * Every tick, not every other one.
+     *
+     * <p>A goal that returns {@code false} here is run by
+     * {@code GoalSelector.tickRunningGoals(false)} on odd ticks, which is to say
+     * not at all - so every interval in this class was quietly doubled, and a
+     * horse whose path had just failed stood still for twice as long as the
+     * constant said. It is one navigation call every few ticks either way; the
+     * saving was never real and the halved responsiveness was.
+     */
     @Override
     public boolean requiresUpdateEveryTick() {
-        return false;
+        return true;
     }
 
     @Override
@@ -148,6 +168,8 @@ public final class CowboyMountGoal extends Goal {
         doorScanCooldown = 0;
         doorHeldTicks = 0;
         wasUrgent = false;
+        stuckTicks = 0;
+        lastDistance = Double.MAX_VALUE;
     }
 
     @Override
@@ -180,6 +202,7 @@ public final class CowboyMountGoal extends Goal {
                 cowboy, level, horse.blockPosition(), wasUrgent);
         wasUrgent = plan.urgent();
         announceDutyChange(cowboy, level, plan);
+        announceIfStuck(cowboy, level, plan);
         switch (plan.duty()) {
             case FLEE -> flee(level, plan);
             case SHELTER -> shelter(cowboy, level, plan);
@@ -208,11 +231,8 @@ public final class CowboyMountGoal extends Goal {
             // navigator get as far along it as it can.
             away = straightAwayFrom(threat);
         }
-        if (horse.getNavigation().moveTo(away.x, away.y, away.z, FLEE_SPEED)) {
-            repathCooldown = FLEE_REPATH_INTERVAL;
-        }
-        // A failed path deliberately leaves the cooldown alone, so the next tick
-        // tries again instead of waiting out an interval it did nothing with.
+        repathCooldown = FLEE_REPATH_INTERVAL;
+        drive(away.x, away.y, away.z, FLEE_SPEED);
     }
 
     /** A point {@link #FLEE_DISTANCE} blocks directly away from a threat. */
@@ -273,7 +293,45 @@ public final class CowboyMountGoal extends Goal {
     }
 
     /**
-     * In a dev build, say in chat every time he changes what he is doing.
+     * In a dev build, say why he is not getting anywhere.
+     *
+     * <p>Here because "he does not go to his barn" has now survived three fixes
+     * that were each arrived at by reading the code, and the thing none of them
+     * could tell me is which of the several ways a horse can refuse to move is
+     * the one actually happening. So when he has somewhere to be and has not got
+     * closer to it for {@link #STUCK_TICKS}, this prints the state that decides
+     * it: how far off he is, whether the navigator thinks it has a path, and
+     * whether the horse is in one of the two states that make
+     * {@code AbstractHorse.isImmobile()} true. One line names the culprit.
+     *
+     * <p>Delete it with {@code wiki/known-gaps.html} gap 59.
+     */
+    private void announceIfStuck(Cowboy cowboy, ServerLevel level, CowboyRoutine.Plan plan) {
+        if (!DebugAnnounce.enabled() || plan.goal().isEmpty()) {
+            stuckTicks = 0;
+            return;
+        }
+        double distance = Math.sqrt(horse.blockPosition().distSqr(plan.goal().get()));
+        if (distance < lastDistance - 0.5) {
+            lastDistance = distance;
+            stuckTicks = 0;
+            return;
+        }
+        if (++stuckTicks < STUCK_TICKS) {
+            return;
+        }
+        stuckTicks = 0;
+        lastDistance = distance;
+        DebugAnnounce.say(level, "Cowboy", String.format(
+                "%s stuck on %s: %.1f blocks off, nav %s, immobile=%s standing=%s eating=%s",
+                cowboy.cowboyName(), plan.duty(), distance,
+                horse.getNavigation().isDone() ? "idle" : "pathing",
+                horse.isImmobile(), horse.isStanding(), horse.isEating()),
+                ChatFormatting.RED);
+    }
+
+    /**
+     * In a dev build, say every time he changes what he is doing.
      *
      * <p>Here because "he does not flee from zombies" was reported twice and could
      * not be told apart, from outside, from "this goal is not running at all" -
@@ -296,14 +354,13 @@ public final class CowboyMountGoal extends Goal {
     }
 
     /**
-     * How many game ticks one call of {@link #tick()} stands for.
-     *
-     * <p>{@link #requiresUpdateEveryTick()} is false, so the goal selector runs
-     * this every <b>other</b> tick. Anything here counting toward a duration in
-     * seconds has to know that, or it waits twice as long as it reads.
+     * How many game ticks one call of {@link #tick()} stands for. One, now that
+     * {@link #requiresUpdateEveryTick()} is true - kept as a named thing rather
+     * than a bare {@code 1} because it was {@code 2} and the difference silently
+     * doubled every duration in this class.
      */
     private static int ticksSinceLastCall() {
-        return 2;
+        return 1;
     }
 
     private void patrol(Cowboy cowboy, ServerLevel level, CowboyRoutine.Plan plan) {
@@ -341,7 +398,7 @@ public final class CowboyMountGoal extends Goal {
                     horse.getRandom().nextInt(IDLE_STROLL_RANGE * 2 + 1) - IDLE_STROLL_RANGE,
                     0,
                     horse.getRandom().nextInt(IDLE_STROLL_RANGE * 2 + 1) - IDLE_STROLL_RANGE);
-            horse.getNavigation().moveTo(spot.getX() + 0.5, spot.getY(), spot.getZ() + 0.5, AMBLE_SPEED);
+            drive(spot.getX() + 0.5, spot.getY(), spot.getZ() + 0.5, AMBLE_SPEED);
         }
     }
 
@@ -360,6 +417,34 @@ public final class CowboyMountGoal extends Goal {
             return;
         }
         repathCooldown = interval;
-        horse.getNavigation().moveTo(target.getX() + 0.5, target.getY(), target.getZ() + 0.5, speed);
+        drive(target.getX() + 0.5, target.getY(), target.getZ() + 0.5, speed);
+    }
+
+    /**
+     * Point the horse at somewhere and make sure it actually goes.
+     *
+     * <p><b>Navigation first, move control second.</b> A path is what you want -
+     * it goes round things - but {@code moveTo} returns false whenever it cannot
+     * build one, and a rider on a horse standing in a barn doorway or against a
+     * fence corner hits that often. Falling through to the move control walks the
+     * horse straight at the target instead, which is worse pathing and much
+     * better than not moving at all. Nothing else on this horse is steering, so
+     * there is no one to argue with.
+     *
+     * <p>It also clears the <b>rearing</b> state first.
+     * {@code AbstractHorse.isImmobile()} is true while a horse is standing, and
+     * standing is set by {@code RandomStandGoal}, which carries <i>no</i>
+     * {@link Flag} at all - so holding {@link Flag#MOVE} does not starve it and
+     * it can freeze the mount for twenty ticks at a time, on its own schedule,
+     * for ever. A horse that is trying to get home does not rear.
+     */
+    private void drive(double x, double y, double z, double speed) {
+        if (horse.isStanding()) {
+            horse.clearStanding();
+        }
+        if (!horse.getNavigation().moveTo(x, y, z, speed)) {
+            MoveControl control = horse.getMoveControl();
+            control.setWantedPosition(x, y, z, speed);
+        }
     }
 }

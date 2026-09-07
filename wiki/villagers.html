@@ -405,7 +405,47 @@
     that from the rider's side, the itinerary lives on the mount:
     <code>CowboyMountGoal</code> sits at <strong>priority 0</strong> and holds
     <code>Flag.MOVE</code> continuously while a cowboy is aboard, which starves every
-    other movement goal the horse has.
+    other movement goal the horse has. Nothing about the plan lives on the villager;
+    he is a passenger with opinions.
+</p>
+
+<p>
+    <strong>Holding <code>MOVE</code> is not enough on its own</strong>, which is the
+    thing that took three attempts to find. Two vanilla goals get past it, and both
+    are specifically about a horse that has someone on its back:
+</p>
+
+<ul>
+    <li><code>RandomStandGoal</code> carries <strong>no flags at all</strong>, so no
+        lock starves it. It rears the horse on its own schedule &mdash; and
+        <code>AbstractHorse.isImmobile()</code> is true while a horse is rearing, so
+        it can freeze the mount for twenty ticks at a time, for ever, and no amount of
+        navigation will move it.</li>
+    <li><code>RunAroundLikeCrazyGoal</code> is the bucking a player sits through to
+        tame a horse. Its condition is exactly &ldquo;untamed, and someone is on
+        me&rdquo;, which is permanently true of this one, and its tick
+        <strong>ejects the passenger</strong>. It does carry <code>MOVE</code>, so it
+        should be starved &mdash; but that is a lot of trust to place in goal
+        ordering for a goal whose whole purpose is to undo this character.</li>
+</ul>
+
+<p>
+    So <code>CowboyHandler.clearTheMountsRivals</code> takes both off the horse he is
+    riding, along with <code>TemptGoal</code> (anyone with wheat could otherwise walk
+    the cowboy out of his own village). <strong>Only the horse he is on</strong>: every
+    other horse in the world keeps all three, his own string included, because a horse
+    a player buys must still buck or it can never be tamed. It runs from the
+    <em>cowboy's</em> tick rather than the horse's, because removing a goal from a
+    selector that is iterating its own goal set is a concurrent modification.
+</p>
+
+<p>
+    Movement itself goes through one call, which tries the <strong>navigator first and
+    the move control second</strong>. A path is what you want &mdash; it goes round
+    things &mdash; but <code>moveTo</code> returns false whenever it cannot build one,
+    and a horse in a doorway or a fence corner hits that often; walking straight at the
+    target is worse pathing and much better than standing still. That call also clears
+    the rearing state, because a horse that is trying to get home does not rear.
 </p>
 
 <p>
@@ -597,6 +637,15 @@
     tags &mdash; tags <em>merge</em> across datapacks, so adding to vanilla's is
     additive and safe where overriding a worldgen file would not be. One villager per
     post, as every vanilla job site is.
+</p>
+
+<p>
+    <strong>He has the cowboy's family name.</strong> Once he has taken the job,
+    <code>CowboyHandler.nameTheHorseman</code> gives him a first name of his own and
+    the surname of the cowboy whose barn he is standing outside &mdash; they run the
+    place together, and two names that share a half say so without a line of dialogue.
+    It waits for the profession rather than naming the nearest villager, which would
+    eventually name somebody's librarian.
 </p>
 
 <p>

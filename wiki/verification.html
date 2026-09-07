@@ -213,9 +213,18 @@
     <li><strong>Watch the chat while you do all three.</strong> A dev build prints a grey
         <code>[Cowboy] &lt;name&gt;: PATROL / SHELTER</code> line on every duty change
         and a red <code>FLEE</code> one when he bolts. A sane night is one
-        <code>SHELTER</code> at dusk and one <code>PATROL</code> at dawn; a stream of
-        them is the twitching coming back, and total silence would mean the goal is not
-        running at all (<a href="known-gaps.html#gap-59">gap 59</a>).</li>
+        <code>SHELTER</code> at dusk and one <code>PATROL</code> at dawn.</li>
+    <li><strong>The important line is the red &ldquo;stuck&rdquo; one.</strong> When he
+        has somewhere to be and has not got closer to it for five seconds, a dev build
+        now prints <code>[Cowboy] &lt;name&gt; stuck on SHELTER: 23.4 blocks off, nav
+        idle, immobile=true standing=true eating=false</code>. <strong>That line names
+        the culprit</strong>, and it is the whole point of this round: three fixes for
+        &ldquo;he never goes to his barn&rdquo; have been derived by reading the code
+        and none of them has been confirmed. Copy the line out verbatim if it appears
+        &mdash; <code>nav idle</code> means no path was built, <code>standing=true</code>
+        means something is still rearing him, <code>nav pathing</code> with the distance
+        not falling means he is walking into something
+        (<a href="known-gaps.html#gap-59">gap 59</a>).</li>
     <li><strong>At dusk, do all four double doors open, and does the herd go in?</strong>
         Then do all four shut behind them? This is a lot of pathfinding through a
         two-block gap and it is the part most likely to half-work. <strong>Partial
@@ -266,6 +275,12 @@
         villager standing one step along beside it. Check it survived the jigsaw (a
         modded block in a vanilla-pool piece is the thing that could quietly fail) and
         that it looks deliberate rather than like a missing stair.</li>
+    <li><strong>Has the horseman got the cowboy's surname?</strong> Once he takes the
+        job he should be renamed to a new first name plus the cowboy's family name, with
+        the name tag showing. If the cowboy is <em>Wade Hargreave</em>, the horseman
+        should be <em>&lt;someone&gt; Hargreave</em>. A horseman still showing
+        &ldquo;Horseman&rdquo; means the naming pass never found him &mdash; check he is
+        within 16 blocks of the barn's centre.</li>
     <li><strong>Does that villager take the job?</strong> He is placed unemployed on
         purpose. A dev build prints an aqua <code>[Horseman] &lt;name&gt; took the job
         at x, y, z</code> the first time it sees one

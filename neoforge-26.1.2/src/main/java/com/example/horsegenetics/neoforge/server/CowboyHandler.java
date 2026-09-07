@@ -15,6 +15,7 @@ import com.example.horsegenetics.neoforge.data.CowboyBrand;
 import com.example.horsegenetics.neoforge.data.HorseCareAttachment;
 import com.example.horsegenetics.neoforge.data.ModAttachments;
 import com.example.horsegenetics.neoforge.entity.Cowboy;
+import com.example.horsegenetics.neoforge.village.ModVillagerProfessions;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -22,7 +23,11 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.goal.WrappedGoal;
+import net.minecraft.world.entity.ai.goal.RandomStandGoal;
+import net.minecraft.world.entity.ai.goal.RunAroundLikeCrazyGoal;
+import net.minecraft.world.entity.ai.goal.TemptGoal;
 import net.minecraft.world.entity.animal.equine.Horse;
+import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -149,6 +154,9 @@ public final class CowboyHandler {
      */
     private static final int RESTOCK_PER_LOOK = 1;
 
+    /** How far from the barn to look for the horseman when giving him his name. */
+    private static final int HORSEMAN_SEARCH = 16;
+
     private static final PersonNameGenerator NAMES = PersonNameGenerator.cowboys();
 
     private CowboyHandler() {
@@ -170,9 +178,81 @@ public final class CowboyHandler {
             found(cowboy, level);
             return;
         }
+        clearTheMountsRivals(cowboy);
         if (cowboy.tickRestockClock()) {
             cowboy.setRestockCooldown(RESTOCK_INTERVAL + cowboy.getRandom().nextInt(RESTOCK_JITTER));
             restock(cowboy, level);
+            nameTheHorseman(cowboy, level);
+        }
+    }
+
+    /**
+     * Take off the horse he is riding the three vanilla goals that fight a rider
+     * who is not a player.
+     *
+     * <ul>
+     *   <li><b>{@code RunAroundLikeCrazyGoal}</b> is the bucking a player has to
+     *       sit through to tame a horse. Its {@code canUse} is exactly "untamed,
+     *       and someone is on me", which is permanently true of this horse - and
+     *       its tick <b>ejects the passenger</b> and makes the animal rear. It
+     *       carries {@code MOVE} so {@link CowboyMountGoal} normally starves it,
+     *       but "normally" is doing a lot of work for a goal whose whole purpose
+     *       is to undo the thing this character is.</li>
+     *   <li><b>{@code RandomStandGoal}</b> carries <b>no flags at all</b>, so
+     *       nothing starves it. It rears the horse on its own schedule, and
+     *       {@code AbstractHorse.isImmobile()} is true while a horse is rearing -
+     *       so it can freeze the mount for twenty ticks at a time, for ever, and
+     *       no amount of navigation will move it.</li>
+     *   <li><b>{@code TemptGoal}</b> would let anyone with wheat walk the cowboy
+     *       out of his own village.</li>
+     * </ul>
+     *
+     * <p>Done from the <b>cowboy's</b> tick and not the horse's, and not from
+     * {@code CowboyMountGoal.start()}, because removing a goal from a selector
+     * that is in the middle of iterating its own goal set is a concurrent
+     * modification. This runs in a different entity's tick entirely.
+     *
+     * <p>Only ever the horse he is on. Every other horse in the world keeps all
+     * three, including the rest of his string - a horse a player buys must still
+     * buck, or it cannot be tamed.
+     */
+    private static void clearTheMountsRivals(Cowboy cowboy) {
+        if (!(cowboy.getVehicle() instanceof Horse mount)) {
+            return;
+        }
+        mount.goalSelector.removeAllGoals(goal -> goal instanceof RunAroundLikeCrazyGoal
+                || goal instanceof RandomStandGoal
+                || goal instanceof TemptGoal);
+    }
+
+    /**
+     * Give the horseman at the post his name: <b>a first name of his own and the
+     * cowboy's family name</b>.
+     *
+     * <p>They run the place together, and two names that share a half say that
+     * without a line of dialogue. It waits until he has actually taken the job -
+     * before that he is an unemployed villager, and naming whichever villager
+     * happens to be nearest would eventually name somebody's librarian.
+     */
+    private static void nameTheHorseman(Cowboy cowboy, ServerLevel level) {
+        if (cowboy.hasNamedHorseman()) {
+            return;
+        }
+        BlockPos barn = cowboy.home().orElse(cowboy.blockPosition());
+        for (Villager villager : level.getEntitiesOfClass(
+                Villager.class, new AABB(barn).inflate(HORSEMAN_SEARCH))) {
+            if (villager.getCustomName() != null
+                    || !villager.getVillagerData().profession().is(ModVillagerProfessions.HORSEMAN.getKey())) {
+                continue;
+            }
+            Rng rng = new NeoRng(villager.getRandom());
+            villager.setCustomName(Component.literal(
+                    NAMES.generateParts(rng).first() + " " + cowboy.lastName()));
+            villager.setCustomNameVisible(true);
+            cowboy.markHorsemanNamed();
+            DebugAnnounce.sayAt(level, "Horseman", villager.getName().getString() + " took the name",
+                    villager.blockPosition(), ChatFormatting.AQUA);
+            return;
         }
     }
 
@@ -183,7 +263,9 @@ public final class CowboyHandler {
         }
 
         Rng rng = new NeoRng(cowboy.getRandom());
-        cowboy.setCustomName(Component.literal(NAMES.generate(rng)));
+        // Generated as parts, because the horseman at the post outside takes the
+        // family half of it - see nameTheHorseman.
+        cowboy.setCustomName(Component.literal(NAMES.generateParts(rng).joined()));
         cowboy.setCustomNameVisible(true);
 
         // Home is where the structure put him - the middle of the barn - and it
