@@ -5,7 +5,6 @@ import com.example.horsegenetics.common.horse.TransferDeed;
 import com.example.horsegenetics.neoforge.data.ModDataComponents;
 import com.example.horsegenetics.neoforge.item.ModItems;
 import com.example.horsegenetics.neoforge.server.CowboyHandler;
-import com.example.horsegenetics.neoforge.server.CowboyRemountGoal;
 import com.example.horsegenetics.neoforge.server.HorsePrices;
 import com.example.horsegenetics.neoforge.server.HorseRecords;
 import net.minecraft.core.BlockPos;
@@ -31,7 +30,6 @@ import net.minecraft.world.entity.ai.goal.LookAtTradingPlayerGoal;
 import net.minecraft.world.entity.ai.goal.PanicGoal;
 import net.minecraft.world.entity.ai.goal.TradeWithPlayerGoal;
 import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
-import net.minecraft.world.entity.animal.equine.AbstractHorse;
 import net.minecraft.world.entity.animal.equine.Horse;
 import net.minecraft.world.entity.npc.villager.AbstractVillager;
 import net.minecraft.world.entity.player.Player;
@@ -43,7 +41,6 @@ import net.minecraft.world.item.trading.MerchantOffers;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
-import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -62,13 +59,22 @@ import java.util.UUID;
  * He is <b>not a villager profession</b>. A profession is acquired from a job
  * site by a villager whose brain runs vanilla's schedule, and that schedule
  * would dismount him every morning to go stand at his workstation. Everything
- * that makes this character himself - always mounted, home is a barn and not a
- * bed, stock is a live herd and not a trade table - is a fight with that brain.
- * So he is his own {@link AbstractVillager}: he keeps the merchant screen, the
- * villager silhouette and the trading goals, and none of the schedule. The
- * <b>horseman</b> ({@code ModVillagerProfessions}) is the one that is a real
- * profession, because a shopkeeper standing at a workstation is exactly what
- * vanilla's brain is for.
+ * that makes this character himself - home is a barn and not a bed, stock is a
+ * live herd and not a trade table - is a fight with that brain. So he is his own
+ * {@link AbstractVillager}: he keeps the merchant screen, the villager
+ * silhouette and the trading goals, and none of the schedule. The <b>horseman</b>
+ * ({@code ModVillagerProfessions}) is the one that is a real profession, because
+ * a shopkeeper standing at a workstation is exactly what vanilla's brain is for.
+ *
+ * <h2>He does not ride</h2>
+ * He did, for about a day, and it cost more than every other part of this
+ * character put together. A mob rider cannot steer, so the itinerary had to live
+ * on the horse; the horse's own goals all exist for the "someone is on my back"
+ * case and fought it; a villager has no seated pose so he had to be sunk into
+ * the saddle; and getting a mounted man and eleven horses through a barn door at
+ * dusk was never made to work at all. <b>The herd follows the man now</b>, on
+ * foot, and everything above went in the bin with the saddle. See
+ * {@code wiki/known-gaps.html}.
  *
  * <h2>Selling a horse he does not hand over</h2>
  * Each offer is one emerald price against one signed transfer paper, named for
@@ -93,8 +99,8 @@ import java.util.UUID;
  * <ul>
  *   <li>{@code home} - the barn he was generated in, and the place he and his
  *       herd return to at night.</li>
- *   <li>{@code herd} - the horses he bred, in the order they were made. The
- *       first is his own mount and is never for sale.</li>
+ *   <li>{@code herd} - the horses he bred, in the order they were made. All of
+ *       them follow him and all of them are for sale.</li>
  *   <li>{@code sold} - herd members he has already issued a paper for.</li>
  *   <li>{@code stockTarget} - how many horses he had for sale on the day he
  *       set up, and the number {@code CowboyHandler} breeds him back up to. A
@@ -102,32 +108,18 @@ import java.util.UUID;
  *   <li>{@code preferredBreed} - the breed he is known for. Half his string is
  *       it and the rest is whatever else the country round him produces, which
  *       is how a real breeder's yard looks.</li>
- *   <li>{@code founded} - has {@code CowboyHandler} given him his name, his
- *       mount and his herd yet? He is baked into {@code cowboy_barn.nbt} bare;
- *       everything about him is built on his first server tick.</li>
+ *   <li>{@code founded} - has {@code CowboyHandler} given him his name and his
+ *       herd yet? He arrives bare - a villager who claimed a Horse Trader's Post
+ *       and was replaced by one of these - and everything about him is built on
+ *       his first server tick.</li>
  * </ul>
  */
 public class Cowboy extends AbstractVillager {
 
-    /** Fewest horses in the herd, on top of the one he rides. */
+    /** Fewest horses in his string. */
     public static final int MIN_HERD = 4;
-    /** Most horses in the herd, on top of the one he rides. */
+    /** Most horses in his string. */
     public static final int MAX_HERD = 10;
-
-    /**
-     * How far into the saddle he is drawn, in blocks.
-     *
-     * <p>A villager has no sitting pose - vanilla's own villagers stand bolt
-     * upright in boats and minecarts - so a cowboy placed properly on a horse's
-     * back is a man standing on it. Sinking him until the horse's barrel takes
-     * his legs reads as riding from any normal distance. It is a bandaid and
-     * knowingly so: the real fix is a villager mesh with a seated leg pose, and
-     * this is what it costs until there is one.
-     *
-     * <p>Applied to the <b>attachment point</b> and not to the renderer, so his
-     * hitbox goes down with the picture and you click him where you see him.
-     */
-    private static final double SADDLE_SINK = 0.5;
 
     private @Nullable BlockPos home;
     private final List<UUID> herd = new ArrayList<>();
@@ -136,8 +128,6 @@ public class Cowboy extends AbstractVillager {
     private int stockTarget;
     private @Nullable String preferredBreed;
     private int restockCooldown;
-    /** True for exactly the length of a deliberate dismount - see letHimDown. */
-    private boolean steppingDown;
 
     public Cowboy(EntityType<? extends Cowboy> type, Level level) {
         super(type, level);
@@ -150,7 +140,7 @@ public class Cowboy extends AbstractVillager {
      * <p>He spends the night on foot in a field now (see {@link #letHimDown}),
      * and a villager on foot in a field at night is a zombie's supper. The
      * alternative was a barn he could reliably get into, and a day of trying
-     * established that a mounted man's bedtime costs more than it is worth.
+     * established that a man who tries to bed down costs more than it is worth.
      * Owner's call, and the right one: this is one number against a subsystem.
      */
     public static final double HEALTH = 200.0;
@@ -168,11 +158,6 @@ public class Cowboy extends AbstractVillager {
         this.goalSelector.addGoal(1, new TradeWithPlayerGoal(this));
         this.goalSelector.addGoal(1, new LookAtTradingPlayerGoal(this));
         this.goalSelector.addGoal(2, new PanicGoal(this, 0.6));
-        // Fetching his horse back at first light, after a night on foot.
-        this.goalSelector.addGoal(3, new CowboyRemountGoal(this));
-        // On foot: overnight, and the day his horse is killed. While he is
-        // mounted, CowboyMountGoal on the horse does all the moving and these
-        // never get the chance to path anywhere.
         this.goalSelector.addGoal(8, new WaterAvoidingRandomStrollGoal(this, 0.4));
         this.goalSelector.addGoal(10, new LookAtPlayerGoal(this, Player.class, 8.0F));
     }
@@ -241,7 +226,7 @@ public class Cowboy extends AbstractVillager {
         this.home = pos.immutable();
     }
 
-    /** Every horse he bred, mount first. Ids only - some may be unloaded or dead. */
+    /** Every horse he bred. Ids only - some may be unloaded or dead. */
     public List<UUID> herdIds() {
         return List.copyOf(herd);
     }
@@ -254,14 +239,9 @@ public class Cowboy extends AbstractVillager {
 
     /**
      * Forget a horse entirely - it was retired in a restock, or it has been
-     * tamed and is somebody else's now. <b>Never slot 0</b>: that id is the
-     * herd's lead, every other member carries it, and dropping it would orphan
-     * the string even if the mount is dead.
+     * tamed and is somebody else's now.
      */
     public void removeFromHerd(UUID horseId) {
-        if (!herd.isEmpty() && herd.get(0).equals(horseId)) {
-            return;
-        }
         herd.remove(horseId);
         sold.remove(horseId);
     }
@@ -283,21 +263,6 @@ public class Cowboy extends AbstractVillager {
         this.restockCooldown = Math.max(0, ticks);
     }
 
-    /**
-     * The horse he rides - <b>herd slot 0</b>, and therefore the herd's lead:
-     * every other member of his string carries this id as its
-     * {@code HorseCareAttachment.herd}. Never offered for sale; empty once it
-     * has been killed.
-     */
-    public Optional<UUID> mountId() {
-        return herd.isEmpty() ? Optional.empty() : Optional.of(herd.get(0));
-    }
-
-    /** The lead horse as a live entity, or {@code null} if dead or unloaded. */
-    public @Nullable AbstractHorse mount(ServerLevel level) {
-        return mountId().map(id -> liveHorse(level, id)).orElse(null);
-    }
-
     /** Has a paper already been written for this horse? */
     public boolean hasSold(UUID horseId) {
         return sold.contains(horseId);
@@ -312,7 +277,7 @@ public class Cowboy extends AbstractVillager {
 
     /**
      * One offer per herd horse that is still his to sell: alive, still untamed,
-     * not his mount, and not already papered. Rebuilt from scratch every time
+     * and not already papered. Rebuilt from scratch every time
      * the list is asked for, because the herd is a live thing - a horse can be
      * killed by a wolf between one player looking and the next.
      */
@@ -320,9 +285,7 @@ public class Cowboy extends AbstractVillager {
     protected void updateTrades(ServerLevel level) {
         MerchantOffers merchantOffers = this.getOffers();
         merchantOffers.clear();
-        List<UUID> ids = herdIds();
-        for (int i = 1; i < ids.size(); i++) { // 0 is his own mount
-            UUID id = ids.get(i);
+        for (UUID id : herdIds()) {
             if (hasSold(id)) {
                 continue;
             }
@@ -408,57 +371,6 @@ public class Cowboy extends AbstractVillager {
     @Override
     public @Nullable AgeableMob getBreedOffspring(ServerLevel level, AgeableMob partner) {
         return null;
-    }
-
-    /**
-     * He never gets off <b>by accident</b>. Vanilla dismounts a passenger whose
-     * vehicle it thinks is unsuitable, and a player can shake a rider loose;
-     * this makes the horse and {@link #letHimDown} the only two things that can
-     * end the ride.
-     */
-    @Override
-    public void stopRiding() {
-        if (!steppingDown && getVehicle() instanceof AbstractHorse horse && horse.isAlive() && !isRemoved()) {
-            return;
-        }
-        super.stopRiding();
-    }
-
-    /**
-     * Get off, on purpose. The only way down that {@link #stopRiding()} honours,
-     * and the one {@code CowboyHandler} uses at dusk.
-     *
-     * <p>He rides by day and walks by night, because riding through a night
-     * meant getting a string of horses through a two-block barn door and that
-     * was never made to work. {@link CowboyRemountGoal} walks him back to the
-     * animal at first light.
-     */
-    public void letHimDown() {
-        steppingDown = true;
-        try {
-            stopRiding();
-        } finally {
-            steppingDown = false;
-        }
-    }
-
-    /** Nothing shoves a mounted man off his horse. */
-    @Override
-    public boolean isPushable() {
-        return !isPassenger();
-    }
-
-    /**
-     * Sit him <i>into</i> the horse rather than on top of it - see
-     * {@link #SADDLE_SINK} for why that is the best a villager mesh can do.
-     *
-     * <p>The vehicle attachment is subtracted from the saddle position by
-     * {@code Entity.positionRider}, so adding to its Y moves him down.
-     */
-    @Override
-    public Vec3 getVehicleAttachmentPoint(Entity vehicle) {
-        Vec3 point = super.getVehicleAttachmentPoint(vehicle);
-        return vehicle instanceof AbstractHorse ? point.add(0.0, SADDLE_SINK, 0.0) : point;
     }
 
     @Override

@@ -298,154 +298,38 @@
     without bound over a long world.
 </p>
 
-<h3 id="routine">His day &mdash; and only his day</h3>
+<h3 id="routine">His day</h3>
 
 <div class="note rule">
-    <span class="label">He rides by day and walks by night</span>
+    <span class="label">He does not ride</span>
     <p>
-        At dusk <code>CowboyHandler</code> takes him <strong>off</strong> his horse.
-        He spends the night as an ordinary villager, running the ordinary villager
-        goals he has always had, with no custom code of any kind; at first light
-        <code>CowboyRemountGoal</code> walks him back to the animal and he gets on.
-        He survives the night on <strong>ten times a villager's health</strong>
-        (<code>Cowboy.HEALTH</code>) rather than on shelter.
+        He did, for about a day, and it cost more than every other part of this
+        character put together. A mob rider <strong>cannot steer</strong>, so the
+        itinerary had to live on the horse; the horse's own goals all exist for the
+        &ldquo;someone is on my back&rdquo; case and fought it; a villager has no seated
+        pose, so he had to be sunk into the saddle to stop looking like he was standing
+        on it; and getting a mounted man and eleven horses through a barn door at dusk
+        was never made to work at all. Five rounds of fixes, each exposing the next.
     </p>
     <p>
-        <strong>There used to be a whole night.</strong> He rode home at dusk, opened
-        four double doors, waited for eleven horses to file through a two-block gap
-        and shut up behind them. Every part of it worked in isolation and the whole
-        never did. A horse over about 1.43 scale <em>cannot path through a two-block
-        doorway at all</em>; a villager who wanders in is a cork, because a village
-        brain has no reason to leave a building at night; the string shoved each
-        other back out of the entrance; and each fix for one of those exposed the
-        next. The owner's call, after a day of it, was that a mounted man's bedtime
-        is not worth a subsystem. Removing it deleted <code>CowboyDoors</code>,
-        <code>HerdCollision</code>, the <code>SHELTER</code> duty and about five
-        hundred lines, and the night stopped being a problem that needs solving.
+        <strong>The herd follows the man now.</strong> He is an ordinary villager who
+        walks, and <code>CowboyHerdGoal</code> points his horses at him instead of at a
+        lead horse. That deleted <code>CowboyMountGoal</code>,
+        <code>CowboyRemountGoal</code>, <code>CowboyRoutine</code>,
+        <code>CowboyDoors</code>, <code>HerdCollision</code>, the saddle sink, the
+        patrol, the shelter and the flee &mdash; roughly a thousand lines for a
+        character nobody could tell had them. He keeps ten times a villager's health
+        (<code>Cowboy.HEALTH</code>), which is what the night cost in the end.
     </p>
 </div>
 
 <p>
-    What is left is decided in one place, <code>CowboyRoutine.plan</code>, which both
-    goals read &mdash; so the man and his animals cannot disagree about the plan.
+    So there is no routine to document. He floats, trades, panics, strolls and looks at
+    players &mdash; the goals every villager has. His horses trail him at
+    <strong>14 blocks</strong> and settle at 7 by day, tightening to 4 after dark so the
+    string gathers on him rather than strung out across a field.
 </p>
 
-<div class="table-wrap">
-<table>
-<thead><tr><th>Duty</th><th>When</th><th>What he does</th></tr></thead>
-<tbody>
-<tr>
-    <td><strong><code>PATROL</code></strong></td>
-    <td>Mounted, nothing hostile near</td>
-    <td>Wanders freely within 40 blocks of the barn. Past that he drifts toward the
-        <strong>village centre</strong> &mdash; not into it; he pulls up 22 blocks
-        short of the bell, so he reads as a man riding the ring road rather than one
-        parked in the square. Past 64 blocks he gives up on the patrol and rides
-        straight home.</td>
-</tr>
-<tr>
-    <td><strong><code>FLEE</code></strong></td>
-    <td>Mounted, monster within 16 blocks</td>
-    <td>Rides hard and randomly away from the nearest monster, faster than he moves
-        for any other reason, re-pathing every 10 ticks. If nothing in the sampled arc
-        is pathable he aims straight down the line away from it rather than standing
-        still. He does not settle until the thing is <strong>28</strong> blocks off,
-        not 16 &mdash; with one radius he bolted, stopped dead the instant he was
-        clear, turned round and ambled back towards it.</td>
-</tr>
-<tr>
-    <td><em>nothing</em></td>
-    <td>On foot, after dark</td>
-    <td>His own goals, which are a villager's: float, trade, panic, stroll, look. No
-        duty is computed at all, because <code>CowboyMountGoal</code> only runs while
-        he is a passenger.</td>
-</tr>
-</tbody>
-</table>
-</div>
-
-<p>
-    Reacting to a monster is <strong>not</strong> a night rule, though it was one, and
-    being one was a bug: the check sat inside an <code>isDarkOutside()</code> branch, so
-    a zombie that walked out of a cave mouth at noon stood next to a man who ignored it.
-    What makes him move is a monster near him, and that has nothing to do with the clock
-    &mdash; it just happens that after dark he is on foot and it is his own
-    <code>PanicGoal</code> and his health doing the work instead.
-</p>
-
-<p>
-    The <em>centre</em> of the village is its <code>minecraft:meeting</code> POI, i.e.
-    its bell. That is the one part of a generated village reliably at its middle and
-    reliably findable at runtime, which beats trying to recover the structure's bounding
-    box after the fact.
-</p>
-
-
-<h3 id="riding">The horse does the walking</h3>
-
-<p>
-    A rider that is not a player <strong>cannot steer a horse</strong> &mdash; vanilla
-    only hands control to a saddled mount's player passenger &mdash; so a mounted mob
-    is dead weight and the animal keeps running its own stroll goal. Rather than fight
-    that from the rider's side, the itinerary lives on the mount:
-    <code>CowboyMountGoal</code> sits at <strong>priority 0</strong> and holds
-    <code>Flag.MOVE</code> continuously while a cowboy is aboard, which starves every
-    other movement goal the horse has. Nothing about the plan lives on the villager;
-    he is a passenger with opinions.
-</p>
-
-<p>
-    <strong>Holding <code>MOVE</code> is not enough on its own</strong>, which is the
-    thing that took three attempts to find. Two vanilla goals get past it, and both
-    are specifically about a horse that has someone on its back:
-</p>
-
-<ul>
-    <li><code>RandomStandGoal</code> carries <strong>no flags at all</strong>, so no
-        lock starves it. It rears the horse on its own schedule &mdash; and
-        <code>AbstractHorse.isImmobile()</code> is true while a horse is rearing, so
-        it can freeze the mount for twenty ticks at a time, for ever, and no amount of
-        navigation will move it.</li>
-    <li><code>RunAroundLikeCrazyGoal</code> is the bucking a player sits through to
-        tame a horse. Its condition is exactly &ldquo;untamed, and someone is on
-        me&rdquo;, which is permanently true of this one, and its tick
-        <strong>ejects the passenger</strong>. It does carry <code>MOVE</code>, so it
-        should be starved &mdash; but that is a lot of trust to place in goal
-        ordering for a goal whose whole purpose is to undo this character.</li>
-</ul>
-
-<p>
-    So <code>CowboyHandler.clearTheMountsRivals</code> takes both off the horse he is
-    riding, along with <code>TemptGoal</code> (anyone with wheat could otherwise walk
-    the cowboy out of his own village). <strong>Only the horse he is on</strong>: every
-    other horse in the world keeps all three, his own string included, because a horse
-    a player buys must still buck or it can never be tamed. It runs from the
-    <em>cowboy's</em> tick rather than the horse's, because removing a goal from a
-    selector that is iterating its own goal set is a concurrent modification.
-</p>
-
-<p>
-    Movement itself goes through one call, which tries the <strong>navigator first and
-    the move control second</strong>. A path is what you want &mdash; it goes round
-    things &mdash; but <code>moveTo</code> returns false whenever it cannot build one,
-    and a horse in a doorway or a fence corner hits that often; walking straight at the
-    target is worse pathing and much better than standing still. That call also clears
-    the rearing state, because a horse that is trying to get home does not rear.
-</p>
-
-<p>
-    It holds <code>MOVE</code> and <em>not</em> <code>JUMP</code>, which matters: the
-    horse's own <code>FloatGoal</code> is what keeps it &mdash; and the man on it
-    &mdash; from drowning.
-</p>
-
-<p>
-    The rest of the herd runs <code>CowboyHerdGoal</code>, which trails the lead horse
-    with hysteresis (set off at 14 blocks, stop at 7) so they spread out and graze
-    instead of stacking on him. After dark it tightens to 4 blocks and quickens, which
-    is both what gets them through the barn doors behind him and what keeps them with
-    him if he bolts.
-</p>
 
 <h2 id="barn">The barn, and how it lands on the outskirts</h2>
 
@@ -623,58 +507,52 @@
     of how one comes to exist.
 </p>
 
-<h3 id="post-at-the-barn">He comes with the barn</h3>
+<h3 id="post-at-the-barn">One block, two trades</h3>
 
 <p>
-    Before this he only existed where a <em>player</em> had crafted a post and waited,
-    which meant an entire trade could be in a world and never be met. Now the post is
-    <strong>part of the barn</strong>: it is a block in
-    <code>cowboy_barn.nbt</code> at local <code>(0, 0, 3)</code> &mdash; the middle of
-    the road-facing end, between the two door pairs, in place of the step that was
-    drawn there &mdash; and a plain villager stands one step along the skirt beside it.
-    Both are baked in by <code>tools/barn/bake-barn.py</code>. So the first thing you
-    walk up to on the way in from the street is his counter.
+    A Horse Trader's Post hands out a <strong>cowboy first and a horseman second</strong>,
+    and keeps alternating. It manages that by <em>letting go</em>: a villager claims the
+    post the ordinary way and takes the horseman profession,
+    <code>server/HorsemanHandler</code> looks at the village and decides which of the two
+    he should actually be, and if the answer is cowboy he is <strong>replaced by a
+    <code>Cowboy</code> entity</strong> standing where he stood. The post he was holding
+    falls vacant, so the next villager along claims it and &mdash; the count now being
+    uneven &mdash; becomes the horseman and keeps it.
 </p>
 
 <p>
-    <strong>Structure and not runtime code</strong>, deliberately. A job-site POI is
-    indexed off the block, so putting the block in the world <em>is</em> the whole
-    mechanism &mdash; there is nothing for a handler to do that the template cannot &mdash;
-    and a shop front is architecture rather than behaviour. It also means the post
-    cannot land somewhere silly: an earlier version searched for open ground near the
-    barn at runtime, which is one more thing to get wrong for no gain.
+    The count is <strong>taken rather than remembered</strong>: cowboys and horsemen
+    within 128 blocks are counted and the trade with fewer is handed out, ties going to
+    the cowboy. That is self-correcting, where a saved &ldquo;whose turn is it&rdquo;
+    would drift the first time something died. It also means the barn no longer carries
+    a cowboy in its structure file &mdash; just the post and one villager, and the pair
+    assembles itself.
 </p>
 
 <p>
-    He <strong>takes</strong> the job rather than being handed it. Baking the
-    profession onto the villager would be no harder and would skip the only part of the
-    wiring that has ever been in doubt &mdash; whether the POI registered and whether
-    the <code>acquirable_job_site</code> tag merged. If the villager beside the post
-    stays a nitwit, that is the answer to a real question, and it is worth being told
-    it.
+    Replacing the villager outright is blunt and the blunt thing is right: a cowboy is a
+    different <em>entity</em>, not a profession. He has a herd, a stock target and a
+    merchant screen that sells papers rather than goods, and none of that fits on a
+    <code>Villager</code>.
 </p>
 
-<div class="note rule">
-    <span class="label">Dev shortcut: a clock levels him up</span>
-    <p>
-        His interesting trades are tiers 4 and 5, and the honest route to them is
-        several hundred emeralds of trading per horseman per test world. In a dev build
-        (<code>server/DebugHorsemanLevelUp</code>), right-clicking him with a
-        <strong>clock</strong> promotes him one tier and re-rolls his trades; five
-        clicks reach Master. The clock because it is already in the debug hotbar and
-        has no vanilla villager interaction to shadow. It is not consumed, and the
-        interaction is cancelled so the trade screen does not open on the same click.
-    </p>
-    <p>
-        This is the mod's only <a href="api-notes.html#access-transformer">access
-        transformer</a> line outside the pool append, and it is needed because the
-        obvious public route is a trap: raising the level with
-        <code>setVillagerData</code> works and re-rolling the trades to match does not
-        &mdash; <code>updateTrades</code> is protected and <code>getOffers</code> only
-        rebuilds a null list &mdash; so a &ldquo;Master&rdquo; would still be offering
-        Novice trades.
-    </p>
-</div>
+<h3 id="family-names">One family per post</h3>
+
+<p>
+    A cowboy takes a first and last name <strong>no other cowboy in town has</strong>;
+    the horseman that follows him takes <em>his</em> surname and a first name of his own.
+    So a village reads as one family per post &mdash; Wade Hargreave at the barn and
+    Frank Hargreave behind the counter &mdash; and a player who raises a second post gets
+    Lula Adams and Joe Adams.
+</p>
+
+<p>
+    Surnames are the half that matters, because they are what pairs the two, so the
+    cowboy's is the one retried until it is unique
+    (<code>HorsemanHandler.uniqueName</code>). No cowboy in range and the horseman keeps
+    the plain profession name; that should not happen, since the alternation hands out a
+    cowboy first, but killing one gets you a nameless horseman rather than an exception.
+</p>
 
 <h3 id="trade-table">The trade table</h3>
 

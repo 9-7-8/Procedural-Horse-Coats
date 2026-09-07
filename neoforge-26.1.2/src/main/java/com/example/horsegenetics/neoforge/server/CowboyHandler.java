@@ -19,19 +19,9 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.goal.WrappedGoal;
-import net.minecraft.world.entity.ai.goal.BreedGoal;
-import net.minecraft.world.entity.ai.goal.Goal;
-import net.minecraft.world.entity.ai.goal.FollowParentGoal;
-import net.minecraft.world.entity.ai.goal.PanicGoal;
-import net.minecraft.world.entity.ai.goal.RandomStandGoal;
-import net.minecraft.world.entity.ai.goal.RunAroundLikeCrazyGoal;
-import net.minecraft.world.entity.ai.goal.RandomStrollGoal;
-import net.minecraft.world.entity.ai.goal.TemptGoal;
-import net.minecraft.world.entity.animal.equine.AbstractHorse;
 import net.minecraft.world.entity.animal.equine.Horse;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
@@ -183,43 +173,13 @@ public final class CowboyHandler {
             found(cowboy, level);
             return;
         }
-        clearTheMountsRivals(cowboy);
         if (cowboy.tickCount % COWBOY_REPORT_INTERVAL == 0) {
-            keepHimMounted(cowboy, level);
             reportCowboy(cowboy, level);
         }
         if (cowboy.tickRestockClock()) {
             cowboy.setRestockCooldown(RESTOCK_INTERVAL + cowboy.getRandom().nextInt(RESTOCK_JITTER));
             restock(cowboy, level);
         }
-    }
-
-    /**
-     * Put him back on his horse if he has come off it.
-     *
-     * <p><b>He rides by day and walks by night.</b> Riding through a night meant
-     * shepherding eleven horses through a two-block barn door, and a day of
-     * trying established that it cannot be made to work - so at dusk he simply
-     * gets off, and spends the night as an ordinary villager running the
-     * ordinary villager goals he has always had. He survives it on
-     * {@link Cowboy#HEALTH} rather than on shelter.
-     *
-     * <p>Getting back on is {@link CowboyRemountGoal}'s job rather than this
-     * one's, because it should look like a man fetching his horse:
-     * {@code startRiding} works at any range, so doing it here would teleport
-     * him onto the animal from across the village.
-     */
-    private static void keepHimMounted(Cowboy cowboy, ServerLevel level) {
-        if (level.isDarkOutside()) {
-            if (cowboy.isPassenger()) {
-                cowboy.letHimDown();
-                DebugAnnounce.say(level, "Cowboy", cowboy.cowboyName()
-                        + " got down for the night", ChatFormatting.GRAY);
-            }
-            return;
-        }
-        // Daylight and on foot: CowboyRemountGoal walks him back to the animal,
-        // so there is nothing to do here but let it.
     }
 
     /**
@@ -234,109 +194,21 @@ public final class CowboyHandler {
         if (!DebugAnnounce.enabled()) {
             return;
         }
-        Entity vehicle = cowboy.getVehicle();
-        AbstractHorse mount = cowboy.mount(level);
         DebugAnnounce.log("Cowboy", String.format(
-                "%s founded=%s pos=%d,%d,%d home=%s vehicle=%s mountId=%s mountLoaded=%s "
-                        + "herd=%d live=%d stock=%d target=%d trading=%s",
+                "%s founded=%s pos=%d,%d,%d home=%s herd=%d live=%d stock=%d target=%d trading=%s",
                 cowboy.cowboyName(), cowboy.isFounded(),
                 cowboy.blockPosition().getX(), cowboy.blockPosition().getY(), cowboy.blockPosition().getZ(),
                 cowboy.home().map(Object::toString).orElse("none"),
-                vehicle == null ? "NONE" : vehicle.getType() + "/" + vehicle.getUUID(),
-                cowboy.mountId().map(Object::toString).orElse("none"),
-                mount != null,
                 cowboy.herdIds().size(), cowboy.liveHerd(level).size(),
                 sellableStock(cowboy, level).size(), cowboy.stockTarget(),
                 cowboy.isTrading()));
     }
 
-    /**
-     * Take off the horse he is riding the three vanilla goals that fight a rider
-     * who is not a player.
-     *
-     * <ul>
-     *   <li><b>{@code RunAroundLikeCrazyGoal}</b> is the bucking a player has to
-     *       sit through to tame a horse. Its {@code canUse} is exactly "untamed,
-     *       and someone is on me", which is permanently true of this horse - and
-     *       its tick <b>ejects the passenger</b> and makes the animal rear. It
-     *       carries {@code MOVE} so {@link CowboyMountGoal} normally starves it,
-     *       but "normally" is doing a lot of work for a goal whose whole purpose
-     *       is to undo the thing this character is.</li>
-     *   <li><b>{@code RandomStandGoal}</b> carries <b>no flags at all</b>, so
-     *       nothing starves it. It rears the horse on its own schedule, and
-     *       {@code AbstractHorse.isImmobile()} is true while a horse is rearing -
-     *       so it can freeze the mount for twenty ticks at a time, for ever, and
-     *       no amount of navigation will move it.</li>
-     *   <li><b>{@code TemptGoal}</b> would let anyone with wheat walk the cowboy
-     *       out of his own village.</li>
-     * </ul>
-     *
-     * <p>Done from the <b>cowboy's</b> tick and not the horse's, and not from
-     * {@code CowboyMountGoal.start()}, because removing a goal from a selector
-     * that is in the middle of iterating its own goal set is a concurrent
-     * modification. This runs in a different entity's tick entirely.
-     *
-     * <p>Only ever the horse he is on. Every other horse in the world keeps all
-     * three, including the rest of his string - a horse a player buys must still
-     * buck, or it cannot be tamed.
-     */
-    private static void clearTheMountsRivals(Cowboy cowboy) {
-        if (!(cowboy.getVehicle() instanceof Horse mount)) {
-            return;
-        }
-        // Something is stopping CowboyMountGoal while its rider is plainly still
-        // aboard, which leaves exactly one vanilla mechanism unaccounted for: a
-        // disabled control flag. GoalSelector stops any running goal whose flags
-        // are disabled, without consulting canContinueToUse - so a single stray
-        // disableControlFlag(MOVE) anywhere would look exactly like this. Vanilla
-        // only does it from the leash handling, which should not apply to a horse
-        // nobody has leashed, but re-enabling it costs a set removal a tick and
-        // takes the possibility off the table.
-        mount.goalSelector.enableControlFlag(Goal.Flag.MOVE);
-
-        int before = mount.goalSelector.getAvailableGoals().size();
-        mount.goalSelector.removeAllGoals(CowboyHandler::isRivalToTheItinerary);
-        int removed = before - mount.goalSelector.getAvailableGoals().size();
-        if (removed > 0) {
-            DebugAnnounce.log("Cowboy", cowboy.cowboyName() + "'s mount " + mount.getUUID()
-                    + ": removed " + removed + " rival goals, " + before + " -> "
-                    + mount.goalSelector.getAvailableGoals().size());
-        }
-    }
-
-    /**
-     * Does this vanilla goal have any business steering the cowboy's mount?
-     *
-     * <p>Everything that can <b>move</b> or <b>freeze</b> the horse comes off, so
-     * {@code CowboyMountGoal} is the only thing on the animal with an opinion
-     * about where it goes. Holding {@code Flag.MOVE} was supposed to be enough
-     * and demonstrably was not - the mount was seen wandering at night exactly as
-     * it does by day, which is a stroll goal winning - and rather than keep
-     * reasoning about goal-flag arbitration, this takes the argument away.
-     *
-     * <p>{@code FloatGoal} stays, because it is the goal that stops the pair
-     * drowning, and the two look goals stay because they only turn his head.
-     */
-    private static boolean isRivalToTheItinerary(Goal goal) {
-        return goal instanceof RunAroundLikeCrazyGoal   // bucks, and ejects the rider
-                || goal instanceof RandomStandGoal      // rears - and a rearing horse is isImmobile()
-                || goal instanceof TemptGoal            // anyone with wheat could walk off with him
-                || goal instanceof RandomStrollGoal     // the aimless wandering, day and night
-                || goal instanceof PanicGoal            // bolts at random when hurt, fighting the flee
-                || goal instanceof BreedGoal
-                || goal instanceof FollowParentGoal;
-    }
-
     private static void found(Cowboy cowboy, ServerLevel level) {
-        if (hasNeighbouringCowboy(cowboy, level)) {
-            cowboy.discard();
-            return;
-        }
-
         Rng rng = new NeoRng(cowboy.getRandom());
-        // Generated as parts, because the horseman at the post outside takes the
-        // family half of it - see server/HorsemanHandler.
-        cowboy.setCustomName(Component.literal(NAMES.generateParts(rng).joined()));
+        // Unique in town, because the surname is what pairs him with his
+        // horseman - see server/HorsemanHandler.
+        cowboy.setCustomName(Component.literal(HorsemanHandler.uniqueName(level, cowboy, rng).joined()));
         cowboy.setCustomNameVisible(true);
 
         // Home is where the structure put him - the middle of the barn - and it
@@ -356,24 +228,15 @@ public final class CowboyHandler {
         }
 
         // The breed he is known for, settled before the first horse is made so
-        // that horse can be one - a breeder rides his own stock.
+        // that horse can be one.
         Breed favourite = pickBreed(cowboy, level);
         cowboy.setPreferredBreed(favourite.id());
 
         int herdSize = Cowboy.MIN_HERD + cowboy.getRandom().nextInt(Cowboy.MAX_HERD - Cowboy.MIN_HERD + 1);
         cowboy.setStockTarget(herdSize);
 
-        // His own horse first: herd slot 0 is the one he rides and never sells.
-        Horse mount = breedHorse(cowboy, level, rng, favourite);
-        if (mount != null) {
-            boolean mounted = cowboy.startRiding(mount, true, false);
-            DebugAnnounce.log("Cowboy", cowboy.cowboyName() + " startRiding(" + mount.getUUID()
-                    + ") = " + mounted + "; vehicle is now " + cowboy.getVehicle());
-        } else {
-            DebugAnnounce.log("Cowboy", cowboy.cowboyName() + " got no mount - nowhere to stand one");
-        }
-
-        for (int i = 0; i < herdSize; i++) {
+        breedHorse(cowboy, level, rng, favourite);
+        for (int i = 1; i < herdSize; i++) {
             breedHorse(cowboy, level, rng, nextBreedFor(cowboy, level));
         }
 
@@ -396,34 +259,6 @@ public final class CowboyHandler {
                 cowboy.cowboyName() + " set up with "
                         + (cowboy.herdIds().size() - 1) + " horses for sale",
                 cowboy.blockPosition(), ChatFormatting.YELLOW);
-    }
-
-    /**
-     * Is this cowboy the surplus one? Two tests, because there are two ways a
-     * village ends up with two barns' worth of cowboy:
-     *
-     * <ul>
-     *   <li>an <b>already founded</b> neighbour - the ordinary case, one barn
-     *       loaded and set up before the other was reached;</li>
-     *   <li>an <b>unfounded</b> neighbour with a lower UUID - the case where
-     *       both barns load in the same tick and neither is founded yet, so a
-     *       plain "is anyone founded?" check would let both through. Electing
-     *       the lowest UUID is the same tie-break {@link HerdManager} uses for
-     *       a wild herd's lead, and for the same reason: every candidate has to
-     *       reach the same answer without talking to the others.</li>
-     * </ul>
-     */
-    private static boolean hasNeighbouringCowboy(Cowboy cowboy, ServerLevel level) {
-        AABB box = new AABB(cowboy.blockPosition()).inflate(ONE_PER_RADIUS);
-        for (Cowboy other : level.getEntitiesOfClass(Cowboy.class, box)) {
-            if (other == cowboy) {
-                continue;
-            }
-            if (other.isFounded() || other.getUUID().compareTo(cowboy.getUUID()) < 0) {
-                return true;
-            }
-        }
-        return false;
     }
 
     /**
@@ -460,27 +295,12 @@ public final class CowboyHandler {
         HorseRecords.apply(horse, record);
         horse.setData(ModAttachments.COWBOY_BRAND.get(), CowboyBrand.of(cowboy.getUUID()));
         cowboy.addToHerd(horse.getUUID());
-        joinHerd(cowboy, horse);
-        return horse;
-    }
-
-    /**
-     * Put the horse in the cowboy's herd, <b>led by the horse he rides</b>. The
-     * first horse made is the mount, so it becomes the lead and points at
-     * itself - the same convention {@link HerdManager} uses for a wild herd's
-     * lead, which is what lets the browser and the info panel treat this as an
-     * ordinary herd with an ordinary lead.
-     *
-     * <p>Deliberately <b>not</b> {@code withWildHerd}: that also sets a herd
-     * breed and band, and neither is true here. His string is a mixed set of
-     * pure breeds, not one breed's band, and saying otherwise would put a
-     * falsehood in the field {@code WildHerdGoal} keys off - which would then
-     * fight {@link CowboyHerdGoal} for the same horses.
-     */
-    private static void joinHerd(Cowboy cowboy, Horse horse) {
-        UUID lead = cowboy.mountId().orElse(horse.getUUID());
+        // The herd's lead id is the man himself. Every other herd in this mod
+        // leads with a horse, but this one has never had a horse to lead with
+        // since he stopped riding - and the browser only needs the ids to agree.
         HorseCareAttachment care = horse.getData(ModAttachments.HORSE_CARE.get());
-        horse.setData(ModAttachments.HORSE_CARE.get(), care.withHerd(Optional.of(lead)));
+        horse.setData(ModAttachments.HORSE_CARE.get(), care.withHerd(Optional.of(cowboy.getUUID())));
+        return horse;
     }
 
     /**
@@ -546,7 +366,7 @@ public final class CowboyHandler {
                     barn.offset((int) Math.round(Math.cos(angle) * distance),
                             0,
                             (int) Math.round(Math.sin(angle) * distance)));
-            if (CowboyRoutine.insideBarn(barn, ground)) {
+            if (nearHome(barn, ground)) {
                 continue;
             }
             if (standingOnGround(level, barn, ground) && roomForAHorse(level, ground)) {
@@ -576,9 +396,46 @@ public final class CowboyHandler {
         return true;
     }
 
+    /**
+     * Half-span of the box that counts as "at the barn", around his home block.
+     *
+     * <p>An approximation, and knowingly so: the barn is 15x7 on the ground and
+     * the jigsaw can rotate it any of four ways, so the only shape that is
+     * rotation-independent is a square.
+     */
+    private static final int HOME_RADIUS = 5;
+
+    /** How far above and below home "at the barn" reaches. */
+    private static final int HOME_HEIGHT = 3;
+
+    /** How far to look for the village bell from the barn. */
+    private static final int BELL_SEARCH = 96;
+
+    private static final java.util.function.Predicate<net.minecraft.core.Holder<
+            net.minecraft.world.entity.ai.village.poi.PoiType>> MEETING =
+            holder -> holder.is(net.minecraft.world.entity.ai.village.poi.PoiTypes.MEETING);
+
+    /** Near enough to his home block to count as "at the barn". */
+    private static boolean nearHome(BlockPos barn, BlockPos pos) {
+        return Math.abs(pos.getX() - barn.getX()) <= HOME_RADIUS
+                && Math.abs(pos.getZ() - barn.getZ()) <= HOME_RADIUS
+                && Math.abs(pos.getY() - barn.getY()) <= HOME_HEIGHT;
+    }
+
+    /**
+     * The village's bell - the one part of a generated village reliably at its
+     * middle and reliably findable at runtime, which beats trying to recover the
+     * structure's bounding box after the fact.
+     */
+    private static Optional<BlockPos> villageCentre(ServerLevel level, BlockPos barn) {
+        return level.getPoiManager().findClosest(
+                MEETING, barn, BELL_SEARCH,
+                net.minecraft.world.entity.ai.village.poi.PoiManager.Occupancy.ANY);
+    }
+
     /** Which way is out of town: the bearing from the village bell to the barn. */
     private static double outwardHeading(ServerLevel level, BlockPos barn) {
-        Optional<BlockPos> centre = CowboyRoutine.villageCentre(level, barn);
+        Optional<BlockPos> centre = villageCentre(level, barn);
         if (centre.isPresent()) {
             double dx = barn.getX() - centre.get().getX();
             double dz = barn.getZ() - centre.get().getZ();
@@ -693,8 +550,7 @@ public final class CowboyHandler {
     private static List<Horse> sellableStock(Cowboy cowboy, ServerLevel level) {
         List<UUID> ids = cowboy.herdIds();
         List<Horse> out = new ArrayList<>();
-        for (int i = 1; i < ids.size(); i++) { // 0 is his own mount
-            UUID id = ids.get(i);
+        for (UUID id : ids) {
             if (cowboy.hasSold(id)) {
                 continue;
             }
@@ -785,16 +641,11 @@ public final class CowboyHandler {
             return;
         }
         for (WrappedGoal wrapped : horse.goalSelector.getAvailableGoals()) {
-            if (wrapped.getGoal() instanceof CowboyMountGoal) {
+            if (wrapped.getGoal() instanceof CowboyHerdGoal) {
                 return;
             }
         }
-        // Priority 0: while the cowboy is aboard, his itinerary outranks every
-        // stroll, panic and follow goal the horse has.
-        horse.goalSelector.addGoal(0, new CowboyMountGoal(horse));
         horse.goalSelector.addGoal(3, new CowboyHerdGoal(horse));
-        DebugAnnounce.log("Cowboy", "goals attached to horse " + horse.getUUID()
-                + " (" + horse.goalSelector.getAvailableGoals().size() + " goals total)");
     }
 
     // ------------------------------------------------------------------

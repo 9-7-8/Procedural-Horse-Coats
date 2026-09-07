@@ -14,15 +14,12 @@ import java.util.UUID;
 
 /**
  * Keeps a <b>branded</b> horse - one the cowboy bred and still owns - with the
- * outfit.
+ * cowboy.
  *
- * <p>The <b>lead is the horse the cowboy rides</b> - herd slot 0, and the
- * {@code herd} id every other member carries. The lead itself never runs this
- * goal, even on the nights he is off it - see {@link #isTheLead()}. Following
- * the mount rather than the man is the same thing positionally while he is on
- * it, and the right thing structurally either way: the herd has a lead horse
- * the way any other herd in this mod does, so the browser and the info panel
- * see an ordinary herd, and the man on top is a detail.
+ * <p><b>The man is the lead.</b> He used to ride one of them and the rest
+ * trailed the horse he was on, which was the same thing positionally and a
+ * great deal more machinery; he does not ride any more, so they follow him
+ * directly and there is no lead horse to keep track of.
  *
  * <p>The same shape as {@link WildHerdGoal}, and deliberately not the same goal.
  * A wild herd elects its own lead and knows nothing about a man; this one has a
@@ -32,10 +29,8 @@ import java.util.UUID;
  *
  * <p>By day it only closes the gap when the gap is real ({@link #FOLLOW_RANGE}),
  * so the herd spreads out and grazes around him instead of stacking on him.
- * After dark it tightens right up and quickens ({@link #NIGHT_RANGE}), which
- * gathers the string onto the parked lead for the night rather than leaving it
- * strung out across a field - the closest thing to a stable there is, now that
- * there is no barn to put them in.
+ * After dark it tightens right up and quickens ({@link #NIGHT_RANGE}): a string
+ * gathered on its owner is the closest thing to a stable there is.
  */
 public final class CowboyHerdGoal extends Goal {
 
@@ -79,24 +74,7 @@ public final class CowboyHerdGoal extends Goal {
             return false; // sold, or somebody is on it
         }
         this.cowboy = resolveCowboy();
-        return cowboy != null && !isTheLead() && needsToMove();
-    }
-
-    /**
-     * Is this the horse he rides? Then it follows nobody: it <b>is</b> the thing
-     * the rest of the string follows, and a lead that chases its own follower is
-     * a circle.
-     *
-     * <p>Asked by <b>id</b> and not by {@code isVehicle()}, which is the same
-     * question only while he is actually on it. He is off it every night now, and
-     * without this the lead spent that night trailing a man on foot at four
-     * blocks - which put the whole string in a scrum around him, made a
-     * dismounted cowboy look exactly like a mounted one, and left him with
-     * nothing to walk back to in the morning. Left alone it stands where he got
-     * off, the rest of the herd settles around it, and dawn is a short walk.
-     */
-    private boolean isTheLead() {
-        return cowboy != null && cowboy.mountId().filter(horse.getUUID()::equals).isPresent();
+        return cowboy != null && needsToMove();
     }
 
     /**
@@ -112,7 +90,7 @@ public final class CowboyHerdGoal extends Goal {
         if (horse.isTamed() || horse.isVehicle() || horse.isLeashed()) {
             return false;
         }
-        return cowboy != null && cowboy.isAlive() && !isTheLead() && !settled();
+        return cowboy != null && cowboy.isAlive() && !settled();
     }
 
     @Override
@@ -130,17 +108,8 @@ public final class CowboyHerdGoal extends Goal {
         return horse.level().isDarkOutside();
     }
 
-    /**
-     * The lead horse, if it is still alive - and the cowboy himself if it is
-     * not, so a man whose mount was killed still has his string behind him.
-     */
+    /** The man. He is the lead - see the class comment. */
     private BlockPos target() {
-        if (horse.level() instanceof ServerLevel level) {
-            AbstractHorse lead = cowboy.mount(level);
-            if (lead != null && lead != horse) {
-                return lead.blockPosition();
-            }
-        }
         return cowboy.blockPosition();
     }
 

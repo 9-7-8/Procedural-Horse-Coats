@@ -9,9 +9,9 @@ commit both files. It adds the two things a structure-block save cannot carry:
     the barn to a plains-village street connector (see BarnPoolInjector),
   * a horse trader's post in the middle of that same road-facing end, and a
     villager stood beside it who will take the job off it, and
-  * the cowboy himself as a structure entity - the same mechanism vanilla uses
-    to put villagers in village/plains/villagers/*.nbt. He is placed bare;
-    CowboyHandler builds him on his first server tick.
+  * one villager beside that post, the same mechanism vanilla uses to put
+    villagers in village/plains/villagers/*.nbt. He claims the post and becomes
+    the cowboy; the next villager to claim it becomes the horseman.
 
 It also takes one thing away: the blocks directly above the doors, so a big
 horse can path through them (see CLEAR_ABOVE_DOORS).
@@ -257,17 +257,13 @@ for b in blocks:
             cleared += 1
 
 # ---- 4. the people ------------------------------------------------------
-# The cowboy is placed bare: CowboyHandler gives him his name, his mount and his
-# herd on his first tick, the same deferred-founding shape the wild horses use.
-#
-# The horseman is placed as a plain villager, one step along the skirt from the
-# post so he is not standing in it.  Vanilla employs him.
+# One plain villager, one step along the skirt from the post so he is not
+# standing in it.  Nothing else: he claims the post the ordinary way and
+# HorsemanHandler turns him into the cowboy, which frees the post for the next
+# villager along to claim and become the horseman.  The barn used to carry a
+# horsegenetics:cowboy directly; putting the whole pair behind one block instead
+# is what made the two trades alternate.
 root.v['entities'] = Tag(9, (10, [
-    T_cmp({
-        'pos': T_dlist([7.5, 1.0, 3.5]),
-        'blockPos': T_ilist([7, 1, 3]),
-        'nbt': T_cmp({'id': T_str('horsegenetics:cowboy')}),
-    }),
     T_cmp({
         'pos': T_dlist([0.5, 1.0, 4.5]),
         'blockPos': T_ilist([0, 1, 4]),

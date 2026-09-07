@@ -194,44 +194,36 @@
         not riding into the square.</li>
 </ul>
 
-<h3 id="villagers-night">The night &mdash; now that there is not one</h3>
+<h3 id="villagers-post">The post hands out both trades</h3>
 
 <p>
-    The whole sheltering subsystem is <strong>gone</strong>. He dismounts at dusk,
-    spends the night as an ordinary villager with no custom code at all, and is walked
-    back to his horse at first light; he survives it on ten times a villager's health
-    rather than on a barn. See <a href="known-gaps.html#gap-55">gap 55</a> for why.
+    The mounted cowboy is <strong>gone entirely</strong> &mdash; no riding, no routine,
+    no barn shelter. A Horse Trader's Post now produces a cowboy first and a horseman
+    second and keeps alternating, and the barn's structure file carries only the post and
+    one villager. Design: <a href="villagers.html#post-at-the-barn">One block, two
+    trades</a>.
 </p>
 
 <ul>
-    <li><strong>Does he get off his horse at dusk, and back on at dawn?</strong> Watch
-        the changeover both ways. A grey <code>got down for the night</code> line and a
-        grey <code>is back on his horse</code> line say it happened.</li>
-    <li><strong>Does he survive the night?</strong> Ten times the health and no shelter
-        at all is the trade. If zombies still kill him the number is the fix
-        (<code>Cowboy.HEALTH</code>), not a barn.</li>
-    <li><strong>Does he <em>walk</em> to his horse in the morning?</strong> He should
-        path over and mount when he arrives. Blinking onto it from across the village
-        would mean something is calling <code>startRiding</code> directly rather than
-        going through <code>CowboyRemountGoal</code>.</li>
-    <li><strong>Does he find the <em>same</em> horse?</strong> Herd slot 0. If he comes
-        back on a different animal, or on none, check <code>mountId</code> in the
-        log.</li>
-    <li><strong>Where does the string spend the night?</strong> Gathered on the horse
-        he got off, which stands where he left it &mdash; the lead never follows anybody,
-        so it is the thing they settle on. He himself wanders off a little way on his own
-        goals. If the lead is instead trailing him around at four blocks, the
-        <code>isTheLead</code> check is not firing, and a dismounted cowboy in a scrum of
-        horses looks exactly like a mounted one.</li>
-    <li><strong>Does he keep his distance from a zombie by day?</strong> The one piece of
-        monster behaviour that is left, and still unconfirmed. He should start moving at
-        about 16 blocks and not settle until it is nearly 30 off &mdash; one clean
-        departure, not a dozen little dashes. After dark he is on foot and it is his own
-        <code>PanicGoal</code> and his health doing the work.</li>
-    <li><strong>Watch the chat.</strong> A dev build prints a grey <code>[Cowboy]
-        &lt;name&gt;: PATROL</code> line on every duty change and a red
-        <code>FLEE</code> one when he bolts. There is no <code>SHELTER</code> any
-        more.</li>
+    <li><strong>Does a generated barn produce a cowboy?</strong> The baked villager should
+        claim the post and be replaced on the spot. A yellow <code>a villager took the
+        post and became a cowboy</code> line says it happened. If he stays a horseman
+        forever, <code>wantsACowboy</code> is counting something wrong.</li>
+    <li><strong>Does a <em>second</em> villager then become the horseman?</strong> The
+        post falls vacant when the cowboy replaces its holder, so the next claimant should
+        take it and keep it. This is the whole alternation &mdash; watch one post produce
+        both.</li>
+    <li><strong>Do they share a surname?</strong> Wade Hargreave and Frank Hargreave. A
+        second post in the same village should give a different family, not a second
+        Hargreave.</li>
+    <li><strong>Do the horses follow the man?</strong> All of them, at a loose distance by
+        day and tightly after dark. He is the herd lead now, so the browser should show
+        them as one herd led by him.</li>
+    <li><strong>Is every horse for sale?</strong> There is no mount to hold back any more,
+        so the merchant screen should list the whole string.</li>
+    <li><strong>Does he behave like a villager otherwise?</strong> He should stroll, look
+        at you, panic when hurt, and do nothing clever at night. Ten times health means
+        zombies should not finish him.</li>
 </ul>
 
 <h3 id="villagers-papers">Transfer papers</h3>
