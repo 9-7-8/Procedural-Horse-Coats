@@ -222,8 +222,18 @@
     <li><strong>Is every horse for sale?</strong> There is no mount to hold back any more,
         so the merchant screen should list the whole string.</li>
     <li><strong>Does he behave like a villager otherwise?</strong> He should stroll, look
-        at you, panic when hurt, and do nothing clever at night. Ten times health means
-        zombies should not finish him.</li>
+        at you, panic when hurt, and do nothing clever at night. <strong>He will not go
+        indoors</strong> &mdash; he cannot, an <code>AbstractVillager</code> has no
+        villager brain and no schedule, exactly like a wandering trader. That is expected,
+        not a bug.</li>
+    <li><strong>Do hostile mobs ignore him?</strong> New: nothing with the
+        <code>Enemy</code> interface can take him as a target. Spawn a zombie next to him
+        at night and watch it walk past; hit him yourself and confirm the zombie
+        <em>still</em> does not turn on him, since retaliation goes through the same
+        door. Between that and ten times health he should be unkillable by accident.</li>
+    <li><strong>Are his horses still killable?</strong> Deliberately &mdash; only the man
+        is protected. A wolf taking one should still happen, and the restocking should
+        replace it.</li>
 </ul>
 
 <h3 id="villagers-papers">Transfer papers</h3>

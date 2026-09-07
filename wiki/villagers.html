@@ -330,6 +330,42 @@
     string gathers on him rather than strung out across a field.
 </p>
 
+<h3 id="nights">He does not go indoors, and does not need to</h3>
+
+<p>
+    <strong>He cannot.</strong> Walking into a house and getting into a bed lives in
+    vanilla's <em>villager brain</em>, and a <code>Cowboy</code> is an
+    <code>AbstractVillager</code> &mdash; the same base as a wandering trader, chosen
+    precisely so that no schedule drags him away from his horses. A wandering trader does
+    not go indoors either. Giving him somewhere to sleep is what the entire barn-shelter
+    subsystem <em>was</em>, and it is written up in
+    <a href="known-gaps.html#gap-55">gap 55</a> as the thing that could not be made to
+    work.
+</p>
+
+<p>
+    So the night is survived rather than avoided, on two numbers and no behaviour:
+</p>
+
+<ul>
+    <li><strong>Ten times a villager's health</strong> (<code>Cowboy.HEALTH</code>).</li>
+    <li><strong>Nothing hunts him.</strong> <code>CowboySafetyHandler</code> cancels
+        <code>LivingChangeTargetEvent</code> whenever an <code>Enemy</code> is about to
+        pick him, and that event fires from <code>Mob.setTarget</code> &mdash; the one
+        door every way of acquiring a target goes through, whether that is a
+        nearest-attackable goal, a raid's orders or retaliation for being hit. He is
+        never anybody's target, so nothing paths to him and nothing swings at him.</li>
+</ul>
+
+<p>
+    <code>Enemy</code> rather than <code>Monster</code> on purpose: it is the interface
+    that means &ldquo;this thing is hostile&rdquo;, and it catches the few hostiles that
+    are not <code>Monster</code> subclasses. Players are not covered and can still hit
+    him. <strong>His horses are not covered either</strong> &mdash; they are ordinary
+    animals, a wolf getting one is a thing that happens, and that is what the
+    <a href="#restock">restocking</a> is for.
+</p>
+
 
 <h2 id="barn">The barn, and how it lands on the outskirts</h2>
 
