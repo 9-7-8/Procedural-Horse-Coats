@@ -504,108 +504,107 @@
     &ldquo;Adept&rdquo; rung that does not exist.
 </p>
 
-<h3 id="workstation">The workstation</h3>
+<h3 id="workstation">Two posts, one texture</h3>
 
 <p>
-    A plain block (3 hair cloth + 2 braided rope + 2 fence, shapeless) whose only job
-    is to exist somewhere the POI system can index. The profession is bound to the
-    <code>horsegenetics:horse_traders_post</code> POI, and the POI is added to the
-    vanilla <code>minecraft:acquirable_job_site</code> and <code>minecraft:village</code>
-    tags &mdash; tags <em>merge</em> across datapacks, so adding to vanilla's is
-    additive and safe where overriding a worldgen file would not be. One villager per
-    post, as every vanilla job site is.
+    <strong>Cowboy Hitch</strong> and <strong>Horseman&rsquo;s Table</strong>: the same
+    block twice, on the same three-face texture set, with different names and different
+    jobs. Each is 3 hair cloth + 2 braided rope + 2 fence, shapeless. Neither
+    <em>does</em> anything yet beyond marking a spot &mdash; turning them into real
+    workstations, a hitch you tie a horse to and a table you work leather at, is open
+    work.
 </p>
 
-<p>
-    <strong>He has a cowboy's family name.</strong> The moment a villager takes the
-    job, <code>server/HorsemanHandler</code> gives him a first name of his own and the
-    surname of the <strong>nearest cowboy in town</strong> &mdash; within 128 blocks,
-    which is a village. Two names that share a half say "these people are the horse
-    family here" without a line of dialogue.
-</p>
-
-<p>
-    The <em>nearest</em> one rather than the one whose barn he is standing outside,
-    because he is not the barn's property: a player can craft a second post and put it
-    anywhere, and a horseman across the square should still be the family everyone in
-    that village buys horses from. For the post baked into the barn those two answers
-    are the same man anyway. No cowboy within range and he keeps the plain profession
-    name &mdash; a horseman in a village with no horse family is nobody's relative.
-</p>
-
-<p>
-    <strong>It is his only workstation and there is no second block.</strong> Worth
-    saying because the names do not: &ldquo;horse trader's post&rdquo; and
-    &ldquo;horseman&rdquo; are one trade, so a separate <em>horseman post</em> would be
-    a duplicate block claiming the same job. And he needs <strong>no house, no bed and
-    no structure of his own</strong> &mdash; a profession comes from a job site and
-    nothing else, so a post on bare ground next to an unemployed villager is the whole
-    of how one comes to exist.
-</p>
-
-<h3 id="post-at-the-barn">One block, two trades</h3>
-
-<p>
-    A Horse Trader's Post hands out a <strong>cowboy first and a horseman second</strong>,
-    and keeps alternating &mdash; out of <em>one</em> villager, twice. He claims the post
-    the ordinary way and takes the horseman profession,
-    <code>server/HorsemanHandler</code> looks at the village and decides which of the two
-    he should actually be, and if the answer is cowboy then a <code>Cowboy</code> entity
-    is stood up beside him and <strong>he is demoted back to no profession</strong>. He
-    re-claims his own post a moment later, the count is now uneven, and he settles as the
-    horseman.
-</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Block</th><th>Hands out</th><th>How</th></tr></thead>
+<tbody>
+<tr>
+    <td><strong>Horseman&rsquo;s Table</strong></td>
+    <td>the horseman</td>
+    <td>An ordinary <strong>job site</strong>. It backs the
+        <code>horsegenetics:horsemans_table</code> POI, which is added to vanilla&rsquo;s
+        <code>acquirable_job_site</code> and <code>village</code> tags &mdash; tags
+        <em>merge</em> across datapacks, so adding to vanilla&rsquo;s is safe where
+        overriding a worldgen file would not be. One villager per table.</td>
+</tr>
+<tr>
+    <td><strong>Cowboy Hitch</strong></td>
+    <td>the cowboy</td>
+    <td><strong>Not a job site at all.</strong> A cowboy is an <em>entity</em>, not a
+        profession &mdash; he has a herd, a stock target and a merchant screen that sells
+        papers rather than goods, none of which fits on a <code>Villager</code> &mdash;
+        so there is nothing for a profession to point at and no POI to claim.
+        <code>server/CowboyHitchHandler</code> looks for the <em>block</em> instead:
+        every two seconds, an unemployed villager within 6 blocks of a hitch that has no
+        cowboy within 32 is taken on.</td>
+</tr>
+</tbody>
+</table>
+</div>
 
 <div class="note rule">
-    <span class="label">Demoted, not deleted &mdash; a job-site ticket outlives its holder</span>
+    <span class="label">Why two blocks and not one</span>
     <p>
-        The first version <em>discarded</em> the villager and relied on his post falling
-        vacant for the next one along to claim. It never fell vacant. A job-site ticket
-        is released by <code>Villager.releaseAllPois</code>, which is private and runs on
-        <strong>death</strong> &mdash; so a discarded villager holds his post for ever,
-        and with <code>maxTickets</code> of one the post produced a single cowboy and
-        then nothing at all, while every other villager in town stood around unemployed.
+        One block tried to do both, handing out a cowboy first and a horseman second by
+        alternating. It could not. Converting the villager meant either
+        <strong>discarding</strong> him &mdash; which silently holds his job-site ticket
+        for ever, because <code>Villager.releaseAllPois</code> is private and runs on
+        death, so the post produced one cowboy and then nothing while the rest of the
+        village stood unemployed &mdash; or demoting him and trusting vanilla to
+        re-assign him, which is two more moving parts than a second block.
     </p>
     <p>
-        So the ticket is handed back explicitly, through the one public door there is
-        (<code>Villager.releasePoi</code>), while its owner is alive and standing on it.
-        Worth remembering generally: <strong>removing a villager does not free what he
-        was holding.</strong>
+        A post each is far less clever and simply works. The hitch makes cowboys, the
+        table makes horsemen, and neither has to know the other exists. Discarding the
+        villager is safe at the hitch for exactly the reason it was not safe at the
+        shared post: he never claimed the hitch, because the hitch is not a job site.
     </p>
 </div>
 
 <p>
-    The count is <strong>taken rather than remembered</strong>: cowboys and horsemen
-    within 128 blocks are counted and the trade with fewer is handed out, ties going to
-    the cowboy. That is self-correcting, where a saved &ldquo;whose turn is it&rdquo;
-    would drift the first time something died. It also means the barn no longer carries
-    a cowboy in its structure file &mdash; just the post and one villager, and the pair
-    assembles itself.
+    <strong>One cowboy per hitch</strong>, guarded by looking rather than remembering: a
+    hitch with a cowboy already within 32 blocks is spoken for. That is self-correcting
+    &mdash; kill him and the next villager past the hitch takes over &mdash; where a
+    &ldquo;used&rdquo; flag on the block would need saving and would go stale the moment
+    he died.
+</p>
+
+<h3 id="post-at-the-barn">Both of them come with the barn</h3>
+
+<p>
+    The barn carries the pair <strong>stacked</strong> in the middle of its road-facing
+    end, between the two door pairs: the hitch on the ground and the table on top of it,
+    which is the way round they read &mdash; you tie a horse to the low one. A villager
+    stands either side. One claims the table and becomes the horseman; the other is taken
+    on by the hitch and becomes the cowboy.
 </p>
 
 <p>
-    A cowboy is <em>spawned</em> rather than converted because he is a different
-    <strong>entity</strong>, not a profession: he has a herd, a stock target and a
-    merchant screen that sells papers rather than goods, and none of that fits on a
-    <code>Villager</code>.
+    Baked into the structure rather than placed at runtime, because a job-site POI is
+    indexed off the block &mdash; putting the block in the world <em>is</em> the whole
+    mechanism &mdash; and because a shop front is architecture. Neither villager is given
+    a profession: letting them take the jobs the ordinary way is the only test there is
+    of the part that has ever been in doubt, which is whether the POI registered and
+    whether the tag merged. Two nitwits standing there for ever is a real answer to a
+    real question.
 </p>
 
-<h3 id="family-names">One family per post</h3>
+<h3 id="family-names">One family per village</h3>
 
 <p>
     A cowboy takes a first and last name <strong>no other cowboy in town has</strong>;
-    the horseman that follows him takes <em>his</em> surname and a first name of his own.
-    So a village reads as one family per post &mdash; Wade Hargreave at the barn and
-    Frank Hargreave behind the counter &mdash; and a player who raises a second post gets
-    Lula Adams and Joe Adams.
+    every horseman takes the nearest cowboy&rsquo;s surname and a first name of his own.
+    So a village reads as one family in the horse trade &mdash; Wade Hargreave at the
+    hitch, Frank Hargreave behind the table &mdash; and a second cowboy across town
+    founds the Adamses.
 </p>
 
 <p>
-    Surnames are the half that matters, because they are what pairs the two, so the
-    cowboy's is the one retried until it is unique
-    (<code>HorsemanHandler.uniqueName</code>). No cowboy in range and the horseman keeps
-    the plain profession name; that should not happen, since the alternation hands out a
-    cowboy first, but killing one gets you a nameless horseman rather than an exception.
+    Surnames are the half that matters, because they are what says two people are the
+    same outfit, so the cowboy&rsquo;s is the one retried until it is unique
+    (<code>HorsemanHandler.uniqueName</code>). No cowboy within 128 blocks and the
+    horseman keeps the plain profession name until there is one.
 </p>
 
 <h3 id="trade-table">The trade table</h3>

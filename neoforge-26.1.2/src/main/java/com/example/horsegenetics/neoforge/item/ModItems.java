@@ -136,10 +136,15 @@ public final class ModItems {
     public static final DeferredItem<SignedTransferPaperItem> SIGNED_TRANSFER_PAPER =
             register("signed_transfer_paper", p -> new SignedTransferPaperItem(p.stacksTo(1)));
 
-    // --- the horseman's workstation (roadmap §19) ------------------------
-    public static final DeferredItem<net.minecraft.world.item.BlockItem> HORSE_TRADERS_POST =
-            registerBlockItem("horse_traders_post",
-                    com.example.horsegenetics.neoforge.block.ModBlocks.HORSE_TRADERS_POST);
+    // --- the two work posts (roadmap §19) --------------------------------
+    // One each, because one block could not hand out both trades - see
+    // block/ModBlocks.COWBOY_HITCH.
+    public static final DeferredItem<net.minecraft.world.item.BlockItem> COWBOY_HITCH =
+            registerBlockItem("cowboy_hitch",
+                    com.example.horsegenetics.neoforge.block.ModBlocks.COWBOY_HITCH);
+    public static final DeferredItem<net.minecraft.world.item.BlockItem> HORSEMANS_TABLE =
+            registerBlockItem("horsemans_table",
+                    com.example.horsegenetics.neoforge.block.ModBlocks.HORSEMANS_TABLE);
 
     // --- whistles (roadmap §11) - recall your tamed horses in a radius ---
     public static final DeferredItem<WhistleItem> BASIC_WHISTLE =

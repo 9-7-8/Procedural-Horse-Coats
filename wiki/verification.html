@@ -198,23 +198,26 @@
 
 <p>
     The mounted cowboy is <strong>gone entirely</strong> &mdash; no riding, no routine,
-    no barn shelter. A Horse Trader's Post now produces a cowboy first and a horseman
+    no barn shelter. A Horseman's Table now produces a cowboy first and a horseman
     second and keeps alternating, and the barn's structure file carries only the post and
     one villager. Design: <a href="villagers.html#post-at-the-barn">One block, two
     trades</a>.
 </p>
 
 <ul>
-    <li><strong>Does a generated barn produce a cowboy?</strong> The baked villager should
-        claim the post and be replaced on the spot. A yellow <code>a villager took the
-        post and became a cowboy</code> line says it happened. If he stays a horseman
-        forever, <code>wantsACowboy</code> is counting something wrong.</li>
-    <li><strong>Does the <em>same</em> villager then become the horseman?</strong> He is
-        demoted rather than deleted, hands his post back and re-takes it a moment later
-        as the other trade. <strong>One villager and one post should give you both</strong>
-        &mdash; the first attempt discarded him, which silently held the post for ever and
-        produced exactly one cowboy and then nothing. If you see a cowboy and a permanently
-        unemployed village, that is back.</li>
+    <li><strong>Are both posts in the barn, stacked?</strong> Cowboy Hitch on the ground
+        with the Horseman's Table on top, in the middle of the road-facing end, and a
+        villager either side. Both are modded blocks in a piece appended to a vanilla
+        pool, which is the thing that could quietly fail.</li>
+    <li><strong>Does the hitch make a cowboy?</strong> A yellow <code>a villager took the
+        hitch and became a cowboy</code> line, within a couple of seconds of a spare
+        villager standing near it. Then place a second hitch 40 blocks away and confirm it
+        takes on another; place one 10 blocks away and confirm it does <em>not</em>,
+        because a cowboy is already within 32.</li>
+    <li><strong>Does the table make a horseman?</strong> The other baked villager should
+        claim it the ordinary way. This is the only real test of the POI registration and
+        the <code>acquirable_job_site</code> tag merge, so a nitwit standing at the table
+        for ever is a finding, not patience.</li>
     <li><strong>Do they share a surname?</strong> Wade Hargreave and Frank Hargreave. A
         second post in the same village should give a different family, not a second
         Hargreave.</li>
@@ -263,7 +266,7 @@
 
 <ul>
     <li><strong>Is the post built into the barn's road-facing end?</strong> New: the
-        Horse Trader's Post is now a block in the structure, in the middle of the end
+        Horseman's Table is now a block in the structure, in the middle of the end
         you approach from the street, in place of the centre step &mdash; with a plain
         villager standing one step along beside it. Check it survived the jigsaw (a
         modded block in a vanilla-pool piece is the thing that could quietly fail) and

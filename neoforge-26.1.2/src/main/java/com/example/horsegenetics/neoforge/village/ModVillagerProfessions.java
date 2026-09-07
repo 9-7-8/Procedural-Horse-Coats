@@ -16,7 +16,7 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 
 /**
  * The <b>horseman</b> - an ordinary villager profession that sells horse tack
- * and horse-genetics goods from a Horse Trader's Post.
+ * and horse-genetics goods from a Horseman's Table.
  *
  * <p>Unlike the {@code Cowboy}, this one <i>wants</i> vanilla's brain: it is a
  * shopkeeper who should walk to a workstation in the morning, restock at it,
@@ -59,8 +59,8 @@ public final class ModVillagerProfessions {
     public static final DeferredHolder<VillagerProfession, VillagerProfession> HORSEMAN =
             PROFESSIONS.register("horseman", () -> new VillagerProfession(
                     Component.translatable("entity.horsegenetics.villager.horseman"),
-                    poi -> poi.is(ModPoiTypes.HORSE_TRADERS_POST_KEY),
-                    poi -> poi.is(ModPoiTypes.HORSE_TRADERS_POST_KEY),
+                    poi -> poi.is(ModPoiTypes.HORSEMANS_TABLE_KEY),
+                    poi -> poi.is(ModPoiTypes.HORSEMANS_TABLE_KEY),
                     ImmutableSet.of(),  // nothing he picks up off the ground
                     ImmutableSet.of(),  // no secondary POI (a farmer's farmland, a fisherman's water)
                     SoundEvents.VILLAGER_WORK_LEATHERWORKER,

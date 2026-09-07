@@ -13,8 +13,13 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 import java.util.Set;
 
 /**
- * Points of interest this mod adds. One: the <b>Horse Trader's Post</b>, the
+ * Points of interest this mod adds. One: the <b>Horseman's Table</b>, the
  * horseman's job site.
+ *
+ * <p>The <b>Cowboy Hitch</b> is deliberately <i>not</i> here. It is not a job
+ * site - no profession claims it, because a cowboy is an entity and not a
+ * profession - so it is found by looking for the block rather than by asking the
+ * POI system. See {@code server/CowboyHitchHandler}.
  *
  * <p>A POI is only half the wiring. It has to be in the
  * {@code minecraft:acquirable_job_site} block-entity tag before an unemployed
@@ -31,13 +36,13 @@ public final class ModPoiTypes {
     public static final DeferredRegister<PoiType> POI_TYPES =
             DeferredRegister.create(Registries.POINT_OF_INTEREST_TYPE, HorseGenetics.MOD_ID);
 
-    public static final ResourceKey<PoiType> HORSE_TRADERS_POST_KEY = ResourceKey.create(
+    public static final ResourceKey<PoiType> HORSEMANS_TABLE_KEY = ResourceKey.create(
             Registries.POINT_OF_INTEREST_TYPE,
-            Identifier.fromNamespaceAndPath(HorseGenetics.MOD_ID, "horse_traders_post"));
+            Identifier.fromNamespaceAndPath(HorseGenetics.MOD_ID, "horsemans_table"));
 
-    public static final DeferredHolder<PoiType, PoiType> HORSE_TRADERS_POST =
-            POI_TYPES.register("horse_traders_post", () -> new PoiType(
-                    Set.copyOf(ModBlocks.HORSE_TRADERS_POST.get().getStateDefinition().getPossibleStates()),
+    public static final DeferredHolder<PoiType, PoiType> HORSEMANS_TABLE =
+            POI_TYPES.register("horsemans_table", () -> new PoiType(
+                    Set.copyOf(ModBlocks.HORSEMANS_TABLE.get().getStateDefinition().getPossibleStates()),
                     1,   // one horseman per post
                     1)); // valid range, in blocks - vanilla's job sites all use 1
 

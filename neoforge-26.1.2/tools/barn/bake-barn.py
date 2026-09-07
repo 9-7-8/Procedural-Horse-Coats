@@ -7,8 +7,8 @@ commit both files. It adds the two things a structure-block save cannot carry:
 
   * a jigsaw block on the west face at y=0, so the village generator can attach
     the barn to a plains-village street connector (see BarnPoolInjector),
-  * a horse trader's post in the middle of that same road-facing end, and a
-    villager stood beside it who will take the job off it, and
+  * the two work posts stacked in the middle of that same road-facing end, and a
+    villager either side of them - one becomes the cowboy, one the horseman, and
   * one villager beside that post, the same mechanism vanilla uses to put
     villagers in village/plains/villagers/*.nbt. He claims the post and becomes
     the cowboy; the next villager to claim it becomes the horseman.
@@ -189,27 +189,35 @@ blocks.append(T_cmp({
     }),
 }))
 
-# ---- 2. the horseman's post --------------------------------------------
-# The middle of the road-facing end (x=0), between the two door pairs, in place
-# of the step that was drawn there.  It is the first thing you walk up to.
+# ---- 2. the two work posts ---------------------------------------------
+# Stacked in the middle of the road-facing end (x=0), between the two door
+# pairs, in place of the step that was drawn there.  They are the first thing
+# you walk up to.
+#
+# The hitch on the ground and the table above it, which is the way round they
+# read: you tie a horse to the low one.  Two blocks and not one because one
+# could never hand out both trades - see server/CowboyHitchHandler.
 #
 # Baked into the structure rather than placed at runtime because a job-site POI
 # is indexed off the block, so putting the block in the world *is* the whole
-# mechanism - and because a shop front is architecture.  The villager beside it
-# is not given the profession: he takes it off the post the ordinary way, which
-# is the only part of the wiring that has ever been in doubt (whether the POI
-# registered, whether the acquirable_job_site tag merged).  A nitwit standing
-# there for ever is a real answer to a real question.
-POST_POS = (0, 0, 3)
+# mechanism - and because a shop front is architecture.  Neither villager below
+# is given a profession: one takes the table the ordinary way, which is the only
+# part of the wiring that has ever been in doubt (whether the POI registered,
+# whether the acquirable_job_site tag merged), and the other is picked up by the
+# hitch.  Two nitwits standing there for ever is a real answer to a real
+# question.
+POSTS = {
+    (0, 0, 3): 'horsegenetics:cowboy_hitch',
+    (0, 1, 3): 'horsegenetics:horsemans_table',
+}
 
-palette.append(T_cmp({'Name': T_str('horsegenetics:horse_traders_post')}))
-post_state = len(palette) - 1
-
-blocks[:] = [b for b in blocks if tuple(x.v for x in b.v['pos'].v[1]) != POST_POS]
-blocks.append(T_cmp({
-    'pos': T_ilist(list(POST_POS)),
-    'state': T_int(post_state),
-}))
+for pos, block_id in POSTS.items():
+    palette.append(T_cmp({'Name': T_str(block_id)}))
+    blocks[:] = [b for b in blocks if tuple(x.v for x in b.v['pos'].v[1]) != pos]
+    blocks.append(T_cmp({
+        'pos': T_ilist(list(pos)),
+        'state': T_int(len(palette) - 1),
+    }))
 
 # ---- 3. headroom over the doors ----------------------------------------
 # Minecraft's ground pathfinder does not measure a mob, it rounds it up:
@@ -257,16 +265,21 @@ for b in blocks:
             cleared += 1
 
 # ---- 4. the people ------------------------------------------------------
-# One plain villager, one step along the skirt from the post so he is not
-# standing in it.  Nothing else: he claims the post the ordinary way and
-# HorsemanHandler turns him into the cowboy, which frees the post for the next
-# villager along to claim and become the horseman.  The barn used to carry a
-# horsegenetics:cowboy directly; putting the whole pair behind one block instead
-# is what made the two trades alternate.
+# Two plain villagers, one either side of the stacked posts so neither is
+# standing in them.  Nothing else: one claims the table the ordinary way and
+# becomes the horseman, the other is taken on by the hitch and becomes the
+# cowboy.  The barn used to carry a horsegenetics:cowboy directly; letting the
+# blocks hand out both roles is what makes a player-placed post work the same
+# way a generated one does.
 root.v['entities'] = Tag(9, (10, [
     T_cmp({
         'pos': T_dlist([0.5, 1.0, 4.5]),
         'blockPos': T_ilist([0, 1, 4]),
+        'nbt': T_cmp({'id': T_str('minecraft:villager')}),
+    }),
+    T_cmp({
+        'pos': T_dlist([0.5, 1.0, 2.5]),
+        'blockPos': T_ilist([0, 1, 2]),
         'nbt': T_cmp({'id': T_str('minecraft:villager')}),
     }),
 ]))
@@ -280,5 +293,5 @@ out.write(struct.pack('>B', roottype)); w_str(out, rootname); w_payload(out, roo
 open(DST, 'wb').write(gzip.compress(out.getvalue(), mtime=0))
 print('wrote', DST, 'palette', len(palette), 'blocks', len(blocks),
       'jigsaw at', JIGSAW_POS, 'final_state', final_state,
-      'post at', POST_POS,
+      'posts at', sorted(POSTS),
       'cleared', cleared, 'blocks over', len(door_columns), 'door columns')
