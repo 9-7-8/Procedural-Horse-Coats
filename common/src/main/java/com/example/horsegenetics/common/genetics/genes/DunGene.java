@@ -91,32 +91,44 @@ public final class DunGene implements Gene {
 
     /**
      * Body dilution under {@code D}, through
-     * {@link PigmentField#diluteNeutral}: {@code keepRed} is applied to the red
-     * that is actually <i>showing</i>, so a chestnut keeps most of its and
-     * comes out a pale red dun while a black one has none to keep and slides
-     * down the gradient's neutral column into grullo. {@code KEEP_BLACK} is the
-     * number that decides how light that grullo is - low enough to read as a
-     * body colour rather than a black horse, high enough that a black mane and
-     * a black dorsal stripe still show against it.
+     * {@link PigmentField#diluteNeutral}.
+     *
+     * <p><b>Dun takes black off. It barely touches red.</b> That one asymmetry
+     * is what makes the three bases come out as different as they do from a
+     * single pair of numbers:
+     * <ul>
+     *   <li>a <b>black</b> horse has no <i>visible</i> red at all, so only
+     *       {@code KEEP_BLACK} applies and the sample slides straight down the
+     *       gradient's neutral column into grullo;</li>
+     *   <li>a <b>bay</b> body is mostly red under a third of a load of black,
+     *       so taking that black off unmasks the red it was damping and the
+     *       body swings from red-brown to tan - the big, obvious change,
+     *       and none of it is the red moving;</li>
+     *   <li>a <b>chestnut</b> has no black to take, so red dun is
+     *       <b>almost the same colour as chestnut</b>. That is the point of
+     *       {@code KEEP_RED} being this close to 1: it is not a dilution knob,
+     *       it is just enough countershade to let the markings read at all.
+     *       A red dun is a chestnut with primitive markings, not a pale
+     *       horse.</li>
+     * </ul>
      */
-    private static final float KEEP_RED = 0.72f;
+    private static final float KEEP_RED = 0.93f;
     private static final float KEEP_BLACK = 0.42f;
 
     /**
      * The same two numbers for {@code d1} - the <i>undiluted</i> outcome, so
-     * they are chosen to move as little as possible while still letting the
-     * stripe read.
+     * they are chosen to move less than {@code D}'s do, and {@code D}'s barely
+     * move at all.
      *
-     * <p><b>Black is never touched</b> ({@code MARKED_KEEP_BLACK = 1}). The
-     * gradient's whole {@code black = 1} row is pure black, and the composer
-     * gives a texel that resolves to pure black <i>80% opacity</i> - so nudging
-     * a black texel off that row makes it fully opaque and therefore
-     * <b>darker</b>, and a body darker than its own dorsal stripe is worse than
-     * no stripe at all. What is left is a small bite out of the visible red,
-     * which is nothing at all on a true black or a bay's points: not a gap, but
-     * the answer - a real non-dun black shows no primitive markings either.
+     * <p><b>Black is never touched</b> ({@code MARKED_KEEP_BLACK = 1}), which
+     * is the whole of what "non-dun" means here: taking black off is the half
+     * of the dilution that actually changes a horse's colour, so an allele that
+     * does not dilute must not do it. What is left is a whisper off the visible
+     * red - enough for a spine line on a chestnut or a bay, and nothing at all
+     * on a true black or a bay's points. That last one is not a gap but the
+     * answer: a real non-dun black shows no primitive markings either.
      */
-    private static final float MARKED_KEEP_RED = 0.86f;
+    private static final float MARKED_KEEP_RED = 0.95f;
     private static final float MARKED_KEEP_BLACK = 1.0f;
 
     /** Mean half-width of the dorsal stripe, in body units; jittered per horse. */
@@ -176,9 +188,11 @@ public final class DunGene implements Gene {
             .restrict(primitive(MARKED_KEEP_RED, MARKED_KEEP_BLACK, false));
 
     private final Expression DUN = Expression.of("dun", "Dun")
-            .describe("The body lightens - dun on a bay, red dun on a chestnut, blue-grey grullo on a "
-                    + "black - while the points, a dorsal stripe from poll to tail, and whichever "
-                    + "primitive markings this horse drew skip the dilution and stay dark.")
+            .describe("Black pigment thins while red is left alone, so a bay turns tan, a black "
+                    + "turns blue-grey grullo, and a chestnut - which has no black to lose - stays "
+                    + "very nearly chestnut. The points, a dorsal stripe from poll to tail, and "
+                    + "whichever primitive markings this horse drew skip the dilution and stay "
+                    + "dark.")
             .varies()
             .restrict(primitive(KEEP_RED, KEEP_BLACK, true));
 

@@ -48,8 +48,9 @@ public interface ColorView {
      * gene that wants to reason about the coat it is painting over. A texel the
      * natural phase left <b>transparent</b> reads as <b>white</b> here - because
      * that is what a viewer sees, the bald template - not as the black that
-     * {@code argb} reports. A texel that resolved to pure black reads as 20%
-     * grey, for the same reason.
+     * {@code argb} reports. A texel that resolved to <b>near black</b> reads
+     * as roughly 20% grey, for the same reason - black composites at less than
+     * full opacity so it is not a flat void.
      *
      * <p>{@code channel} is 0 red, 1 green, 2 blue.
      */

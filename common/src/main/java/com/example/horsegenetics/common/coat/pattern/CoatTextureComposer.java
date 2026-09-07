@@ -31,8 +31,9 @@ import java.util.Optional;
  *       returns a {@link PigmentField} with the pigment pushed further down.
  *       Downward only.</li>
  *   <li><b>resolve</b> - {@code (red, black)} -&gt; {@link GradientLut}, into
- *       the {@link ColorField}. Fully restricted -&gt; transparent; resolves to
- *       pure black -&gt; 80% opacity.</li>
+ *       the {@link ColorField}. Fully restricted -&gt; transparent; near
+ *       black -&gt; composited at less than full opacity, so the template's
+ *       hair shading survives where the horse is darkest.</li>
  *   <li><b>magical (RGB) phase</b> - each visible magical gene (in
  *       {@link Genes#magicalOrder()}) returns a signed RGB delta, folded into
  *       that colour field by integer addition (or, for flat paint, a replace).
@@ -52,7 +53,37 @@ import java.util.Optional;
  */
 public final class CoatTextureComposer {
 
+    /**
+     * Opacity of a texel that resolves to <b>black</b>. The composite is a
+     * multiply, so a fully opaque black texel scales the template to nothing
+     * and the coat loses the template's hair shading exactly where the horse is
+     * darkest - a flat, dead {@code #000000} patch. Compositing black at 80%
+     * lets a fifth of the template through, which is what gives a black horse
+     * its {@code #2C2C2C}-ish strand detail.
+     */
     private static final int PURE_BLACK_ALPHA = 0xCC; // 80%
+
+    /**
+     * How far off black a colour can be and still get some of that softening,
+     * as a maximum channel value.
+     *
+     * <p><b>This used to be an equality test against {@code #000000}</b>, which
+     * quietly made the rule depend on one pixel of the gradient art being
+     * exactly zero. It was: both bottom corners of the chart were black, so a
+     * black horse ({@code red 1, black 1}) and a bay's points ({@code red 0,
+     * black 1}) both softened. Then the chart's low-red column was recoloured
+     * toward blue-grey, its corner moved to {@code #000104}, and every bay,
+     * seal brown and bay dun on the server started wearing dead-flat black
+     * points while a plain black horse kept its shading - a rendering rule
+     * switched off by an art edit, with nothing to say so.
+     *
+     * <p>So the softening ramps out over this range instead of switching. The
+     * ramp is deliberately wide enough that the effective multiply is
+     * near-constant across it (0.200 at pure black, dipping to 0.184 around
+     * {@code #202020} before climbing again), so no coat gets a visible step
+     * where it crosses.
+     */
+    private static final int NEAR_BLACK = 0x30;
 
     /**
      * A texel goes fully transparent (bald white template shows through) only
@@ -139,7 +170,7 @@ public final class CoatTextureComposer {
                 return;
             }
             int rgb = lut.sample(r, b) & 0xFFFFFF;
-            colour.setArgb(px, py, (rgb == 0 ? PURE_BLACK_ALPHA << 24 : 0xFF000000) | rgb);
+            colour.setArgb(px, py, (nearBlackAlpha(rgb) << 24) | rgb);
         });
 
         // 3. magical phase - each gene's signed RGB delta accumulates.
@@ -217,6 +248,19 @@ public final class CoatTextureComposer {
             }
         }
         return null;
+    }
+
+    /**
+     * The opacity a resolved colour composites at: {@value #PURE_BLACK_ALPHA}
+     * at black, ramping to fully opaque by {@link #NEAR_BLACK}. See that
+     * constant for why this is a ramp and not an {@code == 0} test.
+     */
+    private static int nearBlackAlpha(int rgb) {
+        int max = Math.max((rgb >> 16) & 0xFF, Math.max((rgb >> 8) & 0xFF, rgb & 0xFF));
+        if (max >= NEAR_BLACK) {
+            return 0xFF;
+        }
+        return 0xFF - (0xFF - PURE_BLACK_ALPHA) * (NEAR_BLACK - max) / NEAR_BLACK;
     }
 
     private static int blend(int templateCh, int overlayCh, float a) {
