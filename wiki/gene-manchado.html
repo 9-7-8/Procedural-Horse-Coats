@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manchado &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="nav.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow natural">Natural gene <span class="sep">/</span> phase 1</p>
+<h1>Manchado &mdash; white with islands in it</h1>
+<p class="lede">
+    The rare Argentine pattern: broad, clean white over the <strong>topline</strong>
+    with smooth rounded <strong>islands of the base colour left inside it</strong>,
+    a mostly white tail, and a head, belly and lower legs that stay dark. Close to
+    the inverse of a leopard &mdash; a leopard puts dark spots <em>on</em> a white
+    horse; this leaves dark islands <em>in</em> a white field.
+</p>
+
+<div class="gene-preview" data-gene="horsegenetics.manchado"></div>
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd>horsegenetics.manchado</dd></div>
+    <div><dt>Alleles</dt><dd><span class="allele rec">ma</span> <span class="allele dom">Ma</span></dd></div>
+    <div><dt>Outcomes</dt><dd>wild, <code>manchado-carrier</code> (silent), <code>manchado</code></dd></div>
+    <div><dt>Shows when</dt><dd><code>ma/ma</code>, and only then</dd></div>
+    <div><dt>Default allele</dt><dd>Ma</dd></div>
+    <div><dt>Priority</dt><dd><code>ManchadoGene.PRIORITY</code> &mdash; with the white-spotting loci</dd></div>
+    <div><dt>Founders</dt><dd><strong>carriers only</strong> &mdash; no wild horse is ever manchado</dd></div>
+    <div><dt>Deterministic</dt><dd><strong>no</strong> when expressed</dd></div>
+    <div><dt>Epi draws</dt><dd>2 &times; nextLong &mdash; the field seed and the island seed</dd></div>
+    <div><dt>Health</dt><dd><strong>none</strong></dd></div>
+</dl>
+
+<div class="note">
+    <span class="label">Unplayed</span>
+    <p>
+        Covered by <code>ManchadoGeneTest</code> and the golden file, and eyeballed as
+        side views beside a tobiano and a leopard. Not seen in a game. See
+        <a href="verification.html#manchado">verification &sect;0-W</a>.
+    </p>
+</div>
+
+<h2 id="own-locus">Its own locus, deliberately</h2>
+
+<p>
+    Manchado is <strong>not</strong> a <a href="gene-leopard.html">leopard-complex</a>
+    modifier and <strong>not</strong> a <a href="gene-kit.html">KIT</a> allele. It is
+    not one of the mapped, commercially testable white-spotting patterns at all: the
+    modern reviews catalogue <code>KIT</code> (tobiano, sabino, the dominant whites),
+    <code>MITF</code> and <code>PAX3</code> (splash), <code>EDNRB</code> (frame) and
+    <code>TRPM1</code> plus <code>RFWD3</code> (leopard complex and PATN1), and
+    manchado is in none of them.
+</p>
+
+<p>
+    A horse cannot be confirmed manchado by a white-pattern panel. It is identified
+    <em>phenotypically</em>, by its shape &mdash; so filing it under an existing locus
+    here would have been a claim nobody has earned, and would have turned it into
+    &ldquo;another Appaloosa setting&rdquo; rather than the thing it is.
+</p>
+
+<h3>Why recessive</h3>
+
+<p>
+    The long-standing proposal is a rare autosomal recessive, written <code>ma</code>.
+    That is a hypothesis, not a validated locus, and the mod says so &mdash; but it is
+    the one that explains the observations: the pattern turns up <em>sporadically</em>
+    out of solid-looking parents across several Argentine populations (Criollo, polo
+    ponies, Arabians, Hackneys, Thoroughbred-associated stock) without spreading the way
+    a dominant pinto gene would, which is exactly what a rare allele carried into
+    several registries by a founder effect looks like.
+</p>
+
+<p>
+    The competing ideas are <strong>somatic mosaicism</strong> &mdash; a change
+    occurring after conception in some pigment-cell lineages rather than an inherited
+    allele &mdash; and a transposable element. Neither is proven either. This is a
+    modelled allele based on a suspected inheritance pattern, and the real cause is
+    unresolved.
+</p>
+
+<div class="note">
+    <span class="label">Carriers only in the wild</span>
+    <p>
+        The founder table has <strong>no affected row at all</strong>: about one wild
+        horse in eighty carries a copy and none of them shows it. The only way to see a
+        manchado is to breed two carriers, which is the whole point of a pattern this
+        rare and the reason the carrier gets its own wording in the gene browser. The
+        same shape the <a href="gene-acan.html">health loci</a> use, for a much happier
+        reason.
+    </p>
+</div>
+
+<h2 id="shape">The geometry</h2>
+
+<p>
+    Manchado is identified by shape rather than by how much white there is, so the
+    shape is what the gene draws.
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Feature</th><th>How it is drawn</th></tr></thead>
+<tbody>
+<tr><td><strong>A dorsal white sheet</strong> over the back, crest, upper shoulder, upper barrel and croup</td><td>A height threshold on the barrel and the neck, with a low-frequency wander so the margin is not a level waterline.</td></tr>
+<tr><td><strong>A crisp margin</strong></td><td>A deliberately narrow smoothstep. Manchado's white does <em>not</em> dissolve into roaning, and a soft edge here would draw a sabino.</td></tr>
+<tr><td><strong>Rounded islands</strong> of base colour inside the white</td><td>The same cellular field <a href="gene-grey.html">grey</a>'s dapples use, at a large cell size, subtracted from the white rather than painted over it &mdash; an island is base coat the white never reached.</td></tr>
+<tr><td><strong>A mostly white tail</strong></td><td>Reported as a notable manchado feature even when the hind legs stay dark.</td></tr>
+<tr><td><strong>A dark head, belly, underside of neck and lower legs</strong></td><td>Excluded outright.</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="note">
+    <span class="label">The islands were slivers first</span>
+    <p>
+        Which cells are islands was originally sampled at the cells' own frequency,
+        so it varied <em>inside</em> each cell and cut it in half &mdash; the field came
+        out as slivers rather than as ovals. It is sampled at a much lower frequency
+        now, which picks island-rich and island-poor <em>regions</em> and leaves each
+        oval whole. Worth recording because the symptom (a pattern that looks torn
+        rather than round) reads like an art problem and was arithmetic.
+    </p>
+</div>
+
+<h2 id="not">What it is not</h2>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Pattern</th><th>How it differs</th></tr></thead>
+<tbody>
+<tr><td><a href="gene-kit.html">Sabino</a></td><td>Jagged, roaned margins, and white on the face and legs. Manchado's white is clean and opaque, and its face and legs are dark.</td></tr>
+<tr><td><a href="gene-tobiano.html">Tobiano</a></td><td>Large smooth patches crossing the spine, usually with white legs &mdash; but <strong>no rounded islands inside the white</strong>. That is the whole difference.</td></tr>
+<tr><td><a href="gene-mitf.html">Splash</a></td><td>Comes up from below: white belly, tall leg white, a bald face, blue eyes. Manchado is top-down and its underside stays coloured.</td></tr>
+<tr><td><a href="gene-leopard.html">Leopard complex</a></td><td>Does put colour inside white, but with mottled skin, striped hooves and white sclera, and as a dense cloud of small spots rather than a handful of large ovals.</td></tr>
+<tr><td><a href="gene-roan.html">Roan</a></td><td>Hair-by-hair mixing, not patch white.</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    <code>ManchadoGeneTest</code> asserts the geometry directly rather than describing
+    it &mdash; that the white is dorsal, that the belly and legs are untouched, and
+    that the coloured leftovers inside the field are <em>runs</em> rather than single
+    texels, which is the measurable difference between an island and a fleck.
+</p>
+
+<h2>Health</h2>
+
+<p>
+    <strong>None.</strong> This is the white pattern about which least is known, and
+    inventing a cost for it would be inventing a fact. Every other white locus in the
+    mod carries something; this one carries nothing, and a manchado horse resolves to
+    exactly the same body as a solid one.
+</p>
+
+<h2 id="carrot">Its gene carrot</h2>
+
+<div class="gene-carrot" data-gene="horsegenetics.manchado"></div>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="gene-tobiano.html">Tobiano</a>
+        <a href="gene-leopard.html">Leopard complex</a>
+        <a href="gene-kit.html">KIT (sabino / dominant white)</a>
+        <a href="gene-rabicano.html">Rabicano</a>
+    </div>
+    Source: <code>common/genetics/genes/ManchadoGene.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+<script defer src="gene-preview/gene-preview.js"></script>
+<script defer src="gene-carrot/gene-carrot.js"></script>
+</body>
+</html>

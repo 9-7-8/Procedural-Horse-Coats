@@ -30,6 +30,7 @@ import com.example.horsegenetics.common.genetics.genes.MagicSectoralHeterochromi
 import com.example.horsegenetics.common.genetics.genes.MagicSizeGene;
 import com.example.horsegenetics.common.genetics.genes.MagicSpeedGene;
 import com.example.horsegenetics.common.genetics.genes.MagicZebraGene;
+import com.example.horsegenetics.common.genetics.genes.ManchadoGene;
 import com.example.horsegenetics.common.genetics.genes.ManeColorGene;
 import com.example.horsegenetics.common.genetics.genes.MilkGene;
 import com.example.horsegenetics.common.genetics.genes.MushroomGene;
@@ -196,6 +197,14 @@ public final class Genes {
      */
     public static final EdnrbGene EDNRB = new EdnrbGene();
     public static final KitGene KIT = new KitGene();
+    /**
+     * <b>Manchado</b> - the rare Argentine pattern, and its own locus on
+     * purpose. It is not a leopard-complex modifier and not a {@code KIT}
+     * allele: it is not one of the mapped white-spotting pathways at all, and
+     * filing it under either would have claimed something nobody has earned. A
+     * modelled recessive, carriers only in the wild.
+     */
+    public static final ManchadoGene MANCHADO = new ManchadoGene();
     public static final MitfGene MITF = new MitfGene();
     public static final Pax3Gene PAX3 = new Pax3Gene();
 
@@ -315,7 +324,7 @@ public final class Genes {
             SEX, DIET, EXTENSION, AGOUTI, SHADE, CHAMPAGNE, GREY, MATP,
             MAGIC_ZEBRA, PINK_HAIR, DUN, SILVER, FLAXEN, SOOTY, PANGARE, MUSHROOM, BRINDLE, TIGER_EYE,
             NATURAL_ZEBRA, ROAN, RABICANO, TOBIANO,
-            LEOPARD, EDNRB, KIT, MITF, PAX3,
+            LEOPARD, EDNRB, KIT, MANCHADO, MITF, PAX3,
             MILK, BODY_SIZE, MAGIC_SPEED, MAGIC_HEALTH, MAGIC_JUMP,
             MANE_COLOR, TAIL_COLOR, PARTICLE, LIGHT, HEALER, SECTORAL_EYES, VERDANT, LUT, CUTIE_MARK,
             DHAMPIR,

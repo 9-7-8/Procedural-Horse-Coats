@@ -88,6 +88,11 @@ class CoatPipelineGoldenTest {
             override("agouti=A/a", "rabicano=Rb/Rb"),
             override("extension=e/e", "rabicano=Rb/Rb"),
             override("agouti=A/a", "roan=Rn/rn", "rabicano=Rb/Rb"),
+            // manchado: a dorsal white field with base-colour islands in it
+            override("agouti=A/a", "manchado=ma/ma"),
+            override("manchado=ma/ma"),
+            override("extension=e/e", "manchado=ma/ma"),
+            override("agouti=A/a", "manchado=ma/Ma"),                    // a silent carrier
             override("kit=W22/N"),
             override("champagne=Ch/c"),
             override("agouti=A/a", "champagne=Ch/c"),

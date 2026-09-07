@@ -156,6 +156,11 @@ public final class CoatSampleTool {
             {"rabicano_chestnut", "extension=e/e rabicano=Rb/Rb"},
             {"rabicano_black", "rabicano=Rb/Rb"},
 
+            // manchado - white fields with base-colour islands, dark head and legs
+            {"manchado_bay", "agouti=A/a manchado=ma/ma"},
+            {"manchado_black", "manchado=ma/ma"},
+            {"manchado_chestnut", "extension=e/e manchado=ma/ma"},
+
             // dhampir - the carrier is the eyes alone, the homozygote is white
             {"dhampir_trace_bay", "agouti=A/a dhampir=Dhmp/n"},
             {"dhampir", "dhampir=Dhmp/Dhmp"},
@@ -194,11 +199,12 @@ public final class CoatSampleTool {
             1, 4, 6, 2, 8,
             0, 0,
             2,
-            // flaxen x4, sooty x5, pangare x6, rabicano x4, dhampir x3
+            // flaxen x4, sooty x5, pangare x6, rabicano x4, manchado x3, dhampir x3
             3, 1, 5, 0,
             0, 0, 0, 2, 0,
             0, 0, 4, 0, 0, 0,
             2, 1, 6, 3,
+            0, 4, 2,
             4, 0, 0};
 
     private CoatSampleTool() {}

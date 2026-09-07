@@ -87,6 +87,13 @@ public final class GeneDescriptions {
                             + "that can come out at almost nothing, so a horse recorded as solid "
                             + "can throw a heavily ticked foal. Not classic roan: the tail tells "
                             + "them apart."),
+            Map.entry("horsegenetics.manchado",
+                    "A rare Argentine pattern: broad clean white over the back, crest and croup "
+                            + "with smooth rounded islands of the base colour left inside it, a "
+                            + "mostly white tail, and a dark head, belly and lower legs. It takes "
+                            + "two copies and no wild horse has them, so the only way to see one is "
+                            + "to breed two carriers. Its own locus - it belongs to none of the "
+                            + "mapped white-pattern genes, and its real cause is unknown."),
             Map.entry("horsegenetics.champagne",
                     "A dilution that ignores its own dose - one copy or two give the same result. "
                             + "It keeps most red, cuts black hard and feeds some removed black back "
