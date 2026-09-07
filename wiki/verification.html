@@ -32,6 +32,66 @@
     </p>
 </div>
 
+<h2 id="sooty">&sect;0-T &mdash; sooty (2026-09-07, NOT looked at)</h2>
+
+<p>
+    A new locus, <a href="gene-sooty.html">sooty</a> - the dark countershading over a
+    horse's topline. It is <strong>common</strong>, so unlike most of this page's
+    entries it is not a rarity you have to hunt for: a large fraction of every wild
+    herd now carries some, and the whole population should look a little different
+    because of it. Covered by <code>SootyGeneTest</code> and the golden file, and
+    eyeballed as side views over five bases; not seen in a game.
+</p>
+
+<ul>
+    <li><strong>Look at a herd first, not at one horse.</strong> The gene's job is to
+        stop every bay looking like the same bay. If a field of them reads as one
+        colour the dosage is too weak; if half of them read as black it is too
+        strong.</li>
+    <li><strong>The countershading itself.</strong> Dark along the spine, fading
+        smoothly to a clear belly. If there is a visible <em>edge</em> where the dark
+        stops, the falloff is wrong.</li>
+    <li><strong>A sooty palomino is the money shot.</strong> It should read as a dirty
+        bronze horse with muddy lower legs - the most dramatic version because of the
+        contrast against gold.</li>
+    <li><strong>A sooty chestnut should be liver, not black.</strong> The chart's warm
+        edge is supposed to keep it brown. If a sooty chestnut has black-looking hairs
+        that is wrong, and it is a real conceptual problem rather than a taste one: a
+        chestnut cannot make black hair.</li>
+    <li><strong>A plain black must be identical with and without it.</strong> Stand
+        <code>S2/S2</code> and <code>s/s</code> blacks side by side; any difference at
+        all is a bug in the "never past where the texel started" rule.</li>
+    <li><strong>A sooty dun must keep its primitive markings</strong> - dorsal stripe,
+        leg bars, shoulder bar - with the cape drawn around them, not over them.</li>
+    <li><strong>Faint sooty against a dun.</strong> <code>S1/s</code> draws a dorsal
+        haze and nothing else, which is exactly what gets misidentified as dun in real
+        life. Confirm the two are actually distinguishable in game: the dun has bars
+        and a diluted body, the sooty horse has neither.</li>
+    <li><strong>The mane and tail must not move.</strong></li>
+</ul>
+
+<div class="note">
+    <span class="label">Questions for the owner</span>
+    <ol>
+        <li><strong>Is it too common?</strong> Roughly two horses in three carry at
+            least one copy. That is what the reference describes ("widely observed,
+            common across domestic populations") and it may still be too much of a good
+            thing when every bay in the world has a dark back.</li>
+        <li><strong>Shade and sooty are two loci for one paper.</strong>
+            <a href="gene-sooty.html#not-shade">The reasoning is written up</a>, and it
+            is a genuine design call rather than an oversight - but a dark bay can now
+            be dark for two independent reasons, and that may be one reason too many.</li>
+        <li><strong>Does the liver-chestnut approximation hold up?</strong> Sooty
+            darkens a chestnut by raising the pigment chart's black axis, which on the
+            chart's warm edge resolves brown rather than black. It is the right picture
+            made the wrong way round, and it is worth a look before it is trusted.</li>
+        <li><strong>Should a plain black's sooty combination be hidden?</strong> It
+            paints nothing there, but it is still a non-wild expression, so a black
+            horse gets its own baked texture per sooty combination - five bakes for one
+            appearance. Cheap to fix if the answer is yes.</li>
+    </ol>
+</div>
+
 <h2 id="flaxen">&sect;0-S &mdash; flaxen, and W4 (2026-09-07, NOT looked at)</h2>
 
 <p>

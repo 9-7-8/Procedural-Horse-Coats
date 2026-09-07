@@ -199,7 +199,26 @@ class GeneCoatHookTest {
     private static boolean paintsNothingItself(Gene gene) {
         return gene instanceof LutContribution
                 || gene instanceof EyeColorContribution
-                || gene instanceof EyePatchContribution;
+                || gene instanceof EyePatchContribution
+                || paintsNothingOnThisBase(gene);
+    }
+
+    /**
+     * <b>Sooty, and only sooty.</b> This test's base genotype is every other
+     * gene at its default, which is a <i>plain black horse</i> - and sooty works
+     * by declining to remove pigment, so on a horse from which nothing has been
+     * removed it is correctly a no-op. Its combination is not a wild type (it
+     * would show immediately on a bay, a buckskin or a palomino) and its output
+     * really is identical to its input here, so it fails both halves of the
+     * contract this file checks for reasons that are the gene working.
+     *
+     * <p>The same shape as the agouti-on-a-chestnut note above, and it is a
+     * named exception rather than a general "skip a gene whose output matches
+     * its input" because that general form would silently stop testing any gene
+     * that quietly broke.
+     */
+    private static boolean paintsNothingOnThisBase(Gene gene) {
+        return gene.key().equals("horsegenetics.sooty");
     }
 
     /**

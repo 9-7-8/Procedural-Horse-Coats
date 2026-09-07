@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sooty &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="nav.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow natural">Natural gene <span class="sep">/</span> phase 1</p>
+<h1>Sooty &mdash; the dark that lies on top</h1>
+<p class="lede">
+    The countershading over a horse&rsquo;s topline, crest, shoulder and croup
+    that makes it look darker than its base colour says it should be. A muddy
+    palomino, a smutty buckskin, a liver-leaning chestnut and a dark bay that
+    people keep calling black are all this, and it is the commonest single reason
+    a coat cannot be identified from a photograph.
+</p>
+
+<div class="gene-preview" data-gene="horsegenetics.sooty"></div>
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd>horsegenetics.sooty</dd></div>
+    <div><dt>Alleles</dt><dd><span class="allele dom">S2</span> <span class="allele dom">S1</span> <span class="allele wild">s</span></dd></div>
+    <div><dt>Outcomes</dt><dd>wild, <code>faint-sooty</code>, <code>sooty</code>, <code>heavy-sooty</code>, <code>extreme-sooty</code></dd></div>
+    <div><dt>Default allele</dt><dd>s</dd></div>
+    <div><dt>Priority</dt><dd><code>SootyGene.PRIORITY</code> &mdash; after dun, before the dilutions</dd></div>
+    <div><dt>Founder draws</dt><dd>1 &times; nextFloat()</dd></div>
+    <div><dt>Deterministic</dt><dd><strong>no</strong> when expressed</dd></div>
+    <div><dt>Epi draws</dt><dd>1 &times; nextFloat &mdash; the expression roll</dd></div>
+    <div><dt>Health</dt><dd><strong>none established</strong></dd></div>
+</dl>
+
+<div class="note">
+    <span class="label">Unplayed</span>
+    <p>
+        Covered by <code>SootyGeneTest</code> and the golden file, and the range has
+        been eyeballed as side views over five bases. Not seen in a game. See
+        <a href="verification.html#sooty">verification &sect;0-T</a>.
+    </p>
+</div>
+
+<h2 id="mechanism">Sooty is a <em>failure to restrict</em></h2>
+
+<div class="note good">
+    <span class="label">This is the whole design, and it is what makes the gene possible here at all</span>
+    <p>
+        <a href="pipeline.html">Phase 1 only ever pushes pigment down.</a> Every
+        texel starts at a full load of both pigments and each gene takes some
+        away; a gene that <em>adds black</em> cannot exist in this model.
+    </p>
+    <p>
+        Sooty does not add any. It <strong>declines to remove</strong> what agouti
+        and the dilutions were about to take &mdash; the eumelanin was always on
+        that texel, and this locus is the horse not switching it off along its
+        topline. The painter walks the black level back up toward, and never
+        past, the load the texel began the pipeline with.
+    </p>
+    <p>
+        That is the honest mechanical description, and it happens to be what the
+        biology is thought to be: the chromosome-22 region the evidence points at
+        sits beside <em>ASIP</em>, whose entire job is telling a follicle to stop
+        making black. <code>SootyGeneTest</code> asserts the ceiling directly,
+        because if it ever breaks the gene has stopped being &ldquo;a failure to
+        restrict&rdquo; and become &ldquo;invents pigment&rdquo;, and the
+        pipeline&rsquo;s downward-only guarantee goes with it.
+    </p>
+</div>
+
+<h2 id="evidence">What is actually known</h2>
+
+<p>
+    <strong>Not much, and nothing testable.</strong> There is no validated
+    commercial sooty test and no demonstrated inheritance model &mdash; not
+    dominant, not recessive, not codominant, not incomplete dominant. Saying
+    otherwise would be inventing a fact.
+</p>
+
+<p>
+    What exists is a 2020 genome-wide association study of 126 bay horses (Quarter
+    Horses, Arabians, Persian Horses, two Standardbreds and one Thoroughbred)
+    finding a very strong association between a region on chromosome 22 near
+    <em>ASIP</em> and <em>RALY</em> and how far black spreads over a bay. The lead
+    marker&rsquo;s effect was roughly <strong>additive</strong> &mdash; which is
+    the one structural fact worth building on, and is why this locus is a dosage.
+    The causal mutation was not identified; a candidate <em>RALY</em> indel was
+    found and the lead marker still predicted the phenotype better.
+</p>
+
+<p>
+    So: a <strong>dose-dependent modifier with a per-horse roll</strong>, the same
+    shape <a href="gene-flaxen.html">flaxen</a> and
+    <a href="gene-shade.html#score">the bay shade score</a> take, and labelled as
+    a modelled modifier rather than as settled science.
+</p>
+
+<h2 id="not-shade">Why it is not the shade locus, given they are the same paper</h2>
+
+<p>
+    <a href="gene-shade.html">Shade</a> models the <em>same</em> chromosome-22
+    signal. Keeping them apart is deliberate:
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th></th><th><a href="gene-shade.html">Shade</a></th><th>Sooty (this gene)</th></tr></thead>
+<tbody>
+<tr><td><strong>Scope</strong></td><td>Bays only</td><td>Every base with pigment to keep</td></tr>
+<tr><td><strong>Justified by</strong></td><td>The study, which measured bay horses and ranked bay shade. That is the claim it supports.</td><td>The phenotype. A muddy palomino and a smutty buckskin are real and common and obviously not bay shade.</td></tr>
+<tr><td><strong>Does</strong></td><td>Decides how far black spreads from the points &mdash; blood bay to seal brown</td><td>Lays a dark cape over the topline of anything</td></tr>
+<tr><td><strong>Shows on a chestnut</strong></td><td>No</td><td>Yes &mdash; as a liver overlay</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    Folding them into one locus would have claimed a great deal more than the
+    paper does: that one mutation causes both bay shade and every dirty palomino.
+    Two abstractions of overlapping evidence, each honest about its own scope. A
+    horse carries both, and a dark bay can be dark for either reason or for both
+    at once.
+</p>
+
+<h2 id="dosage">The dosage</h2>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Combination</th><th>Dosage</th><th>Outcome</th><th>What shows</th></tr></thead>
+<tbody>
+<tr><td><code>s/s</code></td><td>0</td><td>wild type</td><td>the base colour reads cleanly</td></tr>
+<tr><td><code>S1/s</code></td><td>1</td><td><code>faint-sooty</code></td><td>a dark haze along the spine, a little at the croup</td></tr>
+<tr><td><code>S1/S1</code>, <code>S2/s</code></td><td>2</td><td><code>sooty</code></td><td>an obviously dark topline over a clearer belly</td></tr>
+<tr><td><code>S2/S1</code></td><td>3</td><td><code>heavy-sooty</code></td><td>a dark cape over shoulder, back and croup</td></tr>
+<tr><td><code>S2/S2</code></td><td>4</td><td><code>extreme-sooty</code></td><td>dark enough that a bay or buckskin reads nearly black</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="note">
+    <span class="label">A dorsal haze is not a dun stripe</span>
+    <p>
+        <code>faint-sooty</code> draws a dark line down the spine, and that is
+        exactly the thing a horse gets misidentified as a
+        <a href="gene-dun.html">dun</a> for. AQHA is explicit that a dorsal stripe
+        alone does not establish dun. In this mod the difference is visible and
+        structural: a dun brings <strong>leg bars, a shoulder bar and a face
+        mask</strong> with its stripe and <em>dilutes the body</em>; sooty brings
+        a diffuse band and darkens. A horse can be both, and sooty runs after dun
+        precisely so a sooty dun keeps its primitive markings and gains a cape
+        around them.
+    </p>
+</div>
+
+<h2 id="bases">The same score looks different on every base</h2>
+
+<p>
+    The genotype sets the <em>intensity</em>; what darkening looks like is
+    whatever pigment is there to keep. That falls out of the mechanism rather than
+    needing a per-colour table, which is the nice part:
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Base</th><th>What sooty does to it</th></tr></thead>
+<tbody>
+<tr><td><a href="gene-agouti.html">Bay</a></td><td>The kept eumelanin is black, so it caps the shoulder and back. A dark bay, a mahogany, or something that reads seal-brown.</td></tr>
+<tr><td>Buckskin</td><td>A brown-to-near-black cape over the gold. Frequently mistaken for a dark bay.</td></tr>
+<tr><td>Palomino</td><td>The most dramatic, because of the contrast: gold dragged toward bronze, with muddy lower legs.</td></tr>
+<tr><td>Chestnut</td><td>The chart&rsquo;s warm edge stays brown a long way down, so it reads as a <strong>liver overlay</strong> rather than as black hairs &mdash; which is the right answer, since a chestnut cannot make black hair.</td></tr>
+<tr><td>Black</td><td><strong>Nothing.</strong> There is no removed pigment to keep. That is not a special case in the code; it is arithmetic, and it is exactly what the reference says about trying to identify sooty on a black horse.</td></tr>
+<tr><td><a href="gene-grey.html">Grey</a></td><td>Drawn, then progressively hidden as grey lightens over it &mdash; grey runs later.</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2 id="shape">Where it sits</h2>
+
+<ul>
+    <li><strong>Countershading</strong> is the core: full along the topline,
+        smoothly fading to nothing at the belly. The barrel&rsquo;s own height
+        fraction does it, so it does not depend on the horse&rsquo;s size.</li>
+    <li><strong>The croup and the shoulder</strong> take extra &mdash; two soft
+        humps along the barrel. They are the two places the reference names as
+        darkest.</li>
+    <li><strong>The crest</strong> takes most of the body&rsquo;s share, thinning
+        down the neck; <strong>the face</strong> a little.</li>
+    <li><strong>Muddy lower legs</strong>, but only on a chestnut-based coat. On a
+        bay the legs are already black-pointed and there is nothing to add.</li>
+    <li><strong>The mane, tail and ears are excluded outright.</strong> Sooty is a
+        body-coat modifier; a dark mane on a sooty horse is the base
+        colour&rsquo;s doing, and the reference puts mane and tail changes with
+        <a href="gene-silver.html">silver</a>,
+        <a href="gene-flaxen.html">flaxen</a>, cream and sun bleaching instead.</li>
+    <li><strong>Mottled</strong> by a fixed noise field, so it reads as hairs
+        rather than as an airbrush.</li>
+</ul>
+
+<h2>Health</h2>
+
+<div class="note warn">
+    <span class="label">None &mdash; and do not borrow one</span>
+    <p>
+        There is no established disorder, welfare problem or performance
+        consequence from sooty. The mod gives it no
+        <code>TraitContribution</code> at all.
+    </p>
+    <p>
+        The nuance worth recording is that the chromosome-22 region sits near
+        <em>ASIP</em>, and the study&rsquo;s authors <em>suggested future work</em>
+        on whether regulatory variation there might have health implications.
+        That is a research hypothesis, not a finding: they identified no causal
+        mutation and demonstrated no health effect. Meanwhile
+        <a href="gene-grey.html">grey</a> really does carry melanoma risk,
+        <a href="gene-silver.html">silver</a> really does carry an eye defect,
+        <a href="gene-ednrb.html">frame</a> really is a homozygous lethal and
+        <a href="gene-leopard.html">LP/LP</a> really does carry night blindness
+        &mdash; and none of that belongs to sooty because a sooty horse happens
+        to be dark.
+    </p>
+</div>
+
+<h2 id="carrot">Its gene carrot</h2>
+
+<div class="gene-carrot" data-gene="horsegenetics.sooty"></div>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="gene-shade.html">Shade &mdash; the same paper, scoped to bays</a>
+        <a href="gene-dun.html">Dun &mdash; the thing it is mistaken for</a>
+        <a href="gene-flaxen.html">Flaxen</a>
+        <a href="pipeline.html">The coat pipeline</a>
+    </div>
+    Source: <code>common/genetics/genes/SootyGene.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+<script defer src="gene-preview/gene-preview.js"></script>
+<script defer src="gene-carrot/gene-carrot.js"></script>
+</body>
+</html>

@@ -64,6 +64,14 @@ public final class GeneDescriptions {
                             + "mutation has ever been identified. It touches the long hair and "
                             + "nothing else, and it is invisible on any horse that makes black "
                             + "hair, which carries and transmits it regardless."),
+            Map.entry("horsegenetics.sooty",
+                    "The dark countershading that lies over a horse's topline, crest, shoulder and "
+                            + "croup and makes it look darker than its base colour says - a muddy "
+                            + "palomino, a smutty buckskin, a bay people keep calling black. It "
+                            + "works by declining to remove pigment the rest of the coat was about "
+                            + "to lose, so it shows most on the colours with the most to keep and "
+                            + "does nothing at all on a plain black. A dosage of two variant "
+                            + "alleles; no confirmed real-world inheritance exists."),
             Map.entry("horsegenetics.champagne",
                     "A dilution that ignores its own dose - one copy or two give the same result. "
                             + "It keeps most red, cuts black hard and feeds some removed black back "

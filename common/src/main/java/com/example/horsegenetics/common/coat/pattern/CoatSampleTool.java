@@ -135,6 +135,13 @@ public final class CoatSampleTool {
             {"flaxen_extreme", "extension=e/e flaxen=Fl2/Fl2"},
             {"flaxen_on_a_bay", "agouti=A/a flaxen=Fl2/Fl2"},
 
+            // sooty - the same dosage over four different bases
+            {"sooty_bay", "agouti=A/a sooty=S2/S2"},
+            {"sooty_buckskin", "agouti=A/a matp=Cr/N sooty=S2/S2"},
+            {"sooty_palomino", "extension=e/e matp=Cr/N sooty=S2/S2"},
+            {"sooty_chestnut", "extension=e/e sooty=S1/S1"},
+            {"sooty_black", "sooty=S2/S2"},
+
             // dhampir - the carrier is the eyes alone, the homozygote is white
             {"dhampir_trace_bay", "agouti=A/a dhampir=Dhmp/n"},
             {"dhampir", "dhampir=Dhmp/Dhmp"},
@@ -173,8 +180,9 @@ public final class CoatSampleTool {
             1, 4, 6, 2, 8,
             0, 0,
             2,
-            // flaxen x4, dhampir x3
+            // flaxen x4, sooty x5, dhampir x3
             3, 1, 5, 0,
+            0, 0, 0, 2, 0,
             4, 0, 0};
 
     private CoatSampleTool() {}

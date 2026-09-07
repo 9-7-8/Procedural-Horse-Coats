@@ -47,6 +47,7 @@ import com.example.horsegenetics.common.genetics.genes.ShadeGene;
 import com.example.horsegenetics.common.genetics.genes.Ryr2Gene;
 import com.example.horsegenetics.common.genetics.genes.ShoxGene;
 import com.example.horsegenetics.common.genetics.genes.SilverGene;
+import com.example.horsegenetics.common.genetics.genes.SootyGene;
 import com.example.horsegenetics.common.genetics.genes.St14Gene;
 import com.example.horsegenetics.common.genetics.genes.MitfGene;
 import com.example.horsegenetics.common.genetics.genes.TailColorGene;
@@ -141,6 +142,19 @@ public final class Genes {
      * chestnut and this is invisible on everything else.
      */
     public static final FlaxenGene FLAXEN = new FlaxenGene();
+    /**
+     * <b>Sooty</b> - the dark countershading over a horse's topline, and the
+     * one gene here that works by <i>declining to remove</i> pigment rather
+     * than by removing it. It sits after {@link DunGene} so a dun's primitive
+     * markings are already drawn, and before {@link MatpGene} so a smutty
+     * buckskin's cape dilutes with the rest of it.
+     *
+     * <p>It models the same chromosome-22 signal {@link ShadeGene} does and is
+     * deliberately a second gene: shade is scoped to bays, where the evidence
+     * is, and this is scoped to the phenotype, which turns up on palominos and
+     * buckskins the evidence says nothing about.
+     */
+    public static final SootyGene SOOTY = new SootyGene();
     public static final MushroomGene MUSHROOM = new MushroomGene();
     /**
      * Natural zebra striping - the real-world half of the zebra pair, and
@@ -281,7 +295,7 @@ public final class Genes {
     /** The hand-written genes. Order here is irrelevant - the registry sorts. */
     private static final List<Gene> BUILTINS = List.of(
             SEX, DIET, EXTENSION, AGOUTI, SHADE, CHAMPAGNE, GREY, MATP,
-            MAGIC_ZEBRA, PINK_HAIR, DUN, SILVER, FLAXEN, MUSHROOM, BRINDLE, TIGER_EYE,
+            MAGIC_ZEBRA, PINK_HAIR, DUN, SILVER, FLAXEN, SOOTY, MUSHROOM, BRINDLE, TIGER_EYE,
             NATURAL_ZEBRA, ROAN, TOBIANO,
             LEOPARD, EDNRB, KIT, MITF, PAX3,
             MILK, BODY_SIZE, MAGIC_SPEED, MAGIC_HEALTH, MAGIC_JUMP,

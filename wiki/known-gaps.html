@@ -64,9 +64,9 @@
 </li>
 <li id="gap-4"><strong>White markings beyond splash</strong> - the framework is ready (natural + non-deterministic gene); sock distributions, roan and rabicano slot in the same way.
 </li>
-<li id="gap-5"><strong>More loci</strong> - dun, pearl-cream stacking nuance, sooty.
+<li id="gap-5"><strong>More loci</strong> - pearl-cream stacking nuance. Dun, sooty and flaxen have all shipped since this was written.
 </li>
-<li id="gap-6"><strong>Coat realism</strong> - outside grey's dapples, every gene still samples the gradient flat per pixel (no sooty shading, no seasonal coat). <code>BodyNoise</code> is the reusable seam for the next one. <code>T</code> on a non-deterministic coat still bakes a unique (identical-looking) texture per horse.
+<li id="gap-6"><strong>Coat realism</strong> - outside grey's dapples and <a href="gene-sooty.html">sooty</a>'s countershading, every gene still samples the gradient flat per pixel (no seasonal coat, and no seasons to have one in). <code>BodyNoise</code> is the reusable seam for the next one. <code>T</code> on a non-deterministic coat still bakes a unique (identical-looking) texture per horse.
 </li>
 <li id="gap-7"><strong>Phase 3 now has three inhabitants and the blend question is answered.</strong> Magic zebra validated the <em>negative</em> half of the unclamped signed model (<code>-200%</code> reads black over any coat, dominant white included); pink hair showed that a <strong>blind add is not enough</strong> on its own - to reach pink on a black mane a fixed delta has to push hard enough to saturate a pale mane to white, so it reads <code>ColorView.visible</code> and returns the delta that walks the texel toward its target. So: <em>straight signed add</em> stays the blend, but the useful magical genes will read first, and <code>magicalOrder()</code> matters more than §1 assumed. <code>naturalOrder()</code> / <code>magicalOrder()</code> are still hand-written lists
 

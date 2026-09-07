@@ -68,6 +68,14 @@ class CoatPipelineGoldenTest {
             override("extension=e/e", "flaxen=Fl2/Fl2"),
             override("extension=e/e", "flaxen=Fl2/Fl2", "matp=Cr/N"),   // a flaxen palomino
             override("agouti=A/a", "flaxen=Fl2/Fl2"),                   // carried, invisible
+            // sooty: the same dosage over four bases, and a no-op on the fifth
+            override("agouti=A/a", "sooty=S1/s"),
+            override("agouti=A/a", "sooty=S2/S2"),
+            override("agouti=A/a", "matp=Cr/N", "sooty=S2/S2"),
+            override("extension=e/e", "matp=Cr/N", "sooty=S2/S2"),
+            override("extension=e/e", "sooty=S2/S2"),
+            override("sooty=S2/S2"),                                     // a plain black - unchanged
+            override("agouti=A/a", "dun=D/d2", "sooty=S2/S2"),
             override("kit=W22/N"),
             override("champagne=Ch/c"),
             override("agouti=A/a", "champagne=Ch/c"),
