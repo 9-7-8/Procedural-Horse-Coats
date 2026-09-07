@@ -94,9 +94,10 @@ public final class GeneDescriptions {
                             + "barrel down the legs and over the back; the head stays coloured. "
                             + "Patch size and coverage vary per horse."),
             Map.entry("horsegenetics.ednrb",
-                    "Frame overo: sharp, jagged white spreading sideways along the belly, barrel, "
-                            + "flank and lower neck that never crosses the back, so colour is left "
-                            + "framing it above and below. Broad white face, dark legs, and two "
+                    "Frame overo: big, sharp-edged white splotches across the middle of the "
+                            + "side - barrel, flank, shoulder and lower neck - that never cross the "
+                            + "back and rarely reach the belly, so colour is left framing them "
+                            + "above and below. Broad white face, dark legs, and two "
                             + "sides that need not match; some carriers show almost nothing, which "
                             + "is why frame is tested for. Two copies (O/O) is Overo Lethal White - "
                             + "an all-white foal that does not survive. It has its locus to itself, "

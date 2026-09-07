@@ -447,7 +447,9 @@
 <p class="muted">
     Not fixed, and still open above: <a href="known-gaps.html#gap-30">tobiano&rsquo;s
     <code>cover</code> knob</a>, which is still calibrated as if the patch field were
-    uniform. Frame&rsquo;s band is fixed &mdash; <a href="#frame-overo">&sect;0-F2</a>.
+    uniform &mdash; and it is the same defect frame turned out to have, so the two-pass
+    quantile <code>EdnrbGene</code> now uses is the shape of that fix. Frame&rsquo;s own
+    band is rebuilt &mdash; <a href="#frame-overo">&sect;0-F2</a>.
 </p>
 
 <h3 id="brindle">Brindle &mdash; the X-linked gene</h3>
@@ -601,13 +603,12 @@
         <a href="#white-belly">&sect;0-G</a> for what to look at.
     </p>
     <p>
-        <strong>And frame is fixed too (2026-09-06)</strong>, with the per-part
-        reference it needed: a barrel band against the topline plus a separate rule for
-        the neck&rsquo;s own height. Measured spine white went from ~75% to
-        <strong>0.00 at every seed</strong>. The whole pattern was re-derived from a
-        locus-by-locus reference in the same pass &mdash; see
-        <a href="#frame-overo">&sect;0-F2</a>. Tobiano crossing the topline is
-        <em>correct</em> for tobiano.
+        <strong>Frame&rsquo;s topline is fixed (2026-09-06)</strong> and measured spine
+        white went from ~75% to <strong>0.00 at every seed</strong>. Its <em>shape</em>
+        took a second pass the same day &mdash; the first one still drew a dipped horse,
+        and the tests here did not catch it because none of them asserted the white was
+        framed from <em>below</em>. See <a href="#frame-overo">&sect;0-F2</a>. Tobiano
+        crossing the topline is <em>correct</em> for tobiano.
     </p>
 </div>
 
@@ -845,24 +846,37 @@
     a note on <a href="gene-leopard.html">the gene page</a>.
 </p>
 
-<h2 id="frame-overo">&sect;0-F2 &mdash; frame overo, rebuilt (2026-09-06, NOT looked at)</h2>
+<h2 id="frame-overo">&sect;0-F2 &mdash; frame overo, rebuilt <em>again</em> (2026-09-06, NOT looked at)</h2>
 
-<p>
-    The pattern was re-derived from a locus-by-locus reference and <strong>every constant
-    moved</strong>. The whole account is on
-    <a href="gene-ednrb.html#paints">the EDNRB page</a>; what matters here is that
-    <em>nothing below has been seen on a horse</em>, and that the numbers quoted are
-    offline measurements over eleven epigenetic seeds, not observations.
-</p>
+<div class="note warn">
+    <span class="label">The previous rebuild was reported here as fixed and was still wrong</span>
+    <p>
+        It drew a horse <strong>dipped</strong> in white to a frayed waterline, with the
+        colour reduced to scraps &mdash; and it passed every test on this page, because
+        the tests asserted a dark spine and a white belly and a dipped horse has both.
+        The missing assertion was the one that says frame white is <em>framed</em>:
+        colour above it <strong>and</strong> below it. It exists now
+        (<code>frameWhiteIsFramedAboveAndBelow</code>).
+    </p>
+    <p>
+        Three things were wrong &mdash; an uncalibrated threshold, a band open downward,
+        and a jag finer than one texel &mdash; and they are laid out on
+        <a href="gene-ednrb.html#paints">the EDNRB page</a>. The lesson worth carrying:
+        <strong>offline measurements agreed with the old code at every step.</strong>
+        Nothing below is a substitute for looking at the horse.
+    </p>
+</div>
 
 <div class="note good">
     <span class="label">What was measured offline, and is now pinned</span>
     <p>
-        Asserted in <code>WhitePatternGenesTest</code> at every seed rather than left as a
-        number in prose: spine white <strong>0.00</strong> (it was ~75%, the bug this
-        closes), the belly whiter than the flank because frame climbs <em>from</em> the
-        belly, the legs under 10% and the upper crest under 15%, the patches measurably
-        wider than they are tall, and the range reaching both cryptic and textbook.
+        Asserted in <code>WhitePatternGenesTest</code> rather than left as a number in
+        prose: spine white <strong>0.00</strong> at every seed, the legs under 10% and the
+        upper crest under 15%, the middle of the side decisively whiter than both the
+        belly below it and the barrel above it, the patches measurably wider than they are
+        tall, and the range reaching both cryptic and textbook. Swept over 400 epigenetic
+        seeds besides: no seed put white on the spine or the crest, and no seed came out
+        with a belly whiter than its own flank.
     </p>
 </div>
 
@@ -873,15 +887,17 @@
         the topline. Walk behind a frame horse and look along the spine from the withers
         to the croup: it should be solid colour on every horse, with the white stopping
         somewhere on the flank.</li>
-    <li><strong>Does the white read as <em>horizontal</em>?</strong> This is the change
-        most likely to be wrong. Patches are sampled about five times longer along the
-        horse than tall, which measures as elongated and may still read as a blotch at
-        128px. Compare a frame side-on against a <a href="gene-tobiano.html">tobiano</a>:
-        frame should look like a band running along the barrel, tobiano like something
-        poured over the back.</li>
-    <li><strong>Is the belly actually white?</strong> Look underneath. The lower barrel
-        should be substantially white on a well-marked horse, pushing up into the sides in
-        separate tongues rather than as one clean edge.</li>
+    <li><strong>Are they splotches, in the middle of the side?</strong> This is the
+        change, and the thing that was wrong. A frame horse should read as two or three
+        big irregular white patches sitting in the <em>centre</em> of the barrel and
+        flank, with coloured coat above them and below them. Compare side-on against a
+        <a href="gene-tobiano.html">tobiano</a>: frame is patches framed by colour,
+        tobiano is something poured over the back.</li>
+    <li><strong>Does it look <em>dipped</em>?</strong> The specific failure to watch for,
+        because it is what shipped twice. If the white starts at the belly and rises to a
+        ragged line, or if the coloured coat is broken into scraps rather than being the
+        ground the patches sit on, it is still wrong. The belly should be mostly dark,
+        with white reaching down onto it only under the boldest patches.</li>
     <li><strong>The neck.</strong> New, and it had none before: white along the lower and
         middle neck, sometimes joining the face white to the body white, with the
         <strong>crest dark</strong>. Check the crest specifically &mdash; a white crest
@@ -893,14 +909,14 @@
     <li><strong>Asymmetry.</strong> Walk around the horse. One flank should sometimes be
         visibly whiter than the other &mdash; if both sides always match, the side lean is
         too weak to see.</li>
-    <li><strong>The cryptic end.</strong> About one frame horse in five should be marked
-        so lightly you would not call it frame &mdash; a bold face, a blue eye, and almost
-        nothing on the body. Confirm that reads as a lightly marked horse and not as a
-        <em>broken</em> one. This is deliberate; it is why frame is DNA-tested.</li>
+    <li><strong>The cryptic end.</strong> A clear minority of frame horses should be
+        marked so lightly you would not call them frame &mdash; a bold face, a blue eye,
+        and almost nothing on the body. Confirm that reads as a lightly marked horse and
+        not as a <em>broken</em> one. This is deliberate; it is why frame is DNA-tested.</li>
     <li><strong>The bold end.</strong> And confirm the other tail still looks like a paint
-        horse. Total white on a bold frame is around a quarter of the horse, which is low
-        for a paint and correct: four dark legs, a dark back, a dark mane and tail are most
-        of the surface.</li>
+        horse. Total white on a bold frame is around a quarter of the barrel and neck,
+        which is low for a paint and correct: four dark legs, a dark back, a dark mane and
+        tail are most of the surface, and leaving them coloured is the pattern.</li>
     <li><strong>Stacked.</strong> Frame has its locus to itself, so try it with splash and
         with sabino. A frame-plus-splash horse should be louder than either alone (white
         finds white) without becoming a white blob.</li>

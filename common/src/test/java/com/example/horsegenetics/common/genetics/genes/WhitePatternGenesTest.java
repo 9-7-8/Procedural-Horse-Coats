@@ -323,10 +323,12 @@ class WhitePatternGenesTest {
     /**
      * <b>Frame's white does not cross the back.</b> This is the definition of
      * the pattern rather than a tuning preference - "doesn't cross the back"
-     * is how frame is told from tobiano at a glance - and it is the property
-     * that was broken: the ceiling was a fraction of the whole-horse box, which
-     * runs to the <i>ear tips</i>, so {@code 0.74} of it sat 19% above the
-     * spine and frame white could and did spill over the topline.
+     * is how frame is told from tobiano at a glance - so the painter enforces
+     * it with a hard exclusion above {@code EdnrbGene.TOPLINE_CAP} rather than
+     * with a ramp that merely discourages it. It has been broken twice: once
+     * by measuring the ceiling against the whole-horse box, which runs to the
+     * <i>ear tips</i>, and once by a threshold so far outside the noise field's
+     * range that the white flooded up to whatever ceiling it was given.
      */
     @Test
     void frameWhiteNeverReachesTheTopline() {
@@ -338,26 +340,40 @@ class WhitePatternGenesTest {
     }
 
     /**
-     * <b>And it does reach the belly</b>, which is the other half of the same
-     * claim. The lower barrel is one of the two hallmark locations; a band that
-     * started above the underline - which is what this gene used to do - drew
-     * the one part of a frame horse that is reliably dark and skipped the part
-     * that is reliably white.
+     * <b>Frame white is framed above and below</b>, which is the shape of the
+     * pattern and the reason for its name: big splotches in the middle of the
+     * side, with coloured coat left over the back <i>and</i> under the belly.
+     *
+     * <p>This is the test that was missing, and its absence is why the gene
+     * shipped drawing a horse dipped in white to a frayed waterline. The
+     * assertion it replaces demanded the opposite - a belly whiter than the
+     * flank - which is a description of a dipped horse rather than of a frame
+     * one. Frame's white does reach the belly here and there, at the bottom of
+     * its boldest patches; what it does not do is <i>start</i> there.
      */
     @Test
-    void frameWhitensTheBellyAndClimbsIntoTheFlank() {
+    void frameWhiteIsFramedAboveAndBelow() {
         double belly = 0;
-        double flank = 0;
+        double middle = 0;
+        double upper = 0;
         for (long seed : FRAME_SEEDS) {
-            belly += bodyBandWhite(FRAME, seed, 0.40, 0.62);
-            flank += bodyBandWhite(FRAME, seed, 0.62, 0.85);
+            double b = bodyBandWhite(FRAME, seed, 0.40, 0.62);
+            double m = bodyBandWhite(FRAME, seed, 0.62, 0.85);
+            assertTrue(m > b, "frame pooled in the belly rather than the side at seed " + seed
+                    + ": belly " + b + " against middle " + m);
+            belly += b;
+            middle += m;
+            upper += bodyBandWhite(FRAME, seed, 0.85, 0.93);
         }
         belly /= FRAME_SEEDS.length;
-        flank /= FRAME_SEEDS.length;
-        assertTrue(belly > 0.35, "the belly is a hallmark frame location, got " + belly);
-        assertTrue(belly > flank + 0.15,
-                "frame climbs FROM the belly, so the belly must be whiter than the flank: "
-                        + belly + " vs " + flank);
+        middle /= FRAME_SEEDS.length;
+        upper /= FRAME_SEEDS.length;
+        assertTrue(middle > 0.30,
+                "the middle of the side is where frame lives, got " + middle);
+        assertTrue(middle > belly + 0.25,
+                "frame is not a dipped horse: belly " + belly + " against middle " + middle);
+        assertTrue(middle > upper + 0.25,
+                "frame is framed above too: upper barrel " + upper + " against middle " + middle);
     }
 
     /**
@@ -377,11 +393,14 @@ class WhitePatternGenesTest {
     }
 
     /**
-     * <b>The white runs along the horse, not up it.</b> The single most
-     * diagnostic thing about frame, and the reason the patch field is sampled
-     * with {@code x} squashed and {@code y} stretched: tobiano runs top-down
-     * over the back and splash comes bottom-up from the feet, and frame goes
-     * sideways.
+     * <b>The white runs along the horse, not up it.</b> Tobiano runs top-down
+     * over the back and splash comes bottom-up from the feet; frame's splotches
+     * are wider than they are tall, which is what the patch field's two period
+     * counts ({@code EdnrbGene.PATCHES_ALONG} against
+     * {@code PATCHES_TALL}) buy. This is a claim about the <i>patches</i>, not
+     * about the pattern as a whole - a frame horse that is elongated because it
+     * has been dipped to a waterline passes this and fails
+     * {@link #frameWhiteIsFramedAboveAndBelow}, which is why both exist.
      *
      * <p>Measured as edge anisotropy on the finished coat, over the barrel's
      * two <b>side</b> faces only - the ones whose sheet axes are the horse's
@@ -414,22 +433,44 @@ class WhitePatternGenesTest {
      * The face is rolled separately, so even a nearly-unmarked body comes with
      * a bold face and a blue eye, which is exactly how a cryptic frame is
      * spotted.
+     *
+     * <p>Measured over the <b>barrel and neck</b> rather than the whole hide,
+     * because that is the surface frame can mark: the legs, mane and tail are
+     * excluded by the painter, so including them only dilutes every reading by
+     * the same constant and makes the thresholds harder to reason about.
      */
     @Test
     void frameRunsFromCrypticToTextbook() {
         double least = 1;
         double most = 0;
         for (long seed : FRAME_SEEDS) {
-            double w = whiteFraction(FRAME, seed);
+            double w = sideWhite(FRAME, seed);
             least = Math.min(least, w);
             most = Math.max(most, w);
         }
-        assertTrue(least < 0.10, "no seed produced a cryptic frame (least was " + least + ")");
-        assertTrue(most > 0.20, "no seed produced a bold frame (most was " + most + ")");
+        assertTrue(least < 0.12, "no seed produced a cryptic frame (least was " + least + ")");
+        assertTrue(most > 0.22, "no seed produced a bold frame (most was " + most + ")");
         for (long seed : FRAME_SEEDS) {
             assertTrue(faceWhite(FRAME, seed) > 0.15,
                     "every frame horse wears a bold face, seed " + seed);
         }
+    }
+
+    /** White fraction of the surface frame can mark - the barrel and the neck. */
+    private static double sideWhite(String code, long seed) {
+        int[] img = composeAdult(code, seed);
+        int[] tally = new int[2];
+        int n = HorseSkinGeometry.SHEET_SIZE;
+        HorseSkinGeometry.forEachTexel(Skin.ADULT, (px, py, part, face, point) -> {
+            if (part != Part.BODY && part != Part.NECK) {
+                return;
+            }
+            tally[1]++;
+            if ((img[py * n + px] & 0xFFFFFF) > 0xE0E0E0) {
+                tally[0]++;
+            }
+        });
+        return tally[1] == 0 ? 0 : tally[0] / (double) tally[1];
     }
 
     /** White fraction of the BODY part between two fractions of the topline. */

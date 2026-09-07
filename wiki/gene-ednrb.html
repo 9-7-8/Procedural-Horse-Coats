@@ -58,7 +58,7 @@
 <thead><tr><th>Combination</th><th>Outcome</th><th>Look</th></tr></thead>
 <tbody>
 <tr><td><code>N/N</code></td><td>wild type</td><td>nothing</td></tr>
-<tr><td><code>O/N</code></td><td><code>frame-overo</code></td><td>sharp, jagged white spreading sideways along the belly, barrel, flank and lower neck, never crossing the back, so colour is left framing it above and below. Broad white face, dark legs but for the odd coronet, and the two sides need not match. Anything from cryptic to textbook.</td></tr>
+<tr><td><code>O/N</code></td><td><code>frame-overo</code></td><td>big, sharp-edged splotches of white across the middle of the side &mdash; barrel, flank, shoulder, lower neck &mdash; never crossing the back and rarely reaching the belly, so colour is left framing them above and below. Broad white face, dark legs but for the odd coronet, and the two sides need not match. Anything from cryptic to textbook.</td></tr>
 <tr><td><code>O/O</code></td><td><code>lethal-white</code> <em>(masks)</em></td><td>an all-white foal with pink skin</td></tr>
 </tbody>
 </table>
@@ -110,17 +110,37 @@
 <h2 id="paints">How frame overo paints</h2>
 
 <div class="note warn">
-    <span class="label">Rebuilt 2026-09-06 against the reference, NOT yet looked at</span>
+    <span class="label">Rebuilt again 2026-09-06, NOT yet looked at</span>
     <p>
-        The shape was re-derived from a locus-by-locus description of the real pattern
-        and every constant below moved. The load-bearing fix is the
-        <strong>reference height</strong>: the band used to be measured against
-        <code>HorseSkinGeometry.bodyBounds</code>, the whole-horse box that runs to the
-        <em>ear tips</em>, on which the old ceiling of <code>0.74</code> sits at
-        <strong>1.19 of the topline</strong> &mdash; so frame white could cross the spine,
-        which is the one thing frame never does. It is measured against
-        <a href="#topline"><code>WhitePattern.toplineHeight</code></a> now, where the
-        fractions mean something anatomical.
+        The first rebuild fixed the reference height and still drew a horse
+        <strong>dipped</strong> in white to a frayed waterline &mdash; belly-deep or
+        deeper, with the coloured coat reduced to scraps. Three independent mistakes
+        made it, and each was individually plausible:
+    </p>
+    <ul>
+        <li><strong>The threshold was never calibrated against the field it
+            thresholded.</strong> <code>PatchNoise.field</code> averages three octaves, so
+            it concentrates near <code>0.5</code> and rarely leaves
+            <code>[0.25,&nbsp;0.70]</code>. Cutting it at <code>1&nbsp;-&nbsp;cover</code>
+            over a range that ran up to <code>0.86</code> and down to <code>0.24</code>
+            put most rolls <em>outside the field's spread entirely</em>: a frame horse
+            came out blank or flooded, with nothing in between.</li>
+        <li><strong>The band was open downward.</strong> A floor below the underline and
+            no penalty above it is a bottom-anchored gate &mdash; every texel from the
+            belly up was equally eligible, so the flood pooled at the bottom and frayed
+            along its top edge. That is the dipped horse, and no amount of retuning the
+            noise would have fixed it, because the band and not the noise was drawing
+            the shape.</li>
+        <li><strong>The jag ran finer than one texel.</strong> A barrel texel is half a
+            model unit; the jag's frequency was <code>3.4</code> <em>per unit</em>, a
+            period of a third of a texel. It was not an edge treatment at all but
+            per-pixel white noise, and it is what dissolved the colour into scraps.</li>
+    </ul>
+    <p>
+        The first two were one knob wearing two hats, which is why neither could be set
+        correctly. They are separated now: <a href="#quantile">a quantile threshold</a>
+        decides <em>how much</em> white there is and the band decides <em>where it
+        pools</em>.
     </p>
 </div>
 
@@ -136,16 +156,16 @@
 <thead><tr><th>The pattern</th><th>How it is drawn</th></tr></thead>
 <tbody>
 <tr>
-    <td><strong>Horizontal spread.</strong> White runs along the sides &mdash; barrel, flank, shoulder, lower neck &mdash; rather than vertically from the feet or over the back.</td>
-    <td>The patch field is sampled with <code>x</code> squashed and <code>y</code> stretched (<code>X_SQUASH</code> / <code>Y_STRETCH</code>), so one patch is about five times longer along the horse than it is tall. Sampled isotropically it read as a paint splat, which is every white gene.</td>
+    <td><strong>Big splotches in the middle of the side</strong>, with coloured coat left <em>above and below</em> them. That framing is the pattern and the name.</td>
+    <td>The band is a soft <strong>centre</strong>, not a floor: the bar rises quadratically with distance from a per-horse <code>BAND_CENTER</code>, by <code>EDGE_BIAS</code> at the band edge. So the strongest peaks of the field push a patch down over the belly or up toward the hip while everything else stays gathered around the middle of the barrel. <code>BAND_UP</code> is smaller than <code>BAND_DOWN</code> &mdash; frame white reaches the belly far more readily than it climbs.</td>
 </tr>
 <tr>
     <td><strong>A dark back.</strong> Viewed from the side the white does not cross the dorsal midline.</td>
-    <td>A per-horse ceiling, a fraction of the topline, that never reaches 1.0 &mdash; <code>CEILING_MIN</code> (the low barrel only) to <code>CEILING_MIN + CEILING_RANGE</code> (up through the flank toward the hip). The withers, spine and croup are dark either way.</td>
+    <td><code>TOPLINE_CAP</code>, a fraction of the barrel's own height, is a <strong>hard exclusion</strong> and not a ramp. It is the definition of the pattern rather than a tuning choice, so it is enforced and not merely discouraged; the withers, spine and croup are dark at every seed.</td>
 </tr>
 <tr>
-    <td><strong>A white belly.</strong> The lower barrel goes substantially white and pushes upward into the sides in separate tongues.</td>
-    <td><code>BODY_FLOOR</code> sits <em>below</em> the underline, so the belly is fully in band. The previous version started above it &mdash; drawing the one part of a frame horse that is reliably dark and skipping the part that is reliably white.</td>
+    <td><strong>The patches are wider than they are tall</strong>, but they are patches &mdash; not a stripe running the length of the horse.</td>
+    <td><code>PATCHES_ALONG</code> and <code>PATCHES_TALL</code>, counts of patch periods across the <strong>barrel's own</strong> bounding box rather than absolute model units &mdash; so a foal is marked at the same relative scale as the adult it grows into. Sampled five times longer than tall, which is what the previous version did, the field produced horizontal <em>streaks</em>: the anisotropy was doing the vertical band's job, and doing it by smearing every patch into a waterline.</td>
 </tr>
 <tr>
     <td><strong>Lower and middle neck white; the upper crest dark.</strong> Sometimes the neck white joins the face to the body.</td>
@@ -157,7 +177,7 @@
 </tr>
 <tr>
     <td><strong>Irregular, sharp-edged patches</strong> &mdash; jagged, angular, zig-zagged, not the smooth rounded fields of tobiano.</td>
-    <td>A hard threshold (so the edge is crisp, never feathered) wobbled at a fine scale by <code>JAG</code> / <code>JAG_FREQ</code>.</td>
+    <td>A hard threshold (so the edge is crisp, never feathered) wobbled by <code>JAG</code> at <code>JAG_PERIODS</code> across the barrel &mdash; a wobble about five texels wide, sized to displace an edge by two or three texels rather than to overwhelm the patch field it is meant to be perturbing.</td>
 </tr>
 <tr>
     <td><strong>Asymmetry.</strong> One side can carry a bold hip patch while the other is largely dark.</td>
@@ -169,11 +189,29 @@
 </tr>
 <tr>
     <td><strong>Cryptic expression.</strong> A carrier may show little more than facial white and a blue eye, which is why the locus is DNA-tested and not eyeballed.</td>
-    <td>The cover roll reaches low enough that nothing clears the threshold, skewed toward the bold end by <code>COVER_GAMMA</code> so about one frame horse in five is near-invisible and the rest look like the pattern. The blue eye is claimed by the allele, not by the coverage, so a cryptic frame still has one.</td>
+    <td>The cover roll reaches nearly to zero, skewed toward the bold end by <code>COVER_GAMMA</code> so the near-invisible horses are a clear minority and the rest look like the pattern. The blue eye is claimed by the allele, not by the coverage, so a cryptic frame still has one.</td>
 </tr>
 </tbody>
 </table>
 </div>
+
+<h3 id="quantile">The threshold is a quantile, not a constant</h3>
+<p>
+    <code>paintFrame</code> runs <strong>two passes</strong>. The first scores every
+    texel frame is allowed to mark; the second whitens the top <code>cover</code>
+    fraction of them. Scoring twice costs two noise evaluations per texel and buys the
+    one thing a single pass cannot: a threshold that is a quantile of
+    <em>this horse's own field</em> rather than a constant hoped to sit somewhere inside
+    it. <code>cover</code> then means what its name says at every value, instead of
+    saturating to blank or flooded at both ends of its range.
+</p>
+<p>
+    It also separates two things that used to be one knob. <code>cover</code> decides
+    <strong>how much</strong> white there is; the band, <code>EDGE_BIAS</code> and
+    <code>SIDE_LEAN</code> decide <strong>where it pools</strong> &mdash; and because a
+    bias that only re-ranks texels cannot change how many of them clear a quantile, the
+    two can now be tuned without fighting each other.
+</p>
 
 <h3 id="topline">Measured against the topline, not the horse</h3>
 <p>
@@ -191,18 +229,21 @@
     <code>lethal-white</code> is a different painter: both pigments to zero everywhere,
     and it <code>masks</code>, so it takes exactly one catalogue entry however much else the
     horse carries. <code>O/O</code> is 100% white by construction; a single copy runs from
-    a few per cent to a bit over a quarter of the horse, which sounds low for a bold paint
+    almost nothing to a bit over a quarter of the barrel and neck, which sounds low for a bold paint
     horse and is not &mdash; four dark legs, a dark back, a dark mane and a dark tail are
     most of a horse's surface, and leaving them coloured is the pattern.
 </p>
 
 <p>
     The measurements above are pinned in <code>WhitePatternGenesTest</code>, which asserts
-    the spine is white-free at every seed, that the belly is whiter than the flank (frame
-    climbs <em>from</em> the belly), that the legs and crest stay dark, that the patches
-    are measurably wider than they are tall, and that the range reaches both cryptic and
-    textbook. None of it has been looked at in game &mdash;
-    <a href="verification.html">To be verified</a>.
+    that the spine is white-free at every seed, that the legs and crest stay dark, that the
+    middle of the side is decisively whiter than both the belly below it and the barrel
+    above it (<code>frameWhiteIsFramedAboveAndBelow</code> &mdash; the test that was
+    missing, and whose absence is why a dipped horse could ship), that the patches are
+    measurably wider than they are tall, and that the range reaches both cryptic and
+    textbook. The two claims are deliberately separate: a horse dipped to a waterline is
+    also elongated, so it passes the anisotropy test and fails the framing one. None of it
+    has been looked at in game &mdash; <a href="verification.html">To be verified</a>.
 </p>
 
 <h2>The death &mdash; built 2026-09-04</h2>
