@@ -147,17 +147,7 @@ public final class CoatTextureComposer {
         GradientLut lut = luts.resolve(selectAlternateLut(genotype));
 
         // 1. natural phase - each gene's expression folds the pigment field further down.
-        PigmentField pigment = new PigmentField(n);
-        for (Gene gene : Genes.naturalOrder()) {
-            Expression expression = gene.expressionIn(genotype.pair(gene), genotype);
-            if (expression.wildType()) {
-                continue;
-            }
-            PigmentField next = expression.restrict(ctx, pigment);
-            if (next != null) {
-                pigment = next;
-            }
-        }
+        PigmentField pigment = naturalPhase(genotype, ctx, n);
 
         // 2. resolve - pigment through the gradient, into the colour field.
         // Texels this skin doesn't map are left at zero = fully transparent.
@@ -234,6 +224,43 @@ public final class CoatTextureComposer {
      * {@link LutContribution} with a non-wild, non-empty answer wins - there is
      * only one such gene, so "first" is just defensiveness.
      */
+    /**
+     * Phase 1 on its own: the pigment field every texel carries <b>before</b> the
+     * gradient lookup, with no colour resolved and no magical phase run.
+     *
+     * <p>This is what a tool needs to answer &ldquo;which part of the chart does
+     * this coat actually read from?&rdquo; - the pair at each texel is exactly
+     * what {@link GradientLut#sample} is handed, so
+     * {@link GradientLut#chartX}/{@link GradientLut#chartY} turn it into a
+     * position on the artwork. Deriving it from a <em>baked</em> sheet instead
+     * cannot work: by then the colour has been multiplied by the hair template
+     * and moved again by any phase-3 tint.
+     *
+     * <p>It runs the same loop {@link #bake} does, because it <em>is</em> that
+     * loop - a second copy would drift the first time a gene changed how it
+     * restricts.
+     */
+    public static PigmentField pigmentField(Genotype genotype, Epigenome epigenome,
+                                            Skin skin, boolean adult) {
+        int n = HorseSkinGeometry.SHEET_SIZE;
+        return naturalPhase(genotype, new CoatBuildContext(genotype, epigenome, skin, adult), n);
+    }
+
+    private static PigmentField naturalPhase(Genotype genotype, CoatBuildContext ctx, int n) {
+        PigmentField pigment = new PigmentField(n);
+        for (Gene gene : Genes.naturalOrder()) {
+            Expression expression = gene.expressionIn(genotype.pair(gene), genotype);
+            if (expression.wildType()) {
+                continue;
+            }
+            PigmentField next = expression.restrict(ctx, pigment);
+            if (next != null) {
+                pigment = next;
+            }
+        }
+        return pigment;
+    }
+
     private static String selectAlternateLut(Genotype genotype) {
         for (Gene gene : Genes.codeOrder()) {
             if (!(gene instanceof LutContribution lut)) {

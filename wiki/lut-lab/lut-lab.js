@@ -208,6 +208,9 @@ window.HG = window.HG || {};
       + '<span class="ll-axis ll-axis-y">&larr; more black pigment</span>'
       + '</div>'
       + '<div class="ll-readout"><span class="ll-swatch"></span><code class="ll-hex">hover the chart</code></div>'
+      + '<label class="ll-toggle"><input type="checkbox" checked>'
+      + '<span>Show what this coat reads</span></label>'
+      + '<div class="ll-footprint"></div>'
       + '<div class="ll-luts" role="group" aria-label="Gradient"></div>'
       + '<label class="ll-upload">'
       + '<input type="file" accept="image/*" multiple>'
@@ -269,6 +272,9 @@ window.HG = window.HG || {};
     var swatch = host.querySelector(".ll-swatch");
     var hex = host.querySelector(".ll-hex");
     var chartSource = null;   // an offscreen canvas at the LUT's native size
+    var footprint = null;     // the current horse's reading of the chart
+    var showFootprint = true;
+    var fpEl = host.querySelector(".ll-footprint");
 
     function drawChart(lut) {
       var off = document.createElement("canvas");
@@ -285,12 +291,80 @@ window.HG = window.HG || {};
       off.getContext("2d").putImageData(img, 0, 0);
       chartSource = off;
 
+      paintChart();
+    }
+
+    /** The gradient art alone, with the footprint overlay on top of it if it is on. */
+    function paintChart() {
+      if (!chartSource) return;
       var g = chart.getContext("2d");
       g.clearRect(0, 0, chart.width, chart.height);
       // Smoothed, because GradientLut samples it bilinearly - a nearest-neighbour
       // blow-up would show banding the pipeline never sees.
       g.imageSmoothingEnabled = true;
-      g.drawImage(off, 0, 0, chart.width, chart.height);
+      g.drawImage(chartSource, 0, 0, chart.width, chart.height);
+      if (showFootprint && footprint) drawFootprint(g, footprint);
+    }
+
+    /**
+     * Draw where this coat actually reads from - the whole reason the chart is
+     * on the page rather than just the horse.
+     *
+     * <p>Everything drawn here comes from lutFootprintJson, which ran phase 1
+     * and reported positions in chart coordinates. Nothing about the axis
+     * convention is restated here; if it were, this overlay could disagree with
+     * the pipeline it is drawing, which is the one thing it must never do.
+     */
+    function drawFootprint(g, fp) {
+      var W = chart.width, H = chart.height;
+      if (fp.empty) return;
+
+      // Dim the whole chart, then erase the dimming back off wherever the coat
+      // samples - so the art shows through at full strength exactly where it is
+      // used, and the density of use reads as brightness.
+      g.save();
+      g.fillStyle = "rgba(8, 12, 24, 0.78)";
+      g.fillRect(0, 0, W, H);
+      g.globalCompositeOperation = "destination-out";
+      var cw = W / fp.bins, ch = H / fp.bins;
+      fp.cells.forEach(function (c) {
+        var t = fp.peak > 1 ? Math.pow(c.n / fp.peak, 0.45) : 1;
+        g.fillStyle = "rgba(0,0,0," + (0.30 + 0.70 * t) + ")";
+        // +1 so neighbouring cells meet instead of leaving a grid of seams.
+        g.fillRect(c.x * cw, c.y * ch, cw + 1, ch + 1);
+      });
+      g.restore();
+
+      var x0 = fp.minX * W, x1 = fp.maxX * W;
+      var y0 = fp.minY * H, y1 = fp.maxY * H;
+
+      // The bounding box - "the range it uses", as one rectangle.
+      g.save();
+      g.strokeStyle = "rgba(125, 211, 252, 0.95)";
+      g.lineWidth = 1;
+      g.setLineDash([4, 3]);
+      g.strokeRect(x0 + 0.5, y0 + 0.5, Math.max(1, x1 - x0), Math.max(1, y1 - y0));
+      g.setLineDash([]);
+
+      // Solid bars along the bottom and right edges, so each axis range can be
+      // read on its own - the X level and the Y level, not just the box.
+      g.strokeStyle = "rgba(125, 211, 252, 0.95)";
+      g.lineWidth = 3;
+      g.beginPath();
+      g.moveTo(x0, H - 1.5); g.lineTo(x1, H - 1.5);
+      g.moveTo(W - 1.5, y0); g.lineTo(W - 1.5, y1);
+      g.stroke();
+
+      // The texel-weighted centroid: where the coat sits on average.
+      var cx = fp.cx * W, cy = fp.cy * H;
+      g.strokeStyle = "rgba(255, 255, 255, 0.95)";
+      g.lineWidth = 1.5;
+      g.beginPath();
+      g.arc(cx, cy, 4.5, 0, Math.PI * 2);
+      g.moveTo(cx - 8, cy); g.lineTo(cx + 8, cy);
+      g.moveTo(cx, cy - 8); g.lineTo(cx, cy + 8);
+      g.stroke();
+      g.restore();
     }
 
     chart.addEventListener("mousemove", function (e) {
@@ -426,6 +500,34 @@ window.HG = window.HG || {};
       render();
     });
 
+    host.querySelector(".ll-toggle input").addEventListener("change", function (e) {
+      showFootprint = e.target.checked;
+      paintChart();
+    });
+
+    /** The footprint in words and numbers, under the chart. */
+    function describeFootprint(fp) {
+      if (!fp || fp.empty || !fp.texels) {
+        fpEl.innerHTML = '<span class="ll-fp-none">No pigment anywhere on this horse'
+          + ' &mdash; nothing reads the chart.</span>';
+        return;
+      }
+      function pct(v) { return Math.round(v * 100) + "%"; }
+      fpEl.innerHTML = ''
+        + '<div class="ll-fp-row"><span>red pigment</span><code>'
+        + pct(fp.redMin) + ' &ndash; ' + pct(fp.redMax) + '</code></div>'
+        + '<div class="ll-fp-row"><span>black pigment</span><code>'
+        + pct(fp.blackMin) + ' &ndash; ' + pct(fp.blackMax) + '</code></div>'
+        + '<div class="ll-fp-row"><span>chart X</span><code>'
+        + pct(fp.minX) + ' &ndash; ' + pct(fp.maxX) + '</code></div>'
+        + '<div class="ll-fp-row"><span>chart Y</span><code>'
+        + pct(fp.minY) + ' &ndash; ' + pct(fp.maxY) + '</code></div>'
+        + '<div class="ll-fp-row ll-fp-mid"><span>centre of mass</span><code>'
+        + pct(fp.cx) + ', ' + pct(fp.cy) + '</code></div>'
+        + '<div class="ll-fp-row"><span>pigmented texels</span><code>'
+        + fp.texels + '</code></div>';
+    }
+
     var codeEl = host.querySelector(".ll-code");
 
     function render() {
@@ -448,6 +550,13 @@ window.HG = window.HG || {};
       }
 
       view.setImage(toImageData(api.coatOf(code, state.epigenome, true)));
+
+      // Where this exact horse reads the chart. 48 bins is finer than the eye
+      // resolves at the size the canvas is drawn, and far cheaper than one cell
+      // per texel.
+      footprint = JSON.parse(api.lutFootprintJson(code, state.epigenome, true, 48));
+      paintChart();
+      describeFootprint(footprint);
 
       var baseIndex = indexOfBase(bases, state.base);
       codeEl.textContent = [luts[state.lut].name + " LUT", bases[baseIndex].name]

@@ -49,6 +49,45 @@
     palomino, champagne and dun in the world lives.
 </p>
 
+<h2 id="overlay">The overlay &mdash; what this coat actually reads</h2>
+<p>
+    The chart is dimmed everywhere the current horse does <em>not</em> sample, so the
+    artwork shows through at full strength exactly where it does, and the brightness of
+    a region is how many texels land there. On top of that sit a dashed
+    <strong>bounding box</strong> (the range), a solid bar along the <strong>bottom and
+    right edges</strong> so each axis can be read on its own, and a white
+    <strong>crosshair at the centre of mass</strong> &mdash; where the coat sits on
+    average. The numbers underneath say the same thing twice: once in pigment levels,
+    which is what a gene tunes, and once as chart X/Y, which is where to click in an
+    image editor. Untick <em>Show what this coat reads</em> to see the bare gradient.
+</p>
+<p>
+    This is the part that makes the page useful for tuning something other than a
+    palette. Switch between <code>Ch/Ch</code> and <code>Cr/Cr</code> on a chestnut and
+    the crosshair walks right across the chart &mdash; champagne to 45%, cremello to
+    92% &mdash; because that is the whole of what a dilution is: the same lookup, read
+    somewhere else. A gene whose footprint is a single cell is painting one flat colour;
+    one that spreads over dozens is painting a range, and dun's twenty-nine cells are its
+    dorsal stripe and leg bars sitting at different depths. If a gene lands somewhere the
+    gradient has nothing interesting, that shows up here before it shows up on a horse.
+</p>
+
+<div class="note">
+    <span class="label">It is phase 1, not the finished pixels</span>
+    <p>
+        The overlay is computed from <code>CoatTextureComposer.pigmentField</code> &mdash;
+        the same phase-1 loop <code>bake</code> runs &mdash; so it cannot disagree with the
+        horse beside it. It deliberately is <em>not</em> derived from the baked sheet,
+        which could not work: by then the colour has been multiplied by the hair template
+        and moved again by any phase-3 tint. Two consequences worth knowing. Texels with
+        no pigment at all are excluded, exactly as phase 2 excludes them, so a
+        <strong>tobiano reads the chart at fewer texels than a solid horse</strong> (4&nbsp;160
+        against 11&nbsp;904 on a black) &mdash; white is off the chart, not a colour on it.
+        And a magical gene that paints in phase 3, or an eye colour, will not appear here
+        at all, because neither one reads the gradient.
+    </p>
+</div>
+
 <h2 id="rows">The rows</h2>
 <p>
     <strong>Base coat</strong> is the three coats every other gene starts from &mdash;

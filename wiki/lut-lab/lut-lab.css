@@ -118,6 +118,47 @@
     padding: 0;
 }
 
+/* ---- the footprint overlay ------------------------------------------- */
+
+.lut-lab .ll-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.72rem;
+    color: var(--text-dim);
+    cursor: pointer;
+    margin-bottom: 0.5rem;
+}
+.lut-lab .ll-toggle input { margin: 0; cursor: pointer; }
+
+/* The numbers under the chart. A gene author reads these while tuning, so they
+   are a label/value table rather than a sentence - scannable, and the values
+   line up down the right edge when you flick between combinations. */
+.lut-lab .ll-footprint {
+    font-size: 0.7rem;
+    color: var(--text-faint);
+    border-top: 1px solid var(--border-soft);
+    padding-top: 0.45rem;
+}
+.lut-lab .ll-fp-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.1rem 0;
+}
+.lut-lab .ll-fp-row code {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    background: none;
+    border: none;
+    padding: 0;
+    white-space: nowrap;
+}
+/* The centroid is the one line that matches a mark drawn on the chart. */
+.lut-lab .ll-fp-mid code { color: var(--text); }
+.lut-lab .ll-fp-none { color: var(--warn); }
+
 .lut-lab .ll-luts {
     display: flex;
     flex-wrap: wrap;

@@ -5,6 +5,7 @@ import com.example.horsegenetics.common.breed.Breed;
 import com.example.horsegenetics.common.coat.pattern.CoatTextureComposer;
 import com.example.horsegenetics.common.coat.pattern.GradientLut;
 import com.example.horsegenetics.common.coat.pattern.LutSet;
+import com.example.horsegenetics.common.coat.pattern.PigmentField;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Skin;
 import com.example.horsegenetics.common.genetics.AbilityContribution;
@@ -58,6 +59,14 @@ public final class DesignerApi {
 
     private static HorseEditor editor;
     private static final JavaRng RNG = new JavaRng();
+
+    /**
+     * The pigment level below which phase 2 leaves a texel transparent instead of
+     * sampling. Mirrors {@code CoatTextureComposer.TRANSPARENT_EPS}, which is
+     * private; the footprint has to apply the same test or it would report the
+     * whole sheet as coverage on a horse that is mostly unpigmented.
+     */
+    private static final float PIGMENT_EPS = 0.001f;
 
     private static GradientLut baseLut;
     private static final Map<String, GradientLut> altLuts = new LinkedHashMap<>();
@@ -665,6 +674,105 @@ public final class DesignerApi {
                     new LutSet(baseLut, altLuts));
         } catch (RuntimeException bad) {
             return new int[blank];
+        }
+    }
+
+    /**
+     * <b>Where on the chart this coat reads from.</b> Runs phase 1 for the given
+     * horse and reports, in normalised chart coordinates, every position the
+     * gradient lookup is about to sample - as a coarse occupancy histogram plus
+     * the exact bounds and the texel-weighted centroid.
+     *
+     * <p>This is the LUT lab's overlay, and it is the reason the lab can claim to
+     * show what a dilution <em>does</em> rather than only what it looks like: a
+     * cream is a horse whose pigment pair moved, and the pair is the thing to
+     * draw. It is computed from {@link CoatTextureComposer#pigmentField}, the
+     * same phase-1 loop {@code bake} runs, so it cannot disagree with the horse
+     * beside it.
+     *
+     * <p>Coordinates are {@link GradientLut#chartX}/{@link GradientLut#chartY} -
+     * 0,0 is the top-left of the artwork - so a caller draws them directly and
+     * never restates the axis convention. Only texels this skin actually maps and
+     * that carry some pigment are counted, which is the same test phase 2 applies
+     * before it samples; a fully white horse therefore reports no coverage at all
+     * rather than a phantom point in the corner.
+     *
+     * @param bins histogram resolution per axis, clamped to [8, 128]
+     */
+    @JSExport
+    public static String lutFootprintJson(String genotypeCode, String epigenomeCode,
+                                          boolean adult, int bins) {
+        int b = bins < 8 ? 8 : (bins > 128 ? 128 : bins);
+        Json j = new Json().obj();
+        try {
+            Genotype gt = Genotype.parse(genotypeCode);
+            Epigenome epi = Epigenome.parse(epigenomeCode);
+            Skin skin = adult ? Skin.ADULT : Skin.BABY;
+            PigmentField pigment = CoatTextureComposer.pigmentField(gt, epi, skin, adult);
+
+            int[] counts = new int[b * b];
+            // Arrays rather than locals because forEachTexel takes a lambda and a
+            // captured local must be effectively final. acc is double: a 128x128
+            // sheet is 16k texels and the centroid is the one number here a
+            // reader will read to three places.
+            double[] acc = new double[2];
+            float[] bnd = { 1f, 0f, 1f, 0f };   // minX, maxX, minY, maxY (chart space)
+            float[] lvl = { 1f, 0f, 1f, 0f };   // minRed, maxRed, minBlack, maxBlack
+            int[] total = new int[1];
+
+            HorseSkinGeometry.forEachTexel(skin, (px, py, part, face, point) -> {
+                float r = pigment.red(px, py);
+                float bl = pigment.black(px, py);
+                if (r <= PIGMENT_EPS && bl <= PIGMENT_EPS) {
+                    return;   // phase 2 leaves these transparent and never samples
+                }
+                float x = GradientLut.chartX(r);
+                float y = GradientLut.chartY(bl);
+                int bx = (int) (x * (b - 1) + 0.5f);
+                int by = (int) (y * (b - 1) + 0.5f);
+                counts[by * b + bx]++;
+                total[0]++;
+                acc[0] += x;
+                acc[1] += y;
+                if (x < bnd[0]) bnd[0] = x;
+                if (x > bnd[1]) bnd[1] = x;
+                if (y < bnd[2]) bnd[2] = y;
+                if (y > bnd[3]) bnd[3] = y;
+                // The same span said in pigment levels, which is what a gene
+                // author tunes. Emitted from here so no caller has to invert
+                // chartX/chartY and get the direction wrong.
+                if (r < lvl[0]) lvl[0] = r;
+                if (r > lvl[1]) lvl[1] = r;
+                if (bl < lvl[2]) lvl[2] = bl;
+                if (bl > lvl[3]) lvl[3] = bl;
+            });
+
+            j.kv("texels", total[0]).kv("bins", b);
+            if (total[0] == 0) {
+                // Every texel unpigmented - a fully white horse. Say so rather
+                // than reporting a bounding box round nothing.
+                return j.kv("empty", true).key("cells").arr().endArr().endObj().toString();
+            }
+            j.kv("empty", false)
+                    .kv("minX", bnd[0]).kv("maxX", bnd[1])
+                    .kv("minY", bnd[2]).kv("maxY", bnd[3])
+                    .kv("cx", acc[0] / total[0]).kv("cy", acc[1] / total[0])
+                    .kv("redMin", lvl[0]).kv("redMax", lvl[1])
+                    .kv("blackMin", lvl[2]).kv("blackMax", lvl[3]);
+
+            int peak = 0;
+            for (int i = 0; i < counts.length; i++) {
+                if (counts[i] > peak) peak = counts[i];
+            }
+            j.kv("peak", peak).key("cells").arr();
+            for (int i = 0; i < counts.length; i++) {
+                if (counts[i] == 0) continue;
+                j.obj().kv("x", i % b).kv("y", i / b).kv("n", counts[i]).endObj();
+            }
+            return j.endArr().endObj().toString();
+        } catch (RuntimeException bad) {
+            return new Json().obj().kv("texels", 0).kv("empty", true)
+                    .key("cells").arr().endArr().endObj().toString();
         }
     }
 

@@ -40,12 +40,29 @@ public final class GradientLut {
         return height;
     }
 
+    /**
+     * Where a pigment pair lands on the chart, normalised so 0 is the left edge
+     * and 1 the right - {@code redLevel} 1 sits at 0 (the reddest column).
+     *
+     * <p>This exists so the axis convention is written down <b>once</b>. It is
+     * what {@link #sample} scales up, and it is what a tool that wants to draw
+     * the region of the chart a coat actually reads from asks for; a caller
+     * working it out again is how a viewer ends up mirroring the gradient it is
+     * meant to be explaining.
+     */
+    public static float chartX(float redLevel) {
+        return 1.0f - clamp01(redLevel);
+    }
+
+    /** Where a pigment pair lands vertically: 0 is the top, 1 the bottom (max black). */
+    public static float chartY(float blackLevel) {
+        return clamp01(blackLevel);
+    }
+
     /** Bilinearly sampled coat colour (0xFFRRGGBB) for a pigment level pair, each clamped to [0,1]. */
     public int sample(float redLevel, float blackLevel) {
-        float r = clamp01(redLevel);
-        float b = clamp01(blackLevel);
-        float fx = (1.0f - r) * (width - 1);   // red max -> x = 0 (left)
-        float fy = b * (height - 1);           // black max -> y = height-1 (bottom)
+        float fx = chartX(redLevel) * (width - 1);   // red max -> x = 0 (left)
+        float fy = chartY(blackLevel) * (height - 1); // black max -> y = height-1 (bottom)
 
         int x0 = (int) Math.floor(fx);
         int y0 = (int) Math.floor(fy);
