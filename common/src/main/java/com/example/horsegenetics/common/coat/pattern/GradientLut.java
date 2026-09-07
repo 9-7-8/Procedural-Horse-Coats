@@ -11,8 +11,13 @@ package com.example.horsegenetics.common.coat.pattern;
  *       <b>down</b>.</li>
  * </ul>
  * So {@code (1, 1)} is the bottom-left (black), {@code (1, 0)} the top-left
- * (chestnut red), {@code (0, 0)} the top-right (white). The gradient art also
- * carries a champagne-gold column near the horizontal middle.
+ * (chestnut red), {@code (0, 0)} the top-right (white).
+ *
+ * <p>Nothing here knows anything else about the artwork, and nothing should.
+ * The chart shipped as the default has been replaced more than once and its
+ * internal structure changed each time - a description of where its warm zone
+ * sits is a comment that goes stale silently. Measure it with the
+ * <a href="../../../../../../../wiki/lut-lab.html">LUT lab</a> instead.
  *
  * <p>Pure array maths - the {@code int[]} is loaded by the game module (or a
  * build tool) and handed in.
