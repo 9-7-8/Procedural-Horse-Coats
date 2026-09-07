@@ -1429,12 +1429,23 @@
     <li><strong>The village horse trader is two people, not one.</strong> &sect;19
         described one villager profession that would sell items. It shipped as a
         <strong>horseman</strong> (that profession, exactly) and a <strong>cowboy</strong>
-        who is not a profession at all, because everything that makes the cowboy himself
-        &mdash; always mounted, home is a barn rather than a bed, stock is a live herd
-        rather than a trade table &mdash; is a fight with vanilla's villager brain, which
-        would dismount him every morning to stand at a workstation. Splitting them lets
-        each use the machinery it actually wants. See
+        who is not a profession at all: his stock is a live herd rather than a trade
+        table, and a shopkeeper's daily schedule is the wrong machinery for a man who
+        keeps animals. Splitting them lets each use the machinery it actually wants. The
+        original case rested partly on his being permanently mounted, which was
+        <a href="known-gaps.html#gap-55">abandoned</a> a day later &mdash; the split
+        outlived the argument that produced it. See
         <a href="villagers.html#not-a-profession">Villagers</a>.</li>
+
+    <li><strong>The cowboy's house is part of the barn's structure piece, not built at
+        runtime.</strong> The runtime version looked cheaper and never worked, and
+        loosening its flatness test would not have saved it: the work posts stand on the
+        house, the work posts are what make a cowboy, and a cowboy cannot build the thing
+        that made him. Anything that wants to be near the barn and to exist <em>before</em>
+        the cowboy does belongs in the same baked piece for the same reason. The cost is a
+        deeper footprint and a piece that generates less often, paid for in pool weight.
+        See <a href="villagers.html#horseman-nights">Villagers</a> and
+        <a href="known-gaps.html#gap-61">gap 61</a>.</li>
 
     <li><strong>A horse is sold as a paper, not handed over.</strong> The alternative was
         &ldquo;pay the trader, receive a horse&rdquo;, which is one click and leaves
