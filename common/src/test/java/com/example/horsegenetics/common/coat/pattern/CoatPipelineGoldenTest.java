@@ -62,6 +62,14 @@ class CoatPipelineGoldenTest {
             override("kit=W22/N", "dhampir=Dhmp/n"),      // red must beat the depigmented blue
             override("kit=W4/N"),                        // Camarillo white, one copy
             override("agouti=A/a", "kit=W4/W4"),         // ...and the viable homozygote
+            // the boosters: mild, viable, additive, and most of what KIT does
+            override("agouti=A/a", "kit=W35/N"),
+            override("agouti=A/a", "kit=W35/W35"),
+            override("agouti=A/a", "kit=W32/W34"),       // two different boosters
+            override("agouti=A/a", "kit=SB1/W35"),       // ...and one beside sabino
+            override("agouti=A/a", "kit=W15/N"),         // the viable strong homozygote's...
+            override("agouti=A/a", "kit=W15/W15"),       // ...one and two copies
+            override("agouti=A/a", "kit=W23/N"),
             // flaxen: a chestnut long-hair dosage, silent on anything else
             override("extension=e/e", "flaxen=Fl1/f"),
             override("extension=e/e", "flaxen=Fl1/Fl1"),

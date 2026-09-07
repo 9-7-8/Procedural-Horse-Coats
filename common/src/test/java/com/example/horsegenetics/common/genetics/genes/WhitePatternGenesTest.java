@@ -109,8 +109,9 @@ class WhitePatternGenesTest {
     void kitDropsOnlyItsNonviableHomozygotesAndGivesEachOutcomeOnePen() {
         int n = Genes.KIT.alleles().size();
         int everyCombination = n * (n + 1) / 2;
-        assertEquals(everyCombination - 4, GenotypeCatalog.allPairsOf(Genes.KIT).size(),
-                "only the four homozygotes thought nonviable should be dropped");
+        assertEquals(everyCombination - Genes.KIT.nonviableHomozygotes(),
+                GenotypeCatalog.allPairsOf(Genes.KIT).size(),
+                "only the homozygotes thought nonviable should be dropped");
         assertEquals(Genes.KIT.expressions().size(), GenotypeCatalog.distinctPairsOf(Genes.KIT).size(),
                 "one gallery pen per declared outcome");
     }
@@ -129,10 +130,12 @@ class WhitePatternGenesTest {
     @Test
     void onlyTheSameStrongKitAlleleTwiceIsRuledOut() {
         KitGene kit = Genes.KIT;
-        for (Allele lethal : List.of(kit.W22, kit.W13, kit.W10, kit.W5)) {
+        for (Allele lethal : List.of(kit.W22, kit.W13, kit.W23, kit.W10, kit.W5)) {
             assertFalse(kit.canOccur(new AllelePair(lethal, lethal)), lethal.token() + "/" + lethal.token());
         }
-        for (Allele viable : List.of(kit.W23, kit.SB1, kit.W20, kit.N)) {
+        // W15 is the one strong allele with a homozygote actually on record,
+        // and the boosters double up freely - that is the point of them.
+        for (Allele viable : List.of(kit.W15, kit.SB1, kit.W20, kit.W35, kit.W32, kit.W34, kit.N)) {
             assertTrue(kit.canOccur(new AllelePair(viable, viable)), viable.token() + "/" + viable.token());
         }
         assertTrue(kit.canOccur(new AllelePair(kit.W22, kit.W5)));

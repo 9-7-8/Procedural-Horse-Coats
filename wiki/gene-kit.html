@@ -16,11 +16,14 @@
 <h1>KIT (white spotting)</h1>
 <p class="lede">
     The white-patterning neighbourhood on equine chromosome 3, and the mod&rsquo;s
-    <strong>eight-allele</strong> locus. Sabino&nbsp;1 and the numbered
-    <code>W</code> series are all <code>KIT</code> variants, so they are alleles of
-    <em>one</em> gene &mdash; which means a horse can be sabino <em>or</em> dominant
-    white, and never both. It replaces the old separate <code>horsegenetics.white</code>
-    and <code>horsegenetics.sabino</code> genes.
+    <strong>widest</strong> locus. Sabino&nbsp;1 and the numbered <code>W</code> series
+    are all <code>KIT</code> variants, so they are alleles of <em>one</em> gene &mdash;
+    which means a horse can be sabino <em>or</em> dominant white, and never both. It
+    replaces the old separate <code>horsegenetics.white</code> and
+    <code>horsegenetics.sabino</code> genes. Most of what it does to a population is not
+    the dramatic part: <strong>four mild, viable, additive <em>boosters</em></strong>
+    &mdash; <code>W35</code>, <code>W32</code>, <code>W34</code>, <code>W20</code> &mdash;
+    are between them the commonest thing at this locus by a wide margin.
 </p>
 
 <!-- The gene, on the three base coats, as a horse you can spin. One div and one
@@ -33,15 +36,17 @@
     <div><dt>Priority</dt><dd>76</dd></div>
     <div><dt>Alleles</dt><dd>
         <span class="allele dom">W22</span> <span class="allele dom">W4</span>
-        <span class="allele dom">W13</span>
+        <span class="allele dom">W13</span> <span class="allele dom">W23</span>
         <span class="allele dom">W10</span> <span class="allele dom">W5</span>
-        <span class="allele dom">W23</span> <span class="allele dom">SB1</span>
-        <span class="allele dom">W20</span> <span class="allele wild">N</span>
+        <span class="allele dom">W15</span> <span class="allele dom">SB1</span>
+        <span class="allele dom">W20</span> <span class="allele dom">W35</span>
+        <span class="allele dom">W32</span> <span class="allele dom">W34</span>
+        <span class="allele wild">N</span>
     </dd></div>
-    <div><dt>Combinations</dt><dd>every pair of its alleles, minus the four nonviable homozygotes; one outcome each &mdash; <code>WhitePatternGenesTest</code> asserts the relationship rather than the counts</dd></div>
+    <div><dt>Combinations</dt><dd>every pair of its alleles, minus <code>KitGene.nonviableHomozygotes()</code>; one outcome each &mdash; <code>WhitePatternGenesTest</code> asserts the relationship rather than the counts</dd></div>
     <div><dt>Outcomes</dt><dd>wild, <code>minimal-white</code>, <code>modest-white</code>, <code>sabino</code>, <code>broad-white</code>, <code>extensive-white</code>, <code>near-white</code>, <code>dominant-white</code> (masks), <code>camarillo-white</code> (masks)</dd></div>
     <div><dt>Default allele</dt><dd>N</dd></div>
-    <div><dt>Wild frequency</dt><dd><code>W20</code> 6%, <code>SB1</code> 2.2%, <code>W23</code> 0.6%, <code>W5</code> 0.5%, <code>W10</code> 0.4%, <code>W13</code> 0.2%, <code>W22</code> 0.1%, <code>W4</code> 0.04%, rest <code>N</code></dd></div>
+    <div><dt>Wild frequency</dt><dd>the boosters first &mdash; <code>W35</code> 9%, <code>W20</code> 8.5%, <code>W32</code> 3.5%, <code>W34</code> 1% &mdash; then <code>SB1</code> 2.2%, and every strong <code>W</code> at or below 0.5%. See <code>KitGene.frequencies()</code>; Hardy-Weinberg over the lot, with the nonviable homozygotes dropped and the rest rescaled</dd></div>
     <div><dt>Founder draws</dt><dd>1 &times; nextFloat()</dd></div>
     <div><dt>Deterministic</dt><dd><strong>no</strong>, except the wild type and dominant white</dd></div>
     <div><dt>Epi draws</dt><dd>nextLong() seed, 4 &times; nextFloat() leg heights, nextFloat() belly, nextFloat() face</dd></div>
@@ -79,8 +84,9 @@
 <h2>The alleles</h2>
 
 <p>
-    Eight of the thirty-plus named ones, chosen to span the real range rather than to
-    reproduce a testing panel. <strong>The <code>W</code> number is a discovery order,
+    Twelve of the thirty-plus named ones (<code>W1</code>&ndash;<code>W35</code>, with
+    gaps &mdash; there is no <code>W29</code>), chosen to span the real range rather than
+    to reproduce a testing panel. <strong>The <code>W</code> number is a discovery order,
     not a severity ranking</strong> &mdash; <code>W20</code> is far milder than
     <code>W5</code>, and nothing about an allele can be inferred from its number.
 </p>
@@ -90,12 +96,16 @@
 <thead><tr><th>Allele</th><th>One copy</th><th>Two copies</th></tr></thead>
 <tbody>
 <tr><td><code>N</code></td><td>&mdash;</td><td>wild type</td></tr>
-<tr><td><code>W20</code></td><td>subtle: ordinary face and leg white; a <strong>booster</strong> beside another variant</td><td><strong>viable</strong>, modestly more &mdash; not twice as white</td></tr>
+<tr><td><code>W35</code></td><td><strong>booster</strong>: often nothing visible, through sabino-like</td><td><strong>viable</strong>, modestly more</td></tr>
+<tr><td><code>W32</code></td><td><strong>booster</strong>: one of the mildest variants known</td><td><strong>viable</strong>, modestly more</td></tr>
+<tr><td><code>W34</code></td><td><strong>booster</strong>: nothing visible, through sabino-like</td><td><strong>viable</strong>, modestly more</td></tr>
+<tr><td><code>W20</code></td><td><strong>booster</strong>: subtle, ordinary face and leg white</td><td><strong>viable</strong>, modestly more &mdash; not twice as white</td></tr>
 <tr><td><code>SB1</code></td><td>classic sabino&nbsp;1</td><td><strong>viable</strong>, sabino-white (90%+)</td></tr>
-<tr><td><code>W23</code></td><td>modest to broad spotting</td><td>viability unknown &mdash; <strong>allowed</strong></td></tr>
+<tr><td><code>W15</code></td><td>sabino-like through very white</td><td><strong>viable</strong> &mdash; an all-white <code>W15/W15</code> is on record</td></tr>
 <tr><td><code>W5</code></td><td>sabino-like, broad</td><td><strong>cannot occur</strong></td></tr>
 <tr><td><code>W10</code></td><td>sabino-like, broad</td><td><strong>cannot occur</strong></td></tr>
-<tr><td><code>W13</code></td><td>extensive white spotting</td><td><strong>cannot occur</strong></td></tr>
+<tr><td><code>W13</code></td><td>near-white to all white</td><td><strong>cannot occur</strong></td></tr>
+<tr><td><code>W23</code></td><td>near-white to all white</td><td><strong>cannot occur</strong></td></tr>
 <tr><td><code>W4</code></td><td>Camarillo white &mdash; all white from birth, pink skin, <strong>masks</strong></td><td>viability unknown &mdash; <strong>allowed</strong></td></tr>
 <tr><td><code>W22</code></td><td>dominant white &mdash; all white, <strong>masks</strong></td><td><strong>cannot occur</strong></td></tr>
 </tbody>
@@ -145,10 +155,68 @@
     </p>
 </div>
 
+<h2 id="boosters">The boosters are most of what this locus does</h2>
+
+<p>
+    <code>W35</code>, <code>W32</code>, <code>W34</code> and <code>W20</code> are one
+    group and behave as one. All four are mild; all four have <strong>viable
+    homozygotes</strong>; all four range from &ldquo;no visible white beyond ordinary
+    markings&rdquo; to frank sabino-like spotting; and all four add white beside any other
+    variant here.
+</p>
+
+<p>
+    <code>W20</code> is the famous one &mdash; detected in twenty-five of twenty-eight
+    surveyed breeds, and reaching an allele frequency of 0.34 in sampled Thoroughbreds,
+    0.33 in Gypsy Cobs and 0.21 in Paints. But in the one large commercial dataset that
+    measured the newer alleles, <strong><code>W35</code> was commoner still</strong> at
+    0.168, with <code>W32</code> at 0.061 behind it. That is the correction this page used
+    to need: the mod carried <code>W20</code> alone and treated the rest of the locus as a
+    museum of rare founder alleles.
+</p>
+
+<p>
+    The founder frequencies here are that <em>ordering</em> at roughly half the magnitude,
+    because a commercial colour-testing dataset is a population selected for having
+    something to find. The breeds that genuinely carry them &mdash; the stock horses for
+    <code>W35</code> and <code>W34</code>, the Thoroughbred and the Paint for
+    <code>W20</code>, the Quarter Horse, Paint, Standardbred and Welsh Pony for
+    <code>W32</code> &mdash; say so in <a href="breeds.html">their own tables</a>.
+</p>
+
+<div class="note">
+    <span class="label">Three things this page deliberately does not model</span>
+    <p>
+        <strong>Haplotype phase.</strong> Several <code>KIT</code> changes can sit on the
+        same physical chromosome &mdash; <code>W22</code> is usually reported linked with
+        <code>W20</code>, and one 2024 dataset found horses carrying six variants across
+        their two copies. A horse here has two alleles at this locus and no more, because
+        an allele pair is the model. Linkage is a system, not a number.
+    </p>
+    <p>
+        <strong><code>W34</code> &times; <code>MC1R</code>.</strong> Its effect is reported
+        as <em>possibly</em> stronger on a chestnut background. &ldquo;Possibly&rdquo; is
+        doing a lot of work there, and buying it would cost <code>W34</code> an outcome of
+        its own.
+    </p>
+    <p>
+        <strong>The other twenty-odd named alleles</strong> &mdash; <code>W1</code>&ndash;<code>W3</code>,
+        <code>W6</code>&ndash;<code>W9</code>, <code>W11</code>, <code>W12</code>,
+        <code>W14</code>, <code>W16</code>&ndash;<code>W19</code>, <code>W21</code>,
+        <code>W24</code>&ndash;<code>W28</code>, <code>W30</code>, <code>W31</code>,
+        <code>W33</code>. Almost all are one founder or one family, described in terms an
+        allele already here covers, with frequencies that round to zero. <strong>The owner
+        does want the full set eventually</strong>, redundant alleles included, so this is
+        a &ldquo;not yet&rdquo; rather than a &ldquo;no&rdquo; &mdash; see
+        <a href="roadmap.html#natural-genes">the roadmap</a>, which also notes the
+        combinatorial cost of each one.
+    </p>
+</div>
+
 <h2>The combination table</h2>
 
 <p>
-    Thirty-six combinations, eight outcomes, written as a cascade: the strongest allele
+    Every pair of alleles, nine outcomes, written as a cascade: the strongest allele
     first, then what the second copy adds. There is no dose arithmetic and deliberately
     so &mdash; this locus holds a real viable dose series (<code>SB1</code>), a booster
     that is subtle alone (<code>W20</code>), and several alleles that are
@@ -162,12 +230,12 @@
 <tbody>
 <tr><td>anything with <code>W22</code></td><td><code>dominant-white</code> <em>(masks)</em></td><td>pure white, pink skin, no other coat gene visible</td></tr>
 <tr><td>anything else with <code>W4</code></td><td><code>camarillo-white</code> <em>(masks)</em></td><td>the same white. A separate outcome because the two differ in what a breeder acts on, not in what they look like</td></tr>
-<tr><td>two of <code>W13</code>/<code>W10</code>/<code>W5</code>/<code>W23</code>; <code>W13</code>+<code>SB1</code>; <code>W10</code>/<code>W5</code>+<code>SB1</code>; <code>SB1/SB1</code></td><td><code>near-white</code></td><td>90%+ white, a few coloured flecks on ears and crest</td></tr>
-<tr><td><code>W13</code>+<code>N</code>/<code>W20</code>; <code>W10</code>/<code>W5</code>+<code>W20</code>; <code>W23</code>+<code>SB1</code></td><td><code>extensive-white</code></td><td>most of the horse white, colour holding along the topline</td></tr>
-<tr><td><code>W10</code>/<code>W5</code>/<code>W23</code>+<code>N</code>; <code>W23</code>+<code>W20</code>; <code>SB1</code>+<code>W20</code></td><td><code>broad-white</code></td><td>irregular white well up legs and flanks, wide blaze, first barrel patches</td></tr>
+<tr><td>any two <em>strong</em> alleles (<code>W13</code>, <code>W23</code>, <code>W10</code>, <code>W5</code>, <code>W15</code>); <code>W13</code>/<code>W23</code>+<code>SB1</code> or a booster; <code>W10</code>/<code>W5</code>/<code>W15</code>+<code>SB1</code>; <code>SB1/SB1</code></td><td><code>near-white</code></td><td>90%+ white, a few coloured flecks on ears and crest</td></tr>
+<tr><td><code>W13</code>/<code>W23</code>+<code>N</code>; <code>W10</code>/<code>W5</code>/<code>W15</code>+ a booster</td><td><code>extensive-white</code></td><td>most of the horse white, colour holding along the topline</td></tr>
+<tr><td><code>W10</code>/<code>W5</code>/<code>W15</code>+<code>N</code>; <code>SB1</code>+ a booster</td><td><code>broad-white</code></td><td>irregular white well up legs and flanks, wide blaze, first barrel patches</td></tr>
 <tr><td><code>SB1/N</code></td><td><code>sabino</code></td><td>tall jagged stockings, belly white, broad blaze, roaned margins</td></tr>
-<tr><td><code>W20/W20</code></td><td><code>modest-white</code></td><td>narrow blaze, socks past the fetlock, maybe a belly fleck</td></tr>
-<tr><td><code>W20/N</code></td><td><code>minimal-white</code></td><td>a star or snip and a low sock or two</td></tr>
+<tr><td><strong>two booster copies</strong> &mdash; the same one twice, or two different ones</td><td><code>modest-white</code></td><td>narrow blaze, socks past the fetlock, maybe a belly fleck</td></tr>
+<tr><td><strong>one booster copy</strong> beside <code>N</code></td><td><code>minimal-white</code></td><td>a star or snip and a low sock or two</td></tr>
 <tr><td><code>N/N</code></td><td>wild type</td><td>nothing</td></tr>
 </tbody>
 </table>
@@ -176,7 +244,7 @@
 <div class="note">
     <span class="label">Two of these are the same expression on purpose</span>
     <p>
-        <code>W5/N</code> and <code>W23/W20</code> both land on <code>broad-white</code>,
+        <code>W5/N</code> and <code>W15/N</code> both land on <code>broad-white</code>,
         and so do several others. That is not the model losing information: the source
         describes those alleles in overlapping terms and separates them mainly by how much
         white a copy tends to make. Several combinations sharing an outcome <em>is</em>
@@ -188,8 +256,10 @@
 <h2>Viability: what <code>canOccur</code> means here</h2>
 
 <p>
-    The four alleles UC Davis lists as &ldquo;homozygosity thought nonviable&rdquo; get
-    <code>canOccur</code> <strong>false</strong>. Those are <em>embryonic</em> lethals, so
+    The alleles UC Davis lists as &ldquo;homozygosity thought nonviable&rdquo; &mdash;
+    <code>W22</code>, <code>W13</code>, <code>W23</code>, <code>W10</code>,
+    <code>W5</code> &mdash; get <code>canOccur</code> <strong>false</strong>. Those are
+    <em>embryonic</em> lethals, so
     there is no such horse &mdash; no catalogue entry, nothing in
     <code>totalGenotypes()</code>, nothing in the founder table. It is the same statement
     the <a href="gene-sex.html">sex locus</a> makes about <code>Y/Y</code>, and it is a
@@ -206,9 +276,14 @@
 </p>
 
 <p>
-    <code>W23</code>&rsquo;s homozygote has no evidence either way. The model has to pick,
-    and picking &ldquo;allowed&rdquo; is the choice that does not invent a lethal the
-    source never claims; it lands on <code>near-white</code>.
+    <strong>&ldquo;No homozygote has been found&rdquo; and &ldquo;a homozygote has been
+    found&rdquo; are different claims, and the table says which is which.</strong> For
+    most of the strong alleles the first is true and the model treats it as a lethal, which
+    is what a breeder is told to do. For <code>W15</code> the <em>second</em> is true
+    &mdash; a <code>W15/W15</code> horse is on record and it is all white &mdash; so its
+    homozygote is allowed and lands on <code>near-white</code>. <code>W4</code>&rsquo;s has
+    no evidence either way, and picking &ldquo;allowed&rdquo; is the choice that does not
+    invent a lethal the source never claims.
 </p>
 
 <div class="note">

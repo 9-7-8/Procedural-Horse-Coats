@@ -32,6 +32,81 @@
     </p>
 </div>
 
+<h2 id="kit-boosters">&sect;0-AB &mdash; KIT gains the boosters (2026-09-07, NOT looked at)</h2>
+
+<p>
+    <a href="gene-kit.html#boosters"><code>KIT</code></a> went from eight alleles to
+    twelve. The four new ones are the correction the reference asks for: <code>W35</code>,
+    <code>W32</code> and <code>W34</code> join <code>W20</code> as a group of <strong>mild,
+    viable, additive boosters</strong> that between them are most of what this locus does
+    to a population &mdash; <code>W35</code> is commoner than <code>W20</code> in the one
+    large dataset that measured both. <code>W15</code> joins as the one strong allele with
+    a homozygote actually on record, and <code>W23</code> moves from &ldquo;viability
+    unknown&rdquo; to nonviable, which is what its source row says. Every breed with a
+    <code>KIT</code> table gained booster lines.
+</p>
+
+<ul>
+    <li><strong>Ordinary markings should be commoner now, and the loud ones no
+        commoner.</strong> Spawn a big mixed herd: more horses with a star and a sock,
+        about as many sabinos and near-whites as before. If dramatic white got commoner
+        too, a booster is landing in the wrong branch of the table.</li>
+    <li><strong>The ladder must still climb.</strong> <code>W35/N</code> &rarr;
+        <code>W35/W35</code> &rarr; <code>SB1/N</code> &rarr; <code>SB1/W35</code> &rarr;
+        <code>W13/N</code> &rarr; <code>SB1/SB1</code> &rarr; <code>W22/N</code>, each
+        visibly whiter than the last.</li>
+    <li><strong>Two <em>different</em> boosters must count as two.</strong>
+        <code>kit=W32/W34</code> should render the same as <code>W35/W35</code> &mdash;
+        modest white, not minimal. That is the one new rule in the table.</li>
+    <li><strong><code>W15/W15</code> is a real horse.</strong> It should render near-white,
+        and the gallery / catalogue should list it. <code>W23/W23</code> should now be
+        absent, where it used to be the allele the designer opened on.</li>
+    <li><strong>Spawn a Thoroughbred herd.</strong> It got the reference's highest
+        <code>W20</code> rate (34%) plus <code>W32</code>, <code>W35</code> and a trace of
+        <code>W5</code> and <code>W22</code> &mdash; the breed most of the rare <code>W</code>
+        series was first described in. It should be the most-marked common breed.</li>
+    <li><strong>Spawn a Quarter Horse and an American Paint herd.</strong> Both carry three
+        boosters and both splash loci now; they are where the stacking should be most
+        obvious.</li>
+</ul>
+
+<div class="note">
+    <span class="label">Questions for the owner</span>
+    <ol>
+        <li><strong>Two loci now hand out ordinary markings, and I did not reconcile
+            them.</strong> <a href="#splash"><code>SW1</code></a> at 55% and the
+            <code>KIT</code> boosters at roughly 39% carriage are both doing the
+            &ldquo;this horse has a star and a sock&rdquo; job, and they stack. Roughly
+            three horses in four should have some white. If that is too many, the
+            <code>KIT</code> boosters are the better-evidenced half and
+            <code>WILD_SW1_PERCENT</code> is the number to cut.</li>
+        <li><strong>Booster frequencies are the reference's ordering at half its
+            magnitude.</strong> Its dataset puts <code>W35</code> at 0.168,
+            <code>W32</code> at 0.061 and <code>W20</code> up to 0.34 &mdash; but it says
+            itself that the sample is horses whose owners paid for a colour test, which is
+            selected for having something to find. I used 0.09 / 0.035 / 0.085 / 0.010.
+            Say if you want the raw numbers.</li>
+        <li><strong><code>W23</code> changed meaning.</strong> It used to be the locus's
+            &ldquo;viability unknown, therefore allowed&rdquo; example, at
+            <code>broad-white</code>. Its source row actually reads all-white or
+            near-all-white with a suspected lethal homozygote, so it is now a strong allele
+            and cannot double. <code>W15</code> took over the &ldquo;allowed&rdquo; role
+            and has better evidence for it &mdash; an observed homozygote rather than an
+            absence of one.</li>
+        <li><strong>Three things declined, all for the standing reason.</strong> Haplotype
+            <em>phase</em> (several <code>KIT</code> changes on one chromosome; one dataset
+            found six across a horse's two copies) is a linkage system, and an allele pair
+            is the model. <code>W34</code>&rsquo;s possibly-stronger effect on chestnut
+            would cost it an outcome of its own for a &ldquo;may be&rdquo;. And the other
+            twenty-odd named <code>W</code> alleles are one founder each, described in
+            terms an allele already here covers.</li>
+        <li><strong>Breed booster numbers are my judgement.</strong> The reference names
+            which breeds carry which allele and never how often, except for
+            <code>W20</code>. Everything else is a plausible number in the shape the
+            reference gives.</li>
+    </ol>
+</div>
+
 <h2 id="splash">&sect;0-AA &mdash; the splash loci swap roles (2026-09-07, NOT looked at)</h2>
 
 <p>
@@ -1204,12 +1279,12 @@
         expressing row is green with its outcome underneath; a silent one is grey
         and says &ldquo;no effect&rdquo;.</li>
     <li><strong>Adding a gene picks the allele that does something</strong> &mdash;
-        homozygous where the horse can carry it. <code>KIT</code> should come in
-        at <code>W23/W23</code>, not <code>W22/W22</code>: the four strong
-        dominant whites are nonviable homozygotes.</li>
+        homozygous where the horse can carry it. <code>KIT</code> should not come
+        in at <code>W22/W22</code>: the strong dominant whites are nonviable
+        homozygotes, so it picks the strongest allele that can double.</li>
     <li><strong>More than three alleles gets a dropdown</strong>, three or fewer
-        cycles. So particle (41), <code>KIT</code> (8), <code>ACAN</code> (5) and
-        <code>MITF</code> (4) drop down; everything else cycles.</li>
+        cycles. So particle, <code>KIT</code>, <code>ACAN</code> and
+        <code>MITF</code> drop down; everything else cycles.</li>
     <li><strong>The right column, in order:</strong> Age, Sex, Breed, Randomize,
         Reroll epi., Copy code, Paste code, Clear genes.</li>
     <li><strong>Sex-linkage.</strong> Add brindle, switch to Stallion: it must

@@ -19,7 +19,7 @@ import java.util.Map;
 
 /**
  * <b>{@code KIT}</b> ({@code horsegenetics.kit}) - the white-patterning
- * neighbourhood on equine chromosome 3, and the mod's <b>eight-allele</b> locus.
+ * neighbourhood on equine chromosome 3, and the mod's <b>widest</b> locus.
  * It replaces the old {@code horsegenetics.white} (dominant white) and
  * {@code horsegenetics.sabino} ({@code SB1}) genes, which modelled two alleles
  * of <i>one</i> gene as two independent genes and so let a horse be
@@ -40,21 +40,62 @@ import java.util.Map;
  * horses do: a tobiano can also carry {@code W20}.
  *
  * <h2>The alleles</h2>
- * Eight of the thirty-plus named ones, chosen to span the real range rather
- * than to enumerate a testing panel - the {@code W} number is a discovery
- * order, <b>not</b> a severity ranking, so nothing here can be inferred from
- * the numbers:
+ * Twelve of the thirty-plus named ones ({@code W1}-{@code W35}, with gaps),
+ * chosen to span the real range rather than to enumerate a testing panel - the
+ * {@code W} number is a <b>discovery order</b>, not a severity ranking, so
+ * nothing here can be inferred from the numbers:
  * <table>
  *   <tr><th>allele</th><th>one copy</th><th>two copies</th></tr>
  *   <tr><td>{@code N}</td><td>-</td><td>wild type</td></tr>
+ *   <tr><td>{@code W35}</td><td>nothing visible, to sabino-like</td><td><b>viable</b>, modestly more</td></tr>
+ *   <tr><td>{@code W32}</td><td>nothing visible, to mild sabino-like</td><td><b>viable</b>, modestly more</td></tr>
+ *   <tr><td>{@code W34}</td><td>nothing visible, to sabino-like</td><td><b>viable</b>, modestly more</td></tr>
  *   <tr><td>{@code W20}</td><td>subtle: ordinary face / leg white</td><td><b>viable</b>, modestly more</td></tr>
  *   <tr><td>{@code SB1}</td><td>classic sabino-1</td><td><b>viable</b>, sabino-white (90%+)</td></tr>
- *   <tr><td>{@code W23}</td><td>modest to broad spotting</td><td>viability unknown - <b>allowed</b></td></tr>
+ *   <tr><td>{@code W15}</td><td>sabino-like through very white</td><td><b>viable</b> - an all-white homozygote is on record</td></tr>
  *   <tr><td>{@code W5}</td><td>sabino-like, broad</td><td><b>nonviable</b></td></tr>
  *   <tr><td>{@code W10}</td><td>sabino-like, broad</td><td><b>nonviable</b></td></tr>
  *   <tr><td>{@code W13}</td><td>extensive white spotting</td><td><b>nonviable</b></td></tr>
+ *   <tr><td>{@code W23}</td><td>near-white to all white</td><td><b>nonviable</b></td></tr>
  *   <tr><td>{@code W22}</td><td>dominant white - all white, <b>masks</b></td><td><b>nonviable</b></td></tr>
  * </table>
+ *
+ * <h2>The boosters are the common part of this locus</h2>
+ * <b>{@code W35}, {@code W32}, {@code W34} and {@code W20} are a group</b>, and
+ * between them they are most of what this locus actually does to a population.
+ * All four are mild, all four have viable homozygotes, all four range from "no
+ * visible white beyond ordinary markings" to frank sabino-like spotting, and
+ * all four add white beside any other variant here. {@code W20} is the famous
+ * one - detected in twenty-five of twenty-eight surveyed breeds - but
+ * {@code W35} is <i>commoner still</i> in the one large commercial dataset that
+ * measured it, and {@code W32} is not far behind.
+ *
+ * <p>That matters because the mod used to carry {@code W20} alone and treat the
+ * rest of the locus as a museum of rare founder alleles. The rare alleles are
+ * real and they are here, but a horse's chance of carrying <i>something</i> at
+ * {@code KIT} is set by the boosters, and one booster copy is an ordinary horse
+ * with a star and a sock.
+ *
+ * <h2>What is deliberately not modelled</h2>
+ * <ul>
+ *   <li><b>Haplotype phase.</b> Several {@code KIT} changes can sit on the same
+ *       physical chromosome - {@code W22} is usually reported linked with
+ *       {@code W20}, and one 2024 dataset found horses carrying six variants
+ *       across their two copies. A horse here has two alleles at this locus and
+ *       no more, because an allele pair is the model. Linkage is a system, not a
+ *       number.</li>
+ *   <li><b>{@code W34}'s interaction with {@code MC1R}.</b> Its effect is
+ *       reported as possibly stronger on a chestnut background. "Possibly" is
+ *       doing a lot of work in that sentence, and buying it costs {@code W34} an
+ *       outcome of its own.</li>
+ *   <li><b>The other twenty-odd named alleles.</b> {@code W1}-{@code W3},
+ *       {@code W6}-{@code W9}, {@code W11}, {@code W12}, {@code W14},
+ *       {@code W16}-{@code W19}, {@code W21}, {@code W24}-{@code W28},
+ *       {@code W30}, {@code W31}, {@code W33}. Almost all are one founder or one
+ *       family, described in terms already covered by an allele that is here,
+ *       and their frequencies round to zero. Adding one is a line, the day it
+ *       says something the others do not.</li>
+ * </ul>
  *
  * <h2>Viability, and what {@code canOccur} means here</h2>
  * The four {@code W} alleles UC Davis lists as "homozygosity thought nonviable"
@@ -68,10 +109,11 @@ import java.util.Map;
  * variant, and horses carrying two different strong {@code W}s are recorded. So
  * the rule is one allele twice, not two strong alleles.
  *
- * <p>{@code W23}'s homozygote has <b>no evidence either way</b>. The model has
- * to choose, and choosing "allowed" is the choice that does not invent a lethal
- * the source does not claim; it lands on the same near-white outcome as
- * sabino-white.
+ * <p>Where the evidence runs the other way it is taken the other way:
+ * {@code W15}'s homozygote is <b>on record and all white</b>, so it is allowed
+ * and lands on the near-white outcome. "No homozygote has been found" and "a
+ * homozygote has been found" are different claims and the table says which is
+ * which.
  *
  * <h2>How one copy and two relate</h2>
  * There is no dose arithmetic here and deliberately so. Some of these alleles
@@ -122,37 +164,74 @@ public final class KitGene implements Gene, EyeColorContribution {
      */
     public final Allele W4 = new Allele(KEY, 1, "W4", "Camarillo white (W4)");
     public final Allele W13 = new Allele(KEY, 2, "W13", "White spotting (W13)");
-    public final Allele W10 = new Allele(KEY, 3, "W10", "White spotting (W10)");
-    public final Allele W5 = new Allele(KEY, 4, "W5", "White spotting (W5)");
-    public final Allele W23 = new Allele(KEY, 5, "W23", "White spotting (W23)");
-    public final Allele SB1 = new Allele(KEY, 6, "SB1", "Sabino 1 (SB1)");
-    public final Allele W20 = new Allele(KEY, 7, "W20", "White booster (W20)");
-    public final Allele N = new Allele(KEY, 8, "N", "Wild-type (N)");
+    public final Allele W23 = new Allele(KEY, 3, "W23", "White spotting (W23)");
+    public final Allele W10 = new Allele(KEY, 4, "W10", "White spotting (W10)");
+    public final Allele W5 = new Allele(KEY, 5, "W5", "White spotting (W5)");
+    /**
+     * The one strong {@code W} with a <b>documented viable homozygote</b>: a
+     * {@code W15/W15} horse is on record and it is all white. It is here to keep
+     * the locus honest about the difference between "no homozygote has been
+     * found" and "a homozygote has been found", which every other strong allele
+     * on this page is on the first side of.
+     */
+    public final Allele W15 = new Allele(KEY, 6, "W15", "White spotting (W15)");
+    public final Allele SB1 = new Allele(KEY, 7, "SB1", "Sabino 1 (SB1)");
+    public final Allele W20 = new Allele(KEY, 8, "W20", "White booster (W20)");
+    /** The commonest {@code W} allele in the one large dataset that measured it. */
+    public final Allele W35 = new Allele(KEY, 9, "W35", "White booster (W35)");
+    public final Allele W32 = new Allele(KEY, 10, "W32", "White booster (W32)");
+    public final Allele W34 = new Allele(KEY, 11, "W34", "White booster (W34)");
+    public final Allele N = new Allele(KEY, 12, "N", "Wild-type (N)");
 
-    private final List<Allele> alleles = List.of(W22, W4, W13, W10, W5, W23, SB1, W20, N);
+    private final List<Allele> alleles =
+            List.of(W22, W4, W13, W23, W10, W5, W15, SB1, W20, W35, W32, W34, N);
 
     /** The alleles whose homozygote UC Davis lists as thought nonviable. */
-    private final List<Allele> lethalWhenDoubled = List.of(W22, W13, W10, W5);
+    private final List<Allele> lethalWhenDoubled = List.of(W22, W13, W23, W10, W5);
 
     /**
-     * The four alleles that already produce broad-to-extensive white on their
-     * own; two of them together produce more, whichever two they are.
+     * The alleles that already produce broad-to-extensive white on their own;
+     * two of them together produce more, whichever two they are.
      */
-    private final List<Allele> strong = List.of(W13, W10, W5, W23);
+    private final List<Allele> strong = List.of(W13, W23, W10, W5, W15);
+
+    /**
+     * The <b>boosters</b>: mild, viable, additive, and between them most of what
+     * this locus does to a population. One copy is ordinary markings; two is a
+     * little more; beside any other variant here they add a step.
+     */
+    private final List<Allele> boosters = List.of(W20, W35, W32, W34);
+
+    private boolean hasBooster(AllelePair pair) {
+        return boosterCount(pair) > 0;
+    }
+
+    private int boosterCount(AllelePair pair) {
+        int n = 0;
+        if (boosters.contains(pair.first())) {
+            n++;
+        }
+        if (boosters.contains(pair.second())) {
+            n++;
+        }
+        return n;
+    }
 
     private final Expression WILD = Expression.wildType("No congenital white markings.");
 
     private final Expression MINIMAL = Expression.of("minimal-white", "Minimal white")
             .describe("Ordinary-looking white: a star or snip and a low sock or two, the sort of "
-                    + "marking nobody would call a pattern. This is what a single W20 usually does "
-                    + "on its own - it is a booster, and it shows properly beside another variant.")
+                    + "marking nobody would call a pattern. This is what a single booster copy - "
+                    + "W20, W35, W32 or W34 - usually does on its own. They are boosters, and they "
+                    + "show properly beside another variant.")
             .varies()
             .restrict((ctx, coat) -> WhitePattern.sabino(ctx, coat, KEY, S_MINIMAL));
 
     private final Expression MODEST = Expression.of("modest-white", "Modest white")
             .describe("A little more than ordinary: a narrow blaze, socks climbing past the fetlock, "
-                    + "maybe a fleck under the belly. Two copies of W20 are viable and do add white, "
-                    + "but not reliably twice as much as one.")
+                    + "maybe a fleck under the belly. Two booster copies are viable - the same one "
+                    + "twice or two different ones - and do add white, but not reliably twice as "
+                    + "much as one.")
             .varies()
             .restrict((ctx, coat) -> WhitePattern.sabino(ctx, coat, KEY, S_MODEST));
 
@@ -243,12 +322,22 @@ public final class KitGene implements Gene, EyeColorContribution {
         // founder-effect allele traced to an individual horse too.
         p.put(W4, 0.0004);
         p.put(W13, 0.002);
+        p.put(W23, 0.003);
         p.put(W10, 0.004);
         p.put(W5, 0.005);
-        p.put(W23, 0.006);
+        p.put(W15, 0.001);
         p.put(SB1, 0.022);
-        p.put(W20, 0.060);
-        p.put(N, 0.900);
+        // The boosters. The one large commercial dataset puts W35 at 0.168 and
+        // W32 at 0.061, and W20 reaches 0.34 in sampled Thoroughbreds - but that
+        // dataset is horses whose owners paid for a colour test, which is a
+        // population selected for having something to find. These are that
+        // ordering at roughly half the magnitude, with the breeds that really do
+        // carry them saying so in their own tables.
+        p.put(W35, 0.090);
+        p.put(W32, 0.035);
+        p.put(W20, 0.085);
+        p.put(W34, 0.010);
+        p.put(N, 0.7416);
         return p;
     }
 
@@ -287,30 +376,29 @@ public final class KitGene implements Gene, EyeColorContribution {
         if (strong.contains(pair.first()) && strong.contains(pair.second())) {
             return NEAR_WHITE;
         }
-        if (pair.has(W13)) {
-            // W13 alone is already extensive; SB1 beside it tips it over.
-            return pair.has(SB1) ? NEAR_WHITE : EXTENSIVE;
+        // W13 and W23 are the two the source calls all-white or near-all-white
+        // on a single copy, so they start a step above W5 / W10.
+        if (pair.has(W13) || pair.has(W23)) {
+            return pair.has(SB1) || hasBooster(pair) ? NEAR_WHITE : EXTENSIVE;
         }
-        if (pair.has(W10) || pair.has(W5)) {
+        if (pair.has(W10) || pair.has(W5) || pair.has(W15)) {
             if (pair.has(SB1)) {
                 return NEAR_WHITE;
             }
-            return pair.has(W20) ? EXTENSIVE : BROAD;
-        }
-        if (pair.has(W23)) {
-            // Milder than W5 / W10 on its own, so SB1 lifts it one step, not two.
-            return pair.has(SB1) ? EXTENSIVE : BROAD;
+            return hasBooster(pair) ? EXTENSIVE : BROAD;
         }
         if (pair.has(SB1)) {
             // The clearest viable dose series in the whole locus, and the reason
-            // W20 is worth having: SB1 + W20 is visibly more than SB1 alone.
+            // the boosters are worth having: SB1 + W20 is visibly more than SB1
+            // alone, and that is measured rather than assumed.
             if (pair.homozygousFor(SB1)) {
                 return NEAR_WHITE;
             }
-            return pair.has(W20) ? BROAD : SABINO;
+            return hasBooster(pair) ? BROAD : SABINO;
         }
-        if (pair.has(W20)) {
-            return pair.homozygousFor(W20) ? MODEST : MINIMAL;
+        if (hasBooster(pair)) {
+            // Two booster copies - the same one twice or two different ones.
+            return boosterCount(pair) >= 2 ? MODEST : MINIMAL;
         }
         return WILD;
     }
@@ -323,6 +411,16 @@ public final class KitGene implements Gene, EyeColorContribution {
     @Override
     public boolean canOccur(AllelePair pair) {
         return !(pair.homozygous() && lethalWhenDoubled.contains(pair.first()));
+    }
+
+    /**
+     * How many combinations {@link #canOccur} rules out - one per allele whose
+     * homozygote is thought nonviable. An accessor rather than a number,
+     * because the number moves every time the locus grows and a test that
+     * quotes it goes red for the wrong reason.
+     */
+    public int nonviableHomozygotes() {
+        return lethalWhenDoubled.size();
     }
 
     /**
