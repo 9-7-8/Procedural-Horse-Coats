@@ -777,6 +777,111 @@ public final class DesignerApi {
     }
 
     /**
+     * <b>What pigment resolves at this point on the chart?</b> The probe behind the
+     * LUT lab's click-to-inspect: hand it a chart position and it answers with the
+     * red and black levels that land there and the colour they resolve to.
+     *
+     * <p>The inversion is {@link GradientLut#redAtChartX} /
+     * {@link GradientLut#blackAtChartY} rather than arithmetic here, so the axis
+     * convention stays stated once. A probe that mirrored the chart would return
+     * plausible numbers in range and be wrong in the least visible way possible.
+     */
+    @JSExport
+    public static String pigmentAtChartJson(double chartX, double chartY) {
+        float red = GradientLut.redAtChartX((float) chartX);
+        float black = GradientLut.blackAtChartY((float) chartY);
+        return probe(clamp01((float) chartX), clamp01((float) chartY), red, black, -1);
+    }
+
+    /**
+     * <b>Where on the chart is this colour?</b> The nearest position whose colour
+     * matches the one given, with the pigment levels that produce it - so a colour
+     * lifted off reference art can be turned back into the pair a gene would have
+     * to leave behind to hit it.
+     *
+     * <p>Searches the <b>current</b> base chart, so in the lab it follows whatever
+     * gradient is loaded rather than the one the mod ships. {@code distance} comes
+     * back with the answer because the match may be poor: a chart simply may not
+     * contain the colour asked for, and a position returned for a distant match is
+     * not a meaningful answer to anything.
+     *
+     * @param hex {@code #RRGGBB}, {@code RRGGBB} or {@code #RGB}
+     * @return {@code {"ok":false}} if that is not a colour, or if no chart is loaded
+     */
+    @JSExport
+    public static String nearestOnChartJson(String hex) {
+        int rgb = parseHex(hex);
+        if (rgb < 0 || baseLut == null) {
+            return new Json().obj().kv("ok", false).endObj().toString();
+        }
+        GradientLut.Nearest n = baseLut.nearest(rgb);
+        return probe(n.chartX(), n.chartY(),
+                GradientLut.redAtChartX(n.chartX()), GradientLut.blackAtChartY(n.chartY()),
+                n.distance());
+    }
+
+    /** The one shape both probes answer in, so the page handles them identically. */
+    private static String probe(float x, float y, float red, float black, double distance) {
+        Json j = new Json().obj()
+                .kv("ok", true)
+                .kv("x", x).kv("y", y)
+                .kv("red", red).kv("black", black)
+                // How much of each pigment a gene had to take away to land here.
+                .kv("redRestricted", 1.0f - red)
+                .kv("blackRestricted", 1.0f - black);
+        if (baseLut != null) {
+            j.kv("rgb", hex6(baseLut.sample(red, black)));
+        }
+        if (distance >= 0) {
+            j.kv("distance", distance);
+        }
+        return j.endObj().toString();
+    }
+
+    private static String hex6(int argb) {
+        String s = Integer.toHexString(argb & 0xFFFFFF);
+        StringBuilder b = new StringBuilder("#");
+        for (int i = s.length(); i < 6; i++) {
+            b.append('0');
+        }
+        return b.append(s).toString().toUpperCase();
+    }
+
+    /** @return the RGB, or -1 if the string is not a colour this accepts */
+    private static int parseHex(String hex) {
+        if (hex == null) {
+            return -1;
+        }
+        String t = hex.trim();
+        if (t.startsWith("#")) {
+            t = t.substring(1);
+        }
+        if (t.length() == 3) {   // #RGB - each digit doubled, as CSS does it
+            StringBuilder b = new StringBuilder();
+            for (int i = 0; i < 3; i++) {
+                b.append(t.charAt(i)).append(t.charAt(i));
+            }
+            t = b.toString();
+        }
+        if (t.length() != 6) {
+            return -1;
+        }
+        int v = 0;
+        for (int i = 0; i < 6; i++) {
+            int d = Character.digit(t.charAt(i), 16);
+            if (d < 0) {
+                return -1;
+            }
+            v = (v << 4) | d;
+        }
+        return v;
+    }
+
+    private static float clamp01(float v) {
+        return v < 0f ? 0f : (v > 1f ? 1f : v);
+    }
+
+    /**
      * The resolved body of any horse, so a preview can size the model it draws.
      * A coat gene leaves {@code scale} at 1, but the preview window is meant for
      * every gene that shows, and a size locus that did not visibly resize the

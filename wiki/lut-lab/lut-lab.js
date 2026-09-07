@@ -208,6 +208,12 @@ window.HG = window.HG || {};
       + '<span class="ll-axis ll-axis-y">&larr; more black pigment</span>'
       + '</div>'
       + '<div class="ll-readout"><span class="ll-swatch"></span><code class="ll-hex">hover the chart</code></div>'
+      + '<div class="ll-find">'
+      + '<input type="text" class="ll-hexin" placeholder="#B0A08A" spellcheck="false"'
+      + ' aria-label="Find a colour on the chart" maxlength="7">'
+      + '<button type="button" class="ll-findbtn">Find</button>'
+      + '</div>'
+      + '<div class="ll-probe"></div>'
       + '<label class="ll-toggle"><input type="checkbox" checked>'
       + '<span>Show what this coat reads</span></label>'
       + '<div class="ll-footprint"></div>'
@@ -275,6 +281,8 @@ window.HG = window.HG || {};
     var footprint = null;     // the current horse's reading of the chart
     var showFootprint = true;
     var fpEl = host.querySelector(".ll-footprint");
+    var probe = null;         // {x, y} of the clicked / found point, in chart space
+    var probeEl = host.querySelector(".ll-probe");
 
     function drawChart(lut) {
       var off = document.createElement("canvas");
@@ -304,6 +312,35 @@ window.HG = window.HG || {};
       g.imageSmoothingEnabled = true;
       g.drawImage(chartSource, 0, 0, chart.width, chart.height);
       if (showFootprint && footprint) drawFootprint(g, footprint);
+      if (probe) drawProbe(g, probe);
+    }
+
+    /**
+     * The clicked (or found) point. Deliberately the same shape as the footprint's
+     * centre-of-mass mark but amber rather than white, because the two answer
+     * different questions and will often sit close together: one is where this
+     * horse's coat averages out, the other is wherever the reader just pointed.
+     */
+    function drawProbe(g, pt) {
+      var x = pt.x * chart.width;
+      var y = pt.y * chart.height;
+      g.save();
+      // A dark halo first, so the mark survives on a pale corner of the chart.
+      g.strokeStyle = "rgba(8, 12, 24, 0.85)";
+      g.lineWidth = 3.5;
+      g.beginPath();
+      g.arc(x, y, 5.5, 0, Math.PI * 2);
+      g.moveTo(x - 9, y); g.lineTo(x + 9, y);
+      g.moveTo(x, y - 9); g.lineTo(x, y + 9);
+      g.stroke();
+      g.strokeStyle = "rgba(251, 191, 36, 0.98)";
+      g.lineWidth = 1.5;
+      g.beginPath();
+      g.arc(x, y, 5.5, 0, Math.PI * 2);
+      g.moveTo(x - 9, y); g.lineTo(x + 9, y);
+      g.moveTo(x, y - 9); g.lineTo(x, y + 9);
+      g.stroke();
+      g.restore();
     }
 
     /**
@@ -385,6 +422,62 @@ window.HG = window.HG || {};
       swatch.style.background = "transparent";
       hex.textContent = "hover the chart";
     });
+
+    // Click anywhere on the chart to ask what pigment resolves there. The
+    // inversion is the mod's (GradientLut.redAtChartX / blackAtChartY), not
+    // this file's - see DesignerApi.pigmentAtChartJson.
+    chart.addEventListener("click", function (e) {
+      var r = chart.getBoundingClientRect();
+      var x = (e.clientX - r.left) / r.width;
+      var y = (e.clientY - r.top) / r.height;
+      showProbe(JSON.parse(api.pigmentAtChartJson(x, y)), null);
+    });
+
+    function findColour() {
+      var text = host.querySelector(".ll-hexin").value;
+      if (!text.trim()) return;
+      var res = JSON.parse(api.nearestOnChartJson(text));
+      if (!res.ok) {
+        probeEl.innerHTML = '<span class="ll-probe-bad">'
+          + escapeHtml(text) + ' is not a colour &mdash; try <code>#B0A08A</code>.</span>';
+        return;
+      }
+      showProbe(res, text);
+    }
+
+    host.querySelector(".ll-findbtn").addEventListener("click", findColour);
+    host.querySelector(".ll-hexin").addEventListener("keydown", function (e) {
+      if (e.key === "Enter") { e.preventDefault(); findColour(); }
+    });
+
+    /** Pin a point on the chart and say what pigment lands there. */
+    function showProbe(p, asked) {
+      probe = { x: p.x, y: p.y };
+      paintChart();
+      function pct(v) { return Math.round(v * 100) + "%"; }
+      // A poor match means the chart simply has nothing like the colour asked
+      // for, and the position is then not an answer to anything - so say so
+      // rather than printing a confident pair of levels.
+      var far = asked !== null && p.distance > 90;
+      probeEl.innerHTML = ''
+        + '<div class="ll-probe-head">'
+        + '<span class="ll-probe-sw" style="background:' + escapeHtml(p.rgb || "#000") + '"></span>'
+        + '<code>' + escapeHtml(p.rgb || "") + '</code>'
+        + '<span class="ll-probe-at">at ' + pct(p.x) + ', ' + pct(p.y) + '</span>'
+        + '</div>'
+        + '<div class="ll-fp-row"><span>red pigment left</span><code>' + pct(p.red) + '</code></div>'
+        + '<div class="ll-fp-row"><span>red restricted</span><code>' + pct(p.redRestricted) + '</code></div>'
+        + '<div class="ll-fp-row"><span>black pigment left</span><code>' + pct(p.black) + '</code></div>'
+        + '<div class="ll-fp-row"><span>black restricted</span><code>' + pct(p.blackRestricted) + '</code></div>'
+        + (asked !== null
+          ? '<div class="ll-probe-note' + (far ? ' ll-probe-bad' : '') + '">'
+            + (far
+              ? 'nearest match is a long way off &mdash; this chart has nothing like '
+                + escapeHtml(asked) + ', so the position above is not meaningful'
+              : 'nearest match to ' + escapeHtml(asked))
+            + '</div>'
+          : '');
+    }
 
     // ---- the gradient buttons -----------------------------------------
 

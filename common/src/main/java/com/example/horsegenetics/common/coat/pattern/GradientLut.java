@@ -64,6 +64,82 @@ public final class GradientLut {
         return clamp01(blackLevel);
     }
 
+    /**
+     * The red level that lands at chart position {@code x} - the inverse of
+     * {@link #chartX}, for a tool asking "what pigment resolves <i>here</i>?"
+     * rather than "where does this pigment go?".
+     *
+     * <p>It lives beside its forward pair on purpose. The axis convention is one
+     * fact and it is stated once; an inverse worked out at the call site is a
+     * second statement of it, free to disagree, and it would disagree by
+     * mirroring the chart - the single most plausible way to get this wrong and
+     * the hardest to notice, since a mirrored answer is still a valid-looking
+     * number in range.
+     */
+    public static float redAtChartX(float x) {
+        return 1.0f - clamp01(x);
+    }
+
+    /** The black level that lands at chart position {@code y}. Inverse of {@link #chartY}. */
+    public static float blackAtChartY(float y) {
+        return clamp01(y);
+    }
+
+    /**
+     * A position on the chart, and how close its colour came to what was asked
+     * for. {@code distance} is 0 for an exact hit.
+     */
+    public record Nearest(float chartX, float chartY, int rgb, double distance) {
+    }
+
+    /**
+     * The chart position whose colour is closest to {@code rgb} - the question
+     * "my horse is this colour, so what pigment pair produced it?", which is the
+     * one a gene author asks when tuning against reference art.
+     *
+     * <p>Answering it needs a search rather than arithmetic, because the chart is
+     * a painted image and the mapping colour&rarr;position is neither invertible
+     * nor even one-to-one: a desaturated chart has whole regions of near-identical
+     * greys, and the honest answer to "where is #B0B0B0" is "one of many places,
+     * here is the nearest". That is what {@code distance} is for - a large value
+     * means the chart has nothing like the colour asked for, and the position
+     * returned is not meaningful.
+     *
+     * <p>Distance is the <b>redmean</b> approximation rather than a plain RGB
+     * Euclidean one. It costs three extra multiplies and is markedly better at
+     * the thing this is for: telling two similar browns apart the way an eye
+     * does, on a chart where most of the interesting range is low-saturation.
+     */
+    public Nearest nearest(int rgb) {
+        int wantR = (rgb >> 16) & 0xFF;
+        int wantG = (rgb >> 8) & 0xFF;
+        int wantB = rgb & 0xFF;
+        int bestIndex = 0;
+        double best = Double.MAX_VALUE;
+        for (int i = 0; i < argb.length; i++) {
+            int c = argb[i];
+            int r = (c >> 16) & 0xFF;
+            int g = (c >> 8) & 0xFF;
+            int b = c & 0xFF;
+            double rmean = (wantR + r) * 0.5;
+            double dr = wantR - r;
+            double dg = wantG - g;
+            double db = wantB - b;
+            double d = (2 + rmean / 256) * dr * dr + 4 * dg * dg + (2 + (255 - rmean) / 256) * db * db;
+            if (d < best) {
+                best = d;
+                bestIndex = i;
+            }
+        }
+        int x = bestIndex % width;
+        int y = bestIndex / width;
+        return new Nearest(
+                width == 1 ? 0f : (float) x / (width - 1),
+                height == 1 ? 0f : (float) y / (height - 1),
+                argb[bestIndex] & 0xFFFFFF,
+                Math.sqrt(best));
+    }
+
     /** Bilinearly sampled coat colour (0xFFRRGGBB) for a pigment level pair, each clamped to [0,1]. */
     public int sample(float redLevel, float blackLevel) {
         float fx = chartX(redLevel) * (width - 1);   // red max -> x = 0 (left)
