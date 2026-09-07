@@ -700,8 +700,16 @@ public final class WhitePattern {
      * <p>Against the topline the fractions mean something anatomical:
      * {@code 0.05} is the coronet, {@code 0.10} the fetlock, {@code 0.26} the
      * knee and hock, {@code 0.52} the underline, {@code 1.0} the spine.
+     *
+     * <p><b>Public</b>, and every vertical constant in every white locus should
+     * be expressed against it - including the ones that live in their own gene
+     * class rather than in here. {@code EDNRB} measured against
+     * {@link HorseSkinGeometry#bodyBounds} instead and put its ceiling at
+     * {@code 0.74} of a box that runs to the <i>ear tips</i>, which is 1.19 of
+     * the topline: frame's white could cross the spine, which is the one thing
+     * frame never does.
      */
-    private static double toplineHeight(Skin skin) {
+    public static double toplineHeight(Skin skin) {
         Bounds body = HorseSkinGeometry.bodyBounds(skin);
         return HorseSkinGeometry.bounds(skin, Part.BODY).yMax() - body.yMin();
     }

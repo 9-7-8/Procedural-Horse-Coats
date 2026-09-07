@@ -1,8 +1,11 @@
 package com.example.horsegenetics.common.genetics.genes;
 
+import com.example.horsegenetics.common.coat.pattern.CoatRegions;
 import com.example.horsegenetics.common.coat.pattern.CoatTextureComposer;
 import com.example.horsegenetics.common.coat.pattern.GradientLut;
+import com.example.horsegenetics.common.coat.pattern.WhitePattern;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry;
+import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Part;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Skin;
 import com.example.horsegenetics.common.genetics.Allele;
 import com.example.horsegenetics.common.genetics.AllelePair;
@@ -306,6 +309,245 @@ class WhitePatternGenesTest {
             }
         });
         return tally[1] == 0 ? 0 : tally[0] / (double) tally[1];
+    }
+
+    // ------------------------------------------------------------------
+    // Frame overo's shape
+    // ------------------------------------------------------------------
+
+    /** The seeds the frame-shape tests are measured over. */
+    private static final long[] FRAME_SEEDS = {0L, 1L, 2L, 3L, 5L, 8L, 13L, 21L, 34L, 55L, 4242L};
+
+    private static final String FRAME = Codes.of("agouti", "A/a", "ednrb", "O/N");
+
+    /**
+     * <b>Frame's white does not cross the back.</b> This is the definition of
+     * the pattern rather than a tuning preference - "doesn't cross the back"
+     * is how frame is told from tobiano at a glance - and it is the property
+     * that was broken: the ceiling was a fraction of the whole-horse box, which
+     * runs to the <i>ear tips</i>, so {@code 0.74} of it sat 19% above the
+     * spine and frame white could and did spill over the topline.
+     */
+    @Test
+    void frameWhiteNeverReachesTheTopline() {
+        for (long seed : FRAME_SEEDS) {
+            double spine = bodyBandWhite(FRAME, seed, 0.93, 1.01);
+            assertEquals(0.0, spine, 0.001,
+                    "frame put white on the spine at seed " + seed + " (" + spine + ")");
+        }
+    }
+
+    /**
+     * <b>And it does reach the belly</b>, which is the other half of the same
+     * claim. The lower barrel is one of the two hallmark locations; a band that
+     * started above the underline - which is what this gene used to do - drew
+     * the one part of a frame horse that is reliably dark and skipped the part
+     * that is reliably white.
+     */
+    @Test
+    void frameWhitensTheBellyAndClimbsIntoTheFlank() {
+        double belly = 0;
+        double flank = 0;
+        for (long seed : FRAME_SEEDS) {
+            belly += bodyBandWhite(FRAME, seed, 0.40, 0.62);
+            flank += bodyBandWhite(FRAME, seed, 0.62, 0.85);
+        }
+        belly /= FRAME_SEEDS.length;
+        flank /= FRAME_SEEDS.length;
+        assertTrue(belly > 0.35, "the belly is a hallmark frame location, got " + belly);
+        assertTrue(belly > flank + 0.15,
+                "frame climbs FROM the belly, so the belly must be whiter than the flank: "
+                        + belly + " vs " + flank);
+    }
+
+    /**
+     * <b>The legs stay dark and the crest stays dark.</b> Four dark legs plus a
+     * bold face is the frame template; extensive leg white on a frame horse
+     * means it is carrying splash, sabino or tobiano as well. A coronet band or
+     * a white hoof is allowed, which is what the tolerance is for.
+     */
+    @Test
+    void frameLeavesTheLegsAndTheUpperNeckDark() {
+        for (long seed : FRAME_SEEDS) {
+            double legs = partWhite(FRAME, seed, CoatRegions.LEGS.toArray(new Part[0]));
+            assertTrue(legs < 0.10, "frame put " + legs + " white on the legs at seed " + seed);
+            double crest = neckBandWhite(FRAME, seed, 0.80, 1.01);
+            assertTrue(crest < 0.15, "frame put " + crest + " white on the crest at seed " + seed);
+        }
+    }
+
+    /**
+     * <b>The white runs along the horse, not up it.</b> The single most
+     * diagnostic thing about frame, and the reason the patch field is sampled
+     * with {@code x} squashed and {@code y} stretched: tobiano runs top-down
+     * over the back and splash comes bottom-up from the feet, and frame goes
+     * sideways.
+     *
+     * <p>Measured as edge anisotropy on the finished coat, over the barrel's
+     * two <b>side</b> faces only - the ones whose sheet axes are the horse's
+     * length and height, so no unprojection is needed. (The belly face's
+     * vertical axis is the horse's <i>width</i>, which would dilute the
+     * measurement with a direction the test is not about.) Scanning a
+     * horizontally elongated patch across its long axis crosses fewer margins
+     * than scanning it up and down, so a body whose white is stretched
+     * lengthways has <b>fewer horizontal transitions than vertical ones</b>.
+     */
+    @Test
+    void frameWhiteIsWiderThanItIsTall() {
+        int horizontal = 0;
+        int vertical = 0;
+        for (long seed : FRAME_SEEDS) {
+            int[] counts = bodyEdgeCounts(FRAME, seed);
+            horizontal += counts[0];
+            vertical += counts[1];
+        }
+        assertTrue(vertical > horizontal * 1.25,
+                "frame's patches are not horizontally elongated: " + horizontal
+                        + " horizontal edges against " + vertical + " vertical");
+    }
+
+    /**
+     * <b>Cryptic at one end, textbook at the other.</b> "No obvious frame
+     * pattern" does not rule out a carrier, and that is not a curiosity - it is
+     * why the locus is DNA-tested rather than eyeballed, and the mod would be
+     * lying about the gene if every {@code O/N} horse were obviously frame.
+     * The face is rolled separately, so even a nearly-unmarked body comes with
+     * a bold face and a blue eye, which is exactly how a cryptic frame is
+     * spotted.
+     */
+    @Test
+    void frameRunsFromCrypticToTextbook() {
+        double least = 1;
+        double most = 0;
+        for (long seed : FRAME_SEEDS) {
+            double w = whiteFraction(FRAME, seed);
+            least = Math.min(least, w);
+            most = Math.max(most, w);
+        }
+        assertTrue(least < 0.10, "no seed produced a cryptic frame (least was " + least + ")");
+        assertTrue(most > 0.20, "no seed produced a bold frame (most was " + most + ")");
+        for (long seed : FRAME_SEEDS) {
+            assertTrue(faceWhite(FRAME, seed) > 0.15,
+                    "every frame horse wears a bold face, seed " + seed);
+        }
+    }
+
+    /** White fraction of the BODY part between two fractions of the topline. */
+    private static double bodyBandWhite(String code, long seed, double lo, double hi) {
+        int[] img = composeAdult(code, seed);
+        double topline = WhitePattern.toplineHeight(Skin.ADULT);
+        double y0 = HorseSkinGeometry.bodyBounds(Skin.ADULT).yMin();
+        int[] tally = new int[2];
+        int n = HorseSkinGeometry.SHEET_SIZE;
+        HorseSkinGeometry.forEachTexel(Skin.ADULT, (px, py, part, face, point) -> {
+            if (part != Part.BODY) {
+                return;
+            }
+            double h = (point.y() - y0) / topline;
+            if (h < lo || h >= hi) {
+                return;
+            }
+            tally[1]++;
+            if ((img[py * n + px] & 0xFFFFFF) > 0xE0E0E0) {
+                tally[0]++;
+            }
+        });
+        return tally[1] == 0 ? 0 : tally[0] / (double) tally[1];
+    }
+
+    /** White fraction of the NECK part between two fractions of the neck's own height. */
+    private static double neckBandWhite(String code, long seed, double lo, double hi) {
+        int[] img = composeAdult(code, seed);
+        HorseSkinGeometry.Bounds nb = HorseSkinGeometry.bounds(Skin.ADULT, Part.NECK);
+        double span = nb.span(HorseSkinGeometry.Axis.Y);
+        int[] tally = new int[2];
+        int n = HorseSkinGeometry.SHEET_SIZE;
+        HorseSkinGeometry.forEachTexel(Skin.ADULT, (px, py, part, face, point) -> {
+            if (part != Part.NECK) {
+                return;
+            }
+            double h = (point.y() - nb.yMin()) / span;
+            if (h < lo || h >= hi) {
+                return;
+            }
+            tally[1]++;
+            if ((img[py * n + px] & 0xFFFFFF) > 0xE0E0E0) {
+                tally[0]++;
+            }
+        });
+        return tally[1] == 0 ? 0 : tally[0] / (double) tally[1];
+    }
+
+    /** White fraction over a set of parts. */
+    private static double partWhite(String code, long seed, Part... parts) {
+        int[] img = composeAdult(code, seed);
+        Set<Part> want = new HashSet<>(List.of(parts));
+        int[] tally = new int[2];
+        int n = HorseSkinGeometry.SHEET_SIZE;
+        HorseSkinGeometry.forEachTexel(Skin.ADULT, (px, py, part, face, point) -> {
+            if (!want.contains(part)) {
+                return;
+            }
+            tally[1]++;
+            if ((img[py * n + px] & 0xFFFFFF) > 0xE0E0E0) {
+                tally[0]++;
+            }
+        });
+        return tally[1] == 0 ? 0 : tally[0] / (double) tally[1];
+    }
+
+    /**
+     * {@code {horizontal, vertical}} white/coloured transitions across the BODY
+     * texels - the anisotropy measure {@link #frameWhiteIsWiderThanItIsTall}
+     * reads.
+     */
+    private static int[] bodyEdgeCounts(String code, long seed) {
+        int n = HorseSkinGeometry.SHEET_SIZE;
+        int[] img = composeAdult(code, seed);
+        boolean[] body = new boolean[n * n];
+        boolean[] white = new boolean[n * n];
+        HorseSkinGeometry.forEachTexel(Skin.ADULT, (px, py, part, face, point) -> {
+            if (part != Part.BODY) {
+                return;
+            }
+            if (face != HorseSkinGeometry.Face.LEFT && face != HorseSkinGeometry.Face.RIGHT) {
+                return; // only the side faces map (length, height) to (u, v)
+            }
+            body[py * n + px] = true;
+            white[py * n + px] = (img[py * n + px] & 0xFFFFFF) > 0xE0E0E0;
+        });
+        int[] counts = new int[2];
+        for (int y = 0; y < n; y++) {
+            for (int x = 0; x < n; x++) {
+                int i = y * n + x;
+                if (!body[i]) {
+                    continue;
+                }
+                if (x + 1 < n && body[i + 1] && white[i] != white[i + 1]) {
+                    counts[0]++;
+                }
+                if (y + 1 < n && body[i + n] && white[i] != white[i + n]) {
+                    counts[1]++;
+                }
+            }
+        }
+        return counts;
+    }
+
+    private static int[] composeAdult(String code, long seed) {
+        int n = HorseSkinGeometry.SHEET_SIZE;
+        int[] template = new int[n * n];
+        HorseSkinGeometry.forEachTexel(Skin.ADULT, (px, py, part, face, point) ->
+                template[py * n + px] = 0xFFFFFFFF);
+        int[] lut = new int[16 * 16];
+        for (int y = 0; y < 16; y++) {
+            for (int x = 0; x < 16; x++) {
+                int shade = 255 - Math.round(y / 15f * 255);
+                lut[y * 16 + x] = 0xFF000000 | (shade << 16) | (shade << 8) | shade;
+            }
+        }
+        return CoatTextureComposer.compose(Genotype.parse(code), Epigenome.fromSeed(seed),
+                Skin.ADULT, true, template, new GradientLut(lut, 16, 16));
     }
 
     // ------------------------------------------------------------------

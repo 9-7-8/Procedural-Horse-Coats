@@ -92,11 +92,13 @@ public final class GeneDescriptions {
                             + "barrel down the legs and over the back; the head stays coloured. "
                             + "Patch size and coverage vary per horse."),
             Map.entry("horsegenetics.ednrb",
-                    "Frame overo: bold, jagged flank patches that never cross the topline, plus a "
-                            + "bald face; the legs stay coloured. Two frame copies (O/O) is Overo "
-                            + "Lethal White - an all-white foal that does not survive when health "
-                            + "genetics are on. It has its locus to itself, so it stacks freely "
-                            + "with every other white pattern."),
+                    "Frame overo: sharp, jagged white spreading sideways along the belly, barrel, "
+                            + "flank and lower neck that never crosses the back, so colour is left "
+                            + "framing it above and below. Broad white face, dark legs, and two "
+                            + "sides that need not match; some carriers show almost nothing, which "
+                            + "is why frame is tested for. Two copies (O/O) is Overo Lethal White - "
+                            + "an all-white foal that does not survive. It has its locus to itself, "
+                            + "so it stacks freely with every other white pattern."),
             Map.entry("horsegenetics.kit",
                     "The white-spotting neighbourhood on chromosome 3, here an eight-allele locus "
                             + "covering sabino (SB1), the numbered dominant-white (W) series and "
