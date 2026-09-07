@@ -26,6 +26,28 @@
 
 <h2 id="d2026-09-06">2026-09-06</h2>
 
+<h3 id="shadow-pass-2026-09-06">Built 2026-09-06, NOT yet looked at: a shadow pass at the end of phase 3 - nothing magical is painted true black.</h3>
+
+<p>Owner: &ldquo;true black should never be painted on a horse, because then you lose all the painted-on shading, and it just looks bad. This is especially noticeable with the magic zebra gene.&rdquo; <code>ColorField.liftShadows</code>, called after the magical loop; checklist <a href="verification.html#shadow-pass">&sect;0-O</a>, mechanism on <a href="pipeline.html#shadow-pass">Pipeline</a>.</p>
+
+<ul>
+<li><strong>The rule is a floor on the colour, not on the composed pixel.</strong> Phase 4 is a multiply, so flooring the <em>output</em> would have collapsed every shading level below the floor into one value - the opposite of the ask. Flooring the colour before the multiply leaves the multiply small but non-zero, and the template's strand detail comes through proportionally. A texel at or below <code>SHADOW_FLOOR</code> (<code>#151515</code>) in all three channels is scaled so its <em>brightest</em> channel lands on the floor, so hue survives and only a texel with nothing in it at all comes out neutral grey.
+</li>
+<li><strong>Applying it to the whole colour field was wrong, and the tests said so in a way worth keeping.</strong> Phase 2 already answers the same problem from the other side - <code>NEAR_BLACK</code> softens the <em>alpha</em> of a coat the gradient resolved dark, which is why a black horse shows hair shading at all. Running both over one texel lifts it twice, and four tests went red: a bay's <strong>black mane composited brighter than the dark bay body under it</strong>, and the same for a foal's tail and a roan's mane. So <code>ColorField</code> now records which texels an <code>apply</code>d delta wrote and the pass considers only those. <strong>One mechanism per layer</strong> is the rule that came out of it.
+</li>
+<li><strong>The blast radius is measured, not asserted.</strong> 48 of 654 golden cases moved and all 48 carry <code>magic_zebra</code>; every natural coat is byte-identical. That is the check that the scoping actually holds, and it is cheaper than reasoning about which genes reach zero.
+</li>
+<li><strong>A magical black is now darker than a natural black</strong> - <code>#151515</code> times the template, against <code>#000000</code> at 80% opacity, which is ~20% of it. Intended (a stripe should be the darkest thing on the horse) but it is a visible reordering and is on the checklist as the thing to reject if it reads wrong.
+</li>
+<li><strong>The gene stays wrong on purpose.</strong> Magic zebra still subtracts 200% and still aims at zero: committing past the cap is exactly what makes a stripe base-independent, and it must not learn about the floor. The composer decides where paint lands; the gene decides how hard it commits.
+</li>
+<li><strong>It did not collide with the new chart, and that is luck worth noting.</strong> <code>horselut.png</code>'s black corner is <code>#161515</code> - one above the floor - so the natural side never meets the pass even where the scoping would have allowed it.
+</li>
+<li><strong>Found while mirroring the pass into the creator: <a href="known-gaps.html#gap-50">gap #50</a></strong>. <code>wiki/gene-creator/js/fields.js</code> never got phase 2's alpha ramp and still tests <code>rgb === 0</code>, so it draws dark coats a few percent darker than the game. Recorded rather than fixed, at the end of a session. The general point is that this file has <em>no oracle</em> - the parity check covers the spec engine, not the composer - and this is the second divergence found in it by hand.
+</li>
+</ul>
+
+
 <h3 id="dilution-targets-2026-09-06">Built 2026-09-06, NOT yet looked at: four dilutions set to measured restriction targets.</h3>
 
 <p>Owner, now reading numbers straight off the probe: single cream to 20% red / 29% black restricted, classic pearl to 20% / 60%, double dilute to 47% / 95%, champagne to 31% / 80%. Set in <a href="gene-matp.html">MATP</a> and <a href="gene-champagne.html">champagne</a>; checklist <a href="verification.html#dilution-retune">&sect;0-M</a>.</p>
