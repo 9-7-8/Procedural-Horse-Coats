@@ -32,6 +32,35 @@
     </p>
 </div>
 
+<h2 id="shadow-pass">&sect;0-O &mdash; the shadow pass (2026-09-06, NOT looked at)</h2>
+
+<p>
+    Phase 3 now ends with <code>ColorField.liftShadows(SHADOW_FLOOR)</code>: no texel a
+    <em>magical</em> gene painted leaves the phase darker than <code>#151515</code> in all
+    three channels, scaled to keep its hue. The composite is a multiply, so a texel painted
+    pure black scaled the template to nothing and the band lost every strand of hair
+    shading. See <a href="pipeline.html#shadow-pass">Pipeline &sect; the shadow pass</a>.
+</p>
+
+<ul>
+    <li><strong>Magic zebra is the one to look at</strong> &mdash; it is what the pass was
+        built for, and the only gene whose golden hashes moved (48 of 654 cases, all of them
+        <code>magic_zebra</code>). Spawn one and look at a stripe <em>up close</em>: the
+        band should carry the template&rsquo;s strand detail, not read as one flat slab.</li>
+    <li><strong>Check a stripe against a black horse standing next to it.</strong> A magical
+        black (<code>#151515</code> &times; template) is now <em>darker</em> than a natural
+        black (<code>#000000</code> at 80% opacity, so ~20% of the template). That ordering
+        is intended &mdash; a stripe should be the darkest thing on the horse &mdash; but it
+        is the thing to reject if it looks wrong.</li>
+    <li><strong>Nothing else should have moved.</strong> The pass deliberately skips texels
+        phase 3 did not paint, so natural coats are byte-identical; the golden diff confirms
+        it. If a black or a bay <em>looks</em> different, that is &sect;0-N&rsquo;s new
+        chart, not this.</li>
+    <li><strong>Also in the gene creator.</strong> <code>wiki/gene-creator/js/fields.js</code>
+        mirrors the pass, so a user gene that subtracts to black previews the same way the
+        game renders it. Worth one creator gene that paints black to confirm.</li>
+</ul>
+
 <h2 id="new-lut">&sect;0-N &mdash; the new default gradient (2026-09-06, NOT looked at)</h2>
 
 <p>
