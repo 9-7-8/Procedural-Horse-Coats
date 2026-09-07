@@ -32,6 +32,67 @@
     </p>
 </div>
 
+<h2 id="bay-shade">&sect;0-P &mdash; the bay shade overhaul (2026-09-06, NOT looked at)</h2>
+
+<p>
+    Bay is a <strong>four-band continuum</strong> now &mdash; blood bay, bay, liver bay,
+    seal brown &mdash; driven by a new <a href="gene-shade.html">shade</a> locus plus
+    <em>MC1R</em> and <em>ASIP</em> dosage. <strong>Every bay in the world changed</strong>,
+    and roughly half of them are now darker than the old constant-body bay. Nothing here
+    has been seen in game; it has been checked as baked sheets and as side views.
+    See <a href="gene-agouti.html">agouti</a> and <a href="gene-shade.html">shade</a>.
+</p>
+
+<ul>
+    <li><strong>Spawn a herd and look at the spread.</strong> The point of the change is
+        that bays vary. Roughly 15% should read blood bay, 61% ordinary, 19% liver, 5% seal.
+        If a wild field of bays looks like one colour, the band edges in
+        <code>BayShade</code> are wrong, not the painter.</li>
+    <li><strong>The seal brown is the one to judge.</strong> It should read
+        <em>nearly black</em> at distance and give itself away up close: a mealy tan muzzle,
+        a paler ring over the eye, and warm light areas low on the barrel at the elbow and
+        the stifle. Stand one next to a plain black. If you cannot tell them apart at all,
+        the soft points are too weak; if the muzzle looks like a painted-on mask, they are
+        too strong.</li>
+    <li><strong>The liver bay against the ordinary bay.</strong> These are the two adjacent
+        bands most likely to be indistinguishable in game light.</li>
+    <li><strong>Diluted bays.</strong> A buckskin now has a bay shade underneath it, so a
+        cream over a liver bay and a cream over a blood bay should be visibly different
+        buckskins. Same for dun, silver and champagne. Nothing about the <em>points</em>
+        changed, so if a diluted bay's mane looks wrong that is &sect;0-N's chart, not this.</li>
+    <li><strong>A seal brown's soft points are body coat, not points</strong>, so a dilution
+        dilutes them. Worth one silver seal brown and one dun seal brown to confirm that
+        reads as intended rather than as a bug.</li>
+    <li><strong>The blood bay's muzzle should still be black.</strong> The tan muzzle is the
+        seal end only.</li>
+    <li><strong>The gene creator's base coats.</strong> Its preset list gained
+        &ldquo;Blood bay&rdquo; and &ldquo;Liver bay&rdquo; and lost &ldquo;Bay, low
+        points&rdquo;. <code>base-coats.js</code> is a hand-port
+        (<a href="known-gaps.html">it always drifts</a>) &mdash; check a creator bay against
+        a designer bay rather than trusting it.</li>
+</ul>
+
+<div class="note">
+    <span class="label">Questions for the owner</span>
+    <ol>
+        <li><strong>Is a blood bay red enough?</strong> The chart's warmest corner at full
+            red pigment is <code>#965C3F</code>, so that is the reddest a bay body can
+            physically be &mdash; <code>BODY_BLACK_LIGHT</code> is already almost on it. If
+            blood bays should <em>pop</em>, the fix is the chart's warm corner
+            (<a href="lut-lab.html">LUT lab</a>), not a constant in <code>BayCoat</code>.</li>
+        <li><strong>Should the four bands be named in the UI?</strong> They are real
+            <code>Expression</code>s, so the gene browser and the genome display already say
+            &ldquo;Seal brown&rdquo; rather than &ldquo;Bay&rdquo;. That is more information
+            than the old model could give and it may be more than you want on a tooltip.</li>
+        <li><strong>Is 5% seal brown the right rarity?</strong> It is set by
+            <code>ShadeGene</code>'s founder table plus the band edges. Seal needs
+            <code>ShD/ShD</code> <em>and</em> a dosage term, which is deliberately a find.</li>
+        <li><strong>The inner limb is not drawn as a soft point.</strong> It is a classic
+            one on a real seal brown; it was left out because the leg boxes' medial faces
+            need addressing by <code>Face</code> and no gene does that yet. Worth building?</li>
+    </ol>
+</div>
+
 <h2 id="shadow-pass">&sect;0-O &mdash; the shadow pass (2026-09-06, NOT looked at)</h2>
 
 <p>

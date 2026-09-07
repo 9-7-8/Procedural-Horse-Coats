@@ -40,6 +40,7 @@ import com.example.horsegenetics.common.genetics.genes.Rapgef5Gene;
 import com.example.horsegenetics.common.genetics.genes.RoanGene;
 import com.example.horsegenetics.common.genetics.genes.KitGene;
 import com.example.horsegenetics.common.genetics.genes.SexGene;
+import com.example.horsegenetics.common.genetics.genes.ShadeGene;
 import com.example.horsegenetics.common.genetics.genes.Ryr2Gene;
 import com.example.horsegenetics.common.genetics.genes.ShoxGene;
 import com.example.horsegenetics.common.genetics.genes.SilverGene;
@@ -102,6 +103,16 @@ public final class Genes {
     public static final SexGene SEX = new SexGene();
     public static final ExtensionGene EXTENSION = new ExtensionGene();
     public static final AgoutiGene AGOUTI = new AgoutiGene();
+    /**
+     * <b>Shade</b> - the <i>ASIP</i>/<i>RALY</i> regulatory locus that decides
+     * how far black spreads over a bay, and so which of blood / ordinary /
+     * liver / seal that bay is. It paints nothing itself: {@link AgoutiGene}
+     * reads it through {@link BayShade}, and names it in
+     * {@link Gene#coatDependsOn()} so a bay's texture key folds its alleles in.
+     * Unlike the appaloosa modifiers it is unconditional - every horse carries
+     * and transmits it, chestnuts included.
+     */
+    public static final ShadeGene SHADE = new ShadeGene();
     public static final ChampagneGene CHAMPAGNE = new ChampagneGene();
     public static final GreyGene GREY = new GreyGene();
     public static final MatpGene MATP = new MatpGene();
@@ -240,7 +251,7 @@ public final class Genes {
 
     /** The hand-written genes. Order here is irrelevant - the registry sorts. */
     private static final List<Gene> BUILTINS = List.of(
-            SEX, EXTENSION, AGOUTI, CHAMPAGNE, GREY, MATP,
+            SEX, EXTENSION, AGOUTI, SHADE, CHAMPAGNE, GREY, MATP,
             MAGIC_ZEBRA, PINK_HAIR, DUN, SILVER, MUSHROOM, BRINDLE, TIGER_EYE,
             NATURAL_ZEBRA, ROAN, TOBIANO,
             LEOPARD, EDNRB, KIT, MITF, PAX3,

@@ -276,12 +276,35 @@ class CoatTextureComposerTest {
                 "bays should run from low socks to seal, got " + low + " .. " + high);
     }
 
+    /**
+     * <b>Measured on the pigment field, not on the composed image.</b> The
+     * composer lifts pure black off jet (see
+     * {@link #pureBlackIsLiftedToAbout80PercentOpacity}), and this file's
+     * synthetic LUT has a pure-black corner, so a bay's black points come out
+     * <i>lighter</i> than the mid-tones its own leg fade passes through -
+     * {@link #blackLegHeight} then reads the fade's dark pocket rather than the
+     * top of the band, which is a proxy fine for "these two horses differ" and
+     * far too coarse for "these four legs differ by a jitter". The jitter is
+     * {@code BayCoat}'s claim anyway, so it is asserted where it is made.
+     */
     @Test
     void bayLegsDoNotAllStopAtExactlyTheSameHeight() {
-        int[] img = compose(BAY, 3L);
+        Genotype gt = Genotype.parse(BAY);
+        CoatBuildContext ctx = new CoatBuildContext(gt, Epigenome.fromSeed(3L), Skin.ADULT, true);
+        PigmentField f = new PigmentField(N);   // starts at full red + full black
+        BayCoat.apply(ctx, f, ctx.epigeneticsFor(Genes.AGOUTI.key()));
+
         java.util.Set<Double> heights = new java.util.HashSet<>();
-        for (Part leg : com.example.horsegenetics.common.coat.pattern.CoatRegions.LEGS) {
-            heights.add(blackLegHeight(img, leg));
+        for (Part leg : CoatRegions.LEGS) {
+            Bounds b = HorseSkinGeometry.bounds(leg);
+            double[] highest = {0};
+            HorseSkinGeometry.forEachTexel(leg, (px, py, p, face, point) -> {
+                if (f.black(px, py) > 0.5f) {
+                    highest[0] = Math.max(highest[0],
+                            (point.y() - b.yMin()) / b.span(HorseSkinGeometry.Axis.Y));
+                }
+            });
+            heights.add(highest[0]);
         }
         assertTrue(heights.size() > 1, "the four legs should jitter, all stopped at " + heights);
     }

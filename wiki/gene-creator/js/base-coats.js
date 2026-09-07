@@ -41,9 +41,27 @@ window.HG = window.HG || {};
 
   // ---- BayCoat ---------------------------------------------------------
 
-  var BODY_BLACK = 0.32;
+  // The whole bay range off one number - BayShade.spread(), 0 for a blood bay
+  // and 1 for a seal brown. Constants verbatim from BayCoat.
+  var BODY_BLACK_LIGHT = 0.10, BODY_BLACK_DARK = 0.82, BODY_CURVE = 1.7;
   var HOOF_FRACTION = 0.12;
   var SOLID_PORTION = 0.3;
+  var LEG_MIN = 0.15, LEG_RANGE = 0.80;
+  var FACE_MIN = 0.04, FACE_RANGE = 0.62;
+  var SOFT_START = 0.62, SOFT_FULL = 0.95, SOFT_BLACK = 0.28;
+  var SOFT_EYE_REACH = 2.6, MUZZLE_BACK = 0.45;
+
+  function smooth01(t) { t = clamp01(t); return t * t * (3 - 2 * t); }
+
+  function bodyBlack(spread) {
+    return BODY_BLACK_LIGHT
+      + (BODY_BLACK_DARK - BODY_BLACK_LIGHT) * Math.pow(clamp01(spread), BODY_CURVE);
+  }
+  function legHeight(spread) { return LEG_MIN + clamp01(spread) * LEG_RANGE; }
+  function faceHeight(spread) { var t = clamp01(spread); return FACE_MIN + t * t * FACE_RANGE; }
+  function softPoints(spread) {
+    return smooth01((clamp01(spread) - SOFT_START) / (SOFT_FULL - SOFT_START));
+  }
 
   function fade(t, solid, band) {
     if (t <= solid) return 1;
@@ -52,15 +70,48 @@ window.HG = window.HG || {};
     return 1 - u * u * (3 - 2 * u);
   }
 
-  function bay(skin, f, legHeight, faceHeight) {
-    restrictAll(skin, f, function (field, px, py) { field.setBlack(px, py, BODY_BLACK); });
+  function blob(fx, fy, cx, cy, rx, ry) {
+    var dx = (fx - cx) / rx, dy = (fy - cy) / ry;
+    return 1 - smooth01(Math.sqrt(dx * dx + dy * dy));
+  }
+
+  /** BayCoat.softWeight - the muzzle, the ring over the eye, elbow and stifle. */
+  function softWeight(skin, part, point) {
+    if (part === "MUZZLE") {
+      var m = geo.bounds(skin, part);
+      if (!m) return 0;
+      var span = m.span("X");
+      var fromNose = span <= 0 ? 0 : (m.xMax - point.x) / span;
+      return MUZZLE_BACK + (1 - MUZZLE_BACK) * (1 - clamp01(fromNose));
+    }
+    if (part === "HEAD") {
+      var h = geo.bounds(skin, part);
+      if (!h) return 0;
+      var dx = point.x - (h.xMax - h.span("X") * 0.30);
+      var dy = point.y - (h.yMax - h.span("Y") * 0.22);
+      var r = Math.sqrt(dx * dx + dy * dy + point.z * point.z);
+      return 1 - smooth01(r / SOFT_EYE_REACH);
+    }
+    if (part === "BODY") {
+      var b = geo.bounds(skin, part);
+      if (!b) return 0;
+      var fx = (point.x - b.xMin) / b.span("X");
+      var fy = (point.y - b.yMin) / b.span("Y");
+      return Math.max(blob(fx, fy, 0.80, 0.08, 0.28, 0.48), blob(fx, fy, 0.20, 0.10, 0.30, 0.46));
+    }
+    return 0;
+  }
+
+  function bay(skin, f, spread) {
+    var body = bodyBlack(spread);
+    restrictAll(skin, f, function (field, px, py) { field.setBlack(px, py, body); });
     ["MANE", "TAIL", "LEFT_EAR", "RIGHT_EAR"].forEach(function (p) { blackenPart(skin, f, p); });
 
-    var band = Math.max(HOOF_FRACTION / SOLID_PORTION, legHeight);
     geo.LEGS.forEach(function (leg) {
       var b = geo.bounds(skin, leg);
       if (!b) return;
-      var solid = band * SOLID_PORTION;
+      var solid = Math.max(HOOF_FRACTION, legHeight(spread) * SOLID_PORTION);
+      var band = Math.max(legHeight(spread), solid);
       forPart(skin, f, leg, function (field, px, py, point) {
         var k = fade((point.y - b.yMin) / b.span("Y"), solid, band);
         if (k > 0) {
@@ -73,12 +124,24 @@ window.HG = window.HG || {};
     blackenPart(skin, f, "MUZZLE");
     var head = geo.bounds(skin, "HEAD");
     if (head) {
-      var solidFace = faceHeight * SOLID_PORTION;
+      var band = faceHeight(spread);
+      var solidFace = band * SOLID_PORTION;
       forPart(skin, f, "HEAD", function (field, px, py, point) {
-        var k = fade((head.xMax - point.x) / head.span("X"), solidFace, faceHeight);
+        var k = fade((head.xMax - point.x) / head.span("X"), solidFace, band);
         if (k > 0) {
           field.setBlack(px, py, lerp(field.blackAt(px, py), 1, k));
           field.setRed(px, py, lerp(field.redAt(px, py), 0, k));
+        }
+      });
+    }
+
+    var strength = softPoints(spread);
+    if (strength > 0) {
+      restrictAll(skin, f, function (field, px, py, point, part) {
+        var k = strength * softWeight(skin, part, point);
+        if (k > 0) {
+          field.setBlack(px, py, lerp(field.blackAt(px, py), SOFT_BLACK, k));
+          field.setRed(px, py, lerp(field.redAt(px, py), 1, k));
         }
       });
     }
@@ -166,7 +229,7 @@ window.HG = window.HG || {};
    * Run a base coat described as a genotype rather than as a named preset:
    *
    *   { extension: "wild" | "chestnut",
-   *     agouti:    null | { leg, face },          // BayCoat's two point extents
+   *     agouti:    null | { spread },              // BayShade.spread(): 0 blood bay .. 1 seal brown
    *     dilution:  null | one of DILUTIONS,        // MATP / champagne
    *     grey:      null | { seed, progress, spacing, dappleStrength, pointRetention },
    *     white:     false | true }                  // KIT's dominant-white outcome
@@ -184,7 +247,7 @@ window.HG = window.HG || {};
   function compose(skin, f, config) {
     var c = config || {};
     if (c.extension === "chestnut") chestnut(skin, f);
-    if (c.agouti) bay(skin, f, c.agouti.leg, c.agouti.face);
+    if (c.agouti) bay(skin, f, num(c.agouti.spread, BAY.spread));
     if (c.dilution) dilute(skin, f, c.dilution);
     if (c.grey) {
       var g = c.grey;
@@ -202,7 +265,8 @@ window.HG = window.HG || {};
 
   // ---- the presets -----------------------------------------------------
 
-  var BAY = { leg: 0.45, face: 0.22 };
+  // The population's middle - Sh/Sh at ordinary MC1R / ASIP dosage.
+  var BAY = { spread: 0.47 };
 
   /**
    * Each preset is a config run before the gene under test - the same position
@@ -213,8 +277,9 @@ window.HG = window.HG || {};
     { id: "black", label: "Black", config: {} },
     { id: "chestnut", label: "Chestnut", config: { extension: "chestnut" } },
     { id: "bay", label: "Bay", config: { agouti: BAY } },
-    { id: "bay_low", label: "Bay, low points", config: { agouti: { leg: 0.2, face: 0.05 } } },
-    { id: "seal", label: "Seal brown", config: { agouti: { leg: 0.92, face: 0.6 } } },
+    { id: "blood_bay", label: "Blood bay", config: { agouti: { spread: 0.10 } } },
+    { id: "liver_bay", label: "Liver bay", config: { agouti: { spread: 0.72 } } },
+    { id: "seal", label: "Seal brown", config: { agouti: { spread: 0.93 } } },
     { id: "buckskin", label: "Buckskin", config: { agouti: BAY, dilution: "singleCream" } },
     { id: "palomino", label: "Palomino", config: { extension: "chestnut", dilution: "singleCream" } },
     { id: "perlino", label: "Perlino", config: { agouti: BAY, dilution: "doubleDilute" } },

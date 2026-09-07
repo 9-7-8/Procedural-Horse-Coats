@@ -44,6 +44,7 @@
                 { href: "gene-sex.html", text: "Sex (X / Y)", kind: "natural" },
                 { href: "gene-extension.html", text: "Extension", kind: "natural" },
                 { href: "gene-agouti.html", text: "Agouti (bay / seal)", kind: "natural" },
+                { href: "gene-shade.html", text: "Shade (bay shade)", kind: "natural" },
                 { href: "gene-matp.html", text: "MATP (cream / pearl)", kind: "natural" },
                 { href: "gene-champagne.html", text: "Champagne", kind: "natural" },
                 { href: "gene-grey.html", text: "Grey (dapple)", kind: "natural" },

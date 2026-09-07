@@ -3,31 +3,57 @@ package com.example.horsegenetics.common.coat.pattern;
 import com.example.horsegenetics.common.Rng;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Axis;
+import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.BodyPoint;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Bounds;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Part;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Skin;
+import com.example.horsegenetics.common.genetics.BayShade;
 
 /**
- * Builds a <b>bay</b> coat into a {@link PigmentField}:
- * red-brown body, black points (mane, tail, ear tips, hooves), and black that
- * climbs the legs + face by a <b>random</b> amount, fading out at its top edge.
+ * Builds a <b>bay</b> coat into a {@link PigmentField} - the whole bay
+ * continuum, from a bright blood bay through an ordinary bay and a liver bay to
+ * a seal brown, off <b>one number</b>: {@link BayShade#spread}, {@code 0} for
+ * black held to the points and {@code 1} for black over nearly all of it.
  *
- * <p><b>Seal brown is the top of this same distribution</b> - a high leg / face
- * roll gives the "black creeps most of the way up" seal look; there is no
- * separate seal gene.
+ * <h2>What the spread moves</h2>
+ * <ol>
+ *   <li><b>The body</b> - {@link #bodyBlack}, from a warm copper red at
+ *       {@code 0} to nearly black at {@code 1}. This is the term that makes a
+ *       liver bay a liver bay, and it is the one the old constant-body version
+ *       had no way to say at all.</li>
+ *   <li><b>How far black climbs the legs and the face</b> - the same two
+ *       formulas as before, now driven by the shade score rather than by a bare
+ *       uniform roll.</li>
+ *   <li><b>The soft points</b> - {@link #softPoints}, which only switch on near
+ *       the dark end. A seal brown is not "a bay whose black climbed high"; it
+ *       is a nearly-black horse with <i>lighter</i> tan areas left at the
+ *       muzzle, over the eye, and at the elbow and flank. Without them the dark
+ *       end of the range is just a black horse.</li>
+ * </ol>
  *
- * <p>The heights come from the horse's <b>agouti {@code A} copy</b>: one
- * uniform "point extent" number spread across the full range, so bays really do
- * run from low socks to seal rather than clustering at the bottom, plus a small
- * independent jitter per leg (a real horse's four socks are not the same
- * height) and a face height that only climbs on the horses whose legs already
- * did. Because the number rides on the allele, a foal that inherits its dam's
- * {@code A} inherits her point extent exactly.
+ * <p>The mane, tail, ears and hooves are black at every point on the range,
+ * because every bay has black points; that is what makes it a bay.
+ *
+ * <p>The spread is <b>mostly genetic</b> - see {@link BayShade} - so two seal
+ * browns mostly throw dark foals, and a blood bay hiding a dark haplotype is a
+ * surprise two generations out. The per-horse part of it rides on the
+ * expressing {@code A} copy's epigenetic seed, so a foal that inherits its
+ * dam's {@code A} inherits her exact roll.
  */
 public final class BayCoat {
 
-    /** How much black the body keeps - lower = redder body. */
-    public static final float BODY_BLACK = 0.32f;
+    /** Body black at {@link BayShade#spread} 0 - the reddest a bay body gets. */
+    public static final float BODY_BLACK_LIGHT = 0.10f;
+    /** Body black at spread 1 - all but black, and only the soft points keep it off. */
+    public static final float BODY_BLACK_DARK = 0.82f;
+    /**
+     * Curve on the body-black ramp. {@code 1.7} is not a taste knob: it is what
+     * puts spread {@code 0.5} back on <b>0.32</b>, the constant body black that
+     * was verified in-game as an ordinary bay, so the middle of the new range is
+     * the horse that was already known to be right and only the ends are new.
+     */
+    private static final double BODY_CURVE = 1.7;
+
     /** Hooves are always solidly black for at least this fraction of leg height. */
     public static final double HOOF_FRACTION = 0.12;
     /**
@@ -37,48 +63,107 @@ public final class BayCoat {
      */
     private static final double SOLID_PORTION = 0.3;
 
-    private BayCoat() {}
-
     /** Lowest / highest fraction of the leg the black can climb. */
     private static final double LEG_MIN = 0.15;
     private static final double LEG_RANGE = 0.80;
     /** How far one leg may differ from the horse's own average, either way. */
     private static final double LEG_JITTER = 0.14;
 
+    /** Face black: a floor, and a range the <i>square</i> of the spread walks. */
+    private static final double FACE_MIN = 0.04;
+    private static final double FACE_RANGE = 0.62;
+
+    /** Spread at which soft points begin to appear, and where they reach full strength. */
+    private static final double SOFT_START = 0.62;
+    private static final double SOFT_FULL = 0.95;
     /**
-     * Roll this horse's point heights from {@code epi} and paint. Consumes 5
-     * {@code nextFloat()}s: one "point extent" for the horse, then one jitter
-     * per leg.
+     * Black level a fully-expressed soft point falls to. It is a <b>warm brown
+     * against a near-black body</b>, not the reddest the chart has: at 0.13 the
+     * muzzle came out a pale beige blob with a box-shaped edge, which reads as
+     * a marking rather than as mealiness.
+     */
+    private static final float SOFT_BLACK = 0.28f;
+    /** How far from the forehead the pale ring over the eye reaches, in body units. */
+    private static final double SOFT_EYE_REACH = 2.6;
+    /** How much of the muzzle's mealiness is left where it meets the head. */
+    private static final double MUZZLE_BACK = 0.45;
+
+    private BayCoat() {}
+
+    // ------------------------------------------------------------------
+    // The spread -> the things it moves
+    // ------------------------------------------------------------------
+
+    /** Black left on the body at this spread. */
+    public static float bodyBlack(double spread) {
+        double t = clamp01(spread);
+        return (float) (BODY_BLACK_LIGHT
+                + (BODY_BLACK_DARK - BODY_BLACK_LIGHT) * Math.pow(t, BODY_CURVE));
+    }
+
+    /** Fraction of leg height the black climbs at this spread, before per-leg jitter. */
+    public static double legHeight(double spread) {
+        return LEG_MIN + clamp01(spread) * LEG_RANGE;
+    }
+
+    /**
+     * Fraction of head length the black climbs at this spread. <b>Squared</b>,
+     * so the face only follows once the legs are already high - which is what
+     * gives a seal brown rather than "socks plus a black face".
+     */
+    public static double faceHeight(double spread) {
+        double t = clamp01(spread);
+        return FACE_MIN + t * t * FACE_RANGE;
+    }
+
+    /**
+     * How strongly the soft tan points show at this spread: {@code 0} for
+     * anything short of a very dark bay, ramping to {@code 1} at the seal end.
+     */
+    public static double softPoints(double spread) {
+        return smooth01((clamp01(spread) - SOFT_START) / (SOFT_FULL - SOFT_START));
+    }
+
+    // ------------------------------------------------------------------
+    // Painting
+    // ------------------------------------------------------------------
+
+    /**
+     * Roll this horse's shade and paint it. <b>Consumes 5
+     * {@code nextFloat()}s</b>, in this order: one expression roll inside
+     * {@link BayShade#spread}, then one jitter per leg. The order is a contract
+     * - the golden coats and every "adding a gene shifts the stream by this
+     * much" claim lean on it.
      */
     public static void apply(CoatBuildContext ctx, PigmentField f, Rng epi) {
-        double extent = epi.nextFloat();                       // 0 = low socks .. 1 = seal
-        double leg = LEG_MIN + extent * LEG_RANGE;
-        double face = 0.04 + extent * extent * 0.62;           // the face only follows high legs
+        double spread = BayShade.spread(ctx.genotype(), epi);
+        double leg = legHeight(spread);
         double[] legs = new double[CoatRegions.LEGS.size()];
         for (int i = 0; i < legs.length; i++) {
             legs[i] = leg * (1.0 - LEG_JITTER + epi.nextFloat() * LEG_JITTER * 2.0);
         }
-        apply(ctx, f, legs, face);
+        apply(ctx, f, spread, legs);
     }
 
-    /** Paint with one explicit height for all four legs. */
-    public static void apply(CoatBuildContext ctx, PigmentField f, double legHeight, double faceHeight) {
+    /** Paint at an explicit spread, all four legs level - the tools' and the tests' entry. */
+    public static void apply(CoatBuildContext ctx, PigmentField f, double spread) {
         double[] legs = new double[CoatRegions.LEGS.size()];
-        java.util.Arrays.fill(legs, legHeight);
-        apply(ctx, f, legs, faceHeight);
+        java.util.Arrays.fill(legs, legHeight(spread));
+        apply(ctx, f, spread, legs);
     }
 
     /**
-     * Paint with explicit heights (fractions of leg height / head length),
-     * {@code legHeights} in {@link CoatRegions#LEGS} order.
+     * Paint at an explicit spread with explicit per-leg heights (fractions of
+     * leg height, in {@link CoatRegions#LEGS} order).
      */
-    public static void apply(CoatBuildContext ctx, PigmentField f, double[] legHeights, double faceHeight) {
+    public static void apply(CoatBuildContext ctx, PigmentField f, double spread, double[] legHeights) {
         Skin skin = ctx.skin();
+        float body = bodyBlack(spread);
 
-        // 1. bay body: keep the red, knock the black down everywhere
-        CoatRegions.restrictAll(skin, f, (field, px, py, p) -> field.setBlack(px, py, BODY_BLACK));
+        // 1. the body: keep the red, knock the black down to this shade's level
+        CoatRegions.restrictAll(skin, f, (field, px, py, p) -> field.setBlack(px, py, body));
 
-        // 2. hard black points
+        // 2. hard black points - every bay has these, at every shade
         CoatRegions.blackenPart(skin, f, Part.MANE);
         CoatRegions.blackenPart(skin, f, Part.TAIL);
         CoatRegions.blackenPart(skin, f, Part.LEFT_EAR);
@@ -86,19 +171,36 @@ public final class BayCoat {
 
         // 3. black up each leg (its own height), fading out at the top
         for (int i = 0; i < CoatRegions.LEGS.size(); i++) {
-            double h = legHeights[Math.min(i, legHeights.length - 1)];
-            rampBlackUpLeg(skin, f, CoatRegions.LEGS.get(i), Math.max(HOOF_FRACTION / SOLID_PORTION, h));
+            rampBlackUpLeg(skin, f, CoatRegions.LEGS.get(i),
+                    legHeights[Math.min(i, legHeights.length - 1)]);
         }
 
         // 4. black up the face, fading out
-        rampBlackUpFace(skin, f, faceHeight);
+        rampBlackUpFace(skin, f, faceHeight(spread));
+
+        // 5. and, at the dark end only, take it back off the soft points
+        paintSoftPoints(skin, f, softPoints(spread));
     }
 
-    private static void rampBlackUpLeg(Skin skin, PigmentField f, Part leg, double band) {
+    /**
+     * Black up one leg to {@code band}, solid at the bottom and smoothstepping
+     * out at the top.
+     *
+     * <p>The hoof floor is applied to the <b>solid</b> portion, not to the band.
+     * It used to raise the whole band to {@code HOOF_FRACTION / SOLID_PORTION}
+     * = 0.4, which meant every leg shorter than that came out at exactly 0.4 -
+     * so the per-leg jitter vanished on any bay whose black did not already
+     * climb past the knee, and a blood bay's four socks were identical to the
+     * texel. Flooring only the solid portion keeps the guarantee the constant
+     * exists for (the hoof is always solidly black) and leaves the jitter
+     * intact underneath it.
+     */
+    private static void rampBlackUpLeg(Skin skin, PigmentField f, Part leg, double height) {
         Bounds b = HorseSkinGeometry.bounds(skin, leg);
         double yMin = b.yMin();
         double span = b.span(Axis.Y);
-        double solid = band * SOLID_PORTION;
+        double solid = Math.max(HOOF_FRACTION, height * SOLID_PORTION);
+        double band = Math.max(height, solid);
         HorseSkinGeometry.forEachTexel(skin, leg, (px, py, part, face, point) -> {
             double frac = (point.y() - yMin) / span;
             float k = fade(frac, solid, band);
@@ -129,6 +231,73 @@ public final class BayCoat {
     }
 
     /**
+     * The <b>seal brown's tan</b>: pull pigment back toward a warm tan at the
+     * muzzle, over the eye, and at the elbow and the flank - the places a real
+     * seal brown keeps light while the rest of it goes near-black.
+     *
+     * <p>It runs <i>last</i>, so it takes the muzzle back off the face ramp. A
+     * seal brown's muzzle is mealy tan; an ordinary bay's is black, and at
+     * {@code strength} 0 - which is every bay short of the darkest - this whole
+     * pass does nothing.
+     *
+     * <p>The legs are left alone deliberately. A seal brown's legs <i>are</i>
+     * black; the light areas people identify one by are on the barrel and the
+     * head. (The inner limb is the one classic soft point not drawn here - see
+     * {@code wiki/known-gaps.html}.)
+     */
+    private static void paintSoftPoints(Skin skin, PigmentField f, double strength) {
+        if (strength <= 0) {
+            return;
+        }
+        HorseSkinGeometry.forEachTexel(skin, (px, py, part, face, point) -> {
+            float k = (float) (strength * softWeight(skin, part, point));
+            if (k > 0f) {
+                f.setBlack(px, py, lerp(f.black(px, py), SOFT_BLACK, k));
+                f.setRed(px, py, lerp(f.red(px, py), 1.0f, k));
+            }
+        });
+    }
+
+    /** How much of a soft point sits at this texel, {@code 0}-{@code 1}. */
+    private static double softWeight(Skin skin, Part part, BodyPoint point) {
+        switch (part) {
+            case MUZZLE: {
+                // Strongest at the nose and weakening toward the head, so the
+                // mealiness runs out rather than stopping at the box edge.
+                Bounds b = HorseSkinGeometry.bounds(skin, part);
+                double span = b.span(Axis.X);
+                double fromNose = span <= 0 ? 0 : (b.xMax() - point.x()) / span;
+                return MUZZLE_BACK + (1.0 - MUZZLE_BACK) * (1.0 - clamp01(fromNose));
+            }
+            case HEAD:
+                // The same forehead-centred falloff dun's face mask uses - the
+                // pale ring a seal brown carries round the eye sits there.
+                return CoatRegions.faceMask(skin, part, point, SOFT_EYE_REACH);
+            case BODY: {
+                Bounds b = HorseSkinGeometry.bounds(skin, part);
+                double fx = (point.x() - b.xMin()) / b.span(Axis.X);   // 0 rump .. 1 shoulder
+                double fy = (point.y() - b.yMin()) / b.span(Axis.Y);   // 0 belly .. 1 topline
+                // Two broad, low, overlapping fields rather than two small
+                // round ones: a seal brown's light areas are a whole soft
+                // underside strongest at the elbow and the stifle, and drawn
+                // small they read as a pair of orange freckles on the barrel.
+                double elbow = blob(fx, fy, 0.80, 0.08, 0.28, 0.48);
+                double stifle = blob(fx, fy, 0.20, 0.10, 0.30, 0.46);
+                return Math.max(elbow, stifle);
+            }
+            default:
+                return 0.0;
+        }
+    }
+
+    /** A soft elliptical blob in barrel-fraction space: 1 at the centre, 0 past the radii. */
+    private static double blob(double fx, double fy, double cx, double cy, double rx, double ry) {
+        double dx = (fx - cx) / rx;
+        double dy = (fy - cy) / ry;
+        return 1.0 - smooth01(Math.sqrt(dx * dx + dy * dy));
+    }
+
+    /**
      * 1 up to {@code solid}, then a <b>smoothstep</b> fade to 0 by {@code band},
      * then 0. Smoothstep (flat slope at both ends) means neither the start nor
      * the end of the fade reads as an edge - the black just dissolves into the
@@ -144,6 +313,15 @@ public final class BayCoat {
         double u = (t - solid) / (band - solid); // 0 .. 1 across the fade zone
         double s = u * u * (3.0 - 2.0 * u);       // smoothstep
         return (float) (1.0 - s);
+    }
+
+    private static double smooth01(double t) {
+        t = t < 0 ? 0 : (t > 1 ? 1 : t);
+        return t * t * (3 - 2 * t);
+    }
+
+    private static double clamp01(double v) {
+        return v < 0 ? 0 : (v > 1 ? 1 : v);
     }
 
     private static float lerp(float a, float b, float k) {

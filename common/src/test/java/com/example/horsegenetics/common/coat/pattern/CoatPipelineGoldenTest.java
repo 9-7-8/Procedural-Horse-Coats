@@ -48,6 +48,13 @@ class CoatPipelineGoldenTest {
             override("extension=e/e"),
             override("agouti=A/a"),
             override("agouti=A/A"),
+            // the bay shade range, both ends and both dosage terms
+            override("agouti=A/a", "shade=ShL/ShL"),
+            override("agouti=A/A", "shade=ShL/ShL"),
+            override("agouti=A/a", "shade=ShD/ShD"),
+            override("agouti=A/A", "shade=ShD/ShD"),
+            override("agouti=A/a", "shade=Sh/ShD", "extension=E/e"),
+            override("extension=e/e", "shade=ShD/ShD"),   // silent on a chestnut
             override("kit=W22/N"),
             override("champagne=Ch/c"),
             override("agouti=A/a", "champagne=Ch/c"),

@@ -158,17 +158,42 @@ public record Breed(
         public Builder agoutiAny() {
             return gene("horsegenetics.agouti", "A", "A", 30)
                     .gene("horsegenetics.agouti", "A", "a", 45)
-                    .gene("horsegenetics.agouti", "a", "a", 25);
+                    .gene("horsegenetics.agouti", "a", "a", 25)
+                    .shadeAny();
         }
 
         public Builder agoutiBayBias() {
             return gene("horsegenetics.agouti", "A", "A", 55)
                     .gene("horsegenetics.agouti", "A", "a", 38)
-                    .gene("horsegenetics.agouti", "a", "a", 7);
+                    .gene("horsegenetics.agouti", "a", "a", 7)
+                    .shadeAny();
         }
 
         public Builder agoutiBlack() {
-            return fixed("horsegenetics.agouti", "a");
+            return fixed("horsegenetics.agouti", "a").shadeAny();
+        }
+
+        /**
+         * The <b>shade</b> locus at its wild spread. Every one of the three
+         * agouti helpers calls this, and that is not a convenience: shade is a
+         * modifier a coat gene reads, so {@link BreedFounder} forces it wild on
+         * any breed that does not name it - and a world where every breed horse
+         * is shade-neutral and only feral mixed ones vary would be a bug nobody
+         * would think to look for. A breed with a real shade preference (a
+         * registry that culls bright bays, say) overrides it by naming the
+         * locus again afterwards.
+         *
+         * <p>Even {@code agoutiBlack()} takes it: a black horse carries and
+         * transmits shade like any other, and a breed that could never pass one
+         * on would be the same bug one generation later.
+         */
+        public Builder shadeAny() {
+            return gene("horsegenetics.shade", "ShL", "ShL", 9)
+                    .gene("horsegenetics.shade", "ShL", "Sh", 27)
+                    .gene("horsegenetics.shade", "ShL", "ShD", 15)
+                    .gene("horsegenetics.shade", "Sh", "Sh", 20)
+                    .gene("horsegenetics.shade", "Sh", "ShD", 22)
+                    .gene("horsegenetics.shade", "ShD", "ShD", 7);
         }
 
         // --- stat targets ---

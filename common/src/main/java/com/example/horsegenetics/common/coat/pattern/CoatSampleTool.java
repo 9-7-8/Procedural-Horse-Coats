@@ -26,8 +26,8 @@ public final class CoatSampleTool {
     private static final String[][] SAMPLES = {
             {"black", ""},
             {"chestnut", "extension=e/e"},
-            {"bay", "agouti=A/a"},          // mid point extent
-            {"bay_seal", "agouti=A/a"},     // same gene, high extent -> seal
+            {"bay", "agouti=A/a"},                          // Sh/Sh - the ordinary bay
+            {"bay_seal", "agouti=A/A shade=ShD/ShD"},       // the dark haplotype - seal brown
             {"champagne_black", "champagne=Ch/c"},
             {"champagne_bay", "agouti=A/a champagne=Ch/c"},
             {"buckskin", "agouti=A/a matp=Cr/N"},
@@ -40,7 +40,7 @@ public final class CoatSampleTool {
             {"grey_old", "grey=G/g"},           // nearly white
             {"grey_bay", "agouti=A/a grey=G/g"},
             {"grey_chestnut", "extension=e/e grey=G/g"},
-            {"bay_low", "agouti=A/a"},          // same gene as bay/bay_seal, low extent
+            {"bay_blood", "agouti=A/A shade=ShL/ShL"},      // the light haplotype - blood bay
             {"kit_dominant_white", "kit=W22/N"},
             {"bay_splash", "agouti=A/a mitf=SW1/N"},
             {"zebra_bay", "agouti=A/a magic_zebra=Mzeb/n"},          // stripes over a bay
@@ -122,14 +122,29 @@ public final class CoatSampleTool {
             // tiger eye - the coat is untouched; only the two iris texels move
             {"tiger_eye_amber_bay", "agouti=A/a tiger_eye=TE1/TE1"},
             {"tiger_eye_yellow_bay", "agouti=A/a tiger_eye=TE2/TE2"},
+
+            // the middle of the bay shade range, and the shade locus on a horse
+            // with no black for it to move
+            {"bay_liver", "agouti=A/A shade=Sh/ShD"},           // one dark copy - mahogany
+            {"bay_seal_het_agouti", "agouti=A/a shade=ShD/ShD"},// the darkest a bay gets
+            {"chestnut_dark_shade", "extension=e/e shade=ShD/ShD"},
     };
 
     /**
      * One epigenetic seed per sample, chosen to show the spread rather than a
-     * single draw: the three bays are the same {@code A/a} genotype at a low,
-     * a middling and a seal-high point extent, and the three greys the same
-     * {@code G/g} at three stages of greying, and the two zebras the same
-     * {@code Mzeb/n} at two different stripe reaches.
+     * single draw: the three greys are the same {@code G/g} at three stages of
+     * greying, and the two zebras the same {@code Mzeb/n} at two different
+     * stripe reaches.
+     *
+     * <p>The bays <b>used to be</b> one genotype at three seeds, back when the
+     * point extent was a bare epigenetic roll. It is a shade score now, so they
+     * are three genotypes instead - which is the point of the change, and also
+     * the reason a sample list is a poor place to keep a claim about how a gene
+     * works.
+     *
+     * <p>Positional, and {@link #main} refuses to run if the two arrays have
+     * drifted apart: they had, by two entries, which silently handed every
+     * sample after the gap somebody else's seed.
      */
     private static final long[] SEEDS = {0, 0, 7, 3, 0, 0, 0, 0, 0, 0, 0, 1, 3, 21, 3, 3, 0, 0, 31, 0,
             5, 11, 5, 5, 0, 0, 0, 11,
@@ -142,14 +157,20 @@ public final class CoatSampleTool {
             0, 0, 0, 0, 0,
             0, 0, 0,
             1, 7, 3, 5, 2, 9, 4, 6,
-            // brindle x4, natural zebra x5, tiger eye x2
+            // brindle x4, natural zebra x5, tiger eye x2, the three extra shades
             5, 2, 7, 3,
             1, 4, 6, 2, 8,
-            0, 0};
+            0, 0,
+            2};
 
     private CoatSampleTool() {}
 
     public static void main(String[] args) throws IOException {
+        if (SEEDS.length != SAMPLES.length) {
+            throw new IllegalStateException("SEEDS has " + SEEDS.length + " entries for "
+                    + SAMPLES.length + " samples - the two arrays are positional, so a mismatch "
+                    + "hands every sample after the gap the wrong horse's seed");
+        }
         Path outDir = Path.of(args.length > 0 ? args[0] : "build/coat-samples");
         Files.createDirectories(outDir);
 

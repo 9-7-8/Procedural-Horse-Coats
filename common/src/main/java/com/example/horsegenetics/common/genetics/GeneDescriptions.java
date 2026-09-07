@@ -34,8 +34,15 @@ public final class GeneDescriptions {
             Map.entry("horsegenetics.agouti",
                     "Where black pigment is allowed to sit. a/a leaves black over the whole horse "
                             + "(plain black, or chestnut if extension already removed it); one A "
-                            + "copy restricts black to the points, making a bay. Black climbs the "
-                            + "legs and face by a per-horse amount - a high roll is a seal brown."),
+                            + "copy restricts black toward the points, making a bay. How far it is "
+                            + "restricted is the shade locus's business, and that is what makes a "
+                            + "bay a blood bay, an ordinary bay, a liver bay or a seal brown."),
+            Map.entry("horsegenetics.shade",
+                    "The regulatory region beside agouti that decides how far black spreads over a "
+                            + "bay. It paints nothing on its own and every horse carries it - a "
+                            + "chestnut can hand a seal brown to a grandfoal - but on a bay its "
+                            + "dosage, plus whether extension is E/E and whether agouti is A/a, "
+                            + "chooses between a bright blood bay and a near-black seal brown."),
             Map.entry("horsegenetics.champagne",
                     "A dilution that ignores its own dose - one copy or two give the same result. "
                             + "It keeps most red, cuts black hard and feeds some removed black back "
