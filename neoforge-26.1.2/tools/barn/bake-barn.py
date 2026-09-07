@@ -168,5 +168,9 @@ root.v['entities'] = Tag(9, (10, [T_cmp({
 
 out = io.BytesIO()
 out.write(struct.pack('>B', roottype)); w_str(out, rootname); w_payload(out, root)
-open(DST, 'wb').write(gzip.compress(out.getvalue()))
+# mtime=0 so the bake is byte-reproducible. Without it gzip stamps the
+# current time into the header, every run rewrites the file, and
+# `git status` stops being able to tell you the barn is stale - which is
+# the only staleness signal a checked-in derived artefact has.
+open(DST, 'wb').write(gzip.compress(out.getvalue(), mtime=0))
 print('wrote', DST, 'palette', len(palette), 'blocks', len(blocks))
