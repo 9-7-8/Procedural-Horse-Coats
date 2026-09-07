@@ -16,8 +16,9 @@ import java.util.UUID;
  * Keeps a <b>branded</b> horse - one the cowboy bred and still owns - with the
  * cowboy by day and inside the barn at night.
  *
- * <p>The <b>lead is the horse the cowboy is riding</b> - herd slot 0, and the
- * {@code herd} id every other member carries. Following the mount rather than
+ * <p>The <b>lead is the horse the cowboy rides</b> - herd slot 0, and the
+ * {@code herd} id every other member carries. The lead itself never runs this
+ * goal, even on the nights he is off it - see {@link #isTheLead()}. Following the mount rather than
  * the man is the same thing positionally and the right thing structurally: the
  * herd has a lead horse the way any other herd in this mod does, so the browser
  * and the info panel see an ordinary herd, and the man on top is a detail.
@@ -74,10 +75,27 @@ public final class CowboyHerdGoal extends Goal {
     @Override
     public boolean canUse() {
         if (horse.isTamed() || horse.isVehicle() || horse.isLeashed()) {
-            return false; // sold, or it is the one he is sitting on
+            return false; // sold, or somebody is on it
         }
         this.cowboy = resolveCowboy();
-        return cowboy != null && needsToMove();
+        return cowboy != null && !isTheLead() && needsToMove();
+    }
+
+    /**
+     * Is this the horse he rides? Then it follows nobody: it <b>is</b> the thing
+     * the rest of the string follows, and a lead that chases its own follower is
+     * a circle.
+     *
+     * <p>Asked by <b>id</b> and not by {@code isVehicle()}, which is the same
+     * question only while he is actually on it. He is off it every night now, and
+     * without this the lead spent that night trailing a man on foot at four
+     * blocks - which put the whole string in a scrum around him, made a
+     * dismounted cowboy look exactly like a mounted one, and left him with
+     * nothing to walk back to in the morning. Left alone it stands where he got
+     * off, the rest of the herd settles around it, and dawn is a short walk.
+     */
+    private boolean isTheLead() {
+        return cowboy != null && cowboy.mountId().filter(horse.getUUID()::equals).isPresent();
     }
 
     /**
@@ -93,7 +111,7 @@ public final class CowboyHerdGoal extends Goal {
         if (horse.isTamed() || horse.isVehicle() || horse.isLeashed()) {
             return false;
         }
-        return cowboy != null && cowboy.isAlive() && !settled();
+        return cowboy != null && cowboy.isAlive() && !isTheLead() && !settled();
     }
 
     @Override

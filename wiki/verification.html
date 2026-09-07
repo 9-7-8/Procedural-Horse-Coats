@@ -217,8 +217,12 @@
     <li><strong>Does he find the <em>same</em> horse?</strong> Herd slot 0. If he comes
         back on a different animal, or on none, check <code>mountId</code> in the
         log.</li>
-    <li><strong>Where does the string spend the night?</strong> Nothing shelters, so
-        they should simply be standing around him in the field at dawn.</li>
+    <li><strong>Where does the string spend the night?</strong> Gathered on the horse
+        he got off, which stands where he left it &mdash; the lead never follows anybody,
+        so it is the thing they settle on. He himself wanders off a little way on his own
+        goals. If the lead is instead trailing him around at four blocks, the
+        <code>isTheLead</code> check is not firing, and a dismounted cowboy in a scrum of
+        horses looks exactly like a mounted one.</li>
     <li><strong>Does he keep his distance from a zombie by day?</strong> The one piece of
         monster behaviour that is left, and still unconfirmed. He should start moving at
         about 16 blocks and not settle until it is nearly 30 off &mdash; one clean
