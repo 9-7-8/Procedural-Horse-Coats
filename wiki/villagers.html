@@ -547,14 +547,32 @@
 
 <p>
     A Horse Trader's Post hands out a <strong>cowboy first and a horseman second</strong>,
-    and keeps alternating. It manages that by <em>letting go</em>: a villager claims the
-    post the ordinary way and takes the horseman profession,
+    and keeps alternating &mdash; out of <em>one</em> villager, twice. He claims the post
+    the ordinary way and takes the horseman profession,
     <code>server/HorsemanHandler</code> looks at the village and decides which of the two
-    he should actually be, and if the answer is cowboy he is <strong>replaced by a
-    <code>Cowboy</code> entity</strong> standing where he stood. The post he was holding
-    falls vacant, so the next villager along claims it and &mdash; the count now being
-    uneven &mdash; becomes the horseman and keeps it.
+    he should actually be, and if the answer is cowboy then a <code>Cowboy</code> entity
+    is stood up beside him and <strong>he is demoted back to no profession</strong>. He
+    re-claims his own post a moment later, the count is now uneven, and he settles as the
+    horseman.
 </p>
+
+<div class="note rule">
+    <span class="label">Demoted, not deleted &mdash; a job-site ticket outlives its holder</span>
+    <p>
+        The first version <em>discarded</em> the villager and relied on his post falling
+        vacant for the next one along to claim. It never fell vacant. A job-site ticket
+        is released by <code>Villager.releaseAllPois</code>, which is private and runs on
+        <strong>death</strong> &mdash; so a discarded villager holds his post for ever,
+        and with <code>maxTickets</code> of one the post produced a single cowboy and
+        then nothing at all, while every other villager in town stood around unemployed.
+    </p>
+    <p>
+        So the ticket is handed back explicitly, through the one public door there is
+        (<code>Villager.releasePoi</code>), while its owner is alive and standing on it.
+        Worth remembering generally: <strong>removing a villager does not free what he
+        was holding.</strong>
+    </p>
+</div>
 
 <p>
     The count is <strong>taken rather than remembered</strong>: cowboys and horsemen
@@ -566,8 +584,8 @@
 </p>
 
 <p>
-    Replacing the villager outright is blunt and the blunt thing is right: a cowboy is a
-    different <em>entity</em>, not a profession. He has a herd, a stock target and a
+    A cowboy is <em>spawned</em> rather than converted because he is a different
+    <strong>entity</strong>, not a profession: he has a herd, a stock target and a
     merchant screen that sells papers rather than goods, and none of that fits on a
     <code>Villager</code>.
 </p>
