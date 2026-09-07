@@ -32,15 +32,16 @@
     <div><dt>Gene key</dt><dd>horsegenetics.kit</dd></div>
     <div><dt>Priority</dt><dd>76</dd></div>
     <div><dt>Alleles</dt><dd>
-        <span class="allele dom">W22</span> <span class="allele dom">W13</span>
+        <span class="allele dom">W22</span> <span class="allele dom">W4</span>
+        <span class="allele dom">W13</span>
         <span class="allele dom">W10</span> <span class="allele dom">W5</span>
         <span class="allele dom">W23</span> <span class="allele dom">SB1</span>
         <span class="allele dom">W20</span> <span class="allele wild">N</span>
     </dd></div>
-    <div><dt>Combinations</dt><dd>36, of which 32 a horse can carry, landing on 8 outcomes</dd></div>
-    <div><dt>Outcomes</dt><dd>wild, <code>minimal-white</code>, <code>modest-white</code>, <code>sabino</code>, <code>broad-white</code>, <code>extensive-white</code>, <code>near-white</code>, <code>dominant-white</code> (masks)</dd></div>
+    <div><dt>Combinations</dt><dd>every pair of its alleles, minus the four nonviable homozygotes; one outcome each &mdash; <code>WhitePatternGenesTest</code> asserts the relationship rather than the counts</dd></div>
+    <div><dt>Outcomes</dt><dd>wild, <code>minimal-white</code>, <code>modest-white</code>, <code>sabino</code>, <code>broad-white</code>, <code>extensive-white</code>, <code>near-white</code>, <code>dominant-white</code> (masks), <code>camarillo-white</code> (masks)</dd></div>
     <div><dt>Default allele</dt><dd>N</dd></div>
-    <div><dt>Wild frequency</dt><dd><code>W20</code> 6%, <code>SB1</code> 2.2%, <code>W23</code> 0.6%, <code>W5</code> 0.5%, <code>W10</code> 0.4%, <code>W13</code> 0.2%, <code>W22</code> 0.1%, rest <code>N</code></dd></div>
+    <div><dt>Wild frequency</dt><dd><code>W20</code> 6%, <code>SB1</code> 2.2%, <code>W23</code> 0.6%, <code>W5</code> 0.5%, <code>W10</code> 0.4%, <code>W13</code> 0.2%, <code>W22</code> 0.1%, <code>W4</code> 0.04%, rest <code>N</code></dd></div>
     <div><dt>Founder draws</dt><dd>1 &times; nextFloat()</dd></div>
     <div><dt>Deterministic</dt><dd><strong>no</strong>, except the wild type and dominant white</dd></div>
     <div><dt>Epi draws</dt><dd>nextLong() seed, 4 &times; nextFloat() leg heights, nextFloat() belly, nextFloat() face</dd></div>
@@ -95,9 +96,53 @@
 <tr><td><code>W5</code></td><td>sabino-like, broad</td><td><strong>cannot occur</strong></td></tr>
 <tr><td><code>W10</code></td><td>sabino-like, broad</td><td><strong>cannot occur</strong></td></tr>
 <tr><td><code>W13</code></td><td>extensive white spotting</td><td><strong>cannot occur</strong></td></tr>
+<tr><td><code>W4</code></td><td>Camarillo white &mdash; all white from birth, pink skin, <strong>masks</strong></td><td>viability unknown &mdash; <strong>allowed</strong></td></tr>
 <tr><td><code>W22</code></td><td>dominant white &mdash; all white, <strong>masks</strong></td><td><strong>cannot occur</strong></td></tr>
 </tbody>
 </table>
+</div>
+
+<h2 id="camarillo">Two all-white alleles, and why they are two outcomes</h2>
+
+<p>
+    <code>W22</code> and <code>W4</code> paint the identical horse: pure white, pink
+    skin, every other coat gene hidden and still inherited. &ldquo;No pigment cells
+    reached the coat&rdquo; has one appearance, so they could have shared an outcome.
+    They do not, and the reason is that they differ in the only thing a breeder can act
+    on:
+</p>
+
+<ul>
+    <li><strong><code>W22</code>&rsquo;s homozygote is thought nonviable.</strong> Two
+        <code>W22</code> parents throw a quarter fewer live foals, and no
+        <code>W22/W22</code> horse exists.</li>
+    <li><strong><code>W4</code>&rsquo;s is not known to be.</strong> Claims about which
+        dominant-white variants are embryonic lethal are <em>allele-specific</em>, and
+        the ones made online frequently are not. Where the reference is silent this mod
+        allows the homozygote, exactly as it does for <code>W23</code>.</li>
+</ul>
+
+<p>
+    <code>W4</code> is also a <strong>named line</strong> rather than a generic white
+    horse. It traces to one stallion, Sultan, born about 1912 and bought at the
+    California State Fair in 1921 by Adolfo Camarillo, who bred him to Morgan mares; the
+    descendants were parade horses for sixty years and the herd was dispersed at auction
+    in 1987. That is why <a href="breeds.html">the Morgan</a> is the one breed here
+    carrying it, and why the gene dictionary says &ldquo;Camarillo white&rdquo; instead
+    of throwing the fact away.
+</p>
+
+<div class="note">
+    <span class="label">White from birth is not the same as white with age</span>
+    <p>
+        Four things in this mod can render a white horse and only one of them is this.
+        A <a href="gene-grey.html">grey</a> is born coloured and loses it, over dark
+        skin; a <a href="gene-matp.html">double dilute</a> is born pale cream with pink
+        skin and blue eyes; an extensive <a href="gene-mitf.html">splash</a> or sabino
+        is a <em>pattern</em> that happens to have run out of room. A <code>W4</code> or
+        <code>W22</code> horse is white because the pigment cells never populated the
+        coat at all, and it is that way the day it is born.
+    </p>
 </div>
 
 <h2>The combination table</h2>
@@ -116,6 +161,7 @@
 <thead><tr><th>Combination</th><th>Outcome</th><th>Look</th></tr></thead>
 <tbody>
 <tr><td>anything with <code>W22</code></td><td><code>dominant-white</code> <em>(masks)</em></td><td>pure white, pink skin, no other coat gene visible</td></tr>
+<tr><td>anything else with <code>W4</code></td><td><code>camarillo-white</code> <em>(masks)</em></td><td>the same white. A separate outcome because the two differ in what a breeder acts on, not in what they look like</td></tr>
 <tr><td>two of <code>W13</code>/<code>W10</code>/<code>W5</code>/<code>W23</code>; <code>W13</code>+<code>SB1</code>; <code>W10</code>/<code>W5</code>+<code>SB1</code>; <code>SB1/SB1</code></td><td><code>near-white</code></td><td>90%+ white, a few coloured flecks on ears and crest</td></tr>
 <tr><td><code>W13</code>+<code>N</code>/<code>W20</code>; <code>W10</code>/<code>W5</code>+<code>W20</code>; <code>W23</code>+<code>SB1</code></td><td><code>extensive-white</code></td><td>most of the horse white, colour holding along the topline</td></tr>
 <tr><td><code>W10</code>/<code>W5</code>/<code>W23</code>+<code>N</code>; <code>W23</code>+<code>W20</code>; <code>SB1</code>+<code>W20</code></td><td><code>broad-white</code></td><td>irregular white well up legs and flanks, wide blaze, first barrel patches</td></tr>

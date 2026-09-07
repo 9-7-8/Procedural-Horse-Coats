@@ -75,10 +75,12 @@ class GenotypeCatalogTest {
                 tokens(GenotypeCatalog.distinctPairsOf(Genes.MATP)));
         // pink hair's carrier likewise folds into its wild type
         assertEquals(List.of("PihrPihr", "nn"), tokens(GenotypeCatalog.distinctPairsOf(Genes.PINK_HAIR)));
-        // KIT: eight alleles, thirty-two carryable combinations, eight outcomes.
-        // This is the reduction doing real work - twenty-four of those
-        // combinations look like one of the other eight.
-        assertEquals(List.of("NN", "W20N", "W20W20", "SB1N", "SB1W20", "SB1SB1", "W23SB1", "W22N"),
+        // KIT is the reduction doing real work: most of its combinations look
+        // like one of a handful of outcomes, and only one representative of
+        // each survives. Note W4W4 rather than W4N - the group keeps the
+        // homozygote where it has one, and W4's is viable where W22's is not.
+        assertEquals(List.of("NN", "W20N", "W20W20", "SB1N", "SB1W20", "SB1SB1", "W23SB1",
+                        "W4W4", "W22N"),
                 tokens(GenotypeCatalog.distinctPairsOf(Genes.KIT)));
         // the two splash loci: MITF has four outcomes, PAX3 three
         assertEquals(List.of("NN", "SW5N", "SW5SW5", "SW3SW5"),

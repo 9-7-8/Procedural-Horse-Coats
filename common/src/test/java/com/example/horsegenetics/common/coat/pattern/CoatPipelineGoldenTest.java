@@ -60,6 +60,8 @@ class CoatPipelineGoldenTest {
             override("dhampir=Dhmp/Dhmp"),
             override("agouti=A/a", "dhampir=Dhmp/Dhmp"),
             override("kit=W22/N", "dhampir=Dhmp/n"),      // red must beat the depigmented blue
+            override("kit=W4/N"),                        // Camarillo white, one copy
+            override("agouti=A/a", "kit=W4/W4"),         // ...and the viable homozygote
             override("kit=W22/N"),
             override("champagne=Ch/c"),
             override("agouti=A/a", "champagne=Ch/c"),

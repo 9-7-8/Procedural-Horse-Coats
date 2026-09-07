@@ -595,10 +595,13 @@ public final class Breeds {
                 .gene(MATP, "Cr", "N", 8).gene(MATP, "N", "N", 92)
                 .gene(DUN, "D", "d2", 5).gene(DUN, "d2", "d2", 95)
                 .gene(ROAN, "Rn", "rn", 12).gene(ROAN, "rn", "rn", 88)
-                .gene(KIT, "SB1", "N", 16).gene(KIT, "N", "N", 84)
+                .gene(KIT, "SB1", "N", 16).gene(KIT, "W4", "N", 2).gene(KIT, "N", "N", 82)
                 .height(hh(14, 1), hh(15, 2)).speed(6).jump(6).health(8)
                 .note("Slightly crested neck, expressive eyes, compact and refined - a versatile foundation American breed.")
                 .note("Cushing's, EMS: age-related, folded into heartiness.")
+                .note("Carries W4, the Camarillo white: the line was founded on Morgan mares bred "
+                        + "to one white stallion in the 1920s, and it is the only breed here that "
+                        + "throws an all-white foal rather than a grey.")
                 .build();
     }
 

@@ -111,15 +111,25 @@ public final class KitGene implements Gene, EyeColorContribution {
     // Declaration order is AllelePair's canonical slot order and nothing else -
     // it is not a dominance ranking. Strongest first reads best in a code string.
     public final Allele W22 = new Allele(KEY, 0, "W22", "Dominant white (W22)");
-    public final Allele W13 = new Allele(KEY, 1, "W13", "White spotting (W13)");
-    public final Allele W10 = new Allele(KEY, 2, "W10", "White spotting (W10)");
-    public final Allele W5 = new Allele(KEY, 3, "W5", "White spotting (W5)");
-    public final Allele W23 = new Allele(KEY, 4, "W23", "White spotting (W23)");
-    public final Allele SB1 = new Allele(KEY, 5, "SB1", "Sabino 1 (SB1)");
-    public final Allele W20 = new Allele(KEY, 6, "W20", "White booster (W20)");
-    public final Allele N = new Allele(KEY, 7, "N", "Wild-type (N)");
+    /**
+     * <b>Camarillo white.</b> The second all-white allele at this locus, and a
+     * different mutation rather than another name for the first: it traces to
+     * one stallion, Sultan, born about 1912 and bought by Adolfo Camarillo in
+     * 1921, and the line he founded is still a named one. A {@code W4} horse is
+     * white from birth with pink skin and stays that way - which is what
+     * separates it from a grey, and is the whole point of the allele existing
+     * in a mod that also has grey.
+     */
+    public final Allele W4 = new Allele(KEY, 1, "W4", "Camarillo white (W4)");
+    public final Allele W13 = new Allele(KEY, 2, "W13", "White spotting (W13)");
+    public final Allele W10 = new Allele(KEY, 3, "W10", "White spotting (W10)");
+    public final Allele W5 = new Allele(KEY, 4, "W5", "White spotting (W5)");
+    public final Allele W23 = new Allele(KEY, 5, "W23", "White spotting (W23)");
+    public final Allele SB1 = new Allele(KEY, 6, "SB1", "Sabino 1 (SB1)");
+    public final Allele W20 = new Allele(KEY, 7, "W20", "White booster (W20)");
+    public final Allele N = new Allele(KEY, 8, "N", "Wild-type (N)");
 
-    private final List<Allele> alleles = List.of(W22, W13, W10, W5, W23, SB1, W20, N);
+    private final List<Allele> alleles = List.of(W22, W4, W13, W10, W5, W23, SB1, W20, N);
 
     /** The alleles whose homozygote UC Davis lists as thought nonviable. */
     private final List<Allele> lethalWhenDoubled = List.of(W22, W13, W10, W5);
@@ -185,8 +195,35 @@ public final class KitGene implements Gene, EyeColorContribution {
                 return f;
             });
 
+    /**
+     * The same horse as {@link #DOMINANT_WHITE} to look at, and a separate
+     * outcome anyway.
+     *
+     * <p>It could have shared {@code W22}'s: they paint identically, because
+     * "no pigment cells reached the coat" has one appearance. It does not,
+     * because the two differ in the thing a breeder actually acts on -
+     * {@code W22}'s homozygote is thought nonviable and {@code W4}'s is not
+     * known to be - and because a Camarillo white is a <i>named line</i> rather
+     * than a generic white horse. A gene dictionary that answered "dominant
+     * white" for it would be throwing away the only fact about it worth having.
+     */
+    private final Expression CAMARILLO_WHITE = Expression.of("camarillo-white", "Camarillo white")
+            .describe("White from birth over the whole body, with pink skin underneath - not a grey "
+                    + "that turned white, and not a great deal of sabino. Every other coat gene it "
+                    + "carries is hidden and still inherited. Unlike the other all-white variant at "
+                    + "this locus, two copies are not known to be nonviable.")
+            .masking()
+            .restrict((ctx, coat) -> {
+                PigmentField f = coat.mutableCopy();
+                CoatRegions.restrictAll(ctx.skin(), f, (field, px, py, p) -> {
+                    field.whiten(px, py, 1f);
+                });
+                return f;
+            });
+
     private final List<Expression> expressions =
-            List.of(WILD, MINIMAL, MODEST, SABINO, BROAD, EXTENSIVE, NEAR_WHITE, DOMINANT_WHITE);
+            List.of(WILD, MINIMAL, MODEST, SABINO, BROAD, EXTENSIVE, NEAR_WHITE,
+                    DOMINANT_WHITE, CAMARILLO_WHITE);
 
     /**
      * Founder allele frequencies. {@code W20} is genuinely common in some
@@ -200,6 +237,11 @@ public final class KitGene implements Gene, EyeColorContribution {
     private Map<Allele, Double> frequencies() {
         Map<Allele, Double> p = new LinkedHashMap<>();
         p.put(W22, 0.001);
+        // Rarer than any of them: one Californian line, from one 1912 stallion,
+        // dispersed at auction in 1987. It is in the wild table at all rather
+        // than being breed-only because every other allele here is a
+        // founder-effect allele traced to an individual horse too.
+        p.put(W4, 0.0004);
         p.put(W13, 0.002);
         p.put(W10, 0.004);
         p.put(W5, 0.005);
@@ -233,6 +275,12 @@ public final class KitGene implements Gene, EyeColorContribution {
         // all pigment, and nothing another allele does can be seen under it.
         if (pair.has(W22)) {
             return DOMINANT_WHITE;
+        }
+        // W4 removes the pigment just as completely. It sits below W22 only so
+        // that the one combination carrying both reads as the older name; the
+        // horse is the same white either way.
+        if (pair.has(W4)) {
+            return CAMARILLO_WHITE;
         }
         // Two strong alleles - the same one twice, or two different ones - and
         // the horse is near-white however they got there.
@@ -277,9 +325,13 @@ public final class KitGene implements Gene, EyeColorContribution {
         return !(pair.homozygous() && lethalWhenDoubled.contains(pair.first()));
     }
 
-    /** Does this combination remove every pigment everywhere - i.e. carry {@code W22}? */
+    /**
+     * Does this combination remove every pigment everywhere? Either all-white
+     * allele does - {@code W22} or {@code W4} - and callers care about the
+     * <i>absence</i>, not about which mutation caused it.
+     */
     public boolean isDominantWhite(AllelePair pair) {
-        return pair.has(W22);
+        return pair.has(W22) || pair.has(W4);
     }
 
     /**
@@ -293,7 +345,8 @@ public final class KitGene implements Gene, EyeColorContribution {
     public java.util.Optional<EyeColor> eyeColor(AllelePair pair, Genotype genotype,
             com.example.horsegenetics.common.genetics.Epigenome epigenome, double whiteCoverage) {
         Expression e = expressionOf(pair);
-        boolean broad = e == BROAD || e == EXTENSIVE || e == NEAR_WHITE || e == DOMINANT_WHITE;
+        boolean broad = e == BROAD || e == EXTENSIVE || e == NEAR_WHITE
+                || e == DOMINANT_WHITE || e == CAMARILLO_WHITE;
         return WhitePatternEyes.blueIf(broad, whiteCoverage);
     }
 

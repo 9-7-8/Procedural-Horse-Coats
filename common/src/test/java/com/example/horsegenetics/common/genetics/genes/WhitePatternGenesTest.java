@@ -95,16 +95,24 @@ class WhitePatternGenesTest {
     }
 
     /**
-     * KIT has eight alleles, so thirty-six combinations - four of them the
-     * homozygotes UC Davis lists as thought nonviable, leaving thirty-two a
-     * horse can carry and eight distinct looks.
+     * <b>The four nonviable homozygotes are the only combinations KIT drops,
+     * and every outcome it declares gets exactly one pen.</b>
+     *
+     * <p>Stated as two relationships rather than as four counts. The counts
+     * were the obvious way to write it and they were wrong the first time an
+     * allele was added: adding {@code W4} turned "eight alleles, thirty-two
+     * carryable, eight outcomes" red without anything being broken, and a
+     * reader has no way to tell that from a real regression. These two hold
+     * whatever the locus grows to.
      */
     @Test
-    void kitIsThirtySixCombinationsThirtyTwoCarryableAndEightOutcomes() {
-        assertEquals(8, Genes.KIT.alleles().size());
-        assertEquals(32, GenotypeCatalog.allPairsOf(Genes.KIT).size());
-        assertEquals(8, Genes.KIT.expressions().size());
-        assertEquals(8, GenotypeCatalog.distinctPairsOf(Genes.KIT).size());
+    void kitDropsOnlyItsNonviableHomozygotesAndGivesEachOutcomeOnePen() {
+        int n = Genes.KIT.alleles().size();
+        int everyCombination = n * (n + 1) / 2;
+        assertEquals(everyCombination - 4, GenotypeCatalog.allPairsOf(Genes.KIT).size(),
+                "only the four homozygotes thought nonviable should be dropped");
+        assertEquals(Genes.KIT.expressions().size(), GenotypeCatalog.distinctPairsOf(Genes.KIT).size(),
+                "one gallery pen per declared outcome");
     }
 
     // ------------------------------------------------------------------
