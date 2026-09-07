@@ -14,27 +14,28 @@ import java.util.UUID;
 
 /**
  * Keeps a <b>branded</b> horse - one the cowboy bred and still owns - with the
- * cowboy by day and inside the barn at night.
+ * outfit.
  *
  * <p>The <b>lead is the horse the cowboy rides</b> - herd slot 0, and the
  * {@code herd} id every other member carries. The lead itself never runs this
- * goal, even on the nights he is off it - see {@link #isTheLead()}. Following the mount rather than
- * the man is the same thing positionally and the right thing structurally: the
- * herd has a lead horse the way any other herd in this mod does, so the browser
- * and the info panel see an ordinary herd, and the man on top is a detail.
+ * goal, even on the nights he is off it - see {@link #isTheLead()}. Following
+ * the mount rather than the man is the same thing positionally while he is on
+ * it, and the right thing structurally either way: the herd has a lead horse
+ * the way any other herd in this mod does, so the browser and the info panel
+ * see an ordinary herd, and the man on top is a detail.
  *
  * <p>The same shape as {@link WildHerdGoal}, and deliberately not the same goal.
- * A wild herd elects its own lead and knows nothing about night, barns, or a
- * man; this one has a lead chosen for it, a home it is expected to be inside
- * after dark, and a retirement condition - the moment a player redeems the
- * horse's transfer papers it is tamed, the brand is cleared, and this stops
+ * A wild herd elects its own lead and knows nothing about a man; this one has a
+ * lead chosen for it and a retirement condition - the moment a player redeems
+ * the horse's transfer papers it is tamed, the brand is cleared, and this stops
  * running for good.
  *
  * <p>By day it only closes the gap when the gap is real ({@link #FOLLOW_RANGE}),
  * so the herd spreads out and grazes around him instead of stacking on him.
- * After dark it tightens right up and quickens: the lead is either walking into
- * the barn, in which case they need to be close enough to follow him through
- * the doors he opened, or running from something, in which case they run too.
+ * After dark it tightens right up and quickens ({@link #NIGHT_RANGE}), which
+ * gathers the string onto the parked lead for the night rather than leaving it
+ * strung out across a field - the closest thing to a stable there is, now that
+ * there is no barn to put them in.
  */
 public final class CowboyHerdGoal extends Goal {
 
@@ -42,8 +43,8 @@ public final class CowboyHerdGoal extends Goal {
     private static final double FOLLOW_RANGE = 14.0;
     /** Close enough by day. */
     private static final double SETTLE_RANGE = 7.0;
-    /** Close enough after dark - right on the lead's heels, so they follow him in. */
-    private static final double BARN_RANGE = 4.0;
+    /** Close enough after dark - gathered on the parked lead rather than strung out. */
+    private static final double NIGHT_RANGE = 4.0;
 
     private static final double SPEED = 1.0;
     /** Keeping up with a lead that may be bolting. */
@@ -145,12 +146,12 @@ public final class CowboyHerdGoal extends Goal {
 
     /** Far enough away to be worth setting off. */
     private boolean needsToMove() {
-        return !horse.blockPosition().closerThan(target(), night() ? BARN_RANGE : FOLLOW_RANGE);
+        return !horse.blockPosition().closerThan(target(), night() ? NIGHT_RANGE : FOLLOW_RANGE);
     }
 
     /** Close enough to stop. */
     private boolean settled() {
-        return horse.blockPosition().closerThan(target(), night() ? BARN_RANGE : SETTLE_RANGE);
+        return horse.blockPosition().closerThan(target(), night() ? NIGHT_RANGE : SETTLE_RANGE);
     }
 
     private double speed() {
