@@ -34,6 +34,22 @@
 
 <h2 id="lycan">&sect;0-AH &mdash; The werewolf locus, rainbow dust, and a particle locus that went recessive (2026-09-07, NOT looked at)</h2>
 
+<div class="note warn">
+    <span class="label"><code>runServer</code> was not confirmed for this batch</span>
+    <p>
+        <code>:common:test</code>, <code>:neoforge-26.1.2:build</code> and
+        <code>check-parity.mjs</code> are all green, but the headless boot could not be
+        run: another JVM was holding <code>run/world/session.lock</code> and
+        <code>run/logs/latest.log</code> for the whole session, and it was somebody
+        else&rsquo;s game. So the usual &ldquo;it registers and boots clean&rdquo;
+        floor has <em>not</em> been checked for the new
+        <code>lycan_shift</code> attachment or the two new
+        <code>@EventBusSubscriber</code> handlers. Run
+        <code>./gradlew :neoforge-26.1.2:runServer</code> once with nothing else open
+        before anything below.
+    </p>
+</div>
+
 <p>
     Three things, and the first of them is by a distance the most invasive change the
     mod has ever made: it <strong>deletes a horse entity and builds a new one</strong>,
