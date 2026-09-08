@@ -25,8 +25,14 @@ import java.util.TreeMap;
  *       white</i> / <i>Random magical</i> rolls, which are exactly "re-roll one
  *       family";</li>
  *   <li>{@code GeneWikiTool}, which lays the magical genes out one page per
- *       family and takes its slugs, titles and ledes from here.</li>
+ *       family, groups the wiki sidebar and the landing page's gene cards by
+ *       family, and takes every slug, title and lede from here.</li>
  * </ul>
+ *
+ * <p>That last one is why every family carries a {@link #title} and a
+ * {@link #lede} and not only the seven with a page of their own: the sidebar
+ * section, the landing-page heading and the paragraph under it are all this
+ * table, so the wiki cannot group genes one way and the two editors another.
  *
  * <h2>How a gene lands in one</h2>
  * <b>A gene declares no family.</b> It does not need to, and asking eighty-odd
@@ -55,15 +61,38 @@ import java.util.TreeMap;
  */
 public enum GeneFamily {
 
-    NATURAL_COAT("Natural coat genes", true),
-    NATURAL_DILUTION("Natural dilution genes", true),
-    NATURAL_WHITE("Natural white genes", true),
-    NATURAL_HEALTH("Natural health genes", true),
-    NATURAL_OTHER("Other natural genes", true),
+    NATURAL_COAT("Natural coat genes", true, null, "Natural coat genes",
+            "The pigment every other gene then works on: whether the horse can make black at "
+                    + "all, where that black is allowed to go, and the countershading over the "
+                    + "top of it."),
+    NATURAL_DILUTION("Natural dilution genes", true, null, "Natural dilution genes",
+            "Genes that lighten what is already there. Each takes red, or black, or both down "
+                    + "by some amount - which is why the same dilution reads completely "
+                    + "differently on a chestnut and on a black."),
+    NATURAL_WHITE("Natural white genes", true, null, "Natural white genes",
+            "Genes that take the coat away entirely in places. Only alleles at the same locus "
+                    + "compete for a slot, which is why a horse can be tobiano and splashed and "
+                    + "framed at once but never dominant white and sabino."),
+    NATURAL_HEALTH("Natural health genes", true, null, "Natural health genes",
+            "The loci you cannot see: speed, size, jump, and the disorders. Almost every one "
+                    + "is recessive and absent from its own founder table as a homozygote - a "
+                    + "wild horse can carry a disorder but never have one."),
+    NATURAL_OTHER("Other natural genes", true, null, "Other natural genes",
+            "The naturals that are neither pigment nor pattern nor disorder - what the horse "
+                    + "will eat, and what colour its eyes are."),
 
     /** The hand-written magical genes, the way {@code wiki/pages.js} groups them. */
-    MAGIC_CORE("Magical genes", false),
-    MAGIC_BODY("Magical body-stat genes", false),
+    MAGIC_CORE("Magical genes", false, null, "Magical genes",
+            "Where the magic starts. Every gene from here down was invented for this mod and "
+                    + "adds signed colour in phase 3, on top of the pigment the natural genes "
+                    + "have already resolved - or changes what the horse does instead. These "
+                    + "particular ones are Java classes rather than gene files, because most of "
+                    + "them do something no colour op can: swap the whole palette, trail "
+                    + "particles, turn into something else at night."),
+    MAGIC_BODY("Magical body-stat genes", false, null, "Magical body-stat genes",
+            "Four loci that move speed, health, jump and size and paint nothing at all. They "
+                    + "are the magical mirror of the performance genes, with far wider ranges "
+                    + "and no real-world claim behind them."),
 
     // The seven data-driven magical families. Slug / title / lede are the
     // wiki's; GeneWikiTool reads them from here so the page it writes and the
@@ -105,10 +134,6 @@ public enum GeneFamily {
     private final String title;
     private final String lede;
 
-    GeneFamily(String label, boolean natural) {
-        this(label, natural, null, null, null);
-    }
-
     GeneFamily(String label, boolean natural, String slug, String title, String lede) {
         this.label = label;
         this.natural = natural;
@@ -132,12 +157,12 @@ public enum GeneFamily {
         return slug;
     }
 
-    /** The wiki page's heading, or {@code null}. */
+    /** The family's heading, on its own page or over a section of one. */
     public String title() {
         return title;
     }
 
-    /** The wiki page's opening paragraph, or {@code null}. */
+    /** The paragraph under that heading. */
     public String lede() {
         return lede;
     }
@@ -251,6 +276,17 @@ public enum GeneFamily {
                     out.add(f);
                     break;
                 }
+            }
+        }
+        return out;
+    }
+
+    /** Every registered gene in this family, in {@link Genes#codeOrder() paint order}. */
+    public List<Gene> members() {
+        List<Gene> out = new ArrayList<>();
+        for (Gene g : Genes.codeOrder()) {
+            if (of(g) == this) {
+                out.add(g);
             }
         }
         return out;

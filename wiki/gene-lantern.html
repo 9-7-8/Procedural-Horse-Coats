@@ -28,16 +28,22 @@
 
 <div class="gene-preview" data-gene="horsegenetics.lantern"></div>
 
-<h2 id="outcomes">What it does</h2>
+<h2 id="outcomes">What it can come out as</h2>
 
 <div class="table-wrap">
 <table class="facts">
+<thead><tr><th>Outcome</th><th>Carrying</th></tr></thead>
 <tbody>
-<tr><th>Lantern</th><td>A line of light along the spine, brightest at its core and dissipating into a soft bloom either side. It breaks in places - a lantern horse rarely carries an unbroken line - and the same colour shows faintly through the mane where the line passes under it. One copy is as lit as two: the horse cannot turn it off, and in the dark it is the only part of it you see.</td></tr>
-<tr><th>Wild type</th><td>No lantern line.</td></tr>
+<tr><th>Lantern</th><td><code>La/La</code> &middot; <code>La/n</code></td></tr>
+<tr><th>Wild type</th><td><code>n/n</code></td></tr>
 </tbody>
 </table>
 </div>
+
+<p class="muted">
+    How each one is actually drawn - region by region, and the layers it is built from -
+    is on the <a href="#layers">coding tab</a>.
+</p>
 
 <h2 id="inheritance">What you can get</h2>
 
@@ -99,13 +105,28 @@
 
 <h2 id="layers">What it paints</h2>
 
+<p>
+    Each outcome, described the way the gene file describes it, and then the
+    layers that draw it in the order they are painted. The prose is the part
+    a reader checks a bake against; the list underneath is what the engine
+    actually did.
+</p>
+
 <h3>Lantern</h3>
+
+<p>A line of light along the spine, brightest at its core and dissipating into a soft bloom either side. It breaks in places - a lantern horse rarely carries an unbroken line - and the same colour shows faintly through the mane where the line passes under it. One copy is as lit as two: the horse cannot turn it off, and in the dark it is the only part of it you see.</p>
 
 <ol>
 <li>the bloom either side of the line &mdash; <code>CENTERLINE</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code></li>
 <li>the lit core of the line, broken in places &mdash; <code>CENTERLINE</code> &times; <code>AXIS</code> &times; <code>NOISE</code>, painted with <code>TOWARD</code>, and it <strong>glows</strong></li>
 <li>the light carried a little way into the mane &mdash; <code>PARTS</code> &times; <code>AXIS</code> &times; <code>NOISE</code>, painted with <code>TOWARD</code></li>
 </ol>
+
+<h3>Wild type</h3>
+
+<p>No lantern line.</p>
+
+<p class="muted">Paints nothing.</p>
 
 </section>
 

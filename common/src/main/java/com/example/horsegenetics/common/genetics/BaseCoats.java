@@ -28,14 +28,27 @@ public final class BaseCoats {
     }
 
     /**
-     * The three, in the order a UI should offer them - darkest first, which is
-     * also the order in which a white-marking gene goes from most obvious to
-     * least.
+     * The three, in the order a UI should offer them - <b>bay first</b>, then
+     * the two it sits between.
+     *
+     * <p>It used to be darkest first, on the argument that a white marking goes
+     * from most obvious to least in that order. That is true of white markings
+     * and wrong for everything else, and everything else is most of the
+     * registry: <b>a black horse hides every dark marking on it</b>, and a great
+     * many of these genes paint dark. Opening on black meant a reader's first
+     * look at a gene was routinely a horse with nothing visible on it, which
+     * reads as a broken page rather than as a badly chosen background.
+     *
+     * <p>Bay is the only common base that shows a dark marking and a pale one at
+     * once - black points, red body - so it is the one honest default, and it is
+     * why {@code GeneIconTool} already bakes every gene icon on one. Whatever
+     * offers these, offers them in this order, and whatever defaults to the
+     * first one now defaults to bay.
      */
     public static List<BaseCoat> all() {
         return List.of(
-                new BaseCoat("black", "Black", of(Genes.EXTENSION.E, Genes.AGOUTI.a)),
                 new BaseCoat("bay", "Bay", of(Genes.EXTENSION.E, Genes.AGOUTI.A)),
+                new BaseCoat("black", "Black", of(Genes.EXTENSION.E, Genes.AGOUTI.a)),
                 new BaseCoat("chestnut", "Chestnut", of(Genes.EXTENSION.e, Genes.AGOUTI.a)));
     }
 

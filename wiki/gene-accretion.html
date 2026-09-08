@@ -28,18 +28,24 @@
 
 <div class="gene-preview" data-gene="horsegenetics.accretion"></div>
 
-<h2 id="outcomes">What it does</h2>
+<h2 id="outcomes">What it can come out as</h2>
 
 <div class="table-wrap">
 <table class="facts">
+<thead><tr><th>Outcome</th><th>Carrying</th></tr></thead>
 <tbody>
-<tr><th>Bottom Accretion</th><td>The pale field is the underside: a quarter to nearly half the horse, bounded by a single line running nose-to-tail at a third to a half of the local body depth measured up from the belly, rising a little over the shoulder and rather more over the flank. The boundary undulates gently and has no edge at all - it is a gradient a hand's span or two wide. All four legs are included the whole way to the hoof with no separate boundary of their own, and about three horses in five also take a cap on the muzzle.</td></tr>
-<tr><th>Coloured Accretion</th><td>The same marking in a colour the line carries rather than in white. Fully recessive: it takes two copies, and a single copy beside a white allele shows white. It never gives blue eyes, whatever the white form does. It mirrors Bottom Accretion rather than Top Accretion: a horse showing the coloured form carries no white allele at all, so there is no second shape left to tell apart.</td></tr>
-<tr><th>Top Accretion</th><td>The mirror image, and the rarer of the two: the pale field is the topline instead - crest, dorsal neck, withers, back, loin, croup and the top of the hip, a fifth to two-fifths of the horse, bounded by a line at half to two-thirds of the body depth measured down from the spine. The legs are excluded entirely. About half of these horses take the mane as well.</td></tr>
-<tr><th>Wild type</th><td>No accretion.</td></tr>
+<tr><th>Bottom Accretion</th><td><code>Ab/Ab</code> &middot; <code>Ab/At</code> &middot; <code>Ab/n</code> &middot; <code>Ab/Ac</code> &middot; <code>At/Ac</code></td></tr>
+<tr><th>Coloured Accretion</th><td><code>Ac/Ac</code></td></tr>
+<tr><th>Top Accretion</th><td><code>At/At</code> &middot; <code>At/n</code></td></tr>
+<tr><th>Wild type</th><td><code>Ac/n</code> &middot; <code>n/n</code></td></tr>
 </tbody>
 </table>
 </div>
+
+<p class="muted">
+    How each one is actually drawn - region by region, and the layers it is built from -
+    is on the <a href="#layers">coding tab</a>.
+</p>
 
 <h2 id="inheritance">What you can get</h2>
 
@@ -107,7 +113,16 @@
 
 <h2 id="layers">What it paints</h2>
 
+<p>
+    Each outcome, described the way the gene file describes it, and then the
+    layers that draw it in the order they are painted. The prose is the part
+    a reader checks a bake against; the list underneath is what the engine
+    actually did.
+</p>
+
 <h3>Bottom Accretion</h3>
+
+<p>The pale field is the underside: a quarter to nearly half the horse, bounded by a single line running nose-to-tail at a third to a half of the local body depth measured up from the belly, rising a little over the shoulder and rather more over the flank. The boundary undulates gently and has no edge at all - it is a gradient a hand's span or two wide. All four legs are included the whole way to the hoof with no separate boundary of their own, and about three horses in five also take a cap on the muzzle.</p>
 
 <ol>
 <li>the ventral field &mdash; <code>AXIS</code> &times; <code>NOISE</code>, painted with <code>TOWARD</code></li>
@@ -117,6 +132,8 @@
 
 <h3>Coloured Accretion</h3>
 
+<p>The same marking in a colour the line carries rather than in white. Fully recessive: it takes two copies, and a single copy beside a white allele shows white. It never gives blue eyes, whatever the white form does. It mirrors Bottom Accretion rather than Top Accretion: a horse showing the coloured form carries no white allele at all, so there is no second shape left to tell apart.</p>
+
 <ol>
 <li>the ventral field, in colour &mdash; <code>AXIS</code> &times; <code>NOISE</code>, painted with <code>TOWARD</code></li>
 <li>the legs, the whole way down, in colour &mdash; <code>PARTS</code>, painted with <code>TOWARD</code></li>
@@ -125,10 +142,18 @@
 
 <h3>Top Accretion</h3>
 
+<p>The mirror image, and the rarer of the two: the pale field is the topline instead - crest, dorsal neck, withers, back, loin, croup and the top of the hip, a fifth to two-fifths of the horse, bounded by a line at half to two-thirds of the body depth measured down from the spine. The legs are excluded entirely. About half of these horses take the mane as well.</p>
+
 <ol>
 <li>the dorsal field &mdash; <code>AXIS</code> &times; <code>NOISE</code>, painted with <code>TOWARD</code></li>
 <li>the mane, on about half of them &mdash; <code>PARTS</code> &times; <code>NOISE</code>, painted with <code>TOWARD</code></li>
 </ol>
+
+<h3>Wild type</h3>
+
+<p>No accretion.</p>
+
+<p class="muted">Paints nothing.</p>
 
 </section>
 

@@ -28,17 +28,23 @@
 
 <div class="gene-preview" data-gene="horsegenetics.guppy"></div>
 
-<h2 id="outcomes">What it does</h2>
+<h2 id="outcomes">What it can come out as</h2>
 
 <div class="table-wrap">
 <table class="facts">
+<thead><tr><th>Outcome</th><th>Carrying</th></tr></thead>
 <tbody>
-<tr><th>Guppy</th><td>Colour runs the full length of the crest, divided across it into discrete upright bands - three to seven of them, irregular in width, and hard-edged where they meet, with no blending anywhere. Some bands are the hair's own colour or white instead. The forelock follows the same rule at a smaller count. The tail is different: there the colour lies in long streaks running with the fall of the hair rather than across it, over the upper part of it, interleaving where two hues meet into a mottled flame rather than a clean stripe. Both use the same set of hues.</td></tr>
-<tr><th>Guppy carrier</th><td>One copy shows nothing whatever. Two carriers bred together are the only way the banding appears.</td></tr>
-<tr><th>Wild type</th><td>Ordinary hair.</td></tr>
+<tr><th>Guppy</th><td><code>Gup/Gup</code></td></tr>
+<tr><th>Guppy carrier</th><td><code>Gup/n</code></td></tr>
+<tr><th>Wild type</th><td><code>n/n</code></td></tr>
 </tbody>
 </table>
 </div>
+
+<p class="muted">
+    How each one is actually drawn - region by region, and the layers it is built from -
+    is on the <a href="#layers">coding tab</a>.
+</p>
 
 <h2 id="inheritance">What you can get</h2>
 
@@ -99,12 +105,33 @@
 
 <h2 id="layers">What it paints</h2>
 
+<p>
+    Each outcome, described the way the gene file describes it, and then the
+    layers that draw it in the order they are painted. The prose is the part
+    a reader checks a bake against; the list underneath is what the engine
+    actually did.
+</p>
+
 <h3>Guppy</h3>
+
+<p>Colour runs the full length of the crest, divided across it into discrete upright bands - three to seven of them, irregular in width, and hard-edged where they meet, with no blending anywhere. Some bands are the hair's own colour or white instead. The forelock follows the same rule at a smaller count. The tail is different: there the colour lies in long streaks running with the fall of the hair rather than across it, over the upper part of it, interleaving where two hues meet into a mottled flame rather than a clean stripe. Both use the same set of hues.</p>
 
 <ol>
 <li>upright bands across the mane &mdash; <code>STROKES</code>, painted with <code>PALETTE</code></li>
 <li>lengthwise streaks down the upper tail &mdash; <code>STROKES</code> &times; <code>AXIS</code>, painted with <code>PALETTE</code></li>
 </ol>
+
+<h3>Guppy carrier</h3>
+
+<p>One copy shows nothing whatever. Two carriers bred together are the only way the banding appears.</p>
+
+<p class="muted">Paints nothing.</p>
+
+<h3>Wild type</h3>
+
+<p>Ordinary hair.</p>
+
+<p class="muted">Paints nothing.</p>
 
 </section>
 

@@ -28,16 +28,22 @@
 
 <div class="gene-preview" data-gene="horsegenetics.peafowl"></div>
 
-<h2 id="outcomes">What it does</h2>
+<h2 id="outcomes">What it can come out as</h2>
 
 <div class="table-wrap">
 <table class="facts">
+<thead><tr><th>Outcome</th><th>Carrying</th></tr></thead>
 <tbody>
-<tr><th>Peafowl</th><td>The speckles sweep - the field flows across the horse and may break into separate runs, but it never sits in random patches, and it never reaches the belly. Two or three colours at most, in dots no bigger than a pupil, each dot one colour, and never dense enough to read as roan. The mane carries at least one full plume and the tail may carry another; where a plume fails it comes out as a stripe of colour through the hair instead, and a horse showing failed plumes always has one proper one as well. Every plume on a horse is the same design. The hooves are untouched.</td></tr>
-<tr><th>Wild type</th><td>No peafowling.</td></tr>
+<tr><th>Peafowl</th><td><code>Pwl/Pwl</code> &middot; <code>Pwl/n</code></td></tr>
+<tr><th>Wild type</th><td><code>n/n</code></td></tr>
 </tbody>
 </table>
 </div>
+
+<p class="muted">
+    How each one is actually drawn - region by region, and the layers it is built from -
+    is on the <a href="#layers">coding tab</a>.
+</p>
 
 <h2 id="inheritance">What you can get</h2>
 
@@ -99,13 +105,28 @@
 
 <h2 id="layers">What it paints</h2>
 
+<p>
+    Each outcome, described the way the gene file describes it, and then the
+    layers that draw it in the order they are painted. The prose is the part
+    a reader checks a bake against; the list underneath is what the engine
+    actually did.
+</p>
+
 <h3>Peafowl</h3>
+
+<p>The speckles sweep - the field flows across the horse and may break into separate runs, but it never sits in random patches, and it never reaches the belly. Two or three colours at most, in dots no bigger than a pupil, each dot one colour, and never dense enough to read as roan. The mane carries at least one full plume and the tail may carry another; where a plume fails it comes out as a stripe of colour through the hair instead, and a horse showing failed plumes always has one proper one as well. Every plume on a horse is the same design. The hooves are untouched.</p>
 
 <ol>
 <li>the speckle field, flowing &mdash; <code>SPECKLE</code> &times; <code>STROKES</code> &times; <code>AXIS</code>, painted with <code>PALETTE</code></li>
 <li>the plume in the mane &mdash; <code>SPOTS</code> &times; <code>STROKES</code>, painted with <code>TOWARD</code></li>
 <li>the plume in the tail, and the failed ones &mdash; <code>STROKES</code>, painted with <code>TOWARD</code></li>
 </ol>
+
+<h3>Wild type</h3>
+
+<p>No peafowling.</p>
+
+<p class="muted">Paints nothing.</p>
 
 </section>
 

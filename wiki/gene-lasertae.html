@@ -28,17 +28,23 @@
 
 <div class="gene-preview" data-gene="horsegenetics.lasertae"></div>
 
-<h2 id="outcomes">What it does</h2>
+<h2 id="outcomes">What it can come out as</h2>
 
 <div class="table-wrap">
 <table class="facts">
+<thead><tr><th>Outcome</th><th>Carrying</th></tr></thead>
 <tbody>
-<tr><th>Lasertae</th><td>Big soft-edged ellipses, their long axis lying roughly nose to tail. The halo has no boundary worth the name on its outside and a firmer one inside, and within it the core sits a shade or two below the surrounding coat rather than above it - which is what makes a lasertae read as a hole with a light around it rather than as a spot.</td></tr>
-<tr><th>Coloured Lasertae</th><td>The same marking in a colour the line carries rather than in white. Fully recessive: it takes two copies, and a single copy beside the white allele shows white. It never gives blue eyes, whatever the white form does.</td></tr>
-<tr><th>Wild type</th><td>No lasertae.</td></tr>
+<tr><th>Lasertae</th><td><code>Lst/Lst</code> &middot; <code>Lst/Lsc</code> &middot; <code>Lst/n</code></td></tr>
+<tr><th>Coloured Lasertae</th><td><code>Lsc/Lsc</code></td></tr>
+<tr><th>Wild type</th><td><code>Lsc/n</code> &middot; <code>n/n</code></td></tr>
 </tbody>
 </table>
 </div>
+
+<p class="muted">
+    How each one is actually drawn - region by region, and the layers it is built from -
+    is on the <a href="#layers">coding tab</a>.
+</p>
 
 <h2 id="inheritance">What you can get</h2>
 
@@ -102,7 +108,16 @@
 
 <h2 id="layers">What it paints</h2>
 
+<p>
+    Each outcome, described the way the gene file describes it, and then the
+    layers that draw it in the order they are painted. The prose is the part
+    a reader checks a bake against; the list underneath is what the engine
+    actually did.
+</p>
+
 <h3>Lasertae</h3>
+
+<p>Big soft-edged ellipses, their long axis lying roughly nose to tail. The halo has no boundary worth the name on its outside and a firmer one inside, and within it the core sits a shade or two below the surrounding coat rather than above it - which is what makes a lasertae read as a hole with a light around it rather than as a spot.</p>
 
 <ol>
 <li>the halo &mdash; <code>RINGS</code>, painted with <code>TOWARD</code></li>
@@ -111,10 +126,18 @@
 
 <h3>Coloured Lasertae</h3>
 
+<p>The same marking in a colour the line carries rather than in white. Fully recessive: it takes two copies, and a single copy beside the white allele shows white. It never gives blue eyes, whatever the white form does.</p>
+
 <ol>
 <li>the halo, in colour &mdash; <code>RINGS</code>, painted with <code>TOWARD</code></li>
 <li>the darker core inside it, in colour &mdash; <code>SPOTS</code>, painted with <code>TOWARD</code></li>
 </ol>
+
+<h3>Wild type</h3>
+
+<p>No lasertae.</p>
+
+<p class="muted">Paints nothing.</p>
 
 </section>
 

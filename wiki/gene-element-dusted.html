@@ -28,16 +28,22 @@
 
 <div class="gene-preview" data-gene="horsegenetics.element_dusted"></div>
 
-<h2 id="outcomes">What it does</h2>
+<h2 id="outcomes">What it can come out as</h2>
 
 <div class="table-wrap">
 <table class="facts">
+<thead><tr><th>Outcome</th><th>Carrying</th></tr></thead>
 <tbody>
-<tr><th>Element Dusted</th><td>On the legs the colour starts at the hoof and climbs a quarter to three-fifths of the way up, ending in a fade rather than a line, and no two legs end at the same height. It is palest and least saturated at the very bottom - near-white at the hoof on most horses - and gets deeper and stronger as it rises. The hair works the other way round from the legs: the roots keep the horse's own colour and the far half or better takes the palette, running toward near-white at the very ends. Along the topline, from withers to croup and no further down than the upper quarter of the barrel, is a field of soft round dapples in the leading hue at low saturation, which read darker than the coat rather than lighter.</td></tr>
-<tr><th>Wild type</th><td>No dusting.</td></tr>
+<tr><th>Element Dusted</th><td><code>Ed/Ed</code> &middot; <code>Ed/n</code></td></tr>
+<tr><th>Wild type</th><td><code>n/n</code></td></tr>
 </tbody>
 </table>
 </div>
+
+<p class="muted">
+    How each one is actually drawn - region by region, and the layers it is built from -
+    is on the <a href="#layers">coding tab</a>.
+</p>
 
 <h2 id="inheritance">What you can get</h2>
 
@@ -99,7 +105,16 @@
 
 <h2 id="layers">What it paints</h2>
 
+<p>
+    Each outcome, described the way the gene file describes it, and then the
+    layers that draw it in the order they are painted. The prose is the part
+    a reader checks a bake against; the list underneath is what the engine
+    actually did.
+</p>
+
 <h3>Element Dusted</h3>
+
+<p>On the legs the colour starts at the hoof and climbs a quarter to three-fifths of the way up, ending in a fade rather than a line, and no two legs end at the same height. It is palest and least saturated at the very bottom - near-white at the hoof on most horses - and gets deeper and stronger as it rises. The hair works the other way round from the legs: the roots keep the horse's own colour and the far half or better takes the palette, running toward near-white at the very ends. Along the topline, from withers to croup and no further down than the upper quarter of the barrel, is a field of soft round dapples in the leading hue at low saturation, which read darker than the coat rather than lighter.</p>
 
 <ol>
 <li>the legs, climbing from the hoof &mdash; <code>AXIS</code>, painted with <code>RAMP</code></li>
@@ -107,6 +122,12 @@
 <li>the far half of the mane and tail &mdash; <code>AXIS</code>, painted with <code>RAMP</code></li>
 <li>dapples along the topline &mdash; <code>SPOTS</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code></li>
 </ol>
+
+<h3>Wild type</h3>
+
+<p>No dusting.</p>
+
+<p class="muted">Paints nothing.</p>
 
 </section>
 

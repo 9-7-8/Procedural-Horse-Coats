@@ -28,17 +28,23 @@
 
 <div class="gene-preview" data-gene="horsegenetics.gudial"></div>
 
-<h2 id="outcomes">What it does</h2>
+<h2 id="outcomes">What it can come out as</h2>
 
 <div class="table-wrap">
 <table class="facts">
+<thead><tr><th>Outcome</th><th>Carrying</th></tr></thead>
 <tbody>
-<tr><th>Gudial, three colours</th><td>A horse carrying two-colour speckling gets a third colour in the marking: the second hue joins the first through the neck and leg banding and the topline spotting, and the mask picks it up around the eyes.</td></tr>
-<tr><th>Gudial</th><td>The head goes dark and takes an intricate striped mask around the eyes and muzzle. Bold upright bands cross the neck, and the legs are banded the whole way down to the hoof in the same colours - segmented, high-contrast, deliberately loud. Along the back and barrel is a scatter of spotting. The mane carries no regular striping, the hooves take one of the speckling colours, and the marking permits no white patterning of any kind.</td></tr>
-<tr><th>Wild type</th><td>No warning colours.</td></tr>
+<tr><th>Gudial, three colours</th><td><code>Gud/Gud</code></td></tr>
+<tr><th>Gudial</th><td><code>Gud/n</code></td></tr>
+<tr><th>Wild type</th><td><code>n/n</code></td></tr>
 </tbody>
 </table>
 </div>
+
+<p class="muted">
+    How each one is actually drawn - region by region, and the layers it is built from -
+    is on the <a href="#layers">coding tab</a>.
+</p>
 
 <h2 id="inheritance">What you can get</h2>
 
@@ -100,7 +106,16 @@
 
 <h2 id="layers">What it paints</h2>
 
+<p>
+    Each outcome, described the way the gene file describes it, and then the
+    layers that draw it in the order they are painted. The prose is the part
+    a reader checks a bake against; the list underneath is what the engine
+    actually did.
+</p>
+
 <h3>Gudial, three colours</h3>
+
+<p>A horse carrying two-colour speckling gets a third colour in the marking: the second hue joins the first through the neck and leg banding and the topline spotting, and the mask picks it up around the eyes.</p>
 
 <ol>
 <li>the dark head &mdash; <code>PARTS</code>, painted with <code>TOWARD</code></li>
@@ -115,6 +130,8 @@
 
 <h3>Gudial</h3>
 
+<p>The head goes dark and takes an intricate striped mask around the eyes and muzzle. Bold upright bands cross the neck, and the legs are banded the whole way down to the hoof in the same colours - segmented, high-contrast, deliberately loud. Along the back and barrel is a scatter of spotting. The mane carries no regular striping, the hooves take one of the speckling colours, and the marking permits no white patterning of any kind.</p>
+
 <ol>
 <li>the dark head &mdash; <code>PARTS</code>, painted with <code>TOWARD</code></li>
 <li>the striped mask over it &mdash; <code>STROKES</code>, painted with <code>TOWARD</code></li>
@@ -123,6 +140,12 @@
 <li>spotting along the topline &mdash; <code>SPOTS</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code></li>
 <li>hooves in the same colour &mdash; <code>AXIS</code>, painted with <code>TOWARD</code></li>
 </ol>
+
+<h3>Wild type</h3>
+
+<p>No warning colours.</p>
+
+<p class="muted">Paints nothing.</p>
 
 </section>
 

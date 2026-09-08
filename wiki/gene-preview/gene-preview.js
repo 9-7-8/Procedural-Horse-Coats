@@ -1,5 +1,5 @@
-// The preview window that sits on every gene page: this gene, on a black, a
-// bay and a chestnut, as a horse you can spin.
+// The preview window that sits on every gene page: this gene, on a bay, a
+// black and a chestnut, as a horse you can spin. It opens on the bay.
 //
 // WHAT IS NEW HERE, AND WHAT IS NOT. Almost nothing genetic is. The coat comes
 // out of common/ compiled to WebAssembly (wiki/horse-designer/js/java.js - the
@@ -259,14 +259,13 @@ window.HG = window.HG || {};
   }
 
   /**
-   * Which base coat a gene page opens on: BAY, not the first in the list.
+   * Which base coat a gene page opens on: BAY, by name.
    *
-   * A black horse hides every dark marking on it, and half these genes are
-   * dark markings - so opening on black meant a reader's first look at a gene
-   * was often a horse with nothing visible on it. Bay is the only common base
-   * that shows a dark marking and a pale one at once, which is also why the
-   * gene icons are baked on one. Falls back to the first entry if the base
-   * list is ever rearranged out from under this.
+   * BaseCoats.all() puts bay first for exactly this reason, so this and the
+   * plain "take the first one" other callers use now agree. It still asks by
+   * name rather than taking index 0, because the reason bay is the right
+   * default belongs next to the page that depends on it: a black horse hides
+   * every dark marking on it, and a great many of these genes paint dark.
    */
   function defaultBase(bases) {
     for (var i = 0; i < bases.length; i++) {

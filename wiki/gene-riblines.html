@@ -28,17 +28,23 @@
 
 <div class="gene-preview" data-gene="horsegenetics.riblines"></div>
 
-<h2 id="outcomes">What it does</h2>
+<h2 id="outcomes">What it can come out as</h2>
 
 <div class="table-wrap">
 <table class="facts">
+<thead><tr><th>Outcome</th><th>Carrying</th></tr></thead>
 <tbody>
-<tr><th>Riblines</th><td>Sharp-edged white strokes that taper to points at both ends and hold one value along their whole length - no gradient inside a stroke. They run dorso-ventrally on the neck, along the rib arcs on the barrel, down the scapular spine, out from the point of hip, and around the legs rather than along them. Twenty to fifty a side, parallel within a zone and turning as the zone does.</td></tr>
-<tr><th>Coloured riblines</th><td>The same lines, in a colour the line of horses carries rather than in white. Fully recessive - it takes two copies, and a single copy beside the white allele shows white. It never gives blue eyes; the white form may.</td></tr>
-<tr><th>Wild type</th><td>No riblines.</td></tr>
+<tr><th>Riblines</th><td><code>Rib/Rib</code> &middot; <code>Rib/Rbc</code> &middot; <code>Rib/n</code></td></tr>
+<tr><th>Coloured riblines</th><td><code>Rbc/Rbc</code></td></tr>
+<tr><th>Wild type</th><td><code>Rbc/n</code> &middot; <code>n/n</code></td></tr>
 </tbody>
 </table>
 </div>
+
+<p class="muted">
+    How each one is actually drawn - region by region, and the layers it is built from -
+    is on the <a href="#layers">coding tab</a>.
+</p>
 
 <h2 id="inheritance">What you can get</h2>
 
@@ -102,7 +108,16 @@
 
 <h2 id="layers">What it paints</h2>
 
+<p>
+    Each outcome, described the way the gene file describes it, and then the
+    layers that draw it in the order they are painted. The prose is the part
+    a reader checks a bake against; the list underneath is what the engine
+    actually did.
+</p>
+
 <h3>Riblines</h3>
+
+<p>Sharp-edged white strokes that taper to points at both ends and hold one value along their whole length - no gradient inside a stroke. They run dorso-ventrally on the neck, along the rib arcs on the barrel, down the scapular spine, out from the point of hip, and around the legs rather than along them. Twenty to fifty a side, parallel within a zone and turning as the zone does.</p>
 
 <ol>
 <li>strokes down the neck and along the ribs &mdash; <code>STROKES</code>, painted with <code>TOWARD</code></li>
@@ -111,10 +126,18 @@
 
 <h3>Coloured riblines</h3>
 
+<p>The same lines, in a colour the line of horses carries rather than in white. Fully recessive - it takes two copies, and a single copy beside the white allele shows white. It never gives blue eyes; the white form may.</p>
+
 <ol>
 <li>coloured strokes down the neck and along the ribs &mdash; <code>STROKES</code>, painted with <code>TOWARD</code></li>
 <li>coloured rings set around the legs &mdash; <code>STROKES</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code></li>
 </ol>
+
+<h3>Wild type</h3>
+
+<p>No riblines.</p>
+
+<p class="muted">Paints nothing.</p>
 
 </section>
 

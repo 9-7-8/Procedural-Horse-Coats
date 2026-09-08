@@ -28,16 +28,22 @@
 
 <div class="gene-preview" data-gene="horsegenetics.iuari"></div>
 
-<h2 id="outcomes">What it does</h2>
+<h2 id="outcomes">What it can come out as</h2>
 
 <div class="table-wrap">
 <table class="facts">
+<thead><tr><th>Outcome</th><th>Carrying</th></tr></thead>
 <tbody>
-<tr><th>Iuari</th><td>Patches that read as deliberate focal points rather than as marks: darker than the coat on some horses and lighter on others, concentrated on the neck, shoulder, barrel and hindquarter, with soft indistinct middles. What names the marking is the rim - each patch is outlined by speckling that crowds at its boundary and thins away from it, so the patch looks lit from the edge. It goes under white markings rather than over them, and the whole horse still carries its ordinary speckling as well.</td></tr>
-<tr><th>Wild type</th><td>No patches.</td></tr>
+<tr><th>Iuari</th><td><code>Iua/Iua</code> &middot; <code>Iua/n</code></td></tr>
+<tr><th>Wild type</th><td><code>n/n</code></td></tr>
 </tbody>
 </table>
 </div>
+
+<p class="muted">
+    How each one is actually drawn - region by region, and the layers it is built from -
+    is on the <a href="#layers">coding tab</a>.
+</p>
 
 <h2 id="inheritance">What you can get</h2>
 
@@ -99,12 +105,27 @@
 
 <h2 id="layers">What it paints</h2>
 
+<p>
+    Each outcome, described the way the gene file describes it, and then the
+    layers that draw it in the order they are painted. The prose is the part
+    a reader checks a bake against; the list underneath is what the engine
+    actually did.
+</p>
+
 <h3>Iuari</h3>
+
+<p>Patches that read as deliberate focal points rather than as marks: darker than the coat on some horses and lighter on others, concentrated on the neck, shoulder, barrel and hindquarter, with soft indistinct middles. What names the marking is the rim - each patch is outlined by speckling that crowds at its boundary and thins away from it, so the patch looks lit from the edge. It goes under white markings rather than over them, and the whole horse still carries its ordinary speckling as well.</p>
 
 <ol>
 <li>the patches themselves &mdash; <code>PATCHES</code>, painted with <code>TINT</code></li>
 <li>speckling crowded at the patch rims &mdash; <code>SPECKLE</code> &times; <code>PATCHES</code> &times; <code>PATCHES inverted</code>, painted with <code>TOWARD</code></li>
 </ol>
+
+<h3>Wild type</h3>
+
+<p>No patches.</p>
+
+<p class="muted">Paints nothing.</p>
 
 </section>
 

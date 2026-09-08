@@ -28,16 +28,22 @@
 
 <div class="gene-preview" data-gene="horsegenetics.striped_mane_tail"></div>
 
-<h2 id="outcomes">What it does</h2>
+<h2 id="outcomes">What it can come out as</h2>
 
 <div class="table-wrap">
 <table class="facts">
+<thead><tr><th>Outcome</th><th>Carrying</th></tr></thead>
 <tbody>
-<tr><th>Striped mane and tail</th><td>Three to nine bundles spaced along the crest, each running the whole length of the strand it is in, though about a third of them thin out and feather away partway down. The forelock joins in about half the time, at one to three bundles. The tail carries two to six, a little wider at the dock. The bundles are whatever contrasts: light on a dark mane, dark on a light one. No body coat expression of any kind.</td></tr>
-<tr><th>Wild type</th><td>Unstriped hair.</td></tr>
+<tr><th>Striped mane and tail</th><td><code>Smt/Smt</code> &middot; <code>Smt/n</code></td></tr>
+<tr><th>Wild type</th><td><code>n/n</code></td></tr>
 </tbody>
 </table>
 </div>
+
+<p class="muted">
+    How each one is actually drawn - region by region, and the layers it is built from -
+    is on the <a href="#layers">coding tab</a>.
+</p>
 
 <h2 id="inheritance">What you can get</h2>
 
@@ -99,12 +105,27 @@
 
 <h2 id="layers">What it paints</h2>
 
+<p>
+    Each outcome, described the way the gene file describes it, and then the
+    layers that draw it in the order they are painted. The prose is the part
+    a reader checks a bake against; the list underneath is what the engine
+    actually did.
+</p>
+
 <h3>Striped mane and tail</h3>
+
+<p>Three to nine bundles spaced along the crest, each running the whole length of the strand it is in, though about a third of them thin out and feather away partway down. The forelock joins in about half the time, at one to three bundles. The tail carries two to six, a little wider at the dock. The bundles are whatever contrasts: light on a dark mane, dark on a light one. No body coat expression of any kind.</p>
 
 <ol>
 <li>light bundles, where the hair is dark &mdash; <code>STROKES</code> &times; <code>PIGMENT</code>, painted with <code>TOWARD</code></li>
 <li>dark bundles, where the hair is light &mdash; <code>STROKES</code> &times; <code>PIGMENT inverted</code>, painted with <code>TOWARD</code></li>
 </ol>
+
+<h3>Wild type</h3>
+
+<p>Unstriped hair.</p>
+
+<p class="muted">Paints nothing.</p>
 
 </section>
 

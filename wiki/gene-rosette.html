@@ -28,17 +28,23 @@
 
 <div class="gene-preview" data-gene="horsegenetics.rosette"></div>
 
-<h2 id="outcomes">What it does</h2>
+<h2 id="outcomes">What it can come out as</h2>
 
 <div class="table-wrap">
 <table class="facts">
+<thead><tr><th>Outcome</th><th>Carrying</th></tr></thead>
 <tbody>
-<tr><th>Blanket rosette</th><td>Two copies crowd the rosettes together until they touch, and where they touch they read as broken striping rather than as rings. Coverage runs from average to the whole horse, and the mane picks up the tone wherever a rosette meets the topline.</td></tr>
-<tr><th>Semi-rosette</th><td>One copy scatters the rosettes over the upper half of the horse - clear and well-drawn, but selectively placed, and rarely reaching below the barrel.</td></tr>
-<tr><th>Wild type</th><td>No rosettes.</td></tr>
+<tr><th>Blanket rosette</th><td><code>Rs/Rs</code></td></tr>
+<tr><th>Semi-rosette</th><td><code>Rs/n</code></td></tr>
+<tr><th>Wild type</th><td><code>n/n</code></td></tr>
 </tbody>
 </table>
 </div>
+
+<p class="muted">
+    How each one is actually drawn - region by region, and the layers it is built from -
+    is on the <a href="#layers">coding tab</a>.
+</p>
 
 <h2 id="inheritance">What you can get</h2>
 
@@ -100,7 +106,16 @@
 
 <h2 id="layers">What it paints</h2>
 
+<p>
+    Each outcome, described the way the gene file describes it, and then the
+    layers that draw it in the order they are painted. The prose is the part
+    a reader checks a bake against; the list underneath is what the engine
+    actually did.
+</p>
+
 <h3>Blanket rosette</h3>
+
+<p>Two copies crowd the rosettes together until they touch, and where they touch they read as broken striping rather than as rings. Coverage runs from average to the whole horse, and the mane picks up the tone wherever a rosette meets the topline.</p>
 
 <ol>
 <li>the rings themselves, drawn along the body's curve &mdash; <code>RINGS</code>, painted with <code>TOWARD</code></li>
@@ -110,10 +125,18 @@
 
 <h3>Semi-rosette</h3>
 
+<p>One copy scatters the rosettes over the upper half of the horse - clear and well-drawn, but selectively placed, and rarely reaching below the barrel.</p>
+
 <ol>
 <li>rings over the upper body &mdash; <code>RINGS</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code></li>
 <li>a soft shadow inside each ring &mdash; <code>SPOTS</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code></li>
 </ol>
+
+<h3>Wild type</h3>
+
+<p>No rosettes.</p>
+
+<p class="muted">Paints nothing.</p>
 
 </section>
 

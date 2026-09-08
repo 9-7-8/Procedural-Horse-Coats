@@ -28,17 +28,23 @@
 
 <div class="gene-preview" data-gene="horsegenetics.flametouched"></div>
 
-<h2 id="outcomes">What it does</h2>
+<h2 id="outcomes">What it can come out as</h2>
 
 <div class="table-wrap">
 <table class="facts">
+<thead><tr><th>Outcome</th><th>Carrying</th></tr></thead>
 <tbody>
-<tr><th>Flametouched, gradient</th><td>The gradient form: shading over the topline, the face, the hooves and the mane and tail, running smoothly through two or three colours from ember to flame. It is the only form allowed to touch the topline. Up to half the horse. It sets nothing on fire.</td></tr>
-<tr><th>Flametouched, flames</th><td>The flame form: stylised tongues of fire climbing all four legs and a marking across the face, in two or three colours, with the tips brightest. It never touches the topline and never shows over white. It also sets nothing on fire.</td></tr>
-<tr><th>Wild type</th><td>Unlit.</td></tr>
+<tr><th>Flametouched, gradient</th><td><code>Ffm/Ffm</code></td></tr>
+<tr><th>Flametouched, flames</th><td><code>Ffm/n</code></td></tr>
+<tr><th>Wild type</th><td><code>n/n</code></td></tr>
 </tbody>
 </table>
 </div>
+
+<p class="muted">
+    How each one is actually drawn - region by region, and the layers it is built from -
+    is on the <a href="#layers">coding tab</a>.
+</p>
 
 <h2 id="inheritance">What you can get</h2>
 
@@ -100,7 +106,16 @@
 
 <h2 id="layers">What it paints</h2>
 
+<p>
+    Each outcome, described the way the gene file describes it, and then the
+    layers that draw it in the order they are painted. The prose is the part
+    a reader checks a bake against; the list underneath is what the engine
+    actually did.
+</p>
+
 <h3>Flametouched, gradient</h3>
+
+<p>The gradient form: shading over the topline, the face, the hooves and the mane and tail, running smoothly through two or three colours from ember to flame. It is the only form allowed to touch the topline. Up to half the horse. It sets nothing on fire.</p>
 
 <ol>
 <li>shading over the topline &mdash; <code>AXIS</code>, painted with <code>RAMP</code></li>
@@ -109,10 +124,18 @@
 
 <h3>Flametouched, flames</h3>
 
+<p>The flame form: stylised tongues of fire climbing all four legs and a marking across the face, in two or three colours, with the tips brightest. It never touches the topline and never shows over white. It also sets nothing on fire.</p>
+
 <ol>
 <li>flames climbing the legs &mdash; <code>STROKES</code> &times; <code>AXIS</code>, painted with <code>RAMP</code></li>
 <li>a flame marking across the face &mdash; <code>STROKES</code>, painted with <code>RAMP</code></li>
 </ol>
+
+<h3>Wild type</h3>
+
+<p>Unlit.</p>
+
+<p class="muted">Paints nothing.</p>
 
 </section>
 

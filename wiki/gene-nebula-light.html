@@ -28,16 +28,22 @@
 
 <div class="gene-preview" data-gene="horsegenetics.nebula_light"></div>
 
-<h2 id="outcomes">What it does</h2>
+<h2 id="outcomes">What it can come out as</h2>
 
 <div class="table-wrap">
 <table class="facts">
+<thead><tr><th>Outcome</th><th>Carrying</th></tr></thead>
 <tbody>
-<tr><th>Nebula Light</th><td>A quarter to a half of the horse, centred on the back of the barrel, the flank, the croup and the hip, and reaching forward onto the shoulder about half the time. Two to four hue zones overlap within it, drawn from magenta, violet, blue and teal, each a foot or two across and blended into its neighbours over a long transition. There is no hard boundary at any margin. Through the field runs a population of small points, and among them three to ten larger ones with radial halos around them at half their own brightness.</td></tr>
-<tr><th>Wild type</th><td>No nebula.</td></tr>
+<tr><th>Nebula Light</th><td><code>Neb/Neb</code> &middot; <code>Neb/n</code></td></tr>
+<tr><th>Wild type</th><td><code>n/n</code></td></tr>
 </tbody>
 </table>
 </div>
+
+<p class="muted">
+    How each one is actually drawn - region by region, and the layers it is built from -
+    is on the <a href="#layers">coding tab</a>.
+</p>
 
 <h2 id="inheritance">What you can get</h2>
 
@@ -99,13 +105,28 @@
 
 <h2 id="layers">What it paints</h2>
 
+<p>
+    Each outcome, described the way the gene file describes it, and then the
+    layers that draw it in the order they are painted. The prose is the part
+    a reader checks a bake against; the list underneath is what the engine
+    actually did.
+</p>
+
 <h3>Nebula Light</h3>
+
+<p>A quarter to a half of the horse, centred on the back of the barrel, the flank, the croup and the hip, and reaching forward onto the shoulder about half the time. Two to four hue zones overlap within it, drawn from magenta, violet, blue and teal, each a foot or two across and blended into its neighbours over a long transition. There is no hard boundary at any margin. Through the field runs a population of small points, and among them three to ten larger ones with radial halos around them at half their own brightness.</p>
 
 <ol>
 <li>the hue zones &mdash; <code>NOISE</code> &times; <code>AXIS</code>, painted with <code>PALETTE</code></li>
 <li>the fine point population &mdash; <code>SPECKLE</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code>, and it <strong>glows</strong></li>
 <li>the larger points, with halos &mdash; <code>SPOTS</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code></li>
 </ol>
+
+<h3>Wild type</h3>
+
+<p>No nebula.</p>
+
+<p class="muted">Paints nothing.</p>
 
 </section>
 

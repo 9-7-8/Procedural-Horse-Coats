@@ -28,18 +28,24 @@
 
 <div class="gene-preview" data-gene="horsegenetics.burn"></div>
 
-<h2 id="outcomes">What it does</h2>
+<h2 id="outcomes">What it can come out as</h2>
 
 <div class="table-wrap">
 <table class="facts">
+<thead><tr><th>Outcome</th><th>Carrying</th></tr></thead>
 <tbody>
-<tr><th>Full Burn</th><td>One copy of each allele, and the horse takes both fields at once - legs, muzzle and ventral shading black, and the mane and tail black as well. It counts as one mutation, not two.</td></tr>
-<tr><th>Burnt Moon</th><td>Black from the hoof up all four legs, ending somewhere between the mid-cannon and just below the knee, and standing a little higher at the front of the leg than the back. A black cap over the muzzle enclosing both nostrils. And, on about three in five, a soft black gradient along the belly midline and under the jaw. Every edge here is soft. The value is the same black on any horse - it does not take the coat into account at all.</td></tr>
-<tr><th>Burnt Mane and Tail</th><td>Mane, forelock and tail go black, and nothing on the body changes. Up to two strands in five may hold out and keep the base colour or white, in bundles rather than singly, and they hold out most often at the back of the crest and the far end of the tail.</td></tr>
-<tr><th>Wild type</th><td>No burn.</td></tr>
+<tr><th>Full Burn</th><td><code>Bm/Bt</code></td></tr>
+<tr><th>Burnt Moon</th><td><code>Bm/Bm</code> &middot; <code>Bm/n</code></td></tr>
+<tr><th>Burnt Mane and Tail</th><td><code>Bt/Bt</code> &middot; <code>Bt/n</code></td></tr>
+<tr><th>Wild type</th><td><code>n/n</code></td></tr>
 </tbody>
 </table>
 </div>
+
+<p class="muted">
+    How each one is actually drawn - region by region, and the layers it is built from -
+    is on the <a href="#layers">coding tab</a>.
+</p>
 
 <h2 id="inheritance">What you can get</h2>
 
@@ -104,7 +110,16 @@
 
 <h2 id="layers">What it paints</h2>
 
+<p>
+    Each outcome, described the way the gene file describes it, and then the
+    layers that draw it in the order they are painted. The prose is the part
+    a reader checks a bake against; the list underneath is what the engine
+    actually did.
+</p>
+
 <h3>Full Burn</h3>
+
+<p>One copy of each allele, and the horse takes both fields at once - legs, muzzle and ventral shading black, and the mane and tail black as well. It counts as one mutation, not two.</p>
 
 <ol>
 <li>black up the legs &mdash; <code>AXIS</code>, painted with <code>TOWARD</code></li>
@@ -116,6 +131,8 @@
 
 <h3>Burnt Moon</h3>
 
+<p>Black from the hoof up all four legs, ending somewhere between the mid-cannon and just below the knee, and standing a little higher at the front of the leg than the back. A black cap over the muzzle enclosing both nostrils. And, on about three in five, a soft black gradient along the belly midline and under the jaw. Every edge here is soft. The value is the same black on any horse - it does not take the coat into account at all.</p>
+
 <ol>
 <li>black up the legs &mdash; <code>AXIS</code>, painted with <code>TOWARD</code></li>
 <li>the muzzle cap &mdash; <code>PARTS</code>, painted with <code>TOWARD</code></li>
@@ -124,10 +141,18 @@
 
 <h3>Burnt Mane and Tail</h3>
 
+<p>Mane, forelock and tail go black, and nothing on the body changes. Up to two strands in five may hold out and keep the base colour or white, in bundles rather than singly, and they hold out most often at the back of the crest and the far end of the tail.</p>
+
 <ol>
 <li>black mane, forelock and tail &mdash; <code>PARTS</code>, painted with <code>TOWARD</code></li>
 <li>the bundles that hold out &mdash; <code>STROKES</code>, painted with <code>TOWARD</code></li>
 </ol>
+
+<h3>Wild type</h3>
+
+<p>No burn.</p>
+
+<p class="muted">Paints nothing.</p>
 
 </section>
 

@@ -264,7 +264,7 @@ window.HG = window.HG || {};
 
     var state = {
       lut: 0,
-      base: bases[0].key,
+      base: bases[0].key,        // bay - BaseCoats.all() is ordered for this
       // One selected button per locus row, all starting at 0 = off, so the
       // first horse shown is the base coat with nothing on it.
       loci: loci.map(function () { return 0; }),

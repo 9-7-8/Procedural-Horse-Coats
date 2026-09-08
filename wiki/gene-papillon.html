@@ -28,18 +28,24 @@
 
 <div class="gene-preview" data-gene="horsegenetics.papillon"></div>
 
-<h2 id="outcomes">What it does</h2>
+<h2 id="outcomes">What it can come out as</h2>
 
 <div class="table-wrap">
 <table class="facts">
+<thead><tr><th>Outcome</th><th>Carrying</th></tr></thead>
 <tbody>
-<tr><th>Spotty Papillon</th><td>The wing breaks up into spotting toward its lower edge rather than ending as a field - the pattern is still the wing's, but read through a scatter of it.</td></tr>
-<tr><th>Gradient Papillon</th><td>The wing fades into the neck's own colour as it descends, brightest at the crest and gone by the throat - blended rather than bounded, and the subtler of the two shaped forms.</td></tr>
-<tr><th>Simple Papillon</th><td>The wing pattern and the hair colouring, and nothing else - no gradient, no spotting. A clean graphic wing on the neck, and the cleanest of the three to read.</td></tr>
-<tr><th>Wild type</th><td>No wing. The pattern is famously fragile: bred to horses without it, it weakens and is gone within a couple of generations.</td></tr>
+<tr><th>Spotty Papillon</th><td><code>Sp/Sp</code> &middot; <code>Gr/Sp</code></td></tr>
+<tr><th>Gradient Papillon</th><td><code>Gr/Gr</code> &middot; <code>Si/Gr</code></td></tr>
+<tr><th>Simple Papillon</th><td><code>Si/Si</code> &middot; <code>Si/Sp</code></td></tr>
+<tr><th>Wild type</th><td><code>Si/n</code> &middot; <code>Gr/n</code> &middot; <code>Sp/n</code> &middot; <code>n/n</code></td></tr>
 </tbody>
 </table>
 </div>
+
+<p class="muted">
+    How each one is actually drawn - region by region, and the layers it is built from -
+    is on the <a href="#layers">coding tab</a>.
+</p>
 
 <h2 id="inheritance">What you can get</h2>
 
@@ -105,7 +111,16 @@
 
 <h2 id="layers">What it paints</h2>
 
+<p>
+    Each outcome, described the way the gene file describes it, and then the
+    layers that draw it in the order they are painted. The prose is the part
+    a reader checks a bake against; the list underneath is what the engine
+    actually did.
+</p>
+
 <h3>Spotty Papillon</h3>
+
+<p>The wing breaks up into spotting toward its lower edge rather than ending as a field - the pattern is still the wing's, but read through a scatter of it.</p>
 
 <ol>
 <li>the wing field over the neck &mdash; <code>PARTS</code> &times; <code>PATCHES</code> &times; <code>SPOTS</code>, painted with <code>PALETTE</code></li>
@@ -115,6 +130,8 @@
 
 <h3>Gradient Papillon</h3>
 
+<p>The wing fades into the neck's own colour as it descends, brightest at the crest and gone by the throat - blended rather than bounded, and the subtler of the two shaped forms.</p>
+
 <ol>
 <li>the wing field over the neck &mdash; <code>PARTS</code> &times; <code>PATCHES</code> &times; <code>AXIS</code>, painted with <code>PALETTE</code></li>
 <li>the eyespots and veins in it &mdash; <code>RINGS</code> &times; <code>PATCHES</code>, painted with <code>TOWARD</code></li>
@@ -123,11 +140,19 @@
 
 <h3>Simple Papillon</h3>
 
+<p>The wing pattern and the hair colouring, and nothing else - no gradient, no spotting. A clean graphic wing on the neck, and the cleanest of the three to read.</p>
+
 <ol>
 <li>the wing field over the neck &mdash; <code>PARTS</code> &times; <code>PATCHES</code>, painted with <code>PALETTE</code></li>
 <li>the eyespots and veins in it &mdash; <code>RINGS</code> &times; <code>PATCHES</code>, painted with <code>TOWARD</code></li>
 <li>the wing's colours running down the mane and tail &mdash; <code>PARTS</code>, painted with <code>RAMP</code></li>
 </ol>
+
+<h3>Wild type</h3>
+
+<p>No wing. The pattern is famously fragile: bred to horses without it, it weakens and is gone within a couple of generations.</p>
+
+<p class="muted">Paints nothing.</p>
 
 </section>
 

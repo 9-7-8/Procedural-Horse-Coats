@@ -28,16 +28,22 @@
 
 <div class="gene-preview" data-gene="horsegenetics.emitola"></div>
 
-<h2 id="outcomes">What it does</h2>
+<h2 id="outcomes">What it can come out as</h2>
 
 <div class="table-wrap">
 <table class="facts">
+<thead><tr><th>Outcome</th><th>Carrying</th></tr></thead>
 <tbody>
-<tr><th>Emitola</th><td>Black across the chest, belly and between the legs, extensive and intricate, and reaching up the flanks. Its boundary is not a line but a row of flames - sharp, jagged, energetic - and the flame work is picked out throughout in one bright speckling colour, which also takes the forelock, the hooves and the upper legs. The front and hind coverage do not meet: there is always a break between them along the belly. It goes over white markings rather than under, and the mane is left solid with no striping.</td></tr>
-<tr><th>Wild type</th><td>No emitola.</td></tr>
+<tr><th>Emitola</th><td><code>Emi/Emi</code> &middot; <code>Emi/n</code></td></tr>
+<tr><th>Wild type</th><td><code>n/n</code></td></tr>
 </tbody>
 </table>
 </div>
+
+<p class="muted">
+    How each one is actually drawn - region by region, and the layers it is built from -
+    is on the <a href="#layers">coding tab</a>.
+</p>
 
 <h2 id="inheritance">What you can get</h2>
 
@@ -99,13 +105,28 @@
 
 <h2 id="layers">What it paints</h2>
 
+<p>
+    Each outcome, described the way the gene file describes it, and then the
+    layers that draw it in the order they are painted. The prose is the part
+    a reader checks a bake against; the list underneath is what the engine
+    actually did.
+</p>
+
 <h3>Emitola</h3>
+
+<p>Black across the chest, belly and between the legs, extensive and intricate, and reaching up the flanks. Its boundary is not a line but a row of flames - sharp, jagged, energetic - and the flame work is picked out throughout in one bright speckling colour, which also takes the forelock, the hooves and the upper legs. The front and hind coverage do not meet: there is always a break between them along the belly. It goes over white markings rather than under, and the mane is left solid with no striping.</p>
 
 <ol>
 <li>black across the underside &mdash; <code>AXIS</code> &times; <code>STROKES</code> &times; <code>AXIS</code> &times; <code>AXIS inverted</code>, painted with <code>TOWARD</code></li>
 <li>speckling worked through the flames &mdash; <code>SPECKLE</code> &times; <code>STROKES</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code></li>
 <li>the forelock and the hooves &mdash; <code>AXIS</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code></li>
 </ol>
+
+<h3>Wild type</h3>
+
+<p>No emitola.</p>
+
+<p class="muted">Paints nothing.</p>
 
 </section>
 

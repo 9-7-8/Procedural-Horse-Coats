@@ -2845,6 +2845,21 @@
         here and pasting in game is the route across &mdash; <b>unplayed, check
         it</b>.</li>
 
+    <li><strong>The wiki's own gene lists.</strong> The sidebar and the landing
+        page are now generated from the registry and grouped by the same
+        families as this menu. Worth one look on the published wiki: 162 gene
+        pages in the sidebar is a long list, and the landing page grew from
+        about thirty gene cards to a hundred and sixty-four. If the grouping
+        reads badly, the fix is one table -
+        <code>common/genetics/GeneFamily</code> - and not the pages.</li>
+
+    <li><strong>Every gene page opens on a bay.</strong> The preview window
+        already did; what changed is that <code>BaseCoats.all()</code> now
+        offers bay first, so the button order is Bay / Black / Chestnut and the
+        LUT lab opens on a bay too. Check a dark-marking gene - Voided, Goth,
+        Magic zebra - actually shows something the moment its page loads, which
+        was the point.</li>
+
     <li><strong>The gene-family menu above the list.</strong> Pick <em>Natural
         dilution genes</em>: the list should drop to seven rows and the scroll
         bar should go away. Pick <em>Magic: lines and strokes</em> and it should
@@ -2917,8 +2932,9 @@
 
 <p>
     <strong>12 of the 47 rows are struck through.</strong> Clicking one still
-    adds the gene (it is real, and it belongs in an exported horse) but raises a
-    toast saying you will not see it. Which genes those are is
+    adds the gene (it is real, and it belongs in an exported horse); the row
+    says &ldquo;not shown here&rdquo; underneath, and the reason goes to the
+    console. Which genes those are is
     <strong>derived, not typed</strong> &mdash; <code>DesignerApi.showsAs</code>
     asks each gene whether it paints, moves the horse&rsquo;s scale, declares a
     condition, or is read by a painter, so a gene added later classifies itself.
@@ -2931,7 +2947,7 @@
 <tbody>
 <tr><td><code>coat</code></td><td>26 &mdash; everything that paints, plus <code>PATN1</code> / <code>PATN2</code>, which paint nothing themselves but are named in the leopard complex&rsquo;s <code>coatDependsOn()</code></td><td>no</td></tr>
 <tr><td><code>size</code></td><td>6 &mdash; ACAN, B4GALT7, HMGA2, LCORL, SHOX, magic body size</td><td>no</td></tr>
-<tr><td><code>condition</code></td><td>3 &mdash; PLOD1, RAPGEF5, ST14 (the page raises the condition as a toast)</td><td>no</td></tr>
+<tr><td><code>condition</code></td><td>3 &mdash; PLOD1, RAPGEF5, ST14 (the condition is named in the panel&rsquo;s condition line)</td><td>no</td></tr>
 <tr><td><code>ability</code></td><td><strong>4</strong> &mdash; cutie mark, particle, milk, verdant. Item icons, particle types and world blocks: nothing outside Minecraft to draw them with</td><td><strong>yes</strong></td></tr>
 <tr><td><code>stats</code></td><td><strong>8</strong> &mdash; CKM, MET, MSTN, PDK4, RYR2, magic speed / health / jump. Real and invisible; the figures ride along in the JSON export</td><td><strong>yes</strong></td></tr>
 </tbody>
@@ -2944,9 +2960,13 @@
 </p>
 
 <p>
-    <strong>Toasts dismiss themselves after 30 seconds</strong>, and hovering one
-    holds it &mdash; check that a toast you are mid-way through reading does not
-    vanish.
+    <strong>There are no toasts any more</strong> (removed 2026-09-08, owner&rsquo;s
+    call &mdash; they did not reliably clear themselves and a run of Randomize
+    clicks buried the horse behind them). Check that nothing important went with
+    them: a failure to load the mod should hold the boot overlay up and say why,
+    an unreadable horse file should raise a dialog, and everything else &mdash;
+    lethal conditions, genes the page cannot draw, an export &mdash; should be in
+    the browser console and, where it matters, on the panel already.
 </p>
 
 <hr>

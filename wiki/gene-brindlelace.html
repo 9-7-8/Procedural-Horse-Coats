@@ -28,16 +28,22 @@
 
 <div class="gene-preview" data-gene="horsegenetics.brindlelace"></div>
 
-<h2 id="outcomes">What it does</h2>
+<h2 id="outcomes">What it can come out as</h2>
 
 <div class="table-wrap">
 <table class="facts">
+<thead><tr><th>Outcome</th><th>Carrying</th></tr></thead>
 <tbody>
-<tr><th>Brindlelace</th><td>Half the horse is dark, but as a net: short dashes and irregular closed loops with soft edges, enclosing cells of base coat. The grain shifts zone to zone - near-vertical down the neck, oblique across the shoulder, along the rib arcs on the barrel, radiating from the point of hip. Density falls off backward and downward, so the belly and flank open right up, and closes the other way on the legs until the knee and hock are solid. Ears solid; mane and tail solid, full length.</td></tr>
-<tr><th>Wild type</th><td>No lace.</td></tr>
+<tr><th>Brindlelace</th><td><code>Bnl/Bnl</code> &middot; <code>Bnl/n</code></td></tr>
+<tr><th>Wild type</th><td><code>n/n</code></td></tr>
 </tbody>
 </table>
 </div>
+
+<p class="muted">
+    How each one is actually drawn - region by region, and the layers it is built from -
+    is on the <a href="#layers">coding tab</a>.
+</p>
 
 <h2 id="inheritance">What you can get</h2>
 
@@ -99,13 +105,28 @@
 
 <h2 id="layers">What it paints</h2>
 
+<p>
+    Each outcome, described the way the gene file describes it, and then the
+    layers that draw it in the order they are painted. The prose is the part
+    a reader checks a bake against; the list underneath is what the engine
+    actually did.
+</p>
+
 <h3>Brindlelace</h3>
+
+<p>Half the horse is dark, but as a net: short dashes and irregular closed loops with soft edges, enclosing cells of base coat. The grain shifts zone to zone - near-vertical down the neck, oblique across the shoulder, along the rib arcs on the barrel, radiating from the point of hip. Density falls off backward and downward, so the belly and flank open right up, and closes the other way on the legs until the knee and hock are solid. Ears solid; mane and tail solid, full length.</p>
 
 <ol>
 <li>the net over the body, thinning backward and down &mdash; <code>STROKES</code> &times; <code>AXIS</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code></li>
 <li>the net closing to solid below the knee and hock &mdash; <code>PARTS</code> &times; <code>STROKES</code> &times; <code>AXIS</code> &times; <code>PARTS</code>, painted with <code>TOWARD</code></li>
 <li>solid ears, mane and tail &mdash; <code>PARTS</code>, painted with <code>TOWARD</code></li>
 </ol>
+
+<h3>Wild type</h3>
+
+<p>No lace.</p>
+
+<p class="muted">Paints nothing.</p>
 
 </section>
 

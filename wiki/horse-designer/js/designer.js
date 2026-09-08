@@ -12,10 +12,6 @@ window.HG = window.HG || {};
 
   var $ = function (id) { return document.getElementById(id); };
 
-  // Long enough to read a lethal-genotype note, short enough that a run of
-  // Randomize clicks does not bury the field in cards.
-  var TOAST_LIFE_MS = 10000;
-
   function start() {
     var scene = HG.designerScene.create($("field"));
     var gui = HG.gui.create($("gui"), {
@@ -34,8 +30,8 @@ window.HG = window.HG || {};
     var api = null;
 
     if (!scene) {
-      toast("No WebGL", "The field needs WebGL, which this browser will not give. "
-        + "Everything else still works and the coat sheet is a real bake.", "warn");
+      console.warn("[horsegenetics] no WebGL in this browser, so there is no horse to spin."
+        + " Everything else still works and the coat sheet is a real bake.");
     }
 
     HG.java.load().then(function (loaded) {
@@ -49,11 +45,10 @@ window.HG = window.HG || {};
 
       var geomProblem = HG.java.checkGeometry(true) || HG.java.checkGeometry(false);
       if (geomProblem) {
-        toast("The 3D mesh disagrees with the game",
-          "The coat is still exact - it comes from the compiled Java. But the mesh the "
-          + "browser builds is drawn from a JavaScript copy of the geometry tables, and "
-          + "that copy has drifted: <em>" + geomProblem + "</em>. Re-run "
-          + "<code>check-parity.mjs</code>.", "bad");
+        console.error("[horsegenetics] the 3D mesh disagrees with the game: " + geomProblem
+          + ". The coat is still exact - it comes from the compiled Java - but the mesh is"
+          + " built from a JavaScript copy of the geometry tables and that copy has drifted."
+          + " Re-run check-parity.mjs.");
       }
       refresh();
       if (anim) anim.reset();       // start beside the reference block
@@ -73,12 +68,17 @@ window.HG = window.HG || {};
         (function tick() { requestAnimationFrame(tick); gui.draw(); })();
       }
     }).catch(function (err) {
-      $("boot").hidden = true;
-      toast("Could not start the mod", String(err.message || err)
-        + "<br><br>This page loads <code>wasm/web.wasm</code> — the mod itself, compiled. "
-        + "It cannot run from a <code>file://</code> path; serve the repo over HTTP, or "
-        + "open it on the published wiki. If the file is missing, run "
-        + "<code>./gradlew :web:bakeDesignerAssets</code>.", "bad");
+      // The boot overlay is already up and is the right place for this: a page
+      // whose mod did not load has nothing else to show, so it stays up and
+      // says why rather than clearing to an empty field.
+      var box = $("boot").querySelector(".boot-inner");
+      box.innerHTML = '<h1>Could not start the mod</h1>'
+        + '<p>' + escapeHtml(String(err.message || err)) + '</p>'
+        + '<p class="sub">This page loads <code>wasm/web.wasm</code> — the mod itself, '
+        + 'compiled. It cannot run from a <code>file://</code> path; serve the repo over '
+        + 'HTTP, or open it on the published wiki. If the file is missing, run '
+        + '<code>./gradlew :web:bakeDesignerAssets</code>.</p>';
+      console.error("[horsegenetics] " + (err.stack || err));
     });
 
     /**
@@ -127,17 +127,22 @@ window.HG = window.HG || {};
     }
 
     /**
-     * The one thing the panel has no room for. A lethal genotype is worth
-     * saying out loud rather than leaving as a word in a list - it is the
-     * difference between "this horse is unusual" and "this foal dies".
+     * A lethal genotype, said out loud once - to the console.
+     *
+     * <p>It used to be a card over the field. The cards did not reliably clear
+     * themselves and a run of Randomize clicks buried the horse in them, which
+     * is a worse failure than the one they were solving: the conditions are
+     * <b>already on screen</b>, named on the row of the gene that caused them
+     * and drawn in the panel's condition line. This is the debugging copy, not
+     * the notification.
      */
     var shownConditions = {};
     function describeConditions() {
       (state.conditions || []).forEach(function (c) {
         if (shownConditions[c.name]) return;
         shownConditions[c.name] = true;
-        toast(c.name, c.description + "<br><br><em>" + c.severity.toLowerCase() + "</em>",
-          c.severity === "LETHAL_AT_BIRTH" || c.severity === "LETHAL_AT_CONCEPTION" ? "bad" : "warn");
+        console.info("[horsegenetics] " + c.name + " (" + c.severity.toLowerCase() + "): "
+          + c.description);
       });
     }
 
@@ -165,11 +170,9 @@ window.HG = window.HG || {};
       a.click();
       document.body.removeChild(a);
       setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
-      toast("Exported " + name,
-        "Genotype and epigenome codes, plus the name, sex, breed and a readable summary — "
-        + "the whole horse. <em>Import</em> reads it back, and the custom horse spawn egg's "
-        + "<em>Paste horse</em> takes the same text off the clipboard.",
-        "info");
+      console.info("[horsegenetics] exported " + name + " - the whole horse. Import reads it"
+        + " back, and the custom horse spawn egg's Paste takes the same text off the"
+        + " clipboard.");
     }
 
     /**
@@ -199,76 +202,74 @@ window.HG = window.HG || {};
     function applyHorseFile(text, label) {
       var result = JSON.parse(api.loadHorseJson(text));
       if (!result.ok) {
-        toast("That is not a horse file",
-          result.error + ".<br><br>A horse file needs a <code>genotype</code> code this "
-          + "build can read. Export one to see the shape.", "bad");
+        // The one place a dialog is right: the reader asked for this file by
+        // name a moment ago and nothing on screen will change to tell them it
+        // failed.
+        window.alert("That is not a horse file.\n\n" + result.error
+          + ".\n\nA horse file needs a genotype code this build can read. "
+          + "Export one to see the shape.");
         return;
       }
       var notes = [];
       if (result.droppedEpigenome) {
-        notes.push("its epigenome did not parse, so this horse has a fresh one "
-          + "\u2014 the coat will differ wherever a gene varies per horse");
+        notes.push("its epigenome did not parse, so this horse has a fresh one - the coat "
+          + "will differ wherever a gene varies per horse");
       }
       if (result.droppedBreed) {
         notes.push("there is no breed by that name in this build, so the label was dropped");
       }
       refresh();
       var st = JSON.parse(api.stateJson());
-      toast("Loaded " + (st.first + " " + st.last).trim(),
-        "From <code>" + label + "</code>."
-        + (notes.length ? " Worth knowing: " + notes.join("; ") + "." : ""),
-        notes.length ? "warn" : "info");
+      console.info("[horsegenetics] loaded " + (st.first + " " + st.last).trim()
+        + " from " + label + (notes.length ? " - " + notes.join("; ") : ""));
+      if (notes.length) {
+        window.alert("Loaded " + (st.first + " " + st.last).trim()
+          + ", but:\n\n- " + notes.join("\n- "));
+      }
     }
 
     /**
      * A gene the page cannot draw. Java worked out which those are
      * (DesignerApi.showsAs, derived from the gene itself), and there are two
      * honest reasons - so say the right one rather than a vague one.
+     *
+     * <p>The row already says it, and says it permanently: the name is struck
+     * through in the list and reads "not shown here" underneath. This is the
+     * console copy of that, kept because the <i>reason</i> does not fit on a
+     * row.
      */
     var shownUnshowable = {};
     function notShown(i) {
       var gene = genes[i];
       if (shownUnshowable[gene.key]) return;
       shownUnshowable[gene.key] = true;
-      if (gene.shows === "ability") {
-        toast(gene.name + " is only viewable in game",
-          "That gene relies on Minecraft's own assets — particle types, item icons, "
-          + "world blocks — so there is nothing here to draw it with. It is still on "
-          + "the horse and still in <em>Export</em>; you just cannot see it.", "warn");
-      } else {
-        toast(gene.name + " changes numbers, not looks",
-          "That gene moves the horse's speed, health or jump and nothing else, so there "
-          + "is nothing to draw. It is still on the horse, and the figures ride along in "
-          + "<em>Export</em>.", "warn");
-      }
+      console.info("[horsegenetics] " + gene.name + (gene.shows === "ability"
+        ? " is only viewable in game: it relies on Minecraft's own assets - particle types,"
+          + " item icons, world blocks - so there is nothing here to draw it with."
+        : " changes numbers, not looks: it moves speed, health or jump and nothing else.")
+        + " It is still on the horse and still in Export.");
     }
 
-    // ---- toasts ----------------------------------------------------------
+    // ---- saying things --------------------------------------------------
+    //
+    // There is no toast system any more. There was: a stack of dismissible
+    // cards over the field, on a timer. The timer did not reliably fire - a
+    // pointer resting anywhere over the stack held every card in it - so a run
+    // of Randomize clicks buried the horse behind the thing you were trying to
+    // look at, which is the opposite of what a notification is for.
+    //
+    // What replaced it is not a smaller toast. Everything the cards said is
+    // either already permanent on screen (a struck-through gene row, the
+    // condition line under the panel) or is a developer's note, and a
+    // developer's note belongs in the console. The two exceptions are here:
+    // a failure to boot, which owns the boot overlay because the page has
+    // nothing else to show, and a file the reader just chose that would not
+    // load, which gets a dialog because nothing on screen would otherwise
+    // change.
 
-    function toast(title, html, kind) {
-      var box = document.createElement("div");
-      box.className = "toast " + (kind || "info");
-      var x = document.createElement("button");
-      x.type = "button";
-      x.className = "toast-close";
-      x.setAttribute("aria-label", "Dismiss");
-      x.textContent = "×";
-      x.addEventListener("click", function () { box.remove(); });
-      var h = document.createElement("h4");
-      h.textContent = title;
-      var p = document.createElement("p");
-      p.innerHTML = html;
-      box.appendChild(x);
-      box.appendChild(h);
-      box.appendChild(p);
-      $("toasts").appendChild(box);
-      // Everything here is an aside, not a decision - so nothing waits on being
-      // dismissed. Hovering holds it, because a toast that vanishes while you
-      // are reading it is worse than one that lingers.
-      var life = setTimeout(function () { box.remove(); }, TOAST_LIFE_MS);
-      box.addEventListener("pointerenter", function () { clearTimeout(life); });
-      box.addEventListener("pointerleave", function () {
-        life = setTimeout(function () { box.remove(); }, TOAST_LIFE_MS);
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"]/g, function (c) {
+        return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
       });
     }
   }

@@ -28,17 +28,23 @@
 
 <div class="gene-preview" data-gene="horsegenetics.wormholes"></div>
 
-<h2 id="outcomes">What it does</h2>
+<h2 id="outcomes">What it can come out as</h2>
 
 <div class="table-wrap">
 <table class="facts">
+<thead><tr><th>Outcome</th><th>Carrying</th></tr></thead>
 <tbody>
-<tr><th>Wormholes</th><td>Pale annuli with the base coat showing through the middle. Most of them close; a quarter or so are left open as arcs, and a few carry a second ring outside the first. They gather rather than spread - two to four clusters over the scapula, barrel, croup and lateral neck, with a scattering of loners between them.</td></tr>
-<tr><th>Coloured Wormholes</th><td>The same marking in a colour the line carries rather than in white. Fully recessive: it takes two copies, and a single copy beside the white allele shows white. It never gives blue eyes, whatever the white form does.</td></tr>
-<tr><th>Wild type</th><td>No wormholes.</td></tr>
+<tr><th>Wormholes</th><td><code>Wmh/Wmh</code> &middot; <code>Wmh/Wmc</code> &middot; <code>Wmh/n</code></td></tr>
+<tr><th>Coloured Wormholes</th><td><code>Wmc/Wmc</code></td></tr>
+<tr><th>Wild type</th><td><code>Wmc/n</code> &middot; <code>n/n</code></td></tr>
 </tbody>
 </table>
 </div>
+
+<p class="muted">
+    How each one is actually drawn - region by region, and the layers it is built from -
+    is on the <a href="#layers">coding tab</a>.
+</p>
 
 <h2 id="inheritance">What you can get</h2>
 
@@ -102,7 +108,16 @@
 
 <h2 id="layers">What it paints</h2>
 
+<p>
+    Each outcome, described the way the gene file describes it, and then the
+    layers that draw it in the order they are painted. The prose is the part
+    a reader checks a bake against; the list underneath is what the engine
+    actually did.
+</p>
+
 <h3>Wormholes</h3>
+
+<p>Pale annuli with the base coat showing through the middle. Most of them close; a quarter or so are left open as arcs, and a few carry a second ring outside the first. They gather rather than spread - two to four clusters over the scapula, barrel, croup and lateral neck, with a scattering of loners between them.</p>
 
 <ol>
 <li>the rings, clustered &mdash; <code>RINGS</code> &times; <code>NOISE</code>, painted with <code>TOWARD</code></li>
@@ -111,10 +126,18 @@
 
 <h3>Coloured Wormholes</h3>
 
+<p>The same marking in a colour the line carries rather than in white. Fully recessive: it takes two copies, and a single copy beside the white allele shows white. It never gives blue eyes, whatever the white form does.</p>
+
 <ol>
 <li>the rings, clustered, in colour &mdash; <code>RINGS</code> &times; <code>NOISE</code>, painted with <code>TOWARD</code></li>
 <li>the second ring some of them carry, in colour &mdash; <code>RINGS</code>, painted with <code>TOWARD</code></li>
 </ol>
+
+<h3>Wild type</h3>
+
+<p>No wormholes.</p>
+
+<p class="muted">Paints nothing.</p>
 
 </section>
 

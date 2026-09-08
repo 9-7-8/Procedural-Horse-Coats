@@ -28,16 +28,22 @@
 
 <div class="gene-preview" data-gene="horsegenetics.valentine_appaloosa"></div>
 
-<h2 id="outcomes">What it does</h2>
+<h2 id="outcomes">What it can come out as</h2>
 
 <div class="table-wrap">
 <table class="facts">
+<thead><tr><th>Outcome</th><th>Carrying</th></tr></thead>
 <tbody>
-<tr><th>Valentine Appaloosa</th><td>Two things at once. First the base shifts: wherever the coat was black it comes out saturated red or fuchsia, and wherever it was red it comes out pink, mane and tail included - so there is no such thing as a dull Valentine. Then the appaloosa half puts white spots over it, in any of the usual arrangements: a blanket over the hindquarter, leopard spotting over the whole horse, a fine snowflake scatter, or a varnish roan. Some horses show the reverse as well, with white cut-outs left in the colour rather than laid on it.</td></tr>
-<tr><th>Wild type</th><td>No valentine.</td></tr>
+<tr><th>Valentine Appaloosa</th><td><code>Vln/Vln</code> &middot; <code>Vln/n</code></td></tr>
+<tr><th>Wild type</th><td><code>n/n</code></td></tr>
 </tbody>
 </table>
 </div>
+
+<p class="muted">
+    How each one is actually drawn - region by region, and the layers it is built from -
+    is on the <a href="#layers">coding tab</a>.
+</p>
 
 <h2 id="inheritance">What you can get</h2>
 
@@ -99,7 +105,16 @@
 
 <h2 id="layers">What it paints</h2>
 
+<p>
+    Each outcome, described the way the gene file describes it, and then the
+    layers that draw it in the order they are painted. The prose is the part
+    a reader checks a bake against; the list underneath is what the engine
+    actually did.
+</p>
+
 <h3>Valentine Appaloosa</h3>
+
+<p>Two things at once. First the base shifts: wherever the coat was black it comes out saturated red or fuchsia, and wherever it was red it comes out pink, mane and tail included - so there is no such thing as a dull Valentine. Then the appaloosa half puts white spots over it, in any of the usual arrangements: a blanket over the hindquarter, leopard spotting over the whole horse, a fine snowflake scatter, or a varnish roan. Some horses show the reverse as well, with white cut-outs left in the colour rather than laid on it.</p>
 
 <ol>
 <li>black pigment to fuchsia &mdash; <code>PIGMENT</code>, painted with <code>TOWARD</code></li>
@@ -107,6 +122,12 @@
 <li>the white blanket over the hindquarter &mdash; <code>PATCHES</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code></li>
 <li>spots over the blanket and beyond it &mdash; <code>SPOTS</code>, painted with <code>TOWARD</code></li>
 </ol>
+
+<h3>Wild type</h3>
+
+<p>No valentine.</p>
+
+<p class="muted">Paints nothing.</p>
 
 </section>
 

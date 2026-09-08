@@ -28,16 +28,22 @@
 
 <div class="gene-preview" data-gene="horsegenetics.patina"></div>
 
-<h2 id="outcomes">What it does</h2>
+<h2 id="outcomes">What it can come out as</h2>
 
 <div class="table-wrap">
 <table class="facts">
+<thead><tr><th>Outcome</th><th>Carrying</th></tr></thead>
 <tbody>
-<tr><th>Patina</th><td>Oxidation, in the pattern copper takes: green worked into the muzzle, the flanks, the mane and tail and the sun-bleached parts of the coat - the same places a seal bay shows its light points. Dominant, so wherever it is present it shows, but how much varies enormously from horse to horse: a few faint traces on one, heavy verdigris marbling on the next. It also mottles the skin round the eyes and muzzle. A dark coat hides most of it, which is why it is often said not to exist on black horses; a diluted one shows it better, and a double cream or pearl coat hides it completely while passing it on intact.</td></tr>
-<tr><th>Wild type</th><td>No oxidation.</td></tr>
+<tr><th>Patina</th><td><code>Pat/Pat</code> &middot; <code>Pat/n</code></td></tr>
+<tr><th>Wild type</th><td><code>n/n</code></td></tr>
 </tbody>
 </table>
 </div>
+
+<p class="muted">
+    How each one is actually drawn - region by region, and the layers it is built from -
+    is on the <a href="#layers">coding tab</a>.
+</p>
 
 <h2 id="inheritance">What you can get</h2>
 
@@ -99,13 +105,28 @@
 
 <h2 id="layers">What it paints</h2>
 
+<p>
+    Each outcome, described the way the gene file describes it, and then the
+    layers that draw it in the order they are painted. The prose is the part
+    a reader checks a bake against; the list underneath is what the engine
+    actually did.
+</p>
+
 <h3>Patina</h3>
+
+<p>Oxidation, in the pattern copper takes: green worked into the muzzle, the flanks, the mane and tail and the sun-bleached parts of the coat - the same places a seal bay shows its light points. Dominant, so wherever it is present it shows, but how much varies enormously from horse to horse: a few faint traces on one, heavy verdigris marbling on the next. It also mottles the skin round the eyes and muzzle. A dark coat hides most of it, which is why it is often said not to exist on black horses; a diluted one shows it better, and a double cream or pearl coat hides it completely while passing it on intact.</p>
 
 <ol>
 <li>verdigris where the coat lightens &mdash; <code>PATCHES</code> &times; <code>PIGMENT</code>, painted with <code>TOWARD</code></li>
 <li>the flanks, muzzle and hair, where it starts &mdash; <code>PARTS</code> &times; <code>AXIS</code> &times; <code>PATCHES</code>, painted with <code>TOWARD</code></li>
 <li>mottling round the eyes and muzzle &mdash; <code>SPECKLE</code>, painted with <code>TOWARD</code></li>
 </ol>
+
+<h3>Wild type</h3>
+
+<p>No oxidation.</p>
+
+<p class="muted">Paints nothing.</p>
 
 </section>
 

@@ -28,16 +28,22 @@
 
 <div class="gene-preview" data-gene="horsegenetics.auroraband"></div>
 
-<h2 id="outcomes">What it does</h2>
+<h2 id="outcomes">What it can come out as</h2>
 
 <div class="table-wrap">
 <table class="facts">
+<thead><tr><th>Outcome</th><th>Carrying</th></tr></thead>
 <tbody>
-<tr><th>Auroraband</th><td>A single unbroken band, never two, never a detached piece. It starts at the mid-neck level with the throatlatch, drops as it crosses the shoulder, rises again over the barrel toward the croup and falls away over the hindquarter - two inflections, a shallow S. It is narrowest where it starts and widest at the two extremes of that curve, and it ends in a hook that curls back on itself. The fill is not flat: fine discontinuous striations run along the path, densest at the core and thinning to both margins, so the band reads as combed. The upper margin is firmer than the lower, and both are irregular because they follow where the striations end rather than any outline. Colour runs continuously along it, cyan through blue and violet to magenta, saturating and brightening as it goes. Small hard white points are scattered over the whole horse, in the band and out of it alike, evenly and with no relation to it.</td></tr>
-<tr><th>Wild type</th><td>No ribbon.</td></tr>
+<tr><th>Auroraband</th><td><code>Abd/Abd</code> &middot; <code>Abd/n</code></td></tr>
+<tr><th>Wild type</th><td><code>n/n</code></td></tr>
 </tbody>
 </table>
 </div>
+
+<p class="muted">
+    How each one is actually drawn - region by region, and the layers it is built from -
+    is on the <a href="#layers">coding tab</a>.
+</p>
 
 <h2 id="inheritance">What you can get</h2>
 
@@ -99,13 +105,28 @@
 
 <h2 id="layers">What it paints</h2>
 
+<p>
+    Each outcome, described the way the gene file describes it, and then the
+    layers that draw it in the order they are painted. The prose is the part
+    a reader checks a bake against; the list underneath is what the engine
+    actually did.
+</p>
+
 <h3>Auroraband</h3>
+
+<p>A single unbroken band, never two, never a detached piece. It starts at the mid-neck level with the throatlatch, drops as it crosses the shoulder, rises again over the barrel toward the croup and falls away over the hindquarter - two inflections, a shallow S. It is narrowest where it starts and widest at the two extremes of that curve, and it ends in a hook that curls back on itself. The fill is not flat: fine discontinuous striations run along the path, densest at the core and thinning to both margins, so the band reads as combed. The upper margin is firmer than the lower, and both are irregular because they follow where the striations end rather than any outline. Colour runs continuously along it, cyan through blue and violet to magenta, saturating and brightening as it goes. Small hard white points are scattered over the whole horse, in the band and out of it alike, evenly and with no relation to it.</p>
 
 <ol>
 <li>the ribbon, hue running along its length &mdash; <code>STROKES</code> &times; <code>AXIS</code>, painted with <code>RAMP</code></li>
 <li>the striations that make it look combed &mdash; <code>STROKES</code> &times; <code>STROKES</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code></li>
 <li>white points over the whole horse &mdash; <code>SPOTS</code>, painted with <code>TOWARD</code></li>
 </ol>
+
+<h3>Wild type</h3>
+
+<p>No ribbon.</p>
+
+<p class="muted">Paints nothing.</p>
 
 </section>
 

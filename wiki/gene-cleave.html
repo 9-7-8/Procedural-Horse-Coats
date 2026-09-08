@@ -28,18 +28,24 @@
 
 <div class="gene-preview" data-gene="horsegenetics.cleave"></div>
 
-<h2 id="outcomes">What it does</h2>
+<h2 id="outcomes">What it can come out as</h2>
 
 <div class="table-wrap">
 <table class="facts">
+<thead><tr><th>Outcome</th><th>Carrying</th></tr></thead>
 <tbody>
-<tr><th>Cleave</th><td>White and coat take about half the horse each - between 45 and 55 per cent, never outside 35 to 65. White has the head, the front and underside of the neck, the chest, the forelegs, the front of the shoulder and the underside of the barrel; the coat keeps the crest, withers, back, croup, hindquarters, hind legs and the back of the barrel. The dividing zone runs obliquely down and forward from the withers toward the elbow, then back along the belly. What makes it Cleave is the boundary: each field drives long narrow triangles into the other, ten to thirty degrees at the point, straight or slightly hollow along the sides, never convex, and often with smaller teeth splitting off the flanks of the big ones. Detached fragments of the same shape float within a hand's span of the line on both sides. Every edge is hard - no gradient, no roaning, no feathering anywhere on the horse - and the two sides are not mirrored. It takes two copies.</td></tr>
-<tr><th>Coloured Cleave</th><td>The same interlock, with the near half in a colour the line carries rather than in white. Fully recessive: it takes two copies, and a single copy beside the white allele shows white. It never gives blue eyes, whatever the white form does.</td></tr>
-<tr><th>Cleave carrier</th><td>One copy shows nothing at all.</td></tr>
-<tr><th>Wild type</th><td>No cleave.</td></tr>
+<tr><th>Cleave</th><td><code>Clv/Clv</code> &middot; <code>Clv/Clc</code></td></tr>
+<tr><th>Coloured Cleave</th><td><code>Clc/Clc</code></td></tr>
+<tr><th>Cleave carrier</th><td><code>Clv/n</code> &middot; <code>Clc/n</code></td></tr>
+<tr><th>Wild type</th><td><code>n/n</code></td></tr>
 </tbody>
 </table>
 </div>
+
+<p class="muted">
+    How each one is actually drawn - region by region, and the layers it is built from -
+    is on the <a href="#layers">coding tab</a>.
+</p>
 
 <h2 id="inheritance">What you can get</h2>
 
@@ -102,7 +108,16 @@
 
 <h2 id="layers">What it paints</h2>
 
+<p>
+    Each outcome, described the way the gene file describes it, and then the
+    layers that draw it in the order they are painted. The prose is the part
+    a reader checks a bake against; the list underneath is what the engine
+    actually did.
+</p>
+
 <h3>Cleave</h3>
+
+<p>White and coat take about half the horse each - between 45 and 55 per cent, never outside 35 to 65. White has the head, the front and underside of the neck, the chest, the forelegs, the front of the shoulder and the underside of the barrel; the coat keeps the crest, withers, back, croup, hindquarters, hind legs and the back of the barrel. The dividing zone runs obliquely down and forward from the withers toward the elbow, then back along the belly. What makes it Cleave is the boundary: each field drives long narrow triangles into the other, ten to thirty degrees at the point, straight or slightly hollow along the sides, never convex, and often with smaller teeth splitting off the flanks of the big ones. Detached fragments of the same shape float within a hand's span of the line on both sides. Every edge is hard - no gradient, no roaning, no feathering anywhere on the horse - and the two sides are not mirrored. It takes two copies.</p>
 
 <ol>
 <li>the white half, and the spears it drives into the other &mdash; <code>AXIS</code> &times; <code>STROKES</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code></li>
@@ -110,9 +125,23 @@
 
 <h3>Coloured Cleave</h3>
 
+<p>The same interlock, with the near half in a colour the line carries rather than in white. Fully recessive: it takes two copies, and a single copy beside the white allele shows white. It never gives blue eyes, whatever the white form does.</p>
+
 <ol>
 <li>the white half, and the spears it drives into the other, in colour &mdash; <code>AXIS</code> &times; <code>STROKES</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code></li>
 </ol>
+
+<h3>Cleave carrier</h3>
+
+<p>One copy shows nothing at all.</p>
+
+<p class="muted">Paints nothing.</p>
+
+<h3>Wild type</h3>
+
+<p>No cleave.</p>
+
+<p class="muted">Paints nothing.</p>
 
 </section>
 

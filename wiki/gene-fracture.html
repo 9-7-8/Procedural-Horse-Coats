@@ -28,18 +28,24 @@
 
 <div class="gene-preview" data-gene="horsegenetics.fracture"></div>
 
-<h2 id="outcomes">What it does</h2>
+<h2 id="outcomes">What it can come out as</h2>
 
 <div class="table-wrap">
 <table class="facts">
+<thead><tr><th>Outcome</th><th>Carrying</th></tr></thead>
 <tbody>
-<tr><th>Fracture</th><td>Instead of white appearing on a coloured horse, the colour appears on a white one - and it does it in bold uneven blocks and streaks with jagged edges, anywhere at all: neck, shoulder, barrel, hindquarter, legs, face. There is no symmetry to it and no pattern to predict; two Fracture horses out of the same parents look nothing like each other. The head usually keeps a distinct area of coat, and the mane and tail follow whatever is underneath them. It takes two copies - a single copy is carried and shows nothing.</td></tr>
-<tr><th>Coloured Fracture</th><td>The same fragmentation, with the ground in a colour the line carries rather than in white. Fully recessive: it takes two copies, and a single copy beside the white allele shows white. It never gives blue eyes, whatever the white form does.</td></tr>
-<tr><th>Fracture carrier</th><td>One copy shows nothing at all.</td></tr>
-<tr><th>Wild type</th><td>No fracture.</td></tr>
+<tr><th>Fracture</th><td><code>Fdf/Fdf</code> &middot; <code>Fdf/Fdc</code></td></tr>
+<tr><th>Coloured Fracture</th><td><code>Fdc/Fdc</code></td></tr>
+<tr><th>Fracture carrier</th><td><code>Fdf/n</code> &middot; <code>Fdc/n</code></td></tr>
+<tr><th>Wild type</th><td><code>n/n</code></td></tr>
 </tbody>
 </table>
 </div>
+
+<p class="muted">
+    How each one is actually drawn - region by region, and the layers it is built from -
+    is on the <a href="#layers">coding tab</a>.
+</p>
 
 <h2 id="inheritance">What you can get</h2>
 
@@ -102,7 +108,16 @@
 
 <h2 id="layers">What it paints</h2>
 
+<p>
+    Each outcome, described the way the gene file describes it, and then the
+    layers that draw it in the order they are painted. The prose is the part
+    a reader checks a bake against; the list underneath is what the engine
+    actually did.
+</p>
+
 <h3>Fracture</h3>
+
+<p>Instead of white appearing on a coloured horse, the colour appears on a white one - and it does it in bold uneven blocks and streaks with jagged edges, anywhere at all: neck, shoulder, barrel, hindquarter, legs, face. There is no symmetry to it and no pattern to predict; two Fracture horses out of the same parents look nothing like each other. The head usually keeps a distinct area of coat, and the mane and tail follow whatever is underneath them. It takes two copies - a single copy is carried and shows nothing.</p>
 
 <ol>
 <li>white over most of the horse &mdash; <code>PARTS</code>, painted with <code>TOWARD</code></li>
@@ -111,10 +126,24 @@
 
 <h3>Coloured Fracture</h3>
 
+<p>The same fragmentation, with the ground in a colour the line carries rather than in white. Fully recessive: it takes two copies, and a single copy beside the white allele shows white. It never gives blue eyes, whatever the white form does.</p>
+
 <ol>
 <li>white over most of the horse, in colour &mdash; <code>PARTS</code>, painted with <code>TOWARD</code></li>
 <li>the coat breaking back through it in blocks, in colour &mdash; <code>PATCHES inverted</code> &times; <code>STROKES</code>, painted with <code>TOWARD</code></li>
 </ol>
+
+<h3>Fracture carrier</h3>
+
+<p>One copy shows nothing at all.</p>
+
+<p class="muted">Paints nothing.</p>
+
+<h3>Wild type</h3>
+
+<p>No fracture.</p>
+
+<p class="muted">Paints nothing.</p>
 
 </section>
 

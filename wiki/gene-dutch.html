@@ -28,17 +28,23 @@
 
 <div class="gene-preview" data-gene="horsegenetics.dutch"></div>
 
-<h2 id="outcomes">What it does</h2>
+<h2 id="outcomes">What it can come out as</h2>
 
 <div class="table-wrap">
 <table class="facts">
+<thead><tr><th>Outcome</th><th>Carrying</th></tr></thead>
 <tbody>
-<tr><th>Dutch</th><td>The rabbit pattern. A band wraps the body at the shoulder and chest, front edge at the base of the neck and back edge at the girth, broadest underneath and pinching as it climbs to the withers - and on a minimal horse it fails to close over the topline at all, leaving a bridge of coat there. White runs forward along the underside of the neck to the throat, takes the muzzle, and often a stripe up the face. All four legs are stocked to somewhere between mid-cannon and the knee, and the front and hind heights rarely match. Every edge is hard - no roaning, no feathering - and every one of them is a smooth curve. The barrel, flank, hindquarters, mane and tail keep the coat entirely.</td></tr>
-<tr><th>Coloured Dutch</th><td>The same band, muzzle and stockings, in a colour the line carries rather than in white. Fully recessive - two copies, and a single copy beside the white allele shows white. It never gives blue eyes.</td></tr>
-<tr><th>Wild type</th><td>No band.</td></tr>
+<tr><th>Dutch</th><td><code>Dut/Dut</code> &middot; <code>Dut/Dtc</code> &middot; <code>Dut/n</code></td></tr>
+<tr><th>Coloured Dutch</th><td><code>Dtc/Dtc</code></td></tr>
+<tr><th>Wild type</th><td><code>Dtc/n</code> &middot; <code>n/n</code></td></tr>
 </tbody>
 </table>
 </div>
+
+<p class="muted">
+    How each one is actually drawn - region by region, and the layers it is built from -
+    is on the <a href="#layers">coding tab</a>.
+</p>
 
 <h2 id="inheritance">What you can get</h2>
 
@@ -102,7 +108,16 @@
 
 <h2 id="layers">What it paints</h2>
 
+<p>
+    Each outcome, described the way the gene file describes it, and then the
+    layers that draw it in the order they are painted. The prose is the part
+    a reader checks a bake against; the list underneath is what the engine
+    actually did.
+</p>
+
 <h3>Dutch</h3>
+
+<p>The rabbit pattern. A band wraps the body at the shoulder and chest, front edge at the base of the neck and back edge at the girth, broadest underneath and pinching as it climbs to the withers - and on a minimal horse it fails to close over the topline at all, leaving a bridge of coat there. White runs forward along the underside of the neck to the throat, takes the muzzle, and often a stripe up the face. All four legs are stocked to somewhere between mid-cannon and the knee, and the front and hind heights rarely match. Every edge is hard - no roaning, no feathering - and every one of them is a smooth curve. The barrel, flank, hindquarters, mane and tail keep the coat entirely.</p>
 
 <ol>
 <li>the band round the shoulder and chest &mdash; <code>AXIS</code> &times; <code>AXIS</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code></li>
@@ -113,12 +128,20 @@
 
 <h3>Coloured Dutch</h3>
 
+<p>The same band, muzzle and stockings, in a colour the line carries rather than in white. Fully recessive - two copies, and a single copy beside the white allele shows white. It never gives blue eyes.</p>
+
 <ol>
 <li>the coloured band round the shoulder and chest &mdash; <code>AXIS</code> &times; <code>AXIS</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code></li>
 <li>colour forward along the underside of the neck &mdash; <code>AXIS</code>, painted with <code>TOWARD</code></li>
 <li>the muzzle and face stripe, coloured &mdash; <code>PARTS</code> &times; <code>CENTERLINE</code>, painted with <code>TOWARD</code></li>
 <li>coloured stockings &mdash; <code>AXIS</code>, painted with <code>TOWARD</code></li>
 </ol>
+
+<h3>Wild type</h3>
+
+<p>No band.</p>
+
+<p class="muted">Paints nothing.</p>
 
 </section>
 

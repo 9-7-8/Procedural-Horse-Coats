@@ -28,16 +28,22 @@
 
 <div class="gene-preview" data-gene="horsegenetics.nimbus"></div>
 
-<h2 id="outcomes">What it does</h2>
+<h2 id="outcomes">What it can come out as</h2>
 
 <div class="table-wrap">
 <table class="facts">
+<thead><tr><th>Outcome</th><th>Carrying</th></tr></thead>
 <tbody>
-<tr><th>Nimbus</th><td>Half to three-quarters of the horse, concentrated on the neck, shoulder, barrel and hindquarter and falling away toward the head, the legs and the topline. There is no boundary to find: the field simply runs out over a long distance. Inside it the saturation is uneven, gathered into cells a hand's span or two across with weaker channels between them where the coat shows through at a third to two-thirds strength. The whole thing is turbulent - nothing about it repeats, and nothing about it lines up with the horse.</td></tr>
-<tr><th>Wild type</th><td>No cloud.</td></tr>
+<tr><th>Nimbus</th><td><code>Nim/Nim</code> &middot; <code>Nim/n</code></td></tr>
+<tr><th>Wild type</th><td><code>n/n</code></td></tr>
 </tbody>
 </table>
 </div>
+
+<p class="muted">
+    How each one is actually drawn - region by region, and the layers it is built from -
+    is on the <a href="#layers">coding tab</a>.
+</p>
 
 <h2 id="inheritance">What you can get</h2>
 
@@ -99,12 +105,27 @@
 
 <h2 id="layers">What it paints</h2>
 
+<p>
+    Each outcome, described the way the gene file describes it, and then the
+    layers that draw it in the order they are painted. The prose is the part
+    a reader checks a bake against; the list underneath is what the engine
+    actually did.
+</p>
+
 <h3>Nimbus</h3>
+
+<p>Half to three-quarters of the horse, concentrated on the neck, shoulder, barrel and hindquarter and falling away toward the head, the legs and the topline. There is no boundary to find: the field simply runs out over a long distance. Inside it the saturation is uneven, gathered into cells a hand's span or two across with weaker channels between them where the coat shows through at a third to two-thirds strength. The whole thing is turbulent - nothing about it repeats, and nothing about it lines up with the horse.</p>
 
 <ol>
 <li>the cloud over the trunk &mdash; <code>NOISE</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code></li>
 <li>the high-chroma cells inside it &mdash; <code>NOISE</code> &times; <code>NOISE</code>, painted with <code>TOWARD</code></li>
 </ol>
+
+<h3>Wild type</h3>
+
+<p>No cloud.</p>
+
+<p class="muted">Paints nothing.</p>
 
 </section>
 

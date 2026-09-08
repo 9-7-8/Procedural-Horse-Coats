@@ -28,17 +28,23 @@
 
 <div class="gene-preview" data-gene="horsegenetics.winged"></div>
 
-<h2 id="outcomes">What it does</h2>
+<h2 id="outcomes">What it can come out as</h2>
 
 <div class="table-wrap">
 <table class="facts">
+<thead><tr><th>Outcome</th><th>Carrying</th></tr></thead>
 <tbody>
-<tr><th>Spot-Winged</th><td>Two copies lay a dark field over the shoulder and barrel first - a saddle shape with a hard lobed boundary - and put the bands and spots inside it in white, at a much higher spot count. The bands often hook: one long band curving back on itself and ending broad.</td></tr>
-<tr><th>White-Winged</th><td>One copy puts the bands and spots straight onto the coat with no ground under them - two to five roughly concentric bands following the arc of the ribcage from the shoulder back toward the flank, tapering to points at both ends, with ovoid spots gathered near the band ends and over the shoulder, and a single diagonal band crossing the shoulder from the withers toward the elbow. White forms the core of each band and a desaturated tint runs alongside it. Every edge is hard.</td></tr>
-<tr><th>Wild type</th><td>No wings.</td></tr>
+<tr><th>Spot-Winged</th><td><code>Wng/Wng</code></td></tr>
+<tr><th>White-Winged</th><td><code>Wng/n</code></td></tr>
+<tr><th>Wild type</th><td><code>n/n</code></td></tr>
 </tbody>
 </table>
 </div>
+
+<p class="muted">
+    How each one is actually drawn - region by region, and the layers it is built from -
+    is on the <a href="#layers">coding tab</a>.
+</p>
 
 <h2 id="inheritance">What you can get</h2>
 
@@ -100,7 +106,16 @@
 
 <h2 id="layers">What it paints</h2>
 
+<p>
+    Each outcome, described the way the gene file describes it, and then the
+    layers that draw it in the order they are painted. The prose is the part
+    a reader checks a bake against; the list underneath is what the engine
+    actually did.
+</p>
+
 <h3>Spot-Winged</h3>
+
+<p>Two copies lay a dark field over the shoulder and barrel first - a saddle shape with a hard lobed boundary - and put the bands and spots inside it in white, at a much higher spot count. The bands often hook: one long band curving back on itself and ending broad.</p>
 
 <ol>
 <li>the dark saddle over the shoulder and barrel &mdash; <code>PATCHES</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code></li>
@@ -111,12 +126,20 @@
 
 <h3>White-Winged</h3>
 
+<p>One copy puts the bands and spots straight onto the coat with no ground under them - two to five roughly concentric bands following the arc of the ribcage from the shoulder back toward the flank, tapering to points at both ends, with ovoid spots gathered near the band ends and over the shoulder, and a single diagonal band crossing the shoulder from the withers toward the elbow. White forms the core of each band and a desaturated tint runs alongside it. Every edge is hard.</p>
+
 <ol>
 <li>the arc bands along the ribcage &mdash; <code>STROKES</code>, painted with <code>TOWARD</code></li>
 <li>the desaturated tint running beside them &mdash; <code>STROKES</code>, painted with <code>TOWARD</code></li>
 <li>ovoid spots between and beside the bands &mdash; <code>SPOTS</code>, painted with <code>TOWARD</code></li>
 <li>the diagonal band across the shoulder &mdash; <code>STROKES</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code></li>
 </ol>
+
+<h3>Wild type</h3>
+
+<p>No wings.</p>
+
+<p class="muted">Paints nothing.</p>
 
 </section>
 

@@ -579,7 +579,7 @@ window.HG = window.HG || {};
     function isDom(e) {
       var t = e.target;
       while (t && t !== document.body) {
-        if (t.classList && (t.classList.contains("toasts") || t.classList.contains("boot")
+        if (t.classList && (t.classList.contains("boot")
           || t.classList.contains("back"))) return true;
         t = t.parentNode;
       }

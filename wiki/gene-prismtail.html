@@ -28,16 +28,22 @@
 
 <div class="gene-preview" data-gene="horsegenetics.prismtail"></div>
 
-<h2 id="outcomes">What it does</h2>
+<h2 id="outcomes">What it can come out as</h2>
 
 <div class="table-wrap">
 <table class="facts">
+<thead><tr><th>Outcome</th><th>Carrying</th></tr></thead>
 <tbody>
-<tr><th>Prismtail</th><td>Colour occupies the part of the hair nearest the horse and stops before the ends, which always come back to the hair's own colour. Within that run it is stacked in bands, widest at the top and compressing downward, four to seven of them, and the boundaries between adjacent bands are soft - the hues blend rather than cut. The order is the spectrum's own and never repeats or reverses; a short run drops bands off the top rather than squeezing all seven in. Beside the mane's coloured section the upper neck carries a soft wash in the last of those hues, at a fraction of the saturation, with a scatter of pale points in it.</td></tr>
-<tr><th>Wild type</th><td>No spectrum.</td></tr>
+<tr><th>Prismtail</th><td><code>Prt/Prt</code> &middot; <code>Prt/n</code></td></tr>
+<tr><th>Wild type</th><td><code>n/n</code></td></tr>
 </tbody>
 </table>
 </div>
+
+<p class="muted">
+    How each one is actually drawn - region by region, and the layers it is built from -
+    is on the <a href="#layers">coding tab</a>.
+</p>
 
 <h2 id="inheritance">What you can get</h2>
 
@@ -99,13 +105,28 @@
 
 <h2 id="layers">What it paints</h2>
 
+<p>
+    Each outcome, described the way the gene file describes it, and then the
+    layers that draw it in the order they are painted. The prose is the part
+    a reader checks a bake against; the list underneath is what the engine
+    actually did.
+</p>
+
 <h3>Prismtail</h3>
+
+<p>Colour occupies the part of the hair nearest the horse and stops before the ends, which always come back to the hair's own colour. Within that run it is stacked in bands, widest at the top and compressing downward, four to seven of them, and the boundaries between adjacent bands are soft - the hues blend rather than cut. The order is the spectrum's own and never repeats or reverses; a short run drops bands off the top rather than squeezing all seven in. Beside the mane's coloured section the upper neck carries a soft wash in the last of those hues, at a fraction of the saturation, with a scatter of pale points in it.</p>
 
 <ol>
 <li>the spectral bands down the hair &mdash; <code>PARTS</code> &times; <code>AXIS</code>, painted with <code>RAMP</code></li>
 <li>the wash on the upper neck beside it &mdash; <code>AXIS</code>, painted with <code>TOWARD</code></li>
 <li>pale points in the wash &mdash; <code>SPOTS</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code></li>
 </ol>
+
+<h3>Wild type</h3>
+
+<p>No spectrum.</p>
+
+<p class="muted">Paints nothing.</p>
 
 </section>
 

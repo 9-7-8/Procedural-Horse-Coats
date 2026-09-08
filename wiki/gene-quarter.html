@@ -28,18 +28,24 @@
 
 <div class="gene-preview" data-gene="horsegenetics.quarter"></div>
 
-<h2 id="outcomes">What it does</h2>
+<h2 id="outcomes">What it can come out as</h2>
 
 <div class="table-wrap">
 <table class="facts">
+<thead><tr><th>Outcome</th><th>Carrying</th></tr></thead>
 <tbody>
-<tr><th>Double Quarter</th><td>Two quadrants instead of one - the two front, the two back, the two upper, the two lower, or a diagonal pair. Between a third and three-fifths of the horse. Where the pair is adjacent there is no seam at the shared boundary and the two read as one field; where it is diagonal the two meet over a bridge at the trunk's centre, or stay apart across a narrow isthmus of coat.</td></tr>
-<tr><th>Coloured Quarter</th><td>The same marking in a colour the line carries rather than in white. Fully recessive: it takes two copies, and a single copy beside a white allele shows white. It never gives blue eyes, whatever the white form does. It mirrors Double Quarter rather than Part Quarter: a horse showing the coloured form carries no white allele at all, so there is no second shape left to tell apart.</td></tr>
-<tr><th>Part Quarter</th><td>One contiguous quadrant of the trunk, a fifth to a third of the horse. The transverse boundary sits square to the body axis and the long one follows the trunk's midline, and the two do not meet in a corner - the intersection is rounded off over a wide radius. Both boundaries are long soft gradients rather than lines. The quadrant may be filled anywhere from three-fifths to fully, and where it falls short the gap is taken from the corner furthest from its centre.</td></tr>
-<tr><th>Wild type</th><td>No quartering.</td></tr>
+<tr><th>Double Quarter</th><td><code>Qd/Qd</code> &middot; <code>Qd/n</code> &middot; <code>Qd/Qc</code></td></tr>
+<tr><th>Coloured Quarter</th><td><code>Qc/Qc</code></td></tr>
+<tr><th>Part Quarter</th><td><code>Qp/Qp</code> &middot; <code>Qp/Qd</code> &middot; <code>Qp/n</code> &middot; <code>Qp/Qc</code></td></tr>
+<tr><th>Wild type</th><td><code>Qc/n</code> &middot; <code>n/n</code></td></tr>
 </tbody>
 </table>
 </div>
+
+<p class="muted">
+    How each one is actually drawn - region by region, and the layers it is built from -
+    is on the <a href="#layers">coding tab</a>.
+</p>
 
 <h2 id="inheritance">What you can get</h2>
 
@@ -107,7 +113,16 @@
 
 <h2 id="layers">What it paints</h2>
 
+<p>
+    Each outcome, described the way the gene file describes it, and then the
+    layers that draw it in the order they are painted. The prose is the part
+    a reader checks a bake against; the list underneath is what the engine
+    actually did.
+</p>
+
 <h3>Double Quarter</h3>
+
+<p>Two quadrants instead of one - the two front, the two back, the two upper, the two lower, or a diagonal pair. Between a third and three-fifths of the horse. Where the pair is adjacent there is no seam at the shared boundary and the two read as one field; where it is diagonal the two meet over a bridge at the trunk's centre, or stay apart across a narrow isthmus of coat.</p>
 
 <ol>
 <li>two quadrants, softly bounded &mdash; <code>AXIS</code> &times; <code>AXIS</code> &times; <code>NOISE</code>, painted with <code>TOWARD</code></li>
@@ -115,15 +130,25 @@
 
 <h3>Coloured Quarter</h3>
 
+<p>The same marking in a colour the line carries rather than in white. Fully recessive: it takes two copies, and a single copy beside a white allele shows white. It never gives blue eyes, whatever the white form does. It mirrors Double Quarter rather than Part Quarter: a horse showing the coloured form carries no white allele at all, so there is no second shape left to tell apart.</p>
+
 <ol>
 <li>two quadrants, softly bounded, in colour &mdash; <code>AXIS</code> &times; <code>AXIS</code> &times; <code>NOISE</code>, painted with <code>TOWARD</code></li>
 </ol>
 
 <h3>Part Quarter</h3>
 
+<p>One contiguous quadrant of the trunk, a fifth to a third of the horse. The transverse boundary sits square to the body axis and the long one follows the trunk's midline, and the two do not meet in a corner - the intersection is rounded off over a wide radius. Both boundaries are long soft gradients rather than lines. The quadrant may be filled anywhere from three-fifths to fully, and where it falls short the gap is taken from the corner furthest from its centre.</p>
+
 <ol>
 <li>one quadrant, softly bounded &mdash; <code>AXIS</code> &times; <code>AXIS</code> &times; <code>NOISE</code>, painted with <code>TOWARD</code></li>
 </ol>
+
+<h3>Wild type</h3>
+
+<p>No quartering.</p>
+
+<p class="muted">Paints nothing.</p>
 
 </section>
 

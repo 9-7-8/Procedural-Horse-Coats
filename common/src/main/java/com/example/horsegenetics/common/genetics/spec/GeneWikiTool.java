@@ -1,10 +1,14 @@
 package com.example.horsegenetics.common.genetics.spec;
 
 import com.example.horsegenetics.common.genetics.Allele;
+import com.example.horsegenetics.common.genetics.Gene;
 import com.example.horsegenetics.common.genetics.GeneFamily;
 import com.example.horsegenetics.common.genetics.Genes;
+import com.example.horsegenetics.common.genetics.GenotypeCatalog;
+import com.example.horsegenetics.common.breed.Breeds;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -15,6 +19,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Writes the wiki's pages for the <b>data-driven genes</b>: one page each, plus
@@ -92,7 +99,6 @@ public final class GeneWikiTool {
             }
         }
 
-        StringBuilder sections = new StringBuilder();
         for (Map.Entry<GeneFamily, List<SpecGene>> e : byFamily.entrySet()) {
             GeneFamily family = e.getKey();
             List<SpecGene> genes = new ArrayList<>(e.getValue());
@@ -109,21 +115,27 @@ public final class GeneWikiTool {
 
             Path index = wiki.resolve(family.slug() + ".html");
             Files.writeString(index, familyPage(family, genes), StandardCharsets.UTF_8);
-            sections.append(section(family, genes, handWritten));
         }
 
         System.out.println("wrote " + written + " gene pages ("
                 + handWritten.size() + " hand-written ones left alone: " + handWritten + ")"
                 + " and " + GeneFamily.magicalSpecFamilies().size() + " family indexes");
-        rewritePages(wiki.resolve("pages.js"), sections.toString());
+
+        // Both of these list EVERY gene, not only the data-driven ones - see
+        // geneSections. A gene page that nobody registered is unreachable from
+        // the sidebar and invisible on the landing page, and the only way to
+        // stop that happening once there are a hundred and fifty of them is to
+        // stop registering them by hand.
+        rewritePages(wiki.resolve("pages.js"), geneSections(wiki));
+        rewriteLanding(wiki.resolveSibling("index.html"), wiki);
     }
 
-    private static String slug(SpecGene gene) {
+    private static String slug(Gene gene) {
         return gene.key().substring(gene.key().indexOf('.') + 1);
     }
 
     /** The page a gene lives on. Hyphens, to match the hand-written pages beside them. */
-    private static String pageOf(SpecGene gene) {
+    private static String pageOf(Gene gene) {
         return "gene-" + slug(gene).replace('_', '-') + ".html";
     }
 
@@ -173,24 +185,445 @@ public final class GeneWikiTool {
         System.out.println("rewrote the generated span of " + pages.getFileName());
     }
 
-    private static String section(GeneFamily family, List<SpecGene> genes, Set<String> handWritten) {
+    /**
+     * <b>Every gene page in the wiki, grouped by {@link GeneFamily}</b> - the
+     * sidebar's gene sections, whole.
+     *
+     * <h2>Why the tool writes all of them and not only its own</h2>
+     * It used to emit the eighty-odd data-driven genes and leave the built-ins
+     * to five hand-written sections beside it. That gave the wiki one grouping
+     * of the genes and the two gene editors another, which is a disagreement
+     * with no upside; and it meant a gene with a page could quietly fail to be
+     * registered, which is not a hypothetical - {@code PATN1} and {@code PATN2}
+     * have never had one. So this reads the registry, not a list.
+     *
+     * <h2>Where the text and the views come from</h2>
+     * <b>The page itself.</b> The sidebar label is the page's own {@code <h1>}
+     * and the views are the {@code data-tab} panels it actually carries, so the
+     * sidebar cannot promise a science tab that is not there and cannot call a
+     * gene something its own heading does not. That is the same rule
+     * {@code wiki/tools/sync-page-views.mjs} applies to every other page; this
+     * simply applies it while it is already reading the file.
+     *
+     * <p>A gene with no page is skipped and named on stdout. That is the honest
+     * outcome for a locus documented inside another gene's page - the leopard
+     * complex's two modifiers - and it is loud enough to notice for one that was
+     * merely forgotten.
+     */
+    private static String geneSections(Path wiki) throws IOException {
         StringBuilder sb = new StringBuilder();
-        sb.append("        {\n            title: \"Magic: ")
-                .append(family.title().substring(0, 1).toLowerCase(Locale.ROOT))
-                .append(family.title().substring(1)).append("\",\n            items: [\n");
-        List<String> items = new ArrayList<>();
-        items.add("                { href: \"" + family.slug() + ".html\", text: \"All "
-                + family.title().toLowerCase(Locale.ROOT) + "\", kind: \"magical\", "
-                + "views: [\"gameplay\",\"coding\"] }");
-        for (SpecGene gene : genes) {
-            if (handWritten.contains(gene.key())) {
-                continue;   // registered by hand, elsewhere in this file
+        List<String> pageless = new ArrayList<>();
+
+        for (GeneFamily family : GeneFamily.occupied()) {
+            List<String> items = new ArrayList<>();
+
+            // The family's own index page leads its section, where there is one.
+            if (family.slug() != null) {
+                Path index = wiki.resolve(family.slug() + ".html");
+                items.add(item(family.slug() + ".html",
+                        "All " + family.title().toLowerCase(Locale.ROOT),
+                        "magical", viewsOf(index)));
             }
-            items.add("                { href: \"" + pageOf(gene) + "\", text: \""
-                    + esc(gene.name()) + "\", kind: \"magical\", views: [\"gameplay\",\"coding\"] }");
+
+            for (Gene gene : membersForMenu(family)) {
+                Path page = wiki.resolve(pageOf(gene));
+                if (!Files.exists(page)) {
+                    pageless.add(gene.key());
+                    continue;
+                }
+                items.add(item(pageOf(gene), headingOf(page, gene.name()),
+                        gene.isNatural() ? "natural" : "magical", viewsOf(page)));
+            }
+            if (items.isEmpty()) {
+                continue;
+            }
+            sb.append("        {\n            title: \"").append(esc(family.label()))
+                    .append("\",\n            items: [\n")
+                    .append(String.join(",\n", items))
+                    .append("\n            ]\n        },\n");
         }
-        sb.append(String.join(",\n", items)).append("\n            ]\n        },\n");
+        if (!pageless.isEmpty()) {
+            System.out.println("  (no page of their own, so not listed: " + pageless + ")");
+        }
         return sb.toString();
+    }
+
+    /**
+     * A family's genes in the order the menu should offer them: <b>naturals in
+     * paint order, magic alphabetically</b>.
+     *
+     * <p>Not a style choice either way. The natural loci are few and the order
+     * the pipeline applies them in is the order they make sense in - extension
+     * before agouti before the dilutions before the whites - and a reader
+     * following the model wants that. There are eighty-odd magical genes and
+     * nobody can find one by remembering where it paints.
+     */
+    private static List<Gene> membersForMenu(GeneFamily family) {
+        List<Gene> genes = new ArrayList<>(family.members());
+        if (!family.natural()) {
+            genes.sort((a, b) -> a.name().compareToIgnoreCase(b.name()));
+        }
+        return genes;
+    }
+
+    private static String item(String href, String text, String kind, List<String> views) {
+        StringBuilder v = new StringBuilder();
+        for (int i = 0; i < views.size(); i++) {
+            v.append(i == 0 ? "" : ",").append('"').append(views.get(i)).append('"');
+        }
+        return "                { href: \"" + href + "\", text: \"" + js(text)
+                + "\", kind: \"" + kind + "\", views: [" + v + "] }";
+    }
+
+    /**
+     * Escape for a <b>JavaScript string literal</b>, which is not the same job
+     * as escaping for HTML and had been done with the HTML escaper. The sidebar
+     * hands these to {@code createTextNode}, so an entity in one arrives on
+     * screen as its own source: {@code &mdash;} rather than an em dash.
+     */
+    private static String js(String s) {
+        return s.replace("\\", "\\\\").replace("\"", "\\\"");
+    }
+
+    private static final Pattern H1 = Pattern.compile("<h1>(.*?)</h1>", Pattern.DOTALL);
+    private static final Pattern TAB = Pattern.compile("data-tab=\"([a-z]+)\"");
+
+    /**
+     * A page's own {@code <h1>} as plain text: tags stripped, entities decoded,
+     * and any <b>subtitle after an em dash</b> dropped.
+     *
+     * <p>Several gene pages are headed "Sooty &mdash; the dark that lies on
+     * top". That is a good heading and a bad sidebar entry: the sidebar is a
+     * column of a hundred and sixty names being scanned for one of them, and
+     * the half before the dash is the name. Everything after it is on the page.
+     */
+    private static String headingOf(Path page, String fallback) throws IOException {
+        Matcher m = H1.matcher(Files.readString(page, StandardCharsets.UTF_8));
+        if (!m.find()) {
+            return fallback;
+        }
+        String text = decode(m.group(1).replaceAll("<[^>]*>", "")).trim();
+        int dash = text.indexOf(" — ");
+        if (dash > 0) {
+            text = text.substring(0, dash).trim();
+        }
+        return text.isEmpty() ? fallback : text;
+    }
+
+    /** The handful of HTML entities the gene headings actually use. */
+    private static String decode(String s) {
+        return s.replace("&mdash;", "—").replace("&ndash;", "–")
+                .replace("&rsquo;", "’").replace("&lsquo;", "‘")
+                .replace("&eacute;", "é").replace("&hellip;", "…")
+                .replace("&middot;", "·").replace("&times;", "×")
+                .replace("&minus;", "−").replace("&quot;", "\"")
+                .replace("&lt;", "<").replace("&gt;", ">")
+                .replace("&amp;", "&");     // last, or it would double-decode
+    }
+
+    /**
+     * The views a page has something for: its {@code data-tab} panels, in the
+     * canonical order. A page with no panels at all is one continuous document
+     * and is offered to the two audiences a gene page is always written for.
+     */
+    private static List<String> viewsOf(Path page) throws IOException {
+        if (!Files.exists(page)) {
+            return List.of("gameplay", "coding");
+        }
+        Set<String> found = new LinkedHashSet<>();
+        Matcher m = TAB.matcher(Files.readString(page, StandardCharsets.UTF_8));
+        while (m.find()) {
+            found.add(m.group(1));
+        }
+        List<String> out = new ArrayList<>();
+        for (String v : new String[]{"gameplay", "coding", "science"}) {
+            if (found.contains(v)) {
+                out.add(v);
+            }
+        }
+        return out.isEmpty() ? List.of("gameplay", "coding") : out;
+    }
+
+    // ------------------------------------------------------------------
+    // index.html - the landing page's gene cards
+    // ------------------------------------------------------------------
+
+    private static final String LAND_BEGIN =
+            "    <!-- BEGIN generated by :common:bakeGeneWikiPages";
+    private static final String LAND_END =
+            "    <!-- END generated by :common:bakeGeneWikiPages -->";
+
+    /**
+     * <b>One card per gene on the landing page, grouped by family</b> - the same
+     * grouping, in the same order, as the sidebar and as the two gene editors'
+     * filter menu.
+     *
+     * <h2>A hand-written card always wins</h2>
+     * The card bodies people wrote - the paragraph and the tag line - are
+     * <b>harvested off the page and put back</b>, keyed by href. Only a gene
+     * with no card yet gets a generated one, from its own blurb and allele
+     * tokens. So this adds the hundred-odd genes nobody had time to write a
+     * card for without flattening the thirty that somebody did, and editing one
+     * of those by hand keeps working exactly as it did.
+     *
+     * <p>The card links to the gene's page and carries its baked icon where one
+     * exists, which is every data-driven gene ({@code GeneIconTool} writes them
+     * on a standard bay).
+     */
+    private static void rewriteLanding(Path landing, Path wiki) throws IOException {
+        if (!Files.exists(landing)) {
+            System.out.println("no " + landing + " - skipped the landing page");
+            return;
+        }
+        String page = Files.readString(landing, StandardCharsets.UTF_8).replace("\r\n", "\n");
+        Map<String, String> existing = harvestCards(page);
+
+        StringBuilder body = new StringBuilder();
+        body.append(LAND_BEGIN).append(" - do not edit between the markers.\n")
+                .append("         One section per gene family, one card per gene. A card body written\n")
+                .append("         by hand is harvested and put back; only a gene with no card gets a\n")
+                .append("         generated one. See GeneWikiTool.rewriteLanding. -->\n");
+
+        int generated = 0;
+        for (GeneFamily family : GeneFamily.occupied()) {
+            List<String> cards = new ArrayList<>();
+            if (family.slug() != null) {
+                cards.add(familyCard(family, existing.get("wiki/" + family.slug() + ".html")));
+            }
+            for (Gene gene : membersForMenu(family)) {
+                if (!Files.exists(wiki.resolve(pageOf(gene)))) {
+                    continue;
+                }
+                String kept = existing.get("wiki/" + pageOf(gene));
+                if (kept == null) {
+                    generated++;
+                }
+                cards.add(geneCard(gene, wiki, kept));
+            }
+            if (cards.isEmpty()) {
+                continue;
+            }
+            body.append("\n    <div class=\"section-head\">\n        <h2>")
+                    .append(esc(family.label())).append("</h2>\n        <p>")
+                    .append(esc(family.lede())).append("</p>\n    </div>\n")
+                    .append("    <div class=\"cards\">\n");
+            for (String card : cards) {
+                body.append(card);
+            }
+            body.append("    </div>\n");
+        }
+        body.append("\n").append(LAND_END).append("\n");
+
+        int i = page.indexOf(LAND_BEGIN);
+        String out;
+        if (i < 0) {
+            // First run: the gene cards replace whatever sits between the
+            // "Natural genes" heading and the section after the magical one.
+            int at = page.indexOf("    <div class=\"section-head\">\n        <h2>Natural genes</h2>");
+            if (at < 0) {
+                throw new IllegalStateException("index.html: no anchor to insert the gene cards at");
+            }
+            int after = page.indexOf("    <div class=\"section-head\">", magicalEnd(page));
+            if (after < 0) {
+                throw new IllegalStateException("index.html: no section after the gene cards");
+            }
+            out = page.substring(0, at) + body + page.substring(after);
+        } else {
+            int j = page.indexOf(LAND_END, i);
+            if (j < 0) {
+                throw new IllegalStateException("index.html: BEGIN marker with no END");
+            }
+            out = page.substring(0, i) + body + page.substring(j + LAND_END.length() + 1);
+        }
+        out = rewriteStats(out);
+        Files.writeString(landing, out, StandardCharsets.UTF_8);
+        System.out.println("rewrote the gene cards on " + landing.getFileName()
+                + " (" + generated + " generated, " + existing.size() + " hand-written kept)");
+    }
+
+    private static final String STAT_BEGIN =
+            "        <!-- BEGIN stats generated by :common:bakeGeneWikiPages";
+    private static final String STAT_END =
+            "        <!-- END stats generated by :common:bakeGeneWikiPages -->";
+
+    /**
+     * <b>The four numbers in the landing page's header.</b>
+     *
+     * <p>They were hand-written, and by the time anybody checked, three of them
+     * had drifted by orders of magnitude - the gene count said 69 against a
+     * registry of over a hundred and fifty. A derived number in prose is stale
+     * the next time the code moves, and these four move every time a gene is
+     * added. So they are read off the accessors that produce them:
+     * {@code Genes.codeOrder().size()}, {@code Breeds.all().size()},
+     * {@link GenotypeCatalog#totalGenotypes()} and {@link GenotypeCatalog#size()}.
+     *
+     * <p>The last of those <b>saturates</b>. The catalogue counts into a
+     * {@code long} because callers index into it, and the distinct-looking
+     * count passed {@link Long#MAX_VALUE} somewhere in the eighty-four magical
+     * genes, so the honest thing to print is a floor rather than a figure.
+     */
+    private static String rewriteStats(String page) {
+        int i = page.indexOf(STAT_BEGIN);
+        int at;
+        int end;
+        if (i >= 0) {
+            int j = page.indexOf(STAT_END, i);
+            if (j < 0) {
+                throw new IllegalStateException("index.html: stats BEGIN with no END");
+            }
+            at = i;
+            end = j + STAT_END.length() + 1;
+        } else {
+            at = page.indexOf("        <div class=\"stats\">");
+            if (at < 0) {
+                return page;        // no header stats on this page; nothing to do
+            }
+            // The block's own closing tag, at its own indentation - not the
+            // first </div> after it, which ends the first stat row.
+            end = page.indexOf("\n        </div>\n", at);
+            if (end < 0) {
+                throw new IllegalStateException("index.html: unterminated stats block");
+            }
+            end += "\n        </div>\n".length();
+            // and take the hand-written comment above it with us
+            int comment = page.lastIndexOf("        <!--", at);
+            if (comment >= 0 && page.indexOf("-->", comment) < at) {
+                at = comment;
+            }
+        }
+
+        long distinct = GenotypeCatalog.size();
+        String block = STAT_BEGIN + " - do not edit between the markers.\n"
+                + "             Four accessors, not four numbers somebody typed: three of these\n"
+                + "             had drifted by orders of magnitude while they were prose. -->\n"
+                + "        <div class=\"stats\">\n"
+                + "            <div><span>" + Genes.codeOrder().size() + "</span><small>genes</small></div>\n"
+                + "            <div><span>" + Breeds.all().size() + "</span><small>breeds</small></div>\n"
+                + "            <div><span>" + power(GenotypeCatalog.totalGenotypes())
+                + "</span><small>genotypes</small></div>\n"
+                + "            <div><span>" + (distinct == Long.MAX_VALUE
+                        ? "&gt;9&times;10<sup>18</sup>" : group(distinct))
+                + "</span><small>visually distinct</small></div>\n"
+                + "        </div>\n"
+                + STAT_END + "\n";
+        return page.substring(0, at) + block + page.substring(end);
+    }
+
+    /** A very large integer as {@code m&times;10<sup>e</sup>}, two significant figures. */
+    private static String power(BigInteger n) {
+        String digits = n.toString();
+        int exponent = digits.length() - 1;
+        String mantissa = digits.length() > 1
+                ? digits.charAt(0) + "." + digits.charAt(1)
+                : digits;
+        return mantissa + "&times;10<sup>" + exponent + "</sup>";
+    }
+
+    private static String group(long n) {
+        StringBuilder sb = new StringBuilder(Long.toString(n));
+        for (int i = sb.length() - 3; i > 0; i -= 3) {
+            sb.insert(i, ',');
+        }
+        return sb.toString();
+    }
+
+    /** Where the old hand-written magical-gene block ended, on the very first run. */
+    private static int magicalEnd(String page) {
+        int at = page.indexOf("<h2>Magical genes</h2>");
+        return at < 0 ? 0 : at;
+    }
+
+    private static final Pattern CARD = Pattern.compile(
+            "^[ \\t]*<a href=\"(wiki/gene[^\"]*\\.html)\" class=\"card[^\"]*\">\\n"
+                    + "(.*?)^[ \\t]*</a>\\n",
+            Pattern.DOTALL | Pattern.MULTILINE);
+
+    /**
+     * The <b>body</b> of every gene card already on the page, keyed by href -
+     * the heading, the paragraph and the tag line somebody wrote, without the
+     * anchor around them.
+     *
+     * <p>Only the body is kept. The anchor is rebuilt from the gene every time,
+     * so the href, the natural / magical class and the icon are always what the
+     * registry says and can never be a card that was moved between families and
+     * kept the old colour.
+     */
+    private static Map<String, String> harvestCards(String page) {
+        Map<String, String> out = new LinkedHashMap<>();
+        Matcher m = CARD.matcher(page);
+        while (m.find()) {
+            out.put(m.group(1), reindent(m.group(2)));
+        }
+        return out;
+    }
+
+    /** Put a harvested body back on the page's own indentation. */
+    private static String reindent(String body) {
+        StringBuilder sb = new StringBuilder();
+        for (String line : body.split("\n", -1)) {
+            String trimmed = line.strip();
+            if (trimmed.isEmpty()) {
+                continue;
+            }
+            sb.append("            ").append(trimmed).append('\n');
+        }
+        return sb.toString();
+    }
+
+    /**
+     * The anchor round a card body: href, kind, and the baked icon if there is
+     * one.
+     *
+     * <p>The two icon questions are deliberately different. <b>Is there an
+     * icon</b> decides the class, and a body carrying its own {@code <img>}
+     * counts - the seven family cards each picked a representative gene's bake
+     * by hand and keep it. <b>Should one be added</b> is narrower: only when the
+     * body has not got one already, or a card would grow a second icon every
+     * time this ran.
+     */
+    private static String card(String href, String kind, String icon, String body) {
+        boolean bodyHasIcon = body.contains("card-icon");
+        boolean anyIcon = icon != null || bodyHasIcon;
+        return "        <a href=\"" + href + "\" class=\"card " + kind
+                + (anyIcon ? " card-iconed" : "") + "\">\n"
+                + (icon != null && !bodyHasIcon
+                        ? "            <img class=\"card-icon\" src=\"" + icon
+                                + "\" alt=\"\" width=\"120\" loading=\"lazy\">\n"
+                        : "")
+                + body
+                + "        </a>\n";
+    }
+
+    private static String familyCard(GeneFamily family, String body) {
+        return card("wiki/" + family.slug() + ".html", "magical", null,
+                body != null ? body
+                        : "            <h3>All " + esc(family.title().toLowerCase(Locale.ROOT))
+                                + "</h3>\n            <p>" + esc(family.lede())
+                                + "</p>\n            <span class=\"tag\">index</span>\n");
+    }
+
+    /**
+     * A card for a gene nobody wrote one for: its own blurb, its alleles, and
+     * its baked icon if it has one. Deliberately thin - the point of a card is
+     * to be a door to the page, and the page has everything.
+     */
+    private static String geneCard(Gene gene, Path wiki, String body) {
+        String icon = Files.exists(wiki.resolve("assets/gene-icons/" + slug(gene) + ".png"))
+                ? "wiki/assets/gene-icons/" + slug(gene) + ".png"
+                : null;
+        if (body == null) {
+            List<String> tokens = new ArrayList<>();
+            for (Allele a : gene.alleles()) {
+                tokens.add(a.token());
+            }
+            String tag = tokens.size() > 4 ? tokens.size() + " alleles" : String.join(" / ", tokens);
+            String blurb = gene.description();
+            body = "            <h3>" + esc(gene.name()) + "</h3>\n"
+                    + (blurb == null || blurb.isEmpty()
+                            ? "" : "            <p>" + esc(blurb) + "</p>\n")
+                    + "            <span class=\"tag\">" + esc(tag) + "</span>\n";
+        }
+        return card("wiki/" + pageOf(gene), gene.isNatural() ? "natural" : "magical", icon, body);
     }
 
     // ------------------------------------------------------------------
@@ -273,16 +706,7 @@ public final class GeneWikiTool {
         sb.append("<section class=\"tab-panel\" data-tab=\"gameplay\">\n\n");
         sb.append("<div class=\"gene-preview\" data-gene=\"").append(gene.key()).append("\"></div>\n\n");
 
-        sb.append("<h2 id=\"outcomes\">What it does</h2>\n\n");
-        sb.append("<div class=\"table-wrap\">\n<table class=\"facts\">\n<tbody>\n");
-        for (GeneSpec.ExpressionSpec e : gene.spec().expressions()) {
-            if (e.description().isBlank()) {
-                continue;
-            }
-            sb.append("<tr><th>").append(esc(e.name())).append("</th><td>")
-                    .append(esc(e.description())).append("</td></tr>\n");
-        }
-        sb.append("</tbody>\n</table>\n</div>\n\n");
+        sb.append(outcomeSummary(gene));
 
         sb.append("<h2 id=\"inheritance\">What you can get</h2>\n\n");
         sb.append("<div class=\"gene-inheritance\" data-gene=\"").append(gene.key())
@@ -329,6 +753,42 @@ public final class GeneWikiTool {
         sb.append(layers(gene));
         sb.append("</section>\n\n");
         foot(sb);
+        return sb.toString();
+    }
+
+    /**
+     * <b>What the gene can come out as, on the gameplay tab</b>: the outcome
+     * names and the allele combinations that produce them, and no more.
+     *
+     * <p>The prose describing each outcome used to be here, and it is the wrong
+     * tab for it. These descriptions came out of the source documents part by
+     * part - "from the poll down through the orbits and the nasal region to the
+     * muzzle, bounded along the cheekbone and the jaw" - which is a
+     * specification of how the thing is drawn, not what a player wants to read
+     * before going to look for one. It is on the coding tab now, next to the
+     * layers that draw it, where the two halves of the same statement can be
+     * read together. The gameplay tab keeps the picture, the names, the odds
+     * and the carrot.
+     */
+    private static String outcomeSummary(SpecGene gene) {
+        StringBuilder sb = new StringBuilder("<h2 id=\"outcomes\">What it can come out as</h2>\n\n");
+        sb.append("<div class=\"table-wrap\">\n<table class=\"facts\">\n")
+                .append("<thead><tr><th>Outcome</th><th>Carrying</th></tr></thead>\n<tbody>\n");
+        for (GeneSpec.ExpressionSpec e : gene.spec().expressions()) {
+            List<String> combos = new ArrayList<>();
+            for (String c : e.combinations()) {
+                combos.add("<code>" + esc(c) + "</code>");
+            }
+            sb.append("<tr><th>").append(esc(e.name())).append("</th><td>")
+                    .append(combos.isEmpty()
+                            ? "anything else"
+                            : String.join(" &middot; ", combos))
+                    .append("</td></tr>\n");
+        }
+        sb.append("</tbody>\n</table>\n</div>\n\n");
+        sb.append("<p class=\"muted\">\n    How each one is actually drawn - region by region,"
+                + " and the layers it is built from -\n    is on the"
+                + " <a href=\"#layers\">coding tab</a>.\n</p>\n\n");
         return sb.toString();
     }
 
@@ -424,11 +884,22 @@ public final class GeneWikiTool {
 
     private static String layers(SpecGene gene) {
         StringBuilder sb = new StringBuilder("<h2 id=\"layers\">What it paints</h2>\n\n");
+        sb.append("<p>\n    Each outcome, described the way the gene file describes it, and then"
+                + " the\n    layers that draw it in the order they are painted. The prose is the"
+                + " part\n    a reader checks a bake against; the list underneath is what the"
+                + " engine\n    actually did.\n</p>\n\n");
         for (GeneSpec.ExpressionSpec e : gene.spec().expressions()) {
-            if (e.layers().isEmpty()) {
+            if (e.layers().isEmpty() && e.description().isBlank()) {
                 continue;
             }
             sb.append("<h3>").append(esc(e.name())).append("</h3>\n\n");
+            if (!e.description().isBlank()) {
+                sb.append("<p>").append(esc(e.description())).append("</p>\n\n");
+            }
+            if (e.layers().isEmpty()) {
+                sb.append("<p class=\"muted\">Paints nothing.</p>\n\n");
+                continue;
+            }
             sb.append("<ol>\n");
             for (GeneSpec.Layer layer : e.layers()) {
                 sb.append("<li>").append(esc(layer.name()));

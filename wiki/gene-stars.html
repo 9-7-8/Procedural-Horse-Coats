@@ -28,17 +28,23 @@
 
 <div class="gene-preview" data-gene="horsegenetics.stars"></div>
 
-<h2 id="outcomes">What it does</h2>
+<h2 id="outcomes">What it can come out as</h2>
 
 <div class="table-wrap">
 <table class="facts">
+<thead><tr><th>Outcome</th><th>Carrying</th></tr></thead>
 <tbody>
-<tr><th>Stars</th><td>Small hard-edged points, most of them round and a few drawn out into a short cross. They fall thickest over the dorsal third of the barrel, the croup and the upper neck, thin toward the belly, and stop at the knee and hock. They clump: a starred horse has three or four patches where the points crowd, not an even dusting.</td></tr>
-<tr><th>Coloured Stars</th><td>The same marking in a colour the line carries rather than in white. Fully recessive: it takes two copies, and a single copy beside the white allele shows white. It never gives blue eyes, whatever the white form does.</td></tr>
-<tr><th>Wild type</th><td>No stars.</td></tr>
+<tr><th>Stars</th><td><code>Sta/Sta</code> &middot; <code>Sta/Stc</code> &middot; <code>Sta/n</code></td></tr>
+<tr><th>Coloured Stars</th><td><code>Stc/Stc</code></td></tr>
+<tr><th>Wild type</th><td><code>Stc/n</code> &middot; <code>n/n</code></td></tr>
 </tbody>
 </table>
 </div>
+
+<p class="muted">
+    How each one is actually drawn - region by region, and the layers it is built from -
+    is on the <a href="#layers">coding tab</a>.
+</p>
 
 <h2 id="inheritance">What you can get</h2>
 
@@ -102,7 +108,16 @@
 
 <h2 id="layers">What it paints</h2>
 
+<p>
+    Each outcome, described the way the gene file describes it, and then the
+    layers that draw it in the order they are painted. The prose is the part
+    a reader checks a bake against; the list underneath is what the engine
+    actually did.
+</p>
+
 <h3>Stars</h3>
+
+<p>Small hard-edged points, most of them round and a few drawn out into a short cross. They fall thickest over the dorsal third of the barrel, the croup and the upper neck, thin toward the belly, and stop at the knee and hock. They clump: a starred horse has three or four patches where the points crowd, not an even dusting.</p>
 
 <ol>
 <li>points over the upper body, clumped &mdash; <code>SPOTS</code> &times; <code>AXIS</code> &times; <code>NOISE</code>, painted with <code>TOWARD</code></li>
@@ -112,11 +127,19 @@
 
 <h3>Coloured Stars</h3>
 
+<p>The same marking in a colour the line carries rather than in white. Fully recessive: it takes two copies, and a single copy beside the white allele shows white. It never gives blue eyes, whatever the white form does.</p>
+
 <ol>
 <li>points over the upper body, clumped, in colour &mdash; <code>SPOTS</code> &times; <code>AXIS</code> &times; <code>NOISE</code>, painted with <code>TOWARD</code></li>
 <li>the few that are drawn out into a cross, in colour &mdash; <code>SPOTS</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code></li>
 <li>a sparse scatter down the upper leg only, in colour &mdash; <code>SPOTS</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code></li>
 </ol>
+
+<h3>Wild type</h3>
+
+<p>No stars.</p>
+
+<p class="muted">Paints nothing.</p>
 
 </section>
 

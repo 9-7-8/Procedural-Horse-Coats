@@ -28,16 +28,22 @@
 
 <div class="gene-preview" data-gene="horsegenetics.oscar"></div>
 
-<h2 id="outcomes">What it does</h2>
+<h2 id="outcomes">What it can come out as</h2>
 
 <div class="table-wrap">
 <table class="facts">
+<thead><tr><th>Outcome</th><th>Carrying</th></tr></thead>
 <tbody>
-<tr><th>Oscar</th><td>A very heavy sooty that turns the coat black from head to toe, and it does it on anything - single cream, double cream, pearl, champagne, none of them stop it. Then the black flakes: large wavy stripes lift away and reveal the horse's real genetic colour underneath, whatever that is, and they run mostly upright rather than along the body. At its quietest that is a black horse with a little colour showing on the neck; at its loudest it is half and half, with flecks of dark in the colour and flecks of colour in the dark. Mane and tail follow whatever the flaking does where they meet it. It sits under every white marking. One copy looks exactly like two.</td></tr>
-<tr><th>Wild type</th><td>No flaking.</td></tr>
+<tr><th>Oscar</th><td><code>Osc/Osc</code> &middot; <code>Osc/n</code></td></tr>
+<tr><th>Wild type</th><td><code>n/n</code></td></tr>
 </tbody>
 </table>
 </div>
+
+<p class="muted">
+    How each one is actually drawn - region by region, and the layers it is built from -
+    is on the <a href="#layers">coding tab</a>.
+</p>
 
 <h2 id="inheritance">What you can get</h2>
 
@@ -99,13 +105,28 @@
 
 <h2 id="layers">What it paints</h2>
 
+<p>
+    Each outcome, described the way the gene file describes it, and then the
+    layers that draw it in the order they are painted. The prose is the part
+    a reader checks a bake against; the list underneath is what the engine
+    actually did.
+</p>
+
 <h3>Oscar</h3>
+
+<p>A very heavy sooty that turns the coat black from head to toe, and it does it on anything - single cream, double cream, pearl, champagne, none of them stop it. Then the black flakes: large wavy stripes lift away and reveal the horse's real genetic colour underneath, whatever that is, and they run mostly upright rather than along the body. At its quietest that is a black horse with a little colour showing on the neck; at its loudest it is half and half, with flecks of dark in the colour and flecks of colour in the dark. Mane and tail follow whatever the flaking does where they meet it. It sits under every white marking. One copy looks exactly like two.</p>
 
 <ol>
 <li>black over everything &mdash; <code>PARTS</code>, painted with <code>TOWARD</code></li>
 <li>the flakes lifting away again &mdash; <code>STROKES</code>, painted with <code>TOWARD</code></li>
 <li>dark specks left in the flaked areas &mdash; <code>SPECKLE</code> &times; <code>STROKES</code>, painted with <code>TOWARD</code></li>
 </ol>
+
+<h3>Wild type</h3>
+
+<p>No flaking.</p>
+
+<p class="muted">Paints nothing.</p>
 
 </section>
 
