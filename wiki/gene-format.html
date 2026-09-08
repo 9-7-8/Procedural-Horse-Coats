@@ -253,11 +253,20 @@
 </table>
 
 <p>
-    A knob is drawn <strong>once per horse</strong>, in declaration order, from the
-    epigenetic seed of the allele copy that expresses &mdash; so the same horse rebuilds
-    the same coat every session, and a foal that inherits the copy inherits the look.
-    That is the <a href="philosophy.html">determinism contract</a>, and it holds for
-    data-driven genes exactly as it does for hand-written ones.
+    A knob is <strong>stored on the allele copy that expresses</strong>, by name, and
+    read back &mdash; so the same horse rebuilds the same coat every session, and a
+    foal that inherits the copy inherits the look. That is the
+    <a href="philosophy.html">determinism contract</a>, and it holds for data-driven
+    genes exactly as it does for hand-written ones.
+</p>
+
+<p>
+    A knob <em>is</em> an epigenetic value: <code>SpecValues.schema</code> turns the
+    list below straight into the <code>EpiSchema</code> a Java gene declares by hand.
+    That is why data-driven genes needed almost no work when epigenetics moved from a
+    single opaque seed to stored numbers &mdash; the format already described its
+    varying numbers by name and with a range, which is exactly the right shape. See
+    <a href="genetics-model.html#epigenetics">the genetics model</a>.
 </p>
 
 <pre><code class="language-json">"knobs": [
@@ -266,14 +275,24 @@
 ]</code></pre>
 
 <dl class="spec">
-    <div><dt>type: "seed"</dt><dd>Takes a <code>nextLong()</code> instead of a <code>nextFloat()</code>. Feeds a noise mask's <code>seed</code>.</dd></div>
-    <div><dt>per: "leg"</dt><dd>Draws once for the horse, then scales each leg by an independent <code>1 &plusmn; spread</code>. A horse's four socks come out near each other but never level &mdash; the shape <code>BayCoat</code> hand-rolls, in one line.</dd></div>
+    <div><dt>type: "seed"</dt><dd>An opaque <code>long</code> feeding a noise mask's <code>seed</code>. <a href="breeding.html#drift">Drift</a> never nudges one &mdash; there is no &ldquo;slightly different&rdquo; noise field &mdash; so a lineage keeps the shape of its markings.</dd></div>
+    <div><dt>per: "leg"</dt><dd>Four independent stored numbers, one per leg, across a range widened by <code>spread</code>. A horse's four socks come out near each other but never level &mdash; the shape <code>BayCoat</code> hand-rolls, in one line.</dd></div>
 </dl>
 
 <p class="note">
-    Adding a knob in the <em>middle</em> of the list reshuffles every knob after it, so
-    existing horses carrying the gene change look. That is fine while you are tuning;
-    it is worth knowing before you re-tune a gene people have been breeding.
+    <strong>Renaming</strong> a knob orphans it: it reads as a fresh roll on the next
+    parse, and horses carrying the gene change look. <strong>Adding or re-ordering</strong>
+    knobs is free &mdash; values are stored by name. That used to be the other way
+    round, and inserting a knob mid-list silently repainted every horse carrying the
+    gene.
+</p>
+
+<p class="note">
+    A <code>per: "leg"</code> knob changed shape with stored values. It used to draw
+    one base for the horse and then jitter each leg around it, which made the four
+    legs correlated and no single leg a number anyone could edit; now each leg is its
+    own stored value and the <code>spread</code> is folded into the declared range.
+    Same look, four editable numbers instead of one and a wobble.
 </p>
 
 <h2 id="masks">Masks &mdash; where</h2>

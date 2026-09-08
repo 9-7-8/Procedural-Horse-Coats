@@ -159,7 +159,8 @@
 <p>
     A genotype says <em>which</em> alleles a horse carries. It does not say what those
     particular <strong>copies</strong> carry, and every copy carries a
-    <strong>priority</strong> and an <strong>epigenetic seed</strong>. Those live in
+    <strong>priority</strong> and a set of <strong>literal numbers</strong> &mdash;
+    one per value the gene declares. Those live in
     an <code>Epigenome</code>, aligned slot-for-slot with the genotype&rsquo;s pairs.
     <code>Genome</code> is the two together, and it exists because only a breeding
     pass that draws both at once can keep that alignment true.
@@ -172,11 +173,12 @@
         copies is passed on, one more picks the other parent&rsquo;s &mdash;
         <strong>the same 2 draws</strong> <code>Genotype.breedWith</code> makes, so
         the allele half is bit-for-bit unchanged.</li>
-    <li>Each chosen allele arrives carrying that parent copy&rsquo;s priority and
-        seed <strong>verbatim</strong> &mdash; no re-roll, no jitter. A foal that
-        inherits its dam&rsquo;s <code>A</code> inherits her bay
-        <a href="gene-shade.html#score">shade</a> roll exactly &mdash; the
-        polygenic half of how dark a bay she is.</li>
+    <li>Each chosen allele arrives carrying that parent copy&rsquo;s priority
+        <strong>verbatim</strong> and its numbers nudged by
+        <a href="#drift">drift</a>. A foal that inherits its dam&rsquo;s
+        <code>A</code> inherits her bay
+        <a href="gene-shade.html#score">shade</a> &mdash; the polygenic half of how
+        dark a bay she is &mdash; to well inside what anyone could see.</li>
     <li>The two copies are re-aligned to <code>AllelePair</code>&rsquo;s canonical
         slot order; the epigenetics follow their own allele across the swap.</li>
     <li><strong>Priority tie-break</strong>: if both copies arrived holding the same
@@ -187,12 +189,84 @@
 </ol>
 
 <div class="note rule">
-    <span class="label">Draw count</span>
+    <span class="label">Two passes, and why</span>
     <p>
-        <strong>2 <code>nextBoolean()</code> per gene, plus 1 per gene that ties.</strong>
-        This is asserted in tests; a change to it changes every foal.
+        Pass 1 locks <strong>every allele</strong> &mdash; two
+        <code>nextBoolean()</code> per gene, in a fixed order, whatever the
+        <a href="carrots.html">carrots</a> say. Pass 2 then does all the epigenetic
+        work: drift, and the fresh roll a splice carrot&rsquo;s substituted gamete
+        needs. Nothing in pass 2 can move a foal&rsquo;s genotype, which is the
+        guarantee that matters.
+    </p>
+    <p>
+        There is no longer an exact draw count. It used to be
+        &ldquo;2 <code>nextBoolean()</code> per gene plus 1 per tie&rdquo;, which let
+        an unfed carrot be bit-for-bit a plain breeding; drift spends a couple of
+        draws per stored value on top, so that guarantee cannot hold and is not
+        claimed.
     </p>
 </div>
+
+<h4 id="drift">Genetic drift</h4>
+
+<p>
+    Inheritance used to be exactly verbatim, which meant a lineage&rsquo;s numbers
+    were frozen the day its founder was caught and no amount of breeding could
+    produce a horse outside what the wild population already contained. Every
+    scalar now takes a tiny nudge on its way to a foal.
+</p>
+
+<p>
+    The magnitude is drawn from a <strong>two-sided exponential</strong> whose scale
+    is <code>EpiDrift.SCALE</code> of the value&rsquo;s design span &mdash; so the
+    larger the drift, the exponentially less likely it is:
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Of every scalar passed on&hellip;</th><th>moves less than</th></tr></thead>
+<tbody>
+<tr><td>half</td><td>0.10% of its range</td></tr>
+<tr><td>90%</td><td>0.35%</td></tr>
+<tr><td>99%</td><td>0.70%</td></tr>
+<tr><td>all but 1 in 10&nbsp;000</td><td>1.4%</td></tr>
+<tr><td>all but 1 in 1&nbsp;000&nbsp;000</td><td>2.1%</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    So the overwhelming majority of foals are, to the eye and to the stat readout,
+    <strong>exactly their parents</strong> &mdash; &ldquo;breeds true&rdquo; here
+    means imperceptible, not bit-identical &mdash; while the tail stays open. A
+    horse carries a few hundred of these numbers, so roughly one foal in thirty has
+    one value that moved a visible amount. Most pairs breed true; chaos stays
+    possible.
+</p>
+
+<p>
+    <strong>Drift may leave the range founders are rolled in.</strong> A value is
+    held only inside its hard safety bound &mdash; the one that stops a horse
+    breaking the model &mdash; never inside its design range. That is deliberate:
+    the design range is where wild horses start, not a ceiling a breeder can never
+    pass. A line bred for three hundred generations is allowed to be somewhere no
+    wild horse has ever been.
+</p>
+
+<p>
+    <strong>Noise seeds and categories do not nudge.</strong> There is no
+    &ldquo;slightly different&rdquo; splash shape or body site &mdash; nudging
+    either replaces the thing rather than adjusting it. Both instead get a
+    <code>EpiDrift.REPLACE_CHANCE</code> chance per breeding of being re-rolled
+    outright, so a lineage keeps its exact markings essentially forever and a foal
+    that does change is a real event rather than a boundary accident.
+</p>
+
+<p>
+    Priority does not drift either &mdash; it is an ordinal deciding which copy
+    expresses, and a horse whose expressed copy silently swapped between
+    generations would be inexplicable.
+</p>
 
 <h4>What epigenetic priority is for</h4>
 
@@ -205,7 +279,7 @@
     canonically first &mdash; an arbitrary but fixed choice, not a claim that one
     allele wins. When they are the <strong>same</strong> both express, so the tie
     goes to the <strong>higher</strong> epigenetic priority. That is its only job; it is a
-    full-range int for headroom. It selects a <em>seed</em>, never an
+    full-range int for headroom. It selects a <em>copy</em>, never an
     <em>order</em>.
 </p>
 
@@ -213,10 +287,14 @@
 
 <p>
     A founder &mdash; wild spawn, <code>/summon</code>, a dimension pen horse &mdash; gets a
-    fresh <code>Epigenome.random</code>: an independent priority and seed on every
-    copy, deconflicted the same way. That is the <strong>only</strong> place
+    fresh <code>Epigenome.random</code>: an independent priority and an independent
+    roll of every declared value on every copy, from that value&rsquo;s own declared
+    distribution, deconflicted the same way. That is the <strong>only</strong> place
     epigenetics are ever invented. <code>CoatGenerator.generate</code> is the founder
-    path, and a foal must not go through it.
+    path, and a foal must not go through it. A horse of a
+    <a href="breeds.html">breed</a> goes through <code>BreedFounder</code>, which is
+    the same path plus the breed&rsquo;s stat targets written onto the copies &mdash;
+    and the only place a breed ever touches a number.
 </p>
 
 <h3>Stats are inherited, not rolled</h3>
@@ -761,9 +839,11 @@ int     offspringCount(UUID a, UUID b);</code></pre>
         deliberate; if the numbers ever feel too tidy, the place to reopen it is
         epigenetic variation (inherited with the allele, still deterministic), not a
         fresh die roll. See <a href="horse-body.html">the horse&rsquo;s body</a>.</li>
-    <li><strong>A foal&rsquo;s epigenetics are copied exactly, with no
-        variation</strong>, so a closed line converges on one look. Deliberate for
-        now.</li>
+    <li><strong>Drift is untuned against real play.</strong> The curve is what the
+        owner specified and the distribution is unit-tested, but nobody has yet bred
+        thirty generations of anything to see whether a line actually develops
+        character at the rate it should. The two numbers to turn are
+        <code>EpiDrift.SCALE</code> and <code>EpiDrift.REPLACE_CHANCE</code>.</li>
     <li>No inbreeding prevention, no generational effects, and <strong>no sex-linked
         loci yet</strong> &mdash; genes combine independently. The
         <a href="gene-sex.html">sex locus itself is built</a>, which was the
@@ -782,13 +862,15 @@ int     offspringCount(UUID a, UUID b);</code></pre>
 </ul>
 
 <div class="note warn">
-    <span class="label">Epigenetic inheritance is the newest thing here</span>
+    <span class="label">Literal epigenetics and drift are the newest things here</span>
     <p>
-        Built 2026-09-01, <strong>not seen in-game at all</strong>. Unit tests cover
-        the mechanism &mdash; an inherited allele keeps its copy&rsquo;s seed, the
-        epigenetics follow their allele when the pair is reordered, a tie gets
-        deconflicted. What is unproven is the live path: that a foal really looks like
-        the parent it took the allele from. The check is on
+        <strong>Not seen in-game at all.</strong> Unit tests cover the mechanism
+        &mdash; an inherited allele keeps its copy&rsquo;s numbers to within one
+        generation of drift, the epigenetics follow their allele when the pair is
+        reordered, a tie gets deconflicted, and the drift distribution matches its
+        declared curve. What is unproven is the live path: that a foal really looks
+        like the parent it took the allele from, and that a cross of two extreme
+        breeds really does spread rather than average. The checks are on
         <a href="verification.html">To be verified</a>.
     </p>
 </div>

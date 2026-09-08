@@ -63,29 +63,37 @@
     reaches horses that already exist.
 </p>
 
-<h3 id="breed-targets">The breed overload <span class="allele magical">2026-09-05</span></h3>
+<h3 id="breed-targets">There is deliberately no breed here</h3>
 <p>
-    <code>resolve</code> has a fourth form,
-    <code>resolve(genotype, epigenome, BreedStatTargets, healthGenetics)</code>. A
+    <code>resolve</code> takes a genotype, an epigenome and the health switch, and
+    <strong>nothing about the horse&rsquo;s breed</strong>. A
     <a href="breeds.html">breed</a> pins one or more body axes to a
-    <code>TargetBand</code> (a closed multiplier range); the
-    <code>TraitBuilder</code> carries it, and the four
-    <a href="breeds.html#stats">magical body-stat genes</a> read it through
-    <code>TraitBuilder.breedBand(StatAxis)</code>. When a band is present and the
-    horse carries a variant copy at that locus, the gene lands the horse
-    <em>inside</em> the band from its allele copies&rsquo; epigenetic seeds
-    instead of taking its usual bounded-Gaussian draw &mdash; so a Thoroughbred
-    reliably resolves near &times;2 speed where two <code>Swift</code> copies on
-    the Gaussian would only reach &times;1.2, and within-breed spread is exactly
-    the band width. The <b>height</b> band additionally exaggerates its
-    above-baseline part (<code>BreedStatCurve.BIG_GAMMA = 3</code>) so a draught
-    breed genuinely towers &mdash; real horse heights differ by too little to
-    read (a Percheron ends up &times;1.0&ndash;1.38, a Quarter Horse &times;0.96).
-    <code>BreedStatTargets.NONE</code> (a Feral Mixed or breedless
-    horse, and the shorter overloads) changes nothing: every body-stat gene falls
-    back to the Gaussian. <code>HorseRecord.traits()</code> and
-    <code>HorseRecords.traitsOf</code> pass <code>record.lineage().statTargets()</code>.
+    <code>TargetBand</code>, but that band is read exactly once &mdash; by
+    <code>BreedFounder</code>, which writes a point inside it onto a founder&rsquo;s
+    allele copies as ordinary epigenetic numbers. A Thoroughbred still reliably
+    resolves near &times;2 speed where two <code>Swift</code> copies on the plain
+    Gaussian would only reach &times;1.2, because its copies genuinely carry those
+    percentages. The <b>height</b> band still exaggerates its above-baseline part
+    (<code>BreedStatCurve.BIG_GAMMA = 3</code>) so a draught breed genuinely towers
+    &mdash; real horse heights differ by too little to read (a Percheron founder ends
+    up &times;1.0&ndash;1.38, a Quarter Horse &times;0.96).
 </p>
+
+<div class="note rule">
+    <span class="label">This used to be a fourth <code>resolve</code> overload</span>
+    <p>
+        <code>resolve(genotype, epigenome, BreedStatTargets, healthGenetics)</code>
+        threaded the band through <code>TraitBuilder.breedBand(StatAxis)</code> on
+        <em>every single resolution</em>, and
+        <code>BreedLineage.statTargets()</code> handed a <strong>cross</strong> the
+        per-axis average of its two parents&rsquo; bands. So a Percheron bred to a
+        Falabella had its foal&rsquo;s size recomputed into a mid-size band every time
+        anything looked at it, regardless of which alleles the foal actually
+        inherited. The overload, <code>breedBand</code> and
+        <code>BreedStatTargets.average</code> are all gone; see
+        <a href="breeds.html#founder-only">breeds</a>.
+    </p>
+</div>
 
 <h3>Determinism</h3>
 
@@ -261,11 +269,11 @@ public interface HealthContribution extends TraitContribution { }</code></pre>
 <div class="codebox">
 <div class="filename">common/trait/EpigeneticTraitContribution.java</div>
 <pre><code class="language-java">public interface EpigeneticTraitContribution {
-    void contribute(AllelePair pair, Genotype genotype, AlleleRandomness epigenetics, TraitBuilder out);
+    void contribute(AllelePair pair, Genotype genotype, GeneEpigenetics epigenetics, TraitBuilder out);
 }
 
 /** The trait-side twin of CoatBuildContext's two epigenetics accessors. */
-public interface AlleleRandomness {
+public interface GeneEpigenetics {
     Rng expressed();        // one locus, one result - almost everything
     Rng copy(int slot);     // a CODOMINANT gene, where both copies contribute
 }</code></pre>
@@ -425,6 +433,72 @@ public interface AlleleRandomness {
     deafness is <code>INFORMATIONAL</code> &mdash; reported, no cost &mdash; while
     MCOA is priced the way every sub-lethal disorder here is priced, in hearts. Both
     are honest; neither pretends to a system the mod does not have.
+</p>
+
+<h2 id="disorder-shapes">The two shapes a disorder comes in</h2>
+
+<p>
+    Sixteen health loci ship, and they divide into two classes that behave
+    differently enough to be separate base classes.
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th></th><th><code>RecessiveDisorderGene</code></th><th><code>DominantDisorderGene</code></th></tr></thead>
+<tbody>
+<tr><td>One copy</td><td><strong>silent</strong> &mdash; a carrier, indistinguishable from normal</td><td><strong>affected</strong> &mdash; there is no carrier state at all</td></tr>
+<tr><td>Two copies</td><td>affected</td><td>affected, and worse</td></tr>
+<tr><td>Can a founder be affected?</td><td><strong>Never.</strong> The homozygote is simply absent from the founder table</td><td><strong>Yes</strong>, heterozygous &mdash; the homozygote is still excluded</td></tr>
+<tr><td>How you find out</td><td>after the fact, from a foal</td><td>by looking at the horse</td></tr>
+<tr><td>Loci</td><td>the simple ones, plus <a href="gene-acan.html">ACAN</a>&rsquo;s five-allele variant of the same idea. Several colour loci carry a <code>Condition</code> as well &mdash; <a href="gene-ednrb.html">lethal white</a> is a white pattern and a foal lethal at once</td><td><a href="gene-scn4a.html">HYPP</a> and <a href="gene-gys1.html">PSSM1</a></td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="note warn">
+    <span class="label">A dominant disorder <em>must</em> reach founders</span>
+    <p>
+        &ldquo;No founder is ever affected&rdquo; was an invariant of this layer for as
+        long as every disorder was recessive, and it rested on a fact about recessives
+        specifically: a wild-caught horse is an adult that survived, so it carries at
+        most one broken copy, and one copy is silent. A <strong>dominant</strong> has
+        no silent copy. If founders could never be affected, the allele could never
+        enter the world at all and the locus would be dead code.
+    </p>
+    <p>
+        So the invariant is now two narrower ones, and both are tested:
+        <strong>no founder is ever born with a recessive disorder</strong>, and
+        <strong>no founder is ever born <em>dying</em></strong> &mdash; dominant or
+        not. A wild horse may be sick; a wild horse that expires while you watch is a
+        spawn nobody asked for.
+    </p>
+</div>
+
+<p>
+    <a href="gene-scn4a.html">HYPP</a> is also the first locus that is <em>both</em>
+    kinds of thing at once &mdash; a survivable heart reducer on one copy and a lethal
+    on two &mdash; which is what made a second base class worth writing rather than
+    bending the first.
+</p>
+
+<h2 id="reference-numbers">Why the reference&rsquo;s percentages are not the numbers</h2>
+
+<p>
+    The disorder table this layer is built from gives each condition a
+    <strong>health %</strong>, a <strong>speed %</strong> and a <strong>jump %</strong>.
+    None of the shipped genes uses them as arithmetic, and that is deliberate: read
+    literally against the 22-health baseline, HYPP&rsquo;s &ldquo;30% health&rdquo;
+    would make an <em>affected but living</em> horse worse than several of this
+    mod&rsquo;s outright lethals, which is plainly not what the table means.
+</p>
+
+<p>
+    So every locus is calibrated against the disorders that already ship &mdash; a
+    survivable disorder costs 3 to 8 hearts&rsquo; worth, a lethal 11 to 18 &mdash; and
+    the reference is used for the <em>ordering</em> of the disorders against each
+    other. If the severity model on
+    <a href="roadmap.html#decisions">roadmap &sect;3</a> ever lands, it does not get to
+    inherit those percentages either.
 </p>
 
 <h2 id="lethals">The two kinds of lethal</h2>

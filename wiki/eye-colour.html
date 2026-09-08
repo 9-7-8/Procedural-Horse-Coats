@@ -160,9 +160,12 @@
     So the white loci answer two separate questions. <em>Is</em> this horse blue-eyed is
     an allele question, answered by <code>EyeColorContribution</code> on each locus and
     documented on its page. <em>How far did the blue get</em> is not an allele question at
-    all, and it is rolled once as an <code>EyeSpread</code> off the epigenetic seed of the
+    all, and it is read once as an <code>EyeSpread</code> off the stored values of the
     locus that won the claim &mdash; inherited with that allele copy, stable for the life
-    of the horse.
+    of the horse. Which is why <code>EyeSpread.schema()</code> is composed into the
+    schema of <em>every</em> gene that can claim an eye colour: which one wins is not
+    known until the claim is resolved, so the numbers have to be sitting on all of
+    them.
 </p>
 <table class="data">
     <thead><tr><th>Outcome</th><th>Share of blue-eyed horses</th><th>What you see</th></tr></thead>
@@ -284,7 +287,7 @@ bit 2   bit 3        0b0101  the left half
     Both are handed the pair, the whole genotype, the horse's <code>Epigenome</code> (which
     may be <code>null</code> &mdash; a question asked about a genotype rather than about a
     horse) and the horse's resolved white coverage. Both may vary per horse, and if yours
-    does, take every number from <code>AlleleRandomness</code> so it is inherited with the
+    does, take every number from <code>GeneEpigenetics</code> so it is inherited with the
     allele copy, and declare the outcome <code>varies()</code> or two visibly different
     horses will share one cached texture.
 </p>

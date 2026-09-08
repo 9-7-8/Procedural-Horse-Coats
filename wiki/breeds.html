@@ -116,7 +116,7 @@
 <tr><td><strong>Disorder genes</strong> (ACAN, PLOD1, MET&hellip;)</td>
     <td>Keep their <strong>global</strong> founder rates, so any bred line can still surface a carrier &mdash; unless the breed is flagged <strong>hardy</strong> (&ldquo;generally sound&rdquo; on the sheet: Banker, Canadian, Cleveland Bay, Exmoor, Icelandic, and a few landraces), which clears every implemented disorder locus.</td></tr>
 <tr><td><strong>The four magical body-stat genes</strong> (size, speed, health, jump)</td>
-    <td>Driven by the breed&rsquo;s <a href="#stats">stat bands</a>: an axis with a band makes every founder homozygous for that gene&rsquo;s pushing allele; an axis with no band is left wild.</td></tr>
+    <td>Driven by the breed&rsquo;s <a href="#stats">stat bands</a>: an axis with a band makes every founder homozygous for that gene&rsquo;s pushing allele <em>and</em> writes the target onto its copies; an axis with no band is left wild. <a href="#founder-only">Founders only</a>.</td></tr>
 <tr><td><strong>Other magical genes</strong> (pink hair, mane/tail colour, healer, zebra, milk, light, particle, verdant&hellip;)</td>
     <td>Forced wild, then a <a href="#magic">geometric draw</a> switches a few back on.</td></tr>
 </tbody>
@@ -152,21 +152,52 @@
 </p>
 <p>
     Each axis becomes a <strong>target band</strong> (<code>BreedStatCurve</code>).
-    Every founder of the breed is made homozygous for the pushing allele, and the
-    magical body-stat gene then lands the individual <em>inside</em> the band from
-    its own epigenetic seeds &mdash; so within-breed variation is exactly the band
-    width, and a Thoroughbred reliably resolves near &times;2 speed even though
-    two <code>Swift</code> copies on the ordinary Gaussian would only reach
-    &times;1.2. A band that would straddle 1.0 (a near-baseline breed) is dropped
-    and the locus is left wild, so the horse sits exactly on the baseline.
+    Every founder of the breed is made homozygous for the pushing allele, and
+    <code>BreedFounder</code> then picks a point inside the band and
+    <strong>writes it onto that founder&rsquo;s two allele copies</strong> as
+    ordinary epigenetic numbers. So a Thoroughbred reliably resolves near
+    &times;2 speed even though two <code>Swift</code> copies on the ordinary
+    Gaussian would only reach &times;1.2. A band that would straddle 1.0 (a
+    near-baseline breed) is dropped and the locus is left wild, so the horse sits
+    exactly on the baseline.
 </p>
 <p>
-    <strong>Crosses</strong> average their two parent breeds&rsquo; bands per axis,
-    and only where <em>both</em> parents pin that axis &mdash; so a Friesian &times;
-    Thoroughbred keeps no speed band (Friesian never had one) and its speed falls
-    back to the ordinary Gaussian draw, while a Thoroughbred &times; Arabian keeps
-    a speed band midway between the two. <strong>Mixed</strong> and
-    <strong>Feral Mixed</strong> pin nothing.
+    The two copies split the target <strong>unevenly</strong>, on purpose. Two
+    identical copies would make a founder&rsquo;s gametes interchangeable, and half
+    the interest in breeding from a good stallion is that his foals differ
+    depending on which copy they drew.
+</p>
+
+<h3 id="founder-only">A breed shapes its founders and then lets go</h3>
+
+<div class="note rule">
+    <span class="label">The band is consulted once, ever</span>
+    <p>
+        <code>BreedFounder</code> is the <strong>only</strong> place a breed
+        influences a number. Once a horse exists it is whatever it inherited:
+        nothing re-imposes the standard, and a <strong>cross is never
+        normalised</strong>. A Percheron bred to a Falabella produces a foal
+        carrying one enormous copy and one tiny one &mdash; whichever copies it
+        actually drew &mdash; and its siblings differ from it accordingly.
+    </p>
+    <p>
+        This used to be false, and it was the main reason for the epigenetics
+        rewrite. The band was applied every time a horse&rsquo;s body was
+        <em>resolved</em>, and <code>BreedLineage.statTargets()</code> handed a
+        cross the per-axis <em>average</em> of its two parents&rsquo; bands. So that
+        Percheron &times; Falabella foal had its size recomputed into a mid-size
+        band on every lookup, regardless of its alleles, with no way for a breeder
+        to select out of it. <code>BreedStatTargets.average</code> and the
+        resolve-time path are both gone.
+    </p>
+</div>
+
+<p>
+    <strong>A breed label is therefore cosmetic.</strong> It decides what a wild
+    horse of that breed is born as and what a herd spawns, and after that it is
+    lineage bookkeeping for the family tree and the naming. A &ldquo;Percheron&rdquo;
+    bred tiny for fifty generations is tiny, and still labelled Percheron. Keeping a
+    line to a standard is the player&rsquo;s job, not the game&rsquo;s.
 </p>
 
 <h2 id="magic">Magic-gene frequency</h2>
@@ -219,10 +250,10 @@
     fresh wild individual of it &mdash; genotype, epigenome and sex &mdash;
     straight into the editor; you can then hand-edit any locus. The selected
     breed token rides along in <code>SpawnCustomHorsePayload</code> and is
-    stamped on the spawned horse (<code>record.withBreed</code>), so the animal
-    is labelled that breed and pinned to its stat bands even if you changed its
-    colour genes. <code>(none)</code> leaves the current genome alone and spawns
-    Feral Mixed.
+    stamped on the spawned horse (<code>record.withBreed</code>) &mdash; but the
+    label alone changes no number, so a horse whose genome you then hand-edited is
+    whatever you edited it into. <code>(none)</code> leaves the current genome alone
+    and spawns Feral Mixed.
 </p>
 
 <h2>Not modelled (yet)</h2>

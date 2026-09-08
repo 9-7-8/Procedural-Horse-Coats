@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PPIB (HERDA) &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="nav.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow natural">Natural gene <span class="sep">/</span> health</p>
+<h1>PPIB (HERDA)</h1>
+<p class="lede">
+    HERDA &mdash; hereditary equine regional dermal asthenia. The collagen holding
+    the skin to the horse is faulty, so it splits and scars where a saddle sits.
+    The horse lives; it is just never sound.
+</p>
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd>horsegenetics.ppib</dd></div>
+    <div><dt>Priority</dt><dd>95</dd></div>
+    <div><dt>Alleles</dt><dd><span class="allele dom">herda</span> <span class="allele wild">N</span></dd></div>
+    <div><dt>Outcomes</dt><dd>wild, <code>ppib-carrier</code>, <code>herda</code></dd></div>
+    <div><dt>Coat effect</dt><dd><strong>none</strong> &mdash; every outcome is a wild type</dd></div>
+    <div><dt>Default allele</dt><dd>N</dd></div>
+    <div><dt>Wild population</dt><dd>3.4% of founders carry one copy; <b>none</b> carries two</dd></div>
+    <div><dt>Founder draws</dt><dd>1 &times; nextFloat()</dd></div>
+    <div><dt>Catalogue entries</dt><dd>1 &mdash; it never changes what a horse looks like</dd></div>
+</dl>
+
+<div class="note rule">
+    <span class="label">It paints nothing, and that is what makes it free</span>
+    <p>
+        Every combination of this gene is an <a href="genetics-model.html">expression</a>
+        marked <code>wildType</code>. That reads oddly for a gene that can kill a foal,
+        and it is exactly right: <code>wildType</code> means <em>changes nothing about
+        the coat</em>. Because none of the non-coat genes paints,
+        <code>Gene.affectsCoat()</code> is false for all of them, they are left out of a
+        horse&rsquo;s texture key, and the whole locus collapses into one catalogue
+        entry. What the gene actually does travels on
+        <a href="horse-body.html">the trait system</a> instead.
+    </p>
+</div>
+
+<h2>The combination table</h2>
+
+<div class="table-wrap">
+<table>
+<thead><tr>
+<th>combination</th>
+<th>outcome</th>
+<th>effect</th>
+</tr></thead>
+<tbody>
+<tr><td><code>N/N</code></td><td>wild type</td><td>nothing</td></tr>
+<tr><td><code>herda/N</code></td><td><code>ppib-carrier</code></td><td>nothing &mdash; a completely normal horse</td></tr>
+<tr><td><code>herda/herda</code></td><td><code>herda</code></td><td>&minus;7 health, &minus;0.025 speed, &minus;0.15 jump &mdash; <b>survivable</b></td></tr>
+</tbody>
+</table>
+</div>
+
+<h2>The one you will be tempted by</h2>
+
+<p>
+    HERDA has the highest carrier rate of any recessive disorder in the mod, and that
+    is a statement about where it hides rather than about how common the allele is.
+    In the real population it is concentrated inside a very narrow and very heavily
+    used set of working lines &mdash; which is to say, inside exactly the horses a
+    breeder would choose on every other measure.
+</p>
+
+<p>
+    So it is the locus most likely to be sitting quietly in a line somebody has spent
+    a long time building, and the one where the carrier wording in the info panel
+    earns its keep.
+</p>
+
+<h2>Chronic, which the mod cannot yet say</h2>
+
+<p>
+    The reference calls this a <em>chronic</em> condition, as against HYPP&rsquo;s
+    <em>episodic</em> and CA&rsquo;s <em>progressive</em>. The mod&rsquo;s health model
+    has no such axis &mdash; a disorder is a flat cost or a lethal &mdash; so the
+    distinction lives in the prose and nowhere else. Giving <code>Condition</code> a
+    magnitude and an onset kind is flagged and undecided on
+    <a href="roadmap.html#decisions">the roadmap</a>.
+</p>
+
+<div class="note warn">
+    <span class="label">No founder is ever affected</span>
+    <p>
+        The founder table lists only the clear horse and the carrier. A wild-caught
+        horse is an adult that survived, so it can carry this and never have it, and
+        the homozygote&rsquo;s weight is simply absent from the table. <b>The only way
+        to produce an affected foal is to breed two carriers</b> &mdash; which is the
+        whole design: it is what makes a pedigree worth keeping, and what turns the
+        carrier wording in the info panel from decoration into the difference between
+        a breeding programme and a lottery.
+    </p>
+</div>
+
+
+<h2 id="carrot">Its gene carrot</h2>
+
+<p>
+    There is none. A disorder locus sets <code>hasGeneCarrot()</code> false &mdash;
+    forcing one onto somebody&rsquo;s line is hostile &mdash; and
+    <code>SpliceSafety</code> keeps it out of the random splice as well, derived from
+    the fact that it declares a non-informational <code>Condition</code> rather than
+    from any hand-written list.
+</p>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="gene-plod1.html">PLOD1</a>
+        <a href="gene-met.html">MET</a>
+        <a href="horse-body.html">The trait system</a>
+    </div>
+    Source: <code>common/genetics/genes/PpibGene.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

@@ -73,7 +73,7 @@
 <h2 id="epigenetics">Everything about the emblem is epigenetic</h2>
 <p>
     <code>CutieMarkGene.markFor(genotype, epigenome)</code> draws, off the
-    expressing copy's seed and in this fixed order (the draw order is the
+    expressing copy's stored values (the names are the
     contract):
 </p>
 <ol>
@@ -138,7 +138,7 @@
         paint nothing and therefore declare every outcome a wild type, so that filter
         would exclude precisely the genes the hook exists for.</li>
     <li>It is <strong>pure</strong>: a mark in, a mark out. Draw any randomness off
-        <code>AlleleRandomness.forGene(this, genotype, epigenome)</code> so the result
+        <code>GeneEpigenetics.forGene(this, genotype, epigenome)</code> so the result
         stays deterministic and heritable.</li>
     <li>A modifier can make an existing mark stranger; it can <strong>never grant
         one</strong>. A horse that is not <code>Cutmrk/Cutmrk</code> has no mark, so no

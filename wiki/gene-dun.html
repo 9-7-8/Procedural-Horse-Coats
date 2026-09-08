@@ -434,9 +434,10 @@ f.diluteNeutral(px, py,
 <p>
     Leg barring, shoulder bars and forehead rings occur on <em>some</em> duns. A genuine dun
     may have a striking dorsal stripe and nearly invisible shoulder bars, or clear leg barring
-    and no cobwebbing at all. So each accessory is rolled off the expressing copy&rsquo;s
-    epigenetic seed &mdash; a horse regenerates the same markings every session, and a foal
-    that inherits the copy inherits its dam&rsquo;s.
+    and no cobwebbing at all. So each accessory carries a <strong>propensity</strong> on the
+    expressing copy &mdash; a stored number tested against that accessory&rsquo;s chance, so
+    the tendency is heritable and a line can be bred toward it. A horse regenerates the same
+    markings every session, and a foal that inherits the copy inherits its dam&rsquo;s.
 </p>
 
 <div class="codebox">
@@ -453,12 +454,13 @@ private static double accessory(float roll, double chance) {
 
 <p>
     Deliberately not a plain uniform: most of the duns that have a shoulder bar have a
-    <em>hint</em> of one rather than a painted stripe. The <strong>draw order is a
-    contract</strong> &mdash; one <code>nextLong()</code> (the marking seed) then seven
-    <code>nextFloat()</code>s: dorsal-width jitter, shoulder bar, face, then one per leg.
-    Both marked outcomes draw all eight even though <code>d1</code> only uses the first two,
-    so the two share one order and a <code>d1</code> horse that later gains a <code>D</code>
-    copy keeps the stripe it had.
+    <em>hint</em> of one rather than a painted stripe. That ramp lives in the painter, and
+    what is <strong>stored</strong> is the propensity it reads &mdash; <code>seed</code>
+    (the marking field), <code>dorsal_width</code>, <code>shoulder</code>,
+    <code>face</code>, and <code>bar</code> per leg. Both marked outcomes read the same
+    values even though <code>d1</code> only uses the first two, so a <code>d1</code> horse
+    that later gains a <code>D</code> copy keeps the stripe it had and gains the accessories
+    it was always carrying.
 </p>
 
 <h2 id="d1"><code>d1</code>: a marking with no dilution</h2>

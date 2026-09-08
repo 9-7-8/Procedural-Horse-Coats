@@ -126,8 +126,8 @@
 <h2 id="epigenetics">Everything you can see about it is epigenetic</h2>
 
 <p>
-    The allele names a particle and <em>nothing else</em>. Five values are drawn from
-    the epigenetic seed of the allele copy that carries it, in this fixed order:
+    The allele names a particle and <em>nothing else</em>. Everything else is stored
+    on the allele copy that carries it and read by name:
 </p>
 
 <table class="data">
@@ -142,10 +142,12 @@
 </table>
 
 <p>
-    <strong>All five are drawn every time, whether or not the particle uses them.</strong>
-    The draw order <em>is</em> the contract &mdash; a particle that starts or stops
-    caring about its second colour must not shift the numbers drawn after it, or every
-    horse in every save quietly changes.
+    <strong>Every value is stored whether or not this particular particle uses it</strong>,
+    so a variant that starts or stops caring about its second colour costs nothing and
+    moves nothing. This used to be a fixed <em>draw order</em>, and the particle locus is
+    the gene that paid for that lesson: the position of a draw was the meaning of each
+    number, so a conditional draw quietly changed every horse in every save. Values are
+    read by name now and the hazard is gone.
 </p>
 
 <p>
@@ -171,10 +173,10 @@
     fix the behaviour &mdash; two <code>Hlr/Hlr</code> horses heal identically, and
     should. This locus is the case that cannot express, so it is the first
     <strong><code>EpigeneticAbilityContribution</code></strong>: the same interface one
-    layer along, handed an <code>AlleleRandomness</code> so it can read
+    layer along, handed an <code>GeneEpigenetics</code> so it can read
     <code>copy(0)</code> and <code>copy(1)</code> separately. It is the exact twin of
     what <code>EpigeneticTraitContribution</code> did for the body, and
-    <code>AlleleRandomness</code> moved from <code>common/trait/</code> to
+    <code>GeneEpigenetics</code> moved from <code>common/trait/</code> to
     <code>common/genetics/</code> so both sides could use it without the two packages
     depending on each other.
 </p>

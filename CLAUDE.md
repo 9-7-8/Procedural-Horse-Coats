@@ -4,9 +4,10 @@ Procedural horses. A Mendelian genotype of **allele objects** drives a
 **generated coat texture** - genes restrict red/black pigment per pixel, the
 survivors are looked up in a gradient and multiplied onto a white-horse
 template. Every horse also carries a name, a pedigree, resolved-not-rolled body
-stats, and an **epigenome** (a priority + seed on *each allele copy*, inherited
-with the allele). There is a breed system, a gameplay layer of items and
-carrots, a hay-bale portal to a horse dimension, and two browser tools.
+stats, and an **epigenome** (literal named numbers on *each allele copy*,
+inherited with the allele and slightly drifted each breeding). There is a breed
+system, a gameplay layer of items and carrots, a hay-bale portal to a horse
+dimension, and two browser tools.
 Long-term aim is a 1.12.2 backport, which is why the logic is quarantined in a
 game-free module.
 

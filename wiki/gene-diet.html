@@ -83,11 +83,13 @@
 <p>
     An ingot-eater does not eat metal in general &mdash; it wants
     <em>one</em> metal, and a gem-eater one gem.
-    <code>Diet.variants()</code> says how many there are and the choice is a
-    single <code>nextFloat()</code> off the <strong>expressing copy&rsquo;s
-    epigenetic seed</strong>, so it is fixed for the horse&rsquo;s life and a
-    foal that inherits the copy inherits the craving. Two ingot-eating siblings
-    can want different bars.
+    <code>Diet.variants()</code> says how many there are and the choice is one
+    stored number &mdash; <code>variant</code>, on the <strong>expressing
+    copy</strong> &mdash; so it is fixed for the horse&rsquo;s life and a foal
+    that inherits the copy inherits the craving. Two ingot-eating siblings can
+    want different bars. It is kept as a position in <code>[0, 1)</code> rather
+    than an index because how many variants there are depends on which diet the
+    alleles gave the horse.
 </p>
 
 <p>

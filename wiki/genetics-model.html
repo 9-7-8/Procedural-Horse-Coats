@@ -17,7 +17,7 @@
 <p class="lede">
     Alleles are objects, not letters in a string. A horse carries one
     <code>AllelePair</code> per registered <code>Gene</code>, plus an
-    <strong>epigenome</strong> &mdash; a priority and a random seed riding on
+    <strong>epigenome</strong> &mdash; a priority and a set of literal numbers riding on
     <em>each allele copy</em>. Everything below lives in
     <code>common/genetics/</code> and imports nothing from Minecraft.
 </p>
@@ -34,7 +34,9 @@
 <tr><td><code>Expression</code></td><td><strong>One outcome</strong> a gene can produce: a name, a human-readable description, whether it is a wild type, whether it masks, and the paint function. Replaces <code>DominancePattern</code> entirely.</td></tr>
 <tr><td><code>FounderTable</code></td><td>How common each allele <em>combination</em> is in the wild population, as percentages. Replaces the old per-allele &ldquo;1 in N&rdquo; frequency.</td></tr>
 <tr><td><code>Genotype</code></td><td>One <code>AllelePair</code> per registered gene. Round-trips through a code string.</td></tr>
-<tr><td><code>AlleleEpigenetics</code></td><td><code>(int priority, long epigeneticSeed)</code> &mdash; the heritable payload on <strong>one copy</strong> of one allele.</td></tr>
+<tr><td><code>AlleleEpigenetics</code></td><td><code>(int priority, EpiValues values)</code> &mdash; the heritable payload on <strong>one copy</strong> of one allele.</td></tr>
+<tr><td><code>EpiSchema</code> / <code>EpiValue</code></td><td>What a gene declares it writes on a copy (<code>Gene.epiSchema()</code>): each value&rsquo;s name, kind, design range and founder distribution.</td></tr>
+<tr><td><code>EpiValues</code></td><td>The literal numbers themselves, read by name. <code>EpiRoll</code> rolls a founder&rsquo;s; <code>EpiDrift</code> nudges them at each breeding; <code>EpiCodec</code> writes and reads them as text.</td></tr>
 <tr><td><code>Epigenome</code></td><td>One <code>AlleleEpigenetics</code> per copy, aligned slot-for-slot with the genotype&rsquo;s pairs.</td></tr>
 <tr><td><code>Genome</code></td><td><code>Genotype</code> + <code>Epigenome</code>. The thing a foal actually inherits. <code>breedWith</code> takes an optional per-parent <code>GameteBias</code> &mdash; what a <a href="carrots.html">breeding carrot</a> does.</td></tr>
 <tr><td><code>GameteBias</code> / <code>CarrotEffect</code></td><td>A per-parent modifier on the breeding draw (re-roll epigenetics / prefer the dominant or recessive copy / substitute a pair for one gene), and the sealed set of carrot effects that <code>fold</code> into one. <code>NONE</code> is bit-for-bit the plain draw.</td></tr>
@@ -428,6 +430,15 @@ public Expression expressionOf(AllelePair pair) {
 <tr><td>90</td><td><a href="gene-st14.html">ST14</a></td><td><span class="allele rec">nfs</span> / <span class="allele wild">N</span></td><td>1.8% carriers</td><td>naked foal syndrome &mdash; lethal at birth. The bare coat is <em>not</em> drawn</td></tr>
 <tr><td>91</td><td><a href="gene-shox.html">SHOX</a></td><td><span class="allele rec">sa</span> / <span class="allele wild">N</span></td><td>2.0% carriers</td><td>skeletal atavism &mdash; lethal at birth. Pseudoautosomal, so it segregates like an autosome</td></tr>
 <tr><td>92</td><td><a href="gene-met.html">MET</a></td><td><span class="allele rec">met</span> / <span class="allele wild">N</span></td><td>3.0% carriers</td><td><strong>lethal at conception</strong> &mdash; <code>canOccur</code> false, and the pairing produces no foal at all</td></tr>
+<tr><td>93</td><td><a href="gene-scn4a.html">SCN4A</a></td><td><span class="allele dom">H</span> / <span class="allele wild">N</span></td><td><strong>1.2% affected</strong> &mdash; there is no carrier</td><td>HYPP. <strong>Dominant, and the first locus that is both a survivable disorder and a lethal</strong>: <code>H/N</code> is &minus;6 health and rideable, <code>H/H</code> is lethal at birth. Founders can be born <code>H/N</code>, because a dominant that never reached a founder could never exist</td></tr>
+<tr><td>94</td><td><a href="gene-gys1.html">GYS1</a></td><td><span class="allele dom">P</span> / <span class="allele wild">N</span></td><td><strong>2.5% affected</strong> &mdash; there is no carrier</td><td>PSSM1, tying-up. Dominant and <strong>neither combination is lethal</strong>, which makes it the mildest locus here and by far the one a player is most likely to meet</td></tr>
+<tr><td>95</td><td><a href="gene-ppib.html">PPIB</a></td><td><span class="allele rec">herda</span> / <span class="allele wild">N</span></td><td>3.4% carriers</td><td>HERDA, fragile skin &mdash; &minus;7 health, survivable. The highest carrier rate of any recessive here, because the real thing hides in the working lines a breeder would choose</td></tr>
+<tr><td>96</td><td><a href="gene-prkdc.html">PRKDC</a></td><td><span class="allele rec">scid</span> / <span class="allele wild">N</span></td><td>2.8% carriers</td><td>SCID &mdash; lethal at birth. No immune system at all</td></tr>
+<tr><td>97</td><td><a href="gene-myo5a.html">MYO5A</a></td><td><span class="allele rec">lfs</span> / <span class="allele wild">N</span></td><td>2.2% carriers</td><td>lavender foal syndrome &mdash; lethal at birth. The only lethal whose real presentation includes a <em>colour</em>, and it is deliberately not drawn</td></tr>
+<tr><td>98</td><td><a href="gene-toe1.html">TOE1</a></td><td><span class="allele rec">ca</span> / <span class="allele wild">N</span></td><td>2.4% carriers</td><td>cerebellar abiotrophy &mdash; survivable, and the <strong>heaviest jump penalty in the mod</strong>. Progressive in reality; flat here, because there is no age model</td></tr>
+<tr><td>99</td><td><a href="gene-cvm.html">CVM</a></td><td><span class="allele rec">cvm</span> / <span class="allele wild">N</span></td><td>1.6% carriers</td><td>cervical vertebral malformation &mdash; lethal at birth. <strong>No confirmed causal variant</strong>; one locus is the mod's simplification, and the page says so</td></tr>
+<tr><td>100</td><td><a href="gene-gbe1.html">GBE1</a></td><td><span class="allele rec">gbed</span> / <span class="allele wild">N</span></td><td>2.0% carriers</td><td>GBED &mdash; lethal at birth, and the largest heart reduction in the mod</td></tr>
+<tr><td>101</td><td><a href="gene-megaesophagus.html">Megaesophagus</a></td><td><span class="allele rec">meg</span> / <span class="allele wild">N</span></td><td>1.7% carriers</td><td>lethal at birth, and the gentlest of them on the numbers &mdash; the failure is mechanical, not systemic. Also has no confirmed causal variant</td></tr>
 </tbody>
 </table>
 </div>
@@ -548,17 +559,71 @@ public Expression expressionOf(AllelePair pair) {
 
 <ul>
     <li>a <strong>priority</strong> &mdash; an int in
-        <code>[1, Integer.MAX_VALUE]</code>;</li>
-    <li>an <strong>epigenetic seed</strong> &mdash; the <code>long</code> that drives
-        that gene&rsquo;s per-horse randomness (bay point heights, grey dapples,
-        splash markings, zebra stripe knobs).</li>
+        <code>[1, Integer.MAX_VALUE]</code>, used only for the homozygote
+        tie-break below;</li>
+    <li>a set of <strong>literal numbers</strong> &mdash; one per value the gene
+        declares in its <code>epiSchema()</code>: how much white a splash covers,
+        how much bigger a magically large horse is, how far up the legs a bay&rsquo;s
+        points climb.</li>
 </ul>
 
 <p>
-    So a horse carrying <code>A/a</code> has a seed on its <code>A</code> and another
-    on its <code>a</code>, and a foal that inherits the <code>A</code> inherits
-    <strong>that copy&rsquo;s</strong> seed exactly &mdash; no re-roll, no jitter.
-    Bay point heights run in families rather than being reinvented every generation.
+    So a horse carrying <code>A/a</code> has one set of numbers on its <code>A</code>
+    and another on its <code>a</code>, and a foal that inherits the <code>A</code>
+    inherits <strong>that copy&rsquo;s</strong> numbers. Bay point heights run in
+    families rather than being reinvented every generation.
+</p>
+
+<div class="note rule">
+    <span class="label">These used to be one opaque seed</span>
+    <p>
+        A copy carried a single <code>long</code>, and every gene recovered its
+        numbers by replaying a PRNG off it in a documented <em>draw order</em>.
+        That was compact and completely unreadable: &ldquo;how much jump does this
+        copy add&rdquo; could only be answered by running the gene, and the
+        <em>position</em> of a draw was the meaning of each number &mdash; so
+        inserting one while tuning a gene silently rewrote every horse in the save.
+    </p>
+    <p>
+        Values are stored literally and read by name now. It costs a great deal
+        more space (an epigenome code went from tens of characters per gene to a
+        couple of hundred, and is only written for the genes that actually vary),
+        and it buys a genotype a player can read, edit and select on. That was the
+        owner&rsquo;s call and the reason for the whole rewrite.
+    </p>
+</div>
+
+<h3>Three kinds of value, because drift cannot treat them alike</h3>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Kind</th><th>What it is</th><th>How <a href="breeding.html">drift</a> treats it</th></tr></thead>
+<tbody>
+<tr><td><code>SCALAR</code></td><td>A magnitude &mdash; how much white, how much bigger, how wide.</td><td>Nudged continuously. Nudging it a hair makes a horse a hair different.</td></tr>
+<tr><td><code>SEED</code></td><td>The <code>long</code> behind a noise field &mdash; the shape of a splash, a streak, a set of spots.</td><td>Never nudged. There is no &ldquo;slightly different&rdquo; splash, so it is replaced whole or not at all &mdash; and almost never.</td></tr>
+<tr><td><code>CATEGORY</code></td><td>An index into a list the gene owns &mdash; a particle body site, an iris wedge.</td><td>Never nudged, for the same reason: a boundary nudge would silently move a horse&rsquo;s particles from its mane to its tail.</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    Colours are three <code>SCALAR</code> channels (<code>&lt;name&gt;_r</code> /
+    <code>_g</code> / <code>_b</code>) rather than one packed int, so a line&rsquo;s
+    colour drifts gradually instead of jumping. A founder&rsquo;s is still rolled
+    <em>bright</em> &mdash; hue over the whole circle at a held-up saturation and
+    value &mdash; because a magical mane that rolled a muddy olive reads as a bug.
+</p>
+
+<h3>Founder distributions are declared, not flattened</h3>
+
+<p>
+    A value names the distribution its <strong>founders</strong> are rolled from:
+    uniform, a bounded Gaussian, or a power curve. That matters because the genes
+    were deliberately skewed &mdash; ednrb&rsquo;s cover is a power curve so most
+    splash horses carry a little white and a few carry a lot; the magical stat
+    deltas are Gaussian so a single copy is usually subtle. Rolling everything
+    uniformly would have been simpler and would have quietly changed the character
+    of the wild population on every one of them.
 </p>
 
 <h3>Which copy expresses</h3>
@@ -575,17 +640,20 @@ public Expression expressionOf(AllelePair pair) {
 
 <p>
     That is what <code>Epigenome.expressed(gene, genotype)</code> answers, and its
-    seed is what <code>CoatBuildContext.epigeneticsFor(geneKey)</code> runs on.
+    values are what <code>CoatBuildContext.epigeneticsFor(geneKey)</code> returns.
 </p>
 
 <div class="note rule">
     <span class="label">Priority selects a seed, never an order</span>
     <p>
         Epigenetic priority (<code>AlleleEpigenetics.priority</code>) picks
-        <em>which copy&rsquo;s seed expresses</em>. It can never move a gene in
+        <em>which copy&rsquo;s values express</em>. It can never move a gene in
         the processing queue, and by design it never will &mdash; if it could,
-        two horses with the same genotype and the same seeds could diverge on
-        priority alone and silently share a coat cache entry. Gene processing
+        two horses with the same genotype and the same values could diverge on
+        priority alone and silently share a coat cache entry. It also never
+        <a href="breeding.html">drifts</a>: it is an ordinal deciding a tie, not a
+        magnitude, and a horse whose expressed copy silently swapped between
+        generations would be inexplicable. Gene processing
         order is a separate per-gene constant, <code>Gene.priority()</code>
         (<code>Genes</code> sorts on <code>(priority, key)</code>). See
         <a href="philosophy.html">Philosophy §2</a> and
@@ -596,37 +664,64 @@ public Expression expressionOf(AllelePair pair) {
 <h3>The epigenome code string</h3>
 
 <p>
-    Same gene-keyed shape as the genotype code: one
-    <code>&lt;geneKey&gt;=&lt;copy&gt;/&lt;copy&gt;</code> segment per gene in
-    <code>codeOrder()</code>, joined by <code>-</code>, each copy written
-    <code>&lt;priority&gt;:&lt;seed hex&gt;</code>. Parsing is tolerant the same
-    way the genotype code is: a gene a stored code predates gets a
-    <strong>deterministic key-seeded placeholder</strong> (never visible, so it
-    can&rsquo;t fork the texture cache), and an unregistered gene&rsquo;s
-    segment is dropped.
+    One <code>&lt;geneKey&gt;=&lt;copy&gt;/&lt;copy&gt;</code> segment
+    <strong>per gene that declares a schema</strong>, joined by <code>;</code>.
+    Each copy is <code>p:&lt;priority&gt;</code> followed by that gene&rsquo;s named
+    values: a plain number, <code>#</code> for a hex noise seed,
+    <code>[a|b|c|d]</code> for a per-leg value.
 </p>
 
 <div class="codebox">
-<pre><code class="language-none">horsegenetics.extension=17334:9f3c1ab27de40015/842911:0c5e...-horsegenetics.agouti=...</code></pre>
+<pre><code class="language-none">horsegenetics.body_size=p:1734,delta:0.34215/p:9871,delta:0.31049;horsegenetics.ednrb=p:44,seed:#8f3a21c4b70e1d55,face:0.61,cover:0.4113,&hellip;</code></pre>
 </div>
 
 <p>
+    Two things changed shape here. Genes join with <code>;</code> rather than
+    <code>-</code>, because values are signed now and a hyphen can no longer double
+    as a delimiter. And the <strong>majority of genes write nothing at all</strong>
+    &mdash; a gene whose behaviour is fixed by its alleles declares an empty schema,
+    which is what keeps the code readable now that each stored gene carries a
+    couple of hundred characters instead of a sixteen-digit seed.
+</p>
+
+<p>
+    Parsing is tolerant the same way the genotype code is: an unregistered
+    gene&rsquo;s segment is dropped, and anything the schema declares but the text
+    omits &mdash; a gene, or one value inside a gene &mdash; is rolled
+    <strong>deterministically from the gene key and the value&rsquo;s name</strong>,
+    so every horse in the world agrees on it.
+</p>
+
+<p>
+    Every value is <strong>quantised</strong> to what the text can write the moment
+    it is created, so a horse&rsquo;s numbers in memory are exactly what its code
+    says. That is not tidiness: a value that lost a digit on the way to disk would
+    give a horse a subtly different coat after a reload than before it, and the two
+    would fork the texture cache without ever looking different enough to notice.
+</p>
+
+<p>
     <code>Epigenome.fromSeed(long)</code> replays a whole epigenome from a single
-    <code>long</code>, which is the stand-in <code>FamilyTreeScreen</code> uses for
-    an ancestor whose real epigenome is not stored anywhere &mdash; a plausible
-    pattern, not necessarily the real one.
+    <code>long</code> &mdash; a reproducible test and tooling horse, used by the
+    golden-coat suite, the coat sample sheet and the designer preview. It is
+    <strong>not</strong> a stand-in for a horse whose epigenome was not stored;
+    <code>FamilyTreeScreen</code> used it that way and drew ancestors that never
+    existed, and that fallback is gone.
 </p>
 
 <h3>Founders roll; foals inherit</h3>
 
 <ul>
     <li><strong>Founder</strong> (wild spawn, <code>/summon</code>, a dimension pen horse)
-        &mdash; <code>Epigenome.random(rng)</code>: an independent priority and seed
-        on every copy, deconflicted. Reached through
-        <code>CoatGenerator.generate</code>, which is <em>the</em> founder path.</li>
+        &mdash; <code>Epigenome.random(rng)</code>: an independent priority and an
+        independent roll of every declared value on every copy, deconflicted.
+        Reached through <code>CoatGenerator.generate</code>, which is <em>the</em>
+        founder path, and through <code>BreedFounder</code> for a
+        <a href="breeds.html">breed</a>.</li>
     <li><strong>Foal</strong> &mdash; <code>Genome.breedWith</code>. Every inherited
-        allele brings its parent copy&rsquo;s priority and seed <strong>verbatim</strong>.
-        A foal must never go through the founder path.</li>
+        allele brings its parent copy&rsquo;s priority <strong>verbatim</strong> and
+        its numbers nudged by <a href="breeding.html">drift</a>. A foal must never go
+        through the founder path.</li>
 </ul>
 
 <p>
@@ -644,8 +739,11 @@ public Expression expressionOf(AllelePair pair) {
     <code>@&lt;fingerprint hex&gt;</code> <strong>only when the horse is
     non-deterministic</strong>.
     <code>Epigenome.visibleFingerprint(genotype)</code> digests only the
-    <em>expressed</em> seeds of genes that are both visible <strong>and</strong>
+    <em>expressed</em> values of genes that are both visible <strong>and</strong>
     non-deterministic, so epigenetics a horse cannot show do not fork the cache.
+    It folds in every stored number rather than a single seed &mdash; getting that
+    wrong does not throw, it silently forks the cache or collides two horses onto
+    one texture.
 </p>
 
 <p>

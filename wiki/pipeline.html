@@ -968,20 +968,27 @@ private static double stackingSignal(double white) {
     has clean ones, for the same reason their body margins do.
 </p>
 
-<h3>The draw order is fixed and unconditional</h3>
+<h3>Presence is a propensity, not a decision</h3>
 
 <div class="codebox">
 <div class="filename">common/coat/pattern/WhitePattern.java</div>
-<pre><code class="language-java">long seed        = epi.nextLong();    // the margin wobble
-double starRoll  = epi.nextFloat();   // presence
-double stripeRoll= epi.nextFloat();
-double snipRoll  = epi.nextFloat();
-double widthRoll = epi.nextFloat();   // stripe -> blaze -> bald face
-double offsetRoll= epi.nextFloat();   // markings are rarely dead centre
-double reachRoll = epi.nextFloat();   // how far down the face the stripe runs
-double starSize  = epi.nextFloat();
-double snipSize  = epi.nextFloat();</code></pre>
+<pre><code class="language-java">long seed        = epi.seed(FACE_SEED);   // the margin wobble
+double starRoll  = epi.get(STAR);         // propensity, not a flag
+double stripeRoll= epi.get(STRIPE);
+double snipRoll  = epi.get(SNIP);
+double widthRoll = epi.get(FACE_WIDTH);   // stripe -> blaze -> bald face
+double offsetRoll= epi.get(FACE_OFFSET);  // markings are rarely dead centre
+double reachRoll = epi.get(FACE_REACH);   // how far down the face the stripe runs
+double starSize  = epi.get(STAR_SIZE);
+double snipSize  = epi.get(SNIP_SIZE);</code></pre>
 </div>
+
+<p>
+    Whether a horse <em>has</em> a star is its stored star propensity tested against a
+    threshold that moves with the locus's strength &mdash; so one horse's numbers show a
+    star on a strongly marked locus and none on a faint one, and a line can be bred
+    star-prone. Storing the decision instead would have thrown that away.
+</p>
 
 <p>
     <strong>One long and eight floats, every time</strong>, including for the components

@@ -65,7 +65,13 @@ genetics/
   EyeSpread.java            how much of each iris a depigmenting claim reached
   Inheritance.java          AUTOSOMAL / X_LINKED / Y_LINKED, and the reserved-slot scheme
   SpliceSafety.java         which loci the Unknown Gene Splice carrot may roll (derived)
-  AlleleRandomness.java     one gene's per-horse randomness, by copy or by expression
+  GeneEpigenetics.java      one gene's per-horse numbers, by copy or by expression
+  epi/EpiValue.java         one declared number: name, kind, range, founder distribution
+  epi/EpiSchema.java        a gene's whole declaration - Gene.epiSchema()
+  epi/EpiValues.java        the literal numbers on one allele copy, read by name
+  epi/EpiRoll.java          rolls a founder's, honouring each value's distribution
+  epi/EpiDrift.java         the nudge every value takes on its way to a foal
+  epi/EpiCodec.java         reads and writes them as human-editable text
   FounderTable.java         the wild-population weight per allele combination
   FounderContext.java       the genotype so far, for a context-aware founder table
   Genotype.java             one AllelePair per gene; parse / toCode / breedWith
@@ -129,7 +135,7 @@ coat/
 horse/    Sex, HorseRecord, ParentStats, HorseDatabase, InMemoryHorseDatabase
 trait/    Traits, Condition, Severity, Viability, TraitBuilder, TraitContribution,
           EpigeneticTraitContribution, HealthContribution, HorseTraits
-          (AlleleRandomness moved to genetics/ 2026-09-04 - the ability side
+          (GeneEpigenetics moved to genetics/ - the ability side
            needs it too, and genetics/ must not depend on trait/)
 name/     HorseNameGenerator, HorseNames</code></pre>
 </div>
@@ -155,7 +161,7 @@ name/     HorseNameGenerator, HorseNames</code></pre>
     float   nextFloat();        // [0.0, 1.0)
     boolean nextBoolean();
     int     nextInt(int bound); // [0, bound)
-    long    nextLong();         // full 64-bit range - epigenetic seeds
+    long    nextLong();         // full 64-bit range - noise-field seeds
 }</code></pre>
 </div>
 
@@ -374,13 +380,43 @@ CoatPhenotype phenotype();                 // coarse; family-tree fallback only<
 <h3><code>AlleleEpigenetics</code>, <code>Epigenome</code>, <code>Genome</code></h3>
 
 <div class="codebox">
-<pre><code class="language-java">public record AlleleEpigenetics(int priority, long epigeneticSeed) {
+<pre><code class="language-java">public record AlleleEpigenetics(int priority, EpiValues values) {
     static final int MIN_PRIORITY = 1, MAX_PRIORITY = Integer.MAX_VALUE;
 
-    static AlleleEpigenetics random(Rng rng);            // 1 int + 1 long
-    AlleleEpigenetics bumped(boolean up);                // same seed, priority +/-1
+    static AlleleEpigenetics founder(EpiSchema schema, Rng rng);   // roll a fresh copy
+    AlleleEpigenetics drifted(Rng rng);                  // as passed to a foal
+    AlleleEpigenetics bumped(boolean up);                // same values, priority +/-1
     static AlleleEpigenetics deconflict(AlleleEpigenetics first,
                                         AlleleEpigenetics second, Rng rng);
+}
+
+// What a gene declares it writes on a copy. Most genes declare nothing.
+public record EpiValue(String name, Kind kind, double min, double max,
+                       Dist dist, int arity, double clampLo, double clampHi) {
+    enum Kind { SCALAR, SEED, CATEGORY }
+    sealed interface Dist { Uniform | Gaussian(mean, sigma, floor) | Power(gamma)
+                          | Bright(component, satMin, satMax, valMin, valMax) }
+
+    static EpiValue uniform(String name, double min, double max);
+    static EpiValue power(String name, double min, double max, double gamma);
+    static EpiValue gaussian(String name, double mean, double sigma, double floor);
+    static EpiValue perLeg(String name, double min, double max);   // arity 4
+    static EpiValue seed(String name);
+    static EpiValue category(String name, int count);
+    static EpiValue[] colour(String prefix, double satMin, double satMax,
+                             double valMin, double valMax);        // _r / _g / _b
+}
+
+// The numbers themselves. Immutable; quantised to what the code string can write.
+public final class EpiValues {
+    double get(String name);              // a magnitude
+    double get(String name, int leg);     // one leg of a per-leg value
+    long   seed(String name);
+    int    category(String name);
+    int    rgb(String prefix);            // folds _r/_g/_b back to 0xRRGGBB
+    EpiValues with(String name, double v);          // editing - designer, BreedFounder
+    EpiValues withSeed(String name, long v);
+    long   hashInto(long h);              // what the texture key folds in
 }</code></pre>
 </div>
 
@@ -736,7 +772,7 @@ public interface LutContribution {
  *  catches the iris (cream, pearl, champagne) loses to a gene aimed at the iris
  *  and nothing else (tiger eye), which loses to an iris that never got melanocytes
  *  (the four white loci) - an absence cannot be overpainted.
- *  MAY vary per horse: take every number from AlleleRandomness and declare the
+ *  MAY vary per horse: declare every number in epiSchema(), read it by name, and declare the
  *  outcome varies(), or two visibly different horses share one cached texture. */
 public interface EyeColorContribution {
     Optional&lt;EyeColor&gt; eyeColor(AllelePair pair, Genotype genotype,
@@ -787,7 +823,7 @@ public record EyePatch(int quadrants, EyeColor color) {
  *  actually reached. One MITF copy gives anything from one blue eye to extensive
  *  splash, so complete heterochromia (one iris) and sectoral heterochromia (part
  *  of one) are the same failed melanocyte colonisation stopped earlier - not a
- *  separate trait. Rolled ONCE by the composer, off the epigenetic seed of the
+ *  separate trait. Read ONCE by the composer, off the stored values of the
  *  locus that WON the claim; one roll, not one per locus, or a horse carrying two
  *  white loci could never have a single blue eye. */
 public record EyeSpread(int right, int left) {
@@ -822,7 +858,7 @@ public interface CutieMarkContribution {
  *  along. A gene implements one or the other, never both. */
 public interface EpigeneticAbilityContribution {
     List&lt;GeneAbility&gt; abilitiesFor(AllelePair pair, Genotype genotype,
-                                   AlleleRandomness epigenetics);
+                                   GeneEpigenetics epigenetics);
 }
 // (HorseAbilities was SpecAbilities until 2026-09-04; renamed when built-in genes
 //  started contributing, since it was no longer about the spec path.)
@@ -957,17 +993,17 @@ interface HealthContribution extends TraitContribution { }
  *  Every Rng here is a SeededRng on a stored, heritable copy seed, so this stays
  *  inside the determinism contract. */
 interface EpigeneticTraitContribution {
-    void contribute(AllelePair pair, Genotype genotype, AlleleRandomness epigenetics, TraitBuilder out);
+    void contribute(AllelePair pair, Genotype genotype, GeneEpigenetics epigenetics, TraitBuilder out);
 }
 
 /** Twin of CoatBuildContext's two accessors. Lives in genetics/, NOT trait/ -
  *  the ability side needs it as well, and genetics/ must not depend on trait/. */
-interface AlleleRandomness {                                  // genetics/
-    Rng expressed();      // the copy this horse shows - one locus, one result
-    Rng copy(int slot);   // one particular copy - for a CODOMINANT gene
+interface GeneEpigenetics {                                   // genetics/
+    EpiValues expressed();      // the copy this horse shows - one locus, one result
+    EpiValues copy(int slot);   // one particular copy - for a CODOMINANT gene
 
-    // epigenome may be null -> every accessor is MidpointRng.
-    static AlleleRandomness forGene(Gene g, Genotype genotype, Epigenome epigenome);
+    // epigenome may be null -> every value reports its schema's midpoint.
+    static GeneEpigenetics forGene(Gene g, Genotype genotype, Epigenome epigenome);
 }
 
 /** The sink. Additions are applied before multipliers, so gene order buys nothing. */
@@ -1182,10 +1218,11 @@ List&lt;String&gt; GeneCodeDisplay.wrap(Genotype genotype, int lines, int maxCha
     so each <a href="genetics-model.html#combinations">outcome</a> picks a
     <code>strength</code> in <code>[0, 1]</code> and the painter does the rest. Both raise
     that strength by how much of the coat they are handed is already de-pigmented &mdash;
-    see <a href="pipeline.html#white-finds-white">white finds white</a>. Both draw every
-    number from <code>ctx.epigeneticsFor(geneKey)</code>, and
-    <strong>the draw order is part of the contract</strong>: change it and every existing
-    horse carrying that gene repaints.
+    see <a href="pipeline.html#white-finds-white">white finds white</a>. Both read every
+    number by name from <code>ctx.epigeneticsFor(geneKey)</code>, over the schema
+    fragments <code>WhitePattern.sabinoSchema()</code> and
+    <code>splashSchema()</code>, which the calling gene composes into its own
+    <code>epiSchema()</code>.
 </p>
 
 <div class="page-foot">

@@ -94,7 +94,16 @@
                 { href: "gene-rapgef5.html", text: "RAPGEF5 (EFIH)", kind: "natural" },
                 { href: "gene-st14.html", text: "ST14 (naked foal)", kind: "natural" },
                 { href: "gene-shox.html", text: "SHOX (skeletal atavism)", kind: "natural" },
-                { href: "gene-met.html", text: "MET (embryonic lethal)", kind: "natural" }
+                { href: "gene-met.html", text: "MET (embryonic lethal)", kind: "natural" },
+                { href: "gene-scn4a.html", text: "SCN4A (HYPP)", kind: "natural" },
+                { href: "gene-gys1.html", text: "GYS1 (PSSM1)", kind: "natural" },
+                { href: "gene-ppib.html", text: "PPIB (HERDA)", kind: "natural" },
+                { href: "gene-prkdc.html", text: "PRKDC (SCID)", kind: "natural" },
+                { href: "gene-myo5a.html", text: "MYO5A (lavender foal)", kind: "natural" },
+                { href: "gene-toe1.html", text: "TOE1 (cerebellar abiotrophy)", kind: "natural" },
+                { href: "gene-cvm.html", text: "CVM (cervical malformation)", kind: "natural" },
+                { href: "gene-gbe1.html", text: "GBE1 (GBED)", kind: "natural" },
+                { href: "gene-megaesophagus.html", text: "Megaesophagus", kind: "natural" }
             ]
         },
         {

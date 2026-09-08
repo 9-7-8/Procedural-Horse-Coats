@@ -121,7 +121,10 @@
 
 <ul>
     <li><strong>No unseeded randomness.</strong> All per-horse variation comes from
-        the epigenetic seed of the allele copy that expresses. No
+        the <a href="genetics-model.html#epigenetics">stored values</a> on the allele
+        copy that expresses &mdash; literal numbers now, rather than a seed replayed
+        through a PRNG, but the contract is the same and is if anything harder to
+        break: a gene reads numbers, it is never handed a generator. No
         <code>new Random()</code>, no <code>Math.random()</code>, no
         <code>RandomSource</code> from the level.</li>
     <li><strong>No input the key does not capture.</strong> Not entity UUID, not

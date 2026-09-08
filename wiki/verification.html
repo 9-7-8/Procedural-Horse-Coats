@@ -32,6 +32,125 @@
     </p>
 </div>
 
+<h2 id="health-genes">&sect;0-AF &mdash; Nine more health genes, and a wild horse that can be sick (2026-09-07, NOT looked at)</h2>
+
+<p>
+    The reference&rsquo;s disorder list is now covered: HERDA, SCID, lavender foal,
+    cerebellar abiotrophy, CVM, GBED and megaesophagus as recessives, plus
+    <a href="gene-scn4a.html">HYPP</a> and <a href="gene-gys1.html">PSSM1</a> as the
+    mod&rsquo;s first <strong>dominant</strong> disorders. Design:
+    <a href="horse-body.html#disorder-shapes">the two shapes a disorder comes in</a>.
+</p>
+
+<div class="note warn">
+    <span class="label">A wild-caught horse can now be born unwell</span>
+    <p>
+        This is the change most likely to read as a bug when it is working correctly.
+        A dominant disorder has no silent carrier, so if founders could never be
+        affected the allele could never exist &mdash; roughly one wild horse in
+        thirty now has PSSM1 and about one in eighty has HYPP. Neither is ever born
+        <em>dying</em>; that invariant is unchanged and tested.
+    </p>
+</div>
+
+<ul>
+    <li><strong>Find a wild horse with PSSM1 and check the panel says so.</strong> The
+        commonest disorder in the mod by a wide margin, and the first one anybody is
+        likely to meet without breeding for it. It should name the condition and show
+        the horse a few hearts down. If nothing in the wild is ever sick, the dominant
+        founder tables are not being reached.</li>
+    <li><strong>Breed two HYPP horses.</strong> The one locus where the mistake is
+        visible in advance: two affected parents throw a dead foal one time in four,
+        and half the survivors are affected again. This is the whole point of the gene
+        and the quickest way to see the new shape work.</li>
+    <li><strong>Does an <code>H/H</code> foal actually die?</strong> HYPP is the first
+        gene that is a survivable disorder on one copy and a lethal on two, so the
+        lethal path is reached from a genotype that is <em>not</em> a plain
+        homozygous-recessive for the first time. Quickest route is the custom spawn
+        egg: add SCN4A, set it <code>H/H</code>, pick Foal.</li>
+    <li><strong>Spawn one of each new lethal as a foal and read the chat line.</strong>
+        Seven new conditions, seven new sentences, and nothing has ever printed any of
+        them. Watch for a raw translation key or an empty name.</li>
+    <li><strong>Check the &ldquo;View Genes&rdquo; popup does not overflow.</strong>
+        Sixteen health loci now, up from seven &mdash; on a carrier-heavy horse the
+        Active list is meaningfully longer than anything that screen has been shown.</li>
+    <li><strong>Turn the health genetics off in the server config.</strong> The two
+        dominants are the new risk here: they are the only disorders that affect
+        founders, so if the config switch misses them a &ldquo;disorders off&rdquo;
+        world still has sick wild horses.</li>
+    <li><strong>Are the frequencies right in play?</strong> The real question, and the
+        only one that needs hours rather than minutes. Carrier rates run 1.2&ndash;4%.
+        Too rare and the whole layer is invisible; too common and a paddock of wild
+        horses reads as uniformly broken. PSSM1 at 2.5% is the number most likely to
+        want turning, because every copy of it shows.</li>
+</ul>
+
+<h2 id="epigenetics">&sect;0-AE &mdash; Literal epigenetics, drift, and breeds that let go (2026-09-07, NOT looked at)</h2>
+
+<p>
+    Epigenetics stopped being one opaque seed per allele copy and became
+    <strong>named literal numbers</strong> a player can read; every value now takes a
+    tiny <a href="breeding.html#drift">drift</a> on its way to a foal; and a
+    <a href="breeds.html#founder-only">breed</a> shapes its founders and then stops
+    influencing anything. Design:
+    <a href="genetics-model.html#epigenetics">the genetics model</a>. Nothing below has
+    been seen in a game.
+</p>
+
+<div class="note warn">
+    <span class="label">Every horse changed</span>
+    <p>
+        A given seed makes a different-looking horse than it did, deliberately &mdash;
+        the golden coat file was regenerated wholesale. So &ldquo;this horse looks
+        different from last session&rdquo; is expected, and is not the bug. The bug
+        would be a horse that looks different from <em>itself</em> across a reload.
+    </p>
+</div>
+
+<ul>
+    <li><strong>Does a foal look like the parent it took the allele from?</strong> The
+        oldest unverified epigenetics claim and still the important one. Breed a
+        strongly marked horse to a plain one, and check the foal's marking against the
+        parent it inherited from rather than against the pair.</li>
+    <li><strong>Does a horse survive a save-and-reload unchanged?</strong> The one that
+        would be quietly catastrophic. Values are quantised so that what is in memory is
+        exactly what the code string says; if that failed anywhere, a horse would repaint
+        subtly on reload and fork the texture cache. Note a horse's markings, quit to
+        title, reload, look again.</li>
+    <li><strong>Spawn a custom horse.</strong> This exercises a payload cap that was
+        <em>already too small before this change</em> &mdash; the old epigenome code was
+        about 4500 characters against a 4096 limit, so the custom spawn egg may simply
+        have been throwing. It is 65536 now. If spawning works, that bug is closed too;
+        if it throws, the cap is still wrong and the log will say so.</li>
+    <li><strong>Open &ldquo;View Genes&rdquo; on a tamed horse.</strong> The new
+        epigenetics readout. Do the value rows fit? Is the Active/All toggle useful, or
+        is All just a wall? Does the <code>&rsaquo;</code> marking the expressed copy
+        read as anything? ednrb is the worst case &mdash; nine values, one of which is
+        four per-leg numbers on one line.</li>
+    <li><strong>Cross two extreme breeds &mdash; a Percheron and a Falabella.</strong>
+        The headline behaviour change. The foals should <em>spread</em>: some large, some
+        small, some in between, depending on which copies they drew. If they all come out
+        the same middling size, a breed standard has leaked back into resolution and the
+        whole point has been lost.</li>
+    <li><strong>Is a pure breed still recognisably itself?</strong> The other half of
+        the same check. A wild-caught Percheron should still be huge and a Thoroughbred
+        still fast &mdash; the band is written onto the founder's copies now rather than
+        re-applied on every lookup, so if founders come out ordinary-sized the write
+        never happened.</li>
+    <li><strong>Breed a pair repeatedly and read the numbers, not the horses.</strong>
+        Drift is designed to be invisible in one generation, so looking at foals proves
+        nothing. Open the epigenetics readout on parent and foal and compare a value
+        directly; it should differ in about the fourth decimal.</li>
+    <li><strong>Does the horse designer still load and draw?</strong> It runs
+        <code>common/</code> compiled to wasm, and the epigenome format changed under it.
+        Paste a code out of the spawn egg and into the designer and check the same horse
+        comes back.</li>
+    <li><strong>Does the family tree still draw ancestors?</strong> The invented-ancestor
+        fallback is deleted, so a record without a stored genome now draws nothing rather
+        than a plausible stranger. Any blank ancestor portrait is a record that never had
+        a genome &mdash; worth knowing which.</li>
+</ul>
+
 <h2 id="speed-floor">&sect;0-AD &mdash; No horse too slow to escape a zombie (2026-09-07, NOT looked at)</h2>
 
 <p>

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TOE1 (cerebellar abiotrophy) &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="nav.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow natural">Natural gene <span class="sep">/</span> health</p>
+<h1>TOE1 (cerebellar abiotrophy)</h1>
+<p class="lede">
+    Cerebellar abiotrophy. The cells governing balance die off after birth, and
+    the horse is left with no sense of where its own feet are.
+</p>
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd>horsegenetics.toe1</dd></div>
+    <div><dt>Priority</dt><dd>98</dd></div>
+    <div><dt>Alleles</dt><dd><span class="allele dom">ca</span> <span class="allele wild">N</span></dd></div>
+    <div><dt>Outcomes</dt><dd>wild, <code>toe1-carrier</code>, <code>cerebellar-abiotrophy</code></dd></div>
+    <div><dt>Coat effect</dt><dd><strong>none</strong> &mdash; every outcome is a wild type</dd></div>
+    <div><dt>Default allele</dt><dd>N</dd></div>
+    <div><dt>Wild population</dt><dd>2.4% of founders carry one copy; <b>none</b> carries two</dd></div>
+    <div><dt>Founder draws</dt><dd>1 &times; nextFloat()</dd></div>
+    <div><dt>Catalogue entries</dt><dd>1 &mdash; it never changes what a horse looks like</dd></div>
+</dl>
+
+<div class="note rule">
+    <span class="label">It paints nothing, and that is what makes it free</span>
+    <p>
+        Every combination of this gene is an <a href="genetics-model.html">expression</a>
+        marked <code>wildType</code>. That reads oddly for a gene that can kill a foal,
+        and it is exactly right: <code>wildType</code> means <em>changes nothing about
+        the coat</em>. Because none of the non-coat genes paints,
+        <code>Gene.affectsCoat()</code> is false for all of them, they are left out of a
+        horse&rsquo;s texture key, and the whole locus collapses into one catalogue
+        entry. What the gene actually does travels on
+        <a href="horse-body.html">the trait system</a> instead.
+    </p>
+</div>
+
+<h2>The combination table</h2>
+
+<div class="table-wrap">
+<table>
+<thead><tr>
+<th>combination</th>
+<th>outcome</th>
+<th>effect</th>
+</tr></thead>
+<tbody>
+<tr><td><code>N/N</code></td><td>wild type</td><td>nothing</td></tr>
+<tr><td><code>ca/N</code></td><td><code>toe1-carrier</code></td><td>nothing &mdash; a completely normal horse</td></tr>
+<tr><td><code>ca/ca</code></td><td><code>cerebellar-abiotrophy</code></td><td>&minus;8 health, &minus;0.045 speed, &minus;0.30 jump &mdash; <b>survivable</b></td></tr>
+</tbody>
+</table>
+</div>
+
+<h2>The heaviest jump penalty in the mod</h2>
+
+<p>
+    And the only disorder where that is the <em>headline</em> symptom rather than a
+    side effect of being generally unwell. A CA horse cannot judge a distance, so this
+    is the one locus whose cost a player feels through the reins rather than reads in
+    a panel &mdash; which makes it the most legible disorder here despite being
+    invisible.
+</p>
+
+<h2>Progressive, which needs an age model the mod does not have</h2>
+
+<p>
+    A real CA foal looks normal and worsens over its first months. Horse
+    <strong>aging is deliberately out of scope</strong> (see
+    <a href="known-gaps.html#gap-1">gap 1</a>, where grey ran into the same wall), so
+    there is no clock for an onset to run on and the cost is flat from birth.
+</p>
+
+<p>
+    Grey solved its version of this by reading copy-number dosage for a
+    <em>progression window</em> and letting the horse&rsquo;s own epigenetics pick a
+    point in it, fixed for life. The same trick would work here if the severity model
+    ever lands &mdash; a CA horse would be born somewhere on a spectrum rather than
+    moving along one.
+</p>
+
+<div class="note warn">
+    <span class="label">No founder is ever affected</span>
+    <p>
+        The founder table lists only the clear horse and the carrier. A wild-caught
+        horse is an adult that survived, so it can carry this and never have it, and
+        the homozygote&rsquo;s weight is simply absent from the table. <b>The only way
+        to produce an affected foal is to breed two carriers</b> &mdash; which is the
+        whole design: it is what makes a pedigree worth keeping, and what turns the
+        carrier wording in the info panel from decoration into the difference between
+        a breeding programme and a lottery.
+    </p>
+</div>
+
+
+<h2 id="carrot">Its gene carrot</h2>
+
+<p>
+    There is none. A disorder locus sets <code>hasGeneCarrot()</code> false &mdash;
+    forcing one onto somebody&rsquo;s line is hostile &mdash; and
+    <code>SpliceSafety</code> keeps it out of the random splice as well, derived from
+    the fact that it declares a non-informational <code>Condition</code> rather than
+    from any hand-written list.
+</p>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="gene-plod1.html">PLOD1</a>
+        <a href="gene-met.html">MET</a>
+        <a href="horse-body.html">The trait system</a>
+    </div>
+    Source: <code>common/genetics/genes/Toe1Gene.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

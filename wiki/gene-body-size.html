@@ -80,7 +80,7 @@
 <div class="codebox">
 <div class="filename">common/genetics/genes/MagicSizeGene.java</div>
 <pre><code class="language-java">@Override
-public void contribute(AllelePair pair, Genotype genotype, AlleleRandomness epigenetics,
+public void contribute(AllelePair pair, Genotype genotype, GeneEpigenetics epigenetics,
                        TraitBuilder out) {
     double sum = signedDelta(pair.first(),  epigenetics.copy(0))
                + signedDelta(pair.second(), epigenetics.copy(1));
@@ -114,7 +114,7 @@ public void contribute(AllelePair pair, Genotype genotype, AlleleRandomness epig
     Every other epigenetic gene asks for "the copy that expresses", because one
     locus produces one result. A codominant one cannot: asking for the expressed
     copy would count one allele twice and the other not at all. So this gene
-    takes an <code>AlleleRandomness</code> and asks it for
+    takes an <code>GeneEpigenetics</code> and asks it for
     <code>copy(0)</code> and <code>copy(1)</code> &mdash; the trait-side twin of
     the accessor <a href="gene-mane-color.html">mane colour</a> needed for the
     same reason on the coat side.
@@ -270,7 +270,7 @@ public void contribute(AllelePair pair, Genotype genotype, AlleleRandomness epig
         <a href="verification.html">What to check in-game</a>
     </div>
     Source: <code>common/genetics/genes/MagicSizeGene.java</code>,
-    <code>common/trait/AlleleRandomness.java</code>
+    <code>common/trait/GeneEpigenetics.java</code>
 </div>
 
 </article>

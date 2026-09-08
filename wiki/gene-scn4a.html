@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SCN4A (HYPP) &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="nav.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow natural">Natural gene <span class="sep">/</span> health</p>
+<h1>SCN4A (HYPP)</h1>
+<p class="lede">
+    Hyperkalaemic periodic paralysis &mdash; a sodium-channel defect that leaves
+    the muscle liable to lock up. One copy is enough, and two are fatal.
+</p>
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd>horsegenetics.scn4a</dd></div>
+    <div><dt>Priority</dt><dd>93</dd></div>
+    <div><dt>Alleles</dt><dd><span class="allele dom">H</span> <span class="allele wild">N</span></dd></div>
+    <div><dt>Outcomes</dt><dd>wild, <code>hypp</code>, <code>hypp-lethal</code></dd></div>
+    <div><dt>Coat effect</dt><dd><strong>none</strong> &mdash; every outcome is a wild type</dd></div>
+    <div><dt>Default allele</dt><dd>N</dd></div>
+    <div><dt>Wild population</dt><dd>1.2% of founders are born <code>H/N</code> &mdash; and therefore born <b>affected</b></dd></div>
+    <div><dt>Founder draws</dt><dd>1 &times; nextFloat()</dd></div>
+    <div><dt>Catalogue entries</dt><dd>1 &mdash; it never changes what a horse looks like</dd></div>
+</dl>
+
+<div class="note rule">
+    <span class="label">It paints nothing, and that is what makes it free</span>
+    <p>
+        Every combination of this gene is an <a href="genetics-model.html">expression</a>
+        marked <code>wildType</code>. That reads oddly for a gene that can kill a foal,
+        and it is exactly right: <code>wildType</code> means <em>changes nothing about
+        the coat</em>. Because none of the non-coat genes paints,
+        <code>Gene.affectsCoat()</code> is false for all of them, they are left out of a
+        horse&rsquo;s texture key, and the whole locus collapses into one catalogue
+        entry. What the gene actually does travels on
+        <a href="horse-body.html">the trait system</a> instead.
+    </p>
+</div>
+
+<h2>The combination table</h2>
+
+<div class="table-wrap">
+<table>
+<thead><tr>
+<th>combination</th>
+<th>outcome</th>
+<th>effect</th>
+</tr></thead>
+<tbody>
+<tr><td><code>N/N</code></td><td>wild type</td><td>nothing</td></tr>
+<tr><td><code>H/N</code></td><td><code>hypp</code></td><td>&minus;6 health, &minus;0.040 speed, &minus;0.18 jump &mdash; <b>affected, and rideable</b></td></tr>
+<tr><td><code>H/H</code></td><td><code>hypp-lethal</code></td><td>&minus;16 health &mdash; <b>the foal is born and then dies</b></td></tr>
+</tbody>
+</table>
+</div>
+
+<h2>The first locus that is both</h2>
+
+<p>
+    Every disorder before this one was a single thing: a heart reduction, or a lethal.
+    HYPP is a sub-lethal heart reducer <em>and</em> a homozygous lethal on the same
+    locus, which is a shape nothing in the mod had &mdash; and the reason
+    <code>DominantDisorderGene</code> exists alongside
+    <code>RecessiveDisorderGene</code>.
+</p>
+
+<p>
+    The consequence for a breeder is the point of the gene. An <code>H/N</code> horse
+    is <b>visibly</b> unwell and can still be excellent on every other axis, so it is
+    genuinely tempting to breed from &mdash; and two of them throw a dead foal one
+    time in four while half the survivors are affected again. It is the only locus in
+    the mod where the mistake is one you make with your eyes open.
+</p>
+
+<div class="note warn">
+    <span class="label">There is no carrier, and founders can be affected</span>
+    <p>
+        Every other disorder locus in the mod is recessive, and they all lean on two
+        facts: a heterozygote is indistinguishable from normal, and no founder is ever
+        affected. <b>Neither holds here.</b>
+    </p>
+    <p>
+        The second is the interesting break. A recessive can be absent from its own
+        founder table entirely, because a wild-caught horse is an adult that survived
+        and so carries at most one copy. A dominant has no silent carrier at all
+        &mdash; so if founders could never be affected, the allele could never enter
+        the world and the gene would not exist. Founders <em>can</em> therefore be born
+        heterozygous, and a wild-caught horse really can be a sick one. The homozygote
+        is still excluded, which keeps the worst outcome something a breeder made.
+    </p>
+    <p>
+        That changes what the locus is <em>for</em>. A recessive lethal is something
+        you discover about two horses after the fact; this is something you can see in
+        the animal in front of you and decline to breed from.
+    </p>
+</div>
+
+<h2 id="numbers">The numbers are a rendering, not arithmetic</h2>
+
+<p>
+    The reference table gives HYPP as roughly &ldquo;30% health, 60% speed and
+    jump&rdquo;, in a severity model this mod does not have &mdash;
+    <a href="roadmap.html#decisions">roadmap &sect;3</a> flags it and does not decide
+    it. Read literally against a 22-health baseline, those percentages would make an
+    <em>affected but living</em> horse worse than several of the mod&rsquo;s outright
+    lethals, which is plainly not what the table means.
+</p>
+
+<p>
+    So the figures here are calibrated against the disorders that already ship &mdash;
+    the worst survivable outcome in the mod, and comfortably short of a lethal &mdash;
+    and the reference is used for the <em>ordering</em> of the disorders against each
+    other, not for the arithmetic. Every other new health locus follows the same rule.
+</p>
+
+
+<h2 id="carrot">Its gene carrot</h2>
+
+<p>
+    There is none. A disorder locus sets <code>hasGeneCarrot()</code> false &mdash;
+    forcing one onto somebody&rsquo;s line is hostile &mdash; and
+    <code>SpliceSafety</code> keeps it out of the random splice as well, derived from
+    the fact that it declares a non-informational <code>Condition</code> rather than
+    from any hand-written list.
+</p>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="gene-gys1.html">GYS1 (PSSM1)</a>
+        <a href="gene-plod1.html">PLOD1</a>
+        <a href="horse-body.html">The trait system</a>
+    </div>
+    Source: <code>common/genetics/genes/Scn4aGene.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

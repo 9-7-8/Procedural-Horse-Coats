@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GYS1 (PSSM1) &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="nav.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow natural">Natural gene <span class="sep">/</span> health</p>
+<h1>GYS1 (PSSM1)</h1>
+<p class="lede">
+    Type 1 polysaccharide storage myopathy. The muscle stores sugar it cannot burn
+    and ties up under work. Neither combination is lethal.
+</p>
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd>horsegenetics.gys1</dd></div>
+    <div><dt>Priority</dt><dd>94</dd></div>
+    <div><dt>Alleles</dt><dd><span class="allele dom">P</span> <span class="allele wild">N</span></dd></div>
+    <div><dt>Outcomes</dt><dd>wild, <code>pssm1</code>, <code>pssm1-severe</code></dd></div>
+    <div><dt>Coat effect</dt><dd><strong>none</strong> &mdash; every outcome is a wild type</dd></div>
+    <div><dt>Default allele</dt><dd>N</dd></div>
+    <div><dt>Wild population</dt><dd>2.5% of founders are born <code>P/N</code> &mdash; and therefore born <b>affected</b></dd></div>
+    <div><dt>Founder draws</dt><dd>1 &times; nextFloat()</dd></div>
+    <div><dt>Catalogue entries</dt><dd>1 &mdash; it never changes what a horse looks like</dd></div>
+</dl>
+
+<div class="note rule">
+    <span class="label">It paints nothing, and that is what makes it free</span>
+    <p>
+        Every combination of this gene is an <a href="genetics-model.html">expression</a>
+        marked <code>wildType</code>. That reads oddly for a gene that can kill a foal,
+        and it is exactly right: <code>wildType</code> means <em>changes nothing about
+        the coat</em>. Because none of the non-coat genes paints,
+        <code>Gene.affectsCoat()</code> is false for all of them, they are left out of a
+        horse&rsquo;s texture key, and the whole locus collapses into one catalogue
+        entry. What the gene actually does travels on
+        <a href="horse-body.html">the trait system</a> instead.
+    </p>
+</div>
+
+<h2>The combination table</h2>
+
+<div class="table-wrap">
+<table>
+<thead><tr>
+<th>combination</th>
+<th>outcome</th>
+<th>effect</th>
+</tr></thead>
+<tbody>
+<tr><td><code>N/N</code></td><td>wild type</td><td>nothing</td></tr>
+<tr><td><code>P/N</code></td><td><code>pssm1</code></td><td>&minus;3 health, &minus;0.015 speed, &minus;0.06 jump</td></tr>
+<tr><td><code>P/P</code></td><td><code>pssm1-severe</code></td><td>&minus;6 health, &minus;0.030 speed, &minus;0.12 jump &mdash; <b>still survivable</b></td></tr>
+</tbody>
+</table>
+</div>
+
+<h2>The one disorder you will actually meet</h2>
+
+<p>
+    Everything else on the health layer is rare by construction, because the
+    recessives need two carriers to find each other. This one is dominant, so every
+    copy shows &mdash; and at 2.5% of founders it is by a wide margin the disorder a
+    player is most likely to run into. That is true of the real thing too, across
+    draughts, warmbloods, paints and appaloosas.
+</p>
+
+<h2 id="frequency">The frequency is the gene</h2>
+
+<p>
+    2.5% is set deliberately low relative to the real population, and that number is
+    what this locus is really about. A dominant disorder at a realistic rate would
+    mean a visible fraction of every paddock is unwell &mdash; at which point it stops
+    reading as a disorder and starts reading as <em>the baseline horse being bad</em>,
+    which is a different and much worse game. Rare enough to notice, common enough to
+    matter.
+</p>
+
+<div class="note warn">
+    <span class="label">There is no carrier, and founders can be affected</span>
+    <p>
+        Every other disorder locus in the mod is recessive, and they all lean on two
+        facts: a heterozygote is indistinguishable from normal, and no founder is ever
+        affected. <b>Neither holds here.</b>
+    </p>
+    <p>
+        The second is the interesting break. A recessive can be absent from its own
+        founder table entirely, because a wild-caught horse is an adult that survived
+        and so carries at most one copy. A dominant has no silent carrier at all
+        &mdash; so if founders could never be affected, the allele could never enter
+        the world and the gene would not exist. Founders <em>can</em> therefore be born
+        heterozygous, and a wild-caught horse really can be a sick one. The homozygote
+        is still excluded, which keeps the worst outcome something a breeder made.
+    </p>
+    <p>
+        That changes what the locus is <em>for</em>. A recessive lethal is something
+        you discover about two horses after the fact; this is something you can see in
+        the animal in front of you and decline to breed from.
+    </p>
+</div>
+
+<h2>No cliff</h2>
+
+<p>
+    <code>P/P</code> is worse than <code>P/N</code> rather than fatal, which makes
+    this the mildest locus on the health layer and the only dominant one that is safe
+    to breed from if you accept what you are getting. Unlike
+    <a href="gene-scn4a.html">HYPP</a> there is no sudden penalty for ignoring it
+    &mdash; just a line that gets quietly worse.
+</p>
+
+<p>
+    The magnitudes are calibrated against the disorders that already ship rather than
+    computed from the reference&rsquo;s percentages; see
+    <a href="gene-scn4a.html#numbers">HYPP</a> for why.
+</p>
+
+
+<h2 id="carrot">Its gene carrot</h2>
+
+<p>
+    There is none. A disorder locus sets <code>hasGeneCarrot()</code> false &mdash;
+    forcing one onto somebody&rsquo;s line is hostile &mdash; and
+    <code>SpliceSafety</code> keeps it out of the random splice as well, derived from
+    the fact that it declares a non-informational <code>Condition</code> rather than
+    from any hand-written list.
+</p>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="gene-scn4a.html">SCN4A (HYPP)</a>
+        <a href="breeds.html">Breeds</a>
+        <a href="horse-body.html">The trait system</a>
+    </div>
+    Source: <code>common/genetics/genes/Gys1Gene.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>
