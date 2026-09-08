@@ -320,11 +320,37 @@
 <h2 id="egg">The custom horse spawn egg</h2>
 
 <p>
-    <strong>Creative only.</strong> A reskin of the vanilla horse spawn egg &mdash; same
-    icon, and it shows in the vanilla Spawn Eggs tab as well as this mod&rsquo;s. It has
-    no recipe and it does not spawn anything directly: right-clicking it opens
-    <code>client/CustomHorseSpawnScreen</code>, a full genome editor with a gene list down
-    the left, a live orbitable 3D horse in the middle, and controls on the right.
+    <strong>Spawning is creative only</strong> &mdash; the editor itself opens in any game
+    mode. A reskin of the vanilla horse spawn egg: same icon, and it shows in the vanilla
+    Spawn Eggs tab as well as this mod&rsquo;s. It has no recipe and it does not spawn
+    anything directly: right-clicking it opens <code>client/CustomHorseSpawnScreen</code>,
+    a full genome editor with a gene list down the left, a live orbitable 3D horse in the
+    middle, and controls on the right.
+</p>
+
+<p>
+    <strong>All four right-click gestures open it.</strong> A right-click reaches exactly
+    one of <code>RightClickBlock</code> (aiming at the ground),
+    <code>RightClickItem</code> (aiming at nothing),
+    <code>EntityInteractSpecific</code> or <code>EntityInteract</code> (aiming at a mob),
+    and <code>CustomHorseSpawnEggClient</code> used to handle only the first two. Aiming
+    at a <em>horse</em> &mdash; the obvious thing to do when the animal you want to copy is
+    standing in front of you &mdash; fell through to vanilla, which on a tamed horse means
+    you <strong>mount it</strong>. That is a right-click that visibly does the wrong thing,
+    and is the likeliest shape of a report that the egg &ldquo;does not seem to be
+    working&rdquo;.
+</p>
+
+<p>
+    <strong>Nothing about the egg is gated on the environment.</strong> There is no
+    <code>isProduction()</code> check anywhere in the path; it behaves identically under
+    <code>runClient</code> and in a built jar. The only gate is creative mode on the
+    <strong>Spawn</strong> button, which now says so on the button itself and in a tooltip
+    rather than only in a chat line after the click &mdash; and every server-side refusal
+    (<code>refuseSpawn</code>) writes a chat line <em>and</em> a log line, where two of
+    them used to be silent <code>return</code>s. A refusal a player can read is a bug
+    report; a refusal they cannot is a mystery. See
+    <a href="known-gaps.html#gap-70">gap 69</a>.
 </p>
 
 <ul>

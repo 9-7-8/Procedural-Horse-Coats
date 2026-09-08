@@ -32,6 +32,128 @@
     </p>
 </div>
 
+<h2 id="horse-info">&sect;0-AG &mdash; The horse information screen, the breeding preview, and a mare that miscarries (2026-09-07, NOT looked at)</h2>
+
+<p>
+    Four separate things, and the first two deleted the surfaces they replace &mdash; so
+    if the new screen does not open, there is no longer any way to read a horse's record
+    in game. Start here. Design:
+    <a href="breeding.html#H">breeding &sect; client sync</a>,
+    <a href="breeding.html#miscarriage">breeding &sect; the miscarriage</a>,
+    <a href="known-gaps.html#gap-71">gap 71</a>.
+</p>
+
+<div class="note warn">
+    <span class="label">The first click is the load-bearing one</span>
+    <p>
+        Get on a tamed horse, press <kbd>E</kbd>, and click the <strong>i</strong> in the
+        top-left corner of the window. If that opens a dark six-tab overlay, everything
+        below is worth checking. If it does nothing, the button could not find the horse
+        &mdash; and the grey side panel that used to answer these questions is gone, so
+        say so before going further.
+    </p>
+</div>
+
+<h3>The &ldquo;i&rdquo; button and the way in</h3>
+
+<ul>
+    <li><strong>Shift-right-click a tamed horse instead of riding it.</strong> This is the
+        case that was <em>broken</em> before: vanilla opens the same inventory screen
+        without mounting, and the mod read its horse off
+        <code>player.getVehicle()</code>, which is <code>null</code> there. Every one of
+        this mod's additions came up blank. The button should now work identically
+        whether you rode the horse or shift-clicked it &mdash; check both.</li>
+    <li><strong>Does Done / Escape go back to the horse inventory, and does that
+        inventory still work?</strong> The information screen re-shows the container
+        screen it came from rather than closing to the world. Go back and then
+        <strong>move an item between the saddle slot and your inventory</strong>: if the
+        menu came back dead, that click does nothing. See
+        <a href="known-gaps.html#gap-71">gap 71</a>.</li>
+    <li>Open it on a <strong>foal</strong>, and on a horse with a <strong>barn
+        name</strong> and one without.</li>
+</ul>
+
+<h3>The six tabs</h3>
+
+<ul>
+    <li><strong>Overview</strong> &mdash; current health against max, speed, jump, size,
+        bond, conditions, and bred / tamed / owner-now. The barn-name box and its
+        <strong>Set</strong> button are a fixed header that does not scroll; type a name,
+        press Set, close and reopen, and check it stuck. &ldquo;Owner now&rdquo; only
+        appears when it differs from the tamer, so a <a href="items.html#transfer-papers">
+        transferred horse</a> is the way to see it at all.</li>
+    <li><strong>Genes</strong> &mdash; the short form, then the full genetic code, then
+        every locus in code order. <strong>Copy the full code into the spawn egg</strong>:
+        the horse that appears should be this horse. That single check exercises the
+        record, the code, and the egg at once.</li>
+    <li><strong>Health</strong> &mdash; the new one, and the one with no precedent. Each
+        gene shows <em>its own</em> contribution (<code>+0.020</code>,
+        <code>&times;1.42</code>) rather than the total. The question is whether that
+        reads as an explanation of why the horse is fast, or as a column of small
+        numbers. A horse carrying <a href="gene-hmga2.html">HMGA2</a> is the interesting
+        case: it moves all four axes and so appears under all four headings.</li>
+    <li><strong>Coat</strong> and <strong>Other genes</strong> &mdash; carried loci only,
+        with the epigenetic values under each. <a href="gene-dhampir.html">Dhampir</a> is
+        the deliberate oddity: it changes the coat and is filed under <em>Other</em>
+        anyway, because the coat is the least of what it does. Check it is there and not
+        on Coat.</li>
+    <li><strong>Family tree</strong> &mdash; clicking the tab hands off to the pedigree
+        chart. Its Done should come back to the information screen, not to the world.</li>
+</ul>
+
+<h3>The breeding preview (browser <kbd>H</kbd>, second tab)</h3>
+
+<ul>
+    <li><strong>Are your horses in the two lists at all?</strong> The roster is every
+        horse the server has on record that you tamed, plus any loaded horse you own now.
+        A horse you were <em>given</em> a transfer paper for is the case that needs both
+        halves.</li>
+    <li><strong>Pick a mare and a stallion you know share a recessive</strong> and check
+        the odds read <code>1 in 4</code>. The arithmetic is unit-tested against ten
+        thousand real draws, so a wrong number here is a wiring bug, not a maths one.</li>
+    <li><strong>Is the grouping useful?</strong> Loci are blocked by the trait they pull
+        on &mdash; Speed, Max health, Jump, Size, Disorders, Coat, then abilities &mdash;
+        with the leopard complex's <code>PATN</code> modifiers indented under
+        <a href="gene-leopard.html">LP</a>. That is the &ldquo;group the polygenic ones
+        together&rdquo; requirement; the question is whether it reads that way.</li>
+    <li>Toggle <strong>All loci</strong>. It should go from a readable page to a very
+        long one &mdash; that is the point of the default.</li>
+</ul>
+
+<h3>The miscarriage</h3>
+
+<ul>
+    <li><strong>Breed two <a href="gene-met.html">MET</a> carriers</strong> (spawn-egg
+        route: add MET to both, set each <code>met/N</code>). One pairing in four should
+        produce <em>no foal</em>, a chat line to everyone within 32 blocks describing what
+        it looked like, and <strong>half a heart</strong> off the mare.</li>
+    <li><strong>The line must not name the gene.</strong> If it says &ldquo;MET&rdquo; or
+        &ldquo;embryonic lethal&rdquo; anywhere, the wrong string is being printed and the
+        whole point of the feature is gone &mdash; a player is supposed to work it out
+        from a dozen pairings. The <em>log</em> does name it, deliberately.</li>
+    <li>Do the same with the <a href="gene-milk.html">milk</a> locus
+        (<code>Watr/Lava</code>) and check the two descriptions are visibly
+        different.</li>
+    <li><strong>Every successful breeding should also print a few grey
+        <code>[Breeding]</code> lines</strong> in this dev build, and write one line per
+        gene to <code>latest.log</code>. Grep the log for <code>[Breeding]</code> after a
+        foal: that is the first time the draw has ever been visible.</li>
+</ul>
+
+<h3>The spawn egg, in the three places it was blind</h3>
+
+<ul>
+    <li><strong>Right-click a horse with the egg.</strong> This used to mount the horse;
+        it should now open the editor. Also check aiming at the ground and at open
+        air.</li>
+    <li><strong>Switch to survival and open the editor.</strong> Everything should work
+        except a Spawn button that reads <em>Spawn (creative only)</em>, is greyed, and
+        explains itself on hover.</li>
+    <li>Nothing here is a fix for a diagnosed bug &mdash; see
+        <a href="known-gaps.html#gap-70">gap 70</a>. If the third party who reported it is
+        reachable, the useful thing is one line about what they actually saw.</li>
+</ul>
+
 <h2 id="health-genes">&sect;0-AF &mdash; Nine more health genes, and a wild horse that can be sick (2026-09-07, NOT looked at)</h2>
 
 <p>
@@ -71,9 +193,11 @@
     <li><strong>Spawn one of each new lethal as a foal and read the chat line.</strong>
         Seven new conditions, seven new sentences, and nothing has ever printed any of
         them. Watch for a raw translation key or an empty name.</li>
-    <li><strong>Check the &ldquo;View Genes&rdquo; popup does not overflow.</strong>
-        Sixteen health loci now, up from seven &mdash; on a carrier-heavy horse the
-        Active list is meaningfully longer than anything that screen has been shown.</li>
+    <li><strong>Check the information screen's Health tab does not overflow.</strong>
+        Sixteen health loci now, up from seven &mdash; on a carrier-heavy horse that list
+        is meaningfully longer than anything the screen has been shown. (This used to
+        say &ldquo;View Genes&rdquo;; that popup is gone &mdash; see
+        <a href="#horse-info">&sect;0-AG</a>.)</li>
     <li><strong>Turn the health genetics off in the server config.</strong> The two
         dominants are the new risk here: they are the only disorders that affect
         founders, so if the config switch misses them a &ldquo;disorders off&rdquo;
@@ -122,11 +246,13 @@
         about 4500 characters against a 4096 limit, so the custom spawn egg may simply
         have been throwing. It is 65536 now. If spawning works, that bug is closed too;
         if it throws, the cap is still wrong and the log will say so.</li>
-    <li><strong>Open &ldquo;View Genes&rdquo; on a tamed horse.</strong> The new
-        epigenetics readout. Do the value rows fit? Is the Active/All toggle useful, or
-        is All just a wall? Does the <code>&rsaquo;</code> marking the expressed copy
-        read as anything? ednrb is the worst case &mdash; nine values, one of which is
-        four per-leg numbers on one line.</li>
+    <li><strong>Open the information screen's Coat tab on a tamed horse</strong>
+        (<kbd>E</kbd>, then the <strong>i</strong> button). The epigenetics readout lives
+        there and on Health and Other genes now, not in a &ldquo;View Genes&rdquo; popup
+        &mdash; see <a href="#horse-info">&sect;0-AG</a>. Do the value rows fit? Does the
+        <code>&rsaquo;</code> marking the expressed copy read as anything? ednrb is the
+        worst case &mdash; nine values, one of which is four per-leg numbers on one
+        line.</li>
     <li><strong>Cross two extreme breeds &mdash; a Percheron and a Falabella.</strong>
         The headline behaviour change. The foals should <em>spread</em>: some large, some
         small, some in between, depending on which copies they drew. If they all come out
@@ -3420,7 +3546,13 @@ the <a href="session-log.html">session log</a>.</em></p>
     <li><strong>Tab strip</strong>: one tab for now; clicking it is wired
         (<code>tabAt</code>) so a second tab drops in without touching input
         code. Check the strip draws and the active tab reads as active.</li>
-    <li><strong>Horse inventory panel</strong> (<kbd>E</kbd> on a tamed horse):
+    <li><strong>Superseded 2026-09-07 &mdash; see <a href="#horse-info">&sect;0-AG</a>.</strong>
+        The grey panel and <code>GeneInspectScreen</code> are both deleted; the
+        <strong>i</strong> button opens <code>HorseInfoScreen</code> instead, and its
+        Genes / Coat / Other tabs cover everything the paragraph below describes. Kept
+        for what it says about <em>which</em> loci are worth listing, which the new
+        screen still follows. &mdash; Horse inventory panel
+        (<kbd>E</kbd> on a tamed horse):
         the compact genotype line is <strong>gone</strong> from the grey panel;
         a new <strong>&ldquo;View Genes&rdquo;</strong> button sits above
         &ldquo;View Family Tree&rdquo;. It opens
@@ -3706,8 +3838,8 @@ the <a href="session-log.html">session log</a>.</em></p>
         fences and walls, stopping ~3 blocks off. It should ignore you while
         leashed or while someone rides it.</li>
     <li><strong>Herds.</strong> Park 2+ horses within 10 blocks for ten real
-        minutes &rarr; the inventory panel should start showing
-        <code>&bull; herd</code>. Separate them for ten minutes &rarr; the flag
+        minutes &rarr; the information screen's Overview tab should start showing
+        <code>&bull; in a herd</code>. Separate them for ten minutes &rarr; the flag
         clears. A <strong>foal in a herd</strong> should gain bond noticeably
         faster than one alone. Herd members near water+food should heal at +2.</li>
     <li><strong>Persistence.</strong> Bond and herd id survive a save/reload

@@ -36,6 +36,10 @@
 </li>
 <li><strong><code>getTextureLocation(S)</code> is still the texture hook</strong> - the <code>submit()</code> / <code>SubmitNodeCollector</code> split didn't swallow it for entities.
 </li>
+<li><strong><code>PlayerInteractEvent</code> itself is not cancellable</strong> - only its subclasses are. <code>setCanceled</code> / <code>setCancellationResult</code> are declared on <code>RightClickBlock</code>, <code>RightClickItem</code>, <code>EntityInteract</code> and <code>EntityInteractSpecific</code> individually, so a shared <code>consume(PlayerInteractEvent)</code> helper does not compile and you write the four handlers out. Worth knowing <em>which</em> four: a right-click reaches exactly one of them depending on what the crosshair is over, and an item that handles only <code>RightClickBlock</code> + <code>RightClickItem</code> silently does nothing when aimed at a mob (see <code>CustomHorseSpawnEggClient</code>).
+</li>
+<li><strong>An access transformer on a client-only class is fine on a dedicated server.</strong> <code>AbstractMountInventoryScreen</code> is <code>@OnlyIn(Dist.CLIENT)</code> and this mod's <code>accesstransformer.cfg</code> opens its <code>mount</code> field; <code>runServer</code> boots clean, with no missing-target error or warning. The field is the <em>only</em> reliable answer to "which horse is this inventory screen showing" - <code>player.getVehicle()</code> is right only while you are riding, and shift-right-clicking a tamed horse opens the same screen without mounting.
+</li>
 <li><strong><code>EventBusSubscriber</code> dropped <code>bus()</code> / <code>Bus</code>.</strong> <code>IModBusEvent</code> subtypes auto-route to the mod bus, everything else to the game bus.
 </li>
 <li><strong><code>AttachmentType.Builder#serialize</code> takes a <code>MapCodec</code></strong>, not <code>Codec</code>.

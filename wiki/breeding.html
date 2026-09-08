@@ -337,12 +337,13 @@
 </p>
 
 <ul>
-    <li><strong>Embryonic lethal</strong> (<a href="gene-met.html">MET</a>): the
-        Mendelian draw runs as usual, <code>applyBredFoal</code> reads the genotype it
-        produced, returns <code>false</code>, and the caller cancels the
-        <code>BabyEntitySpawnEvent</code>. <b>No foal at all.</b>
-        <code>Genotype.breedWith</code> is untouched, so the odds stay the ordinary
-        one-in-four for two carriers.</li>
+    <li><strong>Embryonic lethal</strong> (<a href="gene-met.html">MET</a>, and the
+        <a href="gene-milk.html">milk</a> locus's incompatible humours): the Mendelian
+        draw runs as usual, <code>applyBredFoal</code> reads the genotype it produced,
+        returns <code>false</code>, and the caller cancels the
+        <code>BabyEntitySpawnEvent</code>. <b>No foal at all</b> &mdash; the mare
+        <a href="#miscarriage">miscarries</a>. <code>Genotype.breedWith</code> is
+        untouched, so the odds stay the ordinary one-in-four for two carriers.</li>
     <li><strong>Lethal at birth</strong> (<a href="gene-ednrb.html">overo lethal
         white</a> and four recessives): the foal <em>is</em> born, named, and filed in
         the pedigree, and then dies over a few seconds. The pedigree is fine with it
@@ -351,9 +352,80 @@
 </ul>
 
 <p>
-    Both send the breeding player a chat line naming the disorder. Both are governed
-    by the server&rsquo;s <code>health.mode</code> setting, which never changes what a
-    horse <em>carries</em> or passes on.
+    Both are governed by the server&rsquo;s <code>health.mode</code> setting, which
+    never changes what a horse <em>carries</em> or passes on.
+</p>
+
+<h3 id="miscarriage">The miscarriage &mdash; and why it does not name the gene</h3>
+
+<p>
+    An embryonic lethal used to be a silent non-event: two horses that would breed with
+    anything except each other, for no visible reason, which is indistinguishable from a
+    bug. It is now something that happens <em>to the mare</em>, in
+    <code>LethalFoalHandler.announceMiscarriage</code>, and in <strong>every build</strong>
+    &mdash; it is gameplay, not a diagnostic.
+</p>
+
+<ul>
+    <li><strong>Half a heart</strong> off the dam, through the same
+        <code>genetic_defect</code> damage type a lethal foal dies of. Enough to see on
+        the health bar if the chat has scrolled away. It can kill a mare already on her
+        last half heart, and that is left alone: breeding an animal that close to death
+        is a decision.</li>
+    <li><strong>A line to everyone within 32 blocks</strong>, not only to whoever held
+        the wheat. The fact belongs to the pairing.</li>
+    <li><strong>The line describes the sign, never the disorder.</strong>
+        <code>MiscarriageSigns</code> holds one sentence per embryonic-lethal
+        <code>Condition</code>, written so that two different lethals read differently
+        without either naming a gene. That is the whole point: a pairing that comes to
+        nothing is the only evidence a player ever gets that two of their horses share a
+        recessive lethal, and printing the answer would retire the pedigree that exists
+        to find it. A dozen pairings sorts a herd into two groups; nothing hands anyone
+        the group's name.</li>
+</ul>
+
+<p class="muted">
+    A condition with no sign written for it falls back to a generic sentence rather than
+    failing, so a new lethal gene works the day it is added &mdash; it simply reads like
+    every other one until somebody writes it a line. The <em>log</em> always names the
+    condition, because a dev reading a log is debugging rather than playing.
+    <code>Condition.description()</code> also still names it, which is what the horse
+    information screen shows for a horse you already have in front of you: an animal you
+    can inspect tells you everything, an event you witnessed tells you what it looked
+    like.
+</p>
+
+<h3 id="breeding-debug">Every draw, written down (dev builds)</h3>
+
+<p>
+    A Mendelian draw is invisible, and the only evidence afterwards is one foal &mdash;
+    which is a single sample of a distribution. &ldquo;Every foal came out chestnut&rdquo;
+    and &ldquo;five foals happened to come out chestnut&rdquo; look identical from the
+    paddock. <code>BreedingDebug.reportDraw</code> runs on every pairing, <em>before</em>
+    the viability check so a miscarriage still leaves a record, and writes:
+</p>
+
+<ul>
+    <li>to the <strong>log</strong>, always (whenever <code>DebugAnnounce</code> is on):
+        both parents' and the foal's short forms, the foal's full code, its four resolved
+        body numbers and viability, every condition, and then
+        <code>BreedingReport.full</code> &mdash; <em>one line per registered gene</em>
+        giving <code>dam A/B x sire C/D -&gt; X/Y</code>, whether that combination is new,
+        what it expresses, and which parent supplied which copy where that can be said at
+        all;</li>
+    <li>to <strong>chat</strong>, in a dev build only
+        (<code>!FMLEnvironment.isProduction()</code>): the body numbers and
+        <code>BreedingReport.notable</code> &mdash; the loci the foal expresses or landed
+        on a combination neither parent had. Past a dozen of those it prints a count and
+        points at the log.</li>
+</ul>
+
+<p class="muted">
+    <code>BreedingReport</code> lives in <code>common/</code> and recomputes nothing: it
+    reads the three genotypes that already exist, so it cannot disagree with what was
+    actually bred. It deliberately does not claim a copy's parent when both parents could
+    have supplied it &mdash; the draw records nothing about that, and a guess dressed as a
+    fact is worse than a question mark.
 </p>
 
 <h3><code>GeneticCodeCombiner</code></h3>
@@ -776,7 +848,7 @@ int     offspringCount(UUID a, UUID b);</code></pre>
     short-circuits.
 </p>
 
-<h3>H. Client sync, inventory panel, family tree</h3>
+<h3 id="H">H. Client sync, the information screen, family tree</h3>
 
 <p>The record attachment is server-only, so it is pushed to clients:</p>
 
@@ -786,12 +858,36 @@ int     offspringCount(UUID a, UUID b);</code></pre>
         <code>HorseRecords.apply</code>. The client stores it in
         <code>ClientHorseRecordCache</code>, keyed by both entity id and record
         UUID.</li>
-    <li><code>HorseScreenHooks</code> hangs a metadata panel, an editable barn-name
-        field and a <strong>Family Tree</strong> button off the vanilla horse
-        inventory screen. It is a grey vanilla-style panel to the left, behind a
-        collapsible tab &mdash; <em>additive</em>, so a second horse-inventory mod is
-        not clobbered. Speed and health are tinted green / amber / red by
-        <code>parentStats.rank*</code>.</li>
+    <li><code>HorseScreenHooks</code> adds <strong>one</strong> thing to the vanilla
+        horse inventory screen: an <strong>i</strong> button in its top-left corner,
+        which opens <code>HorseInfoScreen</code>. The grey side panel that used to carry
+        the horse's numbers behind a collapsible tab is gone &mdash; it was a 128-pixel
+        column trying to hold a page, and everything on it moved to the information
+        screen's Overview tab. Nothing is duplicated and nothing draws over the vanilla
+        screen, so a second horse-inventory mod is still not clobbered.
+
+        <p>
+            The horse comes off the <strong>screen</strong>
+            (<code>AbstractMountInventoryScreen.mount</code>, opened by this mod's access
+            transformer), not off <code>player.getVehicle()</code>. The two agree while
+            you are riding and disagree completely when the screen was opened by
+            <strong>shift-right-clicking a tamed horse</strong>, which vanilla handles
+            without mounting &mdash; the old vehicle lookup returned <code>null</code>
+            there and every one of this mod's additions came up blank.
+        </p></li>
+    <li><code>HorseInfoScreen</code> is a six-tab full-window overlay in the same dark
+        chrome as the horse browser: <strong>Overview</strong> (name, the barn-name
+        editor, sex, generation, breed, the four live body numbers, bond, conditions, and
+        who bred / tamed / owns it), <strong>Genes</strong> (the genetic code, then every
+        locus in code order), <strong>Health</strong> (each gene's <em>own</em>
+        contribution to speed / health / jump / size, from
+        <code>TraitBreakdown</code>, plus the disorders), <strong>Coat</strong>,
+        <strong>Other genes</strong>, and <strong>Family tree</strong>, which hands
+        straight off to <code>FamilyTreeScreen</code> and comes back. Epigenetic values
+        are shown on Health, Coat and Other only &mdash; Genes is the index, and a wall of
+        numbers under every row is what the other three tabs are for. Which tab a gene
+        lands on is decided by <code>GeneCategory</code>, from the interfaces the gene
+        implements, so a drop-in gene sorts itself.</li>
     <li><code>FamilyTreeScreen</code> is a pedigree chart: the subject is the
         right-hand column, each column left is one chart-step older, out to
         great-grandparents. <strong>Within every pair the sire is the top box, the dam
