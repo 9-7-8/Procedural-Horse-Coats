@@ -66,8 +66,21 @@ class SpecGeneTest {
         // Every unmasked entry doubles; each masking combination (KIT's
         // dominant white, EDNRB's lethal white) stays at one pen, because
         // while it shows nothing else is visible - including this gene.
-        assertEquals((catalogueBefore - maskingBefore) * 2L + maskingBefore, GenotypeCatalog.size(),
-                "a dominant two-allele gene doubles every unmasked pen");
+        //
+        // ...unless the catalogue has already saturated, which with the shipped
+        // magical gene files it has: past Long.MAX_VALUE there is nothing left
+        // to double into, and GenotypeCatalog.size() deliberately stops rather
+        // than wrapping. The doubling claim is still the one worth making, so
+        // it is made where it can be - and where it cannot, the claim becomes
+        // "it stayed saturated", which is the other half of the same contract.
+        if (catalogueBefore < Long.MAX_VALUE / 2) {
+            assertEquals((catalogueBefore - maskingBefore) * 2L + maskingBefore,
+                    GenotypeCatalog.size(),
+                    "a dominant two-allele gene doubles every unmasked pen");
+        } else {
+            assertEquals(Long.MAX_VALUE, GenotypeCatalog.size(),
+                    "an already-saturated catalogue stays saturated rather than wrapping");
+        }
     }
 
     /**

@@ -1,0 +1,216 @@
+{
+  "format": 3,
+  "key": "horsegenetics.cleave",
+  "name": "Cleave",
+  "phase": "magical",
+  "priority": 202,
+  "rarity": "RARE",
+  "blurb": "The horse split about half and half, along a boundary made of interlocking spears - long narrow triangles driven into each field from the other, and never a curve anywhere.",
+  "alleles": [
+    {
+      "token": "Clv",
+      "label": "Cleave, white (Clv)"
+    },
+    {
+      "token": "Clc",
+      "label": "Cleave, coloured (Clc)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "toothSeed",
+      "type": "seed"
+    },
+    {
+      "name": "hue",
+      "min": 0.0,
+      "max": 360.0
+    },
+    {
+      "name": "split",
+      "min": 0.42,
+      "max": 0.6
+    },
+    {
+      "name": "reach",
+      "min": 0.18,
+      "max": 0.38
+    }
+  ],
+  "expressions": [
+    {
+      "id": "white",
+      "name": "Cleave",
+      "description": "White and coat take about half the horse each - between 45 and 55 per cent, never outside 35 to 65. White has the head, the front and underside of the neck, the chest, the forelegs, the front of the shoulder and the underside of the barrel; the coat keeps the crest, withers, back, croup, hindquarters, hind legs and the back of the barrel. The dividing zone runs obliquely down and forward from the withers toward the elbow, then back along the belly. What makes it Cleave is the boundary: each field drives long narrow triangles into the other, ten to thirty degrees at the point, straight or slightly hollow along the sides, never convex, and often with smaller teeth splitting off the flanks of the big ones. Detached fragments of the same shape float within a hand's span of the line on both sides. Every edge is hard - no gradient, no roaning, no feathering anywhere on the horse - and the two sides are not mirrored. It takes two copies.",
+      "when": [
+        "Clv/Clv",
+        "Clv/Clc"
+      ],
+      "layers": [
+        {
+          "name": "the white half, and the spears it drives into the other",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "EARS",
+                "MUZZLE",
+                "FRONT_LEGS"
+              ],
+              "axis": "X",
+              "space": "body",
+              "from": "$split",
+              "to": 1.0,
+              "softness": 0.02
+            },
+            {
+              "type": "STROKES",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE",
+                "FRONT_LEGS",
+                "HIND_LEGS"
+              ],
+              "seed": "$toothSeed",
+              "spacing": 4.5,
+              "length": 2.2,
+              "axis": "X",
+              "width": 1.6,
+              "curl": 1.4,
+              "softness": 0.02,
+              "combine": "MAX"
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "EARS",
+                "MUZZLE",
+                "FRONT_LEGS",
+                "HIND_LEGS"
+              ],
+              "axis": "X",
+              "space": "body",
+              "from": "$reach",
+              "to": 1.0,
+              "softness": 0.02,
+              "combine": "MIN"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#ffffff",
+            "strength": 100
+          }
+        }
+      ]
+    },
+    {
+      "id": "coloured",
+      "name": "Coloured Cleave",
+      "description": "The same interlock, with the near half in a colour the line carries rather than in white. Fully recessive: it takes two copies, and a single copy beside the white allele shows white. It never gives blue eyes, whatever the white form does.",
+      "when": {
+        "Clc": 2
+      },
+      "layers": [
+        {
+          "name": "the white half, and the spears it drives into the other, in colour",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "EARS",
+                "MUZZLE",
+                "FRONT_LEGS"
+              ],
+              "axis": "X",
+              "space": "body",
+              "from": "$split",
+              "to": 1.0,
+              "softness": 0.02
+            },
+            {
+              "type": "STROKES",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE",
+                "FRONT_LEGS",
+                "HIND_LEGS"
+              ],
+              "seed": "$toothSeed",
+              "spacing": 4.5,
+              "length": 2.2,
+              "axis": "X",
+              "width": 1.6,
+              "curl": 1.4,
+              "softness": 0.02,
+              "combine": "MAX"
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "EARS",
+                "MUZZLE",
+                "FRONT_LEGS",
+                "HIND_LEGS"
+              ],
+              "axis": "X",
+              "space": "body",
+              "from": "$reach",
+              "to": 1.0,
+              "softness": 0.02,
+              "combine": "MIN"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "hue": "$hue",
+            "saturation": 0.8,
+            "lightness": 0.55
+          }
+        }
+      ]
+    },
+    {
+      "id": "carrier",
+      "name": "Cleave carrier",
+      "description": "One copy shows nothing at all.",
+      "wildType": true
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "No cleave.",
+      "wildType": true,
+      "when": [
+        "n/n"
+      ]
+    }
+  ],
+  "founders": {
+    "Clv/Clv": 0.04,
+    "Clv/Clc": 0.008,
+    "Clc/Clc": 0.008,
+    "n/n": 99.944
+  }
+}

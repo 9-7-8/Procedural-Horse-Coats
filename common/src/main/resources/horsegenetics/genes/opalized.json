@@ -1,0 +1,110 @@
+{
+  "format": 3,
+  "key": "horsegenetics.opalized",
+  "name": "Opalized",
+  "phase": "magical",
+  "priority": 431,
+  "rarity": "RARE",
+  "blurb": "The same substrate as Voided taken the other way - every white region comes out as iridescent cells of three to seven hues, pearlescent at the rim and strongest in the middle.",
+  "alleles": [
+    {
+      "token": "Opl",
+      "label": "Opalized (Opl)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "cellSeed",
+      "type": "seed"
+    },
+    {
+      "name": "hue",
+      "min": 0.0,
+      "max": 360.0
+    },
+    {
+      "name": "spread",
+      "min": 40.0,
+      "max": 130.0
+    },
+    {
+      "name": "chroma",
+      "min": 0.3,
+      "max": 0.85
+    }
+  ],
+  "expressions": [
+    {
+      "id": "opalized",
+      "name": "Opalized",
+      "description": "The outline is the source pattern's, unchanged, but the inside is not uniform. It breaks into irregular lobed cells of differing colour, a hand's breadth or two across, with soft transitions between neighbours - so it reads as iridescence rather than as a gradient. The cells crowd at the core of a marking and thin toward its perimeter, and the outer inch or two trends pale and low-saturation, near pearl. Three to seven hues are present at once on any one horse: pale blues, mints, lilacs and pearl teals at the light end, reds, oranges, ambers and magentas at the dark.",
+      "when": [
+        "Opl/Opl",
+        "Opl/n"
+      ],
+      "layers": [
+        {
+          "name": "the white regions, broken into hue cells",
+          "masks": [
+            {
+              "type": "PIGMENT",
+              "channel": "total",
+              "from": 0.02,
+              "to": 0.22,
+              "invert": true
+            }
+          ],
+          "op": {
+            "type": "PALETTE",
+            "hue": "$hue",
+            "hueSpread": "$spread",
+            "saturation": "$chroma",
+            "lightness": 0.68,
+            "scale": 3.2,
+            "strength": 92
+          }
+        },
+        {
+          "name": "the pearlescent rim",
+          "masks": [
+            {
+              "type": "PIGMENT",
+              "channel": "total",
+              "from": 0.02,
+              "to": 0.22,
+              "invert": true
+            },
+            {
+              "type": "PIGMENT",
+              "channel": "total",
+              "from": 0.0,
+              "to": 0.06,
+              "invert": true,
+              "combine": "SUBTRACT"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#f2f6f8",
+            "strength": 55
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "White stays white.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Opl/Opl": 0.002,
+    "Opl/n": 0.038,
+    "n/n": 99.96
+  }
+}

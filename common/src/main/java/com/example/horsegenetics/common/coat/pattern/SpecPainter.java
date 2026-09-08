@@ -186,6 +186,19 @@ public final class SpecPainter {
                 int rgb = paletteColour(op, v, leg, point, seedBase);
                 towardColour(delta, colour, p, v, leg, px, py, k, rgb);
             }
+            case INVERT -> {
+                // Against what the texel LOOKS like, not what it stores - the
+                // same reading `toward` uses. Inverting the accumulator instead
+                // would give a different negative on every base coat, which is
+                // the one thing an inversion must not do.
+                double amount = v.get(p.value("amount", 100.0), leg) / 100.0 * k;
+                delta.add(px, py,
+                        toward(colour, px, py, 0, 255 - colour.visible(px, py, 0), amount),
+                        toward(colour, px, py, 1, 255 - colour.visible(px, py, 1), amount),
+                        toward(colour, px, py, 2, 255 - colour.visible(px, py, 2), amount));
+                int wantOpacity = percentToChannel(v.get(p.value("opacity", 100.0), leg));
+                delta.addOpacity(px, py, (int) Math.round((wantOpacity - colour.opacity(px, py)) * k));
+            }
             case FLAT -> {
                 int rgb = solidColour(op, v, leg);
                 int wantOpacity = percentToChannel(v.get(p.value("opacity", 100.0), leg));

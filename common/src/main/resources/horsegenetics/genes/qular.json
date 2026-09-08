@@ -1,0 +1,178 @@
+{
+  "format": 3,
+  "key": "horsegenetics.qular",
+  "name": "Qular",
+  "phase": "magical",
+  "priority": 200,
+  "rarity": "RARE",
+  "blurb": "White over eight or nine tenths of the horse, left open in big irregular panels of coat - a giraffe read backwards, with the mane untouched.",
+  "alleles": [
+    {
+      "token": "Qul",
+      "label": "Qular, white (Qul)"
+    },
+    {
+      "token": "Quc",
+      "label": "Qular, coloured (Quc)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "panelSeed",
+      "type": "seed"
+    },
+    {
+      "name": "hue",
+      "min": 0.0,
+      "max": 360.0
+    },
+    {
+      "name": "panelScale",
+      "min": 4.5,
+      "max": 8.0
+    },
+    {
+      "name": "openness",
+      "min": 0.42,
+      "max": 0.62
+    },
+    {
+      "name": "panelEdge",
+      "min": 0.03,
+      "max": 0.2
+    }
+  ],
+  "expressions": [
+    {
+      "id": "white",
+      "name": "Qular",
+      "description": "Nearly the whole horse goes white, and what is left of the coat reads as panels laid on top of it rather than as gaps cut out - big irregular polygons three to ten inches across, scattered over the neck, shoulder, ribcage, barrel, hindquarter and upper legs, and following the muscle as they go. The head is mostly white with panels round the eyes and muzzle; the lower legs often keep a dark boot. How crisp the panel edges are varies a great deal from horse to horse, from soft and feathered to graphic. The mane and tail are not touched by any of it.",
+      "when": [
+        "Qul/Qul",
+        "Qul/Quc",
+        "Qul/n"
+      ],
+      "layers": [
+        {
+          "name": "white over almost the whole horse",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "EARS",
+                "LEGS"
+              ]
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#fdfdfb",
+            "strength": 97
+          }
+        },
+        {
+          "name": "the giraffe panels the white is left out of",
+          "masks": [
+            {
+              "type": "PATCHES",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "LEGS"
+              ],
+              "seed": "$panelSeed",
+              "scale": "$panelScale",
+              "threshold": "$openness",
+              "softness": "$panelEdge",
+              "invert": true
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#fdfdfb",
+            "strength": -97
+          }
+        }
+      ]
+    },
+    {
+      "id": "coloured",
+      "name": "Coloured Qular",
+      "description": "The same panelling, with the ground in a colour the line carries rather than in white. Fully recessive: it takes two copies, and a single copy beside the white allele shows white. It never gives blue eyes, whatever the white form does.",
+      "when": {
+        "Quc": 2
+      },
+      "layers": [
+        {
+          "name": "white over almost the whole horse, in colour",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "EARS",
+                "LEGS"
+              ]
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 97,
+            "hue": "$hue",
+            "saturation": 0.8,
+            "lightness": 0.55
+          }
+        },
+        {
+          "name": "the giraffe panels the white is left out of, in colour",
+          "masks": [
+            {
+              "type": "PATCHES",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "LEGS"
+              ],
+              "seed": "$panelSeed",
+              "scale": "$panelScale",
+              "threshold": "$openness",
+              "softness": "$panelEdge",
+              "invert": true
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": -97,
+            "hue": "$hue",
+            "saturation": 0.8,
+            "lightness": 0.55
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "No panelling.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Qul/Qul": 0.002,
+    "Qul/Quc": 0.008,
+    "Qul/n": 0.038,
+    "Quc/Quc": 0.008,
+    "n/n": 99.944
+  }
+}

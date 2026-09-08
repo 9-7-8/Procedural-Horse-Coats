@@ -1,0 +1,322 @@
+{
+  "format": 3,
+  "key": "horsegenetics.fawn",
+  "name": "Fawn",
+  "phase": "magical",
+  "priority": 312,
+  "rarity": "COMMON",
+  "blurb": "A single flowing line of soft round spots running neck to rump, a darkened topline above it, and a pale underside to the tail.",
+  "alleles": [
+    {
+      "token": "Fwn",
+      "label": "Fawn, white (Fwn)"
+    },
+    {
+      "token": "Fwc",
+      "label": "Fawn, coloured (Fwc)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "spotSeed",
+      "type": "seed"
+    },
+    {
+      "name": "flowSeed",
+      "type": "seed"
+    },
+    {
+      "name": "hue",
+      "min": 0.0,
+      "max": 360.0
+    },
+    {
+      "name": "spotSize",
+      "min": 0.55,
+      "max": 1.0
+    }
+  ],
+  "expressions": [
+    {
+      "id": "white",
+      "name": "Fawn",
+      "description": "Round, oval or tapered spots in one consecutive run somewhere between the neck and the rump - never two clusters with a gap between them, never a spiral or a pattern, just a flowing line of them. They keep off the face, the belly and the legs. Most fawn horses also carry a stylised white eyeliner, a slightly darkened topline in the manner of sooty, a pangare-like lightening underneath, and a pale underside to the tail. Every white on the horse is the same white. Blue eyes are possible.",
+      "when": [
+        "Fwn/Fwn",
+        "Fwn/Fwc",
+        "Fwn/n"
+      ],
+      "layers": [
+        {
+          "name": "the flowing line of spots",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$spotSeed",
+              "spacing": 2.4,
+              "radius": "$spotSize",
+              "vary": 0.55,
+              "chance": 0.6,
+              "stretch": 1.4,
+              "axis": "X",
+              "softness": 0.14
+            },
+            {
+              "type": "STROKES",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$flowSeed",
+              "spacing": 12.0,
+              "length": 26.0,
+              "axis": "X",
+              "width": 5.0,
+              "curl": 0.8,
+              "softness": 1.2
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.3,
+              "to": 1.0,
+              "softness": 0.3
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#ffffff",
+            "strength": 94
+          }
+        },
+        {
+          "name": "eyeliner",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "HEAD"
+              ],
+              "seed": "$spotSeed",
+              "spacing": 7.0,
+              "radius": 1.6,
+              "vary": 0.2,
+              "chance": 0.5,
+              "stretch": 2.2,
+              "axis": "X",
+              "softness": 0.2
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "HEAD"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.45,
+              "to": 0.8,
+              "softness": 0.12
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#ffffff",
+            "strength": 90
+          }
+        },
+        {
+          "name": "the underside of the tail",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "TAIL"
+              ],
+              "axis": "Z",
+              "space": "part",
+              "from": 0.0,
+              "to": 0.45,
+              "softness": 0.1
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#ffffff",
+            "strength": 88
+          }
+        },
+        {
+          "name": "a darkened topline above the run",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.72,
+              "to": 1.0,
+              "softness": 0.3
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#100c08",
+            "strength": 22
+          }
+        }
+      ]
+    },
+    {
+      "id": "coloured",
+      "name": "Coloured Fawn",
+      "description": "The same run of spots in a colour the line carries rather than in white. Fully recessive: it takes two copies, and a single copy beside the white allele shows white. It never gives blue eyes, whatever the white form does.",
+      "when": {
+        "Fwc": 2
+      },
+      "layers": [
+        {
+          "name": "the flowing line of spots, in colour",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$spotSeed",
+              "spacing": 2.4,
+              "radius": "$spotSize",
+              "vary": 0.55,
+              "chance": 0.6,
+              "stretch": 1.4,
+              "axis": "X",
+              "softness": 0.14
+            },
+            {
+              "type": "STROKES",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$flowSeed",
+              "spacing": 12.0,
+              "length": 26.0,
+              "axis": "X",
+              "width": 5.0,
+              "curl": 0.8,
+              "softness": 1.2
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.3,
+              "to": 1.0,
+              "softness": 0.3
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 94,
+            "hue": "$hue",
+            "saturation": 0.8,
+            "lightness": 0.55
+          }
+        },
+        {
+          "name": "eyeliner, in colour",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "HEAD"
+              ],
+              "seed": "$spotSeed",
+              "spacing": 7.0,
+              "radius": 1.6,
+              "vary": 0.2,
+              "chance": 0.5,
+              "stretch": 2.2,
+              "axis": "X",
+              "softness": 0.2
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "HEAD"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.45,
+              "to": 0.8,
+              "softness": 0.12
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 90,
+            "hue": "$hue",
+            "saturation": 0.8,
+            "lightness": 0.55
+          }
+        },
+        {
+          "name": "the underside of the tail, in colour",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "TAIL"
+              ],
+              "axis": "Z",
+              "space": "part",
+              "from": 0.0,
+              "to": 0.45,
+              "softness": 0.1
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 88,
+            "hue": "$hue",
+            "saturation": 0.8,
+            "lightness": 0.55
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "No spots.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Fwn/Fwn": 0.006,
+    "Fwn/Fwc": 0.024,
+    "Fwn/n": 0.114,
+    "Fwc/Fwc": 0.024,
+    "n/n": 99.832
+  }
+}

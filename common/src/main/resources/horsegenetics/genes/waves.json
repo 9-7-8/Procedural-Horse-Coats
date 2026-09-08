@@ -1,0 +1,164 @@
+{
+  "format": 3,
+  "key": "horsegenetics.waves",
+  "name": "Waves",
+  "phase": "magical",
+  "priority": 258,
+  "rarity": "RARE",
+  "blurb": "The back third of the horse taken as one continuous pale field, its front edge running top to bottom in three to six rounded lobes.",
+  "alleles": [
+    {
+      "token": "Wav",
+      "label": "Waves, white (Wav)"
+    },
+    {
+      "token": "Wac",
+      "label": "Waves, coloured (Wac)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "lobeSeed",
+      "type": "seed"
+    },
+    {
+      "name": "hue",
+      "min": 0.0,
+      "max": 360.0
+    },
+    {
+      "name": "reach",
+      "min": 0.22,
+      "max": 0.46
+    }
+  ],
+  "expressions": [
+    {
+      "id": "white",
+      "name": "Waves",
+      "description": "One unbroken field over the hip, thigh, back of the flank and gaskin - a fifth to two-fifths of the horse. Its front edge runs dorso-ventrally and is modulated into three to six rounded lobes; the crests of the lobes are crisp and the troughs between them are softer. It reaches the topline or stops just below it, and runs down as far as the gaskin or the hock. A few detached lobes float a hand's breadth in front of the main edge.",
+      "when": [
+        "Wav/Wav",
+        "Wav/Wac",
+        "Wav/n"
+      ],
+      "layers": [
+        {
+          "name": "the caudal field, with a lobed front edge",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "space": "part",
+              "from": 0.0,
+              "to": "$reach",
+              "softness": 0.16
+            },
+            {
+              "type": "NOISE",
+              "parts": [
+                "BODY"
+              ],
+              "seed": "$lobeSeed",
+              "scale": 4.5,
+              "low": 0.35,
+              "high": 1.5
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "HIND_LEGS"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.45,
+              "to": 1.0,
+              "softness": 0.2,
+              "combine": "MAX"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#f7f2e6",
+            "strength": 84
+          }
+        }
+      ]
+    },
+    {
+      "id": "coloured",
+      "name": "Coloured waves",
+      "description": "The same field in a colour the line carries. Fully recessive: two copies, and a single copy beside the white allele shows white. It never gives blue eyes.",
+      "when": {
+        "Wac": 2
+      },
+      "layers": [
+        {
+          "name": "the caudal field, coloured",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "space": "part",
+              "from": 0.0,
+              "to": "$reach",
+              "softness": 0.16
+            },
+            {
+              "type": "NOISE",
+              "parts": [
+                "BODY"
+              ],
+              "seed": "$lobeSeed",
+              "scale": 4.5,
+              "low": 0.35,
+              "high": 1.5
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "HIND_LEGS"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.45,
+              "to": 1.0,
+              "softness": 0.2,
+              "combine": "MAX"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.75,
+            "lightness": 0.6,
+            "strength": 84
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "No wave field.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Wav/Wav": 0.002,
+    "Wav/Wac": 0.008,
+    "Wav/n": 0.038,
+    "Wac/Wac": 0.008,
+    "n/n": 99.944
+  }
+}

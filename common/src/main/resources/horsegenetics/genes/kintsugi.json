@@ -1,0 +1,156 @@
+{
+  "format": 3,
+  "key": "horsegenetics.kintsugi",
+  "name": "Kintsugi",
+  "phase": "magical",
+  "priority": 376,
+  "rarity": "RARE",
+  "blurb": "The horse repaired like broken pottery - cracks running across it filled with a metallic colour, one on a leg with a single copy and a network of them with two.",
+  "alleles": [
+    {
+      "token": "Kts",
+      "label": "Kintsugi (Kts)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "crackSeed",
+      "type": "seed"
+    },
+    {
+      "name": "hue",
+      "min": 0.0,
+      "max": 360.0
+    },
+    {
+      "name": "hueRun",
+      "min": -50.0,
+      "max": 50.0
+    },
+    {
+      "name": "crackWidth",
+      "min": 0.5,
+      "max": 1.1
+    }
+  ],
+  "expressions": [
+    {
+      "id": "many",
+      "name": "Kintsugi",
+      "description": "Two copies crack the whole horse. At least three separate breaks, each with a clear starting point, running anywhere across the body and never covering more than half of it. The filling runs a gradient of up to two related colours along the length of the network. Where a crack reaches the mane or tail it streaks the hair, and it sometimes takes a hoof as well.",
+      "when": {
+        "Kts": 2
+      },
+      "layers": [
+        {
+          "name": "the crack network",
+          "masks": [
+            {
+              "type": "STROKES",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "LEGS"
+              ],
+              "seed": "$crackSeed",
+              "spacing": 5.0,
+              "length": 3.0,
+              "axis": "X",
+              "width": "$crackWidth",
+              "curl": 1.6,
+              "softness": 0.06
+            }
+          ],
+          "op": {
+            "type": "RAMP",
+            "hue": "$hue",
+            "hueSpan": "$hueRun",
+            "saturation": 0.85,
+            "lightness": 0.62,
+            "axis": "X",
+            "space": "body",
+            "from": 0.0,
+            "to": 1.0,
+            "strength": 95
+          }
+        },
+        {
+          "name": "streaks where a crack reaches the hair",
+          "masks": [
+            {
+              "type": "STROKES",
+              "parts": [
+                "HAIR"
+              ],
+              "seed": "$crackSeed",
+              "spacing": 4.0,
+              "length": 8.0,
+              "axis": "Y",
+              "width": 0.7,
+              "curl": 0.3,
+              "softness": 0.1
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.85,
+            "lightness": 0.62,
+            "strength": 90
+          }
+        }
+      ]
+    },
+    {
+      "id": "one",
+      "name": "Single crack",
+      "description": "One copy gives exactly one crack, on one leg, and nothing else - the same colour the line would give a fully cracked horse, so a single-crack parent tells you what a doubled foal will look like.",
+      "when": {
+        "Kts": 1
+      },
+      "layers": [
+        {
+          "name": "one crack, on one leg",
+          "masks": [
+            {
+              "type": "STROKES",
+              "parts": [
+                "LEFT_FRONT_LEG"
+              ],
+              "seed": "$crackSeed",
+              "spacing": 9.0,
+              "length": 3.0,
+              "axis": "Y",
+              "width": "$crackWidth",
+              "curl": 1.4,
+              "softness": 0.06
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.85,
+            "lightness": 0.62,
+            "strength": 95
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "Unbroken.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Kts/Kts": 0.002,
+    "Kts/n": 0.038,
+    "n/n": 99.96
+  }
+}

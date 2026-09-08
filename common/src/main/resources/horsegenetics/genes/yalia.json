@@ -1,0 +1,367 @@
+{
+  "format": 3,
+  "key": "horsegenetics.yalia",
+  "name": "Yalia",
+  "phase": "magical",
+  "priority": 211,
+  "rarity": "UNCOMMON",
+  "blurb": "Blocky straight-sided zones outlined in a bright colour and filled flat with white - architecture rather than marking - with a band round each leg and the hair going white where a zone reaches it.",
+  "alleles": [
+    {
+      "token": "Yal",
+      "label": "Yalia, white fill (Yal)"
+    },
+    {
+      "token": "Ylc",
+      "label": "Yalia, coloured fill (Ylc)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "zoneSeed",
+      "type": "seed"
+    },
+    {
+      "name": "hue",
+      "min": 0.0,
+      "max": 360.0
+    },
+    {
+      "name": "fillHue",
+      "min": 0.0,
+      "max": 360.0
+    },
+    {
+      "name": "zoneScale",
+      "min": 4.5,
+      "max": 9.0
+    }
+  ],
+  "expressions": [
+    {
+      "id": "white",
+      "name": "Yalia",
+      "description": "Zones with straight edges and sharp corners - angular and blocky, never curved or organic - each drawn round in one colour and filled with flat white that barely varies. A mask across the face, a band along the neck, big patches on the shoulder, ribcage and hindquarter. Bands run round all four legs, perfectly level and sharply bounded. Where a zone reaches the mane or tail the hair inside it goes stark white too. It hides any other white pattern the horse carries, there is no regular mane striping, and the hooves take the outline colour. Nothing about it feathers or fades.",
+      "when": [
+        "Yal/Yal",
+        "Yal/Ylc",
+        "Yal/n"
+      ],
+      "layers": [
+        {
+          "name": "the white fill",
+          "masks": [
+            {
+              "type": "PATCHES",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "HAIR"
+              ],
+              "seed": "$zoneSeed",
+              "scale": "$zoneScale",
+              "threshold": 0.55,
+              "softness": 0.01
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#ffffff",
+            "strength": 98
+          }
+        },
+        {
+          "name": "the outline round every zone",
+          "masks": [
+            {
+              "type": "PATCHES",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "HAIR"
+              ],
+              "seed": "$zoneSeed",
+              "scale": "$zoneScale",
+              "threshold": 0.52,
+              "softness": 0.01
+            },
+            {
+              "type": "PATCHES",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "HAIR"
+              ],
+              "seed": "$zoneSeed",
+              "scale": "$zoneScale",
+              "threshold": 0.58,
+              "softness": 0.01,
+              "invert": true
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.9,
+            "lightness": 0.45,
+            "strength": 96
+          }
+        },
+        {
+          "name": "a band round every leg",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "LEGS"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.14,
+              "to": 0.34,
+              "softness": 0.01
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#ffffff",
+            "strength": 98
+          }
+        },
+        {
+          "name": "the outline of the leg band",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "LEGS"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.12,
+              "to": 0.16,
+              "softness": 0.005
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "LEGS"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.32,
+              "to": 0.36,
+              "softness": 0.005,
+              "combine": "MAX"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.9,
+            "lightness": 0.45,
+            "strength": 96
+          }
+        },
+        {
+          "name": "hooves in the outline colour",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "LEGS"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.0,
+              "to": 0.12,
+              "softness": 0.02
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.9,
+            "lightness": 0.45,
+            "strength": 94
+          }
+        }
+      ]
+    },
+    {
+      "id": "coloured",
+      "name": "Coloured Yalia",
+      "description": "The same architecture with the fill in a colour rather than white - the outline stays its own colour, so the two are picked independently. Fully recessive: two copies, and a single copy beside the white allele shows white. It never gives blue eyes.",
+      "when": {
+        "Ylc": 2
+      },
+      "layers": [
+        {
+          "name": "the white fill, in colour",
+          "masks": [
+            {
+              "type": "PATCHES",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "HAIR"
+              ],
+              "seed": "$zoneSeed",
+              "scale": "$zoneScale",
+              "threshold": 0.55,
+              "softness": 0.01
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 98,
+            "hue": "$fillHue",
+            "saturation": 0.75,
+            "lightness": 0.58
+          }
+        },
+        {
+          "name": "the outline round every zone, in colour",
+          "masks": [
+            {
+              "type": "PATCHES",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "HAIR"
+              ],
+              "seed": "$zoneSeed",
+              "scale": "$zoneScale",
+              "threshold": 0.52,
+              "softness": 0.01
+            },
+            {
+              "type": "PATCHES",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "HAIR"
+              ],
+              "seed": "$zoneSeed",
+              "scale": "$zoneScale",
+              "threshold": 0.58,
+              "softness": 0.01,
+              "invert": true
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.9,
+            "lightness": 0.45,
+            "strength": 96
+          }
+        },
+        {
+          "name": "a band round every leg, in colour",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "LEGS"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.14,
+              "to": 0.34,
+              "softness": 0.01
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 98,
+            "hue": "$fillHue",
+            "saturation": 0.75,
+            "lightness": 0.58
+          }
+        },
+        {
+          "name": "the outline of the leg band, in colour",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "LEGS"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.12,
+              "to": 0.16,
+              "softness": 0.005
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "LEGS"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.32,
+              "to": 0.36,
+              "softness": 0.005,
+              "combine": "MAX"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.9,
+            "lightness": 0.45,
+            "strength": 96
+          }
+        },
+        {
+          "name": "hooves in the outline colour, in colour",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "LEGS"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.0,
+              "to": 0.12,
+              "softness": 0.02
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.9,
+            "lightness": 0.45,
+            "strength": 94
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "No zones.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Yal/Yal": 0.004,
+    "Yal/Ylc": 0.016,
+    "Yal/n": 0.076,
+    "Ylc/Ylc": 0.016,
+    "n/n": 99.888
+  }
+}

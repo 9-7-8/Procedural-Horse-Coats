@@ -104,7 +104,24 @@ PRIORITY BANDS THIS IMPORT USES (magical, so 100+; 100-199 was already taken)
   430-469  modifiers that read the coat beneath them
   500      Invert, which has to be last
 
-PHASE 2 - GENES: see process/index.csv for per-gene state.
+PHASE 2 - GENES: COMPLETE. 84 built, 1 refused (Paint Moon). See index.csv.
+
+PHASE 3 - WIKI: seven generated family pages (wiki/genes-magic-*.html), one
+  icon per gene from :common:bakeGeneIcons, the magical section of pages.js
+  alphabetised, and the gene-page preview defaulting to bay. Regenerate the
+  pages with :common:bakeGeneWikiPages; they are generated because eighty-odd
+  genes already describe themselves in their own files and copying that by hand
+  would be eighty-odd chances for the wiki to be wrong.
+
+WHAT IS LEFT (all written up in wiki/verification.html #magic-import)
+  - Nine early genes still lack the white/coloured twin allele the owner's rule
+    asks for: crescents, wormholes, polymoon, stars, stellar, lasertae,
+    scratches, internal_flow, zebras_coat.
+  - No gene touches eye colour; eleven sources ask for it. Needs a spec hook
+    into EyeColor.
+  - "Speckling colour" is per-gene, not shared. Needs cross-gene epigenetics.
+  - The seven `inverting` akkadorian loci paint light only. War Mask shows the
+    trick that would fix them (two layers, opposite PIGMENT masks).
 
 OPEN QUESTIONS PARKED FOR THE OWNER
   Written up in wiki/verification.html as they are found, not here.

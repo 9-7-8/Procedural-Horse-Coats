@@ -277,6 +277,11 @@ public final class SpecSchema {
                 Param.value("scale", 5.0, "body units across one colour cell"),
                 Param.value("strength", 100.0, "percent of the way to the cell's colour"),
                 Param.value("opacity", 100.0, "percent opacity the texel ends at")));
+
+        OPS.put(OpType.INVERT, List.of(
+                Param.value("amount", 100.0,
+                        "percent of the way to the negative - 100 is a full inversion, 50 is flat grey"),
+                Param.value("opacity", 100.0, "percent opacity the texel ends at")));
     }
 
     private SpecSchema() {}

@@ -1,0 +1,252 @@
+{
+  "format": 3,
+  "key": "horsegenetics.pavonem",
+  "name": "Pavonem",
+  "phase": "magical",
+  "priority": 310,
+  "rarity": "RARE",
+  "blurb": "Peacock eyes - upright ovals filled paler than the coat, each with a bright spot low in it, and always a scatter of ordinary spots around them.",
+  "alleles": [
+    {
+      "token": "Pv",
+      "label": "Pavonem, white (Pv)"
+    },
+    {
+      "token": "Pvc",
+      "label": "Pavonem, coloured (Pvc)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "eyeSeed",
+      "type": "seed"
+    },
+    {
+      "name": "spotSeed",
+      "type": "seed"
+    },
+    {
+      "name": "hue",
+      "min": 0.0,
+      "max": 360.0
+    },
+    {
+      "name": "eyeRadius",
+      "min": 1.6,
+      "max": 3.0
+    }
+  ],
+  "expressions": [
+    {
+      "id": "white",
+      "name": "Pavonem",
+      "description": "A white paint marking rather than a coat colour, and it works on any base. The shape is an oval with a spot set into its lower part, filled with a lighter or roaned version of what is underneath, and it is never alone - ordinary spots always ring it. It stacks happily with tobiano and the rest.",
+      "when": [
+        "Pv/Pv",
+        "Pv/Pvc",
+        "Pv/n"
+      ],
+      "layers": [
+        {
+          "name": "the ovals, filled paler than the coat",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$eyeSeed",
+              "spacing": 6.5,
+              "radius": "$eyeRadius",
+              "vary": 0.35,
+              "chance": 0.7,
+              "stretch": 1.5,
+              "axis": "Y",
+              "softness": 0.35
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#efe9dd",
+            "strength": 70
+          }
+        },
+        {
+          "name": "the spot low in each oval",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$eyeSeed",
+              "spacing": 6.5,
+              "radius": 0.7,
+              "vary": 0.35,
+              "chance": 0.7,
+              "softness": 0.12
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.0,
+              "to": 0.7,
+              "softness": 0.25
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#ffffff",
+            "strength": 94
+          }
+        },
+        {
+          "name": "the ordinary spots that always surround them",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$spotSeed",
+              "spacing": 2.4,
+              "radius": 0.55,
+              "vary": 0.5,
+              "chance": 0.35,
+              "softness": 0.12
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#ffffff",
+            "strength": 92
+          }
+        }
+      ]
+    },
+    {
+      "id": "coloured",
+      "name": "Coloured Pavonem",
+      "description": "The same eyes in a colour the line carries rather than in white. Fully recessive: it takes two copies, and a single copy beside the white allele shows white. It never gives blue eyes, whatever the white form does.",
+      "when": {
+        "Pvc": 2
+      },
+      "layers": [
+        {
+          "name": "the ovals, filled paler than the coat, in colour",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$eyeSeed",
+              "spacing": 6.5,
+              "radius": "$eyeRadius",
+              "vary": 0.35,
+              "chance": 0.7,
+              "stretch": 1.5,
+              "axis": "Y",
+              "softness": 0.35
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 70,
+            "hue": "$hue",
+            "saturation": 0.8,
+            "lightness": 0.55
+          }
+        },
+        {
+          "name": "the spot low in each oval, in colour",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$eyeSeed",
+              "spacing": 6.5,
+              "radius": 0.7,
+              "vary": 0.35,
+              "chance": 0.7,
+              "softness": 0.12
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.0,
+              "to": 0.7,
+              "softness": 0.25
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 94,
+            "hue": "$hue",
+            "saturation": 0.8,
+            "lightness": 0.55
+          }
+        },
+        {
+          "name": "the ordinary spots that always surround them, in colour",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$spotSeed",
+              "spacing": 2.4,
+              "radius": 0.55,
+              "vary": 0.5,
+              "chance": 0.35,
+              "softness": 0.12
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 92,
+            "hue": "$hue",
+            "saturation": 0.8,
+            "lightness": 0.55
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "No eyes.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Pv/Pv": 0.002,
+    "Pv/Pvc": 0.008,
+    "Pv/n": 0.038,
+    "Pvc/Pvc": 0.008,
+    "n/n": 99.944
+  }
+}

@@ -1,0 +1,311 @@
+{
+  "format": 3,
+  "key": "horsegenetics.dutch",
+  "name": "Dutch",
+  "phase": "magical",
+  "priority": 253,
+  "rarity": "UNCOMMON",
+  "blurb": "A hard-edged white band right round the body at the shoulder, widest under the chest and narrowing over the withers, with white stockings and a white muzzle to match.",
+  "alleles": [
+    {
+      "token": "Dut",
+      "label": "Dutch, white (Dut)"
+    },
+    {
+      "token": "Dtc",
+      "label": "Dutch, coloured (Dtc)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "hue",
+      "min": 0.0,
+      "max": 360.0
+    },
+    {
+      "name": "bandWidth",
+      "min": 0.16,
+      "max": 0.34
+    },
+    {
+      "name": "sock",
+      "min": 0.2,
+      "max": 0.6,
+      "per": "leg",
+      "spread": 0.25
+    }
+  ],
+  "expressions": [
+    {
+      "id": "white",
+      "name": "Dutch",
+      "description": "The rabbit pattern. A band wraps the body at the shoulder and chest, front edge at the base of the neck and back edge at the girth, broadest underneath and pinching as it climbs to the withers - and on a minimal horse it fails to close over the topline at all, leaving a bridge of coat there. White runs forward along the underside of the neck to the throat, takes the muzzle, and often a stripe up the face. All four legs are stocked to somewhere between mid-cannon and the knee, and the front and hind heights rarely match. Every edge is hard - no roaning, no feathering - and every one of them is a smooth curve. The barrel, flank, hindquarters, mane and tail keep the coat entirely.",
+      "when": [
+        "Dut/Dut",
+        "Dut/Dtc",
+        "Dut/n"
+      ],
+      "layers": [
+        {
+          "name": "the band round the shoulder and chest",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "space": "part",
+              "from": 0.66,
+              "to": 1.0,
+              "softness": 0.03
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.0,
+              "to": "$bandWidth",
+              "softness": 0.05,
+              "combine": "MAX"
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "space": "part",
+              "from": 0.6,
+              "to": 1.0,
+              "softness": 0.03,
+              "combine": "MIN"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#ffffff",
+            "strength": 100
+          }
+        },
+        {
+          "name": "white forward along the underside of the neck",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "NECK"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.0,
+              "to": 0.42,
+              "softness": 0.06
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#ffffff",
+            "strength": 100
+          }
+        },
+        {
+          "name": "the muzzle and a stripe up the face",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "MUZZLE"
+              ]
+            },
+            {
+              "type": "CENTERLINE",
+              "parts": [
+                "HEAD"
+              ],
+              "halfWidth": 1.1,
+              "softness": 0.15,
+              "combine": "MAX"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#ffffff",
+            "strength": 100
+          }
+        },
+        {
+          "name": "stockings, uneven front to back",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "LEGS"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.0,
+              "to": "$sock",
+              "softness": 0.03
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#ffffff",
+            "strength": 100
+          }
+        }
+      ]
+    },
+    {
+      "id": "coloured",
+      "name": "Coloured Dutch",
+      "description": "The same band, muzzle and stockings, in a colour the line carries rather than in white. Fully recessive - two copies, and a single copy beside the white allele shows white. It never gives blue eyes.",
+      "when": {
+        "Dtc": 2
+      },
+      "layers": [
+        {
+          "name": "the coloured band round the shoulder and chest",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "space": "part",
+              "from": 0.66,
+              "to": 1.0,
+              "softness": 0.03
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.0,
+              "to": "$bandWidth",
+              "softness": 0.05,
+              "combine": "MAX"
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "space": "part",
+              "from": 0.6,
+              "to": 1.0,
+              "softness": 0.03,
+              "combine": "MIN"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.8,
+            "lightness": 0.55,
+            "strength": 96
+          }
+        },
+        {
+          "name": "colour forward along the underside of the neck",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "NECK"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.0,
+              "to": 0.42,
+              "softness": 0.06
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.8,
+            "lightness": 0.55,
+            "strength": 96
+          }
+        },
+        {
+          "name": "the muzzle and face stripe, coloured",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "MUZZLE"
+              ]
+            },
+            {
+              "type": "CENTERLINE",
+              "parts": [
+                "HEAD"
+              ],
+              "halfWidth": 1.1,
+              "softness": 0.15,
+              "combine": "MAX"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.8,
+            "lightness": 0.55,
+            "strength": 96
+          }
+        },
+        {
+          "name": "coloured stockings",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "LEGS"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.0,
+              "to": "$sock",
+              "softness": 0.03
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.8,
+            "lightness": 0.55,
+            "strength": 96
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "No band.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Dut/Dut": 0.004,
+    "Dut/Dtc": 0.016,
+    "Dut/n": 0.076,
+    "Dtc/Dtc": 0.016,
+    "n/n": 99.888
+  }
+}

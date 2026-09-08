@@ -35,6 +35,159 @@
     </p>
 </div>
 
+<h2 id="magic-import">&sect;0-AN &mdash; Eighty-four magical genes, imported in bulk (2026-09-08, NOT looked at)</h2>
+
+<p>
+    The whole of <code>process/</code> turned into gene files. Design:
+    <a href="session-log.html#magic-import-2026-09-08">the session-log entry</a>. Every
+    one of them is JSON &mdash; no Java classes &mdash; and every one has been baked
+    through the real pipeline as an icon and looked at on a contact sheet, which is
+    <em>not</em> the same as having been seen in the game.
+</p>
+
+<div class="note danger">
+    <span class="label">Read this first</span>
+    <p>
+        This is the largest single change the model has ever taken: the registry went
+        from a couple of dozen genes to over a hundred, and <strong>every horse in every
+        existing save now has a different genotype code</strong>. Saved codes will not
+        parse back to the same horse. That is expected under the no-legacy rule, but it
+        is worth knowing before opening an old world.
+    </p>
+</div>
+
+<h3>Decisions taken without you, that you may want to reverse</h3>
+
+<div class="table-wrap">
+<table class="facts">
+<tbody>
+<tr><th>&ldquo;Speckling colour&rdquo; is per gene, not shared</th><td>
+    Eight of the source markings (Rex, Iuari, Emitola, Gudial, Qhada, Panark, Yalia,
+    Peafowl) describe their colour as <em>the horse&rsquo;s speckling colour</em>, taken
+    from a separate Speckling locus. A spec gene cannot read another gene&rsquo;s drawn
+    knobs, so each of these carries its own hue knob instead. Two of them on one horse
+    will not match, and none of them will match Speckling itself. Fixing it properly
+    means a way for one gene to read another&rsquo;s epigenetics, which is a real
+    feature and not a small one.
+</td></tr>
+<tr><th>Paint Moon (G-21) refused</th><td>
+    The akkadorian source&rsquo;s Paint Moon locus is real-world pinto and roan genetics
+    &mdash; tobiano, frame overo, splashed white, sabino, rabicano, classic roan, grey.
+    This mod already has all seven as first-class natural genes. Building a magical gene
+    that re-implements them would give every horse two independent tobianos that know
+    nothing about each other. Left unbuilt and recorded in
+    <code>process/akkadorian-z-mutation-genes.md</code>, which is all that is left of
+    that file.
+</td></tr>
+<tr><th>Everything that changed over time was refused</th><td>
+    Per your rule, nothing shifts after the coat is baked. Four sources asked for it and
+    four were refused, each replaced by a value drawn once and kept:
+    <strong>Patina</strong> (&ldquo;full expression between 8-10 years&rdquo;),
+    <strong>Opossum</strong> (&ldquo;progressive through the age of a Tharoksu&rdquo;),
+    <strong>Goth</strong> (the homozygote &ldquo;emerges over successive sheds&rdquo;),
+    and <strong>Stardust</strong> (&ldquo;lightening increases with age&rdquo;). Each
+    horse gets a fixed extent knob instead, so a line still varies; an individual does
+    not.
+</td></tr>
+<tr><th>Laciano&rsquo;s LL disorders refused</th><td>
+    The source gives the homozygote blindness, deafness and annual tail-hair loss, and
+    says so deliberately. Genes in this import paint and glow and nothing else, so none
+    of it was built. If you want it, it is a <code>HealthContribution</code> on a Java
+    gene, not a spec file.
+</td></tr>
+<tr><th>Eye colour is not wired anywhere</th><td>
+    Eleven sources say the gene sets or matches the eye colour &mdash; Angler, Aurorae,
+    Glow, Lantern, Kintsugi, Peafowl, Flametouched, Fawn, Element Dusted, Qhada (&ldquo;no
+    pupil&rdquo;), Laciano (white sclera). A spec gene has no hook into
+    <code>EyeColor</code>, so none of them touch the eyes. This is the single largest
+    gap in the import and the most likely thing you will notice.
+</td></tr>
+<tr><th>Valentine&rsquo;s hearts are round</th><td>
+    The source is emphatic that the white markings are heart-shaped. There is no heart
+    mask and adding one is a real piece of work; the gene ships with round spots and the
+    base-colour shift (black to fuchsia, red to pink), which is the half that actually
+    reads at texture resolution.
+</td></tr>
+<tr><th>&ldquo;Inverting&rdquo; genes only go one way</th><td>
+    Seven akkadorian loci are flagged <code>inverting</code>: they are supposed to flip
+    the local polarity, so a marking reads light on a dark horse and dark on a light one.
+    Nothing in the op set does that conditionally. They paint light. The one place the
+    idea did survive is <strong>War Mask</strong>, which uses two layers with opposite
+    <code>PIGMENT</code> masks to come out near-black on a light coat and grey on a black
+    one &mdash; the same trick would work on the others and was not applied for time.
+</td></tr>
+<tr><th>Every white-only gene got a coloured twin</th><td>
+    Per your rule: eighteen of these add nothing but white, so each has a second variant
+    allele that paints a colour instead, dominant white over recessive colour, and the
+    coloured allele never gives blue eyes. The genes that were written <em>before</em>
+    that rule was applied consistently &mdash; Crescents, Wormholes, Polymoon, Stars,
+    Stellar, Lasertae, Scratches, Internal Flow, Zebra&rsquo;s Coat &mdash; paint an
+    off-white and <strong>do not</strong> have the twin yet. That is the one piece of the
+    rule left undone.
+</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3>Still to verify in game</h3>
+
+<ul>
+<li>
+    <strong>The genotype code and the sign.</strong> Over a hundred genes now. A pen sign
+    wraps onto three lines and overflows the last one deliberately; with this many genes
+    that last line is very long. Look at a pen.
+</li>
+<li>
+    <strong>The emissive pass, on a real horse, at night.</strong> Eight genes set
+    <code>emissive</code> on a layer &mdash; Angler, Aurorae, Gamma, Glow, Lantern,
+    Nebula Light and the two example genes. The overlay hook that lights them is new
+    (<code>SpecGene.overlay</code>) and has never run in the game.
+</li>
+<li>
+    <strong>Wild horses should almost never be magical.</strong> Founder rates are
+    derived from each gene&rsquo;s rarity tier by
+    <code>process/tools/founders.py</code> and budgeted so all eighty-four together
+    reach about one wild horse in fifteen. Catch a dozen horses; if more than one of
+    them is obviously magical, the budget is wrong.
+</li>
+<li>
+    <strong>The designer and the spawn screen.</strong> Both should now list every one of
+    these. The designer reads <code>wiki/horse-designer/assets/genes.json</code>, which
+    is baked; the spawn screen reads the registry directly.
+</li>
+<li>
+    <strong>The seven generated family pages.</strong>
+    <code>wiki/genes-magic-*.html</code>, each with an icon per gene. Served over
+    <code>http</code>, the preview windows on them should all work; they now default to
+    <strong>bay</strong> rather than black.
+</li>
+</ul>
+
+<h3>Known to be rough</h3>
+
+<ul>
+<li>
+    <strong>Some genes are visually approximate.</strong> Vortex&rsquo;s four-colour band
+    sequence, Auroraband&rsquo;s S-curve, Cleave&rsquo;s interlocking spears and
+    Papillon&rsquo;s wing are all recognisable rather than faithful &mdash; they are
+    built out of noise fields, and a noise field does not draw a specific figure. If any
+    of them matters, it wants either a new mask or a Java gene.
+</li>
+<li>
+    <strong><code>:common:test</code> now takes about nine minutes.</strong> It was under
+    a minute. The golden-coat suite composes a full texture per case and every case now
+    runs a hundred-odd genes. Nothing is wrong; it is just slow, and it will get slower.
+</li>
+<li>
+    <strong>The catalogue has saturated.</strong> <code>GenotypeCatalog.size()</code> is
+    now <code>Long.MAX_VALUE</code> &mdash; the product of every gene&rsquo;s distinct
+    pairs passed 2<sup>63</sup>. It used to wrap to a negative number, which is what the
+    first full test run after this import actually did; it now stops instead. The exact
+    count is still available and exact, as a <code>BigInteger</code>, from
+    <code>totalGenotypes()</code>.
+</li>
+</ul>
+
 <h2 id="three-views">&sect;0-AM &mdash; The three-view wiki, the tabs and the search (2026-09-07, NOT looked at)</h2>
 
 <p>

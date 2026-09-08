@@ -130,10 +130,20 @@ class GenotypeCatalogTest {
      * <b>non-masking</b> distinct pairs, plus one entry for each masking
      * combination anywhere in the registry. A gene can contribute to both
      * halves - {@code KIT} has seven ordinary outcomes and one that masks.
+     *
+     * <p><b>Unless the product does not fit.</b> Every gene multiplies the
+     * catalogue and a two-allele dominant one doubles it, so a registry of any
+     * size passes {@code 2^63} - the magical gene files put the model over it.
+     * Past that point {@link GenotypeCatalog#size()} saturates and stops being
+     * the product, deliberately: it is an index bound, and "more than you can
+     * index" is a safe answer where a wrapped negative is not. The exact count
+     * lives on in {@link GenotypeCatalog#totalGenotypes()}, which is a
+     * {@link java.math.BigInteger} for this reason, so the assertion follows it
+     * there rather than being dropped.
      */
     @Test
     void sizeIsTheProductOfTheUnmaskedPairsPlusOnePenPerMaskingCombination() {
-        long unmasked = 1L;
+        java.math.BigInteger unmasked = java.math.BigInteger.ONE;
         int masking = 0;
         for (Gene gene : Genes.codeOrder()) {
             int plain = 0;
@@ -144,9 +154,17 @@ class GenotypeCatalogTest {
                     plain++;
                 }
             }
-            unmasked *= plain;
+            unmasked = unmasked.multiply(java.math.BigInteger.valueOf(plain));
         }
-        assertEquals(unmasked + masking, GenotypeCatalog.size());
+        java.math.BigInteger want = unmasked.add(java.math.BigInteger.valueOf(masking));
+        if (want.bitLength() < 63) {
+            assertEquals(want.longValueExact(), GenotypeCatalog.size());
+        } else {
+            assertEquals(Long.MAX_VALUE, GenotypeCatalog.size(),
+                    "past 2^63 the catalogue saturates rather than wrapping");
+            assertTrue(GenotypeCatalog.totalGenotypes().compareTo(want) >= 0,
+                    "the exact count must still be at least the unmasked product");
+        }
     }
 
     /**

@@ -1,0 +1,63 @@
+{
+  "format": 3,
+  "key": "horsegenetics.invert",
+  "name": "Invert",
+  "phase": "magical",
+  "priority": 500,
+  "rarity": "RARE",
+  "blurb": "The last thing painted: the whole finished coat comes out as its own negative. White goes black, orange goes blue, and everything the horse was carrying goes with it.",
+  "alleles": [
+    {
+      "token": "Inv",
+      "label": "Invert (Inv)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [],
+  "expressions": [
+    {
+      "id": "invert",
+      "name": "Invert",
+      "description": "It has no shape of its own and no colour of its own. Whatever the horse looks like once every other gene has had its turn, this takes the negative of it: a white sock becomes a black one, a chestnut becomes a deep blue-green, a gold mane becomes violet. It sits at the very end of the paint order, so it inverts a finished horse rather than an unfinished one - which is why two Invert horses out of very different parents still look like nothing else in the field. It takes two copies.",
+      "when": {
+        "Inv": 2
+      },
+      "layers": [
+        {
+          "name": "the whole coat, negated",
+          "masks": [
+            {
+              "type": "ALL"
+            }
+          ],
+          "op": {
+            "type": "INVERT",
+            "amount": 100.0
+          }
+        }
+      ]
+    },
+    {
+      "id": "carrier",
+      "name": "Invert carrier",
+      "description": "One copy shows nothing.",
+      "wildType": true,
+      "when": {
+        "Inv": 1
+      }
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "Not inverted.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Inv/Inv": 0.04,
+    "n/n": 99.96
+  }
+}

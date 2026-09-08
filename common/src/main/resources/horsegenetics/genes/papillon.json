@@ -1,0 +1,369 @@
+{
+  "format": 3,
+  "key": "horsegenetics.papillon",
+  "name": "Papillon",
+  "phase": "magical",
+  "priority": 268,
+  "rarity": "EPIC",
+  "blurb": "A butterfly's wing laid over the neck, drawn from a real species, with the mane and tail carrying the wing's brightest and darkest colours down their length.",
+  "alleles": [
+    {
+      "token": "Si",
+      "label": "Papillon, simple (Si)"
+    },
+    {
+      "token": "Gr",
+      "label": "Papillon, gradient (Gr)"
+    },
+    {
+      "token": "Sp",
+      "label": "Papillon, spotty (Sp)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "wingSeed",
+      "type": "seed"
+    },
+    {
+      "name": "hue",
+      "min": 0.0,
+      "max": 360.0
+    }
+  ],
+  "expressions": [
+    {
+      "id": "spotty",
+      "name": "Spotty Papillon",
+      "description": "The wing breaks up into spotting toward its lower edge rather than ending as a field - the pattern is still the wing's, but read through a scatter of it.",
+      "when": [
+        "Sp/Sp",
+        "Gr/Sp"
+      ],
+      "layers": [
+        {
+          "name": "the wing field over the neck",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "NECK"
+              ]
+            },
+            {
+              "type": "PATCHES",
+              "parts": [
+                "NECK"
+              ],
+              "seed": "$wingSeed",
+              "scale": 5.0,
+              "threshold": 0.4,
+              "softness": 0.06
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "NECK"
+              ],
+              "seed": "$wingSeed",
+              "spacing": 2.2,
+              "radius": 0.8,
+              "vary": 0.5,
+              "chance": 0.65,
+              "softness": 0.1
+            }
+          ],
+          "op": {
+            "type": "PALETTE",
+            "hue": "$hue",
+            "hueSpread": 55.0,
+            "saturation": 0.9,
+            "lightness": 0.5,
+            "scale": 3.2,
+            "strength": 94
+          }
+        },
+        {
+          "name": "the eyespots and veins in it",
+          "masks": [
+            {
+              "type": "RINGS",
+              "parts": [
+                "NECK"
+              ],
+              "seed": "$wingSeed",
+              "spacing": 4.0,
+              "radius": 1.4,
+              "thickness": 0.8,
+              "vary": 0.3,
+              "chance": 0.55,
+              "softness": 0.12
+            },
+            {
+              "type": "PATCHES",
+              "parts": [
+                "NECK"
+              ],
+              "seed": "$wingSeed",
+              "scale": 5.0,
+              "threshold": 0.4,
+              "softness": 0.06
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#100c14",
+            "strength": 88
+          }
+        },
+        {
+          "name": "the wing's colours running down the mane and tail",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "HAIR"
+              ]
+            }
+          ],
+          "op": {
+            "type": "RAMP",
+            "hue": "$hue",
+            "hueSpan": 55.0,
+            "saturation": 0.9,
+            "lightness": 0.45,
+            "axis": "Y",
+            "space": "part",
+            "from": 0.9,
+            "to": 0.05,
+            "strength": 90
+          }
+        }
+      ]
+    },
+    {
+      "id": "gradient",
+      "name": "Gradient Papillon",
+      "description": "The wing fades into the neck's own colour as it descends, brightest at the crest and gone by the throat - blended rather than bounded, and the subtler of the two shaped forms.",
+      "when": [
+        "Gr/Gr",
+        "Si/Gr"
+      ],
+      "layers": [
+        {
+          "name": "the wing field over the neck",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "NECK"
+              ]
+            },
+            {
+              "type": "PATCHES",
+              "parts": [
+                "NECK"
+              ],
+              "seed": "$wingSeed",
+              "scale": 5.0,
+              "threshold": 0.4,
+              "softness": 0.06
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "NECK"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.25,
+              "to": 1.0,
+              "softness": 0.55
+            }
+          ],
+          "op": {
+            "type": "PALETTE",
+            "hue": "$hue",
+            "hueSpread": 55.0,
+            "saturation": 0.9,
+            "lightness": 0.5,
+            "scale": 3.2,
+            "strength": 94
+          }
+        },
+        {
+          "name": "the eyespots and veins in it",
+          "masks": [
+            {
+              "type": "RINGS",
+              "parts": [
+                "NECK"
+              ],
+              "seed": "$wingSeed",
+              "spacing": 4.0,
+              "radius": 1.4,
+              "thickness": 0.8,
+              "vary": 0.3,
+              "chance": 0.55,
+              "softness": 0.12
+            },
+            {
+              "type": "PATCHES",
+              "parts": [
+                "NECK"
+              ],
+              "seed": "$wingSeed",
+              "scale": 5.0,
+              "threshold": 0.4,
+              "softness": 0.06
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#100c14",
+            "strength": 88
+          }
+        },
+        {
+          "name": "the wing's colours running down the mane and tail",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "HAIR"
+              ]
+            }
+          ],
+          "op": {
+            "type": "RAMP",
+            "hue": "$hue",
+            "hueSpan": 55.0,
+            "saturation": 0.9,
+            "lightness": 0.45,
+            "axis": "Y",
+            "space": "part",
+            "from": 0.9,
+            "to": 0.05,
+            "strength": 90
+          }
+        }
+      ]
+    },
+    {
+      "id": "simple",
+      "name": "Simple Papillon",
+      "description": "The wing pattern and the hair colouring, and nothing else - no gradient, no spotting. A clean graphic wing on the neck, and the cleanest of the three to read.",
+      "when": [
+        "Si/Si",
+        "Si/Sp"
+      ],
+      "layers": [
+        {
+          "name": "the wing field over the neck",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "NECK"
+              ]
+            },
+            {
+              "type": "PATCHES",
+              "parts": [
+                "NECK"
+              ],
+              "seed": "$wingSeed",
+              "scale": 5.0,
+              "threshold": 0.4,
+              "softness": 0.06
+            }
+          ],
+          "op": {
+            "type": "PALETTE",
+            "hue": "$hue",
+            "hueSpread": 55.0,
+            "saturation": 0.9,
+            "lightness": 0.5,
+            "scale": 3.2,
+            "strength": 94
+          }
+        },
+        {
+          "name": "the eyespots and veins in it",
+          "masks": [
+            {
+              "type": "RINGS",
+              "parts": [
+                "NECK"
+              ],
+              "seed": "$wingSeed",
+              "spacing": 4.0,
+              "radius": 1.4,
+              "thickness": 0.8,
+              "vary": 0.3,
+              "chance": 0.55,
+              "softness": 0.12
+            },
+            {
+              "type": "PATCHES",
+              "parts": [
+                "NECK"
+              ],
+              "seed": "$wingSeed",
+              "scale": 5.0,
+              "threshold": 0.4,
+              "softness": 0.06
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#100c14",
+            "strength": 88
+          }
+        },
+        {
+          "name": "the wing's colours running down the mane and tail",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "HAIR"
+              ]
+            }
+          ],
+          "op": {
+            "type": "RAMP",
+            "hue": "$hue",
+            "hueSpan": 55.0,
+            "saturation": 0.9,
+            "lightness": 0.45,
+            "axis": "Y",
+            "space": "part",
+            "from": 0.9,
+            "to": 0.05,
+            "strength": 90
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "No wing. The pattern is famously fragile: bred to horses without it, it weakens and is gone within a couple of generations.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Si/Si": 0.02,
+    "Si/Gr": 0.0016,
+    "Si/Sp": 0.0016,
+    "Gr/Gr": 0.0016,
+    "Gr/Sp": 0.0016,
+    "Sp/Sp": 0.0016,
+    "n/n": 99.972
+  }
+}

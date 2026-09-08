@@ -1,0 +1,160 @@
+{
+  "format": 3,
+  "key": "horsegenetics.collar",
+  "name": "Collar",
+  "phase": "magical",
+  "priority": 260,
+  "rarity": "RARE",
+  "blurb": "A band right round the base of the neck, with everything behind it going pale and the head, crest and lower legs keeping the coat.",
+  "alleles": [
+    {
+      "token": "Col",
+      "label": "Collar, white (Col)"
+    },
+    {
+      "token": "Coc",
+      "label": "Collar, coloured (Coc)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "hue",
+      "min": 0.0,
+      "max": 360.0
+    },
+    {
+      "name": "bandBack",
+      "min": 0.58,
+      "max": 0.78
+    }
+  ],
+  "expressions": [
+    {
+      "id": "white",
+      "name": "Collar",
+      "description": "The band wraps the whole circumference at the base of the neck, its back edge landing at or near the front of the scapula, and it divides the horse: everything behind it goes pale, roughly half the animal, while the head, the front of the neck and the crest keep their colour. The legs come back to the coat from the knee and hock down, over a soft transition rather than a line. The mane keeps its colour; the tail follows the pale field about half the time.",
+      "when": [
+        "Col/Col",
+        "Col/Coc",
+        "Col/n"
+      ],
+      "layers": [
+        {
+          "name": "everything behind the collar",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "space": "part",
+              "from": 0.0,
+              "to": "$bandBack",
+              "softness": 0.12
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#f2ede1",
+            "strength": 88
+          }
+        },
+        {
+          "name": "the legs coming back to the coat below the knee",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "LEGS"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.42,
+              "to": 1.0,
+              "softness": 0.3
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#f2ede1",
+            "strength": 84
+          }
+        }
+      ]
+    },
+    {
+      "id": "coloured",
+      "name": "Coloured collar",
+      "description": "The same split, with the caudal field in a colour rather than pale. Fully recessive: two copies, and a single copy beside the white allele shows white. It never gives blue eyes.",
+      "when": {
+        "Coc": 2
+      },
+      "layers": [
+        {
+          "name": "everything behind the collar, coloured",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "space": "part",
+              "from": 0.0,
+              "to": "$bandBack",
+              "softness": 0.12
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.7,
+            "lightness": 0.55,
+            "strength": 88
+          }
+        },
+        {
+          "name": "the legs, coloured to the knee",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "LEGS"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.42,
+              "to": 1.0,
+              "softness": 0.3
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.7,
+            "lightness": 0.55,
+            "strength": 84
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "No collar.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Col/Col": 0.002,
+    "Col/Coc": 0.008,
+    "Col/n": 0.038,
+    "Coc/Coc": 0.008,
+    "n/n": 99.944
+  }
+}

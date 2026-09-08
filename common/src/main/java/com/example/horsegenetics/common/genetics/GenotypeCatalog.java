@@ -139,6 +139,8 @@ public final class GenotypeCatalog {
      */
     public static long size() {
         Layout l = layoutOrBuild();
+        // plainCombinations is already capped to leave room for the masked
+        // entries (see buildLayout), so this addition cannot overflow.
         return l.plainCombinations + l.masked.size();
     }
 
@@ -247,7 +249,7 @@ public final class GenotypeCatalog {
                 }
             }
             plain.add(List.copyOf(unmasked));
-            combinations *= unmasked.size();
+            combinations = saturatingMultiply(combinations, unmasked.size());
         }
 
         // One entry per masking expression: that combination, everything else wild.
@@ -265,7 +267,35 @@ public final class GenotypeCatalog {
             }
         }
 
-        return new Layout(List.copyOf(plain), combinations, List.copyOf(masked));
+        // The masked entries sit at the top of the index range, so the plain
+        // product has to leave room for them - otherwise a saturated product
+        // puts them past Long.MAX_VALUE and nothing can reach them.
+        long room = Long.MAX_VALUE - masked.size();
+        return new Layout(List.copyOf(plain), Math.min(combinations, room), List.copyOf(masked));
+    }
+
+    /**
+     * {@code a * b}, stopping at {@link Long#MAX_VALUE} instead of wrapping.
+     *
+     * <p>This is what {@link #size()} always claimed to do and did not. Every
+     * gene multiplies the catalogue, and a two-allele dominant gene doubles it,
+     * so it takes only about sixty of them to pass {@code 2^63} - at which
+     * point a plain {@code long} multiply wraps to a <b>negative</b> number
+     * that {@code get} then rejects every index against. The bulk magical
+     * import reached that point; before it, the model was comfortably short of
+     * the boundary and the claim was never tested.
+     *
+     * <p>Saturating is the right answer rather than widening to
+     * {@link BigInteger}: {@link #size()} is an index bound callers loop
+     * against, and "there are more of these than you can index" is both true
+     * and safe. {@link #totalGenotypes()} is the one that has to be exact, and
+     * it already is.
+     */
+    private static long saturatingMultiply(long a, long b) {
+        if (b == 0) {
+            return 0;
+        }
+        return a > Long.MAX_VALUE / b ? Long.MAX_VALUE : a * b;
     }
 
     /**

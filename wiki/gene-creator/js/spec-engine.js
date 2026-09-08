@@ -513,6 +513,17 @@ window.HG = window.HG || {};
         towardColour(delta, colour, op, values, legIndex, px, py, k,
           paletteColour(op, values, legIndex, point, seedBase));
         break;
+      case "INVERT": {
+        // Against what the texel LOOKS like - see SpecPainter.
+        var amt = get(values, op.amount, 100, legIndex) / 100 * k;
+        delta.add(px, py,
+          toward(colour, px, py, 0, 255 - colour.visible(px, py, 0), amt),
+          toward(colour, px, py, 1, 255 - colour.visible(px, py, 1), amt),
+          toward(colour, px, py, 2, 255 - colour.visible(px, py, 2), amt));
+        var wantInv = percentToChannel(get(values, op.opacity, 100, legIndex));
+        delta.addOpacity(px, py, Math.round((wantInv - colour.opacityAt(px, py)) * k));
+        break;
+      }
       case "FLAT": {
         var c = solidColour(op, values, legIndex);
         var wantOpacity = percentToChannel(get(values, op.opacity, 100, legIndex));

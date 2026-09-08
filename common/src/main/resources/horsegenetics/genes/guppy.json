@@ -1,0 +1,131 @@
+{
+  "format": 3,
+  "key": "horsegenetics.guppy",
+  "name": "Guppy",
+  "phase": "magical",
+  "priority": 403,
+  "rarity": "UNCOMMON",
+  "blurb": "The mane cut into hard vertical bands of two to four saturated colours, and the tail streaked lengthways in the same palette. The body is untouched.",
+  "alleles": [
+    {
+      "token": "Gup",
+      "label": "Guppy (Gup)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "bandSeed",
+      "type": "seed"
+    },
+    {
+      "name": "hue",
+      "min": 0.0,
+      "max": 360.0
+    },
+    {
+      "name": "spread",
+      "min": 40.0,
+      "max": 150.0
+    }
+  ],
+  "expressions": [
+    {
+      "id": "guppy",
+      "name": "Guppy",
+      "description": "Colour runs the full length of the crest, divided across it into discrete upright bands - three to seven of them, irregular in width, and hard-edged where they meet, with no blending anywhere. Some bands are the hair's own colour or white instead. The forelock follows the same rule at a smaller count. The tail is different: there the colour lies in long streaks running with the fall of the hair rather than across it, over the upper part of it, interleaving where two hues meet into a mottled flame rather than a clean stripe. Both use the same set of hues.",
+      "when": {
+        "Gup": 2
+      },
+      "layers": [
+        {
+          "name": "upright bands across the mane",
+          "masks": [
+            {
+              "type": "STROKES",
+              "parts": [
+                "MANE"
+              ],
+              "seed": "$bandSeed",
+              "spacing": 2.2,
+              "length": 9.0,
+              "axis": "Y",
+              "width": 1.4,
+              "curl": 0.1,
+              "softness": 0.04
+            }
+          ],
+          "op": {
+            "type": "PALETTE",
+            "hue": "$hue",
+            "hueSpread": "$spread",
+            "saturation": 0.92,
+            "lightness": 0.55,
+            "scale": 2.0,
+            "strength": 95
+          }
+        },
+        {
+          "name": "lengthwise streaks down the upper tail",
+          "masks": [
+            {
+              "type": "STROKES",
+              "parts": [
+                "TAIL"
+              ],
+              "seed": "$bandSeed",
+              "spacing": 1.6,
+              "length": 8.0,
+              "axis": "Y",
+              "width": 0.9,
+              "curl": 0.45,
+              "softness": 0.06
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "TAIL"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.2,
+              "to": 1.0,
+              "softness": 0.18
+            }
+          ],
+          "op": {
+            "type": "PALETTE",
+            "hue": "$hue",
+            "hueSpread": "$spread",
+            "saturation": 0.92,
+            "lightness": 0.55,
+            "scale": 2.4,
+            "strength": 93
+          }
+        }
+      ]
+    },
+    {
+      "id": "carrier",
+      "name": "Guppy carrier",
+      "description": "One copy shows nothing whatever. Two carriers bred together are the only way the banding appears.",
+      "wildType": true,
+      "when": {
+        "Gup": 1
+      }
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "Ordinary hair.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Gup/Gup": 0.08,
+    "n/n": 99.92
+  }
+}

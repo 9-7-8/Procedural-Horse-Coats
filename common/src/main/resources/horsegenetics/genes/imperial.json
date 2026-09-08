@@ -1,0 +1,188 @@
+{
+  "format": 3,
+  "key": "horsegenetics.imperial",
+  "name": "Imperial",
+  "phase": "magical",
+  "priority": 206,
+  "rarity": "UNCOMMON",
+  "blurb": "A white cape starting at the withers and working forward up the neck - reaching the poll at full coverage - with slivers of coat left showing between its branches.",
+  "alleles": [
+    {
+      "token": "Sbi",
+      "label": "Imperial, white (Sbi)"
+    },
+    {
+      "token": "Sbc",
+      "label": "Imperial, coloured (Sbc)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "branchSeed",
+      "type": "seed"
+    },
+    {
+      "name": "hue",
+      "min": 0.0,
+      "max": 360.0
+    },
+    {
+      "name": "reach",
+      "min": 0.2,
+      "max": 0.95
+    }
+  ],
+  "expressions": [
+    {
+      "id": "white",
+      "name": "Imperial",
+      "description": "A cape or blanket shape: it originates at the withers and extends up and forward, broad across the neck and shoulder and running as far as the poll when the coverage is maximal. Its edges are defined but irregular, and it is never solid - slivers of the coat beneath must show through between the branches, and a horse whose neck is simply white is not an Imperial. The branches always join up somewhere: a full wrap around the neck on a heavily marked horse, or a narrower connection dipping into the chest and under the elbow on a lightly marked one. It only ever expresses as white, which is what separates it from brindle and every other stripe-adjacent marking.",
+      "when": [
+        "Sbi/Sbi",
+        "Sbi/Sbc",
+        "Sbi/n"
+      ],
+      "layers": [
+        {
+          "name": "the cape over the withers and up the neck",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "NECK"
+              ]
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "NECK"
+              ],
+              "axis": "X",
+              "space": "part",
+              "from": 0.0,
+              "to": "$reach",
+              "softness": 0.2
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "space": "part",
+              "from": 0.78,
+              "to": 1.0,
+              "softness": 0.15,
+              "combine": "MAX"
+            },
+            {
+              "type": "STROKES",
+              "parts": [
+                "NECK",
+                "BODY"
+              ],
+              "seed": "$branchSeed",
+              "spacing": 2.2,
+              "length": 8.0,
+              "axis": "X",
+              "width": 1.3,
+              "curl": 0.8,
+              "softness": 0.15,
+              "invert": true,
+              "combine": "MIN"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#ffffff",
+            "strength": 96
+          }
+        }
+      ]
+    },
+    {
+      "id": "coloured",
+      "name": "Coloured Imperial",
+      "description": "The same cape in a colour the line carries rather than in white - which the marking's own tradition says is not an Imperial at all, but the genetics do not care. Fully recessive: it takes two copies, and a single copy beside the white allele shows white. It never gives blue eyes, whatever the white form does.",
+      "when": {
+        "Sbc": 2
+      },
+      "layers": [
+        {
+          "name": "the cape over the withers and up the neck, in colour",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "NECK"
+              ]
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "NECK"
+              ],
+              "axis": "X",
+              "space": "part",
+              "from": 0.0,
+              "to": "$reach",
+              "softness": 0.2
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "space": "part",
+              "from": 0.78,
+              "to": 1.0,
+              "softness": 0.15,
+              "combine": "MAX"
+            },
+            {
+              "type": "STROKES",
+              "parts": [
+                "NECK",
+                "BODY"
+              ],
+              "seed": "$branchSeed",
+              "spacing": 2.2,
+              "length": 8.0,
+              "axis": "X",
+              "width": 1.3,
+              "curl": 0.8,
+              "softness": 0.15,
+              "invert": true,
+              "combine": "MIN"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 96,
+            "hue": "$hue",
+            "saturation": 0.8,
+            "lightness": 0.55
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "No cape.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Sbi/Sbi": 0.004,
+    "Sbi/Sbc": 0.016,
+    "Sbi/n": 0.076,
+    "Sbc/Sbc": 0.016,
+    "n/n": 99.888
+  }
+}

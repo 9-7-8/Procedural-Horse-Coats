@@ -1,0 +1,121 @@
+{
+  "format": 3,
+  "key": "horsegenetics.frostfall",
+  "name": "Frostfall",
+  "phase": "magical",
+  "priority": 401,
+  "rarity": "COMMON",
+  "blurb": "Mane, forelock and tail losing their colour from partway down, ending white - and reaching it at different depths strand by strand, so the front is feathered rather than level.",
+  "alleles": [
+    {
+      "token": "Fro",
+      "label": "Frostfall (Fro)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "frontSeed",
+      "type": "seed"
+    },
+    {
+      "name": "front",
+      "min": 0.4,
+      "max": 0.62
+    }
+  ],
+  "expressions": [
+    {
+      "id": "frostfall",
+      "name": "Frostfall",
+      "description": "Value only - no hue anywhere in it. The roots keep the hair's own colour, the far ends are white or near it, and the middle passes through a neutral grey. The transition takes up something between a third and two-thirds of the length, so there is no line to point at; and because bundles of strands reach white at different depths, the front is interdigitated rather than a clean horizontal. The tail carries it furthest, the forelock least.",
+      "when": [
+        "Fro/Fro",
+        "Fro/n"
+      ],
+      "layers": [
+        {
+          "name": "the value falling away down the hair",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "HAIR"
+              ]
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "HAIR"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.0,
+              "to": "$front",
+              "softness": 0.42
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#ffffff",
+            "strength": 94
+          }
+        },
+        {
+          "name": "the feathered front, strand group by strand group",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "HAIR"
+              ]
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "HAIR"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.0,
+              "to": "$front",
+              "softness": 0.42
+            },
+            {
+              "type": "STROKES",
+              "parts": [
+                "HAIR"
+              ],
+              "seed": "$frontSeed",
+              "spacing": 1.4,
+              "length": 5.0,
+              "axis": "Y",
+              "width": 0.7,
+              "curl": 0.15,
+              "softness": 0.3
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#ffffff",
+            "strength": 60
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "No frost.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Fro/Fro": 0.006,
+    "Fro/n": 0.114,
+    "n/n": 99.88
+  }
+}

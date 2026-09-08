@@ -1,0 +1,302 @@
+{
+  "format": 3,
+  "key": "horsegenetics.burn",
+  "name": "Burn",
+  "phase": "magical",
+  "priority": 214,
+  "rarity": "COMMON",
+  "blurb": "Pure black, and pure black regardless of what the coat is - up the legs and over the muzzle on one allele, through the mane and tail on the other, and both at once when a horse carries one of each.",
+  "alleles": [
+    {
+      "token": "Bm",
+      "label": "Burnt Moon (Bm)"
+    },
+    {
+      "token": "Bt",
+      "label": "Burnt Mane and Tail (Bt)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "retainSeed",
+      "type": "seed"
+    },
+    {
+      "name": "legHeight",
+      "min": 0.3,
+      "max": 0.55,
+      "per": "leg",
+      "spread": 0.2
+    }
+  ],
+  "expressions": [
+    {
+      "id": "full",
+      "name": "Full Burn",
+      "description": "One copy of each allele, and the horse takes both fields at once - legs, muzzle and ventral shading black, and the mane and tail black as well. It counts as one mutation, not two.",
+      "when": [
+        "Bm/Bt"
+      ],
+      "layers": [
+        {
+          "name": "black up the legs",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "LEGS"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.0,
+              "to": "$legHeight",
+              "softness": 0.2
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#080808",
+            "strength": 96
+          }
+        },
+        {
+          "name": "the muzzle cap",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "MUZZLE"
+              ]
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#080808",
+            "strength": 94
+          }
+        },
+        {
+          "name": "ventral shading",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.0,
+              "to": 0.22,
+              "softness": 0.35
+            },
+            {
+              "type": "NOISE",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$retainSeed",
+              "scale": 25.0,
+              "low": 0.2,
+              "high": 1.4
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#080808",
+            "strength": 70
+          }
+        },
+        {
+          "name": "black mane, forelock and tail",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "HAIR"
+              ]
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#080808",
+            "strength": 96
+          }
+        },
+        {
+          "name": "the bundles that hold out",
+          "masks": [
+            {
+              "type": "STROKES",
+              "parts": [
+                "HAIR"
+              ],
+              "seed": "$retainSeed",
+              "spacing": 2.8,
+              "length": 9.0,
+              "axis": "Y",
+              "width": 0.9,
+              "curl": 0.2,
+              "softness": 0.1
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#080808",
+            "strength": -96
+          }
+        }
+      ]
+    },
+    {
+      "id": "moon",
+      "name": "Burnt Moon",
+      "description": "Black from the hoof up all four legs, ending somewhere between the mid-cannon and just below the knee, and standing a little higher at the front of the leg than the back. A black cap over the muzzle enclosing both nostrils. And, on about three in five, a soft black gradient along the belly midline and under the jaw. Every edge here is soft. The value is the same black on any horse - it does not take the coat into account at all.",
+      "when": [
+        "Bm/Bm",
+        "Bm/n"
+      ],
+      "layers": [
+        {
+          "name": "black up the legs",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "LEGS"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.0,
+              "to": "$legHeight",
+              "softness": 0.2
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#080808",
+            "strength": 96
+          }
+        },
+        {
+          "name": "the muzzle cap",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "MUZZLE"
+              ]
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#080808",
+            "strength": 94
+          }
+        },
+        {
+          "name": "ventral shading",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.0,
+              "to": 0.22,
+              "softness": 0.35
+            },
+            {
+              "type": "NOISE",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$retainSeed",
+              "scale": 25.0,
+              "low": 0.2,
+              "high": 1.4
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#080808",
+            "strength": 70
+          }
+        }
+      ]
+    },
+    {
+      "id": "hair",
+      "name": "Burnt Mane and Tail",
+      "description": "Mane, forelock and tail go black, and nothing on the body changes. Up to two strands in five may hold out and keep the base colour or white, in bundles rather than singly, and they hold out most often at the back of the crest and the far end of the tail.",
+      "when": [
+        "Bt/Bt",
+        "Bt/n"
+      ],
+      "layers": [
+        {
+          "name": "black mane, forelock and tail",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "HAIR"
+              ]
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#080808",
+            "strength": 96
+          }
+        },
+        {
+          "name": "the bundles that hold out",
+          "masks": [
+            {
+              "type": "STROKES",
+              "parts": [
+                "HAIR"
+              ],
+              "seed": "$retainSeed",
+              "spacing": 2.8,
+              "length": 9.0,
+              "axis": "Y",
+              "width": 0.9,
+              "curl": 0.2,
+              "softness": 0.1
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#080808",
+            "strength": -96
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "No burn.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Bm/Bm": 0.006,
+    "Bm/Bt": 0.016,
+    "Bm/n": 0.114,
+    "Bt/Bt": 0.016,
+    "Bt/n": 0.016,
+    "n/n": 99.832
+  }
+}

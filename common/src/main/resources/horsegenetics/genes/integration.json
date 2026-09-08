@@ -1,0 +1,129 @@
+{
+  "format": 3,
+  "key": "horsegenetics.integration",
+  "name": "Integration",
+  "phase": "magical",
+  "priority": 311,
+  "rarity": "COMMON",
+  "blurb": "A spot field spreading outward from wherever the coat is already dark - merging into solid patches close in, thinning to isolated marks a foot or two out, and gone beyond that.",
+  "alleles": [
+    {
+      "token": "Int",
+      "label": "Integration (Int)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "spotSeed",
+      "type": "seed"
+    },
+    {
+      "name": "spotSize",
+      "min": 0.55,
+      "max": 1.3
+    },
+    {
+      "name": "reach",
+      "min": 0.3,
+      "max": 0.75
+    }
+  ],
+  "expressions": [
+    {
+      "id": "integration",
+      "name": "Integration",
+      "description": "It does not choose its own places; it grows out of the ones the horse already has. Anywhere the coat is dark - the crest and the base of the mane, a dorsal stripe, the distal limbs, the margin of any other marking - becomes a source, and elements propagate outward from it. Right at a source they merge into continuous patches with scalloped margins; a hand's span out they are separate circles and lobes with their long axis pointing the way they came; further still they thin to nothing. It reads as an appaloosa blanket at medium scale.",
+      "when": [
+        "Int/Int",
+        "Int/n"
+      ],
+      "layers": [
+        {
+          "name": "elements spreading out of the dark",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "LEGS"
+              ],
+              "seed": "$spotSeed",
+              "spacing": 2.6,
+              "radius": "$spotSize",
+              "vary": 0.6,
+              "chance": 0.7,
+              "stretch": 1.4,
+              "axis": "X",
+              "softness": 0.12
+            },
+            {
+              "type": "PIGMENT",
+              "parts": [
+                "BODY",
+                "NECK",
+                "LEGS"
+              ],
+              "channel": "darkness",
+              "from": 0.35,
+              "to": "$reach"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#f6f2e8",
+            "strength": 90
+          }
+        },
+        {
+          "name": "the merged patches nearest the source",
+          "masks": [
+            {
+              "type": "PIGMENT",
+              "parts": [
+                "BODY",
+                "NECK",
+                "LEGS"
+              ],
+              "channel": "darkness",
+              "from": 0.6,
+              "to": 0.85
+            },
+            {
+              "type": "PATCHES",
+              "parts": [
+                "BODY",
+                "NECK",
+                "LEGS"
+              ],
+              "seed": "$spotSeed",
+              "scale": 3.0,
+              "threshold": 0.45,
+              "softness": 0.1
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#f6f2e8",
+            "strength": 88
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "No spread.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Int/Int": 0.006,
+    "Int/n": 0.114,
+    "n/n": 99.88
+  }
+}

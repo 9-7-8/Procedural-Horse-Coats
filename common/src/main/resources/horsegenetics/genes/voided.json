@@ -1,0 +1,69 @@
+{
+  "format": 3,
+  "key": "horsegenetics.voided",
+  "name": "Voided",
+  "phase": "magical",
+  "priority": 430,
+  "rarity": "UNCOMMON",
+  "blurb": "Every white the horse would have had comes out black instead - the same markings, the same edges, the opposite pigment.",
+  "alleles": [
+    {
+      "token": "Vd",
+      "label": "Voided (Vd)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "depth",
+      "min": 0.03,
+      "max": 0.28
+    }
+  ],
+  "expressions": [
+    {
+      "id": "voided",
+      "name": "Voided",
+      "description": "It changes no pattern and no boundary: whatever white the horse's other genes drew - a snip, a sock, a full tobiano - comes out as black hyperpigmentation of exactly the same shape, with the same hard or roaned edge the source pattern had. Mane and tail follow the same rule. How black varies between horses, from a faded sun-bleached brown-black to jet, but it is consistent across the whole marking on any one of them.",
+      "when": [
+        "Vd/Vd",
+        "Vd/n"
+      ],
+      "layers": [
+        {
+          "name": "the white regions, blackened",
+          "masks": [
+            {
+              "type": "PIGMENT",
+              "channel": "total",
+              "from": 0.02,
+              "to": 0.22,
+              "invert": true
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": 25.0,
+            "saturation": 0.25,
+            "lightness": "$depth",
+            "strength": 96
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "White stays white.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Vd/Vd": 0.004,
+    "Vd/n": 0.076,
+    "n/n": 99.92
+  }
+}

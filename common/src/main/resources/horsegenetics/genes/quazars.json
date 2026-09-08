@@ -1,0 +1,126 @@
+{
+  "format": 3,
+  "key": "horsegenetics.quazars",
+  "name": "Quazars",
+  "phase": "magical",
+  "priority": 257,
+  "rarity": "RARE",
+  "blurb": "Two to four long pale beams lying nose-to-tail across the shoulder, hip and thigh, brightest along their middle and fading out with no edge at all.",
+  "alleles": [
+    {
+      "token": "Qzr",
+      "label": "Quazars, white (Qzr)"
+    },
+    {
+      "token": "Qzc",
+      "label": "Quazars, coloured (Qzc)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "beamSeed",
+      "type": "seed"
+    },
+    {
+      "name": "hue",
+      "min": 0.0,
+      "max": 360.0
+    },
+    {
+      "name": "beamWidth",
+      "min": 2.6,
+      "max": 5.5
+    }
+  ],
+  "expressions": [
+    {
+      "id": "white",
+      "name": "Quazars",
+      "description": "Spindle-shaped beams, widest a little past halfway along and tapering both ways, laid roughly along the body axis. They have no boundary anywhere - the value peaks at the centre line of the beam and falls away steadily to nothing - which is what separates a quazar from a stripe. A beam that reaches the topline carries on down the other side at a little under its original width.",
+      "when": [
+        "Qzr/Qzr",
+        "Qzr/Qzc",
+        "Qzr/n"
+      ],
+      "layers": [
+        {
+          "name": "the beams",
+          "masks": [
+            {
+              "type": "STROKES",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$beamSeed",
+              "spacing": 9.0,
+              "length": 30.0,
+              "axis": "X",
+              "width": "$beamWidth",
+              "curl": 0.4,
+              "softness": 2.4
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#fdfaf0",
+            "strength": 74
+          }
+        }
+      ]
+    },
+    {
+      "id": "coloured",
+      "name": "Coloured quazars",
+      "description": "The same beams in a colour the line carries. Fully recessive: two copies, and a single copy beside the white allele shows white. It never gives blue eyes.",
+      "when": {
+        "Qzc": 2
+      },
+      "layers": [
+        {
+          "name": "the beams, coloured",
+          "masks": [
+            {
+              "type": "STROKES",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$beamSeed",
+              "spacing": 9.0,
+              "length": 30.0,
+              "axis": "X",
+              "width": "$beamWidth",
+              "curl": 0.4,
+              "softness": 2.4
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.7,
+            "lightness": 0.68,
+            "strength": 72
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "No beams.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Qzr/Qzr": 0.002,
+    "Qzr/Qzc": 0.008,
+    "Qzr/n": 0.038,
+    "Qzc/Qzc": 0.008,
+    "n/n": 99.944
+  }
+}

@@ -1,0 +1,187 @@
+{
+  "format": 3,
+  "key": "horsegenetics.hued_pangare",
+  "name": "Hued Pangare",
+  "phase": "magical",
+  "priority": 254,
+  "rarity": "COMMON",
+  "blurb": "Pangare in a colour instead of in cream: a soft field up the belly and the underside of the neck with one copy, and half the horse with two.",
+  "alleles": [
+    {
+      "token": "Hpa",
+      "label": "Hued Pangare (Hpa)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "hue",
+      "min": 0.0,
+      "max": 360.0
+    },
+    {
+      "name": "reach",
+      "min": 0.28,
+      "max": 0.5
+    }
+  ],
+  "expressions": [
+    {
+      "id": "extreme",
+      "name": "Extreme Hued",
+      "description": "Two copies take it up the flanks and the sides of the neck, down all four legs fading toward the hoof, and over the cheek, jaw and muzzle - sometimes as a ring round the eye as well. Half the horse or better. The gradient still runs belly-upward on the trunk and body-downward on the legs, and there is no hard edge anywhere on it.",
+      "when": {
+        "Hpa": 2
+      },
+      "layers": [
+        {
+          "name": "up the belly and flanks",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.0,
+              "to": 0.62,
+              "softness": 0.45
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.75,
+            "lightness": 0.6,
+            "strength": 82
+          }
+        },
+        {
+          "name": "down the legs, fading toward the hoof",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "LEGS"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.25,
+              "to": 1.0,
+              "softness": 0.4
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.7,
+            "lightness": 0.6,
+            "strength": 70
+          }
+        },
+        {
+          "name": "the lower head, and a ring round the eye",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "MUZZLE"
+              ]
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "HEAD"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.0,
+              "to": 0.62,
+              "softness": 0.35,
+              "combine": "MAX"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.75,
+            "lightness": 0.6,
+            "strength": 78
+          }
+        }
+      ]
+    },
+    {
+      "id": "classic",
+      "name": "Classic Hued",
+      "description": "A band along the belly midline reaching a little way up each side, a band down the underside of the neck from throat to chest narrowing as it goes forward, and sometimes a small oval behind the jaw. A tenth to a fifth of the horse. Every boundary is a soft radial fade - there are no edges on this marking - and it overwrites ordinary pangare where the two would meet, including on the black horses ordinary pangare never touches.",
+      "when": {
+        "Hpa": 1
+      },
+      "layers": [
+        {
+          "name": "the belly band",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.0,
+              "to": "$reach",
+              "softness": 0.4
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.75,
+            "lightness": 0.6,
+            "strength": 80
+          }
+        },
+        {
+          "name": "the underside of the neck",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "NECK"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.0,
+              "to": "$reach",
+              "softness": 0.35
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.75,
+            "lightness": 0.6,
+            "strength": 76
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "No hued pangare.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Hpa/Hpa": 0.006,
+    "Hpa/n": 0.114,
+    "n/n": 99.88
+  }
+}

@@ -1,0 +1,180 @@
+{
+  "format": 3,
+  "key": "horsegenetics.element_dusted",
+  "name": "Element Dusted",
+  "phase": "magical",
+  "priority": 406,
+  "rarity": "RARE",
+  "blurb": "Three hues to a horse - one leading and two supporting - climbing the legs from the hoof, running down the far half of the hair, and settling along the topline as dapples.",
+  "alleles": [
+    {
+      "token": "Ed",
+      "label": "Element Dusted (Ed)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "dappleSeed",
+      "type": "seed"
+    },
+    {
+      "name": "hue",
+      "min": 0.0,
+      "max": 360.0
+    },
+    {
+      "name": "spread",
+      "min": 25.0,
+      "max": 75.0
+    },
+    {
+      "name": "climb",
+      "min": 0.28,
+      "max": 0.62,
+      "per": "leg",
+      "spread": 0.22
+    }
+  ],
+  "expressions": [
+    {
+      "id": "element_dusted",
+      "name": "Element Dusted",
+      "description": "On the legs the colour starts at the hoof and climbs a quarter to three-fifths of the way up, ending in a fade rather than a line, and no two legs end at the same height. It is palest and least saturated at the very bottom - near-white at the hoof on most horses - and gets deeper and stronger as it rises. The hair works the other way round from the legs: the roots keep the horse's own colour and the far half or better takes the palette, running toward near-white at the very ends. Along the topline, from withers to croup and no further down than the upper quarter of the barrel, is a field of soft round dapples in the leading hue at low saturation, which read darker than the coat rather than lighter.",
+      "when": [
+        "Ed/Ed",
+        "Ed/n"
+      ],
+      "layers": [
+        {
+          "name": "the legs, climbing from the hoof",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "LEGS"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.0,
+              "to": "$climb",
+              "softness": 0.3
+            }
+          ],
+          "op": {
+            "type": "RAMP",
+            "hue": "$hue",
+            "hueSpan": "$spread",
+            "saturation": 0.75,
+            "lightness": 0.5,
+            "axis": "Y",
+            "space": "part",
+            "from": 0.0,
+            "to": 0.7,
+            "strength": 88
+          }
+        },
+        {
+          "name": "the near-white at the very bottom",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "LEGS"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.0,
+              "to": 0.16,
+              "softness": 0.12
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#f6f4ef",
+            "strength": 70
+          }
+        },
+        {
+          "name": "the far half of the mane and tail",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "HAIR"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.0,
+              "to": 0.55,
+              "softness": 0.3
+            }
+          ],
+          "op": {
+            "type": "RAMP",
+            "hue": "$hue",
+            "hueSpan": "$spread",
+            "saturation": 0.7,
+            "lightness": 0.62,
+            "axis": "Y",
+            "space": "part",
+            "from": 0.5,
+            "to": 0.0,
+            "strength": 88
+          }
+        },
+        {
+          "name": "dapples along the topline",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$dappleSeed",
+              "spacing": 3.0,
+              "radius": 1.0,
+              "vary": 0.5,
+              "chance": 0.75,
+              "softness": 0.5
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.66,
+              "to": 1.0,
+              "softness": 0.3
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.35,
+            "lightness": 0.3,
+            "strength": 45
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "No dusting.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Ed/Ed": 0.002,
+    "Ed/n": 0.038,
+    "n/n": 99.96
+  }
+}

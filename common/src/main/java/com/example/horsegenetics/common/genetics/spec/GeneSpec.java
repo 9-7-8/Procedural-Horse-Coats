@@ -358,7 +358,14 @@ public record GeneSpec(
          * different colours and the boundary between them is a cell wall, which
          * is what separates "iridescent" from "gradient".
          */
-        PALETTE;
+        PALETTE,
+        /**
+         * Magical: replace the texel with its <b>photographic negative</b>.
+         * White goes black, orange goes blue. The one move the other colour ops
+         * cannot make between them - every one of those walks <i>toward</i>
+         * something, and a negative is a function of what is already there.
+         */
+        INVERT;
 
         public boolean isNatural() {
             return this == DILUTE || this == RESTRICT || this == SET_PIGMENT || this == WHITEN;

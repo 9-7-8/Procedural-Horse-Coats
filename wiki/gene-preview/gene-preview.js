@@ -159,7 +159,7 @@ window.HG = window.HG || {};
     view.setSkin("ADULT");
 
     var state = {
-      base: bases[0].key,
+      base: defaultBase(bases),
       outcome: 0,
       // One selected option per modifier locus this gene reads, all starting at
       // the baseline - so the first thing shown is the gene on its own.
@@ -256,6 +256,23 @@ window.HG = window.HG || {};
     }
 
     render();
+  }
+
+  /**
+   * Which base coat a gene page opens on: BAY, not the first in the list.
+   *
+   * A black horse hides every dark marking on it, and half these genes are
+   * dark markings - so opening on black meant a reader's first look at a gene
+   * was often a horse with nothing visible on it. Bay is the only common base
+   * that shows a dark marking and a pale one at once, which is also why the
+   * gene icons are baked on one. Falls back to the first entry if the base
+   * list is ever rearranged out from under this.
+   */
+  function defaultBase(bases) {
+    for (var i = 0; i < bases.length; i++) {
+      if (bases[i].key === "bay") return bases[i].key;
+    }
+    return bases[0].key;
   }
 
   function indexOfBase(bases, key) {

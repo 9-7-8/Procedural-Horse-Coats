@@ -1,0 +1,153 @@
+{
+  "format": 3,
+  "key": "horsegenetics.opossum",
+  "name": "Opossum",
+  "phase": "magical",
+  "priority": 267,
+  "rarity": "COMMON",
+  "blurb": "Grey confined to the front of the horse - forehead, face, neck and the front of the shoulder - with roaned edges that never cut sharply, and a pink muzzle where it reaches that far.",
+  "alleles": [
+    {
+      "token": "Opo",
+      "label": "Opossum (Opo)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "roanSeed",
+      "type": "seed"
+    },
+    {
+      "name": "extent",
+      "min": 0.05,
+      "max": 0.8
+    }
+  ],
+  "expressions": [
+    {
+      "id": "opossum",
+      "name": "Opossum",
+      "description": "A restricted grey. White hair comes in over the brow and forehead and can carry back across the face, down the neck, over the shoulders and as far as the front of the withers - how far is settled once and does not move afterwards. Where it reaches the muzzle the skin there goes soft pink whether or not a white marking is present. Every edge is roaned and jagged - heavy sabino, not a cut line - and it affects the mane wherever it touches, and sometimes streaks the top of the tail. The skin around the eyes stays dark. It sits under all white markings, and a bald face or a big blaze simply overrides it. One copy looks exactly like two.",
+      "when": [
+        "Opo/Opo",
+        "Opo/n"
+      ],
+      "layers": [
+        {
+          "name": "grey from the forehead backward",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "HEAD",
+                "MUZZLE",
+                "NECK",
+                "BODY"
+              ],
+              "axis": "X",
+              "space": "body",
+              "from": "$extent",
+              "to": 1.0,
+              "softness": 0.3
+            },
+            {
+              "type": "SPECKLE",
+              "parts": [
+                "HEAD",
+                "MUZZLE",
+                "NECK",
+                "BODY"
+              ],
+              "seed": "$roanSeed",
+              "spacing": 0.7,
+              "size": 0.6,
+              "density": 0.75,
+              "clumping": 0.6,
+              "clumpScale": 5.0,
+              "softness": 0.5
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#efece7",
+            "strength": 92
+          }
+        },
+        {
+          "name": "the mane where the grey touches it",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "MANE"
+              ],
+              "axis": "X",
+              "space": "part",
+              "from": 0.35,
+              "to": 1.0,
+              "softness": 0.35
+            },
+            {
+              "type": "SPECKLE",
+              "parts": [
+                "MANE"
+              ],
+              "seed": "$roanSeed",
+              "spacing": 0.7,
+              "size": 0.6,
+              "density": 0.7,
+              "softness": 0.5
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#efece7",
+            "strength": 88
+          }
+        },
+        {
+          "name": "a pink muzzle where it gets that far",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "MUZZLE"
+              ]
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "MUZZLE"
+              ],
+              "axis": "X",
+              "space": "body",
+              "from": "$extent",
+              "to": 1.0,
+              "softness": 0.2
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#e8b4ac",
+            "strength": 80
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "No greying.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Opo/Opo": 0.006,
+    "Opo/n": 0.114,
+    "n/n": 99.88
+  }
+}

@@ -1,0 +1,183 @@
+{
+  "format": 3,
+  "key": "horsegenetics.peafowl",
+  "name": "Peafowl",
+  "phase": "magical",
+  "priority": 341,
+  "rarity": "RARE",
+  "blurb": "Speckling that sweeps across the body in a current rather than scattering, in two or three colours, with a plume standing in the mane and another in the tail.",
+  "alleles": [
+    {
+      "token": "Pwl",
+      "label": "Peafowl (Pwl)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "flowSeed",
+      "type": "seed"
+    },
+    {
+      "name": "hue",
+      "min": 0.0,
+      "max": 360.0
+    },
+    {
+      "name": "hue2",
+      "min": 0.0,
+      "max": 360.0
+    },
+    {
+      "name": "density",
+      "min": 0.2,
+      "max": 0.5
+    }
+  ],
+  "expressions": [
+    {
+      "id": "peafowl",
+      "name": "Peafowl",
+      "description": "The speckles sweep - the field flows across the horse and may break into separate runs, but it never sits in random patches, and it never reaches the belly. Two or three colours at most, in dots no bigger than a pupil, each dot one colour, and never dense enough to read as roan. The mane carries at least one full plume and the tail may carry another; where a plume fails it comes out as a stripe of colour through the hair instead, and a horse showing failed plumes always has one proper one as well. Every plume on a horse is the same design. The hooves are untouched.",
+      "when": [
+        "Pwl/Pwl",
+        "Pwl/n"
+      ],
+      "layers": [
+        {
+          "name": "the speckle field, flowing",
+          "masks": [
+            {
+              "type": "SPECKLE",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD"
+              ],
+              "seed": "$flowSeed",
+              "spacing": 0.85,
+              "size": 0.5,
+              "density": "$density",
+              "clumping": 0.85,
+              "clumpScale": 9.0,
+              "softness": 0.3
+            },
+            {
+              "type": "STROKES",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD"
+              ],
+              "seed": "$flowSeed",
+              "spacing": 5.5,
+              "length": 24.0,
+              "axis": "X",
+              "width": 3.4,
+              "curl": 1.0,
+              "softness": 1.0
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.25,
+              "to": 1.0,
+              "softness": 0.25
+            }
+          ],
+          "op": {
+            "type": "PALETTE",
+            "hue": "$hue",
+            "hueSpread": 60.0,
+            "saturation": 0.92,
+            "lightness": 0.55,
+            "scale": 3.0,
+            "strength": 92
+          }
+        },
+        {
+          "name": "the plume in the mane",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "MANE"
+              ],
+              "seed": "$flowSeed",
+              "spacing": 2.2,
+              "radius": 0.6,
+              "vary": 0.4,
+              "chance": 0.6,
+              "stretch": 1.6,
+              "axis": "Y",
+              "softness": 0.1
+            },
+            {
+              "type": "STROKES",
+              "parts": [
+                "MANE"
+              ],
+              "seed": "$flowSeed",
+              "spacing": 6.0,
+              "length": 9.0,
+              "axis": "Y",
+              "width": 2.0,
+              "curl": 0.3,
+              "softness": 0.3
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue2",
+            "saturation": 0.95,
+            "lightness": 0.5,
+            "strength": 94
+          }
+        },
+        {
+          "name": "the plume in the tail, and the failed ones",
+          "masks": [
+            {
+              "type": "STROKES",
+              "parts": [
+                "TAIL"
+              ],
+              "seed": "$flowSeed",
+              "spacing": 3.0,
+              "length": 8.0,
+              "axis": "Y",
+              "width": 1.0,
+              "curl": 0.25,
+              "softness": 0.12
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue2",
+            "saturation": 0.95,
+            "lightness": 0.5,
+            "strength": 92
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "No peafowling.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Pwl/Pwl": 0.002,
+    "Pwl/n": 0.038,
+    "n/n": 99.96
+  }
+}

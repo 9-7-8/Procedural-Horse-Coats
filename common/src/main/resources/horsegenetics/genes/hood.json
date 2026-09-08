@@ -1,0 +1,109 @@
+{
+  "format": 3,
+  "key": "horsegenetics.hood",
+  "name": "Hood",
+  "phase": "magical",
+  "priority": 405,
+  "rarity": "UNCOMMON",
+  "blurb": "A colour laid solid over the head that thins out along the neck and is gone by the shoulder - how far it reaches, and what colour it is, both run in the family.",
+  "alleles": [
+    {
+      "token": "Hd",
+      "label": "Hood (Hd)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "hue",
+      "min": 0.0,
+      "max": 360.0
+    },
+    {
+      "name": "lightness",
+      "min": 0.18,
+      "max": 0.7
+    },
+    {
+      "name": "reach",
+      "min": 0.15,
+      "max": 0.85
+    }
+  ],
+  "expressions": [
+    {
+      "id": "hood",
+      "name": "Hood",
+      "description": "Opaque over the whole head - muzzle, ears and all - and from there it weakens continuously back along the neck until it has vanished entirely, somewhere between the throatlatch and the shoulder depending on the horse. There is no edge to it at any point; it simply runs out. Both the colour and how far it carries are drawn once and passed on.",
+      "when": {
+        "Hd": 2
+      },
+      "layers": [
+        {
+          "name": "solid over the head",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "FACE",
+                "EARS"
+              ]
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.8,
+            "lightness": "$lightness",
+            "strength": 96
+          }
+        },
+        {
+          "name": "thinning out along the neck",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "NECK"
+              ],
+              "axis": "X",
+              "space": "part",
+              "from": "$reach",
+              "to": 1.0,
+              "softness": 0.55
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.8,
+            "lightness": "$lightness",
+            "strength": 96
+          }
+        }
+      ]
+    },
+    {
+      "id": "carrier",
+      "name": "Hood carrier",
+      "description": "One copy shows nothing. It takes two.",
+      "wildType": true,
+      "when": {
+        "Hd": 1
+      }
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "No hood.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Hd/Hd": 0.08,
+    "n/n": 99.92
+  }
+}

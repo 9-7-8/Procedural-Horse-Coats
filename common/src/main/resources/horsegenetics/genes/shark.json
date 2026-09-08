@@ -1,0 +1,222 @@
+{
+  "format": 3,
+  "key": "horsegenetics.shark",
+  "name": "Shark",
+  "phase": "magical",
+  "priority": 259,
+  "rarity": "RARE",
+  "blurb": "A single fin-shaped pale field standing on the withers, leaning forward, with a tapering band running on up the crest to the poll.",
+  "alleles": [
+    {
+      "token": "Shk",
+      "label": "Shark, white (Shk)"
+    },
+    {
+      "token": "Shc",
+      "label": "Shark, coloured (Shc)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "finSeed",
+      "type": "seed"
+    },
+    {
+      "name": "hue",
+      "min": 0.0,
+      "max": 360.0
+    },
+    {
+      "name": "height",
+      "min": 0.4,
+      "max": 0.72
+    }
+  ],
+  "expressions": [
+    {
+      "id": "white",
+      "name": "Shark",
+      "description": "One field, and only one: a sickle standing on the topline over the withers, its base a hand's span or two long, its apex set forward of the middle of that base, its back edge scooped hollow and its front edge straight or slightly bellied. Crisp along the top and the back edge, softer underneath. Most sharks also carry a narrow band running forward along the crest from the apex to the poll.",
+      "when": [
+        "Shk/Shk",
+        "Shk/Shc",
+        "Shk/n"
+      ],
+      "layers": [
+        {
+          "name": "the fin on the withers",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "space": "part",
+              "from": 0.6,
+              "to": 0.95,
+              "softness": 0.1
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": "$height",
+              "to": 1.0,
+              "softness": 0.14
+            },
+            {
+              "type": "NOISE",
+              "parts": [
+                "BODY"
+              ],
+              "seed": "$finSeed",
+              "scale": 5.0,
+              "low": 0.6,
+              "high": 1.3
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#f4efe2",
+            "strength": 88
+          }
+        },
+        {
+          "name": "the band on up the crest",
+          "masks": [
+            {
+              "type": "CENTERLINE",
+              "parts": [
+                "NECK"
+              ],
+              "halfWidth": 1.2,
+              "softness": 0.4
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "NECK"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.7,
+              "to": 1.0,
+              "softness": 0.14
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#f4efe2",
+            "strength": 80
+          }
+        }
+      ]
+    },
+    {
+      "id": "coloured",
+      "name": "Coloured shark",
+      "description": "The same fin in a colour the line carries. Fully recessive: two copies, and a single copy beside the white allele shows white. It never gives blue eyes.",
+      "when": {
+        "Shc": 2
+      },
+      "layers": [
+        {
+          "name": "the fin, coloured",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "space": "part",
+              "from": 0.6,
+              "to": 0.95,
+              "softness": 0.1
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": "$height",
+              "to": 1.0,
+              "softness": 0.14
+            },
+            {
+              "type": "NOISE",
+              "parts": [
+                "BODY"
+              ],
+              "seed": "$finSeed",
+              "scale": 5.0,
+              "low": 0.6,
+              "high": 1.3
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.75,
+            "lightness": 0.6,
+            "strength": 88
+          }
+        },
+        {
+          "name": "the crest band, coloured",
+          "masks": [
+            {
+              "type": "CENTERLINE",
+              "parts": [
+                "NECK"
+              ],
+              "halfWidth": 1.2,
+              "softness": 0.4
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "NECK"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.7,
+              "to": 1.0,
+              "softness": 0.14
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.75,
+            "lightness": 0.6,
+            "strength": 80
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "No fin.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Shk/Shk": 0.002,
+    "Shk/Shc": 0.008,
+    "Shk/n": 0.038,
+    "Shc/Shc": 0.008,
+    "n/n": 99.944
+  }
+}

@@ -1,0 +1,119 @@
+{
+  "format": 3,
+  "key": "horsegenetics.striped_mane_tail",
+  "name": "Striped Mane and Tail",
+  "phase": "magical",
+  "priority": 404,
+  "rarity": "COMMON",
+  "blurb": "A handful of contrasting bundles running the length of the mane and tail - light strands through dark hair, dark through light - and nothing at all on the body.",
+  "alleles": [
+    {
+      "token": "Smt",
+      "label": "Striped Mane and Tail (Smt)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "bundleSeed",
+      "type": "seed"
+    },
+    {
+      "name": "bundleWidth",
+      "min": 0.5,
+      "max": 1.6
+    }
+  ],
+  "expressions": [
+    {
+      "id": "striped",
+      "name": "Striped mane and tail",
+      "description": "Three to nine bundles spaced along the crest, each running the whole length of the strand it is in, though about a third of them thin out and feather away partway down. The forelock joins in about half the time, at one to three bundles. The tail carries two to six, a little wider at the dock. The bundles are whatever contrasts: light on a dark mane, dark on a light one. No body coat expression of any kind.",
+      "when": [
+        "Smt/Smt",
+        "Smt/n"
+      ],
+      "layers": [
+        {
+          "name": "light bundles, where the hair is dark",
+          "masks": [
+            {
+              "type": "STROKES",
+              "parts": [
+                "HAIR"
+              ],
+              "seed": "$bundleSeed",
+              "spacing": 2.6,
+              "length": 12.0,
+              "axis": "Y",
+              "width": "$bundleWidth",
+              "curl": 0.2,
+              "softness": 0.08
+            },
+            {
+              "type": "PIGMENT",
+              "parts": [
+                "HAIR"
+              ],
+              "channel": "darkness",
+              "from": 0.35,
+              "to": 0.6
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#f0ead8",
+            "strength": 88
+          }
+        },
+        {
+          "name": "dark bundles, where the hair is light",
+          "masks": [
+            {
+              "type": "STROKES",
+              "parts": [
+                "HAIR"
+              ],
+              "seed": "$bundleSeed",
+              "spacing": 2.6,
+              "length": 12.0,
+              "axis": "Y",
+              "width": "$bundleWidth",
+              "curl": 0.2,
+              "softness": 0.08
+            },
+            {
+              "type": "PIGMENT",
+              "parts": [
+                "HAIR"
+              ],
+              "channel": "darkness",
+              "from": 0.35,
+              "to": 0.6,
+              "invert": true
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#241d16",
+            "strength": 88
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "Unstriped hair.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Smt/Smt": 0.006,
+    "Smt/n": 0.114,
+    "n/n": 99.88
+  }
+}

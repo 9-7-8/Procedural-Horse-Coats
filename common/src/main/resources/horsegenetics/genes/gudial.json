@@ -1,0 +1,435 @@
+{
+  "format": 3,
+  "key": "horsegenetics.gudial",
+  "name": "Gudial",
+  "phase": "magical",
+  "priority": 373,
+  "rarity": "RARE",
+  "blurb": "Warning colours off a poison frog - bold bands round the neck and legs, a dark masked head worked over in stripes, and spotting along the topline.",
+  "alleles": [
+    {
+      "token": "Gud",
+      "label": "Gudial (Gud)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "bandSeed",
+      "type": "seed"
+    },
+    {
+      "name": "hue",
+      "min": 0.0,
+      "max": 360.0
+    },
+    {
+      "name": "hue2",
+      "min": 0.0,
+      "max": 360.0
+    }
+  ],
+  "expressions": [
+    {
+      "id": "two",
+      "name": "Gudial, three colours",
+      "description": "A horse carrying two-colour speckling gets a third colour in the marking: the second hue joins the first through the neck and leg banding and the topline spotting, and the mask picks it up around the eyes.",
+      "when": {
+        "Gud": 2
+      },
+      "layers": [
+        {
+          "name": "the dark head",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "FACE",
+                "EARS"
+              ]
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#0c0b0a",
+            "strength": 92
+          }
+        },
+        {
+          "name": "the striped mask over it",
+          "masks": [
+            {
+              "type": "STROKES",
+              "parts": [
+                "FACE"
+              ],
+              "seed": "$bandSeed",
+              "spacing": 2.0,
+              "length": 4.0,
+              "axis": "X",
+              "width": 0.7,
+              "curl": 0.6,
+              "softness": 0.08
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.95,
+            "lightness": 0.5,
+            "strength": 94
+          }
+        },
+        {
+          "name": "upright bands across the neck",
+          "masks": [
+            {
+              "type": "STROKES",
+              "parts": [
+                "NECK"
+              ],
+              "seed": "$bandSeed",
+              "spacing": 3.0,
+              "length": 8.0,
+              "axis": "Y",
+              "width": 1.3,
+              "curl": 0.4,
+              "softness": 0.08
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.95,
+            "lightness": 0.5,
+            "strength": 94
+          }
+        },
+        {
+          "name": "banding down every leg",
+          "masks": [
+            {
+              "type": "STROKES",
+              "parts": [
+                "LEGS"
+              ],
+              "seed": "$bandSeed",
+              "spacing": 1.8,
+              "length": 2.2,
+              "axis": "Z",
+              "width": 0.8,
+              "curl": 0.15,
+              "softness": 0.06
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.95,
+            "lightness": 0.5,
+            "strength": 94
+          }
+        },
+        {
+          "name": "spotting along the topline",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$bandSeed",
+              "spacing": 2.6,
+              "radius": 0.7,
+              "vary": 0.5,
+              "chance": 0.45,
+              "softness": 0.1
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.55,
+              "to": 1.0,
+              "softness": 0.3
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.95,
+            "lightness": 0.55,
+            "strength": 92
+          }
+        },
+        {
+          "name": "hooves in the same colour",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "LEGS"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.0,
+              "to": 0.12,
+              "softness": 0.02
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.95,
+            "lightness": 0.45,
+            "strength": 94
+          }
+        },
+        {
+          "name": "the second colour through the neck bands",
+          "masks": [
+            {
+              "type": "STROKES",
+              "parts": [
+                "NECK",
+                "LEGS"
+              ],
+              "seed": "$bandSeed",
+              "spacing": 3.0,
+              "length": 8.0,
+              "axis": "Y",
+              "width": 0.6,
+              "curl": 0.4,
+              "softness": 0.08
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue2",
+            "saturation": 0.95,
+            "lightness": 0.62,
+            "strength": 92
+          }
+        },
+        {
+          "name": "the second colour in the topline spotting",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$bandSeed",
+              "spacing": 2.6,
+              "radius": 0.35,
+              "vary": 0.5,
+              "chance": 0.45,
+              "softness": 0.08
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.55,
+              "to": 1.0,
+              "softness": 0.3
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue2",
+            "saturation": 0.95,
+            "lightness": 0.68,
+            "strength": 92
+          }
+        }
+      ]
+    },
+    {
+      "id": "one",
+      "name": "Gudial",
+      "description": "The head goes dark and takes an intricate striped mask around the eyes and muzzle. Bold upright bands cross the neck, and the legs are banded the whole way down to the hoof in the same colours - segmented, high-contrast, deliberately loud. Along the back and barrel is a scatter of spotting. The mane carries no regular striping, the hooves take one of the speckling colours, and the marking permits no white patterning of any kind.",
+      "when": {
+        "Gud": 1
+      },
+      "layers": [
+        {
+          "name": "the dark head",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "FACE",
+                "EARS"
+              ]
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#0c0b0a",
+            "strength": 92
+          }
+        },
+        {
+          "name": "the striped mask over it",
+          "masks": [
+            {
+              "type": "STROKES",
+              "parts": [
+                "FACE"
+              ],
+              "seed": "$bandSeed",
+              "spacing": 2.0,
+              "length": 4.0,
+              "axis": "X",
+              "width": 0.7,
+              "curl": 0.6,
+              "softness": 0.08
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.95,
+            "lightness": 0.5,
+            "strength": 94
+          }
+        },
+        {
+          "name": "upright bands across the neck",
+          "masks": [
+            {
+              "type": "STROKES",
+              "parts": [
+                "NECK"
+              ],
+              "seed": "$bandSeed",
+              "spacing": 3.0,
+              "length": 8.0,
+              "axis": "Y",
+              "width": 1.3,
+              "curl": 0.4,
+              "softness": 0.08
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.95,
+            "lightness": 0.5,
+            "strength": 94
+          }
+        },
+        {
+          "name": "banding down every leg",
+          "masks": [
+            {
+              "type": "STROKES",
+              "parts": [
+                "LEGS"
+              ],
+              "seed": "$bandSeed",
+              "spacing": 1.8,
+              "length": 2.2,
+              "axis": "Z",
+              "width": 0.8,
+              "curl": 0.15,
+              "softness": 0.06
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.95,
+            "lightness": 0.5,
+            "strength": 94
+          }
+        },
+        {
+          "name": "spotting along the topline",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$bandSeed",
+              "spacing": 2.6,
+              "radius": 0.7,
+              "vary": 0.5,
+              "chance": 0.45,
+              "softness": 0.1
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.55,
+              "to": 1.0,
+              "softness": 0.3
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.95,
+            "lightness": 0.55,
+            "strength": 92
+          }
+        },
+        {
+          "name": "hooves in the same colour",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "LEGS"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.0,
+              "to": 0.12,
+              "softness": 0.02
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.95,
+            "lightness": 0.45,
+            "strength": 94
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "No warning colours.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Gud/Gud": 0.002,
+    "Gud/n": 0.038,
+    "n/n": 99.96
+  }
+}

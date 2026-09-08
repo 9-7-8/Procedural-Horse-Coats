@@ -1,0 +1,146 @@
+{
+  "format": 3,
+  "key": "horsegenetics.oscar",
+  "name": "Oscar",
+  "phase": "magical",
+  "priority": 266,
+  "rarity": "UNCOMMON",
+  "blurb": "Black laid over the whole horse and then flaked away in big wavy upright stripes, so the coat underneath shows through the gaps like the scales of a fish.",
+  "alleles": [
+    {
+      "token": "Osc",
+      "label": "Oscar (Osc)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "flakeSeed",
+      "type": "seed"
+    },
+    {
+      "name": "flakeWidth",
+      "min": 1.4,
+      "max": 4.5
+    },
+    {
+      "name": "flakePitch",
+      "min": 3.0,
+      "max": 6.5
+    }
+  ],
+  "expressions": [
+    {
+      "id": "oscar",
+      "name": "Oscar",
+      "description": "A very heavy sooty that turns the coat black from head to toe, and it does it on anything - single cream, double cream, pearl, champagne, none of them stop it. Then the black flakes: large wavy stripes lift away and reveal the horse's real genetic colour underneath, whatever that is, and they run mostly upright rather than along the body. At its quietest that is a black horse with a little colour showing on the neck; at its loudest it is half and half, with flecks of dark in the colour and flecks of colour in the dark. Mane and tail follow whatever the flaking does where they meet it. It sits under every white marking. One copy looks exactly like two.",
+      "when": [
+        "Osc/Osc",
+        "Osc/n"
+      ],
+      "layers": [
+        {
+          "name": "black over everything",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "EARS",
+                "MUZZLE",
+                "LEGS",
+                "HAIR"
+              ]
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#0e0d0c",
+            "strength": 94
+          }
+        },
+        {
+          "name": "the flakes lifting away again",
+          "masks": [
+            {
+              "type": "STROKES",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "LEGS",
+                "HAIR"
+              ],
+              "seed": "$flakeSeed",
+              "spacing": "$flakePitch",
+              "length": 5.5,
+              "axis": "Y",
+              "width": "$flakeWidth",
+              "curl": 1.2,
+              "softness": 0.2
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#0e0d0c",
+            "strength": -94
+          }
+        },
+        {
+          "name": "dark specks left in the flaked areas",
+          "masks": [
+            {
+              "type": "SPECKLE",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$flakeSeed",
+              "spacing": 0.9,
+              "size": 0.5,
+              "density": 0.25,
+              "clumping": 0.5,
+              "clumpScale": 6.0,
+              "softness": 0.3
+            },
+            {
+              "type": "STROKES",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$flakeSeed",
+              "spacing": "$flakePitch",
+              "length": 5.5,
+              "axis": "Y",
+              "width": "$flakeWidth",
+              "curl": 1.2,
+              "softness": 0.2
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#0e0d0c",
+            "strength": 70
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "No flaking.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Osc/Osc": 0.004,
+    "Osc/n": 0.076,
+    "n/n": 99.92
+  }
+}

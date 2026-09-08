@@ -1,0 +1,304 @@
+{
+  "format": 3,
+  "key": "horsegenetics.winged",
+  "name": "Winged",
+  "phase": "magical",
+  "priority": 207,
+  "rarity": "UNCOMMON",
+  "blurb": "Curved bands sweeping back from the withers along the ribs with ovoid spots between them, and one diagonal stripe across the shoulder - laid straight on the coat with one copy, and inside a dark saddle with two.",
+  "alleles": [
+    {
+      "token": "Wng",
+      "label": "Winged (Wng)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "bandSeed",
+      "type": "seed"
+    },
+    {
+      "name": "spotSeed",
+      "type": "seed"
+    },
+    {
+      "name": "bandWidth",
+      "min": 0.9,
+      "max": 2.2
+    }
+  ],
+  "expressions": [
+    {
+      "id": "spot_winged",
+      "name": "Spot-Winged",
+      "description": "Two copies lay a dark field over the shoulder and barrel first - a saddle shape with a hard lobed boundary - and put the bands and spots inside it in white, at a much higher spot count. The bands often hook: one long band curving back on itself and ending broad.",
+      "when": {
+        "Wng": 2
+      },
+      "layers": [
+        {
+          "name": "the dark saddle over the shoulder and barrel",
+          "masks": [
+            {
+              "type": "PATCHES",
+              "parts": [
+                "BODY"
+              ],
+              "seed": "$bandSeed",
+              "scale": 9.0,
+              "threshold": 0.42,
+              "softness": 0.04
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "space": "part",
+              "from": 0.32,
+              "to": 1.0,
+              "softness": 0.1
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#141014",
+            "strength": 90
+          }
+        },
+        {
+          "name": "white arc bands through it",
+          "masks": [
+            {
+              "type": "STROKES",
+              "parts": [
+                "BODY"
+              ],
+              "seed": "$bandSeed",
+              "spacing": 5.5,
+              "length": 18.0,
+              "axis": "X",
+              "width": "$bandWidth",
+              "curl": 0.7,
+              "softness": 0.06
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "space": "part",
+              "from": 0.3,
+              "to": 1.0,
+              "softness": 0.1
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#ffffff",
+            "strength": 96
+          }
+        },
+        {
+          "name": "white ovoid spots between the bands",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY"
+              ],
+              "seed": "$spotSeed",
+              "spacing": 2.0,
+              "radius": 0.6,
+              "vary": 0.5,
+              "chance": 0.5,
+              "stretch": 1.5,
+              "axis": "X",
+              "softness": 0.06
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "space": "part",
+              "from": 0.3,
+              "to": 1.0,
+              "softness": 0.1
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#ffffff",
+            "strength": 94
+          }
+        },
+        {
+          "name": "bands reaching down onto the upper legs",
+          "masks": [
+            {
+              "type": "STROKES",
+              "parts": [
+                "LEGS"
+              ],
+              "seed": "$bandSeed",
+              "spacing": 3.0,
+              "length": 2.5,
+              "axis": "Z",
+              "width": 1.0,
+              "softness": 0.06
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "LEGS"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.5,
+              "to": 1.0,
+              "softness": 0.15
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#ffffff",
+            "strength": 92
+          }
+        }
+      ]
+    },
+    {
+      "id": "white_winged",
+      "name": "White-Winged",
+      "description": "One copy puts the bands and spots straight onto the coat with no ground under them - two to five roughly concentric bands following the arc of the ribcage from the shoulder back toward the flank, tapering to points at both ends, with ovoid spots gathered near the band ends and over the shoulder, and a single diagonal band crossing the shoulder from the withers toward the elbow. White forms the core of each band and a desaturated tint runs alongside it. Every edge is hard.",
+      "when": {
+        "Wng": 1
+      },
+      "layers": [
+        {
+          "name": "the arc bands along the ribcage",
+          "masks": [
+            {
+              "type": "STROKES",
+              "parts": [
+                "BODY"
+              ],
+              "seed": "$bandSeed",
+              "spacing": 6.5,
+              "length": 18.0,
+              "axis": "X",
+              "width": "$bandWidth",
+              "curl": 0.7,
+              "softness": 0.06
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#ffffff",
+            "strength": 94
+          }
+        },
+        {
+          "name": "the desaturated tint running beside them",
+          "masks": [
+            {
+              "type": "STROKES",
+              "parts": [
+                "BODY"
+              ],
+              "seed": "$bandSeed",
+              "spacing": 6.5,
+              "length": 18.0,
+              "axis": "X",
+              "width": 3.0,
+              "curl": 0.7,
+              "softness": 0.3
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#cdc6d4",
+            "strength": 55
+          }
+        },
+        {
+          "name": "ovoid spots between and beside the bands",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY"
+              ],
+              "seed": "$spotSeed",
+              "spacing": 2.6,
+              "radius": 0.6,
+              "vary": 0.5,
+              "chance": 0.3,
+              "stretch": 1.5,
+              "axis": "X",
+              "softness": 0.06
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#ffffff",
+            "strength": 92
+          }
+        },
+        {
+          "name": "the diagonal band across the shoulder",
+          "masks": [
+            {
+              "type": "STROKES",
+              "parts": [
+                "BODY"
+              ],
+              "seed": "$bandSeed",
+              "spacing": 14.0,
+              "length": 6.0,
+              "axis": "Y",
+              "width": 1.5,
+              "curl": 0.9,
+              "softness": 0.06
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "space": "part",
+              "from": 0.55,
+              "to": 1.0,
+              "softness": 0.12
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#ffffff",
+            "strength": 94
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "No wings.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Wng/Wng": 0.004,
+    "Wng/n": 0.076,
+    "n/n": 99.92
+  }
+}

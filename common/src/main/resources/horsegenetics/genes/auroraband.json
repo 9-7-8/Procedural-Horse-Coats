@@ -1,0 +1,173 @@
+{
+  "format": 3,
+  "key": "horsegenetics.auroraband",
+  "name": "Auroraband",
+  "phase": "magical",
+  "priority": 408,
+  "rarity": "EPIC",
+  "blurb": "One continuous ribbon running the length of the upper body in a shallow S, combed into fine lengthwise striations, and shifting hue from cyan at the front to magenta where it curls at the back.",
+  "alleles": [
+    {
+      "token": "Abd",
+      "label": "Auroraband (Abd)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "ribbonSeed",
+      "type": "seed"
+    },
+    {
+      "name": "width",
+      "min": 2.4,
+      "max": 5.0
+    }
+  ],
+  "expressions": [
+    {
+      "id": "auroraband",
+      "name": "Auroraband",
+      "description": "A single unbroken band, never two, never a detached piece. It starts at the mid-neck level with the throatlatch, drops as it crosses the shoulder, rises again over the barrel toward the croup and falls away over the hindquarter - two inflections, a shallow S. It is narrowest where it starts and widest at the two extremes of that curve, and it ends in a hook that curls back on itself. The fill is not flat: fine discontinuous striations run along the path, densest at the core and thinning to both margins, so the band reads as combed. The upper margin is firmer than the lower, and both are irregular because they follow where the striations end rather than any outline. Colour runs continuously along it, cyan through blue and violet to magenta, saturating and brightening as it goes. Small hard white points are scattered over the whole horse, in the band and out of it alike, evenly and with no relation to it.",
+      "when": [
+        "Abd/Abd",
+        "Abd/n"
+      ],
+      "layers": [
+        {
+          "name": "the ribbon, hue running along its length",
+          "masks": [
+            {
+              "type": "STROKES",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$ribbonSeed",
+              "spacing": 22.0,
+              "length": 26.0,
+              "axis": "X",
+              "width": "$width",
+              "curl": 0.8,
+              "softness": 1.1
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.3,
+              "to": 1.0,
+              "softness": 0.35
+            }
+          ],
+          "op": {
+            "type": "RAMP",
+            "colors": [
+              "#2fd0e0",
+              "#3060d8",
+              "#7a3ad0",
+              "#e02f9a"
+            ],
+            "axis": "X",
+            "space": "body",
+            "from": 0.85,
+            "to": 0.1,
+            "strength": 90
+          }
+        },
+        {
+          "name": "the striations that make it look combed",
+          "masks": [
+            {
+              "type": "STROKES",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$ribbonSeed",
+              "spacing": 22.0,
+              "length": 26.0,
+              "axis": "X",
+              "width": "$width",
+              "curl": 0.8,
+              "softness": 1.1
+            },
+            {
+              "type": "STROKES",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$ribbonSeed",
+              "spacing": 0.9,
+              "length": 14.0,
+              "axis": "X",
+              "width": 0.35,
+              "curl": 0.3,
+              "softness": 0.12
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.3,
+              "to": 1.0,
+              "softness": 0.35
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#000010",
+            "strength": 30
+          }
+        },
+        {
+          "name": "white points over the whole horse",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD"
+              ],
+              "seed": "$ribbonSeed",
+              "spacing": 2.6,
+              "radius": 0.3,
+              "vary": 0.3,
+              "chance": 0.3,
+              "softness": 0.05
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#ffffff",
+            "strength": 92
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "No ribbon.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Abd/Abd": 0.001,
+    "Abd/n": 0.019,
+    "n/n": 99.98
+  }
+}

@@ -1,0 +1,117 @@
+{
+  "format": 3,
+  "key": "horsegenetics.war_mask",
+  "name": "War Mask",
+  "phase": "magical",
+  "priority": 255,
+  "rarity": "COMMON",
+  "blurb": "Most of the face taken by a flat armoured mask - near-black on a light coat, and light grey on a dark one, so it reads on every horse.",
+  "alleles": [
+    {
+      "token": "WrM",
+      "label": "War Mask (WrM)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [],
+  "expressions": [
+    {
+      "id": "war_mask",
+      "name": "War Mask",
+      "description": "A symmetrical field covering three-fifths to three-quarters of the face, from the poll down through the orbits and the nasal region to the muzzle, bounded along the cheekbone and the jaw. One copy looks exactly like two. Which way it goes depends on the coat underneath: on anything but black it comes in near-black and reads as armour plate, and on a black horse it comes in mid grey instead, because there is nothing darker than black to make a mask out of.",
+      "when": [
+        "WrM/WrM",
+        "WrM/n"
+      ],
+      "layers": [
+        {
+          "name": "the mask, dark, on a coat that is not already dark",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "FACE"
+              ]
+            },
+            {
+              "type": "PIGMENT",
+              "parts": [
+                "FACE"
+              ],
+              "channel": "darkness",
+              "from": 0.45,
+              "to": 0.75,
+              "invert": true
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "HEAD"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.18,
+              "to": 1.0,
+              "softness": 0.06
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#141210",
+            "strength": 90
+          }
+        },
+        {
+          "name": "the same mask, light, where the coat is already dark",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "FACE"
+              ]
+            },
+            {
+              "type": "PIGMENT",
+              "parts": [
+                "FACE"
+              ],
+              "channel": "darkness",
+              "from": 0.45,
+              "to": 0.75
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "HEAD"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.18,
+              "to": 1.0,
+              "softness": 0.06
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#7c7770",
+            "strength": 90
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "No mask.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "WrM/WrM": 0.006,
+    "WrM/n": 0.114,
+    "n/n": 99.88
+  }
+}

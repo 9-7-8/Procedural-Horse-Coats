@@ -1,0 +1,195 @@
+{
+  "format": 3,
+  "key": "horsegenetics.panark",
+  "name": "Panark",
+  "phase": "magical",
+  "priority": 375,
+  "rarity": "UNCOMMON",
+  "blurb": "Thick stripes thrown across the horse at every angle, each outlined in a bright colour and speckled inside it - and the ordinary speckling still going on underneath.",
+  "alleles": [
+    {
+      "token": "Pnk",
+      "label": "Panark (Pnk)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "stripeSeed",
+      "type": "seed"
+    },
+    {
+      "name": "hue",
+      "min": 0.0,
+      "max": 360.0
+    },
+    {
+      "name": "stripeWidth",
+      "min": 1.8,
+      "max": 3.6
+    },
+    {
+      "name": "coverage",
+      "min": 2.6,
+      "max": 6.0
+    }
+  ],
+  "expressions": [
+    {
+      "id": "panark",
+      "name": "Panark",
+      "description": "Six to ten inches wide and going in no particular direction - some horizontal across the ribs, some diagonal over the hindquarter, some upright on the neck and legs. There is no consistent orientation and that is the point. Each stripe is bordered all the way round in a speckling colour, which is what separates a Panark from ordinary brindle, and each carries its own speckling scattered through the interior on top of the speckling the horse already has everywhere else. The hooves take the outline colour. Regular mane striping and any white pattern are both allowed.",
+      "when": [
+        "Pnk/Pnk",
+        "Pnk/n"
+      ],
+      "layers": [
+        {
+          "name": "the stripes themselves",
+          "masks": [
+            {
+              "type": "STROKES",
+              "parts": [
+                "BODY",
+                "NECK",
+                "LEGS"
+              ],
+              "seed": "$stripeSeed",
+              "spacing": "$coverage",
+              "length": 7.0,
+              "axis": "X",
+              "width": "$stripeWidth",
+              "curl": 1.4,
+              "softness": 0.12
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#0d0c0b",
+            "strength": 92
+          }
+        },
+        {
+          "name": "the bright outline round each one",
+          "masks": [
+            {
+              "type": "STROKES",
+              "parts": [
+                "BODY",
+                "NECK",
+                "LEGS"
+              ],
+              "seed": "$stripeSeed",
+              "spacing": "$coverage",
+              "length": 7.0,
+              "axis": "X",
+              "width": 4.6,
+              "curl": 1.4,
+              "softness": 0.12
+            },
+            {
+              "type": "STROKES",
+              "parts": [
+                "BODY",
+                "NECK",
+                "LEGS"
+              ],
+              "seed": "$stripeSeed",
+              "spacing": "$coverage",
+              "length": 7.0,
+              "axis": "X",
+              "width": "$stripeWidth",
+              "curl": 1.4,
+              "softness": 0.12,
+              "invert": true
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.9,
+            "lightness": 0.5,
+            "strength": 92
+          }
+        },
+        {
+          "name": "speckling scattered inside the stripes",
+          "masks": [
+            {
+              "type": "SPECKLE",
+              "parts": [
+                "BODY",
+                "NECK",
+                "LEGS"
+              ],
+              "seed": "$stripeSeed",
+              "spacing": 0.8,
+              "size": 0.5,
+              "density": 0.45,
+              "softness": 0.3
+            },
+            {
+              "type": "STROKES",
+              "parts": [
+                "BODY",
+                "NECK",
+                "LEGS"
+              ],
+              "seed": "$stripeSeed",
+              "spacing": "$coverage",
+              "length": 7.0,
+              "axis": "X",
+              "width": "$stripeWidth",
+              "curl": 1.4,
+              "softness": 0.12
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.9,
+            "lightness": 0.62,
+            "strength": 88
+          }
+        },
+        {
+          "name": "hooves in the outline colour",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "LEGS"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.0,
+              "to": 0.12,
+              "softness": 0.02
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.9,
+            "lightness": 0.45,
+            "strength": 94
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "No striping.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Pnk/Pnk": 0.004,
+    "Pnk/n": 0.076,
+    "n/n": 99.92
+  }
+}

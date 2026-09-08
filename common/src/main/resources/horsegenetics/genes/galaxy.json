@@ -1,0 +1,185 @@
+{
+  "format": 3,
+  "key": "horsegenetics.galaxy",
+  "name": "Galaxy",
+  "phase": "magical",
+  "priority": 204,
+  "rarity": "EPIC",
+  "blurb": "A black field over most of the horse with the coat left showing in a few lobed patches, and the black full of stars - hard points and long curved streaks in white and a cool accent or two.",
+  "alleles": [
+    {
+      "token": "Gxy",
+      "label": "Galaxy (Gxy)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "groundSeed",
+      "type": "seed"
+    },
+    {
+      "name": "starSeed",
+      "type": "seed"
+    },
+    {
+      "name": "accentHue",
+      "min": 180.0,
+      "max": 290.0
+    },
+    {
+      "name": "coverage",
+      "min": 0.28,
+      "max": 0.5
+    }
+  ],
+  "expressions": [
+    {
+      "id": "galaxy",
+      "name": "Galaxy",
+      "description": "Black lies over seven to nine tenths of the horse - head, neck, barrel, hindquarter and the upper legs - and the coat survives only as a handful of irregular lobed patches, hard-edged, mostly on the lower legs, the belly, and parts of the shoulder and hip. Two kinds of star sit in the black. Point stars are small hard circles, scattered unevenly, densest over the barrel and hindquarter and sparse on the legs. Streak stars are long tapering strokes curved along their length, following the body's contours - front to back on the barrel, up and down on the shoulder and hip - and they cluster near the shoulder, the crest and the hindquarter. Both come in white and in one to three cool accent hues. The mane and tail are black too and carry the same two forms, the streaks running with the fall of the hair.",
+      "when": [
+        "Gxy/Gxy",
+        "Gxy/n"
+      ],
+      "layers": [
+        {
+          "name": "the black field",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "EARS",
+                "MUZZLE",
+                "LEGS",
+                "HAIR"
+              ]
+            },
+            {
+              "type": "PATCHES",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "LEGS"
+              ],
+              "seed": "$groundSeed",
+              "scale": 6.0,
+              "threshold": "$coverage",
+              "softness": 0.03,
+              "invert": true
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#08080c",
+            "strength": 97
+          }
+        },
+        {
+          "name": "point stars through the black",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "LEGS",
+                "HAIR"
+              ],
+              "seed": "$starSeed",
+              "spacing": 1.5,
+              "radius": 0.32,
+              "vary": 0.55,
+              "chance": 0.4,
+              "softness": 0.05
+            },
+            {
+              "type": "PATCHES",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "LEGS"
+              ],
+              "seed": "$groundSeed",
+              "scale": 6.0,
+              "threshold": "$coverage",
+              "softness": 0.03,
+              "invert": true
+            }
+          ],
+          "op": {
+            "type": "PALETTE",
+            "colors": [
+              "#ffffff",
+              "#ffffff",
+              "#cfe0ff",
+              "#ded0ff",
+              "#c9c9d4"
+            ],
+            "scale": 2.5,
+            "strength": 95
+          }
+        },
+        {
+          "name": "streak stars along the contours",
+          "masks": [
+            {
+              "type": "STROKES",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HAIR"
+              ],
+              "seed": "$starSeed",
+              "spacing": 4.5,
+              "length": 12.0,
+              "axis": "X",
+              "width": 0.7,
+              "curl": 0.9,
+              "softness": 0.1
+            },
+            {
+              "type": "PATCHES",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$groundSeed",
+              "scale": 6.0,
+              "threshold": "$coverage",
+              "softness": 0.03,
+              "invert": true
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$accentHue",
+            "saturation": 0.35,
+            "lightness": 0.85,
+            "strength": 92
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "No galaxy.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Gxy/Gxy": 0.001,
+    "Gxy/n": 0.019,
+    "n/n": 99.98
+  }
+}

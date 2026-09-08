@@ -119,26 +119,37 @@ window.HG.pages = {
             ]
         },
         {
+            // Alphabetical, deliberately. The natural genes are in the order the
+            // coat pipeline applies them, which is the useful order for fifteen of
+            // them; there are now eighty-odd magical genes across seven family
+            // pages and nobody can find one by remembering where it paints.
             title: "Magical genes",
             items: [
-                { href: "gene-dhampir.html", text: "Dhampir", kind: "magical", views: ["gameplay","coding","science"] },
-                { href: "gene-pink-hair.html", text: "Pink hair", kind: "magical", views: ["gameplay","coding","science"] },
-                { href: "gene-mane-color.html", text: "Mane colour", kind: "magical", views: ["gameplay","coding"] },
-                { href: "gene-tail-color.html", text: "Tail colour", kind: "magical", views: ["gameplay","coding","science"] },
-                { href: "gene-healer.html", text: "Healer", kind: "magical", views: ["gameplay","coding","science"] },
-                { href: "gene-magic-zebra.html", text: "Magic zebra", kind: "magical", views: ["gameplay","coding","science"] },
-                { href: "gene-milk.html", text: "Milk (water / lava)", kind: "magical", views: ["gameplay","coding","science"] },
-                { href: "gene-light.html", text: "Light", kind: "magical", views: ["gameplay","coding","science"] },
-                { href: "gene-magic-sectoral-heterochromia.html", text: "Magic sectoral heterochromia", kind: "magical", views: ["gameplay","coding","science"] },
-                { href: "gene-particle.html", text: "Particle", kind: "magical", views: ["gameplay","coding","science"] },
-                { href: "gene-rainbow-dust.html", text: "Rainbow dust", kind: "magical", views: ["gameplay","coding","science"] },
-                { href: "gene-lycan.html", text: "LYCAN (werewolf)", kind: "magical", views: ["gameplay","coding","science"] },
-                { href: "gene-verdant.html", text: "Verdant", kind: "magical", views: ["gameplay","coding"] },
-                { href: "gene-lut.html", text: "LUT (palette swap)", kind: "magical", views: ["gameplay","coding"] },
+                { href: "genes-magic-modifiers.html", text: "Colour modifiers", kind: "magical", views: ["gameplay","coding"] },
                 { href: "gene-cutie-mark.html", text: "Cutie mark", kind: "magical", views: ["gameplay","coding"] },
+                { href: "gene-dhampir.html", text: "Dhampir", kind: "magical", views: ["gameplay","coding","science"] },
+                { href: "genes-magic-fields.html", text: "Fields and regions", kind: "magical", views: ["gameplay","coding"] },
+                { href: "genes-magic-ground.html", text: "Ground and strong white", kind: "magical", views: ["gameplay","coding"] },
+                { href: "gene-healer.html", text: "Healer", kind: "magical", views: ["gameplay","coding","science"] },
+                { href: "gene-light.html", text: "Light", kind: "magical", views: ["gameplay","coding","science"] },
+                { href: "genes-magic-lines.html", text: "Lines and strokes", kind: "magical", views: ["gameplay","coding"] },
+                { href: "gene-lut.html", text: "LUT (palette swap)", kind: "magical", views: ["gameplay","coding"] },
+                { href: "gene-lycan.html", text: "LYCAN (werewolf)", kind: "magical", views: ["gameplay","coding","science"] },
+                { href: "gene-magic-sectoral-heterochromia.html", text: "Magic sectoral heterochromia", kind: "magical", views: ["gameplay","coding","science"] },
+                { href: "gene-magic-zebra.html", text: "Magic zebra", kind: "magical", views: ["gameplay","coding","science"] },
+                { href: "genes-magic-hair.html", text: "Mane and tail", kind: "magical", views: ["gameplay","coding"] },
+                { href: "gene-mane-color.html", text: "Mane colour", kind: "magical", views: ["gameplay","coding"] },
+                { href: "gene-milk.html", text: "Milk (water / lava)", kind: "magical", views: ["gameplay","coding","science"] },
+                { href: "gene-particle.html", text: "Particle", kind: "magical", views: ["gameplay","coding","science"] },
+                { href: "gene-pink-hair.html", text: "Pink hair", kind: "magical", views: ["gameplay","coding","science"] },
+                { href: "gene-rainbow-dust.html", text: "Rainbow dust", kind: "magical", views: ["gameplay","coding","science"] },
+                { href: "genes-magic-speckle.html", text: "Speckle and dust", kind: "magical", views: ["gameplay","coding"] },
+                { href: "genes-magic-spots.html", text: "Spots and rings", kind: "magical", views: ["gameplay","coding"] },
                 { href: "gene-suntouched.html", text: "Suntouched", kind: "magical", views: ["gameplay","coding","science"] },
+                { href: "gene-tail-color.html", text: "Tail colour", kind: "magical", views: ["gameplay","coding","science"] },
+                { href: "gene-verdant.html", text: "Verdant", kind: "magical", views: ["gameplay","coding"] },
                 { href: "gene-waterborn.html", text: "Waterborn", kind: "magical", views: ["gameplay","coding","science"] }
-            ]
+                        ]
         },
         {
             title: "Gameplay",

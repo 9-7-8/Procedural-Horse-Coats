@@ -1,0 +1,83 @@
+{
+  "format": 3,
+  "key": "horsegenetics.fade",
+  "name": "Fade",
+  "phase": "magical",
+  "priority": 400,
+  "rarity": "COMMON",
+  "blurb": "The mane and tail leave the coat colour behind on their way down and end in a colour no horse's hair is, the shade running in the family.",
+  "alleles": [
+    {
+      "token": "Fd",
+      "label": "Fade (Fd)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "hue",
+      "min": 0.0,
+      "max": 360.0
+    },
+    {
+      "name": "depth",
+      "min": 0.25,
+      "max": 0.72
+    },
+    {
+      "name": "start",
+      "min": 0.25,
+      "max": 0.7
+    }
+  ],
+  "expressions": [
+    {
+      "id": "fade",
+      "name": "Fade",
+      "description": "A smooth ombre down the length of the mane, forelock and tail: coat colour at the roots, giving way somewhere down the strand to a colour that has nothing to do with the horse. Where the fade is pale the shift is barely a shift at all and you could miss it; where it is deep the far half of the hair is simply that colour and nothing else. Both the shade and how dark it runs are family traits - bright parents throw bright foals, and a line that has gone deep stays deep - but the drift is slow enough that it takes generations to move far.",
+      "when": [
+        "Fd/Fd",
+        "Fd/n"
+      ],
+      "layers": [
+        {
+          "name": "the gradient down the hair",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "HAIR"
+              ]
+            }
+          ],
+          "op": {
+            "type": "RAMP",
+            "hue": "$hue",
+            "hueSpan": 18.0,
+            "saturation": 0.85,
+            "lightness": "$depth",
+            "axis": "Y",
+            "space": "part",
+            "from": "$start",
+            "to": 0.0,
+            "strength": 90
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "Ordinary hair.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Fd/Fd": 0.006,
+    "Fd/n": 0.114,
+    "n/n": 99.88
+  }
+}

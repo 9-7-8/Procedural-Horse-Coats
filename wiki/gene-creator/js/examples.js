@@ -225,86 +225,250 @@ window.HG.examples = {
     "priority": 240,
     "blurb": "A demonstration gene, not a real one: it uses every shape mask and every colour op once, so the parity check has something to compare on all of them.",
     "alleles": [
-      { "token": "Pri", "label": "Prismatic (Pri)" },
-      { "token": "n", "label": "Wild-type (n)" }
+      {
+        "token": "Pri",
+        "label": "Prismatic (Pri)"
+      },
+      {
+        "token": "n",
+        "label": "Wild-type (n)"
+      }
     ],
     "knobs": [
-      { "name": "spotSeed", "type": "seed" },
-      { "name": "strokeSeed", "type": "seed" },
-      { "name": "coreHue", "min": 0.0, "max": 360.0 },
-      { "name": "spotSize", "min": 0.5, "max": 1.4 }
+      {
+        "name": "spotSeed",
+        "type": "seed"
+      },
+      {
+        "name": "strokeSeed",
+        "type": "seed"
+      },
+      {
+        "name": "coreHue",
+        "min": 0.0,
+        "max": 360.0
+      },
+      {
+        "name": "spotSize",
+        "min": 0.5,
+        "max": 1.4
+      }
     ],
     "expressions": [
       {
         "id": "prismatic",
         "name": "Prismatic",
         "description": "Glowing spots in the horse's own hue, hollow rings over the barrel, dust along the belly, tapering strokes down the neck, a curl on each shoulder, a spectral tail and an opal blaze. Nothing about it is subtle, which is the point: every primitive is visible at once.",
-        "when": [ "Pri/Pri", "Pri/n" ],
+        "when": [
+          "Pri/Pri",
+          "Pri/n"
+        ],
         "layers": [
           {
             "name": "glowing spots in the horse's own hue",
             "emissive": true,
             "masks": [
-              { "type": "SPOTS", "parts": [ "BODY", "NECK" ], "seed": "$spotSeed",
-                "spacing": 3.6, "radius": "$spotSize", "vary": 0.6, "chance": 0.55,
-                "stretch": 1.7, "axis": "X", "softness": 0.2 }
+              {
+                "type": "SPOTS",
+                "parts": [
+                  "BODY",
+                  "NECK"
+                ],
+                "seed": "$spotSeed",
+                "spacing": 3.6,
+                "radius": "$spotSize",
+                "vary": 0.6,
+                "chance": 0.55,
+                "stretch": 1.7,
+                "axis": "X",
+                "softness": 0.2
+              }
             ],
-            "op": { "type": "TOWARD", "hue": "$coreHue", "saturation": 0.85,
-              "lightness": 0.62, "strength": 92 }
+            "op": {
+              "type": "TOWARD",
+              "hue": "$coreHue",
+              "saturation": 0.85,
+              "lightness": 0.62,
+              "strength": 92
+            }
           },
           {
             "name": "hollow rings over the barrel",
             "masks": [
-              { "type": "RINGS", "parts": [ "BODY" ], "spacing": 7.0, "radius": 2.4,
-                "thickness": 0.7, "vary": 0.35, "chance": 0.7, "arc": 0.8, "softness": 0.25 }
+              {
+                "type": "RINGS",
+                "parts": [
+                  "BODY"
+                ],
+                "spacing": 7.0,
+                "radius": 2.4,
+                "thickness": 0.7,
+                "vary": 0.35,
+                "chance": 0.7,
+                "arc": 0.8,
+                "softness": 0.25
+              }
             ],
-            "op": { "type": "TOWARD", "color": "#f5f0ff", "strength": 70 }
+            "op": {
+              "type": "TOWARD",
+              "color": "#f5f0ff",
+              "strength": 70
+            }
           },
           {
             "name": "dust along the belly",
             "masks": [
-              { "type": "SPECKLE", "parts": [ "BODY" ], "spacing": 0.6, "size": 0.4,
-                "density": 0.45, "clumping": 0.7, "clumpScale": 6.0 },
-              { "type": "AXIS", "parts": [ "BODY" ], "axis": "Y", "space": "part",
-                "from": 0.0, "to": 0.35, "softness": 0.2 }
+              {
+                "type": "SPECKLE",
+                "parts": [
+                  "BODY"
+                ],
+                "spacing": 0.6,
+                "size": 0.4,
+                "density": 0.45,
+                "clumping": 0.7,
+                "clumpScale": 6.0
+              },
+              {
+                "type": "AXIS",
+                "parts": [
+                  "BODY"
+                ],
+                "axis": "Y",
+                "space": "part",
+                "from": 0.0,
+                "to": 0.35,
+                "softness": 0.2
+              }
             ],
-            "op": { "type": "PALETTE", "hue": "$coreHue", "hueSpread": 55.0,
-              "saturation": 0.7, "lightness": 0.6, "scale": 4.0, "strength": 80 }
+            "op": {
+              "type": "PALETTE",
+              "hue": "$coreHue",
+              "hueSpread": 55.0,
+              "saturation": 0.7,
+              "lightness": 0.6,
+              "scale": 4.0,
+              "strength": 80
+            }
           },
           {
             "name": "tapering strokes down the neck",
             "masks": [
-              { "type": "STROKES", "parts": [ "NECK" ], "seed": "$strokeSeed",
-                "spacing": 2.0, "length": 9.0, "axis": "Y", "width": 0.3,
-                "curl": 0.5, "softness": 0.3 }
+              {
+                "type": "STROKES",
+                "parts": [
+                  "NECK"
+                ],
+                "seed": "$strokeSeed",
+                "spacing": 2.0,
+                "length": 9.0,
+                "axis": "Y",
+                "width": 0.6,
+                "curl": 0.5,
+                "softness": 0.3
+              }
             ],
-            "op": { "type": "TOWARD", "color": "#101018", "strength": 85 }
+            "op": {
+              "type": "TOWARD",
+              "color": "#101018",
+              "strength": 85
+            }
           },
           {
             "name": "a curl on each shoulder",
             "masks": [
-              { "type": "SPIRAL", "parts": [ "BODY" ], "radius": 5.0, "turns": 2.25,
-                "width": 0.55, "axis": "Z", "offset": 0.22, "softness": 0.18 }
+              {
+                "type": "SPIRAL",
+                "parts": [
+                  "BODY"
+                ],
+                "radius": 5.0,
+                "turns": 2.25,
+                "width": 0.55,
+                "axis": "Z",
+                "offset": 0.22,
+                "softness": 0.18
+              }
             ],
-            "op": { "type": "TOWARD", "color": "#ffffff", "strength": 95 }
+            "op": {
+              "type": "TOWARD",
+              "color": "#ffffff",
+              "strength": 95
+            }
           },
           {
             "name": "a spectral tail, root to tip",
             "masks": [
-              { "type": "PARTS", "parts": [ "TAIL", "MANE" ] }
+              {
+                "type": "PARTS",
+                "parts": [
+                  "TAIL",
+                  "MANE"
+                ]
+              }
             ],
-            "op": { "type": "RAMP", "hue": "$coreHue", "hueSpan": 210.0,
-              "saturation": 0.9, "lightness": 0.55,
-              "axis": "Y", "space": "part", "from": 0.9, "to": 0.1, "strength": 88 }
+            "op": {
+              "type": "RAMP",
+              "hue": "$coreHue",
+              "hueSpan": 210.0,
+              "saturation": 0.9,
+              "lightness": 0.55,
+              "axis": "Y",
+              "space": "part",
+              "from": 0.9,
+              "to": 0.1,
+              "strength": 88
+            }
           },
           {
             "name": "an opal blaze",
             "masks": [
-              { "type": "CENTERLINE", "parts": [ "FACE" ], "halfWidth": 1.4, "softness": 0.5 }
+              {
+                "type": "CENTERLINE",
+                "parts": [
+                  "FACE"
+                ],
+                "halfWidth": 1.4,
+                "softness": 0.5
+              }
             ],
-            "op": { "type": "PALETTE",
-              "colors": [ "#bfe9ff", "#c8ffe0", "#e3d1ff", "#ffe6c9" ],
-              "scale": 2.5, "strength": 90 }
+            "op": {
+              "type": "PALETTE",
+              "colors": [
+                "#bfe9ff",
+                "#c8ffe0",
+                "#e3d1ff",
+                "#ffe6c9"
+              ],
+              "scale": 2.5,
+              "strength": 90
+            }
+          },
+          {
+            "name": "and one hind leg negated, so the parity check sees INVERT too",
+            "masks": [
+              {
+                "type": "PARTS",
+                "parts": [
+                  "LEFT_HIND_LEG"
+                ]
+              },
+              {
+                "type": "AXIS",
+                "parts": [
+                  "LEFT_HIND_LEG"
+                ],
+                "axis": "Y",
+                "space": "part",
+                "from": 0.0,
+                "to": 0.6,
+                "softness": 0.15
+              }
+            ],
+            "op": {
+              "type": "INVERT",
+              "amount": 85.0
+            }
           }
         ]
       },

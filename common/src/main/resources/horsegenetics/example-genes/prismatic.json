@@ -224,6 +224,32 @@
             "scale": 2.5,
             "strength": 90
           }
+        },
+        {
+          "name": "and one hind leg negated, so the parity check sees INVERT too",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "LEFT_HIND_LEG"
+              ]
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "LEFT_HIND_LEG"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.0,
+              "to": 0.6,
+              "softness": 0.15
+            }
+          ],
+          "op": {
+            "type": "INVERT",
+            "amount": 85.0
+          }
         }
       ]
     },

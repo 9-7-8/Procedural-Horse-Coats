@@ -1,0 +1,123 @@
+{
+  "format": 3,
+  "key": "horsegenetics.spectrum_light",
+  "name": "Spectrum Light",
+  "phase": "magical",
+  "priority": 434,
+  "rarity": "LEGENDARY",
+  "blurb": "One long field over the barrel and hip through which the hue rotates continuously in spectral order - red to violet, no bands, no repeats.",
+  "alleles": [
+    {
+      "token": "Spc",
+      "label": "Spectrum Light (Spc)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "fieldSeed",
+      "type": "seed"
+    },
+    {
+      "name": "start",
+      "min": 0.0,
+      "max": 360.0
+    },
+    {
+      "name": "run",
+      "min": 200.0,
+      "max": 300.0
+    }
+  ],
+  "expressions": [
+    {
+      "id": "spectrum",
+      "name": "Spectrum Light",
+      "description": "A single field, three or four feet long and a foot or two tall, lying over the back of the barrel, the flank and the hip with its long axis close to the body's. Along that axis the hue turns continuously through the spectrum in order - red, orange, yellow, green, cyan, blue, violet - at a steady few degrees an inch, with no banding and no segment repeated. Saturation is highest along the field's centre line and falls to nothing at its margins, so it has no edge. Most of these horses also have the neighbouring stretch of mane picking up whatever hue is local to it, at about half strength.",
+      "when": [
+        "Spc/Spc",
+        "Spc/n"
+      ],
+      "layers": [
+        {
+          "name": "the field, hue turning along it",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY"
+              ],
+              "seed": "$fieldSeed",
+              "spacing": 30.0,
+              "radius": 14.0,
+              "vary": 0.2,
+              "stretch": 2.4,
+              "axis": "X",
+              "softness": 4.0
+            }
+          ],
+          "op": {
+            "type": "RAMP",
+            "hue": "$start",
+            "hueSpan": "$run",
+            "saturation": 0.75,
+            "lightness": 0.55,
+            "axis": "X",
+            "space": "body",
+            "from": 0.05,
+            "to": 0.75,
+            "strength": 90
+          }
+        },
+        {
+          "name": "the mane picking up the local hue",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "MANE"
+              ]
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "MANE"
+              ],
+              "axis": "X",
+              "space": "part",
+              "from": 0.0,
+              "to": 0.55,
+              "softness": 0.3
+            }
+          ],
+          "op": {
+            "type": "RAMP",
+            "hue": "$start",
+            "hueSpan": "$run",
+            "saturation": 0.6,
+            "lightness": 0.55,
+            "axis": "X",
+            "space": "body",
+            "from": 0.05,
+            "to": 0.75,
+            "strength": 55
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "No spectrum.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Spc/Spc": 0.0005,
+    "Spc/n": 0.0095,
+    "n/n": 99.99
+  }
+}

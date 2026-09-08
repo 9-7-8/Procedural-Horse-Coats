@@ -1,0 +1,344 @@
+{
+  "format": 3,
+  "key": "horsegenetics.dust",
+  "name": "Dust",
+  "phase": "magical",
+  "priority": 342,
+  "rarity": "COMMON",
+  "blurb": "Fine stipple with no boundary anywhere - up from the pasterns, along the belly, a cap on the muzzle, and a band beside the mane.",
+  "alleles": [
+    {
+      "token": "Dst",
+      "label": "Dust, white (Dst)"
+    },
+    {
+      "token": "Dsc",
+      "label": "Dust, coloured (Dsc)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "dustSeed",
+      "type": "seed"
+    },
+    {
+      "name": "hue",
+      "min": 0.0,
+      "max": 360.0
+    },
+    {
+      "name": "density",
+      "min": 0.3,
+      "max": 0.75
+    }
+  ],
+  "expressions": [
+    {
+      "id": "white",
+      "name": "Dust",
+      "description": "Four fields, and not one of them has an edge - the particles simply thin out until there are none. One rises from the pastern and fetlock and dies away between the mid-cannon and just below the knee. One runs the belly from the elbow back to the flank. One caps the muzzle from the upper lip and dissolves at the nasal bone. The last is a narrow band lying alongside the mane down the crest.",
+      "when": [
+        "Dst/Dst",
+        "Dst/Dsc",
+        "Dst/n"
+      ],
+      "layers": [
+        {
+          "name": "up from the pasterns",
+          "masks": [
+            {
+              "type": "SPECKLE",
+              "parts": [
+                "LEGS"
+              ],
+              "seed": "$dustSeed",
+              "spacing": 0.6,
+              "size": 0.45,
+              "density": "$density",
+              "softness": 0.4
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "LEGS"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.0,
+              "to": 0.35,
+              "softness": 0.35
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#f6f3ec",
+            "strength": 88
+          }
+        },
+        {
+          "name": "along the belly",
+          "masks": [
+            {
+              "type": "SPECKLE",
+              "parts": [
+                "BODY"
+              ],
+              "seed": "$dustSeed",
+              "spacing": 0.6,
+              "size": 0.45,
+              "density": "$density",
+              "softness": 0.4
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.0,
+              "to": 0.28,
+              "softness": 0.3
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#f6f3ec",
+            "strength": 88
+          }
+        },
+        {
+          "name": "the muzzle cap",
+          "masks": [
+            {
+              "type": "SPECKLE",
+              "parts": [
+                "MUZZLE",
+                "HEAD"
+              ],
+              "seed": "$dustSeed",
+              "spacing": 0.6,
+              "size": 0.45,
+              "density": "$density",
+              "softness": 0.4
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "MUZZLE",
+                "HEAD"
+              ],
+              "axis": "X",
+              "space": "body",
+              "from": 0.82,
+              "to": 1.0,
+              "softness": 0.2
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#f6f3ec",
+            "strength": 88
+          }
+        },
+        {
+          "name": "the band beside the mane",
+          "masks": [
+            {
+              "type": "SPECKLE",
+              "parts": [
+                "NECK"
+              ],
+              "seed": "$dustSeed",
+              "spacing": 0.6,
+              "size": 0.45,
+              "density": "$density",
+              "softness": 0.4
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "NECK"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.72,
+              "to": 1.0,
+              "softness": 0.25
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#f6f3ec",
+            "strength": 88
+          }
+        }
+      ]
+    },
+    {
+      "id": "coloured",
+      "name": "Coloured Dust",
+      "description": "The same four fields in a colour the line carries rather than in white. Fully recessive: it takes two copies, and a single copy beside the white allele shows white. It never gives blue eyes, whatever the white form does.",
+      "when": {
+        "Dsc": 2
+      },
+      "layers": [
+        {
+          "name": "up from the pasterns, in colour",
+          "masks": [
+            {
+              "type": "SPECKLE",
+              "parts": [
+                "LEGS"
+              ],
+              "seed": "$dustSeed",
+              "spacing": 0.6,
+              "size": 0.45,
+              "density": "$density",
+              "softness": 0.4
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "LEGS"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.0,
+              "to": 0.35,
+              "softness": 0.35
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 88,
+            "hue": "$hue",
+            "saturation": 0.8,
+            "lightness": 0.55
+          }
+        },
+        {
+          "name": "along the belly, in colour",
+          "masks": [
+            {
+              "type": "SPECKLE",
+              "parts": [
+                "BODY"
+              ],
+              "seed": "$dustSeed",
+              "spacing": 0.6,
+              "size": 0.45,
+              "density": "$density",
+              "softness": 0.4
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.0,
+              "to": 0.28,
+              "softness": 0.3
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 88,
+            "hue": "$hue",
+            "saturation": 0.8,
+            "lightness": 0.55
+          }
+        },
+        {
+          "name": "the muzzle cap, in colour",
+          "masks": [
+            {
+              "type": "SPECKLE",
+              "parts": [
+                "MUZZLE",
+                "HEAD"
+              ],
+              "seed": "$dustSeed",
+              "spacing": 0.6,
+              "size": 0.45,
+              "density": "$density",
+              "softness": 0.4
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "MUZZLE",
+                "HEAD"
+              ],
+              "axis": "X",
+              "space": "body",
+              "from": 0.82,
+              "to": 1.0,
+              "softness": 0.2
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 88,
+            "hue": "$hue",
+            "saturation": 0.8,
+            "lightness": 0.55
+          }
+        },
+        {
+          "name": "the band beside the mane, in colour",
+          "masks": [
+            {
+              "type": "SPECKLE",
+              "parts": [
+                "NECK"
+              ],
+              "seed": "$dustSeed",
+              "spacing": 0.6,
+              "size": 0.45,
+              "density": "$density",
+              "softness": 0.4
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "NECK"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.72,
+              "to": 1.0,
+              "softness": 0.25
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 88,
+            "hue": "$hue",
+            "saturation": 0.8,
+            "lightness": 0.55
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "No dust.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Dst/Dst": 0.006,
+    "Dst/Dsc": 0.024,
+    "Dst/n": 0.114,
+    "Dsc/Dsc": 0.024,
+    "n/n": 99.832
+  }
+}

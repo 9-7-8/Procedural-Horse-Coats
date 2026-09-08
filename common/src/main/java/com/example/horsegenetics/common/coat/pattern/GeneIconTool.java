@@ -20,6 +20,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -73,6 +74,21 @@ public final class GeneIconTool {
      */
     private static final String BASE = "agouti=A/a";
 
+    /**
+     * The fallback horse, for the genes that paint <b>nothing</b> on a plain
+     * bay.
+     *
+     * <p>Voided and Opalized do not draw a shape of their own: they change what
+     * the horse's <i>white markings</i> come out as, so on a horse with no
+     * white they correctly do nothing at all - and an icon of nothing is a
+     * useless icon, however honest. A gene that comes out identical to the
+     * plain bay is re-baked on a bay with a tobiano, which gives it something
+     * to work on. Detected rather than declared: a gene that stops painting is
+     * then a gene whose icon quietly changes backdrop, which is a hint worth
+     * having.
+     */
+    private static final String MARKED = "agouti=A/a tobiano=To/to";
+
     private static int lastReadWidth;
     private static int lastReadHeight;
 
@@ -90,8 +106,12 @@ public final class GeneIconTool {
         LutSet luts = new LutSet(base, java.util.Map.of("bluepink", bluepink));
 
         List<String> written = new ArrayList<>();
+        List<String> onMarked = new ArrayList<>();
         // The plain bay, so a reader has something to compare every icon against.
-        write(outDir.resolve("_bay.png"), bayWith(null), Epigenome.fromSeed(11), template, luts);
+        Genotype plain = bayWith(null, BASE);
+        int[] plainSheet = CoatTextureComposer.compose(plain, Epigenome.fromSeed(11),
+                Skin.ADULT, true, template, luts);
+        ImageIO.write(sideView(plainSheet), "PNG", outDir.resolve("_bay.png").toFile());
         written.add("_bay");
 
         for (SpecGene gene : Genes.loaded()) {
@@ -99,8 +119,19 @@ public final class GeneIconTool {
             // Seeded off the key, so re-baking gives the same horse back and the
             // icons do not all churn every time one gene is added.
             Epigenome epi = Epigenome.fromSeed(gene.key().hashCode() * 2654435761L);
-            write(outDir.resolve(slug + ".png"), bayWith(gene), epi, template, luts);
+            int[] sheet = CoatTextureComposer.compose(bayWith(gene, BASE), epi,
+                    Skin.ADULT, true, template, luts);
+            if (Arrays.equals(sheet, CoatTextureComposer.compose(plain, epi,
+                    Skin.ADULT, true, template, luts))) {
+                sheet = CoatTextureComposer.compose(bayWith(gene, MARKED), epi,
+                        Skin.ADULT, true, template, luts);
+                onMarked.add(slug);
+            }
+            ImageIO.write(sideView(sheet), "PNG", outDir.resolve(slug + ".png").toFile());
             written.add(slug);
+        }
+        if (!onMarked.isEmpty()) {
+            System.out.println("on a marked bay (they paint nothing on a plain one): " + onMarked);
         }
 
         Files.writeString(outDir.resolve("index.txt"),
@@ -115,20 +146,13 @@ public final class GeneIconTool {
      * advertises the homozygote; that is the honest choice for a one-image
      * summary, and the gene's own page carries both.
      */
-    private static Genotype bayWith(SpecGene gene) {
-        Genotype gt = override(BASE);
+    private static Genotype bayWith(SpecGene gene, String base) {
+        Genotype gt = override(base);
         if (gene == null) {
             return gt;
         }
         Allele variant = gene.alleles().get(0);
         return gt.with(new AllelePair(variant, variant));
-    }
-
-    private static void write(Path out, Genotype gt, Epigenome epi, int[] template, LutSet luts)
-            throws IOException {
-        int[] sheet = CoatTextureComposer.compose(gt, epi, Skin.ADULT, true, template, luts);
-        BufferedImage img = sideView(sheet);
-        ImageIO.write(img, "PNG", out.toFile());
     }
 
     // ------------------------------------------------------------------

@@ -300,6 +300,15 @@ window.HG = window.HG || {};
         v("strength", 100, "percent of the way to the cell's colour", { min: 0, max: 100, step: 1 }),
         v("opacity", 100, "percent opacity the texel ends at", { min: 0, max: 100, step: 1 })
       ])
+    },
+    INVERT: {
+      phase: "magical",
+      blurb: "The photographic negative of whatever is already there - white to black, orange to blue. The only colour op that is a function of the texel rather than a walk toward a colour, so put it late.",
+      params: [
+        v("amount", 100, "percent of the way to the negative; 50 lands on flat grey",
+          { min: 0, max: 100, step: 1 }),
+        v("opacity", 100, "percent opacity the texel ends at", { min: 0, max: 100, step: 1 })
+      ]
     }
   };
 

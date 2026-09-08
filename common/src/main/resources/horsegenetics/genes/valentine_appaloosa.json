@@ -1,0 +1,152 @@
+{
+  "format": 3,
+  "key": "horsegenetics.valentine_appaloosa",
+  "name": "Valentine Appaloosa",
+  "phase": "magical",
+  "priority": 208,
+  "rarity": "RARE",
+  "blurb": "The whole coat pushed into pinks and reds - black to fuchsia, red to pink - and then blanketed with white spots, mane and tail carried along with it.",
+  "alleles": [
+    {
+      "token": "Vln",
+      "label": "Valentine Appaloosa (Vln)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "spotSeed",
+      "type": "seed"
+    },
+    {
+      "name": "blanketSeed",
+      "type": "seed"
+    },
+    {
+      "name": "spread",
+      "min": 0.35,
+      "max": 0.85
+    }
+  ],
+  "expressions": [
+    {
+      "id": "valentine",
+      "name": "Valentine Appaloosa",
+      "description": "Two things at once. First the base shifts: wherever the coat was black it comes out saturated red or fuchsia, and wherever it was red it comes out pink, mane and tail included - so there is no such thing as a dull Valentine. Then the appaloosa half puts white spots over it, in any of the usual arrangements: a blanket over the hindquarter, leopard spotting over the whole horse, a fine snowflake scatter, or a varnish roan. Some horses show the reverse as well, with white cut-outs left in the colour rather than laid on it.",
+      "when": [
+        "Vln/Vln",
+        "Vln/n"
+      ],
+      "layers": [
+        {
+          "name": "black pigment to fuchsia",
+          "masks": [
+            {
+              "type": "PIGMENT",
+              "channel": "black",
+              "from": 0.25,
+              "to": 0.7
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#c81e78",
+            "strength": 88
+          }
+        },
+        {
+          "name": "red pigment to pink",
+          "masks": [
+            {
+              "type": "PIGMENT",
+              "channel": "red",
+              "from": 0.25,
+              "to": 0.7
+            },
+            {
+              "type": "PIGMENT",
+              "channel": "black",
+              "from": 0.25,
+              "to": 0.7,
+              "invert": true
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#f087b4",
+            "strength": 82
+          }
+        },
+        {
+          "name": "the white blanket over the hindquarter",
+          "masks": [
+            {
+              "type": "PATCHES",
+              "parts": [
+                "BODY"
+              ],
+              "seed": "$blanketSeed",
+              "scale": 8.0,
+              "threshold": "$spread",
+              "softness": 0.12
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "space": "part",
+              "from": 0.0,
+              "to": 0.55,
+              "softness": 0.3
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#ffffff",
+            "strength": 92
+          }
+        },
+        {
+          "name": "spots over the blanket and beyond it",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HIND_LEGS"
+              ],
+              "seed": "$spotSeed",
+              "spacing": 2.8,
+              "radius": 0.9,
+              "vary": 0.55,
+              "chance": 0.5,
+              "softness": 0.12
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#ffffff",
+            "strength": 90
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "No valentine.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Vln/Vln": 0.002,
+    "Vln/n": 0.038,
+    "n/n": 99.96
+  }
+}

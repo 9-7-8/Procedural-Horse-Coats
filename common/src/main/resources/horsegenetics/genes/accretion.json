@@ -1,0 +1,202 @@
+{
+  "format": 3,
+  "key": "horsegenetics.accretion",
+  "name": "Accretion",
+  "phase": "magical",
+  "priority": 270,
+  "rarity": "COMMON",
+  "blurb": "One long boundary running the length of the horse, dividing it into a pale field and a coloured one - the allele decides whether it is the underside or the topline that goes pale.",
+  "alleles": [
+    {
+      "token": "Ab",
+      "label": "Bottom Accretion (Ab)"
+    },
+    {
+      "token": "At",
+      "label": "Top Accretion (At)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "edgeSeed",
+      "type": "seed"
+    },
+    {
+      "name": "depth",
+      "min": 0.3,
+      "max": 0.55
+    },
+    {
+      "name": "height",
+      "min": 0.45,
+      "max": 0.7
+    }
+  ],
+  "expressions": [
+    {
+      "id": "bottom",
+      "name": "Bottom Accretion",
+      "description": "The pale field is the underside: a quarter to nearly half the horse, bounded by a single line running nose-to-tail at a third to a half of the local body depth measured up from the belly, rising a little over the shoulder and rather more over the flank. The boundary undulates gently and has no edge at all - it is a gradient a hand's span or two wide. All four legs are included the whole way to the hoof with no separate boundary of their own, and about three horses in five also take a cap on the muzzle.",
+      "when": [
+        "Ab/Ab",
+        "Ab/At",
+        "Ab/n"
+      ],
+      "layers": [
+        {
+          "name": "the ventral field",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.0,
+              "to": "$depth",
+              "softness": 0.35
+            },
+            {
+              "type": "NOISE",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$edgeSeed",
+              "scale": 12.0,
+              "low": 0.7,
+              "high": 1.3
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#f4efe4",
+            "strength": 88
+          }
+        },
+        {
+          "name": "the legs, the whole way down",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "LEGS"
+              ]
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#f4efe4",
+            "strength": 88
+          }
+        },
+        {
+          "name": "the muzzle cap",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "MUZZLE"
+              ]
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#f4efe4",
+            "strength": 70
+          }
+        }
+      ]
+    },
+    {
+      "id": "top",
+      "name": "Top Accretion",
+      "description": "The mirror image, and the rarer of the two: the pale field is the topline instead - crest, dorsal neck, withers, back, loin, croup and the top of the hip, a fifth to two-fifths of the horse, bounded by a line at half to two-thirds of the body depth measured down from the spine. The legs are excluded entirely. About half of these horses take the mane as well.",
+      "when": [
+        "At/At",
+        "At/n"
+      ],
+      "layers": [
+        {
+          "name": "the dorsal field",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": "$height",
+              "to": 1.0,
+              "softness": 0.4
+            },
+            {
+              "type": "NOISE",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$edgeSeed",
+              "scale": 10.0,
+              "low": 0.7,
+              "high": 1.3
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#f4efe4",
+            "strength": 88
+          }
+        },
+        {
+          "name": "the mane, on about half of them",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "MANE"
+              ]
+            },
+            {
+              "type": "NOISE",
+              "parts": [
+                "MANE"
+              ],
+              "seed": "$edgeSeed",
+              "scale": 30.0,
+              "low": 0.0,
+              "high": 1.8
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#f4efe4",
+            "strength": 85
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "No accretion.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Ab/Ab": 0.006,
+    "Ab/At": 0.016,
+    "Ab/n": 0.114,
+    "At/At": 0.016,
+    "At/n": 0.016,
+    "n/n": 99.832
+  }
+}

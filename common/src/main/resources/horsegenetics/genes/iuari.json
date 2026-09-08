@@ -1,0 +1,134 @@
+{
+  "format": 3,
+  "key": "horsegenetics.iuari",
+  "name": "Iuari",
+  "phase": "magical",
+  "priority": 263,
+  "rarity": "COMMON",
+  "blurb": "Concentrated patches a shade off the coat, each one ringed by a scatter of bright speckles that thins as it moves away.",
+  "alleles": [
+    {
+      "token": "Iua",
+      "label": "Iuari (Iua)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "patchSeed",
+      "type": "seed"
+    },
+    {
+      "name": "hue",
+      "min": 0.0,
+      "max": 360.0
+    },
+    {
+      "name": "patchScale",
+      "min": 4.0,
+      "max": 8.0
+    },
+    {
+      "name": "shade",
+      "min": -35.0,
+      "max": 35.0
+    }
+  ],
+  "expressions": [
+    {
+      "id": "iuari",
+      "name": "Iuari",
+      "description": "Patches that read as deliberate focal points rather than as marks: darker than the coat on some horses and lighter on others, concentrated on the neck, shoulder, barrel and hindquarter, with soft indistinct middles. What names the marking is the rim - each patch is outlined by speckling that crowds at its boundary and thins away from it, so the patch looks lit from the edge. It goes under white markings rather than over them, and the whole horse still carries its ordinary speckling as well.",
+      "when": [
+        "Iua/Iua",
+        "Iua/n"
+      ],
+      "layers": [
+        {
+          "name": "the patches themselves",
+          "masks": [
+            {
+              "type": "PATCHES",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$patchSeed",
+              "scale": "$patchScale",
+              "threshold": 0.58,
+              "softness": 0.3
+            }
+          ],
+          "op": {
+            "type": "TINT",
+            "red": "$shade",
+            "green": "$shade",
+            "blue": "$shade",
+            "opacity": 0.0
+          }
+        },
+        {
+          "name": "speckling crowded at the patch rims",
+          "masks": [
+            {
+              "type": "SPECKLE",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$patchSeed",
+              "spacing": 0.8,
+              "size": 0.5,
+              "density": 0.55,
+              "softness": 0.3
+            },
+            {
+              "type": "PATCHES",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$patchSeed",
+              "scale": "$patchScale",
+              "threshold": 0.58,
+              "softness": 0.3
+            },
+            {
+              "type": "PATCHES",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$patchSeed",
+              "scale": "$patchScale",
+              "threshold": 0.7,
+              "softness": 0.3,
+              "invert": true
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.9,
+            "lightness": 0.6,
+            "strength": 92
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "No patches.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Iua/Iua": 0.006,
+    "Iua/n": 0.114,
+    "n/n": 99.88
+  }
+}

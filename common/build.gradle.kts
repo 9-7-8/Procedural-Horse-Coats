@@ -74,6 +74,17 @@ tasks.register<JavaExec>("bakeCreatorAssets") {
     args(rootProject.layout.projectDirectory.dir("wiki/gene-creator").asFile.absolutePath)
 }
 
+// The wiki's magical gene family pages, generated from the gene files. See
+// GeneWikiTool for why these pages in particular are not hand-written.
+tasks.register<JavaExec>("bakeGeneWikiPages") {
+    group = "horsegenetics"
+    description = "Write wiki/genes-magic-*.html from the shipped gene files"
+    dependsOn(tasks.named("classes"))
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass.set("com.example.horsegenetics.common.genetics.spec.GeneWikiTool")
+    args(rootProject.layout.projectDirectory.dir("wiki").asFile.absolutePath)
+}
+
 // One side-on snapshot per data-driven gene, on a standard bay, for the wiki's
 // gene index. Also the fastest way to look at every gene at once - see the class.
 tasks.register<JavaExec>("bakeGeneIcons") {

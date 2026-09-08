@@ -1,0 +1,126 @@
+{
+  "format": 3,
+  "key": "horsegenetics.black_holes",
+  "name": "Black Holes",
+  "phase": "magical",
+  "priority": 213,
+  "rarity": "RARE",
+  "blurb": "Solid hard-edged patches with scalloped margins, dropped anywhere at all - face, limbs, belly, over the base of the mane - each with a satellite dot or two beside it.",
+  "alleles": [
+    {
+      "token": "Bhl",
+      "label": "Black Holes (Bhl)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "holeSeed",
+      "type": "seed"
+    },
+    {
+      "name": "holeScale",
+      "min": 3.5,
+      "max": 8.0
+    },
+    {
+      "name": "howMany",
+      "min": 0.55,
+      "max": 0.75
+    }
+  ],
+  "expressions": [
+    {
+      "id": "black_holes",
+      "name": "Black Holes",
+      "description": "Three to twelve solid patches a side, longer than they are tall and lying roughly nose-to-tail, with margins that are hard but scalloped rather than smooth. Placement is unrestricted: unlike almost everything else, these can land on the face, the lower legs, the belly midline or across the base of the mane. About a fifth of them carry one to three small dots just outside the margin. The fill is one thing per horse, either the animal's own main coat colour or flat black regardless of it.",
+      "when": [
+        "Bhl/Bhl",
+        "Bhl/n"
+      ],
+      "layers": [
+        {
+          "name": "the patches",
+          "masks": [
+            {
+              "type": "PATCHES",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE",
+                "LEGS",
+                "HAIR"
+              ],
+              "seed": "$holeSeed",
+              "scale": "$holeScale",
+              "threshold": "$howMany",
+              "softness": 0.03
+            },
+            {
+              "type": "SPECKLE",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE",
+                "LEGS",
+                "HAIR"
+              ],
+              "seed": "$holeSeed",
+              "spacing": 1.4,
+              "size": 0.9,
+              "density": 0.9,
+              "softness": 0.2,
+              "combine": "MIN"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#0a0a0b",
+            "strength": 96
+          }
+        },
+        {
+          "name": "the satellite dots",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "LEGS"
+              ],
+              "seed": "$holeSeed",
+              "spacing": 3.5,
+              "radius": 0.5,
+              "vary": 0.5,
+              "chance": 0.2,
+              "softness": 0.06
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#0a0a0b",
+            "strength": 94
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "No holes.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Bhl/Bhl": 0.002,
+    "Bhl/n": 0.038,
+    "n/n": 99.96
+  }
+}

@@ -1,0 +1,220 @@
+{
+  "format": 3,
+  "key": "horsegenetics.fracture",
+  "name": "Fracture",
+  "phase": "magical",
+  "priority": 201,
+  "rarity": "RARE",
+  "blurb": "Overo read backwards - a white horse with the coat colour breaking through it in hard-edged, unpredictable blocks and streaks.",
+  "alleles": [
+    {
+      "token": "Fdf",
+      "label": "Fracture, white (Fdf)"
+    },
+    {
+      "token": "Fdc",
+      "label": "Fracture, coloured (Fdc)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "breakSeed",
+      "type": "seed"
+    },
+    {
+      "name": "hue",
+      "min": 0.0,
+      "max": 360.0
+    },
+    {
+      "name": "blockScale",
+      "min": 3.5,
+      "max": 7.5
+    },
+    {
+      "name": "howMuch",
+      "min": 0.38,
+      "max": 0.62
+    }
+  ],
+  "expressions": [
+    {
+      "id": "white",
+      "name": "Fracture",
+      "description": "Instead of white appearing on a coloured horse, the colour appears on a white one - and it does it in bold uneven blocks and streaks with jagged edges, anywhere at all: neck, shoulder, barrel, hindquarter, legs, face. There is no symmetry to it and no pattern to predict; two Fracture horses out of the same parents look nothing like each other. The head usually keeps a distinct area of coat, and the mane and tail follow whatever is underneath them. It takes two copies - a single copy is carried and shows nothing.",
+      "when": [
+        "Fdf/Fdf",
+        "Fdf/Fdc"
+      ],
+      "layers": [
+        {
+          "name": "white over most of the horse",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "EARS",
+                "LEGS",
+                "HAIR"
+              ]
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#fcfbf7",
+            "strength": 96
+          }
+        },
+        {
+          "name": "the coat breaking back through it in blocks",
+          "masks": [
+            {
+              "type": "PATCHES",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "LEGS",
+                "HAIR"
+              ],
+              "seed": "$breakSeed",
+              "scale": "$blockScale",
+              "threshold": "$howMuch",
+              "softness": 0.02,
+              "invert": true
+            },
+            {
+              "type": "STROKES",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "LEGS",
+                "HAIR"
+              ],
+              "seed": "$breakSeed",
+              "spacing": 6.0,
+              "length": 5.0,
+              "axis": "X",
+              "width": 2.5,
+              "curl": 1.2,
+              "softness": 0.05,
+              "combine": "MAX"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#fcfbf7",
+            "strength": -96
+          }
+        }
+      ]
+    },
+    {
+      "id": "coloured",
+      "name": "Coloured Fracture",
+      "description": "The same fragmentation, with the ground in a colour the line carries rather than in white. Fully recessive: it takes two copies, and a single copy beside the white allele shows white. It never gives blue eyes, whatever the white form does.",
+      "when": {
+        "Fdc": 2
+      },
+      "layers": [
+        {
+          "name": "white over most of the horse, in colour",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "EARS",
+                "LEGS",
+                "HAIR"
+              ]
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 96,
+            "hue": "$hue",
+            "saturation": 0.8,
+            "lightness": 0.55
+          }
+        },
+        {
+          "name": "the coat breaking back through it in blocks, in colour",
+          "masks": [
+            {
+              "type": "PATCHES",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "LEGS",
+                "HAIR"
+              ],
+              "seed": "$breakSeed",
+              "scale": "$blockScale",
+              "threshold": "$howMuch",
+              "softness": 0.02,
+              "invert": true
+            },
+            {
+              "type": "STROKES",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "LEGS",
+                "HAIR"
+              ],
+              "seed": "$breakSeed",
+              "spacing": 6.0,
+              "length": 5.0,
+              "axis": "X",
+              "width": 2.5,
+              "curl": 1.2,
+              "softness": 0.05,
+              "combine": "MAX"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": -96,
+            "hue": "$hue",
+            "saturation": 0.8,
+            "lightness": 0.55
+          }
+        }
+      ]
+    },
+    {
+      "id": "carrier",
+      "name": "Fracture carrier",
+      "description": "One copy shows nothing at all.",
+      "wildType": true
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "No fracture.",
+      "wildType": true,
+      "when": [
+        "n/n"
+      ]
+    }
+  ],
+  "founders": {
+    "Fdf/Fdf": 0.04,
+    "Fdf/Fdc": 0.008,
+    "Fdc/Fdc": 0.008,
+    "n/n": 99.944
+  }
+}
