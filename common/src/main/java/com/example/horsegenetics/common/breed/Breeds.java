@@ -16,10 +16,14 @@ import java.util.Map;
  *
  * <h2>Referenced-but-unbuilt</h2>
  * Genes and features the sheet asks for that this mod does not have yet -
- * Tiger Eye ({@code TE}), HYPP, lower-leg feathering - are recorded in each breed's
+ * lower-leg feathering, breed mane shapes, NNF - are recorded in each breed's
  * {@link Breed#notes()} and collected in {@code wiki/roadmap.html}. The
- * <b>leopard complex</b> ({@code LP} / {@code PATN1} / {@code PATN2}) is built,
- * and Appaloosa, Knabstrupper, Kiger Mustang, Mustang and Shetland now roll it.
+ * <b>leopard complex</b> ({@code LP} / {@code PATN1} / {@code PATN2}), <b>tiger
+ * eye</b> and the disorder loci the sheet named (<b>HYPP</b>, <b>PSSM1</b>,
+ * <b>HERDA</b>, <b>SCID</b>, <b>CA</b>, <b>LFS</b>, <b>GBED</b>, <b>CVM</b>,
+ * megaesophagus) have all since shipped - so a note here is a claim with a
+ * shelf life, and it has to be deleted in the same change as the gene that
+ * closes it.
  */
 public final class Breeds {
 
@@ -182,7 +186,7 @@ public final class Breeds {
                 .gene(DUN, "d1", "d2", 30).gene(DUN, "d2", "d2", 70)
                 .height(hh(14, 2), hh(16, 0)).speed(9).jump(5).health(8)
                 .note("Metallic / iridescent coat sheen - not modelled (a shader, out of scope).")
-                .note("NNF, CVM: early-lethal foal disorders - candidate genes, see roadmap.")
+                .note("NNF: an early-lethal foal disorder with no gene yet - see roadmap.")
                 .build();
     }
 
@@ -232,7 +236,7 @@ public final class Breeds {
                 .gene(PAX3, "SW2", "N", 30).gene(PAX3, "N", "N", 70)
                 .height(hh(14, 2), hh(16, 0)).speed(7).jump(5).health(6)
                 .note("Pinto spotting: tobiano + sabino + frame overo + splash, all present. O/O (lethal white) is the real breeding hazard.")
-                .note("HYPP: candidate heart-reducing gene, see roadmap. HERDA, PSSM1: age-related, folded into heartiness.")
+                .note("HYPP, HERDA and PSSM1 all have loci now - see SCN4A, PPIB and GYS1. HYPP is the breeding hazard here alongside O/O.")
                 .build();
     }
 
@@ -754,7 +758,7 @@ public final class Breeds {
                 .gene(PAX3, "SW2", "N", 20).gene(PAX3, "N", "N", 80)
                 .height(hh(14, 2), hh(16, 0)).speed(8).jump(5).health(7)
                 .note("Massively muscled hindquarters and broad chest - the sprinter. nd1/nd2 give the odd dorsal stripe with no dilution.")
-                .note("HYPP: candidate heart-reducing gene, roadmap. PSSM1, HERDA: age-related.")
+                .note("HYPP, PSSM1 and HERDA all have loci now - see SCN4A, GYS1 and PPIB. Both dominants, so a wild-caught Quarter Horse really can be an affected one.")
                 .build();
     }
 

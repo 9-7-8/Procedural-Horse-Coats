@@ -40,9 +40,12 @@ import java.util.Set;
  *       draw, honouring {@link #magicWhitelist} / {@link #magicBlacklist}.</li>
  * </ul>
  *
- * <p>Real-world traits this mod cannot model yet - the leopard complex, tiger
- * eye, HYPP, breed-specific mane shapes, feathering, head profiles - are
- * recorded in {@link #notes()} and surfaced on {@code wiki/breeds.html}.
+ * <p>Real-world traits this mod cannot model yet - breed-specific mane shapes,
+ * lower-leg feathering, head profiles, the metallic coat sheen - are recorded
+ * in {@link #notes()} and surfaced on {@code wiki/breeds.html}. The list used
+ * to name the leopard complex, tiger eye and HYPP; all three have since
+ * shipped, which is exactly why the examples belong here and the inventory
+ * belongs on the wiki page.
  */
 public record Breed(
         String id,
