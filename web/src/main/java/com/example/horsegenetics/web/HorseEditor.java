@@ -34,6 +34,22 @@ import java.util.List;
  * <p>What this class is <i>not</i> is a view. It holds no pixels and no layout;
  * it answers questions and takes edits. The browser draws it.
  *
+ * <h2>Why the gene rows are a snapshot, and why that is dangerous here</h2>
+ * The constructor takes {@code Genes.codeOrder()} once, exactly as
+ * {@code CustomHorseSpawnScreen} does, because both address gene rows by index.
+ * On the screen's side that is safe at any moment - {@code Genes} registers the
+ * shipped gene files from its own class initialiser, so the registry is
+ * complete before anything can hold a reference to it.
+ *
+ * <p><b>In the browser it is not.</b> TeaVM cannot read a classpath index, so
+ * the page fetches the gene bundle and hands it in after start-up, and an editor
+ * built before that call holds a list with none of the data-driven genes in it.
+ * That is not hypothetical: {@code DesignerApi.main} used to build one, the page
+ * calls {@code main} first, and eighty-four genes registered cleanly and none of
+ * them appeared. The editor is built lazily now and dropped on every
+ * registration. <b>If you add a boot-time call that touches the editor, put it
+ * after {@code registerGenes}.</b>
+ *
  * <h2>The deliberate divergences</h2>
  * Both are the same one difference wearing two hats: <b>a browser page has no
  * world and no inventory</b>. So the screen's two output actions have no twin

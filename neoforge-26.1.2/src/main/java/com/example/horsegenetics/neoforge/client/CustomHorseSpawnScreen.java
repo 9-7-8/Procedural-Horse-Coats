@@ -112,6 +112,18 @@ import java.util.List;
  * game mode on both, which is the property worth preserving if the gate ever
  * moves: the editor is a viewer that can also spawn, not a creative tool.
  *
+ * <p><b>A third divergence, in when the gene list is taken.</b> Both this class
+ * and {@code HorseEditor} snapshot {@code Genes.codeOrder()} in their
+ * constructor - they have to, because both address gene rows by index. In the
+ * game that is safe at any moment: {@code Genes} registers the shipped gene
+ * files from its own class initialiser, so the registry is complete before
+ * anything can hold a reference to it. In the browser it is not, because TeaVM
+ * cannot read a classpath index and the page has to hand the genes in
+ * afterwards - which is why {@code DesignerApi} builds its editor lazily and
+ * drops it on every registration. Nothing to mirror here; the note exists so
+ * that the next person to see the two constructors side by side knows the
+ * difference is deliberate.
+ *
  * <h2>Notes</h2>
  * Everything here is client-only, and the spawn is <b>creative-only, re-checked
  * on the server</b> ({@code ModNetworking.handleSpawnCustomHorse}).
