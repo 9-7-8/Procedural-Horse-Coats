@@ -1,0 +1,23 @@
+{
+  "structure": "horsegenetics:tm_u_stable",
+  "name": "TM U Stable",
+  "min_horses": 3,
+  "max_horses": 15,
+  "field": 0,
+  "breeds": [
+    "american_paint",
+    "appaloosa",
+    "knabstrupper",
+    "gypsy_vanner",
+    "clydesdale",
+    "shire",
+    "mustang",
+    "kiger_mustang",
+    "shetland_pony",
+    "icelandic_horse",
+    "marwari",
+    "falabella",
+    "american_miniature"
+  ],
+  "magic": "no_coat"
+}

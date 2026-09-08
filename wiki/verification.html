@@ -32,6 +32,110 @@
     </p>
 </div>
 
+<h2 id="stables">&sect;0-AK &mdash; Stables that generate with horses in them (2026-09-07, NOT looked at)</h2>
+
+<p>
+    Design and attribution: <a href="stables.html">generated stables</a>. Gaps
+    <a href="known-gaps.html#gap-80">80</a>&ndash;<a href="known-gaps.html#gap-82">82</a>.
+    This is the least-proven thing in the mod: three buildings converted from
+    formats the game cannot read, placed by worldgen files nobody has generated a
+    world with, and filled by a hook that fires on the wrong event because there is
+    no right one.
+</p>
+
+<div class="note danger">
+    <span class="label">Check a building appears at all before anything else</span>
+    <p>
+        <code>/place structure horsegenetics:horse_stable</code> on flat ground in
+        creative. If the structure does not load, the bake is wrong and everything
+        below is moot; the error will name a block. Do all three &mdash;
+        <code>stables</code> is the one converted from numeric 1.12 block ids and is by
+        far the likeliest to have a wrong block in it, and <code>tm_u_stable</code> is
+        the one with a foreign block substituted.
+    </p>
+</div>
+
+<h3>The buildings</h3>
+
+<ul>
+    <li><strong>Does each one look like its screenshot?</strong> Compare against the
+        Planet Minecraft page linked on <a href="stables.html#the-three">the stables
+        page</a>. What to look for specifically: stairs and slabs facing the right way
+        (the legacy conversion computes those from a data nibble by hand), doors that
+        are whole rather than half, and no floating or missing roof.</li>
+    <li><strong>Is anything obviously the wrong block?</strong> The legacy table maps
+        only the ids those files use, so a wrong mapping shows as one material in the
+        wrong place rather than as an error. Torches, signs, trapdoors and the
+        stained-glass panes are the fiddly ones.</li>
+    <li><strong>TM U Stable's saddle stands</strong> should be barrels &mdash; that is
+        a substitution for a block from a mod this one does not depend on.</li>
+</ul>
+
+<h3>Do they generate</h3>
+
+<ul>
+    <li><strong>Do they appear in a fresh world?</strong>
+        <code>/locate structure horsegenetics:horse_stable</code> and travel to it.
+        Then the other two. If <code>/locate</code> finds nothing, the structure set or
+        the biome tag is wrong.</li>
+    <li><strong>Do they sit on the ground?</strong> <code>beard_thin</code> terrain
+        adaptation and <code>WORLD_SURFACE_WG</code> projection; the failure modes are
+        a building buried to its windows or standing on a plinth of air.</li>
+    <li><strong>Are they rare enough to be worth finding and common enough to find?</strong>
+        Spacing / separation are a datapack edit, so this is the cheap knob.</li>
+</ul>
+
+<h3>The horses &mdash; the part with the most ways to be wrong</h3>
+
+<ul>
+    <li><strong>Are there any?</strong> The log says
+        <code>[Stables] filled &lt;id&gt; at &lt;pos&gt; with N horse(s) (S stall, F field found)</code>
+        for every stable populated. If N is 0, read S and F: both zero means the scan
+        found nowhere to stand, which is <a href="known-gaps.html#gap-82">gap 82</a>.</li>
+    <li><strong>Horse Stable: exactly seven, four outside and three in stalls.</strong>
+        The one stable with a field, and the only one whose split can be checked by
+        eye.</li>
+    <li><strong>Are they standing anywhere daft?</strong> In a wall, on a roof, in the
+        tack room, inside each other. The scan is a heuristic and this is what would
+        show it up.</li>
+    <li><strong>Walk away and come back.</strong> The count must not change. If it
+        doubles, the once-only record is not working and every stable in the world is
+        filling repeatedly.</li>
+    <li><strong>Arrive from the far side of a big one.</strong> <em>TM U Stable</em> is
+        86 blocks across, so its start chunk may load after the player is already
+        inside; the symptom to watch for is horses appearing around you rather than
+        being there when you walk in.</li>
+</ul>
+
+<h3>The genetics each one promises</h3>
+
+<ul>
+    <li><strong>Horse Stable</strong> &mdash; open the <strong>i</strong> screen on all
+        seven. Every one should carry <strong>two rare-or-better natural genes</strong>
+        and show <strong>nothing at all</strong> on the Other genes tab that is
+        magical.</li>
+    <li><strong>Stables</strong> &mdash; every horse Friesian, every horse with
+        <strong>at least one homozygous magical trait</strong>, and most with exactly
+        one. Finding a stable where they all have four means the ladder is wrong.</li>
+    <li><strong>TM U Stable</strong> &mdash; every horse from the white-marking breeds
+        and none with a magical gene that paints. This is also the best look at whether
+        the white-pattern genes read well on a horse standing still in a lit stall.</li>
+    <li><strong>No horse in any stable should have a lethal or be dying.</strong> That
+        is unit-tested, so a failure here means something below the stable is
+        wrong.</li>
+</ul>
+
+<h3>The extension point</h3>
+
+<ul>
+    <li><strong>Does a datapack stable work?</strong> The claim on the page is "two
+        files and no Java". Drop a fourth structure in with a JSON beside it and check
+        it generates and fills &mdash; that is the only test of the thing this feature
+        was actually built for.</li>
+    <li><strong>Does a stable JSON with no structure behind it fail quietly?</strong>
+        It should be ignored, not crash.</li>
+</ul>
+
 <h2 id="themed-carrots">&sect;0-AJ &mdash; Five themed random splice carrots (2026-09-07, NOT looked at)</h2>
 
 <p>

@@ -26,6 +26,28 @@
 
 <h2 id="d2026-09-07">2026-09-07</h2>
 
+<h3 id="stables-2026-09-07">Built 2026-09-07, NOT yet looked at: three stables that generate with rare horses already in them.</h3>
+
+<p>Owner-driven, one request with three buildings attached. Design and <strong>attribution</strong>: <a href="stables.html">generated stables</a>. Checklist <a href="verification.html#stables">&sect;0-AK</a>. Gaps <a href="known-gaps.html#gap-80">80</a>&ndash;<a href="known-gaps.html#gap-82">82</a>.</p>
+
+<ul>
+<li><strong>None of the three files was a Minecraft structure, and that was most of the work.</strong> Two are Sponge Schematic v2 and one is a legacy MCEdit <code>.schematic</code> carrying numeric 1.12 block ids with no block names in it at all. <code>tools/stables/bake-stables.py</code> converts both. <strong>The trick that made it affordable is the DataVersion</strong>: the output claims to be 1.13.2 rather than current, because the game runs every structure it loads through the DataFixer against the file's own version - so <code>grass_path</code> becoming <code>dirt_path</code>, and every other rename in twelve years of Minecraft, is done by the game rather than by a hand-written table that would be subtly wrong. The legacy id table therefore only has to reach 1.13, and it stops there on purpose.</li>
+
+<li><strong>The generation is vanilla's and the horses are this mod's, joined by a structure id and nothing else.</strong> That split is what makes "drop in an NBT and a JSON" true: the three worldgen files are ordinary datapack registries this mod has no code for, and <code>StableDefinitions</code> only says what stands in a building it never places. A pack with only the worldgen gets an empty stable; one with only the stable file is ignored. Both failures are quiet.</li>
+
+<li><strong>The unit test found a real design bug in the magic ladder.</strong> "All horses have at least one homozygous magic trait, 10% chance of two, 5% of three" is a statement about the <em>horse</em> - and the first implementation added the guarantee on top of whatever the breed's own geometric draw had already given it, so every Friesian had four or five and the ladder described nothing observable. A stable that names a magic count now <strong>clears the magical loci and puts back exactly the rolled number</strong>. The test that caught it asserted "fewer than half the horses have extras" and got 400 out of 400.</li>
+
+<li><strong>The four body-stat loci are magical genes and are not <em>magic</em>.</strong> Same test run, second finding: clearing "every magical locus" for the no-magic stable also cleared size, magic speed, health and jump - which is how <code>BreedFounder</code> hits a breed's stat bands, so it quietly deleted the breed's character and made every stable horse a baseline-statted one. They are exempt everywhere now, in both directions: never cleared, never forced.</li>
+
+<li><strong>A stable may not hand out a horse that is dying, and may hand out one that is unwell.</strong> Every locus a stable <em>forces</em> comes from <code>SpliceSafety</code>'s pool, so nothing it adds can kill. But a breed's own genetics can still produce PSSM1, exactly as it would on a wild horse of that breed, and a stable is not a promise of a healthy animal. The line is that a building full of dying foals is not a surprise, it is a bug.</li>
+
+<li><strong>Finding the stalls is a block scan, and the alternative was worse.</strong> A structure NBT cannot say where a stall is. Baking data markers into the NBTs would have worked and would have made "drop in an NBT" untrue for everyone after us - a modder would have had to edit somebody else's schematic in game first. So the populator reads the placed blocks: a floor, two air, a roof, and two of four sides shut in. <strong>Two sides rather than three</strong>, because a stall's open side is its gate and the one opposite is often open to the aisle - three finds only boxes, and a box is not a stall. It is a heuristic, it degrades to "put them outside", and it is <a href="known-gaps.html#gap-82">gap 82</a>.</li>
+
+<li><strong>The populator fires on the wrong event because there is no right one.</strong> There is no "structure finished generating" hook, so it queues on the start chunk's load, waits 40 ticks for the neighbouring chunks the piece spans to finish their own feature stage, and re-queues if any is still missing. Every number in that was picked by reading. The part that is <em>not</em> a guess is the once-only record: without a per-level <code>StablePopulationData</code> a stable gains another seven horses every time a player walks back to it, which is the famous failure of this whole class of hook and looks like a feature for two days.</li>
+
+<li><strong>The attribution is a doc with a licence question on it, not a credits line.</strong> Three buildings by Seuchendoktor, Alpha_One_Seventeen and Tyiarrah, all redistributed <em>inside the jar</em> rather than linked. Planet Minecraft carries no uniform licence and none of the three has been read. That is <a href="known-gaps.html#gap-80">gap 80</a> and it is cheap to fix now (delete two files) and expensive once somebody's world has one in it - so it is written down as a blocker on distribution rather than as a nicety.</li>
+</ul>
+
 <h3 id="themed-carrots-2026-09-07">Built 2026-09-07, NOT yet looked at: five themed random splice carrots.</h3>
 
 <p>Owner-driven, one request. Design: <a href="carrots.html#themed">the five themed splices</a>. Recipes: <a href="items.html#carrots">items</a>. Checklist <a href="verification.html#themed-carrots">&sect;0-AJ</a>.</p>

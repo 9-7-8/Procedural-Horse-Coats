@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Generated stables &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="nav.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow">Gameplay <span class="sep">/</span> world</p>
+<h1>Generated stables</h1>
+<p class="lede">
+    Buildings that generate in the world with <strong>horses already in them</strong>
+    &mdash; horses a player could not have bred yet, from breeds and gene
+    combinations the wild population does not hand out. Three ship;
+    <strong>each is somebody else&rsquo;s build</strong>, and the attributions below
+    are the point of this page as much as the mechanics are.
+    <strong>Built 2026-09-07, not play-tested</strong> &mdash; checklist in
+    <a href="verification.html#stables">verification &sect;0-AK</a>.
+</p>
+
+<div class="note danger">
+    <span class="label">Attribution is not optional here</span>
+    <p>
+        Every building on this page was made by somebody else and downloaded from
+        Planet Minecraft. This mod is <a href="https://creativecommons.org/licenses/by-nc/4.0/">CC
+        BY&#8209;NC&nbsp;4.0</a> and asks its own forks to credit it; shipping other
+        people&rsquo;s work without doing the same would be indefensible. <strong>A new
+        stable is not finished until its author and source are on this page</strong>,
+        and the bake script says so too.
+    </p>
+    <p>
+        <strong>Unresolved:</strong> Planet Minecraft submissions carry no uniform
+        licence, and the terms for these three have not been read one by one. Before
+        this mod is distributed anywhere, that has to be checked per build, and
+        permission asked where it is not clear. See
+        <a href="known-gaps.html#gap-80">gap 80</a>.
+    </p>
+</div>
+
+<h2 id="the-three">The three</h2>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Stable</th><th>Author</th><th>Source</th><th>Size</th></tr></thead>
+<tbody>
+<tr>
+    <td><strong>Horse Stable</strong><br><code>horsegenetics:horse_stable</code></td>
+    <td>Seuchendoktor</td>
+    <td><a href="https://www.planetminecraft.com/project/horse-stable-4536108/">planetminecraft.com/project/horse-stable-4536108</a></td>
+    <td>28 &times; 10 &times; 32</td>
+</tr>
+<tr>
+    <td><strong>Stables</strong><br><code>horsegenetics:stables</code></td>
+    <td>Alpha_One_Seventeen</td>
+    <td><a href="https://www.planetminecraft.com/project/stables-3837665/">planetminecraft.com/project/stables-3837665</a></td>
+    <td>38 &times; 23 &times; 49</td>
+</tr>
+<tr>
+    <td><strong>TM U Stable</strong><br><code>horsegenetics:tm_u_stable</code></td>
+    <td>Tyiarrah</td>
+    <td><a href="https://www.planetminecraft.com/project/tm-u-stable/">planetminecraft.com/project/tm-u-stable</a></td>
+    <td>86 &times; 32 &times; 72</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<h2 id="who-lives-there">Who lives in each</h2>
+
+<h3>Horse Stable &mdash; the good, plain horses</h3>
+
+<p>
+    <strong>Always seven</strong>, and the only stable with a field: four outside under
+    the sky, three in the stalls. Every horse is
+    <strong>high-rarity and entirely natural</strong> &mdash; two forced loci of
+    <a href="carrots.html#themed">rare tier or better</a>, and <em>no magical gene at
+    all</em>. It is the stable a player is meant to find first: nothing about it is
+    impossible, and everything about it took somebody a long time to breed.
+</p>
+
+<h3>Stables &mdash; the Friesian magic line</h3>
+
+<p>
+    <strong>Two to twelve</strong> horses, all in stalls, all
+    <a href="breeds.html">Friesian</a>. Every one carries <strong>at least one
+    homozygous magical trait</strong>, and a ladder of extras: a
+    <strong>10%</strong> chance of a second, <strong>5%</strong> of a third, halving
+    each time, up to ten extra. So most of them have exactly one, a handful have two,
+    and somewhere out there is a horse with eleven.
+</p>
+
+<div class="note warn">
+    <span class="label">A stable that names a magic count owns the magic</span>
+    <p>
+        &ldquo;At least one homozygous magic trait&rdquo; is a statement about the
+        <em>horse</em>, not about what this stable adds to whatever its breed already
+        rolled. So the magical loci are <strong>cleared first</strong> and exactly the
+        rolled number put back. Without that every horse had its breed&rsquo;s own
+        geometric draw <em>plus</em> the guarantee, and the ladder described nothing
+        anybody could observe &mdash; which is how the unit test found it.
+    </p>
+    <p>
+        The four <strong>body-stat</strong> loci (size, magic speed, health, jump) are
+        exempt from all of this, everywhere. They are magical genes and they are not
+        <em>magic</em>: they are how <code>BreedFounder</code> hits a breed&rsquo;s
+        speed and height bands, and clearing them would quietly delete the
+        breed&rsquo;s character.
+    </p>
+</div>
+
+<h3>TM U Stable &mdash; the show yard</h3>
+
+<p>
+    <strong>Three to fifteen</strong> horses, all in stalls, drawn from the
+    <strong>white-marking breeds</strong>: American Paint, Appaloosa, Knabstrupper,
+    Gypsy Vanner, Clydesdale, Shire, Mustang, Kiger Mustang, Shetland, Icelandic,
+    Marwari, Falabella, American Miniature. <strong>No magical gene that paints</strong>
+    &mdash; a horse here may still glow or heal, but it may not be a colour no real
+    horse could be, because the whole point of the yard is the markings.
+</p>
+
+<h2 id="safety">What a stable may never do</h2>
+
+<div class="note">
+    <span class="label">A player did not choose to open this box</span>
+    <p>
+        They walked past a building. So every locus a stable <em>forces</em> is drawn
+        from the same pool the <a href="carrots.html#blacklist">random splice
+        carrots</a> use &mdash; <code>SpliceSafety</code> &mdash; and cannot be a
+        lethal or a heart cost. That is a unit test, not a comment.
+    </p>
+    <p>
+        An <strong>impairing</strong> condition is a different matter and is allowed:
+        that is the breed&rsquo;s own genetics talking, exactly as it would on a wild
+        horse of the same breed. A stable is not a promise of a healthy animal. A
+        building full of dying foals would not be a surprise, it would be a bug.
+    </p>
+</div>
+
+<h2 id="adding">Adding one: two files and no Java</h2>
+
+<p>
+    That is the whole design, and it is why the generation half is vanilla&rsquo;s and
+    the horses half is this mod&rsquo;s, joined only by a structure id. A pack that
+    ships only the worldgen gets an empty building; one that ships only the stable
+    file is ignored until a structure by that id exists. Both failures are quiet and
+    neither breaks a world.
+</p>
+
+<h3>1. The building</h3>
+
+<p>
+    A Minecraft structure NBT at <code>data/&lt;ns&gt;/structure/&lt;id&gt;.nbt</code>,
+    plus the three ordinary vanilla worldgen files that place it &mdash;
+    <code>worldgen/structure/&lt;id&gt;.json</code>,
+    <code>worldgen/structure_set/&lt;id&gt;.json</code> and
+    <code>worldgen/template_pool/&lt;id&gt;.json</code>. Copy this mod&rsquo;s and
+    change the ids; the structures here are <code>minecraft:jigsaw</code> with a
+    single-element start pool, <code>terrain_adaptation: beard_thin</code>, and a
+    <code>random_spread</code> placement.
+</p>
+
+<div class="note warn">
+    <span class="label">A WorldEdit schematic is not a structure</span>
+    <p>
+        None of the three sources was usable as shipped. Two are <strong>Sponge
+        Schematic v2</strong> and one is a <strong>legacy MCEdit
+        <code>.schematic</code></strong> with numeric 1.12 block ids and no block names
+        in it at all. <code>tools/stables/bake-stables.py</code> converts both to
+        structure NBT, and the trick that makes it cheap is that the output keeps
+        <strong>DataVersion 1976</strong> (1.13.2): the game runs every structure it
+        loads through the DataFixer against its own version, so
+        <code>grass_path</code> becoming <code>dirt_path</code> and every other rename
+        since is done by Minecraft, correctly, for nothing. The legacy id table only
+        has to reach 1.13.
+    </p>
+    <p>
+        The bake also drops block entities and entities, and substitutes blocks from
+        mods this one does not depend on &mdash; <em>TM U Stable</em> carries a
+        <code>placeableitems:saddle_stand_block</code>, and a structure naming a block
+        that does not exist does not degrade, it fails to load.
+    </p>
+</div>
+
+<h3>2. The horses</h3>
+
+<p>
+    One file at <code>data/&lt;ns&gt;/horsegenetics/stable/&lt;id&gt;.json</code>.
+    Everything but <code>structure</code> has a default, so the shortest useful one is
+    two lines.
+</p>
+
+<pre><code class="language-json">{
+  "structure": "horsegenetics:horse_stable",
+  "name": "Horse Stable",
+  "min_horses": 7,
+  "max_horses": 7,
+  "field": 4,
+  "breeds": ["friesian"],
+  "magic": "none",
+  "rare_natural_genes": 2,
+  "rare_tier": "rare",
+  "min_magic": 1,
+  "max_magic": 11,
+  "extra_magic_chance": 0.10,
+  "extra_magic_falloff": 0.5
+}</code></pre>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Field</th><th>Default</th><th>What it does</th></tr></thead>
+<tbody>
+<tr><td><code>structure</code></td><td>&mdash;</td><td>The structure id this rule is about. The only required field.</td></tr>
+<tr><td><code>name</code></td><td><code>"Stable"</code></td><td>For logs and this page. Not shown in game yet.</td></tr>
+<tr><td><code>min_horses</code> / <code>max_horses</code></td><td><code>1</code></td><td>Inclusive; rolled per building.</td></tr>
+<tr><td><code>field</code></td><td><code>0</code></td><td>How many stand <strong>outside</strong> under the sky. The rest go in stalls. A target, not a promise &mdash; see below.</td></tr>
+<tr><td><code>breeds</code></td><td>empty</td><td>Draw uniformly from these <a href="breeds.html">breed ids</a>. Empty means the feral mix.</td></tr>
+<tr><td><code>magic</code></td><td><code>"allowed"</code></td><td><code>none</code> clears every magical locus; <code>no_coat</code> clears only the ones that paint; <code>allowed</code> leaves the breed&rsquo;s own draw alone.</td></tr>
+<tr><td><code>rare_natural_genes</code> / <code>rare_tier</code></td><td><code>0</code> / <code>"rare"</code></td><td>How many natural loci at or above that <a href="carrots.html#known">rarity tier</a> to force into a state that actually <em>shows</em> (homozygous, so a recessive is not wasted).</td></tr>
+<tr><td><code>min_magic</code> / <code>max_magic</code></td><td><code>0</code></td><td>The homozygous magic guarantee and its cap. Naming either makes the stable own the horse&rsquo;s magic entirely.</td></tr>
+<tr><td><code>extra_magic_chance</code> / <code>extra_magic_falloff</code></td><td><code>0.10</code> / <code>0.5</code></td><td>The ladder. Each extra is conditional on the one before it, and the chance is multiplied by the falloff each rung.</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2 id="stalls">How it finds the stalls</h2>
+
+<p>
+    A stall is not a thing a structure NBT can say, and requiring a modder to bake
+    data markers into somebody else&rsquo;s schematic would make &ldquo;drop in an
+    NBT&rdquo; untrue. So <code>server/StablePopulator</code> <strong>reads the placed
+    blocks</strong>:
+</p>
+
+<ul>
+    <li>a <strong>standing spot</strong> is a solid floor with two blocks of air on
+        it &mdash; the shape a horse occupies;</li>
+    <li>a <strong>stall</strong> is a standing spot that is <em>enclosed</em> (at
+        least two of its four sides are a fence, gate, wall, door or solid block) and
+        has something over its head;</li>
+    <li>a <strong>field</strong> spot is a standing spot with open sky over grass,
+        dirt or a path.</li>
+</ul>
+
+<p>
+    Two sides rather than three, deliberately: a stall&rsquo;s open side is its gate
+    and the one opposite is often open to the aisle, so three would find only boxes,
+    and a box is not a stall. One spot per column, so a horse on a stall floor and
+    another on its roof are not two stalls.
+</p>
+
+<p>
+    It is a heuristic and it is meant to be. It costs a modder nothing, it degrades to
+    &ldquo;put them in the field&rdquo; rather than to &ldquo;put them in a
+    wall&rdquo;, and a stable that asks for three stalled horses in a building with
+    two stalls gets two and the third outside. The owner&rsquo;s phrasing for the
+    first stable was <em>&ldquo;3 in the stalls (if possible)&rdquo;</em>, which is
+    exactly this contract.
+</p>
+
+<h2 id="when">When the horses arrive</h2>
+
+<p>
+    There is no &ldquo;a structure finished generating&rdquo; event. What there is:
+    a chunk load, and a <code>StructureStart</code> that knows the piece&rsquo;s whole
+    bounding box. So a stable is <strong>queued</strong> when the chunk holding its
+    start loads, and populated <strong>40 ticks later</strong> &mdash; by which time
+    the neighbouring chunks the piece spans have had their own feature stage and the
+    stalls actually exist. It waits again if any of them is still unloaded, because a
+    horse spawned into an unloaded chunk is a horse that never existed.
+</p>
+
+<p>
+    A per-level <code>StablePopulationData</code> remembers which stables have been
+    filled, keyed by structure id and bounding-box corner. Without it a stable would
+    gain another seven horses every time a player walked back to it &mdash; the
+    classic failure of this whole class of hook, and the kind that looks like a
+    feature for two days and then is a paddock with three hundred horses in it.
+</p>
+
+<p>
+    The draw is seeded off the world seed, the corner and the structure id, so the
+    same stable in the same world is the same stable however many times its chunk is
+    reloaded, and a bug report naming a location can be reproduced.
+    Every horse is <code>setPersistenceRequired()</code>: one a player walked half a
+    world to find must not despawn because they left to fetch a saddle.
+</p>
+
+<h2 id="rarity">How often they generate</h2>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Stable</th><th>Spacing</th><th>Separation</th><th>Biomes</th></tr></thead>
+<tbody>
+<tr><td>Horse Stable</td><td>48</td><td>16</td><td rowspan="3"><code>#horsegenetics:has_stable</code> &mdash; plains, sunflower plains, meadow, savanna and plateau, forest, flower forest, birch forest, taiga, snowy plains</td></tr>
+<tr><td>Stables</td><td>64</td><td>24</td></tr>
+<tr><td>TM U Stable</td><td>72</td><td>28</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    In chunks, and rarer than a village (32 / 8) by design: each one is a handful of
+    horses a player could not have bred yet, and the smallest, plainest building is
+    the most common of the three. All three share one biome tag, which is open,
+    grassy, buildable ground &mdash; a stable on a mountainside is a stable
+    half-buried in a mountainside.
+</p>
+
+<p class="muted">
+    <strong>None of these numbers has been played.</strong> Spacing and separation are
+    the first thing to turn if stables feel too common or impossible to find, and they
+    are a datapack edit rather than a code change.
+</p>
+
+</article>
+</main>
+</body>
+</html>

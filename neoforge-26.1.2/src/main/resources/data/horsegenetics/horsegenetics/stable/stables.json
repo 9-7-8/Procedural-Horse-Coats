@@ -1,0 +1,15 @@
+{
+  "structure": "horsegenetics:stables",
+  "name": "Stables",
+  "min_horses": 2,
+  "max_horses": 12,
+  "field": 0,
+  "breeds": [
+    "friesian"
+  ],
+  "magic": "allowed",
+  "min_magic": 1,
+  "max_magic": 11,
+  "extra_magic_chance": 0.1,
+  "extra_magic_falloff": 0.5
+}

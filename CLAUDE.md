@@ -70,6 +70,7 @@ the same change as the code, and never copy it back into here.
 | Breeding carrots, splices, the gene database, research papers | `wiki/carrots.html` |
 | The cowboy, the horseman, transfer papers, the barn | `wiki/villagers.html` |
 | Hay portals, the horse dimension, the pens | `wiki/horse-dimension.html` |
+| **Generated stables - and who made each building** | `wiki/stables.html` |
 | The data-driven gene file format (masks, ops, header) | `wiki/gene-format.html` |
 | The `effects` block - every verb, trigger, flag, and how to add one | `wiki/gene-effects.html` |
 | The wider (mostly unbuilt) trait / effect architecture | `wiki/horse-traits.html` |
@@ -205,6 +206,7 @@ and fails *silently* when stale:
 | `spec/`, `SpecSchema`, `AbilityType`, `HorseSkinGeometry`, the noise classes | `:common:bakeSpecFixtures` **then** `check-parity.mjs` | `wiki/gene-creator/fixtures/expected.json` |
 | the coat PNGs or the name tables | `:common:bakeCreatorAssets` + `:web:bakeDesignerAssets` | the regenerated assets |
 | either `tools/barn/*.source.nbt`, **or `bake-barn.py` itself** | `python neoforge-26.1.2/tools/barn/bake-barn.py` | `data/horsegenetics/structure/cowboy_barn.nbt` |
+| any `tools/stables/*.source.nbt`, **or `bake-stables.py` itself** | `python neoforge-26.1.2/tools/stables/bake-stables.py` | the regenerated `data/horsegenetics/structure/*.nbt` |
 
 **Re-baking is part of the parity check, not a chore beside it.**
 `expected.json` is a checked-in snapshot of the Java, so a stale one makes

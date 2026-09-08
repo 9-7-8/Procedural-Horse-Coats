@@ -1,0 +1,10 @@
+{
+  "structure": "horsegenetics:horse_stable",
+  "name": "Horse Stable",
+  "min_horses": 7,
+  "max_horses": 7,
+  "field": 4,
+  "magic": "none",
+  "rare_natural_genes": 2,
+  "rare_tier": "rare"
+}

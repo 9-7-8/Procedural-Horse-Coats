@@ -1,0 +1,14 @@
+{
+  "structures": [
+    {
+      "structure": "horsegenetics:tm_u_stable",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "spacing": 72,
+    "separation": 28,
+    "salt": 481303
+  }
+}
