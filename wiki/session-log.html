@@ -29,9 +29,31 @@
 
 <h2 id="d2026-09-07">2026-09-07</h2>
 
+<h3 id="three-views-2026-09-07">Built 2026-09-07, NOT yet looked at: the wiki became three views &mdash; Gameplay, Coding, Science &mdash; and got a real search.</h3>
+
+<p>Owner-driven, one request with four things in it. Design: every <a href="gene-flaxen.html">gene page</a>, every <a href="items.html">item page</a>, the <a href="../index.html">landing page</a>. Checklist <a href="verification.html#three-views">&sect;0-AM</a>. Gaps <a href="known-gaps.html#gap-88">88</a>&ndash;<a href="known-gaps.html#gap-91">91</a>.</p>
+
+<ul>
+<li><strong>The wiki was serving three readers one index, and serving none of them.</strong> A player who wants to know what a flaxen looks like, someone adding a gene, and someone checking the model against real horse genetics want almost disjoint subsets of the same page. The split is <code>wiki/tabs.js</code> reading <code>&lt;section class="tab-panel" data-tab&gt;</code>; a page with <em>no</em> panels is left completely alone, which is why the seventeen pages that are one subject for one audience needed no edit at all. The chosen view rides in <code>?view=</code> and in sessionStorage and is pushed through every link the sidebar and the index build, so choosing Science and clicking Flaxen opens Flaxen's science tab.</li>
+
+<li><strong>Where a section went was decided by rule, and the rules came from the owner.</strong> Design rationale - the "why one locus and not forty genes" sections - goes to <strong>Science</strong>, not Coding, because those arguments are almost always framed against real genetics. Look-alikes and breed lists go to <strong>Gameplay</strong>, because telling two horses apart and knowing where to find one are things a player does. Everything unrecognised defaults to <strong>Coding</strong>, which is the safe direction: a coding tab carrying a section it did not need is a nuisance, and a gameplay tab carrying one is the thing the split exists to prevent.</li>
+
+<li><strong>Nothing was rewritten out of existence, and that was checked rather than assumed.</strong> The split moved whole top-level blocks and was verified word-for-word against <code>HEAD</code> on all 69 registered gene pages: zero words lost. Worth having done, because the first run of the transform re-processed pages it had already split and double-wrapped 67 of them - the pages were reverted and it was re-run once, and the script now refuses a page that already has panels.</li>
+
+<li><strong>The inheritance table is asked of the mod, not written down.</strong> A new <code>@JSExport</code> - <code>DesignerApi.geneInheritanceJson</code> - reports every genotype at a locus and the phenotype each one gives, and <code>wiki/gene-inheritance/</code> draws it. That is hard rule 3 applied to a table rather than to a painter: forty gene pages carry a hand-written combination table, and a live one cannot fall out of step when a gene gains an allele. Above three alleles a square stops being readable, so it falls back to a plain list of outcomes - the owner's call, and the reason the gameplay tab of KIT is a list and the gameplay tab of flaxen is a grid.</li>
+
+<li><strong><code>items.html</code> was one page describing thirteen unrelated things.</strong> It is now a roster of links, and each item or group has a page: hair, the breeding carrots, the splice carrots, research papers, seed jars, whistles, stall signs, tickets, transfer papers, the Horseman's Table and the spawn eggs. Their gameplay tabs are written fresh in plain language; the implementation prose moved across intact rather than being reworded, because it was accurate and rewording accurate prose is how errors get introduced.</li>
+
+<li><strong>The sidebar box was never a search.</strong> It filtered page <em>names</em>, so anything you could not already name was unfindable - which on a wiki with seventy gene pages is most of it. <code>wiki/search.js</code> searches the text of every page, and a hit knows which tab it is on and links to it. The corpus is baked to a <em>script</em> rather than fetched as JSON on purpose: the wiki is read from a <code>file://</code> path as often as from a server, and <code>fetch</code> does not work there. It is loaded lazily on the first keystroke, because it is 1.8&nbsp;MB and almost every visit never searches.</li>
+
+<li><strong>The page list moved out of <code>nav.js</code> into <code>wiki/pages.js</code>.</strong> The landing page needs the same list to know which cards to hide in which view, and a second copy would have drifted the first time a page was added. Hard rule 7 now names <code>pages.js</code>. Which views a <em>tabbed</em> page appears in is not an editorial call at all - it is exactly the tabs it has - so <code>sync-page-views.mjs</code> reads them out of the HTML and writes them back, and only an untabbed page keeps a hand-set value.</li>
+
+<li><strong>24 natural gene pages came out with no science tab, and were left that way.</strong> Their real-world material is in the lede rather than in a section a split could pick up. Writing a stub would have meant either inventing veterinary claims or shipping 24 pages whose science tab says "not written yet", and an honest absence beats both. They are listed in <a href="verification.html#three-views">verification</a> as the next thing to write. The magical genes having no science tab is correct, not a gap - they are invented.</li>
+</ul>
+
 <h3 id="breeds-as-data-2026-09-07">Built 2026-09-07, NOT yet looked at: breeds became JSON files, and got spawn eggs, a designer, and a splice mark.</h3>
 
-<p>Owner-driven, one request with four things in it. Design: <a href="breed-format.html">the breed file format</a>, <a href="breeds.html">breeds</a>, <a href="items.html#breed-egg">items</a>, <a href="carrots.html#spliced">carrots</a>. Checklist <a href="verification.html#breeds-as-data">&sect;0-AL</a>. Gaps <a href="known-gaps.html#gap-83">83</a>&ndash;<a href="known-gaps.html#gap-85">85</a>.</p>
+<p>Owner-driven, one request with four things in it. Design: <a href="breed-format.html">the breed file format</a>, <a href="breeds.html">breeds</a>, <a href="item-spawn-eggs.html#breed">items</a>, <a href="carrots.html#spliced">carrots</a>. Checklist <a href="verification.html#breeds-as-data">&sect;0-AL</a>. Gaps <a href="known-gaps.html#gap-83">83</a>&ndash;<a href="known-gaps.html#gap-85">85</a>.</p>
 
 <ul>
 <li><strong>The 49 breeds were not translated by hand, and that was the whole plan.</strong> An 885-line <code>Breeds.java</code> retyped as 49 JSON files is 49 chances to mistype an allele weight and no way to notice. So the writer came first: <code>BreedSpecWriter</code> turns a <code>Breed</code> back into the file that would produce it, <code>BreedFileTool</code> ran it over the Java definitions once, and only then were the definitions deleted. <code>BreedFilesTest</code> now asserts every shipped file is exactly what a fresh bake would write, so the two halves cannot drift apart afterwards either.</li>
@@ -95,7 +117,7 @@
 
 <h3 id="themed-carrots-2026-09-07">Built 2026-09-07, NOT yet looked at: five themed random splice carrots.</h3>
 
-<p>Owner-driven, one request. Design: <a href="carrots.html#themed">the five themed splices</a>. Recipes: <a href="items.html#carrots">items</a>. Checklist <a href="verification.html#themed-carrots">&sect;0-AJ</a>.</p>
+<p>Owner-driven, one request. Design: <a href="carrots.html#themed">the five themed splices</a>. Recipes: <a href="item-breeding-carrots.html">items</a>. Checklist <a href="verification.html#themed-carrots">&sect;0-AJ</a>.</p>
 
 <ul>
 <li><strong>They are one field, not five carrots.</strong> <code>CarrotEffect.GeneSplice</code> gained a <code>SpliceCategory</code>, and everything downstream &mdash; the token, the fold, the combine recipe, the feed handler &mdash; carried on working. That was the point of the check: if adding five carrots had needed five <code>CarrotEffect</code> cases and five <code>fold</code> branches, the abstraction the <a href="roadmap.html#carrot-content">roadmap</a> claimed was cheap would not have been.</li>

@@ -35,11 +35,164 @@
     </p>
 </div>
 
+<h2 id="three-views">&sect;0-AM &mdash; The three-view wiki, the tabs and the search (2026-09-07, NOT looked at)</h2>
+
+<p>
+    Design: <a href="session-log.html#three-views-2026-09-07">the session-log entry</a>.
+    Gaps <a href="known-gaps.html#gap-88">88</a>&ndash;<a href="known-gaps.html#gap-91">91</a>.
+    This is all wiki, so nothing here needs the game &mdash; but it does need the wiki
+    <strong>served over http</strong> (<code>python -m http.server</code>), because the
+    inheritance table asks the mod through wasm and a <code>file://</code> page is its own
+    opaque origin.
+</p>
+
+<div class="note danger">
+    <span class="label">Nothing on this page has been rendered in a browser</span>
+    <p>
+        The split, the tabs, the search, the inheritance widget and the index switcher
+        were all written and structurally checked &mdash; balanced panels on all 83 tabbed
+        pages, zero words lost against <code>HEAD</code> on all 69 gene pages, the build
+        and parity green &mdash; and then <strong>not once looked at</strong>. Treat every
+        item below as unproven, and start with the two that would make everything else
+        moot.
+    </p>
+</div>
+
+<h3>The two that would make the rest moot</h3>
+
+<ul>
+    <li><strong>Does a gene page still render at all?</strong> Open
+        <code>wiki/gene-flaxen.html</code>. Expect the eyebrow, title and lede above a
+        three-tab bar, Gameplay selected, and the page tinted blue. If the tabs do not
+        appear, <code>tabs.js</code> is not finding <code>article.doc</code>&rsquo;s panels
+        and <em>every</em> gene page is showing all three tabs&rsquo; content stacked.</li>
+    <li><strong>Does the inheritance table fill in?</strong> Same page, under &ldquo;What
+        you can get&rdquo;. Expect a 3&times;3 grid of flaxen genotypes with a phenotype
+        under each. &ldquo;Asking the mod&hellip;&rdquo; that never resolves means the new
+        <code>geneInheritanceJson</code> export did not survive TeaVM&rsquo;s
+        reachable-graph pruning, which would be silent everywhere else.</li>
+</ul>
+
+<h3>The tabs</h3>
+
+<ul>
+    <li>Do all three tabs switch, and does the <strong>page background</strong> change
+        with them &mdash; blue / purple / green? The tint is the main signal that you are
+        in a different view.</li>
+    <li>Does the sidebar <strong>re-filter</strong> when you switch tab? On Coding it
+        should gain the project pages; on Gameplay it should lose them.</li>
+    <li>Does a link into a section on another tab <em>switch</em> to that tab? Flaxen&rsquo;s
+        gameplay tab links to <code>#dosage</code>, which lives on Coding.</li>
+    <li>Copy the URL after switching tab and reopen it &mdash; does it come back on the
+        same tab?</li>
+    <li><strong>A gene with more than three alleles</strong> &mdash;
+        <a href="gene-kit.html">KIT</a>, <a href="gene-particle.html">particle</a>,
+        <a href="gene-lycan.html">LYCAN</a>. Expect a plain list of outcomes, not a grid.
+        Particle has forty alleles; if that draws a square, the fallback is not
+        firing.</li>
+    <li><strong>A gene with no viewer</strong> &mdash; any health gene, e.g.
+        <a href="gene-plod1.html">PLOD1</a>. Its gameplay tab should lead with the
+        inheritance table rather than a gap where a horse should be.</li>
+    <li><a href="gene-suntouched.html">Suntouched</a> and
+        <a href="gene-waterborn.html">waterborn</a> are worked examples in the
+        <code>example.</code> namespace, not registered loci, so they deliberately have
+        <em>no</em> inheritance table. Check they do not show a broken one.</li>
+</ul>
+
+<h3>The landing page</h3>
+
+<ul>
+    <li>Do the three view buttons appear under the stats, and does the hero gradient
+        change with them?</li>
+    <li>On <strong>Gameplay</strong>, the modder and project cards should disappear, and
+        the section headings above them with them. An empty heading over no cards means
+        the section-hiding is not working.</li>
+    <li>On <strong>Science</strong>, expect only the gene pages that have a science tab,
+        plus the handful of core pages. If a magical gene appears here, its
+        <code>views</code> in <code>pages.js</code> is wrong.</li>
+    <li>Click through to a gene from the Science view &mdash; does it open on the science
+        tab? That is the whole point of the view being carried in the link.</li>
+</ul>
+
+<h3>The search</h3>
+
+<ul>
+    <li>Does the slash key open it? <kbd>ctrl</kbd>-<kbd>K</kbd>? The sidebar box?</li>
+    <li>Search <strong>flaxen</strong> &mdash; the flaxen page should be first, not the
+        twenty pages that mention it in passing.</li>
+    <li>Search something implementation-shaped, e.g. <strong>HorseSkinGeometry</strong>,
+        and something real-world, e.g. <strong>Morgan</strong>. Do the results carry the
+        right coloured tab chip, and does clicking one land on that tab, scrolled to the
+        section?</li>
+    <li>The index is <strong>1.8&nbsp;MB</strong> and loads on the first keystroke. Is the
+        first search perceptibly slow on this machine? If so that is worth knowing before
+        it grows further &mdash; see <a href="known-gaps.html#gap-90">gap 90</a>.</li>
+</ul>
+
+<h3>The section routing &mdash; the part most likely to be wrong</h3>
+
+<p>
+    Sections were routed to tabs <strong>by a rule over their headings</strong>, not by
+    reading them. That is right far more often than not, and it will be wrong somewhere.
+    The default was Coding, so the expected failure is a section sitting on Coding that a
+    player wanted, rather than jargon leaking onto Gameplay. Worth a skim of a handful of
+    pages with an eye for:
+</p>
+
+<ul>
+    <li>A gameplay tab that is <em>only</em> the viewer, the table and the carrot, on a
+        gene that clearly has more to say to a player.</li>
+    <li>Anything on Gameplay that reads like implementation. Health sections in
+        particular stayed on Coding by design &mdash; only the one-line health summary
+        from the spec panel was promoted &mdash; so a gene whose health story matters may
+        be under-served on Gameplay.</li>
+    <li>The <strong>lede</strong> of each page now shows above all three tabs, so it is
+        doing the job of the plain-language summary. Some ledes are dense and assume the
+        model; those are the ones to rewrite first.</li>
+</ul>
+
+<h3>The natural genes with no science tab</h3>
+
+<p>
+    These are real-world genes whose pages have no section a split could route to Science,
+    so they are currently absent from the science view. Nothing is broken; the writing is
+    simply not done. Deliberately <em>not</em> stubbed &mdash; see the session-log entry.
+</p>
+
+<p class="muted">
+    <a href="gene-b4galt7.html">B4GALT7</a>, <a href="gene-champagne.html">champagne</a>,
+    <a href="gene-ckm.html">CKM</a>, <a href="gene-diet.html">diet</a>,
+    <a href="gene-dun.html">dun</a>, <a href="gene-gbe1.html">GBE1</a>,
+    <a href="gene-gys1.html">GYS1</a>, <a href="gene-hmga2.html">HMGA2</a>,
+    <a href="gene-matp.html">MATP</a>, <a href="gene-met.html">MET</a>,
+    <a href="gene-mstn.html">MSTN</a>, <a href="gene-mushroom.html">mushroom</a>,
+    <a href="gene-myo5a.html">MYO5A</a>, <a href="gene-pax3.html">PAX3</a>,
+    <a href="gene-plod1.html">PLOD1</a>, <a href="gene-ppib.html">PPIB</a>,
+    <a href="gene-prkdc.html">PRKDC</a>, <a href="gene-rabicano.html">rabicano</a>,
+    <a href="gene-rapgef5.html">RAPGEF5</a>, <a href="gene-scn4a.html">SCN4A</a>,
+    <a href="gene-shox.html">SHOX</a>, <a href="gene-st14.html">ST14</a>,
+    <a href="gene-tiger-eye.html">tiger eye</a>, <a href="gene-tobiano.html">tobiano</a>,
+    <a href="gene-toe1.html">TOE1</a>.
+</p>
+
+<h3>The item pages</h3>
+
+<ul>
+    <li>Eleven new pages under <code>item-*.html</code>. Their gameplay tabs are
+        <strong>newly written</strong> rather than moved, so they are the most likely
+        place for a factual slip. The recipes and behaviours were taken from the old
+        <code>items.html</code> and not re-derived from the code &mdash; worth one pass
+        against <code>ModItems.java</code> and the recipe folder.</li>
+    <li><code>items.html</code> itself is now a roster of links. Check every row resolves
+        and that nothing that used to be on it has been lost &mdash; the gene database
+        stayed on <a href="carrots.html">carrots.html</a> on purpose.</li>
+</ul>
+
 <h2 id="breeds-as-data">&sect;0-AL &mdash; Breeds as JSON, breed spawn eggs, and spliced lines (2026-09-07, NOT looked at)</h2>
 
 <p>
     Design: <a href="breed-format.html">the breed file format</a>,
-    <a href="breeds.html">breeds</a>, <a href="items.html#breed-egg">the two new eggs</a>.
+    <a href="breeds.html">breeds</a>, <a href="item-spawn-eggs.html#breed">the two new eggs</a>.
     Gaps <a href="known-gaps.html#gap-83">83</a>&ndash;<a href="known-gaps.html#gap-85">85</a>.
     The Java half of this is well covered by tests; <strong>none of the four things a
     player actually touches has been touched</strong>.
@@ -233,7 +386,7 @@
 
 <p>
     Design: <a href="carrots.html#themed">the five themed splices</a>. Recipes:
-    <a href="items.html#carrots">items</a>. Nothing here has been through a
+    <a href="item-breeding-carrots.html">items</a>. Nothing here has been through a
     <code>runServer</code> boot either &mdash; see the note under
     &sect;<a href="#h-menu">0-AI</a>; this batch adds five items, five models, five
     item definitions and five recipes.
@@ -712,7 +865,7 @@
         bond, conditions, and bred / tamed / owner-now. The barn-name box and its
         <strong>Set</strong> button are a fixed header that does not scroll; type a name,
         press Set, close and reopen, and check it stuck. &ldquo;Owner now&rdquo; only
-        appears when it differs from the tamer, so a <a href="items.html#transfer-papers">
+        appears when it differs from the tamer, so a <a href="item-transfer-papers.html">
         transferred horse</a> is the way to see it at all.</li>
     <li><strong>Genes</strong> &mdash; the short form, then the full genetic code, then
         every locus in code order. <strong>Copy the full code into the spawn egg</strong>:

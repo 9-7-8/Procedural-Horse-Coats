@@ -143,6 +143,10 @@ node wiki/gene-creator/tools/bake-export-fixtures.mjs   # what the creator EXPOR
 ./gradlew :web:bakeDesignerAssets   # ...and copy it + the coat PNGs into wiki/horse-designer/
 python -m http.server                # the designer needs a server; file:// cannot fetch wasm
 
+# the wiki itself (see wiki/tabs.js, wiki/search.js)
+node wiki/tools/build-search-index.mjs   # bake every page's text into wiki/search-index.js
+node wiki/tools/sync-page-views.mjs      # write each tabbed page's tabs back into pages.js
+
 # the cowboy's barn (see wiki/villagers.html#rebaking)
 python neoforge-26.1.2/tools/barn/bake-barn.py   # re-export from a structure block, then
                                      # this adds the jigsaw connector and the cowboy
@@ -159,6 +163,8 @@ python neoforge-26.1.2/tools/barn/bake-barn.py   # re-export from a structure bl
 <p><strong>Run the parity check whenever you touch <code>SpecPainter</code>, <code>SpecSchema</code>, <code>AbilityType</code>, <code>HorseSkinGeometry</code>, <code>BodyNoise</code>/<code>BodyStripes</code>, or any of <code>wiki/gene-creator/js/</code>.</strong> It is the only thing standing between the creator and quietly previewing a horse the game will not breed - it has already caught a wrong <code>nextLong()</code> port, four schema defaults that had drifted apart, and (2026-09-06) a missed top/bottom UV swap.</p>
 
 <p><strong>Re-bake the fixtures before trusting a green run.</strong> <code>expected.json</code> is a <em>checked-in snapshot of the Java</em>, so a stale one makes the check green by definition. That is exactly how the UV swap hid for a day: the Java changed, the fixture was never re-baked, and the JS port was never updated. <strong><code>bakeSpecFixtures</code> is part of the check, not a separate chore.</strong> The creator now also runs <code>js/parity.js</code> <strong>on itself at boot</strong> and prints the verdict under the coat sheet, so a stale port is visible in the tool rather than only at a terminal someone forgot to open.</p>
+
+<p><strong>Re-run <code>build-search-index.mjs</code> whenever wiki prose changes.</strong> The wiki's search reads a baked corpus of every page's text, because the wiki is opened from a <code>file://</code> path as often as from a server and there is nothing to query at read time. It is a generated artefact that <strong>fails silently when stale</strong> - search simply stops finding new pages, with no error anywhere. <code>sync-page-views.mjs</code> is the same discipline for a smaller thing: it reads the <code>tab-panel</code> sections out of each page and writes the list back into <code>wiki/pages.js</code>, so which views list a page is never a hand-maintained copy of which tabs it has. Both are in CLAUDE.md's regenerate table.</p>
 
 <p>Run <code>:common:test</code> first when iterating on genetics/stats - it doesn't touch Minecraft. Requires JDK 25; <code>foojay-resolver-convention</code> in <code>settings.gradle.kts</code> auto-provisions it.</p>
 

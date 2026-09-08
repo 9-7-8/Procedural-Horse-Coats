@@ -16,9 +16,9 @@ game-free module.
 ## Keep this file small
 
 **This file is the standing rules. It is not a log, a reference, or a record of
-what was built.** It was 5 490 lines once; almost all of it was material that
-had a wiki page of its own, and the cost was that the rules nobody may break sat
-buried under 3 000 lines of session history.
+what was built.** It was thousands of lines once, almost all of it material with
+a wiki page of its own, and the cost was that the rules nobody may break sat
+buried under session history.
 
 **The budget is 300 lines.** Before adding anything here, apply the test:
 
@@ -66,7 +66,7 @@ the same change as the code, and never copy it back into here.
 | Breeds, herd spawning, the stat curve, cross/spliced/mixed labels | `wiki/breeds.html` |
 | Speed / health / jump / size, disorders, the two lethal paths | `wiki/horse-body.html` |
 | Gated healing, bond tiers, herds, the shared slow tick | `wiki/horse-care.html` |
-| Every item and every recipe; shearing; the spawn egg | `wiki/items.html` |
+| The item roster; then one page per item | `wiki/items.html`, `wiki/item-*.html` |
 | Breeding carrots, splices, the gene database, research papers | `wiki/carrots.html` |
 | The cowboy, the horseman, transfer papers, the barn | `wiki/villagers.html` |
 | Hay portals, the horse dimension, the pens | `wiki/horse-dimension.html` |
@@ -125,8 +125,9 @@ Two rules about the backlog page, both learned the hard way:
 6. **No legacy or back-compat code.** Dev only, single tester, no saves worth
    keeping - when a format changes, change it and move on. No genotype-code
    padding, no attachment field fallbacks.
-7. **The wiki has one nav.** A new page goes in the `SECTIONS` array in
-   `wiki/nav.js` and nowhere else. (`wiki/gene-creator/`,
+7. **The wiki has one page list.** A new page goes in the `SECTIONS` array in
+   `wiki/pages.js` - which the sidebar *and* the landing page both read - and
+   nowhere else, with the `views` it belongs in. (`wiki/gene-creator/`,
    `wiki/horse-designer/` and `wiki/breed-designer/` are the exceptions - they
    are apps, not pages, and own their own chrome.)
 8. **Flag genuinely unverified API usage in a comment**, the way the existing
@@ -145,6 +146,12 @@ Two multi-file contracts worth knowing before you start:
   `wiki/gene-effects.html`. A verb with a client-render component also needs a
   `RenderLayer`. None of it touches `SpecSchema` or the parity check - effects
   do not paint.
+- **A gene or item page is three tabs** - `<section class="tab-panel"
+  data-tab="gameplay|coding|science">` inside `article.doc`, per
+  `wiki/tabs.js`. Gameplay is the default, is written for a player who does not
+  want the model, and is where health goes as a *sentence*. Design rationale
+  goes on **Science**, not Coding. A page with no panels is left alone.
+
 - **The gene-carrot recipe** lands in four: `KnownGeneSpliceRecipe` (what it
   requires), `SpliceRecipeDisplay` (the canonical slot layout), `RarityItems`
   (the tier->item table, deliberately off `common/`), and
@@ -156,22 +163,14 @@ Two multi-file contracts worth knowing before you start:
 
 ## Architecture in one screen
 
-Three Gradle modules, split deliberately. Full detail:
-`wiki/architecture.html`.
+Three Gradle modules - `common/` (pure Java: the whole genetics / coat / trait
+/ breed model, the part that survives a version port), `neoforge-26.1.2/`
+(everything Minecraft-specific, whose job is to **translate**), and `web/`
+(`common/` compiled to WebAssembly by TeaVM for the wiki, not shipped in the
+mod). Packages, data flow and the build: `wiki/architecture.html`.
 
-- **`common/`** - pure Java, the whole genetics / coat / trait / breed model.
-  This is the part that survives a version port unchanged. Subpackages:
-  `genetics/`, `genetics/spec/`, `coat/`, `coat/pattern/`, `coat/skin/`,
-  `trait/`, `breed/`, `horse/`, `name/`.
-- **`neoforge-26.1.2/`** - everything Minecraft-specific, by concern: `client/`,
-  `data/`, `network/`, `menu/`, `server/`, `block/`, `item/`. Its job is to
-  **translate** - build and read `common` types and shuttle them in and out of
-  Minecraft's systems. The logic stays in `common/`.
-- **`web/`** - `common/` compiled to WebAssembly by TeaVM, for the wiki's horse
-  designer. Three classes and no logic. Not shipped in the mod.
-
-When adding a feature, put as much as possible in `common/` and keep the
-NeoForge module thin. That is what makes a future `forge-1.12.2/` module cheap.
+**When adding a feature, put as much as possible in `common/` and keep the
+NeoForge module thin.** That is what makes a future `forge-1.12.2/` cheap.
 
 ---
 
@@ -207,6 +206,8 @@ and fails *silently* when stale:
 | any breed, or `BreedSpecWriter` | `:common:bakeBreedFiles` | `common/.../horsegenetics/breeds/` **and** `wiki/horse-designer/assets/breeds.json` |
 | `spec/`, `SpecSchema`, `AbilityType`, `HorseSkinGeometry`, the noise classes | `:common:bakeSpecFixtures` **then** `check-parity.mjs` | `wiki/gene-creator/fixtures/expected.json` |
 | the coat PNGs or the name tables | `:common:bakeCreatorAssets` + `:web:bakeDesignerAssets` | the regenerated assets |
+| **any wiki prose at all** | `node wiki/tools/build-search-index.mjs` | `wiki/search-index.js` |
+| a page's tab panels, or a section moved between tabs | `node wiki/tools/sync-page-views.mjs` | `wiki/pages.js` |
 | either `tools/barn/*.source.nbt`, **or `bake-barn.py` itself** | `python neoforge-26.1.2/tools/barn/bake-barn.py` | `data/horsegenetics/structure/cowboy_barn.nbt` |
 | any `tools/stables/*.source.nbt`, **or `bake-stables.py` itself** | `python neoforge-26.1.2/tools/stables/bake-stables.py` | the regenerated `data/horsegenetics/structure/*.nbt` |
 
@@ -278,10 +279,9 @@ where the session actually landed rather than narrating it mid-change.
    material, and a long number is almost always a derived value that should be
    an accessor name instead.
 
-   Over 300 lines is not a nudge, it is the signal to **move a whole section
-   out** - the way the first audit moved four. Trimming words to squeeze under
-   the line misses the point: the budget exists so the hard rules stay findable,
-   and a file that is 299 lines of history has already failed.
+   Over 300 lines is the signal to **move a whole section out**, not to trim
+   words to squeeze under the line: the budget exists so the hard rules stay
+   findable, and a file that is 299 lines of history has already failed.
 6. **Commit and push the doc update as its own commit.** Step 4 always leaves
    the tree dirty; a session must not end with unpushed doc changes.
 7. **Verify clean**: `git status --short` empty and `git log origin/main..HEAD`
