@@ -196,7 +196,28 @@
         carrot that already worked.</li>
 </ul>
 
-<h2 id="h-menu">&sect;0-AI &mdash; The My horses table, and the information screen made readable (2026-09-07, NOT looked at)</h2>
+<h2 id="h-menu">&sect;0-AI &mdash; The My horses table, and the information screen made readable (2026-09-07, <em>partly</em> looked at)</h2>
+
+<div class="note">
+    <span class="label">What the owner&rsquo;s own reports already confirm</span>
+    <p>
+        Four things below were checked without anybody meaning to: the owner opened
+        both screens mid-session and reported what was wrong with them, which
+        establishes that <strong>the browser opens and its tabs render</strong>, that
+        <strong>My horses draws rows</strong> (they asked what the Barn column was
+        for, which needs rows on screen), that the <strong>Breeding preview</strong>
+        tab renders, and that the information screen&rsquo;s <strong>Genes</strong> and
+        <strong>Other genes</strong> tabs render with gene rows on them. So the
+        &ldquo;does the roster arrive at all&rdquo; gate below is <b>passed</b> and the
+        checks it guarded are worth doing rather than moot.
+    </p>
+    <p>
+        Three defects came out of that and are <strong>fixed but not re-checked</strong>:
+        buttons sitting on top of text (all of them are label-width now), brindle
+        showing on every stallion, and <code>KIT</code> filed under Other genes on
+        every horse. Each has its own checklist item below.
+    </p>
+</div>
 
 <div class="note warn">
     <span class="label"><code>runServer</code> could not be booted for this batch either</span>
@@ -225,16 +246,15 @@
     <a href="known-gaps.html#gap-76">76</a>&ndash;<a href="known-gaps.html#gap-79">79</a>.
 </p>
 
-<div class="note danger">
-    <span class="label">Check the roster arrives before checking the table</span>
+<div class="note">
+    <span class="label">The roster gate &mdash; passed, and here for the next change</span>
     <p>
-        Open <kbd>H</kbd>. If <strong>My horses</strong> says
-        <em>&ldquo;asking the server&hellip;&rdquo;</em> and never fills, stop &mdash;
-        the renamed payload did not register, or the request is not reaching
-        <code>HorseRoster</code>, and every row below is moot. <strong>Breeding
-        preview will be empty too</strong>, because both tabs now read the same
-        roster; if only one of the two is empty, that is a different and much stranger
-        bug and is worth saying so.
+        If <strong>My horses</strong> ever says <em>&ldquo;asking the
+        server&hellip;&rdquo;</em> and never fills, stop: the roster payload is not
+        registering or the request is not reaching <code>HorseRoster</code>, and every
+        row below is moot. <strong>Breeding preview will be empty too</strong>, because
+        both tabs read the same roster; if only one of the two is empty, that is a
+        different and much stranger bug and is worth saying so.
     </p>
 </div>
 
@@ -328,6 +348,11 @@
 </ul>
 
 <h3>The little horses, and the buttons that were sitting on the text</h3>
+
+<p class="muted">
+    Everything in this block was built <em>after</em> the owner&rsquo;s reports, so
+    none of it has been seen &mdash; unlike the tabs above, which have.
+</p>
 
 <ul>
     <li><strong>Do the row portraits fill in?</strong> They arrive a screenful at
