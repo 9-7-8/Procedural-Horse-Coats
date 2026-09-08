@@ -376,6 +376,7 @@ public final class GeneWikiTool {
         }
         String page = Files.readString(landing, StandardCharsets.UTF_8).replace("\r\n", "\n");
         Map<String, String> existing = harvestCards(page);
+        Map<String, String> keptIcons = harvestIcons(page);
 
         StringBuilder body = new StringBuilder();
         body.append(LAND_BEGIN).append(" - do not edit between the markers.\n")
@@ -387,7 +388,8 @@ public final class GeneWikiTool {
         for (GeneFamily family : GeneFamily.occupied()) {
             List<String> cards = new ArrayList<>();
             if (family.slug() != null) {
-                cards.add(familyCard(family, existing.get("wiki/" + family.slug() + ".html")));
+                String href = "wiki/" + family.slug() + ".html";
+                cards.add(familyCard(family, existing.get(href), keptIcons.get(href)));
             }
             for (Gene gene : membersForMenu(family)) {
                 if (!Files.exists(wiki.resolve(pageOf(gene)))) {
@@ -397,7 +399,7 @@ public final class GeneWikiTool {
                 if (kept == null) {
                     generated++;
                 }
-                cards.add(geneCard(gene, wiki, kept));
+                cards.add(geneCard(gene, wiki, kept, keptIcons.get("wiki/" + pageOf(gene))));
             }
             if (cards.isEmpty()) {
                 continue;
@@ -537,15 +539,21 @@ public final class GeneWikiTool {
                     + "(.*?)^[ \\t]*</a>\\n",
             Pattern.DOTALL | Pattern.MULTILINE);
 
+    private static final Pattern CARD_ICON = Pattern.compile(
+            "<img class=\"card-icon\"[^>]*src=\"([^\"]+)\"[^>]*>", Pattern.DOTALL);
+
     /**
-     * The <b>body</b> of every gene card already on the page, keyed by href -
-     * the heading, the paragraph and the tag line somebody wrote, without the
-     * anchor around them.
+     * The <b>prose</b> of every gene card already on the page, keyed by href -
+     * the heading, the paragraph and the tag line somebody wrote, with the
+     * anchor, the icon and the text column stripped back off.
      *
-     * <p>Only the body is kept. The anchor is rebuilt from the gene every time,
-     * so the href, the natural / magical class and the icon are always what the
-     * registry says and can never be a card that was moved between families and
-     * kept the old colour.
+     * <p>Only the prose is kept. Everything structural is rebuilt from the gene
+     * every time, so the href, the natural / magical class and the layout are
+     * always what the registry and this tool say, and can never be a card that
+     * was moved between families and kept the old colour. The icon comes back
+     * through {@link #harvestIcons} rather than riding along inside the body,
+     * or a change to the markup here could not reach a card anybody had
+     * touched.
      */
     private static Map<String, String> harvestCards(String page) {
         Map<String, String> out = new LinkedHashMap<>();
@@ -556,49 +564,82 @@ public final class GeneWikiTool {
         return out;
     }
 
-    /** Put a harvested body back on the page's own indentation. */
-    private static String reindent(String body) {
-        StringBuilder sb = new StringBuilder();
-        for (String line : body.split("\n", -1)) {
-            String trimmed = line.strip();
-            if (trimmed.isEmpty()) {
-                continue;
+    /**
+     * The icon each card on the page is <b>already</b> showing, keyed by href.
+     *
+     * <p>A gene's own icon is derived - it is the bake named after the gene -
+     * but a family card's is not: the family index cards each picked one
+     * representative gene's bake by hand, and there is nothing in the registry
+     * that would choose {@code panda.png} for the ground-and-strong-white
+     * family. So a card that has an icon this tool would not have picked keeps
+     * the one it has.
+     */
+    private static Map<String, String> harvestIcons(String page) {
+        Map<String, String> out = new LinkedHashMap<>();
+        Matcher m = CARD.matcher(page);
+        while (m.find()) {
+            Matcher icon = CARD_ICON.matcher(m.group(2));
+            if (icon.find()) {
+                out.put(m.group(1), icon.group(1));
             }
-            sb.append("            ").append(trimmed).append('\n');
+        }
+        return out;
+    }
+
+    /**
+     * Put a harvested body back on the page's own indentation, with the icon
+     * and the text column taken off - {@link #card} puts them back.
+     */
+    private static String reindent(String body) {
+        List<String> lines = new ArrayList<>();
+        for (String line : CARD_ICON.matcher(body).replaceAll("").split("\n", -1)) {
+            String trimmed = line.strip();
+            if (!trimmed.isEmpty()) {
+                lines.add(trimmed);
+            }
+        }
+        // Unwrap the text column, and only when it really is the wrapper: the
+        // outermost pair, not every </div> in the body, so a card that one day
+        // holds a div of its own is not quietly flattened.
+        if (lines.size() >= 2
+                && lines.get(0).equals("<div class=\"card-text\">")
+                && lines.get(lines.size() - 1).equals("</div>")) {
+            lines = lines.subList(1, lines.size() - 1);
+        }
+        StringBuilder sb = new StringBuilder();
+        for (String line : lines) {
+            sb.append("                ").append(line).append('\n');
         }
         return sb.toString();
     }
 
     /**
-     * The anchor round a card body: href, kind, and the baked icon if there is
-     * one.
-     *
-     * <p>The two icon questions are deliberately different. <b>Is there an
-     * icon</b> decides the class, and a body carrying its own {@code <img>}
-     * counts - the seven family cards each picked a representative gene's bake
-     * by hand and keep it. <b>Should one be added</b> is narrower: only when the
-     * body has not got one already, or a card would grow a second icon every
-     * time this ran.
+     * The anchor round a card body: href, kind, the baked icon if there is one,
+     * and the <b>two columns</b> - the icon on the left, every word of the card
+     * in a {@code .card-text} column on the right. The wrapper is what lets the
+     * text be a column of its own rather than text flowing round a float, and
+     * it is emitted whether or not there is an icon so that every generated
+     * card has the same shape.
      */
     private static String card(String href, String kind, String icon, String body) {
-        boolean bodyHasIcon = body.contains("card-icon");
-        boolean anyIcon = icon != null || bodyHasIcon;
         return "        <a href=\"" + href + "\" class=\"card " + kind
-                + (anyIcon ? " card-iconed" : "") + "\">\n"
-                + (icon != null && !bodyHasIcon
+                + (icon != null ? " card-iconed" : "") + "\">\n"
+                + (icon != null
                         ? "            <img class=\"card-icon\" src=\"" + icon
-                                + "\" alt=\"\" width=\"120\" loading=\"lazy\">\n"
+                                + "\" alt=\"\" width=\"96\" loading=\"lazy\">\n"
                         : "")
+                + "            <div class=\"card-text\">\n"
                 + body
+                + "            </div>\n"
                 + "        </a>\n";
     }
 
-    private static String familyCard(GeneFamily family, String body) {
-        return card("wiki/" + family.slug() + ".html", "magical", null,
+    private static String familyCard(GeneFamily family, String body, String icon) {
+        return card("wiki/" + family.slug() + ".html", "magical", icon,
                 body != null ? body
-                        : "            <h3>All " + esc(family.title().toLowerCase(Locale.ROOT))
-                                + "</h3>\n            <p>" + esc(family.lede())
-                                + "</p>\n            <span class=\"tag\">index</span>\n");
+                        : "                <h3>All " + esc(family.title().toLowerCase(Locale.ROOT))
+                                + "</h3>\n                <p>" + esc(family.lede())
+                                + "</p>\n                <span class=\"tag\">index</span>\n");
     }
 
     /**
@@ -606,10 +647,10 @@ public final class GeneWikiTool {
      * its baked icon if it has one. Deliberately thin - the point of a card is
      * to be a door to the page, and the page has everything.
      */
-    private static String geneCard(Gene gene, Path wiki, String body) {
+    private static String geneCard(Gene gene, Path wiki, String body, String kept) {
         String icon = Files.exists(wiki.resolve("assets/gene-icons/" + slug(gene) + ".png"))
                 ? "wiki/assets/gene-icons/" + slug(gene) + ".png"
-                : null;
+                : kept;
         if (body == null) {
             List<String> tokens = new ArrayList<>();
             for (Allele a : gene.alleles()) {
@@ -617,10 +658,10 @@ public final class GeneWikiTool {
             }
             String tag = tokens.size() > 4 ? tokens.size() + " alleles" : String.join(" / ", tokens);
             String blurb = gene.description();
-            body = "            <h3>" + esc(gene.name()) + "</h3>\n"
+            body = "                <h3>" + esc(gene.name()) + "</h3>\n"
                     + (blurb == null || blurb.isEmpty()
-                            ? "" : "            <p>" + esc(blurb) + "</p>\n")
-                    + "            <span class=\"tag\">" + esc(tag) + "</span>\n";
+                            ? "" : "                <p>" + esc(blurb) + "</p>\n")
+                    + "                <span class=\"tag\">" + esc(tag) + "</span>\n";
         }
         return card("wiki/" + pageOf(gene), gene.isNatural() ? "natural" : "magical", icon, body);
     }

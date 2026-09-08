@@ -7,6 +7,12 @@
 // are copied verbatim from the Java file; if that file's geometry changes, this
 // one has to change with it.
 //
+// NOT A COMPLETE PORT, deliberately: the Java file also carries posed() and
+// posedNormal(), which walk the raw cuboid rather than its bounding box so the
+// baked gene icons draw a horse instead of a stack of blocks. On this side that
+// arithmetic lives in model3d.js emitPart, which had it first. The tables below
+// are what both of them read.
+//
 // Body space: X 0 at the tail's rear edge -> +nose, Y 0 at the hoof bottoms ->
 // +up, Z 0 on the centre plane, +Z to the horse's right. Model units, 1 unit =
 // 1/16 block = 2 texels on the 128px sheet.

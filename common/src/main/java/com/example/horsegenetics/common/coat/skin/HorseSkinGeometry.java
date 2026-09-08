@@ -29,6 +29,10 @@ import java.util.Optional;
  * by the other two: NOSE/TAIL span (Z,Y); TOP/BOTTOM span (X,Z); RIGHT/LEFT
  * span (X,Y). The foal mesh has no MANE or MUZZLE part.
  *
+ * <p>{@link #posed} is the escape hatch for anything that <i>draws</i> the
+ * horse: the AABB is right for looking a texel up and wrong for a silhouette,
+ * because a pitched neck's box is nearly twice the neck.
+ *
  * <p>The static no-{@code Skin} methods target {@link Skin#ADULT}; the
  * {@code Skin}-first overloads pick the mesh. Pure data + arithmetic - keep the
  * geometry tables in sync with {@code HdHorseModel} / {@code HdBabyHorseModel}.
@@ -169,7 +173,12 @@ public final class HorseSkinGeometry {
     /** One baked mesh. */
     private static final class Mesh {
         final Map<Part, PartData> parts = new EnumMap<>(Part.class);
+        /** The cuboids the AABBs were taken from - what {@link #posed} poses. */
+        final Map<Part, Raw> raws = new EnumMap<>(Part.class);
         final Bounds bodyBounds;
+        /** The model->body offsets: bodyX = mzMax - mz, bodyY = myMax - my, bodyZ = -mx. */
+        final double myMax;
+        final double mzMax;
         private volatile Sample[] sampleGrid;
 
         Mesh(List<Raw> raw) {
@@ -179,9 +188,12 @@ public final class HorseSkinGeometry {
             for (Raw r : raw) {
                 double[] aabb = modelAabbOf(r);
                 modelAabb.put(r.part, aabb);
+                raws.put(r.part, r);
                 myMaxAll = Math.max(myMaxAll, aabb[3]);
                 mzMaxAll = Math.max(mzMaxAll, aabb[5]);
             }
+            this.myMax = myMaxAll;
+            this.mzMax = mzMaxAll;
             double xMin = Double.POSITIVE_INFINITY, xMax = Double.NEGATIVE_INFINITY;
             double yMin = Double.POSITIVE_INFINITY, yMax = Double.NEGATIVE_INFINITY;
             double zMin = Double.POSITIVE_INFINITY, zMax = Double.NEGATIVE_INFINITY;
@@ -269,6 +281,52 @@ public final class HorseSkinGeometry {
             double u = lerp(fm.u0(), fm.u1(), fm.uUsesA() ? fa : fb);
             double v = lerp(fm.v0(), fm.v1(), fm.vUsesA() ? fa : fb);
             return new Texel(u, v, texelInRect(u, fm.u0(), fm.u1()), texelInRect(v, fm.v0(), fm.v1()), clamped);
+        }
+
+        BodyPoint posed(Part part, Face face, double fa, double fb) {
+            Raw r = raw(part);
+            double cx = bodyFraction(Axis.X, face, fa, fb);
+            double cy = bodyFraction(Axis.Y, face, fa, fb);
+            double cz = bodyFraction(Axis.Z, face, fa, fb);
+            // Body and local axes run against each other on all three axes (see
+            // the constructor), so a body fraction c is a local fraction 1 - c
+            // on the axis it is paired with: bodyX<->local z, bodyY<->local y,
+            // bodyZ<->local x.
+            double lx = r.ox + (1.0 - cz) * r.w;
+            double ly = r.oy + (1.0 - cy) * r.h;
+            double lz = r.oz + (1.0 - cx) * r.d;
+            double cos = Math.cos(r.pitch);
+            double sin = Math.sin(r.pitch);
+            double mx = r.px + lx;
+            double my = r.py + (ly * cos - lz * sin);
+            double mz = r.pz + (ly * sin + lz * cos);
+            return new BodyPoint(mzMax - mz, myMax - my, -mx);
+        }
+
+        BodyPoint posedNormal(Part part, Face face) {
+            Raw r = raw(part);
+            // The face's outward direction in local space. Every body axis is
+            // the reverse of the local axis it pairs with, so "at max" points
+            // along the negative local axis.
+            double sign = face.atMax ? -1.0 : 1.0;
+            double dx = face.normal() == Axis.Z ? sign : 0.0;
+            double dy = face.normal() == Axis.Y ? sign : 0.0;
+            double dz = face.normal() == Axis.X ? sign : 0.0;
+            double cos = Math.cos(r.pitch);
+            double sin = Math.sin(r.pitch);
+            double ry = dy * cos - dz * sin;
+            double rz = dy * sin + dz * cos;
+            // Back to body space. The offsets cancel on a direction; only the
+            // axis swap and the three sign flips survive.
+            return new BodyPoint(-rz, -ry, -dx);
+        }
+
+        private Raw raw(Part part) {
+            Raw r = raws.get(part);
+            if (r == null) {
+                throw new IllegalArgumentException("this mesh has no part " + part);
+            }
+            return r;
         }
     }
 
@@ -360,6 +418,70 @@ public final class HorseSkinGeometry {
 
     public static Texel project(Part part, Face face, BodyPoint point) {
         return project(part, face, point.along(face.spanA()), point.along(face.spanB()));
+    }
+
+    // ------------------------------------------------------------------
+    // The posed mesh - the horse as it is actually drawn
+    // ------------------------------------------------------------------
+
+    /**
+     * <b>The same texel, on the posed cuboid rather than on its bounding box.</b>
+     *
+     * <p>Everything above works in {@link Bounds} - each part's rest-pose
+     * <i>axis-aligned bounding box</i> - because that is all the coat pipeline
+     * needs: it projects a texel onto a box and never asks what shape the horse
+     * is. For a pitched part the AABB is much bigger than the part. The adult
+     * neck is a 4x12x7 cuboid tilted 30 degrees, whose AABB is 4x13.9x12.1 -
+     * nearly twice as deep - so anything that <i>draws</i> from the bounds gets
+     * a pile of oversized blocks rather than a horse.
+     *
+     * <p>This walks the raw cuboid instead ({@code origin + size}, rotated about
+     * the pivot) exactly as {@code HdHorseModel} poses it, and only then flips
+     * into body space. Nothing about the pipeline changes; a renderer just stops
+     * lying about the silhouette. {@code wiki/gene-creator/js/model3d.js}
+     * {@code emitPart} is the same arithmetic for the browser's preview horse -
+     * a change here is a change there.
+     *
+     * @param fa fraction along the face's {@link Face#spanA()} axis, 0..1
+     * @param fb fraction along the face's {@link Face#spanB()} axis, 0..1
+     */
+    public static BodyPoint posed(Skin skin, Part part, Face face, double fa, double fb) {
+        return mesh(skin).posed(part, face, fa, fb);
+    }
+
+    /**
+     * The posed position of a point given on the part's bounding box - the
+     * {@link BodyPoint} {@link #forEachTexel} and {@link #sample} hand out. The
+     * two span fractions are all that is read off it; the normal axis is taken
+     * from the face.
+     */
+    public static BodyPoint posed(Skin skin, Part part, Face face, BodyPoint onBounds) {
+        Bounds b = bounds(skin, part);
+        double fa = invLerp(b.min(face.spanA()), b.max(face.spanA()), onBounds.along(face.spanA()));
+        double fb = invLerp(b.min(face.spanB()), b.max(face.spanB()), onBounds.along(face.spanB()));
+        return posed(skin, part, face, fa, fb);
+    }
+
+    /**
+     * The face's outward <b>unit direction</b> in body space, after the part's
+     * pitch - a vector, carried in a {@link BodyPoint} for the arithmetic. On an
+     * unpitched part it is the plain body axis; on the neck or the tail it is
+     * not, which is the whole reason to ask.
+     */
+    public static BodyPoint posedNormal(Skin skin, Part part, Face face) {
+        return mesh(skin).posedNormal(part, face);
+    }
+
+    /**
+     * Where a face-local {@code (a, b)} pair sits along one body axis, as a
+     * fraction: the two span axes take it straight, and the axis the face looks
+     * along is pinned to whichever end of the box the face is.
+     */
+    private static double bodyFraction(Axis axis, Face face, double fa, double fb) {
+        if (face.normal() == axis) {
+            return face.atMax ? 1.0 : 0.0;
+        }
+        return face.spanA() == axis ? fa : fb;
     }
 
     // ------------------------------------------------------------------

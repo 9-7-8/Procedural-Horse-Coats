@@ -428,6 +428,18 @@ table.facts th {
     margin: 0 0 2rem 0;
 }
 
+/* A grid holding two-column cards needs wider columns, or the picture takes
+   most of one and the words are left in a gutter. Only the grids that actually
+   carry an icon widen; the plain "see also" strips keep their tighter columns.
+   Where :has() is not understood the cards simply stay narrow, which is the
+   layout this file had before them. */
+.cards:has(.card-iconed) {
+    /* min(21rem, 100%), not a bare 21rem: auto-fill still lays a track that
+       wide on a phone, and the grid then overflows the page rather than
+       dropping to one column. */
+    grid-template-columns: repeat(auto-fill, minmax(min(21rem, 100%), 1fr));
+}
+
 a.card {
     display: flex;
     flex-direction: column;
@@ -1102,14 +1114,37 @@ body.landing a.card.tool h3    { color: var(--tool); }
     .gene-card-icon { width: 110px; }
 }
 
-/* A landing-page card for a magical gene family: a real bake of one of its
-   genes on a bay, sitting above the title. The image is decorative - the card
-   already says what the family is - so it carries an empty alt. */
+/* A landing-page card carrying a real bake of the gene on a bay: two columns,
+   the horse on the left and every word of the card on the right. The image is
+   decorative - the card says the same thing in words - so it carries an empty
+   alt.
+
+   The text needs its own .card-text box rather than sitting loose in the grid:
+   a card has three children of its own (heading, paragraph, tag) and they have
+   to stack as one column beside the picture, not spread down three grid rows
+   the tall image would then have to span. */
+a.card.card-iconed {
+    display: grid;
+    grid-template-columns: 96px minmax(0, 1fr);
+    column-gap: 0.85rem;
+    align-items: start;
+}
 .card-iconed .card-icon {
     display: block;
-    width: 120px;
+    width: 96px;
     height: auto;
-    margin: 0 0 8px;
+    margin: 0;
     image-rendering: pixelated;
     border-radius: 6px;
+}
+.card-iconed .card-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    min-width: 0;
+}
+
+@media (max-width: 560px) {
+    a.card.card-iconed { grid-template-columns: 72px minmax(0, 1fr); }
+    .card-iconed .card-icon { width: 72px; }
 }

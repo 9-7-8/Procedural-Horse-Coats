@@ -25,6 +25,11 @@
 // single box per leg. Following the model doc's classic numbers here would draw
 // a horse the game does not render. See wiki/body-space.html#vanilla-model.
 //
+// THE JAVA TWIN. HorseSkinGeometry.posed()/posedNormal() are this same
+// arithmetic on the other side of the port, added so the wiki's baked gene
+// icons draw the horse the game draws rather than a stack of bounding boxes.
+// A change to how a part is posed has to reach both.
+//
 // TWO CALLERS, ONE EMITTER. build() returns the whole horse merged into one
 // geometry, framed for the gene creator's orbit view. buildParts() returns the
 // same quads split per part, each one measured from its own pivot, which is what
