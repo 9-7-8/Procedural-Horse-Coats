@@ -1101,3 +1101,15 @@ body.landing a.card.tool h3    { color: var(--tool); }
 @media (max-width: 560px) {
     .gene-card-icon { width: 110px; }
 }
+
+/* A landing-page card for a magical gene family: a real bake of one of its
+   genes on a bay, sitting above the title. The image is decorative - the card
+   already says what the family is - so it carries an empty alt. */
+.card-iconed .card-icon {
+    display: block;
+    width: 120px;
+    height: auto;
+    margin: 0 0 8px;
+    image-rendering: pixelated;
+    border-radius: 6px;
+}
