@@ -83,17 +83,6 @@ Genes flagged `inverting` reverse local polarity: where the inverting field over
 
 ## 2. Punctate and stipple genes
 
-### G-01 — STARS
-
-Discrete punctate marks.
-
-- **Element geometry:** circular to four-point stellate. Circular elements 0.3–1.2 cm diameter. Stellate elements 1.0–2.5 cm across, formed of two crossing rays at 90° ±15°, ray width 0.1–0.25 cm, ray length asymmetric (long axis 1.3–2.0× short axis).
-- **Count:** 40–200 per side.
-- **Size distribution:** right-skewed; ~70% of elements < 1.0 cm, ~5% stellate.
-- **Density field:** maximum 0.8–2.5 elements/100 cm² over the dorsal third of the barrel, the croup, and the dorsal half of the lateral neck; falling to 0.1–0.3 at the ventral midline; 0 distal to carpus/tarsus; 0 on the muzzle and cheek.
-- **Clustering:** mild clumping over Poisson — 3–8 element groups within 6–12 cm radii, 4–10 groups per side.
-- **Edge:** E0–E1.
-
 ### G-02 — STELLAR
 
 Angular multi-stroke glyphs, larger and sparser than G-01.
@@ -168,29 +157,6 @@ Thin contour lines tracking underlying musculature.
 
 ## 4. Ring, disk and blotch genes
 
-### G-08 — CRESCENTS
-
-Annulus sectors.
-
-- **Element geometry:** outer radius 8–25 cm, arc band width 2.5–9 cm (band width 25–45% of outer radius), angular extent 90–240°. Band width tapers to 30–60% of maximum at both arc terminations.
-- **Count:** 1–4 per side; largest element centered on the mid-barrel, subordinates on the scapula, hip, and caudal neck.
-- **Orientation:** concavity direction unconstrained; cranial or dorsal facing in the reference.
-- **Interior:** retains base field value.
-- **Edge:** E2 on the convex margin, E2–E3 on the concave margin.
-
-### G-09 — WORMHOLES
-
-Annular marks with contrasting centers.
-
-- **Element geometry:** outer diameter 3–12 cm, ring wall thickness 0.8–3 cm (20–30% of outer diameter), interior retains base field value.
-- **Count:** 10–40 per side.
-- **Distribution:** 2–4 clusters over scapula, barrel, croup/hip, lateral neck; cluster radius 15–35 cm, 4–12 elements each. Isolated elements at 15–25% of total.
-- **Variants within an expression:**
-  - Complete rings — 65%
-  - Incomplete arcs (200–330°) — 25%
-  - Concentric doubles — 10%; second ring gap 1–3 cm, wall thickness 0.5–2 cm
-- **Edge:** E1.
-
 ### G-10 — BLACK HOLES  `inverting`
 
 Solid hard-edged patches. Placement is unrestricted — any body region including face, limbs, ventral midline, and over the mane base.
@@ -201,29 +167,6 @@ Solid hard-edged patches. Placement is unrestricted — any body region includin
 - **Satellites:** ~20% of patches carry 1–3 dots 1–3 cm diameter within 5 cm of the parent margin.
 - **Fill value:** either (a) the animal's main coat color, or (b) pure black (L* ≤ 15) independent of the main coat color. Fill choice is per-expression, not per-patch.
 - **Inversion:** over a moon-pattern region the patch renders in the colored/black value; over a colored field it renders in the moon-pattern value.
-
-### G-11 — POLYMOON  `inverting`
-
-Chain of circular disks.
-
-- **Element geometry:** diameter 2–7 cm, circular, edge E1.
-- **Chain path:** curved, total path length 40–110 cm, running from the throatlatch or cranial shoulder along the caudal scapular margin and onto the barrel. Secondary chains of 3–6 disks on the hip or caudal flank in ~40% of expressions.
-- **Spacing:** center-to-center 1.2–2.5× local disk diameter; 0–30% overlap permitted between adjacent disks.
-- **Count:** 8–25 disks in the primary chain.
-- **Size gradient:** diameter varies smoothly along the chain, maximum at 40–60% of path length, minima at both terminations (30–50% of maximum).
-
-### G-12 — LASERTAE
-
-Large ellipses composed of a high-value halo enclosing a dark core.
-
-- **Outer geometry:** long axis 15–40 cm, aspect ratio 1.3:1–2:1, long axis 0–30° from cranio-caudal.
-- **Halo band:** width 3–10 cm, outer edge E3 (6–15 cm), inner edge E2.
-- **Core:** occupies 30–60% of outer ellipse area, concentric or offset up to 20% of the long axis, value equal to or 5–15% darker than the surrounding colored field, edge E2.
-- **Count:** 2–5 per side, centered on the scapula, mid-barrel, and hip.
-
----
-
-## 5. Field and region genes
 
 ### G-13 — QUAZARS
 

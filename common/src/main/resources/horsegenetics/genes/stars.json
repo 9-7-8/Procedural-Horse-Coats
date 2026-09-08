@@ -1,0 +1,75 @@
+{
+  "format": 3,
+  "key": "horsegenetics.stars",
+  "name": "Stars",
+  "phase": "magical",
+  "priority": 330,
+  "rarity": "UNCOMMON",
+  "blurb": "A scatter of small pale points over the upper half of the horse, dense along the topline and thinning to nothing at the belly and below the knee.",
+  "alleles": [
+    { "token": "Sta", "label": "Stars (Sta)" },
+    { "token": "n", "label": "Wild-type (n)" }
+  ],
+  "knobs": [
+    { "name": "starSeed", "type": "seed" },
+    { "name": "clusterSeed", "type": "seed" },
+    { "name": "density", "min": 0.3, "max": 0.75 },
+    { "name": "starSize", "min": 0.22, "max": 0.45 }
+  ],
+  "expressions": [
+    {
+      "id": "stars",
+      "name": "Stars",
+      "description": "Small hard-edged points, most of them round and a few drawn out into a short cross. They fall thickest over the dorsal third of the barrel, the croup and the upper neck, thin toward the belly, and stop at the knee and hock. They clump: a starred horse has three or four patches where the points crowd, not an even dusting.",
+      "when": [ "Sta/Sta", "Sta/n" ],
+      "layers": [
+        {
+          "name": "points over the upper body, clumped",
+          "masks": [
+            { "type": "SPOTS", "parts": [ "BODY", "NECK", "HEAD" ], "seed": "$starSeed",
+              "spacing": 1.5, "radius": "$starSize", "vary": 0.7,
+              "chance": "$density", "softness": 0.08 },
+            { "type": "AXIS", "parts": [ "BODY", "NECK", "HEAD" ], "axis": "Y",
+              "space": "part", "from": 0.3, "to": 1.0, "softness": 0.45 },
+            { "type": "NOISE", "parts": [ "BODY", "NECK", "HEAD" ], "seed": "$clusterSeed",
+              "scale": 6.0, "low": 0.35, "high": 1.4 }
+          ],
+          "op": { "type": "TOWARD", "color": "#f2f4ff", "strength": 90 }
+        },
+        {
+          "name": "the few that are drawn out into a cross",
+          "masks": [
+            { "type": "SPOTS", "parts": [ "BODY", "NECK" ], "seed": "$starSeed",
+              "spacing": 1.5, "radius": "$starSize", "vary": 0.7,
+              "chance": 0.06, "stretch": 3.2, "axis": "X", "softness": 0.06 },
+            { "type": "AXIS", "parts": [ "BODY", "NECK" ], "axis": "Y",
+              "space": "part", "from": 0.3, "to": 1.0, "softness": 0.45 }
+          ],
+          "op": { "type": "TOWARD", "color": "#ffffff", "strength": 92 }
+        },
+        {
+          "name": "a sparse scatter down the upper leg only",
+          "masks": [
+            { "type": "SPOTS", "parts": [ "LEGS" ], "seed": "$starSeed",
+              "spacing": 1.7, "radius": "$starSize", "vary": 0.7,
+              "chance": 0.3, "softness": 0.08 },
+            { "type": "AXIS", "parts": [ "LEGS" ], "axis": "Y", "space": "part",
+              "from": 0.55, "to": 1.0, "softness": 0.25 }
+          ],
+          "op": { "type": "TOWARD", "color": "#f2f4ff", "strength": 88 }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "No stars.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Sta/Sta": 0.4,
+    "Sta/n": 6.0,
+    "n/n": 93.6
+  }
+}

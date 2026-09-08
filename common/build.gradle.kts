@@ -74,6 +74,17 @@ tasks.register<JavaExec>("bakeCreatorAssets") {
     args(rootProject.layout.projectDirectory.dir("wiki/gene-creator").asFile.absolutePath)
 }
 
+// One side-on snapshot per data-driven gene, on a standard bay, for the wiki's
+// gene index. Also the fastest way to look at every gene at once - see the class.
+tasks.register<JavaExec>("bakeGeneIcons") {
+    group = "horsegenetics"
+    description = "Write wiki/assets/gene-icons/*.png - one bay horse per data-driven gene"
+    dependsOn(tasks.named("classes"))
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass.set("com.example.horsegenetics.common.coat.pattern.GeneIconTool")
+    args(rootProject.layout.projectDirectory.dir("wiki/assets/gene-icons").asFile.absolutePath)
+}
+
 // Concatenate the shipped gene files into the single array the browser fetches.
 // The wiki tools cannot walk a classpath index; see GeneFileTool.
 tasks.register<JavaExec>("bakeGeneBundle") {

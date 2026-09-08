@@ -1,0 +1,71 @@
+{
+  "format": 3,
+  "key": "horsegenetics.aurorae",
+  "name": "Aurorae",
+  "phase": "magical",
+  "priority": 300,
+  "rarity": "EPIC",
+  "blurb": "Luminescent spots scattered over the whole horse, in one hue the line carries, with the mane and tail fading into the same light toward their tips.",
+  "alleles": [
+    { "token": "Aur", "label": "Aurorae (Aur)" },
+    { "token": "n", "label": "Wild-type (n)" }
+  ],
+  "knobs": [
+    { "name": "spotSeed", "type": "seed" },
+    { "name": "hue", "min": 0.0, "max": 360.0 },
+    { "name": "spotRadius", "min": 0.45, "max": 0.9 },
+    { "name": "spotSpacing", "min": 2.4, "max": 4.2 },
+    { "name": "roan", "min": 0.0, "max": 0.22 }
+  ],
+  "expressions": [
+    {
+      "id": "aurorae",
+      "name": "Aurorae",
+      "description": "Round and oval spots of cold light over the whole body, sparse in one copy and crowding together in two. Every spot on a horse is the same hue, and the mane and tail run into it toward their tips. A faint wash of the same colour lies over the coat between the spots.",
+      "when": [ "Aur/Aur", "Aur/n" ],
+      "layers": [
+        {
+          "name": "a low roan wash of the same light",
+          "masks": [
+            { "type": "NOISE", "scale": 9.0, "low": 0.25, "high": 1.0 }
+          ],
+          "op": { "type": "TOWARD", "hue": "$hue", "saturation": 0.35, "lightness": 0.6,
+            "strength": "$roan" }
+        },
+        {
+          "name": "luminescent spots over the whole horse",
+          "emissive": true,
+          "masks": [
+            { "type": "SPOTS", "seed": "$spotSeed", "spacing": "$spotSpacing",
+              "radius": "$spotRadius", "vary": 0.65,
+              "chance": { "perDose": [ 0.0, 0.45, 0.85 ] },
+              "stretch": 1.4, "axis": "X", "softness": 0.22 }
+          ],
+          "op": { "type": "TOWARD", "hue": "$hue", "saturation": 0.9, "lightness": 0.66,
+            "strength": 96 }
+        },
+        {
+          "name": "the mane and tail running into the light",
+          "masks": [
+            { "type": "PARTS", "parts": [ "HAIR" ] }
+          ],
+          "op": { "type": "RAMP", "hue": "$hue", "hueSpan": 25.0,
+            "saturation": 0.8, "lightness": 0.6,
+            "axis": "Y", "space": "part", "from": 0.85, "to": 0.05,
+            "strength": { "perDose": [ 0.0, 55.0, 90.0 ] } }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "No aurorae.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Aur/Aur": 0.04,
+    "Aur/n": 0.9,
+    "n/n": 99.06
+  }
+}

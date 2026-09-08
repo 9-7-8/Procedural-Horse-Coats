@@ -1,0 +1,99 @@
+{
+  "format": 3,
+  "key": "horsegenetics.rosette",
+  "name": "Rosette",
+  "phase": "magical",
+  "priority": 304,
+  "rarity": "UNCOMMON",
+  "blurb": "Leopard rosettes following the curve of the body - a dark ring around a centre that keeps the coat colour - sparse in one copy and blanketing the horse in two.",
+  "alleles": [
+    { "token": "Rs", "label": "Rosette (Rs)" },
+    { "token": "n", "label": "Wild-type (n)" }
+  ],
+  "knobs": [
+    { "name": "rosetteSeed", "type": "seed" },
+    { "name": "ringRadius", "min": 1.5, "max": 2.6 },
+    { "name": "ringWeight", "min": 0.85, "max": 1.5 },
+    { "name": "tone", "min": 0.06, "max": 0.22 }
+  ],
+  "expressions": [
+    {
+      "id": "blanket",
+      "name": "Blanket rosette",
+      "description": "Two copies crowd the rosettes together until they touch, and where they touch they read as broken striping rather than as rings. Coverage runs from average to the whole horse, and the mane picks up the tone wherever a rosette meets the topline.",
+      "when": { "Rs": 2 },
+      "layers": [
+        {
+          "name": "the rings themselves, drawn along the body's curve",
+          "masks": [
+            { "type": "RINGS", "seed": "$rosetteSeed", "spacing": 5.0,
+              "radius": "$ringRadius", "thickness": "$ringWeight", "vary": 0.5,
+              "chance": 0.92, "arc": 0.9, "softness": 0.22 }
+          ],
+          "op": { "type": "TOWARD", "hue": 25.0, "saturation": 0.35, "lightness": "$tone",
+            "strength": 82 }
+        },
+        {
+          "name": "a soft shadow inside each ring",
+          "masks": [
+            { "type": "SPOTS", "seed": "$rosetteSeed", "spacing": 5.0,
+              "radius": 1.1, "vary": 0.5, "chance": 0.92, "softness": 0.5 }
+          ],
+          "op": { "type": "TOWARD", "hue": 25.0, "saturation": 0.3, "lightness": 0.3,
+            "strength": 22 }
+        },
+        {
+          "name": "the mane where the rosettes reach the topline",
+          "masks": [
+            { "type": "STROKES", "parts": [ "MANE" ], "seed": "$rosetteSeed",
+              "spacing": 1.6, "length": 5.0, "axis": "Y", "width": 0.4, "curl": 0.2 }
+          ],
+          "op": { "type": "TOWARD", "hue": 25.0, "saturation": 0.3, "lightness": "$tone",
+            "strength": 55 }
+        }
+      ]
+    },
+    {
+      "id": "semi",
+      "name": "Semi-rosette",
+      "description": "One copy scatters the rosettes over the upper half of the horse - clear and well-drawn, but selectively placed, and rarely reaching below the barrel.",
+      "when": { "Rs": 1 },
+      "layers": [
+        {
+          "name": "rings over the upper body",
+          "masks": [
+            { "type": "RINGS", "seed": "$rosetteSeed", "spacing": 6.4,
+              "radius": "$ringRadius", "thickness": "$ringWeight", "vary": 0.5,
+              "chance": 0.55, "arc": 0.85, "softness": 0.22 },
+            { "type": "AXIS", "axis": "Y", "space": "body", "from": 0.42, "to": 1.0,
+              "softness": 0.3 }
+          ],
+          "op": { "type": "TOWARD", "hue": 25.0, "saturation": 0.35, "lightness": "$tone",
+            "strength": 78 }
+        },
+        {
+          "name": "a soft shadow inside each ring",
+          "masks": [
+            { "type": "SPOTS", "seed": "$rosetteSeed", "spacing": 6.4,
+              "radius": 1.1, "vary": 0.5, "chance": 0.55, "softness": 0.5 },
+            { "type": "AXIS", "axis": "Y", "space": "body", "from": 0.42, "to": 1.0,
+              "softness": 0.3 }
+          ],
+          "op": { "type": "TOWARD", "hue": 25.0, "saturation": 0.3, "lightness": 0.3,
+            "strength": 18 }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "No rosettes.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Rs/Rs": 0.5,
+    "Rs/n": 7.0,
+    "n/n": 92.5
+  }
+}

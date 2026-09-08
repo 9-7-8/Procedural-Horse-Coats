@@ -66,6 +66,44 @@ AFTER TOUCHING ANY GENE FILE, RE-RUN
   ./gradlew :common:bakeSpecFixtures && node wiki/gene-creator/tools/check-parity.mjs
   ./gradlew :web:bakeDesignerAssets         (any common/ change at all)
 
+SCALE CALIBRATION - READ BEFORE WRITING A GENE
+  One body unit is TWO texels (HorseSkinGeometry.TEXELS_PER_UNIT). The sources
+  quote centimetres for a 160cm horse, and 1 unit is about 8cm - so a source
+  that says "a 1cm spot" is asking for a sixth of a pixel. Translate for the
+  texture, not for the horse. Working minima, learned by baking icons and
+  looking at them:
+     SPOTS   radius >= 0.5, spacing >= 1.5
+     RINGS   radius >= 1.3, thickness >= 0.7, softness <= thickness/2
+     STROKES spacing * width >= 0.7 (that product is the stroke's real width)
+     SPECKLE spacing >= 0.5
+  Anything finer is arithmetically present and invisible on the horse.
+
+  Part bounds (adult), for masks that need real numbers:
+     BODY  x 7.5..29.5  y 11..21    z -5..5
+     NECK  x 22.1..34.2 y 13.8..27.7 z -2..2
+     HEAD  x 28.1..36.7 y 24.2..32   z -3..3
+     LEGS  x varies     y 0..11      z |1|..|5|
+     MANE  x 20.9..30.6 y 18.2..33   TAIL x 0..10.5 y 5.9..20
+
+THE TWO TOOLS THIS RUN ADDED - USE THEM, DO NOT GUESS
+  ./gradlew :common:bakeGeneIcons      one bay horse per gene, three-quarter view
+  python process/tools/sheet.py 5      stitches them into one contact sheet
+  node process/tools/coverage.mjs <gene.json> [seed]
+                                       per-layer, per-part coverage percentages
+  The icon answers "does it look right"; coverage.mjs answers "did it paint
+  nothing, or paint somewhere the camera cannot see" - which look identical and
+  need opposite fixes.
+
+PRIORITY BANDS THIS IMPORT USES (magical, so 100+; 100-199 was already taken)
+  200-249  ground and strong-white genes that replace the base coat
+  250-299  field and region genes
+  300-329  spot and ring genes
+  330-359  fine detail - speckle, dust, stars
+  360-399  linear and stroke genes
+  400-429  hair-only genes
+  430-469  modifiers that read the coat beneath them
+  500      Invert, which has to be last
+
 PHASE 2 - GENES: see process/index.csv for per-gene state.
 
 OPEN QUESTIONS PARKED FOR THE OWNER

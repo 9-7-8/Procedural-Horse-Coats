@@ -1,0 +1,62 @@
+{
+  "format": 3,
+  "key": "horsegenetics.glow",
+  "name": "Glow",
+  "phase": "magical",
+  "priority": 301,
+  "rarity": "RARE",
+  "blurb": "Small glowing speckles crowded along the topline, with the hooves lit to match. Every lit part of the horse shares one colour.",
+  "alleles": [
+    { "token": "Gl", "label": "Glow (Gl)" },
+    { "token": "n", "label": "Wild-type (n)" }
+  ],
+  "knobs": [
+    { "name": "spotSeed", "type": "seed" },
+    { "name": "hue", "min": 0.0, "max": 360.0 },
+    { "name": "spotRadius", "min": 0.28, "max": 0.55 }
+  ],
+  "expressions": [
+    {
+      "id": "glow",
+      "name": "Glow",
+      "description": "Fine luminescent speckles densest over the neck, shoulder, ribcage and hindquarter and thinning toward the belly, with all four hooves lit in the same colour. One hue per horse, with the speckles a shade paler than the hooves. The mane and tail are untouched.",
+      "when": [ "Gl/Gl", "Gl/n" ],
+      "layers": [
+        {
+          "name": "speckles down the upper body",
+          "emissive": true,
+          "masks": [
+            { "type": "SPOTS", "parts": [ "BODY", "NECK" ], "seed": "$spotSeed",
+              "spacing": 1.9, "radius": "$spotRadius", "vary": 0.55,
+              "chance": { "perDose": [ 0.0, 0.5, 0.8 ] }, "softness": 0.16 },
+            { "type": "AXIS", "parts": [ "BODY", "NECK" ], "axis": "Y", "space": "part",
+              "from": 0.25, "to": 1.0, "softness": 0.35 }
+          ],
+          "op": { "type": "TOWARD", "hue": "$hue", "saturation": 0.75, "lightness": 0.72,
+            "strength": 95 }
+        },
+        {
+          "name": "lit hooves in the same colour",
+          "emissive": true,
+          "masks": [
+            { "type": "AXIS", "parts": [ "LEGS" ], "axis": "Y", "space": "part",
+              "from": 0.0, "to": 0.11, "softness": 0.03 }
+          ],
+          "op": { "type": "TOWARD", "hue": "$hue", "saturation": 0.95, "lightness": 0.5,
+            "strength": 100 }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "No glow.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Gl/Gl": 0.06,
+    "Gl/n": 1.4,
+    "n/n": 98.54
+  }
+}

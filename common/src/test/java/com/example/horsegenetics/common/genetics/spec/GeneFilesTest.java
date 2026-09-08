@@ -1,0 +1,96 @@
+package com.example.horsegenetics.common.genetics.spec;
+
+import com.example.horsegenetics.common.genetics.Gene;
+import com.example.horsegenetics.common.genetics.Genes;
+import org.junit.jupiter.api.Test;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+/**
+ * The tripwire under {@code horsegenetics/genes/}: every shipped gene file
+ * parses, registers, and lands somewhere sane.
+ *
+ * <p>It matters more than it looks. {@link Genes} loads these from its class
+ * initialiser and a file that will not parse is <b>logged and skipped</b> - the
+ * right behaviour in game, where one bad drop-in should not cost the player the
+ * other eighty, and exactly the wrong behaviour in a build, where it means a
+ * typo removes a gene from the world and nothing goes red.
+ */
+class GeneFilesTest {
+
+    @Test
+    void everyShippedGeneFileLoads() {
+        GeneSpecLoader.Result result = GeneSpecLoader.fromClasspath();
+        assertEquals(List.of(), result.errors(), "gene files that would not parse");
+        assertTrue(result.specs().size() > 0, "the shipped gene index found nothing");
+    }
+
+    @Test
+    void everyShippedGeneIsRegistered() {
+        for (GeneSpec spec : GeneSpecLoader.fromClasspath().specs()) {
+            assertTrue(Genes.byKeyOrNull(spec.key()) != null,
+                    spec.key() + " parses but is not in the registry - did the class initialiser run?");
+        }
+    }
+
+    /**
+     * No two shipped genes share an allele <b>key</b>. Tokens repeat freely
+     * across genes (half of them have an {@code n}); what must not repeat is the
+     * {@code gene.token} pair {@link Genes#allele} resolves, and a bulk import
+     * that copy-pasted a key is exactly how that would happen.
+     */
+    @Test
+    void alleleKeysAreUnique() {
+        Set<String> seen = new HashSet<>();
+        List<String> clashes = new ArrayList<>();
+        for (Gene gene : Genes.codeOrder()) {
+            for (com.example.horsegenetics.common.genetics.Allele allele : gene.alleles()) {
+                if (!seen.add(allele.key())) {
+                    clashes.add(allele.key());
+                }
+            }
+        }
+        assertEquals(List.of(), clashes, "duplicate allele keys");
+    }
+
+    /** A magical gene sits at 100 or above, a natural one below it. {@link Genes} only warns. */
+    @Test
+    void everyShippedGeneIsInItsPhaseBand() {
+        List<String> wrong = new ArrayList<>();
+        for (GeneSpec spec : GeneSpecLoader.fromClasspath().specs()) {
+            boolean magicalBand = spec.priority() >= Genes.MAGICAL_BAND_START;
+            if (magicalBand == spec.natural()) {
+                wrong.add(spec.key() + " is " + (spec.natural() ? "natural" : "magical")
+                        + " at priority " + spec.priority());
+            }
+        }
+        assertEquals(List.of(), wrong, "genes outside their phase's priority band");
+    }
+
+    /**
+     * No two <b>shipped gene files</b> share a priority.
+     *
+     * <p>Sharing one is legal - the registry breaks the tie on the key - but for
+     * a data-driven gene it is never deliberate, because the tie-break is
+     * alphabetical and so renaming the gene silently moves it in the paint
+     * order. The hand-written genes do share a few (brindle and sooty both sit
+     * at 36, and mean to); this deliberately does not police them.
+     */
+    @Test
+    void shippedGenePrioritiesAreDistinct() {
+        Set<Integer> seen = new HashSet<>();
+        List<String> clashes = new ArrayList<>();
+        for (GeneSpec spec : GeneSpecLoader.fromClasspath().specs()) {
+            if (!seen.add(spec.priority())) {
+                clashes.add(spec.key() + " @ " + spec.priority());
+            }
+        }
+        assertEquals(List.of(), clashes, "two gene files share a priority - the paint order is then alphabetical");
+    }
+}

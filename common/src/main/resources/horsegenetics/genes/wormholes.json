@@ -1,0 +1,61 @@
+{
+  "format": 3,
+  "key": "horsegenetics.wormholes",
+  "name": "Wormholes",
+  "phase": "magical",
+  "priority": 305,
+  "rarity": "COMMON",
+  "blurb": "Small pale rings whose centres keep the coat underneath, gathered into two or three clusters over the shoulder, barrel and hip.",
+  "alleles": [
+    { "token": "Wmh", "label": "Wormholes (Wmh)" },
+    { "token": "n", "label": "Wild-type (n)" }
+  ],
+  "knobs": [
+    { "name": "ringSeed", "type": "seed" },
+    { "name": "clusterSeed", "type": "seed" },
+    { "name": "ringRadius", "min": 1.3, "max": 2.2 },
+    { "name": "wall", "min": 0.7, "max": 1.1 }
+  ],
+  "expressions": [
+    {
+      "id": "wormholes",
+      "name": "Wormholes",
+      "description": "Pale annuli with the base coat showing through the middle. Most of them close; a quarter or so are left open as arcs, and a few carry a second ring outside the first. They gather rather than spread - two to four clusters over the scapula, barrel, croup and lateral neck, with a scattering of loners between them.",
+      "when": [ "Wmh/Wmh", "Wmh/n" ],
+      "layers": [
+        {
+          "name": "the rings, clustered",
+          "masks": [
+            { "type": "RINGS", "parts": [ "BODY", "NECK" ], "seed": "$ringSeed",
+              "spacing": 4.6, "radius": "$ringRadius", "thickness": "$wall",
+              "vary": 0.45, "chance": { "perDose": [ 0.0, 0.5, 0.85 ] },
+              "arc": 0.88, "softness": 0.3 },
+            { "type": "NOISE", "parts": [ "BODY", "NECK" ], "seed": "$clusterSeed",
+              "scale": 7.0, "low": 0.12, "high": 1.5 }
+          ],
+          "op": { "type": "TOWARD", "color": "#e8e4dc", "strength": 88 }
+        },
+        {
+          "name": "the second ring some of them carry",
+          "masks": [
+            { "type": "RINGS", "parts": [ "BODY", "NECK" ], "seed": "$ringSeed",
+              "spacing": 4.6, "radius": 3.2, "thickness": 0.7,
+              "vary": 0.45, "chance": 0.1, "arc": 0.8, "softness": 0.3 }
+          ],
+          "op": { "type": "TOWARD", "color": "#e8e4dc", "strength": 70 }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "No wormholes.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Wmh/Wmh": 0.9,
+    "Wmh/n": 11.0,
+    "n/n": 88.1
+  }
+}

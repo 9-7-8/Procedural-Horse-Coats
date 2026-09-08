@@ -14,14 +14,14 @@ Oscar,moregenesinfo.md,Osc,TBD,no
 Opossum,moregenesinfo.md,Opo,TBD,no
 Laciano,moregenesinfo.md,Lac,patches+hair-bands,no
 Valentine Appaloosa,moregenesinfo.md,Vln,spots(appaloosa),no
-Lantern,moregenesinfo.md,La,topline-line+glow,no
+Lantern,moregenesinfo.md,La,topline-line+glow,yes
 Papillon,moregenesinfo.md,Ppl,neck-wing,no
 Pavonem,moregenesinfo.md,Pv,rings+spots,no
 Synort,moregenesinfo.md,Syn,ramp+patches,no
-Rosette,moregenesinfo.md,Rs,rings(rosette),no
+Rosette,moregenesinfo.md,Rs,rings(rosette),yes
 Fracture,moregenesinfo.md,Fdf,patches(inverse),no
-Aurorae,moregenesinfo.md,Aur,spots+glow+hair-ramp,no
-Glow,moregenesinfo.md,Gl,spots+glow,no
+Aurorae,moregenesinfo.md,Aur,spots+glow+hair-ramp,yes
+Glow,moregenesinfo.md,Gl,spots+glow,yes
 War Mask,moregenesinfo.md,WrM,face-field,no
 Xuke,moregenesinfo.md,Xuk,speckle(regional),no
 Cosmic,moregenesinfo.md,Cs,blanket+stars,no
@@ -48,18 +48,18 @@ Circuit,moregenesinfo.md,Cir,strokes+spiral+inclusion,no
 Prismtail,moregenesinfo.md,Prt,hair-ramp(spectral),no
 Element Dusted,moregenesinfo.md,Ed,limb+hair ramp+dapples,no
 Filigree,moregenesinfo.md,Flg,spirals+arcs+dashes,no
-Stars,akkadorian-z-mutation-genes.md,Sta,spots(fine),no
+Stars,akkadorian-z-mutation-genes.md,Sta,spots(fine),yes
 Stellar,akkadorian-z-mutation-genes.md,Ste,strokes(glyph),no
 Dust,akkadorian-z-mutation-genes.md,Dst,speckle,no
 Striped Mane Tail,akkadorian-z-mutation-genes.md,Smt,hair-bundles,no
 Scratches,akkadorian-z-mutation-genes.md,Scr,strokes(spindle),no
 Zebras Coat,akkadorian-z-mutation-genes.md,Zbc,strokes(transverse),no
 Internal Flow,akkadorian-z-mutation-genes.md,Ifl,strokes(contour),no
-Crescents,akkadorian-z-mutation-genes.md,Crs,rings(arc),no
-Wormholes,akkadorian-z-mutation-genes.md,Wmh,rings,no
+Crescents,akkadorian-z-mutation-genes.md,Crs,rings(arc),yes
+Wormholes,akkadorian-z-mutation-genes.md,Wmh,rings,yes
 Black Holes,akkadorian-z-mutation-genes.md,Bhl,patches(hard),no
-Polymoon,akkadorian-z-mutation-genes.md,Pmn,spots(chain),no
-Lasertae,akkadorian-z-mutation-genes.md,Lst,rings(halo+core),no
+Polymoon,akkadorian-z-mutation-genes.md,Pmn,spots(chain),yes
+Lasertae,akkadorian-z-mutation-genes.md,Lst,rings(halo+core),yes
 Quazars,akkadorian-z-mutation-genes.md,Qzr,beams,no
 Waves,akkadorian-z-mutation-genes.md,Wav,caudal-field,no
 Shark,akkadorian-z-mutation-genes.md,Shk,withers-field,no
@@ -80,7 +80,7 @@ Panda,newgenes.md,Pan,white-ground+regions,no
 Peafowl,newgenes.md,Pwl,speckle(flow)+plumes,no
 Flametouched,newgenes.md,Ffm,flames-or-ramp,no
 Fawn,newgenes.md,Fwn,spots(flowing white),no
-Angler,anglerinfo.md,Ang,spots(string)+glow,no
+Angler,anglerinfo.md,Ang,spots(string)+glow,yes
 Patina,patinageneinfo.md,Pat,verdigris-marble,no
 Marble Tobiano,marbletobianoinfo.md,Tmr,patches(angular),no
 Imperial,imperialinfo.md,Sbi,neck-cape+branches,no

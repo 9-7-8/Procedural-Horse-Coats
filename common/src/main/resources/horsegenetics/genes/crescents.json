@@ -1,0 +1,50 @@
+{
+  "format": 3,
+  "key": "horsegenetics.crescents",
+  "name": "Crescents",
+  "phase": "magical",
+  "priority": 306,
+  "rarity": "COMMON",
+  "blurb": "One to four broad open arcs, the largest centred on the barrel, each thinning to nothing at both of its ends and keeping the coat colour inside its curve.",
+  "alleles": [
+    { "token": "Crs", "label": "Crescents (Crs)" },
+    { "token": "n", "label": "Wild-type (n)" }
+  ],
+  "knobs": [
+    { "name": "arcSeed", "type": "seed" },
+    { "name": "outer", "min": 2.4, "max": 4.0 },
+    { "name": "band", "min": 1.1, "max": 2.2 },
+    { "name": "sweep", "min": 0.3, "max": 0.68 }
+  ],
+  "expressions": [
+    {
+      "id": "crescents",
+      "name": "Crescents",
+      "description": "Wide arcs of a single band, a quarter to two-thirds of the way round a circle, with the coat inside the curve untouched. The largest sits on the mid-barrel and the smaller ones fall on the scapula, hip and caudal neck. Which way an arc opens is not fixed - a crescent horse has arcs facing several ways, never a row of them facing one.",
+      "when": [ "Crs/Crs", "Crs/n" ],
+      "layers": [
+        {
+          "name": "the arcs, sparse and large",
+          "masks": [
+            { "type": "RINGS", "parts": [ "BODY", "NECK" ], "seed": "$arcSeed",
+              "spacing": 7.0, "radius": "$outer", "thickness": "$band",
+              "vary": 0.35, "chance": { "perDose": [ 0.0, 0.4, 0.7 ] },
+              "arc": "$sweep", "softness": 0.4 }
+          ],
+          "op": { "type": "TOWARD", "color": "#efece2", "strength": 86 }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "No crescents.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Crs/Crs": 0.9,
+    "Crs/n": 11.0,
+    "n/n": 88.1
+  }
+}
