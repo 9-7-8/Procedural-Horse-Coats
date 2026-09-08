@@ -135,29 +135,16 @@ Two rules about the backlog page, both learned the hard way:
 9. **When you resolve something recorded as a gap or as unverified, update that
    page in the same change.**
 
-Two multi-file contracts worth knowing before you start:
+**Adding a mask, an op, an `effects` verb or a gene-carrot recipe touches four
+files each, and the game and the tools drift silently if you miss one.** The
+four lists are on `wiki/modding.html#contracts` - read it before you start, not
+after.
 
-- **A new mask or op** lands in four places: `SpecSchema.java`,
-  `SpecPainter.java`, `wiki/gene-creator/js/{schema,spec-engine}.js`, and
-  `wiki/gene-format.html`. Then re-bake fixtures and re-run parity.
-- **A new `effects` verb** lands in four: a `record` on `GeneAbility`, one
-  `register(new AbilityType(...))`, a `case` in the NeoForge translator
-  (`server/GeneAbilityHandler`, or `GeneYieldHandler` for an interaction), and
-  `wiki/gene-effects.html`. A verb with a client-render component also needs a
-  `RenderLayer`. None of it touches `SpecSchema` or the parity check - effects
-  do not paint.
 - **A gene or item page is three tabs** - `<section class="tab-panel"
   data-tab="gameplay|coding|science">` inside `article.doc`, per
   `wiki/tabs.js`. Gameplay is the default, is written for a player who does not
   want the model, and is where health goes as a *sentence*. Design rationale
   goes on **Science**, not Coding. A page with no panels is left alone.
-
-- **The gene-carrot recipe** lands in four: `KnownGeneSpliceRecipe` (what it
-  requires), `SpliceRecipeDisplay` (the canonical slot layout), `RarityItems`
-  (the tier->item table, deliberately off `common/`), and
-  `wiki/gene-carrot/gene-carrot.js`, which redraws both for the wiki. The wiki
-  cannot read the last two - they are Minecraft-side - so a change there is
-  silent on the pages until it is made here too.
 
 ---
 
@@ -206,6 +193,7 @@ and fails *silently* when stale:
 | any breed, or `BreedSpecWriter` | `:common:bakeBreedFiles` | `common/.../horsegenetics/breeds/` **and** `wiki/horse-designer/assets/breeds.json` |
 | `spec/`, `SpecSchema`, `AbilityType`, `HorseSkinGeometry`, the noise classes | `:common:bakeSpecFixtures` **then** `check-parity.mjs` | `wiki/gene-creator/fixtures/expected.json` |
 | the coat PNGs or the name tables | `:common:bakeCreatorAssets` + `:web:bakeDesignerAssets` | the regenerated assets |
+| **any file in `horsegenetics/genes/`** | `:common:bakeGeneBundle`, `:common:bakeGeneIcons`, `:common:bakeGeneWikiPages` | `wiki/horse-designer/assets/genes.json`, `wiki/assets/gene-icons/`, `wiki/genes-magic-*.html` |
 | **any wiki prose at all** | `node wiki/tools/build-search-index.mjs` | `wiki/search-index.js` |
 | a page's tab panels, or a section moved between tabs | `node wiki/tools/sync-page-views.mjs` | `wiki/pages.js` |
 | either `tools/barn/*.source.nbt`, **or `bake-barn.py` itself** | `python neoforge-26.1.2/tools/barn/bake-barn.py` | `data/horsegenetics/structure/cowboy_barn.nbt` |

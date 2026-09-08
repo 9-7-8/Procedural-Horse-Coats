@@ -16,6 +16,10 @@
       "label": "Top Accretion (At)"
     },
     {
+      "token": "Ac",
+      "label": "Accretion, coloured (Ac)"
+    },
+    {
       "token": "n",
       "label": "Wild-type (n)"
     }
@@ -34,6 +38,11 @@
       "name": "height",
       "min": 0.45,
       "max": 0.7
+    },
+    {
+      "name": "hue",
+      "min": 0.0,
+      "max": 360.0
     }
   ],
   "expressions": [
@@ -44,7 +53,9 @@
       "when": [
         "Ab/Ab",
         "Ab/At",
-        "Ab/n"
+        "Ab/n",
+        "Ab/Ac",
+        "At/Ac"
       ],
       "layers": [
         {
@@ -110,6 +121,87 @@
             "type": "TOWARD",
             "color": "#f4efe4",
             "strength": 70
+          }
+        }
+      ]
+    },
+    {
+      "id": "coloured",
+      "name": "Coloured Accretion",
+      "description": "The same marking in a colour the line carries rather than in white. Fully recessive: it takes two copies, and a single copy beside a white allele shows white. It never gives blue eyes, whatever the white form does. It mirrors Bottom Accretion rather than Top Accretion: a horse showing the coloured form carries no white allele at all, so there is no second shape left to tell apart.",
+      "when": {
+        "Ac": 2
+      },
+      "layers": [
+        {
+          "name": "the ventral field, in colour",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.0,
+              "to": "$depth",
+              "softness": 0.35
+            },
+            {
+              "type": "NOISE",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$edgeSeed",
+              "scale": 12.0,
+              "low": 0.7,
+              "high": 1.3
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 88,
+            "hue": "$hue",
+            "saturation": 0.82,
+            "lightness": 0.58
+          }
+        },
+        {
+          "name": "the legs, the whole way down, in colour",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "LEGS"
+              ]
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 88,
+            "hue": "$hue",
+            "saturation": 0.82,
+            "lightness": 0.58
+          }
+        },
+        {
+          "name": "the muzzle cap, in colour",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "MUZZLE"
+              ]
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 70,
+            "hue": "$hue",
+            "saturation": 0.82,
+            "lightness": 0.58
           }
         }
       ]
@@ -193,10 +285,13 @@
   ],
   "founders": {
     "Ab/Ab": 0.006,
-    "Ab/At": 0.016,
+    "Ab/At": 0.008,
+    "Ab/Ac": 0.008,
     "Ab/n": 0.114,
-    "At/At": 0.016,
-    "At/n": 0.016,
+    "At/At": 0.008,
+    "At/Ac": 0.008,
+    "At/n": 0.008,
+    "Ac/Ac": 0.008,
     "n/n": 99.832
   }
 }

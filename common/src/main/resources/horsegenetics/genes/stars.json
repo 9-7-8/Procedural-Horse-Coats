@@ -12,6 +12,10 @@
       "label": "Stars (Sta)"
     },
     {
+      "token": "Stc",
+      "label": "Stars, coloured (Stc)"
+    },
+    {
       "token": "n",
       "label": "Wild-type (n)"
     }
@@ -34,6 +38,11 @@
       "name": "starSize",
       "min": 0.22,
       "max": 0.45
+    },
+    {
+      "name": "hue",
+      "min": 0.0,
+      "max": 360.0
     }
   ],
   "expressions": [
@@ -43,6 +52,7 @@
       "description": "Small hard-edged points, most of them round and a few drawn out into a short cross. They fall thickest over the dorsal third of the barrel, the croup and the upper neck, thin toward the belly, and stop at the knee and hock. They clump: a starred horse has three or four patches where the points crowd, not an even dusting.",
       "when": [
         "Sta/Sta",
+        "Sta/Stc",
         "Sta/n"
       ],
       "layers": [
@@ -168,6 +178,141 @@
       ]
     },
     {
+      "id": "coloured",
+      "name": "Coloured Stars",
+      "description": "The same marking in a colour the line carries rather than in white. Fully recessive: it takes two copies, and a single copy beside the white allele shows white. It never gives blue eyes, whatever the white form does.",
+      "when": {
+        "Stc": 2
+      },
+      "layers": [
+        {
+          "name": "points over the upper body, clumped, in colour",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD"
+              ],
+              "seed": "$starSeed",
+              "spacing": 1.5,
+              "radius": "$starSize",
+              "vary": 0.7,
+              "chance": "$density",
+              "softness": 0.08
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.3,
+              "to": 1.0,
+              "softness": 0.45
+            },
+            {
+              "type": "NOISE",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD"
+              ],
+              "seed": "$clusterSeed",
+              "scale": 6.0,
+              "low": 0.35,
+              "high": 1.4
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 90,
+            "hue": "$hue",
+            "saturation": 0.82,
+            "lightness": 0.58
+          }
+        },
+        {
+          "name": "the few that are drawn out into a cross, in colour",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$starSeed",
+              "spacing": 1.5,
+              "radius": "$starSize",
+              "vary": 0.7,
+              "chance": 0.06,
+              "stretch": 3.2,
+              "axis": "X",
+              "softness": 0.06
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.3,
+              "to": 1.0,
+              "softness": 0.45
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 92,
+            "hue": "$hue",
+            "saturation": 0.82,
+            "lightness": 0.58
+          }
+        },
+        {
+          "name": "a sparse scatter down the upper leg only, in colour",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "LEGS"
+              ],
+              "seed": "$starSeed",
+              "spacing": 1.7,
+              "radius": "$starSize",
+              "vary": 0.7,
+              "chance": 0.3,
+              "softness": 0.08
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "LEGS"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.55,
+              "to": 1.0,
+              "softness": 0.25
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 88,
+            "hue": "$hue",
+            "saturation": 0.82,
+            "lightness": 0.58
+          }
+        }
+      ]
+    },
+    {
       "id": "wild",
       "name": "Wild type",
       "description": "No stars.",
@@ -176,7 +321,9 @@
   ],
   "founders": {
     "Sta/Sta": 0.004,
+    "Sta/Stc": 0.016,
     "Sta/n": 0.076,
-    "n/n": 99.92
+    "Stc/Stc": 0.016,
+    "n/n": 99.888
   }
 }

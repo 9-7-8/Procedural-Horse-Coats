@@ -12,6 +12,10 @@
       "label": "Crescents (Crs)"
     },
     {
+      "token": "Crc",
+      "label": "Crescents, coloured (Crc)"
+    },
+    {
       "token": "n",
       "label": "Wild-type (n)"
     }
@@ -35,6 +39,11 @@
       "name": "sweep",
       "min": 0.3,
       "max": 0.68
+    },
+    {
+      "name": "hue",
+      "min": 0.0,
+      "max": 360.0
     }
   ],
   "expressions": [
@@ -44,6 +53,7 @@
       "description": "Wide arcs of a single band, a quarter to two-thirds of the way round a circle, with the coat inside the curve untouched. The largest sits on the mid-barrel and the smaller ones fall on the scapula, hip and caudal neck. Which way an arc opens is not fixed - a crescent horse has arcs facing several ways, never a row of them facing one.",
       "when": [
         "Crs/Crs",
+        "Crs/Crc",
         "Crs/n"
       ],
       "layers": [
@@ -81,6 +91,49 @@
       ]
     },
     {
+      "id": "coloured",
+      "name": "Coloured Crescents",
+      "description": "The same marking in a colour the line carries rather than in white. Fully recessive: it takes two copies, and a single copy beside the white allele shows white. It never gives blue eyes, whatever the white form does.",
+      "when": {
+        "Crc": 2
+      },
+      "layers": [
+        {
+          "name": "the arcs, sparse and large, in colour",
+          "masks": [
+            {
+              "type": "RINGS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$arcSeed",
+              "spacing": 7.0,
+              "radius": "$outer",
+              "thickness": "$band",
+              "vary": 0.35,
+              "chance": {
+                "perDose": [
+                  0.0,
+                  0.4,
+                  0.7
+                ]
+              },
+              "arc": "$sweep",
+              "softness": 0.4
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 86,
+            "hue": "$hue",
+            "saturation": 0.82,
+            "lightness": 0.58
+          }
+        }
+      ]
+    },
+    {
       "id": "wild",
       "name": "Wild type",
       "description": "No crescents.",
@@ -89,7 +142,9 @@
   ],
   "founders": {
     "Crs/Crs": 0.006,
+    "Crs/Crc": 0.024,
     "Crs/n": 0.114,
-    "n/n": 99.88
+    "Crc/Crc": 0.024,
+    "n/n": 99.832
   }
 }

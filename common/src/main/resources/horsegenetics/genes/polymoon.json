@@ -12,6 +12,10 @@
       "label": "Polymoon (Pmn)"
     },
     {
+      "token": "Pmc",
+      "label": "Polymoon, coloured (Pmc)"
+    },
+    {
       "token": "n",
       "label": "Wild-type (n)"
     }
@@ -34,6 +38,11 @@
       "name": "spacing",
       "min": 2.6,
       "max": 3.4
+    },
+    {
+      "name": "hue",
+      "min": 0.0,
+      "max": 360.0
     }
   ],
   "expressions": [
@@ -43,6 +52,7 @@
       "description": "Circular disks laid nearly edge to edge along one curved path, sometimes overlapping a little, never scattered. The path leaves the throatlatch or the point of shoulder, follows the back edge of the scapula and runs out onto the barrel. Some horses carry a second, shorter chain on the hip. The disks are largest halfway along and smallest at the two ends.",
       "when": [
         "Pmn/Pmn",
+        "Pmn/Pmc",
         "Pmn/n"
       ],
       "layers": [
@@ -138,6 +148,109 @@
       ]
     },
     {
+      "id": "coloured",
+      "name": "Coloured Polymoon",
+      "description": "The same marking in a colour the line carries rather than in white. Fully recessive: it takes two copies, and a single copy beside the white allele shows white. It never gives blue eyes, whatever the white form does.",
+      "when": {
+        "Pmc": 2
+      },
+      "layers": [
+        {
+          "name": "the primary chain along the shoulder and barrel, in colour",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$diskSeed",
+              "spacing": "$spacing",
+              "radius": "$diskRadius",
+              "vary": 0.45,
+              "chance": 0.95,
+              "softness": 0.16
+            },
+            {
+              "type": "STROKES",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$chainSeed",
+              "spacing": 18.0,
+              "length": 24.0,
+              "axis": "X",
+              "width": 1.8,
+              "curl": 0.7,
+              "softness": 0.35
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 92,
+            "hue": "$hue",
+            "saturation": 0.82,
+            "lightness": 0.58
+          }
+        },
+        {
+          "name": "the shorter second chain some horses carry on the hip, in colour",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY"
+              ],
+              "seed": "$diskSeed",
+              "spacing": "$spacing",
+              "radius": "$diskRadius",
+              "vary": 0.45,
+              "chance": {
+                "perDose": [
+                  0.0,
+                  0.35,
+                  0.7
+                ]
+              },
+              "softness": 0.16
+            },
+            {
+              "type": "STROKES",
+              "parts": [
+                "BODY"
+              ],
+              "seed": "$chainSeed",
+              "spacing": 26.0,
+              "length": 14.0,
+              "axis": "X",
+              "width": 2.08,
+              "curl": 0.9,
+              "softness": 0.35
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "space": "part",
+              "from": 0.0,
+              "to": 0.36,
+              "softness": 0.14
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 88,
+            "hue": "$hue",
+            "saturation": 0.82,
+            "lightness": 0.58
+          }
+        }
+      ]
+    },
+    {
       "id": "wild",
       "name": "Wild type",
       "description": "No chain.",
@@ -146,7 +259,9 @@
   ],
   "founders": {
     "Pmn/Pmn": 0.002,
+    "Pmn/Pmc": 0.008,
     "Pmn/n": 0.038,
-    "n/n": 99.96
+    "Pmc/Pmc": 0.008,
+    "n/n": 99.944
   }
 }

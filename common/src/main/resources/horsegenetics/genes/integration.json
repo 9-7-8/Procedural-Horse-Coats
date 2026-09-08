@@ -12,6 +12,10 @@
       "label": "Integration (Int)"
     },
     {
+      "token": "Inc",
+      "label": "Integration, coloured (Inc)"
+    },
+    {
       "token": "n",
       "label": "Wild-type (n)"
     }
@@ -30,6 +34,11 @@
       "name": "reach",
       "min": 0.3,
       "max": 0.75
+    },
+    {
+      "name": "hue",
+      "min": 0.0,
+      "max": 360.0
     }
   ],
   "expressions": [
@@ -39,7 +48,8 @@
       "description": "It does not choose its own places; it grows out of the ones the horse already has. Anywhere the coat is dark - the crest and the base of the mane, a dorsal stripe, the distal limbs, the margin of any other marking - becomes a source, and elements propagate outward from it. Right at a source they merge into continuous patches with scalloped margins; a hand's span out they are separate circles and lobes with their long axis pointing the way they came; further still they thin to nothing. It reads as an appaloosa blanket at medium scale.",
       "when": [
         "Int/Int",
-        "Int/n"
+        "Int/n",
+        "Int/Inc"
       ],
       "layers": [
         {
@@ -115,6 +125,90 @@
       ]
     },
     {
+      "id": "coloured",
+      "name": "Coloured Integration",
+      "description": "The same marking in a colour the line carries rather than in white. Fully recessive: it takes two copies, and a single copy beside a white allele shows white. It never gives blue eyes, whatever the white form does.",
+      "when": {
+        "Inc": 2
+      },
+      "layers": [
+        {
+          "name": "elements spreading out of the dark, in colour",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "LEGS"
+              ],
+              "seed": "$spotSeed",
+              "spacing": 2.6,
+              "radius": "$spotSize",
+              "vary": 0.6,
+              "chance": 0.7,
+              "stretch": 1.4,
+              "axis": "X",
+              "softness": 0.12
+            },
+            {
+              "type": "PIGMENT",
+              "parts": [
+                "BODY",
+                "NECK",
+                "LEGS"
+              ],
+              "channel": "darkness",
+              "from": 0.35,
+              "to": "$reach"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 90,
+            "hue": "$hue",
+            "saturation": 0.82,
+            "lightness": 0.58
+          }
+        },
+        {
+          "name": "the merged patches nearest the source, in colour",
+          "masks": [
+            {
+              "type": "PIGMENT",
+              "parts": [
+                "BODY",
+                "NECK",
+                "LEGS"
+              ],
+              "channel": "darkness",
+              "from": 0.6,
+              "to": 0.85
+            },
+            {
+              "type": "PATCHES",
+              "parts": [
+                "BODY",
+                "NECK",
+                "LEGS"
+              ],
+              "seed": "$spotSeed",
+              "scale": 3.0,
+              "threshold": 0.45,
+              "softness": 0.1
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 88,
+            "hue": "$hue",
+            "saturation": 0.82,
+            "lightness": 0.58
+          }
+        }
+      ]
+    },
+    {
       "id": "wild",
       "name": "Wild type",
       "description": "No spread.",
@@ -123,7 +217,9 @@
   ],
   "founders": {
     "Int/Int": 0.006,
+    "Int/Inc": 0.024,
     "Int/n": 0.114,
-    "n/n": 99.88
+    "Inc/Inc": 0.024,
+    "n/n": 99.832
   }
 }

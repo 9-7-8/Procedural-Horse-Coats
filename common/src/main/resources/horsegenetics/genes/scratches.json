@@ -12,6 +12,10 @@
       "label": "Scratches (Scr)"
     },
     {
+      "token": "Scc",
+      "label": "Scratches, coloured (Scc)"
+    },
+    {
       "token": "n",
       "label": "Wild-type (n)"
     }
@@ -30,6 +34,11 @@
       "name": "streakLength",
       "min": 6.0,
       "max": 14.0
+    },
+    {
+      "name": "hue",
+      "min": 0.0,
+      "max": 360.0
     }
   ],
   "expressions": [
@@ -39,6 +48,7 @@
       "description": "Long spindle-shaped streaks that run down and back across the body, in sets rather than singly - a set is three to five of them within a hand's breadth, never quite parallel and never crossing. One to four sets a side, on the hip and thigh first, then the back of the barrel and the side of the neck. The legs carry a different form: short bars set across the cannon and forearm rather than along them, which read as banding.",
       "when": [
         "Scr/Scr",
+        "Scr/Scc",
         "Scr/n"
       ],
       "layers": [
@@ -113,6 +123,88 @@
       ]
     },
     {
+      "id": "coloured",
+      "name": "Coloured Scratches",
+      "description": "The same marking in a colour the line carries rather than in white. Fully recessive: it takes two copies, and a single copy beside the white allele shows white. It never gives blue eyes, whatever the white form does.",
+      "when": {
+        "Scc": 2
+      },
+      "layers": [
+        {
+          "name": "raked streaks across the body and neck, in colour",
+          "masks": [
+            {
+              "type": "STROKES",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$rakeSeed",
+              "spacing": 4.2,
+              "length": "$streakLength",
+              "axis": "X",
+              "width": "$streakWidth",
+              "curl": 0.9,
+              "softness": 0.3
+            },
+            {
+              "type": "NOISE",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$rakeSeed",
+              "scale": 9.0,
+              "low": 0.0,
+              "high": 1.9
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 84,
+            "hue": "$hue",
+            "saturation": 0.82,
+            "lightness": 0.58
+          }
+        },
+        {
+          "name": "short bars set across the legs, in colour",
+          "masks": [
+            {
+              "type": "STROKES",
+              "parts": [
+                "LEGS"
+              ],
+              "seed": "$rakeSeed",
+              "spacing": 3.4,
+              "length": 3.0,
+              "axis": "Z",
+              "width": 0.5,
+              "curl": 0.2
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "LEGS"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.15,
+              "to": 0.95,
+              "softness": 0.12
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 76,
+            "hue": "$hue",
+            "saturation": 0.82,
+            "lightness": 0.58
+          }
+        }
+      ]
+    },
+    {
       "id": "wild",
       "name": "Wild type",
       "description": "No scratches.",
@@ -121,7 +213,9 @@
   ],
   "founders": {
     "Scr/Scr": 0.004,
+    "Scr/Scc": 0.016,
     "Scr/n": 0.076,
-    "n/n": 99.92
+    "Scc/Scc": 0.016,
+    "n/n": 99.888
   }
 }

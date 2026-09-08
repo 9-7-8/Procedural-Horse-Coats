@@ -1007,6 +1007,81 @@ PigmentField after  = new SilverGene().restrict(pair, ctx, before);
     <a href="gene-magic-zebra.html">magic zebra</a> the fullest magical one.
 </div>
 
+<h2 id="contracts">The four-file contracts</h2>
+
+<p>
+    Four things in this codebase are <strong>spread across four files each</strong>, and
+    every one of them fails <em>silently</em> when you miss one: the game and the tools
+    simply start describing different genes, and nothing goes red. They moved here out of
+    <code>CLAUDE.md</code>, which is standing rules rather than reference &mdash; but
+    read the relevant one <em>before</em> you start, not after.
+</p>
+
+<h3 id="contract-mask">A new mask or op</h3>
+
+<ol>
+<li><code>SpecSchema.java</code> &mdash; the parameter table, with the fallback each
+    parameter takes when the file leaves it out.</li>
+<li><code>SpecPainter.java</code> &mdash; what it actually does per texel.</li>
+<li><code>wiki/gene-creator/js/schema.js</code> and
+    <code>js/spec-engine.js</code> &mdash; the creator's mirror of both. The fallbacks
+    must be <em>identical</em>: the creator drops any setting equal to its default, so a
+    default that differs writes a file that plays differently from how it previewed.</li>
+<li><a href="gene-format.html">wiki/gene-format.html</a> &mdash; the table a gene author
+    reads.</li>
+</ol>
+
+<p>
+    Then re-bake the fixtures and re-run parity, and <strong>make sure something in
+    <code>example-genes/prismatic.json</code> uses the new thing</strong>. That file
+    exists to exercise every mask and op once; without a case that reaches your addition,
+    <code>check-parity.mjs</code> is green about it by definition.
+</p>
+
+<h3 id="contract-verb">A new <code>effects</code> verb</h3>
+
+<ol>
+<li>A <code>record</code> on <code>GeneAbility</code>.</li>
+<li>One <code>register(new AbilityType(...))</code>.</li>
+<li>A <code>case</code> in the NeoForge translator &mdash;
+    <code>server/GeneAbilityHandler</code>, or <code>GeneYieldHandler</code> for an
+    interaction.</li>
+<li><a href="gene-effects.html">wiki/gene-effects.html</a>.</li>
+</ol>
+
+<p>
+    A verb with a client-render component also needs a <code>RenderLayer</code>. None of
+    it touches <code>SpecSchema</code> or the parity check &mdash; effects do not paint.
+</p>
+
+<h3 id="contract-carrot">A gene-carrot recipe</h3>
+
+<ol>
+<li><code>KnownGeneSpliceRecipe</code> &mdash; what it requires.</li>
+<li><code>SpliceRecipeDisplay</code> &mdash; the canonical slot layout.</li>
+<li><code>RarityItems</code> &mdash; the tier-to-item table, deliberately outside
+    <code>common/</code>.</li>
+<li><code>wiki/gene-carrot/gene-carrot.js</code>, which redraws both for the wiki.</li>
+</ol>
+
+<p>
+    The wiki cannot read the middle two &mdash; they are Minecraft-side &mdash; so a
+    change there is silent on the pages until it is made in the JavaScript too.
+</p>
+
+<h3 id="contract-genefile">A gene file</h3>
+
+<p>
+    Adding or changing a file in
+    <code>common/src/main/resources/horsegenetics/genes/</code> invalidates three baked
+    artefacts, all checked in: <code>:common:bakeGeneBundle</code> (the copy the browser
+    fetches, since TeaVM cannot walk a classpath index),
+    <code>:common:bakeGeneIcons</code> (one snapshot per gene for the family pages) and
+    <code>:common:bakeGeneWikiPages</code> (the family pages themselves). It also moves
+    the coat golden file, because a new gene occupies a real position in the genotype
+    code.
+</p>
+
 </article>
 </main>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>

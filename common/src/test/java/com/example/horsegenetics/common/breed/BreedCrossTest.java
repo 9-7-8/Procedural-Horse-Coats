@@ -54,14 +54,40 @@ class BreedCrossTest {
      */
     @Test
     void aFoundersTwoCopiesDiffer() {
-        int differing = 0;
-        for (long seed = 0; seed < 20; seed++) {
+        // Except when both copies are sitting on the floor, which is not the
+        // same claim and is not a bug.
+        //
+        // BreedFounder splits the band's total unevenly across the two copies
+        // (COPY_SKEW), so a founder whose breed pinned a real target always has
+        // two different numbers. But the stored percentage is floored at
+        // MIN_DELTA so a copy can never point the wrong way, and when the band
+        // draws a total under about twice that, BOTH halves clamp to the floor
+        // and come out identical. About one Percheron in twenty. There is
+        // nowhere for those two copies to differ.
+        //
+        // The test used to run twenty seeds and require nineteen to differ,
+        // which passed for the same reason a coin lands heads - twenty draws
+        // happened to hold at most one floored horse. Adding genes elsewhere in
+        // the registry moved the RNG stream and it held two. Excluding the case
+        // the claim was never about makes it exact rather than lucky, and two
+        // hundred seeds make the exclusion itself visible.
+        int free = 0;
+        int floored = 0;
+        for (long seed = 0; seed < 200; seed++) {
             Genome g = BreedFounder.roll(Breeds.get("percheron"), new SeededRng(seed));
-            if (Math.abs(delta(g, true) - delta(g, false)) > 1e-6) {
-                differing++;
+            double a = delta(g, true);
+            double b = delta(g, false);
+            if (a <= AbstractMagicStatGene.MIN_DELTA && b <= AbstractMagicStatGene.MIN_DELTA) {
+                floored++;
+                continue;
             }
+            free++;
+            assertTrue(Math.abs(a - b) > 1e-6,
+                    "a founder with room to differ must differ, seed " + seed
+                            + " has " + a + " and " + b);
         }
-        assertTrue(differing >= 19, "a founder's two copies should essentially never match");
+        assertTrue(free > 150, "most founders should have room to differ, only " + free + " did");
+        assertTrue(floored < 40, floored + " of 200 founders were floored - the band moved");
     }
 
     /**

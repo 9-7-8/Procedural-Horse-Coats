@@ -12,6 +12,10 @@
       "label": "Stellar (Ste)"
     },
     {
+      "token": "Sec",
+      "label": "Stellar, coloured (Sec)"
+    },
+    {
       "token": "n",
       "label": "Wild-type (n)"
     }
@@ -25,6 +29,11 @@
       "name": "strokeWidth",
       "min": 1.229,
       "max": 3.072
+    },
+    {
+      "name": "hue",
+      "min": 0.0,
+      "max": 360.0
     }
   ],
   "expressions": [
@@ -34,6 +43,7 @@
       "description": "Larger and far sparser than Stars: eight to thirty glyphs a side, each a small bundle of straight or shallow-arced strokes meeting at an angle, with one to three little dots within a hand's breadth of it. The strokes point no particular way - a stellar horse's glyphs are rotated at random. Nothing behind the flank, nothing below the elbow.",
       "when": [
         "Ste/Ste",
+        "Ste/Sec",
         "Ste/n"
       ],
       "layers": [
@@ -168,6 +178,150 @@
       ]
     },
     {
+      "id": "coloured",
+      "name": "Coloured Stellar",
+      "description": "The same marking in a colour the line carries rather than in white. Fully recessive: it takes two copies, and a single copy beside the white allele shows white. It never gives blue eyes, whatever the white form does.",
+      "when": {
+        "Sec": 2
+      },
+      "layers": [
+        {
+          "name": "the crossing strokes of each glyph, in colour",
+          "masks": [
+            {
+              "type": "STROKES",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$glyphSeed",
+              "spacing": 3.2,
+              "length": 4.0,
+              "axis": "X",
+              "width": "$strokeWidth",
+              "curl": 0.3,
+              "softness": 0.1
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$glyphSeed",
+              "spacing": 6.5,
+              "radius": 2.2,
+              "vary": 0.4,
+              "chance": {
+                "perDose": [
+                  0.0,
+                  0.35,
+                  0.6
+                ]
+              },
+              "softness": 0.6
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 92,
+            "hue": "$hue",
+            "saturation": 0.82,
+            "lightness": 0.58
+          }
+        },
+        {
+          "name": "the strokes that cross them, in colour",
+          "masks": [
+            {
+              "type": "STROKES",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$glyphSeed",
+              "spacing": 3.2,
+              "length": 4.0,
+              "axis": "Y",
+              "width": "$strokeWidth",
+              "curl": 0.3,
+              "softness": 0.1
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$glyphSeed",
+              "spacing": 6.5,
+              "radius": 2.2,
+              "vary": 0.4,
+              "chance": {
+                "perDose": [
+                  0.0,
+                  0.35,
+                  0.6
+                ]
+              },
+              "softness": 0.6
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 92,
+            "hue": "$hue",
+            "saturation": 0.82,
+            "lightness": 0.58
+          }
+        },
+        {
+          "name": "the satellite dots beside each glyph, in colour",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$glyphSeed",
+              "spacing": 1.3,
+              "radius": 0.3,
+              "vary": 0.5,
+              "chance": 0.18,
+              "softness": 0.08
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$glyphSeed",
+              "spacing": 6.5,
+              "radius": 3.0,
+              "vary": 0.4,
+              "chance": {
+                "perDose": [
+                  0.0,
+                  0.35,
+                  0.6
+                ]
+              },
+              "softness": 0.8
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 88,
+            "hue": "$hue",
+            "saturation": 0.82,
+            "lightness": 0.58
+          }
+        }
+      ]
+    },
+    {
       "id": "wild",
       "name": "Wild type",
       "description": "No glyphs.",
@@ -176,7 +330,9 @@
   ],
   "founders": {
     "Ste/Ste": 0.006,
+    "Ste/Sec": 0.024,
     "Ste/n": 0.114,
-    "n/n": 99.88
+    "Sec/Sec": 0.024,
+    "n/n": 99.832
   }
 }

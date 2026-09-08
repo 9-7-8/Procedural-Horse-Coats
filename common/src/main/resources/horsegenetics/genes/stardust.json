@@ -12,6 +12,10 @@
       "label": "Stardust (Str)"
     },
     {
+      "token": "Stt",
+      "label": "Stardust, coloured (Stt)"
+    },
+    {
       "token": "n",
       "label": "Wild-type (n)"
     }
@@ -25,6 +29,11 @@
       "name": "reach",
       "min": 0.1,
       "max": 0.7
+    },
+    {
+      "name": "hue",
+      "min": 0.0,
+      "max": 360.0
     }
   ],
   "expressions": [
@@ -34,7 +43,8 @@
       "description": "Depigmentation only - nothing anywhere gets darker. It starts as a pale yellow-tinted patch at the base of the forelock, at the very end of the tail, or both. From the tail it works up toward the dock and then forward along the spine, spreading sideways over the croup and rump as it goes; from the forelock it works back across the poll and down the neck on a slope, and stops at the shoulder. It never reaches the barrel, the flank or the legs, and the mane is never fully taken - some base-coloured hair always survives in it. Around the edge of everything it has claimed sit the dapples: little radial stars of four to eight tapering points, crowded at the boundary and thinning inward, with fine ticking in the same band. Newly-pale hair carries a warm yellow cast; older ground is pure white.",
       "when": [
         "Str/Str",
-        "Str/n"
+        "Str/n",
+        "Str/Stt"
       ],
       "layers": [
         {
@@ -192,6 +202,176 @@
       ]
     },
     {
+      "id": "coloured",
+      "name": "Coloured Stardust",
+      "description": "The same marking in a colour the line carries rather than in white. Fully recessive: it takes two copies, and a single copy beside a white allele shows white. It never gives blue eyes, whatever the white form does.",
+      "when": {
+        "Stt": 2
+      },
+      "layers": [
+        {
+          "name": "pale ground along the spine and the croup, in colour",
+          "masks": [
+            {
+              "type": "CENTERLINE",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "halfWidth": 3.0,
+              "softness": 2.2
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "axis": "X",
+              "space": "body",
+              "from": 0.0,
+              "to": "$reach",
+              "softness": 0.3,
+              "combine": "MAX"
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.55,
+              "to": 1.0,
+              "softness": 0.3,
+              "combine": "MIN"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 88,
+            "hue": "$hue",
+            "saturation": 0.82,
+            "lightness": 0.58
+          }
+        },
+        {
+          "name": "the tail from the tip up, and the forelock, in colour",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "TAIL"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.0,
+              "to": "$reach",
+              "softness": 0.25
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "MANE"
+              ],
+              "axis": "X",
+              "space": "part",
+              "from": 0.78,
+              "to": 1.0,
+              "softness": 0.18,
+              "combine": "MAX"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 90,
+            "hue": "$hue",
+            "saturation": 0.82,
+            "lightness": 0.58
+          }
+        },
+        {
+          "name": "star dapples crowding the edge of it, in colour",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$dappleSeed",
+              "spacing": 2.4,
+              "radius": 0.9,
+              "vary": 0.6,
+              "chance": 0.5,
+              "stretch": 2.4,
+              "axis": "X",
+              "softness": 0.2
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.45,
+              "to": 0.85,
+              "softness": 0.25
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 78,
+            "hue": "$hue",
+            "saturation": 0.82,
+            "lightness": 0.58
+          }
+        },
+        {
+          "name": "the crossing arm of each star, in colour",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$dappleSeed",
+              "spacing": 2.4,
+              "radius": 0.9,
+              "vary": 0.6,
+              "chance": 0.5,
+              "stretch": 2.4,
+              "axis": "Y",
+              "softness": 0.2
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.45,
+              "to": 0.85,
+              "softness": 0.25
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 78,
+            "hue": "$hue",
+            "saturation": 0.82,
+            "lightness": 0.58
+          }
+        }
+      ]
+    },
+    {
       "id": "wild",
       "name": "Wild type",
       "description": "No stardust.",
@@ -200,7 +380,9 @@
   ],
   "founders": {
     "Str/Str": 0.004,
+    "Str/Stt": 0.016,
     "Str/n": 0.076,
-    "n/n": 99.92
+    "Stt/Stt": 0.016,
+    "n/n": 99.888
   }
 }
