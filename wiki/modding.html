@@ -1076,8 +1076,9 @@ PigmentField after  = new SilverGene().restrict(pair, ctx, before);
     <code>common/src/main/resources/horsegenetics/genes/</code> invalidates three baked
     artefacts, all checked in: <code>:common:bakeGeneBundle</code> (the copy the browser
     fetches, since TeaVM cannot walk a classpath index),
-    <code>:common:bakeGeneIcons</code> (one snapshot per gene for the family pages) and
-    <code>:common:bakeGeneWikiPages</code> (the family pages themselves). It also moves
+    <code>:common:bakeGeneIcons</code> (one snapshot per gene, for its own page and its
+    landing-page card) and <code>:common:bakeGeneWikiPages</code> (the gene page itself,
+    plus the generated spans of <code>wiki/pages.js</code> and the landing page). It also moves
     the coat golden file, because a new gene occupies a real position in the genotype
     code.
 </p>

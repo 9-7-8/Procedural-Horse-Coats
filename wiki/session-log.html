@@ -29,6 +29,25 @@
 
 <h2 id="d2026-09-08">2026-09-08</h2>
 
+<h3 id="family-indexes-gone-2026-09-08">Built 2026-09-08: the seven magical family index pages are deleted &mdash; the landing page was already the index.</h3>
+
+<p>Owner-driven, one request. Written up in <code>GeneWikiTool</code>; the grouping itself is unchanged and still <code>common/genetics/GeneFamily</code>.</p>
+
+<ul>
+
+<li><strong>Two indexes over one list is one too many.</strong> Each <code>genes-magic-*.html</code> listed one family's genes with an icon, a blurb and a link to the full page &mdash; which is what the landing page's section for that family already said, in the same order, from the same table. The pages were generated an hour after the landing-page cards were, by the same tool, from the same source, and nobody noticed they had become a duplicate of each other. The owner did.</li>
+
+<li><strong>What went with them.</strong> The <em>&ldquo;All ground and strong white&rdquo;</em> item that led each of the seven sidebar sections, and the family card that led each section of landing-page cards. <code>GeneFamily</code> lost its <code>slug</code> and <code>magicalSpecFamilies()</code>; nothing else asked for either, which is the tell that they existed only to name a file. The <code>.gene-card</code> block in <code>styles.css</code> had no other reader either.</li>
+
+<li><strong>A gene page's eyebrow still names its family, as text rather than a link.</strong> The family is a heading now &mdash; a sidebar section and a landing-page section &mdash; and not a destination, so there is nothing for it to point at. Keeping the words is worth it: the eyebrow is where a reader learns that Dust is a speckle gene rather than a spot gene, and that is the one fact the page's own title cannot carry.</li>
+
+<li><strong>The hand-written family blurbs went with the cards</strong> and are in the history rather than on the page: each opened by counting its family (&ldquo;Sixteen genes that replace the base coat&hellip;&rdquo;), which was a derived number sitting in prose and already drifting. What is left is <code>GeneFamily.lede()</code>, which every section heading has always used and which counts nothing.</li>
+
+<li><strong><code>harvestIcons</code> went too, and it is the only removal that lost a capability.</strong> It existed because a family card's icon was a hand-picked representative &mdash; nothing in the registry would have chosen <code>panda.png</code> to stand for ground-and-strong-white &mdash; so a card that carried an icon the tool would not have picked kept the one it had. A gene's own icon has always been derived from its name, so with the family cards gone there was nothing left for it to preserve.</li>
+
+</ul>
+
+
 <h3 id="icon-camera-2026-09-08">Built 2026-09-08: the gene icons were being drawn through a sheared camera, and every gene has one now &mdash; or honestly none.</h3>
 
 <p>Owner-driven, five requests in one, and one of them had to be answered twice. Written up in <code>GeneIconTool</code> and <code>HorseSkinGeometry.posed</code>; the card markup is <code>GeneWikiTool.card</code>.</p>
