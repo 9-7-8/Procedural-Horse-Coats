@@ -155,10 +155,18 @@ public final class HorseBreedingHandler {
         // a cross is whatever it inherited (see BreedStatTargets).
         Traits childTraits = HorseTraits.resolve(childGenome.genotype(),
                 childGenome.epigenome(), ServerConfig.healthGeneticsActive());
+
+        // The dev build's account of the draw, written before the viability
+        // check so a pairing that comes to nothing still leaves a record of
+        // exactly what it drew - which is the case where the log is the only
+        // evidence there is.
+        BreedingDebug.reportDraw(damRecord, sireRecord, damGenome, sireGenome, childGenome,
+                childTraits, breeder);
+
         if (childTraits.viability() == Viability.LETHAL_AT_CONCEPTION && ServerConfig.lethalsActive()) {
             Condition cause = childTraits.lethalCondition().orElse(null);
             if (cause != null) {
-                LethalFoalHandler.announceRefusedPairing(breeder, cause);
+                LethalFoalHandler.announceMiscarriage(damHorse, breeder, cause);
             }
             return false;
         }

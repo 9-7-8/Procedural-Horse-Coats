@@ -1,6 +1,7 @@
 package com.example.horsegenetics.neoforge.network;
 
 import com.example.horsegenetics.common.genetics.GeneCodeDisplay;
+import com.example.horsegenetics.neoforge.HorseGenetics;
 import com.example.horsegenetics.common.genetics.Epigenome;
 import com.example.horsegenetics.common.genetics.Genome;
 import com.example.horsegenetics.common.genetics.Genotype;
@@ -168,6 +169,23 @@ public final class ModNetworking {
                 })
         );
 
+        registrar.playToClient(
+                BreedingRosterPayload.TYPE,
+                BreedingRosterPayload.STREAM_CODEC,
+                (payload, context) -> context.enqueueWork(() ->
+                        com.example.horsegenetics.neoforge.client.ClientBreedingRoster.accept(payload.entries()))
+        );
+
+        registrar.playToServer(
+                BreedingRosterRequestPayload.TYPE,
+                BreedingRosterRequestPayload.STREAM_CODEC,
+                (payload, context) -> context.enqueueWork(() -> {
+                    if (context.player() instanceof ServerPlayer serverPlayer) {
+                        com.example.horsegenetics.neoforge.server.BreedingRoster.sendTo(serverPlayer);
+                    }
+                })
+        );
+
         registrar.playToServer(
                 SelectBrowserGenePayload.TYPE,
                 SelectBrowserGenePayload.STREAM_CODEC,
@@ -200,12 +218,18 @@ public final class ModNetworking {
         if (!(serverPlayer.level() instanceof ServerLevel level)) {
             return;
         }
+        // Every rejection below says so, in chat and in the log. They were
+        // silent `return`s, which is how "the custom egg spawner also does not
+        // seem to be working" arrives with nothing to act on: a click, no
+        // horse, no message, no line anywhere. A refusal a player can read is
+        // a bug report; a refusal they cannot is a mystery.
         if (!serverPlayer.getAbilities().instabuild) {
-            serverPlayer.sendSystemMessage(
-                    Component.literal("[Custom Horse] the custom spawn egg is a creative-mode tool."));
+            refuseSpawn(serverPlayer, "the custom spawn egg is a creative-mode tool - "
+                    + "switch to creative and try again.");
             return;
         }
         if (!holdsSpawnEgg(serverPlayer)) {
+            refuseSpawn(serverPlayer, "you are not holding the custom spawn egg any more.");
             return;
         }
 
@@ -218,7 +242,8 @@ public final class ModNetworking {
                     : Epigenome.parse(payload.epigenomeCode());
             genome = new Genome(genotype, epigenome);
         } catch (RuntimeException e) {
-            serverPlayer.sendSystemMessage(Component.literal("[Custom Horse] rejected genome: " + e.getMessage()));
+            refuseSpawn(serverPlayer, "rejected genome: " + e.getMessage());
+            HorseGenetics.LOGGER.warn("[Custom Horse] genome rejected", e);
             return;
         }
 
@@ -229,6 +254,7 @@ public final class ModNetworking {
 
         Horse horse = EntityType.HORSE.create(level, EntitySpawnReason.SPAWN_ITEM_USE);
         if (horse == null) {
+            refuseSpawn(serverPlayer, "the game refused to create a horse entity here.");
             return;
         }
         horse.snapTo(pos.x, pos.y, pos.z, serverPlayer.getYRot(), 0.0F);
@@ -250,6 +276,13 @@ public final class ModNetworking {
                 + (payload.baby() ? "foal " : "") + sex.label(!payload.baby()) + " "
                 + record.lineage().displayName() + " - "
                 + GeneCodeDisplay.shortForm(genome.genotype())));
+    }
+
+    /** One refusal, said in chat and written to the log. */
+    private static void refuseSpawn(ServerPlayer player, String reason) {
+        player.sendSystemMessage(Component.literal("[Custom Horse] " + reason));
+        HorseGenetics.LOGGER.info("[Custom Horse] refused spawn for {}: {}",
+                player.getGameProfile().name(), reason);
     }
 
     private static boolean holdsSpawnEgg(ServerPlayer player) {

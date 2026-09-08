@@ -52,6 +52,15 @@ public final class HorseAncestryData extends SavedData implements HorseDatabase 
         return List.copyOf(delegate.all());
     }
 
+    /**
+     * Every horse this world has ever registered, in no particular order. The
+     * breeding-preview roster walks it to find the ones a given player owns;
+     * nothing else should need it, and nothing should mutate what comes back.
+     */
+    public List<HorseRecord> all() {
+        return snapshot();
+    }
+
     @Override
     public void record(HorseRecord horse) {
         // Only dirty the file when something actually changed (HorseRecord is a

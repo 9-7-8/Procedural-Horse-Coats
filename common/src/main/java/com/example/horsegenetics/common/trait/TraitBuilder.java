@@ -154,6 +154,54 @@ public final class TraitBuilder {
                 conditions);
     }
 
+    // ------------------------------------------------------------------
+    // Raw accumulators, for TraitBreakdown
+    // ------------------------------------------------------------------
+    // Read *before* build() clamps anything, and package-private on purpose:
+    // they are one gene's own arithmetic, which is exactly what the horse
+    // information screen's Health tab needs and exactly what nothing else
+    // should be reading. A caller that wants the horse calls HorseTraits.
+
+    double rawSpeed() {
+        return speed;
+    }
+
+    double rawHealth() {
+        return health;
+    }
+
+    double rawJump() {
+        return jump;
+    }
+
+    double rawScale() {
+        return scale;
+    }
+
+    double rawSpeedFactor() {
+        return magicalSpeedFactor;
+    }
+
+    double rawHealthFactor() {
+        return magicalHealthFactor;
+    }
+
+    double rawJumpFactor() {
+        return magicalJumpFactor;
+    }
+
+    double rawScaleFactor() {
+        return scaleFactor;
+    }
+
+    double rawMagicalScaleFactor() {
+        return magicalScaleFactor;
+    }
+
+    java.util.List<Condition> rawConditions() {
+        return java.util.List.copyOf(conditions);
+    }
+
     /**
      * A magical body-stat multiplier, clamped to the {@code MAGICAL_*_FACTOR}
      * guard. The bounded Gaussian on the genes that call it keeps the real

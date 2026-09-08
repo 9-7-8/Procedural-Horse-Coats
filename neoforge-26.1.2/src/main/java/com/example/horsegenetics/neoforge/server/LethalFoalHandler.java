@@ -2,9 +2,11 @@ package com.example.horsegenetics.neoforge.server;
 
 import com.example.horsegenetics.common.horse.HorseRecord;
 import com.example.horsegenetics.common.trait.Condition;
+import com.example.horsegenetics.common.trait.MiscarriageSigns;
 import com.example.horsegenetics.common.trait.Traits;
 import com.example.horsegenetics.common.trait.Viability;
 import com.example.horsegenetics.neoforge.ServerConfig;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -135,16 +137,69 @@ public final class LethalFoalHandler {
     }
 
     /**
-     * Tell the player why a pairing produced nothing. Without this an embryonic
-     * lethal is indistinguishable from a bug - two horses that will breed with
-     * anything except each other, for no visible reason.
+     * <b>The mare loses it.</b> An embryonic lethal used to be a silent
+     * non-event - two horses that would breed with anything except each other,
+     * for no visible reason, which is indistinguishable from a bug. It is now
+     * something that happens <i>to</i> the mare and that everyone standing there
+     * sees.
+     *
+     * <h2>Three parts, all deliberate</h2>
+     * <ul>
+     *   <li><b>Half a heart</b> off the dam, through the same
+     *       {@link #GENETIC_DEFECT} damage type a lethal foal dies of. Small
+     *       enough to be a cost rather than a punishment, and visible enough
+     *       that a player watching the mare knows something went wrong even if
+     *       the chat has scrolled. It can kill a mare already on her last half
+     *       heart, and that is left alone: breeding an animal that close to
+     *       death is a decision, not an accident.</li>
+     *   <li><b>A description of what it looked like</b>, not of what it was -
+     *       see {@link MiscarriageSigns}. Naming the disorder would answer the
+     *       question the pedigree exists to ask.</li>
+     *   <li><b>Told to everyone nearby</b>, not only the breeder, because the
+     *       fact belongs to the pairing rather than to whoever held the wheat.</li>
+     * </ul>
+     *
+     * <p>Runs in both dev and production builds. It is the only feedback a
+     * player gets that a pair shares a recessive lethal.
      */
-    public static void announceRefusedPairing(@Nullable Player breeder, Condition cause) {
-        if (breeder == null) {
-            return;
+    public static void announceMiscarriage(Horse dam, @Nullable Player breeder, Condition cause) {
+        String sign = MiscarriageSigns.of(cause);
+        String name = HorseRecords.hasRealRecord(dam)
+                ? HorseRecords.of(dam).displayName()
+                : "The mare";
+        Component line = Component.literal(name + " did not carry. " + sign)
+                .withStyle(ChatFormatting.GRAY);
+
+        if (dam.level() instanceof ServerLevel level) {
+            dam.hurtServer(level, geneticDefect(level), MISCARRIAGE_DAMAGE);
+            tell(level, dam, breeder, line);
+        } else if (breeder != null) {
+            breeder.sendSystemMessage(line);
         }
-        breeder.sendSystemMessage(Component.literal(
-                "The pairing produced no foal: " + cause.description()));
+
+        // The log gets the answer the chat line withholds - a dev reading a log
+        // is debugging, not playing, and "which lethal was that" is the first
+        // thing they will want.
+        DebugAnnounce.log("Breeding", "miscarriage: " + cause.name() + " (" + cause.id() + ")"
+                + " - dam " + name + (breeder == null ? "" : ", bred by " + breeder.getGameProfile().name())
+                + (MiscarriageSigns.isWritten(cause) ? "" : " [no sign written for this condition]"));
+    }
+
+    /** Half a heart. Two health points are one heart, so this is 1.0. */
+    private static final float MISCARRIAGE_DAMAGE = 1.0f;
+
+    /** The breeder if there is one, and everyone close enough to have seen it. */
+    private static void tell(ServerLevel level, Horse horse, @Nullable Player breeder, Component line) {
+        List<Player> nearby = level.getEntitiesOfClass(Player.class,
+                new AABB(horse.blockPosition()).inflate(MESSAGE_RADIUS));
+        boolean toldBreeder = false;
+        for (Player player : nearby) {
+            player.sendSystemMessage(line);
+            toldBreeder |= player == breeder;
+        }
+        if (breeder != null && !toldBreeder) {
+            breeder.sendSystemMessage(line);
+        }
     }
 
     private LethalFoalHandler() {

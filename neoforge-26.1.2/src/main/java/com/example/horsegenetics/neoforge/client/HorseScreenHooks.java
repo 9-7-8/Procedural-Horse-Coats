@@ -1,342 +1,84 @@
 package com.example.horsegenetics.neoforge.client;
 
 import com.example.horsegenetics.common.horse.HorseRecord;
-import com.example.horsegenetics.common.horse.ParentStats;
-import com.example.horsegenetics.common.trait.Condition;
-import com.example.horsegenetics.common.trait.HorseTraits;
-import com.example.horsegenetics.common.trait.Traits;
-import com.example.horsegenetics.neoforge.network.SetBarnNamePayload;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.HorseInventoryScreen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.animal.equine.AbstractHorse;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.ScreenEvent;
-import net.neoforged.neoforge.client.network.ClientPacketDistributor;
-import org.lwjgl.glfw.GLFW;
 
 /**
- * Client hooks on the vanilla horse inventory screen (E while riding a tamed
- * horse). Everything this mod adds - a metadata panel, an editable barn-name
- * field, and a <b>"View Family Tree"</b> button - sits in a <b>grey
- * vanilla-style panel to the left of the horse GUI</b>, behind a collapsible
- * tab (the small button on its edge). Nothing here replaces the screen or
- * removes other listeners, so a second horse-inventory mod keeps working;
- * toggle our tab off to get it fully out of the way.
+ * This mod's one addition to the vanilla horse inventory screen (<kbd>E</kbd>
+ * while riding, or shift-right-click on a tamed horse): a single <b>i</b>
+ * button at the top left of the window, which opens {@link HorseInfoScreen}.
  *
- * <p>The panel fill is drawn in {@link ScreenEvent.Render.Background} (behind
- * the widgets, in front of the backdrop); {@link #onKeyPressed} keeps
- * <kbd>E</kbd> from closing the screen while the barn-name box is focused.
+ * <h2>One button, and nothing else</h2>
+ * There used to be a grey vanilla-style panel to the left of the GUI, behind a
+ * collapsible tab, carrying the horse's name, its four body numbers, its
+ * disorders, its bond and an editable barn-name box. All of that now lives on
+ * the information screen's Overview tab, which has room to say it properly -
+ * the panel was a 128-pixel column trying to hold a page. Nothing is duplicated
+ * and nothing here draws over the vanilla screen, so a second horse-inventory
+ * mod keeps working and the only pixel this mod owns is the button.
  *
- * <p>Layout constants below are eyeballed, not visually verified.
+ * <h2>Which horse is this</h2>
+ * The horse comes off the <b>screen</b>, not off {@code player.getVehicle()}.
+ * The two agree while you are riding, and disagree completely when the screen
+ * was opened by shift-right-clicking a tamed horse - vanilla's
+ * {@code AbstractHorse.mobInteract} opens the inventory <i>without</i> mounting,
+ * so the old vehicle lookup returned null and every one of this mod's additions
+ * came up blank. {@code AbstractMountInventoryScreen.mount} is the authority;
+ * it is protected, and this mod's access transformer opens it.
  */
 @EventBusSubscriber(value = Dist.CLIENT)
 public final class HorseScreenHooks {
 
-    /** Session-wide: remembered across screen re-inits (resize, reopen). */
-    private static boolean panelOpen = true;
+    /** Square, and tucked inside the window's top-left corner. */
+    private static final int BUTTON = 14;
+    private static final int INSET = 5;
 
-    private static Button tabButton;
-    private static Button viewGenesButton;
-    private static Button familyTreeButton;
-    private static Button setBarnButton;
-    private static EditBox barnBox;
-
-    private static final int PANEL_W = 128;
-    private static final int PANEL_H = 176;
-
-    // vanilla container-panel palette. Text is drawn WITHOUT a drop shadow
-    // (see the `false` arg on every g.text call below) - on the light-grey
-    // FACE a shadowed dark string turns into unreadable grey-on-grey mush,
-    // exactly like a vanilla inventory label would.
-    private static final int FACE = 0xFFC6C6C6;
-    private static final int HILIGHT = 0xFFFFFFFF;
-    private static final int SHADOW = 0xFF555555;
-    private static final int LABEL = 0xFF404040;   // vanilla container-label grey
-    private static final int VALUE = 0xFF1B1B1B;   // near-black for the primary values
-
-    private static final int STAT_UP = 0xFF1A6B1A;   // above both parents
-    private static final int STAT_MID = 0xFF8A5E00;  // above one
-    private static final int STAT_DOWN = 0xFFA61B1B; // below both
+    private static Button infoButton;
 
     @SubscribeEvent
     static void onScreenInit(ScreenEvent.Init.Post event) {
         if (!(event.getScreen() instanceof HorseInventoryScreen screen)) {
             return;
         }
-        HorseRecord record = currentRecord();
+        int left = ((AbstractContainerScreen<?>) screen).getGuiLeft();
+        int top = ((AbstractContainerScreen<?>) screen).getGuiTop();
 
-        int px = panelLeft(screen);
-        int py = panelTop(screen);
+        infoButton = Button.builder(Component.literal("i"), b -> openInfo(screen))
+                .bounds(left + INSET, top + INSET, BUTTON, BUTTON)
+                .tooltip(net.minecraft.client.gui.components.Tooltip.create(
+                        Component.literal("Horse information")))
+                .build();
+        infoButton.active = horseOf(screen) != null;
+        event.addListener(infoButton);
+    }
 
-        // tab toggle - sits on the panel's right edge, between it and the GUI
-        tabButton = Button.builder(Component.literal(panelOpen ? "<" : "i"), b -> togglePanel())
-                .bounds(px + PANEL_W, py, 12, 20).build();
-        event.addListener(tabButton);
-
-        viewGenesButton = Button.builder(Component.literal("View Genes"), b -> openGeneInspect())
-                .bounds(px + 6, py + PANEL_H - 70, PANEL_W - 12, 18).build();
-        event.addListener(viewGenesButton);
-
-        familyTreeButton = Button.builder(Component.literal("View Family Tree"), b -> openFamilyTree())
-                .bounds(px + 6, py + PANEL_H - 48, PANEL_W - 12, 18).build();
-        event.addListener(familyTreeButton);
-
-        barnBox = new EditBox(Minecraft.getInstance().font, px + 6, py + PANEL_H - 26, PANEL_W - 44, 16,
-                Component.literal("Barn name"));
-        barnBox.setMaxLength(HorseRecord.MAX_BARN_NAME);
-        barnBox.setHint(Component.literal("barn name"));
-        if (record != null) {
-            record.barnName().ifPresent(barnBox::setValue);
+    private static void openInfo(HorseInventoryScreen screen) {
+        AbstractHorse horse = horseOf(screen);
+        if (horse == null) {
+            return;
         }
-        event.addListener(barnBox);
-
-        setBarnButton = Button.builder(Component.literal("Set"), b -> submitBarn(barnBox.getValue()))
-                .bounds(px + PANEL_W - 34, py + PANEL_H - 26, 28, 16).build();
-        event.addListener(setBarnButton);
-
-        applyVisibility();
+        HorseRecord record = ClientHorseRecordCache.get(horse.getId());
+        if (record != null) {
+            Minecraft.getInstance().setScreen(new HorseInfoScreen(record, horse, screen));
+        }
     }
 
     /**
-     * Drawn in {@link ScreenEvent.Render.Background} - the hook that fires
-     * <em>after</em> the screen's dimmed backdrop but <em>before</em> the widget
-     * layer. That's the only place a filled rect ends up behind our buttons /
-     * edit box (so they stay visible and clickable) yet in front of the dark
-     * backdrop (so the panel isn't a murky grey rectangle). Text goes in the
-     * same pass, after the fill, so it sits on top of the grey.
+     * The horse this screen is showing. Public because
+     * {@link HorseInfoScreen} needs it to go back, and because it is the one
+     * correct answer to "which horse" on this screen - see the class note.
      */
-    @SubscribeEvent
-    static void onPanelRender(ScreenEvent.Render.Background event) {
-        if (!(event.getScreen() instanceof HorseInventoryScreen screen)) {
-            return;
-        }
-        if (tabButton != null) {
-            tabButton.setMessage(Component.literal(panelOpen ? "<" : "i"));
-        }
-        if (!panelOpen) {
-            return;
-        }
-        HorseRecord r = currentRecord();
-        if (r == null) {
-            return;
-        }
-
-        var g = event.getGuiGraphics();
-        var font = Minecraft.getInstance().font;
-        int px = panelLeft(screen);
-        int py = panelTop(screen);
-
-        // grey bevelled panel
-        g.fill(px, py, px + PANEL_W, py + PANEL_H, FACE);
-        g.fill(px, py, px + PANEL_W, py + 1, HILIGHT);
-        g.fill(px, py, px + 1, py + PANEL_H, HILIGHT);
-        g.fill(px, py + PANEL_H - 1, px + PANEL_W, py + PANEL_H, SHADOW);
-        g.fill(px + PANEL_W - 1, py, px + PANEL_W, py + PANEL_H, SHADOW);
-
-        AbstractHorse horse = ridingHorse();
-        boolean adult = horse == null || !horse.isBaby();
-        int tx = px + 7;
-        int ty = py + 7;
-
-        g.text(font, Component.literal(clip(r.displayName(), 21)), tx, ty, VALUE, false);
-        ty += 11;
-        if (r.barnName().isPresent()) {
-            g.text(font, Component.literal(clip("(" + (r.firstName() + " " + r.lastName()).strip() + ")", 22)),
-                    tx, ty, LABEL, false);
-            ty += 10;
-        }
-        g.text(font, Component.literal(r.sex().label(adult) + "   gen " + r.generation()), tx, ty, LABEL, false);
-        ty += 11;
-        g.text(font, Component.literal(clip(r.lineage().displayName(), 22)), tx, ty, VALUE, false);
-        ty += 12;
-
-        // Speed and health come off the live entity's attributes, not off a
-        // stored field - there is no stored field any more, and the entity is
-        // the one number the server has already told this client is true. The
-        // conditions below are resolved from the genotype instead, because
-        // carrying a disorder is a fact about the alleles whatever the server
-        // has its health.mode set to.
-        double liveSpeed = horse == null ? 0.0 : horse.getAttributeValue(Attributes.MOVEMENT_SPEED);
-        double liveHealth = horse == null ? 0.0 : horse.getAttributeValue(Attributes.MAX_HEALTH);
-        double liveJump = horse == null ? 0.0 : horse.getAttributeValue(Attributes.JUMP_STRENGTH);
-        double liveScale = horse == null ? 1.0 : horse.getAttributeValue(Attributes.SCALE);
-
-        ty = stat(g, font, tx, ty, "speed ", String.format("%.3f", liveSpeed),
-                statColor(r, true, liveSpeed));
-        ty = stat(g, font, tx, ty, "health ", String.format("%.1f", liveHealth),
-                statColor(r, false, liveHealth));
-        ty = stat(g, font, tx, ty, "jump ", String.format("%.2f", liveJump), VALUE);
-        ty = stat(g, font, tx, ty, "size ", sizeWord(liveScale), VALUE);
-        ty += 1;
-
-        for (Condition c : conditionsOf(r)) {
-            g.text(font, Component.literal(clip(c.name(), 22)), tx, ty,
-                    c.severity().lethal() ? STAT_DOWN : STAT_MID, false);
-            ty += 10;
-        }
-        ty += 1;
-
-        ClientHorseCareCache.Care care = horse == null ? null : ClientHorseCareCache.get(horse.getId());
-        if (care != null) {
-            g.text(font, Component.literal("bond "), tx, ty, LABEL, false);
-            g.text(font, Component.literal(care.bond() + "  " + bondTierLabel(care.bond())
-                    + (care.inHerd() ? "  • herd" : "")),
-                    tx + font.width("bond "), ty, VALUE, false);
-            ty += 11;
-        }
-
-        g.text(font, Component.literal(clip(attributionLine(r), 22)), tx, ty, LABEL, false);
-    }
-
-    /** Matches HorseCareAttachment.behaviourTier() - kept here to avoid a server import. */
-    private static String bondTierLabel(int bond) {
-        if (bond >= 81) return "follows";
-        if (bond >= 61) return "approaches";
-        if (bond >= 31) return "attentive";
-        return "wary";
-    }
-
-    /**
-     * While the barn-name box has focus, keep the vanilla inventory keybind (and
-     * any other key) from reaching the screen - otherwise pressing <kbd>E</kbd>
-     * mid-word closes the whole GUI and the edit is lost. Escape still closes;
-     * Enter submits and unfocuses; every other key is forwarded to the box so
-     * backspace / arrows keep working. (Character input rides a separate event,
-     * so letters still type.)
-     */
-    @SubscribeEvent
-    static void onKeyPressed(ScreenEvent.KeyPressed.Pre event) {
-        if (!(event.getScreen() instanceof HorseInventoryScreen)) {
-            return;
-        }
-        if (barnBox == null || !panelOpen || !barnBox.isFocused()) {
-            return;
-        }
-        int key = event.getKeyCode();
-        if (key == GLFW.GLFW_KEY_ESCAPE) {
-            return; // let escape close the screen as usual
-        }
-        if (key == GLFW.GLFW_KEY_ENTER || key == GLFW.GLFW_KEY_KP_ENTER) {
-            submitBarn(barnBox.getValue());
-            barnBox.setFocused(false);
-        } else {
-            barnBox.keyPressed(event.getKeyEvent()); // backspace / delete / arrows / home / end
-        }
-        event.setCanceled(true);
-    }
-
-    /** One {@code label value} row; returns the next y. */
-    private static int stat(net.minecraft.client.gui.GuiGraphicsExtractor g, Font font,
-                            int tx, int ty, String label, String value, int colour) {
-        g.text(font, Component.literal(label), tx, ty, LABEL, false);
-        g.text(font, Component.literal(value), tx + font.width(label), ty, colour, false);
-        return ty + 10;
-    }
-
-    /**
-     * The disorders this horse's alleles give it. Resolved with the health
-     * genetics on regardless of the server setting: the setting decides whether
-     * the disorder <i>bites</i>, not whether the horse has it, and a breeder
-     * needs to see it either way. A malformed code just shows nothing.
-     */
-    private static java.util.List<Condition> conditionsOf(HorseRecord r) {
-        try {
-            Traits traits = HorseTraits.resolve(r.genotype());
-            return traits.conditions();
-        } catch (RuntimeException unparseable) {
-            return java.util.List.of();
-        }
-    }
-
-    /** Body scale as a word - a number between 0.88 and 1.10 means nothing to a player. */
-    private static String sizeWord(double scale) {
-        if (scale < 0.80) return "dwarf";
-        if (scale < 0.94) return "small";
-        if (scale <= 1.03) return "average";
-        if (scale <= 1.12) return "large";
-        return "draught";
-    }
-
-    private static int statColor(HorseRecord r, boolean speed, double value) {
-        if (r.parentStats().isEmpty()) {
-            return VALUE;
-        }
-        ParentStats ps = r.parentStats().get();
-        int rank = speed ? ps.rankSpeed(value) : ps.rankHealth(value);
-        return rank > 0 ? STAT_UP : rank < 0 ? STAT_DOWN : STAT_MID;
-    }
-
-    // --- helpers ---
-
-    private static int panelLeft(HorseInventoryScreen screen) {
-        int guiLeft = ((AbstractContainerScreen<?>) screen).getGuiLeft();
-        return Math.max(2, guiLeft - PANEL_W - 8);
-    }
-
-    private static int panelTop(HorseInventoryScreen screen) {
-        return ((AbstractContainerScreen<?>) screen).getGuiTop();
-    }
-
-    private static void togglePanel() {
-        panelOpen = !panelOpen;
-        applyVisibility();
-    }
-
-    private static void applyVisibility() {
-        if (viewGenesButton != null) viewGenesButton.visible = panelOpen;
-        if (familyTreeButton != null) familyTreeButton.visible = panelOpen;
-        if (setBarnButton != null) setBarnButton.visible = panelOpen;
-        if (barnBox != null) barnBox.visible = panelOpen;
-    }
-
-    private static String attributionLine(HorseRecord r) {
-        if (r.bredBy().isPresent()) {
-            return "bred by " + r.bredBy().get();
-        }
-        return "tamed by " + r.tamedBy().orElse("(untamed)");
-    }
-
-    private static String clip(String s, int max) {
-        return s.length() <= max ? s : s.substring(0, max - 1) + "…";
-    }
-
-    private static HorseRecord currentRecord() {
-        AbstractHorse horse = ridingHorse();
-        return horse == null ? null : ClientHorseRecordCache.get(horse.getId());
-    }
-
-    private static void submitBarn(String value) {
-        AbstractHorse horse = ridingHorse();
-        if (horse != null) {
-            ClientPacketDistributor.sendToServer(new SetBarnNamePayload(horse.getId(), value));
-        }
-    }
-
-    private static void openFamilyTree() {
-        HorseRecord record = currentRecord();
-        if (record != null) {
-            Minecraft.getInstance().setScreen(new FamilyTreeScreen(record));
-        }
-    }
-
-    private static void openGeneInspect() {
-        HorseRecord record = currentRecord();
-        if (record != null) {
-            Minecraft.getInstance().setScreen(new GeneInspectScreen(record));
-        }
-    }
-
-    private static AbstractHorse ridingHorse() {
-        Minecraft mc = Minecraft.getInstance();
-        return mc.player != null && mc.player.getVehicle() instanceof AbstractHorse horse ? horse : null;
+    public static AbstractHorse horseOf(HorseInventoryScreen screen) {
+        return screen.mount instanceof AbstractHorse horse ? horse : null;
     }
 
     private HorseScreenHooks() {

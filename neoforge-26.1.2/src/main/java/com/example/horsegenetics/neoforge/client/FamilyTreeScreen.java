@@ -65,6 +65,8 @@ public final class FamilyTreeScreen extends Screen {
     private static final int HEAD_ROOM = 16;            // space above row 1 for the model head
 
     private UUID rootId;
+    /** Where Done / Escape goes, or null to close out to the game. */
+    private final @org.jetbrains.annotations.Nullable Screen parent;
     private final List<Node> nodes = new ArrayList<>();
     /** One reusable client-only horse per record, so each box can draw a live 3D model. */
     private final Map<UUID, Horse> modelHorses = new HashMap<>();
@@ -81,8 +83,28 @@ public final class FamilyTreeScreen extends Screen {
     private record Node(int col, int idx, UUID id, HorseRecord record, int x, int y) {}
 
     public FamilyTreeScreen(HorseRecord root) {
+        this(root, null);
+    }
+
+    /**
+     * @param parent the screen to go back to on Done / Escape, or {@code null}
+     *               to close out to the game. The horse information screen's
+     *               Family tree tab passes itself, so the tree reads as one of
+     *               its pages rather than as a place you end up.
+     */
+    public FamilyTreeScreen(HorseRecord root, @org.jetbrains.annotations.Nullable Screen parent) {
         super(Component.literal("Family Tree"));
         this.rootId = root.id();
+        this.parent = parent;
+    }
+
+    @Override
+    public void onClose() {
+        if (parent != null) {
+            net.minecraft.client.Minecraft.getInstance().setScreen(parent);
+            return;
+        }
+        super.onClose();
     }
 
     @Override

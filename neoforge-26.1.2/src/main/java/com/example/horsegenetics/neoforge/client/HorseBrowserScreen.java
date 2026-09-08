@@ -1,11 +1,14 @@
 package com.example.horsegenetics.neoforge.client;
 
 import com.example.horsegenetics.common.genetics.Allele;
+import com.example.horsegenetics.common.genetics.BreedingPreview;
 import com.example.horsegenetics.common.genetics.Expression;
 import com.example.horsegenetics.common.genetics.Gene;
 import com.example.horsegenetics.common.genetics.Genes;
+import com.example.horsegenetics.common.horse.Sex;
 import com.example.horsegenetics.neoforge.menu.HorseBrowserMenu;
 import com.example.horsegenetics.neoforge.menu.SpliceRecipeDisplay;
+import com.example.horsegenetics.neoforge.network.BreedingRosterRequestPayload;
 import com.example.horsegenetics.neoforge.network.SelectBrowserGenePayload;
 import com.example.horsegenetics.neoforge.network.WriteResearchPaperPayload;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -23,16 +26,23 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
+import java.util.UUID;
 
 /**
  * The <b>Horse Browser</b> - opened with the browser key (default <kbd>H</kbd>).
- * An {@link AbstractContainerScreen} over {@link HorseBrowserMenu}, with two
+ * An {@link AbstractContainerScreen} over {@link HorseBrowserMenu}, with three
  * tabs drawn from a strip at the top of the window:
  *
  * <ul>
  *   <li><b>Gene database</b> - a full-window reference: a filterable gene list on
  *       the left, a scrolling detail pane on the right. No slots (the menu's
  *       slots all go inactive here).</li>
+ *   <li><b>Breeding preview</b> - pick one of your mares and one of your
+ *       stallions and read what they could produce at every locus, and how
+ *       often. It is a <b>Punnett square per gene</b>, not a foal and not a
+ *       list of genotypes: {@link BreedingPreview} says why, and it is grouped
+ *       so the loci that pull on one trait arrive together. The roster comes
+ *       from the server on opening the tab ({@code BreedingRosterPayload}).</li>
  *   <li><b>Crafting</b> - a compact centered panel: a 3x3 grid + result slot that
  *       only makes this mod's recipes (see {@code HorseBrowserRecipes}), the
  *       gene list reused on the left to pick which gene a book becomes a paper
@@ -47,6 +57,7 @@ public final class HorseBrowserScreen extends AbstractContainerScreen<HorseBrows
 
     private enum Tab {
         GENE_DATABASE("Gene database"),
+        BREEDING_PREVIEW("Breeding preview"),
         CRAFTING("Crafting");
 
         final String label;
@@ -93,6 +104,18 @@ public final class HorseBrowserScreen extends AbstractContainerScreen<HorseBrows
 
     private EditBox searchBox;
     private Button craftPaperButton;
+    private Button refreshRosterButton;
+    private Button settledToggle;
+
+    // --- Breeding preview tab ---
+    private UUID damId;
+    private UUID sireId;
+    private boolean showSettled = false;
+    private int mareScroll = 0;
+    private int stallionScroll = 0;
+    /** Recomputed only when the pair or the toggle changes - the walk is not free. */
+    private List<BreedingPreview.Group> preview = List.of();
+    private int previewRosterVersion = -1;
     private final List<Gene> allGenes;
     private List<Gene> filtered = List.of();
 
@@ -188,7 +211,29 @@ public final class HorseBrowserScreen extends AbstractContainerScreen<HorseBrows
         craftPaperButton.visible = false;
         addRenderableWidget(craftPaperButton);
 
+        refreshRosterButton = Button.builder(Component.literal("Refresh"), b -> requestRoster())
+                .bounds(listX(), contentTop() - 1, 60, 18).build();
+        refreshRosterButton.visible = false;
+        addRenderableWidget(refreshRosterButton);
+
+        settledToggle = Button.builder(settledLabel(), b -> {
+                    showSettled = !showSettled;
+                    b.setMessage(settledLabel());
+                    rebuildPreview();
+                })
+                .bounds(listX() + 64, contentTop() - 1, 130, 18).build();
+        settledToggle.visible = false;
+        addRenderableWidget(settledToggle);
+
         applyFilter();
+    }
+
+    private Component settledLabel() {
+        return Component.literal(showSettled ? "All loci" : "Only what can vary");
+    }
+
+    private void requestRoster() {
+        ClientPacketDistributor.sendToServer(BreedingRosterRequestPayload.INSTANCE);
     }
 
     private void craftPaper() {
@@ -208,7 +253,21 @@ public final class HorseBrowserScreen extends AbstractContainerScreen<HorseBrows
 
     /** Show / hide / position the "Craft research paper" button for the current tab. */
     private void layoutGeneButtons() {
+        boolean breeding = tab == Tab.BREEDING_PREVIEW;
+        if (refreshRosterButton != null) {
+            refreshRosterButton.visible = breeding;
+            refreshRosterButton.active = breeding;
+        }
+        if (settledToggle != null) {
+            settledToggle.visible = breeding;
+            settledToggle.active = breeding;
+        }
         if (craftPaperButton == null) {
+            return;
+        }
+        if (breeding) {
+            craftPaperButton.visible = false;
+            craftPaperButton.active = false;
             return;
         }
         Gene sel = selected();
@@ -284,8 +343,26 @@ public final class HorseBrowserScreen extends AbstractContainerScreen<HorseBrows
                 listScroll = 0;
                 detailScroll = 0f;
                 applyFilter();
+                if (tab == Tab.BREEDING_PREVIEW && !ClientBreedingRoster.received()) {
+                    requestRoster();
+                }
             }
             return true;
+        }
+        if (tab == Tab.BREEDING_PREVIEW) {
+            ClientBreedingRoster.Horse mare = horseAt(event.x(), event.y(), Sex.FEMALE);
+            if (mare != null) {
+                damId = mare.id().equals(damId) ? null : mare.id();
+                rebuildPreview();
+                return true;
+            }
+            ClientBreedingRoster.Horse stallion = horseAt(event.x(), event.y(), Sex.MALE);
+            if (stallion != null) {
+                sireId = stallion.id().equals(sireId) ? null : stallion.id();
+                rebuildPreview();
+                return true;
+            }
+            return super.mouseClicked(event, doubleClick);
         }
         int row = rowAt(event.x(), event.y());
         if (row >= 0) {
@@ -329,6 +406,24 @@ public final class HorseBrowserScreen extends AbstractContainerScreen<HorseBrows
 
     @Override
     public boolean mouseScrolled(double mx, double my, double sx, double sy) {
+        if (tab == Tab.BREEDING_PREVIEW) {
+            if (mx >= listX() && mx <= listX() + listW()) {
+                boolean upper = my < pickerSplit();
+                List<ClientBreedingRoster.Horse> list = ClientBreedingRoster.of(upper ? Sex.FEMALE : Sex.MALE);
+                int visible = pickerRows(upper);
+                int max = Math.max(0, list.size() - visible);
+                if (upper) {
+                    mareScroll = Math.max(0, Math.min(max, mareScroll - (int) Math.signum(sy)));
+                } else {
+                    stallionScroll = Math.max(0, Math.min(max, stallionScroll - (int) Math.signum(sy)));
+                }
+                return true;
+            }
+            if (detailMaxScroll > 0) {
+                detailScroll = Math.max(0f, Math.min(detailMaxScroll, detailScroll - (float) sy * 16f));
+            }
+            return true;
+        }
         if (mx >= listX() && mx <= listX() + listW() && my >= listTop() && maxListScroll() > 0) {
             listScroll = Math.max(0, Math.min(maxListScroll(), listScroll - (int) Math.signum(sy)));
             return true;
@@ -392,7 +487,10 @@ public final class HorseBrowserScreen extends AbstractContainerScreen<HorseBrows
             applyFilter();
         }
         if (searchBox != null) {
-            boolean showSearch = true; // both tabs filter the same list
+            // The gene database and Crafting filter the same gene list; the
+            // breeding tab's left pane is horses, and reusing one box for two
+            // different lists reads as a bug the first time it clears itself.
+            boolean showSearch = tab != Tab.BREEDING_PREVIEW;
             searchBox.visible = showSearch;
             searchBox.active = showSearch;
         }
@@ -403,6 +501,8 @@ public final class HorseBrowserScreen extends AbstractContainerScreen<HorseBrows
         if (tab == Tab.GENE_DATABASE) {
             drawGeneList(g, mouseX, mouseY, contentBottom());
             drawGeneDetail(g);
+        } else if (tab == Tab.BREEDING_PREVIEW) {
+            drawBreedingPreview(g, mouseX, mouseY);
         } else {
             drawCraftingPanel(g, mouseX, mouseY);
         }
@@ -644,6 +744,248 @@ public final class HorseBrowserScreen extends AbstractContainerScreen<HorseBrows
                 ty += this.font.lineHeight + 1;
             }
         }
+    }
+
+    // ------------------------------------------------------------------
+    // Breeding preview
+    // ------------------------------------------------------------------
+    //
+    // Two pickers stacked down the left - mares above, stallions below - and
+    // the Punnett squares down the right, grouped by the trait the loci pull
+    // on (BreedingPreview.groups). It answers "can this pair throw that allele,
+    // and how often", which is the question a beginner actually has, and
+    // deliberately not "what will the foal look like": a predicted coat is a
+    // promise the draw does not make.
+
+    /** The y at which the mare list ends and the stallion list begins. */
+    private int pickerSplit() {
+        return listTop() + (contentBottom() - listTop()) / 2;
+    }
+
+    private int pickerTop(boolean mares) {
+        return (mares ? listTop() : pickerSplit()) + 12;
+    }
+
+    private int pickerBottom(boolean mares) {
+        return mares ? pickerSplit() - 6 : contentBottom();
+    }
+
+    private int pickerRows(boolean mares) {
+        return Math.max(1, (pickerBottom(mares) - pickerTop(mares)) / ROW_H);
+    }
+
+    private int pickerScroll(boolean mares) {
+        return mares ? mareScroll : stallionScroll;
+    }
+
+    /** The roster row under the cursor in one of the two pickers, or null. */
+    private ClientBreedingRoster.Horse horseAt(double mx, double my, Sex sex) {
+        boolean mares = sex == Sex.FEMALE;
+        if (mx < listX() || mx > listX() + listW()
+                || my < pickerTop(mares) || my >= pickerTop(mares) + pickerRows(mares) * ROW_H) {
+            return null;
+        }
+        List<ClientBreedingRoster.Horse> list = ClientBreedingRoster.of(sex);
+        int i = pickerScroll(mares) + (int) ((my - pickerTop(mares)) / ROW_H);
+        return i >= 0 && i < list.size() ? list.get(i) : null;
+    }
+
+    /**
+     * Recompute the squares. Only on a selection or toggle change: the walk
+     * touches every registered gene and probes the trait system once per
+     * possible outcome, which is nothing at all once and far too much per frame.
+     */
+    private void rebuildPreview() {
+        detailScroll = 0f;
+        ClientBreedingRoster.Horse dam = ClientBreedingRoster.byId(damId);
+        ClientBreedingRoster.Horse sire = ClientBreedingRoster.byId(sireId);
+        previewRosterVersion = ClientBreedingRoster.version();
+        if (dam == null || sire == null) {
+            preview = List.of();
+            return;
+        }
+        try {
+            // Which one is the dam is read off the genotypes rather than off
+            // the list the player clicked: the sex loci are the authority, and
+            // a sex-linked square comes out wrong rather than mirrored if the
+            // two disagree.
+            boolean firstIsDam = BreedingPreview.isDam(dam.genotype());
+            preview = BreedingPreview.groups(
+                    firstIsDam ? dam.genotype() : sire.genotype(),
+                    firstIsDam ? sire.genotype() : dam.genotype(),
+                    showSettled);
+        } catch (RuntimeException unusable) {
+            preview = List.of();
+        }
+    }
+
+    private void drawBreedingPreview(GuiGraphicsExtractor g, int mouseX, int mouseY) {
+        if (previewRosterVersion != ClientBreedingRoster.version()) {
+            rebuildPreview();
+        }
+        drawPicker(g, mouseX, mouseY, Sex.FEMALE);
+        drawPicker(g, mouseX, mouseY, Sex.MALE);
+        drawPreviewPane(g);
+    }
+
+    private void drawPicker(GuiGraphicsExtractor g, int mouseX, int mouseY, Sex sex) {
+        boolean mares = sex == Sex.FEMALE;
+        List<ClientBreedingRoster.Horse> list = ClientBreedingRoster.of(sex);
+        int l = listX();
+        int w = listW();
+        int headY = mares ? listTop() : pickerSplit();
+        int top = pickerTop(mares);
+        int bottom = pickerBottom(mares);
+        UUID chosen = mares ? damId : sireId;
+
+        g.text(this.font, Component.literal((mares ? "Mares" : "Stallions") + "  (" + list.size() + ")"),
+                l, headY, LABEL, false);
+
+        g.fill(l - 2, top - 2, l + w + 2, bottom + 2, PANEL_SOFT);
+        g.enableScissor(l, top, l + w, bottom);
+        int visible = pickerRows(mares);
+        int scroll = pickerScroll(mares);
+        for (int i = scroll; i < list.size() && i < scroll + visible; i++) {
+            ClientBreedingRoster.Horse horse = list.get(i);
+            int ry = top + (i - scroll) * ROW_H;
+            boolean sel = horse.id().equals(chosen);
+            boolean hover = mouseX >= l && mouseX <= l + w && mouseY >= ry && mouseY < ry + ROW_H;
+            if (sel) {
+                g.fill(l - 2, ry, l + w, ry + ROW_H, ROW_SEL);
+            } else if (hover) {
+                g.fill(l - 2, ry, l + w, ry + ROW_H, ROW_HOVER);
+            }
+            drawFitted(g, horse.name() + "  g" + horse.generation(), l + 4, ry + 2, w - 12,
+                    sel ? NAME : NAME_DIM);
+        }
+        g.disableScissor();
+
+        if (list.isEmpty()) {
+            String note = !ClientBreedingRoster.received()
+                    ? "asking the server..."
+                    : "no tamed " + (mares ? "mares" : "stallions") + " on record";
+            g.text(this.font, Component.literal(note), l + 4, top + 2, EXPR_OFF, false);
+        }
+
+        int max = Math.max(0, list.size() - visible);
+        if (max > 0) {
+            int trackH = bottom - top;
+            int x1 = l + w;
+            g.fill(x1 - 3, top, x1, bottom, 0x33FFFFFF);
+            int thumbH = Math.max(16, trackH * visible / list.size());
+            int thumbY = top + (trackH - thumbH) * scroll / max;
+            g.fill(x1 - 3, thumbY, x1, thumbY + thumbH, 0xAAFFFFFF);
+        }
+    }
+
+    private void drawPreviewPane(GuiGraphicsExtractor g) {
+        int l = detailX();
+        int r = detailR();
+        int top = contentTop();
+        int bottom = contentBottom();
+        int w = r - l;
+        g.fill(l - 6, top - 2, r + 2, bottom + 2, PANEL_SOFT);
+
+        ClientBreedingRoster.Horse dam = ClientBreedingRoster.byId(damId);
+        ClientBreedingRoster.Horse sire = ClientBreedingRoster.byId(sireId);
+        int lineH = this.font.lineHeight + 2;
+
+        if (dam == null || sire == null) {
+            int y = top + 4;
+            g.text(this.font, Component.literal("Pick a mare and a stallion"), l, y, HEADING, false);
+            y += lineH + 4;
+            for (String line : GuiText.wrap(this.font,
+                    "This shows what the pair could produce at every locus, and how often - not a "
+                            + "foal, and not a genotype. It answers whether two horses could throw a "
+                            + "given allele, which is the only question a Punnett square can honestly "
+                            + "answer about a whole horse.", w)) {
+                g.text(this.font, Component.literal(line), l, y, DESC, false);
+                y += lineH;
+            }
+            if (ClientBreedingRoster.truncated()) {
+                y += lineH;
+                for (String line : GuiText.wrap(this.font,
+                        "You own more horses than this list holds - it is showing the most recent "
+                                + "generations.", w)) {
+                    g.text(this.font, Component.literal(line), l, y, TAG, false);
+                    y += lineH;
+                }
+            }
+            detailMaxScroll = 0f;
+            return;
+        }
+
+        g.enableScissor(l - 4, top, r, bottom);
+        int y = top - (int) detailScroll;
+        int startY = y;
+
+        drawFitted(g, dam.name() + "   x   " + sire.name(), l, y, w, HEADING);
+        y += lineH;
+        drawFitted(g, dam.breed() + " mare  x  " + sire.breed() + " stallion", l, y, w, TAG);
+        y += lineH + 4;
+
+        if (preview.isEmpty()) {
+            g.text(this.font, Component.literal(showSettled
+                            ? "Nothing to show - those genotypes would not resolve."
+                            : "Every locus is settled: this pair can only produce one thing."),
+                    l, y, EXPR_OFF, false);
+            y += lineH;
+        }
+
+        for (BreedingPreview.Group group : preview) {
+            g.text(this.font, Component.literal(group.label()), l, y, HEADING, false);
+            y += lineH;
+            for (String line : GuiText.wrap(this.font, group.note(), w)) {
+                g.text(this.font, Component.literal(line), l, y, TAG, false);
+                y += lineH;
+            }
+            y += 2;
+            for (BreedingPreview.Locus locus : group.loci()) {
+                int indent = BreedingPreview.isModifier(locus.gene()) ? 10 : 0;
+                drawFitted(g, locus.gene().name(), l + indent, y, w - indent - 130, NAME);
+                drawFitted(g, locus.dam().toTokens() + "  x  " + locus.sire().toTokens(),
+                        l + w - 126, y, 126, ALLELE_TOK);
+                y += lineH;
+                for (BreedingPreview.Outcome outcome : locus.outcomes()) {
+                    g.text(this.font, Component.literal(percent(outcome.chance())),
+                            l + indent + 12, y, DESC, false);
+                    g.text(this.font, Component.literal(outcome.pair().toTokens()),
+                            l + indent + 48, y, ALLELE_TOK, false);
+                    drawFitted(g, outcome.expression().name(), l + indent + 120, y,
+                            w - indent - 120, outcome.expressing() ? EXPR_ON : EXPR_OFF);
+                    y += lineH;
+                }
+                y += 3;
+            }
+            y += 4;
+        }
+        g.disableScissor();
+
+        int contentH = y - startY;
+        detailMaxScroll = Math.max(0f, contentH - (bottom - top));
+        detailScroll = Math.max(0f, Math.min(detailScroll, detailMaxScroll));
+        if (detailMaxScroll > 0f) {
+            int trackH = bottom - top;
+            int x1 = r + 1;
+            g.fill(x1 - 3, top, x1, bottom, 0x33FFFFFF);
+            int thumbH = Math.max(16, (int) ((long) trackH * trackH / contentH));
+            int thumbY = top + Math.round(detailScroll * (trackH - thumbH) / detailMaxScroll);
+            g.fill(x1 - 3, thumbY, x1, thumbY + thumbH, 0xAAFFFFFF);
+        }
+    }
+
+    /**
+     * A probability as the thing a breeder says out loud. Quarters and halves
+     * keep their fraction, because one in four is what a carrier pairing
+     * literally is and 25% is a translation of it; everything else rounds to a
+     * percent.
+     */
+    private static String percent(double chance) {
+        if (Math.abs(chance - 0.25) < 1e-9) return "1 in 4";
+        if (Math.abs(chance - 0.5) < 1e-9) return "1 in 2";
+        if (Math.abs(chance - 0.75) < 1e-9) return "3 in 4";
+        if (Math.abs(chance - 1.0) < 1e-9) return "always";
+        return Math.round(chance * 100) + "%";
     }
 
     private static void cell(GuiGraphicsExtractor g, int x, int y, int colour) {

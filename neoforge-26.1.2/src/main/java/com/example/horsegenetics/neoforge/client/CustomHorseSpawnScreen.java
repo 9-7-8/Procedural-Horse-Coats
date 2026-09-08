@@ -624,8 +624,23 @@ public final class CustomHorseSpawnScreen extends Screen {
         addRenderableWidget(Button.builder(Component.literal("Clear genes"), b -> reset())
                 .bounds(rx, ry, RIGHT_W, 20).build());
 
-        addRenderableWidget(Button.builder(Component.literal("Spawn"), b -> spawn())
-                .bounds(rx, this.height - 48, RIGHT_W, 20).build());
+        // Creative-only, and the server re-checks it. Saying so on the button
+        // rather than only in a chat line after the click: the one report of
+        // this tool "not working" in a real build came with no detail, and a
+        // dead-looking button that never explains itself is the shape of bug
+        // that produces exactly that report.
+        boolean creative = Minecraft.getInstance().player != null
+                && Minecraft.getInstance().player.getAbilities().instabuild;
+        Button spawnButton = Button.builder(Component.literal(creative ? "Spawn" : "Spawn (creative only)"),
+                        b -> spawn())
+                .bounds(rx, this.height - 48, RIGHT_W, 20)
+                .tooltip(creative ? null : net.minecraft.client.gui.components.Tooltip.create(
+                        Component.literal("The custom spawn egg builds a horse from scratch, so it is a "
+                                + "creative-mode tool. Switch to creative to spawn what you have built; "
+                                + "everything else on this screen works either way.")))
+                .build();
+        spawnButton.active = creative;
+        addRenderableWidget(spawnButton);
         addRenderableWidget(Button.builder(Component.literal("Cancel"), b -> onClose())
                 .bounds(rx, this.height - 26, RIGHT_W, 20).build());
     }
