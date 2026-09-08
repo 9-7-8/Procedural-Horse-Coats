@@ -59,8 +59,13 @@ public final class BlaschkoStripes {
      */
     public record Pattern(long seed, double spacing, double duty, double warp) {}
 
-    /** Soft edge as a fraction of the half-period. Wide: brindle feathers, it does not draw. */
-    private static final double EDGE = 0.22;
+    /**
+     * Soft edge as a fraction of the half-period. Brindle feathers rather than
+     * drawing - but the edge is measured against the <i>period</i>, not against
+     * the streak, so a wide one on a narrow streak leaves a streak that is all
+     * edge and no core. It came down with {@code DUTY} for that reason.
+     */
+    private static final double EDGE = 0.15;
     /** How gently the warp field bends a streak. */
     private static final double WARP_SCALE = 1.0 / 7.0;
     /** Per-band width spread. Brindle streaks are nothing like one width. */
@@ -76,19 +81,32 @@ public final class BlaschkoStripes {
     /** How far the streak swings forward at mid-barrel: the S rather than the ruled line. */
     private static final double SWAY = 1.5;
 
-    /** Below this much of the along-the-streak noise the streak simply is not there. */
-    private static final double BREAK = 0.32;
-    private static final double BREAK_SOFT = 0.30;
-    private static final double BREAK_SCALE = 0.30;
+    /**
+     * Below this much of the along-the-streak noise the streak simply is not
+     * there.
+     *
+     * <p>These three are what make brindle <b>dashes rather than bars</b>, and
+     * they were all too gentle: a threshold of 0.32 removes about a third of
+     * each streak, and a scale of 0.30 spreads that third over a length of
+     * body long enough that what it removes is one end rather than a series of
+     * gaps. Taking the threshold up and the feature size down together turns
+     * one long streak into four or five short ones - which is the difference
+     * between brindle and a zebra with soft edges.
+     */
+    private static final double BREAK = 0.46;
+    private static final double BREAK_SOFT = 0.24;
+    private static final double BREAK_SCALE = 0.62;
 
     /** Half-width, in body units, of the blend between the left and right band rolls. */
     private static final double SIDE_BLEND = 2.0;
     /**
      * Gain on the per-side roll. Above 1 it saturates, so most bands are fully
      * present on a given side and the remainder ramp down to absent - rather
-     * than every band on the horse sitting at some middling half-strength.
+     * than every band on the horse sitting at some middling half-strength. Kept
+     * above 1 for that, but not so far above that <i>every</i> band survives on
+     * both sides: the missing ones are the mosaicism showing.
      */
-    private static final double SIDE_GAIN = 2.0;
+    private static final double SIDE_GAIN = 1.5;
 
     /** The barrel: streaks die out before the lowest belly rather than banding it. */
     private static final double BELLY_BOTTOM = 0.05;

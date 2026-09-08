@@ -5,7 +5,7 @@
   "phase": "magical",
   "priority": 258,
   "rarity": "RARE",
-  "blurb": "The back third of the horse taken as one continuous pale field, its front edge running top to bottom in three to six rounded lobes.",
+  "blurb": "The back third of the horse taken as one continuous pale field, its front edge running top to bottom in three to six evenly spaced rounded lobes.",
   "alleles": [
     {
       "token": "Wav",
@@ -34,13 +34,23 @@
       "name": "reach",
       "min": 0.22,
       "max": 0.46
+    },
+    {
+      "name": "lobe",
+      "min": 2.4,
+      "max": 4.6
+    },
+    {
+      "name": "swell",
+      "min": 0.05,
+      "max": 0.1
     }
   ],
   "expressions": [
     {
       "id": "white",
       "name": "Waves",
-      "description": "One unbroken field over the hip, thigh, back of the flank and gaskin - a fifth to two-fifths of the horse. Its front edge runs dorso-ventrally and is modulated into three to six rounded lobes; the crests of the lobes are crisp and the troughs between them are softer. It reaches the topline or stops just below it, and runs down as far as the gaskin or the hock. A few detached lobes float a hand's breadth in front of the main edge.",
+      "description": "One unbroken field over the hip, thigh, back of the flank and gaskin - a fifth to two-fifths of the horse. Its front edge runs dorso-ventrally and is folded into three to six rounded lobes of even size and even spacing, which is what tells it apart from every other soft-edged field on a horse: this one repeats. It reaches the topline or stops just below it, and runs down as far as the gaskin or the hock. A few detached lobes float a hand's breadth in front of the main edge.",
       "when": [
         "Wav/Wav",
         "Wav/Wac",
@@ -48,28 +58,23 @@
       ],
       "layers": [
         {
-          "name": "the caudal field, with a lobed front edge",
+          "name": "the caudal field, its front edge folded into lobes",
           "masks": [
             {
-              "type": "AXIS",
-              "parts": [
-                "BODY"
-              ],
-              "axis": "X",
-              "space": "part",
-              "from": 0.0,
-              "to": "$reach",
-              "softness": 0.16
-            },
-            {
-              "type": "NOISE",
+              "type": "WAVES",
               "parts": [
                 "BODY"
               ],
               "seed": "$lobeSeed",
-              "scale": 4.5,
-              "low": 0.35,
-              "high": 1.5
+              "axis": "Y",
+              "across": "X",
+              "shape": "sine",
+              "space": "part",
+              "from": -0.3,
+              "to": "$reach",
+              "wavelength": "$lobe",
+              "amplitude": "$swell",
+              "softness": 0.05
             },
             {
               "type": "AXIS",
@@ -78,10 +83,45 @@
               ],
               "axis": "Y",
               "space": "part",
-              "from": 0.45,
+              "from": 0.4,
               "to": 1.0,
               "softness": 0.2,
               "combine": "MAX"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#f7f2e6",
+            "strength": 84
+          }
+        },
+        {
+          "name": "a few detached lobes floating in front of the edge",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY"
+              ],
+              "seed": "$lobeSeed",
+              "spacing": 4.0,
+              "radius": 1.5,
+              "vary": 0.5,
+              "chance": 0.3,
+              "stretch": 1.6,
+              "axis": "Y",
+              "softness": 0.25
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "space": "part",
+              "from": "$reach",
+              "to": 0.62,
+              "softness": 0.12
             }
           ],
           "op": {
@@ -101,28 +141,23 @@
       },
       "layers": [
         {
-          "name": "the caudal field, coloured",
+          "name": "the caudal field, its front edge folded into lobes, in colour",
           "masks": [
             {
-              "type": "AXIS",
-              "parts": [
-                "BODY"
-              ],
-              "axis": "X",
-              "space": "part",
-              "from": 0.0,
-              "to": "$reach",
-              "softness": 0.16
-            },
-            {
-              "type": "NOISE",
+              "type": "WAVES",
               "parts": [
                 "BODY"
               ],
               "seed": "$lobeSeed",
-              "scale": 4.5,
-              "low": 0.35,
-              "high": 1.5
+              "axis": "Y",
+              "across": "X",
+              "shape": "sine",
+              "space": "part",
+              "from": -0.3,
+              "to": "$reach",
+              "wavelength": "$lobe",
+              "amplitude": "$swell",
+              "softness": 0.05
             },
             {
               "type": "AXIS",
@@ -131,7 +166,7 @@
               ],
               "axis": "Y",
               "space": "part",
-              "from": 0.45,
+              "from": 0.4,
               "to": 1.0,
               "softness": 0.2,
               "combine": "MAX"
@@ -139,10 +174,47 @@
           ],
           "op": {
             "type": "TOWARD",
+            "strength": 84,
             "hue": "$hue",
-            "saturation": 0.75,
-            "lightness": 0.6,
-            "strength": 84
+            "saturation": 0.8,
+            "lightness": 0.55
+          }
+        },
+        {
+          "name": "a few detached lobes floating in front of the edge, in colour",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY"
+              ],
+              "seed": "$lobeSeed",
+              "spacing": 4.0,
+              "radius": 1.5,
+              "vary": 0.5,
+              "chance": 0.3,
+              "stretch": 1.6,
+              "axis": "Y",
+              "softness": 0.25
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "space": "part",
+              "from": "$reach",
+              "to": 0.62,
+              "softness": 0.12
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 84,
+            "hue": "$hue",
+            "saturation": 0.8,
+            "lightness": 0.55
           }
         }
       ]

@@ -19,6 +19,7 @@ import com.example.horsegenetics.common.genetics.genes.GreyGene;
 import com.example.horsegenetics.common.genetics.genes.Gys1Gene;
 import com.example.horsegenetics.common.genetics.genes.HealerGene;
 import com.example.horsegenetics.common.genetics.genes.Hmga2Gene;
+import com.example.horsegenetics.common.genetics.genes.HuedPangareGene;
 import com.example.horsegenetics.common.genetics.genes.KitGene;
 import com.example.horsegenetics.common.genetics.genes.LcorlGene;
 import com.example.horsegenetics.common.genetics.genes.LeopardGene;
@@ -181,6 +182,12 @@ public final class Genes {
      * are the two halves of countershading, and they sit next to each other.
      */
     public static final PangareGene PANGARE = new PangareGene();
+    /**
+     * <b>Hued pangare</b> - {@link PangareGene}'s own region map painted in a
+     * colour rather than washed out to cream. Registered next to it because it
+     * shares its painter: see {@link HuedPangareGene}.
+     */
+    public static final HuedPangareGene HUED_PANGARE = new HuedPangareGene();
     public static final MushroomGene MUSHROOM = new MushroomGene();
     /**
      * Natural zebra striping - the real-world half of the zebra pair, and
@@ -374,7 +381,8 @@ public final class Genes {
     /** The hand-written genes. Order here is irrelevant - the registry sorts. */
     private static final List<Gene> BUILTINS = List.of(
             SEX, DIET, EXTENSION, AGOUTI, SHADE, CHAMPAGNE, GREY, MATP,
-            MAGIC_ZEBRA, PINK_HAIR, DUN, SILVER, FLAXEN, SOOTY, PANGARE, MUSHROOM, BRINDLE, TIGER_EYE,
+            MAGIC_ZEBRA, PINK_HAIR, DUN, SILVER, FLAXEN, SOOTY, PANGARE, HUED_PANGARE,
+            MUSHROOM, BRINDLE, TIGER_EYE,
             NATURAL_ZEBRA, ROAN, RABICANO, TOBIANO,
             LEOPARD, EDNRB, KIT, MANCHADO, MITF, PAX3,
             MILK, BODY_SIZE, MAGIC_SPEED, MAGIC_HEALTH, MAGIC_JUMP,

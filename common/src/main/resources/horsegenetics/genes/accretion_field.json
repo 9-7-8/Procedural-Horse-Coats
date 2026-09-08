@@ -1,0 +1,32 @@
+{
+  "format": 3,
+  "key": "horsegenetics.accretion_field",
+  "name": "Accretion Field",
+  "phase": "magical",
+  "priority": 274,
+  "rarity": "COMMON",
+  "blurb": "Half of Accretion, and the half that decides its shape: whether the pale field takes the topline or the underside. On its own it paints nothing at all, and every horse alive carries it.",
+  "alleles": [
+    {
+      "token": "Atp",
+      "label": "Topline field (Atp)"
+    },
+    {
+      "token": "Abt",
+      "label": "Underside field (Abt)"
+    }
+  ],
+  "expressions": [
+    {
+      "id": "field",
+      "name": "Wild type",
+      "description": "Nothing, on its own - and that is the whole of what this locus does by itself. It exists to be read by Accretion, which asks it which way round to draw: one copy of Atp puts the pale field on the topline, and a horse with none of it takes the underside. A horse carrying no Accretion at all still carries this, still breeds it, and still passes it on - which is why a pair of underside-marked parents can throw a topline foal without either of them ever having shown one.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Atp/Atp": 3.0,
+    "Atp/Abt": 23.0,
+    "Abt/Abt": 74.0
+  }
+}

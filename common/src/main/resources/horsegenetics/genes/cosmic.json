@@ -5,7 +5,7 @@
   "phase": "magical",
   "priority": 250,
   "rarity": "UNCOMMON",
-  "blurb": "A blanket anchored on the topline and hanging down the sides, filled with a starfield - and, on a well-marked horse, a planet or two with a ring round it.",
+  "blurb": "A starfield hung off the topline and the crest, running the whole length of the neck and barrel and fading out down the sides with no edge anywhere - and, on a well-marked horse, a planet or two with a ring round it.",
   "alleles": [
     {
       "token": "Cs",
@@ -45,7 +45,7 @@
     {
       "id": "cosmic",
       "name": "Cosmic",
-      "description": "The blanket starts at the dorsal midline and spreads down and out from it, one continuous region with no holes in it and no islands off it. It runs withers to croup and stops above the elbow and stifle - never onto a limb, never onto a hoof. Its lower boundary is lobed and reasonably firm, not a long fade. Inside are stars, thickest near the topline and thinning toward the edge, with a planet or a spiral galaxy on a heavily marked horse. Where the blanket meets the mane or the tail base the colour runs on into the hair, deepening toward the tips.",
+      "description": "The blanket starts at the dorsal midline and spreads down and out from it, one continuous region with no holes in it and no islands off it. It runs from the poll to the croup - the whole length of the neck as well as the barrel, hanging off the crest the way it hangs off the back - and stops above the elbow and stifle, never onto a limb, never onto a hoof. Its lower boundary is a long soft fade rather than a line: there is no edge on this marking anywhere. Inside are stars, thickest near the topline and thinning toward the edge, with a planet or a spiral galaxy on a heavily marked horse. Where the blanket meets the mane or the tail base the colour runs on into the hair, deepening toward the tips.",
       "when": [
         "Cs/Cs",
         "Cs/n"
@@ -57,14 +57,29 @@
             {
               "type": "AXIS",
               "parts": [
-                "BODY",
-                "NECK"
+                "BODY"
               ],
               "axis": "Y",
               "space": "part",
               "from": "$drop",
               "to": 1.0,
-              "softness": 0.1
+              "softness": 0.45
+            },
+            {
+              "type": "WAVES",
+              "parts": [
+                "NECK"
+              ],
+              "axis": "X",
+              "across": "Y",
+              "space": "units",
+              "shape": "saw",
+              "wavelength": 40.0,
+              "amplitude": 11.54,
+              "from": 14.0,
+              "to": 40.0,
+              "softness": 3.2,
+              "combine": "MAX"
             },
             {
               "type": "PATCHES",
@@ -75,7 +90,7 @@
               "seed": "$fieldSeed",
               "scale": 7.0,
               "threshold": 0.35,
-              "softness": 0.1,
+              "softness": 0.3,
               "combine": "MAX"
             },
             {
@@ -86,9 +101,9 @@
               ],
               "axis": "Y",
               "space": "part",
-              "from": 0.22,
+              "from": 0.2,
               "to": 1.0,
-              "softness": 0.12,
+              "softness": 0.35,
               "combine": "MIN"
             }
           ],
@@ -124,14 +139,29 @@
             {
               "type": "AXIS",
               "parts": [
-                "BODY",
-                "NECK"
+                "BODY"
               ],
               "axis": "Y",
               "space": "part",
-              "from": 0.4,
+              "from": 0.35,
               "to": 1.0,
-              "softness": 0.45
+              "softness": 0.5
+            },
+            {
+              "type": "WAVES",
+              "parts": [
+                "NECK"
+              ],
+              "axis": "X",
+              "across": "Y",
+              "space": "units",
+              "shape": "saw",
+              "wavelength": 40.0,
+              "amplitude": 11.54,
+              "from": 15.0,
+              "to": 40.0,
+              "softness": 3.0,
+              "combine": "MAX"
             },
             {
               "type": "PATCHES",

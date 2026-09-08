@@ -5,7 +5,7 @@
   "phase": "magical",
   "priority": 211,
   "rarity": "UNCOMMON",
-  "blurb": "Blocky straight-sided zones outlined in a bright colour and filled flat with white - architecture rather than marking - with a band round each leg and the hair going white where a zone reaches it.",
+  "blurb": "Blocky straight-sided zones outlined in a bright colour and filled flat with white - architecture rather than marking - running down onto the legs, with a level band round each one.",
   "alleles": [
     {
       "token": "Yal",
@@ -45,7 +45,7 @@
     {
       "id": "white",
       "name": "Yalia",
-      "description": "Zones with straight edges and sharp corners - angular and blocky, never curved or organic - each drawn round in one colour and filled with flat white that barely varies. A mask across the face, a band along the neck, big patches on the shoulder, ribcage and hindquarter. Bands run round all four legs, perfectly level and sharply bounded. Where a zone reaches the mane or tail the hair inside it goes stark white too. It hides any other white pattern the horse carries, there is no regular mane striping, and the hooves take the outline colour. Nothing about it feathers or fades.",
+      "description": "Zones with straight edges and sharp corners - angular and blocky, never curved or organic - each drawn round in one colour and filled with flat white that barely varies. A mask across the face, a band along the neck, big patches on the shoulder, ribcage and hindquarter, and the same zones continuing down the legs to the knee and hock rather than stopping at the barrel. Bands run round all four legs as well, perfectly level and sharply bounded. Where a zone reaches the mane or tail the hair inside it goes stark white too. It hides any other white pattern the horse carries, there is no regular mane striping, and the hooves take the outline colour. Nothing about it feathers or fades.",
       "when": [
         "Yal/Yal",
         "Yal/Ylc",
@@ -61,7 +61,8 @@
                 "BODY",
                 "NECK",
                 "HEAD",
-                "HAIR"
+                "HAIR",
+                "LEGS"
               ],
               "seed": "$zoneSeed",
               "scale": "$zoneScale",
@@ -84,7 +85,8 @@
                 "BODY",
                 "NECK",
                 "HEAD",
-                "HAIR"
+                "HAIR",
+                "LEGS"
               ],
               "seed": "$zoneSeed",
               "scale": "$zoneScale",
@@ -97,7 +99,8 @@
                 "BODY",
                 "NECK",
                 "HEAD",
-                "HAIR"
+                "HAIR",
+                "LEGS"
               ],
               "seed": "$zoneSeed",
               "scale": "$zoneScale",
@@ -212,7 +215,8 @@
                 "BODY",
                 "NECK",
                 "HEAD",
-                "HAIR"
+                "HAIR",
+                "LEGS"
               ],
               "seed": "$zoneSeed",
               "scale": "$zoneScale",
@@ -237,7 +241,8 @@
                 "BODY",
                 "NECK",
                 "HEAD",
-                "HAIR"
+                "HAIR",
+                "LEGS"
               ],
               "seed": "$zoneSeed",
               "scale": "$zoneScale",
@@ -250,7 +255,8 @@
                 "BODY",
                 "NECK",
                 "HEAD",
-                "HAIR"
+                "HAIR",
+                "LEGS"
               ],
               "seed": "$zoneSeed",
               "scale": "$zoneScale",

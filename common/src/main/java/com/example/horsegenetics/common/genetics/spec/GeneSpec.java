@@ -161,6 +161,7 @@ public record GeneSpec(
             boolean masks,
             boolean deterministic,
             List<String> combinations,
+            List<LocusCondition> needs,
             List<Layer> layers,
             List<GeneAbility> abilities) {
 
@@ -168,7 +169,31 @@ public record GeneSpec(
         public boolean isCatchAll() {
             return combinations.isEmpty();
         }
+
+        /** Does this entry only apply when a <i>second</i> locus says so? */
+        public boolean conditional() {
+            return !needs.isEmpty();
+        }
     }
+
+    /**
+     * A requirement on <b>another gene</b> - what makes a data-driven gene
+     * polygenic.
+     *
+     * <p>{@code gene} is another gene's {@code key()}, and {@code copies} maps
+     * one of <i>its</i> allele tokens to how many copies the horse must carry
+     * for this expression to be the one. Every entry has to hold.
+     *
+     * <p>The mechanism it drives is not new - {@code Gene.expressionIn} and
+     * {@code Gene.coatDependsOn} have existed for the leopard complex reading
+     * PATN1 and PATN2 since long before the file format did. All this adds is a
+     * way to say the same thing without writing a class, and it is deliberately
+     * the <i>narrow</i> version of that: a count at another locus, and nothing
+     * conditional on the phenotype there. Accretion is the gene built on it -
+     * one locus decides whether the pale field exists and what colour it is,
+     * and a second decides whether it is the topline or the underside.
+     */
+    public record LocusCondition(String gene, Map<String, Integer> copies) {}
 
     /**
      * How common one allele combination is among founder horses, as a
@@ -317,7 +342,31 @@ public record GeneSpec(
          */
         STROKES,
         /** One closed <b>spiral</b> per named part - the filigree / circuit figure. */
-        SPIRAL
+        SPIRAL,
+        /**
+         * A band whose edges are displaced by a <b>sine</b> running along
+         * another axis - the one shape in the vocabulary that is smooth on
+         * purpose.
+         *
+         * <p>Everything else that curves here curves because noise bent it, and
+         * noise never repeats. A wave does: a lobed boundary of three to six
+         * even scallops, or a string of lights that rises and falls the same
+         * way twice, is a periodic function and reads wrong when it is faked
+         * with a ridge. Set {@code spacing} to repeat the band and it draws
+         * parallel ribbons instead of one edge.
+         */
+        WAVES,
+        /**
+         * <b>Polygons that tile</b>, each filled solid, separated by a channel
+         * of even width - {@code BodyNoise.cellEdge}. A giraffe, a cracked
+         * glaze, a dry lake bed.
+         *
+         * <p>{@link #DAPPLES} and {@link #SPOTS} both draw round marks, however
+         * they are pushed, because both measure to a cell's centre. This
+         * measures to the wall between two cells, which is what makes the edges
+         * straight and the corners meet three at a time.
+         */
+        CRACKLE
     }
 
     // ------------------------------------------------------------------

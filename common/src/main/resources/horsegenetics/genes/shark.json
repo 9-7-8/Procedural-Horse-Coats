@@ -5,7 +5,7 @@
   "phase": "magical",
   "priority": 259,
   "rarity": "RARE",
-  "blurb": "A single fin-shaped pale field standing on the withers, leaning forward, with a tapering band running on up the crest to the poll.",
+  "blurb": "A single fin-shaped pale field standing on the withers and on a pale collar right round the base of the neck, with a tapering band running on up the crest to the poll.",
   "alleles": [
     {
       "token": "Shk",
@@ -34,13 +34,18 @@
       "name": "height",
       "min": 0.4,
       "max": 0.72
+    },
+    {
+      "name": "collar",
+      "min": 25.0,
+      "max": 28.0
     }
   ],
   "expressions": [
     {
       "id": "white",
       "name": "Shark",
-      "description": "One field, and only one: a sickle standing on the topline over the withers, its base a hand's span or two long, its apex set forward of the middle of that base, its back edge scooped hollow and its front edge straight or slightly bellied. Crisp along the top and the back edge, softer underneath. Most sharks also carry a narrow band running forward along the crest from the apex to the poll.",
+      "description": "One field, and only one: a sickle standing on the topline over the withers, its apex set forward of the middle of its base, its back edge scooped hollow and its front edge straight or slightly bellied. It stands on the whole base of the neck, which goes pale right round the circumference where the neck meets the chest - that collar is part of the marking, not a separate one. Crisp along the top and the back edge, softer underneath. Most sharks also carry a narrow band running forward along the crest from the apex to the poll.",
       "when": [
         "Shk/Shk",
         "Shk/Shc",
@@ -76,6 +81,37 @@
               "type": "NOISE",
               "parts": [
                 "BODY"
+              ],
+              "seed": "$finSeed",
+              "scale": 5.0,
+              "low": 0.6,
+              "high": 1.3
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#f4efe2",
+            "strength": 88
+          }
+        },
+        {
+          "name": "the whole base of the neck, which the fin stands on",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "NECK"
+              ],
+              "axis": "X",
+              "space": "units",
+              "from": 0.0,
+              "to": "$collar",
+              "softness": 1.4
+            },
+            {
+              "type": "NOISE",
+              "parts": [
+                "NECK"
               ],
               "seed": "$finSeed",
               "scale": 5.0,
@@ -129,7 +165,7 @@
       },
       "layers": [
         {
-          "name": "the fin, coloured",
+          "name": "the fin on the withers, in colour",
           "masks": [
             {
               "type": "AXIS",
@@ -166,14 +202,47 @@
           ],
           "op": {
             "type": "TOWARD",
+            "strength": 88,
             "hue": "$hue",
-            "saturation": 0.75,
-            "lightness": 0.6,
-            "strength": 88
+            "saturation": 0.8,
+            "lightness": 0.55
           }
         },
         {
-          "name": "the crest band, coloured",
+          "name": "the whole base of the neck, which the fin stands on, in colour",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "NECK"
+              ],
+              "axis": "X",
+              "space": "units",
+              "from": 0.0,
+              "to": "$collar",
+              "softness": 1.4
+            },
+            {
+              "type": "NOISE",
+              "parts": [
+                "NECK"
+              ],
+              "seed": "$finSeed",
+              "scale": 5.0,
+              "low": 0.6,
+              "high": 1.3
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 88,
+            "hue": "$hue",
+            "saturation": 0.8,
+            "lightness": 0.55
+          }
+        },
+        {
+          "name": "the band on up the crest, in colour",
           "masks": [
             {
               "type": "CENTERLINE",
@@ -197,10 +266,10 @@
           ],
           "op": {
             "type": "TOWARD",
+            "strength": 80,
             "hue": "$hue",
-            "saturation": 0.75,
-            "lightness": 0.6,
-            "strength": 80
+            "saturation": 0.8,
+            "lightness": 0.55
           }
         }
       ]

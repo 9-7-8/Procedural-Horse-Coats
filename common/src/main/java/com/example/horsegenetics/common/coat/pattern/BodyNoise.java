@@ -54,6 +54,53 @@ public final class BodyNoise {
     }
 
     /**
+     * Distance from {@code (x, y, z)} to the nearest <b>wall</b> between two
+     * cells of the jittered lattice, in lattice units - near 0 on a cell
+     * boundary and largest at a cell's middle.
+     *
+     * <p>{@link #cellDistance} measures to the nearest <i>centre</i>, which
+     * draws round blobs however hard it is pushed. A giraffe, a cracked glaze
+     * and a dry lake bed are the other shape entirely: <b>polygons that tile</b>,
+     * each one filled solid, separated by a narrow channel of even width. That
+     * is a function of the boundary rather than of the centre, so it needs the
+     * two nearest points and not just the one: half the difference of their
+     * distances is, to a good approximation, the distance to the plane that
+     * bisects them.
+     *
+     * <p>Approximate rather than exact - the true Voronoi edge needs the
+     * bisector's normal as well - and the error shows only within a texel of a
+     * three-cell corner, where the channel pinches slightly. Cheap, and the
+     * pinch reads as a drawn junction rather than as a bug.
+     */
+    public static double cellEdge(long seed, double x, double y, double z) {
+        int cx = floor(x);
+        int cy = floor(y);
+        int cz = floor(z);
+        double best = Double.MAX_VALUE;
+        double second = Double.MAX_VALUE;
+        for (int dx = -1; dx <= 1; dx++) {
+            for (int dy = -1; dy <= 1; dy++) {
+                for (int dz = -1; dz <= 1; dz++) {
+                    int lx = cx + dx;
+                    int ly = cy + dy;
+                    int lz = cz + dz;
+                    double px = lx + hash01(seed, lx, ly, lz, 1);
+                    double py = ly + hash01(seed, lx, ly, lz, 2);
+                    double pz = lz + hash01(seed, lx, ly, lz, 3);
+                    double d = (px - x) * (px - x) + (py - y) * (py - y) + (pz - z) * (pz - z);
+                    if (d < best) {
+                        second = best;
+                        best = d;
+                    } else if (d < second) {
+                        second = d;
+                    }
+                }
+            }
+        }
+        return (Math.sqrt(second) - Math.sqrt(best)) / 2.0;
+    }
+
+    /**
      * The nearest jittered lattice point to {@code (x, y, z)}, and two numbers
      * drawn off <b>that point</b> rather than off the sample position.
      *

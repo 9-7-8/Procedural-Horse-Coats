@@ -244,12 +244,22 @@ window.HG = window.HG || {};
         return clamp01(low + (get(values, mask.high, 1, legIndex) - low) * v3);
       }
       case "PIGMENT": {
-        var red = coat.redAt(px, py), black = coat.blackAt(px, py);
         var channel = mask.channel || "darkness";
-        var reading = channel === "red" ? red
-          : channel === "black" ? black
-            : channel === "total" ? (red + black) / 2
-              : clamp01(0.55 * red + 0.95 * black);
+        var reading = pigmentReading(coat, channel, px, py);
+        var spread = get(values, mask.spread, 0, legIndex);
+        if (spread > 0) {
+          // The LOWEST reading in the disc, so pale grows outward - see the
+          // Java. Without it "only beside the horse's own white" is unaskable.
+          var r = Math.round(spread * geo.TEXELS_PER_UNIT), rr = r * r;
+          for (var qy = py - r; qy <= py + r; qy++) {
+            for (var qx = px - r; qx <= px + r; qx++) {
+              var ddx = qx - px, ddy = qy - py;
+              if (ddx * ddx + ddy * ddy > rr) continue;
+              if (qx < 0 || qy < 0 || qx >= geo.SHEET_SIZE || qy >= geo.SHEET_SIZE) continue;
+              reading = Math.min(reading, pigmentReading(coat, channel, qx, qy));
+            }
+          }
+        }
         return smoothstep(get(values, mask.from, 0.5, legIndex),
           get(values, mask.to, 1, legIndex), reading);
       }
@@ -265,6 +275,7 @@ window.HG = window.HG || {};
         if (c4.pick >= get(values, mask.chance, 1.0, legIndex)) return 0;
         var vary4 = clamp01(get(values, mask.vary, 0.5, legIndex));
         var rad4 = get(values, mask.radius, 0.9, legIndex) * (1 - vary4 + 2 * vary4 * c4.size);
+        if ((mask.shape || "round") === "heart") rad4 *= heartRadius(Math.atan2(c4.dy, c4.dx));
         var soft4 = Math.max(1e-6, get(values, mask.softness, 0.25, legIndex));
         return 1 - smoothstep(rad4, rad4 + soft4, c4.distance * spacing4);
       }
@@ -338,9 +349,83 @@ window.HG = window.HG || {};
         var soft8 = Math.max(1e-6, get(values, mask.softness, 0.2, legIndex));
         return 1 - smoothstep(half8, half8 + soft8, nearest);
       }
+      case "WAVES": {
+        var s9 = getSeed(values, mask.seed, seedBase);
+        var along = (mask.axis || "X").toUpperCase();
+        var across = (mask.across || "Y").toUpperCase();
+        var travel = along === "X" ? point.x : along === "Y" ? point.y : point.z;
+        var coord9 = across === "X" ? point.x : across === "Y" ? point.y : point.z;
+        var space9 = mask.space || "part";
+        var t9 = space9 === "body" ? normalise(coord9, geo.bodyBounds(skin), across)
+          : space9 === "units" ? coord9
+            : normalise(coord9, geo.bounds(skin, part), across);
+        var shape9 = mask.shape || "sine";
+        var lambda = Math.max(0.05, get(values, mask.wavelength, 8.0, legIndex));
+        var amp = get(values, mask.amplitude, 0.5, legIndex);
+        var from9 = get(values, mask.from, 0.0, legIndex);
+        var to9 = get(values, mask.to, 1.0, legIndex);
+        var soft9 = get(values, mask.softness, 0.15, legIndex);
+        var pitch9 = get(values, mask.spacing, 0.0, legIndex);
+        if (pitch9 <= 0) return band(t9 - amp * waveform(shape9, travel / lambda), from9, to9, soft9);
+        var ph = get(values, mask.phase, 0.0, legIndex);
+        var mid9 = (from9 + to9) / 2;
+        var lane = Math.round((t9 - mid9) / pitch9);
+        var best9 = 0;
+        for (var n9 = lane - 1; n9 <= lane + 1; n9++) {
+          var jitter = ph === 0 ? 0
+            : ph * noise.value(noise.xor(s9, noise.u64(0, 0x77)), n9, 0.25, 0.25);
+          var centre = n9 * pitch9 + amp * waveform(shape9, travel / lambda + jitter);
+          best9 = Math.max(best9, band(t9 - centre, from9, to9, soft9));
+        }
+        return best9;
+      }
+      case "CRACKLE": {
+        var sc = getSeed(values, mask.seed, seedBase);
+        var scaleC = Math.max(0.05, get(values, mask.scale, 5.0, legIndex));
+        var warpC = get(values, mask.warp, 0.35, legIndex);
+        var wx = point.x / scaleC, wy = point.y / scaleC, wz = point.z / scaleC;
+        if (warpC !== 0) {
+          var nC = noise.value(noise.xor(sc, noise.u64(0, 0x2C)), wx / 3, wy / 3, wz / 3);
+          var mC = noise.value(noise.xor(sc, noise.u64(0, 0x2D)), wz / 3, wx / 3, wy / 3);
+          wx += (nC - 0.5) * warpC;
+          wy += (mC - 0.5) * warpC;
+          wz += (nC - mC) * warpC;
+        }
+        var chanceC = get(values, mask.chance, 1.0, legIndex);
+        if (chanceC < 1 && noise.cell(sc, wx, wy, wz).pick >= chanceC) return 0;
+        var halfC = Math.max(1e-4, get(values, mask.gap, 0.5, legIndex)) / 2;
+        var softC = Math.max(1e-6, get(values, mask.softness, 0.08, legIndex));
+        return smoothstep(halfC, halfC + softC, noise.cellEdge(sc, wx, wy, wz) * scaleC);
+      }
       default:
         return 0;
     }
+  }
+
+  /** One cycle of a WAVES displacement, in [-1, 1] - the port of SpecPainter.waveform. */
+  function waveform(shape, turns) {
+    var t = turns - Math.floor(turns);
+    if (shape === "triangle") return t < 0.25 ? 4 * t : (t < 0.75 ? 2 - 4 * t : 4 * t - 4);
+    if (shape === "saw") return 2 * t - 1;
+    return Math.sin(2 * Math.PI * turns);
+  }
+
+  /** One channel of the coat, as a PIGMENT mask reads it. */
+  function pigmentReading(coat, channel, px, py) {
+    var red = coat.redAt(px, py), black = coat.blackAt(px, py);
+    return channel === "red" ? red
+      : channel === "black" ? black
+        : channel === "total" ? (red + black) / 2
+          : clamp01(0.55 * red + 0.95 * black);
+  }
+
+  /**
+   * The radius of a heart at this angle, as a multiple of the round radius -
+   * the port of SpecPainter.heartRadius.
+   */
+  function heartRadius(theta) {
+    var sin = Math.sin(theta), cos = Math.cos(theta);
+    return (2 - 2 * sin + sin * Math.sqrt(Math.abs(cos)) / (sin + 1.4)) / 2.4;
   }
 
   // NOTE: the game refuses a layer whose FIRST mask combines by MAX or ADD -
@@ -362,9 +447,20 @@ window.HG = window.HG || {};
         case "SUBTRACT": acc = clamp01(acc - c); break;
         default: acc = acc * c;
       }
-      if (acc <= 0 && (mask.combine || "MULTIPLY") === "MULTIPLY") return 0;
+      // Only bail out when nothing left can put coverage back - see the Java.
+      // The old test threw away every union of masks.
+      if (acc <= 0 && cannotRise(masks, i + 1)) return 0;
     }
     return clamp01(acc);
+  }
+
+  /** Can any mask from `from` on raise the accumulator above zero? */
+  function cannotRise(masks, from) {
+    for (var i = from; i < masks.length; i++) {
+      var c = masks[i].combine || "MULTIPLY";
+      if (c === "MAX" || c === "ADD") return false;
+    }
+    return true;
   }
 
   // ---- ops -------------------------------------------------------------

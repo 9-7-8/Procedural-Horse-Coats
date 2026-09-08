@@ -5,7 +5,7 @@
   "phase": "magical",
   "priority": 262,
   "rarity": "COMMON",
-  "blurb": "A cloud of colour lying over the trunk with no edge anywhere, curdled into stronger and weaker cells so the coat reads through it in places.",
+  "blurb": "A cloud of colour lying over the trunk and running out down the legs with no edge anywhere, curdled into stronger and weaker cells so the coat reads through it in places.",
   "alleles": [
     {
       "token": "Nim",
@@ -36,7 +36,7 @@
     {
       "id": "nimbus",
       "name": "Nimbus",
-      "description": "Half to three-quarters of the horse, concentrated on the neck, shoulder, barrel and hindquarter and falling away toward the head, the legs and the topline. There is no boundary to find: the field simply runs out over a long distance. Inside it the saturation is uneven, gathered into cells a hand's span or two across with weaker channels between them where the coat shows through at a third to two-thirds strength. The whole thing is turbulent - nothing about it repeats, and nothing about it lines up with the horse.",
+      "description": "Half to three-quarters of the horse, concentrated on the neck, shoulder, barrel and hindquarter and falling away toward the head and the topline - and running on down the legs rather than stopping at the elbow, thinning the whole way and out long before the hoof. There is no boundary to find anywhere on it: the field simply runs out over a long distance. Inside it the saturation is uneven, gathered into cells a hand's span or two across with weaker channels between them where the coat shows through at a third to two-thirds strength. The whole thing is turbulent - nothing about it repeats, and nothing about it lines up with the horse.",
       "when": [
         "Nim/Nim",
         "Nim/n"
@@ -67,6 +67,39 @@
               "from": 0.05,
               "to": 0.85,
               "softness": 0.5
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.8,
+            "lightness": 0.45,
+            "strength": 90
+          }
+        },
+        {
+          "name": "the cloud carrying on down the legs, thinning as it goes",
+          "masks": [
+            {
+              "type": "NOISE",
+              "parts": [
+                "LEGS"
+              ],
+              "seed": "$cloudSeed",
+              "scale": 9.0,
+              "low": 0.1,
+              "high": "$reach"
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "LEGS"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.2,
+              "to": 1.3,
+              "softness": 0.55
             }
           ],
           "op": {

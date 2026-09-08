@@ -711,6 +711,7 @@ public final class GeneWikiTool {
                     .append(combos.isEmpty()
                             ? "anything else"
                             : String.join(" &middot; ", combos))
+                    .append(needsNote(e))
                     .append("</td></tr>\n");
         }
         sb.append("</tbody>\n</table>\n</div>\n\n");
@@ -770,9 +771,23 @@ public final class GeneWikiTool {
         return sb.toString();
     }
 
+    /**
+     * The outcome a combination lands on <b>at this locus alone</b>.
+     *
+     * <p>Entries carrying {@code needs} are skipped, because the founder table
+     * this feeds is a table about one locus: a row saying "Acr/Acr - Top
+     * Accretion, 0.006%" would be doubly wrong, since only about a quarter of
+     * those horses are top ones and the other locus's own frequencies are not in
+     * this table at all. The outcome list above the founder table names every
+     * conditional entry and says what it depends on, which is where a reader
+     * finds out that the row underneath is the <i>default</i> half of a pair.
+     */
     private static GeneSpec.ExpressionSpec expressionFor(SpecGene gene, String combination) {
         GeneSpec.ExpressionSpec catchAll = null;
         for (GeneSpec.ExpressionSpec e : gene.spec().expressions()) {
+            if (e.conditional()) {
+                continue;
+            }
             if (e.isCatchAll()) {
                 catchAll = e;
             } else if (e.combinations().contains(combination)) {
@@ -780,6 +795,29 @@ public final class GeneWikiTool {
             }
         }
         return catchAll;
+    }
+
+    /**
+     * The " and X at Y" half of a conditional outcome's row - the whole of what
+     * a reader needs to know that this gene is two loci rather than one.
+     */
+    private static String needsNote(GeneSpec.ExpressionSpec e) {
+        if (!e.conditional()) {
+            return "";
+        }
+        StringBuilder sb = new StringBuilder();
+        for (GeneSpec.LocusCondition need : e.needs()) {
+            Gene other = Genes.byKeyOrNull(need.gene());
+            String name = other == null ? need.gene() : other.name();
+            String href = "gene-" + need.gene().substring(need.gene().indexOf('.') + 1)
+                    .replace('_', '-') + ".html";
+            for (Map.Entry<String, Integer> want : need.copies().entrySet()) {
+                sb.append(" <em>and</em> ").append(want.getValue() == 2 ? "two copies" : "a copy")
+                        .append(" of <code>").append(esc(want.getKey())).append("</code> at <a href=\"")
+                        .append(esc(href)).append("\">").append(esc(name)).append("</a>");
+            }
+        }
+        return sb.toString();
     }
 
     /**

@@ -197,6 +197,14 @@ public final class GeneSpecParser {
      * exactly one expression, counting at most one catch-all (an entry with no
      * {@code when}). A gap or an overlap is a load error - the whole value of
      * declaring the table is that it cannot quietly be wrong.
+     *
+     * <p>An entry carrying {@code needs} is exempt from the count, because it
+     * does not <i>claim</i> a combination - it <b>overrides</b> one, and only
+     * when a second locus agrees. Several may name the same combination; the
+     * first one in file order whose condition holds is the outcome, and the
+     * ordinary entry underneath is what a horse gets when none of them does. So
+     * the table stays total whatever the other locus says, which is the
+     * property worth keeping.
      */
     private static List<ExpressionSpec> readExpressions(Map<String, Object> root, boolean natural,
                                                         List<AlleleSpec> alleles, List<String> combinations,
@@ -216,7 +224,7 @@ public final class GeneSpecParser {
             String where = "expression " + (i + 1);
             Map<String, Object> o = asObject(raw.get(i), where);
             expectKeys(o, where, "id", "name", "description", "wildType", "masks", "varies",
-                    "when", "layers", "effects");
+                    "when", "needs", "layers", "effects");
 
             String id = string(o, "id", null);
             if (ids.contains(id)) {
@@ -245,7 +253,19 @@ public final class GeneSpecParser {
                         + " nothing - mark it \"wildType\": true if that is what you meant");
             }
 
+            List<GeneSpec.LocusCondition> needs = readNeeds(o, where);
             List<String> claims = readCombinations(o, id, alleles, combinations);
+            if (!needs.isEmpty()) {
+                if (claims.isEmpty()) {
+                    throw new IllegalArgumentException(where + ": has \"needs\" but no \"when\"."
+                            + " A conditional entry overrides named combinations; it cannot also be"
+                            + " the catch-all");
+                }
+                boolean varies0 = flag(o, "varies", !wildType && !layers.isEmpty() && !knobs.isEmpty());
+                out.add(new ExpressionSpec(id, string(o, "name", id), string(o, "description", ""),
+                        wildType, masks, !varies0, claims, needs, List.copyOf(layers), abilities));
+                continue;
+            }
             if (claims.isEmpty()) {
                 if (catchAllAt >= 0) {
                     throw new IllegalArgumentException("expressions '" + ids.get(catchAllAt) + "' and '" + id
@@ -263,7 +283,7 @@ public final class GeneSpecParser {
 
             boolean varies = flag(o, "varies", !wildType && !layers.isEmpty() && !knobs.isEmpty());
             out.add(new ExpressionSpec(id, string(o, "name", id), string(o, "description", ""),
-                    wildType, masks, !varies, claims, List.copyOf(layers), abilities));
+                    wildType, masks, !varies, claims, List.of(), List.copyOf(layers), abilities));
         }
 
         List<String> unclaimed = new ArrayList<>();
@@ -286,7 +306,44 @@ public final class GeneSpecParser {
             ExpressionSpec fallback = out.get(catchAllAt);
             out.set(catchAllAt, new ExpressionSpec(fallback.id(), fallback.name(), fallback.description(),
                     fallback.wildType(), fallback.masks(), fallback.deterministic(),
-                    List.copyOf(unclaimed), fallback.layers(), fallback.abilities()));
+                    List.copyOf(unclaimed), fallback.needs(), fallback.layers(), fallback.abilities()));
+        }
+        return List.copyOf(out);
+    }
+
+    /**
+     * An expression's {@code needs}: {@code {"<gene key>": {"<token>": copies}}}.
+     *
+     * <p>The other gene's tokens are <b>not</b> checked here, and cannot be:
+     * gene files load in an order nobody controls, and the gene named may not
+     * be registered yet - or at all, if it lives in another mod. A token that
+     * never resolves simply never matches, which is the same outcome as the
+     * gene being absent and is the behaviour a soft dependency wants.
+     */
+    private static List<GeneSpec.LocusCondition> readNeeds(Map<String, Object> o, String where) {
+        Object raw = o.get("needs");
+        if (raw == null) {
+            return List.of();
+        }
+        Map<String, Object> byGene = asObject(raw, where + " needs");
+        List<GeneSpec.LocusCondition> out = new ArrayList<>();
+        for (Map.Entry<String, Object> entry : byGene.entrySet()) {
+            String w = where + " needs '" + entry.getKey() + "'";
+            Map<String, Object> counts = asObject(entry.getValue(), w);
+            if (counts.isEmpty()) {
+                throw new IllegalArgumentException(w + ": name at least one allele token and how many"
+                        + " copies of it the horse has to carry");
+            }
+            Map<String, Integer> copies = new LinkedHashMap<>();
+            for (Map.Entry<String, Object> c : counts.entrySet()) {
+                int n = (int) number(counts, c.getKey(), 0);
+                if (n < 1 || n > 2) {
+                    throw new IllegalArgumentException(w + " '" + c.getKey() + "': a horse carries one or"
+                            + " two copies of an allele, not " + n);
+                }
+                copies.put(c.getKey(), n);
+            }
+            out.add(new GeneSpec.LocusCondition(entry.getKey(), Map.copyOf(copies)));
         }
         return List.copyOf(out);
     }

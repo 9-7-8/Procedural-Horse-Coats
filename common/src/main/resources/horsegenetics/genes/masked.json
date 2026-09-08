@@ -5,7 +5,7 @@
   "phase": "magical",
   "priority": 252,
   "rarity": "UNCOMMON",
-  "blurb": "A hard-edged dark mask over the top of the head and down the crest, broken by pointed light streaks along the neck, with the far half of the tail dark to match.",
+  "blurb": "A hard-edged dark mask over the whole head and down the crest, broken by pointed light streaks along the neck, with the far half of the tail dark to match.",
   "alleles": [
     {
       "token": "Msk",
@@ -31,7 +31,7 @@
     {
       "id": "full",
       "name": "Masked",
-      "description": "Dark over the forehead, poll, orbits and both surfaces of both ears, cut off across the cheekbone so the muzzle and lower jaw keep the coat. The field runs back along the crest, dips lowest at the mid-neck and rises again at the withers, and stops there - the barrel, flank and legs are untouched. Four to ten light streaks run front to back through the neck field, tapering to points at both ends and irregularly spaced, and they are not mirrored side to side. The far half or two-thirds of the tail is dark, cut square across.",
+      "description": "Dark over the whole head - forehead, poll, orbits, cheeks and jaw, carried down to the bottom of the head and onto the muzzle, with both surfaces of both ears to match. The field runs back along the crest, dips lowest at the mid-neck and rises again at the withers, and stops there - the barrel, flank and legs are untouched. Four to ten light streaks run front to back through the neck field, tapering to points at both ends and irregularly spaced, and they are not mirrored side to side. The far half or two-thirds of the tail is dark, cut square across.",
       "when": {
         "Msk": 2
       },
@@ -43,7 +43,8 @@
               "type": "PARTS",
               "parts": [
                 "HEAD",
-                "EARS"
+                "EARS",
+                "MUZZLE"
               ]
             },
             {
@@ -53,9 +54,9 @@
               ],
               "axis": "Y",
               "space": "part",
-              "from": 0.32,
+              "from": -0.1,
               "to": 1.0,
-              "softness": 0.04
+              "softness": 0.06
             }
           ],
           "op": {

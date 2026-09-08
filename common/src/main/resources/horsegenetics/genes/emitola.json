@@ -5,7 +5,7 @@
   "phase": "magical",
   "priority": 264,
   "rarity": "UNCOMMON",
-  "blurb": "The whole underside taken in black, its upper edge broken into flames, and bright speckling worked all through the flame work - with the forelock the same colour.",
+  "blurb": "The whole underside taken in black - chest, belly, between the legs and down all four of them - its upper edge broken into flames, with bright speckling worked all through the flame work and the forelock to match.",
   "alleles": [
     {
       "token": "Emi",
@@ -36,7 +36,7 @@
     {
       "id": "emitola",
       "name": "Emitola",
-      "description": "Black across the chest, belly and between the legs, extensive and intricate, and reaching up the flanks. Its boundary is not a line but a row of flames - sharp, jagged, energetic - and the flame work is picked out throughout in one bright speckling colour, which also takes the forelock, the hooves and the upper legs. The front and hind coverage do not meet: there is always a break between them along the belly. It goes over white markings rather than under, and the mane is left solid with no striping.",
+      "description": "Black across the chest, belly and between the legs, extensive and intricate, reaching up the flanks and running down all four legs to the fetlock without a break anywhere along the underline. Its upper boundary is not a line but a row of flames - sharp, jagged, energetic - and the flame work is picked out throughout in one bright speckling colour, which also takes the forelock and the hooves. It goes over white markings rather than under, and the mane is left solid with no striping.",
       "when": [
         "Emi/Emi",
         "Emi/n"
@@ -84,18 +84,52 @@
               "to": 0.72,
               "softness": 0.06,
               "combine": "MIN"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#0b0a09",
+            "strength": 95
+          }
+        },
+        {
+          "name": "the legs, black to the fetlock, with the flames licking up over the knee",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "LEGS"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.1,
+              "to": 0.62,
+              "softness": 0.05
+            },
+            {
+              "type": "STROKES",
+              "parts": [
+                "LEGS"
+              ],
+              "seed": "$flameSeed",
+              "spacing": 1.6,
+              "length": 3.0,
+              "axis": "Y",
+              "width": 1.0,
+              "curl": 0.5,
+              "softness": 0.1,
+              "combine": "MAX"
             },
             {
               "type": "AXIS",
               "parts": [
-                "BODY"
+                "LEGS"
               ],
-              "axis": "X",
+              "axis": "Y",
               "space": "part",
-              "from": 0.42,
-              "to": 0.58,
-              "softness": 0.08,
-              "invert": true,
+              "from": 0.1,
+              "to": 0.95,
+              "softness": 0.05,
               "combine": "MIN"
             }
           ],
@@ -153,6 +187,40 @@
             "saturation": 0.95,
             "lightness": 0.55,
             "strength": 94
+          }
+        },
+        {
+          "name": "speckling worked through the flames on the legs",
+          "masks": [
+            {
+              "type": "SPECKLE",
+              "parts": [
+                "LEGS"
+              ],
+              "seed": "$flameSeed",
+              "spacing": 0.7,
+              "size": 0.5,
+              "density": 0.5,
+              "softness": 0.3
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "LEGS"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.1,
+              "to": 0.95,
+              "softness": 0.05
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 94,
+            "hue": "$hue",
+            "saturation": 0.95,
+            "lightness": 0.55
           }
         },
         {

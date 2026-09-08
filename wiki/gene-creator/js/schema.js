@@ -145,7 +145,9 @@ window.HG = window.HG || {};
         choice("channel", ["darkness", "red", "black", "total"],
           "'darkness' is 0.55*red + 0.95*black, the reading grey uses"),
         v("from", 0.5, "reading where coverage starts"),
-        v("to", 1.0, "reading where coverage reaches 1")
+        v("to", 1.0, "reading where coverage reaches 1"),
+        v("spread", 0.0, "body units to grow the PALE side by - 'only beside white the horse already has'",
+          { min: 0, max: 8, step: 0.25 })
       ]
     },
     SPOTS: {
@@ -159,6 +161,7 @@ window.HG = window.HG || {};
         v("chance", 1.0, "share of lattice cells that carry a spot at all"),
         v("stretch", 1.0, "1 is round, 2 is a 2:1 oval", { min: 0.2, max: 6, step: 0.05 }),
         choice("axis", ["X", "Y", "Z"], "the axis the oval is stretched along"),
+        choice("shape", ["round", "heart"], "'heart' swaps the disc for a heart, point down"),
         v("softness", 0.25, "edge fade, body units", { min: 0, max: 3, step: 0.05 })
       ]
     },
@@ -213,6 +216,36 @@ window.HG = window.HG || {};
         choice("axis", ["Z", "X", "Y"], "the axis the spiral is viewed down"),
         v("offset", 0.0, "shift the centre along the part's long axis", { min: -1, max: 1, step: 0.05 }),
         v("softness", 0.2, "edge fade, body units", { min: 0, max: 2, step: 0.05 })
+      ]
+    },
+    WAVES: {
+      blurb: "A band with a sine for an edge - scalloped lobes, or (with 'spacing' above 0) parallel ribbons that rise and fall. The one shape here that repeats on purpose.",
+      params: [
+        parts("parts", "restrict to these parts (and, in 'part' space, measure inside each one)"),
+        v("seed", 0, "pick a seed knob, or leave it for a stable default", { seedRef: true }),
+        choice("axis", ["X", "Y", "Z"], "the axis the wave runs along"),
+        choice("across", ["Y", "X", "Z"], "the axis the wave displaces the band on"),
+        choice("shape", ["sine", "triangle", "saw"], "curved, folded into teeth, or cut back square"),
+        choice("space", ["part", "body", "units"], "how 'across' is measured - as on AXIS"),
+        v("from", 0.0, "start of the band, before the sine displaces it"),
+        v("to", 1.0, "end of the band", { min: -2, max: 2, step: 0.01 }),
+        v("wavelength", 8.0, "body units per full oscillation", { min: 0.5, max: 40, step: 0.5 }),
+        v("amplitude", 0.5, "how far the sine displaces the band", { min: 0, max: 8, step: 0.05 }),
+        v("spacing", 0.0, "0 is one band; above 0 repeats it into ribbons", { min: 0, max: 16, step: 0.1 }),
+        v("phase", 0.0, "0 keeps every repeat in step, 1 gives each its own"),
+        v("softness", 0.15, "fade width outside the band")
+      ]
+    },
+    CRACKLE: {
+      blurb: "Polygons that tile, each filled solid, separated by an even channel - a giraffe, a cracked glaze, a dry lake bed. DAPPLES and SPOTS draw round; this draws straight.",
+      params: [
+        parts("parts", "restrict to these parts"),
+        v("seed", 0, "pick a seed knob, or leave it for a stable default", { seedRef: true }),
+        v("scale", 5.0, "body units across one polygon", { min: 0.5, max: 20, step: 0.1 }),
+        v("gap", 0.5, "width of the channel between two polygons", { min: 0.05, max: 4, step: 0.05 }),
+        v("warp", 0.35, "how far the polygons are pushed out of true"),
+        v("chance", 1.0, "share of polygons that are filled at all"),
+        v("softness", 0.08, "edge fade, body units", { min: 0, max: 2, step: 0.01 })
       ]
     }
   };

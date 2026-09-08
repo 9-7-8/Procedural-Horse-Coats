@@ -5,7 +5,7 @@
   "phase": "magical",
   "priority": 203,
   "rarity": "RARE",
-  "blurb": "A strong white that keeps the coat only where a giant panda is dark - the muzzle, the ears, patches round the eyes, the shoulders and the hindquarters - with freckles of it scattered along the topline.",
+  "blurb": "A strong white that keeps the coat only where a giant panda is dark - the muzzle, the ears, patches round the eyes, the shoulders and the hindquarters - with a white gap over the flank between the last two, and freckles of coat along the topline.",
   "alleles": [
     {
       "token": "Pan",
@@ -44,7 +44,7 @@
     {
       "id": "white",
       "name": "Panda",
-      "description": "The coat is confined to the eyes, muzzle, ears, forequarters and hindquarters and everything else goes white, mane and tail included. The eye patches are a little stylised; muzzle and ear markings are optional. Freckles of coat run along the topline - small, or larger and fawn-like. The edges of the coloured regions are smooth: nothing about Panda is jagged or roaned. It never reaches the cheek, the neck or the barrel, and no other marking shows on the white - whatever else the horse carries, it can only be seen where the coat survives.",
+      "description": "The coat is confined to the eyes, muzzle, ears, forequarters and hindquarters and everything else goes white, mane and tail included. The two coloured fields do not meet: there is a clear white gap over the flank between the shoulder and the hindquarter, and another over the neck in front of the shoulder. The eye patches are a little stylised; muzzle and ear markings are optional. Freckles of coat run along the topline - small, or larger and fawn-like. The edges of the coloured regions are smooth: nothing about Panda is jagged or roaned, and no other marking shows on the white - whatever else the horse carries, it can only be seen where the coat survives.",
       "when": [
         "Pan/Pan",
         "Pan/Pnc",

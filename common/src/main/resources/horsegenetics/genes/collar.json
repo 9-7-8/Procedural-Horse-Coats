@@ -5,7 +5,7 @@
   "phase": "magical",
   "priority": 260,
   "rarity": "RARE",
-  "blurb": "A band right round the base of the neck, with everything behind it going pale and the head, crest and lower legs keeping the coat.",
+  "blurb": "A band right round the base of the neck, well up onto the neck itself, with everything behind it going pale and the head, crest and lower legs keeping the coat.",
   "alleles": [
     {
       "token": "Col",
@@ -28,15 +28,20 @@
     },
     {
       "name": "bandBack",
-      "min": 0.58,
-      "max": 0.78
+      "min": 0.88,
+      "max": 1.0
+    },
+    {
+      "name": "neckReach",
+      "min": 23.4,
+      "max": 26.2
     }
   ],
   "expressions": [
     {
       "id": "white",
       "name": "Collar",
-      "description": "The band wraps the whole circumference at the base of the neck, its back edge landing at or near the front of the scapula, and it divides the horse: everything behind it goes pale, roughly half the animal, while the head, the front of the neck and the crest keep their colour. The legs come back to the coat from the knee and hock down, over a soft transition rather than a line. The mane keeps its colour; the tail follows the pale field about half the time.",
+      "description": "The band wraps the whole circumference at the base of the neck, its back edge landing well forward of the scapula and its front edge running up onto the neck itself, and it divides the horse: everything behind it goes pale, roughly half the animal, while the head, the upper neck and the crest keep their colour. The legs come back to the coat from the knee and hock down, over a soft transition rather than a line. The mane keeps its colour; the tail follows the pale field about half the time.",
       "when": [
         "Col/Col",
         "Col/Coc",
@@ -55,7 +60,19 @@
               "space": "part",
               "from": 0.0,
               "to": "$bandBack",
-              "softness": 0.12
+              "softness": 0.1
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "NECK"
+              ],
+              "axis": "X",
+              "space": "units",
+              "from": 0.0,
+              "to": "$neckReach",
+              "softness": 1.1,
+              "combine": "MAX"
             }
           ],
           "op": {
@@ -107,7 +124,19 @@
               "space": "part",
               "from": 0.0,
               "to": "$bandBack",
-              "softness": 0.12
+              "softness": 0.1
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "NECK"
+              ],
+              "axis": "X",
+              "space": "units",
+              "from": 0.0,
+              "to": "$neckReach",
+              "softness": 1.1,
+              "combine": "MAX"
             }
           ],
           "op": {

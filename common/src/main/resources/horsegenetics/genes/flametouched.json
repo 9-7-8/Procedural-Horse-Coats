@@ -5,7 +5,7 @@
   "phase": "magical",
   "priority": 272,
   "rarity": "RARE",
-  "blurb": "Fire on the horse - stylised flames licking up the legs and face with one copy, or a smooth ember gradient over the topline, face, hair and hooves with two. Never both on one horse.",
+  "blurb": "Fire on the horse - stylised many-coloured flames licking up the legs and face with one copy, or a smooth single-coloured ember wash over the topline, face, hair and hooves with two. Never both on one horse.",
   "alleles": [
     {
       "token": "Ffm",
@@ -41,7 +41,7 @@
     {
       "id": "gradient",
       "name": "Flametouched, gradient",
-      "description": "The gradient form: shading over the topline, the face, the hooves and the mane and tail, running smoothly through two or three colours from ember to flame. It is the only form allowed to touch the topline. Up to half the horse. It sets nothing on fire.",
+      "description": "The gradient form, and the single-coloured one: shading over the topline, the face, the hooves and the mane and tail, in one colour the line carries rather than a sweep through several. What runs from ember to flame is how much of it arrives - faintest over the croup, strongest at the shoulder and the head - so the horse reads as one animal lit from the front rather than as a paint chart. It is the only form allowed to touch the topline. Up to half the horse. It sets nothing on fire.",
       "when": {
         "Ffm": 2
       },
@@ -60,19 +60,26 @@
               "from": 0.5,
               "to": 1.0,
               "softness": 0.4
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "axis": "X",
+              "space": "body",
+              "from": -0.35,
+              "to": 1.05,
+              "softness": 0.85
             }
           ],
           "op": {
-            "type": "RAMP",
+            "type": "TOWARD",
             "hue": "$hue",
-            "hueSpan": "$run",
             "saturation": 0.9,
             "lightness": 0.5,
-            "axis": "X",
-            "space": "body",
-            "from": 0.0,
-            "to": 1.0,
-            "strength": 78
+            "strength": 82
           }
         },
         {
@@ -99,15 +106,10 @@
             }
           ],
           "op": {
-            "type": "RAMP",
+            "type": "TOWARD",
             "hue": "$hue",
-            "hueSpan": "$run",
             "saturation": 0.9,
-            "lightness": 0.55,
-            "axis": "Y",
-            "space": "part",
-            "from": 1.0,
-            "to": 0.0,
+            "lightness": 0.58,
             "strength": 88
           }
         }
@@ -116,7 +118,7 @@
     {
       "id": "flames",
       "name": "Flametouched, flames",
-      "description": "The flame form: stylised tongues of fire climbing all four legs and a marking across the face, in two or three colours, with the tips brightest. It never touches the topline and never shows over white. It also sets nothing on fire.",
+      "description": "The flame form, and the many-coloured one: stylised tongues of fire climbing all four legs and a marking across the face, running through two or three colours with the tips brightest. It never touches the topline and never shows over white. It also sets nothing on fire.",
       "when": {
         "Ffm": 1
       },

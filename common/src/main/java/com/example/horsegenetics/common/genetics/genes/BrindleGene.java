@@ -189,11 +189,19 @@ public final class BrindleGene implements Gene {
      * the per-side roll take some of them away - which is what brindle looks
      * like, and is a long way from the first attempt.
      */
-    private static final double SPACING_MIN = 2.2;
-    private static final double SPACING_RANGE = 1.4;
-    /** Fraction of each period that is streak. Brindle streaks are thinner than the gaps. */
-    private static final double DUTY_MIN = 0.30;
-    private static final double DUTY_RANGE = 0.16;
+    private static final double SPACING_MIN = 2.0;
+    private static final double SPACING_RANGE = 1.2;
+    /**
+     * Fraction of each period that is streak.
+     *
+     * <p>A brindle streak is <b>much</b> thinner than the gap beside it - and
+     * the first pass at 0.30-0.46, with a soft edge 0.22 wide on top, drew a
+     * horse whose white and coloured bands were about equal. That is a zebra
+     * with the edges rubbed out. The pattern only reads as brindle when the
+     * coat is plainly the ground and the streaks are marks on it.
+     */
+    private static final double DUTY_MIN = 0.16;
+    private static final double DUTY_RANGE = 0.14;
     /**
      * How far, in body units, the noise may bend a streak off its plane.
      *
@@ -203,8 +211,8 @@ public final class BrindleGene implements Gene {
      * stops being stripes: the first attempt at 1.6-3.0 against a spacing of
      * 1.5-2.8 baked out as wood grain.
      */
-    private static final double WARP_MIN = 0.5;
-    private static final double WARP_RANGE = 0.7;
+    private static final double WARP_MIN = 0.4;
+    private static final double WARP_RANGE = 0.55;
     /**
      * Gain on the streak coverage before it is whitened. <b>A brindle streak is
      * white</b>, so the core of one has to reach {@code 1} - and the raw

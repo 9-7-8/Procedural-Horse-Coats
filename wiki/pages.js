@@ -222,6 +222,7 @@ window.HG.pages = {
             title: "Magic: fields and regions",
             items: [
                 { href: "gene-accretion.html", text: "Accretion", kind: "magical", views: ["gameplay","coding"] },
+                { href: "gene-accretion-field.html", text: "Accretion Field", kind: "magical", views: ["gameplay","coding"] },
                 { href: "gene-collar.html", text: "Collar", kind: "magical", views: ["gameplay","coding"] },
                 { href: "gene-cosmic.html", text: "Cosmic", kind: "magical", views: ["gameplay","coding"] },
                 { href: "gene-dutch.html", text: "Dutch", kind: "magical", views: ["gameplay","coding"] },

@@ -5,7 +5,7 @@
   "phase": "magical",
   "priority": 200,
   "rarity": "RARE",
-  "blurb": "White over eight or nine tenths of the horse, left open in big irregular panels of coat - a giraffe read backwards, with the mane untouched.",
+  "blurb": "White over most of the horse, left open in straight-sided polygons of coat separated by even white channels - a giraffe read backwards, with the mane untouched.",
   "alleles": [
     {
       "token": "Qul",
@@ -32,25 +32,25 @@
     },
     {
       "name": "panelScale",
-      "min": 4.5,
-      "max": 8.0
+      "min": 3.8,
+      "max": 6.4
     },
     {
       "name": "openness",
-      "min": 0.42,
-      "max": 0.62
+      "min": 0.46,
+      "max": 0.72
     },
     {
       "name": "panelEdge",
-      "min": 0.03,
-      "max": 0.2
+      "min": 0.5,
+      "max": 1.15
     }
   ],
   "expressions": [
     {
       "id": "white",
       "name": "Qular",
-      "description": "Nearly the whole horse goes white, and what is left of the coat reads as panels laid on top of it rather than as gaps cut out - big irregular polygons three to ten inches across, scattered over the neck, shoulder, ribcage, barrel, hindquarter and upper legs, and following the muscle as they go. The head is mostly white with panels round the eyes and muzzle; the lower legs often keep a dark boot. How crisp the panel edges are varies a great deal from horse to horse, from soft and feathered to graphic. The mane and tail are not touched by any of it.",
+      "description": "Nearly the whole horse goes white, and what is left of the coat reads as panels laid on top of it rather than as gaps cut out - big irregular polygons with straight sides and corners that meet three at a time, scattered over the neck, shoulder, ribcage, barrel, hindquarter and upper legs. Between them runs an even white channel a finger or two wide, which is what makes it a giraffe rather than a paint. The head is mostly white with panels round the eyes and muzzle; the lower legs keep a dark boot. Every panel edge is crisp - how big the panels are and how wide the channels between them run varies a great deal from horse to horse, but none of them feathers. The mane and tail are not touched by any of it.",
       "when": [
         "Qul/Qul",
         "Qul/Quc",
@@ -81,7 +81,7 @@
           "name": "the giraffe panels the white is left out of",
           "masks": [
             {
-              "type": "PATCHES",
+              "type": "CRACKLE",
               "parts": [
                 "BODY",
                 "NECK",
@@ -90,9 +90,31 @@
               ],
               "seed": "$panelSeed",
               "scale": "$panelScale",
-              "threshold": "$openness",
-              "softness": "$panelEdge",
-              "invert": true
+              "gap": "$panelEdge",
+              "warp": 0.26,
+              "chance": "$openness",
+              "softness": 0.035
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#fdfdfb",
+            "strength": -97
+          }
+        },
+        {
+          "name": "the dark boot the white is left out of",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "LEGS"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.0,
+              "to": 0.26,
+              "softness": 0.06
             }
           ],
           "op": {
@@ -137,7 +159,7 @@
           "name": "the giraffe panels the white is left out of, in colour",
           "masks": [
             {
-              "type": "PATCHES",
+              "type": "CRACKLE",
               "parts": [
                 "BODY",
                 "NECK",
@@ -146,9 +168,33 @@
               ],
               "seed": "$panelSeed",
               "scale": "$panelScale",
-              "threshold": "$openness",
-              "softness": "$panelEdge",
-              "invert": true
+              "gap": "$panelEdge",
+              "warp": 0.26,
+              "chance": "$openness",
+              "softness": 0.035
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": -97,
+            "hue": "$hue",
+            "saturation": 0.8,
+            "lightness": 0.55
+          }
+        },
+        {
+          "name": "the dark boot the white is left out of, in colour",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "LEGS"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.0,
+              "to": 0.26,
+              "softness": 0.06
             }
           ],
           "op": {

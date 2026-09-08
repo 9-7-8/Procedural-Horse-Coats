@@ -21,7 +21,7 @@
 <h1>Accretion</h1>
 
 <p class="lede">
-    One long boundary running the length of the horse, dividing it into a pale field and a coloured one - the allele decides whether it is the underside or the topline that goes pale.
+    One long boundary running the length of the horse, dividing it into a pale field and a coloured one. This locus decides whether there is one at all and what colour it is; Accretion Field decides which half of the horse it takes.
 </p>
 
 <section class="tab-panel" data-tab="gameplay">
@@ -34,10 +34,11 @@
 <table class="facts">
 <thead><tr><th>Outcome</th><th>Carrying</th></tr></thead>
 <tbody>
-<tr><th>Bottom Accretion</th><td><code>Ab/Ab</code> &middot; <code>Ab/At</code> &middot; <code>Ab/n</code> &middot; <code>Ab/Ac</code> &middot; <code>At/Ac</code></td></tr>
-<tr><th>Coloured Accretion</th><td><code>Ac/Ac</code></td></tr>
-<tr><th>Top Accretion</th><td><code>At/At</code> &middot; <code>At/n</code></td></tr>
-<tr><th>Wild type</th><td><code>Ac/n</code> &middot; <code>n/n</code></td></tr>
+<tr><th>Top Accretion</th><td><code>Acr/Acr</code> &middot; <code>Acr/Acc</code> &middot; <code>Acr/n</code> <em>and</em> a copy of <code>Atp</code> at <a href="gene-accretion-field.html">Accretion Field</a></td></tr>
+<tr><th>Coloured Top Accretion</th><td><code>Acc/Acc</code> <em>and</em> a copy of <code>Atp</code> at <a href="gene-accretion-field.html">Accretion Field</a></td></tr>
+<tr><th>Bottom Accretion</th><td><code>Acr/Acr</code> &middot; <code>Acr/Acc</code> &middot; <code>Acr/n</code></td></tr>
+<tr><th>Coloured Bottom Accretion</th><td><code>Acc/Acc</code></td></tr>
+<tr><th>Wild type</th><td><code>Acc/n</code> &middot; <code>n/n</code></td></tr>
 </tbody>
 </table>
 </div>
@@ -54,7 +55,7 @@
 <h2 id="finding">Finding one</h2>
 
 <p>
-    About <strong>1 in 595</strong> wild horses is born showing this. That is the whole of the
+    About <strong>1 in 694</strong> wild horses is born showing this. That is the whole of the
     supply: catch one, or make one with the carrot below. Breeds set their own
     pools and a breed built around this gene will carry it far more often than
     the wild population does.
@@ -64,15 +65,11 @@
 <table class="facts">
 <thead><tr><th>Wild pair</th><th>Shows as</th><th>How often</th></tr></thead>
 <tbody>
-<tr><td><code>Ab/Ab</code></td><td>Bottom Accretion</td><td>0.006% &mdash; 1 in 16,667</td></tr>
-<tr><td><code>Ab/At</code></td><td>Bottom Accretion</td><td>0.008% &mdash; 1 in 12,500</td></tr>
-<tr><td><code>Ab/Ac</code></td><td>Bottom Accretion</td><td>0.008% &mdash; 1 in 12,500</td></tr>
-<tr><td><code>Ab/n</code></td><td>Bottom Accretion</td><td>0.114% &mdash; 1 in 877</td></tr>
-<tr><td><code>At/At</code></td><td>Top Accretion</td><td>0.008% &mdash; 1 in 12,500</td></tr>
-<tr><td><code>At/Ac</code></td><td>Bottom Accretion</td><td>0.008% &mdash; 1 in 12,500</td></tr>
-<tr><td><code>At/n</code></td><td>Top Accretion</td><td>0.008% &mdash; 1 in 12,500</td></tr>
-<tr><td><code>Ac/Ac</code></td><td>Coloured Accretion</td><td>0.008% &mdash; 1 in 12,500</td></tr>
-<tr><td><code>n/n</code></td><td>Wild type</td><td>99.832%</td></tr>
+<tr><td><code>Acr/Acr</code></td><td>Bottom Accretion</td><td>0.006% &mdash; 1 in 16,667</td></tr>
+<tr><td><code>Acr/Acc</code></td><td>Bottom Accretion</td><td>0.008% &mdash; 1 in 12,500</td></tr>
+<tr><td><code>Acr/n</code></td><td>Bottom Accretion</td><td>0.12% &mdash; 1 in 833</td></tr>
+<tr><td><code>Acc/Acc</code></td><td>Coloured Bottom Accretion</td><td>0.01% &mdash; 1 in 10,000</td></tr>
+<tr><td><code>n/n</code></td><td>Wild type</td><td>99.856%</td></tr>
 </tbody>
 </table>
 </div>
@@ -104,7 +101,7 @@
 <tr><th>Key</th><td><code>horsegenetics.accretion</code></td></tr>
 <tr><th>Phase</th><td>magical &mdash; it adds signed colour in phase 3, after the pigment has resolved</td></tr>
 <tr><th>Priority</th><td>270 &mdash; where it sits in the one <code>(priority, key)</code> paint order</td></tr>
-<tr><th>Alleles</th><td><code>Ab</code> &middot; <code>At</code> &middot; <code>Ac</code> &middot; <code>n</code></td></tr>
+<tr><th>Alleles</th><td><code>Acr</code> &middot; <code>Acc</code> &middot; <code>n</code></td></tr>
 <tr><th>Varies per horse</th><td>4 values drawn once off the expressing allele copy, so a foal that inherits the copy inherits the look</td></tr>
 <tr><th>Built from</th><td>AXIS, NOISE, PARTS, TOWARD</td></tr>
 </tbody>
@@ -120,6 +117,24 @@
     actually did.
 </p>
 
+<h3>Top Accretion</h3>
+
+<p>The pale field is the topline instead - crest, dorsal neck, withers, back, loin, croup and the top of the hip, a fifth to two-fifths of the horse, bounded by a line at half to two-thirds of the body depth measured down from the spine. The legs are excluded entirely. About half of these horses take the mane as well. Which half of the horse goes pale is not decided here: it is read off Accretion Field, and one copy of its topline allele is enough.</p>
+
+<ol>
+<li>the dorsal field &mdash; <code>AXIS</code> &times; <code>NOISE</code>, painted with <code>TOWARD</code></li>
+<li>the mane, on about half of them &mdash; <code>PARTS</code> &times; <code>NOISE</code>, painted with <code>TOWARD</code></li>
+</ol>
+
+<h3>Coloured Top Accretion</h3>
+
+<p>The topline field in a colour the line carries rather than pale. Fully recessive at this locus: it takes two copies, and a single copy beside the pale allele shows pale. It never gives blue eyes, whatever the pale form does.</p>
+
+<ol>
+<li>the dorsal field, in colour &mdash; <code>AXIS</code> &times; <code>NOISE</code>, painted with <code>TOWARD</code></li>
+<li>the mane, on about half of them, in colour &mdash; <code>PARTS</code> &times; <code>NOISE</code>, painted with <code>TOWARD</code></li>
+</ol>
+
 <h3>Bottom Accretion</h3>
 
 <p>The pale field is the underside: a quarter to nearly half the horse, bounded by a single line running nose-to-tail at a third to a half of the local body depth measured up from the belly, rising a little over the shoulder and rather more over the flank. The boundary undulates gently and has no edge at all - it is a gradient a hand's span or two wide. All four legs are included the whole way to the hoof with no separate boundary of their own, and about three horses in five also take a cap on the muzzle.</p>
@@ -130,23 +145,14 @@
 <li>the muzzle cap &mdash; <code>PARTS</code>, painted with <code>TOWARD</code></li>
 </ol>
 
-<h3>Coloured Accretion</h3>
+<h3>Coloured Bottom Accretion</h3>
 
-<p>The same marking in a colour the line carries rather than in white. Fully recessive: it takes two copies, and a single copy beside a white allele shows white. It never gives blue eyes, whatever the white form does. It mirrors Bottom Accretion rather than Top Accretion: a horse showing the coloured form carries no white allele at all, so there is no second shape left to tell apart.</p>
+<p>The underside field in a colour the line carries rather than pale. Fully recessive at this locus: it takes two copies, and a single copy beside the pale allele shows pale. It never gives blue eyes, whatever the pale form does.</p>
 
 <ol>
 <li>the ventral field, in colour &mdash; <code>AXIS</code> &times; <code>NOISE</code>, painted with <code>TOWARD</code></li>
 <li>the legs, the whole way down, in colour &mdash; <code>PARTS</code>, painted with <code>TOWARD</code></li>
 <li>the muzzle cap, in colour &mdash; <code>PARTS</code>, painted with <code>TOWARD</code></li>
-</ol>
-
-<h3>Top Accretion</h3>
-
-<p>The mirror image, and the rarer of the two: the pale field is the topline instead - crest, dorsal neck, withers, back, loin, croup and the top of the hip, a fifth to two-fifths of the horse, bounded by a line at half to two-thirds of the body depth measured down from the spine. The legs are excluded entirely. About half of these horses take the mane as well.</p>
-
-<ol>
-<li>the dorsal field &mdash; <code>AXIS</code> &times; <code>NOISE</code>, painted with <code>TOWARD</code></li>
-<li>the mane, on about half of them &mdash; <code>PARTS</code> &times; <code>NOISE</code>, painted with <code>TOWARD</code></li>
 </ol>
 
 <h3>Wild type</h3>

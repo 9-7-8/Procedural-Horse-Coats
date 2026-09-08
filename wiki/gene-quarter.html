@@ -21,7 +21,7 @@
 <h1>Quarter</h1>
 
 <p class="lede">
-    The trunk cut into quadrants by two transverse planes and the midline, with one of them going pale - or two, on the other allele.
+    The trunk cut by a transverse plane and a level one, with one of the four quadrants going pale - or a whole half, on the other allele.
 </p>
 
 <section class="tab-panel" data-tab="gameplay">
@@ -105,7 +105,7 @@
 <tr><th>Phase</th><td>magical &mdash; it adds signed colour in phase 3, after the pigment has resolved</td></tr>
 <tr><th>Priority</th><td>271 &mdash; where it sits in the one <code>(priority, key)</code> paint order</td></tr>
 <tr><th>Alleles</th><td><code>Qp</code> &middot; <code>Qd</code> &middot; <code>Qc</code> &middot; <code>n</code></td></tr>
-<tr><th>Varies per horse</th><td>3 values drawn once off the expressing allele copy, so a foal that inherits the copy inherits the look</td></tr>
+<tr><th>Varies per horse</th><td>7 values drawn once off the expressing allele copy, so a foal that inherits the copy inherits the look</td></tr>
 <tr><th>Built from</th><td>AXIS, NOISE, TOWARD</td></tr>
 </tbody>
 </table>
@@ -122,10 +122,13 @@
 
 <h3>Double Quarter</h3>
 
-<p>Two quadrants instead of one - the two front, the two back, the two upper, the two lower, or a diagonal pair. Between a third and three-fifths of the horse. Where the pair is adjacent there is no seam at the shared boundary and the two read as one field; where it is diagonal the two meet over a bridge at the trunk's centre, or stay apart across a narrow isthmus of coat.</p>
+<p>Half the trunk rather than a quarter of it: either both front quadrants, both back, both upper or both lower, so one of the two cutting planes disappears and the two quadrants read as a single field with no seam where they meet. Between a third and three-fifths of the horse. Which plane survives and which side of it is pale are both settled at birth.</p>
 
 <ol>
-<li>two quadrants, softly bounded &mdash; <code>AXIS</code> &times; <code>AXIS</code> &times; <code>NOISE</code>, painted with <code>TOWARD</code></li>
+<li>the two front quadrants &mdash; <code>AXIS</code> &times; <code>NOISE</code> &times; <code>NOISE</code> &times; <code>NOISE</code>, painted with <code>TOWARD</code></li>
+<li>the two back quadrants &mdash; <code>AXIS</code> &times; <code>NOISE inverted</code> &times; <code>NOISE</code> &times; <code>NOISE</code>, painted with <code>TOWARD</code></li>
+<li>the two upper quadrants &mdash; <code>AXIS</code> &times; <code>NOISE</code> &times; <code>NOISE inverted</code> &times; <code>NOISE</code>, painted with <code>TOWARD</code></li>
+<li>the two lower quadrants &mdash; <code>AXIS</code> &times; <code>NOISE inverted</code> &times; <code>NOISE inverted</code> &times; <code>NOISE</code>, painted with <code>TOWARD</code></li>
 </ol>
 
 <h3>Coloured Quarter</h3>
@@ -133,15 +136,21 @@
 <p>The same marking in a colour the line carries rather than in white. Fully recessive: it takes two copies, and a single copy beside a white allele shows white. It never gives blue eyes, whatever the white form does. It mirrors Double Quarter rather than Part Quarter: a horse showing the coloured form carries no white allele at all, so there is no second shape left to tell apart.</p>
 
 <ol>
-<li>two quadrants, softly bounded, in colour &mdash; <code>AXIS</code> &times; <code>AXIS</code> &times; <code>NOISE</code>, painted with <code>TOWARD</code></li>
+<li>the two front quadrants, in colour &mdash; <code>AXIS</code> &times; <code>NOISE</code> &times; <code>NOISE</code> &times; <code>NOISE</code>, painted with <code>TOWARD</code></li>
+<li>the two back quadrants, in colour &mdash; <code>AXIS</code> &times; <code>NOISE inverted</code> &times; <code>NOISE</code> &times; <code>NOISE</code>, painted with <code>TOWARD</code></li>
+<li>the two upper quadrants, in colour &mdash; <code>AXIS</code> &times; <code>NOISE</code> &times; <code>NOISE inverted</code> &times; <code>NOISE</code>, painted with <code>TOWARD</code></li>
+<li>the two lower quadrants, in colour &mdash; <code>AXIS</code> &times; <code>NOISE inverted</code> &times; <code>NOISE inverted</code> &times; <code>NOISE</code>, painted with <code>TOWARD</code></li>
 </ol>
 
 <h3>Part Quarter</h3>
 
-<p>One contiguous quadrant of the trunk, a fifth to a third of the horse. The transverse boundary sits square to the body axis and the long one follows the trunk's midline, and the two do not meet in a corner - the intersection is rounded off over a wide radius. Both boundaries are long soft gradients rather than lines. The quadrant may be filled anywhere from three-fifths to fully, and where it falls short the gap is taken from the corner furthest from its centre.</p>
+<p>One contiguous quadrant of the trunk, a fifth to a third of the horse. Two planes cut it: one square across the body axis, one level through it, and the quadrant the pale field takes is settled at birth and does not move. The transverse boundary sits square to the body and the level one runs the length of it, and the two do not meet in a corner - the intersection rounds off over a wide radius because both boundaries are long soft gradients rather than lines. The quadrant may be filled anywhere from three-fifths to fully, and where it falls short the gap is taken from the corner furthest from its centre.</p>
 
 <ol>
-<li>one quadrant, softly bounded &mdash; <code>AXIS</code> &times; <code>AXIS</code> &times; <code>NOISE</code>, painted with <code>TOWARD</code></li>
+<li>the front upper quadrant &mdash; <code>AXIS</code> &times; <code>AXIS</code> &times; <code>NOISE</code> &times; <code>NOISE</code> &times; <code>NOISE</code>, painted with <code>TOWARD</code></li>
+<li>the front lower quadrant &mdash; <code>AXIS</code> &times; <code>AXIS</code> &times; <code>NOISE</code> &times; <code>NOISE inverted</code> &times; <code>NOISE</code>, painted with <code>TOWARD</code></li>
+<li>the back upper quadrant &mdash; <code>AXIS</code> &times; <code>AXIS</code> &times; <code>NOISE inverted</code> &times; <code>NOISE</code> &times; <code>NOISE</code>, painted with <code>TOWARD</code></li>
+<li>the back lower quadrant &mdash; <code>AXIS</code> &times; <code>AXIS</code> &times; <code>NOISE inverted</code> &times; <code>NOISE inverted</code> &times; <code>NOISE</code>, painted with <code>TOWARD</code></li>
 </ol>
 
 <h3>Wild type</h3>

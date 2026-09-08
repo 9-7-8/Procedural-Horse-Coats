@@ -21,7 +21,7 @@
 <h1>Flametouched</h1>
 
 <p class="lede">
-    Fire on the horse - stylised flames licking up the legs and face with one copy, or a smooth ember gradient over the topline, face, hair and hooves with two. Never both on one horse.
+    Fire on the horse - stylised many-coloured flames licking up the legs and face with one copy, or a smooth single-coloured ember wash over the topline, face, hair and hooves with two. Never both on one horse.
 </p>
 
 <section class="tab-panel" data-tab="gameplay">
@@ -99,7 +99,7 @@
 <tr><th>Priority</th><td>272 &mdash; where it sits in the one <code>(priority, key)</code> paint order</td></tr>
 <tr><th>Alleles</th><td><code>Ffm</code> &middot; <code>n</code></td></tr>
 <tr><th>Varies per horse</th><td>4 values drawn once off the expressing allele copy, so a foal that inherits the copy inherits the look</td></tr>
-<tr><th>Built from</th><td>AXIS, PARTS, RAMP, STROKES</td></tr>
+<tr><th>Built from</th><td>AXIS, PARTS, RAMP, STROKES, TOWARD</td></tr>
 </tbody>
 </table>
 </div>
@@ -115,16 +115,16 @@
 
 <h3>Flametouched, gradient</h3>
 
-<p>The gradient form: shading over the topline, the face, the hooves and the mane and tail, running smoothly through two or three colours from ember to flame. It is the only form allowed to touch the topline. Up to half the horse. It sets nothing on fire.</p>
+<p>The gradient form, and the single-coloured one: shading over the topline, the face, the hooves and the mane and tail, in one colour the line carries rather than a sweep through several. What runs from ember to flame is how much of it arrives - faintest over the croup, strongest at the shoulder and the head - so the horse reads as one animal lit from the front rather than as a paint chart. It is the only form allowed to touch the topline. Up to half the horse. It sets nothing on fire.</p>
 
 <ol>
-<li>shading over the topline &mdash; <code>AXIS</code>, painted with <code>RAMP</code></li>
-<li>the face, the hair and the hooves &mdash; <code>PARTS</code> &times; <code>AXIS</code>, painted with <code>RAMP</code></li>
+<li>shading over the topline &mdash; <code>AXIS</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code></li>
+<li>the face, the hair and the hooves &mdash; <code>PARTS</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code></li>
 </ol>
 
 <h3>Flametouched, flames</h3>
 
-<p>The flame form: stylised tongues of fire climbing all four legs and a marking across the face, in two or three colours, with the tips brightest. It never touches the topline and never shows over white. It also sets nothing on fire.</p>
+<p>The flame form, and the many-coloured one: stylised tongues of fire climbing all four legs and a marking across the face, running through two or three colours with the tips brightest. It never touches the topline and never shows over white. It also sets nothing on fire.</p>
 
 <ol>
 <li>flames climbing the legs &mdash; <code>STROKES</code> &times; <code>AXIS</code>, painted with <code>RAMP</code></li>

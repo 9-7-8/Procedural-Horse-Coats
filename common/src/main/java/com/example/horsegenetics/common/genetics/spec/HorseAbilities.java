@@ -87,7 +87,10 @@ public final class HorseAbilities {
             if (!(gene instanceof SpecGene spec) || !spec.spec().hasAbilities()) {
                 continue;
             }
-            GeneSpec.ExpressionSpec expressed = spec.expressionSpecOf(pair);
+            // expressionSpecIn, not expressionSpecOf: an expression that only
+            // applies when a second locus agrees may carry effects of its own,
+            // and the plain lookup would hand back the entry underneath it.
+            GeneSpec.ExpressionSpec expressed = spec.expressionSpecIn(pair, genotype);
             if (expressed == null || expressed.abilities().isEmpty()) {
                 continue;
             }

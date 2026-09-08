@@ -5,7 +5,7 @@
   "phase": "magical",
   "priority": 302,
   "rarity": "EPIC",
-  "blurb": "Strings of faintly glowing lights strung horizontally along the body, each light a pale core inside a deeper rim, like the lures of a deep-water fish.",
+  "blurb": "Strings of faintly glowing lights threaded along smooth curves down the body, each light a pale core inside a deeper rim, like the lures of a deep-water fish.",
   "alleles": [
     {
       "token": "Ang",
@@ -45,7 +45,7 @@
     {
       "id": "angler",
       "name": "Angler",
-      "description": "Round and oval lights in strings that run horizontally along the body and bend as they go, never singly - a string is two lights at least. Each light is a pale core inside a deeper rim of the same hue, and one horse carries one design throughout. The strings turn vertical on the face and legs, where nothing else on this horse runs level. Mane, tail and hooves are untouched however close a string passes.",
+      "description": "Round and oval lights in strings that run horizontally along the body, never singly - a string is two lights at least. The string itself is a smooth curve: it rises and falls evenly along its length rather than wandering, so the lights on it sit on a line you can follow with a finger. Each light is a pale core inside a deeper rim of the same hue, and one horse carries one design throughout. The strings turn vertical on the face and legs, where nothing else on this horse runs level. Mane, tail and hooves are untouched however close a string passes.",
       "when": {
         "Ang": 2
       },
@@ -70,17 +70,22 @@
               "softness": 0.2
             },
             {
-              "type": "STROKES",
+              "type": "WAVES",
               "parts": [
                 "BODY",
                 "NECK"
               ],
               "seed": "$stringSeed",
-              "spacing": 7.0,
-              "length": 26.0,
               "axis": "X",
-              "width": 1.12,
-              "curl": 0.55,
+              "across": "Y",
+              "shape": "sine",
+              "space": "units",
+              "from": -0.5,
+              "to": 0.5,
+              "wavelength": 15.0,
+              "amplitude": 1.35,
+              "spacing": 4.4,
+              "phase": 0.9,
               "softness": 0.4
             }
           ],
@@ -112,17 +117,22 @@
               "softness": 0.14
             },
             {
-              "type": "STROKES",
+              "type": "WAVES",
               "parts": [
                 "BODY",
                 "NECK"
               ],
               "seed": "$stringSeed",
-              "spacing": 7.0,
-              "length": 26.0,
               "axis": "X",
-              "width": 1.12,
-              "curl": 0.55,
+              "across": "Y",
+              "shape": "sine",
+              "space": "units",
+              "from": -0.5,
+              "to": 0.5,
+              "wavelength": 15.0,
+              "amplitude": 1.35,
+              "spacing": 4.4,
+              "phase": 0.9,
               "softness": 0.4
             }
           ],
@@ -153,17 +163,22 @@
               "softness": 0.2
             },
             {
-              "type": "STROKES",
+              "type": "WAVES",
               "parts": [
                 "FACE"
               ],
               "seed": "$stringSeed",
-              "spacing": 4.0,
-              "length": 8.0,
               "axis": "Y",
-              "width": 0.8,
-              "curl": 0.4,
-              "softness": 0.5
+              "across": "X",
+              "shape": "sine",
+              "space": "units",
+              "from": -0.45,
+              "to": 0.45,
+              "wavelength": 9.0,
+              "amplitude": 0.9,
+              "spacing": 3.4,
+              "phase": 0.9,
+              "softness": 0.4
             }
           ],
           "op": {
@@ -193,17 +208,22 @@
               "softness": 0.2
             },
             {
-              "type": "STROKES",
+              "type": "WAVES",
               "parts": [
                 "LEGS"
               ],
               "seed": "$stringSeed",
-              "spacing": 4.0,
-              "length": 10.0,
               "axis": "Y",
-              "width": 0.8,
-              "curl": 0.4,
-              "softness": 0.5
+              "across": "X",
+              "shape": "sine",
+              "space": "units",
+              "from": -0.45,
+              "to": 0.45,
+              "wavelength": 9.0,
+              "amplitude": 0.9,
+              "spacing": 3.4,
+              "phase": 0.9,
+              "softness": 0.4
             },
             {
               "type": "AXIS",

@@ -404,11 +404,30 @@ public final class SpecPainter {
                 case ADD -> clamp01(acc + c);
                 case SUBTRACT -> clamp01(acc - c);
             };
-            if (acc <= 0 && mask.combine() == GeneSpec.Combine.MULTIPLY) {
+            // Bail out early only when nothing left can put coverage BACK.
+            // The test used to be "this mask multiplied and the result is 0",
+            // which quietly threw away every union: a layer masked "the
+            // shoulder, MAX the hindquarter" returned 0 for the whole horse
+            // behind the shoulder, because the first mask was 0 there and the
+            // second was never reached. Panda lost half its pattern to it and
+            // nothing went red - both engines agreed, because the JavaScript
+            // twin had the same line.
+            if (acc <= 0 && cannotRise(masks, i + 1)) {
                 return 0;
             }
         }
         return clamp01(acc);
+    }
+
+    /** Can any mask from {@code from} on raise the accumulator above zero? */
+    private static boolean cannotRise(List<Mask> masks, int from) {
+        for (int i = from; i < masks.size(); i++) {
+            GeneSpec.Combine c = masks.get(i).combine();
+            if (c == GeneSpec.Combine.MAX || c == GeneSpec.Combine.ADD) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private static double maskCoverage(Mask mask, SpecValues v, Skin skin, Map<Part, Bounds> bounds,
@@ -480,14 +499,33 @@ public final class SpecPainter {
                 return clamp01(low + (v.get(p.value("high", 1.0), leg) - low) * n);
             }
             case PIGMENT: {
-                float red = coat.red(px, py);
-                float black = coat.black(px, py);
-                double reading = switch (p.text("channel", "darkness")) {
-                    case "red" -> red;
-                    case "black" -> black;
-                    case "total" -> (red + black) / 2.0;
-                    default -> clamp01(0.55 * red + 0.95 * black);
-                };
+                String channel = p.text("channel", "darkness");
+                double reading = pigmentReading(coat, channel, px, py);
+                double spread = v.get(p.value("spread", 0.0), leg);
+                if (spread > 0) {
+                    // The LOWEST reading in the disc, so pale grows outward. A
+                    // gene that must draw only beside white the horse already
+                    // has - fielded's wisps - has nothing else to ask: the coat
+                    // it reads is one number per texel, and "next to white" is
+                    // not a property of any one of them.
+                    int r = (int) Math.round(spread * HorseSkinGeometry.TEXELS_PER_UNIT);
+                    int rr = r * r;
+                    for (int dy = -r; dy <= r; dy++) {
+                        for (int dx = -r; dx <= r; dx++) {
+                            if (dx * dx + dy * dy > rr) {
+                                continue;
+                            }
+                            int qx = px + dx;
+                            int qy = py + dy;
+                            if (qx < 0 || qy < 0
+                                    || qx >= HorseSkinGeometry.SHEET_SIZE
+                                    || qy >= HorseSkinGeometry.SHEET_SIZE) {
+                                continue;
+                            }
+                            reading = Math.min(reading, pigmentReading(coat, channel, qx, qy));
+                        }
+                    }
+                }
                 return BodyStripes.smoothstep(v.get(p.value("from", 0.5), leg),
                         v.get(p.value("to", 1.0), leg), reading);
             }
@@ -508,6 +546,9 @@ public final class SpecPainter {
                 }
                 double vary = clamp01(v.get(p.value("vary", 0.5), leg));
                 double radius = v.get(p.value("radius", 0.9), leg) * (1 - vary + 2 * vary * cell.size());
+                if ("heart".equals(p.text("shape", "round"))) {
+                    radius *= heartRadius(Math.atan2(cell.dy(), cell.dx()));
+                }
                 double soft = Math.max(1e-6, v.get(p.value("softness", 0.25), leg));
                 return 1.0 - BodyStripes.smoothstep(radius, radius + soft, cell.distance() * spacing);
             }
@@ -607,9 +648,124 @@ public final class SpecPainter {
                 double soft = Math.max(1e-6, v.get(p.value("softness", 0.2), leg));
                 return 1.0 - BodyStripes.smoothstep(half, half + soft, nearest);
             }
+            case WAVES: {
+                long seed = v.seed(p.value("seed", 0), seedBase);
+                Axis along = Axis.valueOf(p.text("axis", "X").toUpperCase(java.util.Locale.ROOT));
+                Axis across = Axis.valueOf(p.text("across", "Y").toUpperCase(java.util.Locale.ROOT));
+                // The sine's own coordinate stays in body units whatever space
+                // the band is measured in, so 'wavelength' means one thing.
+                double travel = point.along(along);
+                double coord = point.along(across);
+                double t = switch (p.text("space", "part")) {
+                    case "body" -> normalise(coord, HorseSkinGeometry.bodyBounds(skin), across);
+                    case "units" -> coord;
+                    default -> normalise(coord, bounds.get(part), across);
+                };
+                String shape = p.text("shape", "sine");
+                double lambda = Math.max(0.05, v.get(p.value("wavelength", 8.0), leg));
+                double amplitude = v.get(p.value("amplitude", 0.5), leg);
+                double from = v.get(p.value("from", 0.0), leg);
+                double to = v.get(p.value("to", 1.0), leg);
+                double soft = v.get(p.value("softness", 0.15), leg);
+                double spacing = v.get(p.value("spacing", 0.0), leg);
+                if (spacing <= 0) {
+                    return band(t - amplitude * waveform(shape, travel / lambda), from, to, soft);
+                }
+                // Repeating: which ribbon a texel belongs to is decided by its
+                // UNDISPLACED position, or the phase would depend on the answer
+                // it is being used to compute. The neighbours either side are
+                // tried too, because a displaced ribbon reaches into the next
+                // lane and would otherwise be clipped off at the boundary.
+                double phase = v.get(p.value("phase", 0.0), leg);
+                double mid = (from + to) / 2;
+                int lane = (int) Math.round((t - mid) / spacing);
+                double best = 0;
+                for (int n = lane - 1; n <= lane + 1; n++) {
+                    double jitter = phase == 0 ? 0
+                            : phase * BodyNoise.value(seed ^ 0x77L, n, 0.25, 0.25);
+                    double centre = n * spacing
+                            + amplitude * waveform(shape, travel / lambda + jitter);
+                    best = Math.max(best, band(t - centre, from, to, soft));
+                }
+                return best;
+            }
+            case CRACKLE: {
+                long seed = v.seed(p.value("seed", 0), seedBase);
+                double scale = Math.max(0.05, v.get(p.value("scale", 5.0), leg));
+                double warp = v.get(p.value("warp", 0.35), leg);
+                double wx = point.x() / scale;
+                double wy = point.y() / scale;
+                double wz = point.z() / scale;
+                if (warp != 0) {
+                    // Warping the SAMPLE rather than the lattice keeps the walls
+                    // straight and the corners three-way; it is the polygons
+                    // that come out irregular, which is the giraffe.
+                    double n = BodyNoise.value(seed ^ 0x2CL, wx / 3, wy / 3, wz / 3);
+                    double m = BodyNoise.value(seed ^ 0x2DL, wz / 3, wx / 3, wy / 3);
+                    wx += (n - 0.5) * warp;
+                    wy += (m - 0.5) * warp;
+                    wz += (n - m) * warp;
+                }
+                double chance = v.get(p.value("chance", 1.0), leg);
+                if (chance < 1 && BodyNoise.cell(seed, wx, wy, wz).pick() >= chance) {
+                    return 0;
+                }
+                double half = Math.max(1e-4, v.get(p.value("gap", 0.5), leg)) / 2;
+                double soft = Math.max(1e-6, v.get(p.value("softness", 0.08), leg));
+                return BodyStripes.smoothstep(half, half + soft,
+                        BodyNoise.cellEdge(seed, wx, wy, wz) * scale);
+            }
             default:
                 throw new IllegalStateException("unhandled mask " + mask.type());
         }
+    }
+
+    /**
+     * One cycle of a {@code WAVES} displacement, in {@code [-1, 1]}, at
+     * {@code turns} full turns from the origin.
+     *
+     * <p>All three start at 0 and rise, so swapping one for another keeps the
+     * marking in the same place and changes only whether its edge is curved,
+     * folded or cut.
+     */
+    private static double waveform(String shape, double turns) {
+        double t = turns - Math.floor(turns);
+        return switch (shape) {
+            case "triangle" -> t < 0.25 ? 4 * t : (t < 0.75 ? 2 - 4 * t : 4 * t - 4);
+            case "saw" -> 2 * t - 1;
+            default -> Math.sin(2 * Math.PI * turns);
+        };
+    }
+
+    /** One channel of the coat, as a {@code PIGMENT} mask reads it. */
+    private static double pigmentReading(PigmentView coat, String channel, int px, int py) {
+        float red = coat.red(px, py);
+        float black = coat.black(px, py);
+        return switch (channel) {
+            case "red" -> red;
+            case "black" -> black;
+            case "total" -> (red + black) / 2.0;
+            default -> clamp01(0.55 * red + 0.95 * black);
+        };
+    }
+
+    /**
+     * The radius of a <b>heart</b> at angle {@code theta}, as a multiple of the
+     * radius the same element would have round - the whole of what
+     * {@code "shape": "heart"} changes.
+     *
+     * <p>The classic polar heart, {@code r = 2 - 2 sin t + sin t sqrt|cos t| /
+     * (sin t + 1.4)}, divided through by 2.4 so a heart and a disc of the same
+     * {@code radius} come out about the same size. It is measured in the
+     * {@code (x, y)} plane - nose-to-tail across, hoof-to-withers up - so the
+     * heart stands upright with its point down on the flank, which is the face
+     * a spot is read on. Over the topline it is seen edge-on and reads as a
+     * lozenge, which is the same compromise {@code stretch} already makes.
+     */
+    private static double heartRadius(double theta) {
+        double sin = Math.sin(theta);
+        double cos = Math.cos(theta);
+        return (2 - 2 * sin + sin * Math.sqrt(Math.abs(cos)) / (sin + 1.4)) / 2.4;
     }
 
     /**

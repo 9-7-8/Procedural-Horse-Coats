@@ -10,6 +10,8 @@ import com.example.horsegenetics.common.genetics.Expression;
 import com.example.horsegenetics.common.genetics.FounderContext;
 import com.example.horsegenetics.common.genetics.FounderTable;
 import com.example.horsegenetics.common.genetics.Gene;
+import com.example.horsegenetics.common.genetics.Genes;
+import com.example.horsegenetics.common.genetics.Genotype;
 import com.example.horsegenetics.common.genetics.epi.EpiSchema;
 
 import java.util.ArrayList;
@@ -46,6 +48,15 @@ public final class SpecGene implements Gene, CoatOverlayContribution {
     private final Map<String, Expression> byCombination;
     /** Same key, back to the spec entry - what {@link HorseAbilities} needs. */
     private final Map<String, GeneSpec.ExpressionSpec> specByCombination;
+    /**
+     * The entries carrying {@code needs}, in file order, each with the
+     * {@link Expression} it builds. They are consulted <b>before</b> the two
+     * maps above, and the first whose combination and whose second locus both
+     * agree wins - see {@link #expressionIn}.
+     */
+    private final List<Conditional> conditionals;
+    /** Every other gene any {@code needs} names - {@link Gene#coatDependsOn()}. */
+    private final List<String> dependsOn;
     private final FounderTable founders;
 
     public SpecGene(GeneSpec spec) {
@@ -63,9 +74,20 @@ public final class SpecGene implements Gene, CoatOverlayContribution {
         List<Expression> outcomes = new ArrayList<>();
         Map<String, Expression> byCombo = new LinkedHashMap<>();
         Map<String, GeneSpec.ExpressionSpec> specByCombo = new LinkedHashMap<>();
+        List<Conditional> conditional = new ArrayList<>();
+        List<String> depends = new ArrayList<>();
         for (GeneSpec.ExpressionSpec e : spec.expressions()) {
             Expression expression = toExpression(spec, e);
             outcomes.add(expression);
+            if (e.conditional()) {
+                conditional.add(new Conditional(e, expression));
+                for (GeneSpec.LocusCondition c : e.needs()) {
+                    if (!depends.contains(c.gene())) {
+                        depends.add(c.gene());
+                    }
+                }
+                continue;
+            }
             for (String combination : e.combinations()) {
                 byCombo.put(combination, expression);
                 specByCombo.put(combination, e);
@@ -74,6 +96,8 @@ public final class SpecGene implements Gene, CoatOverlayContribution {
         this.expressions = List.copyOf(outcomes);
         this.byCombination = Map.copyOf(byCombo);
         this.specByCombination = Map.copyOf(specByCombo);
+        this.conditionals = List.copyOf(conditional);
+        this.dependsOn = List.copyOf(depends);
 
         FounderTable.Builder table = FounderTable.builder();
         for (GeneSpec.FounderWeight w : spec.founders()) {
@@ -117,7 +141,7 @@ public final class SpecGene implements Gene, CoatOverlayContribution {
      */
     @Override
     public void overlay(AllelePair pair, CoatBuildContext ctx, CoatOverlay out) {
-        GeneSpec.ExpressionSpec e = expressionSpecOf(pair);
+        GeneSpec.ExpressionSpec e = expressionSpecIn(pair, ctx.genotype());
         if (e == null || !hasEmissiveLayer(e)) {
             return;
         }
@@ -217,6 +241,78 @@ public final class SpecGene implements Gene, CoatOverlayContribution {
     public GeneSpec.ExpressionSpec expressionSpecOf(AllelePair pair) {
         return specByCombination.get(pair.toTokens());
     }
+
+    /** The same, reading any second locus a {@code needs} names. */
+    public GeneSpec.ExpressionSpec expressionSpecIn(AllelePair pair, Genotype genotype) {
+        Conditional c = matching(pair, genotype);
+        return c == null ? expressionSpecOf(pair) : c.spec();
+    }
+
+    /**
+     * The outcome, <b>reading the loci this gene's {@code needs} name</b>.
+     *
+     * <p>This is what the coat pipeline calls, and the only place a spec gene
+     * is polygenic. {@link #expressionOf} answers the same question without a
+     * genotype to read, and so gives the unconditional outcome - which is the
+     * right answer for a UI listing what a locus can do on its own, and the
+     * wrong one for painting a horse.
+     */
+    @Override
+    public Expression expressionIn(AllelePair pair, Genotype genotype) {
+        Conditional c = matching(pair, genotype);
+        return c == null ? expressionOf(pair) : c.expression();
+    }
+
+    /** Which second locus, if any, this gene's outcome depends on. */
+    @Override
+    public List<String> coatDependsOn() {
+        return dependsOn;
+    }
+
+    private Conditional matching(AllelePair pair, Genotype genotype) {
+        if (conditionals.isEmpty() || genotype == null) {
+            return null;
+        }
+        String tokens = pair.toTokens();
+        for (Conditional c : conditionals) {
+            if (c.spec().combinations().contains(tokens) && satisfied(c.spec(), genotype)) {
+                return c;
+            }
+        }
+        return null;
+    }
+
+    private static boolean satisfied(GeneSpec.ExpressionSpec e, Genotype genotype) {
+        for (GeneSpec.LocusCondition need : e.needs()) {
+            Gene other = Genes.byKeyOrNull(need.gene());
+            if (other == null) {
+                return false;
+            }
+            AllelePair at = genotype.pair(other);
+            if (at == null) {
+                return false;
+            }
+            for (Map.Entry<String, Integer> want : need.copies().entrySet()) {
+                Allele allele = tokenOf(other, want.getKey());
+                if (allele == null || at.count(allele) < want.getValue()) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    private static Allele tokenOf(Gene gene, String token) {
+        for (Allele a : gene.alleles()) {
+            if (a.token().equals(token)) {
+                return a;
+            }
+        }
+        return null;
+    }
+
+    /** One {@code needs}-carrying entry, and the outcome it produces. */
+    private record Conditional(GeneSpec.ExpressionSpec spec, Expression expression) {}
 
     /** How many copies of the <b>first-declared</b> allele this horse carries - what {@code perDose} counts. */
     public int dose(AllelePair pair) {

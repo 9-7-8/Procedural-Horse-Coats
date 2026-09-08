@@ -5,7 +5,7 @@
   "phase": "magical",
   "priority": 212,
   "rarity": "COMMON",
-  "blurb": "Grass-like tendrils drawn out of the edges of the horse's white markings - a streak or two on a quiet horse, a windblown field of them on a loud one.",
+  "blurb": "Grass-like tendrils drawn out of the edges of the horse's white markings - and nothing at all on a horse that has none.",
   "alleles": [
     {
       "token": "Fld",
@@ -40,7 +40,7 @@
     {
       "id": "white",
       "name": "Fielded",
-      "description": "Thin wispy streaks with an organic, wind-blown quality - never zebra bars, never tiger stripes. They run out of the edges of whatever white the horse already has: a tobiano patch, a splash, a blaze, a stocking, a snip. At the quiet end there may be nothing visible at all, or a couple of lines off a facial marking; at the loud end they cover the horse, interweaving across the ribs and hindquarter, and where one crosses the topline it carries on into the mane or tail. It can put blue in an eye without going anywhere near it. One copy looks exactly like two.",
+      "description": "Thin wispy streaks with an organic, wind-blown quality - never zebra bars, never tiger stripes. They run out of the edges of whatever white the horse already has: a tobiano patch, a splash, a blaze, a stocking, a snip. On a horse with no white anywhere there is nothing to run out of and Fielded shows nothing at all, however many copies it carries. At the quiet end there may be a couple of lines off a facial marking; at the loud end they cover the horse, interweaving across the ribs and hindquarter, and where one crosses the topline it carries on into the mane or tail. It can put blue in an eye without going anywhere near it. One copy looks exactly like two.",
       "when": [
         "Fld/Fld",
         "Fld/Flw",
@@ -78,6 +78,21 @@
               "scale": 8.0,
               "low": 0.0,
               "high": "$density"
+            },
+            {
+              "type": "PIGMENT",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "LEGS"
+              ],
+              "channel": "total",
+              "from": 0.06,
+              "to": 0.34,
+              "spread": 2.5,
+              "invert": true,
+              "combine": "MULTIPLY"
             }
           ],
           "op": {
@@ -111,6 +126,18 @@
               "scale": 6.0,
               "low": 0.0,
               "high": "$density"
+            },
+            {
+              "type": "PIGMENT",
+              "parts": [
+                "HAIR"
+              ],
+              "channel": "total",
+              "from": 0.06,
+              "to": 0.34,
+              "spread": 3.5,
+              "invert": true,
+              "combine": "MULTIPLY"
             }
           ],
           "op": {
@@ -124,7 +151,7 @@
     {
       "id": "coloured",
       "name": "Coloured Fielded",
-      "description": "The same tendrils in a colour the line carries rather than in white. Fully recessive: it takes two copies, and a single copy beside the white allele shows white. It never gives blue eyes, whatever the white form does.",
+      "description": "The same tendrils in a colour the line carries rather than in white, and the same rule: they only grow out of white the horse already has. Fully recessive - it takes two copies, and a single copy beside the white allele shows white. It never gives blue eyes, whatever the white form does.",
       "when": {
         "Flw": 2
       },
@@ -160,6 +187,21 @@
               "scale": 8.0,
               "low": 0.0,
               "high": "$density"
+            },
+            {
+              "type": "PIGMENT",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "LEGS"
+              ],
+              "channel": "total",
+              "from": 0.06,
+              "to": 0.34,
+              "spread": 2.5,
+              "invert": true,
+              "combine": "MULTIPLY"
             }
           ],
           "op": {
@@ -195,6 +237,18 @@
               "scale": 6.0,
               "low": 0.0,
               "high": "$density"
+            },
+            {
+              "type": "PIGMENT",
+              "parts": [
+                "HAIR"
+              ],
+              "channel": "total",
+              "from": 0.06,
+              "to": 0.34,
+              "spread": 3.5,
+              "invert": true,
+              "combine": "MULTIPLY"
             }
           ],
           "op": {

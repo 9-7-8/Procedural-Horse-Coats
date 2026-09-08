@@ -5,7 +5,7 @@
   "phase": "magical",
   "priority": 209,
   "rarity": "UNCOMMON",
-  "blurb": "Tobiano and appaloosa in one marking - white coming down from the back rather than up from the belly, spotting over it, and always the banded raccoon tail that gives it away.",
+  "blurb": "Tobiano and appaloosa at once: white gathered along the topline and thinning downward, spotting over the hindquarter, and a banded raccoon tail on every one of them.",
   "alleles": [
     {
       "token": "Lac",
@@ -44,7 +44,7 @@
     {
       "id": "white",
       "name": "Laciano",
-      "description": "A spontaneous combination of tobiano and appaloosa, and mistakeable for either on its own. The white patches vary a great deal in size and number but always work downward from the back; the legs are not white unless something else on the horse makes them so. Spotting sits over the hindquarter. The tail is banded - the raccoon tail - and every Laciano has one, which is the only reliable way to name the marking. Striped hooves are common and a white sclera is possible.",
+      "description": "A spontaneous combination of tobiano and appaloosa, and mistakeable for either on its own. The white patches vary a great deal in size and number but are always gathered along the topline and thin out going down - solid over the crest, the withers, the back and the croup, breaking up over the ribs, and rarely anywhere near the belly. The legs are not white unless something else on the horse makes them so. Spotting sits over the hindquarter. The tail is banded - the raccoon tail - and every Laciano has one, which is the only reliable way to name the marking. Striped hooves are common and a white sclera is possible.",
       "when": [
         "Lac/Lac",
         "Lac/Lcc",
@@ -73,9 +73,9 @@
               ],
               "axis": "Y",
               "space": "part",
-              "from": 0.25,
+              "from": 0.66,
               "to": 1.0,
-              "softness": 0.4
+              "softness": 0.5
             }
           ],
           "op": {
@@ -206,9 +206,9 @@
               ],
               "axis": "Y",
               "space": "part",
-              "from": 0.25,
+              "from": 0.66,
               "to": 1.0,
-              "softness": 0.4
+              "softness": 0.5
             }
           ],
           "op": {

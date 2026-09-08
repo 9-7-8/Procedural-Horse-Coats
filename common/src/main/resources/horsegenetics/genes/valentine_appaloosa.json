@@ -5,7 +5,7 @@
   "phase": "magical",
   "priority": 208,
   "rarity": "RARE",
-  "blurb": "The whole coat pushed into pinks and reds - black to fuchsia, red to pink - and then blanketed with white spots, mane and tail carried along with it.",
+  "blurb": "An appaloosa whose every spot is a heart - laid on the coat outside the blanket, and cut out of the blanket as holes inside it.",
   "alleles": [
     {
       "token": "Vln",
@@ -29,59 +29,24 @@
       "name": "spread",
       "min": 0.35,
       "max": 0.85
+    },
+    {
+      "name": "holeSeed",
+      "type": "seed"
     }
   ],
   "expressions": [
     {
       "id": "valentine",
       "name": "Valentine Appaloosa",
-      "description": "Two things at once. First the base shifts: wherever the coat was black it comes out saturated red or fuchsia, and wherever it was red it comes out pink, mane and tail included - so there is no such thing as a dull Valentine. Then the appaloosa half puts white spots over it, in any of the usual arrangements: a blanket over the hindquarter, leopard spotting over the whole horse, a fine snowflake scatter, or a varnish roan. Some horses show the reverse as well, with white cut-outs left in the colour rather than laid on it.",
+      "description": "The appaloosa arrangements, drawn with hearts instead of round spots. A white blanket lies over the hindquarter and hearts are cut out of it as holes, so the coat shows through each one; outside the blanket the same hearts are laid on the coat in white instead. Every heart stands upright with its point down. How much blanket there is varies a great deal - a scatter of hearts over the hip on one horse, a white sheet full of holes on the next. It carries no colour of its own: whatever the horse's base is, Valentine draws in white on it.",
       "when": [
         "Vln/Vln",
         "Vln/n"
       ],
       "layers": [
         {
-          "name": "black pigment to fuchsia",
-          "masks": [
-            {
-              "type": "PIGMENT",
-              "channel": "black",
-              "from": 0.25,
-              "to": 0.7
-            }
-          ],
-          "op": {
-            "type": "TOWARD",
-            "color": "#c81e78",
-            "strength": 88
-          }
-        },
-        {
-          "name": "red pigment to pink",
-          "masks": [
-            {
-              "type": "PIGMENT",
-              "channel": "red",
-              "from": 0.25,
-              "to": 0.7
-            },
-            {
-              "type": "PIGMENT",
-              "channel": "black",
-              "from": 0.25,
-              "to": 0.7,
-              "invert": true
-            }
-          ],
-          "op": {
-            "type": "TOWARD",
-            "color": "#f087b4",
-            "strength": 82
-          }
-        },
-        {
-          "name": "the white blanket over the hindquarter",
+          "name": "the white blanket over the hindquarter, with hearts cut out of it",
           "masks": [
             {
               "type": "PATCHES",
@@ -103,6 +68,22 @@
               "from": 0.0,
               "to": 0.55,
               "softness": 0.3
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY"
+              ],
+              "seed": "$holeSeed",
+              "spacing": 6.2,
+              "radius": 1.9,
+              "vary": 0.25,
+              "chance": 0.45,
+              "stretch": 1.0,
+              "axis": "X",
+              "shape": "heart",
+              "softness": 0.05,
+              "invert": true
             }
           ],
           "op": {
@@ -112,7 +93,7 @@
           }
         },
         {
-          "name": "spots over the blanket and beyond it",
+          "name": "heart-shaped spots laid on the coat",
           "masks": [
             {
               "type": "SPOTS",
@@ -122,11 +103,14 @@
                 "HIND_LEGS"
               ],
               "seed": "$spotSeed",
-              "spacing": 2.8,
-              "radius": 0.9,
-              "vary": 0.55,
+              "spacing": 5.6,
+              "radius": 2.1,
+              "vary": 0.25,
               "chance": 0.5,
-              "softness": 0.12
+              "stretch": 1.0,
+              "axis": "X",
+              "shape": "heart",
+              "softness": 0.05
             }
           ],
           "op": {

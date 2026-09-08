@@ -45,17 +45,17 @@
     {
       "id": "white",
       "name": "Cleave",
-      "description": "White and coat take about half the horse each - between 45 and 55 per cent, never outside 35 to 65. White has the head, the front and underside of the neck, the chest, the forelegs, the front of the shoulder and the underside of the barrel; the coat keeps the crest, withers, back, croup, hindquarters, hind legs and the back of the barrel. The dividing zone runs obliquely down and forward from the withers toward the elbow, then back along the belly. What makes it Cleave is the boundary: each field drives long narrow triangles into the other, ten to thirty degrees at the point, straight or slightly hollow along the sides, never convex, and often with smaller teeth splitting off the flanks of the big ones. Detached fragments of the same shape float within a hand's span of the line on both sides. Every edge is hard - no gradient, no roaning, no feathering anywhere on the horse - and the two sides are not mirrored. It takes two copies.",
+      "description": "White and coat take about half the horse each - between 45 and 55 per cent, never outside 35 to 65. White has the head, the front and underside of the neck, the chest, the forelegs and the front of the shoulder; the coat keeps the withers, back, croup, hindquarters and hind legs. What makes it Cleave is the boundary: each field drives long narrow triangles into the other, straight along the sides and never convex, with smaller teeth splitting off the flanks of the big ones and the pattern of them different on the two sides. Detached spears of the same shape float within a hand's span of the line. Every edge is hard - no gradient, no roaning, no feathering anywhere on the horse. It takes two copies.",
       "when": [
         "Clv/Clv",
         "Clv/Clc"
       ],
       "layers": [
         {
-          "name": "the white half, and the spears it drives into the other",
+          "name": "the white half, and the straight-sided teeth it drives into the other",
           "masks": [
             {
-              "type": "AXIS",
+              "type": "WAVES",
               "parts": [
                 "BODY",
                 "NECK",
@@ -64,30 +64,90 @@
                 "MUZZLE",
                 "FRONT_LEGS"
               ],
-              "axis": "X",
+              "seed": "$toothSeed",
+              "axis": "Y",
+              "across": "X",
+              "shape": "triangle",
               "space": "body",
               "from": "$split",
-              "to": 1.0,
-              "softness": 0.02
+              "to": 1.6,
+              "wavelength": 4.2,
+              "amplitude": 0.075,
+              "softness": 0.004
             },
             {
-              "type": "STROKES",
+              "type": "WAVES",
               "parts": [
                 "BODY",
                 "NECK",
                 "HEAD",
+                "EARS",
+                "MUZZLE",
+                "FRONT_LEGS"
+              ],
+              "seed": "$toothSeed",
+              "axis": "Z",
+              "across": "X",
+              "shape": "triangle",
+              "space": "body",
+              "from": "$split",
+              "to": 1.6,
+              "wavelength": 3.1,
+              "amplitude": 0.06,
+              "softness": 0.004,
+              "combine": "MAX"
+            },
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "EARS",
+                "MUZZLE",
+                "FRONT_LEGS"
+              ],
+              "seed": "$toothSeed",
+              "axis": "Y",
+              "across": "X",
+              "shape": "saw",
+              "space": "body",
+              "from": "$split",
+              "to": 1.6,
+              "wavelength": 1.6,
+              "amplitude": 0.035,
+              "softness": 0.004,
+              "combine": "MAX"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#ffffff",
+            "strength": 100
+          }
+        },
+        {
+          "name": "detached spears floating in front of the line",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "EARS",
                 "MUZZLE",
                 "FRONT_LEGS",
                 "HIND_LEGS"
               ],
               "seed": "$toothSeed",
-              "spacing": 4.5,
-              "length": 2.2,
+              "spacing": 3.6,
+              "radius": 1.3,
+              "vary": 0.6,
+              "chance": 0.35,
+              "stretch": 2.4,
               "axis": "X",
-              "width": 1.6,
-              "curl": 1.4,
-              "softness": 0.02,
-              "combine": "MAX"
+              "softness": 0.02
             },
             {
               "type": "AXIS",
@@ -103,9 +163,9 @@
               "axis": "X",
               "space": "body",
               "from": "$reach",
-              "to": 1.0,
+              "to": "$split",
               "softness": 0.02,
-              "combine": "MIN"
+              "combine": "MULTIPLY"
             }
           ],
           "op": {
@@ -125,10 +185,10 @@
       },
       "layers": [
         {
-          "name": "the white half, and the spears it drives into the other, in colour",
+          "name": "the white half, and the straight-sided teeth it drives into the other, in colour",
           "masks": [
             {
-              "type": "AXIS",
+              "type": "WAVES",
               "parts": [
                 "BODY",
                 "NECK",
@@ -137,30 +197,92 @@
                 "MUZZLE",
                 "FRONT_LEGS"
               ],
-              "axis": "X",
+              "seed": "$toothSeed",
+              "axis": "Y",
+              "across": "X",
+              "shape": "triangle",
               "space": "body",
               "from": "$split",
-              "to": 1.0,
-              "softness": 0.02
+              "to": 1.6,
+              "wavelength": 4.2,
+              "amplitude": 0.075,
+              "softness": 0.004
             },
             {
-              "type": "STROKES",
+              "type": "WAVES",
               "parts": [
                 "BODY",
                 "NECK",
                 "HEAD",
+                "EARS",
+                "MUZZLE",
+                "FRONT_LEGS"
+              ],
+              "seed": "$toothSeed",
+              "axis": "Z",
+              "across": "X",
+              "shape": "triangle",
+              "space": "body",
+              "from": "$split",
+              "to": 1.6,
+              "wavelength": 3.1,
+              "amplitude": 0.06,
+              "softness": 0.004,
+              "combine": "MAX"
+            },
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "EARS",
+                "MUZZLE",
+                "FRONT_LEGS"
+              ],
+              "seed": "$toothSeed",
+              "axis": "Y",
+              "across": "X",
+              "shape": "saw",
+              "space": "body",
+              "from": "$split",
+              "to": 1.6,
+              "wavelength": 1.6,
+              "amplitude": 0.035,
+              "softness": 0.004,
+              "combine": "MAX"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "hue": "$hue",
+            "saturation": 0.8,
+            "lightness": 0.55
+          }
+        },
+        {
+          "name": "detached spears floating in front of the line, in colour",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "EARS",
                 "MUZZLE",
                 "FRONT_LEGS",
                 "HIND_LEGS"
               ],
               "seed": "$toothSeed",
-              "spacing": 4.5,
-              "length": 2.2,
+              "spacing": 3.6,
+              "radius": 1.3,
+              "vary": 0.6,
+              "chance": 0.35,
+              "stretch": 2.4,
               "axis": "X",
-              "width": 1.6,
-              "curl": 1.4,
-              "softness": 0.02,
-              "combine": "MAX"
+              "softness": 0.02
             },
             {
               "type": "AXIS",
@@ -176,9 +298,9 @@
               "axis": "X",
               "space": "body",
               "from": "$reach",
-              "to": 1.0,
+              "to": "$split",
               "softness": 0.02,
-              "combine": "MIN"
+              "combine": "MULTIPLY"
             }
           ],
           "op": {

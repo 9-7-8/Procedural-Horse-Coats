@@ -292,11 +292,30 @@
     <thead><tr><th>Knob</th><th>Range</th><th>What it does</th></tr></thead>
     <tbody>
         <tr><td><code>nextLong()</code></td><td>&mdash;</td><td>The warp, break and per-band field's seed</td></tr>
-        <tr><td>spacing</td><td>2.2&ndash;3.6 body units</td><td>Six to ten streaks along the 22-unit barrel, before the break field and the per-side roll take some away</td></tr>
-        <tr><td>duty</td><td>0.30&ndash;0.46</td><td>Mean fraction of each period that is streak, before the per-band width hash varies it &mdash; thinner than the gaps</td></tr>
-        <tr><td>warp</td><td>0.5&ndash;1.2 body units</td><td>How far the noise bends a streak off its plane</td></tr>
+        <tr><td>spacing</td><td>2.0&ndash;3.2 body units</td><td>Seven to eleven streaks along the 22-unit barrel, before the break field and the per-side roll take some away</td></tr>
+        <tr><td>duty</td><td>0.16&ndash;0.30</td><td>Mean fraction of each period that is streak, before the per-band width hash varies it &mdash; <em>much</em> thinner than the gaps</td></tr>
+        <tr><td>warp</td><td>0.4&ndash;0.95 body units</td><td>How far the noise bends a streak off its plane</td></tr>
     </tbody>
 </table>
+
+<div class="note">
+    <span class="label">The first pass drew a soft-edged zebra</span>
+    <p>
+        Duty ran 0.30&ndash;0.46 with a soft edge 0.22 of a period wide on top, which put
+        about as much white on the horse as coat &mdash; and a horse whose light and dark
+        bands are the same width reads as a zebra with the edges rubbed out, whatever the
+        field underneath it is doing. The break field was gentle for the same reason: a
+        threshold of 0.32 sampled over a long stretch of body removes one <em>end</em> of
+        a streak rather than punching a series of gaps in it.
+    </p>
+    <p>
+        Both came down together in the same pass &mdash; duty and the edge that scales
+        with it, then the break threshold up and its feature size down, so a streak now
+        arrives as four or five short dashes rather than one long bar. The pattern only
+        reads as brindle when the coat is plainly the ground and the streaks are marks
+        made on it.
+    </p>
+</div>
 
 <p>
     <strong>The warp has to stay well under half the spacing.</strong> Brindle is a

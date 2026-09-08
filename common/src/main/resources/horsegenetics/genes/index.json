@@ -1,5 +1,6 @@
 [
   "accretion.json",
+  "accretion_field.json",
   "angler.json",
   "auroraband.json",
   "aurorae.json",
@@ -31,7 +32,6 @@
   "gudial.json",
   "guppy.json",
   "hood.json",
-  "hued_pangare.json",
   "imperial.json",
   "integration.json",
   "internal_flow.json",

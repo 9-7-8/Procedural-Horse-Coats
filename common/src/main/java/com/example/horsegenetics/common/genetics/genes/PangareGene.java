@@ -252,13 +252,10 @@ public final class PangareGene implements Gene {
 
         PigmentField out = coat.mutableCopy();
         HorseSkinGeometry.forEachTexel(skin, (px, py, part, face, point) -> {
-            double w = regionWeight(skin, part, face, point);
-            if (w <= 0) {
+            float k = (float) clamp01(intensity * mealyCoverage(skin, part, face, point));
+            if (k <= 0) {
                 return;
             }
-            double mottle = 1.0 - MOTTLE_DEPTH * BodyNoise.value(MOTTLE_SEED,
-                    point.x() * MOTTLE_SCALE, point.y() * MOTTLE_SCALE, point.z() * MOTTLE_SCALE);
-            float k = (float) clamp01(intensity * w * mottle);
             float red = out.red(px, py);
             if (red > MEALY_RED) {
                 out.setRed(px, py, red + (MEALY_RED - red) * k);
@@ -267,7 +264,23 @@ public final class PangareGene implements Gene {
         return out;
     }
 
-    private static double strength(double score) {
+    /**
+     * <b>The mealy field itself</b>, 0 to 1: the region map times the mottle,
+     * and nothing about pigment. Shared with {@link HuedPangareGene}, which
+     * paints exactly this shape in colour instead of taking red out of it -
+     * see that class for why the two must not each carry their own copy.
+     */
+    static double mealyCoverage(Skin skin, Part part, Face face, BodyPoint point) {
+        double w = regionWeight(skin, part, face, point);
+        if (w <= 0) {
+            return 0;
+        }
+        double mottle = 1.0 - MOTTLE_DEPTH * BodyNoise.value(MOTTLE_SEED,
+                point.x() * MOTTLE_SCALE, point.y() * MOTTLE_SCALE, point.z() * MOTTLE_SCALE);
+        return clamp01(w * mottle);
+    }
+
+    static double strength(double score) {
         return clamp01((score - CLEAR_MAX) / (MAX_DOSAGE - CLEAR_MAX));
     }
 

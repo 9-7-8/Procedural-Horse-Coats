@@ -161,6 +161,31 @@ window.HG = window.HG || {};
     };
   }
 
+  /**
+   * Distance to the nearest WALL between two cells of the jittered lattice -
+   * half the difference of the two nearest centre distances. The polygon field
+   * CRACKLE draws; the port of BodyNoise.cellEdge.
+   */
+  function cellEdge(seed, x, y, z) {
+    var cache = cacheFor(seed);
+    var cx = floor(x), cy = floor(y), cz = floor(z);
+    var best = Infinity, second = Infinity;
+    for (var dx = -1; dx <= 1; dx++) {
+      for (var dy = -1; dy <= 1; dy++) {
+        for (var dz = -1; dz <= 1; dz++) {
+          var lx = cx + dx, ly = cy + dy, lz = cz + dz;
+          var px = lx + hash01(cache, seed, lx, ly, lz, 1);
+          var py = ly + hash01(cache, seed, lx, ly, lz, 2);
+          var pz = lz + hash01(cache, seed, lx, ly, lz, 3);
+          var d = (px - x) * (px - x) + (py - y) * (py - y) + (pz - z) * (pz - z);
+          if (d < best) { second = best; best = d; }
+          else if (d < second) { second = d; }
+        }
+      }
+    }
+    return (Math.sqrt(second) - Math.sqrt(best)) / 2;
+  }
+
   /** Smooth value noise in [0, 1] on a unit lattice. */
   function value(seed, x, y, z) {
     var cache = cacheFor(seed);
@@ -212,6 +237,7 @@ window.HG = window.HG || {};
     K3: K3,
     cellDistance: cellDistance,
     cell: cell,
+    cellEdge: cellEdge,
     ridge: ridge,
     value: value,
     stripeCoverage: stripeCoverage,

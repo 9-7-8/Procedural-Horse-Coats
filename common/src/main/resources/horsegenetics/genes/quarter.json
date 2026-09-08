@@ -5,7 +5,7 @@
   "phase": "magical",
   "priority": 271,
   "rarity": "COMMON",
-  "blurb": "The trunk cut into quadrants by two transverse planes and the midline, with one of them going pale - or two, on the other allele.",
+  "blurb": "The trunk cut by a transverse plane and a level one, with one of the four quadrants going pale - or a whole half, on the other allele.",
   "alleles": [
     {
       "token": "Qp",
@@ -38,13 +38,31 @@
       "name": "hue",
       "min": 0.0,
       "max": 360.0
+    },
+    {
+      "name": "sideSeed",
+      "type": "seed"
+    },
+    {
+      "name": "planeSeed",
+      "type": "seed"
+    },
+    {
+      "name": "xCut",
+      "min": 15.0,
+      "max": 25.0
+    },
+    {
+      "name": "yCut",
+      "min": 14.5,
+      "max": 18.5
     }
   ],
   "expressions": [
     {
       "id": "double",
       "name": "Double Quarter",
-      "description": "Two quadrants instead of one - the two front, the two back, the two upper, the two lower, or a diagonal pair. Between a third and three-fifths of the horse. Where the pair is adjacent there is no seam at the shared boundary and the two read as one field; where it is diagonal the two meet over a bridge at the trunk's centre, or stay apart across a narrow isthmus of coat.",
+      "description": "Half the trunk rather than a quarter of it: either both front quadrants, both back, both upper or both lower, so one of the two cutting planes disappears and the two quadrants read as a single field with no seam where they meet. Between a third and three-fifths of the horse. Which plane survives and which side of it is pale are both settled at birth.",
       "when": [
         "Qd/Qd",
         "Qd/n",
@@ -52,7 +70,7 @@
       ],
       "layers": [
         {
-          "name": "two quadrants, softly bounded",
+          "name": "the two front quadrants",
           "masks": [
             {
               "type": "AXIS",
@@ -61,11 +79,110 @@
                 "NECK"
               ],
               "axis": "X",
-              "space": "body",
-              "from": 0.0,
-              "to": 0.5,
-              "softness": 0.5
+              "space": "units",
+              "from": "$xCut",
+              "to": 45.0,
+              "softness": 2.4
             },
+            {
+              "type": "NOISE",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$sideSeed",
+              "scale": 4000.0,
+              "low": -200.0,
+              "high": 201.0
+            },
+            {
+              "type": "NOISE",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$planeSeed",
+              "scale": 4000.0,
+              "low": -200.0,
+              "high": 201.0
+            },
+            {
+              "type": "NOISE",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$cornerSeed",
+              "scale": 14.0,
+              "low": 0.55,
+              "high": "$fill"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#f2eee3",
+            "strength": 88
+          }
+        },
+        {
+          "name": "the two back quadrants",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "axis": "X",
+              "space": "units",
+              "from": -5.0,
+              "to": "$xCut",
+              "softness": 2.4
+            },
+            {
+              "type": "NOISE",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$sideSeed",
+              "scale": 4000.0,
+              "low": -200.0,
+              "high": 201.0,
+              "invert": true
+            },
+            {
+              "type": "NOISE",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$planeSeed",
+              "scale": 4000.0,
+              "low": -200.0,
+              "high": 201.0
+            },
+            {
+              "type": "NOISE",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$cornerSeed",
+              "scale": 14.0,
+              "low": 0.55,
+              "high": "$fill"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#f2eee3",
+            "strength": 88
+          }
+        },
+        {
+          "name": "the two upper quadrants",
+          "masks": [
             {
               "type": "AXIS",
               "parts": [
@@ -73,11 +190,90 @@
                 "NECK"
               ],
               "axis": "Y",
-              "space": "part",
-              "from": 0.45,
-              "to": 1.0,
-              "softness": 0.5,
-              "combine": "MAX"
+              "space": "units",
+              "from": "$yCut",
+              "to": 40.0,
+              "softness": 2.4
+            },
+            {
+              "type": "NOISE",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$sideSeed",
+              "scale": 4000.0,
+              "low": -200.0,
+              "high": 201.0
+            },
+            {
+              "type": "NOISE",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$planeSeed",
+              "scale": 4000.0,
+              "low": -200.0,
+              "high": 201.0,
+              "invert": true
+            },
+            {
+              "type": "NOISE",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$cornerSeed",
+              "scale": 14.0,
+              "low": 0.55,
+              "high": "$fill"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#f2eee3",
+            "strength": 88
+          }
+        },
+        {
+          "name": "the two lower quadrants",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "axis": "Y",
+              "space": "units",
+              "from": -5.0,
+              "to": "$yCut",
+              "softness": 2.4
+            },
+            {
+              "type": "NOISE",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$sideSeed",
+              "scale": 4000.0,
+              "low": -200.0,
+              "high": 201.0,
+              "invert": true
+            },
+            {
+              "type": "NOISE",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$planeSeed",
+              "scale": 4000.0,
+              "low": -200.0,
+              "high": 201.0,
+              "invert": true
             },
             {
               "type": "NOISE",
@@ -108,7 +304,7 @@
       },
       "layers": [
         {
-          "name": "two quadrants, softly bounded, in colour",
+          "name": "the two front quadrants, in colour",
           "masks": [
             {
               "type": "AXIS",
@@ -117,23 +313,32 @@
                 "NECK"
               ],
               "axis": "X",
-              "space": "body",
-              "from": 0.0,
-              "to": 0.5,
-              "softness": 0.5
+              "space": "units",
+              "from": "$xCut",
+              "to": 45.0,
+              "softness": 2.4
             },
             {
-              "type": "AXIS",
+              "type": "NOISE",
               "parts": [
                 "BODY",
                 "NECK"
               ],
-              "axis": "Y",
-              "space": "part",
-              "from": 0.45,
-              "to": 1.0,
-              "softness": 0.5,
-              "combine": "MAX"
+              "seed": "$sideSeed",
+              "scale": 4000.0,
+              "low": -200.0,
+              "high": 201.0
+            },
+            {
+              "type": "NOISE",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$planeSeed",
+              "scale": 4000.0,
+              "low": -200.0,
+              "high": 201.0
             },
             {
               "type": "NOISE",
@@ -151,25 +356,12 @@
             "type": "TOWARD",
             "strength": 88,
             "hue": "$hue",
-            "saturation": 0.82,
-            "lightness": 0.58
+            "saturation": 0.8,
+            "lightness": 0.55
           }
-        }
-      ]
-    },
-    {
-      "id": "part",
-      "name": "Part Quarter",
-      "description": "One contiguous quadrant of the trunk, a fifth to a third of the horse. The transverse boundary sits square to the body axis and the long one follows the trunk's midline, and the two do not meet in a corner - the intersection is rounded off over a wide radius. Both boundaries are long soft gradients rather than lines. The quadrant may be filled anywhere from three-fifths to fully, and where it falls short the gap is taken from the corner furthest from its centre.",
-      "when": [
-        "Qp/Qp",
-        "Qp/Qd",
-        "Qp/n",
-        "Qp/Qc"
-      ],
-      "layers": [
+        },
         {
-          "name": "one quadrant, softly bounded",
+          "name": "the two back quadrants, in colour",
           "masks": [
             {
               "type": "AXIS",
@@ -178,10 +370,198 @@
                 "NECK"
               ],
               "axis": "X",
-              "space": "body",
-              "from": 0.0,
-              "to": 0.5,
-              "softness": 0.5
+              "space": "units",
+              "from": -5.0,
+              "to": "$xCut",
+              "softness": 2.4
+            },
+            {
+              "type": "NOISE",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$sideSeed",
+              "scale": 4000.0,
+              "low": -200.0,
+              "high": 201.0,
+              "invert": true
+            },
+            {
+              "type": "NOISE",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$planeSeed",
+              "scale": 4000.0,
+              "low": -200.0,
+              "high": 201.0
+            },
+            {
+              "type": "NOISE",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$cornerSeed",
+              "scale": 14.0,
+              "low": 0.55,
+              "high": "$fill"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 88,
+            "hue": "$hue",
+            "saturation": 0.8,
+            "lightness": 0.55
+          }
+        },
+        {
+          "name": "the two upper quadrants, in colour",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "axis": "Y",
+              "space": "units",
+              "from": "$yCut",
+              "to": 40.0,
+              "softness": 2.4
+            },
+            {
+              "type": "NOISE",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$sideSeed",
+              "scale": 4000.0,
+              "low": -200.0,
+              "high": 201.0
+            },
+            {
+              "type": "NOISE",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$planeSeed",
+              "scale": 4000.0,
+              "low": -200.0,
+              "high": 201.0,
+              "invert": true
+            },
+            {
+              "type": "NOISE",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$cornerSeed",
+              "scale": 14.0,
+              "low": 0.55,
+              "high": "$fill"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 88,
+            "hue": "$hue",
+            "saturation": 0.8,
+            "lightness": 0.55
+          }
+        },
+        {
+          "name": "the two lower quadrants, in colour",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "axis": "Y",
+              "space": "units",
+              "from": -5.0,
+              "to": "$yCut",
+              "softness": 2.4
+            },
+            {
+              "type": "NOISE",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$sideSeed",
+              "scale": 4000.0,
+              "low": -200.0,
+              "high": 201.0,
+              "invert": true
+            },
+            {
+              "type": "NOISE",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$planeSeed",
+              "scale": 4000.0,
+              "low": -200.0,
+              "high": 201.0,
+              "invert": true
+            },
+            {
+              "type": "NOISE",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$cornerSeed",
+              "scale": 14.0,
+              "low": 0.55,
+              "high": "$fill"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 88,
+            "hue": "$hue",
+            "saturation": 0.8,
+            "lightness": 0.55
+          }
+        }
+      ]
+    },
+    {
+      "id": "part",
+      "name": "Part Quarter",
+      "description": "One contiguous quadrant of the trunk, a fifth to a third of the horse. Two planes cut it: one square across the body axis, one level through it, and the quadrant the pale field takes is settled at birth and does not move. The transverse boundary sits square to the body and the level one runs the length of it, and the two do not meet in a corner - the intersection rounds off over a wide radius because both boundaries are long soft gradients rather than lines. The quadrant may be filled anywhere from three-fifths to fully, and where it falls short the gap is taken from the corner furthest from its centre.",
+      "when": [
+        "Qp/Qp",
+        "Qp/Qd",
+        "Qp/n",
+        "Qp/Qc"
+      ],
+      "layers": [
+        {
+          "name": "the front upper quadrant",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "axis": "X",
+              "space": "units",
+              "from": "$xCut",
+              "to": 45.0,
+              "softness": 2.4
             },
             {
               "type": "AXIS",
@@ -190,10 +570,237 @@
                 "NECK"
               ],
               "axis": "Y",
-              "space": "part",
-              "from": 0.45,
-              "to": 1.0,
-              "softness": 0.5
+              "space": "units",
+              "from": "$yCut",
+              "to": 40.0,
+              "softness": 2.4
+            },
+            {
+              "type": "NOISE",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$sideSeed",
+              "scale": 4000.0,
+              "low": -200.0,
+              "high": 201.0
+            },
+            {
+              "type": "NOISE",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$planeSeed",
+              "scale": 4000.0,
+              "low": -200.0,
+              "high": 201.0
+            },
+            {
+              "type": "NOISE",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$cornerSeed",
+              "scale": 14.0,
+              "low": 0.55,
+              "high": "$fill"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#f2eee3",
+            "strength": 88
+          }
+        },
+        {
+          "name": "the front lower quadrant",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "axis": "X",
+              "space": "units",
+              "from": "$xCut",
+              "to": 45.0,
+              "softness": 2.4
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "axis": "Y",
+              "space": "units",
+              "from": -5.0,
+              "to": "$yCut",
+              "softness": 2.4
+            },
+            {
+              "type": "NOISE",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$sideSeed",
+              "scale": 4000.0,
+              "low": -200.0,
+              "high": 201.0
+            },
+            {
+              "type": "NOISE",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$planeSeed",
+              "scale": 4000.0,
+              "low": -200.0,
+              "high": 201.0,
+              "invert": true
+            },
+            {
+              "type": "NOISE",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$cornerSeed",
+              "scale": 14.0,
+              "low": 0.55,
+              "high": "$fill"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#f2eee3",
+            "strength": 88
+          }
+        },
+        {
+          "name": "the back upper quadrant",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "axis": "X",
+              "space": "units",
+              "from": -5.0,
+              "to": "$xCut",
+              "softness": 2.4
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "axis": "Y",
+              "space": "units",
+              "from": "$yCut",
+              "to": 40.0,
+              "softness": 2.4
+            },
+            {
+              "type": "NOISE",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$sideSeed",
+              "scale": 4000.0,
+              "low": -200.0,
+              "high": 201.0,
+              "invert": true
+            },
+            {
+              "type": "NOISE",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$planeSeed",
+              "scale": 4000.0,
+              "low": -200.0,
+              "high": 201.0
+            },
+            {
+              "type": "NOISE",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$cornerSeed",
+              "scale": 14.0,
+              "low": 0.55,
+              "high": "$fill"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#f2eee3",
+            "strength": 88
+          }
+        },
+        {
+          "name": "the back lower quadrant",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "axis": "X",
+              "space": "units",
+              "from": -5.0,
+              "to": "$xCut",
+              "softness": 2.4
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "axis": "Y",
+              "space": "units",
+              "from": -5.0,
+              "to": "$yCut",
+              "softness": 2.4
+            },
+            {
+              "type": "NOISE",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$sideSeed",
+              "scale": 4000.0,
+              "low": -200.0,
+              "high": 201.0,
+              "invert": true
+            },
+            {
+              "type": "NOISE",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$planeSeed",
+              "scale": 4000.0,
+              "low": -200.0,
+              "high": 201.0,
+              "invert": true
             },
             {
               "type": "NOISE",

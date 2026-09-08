@@ -445,6 +445,158 @@ window.HG.examples = {
             }
           },
           {
+            "name": "waves of light along the barrel",
+            "masks": [
+              {
+                "type": "WAVES",
+                "parts": [
+                  "BODY"
+                ],
+                "seed": "$strokeSeed",
+                "axis": "X",
+                "across": "Y",
+                "space": "units",
+                "from": -0.4,
+                "to": 0.4,
+                "wavelength": 11.0,
+                "amplitude": 1.4,
+                "spacing": 3.2,
+                "phase": 0.6,
+                "softness": 0.3
+              }
+            ],
+            "op": {
+              "type": "TOWARD",
+              "color": "#9fd6ff",
+              "strength": 74
+            }
+          },
+          {
+            "name": "a giraffe panel over the hindquarter",
+            "masks": [
+              {
+                "type": "CRACKLE",
+                "parts": [
+                  "BODY"
+                ],
+                "seed": "$spotSeed",
+                "scale": 4.2,
+                "gap": 0.6,
+                "warp": 0.4,
+                "chance": 0.8,
+                "softness": 0.06
+              },
+              {
+                "type": "AXIS",
+                "parts": [
+                  "BODY"
+                ],
+                "axis": "X",
+                "space": "part",
+                "from": 0.0,
+                "to": 0.32,
+                "softness": 0.1
+              }
+            ],
+            "op": {
+              "type": "TOWARD",
+              "color": "#3a2a12",
+              "strength": 80
+            }
+          },
+          {
+            "name": "hearts on the shoulder",
+            "masks": [
+              {
+                "type": "SPOTS",
+                "parts": [
+                  "NECK"
+                ],
+                "seed": "$spotSeed",
+                "spacing": 3.4,
+                "radius": 1.1,
+                "vary": 0.3,
+                "chance": 0.6,
+                "stretch": 1.0,
+                "axis": "X",
+                "shape": "heart",
+                "softness": 0.12
+              }
+            ],
+            "op": {
+              "type": "TOWARD",
+              "color": "#ff5fa2",
+              "strength": 88
+            }
+          },
+          {
+            "name": "a halo grown out of whatever white the horse has",
+            "masks": [
+              {
+                "type": "PIGMENT",
+                "parts": [
+                  "BODY",
+                  "NECK",
+                  "HEAD",
+                  "LEGS"
+                ],
+                "channel": "total",
+                "from": 0.05,
+                "to": 0.3,
+                "spread": 2.5,
+                "invert": true
+              }
+            ],
+            "op": {
+              "type": "TOWARD",
+              "color": "#cfe9ff",
+              "strength": 55
+            }
+          },
+          {
+            "name": "a sawtooth and a zigzag edge on the shoulder",
+            "masks": [
+              {
+                "type": "WAVES",
+                "parts": [
+                  "NECK"
+                ],
+                "seed": "$strokeSeed",
+                "axis": "Y",
+                "across": "X",
+                "shape": "triangle",
+                "space": "part",
+                "from": 0.0,
+                "to": 0.45,
+                "wavelength": 3.0,
+                "amplitude": 0.12,
+                "softness": 0.01
+              },
+              {
+                "type": "WAVES",
+                "parts": [
+                  "NECK"
+                ],
+                "seed": "$spotSeed",
+                "axis": "X",
+                "across": "Y",
+                "shape": "saw",
+                "space": "part",
+                "from": 0.3,
+                "to": 1.0,
+                "wavelength": 4.0,
+                "amplitude": 0.1,
+                "softness": 0.01,
+                "combine": "MIN"
+              }
+            ],
+            "op": {
+              "type": "TOWARD",
+              "color": "#ffe08a",
+              "strength": 70
+            }
+          },
+          {
             "name": "and one hind leg negated, so the parity check sees INVERT too",
             "masks": [
               {

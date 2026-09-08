@@ -78,6 +78,20 @@ public final class SpecSchema {
     /** Which pigment reading a {@code PIGMENT} mask thresholds. */
     public static final List<String> PIGMENT_CHANNELS = List.of("darkness", "red", "black", "total");
 
+    /** Which outline a {@code SPOTS} element is drawn with. */
+    public static final List<String> SPOT_SHAPES = List.of("round", "heart");
+
+    /**
+     * Which waveform a {@code WAVES} mask is displaced by.
+     *
+     * <p>{@code sine} scallops, {@code triangle} zigzags into teeth with
+     * straight sides, and {@code saw} ramps and then cuts back square - a row
+     * of spears all raked the same way. The last two are the only way in this
+     * vocabulary to ask for an edge made of <b>straight lines</b>: everything
+     * noise-derived rounds off, however hard the softness is wound down.
+     */
+    public static final List<String> WAVEFORMS = List.of("sine", "triangle", "saw");
+
     /**
      * Why every colour op takes an {@code hue} as well as a {@code color}: a
      * {@code color} is a constant, and a constant cannot be the thing a horse
@@ -155,7 +169,12 @@ public final class SpecSchema {
                 Param.choice("channel", PIGMENT_CHANNELS,
                         "'darkness' is 0.55*red + 0.95*black, the reading GreyCoat uses"),
                 Param.value("from", 0.5, "reading where coverage starts climbing"),
-                Param.value("to", 1.0, "reading where coverage reaches 1")));
+                Param.value("to", 1.0, "reading where coverage reaches 1"),
+                Param.value("spread", 0.0,
+                        "body units to grow the PALE side of the reading by: the mask takes the "
+                                + "lowest reading found within this radius, so a white marking's "
+                                + "influence reaches this far past its own edge and a gene can be "
+                                + "made to draw only where the horse already has white")));
 
         MASKS.put(MaskType.SPOTS, List.of(
                 Param.parts("parts", "restrict to these parts"),
@@ -166,6 +185,9 @@ public final class SpecSchema {
                 Param.value("chance", 1.0, "share of lattice cells that carry an element at all"),
                 Param.value("stretch", 1.0, "long-axis multiplier - 1 is round, 2 is a 2:1 oval"),
                 Param.choice("axis", List.of("X", "Y", "Z"), "the body axis the oval is stretched along"),
+                Param.choice("shape", SPOT_SHAPES,
+                        "'round' is the spot field; 'heart' swaps the disc for a heart, point down, "
+                                + "upright on the flank"),
                 Param.value("softness", 0.25, "edge fade, body units")));
 
         MASKS.put(MaskType.RINGS, List.of(
@@ -208,6 +230,42 @@ public final class SpecSchema {
                 Param.choice("axis", List.of("Z", "X", "Y"), "the axis the spiral is viewed down"),
                 Param.value("offset", 0.0, "shift the centre along the part's long axis, as a share of its span"),
                 Param.value("softness", 0.2, "edge fade, body units")));
+
+        MASKS.put(MaskType.WAVES, List.of(
+                Param.parts("parts", "restrict to these parts (and, in 'part' space, measure within each)"),
+                Param.value("seed", 0, "a seed knob; omit for a stable per-gene default"),
+                Param.choice("axis", List.of("X", "Y", "Z"), "the axis the wave runs along"),
+                Param.choice("across", List.of("Y", "X", "Z"), "the axis the wave displaces the band on"),
+                Param.choice("shape", WAVEFORMS,
+                        "'sine' scallops, 'triangle' zigzags into straight-sided teeth, 'saw' ramps "
+                                + "and cuts back square into raked spears"),
+                Param.choice("space", AXIS_SPACES,
+                        "how 'across' is measured, exactly as on an AXIS mask - and so the units "
+                                + "'from', 'to', 'amplitude', 'spacing' and 'softness' are in. "
+                                + "'wavelength' is always in body units"),
+                Param.value("from", 0.0, "start of the band, before the sine displaces it"),
+                Param.value("to", 1.0, "end of the band"),
+                Param.value("wavelength", 8.0, "body units per full oscillation along 'axis'"),
+                Param.value("amplitude", 0.5, "how far the sine displaces the band"),
+                Param.value("spacing", 0.0,
+                        "0 draws one band; above 0 repeats it every this far along 'across', "
+                                + "which is what turns an edge into a set of parallel ribbons"),
+                Param.value("phase", 0.0,
+                        "0 keeps every repeat in step, 1 gives each its own phase - read only "
+                                + "when 'spacing' is above 0"),
+                Param.value("softness", 0.15, "fade width outside the band")));
+
+        MASKS.put(MaskType.CRACKLE, List.of(
+                Param.parts("parts", "restrict to these parts"),
+                Param.value("seed", 0, "a seed knob; omit for a stable per-gene default"),
+                Param.value("scale", 5.0, "body units across one polygon"),
+                Param.value("gap", 0.5, "width of the channel between two polygons, body units"),
+                Param.value("warp", 0.35, "how far a low-frequency field pushes the polygons out of "
+                        + "true, as a share of the scale - 0 is a regular tiling"),
+                Param.value("chance", 1.0, "share of polygons that are filled at all"),
+                Param.value("softness", 0.08,
+                        "edge fade, body units - small on purpose, because the point of this mask "
+                                + "is the one hard edge in the vocabulary")));
 
         OPS.put(OpType.DILUTE, List.of(
                 Param.value("keepRed", 1.0, "share of red pigment kept"),

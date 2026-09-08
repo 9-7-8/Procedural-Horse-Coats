@@ -3,8 +3,8 @@ package com.example.horsegenetics.common.genetics;
 import java.util.List;
 
 /**
- * The three coats every other coat gene is <b>read against</b>: black, bay and
- * chestnut.
+ * The coats every other coat gene is <b>read against</b>: black, bay and
+ * chestnut, then the same bay wearing each of the three white patterns.
  *
  * <p>Extension and agouti are not markings - they are the pigment a marking
  * gene then has to work on, which is why {@link ShowcaseGenotypes} excludes
@@ -44,12 +44,31 @@ public final class BaseCoats {
      * why {@code GeneIconTool} already bakes every gene icon on one. Whatever
      * offers these, offers them in this order, and whatever defaults to the
      * first one now defaults to bay.
+     *
+     * <p><b>Then three bays with white on them</b>, heterozygous so the pattern
+     * is the ordinary one rather than the lethal or near-white homozygote.
+     * They are here because a solid horse is not a background at all for the
+     * genes that <i>modify somebody else's white</i> - Voided and Opalized
+     * recolour it, Fielded draws tendrils out of its edges and now draws
+     * nothing whatever without it. A preview of one of those on three solid
+     * horses is three pictures of a plain bay, which reads as a broken page
+     * rather than as a badly chosen background. The three cover the three
+     * shapes white comes in: tobiano's hard-edged patches down from the
+     * topline, splash's dipped-in-paint underside, and sabino's roan-edged
+     * legs and face.
      */
     public static List<BaseCoat> all() {
+        Genotype bay = of(Genes.EXTENSION.E, Genes.AGOUTI.A);
         return List.of(
-                new BaseCoat("bay", "Bay", of(Genes.EXTENSION.E, Genes.AGOUTI.A)),
+                new BaseCoat("bay", "Bay", bay),
                 new BaseCoat("black", "Black", of(Genes.EXTENSION.E, Genes.AGOUTI.a)),
-                new BaseCoat("chestnut", "Chestnut", of(Genes.EXTENSION.e, Genes.AGOUTI.a)));
+                new BaseCoat("chestnut", "Chestnut", of(Genes.EXTENSION.e, Genes.AGOUTI.a)),
+                new BaseCoat("tobiano", "Tobiano",
+                        bay.with(new AllelePair(Genes.TOBIANO.To, Genes.TOBIANO.to))),
+                new BaseCoat("splash", "Splash",
+                        bay.with(new AllelePair(Genes.MITF.SW1, Genes.MITF.N))),
+                new BaseCoat("sabino", "Sabino",
+                        bay.with(new AllelePair(Genes.KIT.SB1, Genes.KIT.N))));
     }
 
     /** @return null if no base coat has that key - the caller decides what that means. */
