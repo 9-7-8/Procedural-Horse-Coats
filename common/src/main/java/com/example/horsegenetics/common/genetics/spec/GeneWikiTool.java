@@ -23,8 +23,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Writes the wiki's pages for the <b>data-driven genes</b>: one page each, plus
- * a family index that gathers them by what they are made of.
+ * Writes the wiki's pages for the <b>data-driven genes</b>: one page each.
  *
  * <h2>Why these pages are generated and the others are not</h2>
  * Every other page on the wiki is hand-written, and should be: prose about a
@@ -38,19 +37,22 @@ import java.util.regex.Pattern;
  *
  * <h2>A hand-written page always wins</h2>
  * A gene with a page of its own that is <b>not</b> marked {@link #GENERATED} is
- * left completely alone, and the family index links to it like any other. That
- * is how Suntouched and Waterborn keep the pages somebody wrote for them. To
- * take a generated page over by hand, delete the marker comment and the tool
- * will never touch it again.
+ * left completely alone, and the sidebar and the landing page list it like any
+ * other. That is how Suntouched and Waterborn keep the pages somebody wrote for
+ * them. To take a generated page over by hand, delete the marker comment and
+ * the tool will never touch it again.
  *
  * <h2>The family is the priority band</h2>
  * A gene declares no family. It does not need to: the magical priority bands
  * were laid out as families in the first place - spots together, strokes
  * together, the things that read the coat beneath them last - because the paint
  * order and the taxonomy want the same grouping for the same reason.
- * {@link GeneFamily} is that table. It lives in {@code genetics/} rather than
- * here because the two gene editors group their gene list by the same families
- * and offer a "re-roll one family" randomize - three readers, one table.
+ * {@link GeneFamily} is that table, and it is what the sidebar's sections and
+ * the landing page's headings are cut from - there is no family page of its
+ * own, because a page that only lists a family's genes says exactly what the
+ * landing page already says. It lives in {@code genetics/} rather than here
+ * because the two gene editors group their gene list by the same families and
+ * offer a "re-roll one family" randomize - three readers, one table.
  *
  * <h2>What is <i>not</i> baked into a page</h2>
  * The rarity tier, the gene-carrot recipe and whether the Unknown Splice can
@@ -75,20 +77,10 @@ public final class GeneWikiTool {
     public static void main(String[] args) throws IOException {
         Path wiki = Path.of(args.length > 0 ? args[0] : "wiki");
 
-        Map<GeneFamily, List<SpecGene>> byFamily = new LinkedHashMap<>();
-        for (GeneFamily family : GeneFamily.magicalSpecFamilies()) {
-            byFamily.put(family, new ArrayList<>());
-        }
-        for (SpecGene gene : Genes.loaded()) {
-            byFamily.get(GeneFamily.ofMagicalPriority(gene.priority())).add(gene);
-        }
-
-        int written = 0;
         // Genes whose page somebody wrote by hand. They are skipped twice over:
         // the page is never overwritten, and the generated span of pages.js
         // leaves them out - a hand-written page is registered by hand, and
-        // listing it in both places puts it in the sidebar twice. The family
-        // index still links to it like any other.
+        // listing it in both places puts it in the sidebar twice.
         Set<String> handWritten = new LinkedHashSet<>();
         for (SpecGene gene : Genes.loaded()) {
             Path out = wiki.resolve(pageOf(gene));
@@ -98,27 +90,17 @@ public final class GeneWikiTool {
             }
         }
 
-        for (Map.Entry<GeneFamily, List<SpecGene>> e : byFamily.entrySet()) {
-            GeneFamily family = e.getKey();
-            List<SpecGene> genes = new ArrayList<>(e.getValue());
-            genes.sort((a, b) -> a.name().compareToIgnoreCase(b.name()));
-
-            for (SpecGene gene : genes) {
-                if (handWritten.contains(gene.key())) {
-                    continue;
-                }
-                Files.writeString(wiki.resolve(pageOf(gene)), genePage(gene, family),
-                        StandardCharsets.UTF_8);
-                written++;
+        int written = 0;
+        for (SpecGene gene : Genes.loaded()) {
+            if (handWritten.contains(gene.key())) {
+                continue;
             }
-
-            Path index = wiki.resolve(family.slug() + ".html");
-            Files.writeString(index, familyPage(family, genes, wiki), StandardCharsets.UTF_8);
+            Files.writeString(wiki.resolve(pageOf(gene)), genePage(gene), StandardCharsets.UTF_8);
+            written++;
         }
 
         System.out.println("wrote " + written + " gene pages ("
-                + handWritten.size() + " hand-written ones left alone: " + handWritten + ")"
-                + " and " + GeneFamily.magicalSpecFamilies().size() + " family indexes");
+                + handWritten.size() + " hand-written ones left alone: " + handWritten + ")");
 
         // Both of these list EVERY gene, not only the data-driven ones - see
         // geneSections. A gene page that nobody registered is unreachable from
@@ -215,14 +197,6 @@ public final class GeneWikiTool {
 
         for (GeneFamily family : GeneFamily.occupied()) {
             List<String> items = new ArrayList<>();
-
-            // The family's own index page leads its section, where there is one.
-            if (family.slug() != null) {
-                Path index = wiki.resolve(family.slug() + ".html");
-                items.add(item(family.slug() + ".html",
-                        "All " + family.title().toLowerCase(Locale.ROOT),
-                        "magical", viewsOf(index)));
-            }
 
             for (Gene gene : membersForMenu(family)) {
                 Path page = wiki.resolve(pageOf(gene));
@@ -376,7 +350,6 @@ public final class GeneWikiTool {
         }
         String page = Files.readString(landing, StandardCharsets.UTF_8).replace("\r\n", "\n");
         Map<String, String> existing = harvestCards(page);
-        Map<String, String> keptIcons = harvestIcons(page);
 
         StringBuilder body = new StringBuilder();
         body.append(LAND_BEGIN).append(" - do not edit between the markers.\n")
@@ -387,10 +360,6 @@ public final class GeneWikiTool {
         int generated = 0;
         for (GeneFamily family : GeneFamily.occupied()) {
             List<String> cards = new ArrayList<>();
-            if (family.slug() != null) {
-                String href = "wiki/" + family.slug() + ".html";
-                cards.add(familyCard(family, existing.get(href), keptIcons.get(href)));
-            }
             for (Gene gene : membersForMenu(family)) {
                 if (!Files.exists(wiki.resolve(pageOf(gene)))) {
                     continue;
@@ -550,9 +519,9 @@ public final class GeneWikiTool {
      * <p>Only the prose is kept. Everything structural is rebuilt from the gene
      * every time, so the href, the natural / magical class and the layout are
      * always what the registry and this tool say, and can never be a card that
-     * was moved between families and kept the old colour. The icon comes back
-     * through {@link #harvestIcons} rather than riding along inside the body,
-     * or a change to the markup here could not reach a card anybody had
+     * was moved between families and kept the old colour. The icon is stripped
+     * off rather than riding along inside the body, and derived again from the
+     * gene, or a change to the markup here could not reach a card anybody had
      * touched.
      */
     private static Map<String, String> harvestCards(String page) {
@@ -560,28 +529,6 @@ public final class GeneWikiTool {
         Matcher m = CARD.matcher(page);
         while (m.find()) {
             out.put(m.group(1), reindent(m.group(2)));
-        }
-        return out;
-    }
-
-    /**
-     * The icon each card on the page is <b>already</b> showing, keyed by href.
-     *
-     * <p>A gene's own icon is derived - it is the bake named after the gene -
-     * but a family card's is not: the family index cards each picked one
-     * representative gene's bake by hand, and there is nothing in the registry
-     * that would choose {@code panda.png} for the ground-and-strong-white
-     * family. So a card that has an icon this tool would not have picked keeps
-     * the one it has.
-     */
-    private static Map<String, String> harvestIcons(String page) {
-        Map<String, String> out = new LinkedHashMap<>();
-        Matcher m = CARD.matcher(page);
-        while (m.find()) {
-            Matcher icon = CARD_ICON.matcher(m.group(2));
-            if (icon.find()) {
-                out.put(m.group(1), icon.group(1));
-            }
         }
         return out;
     }
@@ -634,14 +581,6 @@ public final class GeneWikiTool {
                 + "        </a>\n";
     }
 
-    private static String familyCard(GeneFamily family, String body, String icon) {
-        return card("wiki/" + family.slug() + ".html", "magical", icon,
-                body != null ? body
-                        : "                <h3>All " + esc(family.title().toLowerCase(Locale.ROOT))
-                                + "</h3>\n                <p>" + esc(family.lede())
-                                + "</p>\n                <span class=\"tag\">index</span>\n");
-    }
-
     /**
      * A card for a gene nobody wrote one for: its own blurb, its alleles, and
      * its baked icon if it has one. Deliberately thin - the point of a card is
@@ -672,82 +611,20 @@ public final class GeneWikiTool {
     }
 
     // ------------------------------------------------------------------
-    // The family index
-    // ------------------------------------------------------------------
-
-    private static String familyPage(GeneFamily family, List<SpecGene> genes, Path wiki) {
-        StringBuilder sb = new StringBuilder();
-        head(sb, family.title());
-        sb.append("<p class=\"eyebrow magical\">Magical genes <span class=\"sep\">/</span> ")
-                .append(genes.size()).append(" in this family</p>\n\n");
-        sb.append("<h1>").append(esc(family.title())).append("</h1>\n\n");
-        sb.append("<p class=\"lede\">\n    ").append(esc(family.lede())).append("\n</p>\n\n");
-        sb.append("<p class=\"note\">\n    An index. <strong>Each of these has its own page</strong>"
-                + " - that is where the\n    inheritance table, the gene carrot and how you actually"
-                + " come by one live.\n    The picture beside each name is that gene on a standard"
-                + " bay, baked through the\n    real coat pipeline rather than drawn. A gene with no"
-                + " picture is one that\n    changes no pixel of the coat - it does its work"
-                + " somewhere else.\n</p>\n\n");
-
-        sb.append("<section class=\"tab-panel\" data-tab=\"gameplay\">\n\n");
-        for (SpecGene gene : genes) {
-            sb.append("<h2 id=\"").append(slug(gene).replace('_', '-')).append("\"><a href=\"")
-                    .append(pageOf(gene)).append("\">").append(esc(gene.name())).append("</a></h2>\n\n");
-            sb.append("<div class=\"gene-card\">\n");
-            // Only where there is a bake. A gene that changes no pixel of the
-            // coat has no icon at all, and linking one would be a broken image.
-            if (Files.exists(wiki.resolve("assets/gene-icons/" + slug(gene) + ".png"))) {
-                sb.append("<a href=\"").append(pageOf(gene)).append("\">")
-                        .append("<img class=\"gene-card-icon\" src=\"assets/gene-icons/").append(slug(gene))
-                        .append(".png\" alt=\"").append(esc(gene.name()))
-                        .append(" on a bay horse\" width=\"150\" loading=\"lazy\"></a>\n");
-            }
-            sb.append("<div class=\"gene-card-body\">\n");
-            if (!gene.spec().blurb().isBlank()) {
-                sb.append("<p>").append(esc(gene.spec().blurb())).append("</p>\n");
-            }
-            sb.append("<p class=\"gene-card-alleles\">").append(alleleList(gene))
-                    .append(" &middot; <a href=\"").append(pageOf(gene))
-                    .append("\">full page</a></p>\n");
-            sb.append("</div>\n</div>\n\n");
-        }
-        sb.append("</section>\n\n");
-
-        sb.append("<section class=\"tab-panel\" data-tab=\"coding\">\n\n");
-        sb.append("<h2 id=\"files\">The files</h2>\n\n");
-        sb.append("<p>\n    Each of these is a JSON file in\n    "
-                + "<code>common/src/main/resources/horsegenetics/genes/</code>, listed in the\n    "
-                + "<code>index.json</code> beside them and loaded by <code>Genes</code>' class\n    "
-                + "initialiser. None is a Java class; see\n    "
-                + "<a href=\"gene-format.html\">the gene file format</a> for what the masks and "
-                + "ops mean.\n</p>\n\n");
-        sb.append("<div class=\"table-wrap\">\n<table class=\"facts\">\n<thead><tr>")
-                .append("<th>Gene</th><th>File</th><th>Priority</th>")
-                .append("<th>Masks and ops it uses</th></tr></thead>\n<tbody>\n");
-        for (SpecGene gene : genes) {
-            sb.append("<tr><td><a href=\"").append(pageOf(gene)).append("\">")
-                    .append(esc(gene.name())).append("</a></td>")
-                    .append("<td><code>").append(slug(gene)).append(".json</code></td>")
-                    .append("<td>").append(gene.priority()).append("</td>")
-                    .append("<td>").append(esc(String.join(", ", vocabulary(gene)))).append("</td></tr>\n");
-        }
-        sb.append("</tbody>\n</table>\n</div>\n\n</section>\n\n");
-        foot(sb);
-        return sb.toString();
-    }
-
-    // ------------------------------------------------------------------
     // One gene, one page
     // ------------------------------------------------------------------
 
-    private static String genePage(SpecGene gene, GeneFamily family) {
+    private static String genePage(SpecGene gene) {
+        // The family is the eyebrow's second half and nothing more: it names
+        // the sidebar section and the landing-page heading this gene sits
+        // under, neither of which is a page one could link to.
+        GeneFamily family = GeneFamily.ofMagicalPriority(gene.priority());
         String slug = slug(gene);
         StringBuilder sb = new StringBuilder();
         head(sb, gene.name());
 
         sb.append("<p class=\"eyebrow magical\">Magical gene <span class=\"sep\">/</span> ")
-                .append("<a href=\"").append(family.slug()).append(".html\">")
-                .append(esc(family.title().toLowerCase(Locale.ROOT))).append("</a></p>\n\n");
+                .append(esc(family.title().toLowerCase(Locale.ROOT))).append("</p>\n\n");
         sb.append("<h1>").append(esc(gene.name())).append("</h1>\n\n");
         if (!gene.spec().blurb().isBlank()) {
             sb.append("<p class=\"lede\">\n    ").append(esc(gene.spec().blurb())).append("\n</p>\n\n");

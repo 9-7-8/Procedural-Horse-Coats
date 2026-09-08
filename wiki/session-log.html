@@ -29,6 +29,29 @@
 
 <h2 id="d2026-09-08">2026-09-08</h2>
 
+<h3 id="icon-camera-2026-09-08">Built 2026-09-08: the gene icons were being drawn through a sheared camera, and every gene has one now &mdash; or honestly none.</h3>
+
+<p>Owner-driven, five requests in one, and one of them had to be answered twice. Written up in <code>GeneIconTool</code> and <code>HorseSkinGeometry.posed</code>; the card markup is <code>GeneWikiTool.card</code>.</p>
+
+<ul>
+
+<li><strong>Two separate bugs were making the icons wrong, and fixing the first one was not enough.</strong> The owner said the baked horses looked wrong; the mesh was fixed; the owner said they <em>still</em> looked wrong. That second report was correct and the useful part of the session. <strong>The mesh</strong> was the obvious half: the baker placed every texel on the part's rest-pose <em>bounding box</em>, which is all the coat pipeline ever needs, and the adult neck's AABB is nearly twice the neck &mdash; so the horse was a pile of oversized blocks with a rake of stripes for a tail. <code>model3d.js</code> had solved that for the browser preview years of sessions ago and says so in its own header; that arithmetic is now <code>HorseSkinGeometry.posed()</code> / <code>posedNormal()</code> on the Java side, and the two files name each other as twins.</li>
+
+<li><strong>The second bug was the camera, and it was a sign.</strong> <code>sideView</code> built its basis with cross products and wrote <code>up' = v &times; right</code> with two of its three terms negated, so &ldquo;up&rdquo; was about 45 degrees off perpendicular to the view direction &mdash; <code>dot(up, view)</code> came out at essentially 1 rather than 0. <strong>An orthographic projection down a non-orthogonal basis is a shear along the view axis</strong>: every part slid up or down the image by its own depth, which put the head in the sky, the tail on the floor, and the legs nowhere near the barrel they hang off. The basis now comes straight out of an azimuth and an elevation, so all three axes are orthonormal by construction rather than by a cross product somebody has to check, and the camera can be read back as a viewpoint instead of three hand-tuned components.</li>
+
+<li><strong>The lesson is that the picture was not enough.</strong> The sheared horse read <em>enough</em> like a horse to survive being looked at twice, once by the owner and once by me immediately after fixing the mesh underneath it. <a href="known-gaps.html#gap-13">Gap 13</a>'s cousin: looking at the output is necessary and is not sufficient when &ldquo;it looks like a horse&rdquo; is the whole test. Two cheap checks would have caught it in seconds &mdash; the three dot products of the basis, and <strong>counting enclosed transparent pixels</strong>, which went from 568 on a plain bay to zero once the projection stopped shearing the texel grid apart.</li>
+
+<li><strong>An icon for every gene, and the allele it advertises is measured rather than assumed.</strong> The baker walked the data-driven genes only, so 88 of 155 had a picture; it walks the registry now. Which allele to show could not be found by equality: swapping an allele copy swaps the <em>epigenome slot</em> the coat reads with it, so <code>A/A</code> is never byte-identical to the <code>A/a</code> underneath it, and a plain difference test was about to illustrate Agouti with a bay. It counts the texels that moved by a channel step or more and takes the loudest allele, which gives Extension its chestnut and Agouti its black. The fallback backdrop became a ladder &mdash; tobiano bay, chestnut, leopard bay &mdash; and that is what gets Flaxen, PATN1 and PATN2 a picture of themselves rather than of the horse under them.</li>
+
+<li><strong>A gene that changes no pixel gets no icon at all</strong> (owner's call, once the rest was working). Thirty-six of them &mdash; the health loci, the four magical stat genes, and the ones like cutie mark and particle that do their work in a client render layer rather than in the sheet &mdash; were baking as the plain bay. That is honest and useless: a card for a jump gene showed a horse that has nothing to do with it, and thirty-six identical bays down a page read as a bug. The baker <em>deletes</em> a stale file rather than skipping it, so a gene that loses its paint loses its picture on the next bake; the landing card, the family index and the harvested-icon fallback all drop to words, and those sections keep the tighter three-across grid because only a grid holding an icon widens.</li>
+
+<li><strong>A card is a picture beside a paragraph now, not a paragraph under a picture.</strong> Two columns, the horse on the left and every word on the right. The icon also stopped riding inside the harvested card body: it is now harvested separately by href, so a change to the card markup can reach a card somebody has edited by hand &mdash; which is the whole point of harvesting, and was quietly not true.</li>
+
+<li><strong>The landing page reads in the order a reader wants it.</strong> Start here, Gameplay, Items, then the coat engine, For modders and Project, with the hundred-odd gene cards last; <code>wiki/pages.js</code> mirrors it, so the sidebar and the landing page tell one story. <strong>&ldquo;For modders&rdquo; was also appearing on the Gameplay view</strong>, which is not what that heading is for: the Horse designer was the single card under it flagged <code>gameplay</code>, and a section shows when any one of its cards does. That card moved to Gameplay, where a player would look for it anyway.</li>
+
+</ul>
+
+
 <h3 id="wiki-families-2026-09-08">Built 2026-09-08: the wiki groups genes the way the editors do, every gene page is listed in both places, and neither list is written by hand.</h3>
 
 <p>Owner-driven, four requests in one. Written up on <a href="item-spawn-eggs.html">the spawn eggs</a> and in <code>GeneWikiTool</code>; the grouping itself is <code>common/genetics/GeneFamily</code>.</p>
@@ -85,7 +108,7 @@
 
 <h3 id="magic-import-2026-09-08">Built 2026-09-08, NOT yet looked at in game: eighty-four magical genes, imported in bulk out of <code>process/</code>.</h3>
 
-<p>Owner-driven, one overnight request. Every gene is a JSON file &mdash; none of them is a Java class. Each has its own generated page, gathered by seven family indexes: <a href="genes-magic-ground.html">Ground and strong white</a>, <a href="genes-magic-fields.html">Fields and regions</a>, <a href="genes-magic-spots.html">Spots and rings</a>, <a href="genes-magic-speckle.html">Speckle and dust</a>, <a href="genes-magic-lines.html">Lines and strokes</a>, <a href="genes-magic-hair.html">Mane and tail</a>, <a href="genes-magic-modifiers.html">Colour modifiers</a>. Checklist <a href="verification.html#magic-import">&sect;0-AN</a>. Gaps <a href="known-gaps.html#gap-94">94</a>&ndash;<a href="known-gaps.html#gap-97">97</a>.</p>
+<p>Owner-driven, one overnight request. Every gene is a JSON file &mdash; none of them is a Java class. Each has its own generated page, gathered at the time by seven family indexes &mdash; ground and strong white, fields and regions, spots and rings, speckle and dust, lines and strokes, mane and tail, colour modifiers. (Those index pages were later deleted as redundant to the landing page.) Checklist <a href="verification.html#magic-import">&sect;0-AN</a>. Gaps <a href="known-gaps.html#gap-94">94</a>&ndash;<a href="known-gaps.html#gap-97">97</a>.</p>
 
 <ul>
 

@@ -198,10 +198,10 @@ and fails *silently* when stale:
 | any gene, or a coat deliberately moved | `:common:test`, then delete and regenerate the golden file | `common/src/test/resources/coat-golden.txt` |
 | **anything in `common/` or `web/`** | `:web:bakeDesignerAssets` | `wiki/horse-designer/wasm/web.wasm` |
 | any breed, or `BreedSpecWriter` | `:common:bakeBreedFiles` | `common/.../horsegenetics/breeds/` **and** `wiki/horse-designer/assets/breeds.json` |
-| `spec/`, `SpecSchema`, `AbilityType`, `HorseSkinGeometry`, the noise classes | `:common:bakeSpecFixtures` **then** `check-parity.mjs` | `wiki/gene-creator/fixtures/expected.json` |
+| `spec/`, `SpecSchema`, `AbilityType`, `HorseSkinGeometry`, the noise classes | `:common:bakeSpecFixtures` **then** `check-parity.mjs`; geometry also moves `:common:bakeGeneIcons` | `wiki/gene-creator/fixtures/expected.json`, `wiki/assets/gene-icons/` |
 | the coat PNGs or the name tables | `:common:bakeCreatorAssets` + `:web:bakeDesignerAssets` | the regenerated assets |
-| **any file in `horsegenetics/genes/`, or any gene page's `<h1>` or tabs** | `:common:bakeGeneBundle`, `:common:bakeGeneIcons`, `:common:bakeGeneWikiPages` | `wiki/horse-designer/assets/genes.json`, `wiki/assets/gene-icons/`, the gene's `wiki/gene-*.html`, `wiki/genes-magic-*.html` **and the generated spans of `wiki/pages.js` and `index.html`** |
-| `GeneFamily`, or a gene's priority (it may change family) | `:common:bakeGeneWikiPages` | the same two spans, plus `wiki/genes-magic-*.html` |
+| **any file in `horsegenetics/genes/`, or any gene page's `<h1>` or tabs** | `:common:bakeGeneBundle`, `:common:bakeGeneIcons`, `:common:bakeGeneWikiPages` | `wiki/horse-designer/assets/genes.json`, `wiki/assets/gene-icons/`, the gene's `wiki/gene-*.html` **and the generated spans of `wiki/pages.js` and `index.html`** |
+| `GeneFamily`, or a gene's priority (it may change family) | `:common:bakeGeneWikiPages` | the same two spans, plus every gene page's eyebrow |
 | **any wiki prose at all** | `node wiki/tools/build-search-index.mjs` | `wiki/search-index.js` |
 | a page's tab panels, or a section moved between tabs | `node wiki/tools/sync-page-views.mjs` | `wiki/pages.js` |
 | either `tools/barn/*.source.nbt`, **or `bake-barn.py` itself** | `python neoforge-26.1.2/tools/barn/bake-barn.py` | `data/horsegenetics/structure/cowboy_barn.nbt` |

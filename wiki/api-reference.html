@@ -644,7 +644,13 @@ static boolean  hasPart(Skin, Part);
 static Bounds   bounds(Skin, Part);       static Bounds bodyBounds(Skin);
 static void     forEachTexel(Skin[, Part], TexelVisitor);
 static Optional&lt;Sample&gt; sample(Skin, int px, int py);
-static Texel    project(Skin, Part, Face, BodyPoint);</code></pre>
+static Texel    project(Skin, Part, Face, BodyPoint);
+
+// The posed mesh - for drawing, never for painting. Everything above works in
+// the part's rest-pose AABB; these walk the real rotated cuboid instead.
+static BodyPoint posed(Skin, Part, Face, double fa, double fb);
+static BodyPoint posed(Skin, Part, Face, BodyPoint onBounds);
+static BodyPoint posedNormal(Skin, Part, Face);   // outward unit direction</code></pre>
 </div>
 
 <h3><code>CoatData</code> and <code>CoatGenerator</code></h3>

@@ -1446,6 +1446,25 @@
 <h3>Settled 2026-09-08</h3>
 
 <ul>
+    <li><strong>A gene that changes no pixel of the coat gets no icon, not a picture of
+        a horse it has nothing to do with.</strong> The baker used to fall back to the
+        plain bay for the thirty-six genes with no coat of their own - the health loci,
+        the magical stat genes, and the ones like cutie mark and particle that draw in a
+        client render layer rather than in the sheet. Honest and useless: a jump gene's
+        card showed a horse that says nothing about it, and a run of identical bays down
+        a page reads as a bug rather than as a fact. Their cards are words now, and
+        <code>GeneIconTool</code> <em>deletes</em> a stale bake rather than skipping it,
+        so a gene that loses its paint loses its picture on the next run.</li>
+
+    <li><strong>The icon camera is two angles, not three tuned components.</strong> It was
+        a hand-picked view vector plus a basis built with cross products, one of which had
+        an inverted sign - so &ldquo;up&rdquo; was 45&deg; off perpendicular and the whole
+        projection was sheared along the view axis. Azimuth and elevation give an
+        orthonormal basis by construction, and they are also the two numbers anybody
+        actually wants to change. <strong>Do not go back to a vector</strong>: the reason
+        the bug survived a day is that a sheared horse still looks like a horse, and a
+        basis nobody can check by reading it is a basis nobody checks.</li>
+
     <li><strong>The wiki groups genes the way the gene editors do, and neither list is
         written by hand.</strong> The sidebar had five hand-written gene sections
         (&ldquo;Natural genes&rdquo;, &ldquo;White pattern loci&rdquo;, &ldquo;Performance

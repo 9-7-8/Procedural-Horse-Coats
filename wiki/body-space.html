@@ -547,6 +547,20 @@ bodyZ = -mx;                // 0 on the centre plane,        + to the horse's ri
         body space &mdash; an additive read, so no computed value moves and parity
         is untouched.
     </p>
+    <p>
+        <strong>Java has that walk too, as of 2026-09-08:</strong>
+        <code>HorseSkinGeometry.posed(skin, part, face, fa, fb)</code> returns the
+        body-space point on the <em>posed cuboid</em> rather than on the bounding
+        box, with an overload that takes the <code>BodyPoint</code>
+        <code>forEachTexel</code> hands out, and
+        <code>posedNormal(skin, part, face)</code> gives the face&rsquo;s outward
+        direction after the pitch &mdash; which on the neck or the tail is not the
+        plain body axis, and back-face culling has to ask. It exists because the
+        wiki&rsquo;s baked gene icons were drawing the bounding boxes and looked
+        like it. Additive again: nothing the pipeline computes reads either method.
+        The duplication with <code>model3d.js emitPart</code> is real and is
+        <a href="known-gaps.html#gap-100">gap 100</a>.
+    </p>
 </div>
 
 <h3>The texture is an atlas, not a wrap</h3>

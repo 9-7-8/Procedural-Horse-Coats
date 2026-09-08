@@ -24,15 +24,15 @@ import java.util.TreeMap;
  *   <li>those screens' <i>Random natural dilution</i> / <i>Random natural
  *       white</i> / <i>Random magical</i> rolls, which are exactly "re-roll one
  *       family";</li>
- *   <li>{@code GeneWikiTool}, which lays the magical genes out one page per
- *       family, groups the wiki sidebar and the landing page's gene cards by
- *       family, and takes every slug, title and lede from here.</li>
+ *   <li>{@code GeneWikiTool}, which writes one page per magical gene, groups
+ *       the wiki sidebar and the landing page's gene cards by family, and takes
+ *       every title and lede from here.</li>
  * </ul>
  *
  * <p>That last one is why every family carries a {@link #title} and a
- * {@link #lede} and not only the seven with a page of their own: the sidebar
- * section, the landing-page heading and the paragraph under it are all this
- * table, so the wiki cannot group genes one way and the two editors another.
+ * {@link #lede}: the sidebar section, the landing-page heading and the
+ * paragraph under it are all this table, so the wiki cannot group genes one way
+ * and the two editors another.
  *
  * <h2>How a gene lands in one</h2>
  * <b>A gene declares no family.</b> It does not need to, and asking eighty-odd
@@ -61,83 +61,74 @@ import java.util.TreeMap;
  */
 public enum GeneFamily {
 
-    NATURAL_COAT("Natural coat genes", true, null, "Natural coat genes",
+    NATURAL_COAT("Natural coat genes", true, "Natural coat genes",
             "The pigment every other gene then works on: whether the horse can make black at "
                     + "all, where that black is allowed to go, and the countershading over the "
                     + "top of it."),
-    NATURAL_DILUTION("Natural dilution genes", true, null, "Natural dilution genes",
+    NATURAL_DILUTION("Natural dilution genes", true, "Natural dilution genes",
             "Genes that lighten what is already there. Each takes red, or black, or both down "
                     + "by some amount - which is why the same dilution reads completely "
                     + "differently on a chestnut and on a black."),
-    NATURAL_WHITE("Natural white genes", true, null, "Natural white genes",
+    NATURAL_WHITE("Natural white genes", true, "Natural white genes",
             "Genes that take the coat away entirely in places. Only alleles at the same locus "
                     + "compete for a slot, which is why a horse can be tobiano and splashed and "
                     + "framed at once but never dominant white and sabino."),
-    NATURAL_HEALTH("Natural health genes", true, null, "Natural health genes",
+    NATURAL_HEALTH("Natural health genes", true, "Natural health genes",
             "The loci you cannot see: speed, size, jump, and the disorders. Almost every one "
                     + "is recessive and absent from its own founder table as a homozygote - a "
                     + "wild horse can carry a disorder but never have one."),
-    NATURAL_OTHER("Other natural genes", true, null, "Other natural genes",
+    NATURAL_OTHER("Other natural genes", true, "Other natural genes",
             "The naturals that are neither pigment nor pattern nor disorder - what the horse "
                     + "will eat, and what colour its eyes are."),
 
     /** The hand-written magical genes, the way {@code wiki/pages.js} groups them. */
-    MAGIC_CORE("Magical genes", false, null, "Magical genes",
+    MAGIC_CORE("Magical genes", false, "Magical genes",
             "Where the magic starts. Every gene from here down was invented for this mod and "
                     + "adds signed colour in phase 3, on top of the pigment the natural genes "
                     + "have already resolved - or changes what the horse does instead. These "
                     + "particular ones are Java classes rather than gene files, because most of "
                     + "them do something no colour op can: swap the whole palette, trail "
                     + "particles, turn into something else at night."),
-    MAGIC_BODY("Magical body-stat genes", false, null, "Magical body-stat genes",
+    MAGIC_BODY("Magical body-stat genes", false, "Magical body-stat genes",
             "Four loci that move speed, health, jump and size and paint nothing at all. They "
                     + "are the magical mirror of the performance genes, with far wider ranges "
                     + "and no real-world claim behind them."),
 
-    // The seven data-driven magical families. Slug / title / lede are the
-    // wiki's; GeneWikiTool reads them from here so the page it writes and the
-    // menu the editors draw cannot drift apart.
-    MAGIC_GROUND("Magic: ground and strong white", false,
-            "genes-magic-ground", "Ground and strong white",
+    // The seven data-driven magical families. Title and lede are the wiki's;
+    // GeneWikiTool reads them from here so the section it writes and the menu
+    // the editors draw cannot drift apart.
+    MAGIC_GROUND("Magic: ground and strong white", false, "Ground and strong white",
             "Genes that replace the base coat rather than mark it - a white horse with the "
                     + "colour breaking through, a coat confined to a handful of regions, a "
                     + "field split down the middle."),
-    MAGIC_FIELDS("Magic: fields and regions", false,
-            "genes-magic-fields", "Fields and regions",
+    MAGIC_FIELDS("Magic: fields and regions", false, "Fields and regions",
             "Genes that divide the horse into areas - a blanket off the topline, a band round "
                     + "the neck, the underside against the back, a wash with no edge anywhere."),
-    MAGIC_SPOTS("Magic: spots and rings", false,
-            "genes-magic-spots", "Spots and rings",
+    MAGIC_SPOTS("Magic: spots and rings", false, "Spots and rings",
             "Genes made of countable marks: spots, rosettes, annuli, crescents, chains of "
                     + "disks, and haloes with something dark inside them."),
-    MAGIC_SPECKLE("Magic: speckle and dust", false,
-            "genes-magic-speckle", "Speckle and dust",
+    MAGIC_SPECKLE("Magic: speckle and dust", false, "Speckle and dust",
             "Genes made of stipple - fields of fine points that drift into drifts and thin out "
                     + "rather than ending, and the markings built on top of them."),
-    MAGIC_LINES("Magic: lines and strokes", false,
-            "genes-magic-lines", "Lines and strokes",
+    MAGIC_LINES("Magic: lines and strokes", false, "Lines and strokes",
             "Genes made of strokes: scratches, contour lines, riblines, brindle nets, "
                     + "filigree, and the two that are stripes but insist they are not."),
-    MAGIC_HAIR("Magic: mane and tail", false,
-            "genes-magic-hair", "Mane and tail",
+    MAGIC_HAIR("Magic: mane and tail", false, "Mane and tail",
             "Genes that touch only the hair - gradients down its length, bands across it, "
                     + "and the spectrum run root to tip."),
-    MAGIC_MODIFIERS("Magic: colour modifiers", false,
-            "genes-magic-modifiers", "Colour modifiers",
+    MAGIC_MODIFIERS("Magic: colour modifiers", false, "Colour modifiers",
             "Genes with no shape of their own. Each reads what the horse already is and "
                     + "changes it - which is why they paint last, and why a plain horse shows "
                     + "some of them not at all.");
 
     private final String label;
     private final boolean natural;
-    private final String slug;
     private final String title;
     private final String lede;
 
-    GeneFamily(String label, boolean natural, String slug, String title, String lede) {
+    GeneFamily(String label, boolean natural, String title, String lede) {
         this.label = label;
         this.natural = natural;
-        this.slug = slug;
         this.title = title;
         this.lede = lede;
     }
@@ -150,11 +141,6 @@ public enum GeneFamily {
     /** Whether this family holds {@link Gene#isNatural() natural} genes. */
     public boolean natural() {
         return natural;
-    }
-
-    /** The wiki page's file stem, or {@code null} for a family with no index page. */
-    public String slug() {
-        return slug;
     }
 
     /** The family's heading, on its own page or over a section of one. */
@@ -248,18 +234,6 @@ public enum GeneFamily {
     public static GeneFamily ofMagicalPriority(int priority) {
         Map.Entry<Integer, GeneFamily> e = MAGICAL_BANDS.floorEntry(priority);
         return e == null ? MAGIC_CORE : e.getValue();
-    }
-
-    /**
-     * The seven families the data-driven genes land in, in paint order - the
-     * ones with a wiki page of their own.
-     */
-    public static List<GeneFamily> magicalSpecFamilies() {
-        List<GeneFamily> out = new ArrayList<>();
-        for (GeneFamily f : MAGICAL_BANDS.tailMap(200).values()) {
-            out.add(f);
-        }
-        return out;
     }
 
     /**

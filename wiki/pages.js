@@ -200,7 +200,6 @@ window.HG.pages = {
         {
             title: "Magic: ground and strong white",
             items: [
-                { href: "genes-magic-ground.html", text: "All ground and strong white", kind: "magical", views: ["gameplay","coding"] },
                 { href: "gene-black-holes.html", text: "Black Holes", kind: "magical", views: ["gameplay","coding"] },
                 { href: "gene-burn.html", text: "Burn", kind: "magical", views: ["gameplay","coding"] },
                 { href: "gene-cleave.html", text: "Cleave", kind: "magical", views: ["gameplay","coding"] },
@@ -222,7 +221,6 @@ window.HG.pages = {
         {
             title: "Magic: fields and regions",
             items: [
-                { href: "genes-magic-fields.html", text: "All fields and regions", kind: "magical", views: ["gameplay","coding"] },
                 { href: "gene-accretion.html", text: "Accretion", kind: "magical", views: ["gameplay","coding"] },
                 { href: "gene-collar.html", text: "Collar", kind: "magical", views: ["gameplay","coding"] },
                 { href: "gene-cosmic.html", text: "Cosmic", kind: "magical", views: ["gameplay","coding"] },
@@ -252,7 +250,6 @@ window.HG.pages = {
         {
             title: "Magic: spots and rings",
             items: [
-                { href: "genes-magic-spots.html", text: "All spots and rings", kind: "magical", views: ["gameplay","coding"] },
                 { href: "gene-angler.html", text: "Angler", kind: "magical", views: ["gameplay","coding"] },
                 { href: "gene-aurorae.html", text: "Aurorae", kind: "magical", views: ["gameplay","coding"] },
                 { href: "gene-crescents.html", text: "Crescents", kind: "magical", views: ["gameplay","coding"] },
@@ -271,7 +268,6 @@ window.HG.pages = {
         {
             title: "Magic: speckle and dust",
             items: [
-                { href: "genes-magic-speckle.html", text: "All speckle and dust", kind: "magical", views: ["gameplay","coding"] },
                 { href: "gene-dust.html", text: "Dust", kind: "magical", views: ["gameplay","coding"] },
                 { href: "gene-peafowl.html", text: "Peafowl", kind: "magical", views: ["gameplay","coding"] },
                 { href: "gene-speckling.html", text: "Speckling", kind: "magical", views: ["gameplay","coding"] },
@@ -281,7 +277,6 @@ window.HG.pages = {
         {
             title: "Magic: lines and strokes",
             items: [
-                { href: "genes-magic-lines.html", text: "All lines and strokes", kind: "magical", views: ["gameplay","coding"] },
                 { href: "gene-bracket.html", text: "Bracket", kind: "magical", views: ["gameplay","coding"] },
                 { href: "gene-brindlelace.html", text: "Brindlelace", kind: "magical", views: ["gameplay","coding"] },
                 { href: "gene-circuit.html", text: "Circuit", kind: "magical", views: ["gameplay","coding"] },
@@ -301,7 +296,6 @@ window.HG.pages = {
         {
             title: "Magic: mane and tail",
             items: [
-                { href: "genes-magic-hair.html", text: "All mane and tail", kind: "magical", views: ["gameplay","coding"] },
                 { href: "gene-auroraband.html", text: "Auroraband", kind: "magical", views: ["gameplay","coding"] },
                 { href: "gene-corvid.html", text: "Corvid", kind: "magical", views: ["gameplay","coding"] },
                 { href: "gene-element-dusted.html", text: "Element Dusted", kind: "magical", views: ["gameplay","coding"] },
@@ -316,7 +310,6 @@ window.HG.pages = {
         {
             title: "Magic: colour modifiers",
             items: [
-                { href: "genes-magic-modifiers.html", text: "All colour modifiers", kind: "magical", views: ["gameplay","coding"] },
                 { href: "gene-gamma.html", text: "Gamma", kind: "magical", views: ["gameplay","coding"] },
                 { href: "gene-invert.html", text: "Invert", kind: "magical", views: ["gameplay","coding"] },
                 { href: "gene-nebula-light.html", text: "Nebula Light", kind: "magical", views: ["gameplay","coding"] },
