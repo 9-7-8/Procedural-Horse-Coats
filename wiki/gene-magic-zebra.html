@@ -6,14 +6,19 @@
 <title>Magic Zebra &middot; Horse Genetics Wiki</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
 <link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
 <script defer src="nav.js"></script>
+<script defer src="search.js"></script>
 </head>
 <body>
 <main class="content">
 <article class="doc">
 
 <p class="eyebrow magical">Magical gene <span class="sep">/</span> phase 3</p>
+
 <h1>Magic zebra</h1>
+
 <p class="lede">
     A zebra&rsquo;s own stripe map, painted in hard black over whatever the horse already
     is. It subtracts <strong>200%</strong> from all three channels &mdash; deliberate
@@ -25,10 +30,29 @@
     zero would take the template&rsquo;s strand shading with it.
 </p>
 
+<section class="tab-panel" data-tab="gameplay">
+
+<div class="gene-preview" data-gene="horsegenetics.magic_zebra"></div>
+
+<h2 id="inheritance">What you can get</h2>
+
+<div class="gene-inheritance" data-gene="horsegenetics.magic_zebra"></div>
+
+<h2 id="carrot">Its gene carrot</h2>
+
+<!-- The recipe, read off the mod at run time - the rarity tier is the recipe's
+     price, and a price written into fifty pages goes stale silently.
+     See wiki/gene-carrot/gene-carrot.js. -->
+
+<div class="gene-carrot" data-gene="horsegenetics.magic_zebra"></div>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
 <!-- The gene, on the three base coats, as a horse you can spin. One div and one
      script: everything in here is asked of the mod at run time.
      See wiki/gene-preview/gene-preview.js. -->
-<div class="gene-preview" data-gene="horsegenetics.magic_zebra"></div>
 
 <dl class="spec">
     <div><dt>Gene key</dt><dd>horsegenetics.magic_zebra</dd></div>
@@ -68,51 +92,6 @@
         A horse can carry both and show both.
     </p>
 </div>
-
-<h2 id="negative">Why &minus;200%</h2>
-
-<p>
-    A resolved channel tops out at 100%. Subtracting 200% therefore drives every
-    channel hard past zero, where the cap at conversion clamps it to black &mdash;
-    on a cremello, a chestnut, a grey or a <a href="gene-kit.html">dominant
-    white</a> horse alike. The gene commits so far that nothing else can pull the
-    stripe back.
-</p>
-
-<div class="note">
-    <span class="label">Where the stripe actually lands: <code>#151515</code>, not <code>#000000</code></span>
-    <p>
-        The gene still aims at zero and should keep doing so &mdash; committing
-        past the cap is what makes the stripe base-independent. It is the
-        <em>composer</em> that decides no coat is painted true black: the
-        <a href="pipeline.html#shadow-pass">shadow pass</a> at the end of phase 3
-        raises the stripe to <code>SHADOW_FLOOR</code> before the multiply, so
-        the template&rsquo;s hair detail survives inside the band instead of the
-        band rendering as one dead slab. Nothing in this gene needs to know.
-    </p>
-</div>
-
-<p>
-    That is the negative half of the unclamped signed model, and it is exactly the
-    same trick a hypothetical &ldquo;always blue&rdquo; gene would use with the sign
-    flipped. <code>ColorField.add</code> <strong>saturates</strong> rather than
-    wrapping, so stacking two such genes cannot flip the result.
-</p>
-
-<div class="codebox">
-<div class="filename">common/genetics/genes/MagicZebraGene.java</div>
-<pre><code class="language-java">/** Per channel, as a percentage of full scale. Negative - stripes remove colour. */
-public static final int STRIPE_PERCENT = -200;
-
-int amount = (int) Math.round(255.0 * STRIPE_PERCENT / 100.0 * c);
-delta.add(px, py, amount, amount, amount);
-delta.addOpacity(px, py, (int) Math.round(255.0 * c));   // shows on a white horse too</code></pre>
-</div>
-
-<p>
-    <code>c</code> is the stripe coverage at that texel, so the edges fade rather than
-    stepping, and the opacity is raised in proportion.
-</p>
 
 <h2>The five epigenetic knobs</h2>
 
@@ -218,12 +197,56 @@ f.whiten(px, py, (float) ((1.0 - c) * strength));</code></pre>
         reason.</li>
 </ul>
 
-<h2 id="carrot">Its gene carrot</h2>
+</section>
 
-<!-- The recipe, read off the mod at run time - the rarity tier is the recipe's
-     price, and a price written into fifty pages goes stale silently.
-     See wiki/gene-carrot/gene-carrot.js. -->
-<div class="gene-carrot" data-gene="horsegenetics.magic_zebra"></div>
+<section class="tab-panel" data-tab="science">
+
+<h2 id="negative">Why &minus;200%</h2>
+
+<p>
+    A resolved channel tops out at 100%. Subtracting 200% therefore drives every
+    channel hard past zero, where the cap at conversion clamps it to black &mdash;
+    on a cremello, a chestnut, a grey or a <a href="gene-kit.html">dominant
+    white</a> horse alike. The gene commits so far that nothing else can pull the
+    stripe back.
+</p>
+
+<div class="note">
+    <span class="label">Where the stripe actually lands: <code>#151515</code>, not <code>#000000</code></span>
+    <p>
+        The gene still aims at zero and should keep doing so &mdash; committing
+        past the cap is what makes the stripe base-independent. It is the
+        <em>composer</em> that decides no coat is painted true black: the
+        <a href="pipeline.html#shadow-pass">shadow pass</a> at the end of phase 3
+        raises the stripe to <code>SHADOW_FLOOR</code> before the multiply, so
+        the template&rsquo;s hair detail survives inside the band instead of the
+        band rendering as one dead slab. Nothing in this gene needs to know.
+    </p>
+</div>
+
+<p>
+    That is the negative half of the unclamped signed model, and it is exactly the
+    same trick a hypothetical &ldquo;always blue&rdquo; gene would use with the sign
+    flipped. <code>ColorField.add</code> <strong>saturates</strong> rather than
+    wrapping, so stacking two such genes cannot flip the result.
+</p>
+
+<div class="codebox">
+<div class="filename">common/genetics/genes/MagicZebraGene.java</div>
+<pre><code class="language-java">/** Per channel, as a percentage of full scale. Negative - stripes remove colour. */
+public static final int STRIPE_PERCENT = -200;
+
+int amount = (int) Math.round(255.0 * STRIPE_PERCENT / 100.0 * c);
+delta.add(px, py, amount, amount, amount);
+delta.addOpacity(px, py, (int) Math.round(255.0 * c));   // shows on a white horse too</code></pre>
+</div>
+
+<p>
+    <code>c</code> is the stripe coverage at that texel, so the edges fade rather than
+    stepping, and the opacity is raised in proportion.
+</p>
+
+</section>
 
 <div class="page-foot">
     <div class="seealso">
@@ -242,6 +265,7 @@ f.whiten(px, py, (float) ((1.0 - c) * strength));</code></pre>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
 <script defer src="gene-preview/gene-preview.js"></script>
+<script defer src="gene-inheritance/gene-inheritance.js"></script>
 <script defer src="gene-carrot/gene-carrot.js"></script>
 </body>
 </html>

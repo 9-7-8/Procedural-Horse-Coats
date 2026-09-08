@@ -6,14 +6,19 @@
 <title>Dhampir &middot; Horse Genetics Wiki</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
 <link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
 <script defer src="nav.js"></script>
+<script defer src="search.js"></script>
 </head>
 <body>
 <main class="content">
 <article class="doc">
 
 <p class="eyebrow magical">Magical gene <span class="sep">/</span> phase 3</p>
+
 <h1>Dhampir &mdash; the recessive you can see coming</h1>
+
 <p class="lede">
     One copy gives <strong>red eyes with glowing whites</strong> and nothing
     else. Two give a white, sun-shy animal with three times the health of an
@@ -21,7 +26,36 @@
     something living.
 </p>
 
+<section class="tab-panel" data-tab="gameplay">
+
 <div class="gene-preview" data-gene="horsegenetics.dhampir"></div>
+
+<h2 id="inheritance">What you can get</h2>
+
+<div class="gene-inheritance" data-gene="horsegenetics.dhampir"></div>
+
+<h2 id="animal">What the homozygote is</h2>
+
+<div class="table-wrap">
+<table class="facts">
+<tbody>
+<tr><th>Coat</th><td><strong>Pure white</strong>, painted <em>absolutely</em> in phase 3 over whatever the melanin genes made &mdash; <code>ColorField.set</code>, not <code>add</code>, so a black horse, a cremello and a leopard all come out the same white. It <a href="genetics-model.html">masks</a>, like dominant white, and the coat underneath is still in the genome for a foal to inherit.</td></tr>
+<tr><th>Eyes</th><td>Red, at <code>EyeColor.RANK_MAGICAL</code> &mdash; above even a depigmented blue, because this is paint rather than pigment. The <strong>scleras glow</strong> and the iris does not.</td></tr>
+<tr><th>Body</th><td><code>HEALTH_MULTIPLIER</code>, <code>SPEED_MULTIPLIER</code> and <code>JUMP_MULTIPLIER</code>, all <em>unclamped</em> &mdash; it is genuinely a different animal, not a nudge inside the ordinary band. Size is untouched.</td></tr>
+<tr><th>Appetite</th><td><a href="gene-diet.html"><code>Diet.NOTHING</code></a>. It cannot be fed, and it does not regenerate beside hay and water either &mdash; the gated healing checks the diet.</td></tr>
+<tr><th>Daylight</th><td>Half a heart every two seconds while the sky is clear above it. Not vanilla's ignite: a horse set alight burns down far too fast, and the point of the animal is that it survives the run to the treeline.</td></tr>
+<tr><th>Healing</th><td>One bite of one living thing: half a heart dealt, three hearts healed, then it leaves that animal alone for a day.</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2 id="carrot">Its gene carrot</h2>
+
+<div class="gene-carrot" data-gene="horsegenetics.dhampir"></div>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
 
 <dl class="spec">
     <div><dt>Gene key</dt><dd>horsegenetics.dhampir</dd></div>
@@ -62,21 +96,6 @@
     who spots one knows exactly what to do with it. A silent dhampir carrier
     would be a gene nobody would ever meet.
 </p>
-
-<h2 id="animal">What the homozygote is</h2>
-
-<div class="table-wrap">
-<table class="facts">
-<tbody>
-<tr><th>Coat</th><td><strong>Pure white</strong>, painted <em>absolutely</em> in phase 3 over whatever the melanin genes made &mdash; <code>ColorField.set</code>, not <code>add</code>, so a black horse, a cremello and a leopard all come out the same white. It <a href="genetics-model.html">masks</a>, like dominant white, and the coat underneath is still in the genome for a foal to inherit.</td></tr>
-<tr><th>Eyes</th><td>Red, at <code>EyeColor.RANK_MAGICAL</code> &mdash; above even a depigmented blue, because this is paint rather than pigment. The <strong>scleras glow</strong> and the iris does not.</td></tr>
-<tr><th>Body</th><td><code>HEALTH_MULTIPLIER</code>, <code>SPEED_MULTIPLIER</code> and <code>JUMP_MULTIPLIER</code>, all <em>unclamped</em> &mdash; it is genuinely a different animal, not a nudge inside the ordinary band. Size is untouched.</td></tr>
-<tr><th>Appetite</th><td><a href="gene-diet.html"><code>Diet.NOTHING</code></a>. It cannot be fed, and it does not regenerate beside hay and water either &mdash; the gated healing checks the diet.</td></tr>
-<tr><th>Daylight</th><td>Half a heart every two seconds while the sky is clear above it. Not vanilla's ignite: a horse set alight burns down far too fast, and the point of the animal is that it survives the run to the treeline.</td></tr>
-<tr><th>Healing</th><td>One bite of one living thing: half a heart dealt, three hearts healed, then it leaves that animal alone for a day.</td></tr>
-</tbody>
-</table>
-</div>
 
 <h2 id="override">How &ldquo;cannot be fed&rdquo; is expressed</h2>
 
@@ -193,6 +212,10 @@
     </p>
 </div>
 
+</section>
+
+<section class="tab-panel" data-tab="science">
+
 <h2>Where it comes from</h2>
 
 <ul>
@@ -212,9 +235,7 @@
         one outright would skip the whole gene.</li>
 </ul>
 
-<h2 id="carrot">Its gene carrot</h2>
-
-<div class="gene-carrot" data-gene="horsegenetics.dhampir"></div>
+</section>
 
 <div class="page-foot">
     <div class="seealso">
@@ -234,6 +255,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
 <script defer src="gene-preview/gene-preview.js"></script>
+<script defer src="gene-inheritance/gene-inheritance.js"></script>
 <script defer src="gene-carrot/gene-carrot.js"></script>
 </body>
 </html>

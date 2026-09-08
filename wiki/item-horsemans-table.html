@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Horseman's Table &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow">Block <span class="sep">/</span> villagers</p>
+<h1>Horseman&rsquo;s Table</h1>
+<p class="lede">
+    The horseman&rsquo;s workstation, and the only block the mod adds. Put one down
+    near an unemployed villager and you get a horseman.
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+<h2 id="use">What it is for</h2>
+
+<div class="plain">
+    <p>
+        <strong>Recipe (shapeless):</strong> 3 hair cloth + 2 braided rope + 2 fences of
+        any kind.
+    </p>
+    <p>
+        Place one near an unemployed villager and they take up the
+        <a href="villagers.html">horseman</a> trade. One villager per table.
+    </p>
+</div>
+
+<p>
+    That is the whole of how a horseman comes to exist &mdash; no house, no bed and no
+    special structure needed. The block does nothing else; it is the job site and that is
+    the point of it.
+</p>
+</section>
+
+<section class="tab-panel" data-tab="coding">
+<h2 id="poi">It is a POI and nothing else</h2>
+
+<p>
+    A plain block with no behaviour of its own &mdash; everything happens because it backs
+    the <code>horsegenetics:horsemans_table</code> POI. It has its own three-face texture
+    set (<code>horsemans_table_{top,side,bottom}</code>) on a <code>cube_bottom_top</code>
+    model.
+</p>
+
+<p>
+    <strong>It is the horseman's only workstation, and there is no second one.</strong>
+    Worth saying because the name does not: &ldquo;horse trader's post&rdquo; and
+    &ldquo;horseman&rdquo; are the same trade, so a separate <em>horseman post</em>
+    would be a duplicate block claiming the same job for the same profession. Placing
+    one of these next to an unemployed villager is the whole of how a horseman comes to
+    exist &mdash; he needs no house, no bed and no custom structure, because a
+    profession comes from a job site and nothing else.
+</p>
+</section>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="villagers.html">Villagers &amp; transfer papers</a>
+        <a href="item-horse-hair.html">Horse hair</a>
+        <a href="items.html">All items</a>
+    </div>
+    Block and POI registration in the NeoForge module's
+    <code>block/</code> package.
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

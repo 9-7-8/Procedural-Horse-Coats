@@ -6,21 +6,57 @@
 <title>Pangare &middot; Horse Genetics Wiki</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
 <link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
 <script defer src="nav.js"></script>
+<script defer src="search.js"></script>
 </head>
 <body>
 <main class="content">
 <article class="doc">
 
 <p class="eyebrow natural">Natural gene <span class="sep">/</span> phase 1</p>
+
 <h1>Pangar&eacute; &mdash; the pale underside</h1>
+
 <p class="lede">
     Also called <strong>mealy</strong>. The pale muzzle, eye rings, belly, flanks
     and inner legs of an Exmoor pony, a Fjord or a Haflinger: the soft parts of
     the horse go cream and the topline does not.
 </p>
 
+<section class="tab-panel" data-tab="gameplay">
+
 <div class="gene-preview" data-gene="horsegenetics.pangare"></div>
+
+<h2 id="inheritance">What you can get</h2>
+
+<div class="gene-inheritance" data-gene="horsegenetics.pangare"></div>
+
+<div class="health-line none">
+    <span class="icon" aria-hidden="true">&#9679;</span>
+    <p>This gene has no effect on the horse&rsquo;s health.</p>
+</div>
+
+<h2>Breeds</h2>
+
+<p>
+    Five breeds name the locus, at rates that follow the study&rsquo;s marker
+    frequencies rather than being invented: <strong>Exmoor Pony</strong> and
+    <strong>Norwegian Fjord</strong> near-fixed, <strong>Icelandic Horse</strong>
+    common, <strong>Shetland Pony</strong> and <strong>Suffolk Punch</strong>
+    moderate. Every other breed is <code>pa/pa</code>, because a breed that does
+    not name a coat locus gets it wild; the feral population carries the full
+    spread.
+</p>
+
+<h2 id="carrot">Its gene carrot</h2>
+
+<div class="gene-carrot" data-gene="horsegenetics.pangare"></div>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
 
 <dl class="spec">
     <div><dt>Gene key</dt><dd>horsegenetics.pangare</dd></div>
@@ -76,45 +112,6 @@
             the coat is already nearly out of red.</li>
     </ul>
 </div>
-
-<h2 id="evidence">What is actually known</h2>
-
-<p>
-    <strong>No confirmed causal mutation and no test.</strong> Breeders have
-    treated pangar&eacute; as heritable for as long as anyone has kept records
-    &mdash; it is near-fixed in several breeds &mdash; but its inheritance mode is
-    unresolved, and the very wide range of intensity points at several loci
-    rather than one.
-</p>
-
-<p>
-    The nearest thing to evidence is a 2018 population study of a region on
-    chromosome 22 about 50&nbsp;kb downstream of <em>EDN3</em>, whose allele
-    frequencies split sharply between athletic breeds and the pony and draft
-    breeds where mealy is pervasive:
-</p>
-
-<div class="table-wrap">
-<table>
-<thead><tr><th>Marker at</th><th>Breeds</th></tr></thead>
-<tbody>
-<tr><td>99&ndash;98%</td><td>Fjord, Haflinger, Exmoor</td></tr>
-<tr><td>90&ndash;74%</td><td>North Swedish Draught, Gotlandsruss, Ardennes, Icelandic</td></tr>
-<tr><td>58%</td><td>Shetland</td></tr>
-<tr><td>8&ndash;1%</td><td>Quarter Horse, Swedish Warmblood, Shire, Thoroughbred</td></tr>
-</tbody>
-</table>
-</div>
-
-<p>
-    That is an association between a marker and a <em>breed group</em>, not a
-    cause, and the authors said so. So the locus here is a <strong>dosage with a
-    per-horse roll</strong> &mdash; the same shape as
-    <a href="gene-flaxen.html">flaxen</a>, <a href="gene-sooty.html">sooty</a> and
-    <a href="gene-shade.html#score">the bay shade score</a> &mdash; and the
-    population evidence lands where it actually belongs, in
-    <a href="breeds.html">the breed frequencies</a>.
-</p>
 
 <h2 id="dosage">The dosage</h2>
 
@@ -200,21 +197,50 @@
     </p>
 </div>
 
-<h2>Breeds</h2>
+</section>
+
+<section class="tab-panel" data-tab="science">
+
+<h2 id="evidence">What is actually known</h2>
 
 <p>
-    Five breeds name the locus, at rates that follow the study&rsquo;s marker
-    frequencies rather than being invented: <strong>Exmoor Pony</strong> and
-    <strong>Norwegian Fjord</strong> near-fixed, <strong>Icelandic Horse</strong>
-    common, <strong>Shetland Pony</strong> and <strong>Suffolk Punch</strong>
-    moderate. Every other breed is <code>pa/pa</code>, because a breed that does
-    not name a coat locus gets it wild; the feral population carries the full
-    spread.
+    <strong>No confirmed causal mutation and no test.</strong> Breeders have
+    treated pangar&eacute; as heritable for as long as anyone has kept records
+    &mdash; it is near-fixed in several breeds &mdash; but its inheritance mode is
+    unresolved, and the very wide range of intensity points at several loci
+    rather than one.
 </p>
 
-<h2 id="carrot">Its gene carrot</h2>
+<p>
+    The nearest thing to evidence is a 2018 population study of a region on
+    chromosome 22 about 50&nbsp;kb downstream of <em>EDN3</em>, whose allele
+    frequencies split sharply between athletic breeds and the pony and draft
+    breeds where mealy is pervasive:
+</p>
 
-<div class="gene-carrot" data-gene="horsegenetics.pangare"></div>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Marker at</th><th>Breeds</th></tr></thead>
+<tbody>
+<tr><td>99&ndash;98%</td><td>Fjord, Haflinger, Exmoor</td></tr>
+<tr><td>90&ndash;74%</td><td>North Swedish Draught, Gotlandsruss, Ardennes, Icelandic</td></tr>
+<tr><td>58%</td><td>Shetland</td></tr>
+<tr><td>8&ndash;1%</td><td>Quarter Horse, Swedish Warmblood, Shire, Thoroughbred</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    That is an association between a marker and a <em>breed group</em>, not a
+    cause, and the authors said so. So the locus here is a <strong>dosage with a
+    per-horse roll</strong> &mdash; the same shape as
+    <a href="gene-flaxen.html">flaxen</a>, <a href="gene-sooty.html">sooty</a> and
+    <a href="gene-shade.html#score">the bay shade score</a> &mdash; and the
+    population evidence lands where it actually belongs, in
+    <a href="breeds.html">the breed frequencies</a>.
+</p>
+
+</section>
 
 <div class="page-foot">
     <div class="seealso">
@@ -232,6 +258,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
 <script defer src="gene-preview/gene-preview.js"></script>
+<script defer src="gene-inheritance/gene-inheritance.js"></script>
 <script defer src="gene-carrot/gene-carrot.js"></script>
 </body>
 </html>

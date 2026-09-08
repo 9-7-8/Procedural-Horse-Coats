@@ -6,14 +6,19 @@
 <title>Natural zebra &middot; Horse Genetics Wiki</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
 <link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
 <script defer src="nav.js"></script>
+<script defer src="search.js"></script>
 </head>
 <body>
 <main class="content">
 <article class="doc">
 
 <p class="eyebrow natural">Natural gene <span class="sep">/</span> codominant</p>
+
 <h1>Zebra striping</h1>
+
 <p class="lede">
     A real zebra&rsquo;s pattern, made the way a real zebra makes it: the dark bands are
     the horse&rsquo;s own colour and the <strong>gaps have the pigment taken out of
@@ -23,10 +28,29 @@
     less of one.
 </p>
 
+<section class="tab-panel" data-tab="gameplay">
+
+<div class="gene-preview" data-gene="horsegenetics.natural_zebra"></div>
+
+<h2 id="inheritance">What you can get</h2>
+
+<div class="gene-inheritance" data-gene="horsegenetics.natural_zebra"></div>
+
+<h2 id="carrot">Its gene carrot</h2>
+
+<!-- The recipe, read off the mod at run time - the rarity tier is the recipe's
+     price, and a price written into fifty pages goes stale silently.
+     See wiki/gene-carrot/gene-carrot.js. -->
+
+<div class="gene-carrot" data-gene="horsegenetics.natural_zebra"></div>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
 <!-- The gene, on the three base coats, as a horse you can spin. One div and one
      script: everything in here is asked of the mod at run time.
      See wiki/gene-preview/gene-preview.js. -->
-<div class="gene-preview" data-gene="horsegenetics.natural_zebra"></div>
 
 <dl class="spec">
     <div><dt>Gene key</dt><dd>horsegenetics.natural_zebra</dd></div>
@@ -50,39 +74,6 @@
         striped horse on the actual 3D model, in the world, at distance &mdash; which is
         where a body-space pattern usually goes wrong. Checklist on
         <a href="verification.html">To be verified</a>.
-    </p>
-</div>
-
-<h2 id="direction">Which way round a zebra is</h2>
-
-<p>
-    Ask which of a zebra&rsquo;s two colours is the animal and which is the marking, and
-    the biology answers plainly. Hair follicles carry melanocytes; in the dark bands they
-    deposit melanin into the growing hair, and in the white ones signalling suppresses
-    that. <strong>The white stripe is not a white pigment &mdash; it is an absence of the
-    dark one</strong>, and the dark state is the default. A zebra is a dark animal with
-    the colour taken out in bands.
-</p>
-
-<p>
-    That is exactly the shape of <a href="pipeline.html">phase 1</a>, which may only ever
-    take pigment away, and it is why this gene can be natural at all. It whitens the
-    <em>gaps</em> through <code>PigmentField.whiten</code> and never touches the bands.
-    The horse underneath &mdash; whatever <a href="gene-extension.html">extension</a>,
-    <a href="gene-agouti.html">agouti</a>, the dilutions and <a href="gene-grey.html">grey</a>
-    have made of it by priority 68 &mdash; <em>is</em> the striping.
-</p>
-
-<div class="note rule">
-    <span class="label">The contrast with magic zebra is not stylistic</span>
-    <p>
-        <a href="gene-magic-zebra.html">Magic zebra</a> runs in phase 3 and
-        <strong>adds black</strong> on the bands. That is the only way to stripe a
-        cremello or a <a href="gene-kit.html">dominant white</a>, which have no pigment
-        left to remove &mdash; and it is the only way an <em>invented</em> gene could
-        work, because phase 1 cannot add. The two read the same body map from opposite
-        directions: this one whitens <code>1 - coverage</code>, that one blackens
-        <code>coverage</code>. A horse can carry both and show both.
     </p>
 </div>
 
@@ -250,6 +241,43 @@ double along  = point.x() + (radial - point.x()) * toArcs;</code></pre>
     do not.
 </p>
 
+</section>
+
+<section class="tab-panel" data-tab="science">
+
+<h2 id="direction">Which way round a zebra is</h2>
+
+<p>
+    Ask which of a zebra&rsquo;s two colours is the animal and which is the marking, and
+    the biology answers plainly. Hair follicles carry melanocytes; in the dark bands they
+    deposit melanin into the growing hair, and in the white ones signalling suppresses
+    that. <strong>The white stripe is not a white pigment &mdash; it is an absence of the
+    dark one</strong>, and the dark state is the default. A zebra is a dark animal with
+    the colour taken out in bands.
+</p>
+
+<p>
+    That is exactly the shape of <a href="pipeline.html">phase 1</a>, which may only ever
+    take pigment away, and it is why this gene can be natural at all. It whitens the
+    <em>gaps</em> through <code>PigmentField.whiten</code> and never touches the bands.
+    The horse underneath &mdash; whatever <a href="gene-extension.html">extension</a>,
+    <a href="gene-agouti.html">agouti</a>, the dilutions and <a href="gene-grey.html">grey</a>
+    have made of it by priority 68 &mdash; <em>is</em> the striping.
+</p>
+
+<div class="note rule">
+    <span class="label">The contrast with magic zebra is not stylistic</span>
+    <p>
+        <a href="gene-magic-zebra.html">Magic zebra</a> runs in phase 3 and
+        <strong>adds black</strong> on the bands. That is the only way to stripe a
+        cremello or a <a href="gene-kit.html">dominant white</a>, which have no pigment
+        left to remove &mdash; and it is the only way an <em>invented</em> gene could
+        work, because phase 1 cannot add. The two read the same body map from opposite
+        directions: this one whitens <code>1 - coverage</code>, that one blackens
+        <code>coverage</code>. A horse can carry both and show both.
+    </p>
+</div>
+
 <h2 id="not">Not modelled</h2>
 
 <ul>
@@ -270,12 +298,7 @@ double along  = point.x() + (radial - point.x()) * toArcs;</code></pre>
         nothing in the mod identifies a horse by them.</li>
 </ul>
 
-<h2 id="carrot">Its gene carrot</h2>
-
-<!-- The recipe, read off the mod at run time - the rarity tier is the recipe's
-     price, and a price written into fifty pages goes stale silently.
-     See wiki/gene-carrot/gene-carrot.js. -->
-<div class="gene-carrot" data-gene="horsegenetics.natural_zebra"></div>
+</section>
 
 <div class="page-foot">
     <div class="seealso">
@@ -294,6 +317,7 @@ double along  = point.x() + (radial - point.x()) * toArcs;</code></pre>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
 <script defer src="gene-preview/gene-preview.js"></script>
+<script defer src="gene-inheritance/gene-inheritance.js"></script>
 <script defer src="gene-carrot/gene-carrot.js"></script>
 </body>
 </html>

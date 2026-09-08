@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tickets &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow">Item <span class="sep">/</span> stabling</p>
+<h1>Tickets</h1>
+<p class="lede">
+    Four tiers of ticket that craft correctly and, at the moment, do nothing at
+    all.
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+<div class="note warn">
+    <span class="label">These do not work yet</span>
+    <p>
+        All four tickets can be crafted and none of them has any effect. They are meant
+        to teleport a horse to its <a href="item-stall-signs.html">stall</a>, and that is
+        simply unbuilt. Craft them if you like collecting things; there is nothing to use
+        them on.
+    </p>
+</div>
+
+<h2 id="recipes">Recipes</h2>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Item</th><th>Recipe (shapeless)</th></tr></thead>
+<tbody>
+<tr><td><strong>Blank ticket</strong></td><td>paper + horse hair</td></tr>
+<tr><td><strong>Basic ticket</strong></td><td>blank ticket + horse hair</td></tr>
+<tr><td><strong>Bound ticket</strong></td><td>basic ticket + horse hair + ender pearl</td></tr>
+<tr><td><strong>Interdimensional ticket</strong></td><td>bound ticket + horse hair + eye of ender + blaze powder</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>All four share one texture.</p>
+</section>
+
+<section class="tab-panel" data-tab="coding">
+<h2 id="state">Registered, inert</h2>
+
+<p>
+    Four tiers craft correctly and do <strong>nothing</strong>. The stated intent is
+    &ldquo;teleport a bound horse to its stall&rdquo;, which is now possible
+    (<code>StallRecord.center()</code> exists) and simply unbuilt.
+</p>
+
+<h2 id="gaps">Known gaps</h2>
+
+<ul>
+    <li><strong>The tickets do nothing</strong>, and the
+        <a href="item-stall-signs.html">stall system</a> they would consume has no other
+        consumer either.</li>
+    <li>All four share one texture.</li>
+</ul>
+</section>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="item-stall-signs.html">Stall signs</a>
+        <a href="roadmap.html">Roadmap</a>
+        <a href="items.html">All items</a>
+    </div>
+    <code>item/ModItems.java</code>; intended consumer
+    <code>StallRecord.center()</code>.
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

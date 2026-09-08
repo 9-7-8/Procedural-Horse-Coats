@@ -6,14 +6,19 @@
 <title>Sex &middot; Horse Genetics Wiki</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
 <link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
 <script defer src="nav.js"></script>
+<script defer src="search.js"></script>
 </head>
 <body>
 <main class="content">
 <article class="doc">
 
 <p class="eyebrow natural">Natural gene <span class="sep">/</span> no coat phase</p>
+
 <h1>Sex</h1>
+
 <p class="lede">
     The sex chromosome pair, registered as an ordinary locus. A mare is
     <code>X/X</code>, a stallion is <code>X/Y</code> &mdash; <strong>a real
@@ -22,44 +27,11 @@
     nothing</strong>.
 </p>
 
-<dl class="spec">
-    <div><dt>Gene key</dt><dd>horsegenetics.sex</dd></div>
-    <div><dt>Alleles</dt><dd><span class="allele wild">X</span> <span class="allele dom">Y</span></dd></div>
-    <div><dt>Priority</dt><dd>1 &mdash; ahead of every coat gene</dd></div>
-    <div><dt>Outcomes</dt><dd><code>mare</code> (<code>X/X</code>), <code>stallion</code> (<code>X/Y</code>) &mdash; <strong>both wild types</strong></dd></div>
-    <div><dt>Cannot occur</dt><dd><code>Y/Y</code> &mdash; see below</dd></div>
-    <div><dt>Default allele</dt><dd>X (so a code with no sex segment reads as a mare)</dd></div>
-    <div><dt>Wild frequency</dt><dd>50% <code>X/X</code>, 50% <code>X/Y</code></dd></div>
-    <div><dt>Founder draws</dt><dd>1 &times; nextFloat()</dd></div>
-    <div><dt>Coat effect</dt><dd>none, ever</dd></div>
-</dl>
+<section class="tab-panel" data-tab="gameplay">
 
-<h2>Why sex is a gene</h2>
+<h2 id="inheritance">What you can get</h2>
 
-<p>
-    Sex used to be a field on the <a href="breeding.html">horse record</a>, rolled by a
-    coin flip at birth. That made it a <strong>second source of truth</strong> beside
-    the genotype, and it meant a foal&rsquo;s sex was <em>invented</em> rather than
-    <em>inherited</em>. As a locus it costs one allele pair and buys three things:
-</p>
-
-<ul>
-    <li><strong>Inheritance falls out of the ordinary Mendelian draw.</strong> A mare
-        is <code>X/X</code> and can only pass an <code>X</code>; a stallion is
-        <code>X/Y</code> and passes one or the other 50/50 &mdash; exactly the two
-        <code>nextBoolean()</code> per gene that
-        <a href="genetics-model.html">breeding</a> already draws. There is <b>no special
-        case anywhere</b>: the sire decides the foal&rsquo;s sex because that is what
-        the alleles say, not because a handler was told to.</li>
-    <li><strong>It is resolved before every other gene.</strong> At priority
-        <code>1</code> the sex locus is the first entry in <code>Genes.codeOrder()</code>,
-        so a future X-linked or Y-linked gene (<a href="roadmap.html#sex-linked">roadmap
-        &sect;5.3</a>, brindle is the driving case) can segregate against a sex that is
-        already decided.</li>
-    <li><strong>Sex travels with the genome</strong> &mdash; into the genotype code, the
-        stallion seed jar&rsquo;s stored sample, and the custom spawn egg &mdash; instead
-        of needing its own field in each of them.</li>
-</ul>
+<div class="gene-inheritance" data-gene="horsegenetics.sex"></div>
 
 <h2>It paints nothing</h2>
 
@@ -121,6 +93,30 @@ public boolean canOccur(AllelePair pair) {
     a stallion beats throwing.
 </p>
 
+<h2 id="carrot">Its gene carrot</h2>
+
+<!-- The recipe, read off the mod at run time - the rarity tier is the recipe's
+     price, and a price written into fifty pages goes stale silently.
+     See wiki/gene-carrot/gene-carrot.js. -->
+
+<div class="gene-carrot" data-gene="horsegenetics.sex"></div>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd>horsegenetics.sex</dd></div>
+    <div><dt>Alleles</dt><dd><span class="allele wild">X</span> <span class="allele dom">Y</span></dd></div>
+    <div><dt>Priority</dt><dd>1 &mdash; ahead of every coat gene</dd></div>
+    <div><dt>Outcomes</dt><dd><code>mare</code> (<code>X/X</code>), <code>stallion</code> (<code>X/Y</code>) &mdash; <strong>both wild types</strong></dd></div>
+    <div><dt>Cannot occur</dt><dd><code>Y/Y</code> &mdash; see below</dd></div>
+    <div><dt>Default allele</dt><dd>X (so a code with no sex segment reads as a mare)</dd></div>
+    <div><dt>Wild frequency</dt><dd>50% <code>X/X</code>, 50% <code>X/Y</code></dd></div>
+    <div><dt>Founder draws</dt><dd>1 &times; nextFloat()</dd></div>
+    <div><dt>Coat effect</dt><dd>none, ever</dd></div>
+</dl>
+
 <h2>Reading the sex</h2>
 
 <p>
@@ -149,12 +145,38 @@ public static Sex sexOf(String code) { ... }</code></pre>
     goes through it.
 </p>
 
-<h2 id="carrot">Its gene carrot</h2>
+</section>
 
-<!-- The recipe, read off the mod at run time - the rarity tier is the recipe's
-     price, and a price written into fifty pages goes stale silently.
-     See wiki/gene-carrot/gene-carrot.js. -->
-<div class="gene-carrot" data-gene="horsegenetics.sex"></div>
+<section class="tab-panel" data-tab="science">
+
+<h2>Why sex is a gene</h2>
+
+<p>
+    Sex used to be a field on the <a href="breeding.html">horse record</a>, rolled by a
+    coin flip at birth. That made it a <strong>second source of truth</strong> beside
+    the genotype, and it meant a foal&rsquo;s sex was <em>invented</em> rather than
+    <em>inherited</em>. As a locus it costs one allele pair and buys three things:
+</p>
+
+<ul>
+    <li><strong>Inheritance falls out of the ordinary Mendelian draw.</strong> A mare
+        is <code>X/X</code> and can only pass an <code>X</code>; a stallion is
+        <code>X/Y</code> and passes one or the other 50/50 &mdash; exactly the two
+        <code>nextBoolean()</code> per gene that
+        <a href="genetics-model.html">breeding</a> already draws. There is <b>no special
+        case anywhere</b>: the sire decides the foal&rsquo;s sex because that is what
+        the alleles say, not because a handler was told to.</li>
+    <li><strong>It is resolved before every other gene.</strong> At priority
+        <code>1</code> the sex locus is the first entry in <code>Genes.codeOrder()</code>,
+        so a future X-linked or Y-linked gene (<a href="roadmap.html#sex-linked">roadmap
+        &sect;5.3</a>, brindle is the driving case) can segregate against a sex that is
+        already decided.</li>
+    <li><strong>Sex travels with the genome</strong> &mdash; into the genotype code, the
+        stallion seed jar&rsquo;s stored sample, and the custom spawn egg &mdash; instead
+        of needing its own field in each of them.</li>
+</ul>
+
+</section>
 
 <div class="page-foot">
     <div class="seealso">
@@ -170,5 +192,6 @@ public static Sex sexOf(String code) { ... }</code></pre>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
 <script defer src="gene-carrot/gene-carrot.js"></script>
+<script defer src="gene-inheritance/gene-inheritance.js"></script>
 </body>
 </html>

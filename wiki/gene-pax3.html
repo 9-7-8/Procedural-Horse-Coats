@@ -6,14 +6,19 @@
 <title>PAX3 (splash white) &middot; Horse Genetics Wiki</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
 <link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
 <script defer src="nav.js"></script>
+<script defer src="search.js"></script>
 </head>
 <body>
 <main class="content">
 <article class="doc">
 
 <p class="eyebrow natural">Natural gene <span class="sep">/</span> phase 1</p>
+
 <h1>PAX3 (splash white)</h1>
+
 <p class="lede">
     The <strong>second</strong> splash white locus, carrying <code>SW2</code> and
     <code>SW4</code>. Its twin is <a href="gene-mitf.html"><code>MITF</code></a>, and it
@@ -24,10 +29,65 @@
     <a href="gene-mitf.html#sw1"><code>SW1</code></a>, next door.
 </p>
 
+<section class="tab-panel" data-tab="gameplay">
+
+<div class="gene-preview" data-gene="horsegenetics.pax3"></div>
+
+<h2 id="inheritance">What you can get</h2>
+
+<div class="gene-inheritance" data-gene="horsegenetics.pax3"></div>
+
+<h2>Deafness</h2>
+
+<p>
+    A <strong>homozygote at this locus</strong> (no <code>N</code> copy) is deaf, for
+    the same reason as at <a href="gene-mitf.html">MITF</a>: the pigment cells that
+    never reached the coat never reached the inner ear either. The description on this
+    page used to say deafness was &ldquo;described, not modelled&rdquo;. It is modelled
+    now &mdash; as a named, <code>INFORMATIONAL</code> condition that costs the horse
+    nothing, because the mod has no hearing to take away.
+</p>
+
+<p>
+    It is the <em>same</em> <code>Condition</code> object MITF declares, so a horse
+    homozygous at both loci is told once. See
+    <a href="horse-body.html">the horse&rsquo;s body</a>.
+</p>
+
+<h2 id="carrot">Its gene carrot</h2>
+
+<!-- The recipe, read off the mod at run time - the rarity tier is the recipe's
+     price, and a price written into fifty pages goes stale silently.
+     See wiki/gene-carrot/gene-carrot.js. -->
+
+<div class="gene-carrot" data-gene="horsegenetics.pax3"></div>
+
+<div class="note">
+    <span class="label">Blue eyes</span>
+    <p>
+        Like <a href="gene-mitf.html">MITF</a>, any expressing combination here claims a
+        blue iris through the shared <a href="eye-colour.html">eye-colour
+        channel</a>. Blue eyes in the wild pool now come overwhelmingly from
+        <a href="gene-mitf.html"><code>SW1</code></a> next door; a blue eye traceable to
+        <em>this</em> locus belongs to a Quarter Horse, a Paint or a Lipizzan.
+    </p>
+    <p>
+        <strong>One or two blue eyes.</strong> A depigmenting claim frequently fails to
+        reach the whole of both irises: 62% of blue-eyed horses get two whole blue eyes,
+        22% get exactly one (complete heterochromia, the other eye keeping whatever colour
+        the horse's pigment genes gave it), and 16% get a wedge in one or both. It is one
+        roll off this locus's own stored values, inherited with the allele copy &mdash;
+        see <a href="eye-colour.html#spread">the spread</a>.
+    </p>
+</div>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
 <!-- The gene, on the three base coats, as a horse you can spin. One div and one
      script: everything in here is asked of the mod at run time.
      See wiki/gene-preview/gene-preview.js. -->
-<div class="gene-preview" data-gene="horsegenetics.pax3"></div>
 
 <dl class="spec">
     <div><dt>Gene key</dt><dd>horsegenetics.pax3</dd></div>
@@ -188,29 +248,7 @@
     hand-written blazes landing on top of each other and reading as one.
 </p>
 
-<h2>Deafness</h2>
-
-<p>
-    A <strong>homozygote at this locus</strong> (no <code>N</code> copy) is deaf, for
-    the same reason as at <a href="gene-mitf.html">MITF</a>: the pigment cells that
-    never reached the coat never reached the inner ear either. The description on this
-    page used to say deafness was &ldquo;described, not modelled&rdquo;. It is modelled
-    now &mdash; as a named, <code>INFORMATIONAL</code> condition that costs the horse
-    nothing, because the mod has no hearing to take away.
-</p>
-
-<p>
-    It is the <em>same</em> <code>Condition</code> object MITF declares, so a horse
-    homozygous at both loci is told once. See
-    <a href="horse-body.html">the horse&rsquo;s body</a>.
-</p>
-
-<h2 id="carrot">Its gene carrot</h2>
-
-<!-- The recipe, read off the mod at run time - the rarity tier is the recipe's
-     price, and a price written into fifty pages goes stale silently.
-     See wiki/gene-carrot/gene-carrot.js. -->
-<div class="gene-carrot" data-gene="horsegenetics.pax3"></div>
+</section>
 
 <div class="page-foot">
     <div class="seealso">
@@ -222,30 +260,12 @@
     <code>common/coat/pattern/WhitePattern.java</code>
 </div>
 
-<div class="note">
-    <span class="label">Blue eyes</span>
-    <p>
-        Like <a href="gene-mitf.html">MITF</a>, any expressing combination here claims a
-        blue iris through the shared <a href="eye-colour.html">eye-colour
-        channel</a>. Blue eyes in the wild pool now come overwhelmingly from
-        <a href="gene-mitf.html"><code>SW1</code></a> next door; a blue eye traceable to
-        <em>this</em> locus belongs to a Quarter Horse, a Paint or a Lipizzan.
-    </p>
-    <p>
-        <strong>One or two blue eyes.</strong> A depigmenting claim frequently fails to
-        reach the whole of both irises: 62% of blue-eyed horses get two whole blue eyes,
-        22% get exactly one (complete heterochromia, the other eye keeping whatever colour
-        the horse's pigment genes gave it), and 16% get a wedge in one or both. It is one
-        roll off this locus's own stored values, inherited with the allele copy &mdash;
-        see <a href="eye-colour.html#spread">the spread</a>.
-    </p>
-</div>
-
 </article>
 </main>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
 <script defer src="gene-preview/gene-preview.js"></script>
+<script defer src="gene-inheritance/gene-inheritance.js"></script>
 <script defer src="gene-carrot/gene-carrot.js"></script>
 </body>
 </html>

@@ -6,20 +6,43 @@
 <title>ACAN &middot; Horse Genetics Wiki</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
 <link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
 <script defer src="nav.js"></script>
+<script defer src="search.js"></script>
 </head>
 <body>
 <main class="content">
 <article class="doc">
 
 <p class="eyebrow natural">Natural gene <span class="sep">/</span> health</p>
+
 <h1>ACAN (chondrodysplastic dwarfism)</h1>
+
 <p class="lede">
     Chondrodysplastic dwarfism &mdash; five alleles, fifteen combinations, and the
     gene that proves the combination table was worth building. A horse is affected
     when it has <strong>no working copy left</strong>, which is not the same
     statement as &ldquo;it is homozygous&rdquo;.
 </p>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<h2 id="inheritance">What you can get</h2>
+
+<div class="gene-inheritance" data-gene="horsegenetics.acan"></div>
+
+<h2 id="carrot">Its gene carrot</h2>
+
+<!-- The recipe, read off the mod at run time - the rarity tier is the recipe's
+     price, and a price written into fifty pages goes stale silently.
+     See wiki/gene-carrot/gene-carrot.js. -->
+
+<div class="gene-carrot" data-gene="horsegenetics.acan"></div>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
 
 <dl class="spec">
     <div><dt>Gene key</dt><dd>horsegenetics.acan</dd></div>
@@ -66,6 +89,33 @@
 </table>
 </div>
 
+<h2>The founder table</h2>
+
+<p>
+    Built with the multi-allele Hardy&ndash;Weinberg helper at <code>p = 0.004</code>
+    per variant, with <b>every</b> affected combination excluded and the rest
+    rescaled to 100. That is the biology as much as the bookkeeping &mdash; a
+    wild-caught horse is an adult that survived, and an affected foal mostly did not.
+    Ten of the fifteen combinations therefore carry weight zero.
+</p>
+
+<div class="note warn">
+    <span class="label">No founder is ever affected</span>
+    <p>
+        The founder table lists only the clear horse and the carrier. A wild-caught
+        horse is an adult that survived, so it can carry this and never have it, and
+        the homozygote&rsquo;s weight is simply absent from the table. <b>The only way
+        to produce an affected foal is to breed two carriers</b> &mdash; which is the
+        whole design: it is what makes a pedigree worth keeping, and what turns the
+        carrier wording in the info panel from decoration into the difference between
+        a breeding programme and a lottery.
+    </p>
+</div>
+
+</section>
+
+<section class="tab-panel" data-tab="science">
+
 <h2>Why this is not &ldquo;is it homozygous?&rdquo;</h2>
 
 <p>
@@ -91,35 +141,7 @@
     </p>
 </div>
 
-<h2>The founder table</h2>
-
-<p>
-    Built with the multi-allele Hardy&ndash;Weinberg helper at <code>p = 0.004</code>
-    per variant, with <b>every</b> affected combination excluded and the rest
-    rescaled to 100. That is the biology as much as the bookkeeping &mdash; a
-    wild-caught horse is an adult that survived, and an affected foal mostly did not.
-    Ten of the fifteen combinations therefore carry weight zero.
-</p>
-
-<div class="note warn">
-    <span class="label">No founder is ever affected</span>
-    <p>
-        The founder table lists only the clear horse and the carrier. A wild-caught
-        horse is an adult that survived, so it can carry this and never have it, and
-        the homozygote&rsquo;s weight is simply absent from the table. <b>The only way
-        to produce an affected foal is to breed two carriers</b> &mdash; which is the
-        whole design: it is what makes a pedigree worth keeping, and what turns the
-        carrier wording in the info panel from decoration into the difference between
-        a breeding programme and a lottery.
-    </p>
-</div>
-
-<h2 id="carrot">Its gene carrot</h2>
-
-<!-- The recipe, read off the mod at run time - the rarity tier is the recipe's
-     price, and a price written into fifty pages goes stale silently.
-     See wiki/gene-carrot/gene-carrot.js. -->
-<div class="gene-carrot" data-gene="horsegenetics.acan"></div>
+</section>
 
 <div class="page-foot">
     <div class="seealso">
@@ -135,5 +157,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
 <script defer src="gene-carrot/gene-carrot.js"></script>
+<script defer src="gene-inheritance/gene-inheritance.js"></script>
 </body>
 </html>

@@ -6,14 +6,19 @@
 <title>Suntouched &middot; Horse Genetics Wiki</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
 <link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
 <script defer src="nav.js"></script>
+<script defer src="search.js"></script>
 </head>
 <body>
 <main class="content">
 <article class="doc">
 
 <p class="eyebrow magical">Magical gene <span class="sep">/</span> phase 3 + effects</p>
+
 <h1>Suntouched</h1>
+
 <p class="lede">
     A horse lit from within &mdash; molten-gold mane and tail that stay bright in
     the dark, and a body that <strong>casts light</strong> like a torch. It sheds a
@@ -23,69 +28,7 @@
     <a href="gene-effects.html#glow">effect verb</a></strong>.
 </p>
 
-<dl class="spec">
-    <div><dt>Gene key</dt><dd>example.suntouched</dd></div>
-    <div><dt>Alleles</dt><dd><span class="allele dom">Sntch</span> <span class="allele wild">n</span></dd></div>
-    <div><dt>Outcomes</dt><dd>wild, <code>suntouched</code></dd></div>
-    <div><dt>Shows when</dt><dd><code>Sntch/n</code>, <code>Sntch/Sntch</code></dd></div>
-    <div><dt>Default allele</dt><dd>n</dd></div>
-    <div><dt>Wild frequency</dt><dd>1 in 128 per allele &rarr; ~1 wild horse in 64 shows it</dd></div>
-    <div><dt>Founder draws</dt><dd>1 &times; nextFloat()</dd></div>
-    <div><dt>Deterministic</dt><dd><strong>yes</strong> &mdash; no knobs, so every carrier bakes the same gold mane</dd></div>
-    <div><dt>Epigenetic draws</dt><dd>none</dd></div>
-    <div><dt>Priority</dt><dd>210 &mdash; a data-driven magical gene, slots before <a href="gene-waterborn.html">Waterborn</a> (215) and before Test in <code>magicalOrder()</code></dd></div>
-    <div><dt>Mane colour</dt><dd><code>#ffcf47</code> (255, 207, 71), 88% of the way there</dd></div>
-    <div><dt>Effects</dt><dd><code>glow</code> light 12 + emissive <code>HAIR</code>, <code>emitter</code> gold-dust aura</dd></div>
-</dl>
-
-<div class="note warn">
-    <span class="label">Partly verified in-game (2026-09-02)</span>
-    <p>
-        <strong>Confirmed:</strong> the emissive gold mane and tail render (bright
-        in the dark) and look good, the gold-dust <code>emitter</code> shows, and
-        the horse lights the area around it. <strong>Still unverified:</strong> the
-        light cleaning up on death / unload, the foal case, the horse-dimension
-        skip, and hard base coats (cremello, dominant white). Checklist item is
-        <a href="verification.html#effects">To be verified &sect;13</a>.
-    </p>
-</div>
-
-<h2 id="coat">The coat: a molten-gold mane and tail</h2>
-
-<p>
-    The visual half is one ordinary magical coat layer: a <code>PARTS</code> mask on
-    the <code>HAIR</code> parts (mane + tail) crossed with a <code>TOWARD</code> op
-    that walks each hair texel <strong>88%</strong> of the way to <code>#ffcf47</code>.
-</p>
-
-<div class="codebox">
-<div class="filename">the coat layer, from suntouched.json</div>
-<pre><code class="language-json">{
-  "name": "molten-gold glow through the mane and tail",
-  "masks": [
-    { "type": "PARTS", "parts": [ "HAIR" ] }
-  ],
-  "op": { "type": "TOWARD", "color": "#ffcf47", "strength": 88, "opacity": 100 }
-}</code></pre>
-</div>
-
-<p>
-    <code>TOWARD</code> rather than <code>TINT</code> for the same reason
-    <a href="gene-pink-hair.html">pink hair</a> and <a href="gene-waterborn.html">Waterborn</a>
-    use it: it <em>reads</em> what each strand currently looks like and steps it
-    toward the target, so the mane keeps its light and dark instead of flattening to
-    a slab, and it reads the same over a black, a chestnut or a cremello.
-    <code>opacity: 100</code> means the gold also shows on a
-    <a href="gene-kit.html">dominant-white</a> horse.
-</p>
-
-<p>
-    Suntouched carries <strong>no knobs</strong>, so a visible carrier is
-    <strong>deterministic</strong>: every Suntouched horse bakes one shared texture
-    per base coat, and there is nothing on the <code>Sntch</code> copy for a foal to
-    inherit beyond the allele itself. It is the first shipped data-driven gene with
-    no per-horse randomness at all.
-</p>
+<section class="tab-panel" data-tab="gameplay">
 
 <h2 id="effects">The effects</h2>
 
@@ -158,6 +101,74 @@
     </p>
 </div>
 
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd>example.suntouched</dd></div>
+    <div><dt>Alleles</dt><dd><span class="allele dom">Sntch</span> <span class="allele wild">n</span></dd></div>
+    <div><dt>Outcomes</dt><dd>wild, <code>suntouched</code></dd></div>
+    <div><dt>Shows when</dt><dd><code>Sntch/n</code>, <code>Sntch/Sntch</code></dd></div>
+    <div><dt>Default allele</dt><dd>n</dd></div>
+    <div><dt>Wild frequency</dt><dd>1 in 128 per allele &rarr; ~1 wild horse in 64 shows it</dd></div>
+    <div><dt>Founder draws</dt><dd>1 &times; nextFloat()</dd></div>
+    <div><dt>Deterministic</dt><dd><strong>yes</strong> &mdash; no knobs, so every carrier bakes the same gold mane</dd></div>
+    <div><dt>Epigenetic draws</dt><dd>none</dd></div>
+    <div><dt>Priority</dt><dd>210 &mdash; a data-driven magical gene, slots before <a href="gene-waterborn.html">Waterborn</a> (215) and before Test in <code>magicalOrder()</code></dd></div>
+    <div><dt>Mane colour</dt><dd><code>#ffcf47</code> (255, 207, 71), 88% of the way there</dd></div>
+    <div><dt>Effects</dt><dd><code>glow</code> light 12 + emissive <code>HAIR</code>, <code>emitter</code> gold-dust aura</dd></div>
+</dl>
+
+<div class="note warn">
+    <span class="label">Partly verified in-game (2026-09-02)</span>
+    <p>
+        <strong>Confirmed:</strong> the emissive gold mane and tail render (bright
+        in the dark) and look good, the gold-dust <code>emitter</code> shows, and
+        the horse lights the area around it. <strong>Still unverified:</strong> the
+        light cleaning up on death / unload, the foal case, the horse-dimension
+        skip, and hard base coats (cremello, dominant white). Checklist item is
+        <a href="verification.html#effects">To be verified &sect;13</a>.
+    </p>
+</div>
+
+<h2 id="coat">The coat: a molten-gold mane and tail</h2>
+
+<p>
+    The visual half is one ordinary magical coat layer: a <code>PARTS</code> mask on
+    the <code>HAIR</code> parts (mane + tail) crossed with a <code>TOWARD</code> op
+    that walks each hair texel <strong>88%</strong> of the way to <code>#ffcf47</code>.
+</p>
+
+<div class="codebox">
+<div class="filename">the coat layer, from suntouched.json</div>
+<pre><code class="language-json">{
+  "name": "molten-gold glow through the mane and tail",
+  "masks": [
+    { "type": "PARTS", "parts": [ "HAIR" ] }
+  ],
+  "op": { "type": "TOWARD", "color": "#ffcf47", "strength": 88, "opacity": 100 }
+}</code></pre>
+</div>
+
+<p>
+    <code>TOWARD</code> rather than <code>TINT</code> for the same reason
+    <a href="gene-pink-hair.html">pink hair</a> and <a href="gene-waterborn.html">Waterborn</a>
+    use it: it <em>reads</em> what each strand currently looks like and steps it
+    toward the target, so the mane keeps its light and dark instead of flattening to
+    a slab, and it reads the same over a black, a chestnut or a cremello.
+    <code>opacity: 100</code> means the gold also shows on a
+    <a href="gene-kit.html">dominant-white</a> horse.
+</p>
+
+<p>
+    Suntouched carries <strong>no knobs</strong>, so a visible carrier is
+    <strong>deterministic</strong>: every Suntouched horse bakes one shared texture
+    per base coat, and there is nothing on the <code>Sntch</code> copy for a foal to
+    inherit beyond the allele itself. It is the first shipped data-driven gene with
+    no per-horse randomness at all.
+</p>
+
 <h2 id="shipping">Ships as a file, like Waterborn</h2>
 
 <p>
@@ -184,6 +195,10 @@
 
 <p>To turn Suntouched off, drop it from <code>index.json</code> and delete the file.</p>
 
+</section>
+
+<section class="tab-panel" data-tab="science">
+
 <h2>Not modelled yet</h2>
 
 <ul>
@@ -199,6 +214,8 @@
     <li>The <a href="gene-creator/index.html">gene creator</a> cannot edit an
         <code>effects</code> block &mdash; this one was hand-written.</li>
 </ul>
+
+</section>
 
 <div class="page-foot">
     <div class="seealso">
@@ -216,5 +233,6 @@
 </main>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+<script defer src="gene-inheritance/gene-inheritance.js"></script>
 </body>
 </html>

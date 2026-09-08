@@ -6,14 +6,19 @@
 <title>Diet &middot; Horse Genetics Wiki</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
 <link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
 <script defer src="nav.js"></script>
+<script defer src="search.js"></script>
 </head>
 <body>
 <main class="content">
 <article class="doc">
 
 <p class="eyebrow natural">Natural gene <span class="sep">/</span> paints nothing</p>
+
 <h1>Diet &mdash; what the horse will eat</h1>
+
 <p class="lede">
     Thirteen alleles. Twelve of them are <strong>narrow diets</strong> &mdash;
     raw meat, fish, wheat, cake, potions, lava, one metal, one gem &mdash; each
@@ -23,28 +28,11 @@
     metal-eater to full health however hurt it was.
 </p>
 
-<dl class="spec">
-    <div><dt>Gene key</dt><dd>horsegenetics.diet</dd></div>
-    <div><dt>Alleles</dt><dd>12 diets + <span class="allele">n</span> &mdash; see <code>DietGene</code></dd></div>
-    <div><dt>Outcomes</dt><dd>13, and <strong>all of them wild type</strong> &mdash; it paints nothing</dd></div>
-    <div><dt>Shows when</dt><dd>homozygous for one diet allele, and only then</dd></div>
-    <div><dt>Default allele</dt><dd>n</dd></div>
-    <div><dt>Priority</dt><dd><code>DietGene.PRIORITY</code> &mdash; ahead of every gene that paints</dd></div>
-    <div><dt>Founders</dt><dd>feral only, and <strong>never carriers</strong></dd></div>
-    <div><dt>Epigenetic draws</dt><dd>1 &times; nextFloat, and only for a variant diet</dd></div>
-    <div><dt>Model</dt><dd>genetics.Diet, genetics.HorseDiet, genetics.DietContribution</dd></div>
-    <div><dt>Items</dt><dd><code>neoforge/server/DietFoods</code> &mdash; deliberately off <code>common/</code></dd></div>
-</dl>
+<section class="tab-panel" data-tab="gameplay">
 
-<div class="note">
-    <span class="label">Unplayed</span>
-    <p>
-        The locus, its inheritance and the resolution channel are covered by
-        <code>DietGeneTest</code>. The <em>feeding</em> half &mdash; refusing an
-        apple, healing off a bar of gold, leaving a bucket behind &mdash; has
-        never been run in a game. See <a href="verification.html">verification</a>.
-    </p>
-</div>
+<h2 id="inheritance">What you can get</h2>
+
+<div class="gene-inheritance" data-gene="horsegenetics.diet"></div>
 
 <h2>The trade</h2>
 
@@ -77,6 +65,37 @@
     them, so the sentence in the gene browser and the number it is about cannot
     drift apart.
 </p>
+
+<h2 id="carrot">Its gene carrot</h2>
+
+<div class="gene-carrot" data-gene="horsegenetics.diet"></div>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd>horsegenetics.diet</dd></div>
+    <div><dt>Alleles</dt><dd>12 diets + <span class="allele">n</span> &mdash; see <code>DietGene</code></dd></div>
+    <div><dt>Outcomes</dt><dd>13, and <strong>all of them wild type</strong> &mdash; it paints nothing</dd></div>
+    <div><dt>Shows when</dt><dd>homozygous for one diet allele, and only then</dd></div>
+    <div><dt>Default allele</dt><dd>n</dd></div>
+    <div><dt>Priority</dt><dd><code>DietGene.PRIORITY</code> &mdash; ahead of every gene that paints</dd></div>
+    <div><dt>Founders</dt><dd>feral only, and <strong>never carriers</strong></dd></div>
+    <div><dt>Epigenetic draws</dt><dd>1 &times; nextFloat, and only for a variant diet</dd></div>
+    <div><dt>Model</dt><dd>genetics.Diet, genetics.HorseDiet, genetics.DietContribution</dd></div>
+    <div><dt>Items</dt><dd><code>neoforge/server/DietFoods</code> &mdash; deliberately off <code>common/</code></dd></div>
+</dl>
+
+<div class="note">
+    <span class="label">Unplayed</span>
+    <p>
+        The locus, its inheritance and the resolution channel are covered by
+        <code>DietGeneTest</code>. The <em>feeding</em> half &mdash; refusing an
+        apple, healing off a bar of gold, leaving a bucket behind &mdash; has
+        never been run in a game. See <a href="verification.html">verification</a>.
+    </p>
+</div>
 
 <h2 id="which">Which metal, which gem</h2>
 
@@ -179,9 +198,7 @@
     </p>
 </div>
 
-<h2 id="carrot">Its gene carrot</h2>
-
-<div class="gene-carrot" data-gene="horsegenetics.diet"></div>
+</section>
 
 <div class="page-foot">
     <div class="seealso">
@@ -202,5 +219,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
 <script defer src="gene-carrot/gene-carrot.js"></script>
+<script defer src="gene-inheritance/gene-inheritance.js"></script>
 </body>
 </html>

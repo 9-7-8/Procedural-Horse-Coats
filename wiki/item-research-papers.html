@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Research papers &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow">Item <span class="sep">/</span> knowledge</p>
+<h1>Research papers</h1>
+<p class="lede">
+    A paper naming one gene. Reading it adds that gene to your gene database and
+    unlocks its targeted splice carrot &mdash; which is the only way to breed for a
+    specific gene on purpose.
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+<h2 id="use">What it does</h2>
+
+<div class="plain">
+    <p>
+        <strong>Right-click the paper</strong> to learn its gene. That gene joins your
+        gene database, and you can then craft a
+        <a href="item-splice-carrots.html">Known Gene Splice carrot</a> for it.
+    </p>
+</div>
+
+<p>
+    The tooltip tells you which gene the paper is for, how rare it is, and what it does,
+    so you can decide before you read it.
+</p>
+
+<h2 id="get">Three ways to get one</h2>
+
+<ul>
+    <li><strong>Find it.</strong> Research papers turn up in about eight kinds of vanilla
+        chest. Which gene a found paper names is weighted by rarity, so the common genes
+        come up far more often.</li>
+    <li><strong>Write it.</strong> Open the <strong>Horse Browser</strong> (<code>H</code>),
+        pick a gene you have already discovered, and put a single book in the crafting
+        grid. One book, one paper.</li>
+    <li><strong>Trade for it.</strong> Papers can be handed to other players &mdash; which
+        is the point of being able to write them. Knowledge is shareable rather than
+        hoardable.</li>
+</ul>
+</section>
+
+<section class="tab-panel" data-tab="coding">
+<h2 id="component">The component and the routes</h2>
+
+<p>
+    <code>research_paper</code> carries a <code>research_gene</code> data component naming
+    one gene. Right-click it to add that gene to your
+    <a href="carrots.html#database">gene database</a> and unlock its carrot line; the
+    tooltip shows the gene&rsquo;s name, rarity tier and blurb.
+</p>
+
+<ul>
+    <li><strong>Chest loot</strong> &mdash; injected into ~8 vanilla chest tables by a
+        global loot modifier, with the gene weighted by its rarity tier
+        (<code>data/loot/AddResearchPaperModifier</code>).</li>
+    <li><strong>Written by hand</strong> &mdash; in the <strong>Horse Browser</strong>
+        (<code>H</code>), pick a gene you have already discovered and put a single book in
+        the crafting grid. One book &rarr; one paper for that gene. There is no JSON
+        recipe for this; it is <code>menu/HorseBrowserRecipes</code>, because the result
+        depends on which gene is selected in the screen.</li>
+    <li><strong>Traded from another player</strong> &mdash; which is the point of the
+        second route: knowledge is shareable rather than hoardable.</li>
+</ul>
+
+<h2 id="gaps">Known gaps</h2>
+
+<ul>
+    <li>The blank <a href="item-transfer-papers.html">transfer paper</a> reuses this
+        item&rsquo;s texture.</li>
+</ul>
+</section>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="carrots.html">The gene database</a>
+        <a href="item-splice-carrots.html">Splice carrots</a>
+        <a href="items.html">All items</a>
+    </div>
+    <code>data/loot/AddResearchPaperModifier</code>,
+    <code>menu/HorseBrowserRecipes</code>.
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

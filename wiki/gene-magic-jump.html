@@ -6,14 +6,19 @@
 <title>Magic jump &middot; Horse Genetics Wiki</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
 <link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
 <script defer src="nav.js"></script>
+<script defer src="search.js"></script>
 </head>
 <body>
 <main class="content">
 <article class="doc">
 
 <p class="eyebrow magical">Magical gene <span class="sep">/</span> no coat effect</p>
+
 <h1>Magic jump</h1>
+
 <p class="lede">
     The magical version of the natural jump locus, <a href="gene-ryr2.html">RYR2</a>. One of the <strong>four magical
     body-stat genes</strong> &mdash; <a href="gene-body-size.html">size</a>,
@@ -24,6 +29,43 @@
     way. Two copies of the same kind <strong>add</strong>, and no wild horse is
     ever born with two.
 </p>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<h2 id="inheritance">What you can get</h2>
+
+<div class="gene-inheritance" data-gene="horsegenetics.magic_jump"></div>
+
+<h2 id="wild">Only heterozygotes are born wild</h2>
+
+<div class="codebox">
+<pre><code class="language-java">FounderTable.builder()
+        .weight(Springy,   n, 40.0)
+        .weight(Leaden, n, 40.0)
+        .weight(n,      n, 20.0)
+        .build();</code></pre>
+</div>
+
+<p>
+    Written out rather than derived from Hardy-Weinberg, because random mating
+    is exactly what this table is <em>not</em>: about <strong>80%</strong> of
+    wild horses carry one copy, and <strong>no</strong> wild horse carries two
+    of anything. Every doubled horse in the world, in either direction, is
+    something somebody bred &mdash; the health loci&rsquo;s rule, pointed at
+    something worth having.
+</p>
+
+<h2 id="carrot">Its gene carrot</h2>
+
+<!-- The recipe, read off the mod at run time - the rarity tier is the recipe's
+     price, and a price written into fifty pages goes stale silently.
+     See wiki/gene-carrot/gene-carrot.js. -->
+
+<div class="gene-carrot" data-gene="horsegenetics.magic_jump"></div>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
 
 <dl class="spec">
     <div><dt>Gene key</dt><dd>horsegenetics.magic_jump</dd></div>
@@ -164,27 +206,6 @@ public void contribute(AllelePair pair, Genotype genotype, GeneEpigenetics epige
     for two.
 </p>
 
-<h2 id="wild">Only heterozygotes are born wild</h2>
-
-<div class="codebox">
-<pre><code class="language-java">FounderTable.builder()
-        .weight(Springy,   n, 40.0)
-        .weight(Leaden, n, 40.0)
-        .weight(n,      n, 20.0)
-        .build();</code></pre>
-</div>
-
-<p>
-    Written out rather than derived from Hardy-Weinberg, because random mating
-    is exactly what this table is <em>not</em>: about <strong>80%</strong> of
-    wild horses carry one copy, and <strong>no</strong> wild horse carries two
-    of anything. Every doubled horse in the world, in either direction, is
-    something somebody bred &mdash; the health loci&rsquo;s rule, pointed at
-    something worth having.
-</p>
-
-
-
 <h2 id="only">Deliberately jump only</h2>
 
 <p>
@@ -193,12 +214,7 @@ public void contribute(AllelePair pair, Genotype genotype, GeneEpigenetics epige
     that the four can be bred independently.
 </p>
 
-<h2 id="carrot">Its gene carrot</h2>
-
-<!-- The recipe, read off the mod at run time - the rarity tier is the recipe's
-     price, and a price written into fifty pages goes stale silently.
-     See wiki/gene-carrot/gene-carrot.js. -->
-<div class="gene-carrot" data-gene="horsegenetics.magic_jump"></div>
+</section>
 
 <div class="page-foot">
     <div class="seealso">
@@ -216,5 +232,6 @@ public void contribute(AllelePair pair, Genotype genotype, GeneEpigenetics epige
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
 <script defer src="gene-carrot/gene-carrot.js"></script>
+<script defer src="gene-inheritance/gene-inheritance.js"></script>
 </body>
 </html>

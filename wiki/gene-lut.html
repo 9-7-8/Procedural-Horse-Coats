@@ -6,14 +6,19 @@
 <title>LUT &middot; Horse Genetics Wiki</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
 <link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
 <script defer src="nav.js"></script>
+<script defer src="search.js"></script>
 </head>
 <body>
 <main class="content">
 <article class="doc">
 
 <p class="eyebrow magical">Magical gene <span class="sep">/</span> swaps the colour LUT</p>
+
 <h1>LUT</h1>
+
 <p class="lede">
     A horse that resolves its colours against an <strong>unnatural gradient</strong>.
     Every melanin gene does exactly what it always does &mdash; but instead of the warm
@@ -22,10 +27,40 @@
     blue and pink: dreamier coat colours from the same genotype.
 </p>
 
+<section class="tab-panel" data-tab="gameplay">
+
+<div class="gene-preview" data-gene="horsegenetics.lut"></div>
+
+<h2 id="inheritance">What you can get</h2>
+
+<div class="gene-inheritance" data-gene="horsegenetics.lut"></div>
+
+<h2 id="homozygous">Two of the same, or nothing</h2>
+
+<p>
+    A LUT allele only does anything when the horse carries <strong>two identical
+    copies</strong> of it. One copy is a carrier and shows nothing. When there is more
+    than one variant, two <em>different</em> variant alleles will also be silent &mdash;
+    a mixed pair is not &ldquo;half of each palette&rdquo;, it is the natural gradient.
+    This is what makes an unnatural coat a breeding project rather than a lucky catch,
+    and it is the same shape the milk, healer and magic body-stat loci use.
+</p>
+
+<h2 id="carrot">Its gene carrot</h2>
+
+<!-- The recipe, read off the mod at run time - the rarity tier is the recipe's
+     price, and a price written into fifty pages goes stale silently.
+     See wiki/gene-carrot/gene-carrot.js. -->
+
+<div class="gene-carrot" data-gene="horsegenetics.lut"></div>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
 <!-- The gene, on the three base coats, as a horse you can spin. One div and one
      script: everything in here is asked of the mod at run time.
      See wiki/gene-preview/gene-preview.js. -->
-<div class="gene-preview" data-gene="horsegenetics.lut"></div>
 
 <dl class="spec">
     <div><dt>Gene key</dt><dd>horsegenetics.lut</dd></div>
@@ -62,17 +97,8 @@
     </tbody>
 </table>
 
-<h2 id="homozygous">Two of the same, or nothing</h2>
-<p>
-    A LUT allele only does anything when the horse carries <strong>two identical
-    copies</strong> of it. One copy is a carrier and shows nothing. When there is more
-    than one variant, two <em>different</em> variant alleles will also be silent &mdash;
-    a mixed pair is not &ldquo;half of each palette&rdquo;, it is the natural gradient.
-    This is what makes an unnatural coat a breeding project rather than a lucky catch,
-    and it is the same shape the milk, healer and magic body-stat loci use.
-</p>
-
 <h2 id="only-locus">This is the only locus that can change the LUT</h2>
+
 <p>
     There is no per-gene &ldquo;use this gradient&rdquo; hook and there is not going to be
     one. A horse has two copies of this chromosome and no more, so it can shift its
@@ -84,6 +110,7 @@
 </p>
 
 <h2 id="pipeline">Where it sits in the pipeline</h2>
+
 <p>
     LUT is <strong>magical</strong> but it does not paint. It leaves phase 1 (the melanin
     restriction) completely alone and it returns no phase-3 tint. What it does is picked
@@ -94,6 +121,7 @@
     maximal black&rdquo; going into the lookup; it just lands somewhere cool and dark on
     a different chart. See <a href="pipeline.html#phase2">the pipeline</a>.
 </p>
+
 <p>
     The game module loads <code>redblackgradient.png</code> plus every texture named by a
     <code>LutContribution</code> gene's <code>lutResources()</code> into a
@@ -103,27 +131,25 @@
 </p>
 
 <h2 id="palettes">The palettes</h2>
+
 <table class="data">
     <thead><tr><th>Allele</th><th>LUT key</th><th>Texture</th><th>Look</th></tr></thead>
     <tbody>
         <tr><td><code>Blupnk</code></td><td><code>bluepink</code></td><td><code>textures/coat/lutbluepink.png</code></td><td>The warm red/orange/brown gradient replaced with blue and pink &mdash; cooler, dreamier horse colours</td></tr>
     </tbody>
 </table>
+
 <p>More palettes are planned; each is one more row in <code>LutGene.VARIANTS</code>
 (an allele, a LUT key, a 500&times;500 texture laid out like
 <code>redblackgradient.png</code> &mdash; left redder, bottom blacker) and the
 expression table, carrier wording and wiring all follow from that list.</p>
 
-<h2 id="carrot">Its gene carrot</h2>
-
-<!-- The recipe, read off the mod at run time - the rarity tier is the recipe's
-     price, and a price written into fifty pages goes stale silently.
-     See wiki/gene-carrot/gene-carrot.js. -->
-<div class="gene-carrot" data-gene="horsegenetics.lut"></div>
+</section>
 
 </article>
 </main>
 <script defer src="gene-preview/gene-preview.js"></script>
+<script defer src="gene-inheritance/gene-inheritance.js"></script>
 <script defer src="gene-carrot/gene-carrot.js"></script>
 </body>
 </html>

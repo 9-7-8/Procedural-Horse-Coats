@@ -6,14 +6,19 @@
 <title>Sooty &middot; Horse Genetics Wiki</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
 <link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
 <script defer src="nav.js"></script>
+<script defer src="search.js"></script>
 </head>
 <body>
 <main class="content">
 <article class="doc">
 
 <p class="eyebrow natural">Natural gene <span class="sep">/</span> phase 1</p>
+
 <h1>Sooty &mdash; the dark that lies on top</h1>
+
 <p class="lede">
     The countershading over a horse&rsquo;s topline, crest, shoulder and croup
     that makes it look darker than its base colour says it should be. A muddy
@@ -22,7 +27,26 @@
     a coat cannot be identified from a photograph.
 </p>
 
+<section class="tab-panel" data-tab="gameplay">
+
 <div class="gene-preview" data-gene="horsegenetics.sooty"></div>
+
+<h2 id="inheritance">What you can get</h2>
+
+<div class="gene-inheritance" data-gene="horsegenetics.sooty"></div>
+
+<div class="health-line none">
+    <span class="icon" aria-hidden="true">&#9679;</span>
+    <p>This gene has no effect on the horse&rsquo;s health.</p>
+</div>
+
+<h2 id="carrot">Its gene carrot</h2>
+
+<div class="gene-carrot" data-gene="horsegenetics.sooty"></div>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
 
 <dl class="spec">
     <div><dt>Gene key</dt><dd>horsegenetics.sooty</dd></div>
@@ -71,60 +95,6 @@
         pipeline&rsquo;s downward-only guarantee goes with it.
     </p>
 </div>
-
-<h2 id="evidence">What is actually known</h2>
-
-<p>
-    <strong>Not much, and nothing testable.</strong> There is no validated
-    commercial sooty test and no demonstrated inheritance model &mdash; not
-    dominant, not recessive, not codominant, not incomplete dominant. Saying
-    otherwise would be inventing a fact.
-</p>
-
-<p>
-    What exists is a 2020 genome-wide association study of 126 bay horses (Quarter
-    Horses, Arabians, Persian Horses, two Standardbreds and one Thoroughbred)
-    finding a very strong association between a region on chromosome 22 near
-    <em>ASIP</em> and <em>RALY</em> and how far black spreads over a bay. The lead
-    marker&rsquo;s effect was roughly <strong>additive</strong> &mdash; which is
-    the one structural fact worth building on, and is why this locus is a dosage.
-    The causal mutation was not identified; a candidate <em>RALY</em> indel was
-    found and the lead marker still predicted the phenotype better.
-</p>
-
-<p>
-    So: a <strong>dose-dependent modifier with a per-horse roll</strong>, the same
-    shape <a href="gene-flaxen.html">flaxen</a> and
-    <a href="gene-shade.html#score">the bay shade score</a> take, and labelled as
-    a modelled modifier rather than as settled science.
-</p>
-
-<h2 id="not-shade">Why it is not the shade locus, given they are the same paper</h2>
-
-<p>
-    <a href="gene-shade.html">Shade</a> models the <em>same</em> chromosome-22
-    signal. Keeping them apart is deliberate:
-</p>
-
-<div class="table-wrap">
-<table>
-<thead><tr><th></th><th><a href="gene-shade.html">Shade</a></th><th>Sooty (this gene)</th></tr></thead>
-<tbody>
-<tr><td><strong>Scope</strong></td><td>Bays only</td><td>Every base with pigment to keep</td></tr>
-<tr><td><strong>Justified by</strong></td><td>The study, which measured bay horses and ranked bay shade. That is the claim it supports.</td><td>The phenotype. A muddy palomino and a smutty buckskin are real and common and obviously not bay shade.</td></tr>
-<tr><td><strong>Does</strong></td><td>Decides how far black spreads from the points &mdash; blood bay to seal brown</td><td>Lays a dark cape over the topline of anything</td></tr>
-<tr><td><strong>Shows on a chestnut</strong></td><td>No</td><td>Yes &mdash; as a liver overlay</td></tr>
-</tbody>
-</table>
-</div>
-
-<p>
-    Folding them into one locus would have claimed a great deal more than the
-    paper does: that one mutation causes both bay shade and every dirty palomino.
-    Two abstractions of overlapping evidence, each honest about its own scope. A
-    horse carries both, and a dark bay can be dark for either reason or for both
-    at once.
-</p>
 
 <h2 id="dosage">The dosage</h2>
 
@@ -224,9 +194,65 @@
     </p>
 </div>
 
-<h2 id="carrot">Its gene carrot</h2>
+</section>
 
-<div class="gene-carrot" data-gene="horsegenetics.sooty"></div>
+<section class="tab-panel" data-tab="science">
+
+<h2 id="evidence">What is actually known</h2>
+
+<p>
+    <strong>Not much, and nothing testable.</strong> There is no validated
+    commercial sooty test and no demonstrated inheritance model &mdash; not
+    dominant, not recessive, not codominant, not incomplete dominant. Saying
+    otherwise would be inventing a fact.
+</p>
+
+<p>
+    What exists is a 2020 genome-wide association study of 126 bay horses (Quarter
+    Horses, Arabians, Persian Horses, two Standardbreds and one Thoroughbred)
+    finding a very strong association between a region on chromosome 22 near
+    <em>ASIP</em> and <em>RALY</em> and how far black spreads over a bay. The lead
+    marker&rsquo;s effect was roughly <strong>additive</strong> &mdash; which is
+    the one structural fact worth building on, and is why this locus is a dosage.
+    The causal mutation was not identified; a candidate <em>RALY</em> indel was
+    found and the lead marker still predicted the phenotype better.
+</p>
+
+<p>
+    So: a <strong>dose-dependent modifier with a per-horse roll</strong>, the same
+    shape <a href="gene-flaxen.html">flaxen</a> and
+    <a href="gene-shade.html#score">the bay shade score</a> take, and labelled as
+    a modelled modifier rather than as settled science.
+</p>
+
+<h2 id="not-shade">Why it is not the shade locus, given they are the same paper</h2>
+
+<p>
+    <a href="gene-shade.html">Shade</a> models the <em>same</em> chromosome-22
+    signal. Keeping them apart is deliberate:
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th></th><th><a href="gene-shade.html">Shade</a></th><th>Sooty (this gene)</th></tr></thead>
+<tbody>
+<tr><td><strong>Scope</strong></td><td>Bays only</td><td>Every base with pigment to keep</td></tr>
+<tr><td><strong>Justified by</strong></td><td>The study, which measured bay horses and ranked bay shade. That is the claim it supports.</td><td>The phenotype. A muddy palomino and a smutty buckskin are real and common and obviously not bay shade.</td></tr>
+<tr><td><strong>Does</strong></td><td>Decides how far black spreads from the points &mdash; blood bay to seal brown</td><td>Lays a dark cape over the topline of anything</td></tr>
+<tr><td><strong>Shows on a chestnut</strong></td><td>No</td><td>Yes &mdash; as a liver overlay</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    Folding them into one locus would have claimed a great deal more than the
+    paper does: that one mutation causes both bay shade and every dirty palomino.
+    Two abstractions of overlapping evidence, each honest about its own scope. A
+    horse carries both, and a dark bay can be dark for either reason or for both
+    at once.
+</p>
+
+</section>
 
 <div class="page-foot">
     <div class="seealso">
@@ -243,6 +269,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
 <script defer src="gene-preview/gene-preview.js"></script>
+<script defer src="gene-inheritance/gene-inheritance.js"></script>
 <script defer src="gene-carrot/gene-carrot.js"></script>
 </body>
 </html>

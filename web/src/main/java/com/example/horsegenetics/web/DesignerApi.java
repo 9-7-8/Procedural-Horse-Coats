@@ -511,6 +511,63 @@ public final class DesignerApi {
     }
 
     /**
+     * Every genotype at one locus and the phenotype each one gives, for the
+     * inheritance table on a gene page's gameplay tab.
+     *
+     * <p><b>Why this is not {@link #genePreviewJson}.</b> That one answers
+     * "what is worth a button" - distinct-looking combinations, wild type
+     * dropped, because the base coat already shows it. An inheritance table is
+     * the opposite question: a player reading one wants to see that
+     * {@code f/f} gives a plain horse just as much as they want the rest, and
+     * they want {@code Fl1/Fl1} and {@code Fl2/f} listed separately even though
+     * both land on {@code flaxen}, because those are different breeding
+     * outcomes. So this reports <b>all</b> pairs, wild type included, without
+     * collapsing.
+     *
+     * <p>The axis is {@link Gene#alleles()} in registry order. Not every cell
+     * in the square necessarily exists - a sex-linked locus has no pair for
+     * some combinations - so cells are listed rather than assumed, and the
+     * page leaves a gap where there is none.
+     *
+     * <p>Nothing here is a number the wiki could have written down. The point
+     * is that a gene which gains an allele gains a row and a column with no
+     * page edited.
+     */
+    @JSExport
+    public static String geneInheritanceJson(String geneKey) {
+        Gene g = Genes.byKeyOrNull(geneKey);
+        if (g == null) {
+            return new Json().obj().kv("missing", true).kv("key", geneKey).endObj().toString();
+        }
+        Json j = new Json().obj()
+                .kv("missing", false)
+                .kv("key", g.key())
+                .kv("name", g.name())
+                .kv("natural", g.isNatural())
+                .kv("paints", g.affectsCoat())
+                .key("alleles").arr();
+        for (Allele a : g.alleles()) {
+            j.obj().kv("token", a.token())
+                    .kv("label", a.label())
+                    .kv("isDefault", a.equals(g.defaultAllele()))
+                    .endObj();
+        }
+        j.endArr().key("cells").arr();
+        for (AllelePair pair : GenotypeCatalog.allPairsOf(g)) {
+            Expression x = g.expressionOf(pair);
+            j.obj().kv("tokens", pair.toTokens())
+                    .kv("a", pair.first().token())
+                    .kv("b", pair.second().token())
+                    .kv("name", x.name())
+                    .kv("description", x.description())
+                    .kv("wild", x.wildType())
+                    .kv("varies", !x.deterministic())
+                    .endObj();
+        }
+        return j.endArr().endObj().toString();
+    }
+
+    /**
      * What a preview of one gene can offer: its display name, and one entry per
      * combination that <b>looks different</b> -
      * {@link GenotypeCatalog#distinctPairsOf}, minus the wild type, which is

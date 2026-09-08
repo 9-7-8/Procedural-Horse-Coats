@@ -6,14 +6,19 @@
 <title>Brindle &middot; Horse Genetics Wiki</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
 <link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
 <script defer src="nav.js"></script>
+<script defer src="search.js"></script>
 </head>
 <body>
 <main class="content">
 <article class="doc">
 
 <p class="eyebrow natural">Natural gene <span class="sep">/</span> X-linked</p>
+
 <h1>Brindle (MBTPS2)</h1>
+
 <p class="lede">
     Irregular <strong>white streaks</strong>, soft-edged and broken, running down from the
     topline and <strong>not matching from one side of the horse to the other</strong>. It
@@ -23,10 +28,29 @@
     autosomal gene can.
 </p>
 
+<section class="tab-panel" data-tab="gameplay">
+
+<div class="gene-preview" data-gene="horsegenetics.brindle"></div>
+
+<h2 id="inheritance">What you can get</h2>
+
+<div class="gene-inheritance" data-gene="horsegenetics.brindle"></div>
+
+<h2 id="carrot">Its gene carrot</h2>
+
+<!-- The recipe, read off the mod at run time - the rarity tier is the recipe's
+     price, and a price written into fifty pages goes stale silently.
+     See wiki/gene-carrot/gene-carrot.js. -->
+
+<div class="gene-carrot" data-gene="horsegenetics.brindle"></div>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
 <!-- The gene, on the three base coats, as a horse you can spin. One div and one
      script: everything in here is asked of the mod at run time.
      See wiki/gene-preview/gene-preview.js. -->
-<div class="gene-preview" data-gene="horsegenetics.brindle"></div>
 
 <dl class="spec">
     <div><dt>Gene key</dt><dd>horsegenetics.brindle</dd></div>
@@ -56,6 +80,7 @@
 </div>
 
 <h2 id="table">The combination table</h2>
+
 <table class="data">
     <thead><tr><th>Combination</th><th>Who</th><th>Outcome</th><th>Effect</th></tr></thead>
     <tbody>
@@ -69,11 +94,13 @@
 </table>
 
 <h2 id="crosses">The crosses &mdash; this is the whole appeal</h2>
+
 <p>
     A stallion gives his <code>X</code> to every daughter and his <code>Y</code> to every
     son. So brindle does something no other gene in the mod does: it <strong>skips the
     male line entirely for one generation</strong> and comes back through the mares.
 </p>
+
 <table class="data">
     <thead><tr><th>Pairing</th><th>Colts</th><th>Fillies</th></tr></thead>
     <tbody>
@@ -83,6 +110,7 @@
         <tr><td>brindle stallion &times; carrier mare</td><td>50% brindle</td><td><strong>50% brindle</strong>, 50% carriers</td></tr>
     </tbody>
 </table>
+
 <p>
     Read down that table and the breeding project writes itself: a brindle
     <strong>mare</strong> is the prize, she needs a brindle sire <em>and</em> a dam
@@ -91,6 +119,7 @@
 </p>
 
 <h2 id="population">In the wild: fifty stallions to one mare</h2>
+
 <p>
     A stallion needs one copy and a mare needs two, so at an allele frequency of
     <code>p</code> the rates are <code>p</code> and <code>p&sup2;</code> &mdash; a factor
@@ -101,6 +130,7 @@
 </p>
 
 <h2 id="storage">How a hemizygous horse is stored</h2>
+
 <p>
     A genotype is one <code>AllelePair</code> per gene &mdash; two slots, always &mdash;
     and sex linkage does not change that. A stallion's second slot holds a
@@ -110,6 +140,7 @@
     reads), the code string keeps its shape, and parsing needs no special case because
     <code>Y</code> is a declared allele of the gene like any other.
 </p>
+
 <p>
     The reserved allele is declared <strong>last</strong>, which is load-bearing rather
     than tidy: <code>AllelePair</code> canonicalises on declaration order, so declaring it
@@ -117,6 +148,7 @@
     sex-linked gene that gets this wrong, because the failure otherwise is not an
     exception &mdash; it is a gene that quietly misbehaves for exactly one sex.
 </p>
+
 <p>
     On screen a hemizygous copy is written with an <code>X-</code> prefix
     (<code>X-Brn</code>) rather than beside its own placeholder, which would read as a
@@ -126,6 +158,7 @@
 </p>
 
 <h2 id="draw">What it paints</h2>
+
 <p>
     <strong>White streaks.</strong> Not a dilution of the horse's own colour and not
     stripes of a second one &mdash; a brindle streak goes to white hair and stops there,
@@ -135,6 +168,7 @@
     it fades through greys rather than walking sideways into the browns, which is what
     scaling the two pigments together would do.
 </p>
+
 <p>
     That also keeps brindle inside phase 1's restrict-only contract with room to spare.
     White is what is left when <em>all</em> the pigment is taken away, which is the one
@@ -144,11 +178,13 @@
 </p>
 
 <h3 id="own-field">Why it does not share the zebra field</h3>
+
 <p>
     Brindle and zebra look superficially alike &mdash; &ldquo;stripes on a horse&rdquo;
     &mdash; and for one build they shared <code>BodyStripes</code>. That is what made both
     of them wrong. They are not the same picture and they do not come from the same place.
 </p>
+
 <div class="table-wrap">
 <table>
 <thead><tr><th></th><th><a href="gene-natural-zebra.html">Zebra</a> (<code>ZebraStripes</code>)</th><th>Brindle (<code>BlaschkoStripes</code>)</th></tr></thead>
@@ -166,6 +202,7 @@
 </div>
 
 <h3 id="mosaic">The asymmetry is the gene, not a garnish</h3>
+
 <p>
     A plain stripe field phases on <code>|z|</code>, so whatever it draws on the right it
     draws on the left. A brindle mare is a <strong>functional mosaic</strong>: early in
@@ -175,6 +212,7 @@
     reason the pattern exists, and a field that cannot express it is drawing something
     else.
 </p>
+
 <p>
     So each band is rolled <strong>twice</strong> &mdash; once for the horse's right, once
     for its left &mdash; and the texel reads whichever side it is on, blended over two
@@ -183,17 +221,20 @@
 </p>
 
 <h3 id="blaschko">Blaschko lines, and the shape they make</h3>
+
 <p>
     BR1's streaks broadly follow <strong>Blaschko lines</strong> &mdash; the developmental
     paths skin-cell clones trace as they proliferate and migrate. They are not a fixed
     tiger-stripe layout: they flow in different directions on different body regions. The
     useful mental sketch is
 </p>
+
 <p style="text-align:center">
     <em>a V at the topline &rarr; long descending S-like streaks on the barrel &rarr;
     shorter vertical streaks on neck, shoulder and hip &rarr; irregular transverse strokes
     on the upper limbs.</em>
 </p>
+
 <div class="table-wrap">
 <table>
 <thead><tr><th>Region</th><th>What BR1 looks like there</th><th>What the field draws</th></tr></thead>
@@ -233,6 +274,7 @@
 </div>
 
 <h2 id="knobs">The knobs, and the one that bites</h2>
+
 <table class="data">
     <thead><tr><th>Knob</th><th>Range</th><th>What it does</th></tr></thead>
     <tbody>
@@ -242,6 +284,7 @@
         <tr><td>warp</td><td>0.5&ndash;1.2 body units</td><td>How far the noise bends a streak off its plane</td></tr>
     </tbody>
 </table>
+
 <p>
     <strong>The warp has to stay well under half the spacing.</strong> Brindle is a
     smeared pattern and the temptation is to warp it hard, but once the warp exceeds the
@@ -249,6 +292,7 @@
     stripes. The first build ran a warp of 1.6&ndash;3.0 against a spacing of
     1.5&ndash;2.8 and baked out as convincing wood grain.
 </p>
+
 <p>
     A fourth number is a constant rather than a knob: the coverage is <strong>gained
     above 1 before it is whitened</strong>. A brindle streak is white, so the core of one
@@ -258,6 +302,7 @@
     rolls have genuinely damped, soft. Without it every streak came out a tan smear, which
     is to say a diluted stripe, which is the thing this deliberately is not.
 </p>
+
 <p>
     <strong>Stored values</strong>, on the expressing copy: <code>seed</code> for the
     streak field, then <code>spacing</code>, <code>duty</code> and <code>warp</code>
@@ -266,6 +311,7 @@
 </p>
 
 <h2 id="biology">The biology, and what is deliberately left out</h2>
+
 <p>
     BR1 is an intronic splice-site change in <strong><code>MBTPS2</code></strong>
     (originally reported as <code>c.1437+4T&gt;C</code>), inherited <strong>X-linked
@@ -276,6 +322,7 @@
     more obvious than any colour shift. Expression also changes with the season: a winter
     coat can look diffuse or moth-eaten rather than sharply striped.
 </p>
+
 <p>
     None of that is modelled, and the reasons are the same reason: <strong>the mod has one
     channel, and it is colour.</strong> There is no hair-direction or hair-quality
@@ -283,9 +330,11 @@
     draws the pigment half of the trait at its most legible &mdash; white &mdash; and the
     texture half is a line in this paragraph.
 </p>
+
 <p>
     Two further real-world details are deliberately absent:
 </p>
+
 <ul>
     <li><strong>The homozygous mare and the hemizygous stallion are supposed to lack the
         stripes.</strong> In the original pedigree, <code>X<sup>BR1</sup>Y</code> males and
@@ -304,11 +353,14 @@
         heritable &mdash; which is precisely why it is not here. There would be nothing to
         breed.</li>
 </ul>
+
 <h2 id="scaffolding">The scaffolding it proves</h2>
+
 <p>
     Brindle is the first user of <code>Inheritance</code>, and everything it needed is
     general:
 </p>
+
 <ul>
     <li><code>Gene.inheritance()</code> &mdash; <code>AUTOSOMAL</code> (the default),
         <code>X_LINKED</code> or <code>Y_LINKED</code>.</li>
@@ -329,19 +381,26 @@
         Hardy-Weinberg, because Hardy-Weinberg is a statement about diploid loci and this
         one is not.</li>
 </ul>
+
 <p>
     <strong>Y-linked is built but has no gene.</strong> The mirror case works &mdash; a
     mare's pair is two reserved <code>X</code> placeholders, a stallion's is a placeholder
     plus his one real allele &mdash; and is waiting for a gene that wants it.
 </p>
 
+</section>
+
+<section class="tab-panel" data-tab="science">
+
 <h2 id="not">Not modelled</h2>
+
 <p>
     Sexual dimorphism in the coat is a different thing entirely and is unbuilt: the sex
     locus paints nothing and deliberately never will, so a stallion's crest would be a
     separate gene <em>reading</em> this one. Also not planned at all: imprinting, crossing
     over, linkage.
 </p>
+
 <p>
     <strong>Mosaicism is a special case and needs saying carefully.</strong> There is no
     general mosaicism in the model &mdash; a genotype is one pair per gene and every texel
@@ -351,16 +410,12 @@
     phenomenon and not an implementation of it, and nothing else in the mod can reach it.
 </p>
 
-<h2 id="carrot">Its gene carrot</h2>
-
-<!-- The recipe, read off the mod at run time - the rarity tier is the recipe's
-     price, and a price written into fifty pages goes stale silently.
-     See wiki/gene-carrot/gene-carrot.js. -->
-<div class="gene-carrot" data-gene="horsegenetics.brindle"></div>
+</section>
 
 </article>
 </main>
 <script defer src="gene-preview/gene-preview.js"></script>
+<script defer src="gene-inheritance/gene-inheritance.js"></script>
 <script defer src="gene-carrot/gene-carrot.js"></script>
 </body>
 </html>

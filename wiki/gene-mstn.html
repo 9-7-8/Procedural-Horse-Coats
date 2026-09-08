@@ -6,20 +6,68 @@
 <title>MSTN &middot; Horse Genetics Wiki</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
 <link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
 <script defer src="nav.js"></script>
+<script defer src="search.js"></script>
 </head>
 <body>
 <main class="content">
 <article class="doc">
 
 <p class="eyebrow natural">Natural gene <span class="sep">/</span> performance</p>
+
 <h1>MSTN (myostatin)</h1>
+
 <p class="lede">
     The speed gene, and the first gene in this mod with <strong>no coat effect at
     all</strong>. Codominant: each <code>C</code> copy buys movement speed and pays
     for it in hearts, so the heterozygote is genuinely the midpoint of the two
     homozygotes rather than a copy of one of them.
 </p>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<h2 id="inheritance">What you can get</h2>
+
+<div class="gene-inheritance" data-gene="horsegenetics.mstn"></div>
+
+<h2>Where the stamina went</h2>
+
+<p>
+    In real horses this locus trades sprint against stamina. This mod has settled
+    that <strong>there is no stamina resource</strong>
+    (<a href="roadmap.html#settled">a settled decision</a>), so there is nothing for the
+    <code>T</code> side to buy &mdash; and a gene where one allele is simply better
+    than the other is not a choice, it is a chore. So stamina is paid out in the
+    nearest thing the game does have: <strong>max health</strong>. A stayer is the
+    horse that keeps going, and in Minecraft terms that is the horse with more
+    hearts.
+</p>
+
+<div class="note rule">
+    <span class="label">The baseline allele contributes zero</span>
+    <p>
+        The whole trade rides on <code>C</code>; <code>T</code> is worth exactly
+        nothing. That is the rule everywhere in the trait system, and it is what
+        makes an all-wild-type horse resolve to the flat baselines in
+        <a href="horse-body.html">HorseTraits</a>. Paying the stayer a bonus instead
+        would have said the same thing about the <em>difference</em> between the two
+        homozygotes, and made the baseline a lie.
+    </p>
+</div>
+
+<h2 id="carrot">Its gene carrot</h2>
+
+<!-- The recipe, read off the mod at run time - the rarity tier is the recipe's
+     price, and a price written into fifty pages goes stale silently.
+     See wiki/gene-carrot/gene-carrot.js. -->
+
+<div class="gene-carrot" data-gene="horsegenetics.mstn"></div>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
 
 <dl class="spec">
     <div><dt>Gene key</dt><dd>horsegenetics.mstn</dd></div>
@@ -75,37 +123,7 @@
     dominant&rdquo; has ever meant. No special case anywhere.
 </p>
 
-<h2>Where the stamina went</h2>
-
-<p>
-    In real horses this locus trades sprint against stamina. This mod has settled
-    that <strong>there is no stamina resource</strong>
-    (<a href="roadmap.html#settled">a settled decision</a>), so there is nothing for the
-    <code>T</code> side to buy &mdash; and a gene where one allele is simply better
-    than the other is not a choice, it is a chore. So stamina is paid out in the
-    nearest thing the game does have: <strong>max health</strong>. A stayer is the
-    horse that keeps going, and in Minecraft terms that is the horse with more
-    hearts.
-</p>
-
-<div class="note rule">
-    <span class="label">The baseline allele contributes zero</span>
-    <p>
-        The whole trade rides on <code>C</code>; <code>T</code> is worth exactly
-        nothing. That is the rule everywhere in the trait system, and it is what
-        makes an all-wild-type horse resolve to the flat baselines in
-        <a href="horse-body.html">HorseTraits</a>. Paying the stayer a bonus instead
-        would have said the same thing about the <em>difference</em> between the two
-        homozygotes, and made the baseline a lie.
-    </p>
-</div>
-
-<h2 id="carrot">Its gene carrot</h2>
-
-<!-- The recipe, read off the mod at run time - the rarity tier is the recipe's
-     price, and a price written into fifty pages goes stale silently.
-     See wiki/gene-carrot/gene-carrot.js. -->
-<div class="gene-carrot" data-gene="horsegenetics.mstn"></div>
+</section>
 
 <div class="page-foot">
     <div class="seealso">
@@ -121,5 +139,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
 <script defer src="gene-carrot/gene-carrot.js"></script>
+<script defer src="gene-inheritance/gene-inheritance.js"></script>
 </body>
 </html>

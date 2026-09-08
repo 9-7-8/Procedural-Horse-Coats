@@ -6,14 +6,19 @@
 <title>Extension &middot; Horse Genetics Wiki</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
 <link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
 <script defer src="nav.js"></script>
+<script defer src="search.js"></script>
 </head>
 <body>
 <main class="content">
 <article class="doc">
 
 <p class="eyebrow natural">Natural gene <span class="sep">/</span> phase 1</p>
+
 <h1>Extension</h1>
+
 <p class="lede">
     Can this horse make black pigment at all? <span class="allele dom">E</span> says
     yes and does nothing. <span class="allele rec">ee</span> restricts black to zero
@@ -22,21 +27,13 @@
     pipeline has to work with.
 </p>
 
-<!-- The gene, on the three base coats, as a horse you can spin. One div and one
-     script: everything in here is asked of the mod at run time.
-     See wiki/gene-preview/gene-preview.js. -->
+<section class="tab-panel" data-tab="gameplay">
+
 <div class="gene-preview" data-gene="horsegenetics.extension"></div>
 
-<dl class="spec">
-    <div><dt>Gene key</dt><dd>horsegenetics.extension</dd></div>
-    <div><dt>Alleles</dt><dd><span class="allele dom">E</span> <span class="allele rec">e</span></dd></div>
-    <div><dt>Outcomes</dt><dd>wild, <code>chestnut</code></dd></div>
-    <div><dt>Shows when</dt><dd><code>e/e</code></dd></div>
-    <div><dt>Default allele</dt><dd>E</dd></div>
-    <div><dt>Wild frequency</dt><dd>50/50 per allele</dd></div>
-    <div><dt>Founder draws</dt><dd>1 &times; nextFloat()</dd></div>
-    <div><dt>Deterministic</dt><dd>yes</dd></div>
-</dl>
+<h2 id="inheritance">What you can get</h2>
+
+<div class="gene-inheritance" data-gene="horsegenetics.extension"></div>
 
 <h2>What it does</h2>
 
@@ -65,6 +62,33 @@ public PigmentField restrict(AllelePair pair, CoatBuildContext ctx, PigmentView 
 }</code></pre>
 </div>
 
+<h2 id="carrot">Its gene carrot</h2>
+
+<!-- The recipe, read off the mod at run time - the rarity tier is the recipe's
+     price, and a price written into fifty pages goes stale silently.
+     See wiki/gene-carrot/gene-carrot.js. -->
+
+<div class="gene-carrot" data-gene="horsegenetics.extension"></div>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<!-- The gene, on the three base coats, as a horse you can spin. One div and one
+     script: everything in here is asked of the mod at run time.
+     See wiki/gene-preview/gene-preview.js. -->
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd>horsegenetics.extension</dd></div>
+    <div><dt>Alleles</dt><dd><span class="allele dom">E</span> <span class="allele rec">e</span></dd></div>
+    <div><dt>Outcomes</dt><dd>wild, <code>chestnut</code></dd></div>
+    <div><dt>Shows when</dt><dd><code>e/e</code></dd></div>
+    <div><dt>Default allele</dt><dd>E</dd></div>
+    <div><dt>Wild frequency</dt><dd>50/50 per allele</dd></div>
+    <div><dt>Founder draws</dt><dd>1 &times; nextFloat()</dd></div>
+    <div><dt>Deterministic</dt><dd>yes</dd></div>
+</dl>
+
 <h2>Interactions</h2>
 
 <ul>
@@ -92,6 +116,10 @@ public PigmentField restrict(AllelePair pair, CoatBuildContext ctx, PigmentView 
     </p>
 </div>
 
+</section>
+
+<section class="tab-panel" data-tab="science">
+
 <h2>Not modelled</h2>
 
 <p>
@@ -102,12 +130,7 @@ public PigmentField restrict(AllelePair pair, CoatBuildContext ctx, PigmentView 
     is in the code string and the carrier display, not in a new look.
 </p>
 
-<h2 id="carrot">Its gene carrot</h2>
-
-<!-- The recipe, read off the mod at run time - the rarity tier is the recipe's
-     price, and a price written into fifty pages goes stale silently.
-     See wiki/gene-carrot/gene-carrot.js. -->
-<div class="gene-carrot" data-gene="horsegenetics.extension"></div>
+</section>
 
 <div class="page-foot">
     <div class="seealso">
@@ -123,6 +146,7 @@ public PigmentField restrict(AllelePair pair, CoatBuildContext ctx, PigmentView 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
 <script defer src="gene-preview/gene-preview.js"></script>
+<script defer src="gene-inheritance/gene-inheritance.js"></script>
 <script defer src="gene-carrot/gene-carrot.js"></script>
 </body>
 </html>

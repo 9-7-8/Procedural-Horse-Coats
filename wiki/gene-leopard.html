@@ -6,14 +6,19 @@
 <title>Leopard complex &middot; Horse Genetics Wiki</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
 <link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
 <script defer src="nav.js"></script>
+<script defer src="search.js"></script>
 </head>
 <body>
 <main class="content">
 <article class="doc">
 
 <p class="eyebrow natural">Natural gene <span class="sep">/</span> phase 1 + overlay</p>
+
 <h1>The leopard complex (appaloosa)</h1>
+
 <p class="lede">
     Real-horse <strong>TRPM1</strong> (<code>LP</code>) plus two modifier loci,
     <strong>PATN1</strong> and <strong>PATN2</strong>, and the <b>only gene in the
@@ -24,10 +29,34 @@
     modifiers, which mean nothing on a horse with no <code>LP</code>.
 </p>
 
+<section class="tab-panel" data-tab="gameplay">
+
+<div class="gene-preview" data-gene="horsegenetics.leopard"></div>
+
+<h2 id="inheritance">What you can get</h2>
+
+<div class="gene-inheritance" data-gene="horsegenetics.leopard"></div>
+
+<div class="health-line hurts">
+    <span class="icon" aria-hidden="true">&#9888;</span>
+    <p><strong>Health:</strong> <code>LP/LP</code> &rarr; CSNB (night blindness), informational &mdash; costs nothing</p>
+</div>
+
+<h2 id="carrot">Its gene carrot</h2>
+
+<!-- The recipe, read off the mod at run time - the rarity tier is the recipe's
+     price, and a price written into fifty pages goes stale silently.
+     See wiki/gene-carrot/gene-carrot.js. -->
+
+<div class="gene-carrot" data-gene="horsegenetics.leopard"></div>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
 <!-- The gene, on the three base coats, as a horse you can spin. One div and one
      script: everything in here is asked of the mod at run time.
      See wiki/gene-preview/gene-preview.js. -->
-<div class="gene-preview" data-gene="horsegenetics.leopard"></div>
 
 <dl class="spec">
     <div><dt>Gene keys</dt><dd>horsegenetics.leopard, horsegenetics.patn1, horsegenetics.patn2</dd></div>
@@ -84,39 +113,6 @@
     <li><b><code>semi-leopard</code></b> &mdash; a spotted blanket that reaches forward
         over the barrel, between blanket and full leopard.</li>
 </ul>
-
-<h2>Why the modifiers are separate genes</h2>
-
-<p>
-    <code>LP</code> is one locus (TRPM1). <code>PATN1</code> and <code>PATN2</code> are
-    real, independently inherited modifier loci, so they have to be separate genes &mdash;
-    a breeder works toward &ldquo;this line carries PATN1&rdquo; the same way they work
-    toward any other allele. They just have no phenotype of their own: a
-    <code>PATN1</code> carrier with no <code>LP</code> looks like any other horse.
-</p>
-
-<p>
-    That creates a texture-cache problem. A gene is left out of a horse's
-    <a href="genetics-model.html">coat code</a> unless
-    <code>affectsCoat()</code> is true, and every one of PATN's own combinations is a
-    wild type &mdash; so a <code>LP/LP&nbsp;PATN1/PATN1</code> horse and a plain
-    <code>LP/LP</code> one would collide in the cache and render identically. The fix
-    is a new hook, <code>Gene.coatDependsOn()</code>: <code>LeopardGene</code> names
-    both modifiers, and <code>Genotype.coatCode()</code> folds their alleles into the
-    texture key &mdash; <b>but only for a horse that actually carries <code>LP</code></b>,
-    so a PATN carrier with no leopard complex still shares its texture. <code>BreedFounder</code>
-    likewise treats a named modifier like a coat gene (forced wild unless the breed lists it).
-</p>
-
-<div class="note warn">
-    <span class="label">Not a pattern for third-party genes</span>
-    <p>
-        Cross-locus reads make a gene hard to reason about, hard to show in a punnett
-        square and hard to breed toward. The built-in leopard complex earns the
-        exception because it is a real, famous pattern that genuinely works this way.
-        See <a href="roadmap.html#settled">the roadmap&rsquo;s settled decisions</a>.
-    </p>
-</div>
 
 <h2>The painters</h2>
 
@@ -190,10 +186,12 @@
 </p>
 
 <h3>Against classic roan</h3>
+
 <p>
     <code>RoanPatternsTest</code> pins the comparison through the real pipeline, and it
     is the reference&rsquo;s own identification checklist:
 </p>
+
 <div class="table-wrap">
 <table>
 <thead><tr><th></th><th>Varnish roan</th><th><a href="gene-roan.html">Classic roan</a></th></tr></thead>
@@ -273,12 +271,44 @@
     </p>
 </div>
 
-<h2 id="carrot">Its gene carrot</h2>
+</section>
 
-<!-- The recipe, read off the mod at run time - the rarity tier is the recipe's
-     price, and a price written into fifty pages goes stale silently.
-     See wiki/gene-carrot/gene-carrot.js. -->
-<div class="gene-carrot" data-gene="horsegenetics.leopard"></div>
+<section class="tab-panel" data-tab="science">
+
+<h2>Why the modifiers are separate genes</h2>
+
+<p>
+    <code>LP</code> is one locus (TRPM1). <code>PATN1</code> and <code>PATN2</code> are
+    real, independently inherited modifier loci, so they have to be separate genes &mdash;
+    a breeder works toward &ldquo;this line carries PATN1&rdquo; the same way they work
+    toward any other allele. They just have no phenotype of their own: a
+    <code>PATN1</code> carrier with no <code>LP</code> looks like any other horse.
+</p>
+
+<p>
+    That creates a texture-cache problem. A gene is left out of a horse's
+    <a href="genetics-model.html">coat code</a> unless
+    <code>affectsCoat()</code> is true, and every one of PATN's own combinations is a
+    wild type &mdash; so a <code>LP/LP&nbsp;PATN1/PATN1</code> horse and a plain
+    <code>LP/LP</code> one would collide in the cache and render identically. The fix
+    is a new hook, <code>Gene.coatDependsOn()</code>: <code>LeopardGene</code> names
+    both modifiers, and <code>Genotype.coatCode()</code> folds their alleles into the
+    texture key &mdash; <b>but only for a horse that actually carries <code>LP</code></b>,
+    so a PATN carrier with no leopard complex still shares its texture. <code>BreedFounder</code>
+    likewise treats a named modifier like a coat gene (forced wild unless the breed lists it).
+</p>
+
+<div class="note warn">
+    <span class="label">Not a pattern for third-party genes</span>
+    <p>
+        Cross-locus reads make a gene hard to reason about, hard to show in a punnett
+        square and hard to breed toward. The built-in leopard complex earns the
+        exception because it is a real, famous pattern that genuinely works this way.
+        See <a href="roadmap.html#settled">the roadmap&rsquo;s settled decisions</a>.
+    </p>
+</div>
+
+</section>
 
 <div class="page-foot">
     <div class="seealso">
@@ -298,6 +328,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
 <script defer src="gene-preview/gene-preview.js"></script>
+<script defer src="gene-inheritance/gene-inheritance.js"></script>
 <script defer src="gene-carrot/gene-carrot.js"></script>
 </body>
 </html>

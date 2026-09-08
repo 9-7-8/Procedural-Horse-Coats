@@ -6,18 +6,74 @@
 <title>PLOD1 &middot; Horse Genetics Wiki</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
 <link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
 <script defer src="nav.js"></script>
+<script defer src="search.js"></script>
 </head>
 <body>
 <main class="content">
 <article class="doc">
 
 <p class="eyebrow natural">Natural gene <span class="sep">/</span> health</p>
+
 <h1>PLOD1 (fragile foal syndrome)</h1>
+
 <p class="lede">
     Fragile foal syndrome (FFS1), a collagen defect: the skin tears at a touch and
     the joints will not hold. The foal is born alive and does not survive it.
 </p>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<h2 id="inheritance">What you can get</h2>
+
+<div class="gene-inheritance" data-gene="horsegenetics.plod1"></div>
+
+<h2>Born, and then lost</h2>
+
+<p>
+    Lethal <em>at birth</em>, so the foal really is born: it gets a name, a
+    <a href="breeding.html">record</a> and a place in the family tree, and then dies
+    over a few seconds with a chat line naming what took it.
+</p>
+
+<p>
+    That is deliberate. A pairing that silently produced nothing would teach a player
+    nothing about the two horses they just bred, and the whole value of a recessive
+    lethal is that it tells you something about <em>both</em> parents at once. The
+    mechanics of the death are on <a href="horse-body.html">the trait system</a> page.
+</p>
+
+<p>
+    The highest carrier rate of the four foal lethals, because in the real population
+    it is the one hiding inside the largest number of otherwise excellent animals.
+</p>
+
+<div class="note warn">
+    <span class="label">No founder is ever affected</span>
+    <p>
+        The founder table lists only the clear horse and the carrier. A wild-caught
+        horse is an adult that survived, so it can carry this and never have it, and
+        the homozygote&rsquo;s weight is simply absent from the table. <b>The only way
+        to produce an affected foal is to breed two carriers</b> &mdash; which is the
+        whole design: it is what makes a pedigree worth keeping, and what turns the
+        carrier wording in the info panel from decoration into the difference between
+        a breeding programme and a lottery.
+    </p>
+</div>
+
+<h2 id="carrot">Its gene carrot</h2>
+
+<!-- The recipe, read off the mod at run time - the rarity tier is the recipe's
+     price, and a price written into fifty pages goes stale silently.
+     See wiki/gene-carrot/gene-carrot.js. -->
+
+<div class="gene-carrot" data-gene="horsegenetics.plod1"></div>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
 
 <dl class="spec">
     <div><dt>Gene key</dt><dd>horsegenetics.plod1</dd></div>
@@ -63,45 +119,7 @@
 </table>
 </div>
 
-<h2>Born, and then lost</h2>
-
-<p>
-    Lethal <em>at birth</em>, so the foal really is born: it gets a name, a
-    <a href="breeding.html">record</a> and a place in the family tree, and then dies
-    over a few seconds with a chat line naming what took it.
-</p>
-
-<p>
-    That is deliberate. A pairing that silently produced nothing would teach a player
-    nothing about the two horses they just bred, and the whole value of a recessive
-    lethal is that it tells you something about <em>both</em> parents at once. The
-    mechanics of the death are on <a href="horse-body.html">the trait system</a> page.
-</p>
-
-<p>
-    The highest carrier rate of the four foal lethals, because in the real population
-    it is the one hiding inside the largest number of otherwise excellent animals.
-</p>
-
-<div class="note warn">
-    <span class="label">No founder is ever affected</span>
-    <p>
-        The founder table lists only the clear horse and the carrier. A wild-caught
-        horse is an adult that survived, so it can carry this and never have it, and
-        the homozygote&rsquo;s weight is simply absent from the table. <b>The only way
-        to produce an affected foal is to breed two carriers</b> &mdash; which is the
-        whole design: it is what makes a pedigree worth keeping, and what turns the
-        carrier wording in the info panel from decoration into the difference between
-        a breeding programme and a lottery.
-    </p>
-</div>
-
-<h2 id="carrot">Its gene carrot</h2>
-
-<!-- The recipe, read off the mod at run time - the rarity tier is the recipe's
-     price, and a price written into fifty pages goes stale silently.
-     See wiki/gene-carrot/gene-carrot.js. -->
-<div class="gene-carrot" data-gene="horsegenetics.plod1"></div>
+</section>
 
 <div class="page-foot">
     <div class="seealso">
@@ -117,5 +135,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
 <script defer src="gene-carrot/gene-carrot.js"></script>
+<script defer src="gene-inheritance/gene-inheritance.js"></script>
 </body>
 </html>

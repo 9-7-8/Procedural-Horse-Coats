@@ -6,14 +6,19 @@
 <title>EDNRB (frame overo) &middot; Horse Genetics Wiki</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
 <link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
 <script defer src="nav.js"></script>
+<script defer src="search.js"></script>
 </head>
 <body>
 <main class="content">
 <article class="doc">
 
 <p class="eyebrow natural">Natural gene <span class="sep">/</span> phase 1</p>
+
 <h1>EDNRB (frame overo)</h1>
+
 <p class="lede">
     Frame overo, and the model&rsquo;s <strong>first genuine lethal</strong>. Bold
     jagged-edged white on the flanks that never crosses the topline &mdash; and, when two
@@ -23,10 +28,46 @@
     and <a href="gene-pax3.html"><code>PAX3</code></a>.
 </p>
 
+<section class="tab-panel" data-tab="gameplay">
+
+<div class="gene-preview" data-gene="horsegenetics.ednrb"></div>
+
+<h2 id="inheritance">What you can get</h2>
+
+<div class="gene-inheritance" data-gene="horsegenetics.ednrb"></div>
+
+<h2 id="carrot">Its gene carrot</h2>
+
+<!-- The recipe, read off the mod at run time - the rarity tier is the recipe's
+     price, and a price written into fifty pages goes stale silently.
+     See wiki/gene-carrot/gene-carrot.js. -->
+
+<div class="gene-carrot" data-gene="horsegenetics.ednrb"></div>
+
+<div class="note">
+    <span class="label">Blue eyes</span>
+    <p>
+        Frame overos are commonly blue-eyed, and a lethal white foal always is &mdash; it
+        has no pigment anywhere at all. Both claim through the shared
+        <a href="eye-colour.html">eye-colour channel</a>.
+    </p>
+    <p>
+        <strong>One or two blue eyes.</strong> A depigmenting claim frequently fails to
+        reach the whole of both irises: 62% of blue-eyed horses get two whole blue eyes,
+        22% get exactly one (complete heterochromia, the other eye keeping whatever colour
+        the horse's pigment genes gave it), and 16% get a wedge in one or both. It is one
+        roll off this locus's own stored values, inherited with the allele copy &mdash;
+        see <a href="eye-colour.html#spread">the spread</a>.
+    </p>
+</div>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
 <!-- The gene, on the three base coats, as a horse you can spin. One div and one
      script: everything in here is asked of the mod at run time.
      See wiki/gene-preview/gene-preview.js. -->
-<div class="gene-preview" data-gene="horsegenetics.ednrb"></div>
 
 <dl class="spec">
     <div><dt>Gene key</dt><dd>horsegenetics.ednrb</dd></div>
@@ -40,16 +81,6 @@
     <div><dt>Deterministic</dt><dd><code>frame-overo</code> <strong>no</strong>; <code>lethal-white</code> yes</dd></div>
     <div><dt>Epi draws</dt><dd>nextLong() seed, nextFloat() body cover, nextFloat() face width</dd></div>
 </dl>
-
-<h2>Why frame has a locus to itself</h2>
-
-<p>
-    Because it does &mdash; <code>EDNRB</code> is nothing to do with <code>KIT</code> or
-    the splash genes. And that is not a filing detail: a locus of its own is precisely why
-    frame composes freely with everything else. A horse really can be frame
-    <em>and</em> tobiano <em>and</em> splash, and the loudest overos in life are exactly
-    those stacks.
-</p>
 
 <h2>The combination table</h2>
 
@@ -196,6 +227,7 @@
 </div>
 
 <h3 id="quantile">The threshold is a quantile, not a constant</h3>
+
 <p>
     <code>paintFrame</code> runs <strong>two passes</strong>. The first scores every
     texel frame is allowed to mark; the second whitens the top <code>cover</code>
@@ -205,6 +237,7 @@
     it. <code>cover</code> then means what its name says at every value, instead of
     saturating to blank or flooded at both ends of its range.
 </p>
+
 <p>
     It also separates two things that used to be one knob. <code>cover</code> decides
     <strong>how much</strong> white there is; the band, <code>EDGE_BIAS</code> and
@@ -214,6 +247,7 @@
 </p>
 
 <h3 id="topline">Measured against the topline, not the horse</h3>
+
 <p>
     <code>WhitePattern.toplineHeight</code> is the top of the barrel, and it is the
     reference every vertical constant in every white locus is expressed against. On it
@@ -276,12 +310,21 @@
     <a href="horse-body.html">the horse&rsquo;s body</a>.
 </p>
 
-<h2 id="carrot">Its gene carrot</h2>
+</section>
 
-<!-- The recipe, read off the mod at run time - the rarity tier is the recipe's
-     price, and a price written into fifty pages goes stale silently.
-     See wiki/gene-carrot/gene-carrot.js. -->
-<div class="gene-carrot" data-gene="horsegenetics.ednrb"></div>
+<section class="tab-panel" data-tab="science">
+
+<h2>Why frame has a locus to itself</h2>
+
+<p>
+    Because it does &mdash; <code>EDNRB</code> is nothing to do with <code>KIT</code> or
+    the splash genes. And that is not a filing detail: a locus of its own is precisely why
+    frame composes freely with everything else. A horse really can be frame
+    <em>and</em> tobiano <em>and</em> splash, and the loudest overos in life are exactly
+    those stacks.
+</p>
+
+</section>
 
 <div class="page-foot">
     <div class="seealso">
@@ -293,28 +336,12 @@
     Source: <code>common/genetics/genes/EdnrbGene.java</code>
 </div>
 
-<div class="note">
-    <span class="label">Blue eyes</span>
-    <p>
-        Frame overos are commonly blue-eyed, and a lethal white foal always is &mdash; it
-        has no pigment anywhere at all. Both claim through the shared
-        <a href="eye-colour.html">eye-colour channel</a>.
-    </p>
-    <p>
-        <strong>One or two blue eyes.</strong> A depigmenting claim frequently fails to
-        reach the whole of both irises: 62% of blue-eyed horses get two whole blue eyes,
-        22% get exactly one (complete heterochromia, the other eye keeping whatever colour
-        the horse's pigment genes gave it), and 16% get a wedge in one or both. It is one
-        roll off this locus's own stored values, inherited with the allele copy &mdash;
-        see <a href="eye-colour.html#spread">the spread</a>.
-    </p>
-</div>
-
 </article>
 </main>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
 <script defer src="gene-preview/gene-preview.js"></script>
+<script defer src="gene-inheritance/gene-inheritance.js"></script>
 <script defer src="gene-carrot/gene-carrot.js"></script>
 </body>
 </html>

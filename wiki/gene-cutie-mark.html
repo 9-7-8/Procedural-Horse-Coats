@@ -6,14 +6,19 @@
 <title>Cutie mark &middot; Horse Genetics Wiki</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
 <link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
 <script defer src="nav.js"></script>
+<script defer src="search.js"></script>
 </head>
 <body>
 <main class="content">
 <article class="doc">
 
 <p class="eyebrow magical">Magical gene <span class="sep">/</span> recessive <span class="sep">/</span> paints nothing in the pipeline</p>
+
 <h1>Cutie mark</h1>
+
 <p class="lede">
     A horse that wears a little <strong>emblem of one to three items</strong>,
     stamped on <strong>both flanks</strong>, drawn on top of every other coat
@@ -21,6 +26,37 @@
     in a row or a triangle, and how big they are, are all epigenetic and
     inherited with the allele.
 </p>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<h2 id="inheritance">What you can get</h2>
+
+<div class="gene-inheritance" data-gene="horsegenetics.cutie_mark"></div>
+
+<h2 id="pipeline">It paints nothing in the pipeline</h2>
+
+<p>
+    Like <a href="gene-particle.html">particle</a>, all three outcomes are
+    <strong>wild types</strong>: the baked coat <em>texture</em> is unchanged, so
+    two horses that differ only here share one baked coat. The emblem is a
+    <strong>client render layer</strong> (<code>CutieMarkLayer</code>, a twin of
+    the <code>glow</code> emissive layer) that reads the gene straight off the
+    genotype and draws item models on the flanks, after the coat and after every
+    white pattern. That is also why the priority is only a code-order slot: the
+    layer draws last regardless of where the gene sorts.
+</p>
+
+<h2 id="carrot">Its gene carrot</h2>
+
+<!-- The recipe, read off the mod at run time - the rarity tier is the recipe's
+     price, and a price written into fifty pages goes stale silently.
+     See wiki/gene-carrot/gene-carrot.js. -->
+
+<div class="gene-carrot" data-gene="horsegenetics.cutie_mark"></div>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
 
 <dl class="spec">
     <div><dt>Gene key</dt><dd>horsegenetics.cutie_mark</dd></div>
@@ -49,6 +85,7 @@
 </div>
 
 <h2 id="table">The combination table</h2>
+
 <table class="data">
     <thead><tr><th>Combination</th><th>Outcome</th><th>Effect</th></tr></thead>
     <tbody>
@@ -58,24 +95,14 @@
     </tbody>
 </table>
 
-<h2 id="pipeline">It paints nothing in the pipeline</h2>
-<p>
-    Like <a href="gene-particle.html">particle</a>, all three outcomes are
-    <strong>wild types</strong>: the baked coat <em>texture</em> is unchanged, so
-    two horses that differ only here share one baked coat. The emblem is a
-    <strong>client render layer</strong> (<code>CutieMarkLayer</code>, a twin of
-    the <code>glow</code> emissive layer) that reads the gene straight off the
-    genotype and draws item models on the flanks, after the coat and after every
-    white pattern. That is also why the priority is only a code-order slot: the
-    layer draws last regardless of where the gene sorts.
-</p>
-
 <h2 id="epigenetics">Everything about the emblem is epigenetic</h2>
+
 <p>
     <code>CutieMarkGene.markFor(genotype, epigenome)</code> draws, off the
     expressing copy's stored values (the names are the
     contract):
 </p>
+
 <ol>
     <li>the item <strong>count</strong>, 1&ndash;3 (<code>nextInt(3)</code>);</li>
     <li>whether three sit in a <strong>triangle</strong> rather than a row
@@ -85,12 +112,14 @@
     <li>a per-emblem <strong>scale</strong>;</li>
     <li>a small <strong>tilt</strong>.</li>
 </ol>
+
 <p>
     A foal that inherits the <code>Cutmrk</code> copy inherits the exact same
     mark. Breed two carriers and about one foal in four is <code>Cutmrk/Cutmrk</code>.
 </p>
 
 <h2 id="items">The item pool</h2>
+
 <p>
     A pick is resolved against <code>FlatItemCatalog</code> &mdash; every
     registered item that is <strong>not a <code>BlockItem</code></strong>, i.e.
@@ -103,7 +132,6 @@
     goal (the mod already has 26.1.2-only content), and within one install a
     horse's mark is fixed and heritable.
 </p>
-
 
 <h2 id="modifiers">Other genes can modify the mark</h2>
 
@@ -129,6 +157,7 @@
 </div>
 
 <h3>The contract</h3>
+
 <ul>
     <li>An implementor is called for <strong>every</strong> combination it can have,
         including its own wild type, and decides for itself whether it has anything to
@@ -150,6 +179,7 @@
 </ul>
 
 <h3>The first user</h3>
+
 <p>
     <a href="gene-light.html">Light</a>. A horse whose hooves, mane or eyes already glow
     wears a <strong>glowing</strong> mark: any variant copy sets <code>emissive</code> and
@@ -168,15 +198,11 @@
     <a href="roadmap.html#decisions">Roadmap</a>.
 </p>
 
-<h2 id="carrot">Its gene carrot</h2>
-
-<!-- The recipe, read off the mod at run time - the rarity tier is the recipe's
-     price, and a price written into fifty pages goes stale silently.
-     See wiki/gene-carrot/gene-carrot.js. -->
-<div class="gene-carrot" data-gene="horsegenetics.cutie_mark"></div>
+</section>
 
 </article>
 </main>
 <script defer src="gene-carrot/gene-carrot.js"></script>
+<script defer src="gene-inheritance/gene-inheritance.js"></script>
 </body>
 </html>

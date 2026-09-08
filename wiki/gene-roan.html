@@ -6,14 +6,19 @@
 <title>Roan &middot; Horse Genetics Wiki</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
 <link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
 <script defer src="nav.js"></script>
+<script defer src="search.js"></script>
 </head>
 <body>
 <main class="content">
 <article class="doc">
 
 <p class="eyebrow natural">Natural gene <span class="sep">/</span> phase 1</p>
+
 <h1>Roan</h1>
+
 <p class="lede">
     <strong>Classic</strong> or <strong>true</strong> roan: an even salt-and-pepper of
     white hairs through the whole trunk, over a base colour it does not change. Black
@@ -23,10 +28,29 @@
     almost nothing else.
 </p>
 
+<section class="tab-panel" data-tab="gameplay">
+
+<div class="gene-preview" data-gene="horsegenetics.roan"></div>
+
+<h2 id="inheritance">What you can get</h2>
+
+<div class="gene-inheritance" data-gene="horsegenetics.roan"></div>
+
+<h2 id="carrot">Its gene carrot</h2>
+
+<!-- The recipe, read off the mod at run time - the rarity tier is the recipe's
+     price, and a price written into fifty pages goes stale silently.
+     See wiki/gene-carrot/gene-carrot.js. -->
+
+<div class="gene-carrot" data-gene="horsegenetics.roan"></div>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
 <!-- The gene, on the three base coats, as a horse you can spin. One div and one
      script: everything in here is asked of the mod at run time.
      See wiki/gene-preview/gene-preview.js. -->
-<div class="gene-preview" data-gene="horsegenetics.roan"></div>
 
 <dl class="spec">
     <div><dt>Gene key</dt><dd>horsegenetics.roan</dd></div>
@@ -56,6 +80,7 @@
 </div>
 
 <h2 id="shape">The shape is what identifies it</h2>
+
 <p>
     Classic roan is recognised by its <strong>distribution</strong>, and as much by what
     it spares as by what it covers. Each row is a claim the reference makes and the
@@ -96,12 +121,14 @@
 </div>
 
 <h2 id="chevron">The inverted V, and the bug it replaced</h2>
+
 <p>
     The dark distal leg does not end on a level line: it rises into the roaning in a
     point, highest in the middle of the leg and lowest at its edges. It is the edge a
     photograph is read for when the body alone is ambiguous, so it is worth drawing
     properly.
 </p>
+
 <p>
     <strong>Measured across the face being painted, not from the leg's axis.</strong> A
     leg is a box, so every texel sits on one of its flat sides and is therefore
@@ -161,6 +188,7 @@ f.whiten(px, py, (float) w);</code></pre>
 </div>
 
 <h2>Result</h2>
+
 <p>
     Blue roan on a black base, strawberry on a chestnut, bay roan on a bay &mdash; the
     trunk reads as a lighter, hazier version of the base colour with a solid head and
@@ -169,26 +197,13 @@ f.whiten(px, py, (float) w);</code></pre>
     has stopped being one.
 </p>
 
-<h2 id="not-modelled">What is not modelled, and is not a gap</h2>
-<p>
-    Real classic roan is <strong>most obvious in a short summer coat</strong> and least
-    obvious in a long, faded or sun-bleached winter one, and it looks temporarily darker
-    after sweating, rolling, rain or clipping &mdash; the white hairs are still there,
-    they just reflect light differently. None of that is here, and none of it should be:
-    the mod has no seasons, no coat length, no weather-dependent rendering and no aging,
-    so a horse's roan is as fixed as everything else about it.
-</p>
-<p>
-    It is worth writing down because it is the commonest reason a photograph of a real
-    roan disagrees with this page. The <em>pattern</em> below is the thing being
-    modelled; how strongly it reads on a given afternoon is not.
-</p>
-
 <h2 id="not-varnish">Not varnish roan</h2>
+
 <p>
     The two share a word and are told apart by shape, not by how much white there is.
     <code>RoanPatternsTest</code> is that comparison, run against the real pipeline.
 </p>
+
 <div class="table-wrap">
 <table>
 <thead><tr><th></th><th>Classic roan (this gene)</th><th><a href="gene-leopard.html">Varnish roan</a></th></tr></thead>
@@ -202,13 +217,28 @@ f.whiten(px, py, (float) w);</code></pre>
 </table>
 </div>
 
-<h2 id="carrot">Its gene carrot</h2>
+</section>
 
-<!-- The recipe, read off the mod at run time - the rarity tier is the recipe's
-     price, and a price written into fifty pages goes stale silently.
-     See wiki/gene-carrot/gene-carrot.js. -->
-<div class="gene-carrot" data-gene="horsegenetics.roan"></div>
+<section class="tab-panel" data-tab="science">
 
+<h2 id="not-modelled">What is not modelled, and is not a gap</h2>
+
+<p>
+    Real classic roan is <strong>most obvious in a short summer coat</strong> and least
+    obvious in a long, faded or sun-bleached winter one, and it looks temporarily darker
+    after sweating, rolling, rain or clipping &mdash; the white hairs are still there,
+    they just reflect light differently. None of that is here, and none of it should be:
+    the mod has no seasons, no coat length, no weather-dependent rendering and no aging,
+    so a horse's roan is as fixed as everything else about it.
+</p>
+
+<p>
+    It is worth writing down because it is the commonest reason a photograph of a real
+    roan disagrees with this page. The <em>pattern</em> below is the thing being
+    modelled; how strongly it reads on a given afternoon is not.
+</p>
+
+</section>
 
 <div class="page-foot">
     <div class="seealso">
@@ -225,6 +255,7 @@ f.whiten(px, py, (float) w);</code></pre>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
 <script defer src="gene-preview/gene-preview.js"></script>
+<script defer src="gene-inheritance/gene-inheritance.js"></script>
 <script defer src="gene-carrot/gene-carrot.js"></script>
 </body>
 </html>

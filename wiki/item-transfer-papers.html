@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Transfer papers &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow">Item <span class="sep">/</span> trading</p>
+<h1>Transfer papers</h1>
+<p class="lede">
+    How a horse changes hands. Sign a paper against a horse you own and whoever
+    holds the paper can claim that horse &mdash; and the paper is drawn as the horse
+    itself, so you can see which one it is.
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+<h2 id="use">How they work</h2>
+
+<div class="plain">
+    <ol>
+        <li>Craft a <strong>blank transfer paper</strong>: 8 paper in a ring around 1
+            horse hair. This is the one shaped recipe in the mod.</li>
+        <li><strong>Right-click a horse you own</strong> with the blank. It becomes a
+            signed paper for that horse. You can also buy signed papers from the
+            <a href="villagers.html">cowboy</a>.</li>
+        <li>Whoever holds the signed paper can redeem it for the horse.</li>
+    </ol>
+</div>
+
+<div class="note good">
+    <span class="label">A signed paper is drawn as the horse</span>
+    <p>
+        Not as a piece of paper &mdash; as the actual animal, in its own coat, shrunk into
+        the item slot. It is the same picture in your inventory, in your hand, on the
+        ground and in a trader&rsquo;s window. A stall of six papers is six different
+        horses at a glance rather than six identical papers you have to read the names
+        off.
+    </p>
+</div>
+
+<h2 id="rules">Things worth knowing</h2>
+
+<ul>
+    <li><strong>One blank per craft.</strong> Eight paper and a hair is a deliberate act,
+        not a stack you carry around.</li>
+    <li><strong>Signed papers never stack</strong>, because two of them are never the same
+        horse. A paper&rsquo;s name is the horse&rsquo;s name.</li>
+    <li><strong>Only you can sign your blank</strong>, and only against a horse you
+        currently own. Once signed, anyone holding it may redeem it.</li>
+    <li>The picture works off a snapshot taken when the paper was signed, so it still
+        draws the right horse even if that horse is far away, sold on twice, or dead.</li>
+</ul>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Item</th><th>Recipe</th></tr></thead>
+<tbody>
+<tr><td><strong>Blank transfer paper</strong></td><td><strong>Shaped:</strong> 8 &times; paper around 1 &times; horse hair</td></tr>
+<tr><td><strong>Signed transfer paper</strong></td><td>Right-click a horse you own with a blank; or buy one from the cowboy</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+<section class="tab-panel" data-tab="coding">
+<h2 id="components">What each one carries</h2>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Item</th><th>Recipe</th><th>What it carries</th></tr></thead>
+<tbody>
+<tr>
+    <td><strong>Blank transfer paper</strong></td>
+    <td><strong>Shaped:</strong> 8 &times; paper around 1 &times; horse hair</td>
+    <td><code>paper_bearer</code> &mdash; the crafter, stamped on at the bench</td>
+</tr>
+<tr>
+    <td><strong>Signed transfer paper</strong></td>
+    <td>Right-click a horse you own with a blank; or buy one from the cowboy</td>
+    <td><code>horse_deed</code> &mdash; the horse's id, name, breed, breeder, and its
+        <strong>genetic and epigenome codes</strong>, which are what let the item draw
+        as the horse</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<ul>
+    <li><strong>A signed paper is drawn as the horse it names</strong>, not as a
+        paper: the mod's HD horse mesh in that horse's own generated coat, shrunk into
+        the slot (<code>client/TransferDeedRenderer</code>). It works off the deed's own
+        snapshot of the genome, so a paper for a horse that is unloaded, sold on twice
+        or dead still draws the animal it was written for.</li>
+    <li><strong>A signed paper never stacks.</strong> Two of them are never the same
+        item, and a stack could not show you which horse is which. Its
+        <em>name</em> is the horse's name, so a cowboy's merchant window reads as a
+        list of horses rather than a list of identical papers.</li>
+    <li><strong>The blank is bound; the signed one is not.</strong> Only the bound
+        player can sign, and only against a horse they currently own. After that it is
+        a bearer instrument and anyone may redeem it.</li>
+</ul>
+
+<p>
+    Full mechanics on <a href="villagers.html#papers">Villagers &amp; transfer
+    papers</a>, which stays the source of truth for the trade itself.
+</p>
+
+<h2 id="gaps">Known gaps</h2>
+
+<ul>
+    <li>The blank transfer paper reuses the
+        <a href="item-research-papers.html">research-paper</a> texture. The signed paper
+        no longer needs art at all &mdash; it draws as the horse &mdash; but its sprite is
+        still what the game throws as particles when one breaks.</li>
+</ul>
+</section>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="villagers.html">Villagers &amp; transfer papers</a>
+        <a href="items.html">All items</a>
+    </div>
+    <code>client/TransferDeedRenderer</code>; components
+    <code>paper_bearer</code> and <code>horse_deed</code>.
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

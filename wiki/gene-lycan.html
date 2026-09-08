@@ -6,14 +6,19 @@
 <title>LYCAN &middot; Horse Genetics Wiki</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
 <link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
 <script defer src="nav.js"></script>
+<script defer src="search.js"></script>
 </head>
 <body>
 <main class="content">
 <article class="doc">
 
 <p class="eyebrow magical">Magical recessive <span class="sep">/</span> no coat effect</p>
+
 <h1>LYCAN &mdash; the werewolf locus</h1>
+
 <p class="lede">
     A horse with two matching copies <strong>stops being a horse at nightfall</strong>.
     Not a horse wearing a wolf: a real wolf, which breeds with wolves, is tamed with
@@ -22,29 +27,11 @@
     wild type <em>and</em> to each other.
 </p>
 
-<dl class="spec">
-    <div><dt>Gene key</dt><dd>horsegenetics.lycan</dd></div>
-    <div><dt>Priority</dt><dd>152 &mdash; after <a href="gene-rainbow-dust.html">rainbow dust</a>; a code-order slot only</dd></div>
-    <div><dt>Alleles</dt><dd>37 shapes + <span class="allele wild">n</span> &mdash; see <a href="#forms">the table</a></dd></div>
-    <div><dt>Outcomes</dt><dd>wild, carrier, mismatched, and one per shape</dd></div>
-    <div><dt>Shows when</dt><dd><strong>two copies of the <em>same</em> allele</strong></dd></div>
-    <div><dt>Default allele</dt><dd>n</dd></div>
-    <div><dt>Wild frequency</dt><dd>0.03% per shape &mdash; about 1.1% of founders shift; <strong>no founder is a carrier</strong></dd></div>
-    <div><dt>Founder draws</dt><dd>1 &times; nextFloat()</dd></div>
-    <div><dt>Coat effect</dt><dd><strong>none, ever</strong></dd></div>
-    <div><dt>Epigenetic</dt><dd>one colour &mdash; the cloud the shifted animal trails</dd></div>
-</dl>
+<section class="tab-panel" data-tab="gameplay">
 
-<div class="note warn">
-    <span class="label">Not play-tested, and the most invasive thing in the mod</span>
-    <p>
-        This gene <em>discards a horse entity and creates a different one</em>, twice a
-        day. Written against 26.1.2 sources and never watched happen. The things to
-        check first are on <a href="verification.html#lycan">To be verified &sect;0-AH</a>, and the top
-        of that list is: does a shifted horse come back with its name, its record and
-        its pedigree intact?
-    </p>
-</div>
+<h2 id="inheritance">What you can get</h2>
+
+<div class="gene-inheritance" data-gene="horsegenetics.lycan"></div>
 
 <h2 id="rule">Two copies of the same allele, or nothing</h2>
 
@@ -79,40 +66,6 @@
     The mismatched horse is its own named outcome rather than a fold into the wild
     type, because it is a genuinely different thing to be holding: it is one parent of
     two different lines at once.
-</p>
-
-<h2 id="swap">Why it swaps the entity instead of drawing a skin</h2>
-
-<p>
-    The <a href="roadmap.html#magical-genes">roadmap</a> scoped this
-    &ldquo;render-layer first, entity-swap second&rdquo;. The requirement overruled
-    that, and it is worth writing down why, because a render layer is by far the
-    cheaper thing to build.
-</p>
-
-<div class="note rule">
-    <span class="label">A shifted horse must be interactable in <em>all</em> the ways its animal is, and no others</span>
-    <p>
-        Up to and including <strong>breeding with real members of that species</strong>.
-        A horse wearing a wolf skin cannot be bred with a wolf. It cannot be tamed with
-        a bone, sheared, bucketed, dyed, fed a cookie, or leashed to a fence post the
-        way its animal can. Every one of those would have to be hand-written, and each
-        one would still be wrong for the next mob on the list.
-    </p>
-    <p>
-        Putting the real entity in the world gets the entire list for free, correctly,
-        including whatever other mods do to vanilla animals.
-    </p>
-</div>
-
-<p>
-    The <em>&ldquo;and no others&rdquo;</em> half falls out of the same decision. While
-    it is a wolf there is no <code>Horse</code> in the world, so none of this
-    mod&rsquo;s own horse interactions &mdash;
-    <a href="villagers.html">transfer papers</a>, <a href="items.html">shearing</a>,
-    <a href="carrots.html">gene carrots</a>, the stall reader &mdash; can see it at
-    all. The one exception that has to be enforced by hand is <strong>riding</strong>:
-    six or so of the shapes are rideable animals, and the mount is cancelled.
 </p>
 
 <h2 id="identity">Identity survives the night</h2>
@@ -175,21 +128,6 @@
     sheep, cod and wandering trader in the world an attack stat it never had, for the
     sake of the one in ten thousand that is secretly a horse. Dealing a flat three
     points by hand touches nothing that is not already ours.
-</p>
-
-<h2 id="cloud">The cloud colour</h2>
-
-<p>
-    This gene&rsquo;s one epigenetic value, drawn on the allele copy and inherited with
-    it, held to a bright saturation and value like every other rolled colour in the mod
-    &mdash; a faint cloud round a wolf at night is the whole visual, and one that
-    rolled a muddy olive would read as a bug rather than as variety.
-</p>
-
-<p>
-    It is also the only heritable thing about a shifted animal, which makes it the only
-    thing to breed for once you have the shape: a line of were-cats can be bred toward
-    a particular colour of cat.
 </p>
 
 <h2 id="forms">The thirty-seven shapes</h2>
@@ -264,6 +202,59 @@
     not hold a horse in wolf shape forever.
 </p>
 
+<h2 id="carrot">Its gene carrot</h2>
+
+<p>
+    The known carrot hands over <strong>one</strong> copy, never two &mdash; a shifter
+    is the reward for breeding two carriers of the same shape, and a carrot that
+    produced one outright would skip the entire locus.
+</p>
+
+<div class="gene-carrot" data-gene="horsegenetics.lycan"></div>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd>horsegenetics.lycan</dd></div>
+    <div><dt>Priority</dt><dd>152 &mdash; after <a href="gene-rainbow-dust.html">rainbow dust</a>; a code-order slot only</dd></div>
+    <div><dt>Alleles</dt><dd>37 shapes + <span class="allele wild">n</span> &mdash; see <a href="#forms">the table</a></dd></div>
+    <div><dt>Outcomes</dt><dd>wild, carrier, mismatched, and one per shape</dd></div>
+    <div><dt>Shows when</dt><dd><strong>two copies of the <em>same</em> allele</strong></dd></div>
+    <div><dt>Default allele</dt><dd>n</dd></div>
+    <div><dt>Wild frequency</dt><dd>0.03% per shape &mdash; about 1.1% of founders shift; <strong>no founder is a carrier</strong></dd></div>
+    <div><dt>Founder draws</dt><dd>1 &times; nextFloat()</dd></div>
+    <div><dt>Coat effect</dt><dd><strong>none, ever</strong></dd></div>
+    <div><dt>Epigenetic</dt><dd>one colour &mdash; the cloud the shifted animal trails</dd></div>
+</dl>
+
+<div class="note warn">
+    <span class="label">Not play-tested, and the most invasive thing in the mod</span>
+    <p>
+        This gene <em>discards a horse entity and creates a different one</em>, twice a
+        day. Written against 26.1.2 sources and never watched happen. The things to
+        check first are on <a href="verification.html#lycan">To be verified &sect;0-AH</a>, and the top
+        of that list is: does a shifted horse come back with its name, its record and
+        its pedigree intact?
+    </p>
+</div>
+
+<h2 id="cloud">The cloud colour</h2>
+
+<p>
+    This gene&rsquo;s one epigenetic value, drawn on the allele copy and inherited with
+    it, held to a bright saturation and value like every other rolled colour in the mod
+    &mdash; a faint cloud round a wolf at night is the whole visual, and one that
+    rolled a muddy olive would read as a bug rather than as variety.
+</p>
+
+<p>
+    It is also the only heritable thing about a shifted animal, which makes it the only
+    thing to breed for once you have the shape: a line of were-cats can be bred toward
+    a particular colour of cat.
+</p>
+
 <h2 id="split">What lives where</h2>
 
 <p>
@@ -285,15 +276,45 @@
     </tbody>
 </table>
 
-<h2 id="carrot">Its gene carrot</h2>
+</section>
+
+<section class="tab-panel" data-tab="science">
+
+<h2 id="swap">Why it swaps the entity instead of drawing a skin</h2>
 
 <p>
-    The known carrot hands over <strong>one</strong> copy, never two &mdash; a shifter
-    is the reward for breeding two carriers of the same shape, and a carrot that
-    produced one outright would skip the entire locus.
+    The <a href="roadmap.html#magical-genes">roadmap</a> scoped this
+    &ldquo;render-layer first, entity-swap second&rdquo;. The requirement overruled
+    that, and it is worth writing down why, because a render layer is by far the
+    cheaper thing to build.
 </p>
 
-<div class="gene-carrot" data-gene="horsegenetics.lycan"></div>
+<div class="note rule">
+    <span class="label">A shifted horse must be interactable in <em>all</em> the ways its animal is, and no others</span>
+    <p>
+        Up to and including <strong>breeding with real members of that species</strong>.
+        A horse wearing a wolf skin cannot be bred with a wolf. It cannot be tamed with
+        a bone, sheared, bucketed, dyed, fed a cookie, or leashed to a fence post the
+        way its animal can. Every one of those would have to be hand-written, and each
+        one would still be wrong for the next mob on the list.
+    </p>
+    <p>
+        Putting the real entity in the world gets the entire list for free, correctly,
+        including whatever other mods do to vanilla animals.
+    </p>
+</div>
+
+<p>
+    The <em>&ldquo;and no others&rdquo;</em> half falls out of the same decision. While
+    it is a wolf there is no <code>Horse</code> in the world, so none of this
+    mod&rsquo;s own horse interactions &mdash;
+    <a href="villagers.html">transfer papers</a>, <a href="items.html">shearing</a>,
+    <a href="carrots.html">gene carrots</a>, the stall reader &mdash; can see it at
+    all. The one exception that has to be enforced by hand is <strong>riding</strong>:
+    six or so of the shapes are rideable animals, and the mount is cancelled.
+</p>
+
+</section>
 
 <div class="page-foot">
     <div class="seealso">
@@ -312,5 +333,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
 <script defer src="gene-carrot/gene-carrot.js"></script>
+<script defer src="gene-inheritance/gene-inheritance.js"></script>
 </body>
 </html>

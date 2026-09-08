@@ -6,14 +6,19 @@
 <title>KIT (white spotting) &middot; Horse Genetics Wiki</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
 <link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
 <script defer src="nav.js"></script>
+<script defer src="search.js"></script>
 </head>
 <body>
 <main class="content">
 <article class="doc">
 
 <p class="eyebrow natural">Natural gene <span class="sep">/</span> phase 1</p>
+
 <h1>KIT (white spotting)</h1>
+
 <p class="lede">
     The white-patterning neighbourhood on equine chromosome 3, and the mod&rsquo;s
     <strong>widest</strong> locus. Sabino&nbsp;1 and the numbered <code>W</code> series
@@ -26,10 +31,123 @@
     are between them the commonest thing at this locus by a wide margin.
 </p>
 
+<section class="tab-panel" data-tab="gameplay">
+
+<div class="gene-preview" data-gene="horsegenetics.kit"></div>
+
+<h2 id="inheritance">What you can get</h2>
+
+<div class="gene-inheritance" data-gene="horsegenetics.kit"></div>
+
+<h2>Viability: what <code>canOccur</code> means here</h2>
+
+<p>
+    The alleles UC Davis lists as &ldquo;homozygosity thought nonviable&rdquo; &mdash;
+    <code>W22</code>, <code>W13</code>, <code>W23</code>, <code>W10</code>,
+    <code>W5</code> &mdash; get <code>canOccur</code> <strong>false</strong>. Those are
+    <em>embryonic</em> lethals, so
+    there is no such horse &mdash; no catalogue entry, nothing in
+    <code>totalGenotypes()</code>, nothing in the founder table. It is the same statement
+    the <a href="gene-sex.html">sex locus</a> makes about <code>Y/Y</code>, and it is a
+    different statement from <a href="gene-ednrb.html">lethal white</a>, which is a foal
+    that <em>is</em> born.
+</p>
+
+<p>
+    <strong>Compound heterozygotes are allowed.</strong> <code>W5/W13</code>,
+    <code>W22/W10</code> and the rest are real horses. The evidence is about an allele
+    paired <em>with itself</em>, and the breeding advice is to test a prospective mate for
+    <em>the same exact</em> variant &mdash; so the rule in the model is one allele twice,
+    not two strong alleles.
+</p>
+
+<p>
+    <strong>&ldquo;No homozygote has been found&rdquo; and &ldquo;a homozygote has been
+    found&rdquo; are different claims, and the table says which is which.</strong> For
+    most of the strong alleles the first is true and the model treats it as a lethal, which
+    is what a breeder is told to do. For <code>W15</code> the <em>second</em> is true
+    &mdash; a <code>W15/W15</code> horse is on record and it is all white &mdash; so its
+    homozygote is allowed and lands on <code>near-white</code>. <code>W4</code>&rsquo;s has
+    no evidence either way, and picking &ldquo;allowed&rdquo; is the choice that does not
+    invent a lethal the source never claims.
+</p>
+
+<div class="note">
+    <span class="label">Breeding can still make an impossible foal</span>
+    <p>
+        <code>canOccur</code> is consulted by the catalogue and the founder table, not by
+        <code>breedWith</code> &mdash; so crossing two <code>W5</code> carriers can still
+        produce a <code>W5/W5</code> foal, which is born and renders as
+        <code>near-white</code>. Making it not exist needs the health system
+        (<a href="roadmap.html">roadmap</a> &sect;6.4); until then the tolerant answer beats
+        throwing.
+    </p>
+</div>
+
+<h2>White finds white</h2>
+
+<p>
+    The painter reads the coat handed to it and raises its own strength by
+    <code>0.35 &times;</code> however much of the horse is already de-pigmented. That is
+    what makes <code>W20</code> a booster rather than a decoration, and it is why a
+    <code>KIT</code> pattern over a <a href="gene-tobiano.html">tobiano</a> or a
+    <a href="gene-ednrb.html">frame</a> reads louder than the same pattern on a solid
+    horse. One line in the painter, no interaction table anywhere. Full reasoning on
+    <a href="pipeline.html">the pipeline page</a>.
+</p>
+
+<div class="note">
+    <span class="label">Still simplified</span>
+    <p>
+        Pink skin is not rendered (the model has no skin layer, only hair). The
+        <code>W1</code>&ndash;<code>W4</code>, <code>W6</code>&ndash;<code>W9</code>,
+        <code>W11</code>&ndash;<code>W19</code> and <code>W21</code> alleles are not
+        modelled &mdash; their published descriptions do not separate them from the eight
+        that are, and each would add a row nobody could read on a horse. Adding one is a
+        line in <code>alleles()</code>, a row in <code>expressionOf</code> and a frequency.
+    </p>
+</div>
+
+<h2 id="carrot">Its gene carrot</h2>
+
+<!-- The recipe, read off the mod at run time - the rarity tier is the recipe's
+     price, and a price written into fifty pages goes stale silently.
+     See wiki/gene-carrot/gene-carrot.js. -->
+
+<div class="gene-carrot" data-gene="horsegenetics.kit"></div>
+
+<div class="note">
+    <span class="label">Blue eyes &mdash; but only from broad white upward</span>
+    <p>
+        This is the locus that has to draw a line. A plain sabino with four socks and a
+        blaze has <strong>ordinary dark eyes</strong> &mdash; the white on it never
+        reached the head &mdash; so only <code>broad-white</code> and above claim a blue
+        iris through the <a href="eye-colour.html">eye-colour channel</a>. That
+        is the difference between this locus and splash, where even a modest marking
+        comes with blue.
+    </p>
+    <p>
+        <strong>One or two blue eyes.</strong> A depigmenting claim frequently fails to
+        reach the whole of both irises: 62% of blue-eyed horses get two whole blue eyes,
+        22% get exactly one (complete heterochromia, the other eye keeping whatever colour
+        the horse's pigment genes gave it), and 16% get a wedge in one or both. It is one
+        roll off this locus's own stored values, inherited with the allele copy &mdash;
+        see <a href="eye-colour.html#spread">the spread</a>.
+    </p>
+    <p>
+        A horse can still qualify the other way: past 55% of the coat depigmented, the
+        eyes follow however the horse got there &mdash; which covers a sabino that is
+        also something else.
+    </p>
+</div>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
 <!-- The gene, on the three base coats, as a horse you can spin. One div and one
      script: everything in here is asked of the mod at run time.
      See wiki/gene-preview/gene-preview.js. -->
-<div class="gene-preview" data-gene="horsegenetics.kit"></div>
 
 <dl class="spec">
     <div><dt>Gene key</dt><dd>horsegenetics.kit</dd></div>
@@ -52,34 +170,6 @@
     <div><dt>Epi draws</dt><dd>nextLong() seed, 4 &times; nextFloat() leg heights, nextFloat() belly, nextFloat() face</dd></div>
     <div><dt>Painter</dt><dd><code>WhitePattern.sabino</code>, at a strength per outcome</dd></div>
 </dl>
-
-<h2>What is at this locus, and what only looks like it is</h2>
-
-<p>
-    This is the distinction the whole restructure turns on. <strong>Only alleles at
-    exactly the same locus share a gene.</strong> <code>SB1</code> and every numbered
-    <code>W</code> are defined <code>KIT</code> variants, so they compete for the same
-    two chromosome slots. Two patterns that sit right beside them do not:
-</p>
-
-<div class="table-wrap">
-<table>
-<thead><tr><th>Pattern</th><th>What it actually is</th><th>Where it lives here</th></tr></thead>
-<tbody>
-<tr><td>Sabino&nbsp;1, <code>W1</code>&ndash;<code>W35</code></td><td><code>KIT</code> variants</td><td><strong>this gene</strong></td></tr>
-<tr><td>Tobiano</td><td>a large inversion <em>near / downstream of</em> <code>KIT</code></td><td><a href="gene-tobiano.html">its own gene</a></td></tr>
-<tr><td>Roan</td><td>maps to the region; causal change unresolved, breed-dependent</td><td><a href="gene-roan.html">its own gene</a></td></tr>
-<tr><td>Splash white</td><td><code>MITF</code> and <code>PAX3</code> &mdash; different chromosomes entirely</td><td><a href="gene-mitf.html">two</a> <a href="gene-pax3.html">genes</a></td></tr>
-<tr><td>Frame overo</td><td><code>EDNRB</code></td><td><a href="gene-ednrb.html">its own gene</a></td></tr>
-</tbody>
-</table>
-</div>
-
-<p>
-    So a tobiano can also carry <code>W20</code>, and a dominant white can be a roan
-    underneath &mdash; both of which real horses are, and neither of which the old
-    single &ldquo;white&rdquo; gene could say.
-</p>
 
 <h2>The alleles</h2>
 
@@ -253,51 +343,6 @@
     </p>
 </div>
 
-<h2>Viability: what <code>canOccur</code> means here</h2>
-
-<p>
-    The alleles UC Davis lists as &ldquo;homozygosity thought nonviable&rdquo; &mdash;
-    <code>W22</code>, <code>W13</code>, <code>W23</code>, <code>W10</code>,
-    <code>W5</code> &mdash; get <code>canOccur</code> <strong>false</strong>. Those are
-    <em>embryonic</em> lethals, so
-    there is no such horse &mdash; no catalogue entry, nothing in
-    <code>totalGenotypes()</code>, nothing in the founder table. It is the same statement
-    the <a href="gene-sex.html">sex locus</a> makes about <code>Y/Y</code>, and it is a
-    different statement from <a href="gene-ednrb.html">lethal white</a>, which is a foal
-    that <em>is</em> born.
-</p>
-
-<p>
-    <strong>Compound heterozygotes are allowed.</strong> <code>W5/W13</code>,
-    <code>W22/W10</code> and the rest are real horses. The evidence is about an allele
-    paired <em>with itself</em>, and the breeding advice is to test a prospective mate for
-    <em>the same exact</em> variant &mdash; so the rule in the model is one allele twice,
-    not two strong alleles.
-</p>
-
-<p>
-    <strong>&ldquo;No homozygote has been found&rdquo; and &ldquo;a homozygote has been
-    found&rdquo; are different claims, and the table says which is which.</strong> For
-    most of the strong alleles the first is true and the model treats it as a lethal, which
-    is what a breeder is told to do. For <code>W15</code> the <em>second</em> is true
-    &mdash; a <code>W15/W15</code> horse is on record and it is all white &mdash; so its
-    homozygote is allowed and lands on <code>near-white</code>. <code>W4</code>&rsquo;s has
-    no evidence either way, and picking &ldquo;allowed&rdquo; is the choice that does not
-    invent a lethal the source never claims.
-</p>
-
-<div class="note">
-    <span class="label">Breeding can still make an impossible foal</span>
-    <p>
-        <code>canOccur</code> is consulted by the catalogue and the founder table, not by
-        <code>breedWith</code> &mdash; so crossing two <code>W5</code> carriers can still
-        produce a <code>W5/W5</code> foal, which is born and renders as
-        <code>near-white</code>. Making it not exist needs the health system
-        (<a href="roadmap.html">roadmap</a> &sect;6.4); until then the tolerant answer beats
-        throwing.
-    </p>
-</div>
-
 <h2>How it paints</h2>
 
 <p>
@@ -351,36 +396,39 @@ private static final double S_NEAR_WHITE = 0.93;</code></pre>
     face three times in five.
 </p>
 
-<h2>White finds white</h2>
+</section>
+
+<section class="tab-panel" data-tab="science">
+
+<h2>What is at this locus, and what only looks like it is</h2>
 
 <p>
-    The painter reads the coat handed to it and raises its own strength by
-    <code>0.35 &times;</code> however much of the horse is already de-pigmented. That is
-    what makes <code>W20</code> a booster rather than a decoration, and it is why a
-    <code>KIT</code> pattern over a <a href="gene-tobiano.html">tobiano</a> or a
-    <a href="gene-ednrb.html">frame</a> reads louder than the same pattern on a solid
-    horse. One line in the painter, no interaction table anywhere. Full reasoning on
-    <a href="pipeline.html">the pipeline page</a>.
+    This is the distinction the whole restructure turns on. <strong>Only alleles at
+    exactly the same locus share a gene.</strong> <code>SB1</code> and every numbered
+    <code>W</code> are defined <code>KIT</code> variants, so they compete for the same
+    two chromosome slots. Two patterns that sit right beside them do not:
 </p>
 
-<div class="note">
-    <span class="label">Still simplified</span>
-    <p>
-        Pink skin is not rendered (the model has no skin layer, only hair). The
-        <code>W1</code>&ndash;<code>W4</code>, <code>W6</code>&ndash;<code>W9</code>,
-        <code>W11</code>&ndash;<code>W19</code> and <code>W21</code> alleles are not
-        modelled &mdash; their published descriptions do not separate them from the eight
-        that are, and each would add a row nobody could read on a horse. Adding one is a
-        line in <code>alleles()</code>, a row in <code>expressionOf</code> and a frequency.
-    </p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Pattern</th><th>What it actually is</th><th>Where it lives here</th></tr></thead>
+<tbody>
+<tr><td>Sabino&nbsp;1, <code>W1</code>&ndash;<code>W35</code></td><td><code>KIT</code> variants</td><td><strong>this gene</strong></td></tr>
+<tr><td>Tobiano</td><td>a large inversion <em>near / downstream of</em> <code>KIT</code></td><td><a href="gene-tobiano.html">its own gene</a></td></tr>
+<tr><td>Roan</td><td>maps to the region; causal change unresolved, breed-dependent</td><td><a href="gene-roan.html">its own gene</a></td></tr>
+<tr><td>Splash white</td><td><code>MITF</code> and <code>PAX3</code> &mdash; different chromosomes entirely</td><td><a href="gene-mitf.html">two</a> <a href="gene-pax3.html">genes</a></td></tr>
+<tr><td>Frame overo</td><td><code>EDNRB</code></td><td><a href="gene-ednrb.html">its own gene</a></td></tr>
+</tbody>
+</table>
 </div>
 
-<h2 id="carrot">Its gene carrot</h2>
+<p>
+    So a tobiano can also carry <code>W20</code>, and a dominant white can be a roan
+    underneath &mdash; both of which real horses are, and neither of which the old
+    single &ldquo;white&rdquo; gene could say.
+</p>
 
-<!-- The recipe, read off the mod at run time - the rarity tier is the recipe's
-     price, and a price written into fifty pages goes stale silently.
-     See wiki/gene-carrot/gene-carrot.js. -->
-<div class="gene-carrot" data-gene="horsegenetics.kit"></div>
+</section>
 
 <div class="page-foot">
     <div class="seealso">
@@ -394,36 +442,12 @@ private static final double S_NEAR_WHITE = 0.93;</code></pre>
     <code>common/coat/pattern/WhitePattern.java</code>
 </div>
 
-<div class="note">
-    <span class="label">Blue eyes &mdash; but only from broad white upward</span>
-    <p>
-        This is the locus that has to draw a line. A plain sabino with four socks and a
-        blaze has <strong>ordinary dark eyes</strong> &mdash; the white on it never
-        reached the head &mdash; so only <code>broad-white</code> and above claim a blue
-        iris through the <a href="eye-colour.html">eye-colour channel</a>. That
-        is the difference between this locus and splash, where even a modest marking
-        comes with blue.
-    </p>
-    <p>
-        <strong>One or two blue eyes.</strong> A depigmenting claim frequently fails to
-        reach the whole of both irises: 62% of blue-eyed horses get two whole blue eyes,
-        22% get exactly one (complete heterochromia, the other eye keeping whatever colour
-        the horse's pigment genes gave it), and 16% get a wedge in one or both. It is one
-        roll off this locus's own stored values, inherited with the allele copy &mdash;
-        see <a href="eye-colour.html#spread">the spread</a>.
-    </p>
-    <p>
-        A horse can still qualify the other way: past 55% of the coat depigmented, the
-        eyes follow however the horse got there &mdash; which covers a sabino that is
-        also something else.
-    </p>
-</div>
-
 </article>
 </main>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
 <script defer src="gene-preview/gene-preview.js"></script>
+<script defer src="gene-inheritance/gene-inheritance.js"></script>
 <script defer src="gene-carrot/gene-carrot.js"></script>
 </body>
 </html>

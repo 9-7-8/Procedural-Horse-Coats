@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Whistles &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow">Item <span class="sep">/</span> tool</p>
+<h1>Whistles</h1>
+<p class="lede">
+    Right-click one and every tamed horse you own nearby comes to you at once.
+    Three tiers, each reaching further than the last.
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+<h2 id="use">What happens when you blow it</h2>
+
+<div class="plain">
+    <p>
+        Every <strong>tamed horse you own</strong> within range, in the same dimension and
+        not currently being ridden, teleports to a spot beside you. A leashed horse is
+        unleashed and comes. A chime plays and a chat line tells you how many answered.
+    </p>
+</div>
+
+<p>
+    Horses already within 3 blocks, and the one you are riding, are left where they are.
+    There is a roughly <strong>3&nbsp;second cooldown</strong> between uses.
+</p>
+
+<h2 id="tiers">The three whistles</h2>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Item</th><th>Recipe (shapeless)</th><th>Range</th></tr></thead>
+<tbody>
+<tr><td><strong>Basic whistle</strong></td><td>horse hair + iron nugget + stick</td><td>16 blocks</td></tr>
+<tr><td><strong>Golden whistle</strong></td><td>basic whistle + gold ingot</td><td>32 blocks</td></tr>
+<tr><td><strong>Echo whistle</strong></td><td>golden whistle + echo shard</td><td>64 blocks</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="note warn">
+    <span class="label">All three look the same</span>
+    <p>
+        The three whistles share one texture, so the only way to tell which you are
+        holding is the name.
+    </p>
+</div>
+</section>
+
+<section class="tab-panel" data-tab="coding">
+<h2 id="reading">The design reading</h2>
+
+<p>
+    This is the &ldquo;area recall&rdquo; reading of the design. Bond gating, pathing
+    instead of teleporting, and what &ldquo;echo&rdquo; should add beyond range are all
+    still open (<a href="roadmap.html">roadmap</a>).
+</p>
+
+<h2 id="gaps">Known gaps</h2>
+
+<ul>
+    <li>The three whistles share one texture.</li>
+    <li>Nothing gates recall on bond, so a barely-tamed horse answers exactly as a
+        long-kept one does.</li>
+</ul>
+</section>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="horse-care.html">Horse care &mdash; bond &amp; herds</a>
+        <a href="roadmap.html">Roadmap</a>
+        <a href="items.html">All items</a>
+    </div>
+    Item objects in <code>item/ModItems.java</code>.
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

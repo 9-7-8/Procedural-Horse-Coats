@@ -6,20 +6,61 @@
 <title>Verdant &middot; Horse Genetics Wiki</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
 <link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
 <script defer src="nav.js"></script>
+<script defer src="search.js"></script>
 </head>
 <body>
 <main class="content">
 <article class="doc">
 
 <p class="eyebrow magical">Magical gene <span class="sep">/</span> no coat effect</p>
+
 <h1>Verdant</h1>
+
 <p class="lede">
     A horse that changes the ground it walks on: mycelium, moss or grass, creeping
     outward from wherever it stands. Three variants at one locus, every one of them
     needing <strong>two of itself</strong> &mdash; so a mycelium copy beside a moss
     copy is not half of each, it is nothing at all.
 </p>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<h2 id="inheritance">What you can get</h2>
+
+<div class="gene-inheritance" data-gene="horsegenetics.verdant"></div>
+
+<h2 id="invisible">It paints nothing, and that is a gap</h2>
+
+<p>
+    All five outcomes are wild types, so <code>affectsCoat()</code> is false, the
+    locus is out of the texture key, and the gallery collapses it to one entry &mdash;
+    four alleles for no catalogue growth at all, the same trick
+    <a href="gene-sex.html">sex</a> and the
+    <a href="horse-body.html">non-coat loci</a> use.
+</p>
+
+<p>
+    The cost is real, and it is the same one <a href="gene-milk.html">milk</a> has: a
+    verdant horse is <strong>indistinguishable</strong> from an ordinary one until you
+    watch the floor. It sits awkwardly beside <a href="gene-healer.html">healer</a>,
+    which draws a stripe precisely so a player can see what it does. A marking would
+    be the fix, and it would want to be part of the locus rather than bolted on.
+</p>
+
+<h2 id="carrot">Its gene carrot</h2>
+
+<!-- The recipe, read off the mod at run time - the rarity tier is the recipe's
+     price, and a price written into fifty pages goes stale silently.
+     See wiki/gene-carrot/gene-carrot.js. -->
+
+<div class="gene-carrot" data-gene="horsegenetics.verdant"></div>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
 
 <dl class="spec">
     <div><dt>Gene key</dt><dd>horsegenetics.verdant</dd></div>
@@ -120,30 +161,7 @@
     rewrite the floor.
 </p>
 
-<h2 id="invisible">It paints nothing, and that is a gap</h2>
-
-<p>
-    All five outcomes are wild types, so <code>affectsCoat()</code> is false, the
-    locus is out of the texture key, and the gallery collapses it to one entry &mdash;
-    four alleles for no catalogue growth at all, the same trick
-    <a href="gene-sex.html">sex</a> and the
-    <a href="horse-body.html">non-coat loci</a> use.
-</p>
-
-<p>
-    The cost is real, and it is the same one <a href="gene-milk.html">milk</a> has: a
-    verdant horse is <strong>indistinguishable</strong> from an ordinary one until you
-    watch the floor. It sits awkwardly beside <a href="gene-healer.html">healer</a>,
-    which draws a stripe precisely so a player can see what it does. A marking would
-    be the fix, and it would want to be part of the locus rather than bolted on.
-</p>
-
-<h2 id="carrot">Its gene carrot</h2>
-
-<!-- The recipe, read off the mod at run time - the rarity tier is the recipe's
-     price, and a price written into fifty pages goes stale silently.
-     See wiki/gene-carrot/gene-carrot.js. -->
-<div class="gene-carrot" data-gene="horsegenetics.verdant"></div>
+</section>
 
 <div class="page-foot">
     <div class="seealso">
@@ -160,5 +178,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
 <script defer src="gene-carrot/gene-carrot.js"></script>
+<script defer src="gene-inheritance/gene-inheritance.js"></script>
 </body>
 </html>

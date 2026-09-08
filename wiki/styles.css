@@ -580,3 +580,497 @@ body.landing .content { margin-left: 0; padding: 0; }
 td.ok   { color: var(--natural); font-weight: 600; }
 td.warn { color: var(--warn);    font-weight: 600; }
 td.bad  { color: var(--danger);  font-weight: 600; }
+
+/* ------------------------------------------------------------------ *
+ * Gameplay / Coding / Science tabs
+ *
+ * Three audiences for one subject. The tab bar is deliberately loud - a
+ * reader who lands on a gene page from a search result has to be able to
+ * see at a glance that there are two more pages behind this one.
+ *
+ * Every view retints the whole page through --view-accent and --bg, so
+ * which tab you are on is legible from the background alone, the way the
+ * index's view switcher is. wiki/tabs.js sets data-view on <html>.
+ * ------------------------------------------------------------------ */
+
+:root {
+    --view-accent: var(--accent);
+    --view-soft:   rgba(56, 189, 248, 0.10);
+    --view-edge:   rgba(56, 189, 248, 0.40);
+}
+
+html[data-view="gameplay"] {
+    --view-accent: #38bdf8;
+    --view-soft:   rgba(56, 189, 248, 0.10);
+    --view-edge:   rgba(56, 189, 248, 0.40);
+    --bg:          #0b1120;
+    --bg-soft:     #0f172a;
+}
+html[data-view="coding"] {
+    --view-accent: #c084fc;
+    --view-soft:   rgba(192, 132, 252, 0.10);
+    --view-edge:   rgba(192, 132, 252, 0.40);
+    --bg:          #110c1e;
+    --bg-soft:     #171029;
+}
+html[data-view="science"] {
+    --view-accent: #4ade80;
+    --view-soft:   rgba(74, 222, 128, 0.10);
+    --view-edge:   rgba(74, 222, 128, 0.40);
+    --bg:          #081711;
+    --bg-soft:     #0c1f18;
+}
+
+.tab-bar {
+    display: flex;
+    gap: 0.4rem;
+    margin: 0 0 1.9rem 0;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0;
+}
+
+.tab-btn {
+    appearance: none;
+    background: none;
+    border: 1px solid transparent;
+    border-bottom: none;
+    border-radius: 9px 9px 0 0;
+    color: var(--text-faint);
+    font-family: var(--sans);
+    text-align: left;
+    padding: 0.55rem 1.05rem 0.6rem 1.05rem;
+    cursor: pointer;
+    position: relative;
+    top: 1px;
+    transition: color .12s ease, background .12s ease;
+}
+.tab-btn:hover { color: var(--text-dim); background: rgba(255,255,255,0.03); }
+
+.tab-btn .tab-label {
+    display: block;
+    font-size: 0.95rem;
+    font-weight: 650;
+    letter-spacing: -0.01em;
+}
+.tab-btn .tab-hint {
+    display: block;
+    font-size: 0.71rem;
+    letter-spacing: 0.02em;
+    color: var(--text-faint);
+    margin-top: 0.06rem;
+}
+
+/* The active tab is the only one that carries its own colour, so the bar
+   reads as "you are here" rather than as three coloured buttons. */
+.tab-btn.active {
+    color: var(--text);
+    background: var(--bg-soft);
+    border-color: var(--border);
+    border-bottom: 1px solid var(--bg-soft);
+}
+.tab-btn.active .tab-hint { color: var(--text-dim); }
+.tab-btn.active::before {
+    content: "";
+    position: absolute;
+    left: -1px; right: -1px; top: -1px;
+    height: 3px;
+    border-radius: 9px 9px 0 0;
+}
+.tab-btn.tab-gameplay.active::before { background: #38bdf8; }
+.tab-btn.tab-coding.active::before   { background: #c084fc; }
+.tab-btn.tab-science.active::before  { background: #4ade80; }
+
+.tab-btn:focus-visible { outline: 2px solid var(--view-accent); outline-offset: 2px; }
+
+/* Links and rules inside a panel follow the view's colour. */
+.tab-panel a { color: var(--view-accent); }
+.tab-panel a:hover { filter: brightness(1.22); }
+.tab-panel .seealso a:hover { border-color: var(--view-accent); }
+.doc h2 { border-bottom-color: var(--border-soft); }
+
+@media (max-width: 900px) {
+    .tab-bar { gap: 0.15rem; }
+    .tab-btn { padding: 0.5rem 0.7rem; }
+    .tab-btn .tab-hint { display: none; }
+}
+
+/* ------------------------------------------------------------------ *
+ * Gameplay-tab furniture
+ *
+ * The gameplay tab is written for a player who does not want the model,
+ * so it gets a small vocabulary of its own: a plain-language summary, a
+ * "what you can get" list, and a health line that is a sentence rather
+ * than a trait contribution.
+ * ------------------------------------------------------------------ */
+
+.plain {
+    font-size: 1.05rem;
+    line-height: 1.68;
+    color: var(--text);
+    background: var(--view-soft);
+    border-left: 3px solid var(--view-accent);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    padding: 1rem 1.15rem;
+    margin: 0 0 1.6rem 0;
+    max-width: 52rem;
+}
+.plain > :first-child { margin-top: 0; }
+.plain > :last-child { margin-bottom: 0; }
+
+/* "What you can get" - the plain outcome list that stands in for an
+   inheritance grid on a gene with too many alleles to draw one. */
+.outcomes { list-style: none; margin: 0 0 1.5rem 0; padding: 0; max-width: 52rem; }
+.outcomes li {
+    display: flex;
+    gap: 0.9rem;
+    align-items: baseline;
+    padding: 0.5rem 0.2rem;
+    border-bottom: 1px solid var(--border-soft);
+    margin: 0;
+}
+.outcomes li:last-child { border-bottom: none; }
+.outcomes .what {
+    flex: 0 0 12rem;
+    font-weight: 650;
+    color: #fff;
+}
+.outcomes .looks { color: var(--text-dim); }
+
+@media (max-width: 620px) {
+    .outcomes li { display: block; }
+    .outcomes .what { margin-bottom: 0.15rem; }
+}
+
+/* A health statement a player can act on. Never a percentage without the
+   thing it is a percentage of. */
+.health-line {
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.85rem 1rem;
+    margin: 0 0 1.5rem 0;
+    max-width: 52rem;
+}
+.health-line .icon { font-size: 1.1rem; line-height: 1.4; }
+.health-line.none  { border-color: var(--border-soft); color: var(--text-dim); }
+.health-line.hurts { border-left: 3px solid var(--warn); }
+.health-line.fatal { border-left: 3px solid var(--danger); }
+.health-line p { margin: 0; max-width: none; }
+
+/* ------------------------------------------------------------------ *
+ * Inheritance table (wiki/gene-inheritance/) - gameplay tab
+ * ------------------------------------------------------------------ */
+
+.gene-inheritance { margin: 0 0 1.6rem 0; }
+
+.gi-boot {
+    background: var(--panel);
+    border: 1px dashed var(--border);
+    border-radius: var(--radius);
+    padding: 0.9rem 1rem;
+    color: var(--text-faint);
+    font-size: 0.9rem;
+    max-width: 52rem;
+}
+.gi-failed { border-color: var(--warn); color: var(--text-dim); }
+
+table.gi-grid { border-collapse: separate; border-spacing: 4px; width: auto; }
+table.gi-grid th {
+    background: none;
+    color: var(--text-faint);
+    text-align: center;
+    font-weight: 600;
+    padding: 0.3rem 0.5rem;
+    border: none;
+}
+table.gi-grid th code { color: var(--view-accent); background: none; padding: 0; }
+table.gi-grid td {
+    background: var(--panel);
+    border: 1px solid var(--border-soft);
+    border-radius: 8px;
+    padding: 0.55rem 0.7rem;
+    text-align: center;
+    vertical-align: middle;
+    min-width: 8.5rem;
+}
+table.gi-grid td.gi-wild { background: var(--bg-soft); }
+table.gi-grid td.gi-none { background: none; border: none; color: var(--text-faint); min-width: 0; }
+
+.gi-geno {
+    display: block;
+    background: none;
+    padding: 0;
+    font-size: 0.86rem;
+    color: var(--text-dim);
+}
+.gi-pheno {
+    display: block;
+    margin-top: 0.18rem;
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: #fff;
+}
+.gi-pheno em {
+    font-style: normal;
+    font-weight: 500;
+    font-size: 0.76rem;
+    color: var(--text-faint);
+}
+td.gi-wild .gi-pheno { color: var(--text-dim); font-weight: 500; }
+
+.gi-key { font-size: 0.83rem; color: var(--text-faint); margin: 0.3rem 0 0 0; max-width: 52rem; }
+.gi-combos { color: var(--text-faint); font-family: var(--mono); font-size: 0.8rem; }
+
+/* ------------------------------------------------------------------ *
+ * Search overlay (wiki/search.js)
+ * ------------------------------------------------------------------ */
+
+body.search-open { overflow: hidden; }
+
+.search-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    background: rgba(3, 7, 18, 0.72);
+    backdrop-filter: blur(3px);
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 6vh 1.25rem 2rem 1.25rem;
+}
+
+.search-panel {
+    width: min(46rem, 100%);
+    max-height: 84vh;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    box-shadow: 0 24px 70px rgba(0,0,0,0.55);
+    overflow: hidden;
+}
+
+.search-head {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.7rem 0.8rem;
+    border-bottom: 1px solid var(--border-soft);
+}
+
+.search-input {
+    flex: 1;
+    background: none;
+    border: none;
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 1.08rem;
+    padding: 0.4rem 0.45rem;
+}
+.search-input:focus { outline: none; }
+.search-input::placeholder { color: var(--text-faint); }
+.search-input::-webkit-search-cancel-button { filter: invert(0.6); }
+
+.search-close {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text-faint);
+    font-family: var(--sans);
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+    padding: 0.3rem 0.5rem;
+    cursor: pointer;
+}
+.search-close:hover { color: var(--text); border-color: var(--view-accent); }
+
+.search-results { overflow-y: auto; padding: 0.55rem 0.4rem 0.9rem 0.4rem; }
+
+.sr-empty, .sr-count {
+    margin: 0;
+    padding: 0.75rem 0.95rem;
+    color: var(--text-faint);
+    font-size: 0.85rem;
+}
+.sr-count { padding-bottom: 0.35rem; text-transform: uppercase; letter-spacing: 0.1em; font-size: 0.68rem; }
+
+.sr-page { padding: 0.15rem 0.4rem 0.5rem 0.4rem; }
+
+.sr-title {
+    display: block;
+    padding: 0.3rem 0.55rem 0.1rem 0.55rem;
+    font-weight: 650;
+    font-size: 0.98rem;
+    color: var(--text);
+    text-decoration: none;
+}
+.sr-title:hover { color: var(--view-accent); }
+
+.sr-hit {
+    display: block;
+    padding: 0.42rem 0.55rem;
+    border-radius: 8px;
+    text-decoration: none;
+    color: var(--text-dim);
+    border-left: 2px solid transparent;
+}
+.sr-hit:hover { background: rgba(255,255,255,0.035); border-left-color: var(--view-accent); }
+
+.sr-tab {
+    display: inline-block;
+    font-size: 0.63rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0.08rem 0.4rem;
+    border-radius: 4px;
+    margin-right: 0.45rem;
+    vertical-align: 1px;
+}
+.sr-gameplay { background: rgba(56,189,248,0.16);  color: #7dd3fc; }
+.sr-coding   { background: rgba(192,132,252,0.16); color: #d8b4fe; }
+.sr-science  { background: rgba(74,222,128,0.16);  color: #86efac; }
+
+.sr-head { font-weight: 600; color: var(--text); font-size: 0.87rem; }
+.sr-snip { display: block; font-size: 0.83rem; line-height: 1.5; margin-top: 0.15rem; }
+.sr-snip mark {
+    background: rgba(251, 191, 36, 0.22);
+    color: #fde68a;
+    border-radius: 2px;
+    padding: 0 1px;
+}
+
+/* The sidebar's search launcher, which replaces the old name-only filter. */
+.nav-search {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin: 0 1.25rem 1rem 1.25rem;
+    width: calc(100% - 2.5rem);
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    color: var(--text-faint);
+    font-family: var(--sans);
+    font-size: 0.85rem;
+    padding: 0.42rem 0.6rem;
+    cursor: pointer;
+    text-align: left;
+}
+.nav-search:hover { border-color: var(--view-accent); color: var(--text-dim); }
+.nav-search kbd {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.02rem 0.3rem;
+    color: var(--text-faint);
+}
+
+@media (max-width: 900px) {
+    .search-overlay { padding: 3vh 0.6rem 1rem 0.6rem; }
+}
+
+/* ------------------------------------------------------------------ *
+ * Landing-page view switcher (wiki/index-views.js)
+ *
+ * Three ways to read the same wiki. Choosing one repaints the page and
+ * drops every page that has nothing to say to that reader, so the
+ * gameplay view is a short shelf of things you can do in game rather
+ * than the full engineering index.
+ * ------------------------------------------------------------------ */
+
+:root { --hero-top: #101c33; }
+html[data-view="gameplay"] { --hero-top: #101c33; }
+html[data-view="coding"]   { --hero-top: #1d1436; }
+html[data-view="science"]  { --hero-top: #0d2b1d; }
+
+.hero { background: linear-gradient(180deg, var(--hero-top) 0%, var(--bg) 100%); }
+.hero .stats div span { color: var(--view-accent); }
+
+body.landing a.card:hover  { border-color: var(--view-accent); }
+body.landing a.card h3     { color: var(--view-accent); }
+/* The kind colours still win - a magical gene reads magical in every view. */
+body.landing a.card.natural h3 { color: var(--natural); }
+body.landing a.card.magical h3 { color: var(--magical); }
+body.landing a.card.tool h3    { color: var(--tool); }
+
+.view-switch {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 2rem 0 0 0;
+}
+
+.view-switch button {
+    appearance: none;
+    background: rgba(255,255,255,0.035);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    color: var(--text-dim);
+    font-family: var(--sans);
+    font-size: 0.88rem;
+    padding: 0.42rem 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    transition: border-color .14s ease, color .14s ease, background .14s ease;
+}
+.view-switch button:hover { color: var(--text); }
+.view-switch button small {
+    font-size: 0.72rem;
+    color: var(--text-faint);
+}
+.view-switch button .swatch {
+    width: 9px; height: 9px;
+    border-radius: 50%;
+    align-self: center;
+}
+.view-switch button[data-view="gameplay"] .swatch { background: #38bdf8; }
+.view-switch button[data-view="coding"]   .swatch { background: #c084fc; }
+.view-switch button[data-view="science"]  .swatch { background: #4ade80; }
+
+.view-switch button.active {
+    color: #fff;
+    border-color: var(--view-accent);
+    background: var(--view-soft);
+}
+.view-switch button.active small { color: var(--text-dim); }
+
+.view-note {
+    margin: 0.85rem 0 0 0;
+    font-size: 0.85rem;
+    color: var(--text-faint);
+    max-width: 44rem;
+}
+
+.landing-search {
+    margin-top: 1.4rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-faint);
+    font-family: var(--sans);
+    font-size: 0.9rem;
+    padding: 0.5rem 0.85rem;
+    cursor: pointer;
+}
+.landing-search:hover { border-color: var(--view-accent); color: var(--text-dim); }
+.landing-search kbd {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.02rem 0.32rem;
+}
+
+.view-hidden { display: none !important; }

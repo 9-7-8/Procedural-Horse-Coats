@@ -6,14 +6,19 @@
 <title>Mushroom &middot; Horse Genetics Wiki</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
 <link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
 <script defer src="nav.js"></script>
+<script defer src="search.js"></script>
 </head>
 <body>
 <main class="content">
 <article class="doc">
 
 <p class="eyebrow natural">Natural gene <span class="sep">/</span> phase 1</p>
+
 <h1>Mushroom</h1>
+
 <p class="lede">
     The mirror of <a href="gene-silver.html">silver dapple</a>: it dilutes
     <strong>pheomelanin only</strong>, and only when <strong>homozygous</strong>.
@@ -21,10 +26,48 @@
     colour. A black or bay horse carries it with almost nothing to show.
 </p>
 
+<section class="tab-panel" data-tab="gameplay">
+
+<div class="gene-preview" data-gene="horsegenetics.mushroom"></div>
+
+<h2 id="inheritance">What you can get</h2>
+
+<div class="gene-inheritance" data-gene="horsegenetics.mushroom"></div>
+
+<h2>What it looks like on each base</h2>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Base</th><th>Result</th></tr></thead>
+<tbody>
+<tr><td>chestnut (<code>ee</code>)</td><td><strong>mushroom</strong> &mdash; flat sepia / khaki body, dull mane</td></tr>
+<tr><td>bay (<code>E_ A_</code>)</td><td>red body dulls slightly; black points unchanged</td></tr>
+<tr><td>black (<code>E_ aa</code>)</td><td>no visible change (carrier)</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    It always lowers the red channel when <code>Mu/Mu</code> &mdash; a black horse
+    just has almost none to lose. Whether you can <em>see</em> mushroom is entirely
+    about how much pheomelanin the melanin genes left behind.
+</p>
+
+<h2 id="carrot">Its gene carrot</h2>
+
+<!-- The recipe, read off the mod at run time - the rarity tier is the recipe's
+     price, and a price written into fifty pages goes stale silently.
+     See wiki/gene-carrot/gene-carrot.js. -->
+
+<div class="gene-carrot" data-gene="horsegenetics.mushroom"></div>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
 <!-- The gene, on the three base coats, as a horse you can spin. One div and one
      script: everything in here is asked of the mod at run time.
      See wiki/gene-preview/gene-preview.js. -->
-<div class="gene-preview" data-gene="horsegenetics.mushroom"></div>
 
 <dl class="spec">
     <div><dt>Gene key</dt><dd>horsegenetics.mushroom</dd></div>
@@ -59,31 +102,7 @@
     column</b> at a mid value &mdash; the dull grey-sepia that mushroom is.
 </p>
 
-<h2>What it looks like on each base</h2>
-
-<div class="table-wrap">
-<table>
-<thead><tr><th>Base</th><th>Result</th></tr></thead>
-<tbody>
-<tr><td>chestnut (<code>ee</code>)</td><td><strong>mushroom</strong> &mdash; flat sepia / khaki body, dull mane</td></tr>
-<tr><td>bay (<code>E_ A_</code>)</td><td>red body dulls slightly; black points unchanged</td></tr>
-<tr><td>black (<code>E_ aa</code>)</td><td>no visible change (carrier)</td></tr>
-</tbody>
-</table>
-</div>
-
-<p>
-    It always lowers the red channel when <code>Mu/Mu</code> &mdash; a black horse
-    just has almost none to lose. Whether you can <em>see</em> mushroom is entirely
-    about how much pheomelanin the melanin genes left behind.
-</p>
-
-<h2 id="carrot">Its gene carrot</h2>
-
-<!-- The recipe, read off the mod at run time - the rarity tier is the recipe's
-     price, and a price written into fifty pages goes stale silently.
-     See wiki/gene-carrot/gene-carrot.js. -->
-<div class="gene-carrot" data-gene="horsegenetics.mushroom"></div>
+</section>
 
 <div class="page-foot">
     <div class="seealso">
@@ -99,6 +118,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
 <script defer src="gene-preview/gene-preview.js"></script>
+<script defer src="gene-inheritance/gene-inheritance.js"></script>
 <script defer src="gene-carrot/gene-carrot.js"></script>
 </body>
 </html>

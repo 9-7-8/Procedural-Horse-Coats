@@ -6,14 +6,19 @@
 <title>Shade &middot; Horse Genetics Wiki</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
 <link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
 <script defer src="nav.js"></script>
+<script defer src="search.js"></script>
 </head>
 <body>
 <main class="content">
 <article class="doc">
 
 <p class="eyebrow natural">Natural gene <span class="sep">/</span> paints nothing itself</p>
+
 <h1>Shade &mdash; how far black spreads over a bay</h1>
+
 <p class="lede">
     The regulatory locus beside agouti. It draws no pixel of its own and every
     horse carries it, but on a bay its dosage &mdash; plus whether extension is
@@ -24,10 +29,25 @@
     <strong>seal brown</strong>.
 </p>
 
+<section class="tab-panel" data-tab="gameplay">
+
+<h2 id="inheritance">What you can get</h2>
+
+<div class="gene-inheritance" data-gene="horsegenetics.shade"></div>
+
+<h2 id="carrot">Its gene carrot</h2>
+
+<div class="gene-carrot" data-gene="horsegenetics.shade"></div>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
 <!-- No preview window here on purpose: this gene paints nothing on its own, so
      a preview of it alone would be a plain horse four times over. The agouti
      page's preview offers this locus as a dropdown, which is where seeing it
      actually means something. -->
+
 <p>
     <a href="gene-agouti.html#preview">See it doing something</a> &mdash; the
     agouti preview offers this locus as a modifier, because that is the only
@@ -54,37 +74,6 @@
         the game yet. See <a href="verification.html">verification</a>.
     </p>
 </div>
-
-<h2>What it is modelling</h2>
-
-<p>
-    A genome-wide association study of 126 genetically confirmed bay horses found
-    a ~0.5&nbsp;Mb region on equine chromosome 22, immediately upstream of
-    <em>ASIP</em> and taking in the neighbouring <em>RALY</em> gene, very strongly
-    associated with the continuum from <em>light bay</em> (black confined to mane,
-    tail, lower legs and ear margins) through to <em>near-black bay</em> (black
-    over most of the body with only small red areas left). It is by a wide margin
-    the strongest known signal for bay shade &mdash; much stronger than the
-    ordinary <span class="allele dom">A</span>/<span class="allele rec">a</span>
-    test.
-</p>
-
-<p>
-    The causal mutation has <strong>not</strong> been identified. The lead marker
-    sits in a high-linkage block and nobody has yet disentangled whether the
-    functional variant is in <em>ASIP</em>, in <em>RALY</em>, or in a regulatory
-    element controlling one or both. The leading biological guess is a regulatory
-    variant that alters when, where or how strongly <em>ASIP</em> is expressed:
-    broader <em>ASIP</em> activity inhibits <em>MC1R</em> over more of the horse
-    and biases it redder; narrower activity lets eumelanin cover more of it.
-</p>
-
-<p>
-    So there is no allele to name, and this gene does not pretend there is. What
-    it models is the thing the association actually describes: a
-    <strong>haplotype dosage</strong>, as three alleles worth
-    <code>-1.5</code>, <code>0</code> and <code>+1.5</code>, summed.
-</p>
 
 <h2>The three haplotypes</h2>
 
@@ -183,6 +172,62 @@
     grandfoal.
 </p>
 
+<h2>Interactions</h2>
+
+<ul>
+    <li><strong>It does nothing without a bay.</strong> No black to move on a
+        chestnut; nothing restricted to move on a black. Both still carry it.</li>
+    <li><strong>The dilutions run after the shade is resolved</strong>, so a
+        buckskin has a bay shade underneath it &mdash; a
+        <a href="gene-matp.html">cream</a> over a liver bay and a cream over a
+        blood bay are different buckskins. The same goes for
+        <a href="gene-dun.html">dun</a>, <a href="gene-silver.html">silver</a> and
+        <a href="gene-champagne.html">champagne</a>.</li>
+    <li><strong><a href="gene-grey.html">Grey</a> hides it progressively</strong>,
+        the way it hides everything; the score stays in the genome, so a grey
+        horse is still on record as having been born a seal brown.</li>
+    <li><strong>Breeds all name it.</strong> Shade is a modifier a coat gene
+        reads, so <code>BreedFounder</code> would force it wild on any breed that
+        did not &mdash; leaving every breed horse shade-neutral while only feral
+        mixed ones varied. <code>Breed.Builder.shadeAny()</code> is called by all
+        three agouti helpers so that cannot happen quietly.</li>
+</ul>
+
+</section>
+
+<section class="tab-panel" data-tab="science">
+
+<h2>What it is modelling</h2>
+
+<p>
+    A genome-wide association study of 126 genetically confirmed bay horses found
+    a ~0.5&nbsp;Mb region on equine chromosome 22, immediately upstream of
+    <em>ASIP</em> and taking in the neighbouring <em>RALY</em> gene, very strongly
+    associated with the continuum from <em>light bay</em> (black confined to mane,
+    tail, lower legs and ear margins) through to <em>near-black bay</em> (black
+    over most of the body with only small red areas left). It is by a wide margin
+    the strongest known signal for bay shade &mdash; much stronger than the
+    ordinary <span class="allele dom">A</span>/<span class="allele rec">a</span>
+    test.
+</p>
+
+<p>
+    The causal mutation has <strong>not</strong> been identified. The lead marker
+    sits in a high-linkage block and nobody has yet disentangled whether the
+    functional variant is in <em>ASIP</em>, in <em>RALY</em>, or in a regulatory
+    element controlling one or both. The leading biological guess is a regulatory
+    variant that alters when, where or how strongly <em>ASIP</em> is expressed:
+    broader <em>ASIP</em> activity inhibits <em>MC1R</em> over more of the horse
+    and biases it redder; narrower activity lets eumelanin cover more of it.
+</p>
+
+<p>
+    So there is no allele to name, and this gene does not pretend there is. What
+    it models is the thing the association actually describes: a
+    <strong>haplotype dosage</strong>, as three alleles worth
+    <code>-1.5</code>, <code>0</code> and <code>+1.5</code>, summed.
+</p>
+
 <h2 id="not-at">Why there is no <code>At</code></h2>
 
 <div class="note">
@@ -214,30 +259,7 @@
     is the third.
 </p>
 
-<h2>Interactions</h2>
-
-<ul>
-    <li><strong>It does nothing without a bay.</strong> No black to move on a
-        chestnut; nothing restricted to move on a black. Both still carry it.</li>
-    <li><strong>The dilutions run after the shade is resolved</strong>, so a
-        buckskin has a bay shade underneath it &mdash; a
-        <a href="gene-matp.html">cream</a> over a liver bay and a cream over a
-        blood bay are different buckskins. The same goes for
-        <a href="gene-dun.html">dun</a>, <a href="gene-silver.html">silver</a> and
-        <a href="gene-champagne.html">champagne</a>.</li>
-    <li><strong><a href="gene-grey.html">Grey</a> hides it progressively</strong>,
-        the way it hides everything; the score stays in the genome, so a grey
-        horse is still on record as having been born a seal brown.</li>
-    <li><strong>Breeds all name it.</strong> Shade is a modifier a coat gene
-        reads, so <code>BreedFounder</code> would force it wild on any breed that
-        did not &mdash; leaving every breed horse shade-neutral while only feral
-        mixed ones varied. <code>Breed.Builder.shadeAny()</code> is called by all
-        three agouti helpers so that cannot happen quietly.</li>
-</ul>
-
-<h2 id="carrot">Its gene carrot</h2>
-
-<div class="gene-carrot" data-gene="horsegenetics.shade"></div>
+</section>
 
 <div class="page-foot">
     <div class="seealso">
@@ -255,5 +277,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
 <script defer src="gene-carrot/gene-carrot.js"></script>
+<script defer src="gene-inheritance/gene-inheritance.js"></script>
 </body>
 </html>

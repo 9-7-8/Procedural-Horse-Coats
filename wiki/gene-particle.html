@@ -6,14 +6,19 @@
 <title>Particle &middot; Horse Genetics Wiki</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
 <link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
 <script defer src="nav.js"></script>
+<script defer src="search.js"></script>
 </head>
 <body>
 <main class="content">
 <article class="doc">
 
 <p class="eyebrow magical">Magical recessive <span class="sep">/</span> no coat effect</p>
+
 <h1>Particle</h1>
+
 <p class="lede">
     A horse that trails something as it moves &mdash; flames, souls, snow, hearts,
     portal motes, a shrieker&rsquo;s mark. <strong>Forty variant alleles at one
@@ -24,6 +29,42 @@
     own wild type</strong> &mdash; one copy of <code>n</code> and the horse trails
     nothing at all.
 </p>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<h2 id="inheritance">What you can get</h2>
+
+<div class="gene-inheritance" data-gene="horsegenetics.particle"></div>
+
+<h2 id="invisible">It paints nothing</h2>
+
+<p>
+    All 87 outcomes are wild types, so <code>affectsCoat()</code> is false, the locus
+    is out of the texture key, and <code>GenotypeCatalog</code> collapses all 861
+    combinations to a single entry &mdash; <strong>forty alleles for no catalogue
+    growth at all</strong>, the trick <a href="gene-sex.html">sex</a>,
+    <a href="gene-milk.html">milk</a> and <a href="gene-verdant.html">verdant</a>
+    already use.
+</p>
+
+<p>
+    Unlike those two, though, there is no visibility gap here: the whole gene
+    <em>is</em> the thing you can see. It is the answer to the complaint
+    <a href="gene-milk.html">milk</a> and <a href="gene-verdant.html">verdant</a> both
+    attract &mdash; an effect a player can watch without having to test for it.
+</p>
+
+<h2 id="carrot">Its gene carrot</h2>
+
+<!-- The recipe, read off the mod at run time - the rarity tier is the recipe's
+     price, and a price written into fifty pages goes stale silently.
+     See wiki/gene-carrot/gene-carrot.js. -->
+
+<div class="gene-carrot" data-gene="horsegenetics.particle"></div>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
 
 <dl class="spec">
     <div><dt>Gene key</dt><dd>horsegenetics.particle</dd></div>
@@ -50,24 +91,6 @@
         Checklist on <a href="verification.html">To be verified</a>.
     </p>
 </div>
-
-<h2 id="one-locus">Why one locus and not forty genes</h2>
-
-<p>
-    Forty independent two-allele genes would let a horse carry all forty at once, and
-    then the interesting question &mdash; <em>which</em> of these does this horse
-    trail &mdash; stops having an answer. Every serious line converges on a horse
-    emitting everything, and the fortieth gene is worth nothing because the horse was
-    already covered in particles.
-</p>
-
-<p>
-    One locus with forty alleles says the opposite, and says it structurally rather
-    than by a rule anyone has to enforce. A horse has two copies of chromosome
-    whatever-this-is, so it can carry two of these and no more; a third is not rare,
-    it is impossible. It is exactly the argument that folded dominant white and
-    sabino into <a href="gene-kit.html">KIT</a>, at forty times the scale.
-</p>
 
 <h2 id="dominance">One copy of <code>n</code> and the locus is silent</h2>
 
@@ -363,30 +386,29 @@
     than forty-two.
 </p>
 
-<h2 id="invisible">It paints nothing</h2>
+</section>
+
+<section class="tab-panel" data-tab="science">
+
+<h2 id="one-locus">Why one locus and not forty genes</h2>
 
 <p>
-    All 87 outcomes are wild types, so <code>affectsCoat()</code> is false, the locus
-    is out of the texture key, and <code>GenotypeCatalog</code> collapses all 861
-    combinations to a single entry &mdash; <strong>forty alleles for no catalogue
-    growth at all</strong>, the trick <a href="gene-sex.html">sex</a>,
-    <a href="gene-milk.html">milk</a> and <a href="gene-verdant.html">verdant</a>
-    already use.
+    Forty independent two-allele genes would let a horse carry all forty at once, and
+    then the interesting question &mdash; <em>which</em> of these does this horse
+    trail &mdash; stops having an answer. Every serious line converges on a horse
+    emitting everything, and the fortieth gene is worth nothing because the horse was
+    already covered in particles.
 </p>
 
 <p>
-    Unlike those two, though, there is no visibility gap here: the whole gene
-    <em>is</em> the thing you can see. It is the answer to the complaint
-    <a href="gene-milk.html">milk</a> and <a href="gene-verdant.html">verdant</a> both
-    attract &mdash; an effect a player can watch without having to test for it.
+    One locus with forty alleles says the opposite, and says it structurally rather
+    than by a rule anyone has to enforce. A horse has two copies of chromosome
+    whatever-this-is, so it can carry two of these and no more; a third is not rare,
+    it is impossible. It is exactly the argument that folded dominant white and
+    sabino into <a href="gene-kit.html">KIT</a>, at forty times the scale.
 </p>
 
-<h2 id="carrot">Its gene carrot</h2>
-
-<!-- The recipe, read off the mod at run time - the rarity tier is the recipe's
-     price, and a price written into fifty pages goes stale silently.
-     See wiki/gene-carrot/gene-carrot.js. -->
-<div class="gene-carrot" data-gene="horsegenetics.particle"></div>
+</section>
 
 <div class="page-foot">
     <div class="seealso">
@@ -404,5 +426,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
 <script defer src="gene-carrot/gene-carrot.js"></script>
+<script defer src="gene-inheritance/gene-inheritance.js"></script>
 </body>
 </html>

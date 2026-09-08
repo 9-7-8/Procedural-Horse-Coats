@@ -6,14 +6,19 @@
 <title>Grey &middot; Horse Genetics Wiki</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
 <link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
 <script defer src="nav.js"></script>
+<script defer src="search.js"></script>
 </head>
 <body>
 <main class="content">
 <article class="doc">
 
 <p class="eyebrow natural">Natural gene <span class="sep">/</span> phase 1</p>
+
 <h1>Grey &mdash; the coat that goes white</h1>
+
 <p class="lede">
     A horse is born its ordinary colour and then progressively grows white hairs
     until it is a steel, a dapple, a light or a near-white grey. Grey is a
@@ -25,10 +30,58 @@
     coat gene that is also a health gene.
 </p>
 
+<section class="tab-panel" data-tab="gameplay">
+
+<div class="gene-preview" data-gene="horsegenetics.grey"></div>
+
+<h2 id="inheritance">What you can get</h2>
+
+<div class="gene-inheritance" data-gene="horsegenetics.grey"></div>
+
+<div class="health-line hurts">
+    <span class="icon" aria-hidden="true">&#9888;</span>
+    <p><strong>Health:</strong> an <strong>informational</strong> melanoma-risk condition, in three tiers</p>
+</div>
+
+<h2 id="breeds">Where it is common</h2>
+
+<p>
+    Breed changes the <strong>frequency of the alleles</strong> in the founder pool
+    and nothing about what grey does once present &mdash; a <code>G3</code>
+    Andalusian and a <code>G3</code> Quarter Horse follow the same rule.
+    <a href="breeds.html">Breeds</a> holds the tables; the wild pool outside a breed
+    uses Hardy&ndash;Weinberg over the three alleles.
+</p>
+
+<p>
+    <span class="allele dom">G3</span> is the broadly prevalent one and dominates the
+    grey breeds: the <strong>Lipizzan</strong> and the <strong>Camargue</strong>
+    (fixed grey), the <strong>Percheron</strong>, the
+    <strong>Andalusian</strong> and <strong>Lusitano</strong>, the
+    <strong>Arabian</strong>. <span class="allele dom">G2</span> is real but
+    <strong>breed-clustered</strong>, so only the populations the duplication was
+    actually reported in carry it: the <strong>Andalusian</strong>,
+    <strong>Connemara Pony</strong>, <strong>American Miniature</strong>,
+    <strong>Mustang</strong>, <strong>Quarter Horse</strong>, <strong>Tennessee
+    Walking Horse</strong> and <strong>Welsh Pony</strong>. (The reference also names
+    the Mangalarga Marchador, which this mod&rsquo;s catalogue does not carry.)
+</p>
+
+<h2 id="carrot">Its gene carrot</h2>
+
+<!-- The recipe, read off the mod at run time - the rarity tier is the recipe's
+     price, and a price written into fifty pages goes stale silently.
+     See wiki/gene-carrot/gene-carrot.js. -->
+
+<div class="gene-carrot" data-gene="horsegenetics.grey"></div>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
 <!-- The gene, on the three base coats, as a horse you can spin. One div and one
      script: everything in here is asked of the mod at run time.
      See wiki/gene-preview/gene-preview.js. -->
-<div class="gene-preview" data-gene="horsegenetics.grey"></div>
 
 <dl class="spec">
     <div><dt>Gene key</dt><dd>horsegenetics.grey</dd></div>
@@ -423,6 +476,21 @@ float  keep = lerp(keepDapple, keepWeb, web);</code></pre>
     </p>
 </div>
 
+<h2 id="foals">Foals</h2>
+
+<p>
+    <code>restrict</code> no-ops when <code>!ctx.isAdult()</code>, so a grey foal is
+    born its base colour and greys once grown. One wrinkle:
+    <code>isDeterministic</code> cannot see the foal flag (only <code>restrict</code>
+    gets the <code>CoatBuildContext</code>), so a grey <em>foal</em> is also treated
+    as per-horse. It bakes its own texture, and that texture is identical to a
+    non-grey foal&rsquo;s. Harmless &mdash; just a few extra cache entries.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="science">
+
 <h2 id="not">What grey is not</h2>
 
 <div class="table-wrap">
@@ -437,41 +505,6 @@ float  keep = lerp(keepDapple, keepWeb, web);</code></pre>
 </tbody>
 </table>
 </div>
-
-<h2 id="breeds">Where it is common</h2>
-
-<p>
-    Breed changes the <strong>frequency of the alleles</strong> in the founder pool
-    and nothing about what grey does once present &mdash; a <code>G3</code>
-    Andalusian and a <code>G3</code> Quarter Horse follow the same rule.
-    <a href="breeds.html">Breeds</a> holds the tables; the wild pool outside a breed
-    uses Hardy&ndash;Weinberg over the three alleles.
-</p>
-
-<p>
-    <span class="allele dom">G3</span> is the broadly prevalent one and dominates the
-    grey breeds: the <strong>Lipizzan</strong> and the <strong>Camargue</strong>
-    (fixed grey), the <strong>Percheron</strong>, the
-    <strong>Andalusian</strong> and <strong>Lusitano</strong>, the
-    <strong>Arabian</strong>. <span class="allele dom">G2</span> is real but
-    <strong>breed-clustered</strong>, so only the populations the duplication was
-    actually reported in carry it: the <strong>Andalusian</strong>,
-    <strong>Connemara Pony</strong>, <strong>American Miniature</strong>,
-    <strong>Mustang</strong>, <strong>Quarter Horse</strong>, <strong>Tennessee
-    Walking Horse</strong> and <strong>Welsh Pony</strong>. (The reference also names
-    the Mangalarga Marchador, which this mod&rsquo;s catalogue does not carry.)
-</p>
-
-<h2 id="foals">Foals</h2>
-
-<p>
-    <code>restrict</code> no-ops when <code>!ctx.isAdult()</code>, so a grey foal is
-    born its base colour and greys once grown. One wrinkle:
-    <code>isDeterministic</code> cannot see the foal flag (only <code>restrict</code>
-    gets the <code>CoatBuildContext</code>), so a grey <em>foal</em> is also treated
-    as per-horse. It bakes its own texture, and that texture is identical to a
-    non-grey foal&rsquo;s. Harmless &mdash; just a few extra cache entries.
-</p>
 
 <h2 id="declined">What was in the reference and is not here</h2>
 
@@ -490,12 +523,7 @@ float  keep = lerp(keepDapple, keepWeb, web);</code></pre>
     <a href="roadmap.html#settled">the settled list</a>.
 </p>
 
-<h2 id="carrot">Its gene carrot</h2>
-
-<!-- The recipe, read off the mod at run time - the rarity tier is the recipe's
-     price, and a price written into fifty pages goes stale silently.
-     See wiki/gene-carrot/gene-carrot.js. -->
-<div class="gene-carrot" data-gene="horsegenetics.grey"></div>
+</section>
 
 <div class="page-foot">
     <div class="seealso">
@@ -514,6 +542,7 @@ float  keep = lerp(keepDapple, keepWeb, web);</code></pre>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
 <script defer src="gene-preview/gene-preview.js"></script>
+<script defer src="gene-inheritance/gene-inheritance.js"></script>
 <script defer src="gene-carrot/gene-carrot.js"></script>
 </body>
 </html>

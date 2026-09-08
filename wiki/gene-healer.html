@@ -6,14 +6,19 @@
 <title>Healer &middot; Horse Genetics Wiki</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
 <link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
 <script defer src="nav.js"></script>
+<script defer src="search.js"></script>
 </head>
 <body>
 <main class="content">
 <article class="doc">
 
 <p class="eyebrow magical">Magical gene <span class="sep">/</span> phase 3</p>
+
 <h1>Healer</h1>
+
 <p class="lede">
     A horse that mends the people standing next to it, and carries a red stripe
     down the middle of its mane that says so. Recessive, so about one wild horse in
@@ -21,10 +26,29 @@
     single copy looks like every other horse.
 </p>
 
+<section class="tab-panel" data-tab="gameplay">
+
+<div class="gene-preview" data-gene="horsegenetics.healer"></div>
+
+<h2 id="inheritance">What you can get</h2>
+
+<div class="gene-inheritance" data-gene="horsegenetics.healer"></div>
+
+<h2 id="carrot">Its gene carrot</h2>
+
+<!-- The recipe, read off the mod at run time - the rarity tier is the recipe's
+     price, and a price written into fifty pages goes stale silently.
+     See wiki/gene-carrot/gene-carrot.js. -->
+
+<div class="gene-carrot" data-gene="horsegenetics.healer"></div>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
 <!-- The gene, on the three base coats, as a horse you can spin. One div and one
      script: everything in here is asked of the mod at run time.
      See wiki/gene-preview/gene-preview.js. -->
-<div class="gene-preview" data-gene="horsegenetics.healer"></div>
 
 <dl class="spec">
     <div><dt>Gene key</dt><dd>horsegenetics.healer</dd></div>
@@ -101,16 +125,6 @@
     rather than as a thinner one.
 </p>
 
-<h2 id="order">Why it runs after mane colour</h2>
-
-<p>
-    Priority 116 puts it after <a href="gene-mane-color.html">mane colour</a> (112) so
-    the red sits <em>on top of</em> a coloured mane rather than under it, and before
-    <a href="gene-magic-zebra.html">magic zebra</a> (120) so stripes still black
-    everything out. A horse carrying both a solid mane and this gene shows the
-    colour with a red line down it, which is exactly what you would want to see.
-</p>
-
 <h2 id="aura">The aura</h2>
 
 <p>
@@ -148,12 +162,21 @@
     knowing about: a foal you cannot identify is still doing the work.
 </p>
 
-<h2 id="carrot">Its gene carrot</h2>
+</section>
 
-<!-- The recipe, read off the mod at run time - the rarity tier is the recipe's
-     price, and a price written into fifty pages goes stale silently.
-     See wiki/gene-carrot/gene-carrot.js. -->
-<div class="gene-carrot" data-gene="horsegenetics.healer"></div>
+<section class="tab-panel" data-tab="science">
+
+<h2 id="order">Why it runs after mane colour</h2>
+
+<p>
+    Priority 116 puts it after <a href="gene-mane-color.html">mane colour</a> (112) so
+    the red sits <em>on top of</em> a coloured mane rather than under it, and before
+    <a href="gene-magic-zebra.html">magic zebra</a> (120) so stripes still black
+    everything out. A horse carrying both a solid mane and this gene shows the
+    colour with a red line down it, which is exactly what you would want to see.
+</p>
+
+</section>
 
 <div class="page-foot">
     <div class="seealso">
@@ -170,6 +193,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
 <script defer src="gene-preview/gene-preview.js"></script>
+<script defer src="gene-inheritance/gene-inheritance.js"></script>
 <script defer src="gene-carrot/gene-carrot.js"></script>
 </body>
 </html>

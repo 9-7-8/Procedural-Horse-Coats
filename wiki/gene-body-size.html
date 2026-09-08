@@ -6,14 +6,19 @@
 <title>Magic Body Size &middot; Horse Genetics Wiki</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
 <link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
 <script defer src="nav.js"></script>
+<script defer src="search.js"></script>
 </head>
 <body>
 <main class="content">
 <article class="doc">
 
 <p class="eyebrow magical">Magical gene <span class="sep">/</span> no coat effect</p>
+
 <h1>Magic body size</h1>
+
 <p class="lede">
     The magical version of <a href="gene-lcorl.html">LCORL</a> and
     <a href="gene-hmga2.html">HMGA2</a>. <strong>Most horses in the world carry
@@ -22,6 +27,50 @@
     Two copies of the same kind <strong>add</strong>, and no wild horse is ever
     born with two.
 </p>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<h2 id="inheritance">What you can get</h2>
+
+<div class="gene-inheritance" data-gene="horsegenetics.body_size"></div>
+
+<h2 id="wild">Only heterozygotes are born wild</h2>
+
+<p>
+    The founder table lists <code>Big/n</code>, <code>Small/n</code> and
+    <code>n/n</code> and nothing else. It is written out rather than derived from
+    Hardy-Weinberg, because random mating is exactly what this table is
+    <em>not</em>:
+</p>
+
+<div class="codebox">
+<pre><code class="language-java">private final FounderTable founders = FounderTable.builder()
+        .weight(Big,   n, 40.0)
+        .weight(Small, n, 40.0)
+        .weight(n,     n, 20.0)
+        .build();</code></pre>
+</div>
+
+<p>
+    So <strong>every doubled horse in the world, in either direction, is
+    something somebody bred</strong>. That is the same rule the
+    <a href="horse-body.html">health loci</a> use &mdash; nothing affected is
+    ever wild-caught &mdash; pointed at something worth having instead of
+    something to avoid. And since the percentage travels with the copy, breeding
+    two <em>good</em> copies together is a real project with a real result.
+</p>
+
+<h2 id="carrot">Its gene carrot</h2>
+
+<!-- The recipe, read off the mod at run time - the rarity tier is the recipe's
+     price, and a price written into fifty pages goes stale silently.
+     See wiki/gene-carrot/gene-carrot.js. -->
+
+<div class="gene-carrot" data-gene="horsegenetics.body_size"></div>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
 
 <dl class="spec">
     <div><dt>Gene key</dt><dd>horsegenetics.body_size</dd></div>
@@ -172,32 +221,6 @@ public void contribute(AllelePair pair, Genotype genotype, GeneEpigenetics epige
     horse smaller &mdash; not a distribution tail, a bug in the reader's head.
 </p>
 
-<h2 id="wild">Only heterozygotes are born wild</h2>
-
-<p>
-    The founder table lists <code>Big/n</code>, <code>Small/n</code> and
-    <code>n/n</code> and nothing else. It is written out rather than derived from
-    Hardy-Weinberg, because random mating is exactly what this table is
-    <em>not</em>:
-</p>
-
-<div class="codebox">
-<pre><code class="language-java">private final FounderTable founders = FounderTable.builder()
-        .weight(Big,   n, 40.0)
-        .weight(Small, n, 40.0)
-        .weight(n,     n, 20.0)
-        .build();</code></pre>
-</div>
-
-<p>
-    So <strong>every doubled horse in the world, in either direction, is
-    something somebody bred</strong>. That is the same rule the
-    <a href="horse-body.html">health loci</a> use &mdash; nothing affected is
-    ever wild-caught &mdash; pointed at something worth having instead of
-    something to avoid. And since the percentage travels with the copy, breeding
-    two <em>good</em> copies together is a real project with a real result.
-</p>
-
 <h2 id="clamp">Past the natural clamp, on purpose</h2>
 
 <p>
@@ -255,12 +278,7 @@ public void contribute(AllelePair pair, Genotype genotype, GeneEpigenetics epige
     <code>Attributes.SCALE</code> scales the model <em>and</em> the hitbox.
 </p>
 
-<h2 id="carrot">Its gene carrot</h2>
-
-<!-- The recipe, read off the mod at run time - the rarity tier is the recipe's
-     price, and a price written into fifty pages goes stale silently.
-     See wiki/gene-carrot/gene-carrot.js. -->
-<div class="gene-carrot" data-gene="horsegenetics.body_size"></div>
+</section>
 
 <div class="page-foot">
     <div class="seealso">
@@ -278,5 +296,6 @@ public void contribute(AllelePair pair, Genotype genotype, GeneEpigenetics epige
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
 <script defer src="gene-carrot/gene-carrot.js"></script>
+<script defer src="gene-inheritance/gene-inheritance.js"></script>
 </body>
 </html>

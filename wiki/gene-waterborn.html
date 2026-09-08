@@ -6,14 +6,19 @@
 <title>Waterborn &middot; Horse Genetics Wiki</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
 <link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
 <script defer src="nav.js"></script>
+<script defer src="search.js"></script>
 </head>
 <body>
 <main class="content">
 <article class="doc">
 
 <p class="eyebrow magical">Magical gene <span class="sep">/</span> phase 3 + effects</p>
+
 <h1>Waterborn</h1>
+
 <p class="lede">
     Neon-blue streaks through the mane and tail, and a horse that walks on the
     surface of water instead of wading. It leaves a trail of blue sparks where it
@@ -23,76 +28,7 @@
     block</strong> &mdash; it is a JSON file, not a Java class.
 </p>
 
-<dl class="spec">
-    <div><dt>Gene key</dt><dd>example.waterborn</dd></div>
-    <div><dt>Alleles</dt><dd><span class="allele dom">Wtb</span> <span class="allele wild">n</span></dd></div>
-    <div><dt>Outcomes</dt><dd>wild, <code>waterborn</code></dd></div>
-    <div><dt>Shows when</dt><dd><code>Wtb/n</code>, <code>Wtb/Wtb</code></dd></div>
-    <div><dt>Default allele</dt><dd>n</dd></div>
-    <div><dt>Wild frequency</dt><dd>1 in 90 per allele &rarr; ~1 wild horse in 45 shows it</dd></div>
-    <div><dt>Founder draws</dt><dd>1 &times; nextFloat()</dd></div>
-    <div><dt>Deterministic</dt><dd><strong>no</strong> when expressed &mdash; the stripe field varies per horse</dd></div>
-    <div><dt>Epigenetic draws</dt><dd>1 long (stripe seed) + 1 nextFloat (stripe spacing), off the <code>Wtb</code> copy</dd></div>
-    <div><dt>Priority</dt><dd>215 &mdash; a data-driven magical gene, slots before Test in <code>magicalOrder()</code></dd></div>
-    <div><dt>Stripe colour</dt><dd><code>#1ec8ff</code> (30, 200, 255), 92% of the way there</dd></div>
-    <div><dt>Effects</dt><dd><code>traversal</code> walk_on_water, <code>emitter</code> dust trail, <code>yield</code> mare&rarr;water bucket</dd></div>
-</dl>
-
-<div class="note warn">
-    <span class="label">Partly verified in-game (2026-09-02)</span>
-    <p>
-        <strong>Confirmed:</strong> the neon streaks in the mane and tail render, and
-        the blue particle trail works. <strong>Still unverified:</strong>
-        <code>walk_on_water</code> (an approximation &mdash; surface buoyancy, not a
-        solid plane) and the tamed-mare milking. Checklist item is
-        <a href="verification.html#effects">To be verified &sect;13</a>.
-    </p>
-</div>
-
-<h2 id="coat">The coat: neon streaks in the mane and tail</h2>
-
-<p>
-    The visual half is one ordinary magical coat layer: a <code>STRIPES</code> mask
-    restricted to the <code>HAIR</code> parts (mane + tail) crossed with a
-    <code>TOWARD</code> op that walks each covered texel <strong>92%</strong> of the
-    way to <code>#1ec8ff</code>.
-</p>
-
-<div class="codebox">
-<div class="filename">the coat layer, from waterborn.json</div>
-<pre><code class="language-json">{
-  "name": "neon blue stripes down the mane and tail",
-  "masks": [
-    { "type": "STRIPES", "parts": [ "HAIR" ], "seed": "$stripeSeed",
-      "spacing": "$stripeSpacing", "duty": 0.4, "warp": 0.8 }
-  ],
-  "op": { "type": "TOWARD", "color": "#1ec8ff", "strength": 92, "opacity": 100 }
-}</code></pre>
-</div>
-
-<p>
-    <code>TOWARD</code> rather than <code>TINT</code> for the same reason
-    <a href="gene-pink-hair.html">pink hair</a> uses it: it <em>reads</em> what each
-    strand currently looks like and steps it toward the target, so the mane keeps its
-    light and dark instead of turning into a flat slab, and it reads the same on a
-    black, a chestnut or a cremello. <code>opacity: 100</code> means the streaks also
-    show on a <a href="gene-kit.html">dominant-white</a> horse.
-</p>
-
-<p>Two knobs make the pattern per-horse, so no two Waterborn manes are identical:</p>
-<table>
-<thead><tr><th>Knob</th><th>Range</th><th>Effect</th></tr></thead>
-<tbody>
-<tr><td><code>stripeSeed</code></td><td>a <code>nextLong()</code></td><td>seeds the <a href="body-space.html">BodyStripes</a> field &mdash; where the streaks fall and how the noise warps them.</td></tr>
-<tr><td><code>stripeSpacing</code></td><td>1.6&ndash;2.8 body units</td><td>centre-to-centre gap. Tight, so the hair reads as several thin streaks rather than one band. <code>duty</code> 0.4 = 40% of each period is streak; <code>warp</code> 0.8 bends them off-straight.</td></tr>
-</tbody>
-</table>
-
-<p>
-    Because a knob is in play, a visible Waterborn is <strong>non-deterministic</strong>:
-    each horse bakes its own texture, keyed by the seed on the <code>Wtb</code> copy
-    it carries, and a foal that inherits that copy inherits the exact streak pattern.
-</p>
+<section class="tab-panel" data-tab="gameplay">
 
 <h2 id="effects">The effects</h2>
 
@@ -158,6 +94,82 @@
     </p>
 </div>
 
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd>example.waterborn</dd></div>
+    <div><dt>Alleles</dt><dd><span class="allele dom">Wtb</span> <span class="allele wild">n</span></dd></div>
+    <div><dt>Outcomes</dt><dd>wild, <code>waterborn</code></dd></div>
+    <div><dt>Shows when</dt><dd><code>Wtb/n</code>, <code>Wtb/Wtb</code></dd></div>
+    <div><dt>Default allele</dt><dd>n</dd></div>
+    <div><dt>Wild frequency</dt><dd>1 in 90 per allele &rarr; ~1 wild horse in 45 shows it</dd></div>
+    <div><dt>Founder draws</dt><dd>1 &times; nextFloat()</dd></div>
+    <div><dt>Deterministic</dt><dd><strong>no</strong> when expressed &mdash; the stripe field varies per horse</dd></div>
+    <div><dt>Epigenetic draws</dt><dd>1 long (stripe seed) + 1 nextFloat (stripe spacing), off the <code>Wtb</code> copy</dd></div>
+    <div><dt>Priority</dt><dd>215 &mdash; a data-driven magical gene, slots before Test in <code>magicalOrder()</code></dd></div>
+    <div><dt>Stripe colour</dt><dd><code>#1ec8ff</code> (30, 200, 255), 92% of the way there</dd></div>
+    <div><dt>Effects</dt><dd><code>traversal</code> walk_on_water, <code>emitter</code> dust trail, <code>yield</code> mare&rarr;water bucket</dd></div>
+</dl>
+
+<div class="note warn">
+    <span class="label">Partly verified in-game (2026-09-02)</span>
+    <p>
+        <strong>Confirmed:</strong> the neon streaks in the mane and tail render, and
+        the blue particle trail works. <strong>Still unverified:</strong>
+        <code>walk_on_water</code> (an approximation &mdash; surface buoyancy, not a
+        solid plane) and the tamed-mare milking. Checklist item is
+        <a href="verification.html#effects">To be verified &sect;13</a>.
+    </p>
+</div>
+
+<h2 id="coat">The coat: neon streaks in the mane and tail</h2>
+
+<p>
+    The visual half is one ordinary magical coat layer: a <code>STRIPES</code> mask
+    restricted to the <code>HAIR</code> parts (mane + tail) crossed with a
+    <code>TOWARD</code> op that walks each covered texel <strong>92%</strong> of the
+    way to <code>#1ec8ff</code>.
+</p>
+
+<div class="codebox">
+<div class="filename">the coat layer, from waterborn.json</div>
+<pre><code class="language-json">{
+  "name": "neon blue stripes down the mane and tail",
+  "masks": [
+    { "type": "STRIPES", "parts": [ "HAIR" ], "seed": "$stripeSeed",
+      "spacing": "$stripeSpacing", "duty": 0.4, "warp": 0.8 }
+  ],
+  "op": { "type": "TOWARD", "color": "#1ec8ff", "strength": 92, "opacity": 100 }
+}</code></pre>
+</div>
+
+<p>
+    <code>TOWARD</code> rather than <code>TINT</code> for the same reason
+    <a href="gene-pink-hair.html">pink hair</a> uses it: it <em>reads</em> what each
+    strand currently looks like and steps it toward the target, so the mane keeps its
+    light and dark instead of turning into a flat slab, and it reads the same on a
+    black, a chestnut or a cremello. <code>opacity: 100</code> means the streaks also
+    show on a <a href="gene-kit.html">dominant-white</a> horse.
+</p>
+
+<p>Two knobs make the pattern per-horse, so no two Waterborn manes are identical:</p>
+
+<table>
+<thead><tr><th>Knob</th><th>Range</th><th>Effect</th></tr></thead>
+<tbody>
+<tr><td><code>stripeSeed</code></td><td>a <code>nextLong()</code></td><td>seeds the <a href="body-space.html">BodyStripes</a> field &mdash; where the streaks fall and how the noise warps them.</td></tr>
+<tr><td><code>stripeSpacing</code></td><td>1.6&ndash;2.8 body units</td><td>centre-to-centre gap. Tight, so the hair reads as several thin streaks rather than one band. <code>duty</code> 0.4 = 40% of each period is streak; <code>warp</code> 0.8 bends them off-straight.</td></tr>
+</tbody>
+</table>
+
+<p>
+    Because a knob is in play, a visible Waterborn is <strong>non-deterministic</strong>:
+    each horse bakes its own texture, keyed by the seed on the <code>Wtb</code> copy
+    it carries, and a foal that inherits that copy inherits the exact streak pattern.
+</p>
+
 <h2 id="shipping">The first gene that ships as a file</h2>
 
 <p>
@@ -187,6 +199,10 @@
     The horse dimension is due for an overhaul regardless.
 </p>
 
+</section>
+
+<section class="tab-panel" data-tab="science">
+
 <h2>Not modelled yet</h2>
 
 <ul>
@@ -199,6 +215,8 @@
     <li>The <a href="gene-creator/index.html">gene creator</a> cannot edit an
         <code>effects</code> block yet &mdash; Waterborn&rsquo;s was hand-written.</li>
 </ul>
+
+</section>
 
 <div class="page-foot">
     <div class="seealso">
@@ -216,5 +234,6 @@
 </main>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+<script defer src="gene-inheritance/gene-inheritance.js"></script>
 </body>
 </html>

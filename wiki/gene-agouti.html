@@ -6,14 +6,19 @@
 <title>Agouti &middot; Horse Genetics Wiki</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
 <link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
 <script defer src="nav.js"></script>
+<script defer src="search.js"></script>
 </head>
 <body>
 <main class="content">
 <article class="doc">
 
 <p class="eyebrow natural">Natural gene <span class="sep">/</span> phase 1</p>
+
 <h1>Agouti &mdash; the four bays</h1>
+
 <p class="lede">
     <span class="allele dom">A</span> restricts black toward the
     <strong>points</strong>. <em>How far</em> it restricts is the
@@ -23,11 +28,30 @@
     brown</strong>. Two alleles here; four bays out.
 </p>
 
+<section class="tab-panel" data-tab="gameplay">
+
+<div id="preview" class="gene-preview" data-gene="horsegenetics.agouti"></div>
+
+<h2 id="inheritance">What you can get</h2>
+
+<div class="gene-inheritance" data-gene="horsegenetics.agouti"></div>
+
+<h2 id="carrot">Its gene carrot</h2>
+
+<!-- The recipe, read off the mod at run time - the rarity tier is the recipe's
+     price, and a price written into fifty pages goes stale silently.
+     See wiki/gene-carrot/gene-carrot.js. -->
+
+<div class="gene-carrot" data-gene="horsegenetics.agouti"></div>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
 <!-- The gene, on the three base coats, as a horse you can spin. One div and one
      script: everything in here is asked of the mod at run time. Agouti declares
      coatDependsOn(shade), so the preview offers the shade locus as a dropdown
      of its own - see wiki/gene-preview/gene-preview.js. -->
-<div id="preview" class="gene-preview" data-gene="horsegenetics.agouti"></div>
 
 <dl class="spec">
     <div><dt>Gene key</dt><dd>horsegenetics.agouti</dd></div>
@@ -53,41 +77,6 @@
         ramp, the four labels and the seal&rsquo;s soft points. It has been
         checked against baked sheets and side views, not in the game. See
         <a href="verification.html">verification</a>.
-    </p>
-</div>
-
-<h2 id="four">Why four outcomes and not one</h2>
-
-<p>
-    Blood bay, bay, liver bay and seal brown are
-    <strong>phenotype descriptions, not loci</strong>. Every one of them tests as
-    the same foundation &mdash; one functional <em>MC1R</em> copy and one
-    functional <em>ASIP</em> copy, <code>E_A_</code> &mdash; and no validated
-    equine allele separates them. What separates them in a real horse is a
-    regulatory region, a couple of dosage effects and a polygenic tail, and what
-    separates them here is the same list, summed into
-    <a href="gene-shade.html#score">one shade score</a>.
-</p>
-
-<p>
-    So agouti declares four bay <code>Expression</code>s and picks between them in
-    <code>expressionIn</code>, by reading the rest of the genotype. Its
-    pair-only <code>expressionOf</code> answers <code>bay</code> for any
-    <span class="allele dom">A</span> horse and admits it is coarse &mdash; the
-    same position <a href="gene-leopard.html">the leopard complex</a> is in, and
-    the reason both genes list their <em>combinations</em> in the preview window
-    rather than their outcomes.
-</p>
-
-<div class="note">
-    <span class="label">There is still no seal allele &mdash; and no <code>At</code></span>
-    <p>
-        A seal brown is <code>ShD/ShD</code> plus a dosage term, not an allele of
-        this gene. The <code>A+</code> / <code>A</code> / <code>At</code> /
-        <code>a</code> series people quote for seal brown is real in other
-        mammals and unvalidated in horses; <a href="gene-shade.html#not-at">the
-        shade page</a> has the argument and the alternative designs that were
-        rejected.
     </p>
 </div>
 
@@ -289,12 +278,46 @@ for (int i = 0; i &lt; legs.length; i++) {                 // 4 - one jitter per
 </table>
 </div>
 
-<h2 id="carrot">Its gene carrot</h2>
+</section>
 
-<!-- The recipe, read off the mod at run time - the rarity tier is the recipe's
-     price, and a price written into fifty pages goes stale silently.
-     See wiki/gene-carrot/gene-carrot.js. -->
-<div class="gene-carrot" data-gene="horsegenetics.agouti"></div>
+<section class="tab-panel" data-tab="science">
+
+<h2 id="four">Why four outcomes and not one</h2>
+
+<p>
+    Blood bay, bay, liver bay and seal brown are
+    <strong>phenotype descriptions, not loci</strong>. Every one of them tests as
+    the same foundation &mdash; one functional <em>MC1R</em> copy and one
+    functional <em>ASIP</em> copy, <code>E_A_</code> &mdash; and no validated
+    equine allele separates them. What separates them in a real horse is a
+    regulatory region, a couple of dosage effects and a polygenic tail, and what
+    separates them here is the same list, summed into
+    <a href="gene-shade.html#score">one shade score</a>.
+</p>
+
+<p>
+    So agouti declares four bay <code>Expression</code>s and picks between them in
+    <code>expressionIn</code>, by reading the rest of the genotype. Its
+    pair-only <code>expressionOf</code> answers <code>bay</code> for any
+    <span class="allele dom">A</span> horse and admits it is coarse &mdash; the
+    same position <a href="gene-leopard.html">the leopard complex</a> is in, and
+    the reason both genes list their <em>combinations</em> in the preview window
+    rather than their outcomes.
+</p>
+
+<div class="note">
+    <span class="label">There is still no seal allele &mdash; and no <code>At</code></span>
+    <p>
+        A seal brown is <code>ShD/ShD</code> plus a dosage term, not an allele of
+        this gene. The <code>A+</code> / <code>A</code> / <code>At</code> /
+        <code>a</code> series people quote for seal brown is real in other
+        mammals and unvalidated in horses; <a href="gene-shade.html#not-at">the
+        shade page</a> has the argument and the alternative designs that were
+        rejected.
+    </p>
+</div>
+
+</section>
 
 <div class="page-foot">
     <div class="seealso">
@@ -314,6 +337,7 @@ for (int i = 0; i &lt; legs.length; i++) {                 // 4 - one jitter per
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
 <script defer src="gene-preview/gene-preview.js"></script>
+<script defer src="gene-inheritance/gene-inheritance.js"></script>
 <script defer src="gene-carrot/gene-carrot.js"></script>
 </body>
 </html>

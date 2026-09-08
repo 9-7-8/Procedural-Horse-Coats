@@ -6,14 +6,19 @@
 <title>Dun &middot; Horse Genetics Wiki</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
 <link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
 <script defer src="nav.js"></script>
+<script defer src="search.js"></script>
 </head>
 <body>
 <main class="content">
 <article class="doc">
 
 <p class="eyebrow natural">Natural gene <span class="sep">/</span> phase 1</p>
+
 <h1>Dun</h1>
+
 <p class="lede">
     Real-horse <code>TBX3</code>, and the mod&rsquo;s second <strong>three-allele</strong>
     locus. Two effects that come apart: a <strong>body dilution</strong> that thins black
@@ -23,10 +28,42 @@
     allele is the one that carries the markings <em>without</em> the dilution.
 </p>
 
+<section class="tab-panel" data-tab="gameplay">
+
+<div class="gene-preview" data-gene="horsegenetics.dun"></div>
+
+<h2 id="inheritance">What you can get</h2>
+
+<div class="gene-inheritance" data-gene="horsegenetics.dun"></div>
+
+<h2>What it looks like on each base</h2>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Base</th><th>With <code>D</code></th><th>With <code>d1</code> only</th></tr></thead>
+<tbody>
+<tr><td>bay (<code>E_ A_</code>)</td><td><strong>bay dun / zebra dun</strong> &mdash; tan body (all of it the black coming off, none of it the red moving), black points that survive the dilution intact, a black-centred mane and tail with pale guard hair either side, dark dorsal stripe, bars where there is pale leg to show them on</td><td>ordinary bay, slightly lighter through the barrel, with a deeper line down the spine</td></tr>
+<tr><td>black (<code>E_ aa</code>)</td><td><strong>grullo</strong> &mdash; a blue-grey slate body on the gradient&rsquo;s neutral column, black lower legs, a black-centred mane and tail, near-black dorsal stripe and bars</td><td>plain black &mdash; nothing visible</td></tr>
+<tr><td>chestnut (<code>ee</code>)</td><td><strong>red dun</strong> &mdash; a chestnut, very slightly lifted, carrying red-brown rather than black points and markings. The subtlest of the three by a long way.</td><td>ordinary chestnut with a faintly redder dorsal line</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2 id="carrot">Its gene carrot</h2>
+
+<!-- The recipe, read off the mod at run time - the rarity tier is the recipe's
+     price, and a price written into fifty pages goes stale silently.
+     See wiki/gene-carrot/gene-carrot.js. -->
+
+<div class="gene-carrot" data-gene="horsegenetics.dun"></div>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
 <!-- The gene, on the three base coats, as a horse you can spin. One div and one
      script: everything in here is asked of the mod at run time.
      See wiki/gene-preview/gene-preview.js. -->
-<div class="gene-preview" data-gene="horsegenetics.dun"></div>
 
 <dl class="spec">
     <div><dt>Gene key</dt><dd>horsegenetics.dun</dd></div>
@@ -492,19 +529,6 @@ private static double accessory(float roll, double chance) {
     </p>
 </div>
 
-<h2>What it looks like on each base</h2>
-
-<div class="table-wrap">
-<table>
-<thead><tr><th>Base</th><th>With <code>D</code></th><th>With <code>d1</code> only</th></tr></thead>
-<tbody>
-<tr><td>bay (<code>E_ A_</code>)</td><td><strong>bay dun / zebra dun</strong> &mdash; tan body (all of it the black coming off, none of it the red moving), black points that survive the dilution intact, a black-centred mane and tail with pale guard hair either side, dark dorsal stripe, bars where there is pale leg to show them on</td><td>ordinary bay, slightly lighter through the barrel, with a deeper line down the spine</td></tr>
-<tr><td>black (<code>E_ aa</code>)</td><td><strong>grullo</strong> &mdash; a blue-grey slate body on the gradient&rsquo;s neutral column, black lower legs, a black-centred mane and tail, near-black dorsal stripe and bars</td><td>plain black &mdash; nothing visible</td></tr>
-<tr><td>chestnut (<code>ee</code>)</td><td><strong>red dun</strong> &mdash; a chestnut, very slightly lifted, carrying red-brown rather than black points and markings. The subtlest of the three by a long way.</td><td>ordinary chestnut with a faintly redder dorsal line</td></tr>
-</tbody>
-</table>
-</div>
-
 <h2>Founder frequencies</h2>
 
 <p>
@@ -554,12 +578,7 @@ private static double accessory(float roll, double chance) {
     </p>
 </div>
 
-<h2 id="carrot">Its gene carrot</h2>
-
-<!-- The recipe, read off the mod at run time - the rarity tier is the recipe's
-     price, and a price written into fifty pages goes stale silently.
-     See wiki/gene-carrot/gene-carrot.js. -->
-<div class="gene-carrot" data-gene="horsegenetics.dun"></div>
+</section>
 
 <div class="page-foot">
     <div class="seealso">
@@ -578,6 +597,7 @@ private static double accessory(float roll, double chance) {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
 <script defer src="gene-preview/gene-preview.js"></script>
+<script defer src="gene-inheritance/gene-inheritance.js"></script>
 <script defer src="gene-carrot/gene-carrot.js"></script>
 </body>
 </html>

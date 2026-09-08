@@ -6,14 +6,19 @@
 <title>Manchado &middot; Horse Genetics Wiki</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
 <link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
 <script defer src="nav.js"></script>
+<script defer src="search.js"></script>
 </head>
 <body>
 <main class="content">
 <article class="doc">
 
 <p class="eyebrow natural">Natural gene <span class="sep">/</span> phase 1</p>
+
 <h1>Manchado &mdash; white with islands in it</h1>
+
 <p class="lede">
     The rare Argentine pattern: broad, clean white over the <strong>topline</strong>
     with smooth rounded <strong>islands of the base colour left inside it</strong>,
@@ -22,7 +27,26 @@
     horse; this leaves dark islands <em>in</em> a white field.
 </p>
 
+<section class="tab-panel" data-tab="gameplay">
+
 <div class="gene-preview" data-gene="horsegenetics.manchado"></div>
+
+<h2 id="inheritance">What you can get</h2>
+
+<div class="gene-inheritance" data-gene="horsegenetics.manchado"></div>
+
+<div class="health-line none">
+    <span class="icon" aria-hidden="true">&#9679;</span>
+    <p>This gene has no effect on the horse&rsquo;s health.</p>
+</div>
+
+<h2 id="carrot">Its gene carrot</h2>
+
+<div class="gene-carrot" data-gene="horsegenetics.manchado"></div>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
 
 <dl class="spec">
     <div><dt>Gene key</dt><dd>horsegenetics.manchado</dd></div>
@@ -129,6 +153,19 @@
     </p>
 </div>
 
+<h2>Health</h2>
+
+<p>
+    <strong>None.</strong> This is the white pattern about which least is known, and
+    inventing a cost for it would be inventing a fact. Every other white locus in the
+    mod carries something; this one carries nothing, and a manchado horse resolves to
+    exactly the same body as a solid one.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="science">
+
 <h2 id="not">What it is not</h2>
 
 <div class="table-wrap">
@@ -151,18 +188,7 @@
     texels, which is the measurable difference between an island and a fleck.
 </p>
 
-<h2>Health</h2>
-
-<p>
-    <strong>None.</strong> This is the white pattern about which least is known, and
-    inventing a cost for it would be inventing a fact. Every other white locus in the
-    mod carries something; this one carries nothing, and a manchado horse resolves to
-    exactly the same body as a solid one.
-</p>
-
-<h2 id="carrot">Its gene carrot</h2>
-
-<div class="gene-carrot" data-gene="horsegenetics.manchado"></div>
+</section>
 
 <div class="page-foot">
     <div class="seealso">
@@ -179,6 +205,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
 <script defer src="gene-preview/gene-preview.js"></script>
+<script defer src="gene-inheritance/gene-inheritance.js"></script>
 <script defer src="gene-carrot/gene-carrot.js"></script>
 </body>
 </html>

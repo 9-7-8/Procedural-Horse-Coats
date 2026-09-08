@@ -6,14 +6,19 @@
 <title>Silver dapple &middot; Horse Genetics Wiki</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
 <link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
 <script defer src="nav.js"></script>
+<script defer src="search.js"></script>
 </head>
 <body>
 <main class="content">
 <article class="doc">
 
 <p class="eyebrow natural">Natural gene <span class="sep">/</span> phase 1</p>
+
 <h1>Silver dapple</h1>
+
 <p class="lede">
     Real-horse <code>PMEL17</code>. Silver dilutes <strong>eumelanin only</strong> &mdash;
     it walks black toward chocolate, and the mane and tail most of the way to flaxen,
@@ -21,10 +26,42 @@
     identical to one that doesn&rsquo;t: it has no black for silver to act on.
 </p>
 
+<section class="tab-panel" data-tab="gameplay">
+
+<div class="gene-preview" data-gene="horsegenetics.silver"></div>
+
+<h2 id="inheritance">What you can get</h2>
+
+<div class="gene-inheritance" data-gene="horsegenetics.silver"></div>
+
+<h2>What it looks like on each base</h2>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Base</th><th>Name</th><th>Result</th></tr></thead>
+<tbody>
+<tr><td>black (<code>E_ aa</code>)</td><td><strong>silver / chocolate</strong></td><td>chocolate body, flaxen mane &amp; tail</td></tr>
+<tr><td>bay (<code>E_ A_</code>)</td><td><strong>silver bay</strong></td><td>red body untouched, points diluted to chocolate, flaxen mane / tail</td></tr>
+<tr><td>chestnut (<code>ee</code>)</td><td>&mdash;</td><td>no visible change (carrier)</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2 id="carrot">Its gene carrot</h2>
+
+<!-- The recipe, read off the mod at run time - the rarity tier is the recipe's
+     price, and a price written into fifty pages goes stale silently.
+     See wiki/gene-carrot/gene-carrot.js. -->
+
+<div class="gene-carrot" data-gene="horsegenetics.silver"></div>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
 <!-- The gene, on the three base coats, as a horse you can spin. One div and one
      script: everything in here is asked of the mod at run time.
      See wiki/gene-preview/gene-preview.js. -->
-<div class="gene-preview" data-gene="horsegenetics.silver"></div>
 
 <dl class="spec">
     <div><dt>Gene key</dt><dd>horsegenetics.silver</dd></div>
@@ -60,43 +97,6 @@ f.dilute(px, py,
     reddish chestnut instead.)
 </p>
 
-<h2>What it looks like on each base</h2>
-
-<div class="table-wrap">
-<table>
-<thead><tr><th>Base</th><th>Name</th><th>Result</th></tr></thead>
-<tbody>
-<tr><td>black (<code>E_ aa</code>)</td><td><strong>silver / chocolate</strong></td><td>chocolate body, flaxen mane &amp; tail</td></tr>
-<tr><td>bay (<code>E_ A_</code>)</td><td><strong>silver bay</strong></td><td>red body untouched, points diluted to chocolate, flaxen mane / tail</td></tr>
-<tr><td>chestnut (<code>ee</code>)</td><td>&mdash;</td><td>no visible change (carrier)</td></tr>
-</tbody>
-</table>
-</div>
-
-<h2>Why it runs after agouti</h2>
-<p>
-    Silver only has something to do once the black points exist, so in
-    <a href="pipeline.html"><code>Genes.naturalOrder()</code></a> it sits immediately
-    after <a href="gene-agouti.html">agouti</a>: agouti paints the mane / tail / leg
-    black, silver then lightens it. Put the other way round and a bay&rsquo;s mane
-    would be re-blackened after silver had already flaxened it.
-</p>
-
-<div class="note">
-    <span class="label">Follow-ups</span>
-    <ul>
-        <li>The <em>dappling</em> that gives the gene its name is not built &mdash; v1
-            is the dilution only. A deterministic dapple field (a fixed-seed
-            <a href="body-space.html"><code>BodyNoise</code></a> modulation, like
-            <a href="gene-grey.html">grey</a>&rsquo;s but lighter and per-genotype rather
-            than per-horse) is the obvious next step.</li>
-        <li>The flaxen mane still reads a little <em>gold</em> rather than pale.</li>
-        <li>Health: <code>Z/Z</code> &rarr; MCOA (multiple congenital ocular anomalies)
-            is <strong>built</strong> &mdash; an impairing <code>Condition</code> costing
-            two hearts. See <a href="horse-body.html">the horse&rsquo;s body</a>.</li>
-    </ul>
-</div>
-
 <h2>MCOA &mdash; the eye defect that rides along</h2>
 
 <p>
@@ -125,12 +125,36 @@ f.dilute(px, py,
     <a href="horse-body.html">the horse&rsquo;s body</a>.
 </p>
 
-<h2 id="carrot">Its gene carrot</h2>
+</section>
 
-<!-- The recipe, read off the mod at run time - the rarity tier is the recipe's
-     price, and a price written into fifty pages goes stale silently.
-     See wiki/gene-carrot/gene-carrot.js. -->
-<div class="gene-carrot" data-gene="horsegenetics.silver"></div>
+<section class="tab-panel" data-tab="science">
+
+<h2>Why it runs after agouti</h2>
+
+<p>
+    Silver only has something to do once the black points exist, so in
+    <a href="pipeline.html"><code>Genes.naturalOrder()</code></a> it sits immediately
+    after <a href="gene-agouti.html">agouti</a>: agouti paints the mane / tail / leg
+    black, silver then lightens it. Put the other way round and a bay&rsquo;s mane
+    would be re-blackened after silver had already flaxened it.
+</p>
+
+<div class="note">
+    <span class="label">Follow-ups</span>
+    <ul>
+        <li>The <em>dappling</em> that gives the gene its name is not built &mdash; v1
+            is the dilution only. A deterministic dapple field (a fixed-seed
+            <a href="body-space.html"><code>BodyNoise</code></a> modulation, like
+            <a href="gene-grey.html">grey</a>&rsquo;s but lighter and per-genotype rather
+            than per-horse) is the obvious next step.</li>
+        <li>The flaxen mane still reads a little <em>gold</em> rather than pale.</li>
+        <li>Health: <code>Z/Z</code> &rarr; MCOA (multiple congenital ocular anomalies)
+            is <strong>built</strong> &mdash; an impairing <code>Condition</code> costing
+            two hearts. See <a href="horse-body.html">the horse&rsquo;s body</a>.</li>
+    </ul>
+</div>
+
+</section>
 
 <div class="page-foot">
     <div class="seealso">
@@ -147,6 +171,7 @@ f.dilute(px, py,
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
 <script defer src="gene-preview/gene-preview.js"></script>
+<script defer src="gene-inheritance/gene-inheritance.js"></script>
 <script defer src="gene-carrot/gene-carrot.js"></script>
 </body>
 </html>

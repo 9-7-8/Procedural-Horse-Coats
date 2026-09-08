@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spawn eggs &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow">Item group <span class="sep">/</span> creative</p>
+<h1>The spawn eggs</h1>
+<p class="lede">
+    Three eggs: one opens a full genome editor, one gives you a foundation horse of
+    a chosen breed, and one holds an exact horse you built earlier.
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+<h2 id="custom">The custom horse spawn egg</h2>
+
+<div class="plain">
+    <p>
+        Right-click it to open a <strong>horse editor</strong>: every gene down the left,
+        a 3D horse in the middle you can spin, and controls on the right. Spawning the
+        horse is <strong>creative only</strong>, but the editor itself opens in any game
+        mode, so you can use it to look things up.
+    </p>
+</div>
+
+<ul>
+    <li>Click a gene to add it to the horse; click again to cycle its versions. Genes with
+        lots of versions get a dropdown.</li>
+    <li><strong>Reroll epi.</strong> re-rolls the small per-horse variations &mdash; leg
+        heights, dapples, splash edges &mdash; and redraws.</li>
+    <li><strong>Breed</strong> rolls a real founder of a breed you pick.
+        <strong>Randomize</strong> rolls within that breed, or from everything if no breed
+        is chosen.</li>
+    <li><strong>Copy code / Paste code</strong> move the genotype through your clipboard,
+        so you can share a horse as text.</li>
+    <li><strong>Make egg</strong> saves what is on screen into a preset egg instead of
+        spawning it.</li>
+</ul>
+
+<p>
+    The same editor is on the wiki as the
+    <a href="horse-designer/index.html">horse designer</a>, if you want to play with it
+    without opening the game.
+</p>
+
+<h2 id="breed">Breed spawn eggs</h2>
+
+<p>
+    One right-click, one <strong>foundation horse</strong> of one breed &mdash; a clean
+    place to start a line from, with no pedigree behind it. There is no recipe: they come
+    out of dungeon chests, and the <a href="villagers.html">horseman</a> sells them
+    (22 emeralds for a common breed, 38 for an uncommon, 58 for a rare).
+</p>
+
+<p>
+    Every breed uses the same egg item and the same vanilla-looking texture &mdash; the
+    tooltip is what tells you the breed, whether it is natural or magical, and how common
+    it is. A few breeds have no egg at all, <strong>Feral Mixed</strong> among them,
+    because vanilla&rsquo;s own horse egg already gives you a horse of no particular
+    breeding.
+</p>
+
+<h2 id="preset">Preset horse spawn eggs</h2>
+
+<p>
+    The exact horse the editor was showing when you pressed <strong>Make egg</strong>:
+    genes, variations, sex, age and breed label. Right-click and it appears exactly as
+    previewed. Making one is creative only; <strong>using</strong> one is not, which is
+    the point &mdash; you can hand one to somebody else.
+</p>
+
+<div class="note">
+    <span class="label">An old egg can stop working</span>
+    <p>
+        A saved horse only makes sense against the gene list that saved it, so an egg made
+        before a gene pack was added or removed will refuse and say so, in chat and in
+        red on its tooltip, rather than spawning something wrong.
+    </p>
+</div>
+</section>
+
+<section class="tab-panel" data-tab="coding">
+<h2 id="egg">The custom horse spawn egg</h2>
+
+<p>
+    <strong>Spawning is creative only</strong> &mdash; the editor itself opens in any game
+    mode. A reskin of the vanilla horse spawn egg: same icon, and it shows in the vanilla
+    Spawn Eggs tab as well as this mod&rsquo;s. It has no recipe and it does not spawn
+    anything directly: right-clicking it opens <code>client/CustomHorseSpawnScreen</code>,
+    a full genome editor.
+</p>
+
+<p>
+    <strong>All four right-click gestures open it.</strong> A right-click reaches exactly
+    one of <code>RightClickBlock</code>, <code>RightClickItem</code>,
+    <code>EntityInteractSpecific</code> or <code>EntityInteract</code>, and
+    <code>CustomHorseSpawnEggClient</code> used to handle only the first two. Aiming
+    at a <em>horse</em> fell through to vanilla, which on a tamed horse means you
+    <strong>mount it</strong>.
+</p>
+
+<p>
+    <strong>Nothing about the egg is gated on the environment.</strong> There is no
+    <code>isProduction()</code> check anywhere in the path; it behaves identically under
+    <code>runClient</code> and in a built jar. The only gate is creative mode on the
+    <strong>Spawn</strong> button, and every server-side refusal
+    (<code>refuseSpawn</code>) writes a chat line <em>and</em> a log line. See
+    <a href="known-gaps.html#gap-70">gap 69</a>.
+</p>
+
+<div class="note rule">
+    <span class="label">One screen in two places</span>
+    <p>
+        <code>CustomHorseSpawnScreen</code> and
+        <a href="horse-designer/index.html">wiki/horse-designer/</a> are the same screen
+        built twice &mdash; change both. The designer&rsquo;s model is
+        <code>web/HorseEditor.java</code>, mirroring the screen&rsquo;s
+        <code>variantPair</code> / <code>enforceSexLinkage</code> / <code>applyGenome</code>
+        / <code>randomizeGenes</code> under the same names.
+    </p>
+</div>
+
+<ul>
+    <li>Every registered gene is a row, alphabetically <strong>by display name</strong>.
+        A gene starts <em>off</em> the horse; clicking the row adds it, homozygous for the
+        first allele that does something. Genes with more than three alleles get a
+        dropdown instead of a cycle button.</li>
+    <li><strong>Make egg</strong> writes what is on screen into a
+        <a href="#preset">preset horse spawn egg</a> instead of spawning it. Same
+        packet, same server-side validation, one flag different &mdash; so the egg and the
+        button cannot drift into spawning different horses.</li>
+    <li>The <strong>epigenome travels with the genotype</strong> to the server. The server
+        re-checks creative mode <em>and</em> that you are holding the egg.</li>
+</ul>
+
+<h2 id="breed-egg">Breed spawn eggs</h2>
+
+<p>
+    An ordinary <code>BreedFounder</code> roll off that breed&rsquo;s own pool, the same
+    way a wild herd member is made. They come out of dungeon chests
+    (<code>AddBreedSpawnEggModifier</code>, ~7% into simple dungeons, mineshafts,
+    strongholds, temples, mansions, outposts, ocean ruins and bastions) and off the
+    <a href="villagers.html#horseman">horseman</a>. Both draw weighted by the breed&rsquo;s
+    own commonness.
+</p>
+
+<div class="note rule">
+    <span class="label">One item, not forty-nine</span>
+    <p>
+        The breed is a <code>breed</code> data component, so there is a single registered
+        item and every breed is a stack of it. That is not a shortcut &mdash; it is what
+        makes the feature work for <a href="breed-format.html">player-added breeds</a>. A
+        breed dropped into <code>config/horsegenetics/breeds/</code> after the jar was
+        built has no registry entry, no model file and no lang key, and could never have an
+        item of its own; with the breed on the component it gets an egg on exactly the same
+        terms as a built-in one.
+    </p>
+</div>
+
+<p>
+    A breed opts out by leaving <code>spawn_egg</code> out of its
+    <a href="breeds.html#sources">source checklist</a>: no egg exists, none can drop, and
+    the horseman never stocks one.
+</p>
+
+<h2 id="preset">Preset horse spawn eggs</h2>
+
+<p>
+    Genotype, epigenome, sex, age and breed label kept in an item. A genotype code is only
+    readable against the gene list that wrote it, so an egg made before a gene pack was
+    added or removed says so in chat and refuses, rather than crashing.
+</p>
+
+<h2 id="tab">The creative tab</h2>
+
+<p>
+    <code>item/ModCreativeTabs</code> registers one <strong>Horse Genetics</strong> tab
+    holding every item in <code>ModItems.TAB_ITEMS</code>, plus one <em>filled</em> breed
+    spawn egg per breed that has one. The blank breed egg is not listed anywhere: its
+    whole content is the breed component, and one without a breed is a puzzle rather than
+    an item. In a dev build, the <em>Spawn Test Horse World</em> button&rsquo;s starting
+    inventory contains one of every item.
+</p>
+</section>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="horse-designer/index.html">The horse designer</a>
+        <a href="breeds.html">Breeds</a>
+        <a href="items.html">All items</a>
+    </div>
+    <code>client/CustomHorseSpawnScreen</code>,
+    <code>data/loot/AddBreedSpawnEggModifier</code>, <code>item/ModCreativeTabs</code>.
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

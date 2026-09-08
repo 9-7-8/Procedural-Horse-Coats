@@ -6,14 +6,19 @@
 <title>MITF (splash white) &middot; Horse Genetics Wiki</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
 <link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
 <script defer src="nav.js"></script>
+<script defer src="search.js"></script>
 </head>
 <body>
 <main class="content">
 <article class="doc">
 
 <p class="eyebrow natural">Natural gene <span class="sep">/</span> phase 1</p>
+
 <h1>MITF (splash white)</h1>
+
 <p class="lede">
     The first of the <strong>two</strong> splash white loci, carrying <code>SW1</code>,
     <code>SW3</code> and <code>SW5</code>. Splash is caused by variants in two different
@@ -24,10 +29,52 @@
     occasionally a blue-eyed splash, on the same genotype.
 </p>
 
+<section class="tab-panel" data-tab="gameplay">
+
+<div class="gene-preview" data-gene="horsegenetics.mitf"></div>
+
+<h2 id="inheritance">What you can get</h2>
+
+<div class="gene-inheritance" data-gene="horsegenetics.mitf"></div>
+
+<h2>Deafness</h2>
+
+<p>
+    The splash pattern comes from melanocytes failing to reach the skin, and the same
+    cells line the inner ear &mdash; so a horse white enough at this locus is very often
+    deaf. A <strong>homozygote at this locus</strong> (no <code>N</code> copy) gets the
+    <code>splash-deafness</code> condition.
+</p>
+
+<p>
+    It costs the horse <strong>nothing</strong>. The mod has no hearing for a horse to
+    lose, and inventing a penalty to stand in for one would be worse than saying so: it
+    is <code>INFORMATIONAL</code> &mdash; named in the info panel and the paper dump,
+    and that is all. See <a href="horse-body.html">the horse&rsquo;s body</a>.
+</p>
+
+<p>
+    The condition is <em>shared</em> with <a href="gene-pax3.html">PAX3</a>: one
+    disorder with two causes. A horse homozygous at both loci is told it is deaf once,
+    not twice &mdash; <code>TraitBuilder</code> de-duplicates on the condition id for
+    exactly this case.
+</p>
+
+<h2 id="carrot">Its gene carrot</h2>
+
+<!-- The recipe, read off the mod at run time - the rarity tier is the recipe's
+     price, and a price written into fifty pages goes stale silently.
+     See wiki/gene-carrot/gene-carrot.js. -->
+
+<div class="gene-carrot" data-gene="horsegenetics.mitf"></div>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
 <!-- The gene, on the three base coats, as a horse you can spin. One div and one
      script: everything in here is asked of the mod at run time.
      See wiki/gene-preview/gene-preview.js. -->
-<div class="gene-preview" data-gene="horsegenetics.mitf"></div>
 
 <dl class="spec">
     <div><dt>Gene key</dt><dd>horsegenetics.mitf</dd></div>
@@ -45,21 +92,6 @@
     <div><dt>Epi draws</dt><dd>nextLong() waterline seed, nextFloat() waterline height, then the shared face-marking draw (1 long + 8 floats)</dd></div>
     <div><dt>Painter</dt><dd><code>WhitePattern.splash</code>, at a strength per outcome &mdash; and over a <em>range</em> for <code>SW1/N</code></dd></div>
 </dl>
-
-<h2>Why splash is two genes</h2>
-
-<p>
-    A gene has two slots. If <code>SW1</code> and <code>SW2</code> were alleles of one
-    gene, they would compete for those slots &mdash; and a horse could not carry both. In
-    life a horse carries <code>N/SW1</code> at <code>MITF</code> <em>and</em>
-    <code>N/SW2</code> at <code>PAX3</code>, and comes out with markedly more face, leg and
-    belly white than either alone. One gene cannot express that genotype at all.
-</p>
-
-<p>
-    Two <em>MITF</em> variants can still meet &mdash; <code>SW1/SW3</code> is a real
-    compound heterozygote &mdash; and that is what this locus&rsquo;s own table is for.
-</p>
 
 <h2>The alleles</h2>
 
@@ -254,35 +286,26 @@ private static final double S_EXTENSIVE    = 0.86;</code></pre>
     two competing conventions.
 </p>
 
-<h2>Deafness</h2>
+</section>
+
+<section class="tab-panel" data-tab="science">
+
+<h2>Why splash is two genes</h2>
 
 <p>
-    The splash pattern comes from melanocytes failing to reach the skin, and the same
-    cells line the inner ear &mdash; so a horse white enough at this locus is very often
-    deaf. A <strong>homozygote at this locus</strong> (no <code>N</code> copy) gets the
-    <code>splash-deafness</code> condition.
+    A gene has two slots. If <code>SW1</code> and <code>SW2</code> were alleles of one
+    gene, they would compete for those slots &mdash; and a horse could not carry both. In
+    life a horse carries <code>N/SW1</code> at <code>MITF</code> <em>and</em>
+    <code>N/SW2</code> at <code>PAX3</code>, and comes out with markedly more face, leg and
+    belly white than either alone. One gene cannot express that genotype at all.
 </p>
 
 <p>
-    It costs the horse <strong>nothing</strong>. The mod has no hearing for a horse to
-    lose, and inventing a penalty to stand in for one would be worse than saying so: it
-    is <code>INFORMATIONAL</code> &mdash; named in the info panel and the paper dump,
-    and that is all. See <a href="horse-body.html">the horse&rsquo;s body</a>.
+    Two <em>MITF</em> variants can still meet &mdash; <code>SW1/SW3</code> is a real
+    compound heterozygote &mdash; and that is what this locus&rsquo;s own table is for.
 </p>
 
-<p>
-    The condition is <em>shared</em> with <a href="gene-pax3.html">PAX3</a>: one
-    disorder with two causes. A horse homozygous at both loci is told it is deaf once,
-    not twice &mdash; <code>TraitBuilder</code> de-duplicates on the condition id for
-    exactly this case.
-</p>
-
-<h2 id="carrot">Its gene carrot</h2>
-
-<!-- The recipe, read off the mod at run time - the rarity tier is the recipe's
-     price, and a price written into fifty pages goes stale silently.
-     See wiki/gene-carrot/gene-carrot.js. -->
-<div class="gene-carrot" data-gene="horsegenetics.mitf"></div>
+</section>
 
 <div class="page-foot">
     <div class="seealso">
@@ -300,6 +323,7 @@ private static final double S_EXTENSIVE    = 0.86;</code></pre>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
 <script defer src="gene-preview/gene-preview.js"></script>
+<script defer src="gene-inheritance/gene-inheritance.js"></script>
 <script defer src="gene-carrot/gene-carrot.js"></script>
 </body>
 </html>

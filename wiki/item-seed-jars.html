@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Seed jars &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow">Item <span class="sep">/</span> breeding</p>
+<h1>Seed jars</h1>
+<p class="lede">
+    A jar that stores a stallion&rsquo;s genetics so you can breed a mare with him
+    later &mdash; from anywhere, and without him being there.
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+<h2 id="use">How to use one</h2>
+
+<div class="plain">
+    <ol>
+        <li>Craft an <strong>empty seed jar</strong>: glass bottle + horse hair.</li>
+        <li>Right-click a tamed adult <strong>stallion in breeding mode</strong>. The jar
+            fills and is stamped with his genetics.</li>
+        <li>Right-click a tamed adult <strong>mare in breeding mode</strong>. A foal is
+            bred immediately. The jar is used up.</li>
+    </ol>
+</div>
+
+<p>
+    The jar&rsquo;s tooltip names the stallion it holds, so a shelf of jars reads as a
+    list of sires. The foal is bred exactly as it would be if the two horses had met, so
+    everything on <a href="breeding.html">breeding &amp; pedigree</a> applies.
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Item</th><th>How you get it</th><th>What it does</th></tr></thead>
+<tbody>
+<tr><td><strong>Empty seed jar</strong></td><td>glass bottle + horse hair</td><td>Right-click a tamed adult stallion in breeding mode to fill it.</td></tr>
+<tr><td><strong>Stallion seed jar</strong></td><td>The above</td><td>Right-click a tamed adult mare in breeding mode &rarr; a foal, immediately.</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="note">
+    <span class="label">What it costs</span>
+    <p>
+        Filling the jar uses up the stallion&rsquo;s breeding mode, and the mare takes the
+        ordinary breeding cooldown afterwards. There is no gestation and no extra cooldown
+        on the stallion.
+    </p>
+</div>
+</section>
+
+<section class="tab-panel" data-tab="coding">
+<h2 id="storage">What the jar stores</h2>
+
+<p>
+    The jar stores a <code>GenomeSample</code> &mdash; a genotype <em>and</em> an epigenome
+    frozen to code strings &mdash; in a <code>stored_genome</code> data component, and the
+    allele draw happens <strong>at impregnation</strong>, exactly like natural breeding.
+    The foal is bred from the mare&rsquo;s live genome and the jar&rsquo;s stored one
+    through the ordinary <code>applyBredFoal</code> path, so there is no second breeding
+    code path to keep in step. Full flow on
+    <a href="breeding.html">breeding &amp; pedigree</a>.
+</p>
+
+<h2 id="gaps">Known gaps</h2>
+
+<ul>
+    <li>Gestation, a donor cooldown, and carrot effects applied to the jar are all
+        unbuilt.</li>
+</ul>
+</section>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="breeding.html">Breeding &amp; pedigree</a>
+        <a href="items.html">All items</a>
+    </div>
+    <code>stored_genome</code> data component; breeding through
+    <code>applyBredFoal</code>.
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

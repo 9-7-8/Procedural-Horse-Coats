@@ -6,14 +6,19 @@
 <title>Pink Hair &middot; Horse Genetics Wiki</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
 <link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
 <script defer src="nav.js"></script>
+<script defer src="search.js"></script>
 </head>
 <body>
 <main class="content">
 <article class="doc">
 
 <p class="eyebrow magical">Magical gene <span class="sep">/</span> phase 3</p>
+
 <h1>Pink hair</h1>
+
 <p class="lede">
     The mane and tail turn pink &mdash; and keep their shading, because the gene
     <em>reads</em> what each hair texel currently looks like before deciding what to
@@ -22,10 +27,29 @@
     <em>breed for</em> rather than spot.
 </p>
 
+<section class="tab-panel" data-tab="gameplay">
+
+<div class="gene-preview" data-gene="horsegenetics.pink_hair"></div>
+
+<h2 id="inheritance">What you can get</h2>
+
+<div class="gene-inheritance" data-gene="horsegenetics.pink_hair"></div>
+
+<h2 id="carrot">Its gene carrot</h2>
+
+<!-- The recipe, read off the mod at run time - the rarity tier is the recipe's
+     price, and a price written into fifty pages goes stale silently.
+     See wiki/gene-carrot/gene-carrot.js. -->
+
+<div class="gene-carrot" data-gene="horsegenetics.pink_hair"></div>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
 <!-- The gene, on the three base coats, as a horse you can spin. One div and one
      script: everything in here is asked of the mod at run time.
      See wiki/gene-preview/gene-preview.js. -->
-<div class="gene-preview" data-gene="horsegenetics.pink_hair"></div>
 
 <dl class="spec">
     <div><dt>Gene key</dt><dd>horsegenetics.pink_hair</dd></div>
@@ -94,29 +118,6 @@ private static int toward(ColorView colour, int px, int py, int channel, int tar
     </p>
 </div>
 
-<h2>Why a carrier gene, and why 1 in 12</h2>
-
-<p>
-    Every other gene in the mod is spottable &mdash; you can look at a horse and know
-    whether it has the thing. Pink hair is the first where the carrier is invisible,
-    so finding one is a <strong>breeding problem</strong>: you notice one wild horse
-    in 144 showing it, and you have to work out who else is carrying.
-</p>
-
-<p>
-    The comparatively common allele frequency is deliberate for that reason &mdash; an
-    invisible carrier that is <em>also</em> rare is something nobody ever gets to play
-    with. At 1 in 12 per allele, roughly 16% of wild horses carry a copy.
-</p>
-
-<p>
-    It also makes pink hair the natural first consumer of a
-    <a href="genetics-model.html#combinations">&ldquo;carrier of X&rdquo;
-    display</a>: the gene declares a <code>pink-carrier</code> wild-type
-    expression with its own description, so the wording a UI would show already
-    exists &mdash; nothing reads it yet but the gene dictionary.
-</p>
-
 <h2>Foals get a pink tail only</h2>
 
 <p>
@@ -155,6 +156,33 @@ for (Part part : HAIR) {
     <code>Pihr/Pihr</code> for an affected horse.
 </p>
 
+</section>
+
+<section class="tab-panel" data-tab="science">
+
+<h2>Why a carrier gene, and why 1 in 12</h2>
+
+<p>
+    Every other gene in the mod is spottable &mdash; you can look at a horse and know
+    whether it has the thing. Pink hair is the first where the carrier is invisible,
+    so finding one is a <strong>breeding problem</strong>: you notice one wild horse
+    in 144 showing it, and you have to work out who else is carrying.
+</p>
+
+<p>
+    The comparatively common allele frequency is deliberate for that reason &mdash; an
+    invisible carrier that is <em>also</em> rare is something nobody ever gets to play
+    with. At 1 in 12 per allele, roughly 16% of wild horses carry a copy.
+</p>
+
+<p>
+    It also makes pink hair the natural first consumer of a
+    <a href="genetics-model.html#combinations">&ldquo;carrier of X&rdquo;
+    display</a>: the gene declares a <code>pink-carrier</code> wild-type
+    expression with its own description, so the wording a UI would show already
+    exists &mdash; nothing reads it yet but the gene dictionary.
+</p>
+
 <h2>Not modelled yet</h2>
 
 <p>
@@ -163,12 +191,7 @@ for (Part part : HAIR) {
     allelic series.
 </p>
 
-<h2 id="carrot">Its gene carrot</h2>
-
-<!-- The recipe, read off the mod at run time - the rarity tier is the recipe's
-     price, and a price written into fifty pages goes stale silently.
-     See wiki/gene-carrot/gene-carrot.js. -->
-<div class="gene-carrot" data-gene="horsegenetics.pink_hair"></div>
+</section>
 
 <div class="page-foot">
     <div class="seealso">
@@ -185,6 +208,7 @@ for (Part part : HAIR) {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
 <script defer src="gene-preview/gene-preview.js"></script>
+<script defer src="gene-inheritance/gene-inheritance.js"></script>
 <script defer src="gene-carrot/gene-carrot.js"></script>
 </body>
 </html>

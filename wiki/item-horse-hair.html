@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Horse hair &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow">Item <span class="sep">/</span> material</p>
+<h1>Horse hair &amp; the material chain</h1>
+<p class="lede">
+    Horse hair is the base material for almost everything the mod adds. You get it
+    by shearing a horse, and nearly every other item on the wiki is made from it or
+    from something made from it.
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+<h2 id="get">How you get it</h2>
+
+<p>
+    <strong>Right-click an adult horse with shears.</strong> You get 1&ndash;3 horse hair,
+    the shears lose a point of durability, and the horse likes you a little more
+    (<strong>+5 bond</strong> &mdash; see <a href="horse-care.html">horse care</a>).
+</p>
+
+<p>
+    You can shear each horse <strong>once per Minecraft day</strong>. Foals cannot be
+    sheared. Keeping a few horses around is the practical way to have hair coming in.
+</p>
+
+<div class="note warn">
+    <span class="label">A sheared horse still looks the same</span>
+    <p>
+        The shearing works, but the horse&rsquo;s appearance does not change yet, so
+        there is no way to tell by looking which of your horses you have already done
+        today.
+    </p>
+</div>
+
+<h2 id="chain">What you can make from it</h2>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Item</th><th>Recipe (shapeless)</th><th>Reverses to</th></tr></thead>
+<tbody>
+<tr><td><strong>Horse hair</strong></td><td>Shear an adult horse &rarr; 1&ndash;3</td><td>&mdash;</td></tr>
+<tr><td><strong>Hair bundle</strong></td><td>4 &times; horse hair</td><td>4 &times; horse hair</td></tr>
+<tr><td><strong>Braided rope</strong></td><td>3 &times; hair bundle</td><td>3 &times; hair bundle</td></tr>
+<tr><td><strong>Hair cloth</strong></td><td>4 &times; hair bundle</td><td>4 &times; hair bundle</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="note">
+    <span class="label">How recipes work in this mod</span>
+    <ul>
+        <li>Nearly every recipe is <strong>shapeless</strong> &mdash; the shape is not the
+            puzzle. The one exception is the
+            <a href="item-transfer-papers.html">blank transfer paper</a>.</li>
+        <li>Every recipe uses at least one modded item and makes a modded item, so
+            nothing here can clash with a vanilla recipe.</li>
+        <li>The material chain <strong>reverses</strong>: a bundle goes back to four
+            hairs, a rope back to three bundles. Nothing you craft is a trap.</li>
+    </ul>
+</div>
+
+<h2 id="uses">What needs hair</h2>
+
+<ul>
+    <li><a href="item-breeding-carrots.html">Breeding carrots</a> and
+        <a href="item-splice-carrots.html">splice carrots</a> &mdash; one hair each.</li>
+    <li><a href="item-whistles.html">Whistles</a>, <a href="item-tickets.html">tickets</a>,
+        <a href="item-seed-jars.html">seed jars</a> and
+        <a href="item-transfer-papers.html">transfer papers</a>.</li>
+    <li>The <a href="item-horsemans-table.html">Horseman&rsquo;s Table</a>, which needs
+        hair cloth and braided rope rather than raw hair.</li>
+</ul>
+</section>
+
+<section class="tab-panel" data-tab="coding">
+<h2 id="shearing">Shearing</h2>
+
+<p>
+    Right-click an <strong>adult</strong> horse with shears
+    (<code>server/HorseShearHandler</code>): 1&ndash;3 <code>horse_hair</code> drop, the
+    shears take a point of durability, and the horse gains <strong>+5 bond</strong>
+    through <code>HorseCareHandler.awardBondFor</code> &mdash; so shearing is the one
+    interaction that is both an economy input and a relationship input
+    (<a href="horse-care.html">horse care</a>).
+</p>
+
+<p>
+    It is gated to <strong>once per 24&nbsp;000-tick Minecraft day</strong>, which is the
+    mod-wide rule for every time-gated action. The gate is a stored game-time stamp under
+    the key <code>"shear"</code> on <code>data/HorseCooldownsAttachment</code> &mdash; a
+    plain <code>Map&lt;String,&nbsp;Long&gt;</code> on the horse, shared with the
+    <a href="gene-effects.html"><code>yield</code></a> verb&rsquo;s per-gene cooldowns
+    (<code>"yield:&lt;geneKey&gt;"</code>). Because it is stored on the horse rather than
+    in a static map, it survives a reload and cannot leak between worlds.
+</p>
+
+<div class="note warn">
+    <span class="label">The sheared look is unbuilt</span>
+    <p>
+        The mechanic is complete; the <em>visual</em> is not built. It is settled as a
+        low-fidelity <strong>render-layer overlay</strong> &mdash; it only has to read as
+        vaguely different, so no coat variant and no extra bake &mdash; driven off the same
+        <code>"shear"</code> cooldown stamp. See <a href="roadmap.html">the roadmap</a>.
+    </p>
+</div>
+
+<h2 id="gaps">Known gaps</h2>
+
+<ul>
+    <li><code>braided_rope</code> and <code>hair_cloth</code> have recipes but no real
+        textures.</li>
+    <li>There is no <strong>double-wide gate</strong> block, which the design document
+        lists as a braided-rope product.</li>
+</ul>
+</section>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="items.html">All items</a>
+        <a href="horse-care.html">Horse care &mdash; bond &amp; herds</a>
+        <a href="roadmap.html">Roadmap</a>
+    </div>
+    Recipes in <code>data/horsegenetics/recipe/</code>; shearing in
+    <code>server/HorseShearHandler</code>.
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

@@ -6,14 +6,19 @@
 <title>Milk &middot; Horse Genetics Wiki</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
 <link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
 <script defer src="nav.js"></script>
+<script defer src="search.js"></script>
 </head>
 <body>
 <main class="content">
 <article class="doc">
 
 <p class="eyebrow magical">Magical gene <span class="sep">/</span> no coat effect</p>
+
 <h1>Milk</h1>
+
 <p class="lede">
     What comes out when you put a bucket under the horse. Ordinarily milk, from a
     mare, as everywhere else in the game &mdash; but two copies of one magical
@@ -21,6 +26,42 @@
     two of the other and it fills with <strong>lava</strong>. One of each and
     there is no foal at all.
 </p>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<h2 id="inheritance">What you can get</h2>
+
+<div class="gene-inheritance" data-gene="horsegenetics.milk"></div>
+
+<h2 id="nothing">It paints nothing</h2>
+
+<p>
+    Every one of the five outcomes is a <code>wildType</code>, which in this model
+    means &ldquo;changes nothing <em>about the coat</em>&rdquo; &mdash; the same trick
+    the <a href="horse-body.html">thirteen non-coat loci</a> and
+    <a href="gene-sex.html">sex</a> use. So <code>affectsCoat()</code> is false, the
+    locus is left out of a horse&rsquo;s texture key, and the genotype gallery
+    collapses it to a single entry. Three alleles, no growth in the catalogue at all.
+</p>
+
+<p>
+    The cost is that a lava horse is <strong>indistinguishable from an ordinary
+    one</strong> until somebody puts a bucket under it. That is a real gap and it is
+    logged as one &mdash; a marking allele would be the fix, and would want to be part
+    of the locus rather than bolted on.
+</p>
+
+<h2 id="carrot">Its gene carrot</h2>
+
+<!-- The recipe, read off the mod at run time - the rarity tier is the recipe's
+     price, and a price written into fifty pages goes stale silently.
+     See wiki/gene-carrot/gene-carrot.js. -->
+
+<div class="gene-carrot" data-gene="horsegenetics.milk"></div>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
 
 <dl class="spec">
     <div><dt>Gene key</dt><dd>horsegenetics.milk</dd></div>
@@ -97,17 +138,6 @@
     </p>
 </div>
 
-<h2 id="sex">Why milk is a mare&rsquo;s and lava is not</h2>
-
-<p>
-    The wild type keeps the ordinary rule: milk comes from a grown mare. Water and
-    lava are not milk, and come from <strong>any</strong> grown horse of either sex.
-    The asymmetry is deliberate &mdash; the ordinary reading of the locus stays
-    ordinary, and the magical readings are visibly not. It also makes a lava
-    <em>stallion</em> worth keeping, which matters for a locus whose only route to
-    the good outcomes is a breeding programme.
-</p>
-
 <h2 id="how">How it reaches the game</h2>
 
 <p>
@@ -168,30 +198,22 @@
     </p>
 </div>
 
-<h2 id="nothing">It paints nothing</h2>
+</section>
+
+<section class="tab-panel" data-tab="science">
+
+<h2 id="sex">Why milk is a mare&rsquo;s and lava is not</h2>
 
 <p>
-    Every one of the five outcomes is a <code>wildType</code>, which in this model
-    means &ldquo;changes nothing <em>about the coat</em>&rdquo; &mdash; the same trick
-    the <a href="horse-body.html">thirteen non-coat loci</a> and
-    <a href="gene-sex.html">sex</a> use. So <code>affectsCoat()</code> is false, the
-    locus is left out of a horse&rsquo;s texture key, and the genotype gallery
-    collapses it to a single entry. Three alleles, no growth in the catalogue at all.
+    The wild type keeps the ordinary rule: milk comes from a grown mare. Water and
+    lava are not milk, and come from <strong>any</strong> grown horse of either sex.
+    The asymmetry is deliberate &mdash; the ordinary reading of the locus stays
+    ordinary, and the magical readings are visibly not. It also makes a lava
+    <em>stallion</em> worth keeping, which matters for a locus whose only route to
+    the good outcomes is a breeding programme.
 </p>
 
-<p>
-    The cost is that a lava horse is <strong>indistinguishable from an ordinary
-    one</strong> until somebody puts a bucket under it. That is a real gap and it is
-    logged as one &mdash; a marking allele would be the fix, and would want to be part
-    of the locus rather than bolted on.
-</p>
-
-<h2 id="carrot">Its gene carrot</h2>
-
-<!-- The recipe, read off the mod at run time - the rarity tier is the recipe's
-     price, and a price written into fifty pages goes stale silently.
-     See wiki/gene-carrot/gene-carrot.js. -->
-<div class="gene-carrot" data-gene="horsegenetics.milk"></div>
+</section>
 
 <div class="page-foot">
     <div class="seealso">
@@ -208,5 +230,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
 <script defer src="gene-carrot/gene-carrot.js"></script>
+<script defer src="gene-inheritance/gene-inheritance.js"></script>
 </body>
 </html>

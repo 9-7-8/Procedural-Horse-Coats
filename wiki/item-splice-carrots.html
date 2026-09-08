@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Splice carrots &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow">Item group <span class="sep">/</span> breeding</p>
+<h1>The splice carrots</h1>
+<p class="lede">
+    Carrots that add a gene to a foal. One targets a gene you have researched; the
+    others roll one at random, either from the whole pool or from one themed slice of
+    it.
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+<h2 id="known">Known Gene Splice &mdash; the targeted one</h2>
+
+<div class="plain">
+    <p>
+        Pick the gene yourself. Craft it with a
+        <a href="item-research-papers.html">research paper</a> for the gene you want, and
+        feeding it to a parent gives the foal that gene.
+    </p>
+</div>
+
+<p>
+    <strong>Recipe:</strong> golden carrot + a research paper + horse hair + the rarity
+    item for that paper&rsquo;s gene &mdash; and nothing else, exactly four filled slots.
+    The gene comes off the paper, so a rarer gene needs a rarer reagent.
+</p>
+
+<div class="note warn">
+    <span class="label">This one is not filtered</span>
+    <p>
+        The random splices refuse to hand a foal something that would kill it or cost it
+        hearts. The Known splice does not: you named the gene and you can read what it
+        does, so splicing a horse into a lethal genotype on purpose is allowed. Check the
+        gene&rsquo;s own page first.
+    </p>
+</div>
+
+<h2 id="random">Unknown Gene Splice &mdash; the random one</h2>
+
+<p>
+    <strong>Recipe:</strong> golden carrot + horse hair + gunpowder. It picks one gene at
+    random and gives the foal a random version of it. It will never pick something that
+    kills the foal or costs it hearts &mdash; see
+    <a href="item-breeding-carrots.html">the breeding carrots</a>.
+</p>
+
+<h2 id="themed">The five themed splices</h2>
+
+<p>
+    Each is the plain Unknown Gene Splice refined with one more reagent, and each narrows
+    the random draw to one kind of gene. Same surprise, smaller pool.
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Carrot</th><th>Recipe (shapeless)</th><th>Rolls from</th></tr></thead>
+<tbody>
+<tr><td><strong>Dilution Gene Splice</strong></td><td>Unknown Gene Splice + light grey dye</td><td>the genes that lighten a coat</td></tr>
+<tr><td><strong>White Gene Splice</strong></td><td>Unknown Gene Splice + bone meal</td><td>the white-patterning genes</td></tr>
+<tr><td><strong>Marking Gene Splice</strong></td><td>Unknown Gene Splice + ink sac</td><td>the marking genes</td></tr>
+<tr><td><strong>Performance Gene Splice</strong></td><td>Unknown Gene Splice + rabbit&rsquo;s foot</td><td>the speed / size / jump genes</td></tr>
+<tr><td><strong>Magical Gene Splice</strong></td><td>Unknown Gene Splice + amethyst shard</td><td>the invented genes</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2 id="mark">A splice that lands marks the foal</h2>
+
+<p>
+    A foal that got a gene from a splice carrot carries that fact for life, and so do its
+    descendants &mdash; a spliced line is visibly a spliced line. The detail is on
+    <a href="carrots.html">the carrot family page</a>.
+</p>
+</section>
+
+<section class="tab-panel" data-tab="coding">
+<h2 id="recipe-type">The Known Gene Splice is a custom recipe type</h2>
+
+<p>
+    Not a JSON shapeless recipe: <code>server/recipe/KnownGeneSpliceRecipe</code>. It
+    requires golden carrot + a <a href="item-research-papers.html">research paper</a> +
+    horse hair + the rarity item for that paper&rsquo;s gene, and <strong>nothing
+    else</strong> &mdash; exactly four filled slots. The gene is read off the paper at
+    craft time, so a drop-in gene file gets its carrot the moment it registers.
+</p>
+
+<div class="note rule">
+    <span class="label">This recipe lands in four places</span>
+    <p>
+        <code>KnownGeneSpliceRecipe</code> (what it requires),
+        <code>SpliceRecipeDisplay</code> (the canonical slot layout),
+        <code>RarityItems</code> (the tier &rarr; item table, deliberately off
+        <code>common/</code>), and <code>wiki/gene-carrot/gene-carrot.js</code>, which
+        redraws both for the wiki. The wiki cannot read the last two &mdash; they are
+        Minecraft-side &mdash; so a change there is silent on the pages until it is made
+        here too.
+    </p>
+</div>
+
+<h2 id="item">One item, many genes</h2>
+
+<p>
+    <code>known_gene_splice_carrot</code> is <strong>one generic item</strong>
+    parameterised by a data component, so every gene&rsquo;s carrot looks the same in the
+    inventory. That is a known gap.
+</p>
+
+<h2 id="blacklist">The blacklist, and why it is derived</h2>
+
+<p>
+    <code>SpliceSafety</code> works the random pool out from what the genes actually do
+    rather than from a typed list of keys: every combination the carrot could roll is
+    resolved through <code>HorseTraits</code> on an otherwise wild-type horse, and the
+    locus is dropped if any of them produces a condition worse than
+    <code>INFORMATIONAL</code> or leaves the horse short of baseline health. A new health
+    gene is excluded the moment it is registered, by having done its job. Full argument on
+    <a href="carrots.html">the carrot family page</a>.
+</p>
+</section>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="carrots.html">The carrot family &amp; gene database</a>
+        <a href="item-breeding-carrots.html">Breeding carrots</a>
+        <a href="item-research-papers.html">Research papers</a>
+        <a href="items.html">All items</a>
+    </div>
+    <code>server/recipe/KnownGeneSpliceRecipe</code>,
+    <code>common/genetics/SpliceSafety.java</code>.
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

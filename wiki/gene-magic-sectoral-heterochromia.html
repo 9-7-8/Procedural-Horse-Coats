@@ -6,14 +6,19 @@
 <title>Magic sectoral heterochromia &middot; Horse Genetics Wiki</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
 <link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
 <script defer src="nav.js"></script>
+<script defer src="search.js"></script>
 </head>
 <body>
 <main class="content">
 <article class="doc">
 
 <p class="eyebrow magical">Magical gene <span class="sep">/</span> expresses only in the heterozygote <span class="sep">/</span> eyes only</p>
+
 <h1>Magic sectoral heterochromia</h1>
+
 <p class="lede">
     Six colour alleles and a wild type. A horse carrying <strong>two different</strong>
     colours shows both of them at once &mdash; a randomly shaped wedge of one and the rest
@@ -22,10 +27,29 @@
     expressing combination</strong>.
 </p>
 
+<section class="tab-panel" data-tab="gameplay">
+
+<div class="gene-preview" data-gene="horsegenetics.magic_sectoral_heterochromia"></div>
+
+<h2 id="inheritance">What you can get</h2>
+
+<div class="gene-inheritance" data-gene="horsegenetics.magic_sectoral_heterochromia"></div>
+
+<h2 id="carrot">Its gene carrot</h2>
+
+<!-- The recipe, read off the mod at run time - the rarity tier is the recipe's
+     price, and a price written into fifty pages goes stale silently.
+     See wiki/gene-carrot/gene-carrot.js. -->
+
+<div class="gene-carrot" data-gene="horsegenetics.magic_sectoral_heterochromia"></div>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
 <!-- The gene, on the three base coats, as a horse you can spin. One div and one
      script: everything in here is asked of the mod at run time.
      See wiki/gene-preview/gene-preview.js. -->
-<div class="gene-preview" data-gene="horsegenetics.magic_sectoral_heterochromia"></div>
 
 <dl class="spec">
     <div><dt>Gene key</dt><dd>horsegenetics.magic_sectoral_heterochromia</dd></div>
@@ -51,6 +75,7 @@
 </div>
 
 <h2 id="table">The combination table</h2>
+
 <table class="data">
     <thead><tr><th>Combination</th><th>Outcome</th><th>Effect</th></tr></thead>
     <tbody>
@@ -62,11 +87,13 @@
 </table>
 
 <h2 id="shape">The gene is the disagreement, not the colour</h2>
+
 <p>
     This is deliberately the opposite shape to every other gene here. A dominant gene
     rewards finding one allele; a recessive one rewards finding two of the same. This one
     rewards finding two <strong>different</strong> ones.
 </p>
+
 <p>
     So its fifteen expressing combinations are fifteen separate breeding targets, and
     <strong>none of them is reachable by doubling up on a single lucky horse</strong>. A
@@ -74,6 +101,7 @@
     itself produces nothing at all. Every other locus in the mod gets easier once you own
     one good animal, and this one does not.
 </p>
+
 <p>
     They are declared as fifteen <em>outcomes</em>, one apiece, rather than as one
     <code>sectoral-heterochromia</code> covering all of them. An
@@ -85,12 +113,14 @@
 </p>
 
 <h2 id="silent">It does not overwrite the horse's eye colour</h2>
+
 <p>
     A non-expressing combination contributes <em>nothing</em> &mdash; not a claim on the
     iris, not a wild-type dark eye. A <a href="gene-champagne.html">champagne</a> horse
     carrying <code>gold/gold</code> keeps its champagne eye; a splashed white one carrying
     <code>blue/n</code> keeps its blue.
 </p>
+
 <p>
     That is a property of the hook it uses, not a special case in the gene.
     <code>EyePatchContribution</code> paints <em>over</em> the
@@ -101,6 +131,7 @@
 </p>
 
 <h2 id="chaos">Chaos</h2>
+
 <p>
     The <code>chaos</code> allele has no colour of its own. It takes one from <strong>its
     own copy's epigenetics</strong>, rolled in hue / saturation / value rather than as
@@ -108,6 +139,7 @@
     near-black or a near-white. Two horses carrying chaos rarely agree, and a chaos eye a
     breeder likes is inherited with that copy like any other epigenetic trait.
 </p>
+
 <p>
     <code>chaos/chaos</code> is still a matched pair and still shows nothing, even though
     the two copies would have rolled different colours. The rule is about the alleles, not
@@ -116,32 +148,8 @@
     means.
 </p>
 
-<h2 id="wedges">Where the shapes come from</h2>
-<p>
-    An iris is a 2&times;2 block of texels, so a sector is a four-bit mask over it and
-    there are exactly twelve masks that read as a wedge rather than as stray pixels. The
-    full account is on <a href="eye-colour.html#wedges">Eye colour &amp;
-    heterochromia</a>.
-</p>
-<p>
-    Each eye's wedge is drawn from the seed of <strong>one allele copy each</strong>, so a
-    shape is inherited alongside the colour that leads it. The left eye's is drawn with
-    <code>EyePatch.differentWedge</code>, which is guaranteed not to return the right
-    eye's &mdash; at twelve shapes a matched pair would otherwise turn up on one horse in
-    twelve and read as a bug rather than as a coincidence.
-</p>
-<p>
-    The two colours also <strong>swap which of them leads</strong>: the first allele's
-    colour takes the wedge in the right eye and the rest of the left one. A sectoral eye
-    that was symmetric would not look like heterochromia, it would look like a decal.
-</p>
-<p>
-    The values are per allele copy: each copy stores a wedge
-    and then a chaos colour, the chaos draws happening whether or not that copy is the
-    chaos allele. So changing one allele never shifts the other copy's shape.
-</p>
-
 <h2 id="natural">It is not the natural heterochromia</h2>
+
 <p>
     A horse can have two-coloured eyes without this gene, and usually does: the
     <a href="gene-mitf.html">splash</a>, <a href="gene-ednrb.html">frame</a> and
@@ -151,21 +159,51 @@
     horse's own colour, and it is documented on
     <a href="eye-colour.html#spread">Eye colour &amp; heterochromia</a>.
 </p>
+
 <p>
     This gene is the magical version and works the other way round: two real pigments
     rather than one pigment and one absence, in colours a horse has no business having.
 </p>
 
-<h2 id="carrot">Its gene carrot</h2>
+</section>
 
-<!-- The recipe, read off the mod at run time - the rarity tier is the recipe's
-     price, and a price written into fifty pages goes stale silently.
-     See wiki/gene-carrot/gene-carrot.js. -->
-<div class="gene-carrot" data-gene="horsegenetics.magic_sectoral_heterochromia"></div>
+<section class="tab-panel" data-tab="science">
+
+<h2 id="wedges">Where the shapes come from</h2>
+
+<p>
+    An iris is a 2&times;2 block of texels, so a sector is a four-bit mask over it and
+    there are exactly twelve masks that read as a wedge rather than as stray pixels. The
+    full account is on <a href="eye-colour.html#wedges">Eye colour &amp;
+    heterochromia</a>.
+</p>
+
+<p>
+    Each eye's wedge is drawn from the seed of <strong>one allele copy each</strong>, so a
+    shape is inherited alongside the colour that leads it. The left eye's is drawn with
+    <code>EyePatch.differentWedge</code>, which is guaranteed not to return the right
+    eye's &mdash; at twelve shapes a matched pair would otherwise turn up on one horse in
+    twelve and read as a bug rather than as a coincidence.
+</p>
+
+<p>
+    The two colours also <strong>swap which of them leads</strong>: the first allele's
+    colour takes the wedge in the right eye and the rest of the left one. A sectoral eye
+    that was symmetric would not look like heterochromia, it would look like a decal.
+</p>
+
+<p>
+    The values are per allele copy: each copy stores a wedge
+    and then a chaos colour, the chaos draws happening whether or not that copy is the
+    chaos allele. So changing one allele never shifts the other copy's shape.
+</p>
+
+</section>
 
 </article>
 </main>
 <script defer src="gene-preview/gene-preview.js"></script>
+<script defer src="gene-inheritance/gene-inheritance.js"></script>
 <script defer src="gene-carrot/gene-carrot.js"></script>
 </body>
 </html>

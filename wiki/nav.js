@@ -1,8 +1,21 @@
 /* Shared wiki navigation.
  *
- * Every page in wiki/ loads this and gets the same sidebar. Add a page in ONE
- * place - the SECTIONS array below - and it appears everywhere. The active
- * link is worked out from the filename, so nothing per-page has to be set.
+ * Every page in wiki/ loads this and gets the same sidebar. The page list is
+ * NOT here - it is wiki/pages.js, which the landing page reads too, so a page
+ * is registered in one place and appears in both. Load pages.js first.
+ *
+ * The active link is worked out from the filename, so nothing per-page has to
+ * be set.
+ *
+ * VIEWS. The wiki is read in one of three views - Gameplay, Coding, Science.
+ * The sidebar shows only the pages that have something for the current view,
+ * and carries the view through every link it builds, so choosing Science on the
+ * landing page and clicking Flaxen lands on Flaxen's science tab. The view
+ * itself is chosen by the tabs (wiki/tabs.js) or the landing page's switcher;
+ * this only reads it.
+ *
+ * The old box filtered page names. It is now the launcher for the real
+ * full-text search (wiki/search.js) - the names were never the hard part.
  *
  * Works from file:// as well as a web server (it builds DOM, it does not
  * fetch anything).
@@ -10,169 +23,11 @@
 (function () {
     "use strict";
 
-    var SECTIONS = [
-        {
-            title: "Start here",
-            items: [
-                { href: "../index.html", text: "Wiki home", kind: "core" },
-                { href: "philosophy.html", text: "Philosophy", kind: "core" },
-                { href: "genetics-model.html", text: "The genetics model", kind: "core" },
-                { href: "breeding.html", text: "Breeding & pedigree", kind: "core" },
-                { href: "breeds.html", text: "Breeds", kind: "core" },
-                { href: "horse-body.html", text: "The horse's body", kind: "core" }
-            ]
-        },
-        {
-            title: "The coat engine",
-            items: [
-                { href: "pipeline.html", text: "Three-phase pipeline", kind: "core" },
-                { href: "body-space.html", text: "Body space & regions", kind: "core" },
-                { href: "eye-colour.html", text: "Eye colour & heterochromia", kind: "core" }
-            ]
-        },
-        {
-            title: "For modders",
-            items: [
-                { href: "modding.html", text: "Writing a gene", kind: "core" },
-                { href: "api-reference.html", text: "Class abstractions", kind: "core" },
-                { href: "horse-traits.html", text: "Trait & effect architecture", kind: "magical" }
-            ]
-        },
-        {
-            title: "Natural genes",
-            items: [
-                { href: "gene-sex.html", text: "Sex (X / Y)", kind: "natural" },
-                { href: "gene-diet.html", text: "Diet", kind: "natural" },
-                { href: "gene-extension.html", text: "Extension", kind: "natural" },
-                { href: "gene-agouti.html", text: "Agouti (bay / seal)", kind: "natural" },
-                { href: "gene-shade.html", text: "Shade (bay shade)", kind: "natural" },
-                { href: "gene-matp.html", text: "MATP (cream / pearl)", kind: "natural" },
-                { href: "gene-champagne.html", text: "Champagne", kind: "natural" },
-                { href: "gene-grey.html", text: "Grey (dapple)", kind: "natural" },
-                { href: "gene-dun.html", text: "Dun", kind: "natural" },
-                { href: "gene-silver.html", text: "Silver dapple", kind: "natural" },
-                { href: "gene-flaxen.html", text: "Flaxen", kind: "natural" },
-                { href: "gene-sooty.html", text: "Sooty", kind: "natural" },
-                { href: "gene-pangare.html", text: "Pangare (mealy)", kind: "natural" },
-                { href: "gene-mushroom.html", text: "Mushroom", kind: "natural" },
-                { href: "gene-natural-zebra.html", text: "Zebra striping", kind: "natural" },
-                { href: "gene-brindle.html", text: "Brindle (X-linked)", kind: "natural" },
-                { href: "gene-tiger-eye.html", text: "Tiger eye", kind: "natural" }
-            ]
-        },
-        {
-            title: "White pattern loci",
-            items: [
-                { href: "gene-kit.html", text: "KIT (dominant white / sabino)", kind: "natural" },
-                { href: "gene-mitf.html", text: "MITF (splash white)", kind: "natural" },
-                { href: "gene-pax3.html", text: "PAX3 (splash white)", kind: "natural" },
-                { href: "gene-ednrb.html", text: "EDNRB (frame overo)", kind: "natural" },
-                { href: "gene-tobiano.html", text: "Tobiano", kind: "natural" },
-                { href: "gene-manchado.html", text: "Manchado", kind: "natural" },
-                { href: "gene-roan.html", text: "Roan (classic)", kind: "natural" },
-                { href: "gene-rabicano.html", text: "Rabicano", kind: "natural" },
-                { href: "gene-leopard.html", text: "Leopard complex (appaloosa)", kind: "natural" }
-            ]
-        },
-        {
-            title: "Performance & size genes",
-            items: [
-                { href: "gene-mstn.html", text: "MSTN (myostatin)", kind: "natural" },
-                { href: "gene-pdk4.html", text: "PDK4", kind: "natural" },
-                { href: "gene-ckm.html", text: "CKM", kind: "natural" },
-                { href: "gene-ryr2.html", text: "RYR2 (jumping)", kind: "natural" },
-                { href: "gene-lcorl.html", text: "LCORL / NCAPG (height)", kind: "natural" },
-                { href: "gene-hmga2.html", text: "HMGA2 (pony)", kind: "natural" }
-            ]
-        },
-        {
-            title: "Health genes",
-            items: [
-                { href: "gene-acan.html", text: "ACAN (dwarfism)", kind: "natural" },
-                { href: "gene-b4galt7.html", text: "B4GALT7 (Friesian dwarfism)", kind: "natural" },
-                { href: "gene-plod1.html", text: "PLOD1 (fragile foal)", kind: "natural" },
-                { href: "gene-rapgef5.html", text: "RAPGEF5 (EFIH)", kind: "natural" },
-                { href: "gene-st14.html", text: "ST14 (naked foal)", kind: "natural" },
-                { href: "gene-shox.html", text: "SHOX (skeletal atavism)", kind: "natural" },
-                { href: "gene-met.html", text: "MET (embryonic lethal)", kind: "natural" },
-                { href: "gene-scn4a.html", text: "SCN4A (HYPP)", kind: "natural" },
-                { href: "gene-gys1.html", text: "GYS1 (PSSM1)", kind: "natural" },
-                { href: "gene-ppib.html", text: "PPIB (HERDA)", kind: "natural" },
-                { href: "gene-prkdc.html", text: "PRKDC (SCID)", kind: "natural" },
-                { href: "gene-myo5a.html", text: "MYO5A (lavender foal)", kind: "natural" },
-                { href: "gene-toe1.html", text: "TOE1 (cerebellar abiotrophy)", kind: "natural" },
-                { href: "gene-cvm.html", text: "CVM (cervical malformation)", kind: "natural" },
-                { href: "gene-gbe1.html", text: "GBE1 (GBED)", kind: "natural" },
-                { href: "gene-megaesophagus.html", text: "Megaesophagus", kind: "natural" }
-            ]
-        },
-        {
-            title: "Magical body-stat genes",
-            items: [
-                { href: "gene-body-size.html", text: "Magic body size", kind: "magical" },
-                { href: "gene-magic-speed.html", text: "Magic speed", kind: "magical" },
-                { href: "gene-magic-health.html", text: "Magic health", kind: "magical" },
-                { href: "gene-magic-jump.html", text: "Magic jump", kind: "magical" }
-            ]
-        },
-        {
-            title: "Magical genes",
-            items: [
-                { href: "gene-dhampir.html", text: "Dhampir", kind: "magical" },
-                { href: "gene-pink-hair.html", text: "Pink hair", kind: "magical" },
-                { href: "gene-mane-color.html", text: "Mane colour", kind: "magical" },
-                { href: "gene-tail-color.html", text: "Tail colour", kind: "magical" },
-                { href: "gene-healer.html", text: "Healer", kind: "magical" },
-                { href: "gene-magic-zebra.html", text: "Magic zebra", kind: "magical" },
-                { href: "gene-milk.html", text: "Milk (water / lava)", kind: "magical" },
-                { href: "gene-light.html", text: "Light", kind: "magical" },
-                { href: "gene-magic-sectoral-heterochromia.html", text: "Magic sectoral heterochromia", kind: "magical" },
-                { href: "gene-particle.html", text: "Particle", kind: "magical" },
-                { href: "gene-rainbow-dust.html", text: "Rainbow dust", kind: "magical" },
-                { href: "gene-lycan.html", text: "LYCAN (werewolf)", kind: "magical" },
-                { href: "gene-verdant.html", text: "Verdant", kind: "magical" },
-                { href: "gene-lut.html", text: "LUT (palette swap)", kind: "magical" },
-                { href: "gene-cutie-mark.html", text: "Cutie mark", kind: "magical" },
-                { href: "gene-suntouched.html", text: "Suntouched", kind: "magical" },
-                { href: "gene-waterborn.html", text: "Waterborn", kind: "magical" }
-            ]
-        },
-        {
-            title: "Gameplay",
-            items: [
-                { href: "horse-care.html", text: "Horse care: healing, bond, herds", kind: "core" },
-                { href: "carrots.html", text: "Breeding carrots & the gene database", kind: "magical" },
-                { href: "items.html", text: "Items, recipes & the hair economy", kind: "core" },
-                { href: "villagers.html", text: "Villagers & transfer papers", kind: "core" },
-                { href: "horse-dimension.html", text: "Hay portals & the horse dimension", kind: "core" },
-                { href: "stables.html", text: "Generated stables", kind: "core" }
-            ]
-        },
-        {
-            title: "Project",
-            items: [
-                { href: "architecture.html", text: "Architecture & the build", kind: "core" },
-                { href: "api-notes.html", text: "NeoForge 26.1.2 API notes", kind: "core" },
-                { href: "verification.html", text: "To be verified", kind: "core" },
-                { href: "known-gaps.html", text: "Known gaps & lessons", kind: "core" },
-                { href: "compatibility.html", text: "Mod compatibility", kind: "core" },
-                { href: "roadmap.html", text: "Roadmap / backlog", kind: "core" },
-                { href: "session-log.html", text: "Session log", kind: "core" }
-            ]
-        },
-        {
-            title: "Tools",
-            items: [
-                { href: "gene-creator/index.html", text: "Gene creator", kind: "tool" },
-                { href: "horse-designer/index.html", text: "Horse designer", kind: "tool" },
-                { href: "breed-designer/index.html", text: "Breed designer", kind: "tool" },
-                { href: "lut-lab.html", text: "LUT lab", kind: "tool" },
-                { href: "gene-format.html", text: "Gene file format", kind: "tool" },
-                { href: "breed-format.html", text: "Breed file format", kind: "tool" },
-                { href: "gene-effects.html", text: "Gene effects", kind: "tool" }
-            ]
-        }
-    ];
+    var HG = window.HG || (window.HG = {});
+
+    function sections() {
+        return (HG.pages && HG.pages.SECTIONS) || [];
+    }
 
     function basename(path) {
         var i = path.lastIndexOf("/");
@@ -180,8 +35,33 @@
         return name === "" ? "index.html" : name;
     }
 
+    function param(name) {
+        var m = new RegExp("[?&]" + name + "=([^&#]*)").exec(window.location.search);
+        return m ? decodeURIComponent(m[1]) : null;
+    }
+
+    /** The view being read, if the reader has expressed one. */
+    function currentView() {
+        var v = param("view") || (HG.readView && HG.readView());
+        return v === "gameplay" || v === "coding" || v === "science" ? v : null;
+    }
+
+    /**
+     * Carry the view through a link, so the destination opens on the tab the
+     * reader is already reading in. A page that has no such tab falls back on
+     * its own (wiki/tabs.js), so this never has to know what a page contains.
+     */
+    function withView(href, view) {
+        if (!view || href.indexOf("?") >= 0) { return href; }
+        var hash = "";
+        var h = href.indexOf("#");
+        if (h >= 0) { hash = href.slice(h); href = href.slice(0, h); }
+        return href + "?view=" + view + hash;
+    }
+
     function build() {
         var here = basename(window.location.pathname);
+        var view = currentView();
 
         var nav = document.createElement("nav");
         nav.className = "sidebar";
@@ -189,18 +69,24 @@
 
         var brand = document.createElement("a");
         brand.className = "brand";
-        brand.href = "../index.html";
+        brand.href = withView("../index.html", view);
         brand.innerHTML = "<strong>Procedural Horse Genetics</strong><span>Wiki</span>";
         nav.appendChild(brand);
 
-        var filter = document.createElement("input");
-        filter.type = "search";
-        filter.className = "nav-filter";
-        filter.placeholder = "Filter pages…";
-        filter.setAttribute("aria-label", "Filter wiki pages");
-        nav.appendChild(filter);
+        var search = document.createElement("button");
+        search.type = "button";
+        search.className = "nav-search";
+        search.setAttribute("data-search-launch", "");
+        search.innerHTML = "<span>Search the wiki&hellip;</span><kbd>/</kbd>";
+        nav.appendChild(search);
 
-        SECTIONS.forEach(function (section) {
+        sections().forEach(function (section) {
+            var items = section.items.filter(function (item) {
+                if (!view || !item.views) { return true; }
+                return item.views.indexOf(view) >= 0;
+            });
+            if (!items.length) { return; }
+
             var group = document.createElement("div");
             group.className = "nav-group";
 
@@ -209,10 +95,10 @@
             group.appendChild(h);
 
             var ul = document.createElement("ul");
-            section.items.forEach(function (item) {
+            items.forEach(function (item) {
                 var li = document.createElement("li");
                 var a = document.createElement("a");
-                a.href = item.href;
+                a.href = withView(item.href, view);
                 a.className = "k-" + item.kind;
                 if (basename(item.href) === here) {
                     a.className += " active";
@@ -227,19 +113,6 @@
             nav.appendChild(group);
         });
 
-        filter.addEventListener("input", function () {
-            var q = filter.value.trim().toLowerCase();
-            nav.querySelectorAll(".nav-group").forEach(function (group) {
-                var shown = 0;
-                group.querySelectorAll("li").forEach(function (li) {
-                    var hit = q === "" || li.textContent.toLowerCase().indexOf(q) >= 0;
-                    li.classList.toggle("nav-hidden", !hit);
-                    if (hit) { shown++; }
-                });
-                group.classList.toggle("nav-hidden", shown === 0);
-            });
-        });
-
         var toggle = document.createElement("button");
         toggle.className = "nav-toggle";
         toggle.type = "button";
@@ -250,6 +123,16 @@
 
         document.body.insertBefore(nav, document.body.firstChild);
         document.body.insertBefore(toggle, document.body.firstChild);
+
+        // Switching tab re-filters the sidebar, so the page list always matches
+        // the tab being read rather than the one the page was opened on.
+        document.addEventListener("hg:view", function () {
+            var old = document.getElementById("wiki-nav");
+            var oldToggle = document.querySelector(".nav-toggle");
+            if (old) { old.parentNode.removeChild(old); }
+            if (oldToggle) { oldToggle.parentNode.removeChild(oldToggle); }
+            build();
+        });
     }
 
     if (document.readyState === "loading") {

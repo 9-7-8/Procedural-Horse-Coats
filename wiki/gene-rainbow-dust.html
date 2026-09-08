@@ -6,19 +6,48 @@
 <title>Rainbow dust &middot; Horse Genetics Wiki</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
 <link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
 <script defer src="nav.js"></script>
+<script defer src="search.js"></script>
 </head>
 <body>
 <main class="content">
 <article class="doc">
 
 <p class="eyebrow magical">Magical recessive <span class="sep">/</span> no coat effect</p>
+
 <h1>Rainbow dust</h1>
+
 <p class="lede">
     Coloured dust off all four hooves as the horse walks, fading from one colour into
     the next and working its way round the whole rainbow before it starts again. The
     smallest gene in the mod that anybody will actually want.
 </p>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<h2 id="inheritance">What you can get</h2>
+
+<div class="gene-inheritance" data-gene="horsegenetics.rainbow_dust"></div>
+
+<h2 id="invisible">It paints nothing</h2>
+
+<p>
+    All three outcomes are wild types, so <code>affectsCoat()</code> is false, the
+    locus stays out of a horse&rsquo;s texture key, and the genotype gallery collapses
+    it to a single entry &mdash; the same trick
+    <a href="gene-particle.html">particle</a>, <a href="gene-milk.html">milk</a> and
+    <a href="gene-verdant.html">verdant</a> use.
+</p>
+
+<h2 id="carrot">Its gene carrot</h2>
+
+<div class="gene-carrot" data-gene="horsegenetics.rainbow_dust"></div>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
 
 <dl class="spec">
     <div><dt>Gene key</dt><dd>horsegenetics.rainbow_dust</dd></div>
@@ -42,35 +71,6 @@
         whether the fade reads as a rainbow at all at hoof scale, and whether the
         slow end of the cycle range just looks like a solid colour. Checklist on
         <a href="verification.html#lycan">To be verified &sect;0-AH</a>.
-    </p>
-</div>
-
-<h2 id="not-particle">Why it is not a forty-first particle allele</h2>
-
-<p>
-    It is the obvious question. The <a href="gene-particle.html">particle locus</a>
-    already has forty alleles, every one of them &ldquo;this horse trails
-    <em>something</em>&rdquo;, and adding a forty-first is one line.
-</p>
-
-<div class="note rule">
-    <span class="label">Because the particle locus&rsquo;s alleles compete and this one does not</span>
-    <p>
-        The whole premise of that locus is that a horse has two copies of the
-        chromosome and therefore shows <strong>at most two</strong> particles, ever.
-        Every allele there is competing for one of two slots, and choosing between
-        them is the game.
-    </p>
-    <p>
-        Rainbow dust competes with nothing. A horse can trail flames <em>and</em>
-        rainbow dust, and it should be able to. Filing it at that locus would have
-        quietly cost a flame horse its flames &mdash; the flame allele would have had
-        to lose a slot to it &mdash; and filing it here costs nothing but a locus.
-    </p>
-    <p>
-        It is also a different <em>kind</em> of thing. Every particle allele names a
-        particle and lets the epigenetics pick the colour. This one names the colour
-        and lets the clock pick it, which is a behaviour rather than a variant.
     </p>
 </div>
 
@@ -159,19 +159,40 @@
     this gene there is to breed.
 </p>
 
-<h2 id="invisible">It paints nothing</h2>
+</section>
+
+<section class="tab-panel" data-tab="science">
+
+<h2 id="not-particle">Why it is not a forty-first particle allele</h2>
 
 <p>
-    All three outcomes are wild types, so <code>affectsCoat()</code> is false, the
-    locus stays out of a horse&rsquo;s texture key, and the genotype gallery collapses
-    it to a single entry &mdash; the same trick
-    <a href="gene-particle.html">particle</a>, <a href="gene-milk.html">milk</a> and
-    <a href="gene-verdant.html">verdant</a> use.
+    It is the obvious question. The <a href="gene-particle.html">particle locus</a>
+    already has forty alleles, every one of them &ldquo;this horse trails
+    <em>something</em>&rdquo;, and adding a forty-first is one line.
 </p>
 
-<h2 id="carrot">Its gene carrot</h2>
+<div class="note rule">
+    <span class="label">Because the particle locus&rsquo;s alleles compete and this one does not</span>
+    <p>
+        The whole premise of that locus is that a horse has two copies of the
+        chromosome and therefore shows <strong>at most two</strong> particles, ever.
+        Every allele there is competing for one of two slots, and choosing between
+        them is the game.
+    </p>
+    <p>
+        Rainbow dust competes with nothing. A horse can trail flames <em>and</em>
+        rainbow dust, and it should be able to. Filing it at that locus would have
+        quietly cost a flame horse its flames &mdash; the flame allele would have had
+        to lose a slot to it &mdash; and filing it here costs nothing but a locus.
+    </p>
+    <p>
+        It is also a different <em>kind</em> of thing. Every particle allele names a
+        particle and lets the epigenetics pick the colour. This one names the colour
+        and lets the clock pick it, which is a behaviour rather than a variant.
+    </p>
+</div>
 
-<div class="gene-carrot" data-gene="horsegenetics.rainbow_dust"></div>
+</section>
 
 <div class="page-foot">
     <div class="seealso">
@@ -188,5 +209,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
 <script defer src="gene-carrot/gene-carrot.js"></script>
+<script defer src="gene-inheritance/gene-inheritance.js"></script>
 </body>
 </html>

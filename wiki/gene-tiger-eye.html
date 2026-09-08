@@ -6,14 +6,19 @@
 <title>Tiger eye &middot; Horse Genetics Wiki</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
 <link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
 <script defer src="nav.js"></script>
+<script defer src="search.js"></script>
 </head>
 <body>
 <main class="content">
 <article class="doc">
 
 <p class="eyebrow natural">Natural gene <span class="sep">/</span> eyes only</p>
+
 <h1>Tiger eye (SLC24A5)</h1>
+
 <p class="lede">
     A bright amber iris in a horse whose coat is entirely ordinary. It is the first gene
     in the mod that changes <strong>only the eyes</strong>, and the reason the
@@ -21,10 +26,41 @@
     Puerto Rican Paso Fino, in life and here.
 </p>
 
+<section class="tab-panel" data-tab="gameplay">
+
+<div class="gene-preview" data-gene="horsegenetics.tiger_eye"></div>
+
+<h2 id="inheritance">What you can get</h2>
+
+<div class="gene-inheritance" data-gene="horsegenetics.tiger_eye"></div>
+
+<h2 id="breed">Where to find it</h2>
+
+<p>
+    <code>SLC24A5</code> is a <a href="breeds.html">Puerto Rican Paso Fino</a> gene,
+    essentially confined to that breed in life, and it is distributed that way here: a
+    quarter of Paso Finos carry a copy and about one in twenty-five has the amber eyes,
+    against roughly one wild horse in five thousand. It is the clearest case in the mod of
+    a gene you find by knowing which breed to look in &mdash; and since the breed is
+    <code>RARE</code> and spawns in jungle, savanna, beach and mangrove swamp, finding one
+    is a trip rather than a wait.
+</p>
+
+<h2 id="carrot">Its gene carrot</h2>
+
+<!-- The recipe, read off the mod at run time - the rarity tier is the recipe's
+     price, and a price written into fifty pages goes stale silently.
+     See wiki/gene-carrot/gene-carrot.js. -->
+
+<div class="gene-carrot" data-gene="horsegenetics.tiger_eye"></div>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
 <!-- The gene, on the three base coats, as a horse you can spin. One div and one
      script: everything in here is asked of the mod at run time.
      See wiki/gene-preview/gene-preview.js. -->
-<div class="gene-preview" data-gene="horsegenetics.tiger_eye"></div>
 
 <dl class="spec">
     <div><dt>Gene key</dt><dd>horsegenetics.tiger_eye</dd></div>
@@ -51,6 +87,7 @@
 </div>
 
 <h2 id="table">The combination table</h2>
+
 <table class="data">
     <thead><tr><th>Combination</th><th>Outcome</th><th>Effect</th></tr></thead>
     <tbody>
@@ -60,6 +97,7 @@
         <tr><td><code>TE2/TE2</code></td><td><code>tiger-eye-yellow</code></td><td>The paler, more yellow shade, <code>#D6B341</code></td></tr>
     </tbody>
 </table>
+
 <p>
     Recessive: one wild-type copy and nothing shows, so two carriers bred together is the
     only way amber eyes appear. The two variants are the same trait a stop apart in shade
@@ -68,12 +106,14 @@
 </p>
 
 <h2 id="not-a-pattern">It is not a coat pattern</h2>
+
 <p>
     Worth saying, because the breed reference this mod was built from files tiger eye
     under coat patterns and it is not one. The coat is completely unaffected; only the
     iris changes. That is precisely why it could not be built until the eye-colour
     channel existed &mdash; there was nowhere for it to write.
 </p>
+
 <p>
     It does still <strong>affect the baked coat texture</strong>, because the eyes are
     drawn into it. So unlike the mod's other "paints nothing" genes, its expressing
@@ -84,6 +124,7 @@
 </p>
 
 <h2 id="channel">The eye-colour channel</h2>
+
 <p>
     A horse has one iris colour, so "what colour are its eyes" has exactly one answer and
     several genes have a claim on it. That makes it a <strong>channel</strong> with a
@@ -92,6 +133,7 @@
     fight with. Tiger eye is why it exists: it was the first gene in the mod with nowhere
     else to write.
 </p>
+
 <p>
     The channel is now the whole account of a horse's eyes &mdash; the three ranks, the
     dilutions' green and hazel, the white loci's blue, complete and sectoral
@@ -99,6 +141,7 @@
     <a href="eye-colour.html">Eye colour &amp; heterochromia</a>. Only what is about
     <em>this</em> gene is repeated here.
 </p>
+
 <p>
     Tiger eye claims at <strong>rank 20, iris-specific pigment</strong>: above the
     whole-body dilutions (<a href="gene-matp.html">cream / pearl</a>,
@@ -108,6 +151,7 @@
     <strong>blue beats amber</strong> and has to: a depigmented iris has no pigment left
     for a pigment gene to recolour, so a splashed white tiger-eye horse has blue eyes.
 </p>
+
 <div class="note">
     <span class="label">One blue eye and one amber one</span>
     <p>
@@ -119,27 +163,12 @@
     </p>
 </div>
 
-<h2 id="breed">Where to find it</h2>
-<p>
-    <code>SLC24A5</code> is a <a href="breeds.html">Puerto Rican Paso Fino</a> gene,
-    essentially confined to that breed in life, and it is distributed that way here: a
-    quarter of Paso Finos carry a copy and about one in twenty-five has the amber eyes,
-    against roughly one wild horse in five thousand. It is the clearest case in the mod of
-    a gene you find by knowing which breed to look in &mdash; and since the breed is
-    <code>RARE</code> and spawns in jungle, savanna, beach and mangrove swamp, finding one
-    is a trip rather than a wait.
-</p>
-
-<h2 id="carrot">Its gene carrot</h2>
-
-<!-- The recipe, read off the mod at run time - the rarity tier is the recipe's
-     price, and a price written into fifty pages goes stale silently.
-     See wiki/gene-carrot/gene-carrot.js. -->
-<div class="gene-carrot" data-gene="horsegenetics.tiger_eye"></div>
+</section>
 
 </article>
 </main>
 <script defer src="gene-preview/gene-preview.js"></script>
+<script defer src="gene-inheritance/gene-inheritance.js"></script>
 <script defer src="gene-carrot/gene-carrot.js"></script>
 </body>
 </html>

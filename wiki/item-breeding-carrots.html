@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Breeding carrots &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow">Item group <span class="sep">/</span> breeding</p>
+<h1>The breeding carrots</h1>
+<p class="lede">
+    Four carrots you feed to a horse before breeding it. Each one changes what that
+    horse passes on to the foal &mdash; not what the horse itself is. Feed one to each
+    parent and both effects apply.
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+<h2 id="rule">The one rule</h2>
+
+<div class="plain">
+    <p>
+        A carrot changes <strong>what a horse passes on</strong>, not the horse. Feeding
+        one never alters the animal in front of you, and the effect is used up by the
+        next foal.
+    </p>
+</div>
+
+<h2 id="what">What each one does</h2>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Carrot</th><th>What it does to the foal</th></tr></thead>
+<tbody>
+<tr><td><strong>Stabilizer</strong></td>
+    <td>Where this parent has two different versions of a gene, it passes on the
+        <strong>stronger</strong> one instead of flipping a coin. Does nothing at a gene
+        where both copies are the same.</td></tr>
+<tr><td><strong>Magnifier</strong></td>
+    <td>The opposite: it passes on the <strong>weaker</strong> version. Useful for
+        digging a hidden gene out of a line.</td></tr>
+<tr><td><strong>Unknown Epigenetic Splice</strong></td>
+    <td>Re-rolls the small per-horse variations the foal inherits &mdash; how high a
+        bay&rsquo;s black legs go, how heavy a grey&rsquo;s dapples are, where a splash
+        edge falls. The genes themselves are untouched.</td></tr>
+<tr><td><strong>Unknown Gene Splice</strong></td>
+    <td>Picks one gene at random and gives the foal a random version of it. It will
+        never pick something that kills the foal or costs it hearts.</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2 id="recipes">Recipes</h2>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Carrot</th><th>Recipe (shapeless)</th></tr></thead>
+<tbody>
+<tr><td><strong>Unknown Epigenetic Splice</strong></td><td>golden carrot + horse hair + fermented spider eye</td></tr>
+<tr><td><strong>Unknown Gene Splice</strong></td><td>golden carrot + horse hair + gunpowder</td></tr>
+<tr><td><strong>Stabilizer</strong></td><td>golden carrot + horse hair + nether quartz</td></tr>
+<tr><td><strong>Magnifier</strong></td><td>golden carrot + horse hair + glowstone dust</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2 id="combine">Combining them</h2>
+
+<p>
+    Put two or more breeding carrots in the crafting grid and they merge into one carrot
+    carrying every effect. Combinations that contradict each other simply do not craft.
+</p>
+
+<div class="note good">
+    <span class="label">The random splice will not hurt your foal</span>
+    <p>
+        The Unknown Gene Splice never rolls a gene that would kill the foal or leave it
+        with fewer hearts. It <em>can</em> give you a slower horse, or a pony &mdash; an
+        unwanted surprise is what a random splice is for. Hearts are the line.
+    </p>
+    <p>
+        The targeted <a href="item-splice-carrots.html">Known Gene Splice</a> is
+        <strong>not</strong> filtered: there you named the gene yourself.
+    </p>
+</div>
+</section>
+
+<section class="tab-panel" data-tab="coding">
+<h2 id="effects">The gamete effects</h2>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Carrot</th><th>What it does to the gamete</th></tr></thead>
+<tbody>
+<tr><td><strong>Unknown Epigenetic Splice</strong></td><td>Every allele copy this parent passes on gets <strong>freshly rolled values</strong> instead of the parent copy&rsquo;s own. The alleles are untouched &mdash; the foal has the same genotype an un-fed pairing would give, only re-rolled bay-point heights / grey dapples / splash edges. The re-roll runs in a <em>second pass</em>, after every allele is locked, so it can never move a foal&rsquo;s genotype. (<code>CarrotEffect.EpigeneticSplice</code>.)</td></tr>
+<tr><td><strong>Stabilizer</strong></td><td>At every <strong>heterozygous</strong> locus, contribute the <em>earlier-declared</em> allele (the variant / dominant one) rather than the 50/50 coin. A no-op at a homozygous locus.</td></tr>
+<tr><td><strong>Magnifier</strong></td><td>The mirror &mdash; contribute the later-declared (baseline / recessive) copy. Same no-op rule.</td></tr>
+<tr><td><strong>Unknown Gene Splice</strong></td><td>Pick <strong>one random gene</strong> and draw this parent&rsquo;s gamete for it from that gene&rsquo;s <a href="gene-format.html">splice distribution</a> (or a uniform draw over its viable pairs if it declares none). The gene and the pair are rolled at breeding time off the foal&rsquo;s deterministic RNG. (<code>CarrotEffect.GeneSplice</code>.)</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    The blacklist that keeps the random splice safe, how the effects are stored on the
+    horse, and the full breeding flow are on
+    <a href="carrots.html">the carrot family page</a>, which stays the source of truth
+    for the mechanics; this page is the item roster and the recipes.
+</p>
+
+<p>
+    Combining is <code>server/recipe/CarrotCombineRecipe</code>. A themed splice combines
+    like any other &mdash; it writes the same token as the plain one with its theme
+    appended, so there is no second code path.
+</p>
+</section>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="carrots.html">The carrot family &amp; gene database</a>
+        <a href="item-splice-carrots.html">Splice carrots</a>
+        <a href="breeding.html">Breeding &amp; pedigree</a>
+        <a href="items.html">All items</a>
+    </div>
+    Effects in <code>common/genetics/CarrotEffect.java</code>; recipes in
+    <code>data/horsegenetics/recipe/</code>.
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

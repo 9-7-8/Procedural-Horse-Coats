@@ -6,18 +6,58 @@
 <title>PRKDC (SCID) &middot; Horse Genetics Wiki</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
 <link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
 <script defer src="nav.js"></script>
+<script defer src="search.js"></script>
 </head>
 <body>
 <main class="content">
 <article class="doc">
 
 <p class="eyebrow natural">Natural gene <span class="sep">/</span> health</p>
+
 <h1>PRKDC (SCID)</h1>
+
 <p class="lede">
     Severe combined immunodeficiency. An affected foal is born with no adaptive
     immune system at all.
 </p>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<h2 id="inheritance">What you can get</h2>
+
+<div class="gene-inheritance" data-gene="horsegenetics.prkdc"></div>
+
+<h2>Born, and then lost</h2>
+
+<p>
+    Lethal <em>at birth</em>, so the foal really is born: it gets a name, a
+    <a href="breeding.html">record</a> and a place in the family tree, and then dies
+    over a few seconds with a chat line naming what took it.
+</p>
+
+<p>
+    That is deliberate. A pairing that silently produced nothing would teach a player
+    nothing about the two horses they just bred, and the whole value of a recessive
+    lethal is that it tells you something about <em>both</em> parents at once. The
+    mechanics of the death are on <a href="horse-body.html">the trait system</a> page.
+</p>
+
+<h2 id="carrot">Its gene carrot</h2>
+
+<p>
+    There is none. A disorder locus sets <code>hasGeneCarrot()</code> false &mdash;
+    forcing one onto somebody&rsquo;s line is hostile &mdash; and
+    <code>SpliceSafety</code> keeps it out of the random splice as well, derived from
+    the fact that it declares a non-informational <code>Condition</code> rather than
+    from any hand-written list.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
 
 <dl class="spec">
     <div><dt>Gene key</dt><dd>horsegenetics.prkdc</dd></div>
@@ -62,21 +102,6 @@
 </table>
 </div>
 
-<h2>Born, and then lost</h2>
-
-<p>
-    Lethal <em>at birth</em>, so the foal really is born: it gets a name, a
-    <a href="breeding.html">record</a> and a place in the family tree, and then dies
-    over a few seconds with a chat line naming what took it.
-</p>
-
-<p>
-    That is deliberate. A pairing that silently produced nothing would teach a player
-    nothing about the two horses they just bred, and the whole value of a recessive
-    lethal is that it tells you something about <em>both</em> parents at once. The
-    mechanics of the death are on <a href="horse-body.html">the trait system</a> page.
-</p>
-
 <h2>What the mechanism cannot carry</h2>
 
 <p>
@@ -105,16 +130,7 @@
     </p>
 </div>
 
-
-<h2 id="carrot">Its gene carrot</h2>
-
-<p>
-    There is none. A disorder locus sets <code>hasGeneCarrot()</code> false &mdash;
-    forcing one onto somebody&rsquo;s line is hostile &mdash; and
-    <code>SpliceSafety</code> keeps it out of the random splice as well, derived from
-    the fact that it declares a non-informational <code>Condition</code> rather than
-    from any hand-written list.
-</p>
+</section>
 
 <div class="page-foot">
     <div class="seealso">
@@ -129,5 +145,6 @@
 </main>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+<script defer src="gene-inheritance/gene-inheritance.js"></script>
 </body>
 </html>

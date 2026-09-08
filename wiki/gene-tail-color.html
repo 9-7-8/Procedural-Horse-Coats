@@ -6,14 +6,19 @@
 <title>Tail Colour &middot; Horse Genetics Wiki</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
 <link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
 <script defer src="nav.js"></script>
+<script defer src="search.js"></script>
 </head>
 <body>
 <main class="content">
 <article class="doc">
 
 <p class="eyebrow magical">Magical gene <span class="sep">/</span> phase 3</p>
+
 <h1>Tail colour</h1>
+
 <p class="lede">
     <a href="gene-mane-color.html">Mane colour</a>&rsquo;s twin, one locus over:
     the same three alleles, the same combination table, the same per-copy colour
@@ -22,10 +27,29 @@
     produce.
 </p>
 
+<section class="tab-panel" data-tab="gameplay">
+
+<div class="gene-preview" data-gene="horsegenetics.tail_color"></div>
+
+<h2 id="inheritance">What you can get</h2>
+
+<div class="gene-inheritance" data-gene="horsegenetics.tail_color"></div>
+
+<h2 id="carrot">Its gene carrot</h2>
+
+<!-- The recipe, read off the mod at run time - the rarity tier is the recipe's
+     price, and a price written into fifty pages goes stale silently.
+     See wiki/gene-carrot/gene-carrot.js. -->
+
+<div class="gene-carrot" data-gene="horsegenetics.tail_color"></div>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
 <!-- The gene, on the three base coats, as a horse you can spin. One div and one
      script: everything in here is asked of the mod at run time.
      See wiki/gene-preview/gene-preview.js. -->
-<div class="gene-preview" data-gene="horsegenetics.tail_color"></div>
 
 <dl class="spec">
     <div><dt>Gene key</dt><dd>horsegenetics.tail_color</dd></div>
@@ -59,22 +83,6 @@
     <a href="gene-mane-color.html">mane colour</a>. This page is the differences.
 </p>
 
-<h2 id="why-separate">Why it is a separate locus</h2>
-
-<p>
-    Folding mane and tail into one gene would make a horse with a red mane and a blue
-    tail <strong>impossible to breed</strong>. It also halves what the family is
-    worth: two loci with two independent per-copy colours each is four colours across
-    one horse, before anything else it carries is considered, and that combinatorial
-    room is the whole reason these genes were designed as a set.
-</p>
-
-<p>
-    It is the same rule the <a href="gene-kit.html">white-pattern loci</a> follow from
-    the other direction: only alleles at the <em>same</em> locus compete for a slot.
-    Mane and tail plainly do not.
-</p>
-
 <h2 id="foal">It shows on a foal, and the mane does not</h2>
 
 <p>
@@ -95,12 +103,27 @@
     loci, and why it will serve a third if the family grows.
 </p>
 
-<h2 id="carrot">Its gene carrot</h2>
+</section>
 
-<!-- The recipe, read off the mod at run time - the rarity tier is the recipe's
-     price, and a price written into fifty pages goes stale silently.
-     See wiki/gene-carrot/gene-carrot.js. -->
-<div class="gene-carrot" data-gene="horsegenetics.tail_color"></div>
+<section class="tab-panel" data-tab="science">
+
+<h2 id="why-separate">Why it is a separate locus</h2>
+
+<p>
+    Folding mane and tail into one gene would make a horse with a red mane and a blue
+    tail <strong>impossible to breed</strong>. It also halves what the family is
+    worth: two loci with two independent per-copy colours each is four colours across
+    one horse, before anything else it carries is considered, and that combinatorial
+    room is the whole reason these genes were designed as a set.
+</p>
+
+<p>
+    It is the same rule the <a href="gene-kit.html">white-pattern loci</a> follow from
+    the other direction: only alleles at the <em>same</em> locus compete for a slot.
+    Mane and tail plainly do not.
+</p>
+
+</section>
 
 <div class="page-foot">
     <div class="seealso">
@@ -117,6 +140,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
 <script defer src="gene-preview/gene-preview.js"></script>
+<script defer src="gene-inheritance/gene-inheritance.js"></script>
 <script defer src="gene-carrot/gene-carrot.js"></script>
 </body>
 </html>
