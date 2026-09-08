@@ -389,14 +389,12 @@ public final class FamilyTreeScreen extends Screen {
 
     private static CoatData coatFor(HorseRecord r) {
         try {
-            // The record carries the epigenome now, so a dead or distant
-            // ancestor draws its *real* coat rather than a plausible stand-in
-            // invented from its UUID. The fallback is only for a record written
-            // before the field existed.
-            return r.hasGenome()
-                    ? new CoatData(r.genome())
-                    : new CoatData(Genotype.parse(r.geneticCode()),
-                            Epigenome.fromSeed(r.id().getMostSignificantBits()));
+            // The record carries the epigenome, so a dead or distant ancestor
+            // draws its *real* coat. There is deliberately no stand-in for a
+            // record without one: inventing a plausible epigenome from the UUID
+            // drew a horse that never existed, which is worse than a blank in a
+            // pedigree - the whole job of this screen is to show what was there.
+            return r.hasGenome() ? new CoatData(r.genome()) : null;
         } catch (RuntimeException e) {
             return null;
         }

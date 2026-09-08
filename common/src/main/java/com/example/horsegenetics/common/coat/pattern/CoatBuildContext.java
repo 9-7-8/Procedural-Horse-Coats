@@ -1,10 +1,9 @@
 package com.example.horsegenetics.common.coat.pattern;
 
-import com.example.horsegenetics.common.Rng;
-import com.example.horsegenetics.common.SeededRng;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Skin;
 import com.example.horsegenetics.common.genetics.Epigenome;
+import com.example.horsegenetics.common.genetics.epi.EpiValues;
 import com.example.horsegenetics.common.genetics.Genes;
 import com.example.horsegenetics.common.genetics.Genotype;
 
@@ -18,10 +17,10 @@ import com.example.horsegenetics.common.genetics.Genotype;
  * call; a gene returns its contribution rather than drawing into shared state.
  * See {@code Gene.restrict} / {@code Gene.tint}.
  *
- * <p>Non-deterministic genes take all randomness from {@link #epigeneticsFor},
- * which runs on the seed of the <b>allele copy that expresses</b> at that gene,
- * so the same horse regenerates the same coat and a foal that inherited the
- * copy regenerates its parent's.
+ * <p>Non-deterministic genes take every per-horse number from
+ * {@link #epigeneticsFor}, which reads the literal values stored on the
+ * <b>allele copy that expresses</b> at that gene, so the same horse regenerates
+ * the same coat and a foal that inherited the copy regenerates its parent's.
  */
 public final class CoatBuildContext {
 
@@ -61,12 +60,12 @@ public final class CoatBuildContext {
     }
 
     /**
-     * This horse's randomness for one gene: a {@link SeededRng} on the
-     * epigenetic seed of the allele copy expressing at {@code geneKey}
-     * (heterozygote - the dominant copy; homozygote - the higher-priority one).
+     * This horse's numbers for one gene - the literal {@link EpiValues} stored
+     * on the allele copy expressing at {@code geneKey} (heterozygote - the
+     * dominant copy; homozygote - the higher-priority one).
      */
-    public Rng epigeneticsFor(String geneKey) {
-        return new SeededRng(epigenome.expressedSeed(Genes.byKey(geneKey), genotype), geneKey);
+    public EpiValues epigeneticsFor(String geneKey) {
+        return epigenome.expressedValues(Genes.byKey(geneKey), genotype);
     }
 
     /**
@@ -82,11 +81,10 @@ public final class CoatBuildContext {
      *
      * <p>Derived identically to the single-copy form, so for a heterozygote
      * {@code epigeneticsForCopy(key, 0)} and {@code epigeneticsFor(key)} are the
-     * same generator.
+     * same numbers.
      */
-    public Rng epigeneticsForCopy(String geneKey, int slot) {
+    public EpiValues epigeneticsForCopy(String geneKey, int slot) {
         Epigenome.Copies copies = epigenome.copies(geneKey);
-        long seed = (slot == 0 ? copies.first() : copies.second()).epigeneticSeed();
-        return new SeededRng(seed, geneKey);
+        return (slot == 0 ? copies.first() : copies.second()).values();
     }
 }

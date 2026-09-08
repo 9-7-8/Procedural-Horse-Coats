@@ -8,12 +8,13 @@ import com.example.horsegenetics.common.genetics.FounderContext;
 import com.example.horsegenetics.common.genetics.FounderTable;
 import com.example.horsegenetics.common.genetics.Gene;
 import com.example.horsegenetics.common.genetics.Genotype;
-import com.example.horsegenetics.common.genetics.AlleleRandomness;
+import com.example.horsegenetics.common.genetics.GeneEpigenetics;
 import com.example.horsegenetics.common.trait.EpigeneticTraitContribution;
 import com.example.horsegenetics.common.trait.HorseTraits;
-import com.example.horsegenetics.common.trait.StatAxis;
-import com.example.horsegenetics.common.trait.TargetBand;
 import com.example.horsegenetics.common.trait.TraitBuilder;
+import com.example.horsegenetics.common.genetics.epi.EpiSchema;
+import com.example.horsegenetics.common.genetics.epi.EpiValue;
+import com.example.horsegenetics.common.genetics.epi.EpiValues;
 
 import java.util.List;
 
@@ -49,9 +50,9 @@ import java.util.List;
  * also useful: a horse a hair off normal size is carrying both extremes.
  *
  * <h2>Where the percentage comes from</h2>
- * One {@link Rng#nextGaussian()} per copy, off <b>that copy's</b> epigenetic
- * seed ({@link AlleleRandomness#copy}) - not the expressing copy, which would
- * count one allele twice and the other not at all.
+ * It is <b>stored on the copy</b> and read back ({@link GeneEpigenetics#copy})
+ * - not off the expressing copy, which would count one allele twice and the
+ * other not at all. A founder's is rolled once, from the distribution below.
  *
  * <p>The distribution is <b>normal, centred on {@value #MEAN_DELTA}</b> with a
  * standard deviation of {@value #SIGMA_DELTA}. So a typical carrier is about
@@ -92,6 +93,9 @@ import java.util.List;
 public final class MagicSizeGene implements Gene, EpigeneticTraitContribution {
 
     public static final String KEY = "horsegenetics.body_size";
+
+    /** The name of the one value a copy of this locus carries. */
+    public static final String DELTA = "delta";
     public static final int PRIORITY = 140;
 
     /** The percentage one variant copy is worth, on average - so one copy is about 1.1x or 0.9x. */
@@ -197,20 +201,8 @@ public final class MagicSizeGene implements Gene, EpigeneticTraitContribution {
      * {@code Big/Small} cancels without being a special case.
      */
     @Override
-    public void contribute(AllelePair pair, Genotype genotype, AlleleRandomness epigenetics,
+    public void contribute(AllelePair pair, Genotype genotype, GeneEpigenetics epigenetics,
                            TraitBuilder out) {
-        int variantCopies = pair.count(Big) + pair.count(Small);
-
-        // A breed that pins body scale has made its wild founders homozygous
-        // for Big or Small; land this horse inside the breed's height band from
-        // its own epigenetic seeds. See AbstractMagicStatGene for the shape.
-        TargetBand band = out.breedBand(StatAxis.SCALE);
-        if (band != null && variantCopies > 0) {
-            double u = 0.5 * (epigenetics.copy(0).nextFloat() + epigenetics.copy(1).nextFloat());
-            out.multiplyScaleUnclamped(band.lerp(u));
-            return;
-        }
-
         double sum = signedDelta(pair.first(), epigenetics.copy(0))
                 + signedDelta(pair.second(), epigenetics.copy(1));
         if (sum != 0.0) {
@@ -218,22 +210,24 @@ public final class MagicSizeGene implements Gene, EpigeneticTraitContribution {
         }
     }
 
-    private double signedDelta(Allele allele, Rng epigenetics) {
+    private double signedDelta(Allele allele, EpiValues epigenetics) {
         if (allele.equals(Big)) {
-            return delta(epigenetics);
+            return epigenetics.get(DELTA);
         }
         if (allele.equals(Small)) {
-            return -delta(epigenetics);
+            return -epigenetics.get(DELTA);
         }
         return 0.0; // the baseline allele is worth nothing, as everywhere else
     }
 
     /**
-     * One copy's percentage: a normal draw about {@link #MEAN_DELTA}, floored at
-     * {@link #MIN_DELTA}. Always positive - the sign is the allele's job, not
-     * the distribution's.
+     * The one number a copy of this locus carries: how much bigger, or smaller,
+     * that copy makes the horse. Written down rather than recovered from a seed,
+     * so "this stallion's big copy is worth +34.2%" is something a breeder can
+     * read off the horse and select for.
      */
-    public static double delta(Rng epigenetics) {
-        return Math.max(MIN_DELTA, MEAN_DELTA + epigenetics.nextGaussian() * SIGMA_DELTA);
+    @Override
+    public EpiSchema epiSchema() {
+        return EpiSchema.of(EpiValue.gaussian(DELTA, MEAN_DELTA, SIGMA_DELTA, MIN_DELTA));
     }
 }

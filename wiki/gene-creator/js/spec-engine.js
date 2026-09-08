@@ -63,7 +63,27 @@ window.HG = window.HG || {};
     return noise.add(noise.u64(hi >>> 0, 0), noise.fromInt(lo));
   };
 
-  /** Draw every knob, in declaration order - the SpecValues contract. */
+  /**
+   * Round to what an epigenome code can write - the port of
+   * EpiCodec.quantise. Every stored value passes through this in Java, so the
+   * creator has to as well or parity fails in the sixth decimal.
+   */
+  function quantise(v) {
+    if (!isFinite(v)) return 0;
+    if (Math.abs(v) >= 1e12) return Math.trunc(v);
+    return Math.round(v * 1000000) / 1000000;
+  }
+
+  /**
+   * Roll a founder's knob values - the port of EpiRoll.founder over the schema
+   * SpecValues.schema builds.
+   *
+   * <p>A per-leg knob draws FOUR floats, one per leg, across a range widened by
+   * its spread. It used to draw five - one base, then a jitter per leg around
+   * it - which meant the four legs were correlated and no single leg was a
+   * number anyone could edit. Now each leg is an independent stored value, and
+   * the spread is folded into the range instead of applied afterwards.
+   */
   function drawValues(spec, seedHigh, seedLow, dose) {
     var rng = new JavaRandom(seedHigh, seedLow);
     var ranges = [], seeds = [];
@@ -73,11 +93,16 @@ window.HG = window.HG || {};
         ranges[i] = null;
         return;
       }
-      var base = knob.min + rng.nextFloat() * (knob.max - knob.min);
-      if (knob.per !== "leg") { ranges[i] = [base]; return; }
+      if (knob.per !== "leg") {
+        ranges[i] = [quantise(knob.min + rng.nextFloat() * (knob.max - knob.min))];
+        return;
+      }
+      var spread = knob.spread || 0;
+      var lo = knob.min * (1 - spread);
+      var hi = knob.max * (1 + spread);
       var perLeg = [];
       for (var leg = 0; leg < LEG_COUNT; leg++) {
-        perLeg.push(base * (1 - (knob.spread || 0) + rng.nextFloat() * (knob.spread || 0) * 2));
+        perLeg.push(quantise(lo + rng.nextFloat() * (hi - lo)));
       }
       ranges[i] = perLeg;
     });

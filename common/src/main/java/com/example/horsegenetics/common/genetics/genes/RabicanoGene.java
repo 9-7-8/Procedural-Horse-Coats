@@ -18,6 +18,9 @@ import com.example.horsegenetics.common.genetics.Expression;
 import com.example.horsegenetics.common.genetics.FounderContext;
 import com.example.horsegenetics.common.genetics.FounderTable;
 import com.example.horsegenetics.common.genetics.Gene;
+import com.example.horsegenetics.common.genetics.epi.EpiSchema;
+import com.example.horsegenetics.common.genetics.epi.EpiValue;
+import com.example.horsegenetics.common.genetics.epi.EpiValues;
 
 import java.util.List;
 
@@ -172,17 +175,33 @@ public final class RabicanoGene implements Gene {
      * a real, ordinary outcome, not an edge case - and from a floor on a
      * homozygote, with the two ranges overlapping most of the way.
      */
+    /**
+     * Where in its dosage's range this horse sits, how tail-heavy its ticking
+     * is, and which flank carries more of it.
+     */
+    @Override
+    public EpiSchema epiSchema() {
+        return EpiSchema.of(
+                EpiValue.seed("seed"),
+                EpiValue.uniform("expression", 0, 1),
+                EpiValue.uniform("tail_emphasis", 0.65, 1.0),
+                EpiValue.uniform("side_bias", -0.15, 0.15));
+    }
+
     private PigmentField paint(CoatBuildContext ctx, PigmentView coat) {
-        Rng epi = ctx.epigeneticsFor(KEY);
-        long seed = epi.nextLong();
+        EpiValues epi = ctx.epigeneticsFor(KEY);
+        long seed = epi.seed("seed");
         boolean twoCopies = ctx.genotype().pair(this).homozygousFor(Rb);
         double lo = twoCopies ? HOM_MIN : HET_MIN;
         double hi = twoCopies ? HOM_MAX : HET_MAX;
-        double expression = lo + epi.nextFloat() * (hi - lo);
-        double tailEmphasis = 0.65 + epi.nextFloat() * 0.35;
+        // Stored as a position in the range, because the range itself depends on
+        // dosage - a horse that gains a second copy keeps its place in the range
+        // rather than being re-rolled inside the wider one.
+        double expression = lo + epi.get("expression") * (hi - lo);
+        double tailEmphasis = epi.get("tail_emphasis");
         // The two flanks are related and are not mirror images - one side always
         // carries a little more than the other.
-        double sideBias = (epi.nextFloat() - 0.5) * 0.30;
+        double sideBias = epi.get("side_bias");
 
         Skin skin = ctx.skin();
         PigmentField f = coat.mutableCopy();

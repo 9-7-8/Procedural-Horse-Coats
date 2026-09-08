@@ -12,6 +12,9 @@ import com.example.horsegenetics.common.genetics.Gene;
 import com.example.horsegenetics.common.genetics.Genotype;
 import com.example.horsegenetics.common.trait.HealthContribution;
 import com.example.horsegenetics.common.trait.TraitBuilder;
+import com.example.horsegenetics.common.genetics.epi.EpiSchema;
+import com.example.horsegenetics.common.genetics.epi.EpiValue;
+import com.example.horsegenetics.common.genetics.EyeSpread;
 
 import java.util.List;
 
@@ -176,6 +179,15 @@ public final class Pax3Gene implements Gene, HealthContribution, EyeColorContrib
     public java.util.Optional<EyeColor> eyeColor(AllelePair pair, Genotype genotype,
             com.example.horsegenetics.common.genetics.Epigenome epigenome, double whiteCoverage) {
         return WhitePatternEyes.blueIf(!expressionOf(pair).wildType(), whiteCoverage);
+    }
+
+    /**
+     * The splash shape, plus the eye spread - see {@link MitfGene}, whose pattern
+     * this locus shares.
+     */
+    @Override
+    public EpiSchema epiSchema() {
+        return WhitePattern.splashSchema().and(EyeSpread.schema().values().toArray(new EpiValue[0]));
     }
 
 }

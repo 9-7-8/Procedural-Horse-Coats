@@ -13,6 +13,9 @@ import com.example.horsegenetics.common.genetics.Expression;
 import com.example.horsegenetics.common.genetics.FounderContext;
 import com.example.horsegenetics.common.genetics.FounderTable;
 import com.example.horsegenetics.common.genetics.Gene;
+import com.example.horsegenetics.common.genetics.epi.EpiSchema;
+import com.example.horsegenetics.common.genetics.epi.EpiValue;
+import com.example.horsegenetics.common.genetics.epi.EpiValues;
 
 import java.util.List;
 
@@ -267,29 +270,45 @@ public final class DunGene implements Gene {
     }
 
     /**
+     * The marking field, the dorsal stripe's width, and a propensity for each
+     * accessory - the shoulder bar, the facial cobweb, and one per leg. The
+     * accessories are stored as propensities rather than as strengths so
+     * {@link #accessory} can keep its ramp: most duns that have a shoulder bar
+     * have a hint of one, not a painted stripe, and that shape lives in the
+     * painter rather than in the stored number.
+     */
+    @Override
+    public EpiSchema epiSchema() {
+        return EpiSchema.of(
+                EpiValue.seed("seed"),
+                EpiValue.uniform("dorsal_width", 0.80, 1.30),
+                EpiValue.uniform("shoulder", 0, 1),
+                EpiValue.uniform("face", 0, 1),
+                EpiValue.perLeg("bar", 0, 1));
+    }
+
+    /**
      * Which primitive markings <b>this</b> horse drew, and how strongly. Rolled
      * off the expressing copy's epigenetic seed, so a horse regenerates the
      * same set every session and a foal that inherits the copy inherits its
      * dam's markings.
      *
-     * <p>The draw order is a contract: <b>one {@code nextLong()} then seven
-     * {@code nextFloat()}s</b> - the marking seed, the dorsal-width jitter, the
-     * shoulder bar, the face, then one per leg. Both marked outcomes draw all
-     * eight even though {@code d1} only uses the first two, so the two share
-     * one order and a {@code d1} horse that later gains a {@code D} copy keeps
-     * the stripe it had.
+     * <p>Both marked outcomes read the same stored values even though
+     * {@code d1} only uses the seed and the dorsal width, so a {@code d1} horse
+     * that later gains a {@code D} copy keeps the stripe it had and gains the
+     * accessories it was always carrying.
      */
     private record Markings(long seed, double dorsalHalfWidth, double shoulder, double face,
                             boolean cobweb, double[] bars) {}
 
-    private static Markings roll(Rng epi) {
-        long seed = epi.nextLong();
-        double dorsal = DORSAL_HALF_WIDTH * (0.80 + 0.50 * epi.nextFloat());
-        double shoulder = accessory(epi.nextFloat(), SHOULDER_CHANCE);
-        double face = accessory(epi.nextFloat(), COBWEB_CHANCE);
+    private static Markings roll(EpiValues epi) {
+        long seed = epi.seed("seed");
+        double dorsal = DORSAL_HALF_WIDTH * epi.get("dorsal_width");
+        double shoulder = accessory(epi.get("shoulder"), SHOULDER_CHANCE);
+        double face = accessory(epi.get("face"), COBWEB_CHANCE);
         double[] bars = new double[CoatRegions.LEGS.size()];
         for (int i = 0; i < bars.length; i++) {
-            bars[i] = accessory(epi.nextFloat(), BAR_CHANCE);
+            bars[i] = accessory(epi.get("bar", i), BAR_CHANCE);
         }
         // "A full dark mask can replace the more delicate web effect visually" -
         // so the same roll picks which of the two this horse shows, the stronger
@@ -303,7 +322,7 @@ public final class DunGene implements Gene {
      * plain uniform - most of the duns that have a shoulder bar have a hint of
      * one, not a painted stripe.
      */
-    private static double accessory(float roll, double chance) {
+    private static double accessory(double roll, double chance) {
         if (roll >= chance) {
             return 0;
         }

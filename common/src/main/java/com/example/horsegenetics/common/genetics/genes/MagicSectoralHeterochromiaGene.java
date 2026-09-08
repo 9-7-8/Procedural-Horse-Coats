@@ -3,7 +3,7 @@ package com.example.horsegenetics.common.genetics.genes;
 import com.example.horsegenetics.common.Rng;
 import com.example.horsegenetics.common.genetics.Allele;
 import com.example.horsegenetics.common.genetics.AllelePair;
-import com.example.horsegenetics.common.genetics.AlleleRandomness;
+import com.example.horsegenetics.common.genetics.GeneEpigenetics;
 import com.example.horsegenetics.common.genetics.Epigenome;
 import com.example.horsegenetics.common.genetics.Expression;
 import com.example.horsegenetics.common.genetics.EyeColor;
@@ -14,6 +14,9 @@ import com.example.horsegenetics.common.genetics.FounderContext;
 import com.example.horsegenetics.common.genetics.FounderTable;
 import com.example.horsegenetics.common.genetics.Gene;
 import com.example.horsegenetics.common.genetics.Genotype;
+import com.example.horsegenetics.common.genetics.epi.EpiSchema;
+import com.example.horsegenetics.common.genetics.epi.EpiValue;
+import com.example.horsegenetics.common.genetics.epi.EpiValues;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -225,18 +228,33 @@ public final class MagicSectoralHeterochromiaGene implements Gene, EyePatchContr
      * otherwise happen to one horse in twelve and read as a bug rather than as
      * a coincidence.
      */
+    /**
+     * Per copy: which wedge of the iris it claims, how far the other eye's wedge
+     * is rotated from it, and the colour a {@code chaos} copy shows.
+     *
+     * <p>The wedges are categories, so drift never rotates a horse's sector a
+     * step at a time - a line keeps the shape of its eyes.
+     */
+    @Override
+    public EpiSchema epiSchema() {
+        return EpiSchema.of(
+                        EpiValue.category("wedge", EyePatch.wedgeCount()),
+                        EpiValue.category("wedge_step", EyePatch.wedgeStepCount()))
+                .and(EpiValue.colour("chaos", 0.45, 0.95, 0.45, 0.90));
+    }
+
     @Override
     public Optional<EyePatches> eyePatches(AllelePair pair, Genotype genotype, Epigenome epigenome,
                                            double whiteCoverage) {
         if (!shows(pair)) {
             return Optional.empty();
         }
-        AlleleRandomness rnd = AlleleRandomness.forGene(this, genotype, epigenome);
-        Rng first = rnd.copy(0);
-        Rng second = rnd.copy(1);
+        GeneEpigenetics rnd = GeneEpigenetics.forGene(this, genotype, epigenome);
+        EpiValues first = rnd.copy(0);
+        EpiValues second = rnd.copy(1);
 
-        int rightWedge = EyePatch.randomWedge(first);
-        int leftWedge = EyePatch.differentWedge(second, rightWedge);
+        int rightWedge = EyePatch.wedgeAt(first.category("wedge"));
+        int leftWedge = EyePatch.differentWedgeAt(rightWedge, second.category("wedge_step"));
         EyeColor a = colorOf(pair.first(), first);
         EyeColor b = colorOf(pair.second(), second);
 
@@ -248,16 +266,13 @@ public final class MagicSectoralHeterochromiaGene implements Gene, EyePatchContr
     }
 
     /**
-     * One allele's colour. Every branch consumes the same three draws so the
-     * draw order does not depend on which allele this copy carries; only
-     * {@code chaos} uses them.
+     * One allele's colour. Every copy stores a chaos colour whichever allele it
+     * carries, so a fixed-colour copy that is later spliced to {@code chaos}
+     * already has one rather than being invented on the spot.
      */
-    private EyeColor colorOf(Allele allele, Rng rng) {
-        float hue = rng.nextFloat();
-        float sat = 0.45f + rng.nextFloat() * 0.50f;
-        float val = 0.45f + rng.nextFloat() * 0.45f;
+    private EyeColor colorOf(Allele allele, EpiValues epi) {
         if (allele == chaos) {
-            return patchColor("chaos", "Chaos", hsvToRgb(hue, sat, val));
+            return patchColor("chaos", "Chaos", epi.rgb("chaos"));
         }
         if (allele == green) {
             return patchColor("magic-green", "Green", GREEN_RGB);

@@ -15,6 +15,9 @@ import com.example.horsegenetics.common.genetics.FounderContext;
 import com.example.horsegenetics.common.genetics.FounderTable;
 import com.example.horsegenetics.common.genetics.Gene;
 import com.example.horsegenetics.common.genetics.Genotype;
+import com.example.horsegenetics.common.genetics.epi.EpiSchema;
+import com.example.horsegenetics.common.genetics.epi.EpiValue;
+import com.example.horsegenetics.common.genetics.epi.EpiValues;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -175,11 +178,11 @@ public final class FlaxenGene implements Gene {
      * convinced anyone. Rolled off the expressing copy's epigenetic seed, so it
      * is fixed for life and inherited with the allele.
      *
-     * <p><b>Consumes one {@link Rng#nextFloat()}</b>, and is the first draw a
-     * flaxen horse makes.
+     * <p>Reads the stored {@code expression} offset - the number that separates
+     * two flaxens of the same dosage.
      */
-    public static double score(double dosage, Rng epi) {
-        return dosage + (epi.nextFloat() * 2.0 - 1.0) * EXPRESSION_RANGE;
+    public static double score(double dosage, EpiValues epi) {
+        return dosage + epi.get("expression");
     }
 
     // ------------------------------------------------------------------
@@ -238,13 +241,26 @@ public final class FlaxenGene implements Gene {
      * needed. That is exactly what {@link SilverGene} <i>cannot</i> do, and why
      * it has one.
      */
+    /**
+     * Two numbers: how far this horse reads from its raw dosage, and how far its
+     * tail reads from its mane. The second is why a flaxen's tail is rarely an
+     * exact match for its mane, and it is inherited with the allele like
+     * everything else here.
+     */
+    @Override
+    public EpiSchema epiSchema() {
+        return EpiSchema.of(
+                EpiValue.uniform("expression", -EXPRESSION_RANGE, EXPRESSION_RANGE),
+                EpiValue.uniform("tail_offset", -TAIL_OFFSET, TAIL_OFFSET));
+    }
+
     private PigmentField paint(CoatBuildContext ctx, PigmentView coat) {
         Skin skin = ctx.skin();
-        Rng epi = ctx.epigeneticsFor(KEY);
+        EpiValues epi = ctx.epigeneticsFor(KEY);
         double dosage = dosage(ctx.genotype().pair(this));
 
         double mane = score(dosage, epi);
-        double tail = mane + (epi.nextFloat() * 2.0 - 1.0) * TAIL_OFFSET;
+        double tail = mane + epi.get("tail_offset");
 
         PigmentField out = coat.mutableCopy();
         HorseSkinGeometry.forEachTexel(skin, (px, py, part, face, point) -> {

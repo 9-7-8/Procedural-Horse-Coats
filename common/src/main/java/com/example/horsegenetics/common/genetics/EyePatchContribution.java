@@ -23,12 +23,12 @@ import java.util.Optional;
  *       epigenome alone.</li>
  *   <li><b>May vary per horse</b> - unlike the eye-colour channel this one
  *       exists for the case that does. Take every number from
- *       {@link AlleleRandomness}, so the patch is inherited with the allele
+ *       {@link GeneEpigenetics}, so the patch is inherited with the allele
  *       copy that drew it, and declare the outcome
  *       {@link Expression.Builder#varies()} so the horse gets its own texture
  *       instead of colliding with another in the coat cache.</li>
  *   <li>{@code epigenome} may be {@code null} - a question asked about a
- *       genotype rather than about a horse. {@link AlleleRandomness#forGene}
+ *       genotype rather than about a horse. {@link GeneEpigenetics#forGene}
  *       already handles that by handing back midpoints; a gene that cannot
  *       answer without a real horse should return {@link Optional#empty()}.</li>
  *   <li>A gene with nothing to say returns empty. All but one do.</li>

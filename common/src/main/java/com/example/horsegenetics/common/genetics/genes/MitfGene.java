@@ -13,6 +13,9 @@ import com.example.horsegenetics.common.genetics.Genotype;
 import com.example.horsegenetics.common.trait.Condition;
 import com.example.horsegenetics.common.trait.HealthContribution;
 import com.example.horsegenetics.common.trait.TraitBuilder;
+import com.example.horsegenetics.common.genetics.epi.EpiSchema;
+import com.example.horsegenetics.common.genetics.epi.EpiValue;
+import com.example.horsegenetics.common.genetics.EyeSpread;
 
 import java.util.List;
 
@@ -268,6 +271,16 @@ public final class MitfGene implements Gene, HealthContribution, EyeColorContrib
     public java.util.Optional<EyeColor> eyeColor(AllelePair pair, Genotype genotype,
             com.example.horsegenetics.common.genetics.Epigenome epigenome, double whiteCoverage) {
         return WhitePatternEyes.blueIf(isSplash(pair), whiteCoverage);
+    }
+
+    /**
+     * The splash shape - the waterline field, where in its range this horse lands,
+     * and the shared face marking - plus the eye spread, which splash claims more
+     * often than any other locus.
+     */
+    @Override
+    public EpiSchema epiSchema() {
+        return WhitePattern.splashSchema().and(EyeSpread.schema().values().toArray(new EpiValue[0]));
     }
 
 }

@@ -3,27 +3,27 @@ package com.example.horsegenetics.common.genetics;
 import com.example.horsegenetics.common.genetics.genes.AcanGene;
 import com.example.horsegenetics.common.genetics.genes.AgoutiGene;
 import com.example.horsegenetics.common.genetics.genes.B4galt7Gene;
+import com.example.horsegenetics.common.genetics.genes.BrindleGene;
+import com.example.horsegenetics.common.genetics.genes.ChampagneGene;
 import com.example.horsegenetics.common.genetics.genes.CkmGene;
+import com.example.horsegenetics.common.genetics.genes.CutieMarkGene;
+import com.example.horsegenetics.common.genetics.genes.CvmGene;
+import com.example.horsegenetics.common.genetics.genes.DhampirGene;
+import com.example.horsegenetics.common.genetics.genes.DietGene;
 import com.example.horsegenetics.common.genetics.genes.DunGene;
 import com.example.horsegenetics.common.genetics.genes.EdnrbGene;
-import com.example.horsegenetics.common.genetics.genes.ChampagneGene;
 import com.example.horsegenetics.common.genetics.genes.ExtensionGene;
 import com.example.horsegenetics.common.genetics.genes.FlaxenGene;
+import com.example.horsegenetics.common.genetics.genes.Gbe1Gene;
 import com.example.horsegenetics.common.genetics.genes.GreyGene;
+import com.example.horsegenetics.common.genetics.genes.Gys1Gene;
 import com.example.horsegenetics.common.genetics.genes.HealerGene;
 import com.example.horsegenetics.common.genetics.genes.Hmga2Gene;
+import com.example.horsegenetics.common.genetics.genes.KitGene;
 import com.example.horsegenetics.common.genetics.genes.LcorlGene;
 import com.example.horsegenetics.common.genetics.genes.LeopardGene;
 import com.example.horsegenetics.common.genetics.genes.LightGene;
-import com.example.horsegenetics.common.genetics.genes.CutieMarkGene;
-import com.example.horsegenetics.common.genetics.genes.DhampirGene;
-import com.example.horsegenetics.common.genetics.genes.DietGene;
-import com.example.horsegenetics.common.genetics.genes.PangareGene;
-import com.example.horsegenetics.common.genetics.genes.Patn1Gene;
-import com.example.horsegenetics.common.genetics.genes.Patn2Gene;
 import com.example.horsegenetics.common.genetics.genes.LutGene;
-import com.example.horsegenetics.common.genetics.genes.BrindleGene;
-import com.example.horsegenetics.common.genetics.genes.TigerEyeGene;
 import com.example.horsegenetics.common.genetics.genes.MagicHealthGene;
 import com.example.horsegenetics.common.genetics.genes.MagicJumpGene;
 import com.example.horsegenetics.common.genetics.genes.MagicSectoralHeterochromiaGene;
@@ -32,32 +32,41 @@ import com.example.horsegenetics.common.genetics.genes.MagicSpeedGene;
 import com.example.horsegenetics.common.genetics.genes.MagicZebraGene;
 import com.example.horsegenetics.common.genetics.genes.ManchadoGene;
 import com.example.horsegenetics.common.genetics.genes.ManeColorGene;
-import com.example.horsegenetics.common.genetics.genes.MilkGene;
-import com.example.horsegenetics.common.genetics.genes.MushroomGene;
-import com.example.horsegenetics.common.genetics.genes.NaturalZebraGene;
 import com.example.horsegenetics.common.genetics.genes.MatpGene;
+import com.example.horsegenetics.common.genetics.genes.MegaesophagusGene;
 import com.example.horsegenetics.common.genetics.genes.MetGene;
+import com.example.horsegenetics.common.genetics.genes.MilkGene;
+import com.example.horsegenetics.common.genetics.genes.MitfGene;
 import com.example.horsegenetics.common.genetics.genes.MstnGene;
+import com.example.horsegenetics.common.genetics.genes.MushroomGene;
+import com.example.horsegenetics.common.genetics.genes.Myo5aGene;
+import com.example.horsegenetics.common.genetics.genes.NaturalZebraGene;
+import com.example.horsegenetics.common.genetics.genes.PangareGene;
+import com.example.horsegenetics.common.genetics.genes.ParticleGene;
+import com.example.horsegenetics.common.genetics.genes.Patn1Gene;
+import com.example.horsegenetics.common.genetics.genes.Patn2Gene;
+import com.example.horsegenetics.common.genetics.genes.Pax3Gene;
 import com.example.horsegenetics.common.genetics.genes.Pdk4Gene;
 import com.example.horsegenetics.common.genetics.genes.PinkHairGene;
 import com.example.horsegenetics.common.genetics.genes.Plod1Gene;
+import com.example.horsegenetics.common.genetics.genes.PpibGene;
+import com.example.horsegenetics.common.genetics.genes.PrkdcGene;
 import com.example.horsegenetics.common.genetics.genes.RabicanoGene;
 import com.example.horsegenetics.common.genetics.genes.Rapgef5Gene;
 import com.example.horsegenetics.common.genetics.genes.RoanGene;
-import com.example.horsegenetics.common.genetics.genes.KitGene;
+import com.example.horsegenetics.common.genetics.genes.Ryr2Gene;
+import com.example.horsegenetics.common.genetics.genes.Scn4aGene;
 import com.example.horsegenetics.common.genetics.genes.SexGene;
 import com.example.horsegenetics.common.genetics.genes.ShadeGene;
-import com.example.horsegenetics.common.genetics.genes.Ryr2Gene;
 import com.example.horsegenetics.common.genetics.genes.ShoxGene;
 import com.example.horsegenetics.common.genetics.genes.SilverGene;
 import com.example.horsegenetics.common.genetics.genes.SootyGene;
 import com.example.horsegenetics.common.genetics.genes.St14Gene;
-import com.example.horsegenetics.common.genetics.genes.MitfGene;
 import com.example.horsegenetics.common.genetics.genes.TailColorGene;
+import com.example.horsegenetics.common.genetics.genes.TigerEyeGene;
 import com.example.horsegenetics.common.genetics.genes.TobianoGene;
+import com.example.horsegenetics.common.genetics.genes.Toe1Gene;
 import com.example.horsegenetics.common.genetics.genes.VerdantGene;
-import com.example.horsegenetics.common.genetics.genes.ParticleGene;
-import com.example.horsegenetics.common.genetics.genes.Pax3Gene;
 import com.example.horsegenetics.common.genetics.spec.SpecGene;
 
 import com.example.horsegenetics.common.CommonLog;
@@ -305,11 +314,11 @@ public final class Genes {
     public static final Hmga2Gene HMGA2 = new Hmga2Gene();
 
     /**
-     * The <b>health</b> loci. Every one of them is recessive and every one of
-     * them is absent from its own founder table as a homozygote - a wild-caught
-     * horse is an adult that survived, so it can carry a disorder but never have
-     * one. The only way to see any of these is to breed two carriers, which is
-     * the whole design: it makes a pedigree worth keeping.
+     * The <b>recessive health</b> loci. Every one of them is absent from its own
+     * founder table as a homozygote - a wild-caught horse is an adult that
+     * survived, so it can carry a disorder but never have one. The only way to
+     * see any of these is to breed two carriers, which is the whole design: it
+     * makes a pedigree worth keeping.
      */
     public static final AcanGene ACAN = new AcanGene();
     public static final B4galt7Gene B4GALT7 = new B4galt7Gene();
@@ -318,6 +327,24 @@ public final class Genes {
     public static final St14Gene ST14 = new St14Gene();
     public static final ShoxGene SHOX = new ShoxGene();
     public static final MetGene MET = new MetGene();
+    public static final PpibGene PPIB = new PpibGene();
+    public static final PrkdcGene PRKDC = new PrkdcGene();
+    public static final Myo5aGene MYO5A = new Myo5aGene();
+    public static final Toe1Gene TOE1 = new Toe1Gene();
+    public static final CvmGene CVM = new CvmGene();
+    public static final Gbe1Gene GBE1 = new Gbe1Gene();
+    public static final MegaesophagusGene MEGAESOPHAGUS = new MegaesophagusGene();
+
+    /**
+     * The <b>dominant</b> disorders, and the two exceptions to the paragraph
+     * above. A dominant has no silent carrier, so if founders could never be
+     * affected the allele could never enter the world at all - which means a
+     * wild-caught horse really can be a sick one here. The homozygote is still
+     * excluded, so the worst outcome is still something somebody bred. See
+     * {@link com.example.horsegenetics.common.genetics.genes.DominantDisorderGene}.
+     */
+    public static final Scn4aGene SCN4A = new Scn4aGene();
+    public static final Gys1Gene GYS1 = new Gys1Gene();
 
     /** The hand-written genes. Order here is irrelevant - the registry sorts. */
     private static final List<Gene> BUILTINS = List.of(
@@ -329,7 +356,8 @@ public final class Genes {
             MANE_COLOR, TAIL_COLOR, PARTICLE, LIGHT, HEALER, SECTORAL_EYES, VERDANT, LUT, CUTIE_MARK,
             DHAMPIR,
             MSTN, PDK4, CKM, RYR2, LCORL, HMGA2, PATN1, PATN2,
-            ACAN, B4GALT7, PLOD1, RAPGEF5, ST14, SHOX, MET);
+            ACAN, B4GALT7, PLOD1, RAPGEF5, ST14, SHOX, MET,
+            PPIB, PRKDC, MYO5A, TOE1, CVM, GBE1, MEGAESOPHAGUS, SCN4A, GYS1);
 
     /** Ordering: lower priority first, ties broken alphabetically by key. */
     private static final Comparator<Gene> BY_PRIORITY_THEN_KEY =

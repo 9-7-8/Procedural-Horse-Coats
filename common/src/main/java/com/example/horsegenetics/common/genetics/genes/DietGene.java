@@ -2,7 +2,7 @@ package com.example.horsegenetics.common.genetics.genes;
 
 import com.example.horsegenetics.common.genetics.Allele;
 import com.example.horsegenetics.common.genetics.AllelePair;
-import com.example.horsegenetics.common.genetics.AlleleRandomness;
+import com.example.horsegenetics.common.genetics.GeneEpigenetics;
 import com.example.horsegenetics.common.genetics.Diet;
 import com.example.horsegenetics.common.genetics.DietContribution;
 import com.example.horsegenetics.common.genetics.Expression;
@@ -12,6 +12,8 @@ import com.example.horsegenetics.common.genetics.Gene;
 import com.example.horsegenetics.common.genetics.GeneRarity;
 import com.example.horsegenetics.common.genetics.Genotype;
 import com.example.horsegenetics.common.genetics.HorseDiet;
+import com.example.horsegenetics.common.genetics.epi.EpiSchema;
+import com.example.horsegenetics.common.genetics.epi.EpiValue;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -208,7 +210,7 @@ public final class DietGene implements Gene, DietContribution {
     // --- DietContribution -------------------------------------------------
 
     @Override
-    public Optional<HorseDiet> diet(AllelePair pair, Genotype genotype, AlleleRandomness random) {
+    public Optional<HorseDiet> diet(AllelePair pair, Genotype genotype, GeneEpigenetics random) {
         Diet diet = dietOf(pair);
         if (diet == null) {
             return Optional.empty();
@@ -216,10 +218,20 @@ public final class DietGene implements Gene, DietContribution {
         if (diet.variants() <= 0) {
             return Optional.of(HorseDiet.of(diet));
         }
-        // One draw, off the expressing copy: which metal, which gem. The horse
-        // asks for the same one for life, and a foal that inherits the copy
-        // inherits the craving.
-        int pick = (int) (random.expressed().nextFloat() * diet.variants());
+        // One stored number, off the expressing copy: which metal, which gem. The
+        // horse asks for the same one for life, and a foal that inherits the copy
+        // inherits the craving. Kept as a position rather than an index because
+        // how many variants there are depends on which diet the alleles gave it.
+        int pick = (int) (random.expressed().get("variant") * diet.variants());
         return Optional.of(HorseDiet.of(diet, pick));
     }
+    /**
+     * Which variant of its diet this horse craves - which metal, which gem. One
+     * number, and the only thing about a diet that is not fixed by the alleles.
+     */
+    @Override
+    public EpiSchema epiSchema() {
+        return EpiSchema.of(EpiValue.uniform("variant", 0, 1));
+    }
+
 }

@@ -23,6 +23,10 @@ import com.example.horsegenetics.common.genetics.Genotype;
 import com.example.horsegenetics.common.trait.Condition;
 import com.example.horsegenetics.common.trait.HealthContribution;
 import com.example.horsegenetics.common.trait.TraitBuilder;
+import com.example.horsegenetics.common.genetics.epi.EpiSchema;
+import com.example.horsegenetics.common.genetics.epi.EpiValue;
+import com.example.horsegenetics.common.genetics.epi.EpiValues;
+import com.example.horsegenetics.common.genetics.EyeSpread;
 
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -394,26 +398,66 @@ public final class EdnrbGene implements Gene, HealthContribution, EyeColorContri
      * the side lean), because a bias that only re-ranks texels cannot change
      * how many of them clear a quantile.
      *
-     * <p><b>Draw order</b>, off {@code ctx.epigeneticsFor(KEY)}:
-     * {@code nextLong()} (the noise seed), then {@code nextFloat()}s for the
-     * face strength, the body cover, the barrel band centre, the band reach,
-     * the neck band centre and the side lean, then one per leg in
-     * {@link CoatRegions#LEGS} order, then whatever
-     * {@link WhitePattern#faceMarking} takes. Every draw happens whether or not
-     * it is used, so retuning one of them cannot move another.
+     * <p>Every number is read by name off the expressing copy - the noise seed,
+     * the face strength, the body cover, the barrel band centre and reach, the
+     * neck band centre, the side lean, and one coronet height per leg in
+     * {@link CoatRegions#LEGS} order. See {@link #epiSchema()}.
      */
+    // ------------------------------------------------------------------
+    // Epigenetics
+    // ------------------------------------------------------------------
+
+    private static final String SEED = "seed";
+    private static final String FACE = "face";
+    private static final String COVER = "cover";
+    private static final String BAND_CENTER = "band_center";
+    private static final String BAND_REACH = "band_reach";
+    private static final String NECK_CENTER = "neck_center";
+    private static final String LEAN = "side_lean";
+    private static final String CORONET = "coronet";
+
+    /**
+     * Frame's shape, per horse: the noise field, how strong the face marking is,
+     * <b>how much white there is</b> ({@link #COVER}), where the barrel and neck
+     * bands sit and how far they reach, which side the white leans to, and one
+     * coronet height per leg.
+     *
+     * <p>{@link #COVER} keeps the power curve it was drawn with, so most frames
+     * carry a modest amount of white and the near-white ones stay rare. It is
+     * the single most legible number on the gene, and the one a breeder aiming
+     * for a loud frame is actually selecting on.
+     *
+     * <p>Composed with {@link WhitePattern#faceSchema()} - frame draws the
+     * shared face marking - and with {@link EyeSpread#schema()}, because a frame
+     * can claim the eye colour and the spread is read off whichever gene wins.
+     */
+    @Override
+    public EpiSchema epiSchema() {
+        return EpiSchema.of(
+                        EpiValue.seed(SEED),
+                        EpiValue.uniform(FACE, FACE_MIN, FACE_MIN + FACE_RANGE),
+                        EpiValue.power(COVER, COVER_MIN, COVER_MIN + COVER_RANGE, COVER_GAMMA),
+                        EpiValue.uniform(BAND_CENTER, BAND_CENTER_MIN, BAND_CENTER_MIN + BAND_CENTER_RANGE),
+                        EpiValue.uniform(BAND_REACH, BAND_REACH_MIN, BAND_REACH_MIN + BAND_REACH_RANGE),
+                        EpiValue.uniform(NECK_CENTER, NECK_CENTER_MIN, NECK_CENTER_MIN + NECK_CENTER_RANGE),
+                        EpiValue.uniform(LEAN, -1, 1),
+                        EpiValue.perLeg(CORONET, 0, 1))
+                .and(WhitePattern.faceSchema().values().toArray(new EpiValue[0]))
+                .and(EyeSpread.schema().values().toArray(new EpiValue[0]));
+    }
+
     private static PigmentField paintFrame(CoatBuildContext ctx, PigmentView coat) {
-        Rng epi = ctx.epigeneticsFor(KEY);
-        long seed = epi.nextLong();
-        double faceStrength = FACE_MIN + epi.nextFloat() * FACE_RANGE;
-        double cover = COVER_MIN + COVER_RANGE * Math.pow(epi.nextFloat(), COVER_GAMMA);
-        double bandCenter = BAND_CENTER_MIN + epi.nextFloat() * BAND_CENTER_RANGE;
-        double reach = BAND_REACH_MIN + epi.nextFloat() * BAND_REACH_RANGE;
-        double neckCenter = NECK_CENTER_MIN + epi.nextFloat() * NECK_CENTER_RANGE;
-        double sideLean = (epi.nextFloat() - 0.5f) * 2.0;
+        EpiValues epi = ctx.epigeneticsFor(KEY);
+        long seed = epi.seed(SEED);
+        double faceStrength = epi.get(FACE);
+        double cover = epi.get(COVER);
+        double bandCenter = epi.get(BAND_CENTER);
+        double reach = epi.get(BAND_REACH);
+        double neckCenter = epi.get(NECK_CENTER);
+        double sideLean = epi.get(LEAN);
         double[] coronets = new double[CoatRegions.LEGS.size()];
         for (int i = 0; i < coronets.length; i++) {
-            coronets[i] = epi.nextFloat();
+            coronets[i] = epi.get(CORONET, i);
         }
 
         Skin skin = ctx.skin();

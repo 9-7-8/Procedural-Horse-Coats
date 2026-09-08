@@ -74,7 +74,7 @@ public final class HorseDiet {
                 continue;
             }
             Optional<HorseDiet> claim = contribution.diet(genotype.pair(gene), genotype,
-                    AlleleRandomness.forGene(gene, genotype, epigenome));
+                    GeneEpigenetics.forGene(gene, genotype, epigenome));
             if (claim.isPresent()) {
                 found = claim.get();
             }

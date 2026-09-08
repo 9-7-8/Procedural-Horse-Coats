@@ -147,12 +147,12 @@ public final class HorseRecords {
     }
 
     public static Traits traitsOf(HorseRecord record) {
-        // The epigenome matters here: the magical size locus says "big", and how
-        // big is written on the allele copy the horse inherited. The breed
-        // matters too: a pure breed pins one or more body axes to a target band.
+        // The epigenome is what matters here: the magical size locus says "big",
+        // and how big is written on the allele copy the horse inherited. The
+        // breed deliberately is not consulted - it shaped this horse's founding
+        // ancestors and nothing since (see BreedStatTargets).
         return HorseTraits.resolve(record.genotype(),
                 record.hasGenome() ? record.epigenome() : null,
-                record.lineage().statTargets(),
                 ServerConfig.healthGeneticsActive());
     }
 

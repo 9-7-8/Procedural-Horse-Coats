@@ -155,23 +155,6 @@ public record BreedLineage(Kind kind, List<String> components) {
 
     // --- display -----------------------------------------------------
 
-    /**
-     * The magical body-stat targets this label pins. A <b>pure</b> breed uses
-     * its own; a <b>cross</b> uses the per-axis average of its two components
-     * ({@link com.example.horsegenetics.common.trait.BreedStatTargets#average});
-     * <b>mixed</b> and <b>feral</b> pin nothing, so their body stats fall back
-     * to the ordinary bounded-Gaussian draw.
-     */
-    public com.example.horsegenetics.common.trait.BreedStatTargets statTargets() {
-        return switch (kind) {
-            case PURE -> Breeds.get(components.get(0)).statTargets();
-            case CROSS -> com.example.horsegenetics.common.trait.BreedStatTargets.average(
-                    Breeds.get(components.get(0)).statTargets(),
-                    Breeds.get(components.get(1)).statTargets());
-            case MIXED, FERAL -> com.example.horsegenetics.common.trait.BreedStatTargets.NONE;
-        };
-    }
-
     /** The player-facing label, e.g. {@code "Arabian × Friesian cross"}. */
     public String displayName() {
         return switch (kind) {

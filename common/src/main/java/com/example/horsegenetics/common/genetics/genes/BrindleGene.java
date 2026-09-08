@@ -17,6 +17,9 @@ import com.example.horsegenetics.common.genetics.Gene;
 import com.example.horsegenetics.common.genetics.Genes;
 import com.example.horsegenetics.common.genetics.Inheritance;
 import com.example.horsegenetics.common.horse.Sex;
+import com.example.horsegenetics.common.genetics.epi.EpiSchema;
+import com.example.horsegenetics.common.genetics.epi.EpiValue;
+import com.example.horsegenetics.common.genetics.epi.EpiValues;
 
 import java.util.List;
 
@@ -228,17 +231,26 @@ public final class BrindleGene implements Gene {
      * through greys rather than walking sideways into the browns, which is what
      * scaling the two pigments together would do.
      *
-     * <p><b>Draw order</b>, off {@code ctx.epigeneticsFor(geneKey)}:
-     * {@code nextLong()} (the streak seed), then three {@code nextFloat()}s -
-     * spacing, duty, warp.
+     * <p>Four stored numbers: the streak field's seed, then its spacing, duty
+     * and warp.
      */
+    /** The streak field and its three shape numbers. */
+    @Override
+    public EpiSchema epiSchema() {
+        return EpiSchema.of(
+                EpiValue.seed("seed"),
+                EpiValue.uniform("spacing", SPACING_MIN, SPACING_MIN + SPACING_RANGE),
+                EpiValue.uniform("duty", DUTY_MIN, DUTY_MIN + DUTY_RANGE),
+                EpiValue.uniform("warp", WARP_MIN, WARP_MIN + WARP_RANGE));
+    }
+
     private PigmentField paint(CoatBuildContext ctx, PigmentView coat) {
-        Rng epi = ctx.epigeneticsFor(KEY);
+        EpiValues epi = ctx.epigeneticsFor(KEY);
         BlaschkoStripes.Pattern pat = new BlaschkoStripes.Pattern(
-                epi.nextLong(),
-                SPACING_MIN + SPACING_RANGE * epi.nextFloat(),
-                DUTY_MIN + DUTY_RANGE * epi.nextFloat(),
-                WARP_MIN + WARP_RANGE * epi.nextFloat());
+                epi.seed("seed"),
+                epi.get("spacing"),
+                epi.get("duty"),
+                epi.get("warp"));
 
         Skin skin = ctx.skin();
         PigmentField f = coat.mutableCopy();

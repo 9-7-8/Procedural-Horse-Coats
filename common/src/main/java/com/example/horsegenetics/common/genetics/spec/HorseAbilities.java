@@ -1,7 +1,7 @@
 package com.example.horsegenetics.common.genetics.spec;
 
 import com.example.horsegenetics.common.genetics.AbilityContribution;
-import com.example.horsegenetics.common.genetics.AlleleRandomness;
+import com.example.horsegenetics.common.genetics.GeneEpigenetics;
 import com.example.horsegenetics.common.genetics.AllelePair;
 import com.example.horsegenetics.common.genetics.Epigenome;
 import com.example.horsegenetics.common.genetics.EpigeneticAbilityContribution;
@@ -72,7 +72,7 @@ public final class HorseAbilities {
         for (Gene gene : Genes.codeOrder()) {
             AllelePair pair = genotype.pair(gene);
             if (gene instanceof EpigeneticAbilityContribution contribution) {
-                AlleleRandomness epi = AlleleRandomness.forGene(gene, genotype, epigenome);
+                GeneEpigenetics epi = GeneEpigenetics.forGene(gene, genotype, epigenome);
                 for (GeneAbility ability : contribution.abilitiesFor(pair, genotype, epi)) {
                     out.add(new Active(gene.key(), ability));
                 }

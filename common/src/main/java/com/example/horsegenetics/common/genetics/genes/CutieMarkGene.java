@@ -3,7 +3,7 @@ package com.example.horsegenetics.common.genetics.genes;
 import com.example.horsegenetics.common.Rng;
 import com.example.horsegenetics.common.genetics.Allele;
 import com.example.horsegenetics.common.genetics.AllelePair;
-import com.example.horsegenetics.common.genetics.AlleleRandomness;
+import com.example.horsegenetics.common.genetics.GeneEpigenetics;
 import com.example.horsegenetics.common.genetics.CutieMarkContribution;
 import com.example.horsegenetics.common.genetics.Epigenome;
 import com.example.horsegenetics.common.genetics.Expression;
@@ -12,6 +12,9 @@ import com.example.horsegenetics.common.genetics.FounderTable;
 import com.example.horsegenetics.common.genetics.Gene;
 import com.example.horsegenetics.common.genetics.Genes;
 import com.example.horsegenetics.common.genetics.Genotype;
+import com.example.horsegenetics.common.genetics.epi.EpiSchema;
+import com.example.horsegenetics.common.genetics.epi.EpiValue;
+import com.example.horsegenetics.common.genetics.epi.EpiValues;
 
 import java.util.List;
 import java.util.Optional;
@@ -169,16 +172,38 @@ public final class CutieMarkGene implements Gene {
      * cannot corrupt an accumulator, surprise a later painter, or move the coat
      * texture key. See {@link CutieMarkContribution}.
      */
+    /**
+     * The emblem itself: how many glyphs, whether they sit in a triangle, which
+     * three glyphs, how large and how tilted.
+     *
+     * <p>The count and the triangle are <b>categories</b> - a cutie mark with
+     * two glyphs is not "less" than one with three, so drift never walks a mark
+     * from two glyphs to three; it either leaves it alone or, once in a very
+     * long while, re-picks. The picks are positions rather than indices because
+     * the glyph table is not a fixed size.
+     */
+    @Override
+    public EpiSchema epiSchema() {
+        return EpiSchema.of(
+                EpiValue.category("count", 3),
+                EpiValue.category("triangle", 2),
+                EpiValue.uniform("pick_a", 0, 1),
+                EpiValue.uniform("pick_b", 0, 1),
+                EpiValue.uniform("pick_c", 0, 1),
+                EpiValue.uniform("scale", 0.7, 1.3),
+                EpiValue.uniform("tilt", -0.35, 0.35));
+    }
+
     public Optional<Mark> markFor(Genotype genotype, Epigenome epigenome) {
         if (genotype.pair(this).count(Cutmrk) != 2) {
             return Optional.empty();
         }
-        Rng r = AlleleRandomness.forGene(this, genotype, epigenome).expressed();
-        int count = 1 + r.nextInt(3);
-        boolean triangle = r.nextBoolean() && count == 3;
-        double[] picks = {r.nextFloat(), r.nextFloat(), r.nextFloat()};
-        double scale = 0.7 + r.nextFloat() * 0.6;
-        double tilt = (r.nextFloat() - 0.5) * 0.7;
+        EpiValues epi = GeneEpigenetics.forGene(this, genotype, epigenome).expressed();
+        int count = 1 + epi.category("count");
+        boolean triangle = epi.category("triangle") == 1 && count == 3;
+        double[] picks = {epi.get("pick_a"), epi.get("pick_b"), epi.get("pick_c")};
+        double scale = epi.get("scale");
+        double tilt = epi.get("tilt");
         Mark mark = new Mark(count, triangle, picks, scale, tilt, false);
 
         for (Gene gene : Genes.codeOrder()) {

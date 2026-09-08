@@ -217,7 +217,7 @@ public record HorseRecord(
      */
     public Traits traits() {
         return hasGenome()
-                ? HorseTraits.resolve(genotype(), epigenome(), lineage().statTargets(), true)
+                ? HorseTraits.resolve(genotype(), epigenome(), true)
                 : HorseTraits.resolve(genotype());
     }
 

@@ -8,6 +8,9 @@ import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Bounds;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Part;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Skin;
 import com.example.horsegenetics.common.genetics.BayShade;
+import com.example.horsegenetics.common.genetics.epi.EpiSchema;
+import com.example.horsegenetics.common.genetics.epi.EpiValue;
+import com.example.horsegenetics.common.genetics.epi.EpiValues;
 
 /**
  * Builds a <b>bay</b> coat into a {@link PigmentField} - the whole bay
@@ -132,20 +135,28 @@ public final class BayCoat {
     // ------------------------------------------------------------------
 
     /**
-     * Roll this horse's shade and paint it. <b>Consumes 5
-     * {@code nextFloat()}s</b>, in this order: one expression roll inside
-     * {@link BayShade#spread}, then one jitter per leg. The order is a contract
-     * - the golden coats and every "adding a gene shifts the stream by this
-     * much" claim lean on it.
+     * Paint this horse's shade from its stored numbers: the shade offset inside
+     * {@link BayShade#spread}, then one height multiplier per leg, so a bay's
+     * four points are never quite level with each other.
      */
-    public static void apply(CoatBuildContext ctx, PigmentField f, Rng epi) {
+    public static void apply(CoatBuildContext ctx, PigmentField f, EpiValues epi) {
         double spread = BayShade.spread(ctx.genotype(), epi);
         double leg = legHeight(spread);
         double[] legs = new double[CoatRegions.LEGS.size()];
         for (int i = 0; i < legs.length; i++) {
-            legs[i] = leg * (1.0 - LEG_JITTER + epi.nextFloat() * LEG_JITTER * 2.0);
+            legs[i] = leg * epi.get(LEG_JITTER_VALUE, i);
         }
         apply(ctx, f, spread, legs);
+    }
+
+    /** Per-leg multiplier on the point height - see {@link #LEG_JITTER}. */
+    public static final String LEG_JITTER_VALUE = "leg_jitter";
+
+    /** Everything a bay stores: its shade offset and its four point heights. */
+    public static EpiSchema schema() {
+        return EpiSchema.of(
+                BayShade.shadeValue(),
+                EpiValue.perLeg(LEG_JITTER_VALUE, 1.0 - LEG_JITTER, 1.0 + LEG_JITTER));
     }
 
     /** Paint at an explicit spread, all four legs level - the tools' and the tests' entry. */

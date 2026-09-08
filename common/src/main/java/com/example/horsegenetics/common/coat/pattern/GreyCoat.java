@@ -8,6 +8,9 @@ import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Bounds;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Part;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Skin;
 import com.example.horsegenetics.common.genetics.Genes;
+import com.example.horsegenetics.common.genetics.epi.EpiSchema;
+import com.example.horsegenetics.common.genetics.epi.EpiValue;
+import com.example.horsegenetics.common.genetics.epi.EpiValues;
 
 import java.util.EnumMap;
 import java.util.Map;
@@ -161,22 +164,22 @@ public final class GreyCoat {
     private GreyCoat() {}
 
     /**
-     * Roll this horse's greying from {@code epi} and paint. Consumes
-     * 1 {@code nextLong()} (the dapple field's seed) + 8 {@code nextFloat()}s:
-     * progression, dapple spacing, dapple strength, point retention, the mane /
-     * tail stage swing, the chubari roll, the chubari seed offset and the
-     * bloody-shoulder roll.
+     * Paint this horse's greying from its stored numbers - see
+     * {@link #schema()}. Chubari spots and a bloody shoulder are
+     * <b>propensities</b> rather than flags: the stored number is tested against
+     * a fixed chance, so the trait is heritable as a tendency and a line can be
+     * bred toward it.
      */
-    public static void apply(CoatBuildContext ctx, PigmentField f, Rng epi) {
-        long noiseSeed = epi.nextLong();
-        float where = epi.nextFloat();                             // where in this dosage's window
-        double spacing = DAPPLE_SPACING_MIN + epi.nextFloat() * DAPPLE_SPACING_RANGE;
-        float dappleStrength = 0.5f + epi.nextFloat() * 0.5f;
-        float pointRetention = epi.nextFloat();
-        float hairSwing = (epi.nextFloat() - 0.5f) * 2f * HAIR_STAGE_SWING;
-        boolean chubari = epi.nextFloat() < CHUBARI_CHANCE;
-        long chubariSeed = noiseSeed ^ (long) (epi.nextFloat() * 0x7FFFFFFF) ^ 0xC4B0A21L;
-        float bloody = epi.nextFloat() < BLOODY_CHANCE ? 1f : 0f;
+    public static void apply(CoatBuildContext ctx, PigmentField f, EpiValues epi) {
+        long noiseSeed = epi.seed(DAPPLE_SEED);
+        float where = (float) epi.get(PROGRESS);                   // where in this dosage's window
+        double spacing = epi.get(DAPPLE_SPACING);
+        float dappleStrength = (float) epi.get(DAPPLE_STRENGTH);
+        float pointRetention = (float) epi.get(POINT_RETENTION);
+        float hairSwing = (float) epi.get(HAIR_SWING);
+        boolean chubari = epi.get(CHUBARI) < CHUBARI_CHANCE;
+        long chubariSeed = epi.seed(CHUBARI_SEED);
+        float bloody = epi.get(BLOODY) < BLOODY_CHANCE ? 1f : 0f;
 
         float[] window = windowFor(ctx);
         float progress = window[0] + (window[1] - window[0]) * where;
@@ -411,5 +414,37 @@ public final class GreyCoat {
 
     private static float clamp01(float v) {
         return v < 0f ? 0f : (v > 1f ? 1f : v);
+    }
+
+    // ------------------------------------------------------------------
+    // Epigenetics
+    // ------------------------------------------------------------------
+
+    public static final String DAPPLE_SEED = "dapple_seed";
+    /** Where in this dosage's window the horse has got to - how far along it is. */
+    public static final String PROGRESS = "progress";
+    public static final String DAPPLE_SPACING = "dapple_spacing";
+    public static final String DAPPLE_STRENGTH = "dapple_strength";
+    public static final String POINT_RETENTION = "point_retention";
+    public static final String HAIR_SWING = "hair_swing";
+    /** How chubari-prone this copy is, tested against {@link #CHUBARI_CHANCE}. */
+    public static final String CHUBARI = "chubari";
+    public static final String CHUBARI_SEED = "chubari_seed";
+    /** How bloody-shoulder-prone this copy is, tested against {@link #BLOODY_CHANCE}. */
+    public static final String BLOODY = "bloody";
+
+    /** Everything a grey stores. Composed into {@code GreyGene}'s schema. */
+    public static EpiSchema schema() {
+        return EpiSchema.of(
+                EpiValue.seed(DAPPLE_SEED),
+                EpiValue.uniform(PROGRESS, 0, 1),
+                EpiValue.uniform(DAPPLE_SPACING, DAPPLE_SPACING_MIN,
+                        DAPPLE_SPACING_MIN + DAPPLE_SPACING_RANGE),
+                EpiValue.uniform(DAPPLE_STRENGTH, 0.5, 1.0),
+                EpiValue.uniform(POINT_RETENTION, 0, 1),
+                EpiValue.uniform(HAIR_SWING, -HAIR_STAGE_SWING, HAIR_STAGE_SWING),
+                EpiValue.uniform(CHUBARI, 0, 1),
+                EpiValue.seed(CHUBARI_SEED),
+                EpiValue.uniform(BLOODY, 0, 1));
     }
 }

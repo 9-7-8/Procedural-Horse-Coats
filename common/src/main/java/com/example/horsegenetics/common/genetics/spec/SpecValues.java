@@ -4,22 +4,30 @@ import com.example.horsegenetics.common.Rng;
 import com.example.horsegenetics.common.genetics.spec.GeneSpec.Knob;
 import com.example.horsegenetics.common.genetics.spec.GeneSpec.Value;
 
+import java.util.ArrayList;
+import java.util.List;
+import com.example.horsegenetics.common.genetics.epi.EpiSchema;
+import com.example.horsegenetics.common.genetics.epi.EpiValue;
+import com.example.horsegenetics.common.genetics.epi.EpiValues;
+
 /**
  * One horse's draw of a {@link GeneSpec}'s {@link Knob}s - the bridge between
  * "the spec says this number varies" and an actual number to paint with.
  *
- * <p>Every knob is drawn <b>once</b>, in declaration order, from the epigenetic
- * seed of the allele copy that expresses. That is the whole determinism
- * contract in one sentence: the same copy always draws the same numbers, so a
- * horse's coat rebuilds identically next session and a foal that inherits the
- * copy inherits the look. Nothing downstream may consult the {@link Rng} again.
+ * <p>Every knob is <b>stored</b> on the allele copy that expresses, and read
+ * back by name. That is the whole determinism contract in one sentence: the
+ * same copy always has the same numbers, so a horse's coat rebuilds identically
+ * next session and a foal that inherits the copy inherits the look.
  *
- * <p>Draw order, so a spec's numbers stay stable when it is edited: for each
- * knob, one {@code nextLong()} if it is a seed, otherwise one
- * {@code nextFloat()} for the horse's base value, plus one more per leg if it is
- * {@code perLeg}. Adding a knob in the middle of the list <b>does</b> reshuffle
- * every knob after it - which is fine (a horse changes look when its gene is
- * re-tuned) but worth knowing while iterating in the creator.
+ * <p>A knob's name is its identity, so <b>adding or re-ordering knobs no longer
+ * reshuffles every knob after it</b> - which used to be the main hazard of
+ * iterating on a gene in the creator. Renaming one still orphans it: it reads as
+ * a fresh roll on the next parse.
+ *
+ * <p>{@link Knob} is the gene file format's own name for what
+ * {@link EpiValue} is in Java, and {@link #schema} is the one-line translation
+ * between them - which is why a data-driven gene needed almost no work to move
+ * onto stored values.
  */
 public final class SpecValues {
 
@@ -38,27 +46,50 @@ public final class SpecValues {
         this.dose = dose;
     }
 
-    /** Draw every knob. {@code dose} is how many variant copies the horse carries. */
-    public static SpecValues draw(GeneSpec spec, Rng rng, int dose) {
+    /**
+     * This spec's knobs as an {@link EpiSchema} - what {@code SpecGene} returns
+     * from {@code Gene.epiSchema()}, and the whole of the translation between
+     * the gene file format and stored epigenetics.
+     *
+     * <p>A {@code perLeg} knob becomes a four-arity value, and its
+     * {@code spread} is folded into the declared range rather than applied
+     * around a hidden shared base. Each leg is then an independent stored number
+     * a player can edit one at a time, which is the point of the exercise.
+     */
+    public static EpiSchema schema(GeneSpec spec) {
+        List<EpiValue> values = new ArrayList<>(spec.knobs().size());
+        for (Knob knob : spec.knobs()) {
+            if (knob.seed()) {
+                values.add(EpiValue.seed(knob.name()));
+            } else if (knob.perLeg()) {
+                values.add(EpiValue.perLeg(knob.name(),
+                        knob.min() * (1.0 - knob.spread()), knob.max() * (1.0 + knob.spread())));
+            } else {
+                values.add(EpiValue.uniform(knob.name(), knob.min(), knob.max()));
+            }
+        }
+        return EpiSchema.of(values);
+    }
+
+    /**
+     * Read every knob off {@code epi}. {@code dose} is how many variant copies
+     * the horse carries.
+     */
+    public static SpecValues read(GeneSpec spec, EpiValues epi, int dose) {
         int n = spec.knobs().size();
         double[][] ranges = new double[n][];
         long[] seeds = new long[n];
         for (int i = 0; i < n; i++) {
             Knob knob = spec.knobs().get(i);
             if (knob.seed()) {
-                seeds[i] = rng.nextLong();
+                seeds[i] = epi.seed(knob.name());
                 continue;
             }
-            double base = knob.min() + rng.nextFloat() * (knob.max() - knob.min());
-            if (!knob.perLeg()) {
-                ranges[i] = new double[]{base};
-                continue;
+            double[] drawn = new double[knob.perLeg() ? LEG_COUNT : 1];
+            for (int leg = 0; leg < drawn.length; leg++) {
+                drawn[leg] = epi.get(knob.name(), leg);
             }
-            double[] perLeg = new double[LEG_COUNT];
-            for (int leg = 0; leg < LEG_COUNT; leg++) {
-                perLeg[leg] = base * (1.0 - knob.spread() + rng.nextFloat() * knob.spread() * 2.0);
-            }
-            ranges[i] = perLeg;
+            ranges[i] = drawn;
         }
         return new SpecValues(spec, ranges, seeds, dose);
     }

@@ -8,7 +8,15 @@ import java.util.Deque;
 /**
  * Deterministic {@link Rng} for tests: hand it the exact sequence of values
  * you want {@code nextFloat()} / {@code nextBoolean()} to return, in order.
- * Running past the end of a sequence fails loudly rather than guessing.
+ * Running past the end of a sequence fails loudly rather than guessing - unless
+ * a {@link #fallingBackTo fallback} is set.
+ *
+ * <p>The fallback exists for breeding tests. A foal's alleles come from a short,
+ * scripted run of {@code nextBoolean()}s that a test wants to control exactly,
+ * and then epigenetic drift consumes a couple of draws per stored value - far
+ * too many to script, and not what the test is about. Scripting the booleans and
+ * falling back to a seeded generator keeps the allele choices pinned and lets
+ * the drift be ordinary.
  */
 public final class FakeRng implements Rng {
 
@@ -16,6 +24,13 @@ public final class FakeRng implements Rng {
     private final Deque<Boolean> booleans = new ArrayDeque<>();
     private final Deque<Integer> ints = new ArrayDeque<>();
     private final Deque<Long> longs = new ArrayDeque<>();
+    private Rng fallback;
+
+    /** Where draws go once a scripted queue runs out. Without one, running out fails. */
+    public FakeRng fallingBackTo(Rng rng) {
+        this.fallback = rng;
+        return this;
+    }
 
     public FakeRng floats(float... values) {
         for (float v : values) {
@@ -48,6 +63,9 @@ public final class FakeRng implements Rng {
     @Override
     public float nextFloat() {
         if (floats.isEmpty()) {
+            if (fallback != null) {
+                return fallback.nextFloat();
+            }
             throw new IllegalStateException("FakeRng.nextFloat() called more times than values provided");
         }
         return floats.removeFirst();
@@ -56,6 +74,9 @@ public final class FakeRng implements Rng {
     @Override
     public boolean nextBoolean() {
         if (booleans.isEmpty()) {
+            if (fallback != null) {
+                return fallback.nextBoolean();
+            }
             throw new IllegalStateException("FakeRng.nextBoolean() called more times than values provided");
         }
         return booleans.removeFirst();
@@ -64,6 +85,9 @@ public final class FakeRng implements Rng {
     @Override
     public int nextInt(int bound) {
         if (ints.isEmpty()) {
+            if (fallback != null) {
+                return fallback.nextInt(bound);
+            }
             throw new IllegalStateException("FakeRng.nextInt() called more times than values provided");
         }
         int v = ints.removeFirst();
@@ -77,6 +101,9 @@ public final class FakeRng implements Rng {
     @Override
     public long nextLong() {
         if (longs.isEmpty()) {
+            if (fallback != null) {
+                return fallback.nextLong();
+            }
             throw new IllegalStateException("FakeRng.nextLong() called more times than values provided");
         }
         return longs.removeFirst();

@@ -10,6 +10,7 @@ import com.example.horsegenetics.common.genetics.FounderContext;
 import com.example.horsegenetics.common.genetics.FounderTable;
 import com.example.horsegenetics.common.genetics.Gene;
 import com.example.horsegenetics.common.genetics.Genotype;
+import com.example.horsegenetics.common.genetics.epi.EpiSchema;
 
 import java.util.List;
 
@@ -141,4 +142,14 @@ public final class AgoutiGene implements Gene {
     public boolean isBay(AllelePair pair) {
         return pair.has(A);
     }
+    /**
+     * A bay's shade offset and its four point heights - see
+     * {@link BayCoat#schema()}. Agouti is the locus that decides <i>where</i>
+     * black sits, and how far it climbs is the per-horse part of that.
+     */
+    @Override
+    public EpiSchema epiSchema() {
+        return BayCoat.schema();
+    }
+
 }

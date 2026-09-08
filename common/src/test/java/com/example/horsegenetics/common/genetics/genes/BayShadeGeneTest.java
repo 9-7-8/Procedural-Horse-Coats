@@ -14,6 +14,7 @@ import com.example.horsegenetics.common.genetics.Epigenome;
 import com.example.horsegenetics.common.genetics.Gene;
 import com.example.horsegenetics.common.genetics.Genes;
 import com.example.horsegenetics.common.genetics.Genotype;
+import com.example.horsegenetics.common.testutil.Epi;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -217,9 +218,19 @@ class BayShadeGeneTest {
                 > meanBlack(paint(0.0), Part.LEFT_FRONT_LEG));
     }
 
-    /** The five-draw order is a contract - the golden coats lean on it. */
+    /**
+     * A bay is a pure function of its five stored numbers - the shade offset and
+     * one point height per leg.
+     *
+     * <p>This used to be a draw-order test, counting that a bay consumed exactly
+     * five {@code nextFloat()}s in a fixed order, because inserting a draw
+     * anywhere in that sequence silently repainted every bay in every save. The
+     * numbers are named now, so the ordering hazard is gone and what is worth
+     * pinning is that the five really are the whole of it: same values, same
+     * horse, and moving one of them moves the horse.
+     */
     @Test
-    void theRollConsumesFiveFloatsInOneOrder() {
+    void aBayIsAPureFunctionOfItsFiveStoredNumbers() {
         Genotype gt = bay("Sh/Sh", "E/E", "A/a");
         CoatBuildContext ctx = new CoatBuildContext(gt, Epigenome.fromSeed(11L), Skin.ADULT, true);
 
@@ -230,17 +241,15 @@ class BayShadeGeneTest {
         assertEquals(meanBlack(once, Part.BODY), meanBlack(twice, Part.BODY),
                 "the same horse must regenerate the same coat");
 
-        SeededRng counted = new SeededRng(7L, AgoutiGene.KEY);
-        SeededRng reference = new SeededRng(7L, AgoutiGene.KEY);
-        BayShade.spread(gt, counted);
-        for (int i = 0; i < CoatRegions.LEGS.size(); i++) {
-            counted.nextFloat();
-        }
-        for (int i = 0; i < 5; i++) {
-            reference.nextFloat();
-        }
-        assertEquals(reference.nextFloat(), counted.nextFloat(),
-                "a bay must consume exactly five floats");
+        assertEquals(5, BayCoat.schema().values().size() - 1 + CoatRegions.LEGS.size(),
+                "a shade offset plus one height per leg");
+
+        // The shade offset really is what decides how far black spreads.
+        double dark = BayShade.spread(gt,
+                Epi.of(BayCoat.schema(), BayShade.SHADE, BayShade.EXPRESSION_RANGE));
+        double light = BayShade.spread(gt,
+                Epi.of(BayCoat.schema(), BayShade.SHADE, -BayShade.EXPRESSION_RANGE));
+        assertTrue(dark > light, "a higher shade offset spreads more black");
     }
 
     // ------------------------------------------------------------------

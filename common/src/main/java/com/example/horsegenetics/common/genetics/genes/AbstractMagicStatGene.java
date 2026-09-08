@@ -3,7 +3,7 @@ package com.example.horsegenetics.common.genetics.genes;
 import com.example.horsegenetics.common.Rng;
 import com.example.horsegenetics.common.genetics.Allele;
 import com.example.horsegenetics.common.genetics.AllelePair;
-import com.example.horsegenetics.common.genetics.AlleleRandomness;
+import com.example.horsegenetics.common.genetics.GeneEpigenetics;
 import com.example.horsegenetics.common.genetics.Expression;
 import com.example.horsegenetics.common.genetics.FounderContext;
 import com.example.horsegenetics.common.genetics.FounderTable;
@@ -12,8 +12,10 @@ import com.example.horsegenetics.common.genetics.Genotype;
 import com.example.horsegenetics.common.trait.EpigeneticTraitContribution;
 import com.example.horsegenetics.common.trait.HorseTraits;
 import com.example.horsegenetics.common.trait.StatAxis;
-import com.example.horsegenetics.common.trait.TargetBand;
 import com.example.horsegenetics.common.trait.TraitBuilder;
+import com.example.horsegenetics.common.genetics.epi.EpiSchema;
+import com.example.horsegenetics.common.genetics.epi.EpiValue;
+import com.example.horsegenetics.common.genetics.epi.EpiValues;
 
 import java.util.List;
 
@@ -53,6 +55,9 @@ import java.util.List;
  *      multiplies <i>scale</i>, which carries its own two-stage natural clamp.
  */
 public abstract class AbstractMagicStatGene implements Gene, EpigeneticTraitContribution {
+
+    /** The name of the one value a copy of any of these loci carries. */
+    public static final String DELTA = "delta";
 
     /** The percentage one variant copy is worth, on average - about a tenth either way. */
     public static final double MEAN_DELTA = 0.10;
@@ -129,8 +134,14 @@ public abstract class AbstractMagicStatGene implements Gene, EpigeneticTraitCont
     /** Push {@code factor} into this stat's unclamped magical multiplier on {@link TraitBuilder}. */
     protected abstract void applyMagic(TraitBuilder out, double factor);
 
-    /** Which body axis this gene drives - the axis a breed pins with a {@link TargetBand}. */
-    protected abstract StatAxis axis();
+    /**
+     * Which body axis this gene drives. A breed uses it at <b>founder time</b>
+     * to decide which of these loci to double up and what to write on the
+     * copies ({@code BreedFounder}); nothing consults it when a horse's body is
+     * resolved, which is what stops a bred line being pulled back toward its
+     * breed's standard.
+     */
+    public abstract StatAxis axis();
 
     @Override public String key() { return key; }
     @Override public String name() { return displayName; }
@@ -165,23 +176,8 @@ public abstract class AbstractMagicStatGene implements Gene, EpigeneticTraitCont
      * without a special case.
      */
     @Override
-    public void contribute(AllelePair pair, Genotype genotype, AlleleRandomness epigenetics,
+    public void contribute(AllelePair pair, Genotype genotype, GeneEpigenetics epigenetics,
                            TraitBuilder out) {
-        int variantCopies = pair.count(up) + pair.count(down);
-
-        // A breed that pins this axis has already made its wild founders
-        // homozygous for the pushing allele; land the horse somewhere in the
-        // breed's band from its own epigenetic seeds, so members of the breed
-        // vary only as much as the band is wide. No band, or a horse that is
-        // not carrying a variant copy (a cross that lost the allele) - fall
-        // back to the ordinary bounded-Gaussian draw below.
-        TargetBand band = out.breedBand(axis());
-        if (band != null && variantCopies > 0) {
-            double u = 0.5 * (epigenetics.copy(0).nextFloat() + epigenetics.copy(1).nextFloat());
-            applyMagic(out, band.lerp(u));
-            return;
-        }
-
         double sum = signedDelta(pair.first(), epigenetics.copy(0))
                 + signedDelta(pair.second(), epigenetics.copy(1));
         if (sum != 0.0) {
@@ -189,23 +185,24 @@ public abstract class AbstractMagicStatGene implements Gene, EpigeneticTraitCont
         }
     }
 
-    private double signedDelta(Allele allele, Rng epigenetics) {
+    private double signedDelta(Allele allele, EpiValues epigenetics) {
         if (allele.equals(up)) {
-            return delta(epigenetics);
+            return epigenetics.get(DELTA);
         }
         if (allele.equals(down)) {
-            return -delta(epigenetics);
+            return -epigenetics.get(DELTA);
         }
         return 0.0; // the baseline allele is worth nothing, as everywhere else
     }
 
     /**
-     * One copy's percentage: a bounded normal draw about {@link #MEAN_DELTA},
-     * floored at {@link #MIN_DELTA}. Always positive - the sign is the allele's
-     * job, not the distribution's.
+     * The one number a copy of this locus carries: the percentage it is worth.
+     * Always positive - the sign is the allele's job, not the value's - and
+     * always readable, which is the entire point of storing it.
      */
-    public static double delta(Rng epigenetics) {
-        return Math.max(MIN_DELTA, MEAN_DELTA + epigenetics.nextGaussian() * SIGMA_DELTA);
+    @Override
+    public EpiSchema epiSchema() {
+        return EpiSchema.of(EpiValue.gaussian(DELTA, MEAN_DELTA, SIGMA_DELTA, MIN_DELTA));
     }
 
     /** The six outcome descriptions plus the four display names, for the base constructor. */

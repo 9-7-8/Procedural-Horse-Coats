@@ -18,6 +18,7 @@ import com.example.horsegenetics.common.trait.HorseTraits;
 import com.example.horsegenetics.common.trait.Severity;
 import com.example.horsegenetics.common.trait.Traits;
 import com.example.horsegenetics.common.trait.Viability;
+import com.example.horsegenetics.common.genetics.epi.EpiRoll;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashSet;
@@ -276,8 +277,10 @@ class MagicalUtilityGenesTest {
     void aDoubledSizeIsTheSumOfItsTwoCopies() {
         Epigenome epi = Epigenome.fromSeed(31L);
         Epigenome.Copies copies = epi.copies(MagicSizeGene.KEY);
-        double first = MagicSizeGene.delta(new SeededRng(copies.first().epigeneticSeed(), MagicSizeGene.KEY));
-        double second = MagicSizeGene.delta(new SeededRng(copies.second().epigeneticSeed(), MagicSizeGene.KEY));
+        // Straight off the copies now - the percentage is stored, not recovered
+        // by replaying a PRNG.
+        double first = copies.first().values().get(MagicSizeGene.DELTA);
+        double second = copies.second().values().get(MagicSizeGene.DELTA);
 
         double big = HorseTraits.resolve(Genotype.parse(Codes.of("body_size", "Big/Big")), epi, true).scale();
         assertEquals(1.0 + first + second, big, 1e-9);
@@ -361,10 +364,19 @@ class MagicalUtilityGenesTest {
         assertTrue(max - min > 3 * MagicSizeGene.SIGMA_DELTA, "the tails should still reach");
     }
 
+    /**
+     * One founder's size percentage, from the distribution the schema declares -
+     * which is what {@code EpiRoll} actually rolls, so the bounds tested here are
+     * the bounds the game uses.
+     */
+    private static double sizeDelta(Rng rng) {
+        return EpiRoll.founder(Genes.BODY_SIZE.epiSchema(), rng).get(MagicSizeGene.DELTA);
+    }
+
     /** The floor holds: a "big" allele can never come out making a horse smaller. */
     @Test
     void aVariantCopyNeverPointsTheWrongWay() {
-        assertEquals(MagicSizeGene.MIN_DELTA, MagicSizeGene.delta(constant(0.0f)), 1e-9);
+        assertEquals(MagicSizeGene.MIN_DELTA, sizeDelta(constant(0.0f)), 1e-9);
         for (long seed = 0; seed < 2000; seed++) {
             assertTrue(scaleOf(Codes.of("body_size", "Big/n"), seed) > 1.0);
             assertTrue(scaleOf(Codes.of("body_size", "Small/n"), seed) < 1.0);
@@ -378,7 +390,7 @@ class MagicalUtilityGenesTest {
         assertEquals(-6.0, constant(0.0f).nextGaussian(), 1e-6);
         assertEquals(6.0, constant(1.0f).nextGaussian(), 1e-6);
         assertEquals(MagicSizeGene.MEAN_DELTA + 6 * MagicSizeGene.SIGMA_DELTA,
-                MagicSizeGene.delta(constant(1.0f)), 1e-6);
+                sizeDelta(constant(1.0f)), 1e-6);
     }
 
     /**
@@ -389,13 +401,13 @@ class MagicalUtilityGenesTest {
      */
     @Test
     void twoGoodCopiesReachPastTheNaturalScaleClamp() {
-        double best = 1.0 + 2 * MagicSizeGene.delta(constant(1.0f));
+        double best = 1.0 + 2 * sizeDelta(constant(1.0f));
         assertTrue(best > HorseTraits.MAX_SCALE,
                 "two maximal big copies should exceed the natural clamp, got " + best);
         assertTrue(best <= HorseTraits.MAGICAL_MAX_SCALE);
         assertEquals(MagicSizeGene.MAX_FACTOR_APPROX, best, 1e-9);
         // and one copy alone cannot - a giant is a breeding result, not a catch
-        assertTrue(1.0 + MagicSizeGene.delta(constant(1.0f)) < HorseTraits.MAX_SCALE);
+        assertTrue(1.0 + sizeDelta(constant(1.0f)) < HorseTraits.MAX_SCALE);
     }
 
     /** Same genome, same horse - every time it is asked, which is what makes it heritable. */
@@ -514,10 +526,8 @@ class MagicalUtilityGenesTest {
         for (long seed = 0; seed < 20; seed++) {
             Epigenome epi = Epigenome.fromSeed(seed);
             Epigenome.Copies copies = epi.copies(ManeColorGene.KEY);
-            int first = com.example.horsegenetics.common.coat.pattern.HairPattern.randomBrightColour(
-                    new SeededRng(copies.first().epigeneticSeed(), ManeColorGene.KEY));
-            int second = com.example.horsegenetics.common.coat.pattern.HairPattern.randomBrightColour(
-                    new SeededRng(copies.second().epigeneticSeed(), ManeColorGene.KEY));
+            int first = copies.first().values().rgb("hair");
+            int second = copies.second().values().rgb("hair");
             if (first != second) {
                 differing++;
             }

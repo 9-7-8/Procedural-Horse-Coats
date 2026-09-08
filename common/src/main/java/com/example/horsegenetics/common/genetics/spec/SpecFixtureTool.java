@@ -12,6 +12,7 @@ import com.example.horsegenetics.common.genetics.Allele;
 import com.example.horsegenetics.common.genetics.AllelePair;
 import com.example.horsegenetics.common.genetics.Epigenome;
 import com.example.horsegenetics.common.genetics.Genotype;
+import com.example.horsegenetics.common.genetics.epi.EpiRoll;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -198,10 +199,11 @@ public final class SpecFixtureTool {
 
     private static String bake(SpecGene gene, String file, long seed, int dose, Skin skin) {
         GeneSpec spec = gene.spec();
-        // The creator has no horse, so it seeds the draw directly. Match that:
-        // the same SeededRng, namespaced by gene key exactly as
-        // CoatBuildContext.epigeneticsFor does.
-        SpecValues values = SpecValues.draw(spec, new SeededRng(seed, spec.key()), dose);
+        // The creator has no horse, so it rolls a founder's values directly.
+        // Match that: the same SeededRng, namespaced by gene key exactly as an
+        // allele copy's would have been.
+        SpecValues values = SpecValues.read(spec,
+                EpiRoll.founder(SpecValues.schema(spec), new SeededRng(seed, spec.key())), dose);
 
         // Which outcome a horse carrying `dose` copies of the first-declared
         // allele lands on. The fixture pins the resolution table as well as the

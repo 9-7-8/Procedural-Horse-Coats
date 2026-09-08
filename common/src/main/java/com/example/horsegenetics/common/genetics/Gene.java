@@ -1,5 +1,7 @@
 package com.example.horsegenetics.common.genetics;
 
+import com.example.horsegenetics.common.genetics.epi.EpiSchema;
+
 import java.util.List;
 
 /**
@@ -475,5 +477,28 @@ public interface Gene {
      */
     default boolean isDeterministic(AllelePair pair, Genotype genotype) {
         return expressionIn(pair, genotype).deterministic();
+    }
+
+    /**
+     * <b>Every number this gene writes on an allele copy</b>, declared once - the
+     * gene's half of the epigenetics contract.
+     *
+     * <p>Most genes return {@link EpiSchema#EMPTY} and store nothing: a
+     * {@code p/p} pony is one particular pony and always the same one, so there
+     * is no per-horse number to keep. A gene overrides this when two horses
+     * carrying <i>identical alleles</i> should still differ - how much white a
+     * splash covers, how much bigger a magically large horse is, what colour a
+     * particle trail comes out.
+     *
+     * <p>Declaring a value here is what makes it storable, inheritable,
+     * driftable and visible in the in-game inspector, all without any of those
+     * knowing what the value means. Read them back through
+     * {@code CoatBuildContext.epigeneticsFor} (painting) or
+     * {@link GeneEpigenetics} (traits and abilities).
+     *
+     * @see com.example.horsegenetics.common.genetics.epi.EpiValue
+     */
+    default EpiSchema epiSchema() {
+        return EpiSchema.EMPTY;
     }
 }

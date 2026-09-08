@@ -12,6 +12,7 @@ import com.example.horsegenetics.common.genetics.Genotype;
 import com.example.horsegenetics.common.trait.Condition;
 import com.example.horsegenetics.common.trait.HealthContribution;
 import com.example.horsegenetics.common.trait.TraitBuilder;
+import com.example.horsegenetics.common.genetics.epi.EpiSchema;
 
 import java.util.List;
 
@@ -220,4 +221,15 @@ public final class GreyGene implements Gene, HealthContribution {
                     return f;
                 });
     }
+    /**
+     * Everything greying varies by - see {@link GreyCoat#schema()}. Grey is the
+     * gene with the most per-horse character in the mod: two greys of the same
+     * age and dosage differ in how far along they are, how they dapple, and
+     * whether they carry chubari spots or a bloody shoulder.
+     */
+    @Override
+    public EpiSchema epiSchema() {
+        return GreyCoat.schema();
+    }
+
 }

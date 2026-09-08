@@ -27,7 +27,7 @@ import java.util.Optional;
  * <ul>
  *   <li>Pure: a pair, the whole genotype, and the horse's per-copy randomness
  *       in; a claim or {@link Optional#empty()} out.</li>
- *   <li>Every number a claim varies by comes from {@link AlleleRandomness}, so
+ *   <li>Every number a claim varies by comes from {@link GeneEpigenetics}, so
  *       it is inherited with the allele copy and a horse asks for the same
  *       metal for its whole life. {@code random} may hand back midpoints - the
  *       question was asked about a genotype rather than about a horse - and a
@@ -45,5 +45,5 @@ public interface DietContribution {
      *                  {@link Diet#variants()} above zero - the claim carries
      *                  the chosen index itself, in {@link HorseDiet#variant()}
      */
-    Optional<HorseDiet> diet(AllelePair pair, Genotype genotype, AlleleRandomness variantOf);
+    Optional<HorseDiet> diet(AllelePair pair, Genotype genotype, GeneEpigenetics variantOf);
 }

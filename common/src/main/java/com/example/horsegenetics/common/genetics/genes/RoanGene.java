@@ -17,6 +17,9 @@ import com.example.horsegenetics.common.genetics.Expression;
 import com.example.horsegenetics.common.genetics.FounderContext;
 import com.example.horsegenetics.common.genetics.FounderTable;
 import com.example.horsegenetics.common.genetics.Gene;
+import com.example.horsegenetics.common.genetics.epi.EpiSchema;
+import com.example.horsegenetics.common.genetics.epi.EpiValue;
+import com.example.horsegenetics.common.genetics.epi.EpiValues;
 
 import java.util.List;
 
@@ -146,11 +149,24 @@ public final class RoanGene implements Gene {
         return pair.has(Rn);
     }
 
+    /**
+     * The roan field, how densely it roans, and how forehead-prone this copy is.
+     * The forehead value is a propensity tested against {@link #FOREHEAD_CHANCE}
+     * - most roans keep a dark head, and the ones that do not inherit it.
+     */
+    @Override
+    public EpiSchema epiSchema() {
+        return EpiSchema.of(
+                EpiValue.seed("seed"),
+                EpiValue.uniform("density", 0, DENSITY_RANGE),
+                EpiValue.uniform("forehead", 0, 1));
+    }
+
     private static PigmentField paintRoan(CoatBuildContext ctx, PigmentView coat) {
-        Rng epi = ctx.epigeneticsFor(KEY);
-        long seed = epi.nextLong();
-        double density = epi.nextFloat() * DENSITY_RANGE;
-        float foreheadRoll = epi.nextFloat();
+        EpiValues epi = ctx.epigeneticsFor(KEY);
+        long seed = epi.seed("seed");
+        double density = epi.get("density");
+        double foreheadRoll = epi.get("forehead");
         double forehead = foreheadRoll < FOREHEAD_CHANCE
                 ? FOREHEAD_MAX * (1.0 - foreheadRoll / FOREHEAD_CHANCE) : 0.0;
 

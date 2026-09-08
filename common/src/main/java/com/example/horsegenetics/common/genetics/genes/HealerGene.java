@@ -16,6 +16,8 @@ import com.example.horsegenetics.common.genetics.FounderTable;
 import com.example.horsegenetics.common.genetics.Gene;
 import com.example.horsegenetics.common.genetics.Genotype;
 import com.example.horsegenetics.common.genetics.spec.GeneAbility;
+import com.example.horsegenetics.common.genetics.epi.EpiSchema;
+import com.example.horsegenetics.common.genetics.epi.EpiValue;
 
 import java.util.List;
 
@@ -133,9 +135,17 @@ public final class HealerGene implements Gene, AbilityContribution {
         return isHealer(pair) ? aura : List.of();
     }
 
+    /**
+     * How strongly this horse's red mane stripe reads. One number, and the only
+     * thing that varies between two horses carrying the same healer alleles.
+     */
+    @Override
+    public EpiSchema epiSchema() {
+        return EpiSchema.of(EpiValue.uniform("opacity", OPACITY_MIN, OPACITY_MIN + OPACITY_RANGE));
+    }
+
     private static ColorField paintStripe(CoatBuildContext ctx, PigmentView coat, ColorView accumulated) {
-        Rng epi = ctx.epigeneticsFor(KEY);
-        double opacity = OPACITY_MIN + epi.nextFloat() * OPACITY_RANGE;
+        double opacity = ctx.epigeneticsFor(KEY).get("opacity");
 
         ColorField delta = ColorField.deltaLike(accumulated);
         HairPattern.paint(ctx, accumulated, delta, Part.MANE, (px, py, point) -> {

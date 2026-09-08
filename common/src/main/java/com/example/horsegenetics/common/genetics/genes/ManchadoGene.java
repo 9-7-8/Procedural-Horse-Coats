@@ -19,6 +19,9 @@ import com.example.horsegenetics.common.genetics.FounderContext;
 import com.example.horsegenetics.common.genetics.FounderTable;
 import com.example.horsegenetics.common.genetics.Gene;
 import com.example.horsegenetics.common.genetics.GeneRarity;
+import com.example.horsegenetics.common.genetics.epi.EpiSchema;
+import com.example.horsegenetics.common.genetics.epi.EpiValue;
+import com.example.horsegenetics.common.genetics.epi.EpiValues;
 
 import java.util.List;
 
@@ -185,10 +188,20 @@ public final class ManchadoGene implements Gene {
      * manchados with similar white can carry quite different islands, which is
      * what makes each one an individual rather than a stamp.
      */
+    /**
+     * Two independent noise fields - the white's outline and the islands inside
+     * it. Separate so two manchados with similar white can carry quite different
+     * islands, which is what makes each one an individual rather than a stamp.
+     */
+    @Override
+    public EpiSchema epiSchema() {
+        return EpiSchema.of(EpiValue.seed("field"), EpiValue.seed("island"));
+    }
+
     private static PigmentField paint(CoatBuildContext ctx, PigmentView coat) {
-        Rng epi = ctx.epigeneticsFor(KEY);
-        long fieldSeed = epi.nextLong();
-        long islandSeed = epi.nextLong();
+        EpiValues epi = ctx.epigeneticsFor(KEY);
+        long fieldSeed = epi.seed("field");
+        long islandSeed = epi.seed("island");
 
         Skin skin = ctx.skin();
         PigmentField f = coat.mutableCopy();

@@ -2,6 +2,9 @@ package com.example.horsegenetics.common.genetics;
 
 import com.example.horsegenetics.common.Rng;
 import com.example.horsegenetics.common.SeededRng;
+import com.example.horsegenetics.common.genetics.epi.EpiCodec;
+import com.example.horsegenetics.common.genetics.epi.EpiSchema;
+import com.example.horsegenetics.common.genetics.epi.EpiValues;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -19,23 +22,32 @@ import java.util.Objects;
  * anything that builds the two together has to align them the same way - which
  * is exactly why {@link Genome} owns both and does the breeding.
  *
- * <p>Round-trips through a <b>gene-keyed code string</b> shaped like the
- * genotype code: one {@code <geneKey>=<copy>/<copy>} segment per gene in
- * {@link Genes#codeOrder()} joined by {@code -}, each copy written
- * {@code <priority>:<seed in unsigned hex>}. Parsing is <b>tolerant</b> the
- * same way {@link Genotype#parse} is: a registered gene with no segment gets a
- * deterministic placeholder (derived from its key, so two horses agree on it),
- * and a segment naming an unregistered gene is dropped. Safe because an absent
- * gene reads wild type - invisible, excluded from
- * {@link #visibleFingerprint} - so a placeholder never changes the texture key.
- * There is <b>no</b> legacy positional-format handling.
+ * <h2>Only genes that vary are stored</h2>
+ * A gene declares what it writes on an allele copy with
+ * {@link Gene#epiSchema()}, and most declare nothing - their behaviour is a pure
+ * function of their alleles. Those genes get <b>no segment at all</b>, which is
+ * what keeps the code readable now that each stored gene carries a couple of
+ * hundred characters of literal numbers rather than a sixteen-digit seed.
+ *
+ * <h2>The code string</h2>
+ * One {@code <geneKey>=<copy>/<copy>} segment per varying gene in
+ * {@link Genes#codeOrder()}, joined by {@code ;}. Each copy is
+ * {@code p:<priority>} followed by that gene's named values - see
+ * {@link EpiCodec} for the field grammar. Parsing is <b>tolerant</b> the same
+ * way {@link Genotype#parse} is: a segment naming an unregistered gene is
+ * dropped, a registered gene with no segment is rolled deterministically from
+ * its key, and a value the text omits is rolled deterministically from the gene
+ * key plus the value's name. There is <b>no</b> legacy seed-format handling.
  */
 public final class Epigenome {
 
-    private static final String GENE_SEP = "-";
-    private static final String COPY_SEP = "/";
-    private static final String FIELD_SEP = ":";
     private static final String NAME_SEP = "=";
+    private static final String PRIORITY_FIELD = "p";
+
+    /** What a gene that declares no epigenetics reads back as. */
+    private static final Copies NONE = new Copies(
+            new AlleleEpigenetics(1, EpiValues.EMPTY),
+            new AlleleEpigenetics(2, EpiValues.EMPTY));
 
     /** The two allele copies at one gene, aligned to that gene's {@link AllelePair}. */
     public record Copies(AlleleEpigenetics first, AlleleEpigenetics second) {
@@ -51,38 +63,60 @@ public final class Epigenome {
         this.byGene = Collections.unmodifiableMap(byGene);
     }
 
+    /** Every gene that actually writes something on an allele copy. */
+    private static boolean stores(Gene g) {
+        return !g.epiSchema().isEmpty();
+    }
+
     // ------------------------------------------------------------------
     // Construction
     // ------------------------------------------------------------------
 
     /**
-     * Fresh epigenetics for a founder / wild horse: an independent random
-     * priority + seed on every allele copy, deconflicted so no gene carries the
-     * same priority twice.
+     * Fresh epigenetics for a founder / wild horse: independent values on every
+     * allele copy, rolled from each gene's declared distributions, and
+     * deconflicted so no gene carries the same priority twice.
      */
     public static Epigenome random(Rng rng) {
         Map<String, Copies> m = new LinkedHashMap<>();
         for (Gene g : Genes.codeOrder()) {
-            AlleleEpigenetics a = AlleleEpigenetics.random(rng);
-            AlleleEpigenetics b = AlleleEpigenetics.deconflict(a, AlleleEpigenetics.random(rng), rng);
-            m.put(g.key(), new Copies(a, b));
+            if (!stores(g)) {
+                continue;
+            }
+            m.put(g.key(), founderCopies(g.epiSchema(), rng));
         }
         return new Epigenome(m);
     }
 
     /**
-     * The same, replayed from a single {@code long} - used where a horse has no
-     * stored epigenome but a stable stand-in is wanted (the family tree draws
-     * ancestors this way, from their record UUID).
+     * The same, replayed from a single {@code long} - a <b>reproducible test and
+     * tooling horse</b>, used by the golden-coat suite, the coat sample sheet,
+     * the spec fixtures and the designer's preview.
+     *
+     * <p>It is <b>not</b> a stand-in for a horse whose epigenome was not stored.
+     * It used to be used that way by the family tree, which drew a dead
+     * ancestor's coat from a seed derived from its record UUID - a plausible
+     * horse rather than the real one. Records carry their epigenome, so that
+     * fallback is gone; if a record has no genome the honest answer is to draw
+     * nothing.
      */
     public static Epigenome fromSeed(long seed) {
         return random(new SeededRng(seed));
     }
 
-    /** From explicit per-gene copies; every registered gene must be supplied. */
+    private static Copies founderCopies(EpiSchema schema, Rng rng) {
+        AlleleEpigenetics a = AlleleEpigenetics.founder(schema, rng);
+        AlleleEpigenetics b = AlleleEpigenetics.deconflict(a, AlleleEpigenetics.founder(schema, rng), rng);
+        return new Copies(a, b);
+    }
+
+    /** From explicit per-gene copies; every gene that stores must be supplied. */
     public static Epigenome of(Map<String, Copies> byGene) {
         Map<String, Copies> m = new LinkedHashMap<>();
         for (Gene g : Genes.codeOrder()) {
+            if (!stores(g)) {
+                continue;
+            }
             Copies c = byGene.get(g.key());
             if (c == null) {
                 throw new IllegalArgumentException("no epigenetics supplied for " + g.key());
@@ -96,112 +130,130 @@ public final class Epigenome {
         Objects.requireNonNull(code, "code");
         Map<String, Copies> supplied = new LinkedHashMap<>();
         if (!code.isEmpty()) {
-            for (String segment : code.split(GENE_SEP, -1)) {
+            for (String segment : split(code, EpiCodec.GENE_SEP)) {
+                if (segment.isEmpty()) {
+                    continue;
+                }
                 int eq = segment.indexOf(NAME_SEP);
                 if (eq < 0) {
                     throw new IllegalArgumentException(
                             "epigenome segment needs '<gene>=<copy>/<copy>', got: " + segment);
                 }
                 Gene g = Genes.byKeyOrNull(segment.substring(0, eq));
-                if (g == null) {
-                    continue; // a gene no longer registered - drop the segment
+                if (g == null || !stores(g)) {
+                    continue; // a gene no longer registered, or one that stopped varying
                 }
-                String[] copies = segment.substring(eq + 1).split(COPY_SEP, -1);
+                String[] copies = split(segment.substring(eq + 1), EpiCodec.COPY_SEP);
                 if (copies.length != 2) {
                     throw new IllegalArgumentException("segment for " + g.key()
                             + " needs two '/'-separated copies, got: " + segment);
                 }
-                supplied.put(g.key(), new Copies(parseCopy(copies[0]), parseCopy(copies[1])));
+                supplied.put(g.key(), new Copies(
+                        parseCopy(g, copies[0]), parseCopy(g, copies[1])));
             }
         }
         Map<String, Copies> m = new LinkedHashMap<>();
         for (Gene g : Genes.codeOrder()) {
+            if (!stores(g)) {
+                continue;
+            }
             Copies c = supplied.get(g.key());
-            m.put(g.key(), c != null ? c : placeholder(g.key()));
+            m.put(g.key(), c != null ? c : placeholder(g));
         }
         return new Epigenome(m);
     }
 
     /**
-     * Deterministic stand-in epigenetics for a gene the stored code predates -
-     * seeded off the gene key so every horse agrees, and never visible (the
-     * gene reads wild type), so it can't fork a texture cache entry.
+     * Deterministic stand-in epigenetics for a gene the stored code does not
+     * mention - seeded off the gene key so every horse agrees on it, which is
+     * what stops two clients rendering the same horse differently.
      */
-    private static Copies placeholder(String geneKey) {
-        Rng rng = new SeededRng(geneKey.hashCode());
-        AlleleEpigenetics a = AlleleEpigenetics.random(rng);
-        AlleleEpigenetics b = AlleleEpigenetics.deconflict(a, AlleleEpigenetics.random(rng), rng);
-        return new Copies(a, b);
+    private static Copies placeholder(Gene g) {
+        return founderCopies(g.epiSchema(), new SeededRng(g.key().hashCode()));
     }
 
-    private static AlleleEpigenetics parseCopy(String s) {
-        int sep = s.indexOf(FIELD_SEP);
-        if (sep < 0) {
-            throw new IllegalArgumentException("epigenetics copy needs '<priority>:<seed>', got: " + s);
-        }
-        return new AlleleEpigenetics(
-                Integer.parseInt(s.substring(0, sep)),
-                parseUnsignedHex(s.substring(sep + 1)));
+    private static AlleleEpigenetics parseCopy(Gene g, String text) {
+        Map<String, String> fields = EpiCodec.fields(text);
+        String p = fields.remove(PRIORITY_FIELD);
+        int priority = p == null ? AlleleEpigenetics.MIN_PRIORITY : Integer.parseInt(p.trim());
+        return new AlleleEpigenetics(priority, EpiCodec.read(g.epiSchema(), fields, g.key()));
     }
 
     /**
-     * A seed, read back from the 16 hex digits {@link #appendCopy} wrote.
-     *
-     * <p>This is {@code Long.parseUnsignedLong(s, 16)} written out. That method
-     * is not in TeaVM's class library, and the wiki's
-     * <a href="../../../../../../../wiki/horse-designer/">horse designer</a>
-     * compiles this module to WebAssembly - so using it would mean the browser
-     * could bake a horse but never read one back. It is also one fewer JDK
-     * method between {@code common/} and the Java 8 backport.
-     *
-     * <p>The shift is what makes it <i>unsigned</i>: a seed uses the full 64-bit
-     * range, so the top bit is data, not a sign. Sixteen digits is exactly 64
-     * bits, hence the length guard.
+     * {@code String.split} with a literal char and no regex - the separators are
+     * characters that mean something to a regex engine, and {@code common/} is
+     * built to compile under TeaVM where a regex is a dependency worth avoiding.
      */
-    private static long parseUnsignedHex(String s) {
-        if (s.isEmpty() || s.length() > 16) {
-            throw new IllegalArgumentException("epigenetic seed must be 1-16 hex digits, got: " + s);
-        }
-        long value = 0;
+    private static String[] split(String s, char sep) {
+        int count = 1;
         for (int i = 0; i < s.length(); i++) {
-            int digit = Character.digit(s.charAt(i), 16);
-            if (digit < 0) {
-                throw new IllegalArgumentException("epigenetic seed is not hex: " + s);
+            if (s.charAt(i) == sep) {
+                count++;
             }
-            value = (value << 4) | digit;
         }
-        return value;
+        String[] out = new String[count];
+        int at = 0;
+        int n = 0;
+        while (true) {
+            int end = s.indexOf(sep, at);
+            if (end < 0) {
+                out[n] = s.substring(at);
+                return out;
+            }
+            out[n++] = s.substring(at, end);
+            at = end + 1;
+        }
     }
 
     public String toCode() {
-        StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder(1024);
         for (Gene g : Genes.codeOrder()) {
+            if (!stores(g)) {
+                continue;
+            }
             if (sb.length() > 0) {
-                sb.append(GENE_SEP);
+                sb.append(EpiCodec.GENE_SEP);
             }
             Copies c = byGene.get(g.key());
             sb.append(g.key()).append(NAME_SEP);
             appendCopy(sb, c.first());
-            sb.append(COPY_SEP);
+            sb.append(EpiCodec.COPY_SEP);
             appendCopy(sb, c.second());
         }
         return sb.toString();
     }
 
     private static void appendCopy(StringBuilder sb, AlleleEpigenetics e) {
-        sb.append(e.priority()).append(FIELD_SEP).append(Long.toUnsignedString(e.epigeneticSeed(), 16));
+        sb.append(PRIORITY_FIELD).append(EpiCodec.NAME_SEP).append(e.priority());
+        EpiCodec.write(sb, e.values()); // each field is written with its leading comma
     }
 
     // ------------------------------------------------------------------
     // Access
     // ------------------------------------------------------------------
 
+    /**
+     * This epigenome with one gene's copies replaced - how {@code BreedFounder}
+     * stamps a breed's target onto a founder it has just rolled. Nothing else
+     * should need it: after a horse exists its numbers only ever change by
+     * inheritance.
+     */
+    public Epigenome with(String geneKey, Copies replacement) {
+        Map<String, Copies> next = new LinkedHashMap<>(byGene);
+        if (!next.containsKey(geneKey)) {
+            throw new IllegalArgumentException(geneKey + " stores no epigenetics");
+        }
+        next.put(geneKey, replacement);
+        return new Epigenome(next);
+    }
+
     public Copies copies(Gene gene) {
-        return byGene.get(gene.key());
+        return copies(gene.key());
     }
 
     public Copies copies(String geneKey) {
-        return byGene.get(geneKey);
+        Copies c = byGene.get(geneKey);
+        return c != null ? c : NONE;
     }
 
     /**
@@ -223,27 +275,35 @@ public final class Epigenome {
         return c.first().priority() >= c.second().priority() ? c.first() : c.second();
     }
 
-    /** The seed the coat pipeline feeds {@code gene}'s per-horse randomness. */
-    public long expressedSeed(Gene gene, Genotype genotype) {
-        return expressed(gene, genotype).epigeneticSeed();
+    /** The literal numbers the coat pipeline paints {@code gene} with, for this horse. */
+    public EpiValues expressedValues(Gene gene, Genotype genotype) {
+        return expressed(gene, genotype).values();
     }
 
     /**
      * A 64-bit digest of just the epigenetics that <i>can change this horse's
-     * pixels</i> - the expressed seed of every gene that is both visible and
+     * pixels</i> - the expressed values of every gene that is both visible and
      * non-deterministic under {@code genotype}. Two horses agreeing here render
      * the same coat, so this (not the whole epigenome) is what
      * {@code CoatData.textureKey()} keys on.
+     *
+     * <p>It hashes the <b>values</b> now rather than a single seed. Getting this
+     * wrong does not throw - it silently forks the texture cache, or worse
+     * collides two different horses onto one texture - so it must fold in every
+     * number a visible gene could paint with.
      */
     public long visibleFingerprint(Genotype genotype) {
         long h = 0xcbf29ce484222325L;
         for (Gene g : Genes.codeOrder()) {
+            if (!stores(g)) {
+                continue;
+            }
             AllelePair pair = genotype.pair(g);
             if (!g.isVisible(pair, genotype) || g.isDeterministic(pair, genotype)) {
                 continue;
             }
             h = (h ^ g.key().hashCode()) * 0x100000001b3L;
-            h = (h ^ expressedSeed(g, genotype)) * 0x100000001b3L;
+            h = expressedValues(g, genotype).hashInto(h);
         }
         return h;
     }

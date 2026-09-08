@@ -12,6 +12,7 @@ import com.example.horsegenetics.common.genetics.GenotypeCatalog;
 import com.example.horsegenetics.common.testutil.Codes;
 import com.example.horsegenetics.common.trait.HorseTraits;
 import com.example.horsegenetics.common.trait.Traits;
+import com.example.horsegenetics.common.genetics.epi.EpiRoll;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashSet;
@@ -124,10 +125,10 @@ class MagicBodyStatGenesTest {
         for (Locus l : LOCI) {
             Epigenome epi = Epigenome.fromSeed(31L);
             Epigenome.Copies copies = epi.copies(l.gene().key());
-            double first = AbstractMagicStatGene.delta(
-                    new SeededRng(copies.first().epigeneticSeed(), l.gene().key()));
-            double second = AbstractMagicStatGene.delta(
-                    new SeededRng(copies.second().epigeneticSeed(), l.gene().key()));
+            // Straight off the copies now - the percentage is stored, not
+            // recovered by replaying a PRNG.
+            double first = copies.first().values().get(AbstractMagicStatGene.DELTA);
+            double second = copies.second().values().get(AbstractMagicStatGene.DELTA);
 
             double up = statWith(l, up(l) + "/" + up(l), epi) / l.baseline();
             assertEquals(1.0 + first + second, up, 1e-9, l.gene().key());
@@ -195,9 +196,19 @@ class MagicBodyStatGenesTest {
     /** The per-copy floor: an up allele at the -6 sigma end still adds MIN_DELTA. */
     @Test
     void theFloorHolds() {
-        assertEquals(AbstractMagicStatGene.MIN_DELTA, AbstractMagicStatGene.delta(constant(0.0f)), 1e-9);
+        assertEquals(AbstractMagicStatGene.MIN_DELTA, delta(constant(0.0f)), 1e-9);
         assertEquals(AbstractMagicStatGene.MEAN_DELTA + 6 * AbstractMagicStatGene.SIGMA_DELTA,
-                AbstractMagicStatGene.delta(constant(1.0f)), 1e-6);
+                delta(constant(1.0f)), 1e-6);
+    }
+
+    /**
+     * One founder's percentage for these loci, from the distribution the schema
+     * declares - which is what {@code EpiRoll} actually rolls, so the bounds
+     * tested here are the bounds the game uses.
+     */
+    private static double delta(Rng rng) {
+        return EpiRoll.founder(LOCI.get(0).gene().epiSchema(), rng)
+                .get(AbstractMagicStatGene.DELTA);
     }
 
     // ------------------------------------------------------------------

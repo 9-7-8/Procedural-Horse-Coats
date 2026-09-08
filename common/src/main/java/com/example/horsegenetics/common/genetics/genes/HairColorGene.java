@@ -13,6 +13,9 @@ import com.example.horsegenetics.common.genetics.Expression;
 import com.example.horsegenetics.common.genetics.FounderContext;
 import com.example.horsegenetics.common.genetics.FounderTable;
 import com.example.horsegenetics.common.genetics.Gene;
+import com.example.horsegenetics.common.genetics.epi.EpiSchema;
+import com.example.horsegenetics.common.genetics.epi.EpiValue;
+import com.example.horsegenetics.common.genetics.epi.EpiValues;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -159,24 +162,42 @@ public abstract class HairColorGene implements Gene {
         return hasStriped ? STRIPED : WILD;
     }
 
+    /**
+     * A colour and a band field, per copy. The colour is three channels rather
+     * than one packed value, so a line's mane colour drifts gradually instead of
+     * jumping - a founder's is rolled bright, and its descendants wander from
+     * there.
+     */
+    @Override
+    public EpiSchema epiSchema() {
+        return EpiSchema.of(
+                        EpiValue.seed("band_seed"),
+                        EpiValue.uniform("spacing", SPACING_MIN, SPACING_MIN + SPACING_RANGE),
+                        EpiValue.uniform("duty", DUTY_MIN, DUTY_MIN + DUTY_RANGE))
+                .and(EpiValue.colour("hair", HAIR_SAT_MIN, HAIR_SAT_MAX, HAIR_VAL_MIN, HAIR_VAL_MAX));
+    }
+
     // ------------------------------------------------------------------
     // Painting
     // ------------------------------------------------------------------
 
     /**
-     * The four numbers one allele copy carries, in a fixed draw order: colour
-     * (three floats), then the band seed, spacing and duty. Every copy draws all
-     * of them whichever role it ends up in, so an allele's colour is the same
-     * whether it is painting a solid hair or a set of bands.
+     * What one allele copy carries: its colour, and the band field it would draw
+     * if it ended up as the striping copy. Every copy stores all of it whichever
+     * role it ends up in, so an allele's colour is the same whether it is
+     * painting a solid hair or a set of bands.
      */
+    /** The saturation / value band a magical hair colour is rolled inside. */
+    private static final double HAIR_SAT_MIN = 0.60;
+    private static final double HAIR_SAT_MAX = 1.00;
+    private static final double HAIR_VAL_MIN = 0.62;
+    private static final double HAIR_VAL_MAX = 1.00;
+
     private record Hair(int rgb, long seed, double spacing, double duty) {}
 
-    private static Hair draw(Rng rng) {
-        int rgb = HairPattern.randomBrightColour(rng);
-        long seed = rng.nextLong();
-        double spacing = SPACING_MIN + rng.nextFloat() * SPACING_RANGE;
-        double duty = DUTY_MIN + rng.nextFloat() * DUTY_RANGE;
-        return new Hair(rgb, seed, spacing, duty);
+    private static Hair draw(EpiValues epi) {
+        return new Hair(epi.rgb("hair"), epi.seed("band_seed"),
+                epi.get("spacing"), epi.get("duty"));
     }
 
     private static double strength() {

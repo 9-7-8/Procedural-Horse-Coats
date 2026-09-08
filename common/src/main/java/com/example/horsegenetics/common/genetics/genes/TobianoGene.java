@@ -16,6 +16,9 @@ import com.example.horsegenetics.common.genetics.Expression;
 import com.example.horsegenetics.common.genetics.FounderContext;
 import com.example.horsegenetics.common.genetics.FounderTable;
 import com.example.horsegenetics.common.genetics.Gene;
+import com.example.horsegenetics.common.genetics.epi.EpiSchema;
+import com.example.horsegenetics.common.genetics.epi.EpiValue;
+import com.example.horsegenetics.common.genetics.epi.EpiValues;
 
 import java.util.List;
 
@@ -162,15 +165,27 @@ public final class TobianoGene implements Gene {
      * moving the total.
      *
      * <p><b>Draw order</b>, off the expressing {@code To} copy:
-     * {@code nextLong()} (the patch field's seed), then {@code nextFloat()}s for
-     * the cover and the patch size. Unchanged, so a horse keeps its identity
-     * across this rewrite even though its coat moves.
+     * the patch field's seed, how much of the horse is white, and how large the
+     * patches are - all read by name off the expressing copy.
      */
+    /**
+     * How much white this horse carries and how it is broken up. {@code cover}
+     * keeps its power curve so most tobianos are moderately marked and the
+     * near-white ones stay uncommon.
+     */
+    @Override
+    public EpiSchema epiSchema() {
+        return EpiSchema.of(
+                EpiValue.seed("seed"),
+                EpiValue.power("cover", COVER_MIN, COVER_MIN + COVER_RANGE, COVER_GAMMA),
+                EpiValue.uniform("patches", PATCHES_MIN, PATCHES_MIN + PATCHES_RANGE));
+    }
+
     private static PigmentField paintTobiano(CoatBuildContext ctx, PigmentView coat) {
-        Rng epi = ctx.epigeneticsFor(KEY);
-        long seed = epi.nextLong();
-        double cover = COVER_MIN + COVER_RANGE * Math.pow(epi.nextFloat(), COVER_GAMMA);
-        double patches = PATCHES_MIN + epi.nextFloat() * PATCHES_RANGE;
+        EpiValues epi = ctx.epigeneticsFor(KEY);
+        long seed = epi.seed("seed");
+        double cover = epi.get("cover");
+        double patches = epi.get("patches");
 
         Skin skin = ctx.skin();
         Shape shape = new Shape(skin, seed, patches);

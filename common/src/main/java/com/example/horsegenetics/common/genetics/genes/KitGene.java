@@ -12,6 +12,9 @@ import com.example.horsegenetics.common.genetics.FounderContext;
 import com.example.horsegenetics.common.genetics.FounderTable;
 import com.example.horsegenetics.common.genetics.Gene;
 import com.example.horsegenetics.common.genetics.Genotype;
+import com.example.horsegenetics.common.genetics.epi.EpiSchema;
+import com.example.horsegenetics.common.genetics.epi.EpiValue;
+import com.example.horsegenetics.common.genetics.EyeSpread;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -446,6 +449,16 @@ public final class KitGene implements Gene, EyeColorContribution {
         boolean broad = e == BROAD || e == EXTENSIVE || e == NEAR_WHITE
                 || e == DOMINANT_WHITE || e == CAMARILLO_WHITE;
         return WhitePatternEyes.blueIf(broad, whiteCoverage);
+    }
+
+    /**
+     * The sabino shape - the noise field, one sock height per leg, the belly and
+     * the shared face marking - plus the eye spread, since a loud {@code KIT}
+     * horse can claim a blue eye and the spread is read off whichever gene wins.
+     */
+    @Override
+    public EpiSchema epiSchema() {
+        return WhitePattern.sabinoSchema().and(EyeSpread.schema().values().toArray(new EpiValue[0]));
     }
 
 }

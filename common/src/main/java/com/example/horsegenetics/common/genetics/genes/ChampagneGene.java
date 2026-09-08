@@ -5,7 +5,7 @@ import com.example.horsegenetics.common.coat.pattern.PigmentField;
 import com.example.horsegenetics.common.Rng;
 import com.example.horsegenetics.common.genetics.Allele;
 import com.example.horsegenetics.common.genetics.AllelePair;
-import com.example.horsegenetics.common.genetics.AlleleRandomness;
+import com.example.horsegenetics.common.genetics.GeneEpigenetics;
 import com.example.horsegenetics.common.genetics.Epigenome;
 import com.example.horsegenetics.common.genetics.Expression;
 import com.example.horsegenetics.common.genetics.EyeColor;
@@ -14,6 +14,9 @@ import com.example.horsegenetics.common.genetics.FounderContext;
 import com.example.horsegenetics.common.genetics.FounderTable;
 import com.example.horsegenetics.common.genetics.Gene;
 import com.example.horsegenetics.common.genetics.Genotype;
+import com.example.horsegenetics.common.genetics.epi.EpiSchema;
+import com.example.horsegenetics.common.genetics.epi.EpiValue;
+import com.example.horsegenetics.common.genetics.EyeSpread;
 
 import java.util.List;
 import java.util.Optional;
@@ -135,17 +138,30 @@ public final class ChampagneGene implements Gene, EyeColorContribution {
      * is aimed at the eye and nothing else, over-rides it, and a splashed white
      * champagne has blue eyes.
      *
-     * <p>One {@code nextFloat}, from the expressing copy: the whole draw-order
-     * contract of this gene.
+     * <p>One stored number, from the expressing copy: where this horse falls in
+     * the champagne eye range. It is a weighted pick rather than a flat one -
+     * amber is commoner than hazel - so it is kept as a {@code 0..1} position
+     * with the probabilities as thresholds, which preserves the weighting
+     * exactly. That also means drift can, very occasionally and over many
+     * generations, walk a line's eyes from one shade to the next.
      */
+    /**
+     * Where this horse sits in the champagne eye range - see
+     * {@link #eyeColor}. Champagne changes nothing else per horse.
+     */
+    @Override
+    public EpiSchema epiSchema() {
+        return EpiSchema.of(EpiValue.uniform("eye", 0, 1))
+                .and(EyeSpread.schema().values().toArray(new EpiValue[0]));
+    }
+
     @Override
     public Optional<EyeColor> eyeColor(AllelePair pair, Genotype genotype, Epigenome epigenome,
                                        double whiteCoverage) {
         if (!pair.has(Ch)) {
             return Optional.empty();
         }
-        Rng r = AlleleRandomness.forGene(this, genotype, epigenome).expressed();
-        float roll = r.nextFloat();
+        double roll = GeneEpigenetics.forGene(this, genotype, epigenome).expressed().get("eye");
         if (roll < P_AMBER) {
             return Optional.of(EyeColor.dilution("champagne-amber", "Champagne amber", AMBER));
         }

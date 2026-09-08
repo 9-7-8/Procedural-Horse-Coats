@@ -1,12 +1,12 @@
 package com.example.horsegenetics.common.coat.pattern;
 
-import com.example.horsegenetics.common.SeededRng;
 import com.example.horsegenetics.common.coat.pattern.WhitePattern.FaceMarking;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Face;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Part;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Skin;
-import com.example.horsegenetics.common.testutil.FakeRng;
+import com.example.horsegenetics.common.genetics.epi.EpiValues;
+import com.example.horsegenetics.common.testutil.Epi;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashSet;
@@ -37,36 +37,69 @@ class FaceMarkingTest {
     /** A strength in the middle of the range, where all three components are live. */
     private static final double MID = 0.30;
 
+    /** A reproducible face marking's worth of stored values. */
+    private static EpiValues seeded(long seed) {
+        return Epi.seeded(WhitePattern.faceSchema(), seed);
+    }
+
     // ------------------------------------------------------------------
     // The determinism contract
     // ------------------------------------------------------------------
 
     /**
-     * <b>The draw is fixed and unconditional</b>: one {@code long} and eight
-     * {@code float}s, whatever marking falls out. This is the property the
-     * particle locus paid for the hard way - a draw made only when a flag is
-     * set silently repaints every horse in every save the first time that
-     * flag's odds move. So the empty marking and the bald face must consume
-     * exactly the same sequence.
+     * <b>The same stored values span every marking</b> - an unmarked face and a
+     * bald face differ only in the numbers, never in which numbers exist.
+     *
+     * <p>This used to be a draw-order test: the painter took a scripted
+     * {@code FakeRng} and the claim was that it consumed exactly one long and
+     * eight floats whatever the marking turned out to be, because a draw made
+     * only when a flag was set would silently repaint every horse in every save
+     * the first time that flag's odds moved. Values are read by name now, so
+     * that hazard cannot happen and the interesting claim is the one below: the
+     * presence values are propensities, and the <i>same</i> propensity reads
+     * differently at different locus strengths.
      */
     @Test
-    void everyMarkingConsumesTheSameNineDrawsWhateverItTurnsOutToBe() {
-        FakeRng bare = new FakeRng().longs(1L).floats(0.99f, 0.99f, 0.99f, 0.0f, 0.5f, 0.5f, 0.0f, 0.0f);
-        FaceMarking nothing = WhitePattern.faceMarking(bare, Skin.ADULT, 0.05, 0.4);
-        bare.assertExhausted();
-        assertFalse(nothing.marksAnything(), "0.99 on all three presence rolls is an unmarked face");
+    void theSameValuesSpanAnUnmarkedFaceAndABaldOne() {
+        FaceMarking nothing = WhitePattern.faceMarking(
+                Epi.of(WhitePattern.faceSchema(),
+                "face_seed", 1L, "star", 0.99, "stripe", 0.99, "snip", 0.99,
+                "face_width", 0.0, "face_offset", 0.5, "face_reach", 0.5,
+                "star_size", 0.0, "snip_size", 0.0),
+                Skin.ADULT, 0.05, 0.4);
+        assertFalse(nothing.marksAnything(), "0.99 on all three presence values is an unmarked face");
 
-        FakeRng loud = new FakeRng().longs(1L).floats(0.01f, 0.01f, 0.01f, 0.99f, 0.5f, 0.5f, 0.99f, 0.99f);
-        FaceMarking bald = WhitePattern.faceMarking(loud, Skin.ADULT, 0.95, 0.4);
-        loud.assertExhausted();
+        FaceMarking bald = WhitePattern.faceMarking(
+                Epi.of(WhitePattern.faceSchema(),
+                "face_seed", 1L, "star", 0.01, "stripe", 0.01, "snip", 0.01,
+                "face_width", 0.99, "face_offset", 0.5, "face_reach", 0.5,
+                "star_size", 0.99, "snip_size", 0.99),
+                Skin.ADULT, 0.95, 0.4);
         assertTrue(bald.isBald(), "0.01 on all three at full strength is a bald face");
+    }
+
+    /**
+     * A presence value is a <b>propensity</b>, not a decision: one horse's
+     * stored numbers produce a marking on a strongly marked locus and none on a
+     * faint one. This is what makes "star-prone" a heritable thing to breed for.
+     */
+    @Test
+    void aPresenceValueIsAPropensityAndReadsWithTheLocusStrength() {
+        EpiValues middling = Epi.of(WhitePattern.faceSchema(),
+            "face_seed", 5L, "star", 0.70, "stripe", 0.50, "snip", 0.40,
+            "face_width", 0.5, "face_offset", 0.5, "face_reach", 0.5,
+            "star_size", 0.5, "snip_size", 0.5);
+        assertFalse(WhitePattern.faceMarking(middling, Skin.ADULT, 0.02, 0.4).marksAnything(),
+                "the same horse is unmarked where the locus is barely doing anything");
+        assertTrue(WhitePattern.faceMarking(middling, Skin.ADULT, 0.95, 0.4).marksAnything(),
+                "...and marked where it is");
     }
 
     /** Same seed, same marking - the coat is rebuilt every session and must not drift. */
     @Test
     void theSameSeedDrawsTheSameMarking() {
-        FaceMarking a = WhitePattern.faceMarking(new SeededRng(4242L), Skin.ADULT, MID, 0.4);
-        FaceMarking b = WhitePattern.faceMarking(new SeededRng(4242L), Skin.ADULT, MID, 0.4);
+        FaceMarking a = WhitePattern.faceMarking(seeded(4242L), Skin.ADULT, MID, 0.4);
+        FaceMarking b = WhitePattern.faceMarking(seeded(4242L), Skin.ADULT, MID, 0.4);
         assertEquals(a.describe(), b.describe());
         assertEquals(coverage(a, Skin.ADULT), coverage(b, Skin.ADULT));
     }
@@ -115,8 +148,12 @@ class FaceMarkingTest {
      */
     @Test
     void aStarAndASnipLeaveColouredFaceBetweenThem() {
-        FakeRng rng = new FakeRng().longs(9L).floats(0.01f, 0.99f, 0.01f, 0.0f, 0.5f, 0.5f, 0.5f, 0.5f);
-        FaceMarking m = WhitePattern.faceMarking(rng, Skin.ADULT, MID, 0.4);
+        FaceMarking m = WhitePattern.faceMarking(
+                Epi.of(WhitePattern.faceSchema(),
+                "face_seed", 9L, "star", 0.01, "stripe", 0.99, "snip", 0.01,
+                "face_width", 0.0, "face_offset", 0.5, "face_reach", 0.5,
+                "star_size", 0.5, "snip_size", 0.5),
+                Skin.ADULT, MID, 0.4);
         assertEquals("star and snip", m.describe());
 
         boolean[] seen = new boolean[3];   // white forehead, coloured middle, white nostrils
@@ -150,7 +187,7 @@ class FaceMarkingTest {
         Set<String> seen = new HashSet<>();
         for (double s = 0.05; s <= 0.96; s += 0.03) {
             for (long seed = 0; seed < 400; seed++) {
-                seen.add(WhitePattern.faceMarking(new SeededRng(seed * 7919L), Skin.ADULT, s, 0.4)
+                seen.add(WhitePattern.faceMarking(seeded(seed * 7919L), Skin.ADULT, s, 0.4)
                         .describe());
             }
         }
@@ -175,7 +212,7 @@ class FaceMarkingTest {
             double mean = 0;
             int n = 300;
             for (long seed = 0; seed < n; seed++) {
-                mean += coverage(WhitePattern.faceMarking(new SeededRng(seed * 7919L), Skin.ADULT, s, 0.4),
+                mean += coverage(WhitePattern.faceMarking(seeded(seed * 7919L), Skin.ADULT, s, 0.4),
                         Skin.ADULT) / n;
             }
             assertTrue(mean > previous,
@@ -190,7 +227,7 @@ class FaceMarkingTest {
         int bare = 0;
         int n = 1000;
         for (long seed = 0; seed < n; seed++) {
-            if (!WhitePattern.faceMarking(new SeededRng(seed * 7919L), Skin.ADULT, 0.12, 0.4).marksAnything()) {
+            if (!WhitePattern.faceMarking(seeded(seed * 7919L), Skin.ADULT, 0.12, 0.4).marksAnything()) {
                 bare++;
             }
         }
@@ -211,13 +248,19 @@ class FaceMarkingTest {
     @Test
     void onlyABaldFaceReachesUnderTheJaw() {
         FaceMarking blaze = WhitePattern.faceMarking(
-                new FakeRng().longs(3L).floats(0.01f, 0.01f, 0.99f, 0.0f, 0.5f, 0.99f, 0.5f, 0.5f),
+                Epi.of(WhitePattern.faceSchema(),
+                "face_seed", 3L, "star", 0.01, "stripe", 0.01, "snip", 0.99,
+                "face_width", 0.0, "face_offset", 0.5, "face_reach", 0.99,
+                "star_size", 0.5, "snip_size", 0.5),
                 Skin.ADULT, 0.62, 0.11);
         assertEquals("blaze", blaze.describe());
         assertEquals(0, countCovered(blaze, Skin.ADULT, Face.BOTTOM), "a blaze wrapped under the jaw");
 
         FaceMarking bald = WhitePattern.faceMarking(
-                new FakeRng().longs(3L).floats(0.01f, 0.01f, 0.01f, 0.99f, 0.5f, 0.99f, 0.99f, 0.99f),
+                Epi.of(WhitePattern.faceSchema(),
+                "face_seed", 3L, "star", 0.01, "stripe", 0.01, "snip", 0.01,
+                "face_width", 0.99, "face_offset", 0.5, "face_reach", 0.99,
+                "star_size", 0.99, "snip_size", 0.99),
                 Skin.ADULT, 0.95, 0.11);
         assertTrue(bald.isBald());
         assertTrue(countCovered(bald, Skin.ADULT, Face.BOTTOM) > 0, "a bald face should take the jaw");
@@ -228,7 +271,10 @@ class FaceMarkingTest {
     void onlyABaldFaceReachesTheSidesOfTheHead() {
         assertEquals(0, countCovered(starOnly(), Skin.ADULT, Face.RIGHT));
         FaceMarking bald = WhitePattern.faceMarking(
-                new FakeRng().longs(3L).floats(0.01f, 0.01f, 0.01f, 0.99f, 0.5f, 0.99f, 0.99f, 0.99f),
+                Epi.of(WhitePattern.faceSchema(),
+                "face_seed", 3L, "star", 0.01, "stripe", 0.01, "snip", 0.01,
+                "face_width", 0.99, "face_offset", 0.5, "face_reach", 0.99,
+                "star_size", 0.99, "snip_size", 0.99),
                 Skin.ADULT, 0.95, 0.11);
         assertTrue(countCovered(bald, Skin.ADULT, Face.RIGHT) > 0);
     }
@@ -237,7 +283,10 @@ class FaceMarkingTest {
     @Test
     void aFaceMarkingNeverCoversAnythingButTheHeadAndMuzzle() {
         FaceMarking bald = WhitePattern.faceMarking(
-                new FakeRng().longs(3L).floats(0.01f, 0.01f, 0.01f, 0.99f, 0.5f, 0.99f, 0.99f, 0.99f),
+                Epi.of(WhitePattern.faceSchema(),
+                "face_seed", 3L, "star", 0.01, "stripe", 0.01, "snip", 0.01,
+                "face_width", 0.99, "face_offset", 0.5, "face_reach", 0.99,
+                "star_size", 0.99, "snip_size", 0.99),
                 Skin.ADULT, 0.95, 0.4);
         HorseSkinGeometry.forEachTexel(Skin.ADULT, (px, py, part, face, point) -> {
             if (part == Part.HEAD || part == Part.MUZZLE) {
@@ -261,7 +310,10 @@ class FaceMarkingTest {
         assertFalse(HorseSkinGeometry.hasPart(Skin.BABY, Part.MUZZLE));
 
         FaceMarking snip = WhitePattern.faceMarking(
-                new FakeRng().longs(9L).floats(0.99f, 0.99f, 0.01f, 0.0f, 0.5f, 0.5f, 0.5f, 0.5f),
+                Epi.of(WhitePattern.faceSchema(),
+                "face_seed", 9L, "star", 0.99, "stripe", 0.99, "snip", 0.01,
+                "face_width", 0.0, "face_offset", 0.5, "face_reach", 0.5,
+                "star_size", 0.5, "snip_size", 0.5),
                 Skin.BABY, MID, 0.4);
         assertEquals("snip", snip.describe());
 
@@ -282,13 +334,19 @@ class FaceMarkingTest {
 
     private static FaceMarking starOnly() {
         return WhitePattern.faceMarking(
-                new FakeRng().longs(9L).floats(0.01f, 0.99f, 0.99f, 0.0f, 0.5f, 0.5f, 0.5f, 0.5f),
+                Epi.of(WhitePattern.faceSchema(),
+                "face_seed", 9L, "star", 0.01, "stripe", 0.99, "snip", 0.99,
+                "face_width", 0.0, "face_offset", 0.5, "face_reach", 0.5,
+                "star_size", 0.5, "snip_size", 0.5),
                 Skin.ADULT, MID, 0.4);
     }
 
     private static FaceMarking snipOnly() {
         return WhitePattern.faceMarking(
-                new FakeRng().longs(9L).floats(0.99f, 0.99f, 0.01f, 0.0f, 0.5f, 0.5f, 0.5f, 0.5f),
+                Epi.of(WhitePattern.faceSchema(),
+                "face_seed", 9L, "star", 0.99, "stripe", 0.99, "snip", 0.01,
+                "face_width", 0.0, "face_offset", 0.5, "face_reach", 0.5,
+                "star_size", 0.5, "snip_size", 0.5),
                 Skin.ADULT, MID, 0.4);
     }
 

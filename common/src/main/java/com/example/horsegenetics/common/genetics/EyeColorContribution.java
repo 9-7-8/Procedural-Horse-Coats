@@ -39,11 +39,11 @@ import java.util.Optional;
  *   <li>Pure: a pair, the genotype, the horse's epigenome and its resolved white
  *       coverage in; a claim or {@link Optional#empty()} out.</li>
  *   <li>{@code epigenome} may be {@code null} - the question was asked about a
- *       genotype rather than about a horse. {@link AlleleRandomness#forGene}
+ *       genotype rather than about a horse. {@link GeneEpigenetics#forGene}
  *       handles that by handing back midpoints, which is the honest answer.</li>
  *   <li>A claim <b>may vary per horse</b> - champagne's iris runs from amber
  *       through hazel to olive - but only if every number comes from
- *       {@link AlleleRandomness}, so it is inherited with the allele copy, and
+ *       {@link GeneEpigenetics}, so it is inherited with the allele copy, and
  *       only if the outcome declares itself
  *       {@link Expression.Builder#varies()}. The eye is baked into the coat
  *       texture, so an undeclared variation would let two visibly different

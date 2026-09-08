@@ -5,7 +5,7 @@ import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Skin;
 import com.example.horsegenetics.common.genetics.AllelePair;
 import com.example.horsegenetics.common.genetics.Epigenome;
 import com.example.horsegenetics.common.genetics.Expression;
-import com.example.horsegenetics.common.genetics.AlleleRandomness;
+import com.example.horsegenetics.common.genetics.GeneEpigenetics;
 import com.example.horsegenetics.common.genetics.EyeColor;
 import com.example.horsegenetics.common.genetics.EyeColorContribution;
 import com.example.horsegenetics.common.genetics.EyePatch;
@@ -351,8 +351,11 @@ public final class CoatTextureComposer {
                 overlay.tintIris(under.color().rgb(), under.color().strength());
             }
             EyeColor blue = winner.color();
+            // Off the winning gene's own copy: the spread values live on every
+            // gene that can claim an eye, precisely because which one wins is
+            // not known until here.
             EyeSpread spread = EyeSpread.roll(
-                    AlleleRandomness.forGene(winner.gene(), genotype, epigenome).expressed());
+                    GeneEpigenetics.forGene(winner.gene(), genotype, epigenome).expressed());
             overlay.tintIrisSector(CoatRegions.RIGHT_EYE, spread.right(), blue.rgb(), blue.strength());
             overlay.tintIrisSector(CoatRegions.LEFT_EYE, spread.left(), blue.rgb(), blue.strength());
         } else if (winner != null) {

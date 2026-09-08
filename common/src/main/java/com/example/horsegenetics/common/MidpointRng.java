@@ -7,17 +7,19 @@ package com.example.horsegenetics.common;
  *
  * <p>It is not random and is not pretending to be. It exists for the one
  * question that has no horse attached to it: "what does <i>this genotype</i>
- * do?", asked by a punnett display, a wiki table or a unit test, where there is
- * no epigenome to read and inventing one would answer about a horse nobody
- * owns. {@link com.example.horsegenetics.common.trait.HorseTraits#resolve(
- * com.example.horsegenetics.common.genetics.Genotype)} uses it so an
- * epigenetically-varying trait reports its midpoint rather than a number drawn
- * off a seed the caller never supplied.
+ * do?", asked by a punnett display, a wiki table or a unit test.
  *
- * <p><b>Never use it to build a horse.</b> A real horse's epigenetic draws come
- * from the expressing allele copy's seed ({@code CoatBuildContext
- * .epigeneticsFor}), which is stored, heritable and reproducible; this one would
- * make every horse identical.
+ * <p><b>It is no longer the epigenetics path.</b> It used to be: a trait asked
+ * about a genotype with no epigenome got an {@link Rng} that returned 0.5 from
+ * every draw, which landed the gene on the middle of its range. Epigenetics are
+ * stored values now, so the honest midpoint is the one the value's own schema
+ * declares ({@code EpiSchema.midpoint()}) - and unlike 0.5 through a
+ * distribution, it is right even when the distribution is skewed.
+ *
+ * <p>What is left is its use as a <b>zero-sigma Gaussian</b>: all-{@code 0.5}
+ * inputs make {@link Rng#nextGaussian()} return exactly {@code 0}, which is the
+ * property that made this class worth having in the first place and is what the
+ * bounded-Gaussian tests pin.
  */
 public final class MidpointRng implements Rng {
 

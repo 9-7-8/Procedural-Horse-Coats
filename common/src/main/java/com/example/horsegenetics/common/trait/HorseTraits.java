@@ -1,10 +1,9 @@
 package com.example.horsegenetics.common.trait;
 
-import com.example.horsegenetics.common.MidpointRng;
 import com.example.horsegenetics.common.Rng;
 import com.example.horsegenetics.common.SeededRng;
 import com.example.horsegenetics.common.genetics.AllelePair;
-import com.example.horsegenetics.common.genetics.AlleleRandomness;
+import com.example.horsegenetics.common.genetics.GeneEpigenetics;
 import com.example.horsegenetics.common.genetics.Epigenome;
 import com.example.horsegenetics.common.genetics.Gene;
 import com.example.horsegenetics.common.genetics.Genes;
@@ -100,9 +99,8 @@ public final class HorseTraits {
     /**
      * The horse this genotype describes, with the health genetics switched on
      * and <b>no epigenome</b> - so an {@link EpigeneticTraitContribution}
-     * reports its midpoint (see {@link MidpointRng}). This is the right call for
-     * a question about a <i>genotype</i>; to resolve an actual horse, pass its
-     * epigenome.
+     * reports its schema's midpoint. This is the right call for a question about
+     * a <i>genotype</i>; to resolve an actual horse, pass its epigenome.
      */
     public static Traits resolve(Genotype genotype) {
         return resolve(genotype, null, true);
@@ -126,27 +124,23 @@ public final class HorseTraits {
 
     /**
      * The full form. {@code epigenome} may be {@code null}, in which case every
-     * {@link EpigeneticTraitContribution} draws from {@link MidpointRng} - the
-     * midpoint of what the genotype can produce, not a horse.
+     * {@link EpigeneticTraitContribution} reports its schema's midpoint - the
+     * middle of what the genotype can produce, not a horse.
+     *
+     * <p><b>There is deliberately no breed here.</b> A breed shapes its
+     * founders and then lets go: it decides which magical stat loci a wild
+     * horse of that breed is doubled up on and what numbers those copies carry
+     * ({@code BreedFounder}), and after that a horse is whatever it inherited.
+     * Re-applying a breed standard at resolve time - which is what this used to
+     * do, averaging both parents' bands for a cross - meant a Percheron crossed
+     * with a Falabella had its size recomputed into a mid-size band every time
+     * it was looked at, regardless of which alleles the foal actually got.
      *
      * @param healthGenetics {@code false} suppresses every
      *        {@link HealthContribution}, as above.
      */
     public static Traits resolve(Genotype genotype, Epigenome epigenome, boolean healthGenetics) {
-        return resolve(genotype, epigenome, BreedStatTargets.NONE, healthGenetics);
-    }
-
-    /**
-     * The full form with a <b>breed</b>. {@code breedTargets} pins one or more
-     * body axes to a {@link com.example.horsegenetics.common.trait.TargetBand}
-     * range; the four magical body-stat genes then land the horse inside the
-     * band from its epigenetic seeds rather than taking their default draw.
-     * Pass {@link BreedStatTargets#NONE} (or use the shorter overload) for an
-     * Unknown / breedless horse.
-     */
-    public static Traits resolve(Genotype genotype, Epigenome epigenome,
-                                 BreedStatTargets breedTargets, boolean healthGenetics) {
-        TraitBuilder out = new TraitBuilder(breedTargets == null ? BreedStatTargets.NONE : breedTargets);
+        TraitBuilder out = new TraitBuilder();
         for (Gene gene : Genes.codeOrder()) {
             boolean plain = gene instanceof TraitContribution;
             boolean epigenetic = gene instanceof EpigeneticTraitContribution;
@@ -162,24 +156,24 @@ public final class HorseTraits {
             }
             if (epigenetic) {
                 ((EpigeneticTraitContribution) gene)
-                        .contribute(pair, genotype, randomnessFor(gene, genotype, epigenome), out);
+                        .contribute(pair, genotype, epigeneticsFor(gene, genotype, epigenome), out);
             }
         }
         return out.build();
     }
 
     /**
-     * One gene's per-horse randomness, derived exactly the way
-     * {@code CoatBuildContext} derives the coat's - so a gene that varies both
-     * its coat and its body reads the same numbers, not two sets.
+     * One gene's per-horse numbers, read exactly the way
+     * {@code CoatBuildContext} reads the coat's - so a gene that varies both its
+     * coat and its body sees the same numbers, not two sets.
      *
-     * <p>With no epigenome every accessor is {@link MidpointRng}, so an
-     * epigenetic trait reports the midpoint of what the genotype can produce.
-     * The construction itself lives on {@link AlleleRandomness} because the
+     * <p>With no epigenome every value reports its schema's midpoint, so an
+     * epigenetic trait describes the middle of what the genotype can produce.
+     * The construction itself lives on {@link GeneEpigenetics} because the
      * ability side needs the identical thing.
      */
-    private static AlleleRandomness randomnessFor(Gene gene, Genotype genotype, Epigenome epigenome) {
-        return AlleleRandomness.forGene(gene, genotype, epigenome);
+    private static GeneEpigenetics epigeneticsFor(Gene gene, Genotype genotype, Epigenome epigenome) {
+        return GeneEpigenetics.forGene(gene, genotype, epigenome);
     }
 
     /** The all-wild-type horse - the baselines, nothing added. */

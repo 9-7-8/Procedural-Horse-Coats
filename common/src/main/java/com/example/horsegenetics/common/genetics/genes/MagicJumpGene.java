@@ -57,7 +57,7 @@ public final class MagicJumpGene extends AbstractMagicStatGene {
     }
 
     @Override
-    protected StatAxis axis() {
+    public StatAxis axis() {
         return StatAxis.JUMP;
     }
 

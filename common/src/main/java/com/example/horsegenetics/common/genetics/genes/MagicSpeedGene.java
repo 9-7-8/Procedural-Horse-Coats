@@ -58,7 +58,7 @@ public final class MagicSpeedGene extends AbstractMagicStatGene {
     }
 
     @Override
-    protected StatAxis axis() {
+    public StatAxis axis() {
         return StatAxis.SPEED;
     }
 

@@ -8,6 +8,7 @@ import com.example.horsegenetics.common.genetics.Expression;
 import com.example.horsegenetics.common.genetics.FounderContext;
 import com.example.horsegenetics.common.genetics.FounderTable;
 import com.example.horsegenetics.common.genetics.Gene;
+import com.example.horsegenetics.common.genetics.epi.EpiSchema;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -22,8 +23,8 @@ import java.util.Map;
  *
  * <p>It is an ordinary gene in every other respect: it goes in the same
  * registry, takes the same place in the genotype code, breeds by the same
- * Mendelian draw, and its non-deterministic numbers come off the same
- * per-allele epigenetic seed. Nothing downstream knows or cares that it was
+ * Mendelian draw, and its varying numbers are stored on the allele copy the
+ * same way. Nothing downstream knows or cares that it was
  * loaded from a file.
  *
  * <p>The spec's {@code expressions} table is turned into real
@@ -105,7 +106,18 @@ public final class SpecGene implements Gene {
 
     private SpecValues values(CoatBuildContext ctx) {
         AllelePair pair = ctx.genotype().pair(spec.key());
-        return SpecValues.draw(spec, ctx.epigeneticsFor(spec.key()), pair == null ? 0 : dose(pair));
+        return SpecValues.read(spec, ctx.epigeneticsFor(spec.key()), pair == null ? 0 : dose(pair));
+    }
+
+    /**
+     * The spec's knobs, as stored values - see {@link SpecValues#schema}. A
+     * data-driven gene needed almost nothing here: the format already declared
+     * its varying numbers by name and with a range, which is exactly what an
+     * {@link EpiSchema} is.
+     */
+    @Override
+    public EpiSchema epiSchema() {
+        return SpecValues.schema(spec);
     }
 
     public GeneSpec spec() {

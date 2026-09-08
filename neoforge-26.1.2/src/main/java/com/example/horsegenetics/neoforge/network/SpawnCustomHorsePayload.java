@@ -41,8 +41,14 @@ public record SpawnCustomHorsePayload(String genotypeCode, String epigenomeCode,
             new Type<>(Identifier.fromNamespaceAndPath(HorseGenetics.MOD_ID, "spawn_custom_horse"));
 
     public static final StreamCodec<ByteBuf, SpawnCustomHorsePayload> STREAM_CODEC = StreamCodec.composite(
-            ByteBufCodecs.stringUtf8(2048), SpawnCustomHorsePayload::genotypeCode,
-            ByteBufCodecs.stringUtf8(4096), SpawnCustomHorsePayload::epigenomeCode,
+            // These caps are hard failures, not truncations: NeoForge throws when
+            // an encoded string is over, so an undersized cap breaks spawning
+            // outright rather than degrading. The epigenome one was 4096 while a
+            // full code was already about 4500 characters, which means this
+            // packet could not have worked - see EpigenomeSizeTest, which now
+            // guards the margin from the common side.
+            ByteBufCodecs.stringUtf8(8192), SpawnCustomHorsePayload::genotypeCode,
+            ByteBufCodecs.stringUtf8(65536), SpawnCustomHorsePayload::epigenomeCode,
             ByteBufCodecs.BOOL, SpawnCustomHorsePayload::baby,
             ByteBufCodecs.BOOL, SpawnCustomHorsePayload::female,
             ByteBufCodecs.stringUtf8(64), SpawnCustomHorsePayload::breed,

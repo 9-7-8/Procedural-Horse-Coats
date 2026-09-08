@@ -109,10 +109,22 @@ class ManchadoGeneTest {
         }
     }
 
+    /**
+     * A white tail is a reported manchado feature - so it must be what the gene
+     * usually does, not what one lucky horse does. Averaged over a spread of
+     * horses rather than pinned to a single seed: the numbers a horse carries
+     * are stored now, so which horse a given seed produces is an implementation
+     * detail, while "manchados tend to have white tails" is the actual claim.
+     */
     @Test
     void theTailGoesMostlyWhite() {
-        assertTrue(partWhite(paint(bay(MANCHADO.ma, MANCHADO.ma), 4L), Part.TAIL) > 0.6,
-                "a white tail is a reported manchado feature");
+        double total = 0;
+        int horses = 20;
+        for (long seed = 0; seed < horses; seed++) {
+            total += partWhite(paint(bay(MANCHADO.ma, MANCHADO.ma), seed), Part.TAIL);
+        }
+        double mean = total / horses;
+        assertTrue(mean > 0.6, "a white tail is a reported manchado feature, got mean " + mean);
     }
 
     /**

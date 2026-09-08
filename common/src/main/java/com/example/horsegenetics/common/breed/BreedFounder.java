@@ -11,6 +11,9 @@ import com.example.horsegenetics.common.horse.Sex;
 import com.example.horsegenetics.common.trait.HealthContribution;
 import com.example.horsegenetics.common.trait.StatAxis;
 import com.example.horsegenetics.common.trait.TargetBand;
+import com.example.horsegenetics.common.genetics.Epigenome;
+import com.example.horsegenetics.common.genetics.AlleleEpigenetics;
+import com.example.horsegenetics.common.genetics.genes.AbstractMagicStatGene;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +33,9 @@ import java.util.Set;
  *       {@link Breed#founderTable weighted pool};</li>
  *   <li><b>the four magical body-stat loci</b> are set from
  *       {@link Breed#statTargets()} - homozygous for the pushing allele on any
- *       axis the breed pins, wild on the rest;</li>
+ *       axis the breed pins, wild on the rest - and then, once the epigenome
+ *       exists, those copies are given numbers that land the horse inside the
+ *       band ({@link #stampStatTargets});</li>
  *   <li><b>every other magical gene</b> is forced wild, then the geometric
  *       {@link #rollMagic magic-gene draw} switches a few back on.</li>
  * </ol>
@@ -44,6 +49,10 @@ import java.util.Set;
  * <p>This is a <b>founder</b> path: the {@link Rng} is the wild spawn's, not a
  * seeded one, and consuming a few extra draws for genes that are then
  * overwritten is fine - founders are the one place randomness is free.
+ *
+ * <p>It is also the <b>only</b> place a breed influences a number. Everything
+ * downstream - resolving a body, breeding a foal, reading a record - knows only
+ * what the horse itself carries. See {@code BreedStatTargets}.
  */
 public final class BreedFounder {
 
@@ -105,7 +114,73 @@ public final class BreedFounder {
         }
 
         g = rollMagic(breed, g, rng);
-        return Genome.of(g, rng);
+        return stampStatTargets(breed, Genome.of(g, rng), rng);
+    }
+
+    /**
+     * Write the breed's stat bands onto the founder's <b>allele copies</b> - the
+     * one and only place a breed touches a number.
+     *
+     * <p>The genotype pass above already made this horse homozygous for the
+     * pushing allele on every axis the breed pins; this picks a factor inside
+     * the band and splits it across the two copies, so the horse lands where the
+     * breed wants it to. From here the numbers are ordinary epigenetics: they
+     * inherit, they drift, and nothing ever pulls them back toward the standard.
+     *
+     * <p>That last point is the whole change. A Percheron bred to a Falabella
+     * now produces a foal carrying one enormous copy and one tiny one - it got
+     * whichever copies it got - rather than a horse whose size is recomputed
+     * into the average of two breed standards every time it is looked at.
+     *
+     * <p>The two copies are split <b>unevenly</b> (see {@link #COPY_SKEW}) rather
+     * than given half each. Two identical copies would make a founder's two
+     * gametes interchangeable, and half the interest in breeding one is that its
+     * foals differ depending on which copy they drew.
+     */
+    private static Genome stampStatTargets(Breed breed, Genome genome, Rng rng) {
+        Epigenome epi = genome.epigenome();
+        for (Gene gene : Genes.codeOrder()) {
+            if (!BODY_STAT_KEYS.contains(gene.key())) {
+                continue;
+            }
+            TargetBand band = breed.statTargets().band(axisOf(gene));
+            if (band == null) {
+                continue;
+            }
+            AllelePair pair = genome.genotype().pair(gene);
+            if (pair.count(gene.defaultAllele()) == 2) {
+                continue;   // the breed pins this axis but the horse lost the allele
+            }
+            // Both copies are the pushing allele, and the gene sums their two
+            // deltas - so the total distance from 1.0 is what has to land in the
+            // band, and each copy carries a share of it. The sign is the
+            // allele's job, so the stored numbers are always positive.
+            double total = Math.abs(band.lerp(rng.nextFloat()) - 1.0);
+            double share = 0.5 + (rng.nextFloat() - 0.5f) * COPY_SKEW;
+            Epigenome.Copies c = epi.copies(gene);
+            epi = epi.with(gene.key(), new Epigenome.Copies(
+                    withDelta(c.first(), total * share),
+                    withDelta(c.second(), total * (1.0 - share))));
+        }
+        return new Genome(genome.genotype(), epi);
+    }
+
+    /** How unevenly a founder's two copies split the breed's target. */
+    private static final double COPY_SKEW = 0.30;
+
+    private static AlleleEpigenetics withDelta(AlleleEpigenetics copy, double delta) {
+        return new AlleleEpigenetics(copy.priority(),
+                copy.values().with(AbstractMagicStatGene.DELTA, delta));
+    }
+
+    private static StatAxis axisOf(Gene gene) {
+        return switch (gene.key()) {
+            case "horsegenetics.body_size" -> StatAxis.SCALE;
+            case "horsegenetics.magic_speed" -> StatAxis.SPEED;
+            case "horsegenetics.magic_health" -> StatAxis.HEALTH;
+            case "horsegenetics.magic_jump" -> StatAxis.JUMP;
+            default -> throw new IllegalStateException(gene.key());
+        };
     }
 
     // ------------------------------------------------------------------
@@ -153,14 +228,7 @@ public final class BreedFounder {
     }
 
     private static AllelePair bodyStatPair(Breed breed, Gene gene) {
-        StatAxis axis = switch (gene.key()) {
-            case "horsegenetics.body_size" -> StatAxis.SCALE;
-            case "horsegenetics.magic_speed" -> StatAxis.SPEED;
-            case "horsegenetics.magic_health" -> StatAxis.HEALTH;
-            case "horsegenetics.magic_jump" -> StatAxis.JUMP;
-            default -> throw new IllegalStateException(gene.key());
-        };
-        TargetBand band = breed.statTargets().band(axis);
+        TargetBand band = breed.statTargets().band(axisOf(gene));
         if (band == null) {
             return wild(gene);
         }

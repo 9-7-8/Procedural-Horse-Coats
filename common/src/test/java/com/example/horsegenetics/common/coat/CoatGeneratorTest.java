@@ -26,8 +26,8 @@ class CoatGeneratorTest {
     void givesEveryAlleleCopyItsOwnEpigenetics() {
         CoatData data = CoatGenerator.generate(BAY, new SeededRng(0xABCDL));
         var agouti = data.epigenome().copies(Genes.AGOUTI);
-        assertNotEquals(agouti.first().epigeneticSeed(), agouti.second().epigeneticSeed(),
-                "the A and the a copy get independent seeds");
+        assertNotEquals(agouti.first().values(), agouti.second().values(),
+                "the A and the a copy get independent numbers");
         assertNotEquals(agouti.first().priority(), agouti.second().priority(),
                 "no gene may carry the same priority twice");
     }

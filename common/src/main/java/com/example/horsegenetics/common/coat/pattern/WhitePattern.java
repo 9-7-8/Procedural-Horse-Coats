@@ -8,6 +8,9 @@ import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Bounds;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Face;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Part;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Skin;
+import com.example.horsegenetics.common.genetics.epi.EpiSchema;
+import com.example.horsegenetics.common.genetics.epi.EpiValue;
+import com.example.horsegenetics.common.genetics.epi.EpiValues;
 
 /**
  * <b>The two shapes congenital white spotting comes in</b>, each as one painter
@@ -124,15 +127,14 @@ public final class WhitePattern {
      * "white finds white" above - so a {@code KIT} pattern over a tobiano or a
      * frame is louder than the same pattern on a solid horse.
      *
-     * <p><b>Draw order</b>, off {@code ctx.epigeneticsFor(geneKey)}:
-     * {@code nextLong()} (the noise seed), then four {@code nextFloat()}s (one
-     * per leg, in {@link CoatRegions#LEGS} order), then {@code nextFloat()} for
-     * the belly and {@code nextFloat()} for the face.
+     * <p>Reads {@link #sabinoSchema()}: the noise seed, one stored height per
+     * leg in {@link CoatRegions#LEGS} order, the belly, and the shared face
+     * marking.
      */
     public static PigmentField sabino(CoatBuildContext ctx, PigmentView coat, String geneKey, double strength) {
         double s = clamp01(strength + SABINO_STACKING * alreadyWhite(coat, ctx.skin()));
-        Rng epi = ctx.epigeneticsFor(geneKey);
-        long seed = epi.nextLong();
+        EpiValues epi = ctx.epigeneticsFor(geneKey);
+        long seed = epi.seed(SABINO_SEED);
 
         // Each leg climbs to roughly the family strength, but they are never
         // level with one another - and the spread narrows as the horse whitens,
@@ -140,9 +142,9 @@ public final class WhitePattern {
         double spread = 0.05 + 0.30 * (1.0 - s);
         double[] legH = new double[CoatRegions.LEGS.size()];
         for (int i = 0; i < legH.length; i++) {
-            legH[i] = clamp01(s * 1.05 + (epi.nextFloat() - 0.5) * 2.0 * spread);
+            legH[i] = clamp01(s * 1.05 + (epi.get(LEG, i) - 0.5) * 2.0 * spread);
         }
-        double bellyRoll = epi.nextFloat();
+        double bellyRoll = epi.get(BELLY);
 
         Skin skin = ctx.skin();
         FaceMarking faceMark = faceMarking(epi, skin, s, SABINO_FACE_JAG);
@@ -255,11 +257,10 @@ public final class WhitePattern {
      * {@code PAX3} splash on the same horse add up instead of overlapping, and
      * it is the reason splash is two genes here rather than one.
      *
-     * <p><b>Draw order</b>, off {@code ctx.epigeneticsFor(geneKey)}:
-     * {@code nextLong()} (the waterline noise seed), {@code nextFloat()} for how
-     * high the waterline sits, then the shared {@link #faceMarking} draw (one
-     * long and eight floats) - which runs at a boosted strength (see
-     * {@link #SPLASH_FACE_BOOST}) but consumes exactly the same numbers.
+     * <p>Reads {@link #splashSchema()}: the waterline noise seed, where in its
+     * range this horse's splash lands, and the shared face marking - which runs
+     * at a boosted strength (see {@link #SPLASH_FACE_BOOST}) off the same stored
+     * numbers.
      */
     public static PigmentField splash(CoatBuildContext ctx, PigmentView coat, String geneKey, double strength) {
         return splash(ctx, coat, geneKey, strength, strength);
@@ -280,14 +281,14 @@ public final class WhitePattern {
      * not to be - predictable. Every other outcome passes one number, which the
      * four-argument overload above does by handing the same value twice.
      *
-     * <p>Consumes exactly the draws the fixed-strength form does; only what
-     * they are used for changes.
+     * <p>Reads exactly the values the fixed-strength form does; only what they
+     * are used for changes.
      */
     public static PigmentField splash(CoatBuildContext ctx, PigmentView coat, String geneKey,
                                       double minStrength, double maxStrength) {
-        Rng epi = ctx.epigeneticsFor(geneKey);
-        long seed = epi.nextLong();
-        double levelRoll = epi.nextFloat();
+        EpiValues epi = ctx.epigeneticsFor(geneKey);
+        long seed = epi.seed(SPLASH_SEED);
+        double levelRoll = epi.get(LEVEL);
         double strength = minStrength + (maxStrength - minStrength) * levelRoll;
         double s = clamp01(strength + SPLASH_STACKING * stackingSignal(alreadyWhite(coat, ctx.skin())));
 
@@ -574,31 +575,29 @@ public final class WhitePattern {
      * mean something: {@code W20/N} is described as "a star and a sock", and
      * now it can actually be one.
      *
-     * <p><b>Draw order</b> - part of the determinism contract, so it is fixed
-     * and <b>unconditional</b>. Every one of these is drawn every time, for
-     * every marking, including the components that turn out absent; a draw made
-     * only when a flag is set would silently repaint every horse in every save
-     * the first time those odds moved. In order: {@code nextLong()} (the
-     * margin-wobble seed), then {@code nextFloat()} for the star's presence,
-     * the stripe's presence, the snip's presence, the width, the lateral
-     * offset, the stripe's reach down the face, the star's size and the snip's
-     * size - <b>one long and eight floats</b>.
+     * <p>Every number is stored on the allele copy and read by name - see
+     * {@link #faceSchema()}. The presence values are <b>propensities</b>, not
+     * booleans: whether this horse actually has a star is its stored star
+     * propensity tested against a threshold that moves with the locus's
+     * strength, so one propensity shows a star on a strongly marked horse and
+     * not on a faint one, and a line can be bred star-prone. Storing the
+     * decision instead would have thrown that away.
      *
      * @param jag how far the margin wanders, in body units - the sabino/splash
      *            difference, so a {@code KIT} star has torn edges and a splash
      *            blaze has clean ones
      */
-    public static FaceMarking faceMarking(Rng epi, Skin skin, double strength, double jag) {
+    public static FaceMarking faceMarking(EpiValues epi, Skin skin, double strength, double jag) {
         double s = clamp01(strength);
-        long seed = epi.nextLong();
-        double starRoll = epi.nextFloat();
-        double stripeRoll = epi.nextFloat();
-        double snipRoll = epi.nextFloat();
-        double widthRoll = epi.nextFloat();
-        double offsetRoll = epi.nextFloat();
-        double reachRoll = epi.nextFloat();
-        double starSizeRoll = epi.nextFloat();
-        double snipSizeRoll = epi.nextFloat();
+        long seed = epi.seed(FACE_SEED);
+        double starRoll = epi.get(STAR);
+        double stripeRoll = epi.get(STRIPE);
+        double snipRoll = epi.get(SNIP);
+        double widthRoll = epi.get(FACE_WIDTH);
+        double offsetRoll = epi.get(FACE_OFFSET);
+        double reachRoll = epi.get(FACE_REACH);
+        double starSizeRoll = epi.get(STAR_SIZE);
+        double snipSizeRoll = epi.get(SNIP_SIZE);
 
         Bounds head = HorseSkinGeometry.bounds(skin, Part.HEAD);
         double faceMin = head.xMin();
@@ -745,5 +744,66 @@ public final class WhitePattern {
 
     private static double clamp01(double v) {
         return v < 0 ? 0 : (v > 1 ? 1 : v);
+    }
+
+    // ------------------------------------------------------------------
+    // Epigenetics
+    // ------------------------------------------------------------------
+
+    /** The margin-wobble noise seed of a face marking. */
+    public static final String FACE_SEED = "face_seed";
+    /** How star-prone this copy is - a propensity, not a flag. See {@link #faceMarking}. */
+    public static final String STAR = "star";
+    public static final String STRIPE = "stripe";
+    public static final String SNIP = "snip";
+    public static final String FACE_WIDTH = "face_width";
+    public static final String FACE_OFFSET = "face_offset";
+    public static final String FACE_REACH = "face_reach";
+    public static final String STAR_SIZE = "star_size";
+    public static final String SNIP_SIZE = "snip_size";
+
+    /** The sabino noise seed. */
+    public static final String SABINO_SEED = "seed";
+    /** One per leg, in {@link CoatRegions#LEGS} order - how high that sock climbs. */
+    public static final String LEG = "leg";
+    public static final String BELLY = "belly";
+
+    /** The splash waterline noise seed. */
+    public static final String SPLASH_SEED = "seed";
+    /** Where in its allowed range this horse's splash lands. */
+    public static final String LEVEL = "level";
+
+    /**
+     * What {@link #faceMarking} reads. Composed into the schema of every gene
+     * that draws a face marking, which is why these names carry a {@code face_}
+     * prefix where they could collide - a caller like {@code EdnrbGene} has
+     * values of its own alongside them.
+     */
+    public static EpiSchema faceSchema() {
+        return EpiSchema.of(
+                EpiValue.seed(FACE_SEED),
+                EpiValue.uniform(STAR, 0, 1),
+                EpiValue.uniform(STRIPE, 0, 1),
+                EpiValue.uniform(SNIP, 0, 1),
+                EpiValue.uniform(FACE_WIDTH, 0, 1),
+                EpiValue.uniform(FACE_OFFSET, 0, 1),
+                EpiValue.uniform(FACE_REACH, 0, 1),
+                EpiValue.uniform(STAR_SIZE, 0, 1),
+                EpiValue.uniform(SNIP_SIZE, 0, 1));
+    }
+
+    /** What {@link #sabino} reads - the {@code KIT} shape. */
+    public static EpiSchema sabinoSchema() {
+        return faceSchema().and(
+                EpiValue.seed(SABINO_SEED),
+                EpiValue.perLeg(LEG, 0, 1),
+                EpiValue.uniform(BELLY, 0, 1));
+    }
+
+    /** What {@link #splash} reads - the {@code MITF} / {@code PAX3} shape. */
+    public static EpiSchema splashSchema() {
+        return faceSchema().and(
+                EpiValue.seed(SPLASH_SEED),
+                EpiValue.uniform(LEVEL, 0, 1));
     }
 }

@@ -7,7 +7,7 @@ import com.example.horsegenetics.common.coat.pattern.ColorField;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry;
 import com.example.horsegenetics.common.genetics.Allele;
 import com.example.horsegenetics.common.genetics.AllelePair;
-import com.example.horsegenetics.common.genetics.AlleleRandomness;
+import com.example.horsegenetics.common.genetics.GeneEpigenetics;
 import com.example.horsegenetics.common.genetics.Diet;
 import com.example.horsegenetics.common.genetics.DietContribution;
 import com.example.horsegenetics.common.genetics.Expression;
@@ -22,6 +22,9 @@ import com.example.horsegenetics.common.genetics.Genotype;
 import com.example.horsegenetics.common.genetics.HorseDiet;
 import com.example.horsegenetics.common.trait.TraitBuilder;
 import com.example.horsegenetics.common.trait.TraitContribution;
+import com.example.horsegenetics.common.genetics.epi.EpiSchema;
+import com.example.horsegenetics.common.genetics.epi.EpiValue;
+import com.example.horsegenetics.common.genetics.EyeSpread;
 
 import java.util.List;
 import java.util.Optional;
@@ -239,7 +242,16 @@ public final class DhampirGene implements Gene, TraitContribution, EyeColorContr
     }
 
     @Override
-    public Optional<HorseDiet> diet(AllelePair pair, Genotype genotype, AlleleRandomness random) {
+    public Optional<HorseDiet> diet(AllelePair pair, Genotype genotype, GeneEpigenetics random) {
         return isDhampir(pair) ? Optional.of(HorseDiet.of(Diet.NOTHING)) : Optional.empty();
     }
+    /**
+     * Only the eye spread. Everything else this gene does is fixed by its
+     * alleles.
+     */
+    @Override
+    public EpiSchema epiSchema() {
+        return EyeSpread.schema();
+    }
+
 }

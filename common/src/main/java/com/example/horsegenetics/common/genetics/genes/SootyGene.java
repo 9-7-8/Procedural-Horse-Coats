@@ -17,6 +17,9 @@ import com.example.horsegenetics.common.genetics.Expression;
 import com.example.horsegenetics.common.genetics.FounderContext;
 import com.example.horsegenetics.common.genetics.FounderTable;
 import com.example.horsegenetics.common.genetics.Gene;
+import com.example.horsegenetics.common.genetics.epi.EpiSchema;
+import com.example.horsegenetics.common.genetics.epi.EpiValue;
+import com.example.horsegenetics.common.genetics.epi.EpiValues;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -212,9 +215,12 @@ public final class SootyGene implements Gene {
         return a.equals(S1) ? 1.0 : 0.0;
     }
 
-    /** The dosage plus this horse's own roll. <b>Consumes one {@code nextFloat()}</b>. */
-    public static double score(double dosage, Rng epi) {
-        return dosage + (epi.nextFloat() * 2.0 - 1.0) * EXPRESSION_RANGE;
+    /**
+     * The dosage plus this horse's own stored offset - the number that makes two
+     * horses of the same dosage read a shade apart.
+     */
+    public static double score(double dosage, EpiValues epi) {
+        return dosage + epi.get("expression");
     }
 
     @Override
@@ -234,6 +240,16 @@ public final class SootyGene implements Gene {
 
     public boolean isSooty(AllelePair pair) {
         return dosage(pair) > CLEAR_MAX;
+    }
+
+    /**
+     * How far this horse reads from its raw dosage. Stored rather than rolled,
+     * so a breeder can see which of two same-dosage horses got the darker end
+     * of the range - and inherit it.
+     */
+    @Override
+    public EpiSchema epiSchema() {
+        return EpiSchema.of(EpiValue.uniform("expression", -EXPRESSION_RANGE, EXPRESSION_RANGE));
     }
 
     // ------------------------------------------------------------------

@@ -26,6 +26,9 @@ import com.example.horsegenetics.common.genetics.Genotype;
 import com.example.horsegenetics.common.trait.Condition;
 import com.example.horsegenetics.common.trait.HealthContribution;
 import com.example.horsegenetics.common.trait.TraitBuilder;
+import com.example.horsegenetics.common.genetics.epi.EpiSchema;
+import com.example.horsegenetics.common.genetics.epi.EpiValue;
+import com.example.horsegenetics.common.genetics.epi.EpiValues;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -351,16 +354,51 @@ public final class LeopardGene implements Gene, CoatOverlayContribution, HealthC
     }
 
     // ------------------------------------------------------------------
+    // Epigenetics
+    // ------------------------------------------------------------------
+
+    private static final String SEED = "seed";
+    private static final String SPOT_SIZE = "spot_size";
+    private static final String SPOT_DENSITY = "spot_density";
+    private static final String BLANKET_COVER = "blanket_cover";
+    private static final String VARNISH_DENSITY = "varnish_density";
+    private static final String VARNISH_ASYMMETRY = "varnish_asymmetry";
+    private static final String VARNISH_MARK = "varnish_mark";
+
+    /**
+     * The leopard complex has <b>three</b> painters - spotted, blanket and
+     * varnish - and which one runs depends on the horse's {@code PATN} dosage.
+     * Every horse stores the values all three need, whichever it currently
+     * shows, so a horse that gains a {@code PATN} copy and switches painter
+     * keeps a coherent identity rather than being re-invented.
+     *
+     * <p>{@link #SPOT_SIZE} is deliberately shared between the leopard spots
+     * and the spots inside a blanket: they are the same feature, so a line bred
+     * for large spots keeps them across the switch.
+     */
+    @Override
+    public EpiSchema epiSchema() {
+        return EpiSchema.of(
+                EpiValue.seed(SEED),
+                EpiValue.uniform(SPOT_SIZE, 0.85, 1.15),
+                EpiValue.uniform(SPOT_DENSITY, 0.90, 1.10),
+                EpiValue.uniform(BLANKET_COVER, -0.06, 0.06),
+                EpiValue.uniform(VARNISH_DENSITY, 0.85, 1.15),
+                EpiValue.uniform(VARNISH_ASYMMETRY, -0.25, 0.25),
+                EpiValue.uniform(VARNISH_MARK, MARK_MIN, MARK_MIN + MARK_RANGE));
+    }
+
+    // ------------------------------------------------------------------
     // Painters
     // ------------------------------------------------------------------
 
     /** A leopard / fewspot coat: the whole horse white, with round base-colour spots punched back in. */
     private static PigmentField paintSpotted(CoatBuildContext ctx, PigmentView coat,
                                              double spacing, double radiusFrac) {
-        Rng epi = ctx.epigeneticsFor(KEY);
-        long seed = epi.nextLong();
-        double sizeJitter = 0.85 + 0.30 * epi.nextFloat();   // per-horse spot-size wobble
-        double densityJitter = 0.90 + 0.20 * epi.nextFloat();
+        EpiValues epi = ctx.epigeneticsFor(KEY);
+        long seed = epi.seed(SEED);
+        double sizeJitter = epi.get(SPOT_SIZE);
+        double densityJitter = epi.get(SPOT_DENSITY);
 
         Skin skin = ctx.skin();
         PigmentField f = coat.mutableCopy();
@@ -381,10 +419,10 @@ public final class LeopardGene implements Gene, CoatOverlayContribution, HealthC
      */
     private static PigmentField paintBlanket(CoatBuildContext ctx, PigmentView coat,
                                              double coverage, boolean spots) {
-        Rng epi = ctx.epigeneticsFor(KEY);
-        long seed = epi.nextLong();
-        double coverJitter = coverage + (epi.nextFloat() - 0.5) * 0.12;
-        double spotJitter = 0.85 + 0.30 * epi.nextFloat();
+        EpiValues epi = ctx.epigeneticsFor(KEY);
+        long seed = epi.seed(SEED);
+        double coverJitter = coverage + epi.get(BLANKET_COVER);
+        double spotJitter = epi.get(SPOT_SIZE);
 
         Skin skin = ctx.skin();
         Bounds body = HorseSkinGeometry.bounds(skin, Part.BODY);
@@ -448,11 +486,11 @@ public final class LeopardGene implements Gene, CoatOverlayContribution, HealthC
      */
     private static PigmentField paintVarnish(CoatBuildContext ctx, PigmentView coat,
                                              double strength, boolean snowflakes) {
-        Rng epi = ctx.epigeneticsFor(KEY);
-        long seed = epi.nextLong();
-        double densityJitter = 0.85 + 0.30 * epi.nextFloat();
-        double asymmetry = (epi.nextFloat() - 0.5) * 0.5;   // one side roans a little more
-        double markStrength = MARK_MIN + epi.nextFloat() * MARK_RANGE;
+        EpiValues epi = ctx.epigeneticsFor(KEY);
+        long seed = epi.seed(SEED);
+        double densityJitter = epi.get(VARNISH_DENSITY);
+        double asymmetry = epi.get(VARNISH_ASYMMETRY);   // one side roans a little more
+        double markStrength = epi.get(VARNISH_MARK);
 
         Skin skin = ctx.skin();
         Mark[] marks = varnishMarks(skin);

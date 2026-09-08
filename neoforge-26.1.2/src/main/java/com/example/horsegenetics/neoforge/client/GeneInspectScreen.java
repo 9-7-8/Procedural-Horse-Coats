@@ -6,12 +6,19 @@ import com.example.horsegenetics.common.genetics.Gene;
 import com.example.horsegenetics.common.genetics.Genes;
 import com.example.horsegenetics.common.genetics.Genotype;
 import com.example.horsegenetics.common.horse.HorseRecord;
+import com.example.horsegenetics.common.genetics.Epigenome;
+import com.example.horsegenetics.common.genetics.epi.EpiSchema;
+import com.example.horsegenetics.common.genetics.epi.EpiValue;
+import com.example.horsegenetics.common.genetics.epi.EpiValues;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * A full-window popup, opened from the "View Genes" button on the horse
@@ -21,9 +28,21 @@ import java.util.List;
  * outcome that really paints). It exists to make "do the alleles I see match
  * the look I expected" a glance rather than a puzzle.
  *
- * <p>Every registered gene is listed, in processing order ({@link Genes#codeOrder()}),
- * so the silent ones are visible too - they are just dimmed. Closes back to the
- * game like {@link FamilyTreeScreen}.
+ * <p>Under each gene it also shows <b>the numbers that gene has written on this
+ * horse's two allele copies</b> - how much white a splash covers, how much
+ * bigger a magically large horse is, what colour a particle trail comes out.
+ * Those used to be recoverable only by replaying a PRNG off a stored seed, so
+ * "why is this horse this size" had no answer you could look at. They are stored
+ * literally now, and this is where you read them.
+ *
+ * <p>The copy the horse actually <b>expresses</b> is marked; on a heterozygote
+ * that is the dominant copy, on a homozygote the higher-priority one. The other
+ * copy is still shown, because it is what half this horse's foals will inherit -
+ * which is the entire reason to look.
+ *
+ * <p><b>Active</b> lists the genes this horse carries something at;
+ * <b>All</b> adds the baseline ones. Closes back to the game like
+ * {@link FamilyTreeScreen}.
  */
 public final class GeneInspectScreen extends Screen {
 
@@ -40,8 +59,17 @@ public final class GeneInspectScreen extends Screen {
     private static final int DESC_OFF = 0xFF70768A;
     private static final int ROW_LINE = 0x22FFFFFF;
 
+    private static final int VALUE_NAME = 0xFF7F8BA6;
+    private static final int VALUE_ON = 0xFFD8C48A;
+    private static final int VALUE_OFF = 0xFF6E7686;
+
     private final Genotype genotype;
+    /** This horse's stored numbers, or {@code null} for a record with no genome. */
+    private final Epigenome epigenome;
     private final String heading;
+
+    /** False shows only what the horse carries; true adds the baseline loci. */
+    private boolean showAll = false;
 
     private float scroll = 0f;
     private float maxScroll = 0f;
@@ -55,6 +83,13 @@ public final class GeneInspectScreen extends Screen {
             g = Genotype.parse("");
         }
         this.genotype = g;
+        Epigenome e;
+        try {
+            e = record.hasGenome() ? record.epigenome() : null;
+        } catch (RuntimeException unparseable) {
+            e = null;
+        }
+        this.epigenome = e;
         this.heading = record.displayName() + " — genes";
     }
 
@@ -64,6 +99,17 @@ public final class GeneInspectScreen extends Screen {
         addRenderableWidget(Button.builder(Component.literal("Done"), b -> onClose())
                 .bounds(this.width / 2 - 50, this.height - 26, 100, 20)
                 .build());
+        addRenderableWidget(Button.builder(filterLabel(), b -> {
+                    showAll = !showAll;
+                    scroll = 0f;
+                    b.setMessage(filterLabel());
+                })
+                .bounds(panelRight() - 78, panelTop() + 4, 70, 16)
+                .build());
+    }
+
+    private Component filterLabel() {
+        return Component.literal(showAll ? "All genes" : "Active only");
     }
 
     @Override
@@ -143,7 +189,7 @@ public final class GeneInspectScreen extends Screen {
             // its baseline is left out.
             boolean always = gene == Genes.SEX || gene == Genes.EXTENSION || gene == Genes.AGOUTI;
             boolean baseline = pair.homozygousFor(gene.defaultAllele());
-            if (!always && baseline) {
+            if (!always && baseline && !showAll) {
                 continue;
             }
             boolean on = !expr.wildType();           // really changes the coat
@@ -151,11 +197,12 @@ public final class GeneInspectScreen extends Screen {
 
             List<String> descLines = GuiText.wrap(this.font, phenotypeText(gene, expr),
                     Math.max(60, descW));
+            List<String> valueLines = epigeneticLines(gene);
             // column 1 is 2 lines (name + tokens); column 2 is 1 line (outcome
-            // name) plus the wrapped description - the row has to clear whichever
-            // is taller.
+            // name), the wrapped description, then one line per stored value -
+            // the row has to clear whichever is taller.
             int lineStep = this.font.lineHeight + 1;
-            int rowLines = Math.max(2, 1 + descLines.size());
+            int rowLines = Math.max(2, 1 + descLines.size() + valueLines.size());
             int rowH = 4 + lineStep * rowLines;
 
             if (y + rowH >= top && y <= viewBottom) {
@@ -177,6 +224,11 @@ public final class GeneInspectScreen extends Screen {
                 int dy = y + 3 + this.font.lineHeight + 1;
                 for (String line : descLines) {
                     g.text(this.font, Component.literal(line), split + 8, dy, descColour);
+                    dy += this.font.lineHeight + 1;
+                }
+                for (String line : valueLines) {
+                    g.text(this.font, Component.literal(line), split + 8, dy,
+                            on || carrier ? VALUE_ON : VALUE_OFF);
                     dy += this.font.lineHeight + 1;
                 }
             }
@@ -244,4 +296,128 @@ public final class GeneInspectScreen extends Screen {
         return super.mouseScrolled(mx, my, sx, sy);
     }
 
+
+    // ------------------------------------------------------------------
+    // The stored numbers
+    // ------------------------------------------------------------------
+
+    /**
+     * One line per value this gene writes on an allele copy, showing both
+     * copies with the expressed one marked:
+     *
+     * <pre>
+     *   cover      &gt; 41%      9%
+     *   coronet      .31 .80 .12 .60
+     * </pre>
+     *
+     * Empty for the majority of genes, which declare no schema because their
+     * behaviour is fixed by their alleles - two {@code Hlr/Hlr} horses heal
+     * identically and there is nothing per-horse to show.
+     */
+    private List<String> epigeneticLines(Gene gene) {
+        EpiSchema schema = gene.epiSchema();
+        if (epigenome == null || schema.isEmpty()) {
+            return List.of();
+        }
+        Epigenome.Copies copies = epigenome.copies(gene);
+        boolean firstExpressed = epigenome.expressed(gene, genotype) == copies.first();
+        EpiValues a = copies.first().values();
+        EpiValues b = copies.second().values();
+
+        List<String> out = new ArrayList<>();
+        Set<String> done = new HashSet<>();
+        for (EpiValue v : schema.values()) {
+            if (done.contains(v.name())) {
+                continue;
+            }
+            String colour = colourPrefix(schema, v.name());
+            if (colour != null) {
+                done.add(colour + "_r");
+                done.add(colour + "_g");
+                done.add(colour + "_b");
+                out.add(row(colour, firstExpressed, hex(a.rgb(colour)), hex(b.rgb(colour))));
+                continue;
+            }
+            done.add(v.name());
+            out.add(row(v.name(), firstExpressed, show(v, a), show(v, b)));
+        }
+        return out;
+    }
+
+    /** {@code <name>  <A>  <B>}, with a caret on whichever copy the horse shows. */
+    private static String row(String name, boolean firstExpressed, String a, String b) {
+        return GuiText.clip(name, 18) + "   "
+                + (firstExpressed ? "\u203a" : " ") + a + "   "
+                + (firstExpressed ? " " : "\u203a") + b;
+    }
+
+    /**
+     * {@code p} if {@code p_r}, {@code p_g} and {@code p_b} are all declared -
+     * a colour, which reads far better as one hex value than as three numbers.
+     */
+    private static String colourPrefix(EpiSchema schema, String name) {
+        if (!name.endsWith("_r")) {
+            return null;
+        }
+        String prefix = name.substring(0, name.length() - 2);
+        return schema.indexOf(prefix + "_g") >= 0 && schema.indexOf(prefix + "_b") >= 0
+                ? prefix : null;
+    }
+
+    private static String hex(int rgb) {
+        StringBuilder sb = new StringBuilder(Integer.toHexString(rgb & 0xFFFFFF));
+        while (sb.length() < 6) {
+            sb.insert(0, '0');
+        }
+        return "#" + sb;
+    }
+
+    /** One value, formatted for a person rather than for a codec. */
+    private static String show(EpiValue v, EpiValues values) {
+        if (v.kind() == EpiValue.Kind.SEED) {
+            // Truncated: the full 16 digits say nothing a person can act on, and
+            // the point of showing it at all is "these two horses match / do not".
+            String h = Long.toHexString(values.seed(v.name()));
+            return "#" + (h.length() > 6 ? h.substring(0, 6) : h);
+        }
+        if (v.kind() == EpiValue.Kind.CATEGORY) {
+            return Integer.toString(values.category(v.name()));
+        }
+        if (v.arity() > 1) {
+            StringBuilder sb = new StringBuilder();
+            for (int leg = 0; leg < v.arity(); leg++) {
+                if (leg > 0) {
+                    sb.append(' ');
+                }
+                sb.append(num(values.get(v.name(), leg)));
+            }
+            return sb.toString();
+        }
+        return num(values.get(v.name()));
+    }
+
+    /** Three decimals, trailing zeros trimmed - enough to tell two horses apart. */
+    private static String num(double d) {
+        long scaled = Math.round(d * 1000);
+        StringBuilder sb = new StringBuilder();
+        if (scaled < 0) {
+            sb.append('-');
+            scaled = -scaled;
+        }
+        sb.append(scaled / 1000);
+        long frac = scaled % 1000;
+        if (frac != 0) {
+            String f = Long.toString(frac);
+            int end = f.length();
+            while (end > 0 && f.charAt(end - 1) == '0') {
+                end--;
+            }
+            sb.append('.');
+            for (int pad = f.length(); pad < 3; pad++) {
+                sb.append('0');
+            }
+            sb.append(f, 0, end);
+        }
+        return sb.toString();
+    }
 }

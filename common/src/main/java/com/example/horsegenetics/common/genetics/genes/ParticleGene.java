@@ -3,7 +3,7 @@ package com.example.horsegenetics.common.genetics.genes;
 import com.example.horsegenetics.common.Rng;
 import com.example.horsegenetics.common.coat.pattern.HairPattern;
 import com.example.horsegenetics.common.genetics.Allele;
-import com.example.horsegenetics.common.genetics.AlleleRandomness;
+import com.example.horsegenetics.common.genetics.GeneEpigenetics;
 import com.example.horsegenetics.common.genetics.AllelePair;
 import com.example.horsegenetics.common.genetics.EpigeneticAbilityContribution;
 import com.example.horsegenetics.common.genetics.Expression;
@@ -12,6 +12,9 @@ import com.example.horsegenetics.common.genetics.FounderTable;
 import com.example.horsegenetics.common.genetics.Gene;
 import com.example.horsegenetics.common.genetics.Genotype;
 import com.example.horsegenetics.common.genetics.spec.GeneAbility;
+import com.example.horsegenetics.common.genetics.epi.EpiSchema;
+import com.example.horsegenetics.common.genetics.epi.EpiValue;
+import com.example.horsegenetics.common.genetics.epi.EpiValues;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -305,7 +308,7 @@ public final class ParticleGene implements Gene, EpigeneticAbilityContribution {
     }
 
     @Override
-    public List<GeneAbility> abilitiesFor(AllelePair pair, Genotype genotype, AlleleRandomness epigenetics) {
+    public List<GeneAbility> abilitiesFor(AllelePair pair, Genotype genotype, GeneEpigenetics epigenetics) {
         List<Variant> shown = shown(pair);
         if (shown.isEmpty()) {
             return List.of();
@@ -320,17 +323,37 @@ public final class ParticleGene implements Gene, EpigeneticAbilityContribution {
     }
 
     /**
-     * One copy's trail. <b>Every value is drawn, in this order, every time</b>,
-     * whether or not the particle uses it - the draw order is the contract, so a
-     * particle that starts or stops caring about its second colour must not
-     * shift the numbers drawn after it.
+     * What one copy's trail looks like: two colours, where on the horse it comes
+     * from, how much of it there is, and one spare number the particle type may
+     * read.
+     *
+     * <p>The site and the count are <b>categories</b>: they are picks from a
+     * list, not magnitudes, so drift never nudges them a step - it either leaves
+     * them alone or, very rarely, re-picks one outright. A horse's particles do
+     * not wander from its mane to its tail by accident.
      */
-    private GeneAbility.Emitter emitter(Variant v, Rng rng) {
-        int color = HairPattern.randomBrightColour(rng);
-        int color2 = HairPattern.randomBrightColour(rng);
-        String site = SITES.get(rng.nextInt(SITES.size()));
-        int count = 1 + rng.nextInt(MAX_COUNT);
-        double data = rng.nextFloat();
+    @Override
+    public EpiSchema epiSchema() {
+        return EpiSchema.of(
+                        EpiValue.category("site", SITES.size()),
+                        EpiValue.category("count", MAX_COUNT),
+                        EpiValue.uniform("data", 0, 1))
+                .and(EpiValue.colour("color", 0.60, 1.00, 0.62, 1.00))
+                .and(EpiValue.colour("color2", 0.60, 1.00, 0.62, 1.00));
+    }
+
+    /**
+     * One copy's trail, read off that copy's stored values. Every value is
+     * stored whether or not this particular particle uses it, so a variant that
+     * starts or stops caring about its second colour costs nothing and moves
+     * nothing.
+     */
+    private GeneAbility.Emitter emitter(Variant v, EpiValues epi) {
+        int color = epi.rgb("color");
+        int color2 = epi.rgb("color2");
+        String site = SITES.get(epi.category("site"));
+        int count = 1 + epi.category("count");
+        double data = epi.get("data");
         return new GeneAbility.Emitter("particle", "trail", site, new GeneAbility.Trigger.OnMove(),
                 color, color2, count, data, v.particle(), EMIT_CHANCE,
                 GeneAbility.Condition.ALWAYS, 1);

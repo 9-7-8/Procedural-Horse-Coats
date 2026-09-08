@@ -22,22 +22,21 @@ import java.util.List;
  * carries them.
  *
  * <h2>This does not weaken determinism</h2>
- * The {@link AlleleRandomness} handed in is not a fresh die roll: it is a
- * {@link com.example.horsegenetics.common.SeededRng} on the epigenetic seed
- * stored on an allele copy - rolled once for a founder, written on the record,
- * and inherited verbatim. The same horse produces the same effect every time it
- * is asked, on the server, after a reload, in a test; and a foal that inherits
- * the copy inherits the look, which is the whole point.
+ * The {@link GeneEpigenetics} handed in is not a fresh die roll: it is the
+ * literal values stored on an allele copy - rolled once for a founder, written
+ * on the record, and inherited with the allele. The same horse produces the same
+ * effect every time it is asked, on the server, after a reload, in a test; and a
+ * foal that inherits the copy inherits the look, which is the whole point.
  *
- * <p>Ask with no epigenome and every draw comes from
- * {@link com.example.horsegenetics.common.MidpointRng}, so the answer describes
- * the genotype rather than a horse nobody owns.
+ * <p>Ask with no epigenome and every value reports its schema's midpoint, so the
+ * answer describes the genotype rather than a horse nobody owns.
  *
- * <h2>Draw order is the contract</h2>
- * A gene must draw the same values in the same order every time, whatever it
- * ends up using them for - the order <i>is</i> the meaning of each number, and
- * re-ordering them silently rewrites every horse in every save. Draw the values
- * you might need, then decide what to do with them.
+ * <h2>Read by name</h2>
+ * Values are declared on {@code Gene.epiSchema()} and read by name, so a gene
+ * reads whichever it needs in whatever order suits it. This used to be a fixed
+ * draw order whose <i>position</i> was the meaning of each number - so
+ * re-ordering, or inserting one while tuning, silently rewrote every horse in
+ * every save. The particle locus is the gene that paid for that lesson.
  *
  * <p>A gene implements this <b>or</b> {@link AbilityContribution}, not both;
  * {@code HorseAbilities} checks for this one first.
@@ -49,11 +48,11 @@ public interface EpigeneticAbilityContribution {
      * What this combination makes the horse do. Return {@link List#of()} for a
      * combination that does nothing.
      *
-     * @param epigenetics this horse's randomness for this gene.
-     *                    {@link AlleleRandomness#expressed()} where one locus
-     *                    gives one result; {@link AlleleRandomness#copy(int)}
+     * @param epigenetics this horse's numbers for this gene.
+     *                    {@link GeneEpigenetics#expressed()} where one locus
+     *                    gives one result; {@link GeneEpigenetics#copy(int)}
      *                    where both copies contribute at once, as they do
      *                    wherever two codominant alleles each grant an effect.
      */
-    List<GeneAbility> abilitiesFor(AllelePair pair, Genotype genotype, AlleleRandomness epigenetics);
+    List<GeneAbility> abilitiesFor(AllelePair pair, Genotype genotype, GeneEpigenetics epigenetics);
 }

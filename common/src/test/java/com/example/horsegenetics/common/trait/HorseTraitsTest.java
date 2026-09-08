@@ -207,6 +207,8 @@ class HorseTraitsTest {
                 // the health loci
                 Genes.ACAN, Genes.B4GALT7, Genes.PLOD1, Genes.RAPGEF5, Genes.ST14,
                 Genes.SHOX, Genes.MET,
+                Genes.SCN4A, Genes.GYS1, Genes.PPIB, Genes.PRKDC, Genes.MYO5A,
+                Genes.TOE1, Genes.CVM, Genes.GBE1, Genes.MEGAESOPHAGUS,
                 // colour loci that carry a disorder, milk's embryonic lethal,
                 // the leopard complex's CSNB, grey's melanoma risk flag
                 Genes.EDNRB, Genes.MITF, Genes.PAX3, Genes.SILVER, Genes.MILK, Genes.LEOPARD,

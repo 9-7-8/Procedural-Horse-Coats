@@ -12,6 +12,9 @@ import com.example.horsegenetics.common.genetics.FounderContext;
 import com.example.horsegenetics.common.genetics.FounderTable;
 import com.example.horsegenetics.common.genetics.Gene;
 import com.example.horsegenetics.common.genetics.Genotype;
+import com.example.horsegenetics.common.genetics.epi.EpiSchema;
+import com.example.horsegenetics.common.genetics.epi.EpiValue;
+import com.example.horsegenetics.common.genetics.EyeSpread;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -346,4 +349,13 @@ public final class MatpGene implements Gene, EyeColorContribution {
             return f;
         };
     }
+    /**
+     * Only the eye spread. The dilution itself is fixed by the alleles - two
+     * cremellos are the same cremello - but which eyes the blue lands in is not.
+     */
+    @Override
+    public EpiSchema epiSchema() {
+        return EyeSpread.schema();
+    }
+
 }

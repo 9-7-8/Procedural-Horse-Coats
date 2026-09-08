@@ -11,6 +11,9 @@ import com.example.horsegenetics.common.genetics.Expression;
 import com.example.horsegenetics.common.genetics.FounderContext;
 import com.example.horsegenetics.common.genetics.FounderTable;
 import com.example.horsegenetics.common.genetics.Gene;
+import com.example.horsegenetics.common.genetics.epi.EpiSchema;
+import com.example.horsegenetics.common.genetics.epi.EpiValue;
+import com.example.horsegenetics.common.genetics.epi.EpiValues;
 
 import java.util.List;
 
@@ -118,17 +121,28 @@ public final class MagicZebraGene implements Gene {
         return pair.has(Mzeb);
     }
 
+    /** The stripe field and its four shape numbers - spacing, width, bend, reach. */
+    @Override
+    public EpiSchema epiSchema() {
+        return EpiSchema.of(
+                EpiValue.seed("seed"),
+                EpiValue.uniform("spacing", SPACING_MIN, SPACING_MIN + SPACING_RANGE),
+                EpiValue.uniform("width", WIDTH_MIN, WIDTH_MIN + WIDTH_RANGE),
+                EpiValue.uniform("bend", BEND_MIN, BEND_MIN + BEND_RANGE),
+                EpiValue.uniform("reach", REACH_MIN, REACH_MIN + REACH_RANGE));
+    }
+
     private static ColorField paintStripes(
             com.example.horsegenetics.common.coat.pattern.CoatBuildContext ctx,
             com.example.horsegenetics.common.coat.pattern.PigmentView coat,
             com.example.horsegenetics.common.coat.pattern.ColorView accumulated) {
-        Rng epi = ctx.epigeneticsFor(KEY);
+        EpiValues epi = ctx.epigeneticsFor(KEY);
         ZebraStripes.Pattern pat = new ZebraStripes.Pattern(
-                epi.nextLong(),
-                SPACING_MIN + epi.nextFloat() * SPACING_RANGE,
-                WIDTH_MIN + epi.nextFloat() * WIDTH_RANGE,
-                BEND_MIN + epi.nextFloat() * BEND_RANGE,
-                REACH_MIN + epi.nextFloat() * REACH_RANGE,
+                epi.seed("seed"),
+                epi.get("spacing"),
+                epi.get("width"),
+                epi.get("bend"),
+                epi.get("reach"),
                 DORSAL_HALF_WIDTH);
 
         Skin skin = ctx.skin();

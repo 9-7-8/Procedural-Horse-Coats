@@ -1,6 +1,8 @@
 package com.example.horsegenetics.common.genetics;
 
 import com.example.horsegenetics.common.Rng;
+import com.example.horsegenetics.common.genetics.epi.EpiDrift;
+import com.example.horsegenetics.common.genetics.epi.EpiSchema;
 import com.example.horsegenetics.common.horse.Sex;
 
 import java.util.LinkedHashMap;
@@ -10,7 +12,7 @@ import java.util.Objects;
 
 /**
  * Everything a horse inherits: its {@link Genotype} (which alleles) plus its
- * {@link Epigenome} (the priority + epigenetic seed riding on each of those
+ * {@link Epigenome} (the priority + the literal values riding on each of those
  * allele copies). The two are one unit because they have to stay
  * <b>aligned</b> - slot {@code first}/{@code second} of a gene's
  * {@link Epigenome.Copies} belongs to the matching slot of its
@@ -20,8 +22,9 @@ import java.util.Objects;
  * <p><b>Breeding</b> ({@link #breedWith}) is Mendelian on the genotype and
  * <i>carrier-faithful</i> on the epigenetics: the child takes one copy from
  * each parent, and each inherited allele brings that parent copy's priority and
- * epigenetic seed along <b>unchanged</b> - no re-roll, no jitter. The one
- * exception is the priority tie-break; see {@link AlleleEpigenetics#deconflict}.
+ * literal values along - no re-roll. Those values are then nudged by
+ * {@link EpiDrift}, small enough that a pair breeds true to the eye and
+ * open-ended enough that a line slowly becomes its own thing.
  */
 public record Genome(Genotype genotype, Epigenome epigenome) {
 
@@ -35,7 +38,7 @@ public record Genome(Genotype genotype, Epigenome epigenome) {
         return new Genome(Genotype.random(rng), Epigenome.random(rng));
     }
 
-    /** A known genotype with fresh random epigenetics (debug-pen horses, imports). */
+    /** A known genotype with fresh rolled epigenetics (debug-pen horses, imports). */
     public static Genome of(Genotype genotype, Rng rng) {
         return new Genome(genotype, Epigenome.random(rng));
     }
@@ -52,14 +55,22 @@ public record Genome(Genotype genotype, Epigenome epigenome) {
      *       draws {@link Genotype#breedWith} makes, so the genotype half is
      *       unchanged;</li>
      *   <li>each chosen allele arrives carrying its parent copy's
-     *       {@link AlleleEpigenetics} verbatim;</li>
+     *       {@link AlleleEpigenetics} - the priority verbatim, the values
+     *       nudged by {@link EpiDrift};</li>
      *   <li>the two copies are re-aligned to the canonical dominant-first
      *       {@link AllelePair} order;</li>
      *   <li>if both arrived with the <b>same priority</b>, one extra
      *       {@code nextBoolean()} bumps the second copy one step up or down
      *       ({@link AlleleEpigenetics#deconflict}).</li>
      * </ol>
-     * So: 2 {@code nextBoolean()} per gene, plus 1 per gene that ties.
+     *
+     * <p><b>The old draw-order contract is gone.</b> It used to be exactly two
+     * {@code nextBoolean()} per gene plus a tie, which let an unfed carrot be
+     * bit-for-bit identical to a plain breeding. Drift now consumes a couple of
+     * draws per stored value on top, so that guarantee cannot hold and is not
+     * claimed. What <i>is</i> still guaranteed is the thing it was protecting:
+     * pass 1 locks every allele before pass 2 spends a single draw, so no
+     * carrot and no amount of drift can move a foal's genotype.
      */
     public Genome breedWith(Genome other, Rng rng) {
         return breedWith(other, rng, GameteBias.NONE, GameteBias.NONE);
@@ -77,9 +88,10 @@ public record Genome(Genotype genotype, Epigenome epigenome) {
      *       so the other parent's stream stays aligned);</li>
      *   <li>draw that parent's gamete for a named gene from a substitute pair
      *       (Known Gene Splice carrot, Unknown Gene Splice carrot);</li>
-     *   <li>hand the contributed copy a fresh epigenetic seed rather than the
-     *       parent copy's own (epigenetic-splice carrot, and always for a substituted
-     *       copy) - which consumes one {@code int} + one {@code long} extra.</li>
+     *   <li>hand the contributed copy freshly rolled values rather than the
+     *       parent copy's own (epigenetic-splice carrot, and always for a
+     *       substituted copy - a spliced gamete has no real parent copy behind
+     *       it for its numbers to have come from).</li>
      * </ul>
      */
     public Genome breedWith(Genome other, Rng rng, GameteBias mineBias, GameteBias theirsBias) {
@@ -89,10 +101,9 @@ public record Genome(Genotype genotype, Epigenome epigenome) {
         // the second pass, since AllelePair may have swapped the two.
         Map<String, Boolean> damIsFirst = new LinkedHashMap<>();
 
-        // --- Pass 1: the allele draw. This consumes EXACTLY what the plain
-        // breed consumes - two nextBoolean() per gene plus a deconflict tie -
-        // so an unfed carrot (NONE/NONE) is bit-for-bit identical, and a bias
-        // that only re-rolls epigenetics does not shift a single allele.
+        // --- Pass 1: the allele draw, and nothing else. Two nextBoolean() per
+        // gene, in a fixed order, whatever the carrots say - so a bias that only
+        // touches epigenetics cannot shift a single allele, and neither can drift.
         for (Gene g : Genes.codeOrder()) {
             AllelePair mine = mineBias.pairFor(g.key(), genotype.pair(g));
             AllelePair theirs = theirsBias.pairFor(g.key(), other.genotype().pair(g));
@@ -119,43 +130,44 @@ public record Genome(Genotype genotype, Epigenome epigenome) {
 
             AllelePair pair = new AllelePair(a, b);
             boolean aFirst = pair.first().equals(a);
-            Epigenome.Copies childCopies = aFirst
-                    ? new Epigenome.Copies(aEpi, bEpi)
-                    : new Epigenome.Copies(bEpi, aEpi);
-            childCopies = new Epigenome.Copies(
-                    childCopies.first(),
-                    AlleleEpigenetics.deconflict(childCopies.first(), childCopies.second(), rng));
-
             pairs.put(g.key(), pair);
-            copies.put(g.key(), childCopies);
+            copies.put(g.key(), aFirst
+                    ? new Epigenome.Copies(aEpi, bEpi)
+                    : new Epigenome.Copies(bEpi, aEpi));
             damIsFirst.put(g.key(), aFirst);
         }
 
-        // --- Pass 2: epigenetic re-rolls (epigenetic splice, and every substituted
-        // copy - a gene-splice / gene-carrot gamete has no real parent copy behind
-        // it). Runs AFTER every allele is locked, so its extra draws never move
-        // a foal's genotype - only its seeds.
-        boolean anyReroll = mineBias.rerollEpigenetics() || theirsBias.rerollEpigenetics()
-                || !mineBias.substitutePairs().isEmpty() || !theirsBias.substitutePairs().isEmpty();
-        if (anyReroll) {
-            for (Gene g : Genes.codeOrder()) {
-                boolean rerollMine = mineBias.rerollEpigenetics() || mineBias.substitutes(g.key());
-                boolean rerollTheirs = theirsBias.rerollEpigenetics() || theirsBias.substitutes(g.key());
-                if (!rerollMine && !rerollTheirs) {
-                    continue;
-                }
-                Epigenome.Copies c = copies.get(g.key());
-                boolean aFirst = damIsFirst.get(g.key());
-                AlleleEpigenetics first = (aFirst ? rerollMine : rerollTheirs)
-                        ? AlleleEpigenetics.random(rng) : c.first();
-                AlleleEpigenetics second = (aFirst ? rerollTheirs : rerollMine)
-                        ? AlleleEpigenetics.random(rng) : c.second();
-                second = AlleleEpigenetics.deconflict(first, second, rng);
-                copies.put(g.key(), new Epigenome.Copies(first, second));
+        // --- Pass 2: the epigenetics. Every stored copy is either re-rolled
+        // (an epigenetic-splice carrot, or any substituted copy - a spliced
+        // gamete has no real parent copy for its numbers to have come from) or
+        // inherited-with-drift. Runs only over genes that actually store
+        // something, and only after every allele above is locked.
+        for (Gene g : Genes.codeOrder()) {
+            EpiSchema schema = g.epiSchema();
+            if (schema.isEmpty()) {
+                continue;
             }
+            boolean rerollMine = mineBias.rerollEpigenetics() || mineBias.substitutes(g.key());
+            boolean rerollTheirs = theirsBias.rerollEpigenetics() || theirsBias.substitutes(g.key());
+            Epigenome.Copies c = copies.get(g.key());
+            boolean aFirst = damIsFirst.get(g.key());
+
+            AlleleEpigenetics first = inherit(c.first(), aFirst ? rerollMine : rerollTheirs, schema, rng);
+            AlleleEpigenetics second = inherit(c.second(), aFirst ? rerollTheirs : rerollMine, schema, rng);
+            copies.put(g.key(), new Epigenome.Copies(
+                    first, AlleleEpigenetics.deconflict(first, second, rng)));
         }
 
         return new Genome(Genotype.of(List.copyOf(pairs.values())), Epigenome.of(copies));
+    }
+
+    /**
+     * One contributed copy's numbers: freshly rolled if a carrot substituted the
+     * gamete, otherwise the parent copy's own carried forward and drifted.
+     */
+    private static AlleleEpigenetics inherit(AlleleEpigenetics parent, boolean reroll,
+                                             EpiSchema schema, Rng rng) {
+        return reroll ? AlleleEpigenetics.founder(schema, rng) : parent.drifted(rng);
     }
 
     /**
@@ -180,8 +192,8 @@ public record Genome(Genotype genotype, Epigenome epigenome) {
         return epigenome.toCode();
     }
 
-    /** The epigenetic seed {@code gene}'s per-horse randomness runs on for this horse. */
-    public long expressedSeed(Gene gene) {
-        return epigenome.expressedSeed(gene, genotype);
+    /** The literal numbers {@code gene} paints this horse with. */
+    public com.example.horsegenetics.common.genetics.epi.EpiValues expressedValues(Gene gene) {
+        return epigenome.expressedValues(gene, genotype);
     }
 }

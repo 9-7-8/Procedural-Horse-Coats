@@ -16,6 +16,7 @@ import com.example.horsegenetics.common.genetics.Genes;
 import com.example.horsegenetics.common.genetics.Genotype;
 import com.example.horsegenetics.common.genetics.GenotypeCatalog;
 import com.example.horsegenetics.common.testutil.Codes;
+import com.example.horsegenetics.common.genetics.epi.EpiRoll;
 import org.junit.jupiter.api.Test;
 
 import java.util.LinkedHashSet;
@@ -349,7 +350,7 @@ class EyeColorTest {
         // and lethal to a distribution test. See wiki/known-gaps.html.
         Rng rng = new SeededRng(20260906L, "spread");
         for (int i = 0; i < 4000; i++) {
-            EyeSpread s = EyeSpread.roll(rng);
+            EyeSpread s = EyeSpread.roll(EpiRoll.founder(EyeSpread.schema(), rng));
             assertFalse(s.empty(), "a blue-eyed horse always has some blue somewhere");
             if (s.equals(EyeSpread.BOTH)) {
                 both++;

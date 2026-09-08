@@ -4,13 +4,22 @@ import java.util.EnumMap;
 import java.util.Map;
 
 /**
- * The per-axis {@link TargetBand}s a breed pins its horses to. Threaded into
- * {@link HorseTraits#resolve} and read by the four magical body-stat genes
- * through {@link TraitBuilder#breedBand}.
+ * The per-axis {@link TargetBand}s a breed pins its <b>founders</b> to - read
+ * only by {@code BreedFounder}, when it decides what numbers to write on a wild
+ * horse of that breed.
+ *
+ * <p><b>It is not consulted again.</b> This used to be threaded into
+ * {@link HorseTraits#resolve} and read on every single body resolution, which
+ * meant a breed re-imposed its standard on every horse that carried its label
+ * forever - and a cross had the two standards <i>averaged</i>. A Percheron bred
+ * to a Falabella produced a foal pulled back toward mid-size no matter which
+ * alleles it actually inherited. Now a breed shapes the horses it starts with
+ * and then lets go, which is the owner's call: keeping a line to a standard is
+ * the player's job, not the game's.
  *
  * <p>{@link #NONE} is the "Unknown breed / no breed" value: every axis absent,
- * so every body-stat gene falls back to its ordinary bounded-Gaussian draw and
- * a horse's body is exactly what it was before breeds existed.
+ * so a founder's body-stat loci are left wild and its body is exactly what it
+ * was before breeds existed.
  */
 public final class BreedStatTargets {
 
@@ -37,26 +46,6 @@ public final class BreedStatTargets {
 
     public boolean pins(StatAxis axis) {
         return bands.containsKey(axis);
-    }
-
-    /**
-     * The per-axis average of two breeds' targets - what a <b>cross</b> of two
-     * pure breeds pins. An axis is only carried forward when <i>both</i> parents
-     * pin it, so a Friesian &times; Thoroughbred cross keeps no speed band
-     * (Friesian never had one) and its speed falls back to the ordinary draw,
-     * while a Thoroughbred &times; Arabian cross keeps a speed band midway
-     * between the two.
-     */
-    public static BreedStatTargets average(BreedStatTargets a, BreedStatTargets b) {
-        Builder out = builder();
-        for (StatAxis axis : StatAxis.values()) {
-            TargetBand ba = a.band(axis);
-            TargetBand bb = b.band(axis);
-            if (ba != null && bb != null) {
-                out.band(axis, TargetBand.of((ba.lo() + bb.lo()) / 2.0, (ba.hi() + bb.hi()) / 2.0));
-            }
-        }
-        return out.build();
     }
 
     public static final class Builder {

@@ -1,6 +1,8 @@
 package com.example.horsegenetics.common.genetics;
 
 import com.example.horsegenetics.common.Rng;
+import com.example.horsegenetics.common.genetics.epi.EpiValue;
+import com.example.horsegenetics.common.genetics.epi.EpiValues;
 
 /**
  * <b>The bay-shade score</b> - the one number that decides whether a bay horse
@@ -157,13 +159,19 @@ public final class BayShade {
      * soft tan points left). {@link #geneticScore} plus one expression roll,
      * rescaled onto {@code [0, 1]}.
      *
-     * <p><b>Consumes exactly one {@link Rng#nextFloat()}</b> and must be the
-     * first draw a bay makes - {@code BayCoat}'s per-leg jitter follows it, and
-     * the order is what makes a coat reproducible.
+     * <p>Reads the stored {@link #SHADE} offset - the number that separates two
+     * bays with the same shade genes.
      */
-    public static double spread(Genotype genotype, Rng epi) {
-        double score = geneticScore(genotype)
-                + (epi.nextFloat() * 2.0 - 1.0) * EXPRESSION_RANGE;
+    public static double spread(Genotype genotype, EpiValues epi) {
+        double score = geneticScore(genotype) + epi.get(SHADE);
         return (score - MIN_SCORE) / (MAX_SCORE - MIN_SCORE);
+    }
+
+    /** How far this horse reads from its raw shade score. */
+    public static final String SHADE = "shade";
+
+    /** The shade offset every bay carries. Composed into {@code AgoutiGene}'s schema. */
+    public static EpiValue shadeValue() {
+        return EpiValue.uniform(SHADE, -EXPRESSION_RANGE, EXPRESSION_RANGE);
     }
 }

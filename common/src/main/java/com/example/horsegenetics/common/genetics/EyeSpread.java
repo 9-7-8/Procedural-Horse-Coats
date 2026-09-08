@@ -1,6 +1,9 @@
 package com.example.horsegenetics.common.genetics;
 
 import com.example.horsegenetics.common.Rng;
+import com.example.horsegenetics.common.genetics.epi.EpiSchema;
+import com.example.horsegenetics.common.genetics.epi.EpiValue;
+import com.example.horsegenetics.common.genetics.epi.EpiValues;
 
 /**
  * <b>How much of each iris a depigmenting claim actually reaches</b> - which is
@@ -76,25 +79,55 @@ public record EyeSpread(int right, int left) {
     }
 
     /**
-     * Roll one. Draw order is the contract - {@code nextFloat}, then
-     * {@code nextBoolean}, then the wedges - so a horse's eyes do not change
-     * when something else in the gene changes.
+     * How a depigmenting gene's blue lands on this horse's two eyes, read off
+     * the stored values of whichever gene claimed the eye colour.
+     *
+     * <p>{@link #SPREAD} is a position rather than a decision: it is tested
+     * against {@link #BOTH_EYES} and {@link #ONE_EYE}, so both eyes / one eye /
+     * a sector stays a weighted outcome and stays heritable as a tendency.
      */
-    public static EyeSpread roll(Rng rng) {
-        float roll = rng.nextFloat();
+    public static EyeSpread roll(EpiValues epi) {
+        double roll = epi.get(SPREAD);
         if (roll < BOTH_EYES) {
             return BOTH;
         }
-        boolean rightFirst = rng.nextBoolean();
+        boolean rightFirst = epi.category(FIRST) == 0;
         if (roll < BOTH_EYES + ONE_EYE) {
             return rightFirst
                     ? new EyeSpread(EyePatch.WHOLE, EyePatch.NONE)
                     : new EyeSpread(EyePatch.NONE, EyePatch.WHOLE);
         }
-        int wedge = EyePatch.randomWedge(rng);
-        int other = rng.nextFloat() < SECTORAL_IN_BOTH
-                ? EyePatch.differentWedge(rng, wedge)
+        int wedge = EyePatch.wedgeAt(epi.category(WEDGE));
+        int other = epi.get(BOTH_SECTORS) < SECTORAL_IN_BOTH
+                ? EyePatch.differentWedgeAt(wedge, epi.category(WEDGE_STEP))
                 : EyePatch.WHOLE;
         return rightFirst ? new EyeSpread(wedge, other) : new EyeSpread(other, wedge);
+    }
+
+    // ------------------------------------------------------------------
+    // Epigenetics
+    // ------------------------------------------------------------------
+
+    /** Both eyes / one eye / a sector - a weighted position, see {@link #roll}. */
+    public static final String SPREAD = "eye_spread";
+    /** Which eye a one-eyed or sectoral effect lands on. */
+    public static final String FIRST = "eye_first";
+    public static final String WEDGE = "eye_wedge";
+    public static final String WEDGE_STEP = "eye_wedge_step";
+    public static final String BOTH_SECTORS = "eye_both_sectors";
+
+    /**
+     * What {@link #roll} reads. Every gene that can claim an eye colour composes
+     * this into its own schema, because the spread is read off <b>whichever
+     * gene won the claim</b> - so the values have to be sitting on that gene's
+     * allele copy, whichever one it turns out to be.
+     */
+    public static EpiSchema schema() {
+        return EpiSchema.of(
+                EpiValue.uniform(SPREAD, 0, 1),
+                EpiValue.category(FIRST, 2),
+                EpiValue.category(WEDGE, EyePatch.wedgeCount()),
+                EpiValue.category(WEDGE_STEP, EyePatch.wedgeStepCount()),
+                EpiValue.uniform(BOTH_SECTORS, 0, 1));
     }
 }

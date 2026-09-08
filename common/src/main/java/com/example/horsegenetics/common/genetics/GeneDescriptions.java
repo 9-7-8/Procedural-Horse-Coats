@@ -333,7 +333,47 @@ public final class GeneDescriptions {
             Map.entry("horsegenetics.met",
                     "MET, lethal at conception: when two carriers would produce an affected foal, "
                             + "the pairing simply yields no foal at all. The opposite of Overo "
-                            + "Lethal White, which is at least born."));
+                            + "Lethal White, which is at least born."),
+            Map.entry("horsegenetics.ppib",
+                    "PPIB (HERDA), fragile skin - a recessive disorder the horse lives with rather "
+                            + "than dies of: it splits where a saddle sits and never heals cleanly. "
+                            + "The commonest survivable recessive here, because the real thing hides "
+                            + "inside exactly the working lines a breeder would choose."),
+            Map.entry("horsegenetics.prkdc",
+                    "PRKDC (SCID), severe combined immunodeficiency - a recessive lethal. The foal "
+                            + "is born with no immune system and does not survive."),
+            Map.entry("horsegenetics.myo5a",
+                    "MYO5A, lavender foal syndrome - a recessive lethal at birth. The real disorder "
+                            + "comes with a diluted silvery coat, which is deliberately not drawn: "
+                            + "the foal dies in seconds and phase 1 can only remove pigment."),
+            Map.entry("horsegenetics.toe1",
+                    "TOE1, cerebellar abiotrophy - a recessive disorder of balance. The horse "
+                            + "survives but has no idea where its feet are, which makes it the "
+                            + "heaviest jump penalty in the mod. Progressive in reality; a flat cost "
+                            + "here, because there is no age model."),
+            Map.entry("horsegenetics.cvm",
+                    "CVM, cervical vertebral malformation - a recessive lethal at birth. Unlike "
+                            + "every other natural gene here it has no confirmed causal variant; "
+                            + "treating it as one locus is the mod's simplification, not a claim "
+                            + "about horse genetics."),
+            Map.entry("horsegenetics.gbe1",
+                    "GBE1 (GBED), glycogen branching enzyme deficiency - a recessive lethal at "
+                            + "birth, and the largest heart reduction in the mod. The foal cannot "
+                            + "store or release sugar."),
+            Map.entry("horsegenetics.megaesophagus",
+                    "Megaesophagus, a slack gullet that will not move milk - a recessive lethal at "
+                            + "birth. Like CVM it is a breed condition with no confirmed causal "
+                            + "variant, simplified to one locus."),
+            Map.entry("horsegenetics.scn4a",
+                    "SCN4A (HYPP), periodic paralysis - the first locus that is BOTH a survivable "
+                            + "disorder and a lethal. One copy affects the horse (there is no silent "
+                            + "carrier), two kill the foal. Wild horses can be born with one copy, "
+                            + "because a dominant that never appeared in a founder could never "
+                            + "appear at all."),
+            Map.entry("horsegenetics.gys1",
+                    "GYS1 (PSSM1), tying-up - a dominant disorder, so every copy shows and there is "
+                            + "no carrier. Neither combination is lethal, which makes it the mildest "
+                            + "and by far the commonest disorder a player will actually meet."));
 
     /** The summary for {@code geneKey}, or {@code ""} if there is no entry. */
     public static String of(String geneKey) {

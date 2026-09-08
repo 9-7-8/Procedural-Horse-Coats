@@ -65,7 +65,7 @@ public final class MagicHealthGene extends AbstractMagicStatGene {
     }
 
     @Override
-    protected StatAxis axis() {
+    public StatAxis axis() {
         return StatAxis.HEALTH;
     }
 

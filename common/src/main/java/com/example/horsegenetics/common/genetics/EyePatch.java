@@ -73,9 +73,9 @@ public record EyePatch(int quadrants, EyeColor color) {
         return ~quadrants & WHOLE;
     }
 
-    /** One of {@link #WEDGES}, uniformly. */
-    public static int randomWedge(Rng rng) {
-        return WEDGES[rng.nextInt(WEDGES.length)];
+    /** The wedge at {@code index} - a stored {@code EpiValue.category} index. */
+    public static int wedgeAt(int index) {
+        return WEDGES[Math.floorMod(index, WEDGES.length)];
     }
 
     /**
@@ -83,14 +83,24 @@ public record EyePatch(int quadrants, EyeColor color) {
      * with a sector in both eyes has a visibly different shape in each, rather
      * than a one-in-twelve chance of a matching pair that looks like a bug.
      */
-    public static int differentWedge(Rng rng, int other) {
+    public static int differentWedgeAt(int other, int step) {
         int i = 0;
         while (i < WEDGES.length && WEDGES[i] != other) {
             i++;
         }
         if (i == WEDGES.length) {
-            return randomWedge(rng); // not one of ours - nothing to avoid
+            return wedgeAt(step); // not one of ours - nothing to avoid
         }
-        return WEDGES[(i + 1 + rng.nextInt(WEDGES.length - 1)) % WEDGES.length];
+        return WEDGES[(i + 1 + Math.floorMod(step, WEDGES.length - 1)) % WEDGES.length];
+    }
+
+    /** How many distinct steps {@link #differentWedgeAt} can take. */
+    public static int wedgeStepCount() {
+        return WEDGES.length - 1;
+    }
+
+    /** How many wedges there are - the size of a stored wedge category. */
+    public static int wedgeCount() {
+        return WEDGES.length;
     }
 }

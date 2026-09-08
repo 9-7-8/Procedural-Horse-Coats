@@ -10,6 +10,9 @@ import com.example.horsegenetics.common.genetics.FounderContext;
 import com.example.horsegenetics.common.genetics.FounderTable;
 import com.example.horsegenetics.common.genetics.Gene;
 import com.example.horsegenetics.common.genetics.Genotype;
+import com.example.horsegenetics.common.genetics.epi.EpiSchema;
+import com.example.horsegenetics.common.genetics.epi.EpiValue;
+import com.example.horsegenetics.common.genetics.EyeSpread;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -136,4 +139,12 @@ public final class TigerEyeGene implements Gene, EyeColorContribution {
                 ? EyeColor.pigment("tiger-eye-yellow", "Tiger eye (yellow)", YELLOW)
                 : EyeColor.pigment("tiger-eye-amber", "Tiger eye (amber)", AMBER));
     }
+    /**
+     * Only the eye spread; the iris colour itself is fixed by the alleles.
+     */
+    @Override
+    public EpiSchema epiSchema() {
+        return EyeSpread.schema();
+    }
+
 }

@@ -2,7 +2,7 @@ package com.example.horsegenetics.common.genetics.genes;
 
 import com.example.horsegenetics.common.SeededRng;
 import com.example.horsegenetics.common.genetics.Allele;
-import com.example.horsegenetics.common.genetics.AlleleRandomness;
+import com.example.horsegenetics.common.genetics.GeneEpigenetics;
 import com.example.horsegenetics.common.genetics.AllelePair;
 import com.example.horsegenetics.common.genetics.Epigenome;
 import com.example.horsegenetics.common.genetics.Expression;
@@ -327,10 +327,31 @@ class ParticleGeneTest {
                 continue; // it drew the sire's wild-type copy
             }
             inherited++;
-            assertEquals(sireTrail, trail.get(0),
-                    "the copy carries its colour, its site and its density with it");
+            GeneAbility.Emitter got = trail.get(0);
+            // Everything discrete comes through untouched: drift never nudges a
+            // category a step, so a foal's particles are on the same part of its
+            // body, in the same number, of the same kind.
+            assertEquals(sireTrail.particle(), got.particle(), "same particle");
+            assertEquals(sireTrail.anchor(), got.anchor(), "same body site");
+            assertEquals(sireTrail.count(), got.count(), "same density");
+            // The colour is inherited too, but one generation of drift may have
+            // moved a channel by a hair - which is the point of drift, and is
+            // far too small to see.
+            assertColourClose(sireTrail.color(), got.color());
+            assertColourClose(sireTrail.color2(), got.color2());
         }
         assertTrue(inherited > 10, "some foals should have inherited the variant copy");
+    }
+
+    /** Two colours one generation of drift apart - a channel or two, never a new colour. */
+    private static void assertColourClose(int expected, int actual) {
+        for (int shift = 0; shift <= 16; shift += 8) {
+            int a = (expected >> shift) & 0xFF;
+            int b = (actual >> shift) & 0xFF;
+            assertTrue(Math.abs(a - b) <= 4,
+                    "channel drifted too far: " + Integer.toHexString(expected)
+                            + " -> " + Integer.toHexString(actual));
+        }
     }
 
     /**

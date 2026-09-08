@@ -11,6 +11,9 @@ import com.example.horsegenetics.common.genetics.Expression;
 import com.example.horsegenetics.common.genetics.FounderContext;
 import com.example.horsegenetics.common.genetics.FounderTable;
 import com.example.horsegenetics.common.genetics.Gene;
+import com.example.horsegenetics.common.genetics.epi.EpiSchema;
+import com.example.horsegenetics.common.genetics.epi.EpiValue;
+import com.example.horsegenetics.common.genetics.epi.EpiValues;
 
 import java.util.List;
 
@@ -165,21 +168,34 @@ public final class NaturalZebraGene implements Gene {
      * the muzzle, the tail - come back as coverage 1 and are therefore never
      * touched, without this method knowing they exist.
      *
-     * <p><b>Draw order</b>, off {@code ctx.epigeneticsFor(geneKey)}:
-     * {@code nextLong()} (the band field's seed), then four
-     * {@code nextFloat()}s - spacing, duty, bend, leg reach. Both outcomes draw
-     * all five, so a shadow-striped horse and its fully striped foal wear the
-     * same pattern at two strengths.
+     * <p>Both outcomes read the same five stored numbers - the band field's
+     * seed, the spacing, duty, bend and leg reach - so a shadow-striped horse
+     * and its fully striped foal wear the same pattern at two strengths.
      */
+    /**
+     * The band field and its four shape numbers. Shared by both outcomes, which
+     * is what keeps a shadow-striped parent and a fully striped foal wearing the
+     * same pattern.
+     */
+    @Override
+    public EpiSchema epiSchema() {
+        return EpiSchema.of(
+                EpiValue.seed("seed"),
+                EpiValue.uniform("spacing", SPACING_MIN, SPACING_MIN + SPACING_RANGE),
+                EpiValue.uniform("duty", DUTY_MIN, DUTY_MIN + DUTY_RANGE),
+                EpiValue.uniform("bend", BEND_MIN, BEND_MIN + BEND_RANGE),
+                EpiValue.uniform("leg_reach", LEG_REACH_MIN, LEG_REACH_MIN + LEG_REACH_RANGE));
+    }
+
     private static Expression.Pigment paint(float strength) {
         return (ctx, coat) -> {
-            Rng epi = ctx.epigeneticsFor(KEY);
+            EpiValues epi = ctx.epigeneticsFor(KEY);
             ZebraStripes.Pattern pat = new ZebraStripes.Pattern(
-                    epi.nextLong(),
-                    SPACING_MIN + SPACING_RANGE * epi.nextFloat(),
-                    DUTY_MIN + DUTY_RANGE * epi.nextFloat(),
-                    BEND_MIN + BEND_RANGE * epi.nextFloat(),
-                    LEG_REACH_MIN + LEG_REACH_RANGE * epi.nextFloat(),
+                    epi.seed("seed"),
+                    epi.get("spacing"),
+                    epi.get("duty"),
+                    epi.get("bend"),
+                    epi.get("leg_reach"),
                     DORSAL_HALF_WIDTH);
 
             Skin skin = ctx.skin();

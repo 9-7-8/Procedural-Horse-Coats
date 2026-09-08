@@ -150,11 +150,11 @@ public final class HorseBreedingHandler {
         // The draw happens first and is never conditioned on viability - it is
         // the ordinary Mendelian one, and this only reads its result. That is
         // what keeps the odds honest (one in four for two carriers) and keeps
-        // Genotype.breedWith free of any notion of a lethal. The breed's stat
-        // bands (a cross averages its parents') feed the magical body-stat genes.
+        // Genotype.breedWith free of any notion of a lethal. The foal's breed is
+        // not consulted: a breed shapes its founders and nothing after them, so
+        // a cross is whatever it inherited (see BreedStatTargets).
         Traits childTraits = HorseTraits.resolve(childGenome.genotype(),
-                childGenome.epigenome(), childLineage.statTargets(),
-                ServerConfig.healthGeneticsActive());
+                childGenome.epigenome(), ServerConfig.healthGeneticsActive());
         if (childTraits.viability() == Viability.LETHAL_AT_CONCEPTION && ServerConfig.lethalsActive()) {
             Condition cause = childTraits.lethalCondition().orElse(null);
             if (cause != null) {
