@@ -113,7 +113,7 @@ public final class GeneWikiTool {
             }
 
             Path index = wiki.resolve(family.slug() + ".html");
-            Files.writeString(index, familyPage(family, genes), StandardCharsets.UTF_8);
+            Files.writeString(index, familyPage(family, genes, wiki), StandardCharsets.UTF_8);
         }
 
         System.out.println("wrote " + written + " gene pages ("
@@ -399,7 +399,7 @@ public final class GeneWikiTool {
                 if (kept == null) {
                     generated++;
                 }
-                cards.add(geneCard(gene, wiki, kept, keptIcons.get("wiki/" + pageOf(gene))));
+                cards.add(geneCard(gene, wiki, kept));
             }
             if (cards.isEmpty()) {
                 continue;
@@ -647,10 +647,15 @@ public final class GeneWikiTool {
      * its baked icon if it has one. Deliberately thin - the point of a card is
      * to be a door to the page, and the page has everything.
      */
-    private static String geneCard(Gene gene, Path wiki, String body, String kept) {
+    private static String geneCard(Gene gene, Path wiki, String body) {
+        // Derived, never harvested: a gene's icon is the bake named after it,
+        // and a gene that has no bake has no icon. GeneIconTool writes one only
+        // for a gene that changes the coat, so a health or stat gene correctly
+        // gets a card of words - and if it kept whatever icon the page last
+        // carried, that would be a link to a file the baker has just deleted.
         String icon = Files.exists(wiki.resolve("assets/gene-icons/" + slug(gene) + ".png"))
                 ? "wiki/assets/gene-icons/" + slug(gene) + ".png"
-                : kept;
+                : null;
         if (body == null) {
             List<String> tokens = new ArrayList<>();
             for (Allele a : gene.alleles()) {
@@ -670,7 +675,7 @@ public final class GeneWikiTool {
     // The family index
     // ------------------------------------------------------------------
 
-    private static String familyPage(GeneFamily family, List<SpecGene> genes) {
+    private static String familyPage(GeneFamily family, List<SpecGene> genes, Path wiki) {
         StringBuilder sb = new StringBuilder();
         head(sb, family.title());
         sb.append("<p class=\"eyebrow magical\">Magical genes <span class=\"sep\">/</span> ")
@@ -680,17 +685,23 @@ public final class GeneWikiTool {
         sb.append("<p class=\"note\">\n    An index. <strong>Each of these has its own page</strong>"
                 + " - that is where the\n    inheritance table, the gene carrot and how you actually"
                 + " come by one live.\n    The picture beside each name is that gene on a standard"
-                + " bay, baked through the\n    real coat pipeline rather than drawn.\n</p>\n\n");
+                + " bay, baked through the\n    real coat pipeline rather than drawn. A gene with no"
+                + " picture is one that\n    changes no pixel of the coat - it does its work"
+                + " somewhere else.\n</p>\n\n");
 
         sb.append("<section class=\"tab-panel\" data-tab=\"gameplay\">\n\n");
         for (SpecGene gene : genes) {
             sb.append("<h2 id=\"").append(slug(gene).replace('_', '-')).append("\"><a href=\"")
                     .append(pageOf(gene)).append("\">").append(esc(gene.name())).append("</a></h2>\n\n");
             sb.append("<div class=\"gene-card\">\n");
-            sb.append("<a href=\"").append(pageOf(gene)).append("\">")
-                    .append("<img class=\"gene-card-icon\" src=\"assets/gene-icons/").append(slug(gene))
-                    .append(".png\" alt=\"").append(esc(gene.name()))
-                    .append(" on a bay horse\" width=\"150\" loading=\"lazy\"></a>\n");
+            // Only where there is a bake. A gene that changes no pixel of the
+            // coat has no icon at all, and linking one would be a broken image.
+            if (Files.exists(wiki.resolve("assets/gene-icons/" + slug(gene) + ".png"))) {
+                sb.append("<a href=\"").append(pageOf(gene)).append("\">")
+                        .append("<img class=\"gene-card-icon\" src=\"assets/gene-icons/").append(slug(gene))
+                        .append(".png\" alt=\"").append(esc(gene.name()))
+                        .append(" on a bay horse\" width=\"150\" loading=\"lazy\"></a>\n");
+            }
             sb.append("<div class=\"gene-card-body\">\n");
             if (!gene.spec().blurb().isBlank()) {
                 sb.append("<p>").append(esc(gene.spec().blurb())).append("</p>\n");

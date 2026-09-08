@@ -54,17 +54,20 @@ public final class GeneIconTool {
     private static final int MARGIN = 4;
 
     /**
-     * The camera, as a direction from the horse toward the viewer: off the
-     * horse's left ({@code -Z}), ahead of the shoulder ({@code +X}), and well
-     * above ({@code +Y}). The elevation is the part that was tuned: a level
-     * camera cannot see the topline at all, and a shallow one foreshortens it
-     * to a two-pixel strip, which for a dorsal-stripe gene is the same as
-     * showing nothing. High enough to read the back, low enough to keep the
-     * near flank.
+     * <b>Where the camera stands</b>, as two angles rather than a vector - the
+     * vector was tuned by hand and could not be read back as a viewpoint.
+     *
+     * <p>{@code AZIMUTH} swings round from square-on to the horse's left toward
+     * its nose, so the picture keeps the near flank and gains a little of the
+     * chest; the body is foreshortened by its cosine, which is why it stays
+     * modest. {@code ELEVATION} lifts the camera off the ground. That one
+     * matters more than it looks: a level camera cannot see the {@code TOP}
+     * faces at all, and a dorsal stripe, a topline blanket or a mane gene then
+     * shows nothing whatever. High enough to read the back, low enough that the
+     * horse still reads as a horse rather than a rug.
      */
-    private static final double VX = 0.38;
-    private static final double VY = 0.72;
-    private static final double VZ = -0.58;
+    private static final double AZIMUTH = Math.toRadians(26);
+    private static final double ELEVATION = Math.toRadians(24);
 
     /** Pixels a single texel is painted as. See {@link #fill}. */
     private static final int BLOCK = SCALE / HorseSkinGeometry.TEXELS_PER_UNIT + 2;
@@ -144,9 +147,16 @@ public final class GeneIconTool {
                 }
             }
             if (sheet == null) {
-                sheet = CoatTextureComposer.compose(override(BASE), epi,
-                        Skin.ADULT, true, template, luts);
+                // A gene with no coat of its own gets no icon at all. It used
+                // to get the plain bay, which is honest and useless: a card for
+                // a health gene then showed a horse the gene has nothing to do
+                // with, and thirty-six identical bays down the page read as a
+                // bug. Delete rather than skip, so a gene that loses its paint
+                // loses its icon on the next bake instead of keeping a stale
+                // one for ever.
+                Files.deleteIfExists(outDir.resolve(slug + ".png"));
                 invisible.add(slug);
+                continue;
             }
             ImageIO.write(sideView(sheet), "PNG", outDir.resolve(slug + ".png").toFile());
             written.add(slug);
@@ -154,7 +164,8 @@ public final class GeneIconTool {
         onBackdrop.forEach((backdrop, slugs) ->
                 System.out.println("on " + backdrop + " (nothing shows on a plain bay): " + slugs));
         if (!invisible.isEmpty()) {
-            System.out.println("no coat of their own - baked as the plain bay: " + invisible);
+            System.out.println("no coat of their own, so no icon (" + invisible.size()
+                    + "): " + invisible);
         }
 
         Files.writeString(outDir.resolve("index.txt"),
@@ -253,23 +264,33 @@ public final class GeneIconTool {
      * part's "top" is not +Y.
      */
     private static BufferedImage sideView(int[] sheet) {
-        // From the horse's left (negative Z), forward of the shoulder, looking
-        // down. Normalised so the pixel scale means what SCALE says.
-        double len = Math.sqrt(VX * VX + VY * VY + VZ * VZ);
-        double vx = VX / len;
-        double vy = VY / len;
-        double vz = VZ / len;
-        // right = normalize(up x v), up' = v x right. World up is +Y.
-        double rlen = Math.hypot(vz, vx);
-        final double rx = vz / rlen;
-        final double rz = -vx / rlen;
-        final double ux = -vy * rz;
-        final double uy = vz * rx - vx * rz;
-        final double uz = vy * rx;
+        // The camera basis, written straight out of the two angles rather than
+        // built with cross products. It used to be the latter and one of them
+        // had its sign inverted, which left "up" 45 degrees off perpendicular
+        // to the view direction - so the projection was sheared along the view
+        // axis and every part slid up or down the image by its own depth. The
+        // horse came out with its head in the sky and its tail on the floor,
+        // which read enough like a horse to survive a look.
+        final double ca = Math.cos(AZIMUTH);
+        final double sa = Math.sin(AZIMUTH);
+        final double ce = Math.cos(ELEVATION);
+        final double se = Math.sin(ELEVATION);
 
-        final double cx = vx;
-        final double cy = vy;
-        final double cz = vz;
+        // Toward the viewer: round to the horse's left (-Z) by the azimuth,
+        // and up off the ground by the elevation.
+        final double cx = sa * ce;
+        final double cy = se;
+        final double cz = -ca * ce;
+        // Screen right: along the ground, square to the view. The horse's nose
+        // lands on the left of the image.
+        final double rx = -ca;
+        final double rz = -sa;
+        // Screen up: the remaining axis. Orthonormal with the two above by
+        // construction - dot(up, view) and dot(up, right) are both identically
+        // zero, which is the point of deriving all three from the angles.
+        final double ux = -se * sa;
+        final double uy = ce;
+        final double uz = se * ca;
         List<double[]> queue = new ArrayList<>();
         double minSx = Double.MAX_VALUE;
         double maxSx = -Double.MAX_VALUE;

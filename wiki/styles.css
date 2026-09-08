@@ -1137,7 +1137,11 @@ a.card.card-iconed {
     image-rendering: pixelated;
     border-radius: 6px;
 }
-.card-iconed .card-text {
+/* Not scoped to .card-iconed: a gene that changes no pixel of the coat has no
+   icon, and its card is this box on its own. It still has to space its own
+   heading, paragraph and tag, because the card's gap now sits between the
+   picture and the words rather than between the words. */
+a.card .card-text {
     display: flex;
     flex-direction: column;
     gap: 0.35rem;
