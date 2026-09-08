@@ -32,6 +32,214 @@
     </p>
 </div>
 
+<h2 id="h-menu">&sect;0-AI &mdash; The My horses table, and the information screen made readable (2026-09-07, NOT looked at)</h2>
+
+<div class="note warn">
+    <span class="label"><code>runServer</code> could not be booted for this batch either</span>
+    <p>
+        <code>:common:test</code>, <code>:neoforge-26.1.2:build</code> and
+        <code>check-parity.mjs</code> are green; the headless boot failed on
+        <code>DirectoryLock</code> again, which means another JVM was holding
+        <code>run/world/session.lock</code> &mdash; somebody else&rsquo;s game, not a
+        registration fault. So <strong>nothing here has been through the
+        &ldquo;it registers and boots clean&rdquo; floor</strong>, and this batch adds a
+        payload (<code>horse_roster</code>, <em>renamed</em> from
+        <code>breeding_roster</code>), <b>five</b> more
+        (<code>inspect_horse</code>, <code>horse_coat_request</code> /
+        <code>horse_coat_batch</code>, <code>offspring_request</code> /
+        <code>offspring_data</code>), a hand-written stream codec and a new AI goal on
+        every horse. Run <code>./gradlew :neoforge-26.1.2:runServer</code> once with
+        nothing else open before anything below.
+    </p>
+</div>
+
+<p>
+    Sixteen owner requests in one pass, split between the <kbd>H</kbd> browser and the
+    <strong>i</strong> information screen. Design:
+    <a href="roadmap.html#browser">roadmap &sect; the horse browser</a>,
+    <a href="breeding.html#H">breeding &sect; client sync</a>. Gaps
+    <a href="known-gaps.html#gap-76">76</a>&ndash;<a href="known-gaps.html#gap-79">79</a>.
+</p>
+
+<div class="note danger">
+    <span class="label">Check the roster arrives before checking the table</span>
+    <p>
+        Open <kbd>H</kbd>. If <strong>My horses</strong> says
+        <em>&ldquo;asking the server&hellip;&rdquo;</em> and never fills, stop &mdash;
+        the renamed payload did not register, or the request is not reaching
+        <code>HorseRoster</code>, and every row below is moot. <strong>Breeding
+        preview will be empty too</strong>, because both tabs now read the same
+        roster; if only one of the two is empty, that is a different and much stranger
+        bug and is worth saying so.
+    </p>
+</div>
+
+<h3>My horses (browser <kbd>H</kbd>, first tab &mdash; and it is now the tab that opens)</h3>
+
+<ul>
+    <li><strong>Is every horse you own on it?</strong> Including one left in another
+        dimension and one in an unloaded chunk &mdash; those should appear with
+        <em>not loaded</em> in the Where column, <code>?</code> for bond, and
+        <strong>adult</strong> regardless of whether they were a foal when you left
+        (that is deliberate; a foal out of the world long enough to unload has almost
+        certainly grown).</li>
+    <li><strong>Are thirteen columns legible?</strong> At GUI scale 2, then 3, then 4.
+        <code>drawFitted</code> squeezes a cell rather than dropping it, so the failure
+        mode is unreadable rather than missing, and Name / Breed / Coat / Where are the
+        ones that will squeeze first.</li>
+    <li><strong>Does clicking a heading sort by it, and clicking it again reverse?</strong>
+        The arrow beside the heading should agree with what the rows are doing. Check
+        Bond in particular: an unknown bond is <code>-1</code> internally, so it should
+        sort to one end and not into the middle.</li>
+    <li><strong>The filter language.</strong> Type each and read the count:
+        <code>mare</code>, <code>foal</code>, <code>-lethal</code>,
+        <code>gen&gt;2</code>, <code>bond&gt;50</code>, <code>breed:shire</code>,
+        <code>gene:SB1</code>, <code>expresses:tobiano</code>, and two together
+        (<code>mare gen&gt;2</code>). Half-typed rubbish (<code>speed&gt;</code>,
+        <code>gene:</code>) must filter to nothing rather than throw &mdash; the unit
+        tests say it does, but they are not running inside a render loop.</li>
+    <li><strong>Does <code>gene:</code> really find a carrier?</strong> The point of the
+        tab. Take a horse you know is heterozygous for something that shows nothing and
+        confirm <code>gene:&lt;token&gt;</code> lists it while
+        <code>expresses:&lt;token&gt;</code> does not.</li>
+    <li><strong>Does clicking a row fill the footer</strong> with the two summary lines,
+        and clicking it again clear them?</li>
+    <li><strong>Does the coat column say something a person recognises?</strong> It is
+        built from the expression names (base coat, then every non-wild coat gene), so
+        it should read like <em>&ldquo;Bay, tobiano, silver&rdquo;</em> and not like a
+        list of gene keys. If a horse's column is empty or says something odd, note
+        which horse.</li>
+    <li><strong>Refresh</strong> re-asks the server; tame a horse with the screen shut,
+        reopen, and confirm it appears (it should, on open) and again after Refresh.</li>
+</ul>
+
+<h3>The information screen (<strong>i</strong> on the horse inventory)</h3>
+
+<ul>
+    <li><strong>Is the <em>i</em> button clear of the window?</strong> It now hangs off
+        the left edge rather than sitting in the corner. Check it is not off-screen at
+        GUI scale 4 on a small window &mdash; that is the one way this move can go
+        wrong, and it would leave no way in to the screen.</li>
+    <li><strong>Does the barn-name box look like somewhere you type?</strong> It is
+        framed now, and the frame should brighten to blue while the field has focus.
+        This is also the check that the drawing-order fix worked: <strong>if the box
+        still looks washed-out and grey, the widget pass is still being painted over</strong>
+        and the Done button will look wrong too.</li>
+    <li><strong>Genes tab.</strong> The full genetic code should be <em>gone</em>; the
+        short form and a count (&ldquo;12 of 78 loci&rdquo;) stay. The filter button
+        should read <em>Only what it carries</em> on opening. Turn it off and the list
+        should grow to every locus and the count to <em>all N loci</em>.</li>
+    <li><strong>Does the filter keep carriers?</strong> On a horse you know carries
+        something silently, the locus must still be listed with the filter <em>on</em>.
+        If it disappears, the filter is reading the phenotype and that is a bug, not a
+        preference.</li>
+    <li><strong>Dividers on Coat, Health and Other genes.</strong> One hairline between
+        entries, faint. Too heavy and it reads as a section break per gene; absent and
+        the descriptions run together, which is what it is fixing.</li>
+    <li><strong>Health colours.</strong> Max health / speed / jump green above the
+        baseline and red below, with size left plain. <strong>Read the red against the
+        dark panel</strong> &mdash; it was brightened for exactly this and the check is
+        whether <em>0.164</em> is legible, not whether it looks alarming.</li>
+</ul>
+
+<h3>The two behaviour changes</h3>
+
+<ul>
+    <li><strong>Shift-right-click a tamed foal.</strong> Its inventory screen should
+        open, with <strong>no saddle slot</strong> and no armour slot, and the
+        <strong>i</strong> button should work from it. Then check nothing was stolen:
+        shift-right-click a foal while holding a <a href="carrots.html">breeding
+        carrot</a>, a name tag, a transfer paper and shears, and confirm each still does
+        its own thing (the handler runs at <code>EventPriority.LOWEST</code>, so it
+        should only see a click nothing else claimed).</li>
+    <li><strong>Does a horse stop wandering while you read about it?</strong> Open the
+        <strong>i</strong> screen on a horse that was walking. It should stand. Then the
+        two failure modes worth provoking: close the screen and confirm it starts moving
+        again <em>within a second or two</em>, and open the screen on a horse you are
+        <em>riding</em> &mdash; a ridden horse is exempt and must still steer.</li>
+    <li><strong>And the one that would be bad:</strong> open the screen, then
+        <code>/kill</code> yourself or alt-F4 with it up. The horse must start moving
+        again within about three seconds (the lease). If it stands there forever, the
+        heartbeat or the expiry is wrong and every horse ever inspected is frozen.</li>
+</ul>
+
+<h3>The little horses, and the buttons that were sitting on the text</h3>
+
+<ul>
+    <li><strong>Do the row portraits fill in?</strong> They arrive a screenful at
+        a time, after the row is already drawn, so the honest expectation is an
+        empty well that becomes a horse a moment later. If they <em>never</em>
+        fill in, the coat request or its reply is not landing and the whole
+        feature is off; if they fill in but the row jumps, the well is the wrong
+        size.</li>
+    <li><strong>Scroll the table fast.</strong> Each screenful asks for its own
+        rows once; a second pass over the same rows must ask for nothing. The way
+        this goes wrong is silent - a request per frame - so watch for a stutter
+        that gets worse the longer the tab is open rather than for an error.</li>
+    <li><strong>Is a foal drawn as a foal?</strong> Only in the rows the roster
+        knows are foals, which means only loaded ones - an unloaded horse is
+        assumed grown, deliberately.</li>
+    <li><strong>Do the coats match the real horses?</strong> Pick a horse you can
+        see standing in front of you and compare it against its row. This is the
+        one check that would catch the coat being drawn from the wrong
+        epigenome, and it is a ten-second check because these are horses you
+        own.</li>
+    <li><strong>Breeding preview: portraits in both pickers and the chosen pair
+        above the squares.</strong> The pair portraits are drawn at the top of
+        the scrolling pane, so they should scroll away with it.</li>
+    <li><strong>No button sits on any text now.</strong> Walk all four tabs at
+        GUI scale 2, 3 and 4 and at a narrow window: "Only what varies" beside
+        Refresh (this was the reported one), Refresh on My horses, the filter
+        box, "Craft research paper" on Crafting, and on the information screen
+        the Genes filter and the Offspring Refresh.</li>
+</ul>
+
+<h3>Offspring (information screen, fifth tab)</h3>
+
+<ul>
+    <li><strong>It should show nothing until you press Refresh</strong>, and say
+        so. That is the design, not a failure.</li>
+    <li><strong>Are the generations right?</strong> On a horse you have bred
+        from: foals under the first heading, grandfoals under the second, a rule
+        between them. Breed a mare back into her own line if you can - each
+        horse must appear <em>once</em>, at its earliest generation, and the tab
+        must not loop.</li>
+    <li><strong>Are the descendants drawn in their real coats?</strong> These
+        come off the records directly (no second fetch), so unlike the table
+        rows they should be right immediately or not at all.</li>
+    <li><strong>Does Refresh on horse A then B show B's descendants?</strong>
+        Only one answer is held at a time and it is keyed by horse; a stale
+        answer showing under the wrong horse is the bug to watch for.</li>
+</ul>
+
+<h3>Two genes that were being reported wrong</h3>
+
+<ul>
+    <li><strong>A plain stallion must have no brindle row.</strong> Open the
+        Genes and Coat tabs on any stallion that does not carry it - the locus
+        should be absent with the filter on and read <code>n/Y</code>,
+        &ldquo;No brindle striping&rdquo;, with it off. A
+        <code>Brn/Y</code> stallion must still show, and so must a
+        <code>Brn/n</code> mare, which is the carrier the filter exists to
+        keep.</li>
+    <li><strong>KIT should be under Coat, not Other genes</strong>, on an
+        ordinary sabino. Find a near-white or dominant-white horse and check it
+        moves back to Other genes there - that is the outcome that really does
+        claim a blue eye. The particle locus, diet and the cutie mark stay on
+        Other whatever the horse carries.</li>
+</ul>
+
+<h3>The Crafting tab, which changed by side effect</h3>
+
+<ul>
+    <li><strong>&ldquo;Craft research paper&rdquo; is gone from the Gene database
+        tab</strong> and stays on Crafting. Check the Crafting one is <em>legible</em>
+        now &mdash; it was being painted over by the panel behind it, so it should look
+        like a button for the first time.</li>
+    <li><strong>Does the detail pane on Gene database use the space the button freed?</strong>
+        It should run 26 pixels further down.</li>
+</ul>
+
 <h2 id="lycan">&sect;0-AH &mdash; The werewolf locus, rainbow dust, and a particle locus that went recessive (2026-09-07, NOT looked at)</h2>
 
 <div class="note warn">

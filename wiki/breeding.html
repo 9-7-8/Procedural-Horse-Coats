@@ -859,12 +859,16 @@ int     offspringCount(UUID a, UUID b);</code></pre>
         <code>ClientHorseRecordCache</code>, keyed by both entity id and record
         UUID.</li>
     <li><code>HorseScreenHooks</code> adds <strong>one</strong> thing to the vanilla
-        horse inventory screen: an <strong>i</strong> button in its top-left corner,
-        which opens <code>HorseInfoScreen</code>. The grey side panel that used to carry
-        the horse's numbers behind a collapsible tab is gone &mdash; it was a 128-pixel
-        column trying to hold a page, and everything on it moved to the information
-        screen's Overview tab. Nothing is duplicated and nothing draws over the vanilla
-        screen, so a second horse-inventory mod is still not clobbered.
+        horse inventory screen: an <strong>i</strong> button, which opens
+        <code>HorseInfoScreen</code>. It hangs <strong>off the window's left edge</strong>,
+        level with the top &mdash; it used to sit inside the top-left corner, on top of
+        the screen's own chrome, and the vanilla sprite is a fixed size with no spare
+        pixels in it, so the only place a button of this mod's can go without covering
+        something is outside. The grey side panel that used to carry the horse's numbers
+        behind a collapsible tab is gone &mdash; it was a 128-pixel column trying to hold
+        a page, and everything on it moved to the information screen's Overview tab.
+        Nothing is duplicated and nothing draws over the vanilla screen, so a second
+        horse-inventory mod is still not clobbered.
 
         <p>
             The horse comes off the <strong>screen</strong>
@@ -874,20 +878,109 @@ int     offspringCount(UUID a, UUID b);</code></pre>
             <strong>shift-right-clicking a tamed horse</strong>, which vanilla handles
             without mounting &mdash; the old vehicle lookup returned <code>null</code>
             there and every one of this mod's additions came up blank.
+        </p>
+
+        <p>
+            <strong>Shift-right-click works on a foal too</strong>, which vanilla does
+            not do: <code>AbstractHorse.mobInteract</code> bails out on
+            <code>isBaby()</code> before it reaches the &ldquo;tamed and sneaking, so
+            open the inventory&rdquo; branch, so a foal had no inventory screen and
+            therefore no way to read its genes. <code>HorseInteractionHandler</code>
+            opens it at <code>EventPriority.LOWEST</code>, so every other horse
+            interaction in the mod gets first refusal on the click; the saddle slot
+            excludes itself, because its <code>isActive()</code> already asks
+            <code>canUseSlot(SADDLE)</code>, which is false for a baby.
         </p></li>
-    <li><code>HorseInfoScreen</code> is a six-tab full-window overlay in the same dark
+    <li><code>HorseInfoScreen</code> is a seven-tab full-window overlay in the same dark
         chrome as the horse browser: <strong>Overview</strong> (name, the barn-name
         editor, sex, generation, breed, the four live body numbers, bond, conditions, and
-        who bred / tamed / owns it), <strong>Genes</strong> (the genetic code, then every
-        locus in code order), <strong>Health</strong> (each gene's <em>own</em>
-        contribution to speed / health / jump / size, from
+        who bred / tamed / owns it), <strong>Genes</strong>, <strong>Health</strong>
+        (each gene's <em>own</em> contribution to speed / health / jump / size, from
         <code>TraitBreakdown</code>, plus the disorders), <strong>Coat</strong>,
-        <strong>Other genes</strong>, and <strong>Family tree</strong>, which hands
+        <strong>Other genes</strong>, <strong>Offspring</strong>, and
+        <strong>Family tree</strong>, which hands
         straight off to <code>FamilyTreeScreen</code> and comes back. Epigenetic values
         are shown on Health, Coat and Other only &mdash; Genes is the index, and a wall of
         numbers under every row is what the other three tabs are for. Which tab a gene
         lands on is decided by <code>GeneCategory</code>, from the interfaces the gene
-        implements, so a drop-in gene sorts itself.</li>
+        implements, so a drop-in gene sorts itself.
+
+        <p>
+            <strong>Genes is the short form plus a filtered locus list.</strong> The full
+            genetic code is not on it: it runs to a thousand characters, the surfaces
+            that read it are the custom spawn egg and the horse designer, and it was
+            pushing the list it introduces below the fold. The filter button beside the
+            count is <strong>on by default</strong> and hides every locus the horse is
+            carrying nothing but the wild type at, keeping extension, agouti and
+            shade whatever it says. It deliberately filters on the <em>alleles</em> and
+            not the phenotype, so a <strong>carrier stays on the list</strong> &mdash;
+            a heterozygote showing nothing is the single most interesting thing this
+            screen can tell a breeder, and a filter that read the expression would throw
+            exactly those rows away.
+        </p>
+
+        <p>
+            &ldquo;Carrying nothing&rdquo; is <code>Gene.atBaseline</code>, which tests
+            the gene's <strong>real</strong> alleles rather than the pair's two slots.
+            That is not pedantry: a stallion's <a href="gene-brindle.html">brindle</a>
+            pair reads <code>n/Y</code>, his one real allele plus the reserved slot he
+            does not have, which is homozygous for nothing &mdash; so the slot-based
+            test put a brindle row on <em>every stallion in the game</em>. Anything that
+            asks "is this horse carrying something here" has to go through
+            <code>atBaseline</code> for the same reason.
+        </p>
+
+        <p>
+            Which tab a gene lands on is asked <strong>about the horse</strong>, not
+            about the gene: <code>GeneCategory.of(gene, pair, genotype, epigenome)</code>
+            calls the non-coat channel and looks at the answer. <code>KIT</code>
+            implements eye colour, but only its broad white outcomes claim an iris, and
+            without this every horse alive carried a <code>KIT</code> row under Other
+            genes. A gene that <em>neither paints nor moves the body</em> - the particle
+            locus, diet, the cutie mark - stays on Other whatever its combination
+            grants, because a silent carrier of one has nothing to say on a tab about
+            colour.
+        </p>
+
+        <p>
+            Health, Coat and Other genes put a hairline between entries, because an entry
+            there is a gene row plus a wrapped description plus its epigenetic numbers
+            and the blocks ran together. On Health the four headline numbers are
+            <strong>green above the baseline and red below</strong>
+            (<code>HorseTraits.BASE_*</code>); size is left plain, because a draught
+            horse is not a worse horse than a pony.
+        </p></li>
+    <li><strong>Offspring</strong> is the pedigree read downward: this horse's
+        foals, then their foals, each generation a wrapped row of little horses
+        under a rule. <code>HorseDatabase.descendantsOf</code> returns them
+        <em>grouped by generation</em> - that is the only shape the answer is
+        useful in - and lists each horse once, at the earliest generation that
+        reaches it, so a mare bred back into her own line does not loop.
+
+        <p>
+            It is the <strong>only tab that does not redraw from what the client
+            already has</strong>: the walk is a pass over the whole ancestry
+            table per generation, and each descendant comes back as a full
+            <code>HorseRecord</code> so its coat can be drawn from its own
+            epigenome with no second round trip. Both of those make it a
+            question worth asking deliberately, so it is asked on a
+            <strong>Refresh</strong> press and the tab says whether what you are
+            looking at was ever asked for. Capped in both directions by
+            <code>OffspringDataPayload</code>; a generation cut at the cap says
+            so.
+        </p></li>
+    <li><strong>A horse stands still while its information screen is open.</strong> The
+        AI is server-side and the screen is not, so the client says so:
+        <code>InspectHorsePayload</code> once a second while the screen is up, and once
+        more when it closes. <code>HorseInspectHold</code> keeps it as a
+        <strong>lease</strong> rather than a flag &mdash; it lapses three seconds after
+        the last word from the client &mdash; because a boolean set on open and cleared
+        on close is correct right up until the client crashes with the screen showing,
+        and then that horse stands in a field forever with nothing able to say why. The
+        freeze itself is <code>InspectHoldGoal</code> at priority 0, claiming
+        <code>MOVE</code>, <code>JUMP</code> and <code>LOOK</code>, so stroll, panic, the
+        bond follow and the herd are simply not running and nothing has to be undone when
+        it lifts. A ridden horse is exempt.</li>
     <li><code>FamilyTreeScreen</code> is a pedigree chart: the subject is the
         right-hand column, each column left is one chart-step older, out to
         great-grandparents. <strong>Within every pair the sire is the top box, the dam

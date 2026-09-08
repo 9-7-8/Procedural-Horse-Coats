@@ -1182,46 +1182,63 @@
 <h2 id="browser">18. The horse browser</h2>
 
 <p>
-    The <code>H</code>-key screen is a real container menu with a <strong>Gene
-    database</strong> tab and a <strong>Crafting</strong> tab. The full plan is six:
-    horse list, gene database, vial inventory, herd view, bonding view, crafting tree
-    &mdash; plus out-of-band actions (teleport a horse to a stall, whistle for bonded
-    horses, recall to a holding pen).
+    The <code>H</code>-key screen is a real container menu with <strong>My
+    horses</strong>, <strong>Gene database</strong>, <strong>Breeding preview</strong>
+    and <strong>Crafting</strong> tabs. The full plan is six: the horse list and the
+    gene database are built, and what is left below is the <strong>vial inventory</strong>,
+    the <strong>herd view</strong>, the <strong>bonding view</strong> and a generated
+    <strong>crafting tree</strong> &mdash; plus out-of-band actions (teleport a horse to
+    a stall, whistle for bonded horses, recall to a holding pen).
 </p>
 
 <div class="note danger">
-    <span class="label">Design the index before the tabs</span>
+    <span class="label">The index is still owed, and the horse list is running without it</span>
     <p>
-        <strong>The expensive part is not the UI.</strong> There is no list of a
-        player&rsquo;s horses anywhere today. It needs a per-player owned-horse registry,
-        updated on tame, breed, death and transfer, holding enough denormalised data
-        (name, sex, age, genotype, bond, herd) that horses in <em>unloaded chunks</em>
-        still appear and can be sorted. Sort and filter run <strong>server-side</strong>
-        over that index and the result paginates &mdash; do not sync every horse&rsquo;s
-        genome to the client to filter it there.
+        <strong>The expensive part was never the UI.</strong> A proper per-player
+        owned-horse registry &mdash; updated on tame, breed, death and transfer, holding
+        enough denormalised data (name, sex, age, genotype, bond, herd) that horses in
+        <em>unloaded chunks</em> still appear &mdash; does not exist. The My horses tab
+        ships on <code>HorseRoster</code> instead, which walks the whole ancestry table
+        on request, cuts the result at <code>HorseRosterPayload.MAX_ENTRIES</code> and
+        sends it, and the client sorts and filters what it got.
+    </p>
+    <p>
+        <strong>That is exactly the &ldquo;do not filter it client-side&rdquo; this note
+        used to forbid</strong>, and it was chosen with eyes open: the cap is the whole
+        of the difference, the tab says so in its footer when it bites, and the drawing
+        code takes a list of <code>HorseListing</code>s and does not care who filtered
+        them. What is still owed is the registry, sort and filter running
+        <strong>server-side</strong> over it, and pagination. <code>HorseQuery</code> is
+        already game-free, so the same predicate can run on the server the day the index
+        exists.
     </p>
 </div>
 
-<h3>The two tabs the owner has specifically asked for</h3>
+<h3>The tab the owner has still asked for</h3>
 
 <ul>
-    <li><strong>The tamed-horse database.</strong> Every horse the player owns, in a
-        table that <strong>filters and sorts like any table &mdash; and especially on
-        genes</strong>: &ldquo;show me every horse carrying <code>SB1</code>&rdquo;,
-        &ldquo;sort by whether they carry a lethal&rdquo;. Gene filtering is a
-        first-class feature here, not an afterthought.</li>
     <li><strong>The bonding tab.</strong> The bond level with each horse, the tier it is
         at, and <strong>concrete guidance on how to raise it</strong> &mdash; which
         sources are available, what the daily cap is, how close the next tier is. This is
-        the surface &sect;<a href="#bond">14</a> says bond is missing.</li>
+        the surface &sect;<a href="#bond">14</a> says bond is missing. My horses shows
+        the <em>number</em> and sorts by it, which is not the same thing: it says where
+        you are and not how to move.</li>
 </ul>
 
 <h3>The rest</h3>
 
 <ul>
+    <li><strong>A row should open the horse.</strong> Clicking a My horses row selects it
+        and fills the footer; it should reach the information screen and the family tree.
+        Both want a <code>HorseRecord</code> and the roster deliberately does not carry
+        one (it carries a <code>HorseListing</code>, which is a tenth of the bytes), so
+        this needs a fetch-one-record round trip.</li>
     <li><strong><code>FamilyTreeScreen</code> should <em>become</em> a tab</strong>
-        rather than stay a separate screen, and its <code>drawHorseModel</code> is what
-        row portraits use. It is also the working reference for a from-scratch
+        rather than stay a separate screen. Row portraits exist now &mdash;
+        <code>client/HorsePortrait</code>, used by the My horses table and both
+        breeding pickers &mdash; but they are a <em>second</em> copy of the tree's
+        <code>drawHorseModel</code> rather than a shared one
+        (<a href="known-gaps.html#gap-78">gap 78</a>), and merging them is part of this. It is also the working reference for a from-scratch
         retained-mode screen in this codebase, scissor clipping and entity draw included
         &mdash; with the standing warning: build the render state from a throwaway
         client-only <code>Horse</code>, and never touch <code>ClientCoatCache</code>.</li>
@@ -1230,12 +1247,14 @@
     <li><strong>Teleport, recall and whistle</strong> need the stall and pen definitions
         &sect;<a href="#items">13</a> says are missing, plus answers for a destination
         that no longer exists and for whether any of it crosses dimensions.</li>
-    <li><strong>The existing two tabs are an untested GUI.</strong> Built against the
+    <li><strong>Every tab is an untested GUI.</strong> Built against the
         26.1.2 retained-mode API with no play session. Risks: the fixed-panel slot and
         label geometry at GUI scale 2/3/4, a ghost slot-highlight bleeding through on the
         Gene database tab (the slots are <code>isActive() == false</code> there, but the
         highlight path is only partly reachable), <code>quickMoveStack</code> edge cases,
-        and the book &rarr; research paper result path.</li>
+        the book &rarr; research paper result path, and &mdash; new &mdash; whether
+        thirteen columns of My horses are legible at GUI scale 3 and 4, where
+        <code>drawFitted</code> squeezes each one rather than dropping it.</li>
 </ul>
 
 <div class="note warn">
