@@ -123,17 +123,23 @@
 
         document.body.insertBefore(nav, document.body.firstChild);
         document.body.insertBefore(toggle, document.body.firstChild);
-
-        // Switching tab re-filters the sidebar, so the page list always matches
-        // the tab being read rather than the one the page was opened on.
-        document.addEventListener("hg:view", function () {
-            var old = document.getElementById("wiki-nav");
-            var oldToggle = document.querySelector(".nav-toggle");
-            if (old) { old.parentNode.removeChild(old); }
-            if (oldToggle) { oldToggle.parentNode.removeChild(oldToggle); }
-            build();
-        });
     }
+
+    /** Tear the sidebar down and build it again for the current view. */
+    function rebuild() {
+        var old = document.getElementById("wiki-nav");
+        var oldToggle = document.querySelector(".nav-toggle");
+        if (old) { old.parentNode.removeChild(old); }
+        if (oldToggle) { oldToggle.parentNode.removeChild(oldToggle); }
+        build();
+    }
+
+    // Switching tab re-filters the sidebar, so the page list always matches the
+    // tab being read rather than the one the page was opened on. Registered
+    // once, out here: doing it inside build() would add a fresh listener on
+    // every rebuild, and each switch would then cost one more rebuild than the
+    // last.
+    document.addEventListener("hg:view", rebuild);
 
     if (document.readyState === "loading") {
         document.addEventListener("DOMContentLoaded", build);
