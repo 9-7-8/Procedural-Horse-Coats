@@ -12,14 +12,14 @@ window.HG = window.HG || {};
 
   var $ = function (id) { return document.getElementById(id); };
 
-  var TOAST_LIFE_MS = 30000;
+  // Long enough to read a lethal-genotype note, short enough that a run of
+  // Randomize clicks does not bury the field in cards.
+  var TOAST_LIFE_MS = 10000;
 
   function start() {
     var scene = HG.designerScene.create($("field"));
     var gui = HG.gui.create($("gui"), {
       edit: edit,
-      copyCode: copyCode,
-      pasteCode: pasteCode,
       toggleWander: function () { wander = !wander; refresh(); },
       resetView: function () { if (scene) scene.resetView(); },
       exportJson: exportJson,
@@ -41,7 +41,10 @@ window.HG = window.HG || {};
     HG.java.load().then(function (loaded) {
       api = loaded;
       genes = JSON.parse(api.genesJson());
-      gui.setData(genes, JSON.parse(api.breedsJson()));
+      gui.setData(genes, JSON.parse(api.breedsJson()),
+        JSON.parse(api.familiesJson()),
+        JSON.parse(api.randomizeModesJson()),
+        JSON.parse(api.addScopesJson()));
       $("boot").hidden = true;
 
       var geomProblem = HG.java.checkGeometry(true) || HG.java.checkGeometry(false);
@@ -139,13 +142,16 @@ window.HG = window.HG || {};
     }
 
     /**
-     * The horse as a file. Two code strings are the whole of it - everything
-     * else in there is for a person reading it, and a loader must re-resolve
-     * traits rather than trust them.
+     * The horse as a file - the whole animal, not just its alleles. Two code
+     * strings are the load-bearing part; everything else in there is for a
+     * person reading it, and a loader must re-resolve traits rather than trust
+     * them.
      *
-     * <p>Nothing loads this yet; see the roadmap. It exists so that designing a
-     * horse here and bringing it into a world is one step away rather than a
-     * retyped genotype code.
+     * <p>This is the page's only way out, and the custom horse spawn egg's Copy
+     * horse writes the identical format to the clipboard. Copy code / Paste code
+     * used to sit beside these doing a worse version of the same job - a
+     * genotype code alone, so the horse came back with fresh epigenetics, no
+     * name and no breed - and are gone.
      */
     function exportJson() {
       var json = api.horseJson();
@@ -160,16 +166,16 @@ window.HG = window.HG || {};
       document.body.removeChild(a);
       setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
       toast("Exported " + name,
-        "Genotype and epigenome codes, plus the name, sex, breed and a readable summary. "
-        + "<strong>Nothing in game loads this yet</strong> — it is on the roadmap. "
-        + "Until then, <em>Copy code</em> and the custom horse spawn egg are the way in.",
+        "Genotype and epigenome codes, plus the name, sex, breed and a readable summary — "
+        + "the whole horse. <em>Import</em> reads it back, and the custom horse spawn egg's "
+        + "<em>Paste horse</em> takes the same text off the clipboard.",
         "info");
     }
 
     /**
-     * Read a horse file back. The JSON is parsed here - that is a browser format
-     * and JavaScript reads it for free - but every field is *applied* through
-     * Java, so nothing genetic is decided in this file.
+     * Read a horse file back. The whole of it happens in Java - HorseFile.read
+     * plus the editor - because the format is the mod's and not the page's; this
+     * function picks a file and reports what came back.
      *
      * <p>Deliberately tolerant: a file that names a gene this build does not
      * have loads with that locus dropped (Genotype.parse already does that), a
@@ -191,73 +197,27 @@ window.HG = window.HG || {};
     }
 
     function applyHorseFile(text, label) {
-      var horse;
-      try {
-        horse = JSON.parse(text);
-      } catch (err) {
-        toast("That is not valid JSON", String(err.message || err), "bad");
-        return;
-      }
-      if (!horse || typeof horse.genotype !== "string") {
+      var result = JSON.parse(api.loadHorseJson(text));
+      if (!result.ok) {
         toast("That is not a horse file",
-          "A horse file needs a <code>genotype</code> code. Export one to see the shape.",
-          "bad");
+          result.error + ".<br><br>A horse file needs a <code>genotype</code> code this "
+          + "build can read. Export one to see the shape.", "bad");
         return;
       }
-      if (!api.pasteCode(horse.genotype)) {
-        toast("The genotype did not parse",
-          "The file's <code>genotype</code> is not a code this build can read. Nothing "
-          + "was changed.", "bad");
-        return;
-      }
-
       var notes = [];
-      if (typeof horse.epigenome === "string" && horse.epigenome) {
-        if (!api.setEpigenomeCode(horse.epigenome)) {
-          notes.push("its epigenome did not parse, so this horse has a fresh one "
-            + "— the coat will differ wherever a gene varies per horse");
-        }
+      if (result.droppedEpigenome) {
+        notes.push("its epigenome did not parse, so this horse has a fresh one "
+          + "\u2014 the coat will differ wherever a gene varies per horse");
       }
-      if (horse.name && (horse.name.first || horse.name.last)) {
-        api.setName(horse.name.first || "", horse.name.last || "");
-      }
-      if (typeof horse.baby === "boolean") api.setBaby(horse.baby);
-      if (horse.sex === "MARE" || horse.sex === "STALLION") api.setSex(horse.sex === "MARE");
-      if (horse.breed && !api.setBreedByName(horse.breed)) {
-        notes.push("there is no breed called “" + horse.breed + "” in this build, "
-          + "so the label was dropped");
+      if (result.droppedBreed) {
+        notes.push("there is no breed by that name in this build, so the label was dropped");
       }
       refresh();
       var st = JSON.parse(api.stateJson());
       toast("Loaded " + (st.first + " " + st.last).trim(),
         "From <code>" + label + "</code>."
-        + (notes.length ? " Two things to know: " + notes.join("; ") + "." : ""),
+        + (notes.length ? " Worth knowing: " + notes.join("; ") + "." : ""),
         notes.length ? "warn" : "info");
-    }
-
-    function copyCode() {
-      var code = api.genotypeCode();
-      if (navigator.clipboard) {
-        navigator.clipboard.writeText(code).then(function () {
-          toast("Copied", "The genotype code is on your clipboard. Paste it into the "
-            + "custom horse spawn egg in game, or back in here.", "info");
-        });
-      } else {
-        window.prompt("Genotype code", code);
-      }
-    }
-
-    function pasteCode() {
-      var code = window.prompt("Paste a genotype code");
-      if (!code) return;
-      if (!api.pasteCode(code)) {
-        toast("That code did not parse",
-          "A genotype code is <code>gene=a/b</code> segments joined by <code>-</code>. "
-          + "Parsing is tolerant of missing genes but not of an allele token the gene "
-          + "does not have.", "bad");
-        return;
-      }
-      refresh();
     }
 
     /**
@@ -274,12 +234,12 @@ window.HG = window.HG || {};
         toast(gene.name + " is only viewable in game",
           "That gene relies on Minecraft's own assets — particle types, item icons, "
           + "world blocks — so there is nothing here to draw it with. It is still on "
-          + "the horse and still in <em>Export JSON</em>; you just cannot see it.", "warn");
+          + "the horse and still in <em>Export</em>; you just cannot see it.", "warn");
       } else {
         toast(gene.name + " changes numbers, not looks",
           "That gene moves the horse's speed, health or jump and nothing else, so there "
           + "is nothing to draw. It is still on the horse, and the figures ride along in "
-          + "<em>Export JSON</em>.", "warn");
+          + "<em>Export</em>.", "warn");
       }
     }
 

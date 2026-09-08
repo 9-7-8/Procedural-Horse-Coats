@@ -68,6 +68,15 @@ public final class Epigenome {
         return !g.epiSchema().isEmpty();
     }
 
+    /**
+     * The same question, publicly - {@link #with} only accepts a gene this
+     * returns {@code true} for, and the gene editors need to ask before they
+     * put one locus's numbers back after re-rolling the rest.
+     */
+    public static boolean carries(Gene gene) {
+        return stores(gene);
+    }
+
     // ------------------------------------------------------------------
     // Construction
     // ------------------------------------------------------------------

@@ -15,8 +15,10 @@
 // and no inventory, so the screen's two output buttons have no twin here.
 // "Spawn" has nothing to spawn into; "Make egg" (which writes the horse on
 // screen into a preset_horse_spawn_egg item) has no inventory to put an item
-// in. The page's equivalent of both is "Copy code" - the same horse, in a form
-// you can paste anywhere, this page included. Nothing else may differ.
+// in. Export / Import sit in the slot the screen gives Copy horse / Paste
+// horse, and carry the identical payload - HorseFile, the whole animal - to a
+// file rather than to a clipboard, because a browser tab has no chat to paste
+// into and a Minecraft screen has no file picker. Nothing else may differ.
 //
 // What this file does NOT contain is any genetics. Every question it asks -
 // what a row expresses, which allele a gene is added at, how a sex-linked row
@@ -37,13 +39,16 @@ window.HG = window.HG || {};
   var DD_VISIBLE = 8;
   var DD_W = 76;
   var BREED_DD_W = 118;
+  var LOCK_W = 10;        // the padlock column down the left of the gene list
+  var FILTER_H = 14;      // the family filter sitting above it
+  var ARROW_W = 14;       // the arrow half of a split button
+  var MENU_DD_W = 118;    // the randomize / add-random / family menus
 
   // ---- colours, the same ARGB the screen fills with ---------------------
   var PANEL = "rgba(0,0,0,0.565)";        // 0x90000000
   var NAME_BG = "rgba(0,0,0,0.88)";       // 0xE0000000 - opaque enough to read over grass
   var ROW_BG = "rgba(32,40,56,0.2)";      // 0x33202838
   var HOVER = "rgba(255,255,255,0.2)";    // 0x33FFFFFF
-  var C_HEADER = "#9098A8";
   var C_NAME_OFF = "#9AA0B0";
   var C_NAME_ON = "#FFFFFF";
   var C_EXPRESSING = "#9BE08A";
@@ -58,16 +63,21 @@ window.HG = window.HG || {};
   var DD_SEL = "rgba(112,136,255,0.33)";
   var DD_TEXT = "#C0C4D0";
   var C_UNSHOWN = "#6B7182";   // a gene this page cannot draw at all
+  var C_LOCK_ON = "#E8C060";   // a locked row - the same amber the size readout uses
+  var C_LOCK_OFF = "#565C6C";  // an unlocked one: present, and clearly not doing anything
 
   function create(canvas, opts) {
     var ctx = canvas.getContext("2d");
     var scale = 3;
     var vw = 0, vh = 0;          // virtual (GUI) size, like Minecraft's gui scale
     var genes = [], breeds = [], state = null;
+    var families = [], modes = [], addScopes = [];
+    var filter = "";             // "" = every gene; otherwise a GeneFamily name
+    var view = [];               // indices into genes[], after the filter
     var scroll = 0;
     var mouse = { x: -1, y: -1, inside: false };
     var widgets = [];            // rebuilt every draw, like the screen's init()
-    var dd = null;               // { kind:"allele"|"breed", row, slot, x, y, scroll }
+    var dd = null;               // { kind:"allele"|"breed"|"family"|"randomize"|"add", ... }
 
     function resize() {
       var w = canvas.clientWidth, h = canvas.clientHeight;
@@ -89,15 +99,31 @@ window.HG = window.HG || {};
     function previewLeft() { return LIST_X + listWidth() + 8; }
     function previewRight() { return rightX() - 8; }
     function visibleRows() { return Math.max(1, Math.floor((listBottom() - LIST_TOP) / ROW_H)); }
-    function maxScroll() { return Math.max(0, genes.length - visibleRows()); }
+    function maxScroll() { return Math.max(0, view.length - visibleRows()); }
+    function nameX() { return LIST_X + LOCK_W; }
     function nameWidth(added) {
-      return added ? listWidth() - 2 * ALLELE_W - REMOVE_W - 10 : listWidth() - 8;
+      return added ? listWidth() - LOCK_W - 2 * ALLELE_W - REMOVE_W - 10
+        : listWidth() - LOCK_W - 8;
     }
+
+    /**
+     * Which genes the list is showing, after the family filter. Recomputed
+     * every frame rather than cached: it is a walk of a few hundred strings and
+     * a cache would be one more thing to invalidate when a gene is added.
+     */
+    function rebuildView() {
+      view = [];
+      for (var i = 0; i < genes.length; i++) {
+        if (!filter || genes[i].family === filter) view.push(i);
+      }
+    }
+
+    /** The gene index under a point, or -1. Rows are addressed through the view. */
     function rowAt(mx, my) {
       if (mx < LIST_X - 4 || mx > LIST_X + listWidth()
         || my < LIST_TOP || my >= LIST_TOP + visibleRows() * ROW_H) return -1;
-      var i = scroll + Math.floor((my - LIST_TOP) / ROW_H);
-      return i < genes.length ? i : -1;
+      var k = scroll + Math.floor((my - LIST_TOP) / ROW_H);
+      return k < view.length ? view[k] : -1;
     }
 
     /** Where the horse should be framed, in CSS pixels - the screen's preview box. */
@@ -153,6 +179,30 @@ window.HG = window.HG || {};
       text(s, (x0 + x1) / 2 - widthOf(s) / 2, y, colour);
     }
 
+    /**
+     * A padlock, drawn rather than typed. Minecraft's font has no lock glyph
+     * outside the astral planes it cannot reach, and this has to be the same
+     * mark on both screens - so both draw the same eight rectangles.
+     */
+    function padlock(x, y, locked, colour) {
+      var bx = x + 2, by = y + 6;            // 5x6 icon, centred in the column
+      if (locked) {
+        fill(bx + 1, by, bx + 4, by + 1, colour);       // shackle, closed
+        fill(bx + 1, by + 1, bx + 2, by + 2, colour);
+        fill(bx + 3, by + 1, bx + 4, by + 2, colour);
+      } else {
+        fill(bx + 2, by, bx + 5, by + 1, colour);       // shackle, swung open
+        fill(bx + 4, by + 1, bx + 5, by + 2, colour);
+      }
+      fill(bx, by + 2, bx + 5, by + 6, colour);         // body
+    }
+
+    /** A button and, glued to its right, the arrow that opens its menu. */
+    function splitButton(x, y, w, label, onClick, onMenu) {
+      button(x, y, w - ARROW_W, 20, label, onClick, true);
+      button(x + w - ARROW_W, y, ARROW_W, 20, "\u25be", onMenu, true);
+    }
+
     function button(x, y, w, h, label, onClick, hot) {
       var over = mouse.x >= x && mouse.x < x + w && mouse.y >= y && mouse.y < y + h;
       fill(x, y, x + w, y + h, over ? "rgba(70,74,88,0.95)" : "rgba(30,32,42,0.92)");
@@ -177,8 +227,10 @@ window.HG = window.HG || {};
       ctx.font = "8px ui-monospace, 'DejaVu Sans Mono', Menlo, Consolas, monospace";
       ctx.imageSmoothingEnabled = false;
 
+      rebuildView();
+      scroll = Math.max(0, Math.min(scroll, maxScroll()));
       var hovered = dd ? -1 : rowAt(mouse.x, mouse.y);
-      var shown = Math.min(genes.length, scroll + visibleRows()) - scroll;
+      var shown = Math.min(view.length, scroll + visibleRows()) - scroll;
 
       // Header band. The screen puts its title here; a horse has a better one,
       // so this is the name - and each half is its own button, which is where
@@ -187,10 +239,10 @@ window.HG = window.HG || {};
       drawName();
 
       // the name column only - stop short of an added row's allele buttons
-      fill(LIST_X - 4, LIST_TOP - 14, LIST_X + nameWidth(true) + 2, LIST_TOP + shown * ROW_H, NAME_BG);
-      text(maxScroll() > 0 ? "Genes - click to add  (scroll)" : "Genes - click to add",
-        LIST_X, LIST_TOP - 12, C_HEADER);
+      fill(LIST_X - 4, LIST_TOP - 2, LIST_X + nameWidth(true) + LOCK_W + 2,
+        LIST_TOP + shown * ROW_H, NAME_BG);
 
+      drawFilter();
       drawRows(hovered);
       drawRightColumn();
       drawGenomeLine();
@@ -218,41 +270,96 @@ window.HG = window.HG || {};
         click: function () { opts.edit("rerollName", bit); } });
     }
 
+    /**
+     * The family filter, above the list. A hundred and seventy loci in one
+     * alphabetical column is a list you scroll rather than read; this is how you
+     * ask for the eight dilutions, or for the fourteen genes made of strokes.
+     */
+    function drawFilter() {
+      var w = listWidth() + 4;
+      var y = LIST_TOP - FILTER_H - 2;
+      var label = "All genes";
+      for (var i = 0; i < families.length; i++) {
+        if (families[i].key === filter) label = families[i].label;
+      }
+      var fy = y;
+      button(LIST_X - 4, y, w, FILTER_H, label + "  \u25be", function () {
+        dd = {
+          kind: "family", x: LIST_X - 4, y: clampDd(fy + FILTER_H),
+          scroll: Math.max(0, Math.min(indexOfFamily() - (DD_VISIBLE >> 1),
+            Math.max(0, families.length - DD_VISIBLE)))
+        };
+      }, true);
+    }
+
+    function indexOfFamily() {
+      for (var i = 0; i < families.length; i++) if (families[i].key === filter) return i;
+      return 0;
+    }
+
     function drawRows(hovered) {
       var listW = listWidth();
       var aX = LIST_X + listW - 2 * ALLELE_W - REMOVE_W - 6;
       var bX = LIST_X + listW - ALLELE_W - REMOVE_W - 4;
       var xX = LIST_X + listW - REMOVE_W;
 
-      for (var i = scroll; i < genes.length && i < scroll + visibleRows(); i++) {
+      var nx = nameX();
+
+      for (var k = scroll; k < view.length && k < scroll + visibleRows(); k++) {
+        var i = view[k];
         var gene = genes[i];
         var row = state.rows[i];
-        var ry = LIST_TOP + (i - scroll) * ROW_H;
+        var ry = LIST_TOP + (k - scroll) * ROW_H;
 
         var canShow = viewable(gene);
+        drawLock(i, row, ry);
 
         if (!row.added) {
           // off the horse: a plain name, the whole row clickable
-          if (i === hovered) fill(LIST_X - 4, ry, LIST_X + listW, ry + ROW_H - 2, HOVER);
+          if (i === hovered) fill(nx - 2, ry, LIST_X + listW, ry + ROW_H - 2, HOVER);
           var offColour = canShow ? (i === hovered ? C_NAME_ON : C_NAME_OFF) : C_UNSHOWN;
-          if (canShow) fitted(gene.name, LIST_X, ry + 6, nameWidth(false), offColour);
-          else struck(gene.name, LIST_X, ry + 6, nameWidth(false), offColour);
-          widgets.push({ x: LIST_X - 4, y: ry, w: listW + 4, h: ROW_H - 2, click: add(i) });
+          if (canShow) fitted(gene.name, nx, ry + 6, nameWidth(false), offColour);
+          else struck(gene.name, nx, ry + 6, nameWidth(false), offColour);
+          // Starts at nx, not at the hover fill's nx-2: the padlock is pushed
+          // first and the later widget wins the hit test, so a row that
+          // overlapped the lock column would swallow its clicks.
+          widgets.push({ x: nx, y: ry, w: LIST_X + listW - nx, h: ROW_H - 2, click: add(i) });
           continue;
         }
 
         // on the horse: name, what it expresses, and its two allele buttons
-        fill(LIST_X - 4, ry, LIST_X + nameWidth(true) + 2, ry + ROW_H - 2, ROW_BG);
+        fill(nx - 2, ry, nx + nameWidth(true) + 2, ry + ROW_H - 2, ROW_BG);
         var onColour = !canShow ? C_UNSHOWN : (row.expressing ? C_EXPRESSING : C_ADDED);
-        if (canShow) fitted(gene.name, LIST_X, ry + 1, nameWidth(true), onColour);
-        else struck(gene.name, LIST_X, ry + 1, nameWidth(true), onColour);
-        fitted(canShow ? row.expression : "not shown here", LIST_X, ry + 10, nameWidth(true), C_SUB);
+        if (canShow) fitted(gene.name, nx, ry + 1, nameWidth(true), onColour);
+        else struck(gene.name, nx, ry + 1, nameWidth(true), onColour);
+        fitted(canShow ? row.expression : "not shown here", nx, ry + 10, nameWidth(true), C_SUB);
 
         var many = gene.alleles.length > 3;
         button(aX, ry, ALLELE_W, ROW_H - 2, gene.alleles[row.a].token, slot(i, 0, many, aX, ry));
         button(bX, ry, ALLELE_W, ROW_H - 2, gene.alleles[row.b].token, slot(i, 1, many, bX, ry));
-        button(xX, ry, REMOVE_W, ROW_H - 2, "x", remove(i));
+        // Extension, agouti and shade carry no x - every horse has alleles at
+        // all three, so there is no state in which taking one off is honest.
+        if (!gene.alwaysCarried) {
+          button(xX, ry, REMOVE_W, ROW_H - 2, "x", remove(i));
+        }
       }
+    }
+
+    /**
+     * The padlock at the head of a row. Locked means every randomize - the main
+     * one and the epigenetic one - leaves this gene exactly as it stands, which
+     * is what turns Randomize from "another horse" into "another horse, keeping
+     * this".
+     */
+    function drawLock(i, row, ry) {
+      var over = mouse.x >= LIST_X - 4 && mouse.x < LIST_X + LOCK_W
+        && mouse.y >= ry && mouse.y < ry + ROW_H - 2;
+      if (over) fill(LIST_X - 4, ry, LIST_X + LOCK_W, ry + ROW_H - 2, HOVER);
+      padlock(LIST_X - 2, ry, row.locked, row.locked ? C_LOCK_ON : C_LOCK_OFF);
+      widgets.push({
+        x: LIST_X - 4, y: ry, w: LOCK_W + 4, h: ROW_H - 2,
+        click: function () { opts.edit("setLocked", i, !row.locked); }
+      });
     }
 
     // Clicking a struck-through gene still adds it - it is a real gene and it
@@ -279,7 +386,18 @@ window.HG = window.HG || {};
     }
 
     function clampDd(y) {
-      return Math.max(LIST_TOP, Math.min(y, vh - DD_VISIBLE * DD_ROW_H - 4));
+      return Math.max(4, Math.min(y, vh - DD_VISIBLE * DD_ROW_H - 4));
+    }
+
+    /** A menu of {key,label} entries, anchored under a split button's arrow. */
+    function openMenu(kind, x, y, items, current) {
+      var at = 0;
+      for (var i = 0; i < items.length; i++) if (items[i].key === current) at = i;
+      dd = {
+        kind: kind, x: x, y: clampDd(y),
+        scroll: Math.max(0, Math.min(at - (DD_VISIBLE >> 1),
+          Math.max(0, items.length - DD_VISIBLE)))
+      };
     }
 
     function drawRightColumn() {
@@ -304,23 +422,32 @@ window.HG = window.HG || {};
         };
       });
       step();
-      button(rx, ry, RIGHT_W, 20, "Randomize", function () { opts.edit("randomize"); });
+      // Two split buttons. The face does the thing; the arrow picks which thing
+      // it is, and the choice sticks - the label always says what will happen.
+      var randY = ry;
+      splitButton(rx, ry, RIGHT_W, state.randomizeLabel,
+        function () { opts.edit("randomize"); },
+        function () { openMenu("randomize", rx, randY + 20, modes, state.randomizeMode); });
       step();
-      button(rx, ry, RIGHT_W, 20, "Reroll epi.", function () { opts.edit("rerollEpigenome"); });
+      var addY = ry;
+      splitButton(rx, ry, RIGHT_W, state.addLabel,
+        function () { opts.edit("addRandom"); },
+        function () { openMenu("add", rx, addY + 20, addScopes, state.addScope); });
       step();
-      button(rx, ry, RIGHT_W, 20, "Copy code", function () { opts.copyCode(); });
-      step();
-      button(rx, ry, RIGHT_W, 20, "Paste code", function () { opts.pasteCode(); });
+      button(rx, ry, RIGHT_W, 20,
+        state.randomizeInvisible ? "Rnd health: on" : "Rnd health: off",
+        function () { opts.edit("setRandomizeInvisible", !state.randomizeInvisible); });
       step();
       button(rx, ry, RIGHT_W, 20, "Clear genes", function () { opts.edit("clearGenes"); });
 
       // Where the screen has Spawn / Cancel there is nothing to spawn - the
-      // horse is already standing in the field. These four are the browser's
-      // own, and the only controls here with no counterpart in game.
+      // horse is already standing in the field. These are the browser's own,
+      // and the only controls here with no counterpart in game.
       button(rx, vh - 92, RIGHT_W, 20, "Reroll name",
         function () { opts.edit("rerollName", 3); }, true);
       // Export and Import share a row - two halves of one idea, and the column
-      // has no space to spare.
+      // has no space to spare. They sit in the slot the screen gives Copy horse
+      // and Paste horse, which write the same format to the clipboard.
       var halfW = (RIGHT_W - 4) / 2;
       button(rx, vh - 70, halfW, 20, "Export", function () { opts.exportJson(); }, true);
       button(rx + halfW + 4, vh - 70, halfW, 20, "Import", function () { opts.importJson(); }, true);
@@ -344,12 +471,35 @@ window.HG = window.HG || {};
       }
     }
 
+    /** {labels, currentIndex, width} for whichever dropdown is open. */
+    function ddContents() {
+      if (dd.kind === "breed") {
+        return { labels: breeds, current: state.breedIndex, w: BREED_DD_W };
+      }
+      if (dd.kind === "allele") {
+        return {
+          labels: genes[dd.row].alleles.map(function (a) { return a.token; }),
+          current: dd.slot === 0 ? state.rows[dd.row].a : state.rows[dd.row].b,
+          w: DD_W
+        };
+      }
+      var src = dd.kind === "family" ? families : (dd.kind === "randomize" ? modes : addScopes);
+      var key = dd.kind === "family" ? filter
+        : (dd.kind === "randomize" ? state.randomizeMode : state.addScope);
+      var at = 0;
+      var labels = [];
+      for (var i = 0; i < src.length; i++) {
+        labels.push(src[i].label);
+        if (src[i].key === key) at = i;
+      }
+      return { labels: labels, current: at, w: MENU_DD_W };
+    }
+
     function drawDropdown() {
-      var isBreed = dd.kind === "breed";
-      var w = isBreed ? BREED_DD_W : DD_W;
-      var items = isBreed ? breeds : genes[dd.row].alleles.map(function (a) { return a.token; });
-      var current = isBreed ? state.breedIndex
-        : (dd.slot === 0 ? state.rows[dd.row].a : state.rows[dd.row].b);
+      var c = ddContents();
+      var w = c.w;
+      var items = c.labels;
+      var current = c.current;
       var h = DD_VISIBLE * DD_ROW_H;
 
       fill(dd.x - 1, dd.y - 1, dd.x + w + 1, dd.y + h + 1, DD_BG);
@@ -378,18 +528,24 @@ window.HG = window.HG || {};
     }
 
     function pickFromDropdown() {
-      var isBreed = dd.kind === "breed";
-      var w = isBreed ? BREED_DD_W : DD_W;
-      var items = isBreed ? breeds.length : genes[dd.row].alleles.length;
+      var c = ddContents();
       var h = DD_VISIBLE * DD_ROW_H;
-      if (mouse.x >= dd.x && mouse.x < dd.x + w && mouse.y >= dd.y && mouse.y < dd.y + h) {
-        var idx = dd.scroll + Math.floor((mouse.y - dd.y) / DD_ROW_H);
-        if (idx >= 0 && idx < items) {
-          if (isBreed) opts.edit("setBreed", idx);
-          else opts.edit("setAllele", dd.row, dd.slot, idx);
-        }
+      var kind = dd.kind, row = dd.row, slot = dd.slot;
+      var idx = -1;
+      if (mouse.x >= dd.x && mouse.x < dd.x + c.w && mouse.y >= dd.y && mouse.y < dd.y + h) {
+        var hit = dd.scroll + Math.floor((mouse.y - dd.y) / DD_ROW_H);
+        if (hit >= 0 && hit < c.labels.length) idx = hit;
       }
       dd = null;
+      if (idx < 0) return;
+      if (kind === "breed") opts.edit("setBreed", idx);
+      else if (kind === "allele") opts.edit("setAllele", row, slot, idx);
+      else if (kind === "family") { filter = families[idx].key; scroll = 0; draw(); }
+      // Picking a mode also runs it. The menu is how you say what Randomize
+      // means, and having said it you wanted it done - the label keeps the
+      // choice for next time.
+      else if (kind === "randomize") { opts.edit("setRandomizeMode", modes[idx].key); opts.edit("randomize"); }
+      else if (kind === "add") { opts.edit("setAddScope", addScopes[idx].key); opts.edit("addRandom"); }
     }
 
     // ---- input -----------------------------------------------------------
@@ -413,7 +569,7 @@ window.HG = window.HG || {};
       }
       // the two opaque panels, so a drag on them never spins the horse
       var listW = listWidth();
-      if (mouse.x < LIST_X + listW && mouse.y > LIST_TOP - 16) return true;
+      if (mouse.x < LIST_X + listW && mouse.y > LIST_TOP - FILTER_H - 4) return true;
       if (mouse.x > rightX() - 4) return true;
       if (mouse.y < 32) return true;
       return false;
@@ -459,13 +615,13 @@ window.HG = window.HG || {};
       toVirtual(e);
       var dir = e.deltaY > 0 ? 1 : -1;
       if (dd) {
-        var items = dd.kind === "breed" ? breeds.length : genes[dd.row].alleles.length;
+        var items = ddContents().labels.length;
         dd.scroll = Math.max(0, Math.min(dd.scroll + dir, Math.max(0, items - DD_VISIBLE)));
         e.preventDefault();
         e.stopPropagation();
         return;
       }
-      if (mouse.x < LIST_X + listWidth() && mouse.y > LIST_TOP - 16) {
+      if (mouse.x < LIST_X + listWidth() && mouse.y > LIST_TOP - FILTER_H - 4) {
         scroll = Math.max(0, Math.min(scroll + dir, maxScroll()));
         e.preventDefault();
         e.stopPropagation();
@@ -473,7 +629,13 @@ window.HG = window.HG || {};
     }, { passive: false, capture: true });
 
     return {
-      setData: function (g, b) { genes = g; breeds = b; },
+      setData: function (g, b, f, m, a) {
+        genes = g;
+        breeds = b;
+        families = f;
+        modes = m;
+        addScopes = a;
+      },
       setState: function (s) { state = s; },
       draw: draw,
       previewRect: previewRect,

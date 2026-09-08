@@ -9,15 +9,19 @@ import com.example.horsegenetics.common.coat.pattern.HairPattern;
 import com.example.horsegenetics.common.genetics.Genome;
 import com.example.horsegenetics.common.genetics.Allele;
 import com.example.horsegenetics.common.genetics.AllelePair;
+import com.example.horsegenetics.common.genetics.EditorRules;
 import com.example.horsegenetics.common.genetics.Epigenome;
 import com.example.horsegenetics.common.genetics.Expression;
 import com.example.horsegenetics.common.genetics.Gene;
 import com.example.horsegenetics.common.genetics.GeneCodeDisplay;
+import com.example.horsegenetics.common.genetics.GeneFamily;
 import com.example.horsegenetics.common.genetics.Genes;
 import com.example.horsegenetics.common.genetics.Genotype;
 import com.example.horsegenetics.common.genetics.Inheritance;
+import com.example.horsegenetics.common.genetics.RandomizeMode;
 import com.example.horsegenetics.common.genetics.spec.GeneAbility;
 import com.example.horsegenetics.common.genetics.spec.HorseAbilities;
+import com.example.horsegenetics.common.horse.HorseFile;
 import com.example.horsegenetics.common.horse.Sex;
 import com.example.horsegenetics.common.trait.HorseTraits;
 import com.example.horsegenetics.common.trait.Traits;
@@ -53,9 +57,41 @@ import java.util.List;
  * <b>Left</b> - every registered gene in <b>alphabetical order by display
  * name</b> ({@link Gene#name()}, so the list reads ACAN, Agouti, B4GALT7,
  * Champagne, EDNRB (frame overo), KIT (white spotting)&hellip; rather than in
- * the registry's processing order).
+ * the registry's processing order), under a {@link GeneFamily} filter and each
+ * with a padlock.
  * <b>Centre</b> - a live 3D horse in the coat the genome makes.
- * <b>Right</b> - age, sex, an epigenetics re-roll, code copy / paste, and spawn.
+ * <b>Right</b> - age, sex, breed, the two split buttons, and spawn.
+ *
+ * <h2>The two split buttons</h2>
+ * <b>Randomize</b> and <b>Add random</b> each have an arrow beside them. The
+ * face does the thing; the arrow picks <i>which</i> thing, out of
+ * {@link RandomizeMode} and {@link EditorRules.AddScope}, and the choice sticks
+ * - the label always says what the next press will do. Picking from the menu
+ * also runs it, because having said what Randomize means you wanted it done.
+ *
+ * <p>Two rules are worth stating here rather than leaving to the enum.
+ * <b>The sex is rolled first</b> on the whole-genome modes, before a single
+ * allele: a sex-linked locus cannot be filled in before the sex is known.
+ * And <b>a scoped roll leaves everything else alone</b> - <i>Rnd dilution</i>
+ * re-rolls seven loci and does not touch the rest of the horse, epigenetics
+ * included.
+ *
+ * <h2>Locks, and the loci that change nothing you can see</h2>
+ * A <b>locked</b> row is held exactly as it stands against every randomize -
+ * its alleles, whether it is on the horse, and its epigenetics. That is the
+ * difference between "roll me another horse" and "roll me another horse with
+ * <i>this</i> tobiano".
+ *
+ * <p><b>Rnd health</b> is off by default, and turns on the genes that change
+ * nothing visible: the disorders, the stat loci, the ability genes
+ * ({@link Genes#influencesCoat} draws the line). Off, because the reason to
+ * press Randomize on a gene editor is almost always to look at a coat, and
+ * rolling a lethal into the horse you are looking at is a surprise nobody
+ * asked for.
+ *
+ * <p><b>Extension, agouti and shade are always on the horse</b> and carry no
+ * {@code x}: every horse has alleles at all three, and a list that hides them
+ * until you click implies otherwise.
  *
  * <h2>The list is a catalogue you add from</h2>
  * A gene starts <b>off</b> the horse and is drawn as a plain name;
@@ -93,16 +129,23 @@ import java.util.List;
  * <p><b>A change here belongs there in the same commit.</b> Most of it will be
  * a change in Java either way: the designer's model is
  * {@code web/HorseEditor.java}, a deliberate twin of the state and the rules on
- * this class - {@code variantPair}, {@code enforceSexLinkage},
- * {@code applyGenome} and {@code randomizeGenes} are all mirrored there under
- * the same names. Only the drawing is JavaScript
+ * this class - {@code applyGenome}, {@code stamp}, {@code randomizable},
+ * {@code topUpMagical}, {@code addRandom} and {@code enforceSexLinkage} are all
+ * mirrored there under the same names, and the rules that are <i>identical</i>
+ * rather than merely parallel have moved to {@code common/EditorRules} and
+ * {@code common/RandomizeMode} so there is only one of each. Only the drawing is JavaScript
  * ({@code wiki/horse-designer/js/gui.js}), and it copies the layout constants
  * and colours below by value, so a moved widget is a two-line change.
  *
- * <p>The two deliberate divergences: the browser has nothing to spawn, so
+ * <p>The deliberate divergences: the browser has nothing to spawn, so
  * <b>Spawn</b> and <b>Cancel</b> are replaced by <b>Wander</b> and <b>Reset
- * view</b>; and it cannot draw the cutie-mark item icons or the particle
- * emitters, which come from the game's own registries.
+ * view</b>; it cannot draw the cutie-mark item icons or the particle emitters,
+ * which come from the game's own registries; and where this screen has
+ * <b>Copy horse</b> / <b>Paste</b> the browser has <b>Export</b> /
+ * <b>Import</b>. That last pair is the same slot on the same column carrying
+ * the identical payload - {@code HorseFile}, the whole animal - to a file
+ * rather than to a clipboard, because a Minecraft screen has no file picker and
+ * a browser tab has no chat to paste into.
  *
  * <p><b>The creative gate belongs to that first divergence.</b> This screen's
  * Spawn button reads <i>Spawn (creative only)</i> and is inactive outside
@@ -148,6 +191,12 @@ public final class CustomHorseSpawnScreen extends Screen {
     private static final int RIGHT_W = 96;
     private static final int RIGHT_STEP = 22;
     private static final int PANEL = 0x90000000;
+    /** The padlock column down the left of the gene list. */
+    private static final int LOCK_W = 10;
+    /** The family filter sitting above the list. */
+    private static final int FILTER_H = 14;
+    /** The arrow half of a split button. */
+    private static final int ARROW_W = 14;
 
     /** Many-allele genes (particle, KIT, ...) get a scrollable list instead of a cycle button. */
     private static final int DD_ROW_H = 12;
@@ -155,6 +204,8 @@ public final class CustomHorseSpawnScreen extends Screen {
     private static final int DD_W = 76;
     /** The breed picker's dropdown is wider - breed names are long. */
     private static final int BREED_DD_W = 118;
+    /** So are the randomize / add-random / gene-family menus. */
+    private static final int MENU_DD_W = 118;
 
     private boolean baby = false;
     private boolean female = true;
@@ -167,14 +218,21 @@ public final class CustomHorseSpawnScreen extends Screen {
     private boolean draggingPreview = false;
     private final long screenOpenedAt = System.currentTimeMillis();
 
-    /** The open many-allele dropdown, or {@code null}. Anchored at ({@link #ddX}, {@link #ddY}). */
+    /**
+     * Which dropdown is open, if any. There are five of them now - the allele
+     * picker, the breed picker, the gene-family filter and the two split-button
+     * menus - and they are all the same widget with different contents, so they
+     * share one open-state rather than one boolean each.
+     */
+    private enum Dd { NONE, ALLELE, BREED, FAMILY, RANDOMIZE, ADD }
+
+    private Dd dd = Dd.NONE;
+    /** The row whose allele slot is being picked - {@link Dd#ALLELE} only. */
     private Row ddRow;
     private int ddSlot;
     private int ddScroll;
     private int ddX;
     private int ddY;
-    /** True while the breed picker's dropdown is open (mutually exclusive with {@link #ddRow}). */
-    private boolean breedDd;
 
     /**
      * GUI-space "dust" motes for the particle-locus preview. The real emitter
@@ -207,6 +265,25 @@ public final class CustomHorseSpawnScreen extends Screen {
     private final java.util.List<Breed> breedChoices = Breeds.all();
 
     private final List<Row> rows = new ArrayList<>();
+    /** {@link #rows} after {@link #filter} - what the list actually shows. */
+    private final List<Row> view = new ArrayList<>();
+    /** The gene family the list is narrowed to, or {@code null} for all of them. */
+    private GeneFamily filter = null;
+    private final List<GeneFamily> familyChoices = new ArrayList<>();
+
+    /** What the Randomize split button will do next time it is pressed. */
+    private RandomizeMode randomizeMode = RandomizeMode.RANDOM;
+    /** What the Add random split button will do next time it is pressed. */
+    private EditorRules.AddScope addScope = EditorRules.AddScope.ANY;
+    /**
+     * Whether a randomize may touch the loci that change nothing you can see -
+     * the disorders, the stat genes, the ability genes. Off, because the
+     * overwhelmingly common reason to press Randomize on a gene editor is to
+     * look at a coat, and rolling a lethal into the horse you are looking at is
+     * a surprise nobody asked for. {@link Genes#influencesCoat} draws the line.
+     */
+    private boolean randomizeInvisible = false;
+
     private Epigenome epigenome;
 
     /** Cached preview, rebuilt only when the genome actually changes. */
@@ -223,6 +300,8 @@ public final class CustomHorseSpawnScreen extends Screen {
     private static final class Row {
         final Gene gene;
         boolean added;
+        /** Held against every randomize - see {@link CustomHorseSpawnScreen#toggleLock}. */
+        boolean locked;
         int a;
         int b;
 
@@ -231,6 +310,10 @@ public final class CustomHorseSpawnScreen extends Screen {
             int def = indexOf(gene, gene.defaultAllele());
             this.a = def;
             this.b = def;
+            // Extension, agouti and shade are on the horse from the start:
+            // every horse has alleles at all three. EditorRules says so once,
+            // for this screen and the browser one both.
+            this.added = EditorRules.alwaysCarried(gene);
         }
     }
 
@@ -243,6 +326,8 @@ public final class CustomHorseSpawnScreen extends Screen {
             rows.add(new Row(gene));
         }
         rows.sort(Comparator.comparing(r -> r.gene.name(), String.CASE_INSENSITIVE_ORDER));
+        familyChoices.addAll(GeneFamily.occupied());
+        rebuildView();
         this.epigenome = rollEpigenome();
     }
 
@@ -261,114 +346,324 @@ public final class CustomHorseSpawnScreen extends Screen {
     }
 
     /**
-     * Open the breed picker - a scrollable dropdown of {@code "(none)"} plus
-     * every {@link Breeds#all() breed}, anchored at the Breed button.
-     * Choosing a real breed rolls a fresh wild founder of it
-     * ({@link BreedFounder#roll}) straight into the editor - genotype,
-     * epigenome and sex - and stamps that breed on whatever is spawned (you can
-     * still hand-edit any locus afterwards). {@code "(none)"} leaves the current
-     * genome alone and spawns as Feral Mixed.
+     * Open one of the five dropdowns, anchored at a widget. They differ only in
+     * what {@link #ddLabels} answers, which is what keeps the drawing, the
+     * scrolling and the click handling single copies of themselves.
      */
-    private void openBreedDropdown(int anchorX, int anchorY) {
-        breedDd = true;
-        ddRow = null;
+    private void openDropdown(Dd kind, int anchorX, int anchorY) {
+        this.dd = kind;
+        this.ddX = anchorX;
         int h = DD_VISIBLE * DD_ROW_H;
-        ddX = anchorX;
-        ddY = Math.max(LIST_TOP, Math.min(anchorY, this.height - h - 4));
-        int max = Math.max(0, breedChoices.size() + 1 - DD_VISIBLE);
-        ddScroll = Math.max(0, Math.min(breedIndex - DD_VISIBLE / 2, max));
+        this.ddY = Math.max(4, Math.min(anchorY, this.height - h - 4));
+        int max = Math.max(0, ddLabels().size() - DD_VISIBLE);
+        this.ddScroll = Math.max(0, Math.min(ddCurrent() - DD_VISIBLE / 2, max));
     }
 
-    private void pickBreedFromDropdown(double mx, double my) {
-        int h = DD_VISIBLE * DD_ROW_H;
-        if (mx >= ddX && mx < ddX + BREED_DD_W && my >= ddY && my < ddY + h) {
-            int idx = ddScroll + (int) ((my - ddY) / DD_ROW_H);
-            if (idx >= 0 && idx <= breedChoices.size()) {
-                breedIndex = idx;
-                if (idx != 0) {
-                    applyBreedPreset(breedChoices.get(idx - 1));
+    private void openAlleleDropdown(Row row, int slot, int anchorX, int anchorY) {
+        this.ddRow = row;
+        this.ddSlot = slot;
+        openDropdown(Dd.ALLELE, anchorX, anchorY);
+    }
+
+    /** What the open dropdown lists. */
+    private List<String> ddLabels() {
+        List<String> out = new ArrayList<>();
+        switch (dd) {
+            case ALLELE -> {
+                for (Allele a : ddRow.gene.alleles()) {
+                    out.add(a.token());
                 }
             }
+            case BREED -> {
+                out.add("(none)");
+                for (Breed b : breedChoices) {
+                    out.add(b.name());
+                }
+            }
+            case FAMILY -> {
+                out.add("All genes");
+                for (GeneFamily f : familyChoices) {
+                    out.add(f.label());
+                }
+            }
+            case RANDOMIZE -> {
+                for (RandomizeMode m : RandomizeMode.values()) {
+                    out.add(m.label());
+                }
+            }
+            case ADD -> {
+                for (EditorRules.AddScope a : EditorRules.AddScope.values()) {
+                    out.add(a.label());
+                }
+            }
+            default -> { }
         }
-        closeDropdown();
-        rebuildWidgets();
+        return out;
     }
 
-    private void applyBreedPreset(Breed breed) {
-        applyGenome(BreedFounder.roll(breed, new NeoRng(RandomSource.create())), true);
+    /** Which entry of the open dropdown is the current one. */
+    private int ddCurrent() {
+        return switch (dd) {
+            case ALLELE -> ddSlot == 0 ? ddRow.a : ddRow.b;
+            case BREED -> breedIndex;
+            case FAMILY -> filter == null ? 0 : familyChoices.indexOf(filter) + 1;
+            case RANDOMIZE -> randomizeMode.ordinal();
+            case ADD -> addScope.ordinal();
+            default -> 0;
+        };
+    }
+
+    private int ddWidth() {
+        return switch (dd) {
+            case ALLELE -> DD_W;
+            case BREED -> BREED_DD_W;
+            default -> MENU_DD_W;
+        };
+    }
+
+    private void closeDropdown() {
+        dd = Dd.NONE;
+        ddRow = null;
     }
 
     /**
-     * Stamp a whole rolled genome onto the editor - every locus, the epigenome,
-     * optionally the sex. A locus the roll left at its baseline drops off the
-     * list, so a mostly-plain roll does not come back as 40 rows of {@code N/N}.
+     * Any click while a dropdown is open resolves or dismisses it. Picking a
+     * <b>mode</b> also runs it: the menu is how you say what Randomize means,
+     * and having said it you wanted it done - the button face keeps the choice
+     * for next time.
      */
-    private void applyGenome(Genome g, boolean adoptSex) {
+    private void pickFromDropdown(double mx, double my) {
+        Dd kind = dd;
+        int h = DD_VISIBLE * DD_ROW_H;
+        int w = ddWidth();
+        int idx = -1;
+        if (mx >= ddX && mx < ddX + w && my >= ddY && my < ddY + h) {
+            int hit = ddScroll + (int) ((my - ddY) / DD_ROW_H);
+            if (hit >= 0 && hit < ddLabels().size()) {
+                idx = hit;
+            }
+        }
+        Row row = ddRow;
+        int slot = ddSlot;
+        closeDropdown();
+        if (idx >= 0) {
+            switch (kind) {
+                case ALLELE -> {
+                    if (slot == 0) {
+                        row.a = idx;
+                    } else {
+                        row.b = idx;
+                    }
+                    enforceSexLinkage(row);
+                }
+                case BREED -> {
+                    breedIndex = idx;
+                    if (idx != 0) {
+                        applyBreedPreset(breedChoices.get(idx - 1));
+                    }
+                }
+                case FAMILY -> {
+                    filter = idx == 0 ? null : familyChoices.get(idx - 1);
+                    scroll = 0;
+                    rebuildView();
+                }
+                case RANDOMIZE -> {
+                    randomizeMode = RandomizeMode.values()[idx];
+                    randomize();
+                }
+                case ADD -> {
+                    addScope = EditorRules.AddScope.values()[idx];
+                    addRandom();
+                }
+                default -> { }
+            }
+        }
+        rebuildWidgets();
+    }
+
+    /**
+     * Roll a fresh wild founder of a breed straight into the editor - genotype,
+     * epigenome and sex - and stamp that breed on whatever is spawned. Picking a
+     * breed by hand is "here is a different horse", so it replaces the whole one,
+     * locks and all; the {@code Rnd breed} mode is the one that respects them.
+     */
+    private void applyBreedPreset(Breed breed) {
+        applyGenome(BreedFounder.roll(breed, new NeoRng(RandomSource.create())), true, null);
+    }
+
+    /**
+     * Stamp a whole rolled genome onto the editor - the epigenome, optionally
+     * the sex, and every locus {@code mode} is <b>allowed</b> to touch. A locus
+     * the roll left at its baseline drops off the list, so a mostly-plain roll
+     * does not come back as forty rows of {@code N/N}.
+     *
+     * <p>{@code mode} is {@code null} for the stamps that are not a randomize -
+     * a breed picked by hand, a horse pasted in - which replace the horse
+     * outright.
+     */
+    private void applyGenome(Genome g, boolean adoptSex, RandomizeMode mode) {
         Genotype gt = g.genotype();
         if (adoptSex) {
             female = gt.sex() == Sex.FEMALE;
         }
+        Epigenome next = g.epigenome();
         for (Row row : rows) {
-            AllelePair pair = gt.pair(row.gene);
-            int def = indexOf(row.gene, row.gene.defaultAllele());
-            row.a = indexOf(row.gene, pair.first());
-            row.b = indexOf(row.gene, pair.second());
-            row.added = !(row.a == def && row.b == def);
+            if (mode != null && !(mode.covers(row.gene) && randomizable(row))) {
+                // untouched - and its epigenetics stay untouched with it
+                if (Epigenome.carries(row.gene)) {
+                    next = next.with(row.gene.key(), epigenome.copies(row.gene));
+                }
+                continue;
+            }
+            stamp(row, gt);
         }
-        epigenome = g.epigenome();
+        epigenome = next;
         previewKey = "";
     }
 
     /**
-     * <b>Randomize genes.</b> With a breed selected this is a fresh
-     * {@link BreedFounder#roll} of it (so the alleles stay inside that breed's
-     * pools and stat targets); with "(none)" it is an unconstrained
-     * {@link Genome#random}. The chosen sex is kept either way.
+     * One row from a genotype. A locus at its baseline is not marked added -
+     * that is what stops a paste coming back as forty rows of {@code N/N} -
+     * unless it is one of the three every horse visibly carries.
      */
-    private void randomizeGenes() {
+    private void stamp(Row row, Genotype gt) {
+        AllelePair pair = gt.pair(row.gene);
+        int def = indexOf(row.gene, row.gene.defaultAllele());
+        row.a = indexOf(row.gene, pair.first());
+        row.b = indexOf(row.gene, pair.second());
+        row.added = !(row.a == def && row.b == def) || EditorRules.alwaysCarried(row.gene);
+    }
+
+    /** Is this row's gene something a randomize is allowed to move? */
+    private boolean randomizable(Row row) {
+        return !row.locked && (randomizeInvisible || Genes.influencesCoat(row.gene));
+    }
+
+    /**
+     * <b>Randomize, in whichever of {@link RandomizeMode}'s senses is selected.</b>
+     *
+     * <p>The order is load-bearing, and is the same on the browser twin:
+     * <ol>
+     *   <li><b>the sex first</b>, for the whole-genome modes - a sex-linked
+     *       locus cannot be filled in before the sex is known, and rolling it
+     *       afterwards means snapping half of what was rolled straight back;</li>
+     *   <li>the breed, if the mode picks one, because a breed constrains every
+     *       locus after it;</li>
+     *   <li>the alleles;</li>
+     *   <li>the magical floor, for the {@code +N} modes.</li>
+     * </ol>
+     *
+     * <p>A locked row, a row outside the mode's scope, and - unless
+     * {@link #randomizeInvisible} - a row that changes nothing you can see are
+     * all left exactly as they were, epigenetics included.
+     */
+    private void randomize() {
         NeoRng rng = new NeoRng(RandomSource.create());
-        Genome g = breedIndex == 0
-                ? Genome.random(rng)
-                : BreedFounder.roll(breedChoices.get(breedIndex - 1), rng,
-                        female ? Sex.FEMALE : Sex.MALE);
-        applyGenome(g, false);
-        closeDropdown();
-        rebuildWidgets();
-    }
-
-    private void openDropdown(Row row, int slot, int anchorX, int anchorY) {
-        breedDd = false;
-        ddRow = row;
-        ddSlot = slot;
-        ddX = anchorX;
-        int h = DD_VISIBLE * DD_ROW_H;
-        ddY = Math.max(LIST_TOP, Math.min(anchorY, this.height - h - 4));
-        int cur = slot == 0 ? row.a : row.b;
-        int max = Math.max(0, row.gene.alleles().size() - DD_VISIBLE);
-        ddScroll = Math.max(0, Math.min(cur - DD_VISIBLE / 2, max));
-    }
-
-    private void closeDropdown() {
-        ddRow = null;
-        breedDd = false;
-    }
-
-    private void pickFromDropdown(double mx, double my) {
-        List<Allele> as = ddRow.gene.alleles();
-        int h = DD_VISIBLE * DD_ROW_H;
-        if (mx >= ddX && mx < ddX + DD_W && my >= ddY && my < ddY + h) {
-            int idx = ddScroll + (int) ((my - ddY) / DD_ROW_H);
-            if (idx >= 0 && idx < as.size()) {
-                if (ddSlot == 0) {
-                    ddRow.a = idx;
-                } else {
-                    ddRow.b = idx;
-                }
-                enforceSexLinkage(ddRow);
-            }
+        RandomizeMode mode = randomizeMode;
+        if (mode == RandomizeMode.EPIGENETICS) {
+            rerollEpigenome(rng);
+            closeDropdown();
+            rebuildWidgets();
+            return;
+        }
+        if (mode.rollsSex()) {
+            setSex(rng.nextBoolean());
+        }
+        if (mode == RandomizeMode.BREED && !breedChoices.isEmpty()) {
+            breedIndex = 1 + rng.nextInt(breedChoices.size());
+        }
+        Sex sex = female ? Sex.FEMALE : Sex.MALE;
+        Genome g;
+        if (mode == RandomizeMode.TRUE_RANDOM) {
+            g = new Genome(EditorRules.trueRandom(rng, sex), Epigenome.random(rng));
+        } else if (breedIndex == 0) {
+            g = Genome.random(rng);
+        } else {
+            g = BreedFounder.roll(breedChoices.get(breedIndex - 1), rng, sex);
+        }
+        applyGenome(g, false, mode);
+        if (mode.magicalFloor() > 0) {
+            topUpMagical(mode.magicalFloor(), rng);
         }
         closeDropdown();
         rebuildWidgets();
+    }
+
+    /**
+     * Add magical genes, at the pair that shows, until the horse shows at least
+     * {@code want} of them. Genes already showing count, so <i>+1 magical</i> on
+     * a horse that rolled a galaxy coat adds nothing.
+     */
+    private void topUpMagical(int want, NeoRng rng) {
+        List<Row> candidates = new ArrayList<>();
+        int showing = 0;
+        Genotype gt = genotype();
+        for (Row row : rows) {
+            if (row.gene.isNatural()) {
+                continue;
+            }
+            if (EditorRules.showingMagical(gt, row.gene)) {
+                showing++;
+            } else if (randomizable(row)) {
+                candidates.add(row);
+            }
+        }
+        while (showing < want && !candidates.isEmpty()) {
+            add(candidates.remove(rng.nextInt(candidates.size())));
+            showing++;
+        }
+    }
+
+    /**
+     * <b>Add random.</b> One gene the horse is not already carrying, put on at
+     * the pair that shows - the fastest way to meet a gene you did not know
+     * existed. A no-op when everything in scope is already on, or locked.
+     */
+    private void addRandom() {
+        NeoRng rng = new NeoRng(RandomSource.create());
+        List<Row> candidates = new ArrayList<>();
+        for (Row row : rows) {
+            if (!row.added && addScope.covers(row.gene) && randomizable(row)) {
+                candidates.add(row);
+            }
+        }
+        if (!candidates.isEmpty()) {
+            add(candidates.get(rng.nextInt(candidates.size())));
+        }
+        closeDropdown();
+        rebuildWidgets();
+    }
+
+    /**
+     * A fresh epigenome, with every locked locus keeping the numbers it had. The
+     * gene is what a lock is on, and its epigenetics are part of that gene on
+     * this horse - a lock that let the dapple pattern re-roll underneath the
+     * allele would not be a lock.
+     */
+    private void rerollEpigenome(NeoRng rng) {
+        Epigenome fresh = Epigenome.random(rng);
+        for (Row row : rows) {
+            if (!randomizable(row) && Epigenome.carries(row.gene)) {
+                fresh = fresh.with(row.gene.key(), epigenome.copies(row.gene));
+            }
+        }
+        epigenome = fresh;
+        previewKey = "";
+    }
+
+    private void toggleLock(Row row) {
+        row.locked = !row.locked;
+    }
+
+    /** {@link #rows} narrowed by {@link #filter}. Rebuilt whenever either moves. */
+    private void rebuildView() {
+        view.clear();
+        for (Row row : rows) {
+            if (filter == null || GeneFamily.of(row.gene) == filter) {
+                view.add(row);
+            }
+        }
+        scroll = Math.max(0, Math.min(scroll, maxScroll()));
     }
 
     private boolean inPreview(double mx, double my) {
@@ -376,61 +671,10 @@ public final class CustomHorseSpawnScreen extends Screen {
                 && my >= LIST_TOP && my <= this.height - 30;
     }
 
-    /**
-     * What a freshly added gene lands on: <b>a combination that actually
-     * shows</b> - you added the row to see the gene, not to leave it silent.
-     *
-     * <p>Candidates are tried in order of how obvious they are - each variant
-     * allele homozygous, then two <i>different</i> variant alleles, then one
-     * variant against the baseline - and the first that both
-     * {@link Gene#canOccur} and is not a wild type wins. A pair the gene rules
-     * out is skipped (KIT's four nonviable {@code W} homozygotes, MET's
-     * {@code met/met}); if nothing in the list expresses, the first carryable
-     * candidate is used anyway, and if there is no variant at all the row stays
-     * on the baseline.
-     *
-     * <p>The wild-type test is what the two-different-alleles rung is for.
-     * Magic sectoral heterochromia is the gene that needs it: every one of its
-     * homozygotes is silent by design, so the old "first variant homozygote"
-     * rule would have added the row and shown nothing.
-     */
-    private static AllelePair variantPair(Gene gene) {
-        Allele base = gene.defaultAllele();
-        List<Allele> alleles = gene.alleles();
-        List<AllelePair> candidates = new ArrayList<>();
-        for (Allele a : alleles) {
-            if (!a.equals(base)) {
-                candidates.add(new AllelePair(a, a));
-            }
-        }
-        for (int i = 0; i < alleles.size(); i++) {
-            for (int j = i + 1; j < alleles.size(); j++) {
-                Allele a = alleles.get(i);
-                Allele b = alleles.get(j);
-                if (!a.equals(base) && !b.equals(base)) {
-                    candidates.add(new AllelePair(a, b));
-                }
-            }
-        }
-        for (Allele a : alleles) {
-            if (!a.equals(base)) {
-                candidates.add(new AllelePair(a, base));
-            }
-        }
-        AllelePair carryable = null;
-        for (AllelePair pair : candidates) {
-            if (!gene.canOccur(pair)) {
-                continue;
-            }
-            if (carryable == null) {
-                carryable = pair;
-            }
-            if (!gene.expressionOf(pair).wildType()) {
-                return pair;
-            }
-        }
-        return carryable != null ? carryable : new AllelePair(base, base);
-    }
+    // What a freshly added gene lands on - the first combination that actually
+    // shows something - is EditorRules.variantPair in common/. It was written
+    // out here and in the browser twin's HorseEditor in the same shape under
+    // the same name; one copy is better than two kept in step by hand.
 
     /**
      * Keep a sex-linked row honest against the current {@link #female} flag -
@@ -516,22 +760,45 @@ public final class CustomHorseSpawnScreen extends Screen {
     }
 
     private int maxScroll() {
-        return Math.max(0, rows.size() - visibleRows());
+        return Math.max(0, view.size() - visibleRows());
+    }
+
+    /** Where a gene's name starts: past the padlock column. */
+    private int nameX() {
+        return LIST_X + LOCK_W;
     }
 
     /** Width available for a gene name: the whole row, less the widgets an added row carries. */
     private int nameWidth(boolean added) {
-        return added ? listWidth() - 2 * ALLELE_W - REMOVE_W - 10 : listWidth() - 8;
+        return added ? listWidth() - LOCK_W - 2 * ALLELE_W - REMOVE_W - 10
+                : listWidth() - LOCK_W - 8;
     }
 
-    /** The row under {@code (mouseX, mouseY)}, or {@code -1}. */
+    /** The <b>visible</b> row index under {@code (mouseX, mouseY)}, or {@code -1}. */
     private int rowAt(double mouseX, double mouseY) {
         if (mouseX < LIST_X - 4 || mouseX > LIST_X + listWidth()
                 || mouseY < LIST_TOP || mouseY >= LIST_TOP + visibleRows() * ROW_H) {
             return -1;
         }
         int index = scroll + (int) ((mouseY - LIST_TOP) / ROW_H);
-        return index < rows.size() ? index : -1;
+        return index < view.size() ? index : -1;
+    }
+
+    /** Is this point on a row's padlock rather than on the row itself? */
+    private boolean inLockColumn(double mouseX) {
+        return mouseX >= LIST_X - 4 && mouseX < LIST_X + LOCK_W;
+    }
+
+    /** Cut a label down until it fits, the way the breed button always has. */
+    private String truncate(String text, int maxW) {
+        if (this.font.width(text) <= maxW) {
+            return text;
+        }
+        StringBuilder sb = new StringBuilder(text);
+        while (sb.length() > 1 && this.font.width(sb.toString() + "\u2026") > maxW) {
+            sb.setLength(sb.length() - 1);
+        }
+        return sb + "\u2026";
     }
 
     // ------------------------------------------------------------------
@@ -540,16 +807,31 @@ public final class CustomHorseSpawnScreen extends Screen {
 
     @Override
     protected void init() {
-        scroll = Math.max(0, Math.min(scroll, maxScroll()));
+        rebuildView();
 
         int listW = listWidth();
         int aX = LIST_X + listW - 2 * ALLELE_W - REMOVE_W - 6;
         int bX = LIST_X + listW - ALLELE_W - REMOVE_W - 4;
         int xX = LIST_X + listW - REMOVE_W;
 
+        // The gene-family filter, above the list. A hundred and seventy loci in
+        // one alphabetical column is a list you scroll rather than read; this is
+        // how you ask for the dilutions, or for the genes made of strokes.
+        final int filterY = LIST_TOP - FILTER_H - 2;
+        addRenderableWidget(Button.builder(
+                        Component.literal(truncate(
+                                (filter == null ? "All genes" : filter.label()) + " \u25be",
+                                listW - 4)),
+                        b -> openDropdown(Dd.FAMILY, LIST_X - 4, filterY + FILTER_H))
+                .bounds(LIST_X - 4, filterY, listW + 4, FILTER_H).build());
+
         int visible = visibleRows();
-        for (int i = scroll; i < rows.size() && i < scroll + visible; i++) {
-            final Row row = rows.get(i);
+        for (int i = scroll; i < view.size() && i < scroll + visible; i++) {
+            final Row row = view.get(i);
+            // Every row carries a padlock, added or not. It is drawn rather than
+            // labelled (the font has no lock glyph in the plane it can reach),
+            // so it takes its click in mouseClicked instead of being a Button -
+            // see inLockColumn.
             if (!row.added) {
                 continue; // a gene not on the horse is a plain name; the row itself is the button
             }
@@ -560,7 +842,7 @@ public final class CustomHorseSpawnScreen extends Screen {
                             Component.literal(as.get(row.a).token()),
                             b -> {
                                 if (dropdown) {
-                                    openDropdown(row, 0, aX, ry);
+                                    openAlleleDropdown(row, 0, aX, ry);
                                 } else {
                                     row.a = (row.a + 1) % as.size();
                                     enforceSexLinkage(row);
@@ -572,7 +854,7 @@ public final class CustomHorseSpawnScreen extends Screen {
                             Component.literal(as.get(row.b).token()),
                             b -> {
                                 if (dropdown) {
-                                    openDropdown(row, 1, bX, ry);
+                                    openAlleleDropdown(row, 1, bX, ry);
                                 } else {
                                     row.b = (row.b + 1) % as.size();
                                     enforceSexLinkage(row);
@@ -580,13 +862,18 @@ public final class CustomHorseSpawnScreen extends Screen {
                                 }
                             })
                     .bounds(bX, ry, ALLELE_W, ROW_H - 2).build());
-            addRenderableWidget(Button.builder(
-                            Component.literal("x"),
-                            b -> {
-                                remove(row);
-                                rebuildWidgets();
-                            })
-                    .bounds(xX, ry, REMOVE_W, ROW_H - 2).build());
+            // Extension, agouti and shade carry no x - every horse has alleles
+            // at all three, so there is no state in which taking one off is
+            // honest. EditorRules.alwaysCarried, and the browser twin agrees.
+            if (!EditorRules.alwaysCarried(row.gene)) {
+                addRenderableWidget(Button.builder(
+                                Component.literal("x"),
+                                b -> {
+                                    remove(row);
+                                    rebuildWidgets();
+                                })
+                        .bounds(xX, ry, REMOVE_W, ROW_H - 2).build());
+            }
         }
 
         int rx = rightX();
@@ -602,12 +889,7 @@ public final class CustomHorseSpawnScreen extends Screen {
         addRenderableWidget(Button.builder(
                         Component.literal(female ? "Sex: Mare" : "Sex: Stallion"),
                         b -> {
-                            female = !female;
-                            for (Row row : rows) {
-                                if (row.added) {
-                                    enforceSexLinkage(row);
-                                }
-                            }
+                            setSex(!female);
                             rebuildWidgets();
                         })
                 .bounds(rx, ry, RIGHT_W, 20).build());
@@ -620,26 +902,46 @@ public final class CustomHorseSpawnScreen extends Screen {
         final int breedBtnY = ry;
         addRenderableWidget(Button.builder(
                         Component.literal("Breed: " + breedName + " ▾"),
-                        b -> openBreedDropdown(breedBtnX, breedBtnY))
+                        b -> openDropdown(Dd.BREED, breedBtnX, breedBtnY))
                 .bounds(rx, ry, RIGHT_W, 20).build());
         ry += RIGHT_STEP;
+        // Two split buttons. The face does the thing; the arrow picks which
+        // thing it is, and the choice sticks - the label always says what will
+        // happen next.
+        final int randY = ry;
         addRenderableWidget(Button.builder(
-                        Component.literal("Randomize"),
-                        b -> randomizeGenes())
-                .bounds(rx, ry, RIGHT_W, 20).build());
+                        Component.literal(randomizeMode.shortLabel()), b -> randomize())
+                .tooltip(net.minecraft.client.gui.components.Tooltip.create(
+                        Component.literal(randomizeMode.label()
+                                + ". The arrow beside it changes what this button does.")))
+                .bounds(rx, ry, RIGHT_W - ARROW_W, 20).build());
+        addRenderableWidget(Button.builder(Component.literal("▾"),
+                        b -> openDropdown(Dd.RANDOMIZE, rx, randY + 20))
+                .bounds(rx + RIGHT_W - ARROW_W, ry, ARROW_W, 20).build());
+        ry += RIGHT_STEP;
+        final int addY = ry;
+        addRenderableWidget(Button.builder(
+                        Component.literal(addScope.shortLabel()), b -> addRandom())
+                .tooltip(net.minecraft.client.gui.components.Tooltip.create(
+                        Component.literal("Put one gene the horse is not already carrying onto it, "
+                                + "at a combination that shows. The arrow narrows it to the "
+                                + "naturals or to the magic.")))
+                .bounds(rx, ry, RIGHT_W - ARROW_W, 20).build());
+        addRenderableWidget(Button.builder(Component.literal("▾"),
+                        b -> openDropdown(Dd.ADD, rx, addY + 20))
+                .bounds(rx + RIGHT_W - ARROW_W, ry, ARROW_W, 20).build());
         ry += RIGHT_STEP;
         addRenderableWidget(Button.builder(
-                        Component.literal("Reroll epi."),
+                        Component.literal(randomizeInvisible ? "Rnd health: on" : "Rnd health: off"),
                         b -> {
-                            epigenome = rollEpigenome();
+                            randomizeInvisible = !randomizeInvisible;
                             rebuildWidgets();
                         })
-                .bounds(rx, ry, RIGHT_W, 20).build());
-        ry += RIGHT_STEP;
-        addRenderableWidget(Button.builder(Component.literal("Copy code"), b -> copyCode())
-                .bounds(rx, ry, RIGHT_W, 20).build());
-        ry += RIGHT_STEP;
-        addRenderableWidget(Button.builder(Component.literal("Paste code"), b -> pasteCode())
+                .tooltip(net.minecraft.client.gui.components.Tooltip.create(
+                        Component.literal("Off: Randomize leaves alone every gene that changes "
+                                + "nothing you can see - the disorders, the stat loci, the ability "
+                                + "genes - so rolling a coat cannot quietly roll a lethal. On: it "
+                                + "rolls those too.")))
                 .bounds(rx, ry, RIGHT_W, 20).build());
         ry += RIGHT_STEP;
         addRenderableWidget(Button.builder(Component.literal("Clear genes"), b -> reset())
@@ -662,8 +964,26 @@ public final class CustomHorseSpawnScreen extends Screen {
                 .build();
         spawnButton.active = creative;
         addRenderableWidget(spawnButton);
+        // The whole horse, to and from the clipboard - the same HorseFile the
+        // browser designer's Export / Import writes to a file, in the same slot
+        // on the same column. They replaced Copy code / Paste code, which moved
+        // the alleles alone and so pasted back a different horse: fresh
+        // epigenetics, no name, no breed.
+        int halfW = (RIGHT_W - 4) / 2;
+        addRenderableWidget(Button.builder(Component.literal("Copy horse"), b -> copyHorse())
+                .tooltip(net.minecraft.client.gui.components.Tooltip.create(
+                        Component.literal("Put this whole horse on the clipboard - alleles, "
+                                + "epigenetics, name, sex, age and breed. The horse designer's "
+                                + "Import reads the same text.")))
+                .bounds(rx, this.height - 70, halfW, 20).build());
+        addRenderableWidget(Button.builder(Component.literal("Paste"), b -> pasteHorse())
+                .tooltip(net.minecraft.client.gui.components.Tooltip.create(
+                        Component.literal("Read a horse off the clipboard. Tolerant: a gene this "
+                                + "build does not have is dropped, an epigenome that will not "
+                                + "parse is re-rolled, an unknown breed loses its label.")))
+                .bounds(rx + halfW + 4, this.height - 70, halfW, 20).build());
         Button eggButton = Button.builder(Component.literal("Make egg"), b -> makeEgg())
-                .bounds(rx, this.height - 70, RIGHT_W, 20)
+                .bounds(rx, this.height - 92, RIGHT_W, 20)
                 .tooltip(net.minecraft.client.gui.components.Tooltip.create(
                         Component.literal(creative
                                 ? "Put this exact horse into a preset spawn egg instead of "
@@ -685,20 +1005,23 @@ public final class CustomHorseSpawnScreen extends Screen {
      */
     @Override
     public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
-        if (breedDd) {
-            pickBreedFromDropdown(event.x(), event.y()); // any click resolves or dismisses it
+        if (dd != Dd.NONE) {
+            pickFromDropdown(event.x(), event.y()); // any click resolves or dismisses it
             return true;
         }
-        if (ddRow != null) {
-            pickFromDropdown(event.x(), event.y()); // any click resolves or dismisses it
+        // The padlock column first: it overlaps no widget, and on an added row
+        // the rest of the line belongs to the allele buttons.
+        int index = rowAt(event.x(), event.y());
+        if (index >= 0 && inLockColumn(event.x())) {
+            toggleLock(view.get(index));
+            rebuildWidgets();
             return true;
         }
         if (super.mouseClicked(event, doubleClick)) {
             return true;
         }
-        int index = rowAt(event.x(), event.y());
-        if (index >= 0 && !rows.get(index).added) {
-            add(rows.get(index));
+        if (index >= 0 && !view.get(index).added) {
+            add(view.get(index));
             rebuildWidgets();
             return true;
         }
@@ -730,13 +1053,8 @@ public final class CustomHorseSpawnScreen extends Screen {
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
-        if (breedDd) {
-            int max = Math.max(0, breedChoices.size() + 1 - DD_VISIBLE);
-            ddScroll = Math.max(0, Math.min(max, ddScroll - (int) Math.signum(scrollY)));
-            return true;
-        }
-        if (ddRow != null) {
-            int max = Math.max(0, ddRow.gene.alleles().size() - DD_VISIBLE);
+        if (dd != Dd.NONE) {
+            int max = Math.max(0, ddLabels().size() - DD_VISIBLE);
             ddScroll = Math.max(0, Math.min(max, ddScroll - (int) Math.signum(scrollY)));
             return true;
         }
@@ -757,17 +1075,31 @@ public final class CustomHorseSpawnScreen extends Screen {
     // ------------------------------------------------------------------
 
     private void add(Row row) {
-        AllelePair pair = variantPair(row.gene);
+        AllelePair pair = EditorRules.variantPair(row.gene);
         row.a = indexOf(row.gene, pair.first());
         row.b = indexOf(row.gene, pair.second());
         row.added = true;
         enforceSexLinkage(row); // variantPair doesn't know the screen's sex
     }
 
+    /** A no-op on the three loci every horse visibly carries - they have no x. */
     private void remove(Row row) {
+        if (EditorRules.alwaysCarried(row.gene)) {
+            return;
+        }
         row.added = false;
         row.a = indexOf(row.gene, row.gene.defaultAllele());
         row.b = row.a;
+    }
+
+    /** The Sex button, and the sex a whole-genome randomize rolls. */
+    private void setSex(boolean isFemale) {
+        female = isFemale;
+        for (Row row : rows) {
+            if (row.added) {
+                enforceSexLinkage(row);
+            }
+        }
     }
 
     /**
@@ -786,46 +1118,106 @@ public final class CustomHorseSpawnScreen extends Screen {
         return Genotype.of(pairs).withSex(female ? Sex.FEMALE : Sex.MALE);
     }
 
+    /** Back to a plain horse - but a locked row is kept, which is the point of a lock. */
     private void reset() {
         for (Row row : rows) {
-            remove(row);
+            if (row.locked) {
+                continue;
+            }
+            row.added = EditorRules.alwaysCarried(row.gene);
+            row.a = indexOf(row.gene, row.gene.defaultAllele());
+            row.b = row.a;
         }
-        epigenome = rollEpigenome();
+        breedIndex = 0;
+        rerollEpigenome(new NeoRng(RandomSource.create()));
         rebuildWidgets();
     }
 
     /**
-     * Copy the genotype code out / paste one back in - the round trip
-     * {@code wiki/roadmap.html} section 9 asks for, and what turns "look at
-     * this horse" into something reproducible. The epigenome is deliberately
-     * not in the string: it has its own re-roll button, and a code you can
-     * paste into a chat message wants to stay one line.
+     * <b>The whole horse, to and from the clipboard.</b> {@link HorseFile} - the
+     * alleles, the epigenetics riding on each copy, the name, the sex, the age
+     * and the breed label - which is the same format the browser designer's
+     * Export writes to a file, so a horse crosses between them intact.
+     *
+     * <p>It replaced Copy code / Paste code, which moved a genotype code and
+     * nothing else. Paste one of those back and you got a different horse: same
+     * alleles, fresh epigenetics, no name, no breed. On a mod whose premise is
+     * that one genotype makes many horses, that is a lossy copy pretending to be
+     * an exact one.
      */
-    private void copyCode() {
-        Minecraft.getInstance().keyboardHandler.setClipboard(genotype().toCode());
+    private void copyHorse() {
+        String breedName = breedIndex == 0 ? "" : breedChoices.get(breedIndex - 1).name();
+        Minecraft.getInstance().keyboardHandler.setClipboard(HorseFile.write(
+                new HorseFile("", "", female, baby, breedName,
+                        genotype().toCode(), epigenome.toCode()),
+                "custom horse spawn egg"));
+        say("Copied this horse to the clipboard.");
     }
 
-    private void pasteCode() {
-        String code = Minecraft.getInstance().keyboardHandler.getClipboard();
-        Genotype parsed;
+    /**
+     * Read one back. Deliberately tolerant - a gene this build does not have is
+     * dropped, an epigenome that will not parse is re-rolled, an unknown breed
+     * loses only its label - and it says which of those happened, because a
+     * silent partial load is how you end up debugging a coat that was never the
+     * one you copied.
+     */
+    private void pasteHorse() {
+        String text = Minecraft.getInstance().keyboardHandler.getClipboard();
+        HorseFile horse;
         try {
-            parsed = Genotype.parse(code.trim());
+            horse = HorseFile.read(text);
         } catch (RuntimeException e) {
-            return; // a clipboard full of something else is not worth a dialog
+            say("That clipboard is not a horse: " + e.getMessage());
+            return;
         }
+        Genotype parsed = Genotype.parse(horse.genotype());
+        female = horse.female();
+        baby = horse.baby();
         for (Row row : rows) {
-            AllelePair pair = parsed.pair(row.gene);
-            row.a = indexOf(row.gene, pair.first());
-            row.b = indexOf(row.gene, pair.second());
-            // a locus the pasted horse leaves at its baseline is not "added" -
-            // it would otherwise paste back as 30-odd rows of N/N.
-            row.added = !pair.homozygousFor(row.gene.defaultAllele());
+            stamp(row, parsed);
+            enforceSexLinkage(row); // a hand-edited or stale file may not be sex-consistent
         }
-        female = parsed.sex() == Sex.FEMALE;
-        for (Row row : rows) {
-            enforceSexLinkage(row); // a hand-edited or stale clipboard code may not be sex-consistent
+        breedIndex = 0;
+        for (int i = 0; i < breedChoices.size(); i++) {
+            if (breedChoices.get(i).name().equalsIgnoreCase(horse.breed())) {
+                breedIndex = i + 1;
+                break;
+            }
+        }
+        boolean droppedEpigenome = true;
+        if (!horse.epigenome().isEmpty()) {
+            try {
+                epigenome = Epigenome.parse(horse.epigenome());
+                droppedEpigenome = false;
+            } catch (RuntimeException ignored) {
+                epigenome = rollEpigenome();
+            }
+        } else {
+            epigenome = rollEpigenome();
+        }
+        previewKey = "";
+        if (droppedEpigenome) {
+            say("Pasted the horse, but its epigenome did not parse - "
+                    + "this one has a fresh set, so the coat will differ wherever a gene "
+                    + "varies per horse.");
+        }
+        if (!horse.breed().isEmpty() && breedIndex == 0) {
+            say("Pasted the horse, but there is no breed called \""
+                    + horse.breed() + "\" in this build - the label was dropped.");
         }
         rebuildWidgets();
+    }
+
+    /**
+     * A line in the client's own chat. The paste is tolerant by design, so it
+     * has things to say that a screen this full has nowhere to print - and a
+     * partial load that says nothing is how you end up debugging a coat that was
+     * never the one you copied.
+     */
+    private static void say(String message) {
+        if (Minecraft.getInstance().player != null) {
+            Minecraft.getInstance().player.sendSystemMessage(Component.literal(message));
+        }
     }
 
     private void spawn() {
@@ -1099,11 +1491,14 @@ public final class CustomHorseSpawnScreen extends Screen {
         int listW = listWidth();
         Genotype genotype = genotype();
         int visible = visibleRows();
-        int shown = Math.min(rows.size(), scroll + visible) - scroll;
+        int shown = Math.min(view.size(), scroll + visible) - scroll;
         int hovered = rowAt(mouseX, mouseY);
+        int nx = nameX();
 
-        // header band - nothing lives above the list or the right column
-        g.fill(0, 6, this.width, 32, PANEL);
+        // Header band. It stops at 24 rather than 32: the backdrop is painted
+        // after the widgets (see the drawing note on the class), and the gene
+        // family filter sits at 24, so a taller band would paint over it.
+        g.fill(0, 6, this.width, 24, PANEL);
         g.text(this.font, this.title, this.width / 2 - this.font.width(this.title) / 2, 14, 0xFFFFFFFF);
 
         // the name column only - stop short of an added row's allele buttons
@@ -1111,32 +1506,33 @@ public final class CustomHorseSpawnScreen extends Screen {
         // grass, on the browser twin) and a half-transparent backing made them
         // hard to read. Keep this and wiki/horse-designer/js/gui.js NAME_BG the
         // same value.
-        g.fill(LIST_X - 4, LIST_TOP - 14, LIST_X + nameWidth(true) + 2,
+        g.fill(LIST_X - 4, LIST_TOP - 2, LIST_X + nameWidth(true) + LOCK_W + 2,
                 LIST_TOP + shown * ROW_H, 0xE0000000);
-        Component header = Component.literal(maxScroll() > 0
-                ? "Genes - click to add  (scroll)"
-                : "Genes - click to add");
-        g.text(this.font, header, LIST_X, LIST_TOP - 12, 0xFF9098A8);
 
-        for (int i = scroll; i < rows.size() && i < scroll + visible; i++) {
-            Row row = rows.get(i);
+        for (int i = scroll; i < view.size() && i < scroll + visible; i++) {
+            Row row = view.get(i);
             int ry = LIST_TOP + (i - scroll) * ROW_H;
+            boolean overLock = i == hovered && inLockColumn(mouseX);
+            if (overLock) {
+                g.fill(LIST_X - 4, ry, LIST_X + LOCK_W, ry + ROW_H - 2, 0x33FFFFFF);
+            }
+            drawPadlock(g, LIST_X - 2, ry, row.locked);
             if (!row.added) {
                 // off the horse: a plain name, the whole row clickable
-                if (i == hovered) {
-                    g.fill(LIST_X - 4, ry, LIST_X + listW, ry + ROW_H - 2, 0x33FFFFFF);
+                if (i == hovered && !overLock) {
+                    g.fill(nx - 2, ry, LIST_X + listW, ry + ROW_H - 2, 0x33FFFFFF);
                 }
-                drawFitted(g, row.gene.name(), LIST_X, ry + 6, nameWidth(false),
+                drawFitted(g, row.gene.name(), nx, ry + 6, nameWidth(false),
                         i == hovered ? 0xFFFFFFFF : 0xFF9AA0B0);
                 continue;
             }
             // on the horse: name, what it expresses, and its two allele buttons
             Expression e = genotype.expressionOf(row.gene);
             boolean expressing = !e.wildType();
-            g.fill(LIST_X - 4, ry, LIST_X + nameWidth(true) + 2, ry + ROW_H - 2, 0x33202838);
-            drawFitted(g, row.gene.name(), LIST_X, ry + 1, nameWidth(true),
+            g.fill(nx - 2, ry, nx + nameWidth(true) + 2, ry + ROW_H - 2, 0x33202838);
+            drawFitted(g, row.gene.name(), nx, ry + 1, nameWidth(true),
                     expressing ? 0xFF9BE08A : 0xFFC8C8C8);
-            drawFitted(g, expressing ? e.name() : "no effect", LIST_X, ry + 10, nameWidth(true),
+            drawFitted(g, expressing ? e.name() : "no effect", nx, ry + 10, nameWidth(true),
                     0xFF787888);
         }
 
@@ -1148,72 +1544,66 @@ public final class CustomHorseSpawnScreen extends Screen {
         drawFitted(g, "epigenetics #" + Long.toHexString(epigenome.visibleFingerprint(genotype)),
                 LIST_X, this.height - 26, listW - 4, 0xFF8890A8);
 
-        if (ddRow != null) {
+        if (dd != Dd.NONE) {
             drawDropdown(g, mouseX, mouseY);
-        } else if (breedDd) {
-            drawBreedDropdown(g, mouseX, mouseY);
         }
     }
 
-    /** The open breed picker, drawn last so it sits over the widgets it covers. */
-    private void drawBreedDropdown(GuiGraphicsExtractor g, int mouseX, int mouseY) {
-        int count = breedChoices.size() + 1;
-        int h = DD_VISIBLE * DD_ROW_H;
-        g.fill(ddX - 1, ddY - 1, ddX + BREED_DD_W + 1, ddY + h + 1, 0xF00E0E16);
-        g.fill(ddX - 1, ddY - 1, ddX + BREED_DD_W + 1, ddY, 0xFF5A6478);
-        for (int i = 0; i < DD_VISIBLE; i++) {
-            int idx = ddScroll + i;
-            if (idx >= count) {
-                break;
-            }
-            int ry = ddY + i * DD_ROW_H;
-            boolean hov = mouseX >= ddX && mouseX < ddX + BREED_DD_W && mouseY >= ry && mouseY < ry + DD_ROW_H;
-            if (idx == breedIndex) {
-                g.fill(ddX, ry, ddX + BREED_DD_W, ry + DD_ROW_H, 0x557088FF);
-            } else if (hov) {
-                g.fill(ddX, ry, ddX + BREED_DD_W, ry + DD_ROW_H, 0x33FFFFFF);
-            }
-            String label = idx == 0 ? "(none)" : breedChoices.get(idx - 1).name();
-            drawFitted(g, label, ddX + 3, ry + 2, BREED_DD_W - 10,
-                    idx == breedIndex ? 0xFFFFFFFF : 0xFFC0C4D0);
+    /**
+     * The padlock at the head of a row - drawn, not typed. Minecraft's font has
+     * no lock glyph in the plane it can reach, and the mark has to be the same
+     * on both screens, so both draw the same handful of rectangles. See
+     * {@code wiki/horse-designer/js/gui.js} {@code padlock()}.
+     */
+    private void drawPadlock(GuiGraphicsExtractor g, int x, int y, boolean locked) {
+        int colour = locked ? 0xFFE8C060 : 0xFF565C6C;
+        int bx = x + 2;
+        int by = y + 6;                              // a 5x6 icon, centred in the column
+        if (locked) {
+            g.fill(bx + 1, by, bx + 4, by + 1, colour);        // shackle, closed
+            g.fill(bx + 1, by + 1, bx + 2, by + 2, colour);
+            g.fill(bx + 3, by + 1, bx + 4, by + 2, colour);
+        } else {
+            g.fill(bx + 2, by, bx + 5, by + 1, colour);        // shackle, swung open
+            g.fill(bx + 4, by + 1, bx + 5, by + 2, colour);
         }
-        int max = Math.max(0, count - DD_VISIBLE);
-        if (max > 0) {
-            int barH = Math.max(6, h * DD_VISIBLE / count);
-            int barY = ddY + Math.round((h - barH) * (ddScroll / (float) max));
-            g.fill(ddX + BREED_DD_W - 2, ddY, ddX + BREED_DD_W, ddY + h, 0x40FFFFFF);
-            g.fill(ddX + BREED_DD_W - 2, barY, ddX + BREED_DD_W, barY + barH, 0xFF8890A8);
-        }
+        g.fill(bx, by + 2, bx + 5, by + 6, colour);            // body
     }
 
-    /** The open many-allele picker, drawn last so it sits over the widgets it covers. */
+    /**
+     * Whichever dropdown is open, drawn last so it sits over the widgets it
+     * covers. One routine for all five: they differ only in what
+     * {@link #ddLabels} answers, and two copies of this had already started to
+     * drift before the third, fourth and fifth arrived.
+     */
     private void drawDropdown(GuiGraphicsExtractor g, int mouseX, int mouseY) {
-        List<Allele> as = ddRow.gene.alleles();
+        List<String> labels = ddLabels();
+        int w = ddWidth();
+        int cur = ddCurrent();
         int h = DD_VISIBLE * DD_ROW_H;
-        g.fill(ddX - 1, ddY - 1, ddX + DD_W + 1, ddY + h + 1, 0xF00E0E16);
-        g.fill(ddX - 1, ddY - 1, ddX + DD_W + 1, ddY, 0xFF5A6478);
-        int cur = ddSlot == 0 ? ddRow.a : ddRow.b;
+        g.fill(ddX - 1, ddY - 1, ddX + w + 1, ddY + h + 1, 0xF00E0E16);
+        g.fill(ddX - 1, ddY - 1, ddX + w + 1, ddY, 0xFF5A6478);
         for (int i = 0; i < DD_VISIBLE; i++) {
             int idx = ddScroll + i;
-            if (idx >= as.size()) {
+            if (idx >= labels.size()) {
                 break;
             }
             int ry = ddY + i * DD_ROW_H;
-            boolean hov = mouseX >= ddX && mouseX < ddX + DD_W && mouseY >= ry && mouseY < ry + DD_ROW_H;
+            boolean hov = mouseX >= ddX && mouseX < ddX + w && mouseY >= ry && mouseY < ry + DD_ROW_H;
             if (idx == cur) {
-                g.fill(ddX, ry, ddX + DD_W, ry + DD_ROW_H, 0x557088FF);
+                g.fill(ddX, ry, ddX + w, ry + DD_ROW_H, 0x557088FF);
             } else if (hov) {
-                g.fill(ddX, ry, ddX + DD_W, ry + DD_ROW_H, 0x33FFFFFF);
+                g.fill(ddX, ry, ddX + w, ry + DD_ROW_H, 0x33FFFFFF);
             }
-            drawFitted(g, as.get(idx).token(), ddX + 3, ry + 2, DD_W - 10,
+            drawFitted(g, labels.get(idx), ddX + 3, ry + 2, w - 10,
                     idx == cur ? 0xFFFFFFFF : 0xFFC0C4D0);
         }
-        int max = Math.max(0, as.size() - DD_VISIBLE);
+        int max = Math.max(0, labels.size() - DD_VISIBLE);
         if (max > 0) {
-            int barH = Math.max(6, h * DD_VISIBLE / as.size());
+            int barH = Math.max(6, h * DD_VISIBLE / labels.size());
             int barY = ddY + Math.round((h - barH) * (ddScroll / (float) max));
-            g.fill(ddX + DD_W - 2, ddY, ddX + DD_W, ddY + h, 0x40FFFFFF);
-            g.fill(ddX + DD_W - 2, barY, ddX + DD_W, barY + barH, 0xFF8890A8);
+            g.fill(ddX + w - 2, ddY, ddX + w, ddY + h, 0x40FFFFFF);
+            g.fill(ddX + w - 2, barY, ddX + w, barY + barH, 0xFF8890A8);
         }
     }
 

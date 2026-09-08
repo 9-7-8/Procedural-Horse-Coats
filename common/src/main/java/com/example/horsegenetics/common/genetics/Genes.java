@@ -79,8 +79,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * The gene registry. Genes are addressed by {@code <modauthor>.<gene>}
@@ -394,6 +396,7 @@ public final class Genes {
     private static volatile List<Gene> magicalOrder = List.of();
     private static volatile Map<String, Gene> byKey = Map.of();
     private static volatile Map<String, Allele> alleleByKey = Map.of();
+    private static volatile Set<String> coatInfluencing = Set.of();
 
     static {
         rebuild();
@@ -559,6 +562,17 @@ public final class Genes {
         byKey = Map.copyOf(keys);
         alleleByKey = Map.copyOf(alleles);
 
+        // "Does this gene change how the horse looks?" - asked often enough
+        // (every editor row, every frame) to be worth a set rather than a walk.
+        Set<String> influencing = new LinkedHashSet<>();
+        for (Gene g : order) {
+            if (g.affectsCoat()) {
+                influencing.add(g.key());
+                influencing.addAll(g.coatDependsOn());
+            }
+        }
+        coatInfluencing = Set.copyOf(influencing);
+
         // Built-ins never pass through register(SpecGene), so the sex-linked
         // declaration check has to live here to cover both.
         for (Gene g : order) {
@@ -588,6 +602,26 @@ public final class Genes {
 
     public static List<Gene> all() {
         return order;
+    }
+
+    /**
+     * Does this gene change how a horse <b>looks</b> - directly or through
+     * another gene that reads it?
+     *
+     * <p>{@link Gene#affectsCoat()} alone is not the question. {@code PATN1},
+     * {@code PATN2} and {@link #SHADE} paint nothing on their own and every one
+     * of their expressions is a wild type, yet a horse carrying them looks
+     * different, because a painter names them in {@link Gene#coatDependsOn()}.
+     * The relationship is declared, so this reads the declaration rather than
+     * keeping a list of exceptions beside it.
+     *
+     * <p>This is the line the editors' <i>"randomize the health genes too?"</i>
+     * switch is drawn on, and the line {@code DesignerApi.showsAs} starts from:
+     * everything it returns {@code false} for is real, heritable and completely
+     * invisible.
+     */
+    public static boolean influencesCoat(Gene gene) {
+        return coatInfluencing.contains(gene.key());
     }
 
     public static Gene byKey(String geneKey) {

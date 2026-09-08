@@ -6,12 +6,14 @@ import com.example.horsegenetics.common.breed.BreedFounder;
 import com.example.horsegenetics.common.breed.Breeds;
 import com.example.horsegenetics.common.genetics.Allele;
 import com.example.horsegenetics.common.genetics.AllelePair;
+import com.example.horsegenetics.common.genetics.EditorRules;
 import com.example.horsegenetics.common.genetics.Epigenome;
 import com.example.horsegenetics.common.genetics.Gene;
 import com.example.horsegenetics.common.genetics.Genes;
 import com.example.horsegenetics.common.genetics.Genome;
 import com.example.horsegenetics.common.genetics.Genotype;
 import com.example.horsegenetics.common.genetics.Inheritance;
+import com.example.horsegenetics.common.genetics.RandomizeMode;
 import com.example.horsegenetics.common.horse.Sex;
 import com.example.horsegenetics.common.name.HorseNameGenerator;
 
@@ -59,12 +61,18 @@ import java.util.List;
  *       packet to.</li>
  *   <li><b>Make egg</b> - which writes the horse on screen into a
  *       {@code preset_horse_spawn_egg}. There is no inventory to put an item
- *       in. The page's equivalent is already there and better suited to a
- *       browser: copy the genotype code, which is the same horse in a form you
- *       can paste anywhere, this page included.</li>
+ *       in.</li>
  * </ul>
- * Everything else - the row list, the sex flag, the breed index, the epigenome -
- * is the same state and must stay so.
+ *
+ * <p><b>And one in how a horse leaves the screen.</b> Both carry the same
+ * payload - {@code HorseFile}, the whole horse rather than its alleles - but the
+ * page writes it to a file you can keep and the screen writes it to the
+ * clipboard, because a Minecraft screen has no file picker and a browser tab
+ * has no chat to paste into. Same format, so a horse exported here loads in
+ * game and back.
+ *
+ * <p>Everything else - the row list, the locks, the sex flag, the breed index,
+ * the randomize mode, the epigenome - is the same state and must stay so.
  */
 public final class HorseEditor {
 
@@ -74,11 +82,14 @@ public final class HorseEditor {
         int a;
         int b;
         boolean added;
+        /** Held against every randomize - see {@link HorseEditor#setLocked}. */
+        boolean locked;
 
         Row(Gene gene) {
             this.gene = gene;
             this.a = indexOf(gene, gene.defaultAllele());
             this.b = this.a;
+            this.added = EditorRules.alwaysCarried(gene);
         }
     }
 
@@ -98,6 +109,20 @@ public final class HorseEditor {
     private boolean baby = false;
     private int breedIndex = 0;
     private Epigenome epigenome;
+
+    /** What the Randomize split button will do next time it is pressed. */
+    private RandomizeMode randomizeMode = RandomizeMode.RANDOM;
+    /** What the Add random split button will do next time it is pressed. */
+    private EditorRules.AddScope addScope = EditorRules.AddScope.ANY;
+    /**
+     * Whether a randomize is allowed to touch the loci that change nothing you
+     * can see - the disorders, the stat genes, the ability genes. Off, because
+     * the overwhelmingly common reason to press Randomize on a gene editor is
+     * to look at a coat, and rolling a lethal into the horse you are looking at
+     * is a surprise nobody asked for. {@link Genes#influencesCoat} draws the
+     * line.
+     */
+    private boolean randomizeInvisible = false;
 
     /**
      * Every horse has a name, the way every horse in game does - it is rolled
@@ -240,29 +265,76 @@ public final class HorseEditor {
     // ---- editing ---------------------------------------------------------
 
     /**
-     * Put a gene on the horse, homozygous for the first allele that does
-     * something - and if the horse cannot carry that pair, the next one it can.
-     * Verbatim the screen's {@code variantPair} rule: a gene you just added
-     * should <i>show</i>, or adding it taught you nothing.
+     * Put a gene on the horse at {@link EditorRules#variantPair} - the first
+     * combination that actually does something. A gene you just added should
+     * <i>show</i>, or adding it taught you nothing.
      */
     public void add(int index) {
         Row row = rows.get(index);
         if (row.added) {
             return;
         }
-        AllelePair pair = variantPair(row.gene);
+        showVariant(row);
+    }
+
+    /** Put a row on the horse at the pair that shows. Shared by add and Add random. */
+    private void showVariant(Row row) {
+        AllelePair pair = EditorRules.variantPair(row.gene);
         row.a = indexOf(row.gene, pair.first());
         row.b = indexOf(row.gene, pair.second());
         row.added = true;
         enforceSexLinkage(row);
     }
 
+    /**
+     * Take a gene off the horse - except the three every horse visibly has, at
+     * which no {@code x} is drawn and this is a no-op
+     * ({@link EditorRules#alwaysCarried}).
+     */
     public void remove(int index) {
         Row row = rows.get(index);
+        if (EditorRules.alwaysCarried(row.gene)) {
+            return;
+        }
         row.added = false;
         int def = indexOf(row.gene, row.gene.defaultAllele());
         row.a = def;
         row.b = def;
+    }
+
+    /**
+     * <b>Lock a row.</b> A locked gene is held exactly as it stands against
+     * every randomize - its alleles, whether it is on the horse at all, and its
+     * epigenetics. It is the difference between "roll me another horse" and
+     * "roll me another horse with <i>this</i> tobiano", and the second is what
+     * a gene editor is for.
+     */
+    public void setLocked(int index, boolean locked) {
+        rows.get(index).locked = locked;
+    }
+
+    public void setRandomizeMode(RandomizeMode mode) {
+        this.randomizeMode = mode;
+    }
+
+    public RandomizeMode randomizeMode() {
+        return randomizeMode;
+    }
+
+    public void setAddScope(EditorRules.AddScope scope) {
+        this.addScope = scope;
+    }
+
+    public EditorRules.AddScope addScope() {
+        return addScope;
+    }
+
+    public void setRandomizeInvisible(boolean on) {
+        this.randomizeInvisible = on;
+    }
+
+    public boolean randomizeInvisible() {
+        return randomizeInvisible;
     }
 
     /** Step one allele slot to the next allele - the &le; 3 allele case. */
@@ -313,34 +385,129 @@ public final class HorseEditor {
         this.breedIndex = Math.max(0, Math.min(index, breeds().size()));
         if (breedIndex != 0) {
             rerollName(3, rng);
-            applyGenome(BreedFounder.roll(breeds().get(breedIndex - 1), rng), true);
+            applyGenome(BreedFounder.roll(breeds().get(breedIndex - 1), rng), true, null);
         }
     }
 
     /**
-     * With a breed selected this is a fresh {@link BreedFounder#roll} of it, so
-     * the alleles stay inside that breed's pools and stat targets; with
-     * "(none)" it is an unconstrained {@link Genome#random}. The chosen sex is
-     * kept either way.
+     * <b>Randomize, in whichever of {@link RandomizeMode}'s senses is selected.</b>
+     *
+     * <p>The order is load-bearing, and is the same on both screens:
+     * <ol>
+     *   <li><b>the sex first</b>, for the whole-genome modes - a sex-linked
+     *       locus cannot be filled in before the sex is known, and rolling it
+     *       afterwards means snapping half of what was rolled straight back;</li>
+     *   <li>the breed, if the mode picks one, because a breed constrains every
+     *       locus after it;</li>
+     *   <li>the alleles;</li>
+     *   <li>the magical floor, for the {@code +N} modes.</li>
+     * </ol>
+     *
+     * <p>A locked row, a row outside the mode's scope, and - unless
+     * {@link #randomizeInvisible} is on - a row that changes nothing you can see
+     * are all left exactly as they were, epigenetics included.
      */
     public void randomize(Rng rng) {
+        RandomizeMode mode = randomizeMode;
+        if (mode == RandomizeMode.EPIGENETICS) {
+            rerollEpigenome(rng);
+            return;
+        }
         rerollName(3, rng);   // a different horse deserves a different name
-        Genome g = breedIndex == 0
-                ? Genome.random(rng)
-                : BreedFounder.roll(breeds().get(breedIndex - 1), rng, female ? Sex.FEMALE : Sex.MALE);
-        applyGenome(g, false);
+        if (mode.rollsSex()) {
+            setSex(rng.nextBoolean());
+        }
+        if (mode == RandomizeMode.BREED && !breeds().isEmpty()) {
+            breedIndex = 1 + rng.nextInt(breeds().size());
+        }
+        Sex sex = female ? Sex.FEMALE : Sex.MALE;
+        Genome g;
+        if (mode == RandomizeMode.TRUE_RANDOM) {
+            g = new Genome(EditorRules.trueRandom(rng, sex), Epigenome.random(rng));
+        } else if (breedIndex == 0) {
+            g = Genome.random(rng);
+        } else {
+            g = BreedFounder.roll(breeds().get(breedIndex - 1), rng, sex);
+        }
+        applyGenome(g, false, mode);
+        if (mode.magicalFloor() > 0) {
+            topUpMagical(mode.magicalFloor(), rng);
+        }
     }
 
+    /**
+     * Add magical genes, at the pair that shows, until the horse shows at least
+     * {@code want} of them. Genes already showing count, so <i>+1 magical</i> on
+     * a horse that rolled a galaxy coat adds nothing.
+     */
+    private void topUpMagical(int want, Rng rng) {
+        List<Row> candidates = new ArrayList<>();
+        int showing = 0;
+        Genotype gt = genotype();
+        for (Row row : rows) {
+            if (row.gene.isNatural()) {
+                continue;
+            }
+            if (EditorRules.showingMagical(gt, row.gene)) {
+                showing++;
+            } else if (randomizable(row)) {
+                candidates.add(row);
+            }
+        }
+        while (showing < want && !candidates.isEmpty()) {
+            showVariant(candidates.remove(rng.nextInt(candidates.size())));
+            showing++;
+        }
+    }
+
+    /**
+     * <b>Add random.</b> One gene the horse is not already carrying, put on at
+     * the pair that shows - the fastest way to meet a gene you did not know
+     * existed. {@link EditorRules.AddScope} narrows it to the naturals or the
+     * magic. A no-op when everything in scope is already on, or locked.
+     */
+    public void addRandom(Rng rng) {
+        List<Row> candidates = new ArrayList<>();
+        for (Row row : rows) {
+            if (!row.added && addScope.covers(row.gene) && randomizable(row)) {
+                candidates.add(row);
+            }
+        }
+        if (!candidates.isEmpty()) {
+            showVariant(candidates.get(rng.nextInt(candidates.size())));
+        }
+    }
+
+    /**
+     * A fresh epigenome, with every locked locus keeping the numbers it had.
+     * The gene is what a lock is on, and its epigenetics are part of that gene
+     * on this horse - a lock that let the dapple pattern re-roll underneath the
+     * allele would not be a lock.
+     */
     public void rerollEpigenome(Rng rng) {
-        this.epigenome = Epigenome.random(rng);
+        Epigenome fresh = Epigenome.random(rng);
+        for (Row row : rows) {
+            if (!randomizable(row) && Epigenome.carries(row.gene)) {
+                fresh = fresh.with(row.gene.key(), epigenome.copies(row.gene));
+            }
+        }
+        this.epigenome = fresh;
+    }
+
+    /** Is this row's gene something a randomize is allowed to move? */
+    private boolean randomizable(Row row) {
+        return !row.locked && (randomizeInvisible || Genes.influencesCoat(row.gene));
     }
 
     public void clearGenes() {
         for (Row row : rows) {
+            if (row.locked) {
+                continue;
+            }
             int def = indexOf(row.gene, row.gene.defaultAllele());
             row.a = def;
             row.b = def;
-            row.added = false;
+            row.added = EditorRules.alwaysCarried(row.gene);
         }
         breedIndex = 0;
     }
@@ -360,82 +527,60 @@ public final class HorseEditor {
         }
         female = gt.sex() == Sex.FEMALE;
         for (Row row : rows) {
-            AllelePair pair = gt.pair(row.gene);
-            int def = indexOf(row.gene, row.gene.defaultAllele());
-            row.a = indexOf(row.gene, pair.first());
-            row.b = indexOf(row.gene, pair.second());
-            row.added = !(row.a == def && row.b == def);
+            stamp(row, gt);
         }
         breedIndex = 0;
         return true;
     }
 
-    /** Stamp a rolled genome onto the editor - every locus, the epigenome, optionally the sex. */
-    private void applyGenome(Genome g, boolean adoptSex) {
+    /**
+     * Stamp a rolled genome onto the editor - the epigenome, optionally the
+     * sex, and every locus the mode is <b>allowed</b> to touch.
+     *
+     * <p>{@code mode} is {@code null} for the stamps that are not a randomize at
+     * all (a breed picked by hand, a horse imported from a file): those replace
+     * the horse outright, locks and all, because they are not "roll me another
+     * one", they are "here is a different horse".
+     */
+    private void applyGenome(Genome g, boolean adoptSex, RandomizeMode mode) {
         Genotype gt = g.genotype();
         if (adoptSex) {
             female = gt.sex() == Sex.FEMALE;
         }
+        Epigenome next = g.epigenome();
         for (Row row : rows) {
-            AllelePair pair = gt.pair(row.gene);
-            int def = indexOf(row.gene, row.gene.defaultAllele());
-            row.a = indexOf(row.gene, pair.first());
-            row.b = indexOf(row.gene, pair.second());
-            row.added = !(row.a == def && row.b == def);
-        }
-        this.epigenome = g.epigenome();
-    }
-
-    // ---- the two rules worth stating twice --------------------------------
-
-    /**
-     * The pair a gene is added at: <b>a combination that actually shows</b>.
-     * Candidates in order of how obvious they are - each variant allele
-     * homozygous, then two <i>different</i> variant alleles, then one variant
-     * against the baseline - and the first that both {@code canOccur} and is
-     * not a wild type wins; failing that, the first carryable one; failing
-     * that, the baseline. {@code KIT}'s four nonviable {@code W} homozygotes
-     * and {@code MET}'s {@code met/met} are what the {@code canOccur} checks
-     * are for, and magic sectoral heterochromia - every one of whose
-     * homozygotes is silent by design - is what the wild-type test is for.
-     */
-    private static AllelePair variantPair(Gene gene) {
-        Allele base = gene.defaultAllele();
-        List<Allele> alleles = gene.alleles();
-        List<AllelePair> candidates = new ArrayList<>();
-        for (Allele a : alleles) {
-            if (!a.equals(base)) {
-                candidates.add(new AllelePair(a, a));
-            }
-        }
-        for (int i = 0; i < alleles.size(); i++) {
-            for (int j = i + 1; j < alleles.size(); j++) {
-                Allele a = alleles.get(i);
-                Allele b = alleles.get(j);
-                if (!a.equals(base) && !b.equals(base)) {
-                    candidates.add(new AllelePair(a, b));
+            if (mode != null && !(mode.covers(row.gene) && randomizable(row))) {
+                // Untouched - and its epigenetics stay untouched with it.
+                if (Epigenome.carries(row.gene)) {
+                    next = next.with(row.gene.key(), epigenome.copies(row.gene));
                 }
-            }
-        }
-        for (Allele a : alleles) {
-            if (!a.equals(base)) {
-                candidates.add(new AllelePair(a, base));
-            }
-        }
-        AllelePair carryable = null;
-        for (AllelePair pair : candidates) {
-            if (!gene.canOccur(pair)) {
                 continue;
             }
-            if (carryable == null) {
-                carryable = pair;
-            }
-            if (!gene.expressionOf(pair).wildType()) {
-                return pair;
-            }
+            stamp(row, gt);
         }
-        return carryable != null ? carryable : new AllelePair(base, base);
+        this.epigenome = next;
     }
+
+    /**
+     * One row from a genotype. A locus sitting at its baseline is <b>not</b>
+     * marked added - or a paste would come back as forty rows of {@code N/N} -
+     * unless it is one of the three every horse visibly carries.
+     */
+    private void stamp(Row row, Genotype gt) {
+        AllelePair pair = gt.pair(row.gene);
+        int def = indexOf(row.gene, row.gene.defaultAllele());
+        row.a = indexOf(row.gene, pair.first());
+        row.b = indexOf(row.gene, pair.second());
+        row.added = !(row.a == def && row.b == def) || EditorRules.alwaysCarried(row.gene);
+    }
+
+    // ---- the one rule still written out here -------------------------------
+    //
+    // variantPair moved to EditorRules in common/ - it is the same rule on both
+    // screens and had been written out twice. This one has not: it works on the
+    // row's two allele *indices* rather than on an AllelePair, because a pair
+    // canonicalises its slots on construction and the placeholder would not
+    // stay in the slot the screen draws it in.
 
     /**
      * Keep a sex-linked row honest against the current sex - a stallion has one

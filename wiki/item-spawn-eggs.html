@@ -36,17 +36,73 @@
 
 <ul>
     <li>Click a gene to add it to the horse; click again to cycle its versions. Genes with
-        lots of versions get a dropdown.</li>
-    <li><strong>Reroll epi.</strong> re-rolls the small per-horse variations &mdash; leg
-        heights, dapples, splash edges &mdash; and redraws.</li>
-    <li><strong>Breed</strong> rolls a real founder of a breed you pick.
-        <strong>Randomize</strong> rolls within that breed, or from everything if no breed
-        is chosen.</li>
-    <li><strong>Copy code / Paste code</strong> move the genotype through your clipboard,
-        so you can share a horse as text.</li>
+        lots of versions get a dropdown. <strong>Extension</strong>, <strong>agouti</strong>
+        and <strong>shade</strong> are always on the horse and have no <code>x</code>:
+        every horse has versions of all three, and between them they decide whether it is
+        black, bay or chestnut.</li>
+    <li>The <strong>menu above the list</strong> narrows it to one kind of gene &mdash; the
+        natural dilutions, the whites, the health genes, or any one family of magic. A
+        hundred and seventy genes in one alphabetical column is a list you scroll rather
+        than read.</li>
+    <li>The <strong>padlock</strong> beside each gene holds it. A locked gene is kept
+        exactly as it is by every randomize, alleles and variations both &mdash; which is
+        how you roll another horse while keeping <em>this</em> tobiano.</li>
+    <li><strong>Breed</strong> rolls a real founder of a breed you pick.</li>
+    <li><strong>Randomize</strong> rolls within that breed, or from everything if no breed
+        is chosen &mdash; and the <strong>arrow beside it</strong> changes what it does.
+        See the list below. Whatever you pick sticks, and the button says so.</li>
+    <li><strong>Add random</strong> puts one gene the horse is not already carrying onto
+        it, at a version that shows. Its arrow narrows that to the natural genes or to
+        the magic.</li>
+    <li><strong>Rnd health</strong> is off to begin with. Off, a randomize leaves alone
+        every gene that changes nothing you can see &mdash; the disorders, the stat genes,
+        the ability genes &mdash; so rolling for a coat cannot quietly roll you a lethal.
+        Turn it on and it rolls those too.</li>
+    <li><strong>Copy horse / Paste</strong> move the <em>whole</em> horse through your
+        clipboard: genes, variations, name, sex, age and breed. It is the same text the
+        horse designer&rsquo;s <em>Export</em> writes, so a horse crosses between them
+        intact.</li>
     <li><strong>Make egg</strong> saves what is on screen into a preset egg instead of
         spawning it.</li>
 </ul>
+
+<h3 id="randomize-menu">What the Randomize arrow offers</h3>
+
+<div class="plain">
+    <p>
+        Eleven ways to roll, and the useful ones are the narrow ones: most of the time you
+        are not asking for a different horse, you are asking for a different <em>something</em>
+        on the horse you already have. A narrow roll leaves everything outside it untouched.
+    </p>
+</div>
+
+<ul>
+    <li><strong>Randomize</strong> &mdash; a wild horse: every gene drawn at the rate it
+        actually turns up. What the button has always done.</li>
+    <li><strong>True random</strong> &mdash; every gene picks two of its versions with
+        equal weight, ignoring how rare they are. This is how you meet a homozygous
+        dominant white without rolling for a week. A combination the gene forbids snaps
+        back to plain rather than being redrawn: an impossible horse is not a rare one.</li>
+    <li><strong>Random natural</strong> / <strong>random magical</strong> &mdash; re-roll
+        one half of the horse and leave the other exactly as it is.</li>
+    <li><strong>Random natural dilution</strong> / <strong>random natural white</strong>
+        &mdash; re-roll one family. Same horse, different colour; same horse, different
+        markings.</li>
+    <li><strong>Randomize breed</strong> &mdash; pick a breed at random and roll a real
+        founder of it.</li>
+    <li><strong>Random +1 / +2 / +3 magical</strong> &mdash; an ordinary roll, then magical
+        genes added until at least that many are showing. Genes the roll already turned up
+        count.</li>
+    <li><strong>Randomize epigenetics</strong> &mdash; the small per-horse variations, leg
+        heights, dapples and splash edges, and nothing else. This is where the old
+        <em>Reroll epi.</em> button went.</li>
+</ul>
+
+<p>
+    A randomize that rolls the whole horse rolls its <strong>sex first</strong>, before any
+    gene. That is not cosmetic: a stallion carries one copy of an X-linked gene and a mare
+    two, so rolling the genes first would mean immediately undoing half of them.
+</p>
 
 <p>
     The same editor is on the wiki as the
@@ -126,8 +182,19 @@
         <a href="horse-designer/index.html">wiki/horse-designer/</a> are the same screen
         built twice &mdash; change both. The designer&rsquo;s model is
         <code>web/HorseEditor.java</code>, mirroring the screen&rsquo;s
-        <code>variantPair</code> / <code>enforceSexLinkage</code> / <code>applyGenome</code>
-        / <code>randomizeGenes</code> under the same names.
+        <code>applyGenome</code> / <code>stamp</code> / <code>randomizable</code> /
+        <code>topUpMagical</code> / <code>addRandom</code> / <code>enforceSexLinkage</code>
+        under the same names.
+    </p>
+    <p>
+        The rules that are <em>identical</em> rather than merely parallel have stopped
+        being mirrored at all and live in <code>common/</code>:
+        <code>genetics/EditorRules</code> (which combination a gene is added at, which
+        three loci are always carried, the uniform roll),
+        <code>genetics/RandomizeMode</code> (the eleven modes, their scope, and which of
+        them roll the sex) and <code>genetics/GeneFamily</code> (the groups the filter and
+        the family rolls use). Two copies of a rule kept in step by hand was workable at
+        two methods and is not at eleven modes.
     </p>
 </div>
 
@@ -142,6 +209,19 @@
         button cannot drift into spawning different horses.</li>
     <li>The <strong>epigenome travels with the genotype</strong> to the server. The server
         re-checks creative mode <em>and</em> that you are holding the egg.</li>
+    <li><strong>Copy horse / Paste</strong> write and read <code>common/horse/HorseFile</code>
+        &mdash; a small JSON carrying both code strings plus the name, sex, age and breed
+        label. They replaced <em>Copy code</em> / <em>Paste code</em>, which moved a
+        genotype code alone: paste one of those back and the horse returned with fresh
+        epigenetics, no name and no breed, which on a mod whose premise is that one
+        genotype makes many horses is a lossy copy pretending to be an exact one. The
+        browser designer&rsquo;s <em>Export</em> / <em>Import</em> are the same format
+        against a file rather than a clipboard.</li>
+    <li>The gene list is filtered by <code>GeneFamily.of</code>, which asks the gene rather
+        than keeping a table beside it: magical genes band on their paint priority (the
+        bands were laid out as families in the first place), naturals that change nothing
+        visible are health genes, and the handful whose slot in the paint order fights
+        their family are named in one short override table with the reason.</li>
 </ul>
 
 <h2 id="breed-egg">Breed spawn eggs</h2>

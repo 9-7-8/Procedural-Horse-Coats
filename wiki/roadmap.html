@@ -495,68 +495,6 @@
 
 <hr>
 
-<h2 id="horse-files">9. Loading a designed horse into the game</h2>
-
-<div class="note">
-    <span class="label">Half of this is already built</span>
-    <p>
-        The <a href="horse-designer/index.html">horse designer</a> exports a horse
-        as JSON &mdash; <code>DesignerApi.horseJson()</code>, behind the
-        <b>Export JSON</b> button, and reads it back through <b>Import</b> - so
-        the format is proven to round-trip a horse exactly (genotype, epigenome,
-        name, sex, breed). <strong>Nothing in game reads it.</strong> So a horse
-        you design in the browser still has to be brought over by copying its
-        genotype code into the custom horse spawn egg by hand, which loses the
-        epigenome, the name, the sex and the breed.
-    </p>
-</div>
-
-<p>The file is deliberately small &mdash; two code strings carry the whole horse:</p>
-
-<div class="codebox">
-<div class="filename">what Export JSON writes</div>
-<pre><code>{
-  "format": 1,
-  "name": { "first": "Sunfire", "last": "Neighsay" },
-  "sex": "STALLION",
-  "baby": false,
-  "breed": "Caspian Pony",
-  "genotype":  "horsegenetics.sex=X/Y-horsegenetics.extension=E/e-...",
-  "epigenome": "horsegenetics.sex=12:a4f1.../...",
-  "readable": { "shortForm": "...", "speed": 0.2175, "scale": 0.932, "conditions": [] }
-}</code></pre>
-</div>
-
-<ul>
-    <li><strong>A loader must re-resolve, not restore.</strong> Everything under
-        <code>readable</code> is derived and is written for a person, not for the
-        game. Trusting a saved <code>speed</code> would freeze a horse against a
-        later re-tuning of the gene that produced it &mdash; the same reason
-        <code>HorseRecord</code> stopped storing stats at all
-        (<a href="horse-body.html">horse body</a>). Read the two codes, resolve the
-        rest.</li>
-    <li><strong>Where it goes in.</strong> The natural home is the custom horse
-        spawn egg, which already has <b>Paste code</b> and is already
-        creative-gated and re-checked on the server: an <b>Import horse file</b>
-        button beside it, taking the JSON off the clipboard, would need no new
-        item and no new screen. A file picker is not available to a Minecraft
-        screen, so the clipboard is the route.</li>
-    <li><strong>Unknown genes must not be fatal.</strong> A code written by a
-        version with a gene this world does not have should load with that locus
-        dropped, which <code>Genotype.parse</code> already does; a code
-        <em>missing</em> a gene reads as its wild type. Say what was dropped
-        rather than failing.</li>
-    <li><strong>The breed is a label, not a constraint.</strong> Stamp it and move
-        on &mdash; the genotype already carries whatever the breed roll produced,
-        and re-rolling it on import would throw away the horse that was
-        designed.</li>
-    <li><strong>Open:</strong> whether importing should be creative-only. It can
-        only make horses the spawn egg could already make, so the argument for
-        gating it is consistency rather than balance.</li>
-</ul>
-
-<hr>
-
 <h2 id="designer">10. The visual marking designer</h2>
 
 <div class="note danger">
@@ -1504,6 +1442,27 @@
 <p>
     Kept here so a later session does not relitigate them. These are answers, not work.
 </p>
+
+<h3>Settled 2026-09-08</h3>
+
+<ul>
+    <li><strong>A horse moves between the two editors as a whole horse, through one
+        format.</strong> &sect;9 asked for an <em>Import horse file</em> button beside the
+        spawn egg's <b>Paste code</b>. It shipped as a replacement for it rather than a
+        neighbour: there is one format,
+        <a href="item-spawn-eggs.html#egg"><code>common/horse/HorseFile</code></a>, the
+        designer's <b>Export</b> / <b>Import</b> write it to a file and the spawn egg's
+        <b>Copy horse</b> / <b>Paste</b> write it to the clipboard, and <em>Copy code</em>
+        / <em>Paste code</em> are gone. Keeping both would have meant two ways to copy a
+        horse of which one silently loses its epigenetics, its name and its breed, and
+        nobody reads a button and thinks "this one is the lossy one".</li>
+
+    <li><strong>Importing is not creative-gated.</strong> &sect;9 left this open. It can
+        only build a horse the editor could already build by hand, and everything above
+        the Spawn button works in every game mode on purpose &mdash; the editor is a
+        viewer that can also spawn. Spawning stays creative-only and still re-checked on
+        the server.</li>
+</ul>
 
 <h3>Settled 2026-09-07</h3>
 

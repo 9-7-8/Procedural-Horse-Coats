@@ -2837,12 +2837,48 @@
         file &mdash; two code strings plus a readable summary. Export one,
         Randomize, then import it back: name, sex, breed, coat and the
         epigenetic fingerprint should all return exactly (that round-trip passes
-        offline; what is unchecked is the file picker and the download in a real
-        browser). Import is tolerant on purpose &mdash; an unknown gene drops, an
-        unrecognised breed loses only its label, and it says which. <strong>Nothing
-        in game loads it yet</strong>; that is
-        <a href="roadmap.html#horse-files">roadmap &sect;9</a>, and until then
-        <b>Copy code</b> into the spawn egg is the route in.</li>
+        offline against the compiled wasm; what is unchecked is the file picker
+        and the download in a real browser). Import is tolerant on purpose
+        &mdash; an unknown gene drops, an unrecognised breed loses only its
+        label, and it says which. <strong>The custom horse spawn egg now reads
+        the same format</strong> off the clipboard (<b>Paste</b>), so exporting
+        here and pasting in game is the route across &mdash; <b>unplayed, check
+        it</b>.</li>
+
+    <li><strong>The gene-family menu above the list.</strong> Pick <em>Natural
+        dilution genes</em>: the list should drop to seven rows and the scroll
+        bar should go away. Pick <em>Magic: lines and strokes</em> and it should
+        be the fourteen stroke genes. <em>All genes</em> restores it. The filter
+        is a view only &mdash; a gene filtered out is still on the horse, so the
+        coat must not change when you change the menu.</li>
+
+    <li><strong>The padlocks.</strong> Lock KIT at a white pattern you like, then
+        hold Randomize: the pattern and its epigenetic fingerprint stay while
+        everything else moves. <b>Rnd epigen.</b> must respect the lock too
+        &mdash; that is the half most likely to be wrong, because the epigenome
+        is rebuilt whole and the locked loci are put back into it.</li>
+
+    <li><strong>The Randomize menu.</strong> Eleven modes; the ones to actually
+        look at are <em>True random</em> (should produce absurd horses, and never
+        an impossible one &mdash; no KIT <code>W</code> homozygote, no
+        <code>met/met</code>), <em>Rnd dilution</em> and <em>Rnd white</em>
+        (should visibly change one thing and leave the rest of the horse alone),
+        and <em>Rnd +3 magic</em> (should always land three magical genes that
+        are actually showing, not three that happen to be silent).</li>
+
+    <li><strong>Sex is rolled first.</strong> Add brindle (X-linked), then hold
+        Randomize. The row must never sit in a state a horse of that sex cannot
+        carry &mdash; no <code>Brn/Brn</code> stallion.</li>
+
+    <li><strong>Rnd health, off by default.</strong> With it off, no amount of
+        randomizing should ever put a disorder or a stat gene on the horse. Turn
+        it on and they should start appearing. This one is worth checking
+        <em>in game</em> as well, since it is the switch that decides whether
+        Randomize can hand you a lethal.</li>
+
+    <li><strong>Extension, agouti and shade</strong> should be on the horse the
+        moment the screen opens, and have no <code>x</code>. <b>Clear genes</b>
+        must leave them there.</li>
     <li><strong>Does it open at all?</strong> A boot overlay, then sky, grass, a
         horse, and the panel over it.</li>
     <li><strong>Is the horse in the gap?</strong> The camera is shifted sideways so

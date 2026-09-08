@@ -19,9 +19,11 @@ import com.example.horsegenetics.common.genetics.AbilityContribution;
 import com.example.horsegenetics.common.genetics.Allele;
 import com.example.horsegenetics.common.genetics.AllelePair;
 import com.example.horsegenetics.common.genetics.BaseCoats;
+import com.example.horsegenetics.common.genetics.EditorRules;
 import com.example.horsegenetics.common.genetics.EpigeneticAbilityContribution;
 import com.example.horsegenetics.common.genetics.CarrotEffect;
 import com.example.horsegenetics.common.genetics.Epigenome;
+import com.example.horsegenetics.common.genetics.GeneFamily;
 import com.example.horsegenetics.common.genetics.GenotypeCatalog;
 import com.example.horsegenetics.common.genetics.genes.CutieMarkGene;
 import com.example.horsegenetics.common.genetics.Expression;
@@ -31,7 +33,9 @@ import com.example.horsegenetics.common.genetics.Genes;
 import com.example.horsegenetics.common.genetics.Genome;
 import com.example.horsegenetics.common.genetics.Genotype;
 import com.example.horsegenetics.common.genetics.epi.EpiValue;
+import com.example.horsegenetics.common.genetics.RandomizeMode;
 import com.example.horsegenetics.common.genetics.SpliceSafety;
+import com.example.horsegenetics.common.horse.HorseFile;
 import com.example.horsegenetics.common.trait.Condition;
 import com.example.horsegenetics.common.trait.HorseTraits;
 import com.example.horsegenetics.common.trait.Traits;
@@ -236,6 +240,9 @@ public final class DesignerApi {
                     .kv("sexLinked", g.inheritance().sexLinked())
                     .kv("defaultIndex", HorseEditor.indexOf(g, g.defaultAllele()))
                     .kv("shows", showsAs(g))
+                    .kv("family", GeneFamily.of(g).name())
+                    .kv("alwaysCarried", EditorRules.alwaysCarried(g))
+                    .kv("influencesCoat", Genes.influencesCoat(g))
                     .key("alleles").arr();
             for (Allele a : g.alleles()) {
                 j.obj().kv("token", a.token()).kv("label", a.label()).endObj();
@@ -270,7 +277,7 @@ public final class DesignerApi {
      * </ul>
      */
     private static String showsAs(Gene g) {
-        if (g.affectsCoat() || readByAPainter(g)) {
+        if (Genes.influencesCoat(g)) {
             return "coat";
         }
         Epigenome epi = Epigenome.fromSeed(0x5EEDL);
@@ -300,19 +307,38 @@ public final class DesignerApi {
     }
 
     /**
-     * Does some other gene fold this one's alleles into the coat?
-     * {@code PATN1} and {@code PATN2} paint nothing on their own and would
-     * otherwise look invisible, but the leopard complex names them in
-     * {@link Gene#coatDependsOn()} and a horse carrying them looks different.
-     * The relationship is declared, so read it rather than special-case them.
+     * The gene-list filter's menu: {@code "(all genes)"} and then every
+     * {@link GeneFamily} that currently holds one, in menu order. Sent once, the
+     * way the gene list is - a family cannot appear while the page is open.
      */
-    private static boolean readByAPainter(Gene g) {
-        for (Gene other : Genes.codeOrder()) {
-            if (other != g && other.affectsCoat() && other.coatDependsOn().contains(g.key())) {
-                return true;
-            }
+    @JSExport
+    public static String familiesJson() {
+        Json j = new Json().arr();
+        j.obj().kv("key", "").kv("label", "All genes").endObj();
+        for (GeneFamily f : GeneFamily.occupied()) {
+            j.obj().kv("key", f.name()).kv("label", f.label()).endObj();
         }
-        return false;
+        return j.endArr().toString();
+    }
+
+    /** The Randomize split button's menu, in {@link RandomizeMode} order. */
+    @JSExport
+    public static String randomizeModesJson() {
+        Json j = new Json().arr();
+        for (RandomizeMode m : RandomizeMode.values()) {
+            j.obj().kv("key", m.name()).kv("label", m.label()).endObj();
+        }
+        return j.endArr().toString();
+    }
+
+    /** The Add random split button's menu. */
+    @JSExport
+    public static String addScopesJson() {
+        Json j = new Json().arr();
+        for (EditorRules.AddScope a : EditorRules.AddScope.values()) {
+            j.obj().kv("key", a.name()).kv("label", a.label()).endObj();
+        }
+        return j.endArr().toString();
     }
 
     /** "(none)" plus every breed, in {@link com.example.horsegenetics.common.breed.Breeds#all()} order. */
@@ -349,6 +375,11 @@ public final class DesignerApi {
                 .kv("female", e.female())
                 .kv("baby", e.baby())
                 .kv("breedIndex", e.breedIndex())
+                .kv("randomizeMode", e.randomizeMode().name())
+                .kv("randomizeLabel", e.randomizeMode().shortLabel())
+                .kv("addScope", e.addScope().name())
+                .kv("addLabel", e.addScope().shortLabel())
+                .kv("randomizeInvisible", e.randomizeInvisible())
                 .kv("shortForm", GeneCodeDisplay.shortForm(gt))
                 .kv("epiFingerprint", Long.toHexString(e.epigenome().visibleFingerprint(gt)))
                 .kv("code", gt.toCode())
@@ -369,6 +400,7 @@ public final class DesignerApi {
             boolean expressing = x != null && !x.wildType();
             j.obj()
                     .kv("added", row.added)
+                    .kv("locked", row.locked)
                     .kv("a", row.a)
                     .kv("b", row.b)
                     .kv("expressing", expressing)
@@ -416,8 +448,48 @@ public final class DesignerApi {
     }
 
     @JSExport
+    public static void setLocked(int row, boolean locked) {
+        editor().setLocked(row, locked);
+    }
+
+    /**
+     * Pick what Randomize does. The name is a {@link RandomizeMode} constant -
+     * the page never invents one, it echoes back a key out of
+     * {@link #randomizeModesJson}.
+     */
+    @JSExport
+    public static void setRandomizeMode(String mode) {
+        for (RandomizeMode m : RandomizeMode.values()) {
+            if (m.name().equals(mode)) {
+                editor().setRandomizeMode(m);
+                return;
+            }
+        }
+    }
+
+    @JSExport
+    public static void setAddScope(String scope) {
+        for (EditorRules.AddScope a : EditorRules.AddScope.values()) {
+            if (a.name().equals(scope)) {
+                editor().setAddScope(a);
+                return;
+            }
+        }
+    }
+
+    @JSExport
+    public static void setRandomizeInvisible(boolean on) {
+        editor().setRandomizeInvisible(on);
+    }
+
+    @JSExport
     public static void randomize() {
         editor().randomize(RNG);
+    }
+
+    @JSExport
+    public static void addRandom() {
+        editor().addRandom(RNG);
     }
 
     @JSExport
@@ -440,86 +512,70 @@ public final class DesignerApi {
         return editor().epigenome().toCode();
     }
 
-    /** @return false if the code did not parse - the page says so and changes nothing. */
-    @JSExport
-    public static boolean pasteCode(String code) {
-        return editor().paste(code);
-    }
-
     /**
-     * The other half of an import. The page parses the JSON (that is a browser
-     * format and JavaScript reads it for free) and calls these; everything
-     * genetic still happens here.
-     */
-    @JSExport
-    public static boolean setEpigenomeCode(String code) {
-        return editor().setEpigenome(code);
-    }
-
-    @JSExport
-    public static void setName(String first, String last) {
-        editor().setName(first, last);
-    }
-
-    /** @return false if no breed by that name - the label is dropped, the horse is not. */
-    @JSExport
-    public static boolean setBreedByName(String name) {
-        return editor().stampBreed(name);
-    }
-
-    /**
-     * The horse as a file: enough to rebuild it exactly, plus enough for a
-     * person to tell what it is.
+     * <b>The horse as a file</b> - {@link HorseFile}, which is the whole animal
+     * and not just its alleles: the genotype code, the epigenome code, the
+     * name, the sex, the age and the breed label.
      *
-     * <p>The two code strings are the whole of it - a genotype code and an
-     * epigenome code reconstruct the horse completely, which is the same
-     * guarantee {@code HorseRecord} leans on. Everything else here is
-     * derived and is written out for the reader, not for the loader: a
-     * <b>loader must re-resolve traits rather than trust these</b>, or a
-     * re-tuned gene would be unable to reach a saved horse.
-     *
-     * <p>Nothing loads this yet - see the roadmap. It exists so that designing a
-     * horse here and bringing it into a world is one step away rather than a
-     * retyped genotype code.
+     * <p>It replaced <i>Copy code</i>, which put a genotype code on the
+     * clipboard and nothing else. Paste one of those back and you got a
+     * different horse - same alleles, fresh epigenetics, no name, no breed -
+     * which on a mod whose premise is that one genotype makes many horses is a
+     * lossy copy pretending to be an exact one. The custom horse spawn egg
+     * writes and reads this same format, so a horse designed here opens in game
+     * and comes back.
      */
     @JSExport
     public static String horseJson() {
         HorseEditor e = editor();
-        Genotype gt = e.genotype();
-        Traits traits = HorseTraits.resolve(gt, e.epigenome(), true);
-        Json j = new Json().obj()
-                .kv("format", 1)
-                .kv("generator", "horse designer (wiki/horse-designer)")
-                .key("name").obj().kv("first", e.first()).kv("last", e.last()).endObj()
-                .kv("sex", e.female() ? "MARE" : "STALLION")
-                .kv("baby", e.baby())
-                .kv("breed", e.breedIndex() == 0 ? null : e.breeds().get(e.breedIndex() - 1).name())
-                .kv("genotype", gt.toCode())
-                .kv("epigenome", e.epigenome().toCode())
-                .key("readable").obj()
-                .kv("shortForm", GeneCodeDisplay.shortForm(gt))
-                .kv("speed", traits.speed())
-                .kv("health", traits.health())
-                .kv("jump", traits.jump())
-                .kv("scale", traits.scale())
-                .key("conditions").arr();
-        for (Condition c : traits.conditions()) {
-            j.val(c.name());
-        }
-        return j.endArr().endObj().endObj().toString();
+        return HorseFile.write(new HorseFile(
+                e.first(), e.last(), e.female(), e.baby(),
+                e.breedIndex() == 0 ? "" : e.breeds().get(e.breedIndex() - 1).name(),
+                e.genotype().toCode(), e.epigenome().toCode()),
+                "horse designer (wiki/horse-designer)");
     }
 
     /** A filename for it, from the horse's own name. */
     @JSExport
     public static String horseFileName() {
-        String raw = (editor().first() + "-" + editor().last()).toLowerCase();
-        StringBuilder out = new StringBuilder();
-        for (int i = 0; i < raw.length(); i++) {
-            char c = raw.charAt(i);
-            out.append((c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') ? c : '-');
+        return HorseFile.fileName(editor().first(), editor().last());
+    }
+
+    /**
+     * Read one back, and say what had to be dropped.
+     *
+     * <p><b>Deliberately tolerant</b>, and the reason this returns a report
+     * rather than a boolean: a file naming a gene this build does not have
+     * loads with that locus at its wild type, an epigenome that will not parse
+     * costs the horse its epigenetics and nothing else, and an unrecognised
+     * breed loses only its label. Every one of those is worth saying out loud
+     * and none of them is worth refusing the horse over.
+     *
+     * @return JSON: {@code ok}, and either {@code error} or the two
+     *         {@code droppedEpigenome} / {@code droppedBreed} flags
+     */
+    @JSExport
+    public static String loadHorseJson(String text) {
+        HorseFile horse;
+        try {
+            horse = HorseFile.read(text);
+        } catch (RuntimeException e) {
+            return new Json().obj().kv("ok", false)
+                    .kv("error", e.getMessage() == null ? "unreadable" : e.getMessage())
+                    .endObj().toString();
         }
-        String name = out.toString().replaceAll("-+", "-").replaceAll("^-|-$", "");
-        return (name.isEmpty() ? "horse" : name) + ".json";
+        HorseEditor ed = editor();
+        ed.paste(horse.genotype());
+        boolean droppedEpigenome = !horse.epigenome().isEmpty()
+                && !ed.setEpigenome(horse.epigenome());
+        ed.setName(horse.first(), horse.last());
+        ed.setBaby(horse.baby());
+        ed.setSex(horse.female());
+        boolean droppedBreed = !ed.stampBreed(horse.breed());
+        return new Json().obj().kv("ok", true)
+                .kv("droppedEpigenome", droppedEpigenome)
+                .kv("droppedBreed", droppedBreed)
+                .endObj().toString();
     }
 
     // ---- gene previews -----------------------------------------------------
