@@ -1804,6 +1804,32 @@
     and <code>node wiki/tools/build-search-index.mjs</code> so it becomes searchable.
 </p>
 
+<h2 id="generated-stats">Generate the landing page&rsquo;s headline numbers</h2>
+
+<p>
+    <code>index.html</code>&rsquo;s hero states the gene count, the breed count, the size
+    of the genotype space and the number of visually distinct coats. All four are derived,
+    all four are hand-written, and on 2026-09-07 three of them were found stale - the coat
+    space by six orders of magnitude (<a href="known-gaps.html#gap-93">gap 93</a>). They
+    have been corrected, and nothing stops them drifting again.
+</p>
+
+<p>
+    <strong>The job:</strong> a small Gradle task that writes <code>wiki/stats.js</code> -
+    four numbers off <code>Genes.codeOrder().size()</code>,
+    <code>Breeds.all().size()</code>, <code>GenotypeCatalog.totalGenotypes()</code> and
+    <code>GenotypeCatalog.size()</code> - and a few lines in
+    <code>wiki/index-views.js</code> to write them into the hero. Run it beside
+    <code>:web:bakeDesignerAssets</code>, which already exists for the same reason, and add
+    it to CLAUDE.md&rsquo;s regenerate table.
+</p>
+
+<p class="muted">
+    Small, and worth doing because it is the third time a derived number in this wiki has
+    been found wrong by hand. The alternative - remembering to re-check four numbers on a
+    page nobody edits, every time a gene is added - is what has already failed twice.
+</p>
+
 </article>
 </main>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
