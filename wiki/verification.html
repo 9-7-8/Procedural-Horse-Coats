@@ -35,6 +35,117 @@
     </p>
 </div>
 
+<h2 id="gene-fixes">&sect;0-AO &mdash; Twenty-four gene fixes, four new painters and a polygenic locus (2026-09-08, NOT looked at)</h2>
+
+<p>
+    Owner-driven, off a list of twenty-four notes taken from looking at the horses.
+    Design: <a href="session-log.html#gene-fixes-2026-09-08">the session-log entry</a>.
+    Every gene below was re-baked and looked at from six angles on a contact sheet before
+    it was called done, which catches a gene that paints nothing and catches nothing
+    else &mdash; how any of it reads on a moving horse in daylight is exactly what is
+    unverified.
+</p>
+
+<h3>The one that changes horses you already have</h3>
+
+<ul>
+<li><strong>A layer whose masks were unioned was being truncated, in fifteen genes.</strong>
+    The mask fold bailed out as soon as coverage hit zero on a <code>MULTIPLY</code>
+    mask, without checking whether a later <code>MAX</code> or <code>ADD</code> could put
+    it back &mdash; so <em>every</em> union of two regions silently kept only the first.
+    <a href="gene-panda.html">Panda</a> is where it was caught (its hindquarter patch
+    never drew at all), but <code>brindlelace</code>, <code>cleave</code>,
+    <code>cosmic</code>, <code>dutch</code>, <code>emitola</code>,
+    <code>flametouched</code>, <code>fracture</code>, <code>imperial</code>,
+    <code>marble_tobiano</code>, <code>patina</code>, <code>quarter</code>,
+    <code>stardust</code>, <code>waves</code> and <code>yalia</code> all use the same
+    shape. <strong>Look at all of them</strong> &mdash; the ones this session did not
+    otherwise touch are the interesting cases, because their fix is invisible in the
+    diff. Both engines had the same line, so parity was green about it throughout.</li>
+</ul>
+
+<h3>The four new painters</h3>
+
+<ul>
+<li><strong><code>WAVES</code></strong> &mdash; a band whose edge is a sine, a triangle or
+    a sawtooth. It is the only periodic shape in the vocabulary and three genes now
+    depend on it: <a href="gene-waves.html">Waves</a>' lobed edge,
+    <a href="gene-angler.html">Angler</a>'s strings of lights, and
+    <a href="gene-cleave.html">Cleave</a>'s teeth. Check the lobes are <em>even</em> -
+    that is the whole point of it, and it is the thing noise could never do.</li>
+<li><strong><code>CRACKLE</code></strong> &mdash; tiling polygons with an even channel
+    between them. <a href="gene-qular.html">Qular</a> is the giraffe built on it. Check
+    the panel edges are straight and the corners meet three at a time; a rounded corner
+    means the warp is too high.</li>
+<li><strong><code>SPOTS</code> with <code>"shape": "heart"</code></strong> &mdash;
+    <a href="gene-valentine-appaloosa.html">Valentine</a>. A heart is about four texels
+    across at the size it is drawn, so whether it reads as a heart <em>in game</em>
+    rather than on a contact sheet is genuinely unknown. If it reads as a blob, the
+    lever is <code>radius</code> and <code>spacing</code> together.</li>
+<li><strong><code>PIGMENT</code> with <code>spread</code></strong> &mdash;
+    <a href="gene-fielded.html">Fielded</a> now draws nothing at all on a horse with no
+    white, and grows out of the edges of whatever white there is. The dilation is done in
+    <em>sheet</em> space rather than body space, so it can in principle leak across a UV
+    seam; nothing obvious showed on the bakes, but a wisp appearing somewhere with no
+    white near it on the horse would be that.</li>
+</ul>
+
+<h3>Accretion is two loci now</h3>
+
+<ul>
+<li><a href="gene-accretion.html">Accretion</a> decides whether there is a pale field and
+    what colour it is; <a href="gene-accretion-field.html">Accretion Field</a> decides
+    whether it takes the topline or the underside, paints nothing on its own, and is
+    carried by every horse alive. <strong>Breed a pair of underside-marked horses and
+    look for a topline foal</strong> &mdash; that is the observable the split exists for,
+    and it is the only way to tell the new model from the old one from inside the game.</li>
+<li>The <code>needs</code> block that makes it work is new format. A gene file naming a
+    locus that does not exist silently never matches, by design, so a typo in a gene key
+    is invisible: if a horse shows the wrong half of a two-locus gene, check the key
+    spelling first.</li>
+</ul>
+
+<h3>The rest of the list, briefly</h3>
+
+<ul>
+<li><strong>Thinner and more broken</strong>: <a href="gene-brindle.html">brindle</a>.</li>
+<li><strong>Moved or extended</strong>: <a href="gene-collar.html">collar</a> up onto the
+    neck, <a href="gene-cosmic.html">cosmic</a> the length of the neck,
+    <a href="gene-emitola.html">emitola</a> onto belly and legs,
+    <a href="gene-masked.html">masked</a> over the cheeks,
+    <a href="gene-nimbus.html">nimbus</a> down the legs,
+    <a href="gene-opossum.html">opossum</a> onto the front legs,
+    <a href="gene-quazars.html">quazars</a> onto the legs,
+    <a href="gene-shark.html">shark</a> round the base of the neck,
+    <a href="gene-yalia.html">yalia</a> down the legs.</li>
+<li><strong>Rebuilt</strong>: <a href="gene-quarter.html">quarter</a> (it read as a
+    second nimbus and is now actual quadrants), <a href="gene-waves.html">waves</a>,
+    <a href="gene-patina.html">patina</a> (whose <code>PIGMENT</code> thresholds were
+    inverted, so the verdigris was landing on the dark parts).</li>
+<li><strong>Goth is on the other edge of the neck.</strong> A Y band on the adult neck is
+    a <em>collar</em>, because the neck is pitched thirty degrees &mdash; it wrapped the
+    throat as readily as the crest. The hood is now a tilted plane. That trick
+    (<code>WAVES</code> with a sawtooth longer than the horse) is used by goth and cosmic
+    and is worth a look on both: it is calibrated to the current pitch and nothing
+    fails if the pitch changes.</li>
+<li><strong>Hued pangare is a Java gene now</strong> and shares
+    <a href="gene-pangare.html">pangare</a>'s own region map.
+    <strong>Check ordinary pangare has not moved</strong> &mdash; the shared method came
+    out of its painter, and a bay's mealy underside is the thing to compare.</li>
+<li><strong>Flametouched's gradient form is single-coloured.</strong> Whether that is what
+    was meant by &ldquo;the single-color flametouched&rdquo; is the one item on the list
+    that was interpreted rather than read; say so if it is wrong.</li>
+</ul>
+
+<h3>The wiki, not the game</h3>
+
+<ul>
+<li>Every gene preview window now offers <strong>six base coats</strong> rather than
+    three &mdash; bay, black, chestnut, then a tobiano, splash and sabino bay. The
+    <a href="lut-lab/">LUT lab</a> reads the same list and gained the same three buttons;
+    it has not been opened since.</li>
+</ul>
+
 <h2 id="magic-import">&sect;0-AN &mdash; Eighty-four magical genes, imported in bulk (2026-09-08, NOT looked at)</h2>
 
 <p>

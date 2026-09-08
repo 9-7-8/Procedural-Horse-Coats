@@ -220,6 +220,19 @@ public Expression expressionOf(AllelePair pair) {
     &mdash; typically a wild type, meaning &ldquo;suppressed here&rdquo;.
 </p>
 
+<p>
+    <strong>A data-driven gene can do this too now.</strong> An expression in a
+    <a href="gene-format.html#needs">gene file</a> may carry a <code>needs</code> block
+    naming another locus and a copy count, and <code>SpecGene</code> implements
+    <code>expressionIn</code> and <code>coatDependsOn</code> off it. That is the whole of
+    the addition: no new concept, just a way to reach the hook the leopard complex has
+    used since long before the file format existed.
+    <a href="gene-accretion.html">Accretion</a> is the gene built on it &mdash; one locus
+    decides whether there is a pale field and what colour it is, and
+    <a href="gene-accretion-field.html">Accretion Field</a>, which paints nothing at all
+    and which every horse carries, decides whether it takes the topline or the underside.
+</p>
+
 <h2 id="founders">Founder frequency, per combination</h2>
 
 <p>
@@ -377,8 +390,10 @@ public Expression expressionOf(AllelePair pair) {
     it is simply never a founder, because a founder is an adult that survived. The
     death is modelled; see <a href="horse-body.html">the horse&rsquo;s body</a> and
     <a href="gene-ednrb.html">its page</a>.
-    &para;&para; <strong>The leopard complex is the model&rsquo;s only cross-locus
-    gene.</strong> <a href="gene-leopard.html"><code>LP</code></a> reads
+    &para;&para; <strong>The leopard complex was the model&rsquo;s first cross-locus
+    gene</strong>, and <a href="gene-accretion.html">accretion</a> is the second &mdash;
+    the first to do it from a file rather than from Java.
+    <a href="gene-leopard.html"><code>LP</code></a> reads
     <code>PATN1</code> and <code>PATN2</code> in <code>expressionIn</code> to pick
     one of eight outcomes (leopard, fewspot, spotted blanket, snowcap, semi-leopard,
     or the plain <code>LP</code> looks). The modifiers paint nothing on their own, so

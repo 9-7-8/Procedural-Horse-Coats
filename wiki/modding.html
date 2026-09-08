@@ -1026,7 +1026,11 @@ PigmentField after  = new SilverGene().restrict(pair, ctx, before);
 <li><code>wiki/gene-creator/js/schema.js</code> and
     <code>js/spec-engine.js</code> &mdash; the creator's mirror of both. The fallbacks
     must be <em>identical</em>: the creator drops any setting equal to its default, so a
-    default that differs writes a file that plays differently from how it previewed.</li>
+    default that differs writes a file that plays differently from how it previewed.
+    If the mask needs a <em>new field</em> out of <code>BodyNoise</code> rather than one
+    of the ones already there, that is a fifth file &mdash;
+    <code>wiki/gene-creator/js/noise.js</code>, which is where the hash arithmetic is
+    ported, and where <code>CRACKLE</code>'s <code>cellEdge</code> had to go.</li>
 <li><a href="gene-format.html">wiki/gene-format.html</a> &mdash; the table a gene author
     reads.</li>
 </ol>
