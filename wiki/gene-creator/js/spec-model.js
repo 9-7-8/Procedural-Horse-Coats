@@ -185,7 +185,16 @@ window.HG = window.HG || {};
   function newOp(type) {
     var op = { type: type };
     schema.OPS[type].params.forEach(function (p) {
-      op[p.name] = p.kind === "COLOR" ? "#ff69b4" : initial(p);
+      if (p.kind === "COLOR") {
+        op[p.name] = "#ff69b4";
+      } else if (p.kind === "COLORS") {
+        // Two stops, because one is not a ramp and the parser says so. Starting
+        // a RAMP empty would work - it would fall through to the hue sweep -
+        // but then the stop list only appears once you already knew it existed.
+        op[p.name] = ["#ff69b4", "#69b4ff"];
+      } else {
+        op[p.name] = initial(p);
+      }
     });
     return op;
   }
@@ -398,7 +407,15 @@ window.HG = window.HG || {};
     schema.OPS[op.type].params.forEach(function (p) {
       var v = op[p.name];
       if (v === undefined || v === null || v === "") return;
-      out[p.name] = p.kind === "COLOR" ? String(v) : tidyValue(v);
+      if (p.kind === "COLOR") {
+        out[p.name] = String(v);
+      } else if (p.kind === "COLORS") {
+        if (v.length) {
+          out[p.name] = v.map(String);
+        }
+      } else {
+        out[p.name] = tidyValue(v);
+      }
     });
     return out;
   }

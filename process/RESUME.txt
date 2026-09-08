@@ -1,0 +1,72 @@
+MAGIC GENE BULK IMPORT - resume notes
+=====================================
+
+WHAT THIS IS
+  process/*.md are source descriptions for ~85 new magical genes.
+  process/index.csv is the manifest: gene, source file, allele token, painter
+  family, and whether it has been created yet. CHECK index.csv BEFORE creating
+  any gene - if its row says "yes", it is already done.
+
+  As each gene ships, its section is deleted out of the source .md. When a .md
+  holds nothing but whitespace it is deleted outright. So the .md files shrink
+  as the run proceeds, and what is left in them is what is left to do.
+
+RULES THIS RUN IS WORKING UNDER (from the owner)
+  - Genes may glow or emit particles. Nothing else. No gameplay effects, no
+    stat changes, no ability grants, however magical the description sounds.
+  - Nothing changes after the coat is baked. No age progression, no seasonal
+    drift, no "reaches full expression at 8-10 years".
+  - A gene that would break either rule: refuse the offending part, build the
+    rest, and write the refusal into wiki/verification.html.
+  - A gene that adds ONLY white gets two alleles: a white one (dominant) and a
+    colour one (fully recessive, needs two copies). The colour allele never
+    gives blue eyes even when the white one would. If the source calls the gene
+    recessive, the white allele is homozygous-only too.
+  - Name or allele-token collision: append 2, then 3, and so on. The owner will
+    rename later.
+  - JSON, not Java, unless the gene genuinely cannot be described as data.
+  - Ignore breed references, DeviantArt, and HARPG scoring (coins, karma, RP).
+
+ORDER OF WORK
+  1. DONE - shared painters first, so the genes can be data. See below.
+  2. Genes in groups of five, by painter family, checking after each group.
+  3. Wiki: group the magic genes by type rather than 85 loose pages; sort the
+     magic gene tabs alphabetically; give each an icon baked from an example of
+     the gene on a bay horse; switch every gene page's preview default from
+     black to bay.
+
+PHASE 1 - INFRASTRUCTURE (COMPLETE)
+  New masks   SPOTS, RINGS, SPECKLE, STROKES, SPIRAL
+  New ops     RAMP (colour along an axis), PALETTE (colour per cell)
+  New on both TOWARD and FLAT: hue / saturation / lightness, so a colour can
+              come off a knob instead of being a literal. hue < 0 means "not
+              set, use color" - a sentinel, not a presence test, because the
+              creator carries every parameter whether or not you touched it.
+  New on Layer: "emissive": true -> the texels it covers render full-bright.
+  Landed in:  GeneSpec, SpecSchema, GeneSpecParser, SpecPainter, SpecGene,
+              BodyNoise (Cell + ridge), wiki/gene-creator/js/{schema,spec-engine,
+              noise,ui,spec-model}.js, creator.css, wiki/gene-format.html.
+  Fixture:    common/.../example-genes/prismatic.json exercises every new mask
+              and op; it is in SpecFixtureTool.SPECS and CreatorAssetTool.
+              WITHOUT it the parity check is green by definition.
+
+  Loading:    Genes' static initialiser now registers the files listed in
+              horsegenetics/genes/index.json. Nothing called that before, so
+              suntouched and waterborn were shipped but dead; they now load.
+              The NeoForge copy of that folder was deleted - one folder, in
+              common/ - and the coat golden file was regenerated because the
+              two genes now occupy real positions in the genotype code.
+  Browser:    :common:bakeGeneBundle writes wiki/horse-designer/assets/genes.json;
+              DesignerApi.registerGenes takes it; java.js registers genes BEFORE
+              breeds, because adding a gene moves every gene after it.
+
+AFTER TOUCHING ANY GENE FILE, RE-RUN
+  ./gradlew :common:bakeGeneBundle          (the browser's copy)
+  ./gradlew :common:test                    (golden file moves when a gene does)
+  ./gradlew :common:bakeSpecFixtures && node wiki/gene-creator/tools/check-parity.mjs
+  ./gradlew :web:bakeDesignerAssets         (any common/ change at all)
+
+PHASE 2 - GENES: see process/index.csv for per-gene state.
+
+OPEN QUESTIONS PARKED FOR THE OWNER
+  Written up in wiki/verification.html as they are found, not here.

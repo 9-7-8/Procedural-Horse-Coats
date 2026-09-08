@@ -118,15 +118,56 @@ public final class SpecPainter {
                 int leg = legIndex(part);
                 double k = coverage(layer, values, skin, bounds, part, point, coat, px, py, leg, fallbackSeed);
                 if (k > 0) {
-                    applyColour(layer.op(), values, delta, colour, px, py, leg, k);
+                    applyColour(layer.op(), values, delta, colour, skin, bounds, part, point,
+                            px, py, leg, k, fallbackSeed);
                 }
             });
         }
         return delta;
     }
 
+    // ------------------------------------------------------------------
+    // Phase 4 - the overlay, where glow is decided
+    // ------------------------------------------------------------------
+
+    /**
+     * Mark every texel an {@code emissive} layer covers as full-bright.
+     *
+     * <p>It runs in the <b>overlay</b> pass rather than in {@link #tint},
+     * because that is the pass {@code CoatOverlay} - and so
+     * {@code markEmissive} - exists in. The layers are re-walked rather than
+     * remembered from phase 3: masks are pure functions of the geometry and the
+     * horse's drawn values, so walking them twice costs a little time and buys
+     * not having to carry a boolean sheet through two phases that have no use
+     * for it.
+     *
+     * <p>The one thing lost by running here is the coat: a {@code PIGMENT} mask
+     * has no pigment field to read once the texture is baked. {@code
+     * GeneSpecParser} rejects that combination outright rather than letting it
+     * quietly read as zero.
+     */
+    public static void emissive(GeneSpec spec, List<Layer> layers, SpecValues values,
+                                Skin skin, CoatOverlay out) {
+        Map<Part, Bounds> bounds = boundsOf(skin);
+        for (int i = 0; i < layers.size(); i++) {
+            Layer layer = layers.get(i);
+            if (!layer.emissive()) {
+                continue;
+            }
+            long fallbackSeed = layerSeed(spec, i);
+            HorseSkinGeometry.forEachTexel(skin, (px, py, part, face, point) -> {
+                double k = coverage(layer, values, skin, bounds, part, point, null, px, py,
+                        legIndex(part), fallbackSeed);
+                if (k >= GeneSpec.EMISSIVE_THRESHOLD) {
+                    out.markEmissive(px, py);
+                }
+            });
+        }
+    }
+
     private static void applyColour(Op op, SpecValues v, ColorField delta, ColorView colour,
-                                    int px, int py, int leg, double k) {
+                                    Skin skin, Map<Part, Bounds> bounds, Part part, BodyPoint point,
+                                    int px, int py, int leg, double k, long seedBase) {
         Params p = op.params();
         switch (op.type()) {
             case TINT -> {
@@ -136,18 +177,17 @@ public final class SpecPainter {
                         percentToChannel(v.get(p.value("blue", 0.0), leg) * k));
                 delta.addOpacity(px, py, percentToChannel(v.get(p.value("opacity", 100.0), leg) * k));
             }
-            case TOWARD -> {
-                int rgb = p.color("color", 0xFFFFFF);
-                double strength = v.get(p.value("strength", 100.0), leg) / 100.0 * k;
-                delta.add(px, py,
-                        toward(colour, px, py, 0, (rgb >> 16) & 0xFF, strength),
-                        toward(colour, px, py, 1, (rgb >> 8) & 0xFF, strength),
-                        toward(colour, px, py, 2, rgb & 0xFF, strength));
-                int wantOpacity = percentToChannel(v.get(p.value("opacity", 100.0), leg));
-                delta.addOpacity(px, py, (int) Math.round((wantOpacity - colour.opacity(px, py)) * k));
+            case TOWARD -> towardColour(delta, colour, p, v, leg, px, py, k, solidColour(op, v, leg));
+            case RAMP -> {
+                int rgb = rampColour(op, v, leg, axisPosition(op, v, leg, skin, bounds, part, point));
+                towardColour(delta, colour, p, v, leg, px, py, k, rgb);
+            }
+            case PALETTE -> {
+                int rgb = paletteColour(op, v, leg, point, seedBase);
+                towardColour(delta, colour, p, v, leg, px, py, k, rgb);
             }
             case FLAT -> {
-                int rgb = p.color("color", 0xFFFFFF);
+                int rgb = solidColour(op, v, leg);
                 int wantOpacity = percentToChannel(v.get(p.value("opacity", 100.0), leg));
                 delta.set(px, py,
                         (int) Math.round(lerp(colour.opacity(px, py), wantOpacity, k)),
@@ -157,6 +197,157 @@ public final class SpecPainter {
             }
             default -> throw new IllegalStateException("not a colour op: " + op.type());
         }
+    }
+
+    /**
+     * The {@code TOWARD} move, shared by the three ops that make it: walk the
+     * texel's <i>visible</i> colour a share of the way to {@code rgb}, then take
+     * its opacity a matching share of the way to what the layer asked for. All
+     * that separates {@code TOWARD}, {@code RAMP} and {@code PALETTE} is where
+     * {@code rgb} came from.
+     */
+    private static void towardColour(ColorField delta, ColorView colour, Params p, SpecValues v,
+                                     int leg, int px, int py, double k, int rgb) {
+        double strength = v.get(p.value("strength", 100.0), leg) / 100.0 * k;
+        delta.add(px, py,
+                toward(colour, px, py, 0, (rgb >> 16) & 0xFF, strength),
+                toward(colour, px, py, 1, (rgb >> 8) & 0xFF, strength),
+                toward(colour, px, py, 2, rgb & 0xFF, strength));
+        int wantOpacity = percentToChannel(v.get(p.value("opacity", 100.0), leg));
+        delta.addOpacity(px, py, (int) Math.round((wantOpacity - colour.opacity(px, py)) * k));
+    }
+
+    /**
+     * The colour a {@code TOWARD} or {@code FLAT} layer aims at: the literal
+     * {@code color}, unless {@code hue} is 0 or above - in which case it is
+     * built from HSL, and {@code hue} may be a knob. That one indirection is
+     * what lets a single gene file paint a different colour on every line of
+     * horses rather than the one colour its author happened to type.
+     *
+     * <p>The switch is a <b>negative sentinel</b> rather than "is the key
+     * present", because the gene creator carries every parameter at its default
+     * whether or not the author touched it. A presence test would have the
+     * preview take the HSL path and the exported file take the colour one.
+     */
+    private static int solidColour(Op op, SpecValues v, int leg) {
+        Params p = op.params();
+        double hue = v.get(p.value("hue", -1), leg);
+        if (hue < 0) {
+            return p.color("color", 0xFFFFFF);
+        }
+        return hsl(hue, v.get(p.value("saturation", 0.8), leg),
+                v.get(p.value("lightness", 0.55), leg));
+    }
+
+    /** Where along a {@code RAMP}'s axis this texel sits, as a 0..1 position between its stops. */
+    private static double axisPosition(Op op, SpecValues v, int leg, Skin skin,
+                                       Map<Part, Bounds> bounds, Part part, BodyPoint point) {
+        Params p = op.params();
+        Axis axis = Axis.valueOf(p.text("axis", "X").toUpperCase(java.util.Locale.ROOT));
+        double coord = point.along(axis);
+        Bounds partBounds = bounds.get(part);
+        double t = switch (p.text("space", "part")) {
+            case "body" -> normalise(coord, HorseSkinGeometry.bodyBounds(skin), axis);
+            case "units" -> coord;
+            default -> partBounds == null ? 0 : normalise(coord, partBounds, axis);
+        };
+        double from = v.get(p.value("from", 0.0), leg);
+        double to = v.get(p.value("to", 1.0), leg);
+        return to == from ? 0 : clamp01((t - from) / (to - from));
+    }
+
+    /** The stop, or the swept hue, a {@code RAMP} reaches at position {@code t}. */
+    private static int rampColour(Op op, SpecValues v, int leg, double t) {
+        Params p = op.params();
+        List<Integer> stops = p.colors("colors");
+        if (stops.isEmpty()) {
+            double span = v.get(p.value("hueSpan", 60.0), leg);
+            return hsl(v.get(p.value("hue", 0), leg) + span * t,
+                    v.get(p.value("saturation", 0.8), leg),
+                    v.get(p.value("lightness", 0.55), leg));
+        }
+        // n stops make n-1 segments; t lands in one and interpolates across it,
+        // so the ramp comes out continuous rather than banded.
+        double scaled = t * (stops.size() - 1);
+        int i = (int) Math.floor(scaled);
+        if (i >= stops.size() - 1) {
+            return stops.get(stops.size() - 1);
+        }
+        return mixRgb(stops.get(i), stops.get(i + 1), scaled - i);
+    }
+
+    /**
+     * The colour a {@code PALETTE} layer gives this texel: one entry of the
+     * palette, chosen by the cell the texel falls in. Neighbouring cells take
+     * unrelated entries and meet at a wall, which is the whole difference
+     * between an opal and a gradient.
+     */
+    private static int paletteColour(Op op, SpecValues v, int leg, BodyPoint point, long seedBase) {
+        Params p = op.params();
+        long seed = v.seed(p.value("seed", 0), seedBase);
+        double scale = Math.max(0.05, v.get(p.value("scale", 5.0), leg));
+        BodyNoise.Cell cell = BodyNoise.cell(seed,
+                point.x() / scale, point.y() / scale, point.z() / scale);
+        List<Integer> palette = p.colors("colors");
+        if (!palette.isEmpty()) {
+            int i = (int) (cell.pick() * palette.size());
+            return palette.get(Math.min(i, palette.size() - 1));
+        }
+        double spread = v.get(p.value("hueSpread", 40.0), leg);
+        return hsl(v.get(p.value("hue", 0), leg) + (cell.pick() * 2 - 1) * spread,
+                v.get(p.value("saturation", 0.8), leg),
+                v.get(p.value("lightness", 0.55), leg));
+    }
+
+    private static int mixRgb(int a, int b, double t) {
+        int r = (int) Math.round(lerp((a >> 16) & 0xFF, (b >> 16) & 0xFF, t));
+        int g = (int) Math.round(lerp((a >> 8) & 0xFF, (b >> 8) & 0xFF, t));
+        int bl = (int) Math.round(lerp(a & 0xFF, b & 0xFF, t));
+        return (r << 16) | (g << 8) | bl;
+    }
+
+    /** HSL to {@code 0xRRGGBB}. {@code h} is in degrees and wraps; {@code s} and {@code l} clamp. */
+    static int hsl(double h, double s, double l) {
+        double hue = (((h % 360) + 360) % 360) / 60.0;
+        double sat = clamp01(s);
+        double light = clamp01(l);
+        double c = (1 - Math.abs(2 * light - 1)) * sat;
+        double x = c * (1 - Math.abs(hue % 2 - 1));
+        double m = light - c / 2;
+        double r;
+        double g;
+        double b;
+        if (hue < 1) {
+            r = c;
+            g = x;
+            b = 0;
+        } else if (hue < 2) {
+            r = x;
+            g = c;
+            b = 0;
+        } else if (hue < 3) {
+            r = 0;
+            g = c;
+            b = x;
+        } else if (hue < 4) {
+            r = 0;
+            g = x;
+            b = c;
+        } else if (hue < 5) {
+            r = x;
+            g = 0;
+            b = c;
+        } else {
+            r = c;
+            g = 0;
+            b = x;
+        }
+        return (channel(r + m) << 16) | (channel(g + m) << 8) | channel(b + m);
+    }
+
+    private static int channel(double v) {
+        int i = (int) Math.round(v * 255);
+        return i < 0 ? 0 : (i > 255 ? 255 : i);
     }
 
     /**
@@ -286,6 +477,122 @@ public final class SpecPainter {
                 };
                 return BodyStripes.smoothstep(v.get(p.value("from", 0.5), leg),
                         v.get(p.value("to", 1.0), leg), reading);
+            }
+            case SPOTS: {
+                long seed = v.seed(p.value("seed", 0), seedBase);
+                double spacing = Math.max(0.05, v.get(p.value("spacing", 4.0), leg));
+                double stretch = Math.max(0.05, v.get(p.value("stretch", 1.0), leg));
+                Axis longAxis = Axis.valueOf(p.text("axis", "X").toUpperCase(java.util.Locale.ROOT));
+                // Squashing the sample along one axis before the lattice walk is
+                // what makes an oval: the cells stay round in the squashed frame
+                // and come out stretched on the horse.
+                BodyNoise.Cell cell = BodyNoise.cell(seed,
+                        point.x() / (spacing * (longAxis == Axis.X ? stretch : 1)),
+                        point.y() / (spacing * (longAxis == Axis.Y ? stretch : 1)),
+                        point.z() / (spacing * (longAxis == Axis.Z ? stretch : 1)));
+                if (cell.pick() >= v.get(p.value("chance", 1.0), leg)) {
+                    return 0;
+                }
+                double vary = clamp01(v.get(p.value("vary", 0.5), leg));
+                double radius = v.get(p.value("radius", 0.9), leg) * (1 - vary + 2 * vary * cell.size());
+                double soft = Math.max(1e-6, v.get(p.value("softness", 0.25), leg));
+                return 1.0 - BodyStripes.smoothstep(radius, radius + soft, cell.distance() * spacing);
+            }
+            case RINGS: {
+                long seed = v.seed(p.value("seed", 0), seedBase);
+                double spacing = Math.max(0.05, v.get(p.value("spacing", 6.0), leg));
+                BodyNoise.Cell cell = BodyNoise.cell(seed,
+                        point.x() / spacing, point.y() / spacing, point.z() / spacing);
+                if (cell.pick() >= v.get(p.value("chance", 1.0), leg)) {
+                    return 0;
+                }
+                double vary = clamp01(v.get(p.value("vary", 0.4), leg));
+                double radius = v.get(p.value("radius", 2.0), leg) * (1 - vary + 2 * vary * cell.size());
+                double half = Math.max(1e-6, v.get(p.value("thickness", 0.6), leg)) / 2;
+                double soft = Math.max(1e-6, v.get(p.value("softness", 0.2), leg));
+                double ring = 1.0 - BodyStripes.smoothstep(half, half + soft,
+                        Math.abs(cell.distance() * spacing - radius));
+                double arc = clamp01(v.get(p.value("arc", 1.0), leg));
+                if (arc >= 1) {
+                    return ring;
+                }
+                // A crescent is a ring with a wedge missing. The wedge opens at
+                // the ring's own angle, so every crescent on the horse faces a
+                // different way instead of all of them pointing at one corner.
+                double theta = Math.atan2(cell.dy(), cell.dz()) / (2 * Math.PI) + 0.5;
+                return (((theta - cell.angle()) % 1) + 1) % 1 <= arc ? ring : 0;
+            }
+            case SPECKLE: {
+                long seed = v.seed(p.value("seed", 0), seedBase);
+                double spacing = Math.max(0.02, v.get(p.value("spacing", 0.7), leg));
+                BodyNoise.Cell cell = BodyNoise.cell(seed,
+                        point.x() / spacing, point.y() / spacing, point.z() / spacing);
+                double density = clamp01(v.get(p.value("density", 0.5), leg));
+                double clumping = clamp01(v.get(p.value("clumping", 0.0), leg));
+                if (clumping > 0) {
+                    double clumpScale = Math.max(0.05, v.get(p.value("clumpScale", 7.0), leg));
+                    double n = BodyNoise.value(seed ^ 0x5EC1EL,
+                            point.x() / clumpScale, point.y() / clumpScale, point.z() / clumpScale);
+                    density = clamp01(density * (1 - clumping + 2 * clumping * n));
+                }
+                if (cell.pick() >= density) {
+                    return 0;
+                }
+                double radius = clamp01(v.get(p.value("size", 0.45), leg));
+                double soft = Math.max(1e-6, v.get(p.value("softness", 0.3), leg)) * radius;
+                return 1.0 - BodyStripes.smoothstep(radius, radius + soft, cell.distance());
+            }
+            case STROKES: {
+                long seed = v.seed(p.value("seed", 0), seedBase);
+                double spacing = Math.max(0.05, v.get(p.value("spacing", 3.0), leg));
+                double length = Math.max(0.05, v.get(p.value("length", 12.0), leg));
+                Axis longAxis = Axis.valueOf(p.text("axis", "X").toUpperCase(java.util.Locale.ROOT));
+                double curl = v.get(p.value("curl", 0.35), leg) * spacing;
+                // Warping the sample before the ridge is what stops the strokes
+                // reading as a comb: it is the difference between parallel lines
+                // and lines that wander, fork and pinch out the way drawn ones do.
+                double w = BodyNoise.value(seed ^ 0x71L, point.x() / (spacing * 4),
+                        point.y() / (spacing * 4), point.z() / (spacing * 4));
+                double sx = point.x() + (longAxis == Axis.X ? 0 : (w - 0.5) * curl);
+                double sy = point.y() + (longAxis == Axis.Y ? 0 : (w - 0.5) * curl);
+                double sz = point.z() + (longAxis == Axis.Z ? 0 : (w - 0.5) * curl);
+                double ridge = BodyNoise.ridge(seed,
+                        sx / (longAxis == Axis.X ? length : spacing),
+                        sy / (longAxis == Axis.Y ? length : spacing),
+                        sz / (longAxis == Axis.Z ? length : spacing));
+                double width = clamp01(v.get(p.value("width", 0.35), leg));
+                double soft = Math.max(1e-6, v.get(p.value("softness", 0.25), leg)) * Math.max(width, 1e-3);
+                return BodyStripes.smoothstep(1 - width - soft, 1 - width, ridge);
+            }
+            case SPIRAL: {
+                long seed = v.seed(p.value("seed", 0), seedBase);
+                Bounds b = bounds.get(part);
+                if (b == null) {
+                    return 0;
+                }
+                Axis view = Axis.valueOf(p.text("axis", "Z").toUpperCase(java.util.Locale.ROOT));
+                Axis u = view == Axis.X ? Axis.Y : Axis.X;
+                Axis w2 = view == Axis.Z ? Axis.Y : Axis.Z;
+                double cu = (b.min(u) + b.max(u)) / 2 + v.get(p.value("offset", 0.0), leg) * b.span(u);
+                double cw = (b.min(w2) + b.max(w2)) / 2;
+                double du = point.along(u) - cu;
+                double dw = point.along(w2) - cw;
+                double r = Math.sqrt(du * du + dw * dw);
+                double outer = Math.max(0.05, v.get(p.value("radius", 4.0), leg));
+                if (r > outer) {
+                    return 0;
+                }
+                // Archimedean: the arm sits wherever the radius matches how far
+                // the angle has turned, and the rounding picks whichever
+                // revolution of the arm is nearest to this texel.
+                double turns = Math.max(0.25, v.get(p.value("turns", 2.0), leg));
+                double pitch = outer / turns;
+                double theta = Math.atan2(dw, du) / (2 * Math.PI) + (seed & 0xFF) / 255.0;
+                double offsetR = r - ((theta % 1) + 1) % 1 * pitch;
+                double nearest = Math.abs(offsetR - Math.round(offsetR / pitch) * pitch);
+                double half = Math.max(1e-6, v.get(p.value("width", 0.5), leg)) / 2;
+                double soft = Math.max(1e-6, v.get(p.value("softness", 0.2), leg));
+                return 1.0 - BodyStripes.smoothstep(half, half + soft, nearest);
             }
             default:
                 throw new IllegalStateException("unhandled mask " + mask.type());

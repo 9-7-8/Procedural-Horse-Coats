@@ -53,6 +53,77 @@ public final class BodyNoise {
         return d < 0 ? 0 : (d > 1 ? 1 : d);
     }
 
+    /**
+     * The nearest jittered lattice point to {@code (x, y, z)}, and two numbers
+     * drawn off <b>that point</b> rather than off the sample position.
+     *
+     * <p>{@link #cellDistance} answers "how far to the nearest centre", which is
+     * all a dapple field needs. A field of discrete <i>elements</i> - a spot, a
+     * ring, a disk in a chain - needs more: whether this particular element
+     * exists at all, how big it is, and which colour of a palette it took. All
+     * three are per-element decisions, so they have to be drawn off the element,
+     * and every texel inside one element must draw the same numbers. Hence a
+     * record: one lattice walk answers all of it.
+     *
+     * <p>{@code distance} is in <b>lattice units</b> (unnormalised, unlike
+     * {@code cellDistance}), so a caller that scaled its coordinates by
+     * {@code spacing} reads a radius in the same units it chose.
+     */
+    public record Cell(double distance, double dx, double dy, double dz,
+                       double pick, double size, double angle) {}
+
+    /** {@link Cell} for the jittered unit lattice - scale the coordinates to choose the spacing. */
+    public static Cell cell(long seed, double x, double y, double z) {
+        int cx = floor(x);
+        int cy = floor(y);
+        int cz = floor(z);
+        double best = Double.MAX_VALUE;
+        int bx = cx;
+        int by = cy;
+        int bz = cz;
+        for (int dx = -1; dx <= 1; dx++) {
+            for (int dy = -1; dy <= 1; dy++) {
+                for (int dz = -1; dz <= 1; dz++) {
+                    int lx = cx + dx;
+                    int ly = cy + dy;
+                    int lz = cz + dz;
+                    double px = lx + hash01(seed, lx, ly, lz, 1);
+                    double py = ly + hash01(seed, lx, ly, lz, 2);
+                    double pz = lz + hash01(seed, lx, ly, lz, 3);
+                    double d = (px - x) * (px - x) + (py - y) * (py - y) + (pz - z) * (pz - z);
+                    if (d < best) {
+                        best = d;
+                        bx = lx;
+                        by = ly;
+                        bz = lz;
+                    }
+                }
+            }
+        }
+        double px = bx + hash01(seed, bx, by, bz, 1);
+        double py = by + hash01(seed, bx, by, bz, 2);
+        double pz = bz + hash01(seed, bx, by, bz, 3);
+        return new Cell(Math.sqrt(best), x - px, y - py, z - pz,
+                hash01(seed, bx, by, bz, 11),
+                hash01(seed, bx, by, bz, 12),
+                hash01(seed, bx, by, bz, 13));
+    }
+
+    /**
+     * A <b>ridge</b> of the value field: 1 along the surfaces where the noise
+     * crosses its midpoint, falling to 0 either side.
+     *
+     * <p>This is the primitive behind every "tapering stroke" gene. Value noise
+     * sampled in a coordinate frame stretched along one axis produces
+     * contours that run along that axis; taking the ridge of it turns those
+     * contours into lines that curve, fork, pinch out and taper on their own -
+     * the shapes a hand-drawn marking has and a sine wave never does.
+     */
+    public static double ridge(long seed, double x, double y, double z) {
+        double n = value(seed, x, y, z);
+        return 1.0 - Math.abs(2.0 * n - 1.0);
+    }
+
     /** Smooth value noise in {@code [0, 1]} on a unit lattice - used to warp other fields. */
     public static double value(long seed, double x, double y, double z) {
         int x0 = floor(x);

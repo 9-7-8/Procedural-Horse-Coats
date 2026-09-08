@@ -78,7 +78,13 @@ window.HG = window.HG || {};
   function hash01(seedCache, seed, x, y, z, salt) {
     // Lattice coordinates stay small (a horse is ~22 units long), so this packs
     // cleanly into one number; anything out of range just misses the cache.
-    var key = (((x + 1024) * 2048 + (y + 1024)) * 2048 + (z + 1024)) * 8 + salt;
+    //
+    // The salt gets FOUR bits, not three. BodyNoise.cell draws its per-element
+    // numbers on salts 11-13, and a three-bit slot silently folded those onto
+    // salts 3, 4 and 5 - which is to say every spot on the horse took its size
+    // from its own z coordinate. It cost an afternoon; widen this before adding
+    // a salt, not after.
+    var key = (((x + 1024) * 2048 + (y + 1024)) * 2048 + (z + 1024)) * 16 + salt;
     var hit = seedCache.get(key);
     if (hit !== undefined) return hit;
 
@@ -122,6 +128,39 @@ window.HG = window.HG || {};
     return out < 0 ? 0 : (out > 1 ? 1 : out);
   }
 
+  /**
+   * The nearest jittered lattice point, with the vector to it and three numbers
+   * drawn off the point itself - the port of BodyNoise.cell. Distance is in
+   * lattice units here, NOT normalised the way cellDistance's is.
+   */
+  function cell(seed, x, y, z) {
+    var cache = cacheFor(seed);
+    var cx = floor(x), cy = floor(y), cz = floor(z);
+    var best = Infinity, bx = cx, by = cy, bz = cz;
+    for (var dx = -1; dx <= 1; dx++) {
+      for (var dy = -1; dy <= 1; dy++) {
+        for (var dz = -1; dz <= 1; dz++) {
+          var lx = cx + dx, ly = cy + dy, lz = cz + dz;
+          var px = lx + hash01(cache, seed, lx, ly, lz, 1);
+          var py = ly + hash01(cache, seed, lx, ly, lz, 2);
+          var pz = lz + hash01(cache, seed, lx, ly, lz, 3);
+          var d = (px - x) * (px - x) + (py - y) * (py - y) + (pz - z) * (pz - z);
+          if (d < best) { best = d; bx = lx; by = ly; bz = lz; }
+        }
+      }
+    }
+    var ax = bx + hash01(cache, seed, bx, by, bz, 1);
+    var ay = by + hash01(cache, seed, bx, by, bz, 2);
+    var az = bz + hash01(cache, seed, bx, by, bz, 3);
+    return {
+      distance: Math.sqrt(best),
+      dx: x - ax, dy: y - ay, dz: z - az,
+      pick: hash01(cache, seed, bx, by, bz, 11),
+      size: hash01(cache, seed, bx, by, bz, 12),
+      angle: hash01(cache, seed, bx, by, bz, 13)
+    };
+  }
+
   /** Smooth value noise in [0, 1] on a unit lattice. */
   function value(seed, x, y, z) {
     var cache = cacheFor(seed);
@@ -132,6 +171,11 @@ window.HG = window.HG || {};
     var c01 = lerp(hash01(cache, seed, x0, y0, z0 + 1, 0), hash01(cache, seed, x0 + 1, y0, z0 + 1, 0), fx);
     var c11 = lerp(hash01(cache, seed, x0, y0 + 1, z0 + 1, 0), hash01(cache, seed, x0 + 1, y0 + 1, z0 + 1, 0), fx);
     return lerp(lerp(c00, c10, fy), lerp(c01, c11, fy), fz);
+  }
+
+  /** The ridge of the value field - the primitive every tapering-stroke gene is built on. */
+  function ridge(seed, x, y, z) {
+    return 1 - Math.abs(2 * value(seed, x, y, z) - 1);
   }
 
   // ---- BodyStripes -----------------------------------------------------
@@ -167,6 +211,8 @@ window.HG = window.HG || {};
     K1: K1,
     K3: K3,
     cellDistance: cellDistance,
+    cell: cell,
+    ridge: ridge,
     value: value,
     stripeCoverage: stripeCoverage,
     smoothstep: smoothstep,

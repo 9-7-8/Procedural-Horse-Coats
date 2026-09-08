@@ -74,6 +74,17 @@ tasks.register<JavaExec>("bakeCreatorAssets") {
     args(rootProject.layout.projectDirectory.dir("wiki/gene-creator").asFile.absolutePath)
 }
 
+// Concatenate the shipped gene files into the single array the browser fetches.
+// The wiki tools cannot walk a classpath index; see GeneFileTool.
+tasks.register<JavaExec>("bakeGeneBundle") {
+    group = "horsegenetics"
+    description = "Write wiki/horse-designer/assets/genes.json from horsegenetics/genes/"
+    dependsOn(tasks.named("classes"))
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass.set("com.example.horsegenetics.common.genetics.spec.GeneFileTool")
+    args(rootProject.layout.projectDirectory.file("wiki/horse-designer/assets/genes.json").asFile.absolutePath)
+}
+
 // Write every registered breed out as a JSON file plus the classpath index the
 // loader reads. This is how the built-in breeds became data files, and how a
 // Java-defined breed is exported for someone to edit. Dev tooling only.

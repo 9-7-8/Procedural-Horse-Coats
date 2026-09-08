@@ -237,6 +237,95 @@ window.HG = window.HG || {};
         return smoothstep(get(values, mask.from, 0.5, legIndex),
           get(values, mask.to, 1, legIndex), reading);
       }
+      case "SPOTS": {
+        var sp = getSeed(values, mask.seed, seedBase);
+        var spacing4 = Math.max(0.05, get(values, mask.spacing, 4.0, legIndex));
+        var stretch = Math.max(0.05, get(values, mask.stretch, 1.0, legIndex));
+        var la = (mask.axis || "X").toUpperCase();
+        var c4 = noise.cell(sp,
+          point.x / (spacing4 * (la === "X" ? stretch : 1)),
+          point.y / (spacing4 * (la === "Y" ? stretch : 1)),
+          point.z / (spacing4 * (la === "Z" ? stretch : 1)));
+        if (c4.pick >= get(values, mask.chance, 1.0, legIndex)) return 0;
+        var vary4 = clamp01(get(values, mask.vary, 0.5, legIndex));
+        var rad4 = get(values, mask.radius, 0.9, legIndex) * (1 - vary4 + 2 * vary4 * c4.size);
+        var soft4 = Math.max(1e-6, get(values, mask.softness, 0.25, legIndex));
+        return 1 - smoothstep(rad4, rad4 + soft4, c4.distance * spacing4);
+      }
+      case "RINGS": {
+        var sr = getSeed(values, mask.seed, seedBase);
+        var spacing5 = Math.max(0.05, get(values, mask.spacing, 6.0, legIndex));
+        var c5 = noise.cell(sr, point.x / spacing5, point.y / spacing5, point.z / spacing5);
+        if (c5.pick >= get(values, mask.chance, 1.0, legIndex)) return 0;
+        var vary5 = clamp01(get(values, mask.vary, 0.4, legIndex));
+        var rad5 = get(values, mask.radius, 2.0, legIndex) * (1 - vary5 + 2 * vary5 * c5.size);
+        var half5 = Math.max(1e-6, get(values, mask.thickness, 0.6, legIndex)) / 2;
+        var soft5 = Math.max(1e-6, get(values, mask.softness, 0.2, legIndex));
+        var ring = 1 - smoothstep(half5, half5 + soft5, Math.abs(c5.distance * spacing5 - rad5));
+        var arc = clamp01(get(values, mask.arc, 1.0, legIndex));
+        if (arc >= 1) return ring;
+        var theta5 = Math.atan2(c5.dy, c5.dz) / (2 * Math.PI) + 0.5;
+        return ((((theta5 - c5.angle) % 1) + 1) % 1) <= arc ? ring : 0;
+      }
+      case "SPECKLE": {
+        var ss = getSeed(values, mask.seed, seedBase);
+        var spacing6 = Math.max(0.02, get(values, mask.spacing, 0.7, legIndex));
+        var c6 = noise.cell(ss, point.x / spacing6, point.y / spacing6, point.z / spacing6);
+        var density = clamp01(get(values, mask.density, 0.5, legIndex));
+        var clumping = clamp01(get(values, mask.clumping, 0.0, legIndex));
+        if (clumping > 0) {
+          var cs = Math.max(0.05, get(values, mask.clumpScale, 7.0, legIndex));
+          var n6 = noise.value(noise.xor(ss, noise.u64(0, 0x5EC1E)),
+            point.x / cs, point.y / cs, point.z / cs);
+          density = clamp01(density * (1 - clumping + 2 * clumping * n6));
+        }
+        if (c6.pick >= density) return 0;
+        var rad6 = clamp01(get(values, mask.size, 0.45, legIndex));
+        var soft6 = Math.max(1e-6, get(values, mask.softness, 0.3, legIndex)) * rad6;
+        return 1 - smoothstep(rad6, rad6 + soft6, c6.distance);
+      }
+      case "STROKES": {
+        var st = getSeed(values, mask.seed, seedBase);
+        var spacing7 = Math.max(0.05, get(values, mask.spacing, 3.0, legIndex));
+        var length7 = Math.max(0.05, get(values, mask.length, 12.0, legIndex));
+        var la7 = (mask.axis || "X").toUpperCase();
+        var curl = get(values, mask.curl, 0.35, legIndex) * spacing7;
+        var w7 = noise.value(noise.xor(st, noise.u64(0, 0x71)),
+          point.x / (spacing7 * 4), point.y / (spacing7 * 4), point.z / (spacing7 * 4));
+        var sx = point.x + (la7 === "X" ? 0 : (w7 - 0.5) * curl);
+        var sy = point.y + (la7 === "Y" ? 0 : (w7 - 0.5) * curl);
+        var sz = point.z + (la7 === "Z" ? 0 : (w7 - 0.5) * curl);
+        var r7 = noise.ridge(st,
+          sx / (la7 === "X" ? length7 : spacing7),
+          sy / (la7 === "Y" ? length7 : spacing7),
+          sz / (la7 === "Z" ? length7 : spacing7));
+        var width7 = clamp01(get(values, mask.width, 0.35, legIndex));
+        var soft7 = Math.max(1e-6, get(values, mask.softness, 0.25, legIndex)) * Math.max(width7, 1e-3);
+        return smoothstep(1 - width7 - soft7, 1 - width7, r7);
+      }
+      case "SPIRAL": {
+        var s8 = getSeed(values, mask.seed, seedBase);
+        var b8 = geo.bounds(skin, part);
+        if (!b8) return 0;
+        var view = (mask.axis || "Z").toUpperCase();
+        var u8 = view === "X" ? "Y" : "X";
+        var w8 = view === "Z" ? "Y" : "Z";
+        var cu = (b8.min(u8) + b8.max(u8)) / 2 + get(values, mask.offset, 0.0, legIndex) * b8.span(u8);
+        var cw = (b8.min(w8) + b8.max(w8)) / 2;
+        var du = (u8 === "X" ? point.x : u8 === "Y" ? point.y : point.z) - cu;
+        var dw = (w8 === "X" ? point.x : w8 === "Y" ? point.y : point.z) - cw;
+        var r8 = Math.sqrt(du * du + dw * dw);
+        var outer = Math.max(0.05, get(values, mask.radius, 4.0, legIndex));
+        if (r8 > outer) return 0;
+        var turns = Math.max(0.25, get(values, mask.turns, 2.0, legIndex));
+        var pitch = outer / turns;
+        var theta8 = Math.atan2(dw, du) / (2 * Math.PI) + (s8.l & 0xFF) / 255;
+        var offsetR = r8 - (((theta8 % 1) + 1) % 1) * pitch;
+        var nearest = Math.abs(offsetR - Math.round(offsetR / pitch) * pitch);
+        var half8 = Math.max(1e-6, get(values, mask.width, 0.5, legIndex)) / 2;
+        var soft8 = Math.max(1e-6, get(values, mask.softness, 0.2, legIndex));
+        return 1 - smoothstep(half8, half8 + soft8, nearest);
+      }
       default:
         return 0;
     }
@@ -293,6 +382,83 @@ window.HG = window.HG || {};
     }
   }
 
+  /** HSL to [r, g, b] - the port of SpecPainter.hsl. */
+  function hsl(h, s, l) {
+    var hue = ((((h % 360) + 360) % 360)) / 60;
+    var sat = clamp01(s), light = clamp01(l);
+    var c = (1 - Math.abs(2 * light - 1)) * sat;
+    var x = c * (1 - Math.abs(hue % 2 - 1));
+    var m = light - c / 2;
+    var r, g, b;
+    if (hue < 1) { r = c; g = x; b = 0; }
+    else if (hue < 2) { r = x; g = c; b = 0; }
+    else if (hue < 3) { r = 0; g = c; b = x; }
+    else if (hue < 4) { r = 0; g = x; b = c; }
+    else if (hue < 5) { r = x; g = 0; b = c; }
+    else { r = c; g = 0; b = x; }
+    return [channel8(r + m), channel8(g + m), channel8(b + m)];
+  }
+
+  function channel8(v) {
+    var i = Math.round(v * 255);
+    return i < 0 ? 0 : (i > 255 ? 255 : i);
+  }
+
+  // A TOWARD / FLAT layer's target: the literal colour, unless hue is 0 or
+  // above. A negative sentinel rather than a presence test, because the creator
+  // carries every parameter at its default whether or not you touched one - see
+  // the note on SpecPainter.solidColour.
+  function solidColour(op, values, legIndex) {
+    var hue = get(values, op.hue, -1, legIndex);
+    if (hue < 0) return hexToRgb(op.color);
+    return hsl(hue, get(values, op.saturation, 0.8, legIndex),
+      get(values, op.lightness, 0.55, legIndex));
+  }
+
+  function mixRgb(a, b, t) {
+    return [Math.round(lerp(a[0], b[0], t)), Math.round(lerp(a[1], b[1], t)), Math.round(lerp(a[2], b[2], t))];
+  }
+
+  function rampColour(op, values, legIndex, t) {
+    var stops = op.colors || [];
+    if (!stops.length) {
+      var span = get(values, op.hueSpan, 60, legIndex);
+      return hsl(get(values, op.hue, 0, legIndex) + span * t,
+        get(values, op.saturation, 0.8, legIndex),
+        get(values, op.lightness, 0.55, legIndex));
+    }
+    var scaled = t * (stops.length - 1);
+    var i = Math.floor(scaled);
+    if (i >= stops.length - 1) return hexToRgb(stops[stops.length - 1]);
+    return mixRgb(hexToRgb(stops[i]), hexToRgb(stops[i + 1]), scaled - i);
+  }
+
+  function axisPosition(op, values, legIndex, skin, part, point) {
+    var axis = (op.axis || "X").toUpperCase();
+    var coord = axis === "X" ? point.x : axis === "Y" ? point.y : point.z;
+    var space = op.space || "part";
+    var t = space === "body" ? normalise(coord, geo.bodyBounds(skin), axis)
+      : space === "units" ? coord
+        : normalise(coord, geo.bounds(skin, part), axis);
+    var from = get(values, op.from, 0, legIndex);
+    var to = get(values, op.to, 1, legIndex);
+    return to === from ? 0 : clamp01((t - from) / (to - from));
+  }
+
+  function paletteColour(op, values, legIndex, point, seedBase) {
+    var seed = getSeed(values, op.seed, seedBase);
+    var scale = Math.max(0.05, get(values, op.scale, 5.0, legIndex));
+    var c = noise.cell(seed, point.x / scale, point.y / scale, point.z / scale);
+    var palette = op.colors || [];
+    if (palette.length) {
+      return hexToRgb(palette[Math.min(Math.floor(c.pick * palette.length), palette.length - 1)]);
+    }
+    var spread = get(values, op.hueSpread, 40, legIndex);
+    return hsl(get(values, op.hue, 0, legIndex) + (c.pick * 2 - 1) * spread,
+      get(values, op.saturation, 0.8, legIndex),
+      get(values, op.lightness, 0.55, legIndex));
+  }
+
   function toward(colour, px, py, channel, target, strength) {
     var seen = colour.visible(px, py, channel);
     var wanted = seen + (target - seen) * strength;
@@ -301,7 +467,17 @@ window.HG = window.HG || {};
     return Math.round(wanted - stored);
   }
 
-  function applyColour(op, values, delta, colour, px, py, legIndex, k) {
+  function towardColour(delta, colour, op, values, legIndex, px, py, k, rgb) {
+    var strength = get(values, op.strength, 100, legIndex) / 100 * k;
+    delta.add(px, py,
+      toward(colour, px, py, 0, rgb[0], strength),
+      toward(colour, px, py, 1, rgb[1], strength),
+      toward(colour, px, py, 2, rgb[2], strength));
+    var want = percentToChannel(get(values, op.opacity, 100, legIndex));
+    delta.addOpacity(px, py, Math.round((want - colour.opacityAt(px, py)) * k));
+  }
+
+  function applyColour(op, values, delta, colour, skin, part, point, px, py, legIndex, k, seedBase) {
     switch (op.type) {
       case "TINT":
         delta.add(px, py,
@@ -310,19 +486,19 @@ window.HG = window.HG || {};
           percentToChannel(get(values, op.blue, 0, legIndex) * k));
         delta.addOpacity(px, py, percentToChannel(get(values, op.opacity, 100, legIndex) * k));
         break;
-      case "TOWARD": {
-        var rgb = hexToRgb(op.color);
-        var strength = get(values, op.strength, 100, legIndex) / 100 * k;
-        delta.add(px, py,
-          toward(colour, px, py, 0, rgb[0], strength),
-          toward(colour, px, py, 1, rgb[1], strength),
-          toward(colour, px, py, 2, rgb[2], strength));
-        var want = percentToChannel(get(values, op.opacity, 100, legIndex));
-        delta.addOpacity(px, py, Math.round((want - colour.opacityAt(px, py)) * k));
+      case "TOWARD":
+        towardColour(delta, colour, op, values, legIndex, px, py, k, solidColour(op, values, legIndex));
         break;
-      }
+      case "RAMP":
+        towardColour(delta, colour, op, values, legIndex, px, py, k,
+          rampColour(op, values, legIndex, axisPosition(op, values, legIndex, skin, part, point)));
+        break;
+      case "PALETTE":
+        towardColour(delta, colour, op, values, legIndex, px, py, k,
+          paletteColour(op, values, legIndex, point, seedBase));
+        break;
       case "FLAT": {
-        var c = hexToRgb(op.color);
+        var c = solidColour(op, values, legIndex);
         var wantOpacity = percentToChannel(get(values, op.opacity, 100, legIndex));
         delta.set(px, py,
           Math.round(lerp(colour.opacityAt(px, py), wantOpacity, k)),
@@ -420,7 +596,7 @@ window.HG = window.HG || {};
       geo.forEachTexel(skin, function (px, py, part, face, point) {
         var leg = geo.legIndex(part);
         var k = coverage(layer, values, skin, part, point, coat, px, py, leg, seed);
-        if (k > 0) applyColour(layer.op, values, delta, colour, px, py, leg, k);
+        if (k > 0) applyColour(layer.op, values, delta, colour, skin, part, point, px, py, leg, k, seed);
       });
     });
     return delta;

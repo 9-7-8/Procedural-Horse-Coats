@@ -1,6 +1,8 @@
 package com.example.horsegenetics.common.genetics.spec;
 
 import com.example.horsegenetics.common.coat.pattern.CoatBuildContext;
+import com.example.horsegenetics.common.coat.pattern.CoatOverlay;
+import com.example.horsegenetics.common.coat.pattern.CoatOverlayContribution;
 import com.example.horsegenetics.common.coat.pattern.SpecPainter;
 import com.example.horsegenetics.common.genetics.Allele;
 import com.example.horsegenetics.common.genetics.AllelePair;
@@ -33,7 +35,7 @@ import java.util.Map;
  * combination is then resolved by a map lookup, which is why the parser insists
  * the table cover every combination exactly once.
  */
-public final class SpecGene implements Gene {
+public final class SpecGene implements Gene, CoatOverlayContribution {
 
     private final GeneSpec spec;
     private final List<Allele> alleles;
@@ -102,6 +104,33 @@ public final class SpecGene implements Gene {
                 : b.tint((ctx, coat, accumulated) -> e.layers().isEmpty()
                         ? null
                         : SpecPainter.tint(spec, e.layers(), values(ctx), ctx, coat, accumulated));
+    }
+
+    /**
+     * The overlay pass: hand {@link SpecPainter} the expressing outcome's
+     * layers so the {@code emissive} ones can light their texels.
+     *
+     * <p>Every spec gene carries this hook, and almost every one of them does
+     * nothing in it - the early return is the normal case. It is cheaper to
+     * check a flag per gene than to make the registry sort genes by whether
+     * they glow.
+     */
+    @Override
+    public void overlay(AllelePair pair, CoatBuildContext ctx, CoatOverlay out) {
+        GeneSpec.ExpressionSpec e = expressionSpecOf(pair);
+        if (e == null || !hasEmissiveLayer(e)) {
+            return;
+        }
+        SpecPainter.emissive(spec, e.layers(), values(ctx), ctx.skin(), out);
+    }
+
+    private static boolean hasEmissiveLayer(GeneSpec.ExpressionSpec e) {
+        for (GeneSpec.Layer layer : e.layers()) {
+            if (layer.emissive()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private SpecValues values(CoatBuildContext ctx) {

@@ -111,6 +111,10 @@ input[type="color"] { width: 46px; height: 26px; padding: 1px; background: #0c13
 .row { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin-bottom: 6px; }
 .row > input[type="text"] { flex: 1; }
 
+/* A ramp stop or a palette entry: the well and its delete button, kept together
+   so a wrapped row breaks between stops rather than through one. */
+.swatch-cell { display: inline-flex; align-items: center; gap: 2px; }
+
 .btn {
   background: var(--accent-dim);
   border: 1px solid transparent;

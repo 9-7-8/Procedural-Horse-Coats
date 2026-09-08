@@ -69,6 +69,9 @@ import com.example.horsegenetics.common.genetics.genes.TigerEyeGene;
 import com.example.horsegenetics.common.genetics.genes.TobianoGene;
 import com.example.horsegenetics.common.genetics.genes.Toe1Gene;
 import com.example.horsegenetics.common.genetics.genes.VerdantGene;
+import com.example.horsegenetics.common.genetics.spec.GeneSpec;
+import com.example.horsegenetics.common.genetics.spec.GeneSpecLoader;
+import com.example.horsegenetics.common.genetics.spec.GeneSpecParser;
 import com.example.horsegenetics.common.genetics.spec.SpecGene;
 
 import com.example.horsegenetics.common.CommonLog;
@@ -394,6 +397,61 @@ public final class Genes {
 
     static {
         rebuild();
+        loadBuiltinSpecs();
+    }
+
+    /**
+     * Register the gene files shipped inside the jar -
+     * {@code horsegenetics/genes/} and its {@code index.json}.
+     *
+     * <p>It runs from the class initialiser rather than from a mod entry point
+     * because the registry decides the genotype code's layout, and a code
+     * written before these arrived is a different code. Doing it here means
+     * there is no window in which some caller has already read
+     * {@link #codeOrder()} and got a shorter answer.
+     *
+     * <p>In the browser this finds nothing and says nothing:
+     * {@code getResourceAsStream} is the weakest thing TeaVM does, so the
+     * designer hands the same genes in as a bundle instead
+     * ({@link #registerBundle}). A missing index is not an error anywhere - a
+     * build with no data-driven genes is a legitimate build.
+     */
+    private static void loadBuiltinSpecs() {
+        for (String problem : GeneSpecLoader.register(GeneSpecLoader.fromClasspath())) {
+            CommonLog.warn("built-in gene: " + problem);
+        }
+    }
+
+    /**
+     * Register a bundle - every gene file as one JSON array, which is what
+     * {@code wiki/horse-designer/assets/genes.json} is. The browser's way in;
+     * see {@link #loadBuiltinSpecs}.
+     *
+     * @return everything worth telling the page about, empty when all is well
+     */
+    public static synchronized List<String> registerBundle(String json, String source) {
+        List<String> problems = new ArrayList<>();
+        List<GeneSpec> parsed;
+        try {
+            parsed = GeneSpecParser.parseAll(json, source, problems::add);
+        } catch (RuntimeException e) {
+            String message = String.valueOf(e.getMessage());
+            CommonLog.warn(message);
+            return List.of(message);
+        }
+        for (GeneSpec spec : parsed) {
+            if (byKey.containsKey(spec.key())) {
+                // The jar's own index did load - nothing to do, and re-registering
+                // would throw. Harmless, and worth not being loud about.
+                continue;
+            }
+            try {
+                register(new SpecGene(spec));
+            } catch (RuntimeException e) {
+                problems.add("could not register " + spec.key() + ": " + e.getMessage());
+            }
+        }
+        return List.copyOf(problems);
     }
 
     private Genes() {}

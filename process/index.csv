@@ -1,0 +1,86 @@
+gene,file,allele,painter_family,created
+Speckling,(substrate; referenced by moregenesinfo.md),Spk,speckle,no
+Rex,moregenesinfo.md,Rx,rings,no
+Iuari,moregenesinfo.md,Iua,patches+speckle,no
+Emitola,moregenesinfo.md,Emi,ventral-field+flame,no
+Gudial,moregenesinfo.md,Gud,strokes+spots,no
+Qular,moregenesinfo.md,Qul,patches(white-ground),no
+Qhada,moregenesinfo.md,Qha,topline-bands,no
+Panark,moregenesinfo.md,Pnk,strokes(thick)+outline,no
+Yalia,moregenesinfo.md,Yal,patches(hard)+bands,no
+Fade,moregenesinfo.md,Fd,hair-ramp,no
+Fielded,moregenesinfo.md,Fld,strokes(wispy),no
+Oscar,moregenesinfo.md,Osc,TBD,no
+Opossum,moregenesinfo.md,Opo,TBD,no
+Laciano,moregenesinfo.md,Lac,patches+hair-bands,no
+Valentine Appaloosa,moregenesinfo.md,Vln,spots(appaloosa),no
+Lantern,moregenesinfo.md,La,topline-line+glow,no
+Papillon,moregenesinfo.md,Ppl,neck-wing,no
+Pavonem,moregenesinfo.md,Pv,rings+spots,no
+Synort,moregenesinfo.md,Syn,ramp+patches,no
+Rosette,moregenesinfo.md,Rs,rings(rosette),no
+Fracture,moregenesinfo.md,Fdf,patches(inverse),no
+Aurorae,moregenesinfo.md,Aur,spots+glow+hair-ramp,no
+Glow,moregenesinfo.md,Gl,spots+glow,no
+War Mask,moregenesinfo.md,WrM,face-field,no
+Xuke,moregenesinfo.md,Xuk,speckle(regional),no
+Cosmic,moregenesinfo.md,Cs,blanket+stars,no
+Guppy,moregenesinfo.md,Gup,hair-bands,no
+Hued Pangare,moregenesinfo.md,Hpa,ventral-wash,no
+Stardust,moregenesinfo.md,Str,topline-field+star-dapples,no
+Winged,moregenesinfo.md,Wng,arc-bands+spots,no
+Masked,moregenesinfo.md,Msk,head-neck-field+strokes,no
+Dutch,moregenesinfo.md,Dut,transverse-band,no
+Goth,moregenesinfo.md,Gth,head-neck-field,no
+Galaxy,moregenesinfo.md,Gxy,black-ground+stars,no
+Cleave,moregenesinfo.md,Clv,sawtooth-boundary,no
+Voided,moregenesinfo.md,Vd,white-inverter,no
+Opalized,moregenesinfo.md,Opl,white-palette-cells,no
+Frostfall,moregenesinfo.md,Fro,hair-ramp,no
+Nimbus,moregenesinfo.md,Nim,cloud-wash,no
+Riblines,moregenesinfo.md,Rib,strokes(thin),no
+Brindlelace,moregenesinfo.md,Bnl,strokes(reticulated),no
+Corvid,moregenesinfo.md,Cvd,face-mask+hair-speckle,no
+Bracket,moregenesinfo.md,Brk,strokes(two clusters),no
+Auroraband,moregenesinfo.md,Abd,ribbon+ramp,no
+Vortex,moregenesinfo.md,Vtx,bands(palette),no
+Circuit,moregenesinfo.md,Cir,strokes+spiral+inclusion,no
+Prismtail,moregenesinfo.md,Prt,hair-ramp(spectral),no
+Element Dusted,moregenesinfo.md,Ed,limb+hair ramp+dapples,no
+Filigree,moregenesinfo.md,Flg,spirals+arcs+dashes,no
+Stars,akkadorian-z-mutation-genes.md,Sta,spots(fine),no
+Stellar,akkadorian-z-mutation-genes.md,Ste,strokes(glyph),no
+Dust,akkadorian-z-mutation-genes.md,Dst,speckle,no
+Striped Mane Tail,akkadorian-z-mutation-genes.md,Smt,hair-bundles,no
+Scratches,akkadorian-z-mutation-genes.md,Scr,strokes(spindle),no
+Zebras Coat,akkadorian-z-mutation-genes.md,Zbc,strokes(transverse),no
+Internal Flow,akkadorian-z-mutation-genes.md,Ifl,strokes(contour),no
+Crescents,akkadorian-z-mutation-genes.md,Crs,rings(arc),no
+Wormholes,akkadorian-z-mutation-genes.md,Wmh,rings,no
+Black Holes,akkadorian-z-mutation-genes.md,Bhl,patches(hard),no
+Polymoon,akkadorian-z-mutation-genes.md,Pmn,spots(chain),no
+Lasertae,akkadorian-z-mutation-genes.md,Lst,rings(halo+core),no
+Quazars,akkadorian-z-mutation-genes.md,Qzr,beams,no
+Waves,akkadorian-z-mutation-genes.md,Wav,caudal-field,no
+Shark,akkadorian-z-mutation-genes.md,Shk,withers-field,no
+Collar,akkadorian-z-mutation-genes.md,Col,transverse-split,no
+Accretion,akkadorian-z-mutation-genes.md,Acr,dorsal-ventral-split,no
+Quarter,akkadorian-z-mutation-genes.md,Qtr,quadrant-field,no
+Sky Shadow,akkadorian-z-mutation-genes.md,Sky,whole-body-wash,no
+Integration,akkadorian-z-mutation-genes.md,Int,spots(spread),no
+Paint Moon,akkadorian-z-mutation-genes.md,-,REFUSED-duplicate-of-natural-pinto-genes,no
+Gamma,akkadorian-z-mutation-genes.md,Gam,chromatic-field+glow,no
+Nebula Light,akkadorian-z-mutation-genes.md,Neb,palette-cells+points,no
+Spectrum Light,akkadorian-z-mutation-genes.md,Spc,ramp(spectral),no
+Burn,akkadorian-z-mutation-genes.md,Brn,points-blacken,no
+Kintsugi,newgenes.md,Kts,cracks,no
+Hood,newgenes.md,Hd,head-neck-ramp,no
+Invert,newgenes.md,Inv,colour-inverter,no
+Panda,newgenes.md,Pan,white-ground+regions,no
+Peafowl,newgenes.md,Pwl,speckle(flow)+plumes,no
+Flametouched,newgenes.md,Ffm,flames-or-ramp,no
+Fawn,newgenes.md,Fwn,spots(flowing white),no
+Angler,anglerinfo.md,Ang,spots(string)+glow,no
+Patina,patinageneinfo.md,Pat,verdigris-marble,no
+Marble Tobiano,marbletobianoinfo.md,Tmr,patches(angular),no
+Imperial,imperialinfo.md,Sbi,neck-cape+branches,no

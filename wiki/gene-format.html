@@ -329,6 +329,11 @@
 <tr><td><code>PATCHES</code></td><td><code>seed</code>, <code>scale</code> 6.0, <code>threshold</code> 0.5, <code>softness</code> 0.12</td><td>Big irregular blobs &mdash; pinto, tobiano, roan patching.</td></tr>
 <tr><td><code>NOISE</code></td><td><code>seed</code>, <code>scale</code> 8.0, <code>low</code> 0, <code>high</code> 1</td><td>Shading rather than a shape &mdash; sooty, countershading.</td></tr>
 <tr><td><code>PIGMENT</code></td><td><code>channel</code> (darkness/red/black/total), <code>from</code> 0.5, <code>to</code> 1.0</td><td>Coverage read off the coat the earlier genes left &mdash; find the black points, then paint them. <code>darkness</code> is <code>0.55&middot;red + 0.95&middot;black</code>, the reading grey uses.</td></tr>
+<tr><td><code>SPOTS</code></td><td><code>seed</code>, <code>spacing</code> 4.0, <code>radius</code> 0.9, <code>vary</code> 0.5, <code>chance</code> 1.0, <code>stretch</code> 1.0, <code>axis</code> (X/Y/Z), <code>softness</code> 0.25</td><td>Countable round or oval marks with bare coat between them &mdash; freckles, stars, leopard spots. <code>DAPPLES</code> fills the horse with cells and leaves a web; this leaves most of it bare and puts marks on it. Drop <code>chance</code> to thin the field out, raise <code>stretch</code> to turn the marks into ovals along <code>axis</code>.</td></tr>
+<tr><td><code>RINGS</code></td><td><code>seed</code>, <code>spacing</code> 6.0, <code>radius</code> 2.0, <code>thickness</code> 0.6, <code>vary</code> 0.4, <code>chance</code> 1.0, <code>arc</code> 1.0, <code>softness</code> 0.2</td><td>The same scatter drawn hollow &mdash; rosettes, wormholes, halos. <code>arc</code> below 1 opens the ring into a crescent, and each ring opens a different way, so a field of them does not read as printed.</td></tr>
+<tr><td><code>SPECKLE</code></td><td><code>seed</code>, <code>spacing</code> 0.7, <code>size</code> 0.45, <code>density</code> 0.5, <code>clumping</code> 0, <code>clumpScale</code> 7.0, <code>softness</code> 0.3</td><td>Fine stipple with no boundary anywhere &mdash; dust, ticking, speckling. A texel is about 0.5 body units, so <code>spacing</code> under that is scattered single pixels. <code>clumping</code> lets a slow field push the density around, which is the difference between even static and drifts of it.</td></tr>
+<tr><td><code>STROKES</code></td><td><code>seed</code>, <code>spacing</code> 3.0, <code>length</code> 12.0, <code>axis</code> (X/Y/Z), <code>width</code> 0.35, <code>curl</code> 0.35, <code>softness</code> 0.25</td><td>Tapering, curving lines that fork and pinch out &mdash; scratches, riblines, brindle bars, wisps. It is the <em>ridge</em> of the noise field sampled in a frame stretched along <code>axis</code>, which is why the strokes end in points and wander rather than sitting parallel like a comb.</td></tr>
+<tr><td><code>SPIRAL</code></td><td><code>seed</code>, <code>radius</code> 4.0, <code>turns</code> 2.0, <code>width</code> 0.5, <code>axis</code> (Z/X/Y), <code>offset</code> 0, <code>softness</code> 0.2</td><td>One closed spiral per named part &mdash; the filigree curl. The only mask that draws a <em>figure</em> rather than a field, so it takes its centre from the part's bounds; <code>offset</code> slides it along the part's long axis.</td></tr>
 </tbody>
 </table>
 
@@ -375,10 +380,57 @@ through black hairs look like. On a chestnut nothing was masked and the op colla
 <thead><tr><th>Type</th><th>Parameters</th><th>What it does</th></tr></thead>
 <tbody>
 <tr><td><code>TINT</code></td><td><code>red</code>, <code>green</code>, <code>blue</code> (percent, signed), <code>opacity</code> 100</td><td>Adds signed colour. The accumulator is an uncapped <code>int</code>, so <code>-200</code> on all three channels reads black over <em>any</em> coat and <code>+300</code> on blue is blue whatever else the horse carries. That headroom is the point: your gene never has to know what else is there.</td></tr>
-<tr><td><code>TOWARD</code></td><td><code>color</code>, <code>strength</code> 100, <code>opacity</code> 100</td><td>Walks the texel toward a colour, reading what it already <em>looks</em> like &mdash; so one number lands the same on a black mane and a cremello one, and keeps the strand shading. The pink-hair move.</td></tr>
-<tr><td><code>FLAT</code></td><td><code>color</code>, <code>opacity</code> 100</td><td>Flat paint that <em>replaces</em> what is under it. Order-dependent, so reserve it for a <code>masks</code> expression that must look identical on any base.</td></tr>
+<tr><td><code>TOWARD</code></td><td><code>color</code>, <code>hue</code> &minus;1, <code>saturation</code> 0.8, <code>lightness</code> 0.55, <code>strength</code> 100, <code>opacity</code> 100</td><td>Walks the texel toward a colour, reading what it already <em>looks</em> like &mdash; so one number lands the same on a black mane and a cremello one, and keeps the strand shading. The pink-hair move.</td></tr>
+<tr><td><code>FLAT</code></td><td><code>color</code>, <code>hue</code> &minus;1, <code>saturation</code> 0.8, <code>lightness</code> 0.55, <code>opacity</code> 100</td><td>Flat paint that <em>replaces</em> what is under it. Order-dependent, so reserve it for a <code>masks</code> expression that must look identical on any base.</td></tr>
+<tr><td><code>RAMP</code></td><td><code>colors</code> (or <code>hue</code> 0 + <code>hueSpan</code> 60), <code>saturation</code> 0.8, <code>lightness</code> 0.55, <code>axis</code> (X/Y/Z), <code>space</code> (part/body/units), <code>from</code> 0, <code>to</code> 1, <code>strength</code> 100, <code>opacity</code> 100</td><td><code>TOWARD</code> with the colour running <em>along an axis</em> &mdash; a spectral tail, an aurora band, a mane fading root to tip. Give it <code>colors</code> for named stops (it interpolates between them, so the result is continuous rather than banded), or leave <code>colors</code> out and it sweeps <code>hueSpan</code> degrees of the wheel from <code>hue</code>.</td></tr>
+<tr><td><code>PALETTE</code></td><td><code>colors</code> (or <code>hue</code> 0 + <code>hueSpread</code> 40), <code>saturation</code> 0.8, <code>lightness</code> 0.55, <code>seed</code>, <code>scale</code> 5.0, <code>strength</code> 100, <code>opacity</code> 100</td><td><code>TOWARD</code> with the colour drawn <em>per cell</em> &mdash; opal, nebula, galaxy. Adjacent cells take unrelated entries and meet at a wall, which is exactly what separates "iridescent" from "gradient"; <code>RAMP</code> is the other one.</td></tr>
 </tbody>
 </table>
+
+<h3 id="hue">Giving a gene the horse's own colour</h3>
+
+<p>
+    All four colour ops take <code>hue</code>, <code>saturation</code> and
+    <code>lightness</code> as an alternative to a literal <code>color</code>. That
+    matters more than it sounds: <code>color</code> is a constant, and a constant
+    cannot be the thing a <em>horse</em> drew for itself. <code>hue</code> is an
+    ordinary number parameter, so it can point at a knob &mdash; and one knob is the
+    difference between a gene that paints teal spots and a gene that paints spots of
+    whatever colour this line of horses runs to.
+</p>
+
+<pre><code>"knobs": [ { "name": "glowHue", "min": 0, "max": 360 } ],
+...
+"op": { "type": "TOWARD", "hue": "$glowHue", "saturation": 0.85, "lightness": 0.6 }</code></pre>
+
+<p>
+    On <code>TOWARD</code> and <code>FLAT</code>, <code>hue</code> defaults to
+    <b>&minus;1</b>, which means "not set" &mdash; those ops paint <code>color</code>
+    until the hue is 0 or above. (A negative sentinel rather than "is the key
+    present", because the gene creator carries every parameter whether or not you
+    touched it, and a presence test would preview one colour and export another.) On
+    <code>RAMP</code> and <code>PALETTE</code> the switch is the <code>colors</code>
+    list instead: name stops and it uses them, leave it out and it sweeps the hue.
+</p>
+
+<h3 id="emissive">Glow</h3>
+
+<p>
+    A layer may carry <code>"emissive": true</code>. Every texel it covers past
+    halfway is marked full-bright, so it renders at night as if lit. Glow is a
+    property of the <em>layer</em>, not of the op, because it is orthogonal to
+    colour: the same <code>TOWARD</code> that paints a teal spot paints a lit teal
+    spot with one flag flipped, and a gene that wants a lit core inside an unlit
+    bloom writes two layers rather than two ops.
+</p>
+
+<p>
+    Two limits, both load errors rather than surprises. A natural gene cannot set it
+    &mdash; pigment does not glow. And an emissive layer cannot use a
+    <code>PIGMENT</code> mask: glow is decided in the overlay pass, after the texture
+    is baked, and there is no pigment field left there to read. Split the layer if you
+    need both.
+</p>
 
 <h2 id="effects">Effects &mdash; behaviour beyond the coat</h2>
 

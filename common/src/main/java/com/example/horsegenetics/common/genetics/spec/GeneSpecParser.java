@@ -19,6 +19,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.function.Consumer;
 
 /**
  * Reads a gene JSON file into a {@link GeneSpec}, or throws with a message that
@@ -58,6 +59,35 @@ public final class GeneSpecParser {
         } catch (RuntimeException e) {
             throw new IllegalArgumentException("gene spec " + source + ": " + e.getMessage(), e);
         }
+    }
+
+    /**
+     * Parse a <b>bundle</b>: one JSON array holding what would otherwise be a
+     * folder of gene files. It exists for the browser, which cannot walk a
+     * classpath index - see {@code DesignerApi.registerGenes} - and it is
+     * written by {@link GeneFileTool} out of the same files the game reads, so
+     * the tool and the mod cannot describe different genes without somebody
+     * skipping a re-bake.
+     *
+     * <p>A file that will not parse is reported through {@code problems} and
+     * skipped, exactly as in {@link GeneSpecLoader}: one bad gene should not
+     * cost the reader the other eighty.
+     */
+    public static List<GeneSpec> parseAll(String json, String source, Consumer<String> problems) {
+        Object parsed = Json.parse(json);
+        if (!(parsed instanceof List<?> entries)) {
+            throw new IllegalArgumentException(source + ": expected an array of gene objects");
+        }
+        List<GeneSpec> out = new ArrayList<>();
+        for (int i = 0; i < entries.size(); i++) {
+            String where = source + " [" + i + "]";
+            try {
+                out.add(read(asObject(entries.get(i), where)));
+            } catch (RuntimeException e) {
+                problems.accept("gene spec " + where + ": " + e.getMessage());
+            }
+        }
+        return List.copyOf(out);
     }
 
     // ------------------------------------------------------------------
@@ -481,6 +511,24 @@ public final class GeneSpecParser {
         };
     }
 
+    /**
+     * A palette or a ramp: an array of {@code "#rrggbb"}. One stop is legal but
+     * pointless, so the parser asks for two - a one-stop ramp is a {@code TOWARD}
+     * and saying so is a better error than a gradient that never moves.
+     */
+    private static List<Integer> readColors(Object raw, String where) {
+        List<Object> a = asArray(raw, where);
+        if (a.size() < 2) {
+            throw new IllegalArgumentException(where + ": needs at least two colours, got " + a.size()
+                    + " - a single colour is a TOWARD op, not a ramp or a palette");
+        }
+        List<Integer> out = new ArrayList<>();
+        for (int i = 0; i < a.size(); i++) {
+            out.add(readColor(a.get(i), where + " [" + i + "]"));
+        }
+        return List.copyOf(out);
+    }
+
     private static int readMinDose(Map<String, Object> o, String where) {
         int d = (int) number(o, "minDose", 1);
         if (d != 1 && d != 2) {
@@ -612,8 +660,14 @@ public final class GeneSpecParser {
 
     private static Layer readLayer(Map<String, Object> o, String where, boolean natural,
                                    List<Knob> knobs, Map<String, Integer> knobIndex) {
-        expectKeys(o, where, "name", "masks", "op");
+        expectKeys(o, where, "name", "masks", "op", "emissive");
         String name = string(o, "name", where);
+        boolean emissive = flag(o, "emissive", false);
+        if (emissive && natural) {
+            throw new IllegalArgumentException(where + ": 'emissive' is a magical-phase property - a "
+                    + "natural gene moves pigment, and pigment does not glow. Move the glow to a "
+                    + "magical gene, or drop the flag.");
+        }
 
         List<Mask> masks = new ArrayList<>();
         for (Object m : array(o, "masks")) {
@@ -633,7 +687,17 @@ public final class GeneSpecParser {
         }
         Params params = readParams(opJson, SpecSchema.opParams(opType), SpecSchema.opParamNames(opType),
                 where + " op '" + opType + "'", knobs, knobIndex, "type");
-        return new Layer(name, List.copyOf(masks), new Op(opType, params));
+        if (emissive) {
+            for (Mask m : masks) {
+                if (m.type() == MaskType.PIGMENT) {
+                    throw new IllegalArgumentException(where + ": an emissive layer cannot use a "
+                            + "PIGMENT mask. Glow is decided in the overlay pass, after the texture "
+                            + "is baked, and there is no pigment field left there to read. Split the "
+                            + "layer: paint the colour with the PIGMENT mask, glow with a shape one.");
+                }
+            }
+        }
+        return new Layer(name, List.copyOf(masks), new Op(opType, params), emissive);
     }
 
     private static Mask readMask(Map<String, Object> o, String where,
@@ -673,6 +737,7 @@ public final class GeneSpecParser {
                 }
                 case FLAG -> asBoolean(raw, where + " '" + p.name() + "'");
                 case COLOR -> readColor(raw, where + " '" + p.name() + "'");
+                case COLORS -> readColors(raw, where + " '" + p.name() + "'");
             });
         }
         return new Params(Map.copyOf(out));

@@ -43,7 +43,8 @@ public final class CreatorAssetTool {
             {"silver.json", "Silver dapple (dilution, no randomness)"},
             {"dun.json", "Dun (dilution + dorsal stripe + leg bars)"},
             {"tobiano.json", "Tobiano (white patches, dose-sensitive)"},
-            {"aurora.json", "Aurora (magical, recessive)"}
+            {"aurora.json", "Aurora (magical, recessive)"},
+            {"prismatic.json", "Prismatic (every shape mask and colour op, once each)"}
     };
 
     private CreatorAssetTool() {}

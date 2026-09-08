@@ -35,7 +35,9 @@ public final class SpecSchema {
         /** A boolean. */
         FLAG,
         /** {@code "#rrggbb"}. */
-        COLOR
+        COLOR,
+        /** A list of {@code "#rrggbb"} - a palette, or a ramp's stops. */
+        COLORS
     }
 
     /**
@@ -64,6 +66,10 @@ public final class SpecSchema {
         static Param color(String name, String doc) {
             return new Param(name, Kind.COLOR, 0, List.of(), doc);
         }
+
+        static Param colors(String name, String doc) {
+            return new Param(name, Kind.COLORS, 0, List.of(), doc);
+        }
     }
 
     /** Which coordinate an {@code AXIS} mask measures against. */
@@ -71,6 +77,21 @@ public final class SpecSchema {
 
     /** Which pigment reading a {@code PIGMENT} mask thresholds. */
     public static final List<String> PIGMENT_CHANNELS = List.of("darkness", "red", "black", "total");
+
+    /**
+     * Why every colour op takes an {@code hue} as well as a {@code color}: a
+     * {@code color} is a constant, and a constant cannot be the thing a horse
+     * drew for itself. {@code hue} is a {@link Kind#VALUE}, so it can be pointed
+     * at a knob - and one knob is the difference between a gene that paints
+     * teal spots and a gene that paints spots of whatever colour this line of
+     * horses runs to.
+     */
+    private static final String HUE_DOC =
+            "hue in degrees - 0 red, 120 green, 240 blue. Below 0 means \"not set\", and the "
+                    + "layer paints 'color' instead - which is what lets one number be the "
+                    + "difference between a fixed palette and an epigenetic one.";
+    private static final String SATURATION_DOC = "saturation 0 to 1; read only when 'hue' is set";
+    private static final String LIGHTNESS_DOC = "lightness 0 to 1; read only when 'hue' is set";
 
     private static final Map<MaskType, List<Param>> MASKS = new LinkedHashMap<>();
     private static final Map<OpType, List<Param>> OPS = new LinkedHashMap<>();
@@ -136,6 +157,58 @@ public final class SpecSchema {
                 Param.value("from", 0.5, "reading where coverage starts climbing"),
                 Param.value("to", 1.0, "reading where coverage reaches 1")));
 
+        MASKS.put(MaskType.SPOTS, List.of(
+                Param.parts("parts", "restrict to these parts"),
+                Param.value("seed", 0, "a seed knob; omit for a stable per-gene default"),
+                Param.value("spacing", 4.0, "body units between element centres - the lattice pitch"),
+                Param.value("radius", 0.9, "element radius, body units (the adult barrel is 22 long)"),
+                Param.value("vary", 0.5, "how much the radius varies element to element, 0 to 1"),
+                Param.value("chance", 1.0, "share of lattice cells that carry an element at all"),
+                Param.value("stretch", 1.0, "long-axis multiplier - 1 is round, 2 is a 2:1 oval"),
+                Param.choice("axis", List.of("X", "Y", "Z"), "the body axis the oval is stretched along"),
+                Param.value("softness", 0.25, "edge fade, body units")));
+
+        MASKS.put(MaskType.RINGS, List.of(
+                Param.parts("parts", "restrict to these parts"),
+                Param.value("seed", 0, "a seed knob; omit for a stable per-gene default"),
+                Param.value("spacing", 6.0, "body units between ring centres"),
+                Param.value("radius", 2.0, "ring radius, body units"),
+                Param.value("thickness", 0.6, "wall thickness, body units"),
+                Param.value("vary", 0.4, "how much the radius varies ring to ring, 0 to 1"),
+                Param.value("chance", 1.0, "share of lattice cells that carry a ring at all"),
+                Param.value("arc", 1.0, "share of the circumference drawn - below 1 gives a crescent"),
+                Param.value("softness", 0.2, "edge fade, body units")));
+
+        MASKS.put(MaskType.SPECKLE, List.of(
+                Param.parts("parts", "restrict to these parts"),
+                Param.value("seed", 0, "a seed knob; omit for a stable per-gene default"),
+                Param.value("spacing", 0.7, "body units between particle centres - a texel is about 0.5"),
+                Param.value("size", 0.45, "particle radius as a share of the spacing"),
+                Param.value("density", 0.5, "share of lattice cells carrying a particle"),
+                Param.value("clumping", 0.0, "how far a low-frequency field pushes density around, 0 to 1"),
+                Param.value("clumpScale", 7.0, "body units per clump"),
+                Param.value("softness", 0.3, "edge fade as a share of the particle radius")));
+
+        MASKS.put(MaskType.STROKES, List.of(
+                Param.parts("parts", "restrict to these parts"),
+                Param.value("seed", 0, "a seed knob; omit for a stable per-gene default"),
+                Param.value("spacing", 3.0, "body units between neighbouring strokes"),
+                Param.value("length", 12.0, "body units a stroke runs before it curves away or pinches out"),
+                Param.choice("axis", List.of("X", "Y", "Z"), "the axis strokes run along"),
+                Param.value("width", 0.35, "stroke width as a share of the spacing"),
+                Param.value("curl", 0.35, "how far strokes wander off the axis, as a share of the spacing"),
+                Param.value("softness", 0.25, "edge fade as a share of the width")));
+
+        MASKS.put(MaskType.SPIRAL, List.of(
+                Param.parts("parts", "one spiral is drawn per named part"),
+                Param.value("seed", 0, "a seed knob; omit for a stable per-gene default"),
+                Param.value("radius", 4.0, "outer radius, body units"),
+                Param.value("turns", 2.0, "revolutions from the centre out to the radius"),
+                Param.value("width", 0.5, "stroke width, body units"),
+                Param.choice("axis", List.of("Z", "X", "Y"), "the axis the spiral is viewed down"),
+                Param.value("offset", 0.0, "shift the centre along the part's long axis, as a share of its span"),
+                Param.value("softness", 0.2, "edge fade, body units")));
+
         OPS.put(OpType.DILUTE, List.of(
                 Param.value("keepRed", 1.0, "share of red pigment kept"),
                 Param.value("keepBlack", 1.0, "share of black pigment kept"),
@@ -165,12 +238,45 @@ public final class SpecSchema {
 
         OPS.put(OpType.TOWARD, List.of(
                 Param.color("color", "the colour this layer walks the texel toward"),
+                Param.value("hue", -1, HUE_DOC),
+                Param.value("saturation", 0.8, SATURATION_DOC),
+                Param.value("lightness", 0.55, LIGHTNESS_DOC),
                 Param.value("strength", 100.0, "percent of the way there"),
                 Param.value("opacity", 100.0, "percent opacity the texel ends at")));
 
         OPS.put(OpType.FLAT, List.of(
                 Param.color("color", "flat paint, replacing whatever was accumulated"),
+                Param.value("hue", -1, HUE_DOC),
+                Param.value("saturation", 0.8, SATURATION_DOC),
+                Param.value("lightness", 0.55, LIGHTNESS_DOC),
                 Param.value("opacity", 100.0, "percent opacity")));
+
+        OPS.put(OpType.RAMP, List.of(
+                Param.colors("colors", "two or more stops, walked through in order along the axis"),
+                Param.value("hue", 0, HUE_DOC + " On a ramp it names the first stop, and the ramp "
+                        + "then travels 'hueSpan' degrees round the wheel from it."),
+                Param.value("hueSpan", 60.0, "degrees of hue the ramp travels; negative runs the other way"),
+                Param.value("saturation", 0.8, SATURATION_DOC),
+                Param.value("lightness", 0.55, LIGHTNESS_DOC),
+                Param.choice("axis", List.of("X", "Y", "Z"), "the body axis the ramp runs along"),
+                Param.choice("space", AXIS_SPACES,
+                        "as on an AXIS mask - 'part' runs the ramp inside each part, which is what a mane wants"),
+                Param.value("from", 0.0, "axis position the first stop sits at"),
+                Param.value("to", 1.0, "axis position the last stop sits at"),
+                Param.value("strength", 100.0, "percent of the way to the ramp colour"),
+                Param.value("opacity", 100.0, "percent opacity the texel ends at")));
+
+        OPS.put(OpType.PALETTE, List.of(
+                Param.colors("colors", "the palette; each cell takes one entry whole"),
+                Param.value("hue", 0, HUE_DOC + " On a palette it names the centre hue, and each "
+                        + "cell lands within 'hueSpread' degrees of it."),
+                Param.value("hueSpread", 40.0, "degrees either side of 'hue' a cell may land"),
+                Param.value("saturation", 0.8, SATURATION_DOC),
+                Param.value("lightness", 0.55, LIGHTNESS_DOC),
+                Param.value("seed", 0, "a seed knob; omit for a stable per-gene default"),
+                Param.value("scale", 5.0, "body units across one colour cell"),
+                Param.value("strength", 100.0, "percent of the way to the cell's colour"),
+                Param.value("opacity", 100.0, "percent opacity the texel ends at")));
     }
 
     private SpecSchema() {}

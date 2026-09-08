@@ -246,8 +246,29 @@ public record GeneSpec(
     // Layers
     // ------------------------------------------------------------------
 
-    /** Where (masks) crossed with what (an op). */
-    public record Layer(String name, List<Mask> masks, Op op) {}
+    /**
+     * Where (masks) crossed with what (an op), plus whether what it paints
+     * <b>glows</b>.
+     *
+     * <p>{@code emissive} is a property of the layer rather than of the op
+     * because glowing is orthogonal to colour: the same {@code TOWARD} that
+     * paints a teal spot paints a <i>lit</i> teal spot with one flag flipped,
+     * and a gene that wants both a lit core and an unlit bloom writes two
+     * layers rather than two ops. Texels the layer covers past
+     * {@link #EMISSIVE_THRESHOLD} are handed to
+     * {@code CoatOverlay.markEmissive}; the coat colour is unaffected either
+     * way, so a spec that sets it on a natural gene is a load error.
+     */
+    public record Layer(String name, List<Mask> masks, Op op, boolean emissive) {}
+
+    /**
+     * How much of a texel an emissive layer has to cover before that texel is
+     * marked full-bright. Emissiveness is a boolean per texel - there is no
+     * half-lit - so a soft-edged glow needs a cut somewhere, and taking it at
+     * the halfway point keeps the lit region the shape the mask drew rather
+     * than a bloom two body units wider than it.
+     */
+    public static final double EMISSIVE_THRESHOLD = 0.5;
 
     /** How a mask term folds into the coverage the terms before it produced. */
     public enum Combine { MULTIPLY, MAX, MIN, ADD, SUBTRACT }
@@ -277,7 +298,26 @@ public record GeneSpec(
         /** Smooth value noise as a soft shading field (sooty, countershading). */
         NOISE,
         /** Coverage read off the pigment the earlier genes left - "find the black". */
-        PIGMENT
+        PIGMENT,
+        /**
+         * Discrete round or oval <b>elements</b> on a jittered lattice - a spot
+         * field. Unlike {@link #DAPPLES}, which fills the horse with cells and
+         * leaves a web between them, this leaves most of the horse bare and puts
+         * countable marks on it: a leopard spot, a star, a freckle.
+         */
+        SPOTS,
+        /** The same lattice drawn as <b>annuli</b> - a ring, a crescent, a rosette. */
+        RINGS,
+        /** Fine stipple with no discrete boundary - dust, ticking, speckling. */
+        SPECKLE,
+        /**
+         * Tapering, curving <b>strokes</b> - {@code BodyNoise.ridge} sampled in a
+         * frame stretched along one axis. The shape behind every streak,
+         * scratch, ribline and brindle bar.
+         */
+        STROKES,
+        /** One closed <b>spiral</b> per named part - the filigree / circuit figure. */
+        SPIRAL
     }
 
     // ------------------------------------------------------------------
@@ -305,7 +345,20 @@ public record GeneSpec(
         /** Magical: walk what the texel <i>looks</i> like toward a colour - the pink-hair move. */
         TOWARD,
         /** Magical: flat opaque paint that replaces the accumulator. Masking genes only. */
-        FLAT;
+        FLAT,
+        /**
+         * Magical: {@link #TOWARD} whose target colour <b>runs along an axis</b>
+         * - a hue ramp. The spectral tail, the aurora band, the mane that fades
+         * from root to tip.
+         */
+        RAMP,
+        /**
+         * Magical: {@link #TOWARD} whose target colour is <b>drawn per cell</b>
+         * from a palette - the opal, the nebula, the galaxy. Adjacent cells take
+         * different colours and the boundary between them is a cell wall, which
+         * is what separates "iridescent" from "gradient".
+         */
+        PALETTE;
 
         public boolean isNatural() {
             return this == DILUTE || this == RESTRICT || this == SET_PIGMENT || this == WHITEN;
@@ -348,6 +401,13 @@ public record GeneSpec(
         public boolean flag(String name, boolean fallback) {
             Object o = raw.get(name);
             return o == null ? fallback : (Boolean) o;
+        }
+
+        /** A list-of-colours parameter, as 0xRRGGBB each; empty when absent. */
+        @SuppressWarnings("unchecked")
+        public List<Integer> colors(String name) {
+            Object o = raw.get(name);
+            return o == null ? List.of() : (List<Integer>) o;
         }
 
         /** A {@code "#rrggbb"} parameter, as 0xRRGGBB. */

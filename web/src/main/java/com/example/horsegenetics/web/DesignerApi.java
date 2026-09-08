@@ -1041,6 +1041,29 @@ public final class DesignerApi {
      *
      * @return a JSON array of anything that would not load, empty when all is well
      */
+    /**
+     * Register the gene bundle the page fetched -
+     * {@code wiki/horse-designer/assets/genes.json}, which is
+     * {@code common/src/main/resources/horsegenetics/genes/} rewritten as one
+     * array by {@code :common:bakeGeneBundle}.
+     *
+     * <p>Same reason as {@link #registerBreeds}: {@code getResourceAsStream} is
+     * the weakest thing TeaVM does. Call it <b>first</b>, ahead of the breeds
+     * and ahead of anything that parses a genotype - a gene arriving late moves
+     * every gene after it in the code order, so a code read before this call
+     * and a code read after it are two different codes.
+     *
+     * @return a JSON array of anything that would not load, empty when all is well
+     */
+    @JSExport
+    public static String registerGenes(String bundleJson) {
+        Json j = new Json().arr();
+        for (String message : Genes.registerBundle(bundleJson, "genes.json")) {
+            j.val(message);
+        }
+        return j.endArr().toString();
+    }
+
     @JSExport
     public static String registerBreeds(String bundleJson) {
         Json j = new Json().arr();

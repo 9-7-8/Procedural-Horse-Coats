@@ -48,6 +48,12 @@ window.HG = window.HG || {};
   // breath as the breed files, or the tools are a version behind the mod.
   var BREEDS = BASE + "assets/breeds.json";
 
+  // Every data-driven gene, as one array - common/src/main/resources/horsegenetics/genes/
+  // rewritten by :common:bakeGeneBundle. This one has to be registered BEFORE
+  // the breeds and before anything reads a genotype: where a gene sits in the
+  // code order depends on how many genes there are.
+  var GENES = BASE + "assets/genes.json";
+
   var api = null;
 
   /**
@@ -121,11 +127,19 @@ window.HG = window.HG || {};
           decode(ASSETS.adult), decode(ASSETS.baby),
           fetch(NAMES[0]).then(function (r) { return r.text(); }),
           fetch(NAMES[1]).then(function (r) { return r.text(); }),
-          fetch(BREEDS).then(function (r) { return r.text(); })
+          fetch(BREEDS).then(function (r) { return r.text(); }),
+          fetch(GENES).then(function (r) { return r.text(); })
         ]);
       })
       .then(function (imgs) {
-        // Breeds first: the registry is lazy, so anything that asks before this
+        // Genes first of all: registering one moves every gene after it in the
+        // code order, and a breed names its loci by key, so both have to be in
+        // before anything reads or writes a genotype.
+        var geneProblems = JSON.parse(api.registerGenes(imgs[7]));
+        for (var g = 0; g < geneProblems.length; g++) {
+          console.warn("[horsegenetics] genes: " + geneProblems[g]);
+        }
+        // Then breeds: the registry is lazy, so anything that asks before this
         // gets an empty list and caches nothing to correct later.
         var breedProblems = JSON.parse(api.registerBreeds(imgs[6]));
         for (var i = 0; i < breedProblems.length; i++) {

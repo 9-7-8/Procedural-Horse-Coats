@@ -44,7 +44,7 @@ import java.util.Locale;
 public final class SpecFixtureTool {
 
     /** Example genes to bake, from {@code main/resources/horsegenetics/example-genes/}. */
-    private static final String[] SPECS = {"silver.json", "dun.json", "tobiano.json", "aurora.json"};
+    private static final String[] SPECS = {"silver.json", "dun.json", "tobiano.json", "aurora.json", "prismatic.json"};
 
     /** Preview seeds - the same numbers the creator's seed box defaults to. */
     private static final long[] SEEDS = {1L, 7L, 21L};

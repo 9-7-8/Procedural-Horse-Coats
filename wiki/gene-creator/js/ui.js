@@ -795,7 +795,44 @@ window.HG = window.HG || {};
       input.addEventListener("input", function () { op[p.name] = input.value; changed(); });
       return field(p.name, input, p.doc);
     }
+    if (p.kind === "COLORS") {
+      return field(p.name, colorListEditor(op, p.name), p.doc);
+    }
+    if (p.kind === "CHOICE") {
+      return field(p.name, select(p.choices, op[p.name] || p.fallback,
+        function (v) { op[p.name] = v; changed(); }), p.doc);
+    }
     return field(p.name, valueEditor(op, p.name, p, changed), p.doc);
+  }
+
+  /**
+   * A ramp's stops, or a palette's entries: a row of colour wells with a way to
+   * add and remove one. Order matters for a RAMP (it walks them left to right)
+   * and does not for a PALETTE, which is the only thing to know.
+   */
+  function colorListEditor(op, name) {
+    var wrap = el("div", { class: "row wrap" });
+    var list = op[name] || (op[name] = []);
+    list.forEach(function (hex, i) {
+      var well = el("input", { type: "color", value: hex });
+      well.addEventListener("input", function () { list[i] = well.value; changed(); });
+      var cell = el("div", { class: "swatch-cell" }, [
+        well,
+        button("\u2715", function () {
+          if (list.length <= 2) {
+            return;   // the parser wants two; taking the last one away is a load error
+          }
+          list.splice(i, 1);
+          changed();
+        }, "btn tiny danger")
+      ]);
+      wrap.appendChild(cell);
+    });
+    wrap.appendChild(button("+ stop", function () {
+      list.push(list.length ? list[list.length - 1] : "#ff69b4");
+      changed();
+    }, "btn tiny"));
+    return wrap;
   }
 
   function move(list, index, delta) {

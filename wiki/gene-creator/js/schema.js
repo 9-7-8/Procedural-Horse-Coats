@@ -27,6 +27,20 @@ window.HG = window.HG || {};
   function parts(name, doc) { return { name: name, kind: "PARTS", doc: doc }; }
   function choice(name, choices, doc) { return { name: name, kind: "CHOICE", choices: choices, fallback: choices[0], doc: doc }; }
   function color(name, doc) { return { name: name, kind: "COLOR", fallback: "#ffffff", doc: doc }; }
+  function colors(name, doc) { return { name: name, kind: "COLORS", doc: doc }; }
+
+  // The three that turn any colour op into an epigenetic one. They repeat on
+  // four ops, so they are built rather than retyped - a hue that drifts between
+  // the ops is the kind of divergence nobody notices until a horse is wrong.
+  function hueParams(hueDoc, unset) {
+    return [
+      v("hue", unset ? -1 : 0, hueDoc, { min: unset ? -1 : 0, max: 360, step: 1 }),
+      v("saturation", 0.8, "saturation 0 to 1; read only when 'hue' is set"),
+      v("lightness", 0.55, "lightness 0 to 1; read only when 'hue' is set")
+    ];
+  }
+  var HUE_DOC = "hue in degrees - 0 red, 120 green, 240 blue. Below 0 means \"not set\", "
+    + "so the layer paints 'color' instead. Point it at a knob to give every horse its own.";
 
   var PART_NAMES = HG.geometry.PARTS;
   var GROUP_NAMES = ["ALL", "LEGS", "FRONT_LEGS", "HIND_LEGS", "EARS", "HAIR", "FACE", "POINTS", "BARREL"];
@@ -133,6 +147,73 @@ window.HG = window.HG || {};
         v("from", 0.5, "reading where coverage starts"),
         v("to", 1.0, "reading where coverage reaches 1")
       ]
+    },
+    SPOTS: {
+      blurb: "Countable round or oval marks with bare coat between them - freckles, stars, leopard spots. DAPPLES fills the horse; this scatters on it.",
+      params: [
+        parts("parts", "restrict to these parts"),
+        v("seed", 0, "pick a seed knob, or leave it for a stable default", { seedRef: true }),
+        v("spacing", 4.0, "body units between centres", { min: 0.3, max: 20, step: 0.1 }),
+        v("radius", 0.9, "spot radius, body units", { min: 0.05, max: 8, step: 0.05 }),
+        v("vary", 0.5, "how much the radius varies spot to spot"),
+        v("chance", 1.0, "share of lattice cells that carry a spot at all"),
+        v("stretch", 1.0, "1 is round, 2 is a 2:1 oval", { min: 0.2, max: 6, step: 0.05 }),
+        choice("axis", ["X", "Y", "Z"], "the axis the oval is stretched along"),
+        v("softness", 0.25, "edge fade, body units", { min: 0, max: 3, step: 0.05 })
+      ]
+    },
+    RINGS: {
+      blurb: "The same scatter drawn hollow - rosettes, wormholes, crescents. Drop 'arc' below 1 to open the ring.",
+      params: [
+        parts("parts", "restrict to these parts"),
+        v("seed", 0, "pick a seed knob, or leave it for a stable default", { seedRef: true }),
+        v("spacing", 6.0, "body units between centres", { min: 0.5, max: 24, step: 0.1 }),
+        v("radius", 2.0, "ring radius, body units", { min: 0.1, max: 12, step: 0.05 }),
+        v("thickness", 0.6, "wall thickness, body units", { min: 0.05, max: 6, step: 0.05 }),
+        v("vary", 0.4, "how much the radius varies ring to ring"),
+        v("chance", 1.0, "share of lattice cells that carry a ring at all"),
+        v("arc", 1.0, "share of the circumference drawn - below 1 gives a crescent"),
+        v("softness", 0.2, "edge fade, body units", { min: 0, max: 3, step: 0.05 })
+      ]
+    },
+    SPECKLE: {
+      blurb: "Fine stipple with no boundary anywhere - dust, ticking, speckling. Turn 'clumping' up to make it drift into patches.",
+      params: [
+        parts("parts", "restrict to these parts"),
+        v("seed", 0, "pick a seed knob, or leave it for a stable default", { seedRef: true }),
+        v("spacing", 0.7, "body units between particles - a texel is about 0.5", { min: 0.1, max: 4, step: 0.05 }),
+        v("size", 0.45, "particle radius as a share of the spacing"),
+        v("density", 0.5, "share of cells carrying a particle"),
+        v("clumping", 0.0, "how far a slow field pushes the density around"),
+        v("clumpScale", 7.0, "body units per clump", { min: 1, max: 30, step: 0.5 }),
+        v("softness", 0.3, "edge fade as a share of the particle radius")
+      ]
+    },
+    STROKES: {
+      blurb: "Tapering, curving lines that fork and pinch out - scratches, riblines, brindle bars, wisps. Raise 'length' for long strokes, 'curl' to make them wander.",
+      params: [
+        parts("parts", "restrict to these parts"),
+        v("seed", 0, "pick a seed knob, or leave it for a stable default", { seedRef: true }),
+        v("spacing", 3.0, "body units between neighbouring strokes", { min: 0.2, max: 16, step: 0.1 }),
+        v("length", 12.0, "body units a stroke runs before it curves away", { min: 1, max: 60, step: 0.5 }),
+        choice("axis", ["X", "Y", "Z"], "the axis the strokes run along"),
+        v("width", 0.35, "stroke width as a share of the spacing"),
+        v("curl", 0.35, "how far strokes wander off the axis"),
+        v("softness", 0.25, "edge fade as a share of the width")
+      ]
+    },
+    SPIRAL: {
+      blurb: "One closed spiral per named part - the filigree curl. Use 'offset' to slide it off the part's centre.",
+      params: [
+        parts("parts", "one spiral is drawn per part named here"),
+        v("seed", 0, "pick a seed knob, or leave it for a stable default", { seedRef: true }),
+        v("radius", 4.0, "outer radius, body units", { min: 0.5, max: 20, step: 0.1 }),
+        v("turns", 2.0, "revolutions from the centre out", { min: 0.25, max: 8, step: 0.25 }),
+        v("width", 0.5, "stroke width, body units", { min: 0.05, max: 4, step: 0.05 }),
+        choice("axis", ["Z", "X", "Y"], "the axis the spiral is viewed down"),
+        v("offset", 0.0, "shift the centre along the part's long axis", { min: -1, max: 1, step: 0.05 }),
+        v("softness", 0.2, "edge fade, body units", { min: 0, max: 2, step: 0.05 })
+      ]
     }
   };
 
@@ -174,20 +255,51 @@ window.HG = window.HG || {};
     },
     TOWARD: {
       phase: "magical",
-      blurb: "Walk the texel toward a colour, reading what it already looks like - so it lands the same on a black mane and a cremello one.",
+      blurb: "Walk the texel toward a colour, reading what it already looks like - so it lands the same on a black mane and a cremello one. Point 'hue' at a knob and the colour becomes the horse's own.",
       params: [
-        color("color", "the colour to walk toward"),
+        color("color", "the colour to walk toward")
+      ].concat(hueParams(HUE_DOC, true), [
         v("strength", 100, "percent of the way there", { min: 0, max: 100, step: 1 }, 82),
         v("opacity", 100, "percent opacity the texel ends at", { min: 0, max: 100, step: 1 })
-      ]
+      ])
     },
     FLAT: {
       phase: "magical",
       blurb: "Flat paint that replaces everything under it. For a gene that must look identical on any base.",
       params: [
-        color("color", "flat paint"),
+        color("color", "flat paint")
+      ].concat(hueParams(HUE_DOC, true), [
         v("opacity", 100, "percent opacity", { min: 0, max: 100, step: 1 })
-      ]
+      ])
+    },
+    RAMP: {
+      phase: "magical",
+      blurb: "TOWARD with the colour running along an axis - a spectral tail, an aurora band, a mane fading root to tip. Give it 'colors' for named stops, or 'hue' + 'hueSpan' to sweep the wheel.",
+      params: [
+        colors("colors", "two or more stops, walked through in order")
+      ].concat(hueParams(HUE_DOC + " On a ramp it names the first stop."), [
+        v("hueSpan", 60, "degrees of hue the ramp travels; negative runs the other way",
+          { min: -360, max: 360, step: 5 }),
+        choice("axis", ["X", "Y", "Z"], "the axis the ramp runs along"),
+        choice("space", ["part", "body", "units"], "'part' runs the ramp inside each part - what a mane wants"),
+        v("from", 0.0, "axis position the first stop sits at"),
+        v("to", 1.0, "axis position the last stop sits at"),
+        v("strength", 100, "percent of the way to the ramp colour", { min: 0, max: 100, step: 1 }),
+        v("opacity", 100, "percent opacity the texel ends at", { min: 0, max: 100, step: 1 })
+      ])
+    },
+    PALETTE: {
+      phase: "magical",
+      blurb: "TOWARD with the colour drawn per cell - opal, nebula, galaxy. Neighbouring cells take unrelated colours and meet at a wall, which is what makes it read as iridescent rather than as a gradient.",
+      params: [
+        colors("colors", "the palette; each cell takes one entry whole")
+      ].concat(hueParams(HUE_DOC + " On a palette it names the centre hue."), [
+        v("hueSpread", 40, "degrees either side of 'hue' a cell may land", { min: 0, max: 180, step: 5 }),
+        v("seed", 0, "pick a seed knob, or leave it for a stable default", { seedRef: true }),
+        v("scale", 5.0, "body units across one colour cell", { min: 0.3, max: 30, step: 0.1 }),
+        v("strength", 100, "percent of the way to the cell's colour", { min: 0, max: 100, step: 1 }),
+        v("opacity", 100, "percent opacity the texel ends at", { min: 0, max: 100, step: 1 })
+      ])
     }
   };
 
