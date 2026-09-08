@@ -258,6 +258,13 @@ public final class AbilityType {
     /** The most particles one firing may spawn. A guard, not a design - see the particle locus. */
     public static final int MAX_EMITTER_COUNT = 16;
 
+    /**
+     * The slowest a {@code cycle} may turn - ten Minecraft minutes for one lap
+     * of the hue circle. A guard against a number that would read as "stuck on
+     * green" rather than as a rainbow, not a design.
+     */
+    public static final int MAX_CYCLE_TICKS = 12_000;
+
     /** Particle (or, one day, light) emitter fired by a {@link Trigger}. */
     public static final AbilityType EMITTER = register(new AbilityType("emitter",
             List.of(
@@ -277,7 +284,10 @@ public final class AbilityType {
                     Param.num("data", 0.0,
                             "a normalised [0,1) number for whatever else the particle takes - "
                                     + "a shriek's delay, a note's pitch, a sculk charge's roll"),
-                    Param.num("chance", 1.0, "per-fire probability, in (0, 1]")),
+                    Param.num("chance", 1.0, "per-fire probability, in (0, 1]"),
+                    Param.num("cycle", 0,
+                            "ticks for one full rotation of the hue circle - the trail cycles the "
+                                    + "rainbow and 'color' / 'color2' are ignored; 0 = fixed colours")),
             v -> {
                 double chance = v.num("chance");
                 if (chance <= 0 || chance > 1) {
@@ -291,9 +301,13 @@ public final class AbilityType {
                 if (data < 0 || data >= 1) {
                     throw v.bad("data must be in [0, 1), got " + data);
                 }
+                int cycle = v.intOf("cycle");
+                if (cycle < 0 || cycle > MAX_CYCLE_TICKS) {
+                    throw v.bad("cycle must be in [0, " + MAX_CYCLE_TICKS + "] ticks, got " + cycle);
+                }
                 return new GeneAbility.Emitter(v.str("kind"), v.str("shape"), v.str("anchor"),
                         v.trigger("trigger"), v.color("color"), v.color("color2"), count, data,
-                        v.str("particle"), chance, v.when, v.minDose);
+                        v.str("particle"), chance, cycle, v.when, v.minDose);
             }));
 
     /** Mob effect kept topped up on self or rider while {@code when} holds. */

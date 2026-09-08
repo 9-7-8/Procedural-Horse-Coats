@@ -242,11 +242,26 @@ public final class GeneDescriptions {
                             + "mane gene on purpose, so a red mane with a blue tail is something "
                             + "you can breed. Shows on a foal."),
             Map.entry("horsegenetics.particle",
-                    "A magical gene that paints nothing: the horse trails a particle as it moves "
-                            + "- flames, souls, snow, hearts, portal motes. Forty variants share "
-                            + "one locus, so a horse shows at most two, ever; most pairs hide the "
-                            + "lower-ranked copy, some families show both at once. Colour, body "
-                            + "site and density are drawn per allele copy and inherited with it."),
+                    "A magical recessive that paints nothing: the horse trails a particle as it "
+                            + "moves - flames, souls, snow, hearts, portal motes. Forty variants "
+                            + "share one locus, so a horse shows at most two, ever. One wild-type "
+                            + "copy silences the lot, so it takes two variant copies to see "
+                            + "anything; between two variants the lower-ranked one shows and some "
+                            + "families show both at once. Colour, body site and density are drawn "
+                            + "per allele copy and inherited with it."),
+            Map.entry("horsegenetics.rainbow_dust",
+                    "A magical recessive that paints nothing: Rbw/Rbw kicks coloured dust off all "
+                            + "four hooves as it walks, fading from one colour to the next and "
+                            + "working round the whole rainbow. One copy shows nothing. How fast "
+                            + "the colour turns is drawn per allele copy and inherited with it."),
+            Map.entry("horsegenetics.lycan",
+                    "The werewolf locus, and it paints nothing: two copies of the SAME allele and "
+                            + "the horse becomes a real animal from dusk to dawn - a wolf, a cat, "
+                            + "a chicken, one of thirty-seven shapes. One copy shows nothing, and "
+                            + "two different shapes show nothing either. A shifted animal can be "
+                            + "done everything to that animal can be done to, cannot be ridden, "
+                            + "trails a faint cloud of dust whose colour is inherited, and follows "
+                            + "anything that strikes it until sunrise."),
             Map.entry("horsegenetics.light",
                     "A magical gene: gold, glowing hooves, mane or eyes, plus torch-strength world "
                             + "light around the horse. Three variant alleles, each dominant to the "

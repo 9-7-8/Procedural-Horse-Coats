@@ -23,11 +23,11 @@ import java.util.Locale;
 import java.util.Map;
 
 /**
- * <b>Particle</b> ({@code horsegenetics.particle}) - a <b>magical</b> gene, and
- * by a wide margin the largest locus in the mod: <b>forty variant alleles</b>
+ * <b>Particle</b> ({@code horsegenetics.particle}) - a <b>magical recessive</b>,
+ * and by a wide margin the largest locus in the mod: <b>forty variant alleles</b>
  * plus the wild type, 861 combinations, 87 outcomes. Roughly one wild horse in
  * thirteen trails <i>something</i> as it moves; any one particular thing is
- * about one horse in five hundred.
+ * about one horse in six hundred.
  *
  * <h2>Why one locus and not forty genes</h2>
  * The alternative was forty two-allele genes, and it is worth being explicit
@@ -40,13 +40,23 @@ import java.util.Map;
  * choosing which two is the whole game. It is the argument that folded dominant
  * white and sabino into {@link KitGene}, at forty times the scale.
  *
- * <h2>Dominance, and the pairs that hide something</h2>
- * Every allele carries a <b>rank</b>, and the alleles are declared in rank
- * order, so {@link AllelePair}'s canonical form puts the more dominant copy in
- * slot 0. Where two alleles are not codominant the lower rank is the one you
- * see; the other is carried silently and passed on. That is what makes the locus
- * breedable rather than merely wide - a horse trailing dust may be hiding a
- * soul, and only its foals will say so.
+ * <h2>One copy of {@code n} and the locus is silent</h2>
+ * <b>The whole locus is recessive to its own wild type.</b> {@code Rflm/n} is a
+ * horse that trails nothing whatsoever and is indistinguishable from
+ * {@code n/n}; two copies of a variant are what it takes to see anything at all.
+ * That is the owner's call and it is the one rule everything else here follows
+ * from - a particle is a thing you <i>breed for</i>, not a thing a single lucky
+ * allele hands you, and a locus this wide would otherwise put something on far
+ * too many horses.
+ *
+ * <p><b>Rank only decides between two variants.</b> Every allele carries one,
+ * and the alleles are declared in rank order, so {@link AllelePair}'s canonical
+ * form puts the more dominant copy in slot 0. Where two <i>variant</i> alleles
+ * meet and are not codominant the lower rank is the one you see; the other is
+ * carried silently and passed on. That is what makes the locus breedable rather
+ * than merely wide - a horse trailing dust may be hiding a soul, and only its
+ * foals will say so. Rank never beats the wild type: {@code n} is not the
+ * weakest allele here, it is an off switch.
  *
  * <p><b>Codominance is by family.</b> Every allele belongs to at most one group
  * ({@link Variant#group()}), and two <i>different</i> alleles of the same group
@@ -55,8 +65,8 @@ import java.util.Map;
  * and the smokes are one family of eight, so any two of them stack; dusts,
  * swirls, sparks, portals, sculk, rain, and the cherry/heart/soul trio are the
  * rest. Twenty-nine of the forty alleles sit in a group, which yields <b>46
- * double outcomes</b> on top of the 40 single ones. None of them can be caught
- * wild in any useful number: a doubled horse is one somebody bred.
+ * double outcomes</b> on top of the 40 single ones, and every one of them is a
+ * combination a wild horse can be caught in - see {@link #foundersTable()}.
  *
  * <h2>Everything visible about it is epigenetic</h2>
  * The allele names a particle and nothing else. Its <b>colour</b>, its
@@ -64,7 +74,7 @@ import java.util.Map;
  * all four hooves, the front pair, the back pair, the tail - <b>how much</b> of
  * it there is, and one spare number for whatever else the particle takes, are
  * all drawn from the epigenetic seed of the allele copy that carries it. So two
- * horses that are both {@code Rflm/n} are not the same horse, and a foal that
+ * horses that are both {@code Rflm/Rflm} are not the same horse, and a foal that
  * inherits the copy inherits the exact look. This is the gene
  * {@link EpigeneticAbilityContribution} was written for.
  *
@@ -87,18 +97,25 @@ public final class ParticleGene implements Gene, EpigeneticAbilityContribution {
     public static final int PRIORITY = 150;
 
     /**
-     * How common <b>each</b> of the forty variants is among founders - the same
-     * for all of them, because no particle is the ordinary one.
+     * How many founders in a hundred carry <b>each one</b> of the forty
+     * homozygous variants - the same for all of them, because no particle is the
+     * ordinary one.
      *
-     * <p>It looks tiny and is not. Forty alleles at this frequency put the
-     * variant share of the population at {@code 40 x 0.001 = 4%}, so about
-     * <b>7.8%</b> of wild horses trail something, while any <i>named</i>
-     * particle is roughly one horse in five hundred. That is the split the locus
-     * wants: meeting a particle horse is a good day, meeting the one you were
-     * looking for is a find, and meeting a codominant double in the wild
-     * essentially never happens.
+     * <p>Forty of these is {@code 40 x 0.15 = 6%} of the wild population
+     * trailing one thing, and any <i>named</i> particle is roughly one horse in
+     * six hundred and sixty. Meeting a particle horse is a good day; meeting the
+     * one you were looking for is a find.
      */
-    public static final double WILD_ALLELE_FREQUENCY = 0.001;
+    public static final double WILD_HOMOZYGOUS_PERCENT = 0.15;
+
+    /**
+     * How many founders in a hundred carry <b>each one</b> of the forty-six
+     * codominant pairs - the two-particle horses. Rarer per combination than a
+     * single, so a double is still a thing you mostly breed, but no longer a
+     * thing the wild population flatly cannot contain: a pair from one family is
+     * a <i>valid</i> heterozygote and the founder table says so.
+     */
+    public static final double WILD_CODOMINANT_PERCENT = 0.04;
 
     /** Per-copy density, drawn uniformly over {@code [1, MAX_COUNT]}. */
     public static final int MAX_COUNT = 4;
@@ -226,7 +243,7 @@ public final class ParticleGene implements Gene, EpigeneticAbilityContribution {
             }
         }
         expressions = List.copyOf(out);
-        founders = FounderTable.hardyWeinberg(frequencies(), pair -> true);
+        founders = foundersTable();
     }
 
     private void variant(String token, String particle, String group, String label, String prose) {
@@ -242,14 +259,44 @@ public final class ParticleGene implements Gene, EpigeneticAbilityContribution {
         return a * 64 + b;
     }
 
-    /** Baseline last, and a {@link LinkedHashMap} - see {@link MilkGene}. */
-    private Map<Allele, Double> frequencies() {
-        Map<Allele, Double> p = new LinkedHashMap<>();
+    /**
+     * <b>Every combination a wild horse can be caught in is one that shows.</b>
+     * The table lists the forty homozygotes, the forty-six codominant pairs, and
+     * nothing else - no {@code X/n} carrier, and no cross-family
+     * {@code Dst/Bflm} whose dust is quietly sitting on a soul flame.
+     *
+     * <p>This is not the random-mating shape, and it is not meant to be. A
+     * locus that only expresses when both copies agree makes the carrier
+     * <i>invisible</i>, and a founder population full of invisible carriers is a
+     * population where the whole locus is a lottery run in the dark: you cannot
+     * see what you have, so you cannot choose what to pair. Putting the wild
+     * horses on the expressing combinations puts the alleles where a breeder can
+     * find them - what you catch is what you saw it do - and the carriers then
+     * appear where they belong, one generation down, in the foals of a horse
+     * bred to a plain one.
+     *
+     * <p>The cross-family heterozygotes are excluded for the same reason and not
+     * because they are impossible: {@code Dst/Bflm} is a perfectly legal horse
+     * and breeding will produce one. It is just not a horse the wild ever hands
+     * you, because a founder carrying a soul flame nobody can see is the case
+     * this table exists to remove.
+     */
+    private FounderTable foundersTable() {
+        FounderTable.Builder b = FounderTable.builder();
+        double emitting = 0.0;
         for (Variant v : variants) {
-            p.put(v.allele(), WILD_ALLELE_FREQUENCY);
+            b.weight(v.allele(), WILD_HOMOZYGOUS_PERCENT);
+            emitting += WILD_HOMOZYGOUS_PERCENT;
         }
-        p.put(n, 1.0 - WILD_ALLELE_FREQUENCY * variants.size());
-        return p;
+        for (Variant a : variants) {
+            for (Variant c : variants) {
+                if (a.allele().order() < c.allele().order() && a.codominantWith(c)) {
+                    b.weight(a.allele(), c.allele(), WILD_CODOMINANT_PERCENT);
+                    emitting += WILD_CODOMINANT_PERCENT;
+                }
+            }
+        }
+        return b.weight(n, 100.0 - emitting).build();
     }
 
     // ------------------------------------------------------------------
@@ -277,10 +324,12 @@ public final class ParticleGene implements Gene, EpigeneticAbilityContribution {
     public Expression expressionOf(AllelePair pair) {
         int a = pair.first().order();
         int b = pair.second().order();
-        if (a == n.order()) {
-            return wild; // the wild type sorts last, so first == n means both are
+        if (b == n.order()) {
+            // The wild type sorts last, so second == n means at least one copy
+            // is wild - and one copy of n silences the whole locus.
+            return wild;
         }
-        if (b == n.order() || a == b) {
+        if (a == b) {
             return singles[a];
         }
         Expression both = duals.get(key(a, b));
@@ -296,11 +345,11 @@ public final class ParticleGene implements Gene, EpigeneticAbilityContribution {
     public List<Variant> shown(AllelePair pair) {
         int a = pair.first().order();
         int b = pair.second().order();
-        if (a == n.order()) {
-            return List.of();
+        if (b == n.order()) {
+            return List.of();   // a single wild-type copy silences the locus
         }
         Variant first = variants.get(a);
-        if (b == n.order() || a == b) {
+        if (a == b) {
             return List.of(first);
         }
         Variant second = variants.get(b);
@@ -355,7 +404,7 @@ public final class ParticleGene implements Gene, EpigeneticAbilityContribution {
         int count = 1 + epi.category("count");
         double data = epi.get("data");
         return new GeneAbility.Emitter("particle", "trail", site, new GeneAbility.Trigger.OnMove(),
-                color, color2, count, data, v.particle(), EMIT_CHANCE,
+                color, color2, count, data, v.particle(), EMIT_CHANCE, 0,
                 GeneAbility.Condition.ALWAYS, 1);
     }
 }

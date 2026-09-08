@@ -92,9 +92,21 @@ public sealed interface GeneAbility {
      * <p>{@code count} is how many particles one firing spawns (at least 1) -
      * the difference between a trickle and a plume, and the one knob that reads
      * from across a paddock.
+     *
+     * <p>{@code cycleTicks} is the <b>rainbow</b> knob, and the one field here
+     * that is a function of time rather than a constant: {@code 0} means the two
+     * colours above are the colours, and anything larger is how many ticks one
+     * full rotation of the hue circle takes - the translator recomputes
+     * {@code color} and {@code color2} from the clock on every firing and
+     * ignores what the gene put in them. It is a parameter rather than a second
+     * verb because everything else about a rotating trail - the particle, the
+     * anchor, the count, the chance - is the same emitter it already was, and a
+     * whole verb whose only difference is where two ints come from would be a
+     * copy of this one.
      */
     record Emitter(String kind, String shape, String anchor, Trigger trigger, int color, int color2,
-                   int count, double data, String particle, double chance, Condition when, int minDose)
+                   int count, double data, String particle, double chance, int cycleTicks,
+                   Condition when, int minDose)
             implements GeneAbility {}
 
     /**

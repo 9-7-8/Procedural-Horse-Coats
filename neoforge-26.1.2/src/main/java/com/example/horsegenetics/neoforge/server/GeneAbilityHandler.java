@@ -1,5 +1,6 @@
 package com.example.horsegenetics.neoforge.server;
 
+import com.example.horsegenetics.common.coat.pattern.HairPattern;
 import com.example.horsegenetics.common.genetics.Epigenome;
 import com.example.horsegenetics.common.genetics.Genotype;
 import com.example.horsegenetics.common.genetics.spec.GeneAbility;
@@ -294,13 +295,18 @@ public final class GeneAbilityHandler {
      */
     private static ParticleOptions particleFor(GeneAbility.Emitter e, Horse horse) {
         int rgb = e.color();
+        int second = e.color2();
+        if (e.cycleTicks() > 0) {
+            rgb = cycleHue(horse, e.cycleTicks(), 0.0);
+            second = cycleHue(horse, e.cycleTicks(), RAINBOW_LEAD);
+        }
         int argb = 0xFF000000 | rgb;
         double data = e.data();
         return switch (e.particle()) {
             // --- carry a colour ---
             case "minecraft:dust" -> new DustParticleOptions(rgb, 1.0F);
             case "minecraft:dust_color_transition" ->
-                    new DustColorTransitionOptions(rgb, e.color2(), 1.0F);
+                    new DustColorTransitionOptions(rgb, second, 1.0F);
             case "minecraft:effect" -> SpellParticleOption.create(ParticleTypes.EFFECT, argb, 1.0F);
             case "minecraft:instant_effect" ->
                     SpellParticleOption.create(ParticleTypes.INSTANT_EFFECT, argb, 1.0F);
@@ -328,6 +334,26 @@ public final class GeneAbilityHandler {
             // time the game adds a particle.
             default -> simpleParticle(e.particle(), rgb);
         };
+    }
+
+    /**
+     * How far ahead of the trail's current hue its <b>second</b> colour sits, as
+     * a fraction of the circle. A twelfth is one step further round than the
+     * six named colours of a rainbow are apart, so a
+     * {@code dust_color_transition} fading from here to there reads as "red
+     * going orange" rather than as two unrelated colours in one puff.
+     */
+    private static final double RAINBOW_LEAD = 1.0 / 12.0;
+
+    /**
+     * The hue this horse's cycling trail is on right now, {@code offset} of a
+     * turn ahead. Counted off the horse's own {@code tickCount} rather than the
+     * world's, so two rainbow horses side by side are not in lockstep - the same
+     * reason the healing aura beats on its own clock.
+     */
+    private static int cycleHue(Horse horse, int cycleTicks, double offset) {
+        double turn = (double) (horse.tickCount % cycleTicks) / cycleTicks + offset;
+        return HairPattern.hsvToRgb(turn - Math.floor(turn), 1.0, 1.0);
     }
 
     /**

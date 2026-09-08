@@ -5,6 +5,7 @@ import com.example.horsegenetics.common.breed.BreedFounder;
 import com.example.horsegenetics.common.breed.BreedLineage;
 import com.example.horsegenetics.common.breed.Breeds;
 import com.example.horsegenetics.common.coat.CoatData;
+import com.example.horsegenetics.common.coat.pattern.HairPattern;
 import com.example.horsegenetics.common.genetics.Genome;
 import com.example.horsegenetics.common.genetics.Allele;
 import com.example.horsegenetics.common.genetics.AllelePair;
@@ -995,6 +996,25 @@ public final class CustomHorseSpawnScreen extends Screen {
         }
     }
 
+    /**
+     * The colour one puff comes out, which is <b>not</b> simply
+     * {@code e.color()} for a cycling emitter: rainbow dust leaves its two
+     * colour fields white and expects the translator to read the hue off the
+     * clock, so a preview that trusted the record would draw a white trail for
+     * the one gene whose entire point is that it is not white. The wall clock
+     * stands in for the horse's {@code tickCount} here - there is no horse yet -
+     * at the game's twenty ticks a second, so a cycle set on this screen turns
+     * at the speed it will turn in the world.
+     */
+    private static int previewColor(GeneAbility.Emitter e) {
+        if (e.cycleTicks() > 0) {
+            double seconds = (System.nanoTime() % 1_000_000_000_000L) / 1.0e9;
+            double turn = seconds * 20.0 / e.cycleTicks();
+            return HairPattern.hsvToRgb(turn - Math.floor(turn), 1.0, 1.0) & 0xFFFFFF;
+        }
+        return (e.color() & 0xFFFFFF) == 0 ? 0xFFFFFF : (e.color() & 0xFFFFFF);
+    }
+
     private void spawnMotes(GeneAbility.Emitter e, int x0, int y0, int x1, int y1) {
         if (motes.size() >= MOTE_CAP) {
             return;
@@ -1011,7 +1031,7 @@ public final class CustomHorseSpawnScreen extends Screen {
         float baseY = y0 + hgt * yFrac;
         float spreadX = 26f * previewZoom;
         float spreadY = 10f * previewZoom;
-        int rgb = (e.color() & 0xFFFFFF) == 0 ? 0xFFFFFF : (e.color() & 0xFFFFFF);
+        int rgb = previewColor(e);
         int n = Math.max(1, Math.min(6, e.count()));
         for (int i = 0; i < n && motes.size() < MOTE_CAP; i++) {
             Mote m = new Mote();

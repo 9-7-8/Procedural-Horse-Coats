@@ -24,6 +24,7 @@ import com.example.horsegenetics.common.genetics.genes.LcorlGene;
 import com.example.horsegenetics.common.genetics.genes.LeopardGene;
 import com.example.horsegenetics.common.genetics.genes.LightGene;
 import com.example.horsegenetics.common.genetics.genes.LutGene;
+import com.example.horsegenetics.common.genetics.genes.LycanGene;
 import com.example.horsegenetics.common.genetics.genes.MagicHealthGene;
 import com.example.horsegenetics.common.genetics.genes.MagicJumpGene;
 import com.example.horsegenetics.common.genetics.genes.MagicSectoralHeterochromiaGene;
@@ -52,6 +53,7 @@ import com.example.horsegenetics.common.genetics.genes.Plod1Gene;
 import com.example.horsegenetics.common.genetics.genes.PpibGene;
 import com.example.horsegenetics.common.genetics.genes.PrkdcGene;
 import com.example.horsegenetics.common.genetics.genes.RabicanoGene;
+import com.example.horsegenetics.common.genetics.genes.RainbowDustGene;
 import com.example.horsegenetics.common.genetics.genes.Rapgef5Gene;
 import com.example.horsegenetics.common.genetics.genes.RoanGene;
 import com.example.horsegenetics.common.genetics.genes.Ryr2Gene;
@@ -267,6 +269,24 @@ public final class Genes {
     public static final ManeColorGene MANE_COLOR = new ManeColorGene();
     public static final TailColorGene TAIL_COLOR = new TailColorGene();
     public static final ParticleGene PARTICLE = new ParticleGene();
+    /**
+     * <b>Rainbow dust</b> - its own locus rather than a forty-first
+     * {@link ParticleGene} allele, because the particle locus's premise is that
+     * its alleles <i>compete</i> for two slots and this one competes with
+     * nothing: a horse may trail flames and rainbow dust at once. It sits
+     * immediately after it all the same, since it is the gene that locus is most
+     * often confused with.
+     */
+    public static final RainbowDustGene RAINBOW_DUST = new RainbowDustGene();
+    /**
+     * <b>LYCAN</b> - the werewolf locus, thirty-seven shapes, every one of them
+     * recessive to the wild type <i>and</i> to each other: only two copies of
+     * the same allele shift. It paints nothing and grants no
+     * {@link AbilityContribution} - the whole effect is a night-time entity swap
+     * in {@code neoforge/server/LycanthropyHandler}, the same split
+     * {@link #DHAMPIR} makes.
+     */
+    public static final LycanGene LYCAN = new LycanGene();
     public static final LightGene LIGHT = new LightGene();
     /** LUT - swaps the natural red/black gradient for an unnatural palette when homozygous for a variant. */
     public static final LutGene LUT = new LutGene();
@@ -353,7 +373,8 @@ public final class Genes {
             NATURAL_ZEBRA, ROAN, RABICANO, TOBIANO,
             LEOPARD, EDNRB, KIT, MANCHADO, MITF, PAX3,
             MILK, BODY_SIZE, MAGIC_SPEED, MAGIC_HEALTH, MAGIC_JUMP,
-            MANE_COLOR, TAIL_COLOR, PARTICLE, LIGHT, HEALER, SECTORAL_EYES, VERDANT, LUT, CUTIE_MARK,
+            MANE_COLOR, TAIL_COLOR, PARTICLE, RAINBOW_DUST, LYCAN,
+            LIGHT, HEALER, SECTORAL_EYES, VERDANT, LUT, CUTIE_MARK,
             DHAMPIR,
             MSTN, PDK4, CKM, RYR2, LCORL, HMGA2, PATN1, PATN2,
             ACAN, B4GALT7, PLOD1, RAPGEF5, ST14, SHOX, MET,

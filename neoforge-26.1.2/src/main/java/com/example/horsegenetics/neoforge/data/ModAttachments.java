@@ -76,6 +76,15 @@ public final class ModAttachments {
                     .sync(CowboyBrand.STREAM_CODEC)
                     .build());
 
+    // The horse a shifted lycanthrope used to be, held on the ANIMAL rather than
+    // on a horse - at night there is no horse to hold it. See data/LycanShift.
+    // Not copyOnDeath: an animal that dies takes the horse inside it with it.
+    public static final Supplier<AttachmentType<LycanShift>> LYCAN_SHIFT =
+            ATTACHMENT_TYPES.register("lycan_shift", () -> AttachmentType
+                    .builder(() -> LycanShift.NONE)
+                    .serialize(LycanShift.MAP_CODEC)
+                    .build());
+
     private ModAttachments() {
     }
 }

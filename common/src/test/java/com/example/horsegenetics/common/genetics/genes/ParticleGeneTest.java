@@ -136,11 +136,19 @@ class ParticleGeneTest {
     // Dominance and codominance
     // ------------------------------------------------------------------
 
+    /**
+     * <b>The locus is recessive to its own wild type.</b> One copy of {@code n}
+     * and the horse trails nothing whatsoever - not a fainter version of it,
+     * nothing - so a variant needs two copies to be seen at all. This is the
+     * rule the founder table and half the gene's design follow from.
+     */
     @Test
-    void aVariantOverTheWildTypeShowsItself() {
-        assertEquals(List.of(v("Soul")), GENE.shown(pair("Soul", "n")));
+    void oneWildTypeCopySilencesTheWholeLocus() {
         assertEquals(List.of(v("Soul")), GENE.shown(pair("Soul", "Soul")));
+        assertEquals(List.of(), GENE.shown(pair("Soul", "n")));
         assertEquals(List.of(), GENE.shown(pair("n", "n")));
+        assertEquals(GENE.expressionOf(pair("n", "n")), GENE.expressionOf(pair("Soul", "n")),
+                "a carrier must be indistinguishable from a plain horse");
     }
 
     /** The lower rank wins, and the loser is carried silently - which is what makes the locus breedable. */
@@ -148,8 +156,8 @@ class ParticleGeneTest {
     void aNonCodominantHeterozygoteHidesTheHigherRankedCopy() {
         // Dst (rank 1) against Soul (rank 99): dust shows, the soul is carried.
         assertEquals(List.of(v("Dst")), GENE.shown(pair("Dst", "Soul")));
-        assertEquals(GENE.expressionOf(pair("Dst", "n")), GENE.expressionOf(pair("Dst", "Soul")),
-                "a hidden copy must be indistinguishable from the wild type");
+        assertEquals(GENE.expressionOf(pair("Dst", "Dst")), GENE.expressionOf(pair("Dst", "Soul")),
+                "a hidden copy must be indistinguishable from a second copy of the one that shows");
         // ...and it really is still there to pass on.
         assertTrue(pair("Dst", "Soul").has(GENE.fromToken("Soul")));
     }
@@ -158,7 +166,7 @@ class ParticleGeneTest {
     void twoAllelesOfOneFamilyBothShow() {
         List<Variant> shown = GENE.shown(pair("Dst", "Dst3"));
         assertEquals(List.of(v("Dst"), v("Dst3")), shown);
-        assertNotEquals(GENE.expressionOf(pair("Dst", "n")), GENE.expressionOf(pair("Dst", "Dst3")));
+        assertNotEquals(GENE.expressionOf(pair("Dst", "Dst")), GENE.expressionOf(pair("Dst", "Dst3")));
     }
 
     /**
@@ -220,28 +228,61 @@ class ParticleGeneTest {
     // ------------------------------------------------------------------
 
     /**
-     * About one wild horse in thirteen trails something; a codominant double is
-     * about one in ten thousand, so it is a thing you breed rather than catch.
+     * <b>Every combination a founder can be caught in is one that shows.</b> No
+     * wild horse is a silent carrier, and none is a cross-family heterozygote
+     * quietly sitting on a particle nobody can see - because a locus that only
+     * expresses when both copies agree makes carriers invisible, and a
+     * population of invisible carriers is a locus nobody can breed on purpose.
+     * The table is the whole enforcement of that, so this walks it directly
+     * rather than sampling.
      */
     @Test
-    void theWildPopulationIsMostlyPlainAndDoublesAreEffectivelyUnobtainable() {
+    void noFounderIsACarrierAndNoneIsAMismatch() {
+        for (AllelePair pair : GENE.founderTable(null).pairs()) {
+            if (pair.first().equals(GENE.wildTypeAllele())) {
+                continue;   // the plain horse, which is most of them
+            }
+            assertFalse(pair.has(GENE.wildTypeAllele()),
+                    "a founder must never carry one silent copy: " + pair);
+            assertFalse(GENE.shown(pair).isEmpty(),
+                    "a founder combination that shows nothing: " + pair);
+            if (!pair.homozygous()) {
+                assertEquals(2, GENE.shown(pair).size(),
+                        "the only wild heterozygote is a codominant one: " + pair);
+            }
+        }
+    }
+
+    /**
+     * About one wild horse in thirteen trails something. A codominant double is
+     * rarer per combination than any single, but no longer impossible: it is a
+     * <i>valid</i> pair, so the wild can hand you one.
+     */
+    @Test
+    void theWildPopulationIsMostlyPlain() {
         int draws = 60_000;
         int emitting = 0;
         int doubles = 0;
+        int carriers = 0;
         SeededRng rng = new SeededRng(0xF0A1);
         for (int i = 0; i < draws; i++) {
-            int shown = GENE.shown(Genotype.random(rng).pair(GENE)).size();
+            AllelePair pair = Genotype.random(rng).pair(GENE);
+            int shown = GENE.shown(pair).size();
             if (shown > 0) {
                 emitting++;
             }
             if (shown == 2) {
                 doubles++;
             }
+            if (shown == 0 && !pair.homozygous()) {
+                carriers++;
+            }
         }
         double emittingShare = (double) emitting / draws;
         assertTrue(emittingShare > 0.05 && emittingShare < 0.11,
                 "expected roughly 8% of founders to emit, got " + emittingShare);
-        assertTrue((double) doubles / draws < 0.002, "codominant doubles should be a rarity, got " + doubles);
+        assertTrue((double) doubles / draws < 0.04, "doubles should stay a minority, got " + doubles);
+        assertEquals(0, carriers, "no founder is a silent carrier");
     }
 
     // ------------------------------------------------------------------
@@ -271,7 +312,7 @@ class ParticleGeneTest {
 
     @Test
     void theSameHorseAlwaysProducesTheSameTrail() {
-        Genome genome = genomeShowing(pair("Rflm", "n"), 99);
+        Genome genome = genomeShowing(pair("Rflm", "Rflm"), 99);
         assertEquals(emittersOf(genome), emittersOf(genome));
 
         // ...and re-parsing it off its code strings changes nothing, which is
@@ -284,7 +325,7 @@ class ParticleGeneTest {
     void twoHorsesWithTheSameAlleleNeedNotLookAlike() {
         Set<String> looks = new HashSet<>();
         for (long seed = 0; seed < 40; seed++) {
-            GeneAbility.Emitter e = emittersOf(genomeShowing(pair("Rflm", "n"), seed)).get(0);
+            GeneAbility.Emitter e = emittersOf(genomeShowing(pair("Rflm", "Rflm"), seed)).get(0);
             assertEquals("minecraft:flame", e.particle(), "the allele fixes the particle and only that");
             looks.add(e.color() + "|" + e.anchor() + "|" + e.count());
         }
@@ -312,46 +353,63 @@ class ParticleGeneTest {
         assertEquals(30, differing, "the two copies should never be forced to agree");
     }
 
-    /** A foal that inherits the copy inherits the exact look - the reason this is worth breeding. */
+    /**
+     * A foal that inherits a copy inherits the <b>exact look</b> of it - the
+     * reason the locus is worth breeding at all.
+     *
+     * <p>Tested on a <b>codominant</b> pair rather than on a homozygote, and
+     * that is not incidental. A {@code Rflm/Rflm} horse's two copies carry two
+     * independent draws and only slot 0 is on show, so its other copy's colour
+     * is real, heritable and unobservable - there is nothing to assert against.
+     * {@code Rflm/Csmk} puts a different particle on each copy, which makes each
+     * copy individually visible, so a foal's flame can be checked against the
+     * flame it must have come from.
+     */
     @Test
     void aFoalInheritsTheExactTrailOfTheCopyItGets() {
-        Genome sire = genomeShowing(pair("Bflm", "n"), 5150);
-        GeneAbility.Emitter sireTrail = emittersOf(sire).get(0);
-        Genome dam = genomeShowing(pair("n", "n"), 42);
+        Genome sire = genomeShowing(pair("Rflm", "Csmk"), 5150);
+        Genome dam = genomeShowing(pair("Rflm", "Csmk"), 42);
+        GeneAbility.Emitter sireFlame = emittersOf(sire).get(0);
+        GeneAbility.Emitter damFlame = emittersOf(dam).get(0);
 
         int inherited = 0;
-        for (long seed = 0; seed < 60; seed++) {
+        for (long seed = 0; seed < 80; seed++) {
             Genome foal = dam.breedWith(sire, new SeededRng(seed));
             List<GeneAbility.Emitter> trail = emittersOf(foal);
-            if (trail.isEmpty()) {
-                continue; // it drew the sire's wild-type copy
+            if (trail.size() != 2) {
+                continue; // Rflm/Rflm or Csmk/Csmk - only one particle to see
             }
             inherited++;
             GeneAbility.Emitter got = trail.get(0);
+            assertEquals("minecraft:flame", got.particle());
             // Everything discrete comes through untouched: drift never nudges a
             // category a step, so a foal's particles are on the same part of its
-            // body, in the same number, of the same kind.
-            assertEquals(sireTrail.particle(), got.particle(), "same particle");
-            assertEquals(sireTrail.anchor(), got.anchor(), "same body site");
-            assertEquals(sireTrail.count(), got.count(), "same density");
-            // The colour is inherited too, but one generation of drift may have
+            // body and in the same number as the parent copy it came from. The
+            // colour is inherited too, but one generation of drift may have
             // moved a channel by a hair - which is the point of drift, and is
             // far too small to see.
-            assertColourClose(sireTrail.color(), got.color());
-            assertColourClose(sireTrail.color2(), got.color2());
+            assertTrue(matches(sireFlame, got) || matches(damFlame, got),
+                    "a foal's flame must be one of its parents' flames, not a fresh roll");
         }
-        assertTrue(inherited > 10, "some foals should have inherited the variant copy");
+        assertTrue(inherited > 20, "some foals should have inherited one copy of each");
+    }
+
+    /** Same body site, same density, and a colour at most one generation of drift away. */
+    private static boolean matches(GeneAbility.Emitter parent, GeneAbility.Emitter foal) {
+        return parent.anchor().equals(foal.anchor())
+                && parent.count() == foal.count()
+                && colourClose(parent.color(), foal.color())
+                && colourClose(parent.color2(), foal.color2());
     }
 
     /** Two colours one generation of drift apart - a channel or two, never a new colour. */
-    private static void assertColourClose(int expected, int actual) {
+    private static boolean colourClose(int expected, int actual) {
         for (int shift = 0; shift <= 16; shift += 8) {
-            int a = (expected >> shift) & 0xFF;
-            int b = (actual >> shift) & 0xFF;
-            assertTrue(Math.abs(a - b) <= 4,
-                    "channel drifted too far: " + Integer.toHexString(expected)
-                            + " -> " + Integer.toHexString(actual));
+            if (Math.abs(((expected >> shift) & 0xFF) - ((actual >> shift) & 0xFF)) > 4) {
+                return false;
+            }
         }
+        return true;
     }
 
     /**
@@ -360,7 +418,7 @@ class ParticleGeneTest {
      */
     @Test
     void withNoEpigenomeTheAnswerIsTheStableMidpoint() {
-        Genotype genotype = Genotype.wildType().with(pair("Note", "n"));
+        Genotype genotype = Genotype.wildType().with(pair("Note", "Note"));
         assertEquals(HorseAbilities.activeFor(genotype), HorseAbilities.activeFor(genotype, null));
 
         List<HorseAbilities.Active> ours = new ArrayList<>();
@@ -376,7 +434,7 @@ class ParticleGeneTest {
     @Test
     void everyEmitterIsWithinTheVerbsLimits() {
         for (Variant variant : GENE.variants()) {
-            Genome genome = genomeShowing(new AllelePair(variant.allele(), GENE.wildTypeAllele()), 7);
+            Genome genome = genomeShowing(new AllelePair(variant.allele(), variant.allele()), 7);
             GeneAbility.Emitter e = emittersOf(genome).get(0);
             assertEquals(variant.particle(), e.particle());
             assertTrue(e.count() >= 1 && e.count() <= ParticleGene.MAX_COUNT, "count " + e.count());

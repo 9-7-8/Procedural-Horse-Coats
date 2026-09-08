@@ -246,7 +246,9 @@ window.HG = window.HG || {};
         eColor("color2", "the second colour, for particles that fade between two"),
         eNum("count", 1, "particles per firing, 1-16", { min: 1, max: 16, step: 1 }),
         eNum("data", 0, "a spare 0-1 number some particles read", { min: 0, max: 1, step: 0.01 }),
-        eNum("chance", 1, "odds of firing on any given beat", { min: 0, max: 1, step: 0.01 })
+        eNum("chance", 1, "odds of firing on any given beat", { min: 0, max: 1, step: 0.01 }),
+        eNum("cycle", 0, "ticks for one lap of the hue circle - a rainbow trail; 0 = fixed colours",
+          { min: 0, max: 12000, step: 1 })
       ]
     },
     mob_effect: {
