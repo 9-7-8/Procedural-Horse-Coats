@@ -1,127 +1,23 @@
-MAGIC GENE BULK IMPORT - resume notes
-=====================================
+MAGIC GENE BULK IMPORT - finished 2026-09-08
+============================================
 
-WHAT THIS IS
-  process/*.md are source descriptions for ~85 new magical genes.
-  process/index.csv is the manifest: gene, source file, allele token, painter
-  family, and whether it has been created yet. CHECK index.csv BEFORE creating
-  any gene - if its row says "yes", it is already done.
+All 84 genes are built and landed. What is left in this folder:
 
-  As each gene ships, its section is deleted out of the source .md. When a .md
-  holds nothing but whitespace it is deleted outright. So the .md files shrink
-  as the run proceeds, and what is left in them is what is left to do.
+  index.csv    the manifest - every gene, its source file, its allele token and
+               its painter family. The record of what came from where.
 
-RULES THIS RUN IS WORKING UNDER (from the owner)
-  - Genes may glow or emit particles. Nothing else. No gameplay effects, no
-    stat changes, no ability grants, however magical the description sounds.
-  - Nothing changes after the coat is baked. No age progression, no seasonal
-    drift, no "reaches full expression at 8-10 years".
-  - A gene that would break either rule: refuse the offending part, build the
-    rest, and write the refusal into wiki/verification.html.
-  - A gene that adds ONLY white gets two alleles: a white one (dominant) and a
-    colour one (fully recessive, needs two copies). The colour allele never
-    gives blue eyes even when the white one would. If the source calls the gene
-    recessive, the white allele is homozygous-only too.
-  - Name or allele-token collision: append 2, then 3, and so on. The owner will
-    rename later.
-  - JSON, not Java, unless the gene genuinely cannot be described as data.
-  - Ignore breed references, DeviantArt, and HARPG scoring (coins, karma, RP).
+  akkadorian-z-mutation-genes.md
+               one refused locus (Paint Moon) and why. Nothing else survives of
+               the seven source files; each gene's section was deleted as it
+               shipped.
 
-ORDER OF WORK
-  1. DONE - shared painters first, so the genes can be data. See below.
-  2. Genes in groups of five, by painter family, checking after each group.
-  3. Wiki: group the magic genes by type rather than 85 loose pages; sort the
-     magic gene tabs alphabetically; give each an icon baked from an example of
-     the gene on a bay horse; switch every gene page's preview default from
-     black to bay.
+  tools/       founders.py, sheet.py, coverage.mjs - still useful, and now
+               documented on wiki/gene-format.html#looking rather than here.
 
-PHASE 1 - INFRASTRUCTURE (COMPLETE)
-  New masks   SPOTS, RINGS, SPECKLE, STROKES, SPIRAL
-  New ops     RAMP (colour along an axis), PALETTE (colour per cell)
-  New on both TOWARD and FLAT: hue / saturation / lightness, so a colour can
-              come off a knob instead of being a literal. hue < 0 means "not
-              set, use color" - a sentinel, not a presence test, because the
-              creator carries every parameter whether or not you touched it.
-  New on Layer: "emissive": true -> the texels it covers render full-bright.
-  Landed in:  GeneSpec, SpecSchema, GeneSpecParser, SpecPainter, SpecGene,
-              BodyNoise (Cell + ridge), wiki/gene-creator/js/{schema,spec-engine,
-              noise,ui,spec-model}.js, creator.css, wiki/gene-format.html.
-  Fixture:    common/.../example-genes/prismatic.json exercises every new mask
-              and op; it is in SpecFixtureTool.SPECS and CreatorAssetTool.
-              WITHOUT it the parity check is green by definition.
+Everything else that was in this file has moved somewhere it will be found:
 
-  Loading:    Genes' static initialiser now registers the files listed in
-              horsegenetics/genes/index.json. Nothing called that before, so
-              suntouched and waterborn were shipped but dead; they now load.
-              The NeoForge copy of that folder was deleted - one folder, in
-              common/ - and the coat golden file was regenerated because the
-              two genes now occupy real positions in the genotype code.
-  Browser:    :common:bakeGeneBundle writes wiki/horse-designer/assets/genes.json;
-              DesignerApi.registerGenes takes it; java.js registers genes BEFORE
-              breeds, because adding a gene moves every gene after it.
-
-AFTER TOUCHING ANY GENE FILE, RE-RUN
-  ./gradlew :common:bakeGeneBundle          (the browser's copy)
-  ./gradlew :common:test                    (golden file moves when a gene does)
-  ./gradlew :common:bakeSpecFixtures && node wiki/gene-creator/tools/check-parity.mjs
-  ./gradlew :web:bakeDesignerAssets         (any common/ change at all)
-
-SCALE CALIBRATION - READ BEFORE WRITING A GENE
-  One body unit is TWO texels (HorseSkinGeometry.TEXELS_PER_UNIT). The sources
-  quote centimetres for a 160cm horse, and 1 unit is about 8cm - so a source
-  that says "a 1cm spot" is asking for a sixth of a pixel. Translate for the
-  texture, not for the horse. Working minima, learned by baking icons and
-  looking at them:
-     SPOTS   radius >= 0.5, spacing >= 1.5
-     RINGS   radius >= 1.3, thickness >= 0.7, softness <= thickness/2
-     STROKES spacing * width >= 0.7 (that product is the stroke's real width)
-     SPECKLE spacing >= 0.5
-  Anything finer is arithmetically present and invisible on the horse.
-
-  Part bounds (adult), for masks that need real numbers:
-     BODY  x 7.5..29.5  y 11..21    z -5..5
-     NECK  x 22.1..34.2 y 13.8..27.7 z -2..2
-     HEAD  x 28.1..36.7 y 24.2..32   z -3..3
-     LEGS  x varies     y 0..11      z |1|..|5|
-     MANE  x 20.9..30.6 y 18.2..33   TAIL x 0..10.5 y 5.9..20
-
-THE TWO TOOLS THIS RUN ADDED - USE THEM, DO NOT GUESS
-  ./gradlew :common:bakeGeneIcons      one bay horse per gene, three-quarter view
-  python process/tools/sheet.py 5      stitches them into one contact sheet
-  node process/tools/coverage.mjs <gene.json> [seed]
-                                       per-layer, per-part coverage percentages
-  The icon answers "does it look right"; coverage.mjs answers "did it paint
-  nothing, or paint somewhere the camera cannot see" - which look identical and
-  need opposite fixes.
-
-PRIORITY BANDS THIS IMPORT USES (magical, so 100+; 100-199 was already taken)
-  200-249  ground and strong-white genes that replace the base coat
-  250-299  field and region genes
-  300-329  spot and ring genes
-  330-359  fine detail - speckle, dust, stars
-  360-399  linear and stroke genes
-  400-429  hair-only genes
-  430-469  modifiers that read the coat beneath them
-  500      Invert, which has to be last
-
-PHASE 2 - GENES: COMPLETE. 84 built, 1 refused (Paint Moon). See index.csv.
-
-PHASE 3 - WIKI: seven generated family pages (wiki/genes-magic-*.html), one
-  icon per gene from :common:bakeGeneIcons, the magical section of pages.js
-  alphabetised, and the gene-page preview defaulting to bay. Regenerate the
-  pages with :common:bakeGeneWikiPages; they are generated because eighty-odd
-  genes already describe themselves in their own files and copying that by hand
-  would be eighty-odd chances for the wiki to be wrong.
-
-WHAT IS LEFT (all written up in wiki/verification.html #magic-import)
-  - Nine early genes still lack the white/coloured twin allele the owner's rule
-    asks for: crescents, wormholes, polymoon, stars, stellar, lasertae,
-    scratches, internal_flow, zebras_coat.
-  - No gene touches eye colour; eleven sources ask for it. Needs a spec hook
-    into EyeColor.
-  - "Speckling colour" is per-gene, not shared. Needs cross-gene epigenetics.
-  - The seven `inverting` akkadorian loci paint light only. War Mask shows the
-    trick that would fix them (two layers, opposite PIGMENT masks).
-
-OPEN QUESTIONS PARKED FOR THE OWNER
-  Written up in wiki/verification.html as they are found, not here.
+  the scale calibration and the part bounds -> wiki/gene-format.html#scale
+  the four-file contracts                   -> wiki/modding.html#contracts
+  what was refused, and what is unverified  -> wiki/verification.html#magic-import
+  what is still missing                     -> wiki/known-gaps.html gaps 94-97
+  what was built and why                    -> wiki/session-log.html

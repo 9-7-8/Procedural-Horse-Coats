@@ -351,6 +351,79 @@
     for every gene and every layer, so two layers don't come out on top of each other.
 </p>
 
+<h2 id="scale">Scale &mdash; the thing that wastes an evening</h2>
+
+<p>
+    <strong>One body unit is two texels.</strong> The adult barrel is 22 units long and
+    the sheet is 128&times;128, so a feature under about half a unit is arithmetically
+    present and <em>invisible on the horse</em>. This is the single commonest way a gene
+    comes out blank, and it does not look like a scale problem &mdash; it looks like the
+    mask not working.
+</p>
+
+<p>
+    It bites hardest when a description is in centimetres. A horse is about 160&nbsp;cm at
+    the withers, so a unit is roughly 8&nbsp;cm and a &ldquo;3&nbsp;cm ring wall&rdquo; is
+    a third of a pixel. Translate for the texture, not for the animal.
+</p>
+
+<div class="table-wrap">
+<table class="facts">
+<thead><tr><th>Mask</th><th>Below this it will not read</th></tr></thead>
+<tbody>
+<tr><td><code>SPOTS</code></td><td><code>radius</code> 0.5, <code>spacing</code> 1.5</td></tr>
+<tr><td><code>RINGS</code></td><td><code>radius</code> 1.3, <code>thickness</code> 0.7, and keep <code>softness</code> under half the thickness</td></tr>
+<tr><td><code>STROKES</code></td><td><code>spacing</code> 3.0 &mdash; strokes need bare coat between them or they resolve as a wash rather than as lines</td></tr>
+<tr><td><code>SPECKLE</code></td><td><code>spacing</code> 0.5</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3 id="bounds">Where the parts actually are</h3>
+
+<p>
+    For a mask that needs real coordinates rather than a normalised
+    <code>space: "part"</code> band. Adult mesh, in body units.
+</p>
+
+<div class="table-wrap">
+<table class="facts">
+<thead><tr><th>Part</th><th>X (tail&rarr;nose)</th><th>Y (hoof&rarr;withers)</th><th>Z (centre&rarr;right)</th></tr></thead>
+<tbody>
+<tr><td><code>BODY</code></td><td>7.5 &ndash; 29.5</td><td>11 &ndash; 21</td><td>&minus;5 &ndash; 5</td></tr>
+<tr><td><code>NECK</code></td><td>22.1 &ndash; 34.2</td><td>13.8 &ndash; 27.7</td><td>&minus;2 &ndash; 2</td></tr>
+<tr><td><code>HEAD</code></td><td>28.1 &ndash; 36.7</td><td>24.2 &ndash; 32</td><td>&minus;3 &ndash; 3</td></tr>
+<tr><td><code>MUZZLE</code></td><td>34.2 &ndash; 41</td><td>21.7 &ndash; 28.5</td><td>&minus;2 &ndash; 2</td></tr>
+<tr><td><code>MANE</code></td><td>20.9 &ndash; 30.6</td><td>18.2 &ndash; 33</td><td>&minus;1 &ndash; 1</td></tr>
+<tr><td><code>TAIL</code></td><td>0 &ndash; 10.5</td><td>5.9 &ndash; 20</td><td>&minus;1.5 &ndash; 1.5</td></tr>
+<tr><td>a leg</td><td>4 wide</td><td>0 &ndash; 11</td><td>1 &ndash; 5, either sign</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+    These are read off <code>HorseSkinGeometry.bounds</code> and will move if the mesh
+    does &mdash; ask it rather than trusting the table if something looks a unit out.
+    <a href="body-space.html">Body space</a> is the full story.
+</p>
+
+<h3 id="looking">Look at it, and know which failure you have</h3>
+
+<p>
+    A gene that painted nothing and a gene that painted somewhere the camera cannot see
+    are <em>the same picture</em> and opposite bugs. Two tools separate them:
+</p>
+
+<div class="table-wrap">
+<table class="facts">
+<tbody>
+<tr><th><code>./gradlew :common:bakeGeneIcons</code></th><td>One three-quarter snapshot of every data-driven gene on a standard bay, through the real pipeline. <code>python process/tools/sheet.py 8</code> stitches them into one contact sheet, which is the only practical way to look at eighty genes. Answers <em>does it look right</em>.</td></tr>
+<tr><th><code>node process/tools/coverage.mjs &lt;gene.json&gt;</code></th><td>Per-layer, per-part coverage percentages, through the creator's engine. Answers <em>did it paint at all, and where</em>.</td></tr>
+<tr><th><code>python process/tools/founders.py</code></th><td>Rewrites every imported gene's founder table from its rarity tier, budgeted across the whole set. Founder rates compound, so they are not a per-gene judgement call: twenty genes at &ldquo;a few percent each&rdquo; once took the share of wild horses showing something magical from a half to 0.86.</td></tr>
+</tbody>
+</table>
+</div>
+
 <h2 id="ops">Ops &mdash; what</h2>
 
 <h3>Natural</h3>
