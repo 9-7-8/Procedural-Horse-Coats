@@ -132,6 +132,20 @@ coat/
   skin/
     HorseSkinGeometry.java    body space &lt;-&gt; texel, for ADULT and BABY
 
+breed/
+  Breed.java                one breed, parsed: pools, scores, bands, sources, price
+  Breeds.java               the registry - shipped files, drop-ins, FERAL_MIXED
+  BreedSource.java          WILD / COWBOY / SPAWN_EGG / STABLE - where a breed may come from
+  BreedBands.java           the epigenetic numbers a breed pins on its founders
+  BreedFounder.java         roll a founder Genome for a breed
+  BreedLineage.java         the label: PURE / CROSS / SPLICED / MIXED / FERAL, + combine
+  BreedStatCurve.java       a 1-10 score, or a height in hands, -&gt; a TargetBand
+  Commonness.java           the rarity -&gt; herd-weight ladder
+  spec/BreedSpecParser.java  a breed JSON file -&gt; Breed (warns and skips what is missing)
+  spec/BreedSpecWriter.java  ...and back, omitting every field at its default
+  spec/BreedSpecLoader.java  find + parse, from a folder or the classpath index
+  spec/BreedFileTool.java    the bakeBreedFiles task
+
 horse/    Sex, HorseRecord, ParentStats, HorseDatabase, InMemoryHorseDatabase
 trait/    Traits, Condition, Severity, Viability, TraitBuilder, TraitContribution,
           EpigeneticTraitContribution, HealthContribution, HorseTraits
@@ -952,6 +966,49 @@ record GenomeSample(String genotypeCode, String epigenomeCode) {
 <p>
     Full detail on <a href="breeding.html">Breeding &amp; pedigree</a>, which is the
     single source of truth for records, pedigree and stat inheritance.
+</p>
+
+<h3>Breeds (<code>common/breed/</code>)</h3>
+
+<div class="codebox">
+<pre><code class="language-java">// A breed is a JSON file. This is the parsed form; the Builder is the escape
+// hatch for one that needs behaviour, and Feral Mixed is its only user.
+record Breed(String id, String name, boolean magical, List&lt;String&gt; biomes,
+             double spawnWeight, Set&lt;BreedSource&gt; sources,
+             Map&lt;String, List&lt;Combo&gt;&gt; genePools, StatScores scores, BreedBands bands,
+             double magicChance, Set&lt;String&gt; magicWhitelist, Set&lt;String&gt; magicBlacklist,
+             boolean hardy, List&lt;String&gt; notes, Optional&lt;PriceRange&gt; price) {
+    boolean constrains(String geneKey);
+    boolean allows(BreedSource source);      // the four-way checklist
+    boolean hasSpawnEgg();                   // == allows(SPAWN_EGG)
+    BreedStatTargets statTargets();          // DERIVED from scores(), never stored
+    FounderTable founderTable(String geneKey);
+}
+
+// The registry. Lazy, because a breed file names genes and the gene registry is
+// not complete until the host has loaded its own drop-ins.
+Breeds.loadBuiltins();                       // the classpath index
+Breeds.loadFrom(Path directory);             // config/horsegenetics/breeds/
+Breeds.registerBundle(String json, String source);   // the browser's one-array copy
+Breeds.registerJava(Breed b);                // the escape hatch
+List&lt;Breed&gt; Breeds.forBiome(String biomeId, BreedSource source);
+List&lt;Breed&gt; Breeds.from(BreedSource source);
+
+// Reading and writing the file format. Warnings are for what this install has
+// not got; only a malformed file throws.
+Breed  BreedSpecParser.parse(String json, String source, Consumer&lt;String&gt; warnings);
+List&lt;Breed&gt; BreedSpecParser.parseAll(String jsonArray, String source, Consumer&lt;String&gt;);
+String BreedSpecWriter.write(Breed breed);
+
+// Did a gene splice carrot's allele reach the foal? Asked of the FOAL: does it
+// carry an allele NEITHER parent had?
+boolean SpliceOutcome.spliceReached(Genotype foal, Genotype dam, Genotype sire,
+                                    GameteBias damBias, GameteBias sireBias);</code></pre>
+</div>
+
+<p>
+    Full detail on <a href="breed-format.html">the breed file format</a> and
+    <a href="breeds.html">Breeds</a>.
 </p>
 
 <h2>The trait system (<code>common/trait/</code>)</h2>

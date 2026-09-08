@@ -550,7 +550,7 @@
 
 <hr>
 
-<h2 id="designer">10. The visual marking designer, and breeds as packages</h2>
+<h2 id="designer">10. The visual marking designer</h2>
 
 <div class="note danger">
     <span class="label">The owner wants this, and it is the blocker for the complex patterns</span>
@@ -648,19 +648,13 @@
     needs a bundler or a dev server is out.
 </p>
 
-<div class="note">
-    <span class="label">Breed creation in the editor &mdash; ship breeds as packages</span>
-    <p>
-        The owner wants the editor to <strong>also build breeds</strong>: assemble a
-        suite of genes, custom and built-in, into a <code>Breed</code> definition
-        &mdash; allele pools, stat bands, biomes, magic chance, notes &mdash; and export
-        it beside the gene files, so a content pack ships <em>breeds</em> and not just
-        loose genes. It needs a breed-spec JSON format mirroring
-        <code>common/breed/Breed</code> (there is none &mdash; breeds are hand-written
-        Java), a loader beside <code>GeneSpecLoader</code>, and editor forms over the
-        pool / band / biome fields. See &sect;<a href="#breeds">19</a>.
-    </p>
-</div>
+<p class="muted">
+    <strong>Breeds as packages shipped 2026-09-07</strong> and is no longer on this page:
+    a breed is a JSON file, there is a loader beside <code>GeneSpecLoader</code>, and
+    <a href="breed-designer/index.html">the breed designer</a> is the editor for it. What
+    that leaves here is only the <em>marking</em> half above. See
+    <a href="breed-format.html">the breed file format</a>.
+</p>
 
 <hr>
 
@@ -1315,10 +1309,12 @@
 
 <p>
     <a href="breeds.html">The breed system</a> shipped &mdash; 49 breeds, biome-weighted
-    herd spawning, cross / mixed labels, per-breed stat bands feeding the four magical
-    body-stat genes. <strong>No new gene came with it</strong>, and the breed definitions
+    herd spawning, cross / spliced / mixed labels, per-breed stat bands feeding the four
+    magical body-stat genes, and (2026-09-07) a
+    <a href="breed-format.html">data-driven file format</a> so a breed needs no Java.
+    <strong>No new gene came with it</strong>, and the breed definitions
     reference genes and cosmetics the mod does not have. Each is noted in the
-    breed&rsquo;s <code>notes()</code>; the gene-shaped ones are rows in
+    breed&rsquo;s <code>notes</code>; the gene-shaped ones are rows in
     &sect;&sect;<a href="#natural-genes">10</a>&ndash;<a href="#health-genes">11</a>
     already. What is left here:
 </p>
@@ -1345,15 +1341,14 @@
 <h3>Breed-system follow-ups</h3>
 
 <ul>
-    <li><strong>Breeds are hand-written Java with no data-driven format.</strong> Adding
-        one means editing <code>common/breed/Breeds.java</code>. For content packs and
-        the visual editor (&sect;<a href="#designer">9</a>) to ship breeds,
-        <code>Breed</code> needs a JSON spec and a loader beside
-        <code>GeneSpecLoader</code>, the same way genes got one.</li>
     <li><strong>More fictional breeds wanted.</strong> The 49 are real-world; the mod
         also wants a batch of invented ones &mdash; a werewolf breed built on
         <a href="gene-lycan.html">LYCAN</a> is now possible &mdash; as gene suites. That is partly
-        what would make a polygenic cutie mark worth doing.</li>
+        what would make a polygenic cutie mark worth doing. <strong>This is now cheap</strong>:
+        a breed is a <a href="breed-format.html">JSON file</a> and
+        <a href="breed-designer/index.html">the designer</a> writes it, so an invented
+        breed costs no Java at all. Nobody has written one yet, which is the whole of what
+        is left here.</li>
     <li><strong>Per-gene pool rates are estimates</strong>, never play-balanced. A herd
         should read as that breed without being a monoculture, and that is eyeballed
         across all 49.</li>

@@ -373,6 +373,10 @@
         inside the selected breed&rsquo;s pools, or unconstrained with no breed.</li>
     <li><strong>Copy code / Paste code</strong> round-trip the genotype code through the
         clipboard, which turns a bug report into something reproducible.</li>
+    <li><strong>Make egg</strong> writes what is on screen into a
+        <a href="#preset-egg">preset horse spawn egg</a> instead of spawning it. Same
+        packet, same server-side validation, one flag different &mdash; so the egg and the
+        button cannot drift into spawning different horses.</li>
     <li>The <strong>epigenome travels with the genotype</strong> to the server, so the
         horse that spawns is the horse you were looking at. The server re-checks creative
         mode <em>and</em> that you are holding the egg.</li>
@@ -384,13 +388,87 @@
     lethal foal.
 </p>
 
+<h2 id="breed-egg">Breed spawn eggs</h2>
+
+<p>
+    One right-click, one <strong>foundation horse</strong> of one breed: an ordinary
+    <code>BreedFounder</code> roll off that breed&rsquo;s own pool, the same way a wild herd
+    member is made, labelled with that breed. Foundation is the point &mdash; it has no
+    pedigree and no drift behind it, so what it is worth is that it is a clean place to
+    start a line from, not that it is a good horse.
+</p>
+
+<p>
+    <strong>There is no recipe.</strong> They come out of dungeon chests
+    (<code>AddBreedSpawnEggModifier</code>, ~7% into simple dungeons, mineshafts,
+    strongholds, temples, mansions, outposts, ocean ruins and bastions) and off the
+    <a href="villagers.html#horseman">horseman</a>, dear &mdash; 22 emeralds for a common
+    breed at Journeyman, 38 for an uncommon at Expert, 58 for a rare one at Master. Both
+    draw weighted by the breed&rsquo;s own commonness, so the egg you find is as likely to
+    be a Quarter Horse as a Quarter Horse is likely to be the herd you ride past.
+</p>
+
+<div class="note rule">
+    <span class="label">One item, not forty-nine</span>
+    <p>
+        The breed is a <code>breed</code> data component, so there is a single registered
+        item and every breed is a stack of it. That is not a shortcut &mdash; it is what
+        makes the feature work for <a href="breed-format.html">player-added breeds</a>. A
+        breed dropped into <code>config/horsegenetics/breeds/</code> after the jar was
+        built has no registry entry, no model file and no lang key, and could never have an
+        item of its own; with the breed on the component it gets an egg on exactly the same
+        terms as a built-in one.
+    </p>
+    <p>
+        The texture is vanilla&rsquo;s horse spawn egg, deliberately. Forty-nine
+        hand-tinted eggs is a lot of art for a thing whose identity is written on the
+        tooltip anyway, and what a player holding one wants to know is <em>which breed</em>
+        &mdash; which is a word, not a colour. The tooltip names the breed, whether it is
+        natural or magical, its commonness tier, and that the horse will be a foundation
+        one.
+    </p>
+</div>
+
+<p>
+    A breed opts out by leaving <code>spawn_egg</code> out of its
+    <a href="breeds.html#sources">source checklist</a>: no egg exists, none can drop, and
+    the horseman never stocks one. <strong>Feral Mixed</strong> has none by construction
+    &mdash; &ldquo;a horse of no particular breeding&rdquo; is what vanilla&rsquo;s own
+    horse spawn egg already gives you.
+</p>
+
+<h2 id="preset-egg">Preset horse spawn eggs</h2>
+
+<p>
+    The exact horse the <a href="#egg">custom spawn egg&rsquo;s editor</a> was showing when
+    you pressed <strong>Make egg</strong>, kept in an item: genotype, epigenome, sex, age
+    and breed label. Right-click and it appears, exactly as previewed.
+</p>
+
+<p>
+    It exists because the editor could only ever produce a horse <em>now</em>, in front of
+    you. A build worth ten minutes of fiddling &mdash; a demonstration horse for a bug
+    report, the founder pair for a test line &mdash; had to be rebuilt from scratch every
+    time, and there was nothing you could hand to somebody else. Making one is creative
+    only, the same as spawning; <strong>using</strong> one is not, which is the point of it
+    being an item.
+</p>
+
+<p class="muted">
+    A genotype code is only readable against the gene list that wrote it, so an egg made
+    before a gene pack was added or removed says so in chat and refuses, rather than
+    crashing. Its tooltip says the same thing in red.
+</p>
+
 <h2 id="creative-tab">The creative tab</h2>
 
 <p>
     <code>item/ModCreativeTabs</code> registers one <strong>Horse Genetics</strong> tab
-    holding every item in <code>ModItems.TAB_ITEMS</code>. The custom spawn egg
-    additionally appears in vanilla&rsquo;s
-    Spawn Eggs tab. In a dev build, the <em>Spawn Test Horse World</em> button&rsquo;s
+    holding every item in <code>ModItems.TAB_ITEMS</code>, plus one <em>filled</em>
+    <a href="#breed-egg">breed spawn egg</a> per breed that has one. The blank breed egg is
+    not listed anywhere: its whole content is the breed component, and one without a breed
+    is a puzzle rather than an item. The custom spawn egg and the filled breed eggs
+    additionally appear in vanilla&rsquo;s Spawn Eggs tab. In a dev build, the <em>Spawn Test Horse World</em> button&rsquo;s
     starting inventory contains one of every item.
 </p>
 

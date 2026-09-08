@@ -63,7 +63,7 @@ the same change as the code, and never copy it back into here.
 | Eye colour, the two hooks, both heterochromias | `wiki/eye-colour.html` |
 | Body space, `HorseSkinGeometry`, the vanilla model tables | `wiki/body-space.html` |
 | Breeding, pedigree, horse records, stat inheritance | `wiki/breeding.html` |
-| Breeds, herd spawning, the stat curve, cross/mixed labels | `wiki/breeds.html` |
+| Breeds, herd spawning, the stat curve, cross/spliced/mixed labels | `wiki/breeds.html` |
 | Speed / health / jump / size, disorders, the two lethal paths | `wiki/horse-body.html` |
 | Gated healing, bond tiers, herds, the shared slow tick | `wiki/horse-care.html` |
 | Every item and every recipe; shearing; the spawn egg | `wiki/items.html` |
@@ -72,6 +72,7 @@ the same change as the code, and never copy it back into here.
 | Hay portals, the horse dimension, the pens | `wiki/horse-dimension.html` |
 | **Generated stables - and who made each building** | `wiki/stables.html` |
 | The data-driven gene file format (masks, ops, header) | `wiki/gene-format.html` |
+| The breed file format - a breed is JSON, not Java | `wiki/breed-format.html` |
 | The `effects` block - every verb, trigger, flag, and how to add one | `wiki/gene-effects.html` |
 | The wider (mostly unbuilt) trait / effect architecture | `wiki/horse-traits.html` |
 | Writing a gene; the class-by-class API reference | `wiki/modding.html`, `wiki/api-reference.html` |
@@ -125,9 +126,9 @@ Two rules about the backlog page, both learned the hard way:
    keeping - when a format changes, change it and move on. No genotype-code
    padding, no attachment field fallbacks.
 7. **The wiki has one nav.** A new page goes in the `SECTIONS` array in
-   `wiki/nav.js` and nowhere else. (`wiki/gene-creator/` and
-   `wiki/horse-designer/` are the exceptions - they are apps, not pages, and own
-   their own chrome.)
+   `wiki/nav.js` and nowhere else. (`wiki/gene-creator/`,
+   `wiki/horse-designer/` and `wiki/breed-designer/` are the exceptions - they
+   are apps, not pages, and own their own chrome.)
 8. **Flag genuinely unverified API usage in a comment**, the way the existing
    code does. More useful to the next session than silent confidence.
 9. **When you resolve something recorded as a gap or as unverified, update that
@@ -203,6 +204,7 @@ and fails *silently* when stale:
 |---|---|---|
 | any gene, or a coat deliberately moved | `:common:test`, then delete and regenerate the golden file | `common/src/test/resources/coat-golden.txt` |
 | **anything in `common/` or `web/`** | `:web:bakeDesignerAssets` | `wiki/horse-designer/wasm/web.wasm` |
+| any breed, or `BreedSpecWriter` | `:common:bakeBreedFiles` | `common/.../horsegenetics/breeds/` **and** `wiki/horse-designer/assets/breeds.json` |
 | `spec/`, `SpecSchema`, `AbilityType`, `HorseSkinGeometry`, the noise classes | `:common:bakeSpecFixtures` **then** `check-parity.mjs` | `wiki/gene-creator/fixtures/expected.json` |
 | the coat PNGs or the name tables | `:common:bakeCreatorAssets` + `:web:bakeDesignerAssets` | the regenerated assets |
 | either `tools/barn/*.source.nbt`, **or `bake-barn.py` itself** | `python neoforge-26.1.2/tools/barn/bake-barn.py` | `data/horsegenetics/structure/cowboy_barn.nbt` |

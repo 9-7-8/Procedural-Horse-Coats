@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The breed file format &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="nav.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow">Reference <span class="sep">/</span> data-driven breeds</p>
+<h1>The breed file format</h1>
+<p class="lede">
+    A breed is a <strong>JSON file</strong>, not a Java class. Every breed the mod ships
+    is one, in <code>common/src/main/resources/horsegenetics/breeds/</code>; a breed you
+    write goes in <code>config/horsegenetics/breeds/</code> and needs no rebuild. The
+    <a href="breed-designer/index.html">breed designer</a> writes these files, validates
+    them with the game&rsquo;s own parser and previews the herd they would make; this page
+    is what it is writing.
+</p>
+
+<p>
+    A breed that <em>doesn&rsquo;t</em> fit &mdash; one that needs behaviour rather than a
+    table of numbers &mdash; can still be written in Java against
+    <code>Breed.Builder</code> and registered with <code>Breeds.registerJava</code>.
+    That escape hatch is deliberately narrow, and the only thing shipping through it is
+    <strong>Feral Mixed</strong>, which is the absence of a breed rather than one. A breed
+    that is a set of genes, biomes, bands and numbers must be a file: a Java one cannot be
+    edited by a player, shared between installs, or opened in the designer.
+</p>
+
+<h2>The shape</h2>
+
+<pre><code class="language-json">{
+  "id": "friesian",
+  "name": "Friesian",
+  "kind": "natural",
+  "commonness": "uncommon",
+  "spawn": ["wild", "cowboy", "spawn_egg", "stable"],
+  "biomes": ["minecraft:forest", "minecraft:plains"],
+  "price": [8, 14],
+  "hardy": false,
+  "magic_chance": 0.2,
+  "magic_whitelist": [],
+  "magic_blacklist": [],
+  "stats": { "speed": 5, "jump": 5, "health": 7, "height": [15, 17] },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 62 },
+      { "pair": "E/e", "weight": 33 }
+    ],
+    "horsegenetics.agouti": [ { "pair": "a/a", "weight": 100 } ]
+  },
+  "bands": {
+    "horsegenetics.ednrb": { "cover": [0.55, 0.80] }
+  },
+  "notes": ["Lower-leg feathering - not modelled."]
+}</code></pre>
+
+<p class="note">
+    <strong>Only <code>id</code> and <code>name</code> are required.</strong> Every other
+    field may be left out, and leaving one out is not the same as writing a zero into it
+    &mdash; the table below is what the game does with an absent field. The designer never
+    pre-fills a default into a box for exactly that reason: a filled box says somebody
+    chose the value, which would be a lie.
+</p>
+
+<h2>Every field, and what a blank one means</h2>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Field</th><th>Shape</th><th>Left out&hellip;</th></tr></thead>
+<tbody>
+<tr>
+    <td><code>id</code></td>
+    <td>lower-case token, unique</td>
+    <td><strong>required.</strong> <code>splice</code> and <code>feral_mixed</code> are
+        reserved by the breed-label system and refused.</td>
+</tr>
+<tr>
+    <td><code>name</code></td>
+    <td>display string</td>
+    <td><strong>required.</strong></td>
+</tr>
+<tr>
+    <td><code>kind</code></td>
+    <td><code>"natural"</code> or <code>"magical"</code></td>
+    <td><code>natural</code>. A label, not a mechanic &mdash; what makes a breed magical in
+        play is the genes in its pool.</td>
+</tr>
+<tr>
+    <td><code>commonness</code></td>
+    <td>one of the seven tiers, <code>extremely_common</code>&hellip;<code>very_rare</code></td>
+    <td><code>moderate</code>. Each step is a doubling; see <code>Commonness</code>.</td>
+</tr>
+<tr>
+    <td><code>spawn_weight</code></td>
+    <td>a raw number, instead of a tier</td>
+    <td>the tier above. Naming <em>both</em> is an error.</td>
+</tr>
+<tr>
+    <td><code>spawn</code></td>
+    <td>a checklist of <code>wild</code>, <code>cowboy</code>, <code>spawn_egg</code>,
+        <code>stable</code></td>
+    <td><strong>all four.</strong> <code>[]</code> is a real answer &mdash; it means the
+        breed comes from nowhere at all &mdash; and is not the same as leaving the field
+        out.</td>
+</tr>
+<tr>
+    <td><code>biomes</code></td>
+    <td>namespaced biome ids</td>
+    <td>none, so the breed never heads a wild herd wherever <code>spawn</code> says.</td>
+</tr>
+<tr>
+    <td><code>price</code></td>
+    <td><code>[min, max]</code> emeralds</td>
+    <td><code>HorsePrices.DEFAULT_PRICE</code>, which owns the number. What a signed
+        transfer paper for one costs at the cowboy&rsquo;s, rolled per horse inside the
+        range.</td>
+</tr>
+<tr>
+    <td><code>hardy</code></td>
+    <td><code>true</code> / <code>false</code></td>
+    <td><code>false</code> &mdash; the breed carries every disorder at the global founder
+        rate, so a bred line can still surface a carrier. <code>true</code> forces every
+        implemented disorder locus clear.</td>
+</tr>
+<tr>
+    <td><code>magic_chance</code></td>
+    <td>0&ndash;1</td>
+    <td><code>0.20</code>, halving per extra gene drawn (a geometric draw).</td>
+</tr>
+<tr>
+    <td><code>magic_whitelist</code> / <code>magic_blacklist</code></td>
+    <td>gene keys</td>
+    <td>no restriction. A non-empty whitelist restricts the draw to those genes.</td>
+</tr>
+<tr>
+    <td><code>stats</code></td>
+    <td><code>speed</code>, <code>jump</code>, <code>health</code> as 1&ndash;10 scores
+        (a number or <code>[lo, hi]</code>); <code>height</code> as <code>[lo, hi]</code>
+        in hands</td>
+    <td>every axis <strong>wild</strong>, which is not the same as a score of 5 &mdash;
+        see <code>BreedStatCurve</code>&rsquo;s near-baseline rule.</td>
+</tr>
+<tr>
+    <td><code>genes</code></td>
+    <td>gene key &rarr; weighted <code>{ "pair": "E/e", "weight": 44 }</code> entries</td>
+    <td>the locus is rolled <strong>wild</strong> if it paints, and left at its global
+        founder rate if it does not.</td>
+</tr>
+<tr>
+    <td><code>bands</code></td>
+    <td>gene key &rarr; value name &rarr; <code>[lo, hi]</code></td>
+    <td>no number pinned; founders roll from the value&rsquo;s own design range.</td>
+</tr>
+<tr>
+    <td><code>notes</code></td>
+    <td>strings</td>
+    <td>none. They only surface on <a href="breeds.html">the breeds page</a>.</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<h2>Two kinds of wrongness, treated differently</h2>
+
+<div class="note rule">
+    <span class="label">A malformed file is thrown; a missing gene is warned and skipped</span>
+    <p>
+        A <a href="gene-format.html">gene file</a> is parsed strictly &mdash; an unknown key
+        is an error &mdash; because the creator writes those and an unknown key means the
+        tool and the game disagree. A breed file is different, because a breed is mostly a
+        list of references to <em>other people&rsquo;s</em> genes.
+    </p>
+    <p>
+        So: a file that is <strong>wrong</strong> (no <code>id</code>, an unknown key, a
+        weight that is not a number) is thrown, reported by file name, and the other files
+        still load. A file that names something <strong>this install has not got</strong>
+        &mdash; a gene from a pack you are not running, an allele token that gene no longer
+        declares, an epigenetic value that was renamed &mdash; is warned about in the log
+        and that locus alone is dropped. The breed still loads.
+    </p>
+    <p>
+        That is the whole point of the distinction: a breed written for a bigger modpack
+        has to degrade to the horses this install can actually make, rather than vanishing.
+    </p>
+</div>
+
+<h2>Gene pools</h2>
+
+<p>
+    A pool is a weighted table of allele pairs. Weights are <strong>relative</strong>, so
+    <code>62 / 33 / 5</code> and <code>0.62 / 0.33 / 0.05</code> are the same breed; the
+    designer shows the share each one works out to, because a weight of 44 means nothing
+    until you know what the others add up to.
+</p>
+
+<p class="note">
+    Naming a locus replaces what <code>BreedFounder</code> would otherwise do with it. It
+    does <em>not</em> mean the horse shows that gene: a Suffolk Punch fixed <code>e/e</code>
+    at extension still carries and transmits agouti, it just cannot show it. Pools are about
+    what a line <em>passes on</em>, which is a different question from what it looks like.
+</p>
+
+<p>
+    Every gene the breed does not name is handled for it. Coat genes and the modifiers a
+    coat gene reads (<code>Gene.coatDependsOn()</code>) are forced <strong>wild</strong>, so
+    a breed cannot leak a pattern it never asked for; disorder genes keep their global
+    rates; the four body-stat genes come from <code>stats</code>; other magical genes come
+    from the <code>magic_chance</code> draw.
+</p>
+
+<h2>Epigenetic bands</h2>
+
+<p>
+    A band is the difference between &ldquo;Friesians are black&rdquo; (a pool) and
+    &ldquo;Friesians are <em>deeply</em> black&rdquo; (a number). Each gene declares named
+    numbers on every allele copy &mdash; how far a splash covers, how wide a dorsal stripe
+    is &mdash; and a breed may pin any of them to a closed range. Each founder is given a
+    point inside it on <strong>both</strong> copies, drawn separately so its two gametes
+    are not interchangeable.
+</p>
+
+<p>
+    From there it is ordinary epigenetics. It inherits, it drifts, and nothing pulls it
+    back: a breed shapes the horses it starts with and then lets go. Keeping a line to a
+    standard is the player&rsquo;s job, not the game&rsquo;s.
+</p>
+
+<p class="note">
+    Three things a band will not do, each warned about rather than silently ignored.
+    <strong>The four body-stat genes</strong> are owned by <code>stats</code>, which knows
+    about scores and hands and which allele is the pushing one, so a band naming one of them
+    is refused. <strong>Seeds and categories</strong> have no &ldquo;slightly more&rdquo;
+    &mdash; a seed is the long behind a noise field, a category an index into a list the
+    gene owns &mdash; so only scalars can be banded. And <strong>a value the gene does not
+    declare</strong> is dropped the same way an unknown gene is.
+</p>
+
+<h2>Where a breed may come from</h2>
+
+<p>
+    <code>spawn</code> is a checklist rather than a mode, because the four are genuinely
+    independent. &ldquo;A breed the cowboy has heard of but that no longer runs wild&rdquo;
+    is <code>["cowboy", "spawn_egg"]</code>; &ldquo;a collector&rsquo;s breed that only
+    exists as an egg&rdquo; is <code>["spawn_egg"]</code>; &ldquo;a landrace nobody
+    farms&rdquo; is <code>["wild"]</code>. None of those is a special case in any of the
+    four consumers &mdash; each just asks <code>Breed.allows</code>.
+</p>
+
+<p>
+    Dropping <code>spawn_egg</code> is the &ldquo;opt out of having a spawn egg&rdquo;
+    switch: no <a href="items.html">breed spawn egg</a> exists for that breed, it cannot
+    turn up in dungeon loot, and the horseman never stocks one.
+</p>
+
+<h2>Loading, and the order it happens in</h2>
+
+<p>
+    The mod reads the files it ships (listed in <code>index.json</code>, because a jar has
+    no directory to walk) and then everything in
+    <code>config/horsegenetics/breeds/</code>, in filename order. A README is written into
+    that folder on first run. An id that collides with one already loaded is ignored, and
+    said so.
+</p>
+
+<p>
+    It happens <strong>after</strong> the drop-in genes load, and that ordering is why it is
+    an explicit call rather than a static initialiser: a breed file is mostly references to
+    genes, and loading breeds first would report every drop-in gene as missing.
+</p>
+
+<div class="note rule">
+    <span class="label">A breed does not change the genotype code</span>
+    <p>
+        Adding or removing a <em>gene</em> lengthens the code and invalidates every horse
+        already saved. Adding or removing a <em>breed</em> costs nothing: it is a label and
+        a set of founder rules, and no horse stores it beyond the token on its record. That
+        is what makes breeds the safe thing for a player to fiddle with.
+    </p>
+</div>
+
+<h2>Regenerating the shipped files</h2>
+
+<p>
+    The files under <code>common/src/main/resources/horsegenetics/breeds/</code> and the
+    browser&rsquo;s single-array copy at
+    <code>wiki/horse-designer/assets/breeds.json</code> are one generated artefact with two
+    spellings, written by <code>./gradlew :common:bakeBreedFiles</code>. The wiki tools read
+    the second because a WebAssembly build cannot walk a classpath.
+</p>
+
+<p>
+    <code>BreedFilesTest</code> is what stops them going stale quietly: it checks every
+    shipped file is exactly what a fresh bake would write, that the index lists all of them,
+    and that the browser bundle holds the same breeds in the same order.
+</p>
+
+<h2>Changing the format lands in four places</h2>
+
+<ul>
+    <li><code>BreedSpecParser</code> &mdash; reading it, including which blank means what.</li>
+    <li><code>BreedSpecWriter</code> &mdash; writing it back, omitting the field when it is
+        at its default. The two must agree or the round-trip test fails.</li>
+    <li><code>wiki/breed-designer/js/breed-designer.js</code> &mdash; the form, and the
+        note under the box saying what leaving it blank does.</li>
+    <li>this page.</li>
+</ul>
+
+<p>
+    Then re-run <code>./gradlew :common:bakeBreedFiles</code>, because a field that has
+    changed shape changes every shipped file. Unlike the gene creator there is no parity
+    check to run: the designer validates with the game&rsquo;s own parser compiled to
+    WebAssembly, so there is no second implementation to drift.
+</p>
+
+<div class="footer-links">
+    <div class="see-also">
+        <a href="breed-designer/index.html">Breed designer</a>
+        <a href="breeds.html">Breeds</a>
+        <a href="gene-format.html">Gene file format</a>
+        <a href="breeding.html">Breeding &amp; pedigree</a>
+        <a href="items.html">Items</a>
+    </div>
+    Source: <code>common/breed/spec/</code>, <code>common/breed/Breed.java</code>,
+    <code>neoforge-26.1.2/ModBreedSpecs.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+</body>
+</html>

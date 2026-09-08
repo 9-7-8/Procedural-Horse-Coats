@@ -44,6 +44,38 @@
     </p>
 </div>
 
+<h2 id="spliced">A splice that lands marks the foal for good</h2>
+
+<p>
+    A gene splice carrot whose allele actually reaches the foal changes that foal&rsquo;s
+    breed to <strong>Spliced (its breed)</strong>, and the mark never washes out: it passes
+    down the whole line, and no amount of breeding back removes it. See
+    <a href="breeds.html#spliced">crosses and mixes</a> for the combination rules &mdash;
+    they are the cross rules, because <code>splice</code> is simply a reserved lineage
+    component and a spliced Friesian is the pair <code>{friesian, splice}</code>.
+</p>
+
+<p>
+    &ldquo;Actually reaches the foal&rdquo; is <code>SpliceOutcome.spliceReached</code>, and
+    it asks a question about the <em>foal</em> rather than about the carrot:
+    <em>at a locus a carrot substituted, does the foal carry an allele neither parent
+    had?</em> Neither, not &ldquo;the fed one&rdquo;, and that is not a shortcut. A mare fed
+    a Known Gene Splice for <code>G</code> whose stallion is already <code>G/G</code> was
+    going to produce a <code>G</code>-carrying foal whichever copy she passed on, so nothing
+    outside can say whether the carrot did anything &mdash; and nothing was added, so
+    nothing is claimed.
+</p>
+
+<div class="note rule">
+    <span class="label">This is what makes a purebred worth having</span>
+    <p>
+        Feeding a splice is a gamble and the carrot is spent either way, so a spectacular
+        spliced horse is cheap in effort and says so on its own label. Anybody can splice a
+        Friesian into something remarkable; only a breeder can get there without. Before
+        this, a spliced line and a bred one were indistinguishable a generation later.
+    </p>
+</div>
+
 <h2 id="window">The carrot window</h2>
 
 <p>

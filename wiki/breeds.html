@@ -21,7 +21,18 @@
     than 47 unrelated animals; a lone wild horse, a <code>/summon</code> or a
     spawn-egg horse is the <strong>Feral Mixed</strong> breed and rolls every gene
     unconstrained &mdash; the pre-breeds behaviour. This page is the readable
-    version of <code>common/breed/</code>; the numbers there are a first pass.
+    version of the breed files; the numbers in them are a first pass.
+</p>
+
+<p class="note">
+    <strong>A breed is a JSON file.</strong> Every breed here lives in
+    <code>common/src/main/resources/horsegenetics/breeds/</code>, one file each, and a
+    breed you write yourself goes in <code>config/horsegenetics/breeds/</code> and needs
+    no rebuild &mdash; the same arrangement drop-in genes already had. The
+    <a href="breed-designer/index.html">breed designer</a> writes them and the
+    <a href="breed-format.html">breed file format</a> documents them. Java breeds are
+    still possible for one that needs behaviour rather than numbers, and
+    <strong>Feral Mixed</strong> is the only one shipping that way.
 </p>
 
 <h2>Herd or loner</h2>
@@ -119,8 +130,26 @@
     <td>Driven by the breed&rsquo;s <a href="#stats">stat bands</a>: an axis with a band makes every founder homozygous for that gene&rsquo;s pushing allele <em>and</em> writes the target onto its copies; an axis with no band is left wild. <a href="#founder-only">Founders only</a>.</td></tr>
 <tr><td><strong>Other magical genes</strong> (pink hair, mane/tail colour, healer, zebra, milk, light, particle, verdant&hellip;)</td>
     <td>Forced wild, then a <a href="#magic">geometric draw</a> switches a few back on.</td></tr>
+<tr><td><strong>Any gene&rsquo;s epigenetic numbers</strong> (how far a splash covers, how wide a dorsal stripe is)</td>
+    <td>Rolled from the value&rsquo;s own design range. A breed that names a <a href="#bands-epi">band</a> for one gets every founder written inside it instead. <a href="#founder-only">Founders only</a>.</td></tr>
 </tbody>
 </table>
+
+<h2 id="bands-epi">Epigenetic bands: &ldquo;deeply black&rdquo;, not merely &ldquo;black&rdquo;</h2>
+<p>
+    A pool says <em>which allele</em>; a band says <em>how much</em>. Each gene declares
+    named numbers on every allele copy, and a breed may pin any of them to a closed range
+    &mdash; the general form of what the stat bands already did for the four body axes.
+    Each founder gets a point inside the band on <strong>both</strong> copies, drawn
+    separately so its two gametes are not interchangeable.
+</p>
+<p>
+    Three things a band will not do, each warned about at load rather than silently
+    ignored: it cannot touch the four body-stat genes (those belong to the breed&rsquo;s
+    stat scores), it cannot band a seed or a category (neither has a &ldquo;slightly
+    more&rdquo;), and a value the gene does not declare is dropped the way an unknown gene
+    is. See <a href="breed-format.html">the format page</a>.
+</p>
 
 <h2 id="stats">Stats: the score &rarr; multiplier curve</h2>
 <p>
@@ -214,6 +243,28 @@
     built-ins do yet.
 </p>
 
+<h2 id="sources">Where a breed may come from</h2>
+<p>
+    A breed names any subset of four sources, and naming none means all four. They are a
+    checklist rather than a mode because they are genuinely independent &mdash; &ldquo;a
+    breed the cowboy has heard of but that no longer runs wild&rdquo; is a real thing to
+    want to say, and so is &ldquo;a collector&rsquo;s breed that only exists as an
+    egg&rdquo;.
+</p>
+<table>
+<thead><tr><th>Source</th><th>What switching it on means</th></tr></thead>
+<tbody>
+<tr><td><code>wild</code></td><td>May head a wild herd, in one of its biomes. This is what <code>Breeds.forBiome</code> filters on.</td></tr>
+<tr><td><code>cowboy</code></td><td>The cowboy may breed and sell one, as a signed transfer paper priced from the breed&rsquo;s range.</td></tr>
+<tr><td><code>spawn_egg</code></td><td>A <a href="items.html">breed spawn egg</a> exists for it, and can turn up in dungeon loot or the horseman&rsquo;s stock. Clearing this is the &ldquo;opt out of having an egg&rdquo; switch.</td></tr>
+<tr><td><code>stable</code></td><td>May be pre-placed in a <a href="stables.html">generated stable</a>. A stable definition naming a breed that has switched this off skips it.</td></tr>
+</tbody>
+</table>
+<p class="muted">
+    <code>Feral Mixed</code> names <em>no</em> source at all, which is the honest answer:
+    it is the absence of a breed, so it never spawns as itself and never has an egg.
+</p>
+
 <h2>Breeding: crosses and mixes</h2>
 <p>
     A foal&rsquo;s breed label (<code>BreedLineage.combine</code>, applied in
@@ -233,6 +284,39 @@
 <tr><td>Feral Mixed &times; Feral Mixed</td><td><b>Mixed</b> <span class="muted">(no back door to a &ldquo;pure feral&rdquo; line)</span></td></tr>
 </tbody>
 </table>
+
+<h3 id="spliced">Spliced lines</h3>
+<p>
+    A <a href="carrots.html">gene splice carrot</a> whose allele actually reaches the foal
+    marks it <strong>Spliced (its breed)</strong>, and the mark never washes out. It is not
+    a new rule: <code>splice</code> is a reserved lineage component, so a spliced Friesian
+    is the pair <code>{friesian, splice}</code> and every row of the table above applies to
+    it unchanged.
+</p>
+<table>
+<thead><tr><th>Dam &times; Sire</th><th>Foal</th></tr></thead>
+<tbody>
+<tr><td>Spliced (Friesian) &times; Friesian</td><td>Spliced (Friesian)</td></tr>
+<tr><td>Spliced (Friesian) &times; Spliced (Friesian)</td><td>Spliced (Friesian)</td></tr>
+<tr><td>Spliced (Friesian) &times; Arabian</td><td>Mixed</td></tr>
+<tr><td>Spliced (Friesian) &times; Spliced (Arabian)</td><td>Mixed</td></tr>
+<tr><td>a cross, spliced</td><td>Mixed <span class="muted">(three lines, which has always been Mixed)</span></td></tr>
+<tr><td>Mixed or Feral Mixed, spliced</td><td>unchanged <span class="muted">(neither names an ancestry to qualify)</span></td></tr>
+</tbody>
+</table>
+<p>
+    &ldquo;Actually reaches the foal&rdquo; is decided by
+    <code>SpliceOutcome.spliceReached</code>, and it asks a question about the foal rather
+    than about the carrot: <em>at a locus a carrot substituted, does the foal carry an
+    allele neither parent had?</em> A mare fed a splice for a gene the stallion already
+    carries has added nothing, and correctly does not mark the foal. Feeding a splice is a
+    gamble and the carrot is spent either way.
+</p>
+<p class="note">
+    This is what makes an ordinary purebred worth more than a spectacular spliced one.
+    Anybody can splice a Friesian into something remarkable; only a breeder can get there
+    without, and the label is the difference.
+</p>
 <p>
     The label is stored on the <code>HorseRecord</code> (<code>breed</code>,
     an optional string token) and surfaced in three places: the mounted-horse
@@ -364,12 +448,17 @@
 
 <h2>Code map</h2>
 <ul>
-    <li><code>common/breed/Breed</code> &mdash; the record: id, name, biomes, spawn weight, per-gene pools (as allele tokens), stat bands, magic chance / lists, hardy flag, notes. A fluent <code>Builder</code>.</li>
-    <li><code>common/breed/Breeds</code> &mdash; the 49 built-ins + <code>UNKNOWN</code>; <code>forBiome</code>, <code>get</code>, <code>displayName</code>.</li>
+    <li><code>common/breed/Breed</code> &mdash; the record: id, name, natural/magical, biomes, spawn weight, source checklist, per-gene pools (as allele tokens), stat scores, epigenetic bands, magic chance / lists, hardy flag, price, notes. A fluent <code>Builder</code>, used by the parser and by the Java escape hatch.</li>
+    <li><code>common/breed/Breeds</code> &mdash; the registry: the shipped files, the drop-in folder, <code>FERAL_MIXED</code>; <code>forBiome</code>, <code>from</code>, <code>get</code>, <code>displayName</code>, <code>registerJava</code>. The count is <code>Breeds.all().size()</code>.</li>
+    <li><code>common/breed/BreedSource</code> &mdash; the four-way <a href="#sources">source checklist</a>.</li>
+    <li><code>common/breed/BreedBands</code> &mdash; the <a href="#bands-epi">epigenetic bands</a> a breed pins.</li>
+    <li><code>common/breed/spec/</code> &mdash; <code>BreedSpecParser</code>, <code>BreedSpecWriter</code>, <code>BreedSpecLoader</code>, <code>BreedFileTool</code>: the <a href="breed-format.html">file format</a>, both ways round.</li>
+    <li><code>neoforge/ModBreedSpecs</code> &mdash; loads <code>config/horsegenetics/breeds/</code>, after the drop-in genes.</li>
     <li><code>common/breed/Commonness</code> &mdash; the rarity &rarr; weight ladder.</li>
     <li><code>common/breed/BreedStatCurve</code> &mdash; score / hands &rarr; <code>TargetBand</code>.</li>
     <li><code>common/breed/BreedFounder</code> &mdash; rolls a founder <code>Genome</code> for a breed (start from <code>Genotype.random</code>, override the constrained / coat / body-stat / magical genes).</li>
-    <li><code>common/breed/BreedLineage</code> &mdash; the label value object: pure / cross / mixed / unknown, <code>combine</code>, <code>statTargets</code>, <code>displayName</code>, token round-trip.</li>
+    <li><code>common/breed/BreedLineage</code> &mdash; the label value object: pure / cross / <a href="#spliced">spliced</a> / mixed / feral, <code>combine</code>, <code>displayName</code>, token round-trip.</li>
+    <li><code>common/genetics/SpliceOutcome</code> &mdash; did the splice carrot&rsquo;s allele actually reach the foal.</li>
     <li><code>common/trait/{StatAxis,TargetBand,BreedStatTargets}</code> &mdash; the band types; <code>HorseTraits.resolve</code> takes a <code>BreedStatTargets</code>, and the four magical body-stat genes read it through <code>TraitBuilder.breedBand</code>.</li>
     <li><code>neoforge/server/BreedSpawnHandler</code> &mdash; a one-line <code>FinalizeSpawnEvent</code> hook that flags natural spawns.</li>
     <li><code>neoforge/server/HerdManager</code> &mdash; the deferred genome / record / <b>proximity</b> herd formation.</li>

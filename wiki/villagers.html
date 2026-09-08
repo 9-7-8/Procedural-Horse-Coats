@@ -239,8 +239,17 @@
 </p>
 
 <p>
-    A breed that should be dear may name its own range with
-    <code>Breed.Builder#price(min, max)</code>; anything that does not gets the
+    Which breeds he can deal in at all is the breed's own
+    <a href="breeds.html#sources">source checklist</a>: he draws from the breeds of the
+    country round the barn that allow <code>cowboy</code>, and falls back to every breed
+    that allows it when the local list is empty. So &ldquo;no dealer has ever had one&rdquo;
+    is a thing a breed file can actually say, and it is a different claim from &ldquo;none
+    run wild here&rdquo;.
+</p>
+
+<p>
+    A breed that should be dear names its own range in its file
+    (<code>"price": [min, max]</code>); anything that does not gets the
     default. A <strong>range</strong> rather than a number, because two horses of a
     breed are not worth the same and a stall listing six papers at exactly two
     emeralds each reads as a vending machine &mdash; the roll inside the range is
@@ -786,9 +795,9 @@
 <tbody>
 <tr><td><strong>1 Novice</strong></td><td>16 horse hair</td><td>Hair bundle, saddle, leads</td></tr>
 <tr><td><strong>2 Apprentice</strong></td><td>8 hair bundles</td><td>Basic whistle, blank tickets, iron horse armour</td></tr>
-<tr><td><strong>3 Journeyman</strong></td><td>4 braided rope</td><td>The four general breeding carrots</td></tr>
-<tr><td><strong>4 Expert</strong></td><td>2 hair cloth</td><td>A random common gene carrot, a random uncommon one, a random common/uncommon research paper</td></tr>
-<tr><td><strong>5 Master</strong></td><td>1 stallion seed jar</td><td>A random rare gene carrot, a random epic one, a random rare/epic paper, diamond horse armour</td></tr>
+<tr><td><strong>3 Journeyman</strong></td><td>4 braided rope</td><td>The four general breeding carrots, a common <a href="items.html#breed-egg">breed spawn egg</a> (22&nbsp;em)</td></tr>
+<tr><td><strong>4 Expert</strong></td><td>2 hair cloth</td><td>A random common gene carrot, a random uncommon one, a random common/uncommon research paper, an uncommon breed egg (38&nbsp;em)</td></tr>
+<tr><td><strong>5 Master</strong></td><td>1 stallion seed jar</td><td>A random rare gene carrot, a random epic one, a random rare/epic paper, diamond horse armour, a rare breed egg (58&nbsp;em, one use)</td></tr>
 </tbody>
 </table>
 </div>
@@ -832,6 +841,27 @@
     An empty window returns an empty stack, which <code>VillagerTrade.getOffer</code>
     reads as &ldquo;no offer&rdquo; and drops &mdash; so a rarity tier with no genes
     in it costs a trade slot rather than putting a blank item on sale.
+</p>
+
+<p>
+    <a href="items.html#breed-egg">Breed spawn eggs</a> are the same trick with a second
+    function, <code>horsegenetics:set_random_breed</code>, which takes a commonness window
+    instead of a rarity one:
+</p>
+
+<pre><code class="language-json">{ "function": "horsegenetics:set_random_breed",
+  "commonest": "rare",
+  "rarest": "very_rare" }</code></pre>
+
+<p>
+    The membership test is the breed's own <a href="breeds.html#sources">source
+    checklist</a> &mdash; a breed is a candidate if it allows <code>spawn_egg</code> &mdash;
+    so a breed a player drops into <code>config/horsegenetics/breeds/</code> joins the
+    horseman's stock by being registered, and one that opts out disappears from it, with
+    nothing edited either way. Within a window, draws are weighted by the breed's own
+    <code>spawnWeight</code>. Two functions rather than one parameterised thing, for the
+    reason there are two loot modifiers: a paper is knowledge and an egg is an animal, and
+    a datapack ought to be able to retune one without the other.
 </p>
 
 <h3 id="not-built">What the roadmap asked for and this does not do</h3>

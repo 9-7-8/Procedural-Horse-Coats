@@ -32,6 +32,96 @@
     </p>
 </div>
 
+<h2 id="breeds-as-data">&sect;0-AL &mdash; Breeds as JSON, breed spawn eggs, and spliced lines (2026-09-07, NOT looked at)</h2>
+
+<p>
+    Design: <a href="breed-format.html">the breed file format</a>,
+    <a href="breeds.html">breeds</a>, <a href="items.html#breed-egg">the two new eggs</a>.
+    Gaps <a href="known-gaps.html#gap-83">83</a>&ndash;<a href="known-gaps.html#gap-85">85</a>.
+    The Java half of this is well covered by tests; <strong>none of the four things a
+    player actually touches has been touched</strong>.
+</p>
+
+<div class="note danger">
+    <span class="label">Check the registry is intact before anything else</span>
+    <p>
+        The 49 breeds moved from an 885-line Java class into 49 JSON files. If the
+        classpath index is not being read, every horse in the world is Feral Mixed and
+        every other check below is moot. The boot log says
+        <code>[breeds] N breed(s) registered</code>; the custom spawn egg's
+        <strong>Breed:</strong> dropdown is the same answer with names on it.
+    </p>
+</div>
+
+<h3>The breed designer</h3>
+
+<ul>
+    <li><strong>Does <code>wiki/breed-designer/index.html</code> come up at all?</strong>
+        It needs a server (<code>python -m http.server</code>) &mdash; a
+        <code>file://</code> page cannot fetch the wasm, and the page says so rather than
+        failing silently. Watch the console: it warns per breed if the bundle disagrees
+        with the gene registry.</li>
+    <li><strong>Pick a base coat.</strong> Six presets; each one should fill the gene
+        pools on the right and change the herd below.</li>
+    <li><strong>Does the herd read as a breed?</strong> Nine founders from the real
+        <code>BreedFounder.roll</code>. The thing to look for is the failure a pool
+        actually has: not "this horse is wrong" but "they are all identical" or "one in
+        six is a colour this breed should not have".</li>
+    <li><strong>Open a built-in breed and check it round-trips.</strong> Open Friesian,
+        change nothing, download, and diff against
+        <code>common/src/main/resources/horsegenetics/breeds/friesian.json</code>. They
+        should be byte-identical &mdash; both come out of the same writer.</li>
+    <li><strong>Do the blank boxes read as blank?</strong> Every optional field shows
+        <code>DEFAULT</code> as a placeholder and says underneath what the game does with
+        an empty one. If that reads as an instruction to type the word DEFAULT, it is
+        wrong and needs saying differently.</li>
+</ul>
+
+<h3>Dropping a breed into a built jar</h3>
+
+<ul>
+    <li><strong>Save a designer file into
+        <code>config/horsegenetics/breeds/</code> and restart.</strong> The folder should
+        already exist with a README in it. The log says how many the folder added.</li>
+    <li><strong>Break one on purpose.</strong> Name a gene that does not exist and check
+        the breed still loads with a warning naming the gene &mdash; that degradation is
+        the whole point of the format, and it is easier to check now than to discover
+        later.</li>
+    <li><strong>Check an id collision is refused rather than duplicated</strong> &mdash;
+        drop in a file with <code>"id": "friesian"</code>.</li>
+</ul>
+
+<h3>The two eggs</h3>
+
+<ul>
+    <li><strong>Do filled breed eggs appear in both creative tabs?</strong> One per breed
+        that allows <code>spawn_egg</code>, in the mod's tab and vanilla's Spawn Eggs tab.
+        A <em>blank</em> one should appear in neither.</li>
+    <li><strong>Right-click one on the ground.</strong> A foundation horse of that breed,
+        placed on the block face, egg consumed outside creative. The tooltip should name
+        the breed, natural/magical, and the commonness tier.</li>
+    <li><strong>Custom spawn egg &rarr; Make egg.</strong> Build a horse, press it, and
+        check the preset egg you get spawns <em>that</em> horse &mdash; same coat, same
+        sex, same age, same breed label. This is the one that would be embarrassing to get
+        wrong, because the whole claim is that the egg and the Spawn button are one code
+        path.</li>
+    <li><strong>Loot and trades.</strong> A breed egg is ~7% of a dungeon chest, and the
+        horseman sells one at Journeyman, Expert and Master. Neither number has been felt
+        in play; the question is whether an egg reads as a find or as clutter.</li>
+</ul>
+
+<h3>Spliced lines</h3>
+
+<ul>
+    <li><strong>Feed a gene splice carrot and breed.</strong> If the allele lands, the foal
+        should be <strong>Spliced (Breed)</strong> in the info panel. If it does not, the
+        foal is an ordinary one &mdash; the carrot is spent either way.</li>
+    <li><strong>Breed the spliced foal back to a purebred of the same breed.</strong> It
+        should stay Spliced, not revert. That is the load-bearing half.</li>
+    <li><strong>Check the cowboy prices it as its base breed</strong> and does not count it
+        as part of his purebred string.</li>
+</ul>
+
 <h2 id="stables">&sect;0-AK &mdash; Stables that generate with horses in them (2026-09-07, NOT looked at)</h2>
 
 <p>
