@@ -29,7 +29,9 @@ import net.neoforged.neoforge.registries.DeferredRegister;
  *       cloth are not built).</li>
  *   <li><b>Breeding carrots</b> ({@link #UNKNOWN_EPIGENETIC_SPLICE_CARROT},
  *       {@link #UNKNOWN_GENE_SPLICE_CARROT}, {@link #STABILIZER_CARROT},
- *       {@link #MAGNIFIER_CARROT}) - the four general breeding modifiers.</li>
+ *       {@link #MAGNIFIER_CARROT}) - the four general breeding modifiers, plus
+ *       five <b>themed</b> random splices ({@link #DILUTION_GENE_SPLICE_CARROT}
+ *       and friends) that roll one slice of the pool instead of all of it.</li>
  *   <li><b>{@link #KNOWN_GENE_SPLICE_CARROT}</b> - one item parameterised by a
  *       {@code carrot_effects} component holding a {@code known:<gene>:het|hom}
  *       token, produced by the paper-driven {@code KnownGeneSpliceRecipe}.</li>
@@ -95,6 +97,17 @@ public final class ModItems {
     public static final DeferredItem<Item> UNKNOWN_GENE_SPLICE_CARROT = simple("unknown_gene_splice_carrot");
     public static final DeferredItem<Item> STABILIZER_CARROT = simple("stabilizer_carrot");
     public static final DeferredItem<Item> MAGNIFIER_CARROT = simple("magnifier_carrot");
+
+    // --- the themed random splices --------------------------------------
+    // Each is an Unknown Gene Splice carrot narrowed to one slice of the safe
+    // pool (common/genetics/SpliceCategory), refined from the plain one with a
+    // themed reagent. The pool is a subset of the safe pool by construction, so
+    // none of these can hand a player a damaged foal either.
+    public static final DeferredItem<Item> DILUTION_GENE_SPLICE_CARROT = simple("dilution_gene_splice_carrot");
+    public static final DeferredItem<Item> WHITE_GENE_SPLICE_CARROT = simple("white_gene_splice_carrot");
+    public static final DeferredItem<Item> MARKING_GENE_SPLICE_CARROT = simple("marking_gene_splice_carrot");
+    public static final DeferredItem<Item> PERFORMANCE_GENE_SPLICE_CARROT = simple("performance_gene_splice_carrot");
+    public static final DeferredItem<Item> MAGICAL_GENE_SPLICE_CARROT = simple("magical_gene_splice_carrot");
 
     // --- Known Gene Splice carrot (roadmap §14.2) - parameterised by a paper ---
     public static final DeferredItem<Item> KNOWN_GENE_SPLICE_CARROT = simple("known_gene_splice_carrot");

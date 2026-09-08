@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "horsegenetics:item/marking_gene_splice_carrot"
+  }
+}

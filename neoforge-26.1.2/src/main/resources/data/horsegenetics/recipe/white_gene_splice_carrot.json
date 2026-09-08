@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "horsegenetics:unknown_gene_splice_carrot",
+    "minecraft:bone_meal"
+  ],
+  "result": {
+    "id": "horsegenetics:white_gene_splice_carrot"
+  }
+}

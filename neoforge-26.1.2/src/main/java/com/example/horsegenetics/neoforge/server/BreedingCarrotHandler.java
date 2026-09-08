@@ -2,6 +2,7 @@ package com.example.horsegenetics.neoforge.server;
 
 import com.example.horsegenetics.common.genetics.CarrotEffect;
 import com.example.horsegenetics.common.genetics.Genotype;
+import com.example.horsegenetics.common.genetics.SpliceCategory;
 import com.example.horsegenetics.neoforge.data.CarrotWindowAttachment;
 import com.example.horsegenetics.neoforge.data.ModAttachments;
 import com.example.horsegenetics.neoforge.data.ModDataComponents;
@@ -47,13 +48,40 @@ public final class BreedingCarrotHandler {
         if (item == ModItems.UNKNOWN_GENE_SPLICE_CARROT.get()) return "gene_splice";
         if (item == ModItems.STABILIZER_CARROT.get()) return "stabilizer";
         if (item == ModItems.MAGNIFIER_CARROT.get()) return "magnifier";
+        // The themed splices. Each writes the same token as the plain gene
+        // splice with its category appended, so one CarrotEffect handles all
+        // six and there is no second code path to keep in step.
+        if (item == ModItems.DILUTION_GENE_SPLICE_CARROT.get()) return themed(SpliceCategory.DILUTION);
+        if (item == ModItems.WHITE_GENE_SPLICE_CARROT.get()) return themed(SpliceCategory.WHITE);
+        if (item == ModItems.MARKING_GENE_SPLICE_CARROT.get()) return themed(SpliceCategory.MARKING);
+        if (item == ModItems.PERFORMANCE_GENE_SPLICE_CARROT.get()) return themed(SpliceCategory.PERFORMANCE);
+        if (item == ModItems.MAGICAL_GENE_SPLICE_CARROT.get()) return themed(SpliceCategory.MAGICAL);
         return null;
+    }
+
+    private static String themed(SpliceCategory category) {
+        return new CarrotEffect.GeneSplice(category).id();
     }
 
     /** Burst colour per carrot family, by first effect token. */
     private static int colourFor(List<String> tokens) {
         String first = tokens.isEmpty() ? "" : tokens.get(0);
         if (first.startsWith("known:")) return 0xFFCF47;
+        // The themed splices burst in their own item colour, so the feedback
+        // says which carrot went in rather than only that one did.
+        if (first.startsWith("gene_splice:")) {
+            SpliceCategory category = SpliceCategory.byId(first.substring("gene_splice:".length()));
+            if (category != null) {
+                return switch (category) {
+                    case DILUTION -> 0xE3CE86;
+                    case WHITE -> 0xE9EFF6;
+                    case MARKING -> 0x9A6A3A;
+                    case PERFORMANCE -> 0x2E7BD6;
+                    case MAGICAL -> 0x2FC5C5;
+                    default -> 0xE05B2B;
+                };
+            }
+        }
         return switch (first) {
             case "epigenetic_splice" -> 0x9B59D0;
             case "gene_splice" -> 0xE05B2B;

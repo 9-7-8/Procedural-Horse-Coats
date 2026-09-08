@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "horsegenetics:unknown_gene_splice_carrot",
+    "minecraft:ink_sac"
+  ],
+  "result": {
+    "id": "horsegenetics:marking_gene_splice_carrot"
+  }
+}

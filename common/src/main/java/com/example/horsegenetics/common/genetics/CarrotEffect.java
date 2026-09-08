@@ -41,14 +41,32 @@ public sealed interface CarrotEffect {
     }
 
     /**
-     * The <b>Unknown Gene Splice</b> carrot - pick one random gene and draw this
+     * An <b>Unknown Gene Splice</b> carrot - pick one random gene and draw this
      * parent's gamete for it from that gene's splice distribution
      * ({@link Gene#spliceTable()}, or a uniform draw over its viable pairs if it
      * declares none). The gene and the pair are rolled at breeding time off the
      * foal's own deterministic RNG.
+     *
+     * <p>{@code category} narrows <i>which</i> loci it can land on -
+     * {@link SpliceCategory#ANY} is the original carrot and rolls the whole safe
+     * pool; the five themed carrots roll one slice of it, so a player who wanted
+     * a surprise colour is not handed a jumping stat. A themed pool is always a
+     * subset of the safe pool, so no carrot in this family can damage a foal.
      */
-    record GeneSplice() implements CarrotEffect {
-        @Override public String id() { return "gene_splice"; }
+    record GeneSplice(SpliceCategory category) implements CarrotEffect {
+
+        public GeneSplice {
+            category = category == null ? SpliceCategory.ANY : category;
+        }
+
+        /** The unthemed carrot, and the token it has always written. */
+        public GeneSplice() {
+            this(SpliceCategory.ANY);
+        }
+
+        @Override public String id() {
+            return category == SpliceCategory.ANY ? "gene_splice" : "gene_splice:" + category.id();
+        }
     }
 
     /**
@@ -76,6 +94,12 @@ public sealed interface CarrotEffect {
             case "magnifier": return java.util.Optional.of(new Magnifier());
             case "gene_splice": return java.util.Optional.of(new GeneSplice());
             default:
+                if (token.startsWith("gene_splice:")) {
+                    SpliceCategory category = SpliceCategory.byId(token.substring("gene_splice:".length()));
+                    return category == null
+                            ? java.util.Optional.empty()
+                            : java.util.Optional.of(new GeneSplice(category));
+                }
                 if (token.startsWith("known:")) {
                     String[] p = token.split(":", 3);
                     if (p.length == 3 && (p[2].equals("hom") || p[2].equals("het"))) {
@@ -146,10 +170,10 @@ public sealed interface CarrotEffect {
                 prefer = Boolean.TRUE;
             } else if (e instanceof Magnifier) {
                 prefer = Boolean.FALSE;
-            } else if (e instanceof GeneSplice) {
-                Gene g = randomSpliceGene(rng);
+            } else if (e instanceof GeneSplice gs) {
+                Gene g = randomSpliceGene(gs.category(), rng);
                 if (g != null) {
-                    subs.put(g.key(), splicePair(g, rng));
+                    subs.put(g.key(), splicePair(g, gs.category(), rng));
                 }
             } else if (e instanceof KnownGeneSplice mg) {
                 Gene g = Genes.byKeyOrNull(mg.geneKey());
@@ -178,12 +202,23 @@ public sealed interface CarrotEffect {
      * <p>Returns {@code null} if nothing is safe, which cannot happen with any
      * real registry but must not throw if it does.
      */
-    private static Gene randomSpliceGene(Rng rng) {
-        List<Gene> pool = SpliceSafety.pool();
+    private static Gene randomSpliceGene(SpliceCategory category, Rng rng) {
+        List<Gene> pool = SpliceCategory.pool(category);
         return pool.isEmpty() ? null : pool.get(rng.nextInt(pool.size()));
     }
 
-    private static AllelePair splicePair(Gene gene, Rng rng) {
+    /**
+     * The combination the carrot lands on. A theme may narrow the draw as well
+     * as the pool - the performance carrot rolls only the combinations that make
+     * a horse better, because "positive health splice" is what it says on the
+     * item - and when it has no opinion the gene's own splice table decides, as
+     * it always did.
+     */
+    private static AllelePair splicePair(Gene gene, SpliceCategory category, Rng rng) {
+        List<AllelePair> narrowed = SpliceCategory.pairsFor(gene, category);
+        if (!narrowed.isEmpty()) {
+            return narrowed.get(rng.nextInt(narrowed.size()));
+        }
         return gene.spliceTable()
                 .map(t -> t.draw(rng))
                 .orElseGet(() -> {

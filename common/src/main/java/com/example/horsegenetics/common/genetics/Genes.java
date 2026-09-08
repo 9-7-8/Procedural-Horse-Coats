@@ -484,6 +484,7 @@ public final class Genes {
 
         GenotypeCatalog.invalidate();
         SpliceSafety.invalidate();
+        SpliceCategory.invalidate();
     }
 
     // ------------------------------------------------------------------
