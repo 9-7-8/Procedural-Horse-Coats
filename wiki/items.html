@@ -92,8 +92,10 @@
 <h2 id="carrots">Breeding carrots</h2>
 
 <p>
-    Five carrot items. Four are crafted from a golden carrot, horse hair and one
-    signature reagent; the fifth is parameterised by a research paper.
+    Ten carrot items. Four are crafted from a golden carrot, horse hair and one
+    signature reagent; one is parameterised by a research paper; and five are
+    <a href="carrots.html#themed">themed random splices</a>, each refined from the plain
+    Unknown Gene Splice carrot with a reagent of its own.
     <strong>What each one does to a foal is on
     <a href="carrots.html">the carrot family</a></strong> &mdash; this table is the
     recipes only.
@@ -108,7 +110,12 @@
 <tr><td><strong>Stabilizer carrot</strong></td><td>golden carrot + horse hair + nether quartz</td></tr>
 <tr><td><strong>Magnifier carrot</strong></td><td>golden carrot + horse hair + glowstone dust</td></tr>
 <tr><td><strong>Known Gene Splice carrot</strong></td><td>A <strong>custom recipe type</strong>, not a JSON shapeless one: golden carrot + a <a href="#papers">research paper</a> + horse hair + the rarity item for that paper&rsquo;s gene, and <strong>nothing else</strong> &mdash; exactly four filled slots. The gene is read off the paper at craft time, so a drop-in gene file gets its carrot the moment it registers. (<code>server/recipe/KnownGeneSpliceRecipe</code>.)</td></tr>
-<tr><td><em>Combining carrots</em></td><td>Two or more breeding carrots in the grid merge into one carrying every effect (<code>server/recipe/CarrotCombineRecipe</code>). Contradictory combinations simply do not resolve.</td></tr>
+<tr><td><strong>Dilution Gene Splice carrot</strong></td><td>Unknown Gene Splice carrot + light grey dye</td></tr>
+<tr><td><strong>White Gene Splice carrot</strong></td><td>Unknown Gene Splice carrot + bone meal</td></tr>
+<tr><td><strong>Marking Gene Splice carrot</strong></td><td>Unknown Gene Splice carrot + ink sac</td></tr>
+<tr><td><strong>Performance Gene Splice carrot</strong></td><td>Unknown Gene Splice carrot + rabbit&rsquo;s foot</td></tr>
+<tr><td><strong>Magical Gene Splice carrot</strong></td><td>Unknown Gene Splice carrot + amethyst shard</td></tr>
+<tr><td><em>Combining carrots</em></td><td>Two or more breeding carrots in the grid merge into one carrying every effect (<code>server/recipe/CarrotCombineRecipe</code>). Contradictory combinations simply do not resolve. A themed splice combines like any other &mdash; it writes the same token as the plain one with its theme appended, so there is no second code path.</td></tr>
 </tbody>
 </table>
 </div>

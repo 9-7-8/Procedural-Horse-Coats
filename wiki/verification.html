@@ -32,6 +32,66 @@
     </p>
 </div>
 
+<h2 id="themed-carrots">&sect;0-AJ &mdash; Five themed random splice carrots (2026-09-07, NOT looked at)</h2>
+
+<p>
+    Design: <a href="carrots.html#themed">the five themed splices</a>. Recipes:
+    <a href="items.html#carrots">items</a>. Nothing here has been through a
+    <code>runServer</code> boot either &mdash; see the note under
+    &sect;<a href="#h-menu">0-AI</a>; this batch adds five items, five models, five
+    item definitions and five recipes.
+</p>
+
+<h3>Do they exist at all</h3>
+
+<ul>
+    <li><strong>Are all five in the creative tab, with names and textures?</strong> A
+        missing model shows as the black-and-magenta cube and a missing lang key as
+        <code>item.horsegenetics.dilution_gene_splice_carrot</code>. Both are the sort of
+        thing that only appears in game.</li>
+    <li><strong>Are the five textures actually distinguishable</strong> at inventory
+        size, from each other and from the four carrots that already existed? They are
+        one recolour of the plain Unknown Gene Splice carrot, so the risk is that
+        <em>white</em> and <em>dilution</em> read as the same pale carrot.</li>
+    <li><strong>Do the recipes work at a crafting table?</strong> Unknown Gene Splice
+        carrot plus, in turn, light grey dye, bone meal, an ink sac, a rabbit's foot, an
+        amethyst shard. Note these are <em>not</em> made in the browser's Crafting tab -
+        that grid only makes the paper / known-splice / combine chain, deliberately.</li>
+</ul>
+
+<h3>Do they roll what they say</h3>
+
+<ul>
+    <li><strong>Feed each to a mare, breed, and read the foal's Genes tab.</strong> The
+        spliced locus should be in the carrot's theme every time. Do it several times per
+        carrot &mdash; one foal proves nothing about a random draw.</li>
+    <li><strong>The performance carrot is the one to hammer.</strong> Every foal it
+        touches must come out at or above the baseline on speed, max health and jump
+        &mdash; the Health tab colours those green now, so a red one is the bug. It must
+        <em>never</em> roll <a href="gene-hmga2.html">HMGA2</a>, and when it rolls
+        <a href="gene-lcorl.html">LCORL</a> it must be the tall/fast copy.</li>
+    <li><strong>No themed carrot may ever produce a foal with a disorder</strong>, or one
+        short of hearts. This is asserted by a unit test as a subset property, so a
+        failure here means something is wrong further down than the carrot.</li>
+    <li><strong>Does the particle burst colour match the carrot?</strong> Pale gold,
+        white, brown, blue, cyan.</li>
+</ul>
+
+<h3>The bits that go through shared code</h3>
+
+<ul>
+    <li><strong>Combine a themed splice with another carrot</strong> in the browser's
+        Crafting tab. It should merge like any other &mdash; it writes the plain gene
+        splice's token with its theme appended &mdash; and the combined carrot should
+        still roll within the theme.</li>
+    <li><strong>Feeding one to a foal</strong> should still say &ldquo;a foal cannot be
+        bred&rdquo; and not consume the carrot's effect.</li>
+    <li><strong>Does the unthemed Unknown Gene Splice carrot still behave exactly as
+        before?</strong> It keeps its old token, so nothing should have changed, and this
+        is the check that the shared <code>GeneSplice</code> record did not break the
+        carrot that already worked.</li>
+</ul>
+
 <h2 id="h-menu">&sect;0-AI &mdash; The My horses table, and the information screen made readable (2026-09-07, NOT looked at)</h2>
 
 <div class="note warn">

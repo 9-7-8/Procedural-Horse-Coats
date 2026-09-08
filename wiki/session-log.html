@@ -26,6 +26,26 @@
 
 <h2 id="d2026-09-07">2026-09-07</h2>
 
+<h3 id="themed-carrots-2026-09-07">Built 2026-09-07, NOT yet looked at: five themed random splice carrots.</h3>
+
+<p>Owner-driven, one request. Design: <a href="carrots.html#themed">the five themed splices</a>. Recipes: <a href="items.html#carrots">items</a>. Checklist <a href="verification.html#themed-carrots">&sect;0-AJ</a>.</p>
+
+<ul>
+<li><strong>They are one field, not five carrots.</strong> <code>CarrotEffect.GeneSplice</code> gained a <code>SpliceCategory</code>, and everything downstream &mdash; the token, the fold, the combine recipe, the feed handler &mdash; carried on working. That was the point of the check: if adding five carrots had needed five <code>CarrotEffect</code> cases and five <code>fold</code> branches, the abstraction the <a href="roadmap.html#carrot-content">roadmap</a> claimed was cheap would not have been.</li>
+
+<li><strong>Every themed pool is a subset of the safe pool, and that is the whole safety story.</strong> Each theme starts from <code>SpliceSafety.pool()</code> and removes from it, so the existing blacklist covers all six random carrots at once and a health gene registered tomorrow is out of every one of them the moment it exists. There is a test asserting the subset property rather than a comment claiming it, because the failure mode is a dead foal in somebody's world.</li>
+
+<li><strong>&ldquo;Positive health genes&rdquo; forced the first carrot that narrows the <em>combination</em>.</strong> The blacklist stops at hearts deliberately &mdash; a slower horse is not a damaged one &mdash; so <a href="gene-hmga2.html">HMGA2</a>'s pony allele and <a href="gene-lcorl.html">LCORL</a>'s short copy are both safe and both the opposite of what a carrot labelled <em>positive</em> promises. Filtering the locus was not enough; the performance carrot draws only pairs that beat the baseline on speed, health or jump and lose to it on none. <strong>Size is read neither way</strong>, because a draught horse is not a better horse than a pony &mdash; which is what drops <code>HMGA2</code> off the carrot entirely and keeps <code>LCORL</code> on it for its speed.</li>
+
+<li><strong>The coat three are a declared table, and that is a deliberate departure.</strong> <code>SpliceSafety</code>'s standing argument is that a hand-written list is wrong the day someone adds a gene and wrong <em>silently</em>. It holds there because the cost is a dead foal. It does not hold here: dilution / white / marking is a <strong>taxonomy a person applies</strong>, and no measurement of a finished coat sorts dun (a dilution that draws a dorsal stripe), roan (removes pigment without being a spotting pattern) or brindle (paints white and is a striping gene) the way a horse person would. A derived answer would have been wrong <em>and</em> harder to argue with. The table is written against the <code>Genes</code> constants rather than key strings, so a renamed gene breaks the compile, and an unclassified gene falls to <strong>marking</strong> if it paints and to no theme at all if it does not.</li>
+
+<li><strong>The base coat is in none of the five.</strong> Extension, agouti and shade are what a marking sits <em>on</em>, and a carrot sold as &ldquo;markings&rdquo; that turned a black horse chestnut would be answering a question nobody asked. They stay on the unthemed carrot, which promises nothing about what it rolls &mdash; and that is the general shape of the whole feature: the themed carrots are the unthemed one with a promise attached, so anything the promise cannot cover stays where no promise was made.</li>
+
+<li><strong>Two exclusions fell out for free and are worth naming.</strong> <a href="gene-silver.html">Silver</a> is a textbook dilution and is not on the dilution carrot; <a href="gene-ednrb.html">EDNRB</a> is a textbook white pattern and is not on the white one. Neither needed a line of code &mdash; MCOA costs hearts and overo lethal white kills, so the blacklist had already taken both. That is the subset property doing its job the first time it was asked.</li>
+
+<li><strong>The textures are the plain carrot, recoloured by luminance ramp.</strong> The leafy top is detected by hue and left alone; the body's own shading is rescaled onto a value ramp of the theme's colour, so the sculpting survives and the five read as one family. The feed particle burst uses the same five colours, so the feedback says <em>which</em> carrot went in rather than only that one did.</li>
+</ul>
+
 <h3 id="h-menu-2026-09-07">Built 2026-09-07, NOT yet looked at: the stable as a table, and an information screen you can read.</h3>
 
 <p>Owner-driven, ten requests in one pass. Design: <a href="roadmap.html#browser">roadmap &sect; the horse browser</a>, <a href="breeding.html#H">breeding &sect; client sync</a>. Checklist <a href="verification.html#h-menu">&sect;0-AI</a>. Gaps <a href="known-gaps.html#gap-76">76</a>, <a href="known-gaps.html#gap-77">77</a>.</p>

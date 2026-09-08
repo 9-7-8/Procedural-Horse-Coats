@@ -1105,10 +1105,18 @@
         whole gate today, which is <em>probably</em> right &mdash; but it means a paper
         traded from another player works without the receiver ever discovering the gene.
         Decide deliberately.</li>
-    <li><strong>New carrots are cheap.</strong> Once the <code>GameteBias</code> hook and
-        the <code>carrot_effects</code> component exist, each new one is a
-        <code>CarrotEffect</code> case and a <code>fold</code> rule. The list is meant to
-        grow.</li>
+    <li><strong>New carrots are cheap</strong>, and the <a href="carrots.html#themed">five
+        themed splices</a> are the first proof of it: once the <code>GameteBias</code>
+        hook and the <code>carrot_effects</code> component exist, a new carrot is a
+        <code>CarrotEffect</code> case and a <code>fold</code> rule. Those five did not
+        even need a case &mdash; they are one field on the existing
+        <code>GeneSplice</code>. The list is meant to grow.</li>
+    <li><strong>The themed splices need play-balancing, not building.</strong> Each rolls
+        a uniform locus out of its slice, so a pool of five (marking) hits each locus
+        four times as often as a pool of twenty would. Whether that reads as
+        &ldquo;this carrot is about markings&rdquo; or as &ldquo;this carrot always gives
+        me sooty&rdquo; is a play question. A per-theme weighting, or letting a gene
+        declare its own weight, is the lever if it needs one.</li>
 </ul>
 
 <hr>

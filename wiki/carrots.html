@@ -69,7 +69,9 @@
 
 <p>
     Two are <strong>random</strong> - "Unknown" - and one is <strong>targeted</strong>
-    (&sect;<a href="#known">below</a>) - "Known". Naming:
+    (&sect;<a href="#known">below</a>) - "Known". The random gene splice also comes in
+    five <strong>themed</strong> forms (&sect;<a href="#themed">below</a>), which are the
+    same carrot pointed at one slice of the pool. Naming:
 </p>
 
 <div class="table-wrap">
@@ -126,8 +128,10 @@
         Informational conditions are <strong>kept</strong>: splash deafness and the
         leopard complex&rsquo;s night blindness cost the horse nothing, and excluding them
         would delete most of the white-pattern loci from the carrot for no protection at
-        all. As of this writing the rule drops <strong>13 of the 48</strong> built-in
-        loci, and none of them is named anywhere in the file.
+        all. How many loci the rule drops is <code>Genes.codeOrder().size()</code> minus
+        <code>SpliceSafety.pool().size()</code> &mdash; a number that moves with every
+        gene added, and deliberately not written down here. None of them is named
+        anywhere in the file either.
     </p>
 </div>
 
@@ -137,6 +141,85 @@
     splicing a horse into a lethal genotype on purpose is allowed, and is the player&rsquo;s
     business. The blacklist is about the random draw only.
 </p>
+
+<h2 id="themed">The five themed splices</h2>
+
+<p>
+    A player who wants a surprise <em>colour</em> should not be handed a jumping stat.
+    So the Unknown Gene Splice carrot has five narrowed forms, each rolling one slice of
+    the same safe pool. Crafted by <strong>refining the plain one</strong> - an Unknown
+    Gene Splice carrot plus a themed reagent - because that is what they are.
+</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Carrot</th><th>Rolls</th><th>Reagent</th></tr></thead>
+<tbody>
+<tr><td><strong>Dilution Gene Splice</strong></td><td>The loci that change what colour the pigment <em>is</em>: <a href="gene-matp.html">cream / pearl</a>, <a href="gene-champagne.html">champagne</a>, <a href="gene-dun.html">dun</a>, <a href="gene-flaxen.html">flaxen</a>, <a href="gene-mushroom.html">mushroom</a>, <a href="gene-grey.html">grey</a>, <a href="gene-tiger-eye.html">tiger eye</a>. <a href="gene-silver.html">Silver</a> is <em>not</em> on it &mdash; MCOA costs hearts, so the blacklist had already taken it.</td><td>light grey dye</td></tr>
+<tr><td><strong>White Gene Splice</strong></td><td>The loci that take pigment away in patches: <a href="gene-kit.html">KIT</a>, <a href="gene-tobiano.html">tobiano</a>, <a href="gene-mitf.html">MITF</a> / <a href="gene-pax3.html">PAX3</a> splash, <a href="gene-manchado.html">manchado</a>, <a href="gene-roan.html">roan</a>, and <a href="gene-leopard.html">the leopard complex</a> with <code>PATN1</code> and <code>PATN2</code>. <a href="gene-ednrb.html">EDNRB</a> is <em>not</em> on it &mdash; overo lethal white.</td><td>bone meal</td></tr>
+<tr><td><strong>Marking Gene Splice</strong></td><td>Patterned or shaded pigment that is neither white nor a dilution: <a href="gene-sooty.html">sooty</a>, <a href="gene-pangare.html">pangar&eacute;</a>, <a href="gene-natural-zebra.html">primitive striping</a>, <a href="gene-rabicano.html">rabicano</a>, <a href="gene-brindle.html">brindle</a>.</td><td>ink sac</td></tr>
+<tr><td><strong>Performance Gene Splice</strong></td><td>The natural loci that move speed, health or jump &mdash; and <strong>only upward</strong>. See the note below.</td><td>rabbit&rsquo;s foot</td></tr>
+<tr><td><strong>Magical Gene Splice</strong></td><td>Everything <code>Gene.isNatural()</code> says is not real, whatever it does &mdash; the colour genes, the body-stat genes, particles, the cutie mark, <a href="gene-lycan.html">lycanthropy</a>.</td><td>amethyst shard</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="note">
+    <span class="label">A themed pool is always a subset of the safe pool</span>
+    <p>
+        Every one of the five starts from <code>SpliceSafety.pool()</code> and removes
+        from it. So the <a href="#blacklist">blacklist</a> above covers all six random
+        carrots at once, and a health gene registered tomorrow is out of every one of
+        them the moment it exists. Nothing in this family can hand a player a damaged
+        foal; the deliberate route into a lethal genotype is still the
+        <a href="#known">Known</a> carrot.
+    </p>
+</div>
+
+<div class="note warn">
+    <span class="label">&ldquo;Positive&rdquo; had to narrow the <em>pair</em>, not just the pool</span>
+    <p>
+        The blacklist stops at hearts on purpose &mdash; a <em>slower</em> horse is not a
+        damaged one, so <a href="gene-hmga2.html">HMGA2</a>&rsquo;s pony allele and
+        <a href="gene-lcorl.html">LCORL</a>&rsquo;s short copy stay in the general
+        carrot. A carrot sold as a <strong>positive</strong> health splice cannot roll
+        them. So the performance carrot is the one theme that narrows the
+        <em>combination</em> as well as the locus: it draws only pairs that beat the
+        baseline horse on speed, max health or jump and lose to it on none of the three.
+    </p>
+    <p>
+        Size is read <strong>neither way</strong>. A draught horse is not a better horse
+        than a pony, so a locus that only moves inches contributes nothing &mdash; which
+        is why <code>LCORL</code> is on this carrot for its <em>speed</em> and
+        <code>HMGA2</code>, whose every variant is a trade, drops off it entirely.
+    </p>
+</div>
+
+<div class="note">
+    <span class="label">The coat three are declared; the other two are derived</span>
+    <p>
+        Magical and performance are properties the code can read &mdash;
+        <code>isNatural()</code>, and whether any combination beats baseline. Dilution /
+        white / marking is a <strong>taxonomy a person applies</strong>: dun dilutes the
+        body <em>and</em> draws a dorsal stripe, roan removes pigment without being a
+        spotting pattern, brindle paints white streaks and is still a striping gene. No
+        measurement of the finished coat sorts those the way a horse person would, and
+        being &ldquo;derived&rdquo; would not make a wrong answer right.
+    </p>
+    <p>
+        So those three are a table in <code>SpliceCategory</code>, written against the
+        <code>Genes</code> constants rather than key strings &mdash; a renamed or retired
+        gene breaks the compile instead of quietly dropping out of a carrot. A gene not
+        in the table falls to <strong>marking</strong> if it paints and to no theme at
+        all if it does not, so a drop-in gene from the creator lands somewhere harmless.
+    </p>
+    <p>
+        <strong>Extension, agouti and shade are in none of the five.</strong> They are
+        the base coat rather than a marking on it, and a carrot sold as
+        &ldquo;markings&rdquo; that turned a black horse chestnut would be answering a
+        question nobody asked. They stay on the unthemed carrot, which promises nothing.
+    </p>
+</div>
 
 <h2 id="known">Known Gene Splice carrots</h2>
 
