@@ -2809,15 +2809,18 @@
     <li><strong>More than three alleles gets a dropdown</strong>, three or fewer
         cycles. So particle, <code>KIT</code>, <code>ACAN</code> and
         <code>MITF</code> drop down; everything else cycles.</li>
-    <li><strong>The right column, in order:</strong> Age, Sex, Breed, Randomize,
-        Reroll epi., Copy code, Paste code, Clear genes.</li>
+    <li><strong>The right column, in order:</strong> Age, Sex, Breed,
+        Randomize + its arrow, Add random + its arrow, Rnd health, Clear genes;
+        then, at the foot, Make egg, Copy horse / Paste, Spawn, Cancel.</li>
     <li><strong>Sex-linkage.</strong> Add brindle, switch to Stallion: it must
         snap to <code>Brn/Y</code>. Switch back to Mare and the placeholder must
         go.</li>
     <li><strong>The short form and the epigenetic fingerprint</strong> under the
-        list should match what the spawn egg shows for the same horse. <strong>Copy
-        code here and paste it into the spawn egg in game</strong> &mdash; that is
-        the sharpest test there is, and the two horses should be identical.</li>
+        list should match what the spawn egg shows for the same horse.
+        <strong>Export here and Paste into the spawn egg in game</strong> &mdash;
+        that is the sharpest test there is, and the two horses should now be
+        identical down to the epigenetics, which a genotype code never
+        carried.</li>
 </ul>
 
 <p class="muted">
@@ -3812,8 +3815,8 @@
 <div class="note">
     <span class="label">The spawn egg previews size now</span>
     <p>
-        The preview applies the resolved body scale, so <strong>Reroll epi.</strong>
-        visibly resizes the horse, and a <code>size 1.14x</code> readout sits under
+        The preview applies the resolved body scale, so a
+        <strong>Rnd epigen.</strong> randomize visibly resizes the horse, and a <code>size 1.14x</code> readout sits under
         the panel whenever the horse is not ordinary size. The model is capped at
         2.5&times; so an extreme draw stays a recognisable horse; past that the
         readout says <code>(preview capped)</code> and the number is the truth.
@@ -4201,8 +4204,8 @@
 <thead><tr><th>Check</th><th>Where</th><th>What right looks like</th></tr></thead>
 <tbody>
 <tr><td>A trail appears at all</td><td>Spawn <code>particle=Dst/n</code>, ride it</td><td>Coloured dust behind the horse while moving, nothing while stopped</td></tr>
-<tr><td>The six body sites read as different places</td><td>Spawn the same allele with several <strong>Reroll epi.</strong> presses</td><td>head / spine / all four hooves / front pair / back pair / tail are visibly distinct origins. The hoof sites are the ones most likely to be wrong &mdash; they are computed from the bounding box and yaw, so check they track when the horse turns</td></tr>
-<tr><td>Two horses of one allele differ</td><td><strong>Reroll epi.</strong> on <code>Rflm/n</code> repeatedly</td><td>Different colours, sites and densities every time; the particle itself never changes</td></tr>
+<tr><td>The six body sites read as different places</td><td>Spawn the same allele several times over, re-rolling with <strong>Rnd epigen.</strong> between</td><td>head / spine / all four hooves / front pair / back pair / tail are visibly distinct origins. The hoof sites are the ones most likely to be wrong &mdash; they are computed from the bounding box and yaw, so check they track when the horse turns</td></tr>
+<tr><td>Two horses of one allele differ</td><td><strong>Rnd epigen.</strong> on <code>Rflm/n</code> repeatedly</td><td>Different colours, sites and densities every time; the particle itself never changes</td></tr>
 <tr><td>A codominant pair shows both, independently</td><td><code>particle=Rflm/Csmk</code></td><td>Flames <em>and</em> campfire smoke, from two different places, in two colours &mdash; not one merged stream</td></tr>
 <tr><td>A non-codominant pair hides one</td><td><code>particle=Dst/Soul</code></td><td>Dust only. Indistinguishable from <code>Dst/n</code> &mdash; that is the point</td></tr>
 <tr><td>A foal inherits the exact look</td><td>Breed a trailing stallion onto a plain mare</td><td>Roughly half the foals trail, and those that do match the sire <em>exactly</em> &mdash; same colour, same site, same count</td></tr>
@@ -5189,13 +5192,15 @@ the <a href="session-log.html">session log</a>.</em></p>
         <code>body</code>/<code>spine</code>. It is a <strong>GUI stand-in</strong>,
         not a real particle (the emitter translator is server-side and the
         preview horse never ticks): check the <em>colour</em> is right (the
-        particle locus draws it from the epigenome &mdash; Reroll epi. should
-        change it) and that it does not leak outside the preview panel or tank
+        particle locus draws it from the epigenome &mdash; a <em>Rnd epigen.</em>
+        randomize should change it) and that it does not leak outside the preview panel or tank
         the frame rate. It does not track the model when you orbit/zoom &mdash;
         it stays a band round the panel centre.</li>
-    <li><strong>Reroll epi.</strong> changes the preview <em>without</em> changing the
-        genotype &mdash; watch bay leg heights, grey dapples or a splash edge move. The
-        <code>epigenetics #</code> line under the list changes with it.</li>
+    <li><strong>Rnd epigen.</strong> (the last entry in the Randomize menu)
+        changes the preview <em>without</em> changing the genotype &mdash; watch bay
+        leg heights, grey dapples or a splash edge move. The
+        <code>epigenetics #</code> line under the list changes with it, and a
+        <strong>locked</strong> row must not move at all.</li>
     <li><strong>The spawned horse is the previewed horse.</strong> This is the point of
         the change: set up a striking non-deterministic coat, note the epigenetics
         number, spawn, and check the horse in the world looks <em>identical</em> to the

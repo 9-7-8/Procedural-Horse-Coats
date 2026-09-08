@@ -158,6 +158,19 @@ python neoforge-26.1.2/tools/barn/bake-barn.py   # re-export from a structure bl
 
 <p><strong>Re-run <code>:web:bakeDesignerAssets</code> whenever <code>common/</code> changes</strong>, or the designer is running yesterday's mod. It is the designer's equivalent of re-baking the creator's fixtures, with the crucial difference that it cannot drift <em>silently</em>: the artefact is the code, not a snapshot of its output.</p>
 
+<p class="note">
+    <span class="label">A wasm diff does not mean the mod changed</span>
+    The implication only runs one way. <code>common/</code> changed and
+    <code>wiki/horse-designer/wasm/</code> unchanged does mean the designer is stale;
+    the reverse proves nothing, because <strong>TeaVM's output is not
+    byte-reproducible</strong> - two consecutive builds of identical source give
+    different bytes at the same length (measured 2026-09-08). So a
+    <code>git status</code> showing only the wasm is a re-bake, not a change, and
+    there is no point committing one. What settles whether the designer actually
+    moved is running it: <code>wasm/web.wasm-runtime.js</code> loads in Node, and
+    the exported API can be driven from there without a browser or a texture.
+</p>
+
 <p>The designer borrows only <code>geometry.js</code> and <code>model3d.js</code> from the creator, so <code>check-parity.mjs</code> still covers those - and <code>js/java.js</code> additionally re-checks them against the compiled Java on every page load. Its own files (<code>gui.js</code>, <code>scene.js</code>, <code>animation.js</code>, <code>designer.js</code>) have no automated net.</p>
 
 <p><strong>Run the parity check whenever you touch <code>SpecPainter</code>, <code>SpecSchema</code>, <code>AbilityType</code>, <code>HorseSkinGeometry</code>, <code>BodyNoise</code>/<code>BodyStripes</code>, or any of <code>wiki/gene-creator/js/</code>.</strong> It is the only thing standing between the creator and quietly previewing a horse the game will not breed - it has already caught a wrong <code>nextLong()</code> port, four schema defaults that had drifted apart, and (2026-09-06) a missed top/bottom UV swap.</p>

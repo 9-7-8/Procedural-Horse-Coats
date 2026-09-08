@@ -68,9 +68,12 @@ window.HG = window.HG || {};
         (function tick() { requestAnimationFrame(tick); gui.draw(); })();
       }
     }).catch(function (err) {
-      // The boot overlay is already up and is the right place for this: a page
-      // whose mod did not load has nothing else to show, so it stays up and
-      // says why rather than clearing to an empty field.
+      // The boot overlay is the right place for this: a page whose mod did not
+      // load has nothing else to show, so it stays up and says why rather than
+      // clearing to an empty field. Un-hide it explicitly - a throw from
+      // anywhere after the hide above (refresh, the first frame) would
+      // otherwise write this into something nobody can see.
+      $("boot").hidden = false;
       var box = $("boot").querySelector(".boot-inner");
       box.innerHTML = '<h1>Could not start the mod</h1>'
         + '<p>' + escapeHtml(String(err.message || err)) + '</p>'
