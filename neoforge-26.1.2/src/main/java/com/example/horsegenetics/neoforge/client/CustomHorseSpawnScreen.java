@@ -103,6 +103,14 @@ import java.util.List;
  * view</b>; and it cannot draw the cutie-mark item icons or the particle
  * emitters, which come from the game's own registries.
  *
+ * <p><b>The creative gate belongs to that first divergence.</b> This screen's
+ * Spawn button reads <i>Spawn (creative only)</i> and is inactive outside
+ * creative; the browser has no game mode and its button in that slot is
+ * Wander, so there is nothing to mirror. Everything <em>above</em> that button
+ * - the gene list, the preview, the epigenome, the code box - works in every
+ * game mode on both, which is the property worth preserving if the gate ever
+ * moves: the editor is a viewer that can also spawn, not a creative tool.
+ *
  * <h2>Notes</h2>
  * Everything here is client-only, and the spawn is <b>creative-only, re-checked
  * on the server</b> ({@code ModNetworking.handleSpawnCustomHorse}).
