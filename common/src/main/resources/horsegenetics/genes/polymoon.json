@@ -7,47 +7,133 @@
   "rarity": "RARE",
   "blurb": "A chain of pale disks running from the throatlatch back along the shoulder and onto the barrel, largest in the middle of its run and tapering at both ends.",
   "alleles": [
-    { "token": "Pmn", "label": "Polymoon (Pmn)" },
-    { "token": "n", "label": "Wild-type (n)" }
+    {
+      "token": "Pmn",
+      "label": "Polymoon (Pmn)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
   ],
   "knobs": [
-    { "name": "chainSeed", "type": "seed" },
-    { "name": "diskSeed", "type": "seed" },
-    { "name": "diskRadius", "min": 0.85, "max": 1.25 },
-    { "name": "spacing", "min": 2.6, "max": 3.4 }
+    {
+      "name": "chainSeed",
+      "type": "seed"
+    },
+    {
+      "name": "diskSeed",
+      "type": "seed"
+    },
+    {
+      "name": "diskRadius",
+      "min": 0.85,
+      "max": 1.25
+    },
+    {
+      "name": "spacing",
+      "min": 2.6,
+      "max": 3.4
+    }
   ],
   "expressions": [
     {
       "id": "polymoon",
       "name": "Polymoon",
       "description": "Circular disks laid nearly edge to edge along one curved path, sometimes overlapping a little, never scattered. The path leaves the throatlatch or the point of shoulder, follows the back edge of the scapula and runs out onto the barrel. Some horses carry a second, shorter chain on the hip. The disks are largest halfway along and smallest at the two ends.",
-      "when": [ "Pmn/Pmn", "Pmn/n" ],
+      "when": [
+        "Pmn/Pmn",
+        "Pmn/n"
+      ],
       "layers": [
         {
           "name": "the primary chain along the shoulder and barrel",
           "masks": [
-            { "type": "SPOTS", "parts": [ "BODY", "NECK" ], "seed": "$diskSeed",
-              "spacing": "$spacing", "radius": "$diskRadius", "vary": 0.45,
-              "chance": 0.95, "softness": 0.16 },
-            { "type": "STROKES", "parts": [ "BODY", "NECK" ], "seed": "$chainSeed",
-              "spacing": 18.0, "length": 24.0, "axis": "X", "width": 0.1,
-              "curl": 0.7, "softness": 0.35 }
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$diskSeed",
+              "spacing": "$spacing",
+              "radius": "$diskRadius",
+              "vary": 0.45,
+              "chance": 0.95,
+              "softness": 0.16
+            },
+            {
+              "type": "STROKES",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$chainSeed",
+              "spacing": 18.0,
+              "length": 24.0,
+              "axis": "X",
+              "width": 1.8,
+              "curl": 0.7,
+              "softness": 0.35
+            }
           ],
-          "op": { "type": "TOWARD", "color": "#f4f1ea", "strength": 92 }
+          "op": {
+            "type": "TOWARD",
+            "color": "#f4f1ea",
+            "strength": 92
+          }
         },
         {
           "name": "the shorter second chain some horses carry on the hip",
           "masks": [
-            { "type": "SPOTS", "parts": [ "BODY" ], "seed": "$diskSeed",
-              "spacing": "$spacing", "radius": "$diskRadius", "vary": 0.45,
-              "chance": { "perDose": [ 0.0, 0.35, 0.7 ] }, "softness": 0.16 },
-            { "type": "STROKES", "parts": [ "BODY" ], "seed": "$chainSeed",
-              "spacing": 26.0, "length": 14.0, "axis": "X", "width": 0.08,
-              "curl": 0.9, "softness": 0.35 },
-            { "type": "AXIS", "parts": [ "BODY" ], "axis": "X", "space": "part",
-              "from": 0.0, "to": 0.36, "softness": 0.14 }
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY"
+              ],
+              "seed": "$diskSeed",
+              "spacing": "$spacing",
+              "radius": "$diskRadius",
+              "vary": 0.45,
+              "chance": {
+                "perDose": [
+                  0.0,
+                  0.35,
+                  0.7
+                ]
+              },
+              "softness": 0.16
+            },
+            {
+              "type": "STROKES",
+              "parts": [
+                "BODY"
+              ],
+              "seed": "$chainSeed",
+              "spacing": 26.0,
+              "length": 14.0,
+              "axis": "X",
+              "width": 2.08,
+              "curl": 0.9,
+              "softness": 0.35
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "space": "part",
+              "from": 0.0,
+              "to": 0.36,
+              "softness": 0.14
+            }
           ],
-          "op": { "type": "TOWARD", "color": "#f4f1ea", "strength": 88 }
+          "op": {
+            "type": "TOWARD",
+            "color": "#f4f1ea",
+            "strength": 88
+          }
         }
       ]
     },
@@ -59,8 +145,8 @@
     }
   ],
   "founders": {
-    "Pmn/Pmn": 0.15,
-    "Pmn/n": 3.2,
-    "n/n": 96.65
+    "Pmn/Pmn": 0.002,
+    "Pmn/n": 0.038,
+    "n/n": 99.96
   }
 }

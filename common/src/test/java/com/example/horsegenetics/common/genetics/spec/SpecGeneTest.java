@@ -70,14 +70,23 @@ class SpecGeneTest {
                 "a dominant two-allele gene doubles every unmasked pen");
     }
 
+    /**
+     * The point here is that a loaded gene sorts <b>by its priority</b> among
+     * the built-ins, not that it lands anywhere in particular. It used to assert
+     * that aurora was last in the magical order, which was only true while the
+     * jar shipped no gene files of its own above priority 200; that is a fact
+     * about the shipped set, not about the sort.
+     */
     @Test
     void magicalGenesInterleaveWithBuiltInsByPriority() {
         SpecGene aurora = register("aurora.json"); // priority 200
-        // aurora sorts after the highest-priority built-in magical gene (verdant, 180)
-        assertEquals(aurora, Genes.magicalOrder().get(Genes.magicalOrder().size() - 1));
-        int iVerdant = Genes.magicalOrder().indexOf(Genes.VERDANT);
+        int iVerdant = Genes.magicalOrder().indexOf(Genes.VERDANT);   // 180
+        int iLut = Genes.magicalOrder().indexOf(Genes.LUT);           // 190
         int iAurora = Genes.magicalOrder().indexOf(aurora);
-        assertTrue(iVerdant < iAurora, "priority 180 sorts before priority 200");
+        assertTrue(iAurora >= 0, "a registered magical gene must be in the magical order");
+        assertTrue(iVerdant < iLut && iLut < iAurora,
+                "180, 190 and 200 must come out in that order, got "
+                        + iVerdant + ", " + iLut + ", " + iAurora);
     }
 
     @Test

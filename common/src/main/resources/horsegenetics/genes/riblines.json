@@ -1,0 +1,196 @@
+{
+  "format": 3,
+  "key": "horsegenetics.riblines",
+  "name": "Riblines",
+  "phase": "magical",
+  "priority": 363,
+  "rarity": "UNCOMMON",
+  "blurb": "Thin white strokes following the skeleton - down the neck, along the rib arcs, over the scapula and hip - and set as rings around the legs.",
+  "alleles": [
+    {
+      "token": "Rib",
+      "label": "Riblines, white (Rib)"
+    },
+    {
+      "token": "Rbc",
+      "label": "Riblines, coloured (Rbc)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "lineSeed",
+      "type": "seed"
+    },
+    {
+      "name": "hue",
+      "min": 0.0,
+      "max": 360.0
+    },
+    {
+      "name": "lineWidth",
+      "min": 0.3,
+      "max": 0.45
+    }
+  ],
+  "expressions": [
+    {
+      "id": "white",
+      "name": "Riblines",
+      "description": "Sharp-edged white strokes that taper to points at both ends and hold one value along their whole length - no gradient inside a stroke. They run dorso-ventrally on the neck, along the rib arcs on the barrel, down the scapular spine, out from the point of hip, and around the legs rather than along them. Twenty to fifty a side, parallel within a zone and turning as the zone does.",
+      "when": [
+        "Rib/Rib",
+        "Rib/Rbc",
+        "Rib/n"
+      ],
+      "layers": [
+        {
+          "name": "strokes down the neck and along the ribs",
+          "masks": [
+            {
+              "type": "STROKES",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$lineSeed",
+              "spacing": 5.0,
+              "length": 16.0,
+              "axis": "Y",
+              "width": "$lineWidth",
+              "curl": 0.7,
+              "softness": 0.12
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#ffffff",
+            "strength": 94
+          }
+        },
+        {
+          "name": "rings set around the legs",
+          "masks": [
+            {
+              "type": "STROKES",
+              "parts": [
+                "LEGS"
+              ],
+              "seed": "$lineSeed",
+              "spacing": 3.4,
+              "length": 2.6,
+              "axis": "Z",
+              "width": "$lineWidth",
+              "curl": 0.15,
+              "softness": 0.12
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "LEGS"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.12,
+              "to": 1.0,
+              "softness": 0.1
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#ffffff",
+            "strength": 92
+          }
+        }
+      ]
+    },
+    {
+      "id": "coloured",
+      "name": "Coloured riblines",
+      "description": "The same lines, in a colour the line of horses carries rather than in white. Fully recessive - it takes two copies, and a single copy beside the white allele shows white. It never gives blue eyes; the white form may.",
+      "when": {
+        "Rbc": 2
+      },
+      "layers": [
+        {
+          "name": "coloured strokes down the neck and along the ribs",
+          "masks": [
+            {
+              "type": "STROKES",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$lineSeed",
+              "spacing": 5.0,
+              "length": 16.0,
+              "axis": "Y",
+              "width": "$lineWidth",
+              "curl": 0.7,
+              "softness": 0.12
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.85,
+            "lightness": 0.55,
+            "strength": 92
+          }
+        },
+        {
+          "name": "coloured rings set around the legs",
+          "masks": [
+            {
+              "type": "STROKES",
+              "parts": [
+                "LEGS"
+              ],
+              "seed": "$lineSeed",
+              "spacing": 3.4,
+              "length": 2.6,
+              "axis": "Z",
+              "width": "$lineWidth",
+              "curl": 0.15,
+              "softness": 0.12
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "LEGS"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.12,
+              "to": 1.0,
+              "softness": 0.1
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.85,
+            "lightness": 0.55,
+            "strength": 90
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "No riblines.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Rib/Rib": 0.004,
+    "Rib/Rbc": 0.016,
+    "Rib/n": 0.076,
+    "Rbc/Rbc": 0.016,
+    "n/n": 99.888
+  }
+}

@@ -417,7 +417,19 @@ public final class Genes {
      * build with no data-driven genes is a legitimate build.
      */
     private static void loadBuiltinSpecs() {
-        for (String problem : GeneSpecLoader.register(GeneSpecLoader.fromClasspath())) {
+        GeneSpecLoader.Result result = GeneSpecLoader.fromClasspath();
+        List<String> problems = new ArrayList<>(result.errors());
+        for (GeneSpec spec : result.specs()) {
+            if (byKey.containsKey(spec.key())) {
+                continue;   // already registered - this is a re-entry, not a collision
+            }
+            try {
+                register(new SpecGene(spec));
+            } catch (RuntimeException e) {
+                problems.add("could not register " + spec.key() + ": " + e.getMessage());
+            }
+        }
+        for (String problem : problems) {
             CommonLog.warn("built-in gene: " + problem);
         }
     }
@@ -489,10 +501,23 @@ public final class Genes {
         return List.copyOf(out);
     }
 
-    /** Drop every loaded gene, back to the built-ins. Tests and reloads. */
+    /**
+     * Drop every <b>drop-in</b> gene, back to the built-ins - which now includes
+     * the gene files shipped in the jar, so those are re-registered on the way
+     * out.
+     *
+     * <p>Putting them back is the whole of the method. It used to be
+     * {@code LOADED.clear()} and nothing else, which was correct while the jar
+     * shipped no gene files: there was nothing to put back. Now there are
+     * dozens, and a test that cleared without restoring left every test after
+     * it in the same JVM looking at a shorter genotype code - which surfaced as
+     * an unrelated gene inheriting the wrong particle trail, and took a while to
+     * recognise as an ordering problem rather than a breeding one.
+     */
     public static synchronized void clearLoaded() {
         LOADED.clear();
         rebuild();
+        loadBuiltinSpecs();
     }
 
     private static void checkBand(Gene gene) {

@@ -7,40 +7,101 @@
   "rarity": "UNCOMMON",
   "blurb": "Two to five large ellipses on the scapula, barrel and hip, each a bright diffuse halo closing around a core that stays darker than the coat around it.",
   "alleles": [
-    { "token": "Lst", "label": "Lasertae (Lst)" },
-    { "token": "n", "label": "Wild-type (n)" }
+    {
+      "token": "Lst",
+      "label": "Lasertae (Lst)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
   ],
   "knobs": [
-    { "name": "haloSeed", "type": "seed" },
-    { "name": "outer", "min": 2.4, "max": 4.2 },
-    { "name": "haloBand", "min": 0.9, "max": 2.0 }
+    {
+      "name": "haloSeed",
+      "type": "seed"
+    },
+    {
+      "name": "outer",
+      "min": 2.4,
+      "max": 4.2
+    },
+    {
+      "name": "haloBand",
+      "min": 0.9,
+      "max": 2.0
+    }
   ],
   "expressions": [
     {
       "id": "lasertae",
       "name": "Lasertae",
       "description": "Big soft-edged ellipses, their long axis lying roughly nose to tail. The halo has no boundary worth the name on its outside and a firmer one inside, and within it the core sits a shade or two below the surrounding coat rather than above it - which is what makes a lasertae read as a hole with a light around it rather than as a spot.",
-      "when": [ "Lst/Lst", "Lst/n" ],
+      "when": [
+        "Lst/Lst",
+        "Lst/n"
+      ],
       "layers": [
         {
           "name": "the halo",
           "masks": [
-            { "type": "RINGS", "parts": [ "BODY", "NECK" ], "seed": "$haloSeed",
-              "spacing": 8.5, "radius": "$outer", "thickness": "$haloBand",
-              "vary": 0.3, "chance": { "perDose": [ 0.0, 0.45, 0.8 ] },
-              "softness": 1.6 }
+            {
+              "type": "RINGS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$haloSeed",
+              "spacing": 8.5,
+              "radius": "$outer",
+              "thickness": "$haloBand",
+              "vary": 0.3,
+              "chance": {
+                "perDose": [
+                  0.0,
+                  0.45,
+                  0.8
+                ]
+              },
+              "softness": 1.6
+            }
           ],
-          "op": { "type": "TOWARD", "color": "#fbf6e8", "strength": 70 }
+          "op": {
+            "type": "TOWARD",
+            "color": "#fbf6e8",
+            "strength": 70
+          }
         },
         {
           "name": "the darker core inside it",
           "masks": [
-            { "type": "SPOTS", "parts": [ "BODY", "NECK" ], "seed": "$haloSeed",
-              "spacing": 8.5, "radius": 2.0, "vary": 0.3,
-              "chance": { "perDose": [ 0.0, 0.45, 0.8 ] },
-              "stretch": 1.6, "axis": "X", "softness": 0.8 }
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$haloSeed",
+              "spacing": 8.5,
+              "radius": 2.0,
+              "vary": 0.3,
+              "chance": {
+                "perDose": [
+                  0.0,
+                  0.45,
+                  0.8
+                ]
+              },
+              "stretch": 1.6,
+              "axis": "X",
+              "softness": 0.8
+            }
           ],
-          "op": { "type": "TOWARD", "color": "#000000", "strength": 14 }
+          "op": {
+            "type": "TOWARD",
+            "color": "#000000",
+            "strength": 14
+          }
         }
       ]
     },
@@ -52,8 +113,8 @@
     }
   ],
   "founders": {
-    "Lst/Lst": 0.4,
-    "Lst/n": 6.5,
-    "n/n": 93.1
+    "Lst/Lst": 0.004,
+    "Lst/n": 0.076,
+    "n/n": 99.92
   }
 }

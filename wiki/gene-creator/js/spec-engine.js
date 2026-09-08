@@ -159,6 +159,22 @@ window.HG = window.HG || {};
     return smoothstep(from - soft, from, t) * (1 - smoothstep(to, to + soft, t));
   }
 
+  /**
+   * Distance to the surface where the noise crosses its midpoint, in lattice
+   * units - the port of SpecPainter.levelSetDistance, and the reason a STROKES
+   * stroke keeps its width. |n - 0.5| alone does not: value noise is flat at
+   * its extrema, so the band would balloon wherever the field went quiet.
+   */
+  function levelSetDistance(seed, x, y, z) {
+    var n = noise.value(seed, x, y, z);
+    var e = 0.25;
+    var gx = (noise.value(seed, x + e, y, z) - n) / e;
+    var gy = (noise.value(seed, x, y + e, z) - n) / e;
+    var gz = (noise.value(seed, x, y, z + e) - n) / e;
+    var grad = Math.sqrt(gx * gx + gy * gy + gz * gz);
+    return Math.abs(n - 0.5) / Math.max(grad, 1e-4);
+  }
+
   function normalise(coord, bounds, axis) {
     if (!bounds) return 0;
     var span = bounds.span(axis);
@@ -292,16 +308,12 @@ window.HG = window.HG || {};
         var curl = get(values, mask.curl, 0.35, legIndex) * spacing7;
         var w7 = noise.value(noise.xor(st, noise.u64(0, 0x71)),
           point.x / (spacing7 * 4), point.y / (spacing7 * 4), point.z / (spacing7 * 4));
-        var sx = point.x + (la7 === "X" ? 0 : (w7 - 0.5) * curl);
-        var sy = point.y + (la7 === "Y" ? 0 : (w7 - 0.5) * curl);
-        var sz = point.z + (la7 === "Z" ? 0 : (w7 - 0.5) * curl);
-        var r7 = noise.ridge(st,
-          sx / (la7 === "X" ? length7 : spacing7),
-          sy / (la7 === "Y" ? length7 : spacing7),
-          sz / (la7 === "Z" ? length7 : spacing7));
-        var width7 = clamp01(get(values, mask.width, 0.35, legIndex));
-        var soft7 = Math.max(1e-6, get(values, mask.softness, 0.25, legIndex)) * Math.max(width7, 1e-3);
-        return smoothstep(1 - width7 - soft7, 1 - width7, r7);
+        var sx = (point.x + (la7 === "X" ? 0 : (w7 - 0.5) * curl)) / (la7 === "X" ? length7 : spacing7);
+        var sy = (point.y + (la7 === "Y" ? 0 : (w7 - 0.5) * curl)) / (la7 === "Y" ? length7 : spacing7);
+        var sz = (point.z + (la7 === "Z" ? 0 : (w7 - 0.5) * curl)) / (la7 === "Z" ? length7 : spacing7);
+        var half7 = Math.max(1e-4, get(values, mask.width, 0.8, legIndex)) / 2;
+        var soft7 = Math.max(1e-6, get(values, mask.softness, 0.25, legIndex));
+        return 1 - smoothstep(half7, half7 + soft7, levelSetDistance(st, sx, sy, sz) * spacing7);
       }
       case "SPIRAL": {
         var s8 = getSeed(values, mask.seed, seedBase);
@@ -331,6 +343,10 @@ window.HG = window.HG || {};
     }
   }
 
+  // NOTE: the game refuses a layer whose FIRST mask combines by MAX or ADD -
+  // coverage starts at 1, so either returns 1 and the layer covers everything.
+  // The creator cannot write one (the picker defaults to MULTIPLY), so this
+  // mirrors the arithmetic and leaves the refusing to GeneSpecParser.
   function coverage(layer, values, skin, part, point, coat, px, py, legIndex, fallbackSeed) {
     var acc = 1;
     var masks = layer.masks || [];

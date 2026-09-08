@@ -7,58 +7,167 @@
   "rarity": "RARE",
   "blurb": "A soft line of bioluminescence running the length of the topline from poll to croup, broken here and there where the light fails to carry.",
   "alleles": [
-    { "token": "La", "label": "Lantern (La)" },
-    { "token": "n", "label": "Wild-type (n)" }
+    {
+      "token": "La",
+      "label": "Lantern (La)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
   ],
   "knobs": [
-    { "name": "breakSeed", "type": "seed" },
-    { "name": "hue", "min": 0.0, "max": 360.0 },
-    { "name": "lineWidth", "min": 0.9, "max": 1.7 },
-    { "name": "bloom", "min": 1.2, "max": 2.2 }
+    {
+      "name": "breakSeed",
+      "type": "seed"
+    },
+    {
+      "name": "hue",
+      "min": 0.0,
+      "max": 360.0
+    },
+    {
+      "name": "lineWidth",
+      "min": 0.9,
+      "max": 1.7
+    },
+    {
+      "name": "bloom",
+      "min": 1.2,
+      "max": 2.2
+    }
   ],
   "expressions": [
     {
       "id": "lantern",
       "name": "Lantern",
       "description": "A line of light along the spine, brightest at its core and dissipating into a soft bloom either side. It breaks in places - a lantern horse rarely carries an unbroken line - and the same colour shows faintly through the mane where the line passes under it. One copy is as lit as two: the horse cannot turn it off, and in the dark it is the only part of it you see.",
-      "when": [ "La/La", "La/n" ],
+      "when": [
+        "La/La",
+        "La/n"
+      ],
       "layers": [
         {
           "name": "the bloom either side of the line",
           "masks": [
-            { "type": "CENTERLINE", "parts": [ "BODY", "NECK", "HEAD" ],
-              "halfWidth": "$bloom", "softness": 1.2 },
-            { "type": "AXIS", "parts": [ "BODY", "NECK", "HEAD" ], "axis": "Y",
-              "space": "part", "from": 0.66, "to": 1.0, "softness": 0.3 }
+            {
+              "type": "CENTERLINE",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD"
+              ],
+              "halfWidth": "$bloom",
+              "softness": 1.2
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.66,
+              "to": 1.0,
+              "softness": 0.3
+            }
           ],
-          "op": { "type": "TOWARD", "hue": "$hue", "saturation": 0.7, "lightness": 0.55,
-            "strength": 40 }
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.7,
+            "lightness": 0.55,
+            "strength": 40
+          }
         },
         {
           "name": "the lit core of the line, broken in places",
           "emissive": true,
           "masks": [
-            { "type": "CENTERLINE", "parts": [ "BODY", "NECK", "HEAD" ],
-              "halfWidth": "$lineWidth", "softness": 0.5 },
-            { "type": "AXIS", "parts": [ "BODY", "NECK", "HEAD" ], "axis": "Y",
-              "space": "part", "from": 0.72, "to": 1.0, "softness": 0.18 },
-            { "type": "NOISE", "parts": [ "BODY", "NECK", "HEAD" ], "seed": "$breakSeed",
-              "scale": 3.2, "low": 0.0, "high": 1.7 }
+            {
+              "type": "CENTERLINE",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD"
+              ],
+              "halfWidth": "$lineWidth",
+              "softness": 0.5
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.72,
+              "to": 1.0,
+              "softness": 0.18
+            },
+            {
+              "type": "NOISE",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD"
+              ],
+              "seed": "$breakSeed",
+              "scale": 3.2,
+              "low": 0.0,
+              "high": 1.7
+            }
           ],
-          "op": { "type": "TOWARD", "hue": "$hue", "saturation": 0.85, "lightness": 0.72,
-            "strength": 97 }
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.85,
+            "lightness": 0.72,
+            "strength": 97
+          }
         },
         {
           "name": "the light carried a little way into the mane",
           "masks": [
-            { "type": "PARTS", "parts": [ "MANE" ] },
-            { "type": "AXIS", "parts": [ "MANE" ], "axis": "Y", "space": "part",
-              "from": 0.55, "to": 1.0, "softness": 0.3 },
-            { "type": "NOISE", "parts": [ "MANE" ], "seed": "$breakSeed",
-              "scale": 2.4, "low": 0.0, "high": 1.5 }
+            {
+              "type": "PARTS",
+              "parts": [
+                "MANE"
+              ]
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "MANE"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.55,
+              "to": 1.0,
+              "softness": 0.3
+            },
+            {
+              "type": "NOISE",
+              "parts": [
+                "MANE"
+              ],
+              "seed": "$breakSeed",
+              "scale": 2.4,
+              "low": 0.0,
+              "high": 1.5
+            }
           ],
-          "op": { "type": "TOWARD", "hue": "$hue", "saturation": 0.7, "lightness": 0.6,
-            "strength": 55 }
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.7,
+            "lightness": 0.6,
+            "strength": 55
+          }
         }
       ]
     },
@@ -70,8 +179,8 @@
     }
   ],
   "founders": {
-    "La/La": 0.05,
-    "La/n": 1.1,
-    "n/n": 98.85
+    "La/La": 0.002,
+    "La/n": 0.038,
+    "n/n": 99.96
   }
 }

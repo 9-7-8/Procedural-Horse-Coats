@@ -197,9 +197,9 @@ window.HG = window.HG || {};
         v("spacing", 3.0, "body units between neighbouring strokes", { min: 0.2, max: 16, step: 0.1 }),
         v("length", 12.0, "body units a stroke runs before it curves away", { min: 1, max: 60, step: 0.5 }),
         choice("axis", ["X", "Y", "Z"], "the axis the strokes run along"),
-        v("width", 0.35, "stroke width as a share of the spacing"),
+        v("width", 0.8, "stroke width, body units - a texel is 0.5", { min: 0.05, max: 8, step: 0.05 }),
         v("curl", 0.35, "how far strokes wander off the axis"),
-        v("softness", 0.25, "edge fade as a share of the width")
+        v("softness", 0.25, "edge fade, body units", { min: 0, max: 3, step: 0.05 })
       ]
     },
     SPIRAL: {

@@ -258,7 +258,16 @@ class GenotypeCatalogTest {
             widestLast = Math.max(widestLast, lines.get(lines.size() - 1).length());
             assertEquals(GeneCodeDisplay.shortForm(g), String.join(" ", lines));
         }
-        assertTrue(widestLast <= 200, "the overflowing last sign line has grown to " + widestLast + " chars");
+        // A per-gene budget rather than a number: the label carries every gene
+        // the horse is not wild type at, so its length tracks the size of the
+        // registry, and a constant here would have to be edited every time a
+        // gene file landed. Twelve characters a gene is roughly double what the
+        // longest short-form segment needs, which keeps this a tripwire on the
+        // wrap logic - its actual job - and not on the gene count.
+        int budget = 12 * Genes.codeOrder().size();
+        assertTrue(widestLast <= budget, "the overflowing last sign line has grown to "
+                + widestLast + " chars, past the " + budget + " a "
+                + Genes.codeOrder().size() + "-gene registry allows");
     }
 
     /**

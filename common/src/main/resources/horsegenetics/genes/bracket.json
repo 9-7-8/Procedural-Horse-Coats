@@ -1,0 +1,170 @@
+{
+  "format": 3,
+  "key": "horsegenetics.bracket",
+  "name": "Bracket",
+  "phase": "magical",
+  "priority": 365,
+  "rarity": "UNCOMMON",
+  "blurb": "Two clusters of near-black stripes with nothing between them - one down the neck, one fanning over the croup - plus a dark muzzle, a dark hoof and a band above it.",
+  "alleles": [
+    {
+      "token": "Brk",
+      "label": "Bracket (Brk)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "stripeSeed",
+      "type": "seed"
+    },
+    {
+      "name": "weight",
+      "min": 1.229,
+      "max": 3.277
+    }
+  ],
+  "expressions": [
+    {
+      "id": "bracket",
+      "name": "Bracket",
+      "description": "Stripes blunt at the top and sharply pointed at the bottom, some of them forking near the point. Five to ten come down the side of the neck, curving back as they fall; six to twelve more fan out over the hip and croup, near-vertical at the front and swinging back toward the tail. The barrel, shoulder and flank carry none at all - the gap between the two clusters is the marking. The two sides are not mirrored.",
+      "when": [
+        "Brk/Brk",
+        "Brk/n"
+      ],
+      "layers": [
+        {
+          "name": "the neck cluster",
+          "masks": [
+            {
+              "type": "STROKES",
+              "parts": [
+                "NECK"
+              ],
+              "seed": "$stripeSeed",
+              "spacing": 3.2,
+              "length": 8.0,
+              "axis": "Y",
+              "width": "$weight",
+              "curl": 0.7,
+              "softness": 0.12
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "NECK"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.42,
+              "to": 1.0,
+              "softness": 0.2
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#0a0908",
+            "strength": 92
+          }
+        },
+        {
+          "name": "the croup cluster, fanning back",
+          "masks": [
+            {
+              "type": "STROKES",
+              "parts": [
+                "BODY"
+              ],
+              "seed": "$stripeSeed",
+              "spacing": 3.2,
+              "length": 8.5,
+              "axis": "Y",
+              "width": "$weight",
+              "curl": 0.85,
+              "softness": 0.12
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "space": "part",
+              "from": 0.0,
+              "to": 0.3,
+              "softness": 0.16
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.3,
+              "to": 1.0,
+              "softness": 0.2
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#0a0908",
+            "strength": 92
+          }
+        },
+        {
+          "name": "a dark band above the hoof, and the hoof below it",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "LEGS"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.14,
+              "to": 0.24,
+              "softness": 0.02
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#0a0908",
+            "strength": 95
+          }
+        },
+        {
+          "name": "the muzzle",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "MUZZLE"
+              ]
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#0a0908",
+            "strength": 88
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "No bracket striping.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Brk/Brk": 0.004,
+    "Brk/n": 0.076,
+    "n/n": 99.92
+  }
+}

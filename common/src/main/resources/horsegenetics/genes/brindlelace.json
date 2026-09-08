@@ -1,0 +1,171 @@
+{
+  "format": 3,
+  "key": "horsegenetics.brindlelace",
+  "name": "Brindlelace",
+  "phase": "magical",
+  "priority": 368,
+  "rarity": "UNCOMMON",
+  "blurb": "A dark reticulated net rather than solid patching - short dashes and closed loops with the coat showing through between them, densest at the neck and shoulder and closing to solid below the knee.",
+  "alleles": [
+    {
+      "token": "Bnl",
+      "label": "Brindlelace (Bnl)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "netSeed",
+      "type": "seed"
+    },
+    {
+      "name": "weight",
+      "min": 1.037,
+      "max": 2.304
+    }
+  ],
+  "expressions": [
+    {
+      "id": "brindlelace",
+      "name": "Brindlelace",
+      "description": "Half the horse is dark, but as a net: short dashes and irregular closed loops with soft edges, enclosing cells of base coat. The grain shifts zone to zone - near-vertical down the neck, oblique across the shoulder, along the rib arcs on the barrel, radiating from the point of hip. Density falls off backward and downward, so the belly and flank open right up, and closes the other way on the legs until the knee and hock are solid. Ears solid; mane and tail solid, full length.",
+      "when": [
+        "Bnl/Bnl",
+        "Bnl/n"
+      ],
+      "layers": [
+        {
+          "name": "the net over the body, thinning backward and down",
+          "masks": [
+            {
+              "type": "STROKES",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD"
+              ],
+              "seed": "$netSeed",
+              "spacing": 2.4,
+              "length": 3.4,
+              "axis": "Y",
+              "width": "$weight",
+              "curl": 0.9,
+              "softness": 0.3
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD"
+              ],
+              "axis": "X",
+              "space": "body",
+              "from": 0.18,
+              "to": 1.0,
+              "softness": 0.4
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.15,
+              "to": 1.0,
+              "softness": 0.4
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#120e0b",
+            "strength": 88
+          }
+        },
+        {
+          "name": "the net closing to solid below the knee and hock",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "LEGS"
+              ]
+            },
+            {
+              "type": "STROKES",
+              "parts": [
+                "LEGS"
+              ],
+              "seed": "$netSeed",
+              "spacing": 2.4,
+              "length": 3.0,
+              "axis": "Y",
+              "width": "$weight",
+              "curl": 0.6,
+              "softness": 0.3,
+              "combine": "MIN"
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "LEGS"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.0,
+              "to": 0.42,
+              "softness": 0.35,
+              "combine": "MAX"
+            },
+            {
+              "type": "PARTS",
+              "parts": [
+                "LEGS"
+              ],
+              "combine": "MIN"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#120e0b",
+            "strength": 90
+          }
+        },
+        {
+          "name": "solid ears, mane and tail",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "HAIR",
+                "EARS"
+              ]
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#120e0b",
+            "strength": 90
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "No lace.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Bnl/Bnl": 0.004,
+    "Bnl/n": 0.076,
+    "n/n": 99.92
+  }
+}

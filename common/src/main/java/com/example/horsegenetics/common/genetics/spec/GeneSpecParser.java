@@ -687,6 +687,20 @@ public final class GeneSpecParser {
         }
         Params params = readParams(opJson, SpecSchema.opParams(opType), SpecSchema.opParamNames(opType),
                 where + " op '" + opType + "'", knobs, knobIndex, "type");
+        // Coverage starts at 1 and the first mask folds into that, so MAX and
+        // ADD in that position can only ever return 1 - the layer paints the
+        // whole horse, whatever the mask says. It is always a mistake and it
+        // looks exactly like a mask that is too generous, which is a bad
+        // afternoon. Refuse it and say which one.
+        if (!masks.isEmpty()) {
+            Combine first = masks.get(0).combine();
+            if (first == Combine.MAX || first == Combine.ADD) {
+                throw new IllegalArgumentException(where + ": the FIRST mask cannot combine by "
+                        + first + ". Coverage starts at 1, so " + first + " against it is always 1 "
+                        + "and the layer covers the whole horse. Put a MULTIPLY mask first and "
+                        + first + " the others into it.");
+            }
+        }
         if (emissive) {
             for (Mask m : masks) {
                 if (m.type() == MaskType.PIGMENT) {

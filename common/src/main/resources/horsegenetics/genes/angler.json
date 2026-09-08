@@ -7,80 +7,223 @@
   "rarity": "EPIC",
   "blurb": "Strings of faintly glowing lights strung horizontally along the body, each light a pale core inside a deeper rim, like the lures of a deep-water fish.",
   "alleles": [
-    { "token": "Ang", "label": "Angler (Ang)" },
-    { "token": "n", "label": "Wild-type (n)" }
+    {
+      "token": "Ang",
+      "label": "Angler (Ang)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
   ],
   "knobs": [
-    { "name": "stringSeed", "type": "seed" },
-    { "name": "lightSeed", "type": "seed" },
-    { "name": "hue", "min": 0.0, "max": 360.0 },
-    { "name": "lightSize", "min": 0.95, "max": 1.35 },
-    { "name": "lightSpacing", "min": 2.8, "max": 3.8 }
+    {
+      "name": "stringSeed",
+      "type": "seed"
+    },
+    {
+      "name": "lightSeed",
+      "type": "seed"
+    },
+    {
+      "name": "hue",
+      "min": 0.0,
+      "max": 360.0
+    },
+    {
+      "name": "lightSize",
+      "min": 0.95,
+      "max": 1.35
+    },
+    {
+      "name": "lightSpacing",
+      "min": 2.8,
+      "max": 3.8
+    }
   ],
   "expressions": [
     {
       "id": "angler",
       "name": "Angler",
       "description": "Round and oval lights in strings that run horizontally along the body and bend as they go, never singly - a string is two lights at least. Each light is a pale core inside a deeper rim of the same hue, and one horse carries one design throughout. The strings turn vertical on the face and legs, where nothing else on this horse runs level. Mane, tail and hooves are untouched however close a string passes.",
-      "when": { "Ang": 2 },
+      "when": {
+        "Ang": 2
+      },
       "layers": [
         {
           "name": "the rim of each light, strung along the body",
           "emissive": true,
           "masks": [
-            { "type": "SPOTS", "parts": [ "BODY", "NECK" ], "seed": "$lightSeed",
-              "spacing": "$lightSpacing", "radius": "$lightSize", "vary": 0.4,
-              "chance": 0.85, "stretch": 1.35, "axis": "X", "softness": 0.2 },
-            { "type": "STROKES", "parts": [ "BODY", "NECK" ], "seed": "$stringSeed",
-              "spacing": 7.0, "length": 26.0, "axis": "X", "width": 0.16,
-              "curl": 0.55, "softness": 0.4 }
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$lightSeed",
+              "spacing": "$lightSpacing",
+              "radius": "$lightSize",
+              "vary": 0.4,
+              "chance": 0.85,
+              "stretch": 1.35,
+              "axis": "X",
+              "softness": 0.2
+            },
+            {
+              "type": "STROKES",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$stringSeed",
+              "spacing": 7.0,
+              "length": 26.0,
+              "axis": "X",
+              "width": 1.12,
+              "curl": 0.55,
+              "softness": 0.4
+            }
           ],
-          "op": { "type": "TOWARD", "hue": "$hue", "saturation": 0.95, "lightness": 0.45,
-            "strength": 98 }
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.95,
+            "lightness": 0.45,
+            "strength": 98
+          }
         },
         {
           "name": "the pale core inside each light",
           "emissive": true,
           "masks": [
-            { "type": "SPOTS", "parts": [ "BODY", "NECK" ], "seed": "$lightSeed",
-              "spacing": "$lightSpacing", "radius": 0.55, "vary": 0.4,
-              "chance": 0.85, "stretch": 1.35, "axis": "X", "softness": 0.14 },
-            { "type": "STROKES", "parts": [ "BODY", "NECK" ], "seed": "$stringSeed",
-              "spacing": 7.0, "length": 26.0, "axis": "X", "width": 0.16,
-              "curl": 0.55, "softness": 0.4 }
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$lightSeed",
+              "spacing": "$lightSpacing",
+              "radius": 0.55,
+              "vary": 0.4,
+              "chance": 0.85,
+              "stretch": 1.35,
+              "axis": "X",
+              "softness": 0.14
+            },
+            {
+              "type": "STROKES",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$stringSeed",
+              "spacing": 7.0,
+              "length": 26.0,
+              "axis": "X",
+              "width": 1.12,
+              "curl": 0.55,
+              "softness": 0.4
+            }
           ],
-          "op": { "type": "TOWARD", "hue": "$hue", "saturation": 0.5, "lightness": 0.85,
-            "strength": 96 }
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.5,
+            "lightness": 0.85,
+            "strength": 96
+          }
         },
         {
           "name": "strings running vertically down the face",
           "emissive": true,
           "masks": [
-            { "type": "SPOTS", "parts": [ "FACE" ], "seed": "$lightSeed",
-              "spacing": "$lightSpacing", "radius": "$lightSize", "vary": 0.4,
-              "chance": 0.7, "stretch": 1.35, "axis": "Y", "softness": 0.2 },
-            { "type": "STROKES", "parts": [ "FACE" ], "seed": "$stringSeed",
-              "spacing": 4.0, "length": 8.0, "axis": "Y", "width": 0.2,
-              "curl": 0.4, "softness": 0.5 }
+            {
+              "type": "SPOTS",
+              "parts": [
+                "FACE"
+              ],
+              "seed": "$lightSeed",
+              "spacing": "$lightSpacing",
+              "radius": "$lightSize",
+              "vary": 0.4,
+              "chance": 0.7,
+              "stretch": 1.35,
+              "axis": "Y",
+              "softness": 0.2
+            },
+            {
+              "type": "STROKES",
+              "parts": [
+                "FACE"
+              ],
+              "seed": "$stringSeed",
+              "spacing": 4.0,
+              "length": 8.0,
+              "axis": "Y",
+              "width": 0.8,
+              "curl": 0.4,
+              "softness": 0.5
+            }
           ],
-          "op": { "type": "TOWARD", "hue": "$hue", "saturation": 0.95, "lightness": 0.5,
-            "strength": 96 }
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.95,
+            "lightness": 0.5,
+            "strength": 96
+          }
         },
         {
           "name": "strings running vertically down the legs, clear of the hoof",
           "emissive": true,
           "masks": [
-            { "type": "SPOTS", "parts": [ "LEGS" ], "seed": "$lightSeed",
-              "spacing": "$lightSpacing", "radius": "$lightSize", "vary": 0.4,
-              "chance": 0.7, "stretch": 1.35, "axis": "Y", "softness": 0.2 },
-            { "type": "STROKES", "parts": [ "LEGS" ], "seed": "$stringSeed",
-              "spacing": 4.0, "length": 10.0, "axis": "Y", "width": 0.2,
-              "curl": 0.4, "softness": 0.5 },
-            { "type": "AXIS", "parts": [ "LEGS" ], "axis": "Y", "space": "part",
-              "from": 0.16, "to": 1.0, "softness": 0.08 }
+            {
+              "type": "SPOTS",
+              "parts": [
+                "LEGS"
+              ],
+              "seed": "$lightSeed",
+              "spacing": "$lightSpacing",
+              "radius": "$lightSize",
+              "vary": 0.4,
+              "chance": 0.7,
+              "stretch": 1.35,
+              "axis": "Y",
+              "softness": 0.2
+            },
+            {
+              "type": "STROKES",
+              "parts": [
+                "LEGS"
+              ],
+              "seed": "$stringSeed",
+              "spacing": 4.0,
+              "length": 10.0,
+              "axis": "Y",
+              "width": 0.8,
+              "curl": 0.4,
+              "softness": 0.5
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "LEGS"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.16,
+              "to": 1.0,
+              "softness": 0.08
+            }
           ],
-          "op": { "type": "TOWARD", "hue": "$hue", "saturation": 0.95, "lightness": 0.5,
-            "strength": 96 }
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.95,
+            "lightness": 0.5,
+            "strength": 96
+          }
         }
       ]
     },
@@ -89,7 +232,9 @@
       "name": "Angler carrier",
       "description": "One copy shows nothing. Two carriers bred together are the only way the lights appear.",
       "wildType": true,
-      "when": { "Ang": 1 }
+      "when": {
+        "Ang": 1
+      }
     },
     {
       "id": "wild",
@@ -99,8 +244,7 @@
     }
   ],
   "founders": {
-    "Ang/Ang": 0.3,
-    "Ang/n": 0.0,
-    "n/n": 99.7
+    "Ang/Ang": 0.02,
+    "n/n": 99.98
   }
 }

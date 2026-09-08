@@ -195,9 +195,9 @@ public final class SpecSchema {
                 Param.value("spacing", 3.0, "body units between neighbouring strokes"),
                 Param.value("length", 12.0, "body units a stroke runs before it curves away or pinches out"),
                 Param.choice("axis", List.of("X", "Y", "Z"), "the axis strokes run along"),
-                Param.value("width", 0.35, "stroke width as a share of the spacing"),
+                Param.value("width", 0.8, "stroke width, body units - a texel is 0.5"),
                 Param.value("curl", 0.35, "how far strokes wander off the axis, as a share of the spacing"),
-                Param.value("softness", 0.25, "edge fade as a share of the width")));
+                Param.value("softness", 0.25, "edge fade, body units")));
 
         MASKS.put(MaskType.SPIRAL, List.of(
                 Param.parts("parts", "one spiral is drawn per named part"),

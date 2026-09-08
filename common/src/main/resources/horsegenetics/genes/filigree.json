@@ -1,0 +1,303 @@
+{
+  "format": 3,
+  "key": "horsegenetics.filigree",
+  "name": "Filigree",
+  "phase": "magical",
+  "priority": 367,
+  "rarity": "RARE",
+  "blurb": "White metalwork over the muscle masses - a closed spiral on each of them, long arcs following the body's contours, and broken tracks of short dashes filling the space between.",
+  "alleles": [
+    {
+      "token": "Flg",
+      "label": "Filigree, white (Flg)"
+    },
+    {
+      "token": "Flc",
+      "label": "Filigree, coloured (Flc)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "workSeed",
+      "type": "seed"
+    },
+    {
+      "name": "hue",
+      "min": 0.0,
+      "max": 360.0
+    },
+    {
+      "name": "arcWidth",
+      "min": 0.676,
+      "max": 1.622
+    }
+  ],
+  "expressions": [
+    {
+      "id": "white",
+      "name": "Filigree",
+      "description": "Three element forms at once, all hard-edged and all the same white: closed spirals of about two turns, one to each major muscle mass; long shallow arcs following the contour of the zone they sit in; and fields of short dashes lying parallel to the nearest arc, in broken tracks. The dashes crowd along the topline and the back edges of the shoulder and hindquarter and thin to isolated marks at the belly. The two sides are not mirrored, and the spirals do not all turn the same way. Nothing on the head, nothing below the knee.",
+      "when": [
+        "Flg/Flg",
+        "Flg/Flc",
+        "Flg/n"
+      ],
+      "layers": [
+        {
+          "name": "one spiral to each muscle mass",
+          "masks": [
+            {
+              "type": "SPIRAL",
+              "parts": [
+                "BODY"
+              ],
+              "radius": 4.5,
+              "turns": 2.0,
+              "width": 0.5,
+              "axis": "Z",
+              "offset": -0.25,
+              "softness": 0.08
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#ffffff",
+            "strength": 95
+          }
+        },
+        {
+          "name": "long arcs along the contours",
+          "masks": [
+            {
+              "type": "STROKES",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$workSeed",
+              "spacing": 2.6,
+              "length": 20.0,
+              "axis": "X",
+              "width": "$arcWidth",
+              "curl": 0.8,
+              "softness": 0.1
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#ffffff",
+            "strength": 95
+          }
+        },
+        {
+          "name": "dash fields between and along the arcs",
+          "masks": [
+            {
+              "type": "STROKES",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$workSeed",
+              "spacing": 2.6,
+              "length": 9.0,
+              "axis": "X",
+              "width": 0.624,
+              "curl": 0.8,
+              "softness": 0.1
+            },
+            {
+              "type": "SPECKLE",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$workSeed",
+              "spacing": 1.1,
+              "size": 0.5,
+              "density": 0.4,
+              "softness": 0.25
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.2,
+              "to": 1.0,
+              "softness": 0.5
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#ffffff",
+            "strength": 92
+          }
+        },
+        {
+          "name": "the same work reaching onto the upper legs",
+          "masks": [
+            {
+              "type": "STROKES",
+              "parts": [
+                "LEGS"
+              ],
+              "seed": "$workSeed",
+              "spacing": 2.6,
+              "length": 5.0,
+              "axis": "Y",
+              "width": 0.624,
+              "curl": 0.6
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "LEGS"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.55,
+              "to": 1.0,
+              "softness": 0.2
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#ffffff",
+            "strength": 90
+          }
+        }
+      ]
+    },
+    {
+      "id": "coloured",
+      "name": "Coloured filigree",
+      "description": "The same metalwork worked in a colour rather than in white - the shade runs in a line of horses. Fully recessive: two copies, and a single copy beside the white allele shows white. It never gives blue eyes.",
+      "when": {
+        "Flc": 2
+      },
+      "layers": [
+        {
+          "name": "one coloured spiral to each muscle mass",
+          "masks": [
+            {
+              "type": "SPIRAL",
+              "parts": [
+                "BODY"
+              ],
+              "radius": 4.5,
+              "turns": 2.0,
+              "width": 0.5,
+              "axis": "Z",
+              "offset": -0.25,
+              "softness": 0.08
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.8,
+            "lightness": 0.6,
+            "strength": 93
+          }
+        },
+        {
+          "name": "long coloured arcs along the contours",
+          "masks": [
+            {
+              "type": "STROKES",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$workSeed",
+              "spacing": 2.6,
+              "length": 20.0,
+              "axis": "X",
+              "width": "$arcWidth",
+              "curl": 0.8,
+              "softness": 0.1
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.8,
+            "lightness": 0.6,
+            "strength": 93
+          }
+        },
+        {
+          "name": "coloured dash fields between the arcs",
+          "masks": [
+            {
+              "type": "STROKES",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$workSeed",
+              "spacing": 2.6,
+              "length": 9.0,
+              "axis": "X",
+              "width": 0.624,
+              "curl": 0.8,
+              "softness": 0.1
+            },
+            {
+              "type": "SPECKLE",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$workSeed",
+              "spacing": 1.1,
+              "size": 0.5,
+              "density": 0.4,
+              "softness": 0.25
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.2,
+              "to": 1.0,
+              "softness": 0.5
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.8,
+            "lightness": 0.6,
+            "strength": 90
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "No filigree.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Flg/Flg": 0.002,
+    "Flg/Flc": 0.008,
+    "Flg/n": 0.038,
+    "Flc/Flc": 0.008,
+    "n/n": 99.944
+  }
+}

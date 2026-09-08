@@ -83,16 +83,6 @@ Genes flagged `inverting` reverse local polarity: where the inverting field over
 
 ## 2. Punctate and stipple genes
 
-### G-02 — STELLAR
-
-Angular multi-stroke glyphs, larger and sparser than G-01.
-
-- **Element geometry:** 2–4 straight or shallow-arc strokes (arc radius 8–20 cm) intersecting at 20–90°, stroke width 0.2–0.5 cm, stroke length 1.5–6 cm. Each glyph 2–6 cm across its bounding box. 1–3 satellite dots 0.2–0.6 cm within 3 cm of the glyph.
-- **Count:** 8–30 glyphs per side.
-- **Placement:** scapula, cranial barrel, dorsal neck, withers. Density falls to 0 caudal to the flank and ventral to the elbow line.
-- **Orientation:** stroke sets randomly rotated; no preferred axis.
-- **Edge:** E0.
-
 ### G-03 — DUST
 
 Fine stipple with no discrete boundary anywhere.
@@ -118,44 +108,6 @@ No body coat expression.
 - **Forelock:** included in ~50% of expressions, 1–3 bundles.
 - **Tail:** 2–6 bundles, 1–4 cm wide at the dock, spanning full or partial length.
 - **Value:** contrasting to the mane/tail base value (light strands on dark hair, dark strands on light hair).
-
-### G-05 — SCRATCHES
-
-Parallel spindle-profile streaks.
-
-- **Element geometry:** length 15–45 cm, maximum width 0.8–3 cm located at 40–60% of length, tapering to points at both ends.
-- **Sets:** 3–5 near-parallel streaks, inter-streak spacing 3–8 cm, divergence between streaks ≤ 10°.
-- **Orientation:** long axis 30–60° to the cranio-caudal axis, running dorso-cranial to ventro-caudal.
-- **Set count:** 1–4 per side. Primary sites: hip and thigh, caudal barrel, lateral neck.
-- **Limb variant:** short transverse streaks 4–10 cm long, 0.5–1.5 cm wide, 4–9 per limb segment, oriented 75–90° to the limb axis across the cannon and forearm, reading as banding.
-- **Edge:** E0–E1.
-
-### G-06 — ZEBRA'S COAT
-
-Transverse narrow striping restricted to the cranial body.
-
-- **Element geometry:** width 0.6–2 cm, length 6–30 cm, straight to shallow-arc (radius 30–90 cm), tapered terminations.
-- **Count:** 10–30 stripes per side.
-- **Spacing:** 2–5 cm between stripe centers.
-- **Orientation:** 70–90° to the cranio-caudal axis over the lateral neck; rotating to 45–70° and curving caudally as the field crosses the withers and shoulder.
-- **Field limit:** poll to the caudal scapular border. No expression caudal to the scapula, none on limbs.
-- **Bifurcation:** ~20% of stripes split into 2 branches over the distal 20–40% of their length, branch angle 10–25°.
-- **Edge:** E0–E1.
-
-### G-07 — INTERNAL FLOW
-
-Thin contour lines tracking underlying musculature.
-
-- **Element geometry:** width 0.4–1.5 cm, length 20–60 cm, curvature radius 25–80 cm, constant width along length.
-- **Sets:** nested groups of 2–5 lines, inter-line spacing 2–6 cm, following a common curve family.
-- **Anatomical tracks:** caudal margin of the scapula/triceps; the arc of the ribcage (concave cranially); the cranial margin of the hindquarter sweeping from the point of hip to the stifle.
-- **Continuity:** 60% continuous; 40% broken into 2–4 dashes with 1–3 cm gaps, dash ends tapered.
-- **Set count:** 2–4 per side.
-- **Edge:** E0.
-
----
-
-## 4. Ring, disk and blotch genes
 
 ### G-10 — BLACK HOLES  `inverting`
 

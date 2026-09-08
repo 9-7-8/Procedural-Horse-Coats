@@ -548,21 +548,21 @@ public final class SpecPainter {
                 double length = Math.max(0.05, v.get(p.value("length", 12.0), leg));
                 Axis longAxis = Axis.valueOf(p.text("axis", "X").toUpperCase(java.util.Locale.ROOT));
                 double curl = v.get(p.value("curl", 0.35), leg) * spacing;
-                // Warping the sample before the ridge is what stops the strokes
+                // Warping the sample before the field is what stops the strokes
                 // reading as a comb: it is the difference between parallel lines
                 // and lines that wander, fork and pinch out the way drawn ones do.
                 double w = BodyNoise.value(seed ^ 0x71L, point.x() / (spacing * 4),
                         point.y() / (spacing * 4), point.z() / (spacing * 4));
-                double sx = point.x() + (longAxis == Axis.X ? 0 : (w - 0.5) * curl);
-                double sy = point.y() + (longAxis == Axis.Y ? 0 : (w - 0.5) * curl);
-                double sz = point.z() + (longAxis == Axis.Z ? 0 : (w - 0.5) * curl);
-                double ridge = BodyNoise.ridge(seed,
-                        sx / (longAxis == Axis.X ? length : spacing),
-                        sy / (longAxis == Axis.Y ? length : spacing),
-                        sz / (longAxis == Axis.Z ? length : spacing));
-                double width = clamp01(v.get(p.value("width", 0.35), leg));
-                double soft = Math.max(1e-6, v.get(p.value("softness", 0.25), leg)) * Math.max(width, 1e-3);
-                return BodyStripes.smoothstep(1 - width - soft, 1 - width, ridge);
+                double sx = (point.x() + (longAxis == Axis.X ? 0 : (w - 0.5) * curl))
+                        / (longAxis == Axis.X ? length : spacing);
+                double sy = (point.y() + (longAxis == Axis.Y ? 0 : (w - 0.5) * curl))
+                        / (longAxis == Axis.Y ? length : spacing);
+                double sz = (point.z() + (longAxis == Axis.Z ? 0 : (w - 0.5) * curl))
+                        / (longAxis == Axis.Z ? length : spacing);
+                double half = Math.max(1e-4, v.get(p.value("width", 0.8), leg)) / 2;
+                double soft = Math.max(1e-6, v.get(p.value("softness", 0.25), leg));
+                return 1.0 - BodyStripes.smoothstep(half, half + soft,
+                        levelSetDistance(seed, sx, sy, sz) * spacing);
             }
             case SPIRAL: {
                 long seed = v.seed(p.value("seed", 0), seedBase);
@@ -597,6 +597,29 @@ public final class SpecPainter {
             default:
                 throw new IllegalStateException("unhandled mask " + mask.type());
         }
+    }
+
+    /**
+     * How far this sample is from the surface where the noise field crosses its
+     * midpoint, in lattice units - the shape a {@code STROKES} mask draws.
+     *
+     * <p>The naive version of this is {@code |n - 0.5|}, and it does not work.
+     * Value noise is flat near its extrema and steep between them, so the band
+     * where {@code |n - 0.5|} is small is <b>thin where the field is steep and
+     * enormous where it is flat</b>: the same parameters give a hairline over
+     * half the horse and a blot over the other half. Dividing by the gradient
+     * turns the reading into an approximate distance, and the stroke keeps its
+     * width all the way along. It costs three extra noise samples, which is the
+     * whole reason to write down why they are there.
+     */
+    private static double levelSetDistance(long seed, double x, double y, double z) {
+        double n = BodyNoise.value(seed, x, y, z);
+        double e = 0.25;
+        double gx = (BodyNoise.value(seed, x + e, y, z) - n) / e;
+        double gy = (BodyNoise.value(seed, x, y + e, z) - n) / e;
+        double gz = (BodyNoise.value(seed, x, y, z + e) - n) / e;
+        double grad = Math.sqrt(gx * gx + gy * gy + gz * gz);
+        return Math.abs(n - 0.5) / Math.max(grad, 1e-4);
     }
 
     /**

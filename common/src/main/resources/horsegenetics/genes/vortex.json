@@ -1,0 +1,255 @@
+{
+  "format": 3,
+  "key": "horsegenetics.vortex",
+  "name": "Vortex",
+  "phase": "magical",
+  "priority": 369,
+  "rarity": "EPIC",
+  "blurb": "A hard-edged lens over the neck and shoulder filled with undulating bands in a fixed four-colour order - cyan, cream, magenta and near-black - carried a little way into the mane.",
+  "alleles": [
+    {
+      "token": "Vtx",
+      "label": "Vortex (Vtx)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "bandSeed",
+      "type": "seed"
+    },
+    {
+      "name": "bandPitch",
+      "min": 2.6,
+      "max": 3.7
+    }
+  ],
+  "expressions": [
+    {
+      "id": "vortex",
+      "name": "Vortex",
+      "description": "A broad teardrop reaching from the throatlatch back to about the girth, its outer boundary hard against the coat and made of the pointed ends of its own outermost bands rather than of any outline. Inside it, twelve to twenty-five bands run nose-to-tail on sinusoidal paths, widening at the crests and pinching at the inflections, merging and splitting and dying off between their neighbours. The four colours cycle in order and never repeat side by side, with the cyan and cream toward the core and the magenta and black at the margin. Where the field meets the crest the bands run on into the mane for a third of its length.",
+      "when": [
+        "Vtx/Vtx",
+        "Vtx/n"
+      ],
+      "layers": [
+        {
+          "name": "the near-black ground the bands separate",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "NECK",
+                "BODY"
+              ],
+              "seed": "$bandSeed",
+              "spacing": 26.0,
+              "radius": 10.043999999999999,
+              "vary": 0.2,
+              "stretch": 1.9,
+              "axis": "X",
+              "softness": 1.2
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "NECK",
+                "BODY"
+              ],
+              "axis": "X",
+              "space": "body",
+              "from": 0.44,
+              "to": 1.0,
+              "softness": 0.12
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#0a0a10",
+            "strength": 92
+          }
+        },
+        {
+          "name": "the cyan and cream bands, toward the core",
+          "masks": [
+            {
+              "type": "STROKES",
+              "parts": [
+                "NECK",
+                "BODY"
+              ],
+              "seed": "$bandSeed",
+              "spacing": "$bandPitch",
+              "length": 13.0,
+              "axis": "X",
+              "width": 0.945,
+              "curl": 1.1,
+              "softness": 0.06
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "NECK",
+                "BODY"
+              ],
+              "seed": "$bandSeed",
+              "spacing": 26.0,
+              "radius": 7.811999999999999,
+              "vary": 0.2,
+              "stretch": 1.9,
+              "axis": "X",
+              "softness": 1.0
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "NECK",
+                "BODY"
+              ],
+              "axis": "X",
+              "space": "body",
+              "from": 0.44,
+              "to": 1.0,
+              "softness": 0.12
+            }
+          ],
+          "op": {
+            "type": "RAMP",
+            "colors": [
+              "#2fd8e8",
+              "#f6ecc8",
+              "#2fd8e8"
+            ],
+            "axis": "Y",
+            "space": "part",
+            "from": 0.15,
+            "to": 0.95,
+            "strength": 95
+          }
+        },
+        {
+          "name": "the magenta bands, toward the margin",
+          "masks": [
+            {
+              "type": "STROKES",
+              "parts": [
+                "NECK",
+                "BODY"
+              ],
+              "seed": "$bandSeed",
+              "spacing": "$bandPitch",
+              "length": 13.0,
+              "axis": "X",
+              "width": 0.63,
+              "curl": 1.1,
+              "softness": 0.06,
+              "invert": true
+            },
+            {
+              "type": "STROKES",
+              "parts": [
+                "NECK",
+                "BODY"
+              ],
+              "seed": "$bandSeed",
+              "spacing": 2.6,
+              "length": 11.0,
+              "axis": "X",
+              "width": 0.728,
+              "curl": 1.1,
+              "softness": 0.06
+            },
+            {
+              "type": "SPOTS",
+              "parts": [
+                "NECK",
+                "BODY"
+              ],
+              "seed": "$bandSeed",
+              "spacing": 26.0,
+              "radius": 10.043999999999999,
+              "vary": 0.2,
+              "stretch": 1.9,
+              "axis": "X",
+              "softness": 1.2
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "NECK",
+                "BODY"
+              ],
+              "axis": "X",
+              "space": "body",
+              "from": 0.44,
+              "to": 1.0,
+              "softness": 0.12
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#d4267a",
+            "strength": 93
+          }
+        },
+        {
+          "name": "the bands carried into the mane",
+          "masks": [
+            {
+              "type": "STROKES",
+              "parts": [
+                "MANE"
+              ],
+              "seed": "$bandSeed",
+              "spacing": 2.6,
+              "length": 6.0,
+              "axis": "Y",
+              "width": 0.78,
+              "curl": 0.3,
+              "softness": 0.06
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "MANE"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.5,
+              "to": 1.0,
+              "softness": 0.12
+            }
+          ],
+          "op": {
+            "type": "RAMP",
+            "colors": [
+              "#2fd8e8",
+              "#f6ecc8",
+              "#d4267a"
+            ],
+            "axis": "X",
+            "space": "part",
+            "from": 0.0,
+            "to": 1.0,
+            "strength": 92
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "No vortex.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Vtx/Vtx": 0.001,
+    "Vtx/n": 0.019,
+    "n/n": 99.98
+  }
+}

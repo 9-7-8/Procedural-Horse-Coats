@@ -38,23 +38,23 @@ Voided,moregenesinfo.md,Vd,white-inverter,no
 Opalized,moregenesinfo.md,Opl,white-palette-cells,no
 Frostfall,moregenesinfo.md,Fro,hair-ramp,no
 Nimbus,moregenesinfo.md,Nim,cloud-wash,no
-Riblines,moregenesinfo.md,Rib,strokes(thin),no
-Brindlelace,moregenesinfo.md,Bnl,strokes(reticulated),no
+Riblines,moregenesinfo.md,Rib,strokes(thin),yes
+Brindlelace,moregenesinfo.md,Bnl,strokes(reticulated),yes
 Corvid,moregenesinfo.md,Cvd,face-mask+hair-speckle,no
-Bracket,moregenesinfo.md,Brk,strokes(two clusters),no
+Bracket,moregenesinfo.md,Brk,strokes(two clusters),yes
 Auroraband,moregenesinfo.md,Abd,ribbon+ramp,no
-Vortex,moregenesinfo.md,Vtx,bands(palette),no
-Circuit,moregenesinfo.md,Cir,strokes+spiral+inclusion,no
+Vortex,moregenesinfo.md,Vtx,bands(palette),yes
+Circuit,moregenesinfo.md,Cir,strokes+spiral+inclusion,yes
 Prismtail,moregenesinfo.md,Prt,hair-ramp(spectral),no
 Element Dusted,moregenesinfo.md,Ed,limb+hair ramp+dapples,no
-Filigree,moregenesinfo.md,Flg,spirals+arcs+dashes,no
+Filigree,moregenesinfo.md,Flg,spirals+arcs+dashes,yes
 Stars,akkadorian-z-mutation-genes.md,Sta,spots(fine),yes
-Stellar,akkadorian-z-mutation-genes.md,Ste,strokes(glyph),no
+Stellar,akkadorian-z-mutation-genes.md,Ste,strokes(glyph),yes
 Dust,akkadorian-z-mutation-genes.md,Dst,speckle,no
 Striped Mane Tail,akkadorian-z-mutation-genes.md,Smt,hair-bundles,no
-Scratches,akkadorian-z-mutation-genes.md,Scr,strokes(spindle),no
-Zebras Coat,akkadorian-z-mutation-genes.md,Zbc,strokes(transverse),no
-Internal Flow,akkadorian-z-mutation-genes.md,Ifl,strokes(contour),no
+Scratches,akkadorian-z-mutation-genes.md,Scr,strokes(spindle),yes
+Zebras Coat,akkadorian-z-mutation-genes.md,Zbc,strokes(transverse),yes
+Internal Flow,akkadorian-z-mutation-genes.md,Ifl,strokes(contour),yes
 Crescents,akkadorian-z-mutation-genes.md,Crs,rings(arc),yes
 Wormholes,akkadorian-z-mutation-genes.md,Wmh,rings,yes
 Black Holes,akkadorian-z-mutation-genes.md,Bhl,patches(hard),no

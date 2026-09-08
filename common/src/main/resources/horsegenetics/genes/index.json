@@ -1,14 +1,24 @@
 [
   "angler.json",
   "aurorae.json",
+  "bracket.json",
+  "brindlelace.json",
+  "circuit.json",
   "crescents.json",
+  "filigree.json",
   "glow.json",
+  "internal_flow.json",
   "lantern.json",
   "lasertae.json",
   "polymoon.json",
+  "riblines.json",
   "rosette.json",
+  "scratches.json",
   "stars.json",
+  "stellar.json",
   "suntouched.json",
+  "vortex.json",
   "waterborn.json",
-  "wormholes.json"
+  "wormholes.json",
+  "zebras_coat.json"
 ]

@@ -1,6 +1,7 @@
 package com.example.horsegenetics.common.genetics.genes;
 
 import com.example.horsegenetics.common.SeededRng;
+import com.example.horsegenetics.common.genetics.epi.EpiDrift;
 import com.example.horsegenetics.common.genetics.Allele;
 import com.example.horsegenetics.common.genetics.GeneEpigenetics;
 import com.example.horsegenetics.common.genetics.AllelePair;
@@ -373,6 +374,7 @@ class ParticleGeneTest {
         GeneAbility.Emitter damFlame = emittersOf(dam).get(0);
 
         int inherited = 0;
+        int rerolled = 0;
         for (long seed = 0; seed < 80; seed++) {
             Genome foal = dam.breedWith(sire, new SeededRng(seed));
             List<GeneAbility.Emitter> trail = emittersOf(foal);
@@ -382,16 +384,34 @@ class ParticleGeneTest {
             inherited++;
             GeneAbility.Emitter got = trail.get(0);
             assertEquals("minecraft:flame", got.particle());
+            if (!matches(sireFlame, got) && !matches(damFlame, got)) {
+                // EpiDrift.REPLACE_CHANCE: a category does not nudge, it is
+                // re-rolled whole, rarely. Counted rather than asserted away -
+                // see the comment on the bound below.
+                rerolled++;
+                continue;
+            }
             // Everything discrete comes through untouched: drift never nudges a
             // category a step, so a foal's particles are on the same part of its
             // body and in the same number as the parent copy it came from. The
             // colour is inherited too, but one generation of drift may have
             // moved a channel by a hair - which is the point of drift, and is
             // far too small to see.
-            assertTrue(matches(sireFlame, got) || matches(damFlame, got),
-                    "a foal's flame must be one of its parents' flames, not a fresh roll");
         }
         assertTrue(inherited > 20, "some foals should have inherited one copy of each");
+        // Almost all, not all. A body site is an EpiValue.Kind.CATEGORY, and
+        // EpiDrift does not nudge one - it re-rolls it whole, with probability
+        // REPLACE_CHANCE, precisely so that a foal that emits from somewhere new
+        // is a real event and not a rounding accident at a boundary. Over this
+        // many breedings that fires occasionally, and the assertion used to be
+        // "never", which held only because the RNG stream happened not to reach
+        // it. Adding genes elsewhere in the registry moved the stream and the
+        // test failed for a change that had nothing to do with particles - so
+        // the bound is now the documented behaviour rather than an accident of
+        // seed choice.
+        assertTrue(rerolled <= inherited / 10,
+                rerolled + " of " + inherited + " foals took a fresh body site; at "
+                        + EpiDrift.REPLACE_CHANCE + " per breeding that is far too many");
     }
 
     /** Same body site, same density, and a colour at most one generation of drift away. */

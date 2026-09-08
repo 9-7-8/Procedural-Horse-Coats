@@ -309,6 +309,13 @@
 </p>
 
 <p>
+    The <b>first</b> term may not be <code>MAX</code> or <code>ADD</code>, and the parser
+    says so. Coverage starts at 1, so either of those in first position returns 1 whatever
+    the mask found, and the layer paints the entire horse - which looks precisely like a
+    mask that is merely too generous, and is not.
+</p>
+
+<p>
     Every mask also takes <code>parts</code>: a list of part names
     (<code>BODY</code>, <code>NECK</code>, <code>HEAD</code>, <code>MUZZLE</code>,
     <code>MANE</code>, <code>TAIL</code>, <code>LEFT_EAR</code> &hellip;) and group
@@ -332,7 +339,7 @@
 <tr><td><code>SPOTS</code></td><td><code>seed</code>, <code>spacing</code> 4.0, <code>radius</code> 0.9, <code>vary</code> 0.5, <code>chance</code> 1.0, <code>stretch</code> 1.0, <code>axis</code> (X/Y/Z), <code>softness</code> 0.25</td><td>Countable round or oval marks with bare coat between them &mdash; freckles, stars, leopard spots. <code>DAPPLES</code> fills the horse with cells and leaves a web; this leaves most of it bare and puts marks on it. Drop <code>chance</code> to thin the field out, raise <code>stretch</code> to turn the marks into ovals along <code>axis</code>.</td></tr>
 <tr><td><code>RINGS</code></td><td><code>seed</code>, <code>spacing</code> 6.0, <code>radius</code> 2.0, <code>thickness</code> 0.6, <code>vary</code> 0.4, <code>chance</code> 1.0, <code>arc</code> 1.0, <code>softness</code> 0.2</td><td>The same scatter drawn hollow &mdash; rosettes, wormholes, halos. <code>arc</code> below 1 opens the ring into a crescent, and each ring opens a different way, so a field of them does not read as printed.</td></tr>
 <tr><td><code>SPECKLE</code></td><td><code>seed</code>, <code>spacing</code> 0.7, <code>size</code> 0.45, <code>density</code> 0.5, <code>clumping</code> 0, <code>clumpScale</code> 7.0, <code>softness</code> 0.3</td><td>Fine stipple with no boundary anywhere &mdash; dust, ticking, speckling. A texel is about 0.5 body units, so <code>spacing</code> under that is scattered single pixels. <code>clumping</code> lets a slow field push the density around, which is the difference between even static and drifts of it.</td></tr>
-<tr><td><code>STROKES</code></td><td><code>seed</code>, <code>spacing</code> 3.0, <code>length</code> 12.0, <code>axis</code> (X/Y/Z), <code>width</code> 0.35, <code>curl</code> 0.35, <code>softness</code> 0.25</td><td>Tapering, curving lines that fork and pinch out &mdash; scratches, riblines, brindle bars, wisps. It is the <em>ridge</em> of the noise field sampled in a frame stretched along <code>axis</code>, which is why the strokes end in points and wander rather than sitting parallel like a comb.</td></tr>
+<tr><td><code>STROKES</code></td><td><code>seed</code>, <code>spacing</code> 3.0, <code>length</code> 12.0, <code>axis</code> (X/Y/Z), <code>width</code> 0.8, <code>curl</code> 0.35, <code>softness</code> 0.25</td><td>Tapering, curving lines that fork and pinch out &mdash; scratches, riblines, brindle bars, wisps. It is the <em>level set</em> of the noise field sampled in a frame stretched along <code>axis</code>, which is why the strokes end in points and wander rather than sitting parallel like a comb. <code>width</code> and <code>softness</code> are in body units, not fractions: the mask divides by the field\u2019s own gradient so a stroke is the width you asked for everywhere along its run, rather than a hairline where the noise is steep and a blot where it is flat.</td></tr>
 <tr><td><code>SPIRAL</code></td><td><code>seed</code>, <code>radius</code> 4.0, <code>turns</code> 2.0, <code>width</code> 0.5, <code>axis</code> (Z/X/Y), <code>offset</code> 0, <code>softness</code> 0.2</td><td>One closed spiral per named part &mdash; the filigree curl. The only mask that draws a <em>figure</em> rather than a field, so it takes its centre from the part's bounds; <code>offset</code> slides it along the part's long axis.</td></tr>
 </tbody>
 </table>

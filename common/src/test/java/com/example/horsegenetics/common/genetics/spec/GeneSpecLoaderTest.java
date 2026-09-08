@@ -13,6 +13,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -23,6 +24,17 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * missing comma.
  */
 class GeneSpecLoaderTest {
+
+    /**
+     * How many genes the jar's own {@code horsegenetics/genes/} index puts in
+     * the registry before a test adds anything.
+     *
+     * <p>These assertions used to read {@code assertEquals(1, Genes.loaded())}
+     * - true while the mod shipped no gene files, and a lie the day it shipped
+     * twenty. Counting from a baseline says what the test actually means: this
+     * load added one gene, whatever else was already there.
+     */
+    private static final int SHIPPED = Genes.loaded().size();
 
     @AfterEach
     void unregister() {
@@ -71,8 +83,8 @@ class GeneSpecLoaderTest {
 
         assertEquals(2, errors.size(), errors.toString());
         assertTrue(errors.get(0).contains("broken.json"), errors.get(0));
-        assertEquals(1, Genes.loaded().size());
-        assertEquals("example.good", Genes.loaded().get(0).key());
+        assertEquals(SHIPPED + 1, Genes.loaded().size());
+        assertNotNull(Genes.byKeyOrNull("example.good"), "the good file should have registered");
     }
 
     @Test
@@ -84,7 +96,7 @@ class GeneSpecLoaderTest {
 
         assertEquals(1, errors.size(), errors.toString());
         assertTrue(errors.get(0).contains("already registered"), errors.get(0));
-        assertEquals(1, Genes.loaded().size());
+        assertEquals(SHIPPED + 1, Genes.loaded().size(), "the second file must not have registered");
     }
 
     private static void write(Path dir, String name, String content) throws IOException {
