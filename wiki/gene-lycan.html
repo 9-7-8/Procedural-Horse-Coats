@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LYCAN &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="nav.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow magical">Magical recessive <span class="sep">/</span> no coat effect</p>
+<h1>LYCAN &mdash; the werewolf locus</h1>
+<p class="lede">
+    A horse with two matching copies <strong>stops being a horse at nightfall</strong>.
+    Not a horse wearing a wolf: a real wolf, which breeds with wolves, is tamed with
+    bones, and is a horse again at dawn with the same name and the same pedigree.
+    Thirty-seven shapes share the locus, and every one of them is recessive to the
+    wild type <em>and</em> to each other.
+</p>
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd>horsegenetics.lycan</dd></div>
+    <div><dt>Priority</dt><dd>152 &mdash; after <a href="gene-rainbow-dust.html">rainbow dust</a>; a code-order slot only</dd></div>
+    <div><dt>Alleles</dt><dd>37 shapes + <span class="allele wild">n</span> &mdash; see <a href="#forms">the table</a></dd></div>
+    <div><dt>Outcomes</dt><dd>wild, carrier, mismatched, and one per shape</dd></div>
+    <div><dt>Shows when</dt><dd><strong>two copies of the <em>same</em> allele</strong></dd></div>
+    <div><dt>Default allele</dt><dd>n</dd></div>
+    <div><dt>Wild frequency</dt><dd>0.03% per shape &mdash; about 1.1% of founders shift; <strong>no founder is a carrier</strong></dd></div>
+    <div><dt>Founder draws</dt><dd>1 &times; nextFloat()</dd></div>
+    <div><dt>Coat effect</dt><dd><strong>none, ever</strong></dd></div>
+    <div><dt>Epigenetic</dt><dd>one colour &mdash; the cloud the shifted animal trails</dd></div>
+</dl>
+
+<div class="note warn">
+    <span class="label">Not play-tested, and the most invasive thing in the mod</span>
+    <p>
+        This gene <em>discards a horse entity and creates a different one</em>, twice a
+        day. Written against 26.1.2 sources and never watched happen. The things to
+        check first are on <a href="verification.html#lycan">To be verified &sect;0-AH</a>, and the top
+        of that list is: does a shifted horse come back with its name, its record and
+        its pedigree intact?
+    </p>
+</div>
+
+<h2 id="rule">Two copies of the same allele, or nothing</h2>
+
+<div class="note rule">
+    <span class="label">The rule the whole locus is built on</span>
+    <p>
+        <code>Wlf/n</code> is a horse. <code>Wlf/Cat</code> is <strong>also</strong> a
+        horse &mdash; two shapes, and it settles on neither. Only a matched pair
+        shifts.
+    </p>
+</div>
+
+<p>
+    That is what makes a locus this wide worth breeding rather than a slot machine. If
+    any one of thirty-seven alleles showed, a shifter would be common and which animal
+    you got would be luck. Requiring the <em>same</em> allele twice makes it a search
+    with a target: two wild shifters caught in different biomes are probably different
+    animals, and their foals are horses. The disappointment is the game.
+</p>
+
+<table class="data">
+    <thead><tr><th>Combination</th><th>Outcome</th><th>What happens at dusk</th></tr></thead>
+    <tbody>
+        <tr><td><code>n/n</code></td><td>wild</td><td>nothing</td></tr>
+        <tr><td><code>Wlf/n</code></td><td><code>lycan-carrier</code></td><td>nothing &mdash; and never a founder</td></tr>
+        <tr><td><code>Wlf/Cat</code></td><td><code>lycan-mismatched</code></td><td>nothing; both shapes are carried and both are passed on</td></tr>
+        <tr><td><code>Wlf/Wlf</code></td><td><code>lycan-wlf</code></td><td>it becomes a wolf</td></tr>
+    </tbody>
+</table>
+
+<p>
+    The mismatched horse is its own named outcome rather than a fold into the wild
+    type, because it is a genuinely different thing to be holding: it is one parent of
+    two different lines at once.
+</p>
+
+<h2 id="swap">Why it swaps the entity instead of drawing a skin</h2>
+
+<p>
+    The <a href="roadmap.html#magical-genes">roadmap</a> scoped this
+    &ldquo;render-layer first, entity-swap second&rdquo;. The requirement overruled
+    that, and it is worth writing down why, because a render layer is by far the
+    cheaper thing to build.
+</p>
+
+<div class="note rule">
+    <span class="label">A shifted horse must be interactable in <em>all</em> the ways its animal is, and no others</span>
+    <p>
+        Up to and including <strong>breeding with real members of that species</strong>.
+        A horse wearing a wolf skin cannot be bred with a wolf. It cannot be tamed with
+        a bone, sheared, bucketed, dyed, fed a cookie, or leashed to a fence post the
+        way its animal can. Every one of those would have to be hand-written, and each
+        one would still be wrong for the next mob on the list.
+    </p>
+    <p>
+        Putting the real entity in the world gets the entire list for free, correctly,
+        including whatever other mods do to vanilla animals.
+    </p>
+</div>
+
+<p>
+    The <em>&ldquo;and no others&rdquo;</em> half falls out of the same decision. While
+    it is a wolf there is no <code>Horse</code> in the world, so none of this
+    mod&rsquo;s own horse interactions &mdash;
+    <a href="villagers.html">transfer papers</a>, <a href="items.html">shearing</a>,
+    <a href="carrots.html">gene carrots</a>, the stall reader &mdash; can see it at
+    all. The one exception that has to be enforced by hand is <strong>riding</strong>:
+    six or so of the shapes are rideable animals, and the mount is cancelled.
+</p>
+
+<h2 id="identity">Identity survives the night</h2>
+
+<p>
+    The horse goes into an attachment on the animal, as its complete
+    <code>Entity.saveWithoutId</code> tag &mdash; which on NeoForge carries the
+    mod&rsquo;s data attachments as well. So the record, the name, the pedigree, the
+    <a href="horse-care.html">bond</a>, the cooldowns and the cowboy&rsquo;s brand all
+    cross the night untouched, and so does the horse&rsquo;s <code>UUID</code>.
+</p>
+
+<p>
+    That last one is the load-bearing part: a shifted horse is <em>the same horse</em>,
+    not a lookalike, so the <a href="breeding.html">ancestry database</a>, the breeding
+    roster and the stalls are all undisturbed by the whole business.
+</p>
+
+<div class="note">
+    <span class="label">Storing an entity inside another entity</span>
+    <p>
+        Unusual, and worth being explicit about. The alternative was to keep the horse
+        alive somewhere off-map and teleport it back, which needs a holding dimension,
+        a reaper for the ones whose animal died, and a rule for what happens when the
+        chunk unloads.
+    </p>
+    <p>
+        A tag that travels with the animal has none of those problems: unload the chunk
+        and both go to disk together, and <strong>kill the animal and the horse dies
+        with it</strong> &mdash; which is exactly what should happen, and is why the
+        attachment is deliberately not <code>copyOnDeath</code>.
+    </p>
+</div>
+
+<h2 id="night">What a shifted animal does that an ordinary one does not</h2>
+
+<table class="data">
+    <thead><tr><th>Behaviour</th><th>Detail</th></tr></thead>
+    <tbody>
+        <tr>
+            <td><strong>It trails a cloud</strong></td>
+            <td>A faint puff of coloured dust round the body whenever it moves on the ground &mdash; &ldquo;surrounded by&rdquo;, not &ldquo;trailing from&rdquo;. The colour is <a href="#cloud">epigenetic</a>, and it is the only way to tell a were-cow from a cow.</td>
+        </tr>
+        <tr>
+            <td><strong>It holds a grudge</strong></td>
+            <td>Hit it and it follows and strikes back &mdash; the wolf&rsquo;s temper, given to every form, so a were-chicken really will chase you across a field. It forgets at <strong>sunrise</strong> or after three seconds without line of sight, the same memory a <a href="horse-care.html">wild horse herd</a> uses.</td>
+        </tr>
+        <tr>
+            <td><strong>It cannot be ridden</strong></td>
+            <td>The point of the gene is the night you cannot ride home.</td>
+        </tr>
+    </tbody>
+</table>
+
+<p>
+    The grudge is one goal rather than the usual melee-plus-target pair, because
+    <strong>the forms have no attack</strong>: a chicken has no
+    <code>ATTACK_DAMAGE</code> attribute at all, so the vanilla melee goal has nothing
+    to read. Adding the attribute to thirty-seven vanilla mob types would hand every
+    sheep, cod and wandering trader in the world an attack stat it never had, for the
+    sake of the one in ten thousand that is secretly a horse. Dealing a flat three
+    points by hand touches nothing that is not already ours.
+</p>
+
+<h2 id="cloud">The cloud colour</h2>
+
+<p>
+    This gene&rsquo;s one epigenetic value, drawn on the allele copy and inherited with
+    it, held to a bright saturation and value like every other rolled colour in the mod
+    &mdash; a faint cloud round a wolf at night is the whole visual, and one that
+    rolled a muddy olive would read as a bug rather than as variety.
+</p>
+
+<p>
+    It is also the only heritable thing about a shifted animal, which makes it the only
+    thing to breed for once you have the shape: a line of were-cats can be bred toward
+    a particular colour of cat.
+</p>
+
+<h2 id="forms">The thirty-seven shapes</h2>
+
+<p>
+    Every vanilla mob in a <strong>non-hostile spawn category</strong> &mdash;
+    creature, ambient, water creature, water ambient, axolotl, underground water
+    creature &mdash; minus the horse family, because a horse that turns into a horse at
+    night is not a gene.
+</p>
+
+<div class="note rule">
+    <span class="label">A mechanical rule, not a taste</span>
+    <p>
+        That is why the list contains a pufferfish and a wandering trader without
+        anybody having to defend either, and it is why the two golems, the villager,
+        the copper golem and the mannequin are out &mdash; they are
+        <code>MobCategory.MISC</code>.
+    </p>
+    <p>
+        The mob ids are <em>strings</em>, because <code>common/</code> may not import
+        Minecraft, and the translator resolves them against the live registry. An id
+        this game version has never heard of simply never shifts, and says so once in
+        the log.
+    </p>
+</div>
+
+<table class="data">
+    <thead><tr><th>Allele</th><th>Shape</th><th>Allele</th><th>Shape</th><th>Allele</th><th>Shape</th></tr></thead>
+    <tbody>
+        <tr><td><code>Aly</code></td><td>Allay</td><td><code>Arma</code></td><td>Armadillo</td><td><code>Axo</code></td><td>Axolotl</td></tr>
+        <tr><td><code>Bat</code></td><td>Bat</td><td><code>Bee</code></td><td>Bee</td><td><code>Cml</code></td><td>Camel</td></tr>
+        <tr><td><code>Cat</code></td><td>Cat</td><td><code>Chk</code></td><td>Chicken</td><td><code>Cod</code></td><td>Cod</td></tr>
+        <tr><td><code>Cow</code></td><td>Cow</td><td><code>Dol</code></td><td>Dolphin</td><td><code>Fox</code></td><td>Fox</td></tr>
+        <tr><td><code>Frg</code></td><td>Frog</td><td><code>Glsq</code></td><td>Glow squid</td><td><code>Gt</code></td><td>Goat</td></tr>
+        <tr><td><code>Ghst</code></td><td>Happy ghast</td><td><code>Lma</code></td><td>Llama</td><td><code>Mshr</code></td><td>Mooshroom</td></tr>
+        <tr><td><code>Ntls</code></td><td>Nautilus</td><td><code>Oce</code></td><td>Ocelot</td><td><code>Pnd</code></td><td>Panda</td></tr>
+        <tr><td><code>Prt</code></td><td>Parrot</td><td><code>Pig</code></td><td>Pig</td><td><code>Plr</code></td><td>Polar bear</td></tr>
+        <tr><td><code>Pff</code></td><td>Pufferfish</td><td><code>Rbt</code></td><td>Rabbit</td><td><code>Slm</code></td><td>Salmon</td></tr>
+        <tr><td><code>Shp</code></td><td>Sheep</td><td><code>Snf</code></td><td>Sniffer</td><td><code>Sqd</code></td><td>Squid</td></tr>
+        <tr><td><code>Strd</code></td><td>Strider</td><td><code>Tdp</code></td><td>Tadpole</td><td><code>Tlma</code></td><td>Trader llama</td></tr>
+        <tr><td><code>Trpf</code></td><td>Tropical fish</td><td><code>Trt</code></td><td>Turtle</td><td><code>Wtr</code></td><td>Wandering trader</td></tr>
+        <tr><td><code>Wlf</code></td><td>Wolf</td><td colspan="4">&mdash;</td></tr>
+    </tbody>
+</table>
+
+<h2 id="wild">Finding one</h2>
+
+<p>
+    Each shape sits at <strong>0.03%</strong> of founders, homozygous, and there are no
+    wild carriers and no wild mismatches &mdash; the same rule as
+    <a href="gene-particle.html#wild">the particle locus</a>, for the same reason: a
+    recessive whose carrier is invisible has to put its expressing combination in the
+    wild, or the allele can only ever be found by accident.
+</p>
+
+<p>
+    So about <strong>one wild horse in ninety</strong> shifts at night, and any one
+    particular animal is roughly one horse in three thousand three hundred. Every
+    shifter you meet in the world is one you can watch shift; every carrier in the
+    world is one somebody bred.
+</p>
+
+<h2 id="clock">Dusk, dawn, and dimensions with no night</h2>
+
+<p>
+    The check is <code>Level.isDarkOutside()</code> rather than
+    <code>!isBrightOutside()</code>, and those are not the same thing: both are false in
+    a dimension with a fixed time of day. Asking it this way makes the Nether, the End
+    and the <a href="horse-dimension.html">horse dimension</a> permanent <em>day</em>
+    for this gene, which is the right answer &mdash; a place with no nightfall should
+    not hold a horse in wolf shape forever.
+</p>
+
+<h2 id="split">What lives where</h2>
+
+<p>
+    The gene owns the genetics and the cloud colour and nothing else; the shift is
+    hand-written behaviour in the game module. That is the same split
+    <a href="gene-dhampir.html">dhampir</a> makes, for the same reason: each of these
+    would be an <a href="gene-effects.html"><code>effects</code></a> verb with exactly
+    one user, and the effects vocabulary is meant to be things a <em>data-driven</em>
+    gene would reach for.
+</p>
+
+<table class="data">
+    <thead><tr><th>File</th><th>What it owns</th></tr></thead>
+    <tbody>
+        <tr><td><code>common/genetics/genes/LycanGene.java</code></td><td>the alleles, the matched-pair rule, the founder table, the cloud colour</td></tr>
+        <tr><td><code>neoforge/data/LycanShift.java</code></td><td>the attachment: the horse&rsquo;s tag, the cloud colour, the mob id</td></tr>
+        <tr><td><code>neoforge/server/LycanthropyHandler.java</code></td><td>the swap at both ends of the night, the cloud, the riding ban, the aggro hook</td></tr>
+        <tr><td><code>neoforge/server/LycanTemperGoal.java</code></td><td>the grudge: chase, strike, forget at sunrise or on lost sight</td></tr>
+    </tbody>
+</table>
+
+<h2 id="carrot">Its gene carrot</h2>
+
+<p>
+    The known carrot hands over <strong>one</strong> copy, never two &mdash; a shifter
+    is the reward for breeding two carriers of the same shape, and a carrot that
+    produced one outright would skip the entire locus.
+</p>
+
+<div class="gene-carrot" data-gene="horsegenetics.lycan"></div>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="gene-dhampir.html">Dhampir &mdash; the other gene that is mostly behaviour</a>
+        <a href="gene-particle.html">The particle locus</a>
+        <a href="gene-rainbow-dust.html">Rainbow dust</a>
+        <a href="known-gaps.html">What is unproven about this</a>
+        <a href="verification.html#lycan">What to check in-game</a>
+    </div>
+    Source: <code>common/genetics/genes/LycanGene.java</code>,
+    <code>neoforge/server/LycanthropyHandler.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+<script defer src="gene-carrot/gene-carrot.js"></script>
+</body>
+</html>

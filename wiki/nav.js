@@ -128,6 +128,8 @@
                 { href: "gene-light.html", text: "Light", kind: "magical" },
                 { href: "gene-magic-sectoral-heterochromia.html", text: "Magic sectoral heterochromia", kind: "magical" },
                 { href: "gene-particle.html", text: "Particle", kind: "magical" },
+                { href: "gene-rainbow-dust.html", text: "Rainbow dust", kind: "magical" },
+                { href: "gene-lycan.html", text: "LYCAN (werewolf)", kind: "magical" },
                 { href: "gene-verdant.html", text: "Verdant", kind: "magical" },
                 { href: "gene-lut.html", text: "LUT (palette swap)", kind: "magical" },
                 { href: "gene-cutie-mark.html", text: "Cutie mark", kind: "magical" },

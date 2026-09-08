@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rainbow dust &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="nav.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow magical">Magical recessive <span class="sep">/</span> no coat effect</p>
+<h1>Rainbow dust</h1>
+<p class="lede">
+    Coloured dust off all four hooves as the horse walks, fading from one colour into
+    the next and working its way round the whole rainbow before it starts again. The
+    smallest gene in the mod that anybody will actually want.
+</p>
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd>horsegenetics.rainbow_dust</dd></div>
+    <div><dt>Priority</dt><dd>151 &mdash; immediately after the <a href="gene-particle.html">particle locus</a></dd></div>
+    <div><dt>Alleles</dt><dd><span class="allele rec">Rbw</span> <span class="allele wild">n</span></dd></div>
+    <div><dt>Outcomes</dt><dd>wild, <code>rainbow-dust-carrier</code>, <code>rainbow-dust</code></dd></div>
+    <div><dt>Shows when</dt><dd><code>Rbw/Rbw</code> only</dd></div>
+    <div><dt>Default allele</dt><dd>n</dd></div>
+    <div><dt>Wild frequency</dt><dd>0.25% of founders are <code>Rbw/Rbw</code>; <strong>no founder is a carrier</strong></dd></div>
+    <div><dt>Founder draws</dt><dd>1 &times; nextFloat()</dd></div>
+    <div><dt>Coat effect</dt><dd><strong>none, ever</strong></dd></div>
+    <div><dt>Particle</dt><dd><code>dust_color_transition</code>, anchored at <code>hooves</code></dd></div>
+    <div><dt>Emission</dt><dd>while moving on the ground, 50% of ticks, 2 particles a firing</dd></div>
+    <div><dt>Epigenetic</dt><dd>one value &mdash; how fast the colour turns, 40&ndash;300 ticks a lap</dd></div>
+</dl>
+
+<div class="note warn">
+    <span class="label">Not yet play-tested</span>
+    <p>
+        Nobody has watched a horse do this. The two things worth looking at are
+        whether the fade reads as a rainbow at all at hoof scale, and whether the
+        slow end of the cycle range just looks like a solid colour. Checklist on
+        <a href="verification.html#lycan">To be verified &sect;0-AH</a>.
+    </p>
+</div>
+
+<h2 id="not-particle">Why it is not a forty-first particle allele</h2>
+
+<p>
+    It is the obvious question. The <a href="gene-particle.html">particle locus</a>
+    already has forty alleles, every one of them &ldquo;this horse trails
+    <em>something</em>&rdquo;, and adding a forty-first is one line.
+</p>
+
+<div class="note rule">
+    <span class="label">Because the particle locus&rsquo;s alleles compete and this one does not</span>
+    <p>
+        The whole premise of that locus is that a horse has two copies of the
+        chromosome and therefore shows <strong>at most two</strong> particles, ever.
+        Every allele there is competing for one of two slots, and choosing between
+        them is the game.
+    </p>
+    <p>
+        Rainbow dust competes with nothing. A horse can trail flames <em>and</em>
+        rainbow dust, and it should be able to. Filing it at that locus would have
+        quietly cost a flame horse its flames &mdash; the flame allele would have had
+        to lose a slot to it &mdash; and filing it here costs nothing but a locus.
+    </p>
+    <p>
+        It is also a different <em>kind</em> of thing. Every particle allele names a
+        particle and lets the epigenetics pick the colour. This one names the colour
+        and lets the clock pick it, which is a behaviour rather than a variant.
+    </p>
+</div>
+
+<h2 id="recessive">Recessive, with no wild carriers</h2>
+
+<p>
+    One copy shows nothing at all, exactly as at the particle locus and for the same
+    reason: a trail is a thing you breed for.
+</p>
+
+<p>
+    The founder table follows the same rule too. A wild horse is either plain or the
+    whole rainbow &mdash; never a carrier &mdash; so what you catch is what you
+    watched it do, and the carriers appear one generation later, in the foals of a
+    rainbow horse bred to an ordinary one. The argument is written out in full under
+    <a href="gene-particle.html#wild">the particle locus&rsquo;s founder table</a>.
+</p>
+
+<table class="data">
+    <thead><tr><th>Combination</th><th>What you see</th></tr></thead>
+    <tbody>
+        <tr><td><code>n/n</code></td><td>nothing</td></tr>
+        <tr><td><code>Rbw/n</code></td><td>nothing &mdash; a silent carrier, and never a founder</td></tr>
+        <tr><td><code>Rbw/Rbw</code></td><td>the trail</td></tr>
+    </tbody>
+</table>
+
+<h2 id="cycle">How the colour turns: the <code>cycle</code> parameter</h2>
+
+<p>
+    An <a href="gene-effects.html#emitter"><code>emitter</code></a> carries a fixed
+    <code>color</code> and <code>color2</code>, which is right for every other user of
+    the verb and useless here &mdash; a rainbow is a colour that is a function of
+    time. So the verb grew one parameter:
+</p>
+
+<div class="codebox">
+<div class="filename">common/genetics/spec/GeneAbility.java</div>
+<pre><code class="language-java">record Emitter(String kind, String shape, String anchor, Trigger trigger, int color, int color2,
+               int count, double data, String particle, double chance, int cycleTicks,
+               Condition when, int minDose)
+        implements GeneAbility {}</code></pre>
+</div>
+
+<p>
+    <code>cycleTicks</code> is <code>0</code> for every other emitter in the mod, and
+    means &ldquo;the two colours above are the colours&rdquo;. Anything larger is how
+    many ticks one full rotation of the hue circle takes, and the translator then
+    recomputes both colours from the clock on every firing and ignores what the gene
+    put in them &mdash; <code>color2</code> a twelfth of a turn ahead of
+    <code>color</code>, so the <code>dust_color_transition</code> fade reads as
+    &ldquo;red going orange&rdquo; rather than as two unrelated colours in one puff.
+</p>
+
+<p>
+    It is a parameter rather than a second verb because everything else about a
+    rotating trail &mdash; the particle, the anchor, the count, the chance &mdash; is
+    the emitter it already was, and a whole verb whose only difference is where two
+    ints come from would be a copy of this one. Any data-driven gene can now say
+    <code>"cycle": 120</code> and get a rainbow.
+</p>
+
+<p>
+    The hue is counted off the <em>horse&rsquo;s own</em> tick count rather than the
+    world&rsquo;s, so two rainbow horses standing side by side are not in lockstep
+    &mdash; the same reason the <a href="gene-healer.html">healer</a>&rsquo;s aura
+    beats on its own clock.
+</p>
+
+<h2 id="epigenetics">The one thing that varies</h2>
+
+<p>
+    How <strong>fast</strong> the rainbow turns, in ticks per lap, drawn on the allele
+    copy and inherited with it. A horse near the fast end (40 ticks &mdash; two
+    seconds) strobes; one near the slow end (300 ticks &mdash; fifteen seconds) looks
+    like a solid colour that has changed by the time you next look at it.
+</p>
+
+<p>
+    It is one number rather than a colour, and the colour is deliberately not the
+    gene&rsquo;s to vary: the rainbow <em>is</em> the gene. But two rainbow horses side
+    by side should still not be the same horse, and this is the smallest thing that
+    makes that true. It is a <code>SCALAR</code>, so
+    <a href="genetics-model.html">drift</a> moves it by a hair each generation and a
+    line really can be bred faster or slower &mdash; which is the only thing about
+    this gene there is to breed.
+</p>
+
+<h2 id="invisible">It paints nothing</h2>
+
+<p>
+    All three outcomes are wild types, so <code>affectsCoat()</code> is false, the
+    locus stays out of a horse&rsquo;s texture key, and the genotype gallery collapses
+    it to a single entry &mdash; the same trick
+    <a href="gene-particle.html">particle</a>, <a href="gene-milk.html">milk</a> and
+    <a href="gene-verdant.html">verdant</a> use.
+</p>
+
+<h2 id="carrot">Its gene carrot</h2>
+
+<div class="gene-carrot" data-gene="horsegenetics.rainbow_dust"></div>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="gene-particle.html">The particle locus</a>
+        <a href="gene-effects.html#emitter">The emitter verb</a>
+        <a href="gene-lycan.html">LYCAN &mdash; the other new particle-carrying gene</a>
+        <a href="verification.html#lycan">What to check in-game</a>
+    </div>
+    Source: <code>common/genetics/genes/RainbowDustGene.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+<script defer src="gene-carrot/gene-carrot.js"></script>
+</body>
+</html>

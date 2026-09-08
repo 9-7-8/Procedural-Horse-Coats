@@ -32,6 +32,132 @@
     </p>
 </div>
 
+<h2 id="lycan">&sect;0-AH &mdash; The werewolf locus, rainbow dust, and a particle locus that went recessive (2026-09-07, NOT looked at)</h2>
+
+<p>
+    Three things, and the first of them is by a distance the most invasive change the
+    mod has ever made: it <strong>deletes a horse entity and builds a new one</strong>,
+    twice a game day. Design: <a href="gene-lycan.html">LYCAN</a>,
+    <a href="gene-rainbow-dust.html">rainbow dust</a>,
+    <a href="gene-particle.html#wild">the particle locus&rsquo;s new founder table</a>.
+    Gaps <a href="known-gaps.html#gap-73">73</a>,
+    <a href="known-gaps.html#gap-74">74</a>,
+    <a href="known-gaps.html#gap-75">75</a>.
+</p>
+
+<div class="note warn">
+    <span class="label">Check the horse survives the night before checking anything else</span>
+    <p>
+        Spawn a <code>Wlf/Wlf</code> horse with the egg, give it a name you will
+        recognise, <code>/time set night</code>, watch it become a wolf, then
+        <code>/time set day</code> and watch it come back. If the horse that comes back
+        has <strong>the same name</strong> and the <strong>i</strong> screen still shows
+        its record and its pedigree, the whole design works. If it comes back nameless
+        or with a fresh record, stop &mdash; the attachment did not round-trip through
+        the tag and everything below is moot.
+    </p>
+</div>
+
+<h3>The shift, both ways</h3>
+
+<ul>
+    <li><strong>Does it shift at all, and within about two seconds of nightfall?</strong>
+        The check is staggered by entity id on a 40-tick beat, so a paddock of them
+        should not all pop on the same frame &mdash; watch six and see whether that
+        reads as a wave or as a glitch.</li>
+    <li><strong>Ride one up to dusk.</strong> The rider should be thrown off as the horse
+        goes; the horse should not take the player with it into the tag.</li>
+    <li><strong>Take the animal somewhere before dawn.</strong> The horse is supposed to
+        come back where the <em>animal</em> is standing, not where it shifted &mdash;
+        walk the wolf a hundred blocks and check.</li>
+    <li><strong>Hurt the horse to half health at dusk</strong>, and check the wolf is at
+        half its own; then hurt the wolf and check the horse comes back hurt. The
+        fraction is carried both ways, which matters because a magic-health horse and a
+        chicken have wildly different maxima.</li>
+    <li><strong>Try it on a foal.</strong> It should be a <em>baby</em> wolf, and a foal
+        again at dawn.</li>
+    <li><strong>Log out overnight, or walk away far enough to unload the chunk.</strong>
+        Both entities go to disk together; the horse should still be inside the animal
+        on the way back.</li>
+    <li><strong>Take one into the Nether.</strong> It should never shift there, and one
+        that walks in already shifted should turn back immediately &mdash; a dimension
+        with a fixed time of day counts as permanent day for this gene.</li>
+</ul>
+
+<h3>What the animal can and cannot be</h3>
+
+<ul>
+    <li><strong>Breed it with a real one of its species.</strong> This is the requirement
+        the entity swap exists for, so it has to actually work: two cows, one of them a
+        horse, and a calf. (Then read <a href="known-gaps.html#gap-74">gap 74</a> and
+        decide whether it <em>should</em>.)</li>
+    <li><strong>Try to ride the rideable ones.</strong> A were-pig with a saddle, a
+        were-camel, a were-strider, a were-happy-ghast. All four should refuse, and the
+        refusal should not eat the saddle.</li>
+    <li><strong>Try the mod&rsquo;s own horse interactions on it</strong> &mdash; a
+        transfer paper, shears, a gene carrot, the <strong>i</strong> button. All of
+        them should do nothing at all, because there is no horse there to find.</li>
+    <li><strong>Shear a were-sheep, tame a were-cat, bucket a were-cod.</strong> These
+        should all behave exactly like the real animal. The bucket is the interesting
+        one: a were-cod in a bucket is a horse in a bucket, and nobody has thought about
+        what happens at dawn.</li>
+</ul>
+
+<h3>The cloud and the temper</h3>
+
+<ul>
+    <li><strong>Does the walking cloud read at all?</strong> It is three dust particles
+        round the body on about a third of moving ticks. On a tadpole that may be
+        invisible and on a happy ghast it may be lost inside the model &mdash; both are
+        worth a look, because the cloud is the <em>only</em> way to tell a shifted
+        animal from a real one.</li>
+    <li><strong>Are two were-wolves different colours?</strong> The colour is epigenetic,
+        so two spawned side by side should not match.</li>
+    <li><strong>Hit one and walk away.</strong> It should follow and strike for three
+        points a second; break line of sight for three seconds and it should give up.
+        Then hit one just before dawn and check the grudge ends with the night.</li>
+    <li><strong>Hit a were-chicken specifically.</strong> None of the forms has an attack
+        attribute, so the damage is dealt by hand &mdash; if any form deals no damage or
+        throws, this is where it shows.</li>
+</ul>
+
+<h3>Rainbow dust</h3>
+
+<ul>
+    <li><strong>Spawn an <code>Rbw/Rbw</code> horse and walk it.</strong> Does the dust
+        off the hooves actually read as a rainbow, or as a single colour that changes
+        when you are not looking? The cycle is drawn between 40 and 300 ticks a lap and
+        the slow end is the one at risk.</li>
+    <li><strong>Spawn several.</strong> They should be on visibly different colours at
+        the same moment &mdash; the hue is counted off each horse&rsquo;s own tick
+        count.</li>
+    <li><strong>Check the spawn egg&rsquo;s preview matches.</strong> The mote preview in
+        <code>CustomHorseSpawnScreen</code> now cycles too; if the preview is white and
+        the horse is a rainbow, the preview lost the <code>cycle</code>.</li>
+    <li><strong>Breed a rainbow horse to a plain one and then the foals together.</strong>
+        Half the foals of the second pairing should have it; none of the first should.</li>
+</ul>
+
+<h3>The particle locus going recessive</h3>
+
+<ul>
+    <li><strong>Count.</strong> This is the one that needs numbers rather than eyes: ride
+        a long way and see whether roughly <strong>one wild horse in thirteen</strong>
+        trails something. The founder table was rewritten from a Hardy-Weinberg spread
+        to a hand-declared one, and a mistake there is invisible except as a population
+        that is all plain or all sparkling.</li>
+    <li><strong>Every wild particle horse should be one you can <em>see</em>.</strong>
+        There are no wild carriers any more, so if you catch a horse that trails nothing
+        and its <strong>i</strong> screen says <code>Rflm/n</code>, the table is
+        wrong.</li>
+    <li><strong>Doubles are catchable now.</strong> A wild horse with two particles from
+        one family used to be impossible and is now about one in twenty-five hundred
+        &mdash; worth knowing so one does not read as a bug.</li>
+    <li><strong>An old horse from before this change may look different.</strong> A
+        <code>Dst/n</code> horse in an existing world now trails nothing. That is
+        correct, not a regression.</li>
+</ul>
+
 <h2 id="horse-info">&sect;0-AG &mdash; The horse information screen, the breeding preview, and a mare that miscarries (2026-09-07, NOT looked at)</h2>
 
 <p>

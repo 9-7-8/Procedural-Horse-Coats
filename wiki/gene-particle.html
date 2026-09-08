@@ -12,7 +12,7 @@
 <main class="content">
 <article class="doc">
 
-<p class="eyebrow magical">Magical gene <span class="sep">/</span> no coat effect</p>
+<p class="eyebrow magical">Magical recessive <span class="sep">/</span> no coat effect</p>
 <h1>Particle</h1>
 <p class="lede">
     A horse that trails something as it moves &mdash; flames, souls, snow, hearts,
@@ -20,7 +20,9 @@
     locus</strong>, which makes it by a wide margin the largest gene in the mod, and
     the reason it is one locus rather than forty genes is the whole design: a horse
     has two copies of the chromosome, so it shows <strong>at most two</strong>, ever,
-    and choosing which two is the game.
+    and choosing which two is the game. The whole locus is <strong>recessive to its
+    own wild type</strong> &mdash; one copy of <code>n</code> and the horse trails
+    nothing at all.
 </p>
 
 <dl class="spec">
@@ -29,20 +31,23 @@
     <div><dt>Alleles</dt><dd>40 variants + <span class="allele wild">n</span> &mdash; see <a href="#alleles">the table</a></dd></div>
     <div><dt>Combinations</dt><dd>861, all carryable &mdash; 87 outcomes</dd></div>
     <div><dt>Outcomes</dt><dd>wild, 40 single, 46 codominant double</dd></div>
+    <div><dt>Shows when</dt><dd><strong>neither copy is <code>n</code></strong> &mdash; see <a href="#dominance">below</a></dd></div>
     <div><dt>Default allele</dt><dd>n</dd></div>
-    <div><dt>Wild frequency</dt><dd>0.1% per variant allele &mdash; about <strong>7.7%</strong> of founders trail something</dd></div>
+    <div><dt>Wild frequency</dt><dd>0.15% per homozygote, 0.04% per codominant pair &mdash; about <strong>7.8%</strong> of founders trail something, and <strong>no founder is a carrier</strong></dd></div>
     <div><dt>Founder draws</dt><dd>1 &times; nextFloat()</dd></div>
     <div><dt>Coat effect</dt><dd><strong>none, ever</strong></dd></div>
     <div><dt>Emission</dt><dd>while moving on the ground, 20% of ticks, 1&ndash;4 particles a firing</dd></div>
 </dl>
 
 <div class="note warn">
-    <span class="label">Built 2026-09-04, not yet play-tested</span>
+    <span class="label">Not yet play-tested</span>
     <p>
         Nothing has watched a horse trail anything. Forty particle ids is forty
         chances for one to read badly at horse scale, and the body sites have never
-        been looked at on a scaled horse. Checklist on
-        <a href="verification.html">To be verified</a>.
+        been looked at on a scaled horse. The recessive rule and the carrier-free
+        founder table are newer still, and the thing to check for those is simply
+        that wild particle horses <em>turn up</em> at roughly one in thirteen.
+        Checklist on <a href="verification.html">To be verified</a>.
     </p>
 </div>
 
@@ -64,23 +69,57 @@
     sabino into <a href="gene-kit.html">KIT</a>, at forty times the scale.
 </p>
 
-<h2 id="dominance">Rank, and the copy a horse is hiding</h2>
+<h2 id="dominance">One copy of <code>n</code> and the locus is silent</h2>
+
+<div class="note rule">
+    <span class="label">The whole locus is recessive to its own wild type</span>
+    <p>
+        <code>Rflm/n</code> is a horse that trails <em>nothing</em>. Not a fainter
+        flame, not a smaller one &mdash; nothing, and it is indistinguishable from a
+        plain horse. It takes <strong>two</strong> variant copies to see anything at
+        all.
+    </p>
+    <p>
+        That is the owner&rsquo;s call, and it is the rule everything else on this page
+        follows from. A particle is a thing you <em>breed for</em>: a locus this wide
+        where one lucky allele showed would put something on far too many horses, and
+        would make the interesting half of the gene &mdash; finding the same allele
+        twice &mdash; worth nothing.
+    </p>
+</div>
 
 <p>
-    Every allele carries a <strong>rank</strong>, and the alleles are declared in rank
-    order &mdash; which is load-bearing rather than tidy, because
+    Every allele also carries a <strong>rank</strong>, and the alleles are declared in
+    rank order &mdash; which is load-bearing rather than tidy, because
     <code>AllelePair</code> canonicalises on <code>Allele.order()</code>, so declaring
     them this way is what puts the copy a horse <em>shows</em> in slot 0 and the copy
     it <em>hides</em> in slot 1.
 </p>
 
 <p>
-    Meet two alleles that are not codominant and the lower rank is the one you see.
-    The other is carried in silence and passed on intact, and a horse carrying it is
-    indistinguishable from one carrying a wild type. That is what makes a locus this
-    wide <em>breedable</em> rather than merely large: a horse trailing dust may be
-    hiding a soul, and only its foals will ever say so.
+    Rank only ever decides between <em>two variants</em>. Meet two that are not
+    codominant and the lower rank is the one you see; the other is carried in silence
+    and passed on intact, and the horse is indistinguishable from one carrying two
+    copies of the winner. That is what makes a locus this wide <em>breedable</em>
+    rather than merely large: a horse trailing dust may be hiding a soul, and only its
+    foals will ever say so.
 </p>
+
+<p>
+    <code>n</code> is not simply the weakest allele in that ranking. It is an off
+    switch, and it beats everything.
+</p>
+
+<table class="data">
+    <thead><tr><th>Combination</th><th>What you see</th></tr></thead>
+    <tbody>
+        <tr><td><code>n/n</code></td><td>nothing</td></tr>
+        <tr><td><code>Rflm/n</code></td><td>nothing &mdash; a silent carrier</td></tr>
+        <tr><td><code>Rflm/Rflm</code></td><td>flames</td></tr>
+        <tr><td><code>Rflm/Csmk</code></td><td>flames <em>and</em> campfire smoke &mdash; one family</td></tr>
+        <tr><td><code>Rflm/Prtl</code></td><td>flames only; the portal is carried and hidden</td></tr>
+    </tbody>
+</table>
 
 <h2 id="codominance">Codominance is by family</h2>
 
@@ -151,7 +190,7 @@
 </p>
 
 <p>
-    So two horses that are both <code>Rflm/n</code> are not the same horse: one trails
+    So two horses that are both <code>Rflm/Rflm</code> are not the same horse: one trails
     four red flames off its front hooves, the other one green flame off its tail. And
     because each copy of a codominant pair carries its own draw, the two halves are
     <em>independent</em> &mdash; red flames off the front hooves and blue smoke off the
@@ -195,23 +234,43 @@
     from a gene file today, which is the property the shared vocabulary was chosen for.
 </p>
 
-<h2 id="wild">Rare individually, not rare in aggregate</h2>
+<h2 id="wild">Every wild horse at this locus is one you can see</h2>
 
 <p>
-    Every variant sits at <strong>0.1%</strong>, the same for all forty, because no
-    particle is the ordinary one. Forty of them puts the variant share of the
-    population at 4%, so about <strong>7.7%</strong> of wild horses trail
-    <em>something</em> while any <em>named</em> particle is roughly one horse in five
-    hundred. That is the split the locus wants: meeting a particle horse is a good day,
-    meeting the one you were looking for is a find.
+    The founder table is <strong>not</strong> the random-mating shape, and that is
+    deliberate. It lists the forty homozygotes at <strong>0.15%</strong> each and the
+    forty-six codominant pairs at <strong>0.04%</strong> each, and nothing else. No
+    <code>X/n</code> carrier. No cross-family <code>Dst/Bflm</code> quietly sitting on
+    a soul flame nobody can see.
 </p>
 
+<div class="note rule">
+    <span class="label">Why the wild has no carriers</span>
+    <p>
+        A locus that only expresses when both copies agree makes the carrier
+        <em>invisible</em>, and a founder population full of invisible carriers is a
+        locus run in the dark: you cannot see what a horse has, so you cannot choose
+        what to pair it with, and every particle anyone gets is an accident.
+    </p>
+    <p>
+        Putting the wild horses on the <em>expressing</em> combinations puts the
+        alleles where a breeder can find them &mdash; what you catch is what you
+        watched it do. The carriers then appear exactly where they belong, one
+        generation down, in the foals of a caught horse bred to a plain one.
+    </p>
+    <p>
+        The cross-family heterozygotes are excluded for the same reason and
+        <em>not</em> because they are impossible: <code>Dst/Bflm</code> is a perfectly
+        legal horse and breeding produces one. It is simply never a horse the wild
+        hands you.
+    </p>
+</div>
+
 <p>
-    A codominant double is about <strong>one wild horse in ten thousand</strong>, which
-    for practical purposes means you cannot catch one. Same rule as the
-    <a href="horse-body.html">health loci</a> and
-    <a href="gene-body-size.html">magic body size</a>, pointed at something worth
-    having: every double in the world is one somebody bred.
+    In aggregate that is about <strong>7.8%</strong> of wild horses trailing
+    <em>something</em>, while any one <em>named</em> particle is roughly one horse in
+    six hundred and sixty and any one double is one in twenty-five hundred. Meeting a
+    particle horse is a good day; meeting the one you were looking for is a find.
 </p>
 
 <h2 id="alleles">The forty alleles</h2>

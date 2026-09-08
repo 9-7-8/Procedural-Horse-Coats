@@ -915,8 +915,6 @@
 <thead><tr><th>Gene / family</th><th>What it does</th><th>What it needs</th></tr></thead>
 <tbody>
 <tr><td><strong>Diet genes</strong></td><td>A carnivore horse &mdash; eats or is fed meat, refuses or is unaffected by plants. The hook for vampire and werewolf breeds.</td><td>A diet declaration the feeding, breeding and bond code reads instead of <code>isFood</code>. Touches <a href="horse-care.html">horse care</a> (feed-bond) and taming.</td></tr>
-<tr><td><strong>Lycanthropy (night aggro)</strong></td><td>The horse turns hostile at night and calms at dawn &mdash; the werewolf breed&rsquo;s signature gene.</td><td>A <code>time_of_day</code> condition flag on the <code>effects</code> vocabulary, plus an aggro verb (or reuse of <code>HorseAggroHandler</code>, which already gives horses an attack).</td></tr>
-<tr><td><strong>The <code>WERE</code> locus</strong></td><td>One locus, many alleles, each meaning &ldquo;this horse shifts into <em>some</em> animal at night&rdquo; &mdash; wolf, and whatever else is funny. Not practical; extremely funny.</td><td>The same night trigger. Alleles are just labels; the shift target is the payload. Scope it <strong>render-layer first, entity-swap second</strong>.</td></tr>
 <tr><td><strong>Vampire horses</strong></td><td>Heal <strong>only</strong> by damaging other living mobs; optionally take sun damage like a skeleton.</td><td>Suppress the gated regen for these horses and add a lifesteal-on-attack effect. Sun damage is a burn-in-daylight tick reusing the skeleton condition.</td></tr>
 </tbody>
 </table>
@@ -1294,8 +1292,8 @@
         <code>Breed</code> needs a JSON spec and a loader beside
         <code>GeneSpecLoader</code>, the same way genes got one.</li>
     <li><strong>More fictional breeds wanted.</strong> The 49 are real-world; the mod
-        also wants a batch of invented ones &mdash; werewolf and friends
-        (&sect;<a href="#magical-genes">12.2</a>) &mdash; as gene suites. That is partly
+        also wants a batch of invented ones &mdash; a werewolf breed built on
+        <a href="gene-lycan.html">LYCAN</a> is now possible &mdash; as gene suites. That is partly
         what would make a polygenic cutie mark worth doing.</li>
     <li><strong>Per-gene pool rates are estimates</strong>, never play-balanced. A herd
         should read as that breed without being a monoculture, and that is eyeballed

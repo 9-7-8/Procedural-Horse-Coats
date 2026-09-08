@@ -520,8 +520,39 @@ Component  &rarr;  (Trigger, Condition, Selector, Effect)</code></pre>
 <tr><td><code>count</code></td><td><code>1</code></td><td>Particles per firing, <code>1</code>&ndash;<code>16</code>. A trickle or a plume.</td></tr>
 <tr><td><code>data</code></td><td><code>0.0</code></td><td>A normalised <code>[0, 1)</code> number standing in for whatever else a particle takes.</td></tr>
 <tr><td><code>chance</code></td><td><code>1.0</code></td><td>Per-fire probability, in <code>(0, 1]</code>.</td></tr>
+<tr><td><code>cycle</code></td><td><code>0</code></td><td>Ticks for one lap of the hue circle, <code>0</code>&ndash;<code>12000</code>. <code>0</code> = the colours above are the colours; anything larger is a <a href="#cycle">rainbow</a> and <code>color</code> / <code>color2</code> are ignored.</td></tr>
 </tbody>
 </table>
+
+<h4 id="cycle">A rainbow: the <code>cycle</code> parameter</h4>
+
+<p>
+    Every other field on an emitter is a constant. <code>cycle</code> is the one that
+    is a function of time: set it and the translator recomputes <code>color</code> and
+    <code>color2</code> from the clock on every firing, walking the hue circle round
+    once per <code>cycle</code> ticks and putting <code>color2</code> a twelfth of a
+    turn ahead of <code>color</code> &mdash; so a
+    <code>dust_color_transition</code> fade reads as &ldquo;red going orange&rdquo;
+    rather than as two unrelated colours in one puff.
+</p>
+
+<pre><code class="language-json">{ "type": "emitter", "shape": "trail", "anchor": "hooves",
+  "particle": "minecraft:dust_color_transition", "count": 2, "chance": 0.5,
+  "cycle": 120 }</code></pre>
+
+<p>
+    It is a parameter rather than a verb of its own because everything else about a
+    rotating trail &mdash; the particle, the anchor, the count, the chance &mdash; is
+    the emitter it already was, and a whole verb whose only difference is where two
+    ints come from would be a copy of this one.
+    <a href="gene-rainbow-dust.html">Rainbow dust</a> is its first user, and draws the
+    number epigenetically so no two rainbow horses turn at the same speed.
+</p>
+
+<p>
+    The hue is counted off the <em>horse&rsquo;s own</em> tick count rather than the
+    world&rsquo;s, so two cycling horses side by side are not in lockstep.
+</p>
 
 <h4 id="anchors">Anchors, and the five body sites</h4>
 
@@ -593,7 +624,7 @@ Component  &rarr;  (Trigger, Condition, Selector, Effect)</code></pre>
 <tr><td><code>kind</code></td><td><code>light</code> &middot; <code>particle</code> &middot; <code>sound</code> &middot; <code>block_trail</code></td><td><code>particle</code> live, <code>light</code> parses only. No sound or block trail.</td></tr>
 <tr><td><code>shape</code></td><td><code>point</code> &middot; <code>ring</code> &middot; <code>cone</code> &middot; <code>sphere</code> &middot; <code>trail</code> &middot; <code>burst</code></td><td><code>cone</code> and <code>sphere</code> missing.</td></tr>
 <tr><td><code>anchor</code></td><td><code>entity</code> &middot; <code>feet</code> &middot; <code>head</code> &middot; <code>eyes</code> &middot; <code>forward_offset</code> &middot; <code>impact_point</code> &middot; <code>target</code></td><td><code>body</code> in place of <code>entity</code>; the last three missing (two of them need triggers or selectors that don&rsquo;t exist).</td></tr>
-<tr><td><code>color_source</code></td><td><code>fixed</code> &middot; <code>dye_slot</code> &middot; <code>bound(state_field)</code></td><td>Fixed hex only.</td></tr>
+<tr><td><code>color_source</code></td><td><code>fixed</code> &middot; <code>dye_slot</code> &middot; <code>bound(state_field)</code></td><td>Fixed hex, plus <code>cycle</code> &mdash; a clock-bound hue, which is the first colour source here that is not fixed.</td></tr>
 <tr><td><code>pattern</code></td><td>Sound sequence; see <a href="#sound">sound signalling</a></td><td>Unbuilt.</td></tr>
 </tbody>
 </table>
