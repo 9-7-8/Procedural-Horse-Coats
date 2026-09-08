@@ -38,9 +38,16 @@ import net.neoforged.neoforge.client.event.ScreenEvent;
 @EventBusSubscriber(value = Dist.CLIENT)
 public final class HorseScreenHooks {
 
-    /** Square, and tucked inside the window's top-left corner. */
+    /**
+     * Square, and hung <b>outside</b> the window's left edge, level with its top.
+     * It sat inside the top-left corner and overlapped the saddle slot's row and
+     * the window's own chrome; the vanilla screen is a fixed-size sprite with no
+     * spare pixels in it, so the only place a button of this mod's can go
+     * without covering something is off the side.
+     */
     private static final int BUTTON = 14;
-    private static final int INSET = 5;
+    private static final int GAP = 4;
+    private static final int TOP_INSET = 5;
 
     private static Button infoButton;
 
@@ -53,7 +60,7 @@ public final class HorseScreenHooks {
         int top = ((AbstractContainerScreen<?>) screen).getGuiTop();
 
         infoButton = Button.builder(Component.literal("i"), b -> openInfo(screen))
-                .bounds(left + INSET, top + INSET, BUTTON, BUTTON)
+                .bounds(left - BUTTON - GAP, top + TOP_INSET, BUTTON, BUTTON)
                 .tooltip(net.minecraft.client.gui.components.Tooltip.create(
                         Component.literal("Horse information")))
                 .build();

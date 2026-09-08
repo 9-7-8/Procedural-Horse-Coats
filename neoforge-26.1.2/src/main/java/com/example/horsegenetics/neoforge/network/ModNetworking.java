@@ -170,18 +170,29 @@ public final class ModNetworking {
         );
 
         registrar.playToClient(
-                BreedingRosterPayload.TYPE,
-                BreedingRosterPayload.STREAM_CODEC,
+                HorseRosterPayload.TYPE,
+                HorseRosterPayload.STREAM_CODEC,
                 (payload, context) -> context.enqueueWork(() ->
-                        com.example.horsegenetics.neoforge.client.ClientBreedingRoster.accept(payload.entries()))
+                        com.example.horsegenetics.neoforge.client.ClientHorseRoster.accept(payload.entries()))
         );
 
         registrar.playToServer(
-                BreedingRosterRequestPayload.TYPE,
-                BreedingRosterRequestPayload.STREAM_CODEC,
+                HorseRosterRequestPayload.TYPE,
+                HorseRosterRequestPayload.STREAM_CODEC,
                 (payload, context) -> context.enqueueWork(() -> {
                     if (context.player() instanceof ServerPlayer serverPlayer) {
-                        com.example.horsegenetics.neoforge.server.BreedingRoster.sendTo(serverPlayer);
+                        com.example.horsegenetics.neoforge.server.HorseRoster.sendTo(serverPlayer);
+                    }
+                })
+        );
+
+        registrar.playToServer(
+                InspectHorsePayload.TYPE,
+                InspectHorsePayload.STREAM_CODEC,
+                (payload, context) -> context.enqueueWork(() -> {
+                    if (context.player() instanceof ServerPlayer serverPlayer) {
+                        com.example.horsegenetics.neoforge.server.HorseInspectHold.set(
+                                serverPlayer, payload.entityId(), payload.watching());
                     }
                 })
         );

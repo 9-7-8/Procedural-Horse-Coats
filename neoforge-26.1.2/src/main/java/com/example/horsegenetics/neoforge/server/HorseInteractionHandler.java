@@ -1,10 +1,12 @@
 package com.example.horsegenetics.neoforge.server;
 
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.animal.equine.AbstractHorse;
 import net.minecraft.world.entity.animal.equine.Horse;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.loading.FMLEnvironment;
@@ -19,7 +21,9 @@ import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
  *       registered first / last name and consumes one tag
  *       (see {@code RenameHorsePayload});</li>
  *   <li>in the debug-pen dimension only: a <b>stick</b> instantly tames an
- *       untamed horse, a <b>clock</b> instantly ages a foal to an adult.</li>
+ *       untamed horse, a <b>clock</b> instantly ages a foal to an adult;</li>
+ *   <li><b>shift-right-click on a tamed foal</b> opens its inventory screen -
+ *       see {@link #onFoalInventory}.</li>
  * </ul>
  *
  * Barn-name edits come from the inventory screen (see
@@ -80,6 +84,42 @@ public final class HorseInteractionHandler {
         }
     }
 
+
+    /**
+     * <b>Shift-right-click opens a foal's inventory too.</b> Vanilla's
+     * {@code AbstractHorse.mobInteract} bails out on {@code isBaby()} before it
+     * reaches the "tamed and sneaking, so open the inventory" branch, so a foal
+     * has no inventory screen at all - and with it goes this mod's <b>i</b>
+     * button, which is the only way to read a foal's genes in-game. That is the
+     * wrong trade: a foal cannot be saddled, but the screen is where its
+     * genetics live.
+     *
+     * <p>Nothing has to be done about the saddle: the slot's own
+     * {@code isActive()} asks {@code canUseSlot(SADDLE)}, which is already false
+     * for a baby, so it simply does not appear. This opens the same menu vanilla
+     * would and lets it decide.
+     *
+     * <p><b>Lowest priority, deliberately.</b> Every other horse interaction in
+     * this mod - the name tag, the carrots, the transfer paper, the shears -
+     * cancels the event when it claims a click, and a cancelled event is not
+     * delivered here. So this only ever sees a click nothing else wanted, and
+     * adding an interaction later needs no change here.
+     */
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    static void onFoalInventory(PlayerInteractEvent.EntityInteract event) {
+        if (!(event.getTarget() instanceof AbstractHorse horse)) return;
+        Player player = event.getEntity();
+        if (!horse.isBaby() || !horse.isTamed() || horse.isVehicle()
+                || !player.isSecondaryUseActive()) {
+            return;
+        }
+        if (!event.getLevel().isClientSide()) {
+            horse.openCustomInventoryScreen(player);
+        }
+        // Cancelled on both sides: uncancelled, the client would go on to
+        // predict vanilla's baby path (a feed, or nothing) and flicker.
+        consume(event, InteractionResult.SUCCESS);
+    }
 
     private static void consume(PlayerInteractEvent.EntityInteract event, InteractionResult result) {
         event.setCanceled(true);

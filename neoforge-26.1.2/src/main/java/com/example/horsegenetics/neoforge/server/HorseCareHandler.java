@@ -108,6 +108,9 @@ public final class HorseCareHandler {
         // Wild herd cohesion: a member trails its herd lead so a spawned pack
         // stays together and wanders as a unit (HerdManager sets the herd).
         horse.goalSelector.addGoal(GOAL_PRIORITY + 2, new WildHerdGoal(horse));
+        // Above everything: stand still while a player is reading this horse's
+        // information screen (HorseInspectHold).
+        horse.goalSelector.addGoal(InspectHoldGoal.PRIORITY, new InspectHoldGoal(horse));
     }
 
     // ------------------------------------------------------------------

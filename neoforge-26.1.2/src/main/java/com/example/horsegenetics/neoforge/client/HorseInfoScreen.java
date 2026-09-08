@@ -15,6 +15,7 @@ import com.example.horsegenetics.common.trait.HorseTraits;
 import com.example.horsegenetics.common.trait.StatAxis;
 import com.example.horsegenetics.common.trait.TraitBreakdown;
 import com.example.horsegenetics.common.trait.Traits;
+import com.example.horsegenetics.neoforge.network.InspectHorsePayload;
 import com.example.horsegenetics.neoforge.network.SetBarnNamePayload;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -45,10 +46,14 @@ import java.util.List;
  *   <li><b>Overview</b> - who this horse is. Name, barn name (editable here and
  *       nowhere else now), sex, generation, breed, its four live body numbers,
  *       its bond, its disorders, and who bred / tamed / owns it.</li>
- *   <li><b>Genes</b> - the whole genotype, one row per locus, with the genetic
- *       code itself at the top. Deliberately the only tab with <b>no</b>
- *       epigenetic values: it is the index, and a wall of numbers under every
- *       row is what the other three tabs are for.</li>
+ *   <li><b>Genes</b> - the genotype, one row per locus. Deliberately the only
+ *       tab with <b>no</b> epigenetic values: it is the index, and a wall of
+ *       numbers under every row is what the other three tabs are for. A filter
+ *       button, <b>on by default</b>, hides the loci the horse is plain
+ *       baseline at, keeping the three that decide its base colour; the genetic
+ *       code itself is not here at all - it is on the spawn egg and the
+ *       designer, and a horse's own screen is the wrong place to read a
+ *       thousand characters of it.</li>
  *   <li><b>Health</b> - the genes behind speed, max health, jump and size, each
  *       showing <i>its own</i> contribution rather than the total, plus every
  *       disorder. The numbers come from {@link TraitBreakdown}, so they are the
@@ -103,8 +108,15 @@ public final class HorseInfoScreen extends Screen {
     private static final int EXPR_ON = 0xFF9BE08A;
     private static final int EXPR_CARRIER = 0xFFC9B27A;
     private static final int GOOD = 0xFF9BE08A;
-    private static final int BAD = 0xFFE08A8A;
+    // Brighter than it was: this red now carries a number a player reads
+    // ("speed 0.164"), not just a word, so it has to be legible rather than
+    // merely alarming. ~7:1 against the panel.
+    private static final int BAD = 0xFFF08C8C;
     private static final int RULE = 0x22FFFFFF;
+    /** Fainter than {@link #RULE} - it separates rows, it does not end a section. */
+    private static final int DIVIDER = 0x18FFFFFF;
+    private static final int FIELD_WELL = 0xFF0B0B10;
+    private static final int FIELD_EDGE = 0xFF5A6274;
 
     private static final int TAB_TOP = 6;
     private static final int TAB_H = 18;
@@ -113,8 +125,18 @@ public final class HorseInfoScreen extends Screen {
     /** Overview's fixed header: the horse's name, then the barn-name editor. */
     private static final int HEADER_H = 42;
 
+    /** Genes' fixed header: the locus count, and the filter button beside it. */
+    private static final int GENES_HEADER_H = 24;
+
     /** Remembered across openings - reopening on the tab you were reading. */
     private static Tab lastTab = Tab.OVERVIEW;
+
+    /**
+     * Remembered across openings, and <b>on</b> by default: most horses are
+     * baseline at most of their loci, and a list of eighty rows saying "nothing
+     * here" is what made the Genes tab unreadable. Off shows every locus.
+     */
+    private static boolean hideBaseline = true;
 
     private final HorseRecord record;
     private final @Nullable AbstractHorse horse;
@@ -129,6 +151,10 @@ public final class HorseInfoScreen extends Screen {
 
     private EditBox barnBox;
     private Button setBarnButton;
+    private Button baselineFilterButton;
+
+    /** Ticks since the screen opened, for the once-a-second hold heartbeat. */
+    private int heldTicks;
 
     public HorseInfoScreen(HorseRecord record, @Nullable AbstractHorse horse, @Nullable Screen parent) {
         super(Component.literal(record.displayName()));
@@ -192,7 +218,11 @@ public final class HorseInfoScreen extends Screen {
      * scroll out from under the page they belong to.
      */
     private int pageTop() {
-        return tab == Tab.OVERVIEW ? contentTop() + HEADER_H : contentTop();
+        return switch (tab) {
+            case OVERVIEW -> contentTop() + HEADER_H;
+            case GENES -> contentTop() + GENES_HEADER_H;
+            default -> contentTop();
+        };
     }
 
     private int contentWidth() {
@@ -229,7 +259,25 @@ public final class HorseInfoScreen extends Screen {
                 .build();
         addRenderableWidget(setBarnButton);
 
+        // Genes' filter. Same shape as the browser's "Only what can vary"
+        // toggle - the label says what you are looking at, not what the button
+        // would do, which is the one that reads right on a screen you glance at.
+        int filterW = 150;
+        baselineFilterButton = Button.builder(baselineFilterLabel(), b -> {
+                    hideBaseline = !hideBaseline;
+                    b.setMessage(baselineFilterLabel());
+                    scroll = 0f;
+                })
+                .bounds(contentRight() - filterW, contentTop() - 2, filterW, 16)
+                .build();
+        addRenderableWidget(baselineFilterButton);
+
         applyTabWidgets();
+        sendHold(true);
+    }
+
+    private Component baselineFilterLabel() {
+        return Component.literal(hideBaseline ? "Only what it carries" : "Every locus");
     }
 
     private void applyTabWidgets() {
@@ -245,11 +293,43 @@ public final class HorseInfoScreen extends Screen {
             setBarnButton.visible = overview;
             setBarnButton.active = overview;
         }
+        boolean genes = tab == Tab.GENES;
+        if (baselineFilterButton != null) {
+            baselineFilterButton.visible = genes;
+            baselineFilterButton.active = genes;
+        }
     }
 
     private void submitBarnName() {
         if (horse != null) {
             ClientPacketDistributor.sendToServer(new SetBarnNamePayload(horse.getId(), barnBox.getValue()));
+        }
+    }
+
+    /**
+     * Re-assert the hold once a second. It is a lease rather than a flag on
+     * purpose - see {@code server/HorseInspectHold} - so a client that dies with
+     * this screen open leaves the horse walking again a moment later instead of
+     * frozen forever.
+     */
+    @Override
+    public void tick() {
+        super.tick();
+        if (heldTicks++ % 20 == 0) {
+            sendHold(true);
+        }
+    }
+
+    @Override
+    public void removed() {
+        super.removed();
+        sendHold(false);
+    }
+
+    /** Ask the server to stop this horse wandering off while it is being read about. */
+    private void sendHold(boolean watching) {
+        if (horse != null) {
+            ClientPacketDistributor.sendToServer(new InspectHorsePayload(horse.getId(), watching));
         }
     }
 
@@ -332,9 +412,17 @@ public final class HorseInfoScreen extends Screen {
     // Drawing
     // ------------------------------------------------------------------
 
+    /**
+     * <b>The widgets are drawn last, not first.</b> {@code Screen}'s default is
+     * to paint them and then hand over, which is right for a screen that draws
+     * a background - and wrong for this one, which paints a near-opaque panel
+     * across the whole window. Drawn in the default order, the barn-name box
+     * came out under 94% of that panel: still there, still clickable, and
+     * looking like nothing at all. So the panel goes down first and
+     * {@code super} runs at the end.
+     */
     @Override
     public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
-        super.extractRenderState(g, mouseX, mouseY, partialTick);
         g.fill(0, 0, this.width, this.height, DIM);
 
         int pl = panelLeft();
@@ -351,6 +439,8 @@ public final class HorseInfoScreen extends Screen {
 
         if (tab == Tab.OVERVIEW) {
             drawOverviewHeader(g);
+        } else if (tab == Tab.GENES) {
+            drawGenesHeader(g);
         }
 
         int top = pageTop();
@@ -373,6 +463,8 @@ public final class HorseInfoScreen extends Screen {
         maxScroll = Math.max(0f, contentH - (bottom - top));
         scroll = Math.max(0f, Math.min(scroll, maxScroll));
         drawScrollbar(g, pr, top, bottom, contentH);
+
+        super.extractRenderState(g, mouseX, mouseY, partialTick);
     }
 
     private void drawTabStrip(GuiGraphicsExtractor g) {
@@ -420,7 +512,31 @@ public final class HorseInfoScreen extends Screen {
                 x, y, DIM_TEXT, false);
 
         g.text(this.font, Component.literal("Barn name"), x, contentTop() + HEADER_H - 16, LABEL, false);
+        drawFieldFrame(g, barnBox);
         g.fill(x, contentTop() + HEADER_H - 4, contentRight(), contentTop() + HEADER_H - 3, RULE);
+    }
+
+    /**
+     * A well and a lit edge around a text field. The vanilla {@code EditBox}
+     * sprite is a dark grey box that all but vanishes on this screen's dark
+     * panel - it looked like a caption, not somewhere to type - so the frame is
+     * drawn underneath it, one pixel proud on every side, and brightens to the
+     * tab accent while the field has focus.
+     */
+    private void drawFieldFrame(GuiGraphicsExtractor g, EditBox box) {
+        if (box == null || !box.visible) {
+            return;
+        }
+        int x0 = box.getX() - 2;
+        int y0 = box.getY() - 2;
+        int x1 = box.getX() + box.getWidth() + 2;
+        int y1 = box.getY() + box.getHeight() + 2;
+        int edge = box.isFocused() ? TAB_ACCENT : FIELD_EDGE;
+        g.fill(x0, y0, x1, y1, FIELD_WELL);
+        g.fill(x0, y0, x1, y0 + 1, edge);
+        g.fill(x0, y1 - 1, x1, y1, edge);
+        g.fill(x0, y0, x0 + 1, y1, edge);
+        g.fill(x1 - 1, y0, x1, y1, edge);
     }
 
     private void drawOverview(Cursor c) {
@@ -528,27 +644,77 @@ public final class HorseInfoScreen extends Screen {
     // Genes - the index
     // ------------------------------------------------------------------
 
-    private void drawGenes(Cursor c) {
-        c.heading("Genetic code");
-        c.label("Short form");
-        c.wrapped(GeneCodeDisplay.shortForm(genotype), ALLELE_TOK, 0);
-        c.gap(4);
-        c.label("Full code");
-        c.wrapped(record.geneticCode(), DIM_TEXT, 0);
-        c.gap(3);
-        c.wrapped("The full code is what the custom spawn egg and the horse designer read - "
-                + "paste it into either to rebuild this horse exactly. Epigenetic values are on "
-                + "the Health, Coat and Other genes tabs.", DIM_TEXT, 0);
-        c.rule();
+    /**
+     * The fixed strip above the locus list: the short form of the genotype, and
+     * how much of the list the filter is showing. The filter itself is a real
+     * widget drawn by the widget layer at a fixed position on the right, so
+     * like Overview's barn box it cannot be allowed to scroll away from the
+     * count it belongs to.
+     */
+    private void drawGenesHeader(GuiGraphicsExtractor g) {
+        int x = contentLeft();
+        int y = contentTop();
+        int total = Genes.codeOrder().size();
+        int shown = countShownLoci();
+        g.text(this.font, Component.literal(GuiText.clip(GeneCodeDisplay.shortForm(genotype), 56)),
+                x, y, ALLELE_TOK, false);
+        y += lineH() + 1;
+        g.text(this.font, Component.literal(shown == total
+                        ? "all " + total + " loci, in code order"
+                        : shown + " of " + total + " loci - the rest are plain baseline"),
+                x, y, DIM_TEXT, false);
+        g.fill(x, contentTop() + GENES_HEADER_H - 5, contentRight(),
+                contentTop() + GENES_HEADER_H - 4, RULE);
+    }
 
-        c.label("Every locus, in code order");
+    private int countShownLoci() {
+        int shown = 0;
         for (Gene gene : Genes.codeOrder()) {
+            if (showsLocus(gene)) {
+                shown++;
+            }
+        }
+        return shown;
+    }
+
+    /**
+     * Is this locus on the list right now? With the filter on, a locus is worth
+     * a row when the horse is <b>not</b> plain baseline at it - which keeps
+     * silent carriers, deliberately: a carrier is the single most interesting
+     * thing a breeder can be told, and it is exactly the row a "hide the wild
+     * type" filter would throw away if it read the phenotype instead of the
+     * alleles. The three loci that decide the base colour stay whatever the
+     * filter says, because "what colour is this horse" has no answer without
+     * them.
+     */
+    private boolean showsLocus(Gene gene) {
+        if (!hideBaseline || isBaseCoatLocus(gene)) {
+            return true;
+        }
+        return !genotype.pair(gene).homozygousFor(gene.defaultAllele());
+    }
+
+    /** Extension, agouti and shade - the base coat, and never filtered out. */
+    private static boolean isBaseCoatLocus(Gene gene) {
+        return gene == Genes.EXTENSION || gene == Genes.AGOUTI || gene == Genes.SHADE;
+    }
+
+    private void drawGenes(Cursor c) {
+        int shown = 0;
+        for (Gene gene : Genes.codeOrder()) {
+            if (!showsLocus(gene)) {
+                continue;
+            }
             AllelePair pair = genotype.pair(gene);
             Expression expr = genotype.expressionOf(gene);
             boolean baseline = pair.homozygousFor(gene.defaultAllele());
             boolean on = !expr.wildType();
+            shown++;
             c.row(gene.name(), pair.toTokens(), expr.name(),
                     on ? EXPR_ON : baseline ? DIM_TEXT : EXPR_CARRIER);
+        }
+        if (shown == 0) {
+            c.line("This horse is plain baseline at every locus but its base colour.", DIM_TEXT);
         }
     }
 
@@ -559,12 +725,18 @@ public final class HorseInfoScreen extends Screen {
     private void drawHealth(Cursor c) {
         Traits t = traits();
         c.heading("What this horse's body came out at");
+        // Green above the baseline, red below, plain when it is exactly on it.
+        // Size is left plain on purpose: a draught horse is not a worse horse
+        // than a pony, and colouring it would say it was.
         c.pair("Max health", String.format("%.1f", t.health())
-                + "   (baseline " + String.format("%.1f", HorseTraits.BASE_HEALTH) + ")");
+                        + "   (baseline " + String.format("%.1f", HorseTraits.BASE_HEALTH) + ")",
+                versusBaseline(t.health(), HorseTraits.BASE_HEALTH));
         c.pair("Speed", String.format("%.3f", t.speed())
-                + "   (baseline " + String.format("%.3f", HorseTraits.BASE_SPEED) + ")");
+                        + "   (baseline " + String.format("%.3f", HorseTraits.BASE_SPEED) + ")",
+                versusBaseline(t.speed(), HorseTraits.BASE_SPEED));
         c.pair("Jump", String.format("%.2f", t.jump())
-                + "   (baseline " + String.format("%.2f", HorseTraits.BASE_JUMP) + ")");
+                        + "   (baseline " + String.format("%.2f", HorseTraits.BASE_JUMP) + ")",
+                versusBaseline(t.jump(), HorseTraits.BASE_JUMP));
         c.pair("Size", String.format("%.2f", t.scale()) + "   " + sizeWord(t.scale()));
         c.gap(3);
         c.wrapped("Every number above is the baseline plus what the genes below add. Nothing is "
@@ -588,8 +760,11 @@ public final class HorseInfoScreen extends Screen {
                 continue;
             }
             c.label(axisLabel(axis));
-            for (TraitBreakdown.Term term : on) {
-                drawTerm(c, term, axis);
+            for (int i = 0; i < on.size(); i++) {
+                if (i > 0) {
+                    c.divider();
+                }
+                drawTerm(c, on.get(i), axis);
             }
             c.gap(3);
         }
@@ -603,7 +778,11 @@ public final class HorseInfoScreen extends Screen {
         if (!withConditions.isEmpty()) {
             c.rule();
             c.label("Disorders this horse expresses");
-            for (TraitBreakdown.Term term : withConditions) {
+            for (int i = 0; i < withConditions.size(); i++) {
+                if (i > 0) {
+                    c.divider();
+                }
+                TraitBreakdown.Term term = withConditions.get(i);
                 c.row(term.gene().name(), term.pair().toTokens(), "", VALUE);
                 for (Condition condition : term.conditions()) {
                     c.line(condition.name(), condition.severity().lethal() ? BAD : EXPR_CARRIER, 8);
@@ -630,6 +809,17 @@ public final class HorseInfoScreen extends Screen {
         c.row(term.gene().name(), term.pair().toTokens(), delta.strip(),
                 axis == StatAxis.SCALE ? VALUE : helps ? GOOD : BAD);
         epigenetics(c, term.gene());
+    }
+
+    /**
+     * Green if this number is above the baseline horse, red if below, the plain
+     * value colour if it is exactly on it.
+     */
+    private static int versusBaseline(double actual, double baseline) {
+        if (actual > baseline + 1e-6) {
+            return GOOD;
+        }
+        return actual < baseline - 1e-6 ? BAD : VALUE;
     }
 
     private static String axisLabel(StatAxis axis) {
@@ -689,6 +879,9 @@ public final class HorseInfoScreen extends Screen {
             boolean always = gene == Genes.EXTENSION || gene == Genes.AGOUTI || gene == Genes.SHADE;
             if (!always && baseline) {
                 continue;
+            }
+            if (shown > 0) {
+                c.divider();
             }
             shown++;
             c.row(gene.name(), pair.toTokens(), expr.name(),
@@ -793,6 +986,19 @@ public final class HorseInfoScreen extends Screen {
             y += 3;
             g.fill(x, y, x + width, y + 1, RULE);
             y += 6;
+        }
+
+        /**
+         * The hairline between two entries of a list. Fainter and tighter than
+         * {@link #rule()}, which ends a section: several lines of description
+         * and epigenetic numbers under every gene ran together into one block
+         * without it, and a heavier rule would have read as a new section per
+         * gene.
+         */
+        void divider() {
+            y += 2;
+            g.fill(x, y, x + width, y + 1, DIVIDER);
+            y += 5;
         }
 
         void gap(int px) {

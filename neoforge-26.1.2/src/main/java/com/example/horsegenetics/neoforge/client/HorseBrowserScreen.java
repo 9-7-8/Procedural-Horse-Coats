@@ -5,10 +5,13 @@ import com.example.horsegenetics.common.genetics.BreedingPreview;
 import com.example.horsegenetics.common.genetics.Expression;
 import com.example.horsegenetics.common.genetics.Gene;
 import com.example.horsegenetics.common.genetics.Genes;
+import com.example.horsegenetics.common.horse.HorseListing;
+import com.example.horsegenetics.common.horse.HorseQuery;
 import com.example.horsegenetics.common.horse.Sex;
+import com.example.horsegenetics.common.trait.HorseTraits;
 import com.example.horsegenetics.neoforge.menu.HorseBrowserMenu;
 import com.example.horsegenetics.neoforge.menu.SpliceRecipeDisplay;
-import com.example.horsegenetics.neoforge.network.BreedingRosterRequestPayload;
+import com.example.horsegenetics.neoforge.network.HorseRosterRequestPayload;
 import com.example.horsegenetics.neoforge.network.SelectBrowserGenePayload;
 import com.example.horsegenetics.neoforge.network.WriteResearchPaperPayload;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -30,10 +33,17 @@ import java.util.UUID;
 
 /**
  * The <b>Horse Browser</b> - opened with the browser key (default <kbd>H</kbd>).
- * An {@link AbstractContainerScreen} over {@link HorseBrowserMenu}, with three
+ * An {@link AbstractContainerScreen} over {@link HorseBrowserMenu}, with four
  * tabs drawn from a strip at the top of the window:
  *
  * <ul>
+ *   <li><b>My horses</b> - every horse the player owns as one sortable,
+ *       filterable table. The columns are clickable headings; the filter box
+ *       takes the query language in {@link HorseQuery}, which reaches every
+ *       piece of metadata a horse has, <b>genes included</b> ({@code gene:SB1}
+ *       finds carriers, not just horses that show it). Rows are
+ *       {@link HorseListing}s built once when the roster lands
+ *       ({@link ClientHorseRoster}), not per frame.</li>
  *   <li><b>Gene database</b> - a full-window reference: a filterable gene list on
  *       the left, a scrolling detail pane on the right. No slots (the menu's
  *       slots all go inactive here).</li>
@@ -42,20 +52,27 @@ import java.util.UUID;
  *       often. It is a <b>Punnett square per gene</b>, not a foal and not a
  *       list of genotypes: {@link BreedingPreview} says why, and it is grouped
  *       so the loci that pull on one trait arrive together. The roster comes
- *       from the server on opening the tab ({@code BreedingRosterPayload}).</li>
+ *       from the server on opening the tab ({@code HorseRosterPayload}), and is
+ *       the same roster the My horses table reads.</li>
  *   <li><b>Crafting</b> - a compact centered panel: a 3x3 grid + result slot that
  *       only makes this mod's recipes (see {@code HorseBrowserRecipes}), the
  *       gene list reused on the left to pick which gene a book becomes a paper
  *       for, and the player inventory.</li>
  * </ul>
  *
- * <p>All custom drawing is done in screen coordinates: {@code extractLabels}
- * runs inside the container's {@code leftPos/topPos} translate, so it is undone
- * first.
+ * <h2>Drawing order</h2>
+ * All custom drawing is done in screen coordinates, from
+ * {@link #extractContents} and <b>before</b> its {@code super} call - which is
+ * what draws the widgets and then the slots. It used to run from
+ * {@code extractLabels}, after both, and this screen paints near-opaque panels
+ * across the window: anything of ours that overlapped a widget washed it out,
+ * which is what had happened to the Crafting tab's own button. Chrome under,
+ * widgets and slots over.
  */
 public final class HorseBrowserScreen extends AbstractContainerScreen<HorseBrowserMenu> {
 
     private enum Tab {
+        MY_HORSES("My horses"),
         GENE_DATABASE("Gene database"),
         BREEDING_PREVIEW("Breeding preview"),
         CRAFTING("Crafting");
@@ -88,6 +105,10 @@ public final class HorseBrowserScreen extends AbstractContainerScreen<HorseBrows
     private static final int DESC = 0xFFB2B8C6;
     private static final int TAG = 0xFF7C84A0;
     private static final int ALLELE_TOK = 0xFFE0C070;
+    private static final int GOOD = 0xFF9BE08A;
+    private static final int BAD = 0xFFF08C8C;
+    private static final int HEAD_BG = 0xFF23232E;
+    private static final int DIVIDER = 0x18FFFFFF;
 
     private static final int IMG_W = 262; // the Crafting panel; leftPos/topPos centre it
     private static final int IMG_H = 210;
@@ -95,7 +116,7 @@ public final class HorseBrowserScreen extends AbstractContainerScreen<HorseBrows
     private static final int TAB_H = 18;
     private static final int ROW_H = 12;
 
-    private Tab tab = Tab.GENE_DATABASE;
+    private Tab tab = Tab.MY_HORSES;
     private String search = "";
     private String selectedKey = "";
     private int listScroll = 0;
@@ -103,9 +124,21 @@ public final class HorseBrowserScreen extends AbstractContainerScreen<HorseBrows
     private float detailMaxScroll = 0f;
 
     private EditBox searchBox;
+    private EditBox horseFilterBox;
     private Button craftPaperButton;
     private Button refreshRosterButton;
     private Button settledToggle;
+
+    // --- My horses tab ---
+    private String horseFilter = "";
+    private HorseQuery.Sort sort = HorseQuery.Sort.NAME;
+    private boolean sortDescending = false;
+    private int horseScroll = 0;
+    private UUID selectedHorseId;
+    /** Recomputed when the filter, the sort or the roster changes - never per frame. */
+    private List<HorseListing> horseRows = List.of();
+    private int horseRowsVersion = -1;
+    private String horseRowsQuery = null;
 
     // --- Breeding preview tab ---
     private UUID damId;
@@ -211,6 +244,13 @@ public final class HorseBrowserScreen extends AbstractContainerScreen<HorseBrows
         craftPaperButton.visible = false;
         addRenderableWidget(craftPaperButton);
 
+        horseFilterBox = new EditBox(this.font, fsLeft() + 1, contentTop(),
+                Math.max(160, (fsRight() - fsLeft()) / 2), 16, Component.literal("Filter"));
+        horseFilterBox.setMaxLength(96);
+        horseFilterBox.setHint(Component.literal("mare  gen>2  gene:SB1  -lethal"));
+        horseFilterBox.setValue(horseFilter);
+        addRenderableWidget(horseFilterBox);
+
         refreshRosterButton = Button.builder(Component.literal("Refresh"), b -> requestRoster())
                 .bounds(listX(), contentTop() - 1, 60, 18).build();
         refreshRosterButton.visible = false;
@@ -226,6 +266,9 @@ public final class HorseBrowserScreen extends AbstractContainerScreen<HorseBrows
         addRenderableWidget(settledToggle);
 
         applyFilter();
+        if (tab == Tab.MY_HORSES && !ClientHorseRoster.received()) {
+            requestRoster();
+        }
     }
 
     private Component settledLabel() {
@@ -233,7 +276,7 @@ public final class HorseBrowserScreen extends AbstractContainerScreen<HorseBrows
     }
 
     private void requestRoster() {
-        ClientPacketDistributor.sendToServer(BreedingRosterRequestPayload.INSTANCE);
+        ClientPacketDistributor.sendToServer(HorseRosterRequestPayload.INSTANCE);
     }
 
     private void craftPaper() {
@@ -251,34 +294,48 @@ public final class HorseBrowserScreen extends AbstractContainerScreen<HorseBrows
         return sel != null && sel.hasGeneCarrot() ? SpliceRecipeDisplay.forGene(sel) : java.util.List.of();
     }
 
-    /** Show / hide / position the "Craft research paper" button for the current tab. */
+    /**
+     * Show, hide and place the per-tab buttons.
+     *
+     * <p><b>"Craft research paper" is on the Crafting tab and nowhere else.</b>
+     * It was on the Gene database tab too, doing exactly the same thing from a
+     * screen with no grid and no result slot to show for it - and it was eating
+     * the bottom 26 pixels of the detail pane, which is the one part of that tab
+     * that is short of room. One button, on the tab that is about crafting.
+     */
     private void layoutGeneButtons() {
         boolean breeding = tab == Tab.BREEDING_PREVIEW;
+        boolean mine = tab == Tab.MY_HORSES;
         if (refreshRosterButton != null) {
-            refreshRosterButton.visible = breeding;
-            refreshRosterButton.active = breeding;
+            // Both roster tabs want it; it sits in the same place on each.
+            boolean show = breeding || mine;
+            refreshRosterButton.visible = show;
+            refreshRosterButton.active = show;
+            if (mine) {
+                refreshRosterButton.setRectangle(60, 18, fsRight() - 60, contentTop() - 1);
+            } else {
+                refreshRosterButton.setRectangle(60, 18, listX(), contentTop() - 1);
+            }
         }
         if (settledToggle != null) {
             settledToggle.visible = breeding;
             settledToggle.active = breeding;
         }
+        if (horseFilterBox != null) {
+            horseFilterBox.visible = mine;
+            horseFilterBox.active = mine;
+            if (!mine) {
+                horseFilterBox.setFocused(false);
+            }
+        }
         if (craftPaperButton == null) {
             return;
         }
-        if (breeding) {
-            craftPaperButton.visible = false;
-            craftPaperButton.active = false;
-            return;
-        }
         Gene sel = selected();
-        boolean carrot = sel != null && sel.hasGeneCarrot();
+        boolean carrot = tab == Tab.CRAFTING && sel != null && sel.hasGeneCarrot();
         craftPaperButton.visible = carrot;
         craftPaperButton.active = carrot;
-        if (tab == Tab.GENE_DATABASE) {
-            int x = detailX();
-            int w = Math.min(190, detailR() - detailX());
-            craftPaperButton.setRectangle(w, 18, x, contentBottom() - 22);
-        } else {
+        if (carrot) {
             int x = leftPos + HorseBrowserMenu.RESULT_X + 22;
             int w = leftPos + IMG_W - 8 - x;
             craftPaperButton.setRectangle(w, 16, x, topPos + 90);
@@ -343,20 +400,42 @@ public final class HorseBrowserScreen extends AbstractContainerScreen<HorseBrows
                 listScroll = 0;
                 detailScroll = 0f;
                 applyFilter();
-                if (tab == Tab.BREEDING_PREVIEW && !ClientBreedingRoster.received()) {
+                if ((tab == Tab.BREEDING_PREVIEW || tab == Tab.MY_HORSES)
+                        && !ClientHorseRoster.received()) {
                     requestRoster();
                 }
             }
             return true;
         }
+        if (tab == Tab.MY_HORSES) {
+            HorseQuery.Sort column = columnAt(event.x(), event.y());
+            if (column != null) {
+                // Click a heading to sort by it; click the one you are already
+                // sorted by to turn it round. Same as every table anywhere.
+                if (column == sort) {
+                    sortDescending = !sortDescending;
+                } else {
+                    sort = column;
+                    sortDescending = defaultDescending(column);
+                }
+                rebuildHorseRows();
+                return true;
+            }
+            HorseListing row = horseRowAt(event.x(), event.y());
+            if (row != null) {
+                selectedHorseId = row.id().equals(selectedHorseId) ? null : row.id();
+                return true;
+            }
+            return super.mouseClicked(event, doubleClick);
+        }
         if (tab == Tab.BREEDING_PREVIEW) {
-            ClientBreedingRoster.Horse mare = horseAt(event.x(), event.y(), Sex.FEMALE);
+            HorseListing mare = horseAt(event.x(), event.y(), Sex.FEMALE);
             if (mare != null) {
                 damId = mare.id().equals(damId) ? null : mare.id();
                 rebuildPreview();
                 return true;
             }
-            ClientBreedingRoster.Horse stallion = horseAt(event.x(), event.y(), Sex.MALE);
+            HorseListing stallion = horseAt(event.x(), event.y(), Sex.MALE);
             if (stallion != null) {
                 sireId = stallion.id().equals(sireId) ? null : stallion.id();
                 rebuildPreview();
@@ -406,10 +485,15 @@ public final class HorseBrowserScreen extends AbstractContainerScreen<HorseBrows
 
     @Override
     public boolean mouseScrolled(double mx, double my, double sx, double sy) {
+        if (tab == Tab.MY_HORSES) {
+            int max = Math.max(0, horseRows.size() - horseVisibleRows());
+            horseScroll = Math.max(0, Math.min(max, horseScroll - (int) Math.signum(sy) * 3));
+            return true;
+        }
         if (tab == Tab.BREEDING_PREVIEW) {
             if (mx >= listX() && mx <= listX() + listW()) {
                 boolean upper = my < pickerSplit();
-                List<ClientBreedingRoster.Horse> list = ClientBreedingRoster.of(upper ? Sex.FEMALE : Sex.MALE);
+                List<HorseListing> list = ClientHorseRoster.of(upper ? Sex.FEMALE : Sex.MALE);
                 int visible = pickerRows(upper);
                 int max = Math.max(0, list.size() - visible);
                 if (upper) {
@@ -475,39 +559,53 @@ public final class HorseBrowserScreen extends AbstractContainerScreen<HorseBrows
         g.fill(0, 0, this.width, this.height, DIM);
     }
 
+    /**
+     * Everything this screen draws, in screen coordinates and <b>under</b> the
+     * widgets and slots that {@code super} goes on to draw. See the class note
+     * on drawing order.
+     */
+    @Override
+    public void extractContents(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
+        drawChrome(g, mouseX, mouseY);
+        super.extractContents(g, mouseX, mouseY, partialTick);
+    }
+
+    /** Vanilla's "Horse Browser" / "Inventory" captions; this screen draws its own. */
     @Override
     protected void extractLabels(GuiGraphicsExtractor g, int mouseX, int mouseY) {
-        // Undo the container's leftPos/topPos translate so we work in screen coords.
-        var pose = g.pose();
-        pose.pushMatrix();
-        pose.translate(-leftPos, -topPos);
+    }
 
+    private void drawChrome(GuiGraphicsExtractor g, int mouseX, int mouseY) {
         if (searchBox != null && !searchBox.getValue().equals(search)) {
             search = searchBox.getValue();
             applyFilter();
         }
         if (searchBox != null) {
-            // The gene database and Crafting filter the same gene list; the
-            // breeding tab's left pane is horses, and reusing one box for two
+            // The gene database and Crafting filter the same gene list; the two
+            // roster tabs are about horses, and reusing one box for two
             // different lists reads as a bug the first time it clears itself.
-            boolean showSearch = tab != Tab.BREEDING_PREVIEW;
+            // My horses has its own box, with its own query language.
+            boolean showSearch = tab == Tab.GENE_DATABASE || tab == Tab.CRAFTING;
             searchBox.visible = showSearch;
             searchBox.active = showSearch;
+        }
+        if (horseFilterBox != null && !horseFilterBox.getValue().equals(horseFilter)) {
+            horseFilter = horseFilterBox.getValue();
+            horseScroll = 0;
         }
         layoutGeneButtons();
 
         drawTabStrip(g);
 
-        if (tab == Tab.GENE_DATABASE) {
-            drawGeneList(g, mouseX, mouseY, contentBottom());
-            drawGeneDetail(g);
-        } else if (tab == Tab.BREEDING_PREVIEW) {
-            drawBreedingPreview(g, mouseX, mouseY);
-        } else {
-            drawCraftingPanel(g, mouseX, mouseY);
+        switch (tab) {
+            case MY_HORSES -> drawMyHorses(g, mouseX, mouseY);
+            case GENE_DATABASE -> {
+                drawGeneList(g, mouseX, mouseY, contentBottom());
+                drawGeneDetail(g);
+            }
+            case BREEDING_PREVIEW -> drawBreedingPreview(g, mouseX, mouseY);
+            case CRAFTING -> drawCraftingPanel(g, mouseX, mouseY);
         }
-
-        pose.popMatrix();
     }
 
     private void drawTabStrip(GuiGraphicsExtractor g) {
@@ -747,6 +845,282 @@ public final class HorseBrowserScreen extends AbstractContainerScreen<HorseBrows
     }
 
     // ------------------------------------------------------------------
+    // My horses - the whole stable as one sortable, filterable table
+    // ------------------------------------------------------------------
+    //
+    // The roadmap (wiki/roadmap.html#browser) is right that the expensive part
+    // of this tab is the index behind it, and that sorting and filtering
+    // "belong server-side, paginated". They are not there yet: this sorts and
+    // filters the roster the client already has, capped at
+    // HorseRosterPayload.MAX_ENTRIES. That cap is the whole of the difference,
+    // it is said out loud in the footer when it bites, and nothing here has to
+    // change when the real index arrives - the table draws HorseListings and
+    // does not care who filtered them.
+    //
+    // The query language, the sort comparators and the coat description live in
+    // common/horse (HorseQuery, HorseListing), where they are unit-tested
+    // without a game and will survive the backport. This class draws.
+
+    /** One column of the table: a sort key, and its share of the width. */
+    private record Column(HorseQuery.Sort sort, int weight) {
+    }
+
+    private static final List<Column> COLUMNS = List.of(
+            new Column(HorseQuery.Sort.NAME, 112),
+            new Column(HorseQuery.Sort.BARN, 54),
+            new Column(HorseQuery.Sort.SEX, 44),
+            new Column(HorseQuery.Sort.AGE, 32),
+            new Column(HorseQuery.Sort.BREED, 88),
+            new Column(HorseQuery.Sort.GENERATION, 24),
+            new Column(HorseQuery.Sort.COAT, 104),
+            new Column(HorseQuery.Sort.SPEED, 40),
+            new Column(HorseQuery.Sort.HEALTH, 40),
+            new Column(HorseQuery.Sort.JUMP, 34),
+            new Column(HorseQuery.Sort.SIZE, 34),
+            new Column(HorseQuery.Sort.BOND, 30),
+            new Column(HorseQuery.Sort.WHERE, 64));
+
+    /** The weights above, summed. Columns are laid out as shares of this. */
+    private static final int TOTAL_WEIGHT = 700;
+
+    /** The heading strip, one row tall, above the rows themselves. */
+    private int tableHeadY() {
+        return contentTop() + 30;
+    }
+
+    private int tableTop() {
+        return tableHeadY() + ROW_H + 2;
+    }
+
+    /** The footer holds the selected horse; the rows stop above it. */
+    private int tableBottom() {
+        return contentBottom() - 34;
+    }
+
+    private int horseVisibleRows() {
+        return Math.max(1, (tableBottom() - tableTop()) / ROW_H);
+    }
+
+    private int columnX(int index) {
+        int x = fsLeft() + 2;
+        int avail = fsRight() - fsLeft() - 8;
+        for (int i = 0; i < index; i++) {
+            x += COLUMNS.get(i).weight() * avail / TOTAL_WEIGHT;
+        }
+        return x;
+    }
+
+    private int columnW(int index) {
+        int avail = fsRight() - fsLeft() - 8;
+        return Math.max(12, COLUMNS.get(index).weight() * avail / TOTAL_WEIGHT - 4);
+    }
+
+    /**
+     * A number reads better biggest-first and a name reads better A-Z, so a
+     * fresh click on a column starts it the way that column is usually wanted.
+     */
+    private static boolean defaultDescending(HorseQuery.Sort sort) {
+        return switch (sort) {
+            case GENERATION, SPEED, HEALTH, JUMP, SIZE, BOND -> true;
+            default -> false;
+        };
+    }
+
+    private HorseQuery.Sort columnAt(double mx, double my) {
+        if (my < tableHeadY() || my >= tableHeadY() + ROW_H) {
+            return null;
+        }
+        for (int i = 0; i < COLUMNS.size(); i++) {
+            if (mx >= columnX(i) - 2 && mx < columnX(i) + columnW(i) + 2) {
+                return COLUMNS.get(i).sort();
+            }
+        }
+        return null;
+    }
+
+    private HorseListing horseRowAt(double mx, double my) {
+        if (mx < fsLeft() || mx > fsRight() || my < tableTop()
+                || my >= tableTop() + horseVisibleRows() * ROW_H) {
+            return null;
+        }
+        int i = horseScroll + (int) ((my - tableTop()) / ROW_H);
+        return i >= 0 && i < horseRows.size() ? horseRows.get(i) : null;
+    }
+
+    /**
+     * Re-filter and re-sort. Called when something actually changed - a new
+     * roster, a new query, a new column - and never per frame: a {@code gene:}
+     * term walks every locus of every horse, which is nothing once and far too
+     * much sixty times a second.
+     */
+    private void rebuildHorseRows() {
+        horseRows = HorseQuery.apply(ClientHorseRoster.all(), horseFilter, sort, sortDescending);
+        horseRowsVersion = ClientHorseRoster.version();
+        horseRowsQuery = horseFilter;
+        horseScroll = Math.max(0, Math.min(horseScroll,
+                Math.max(0, horseRows.size() - horseVisibleRows())));
+    }
+
+    private void drawMyHorses(GuiGraphicsExtractor g, int mouseX, int mouseY) {
+        if (horseRowsVersion != ClientHorseRoster.version() || !horseFilter.equals(horseRowsQuery)) {
+            rebuildHorseRows();
+        }
+
+        int l = fsLeft();
+        int r = fsRight();
+        int top = tableTop();
+        int bottom = tableBottom();
+
+        int total = ClientHorseRoster.all().size();
+        String count = horseRows.size() == total
+                ? total + (total == 1 ? " horse" : " horses")
+                : horseRows.size() + " of " + total + " horses";
+        int countW = this.font.width(count);
+        g.text(this.font, Component.literal(count), l + 2, contentTop() + 20, LABEL, false);
+        drawFitted(g, "keys: " + String.join(" ", HorseQuery.keys()),
+                l + countW + 14, contentTop() + 20, r - l - countW - 80, TAG);
+
+        // Headings - clickable, and the sorted one carries the direction.
+        g.fill(l - 2, tableHeadY() - 2, r + 2, tableHeadY() + ROW_H, HEAD_BG);
+        for (int i = 0; i < COLUMNS.size(); i++) {
+            Column column = COLUMNS.get(i);
+            boolean on = column.sort() == sort;
+            String head = column.sort().label() + (on ? (sortDescending ? " v" : " ^") : "");
+            drawFitted(g, head, columnX(i), tableHeadY() + 1, columnW(i), on ? NAME : LABEL);
+        }
+
+        g.fill(l - 2, top - 2, r + 2, bottom + 2, PANEL_SOFT);
+        g.enableScissor(l - 2, top, r + 2, bottom);
+        for (int i = horseScroll; i < horseRows.size() && i < horseScroll + horseVisibleRows(); i++) {
+            HorseListing row = horseRows.get(i);
+            int ry = top + (i - horseScroll) * ROW_H;
+            boolean sel = row.id().equals(selectedHorseId);
+            boolean hover = mouseX >= l && mouseX <= r && mouseY >= ry && mouseY < ry + ROW_H;
+            if (sel) {
+                g.fill(l - 2, ry, r, ry + ROW_H, ROW_SEL);
+            } else if (hover) {
+                g.fill(l - 2, ry, r, ry + ROW_H, ROW_HOVER);
+            } else if ((i & 1) == 1) {
+                // Zebra striping: thirteen columns of small text need the eye
+                // held on one row, and a per-row rule would be heavier than
+                // the rows themselves.
+                g.fill(l - 2, ry, r, ry + ROW_H, DIVIDER);
+            }
+            drawHorseRow(g, row, ry + 2, sel);
+        }
+        g.disableScissor();
+
+        if (horseRows.isEmpty()) {
+            String note = !ClientHorseRoster.received() ? "asking the server..."
+                    : total == 0 ? "no horses on record yet - tame or breed one"
+                    : "nothing matches \"" + horseFilter + "\"";
+            g.text(this.font, Component.literal(note), l + 4, top + 4, EXPR_OFF, false);
+        }
+
+        int max = Math.max(0, horseRows.size() - horseVisibleRows());
+        if (max > 0) {
+            int trackH = bottom - top;
+            g.fill(r - 1, top, r + 2, bottom, 0x33FFFFFF);
+            int thumbH = Math.max(16, trackH * horseVisibleRows() / horseRows.size());
+            int thumbY = top + (trackH - thumbH) * horseScroll / max;
+            g.fill(r - 1, thumbY, r + 2, thumbY + thumbH, 0xAAFFFFFF);
+        }
+
+        drawHorseFooter(g, l, r, bottom + 6);
+    }
+
+    private void drawHorseRow(GuiGraphicsExtractor g, HorseListing row, int y, boolean sel) {
+        int plain = sel ? NAME : NAME_DIM;
+        String[] cells = {
+                row.displayName(),
+                row.barnName().isEmpty() ? "-" : row.barnName(),
+                row.sexLabel(),
+                row.ageLabel(),
+                row.breed(),
+                Integer.toString(row.generation()),
+                row.coat(),
+                String.format("%.3f", row.speed()),
+                String.format("%.1f", row.health()),
+                String.format("%.2f", row.jump()),
+                String.format("%.2f", row.scale()),
+                row.bond() < 0 ? "?" : Integer.toString(row.bond()),
+                row.loaded() ? row.where() : "not loaded"
+        };
+        int[] colours = {
+                row.lethal() ? BAD : plain,
+                plain,
+                plain,
+                plain,
+                plain,
+                plain,
+                plain,
+                statColour(row.speed(), HorseTraits.BASE_SPEED, plain),
+                statColour(row.health(), HorseTraits.BASE_HEALTH, plain),
+                statColour(row.jump(), HorseTraits.BASE_JUMP, plain),
+                plain,
+                row.bond() < 0 ? EXPR_OFF : plain,
+                row.loaded() ? plain : EXPR_OFF
+        };
+        for (int i = 0; i < COLUMNS.size(); i++) {
+            drawFitted(g, cells[i], columnX(i), y, columnW(i), colours[i]);
+        }
+    }
+
+    /** Green above the baseline horse, red below - the same rule as the info screen. */
+    private static int statColour(double actual, double baseline, int plain) {
+        if (actual > baseline + 1e-6) {
+            return GOOD;
+        }
+        return actual < baseline - 1e-6 ? BAD : plain;
+    }
+
+    /**
+     * Two lines under the table: what the selected horse is, in the words the
+     * columns had no room for, or how to drive the tab when nothing is picked.
+     */
+    private void drawHorseFooter(GuiGraphicsExtractor g, int l, int r, int y) {
+        HorseListing row = ClientHorseRoster.byId(selectedHorseId);
+        int w = r - l;
+        int second = y + this.font.lineHeight + 2;
+        if (row == null) {
+            drawFitted(g, "click a heading to sort, a row to read it; terms are ANDed and "
+                            + "-term excludes, e.g. \"mare gen>2 gene:SB1 -lethal\"",
+                    l + 2, y, w, TAG);
+            if (ClientHorseRoster.truncated()) {
+                drawFitted(g, "You own more horses than the roster holds - it is showing the "
+                        + "most recent generations.", l + 2, second, w, EXPR_OFF);
+            }
+            return;
+        }
+        StringBuilder head = new StringBuilder(row.displayName());
+        if (!row.barnName().isEmpty()) {
+            head.append(" (\"").append(row.barnName()).append("\")");
+        }
+        head.append("  -  ").append(row.sexLabel().toLowerCase(Locale.ROOT))
+                .append(", ").append(row.breed())
+                .append(", generation ").append(row.generation())
+                .append("  -  ").append(row.coat());
+        drawFitted(g, head.toString(), l + 2, y, w, NAME);
+
+        StringBuilder tail = new StringBuilder();
+        tail.append("bond ").append(row.bond() < 0 ? "unknown" : row.bond());
+        if (row.inHerd()) {
+            tail.append("  - in a herd");
+        }
+        if (!row.tamedBy().isEmpty()) {
+            tail.append("  - tamed by ").append(row.tamedBy());
+        }
+        if (!row.bredBy().isEmpty()) {
+            tail.append("  - bred by ").append(row.bredBy());
+        }
+        tail.append("  - ").append(row.loaded() ? row.where() : "not loaded right now");
+        if (!row.conditions().isEmpty()) {
+            tail.append("  - ").append(String.join(", ", row.conditions()));
+        }
+        drawFitted(g, tail.toString(), l + 2, second, w, row.lethal() ? BAD : DESC);
+    }
+
+    // ------------------------------------------------------------------
     // Breeding preview
     // ------------------------------------------------------------------
     //
@@ -779,13 +1153,13 @@ public final class HorseBrowserScreen extends AbstractContainerScreen<HorseBrows
     }
 
     /** The roster row under the cursor in one of the two pickers, or null. */
-    private ClientBreedingRoster.Horse horseAt(double mx, double my, Sex sex) {
+    private HorseListing horseAt(double mx, double my, Sex sex) {
         boolean mares = sex == Sex.FEMALE;
         if (mx < listX() || mx > listX() + listW()
                 || my < pickerTop(mares) || my >= pickerTop(mares) + pickerRows(mares) * ROW_H) {
             return null;
         }
-        List<ClientBreedingRoster.Horse> list = ClientBreedingRoster.of(sex);
+        List<HorseListing> list = ClientHorseRoster.of(sex);
         int i = pickerScroll(mares) + (int) ((my - pickerTop(mares)) / ROW_H);
         return i >= 0 && i < list.size() ? list.get(i) : null;
     }
@@ -797,9 +1171,9 @@ public final class HorseBrowserScreen extends AbstractContainerScreen<HorseBrows
      */
     private void rebuildPreview() {
         detailScroll = 0f;
-        ClientBreedingRoster.Horse dam = ClientBreedingRoster.byId(damId);
-        ClientBreedingRoster.Horse sire = ClientBreedingRoster.byId(sireId);
-        previewRosterVersion = ClientBreedingRoster.version();
+        HorseListing dam = ClientHorseRoster.byId(damId);
+        HorseListing sire = ClientHorseRoster.byId(sireId);
+        previewRosterVersion = ClientHorseRoster.version();
         if (dam == null || sire == null) {
             preview = List.of();
             return;
@@ -820,7 +1194,7 @@ public final class HorseBrowserScreen extends AbstractContainerScreen<HorseBrows
     }
 
     private void drawBreedingPreview(GuiGraphicsExtractor g, int mouseX, int mouseY) {
-        if (previewRosterVersion != ClientBreedingRoster.version()) {
+        if (previewRosterVersion != ClientHorseRoster.version()) {
             rebuildPreview();
         }
         drawPicker(g, mouseX, mouseY, Sex.FEMALE);
@@ -830,7 +1204,7 @@ public final class HorseBrowserScreen extends AbstractContainerScreen<HorseBrows
 
     private void drawPicker(GuiGraphicsExtractor g, int mouseX, int mouseY, Sex sex) {
         boolean mares = sex == Sex.FEMALE;
-        List<ClientBreedingRoster.Horse> list = ClientBreedingRoster.of(sex);
+        List<HorseListing> list = ClientHorseRoster.of(sex);
         int l = listX();
         int w = listW();
         int headY = mares ? listTop() : pickerSplit();
@@ -846,7 +1220,7 @@ public final class HorseBrowserScreen extends AbstractContainerScreen<HorseBrows
         int visible = pickerRows(mares);
         int scroll = pickerScroll(mares);
         for (int i = scroll; i < list.size() && i < scroll + visible; i++) {
-            ClientBreedingRoster.Horse horse = list.get(i);
+            HorseListing horse = list.get(i);
             int ry = top + (i - scroll) * ROW_H;
             boolean sel = horse.id().equals(chosen);
             boolean hover = mouseX >= l && mouseX <= l + w && mouseY >= ry && mouseY < ry + ROW_H;
@@ -855,13 +1229,13 @@ public final class HorseBrowserScreen extends AbstractContainerScreen<HorseBrows
             } else if (hover) {
                 g.fill(l - 2, ry, l + w, ry + ROW_H, ROW_HOVER);
             }
-            drawFitted(g, horse.name() + "  g" + horse.generation(), l + 4, ry + 2, w - 12,
+            drawFitted(g, horse.displayName() + "  g" + horse.generation(), l + 4, ry + 2, w - 12,
                     sel ? NAME : NAME_DIM);
         }
         g.disableScissor();
 
         if (list.isEmpty()) {
-            String note = !ClientBreedingRoster.received()
+            String note = !ClientHorseRoster.received()
                     ? "asking the server..."
                     : "no tamed " + (mares ? "mares" : "stallions") + " on record";
             g.text(this.font, Component.literal(note), l + 4, top + 2, EXPR_OFF, false);
@@ -886,8 +1260,8 @@ public final class HorseBrowserScreen extends AbstractContainerScreen<HorseBrows
         int w = r - l;
         g.fill(l - 6, top - 2, r + 2, bottom + 2, PANEL_SOFT);
 
-        ClientBreedingRoster.Horse dam = ClientBreedingRoster.byId(damId);
-        ClientBreedingRoster.Horse sire = ClientBreedingRoster.byId(sireId);
+        HorseListing dam = ClientHorseRoster.byId(damId);
+        HorseListing sire = ClientHorseRoster.byId(sireId);
         int lineH = this.font.lineHeight + 2;
 
         if (dam == null || sire == null) {
@@ -902,7 +1276,7 @@ public final class HorseBrowserScreen extends AbstractContainerScreen<HorseBrows
                 g.text(this.font, Component.literal(line), l, y, DESC, false);
                 y += lineH;
             }
-            if (ClientBreedingRoster.truncated()) {
+            if (ClientHorseRoster.truncated()) {
                 y += lineH;
                 for (String line : GuiText.wrap(this.font,
                         "You own more horses than this list holds - it is showing the most recent "
@@ -919,7 +1293,7 @@ public final class HorseBrowserScreen extends AbstractContainerScreen<HorseBrows
         int y = top - (int) detailScroll;
         int startY = y;
 
-        drawFitted(g, dam.name() + "   x   " + sire.name(), l, y, w, HEADING);
+        drawFitted(g, dam.displayName() + "   x   " + sire.displayName(), l, y, w, HEADING);
         y += lineH;
         drawFitted(g, dam.breed() + " mare  x  " + sire.breed() + " stallion", l, y, w, TAG);
         y += lineH + 4;
