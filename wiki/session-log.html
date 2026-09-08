@@ -29,6 +29,31 @@
 
 <h2 id="d2026-09-08">2026-09-08</h2>
 
+<h3 id="gene-review-2026-09-08">Built 2026-09-08: the owner reviewed the whole registry gene by gene, and the review found more than the fixes did.</h3>
+
+<p>Owner-driven, roughly thirty notes taken while reading the gene pages, arriving as a running commentary rather than a list. Written up on each gene's page; the two engine changes are on <a href="gene-format.html#masks">the gene format</a>.</p>
+
+<ul>
+
+<li><strong>Five genes were drawing nothing at all, and the owner found three of them by opening the pages.</strong> &ldquo;Colored crescents isn't loading on the bay example&rdquo;, then Lasertae, then Stellar. It is one bug: <code>perDose</code> indexes on copies of the gene's <b>first-declared</b> allele, and a <em>coloured</em> expression is reached by two copies of the <b>second</b> - so its dose is always zero, it reads <code>perDose[0]</code>, and every one of these files had written that as <code>0.0</code> on the entirely reasonable ground that a dose of nothing should draw nothing. A <code>chance</code> of zero means the mask never fires. Crescents, Lasertae, Polymoon, Stellar and Wormholes all shipped with an invisible coloured form. Grepping for the shape found the other two before they were reported. <a href="known-gaps.html#gap-105">Gap 105</a> is the real fix: the parser can see this at load.</li>
+
+<li><strong>A Y band on the adult neck is a collar, and the first attempt to fix that got the angle wrong.</strong> Goth's hood was on the throat; the tilted-plane trick was built for it, and the owner came back with &ldquo;it's <em>still</em> coloring the underside of the neck&rdquo;. They were right. The slope had been set to tan(30) from the neck's <em>pitch</em>, and what matters is the neck's own <b>long axis</b>: its box is 12 by 7 and its bounding box comes out 12.07 by 13.89, which only works if the long axis is sixty degrees off horizontal. tan(60), not tan(30) - the complement, which tilts the plane the other way and runs the band <em>across</em> the neck rather than along it. Probing with four coloured bands settled it in one bake, and is what should have been done the first time rather than the second.</li>
+
+<li><strong>Integration was reading a channel that saturates.</strong> It is supposed to spread outward from wherever the coat is already dark - &ldquo;like the black socks on a bay&rdquo; - and it was covering the entire horse. <code>darkness</code> is <code>0.55*red + 0.95*black</code>, so a bay's <em>barrel</em> already reads about 0.84 against its points' 0.95: at any threshold high enough to mean &ldquo;the points&rdquo; it had already selected everything. The channel that tells a sock from a barrel is <code>black</code>, where the body sits at 0.2 and the points at 0.85. Found by painting four threshold bands on a horse in primary colours, which took a minute and settled what half an hour of reasoning had got wrong twice.</li>
+
+<li><strong><code>spread</code> changed meaning twice in one session, and ended up simpler than it started.</strong> It began as &ldquo;grow the pale side of the reading&rdquo;, which is what Fielded needed. Integration needed the opposite. Rather than a second parameter, it moved to <b>after <code>invert</code></b> and now dilates the mask's <i>output</i> - grow whatever this mask selected - which serves both, and is provably the same operation for Fielded. Then Integration proved the disc was in the wrong space: dilating three units off a bay's socks covered the horse, because the leg patches sit next to the barrel <em>on the texture sheet</em>. It measures in body space now (<a href="known-gaps.html#gap-104">gap 104</a>, opened and closed the same day), and the fix was cheap because <code>HorseSkinGeometry.sample</code> is a cached grid rather than a computation.</li>
+
+<li><strong>A mask list is a fold, and putting the shape first throws it away.</strong> Lasertae's eclipses were meant to be confined to the shoulder, and the region terms were <code>MAX</code>ed on after the <code>RINGS</code> mask - so a neck texel evaluated <code>max(0, neckBand)</code>, the band on its own with no ring in it, and the shoulder came out as a wash. The rule is: fold the <em>region</em> into one number first, then multiply the <em>shape</em> in. Worth remembering because it reads perfectly naturally the wrong way round.</li>
+
+<li><strong><code>width</code> has to stay under <code>spacing</code>.</strong> Zebra's Coat had stripes up to 10 body units wide at a 3-unit pitch - they overlapped four deep, and the &ldquo;narrow transverse striping&rdquo; its own description promised rendered as a solid white neck. Six genes were within a whisker of the same thing; the others are broad by design, and only this one was reported.</li>
+
+<li><strong>Two markings lost a stamped-on spiral.</strong> The <code>SPIRAL</code> mask draws one figure per part, centred on the part's bounding box, and it reads as a decal applied to the horse rather than as something grown on it. Circuit and Filigree both dropped theirs at the owner's request; nothing else uses it, and the mask is now unexercised outside the parity gene.</li>
+
+<li><strong>What was flagged rather than guessed.</strong> Pavonem does not read as a peacock eye and the owner offered to walk through what one should look like - so it is untouched, which is the right answer to an offer like that. Flametouched had its look <em>reverted</em>: the earlier session had changed the gene when the request was only about which of its two forms the wiki icon shows, and the icon baker always picks the loudest homozygote with no way for a gene to nominate a different combination.</li>
+
+</ul>
+
+
 <h3 id="gene-fixes-2026-09-08">Built 2026-09-08: twenty-four gene fixes, four new painters, one polygenic locus &mdash; and a mask bug that had been eating half of fifteen genes.</h3>
 
 <p>Owner-driven, a list of twenty-four notes taken from looking at the horses. Written up on each gene's own page; the vocabulary additions are on <a href="gene-format.html#masks">the gene format</a> and the cross-locus block on <a href="genetics-model.html#combinations">the genetics model</a>.</p>
