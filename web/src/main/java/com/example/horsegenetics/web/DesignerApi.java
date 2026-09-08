@@ -85,8 +85,20 @@ public final class DesignerApi {
     private DesignerApi() {
     }
 
+    /**
+     * <b>Deliberately does nothing.</b> It used to build the editor here, and
+     * that was a bug with a long fuse: {@link HorseEditor} snapshots
+     * {@code Genes.codeOrder()} in its constructor, and the page calls
+     * {@code main} <i>before</i> it has handed the gene bundle in - so the
+     * designer listed whatever genes the wasm could find on its own classpath,
+     * which is none of the data-driven ones. Eighty-four genes were registered
+     * and none of them appeared.
+     *
+     * <p>The editor is built lazily instead, on the first call that needs one,
+     * which is after {@link #registerGenes}. {@link #resetEditor} is the belt to
+     * that braces.
+     */
     public static void main(String[] args) {
-        editor = new HorseEditor(RNG);
     }
 
     private static HorseEditor editor() {
@@ -94,6 +106,19 @@ public final class DesignerApi {
             editor = new HorseEditor(RNG);
         }
         return editor;
+    }
+
+    /**
+     * Drop the cached editor so the next call rebuilds it against the registry
+     * as it stands now.
+     *
+     * <p>Called by both register methods. The editor's gene rows are a snapshot
+     * - they have to be, the page addresses rows by index - so anything that
+     * changes the registry has to invalidate them, and registration is the only
+     * thing that does.
+     */
+    private static void resetEditor() {
+        editor = null;
     }
 
     // ---- assets in ---------------------------------------------------------
@@ -190,6 +215,12 @@ public final class DesignerApi {
      * Every gene the page shows, in the order it shows them - alphabetically by
      * display name, the sex locus excluded because the Sex button owns it. Sent
      * once; it cannot change while the page is open.
+     *
+     * <p><b>Ask for it after {@link #registerGenes}, not before.</b> The list is
+     * a snapshot of the registry taken when the editor was built, and the
+     * data-driven genes are not in the registry until the page hands the bundle
+     * in - so a page that read this during boot would get the built-ins alone
+     * and cache them.
      */
     @JSExport
     public static String genesJson() {
@@ -1061,6 +1092,7 @@ public final class DesignerApi {
         for (String message : Genes.registerBundle(bundleJson, "genes.json")) {
             j.val(message);
         }
+        resetEditor();
         return j.endArr().toString();
     }
 
@@ -1070,6 +1102,7 @@ public final class DesignerApi {
         for (String message : Breeds.registerBundle(bundleJson, "breeds.json")) {
             j.val(message);
         }
+        resetEditor();
         return j.endArr().toString();
     }
 

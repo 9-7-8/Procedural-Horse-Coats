@@ -145,6 +145,7 @@ window.HG = window.HG || {};
         for (var i = 0; i < breedProblems.length; i++) {
           console.warn("[horsegenetics] breeds: " + breedProblems[i]);
         }
+        checkGenesArrived(imgs[7]);
         api.setNameWords(imgs[4], imgs[5]);
         api.setGradient(imgs[0].pixels, imgs[0].width, imgs[0].height);
         // Keyed exactly as LutContribution.lutResources() keys it, so the LUT
@@ -157,6 +158,30 @@ window.HG = window.HG || {};
         }
         return api;
       });
+  }
+
+  /**
+   * Every gene in the bundle should now be in the list the page shows.
+   *
+   * This is a tripwire on an ordering bug that had no symptom in the console
+   * and a very visible one on screen: the editor snapshots the registry when it
+   * is BUILT, and it used to be built by main() - which the page calls before
+   * it has handed the bundle in. Eighty-four genes registered successfully,
+   * reported no problems, and none of them appeared. Cheap to check, and the
+   * check names the cause rather than the symptom.
+   */
+  function checkGenesArrived(bundleJson) {
+    try {
+      var wanted = JSON.parse(bundleJson).length;
+      var shown = JSON.parse(api.genesJson()).length;
+      if (shown < wanted) {
+        console.error("[horsegenetics] the designer is showing " + shown
+          + " genes but " + wanted + " were registered - the gene list was snapshotted"
+          + " before registerGenes ran. See DesignerApi.resetEditor.");
+      }
+    } catch (e) {
+      console.warn("[horsegenetics] could not check the gene list: " + e);
+    }
   }
 
   /**

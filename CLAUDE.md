@@ -129,7 +129,11 @@ Two rules about the backlog page, both learned the hard way:
    `wiki/pages.js` - which the sidebar *and* the landing page both read - and
    nowhere else, with the `views` it belongs in. (`wiki/gene-creator/`,
    `wiki/horse-designer/` and `wiki/breed-designer/` are the exceptions - they
-   are apps, not pages, and own their own chrome.)
+   are apps, not pages, and own their own chrome.) **The span between the
+   `BEGIN`/`END generated` markers belongs to `:common:bakeGeneWikiPages`** -
+   the data-driven genes have a page each and cannot be listed by hand. Edit
+   outside it; a hand-written page for one of those genes is respected and
+   dropped from the generated span automatically.
 8. **Flag genuinely unverified API usage in a comment**, the way the existing
    code does. More useful to the next session than silent confidence.
 9. **When you resolve something recorded as a gap or as unverified, update that
@@ -193,7 +197,7 @@ and fails *silently* when stale:
 | any breed, or `BreedSpecWriter` | `:common:bakeBreedFiles` | `common/.../horsegenetics/breeds/` **and** `wiki/horse-designer/assets/breeds.json` |
 | `spec/`, `SpecSchema`, `AbilityType`, `HorseSkinGeometry`, the noise classes | `:common:bakeSpecFixtures` **then** `check-parity.mjs` | `wiki/gene-creator/fixtures/expected.json` |
 | the coat PNGs or the name tables | `:common:bakeCreatorAssets` + `:web:bakeDesignerAssets` | the regenerated assets |
-| **any file in `horsegenetics/genes/`** | `:common:bakeGeneBundle`, `:common:bakeGeneIcons`, `:common:bakeGeneWikiPages` | `wiki/horse-designer/assets/genes.json`, `wiki/assets/gene-icons/`, `wiki/genes-magic-*.html` |
+| **any file in `horsegenetics/genes/`** | `:common:bakeGeneBundle`, `:common:bakeGeneIcons`, `:common:bakeGeneWikiPages` | `wiki/horse-designer/assets/genes.json`, `wiki/assets/gene-icons/`, the gene's `wiki/gene-*.html`, `wiki/genes-magic-*.html` **and the generated span of `wiki/pages.js`** |
 | **any wiki prose at all** | `node wiki/tools/build-search-index.mjs` | `wiki/search-index.js` |
 | a page's tab panels, or a section moved between tabs | `node wiki/tools/sync-page-views.mjs` | `wiki/pages.js` |
 | either `tools/barn/*.source.nbt`, **or `bake-barn.py` itself** | `python neoforge-26.1.2/tools/barn/bake-barn.py` | `data/horsegenetics/structure/cowboy_barn.nbt` |

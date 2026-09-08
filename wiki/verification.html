@@ -158,12 +158,24 @@
     <strong>The designer and the spawn screen.</strong> Both should now list every one of
     these. The designer reads <code>wiki/horse-designer/assets/genes.json</code>, which
     is baked; the spawn screen reads the registry directly.
+    <br>
+    <strong>The designer was showing none of them</strong> and now should &mdash;
+    <code>DesignerApi.main</code> was building the editor, which snapshots the gene list,
+    before the page had handed the bundle in. Fixed, the wasm rebuilt, and verified only
+    by reading the call order: <em>nobody has loaded the page since.</em>
+    <strong>Hard-refresh it</strong> (Ctrl+F5) or the browser will hand you the cached
+    <code>web.wasm</code> and the old behaviour. If it is still wrong the console now says
+    so explicitly, naming the count it expected.
 </li>
 <li>
-    <strong>The seven generated family pages.</strong>
-    <code>wiki/genes-magic-*.html</code>, each with an icon per gene. Served over
-    <code>http</code>, the preview windows on them should all work; they now default to
-    <strong>bay</strong> rather than black.
+    <strong>Eighty-four generated gene pages, and the seven indexes over them.</strong>
+    Each gene has its own <code>wiki/gene-*.html</code> carrying its preview, its
+    inheritance table, how often a wild horse is born with it, and its gene carrot;
+    <code>wiki/genes-magic-*.html</code> gathers them by family with an icon each.
+    Served over <code>http</code>, every widget on them should work &mdash; and the
+    preview now opens on <strong>bay</strong> rather than black. The sidebar gained
+    seven sections and the wiki went from 116 pages to 200, so it is worth a look at
+    whether the navigation still reads.
 </li>
 </ul>
 
