@@ -11,6 +11,13 @@
 // reason: at 8px text on a virtual grid, with the geometry copied across, the
 // layout can be compared side by side. A form full of <select>s could not be.
 //
+// The deliberate divergences, both the same one: a browser page has no world
+// and no inventory, so the screen's two output buttons have no twin here.
+// "Spawn" has nothing to spawn into; "Make egg" (which writes the horse on
+// screen into a preset_horse_spawn_egg item) has no inventory to put an item
+// in. The page's equivalent of both is "Copy code" - the same horse, in a form
+// you can paste anywhere, this page included. Nothing else may differ.
+//
 // What this file does NOT contain is any genetics. Every question it asks -
 // what a row expresses, which allele a gene is added at, how a sex-linked row
 // snaps - goes to the compiled Java in HG.java. This is a view.

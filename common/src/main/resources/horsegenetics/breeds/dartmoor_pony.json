@@ -1,0 +1,51 @@
+{
+  "id": "dartmoor_pony",
+  "name": "Dartmoor Pony",
+  "commonness": "rare",
+  "biomes": [
+    "minecraft:windswept_hills",
+    "minecraft:meadow",
+    "minecraft:forest"
+  ],
+  "stats": {
+    "speed": 4,
+    "jump": 5,
+    "health": 8,
+    "height": [11.5, 12.5]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 42 },
+      { "pair": "E/e", "weight": 44 },
+      { "pair": "e/e", "weight": 14 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 30 },
+      { "pair": "A/a", "weight": 45 },
+      { "pair": "a/a", "weight": 25 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.matp": [
+      { "pair": "Cr/N", "weight": 6 },
+      { "pair": "N/N", "weight": 94 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/N", "weight": 14 },
+      { "pair": "N/N", "weight": 86 }
+    ],
+    "horsegenetics.roan": [
+      { "pair": "Rn/rn", "weight": 12 },
+      { "pair": "rn/rn", "weight": 88 }
+    ]
+  },
+  "notes": [
+    "Small, large head, thick mane and tail. Laminitis / EMS are age-related (folded into heartiness)."
+  ]
+}

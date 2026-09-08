@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.example.horsegenetics.common.breed.spec.BreedSpecLoader;
 import com.example.horsegenetics.common.genetics.Genes;
 import java.util.HashSet;
 import java.util.List;
@@ -13,9 +14,17 @@ import org.junit.jupiter.api.Test;
 
 class BreedsTest {
 
+    /**
+     * Every file in the shipped folder is registered, and nothing else is.
+     * Written against {@code index.json} rather than against a number, because a
+     * number in a test is the same stale-derived-value trap CLAUDE.md keeps
+     * finding in prose - it would have to be edited every time a breed is added,
+     * and editing it is not the same as checking it.
+     */
     @Test
-    void everyBreedSheetRowIsRegistered() {
-        assertEquals(49, Breeds.all().size());
+    void everyShippedBreedFileIsRegistered() {
+        assertEquals(BreedSpecLoader.fromClasspath().breeds().size(), Breeds.all().size());
+        assertFalse(Breeds.all().isEmpty(), "no breed files were found at all");
     }
 
     @Test

@@ -24,8 +24,17 @@ public final class ModCreativeTabs {
                     .title(Component.translatable("itemGroup.horsegenetics.main"))
                     .icon(() -> new ItemStack(ModItems.HORSE_HAIR.get()))
                     .withTabsBefore(CreativeModeTabs.SPAWN_EGGS)
-                    .displayItems((params, output) ->
-                            ModItems.TAB_ITEMS.forEach(item -> output.accept(item.get())))
+                    .displayItems((params, output) -> {
+                        ModItems.TAB_ITEMS.forEach(item -> output.accept(item.get()));
+                        // One filled breed egg per breed that has one. The blank
+                        // item is not listed anywhere: its whole content is the
+                        // breed component, and an egg without one does nothing.
+                        for (com.example.horsegenetics.common.breed.Breed breed
+                                : com.example.horsegenetics.common.breed.Breeds.from(
+                                        com.example.horsegenetics.common.breed.BreedSource.SPAWN_EGG)) {
+                            output.accept(BreedSpawnEggItem.of(breed));
+                        }
+                    })
                     .build());
 
     private ModCreativeTabs() {

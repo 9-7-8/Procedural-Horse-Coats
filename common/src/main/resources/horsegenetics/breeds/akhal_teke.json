@@ -1,0 +1,54 @@
+{
+  "id": "akhal_teke",
+  "name": "Akhal-Teke",
+  "commonness": "uncommon",
+  "biomes": [
+    "minecraft:desert",
+    "minecraft:savanna",
+    "minecraft:badlands",
+    "minecraft:savanna_plateau"
+  ],
+  "stats": {
+    "speed": 9,
+    "jump": 5,
+    "health": 8,
+    "height": [14.5, 16]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 42 },
+      { "pair": "E/e", "weight": 44 },
+      { "pair": "e/e", "weight": 14 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 30 },
+      { "pair": "A/a", "weight": 45 },
+      { "pair": "a/a", "weight": 25 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.matp": [
+      { "pair": "Cr/N", "weight": 14 },
+      { "pair": "Cr/Cr", "weight": 3 },
+      { "pair": "N/N", "weight": 83 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/N", "weight": 5 },
+      { "pair": "N/N", "weight": 95 }
+    ],
+    "horsegenetics.dun": [
+      { "pair": "d1/d2", "weight": 30 },
+      { "pair": "d2/d2", "weight": 70 }
+    ]
+  },
+  "notes": [
+    "Metallic / iridescent coat sheen - not modelled (a shader, out of scope).",
+    "NNF: an early-lethal foal disorder with no gene yet - see roadmap."
+  ]
+}

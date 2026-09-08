@@ -1,0 +1,60 @@
+{
+  "id": "thoroughbred",
+  "name": "Thoroughbred",
+  "commonness": "very_common",
+  "biomes": [
+    "minecraft:plains",
+    "minecraft:savanna",
+    "minecraft:sunflower_plains",
+    "minecraft:meadow"
+  ],
+  "stats": {
+    "speed": 10,
+    "jump": 8,
+    "health": 4,
+    "height": [15.5, 17]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 42 },
+      { "pair": "E/e", "weight": 44 },
+      { "pair": "e/e", "weight": 14 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 55 },
+      { "pair": "A/a", "weight": 38 },
+      { "pair": "a/a", "weight": 7 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/N", "weight": 14 },
+      { "pair": "N/N", "weight": 86 }
+    ],
+    "horsegenetics.roan": [
+      { "pair": "Rn/rn", "weight": 8 },
+      { "pair": "rn/rn", "weight": 92 }
+    ],
+    "horsegenetics.mitf": [
+      { "pair": "SW1/N", "weight": 60 },
+      { "pair": "N/N", "weight": 40 }
+    ],
+    "horsegenetics.kit": [
+      { "pair": "W20/N", "weight": 34 },
+      { "pair": "W32/N", "weight": 6 },
+      { "pair": "W35/N", "weight": 8 },
+      { "pair": "W5/N", "weight": 1 },
+      { "pair": "W22/N", "weight": 1 },
+      { "pair": "N/N", "weight": 50 }
+    ]
+  },
+  "notes": [
+    "Lean, sleek, flat profile, refined legs - the fastest breed in the game, and among the most fragile. EIPH ('bleeder') is exertional."
+  ]
+}

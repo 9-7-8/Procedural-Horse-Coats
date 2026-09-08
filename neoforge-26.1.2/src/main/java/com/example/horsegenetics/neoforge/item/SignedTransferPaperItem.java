@@ -1,6 +1,6 @@
 package com.example.horsegenetics.neoforge.item;
 
-import com.example.horsegenetics.common.breed.Breeds;
+import com.example.horsegenetics.common.breed.BreedLineage;
 import com.example.horsegenetics.common.horse.TransferDeed;
 import com.example.horsegenetics.neoforge.data.ModDataComponents;
 import net.minecraft.ChatFormatting;
@@ -59,7 +59,11 @@ public class SignedTransferPaperItem extends Item {
                     .withStyle(ChatFormatting.DARK_GRAY));
             return;
         }
-        adder.accept(Component.literal(Breeds.displayName(deed.breed().orElse(null)))
+        // The deed carries a BreedLineage *token*, not a breed id, so it is parsed
+        // rather than looked up: a cross used to render as "Cross:arabian+friesian"
+        // here, and a spliced line would have been worse.
+        adder.accept(Component.literal(
+                        BreedLineage.parse(deed.breed().orElse(null)).displayName())
                 .withStyle(ChatFormatting.AQUA));
         deed.bredBy().ifPresent(breeder -> adder.accept(
                 Component.translatable("tooltip.horsegenetics.transfer_paper.bred_by",

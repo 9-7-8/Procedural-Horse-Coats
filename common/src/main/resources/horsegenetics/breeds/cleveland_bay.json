@@ -1,0 +1,33 @@
+{
+  "id": "cleveland_bay",
+  "name": "Cleveland Bay",
+  "commonness": "rare",
+  "biomes": [
+    "minecraft:plains",
+    "minecraft:forest",
+    "minecraft:meadow"
+  ],
+  "hardy": true,
+  "stats": {
+    "speed": 6,
+    "jump": 6,
+    "health": 8,
+    "height": [16, 16.5]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 80 },
+      { "pair": "E/e", "weight": 20 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 100 }
+    ],
+    "horsegenetics.mitf": [
+      { "pair": "SW1/N", "weight": 10 },
+      { "pair": "N/N", "weight": 90 }
+    ]
+  },
+  "notes": [
+    "Always bay with black points, minimal white. Fixed A_ plus an E-heavy extension keeps it off chestnut and black."
+  ]
+}

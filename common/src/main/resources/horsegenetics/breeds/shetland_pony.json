@@ -1,0 +1,81 @@
+{
+  "id": "shetland_pony",
+  "name": "Shetland Pony",
+  "commonness": "very_common",
+  "biomes": [
+    "minecraft:mushroom_fields",
+    "minecraft:snowy_plains",
+    "minecraft:taiga",
+    "minecraft:grove"
+  ],
+  "stats": {
+    "speed": 3,
+    "jump": 3,
+    "health": 9,
+    "height": [8, 10.5]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 42 },
+      { "pair": "E/e", "weight": 44 },
+      { "pair": "e/e", "weight": 14 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 30 },
+      { "pair": "A/a", "weight": 45 },
+      { "pair": "a/a", "weight": 25 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.dun": [
+      { "pair": "D/d2", "weight": 8 },
+      { "pair": "d2/d2", "weight": 92 }
+    ],
+    "horsegenetics.matp": [
+      { "pair": "Cr/N", "weight": 8 },
+      { "pair": "N/N", "weight": 92 }
+    ],
+    "horsegenetics.tobiano": [
+      { "pair": "To/to", "weight": 30 },
+      { "pair": "to/to", "weight": 70 }
+    ],
+    "horsegenetics.kit": [
+      { "pair": "SB1/N", "weight": 14 },
+      { "pair": "W35/N", "weight": 10 },
+      { "pair": "W13/N", "weight": 2 },
+      { "pair": "N/N", "weight": 74 }
+    ],
+    "horsegenetics.leopard": [
+      { "pair": "LP/lp", "weight": 14 },
+      { "pair": "LP/LP", "weight": 2 },
+      { "pair": "lp/lp", "weight": 84 }
+    ],
+    "horsegenetics.patn1": [
+      { "pair": "PATN1/n", "weight": 22 },
+      { "pair": "n/n", "weight": 78 }
+    ],
+    "horsegenetics.patn2": [
+      { "pair": "PATN2/n", "weight": 14 },
+      { "pair": "n/n", "weight": 86 }
+    ],
+    "horsegenetics.pangare": [
+      { "pair": "Pa1/Pa1", "weight": 16 },
+      { "pair": "Pa1/pa", "weight": 38 },
+      { "pair": "pa/pa", "weight": 46 }
+    ],
+    "horsegenetics.mitf": [
+      { "pair": "SW1/N", "weight": 60 },
+      { "pair": "N/N", "weight": 40 }
+    ]
+  },
+  "notes": [
+    "Very small, thick coat, short legs, heavy head - pound for pound the strongest breed. Some carry the leopard complex.",
+    "Hyperlipidemia, EMS: age-related, folded into heartiness."
+  ]
+}

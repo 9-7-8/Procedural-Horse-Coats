@@ -63,6 +63,14 @@ public final class HorsePrices {
             case CROSS -> dearer(
                     priceOf(Breeds.get(lineage.components().get(0))),
                     priceOf(Breeds.get(lineage.components().get(1))));
+            // A spliced line is priced off the breed it was spliced from, and
+            // not a copper more. What a splice buys you is a horse that looks
+            // remarkable; what it costs you is the claim that you bred it, and
+            // a dealer who can read a pedigree is exactly who notices.
+            case SPLICED -> lineage.components().size() == 1
+                    ? priceOf(Breeds.get(lineage.components().get(0)))
+                    : dearer(priceOf(Breeds.get(lineage.components().get(0))),
+                            priceOf(Breeds.get(lineage.components().get(1))));
             case MIXED, FERAL -> DEFAULT_PRICE;
         };
     }

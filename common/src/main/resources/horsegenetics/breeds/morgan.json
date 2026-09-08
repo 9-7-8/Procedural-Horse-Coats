@@ -1,0 +1,71 @@
+{
+  "id": "morgan",
+  "name": "Morgan",
+  "commonness": "very_common",
+  "biomes": [
+    "minecraft:plains",
+    "minecraft:forest",
+    "minecraft:taiga",
+    "minecraft:meadow"
+  ],
+  "stats": {
+    "speed": 6,
+    "jump": 6,
+    "health": 8,
+    "height": [14.25, 15.5]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 42 },
+      { "pair": "E/e", "weight": 44 },
+      { "pair": "e/e", "weight": 14 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 30 },
+      { "pair": "A/a", "weight": 45 },
+      { "pair": "a/a", "weight": 25 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.matp": [
+      { "pair": "Cr/N", "weight": 8 },
+      { "pair": "N/N", "weight": 92 }
+    ],
+    "horsegenetics.dun": [
+      { "pair": "D/d2", "weight": 5 },
+      { "pair": "d2/d2", "weight": 95 }
+    ],
+    "horsegenetics.roan": [
+      { "pair": "Rn/rn", "weight": 12 },
+      { "pair": "rn/rn", "weight": 88 }
+    ],
+    "horsegenetics.kit": [
+      { "pair": "SB1/N", "weight": 16 },
+      { "pair": "W4/N", "weight": 2 },
+      { "pair": "W35/N", "weight": 12 },
+      { "pair": "W34/N", "weight": 4 },
+      { "pair": "N/N", "weight": 66 }
+    ],
+    "horsegenetics.flaxen": [
+      { "pair": "Fl2/Fl1", "weight": 6 },
+      { "pair": "Fl1/Fl1", "weight": 12 },
+      { "pair": "Fl1/f", "weight": 34 },
+      { "pair": "f/f", "weight": 48 }
+    ],
+    "horsegenetics.mitf": [
+      { "pair": "SW1/N", "weight": 55 },
+      { "pair": "N/N", "weight": 45 }
+    ]
+  },
+  "notes": [
+    "Slightly crested neck, expressive eyes, compact and refined - a versatile foundation American breed.",
+    "Cushing's, EMS: age-related, folded into heartiness.",
+    "Carries W4, the Camarillo white: the line was founded on Morgan mares bred to one white stallion in the 1920s, and it is the only breed here that throws an all-white foal rather than a grey."
+  ]
+}

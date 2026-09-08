@@ -1,0 +1,41 @@
+{
+  "id": "american_cream_draft",
+  "name": "American Cream Draft",
+  "commonness": "rare",
+  "biomes": [
+    "minecraft:plains",
+    "minecraft:sunflower_plains",
+    "minecraft:meadow"
+  ],
+  "stats": {
+    "speed": 3,
+    "jump": 2,
+    "health": 5,
+    "height": [15, 16]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "e/e", "weight": 100 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 30 },
+      { "pair": "A/a", "weight": 45 },
+      { "pair": "a/a", "weight": 25 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.matp": [
+      { "pair": "Cr/Cr", "weight": 100 }
+    ]
+  },
+  "notes": [
+    "Pale cream coat, amber eyes, pink skin - the cream double-dilute already renders; dedicated eye colour is a roadmap gene.",
+    "EMS / laminitis: age-related, folded into heartiness."
+  ]
+}

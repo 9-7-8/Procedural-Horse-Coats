@@ -2,6 +2,7 @@ package com.example.horsegenetics.neoforge.server;
 
 import com.example.horsegenetics.common.Rng;
 import com.example.horsegenetics.common.breed.BreedLineage;
+import com.example.horsegenetics.common.genetics.SpliceOutcome;
 import com.example.horsegenetics.common.genetics.CarrotEffect;
 import com.example.horsegenetics.common.genetics.GameteBias;
 import com.example.horsegenetics.common.genetics.GeneticCodeCombiner;
@@ -146,6 +147,15 @@ public final class HorseBreedingHandler {
         // "A x B cross", cross-of-the-same-pair stays that cross, anything
         // messier -> "Mixed" (see BreedLineage.combine).
         BreedLineage childLineage = BreedLineage.combine(damRecord.lineage(), sireRecord.lineage());
+
+        // A gene splice carrot that actually landed marks the foal Spliced
+        // (its breed), for good and down its whole line. It is checked against
+        // the genotype that was just drawn rather than against the carrot,
+        // because feeding one is a gamble - see SpliceOutcome.
+        if (SpliceOutcome.spliceReached(childGenome.genotype(),
+                damGenome.genotype(), sireGenome.genotype(), damBias, sireBias)) {
+            childLineage = childLineage.spliced();
+        }
 
         // The draw happens first and is never conditioned on viability - it is
         // the ordinary Mendelian one, and this only reads its result. That is

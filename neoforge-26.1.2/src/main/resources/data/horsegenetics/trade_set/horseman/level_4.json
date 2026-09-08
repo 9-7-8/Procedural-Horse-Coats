@@ -4,6 +4,7 @@
     "horsegenetics:horseman/level_4/buy_hair_cloth",
     "horsegenetics:horseman/level_4/sell_common_carrot",
     "horsegenetics:horseman/level_4/sell_common_paper",
+    "horsegenetics:horseman/level_4/sell_uncommon_breed_egg",
     "horsegenetics:horseman/level_4/sell_uncommon_carrot"
   ],
   "random_sequence": "horsegenetics:trade_set/horseman/level_4"

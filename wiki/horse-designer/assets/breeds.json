@@ -1,0 +1,2726 @@
+[
+{
+  "id": "akhal_teke",
+  "name": "Akhal-Teke",
+  "commonness": "uncommon",
+  "biomes": [
+    "minecraft:desert",
+    "minecraft:savanna",
+    "minecraft:badlands",
+    "minecraft:savanna_plateau"
+  ],
+  "stats": {
+    "speed": 9,
+    "jump": 5,
+    "health": 8,
+    "height": [14.5, 16]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 42 },
+      { "pair": "E/e", "weight": 44 },
+      { "pair": "e/e", "weight": 14 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 30 },
+      { "pair": "A/a", "weight": 45 },
+      { "pair": "a/a", "weight": 25 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.matp": [
+      { "pair": "Cr/N", "weight": 14 },
+      { "pair": "Cr/Cr", "weight": 3 },
+      { "pair": "N/N", "weight": 83 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/N", "weight": 5 },
+      { "pair": "N/N", "weight": 95 }
+    ],
+    "horsegenetics.dun": [
+      { "pair": "d1/d2", "weight": 30 },
+      { "pair": "d2/d2", "weight": 70 }
+    ]
+  },
+  "notes": [
+    "Metallic / iridescent coat sheen - not modelled (a shader, out of scope).",
+    "NNF: an early-lethal foal disorder with no gene yet - see roadmap."
+  ]
+},
+{
+  "id": "american_cream_draft",
+  "name": "American Cream Draft",
+  "commonness": "rare",
+  "biomes": [
+    "minecraft:plains",
+    "minecraft:sunflower_plains",
+    "minecraft:meadow"
+  ],
+  "stats": {
+    "speed": 3,
+    "jump": 2,
+    "health": 5,
+    "height": [15, 16]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "e/e", "weight": 100 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 30 },
+      { "pair": "A/a", "weight": 45 },
+      { "pair": "a/a", "weight": 25 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.matp": [
+      { "pair": "Cr/Cr", "weight": 100 }
+    ]
+  },
+  "notes": [
+    "Pale cream coat, amber eyes, pink skin - the cream double-dilute already renders; dedicated eye colour is a roadmap gene.",
+    "EMS / laminitis: age-related, folded into heartiness."
+  ]
+},
+{
+  "id": "american_miniature",
+  "name": "American Miniature",
+  "commonness": "very_common",
+  "biomes": [
+    "minecraft:plains",
+    "minecraft:sunflower_plains",
+    "minecraft:meadow"
+  ],
+  "stats": {
+    "speed": 2,
+    "jump": 1,
+    "health": 4,
+    "height": [7, 8.5]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 42 },
+      { "pair": "E/e", "weight": 44 },
+      { "pair": "e/e", "weight": 14 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 30 },
+      { "pair": "A/a", "weight": 45 },
+      { "pair": "a/a", "weight": 25 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.matp": [
+      { "pair": "Cr/N", "weight": 16 },
+      { "pair": "prl/N", "weight": 8 },
+      { "pair": "N/N", "weight": 76 }
+    ],
+    "horsegenetics.dun": [
+      { "pair": "D/d2", "weight": 10 },
+      { "pair": "d1/d2", "weight": 14 },
+      { "pair": "d2/d2", "weight": 76 }
+    ],
+    "horsegenetics.champagne": [
+      { "pair": "Ch/c", "weight": 8 },
+      { "pair": "c/c", "weight": 92 }
+    ],
+    "horsegenetics.silver": [
+      { "pair": "Z/z", "weight": 8 },
+      { "pair": "z/z", "weight": 92 }
+    ],
+    "horsegenetics.tobiano": [
+      { "pair": "To/to", "weight": 22 },
+      { "pair": "to/to", "weight": 78 }
+    ],
+    "horsegenetics.roan": [
+      { "pair": "Rn/rn", "weight": 12 },
+      { "pair": "rn/rn", "weight": 88 }
+    ],
+    "horsegenetics.kit": [
+      { "pair": "SB1/N", "weight": 16 },
+      { "pair": "W20/N", "weight": 12 },
+      { "pair": "W35/N", "weight": 14 },
+      { "pair": "W13/N", "weight": 2 },
+      { "pair": "N/N", "weight": 56 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/N", "weight": 7 },
+      { "pair": "G2/N", "weight": 6 },
+      { "pair": "N/N", "weight": 87 }
+    ],
+    "horsegenetics.mitf": [
+      { "pair": "SW1/N", "weight": 60 },
+      { "pair": "N/N", "weight": 40 }
+    ]
+  },
+  "notes": [
+    "Under 9.5 hh: the magic-size band bottoms this near the MAGICAL_MIN_SCALE guard - about as small as the model goes.",
+    "Dwarfism, dental overcrowding, EMS: ACAN dwarfism already exists; the rest fold into heartiness."
+  ]
+},
+{
+  "id": "american_paint",
+  "name": "American Paint",
+  "commonness": "very_common",
+  "biomes": [
+    "minecraft:plains",
+    "minecraft:savanna",
+    "minecraft:windswept_savanna"
+  ],
+  "stats": {
+    "speed": 7,
+    "jump": 5,
+    "health": 6,
+    "height": [14.5, 16]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 42 },
+      { "pair": "E/e", "weight": 44 },
+      { "pair": "e/e", "weight": 14 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 30 },
+      { "pair": "A/a", "weight": 45 },
+      { "pair": "a/a", "weight": 25 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.matp": [
+      { "pair": "Cr/N", "weight": 12 },
+      { "pair": "N/N", "weight": 88 }
+    ],
+    "horsegenetics.dun": [
+      { "pair": "D/d2", "weight": 6 },
+      { "pair": "d2/d2", "weight": 94 }
+    ],
+    "horsegenetics.tobiano": [
+      { "pair": "To/to", "weight": 48 },
+      { "pair": "To/To", "weight": 10 },
+      { "pair": "to/to", "weight": 42 }
+    ],
+    "horsegenetics.kit": [
+      { "pair": "SB1/N", "weight": 26 },
+      { "pair": "W20/N", "weight": 16 },
+      { "pair": "W35/N", "weight": 16 },
+      { "pair": "W32/N", "weight": 8 },
+      { "pair": "W34/N", "weight": 4 },
+      { "pair": "N/N", "weight": 30 }
+    ],
+    "horsegenetics.ednrb": [
+      { "pair": "O/N", "weight": 20 },
+      { "pair": "N/N", "weight": 80 }
+    ],
+    "horsegenetics.mitf": [
+      { "pair": "SW1/N", "weight": 60 },
+      { "pair": "N/N", "weight": 40 }
+    ],
+    "horsegenetics.pax3": [
+      { "pair": "SW2/N", "weight": 30 },
+      { "pair": "N/N", "weight": 70 }
+    ]
+  },
+  "notes": [
+    "Pinto spotting: tobiano + sabino + frame overo + splash, all present. O/O (lethal white) is the real breeding hazard.",
+    "HYPP, HERDA and PSSM1 all have loci now - see SCN4A, PPIB and GYS1. HYPP is the breeding hazard here alongside O/O."
+  ]
+},
+{
+  "id": "andalusian",
+  "name": "Andalusian",
+  "biomes": [
+    "minecraft:plains",
+    "minecraft:forest",
+    "minecraft:sunflower_plains",
+    "minecraft:meadow"
+  ],
+  "stats": {
+    "speed": 6,
+    "jump": 8,
+    "health": 5,
+    "height": [15, 16.5]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 62 },
+      { "pair": "E/e", "weight": 33 },
+      { "pair": "e/e", "weight": 5 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 30 },
+      { "pair": "A/a", "weight": 45 },
+      { "pair": "a/a", "weight": 25 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/N", "weight": 34 },
+      { "pair": "G2/N", "weight": 18 },
+      { "pair": "G3/G3", "weight": 12 },
+      { "pair": "G3/G2", "weight": 6 },
+      { "pair": "G2/G2", "weight": 4 },
+      { "pair": "N/N", "weight": 26 }
+    ]
+  },
+  "notes": [
+    "Thick flowing mane and tail, baroque compact build - mane length is a roadmap render item.",
+    "OCD, laminitis: age-related, folded into heartiness."
+  ]
+},
+{
+  "id": "appaloosa",
+  "name": "Appaloosa",
+  "biomes": [
+    "minecraft:taiga",
+    "minecraft:forest",
+    "minecraft:windswept_hills"
+  ],
+  "stats": {
+    "speed": 6,
+    "jump": 7,
+    "health": 7,
+    "height": [14.5, 16]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 42 },
+      { "pair": "E/e", "weight": 44 },
+      { "pair": "e/e", "weight": 14 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 30 },
+      { "pair": "A/a", "weight": 45 },
+      { "pair": "a/a", "weight": 25 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.roan": [
+      { "pair": "Rn/rn", "weight": 8 },
+      { "pair": "rn/rn", "weight": 92 }
+    ],
+    "horsegenetics.leopard": [
+      { "pair": "LP/lp", "weight": 55 },
+      { "pair": "LP/LP", "weight": 20 },
+      { "pair": "lp/lp", "weight": 25 }
+    ],
+    "horsegenetics.patn1": [
+      { "pair": "PATN1/n", "weight": 45 },
+      { "pair": "PATN1/PATN1", "weight": 8 },
+      { "pair": "n/n", "weight": 47 }
+    ],
+    "horsegenetics.patn2": [
+      { "pair": "PATN2/n", "weight": 20 },
+      { "pair": "n/n", "weight": 80 }
+    ],
+    "horsegenetics.mitf": [
+      { "pair": "SW1/N", "weight": 55 },
+      { "pair": "N/N", "weight": 45 }
+    ],
+    "horsegenetics.pax3": [
+      { "pair": "SW4/N", "weight": 4 },
+      { "pair": "N/N", "weight": 96 }
+    ],
+    "horsegenetics.kit": [
+      { "pair": "W35/N", "weight": 14 },
+      { "pair": "W34/N", "weight": 5 },
+      { "pair": "SB1/N", "weight": 8 },
+      { "pair": "N/N", "weight": 73 }
+    ]
+  },
+  "notes": [
+    "ERU (equine recurrent uveitis) is age-related; folded into heartiness. CSNB on LP/LP is modelled (informational)."
+  ]
+},
+{
+  "id": "arabian",
+  "name": "Arabian",
+  "commonness": "common",
+  "biomes": [
+    "minecraft:desert",
+    "minecraft:savanna",
+    "minecraft:badlands",
+    "minecraft:savanna_plateau"
+  ],
+  "stats": {
+    "speed": 7,
+    "jump": 6,
+    "health": 9,
+    "height": [14.5, 15.75]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 42 },
+      { "pair": "E/e", "weight": 44 },
+      { "pair": "e/e", "weight": 14 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 55 },
+      { "pair": "A/a", "weight": 38 },
+      { "pair": "a/a", "weight": 7 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/N", "weight": 40 },
+      { "pair": "G3/G3", "weight": 14 },
+      { "pair": "N/N", "weight": 46 }
+    ],
+    "horsegenetics.kit": [
+      { "pair": "SB1/N", "weight": 14 },
+      { "pair": "W35/N", "weight": 10 },
+      { "pair": "W34/N", "weight": 3 },
+      { "pair": "W15/N", "weight": 1 },
+      { "pair": "W23/N", "weight": 1 },
+      { "pair": "N/N", "weight": 71 }
+    ]
+  },
+  "notes": [
+    "Dished face and high-carried tail - head profile is not modelled; tail carriage could be a pose tweak (roadmap).",
+    "SCID, CA, LFS: early-lethal foal disorders - candidate genes, see roadmap."
+  ]
+},
+{
+  "id": "banker_horse",
+  "name": "Banker Horse",
+  "commonness": "rare",
+  "biomes": [
+    "minecraft:beach",
+    "minecraft:stony_shore",
+    "minecraft:river"
+  ],
+  "hardy": true,
+  "stats": {
+    "speed": 6,
+    "jump": 4,
+    "health": 9,
+    "height": [13.5, 14.5]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 42 },
+      { "pair": "E/e", "weight": 44 },
+      { "pair": "e/e", "weight": 14 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 30 },
+      { "pair": "A/a", "weight": 45 },
+      { "pair": "a/a", "weight": 25 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.matp": [
+      { "pair": "Cr/N", "weight": 12 },
+      { "pair": "N/N", "weight": 88 }
+    ],
+    "horsegenetics.dun": [
+      { "pair": "D/d2", "weight": 14 },
+      { "pair": "d1/d2", "weight": 16 },
+      { "pair": "d2/d2", "weight": 70 }
+    ],
+    "horsegenetics.kit": [
+      { "pair": "SB1/N", "weight": 20 },
+      { "pair": "W35/N", "weight": 8 },
+      { "pair": "N/N", "weight": 72 }
+    ]
+  },
+  "notes": [
+    "Primitive markings, Spanish-type head. Feral Colonial Spanish stock - hardy, few genetic issues."
+  ]
+},
+{
+  "id": "belgian_draft",
+  "name": "Belgian Draft",
+  "commonness": "common",
+  "biomes": [
+    "minecraft:plains",
+    "minecraft:forest",
+    "minecraft:meadow"
+  ],
+  "stats": {
+    "speed": 3,
+    "jump": 2,
+    "health": 6,
+    "height": [16, 17]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "e/e", "weight": 100 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 30 },
+      { "pair": "A/a", "weight": 45 },
+      { "pair": "a/a", "weight": 25 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.matp": [
+      { "pair": "Cr/N", "weight": 8 },
+      { "pair": "prl/N", "weight": 5 },
+      { "pair": "N/N", "weight": 87 }
+    ],
+    "horsegenetics.roan": [
+      { "pair": "Rn/rn", "weight": 28 },
+      { "pair": "rn/rn", "weight": 72 }
+    ],
+    "horsegenetics.flaxen": [
+      { "pair": "Fl2/Fl1", "weight": 20 },
+      { "pair": "Fl1/Fl1", "weight": 34 },
+      { "pair": "Fl1/f", "weight": 36 },
+      { "pair": "f/f", "weight": 10 }
+    ]
+  },
+  "notes": [
+    "Flaxen mane and tail on a chestnut body, heavy muscling - the muscling reads through MSTN.",
+    "CPL, EMS, anhidrosis: age-related, folded into heartiness."
+  ]
+},
+{
+  "id": "camargue",
+  "name": "Camargue",
+  "commonness": "uncommon",
+  "biomes": [
+    "minecraft:swamp",
+    "minecraft:mangrove_swamp",
+    "minecraft:river",
+    "minecraft:beach"
+  ],
+  "stats": {
+    "speed": 5,
+    "jump": 4,
+    "health": 9,
+    "height": [13.5, 14.5]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 42 },
+      { "pair": "E/e", "weight": 44 },
+      { "pair": "e/e", "weight": 14 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 30 },
+      { "pair": "A/a", "weight": 45 },
+      { "pair": "a/a", "weight": 25 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/G3", "weight": 100 }
+    ]
+  },
+  "notes": [
+    "Born dark, greys out to white; thick mop-like mane and tail. Melanoma is age-related (folded into heartiness)."
+  ]
+},
+{
+  "id": "canadian_horse",
+  "name": "Canadian Horse",
+  "commonness": "rare",
+  "biomes": [
+    "minecraft:snowy_taiga",
+    "minecraft:grove",
+    "minecraft:snowy_plains"
+  ],
+  "hardy": true,
+  "stats": {
+    "speed": 6,
+    "jump": 5,
+    "health": 9,
+    "height": [14, 16]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 62 },
+      { "pair": "E/e", "weight": 33 },
+      { "pair": "e/e", "weight": 5 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 30 },
+      { "pair": "A/a", "weight": 45 },
+      { "pair": "a/a", "weight": 25 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/N", "weight": 14 },
+      { "pair": "N/N", "weight": 86 }
+    ],
+    "horsegenetics.roan": [
+      { "pair": "Rn/rn", "weight": 14 },
+      { "pair": "rn/rn", "weight": 86 }
+    ]
+  },
+  "notes": [
+    "Dense thick mane and tail, 'little iron horse' build. Famously sound."
+  ]
+},
+{
+  "id": "caspian_pony",
+  "name": "Caspian Pony",
+  "commonness": "rare",
+  "biomes": [
+    "minecraft:desert",
+    "minecraft:badlands",
+    "minecraft:savanna"
+  ],
+  "stats": {
+    "speed": 5,
+    "jump": 4,
+    "health": 7,
+    "height": [9, 11.5]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 42 },
+      { "pair": "E/e", "weight": 44 },
+      { "pair": "e/e", "weight": 14 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 55 },
+      { "pair": "A/a", "weight": 38 },
+      { "pair": "a/a", "weight": 7 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.kit": [
+      { "pair": "SB1/N", "weight": 8 },
+      { "pair": "W35/N", "weight": 6 },
+      { "pair": "N/N", "weight": 86 }
+    ]
+  },
+  "notes": [
+    "Small, fine-boned, short legs, prominent eyes. 'Fragile bones' left as low heartiness rather than a lethal gene."
+  ]
+},
+{
+  "id": "cleveland_bay",
+  "name": "Cleveland Bay",
+  "commonness": "rare",
+  "biomes": [
+    "minecraft:plains",
+    "minecraft:forest",
+    "minecraft:meadow"
+  ],
+  "hardy": true,
+  "stats": {
+    "speed": 6,
+    "jump": 6,
+    "health": 8,
+    "height": [16, 16.5]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 80 },
+      { "pair": "E/e", "weight": 20 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 100 }
+    ],
+    "horsegenetics.mitf": [
+      { "pair": "SW1/N", "weight": 10 },
+      { "pair": "N/N", "weight": 90 }
+    ]
+  },
+  "notes": [
+    "Always bay with black points, minimal white. Fixed A_ plus an E-heavy extension keeps it off chestnut and black."
+  ]
+},
+{
+  "id": "clydesdale",
+  "name": "Clydesdale",
+  "commonness": "uncommon",
+  "biomes": [
+    "minecraft:taiga",
+    "minecraft:snowy_taiga",
+    "minecraft:grove",
+    "minecraft:river"
+  ],
+  "stats": {
+    "speed": 3,
+    "jump": 3,
+    "health": 5,
+    "height": [16.5, 18]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 62 },
+      { "pair": "E/e", "weight": 33 },
+      { "pair": "e/e", "weight": 5 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 30 },
+      { "pair": "A/a", "weight": 45 },
+      { "pair": "a/a", "weight": 25 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.tobiano": [
+      { "pair": "To/to", "weight": 30 },
+      { "pair": "to/to", "weight": 70 }
+    ],
+    "horsegenetics.kit": [
+      { "pair": "SB1/N", "weight": 45 },
+      { "pair": "SB1/SB1", "weight": 8 },
+      { "pair": "W35/N", "weight": 12 },
+      { "pair": "N/N", "weight": 35 }
+    ],
+    "horsegenetics.mitf": [
+      { "pair": "SW1/N", "weight": 55 },
+      { "pair": "N/N", "weight": 45 }
+    ]
+  },
+  "notes": [
+    "Heavy lower-leg feathering - roadmap render layer. Sabino + splash drive the big white legs and face.",
+    "CPL, sunburn: age-related, folded into heartiness."
+  ]
+},
+{
+  "id": "connemara_pony",
+  "name": "Connemara Pony",
+  "biomes": [
+    "minecraft:windswept_hills",
+    "minecraft:windswept_gravelly_hills",
+    "minecraft:windswept_forest",
+    "minecraft:stony_shore"
+  ],
+  "stats": {
+    "speed": 5,
+    "jump": 8,
+    "health": 8,
+    "height": [13, 14.5]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 42 },
+      { "pair": "E/e", "weight": 44 },
+      { "pair": "e/e", "weight": 14 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 30 },
+      { "pair": "A/a", "weight": 45 },
+      { "pair": "a/a", "weight": 25 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.matp": [
+      { "pair": "Cr/N", "weight": 10 },
+      { "pair": "N/N", "weight": 90 }
+    ],
+    "horsegenetics.dun": [
+      { "pair": "D/d2", "weight": 8 },
+      { "pair": "d2/d2", "weight": 92 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/N", "weight": 24 },
+      { "pair": "G2/N", "weight": 14 },
+      { "pair": "G3/G3", "weight": 6 },
+      { "pair": "G3/G2", "weight": 5 },
+      { "pair": "G2/G2", "weight": 3 },
+      { "pair": "N/N", "weight": 48 }
+    ]
+  },
+  "notes": [
+    "Sturdy compact good bone, often grey. OCD / laminitis are age-related (folded into heartiness)."
+  ]
+},
+{
+  "id": "dales_pony",
+  "name": "Dales Pony",
+  "commonness": "rare",
+  "biomes": [
+    "minecraft:windswept_hills",
+    "minecraft:windswept_gravelly_hills",
+    "minecraft:taiga"
+  ],
+  "stats": {
+    "speed": 5,
+    "jump": 6,
+    "health": 9,
+    "height": [13.5, 14.5]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 62 },
+      { "pair": "E/e", "weight": 33 },
+      { "pair": "e/e", "weight": 5 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 30 },
+      { "pair": "A/a", "weight": 45 },
+      { "pair": "a/a", "weight": 25 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.dun": [
+      { "pair": "D/d2", "weight": 6 },
+      { "pair": "d2/d2", "weight": 94 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/N", "weight": 14 },
+      { "pair": "N/N", "weight": 86 }
+    ],
+    "horsegenetics.roan": [
+      { "pair": "Rn/rn", "weight": 20 },
+      { "pair": "rn/rn", "weight": 80 }
+    ]
+  },
+  "notes": [
+    "Heavy feathering, dense bone, hardy moorland type - feathering is a roadmap render item.",
+    "EMS / laminitis: age-related, folded into heartiness."
+  ]
+},
+{
+  "id": "dartmoor_pony",
+  "name": "Dartmoor Pony",
+  "commonness": "rare",
+  "biomes": [
+    "minecraft:windswept_hills",
+    "minecraft:meadow",
+    "minecraft:forest"
+  ],
+  "stats": {
+    "speed": 4,
+    "jump": 5,
+    "health": 8,
+    "height": [11.5, 12.5]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 42 },
+      { "pair": "E/e", "weight": 44 },
+      { "pair": "e/e", "weight": 14 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 30 },
+      { "pair": "A/a", "weight": 45 },
+      { "pair": "a/a", "weight": 25 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.matp": [
+      { "pair": "Cr/N", "weight": 6 },
+      { "pair": "N/N", "weight": 94 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/N", "weight": 14 },
+      { "pair": "N/N", "weight": 86 }
+    ],
+    "horsegenetics.roan": [
+      { "pair": "Rn/rn", "weight": 12 },
+      { "pair": "rn/rn", "weight": 88 }
+    ]
+  },
+  "notes": [
+    "Small, large head, thick mane and tail. Laminitis / EMS are age-related (folded into heartiness)."
+  ]
+},
+{
+  "id": "exmoor_pony",
+  "name": "Exmoor Pony",
+  "commonness": "rare",
+  "biomes": [
+    "minecraft:windswept_hills",
+    "minecraft:taiga",
+    "minecraft:snowy_slopes"
+  ],
+  "hardy": true,
+  "stats": {
+    "speed": 4,
+    "jump": 4,
+    "health": 10,
+    "height": [11.5, 12.75]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 70 },
+      { "pair": "E/e", "weight": 26 },
+      { "pair": "e/e", "weight": 4 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 55 },
+      { "pair": "A/a", "weight": 38 },
+      { "pair": "a/a", "weight": 7 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.dun": [
+      { "pair": "d1/d2", "weight": 30 },
+      { "pair": "d2/d2", "weight": 70 }
+    ],
+    "horsegenetics.pangare": [
+      { "pair": "Pa2/Pa2", "weight": 52 },
+      { "pair": "Pa2/Pa1", "weight": 34 },
+      { "pair": "Pa1/Pa1", "weight": 12 },
+      { "pair": "Pa1/pa", "weight": 2 }
+    ]
+  },
+  "notes": [
+    "Mealy muzzle and eye rings - the breed standard, and near-fixed here. Double-layered winter coat - cosmetic, out of scope.",
+    "An ancient, exceptionally hardy landrace - no white, no dilutions."
+  ]
+},
+{
+  "id": "falabella",
+  "name": "Falabella",
+  "commonness": "uncommon",
+  "biomes": [
+    "minecraft:plains",
+    "minecraft:sunflower_plains",
+    "minecraft:meadow"
+  ],
+  "stats": {
+    "speed": 2,
+    "jump": 1,
+    "health": 3,
+    "height": [6, 8]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 42 },
+      { "pair": "E/e", "weight": 44 },
+      { "pair": "e/e", "weight": 14 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 30 },
+      { "pair": "A/a", "weight": 45 },
+      { "pair": "a/a", "weight": 25 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.matp": [
+      { "pair": "Cr/N", "weight": 16 },
+      { "pair": "prl/N", "weight": 8 },
+      { "pair": "N/N", "weight": 76 }
+    ],
+    "horsegenetics.dun": [
+      { "pair": "D/d2", "weight": 8 },
+      { "pair": "d2/d2", "weight": 92 }
+    ],
+    "horsegenetics.champagne": [
+      { "pair": "Ch/c", "weight": 8 },
+      { "pair": "c/c", "weight": 92 }
+    ],
+    "horsegenetics.silver": [
+      { "pair": "Z/z", "weight": 10 },
+      { "pair": "z/z", "weight": 90 }
+    ],
+    "horsegenetics.tobiano": [
+      { "pair": "To/to", "weight": 20 },
+      { "pair": "to/to", "weight": 80 }
+    ],
+    "horsegenetics.kit": [
+      { "pair": "SB1/N", "weight": 14 },
+      { "pair": "W20/N", "weight": 10 },
+      { "pair": "W35/N", "weight": 10 },
+      { "pair": "N/N", "weight": 66 }
+    ],
+    "horsegenetics.mitf": [
+      { "pair": "SW1/N", "weight": 40 },
+      { "pair": "N/N", "weight": 60 }
+    ]
+  },
+  "notes": [
+    "The smallest breed - the size band sits against the MAGICAL_MIN_SCALE guard.",
+    "'Fragile bones' left as very low heartiness rather than a lethal gene."
+  ]
+},
+{
+  "id": "fjord",
+  "name": "Norwegian Fjord",
+  "commonness": "uncommon",
+  "biomes": [
+    "minecraft:snowy_taiga",
+    "minecraft:frozen_river",
+    "minecraft:snowy_slopes",
+    "minecraft:grove"
+  ],
+  "stats": {
+    "speed": 4,
+    "jump": 3,
+    "health": 9,
+    "height": [13.5, 14.5]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 75 },
+      { "pair": "E/e", "weight": 25 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "a/a", "weight": 100 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.dun": [
+      { "pair": "D/d2", "weight": 40 },
+      { "pair": "D/D", "weight": 55 },
+      { "pair": "d1/d2", "weight": 5 }
+    ],
+    "horsegenetics.pangare": [
+      { "pair": "Pa2/Pa2", "weight": 48 },
+      { "pair": "Pa2/Pa1", "weight": 36 },
+      { "pair": "Pa1/Pa1", "weight": 14 },
+      { "pair": "Pa1/pa", "weight": 2 }
+    ]
+  },
+  "notes": [
+    "The two-tone mane (dark midtstol, pale guard hair) and the primitive stripes both come from the near-fixed dun; the erect clip that shows them off is grooming, and is not modelled.",
+    "Almost every Fjord is a dun (brown/red/grey/white/yellow dun); E_ a/a + D drives the classic brown dun.",
+    "EMS: age-related, folded into heartiness."
+  ]
+},
+{
+  "id": "friesian",
+  "name": "Friesian",
+  "biomes": [
+    "minecraft:plains",
+    "minecraft:forest",
+    "minecraft:meadow",
+    "minecraft:river"
+  ],
+  "stats": {
+    "speed": 5,
+    "jump": 4,
+    "health": 4,
+    "height": [15, 17]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 100 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "a/a", "weight": 100 }
+    ]
+  },
+  "notes": [
+    "Jet black, heavy feathering, thick wavy mane and tail. Fixed E/E a/a, no white or dilution genes at all.",
+    "Feathering + wavy mane: roadmap render items.",
+    "Dwarfism, megaesophagus: dwarfism exists (ACAN); megaesophagus is early-lethal - candidate gene, roadmap."
+  ]
+},
+{
+  "id": "gypsy_vanner",
+  "name": "Gypsy Vanner",
+  "commonness": "common",
+  "biomes": [
+    "minecraft:plains",
+    "minecraft:river",
+    "minecraft:swamp",
+    "minecraft:meadow"
+  ],
+  "stats": {
+    "speed": 4,
+    "jump": 3,
+    "health": 7,
+    "height": [14, 15.5]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 42 },
+      { "pair": "E/e", "weight": 44 },
+      { "pair": "e/e", "weight": 14 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 30 },
+      { "pair": "A/a", "weight": 45 },
+      { "pair": "a/a", "weight": 25 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.matp": [
+      { "pair": "Cr/N", "weight": 8 },
+      { "pair": "N/N", "weight": 92 }
+    ],
+    "horsegenetics.dun": [
+      { "pair": "D/d2", "weight": 6 },
+      { "pair": "d2/d2", "weight": 94 }
+    ],
+    "horsegenetics.tobiano": [
+      { "pair": "To/to", "weight": 62 },
+      { "pair": "To/To", "weight": 16 },
+      { "pair": "to/to", "weight": 22 }
+    ],
+    "horsegenetics.kit": [
+      { "pair": "SB1/N", "weight": 24 },
+      { "pair": "W20/N", "weight": 30 },
+      { "pair": "W35/N", "weight": 10 },
+      { "pair": "N/N", "weight": 36 }
+    ],
+    "horsegenetics.mitf": [
+      { "pair": "SW1/N", "weight": 65 },
+      { "pair": "N/N", "weight": 35 }
+    ]
+  },
+  "notes": [
+    "'Drum' cobby body, heavy feathering, abundant mane and tail - feathering + mane are roadmap render items. Usually tobiano pinto.",
+    "CPL, EMS: age-related, folded into heartiness."
+  ]
+},
+{
+  "id": "hackney",
+  "name": "Hackney",
+  "commonness": "uncommon",
+  "biomes": [
+    "minecraft:plains",
+    "minecraft:sunflower_plains",
+    "minecraft:meadow"
+  ],
+  "stats": {
+    "speed": 6,
+    "jump": 3,
+    "health": 4,
+    "height": [14.5, 16]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 42 },
+      { "pair": "E/e", "weight": 44 },
+      { "pair": "e/e", "weight": 14 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 55 },
+      { "pair": "A/a", "weight": 38 },
+      { "pair": "a/a", "weight": 7 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.roan": [
+      { "pair": "Rn/rn", "weight": 10 },
+      { "pair": "rn/rn", "weight": 90 }
+    ],
+    "horsegenetics.mitf": [
+      { "pair": "SW1/N", "weight": 40 },
+      { "pair": "N/N", "weight": 60 }
+    ]
+  },
+  "notes": [
+    "Upright neck, high knee action - gait/animation is a roadmap item (DMRT3). Refined bone.",
+    "Osteoarthritis: age-related, folded into heartiness."
+  ]
+},
+{
+  "id": "haflinger",
+  "name": "Haflinger",
+  "commonness": "common",
+  "biomes": [
+    "minecraft:cherry_grove",
+    "minecraft:meadow",
+    "minecraft:windswept_hills",
+    "minecraft:grove"
+  ],
+  "stats": {
+    "speed": 5,
+    "jump": 5,
+    "health": 8,
+    "height": [13.5, 15]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "e/e", "weight": 100 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 30 },
+      { "pair": "A/a", "weight": 45 },
+      { "pair": "a/a", "weight": 25 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.roan": [
+      { "pair": "Rn/rn", "weight": 10 },
+      { "pair": "rn/rn", "weight": 90 }
+    ],
+    "horsegenetics.flaxen": [
+      { "pair": "Fl2/Fl2", "weight": 46 },
+      { "pair": "Fl2/Fl1", "weight": 38 },
+      { "pair": "Fl1/Fl1", "weight": 14 },
+      { "pair": "Fl1/f", "weight": 2 }
+    ]
+  },
+  "notes": [
+    "Chestnut body with a striking flaxen mane and tail, and the breed the flaxen locus is calibrated against. Fixed e/e keeps it chestnut.",
+    "EMS / laminitis: age-related, folded into heartiness."
+  ]
+},
+{
+  "id": "hanoverian",
+  "name": "Hanoverian",
+  "commonness": "very_common",
+  "biomes": [
+    "minecraft:plains",
+    "minecraft:forest",
+    "minecraft:meadow",
+    "minecraft:sunflower_plains"
+  ],
+  "stats": {
+    "speed": 7,
+    "jump": 9,
+    "health": 5,
+    "height": [15.75, 17.25]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 42 },
+      { "pair": "E/e", "weight": 44 },
+      { "pair": "e/e", "weight": 14 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 55 },
+      { "pair": "A/a", "weight": 38 },
+      { "pair": "a/a", "weight": 7 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/N", "weight": 22 },
+      { "pair": "N/N", "weight": 78 }
+    ],
+    "horsegenetics.roan": [
+      { "pair": "Rn/rn", "weight": 12 },
+      { "pair": "rn/rn", "weight": 88 }
+    ],
+    "horsegenetics.mitf": [
+      { "pair": "SW1/N", "weight": 45 },
+      { "pair": "N/N", "weight": 55 }
+    ]
+  },
+  "notes": [
+    "Powerful large-framed uphill warmblood, bred for jumping and dressage.",
+    "OCD, navicular: age-related, folded into heartiness."
+  ]
+},
+{
+  "id": "icelandic_horse",
+  "name": "Icelandic Horse",
+  "biomes": [
+    "minecraft:snowy_plains",
+    "minecraft:ice_spikes",
+    "minecraft:frozen_peaks",
+    "minecraft:jagged_peaks",
+    "minecraft:snowy_slopes"
+  ],
+  "hardy": true,
+  "stats": {
+    "speed": 5,
+    "jump": 4,
+    "health": 10,
+    "height": [13, 14]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 42 },
+      { "pair": "E/e", "weight": 44 },
+      { "pair": "e/e", "weight": 14 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 30 },
+      { "pair": "A/a", "weight": 45 },
+      { "pair": "a/a", "weight": 25 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/N", "weight": 16 },
+      { "pair": "N/N", "weight": 84 }
+    ],
+    "horsegenetics.roan": [
+      { "pair": "Rn/rn", "weight": 16 },
+      { "pair": "rn/rn", "weight": 84 }
+    ],
+    "horsegenetics.dun": [
+      { "pair": "D/d2", "weight": 12 },
+      { "pair": "d2/d2", "weight": 88 }
+    ],
+    "horsegenetics.tobiano": [
+      { "pair": "To/to", "weight": 20 },
+      { "pair": "to/to", "weight": 80 }
+    ],
+    "horsegenetics.mitf": [
+      { "pair": "SW1/N", "weight": 65 },
+      { "pair": "N/N", "weight": 35 }
+    ],
+    "horsegenetics.pangare": [
+      { "pair": "Pa2/Pa1", "weight": 18 },
+      { "pair": "Pa1/Pa1", "weight": 26 },
+      { "pair": "Pa1/pa", "weight": 34 },
+      { "pair": "pa/pa", "weight": 22 }
+    ]
+  },
+  "notes": [
+    "Thick double coat, short legs, long back - the tölt (extra gait) is a roadmap item (DMRT3). Extremely varied colours; extremely hardy."
+  ]
+},
+{
+  "id": "irish_draught",
+  "name": "Irish Draught",
+  "commonness": "uncommon",
+  "biomes": [
+    "minecraft:windswept_hills",
+    "minecraft:windswept_gravelly_hills",
+    "minecraft:taiga",
+    "minecraft:forest"
+  ],
+  "stats": {
+    "speed": 5,
+    "jump": 7,
+    "health": 8,
+    "height": [15.5, 17]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 42 },
+      { "pair": "E/e", "weight": 44 },
+      { "pair": "e/e", "weight": 14 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 30 },
+      { "pair": "A/a", "weight": 45 },
+      { "pair": "a/a", "weight": 25 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.matp": [
+      { "pair": "Cr/N", "weight": 8 },
+      { "pair": "N/N", "weight": 92 }
+    ],
+    "horsegenetics.dun": [
+      { "pair": "D/d2", "weight": 5 },
+      { "pair": "d2/d2", "weight": 95 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/N", "weight": 24 },
+      { "pair": "N/N", "weight": 76 }
+    ],
+    "horsegenetics.roan": [
+      { "pair": "Rn/rn", "weight": 12 },
+      { "pair": "rn/rn", "weight": 88 }
+    ]
+  },
+  "notes": [
+    "Scopey powerful frame, strong clean limbs - the classic sport-horse foundation. Joint stress is age-related (folded into heartiness)."
+  ]
+},
+{
+  "id": "karabakh",
+  "name": "Karabakh",
+  "commonness": "rare",
+  "biomes": [
+    "minecraft:desert",
+    "minecraft:savanna",
+    "minecraft:badlands"
+  ],
+  "hardy": true,
+  "stats": {
+    "speed": 7,
+    "jump": 5,
+    "health": 8,
+    "height": [14, 15]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 42 },
+      { "pair": "E/e", "weight": 44 },
+      { "pair": "e/e", "weight": 14 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 55 },
+      { "pair": "A/a", "weight": 38 },
+      { "pair": "a/a", "weight": 7 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.matp": [
+      { "pair": "Cr/N", "weight": 10 },
+      { "pair": "N/N", "weight": 90 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/N", "weight": 24 },
+      { "pair": "N/N", "weight": 76 }
+    ]
+  },
+  "notes": [
+    "Small head, muscular arched neck, golden sheen - the sheen is not modelled (a shader)."
+  ]
+},
+{
+  "id": "kiger_mustang",
+  "name": "Kiger Mustang",
+  "commonness": "rare",
+  "biomes": [
+    "minecraft:badlands",
+    "minecraft:eroded_badlands",
+    "minecraft:wooded_badlands",
+    "minecraft:savanna"
+  ],
+  "hardy": true,
+  "stats": {
+    "speed": 7,
+    "jump": 5,
+    "health": 10,
+    "height": [13, 14.5]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 42 },
+      { "pair": "E/e", "weight": 44 },
+      { "pair": "e/e", "weight": 14 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 55 },
+      { "pair": "A/a", "weight": 38 },
+      { "pair": "a/a", "weight": 7 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.matp": [
+      { "pair": "Cr/N", "weight": 12 },
+      { "pair": "N/N", "weight": 88 }
+    ],
+    "horsegenetics.dun": [
+      { "pair": "D/d2", "weight": 55 },
+      { "pair": "D/D", "weight": 20 },
+      { "pair": "d1/d2", "weight": 10 },
+      { "pair": "d2/d2", "weight": 15 }
+    ],
+    "horsegenetics.leopard": [
+      { "pair": "LP/lp", "weight": 22 },
+      { "pair": "LP/LP", "weight": 3 },
+      { "pair": "lp/lp", "weight": 75 }
+    ],
+    "horsegenetics.patn1": [
+      { "pair": "PATN1/n", "weight": 25 },
+      { "pair": "n/n", "weight": 75 }
+    ],
+    "horsegenetics.patn2": [
+      { "pair": "PATN2/n", "weight": 12 },
+      { "pair": "n/n", "weight": 88 }
+    ]
+  },
+  "notes": [
+    "Strongly dun (dorsal stripe + leg bars) - the near-fixed dun does this. Some carry the leopard complex.",
+    "HERDA, GBED: GBED is early-lethal (candidate gene); HERDA is age-related."
+  ]
+},
+{
+  "id": "knabstrupper",
+  "name": "Knabstrupper",
+  "commonness": "uncommon",
+  "biomes": [
+    "minecraft:plains",
+    "minecraft:birch_forest",
+    "minecraft:forest",
+    "minecraft:meadow"
+  ],
+  "stats": {
+    "speed": 6,
+    "jump": 7,
+    "health": 6,
+    "height": [14.5, 15.5]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 42 },
+      { "pair": "E/e", "weight": 44 },
+      { "pair": "e/e", "weight": 14 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 30 },
+      { "pair": "A/a", "weight": 45 },
+      { "pair": "a/a", "weight": 25 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.matp": [
+      { "pair": "Cr/N", "weight": 6 },
+      { "pair": "N/N", "weight": 94 }
+    ],
+    "horsegenetics.leopard": [
+      { "pair": "LP/lp", "weight": 50 },
+      { "pair": "LP/LP", "weight": 32 },
+      { "pair": "lp/lp", "weight": 18 }
+    ],
+    "horsegenetics.patn1": [
+      { "pair": "PATN1/n", "weight": 58 },
+      { "pair": "PATN1/PATN1", "weight": 16 },
+      { "pair": "n/n", "weight": 26 }
+    ],
+    "horsegenetics.patn2": [
+      { "pair": "PATN2/n", "weight": 10 },
+      { "pair": "n/n", "weight": 90 }
+    ],
+    "horsegenetics.mitf": [
+      { "pair": "SW1/N", "weight": 55 },
+      { "pair": "N/N", "weight": 45 }
+    ]
+  },
+  "notes": [
+    "ERU is age-related; folded into heartiness. CSNB on LP/LP is modelled (informational)."
+  ]
+},
+{
+  "id": "lipizzan",
+  "name": "Lipizzan",
+  "commonness": "uncommon",
+  "biomes": [
+    "minecraft:plains",
+    "minecraft:windswept_hills",
+    "minecraft:meadow",
+    "minecraft:sunflower_plains"
+  ],
+  "stats": {
+    "speed": 5,
+    "jump": 7,
+    "health": 7,
+    "height": [14.5, 16.25]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 42 },
+      { "pair": "E/e", "weight": 44 },
+      { "pair": "e/e", "weight": 14 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 30 },
+      { "pair": "A/a", "weight": 45 },
+      { "pair": "a/a", "weight": 25 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/N", "weight": 60 },
+      { "pair": "G3/G3", "weight": 34 },
+      { "pair": "N/N", "weight": 6 }
+    ],
+    "horsegenetics.pax3": [
+      { "pair": "SW2/N", "weight": 12 },
+      { "pair": "N/N", "weight": 88 }
+    ]
+  },
+  "notes": [
+    "Born dark, greys to white; Roman nose, compact baroque build - head profile not modelled. Melanoma is age-related."
+  ]
+},
+{
+  "id": "lusitano",
+  "name": "Lusitano",
+  "biomes": [
+    "minecraft:savanna",
+    "minecraft:plains",
+    "minecraft:savanna_plateau"
+  ],
+  "stats": {
+    "speed": 6,
+    "jump": 8,
+    "health": 6,
+    "height": [15, 16]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 62 },
+      { "pair": "E/e", "weight": 33 },
+      { "pair": "e/e", "weight": 5 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 30 },
+      { "pair": "A/a", "weight": 45 },
+      { "pair": "a/a", "weight": 25 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/N", "weight": 44 },
+      { "pair": "G3/G3", "weight": 18 },
+      { "pair": "N/N", "weight": 38 }
+    ]
+  },
+  "notes": [
+    "Convex profile, sloping croup, baroque build - head/croup shape not modelled. OCD is age-related."
+  ]
+},
+{
+  "id": "marwari",
+  "name": "Marwari",
+  "commonness": "rare",
+  "biomes": [
+    "minecraft:jungle",
+    "minecraft:sparse_jungle",
+    "minecraft:bamboo_jungle",
+    "minecraft:savanna"
+  ],
+  "stats": {
+    "speed": 7,
+    "jump": 5,
+    "health": 9,
+    "height": [14.5, 15.5]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 42 },
+      { "pair": "E/e", "weight": 44 },
+      { "pair": "e/e", "weight": 14 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 30 },
+      { "pair": "A/a", "weight": 45 },
+      { "pair": "a/a", "weight": 25 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.matp": [
+      { "pair": "Cr/N", "weight": 10 },
+      { "pair": "N/N", "weight": 90 }
+    ],
+    "horsegenetics.dun": [
+      { "pair": "D/d2", "weight": 8 },
+      { "pair": "d2/d2", "weight": 92 }
+    ],
+    "horsegenetics.tobiano": [
+      { "pair": "To/to", "weight": 30 },
+      { "pair": "to/to", "weight": 70 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/N", "weight": 16 },
+      { "pair": "N/N", "weight": 84 }
+    ]
+  },
+  "notes": [
+    "Inward-curving (lyre-shaped) ear tips - NOT modelled (a mesh change, out of scope for now).",
+    "Sweet itch: age-related, folded into heartiness."
+  ]
+},
+{
+  "id": "morgan",
+  "name": "Morgan",
+  "commonness": "very_common",
+  "biomes": [
+    "minecraft:plains",
+    "minecraft:forest",
+    "minecraft:taiga",
+    "minecraft:meadow"
+  ],
+  "stats": {
+    "speed": 6,
+    "jump": 6,
+    "health": 8,
+    "height": [14.25, 15.5]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 42 },
+      { "pair": "E/e", "weight": 44 },
+      { "pair": "e/e", "weight": 14 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 30 },
+      { "pair": "A/a", "weight": 45 },
+      { "pair": "a/a", "weight": 25 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.matp": [
+      { "pair": "Cr/N", "weight": 8 },
+      { "pair": "N/N", "weight": 92 }
+    ],
+    "horsegenetics.dun": [
+      { "pair": "D/d2", "weight": 5 },
+      { "pair": "d2/d2", "weight": 95 }
+    ],
+    "horsegenetics.roan": [
+      { "pair": "Rn/rn", "weight": 12 },
+      { "pair": "rn/rn", "weight": 88 }
+    ],
+    "horsegenetics.kit": [
+      { "pair": "SB1/N", "weight": 16 },
+      { "pair": "W4/N", "weight": 2 },
+      { "pair": "W35/N", "weight": 12 },
+      { "pair": "W34/N", "weight": 4 },
+      { "pair": "N/N", "weight": 66 }
+    ],
+    "horsegenetics.flaxen": [
+      { "pair": "Fl2/Fl1", "weight": 6 },
+      { "pair": "Fl1/Fl1", "weight": 12 },
+      { "pair": "Fl1/f", "weight": 34 },
+      { "pair": "f/f", "weight": 48 }
+    ],
+    "horsegenetics.mitf": [
+      { "pair": "SW1/N", "weight": 55 },
+      { "pair": "N/N", "weight": 45 }
+    ]
+  },
+  "notes": [
+    "Slightly crested neck, expressive eyes, compact and refined - a versatile foundation American breed.",
+    "Cushing's, EMS: age-related, folded into heartiness.",
+    "Carries W4, the Camarillo white: the line was founded on Morgan mares bred to one white stallion in the 1920s, and it is the only breed here that throws an all-white foal rather than a grey."
+  ]
+},
+{
+  "id": "mustang",
+  "name": "Mustang",
+  "biomes": [
+    "minecraft:badlands",
+    "minecraft:eroded_badlands",
+    "minecraft:wooded_badlands",
+    "minecraft:savanna",
+    "minecraft:windswept_savanna"
+  ],
+  "hardy": true,
+  "stats": {
+    "speed": 7,
+    "jump": 5,
+    "health": 10,
+    "height": [13.5, 15.5]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 42 },
+      { "pair": "E/e", "weight": 44 },
+      { "pair": "e/e", "weight": 14 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 30 },
+      { "pair": "A/a", "weight": 45 },
+      { "pair": "a/a", "weight": 25 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.matp": [
+      { "pair": "Cr/N", "weight": 14 },
+      { "pair": "N/N", "weight": 86 }
+    ],
+    "horsegenetics.dun": [
+      { "pair": "D/d2", "weight": 20 },
+      { "pair": "d1/d2", "weight": 14 },
+      { "pair": "d2/d2", "weight": 66 }
+    ],
+    "horsegenetics.champagne": [
+      { "pair": "Ch/c", "weight": 5 },
+      { "pair": "c/c", "weight": 95 }
+    ],
+    "horsegenetics.roan": [
+      { "pair": "Rn/rn", "weight": 16 },
+      { "pair": "rn/rn", "weight": 84 }
+    ],
+    "horsegenetics.tobiano": [
+      { "pair": "To/to", "weight": 16 },
+      { "pair": "to/to", "weight": 84 }
+    ],
+    "horsegenetics.kit": [
+      { "pair": "SB1/N", "weight": 16 },
+      { "pair": "W35/N", "weight": 12 },
+      { "pair": "W34/N", "weight": 4 },
+      { "pair": "N/N", "weight": 68 }
+    ],
+    "horsegenetics.leopard": [
+      { "pair": "LP/lp", "weight": 16 },
+      { "pair": "LP/LP", "weight": 2 },
+      { "pair": "lp/lp", "weight": 82 }
+    ],
+    "horsegenetics.patn1": [
+      { "pair": "PATN1/n", "weight": 25 },
+      { "pair": "n/n", "weight": 75 }
+    ],
+    "horsegenetics.patn2": [
+      { "pair": "PATN2/n", "weight": 12 },
+      { "pair": "n/n", "weight": 88 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/N", "weight": 6 },
+      { "pair": "G2/N", "weight": 5 },
+      { "pair": "N/N", "weight": 89 }
+    ]
+  },
+  "notes": [
+    "Wild-type diversity: every colour, compact build, hard feet. Some carry the leopard complex.",
+    "HERDA, GBED: GBED is early-lethal (candidate gene); HERDA is age-related."
+  ]
+},
+{
+  "id": "new_forest_pony",
+  "name": "New Forest Pony",
+  "commonness": "common",
+  "biomes": [
+    "minecraft:forest",
+    "minecraft:birch_forest",
+    "minecraft:old_growth_birch_forest",
+    "minecraft:flower_forest"
+  ],
+  "stats": {
+    "speed": 5,
+    "jump": 6,
+    "health": 8,
+    "height": [12, 14.5]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 42 },
+      { "pair": "E/e", "weight": 44 },
+      { "pair": "e/e", "weight": 14 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 30 },
+      { "pair": "A/a", "weight": 45 },
+      { "pair": "a/a", "weight": 25 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.dun": [
+      { "pair": "D/d2", "weight": 6 },
+      { "pair": "d2/d2", "weight": 94 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/N", "weight": 18 },
+      { "pair": "N/N", "weight": 82 }
+    ],
+    "horsegenetics.roan": [
+      { "pair": "Rn/rn", "weight": 14 },
+      { "pair": "rn/rn", "weight": 86 }
+    ]
+  },
+  "notes": [
+    "Large head, thick neck, flashy movement. Laminitis / EMS are age-related (folded into heartiness)."
+  ]
+},
+{
+  "id": "paso_fino",
+  "name": "Paso Fino",
+  "biomes": [
+    "minecraft:savanna",
+    "minecraft:jungle",
+    "minecraft:sparse_jungle",
+    "minecraft:bamboo_jungle"
+  ],
+  "stats": {
+    "speed": 5,
+    "jump": 4,
+    "health": 6,
+    "height": [13, 15.5]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 42 },
+      { "pair": "E/e", "weight": 44 },
+      { "pair": "e/e", "weight": 14 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 30 },
+      { "pair": "A/a", "weight": 45 },
+      { "pair": "a/a", "weight": 25 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.matp": [
+      { "pair": "Cr/N", "weight": 10 },
+      { "pair": "N/N", "weight": 90 }
+    ],
+    "horsegenetics.dun": [
+      { "pair": "D/d2", "weight": 6 },
+      { "pair": "d2/d2", "weight": 94 }
+    ],
+    "horsegenetics.roan": [
+      { "pair": "Rn/rn", "weight": 12 },
+      { "pair": "rn/rn", "weight": 88 }
+    ],
+    "horsegenetics.kit": [
+      { "pair": "W20/N", "weight": 10 },
+      { "pair": "W22/N", "weight": 4 },
+      { "pair": "W35/N", "weight": 8 },
+      { "pair": "N/N", "weight": 78 }
+    ]
+  },
+  "notes": [
+    "Compact rounded build, naturally smooth lateral gait - gait is a roadmap item (DMRT3).",
+    "EMS, DSLD: age-related, folded into heartiness."
+  ]
+},
+{
+  "id": "percheron",
+  "name": "Percheron",
+  "commonness": "common",
+  "biomes": [
+    "minecraft:plains",
+    "minecraft:snowy_plains",
+    "minecraft:meadow",
+    "minecraft:sunflower_plains"
+  ],
+  "stats": {
+    "speed": 4,
+    "jump": 3,
+    "health": 6,
+    "height": [15.5, 17.75]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 62 },
+      { "pair": "E/e", "weight": 33 },
+      { "pair": "e/e", "weight": 5 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 30 },
+      { "pair": "A/a", "weight": 45 },
+      { "pair": "a/a", "weight": 25 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/N", "weight": 58 },
+      { "pair": "G3/G3", "weight": 30 },
+      { "pair": "N/N", "weight": 12 }
+    ]
+  },
+  "notes": [
+    "Large draft with a straight profile and (for its size) fine legs. Grey or black. PSSM1 / anhidrosis are age-related."
+  ]
+},
+{
+  "id": "przewalski",
+  "name": "Przewalski's Horse",
+  "commonness": "rare",
+  "biomes": [
+    "minecraft:desert",
+    "minecraft:badlands",
+    "minecraft:savanna"
+  ],
+  "hardy": true,
+  "stats": {
+    "speed": 6,
+    "jump": 3,
+    "health": 10,
+    "height": [12, 14]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 92 },
+      { "pair": "E/e", "weight": 8 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 88 },
+      { "pair": "A/a", "weight": 12 }
+    ],
+    "horsegenetics.dun": [
+      { "pair": "D/D", "weight": 100 }
+    ]
+  },
+  "notes": [
+    "The only never-domesticated true wild horse: stocky dun body, erect black mane, no forelock, no spotting. Mane shape is a roadmap render item.",
+    "OCD: age-related, folded into heartiness."
+  ]
+},
+{
+  "id": "puerto_rican_paso_fino",
+  "name": "Puerto Rican Paso Fino",
+  "commonness": "rare",
+  "biomes": [
+    "minecraft:jungle",
+    "minecraft:savanna",
+    "minecraft:beach",
+    "minecraft:mangrove_swamp"
+  ],
+  "stats": {
+    "speed": 5,
+    "jump": 4,
+    "health": 6,
+    "height": [13, 15]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 42 },
+      { "pair": "E/e", "weight": 44 },
+      { "pair": "e/e", "weight": 14 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 30 },
+      { "pair": "A/a", "weight": 45 },
+      { "pair": "a/a", "weight": 25 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.matp": [
+      { "pair": "Cr/N", "weight": 10 },
+      { "pair": "N/N", "weight": 90 }
+    ],
+    "horsegenetics.dun": [
+      { "pair": "D/d2", "weight": 6 },
+      { "pair": "d2/d2", "weight": 94 }
+    ],
+    "horsegenetics.tiger_eye": [
+      { "pair": "TE1/TE1", "weight": 3 },
+      { "pair": "TE1/TE2", "weight": 1 },
+      { "pair": "TE1/N", "weight": 16 },
+      { "pair": "TE2/N", "weight": 6 },
+      { "pair": "N/N", "weight": 74 }
+    ]
+  },
+  "notes": [
+    "Tiger eye (SLC24A5) - amber or yellow iris, no coat change. The breed's signature.",
+    "Naturally smooth gait - roadmap item (DMRT3). EMS, DSLD: age-related."
+  ]
+},
+{
+  "id": "quarter_horse",
+  "name": "Quarter Horse",
+  "commonness": "extremely_common",
+  "biomes": [
+    "minecraft:plains",
+    "minecraft:savanna",
+    "minecraft:sunflower_plains",
+    "minecraft:meadow"
+  ],
+  "stats": {
+    "speed": 8,
+    "jump": 5,
+    "health": 7,
+    "height": [14.5, 16]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 40 },
+      { "pair": "E/e", "weight": 45 },
+      { "pair": "e/e", "weight": 15 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 30 },
+      { "pair": "A/a", "weight": 45 },
+      { "pair": "a/a", "weight": 25 }
+    ],
+    "horsegenetics.matp": [
+      { "pair": "Cr/N", "weight": 14 },
+      { "pair": "Cr/Cr", "weight": 3 },
+      { "pair": "N/N", "weight": 83 }
+    ],
+    "horsegenetics.dun": [
+      { "pair": "d1/d2", "weight": 22 },
+      { "pair": "d2/d2", "weight": 78 }
+    ],
+    "horsegenetics.roan": [
+      { "pair": "Rn/rn", "weight": 14 },
+      { "pair": "rn/rn", "weight": 86 }
+    ],
+    "horsegenetics.kit": [
+      { "pair": "SB1/N", "weight": 14 },
+      { "pair": "W35/N", "weight": 18 },
+      { "pair": "W32/N", "weight": 8 },
+      { "pair": "W34/N", "weight": 4 },
+      { "pair": "W10/N", "weight": 1 },
+      { "pair": "N/N", "weight": 55 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/N", "weight": 4 },
+      { "pair": "G2/N", "weight": 5 },
+      { "pair": "N/N", "weight": 91 }
+    ],
+    "horsegenetics.mitf": [
+      { "pair": "SW1/N", "weight": 55 },
+      { "pair": "N/N", "weight": 45 }
+    ],
+    "horsegenetics.pax3": [
+      { "pair": "SW2/N", "weight": 20 },
+      { "pair": "N/N", "weight": 80 }
+    ]
+  },
+  "notes": [
+    "Massively muscled hindquarters and broad chest - the sprinter. nd1/nd2 give the odd dorsal stripe with no dilution.",
+    "HYPP, PSSM1 and HERDA all have loci now - see SCN4A, GYS1 and PPIB. Both dominants, so a wild-caught Quarter Horse really can be an affected one."
+  ]
+},
+{
+  "id": "shetland_pony",
+  "name": "Shetland Pony",
+  "commonness": "very_common",
+  "biomes": [
+    "minecraft:mushroom_fields",
+    "minecraft:snowy_plains",
+    "minecraft:taiga",
+    "minecraft:grove"
+  ],
+  "stats": {
+    "speed": 3,
+    "jump": 3,
+    "health": 9,
+    "height": [8, 10.5]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 42 },
+      { "pair": "E/e", "weight": 44 },
+      { "pair": "e/e", "weight": 14 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 30 },
+      { "pair": "A/a", "weight": 45 },
+      { "pair": "a/a", "weight": 25 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.dun": [
+      { "pair": "D/d2", "weight": 8 },
+      { "pair": "d2/d2", "weight": 92 }
+    ],
+    "horsegenetics.matp": [
+      { "pair": "Cr/N", "weight": 8 },
+      { "pair": "N/N", "weight": 92 }
+    ],
+    "horsegenetics.tobiano": [
+      { "pair": "To/to", "weight": 30 },
+      { "pair": "to/to", "weight": 70 }
+    ],
+    "horsegenetics.kit": [
+      { "pair": "SB1/N", "weight": 14 },
+      { "pair": "W35/N", "weight": 10 },
+      { "pair": "W13/N", "weight": 2 },
+      { "pair": "N/N", "weight": 74 }
+    ],
+    "horsegenetics.leopard": [
+      { "pair": "LP/lp", "weight": 14 },
+      { "pair": "LP/LP", "weight": 2 },
+      { "pair": "lp/lp", "weight": 84 }
+    ],
+    "horsegenetics.patn1": [
+      { "pair": "PATN1/n", "weight": 22 },
+      { "pair": "n/n", "weight": 78 }
+    ],
+    "horsegenetics.patn2": [
+      { "pair": "PATN2/n", "weight": 14 },
+      { "pair": "n/n", "weight": 86 }
+    ],
+    "horsegenetics.pangare": [
+      { "pair": "Pa1/Pa1", "weight": 16 },
+      { "pair": "Pa1/pa", "weight": 38 },
+      { "pair": "pa/pa", "weight": 46 }
+    ],
+    "horsegenetics.mitf": [
+      { "pair": "SW1/N", "weight": 60 },
+      { "pair": "N/N", "weight": 40 }
+    ]
+  },
+  "notes": [
+    "Very small, thick coat, short legs, heavy head - pound for pound the strongest breed. Some carry the leopard complex.",
+    "Hyperlipidemia, EMS: age-related, folded into heartiness."
+  ]
+},
+{
+  "id": "shire",
+  "name": "Shire",
+  "commonness": "uncommon",
+  "biomes": [
+    "minecraft:plains",
+    "minecraft:river",
+    "minecraft:meadow",
+    "minecraft:swamp"
+  ],
+  "stats": {
+    "speed": 3,
+    "jump": 2,
+    "health": 4,
+    "height": [16.5, 17.75]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 62 },
+      { "pair": "E/e", "weight": 33 },
+      { "pair": "e/e", "weight": 5 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 30 },
+      { "pair": "A/a", "weight": 45 },
+      { "pair": "a/a", "weight": 25 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.kit": [
+      { "pair": "SB1/N", "weight": 40 },
+      { "pair": "SB1/SB1", "weight": 6 },
+      { "pair": "W35/N", "weight": 10 },
+      { "pair": "N/N", "weight": 44 }
+    ],
+    "horsegenetics.mitf": [
+      { "pair": "SW1/N", "weight": 55 },
+      { "pair": "N/N", "weight": 45 }
+    ]
+  },
+  "notes": [
+    "The tallest breed - the scale band tops out around the natural draught ceiling. Heavy feathering (roadmap), Roman nose (not modelled).",
+    "CPL, PSSM: age-related, folded into heartiness."
+  ]
+},
+{
+  "id": "standardbred",
+  "name": "Standardbred",
+  "commonness": "very_common",
+  "biomes": [
+    "minecraft:plains",
+    "minecraft:sunflower_plains",
+    "minecraft:meadow"
+  ],
+  "stats": {
+    "speed": 9,
+    "jump": 5,
+    "health": 6,
+    "height": [14.5, 16.5]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 42 },
+      { "pair": "E/e", "weight": 44 },
+      { "pair": "e/e", "weight": 14 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 30 },
+      { "pair": "A/a", "weight": 45 },
+      { "pair": "a/a", "weight": 25 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.matp": [
+      { "pair": "Cr/N", "weight": 8 },
+      { "pair": "N/N", "weight": 92 }
+    ],
+    "horsegenetics.dun": [
+      { "pair": "D/d2", "weight": 4 },
+      { "pair": "d2/d2", "weight": 96 }
+    ],
+    "horsegenetics.roan": [
+      { "pair": "Rn/rn", "weight": 12 },
+      { "pair": "rn/rn", "weight": 88 }
+    ],
+    "horsegenetics.kit": [
+      { "pair": "SB1/N", "weight": 10 },
+      { "pair": "W35/N", "weight": 8 },
+      { "pair": "W32/N", "weight": 6 },
+      { "pair": "N/N", "weight": 76 }
+    ]
+  },
+  "notes": [
+    "Long powerful body, thick neck, sturdy legs - the harness racer (trot/pace). Gait is a roadmap item (DMRT3).",
+    "EIPH, DSLD: age-related / exertional, folded into heartiness."
+  ]
+},
+{
+  "id": "suffolk_punch",
+  "name": "Suffolk Punch",
+  "commonness": "rare",
+  "biomes": [
+    "minecraft:plains",
+    "minecraft:forest",
+    "minecraft:meadow",
+    "minecraft:sunflower_plains"
+  ],
+  "stats": {
+    "speed": 3,
+    "jump": 2,
+    "health": 5,
+    "height": [16, 17.5]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "e/e", "weight": 100 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 30 },
+      { "pair": "A/a", "weight": 45 },
+      { "pair": "a/a", "weight": 25 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.pangare": [
+      { "pair": "Pa1/Pa1", "weight": 20 },
+      { "pair": "Pa1/pa", "weight": 40 },
+      { "pair": "pa/pa", "weight": 40 }
+    ]
+  },
+  "notes": [
+    "Always chestnut ('Suffolk sorrel'), wide barrel-bodied, no feathering. Fixed e/e, no white or dilution genes.",
+    "Anhidrosis, obesity: age-related, folded into heartiness. Rare - one of the most endangered breeds."
+  ]
+},
+{
+  "id": "tennessee_walking",
+  "name": "Tennessee Walking Horse",
+  "commonness": "very_common",
+  "biomes": [
+    "minecraft:plains",
+    "minecraft:forest",
+    "minecraft:swamp",
+    "minecraft:meadow"
+  ],
+  "stats": {
+    "speed": 5,
+    "jump": 4,
+    "health": 7,
+    "height": [14.75, 17]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 42 },
+      { "pair": "E/e", "weight": 44 },
+      { "pair": "e/e", "weight": 14 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 30 },
+      { "pair": "A/a", "weight": 45 },
+      { "pair": "a/a", "weight": 25 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.matp": [
+      { "pair": "Cr/N", "weight": 12 },
+      { "pair": "N/N", "weight": 88 }
+    ],
+    "horsegenetics.champagne": [
+      { "pair": "Ch/c", "weight": 8 },
+      { "pair": "c/c", "weight": 92 }
+    ],
+    "horsegenetics.roan": [
+      { "pair": "Rn/rn", "weight": 10 },
+      { "pair": "rn/rn", "weight": 90 }
+    ],
+    "horsegenetics.kit": [
+      { "pair": "SB1/N", "weight": 18 },
+      { "pair": "W35/N", "weight": 12 },
+      { "pair": "N/N", "weight": 70 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/N", "weight": 7 },
+      { "pair": "G2/N", "weight": 5 },
+      { "pair": "N/N", "weight": 88 }
+    ],
+    "horsegenetics.mitf": [
+      { "pair": "SW1/N", "weight": 45 },
+      { "pair": "N/N", "weight": 55 }
+    ]
+  },
+  "notes": [
+    "Long sloping shoulder, long neck, powerful rear drive - the running walk is a roadmap item (DMRT3). Lordosis is age-related."
+  ]
+},
+{
+  "id": "thoroughbred",
+  "name": "Thoroughbred",
+  "commonness": "very_common",
+  "biomes": [
+    "minecraft:plains",
+    "minecraft:savanna",
+    "minecraft:sunflower_plains",
+    "minecraft:meadow"
+  ],
+  "stats": {
+    "speed": 10,
+    "jump": 8,
+    "health": 4,
+    "height": [15.5, 17]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 42 },
+      { "pair": "E/e", "weight": 44 },
+      { "pair": "e/e", "weight": 14 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 55 },
+      { "pair": "A/a", "weight": 38 },
+      { "pair": "a/a", "weight": 7 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/N", "weight": 14 },
+      { "pair": "N/N", "weight": 86 }
+    ],
+    "horsegenetics.roan": [
+      { "pair": "Rn/rn", "weight": 8 },
+      { "pair": "rn/rn", "weight": 92 }
+    ],
+    "horsegenetics.mitf": [
+      { "pair": "SW1/N", "weight": 60 },
+      { "pair": "N/N", "weight": 40 }
+    ],
+    "horsegenetics.kit": [
+      { "pair": "W20/N", "weight": 34 },
+      { "pair": "W32/N", "weight": 6 },
+      { "pair": "W35/N", "weight": 8 },
+      { "pair": "W5/N", "weight": 1 },
+      { "pair": "W22/N", "weight": 1 },
+      { "pair": "N/N", "weight": 50 }
+    ]
+  },
+  "notes": [
+    "Lean, sleek, flat profile, refined legs - the fastest breed in the game, and among the most fragile. EIPH ('bleeder') is exertional."
+  ]
+},
+{
+  "id": "trakehner",
+  "name": "Trakehner",
+  "commonness": "common",
+  "biomes": [
+    "minecraft:taiga",
+    "minecraft:forest",
+    "minecraft:old_growth_pine_taiga",
+    "minecraft:grove"
+  ],
+  "stats": {
+    "speed": 7,
+    "jump": 8,
+    "health": 5,
+    "height": [15.5, 17]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 42 },
+      { "pair": "E/e", "weight": 44 },
+      { "pair": "e/e", "weight": 14 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 55 },
+      { "pair": "A/a", "weight": 38 },
+      { "pair": "a/a", "weight": 7 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/N", "weight": 20 },
+      { "pair": "N/N", "weight": 80 }
+    ],
+    "horsegenetics.roan": [
+      { "pair": "Rn/rn", "weight": 12 },
+      { "pair": "rn/rn", "weight": 88 }
+    ],
+    "horsegenetics.mitf": [
+      { "pair": "SW1/N", "weight": 60 },
+      { "pair": "N/N", "weight": 40 }
+    ]
+  },
+  "notes": [
+    "The lightest, most refined warmblood - an elegant head and an athletic build. OCD, bone spavin: age-related."
+  ]
+},
+{
+  "id": "welsh_pony",
+  "name": "Welsh Pony",
+  "commonness": "very_common",
+  "biomes": [
+    "minecraft:windswept_hills",
+    "minecraft:taiga",
+    "minecraft:plains",
+    "minecraft:meadow"
+  ],
+  "stats": {
+    "speed": [4, 6],
+    "jump": 5,
+    "health": 8,
+    "height": [11, 14.5]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 42 },
+      { "pair": "E/e", "weight": 44 },
+      { "pair": "e/e", "weight": 14 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 30 },
+      { "pair": "A/a", "weight": 45 },
+      { "pair": "a/a", "weight": 25 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.matp": [
+      { "pair": "Cr/N", "weight": 10 },
+      { "pair": "N/N", "weight": 90 }
+    ],
+    "horsegenetics.dun": [
+      { "pair": "D/d2", "weight": 6 },
+      { "pair": "d2/d2", "weight": 94 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/N", "weight": 18 },
+      { "pair": "G2/N", "weight": 10 },
+      { "pair": "G3/G3", "weight": 4 },
+      { "pair": "G3/G2", "weight": 4 },
+      { "pair": "G2/G2", "weight": 2 },
+      { "pair": "N/N", "weight": 62 }
+    ],
+    "horsegenetics.roan": [
+      { "pair": "Rn/rn", "weight": 12 },
+      { "pair": "rn/rn", "weight": 88 }
+    ],
+    "horsegenetics.kit": [
+      { "pair": "SB1/N", "weight": 16 },
+      { "pair": "W35/N", "weight": 10 },
+      { "pair": "W32/N", "weight": 6 },
+      { "pair": "N/N", "weight": 68 }
+    ],
+    "horsegenetics.mitf": [
+      { "pair": "SW1/N", "weight": 60 },
+      { "pair": "N/N", "weight": 40 }
+    ]
+  },
+  "notes": [
+    "Small with large ears, a crested neck and a floating trot. Laminitis / EMS are age-related (folded into heartiness)."
+  ]
+}
+]

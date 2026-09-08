@@ -1,0 +1,70 @@
+{
+  "id": "appaloosa",
+  "name": "Appaloosa",
+  "biomes": [
+    "minecraft:taiga",
+    "minecraft:forest",
+    "minecraft:windswept_hills"
+  ],
+  "stats": {
+    "speed": 6,
+    "jump": 7,
+    "health": 7,
+    "height": [14.5, 16]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 42 },
+      { "pair": "E/e", "weight": 44 },
+      { "pair": "e/e", "weight": 14 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 30 },
+      { "pair": "A/a", "weight": 45 },
+      { "pair": "a/a", "weight": 25 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.roan": [
+      { "pair": "Rn/rn", "weight": 8 },
+      { "pair": "rn/rn", "weight": 92 }
+    ],
+    "horsegenetics.leopard": [
+      { "pair": "LP/lp", "weight": 55 },
+      { "pair": "LP/LP", "weight": 20 },
+      { "pair": "lp/lp", "weight": 25 }
+    ],
+    "horsegenetics.patn1": [
+      { "pair": "PATN1/n", "weight": 45 },
+      { "pair": "PATN1/PATN1", "weight": 8 },
+      { "pair": "n/n", "weight": 47 }
+    ],
+    "horsegenetics.patn2": [
+      { "pair": "PATN2/n", "weight": 20 },
+      { "pair": "n/n", "weight": 80 }
+    ],
+    "horsegenetics.mitf": [
+      { "pair": "SW1/N", "weight": 55 },
+      { "pair": "N/N", "weight": 45 }
+    ],
+    "horsegenetics.pax3": [
+      { "pair": "SW4/N", "weight": 4 },
+      { "pair": "N/N", "weight": 96 }
+    ],
+    "horsegenetics.kit": [
+      { "pair": "W35/N", "weight": 14 },
+      { "pair": "W34/N", "weight": 5 },
+      { "pair": "SB1/N", "weight": 8 },
+      { "pair": "N/N", "weight": 73 }
+    ]
+  },
+  "notes": [
+    "ERU (equine recurrent uveitis) is age-related; folded into heartiness. CSNB on LP/LP is modelled (informational)."
+  ]
+}

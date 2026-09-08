@@ -239,8 +239,20 @@ public final class HerdManager {
      * biome has no assigned breed at all.
      */
     public static Breed pickHerdBreed(Holder<Biome> biome, RandomSource rng) {
+        return pickHerdBreed(biome, rng, com.example.horsegenetics.common.breed.BreedSource.WILD);
+    }
+
+    /**
+     * The same weighted draw for a caller that is not a wild herd - the cowboy
+     * asks with {@link com.example.horsegenetics.common.breed.BreedSource#COWBOY}.
+     * "The country round here produces Fjords" and "a dealer round here can get
+     * you a Fjord" are different claims and a breed may make one without the
+     * other, so the source has to be the caller's to name.
+     */
+    public static Breed pickHerdBreed(Holder<Biome> biome, RandomSource rng,
+                                      com.example.horsegenetics.common.breed.BreedSource source) {
         String biomeId = biome.unwrapKey().map(k -> k.identifier().toString()).orElse("");
-        List<Breed> candidates = Breeds.forBiome(biomeId);
+        List<Breed> candidates = Breeds.forBiome(biomeId, source);
         if (candidates.isEmpty()) {
             return Breeds.FERAL_MIXED;
         }

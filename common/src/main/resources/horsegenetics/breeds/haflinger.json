@@ -1,0 +1,49 @@
+{
+  "id": "haflinger",
+  "name": "Haflinger",
+  "commonness": "common",
+  "biomes": [
+    "minecraft:cherry_grove",
+    "minecraft:meadow",
+    "minecraft:windswept_hills",
+    "minecraft:grove"
+  ],
+  "stats": {
+    "speed": 5,
+    "jump": 5,
+    "health": 8,
+    "height": [13.5, 15]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "e/e", "weight": 100 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 30 },
+      { "pair": "A/a", "weight": 45 },
+      { "pair": "a/a", "weight": 25 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.roan": [
+      { "pair": "Rn/rn", "weight": 10 },
+      { "pair": "rn/rn", "weight": 90 }
+    ],
+    "horsegenetics.flaxen": [
+      { "pair": "Fl2/Fl2", "weight": 46 },
+      { "pair": "Fl2/Fl1", "weight": 38 },
+      { "pair": "Fl1/Fl1", "weight": 14 },
+      { "pair": "Fl1/f", "weight": 2 }
+    ]
+  },
+  "notes": [
+    "Chestnut body with a striking flaxen mane and tail, and the breed the flaxen locus is calibrated against. Fixed e/e keeps it chestnut.",
+    "EMS / laminitis: age-related, folded into heartiness."
+  ]
+}

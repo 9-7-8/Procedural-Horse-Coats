@@ -1,0 +1,67 @@
+{
+  "id": "quarter_horse",
+  "name": "Quarter Horse",
+  "commonness": "extremely_common",
+  "biomes": [
+    "minecraft:plains",
+    "minecraft:savanna",
+    "minecraft:sunflower_plains",
+    "minecraft:meadow"
+  ],
+  "stats": {
+    "speed": 8,
+    "jump": 5,
+    "health": 7,
+    "height": [14.5, 16]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 40 },
+      { "pair": "E/e", "weight": 45 },
+      { "pair": "e/e", "weight": 15 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 30 },
+      { "pair": "A/a", "weight": 45 },
+      { "pair": "a/a", "weight": 25 }
+    ],
+    "horsegenetics.matp": [
+      { "pair": "Cr/N", "weight": 14 },
+      { "pair": "Cr/Cr", "weight": 3 },
+      { "pair": "N/N", "weight": 83 }
+    ],
+    "horsegenetics.dun": [
+      { "pair": "d1/d2", "weight": 22 },
+      { "pair": "d2/d2", "weight": 78 }
+    ],
+    "horsegenetics.roan": [
+      { "pair": "Rn/rn", "weight": 14 },
+      { "pair": "rn/rn", "weight": 86 }
+    ],
+    "horsegenetics.kit": [
+      { "pair": "SB1/N", "weight": 14 },
+      { "pair": "W35/N", "weight": 18 },
+      { "pair": "W32/N", "weight": 8 },
+      { "pair": "W34/N", "weight": 4 },
+      { "pair": "W10/N", "weight": 1 },
+      { "pair": "N/N", "weight": 55 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/N", "weight": 4 },
+      { "pair": "G2/N", "weight": 5 },
+      { "pair": "N/N", "weight": 91 }
+    ],
+    "horsegenetics.mitf": [
+      { "pair": "SW1/N", "weight": 55 },
+      { "pair": "N/N", "weight": 45 }
+    ],
+    "horsegenetics.pax3": [
+      { "pair": "SW2/N", "weight": 20 },
+      { "pair": "N/N", "weight": 80 }
+    ]
+  },
+  "notes": [
+    "Massively muscled hindquarters and broad chest - the sprinter. nd1/nd2 give the odd dorsal stripe with no dilution.",
+    "HYPP, PSSM1 and HERDA all have loci now - see SCN4A, GYS1 and PPIB. Both dominants, so a wild-caught Quarter Horse really can be an affected one."
+  ]
+}

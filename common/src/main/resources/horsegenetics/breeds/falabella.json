@@ -1,0 +1,71 @@
+{
+  "id": "falabella",
+  "name": "Falabella",
+  "commonness": "uncommon",
+  "biomes": [
+    "minecraft:plains",
+    "minecraft:sunflower_plains",
+    "minecraft:meadow"
+  ],
+  "stats": {
+    "speed": 2,
+    "jump": 1,
+    "health": 3,
+    "height": [6, 8]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 42 },
+      { "pair": "E/e", "weight": 44 },
+      { "pair": "e/e", "weight": 14 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 30 },
+      { "pair": "A/a", "weight": 45 },
+      { "pair": "a/a", "weight": 25 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.matp": [
+      { "pair": "Cr/N", "weight": 16 },
+      { "pair": "prl/N", "weight": 8 },
+      { "pair": "N/N", "weight": 76 }
+    ],
+    "horsegenetics.dun": [
+      { "pair": "D/d2", "weight": 8 },
+      { "pair": "d2/d2", "weight": 92 }
+    ],
+    "horsegenetics.champagne": [
+      { "pair": "Ch/c", "weight": 8 },
+      { "pair": "c/c", "weight": 92 }
+    ],
+    "horsegenetics.silver": [
+      { "pair": "Z/z", "weight": 10 },
+      { "pair": "z/z", "weight": 90 }
+    ],
+    "horsegenetics.tobiano": [
+      { "pair": "To/to", "weight": 20 },
+      { "pair": "to/to", "weight": 80 }
+    ],
+    "horsegenetics.kit": [
+      { "pair": "SB1/N", "weight": 14 },
+      { "pair": "W20/N", "weight": 10 },
+      { "pair": "W35/N", "weight": 10 },
+      { "pair": "N/N", "weight": 66 }
+    ],
+    "horsegenetics.mitf": [
+      { "pair": "SW1/N", "weight": 40 },
+      { "pair": "N/N", "weight": 60 }
+    ]
+  },
+  "notes": [
+    "The smallest breed - the size band sits against the MAGICAL_MIN_SCALE guard.",
+    "'Fragile bones' left as very low heartiness rather than a lethal gene."
+  ]
+}

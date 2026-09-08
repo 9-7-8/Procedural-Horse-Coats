@@ -1,0 +1,52 @@
+{
+  "id": "trakehner",
+  "name": "Trakehner",
+  "commonness": "common",
+  "biomes": [
+    "minecraft:taiga",
+    "minecraft:forest",
+    "minecraft:old_growth_pine_taiga",
+    "minecraft:grove"
+  ],
+  "stats": {
+    "speed": 7,
+    "jump": 8,
+    "health": 5,
+    "height": [15.5, 17]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 42 },
+      { "pair": "E/e", "weight": 44 },
+      { "pair": "e/e", "weight": 14 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 55 },
+      { "pair": "A/a", "weight": 38 },
+      { "pair": "a/a", "weight": 7 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/N", "weight": 20 },
+      { "pair": "N/N", "weight": 80 }
+    ],
+    "horsegenetics.roan": [
+      { "pair": "Rn/rn", "weight": 12 },
+      { "pair": "rn/rn", "weight": 88 }
+    ],
+    "horsegenetics.mitf": [
+      { "pair": "SW1/N", "weight": 60 },
+      { "pair": "N/N", "weight": 40 }
+    ]
+  },
+  "notes": [
+    "The lightest, most refined warmblood - an elegant head and an athletic build. OCD, bone spavin: age-related."
+  ]
+}

@@ -1,7 +1,14 @@
 package com.example.horsegenetics.web;
 
 import com.example.horsegenetics.common.Rng;
+import com.example.horsegenetics.common.SeededRng;
 import com.example.horsegenetics.common.breed.Breed;
+import com.example.horsegenetics.common.breed.BreedFounder;
+import com.example.horsegenetics.common.breed.BreedSource;
+import com.example.horsegenetics.common.breed.Breeds;
+import com.example.horsegenetics.common.breed.Commonness;
+import com.example.horsegenetics.common.breed.spec.BreedSpecParser;
+import com.example.horsegenetics.common.breed.spec.BreedSpecWriter;
 import com.example.horsegenetics.common.coat.pattern.CoatTextureComposer;
 import com.example.horsegenetics.common.coat.pattern.GradientLut;
 import com.example.horsegenetics.common.coat.pattern.LutSet;
@@ -21,7 +28,9 @@ import com.example.horsegenetics.common.genetics.Expression;
 import com.example.horsegenetics.common.genetics.Gene;
 import com.example.horsegenetics.common.genetics.GeneCodeDisplay;
 import com.example.horsegenetics.common.genetics.Genes;
+import com.example.horsegenetics.common.genetics.Genome;
 import com.example.horsegenetics.common.genetics.Genotype;
+import com.example.horsegenetics.common.genetics.epi.EpiValue;
 import com.example.horsegenetics.common.genetics.SpliceSafety;
 import com.example.horsegenetics.common.trait.Condition;
 import com.example.horsegenetics.common.trait.HorseTraits;
@@ -957,6 +966,247 @@ public final class DesignerApi {
                 // Whether the Unknown Gene Splice may roll this locus. Derived
                 // from what the gene does to the horse, never listed.
                 .kv("unknownSpliceable", SpliceSafety.isSafe(g))
+                .endObj().toString();
+    }
+
+    // ---- breeds, for wiki/breed-designer/ ----------------------------------
+
+    /**
+     * Register the breed bundle the page fetched -
+     * {@code wiki/horse-designer/assets/breeds.json}, which is
+     * {@code common/src/main/resources/horsegenetics/breeds/} rewritten as one
+     * array by {@code :common:bakeBreedFiles}.
+     *
+     * <p>It has to come in rather than be read off the classpath for the same
+     * reason the gradient and the name tables do: {@code getResourceAsStream} is
+     * the weakest thing TeaVM does. Call it <b>before</b> anything asks for a
+     * breed - the registry is lazy and will otherwise conclude there are none.
+     *
+     * @return a JSON array of anything that would not load, empty when all is well
+     */
+    @JSExport
+    public static String registerBreeds(String bundleJson) {
+        Json j = new Json().arr();
+        for (String message : Breeds.registerBundle(bundleJson, "breeds.json")) {
+            j.val(message);
+        }
+        return j.endArr().toString();
+    }
+
+    /**
+     * The <b>base-coat presets</b> the breed designer's first step offers, each
+     * as the gene pools it would write.
+     *
+     * <p>They are built here, by calling {@code Breed.Builder}'s own
+     * {@code extensionAny} / {@code agoutiBayBias} / {@code shadeAny} helpers
+     * and reading back what they produced, rather than being a table of weights
+     * in the page. The weights in a Friesian's file and the weights the tool
+     * offers for "mostly black" are then the same numbers by construction, and
+     * re-tuning one re-tunes the other.
+     *
+     * <p>Every preset includes the <b>shade</b> locus at its wild spread, for
+     * the reason {@code Breed.Builder.shadeAny} documents: shade is a modifier a
+     * coat gene reads, so a breed that does not name it gets it forced wild -
+     * and a world where only feral horses vary in shade would be a bug nobody
+     * would think to look for.
+     */
+    @JSExport
+    public static String basePresetsJson() {
+        Json j = new Json().arr();
+        preset(j, "any", "Any colour",
+                "The wild spread at both loci - a breed with no colour rule of its own.",
+                Breed.of("x", "x").extensionAny().agoutiAny());
+        preset(j, "bay", "Mostly bay",
+                "Black-biased extension with a strong bay agouti. Chestnuts are rare and blacks uncommon.",
+                Breed.of("x", "x").extensionBlackBias().agoutiBayBias());
+        preset(j, "black", "Mostly black",
+                "Black-biased extension, agouti fixed recessive. The Friesian shape.",
+                Breed.of("x", "x").extensionBlackBias().agoutiBlack());
+        preset(j, "black_only", "Black only",
+                "Fixed at both loci - every founder is black, and the line cannot throw anything else.",
+                Breed.of("x", "x").fixed("horsegenetics.extension", "E").agoutiBlack());
+        preset(j, "bay_only", "Bay only",
+                "Fixed at both loci - every founder is bay.",
+                Breed.of("x", "x").fixed("horsegenetics.extension", "E")
+                        .fixed("horsegenetics.agouti", "A").shadeAny());
+        preset(j, "chestnut", "Chestnut only",
+                "Extension fixed recessive - the Suffolk Punch / Haflinger shape. Agouti still varies but cannot show.",
+                Breed.of("x", "x").extensionChestnut().agoutiAny());
+        return j.endArr().toString();
+    }
+
+    private static void preset(Json j, String key, String name, String blurb, Breed.Builder builder) {
+        Breed breed = builder.build();
+        j.obj().kv("key", key).kv("name", name).kv("blurb", blurb).key("genes").obj();
+        for (Map.Entry<String, List<Breed.Combo>> e : breed.genePools().entrySet()) {
+            j.key(e.getKey()).arr();
+            for (Breed.Combo c : e.getValue()) {
+                j.obj().kv("pair", c.a() + "/" + c.b()).kv("weight", c.weight()).endObj();
+            }
+            j.endArr();
+        }
+        j.endObj().endObj();
+    }
+
+    /**
+     * One registered breed as the <b>file it would be</b> - {@code BreedSpecWriter}
+     * output, byte for byte what {@code :common:bakeBreedFiles} writes.
+     *
+     * <p>This is what "open a built-in breed" in the designer loads, and the
+     * reason the tool cannot drift from the mod: the starting point for editing
+     * a Friesian is the game's own Friesian file, produced by the game's own
+     * writer, not a JavaScript reconstruction of it.
+     */
+    @JSExport
+    public static String breedFileJson(String breedId) {
+        Breed breed = Breeds.get(breedId);
+        if (breed == Breeds.FERAL_MIXED && !"feral_mixed".equals(breedId)) {
+            return "";
+        }
+        return BreedSpecWriter.write(breed);
+    }
+
+    /** Every registered breed, with enough of each to fill a picker. */
+    @JSExport
+    public static String breedCatalogJson() {
+        Json j = new Json().arr();
+        for (Breed b : Breeds.all()) {
+            j.obj()
+                    .kv("id", b.id())
+                    .kv("name", b.name())
+                    .kv("magical", b.magical())
+                    .kv("commonness", Commonness.forWeight(b.spawnWeight())
+                            .name().toLowerCase(java.util.Locale.ROOT))
+                    .kv("genes", b.genePools().size())
+                    .kv("biomes", b.biomes().size())
+                    .key("spawn").arr();
+            for (BreedSource source : BreedSource.values()) {
+                if (b.allows(source)) {
+                    j.val(source.id());
+                }
+            }
+            j.endArr().endObj();
+        }
+        return j.endArr().toString();
+    }
+
+    /**
+     * Every biome id any registered breed mentions, sorted.
+     *
+     * <p>The breed designer offers these as suggestions. It is a union of what
+     * the breeds already say rather than a list of Minecraft's biomes, and that
+     * is the right shape for two reasons: the tool does not have Minecraft's
+     * registry to ask, and the biomes worth suggesting are the ones horses
+     * already live in. A modded biome typed into one breed file turns up as a
+     * suggestion in the next, which a fixed list could never do.
+     */
+    @JSExport
+    public static String knownBiomesJson() {
+        java.util.TreeSet<String> ids = new java.util.TreeSet<>();
+        for (Breed b : Breeds.all()) {
+            ids.addAll(b.biomes());
+        }
+        Json j = new Json().arr();
+        for (String id : ids) {
+            j.val(id);
+        }
+        return j.endArr().toString();
+    }
+
+    /**
+     * A gene's <b>epigenetic value schema</b> - the named numbers a breed may
+     * band, with the range founders are rolled in and the hard clamp beyond it.
+     *
+     * <p>Only {@code SCALAR}s are listed. A seed is the long behind a noise
+     * field and a category is an index into a list the gene owns; neither has a
+     * "slightly more", so neither can be banded, and offering a slider for one
+     * would be offering a control that does nothing.
+     */
+    @JSExport
+    public static String epiSchemaJson(String geneKey) {
+        Gene g = Genes.byKeyOrNull(geneKey);
+        Json j = new Json().arr();
+        if (g == null) {
+            return j.endArr().toString();
+        }
+        for (EpiValue v : g.epiSchema().values()) {
+            if (v.kind() != EpiValue.Kind.SCALAR) {
+                continue;
+            }
+            j.obj()
+                    .kv("name", v.name())
+                    .kv("min", v.min())
+                    .kv("max", v.max())
+                    .kv("clampLo", v.clampLo())
+                    .kv("clampHi", v.clampHi())
+                    .kv("arity", v.arity())
+                    .endObj();
+        }
+        return j.endArr().toString();
+    }
+
+    /**
+     * Run a candidate breed file through the <b>real parser</b> and report what
+     * it said.
+     *
+     * <p>This is the whole reason the breed designer is a wasm page rather than
+     * a form that writes JSON. The tool's validation and the game's are the same
+     * code, so a file the tool calls good is a file the game will load, and a
+     * warning the tool shows is the warning the log would print. There is no
+     * parity to keep because there is no second implementation.
+     */
+    @JSExport
+    public static String checkBreedJson(String json) {
+        List<String> warnings = new ArrayList<>();
+        try {
+            Breed breed = BreedSpecParser.parse(json, "the editor", warnings::add);
+            Json j = new Json().obj()
+                    .kv("ok", true)
+                    .kv("id", breed.id())
+                    .kv("name", breed.name())
+                    .kv("genes", breed.genePools().size())
+                    .key("warnings").arr();
+            for (String w : warnings) {
+                j.val(w);
+            }
+            return j.endArr().endObj().toString();
+        } catch (RuntimeException e) {
+            Json j = new Json().obj()
+                    .kv("ok", false)
+                    .kv("error", String.valueOf(e.getMessage()))
+                    .key("warnings").arr();
+            for (String w : warnings) {
+                j.val(w);
+            }
+            return j.endArr().endObj().toString();
+        }
+    }
+
+    /**
+     * Roll one <b>founder</b> of a candidate breed file and hand back its codes,
+     * so the page can render it through the same pipeline it renders everything
+     * else with.
+     *
+     * <p>It is a real {@code BreedFounder.roll}: the pool draw, the wild-type
+     * forcing, the geometric magic draw, the stat targets and the epigenetic
+     * bands. So the horses the designer shows are the horses a herd of this
+     * breed would actually be made of, and "my pool looks right but every horse
+     * comes out black" is answerable in the tool.
+     */
+    @JSExport
+    public static String breedFounderJson(String json, int seed) {
+        Breed breed;
+        try {
+            breed = BreedSpecParser.parse(json, "the editor", m -> { });
+        } catch (RuntimeException e) {
+            return new Json().obj().kv("ok", false)
+                    .kv("error", String.valueOf(e.getMessage())).endObj().toString();
+        }
+        Genome genome = BreedFounder.roll(breed, new SeededRng(seed));
+        return new Json().obj()
+                .kv("ok", true)
+                .kv("genotype", genome.genotypeCode())
+                .kv("epigenome", genome.epigenome().toCode())
                 .endObj().toString();
     }
 

@@ -1,0 +1,34 @@
+{
+  "id": "przewalski",
+  "name": "Przewalski's Horse",
+  "commonness": "rare",
+  "biomes": [
+    "minecraft:desert",
+    "minecraft:badlands",
+    "minecraft:savanna"
+  ],
+  "hardy": true,
+  "stats": {
+    "speed": 6,
+    "jump": 3,
+    "health": 10,
+    "height": [12, 14]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 92 },
+      { "pair": "E/e", "weight": 8 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 88 },
+      { "pair": "A/a", "weight": 12 }
+    ],
+    "horsegenetics.dun": [
+      { "pair": "D/D", "weight": 100 }
+    ]
+  },
+  "notes": [
+    "The only never-domesticated true wild horse: stocky dun body, erect black mane, no forelock, no spotting. Mane shape is a roadmap render item.",
+    "OCD: age-related, folded into heartiness."
+  ]
+}

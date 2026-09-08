@@ -73,3 +73,18 @@ tasks.register<JavaExec>("bakeCreatorAssets") {
     mainClass.set("com.example.horsegenetics.common.genetics.spec.CreatorAssetTool")
     args(rootProject.layout.projectDirectory.dir("wiki/gene-creator").asFile.absolutePath)
 }
+
+// Write every registered breed out as a JSON file plus the classpath index the
+// loader reads. This is how the built-in breeds became data files, and how a
+// Java-defined breed is exported for someone to edit. Dev tooling only.
+tasks.register<JavaExec>("bakeBreedFiles") {
+    group = "horsegenetics"
+    description = "Write common/src/main/resources/horsegenetics/breeds/ from the registered breeds"
+    dependsOn(tasks.named("classes"))
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass.set("com.example.horsegenetics.common.breed.spec.BreedFileTool")
+    args(layout.projectDirectory.dir("src/main/resources/horsegenetics/breeds").asFile.absolutePath,
+            // ...and the browser's single-file copy of the same content, which
+            // the wiki tools fetch because TeaVM cannot read a classpath index.
+            rootProject.layout.projectDirectory.file("wiki/horse-designer/assets/breeds.json").asFile.absolutePath)
+}

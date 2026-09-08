@@ -1,52 +1,50 @@
 package com.example.horsegenetics.common.breed;
 
+import com.example.horsegenetics.common.CommonLog;
+import com.example.horsegenetics.common.breed.spec.BreedSpecLoader;
+
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
- * The built-in breed registry - 47 real-world breeds plus {@link #FERAL_MIXED}, the
- * label a lone wild horse / {@code /summon} / spawn-egg horse carries.
+ * The breed registry: the files the mod ships, any a player has dropped in, and
+ * {@link #FERAL_MIXED}, the label a horse with no herd identity carries.
  *
- * <p>Every breed here is a first pass: the biome assignments and stat scores
- * come straight from the owner's breed sheet, and the per-gene pool <b>rates</b>
- * are estimates chosen so a herd reads as that breed without being a monoculture.
- * {@code wiki/breeds.html} is the readable version of this file.
+ * <h2>Breeds are data now</h2>
+ * This class used to <i>be</i> the breeds - 885 lines of builder calls, one
+ * method per breed. They live in
+ * {@code common/src/main/resources/horsegenetics/breeds/} instead, one JSON file
+ * each, listed in {@code index.json}; {@code wiki/breed-designer/} writes them
+ * and {@code wiki/breed-format.html} documents them. The point is that adding a
+ * breed is now something a player can do to a built jar, by putting a file in
+ * {@code config/horsegenetics/breeds/}, and that changing one is a two-line diff
+ * somebody can read.
  *
- * <h2>Referenced-but-unbuilt</h2>
- * Genes and features the sheet asks for that this mod does not have yet -
- * lower-leg feathering, breed mane shapes, NNF - are recorded in each breed's
- * {@link Breed#notes()} and collected in {@code wiki/roadmap.html}. The
- * <b>leopard complex</b> ({@code LP} / {@code PATN1} / {@code PATN2}), <b>tiger
- * eye</b> and the disorder loci the sheet named (<b>HYPP</b>, <b>PSSM1</b>,
- * <b>HERDA</b>, <b>SCID</b>, <b>CA</b>, <b>LFS</b>, <b>GBED</b>, <b>CVM</b>,
- * megaesophagus) have all since shipped - so a note here is a claim with a
- * shelf life, and it has to be deleted in the same change as the gene that
- * closes it.
+ * <p>The per-gene pool <b>rates</b> in those files are still estimates, chosen
+ * so a herd reads as that breed without being a monoculture, and the biome
+ * assignments and stat scores still come from the owner's breed sheet.
+ * {@code wiki/breeds.html} is the readable version.
+ *
+ * <h2>Java breeds still exist</h2>
+ * {@link #registerJava} is the escape hatch, and {@link #FERAL_MIXED} is the
+ * only user of it. It is for a breed that needs <i>behaviour</i> - a magical
+ * line whose founders are built by code rather than drawn from a table. A breed
+ * that is a set of genes, biomes, bands and numbers must be a file: a Java one
+ * cannot be edited, cannot be shared, and cannot be opened in the designer.
+ *
+ * <h2>When the files are read</h2>
+ * Lazily, on first access, because a breed file names genes and the gene
+ * registry is not complete until the host has loaded its own drop-ins. In
+ * NeoForge that ordering is explicit - {@code ModGeneSpecs.load()} then
+ * {@code ModBreedSpecs.load()}, both from the mod constructor - and the laziness
+ * is what makes the same class work in a test and in the browser without either
+ * having to know to call an initialiser.
  */
 public final class Breeds {
-
-    // gene keys, spelled once
-    private static final String EXT = "horsegenetics.extension";
-    private static final String AGO = "horsegenetics.agouti";
-    private static final String MATP = "horsegenetics.matp";
-    private static final String DUN = "horsegenetics.dun";
-    private static final String CHAMP = "horsegenetics.champagne";
-    private static final String SILVER = "horsegenetics.silver";
-    private static final String FLAXEN = "horsegenetics.flaxen";
-    private static final String PANGARE = "horsegenetics.pangare";
-    private static final String GREY = "horsegenetics.grey";
-    private static final String ROAN = "horsegenetics.roan";
-    private static final String TOB = "horsegenetics.tobiano";
-    private static final String KIT = "horsegenetics.kit";
-    private static final String MITF = "horsegenetics.mitf";
-    private static final String PAX3 = "horsegenetics.pax3";
-    private static final String EDNRB = "horsegenetics.ednrb";
-    private static final String LEOP = "horsegenetics.leopard";
-    private static final String TE = "horsegenetics.tiger_eye";
-    private static final String PATN1 = "horsegenetics.patn1";
-    private static final String PATN2 = "horsegenetics.patn2";
 
     /**
      * The <b>Feral Mixed</b> breed - the label a horse with no herd identity
@@ -61,68 +59,34 @@ public final class Breeds {
      * "Friesian x Unknown cross" and the model had to answer whether Unknown was
      * a breed with a stat band, a pool and a claim to purity. Absorbing it into
      * Mixed makes the question disappear rather than answering it.
+     *
+     * <p>It is also the one breed that is still Java, and the reason the escape
+     * hatch is kept: it is not a slice of the gene pool, it is the absence of
+     * one, and there is nothing for a file to say.
      */
     public static final Breed FERAL_MIXED = Breed.of("feral_mixed", "Feral Mixed")
+            .sources()  // no source: never spawns as itself, never has an egg
             .note("Lone wild spawns, /summon and spawn-egg horses. Every gene rolled unconstrained - the pre-breeds behaviour.")
             .note("Absorbing: any cross involving a Feral Mixed horse produces a Mixed foal.")
             .build();
 
     private static final List<Breed> ALL = new ArrayList<>();
     private static final Map<String, Breed> BY_ID = new LinkedHashMap<>();
-
-    static {
-        register(akhalTeke());
-        register(americanCreamDraft());
-        register(americanMiniature());
-        register(americanPaint());
-        register(andalusian());
-        register(appaloosa());
-        register(arabian());
-        register(bankerHorse());
-        register(belgianDraft());
-        register(camargue());
-        register(canadianHorse());
-        register(caspianPony());
-        register(clevelandBay());
-        register(clydesdale());
-        register(connemaraPony());
-        register(dalesPony());
-        register(dartmoorPony());
-        register(exmoorPony());
-        register(falabella());
-        register(fjord());
-        register(friesian());
-        register(gypsyVanner());
-        register(hackney());
-        register(haflinger());
-        register(hanoverian());
-        register(icelandicHorse());
-        register(irishDraught());
-        register(karabakh());
-        register(kigerMustang());
-        register(knabstrupper());
-        register(lipizzan());
-        register(lusitano());
-        register(marwari());
-        register(morgan());
-        register(mustang());
-        register(newForestPony());
-        register(pasoFino());
-        register(percheron());
-        register(przewalski());
-        register(puertoRicanPasoFino());
-        register(quarterHorse());
-        register(shetlandPony());
-        register(shire());
-        register(standardbred());
-        register(suffolkPunch());
-        register(tennesseeWalking());
-        register(thoroughbred());
-        register(trakehner());
-        register(welshPony());
-    }
+    private static boolean builtinsLoaded;
 
     private Breeds() {
+    }
+
+    // ------------------------------------------------------------------
+    // Registration
+    // ------------------------------------------------------------------
+
+    /**
+     * Register a breed written in Java. See the class note: this is for a breed
+     * that needs behaviour, not for one that is a table of numbers.
+     */
+    public static synchronized void registerJava(Breed b) {
+        register(b);
     }
 
     private static void register(Breed b) {
@@ -132,15 +96,105 @@ public final class Breeds {
         ALL.add(b);
     }
 
+    /**
+     * Read the breed files shipped inside the jar. Called automatically the
+     * first time anything asks for a breed; safe to call again (it is a no-op).
+     */
+    public static synchronized void loadBuiltins() {
+        if (builtinsLoaded) {
+            return;
+        }
+        builtinsLoaded = true;
+        accept(BreedSpecLoader.fromClasspath());
+    }
+
+    /**
+     * Read a drop-in folder - {@code config/horsegenetics/breeds/} in game.
+     * Returns everything worth telling the player about, most serious first:
+     * files that would not parse, then loci that were skipped because this
+     * install has not got the gene.
+     */
+    public static synchronized List<String> loadFrom(Path directory) {
+        loadBuiltins();
+        BreedSpecLoader.Result result = BreedSpecLoader.fromDirectory(directory);
+        List<String> messages = new ArrayList<>(result.errors());
+        messages.addAll(result.warnings());
+        messages.addAll(accept(result));
+        return messages;
+    }
+
+    /** Register what a load found, reporting the ids that collided. */
+    private static List<String> accept(BreedSpecLoader.Result result) {
+        List<String> problems = new ArrayList<>();
+        for (String error : result.errors()) {
+            CommonLog.warn(error);
+        }
+        for (String warning : result.warnings()) {
+            CommonLog.warn(warning);
+        }
+        for (Breed breed : result.breeds()) {
+            if (BY_ID.containsKey(breed.id())) {
+                String message = "breed \"" + breed.id() + "\" is already registered - the later file is ignored";
+                CommonLog.warn(message);
+                problems.add(message);
+                continue;
+            }
+            register(breed);
+        }
+        return problems;
+    }
+
+    /**
+     * Register a <b>bundle</b> - a JSON array of breed objects - and mark the
+     * built-ins as loaded, whatever the classpath holds.
+     *
+     * <p>This is the browser's path in. A TeaVM build cannot read the resource
+     * folder the game reads breed files off, so the page fetches one bundled
+     * file and hands the text here; marking the built-ins loaded is what stops
+     * a later lazy {@link #loadBuiltins} finding nothing on the classpath and
+     * concluding there are no breeds.
+     *
+     * @return everything worth telling the caller about, most serious first
+     */
+    public static synchronized List<String> registerBundle(String json, String source) {
+        builtinsLoaded = true;
+        List<String> messages = new ArrayList<>();
+        List<Breed> parsed;
+        try {
+            parsed = com.example.horsegenetics.common.breed.spec.BreedSpecParser
+                    .parseAll(json, source, messages::add);
+        } catch (RuntimeException e) {
+            String message = String.valueOf(e.getMessage());
+            CommonLog.warn(message);
+            messages.add(message);
+            return messages;
+        }
+        messages.addAll(accept(new BreedSpecLoader.Result(parsed, List.of(), List.of())));
+        return messages;
+    }
+
+    /** Forget every loaded breed. Tests only - nothing in the game re-reads the folder. */
+    public static synchronized void resetForTesting() {
+        ALL.clear();
+        BY_ID.clear();
+        builtinsLoaded = false;
+    }
+
+    // ------------------------------------------------------------------
+    // Lookup
+    // ------------------------------------------------------------------
+
     public static List<Breed> all() {
+        loadBuiltins();
         return List.copyOf(ALL);
     }
 
     public static Breed get(String id) {
+        loadBuiltins();
         return BY_ID.getOrDefault(id, FERAL_MIXED);
     }
 
-    public static Breed getOrFeral(java.util.Optional<String> id) {
+    public static Breed getOrFeral(Optional<String> id) {
         return id.map(Breeds::get).orElse(FERAL_MIXED);
     }
 
@@ -148,6 +202,7 @@ public final class Breeds {
         if (id == null || id.isBlank() || id.equals("feral_mixed")) {
             return "Feral Mixed";
         }
+        loadBuiltins();
         Breed b = BY_ID.get(id);
         if (b != null) {
             return b.name();
@@ -157,729 +212,35 @@ public final class Breeds {
 
     /** Breeds that can head a wild herd in {@code biomeId} (a "minecraft:plains" style string). */
     public static List<Breed> forBiome(String biomeId) {
+        return forBiome(biomeId, BreedSource.WILD);
+    }
+
+    /**
+     * Breeds that belong in {@code biomeId} and are allowed to come from
+     * {@code source}. The cowboy asks with {@link BreedSource#COWBOY} and the
+     * herd roll with {@link BreedSource#WILD}, which is the whole reason the
+     * source is a parameter: "the country round here produces Fjords" and "a
+     * dealer round here can get you a Fjord" are different claims, and a breed
+     * may make one without the other.
+     */
+    public static List<Breed> forBiome(String biomeId, BreedSource source) {
         List<Breed> out = new ArrayList<>();
-        for (Breed b : ALL) {
-            if (b.biomes().contains(biomeId)) {
+        for (Breed b : all()) {
+            if (b.allows(source) && b.biomes().contains(biomeId)) {
                 out.add(b);
             }
         }
         return out;
     }
 
-    // ------------------------------------------------------------------
-    // helpers for the definitions below
-
-    private static double hh(int hands, int inches) {
-        return hands + inches / 4.0;
-    }
-
-    // ------------------------------------------------------------------
-    // the breeds
-    // ------------------------------------------------------------------
-
-    private static Breed akhalTeke() {
-        return Breed.of("akhal_teke", "Akhal-Teke").commonness(Commonness.UNCOMMON)
-                .biomes("minecraft:desert", "minecraft:savanna", "minecraft:badlands", "minecraft:savanna_plateau")
-                .extensionAny().agoutiAny()
-                .gene(MATP, "Cr", "N", 14).gene(MATP, "Cr", "Cr", 3).gene(MATP, "N", "N", 83)
-                .gene(GREY, "G3", "N", 5).gene(GREY, "N", "N", 95)
-                .gene(DUN, "d1", "d2", 30).gene(DUN, "d2", "d2", 70)
-                .height(hh(14, 2), hh(16, 0)).speed(9).jump(5).health(8)
-                .note("Metallic / iridescent coat sheen - not modelled (a shader, out of scope).")
-                .note("NNF: an early-lethal foal disorder with no gene yet - see roadmap.")
-                .build();
-    }
-
-    private static Breed americanCreamDraft() {
-        return Breed.of("american_cream_draft", "American Cream Draft").commonness(Commonness.RARE)
-                .biomes("minecraft:plains", "minecraft:sunflower_plains", "minecraft:meadow")
-                .extensionChestnut().agoutiAny()
-                .fixed(MATP, "Cr")
-                .height(hh(15, 0), hh(16, 0)).speed(3).jump(2).health(5)
-                .note("Pale cream coat, amber eyes, pink skin - the cream double-dilute already renders; dedicated eye colour is a roadmap gene.")
-                .note("EMS / laminitis: age-related, folded into heartiness.")
-                .build();
-    }
-
-    private static Breed americanMiniature() {
-        return Breed.of("american_miniature", "American Miniature").commonness(Commonness.VERY_COMMON)
-                .biomes("minecraft:plains", "minecraft:sunflower_plains", "minecraft:meadow")
-                .extensionAny().agoutiAny()
-                .gene(MATP, "Cr", "N", 16).gene(MATP, "prl", "N", 8).gene(MATP, "N", "N", 76)
-                .gene(DUN, "D", "d2", 10).gene(DUN, "d1", "d2", 14).gene(DUN, "d2", "d2", 76)
-                .gene(CHAMP, "Ch", "c", 8).gene(CHAMP, "c", "c", 92)
-                .gene(SILVER, "Z", "z", 8).gene(SILVER, "z", "z", 92)
-                .gene(TOB, "To", "to", 22).gene(TOB, "to", "to", 78)
-                .gene(ROAN, "Rn", "rn", 12).gene(ROAN, "rn", "rn", 88)
-                .gene(KIT, "SB1", "N", 16).gene(KIT, "W20", "N", 12).gene(KIT, "W35", "N", 14)
-                .gene(KIT, "W13", "N", 2).gene(KIT, "N", "N", 56)
-                // A G2 population.
-                .gene(GREY, "G3", "N", 7).gene(GREY, "G2", "N", 6).gene(GREY, "N", "N", 87)
-                .gene(MITF, "SW1", "N", 60).gene(MITF, "N", "N", 40)
-                .height(hh(7, 0), hh(8, 2)).speed(2).jump(1).health(4)
-                .note("Under 9.5 hh: the magic-size band bottoms this near the MAGICAL_MIN_SCALE guard - about as small as the model goes.")
-                .note("Dwarfism, dental overcrowding, EMS: ACAN dwarfism already exists; the rest fold into heartiness.")
-                .build();
-    }
-
-    private static Breed americanPaint() {
-        return Breed.of("american_paint", "American Paint").commonness(Commonness.VERY_COMMON)
-                .biomes("minecraft:plains", "minecraft:savanna", "minecraft:windswept_savanna")
-                .extensionAny().agoutiAny()
-                .gene(MATP, "Cr", "N", 12).gene(MATP, "N", "N", 88)
-                .gene(DUN, "D", "d2", 6).gene(DUN, "d2", "d2", 94)
-                .gene(TOB, "To", "to", 48).gene(TOB, "To", "To", 10).gene(TOB, "to", "to", 42)
-                .gene(KIT, "SB1", "N", 26).gene(KIT, "W20", "N", 16).gene(KIT, "W35", "N", 16)
-                .gene(KIT, "W32", "N", 8).gene(KIT, "W34", "N", 4).gene(KIT, "N", "N", 30)
-                .gene(EDNRB, "O", "N", 20).gene(EDNRB, "N", "N", 80)
-                .gene(MITF, "SW1", "N", 60).gene(MITF, "N", "N", 40)
-                .gene(PAX3, "SW2", "N", 30).gene(PAX3, "N", "N", 70)
-                .height(hh(14, 2), hh(16, 0)).speed(7).jump(5).health(6)
-                .note("Pinto spotting: tobiano + sabino + frame overo + splash, all present. O/O (lethal white) is the real breeding hazard.")
-                .note("HYPP, HERDA and PSSM1 all have loci now - see SCN4A, PPIB and GYS1. HYPP is the breeding hazard here alongside O/O.")
-                .build();
-    }
-
-    private static Breed andalusian() {
-        return Breed.of("andalusian", "Andalusian").commonness(Commonness.MODERATE)
-                .biomes("minecraft:plains", "minecraft:forest", "minecraft:sunflower_plains", "minecraft:meadow")
-                .extensionBlackBias().agoutiAny()
-                .gene(GREY, "G3", "N", 34).gene(GREY, "G2", "N", 18).gene(GREY, "G3", "G3", 12)
-                .gene(GREY, "G3", "G2", 6).gene(GREY, "G2", "G2", 4).gene(GREY, "N", "N", 26)
-                .height(hh(15, 0), hh(16, 2)).speed(6).jump(8).health(5)
-                .note("Thick flowing mane and tail, baroque compact build - mane length is a roadmap render item.")
-                .note("OCD, laminitis: age-related, folded into heartiness.")
-                .build();
-    }
-
-    private static Breed appaloosa() {
-        return Breed.of("appaloosa", "Appaloosa").commonness(Commonness.MODERATE)
-                .biomes("minecraft:taiga", "minecraft:forest", "minecraft:windswept_hills")
-                .extensionAny().agoutiAny()
-                .gene(ROAN, "Rn", "rn", 8).gene(ROAN, "rn", "rn", 92)
-                // the defining breed: most Appaloosas show a pattern
-                .gene(LEOP, "LP", "lp", 55).gene(LEOP, "LP", "LP", 20).gene(LEOP, "lp", "lp", 25)
-                .gene(PATN1, "PATN1", "n", 45).gene(PATN1, "PATN1", "PATN1", 8).gene(PATN1, "n", "n", 47)
-                .gene(PATN2, "PATN2", "n", 20).gene(PATN2, "n", "n", 80)
-                .gene(MITF, "SW1", "N", 55).gene(MITF, "N", "N", 45)
-                // SW4 was described in one Appaloosa family and nowhere else.
-                .gene(PAX3, "SW4", "N", 4).gene(PAX3, "N", "N", 96)
-                .gene(KIT, "W35", "N", 14).gene(KIT, "W34", "N", 5).gene(KIT, "SB1", "N", 8)
-                .gene(KIT, "N", "N", 73)
-                .height(hh(14, 2), hh(16, 0)).speed(6).jump(7).health(7)
-                .note("ERU (equine recurrent uveitis) is age-related; folded into heartiness. CSNB on LP/LP is modelled (informational).")
-                .build();
-    }
-
-    private static Breed arabian() {
-        return Breed.of("arabian", "Arabian").commonness(Commonness.COMMON)
-                .biomes("minecraft:desert", "minecraft:savanna", "minecraft:badlands", "minecraft:savanna_plateau")
-                .extensionAny().agoutiBayBias()
-                .gene(GREY, "G3", "N", 40).gene(GREY, "G3", "G3", 14).gene(GREY, "N", "N", 46)
-                .gene(KIT, "SB1", "N", 14).gene(KIT, "W35", "N", 10).gene(KIT, "W34", "N", 3)
-                .gene(KIT, "W15", "N", 1).gene(KIT, "W23", "N", 1).gene(KIT, "N", "N", 71)
-                .height(hh(14, 2), hh(15, 3)).speed(7).jump(6).health(9)
-                .note("Dished face and high-carried tail - head profile is not modelled; tail carriage could be a pose tweak (roadmap).")
-                .note("SCID, CA, LFS: early-lethal foal disorders - candidate genes, see roadmap.")
-                .build();
-    }
-
-    private static Breed bankerHorse() {
-        return Breed.of("banker_horse", "Banker Horse").commonness(Commonness.RARE).hardy()
-                .biomes("minecraft:beach", "minecraft:stony_shore", "minecraft:river")
-                .extensionAny().agoutiAny()
-                .gene(MATP, "Cr", "N", 12).gene(MATP, "N", "N", 88)
-                .gene(DUN, "D", "d2", 14).gene(DUN, "d1", "d2", 16).gene(DUN, "d2", "d2", 70)
-                .gene(KIT, "SB1", "N", 20).gene(KIT, "W35", "N", 8).gene(KIT, "N", "N", 72)
-                .height(hh(13, 2), hh(14, 2)).speed(6).jump(4).health(9)
-                .note("Primitive markings, Spanish-type head. Feral Colonial Spanish stock - hardy, few genetic issues.")
-                .build();
-    }
-
-    private static Breed belgianDraft() {
-        return Breed.of("belgian_draft", "Belgian Draft").commonness(Commonness.COMMON)
-                .biomes("minecraft:plains", "minecraft:forest", "minecraft:meadow")
-                .extensionChestnut().agoutiAny()
-                .gene(MATP, "Cr", "N", 8).gene(MATP, "prl", "N", 5).gene(MATP, "N", "N", 87)
-                .gene(ROAN, "Rn", "rn", 28).gene(ROAN, "rn", "rn", 72)
-                .gene(FLAXEN, "Fl2", "Fl1", 20).gene(FLAXEN, "Fl1", "Fl1", 34)
-                .gene(FLAXEN, "Fl1", "f", 36).gene(FLAXEN, "f", "f", 10)
-                .height(hh(16, 0), hh(17, 0)).speed(3).jump(2).health(6)
-                .note("Flaxen mane and tail on a chestnut body, heavy muscling - the muscling reads through MSTN.")
-                .note("CPL, EMS, anhidrosis: age-related, folded into heartiness.")
-                .build();
-    }
-
-    private static Breed camargue() {
-        return Breed.of("camargue", "Camargue").commonness(Commonness.UNCOMMON)
-                .biomes("minecraft:swamp", "minecraft:mangrove_swamp", "minecraft:river", "minecraft:beach")
-                .extensionAny().agoutiAny()
-                .fixed(GREY, "G3")
-                .height(hh(13, 2), hh(14, 2)).speed(5).jump(4).health(9)
-                .note("Born dark, greys out to white; thick mop-like mane and tail. Melanoma is age-related (folded into heartiness).")
-                .build();
-    }
-
-    private static Breed canadianHorse() {
-        return Breed.of("canadian_horse", "Canadian Horse").commonness(Commonness.RARE).hardy()
-                .biomes("minecraft:snowy_taiga", "minecraft:grove", "minecraft:snowy_plains")
-                .extensionBlackBias().agoutiAny()
-                .gene(GREY, "G3", "N", 14).gene(GREY, "N", "N", 86)
-                .gene(ROAN, "Rn", "rn", 14).gene(ROAN, "rn", "rn", 86)
-                .height(hh(14, 0), hh(16, 0)).speed(6).jump(5).health(9)
-                .note("Dense thick mane and tail, 'little iron horse' build. Famously sound.")
-                .build();
-    }
-
-    private static Breed caspianPony() {
-        return Breed.of("caspian_pony", "Caspian Pony").commonness(Commonness.RARE)
-                .biomes("minecraft:desert", "minecraft:badlands", "minecraft:savanna")
-                .extensionAny().agoutiBayBias()
-                .gene(KIT, "SB1", "N", 8).gene(KIT, "W35", "N", 6).gene(KIT, "N", "N", 86)
-                .height(hh(9, 0), hh(11, 2)).speed(5).jump(4).health(7)
-                .note("Small, fine-boned, short legs, prominent eyes. 'Fragile bones' left as low heartiness rather than a lethal gene.")
-                .build();
-    }
-
-    private static Breed clevelandBay() {
-        return Breed.of("cleveland_bay", "Cleveland Bay").commonness(Commonness.RARE).hardy()
-                .biomes("minecraft:plains", "minecraft:forest", "minecraft:meadow")
-                .gene(EXT, "E", "E", 80).gene(EXT, "E", "e", 20)
-                .fixed(AGO, "A")
-                .gene(MITF, "SW1", "N", 10).gene(MITF, "N", "N", 90)
-                .height(hh(16, 0), hh(16, 2)).speed(6).jump(6).health(8)
-                .note("Always bay with black points, minimal white. Fixed A_ plus an E-heavy extension keeps it off chestnut and black.")
-                .build();
-    }
-
-    private static Breed clydesdale() {
-        return Breed.of("clydesdale", "Clydesdale").commonness(Commonness.UNCOMMON)
-                .biomes("minecraft:taiga", "minecraft:snowy_taiga", "minecraft:grove", "minecraft:river")
-                .extensionBlackBias().agoutiAny()
-                .gene(TOB, "To", "to", 30).gene(TOB, "to", "to", 70)
-                .gene(KIT, "SB1", "N", 45).gene(KIT, "SB1", "SB1", 8).gene(KIT, "W35", "N", 12)
-                .gene(KIT, "N", "N", 35)
-                .gene(MITF, "SW1", "N", 55).gene(MITF, "N", "N", 45)
-                .height(hh(16, 2), hh(18, 0)).speed(3).jump(3).health(5)
-                .note("Heavy lower-leg feathering - roadmap render layer. Sabino + splash drive the big white legs and face.")
-                .note("CPL, sunburn: age-related, folded into heartiness.")
-                .build();
-    }
-
-    private static Breed connemaraPony() {
-        return Breed.of("connemara_pony", "Connemara Pony").commonness(Commonness.MODERATE)
-                .biomes("minecraft:windswept_hills", "minecraft:windswept_gravelly_hills", "minecraft:windswept_forest", "minecraft:stony_shore")
-                .extensionAny().agoutiAny()
-                .gene(MATP, "Cr", "N", 10).gene(MATP, "N", "N", 90)
-                .gene(DUN, "D", "d2", 8).gene(DUN, "d2", "d2", 92)
-                .gene(GREY, "G3", "N", 24).gene(GREY, "G2", "N", 14).gene(GREY, "G3", "G3", 6)
-                .gene(GREY, "G3", "G2", 5).gene(GREY, "G2", "G2", 3).gene(GREY, "N", "N", 48)
-                .height(hh(13, 0), hh(14, 2)).speed(5).jump(8).health(8)
-                .note("Sturdy compact good bone, often grey. OCD / laminitis are age-related (folded into heartiness).")
-                .build();
-    }
-
-    private static Breed dalesPony() {
-        return Breed.of("dales_pony", "Dales Pony").commonness(Commonness.RARE)
-                .biomes("minecraft:windswept_hills", "minecraft:windswept_gravelly_hills", "minecraft:taiga")
-                .extensionBlackBias().agoutiAny()
-                .gene(DUN, "D", "d2", 6).gene(DUN, "d2", "d2", 94)
-                .gene(GREY, "G3", "N", 14).gene(GREY, "N", "N", 86)
-                .gene(ROAN, "Rn", "rn", 20).gene(ROAN, "rn", "rn", 80)
-                .height(hh(13, 2), hh(14, 2)).speed(5).jump(6).health(9)
-                .note("Heavy feathering, dense bone, hardy moorland type - feathering is a roadmap render item.")
-                .note("EMS / laminitis: age-related, folded into heartiness.")
-                .build();
-    }
-
-    private static Breed dartmoorPony() {
-        return Breed.of("dartmoor_pony", "Dartmoor Pony").commonness(Commonness.RARE)
-                .biomes("minecraft:windswept_hills", "minecraft:meadow", "minecraft:forest")
-                .extensionAny().agoutiAny()
-                .gene(MATP, "Cr", "N", 6).gene(MATP, "N", "N", 94)
-                .gene(GREY, "G3", "N", 14).gene(GREY, "N", "N", 86)
-                .gene(ROAN, "Rn", "rn", 12).gene(ROAN, "rn", "rn", 88)
-                .height(hh(11, 2), hh(12, 2)).speed(4).jump(5).health(8)
-                .note("Small, large head, thick mane and tail. Laminitis / EMS are age-related (folded into heartiness).")
-                .build();
-    }
-
-    private static Breed exmoorPony() {
-        return Breed.of("exmoor_pony", "Exmoor Pony").commonness(Commonness.RARE).hardy()
-                .biomes("minecraft:windswept_hills", "minecraft:taiga", "minecraft:snowy_slopes")
-                .gene(EXT, "E", "E", 70).gene(EXT, "E", "e", 26).gene(EXT, "e", "e", 4)
-                .agoutiBayBias()
-                .gene(DUN, "d1", "d2", 30).gene(DUN, "d2", "d2", 70)
-                // Near-fixed. The mealy muzzle and eye rings are the breed
-                // standard, and the 2018 marker sat at 98% here.
-                .gene(PANGARE, "Pa2", "Pa2", 52).gene(PANGARE, "Pa2", "Pa1", 34)
-                .gene(PANGARE, "Pa1", "Pa1", 12).gene(PANGARE, "Pa1", "pa", 2)
-                .height(hh(11, 2), hh(12, 3)).speed(4).jump(4).health(10)
-                .note("Mealy muzzle and eye rings - the breed standard, and near-fixed here. Double-layered winter coat - cosmetic, out of scope.")
-                .note("An ancient, exceptionally hardy landrace - no white, no dilutions.")
-                .build();
-    }
-
-    private static Breed falabella() {
-        return Breed.of("falabella", "Falabella").commonness(Commonness.UNCOMMON)
-                .biomes("minecraft:plains", "minecraft:sunflower_plains", "minecraft:meadow")
-                .extensionAny().agoutiAny()
-                .gene(MATP, "Cr", "N", 16).gene(MATP, "prl", "N", 8).gene(MATP, "N", "N", 76)
-                .gene(DUN, "D", "d2", 8).gene(DUN, "d2", "d2", 92)
-                .gene(CHAMP, "Ch", "c", 8).gene(CHAMP, "c", "c", 92)
-                .gene(SILVER, "Z", "z", 10).gene(SILVER, "z", "z", 90)
-                .gene(TOB, "To", "to", 20).gene(TOB, "to", "to", 80)
-                .gene(KIT, "SB1", "N", 14).gene(KIT, "W20", "N", 10).gene(KIT, "W35", "N", 10)
-                .gene(KIT, "N", "N", 66)
-                .gene(MITF, "SW1", "N", 40).gene(MITF, "N", "N", 60)
-                .height(hh(6, 0), hh(8, 0)).speed(2).jump(1).health(3)
-                .note("The smallest breed - the size band sits against the MAGICAL_MIN_SCALE guard.")
-                .note("'Fragile bones' left as very low heartiness rather than a lethal gene.")
-                .build();
-    }
-
-    private static Breed fjord() {
-        return Breed.of("fjord", "Norwegian Fjord").commonness(Commonness.UNCOMMON)
-                .biomes("minecraft:snowy_taiga", "minecraft:frozen_river", "minecraft:snowy_slopes", "minecraft:grove")
-                .gene(EXT, "E", "E", 75).gene(EXT, "E", "e", 25)
-                .agoutiBlack()
-                .gene(DUN, "D", "d2", 40).gene(DUN, "D", "D", 55).gene(DUN, "d1", "d2", 5)
-                // Near-fixed - the 2018 marker was at 99% in Fjords.
-                .gene(PANGARE, "Pa2", "Pa2", 48).gene(PANGARE, "Pa2", "Pa1", 36)
-                .gene(PANGARE, "Pa1", "Pa1", 14).gene(PANGARE, "Pa1", "pa", 2)
-                .height(hh(13, 2), hh(14, 2)).speed(4).jump(3).health(9)
-                .note("The two-tone mane (dark midtstol, pale guard hair) and the primitive stripes both come from the near-fixed dun; the erect clip that shows them off is grooming, and is not modelled.")
-                .note("Almost every Fjord is a dun (brown/red/grey/white/yellow dun); E_ a/a + D drives the classic brown dun.")
-                .note("EMS: age-related, folded into heartiness.")
-                .build();
-    }
-
-    private static Breed friesian() {
-        return Breed.of("friesian", "Friesian").commonness(Commonness.MODERATE)
-                .biomes("minecraft:plains", "minecraft:forest", "minecraft:meadow", "minecraft:river")
-                .fixed(EXT, "E")
-                .fixed(AGO, "a")
-                .height(hh(15, 0), hh(17, 0)).speed(5).jump(4).health(4)
-                .note("Jet black, heavy feathering, thick wavy mane and tail. Fixed E/E a/a, no white or dilution genes at all.")
-                .note("Feathering + wavy mane: roadmap render items.")
-                .note("Dwarfism, megaesophagus: dwarfism exists (ACAN); megaesophagus is early-lethal - candidate gene, roadmap.")
-                .build();
-    }
-
-    private static Breed gypsyVanner() {
-        return Breed.of("gypsy_vanner", "Gypsy Vanner").commonness(Commonness.COMMON)
-                .biomes("minecraft:plains", "minecraft:river", "minecraft:swamp", "minecraft:meadow")
-                .extensionAny().agoutiAny()
-                .gene(MATP, "Cr", "N", 8).gene(MATP, "N", "N", 92)
-                .gene(DUN, "D", "d2", 6).gene(DUN, "d2", "d2", 94)
-                .gene(TOB, "To", "to", 62).gene(TOB, "To", "To", 16).gene(TOB, "to", "to", 22)
-                .gene(KIT, "SB1", "N", 24).gene(KIT, "W20", "N", 30).gene(KIT, "W35", "N", 10)
-                .gene(KIT, "N", "N", 36)
-                .gene(MITF, "SW1", "N", 65).gene(MITF, "N", "N", 35)
-                .height(hh(14, 0), hh(15, 2)).speed(4).jump(3).health(7)
-                .note("'Drum' cobby body, heavy feathering, abundant mane and tail - feathering + mane are roadmap render items. Usually tobiano pinto.")
-                .note("CPL, EMS: age-related, folded into heartiness.")
-                .build();
-    }
-
-    private static Breed hackney() {
-        return Breed.of("hackney", "Hackney").commonness(Commonness.UNCOMMON)
-                .biomes("minecraft:plains", "minecraft:sunflower_plains", "minecraft:meadow")
-                .extensionAny().agoutiBayBias()
-                .gene(ROAN, "Rn", "rn", 10).gene(ROAN, "rn", "rn", 90)
-                .gene(MITF, "SW1", "N", 40).gene(MITF, "N", "N", 60)
-                .height(hh(14, 2), hh(16, 0)).speed(6).jump(3).health(4)
-                .note("Upright neck, high knee action - gait/animation is a roadmap item (DMRT3). Refined bone.")
-                .note("Osteoarthritis: age-related, folded into heartiness.")
-                .build();
-    }
-
-    private static Breed haflinger() {
-        return Breed.of("haflinger", "Haflinger").commonness(Commonness.COMMON)
-                .biomes("minecraft:cherry_grove", "minecraft:meadow", "minecraft:windswept_hills", "minecraft:grove")
-                .extensionChestnut().agoutiAny()
-                .gene(ROAN, "Rn", "rn", 10).gene(ROAN, "rn", "rn", 90)
-                // The breed's whole look. Fixed e/e keeps it chestnut, and the
-                // flaxen pool is pushed to the top of the range: a Haflinger
-                // without a white mane is not much of a Haflinger.
-                .gene(FLAXEN, "Fl2", "Fl2", 46).gene(FLAXEN, "Fl2", "Fl1", 38)
-                .gene(FLAXEN, "Fl1", "Fl1", 14).gene(FLAXEN, "Fl1", "f", 2)
-                .height(hh(13, 2), hh(15, 0)).speed(5).jump(5).health(8)
-                .note("Chestnut body with a striking flaxen mane and tail, and the breed the flaxen locus is calibrated against. Fixed e/e keeps it chestnut.")
-                .note("EMS / laminitis: age-related, folded into heartiness.")
-                .build();
-    }
-
-    private static Breed hanoverian() {
-        return Breed.of("hanoverian", "Hanoverian").commonness(Commonness.VERY_COMMON)
-                .biomes("minecraft:plains", "minecraft:forest", "minecraft:meadow", "minecraft:sunflower_plains")
-                .extensionAny().agoutiBayBias()
-                .gene(GREY, "G3", "N", 22).gene(GREY, "N", "N", 78)
-                .gene(ROAN, "Rn", "rn", 12).gene(ROAN, "rn", "rn", 88)
-                .gene(MITF, "SW1", "N", 45).gene(MITF, "N", "N", 55)
-                .height(hh(15, 3), hh(17, 1)).speed(7).jump(9).health(5)
-                .note("Powerful large-framed uphill warmblood, bred for jumping and dressage.")
-                .note("OCD, navicular: age-related, folded into heartiness.")
-                .build();
-    }
-
-    private static Breed icelandicHorse() {
-        return Breed.of("icelandic_horse", "Icelandic Horse").commonness(Commonness.MODERATE).hardy()
-                .biomes("minecraft:snowy_plains", "minecraft:ice_spikes", "minecraft:frozen_peaks", "minecraft:jagged_peaks", "minecraft:snowy_slopes")
-                .extensionAny().agoutiAny()
-                .gene(GREY, "G3", "N", 16).gene(GREY, "N", "N", 84)
-                .gene(ROAN, "Rn", "rn", 16).gene(ROAN, "rn", "rn", 84)
-                .gene(DUN, "D", "d2", 12).gene(DUN, "d2", "d2", 88)
-                .gene(TOB, "To", "to", 20).gene(TOB, "to", "to", 80)
-                .gene(MITF, "SW1", "N", 65).gene(MITF, "N", "N", 35)
-                .gene(PANGARE, "Pa2", "Pa1", 18).gene(PANGARE, "Pa1", "Pa1", 26)
-                .gene(PANGARE, "Pa1", "pa", 34).gene(PANGARE, "pa", "pa", 22)
-                .height(hh(13, 0), hh(14, 0)).speed(5).jump(4).health(10)
-                .note("Thick double coat, short legs, long back - the tölt (extra gait) is a roadmap item (DMRT3). Extremely varied colours; extremely hardy.")
-                .build();
-    }
-
-    private static Breed irishDraught() {
-        return Breed.of("irish_draught", "Irish Draught").commonness(Commonness.UNCOMMON)
-                .biomes("minecraft:windswept_hills", "minecraft:windswept_gravelly_hills", "minecraft:taiga", "minecraft:forest")
-                .extensionAny().agoutiAny()
-                .gene(MATP, "Cr", "N", 8).gene(MATP, "N", "N", 92)
-                .gene(DUN, "D", "d2", 5).gene(DUN, "d2", "d2", 95)
-                .gene(GREY, "G3", "N", 24).gene(GREY, "N", "N", 76)
-                .gene(ROAN, "Rn", "rn", 12).gene(ROAN, "rn", "rn", 88)
-                .height(hh(15, 2), hh(17, 0)).speed(5).jump(7).health(8)
-                .note("Scopey powerful frame, strong clean limbs - the classic sport-horse foundation. Joint stress is age-related (folded into heartiness).")
-                .build();
-    }
-
-    private static Breed karabakh() {
-        return Breed.of("karabakh", "Karabakh").commonness(Commonness.RARE).hardy()
-                .biomes("minecraft:desert", "minecraft:savanna", "minecraft:badlands")
-                .extensionAny().agoutiBayBias()
-                .gene(MATP, "Cr", "N", 10).gene(MATP, "N", "N", 90)
-                .gene(GREY, "G3", "N", 24).gene(GREY, "N", "N", 76)
-                .height(hh(14, 0), hh(15, 0)).speed(7).jump(5).health(8)
-                .note("Small head, muscular arched neck, golden sheen - the sheen is not modelled (a shader).")
-                .build();
-    }
-
-    private static Breed kigerMustang() {
-        return Breed.of("kiger_mustang", "Kiger Mustang").commonness(Commonness.RARE).hardy()
-                .biomes("minecraft:badlands", "minecraft:eroded_badlands", "minecraft:wooded_badlands", "minecraft:savanna")
-                .extensionAny().agoutiBayBias()
-                .gene(MATP, "Cr", "N", 12).gene(MATP, "N", "N", 88)
-                .gene(DUN, "D", "d2", 55).gene(DUN, "D", "D", 20).gene(DUN, "d1", "d2", 10).gene(DUN, "d2", "d2", 15)
-                .gene(LEOP, "LP", "lp", 22).gene(LEOP, "LP", "LP", 3).gene(LEOP, "lp", "lp", 75)
-                .gene(PATN1, "PATN1", "n", 25).gene(PATN1, "n", "n", 75)
-                .gene(PATN2, "PATN2", "n", 12).gene(PATN2, "n", "n", 88)
-                .height(hh(13, 0), hh(14, 2)).speed(7).jump(5).health(10)
-                .note("Strongly dun (dorsal stripe + leg bars) - the near-fixed dun does this. Some carry the leopard complex.")
-                .note("HERDA, GBED: GBED is early-lethal (candidate gene); HERDA is age-related.")
-                .build();
-    }
-
-    private static Breed knabstrupper() {
-        return Breed.of("knabstrupper", "Knabstrupper").commonness(Commonness.UNCOMMON)
-                .biomes("minecraft:plains", "minecraft:birch_forest", "minecraft:forest", "minecraft:meadow")
-                .extensionAny().agoutiAny()
-                .gene(MATP, "Cr", "N", 6).gene(MATP, "N", "N", 94)
-                // bred hard for bold leopard - very high LP, PATN1-dominant
-                .gene(LEOP, "LP", "lp", 50).gene(LEOP, "LP", "LP", 32).gene(LEOP, "lp", "lp", 18)
-                .gene(PATN1, "PATN1", "n", 58).gene(PATN1, "PATN1", "PATN1", 16).gene(PATN1, "n", "n", 26)
-                .gene(PATN2, "PATN2", "n", 10).gene(PATN2, "n", "n", 90)
-                .gene(MITF, "SW1", "N", 55).gene(MITF, "N", "N", 45)
-                .height(hh(14, 2), hh(15, 2)).speed(6).jump(7).health(6)
-                .note("ERU is age-related; folded into heartiness. CSNB on LP/LP is modelled (informational).")
-                .build();
-    }
-
-    private static Breed lipizzan() {
-        return Breed.of("lipizzan", "Lipizzan").commonness(Commonness.UNCOMMON)
-                .biomes("minecraft:plains", "minecraft:windswept_hills", "minecraft:meadow", "minecraft:sunflower_plains")
-                .extensionAny().agoutiAny()
-                .gene(GREY, "G3", "N", 60).gene(GREY, "G3", "G3", 34).gene(GREY, "N", "N", 6)
-                .gene(PAX3, "SW2", "N", 12).gene(PAX3, "N", "N", 88)
-                .height(hh(14, 2), hh(16, 1)).speed(5).jump(7).health(7)
-                .note("Born dark, greys to white; Roman nose, compact baroque build - head profile not modelled. Melanoma is age-related.")
-                .build();
-    }
-
-    private static Breed lusitano() {
-        return Breed.of("lusitano", "Lusitano").commonness(Commonness.MODERATE)
-                .biomes("minecraft:savanna", "minecraft:plains", "minecraft:savanna_plateau")
-                .extensionBlackBias().agoutiAny()
-                .gene(GREY, "G3", "N", 44).gene(GREY, "G3", "G3", 18).gene(GREY, "N", "N", 38)
-                .height(hh(15, 0), hh(16, 0)).speed(6).jump(8).health(6)
-                .note("Convex profile, sloping croup, baroque build - head/croup shape not modelled. OCD is age-related.")
-                .build();
-    }
-
-    private static Breed marwari() {
-        return Breed.of("marwari", "Marwari").commonness(Commonness.RARE)
-                .biomes("minecraft:jungle", "minecraft:sparse_jungle", "minecraft:bamboo_jungle", "minecraft:savanna")
-                .extensionAny().agoutiAny()
-                .gene(MATP, "Cr", "N", 10).gene(MATP, "N", "N", 90)
-                .gene(DUN, "D", "d2", 8).gene(DUN, "d2", "d2", 92)
-                .gene(TOB, "To", "to", 30).gene(TOB, "to", "to", 70)
-                .gene(GREY, "G3", "N", 16).gene(GREY, "N", "N", 84)
-                .height(hh(14, 2), hh(15, 2)).speed(7).jump(5).health(9)
-                .note("Inward-curving (lyre-shaped) ear tips - NOT modelled (a mesh change, out of scope for now).")
-                .note("Sweet itch: age-related, folded into heartiness.")
-                .build();
-    }
-
-    private static Breed morgan() {
-        return Breed.of("morgan", "Morgan").commonness(Commonness.VERY_COMMON)
-                .biomes("minecraft:plains", "minecraft:forest", "minecraft:taiga", "minecraft:meadow")
-                .extensionAny().agoutiAny()
-                .gene(MATP, "Cr", "N", 8).gene(MATP, "N", "N", 92)
-                .gene(DUN, "D", "d2", 5).gene(DUN, "d2", "d2", 95)
-                .gene(ROAN, "Rn", "rn", 12).gene(ROAN, "rn", "rn", 88)
-                .gene(KIT, "SB1", "N", 16).gene(KIT, "W4", "N", 2).gene(KIT, "W35", "N", 12)
-                .gene(KIT, "W34", "N", 4).gene(KIT, "N", "N", 66)
-                // The breed flaxen pedigrees were actually studied in.
-                .gene(FLAXEN, "Fl2", "Fl1", 6).gene(FLAXEN, "Fl1", "Fl1", 12)
-                .gene(FLAXEN, "Fl1", "f", 34).gene(FLAXEN, "f", "f", 48)
-                .gene(MITF, "SW1", "N", 55).gene(MITF, "N", "N", 45)
-                .height(hh(14, 1), hh(15, 2)).speed(6).jump(6).health(8)
-                .note("Slightly crested neck, expressive eyes, compact and refined - a versatile foundation American breed.")
-                .note("Cushing's, EMS: age-related, folded into heartiness.")
-                .note("Carries W4, the Camarillo white: the line was founded on Morgan mares bred "
-                        + "to one white stallion in the 1920s, and it is the only breed here that "
-                        + "throws an all-white foal rather than a grey.")
-                .build();
-    }
-
-    private static Breed mustang() {
-        return Breed.of("mustang", "Mustang").commonness(Commonness.MODERATE).hardy()
-                .biomes("minecraft:badlands", "minecraft:eroded_badlands", "minecraft:wooded_badlands", "minecraft:savanna", "minecraft:windswept_savanna")
-                .extensionAny().agoutiAny()
-                .gene(MATP, "Cr", "N", 14).gene(MATP, "N", "N", 86)
-                .gene(DUN, "D", "d2", 20).gene(DUN, "d1", "d2", 14).gene(DUN, "d2", "d2", 66)
-                .gene(CHAMP, "Ch", "c", 5).gene(CHAMP, "c", "c", 95)
-                .gene(ROAN, "Rn", "rn", 16).gene(ROAN, "rn", "rn", 84)
-                .gene(TOB, "To", "to", 16).gene(TOB, "to", "to", 84)
-                .gene(KIT, "SB1", "N", 16).gene(KIT, "W35", "N", 12).gene(KIT, "W34", "N", 4)
-                .gene(KIT, "N", "N", 68)
-                .gene(LEOP, "LP", "lp", 16).gene(LEOP, "LP", "LP", 2).gene(LEOP, "lp", "lp", 82)
-                .gene(PATN1, "PATN1", "n", 25).gene(PATN1, "n", "n", 75)
-                .gene(PATN2, "PATN2", "n", 12).gene(PATN2, "n", "n", 88)
-                // A G2 population.
-                .gene(GREY, "G3", "N", 6).gene(GREY, "G2", "N", 5).gene(GREY, "N", "N", 89)
-                .height(hh(13, 2), hh(15, 2)).speed(7).jump(5).health(10)
-                .note("Wild-type diversity: every colour, compact build, hard feet. Some carry the leopard complex.")
-                .note("HERDA, GBED: GBED is early-lethal (candidate gene); HERDA is age-related.")
-                .build();
-    }
-
-    private static Breed newForestPony() {
-        return Breed.of("new_forest_pony", "New Forest Pony").commonness(Commonness.COMMON)
-                .biomes("minecraft:forest", "minecraft:birch_forest", "minecraft:old_growth_birch_forest", "minecraft:flower_forest")
-                .extensionAny().agoutiAny()
-                .gene(DUN, "D", "d2", 6).gene(DUN, "d2", "d2", 94)
-                .gene(GREY, "G3", "N", 18).gene(GREY, "N", "N", 82)
-                .gene(ROAN, "Rn", "rn", 14).gene(ROAN, "rn", "rn", 86)
-                .height(hh(12, 0), hh(14, 2)).speed(5).jump(6).health(8)
-                .note("Large head, thick neck, flashy movement. Laminitis / EMS are age-related (folded into heartiness).")
-                .build();
-    }
-
-    private static Breed pasoFino() {
-        return Breed.of("paso_fino", "Paso Fino").commonness(Commonness.MODERATE)
-                .biomes("minecraft:savanna", "minecraft:jungle", "minecraft:sparse_jungle", "minecraft:bamboo_jungle")
-                .extensionAny().agoutiAny()
-                .gene(MATP, "Cr", "N", 10).gene(MATP, "N", "N", 90)
-                .gene(DUN, "D", "d2", 6).gene(DUN, "d2", "d2", 94)
-                .gene(ROAN, "Rn", "rn", 12).gene(ROAN, "rn", "rn", 88)
-                .gene(KIT, "W20", "N", 10).gene(KIT, "W22", "N", 4).gene(KIT, "W35", "N", 8)
-                .gene(KIT, "N", "N", 78)
-                .height(hh(13, 0), hh(15, 2)).speed(5).jump(4).health(6)
-                .note("Compact rounded build, naturally smooth lateral gait - gait is a roadmap item (DMRT3).")
-                .note("EMS, DSLD: age-related, folded into heartiness.")
-                .build();
-    }
-
-    private static Breed percheron() {
-        return Breed.of("percheron", "Percheron").commonness(Commonness.COMMON)
-                .biomes("minecraft:plains", "minecraft:snowy_plains", "minecraft:meadow", "minecraft:sunflower_plains")
-                .extensionBlackBias().agoutiAny()
-                .gene(GREY, "G3", "N", 58).gene(GREY, "G3", "G3", 30).gene(GREY, "N", "N", 12)
-                .height(hh(15, 2), hh(17, 3)).speed(4).jump(3).health(6)
-                .note("Large draft with a straight profile and (for its size) fine legs. Grey or black. PSSM1 / anhidrosis are age-related.")
-                .build();
-    }
-
-    private static Breed przewalski() {
-        return Breed.of("przewalski", "Przewalski's Horse").commonness(Commonness.RARE).hardy()
-                .biomes("minecraft:desert", "minecraft:badlands", "minecraft:savanna")
-                .gene(EXT, "E", "E", 92).gene(EXT, "E", "e", 8)
-                .gene(AGO, "A", "A", 88).gene(AGO, "A", "a", 12)
-                .fixed(DUN, "D")
-                .height(hh(12, 0), hh(14, 0)).speed(6).jump(3).health(10)
-                .note("The only never-domesticated true wild horse: stocky dun body, erect black mane, no forelock, no spotting. Mane shape is a roadmap render item.")
-                .note("OCD: age-related, folded into heartiness.")
-                .build();
-    }
-
-    /**
-     * <b>The tiger-eye breed.</b> {@code SLC24A5} is essentially confined to
-     * this one breed in life, and it is distributed that way here: a quarter of
-     * Puerto Rican Paso Finos carry a copy and about one in twenty-five has the
-     * amber eyes, against roughly one wild horse in five thousand. It is the
-     * clearest case in the mod of a gene you find by knowing where to look.
-     */
-    private static Breed puertoRicanPasoFino() {
-        return Breed.of("puerto_rican_paso_fino", "Puerto Rican Paso Fino").commonness(Commonness.RARE)
-                .biomes("minecraft:jungle", "minecraft:savanna", "minecraft:beach", "minecraft:mangrove_swamp")
-                .extensionAny().agoutiAny()
-                .gene(MATP, "Cr", "N", 10).gene(MATP, "N", "N", 90)
-                .gene(DUN, "D", "d2", 6).gene(DUN, "d2", "d2", 94)
-                .gene(TE, "TE1", "TE1", 3).gene(TE, "TE1", "TE2", 1)
-                .gene(TE, "TE1", "N", 16).gene(TE, "TE2", "N", 6).gene(TE, "N", "N", 74)
-                .height(hh(13, 0), hh(15, 0)).speed(5).jump(4).health(6)
-                .note("Tiger eye (SLC24A5) - amber or yellow iris, no coat change. The breed's signature.")
-                .note("Naturally smooth gait - roadmap item (DMRT3). EMS, DSLD: age-related.")
-                .build();
-    }
-
-    private static Breed quarterHorse() {
-        return Breed.of("quarter_horse", "Quarter Horse").commonness(Commonness.EXTREMELY_COMMON)
-                .biomes("minecraft:plains", "minecraft:savanna", "minecraft:sunflower_plains", "minecraft:meadow")
-                .gene(EXT, "E", "E", 40).gene(EXT, "E", "e", 45).gene(EXT, "e", "e", 15)
-                .gene(AGO, "A", "A", 30).gene(AGO, "A", "a", 45).gene(AGO, "a", "a", 25)
-                .gene(MATP, "Cr", "N", 14).gene(MATP, "Cr", "Cr", 3).gene(MATP, "N", "N", 83)
-                .gene(DUN, "d1", "d2", 22).gene(DUN, "d2", "d2", 78)
-                .gene(ROAN, "Rn", "rn", 14).gene(ROAN, "rn", "rn", 86)
-                .gene(KIT, "SB1", "N", 14).gene(KIT, "W35", "N", 18).gene(KIT, "W32", "N", 8)
-                .gene(KIT, "W34", "N", 4).gene(KIT, "W10", "N", 1).gene(KIT, "N", "N", 55)
-                // A G2 population: grey is uncommon here but it is the slow duplication.
-                .gene(GREY, "G3", "N", 4).gene(GREY, "G2", "N", 5).gene(GREY, "N", "N", 91)
-                .gene(MITF, "SW1", "N", 55).gene(MITF, "N", "N", 45)
-                .gene(PAX3, "SW2", "N", 20).gene(PAX3, "N", "N", 80)
-                .height(hh(14, 2), hh(16, 0)).speed(8).jump(5).health(7)
-                .note("Massively muscled hindquarters and broad chest - the sprinter. nd1/nd2 give the odd dorsal stripe with no dilution.")
-                .note("HYPP, PSSM1 and HERDA all have loci now - see SCN4A, GYS1 and PPIB. Both dominants, so a wild-caught Quarter Horse really can be an affected one.")
-                .build();
-    }
-
-    private static Breed shetlandPony() {
-        return Breed.of("shetland_pony", "Shetland Pony").commonness(Commonness.VERY_COMMON)
-                .biomes("minecraft:mushroom_fields", "minecraft:snowy_plains", "minecraft:taiga", "minecraft:grove")
-                .extensionAny().agoutiAny()
-                .gene(DUN, "D", "d2", 8).gene(DUN, "d2", "d2", 92)
-                .gene(MATP, "Cr", "N", 8).gene(MATP, "N", "N", 92)
-                .gene(TOB, "To", "to", 30).gene(TOB, "to", "to", 70)
-                .gene(KIT, "SB1", "N", 14).gene(KIT, "W35", "N", 10).gene(KIT, "W13", "N", 2)
-                .gene(KIT, "N", "N", 74)
-                .gene(LEOP, "LP", "lp", 14).gene(LEOP, "LP", "LP", 2).gene(LEOP, "lp", "lp", 84)
-                .gene(PATN1, "PATN1", "n", 22).gene(PATN1, "n", "n", 78)
-                .gene(PATN2, "PATN2", "n", 14).gene(PATN2, "n", "n", 86)
-                .gene(PANGARE, "Pa1", "Pa1", 16).gene(PANGARE, "Pa1", "pa", 38)
-                .gene(PANGARE, "pa", "pa", 46)
-                .gene(MITF, "SW1", "N", 60).gene(MITF, "N", "N", 40)
-                .height(hh(8, 0), hh(10, 2)).speed(3).jump(3).health(9)
-                .note("Very small, thick coat, short legs, heavy head - pound for pound the strongest breed. Some carry the leopard complex.")
-                .note("Hyperlipidemia, EMS: age-related, folded into heartiness.")
-                .build();
-    }
-
-    private static Breed shire() {
-        return Breed.of("shire", "Shire").commonness(Commonness.UNCOMMON)
-                .biomes("minecraft:plains", "minecraft:river", "minecraft:meadow", "minecraft:swamp")
-                .extensionBlackBias().agoutiAny()
-                .gene(KIT, "SB1", "N", 40).gene(KIT, "SB1", "SB1", 6).gene(KIT, "W35", "N", 10)
-                .gene(KIT, "N", "N", 44)
-                .gene(MITF, "SW1", "N", 55).gene(MITF, "N", "N", 45)
-                .height(hh(16, 2), hh(17, 3)).speed(3).jump(2).health(4)
-                .note("The tallest breed - the scale band tops out around the natural draught ceiling. Heavy feathering (roadmap), Roman nose (not modelled).")
-                .note("CPL, PSSM: age-related, folded into heartiness.")
-                .build();
-    }
-
-    private static Breed standardbred() {
-        return Breed.of("standardbred", "Standardbred").commonness(Commonness.VERY_COMMON)
-                .biomes("minecraft:plains", "minecraft:sunflower_plains", "minecraft:meadow")
-                .extensionAny().agoutiAny()
-                .gene(MATP, "Cr", "N", 8).gene(MATP, "N", "N", 92)
-                .gene(DUN, "D", "d2", 4).gene(DUN, "d2", "d2", 96)
-                .gene(ROAN, "Rn", "rn", 12).gene(ROAN, "rn", "rn", 88)
-                .gene(KIT, "SB1", "N", 10).gene(KIT, "W35", "N", 8).gene(KIT, "W32", "N", 6)
-                .gene(KIT, "N", "N", 76)
-                .height(hh(14, 2), hh(16, 2)).speed(9).jump(5).health(6)
-                .note("Long powerful body, thick neck, sturdy legs - the harness racer (trot/pace). Gait is a roadmap item (DMRT3).")
-                .note("EIPH, DSLD: age-related / exertional, folded into heartiness.")
-                .build();
-    }
-
-    private static Breed suffolkPunch() {
-        return Breed.of("suffolk_punch", "Suffolk Punch").commonness(Commonness.RARE)
-                .biomes("minecraft:plains", "minecraft:forest", "minecraft:meadow", "minecraft:sunflower_plains")
-                .extensionChestnut().agoutiAny()
-                .gene(PANGARE, "Pa1", "Pa1", 20).gene(PANGARE, "Pa1", "pa", 40)
-                .gene(PANGARE, "pa", "pa", 40)
-                .height(hh(16, 0), hh(17, 2)).speed(3).jump(2).health(5)
-                .note("Always chestnut ('Suffolk sorrel'), wide barrel-bodied, no feathering. Fixed e/e, no white or dilution genes.")
-                .note("Anhidrosis, obesity: age-related, folded into heartiness. Rare - one of the most endangered breeds.")
-                .build();
-    }
-
-    private static Breed tennesseeWalking() {
-        return Breed.of("tennessee_walking", "Tennessee Walking Horse").commonness(Commonness.VERY_COMMON)
-                .biomes("minecraft:plains", "minecraft:forest", "minecraft:swamp", "minecraft:meadow")
-                .extensionAny().agoutiAny()
-                .gene(MATP, "Cr", "N", 12).gene(MATP, "N", "N", 88)
-                .gene(CHAMP, "Ch", "c", 8).gene(CHAMP, "c", "c", 92)
-                .gene(ROAN, "Rn", "rn", 10).gene(ROAN, "rn", "rn", 90)
-                .gene(KIT, "SB1", "N", 18).gene(KIT, "W35", "N", 12).gene(KIT, "N", "N", 70)
-                .gene(GREY, "G3", "N", 7).gene(GREY, "G2", "N", 5).gene(GREY, "N", "N", 88)
-                .gene(MITF, "SW1", "N", 45).gene(MITF, "N", "N", 55)
-                .height(hh(14, 3), hh(17, 0)).speed(5).jump(4).health(7)
-                .note("Long sloping shoulder, long neck, powerful rear drive - the running walk is a roadmap item (DMRT3). Lordosis is age-related.")
-                .build();
-    }
-
-    private static Breed thoroughbred() {
-        return Breed.of("thoroughbred", "Thoroughbred").commonness(Commonness.VERY_COMMON)
-                .biomes("minecraft:plains", "minecraft:savanna", "minecraft:sunflower_plains", "minecraft:meadow")
-                .extensionAny().agoutiBayBias()
-                .gene(GREY, "G3", "N", 14).gene(GREY, "N", "N", 86)
-                .gene(ROAN, "Rn", "rn", 8).gene(ROAN, "rn", "rn", 92)
-                .gene(MITF, "SW1", "N", 60).gene(MITF, "N", "N", 40)
-                // The highest W20 population the survey found - and where W5,
-                // W22 and half the rare W series were first described.
-                .gene(KIT, "W20", "N", 34).gene(KIT, "W32", "N", 6).gene(KIT, "W35", "N", 8)
-                .gene(KIT, "W5", "N", 1).gene(KIT, "W22", "N", 1).gene(KIT, "N", "N", 50)
-                .height(hh(15, 2), hh(17, 0)).speed(10).jump(8).health(4)
-                .note("Lean, sleek, flat profile, refined legs - the fastest breed in the game, and among the most fragile. EIPH ('bleeder') is exertional.")
-                .build();
-    }
-
-    private static Breed trakehner() {
-        return Breed.of("trakehner", "Trakehner").commonness(Commonness.COMMON)
-                .biomes("minecraft:taiga", "minecraft:forest", "minecraft:old_growth_pine_taiga", "minecraft:grove")
-                .extensionAny().agoutiBayBias()
-                .gene(GREY, "G3", "N", 20).gene(GREY, "N", "N", 80)
-                .gene(ROAN, "Rn", "rn", 12).gene(ROAN, "rn", "rn", 88)
-                .gene(MITF, "SW1", "N", 60).gene(MITF, "N", "N", 40)
-                .height(hh(15, 2), hh(17, 0)).speed(7).jump(8).health(5)
-                .note("The lightest, most refined warmblood - an elegant head and an athletic build. OCD, bone spavin: age-related.")
-                .build();
-    }
-
-    private static Breed welshPony() {
-        return Breed.of("welsh_pony", "Welsh Pony").commonness(Commonness.VERY_COMMON)
-                .biomes("minecraft:windswept_hills", "minecraft:taiga", "minecraft:plains", "minecraft:meadow")
-                .extensionAny().agoutiAny()
-                .gene(MATP, "Cr", "N", 10).gene(MATP, "N", "N", 90)
-                .gene(DUN, "D", "d2", 6).gene(DUN, "d2", "d2", 94)
-                .gene(GREY, "G3", "N", 18).gene(GREY, "G2", "N", 10).gene(GREY, "G3", "G3", 4)
-                .gene(GREY, "G3", "G2", 4).gene(GREY, "G2", "G2", 2).gene(GREY, "N", "N", 62)
-                .gene(ROAN, "Rn", "rn", 12).gene(ROAN, "rn", "rn", 88)
-                .gene(KIT, "SB1", "N", 16).gene(KIT, "W35", "N", 10).gene(KIT, "W32", "N", 6)
-                .gene(KIT, "N", "N", 68)
-                .gene(MITF, "SW1", "N", 60).gene(MITF, "N", "N", 40)
-                .height(hh(11, 0), hh(14, 2)).speed(4, 6).jump(5).health(8)
-                .note("Small with large ears, a crested neck and a floating trot. Laminitis / EMS are age-related (folded into heartiness).")
-                .build();
+    /** Every breed allowed to come from {@code source}, in registration order. */
+    public static List<Breed> from(BreedSource source) {
+        List<Breed> out = new ArrayList<>();
+        for (Breed b : all()) {
+            if (b.allows(source)) {
+                out.add(b);
+            }
+        }
+        return out;
     }
 }

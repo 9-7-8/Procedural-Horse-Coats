@@ -1,0 +1,49 @@
+{
+  "id": "lipizzan",
+  "name": "Lipizzan",
+  "commonness": "uncommon",
+  "biomes": [
+    "minecraft:plains",
+    "minecraft:windswept_hills",
+    "minecraft:meadow",
+    "minecraft:sunflower_plains"
+  ],
+  "stats": {
+    "speed": 5,
+    "jump": 7,
+    "health": 7,
+    "height": [14.5, 16.25]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 42 },
+      { "pair": "E/e", "weight": 44 },
+      { "pair": "e/e", "weight": 14 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 30 },
+      { "pair": "A/a", "weight": 45 },
+      { "pair": "a/a", "weight": 25 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/N", "weight": 60 },
+      { "pair": "G3/G3", "weight": 34 },
+      { "pair": "N/N", "weight": 6 }
+    ],
+    "horsegenetics.pax3": [
+      { "pair": "SW2/N", "weight": 12 },
+      { "pair": "N/N", "weight": 88 }
+    ]
+  },
+  "notes": [
+    "Born dark, greys to white; Roman nose, compact baroque build - head profile not modelled. Melanoma is age-related."
+  ]
+}

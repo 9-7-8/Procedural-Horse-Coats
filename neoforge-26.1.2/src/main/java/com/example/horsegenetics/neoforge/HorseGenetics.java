@@ -23,6 +23,11 @@ public final class HorseGenetics {
         // adds a segment to that code, so registering one late would invalidate
         // codes already read. See ModGeneSpecs.
         ModGeneSpecs.load();
+        // Then the breeds, which are mostly references to the genes above - a
+        // breed loaded first would report every drop-in gene as missing.
+        // Unlike a gene, a breed does not lengthen the genotype code, so this
+        // one is not order-critical against anything else.
+        ModBreedSpecs.load();
         // The diet locus names categories in common/ and items here; this is
         // the only thing that checks the two agree, and the failure it catches
         // is silent (a horse that would simply never accept anything).

@@ -15,8 +15,12 @@ import com.example.horsegenetics.common.genetics.Epigenome;
 import com.example.horsegenetics.common.genetics.AlleleEpigenetics;
 import com.example.horsegenetics.common.genetics.genes.AbstractMagicStatGene;
 
+import com.example.horsegenetics.common.genetics.epi.EpiSchema;
+import com.example.horsegenetics.common.genetics.epi.EpiValue;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -114,7 +118,7 @@ public final class BreedFounder {
         }
 
         g = rollMagic(breed, g, rng);
-        return stampStatTargets(breed, Genome.of(g, rng), rng);
+        return stampBands(breed, stampStatTargets(breed, Genome.of(g, rng), rng), rng);
     }
 
     /**
@@ -163,6 +167,71 @@ public final class BreedFounder {
                     withDelta(c.second(), total * (1.0 - share))));
         }
         return new Genome(genome.genotype(), epi);
+    }
+
+    /**
+     * Write the breed's <b>epigenetic bands</b> onto the founder's allele
+     * copies - the general form of {@link #stampStatTargets}, and the thing
+     * that lets a breed say "deeply black" rather than only "black".
+     *
+     * <p>The two copies are drawn <b>independently</b> inside the band, for the
+     * same reason the stat target is split unevenly: a founder whose two copies
+     * are identical has interchangeable gametes, and half the interest in
+     * breeding one is that its foals differ by which copy they drew.
+     *
+     * <p>Everything it cannot honour it skips in silence <i>here</i>, because
+     * the complaining was already done once, at load time, where there is a
+     * file name to complain about - see {@code BreedSpecParser}. A gene that is
+     * simply not installed on this machine must cost the breed that locus and
+     * nothing else.
+     */
+    private static Genome stampBands(Breed breed, Genome genome, Rng rng) {
+        BreedBands bands = breed.bands();
+        if (bands.isEmpty()) {
+            return genome;
+        }
+        Epigenome epi = genome.epigenome();
+        for (String key : bands.genes()) {
+            if (BODY_STAT_KEYS.contains(key)) {
+                continue;   // owned by the breed's stat scores; see BreedBands
+            }
+            Gene gene = Genes.byKeyOrNull(key);
+            if (gene == null) {
+                continue;
+            }
+            EpiSchema schema = gene.epiSchema();
+            if (schema.isEmpty()) {
+                continue;
+            }
+            Epigenome.Copies c = epi.copies(gene);
+            AlleleEpigenetics first = c.first();
+            AlleleEpigenetics second = c.second();
+            for (Map.Entry<String, BreedBands.Band> e : bands.forGene(key).entrySet()) {
+                int index = schema.indexOf(e.getKey());
+                if (index < 0) {
+                    continue;
+                }
+                EpiValue value = schema.get(index);
+                if (value.kind() != EpiValue.Kind.SCALAR) {
+                    continue;   // a seed or a category has no "slightly more"
+                }
+                BreedBands.Band band = e.getValue();
+                for (int leg = 0; leg < value.arity(); leg++) {
+                    first = withValue(first, value, leg, band.lerp(rng.nextFloat()));
+                    second = withValue(second, value, leg, band.lerp(rng.nextFloat()));
+                }
+            }
+            epi = epi.with(key, new Epigenome.Copies(first, second));
+        }
+        return new Genome(genome.genotype(), epi);
+    }
+
+    private static AlleleEpigenetics withValue(AlleleEpigenetics copy, EpiValue value, int leg, double raw) {
+        double v = value.clamp(raw);
+        return new AlleleEpigenetics(copy.priority(),
+                value.arity() == 1
+                        ? copy.values().with(value.name(), v)
+                        : copy.values().with(value.name(), leg, v));
     }
 
     /** How unevenly a founder's two copies split the breed's target. */

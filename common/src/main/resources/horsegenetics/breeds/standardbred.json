@@ -1,0 +1,58 @@
+{
+  "id": "standardbred",
+  "name": "Standardbred",
+  "commonness": "very_common",
+  "biomes": [
+    "minecraft:plains",
+    "minecraft:sunflower_plains",
+    "minecraft:meadow"
+  ],
+  "stats": {
+    "speed": 9,
+    "jump": 5,
+    "health": 6,
+    "height": [14.5, 16.5]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 42 },
+      { "pair": "E/e", "weight": 44 },
+      { "pair": "e/e", "weight": 14 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 30 },
+      { "pair": "A/a", "weight": 45 },
+      { "pair": "a/a", "weight": 25 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.matp": [
+      { "pair": "Cr/N", "weight": 8 },
+      { "pair": "N/N", "weight": 92 }
+    ],
+    "horsegenetics.dun": [
+      { "pair": "D/d2", "weight": 4 },
+      { "pair": "d2/d2", "weight": 96 }
+    ],
+    "horsegenetics.roan": [
+      { "pair": "Rn/rn", "weight": 12 },
+      { "pair": "rn/rn", "weight": 88 }
+    ],
+    "horsegenetics.kit": [
+      { "pair": "SB1/N", "weight": 10 },
+      { "pair": "W35/N", "weight": 8 },
+      { "pair": "W32/N", "weight": 6 },
+      { "pair": "N/N", "weight": 76 }
+    ]
+  },
+  "notes": [
+    "Long powerful body, thick neck, sturdy legs - the harness racer (trot/pace). Gait is a roadmap item (DMRT3).",
+    "EIPH, DSLD: age-related / exertional, folded into heartiness."
+  ]
+}

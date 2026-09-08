@@ -1,0 +1,65 @@
+{
+  "id": "kiger_mustang",
+  "name": "Kiger Mustang",
+  "commonness": "rare",
+  "biomes": [
+    "minecraft:badlands",
+    "minecraft:eroded_badlands",
+    "minecraft:wooded_badlands",
+    "minecraft:savanna"
+  ],
+  "hardy": true,
+  "stats": {
+    "speed": 7,
+    "jump": 5,
+    "health": 10,
+    "height": [13, 14.5]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 42 },
+      { "pair": "E/e", "weight": 44 },
+      { "pair": "e/e", "weight": 14 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 55 },
+      { "pair": "A/a", "weight": 38 },
+      { "pair": "a/a", "weight": 7 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.matp": [
+      { "pair": "Cr/N", "weight": 12 },
+      { "pair": "N/N", "weight": 88 }
+    ],
+    "horsegenetics.dun": [
+      { "pair": "D/d2", "weight": 55 },
+      { "pair": "D/D", "weight": 20 },
+      { "pair": "d1/d2", "weight": 10 },
+      { "pair": "d2/d2", "weight": 15 }
+    ],
+    "horsegenetics.leopard": [
+      { "pair": "LP/lp", "weight": 22 },
+      { "pair": "LP/LP", "weight": 3 },
+      { "pair": "lp/lp", "weight": 75 }
+    ],
+    "horsegenetics.patn1": [
+      { "pair": "PATN1/n", "weight": 25 },
+      { "pair": "n/n", "weight": 75 }
+    ],
+    "horsegenetics.patn2": [
+      { "pair": "PATN2/n", "weight": 12 },
+      { "pair": "n/n", "weight": 88 }
+    ]
+  },
+  "notes": [
+    "Strongly dun (dorsal stripe + leg bars) - the near-fixed dun does this. Some carry the leopard complex.",
+    "HERDA, GBED: GBED is early-lethal (candidate gene); HERDA is age-related."
+  ]
+}

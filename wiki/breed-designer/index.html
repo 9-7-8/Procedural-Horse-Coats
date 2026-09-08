@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Breed Designer</title>
+  <link rel="stylesheet" href="breed-designer.css" />
+</head>
+<body>
+
+<header class="topbar">
+  <a class="back" href="../../index.html">&larr; wiki</a>
+  <h1>Breed Designer</h1>
+  <p class="tagline">Pick a base coat, narrow the pool, drop the file in the game.</p>
+  <div class="topbar-actions">
+    <select id="open-builtin" title="Start from a breed the mod already ships">
+      <option value="">Open a built-in breed&hellip;</option>
+    </select>
+    <label class="btn small file-btn">Open file<input type="file" id="file-input" accept=".json" /></label>
+    <button type="button" class="btn small" id="btn-new">New breed</button>
+  </div>
+</header>
+
+<main class="workspace">
+
+  <!-- LEFT: who the breed is, and where it comes from -->
+  <section class="column left">
+    <h2>Identity</h2>
+    <div id="identity"></div>
+
+    <h2>Where it comes from</h2>
+    <div id="sources"></div>
+
+    <h2>Biomes</h2>
+    <div id="biomes"></div>
+
+    <h2>Body</h2>
+    <div id="stats"></div>
+  </section>
+
+  <!-- CENTRE: the base coat first, then the horses it makes -->
+  <section class="column centre">
+    <h2>1 &middot; Base coat</h2>
+    <p class="hint">
+      Extension and agouti are the pigment every other coat gene works on, so they
+      come first. Pick the shape of the breed&rsquo;s colour; refine the pools
+      afterwards on the right.
+    </p>
+    <div id="base-presets" class="preset-row"></div>
+
+    <h2>Founders</h2>
+    <p class="hint">
+      Real <code>BreedFounder.roll</code> draws off the file as it stands &mdash; the
+      pool, the wild-type forcing, the magic draw, the stat targets and the bands.
+      These are the horses a herd of this breed would be made of.
+    </p>
+    <div class="stage">
+      <div id="viewport" class="viewport"></div>
+      <div class="stage-bar">
+        <button type="button" class="btn small" id="btn-reroll">Roll another founder</button>
+        <code id="founder-code" class="founder-code"></code>
+      </div>
+    </div>
+    <div id="herd" class="herd"></div>
+  </section>
+
+  <!-- RIGHT: the pools, the bands, and the file -->
+  <section class="column right">
+    <h2>2 &middot; Gene pools</h2>
+    <p class="hint">
+      A gene the breed does not name is rolled <b>wild</b> if it paints, and left at
+      its global founder rate if it does not. Naming one replaces that with the
+      weighted pairs below.
+    </p>
+    <div class="add-row">
+      <select id="add-gene"><option value="">Add a gene&hellip;</option></select>
+    </div>
+    <div id="pools"></div>
+
+    <h2>3 &middot; Epigenetic bands</h2>
+    <p class="hint">
+      Not <i>which</i> allele but <i>how much</i> &mdash; how dark the shade renders,
+      how far the splash covers. Every founder is given a number inside the band on
+      both copies; after that it inherits and drifts like any other.
+    </p>
+    <div class="add-row">
+      <select id="add-band"><option value="">Band a gene&hellip;</option></select>
+    </div>
+    <div id="bands"></div>
+
+    <h2>4 &middot; The file</h2>
+    <div id="verdict" class="verdict"></div>
+    <div class="export-actions">
+      <button type="button" class="btn" id="btn-download">Download JSON</button>
+      <button type="button" class="btn small" id="btn-copy">Copy</button>
+    </div>
+    <pre id="output" class="output"></pre>
+    <p class="hint">
+      Save it into <code>config/horsegenetics/breeds/</code> and restart. No rebuild,
+      no Java. Every field left blank uses the game&rsquo;s own default, written beside
+      the box that sets it.
+    </p>
+  </section>
+
+</main>
+
+<div class="boot" id="boot">
+  <div class="boot-inner">
+    <h1>Breed Designer</h1>
+    <p>Loading the mod&hellip;</p>
+    <p class="sub">
+      <code>common/</code> compiled to WebAssembly &mdash; the real gene registry, the
+      real breed parser, the real founder roll. The tool cannot disagree with the game
+      because it <em>is</em> the game.
+    </p>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+<!-- Shared with the gene creator and the horse designer: the geometry tables,
+     the mesh emitter and the orbit viewport. All view code; nothing genetic. -->
+<script src="../gene-creator/js/geometry.js"></script>
+<script src="../gene-creator/js/model3d.js"></script>
+<script src="../gene-creator/js/viewport.js"></script>
+
+<!-- The mod. Note this page cannot run from a file:// path - loading the wasm
+     is a fetch, and a local file is its own opaque origin. -->
+<script src="../horse-designer/js/java.js"></script>
+
+<script src="js/breed-designer.js"></script>
+<script>window.HG.breedDesigner.start();</script>
+</body>
+</html>

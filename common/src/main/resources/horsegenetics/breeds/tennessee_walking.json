@@ -1,0 +1,66 @@
+{
+  "id": "tennessee_walking",
+  "name": "Tennessee Walking Horse",
+  "commonness": "very_common",
+  "biomes": [
+    "minecraft:plains",
+    "minecraft:forest",
+    "minecraft:swamp",
+    "minecraft:meadow"
+  ],
+  "stats": {
+    "speed": 5,
+    "jump": 4,
+    "health": 7,
+    "height": [14.75, 17]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 42 },
+      { "pair": "E/e", "weight": 44 },
+      { "pair": "e/e", "weight": 14 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 30 },
+      { "pair": "A/a", "weight": 45 },
+      { "pair": "a/a", "weight": 25 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.matp": [
+      { "pair": "Cr/N", "weight": 12 },
+      { "pair": "N/N", "weight": 88 }
+    ],
+    "horsegenetics.champagne": [
+      { "pair": "Ch/c", "weight": 8 },
+      { "pair": "c/c", "weight": 92 }
+    ],
+    "horsegenetics.roan": [
+      { "pair": "Rn/rn", "weight": 10 },
+      { "pair": "rn/rn", "weight": 90 }
+    ],
+    "horsegenetics.kit": [
+      { "pair": "SB1/N", "weight": 18 },
+      { "pair": "W35/N", "weight": 12 },
+      { "pair": "N/N", "weight": 70 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/N", "weight": 7 },
+      { "pair": "G2/N", "weight": 5 },
+      { "pair": "N/N", "weight": 88 }
+    ],
+    "horsegenetics.mitf": [
+      { "pair": "SW1/N", "weight": 45 },
+      { "pair": "N/N", "weight": 55 }
+    ]
+  },
+  "notes": [
+    "Long sloping shoulder, long neck, powerful rear drive - the running walk is a roadmap item (DMRT3). Lordosis is age-related."
+  ]
+}

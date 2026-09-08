@@ -1,0 +1,82 @@
+{
+  "id": "american_miniature",
+  "name": "American Miniature",
+  "commonness": "very_common",
+  "biomes": [
+    "minecraft:plains",
+    "minecraft:sunflower_plains",
+    "minecraft:meadow"
+  ],
+  "stats": {
+    "speed": 2,
+    "jump": 1,
+    "health": 4,
+    "height": [7, 8.5]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 42 },
+      { "pair": "E/e", "weight": 44 },
+      { "pair": "e/e", "weight": 14 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 30 },
+      { "pair": "A/a", "weight": 45 },
+      { "pair": "a/a", "weight": 25 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.matp": [
+      { "pair": "Cr/N", "weight": 16 },
+      { "pair": "prl/N", "weight": 8 },
+      { "pair": "N/N", "weight": 76 }
+    ],
+    "horsegenetics.dun": [
+      { "pair": "D/d2", "weight": 10 },
+      { "pair": "d1/d2", "weight": 14 },
+      { "pair": "d2/d2", "weight": 76 }
+    ],
+    "horsegenetics.champagne": [
+      { "pair": "Ch/c", "weight": 8 },
+      { "pair": "c/c", "weight": 92 }
+    ],
+    "horsegenetics.silver": [
+      { "pair": "Z/z", "weight": 8 },
+      { "pair": "z/z", "weight": 92 }
+    ],
+    "horsegenetics.tobiano": [
+      { "pair": "To/to", "weight": 22 },
+      { "pair": "to/to", "weight": 78 }
+    ],
+    "horsegenetics.roan": [
+      { "pair": "Rn/rn", "weight": 12 },
+      { "pair": "rn/rn", "weight": 88 }
+    ],
+    "horsegenetics.kit": [
+      { "pair": "SB1/N", "weight": 16 },
+      { "pair": "W20/N", "weight": 12 },
+      { "pair": "W35/N", "weight": 14 },
+      { "pair": "W13/N", "weight": 2 },
+      { "pair": "N/N", "weight": 56 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/N", "weight": 7 },
+      { "pair": "G2/N", "weight": 6 },
+      { "pair": "N/N", "weight": 87 }
+    ],
+    "horsegenetics.mitf": [
+      { "pair": "SW1/N", "weight": 60 },
+      { "pair": "N/N", "weight": 40 }
+    ]
+  },
+  "notes": [
+    "Under 9.5 hh: the magic-size band bottoms this near the MAGICAL_MIN_SCALE guard - about as small as the model goes.",
+    "Dwarfism, dental overcrowding, EMS: ACAN dwarfism already exists; the rest fold into heartiness."
+  ]
+}

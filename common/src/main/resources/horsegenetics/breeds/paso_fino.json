@@ -1,0 +1,58 @@
+{
+  "id": "paso_fino",
+  "name": "Paso Fino",
+  "biomes": [
+    "minecraft:savanna",
+    "minecraft:jungle",
+    "minecraft:sparse_jungle",
+    "minecraft:bamboo_jungle"
+  ],
+  "stats": {
+    "speed": 5,
+    "jump": 4,
+    "health": 6,
+    "height": [13, 15.5]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 42 },
+      { "pair": "E/e", "weight": 44 },
+      { "pair": "e/e", "weight": 14 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 30 },
+      { "pair": "A/a", "weight": 45 },
+      { "pair": "a/a", "weight": 25 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.matp": [
+      { "pair": "Cr/N", "weight": 10 },
+      { "pair": "N/N", "weight": 90 }
+    ],
+    "horsegenetics.dun": [
+      { "pair": "D/d2", "weight": 6 },
+      { "pair": "d2/d2", "weight": 94 }
+    ],
+    "horsegenetics.roan": [
+      { "pair": "Rn/rn", "weight": 12 },
+      { "pair": "rn/rn", "weight": 88 }
+    ],
+    "horsegenetics.kit": [
+      { "pair": "W20/N", "weight": 10 },
+      { "pair": "W22/N", "weight": 4 },
+      { "pair": "W35/N", "weight": 8 },
+      { "pair": "N/N", "weight": 78 }
+    ]
+  },
+  "notes": [
+    "Compact rounded build, naturally smooth lateral gait - gait is a roadmap item (DMRT3).",
+    "EMS, DSLD: age-related, folded into heartiness."
+  ]
+}

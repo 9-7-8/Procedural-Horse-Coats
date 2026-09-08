@@ -1,0 +1,48 @@
+{
+  "id": "karabakh",
+  "name": "Karabakh",
+  "commonness": "rare",
+  "biomes": [
+    "minecraft:desert",
+    "minecraft:savanna",
+    "minecraft:badlands"
+  ],
+  "hardy": true,
+  "stats": {
+    "speed": 7,
+    "jump": 5,
+    "health": 8,
+    "height": [14, 15]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 42 },
+      { "pair": "E/e", "weight": 44 },
+      { "pair": "e/e", "weight": 14 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 55 },
+      { "pair": "A/a", "weight": 38 },
+      { "pair": "a/a", "weight": 7 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.matp": [
+      { "pair": "Cr/N", "weight": 10 },
+      { "pair": "N/N", "weight": 90 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/N", "weight": 24 },
+      { "pair": "N/N", "weight": 76 }
+    ]
+  },
+  "notes": [
+    "Small head, muscular arched neck, golden sheen - the sheen is not modelled (a shader)."
+  ]
+}

@@ -42,6 +42,12 @@ window.HG = window.HG || {};
   // as pixels: TeaVM is weakest at reading its own classpath.
   var NAMES = [BASE + "assets/horse-names-alpha.txt", BASE + "assets/horse-names-beta.txt"];
 
+  // Every breed, as one array - common/src/main/resources/horsegenetics/breeds/
+  // rewritten by :common:bakeBreedFiles. Same reason again: the game reads that
+  // folder off its classpath and a wasm build cannot. Regenerate it in the same
+  // breath as the breed files, or the tools are a version behind the mod.
+  var BREEDS = BASE + "assets/breeds.json";
+
   var api = null;
 
   /**
@@ -114,10 +120,17 @@ window.HG = window.HG || {};
           decode(ASSETS.gradient), decode(ASSETS.bluepink),
           decode(ASSETS.adult), decode(ASSETS.baby),
           fetch(NAMES[0]).then(function (r) { return r.text(); }),
-          fetch(NAMES[1]).then(function (r) { return r.text(); })
+          fetch(NAMES[1]).then(function (r) { return r.text(); }),
+          fetch(BREEDS).then(function (r) { return r.text(); })
         ]);
       })
       .then(function (imgs) {
+        // Breeds first: the registry is lazy, so anything that asks before this
+        // gets an empty list and caches nothing to correct later.
+        var breedProblems = JSON.parse(api.registerBreeds(imgs[6]));
+        for (var i = 0; i < breedProblems.length; i++) {
+          console.warn("[horsegenetics] breeds: " + breedProblems[i]);
+        }
         api.setNameWords(imgs[4], imgs[5]);
         api.setGradient(imgs[0].pixels, imgs[0].width, imgs[0].height);
         // Keyed exactly as LutContribution.lutResources() keys it, so the LUT

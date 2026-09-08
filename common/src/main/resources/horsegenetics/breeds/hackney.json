@@ -1,0 +1,48 @@
+{
+  "id": "hackney",
+  "name": "Hackney",
+  "commonness": "uncommon",
+  "biomes": [
+    "minecraft:plains",
+    "minecraft:sunflower_plains",
+    "minecraft:meadow"
+  ],
+  "stats": {
+    "speed": 6,
+    "jump": 3,
+    "health": 4,
+    "height": [14.5, 16]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 42 },
+      { "pair": "E/e", "weight": 44 },
+      { "pair": "e/e", "weight": 14 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 55 },
+      { "pair": "A/a", "weight": 38 },
+      { "pair": "a/a", "weight": 7 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.roan": [
+      { "pair": "Rn/rn", "weight": 10 },
+      { "pair": "rn/rn", "weight": 90 }
+    ],
+    "horsegenetics.mitf": [
+      { "pair": "SW1/N", "weight": 40 },
+      { "pair": "N/N", "weight": 60 }
+    ]
+  },
+  "notes": [
+    "Upright neck, high knee action - gait/animation is a roadmap item (DMRT3). Refined bone.",
+    "Osteoarthritis: age-related, folded into heartiness."
+  ]
+}

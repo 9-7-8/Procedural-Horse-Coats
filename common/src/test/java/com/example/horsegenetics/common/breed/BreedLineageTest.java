@@ -80,6 +80,56 @@ class BreedLineageTest {
         assertEquals("cross:arabian+friesian", FR_AR.toToken());
     }
 
+    /**
+     * A splice mark rides on a pure or cross line and combines the way a cross
+     * does. The load-bearing half is that it <b>never washes out</b>: that is
+     * what makes an ordinary purebred worth more than a spectacular spliced one.
+     */
+    @Test
+    void splicedCombinesLikeACrossAndNeverWashesOut() {
+        BreedLineage spliced = FRIESIAN.spliced();
+        assertEquals(Kind.SPLICED, spliced.kind());
+        assertEquals("Spliced (Friesian)", spliced.displayName());
+
+        assertEquals(spliced, BreedLineage.combine(spliced, FRIESIAN));
+        assertEquals(spliced, BreedLineage.combine(FRIESIAN, spliced));
+        assertEquals(spliced, BreedLineage.combine(spliced, spliced));
+        assertSame(BreedLineage.MIXED, BreedLineage.combine(spliced, ARABIAN));
+        assertSame(BreedLineage.MIXED, BreedLineage.combine(spliced, ARABIAN.spliced()));
+        assertEquals(spliced, spliced.spliced(), "splicing a spliced line changes nothing");
+    }
+
+    /**
+     * A cross plus a splice is three lines, and three lines have always been
+     * Mixed. That is a consequence of the splice being an ordinary component
+     * rather than a rule written for it.
+     */
+    @Test
+    void splicingACrossIsMixed() {
+        assertSame(BreedLineage.MIXED, FR_AR.spliced());
+    }
+
+    @Test
+    void aSplicedLineCrossedWithACrossIsMixed() {
+        assertSame(BreedLineage.MIXED, BreedLineage.combine(FRIESIAN.spliced(), FR_AR));
+    }
+
+    /**
+     * Neither Mixed nor Feral names an ancestry, so "Spliced (nothing in
+     * particular)" would say less than "Mixed" already does.
+     */
+    @Test
+    void splicingAnUnnamedAncestryIsANoOp() {
+        assertSame(BreedLineage.MIXED, BreedLineage.MIXED.spliced());
+        assertSame(BreedLineage.FERAL, BreedLineage.FERAL.spliced());
+    }
+
+    @Test
+    void splicedTokensRoundTrip() {
+        assertEquals("spliced:friesian", FRIESIAN.spliced().toToken());
+        assertEquals(FRIESIAN.spliced(), BreedLineage.parse("spliced:friesian"));
+    }
+
     @Test
     void blankAndNullParseToFeral() {
         assertEquals(Kind.FERAL, BreedLineage.parse(null).kind());

@@ -1,0 +1,44 @@
+{
+  "id": "caspian_pony",
+  "name": "Caspian Pony",
+  "commonness": "rare",
+  "biomes": [
+    "minecraft:desert",
+    "minecraft:badlands",
+    "minecraft:savanna"
+  ],
+  "stats": {
+    "speed": 5,
+    "jump": 4,
+    "health": 7,
+    "height": [9, 11.5]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 42 },
+      { "pair": "E/e", "weight": 44 },
+      { "pair": "e/e", "weight": 14 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 55 },
+      { "pair": "A/a", "weight": 38 },
+      { "pair": "a/a", "weight": 7 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.kit": [
+      { "pair": "SB1/N", "weight": 8 },
+      { "pair": "W35/N", "weight": 6 },
+      { "pair": "N/N", "weight": 86 }
+    ]
+  },
+  "notes": [
+    "Small, fine-boned, short legs, prominent eyes. 'Fragile bones' left as low heartiness rather than a lethal gene."
+  ]
+}

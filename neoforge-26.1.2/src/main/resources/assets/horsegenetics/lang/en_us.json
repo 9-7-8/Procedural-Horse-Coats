@@ -4,6 +4,11 @@
   "key.categories.horsegenetics.debug": "Horse Genetics (Debug)",
   "itemGroup.horsegenetics.main": "Horse Genetics",
   "item.horsegenetics.custom_horse_spawn_egg": "Custom Horse Spawn Egg",
+  "item.horsegenetics.breed_spawn_egg": "Breed Spawn Egg",
+  "item.horsegenetics.breed_spawn_egg.named": "%1$s Spawn Egg",
+  "item.horsegenetics.breed_spawn_egg.foundation": "Spawns a foundation horse",
+  "item.horsegenetics.preset_horse_spawn_egg": "Preset Horse Spawn Egg",
+  "item.horsegenetics.preset_horse_spawn_egg.stale": "Made with a different gene list - unusable",
   "item.horsegenetics.horse_hair": "Horse Hair",
   "item.horsegenetics.horse_hair_bundle": "Horse Hair Bundle",
   "item.horsegenetics.braided_rope": "Braided Rope",
@@ -73,5 +78,7 @@
   "message.horsegenetics.transfer.already_yours": "This horse is already yours.",
   "message.horsegenetics.transfer.redeemed": "%s is yours now.",
   "message.horsegenetics.transfer.not_yours": "This is %s's horse. You'll need his papers.",
-  "message.horsegenetics.cowboy.sold_out": "He has nothing left to sell."
+  "message.horsegenetics.cowboy.sold_out": "He has nothing left to sell.",
+  "message.horsegenetics.preset_egg.unreadable": "[Preset Horse] this egg was made with a different set of genes: %1$s",
+  "message.horsegenetics.custom_horse.egg_made": "[Custom Horse] wrote this horse into a preset spawn egg."
 }

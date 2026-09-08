@@ -1,0 +1,62 @@
+{
+  "id": "knabstrupper",
+  "name": "Knabstrupper",
+  "commonness": "uncommon",
+  "biomes": [
+    "minecraft:plains",
+    "minecraft:birch_forest",
+    "minecraft:forest",
+    "minecraft:meadow"
+  ],
+  "stats": {
+    "speed": 6,
+    "jump": 7,
+    "health": 6,
+    "height": [14.5, 15.5]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 42 },
+      { "pair": "E/e", "weight": 44 },
+      { "pair": "e/e", "weight": 14 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 30 },
+      { "pair": "A/a", "weight": 45 },
+      { "pair": "a/a", "weight": 25 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.matp": [
+      { "pair": "Cr/N", "weight": 6 },
+      { "pair": "N/N", "weight": 94 }
+    ],
+    "horsegenetics.leopard": [
+      { "pair": "LP/lp", "weight": 50 },
+      { "pair": "LP/LP", "weight": 32 },
+      { "pair": "lp/lp", "weight": 18 }
+    ],
+    "horsegenetics.patn1": [
+      { "pair": "PATN1/n", "weight": 58 },
+      { "pair": "PATN1/PATN1", "weight": 16 },
+      { "pair": "n/n", "weight": 26 }
+    ],
+    "horsegenetics.patn2": [
+      { "pair": "PATN2/n", "weight": 10 },
+      { "pair": "n/n", "weight": 90 }
+    ],
+    "horsegenetics.mitf": [
+      { "pair": "SW1/N", "weight": 55 },
+      { "pair": "N/N", "weight": 45 }
+    ]
+  },
+  "notes": [
+    "ERU is age-related; folded into heartiness. CSNB on LP/LP is modelled (informational)."
+  ]
+}

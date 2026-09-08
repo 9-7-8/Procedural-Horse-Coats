@@ -25,6 +25,11 @@ import net.minecraft.resources.Identifier;
  *   <li>{@code breed} - a {@code BreedLineage} token to stamp on the spawned
  *       horse (the editor's "Breed:" preset), or {@code ""} for Feral Mixed. It is
  *       only a label + stat bands; the genotype above is authoritative.</li>
+ *   <li>{@code asEgg} - <b>write the horse into an item instead of into the
+ *       world</b>. Everything above is identical either way; this only decides
+ *       whether the server spawns the animal now or hands the player a
+ *       {@code preset_horse_spawn_egg} carrying it, to keep, to spawn later, or
+ *       to give to somebody who is not in creative.</li>
  * </ul>
  *
  * The server applies the genome as a <b>founder record</b> before the entity
@@ -34,7 +39,8 @@ import net.minecraft.resources.Identifier;
  * with an arbitrary genome, so a client-side gate would be no gate at all.
  */
 public record SpawnCustomHorsePayload(String genotypeCode, String epigenomeCode,
-                                      boolean baby, boolean female, String breed)
+                                      boolean baby, boolean female, String breed,
+                                      boolean asEgg)
         implements CustomPacketPayload {
 
     public static final Type<SpawnCustomHorsePayload> TYPE =
@@ -52,6 +58,7 @@ public record SpawnCustomHorsePayload(String genotypeCode, String epigenomeCode,
             ByteBufCodecs.BOOL, SpawnCustomHorsePayload::baby,
             ByteBufCodecs.BOOL, SpawnCustomHorsePayload::female,
             ByteBufCodecs.stringUtf8(64), SpawnCustomHorsePayload::breed,
+            ByteBufCodecs.BOOL, SpawnCustomHorsePayload::asEgg,
             SpawnCustomHorsePayload::new
     );
 

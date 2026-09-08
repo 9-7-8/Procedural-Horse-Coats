@@ -1,0 +1,18 @@
+{
+  "wants": {
+    "id": "minecraft:emerald",
+    "count": 38
+  },
+  "gives": {
+    "id": "horsegenetics:breed_spawn_egg"
+  },
+  "max_uses": 2,
+  "xp": 15,
+  "given_item_modifiers": [
+    {
+      "function": "horsegenetics:set_random_breed",
+      "commonest": "moderate",
+      "rarest": "uncommon"
+    }
+  ]
+}

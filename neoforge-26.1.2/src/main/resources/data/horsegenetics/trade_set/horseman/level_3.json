@@ -2,6 +2,7 @@
   "amount": 3.0,
   "trades": [
     "horsegenetics:horseman/level_3/buy_braided_rope",
+    "horsegenetics:horseman/level_3/sell_common_breed_egg",
     "horsegenetics:horseman/level_3/sell_epigenetic_splice",
     "horsegenetics:horseman/level_3/sell_gene_splice",
     "horsegenetics:horseman/level_3/sell_magnifier",

@@ -34,9 +34,21 @@ import java.util.List;
  * <p>What this class is <i>not</i> is a view. It holds no pixels and no layout;
  * it answers questions and takes edits. The browser draws it.
  *
- * <p>The one structural difference from the screen: there is nothing to spawn,
- * so there is no spawn action and no server round-trip. Everything else - the
- * row list, the sex flag, the breed index, the epigenome - is the same state.
+ * <h2>The deliberate divergences</h2>
+ * Both are the same one difference wearing two hats: <b>a browser page has no
+ * world and no inventory</b>. So the screen's two output actions have no twin
+ * here and are not missing features -
+ * <ul>
+ *   <li><b>Spawn</b> - there is nothing to spawn into, and no server to send a
+ *       packet to.</li>
+ *   <li><b>Make egg</b> - which writes the horse on screen into a
+ *       {@code preset_horse_spawn_egg}. There is no inventory to put an item
+ *       in. The page's equivalent is already there and better suited to a
+ *       browser: copy the genotype code, which is the same horse in a form you
+ *       can paste anywhere, this page included.</li>
+ * </ul>
+ * Everything else - the row list, the sex flag, the breed index, the epigenome -
+ * is the same state and must stay so.
  */
 public final class HorseEditor {
 
@@ -55,7 +67,16 @@ public final class HorseEditor {
     }
 
     private final List<Row> rows = new ArrayList<>();
-    private final List<Breed> breeds = Breeds.all();
+    /**
+     * <b>Not</b> captured in a field. In the browser the breed registry is
+     * filled from a fetched bundle (TeaVM cannot read the classpath the game
+     * reads breed files off), so a list snapshotted when this object was built
+     * would be the empty one - and the breed dropdown would be empty on a page
+     * that had loaded every breed correctly.
+     */
+    List<Breed> breeds() {
+        return Breeds.all();
+    }
 
     private boolean female = true;
     private boolean baby = false;
@@ -134,6 +155,7 @@ public final class HorseEditor {
             breedIndex = 0;
             return true;
         }
+        List<Breed> breeds = breeds();
         for (int i = 0; i < breeds.size(); i++) {
             if (breeds.get(i).name().equalsIgnoreCase(name)) {
                 breedIndex = i + 1;
@@ -164,9 +186,7 @@ public final class HorseEditor {
         return rows;
     }
 
-    List<Breed> breeds() {
-        return breeds;
-    }
+
 
     public boolean female() {
         return female;
@@ -274,10 +294,10 @@ public final class HorseEditor {
      * locus afterwards.
      */
     public void setBreed(int index, Rng rng) {
-        this.breedIndex = Math.max(0, Math.min(index, breeds.size()));
+        this.breedIndex = Math.max(0, Math.min(index, breeds().size()));
         if (breedIndex != 0) {
             rerollName(3, rng);
-            applyGenome(BreedFounder.roll(breeds.get(breedIndex - 1), rng), true);
+            applyGenome(BreedFounder.roll(breeds().get(breedIndex - 1), rng), true);
         }
     }
 
@@ -291,7 +311,7 @@ public final class HorseEditor {
         rerollName(3, rng);   // a different horse deserves a different name
         Genome g = breedIndex == 0
                 ? Genome.random(rng)
-                : BreedFounder.roll(breeds.get(breedIndex - 1), rng, female ? Sex.FEMALE : Sex.MALE);
+                : BreedFounder.roll(breeds().get(breedIndex - 1), rng, female ? Sex.FEMALE : Sex.MALE);
         applyGenome(g, false);
     }
 

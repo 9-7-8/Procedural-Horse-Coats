@@ -1,0 +1,48 @@
+{
+  "id": "canadian_horse",
+  "name": "Canadian Horse",
+  "commonness": "rare",
+  "biomes": [
+    "minecraft:snowy_taiga",
+    "minecraft:grove",
+    "minecraft:snowy_plains"
+  ],
+  "hardy": true,
+  "stats": {
+    "speed": 6,
+    "jump": 5,
+    "health": 9,
+    "height": [14, 16]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 62 },
+      { "pair": "E/e", "weight": 33 },
+      { "pair": "e/e", "weight": 5 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 30 },
+      { "pair": "A/a", "weight": 45 },
+      { "pair": "a/a", "weight": 25 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/N", "weight": 14 },
+      { "pair": "N/N", "weight": 86 }
+    ],
+    "horsegenetics.roan": [
+      { "pair": "Rn/rn", "weight": 14 },
+      { "pair": "rn/rn", "weight": 86 }
+    ]
+  },
+  "notes": [
+    "Dense thick mane and tail, 'little iron horse' build. Famously sound."
+  ]
+}

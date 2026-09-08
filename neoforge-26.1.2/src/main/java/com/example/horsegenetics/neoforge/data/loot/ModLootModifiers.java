@@ -7,7 +7,7 @@ import net.neoforged.neoforge.common.loot.IGlobalLootModifier;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;
 
-/** Registers the mod's global loot modifiers (research-paper chest injection). */
+/** Registers the mod's global loot modifiers (research papers and breed spawn eggs into chests). */
 public final class ModLootModifiers {
 
     public static final DeferredRegister<MapCodec<? extends IGlobalLootModifier>> SERIALIZERS =
@@ -15,6 +15,7 @@ public final class ModLootModifiers {
 
     static {
         SERIALIZERS.register("add_research_paper", () -> AddResearchPaperModifier.CODEC);
+        SERIALIZERS.register("add_breed_spawn_egg", () -> AddBreedSpawnEggModifier.CODEC);
     }
 
     public static void register(IEventBus modEventBus) {

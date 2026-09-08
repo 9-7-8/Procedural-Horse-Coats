@@ -9,6 +9,8 @@ import com.example.horsegenetics.common.trait.StatAxis;
 import com.example.horsegenetics.common.trait.TargetBand;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.EnumSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -20,8 +22,18 @@ import java.util.Set;
  * One horse breed: a constrained slice of the gene pool plus the metadata the
  * spawn and breeding systems need. A wild <b>herd</b> of a breed is rolled by
  * {@link BreedFounder} from these fields; a lone wild horse, a {@code /summon}
- * or a spawn-egg horse is {@link Breeds#FERAL_MIXED} instead and rolls the ordinary
- * unconstrained founder.
+ * or a plain spawn-egg horse is {@link Breeds#FERAL_MIXED} instead and rolls the
+ * ordinary unconstrained founder.
+ *
+ * <h2>Almost every breed is a JSON file</h2>
+ * This type is the <b>parsed</b> form. The breeds the mod ships live in
+ * {@code common/src/main/resources/horsegenetics/breeds/}, one file each, and a
+ * player may drop more into {@code config/horsegenetics/breeds/} after the jar
+ * is built - see {@code breed/spec/BreedSpecLoader} and
+ * {@code wiki/breed-designer/}. Writing a breed in Java is still supported
+ * ({@link Builder}) but is reserved for one that needs behaviour a data file
+ * cannot express; a breed that is a set of genes, biomes, bands and numbers
+ * belongs in a file, where somebody who does not build the mod can edit it.
  *
  * <h2>What a breed pins, and what it leaves alone</h2>
  * <ul>
@@ -36,6 +48,9 @@ import java.util.Set;
  *       {@link #statTargets()}: an axis with a {@link TargetBand} makes every
  *       founder homozygous for that gene's pushing allele, and the gene lands
  *       the horse inside the band. An axis with no band is left wild.</li>
+ *   <li><b>Any other gene's epigenetic numbers</b> may be pinned by
+ *       {@link #bands()} - "deeply black", not merely "black". See
+ *       {@link BreedBands}.</li>
  *   <li><b>Other magical genes</b> appear via the geometric {@link #magicChance}
  *       draw, honouring {@link #magicWhitelist} / {@link #magicBlacklist}.</li>
  * </ul>
@@ -50,10 +65,13 @@ import java.util.Set;
 public record Breed(
         String id,
         String name,
+        boolean magical,
         List<String> biomes,
         double spawnWeight,
+        Set<BreedSource> sources,
         Map<String, List<Combo>> genePools,
-        BreedStatTargets statTargets,
+        StatScores scores,
+        BreedBands bands,
         double magicChance,
         Set<String> magicWhitelist,
         Set<String> magicBlacklist,
@@ -64,10 +82,61 @@ public record Breed(
     /** One weighted allele combination in a breed's pool for a gene, as tokens. */
     public record Combo(String a, String b, double weight) {}
 
+    /** A closed {@code lo..hi}; a single-number score is a zero-width one. */
+    public record Range(double lo, double hi) {
+
+        public Range {
+            if (hi < lo) {
+                double t = lo;
+                lo = hi;
+                hi = t;
+            }
+        }
+
+        public static Range of(double one) {
+            return new Range(one, one);
+        }
+
+        public boolean isPoint() {
+            return lo == hi;
+        }
+    }
+
+    /**
+     * The breed sheet's <b>declared</b> numbers - three 1-10 scores and a height
+     * range in hands - kept as written rather than only as the
+     * {@link TargetBand}s {@link BreedStatCurve} turns them into.
+     *
+     * <p>They are kept because they are what a person edits. A band is
+     * {@code [1.90, 2.10]}; the thing the breed sheet, the wiki page and the
+     * breed designer all say is "speed 9". Storing the resolved band alone made
+     * a breed file unreadable and a round trip through the designer lossy, so
+     * the declaration is what is stored and the band is derived on demand
+     * ({@link Breed#statTargets()}).
+     */
+    public record StatScores(Optional<Range> speed, Optional<Range> jump,
+                             Optional<Range> health, Optional<Range> heightHands) {
+
+        public static final StatScores NONE =
+                new StatScores(Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty());
+
+        public StatScores {
+            speed = speed == null ? Optional.empty() : speed;
+            jump = jump == null ? Optional.empty() : jump;
+            health = health == null ? Optional.empty() : health;
+            heightHands = heightHands == null ? Optional.empty() : heightHands;
+        }
+
+        public boolean isEmpty() {
+            return speed.isEmpty() && jump.isEmpty() && health.isEmpty() && heightHands.isEmpty();
+        }
+    }
+
     /**
      * What one horse of this breed fetches, in emeralds: an inclusive range,
      * rolled per horse rather than fixed, so two of a breeder's Fjords are not
-     * the same price to the copper.
+     * the same price to the copper. This is also what a signed transfer paper
+     * for one costs at the cowboy's.
      *
      * <p>A breed that names no range is priced at the default - see
      * {@code HorsePrices}, which owns that number, because how much a horse
@@ -84,15 +153,64 @@ public record Breed(
 
     public Breed {
         biomes = List.copyOf(biomes);
-        genePools = Map.copyOf(genePools);
-        magicWhitelist = Set.copyOf(magicWhitelist);
-        magicBlacklist = Set.copyOf(magicBlacklist);
+        sources = sources == null ? BreedSource.ALL : Set.copyOf(sources);
+        // Ordered copies, not Map.copyOf / Set.copyOf: those are deliberately
+        // unordered, and these are written back out to a checked-in file by
+        // BreedSpecWriter. An unordered copy makes that file's diff depend on
+        // the JVM's hash seed, which is a regenerated-artefact trap of exactly
+        // the kind CLAUDE.md's "regenerate what you invalidate" table exists for.
+        genePools = ordered(genePools);
+        scores = scores == null ? StatScores.NONE : scores;
+        bands = bands == null ? BreedBands.NONE : bands;
+        magicWhitelist = orderedSet(magicWhitelist);
+        magicBlacklist = orderedSet(magicBlacklist);
         notes = List.copyOf(notes);
         price = price == null ? Optional.empty() : price;
     }
 
+    private static Map<String, List<Combo>> ordered(Map<String, List<Combo>> pools) {
+        Map<String, List<Combo>> copy = new LinkedHashMap<>();
+        for (Map.Entry<String, List<Combo>> e : pools.entrySet()) {
+            copy.put(e.getKey(), List.copyOf(e.getValue()));
+        }
+        return Collections.unmodifiableMap(copy);
+    }
+
+    private static Set<String> orderedSet(Set<String> values) {
+        return Collections.unmodifiableSet(new LinkedHashSet<>(values));
+    }
+
     public boolean constrains(String geneKey) {
         return genePools.containsKey(geneKey);
+    }
+
+    /** May this breed turn up from {@code source}? */
+    public boolean allows(BreedSource source) {
+        return sources.contains(source);
+    }
+
+    /** Is there a breed spawn egg for this breed? */
+    public boolean hasSpawnEgg() {
+        return allows(BreedSource.SPAWN_EGG);
+    }
+
+    /**
+     * The per-axis bands the founder roll pins, derived from {@link #scores()}.
+     *
+     * <p>Cheap enough to derive on each call - four comparisons and at most four
+     * {@link BreedStatCurve} evaluations - and deriving is what keeps the
+     * declared score and the resolved band from being able to disagree.
+     */
+    public BreedStatTargets statTargets() {
+        if (scores.isEmpty()) {
+            return BreedStatTargets.NONE;
+        }
+        BreedStatTargets.Builder b = BreedStatTargets.builder();
+        scores.speed().ifPresent(r -> b.band(StatAxis.SPEED, BreedStatCurve.bandFor(StatAxis.SPEED, r.lo(), r.hi())));
+        scores.jump().ifPresent(r -> b.band(StatAxis.JUMP, BreedStatCurve.bandFor(StatAxis.JUMP, r.lo(), r.hi())));
+        scores.health().ifPresent(r -> b.band(StatAxis.HEALTH, BreedStatCurve.bandFor(StatAxis.HEALTH, r.lo(), r.hi())));
+        scores.heightHands().ifPresent(r -> b.band(StatAxis.SCALE, BreedStatCurve.scaleBand(r.lo(), r.hi())));
+        return b.build();
     }
 
     /** The breed's founder table for a gene it constrains. Tokens resolve against the live registry. */
@@ -123,10 +241,18 @@ public record Breed(
     public static final class Builder {
         private final String id;
         private final String name;
+        private boolean magical = false;
         private final List<String> biomes = new ArrayList<>();
         private double spawnWeight = Commonness.MODERATE.weight;
+        private final Set<BreedSource> sources = EnumSet.noneOf(BreedSource.class);
+        /** Whether {@link #sources} was named at all - an empty list is a real answer. */
+        private boolean sourcesNamed = false;
         private final Map<String, List<Combo>> pools = new LinkedHashMap<>();
-        private final BreedStatTargets.Builder targets = BreedStatTargets.builder();
+        private Optional<Range> speed = Optional.empty();
+        private Optional<Range> jump = Optional.empty();
+        private Optional<Range> health = Optional.empty();
+        private Optional<Range> height = Optional.empty();
+        private final BreedBands.Builder bands = BreedBands.builder();
         private double magicChance = 0.20;
         private final Set<String> whitelist = new LinkedHashSet<>();
         private final Set<String> blacklist = new LinkedHashSet<>();
@@ -151,6 +277,31 @@ public record Breed(
             return this;
         }
 
+        public Builder spawnWeight(double w) {
+            this.spawnWeight = w;
+            return this;
+        }
+
+        /** Mark the breed magical rather than natural - a wiki/label distinction, not a mechanic. */
+        public Builder magical() {
+            this.magical = true;
+            return this;
+        }
+
+        /**
+         * Where this breed may come from. <b>Calling this at all</b> is the
+         * answer, so {@code sources()} with no arguments means "nowhere" -
+         * which is what {@link Breeds#FERAL_MIXED} is. A breed that never calls
+         * it is allowed every source.
+         */
+        public Builder sources(BreedSource... which) {
+            sourcesNamed = true;
+            for (BreedSource s : which) {
+                sources.add(s);
+            }
+            return this;
+        }
+
         /** Add a weighted combo (as allele tokens) to a gene's pool. Repeatable. */
         public Builder gene(String geneKey, String a, String b, double weight) {
             pools.computeIfAbsent(geneKey, k -> new ArrayList<>()).add(new Combo(a, b, weight));
@@ -160,6 +311,12 @@ public record Breed(
         /** A gene fixed homozygous for one allele. */
         public Builder fixed(String geneKey, String token) {
             return gene(geneKey, token, token, 100.0);
+        }
+
+        /** Pin one of a gene's epigenetic numbers to a band on every founder. */
+        public Builder band(String geneKey, String valueName, double lo, double hi) {
+            bands.band(geneKey, valueName, lo, hi);
+            return this;
         }
 
         // --- extension / agouti convenience ---
@@ -221,30 +378,30 @@ public record Breed(
                     .gene("horsegenetics.shade", "ShD", "ShD", 7);
         }
 
-        // --- stat targets ---
+        // --- stat scores ---
 
         public Builder speed(double score) {
             return speed(score, score);
         }
 
         public Builder speed(double lo, double hi) {
-            targets.band(StatAxis.SPEED, BreedStatCurve.bandFor(StatAxis.SPEED, lo, hi));
+            this.speed = Optional.of(new Range(lo, hi));
             return this;
         }
 
         public Builder jump(double score) {
-            targets.band(StatAxis.JUMP, BreedStatCurve.bandFor(StatAxis.JUMP, score, score));
+            this.jump = Optional.of(Range.of(score));
             return this;
         }
 
         public Builder health(double score) {
-            targets.band(StatAxis.HEALTH, BreedStatCurve.bandFor(StatAxis.HEALTH, score, score));
+            this.health = Optional.of(Range.of(score));
             return this;
         }
 
         /** The breed's height range, in hands. Sets the body-scale band. */
         public Builder height(double loHh, double hiHh) {
-            targets.band(StatAxis.SCALE, BreedStatCurve.scaleBand(loHh, hiHh));
+            this.height = Optional.of(new Range(loHh, hiHh));
             return this;
         }
 
@@ -288,7 +445,9 @@ public record Breed(
         }
 
         public Breed build() {
-            return new Breed(id, name, biomes, spawnWeight, pools, targets.build(),
+            return new Breed(id, name, magical, biomes, spawnWeight,
+                    sourcesNamed ? sources : BreedSource.ALL, pools,
+                    new StatScores(speed, jump, health, height), bands.build(),
                     magicChance, whitelist, blacklist, hardy, notes, price);
         }
     }

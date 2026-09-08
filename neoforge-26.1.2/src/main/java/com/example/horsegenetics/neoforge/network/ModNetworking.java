@@ -25,6 +25,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.item.ItemStack;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.loading.FMLEnvironment;
@@ -287,6 +288,24 @@ public final class ModNetworking {
         } catch (RuntimeException e) {
             refuseSpawn(serverPlayer, "rejected genome: " + e.getMessage());
             HorseGenetics.LOGGER.warn("[Custom Horse] genome rejected", e);
+            return;
+        }
+
+        // "Make an egg" instead of "spawn now". Everything above is identical -
+        // the same genome is validated the same way - so the two paths cannot
+        // drift apart into "the egg spawns a different horse from the button".
+        if (payload.asEgg()) {
+            ItemStack egg = com.example.horsegenetics.neoforge.item.PresetHorseSpawnEggItem.of(
+                    new com.example.horsegenetics.neoforge.data.StoredGenome(
+                            genome.genotypeCode(), genome.epigenome().toCode(),
+                            serverPlayer.getUUID(), serverPlayer.getGameProfile().name(),
+                            payload.breed()),
+                    payload.baby());
+            if (!serverPlayer.getInventory().add(egg)) {
+                serverPlayer.drop(egg, false);
+            }
+            serverPlayer.sendSystemMessage(
+                    Component.translatable("message.horsegenetics.custom_horse.egg_made"));
             return;
         }
 

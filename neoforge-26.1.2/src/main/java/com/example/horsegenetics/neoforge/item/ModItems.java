@@ -86,6 +86,25 @@ public final class ModItems {
     // real SpawnEggItem; see client/CustomHorseSpawnEggClient.
     public static final DeferredItem<Item> CUSTOM_HORSE_SPAWN_EGG = simple("custom_horse_spawn_egg");
 
+    /**
+     * <b>Breed spawn eggs</b> - one item, the breed on a {@code breed}
+     * component. Not craftable: they come out of dungeon chests and off the
+     * horseman, dear. Single use, and the horse it makes is a foundation horse
+     * of that breed. See {@link BreedSpawnEggItem}.
+     */
+    // Registered without joining TAB_ITEMS: a *blank* breed egg is a puzzle,
+    // not an item. Both tabs get the filled ones instead - see addToCreativeTab.
+    public static final DeferredItem<BreedSpawnEggItem> BREED_SPAWN_EGG =
+            ITEMS.registerItem("breed_spawn_egg", BreedSpawnEggItem::new);
+
+    /**
+     * A horse the creative editor saved rather than spawned - the exact
+     * genotype, epigenome, sex, age and breed label that were on screen. Made
+     * in the custom spawn egg's screen; usable by anybody.
+     */
+    public static final DeferredItem<PresetHorseSpawnEggItem> PRESET_HORSE_SPAWN_EGG =
+            ITEMS.registerItem("preset_horse_spawn_egg", PresetHorseSpawnEggItem::new);
+
     // --- material floor (roadmap §12.2) -----------------------------------
     public static final DeferredItem<Item> HORSE_HAIR = simple("horse_hair");
     public static final DeferredItem<Item> HORSE_HAIR_BUNDLE = simple("horse_hair_bundle");
@@ -177,6 +196,14 @@ public final class ModItems {
     static void addToCreativeTab(BuildCreativeModeTabContentsEvent event) {
         if (event.getTabKey() == CreativeModeTabs.SPAWN_EGGS) {
             event.accept(CUSTOM_HORSE_SPAWN_EGG.get());
+            // One filled egg per breed that has one. The creative tab is the
+            // only place the whole set is visible at once, and a blank
+            // component-driven egg in a tab is a puzzle rather than an item.
+            for (com.example.horsegenetics.common.breed.Breed breed
+                    : com.example.horsegenetics.common.breed.Breeds.from(
+                            com.example.horsegenetics.common.breed.BreedSource.SPAWN_EGG)) {
+                event.accept(BreedSpawnEggItem.of(breed));
+            }
         }
     }
 

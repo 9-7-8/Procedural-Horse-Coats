@@ -1,0 +1,50 @@
+{
+  "id": "fjord",
+  "name": "Norwegian Fjord",
+  "commonness": "uncommon",
+  "biomes": [
+    "minecraft:snowy_taiga",
+    "minecraft:frozen_river",
+    "minecraft:snowy_slopes",
+    "minecraft:grove"
+  ],
+  "stats": {
+    "speed": 4,
+    "jump": 3,
+    "health": 9,
+    "height": [13.5, 14.5]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 75 },
+      { "pair": "E/e", "weight": 25 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "a/a", "weight": 100 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.dun": [
+      { "pair": "D/d2", "weight": 40 },
+      { "pair": "D/D", "weight": 55 },
+      { "pair": "d1/d2", "weight": 5 }
+    ],
+    "horsegenetics.pangare": [
+      { "pair": "Pa2/Pa2", "weight": 48 },
+      { "pair": "Pa2/Pa1", "weight": 36 },
+      { "pair": "Pa1/Pa1", "weight": 14 },
+      { "pair": "Pa1/pa", "weight": 2 }
+    ]
+  },
+  "notes": [
+    "The two-tone mane (dark midtstol, pale guard hair) and the primitive stripes both come from the near-fixed dun; the erect clip that shows them off is grooming, and is not modelled.",
+    "Almost every Fjord is a dun (brown/red/grey/white/yellow dun); E_ a/a + D drives the classic brown dun.",
+    "EMS: age-related, folded into heartiness."
+  ]
+}

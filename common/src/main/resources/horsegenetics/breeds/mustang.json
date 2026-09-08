@@ -1,0 +1,87 @@
+{
+  "id": "mustang",
+  "name": "Mustang",
+  "biomes": [
+    "minecraft:badlands",
+    "minecraft:eroded_badlands",
+    "minecraft:wooded_badlands",
+    "minecraft:savanna",
+    "minecraft:windswept_savanna"
+  ],
+  "hardy": true,
+  "stats": {
+    "speed": 7,
+    "jump": 5,
+    "health": 10,
+    "height": [13.5, 15.5]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 42 },
+      { "pair": "E/e", "weight": 44 },
+      { "pair": "e/e", "weight": 14 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 30 },
+      { "pair": "A/a", "weight": 45 },
+      { "pair": "a/a", "weight": 25 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.matp": [
+      { "pair": "Cr/N", "weight": 14 },
+      { "pair": "N/N", "weight": 86 }
+    ],
+    "horsegenetics.dun": [
+      { "pair": "D/d2", "weight": 20 },
+      { "pair": "d1/d2", "weight": 14 },
+      { "pair": "d2/d2", "weight": 66 }
+    ],
+    "horsegenetics.champagne": [
+      { "pair": "Ch/c", "weight": 5 },
+      { "pair": "c/c", "weight": 95 }
+    ],
+    "horsegenetics.roan": [
+      { "pair": "Rn/rn", "weight": 16 },
+      { "pair": "rn/rn", "weight": 84 }
+    ],
+    "horsegenetics.tobiano": [
+      { "pair": "To/to", "weight": 16 },
+      { "pair": "to/to", "weight": 84 }
+    ],
+    "horsegenetics.kit": [
+      { "pair": "SB1/N", "weight": 16 },
+      { "pair": "W35/N", "weight": 12 },
+      { "pair": "W34/N", "weight": 4 },
+      { "pair": "N/N", "weight": 68 }
+    ],
+    "horsegenetics.leopard": [
+      { "pair": "LP/lp", "weight": 16 },
+      { "pair": "LP/LP", "weight": 2 },
+      { "pair": "lp/lp", "weight": 82 }
+    ],
+    "horsegenetics.patn1": [
+      { "pair": "PATN1/n", "weight": 25 },
+      { "pair": "n/n", "weight": 75 }
+    ],
+    "horsegenetics.patn2": [
+      { "pair": "PATN2/n", "weight": 12 },
+      { "pair": "n/n", "weight": 88 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/N", "weight": 6 },
+      { "pair": "G2/N", "weight": 5 },
+      { "pair": "N/N", "weight": 89 }
+    ]
+  },
+  "notes": [
+    "Wild-type diversity: every colour, compact build, hard feet. Some carry the leopard complex.",
+    "HERDA, GBED: GBED is early-lethal (candidate gene); HERDA is age-related."
+  ]
+}

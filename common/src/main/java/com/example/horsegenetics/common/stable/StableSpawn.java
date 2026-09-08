@@ -3,6 +3,7 @@ package com.example.horsegenetics.common.stable;
 import com.example.horsegenetics.common.Rng;
 import com.example.horsegenetics.common.breed.Breed;
 import com.example.horsegenetics.common.breed.BreedFounder;
+import com.example.horsegenetics.common.breed.BreedSource;
 import com.example.horsegenetics.common.breed.Breeds;
 import com.example.horsegenetics.common.genetics.Allele;
 import com.example.horsegenetics.common.genetics.AllelePair;
@@ -139,12 +140,27 @@ public record StableSpawn(
         return Genome.of(g, rng);
     }
 
-    /** The breed this horse is, or the feral mix when the stable names none. */
+    /**
+     * The breed this horse is, or the feral mix when the stable names none it
+     * can use.
+     *
+     * <p>A named breed that has switched {@link BreedSource#STABLE} off is
+     * skipped rather than honoured: a stable definition is written once, by
+     * whoever built the building, and a breed's own file is the later and more
+     * specific word on where it may turn up.
+     */
     public Breed breed(Rng rng) {
-        if (breeds.isEmpty()) {
+        List<Breed> allowed = new ArrayList<>();
+        for (String id : breeds) {
+            Breed breed = Breeds.get(id);
+            if (breed != Breeds.FERAL_MIXED && breed.allows(BreedSource.STABLE)) {
+                allowed.add(breed);
+            }
+        }
+        if (allowed.isEmpty()) {
             return Breeds.FERAL_MIXED;
         }
-        return Breeds.get(breeds.get(rng.nextInt(breeds.size())));
+        return allowed.get(rng.nextInt(allowed.size()));
     }
 
     // ------------------------------------------------------------------

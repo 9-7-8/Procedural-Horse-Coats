@@ -1,0 +1,51 @@
+{
+  "id": "exmoor_pony",
+  "name": "Exmoor Pony",
+  "commonness": "rare",
+  "biomes": [
+    "minecraft:windswept_hills",
+    "minecraft:taiga",
+    "minecraft:snowy_slopes"
+  ],
+  "hardy": true,
+  "stats": {
+    "speed": 4,
+    "jump": 4,
+    "health": 10,
+    "height": [11.5, 12.75]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 70 },
+      { "pair": "E/e", "weight": 26 },
+      { "pair": "e/e", "weight": 4 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 55 },
+      { "pair": "A/a", "weight": 38 },
+      { "pair": "a/a", "weight": 7 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.dun": [
+      { "pair": "d1/d2", "weight": 30 },
+      { "pair": "d2/d2", "weight": 70 }
+    ],
+    "horsegenetics.pangare": [
+      { "pair": "Pa2/Pa2", "weight": 52 },
+      { "pair": "Pa2/Pa1", "weight": 34 },
+      { "pair": "Pa1/Pa1", "weight": 12 },
+      { "pair": "Pa1/pa", "weight": 2 }
+    ]
+  },
+  "notes": [
+    "Mealy muzzle and eye rings - the breed standard, and near-fixed here. Double-layered winter coat - cosmetic, out of scope.",
+    "An ancient, exceptionally hardy landrace - no white, no dilutions."
+  ]
+}

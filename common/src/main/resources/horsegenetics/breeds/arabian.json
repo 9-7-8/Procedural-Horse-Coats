@@ -1,0 +1,54 @@
+{
+  "id": "arabian",
+  "name": "Arabian",
+  "commonness": "common",
+  "biomes": [
+    "minecraft:desert",
+    "minecraft:savanna",
+    "minecraft:badlands",
+    "minecraft:savanna_plateau"
+  ],
+  "stats": {
+    "speed": 7,
+    "jump": 6,
+    "health": 9,
+    "height": [14.5, 15.75]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 42 },
+      { "pair": "E/e", "weight": 44 },
+      { "pair": "e/e", "weight": 14 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 55 },
+      { "pair": "A/a", "weight": 38 },
+      { "pair": "a/a", "weight": 7 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/N", "weight": 40 },
+      { "pair": "G3/G3", "weight": 14 },
+      { "pair": "N/N", "weight": 46 }
+    ],
+    "horsegenetics.kit": [
+      { "pair": "SB1/N", "weight": 14 },
+      { "pair": "W35/N", "weight": 10 },
+      { "pair": "W34/N", "weight": 3 },
+      { "pair": "W15/N", "weight": 1 },
+      { "pair": "W23/N", "weight": 1 },
+      { "pair": "N/N", "weight": 71 }
+    ]
+  },
+  "notes": [
+    "Dished face and high-carried tail - head profile is not modelled; tail carriage could be a pose tweak (roadmap).",
+    "SCID, CA, LFS: early-lethal foal disorders - candidate genes, see roadmap."
+  ]
+}

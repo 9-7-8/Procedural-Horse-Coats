@@ -2,9 +2,11 @@ package com.example.horsegenetics.common.breed;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.example.horsegenetics.common.SeededRng;
+import com.example.horsegenetics.common.genetics.Epigenome;
 import com.example.horsegenetics.common.genetics.Genes;
 import com.example.horsegenetics.common.genetics.Genome;
 import com.example.horsegenetics.common.genetics.Genotype;
@@ -130,6 +132,42 @@ class BreedFounderTest {
         Genotype a = roll("feral_mixed", 1);
         Genotype b = roll("feral_mixed", 2);
         assertFalse(a.toCode().equals(b.toCode()));
+    }
+
+    /**
+     * An epigenetic band lands on <b>both allele copies</b> of every founder -
+     * the general form of what the stat targets do, and the thing that lets a
+     * breed say "deeply black" rather than only "black".
+     */
+    @Test
+    void anEpigeneticBandLandsOnBothCopiesOfEveryFounder() {
+        Breed breed = Breed.of("banded", "Banded")
+                .fixed("horsegenetics.ednrb", "O")
+                .band("horsegenetics.ednrb", "cover", 0.61, 0.64)
+                .build();
+        for (long seed = 0; seed < 40; seed++) {
+            Genome g = BreedFounder.roll(breed, new SeededRng(seed));
+            Epigenome.Copies copies = g.epigenome().copies(Genes.EDNRB);
+            for (double v : new double[]{copies.first().values().get("cover"),
+                    copies.second().values().get("cover")}) {
+                assertTrue(v >= 0.61 && v <= 0.64,
+                        "seed " + seed + " landed cover at " + v + ", outside the band");
+            }
+        }
+    }
+
+    /**
+     * A band on a gene this build has not got, or on a value it does not
+     * declare, costs the breed that band and nothing else. The complaining
+     * happens once at load time, where there is a file name to complain about.
+     */
+    @Test
+    void aBandOnSomethingMissingIsSurvivable() {
+        Breed breed = Breed.of("odd", "Odd")
+                .band("somemod.imaginary", "whatever", 0, 1)
+                .band("horsegenetics.ednrb", "not_a_value", 0, 1)
+                .build();
+        assertNotNull(BreedFounder.roll(breed, new SeededRng(7)));
     }
 
     /** Is this horse carrying a disorder that actually costs it something? */

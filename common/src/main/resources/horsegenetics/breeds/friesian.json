@@ -1,0 +1,29 @@
+{
+  "id": "friesian",
+  "name": "Friesian",
+  "biomes": [
+    "minecraft:plains",
+    "minecraft:forest",
+    "minecraft:meadow",
+    "minecraft:river"
+  ],
+  "stats": {
+    "speed": 5,
+    "jump": 4,
+    "health": 4,
+    "height": [15, 17]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 100 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "a/a", "weight": 100 }
+    ]
+  },
+  "notes": [
+    "Jet black, heavy feathering, thick wavy mane and tail. Fixed E/E a/a, no white or dilution genes at all.",
+    "Feathering + wavy mane: roadmap render items.",
+    "Dwarfism, megaesophagus: dwarfism exists (ACAN); megaesophagus is early-lethal - candidate gene, roadmap."
+  ]
+}

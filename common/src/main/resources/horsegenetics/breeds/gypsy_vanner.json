@@ -1,0 +1,64 @@
+{
+  "id": "gypsy_vanner",
+  "name": "Gypsy Vanner",
+  "commonness": "common",
+  "biomes": [
+    "minecraft:plains",
+    "minecraft:river",
+    "minecraft:swamp",
+    "minecraft:meadow"
+  ],
+  "stats": {
+    "speed": 4,
+    "jump": 3,
+    "health": 7,
+    "height": [14, 15.5]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 42 },
+      { "pair": "E/e", "weight": 44 },
+      { "pair": "e/e", "weight": 14 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 30 },
+      { "pair": "A/a", "weight": 45 },
+      { "pair": "a/a", "weight": 25 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.matp": [
+      { "pair": "Cr/N", "weight": 8 },
+      { "pair": "N/N", "weight": 92 }
+    ],
+    "horsegenetics.dun": [
+      { "pair": "D/d2", "weight": 6 },
+      { "pair": "d2/d2", "weight": 94 }
+    ],
+    "horsegenetics.tobiano": [
+      { "pair": "To/to", "weight": 62 },
+      { "pair": "To/To", "weight": 16 },
+      { "pair": "to/to", "weight": 22 }
+    ],
+    "horsegenetics.kit": [
+      { "pair": "SB1/N", "weight": 24 },
+      { "pair": "W20/N", "weight": 30 },
+      { "pair": "W35/N", "weight": 10 },
+      { "pair": "N/N", "weight": 36 }
+    ],
+    "horsegenetics.mitf": [
+      { "pair": "SW1/N", "weight": 65 },
+      { "pair": "N/N", "weight": 35 }
+    ]
+  },
+  "notes": [
+    "'Drum' cobby body, heavy feathering, abundant mane and tail - feathering + mane are roadmap render items. Usually tobiano pinto.",
+    "CPL, EMS: age-related, folded into heartiness."
+  ]
+}

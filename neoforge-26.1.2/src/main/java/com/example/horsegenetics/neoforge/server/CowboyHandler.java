@@ -4,6 +4,7 @@ import com.example.horsegenetics.common.Rng;
 import com.example.horsegenetics.common.breed.Breed;
 import com.example.horsegenetics.common.breed.BreedFounder;
 import com.example.horsegenetics.common.breed.BreedLineage;
+import com.example.horsegenetics.common.breed.BreedSource;
 import com.example.horsegenetics.common.breed.Breeds;
 import com.example.horsegenetics.common.genetics.Genome;
 import com.example.horsegenetics.common.horse.HorseRecord;
@@ -319,28 +320,30 @@ public final class CowboyHandler {
      */
     private static Breed pickBreed(Cowboy cowboy, ServerLevel level) {
         Breed breed = HerdManager.pickHerdBreed(
-                level.getBiome(cowboy.blockPosition()), level.getRandom());
+                level.getBiome(cowboy.blockPosition()), level.getRandom(), BreedSource.COWBOY);
         if (breed != Breeds.FERAL_MIXED) {
             return breed;
         }
-        List<Breed> all = Breeds.all();
+        // Nothing local he is allowed to deal in - fall back to the whole set he
+        // is, still weighted by commonness. A breed that has switched the cowboy
+        // source off is not in this list either, so "no dealer has ever had one"
+        // is a thing a breed can actually say.
+        List<Breed> sellable = Breeds.from(BreedSource.COWBOY);
+        if (sellable.isEmpty()) {
+            return Breeds.FERAL_MIXED;
+        }
         double total = 0.0;
-        for (Breed b : all) {
-            if (b != Breeds.FERAL_MIXED) {
-                total += b.spawnWeight();
-            }
+        for (Breed b : sellable) {
+            total += b.spawnWeight();
         }
         double roll = level.getRandom().nextDouble() * total;
-        for (Breed b : all) {
-            if (b == Breeds.FERAL_MIXED) {
-                continue;
-            }
+        for (Breed b : sellable) {
             roll -= b.spawnWeight();
             if (roll < 0.0) {
                 return b;
             }
         }
-        return all.get(all.size() - 1);
+        return sellable.get(sellable.size() - 1);
     }
 
     /**

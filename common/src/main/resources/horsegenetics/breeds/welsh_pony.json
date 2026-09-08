@@ -1,0 +1,70 @@
+{
+  "id": "welsh_pony",
+  "name": "Welsh Pony",
+  "commonness": "very_common",
+  "biomes": [
+    "minecraft:windswept_hills",
+    "minecraft:taiga",
+    "minecraft:plains",
+    "minecraft:meadow"
+  ],
+  "stats": {
+    "speed": [4, 6],
+    "jump": 5,
+    "health": 8,
+    "height": [11, 14.5]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 42 },
+      { "pair": "E/e", "weight": 44 },
+      { "pair": "e/e", "weight": 14 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 30 },
+      { "pair": "A/a", "weight": 45 },
+      { "pair": "a/a", "weight": 25 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.matp": [
+      { "pair": "Cr/N", "weight": 10 },
+      { "pair": "N/N", "weight": 90 }
+    ],
+    "horsegenetics.dun": [
+      { "pair": "D/d2", "weight": 6 },
+      { "pair": "d2/d2", "weight": 94 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G3/N", "weight": 18 },
+      { "pair": "G2/N", "weight": 10 },
+      { "pair": "G3/G3", "weight": 4 },
+      { "pair": "G3/G2", "weight": 4 },
+      { "pair": "G2/G2", "weight": 2 },
+      { "pair": "N/N", "weight": 62 }
+    ],
+    "horsegenetics.roan": [
+      { "pair": "Rn/rn", "weight": 12 },
+      { "pair": "rn/rn", "weight": 88 }
+    ],
+    "horsegenetics.kit": [
+      { "pair": "SB1/N", "weight": 16 },
+      { "pair": "W35/N", "weight": 10 },
+      { "pair": "W32/N", "weight": 6 },
+      { "pair": "N/N", "weight": 68 }
+    ],
+    "horsegenetics.mitf": [
+      { "pair": "SW1/N", "weight": 60 },
+      { "pair": "N/N", "weight": 40 }
+    ]
+  },
+  "notes": [
+    "Small with large ears, a crested neck and a floating trot. Laminitis / EMS are age-related (folded into heartiness)."
+  ]
+}

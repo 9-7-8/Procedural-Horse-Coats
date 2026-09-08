@@ -1,0 +1,51 @@
+{
+  "id": "shire",
+  "name": "Shire",
+  "commonness": "uncommon",
+  "biomes": [
+    "minecraft:plains",
+    "minecraft:river",
+    "minecraft:meadow",
+    "minecraft:swamp"
+  ],
+  "stats": {
+    "speed": 3,
+    "jump": 2,
+    "health": 4,
+    "height": [16.5, 17.75]
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 62 },
+      { "pair": "E/e", "weight": 33 },
+      { "pair": "e/e", "weight": 5 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 30 },
+      { "pair": "A/a", "weight": 45 },
+      { "pair": "a/a", "weight": 25 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.kit": [
+      { "pair": "SB1/N", "weight": 40 },
+      { "pair": "SB1/SB1", "weight": 6 },
+      { "pair": "W35/N", "weight": 10 },
+      { "pair": "N/N", "weight": 44 }
+    ],
+    "horsegenetics.mitf": [
+      { "pair": "SW1/N", "weight": 55 },
+      { "pair": "N/N", "weight": 45 }
+    ]
+  },
+  "notes": [
+    "The tallest breed - the scale band tops out around the natural draught ceiling. Heavy feathering (roadmap), Roman nose (not modelled).",
+    "CPL, PSSM: age-related, folded into heartiness."
+  ]
+}

@@ -650,6 +650,18 @@ public final class CustomHorseSpawnScreen extends Screen {
                 .build();
         spawnButton.active = creative;
         addRenderableWidget(spawnButton);
+        Button eggButton = Button.builder(Component.literal("Make egg"), b -> makeEgg())
+                .bounds(rx, this.height - 70, RIGHT_W, 20)
+                .tooltip(net.minecraft.client.gui.components.Tooltip.create(
+                        Component.literal(creative
+                                ? "Put this exact horse into a preset spawn egg instead of "
+                                        + "spawning it: keep it, spawn it later, or give it to "
+                                        + "somebody who is not in creative."
+                                : "Creative only, the same as Spawn - it writes an arbitrary "
+                                        + "horse into an item.")))
+                .build();
+        eggButton.active = creative;
+        addRenderableWidget(eggButton);
         addRenderableWidget(Button.builder(Component.literal("Cancel"), b -> onClose())
                 .bounds(rx, this.height - 26, RIGHT_W, 20).build());
     }
@@ -805,10 +817,27 @@ public final class CustomHorseSpawnScreen extends Screen {
     }
 
     private void spawn() {
+        send(false);
+    }
+
+    /**
+     * Write what is on screen into a {@code preset_horse_spawn_egg} instead of
+     * spawning it - the "keep this one" the editor used to be missing. A build
+     * worth ten minutes of fiddling could only ever be spent immediately, in
+     * front of you, and there was nothing to hand to anybody else.
+     *
+     * <p>Same packet, same server-side validation, one flag different: the two
+     * cannot drift into "the egg spawns a different horse from the button".
+     */
+    private void makeEgg() {
+        send(true);
+    }
+
+    private void send(boolean asEgg) {
         String breedTok = breedIndex == 0 ? ""
                 : BreedLineage.pure(breedChoices.get(breedIndex - 1).id()).toToken();
         ClientPacketDistributor.sendToServer(new SpawnCustomHorsePayload(
-                genotype().toCode(), epigenome.toCode(), baby, female, breedTok));
+                genotype().toCode(), epigenome.toCode(), baby, female, breedTok, asEgg));
         onClose();
     }
 

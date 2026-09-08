@@ -84,6 +84,29 @@ public final class ModDataComponents {
                     .networkSynchronized(TransferDeedCodecs.STREAM_CODEC)
                     .build());
 
+    /**
+     * The breed a {@code breed_spawn_egg} spawns - a breed id. It is a component
+     * rather than one item per breed because a breed added by a player after the
+     * jar was built has no registry entry to be an item, and must still get an
+     * egg. See {@code item/BreedSpawnEggItem}.
+     */
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<String>> BREED_ID =
+            TYPES.register("breed", () -> DataComponentType.<String>builder()
+                    .persistent(Codec.STRING)
+                    .networkSynchronized(ByteBufCodecs.STRING_UTF8)
+                    .build());
+
+    /**
+     * Whether the horse a {@code preset_horse_spawn_egg} records was a foal.
+     * Beside the genome rather than in it, because age is not genetic - the same
+     * reason {@link StoredGenome} does not store one either.
+     */
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<Boolean>> PRESET_BABY =
+            TYPES.register("preset_baby", () -> DataComponentType.<Boolean>builder()
+                    .persistent(Codec.BOOL)
+                    .networkSynchronized(ByteBufCodecs.BOOL)
+                    .build());
+
     public static void register(IEventBus modEventBus) {
         TYPES.register(modEventBus);
     }
