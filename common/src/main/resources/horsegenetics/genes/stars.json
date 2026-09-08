@@ -5,7 +5,7 @@
   "phase": "magical",
   "priority": 330,
   "rarity": "UNCOMMON",
-  "blurb": "A scatter of small pale points over the upper half of the horse, dense along the topline and thinning to nothing at the belly and below the knee.",
+  "blurb": "A scatter of small pale points densest right along the back and the crest of the neck, thinning down the sides and gone by the belly and the knee.",
   "alleles": [
     {
       "token": "Sta",
@@ -49,7 +49,7 @@
     {
       "id": "stars",
       "name": "Stars",
-      "description": "Small hard-edged points, most of them round and a few drawn out into a short cross. They fall thickest over the dorsal third of the barrel, the croup and the upper neck, thin toward the belly, and stop at the knee and hock. They clump: a starred horse has three or four patches where the points crowd, not an even dusting.",
+      "description": "Small hard-edged points, most of them round and a few drawn out into a short cross. They are thickest right along the topline - the dorsal third of the barrel, the croup, and the crest of the neck rather than the whole upper half of it - and thin steadily going down, out to nothing by the belly and by the knee and hock. They clump on top of that: a starred horse has three or four patches where the points crowd, not an even dusting.",
       "when": [
         "Sta/Sta",
         "Sta/Stc",
@@ -57,14 +57,79 @@
       ],
       "layers": [
         {
-          "name": "points over the upper body, clumped",
+          "name": "points thickest along the back and the crest, gone by the belly and the knee",
           "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.66,
+              "to": 1.0,
+              "softness": 0.42
+            },
+            {
+              "type": "WAVES",
+              "parts": [
+                "NECK"
+              ],
+              "axis": "X",
+              "across": "Y",
+              "space": "units",
+              "shape": "saw",
+              "wavelength": 90.0,
+              "amplitude": 77.94,
+              "from": 50.0,
+              "to": 90.0,
+              "softness": 9.0,
+              "combine": "MAX"
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "HEAD"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.55,
+              "to": 1.2,
+              "softness": 0.4,
+              "combine": "MAX"
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "LEGS"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.72,
+              "to": 1.2,
+              "softness": 0.22,
+              "combine": "MAX"
+            },
+            {
+              "type": "NOISE",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "LEGS"
+              ],
+              "seed": "$clusterSeed",
+              "scale": 6.0,
+              "low": 0.35,
+              "high": 1.4
+            },
             {
               "type": "SPOTS",
               "parts": [
                 "BODY",
                 "NECK",
-                "HEAD"
+                "HEAD",
+                "LEGS"
               ],
               "seed": "$starSeed",
               "spacing": 1.5,
@@ -72,31 +137,6 @@
               "vary": 0.7,
               "chance": "$density",
               "softness": 0.08
-            },
-            {
-              "type": "AXIS",
-              "parts": [
-                "BODY",
-                "NECK",
-                "HEAD"
-              ],
-              "axis": "Y",
-              "space": "part",
-              "from": 0.3,
-              "to": 1.0,
-              "softness": 0.45
-            },
-            {
-              "type": "NOISE",
-              "parts": [
-                "BODY",
-                "NECK",
-                "HEAD"
-              ],
-              "seed": "$clusterSeed",
-              "scale": 6.0,
-              "low": 0.35,
-              "high": 1.4
             }
           ],
           "op": {
@@ -109,10 +149,63 @@
           "name": "the few that are drawn out into a cross",
           "masks": [
             {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.66,
+              "to": 1.0,
+              "softness": 0.42
+            },
+            {
+              "type": "WAVES",
+              "parts": [
+                "NECK"
+              ],
+              "axis": "X",
+              "across": "Y",
+              "space": "units",
+              "shape": "saw",
+              "wavelength": 90.0,
+              "amplitude": 77.94,
+              "from": 50.0,
+              "to": 90.0,
+              "softness": 9.0,
+              "combine": "MAX"
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "HEAD"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.55,
+              "to": 1.2,
+              "softness": 0.4,
+              "combine": "MAX"
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "LEGS"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.72,
+              "to": 1.2,
+              "softness": 0.22,
+              "combine": "MAX"
+            },
+            {
               "type": "SPOTS",
               "parts": [
                 "BODY",
-                "NECK"
+                "NECK",
+                "HEAD",
+                "LEGS"
               ],
               "seed": "$starSeed",
               "spacing": 1.5,
@@ -122,57 +215,12 @@
               "stretch": 3.2,
               "axis": "X",
               "softness": 0.06
-            },
-            {
-              "type": "AXIS",
-              "parts": [
-                "BODY",
-                "NECK"
-              ],
-              "axis": "Y",
-              "space": "part",
-              "from": 0.3,
-              "to": 1.0,
-              "softness": 0.45
             }
           ],
           "op": {
             "type": "TOWARD",
             "color": "#ffffff",
             "strength": 92
-          }
-        },
-        {
-          "name": "a sparse scatter down the upper leg only",
-          "masks": [
-            {
-              "type": "SPOTS",
-              "parts": [
-                "LEGS"
-              ],
-              "seed": "$starSeed",
-              "spacing": 1.7,
-              "radius": "$starSize",
-              "vary": 0.7,
-              "chance": 0.3,
-              "softness": 0.08
-            },
-            {
-              "type": "AXIS",
-              "parts": [
-                "LEGS"
-              ],
-              "axis": "Y",
-              "space": "part",
-              "from": 0.55,
-              "to": 1.0,
-              "softness": 0.25
-            }
-          ],
-          "op": {
-            "type": "TOWARD",
-            "color": "#f2f4ff",
-            "strength": 88
           }
         }
       ]
@@ -186,14 +234,79 @@
       },
       "layers": [
         {
-          "name": "points over the upper body, clumped, in colour",
+          "name": "points thickest along the back and the crest, gone by the belly and the knee, in colour",
           "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.66,
+              "to": 1.0,
+              "softness": 0.42
+            },
+            {
+              "type": "WAVES",
+              "parts": [
+                "NECK"
+              ],
+              "axis": "X",
+              "across": "Y",
+              "space": "units",
+              "shape": "saw",
+              "wavelength": 90.0,
+              "amplitude": 77.94,
+              "from": 50.0,
+              "to": 90.0,
+              "softness": 9.0,
+              "combine": "MAX"
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "HEAD"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.55,
+              "to": 1.2,
+              "softness": 0.4,
+              "combine": "MAX"
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "LEGS"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.72,
+              "to": 1.2,
+              "softness": 0.22,
+              "combine": "MAX"
+            },
+            {
+              "type": "NOISE",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "LEGS"
+              ],
+              "seed": "$clusterSeed",
+              "scale": 6.0,
+              "low": 0.35,
+              "high": 1.4
+            },
             {
               "type": "SPOTS",
               "parts": [
                 "BODY",
                 "NECK",
-                "HEAD"
+                "HEAD",
+                "LEGS"
               ],
               "seed": "$starSeed",
               "spacing": 1.5,
@@ -201,31 +314,6 @@
               "vary": 0.7,
               "chance": "$density",
               "softness": 0.08
-            },
-            {
-              "type": "AXIS",
-              "parts": [
-                "BODY",
-                "NECK",
-                "HEAD"
-              ],
-              "axis": "Y",
-              "space": "part",
-              "from": 0.3,
-              "to": 1.0,
-              "softness": 0.45
-            },
-            {
-              "type": "NOISE",
-              "parts": [
-                "BODY",
-                "NECK",
-                "HEAD"
-              ],
-              "seed": "$clusterSeed",
-              "scale": 6.0,
-              "low": 0.35,
-              "high": 1.4
             }
           ],
           "op": {
@@ -240,10 +328,63 @@
           "name": "the few that are drawn out into a cross, in colour",
           "masks": [
             {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.66,
+              "to": 1.0,
+              "softness": 0.42
+            },
+            {
+              "type": "WAVES",
+              "parts": [
+                "NECK"
+              ],
+              "axis": "X",
+              "across": "Y",
+              "space": "units",
+              "shape": "saw",
+              "wavelength": 90.0,
+              "amplitude": 77.94,
+              "from": 50.0,
+              "to": 90.0,
+              "softness": 9.0,
+              "combine": "MAX"
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "HEAD"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.55,
+              "to": 1.2,
+              "softness": 0.4,
+              "combine": "MAX"
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "LEGS"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.72,
+              "to": 1.2,
+              "softness": 0.22,
+              "combine": "MAX"
+            },
+            {
               "type": "SPOTS",
               "parts": [
                 "BODY",
-                "NECK"
+                "NECK",
+                "HEAD",
+                "LEGS"
               ],
               "seed": "$starSeed",
               "spacing": 1.5,
@@ -253,58 +394,11 @@
               "stretch": 3.2,
               "axis": "X",
               "softness": 0.06
-            },
-            {
-              "type": "AXIS",
-              "parts": [
-                "BODY",
-                "NECK"
-              ],
-              "axis": "Y",
-              "space": "part",
-              "from": 0.3,
-              "to": 1.0,
-              "softness": 0.45
             }
           ],
           "op": {
             "type": "TOWARD",
             "strength": 92,
-            "hue": "$hue",
-            "saturation": 0.82,
-            "lightness": 0.58
-          }
-        },
-        {
-          "name": "a sparse scatter down the upper leg only, in colour",
-          "masks": [
-            {
-              "type": "SPOTS",
-              "parts": [
-                "LEGS"
-              ],
-              "seed": "$starSeed",
-              "spacing": 1.7,
-              "radius": "$starSize",
-              "vary": 0.7,
-              "chance": 0.3,
-              "softness": 0.08
-            },
-            {
-              "type": "AXIS",
-              "parts": [
-                "LEGS"
-              ],
-              "axis": "Y",
-              "space": "part",
-              "from": 0.55,
-              "to": 1.0,
-              "softness": 0.25
-            }
-          ],
-          "op": {
-            "type": "TOWARD",
-            "strength": 88,
             "hue": "$hue",
             "saturation": 0.82,
             "lightness": 0.58

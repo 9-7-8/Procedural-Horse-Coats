@@ -5,7 +5,7 @@
   "phase": "magical",
   "priority": 250,
   "rarity": "UNCOMMON",
-  "blurb": "A starfield hung off the topline and the crest, running the whole length of the neck and barrel and fading out down the sides with no edge anywhere - and, on a well-marked horse, a planet or two with a ring round it.",
+  "blurb": "A starfield hung off the topline and the crest, running from the muzzle to the croup and out down the legs with no edge anywhere - and, on a well-marked horse, a planet or two with a ring round it.",
   "alleles": [
     {
       "token": "Cs",
@@ -45,7 +45,7 @@
     {
       "id": "cosmic",
       "name": "Cosmic",
-      "description": "The blanket starts at the dorsal midline and spreads down and out from it, one continuous region with no holes in it and no islands off it. It runs from the poll to the croup - the whole length of the neck as well as the barrel, hanging off the crest the way it hangs off the back - and stops above the elbow and stifle, never onto a limb, never onto a hoof. Its lower boundary is a long soft fade rather than a line: there is no edge on this marking anywhere. Inside are stars, thickest near the topline and thinning toward the edge, with a planet or a spiral galaxy on a heavily marked horse. Where the blanket meets the mane or the tail base the colour runs on into the hair, deepening toward the tips.",
+      "description": "The blanket starts at the dorsal midline and spreads down and out from it, one continuous region with no holes in it and no islands off it. It runs from the muzzle to the croup - the face and the whole length of the neck as well as the barrel, hanging off the crest the way it hangs off the back - and carries on down the legs, thinning the whole way and out before the hoof. There is no edge on it anywhere: every boundary is a long fade rather than a line. Inside are stars, thickest near the topline and thinning toward the edge, with a planet or a spiral galaxy on a heavily marked horse. Where the blanket meets the mane or the tail base the colour runs on into the hair, deepening toward the tips.",
       "when": [
         "Cs/Cs",
         "Cs/n"
@@ -74,18 +74,44 @@
               "across": "Y",
               "space": "units",
               "shape": "saw",
-              "wavelength": 40.0,
-              "amplitude": 11.54,
-              "from": 14.0,
-              "to": 40.0,
-              "softness": 3.2,
+              "wavelength": 90.0,
+              "amplitude": 77.94,
+              "from": 44.0,
+              "to": 90.0,
+              "softness": 5.0,
+              "combine": "MAX"
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "HEAD"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.1,
+              "to": 1.3,
+              "softness": 0.6,
+              "combine": "MAX"
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "LEGS"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.28,
+              "to": 1.4,
+              "softness": 0.75,
               "combine": "MAX"
             },
             {
               "type": "PATCHES",
               "parts": [
                 "BODY",
-                "NECK"
+                "NECK",
+                "HEAD",
+                "LEGS"
               ],
               "seed": "$fieldSeed",
               "scale": 7.0,
@@ -97,13 +123,15 @@
               "type": "AXIS",
               "parts": [
                 "BODY",
-                "NECK"
+                "NECK",
+                "HEAD",
+                "LEGS"
               ],
               "axis": "Y",
               "space": "part",
-              "from": 0.2,
+              "from": 0.14,
               "to": 1.0,
-              "softness": 0.35,
+              "softness": 0.45,
               "combine": "MIN"
             }
           ],
@@ -127,7 +155,9 @@
               "type": "SPECKLE",
               "parts": [
                 "BODY",
-                "NECK"
+                "NECK",
+                "HEAD",
+                "LEGS"
               ],
               "seed": "$starSeed",
               "spacing": 0.9,
@@ -143,7 +173,7 @@
               ],
               "axis": "Y",
               "space": "part",
-              "from": 0.35,
+              "from": 0.3,
               "to": 1.0,
               "softness": 0.5
             },
@@ -156,23 +186,35 @@
               "across": "Y",
               "space": "units",
               "shape": "saw",
-              "wavelength": 40.0,
-              "amplitude": 11.54,
-              "from": 15.0,
-              "to": 40.0,
-              "softness": 3.0,
+              "wavelength": 90.0,
+              "amplitude": 77.94,
+              "from": 45.0,
+              "to": 90.0,
+              "softness": 5.0,
               "combine": "MAX"
             },
             {
-              "type": "PATCHES",
+              "type": "AXIS",
               "parts": [
-                "BODY",
-                "NECK"
+                "HEAD"
               ],
-              "seed": "$fieldSeed",
-              "scale": 7.0,
-              "threshold": 0.35,
-              "softness": 0.1,
+              "axis": "Y",
+              "space": "part",
+              "from": 0.2,
+              "to": 1.3,
+              "softness": 0.6,
+              "combine": "MAX"
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "LEGS"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.35,
+              "to": 1.4,
+              "softness": 0.7,
               "combine": "MAX"
             }
           ],

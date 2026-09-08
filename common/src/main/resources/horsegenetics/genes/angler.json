@@ -5,7 +5,7 @@
   "phase": "magical",
   "priority": 302,
   "rarity": "EPIC",
-  "blurb": "Strings of faintly glowing lights threaded along smooth curves down the body, each light a pale core inside a deeper rim, like the lures of a deep-water fish.",
+  "blurb": "A single string of faintly glowing lights threaded along a smooth curve down each side of the body and neck, matched left to right, each light a pale core inside a deeper rim.",
   "alleles": [
     {
       "token": "Ang",
@@ -45,48 +45,45 @@
     {
       "id": "angler",
       "name": "Angler",
-      "description": "Round and oval lights in strings that run horizontally along the body, never singly - a string is two lights at least. The string itself is a smooth curve: it rises and falls evenly along its length rather than wandering, so the lights on it sit on a line you can follow with a finger. Each light is a pale core inside a deeper rim of the same hue, and one horse carries one design throughout. The strings turn vertical on the face and legs, where nothing else on this horse runs level. Mane, tail and hooves are untouched however close a string passes.",
+      "description": "One string of lights down each side of the horse, and only one: a single line that runs the length of the barrel and carries on up the side of the neck, rising and falling in a smooth even curve you can follow with a finger. The two sides match each other light for light. Each light is a round or oval pale core inside a deeper rim of the same hue, and one horse carries one design throughout. Mane, tail, face, legs and hooves are untouched however close the string passes.",
       "when": {
         "Ang": 2
       },
       "layers": [
         {
-          "name": "the rim of each light, strung along the body",
+          "name": "the rim of each light along the body line",
           "emissive": true,
           "masks": [
             {
               "type": "SPOTS",
               "parts": [
-                "BODY",
-                "NECK"
+                "BODY"
               ],
               "seed": "$lightSeed",
               "spacing": "$lightSpacing",
               "radius": "$lightSize",
-              "vary": 0.4,
-              "chance": 0.85,
+              "vary": 0.35,
+              "chance": 0.9,
               "stretch": 1.35,
               "axis": "X",
-              "softness": 0.2
+              "mirror": true,
+              "softness": 0.18
             },
             {
               "type": "WAVES",
               "parts": [
-                "BODY",
-                "NECK"
+                "BODY"
               ],
               "seed": "$stringSeed",
               "axis": "X",
               "across": "Y",
               "shape": "sine",
               "space": "units",
-              "from": -0.5,
-              "to": 0.5,
-              "wavelength": 15.0,
-              "amplitude": 1.35,
-              "spacing": 4.4,
-              "phase": 0.9,
-              "softness": 0.4
+              "from": 15.1,
+              "to": 16.6,
+              "wavelength": 17.0,
+              "amplitude": 2.1,
+              "softness": 0.45
             }
           ],
           "op": {
@@ -98,42 +95,39 @@
           }
         },
         {
-          "name": "the pale core inside each light",
+          "name": "the pale core inside each light along the body line",
           "emissive": true,
           "masks": [
             {
               "type": "SPOTS",
               "parts": [
-                "BODY",
-                "NECK"
+                "BODY"
               ],
               "seed": "$lightSeed",
               "spacing": "$lightSpacing",
-              "radius": 0.55,
-              "vary": 0.4,
-              "chance": 0.85,
+              "radius": 0.5,
+              "vary": 0.35,
+              "chance": 0.9,
               "stretch": 1.35,
               "axis": "X",
-              "softness": 0.14
+              "mirror": true,
+              "softness": 0.12
             },
             {
               "type": "WAVES",
               "parts": [
-                "BODY",
-                "NECK"
+                "BODY"
               ],
               "seed": "$stringSeed",
               "axis": "X",
               "across": "Y",
               "shape": "sine",
               "space": "units",
-              "from": -0.5,
-              "to": 0.5,
-              "wavelength": 15.0,
-              "amplitude": 1.35,
-              "spacing": 4.4,
-              "phase": 0.9,
-              "softness": 0.4
+              "from": 15.1,
+              "to": 16.6,
+              "wavelength": 17.0,
+              "amplitude": 2.1,
+              "softness": 0.45
             }
           ],
           "op": {
@@ -145,103 +139,90 @@
           }
         },
         {
-          "name": "strings running vertically down the face",
+          "name": "the rim of each light along the neck line",
           "emissive": true,
           "masks": [
             {
               "type": "SPOTS",
               "parts": [
-                "FACE"
+                "NECK"
               ],
               "seed": "$lightSeed",
               "spacing": "$lightSpacing",
               "radius": "$lightSize",
-              "vary": 0.4,
-              "chance": 0.7,
+              "vary": 0.35,
+              "chance": 0.9,
               "stretch": 1.35,
-              "axis": "Y",
-              "softness": 0.2
+              "axis": "X",
+              "mirror": true,
+              "softness": 0.18
             },
             {
               "type": "WAVES",
               "parts": [
-                "FACE"
+                "NECK"
               ],
               "seed": "$stringSeed",
               "axis": "Y",
               "across": "X",
               "shape": "sine",
               "space": "units",
-              "from": -0.45,
-              "to": 0.45,
-              "wavelength": 9.0,
-              "amplitude": 0.9,
-              "spacing": 3.4,
-              "phase": 0.9,
-              "softness": 0.4
+              "from": 26.4,
+              "to": 27.9,
+              "wavelength": 11.0,
+              "amplitude": 1.5,
+              "softness": 0.45
             }
           ],
           "op": {
             "type": "TOWARD",
             "hue": "$hue",
             "saturation": 0.95,
-            "lightness": 0.5,
-            "strength": 96
+            "lightness": 0.45,
+            "strength": 98
           }
         },
         {
-          "name": "strings running vertically down the legs, clear of the hoof",
+          "name": "the pale core inside each light along the neck line",
           "emissive": true,
           "masks": [
             {
               "type": "SPOTS",
               "parts": [
-                "LEGS"
+                "NECK"
               ],
               "seed": "$lightSeed",
               "spacing": "$lightSpacing",
-              "radius": "$lightSize",
-              "vary": 0.4,
-              "chance": 0.7,
+              "radius": 0.5,
+              "vary": 0.35,
+              "chance": 0.9,
               "stretch": 1.35,
-              "axis": "Y",
-              "softness": 0.2
+              "axis": "X",
+              "mirror": true,
+              "softness": 0.12
             },
             {
               "type": "WAVES",
               "parts": [
-                "LEGS"
+                "NECK"
               ],
               "seed": "$stringSeed",
               "axis": "Y",
               "across": "X",
               "shape": "sine",
               "space": "units",
-              "from": -0.45,
-              "to": 0.45,
-              "wavelength": 9.0,
-              "amplitude": 0.9,
-              "spacing": 3.4,
-              "phase": 0.9,
-              "softness": 0.4
-            },
-            {
-              "type": "AXIS",
-              "parts": [
-                "LEGS"
-              ],
-              "axis": "Y",
-              "space": "part",
-              "from": 0.16,
-              "to": 1.0,
-              "softness": 0.08
+              "from": 26.4,
+              "to": 27.9,
+              "wavelength": 11.0,
+              "amplitude": 1.5,
+              "softness": 0.45
             }
           ],
           "op": {
             "type": "TOWARD",
             "hue": "$hue",
-            "saturation": 0.95,
-            "lightness": 0.5,
+            "saturation": 0.5,
+            "lightness": 0.85,
             "strength": 96
           }
         }

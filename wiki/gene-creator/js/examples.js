@@ -505,7 +505,7 @@ window.HG.examples = {
             }
           },
           {
-            "name": "hearts on the shoulder",
+            "name": "hearts on the shoulder, matched left to right",
             "masks": [
               {
                 "type": "SPOTS",
@@ -520,7 +520,8 @@ window.HG.examples = {
                 "stretch": 1.0,
                 "axis": "X",
                 "shape": "heart",
-                "softness": 0.12
+                "softness": 0.12,
+                "mirror": true
               }
             ],
             "op": {

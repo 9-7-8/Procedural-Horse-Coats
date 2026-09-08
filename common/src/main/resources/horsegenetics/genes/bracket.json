@@ -5,7 +5,7 @@
   "phase": "magical",
   "priority": 365,
   "rarity": "UNCOMMON",
-  "blurb": "Two clusters of near-black stripes with nothing between them - one down the neck, one fanning over the croup - plus a dark muzzle, a dark hoof and a band above it.",
+  "blurb": "Two clusters of hairline near-black stripes with nothing between them - one down the neck, one fanning over the croup - plus a dark muzzle, a dark hoof and a band above it.",
   "alleles": [
     {
       "token": "Brk",
@@ -23,15 +23,15 @@
     },
     {
       "name": "weight",
-      "min": 1.229,
-      "max": 3.277
+      "min": 0.26,
+      "max": 0.58
     }
   ],
   "expressions": [
     {
       "id": "bracket",
       "name": "Bracket",
-      "description": "Stripes blunt at the top and sharply pointed at the bottom, some of them forking near the point. Five to ten come down the side of the neck, curving back as they fall; six to twelve more fan out over the hip and croup, near-vertical at the front and swinging back toward the tail. The barrel, shoulder and flank carry none at all - the gap between the two clusters is the marking. The two sides are not mirrored.",
+      "description": "Extremely thin stripes, blunt at the top and sharply pointed at the bottom, some of them forking near the point - a hairline pen rather than a brush. Five to ten come down the side of the neck, curving back as they fall; six to twelve more fan out over the hip and croup, near-vertical at the front and swinging back toward the tail. The barrel, shoulder and flank carry none at all - the gap between the two clusters is as much a part of the marking as the stripes are. A dark muzzle, a dark hoof and a narrow band above it complete it.",
       "when": [
         "Brk/Brk",
         "Brk/n"
@@ -46,12 +46,12 @@
                 "NECK"
               ],
               "seed": "$stripeSeed",
-              "spacing": 3.2,
+              "spacing": 2.2,
               "length": 8.0,
               "axis": "Y",
               "width": "$weight",
               "curl": 0.7,
-              "softness": 0.12
+              "softness": 0.05
             },
             {
               "type": "AXIS",
@@ -80,12 +80,12 @@
                 "BODY"
               ],
               "seed": "$stripeSeed",
-              "spacing": 3.2,
+              "spacing": 2.2,
               "length": 8.5,
               "axis": "Y",
               "width": "$weight",
               "curl": 0.85,
-              "softness": 0.12
+              "softness": 0.05
             },
             {
               "type": "AXIS",

@@ -41,7 +41,7 @@
     {
       "id": "iuari",
       "name": "Iuari",
-      "description": "Patches that read as deliberate focal points rather than as marks: darker than the coat on some horses and lighter on others, concentrated on the neck, shoulder, barrel and hindquarter, with soft indistinct middles. What names the marking is the rim - each patch is outlined by speckling that crowds at its boundary and thins away from it, so the patch looks lit from the edge. It goes under white markings rather than over them, and the whole horse still carries its ordinary speckling as well.",
+      "description": "Patches that read as deliberate focal points rather than as marks: darker than the coat on some horses and lighter on others, concentrated on the neck, shoulder, barrel and hindquarter and carrying on down the legs, with soft indistinct middles. What names the marking is the rim - each patch is outlined by speckling that crowds at its boundary and thins away from it, so the patch looks lit from the edge. It goes under white markings rather than over them, and the whole horse still carries its ordinary speckling as well.",
       "when": [
         "Iua/Iua",
         "Iua/n"
@@ -54,7 +54,8 @@
               "type": "PATCHES",
               "parts": [
                 "BODY",
-                "NECK"
+                "NECK",
+                "LEGS"
               ],
               "seed": "$patchSeed",
               "scale": "$patchScale",
@@ -77,7 +78,8 @@
               "type": "SPECKLE",
               "parts": [
                 "BODY",
-                "NECK"
+                "NECK",
+                "LEGS"
               ],
               "seed": "$patchSeed",
               "spacing": 0.8,
@@ -89,7 +91,8 @@
               "type": "PATCHES",
               "parts": [
                 "BODY",
-                "NECK"
+                "NECK",
+                "LEGS"
               ],
               "seed": "$patchSeed",
               "scale": "$patchScale",
@@ -100,7 +103,8 @@
               "type": "PATCHES",
               "parts": [
                 "BODY",
-                "NECK"
+                "NECK",
+                "LEGS"
               ],
               "seed": "$patchSeed",
               "scale": "$patchScale",

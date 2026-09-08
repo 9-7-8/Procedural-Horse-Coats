@@ -243,35 +243,19 @@ window.HG = window.HG || {};
         var low = get(values, mask.low, 0, legIndex);
         return clamp01(low + (get(values, mask.high, 1, legIndex) - low) * v3);
       }
-      case "PIGMENT": {
-        var channel = mask.channel || "darkness";
-        var reading = pigmentReading(coat, channel, px, py);
-        var spread = get(values, mask.spread, 0, legIndex);
-        if (spread > 0) {
-          // The LOWEST reading in the disc, so pale grows outward - see the
-          // Java. Without it "only beside the horse's own white" is unaskable.
-          var r = Math.round(spread * geo.TEXELS_PER_UNIT), rr = r * r;
-          for (var qy = py - r; qy <= py + r; qy++) {
-            for (var qx = px - r; qx <= px + r; qx++) {
-              var ddx = qx - px, ddy = qy - py;
-              if (ddx * ddx + ddy * ddy > rr) continue;
-              if (qx < 0 || qy < 0 || qx >= geo.SHEET_SIZE || qy >= geo.SHEET_SIZE) continue;
-              reading = Math.min(reading, pigmentReading(coat, channel, qx, qy));
-            }
-          }
-        }
-        return smoothstep(get(values, mask.from, 0.5, legIndex),
-          get(values, mask.to, 1, legIndex), reading);
-      }
+      case "PIGMENT":
+        return pigmentCoverage(mask, values, coat, px, py, legIndex);
       case "SPOTS": {
         var sp = getSeed(values, mask.seed, seedBase);
         var spacing4 = Math.max(0.05, get(values, mask.spacing, 4.0, legIndex));
         var stretch = Math.max(0.05, get(values, mask.stretch, 1.0, legIndex));
         var la = (mask.axis || "X").toUpperCase();
+        // |z| when mirrored, so the far flank draws the near one's spots.
+        var sz4 = mask.mirror ? Math.abs(point.z) : point.z;
         var c4 = noise.cell(sp,
           point.x / (spacing4 * (la === "X" ? stretch : 1)),
           point.y / (spacing4 * (la === "Y" ? stretch : 1)),
-          point.z / (spacing4 * (la === "Z" ? stretch : 1)));
+          sz4 / (spacing4 * (la === "Z" ? stretch : 1)));
         if (c4.pick >= get(values, mask.chance, 1.0, legIndex)) return 0;
         var vary4 = clamp01(get(values, mask.vary, 0.5, legIndex));
         var rad4 = get(values, mask.radius, 0.9, legIndex) * (1 - vary4 + 2 * vary4 * c4.size);
@@ -410,6 +394,42 @@ window.HG = window.HG || {};
     return Math.sin(2 * Math.PI * turns);
   }
 
+  /**
+   * A PIGMENT mask's `spread`: grow whatever the mask selected, by taking the
+   * largest coverage in a disc. It runs after `invert` - see the Java for why
+   * that is the whole design.
+   */
+  function spreadMask(mask, values, skin, coat, part, point, px, py, legIndex, c) {
+    if (mask.type !== "PIGMENT" || c >= 1) return c;
+    var parts = HG.schema.expandParts(mask.parts);
+    if (parts.length && parts.indexOf(part) < 0) return c;
+    var radius = get(values, mask.spread, 0, legIndex);
+    if (radius <= 0) return c;
+    // The radius is in BODY units and the test is done in body space - a disc
+    // measured in texels leaks across a UV seam. See the Java.
+    var r = Math.ceil(radius * geo.TEXELS_PER_UNIT) + 1, rr = radius * radius, best = c;
+    for (var qy = py - r; qy <= py + r; qy++) {
+      for (var qx = px - r; qx <= px + r; qx++) {
+        if (qx < 0 || qy < 0 || qx >= geo.SHEET_SIZE || qy >= geo.SHEET_SIZE) continue;
+        var at = geo.sample(skin, qx, qy);
+        if (!at) continue;
+        var bx = at.point.x - point.x, by = at.point.y - point.y, bz = at.point.z - point.z;
+        if (bx * bx + by * by + bz * bz > rr) continue;
+        var n = pigmentCoverage(mask, values, coat, qx, qy, legIndex);
+        if (mask.invert) n = 1 - n;
+        if (n > best) { best = n; if (best >= 1) return 1; }
+      }
+    }
+    return best;
+  }
+
+  /** A PIGMENT mask at one texel, before invert and before spread. */
+  function pigmentCoverage(mask, values, coat, px, py, legIndex) {
+    return smoothstep(get(values, mask.from, 0.5, legIndex),
+      get(values, mask.to, 1, legIndex),
+      pigmentReading(coat, mask.channel || "darkness", px, py));
+  }
+
   /** One channel of the coat, as a PIGMENT mask reads it. */
   function pigmentReading(coat, channel, px, py) {
     var red = coat.redAt(px, py), black = coat.blackAt(px, py);
@@ -440,6 +460,7 @@ window.HG = window.HG || {};
       var c = maskCoverage(mask, values, skin, part, point, coat, px, py, legIndex,
         noise.xor(fallbackSeed, noise.mul(noise.fromInt(i), noise.K1)));
       if (mask.invert) c = 1 - c;
+      c = spreadMask(mask, values, skin, coat, part, point, px, py, legIndex, c);
       switch (mask.combine || "MULTIPLY") {
         case "MAX": acc = Math.max(acc, c); break;
         case "MIN": acc = Math.min(acc, c); break;

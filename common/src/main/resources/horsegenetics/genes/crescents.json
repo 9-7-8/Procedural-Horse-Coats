@@ -112,13 +112,7 @@
               "radius": "$outer",
               "thickness": "$band",
               "vary": 0.35,
-              "chance": {
-                "perDose": [
-                  0.0,
-                  0.4,
-                  0.7
-                ]
-              },
+              "chance": 0.7,
               "arc": "$sweep",
               "softness": 0.4
             }

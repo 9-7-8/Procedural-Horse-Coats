@@ -5,7 +5,7 @@
   "phase": "magical",
   "priority": 262,
   "rarity": "COMMON",
-  "blurb": "A cloud of colour lying over the trunk and running out down the legs with no edge anywhere, curdled into stronger and weaker cells so the coat reads through it in places.",
+  "blurb": "A small dense knot of colour on the trunk inside a much larger haze you can read the coat through, with a few faint tangents straggling onto the legs and face and no edge anywhere.",
   "alleles": [
     {
       "token": "Nim",
@@ -28,101 +28,132 @@
     },
     {
       "name": "reach",
-      "min": 0.5,
-      "max": 0.85
+      "min": 58.0,
+      "max": 82.0
     }
   ],
   "expressions": [
     {
       "id": "nimbus",
       "name": "Nimbus",
-      "description": "Half to three-quarters of the horse, concentrated on the neck, shoulder, barrel and hindquarter and falling away toward the head and the topline - and running on down the legs rather than stopping at the elbow, thinning the whole way and out long before the hoof. There is no boundary to find anywhere on it: the field simply runs out over a long distance. Inside it the saturation is uneven, gathered into cells a hand's span or two across with weaker channels between them where the coat shows through at a third to two-thirds strength. The whole thing is turbulent - nothing about it repeats, and nothing about it lines up with the horse.",
+      "description": "A cloud, and mostly a very faint one. The great majority of the marking is a haze you can read the coat straight through, spread over the trunk and trailing onto the head and the legs as a few straggling tangents rather than as a field. Somewhere on the barrel or the shoulder is the body of the cloud - a small dense knot, a hand's span or two across, where the colour actually arrives - and inside that the saturation curdles into stronger and weaker cells so the coat still reads through it in places. There is no boundary to find anywhere on any of it. The whole thing is turbulent: nothing about it repeats, and nothing about it lines up with the horse.",
       "when": [
         "Nim/Nim",
         "Nim/n"
       ],
       "layers": [
         {
-          "name": "the cloud over the trunk",
+          "name": "the haze - most of the marking, and nearly transparent",
           "masks": [
             {
               "type": "NOISE",
               "parts": [
                 "BODY",
-                "NECK"
+                "NECK",
+                "HEAD",
+                "LEGS"
               ],
               "seed": "$cloudSeed",
-              "scale": 9.0,
-              "low": 0.1,
-              "high": "$reach"
-            },
-            {
-              "type": "AXIS",
-              "parts": [
-                "BODY",
-                "NECK"
-              ],
-              "axis": "Y",
-              "space": "part",
-              "from": 0.05,
-              "to": 0.85,
-              "softness": 0.5
+              "scale": 11.0,
+              "low": 0.12,
+              "high": 0.8
             }
           ],
           "op": {
             "type": "TOWARD",
+            "strength": 19,
             "hue": "$hue",
             "saturation": 0.8,
-            "lightness": 0.45,
-            "strength": 90
+            "lightness": 0.45
           }
         },
         {
-          "name": "the cloud carrying on down the legs, thinning as it goes",
+          "name": "straggling tangents down the legs and across the face",
           "masks": [
             {
-              "type": "NOISE",
+              "type": "STROKES",
               "parts": [
-                "LEGS"
+                "LEGS",
+                "HEAD",
+                "MUZZLE"
               ],
               "seed": "$cloudSeed",
-              "scale": 9.0,
-              "low": 0.1,
-              "high": "$reach"
+              "spacing": 2.4,
+              "length": 9.0,
+              "axis": "Y",
+              "width": 1.5,
+              "curl": 0.9,
+              "softness": 0.9
             },
             {
-              "type": "AXIS",
-              "parts": [
-                "LEGS"
-              ],
-              "axis": "Y",
-              "space": "part",
-              "from": 0.2,
-              "to": 1.3,
-              "softness": 0.55
-            }
-          ],
-          "op": {
-            "type": "TOWARD",
-            "hue": "$hue",
-            "saturation": 0.8,
-            "lightness": 0.45,
-            "strength": 90
-          }
-        },
-        {
-          "name": "the high-chroma cells inside it",
-          "masks": [
-            {
               "type": "NOISE",
               "parts": [
-                "BODY",
-                "NECK"
+                "LEGS",
+                "HEAD",
+                "MUZZLE"
               ],
               "seed": "$cloudSeed",
-              "scale": 4.0,
+              "scale": 6.0,
               "low": 0.0,
-              "high": 1.4
+              "high": 1.1
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 15,
+            "hue": "$hue",
+            "saturation": 0.8,
+            "lightness": 0.45
+          }
+        },
+        {
+          "name": "the body of the cloud, small and dense",
+          "masks": [
+            {
+              "type": "NOISE",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$cloudSeed",
+              "scale": 6.5,
+              "low": -2.6,
+              "high": 1.0
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.12,
+              "to": 0.88,
+              "softness": 0.45
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": "$reach",
+            "hue": "$hue",
+            "saturation": 0.85,
+            "lightness": 0.44
+          }
+        },
+        {
+          "name": "the curdle inside the body, where the saturation gathers",
+          "masks": [
+            {
+              "type": "NOISE",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "seed": "$cloudSeed",
+              "scale": 3.2,
+              "low": -1.4,
+              "high": 1.0
             },
             {
               "type": "NOISE",
@@ -131,17 +162,17 @@
                 "NECK"
               ],
               "seed": "$cloudSeed",
-              "scale": 9.0,
-              "low": 0.1,
-              "high": "$reach"
+              "scale": 6.5,
+              "low": -2.6,
+              "high": 1.0
             }
           ],
           "op": {
             "type": "TOWARD",
+            "strength": 28,
             "hue": "$hue",
             "saturation": 0.95,
-            "lightness": 0.42,
-            "strength": 55
+            "lightness": 0.42
           }
         }
       ]

@@ -5,7 +5,7 @@
   "phase": "magical",
   "priority": 203,
   "rarity": "RARE",
-  "blurb": "A strong white that keeps the coat only where a giant panda is dark - the muzzle, the ears, patches round the eyes, the shoulders and the hindquarters - with a white gap over the flank between the last two, and freckles of coat along the topline.",
+  "blurb": "A strong white that keeps the coat only where a giant panda is dark - the ears, the eye patches, the shoulders and front legs, and the flanks, hindquarter and hind legs - with the neck, back and barrel between them white.",
   "alleles": [
     {
       "token": "Pan",
@@ -44,7 +44,7 @@
     {
       "id": "white",
       "name": "Panda",
-      "description": "The coat is confined to the eyes, muzzle, ears, forequarters and hindquarters and everything else goes white, mane and tail included. The two coloured fields do not meet: there is a clear white gap over the flank between the shoulder and the hindquarter, and another over the neck in front of the shoulder. The eye patches are a little stylised; muzzle and ear markings are optional. Freckles of coat run along the topline - small, or larger and fawn-like. The edges of the coloured regions are smooth: nothing about Panda is jagged or roaned, and no other marking shows on the white - whatever else the horse carries, it can only be seen where the coat survives.",
+      "description": "The coat is confined to the places a giant panda is dark and everything else goes white, mane and tail included: the ears, patches round the eyes, the muzzle, the shoulders carrying on down both front legs, and the flanks and hindquarter carrying on down both hind legs. Between the two coloured fields the barrel and the back are white, and so are the neck and the face, which is what makes it read as a panda rather than as a paint. The eye patches are a little stylised; muzzle and ear markings are optional. Freckles of coat run along the topline - small, or larger and fawn-like. The edges of the coloured regions are smooth: nothing about Panda is jagged or roaned, and no other marking shows on the white.",
       "when": [
         "Pan/Pan",
         "Pan/Pnc",
@@ -72,7 +72,7 @@
           }
         },
         {
-          "name": "the coat kept on the forequarter and the hindquarter",
+          "name": "the coat kept on the shoulder and carried down both front legs",
           "masks": [
             {
               "type": "AXIS",
@@ -81,10 +81,27 @@
               ],
               "axis": "X",
               "space": "part",
-              "from": 0.72,
+              "from": 0.76,
               "to": 1.0,
-              "softness": 0.12
+              "softness": 0.14
             },
+            {
+              "type": "PARTS",
+              "parts": [
+                "FRONT_LEGS"
+              ],
+              "combine": "MAX"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#ffffff",
+            "strength": -99
+          }
+        },
+        {
+          "name": "the coat kept on the flank and hindquarter and down both hind legs",
+          "masks": [
             {
               "type": "AXIS",
               "parts": [
@@ -93,8 +110,25 @@
               "axis": "X",
               "space": "part",
               "from": 0.0,
-              "to": 0.24,
-              "softness": 0.12,
+              "to": 0.26,
+              "softness": 0.14
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": -0.1,
+              "to": 0.74,
+              "softness": 0.16
+            },
+            {
+              "type": "PARTS",
+              "parts": [
+                "HIND_LEGS"
+              ],
               "combine": "MAX"
             }
           ],
@@ -204,7 +238,7 @@
           }
         },
         {
-          "name": "the coat kept on the forequarter and the hindquarter, in colour",
+          "name": "the coat kept on the shoulder and carried down both front legs, in colour",
           "masks": [
             {
               "type": "AXIS",
@@ -213,10 +247,29 @@
               ],
               "axis": "X",
               "space": "part",
-              "from": 0.72,
+              "from": 0.76,
               "to": 1.0,
-              "softness": 0.12
+              "softness": 0.14
             },
+            {
+              "type": "PARTS",
+              "parts": [
+                "FRONT_LEGS"
+              ],
+              "combine": "MAX"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": -99,
+            "hue": "$hue",
+            "saturation": 0.8,
+            "lightness": 0.55
+          }
+        },
+        {
+          "name": "the coat kept on the flank and hindquarter and down both hind legs, in colour",
+          "masks": [
             {
               "type": "AXIS",
               "parts": [
@@ -225,8 +278,25 @@
               "axis": "X",
               "space": "part",
               "from": 0.0,
-              "to": 0.24,
-              "softness": 0.12,
+              "to": 0.26,
+              "softness": 0.14
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": -0.1,
+              "to": 0.74,
+              "softness": 0.16
+            },
+            {
+              "type": "PARTS",
+              "parts": [
+                "HIND_LEGS"
+              ],
               "combine": "MAX"
             }
           ],
@@ -303,10 +373,8 @@
           ],
           "op": {
             "type": "TOWARD",
-            "strength": -85,
-            "hue": "$hue",
-            "saturation": 0.8,
-            "lightness": 0.55
+            "color": "#ffffff",
+            "strength": -85
           }
         }
       ]

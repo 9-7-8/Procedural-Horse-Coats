@@ -5,7 +5,7 @@
   "phase": "magical",
   "priority": 312,
   "rarity": "COMMON",
-  "blurb": "A single flowing line of soft round spots running neck to rump, a darkened topline above it, and a pale underside to the tail.",
+  "blurb": "A soft-edged darkened topline with a single flowing line of small round spots running along it, neck to rump, and a pale underside to the tail.",
   "alleles": [
     {
       "token": "Fwn",
@@ -36,21 +36,43 @@
     },
     {
       "name": "spotSize",
-      "min": 0.55,
-      "max": 1.0
+      "min": 0.4,
+      "max": 0.66
     }
   ],
   "expressions": [
     {
       "id": "white",
       "name": "Fawn",
-      "description": "Round, oval or tapered spots in one consecutive run somewhere between the neck and the rump - never two clusters with a gap between them, never a spiral or a pattern, just a flowing line of them. They keep off the face, the belly and the legs. Most fawn horses also carry a stylised white eyeliner, a slightly darkened topline in the manner of sooty, a pangare-like lightening underneath, and a pale underside to the tail. Every white on the horse is the same white. Blue eyes are possible.",
+      "description": "A darkened topline in the manner of sooty - a soft band down the crest, back and croup with no edge to it at either end - and, sitting on that dark band and nowhere else, one consecutive run of small round spots somewhere between the neck and the rump. Never two clusters with a gap between them, never a spiral or a pattern, just a flowing line of them, and all of them small. They keep off the face, the belly and the legs. Most fawn horses also carry a stylised eyeliner, a pangare-like lightening underneath, and a pale underside to the tail.",
       "when": [
         "Fwn/Fwn",
         "Fwn/Fwc",
         "Fwn/n"
       ],
       "layers": [
+        {
+          "name": "the darkened topline the run sits on",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.58,
+              "to": 1.0,
+              "softness": 0.55
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#100c08",
+            "strength": 52
+          }
+        },
         {
           "name": "the flowing line of spots",
           "masks": [
@@ -61,9 +83,9 @@
                 "NECK"
               ],
               "seed": "$spotSeed",
-              "spacing": 2.4,
+              "spacing": 2.0,
               "radius": "$spotSize",
-              "vary": 0.55,
+              "vary": 0.3,
               "chance": 0.6,
               "stretch": 1.4,
               "axis": "X",
@@ -91,9 +113,9 @@
               ],
               "axis": "Y",
               "space": "part",
-              "from": 0.3,
+              "from": 0.68,
               "to": 1.0,
-              "softness": 0.3
+              "softness": 0.2
             }
           ],
           "op": {
@@ -157,28 +179,6 @@
             "color": "#ffffff",
             "strength": 88
           }
-        },
-        {
-          "name": "a darkened topline above the run",
-          "masks": [
-            {
-              "type": "AXIS",
-              "parts": [
-                "BODY",
-                "NECK"
-              ],
-              "axis": "Y",
-              "space": "part",
-              "from": 0.72,
-              "to": 1.0,
-              "softness": 0.3
-            }
-          ],
-          "op": {
-            "type": "TOWARD",
-            "color": "#100c08",
-            "strength": 22
-          }
         }
       ]
     },
@@ -191,6 +191,28 @@
       },
       "layers": [
         {
+          "name": "the darkened topline the run sits on",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.58,
+              "to": 1.0,
+              "softness": 0.55
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#100c08",
+            "strength": 52
+          }
+        },
+        {
           "name": "the flowing line of spots, in colour",
           "masks": [
             {
@@ -200,9 +222,9 @@
                 "NECK"
               ],
               "seed": "$spotSeed",
-              "spacing": 2.4,
+              "spacing": 2.0,
               "radius": "$spotSize",
-              "vary": 0.55,
+              "vary": 0.3,
               "chance": 0.6,
               "stretch": 1.4,
               "axis": "X",
@@ -230,9 +252,9 @@
               ],
               "axis": "Y",
               "space": "part",
-              "from": 0.3,
+              "from": 0.68,
               "to": 1.0,
-              "softness": 0.3
+              "softness": 0.2
             }
           ],
           "op": {

@@ -78,6 +78,19 @@ public final class SpecSchema {
     /** Which pigment reading a {@code PIGMENT} mask thresholds. */
     public static final List<String> PIGMENT_CHANNELS = List.of("darkness", "red", "black", "total");
 
+    /**
+     * Why a mask needs asking for symmetry rather than getting it free: every
+     * field here is sampled in body space, and body space has a signed
+     * {@code z}. A lattice point at {@code z = +2} and one at {@code z = -2} are
+     * different cells, so a spot on the near flank has no counterpart on the
+     * far one - which is right for a paint marking and wrong for anything that
+     * reads as a <i>design</i>. Angler's string of lights is the case: a lure
+     * runs down both sides of a fish the same way.
+     */
+    private static final String MIRROR_DOC =
+            "draw the field on |z| rather than z, so the two sides of the horse get the same "
+                    + "marks in the same places - the only way to ask for a symmetrical scatter";
+
     /** Which outline a {@code SPOTS} element is drawn with. */
     public static final List<String> SPOT_SHAPES = List.of("round", "heart");
 
@@ -171,10 +184,11 @@ public final class SpecSchema {
                 Param.value("from", 0.5, "reading where coverage starts climbing"),
                 Param.value("to", 1.0, "reading where coverage reaches 1"),
                 Param.value("spread", 0.0,
-                        "body units to grow the PALE side of the reading by: the mask takes the "
-                                + "lowest reading found within this radius, so a white marking's "
-                                + "influence reaches this far past its own edge and a gene can be "
-                                + "made to draw only where the horse already has white")));
+                        "body units to grow WHAT THIS MASK SELECTED by - the largest coverage "
+                                + "found within the radius wins, applied after 'invert'. So an "
+                                + "inverted mask over white grows the white (fielded's wisps run "
+                                + "out of it) and a plain one over darkness grows the dark "
+                                + "(integration's spots spread out of the black points)")));
 
         MASKS.put(MaskType.SPOTS, List.of(
                 Param.parts("parts", "restrict to these parts"),
@@ -188,6 +202,7 @@ public final class SpecSchema {
                 Param.choice("shape", SPOT_SHAPES,
                         "'round' is the spot field; 'heart' swaps the disc for a heart, point down, "
                                 + "upright on the flank"),
+                Param.flag("mirror", MIRROR_DOC),
                 Param.value("softness", 0.25, "edge fade, body units")));
 
         MASKS.put(MaskType.RINGS, List.of(

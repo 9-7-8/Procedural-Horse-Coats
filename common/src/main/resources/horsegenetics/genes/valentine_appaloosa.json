@@ -75,14 +75,14 @@
                 "BODY"
               ],
               "seed": "$holeSeed",
-              "spacing": 6.2,
-              "radius": 1.9,
-              "vary": 0.25,
+              "spacing": 7.4,
+              "radius": 2.5,
+              "vary": 0.1,
               "chance": 0.45,
               "stretch": 1.0,
               "axis": "X",
               "shape": "heart",
-              "softness": 0.05,
+              "softness": 0.04,
               "invert": true
             }
           ],
@@ -103,14 +103,14 @@
                 "HIND_LEGS"
               ],
               "seed": "$spotSeed",
-              "spacing": 5.6,
-              "radius": 2.1,
-              "vary": 0.25,
+              "spacing": 6.8,
+              "radius": 2.8,
+              "vary": 0.1,
               "chance": 0.5,
               "stretch": 1.0,
               "axis": "X",
               "shape": "heart",
-              "softness": 0.05
+              "softness": 0.04
             }
           ],
           "op": {

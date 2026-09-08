@@ -5,7 +5,7 @@
   "phase": "magical",
   "priority": 251,
   "rarity": "UNCOMMON",
-  "blurb": "A soft-edged hood over the forehead, poll, ears and the top of the crest - darker than the coat with one copy, greyed out to near-white with two.",
+  "blurb": "A soft-edged hood along the crest of the neck and over the ears - darker than the coat with one copy, greyed out to near-white with two.",
   "alleles": [
     {
       "token": "Gth",
@@ -23,20 +23,20 @@
     },
     {
       "name": "reach",
-      "min": 22.6,
-      "max": 27.4
+      "min": 22.2,
+      "max": 27.0
     },
     {
       "name": "depth",
-      "min": 16.8,
-      "max": 20.2
+      "min": 48.0,
+      "max": 55.0
     }
   ],
   "expressions": [
     {
       "id": "hom",
       "name": "Goth, greyed",
-      "description": "Two copies take the hood the other way: instead of going darker it depigments, and the same forehead, poll, ears and crest end up light grey to white. It shows on every base, black included, which the darker form cannot. Either way it lies along the top and upper side of the neck and stops well above the throat, and the boundary is soft.",
+      "description": "Two copies take the hood the other way: instead of going darker it depigments, and the same crest and ears end up light grey to white. It shows on every base, black included, which the darker form cannot. Either way it lies along the top and upper side of the neck, stops well above the throat, and does not reach the face.",
       "when": {
         "Gth": 2
       },
@@ -47,26 +47,24 @@
             {
               "type": "WAVES",
               "parts": [
-                "HEAD",
-                "EARS",
-                "NECK"
+                "NECK",
+                "EARS"
               ],
               "axis": "X",
               "across": "Y",
               "space": "units",
               "shape": "saw",
-              "wavelength": 40.0,
-              "amplitude": 11.54,
+              "wavelength": 90.0,
+              "amplitude": 77.94,
               "from": "$depth",
-              "to": 40.0,
-              "softness": 2.2
+              "to": 90.0,
+              "softness": 2.6
             },
             {
               "type": "AXIS",
               "parts": [
-                "HEAD",
-                "EARS",
-                "NECK"
+                "NECK",
+                "EARS"
               ],
               "axis": "X",
               "space": "units",
@@ -77,9 +75,8 @@
             {
               "type": "NOISE",
               "parts": [
-                "HEAD",
-                "EARS",
-                "NECK"
+                "NECK",
+                "EARS"
               ],
               "seed": "$edgeSeed",
               "scale": 4.0,
@@ -98,7 +95,7 @@
     {
       "id": "het",
       "name": "Goth",
-      "description": "A hood a shade or several below the coat, over the forehead and poll, the ears, and the crest as far back as the mid-neck or the withers. It follows the top of the neck rather than wrapping it - down the upper side and no further, never onto the throat. The edge is soft on every horse; whether it runs as a smooth curve or a tattered one varies. There is nothing darker than black, so a black horse carrying one copy shows nothing at all.",
+      "description": "A hood a shade or several below the coat, running along the top of the neck from the poll back toward the withers, and taking the ears with it. It follows the crest rather than wrapping the neck - down the upper side and no further, never onto the throat - and it stays off the face entirely. The edge is soft on every horse; whether it runs as a smooth curve or a tattered one varies. There is nothing darker than black, so a black horse carrying one copy shows nothing at all.",
       "when": {
         "Gth": 1
       },
@@ -109,26 +106,24 @@
             {
               "type": "WAVES",
               "parts": [
-                "HEAD",
-                "EARS",
-                "NECK"
+                "NECK",
+                "EARS"
               ],
               "axis": "X",
               "across": "Y",
               "space": "units",
               "shape": "saw",
-              "wavelength": 40.0,
-              "amplitude": 11.54,
+              "wavelength": 90.0,
+              "amplitude": 77.94,
               "from": "$depth",
-              "to": 40.0,
-              "softness": 2.2
+              "to": 90.0,
+              "softness": 2.6
             },
             {
               "type": "AXIS",
               "parts": [
-                "HEAD",
-                "EARS",
-                "NECK"
+                "NECK",
+                "EARS"
               ],
               "axis": "X",
               "space": "units",
@@ -139,9 +134,8 @@
             {
               "type": "NOISE",
               "parts": [
-                "HEAD",
-                "EARS",
-                "NECK"
+                "NECK",
+                "EARS"
               ],
               "seed": "$edgeSeed",
               "scale": 4.0,

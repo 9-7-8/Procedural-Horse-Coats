@@ -5,7 +5,7 @@
   "phase": "magical",
   "priority": 367,
   "rarity": "RARE",
-  "blurb": "White metalwork over the muscle masses - a closed spiral on each of them, long arcs following the body's contours, and broken tracks of short dashes filling the space between.",
+  "blurb": "White metalwork over the muscle masses - long arcs following the body's contours and broken tracks of short dashes between them - carrying onto the head and legs as a hairline.",
   "alleles": [
     {
       "token": "Flg",
@@ -40,35 +40,13 @@
     {
       "id": "white",
       "name": "Filigree",
-      "description": "Three element forms at once, all hard-edged and all the same white: closed spirals of about two turns, one to each major muscle mass; long shallow arcs following the contour of the zone they sit in; and fields of short dashes lying parallel to the nearest arc, in broken tracks. The dashes crowd along the topline and the back edges of the shoulder and hindquarter and thin to isolated marks at the belly. The two sides are not mirrored, and the spirals do not all turn the same way. Nothing on the head, nothing below the knee.",
+      "description": "Two element forms at once, both hard-edged and both the same white: long shallow arcs following the contour of the zone they sit in, and fields of short dashes lying parallel to the nearest arc, in broken tracks. The dashes crowd along the topline and the back edges of the shoulder and thin out below. The same work carries onto the head and all four legs, but drawn much finer there - a hairline rather than a band - so a leg reads as engraved rather than as painted.",
       "when": [
         "Flg/Flg",
         "Flg/Flc",
         "Flg/n"
       ],
       "layers": [
-        {
-          "name": "one spiral to each muscle mass",
-          "masks": [
-            {
-              "type": "SPIRAL",
-              "parts": [
-                "BODY"
-              ],
-              "radius": 4.5,
-              "turns": 2.0,
-              "width": 0.5,
-              "axis": "Z",
-              "offset": -0.25,
-              "softness": 0.08
-            }
-          ],
-          "op": {
-            "type": "TOWARD",
-            "color": "#ffffff",
-            "strength": 95
-          }
-        },
         {
           "name": "long arcs along the contours",
           "masks": [
@@ -142,19 +120,22 @@
           }
         },
         {
-          "name": "the same work reaching onto the upper legs",
+          "name": "the same work at a hairline, down the legs and over the head",
           "masks": [
             {
               "type": "STROKES",
               "parts": [
-                "LEGS"
+                "LEGS",
+                "HEAD",
+                "MUZZLE"
               ],
               "seed": "$workSeed",
-              "spacing": 2.6,
-              "length": 5.0,
+              "spacing": 1.7,
+              "length": 6.0,
               "axis": "Y",
-              "width": 0.624,
-              "curl": 0.6
+              "width": 0.3,
+              "curl": 0.7,
+              "softness": 0.05
             },
             {
               "type": "AXIS",
@@ -163,15 +144,23 @@
               ],
               "axis": "Y",
               "space": "part",
-              "from": 0.55,
-              "to": 1.0,
-              "softness": 0.2
+              "from": 0.16,
+              "to": 1.1,
+              "softness": 0.14
+            },
+            {
+              "type": "PARTS",
+              "parts": [
+                "HEAD",
+                "MUZZLE"
+              ],
+              "combine": "MAX"
             }
           ],
           "op": {
             "type": "TOWARD",
             "color": "#ffffff",
-            "strength": 90
+            "strength": 88
           }
         }
       ]
@@ -184,30 +173,6 @@
         "Flc": 2
       },
       "layers": [
-        {
-          "name": "one coloured spiral to each muscle mass",
-          "masks": [
-            {
-              "type": "SPIRAL",
-              "parts": [
-                "BODY"
-              ],
-              "radius": 4.5,
-              "turns": 2.0,
-              "width": 0.5,
-              "axis": "Z",
-              "offset": -0.25,
-              "softness": 0.08
-            }
-          ],
-          "op": {
-            "type": "TOWARD",
-            "hue": "$hue",
-            "saturation": 0.8,
-            "lightness": 0.6,
-            "strength": 93
-          }
-        },
         {
           "name": "long coloured arcs along the contours",
           "masks": [
@@ -283,6 +248,52 @@
             "lightness": 0.6,
             "strength": 90
           }
+        },
+        {
+          "name": "the same work at a hairline, down the legs and over the head",
+          "masks": [
+            {
+              "type": "STROKES",
+              "parts": [
+                "LEGS",
+                "HEAD",
+                "MUZZLE"
+              ],
+              "seed": "$workSeed",
+              "spacing": 1.7,
+              "length": 6.0,
+              "axis": "Y",
+              "width": 0.3,
+              "curl": 0.7,
+              "softness": 0.05
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "LEGS"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.16,
+              "to": 1.1,
+              "softness": 0.14
+            },
+            {
+              "type": "PARTS",
+              "parts": [
+                "HEAD",
+                "MUZZLE"
+              ],
+              "combine": "MAX"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 86,
+            "hue": "$hue",
+            "saturation": 0.8,
+            "lightness": 0.6
+          }
         }
       ]
     },
@@ -290,7 +301,8 @@
       "id": "wild",
       "name": "Wild type",
       "description": "No filigree.",
-      "wildType": true
+      "wildType": true,
+      "layers": []
     }
   ],
   "founders": {

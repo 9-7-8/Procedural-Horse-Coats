@@ -41,7 +41,7 @@
     {
       "id": "white",
       "name": "Collar",
-      "description": "The band wraps the whole circumference at the base of the neck, its back edge landing well forward of the scapula and its front edge running up onto the neck itself, and it divides the horse: everything behind it goes pale, roughly half the animal, while the head, the upper neck and the crest keep their colour. The legs come back to the coat from the knee and hock down, over a soft transition rather than a line. The mane keeps its colour; the tail follows the pale field about half the time.",
+      "description": "The band wraps the base of the neck, its back edge landing well forward of the scapula and its front edge running up onto the neck itself - but it passes under the crest rather than over it, so the topline of the neck keeps its colour the whole way. Everything behind the band goes pale, roughly half the animal, while the head, the upper neck and the crest keep theirs. The legs come back to the coat from the knee and hock down, over a soft transition rather than a line. The mane keeps its colour; the tail follows the pale field about half the time.",
       "when": [
         "Col/Col",
         "Col/Coc",
@@ -73,6 +73,22 @@
               "to": "$neckReach",
               "softness": 1.1,
               "combine": "MAX"
+            },
+            {
+              "type": "WAVES",
+              "parts": [
+                "NECK"
+              ],
+              "axis": "X",
+              "across": "Y",
+              "space": "units",
+              "shape": "saw",
+              "wavelength": 90.0,
+              "amplitude": 77.94,
+              "from": 50.0,
+              "to": 90.0,
+              "softness": 2.2,
+              "combine": "SUBTRACT"
             }
           ],
           "op": {
@@ -137,6 +153,22 @@
               "to": "$neckReach",
               "softness": 1.1,
               "combine": "MAX"
+            },
+            {
+              "type": "WAVES",
+              "parts": [
+                "NECK"
+              ],
+              "axis": "X",
+              "across": "Y",
+              "space": "units",
+              "shape": "saw",
+              "wavelength": 90.0,
+              "amplitude": 77.94,
+              "from": 50.0,
+              "to": 90.0,
+              "softness": 2.2,
+              "combine": "SUBTRACT"
             }
           ],
           "op": {

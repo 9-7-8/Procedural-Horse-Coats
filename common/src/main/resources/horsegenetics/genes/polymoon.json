@@ -5,7 +5,7 @@
   "phase": "magical",
   "priority": 307,
   "rarity": "RARE",
-  "blurb": "A chain of pale disks running from the throatlatch back along the shoulder and onto the barrel, largest in the middle of its run and tapering at both ends.",
+  "blurb": "A chain of pale disks running from the underside of the throat back along the shoulder and onto the barrel, largest in the middle of its run and tapering to nothing at both ends.",
   "alleles": [
     {
       "token": "Pmn",
@@ -31,8 +31,8 @@
     },
     {
       "name": "diskRadius",
-      "min": 0.85,
-      "max": 1.25
+      "min": 0.45,
+      "max": 0.75
     },
     {
       "name": "spacing",
@@ -43,13 +43,18 @@
       "name": "hue",
       "min": 0.0,
       "max": 360.0
+    },
+    {
+      "name": "bigRadius",
+      "min": 1.15,
+      "max": 1.65
     }
   ],
   "expressions": [
     {
       "id": "polymoon",
       "name": "Polymoon",
-      "description": "Circular disks laid nearly edge to edge along one curved path, sometimes overlapping a little, never scattered. The path leaves the throatlatch or the point of shoulder, follows the back edge of the scapula and runs out onto the barrel. Some horses carry a second, shorter chain on the hip. The disks are largest halfway along and smallest at the two ends.",
+      "description": "Circular disks laid nearly edge to edge along one curved path, sometimes overlapping a little, never scattered and never in two places. The path leaves the underside of the throat, runs back through the point of the shoulder and out along the side of the barrel, rising and falling in one smooth curve. The disks are largest along the shoulder and the barrel and taper away to almost nothing at both ends of the run, so the chain reads as a thing with a beginning and an end rather than as a row.",
       "when": [
         "Pmn/Pmn",
         "Pmn/Pmc",
@@ -57,7 +62,7 @@
       ],
       "layers": [
         {
-          "name": "the primary chain along the shoulder and barrel",
+          "name": "the chain, tapering out tiny at the throat and on the barrel",
           "masks": [
             {
               "type": "SPOTS",
@@ -68,23 +73,38 @@
               "seed": "$diskSeed",
               "spacing": "$spacing",
               "radius": "$diskRadius",
-              "vary": 0.45,
+              "vary": 0.35,
               "chance": 0.95,
               "softness": 0.16
             },
             {
-              "type": "STROKES",
+              "type": "WAVES",
               "parts": [
                 "BODY",
                 "NECK"
               ],
               "seed": "$chainSeed",
-              "spacing": 18.0,
-              "length": 24.0,
               "axis": "X",
-              "width": 1.8,
-              "curl": 0.7,
-              "softness": 0.35
+              "across": "Y",
+              "shape": "sine",
+              "space": "units",
+              "from": 14.5,
+              "to": 16.9,
+              "wavelength": 20.0,
+              "amplitude": 1.7,
+              "softness": 0.55
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "axis": "X",
+              "space": "units",
+              "from": 11.5,
+              "to": 29.5,
+              "softness": 3.6
             }
           ],
           "op": {
@@ -94,55 +114,55 @@
           }
         },
         {
-          "name": "the shorter second chain some horses carry on the hip",
+          "name": "the large moons along the shoulder and barrel",
           "masks": [
             {
               "type": "SPOTS",
               "parts": [
-                "BODY"
+                "BODY",
+                "NECK"
               ],
               "seed": "$diskSeed",
               "spacing": "$spacing",
-              "radius": "$diskRadius",
-              "vary": 0.45,
-              "chance": {
-                "perDose": [
-                  0.0,
-                  0.35,
-                  0.7
-                ]
-              },
+              "radius": "$bigRadius",
+              "vary": 0.35,
+              "chance": 0.95,
               "softness": 0.16
             },
             {
-              "type": "STROKES",
+              "type": "WAVES",
               "parts": [
-                "BODY"
+                "BODY",
+                "NECK"
               ],
               "seed": "$chainSeed",
-              "spacing": 26.0,
-              "length": 14.0,
               "axis": "X",
-              "width": 2.08,
-              "curl": 0.9,
-              "softness": 0.35
+              "across": "Y",
+              "shape": "sine",
+              "space": "units",
+              "from": 14.5,
+              "to": 16.9,
+              "wavelength": 20.0,
+              "amplitude": 1.7,
+              "softness": 0.55
             },
             {
               "type": "AXIS",
               "parts": [
-                "BODY"
+                "BODY",
+                "NECK"
               ],
               "axis": "X",
-              "space": "part",
-              "from": 0.0,
-              "to": 0.36,
-              "softness": 0.14
+              "space": "units",
+              "from": 16.5,
+              "to": 26.0,
+              "softness": 2.2
             }
           ],
           "op": {
             "type": "TOWARD",
             "color": "#f4f1ea",
-            "strength": 88
+            "strength": 92
           }
         }
       ]
@@ -156,7 +176,7 @@
       },
       "layers": [
         {
-          "name": "the primary chain along the shoulder and barrel, in colour",
+          "name": "the chain, tapering out tiny at the throat and on the barrel, in colour",
           "masks": [
             {
               "type": "SPOTS",
@@ -167,23 +187,38 @@
               "seed": "$diskSeed",
               "spacing": "$spacing",
               "radius": "$diskRadius",
-              "vary": 0.45,
+              "vary": 0.35,
               "chance": 0.95,
               "softness": 0.16
             },
             {
-              "type": "STROKES",
+              "type": "WAVES",
               "parts": [
                 "BODY",
                 "NECK"
               ],
               "seed": "$chainSeed",
-              "spacing": 18.0,
-              "length": 24.0,
               "axis": "X",
-              "width": 1.8,
-              "curl": 0.7,
-              "softness": 0.35
+              "across": "Y",
+              "shape": "sine",
+              "space": "units",
+              "from": 14.5,
+              "to": 16.9,
+              "wavelength": 20.0,
+              "amplitude": 1.7,
+              "softness": 0.55
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY",
+                "NECK"
+              ],
+              "axis": "X",
+              "space": "units",
+              "from": 11.5,
+              "to": 29.5,
+              "softness": 3.6
             }
           ],
           "op": {
@@ -195,54 +230,54 @@
           }
         },
         {
-          "name": "the shorter second chain some horses carry on the hip, in colour",
+          "name": "the large moons along the shoulder and barrel, in colour",
           "masks": [
             {
               "type": "SPOTS",
               "parts": [
-                "BODY"
+                "BODY",
+                "NECK"
               ],
               "seed": "$diskSeed",
               "spacing": "$spacing",
-              "radius": "$diskRadius",
-              "vary": 0.45,
-              "chance": {
-                "perDose": [
-                  0.0,
-                  0.35,
-                  0.7
-                ]
-              },
+              "radius": "$bigRadius",
+              "vary": 0.35,
+              "chance": 0.95,
               "softness": 0.16
             },
             {
-              "type": "STROKES",
+              "type": "WAVES",
               "parts": [
-                "BODY"
+                "BODY",
+                "NECK"
               ],
               "seed": "$chainSeed",
-              "spacing": 26.0,
-              "length": 14.0,
               "axis": "X",
-              "width": 2.08,
-              "curl": 0.9,
-              "softness": 0.35
+              "across": "Y",
+              "shape": "sine",
+              "space": "units",
+              "from": 14.5,
+              "to": 16.9,
+              "wavelength": 20.0,
+              "amplitude": 1.7,
+              "softness": 0.55
             },
             {
               "type": "AXIS",
               "parts": [
-                "BODY"
+                "BODY",
+                "NECK"
               ],
               "axis": "X",
-              "space": "part",
-              "from": 0.0,
-              "to": 0.36,
-              "softness": 0.14
+              "space": "units",
+              "from": 16.5,
+              "to": 26.0,
+              "softness": 2.2
             }
           ],
           "op": {
             "type": "TOWARD",
-            "strength": 88,
+            "strength": 92,
             "hue": "$hue",
             "saturation": 0.82,
             "lightness": 0.58

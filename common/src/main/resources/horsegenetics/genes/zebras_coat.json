@@ -27,13 +27,13 @@
     },
     {
       "name": "pitch",
-      "min": 2.8,
-      "max": 3.6999999999999997
+      "min": 1.6,
+      "max": 2.4
     },
     {
       "name": "weight",
-      "min": 3.432,
-      "max": 10.299
+      "min": 0.45,
+      "max": 0.95
     },
     {
       "name": "hue",
@@ -45,7 +45,7 @@
     {
       "id": "zebras_coat",
       "name": "Zebra's Coat",
-      "description": "Ten to thirty narrow stripes with tapered ends, crossing the neck square and then swinging back and curving as the field passes the withers and shoulder. Roughly a fifth of them split into two branches near their lower end. Nothing behind the scapula and nothing on the legs: the sharpness of that cut-off is the marking's signature.",
+      "description": "Ten to thirty narrow stripes with tapered ends - a hairline pen, not a brush - crossing the neck square and then swinging back and curving as the field passes the withers and shoulder. Roughly a fifth of them split into two branches near their lower end. Nothing behind the scapula and nothing on the legs: the sharpness of that cut-off is the marking's signature.",
       "when": [
         "Zbc/Zbc",
         "Zbc/Zbk",
@@ -66,7 +66,7 @@
               "axis": "Y",
               "width": "$weight",
               "curl": 0.5,
-              "softness": 0.2
+              "softness": 0.09
             }
           ],
           "op": {
@@ -89,7 +89,7 @@
               "axis": "Y",
               "width": "$weight",
               "curl": 1.1,
-              "softness": 0.25
+              "softness": 0.09
             },
             {
               "type": "AXIS",
@@ -123,7 +123,7 @@
               "axis": "Y",
               "width": "$weight",
               "curl": 0.4,
-              "softness": 0.2
+              "softness": 0.09
             },
             {
               "type": "AXIS",
@@ -167,7 +167,7 @@
               "axis": "Y",
               "width": "$weight",
               "curl": 0.5,
-              "softness": 0.2
+              "softness": 0.09
             }
           ],
           "op": {
@@ -192,7 +192,7 @@
               "axis": "Y",
               "width": "$weight",
               "curl": 1.1,
-              "softness": 0.25
+              "softness": 0.09
             },
             {
               "type": "AXIS",
@@ -228,7 +228,7 @@
               "axis": "Y",
               "width": "$weight",
               "curl": 0.4,
-              "softness": 0.2
+              "softness": 0.09
             },
             {
               "type": "AXIS",

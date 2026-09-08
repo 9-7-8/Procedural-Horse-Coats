@@ -5,7 +5,7 @@
   "phase": "magical",
   "priority": 300,
   "rarity": "EPIC",
-  "blurb": "Luminescent spots scattered over the whole horse, in one hue the line carries, with the mane and tail fading into the same light toward their tips.",
+  "blurb": "Light in the ends of the mane and tail, brightening toward the tips - and nothing at all on the coat.",
   "alleles": [
     {
       "token": "Aur",
@@ -18,113 +18,56 @@
   ],
   "knobs": [
     {
-      "name": "spotSeed",
-      "type": "seed"
-    },
-    {
       "name": "hue",
       "min": 0.0,
       "max": 360.0
     },
     {
-      "name": "spotRadius",
-      "min": 0.45,
-      "max": 0.9
-    },
-    {
-      "name": "spotSpacing",
-      "min": 2.4,
-      "max": 4.2
-    },
-    {
-      "name": "roan",
-      "min": 0.0,
-      "max": 0.22
+      "name": "tipReach",
+      "min": 0.3,
+      "max": 0.62
     }
   ],
   "expressions": [
     {
       "id": "aurorae",
       "name": "Aurorae",
-      "description": "Round and oval spots of cold light over the whole body, sparse in one copy and crowding together in two. Every spot on a horse is the same hue, and the mane and tail run into it toward their tips. A faint wash of the same colour lies over the coat between the spots.",
+      "description": "The light is in the hair and nowhere else: the lower half or third of the mane and of the tail take it, brightening the whole way to the ends, and the coat itself is untouched. One copy lights the tips alone; two carry it further up the strands and brighter. How far up varies from horse to horse, and the boundary is a fade rather than a line - there is nothing on this marking you could put a finger on.",
       "when": [
         "Aur/Aur",
         "Aur/n"
       ],
       "layers": [
         {
-          "name": "a low roan wash of the same light",
+          "name": "the tips of the mane and tail, running into the light",
           "masks": [
             {
-              "type": "NOISE",
-              "scale": 9.0,
-              "low": 0.25,
-              "high": 1.0
-            }
-          ],
-          "op": {
-            "type": "TOWARD",
-            "hue": "$hue",
-            "saturation": 0.35,
-            "lightness": 0.6,
-            "strength": "$roan"
-          }
-        },
-        {
-          "name": "luminescent spots over the whole horse",
-          "emissive": true,
-          "masks": [
-            {
-              "type": "SPOTS",
-              "seed": "$spotSeed",
-              "spacing": "$spotSpacing",
-              "radius": "$spotRadius",
-              "vary": 0.65,
-              "chance": {
-                "perDose": [
-                  0.0,
-                  0.45,
-                  0.85
-                ]
-              },
-              "stretch": 1.4,
-              "axis": "X",
-              "softness": 0.22
-            }
-          ],
-          "op": {
-            "type": "TOWARD",
-            "hue": "$hue",
-            "saturation": 0.9,
-            "lightness": 0.66,
-            "strength": 96
-          }
-        },
-        {
-          "name": "the mane and tail running into the light",
-          "masks": [
-            {
-              "type": "PARTS",
+              "type": "AXIS",
               "parts": [
                 "HAIR"
-              ]
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": -0.15,
+              "to": "$tipReach",
+              "softness": 0.26
             }
           ],
           "op": {
             "type": "RAMP",
             "hue": "$hue",
             "hueSpan": 25.0,
-            "saturation": 0.8,
-            "lightness": 0.6,
+            "saturation": 0.85,
+            "lightness": 0.62,
             "axis": "Y",
             "space": "part",
-            "from": 0.85,
-            "to": 0.05,
+            "from": "$tipReach",
+            "to": 0.0,
             "strength": {
               "perDose": [
                 0.0,
-                55.0,
-                90.0
+                70.0,
+                95.0
               ]
             }
           }

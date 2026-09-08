@@ -5,7 +5,7 @@
   "phase": "magical",
   "priority": 362,
   "rarity": "RARE",
-  "blurb": "Thin contour lines in nested groups, tracking the muscles underneath - the back of the shoulder, the sweep of the ribcage, the front of the hindquarter.",
+  "blurb": "Thin contour lines in nested groups, tracking the muscles underneath - the back of the shoulder, the sweep of the ribcage, the front of the hindquarter - and carrying on over the face and the legs.",
   "alleles": [
     {
       "token": "Ifl",
@@ -45,7 +45,7 @@
     {
       "id": "internal_flow",
       "name": "Internal Flow",
-      "description": "Lines of even width - no spindle, no taper along the run - laid in nested families of two to five that share a curve. Two to four families a side. Rather more than half of each line is continuous and the rest breaks into two or three dashes with tapered ends, which is what keeps the marking from reading as drawn on.",
+      "description": "Lines of even width - no spindle, no taper along the run - laid in nested families of two to five that share a curve. Two to four families a side over the barrel and neck, and the same contouring carrying on over the face and down the legs, where the families are shorter and fewer. Rather more than half of each line is continuous and the rest breaks into two or three dashes with tapered ends, which is what keeps the marking from reading as drawn on.",
       "when": [
         "Ifl/Ifl",
         "Ifl/Ifc",
@@ -59,7 +59,10 @@
               "type": "STROKES",
               "parts": [
                 "BODY",
-                "NECK"
+                "NECK",
+                "HEAD",
+                "MUZZLE",
+                "LEGS"
               ],
               "seed": "$flowSeed",
               "spacing": 4.5,
@@ -73,7 +76,10 @@
               "type": "NOISE",
               "parts": [
                 "BODY",
-                "NECK"
+                "NECK",
+                "HEAD",
+                "MUZZLE",
+                "LEGS"
               ],
               "seed": "$flowSeed",
               "scale": 11.0,
@@ -94,7 +100,10 @@
               "type": "STROKES",
               "parts": [
                 "BODY",
-                "NECK"
+                "NECK",
+                "HEAD",
+                "MUZZLE",
+                "LEGS"
               ],
               "seed": "$flowSeed",
               "spacing": 4.5,
@@ -108,7 +117,10 @@
               "type": "SPECKLE",
               "parts": [
                 "BODY",
-                "NECK"
+                "NECK",
+                "HEAD",
+                "MUZZLE",
+                "LEGS"
               ],
               "seed": "$flowSeed",
               "spacing": 2.6,
@@ -141,7 +153,10 @@
               "type": "STROKES",
               "parts": [
                 "BODY",
-                "NECK"
+                "NECK",
+                "HEAD",
+                "MUZZLE",
+                "LEGS"
               ],
               "seed": "$flowSeed",
               "spacing": 4.5,
@@ -155,7 +170,10 @@
               "type": "NOISE",
               "parts": [
                 "BODY",
-                "NECK"
+                "NECK",
+                "HEAD",
+                "MUZZLE",
+                "LEGS"
               ],
               "seed": "$flowSeed",
               "scale": 11.0,
@@ -178,7 +196,10 @@
               "type": "STROKES",
               "parts": [
                 "BODY",
-                "NECK"
+                "NECK",
+                "HEAD",
+                "MUZZLE",
+                "LEGS"
               ],
               "seed": "$flowSeed",
               "spacing": 4.5,
@@ -192,7 +213,10 @@
               "type": "SPECKLE",
               "parts": [
                 "BODY",
-                "NECK"
+                "NECK",
+                "HEAD",
+                "MUZZLE",
+                "LEGS"
               ],
               "seed": "$flowSeed",
               "spacing": 2.6,

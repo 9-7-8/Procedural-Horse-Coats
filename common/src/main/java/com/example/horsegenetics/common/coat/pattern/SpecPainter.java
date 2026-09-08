@@ -397,6 +397,7 @@ public final class SpecPainter {
             if (mask.invert()) {
                 c = 1.0 - c;
             }
+            c = spread(mask, v, skin, coat, part, point, px, py, leg, c);
             acc = switch (mask.combine()) {
                 case MULTIPLY -> acc * c;
                 case MAX -> Math.max(acc, c);
@@ -498,37 +499,8 @@ public final class SpecPainter {
                 double low = v.get(p.value("low", 0.0), leg);
                 return clamp01(low + (v.get(p.value("high", 1.0), leg) - low) * n);
             }
-            case PIGMENT: {
-                String channel = p.text("channel", "darkness");
-                double reading = pigmentReading(coat, channel, px, py);
-                double spread = v.get(p.value("spread", 0.0), leg);
-                if (spread > 0) {
-                    // The LOWEST reading in the disc, so pale grows outward. A
-                    // gene that must draw only beside white the horse already
-                    // has - fielded's wisps - has nothing else to ask: the coat
-                    // it reads is one number per texel, and "next to white" is
-                    // not a property of any one of them.
-                    int r = (int) Math.round(spread * HorseSkinGeometry.TEXELS_PER_UNIT);
-                    int rr = r * r;
-                    for (int dy = -r; dy <= r; dy++) {
-                        for (int dx = -r; dx <= r; dx++) {
-                            if (dx * dx + dy * dy > rr) {
-                                continue;
-                            }
-                            int qx = px + dx;
-                            int qy = py + dy;
-                            if (qx < 0 || qy < 0
-                                    || qx >= HorseSkinGeometry.SHEET_SIZE
-                                    || qy >= HorseSkinGeometry.SHEET_SIZE) {
-                                continue;
-                            }
-                            reading = Math.min(reading, pigmentReading(coat, channel, qx, qy));
-                        }
-                    }
-                }
-                return BodyStripes.smoothstep(v.get(p.value("from", 0.5), leg),
-                        v.get(p.value("to", 1.0), leg), reading);
-            }
+            case PIGMENT:
+                return pigmentCoverage(mask, v, coat, px, py, leg);
             case SPOTS: {
                 long seed = v.seed(p.value("seed", 0), seedBase);
                 double spacing = Math.max(0.05, v.get(p.value("spacing", 4.0), leg));
@@ -537,10 +509,12 @@ public final class SpecPainter {
                 // Squashing the sample along one axis before the lattice walk is
                 // what makes an oval: the cells stay round in the squashed frame
                 // and come out stretched on the horse.
+                // |z| when mirrored, so the far flank draws the near one's spots.
+                double sz = p.flag("mirror", false) ? Math.abs(point.z()) : point.z();
                 BodyNoise.Cell cell = BodyNoise.cell(seed,
                         point.x() / (spacing * (longAxis == Axis.X ? stretch : 1)),
                         point.y() / (spacing * (longAxis == Axis.Y ? stretch : 1)),
-                        point.z() / (spacing * (longAxis == Axis.Z ? stretch : 1)));
+                        sz / (spacing * (longAxis == Axis.Z ? stretch : 1)));
                 if (cell.pick() >= v.get(p.value("chance", 1.0), leg)) {
                     return 0;
                 }
@@ -735,6 +709,97 @@ public final class SpecPainter {
             case "saw" -> 2 * t - 1;
             default -> Math.sin(2 * Math.PI * turns);
         };
+    }
+
+    /**
+     * A {@code PIGMENT} mask's {@code spread}: <b>grow whatever this mask
+     * selected</b> outward by a radius, by taking the largest coverage found in
+     * a disc around the texel.
+     *
+     * <p>It runs here rather than inside {@link #maskCoverage} because it has
+     * to happen <b>after {@code invert}</b>, and that is the whole of the
+     * design. Dilating the <i>reading</i> can only ever grow one side of it:
+     * the first version took the lowest reading in the disc, which grows the
+     * pale, and fielded wanted exactly that. Integration wants the opposite -
+     * it spreads out of the black points, so it needs the dark grown. Dilating
+     * the mask's <i>output</i> serves both without a second parameter, because
+     * an inverted mask has already turned "dark" into "what I selected". For
+     * fielded the two are the same operation: the maximum of {@code 1 - s(r)}
+     * is {@code 1 - } the minimum of {@code s(r)}.
+     *
+     * <p><b>The radius is in body units, and the test is done in body space.</b>
+     * The sheet window is only a bound on the search: a texture atlas packs
+     * unrelated parts next to each other, so a disc measured in <i>texels</i>
+     * leaks across a UV seam and grows the marking somewhere it has no business
+     * being. Integration is what proved it - dilating three units off a bay's
+     * black socks covered the entire horse, because the leg patches sit beside
+     * the barrel on the sheet. Asking the geometry where each candidate texel
+     * actually <i>is</i> costs one cached grid lookup, and {@code sample} is a
+     * table.
+     */
+    private static double spread(Mask mask, SpecValues v, Skin skin, PigmentView coat,
+                                 Part part, BodyPoint point, int px, int py, int leg,
+                                 double c) {
+        if (mask.type() != GeneSpec.MaskType.PIGMENT || c >= 1) {
+            return c;
+        }
+        Params p = mask.params();
+        List<Part> parts = p.parts("parts");
+        if (!parts.isEmpty() && !parts.contains(part)) {
+            return c;
+        }
+        double radius = v.get(p.value("spread", 0.0), leg);
+        if (radius <= 0) {
+            return c;
+        }
+        // Generous by a texel, because the sheet is not exactly two texels to
+        // the unit on a face seen at an angle.
+        int r = (int) Math.ceil(radius * HorseSkinGeometry.TEXELS_PER_UNIT) + 1;
+        double rr = radius * radius;
+        double best = c;
+        for (int dy = -r; dy <= r; dy++) {
+            for (int dx = -r; dx <= r; dx++) {
+                int qx = px + dx;
+                int qy = py + dy;
+                if (qx < 0 || qy < 0
+                        || qx >= HorseSkinGeometry.SHEET_SIZE
+                        || qy >= HorseSkinGeometry.SHEET_SIZE) {
+                    continue;
+                }
+                java.util.Optional<HorseSkinGeometry.Sample> at =
+                        HorseSkinGeometry.sample(skin, qx, qy);
+                if (at.isEmpty()) {
+                    continue;
+                }
+                BodyPoint q = at.get().point();
+                double bx = q.x() - point.x();
+                double by = q.y() - point.y();
+                double bz = q.z() - point.z();
+                if (bx * bx + by * by + bz * bz > rr) {
+                    continue;
+                }
+                double n = pigmentCoverage(mask, v, coat, qx, qy, leg);
+                if (mask.invert()) {
+                    n = 1.0 - n;
+                }
+                if (n > best) {
+                    best = n;
+                    if (best >= 1) {
+                        return 1;
+                    }
+                }
+            }
+        }
+        return best;
+    }
+
+    /** A {@code PIGMENT} mask at one texel, before {@code invert} and before {@code spread}. */
+    private static double pigmentCoverage(Mask mask, SpecValues v, PigmentView coat,
+                                          int px, int py, int leg) {
+        Params p = mask.params();
+        return BodyStripes.smoothstep(v.get(p.value("from", 0.5), leg),
+                v.get(p.value("to", 1.0), leg),
+                pigmentReading(coat, p.text("channel", "darkness"), px, py));
     }
 
     /** One channel of the coat, as a {@code PIGMENT} mask reads it. */

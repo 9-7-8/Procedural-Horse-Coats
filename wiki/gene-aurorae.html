@@ -21,7 +21,7 @@
 <h1>Aurorae</h1>
 
 <p class="lede">
-    Luminescent spots scattered over the whole horse, in one hue the line carries, with the mane and tail fading into the same light toward their tips.
+    Light in the ends of the mane and tail, brightening toward the tips - and nothing at all on the coat.
 </p>
 
 <section class="tab-panel" data-tab="gameplay">
@@ -97,8 +97,8 @@
 <tr><th>Phase</th><td>magical &mdash; it adds signed colour in phase 3, after the pigment has resolved</td></tr>
 <tr><th>Priority</th><td>300 &mdash; where it sits in the one <code>(priority, key)</code> paint order</td></tr>
 <tr><th>Alleles</th><td><code>Aur</code> &middot; <code>n</code></td></tr>
-<tr><th>Varies per horse</th><td>5 values drawn once off the expressing allele copy, so a foal that inherits the copy inherits the look</td></tr>
-<tr><th>Built from</th><td>NOISE, PARTS, RAMP, SPOTS, TOWARD, emissive</td></tr>
+<tr><th>Varies per horse</th><td>2 values drawn once off the expressing allele copy, so a foal that inherits the copy inherits the look</td></tr>
+<tr><th>Built from</th><td>AXIS, RAMP</td></tr>
 </tbody>
 </table>
 </div>
@@ -114,12 +114,10 @@
 
 <h3>Aurorae</h3>
 
-<p>Round and oval spots of cold light over the whole body, sparse in one copy and crowding together in two. Every spot on a horse is the same hue, and the mane and tail run into it toward their tips. A faint wash of the same colour lies over the coat between the spots.</p>
+<p>The light is in the hair and nowhere else: the lower half or third of the mane and of the tail take it, brightening the whole way to the ends, and the coat itself is untouched. One copy lights the tips alone; two carry it further up the strands and brighter. How far up varies from horse to horse, and the boundary is a fade rather than a line - there is nothing on this marking you could put a finger on.</p>
 
 <ol>
-<li>a low roan wash of the same light &mdash; <code>NOISE</code>, painted with <code>TOWARD</code></li>
-<li>luminescent spots over the whole horse &mdash; <code>SPOTS</code>, painted with <code>TOWARD</code>, and it <strong>glows</strong></li>
-<li>the mane and tail running into the light &mdash; <code>PARTS</code>, painted with <code>RAMP</code></li>
+<li>the tips of the mane and tail, running into the light &mdash; <code>AXIS</code>, painted with <code>RAMP</code></li>
 </ol>
 
 <h3>Wild type</h3>

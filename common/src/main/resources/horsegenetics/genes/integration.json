@@ -5,7 +5,7 @@
   "phase": "magical",
   "priority": 311,
   "rarity": "COMMON",
-  "blurb": "A spot field spreading outward from wherever the coat is already dark - merging into solid patches close in, thinning to isolated marks a foot or two out, and gone beyond that.",
+  "blurb": "A spot field spreading outward from wherever the coat is already dark - merging into solid patches right at the source, thinning to isolated marks a foot or two out, and gone beyond that.",
   "alleles": [
     {
       "token": "Int",
@@ -32,8 +32,8 @@
     },
     {
       "name": "reach",
-      "min": 0.3,
-      "max": 0.75
+      "min": 1.6,
+      "max": 3.4
     },
     {
       "name": "hue",
@@ -45,7 +45,7 @@
     {
       "id": "integration",
       "name": "Integration",
-      "description": "It does not choose its own places; it grows out of the ones the horse already has. Anywhere the coat is dark - the crest and the base of the mane, a dorsal stripe, the distal limbs, the margin of any other marking - becomes a source, and elements propagate outward from it. Right at a source they merge into continuous patches with scalloped margins; a hand's span out they are separate circles and lobes with their long axis pointing the way they came; further still they thin to nothing. It reads as an appaloosa blanket at medium scale.",
+      "description": "It does not choose its own places; it grows out of the ones the horse already has. Anywhere the coat is genuinely dark - a bay's black points, the crest and the base of the mane, a dorsal stripe, the margin of any other dark marking - becomes a source, and the field propagates outward from it. Right at a source the elements merge into continuous patches with scalloped margins; a hand's span out they are separate circles and lobes; a foot or two out they thin to nothing, and beyond that there is none. A horse with no dark on it anywhere shows almost none of this, and the same horse with black points is covered from the knees up.",
       "when": [
         "Int/Int",
         "Int/n",
@@ -53,14 +53,51 @@
       ],
       "layers": [
         {
-          "name": "elements spreading out of the dark",
+          "name": "merged patches right at the source",
+          "masks": [
+            {
+              "type": "PIGMENT",
+              "parts": [
+                "BODY",
+                "NECK",
+                "LEGS",
+                "HEAD"
+              ],
+              "channel": "black",
+              "from": 0.62,
+              "to": 0.88,
+              "spread": 1.1
+            },
+            {
+              "type": "PATCHES",
+              "parts": [
+                "BODY",
+                "NECK",
+                "LEGS",
+                "HEAD"
+              ],
+              "seed": "$spotSeed",
+              "scale": 3.0,
+              "threshold": 0.42,
+              "softness": 0.12
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#f6f2e8",
+            "strength": 88
+          }
+        },
+        {
+          "name": "elements thinning outward from it",
           "masks": [
             {
               "type": "SPOTS",
               "parts": [
                 "BODY",
                 "NECK",
-                "LEGS"
+                "LEGS",
+                "HEAD"
               ],
               "seed": "$spotSeed",
               "spacing": 2.6,
@@ -76,50 +113,19 @@
               "parts": [
                 "BODY",
                 "NECK",
-                "LEGS"
+                "LEGS",
+                "HEAD"
               ],
-              "channel": "darkness",
-              "from": 0.35,
-              "to": "$reach"
+              "channel": "black",
+              "from": 0.62,
+              "to": 0.88,
+              "spread": "$reach"
             }
           ],
           "op": {
             "type": "TOWARD",
             "color": "#f6f2e8",
             "strength": 90
-          }
-        },
-        {
-          "name": "the merged patches nearest the source",
-          "masks": [
-            {
-              "type": "PIGMENT",
-              "parts": [
-                "BODY",
-                "NECK",
-                "LEGS"
-              ],
-              "channel": "darkness",
-              "from": 0.6,
-              "to": 0.85
-            },
-            {
-              "type": "PATCHES",
-              "parts": [
-                "BODY",
-                "NECK",
-                "LEGS"
-              ],
-              "seed": "$spotSeed",
-              "scale": 3.0,
-              "threshold": 0.45,
-              "softness": 0.1
-            }
-          ],
-          "op": {
-            "type": "TOWARD",
-            "color": "#f6f2e8",
-            "strength": 88
           }
         }
       ]
@@ -133,14 +139,53 @@
       },
       "layers": [
         {
-          "name": "elements spreading out of the dark, in colour",
+          "name": "merged patches right at the source, in colour",
+          "masks": [
+            {
+              "type": "PIGMENT",
+              "parts": [
+                "BODY",
+                "NECK",
+                "LEGS",
+                "HEAD"
+              ],
+              "channel": "black",
+              "from": 0.62,
+              "to": 0.88,
+              "spread": 1.1
+            },
+            {
+              "type": "PATCHES",
+              "parts": [
+                "BODY",
+                "NECK",
+                "LEGS",
+                "HEAD"
+              ],
+              "seed": "$spotSeed",
+              "scale": 3.0,
+              "threshold": 0.42,
+              "softness": 0.12
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 88,
+            "hue": "$hue",
+            "saturation": 0.82,
+            "lightness": 0.58
+          }
+        },
+        {
+          "name": "elements thinning outward from it, in colour",
           "masks": [
             {
               "type": "SPOTS",
               "parts": [
                 "BODY",
                 "NECK",
-                "LEGS"
+                "LEGS",
+                "HEAD"
               ],
               "seed": "$spotSeed",
               "spacing": 2.6,
@@ -156,51 +201,18 @@
               "parts": [
                 "BODY",
                 "NECK",
-                "LEGS"
+                "LEGS",
+                "HEAD"
               ],
-              "channel": "darkness",
-              "from": 0.35,
-              "to": "$reach"
+              "channel": "black",
+              "from": 0.62,
+              "to": 0.88,
+              "spread": "$reach"
             }
           ],
           "op": {
             "type": "TOWARD",
             "strength": 90,
-            "hue": "$hue",
-            "saturation": 0.82,
-            "lightness": 0.58
-          }
-        },
-        {
-          "name": "the merged patches nearest the source, in colour",
-          "masks": [
-            {
-              "type": "PIGMENT",
-              "parts": [
-                "BODY",
-                "NECK",
-                "LEGS"
-              ],
-              "channel": "darkness",
-              "from": 0.6,
-              "to": 0.85
-            },
-            {
-              "type": "PATCHES",
-              "parts": [
-                "BODY",
-                "NECK",
-                "LEGS"
-              ],
-              "seed": "$spotSeed",
-              "scale": 3.0,
-              "threshold": 0.45,
-              "softness": 0.1
-            }
-          ],
-          "op": {
-            "type": "TOWARD",
-            "strength": 88,
             "hue": "$hue",
             "saturation": 0.82,
             "lightness": 0.58

@@ -5,7 +5,7 @@
   "phase": "magical",
   "priority": 366,
   "rarity": "RARE",
-  "blurb": "Black strokes down the caudal neck and shoulder with a closed spiral at the withers, the widest of them carrying a saturated blue core, and a blue band at every fetlock.",
+  "blurb": "Black strokes down the caudal neck and shoulder, the widest of them carrying a saturated blue core, with a blue band at every fetlock.",
   "alleles": [
     {
       "token": "Cir",
@@ -36,7 +36,7 @@
     {
       "id": "circuit",
       "name": "Circuit",
-      "description": "Tapering strokes running down and back from the crest to the point of shoulder, forking into two or three branches near their ends, with one closed spiral of two or three turns sitting at the upper shoulder. Blue appears only inside black - as a lozenge inset along the core of the widest strokes, leaving black margins either side, and as the fetlock bands. It is never a marking on bare coat. Nothing behind the girth.",
+      "description": "Tapering strokes running down and back from the crest to the point of shoulder, forking into two or three branches near their ends. Blue appears only inside black - as a lozenge inset along the core of the widest strokes, leaving black margins either side, and as the fetlock band. A single stroke sits over each orbital ridge, and the cannons carry the same cored strokes as the shoulder.",
       "when": [
         "Cir/Cir",
         "Cir/n"
@@ -70,28 +70,6 @@
               "from": 0.5,
               "to": 1.0,
               "softness": 0.2
-            }
-          ],
-          "op": {
-            "type": "TOWARD",
-            "color": "#080808",
-            "strength": 95
-          }
-        },
-        {
-          "name": "the closed spiral at the withers",
-          "masks": [
-            {
-              "type": "SPIRAL",
-              "parts": [
-                "BODY"
-              ],
-              "radius": 4.0,
-              "turns": 2.5,
-              "width": 0.7,
-              "axis": "Z",
-              "offset": 0.3,
-              "softness": 0.1
             }
           ],
           "op": {
@@ -245,7 +223,8 @@
       "id": "wild",
       "name": "Wild type",
       "description": "No circuitry.",
-      "wildType": true
+      "wildType": true,
+      "layers": []
     }
   ],
   "founders": {

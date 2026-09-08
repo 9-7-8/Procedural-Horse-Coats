@@ -212,13 +212,7 @@
               "spacing": 6.5,
               "radius": 2.2,
               "vary": 0.4,
-              "chance": {
-                "perDose": [
-                  0.0,
-                  0.35,
-                  0.6
-                ]
-              },
+              "chance": 0.6,
               "softness": 0.6
             }
           ],
@@ -257,13 +251,7 @@
               "spacing": 6.5,
               "radius": 2.2,
               "vary": 0.4,
-              "chance": {
-                "perDose": [
-                  0.0,
-                  0.35,
-                  0.6
-                ]
-              },
+              "chance": 0.6,
               "softness": 0.6
             }
           ],
@@ -301,13 +289,7 @@
               "spacing": 6.5,
               "radius": 3.0,
               "vary": 0.4,
-              "chance": {
-                "perDose": [
-                  0.0,
-                  0.35,
-                  0.6
-                ]
-              },
+              "chance": 0.6,
               "softness": 0.8
             }
           ],

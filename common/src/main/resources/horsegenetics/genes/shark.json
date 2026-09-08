@@ -5,7 +5,7 @@
   "phase": "magical",
   "priority": 259,
   "rarity": "RARE",
-  "blurb": "A single fin-shaped pale field standing on the withers and on a pale collar right round the base of the neck, with a tapering band running on up the crest to the poll.",
+  "blurb": "A single fin-shaped pale field standing on the withers and on the top of the base of the neck, with a tapering band running on up the crest to the poll.",
   "alleles": [
     {
       "token": "Shk",
@@ -45,7 +45,7 @@
     {
       "id": "white",
       "name": "Shark",
-      "description": "One field, and only one: a sickle standing on the topline over the withers, its apex set forward of the middle of its base, its back edge scooped hollow and its front edge straight or slightly bellied. It stands on the whole base of the neck, which goes pale right round the circumference where the neck meets the chest - that collar is part of the marking, not a separate one. Crisp along the top and the back edge, softer underneath. Most sharks also carry a narrow band running forward along the crest from the apex to the poll.",
+      "description": "One field, and only one: a sickle standing on the topline over the withers, its apex set forward of the middle of its base, its back edge scooped hollow and its front edge straight or slightly bellied. It stands on the base of the neck, which goes pale over the crest and down the upper side but never onto the throat - that much of the neck is part of the marking, not a separate one. Crisp along the top and the back edge, softer underneath. Most sharks also carry a narrow band running forward along the crest from the apex to the poll.",
       "when": [
         "Shk/Shk",
         "Shk/Shc",
@@ -95,7 +95,7 @@
           }
         },
         {
-          "name": "the whole base of the neck, which the fin stands on",
+          "name": "the base of the neck the fin stands on, clear of the throat",
           "masks": [
             {
               "type": "AXIS",
@@ -107,6 +107,21 @@
               "from": 0.0,
               "to": "$collar",
               "softness": 1.4
+            },
+            {
+              "type": "WAVES",
+              "parts": [
+                "NECK"
+              ],
+              "axis": "X",
+              "across": "Y",
+              "space": "units",
+              "shape": "saw",
+              "wavelength": 90.0,
+              "amplitude": 77.94,
+              "from": 45.0,
+              "to": 90.0,
+              "softness": 4.5
             },
             {
               "type": "NOISE",
@@ -209,7 +224,7 @@
           }
         },
         {
-          "name": "the whole base of the neck, which the fin stands on, in colour",
+          "name": "the base of the neck the fin stands on, clear of the throat",
           "masks": [
             {
               "type": "AXIS",
@@ -221,6 +236,21 @@
               "from": 0.0,
               "to": "$collar",
               "softness": 1.4
+            },
+            {
+              "type": "WAVES",
+              "parts": [
+                "NECK"
+              ],
+              "axis": "X",
+              "across": "Y",
+              "space": "units",
+              "shape": "saw",
+              "wavelength": 90.0,
+              "amplitude": 77.94,
+              "from": 45.0,
+              "to": 90.0,
+              "softness": 4.5
             },
             {
               "type": "NOISE",

@@ -5,7 +5,7 @@
   "phase": "magical",
   "priority": 407,
   "rarity": "UNCOMMON",
-  "blurb": "A white wedge up the face with a black muzzle below it, black cannons over a thin white ring at the coronet, and black hair speckled white throughout.",
+  "blurb": "A white mask running the whole length of the face to the back of the head with a black muzzle below it, black cannons over a thin white ring at the coronet, and black hair speckled white throughout.",
   "alleles": [
     {
       "token": "Cvd",
@@ -23,15 +23,15 @@
     },
     {
       "name": "maskReach",
-      "min": 0.45,
-      "max": 0.85
+      "min": 0.14,
+      "max": 0.34
     }
   ],
   "expressions": [
     {
       "id": "corvid",
       "name": "Corvid",
-      "description": "The face carries a white field from the muzzle boundary back over the nasal bone and orbits, narrowing to a wedge at the forehead, bounded along the upper cheek and hard-edged along a smooth curve throughout. Below it the muzzle is black to the nostrils, cut square across the nasal bone. Each leg has a white ring immediately above the hoof, the same height all the way round, with black from that ring up to about the knee and hock - and that upper boundary is the one soft edge on the whole marking. Mane, forelock and tail are black, carrying small hard white points through them, densest near the crest and dock, and a few long soft-edged streaks in the horse's own coat colour running with the fall of the hair.",
+      "description": "The face carries a white field from the muzzle boundary back over the nasal bone and orbits and on to the poll - the whole length of the head, not a wedge that runs out at the forehead - bounded along the upper cheek and hard-edged along a smooth curve throughout. Below it the muzzle is black to the nostrils, cut square across the nasal bone. Each leg has a white ring immediately above the hoof, with black up the cannon over it, and the mane and tail are black speckled white throughout.",
       "when": [
         "Cvd/Cvd",
         "Cvd/n"
@@ -53,7 +53,7 @@
               ],
               "axis": "X",
               "space": "part",
-              "from": "$maskReach",
+              "from": -0.1,
               "to": 1.0,
               "softness": 0.04
             },
@@ -64,7 +64,7 @@
               ],
               "axis": "Y",
               "space": "part",
-              "from": 0.25,
+              "from": "$maskReach",
               "to": 1.0,
               "softness": 0.04
             }

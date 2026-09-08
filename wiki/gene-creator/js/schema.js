@@ -25,6 +25,7 @@ window.HG = window.HG || {};
     };
   }
   function parts(name, doc) { return { name: name, kind: "PARTS", doc: doc }; }
+  function flag(name, doc) { return { name: name, kind: "FLAG", fallback: false, doc: doc }; }
   function choice(name, choices, doc) { return { name: name, kind: "CHOICE", choices: choices, fallback: choices[0], doc: doc }; }
   function color(name, doc) { return { name: name, kind: "COLOR", fallback: "#ffffff", doc: doc }; }
   function colors(name, doc) { return { name: name, kind: "COLORS", doc: doc }; }
@@ -162,6 +163,7 @@ window.HG = window.HG || {};
         v("stretch", 1.0, "1 is round, 2 is a 2:1 oval", { min: 0.2, max: 6, step: 0.05 }),
         choice("axis", ["X", "Y", "Z"], "the axis the oval is stretched along"),
         choice("shape", ["round", "heart"], "'heart' swaps the disc for a heart, point down"),
+        flag("mirror", "draw on |z|, so the two sides of the horse match"),
         v("softness", 0.25, "edge fade, body units", { min: 0, max: 3, step: 0.05 })
       ]
     },
