@@ -54,7 +54,6 @@ public final class HorseQuery {
     /** The columns a table can be ordered by. */
     public enum Sort {
         NAME("Name"),
-        BARN("Barn"),
         SEX("Sex"),
         AGE("Age"),
         BREED("Breed"),
@@ -287,7 +286,10 @@ public final class HorseQuery {
                 if (equalsIgnoreCase(allele.token(), value)) {
                     return true;
                 }
-                if (namedGene && allele != gene.defaultAllele()) {
+                if (namedGene && allele != gene.defaultAllele() && !gene.isPlaceholder(allele)) {
+                    // The reserved Y in a stallion's X-linked pair is the slot
+                    // he does not have, not an allele he is carrying - without
+                    // this, gene:brindle matches every stallion alive.
                     return true;
                 }
             }
@@ -357,7 +359,6 @@ public final class HorseQuery {
     public static Comparator<HorseListing> comparator(Sort sort, boolean descending) {
         Comparator<HorseListing> c;
         switch (sort) {
-            case BARN -> c = Comparator.comparing(HorseListing::barnName, String.CASE_INSENSITIVE_ORDER);
             case SEX -> c = Comparator.comparing(HorseListing::sexLabel, String.CASE_INSENSITIVE_ORDER);
             case AGE -> c = Comparator.comparing(HorseListing::ageLabel, String.CASE_INSENSITIVE_ORDER);
             case BREED -> c = Comparator.comparing(HorseListing::breed, String.CASE_INSENSITIVE_ORDER);

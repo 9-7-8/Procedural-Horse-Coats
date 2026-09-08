@@ -95,6 +95,11 @@ public final class HorseAncestryData extends SavedData implements HorseDatabase 
         return delegate.ancestorsOf(id, depth);
     }
 
+    @Override
+    public List<List<HorseRecord>> descendantsOf(UUID id, int depth) {
+        return delegate.descendantsOf(id, depth);
+    }
+
     public int size() {
         return delegate.size();
     }

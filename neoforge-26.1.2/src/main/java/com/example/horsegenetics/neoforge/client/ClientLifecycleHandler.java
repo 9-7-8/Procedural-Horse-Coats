@@ -21,6 +21,9 @@ public final class ClientLifecycleHandler {
         ClientHorseCareCache.clear();
         ClientGeneDatabase.clear();
         ClientHorseRoster.clear();
+        ClientHorseCoats.clear();
+        ClientOffspring.clear();
+        HorsePortrait.clear();
         GeneticCoatTextureFactory.clear();
         FlatItemCatalog.clear();
     }

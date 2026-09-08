@@ -98,6 +98,52 @@ public final class InMemoryHorseDatabase implements HorseDatabase {
         frontier.add(parentId.get());
     }
 
+    /**
+     * Descendants by generation. There is no parent-to-child index - the store
+     * is a map by id - so each generation is one pass over the whole table,
+     * testing whether either parent is in the frontier. That is
+     * {@code O(depth * n)} and it is the right trade at this size: an index
+     * would have to be kept correct through every record, rename, transfer and
+     * forget, for a query that runs when somebody presses a button.
+     */
+    @Override
+    public List<List<HorseRecord>> descendantsOf(UUID id, int depth) {
+        if (depth <= 0) {
+            return List.of();
+        }
+        List<List<HorseRecord>> generations = new ArrayList<>();
+        Set<UUID> seen = new HashSet<>();
+        seen.add(id);
+        Set<UUID> frontier = new HashSet<>();
+        frontier.add(id);
+
+        for (int generation = 0; generation < depth && !frontier.isEmpty(); generation++) {
+            List<HorseRecord> children = new ArrayList<>();
+            for (HorseRecord record : byId.values()) {
+                if (seen.contains(record.id()) || !hasParentIn(record, frontier)) {
+                    continue;
+                }
+                children.add(record);
+            }
+            if (children.isEmpty()) {
+                break;
+            }
+            Set<UUID> next = new HashSet<>();
+            for (HorseRecord child : children) {
+                seen.add(child.id());
+                next.add(child.id());
+            }
+            generations.add(List.copyOf(children));
+            frontier = next;
+        }
+        return List.copyOf(generations);
+    }
+
+    private static boolean hasParentIn(HorseRecord record, Set<UUID> parents) {
+        return record.motherId().filter(parents::contains).isPresent()
+                || record.fatherId().filter(parents::contains).isPresent();
+    }
+
     /** Snapshot of every stored record, for serialization. */
     public Collection<HorseRecord> all() {
         return List.copyOf(byId.values());

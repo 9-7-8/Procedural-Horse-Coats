@@ -115,6 +115,15 @@ public final class HorseBrowserScreen extends AbstractContainerScreen<HorseBrows
     private static final int TAB_TOP = 6;
     private static final int TAB_H = 18;
     private static final int ROW_H = 12;
+    /**
+     * The roster tables' row height. Taller than {@link #ROW_H} because these
+     * rows carry a <b>horse</b> - see {@link HorsePortrait} - and a coat is not
+     * readable in twelve pixels. The gene list keeps the short pitch: it is a
+     * list of names and a taller row would only show fewer of them.
+     */
+    private static final int HORSE_ROW_H = 26;
+    /** Square, at the left of a roster row. */
+    private static final int PORTRAIT_W = 30;
 
     private Tab tab = Tab.MY_HORSES;
     private String search = "";
@@ -237,9 +246,8 @@ public final class HorseBrowserScreen extends AbstractContainerScreen<HorseBrows
         searchBox.setValue(search);
         addRenderableWidget(searchBox);
 
-        int bw = Math.min(190, detailR() - detailX());
         craftPaperButton = Button.builder(Component.translatable("gui.horsegenetics.craft_paper"), b -> craftPaper())
-                .bounds(detailX(), contentBottom() - 22, bw, 18)
+                .bounds(detailX(), contentBottom() - 22, 120, 18)
                 .build();
         craftPaperButton.visible = false;
         addRenderableWidget(craftPaperButton);
@@ -252,7 +260,7 @@ public final class HorseBrowserScreen extends AbstractContainerScreen<HorseBrows
         addRenderableWidget(horseFilterBox);
 
         refreshRosterButton = Button.builder(Component.literal("Refresh"), b -> requestRoster())
-                .bounds(listX(), contentTop() - 1, 60, 18).build();
+                .bounds(listX(), contentTop() - 1, buttonW("Refresh"), 18).build();
         refreshRosterButton.visible = false;
         addRenderableWidget(refreshRosterButton);
 
@@ -261,7 +269,7 @@ public final class HorseBrowserScreen extends AbstractContainerScreen<HorseBrows
                     b.setMessage(settledLabel());
                     rebuildPreview();
                 })
-                .bounds(listX() + 64, contentTop() - 1, 130, 18).build();
+                .bounds(listX() + 64, contentTop() - 1, buttonW(settledLabel().getString()), 18).build();
         settledToggle.visible = false;
         addRenderableWidget(settledToggle);
 
@@ -272,7 +280,19 @@ public final class HorseBrowserScreen extends AbstractContainerScreen<HorseBrows
     }
 
     private Component settledLabel() {
-        return Component.literal(showSettled ? "All loci" : "Only what can vary");
+        return Component.literal(showSettled ? "All loci" : "Only what varies");
+    }
+
+    /**
+     * A button exactly as wide as what is written on it. Every button on this
+     * screen used to carry a hand-picked width, and every one of them was too
+     * big for its label - which is invisible while the panels are painted
+     * <em>over</em> the widgets and becomes a button sitting on top of the text
+     * beside it the moment that is fixed. Sizing from the font means a
+     * relabelled or translated button cannot go back to overlapping.
+     */
+    private int buttonW(String label) {
+        return this.font.width(label) + 14;
     }
 
     private void requestRoster() {
@@ -306,20 +326,25 @@ public final class HorseBrowserScreen extends AbstractContainerScreen<HorseBrows
     private void layoutGeneButtons() {
         boolean breeding = tab == Tab.BREEDING_PREVIEW;
         boolean mine = tab == Tab.MY_HORSES;
+        int refreshW = buttonW("Refresh");
         if (refreshRosterButton != null) {
             // Both roster tabs want it; it sits in the same place on each.
             boolean show = breeding || mine;
             refreshRosterButton.visible = show;
             refreshRosterButton.active = show;
-            if (mine) {
-                refreshRosterButton.setRectangle(60, 18, fsRight() - 60, contentTop() - 1);
-            } else {
-                refreshRosterButton.setRectangle(60, 18, listX(), contentTop() - 1);
-            }
+            refreshRosterButton.setRectangle(refreshW, 18,
+                    mine ? fsRight() - refreshW : listX(), contentTop() - 1);
         }
         if (settledToggle != null) {
             settledToggle.visible = breeding;
             settledToggle.active = breeding;
+            // Clamped to the left column. Unclamped it ran past the picker and
+            // over the Punnett pane's first line at narrow window widths, which
+            // is the overlap that started all of this.
+            int x = listX() + refreshW + 4;
+            int w = Math.min(buttonW(settledLabel().getString()), listX() + listW() - x);
+            settledToggle.setRectangle(Math.max(20, w), 18, x, contentTop() - 1);
+            settledToggle.setMessage(settledLabel());
         }
         if (horseFilterBox != null) {
             horseFilterBox.visible = mine;
@@ -337,8 +362,10 @@ public final class HorseBrowserScreen extends AbstractContainerScreen<HorseBrows
         craftPaperButton.active = carrot;
         if (carrot) {
             int x = leftPos + HorseBrowserMenu.RESULT_X + 22;
-            int w = leftPos + IMG_W - 8 - x;
-            craftPaperButton.setRectangle(w, 16, x, topPos + 90);
+            int w = Math.min(buttonW(craftPaperButton.getMessage().getString()),
+                    leftPos + IMG_W - 8 - x);
+            // Below the note beside the grid, not through it.
+            craftPaperButton.setRectangle(w, 16, x, topPos + 104);
         }
     }
 
@@ -866,8 +893,7 @@ public final class HorseBrowserScreen extends AbstractContainerScreen<HorseBrows
     }
 
     private static final List<Column> COLUMNS = List.of(
-            new Column(HorseQuery.Sort.NAME, 112),
-            new Column(HorseQuery.Sort.BARN, 54),
+            new Column(HorseQuery.Sort.NAME, 124),
             new Column(HorseQuery.Sort.SEX, 44),
             new Column(HorseQuery.Sort.AGE, 32),
             new Column(HorseQuery.Sort.BREED, 88),
@@ -881,7 +907,7 @@ public final class HorseBrowserScreen extends AbstractContainerScreen<HorseBrows
             new Column(HorseQuery.Sort.WHERE, 64));
 
     /** The weights above, summed. Columns are laid out as shares of this. */
-    private static final int TOTAL_WEIGHT = 700;
+    private static final int TOTAL_WEIGHT = 658;
 
     /** The heading strip, one row tall, above the rows themselves. */
     private int tableHeadY() {
@@ -898,12 +924,12 @@ public final class HorseBrowserScreen extends AbstractContainerScreen<HorseBrows
     }
 
     private int horseVisibleRows() {
-        return Math.max(1, (tableBottom() - tableTop()) / ROW_H);
+        return Math.max(1, (tableBottom() - tableTop()) / HORSE_ROW_H);
     }
 
     private int columnX(int index) {
-        int x = fsLeft() + 2;
-        int avail = fsRight() - fsLeft() - 8;
+        int x = fsLeft() + PORTRAIT_W + 4;
+        int avail = fsRight() - fsLeft() - PORTRAIT_W - 10;
         for (int i = 0; i < index; i++) {
             x += COLUMNS.get(i).weight() * avail / TOTAL_WEIGHT;
         }
@@ -911,7 +937,7 @@ public final class HorseBrowserScreen extends AbstractContainerScreen<HorseBrows
     }
 
     private int columnW(int index) {
-        int avail = fsRight() - fsLeft() - 8;
+        int avail = fsRight() - fsLeft() - PORTRAIT_W - 10;
         return Math.max(12, COLUMNS.get(index).weight() * avail / TOTAL_WEIGHT - 4);
     }
 
@@ -940,10 +966,10 @@ public final class HorseBrowserScreen extends AbstractContainerScreen<HorseBrows
 
     private HorseListing horseRowAt(double mx, double my) {
         if (mx < fsLeft() || mx > fsRight() || my < tableTop()
-                || my >= tableTop() + horseVisibleRows() * ROW_H) {
+                || my >= tableTop() + horseVisibleRows() * HORSE_ROW_H) {
             return null;
         }
-        int i = horseScroll + (int) ((my - tableTop()) / ROW_H);
+        int i = horseScroll + (int) ((my - tableTop()) / HORSE_ROW_H);
         return i >= 0 && i < horseRows.size() ? horseRows.get(i) : null;
     }
 
@@ -991,24 +1017,32 @@ public final class HorseBrowserScreen extends AbstractContainerScreen<HorseBrows
 
         g.fill(l - 2, top - 2, r + 2, bottom + 2, PANEL_SOFT);
         g.enableScissor(l - 2, top, r + 2, bottom);
+        List<HorseListing> onScreen = new ArrayList<>();
         for (int i = horseScroll; i < horseRows.size() && i < horseScroll + horseVisibleRows(); i++) {
             HorseListing row = horseRows.get(i);
-            int ry = top + (i - horseScroll) * ROW_H;
+            onScreen.add(row);
+            int ry = top + (i - horseScroll) * HORSE_ROW_H;
             boolean sel = row.id().equals(selectedHorseId);
-            boolean hover = mouseX >= l && mouseX <= r && mouseY >= ry && mouseY < ry + ROW_H;
+            boolean hover = mouseX >= l && mouseX <= r && mouseY >= ry && mouseY < ry + HORSE_ROW_H;
             if (sel) {
-                g.fill(l - 2, ry, r, ry + ROW_H, ROW_SEL);
+                g.fill(l - 2, ry, r, ry + HORSE_ROW_H, ROW_SEL);
             } else if (hover) {
-                g.fill(l - 2, ry, r, ry + ROW_H, ROW_HOVER);
+                g.fill(l - 2, ry, r, ry + HORSE_ROW_H, ROW_HOVER);
             } else if ((i & 1) == 1) {
-                // Zebra striping: thirteen columns of small text need the eye
+                // Zebra striping: twelve columns of small text need the eye
                 // held on one row, and a per-row rule would be heavier than
                 // the rows themselves.
-                g.fill(l - 2, ry, r, ry + ROW_H, DIVIDER);
+                g.fill(l - 2, ry, r, ry + HORSE_ROW_H, DIVIDER);
             }
-            drawHorseRow(g, row, ry + 2, sel);
+            HorsePortrait.draw(g, ClientHorseCoats.get(row.id()), !row.adult(),
+                    l, ry + 1, PORTRAIT_W, HORSE_ROW_H - 2, mouseX, mouseY);
+            drawHorseRow(g, row, ry + (HORSE_ROW_H - this.font.lineHeight) / 2, sel);
         }
         g.disableScissor();
+        // Only the rows actually on screen, and only once each - see
+        // ClientHorseCoats. Asking for the whole stable up front is what the
+        // roster deliberately does not do.
+        ClientHorseCoats.request(onScreen);
 
         if (horseRows.isEmpty()) {
             String note = !ClientHorseRoster.received() ? "asking the server..."
@@ -1032,8 +1066,11 @@ public final class HorseBrowserScreen extends AbstractContainerScreen<HorseBrows
     private void drawHorseRow(GuiGraphicsExtractor g, HorseListing row, int y, boolean sel) {
         int plain = sel ? NAME : NAME_DIM;
         String[] cells = {
+                // The barn name is deliberately not a column: it is blank on
+                // nearly every horse, so it was a column of dashes. It is on
+                // the footer line and on the information screen, and `barn:`
+                // still filters on it.
                 row.displayName(),
-                row.barnName().isEmpty() ? "-" : row.barnName(),
                 row.sexLabel(),
                 row.ageLabel(),
                 row.breed(),
@@ -1048,7 +1085,6 @@ public final class HorseBrowserScreen extends AbstractContainerScreen<HorseBrows
         };
         int[] colours = {
                 row.lethal() ? BAD : plain,
-                plain,
                 plain,
                 plain,
                 plain,
@@ -1145,7 +1181,7 @@ public final class HorseBrowserScreen extends AbstractContainerScreen<HorseBrows
     }
 
     private int pickerRows(boolean mares) {
-        return Math.max(1, (pickerBottom(mares) - pickerTop(mares)) / ROW_H);
+        return Math.max(1, (pickerBottom(mares) - pickerTop(mares)) / HORSE_ROW_H);
     }
 
     private int pickerScroll(boolean mares) {
@@ -1156,11 +1192,11 @@ public final class HorseBrowserScreen extends AbstractContainerScreen<HorseBrows
     private HorseListing horseAt(double mx, double my, Sex sex) {
         boolean mares = sex == Sex.FEMALE;
         if (mx < listX() || mx > listX() + listW()
-                || my < pickerTop(mares) || my >= pickerTop(mares) + pickerRows(mares) * ROW_H) {
+                || my < pickerTop(mares) || my >= pickerTop(mares) + pickerRows(mares) * HORSE_ROW_H) {
             return null;
         }
         List<HorseListing> list = ClientHorseRoster.of(sex);
-        int i = pickerScroll(mares) + (int) ((my - pickerTop(mares)) / ROW_H);
+        int i = pickerScroll(mares) + (int) ((my - pickerTop(mares)) / HORSE_ROW_H);
         return i >= 0 && i < list.size() ? list.get(i) : null;
     }
 
@@ -1199,7 +1235,7 @@ public final class HorseBrowserScreen extends AbstractContainerScreen<HorseBrows
         }
         drawPicker(g, mouseX, mouseY, Sex.FEMALE);
         drawPicker(g, mouseX, mouseY, Sex.MALE);
-        drawPreviewPane(g);
+        drawPreviewPane(g, mouseX, mouseY);
     }
 
     private void drawPicker(GuiGraphicsExtractor g, int mouseX, int mouseY, Sex sex) {
@@ -1219,20 +1255,28 @@ public final class HorseBrowserScreen extends AbstractContainerScreen<HorseBrows
         g.enableScissor(l, top, l + w, bottom);
         int visible = pickerRows(mares);
         int scroll = pickerScroll(mares);
+        List<HorseListing> onScreen = new ArrayList<>();
         for (int i = scroll; i < list.size() && i < scroll + visible; i++) {
             HorseListing horse = list.get(i);
-            int ry = top + (i - scroll) * ROW_H;
+            onScreen.add(horse);
+            int ry = top + (i - scroll) * HORSE_ROW_H;
             boolean sel = horse.id().equals(chosen);
-            boolean hover = mouseX >= l && mouseX <= l + w && mouseY >= ry && mouseY < ry + ROW_H;
+            boolean hover = mouseX >= l && mouseX <= l + w && mouseY >= ry && mouseY < ry + HORSE_ROW_H;
             if (sel) {
-                g.fill(l - 2, ry, l + w, ry + ROW_H, ROW_SEL);
+                g.fill(l - 2, ry, l + w, ry + HORSE_ROW_H, ROW_SEL);
             } else if (hover) {
-                g.fill(l - 2, ry, l + w, ry + ROW_H, ROW_HOVER);
+                g.fill(l - 2, ry, l + w, ry + HORSE_ROW_H, ROW_HOVER);
             }
-            drawFitted(g, horse.displayName() + "  g" + horse.generation(), l + 4, ry + 2, w - 12,
-                    sel ? NAME : NAME_DIM);
+            HorsePortrait.draw(g, ClientHorseCoats.get(horse.id()), !horse.adult(),
+                    l, ry + 1, PORTRAIT_W, HORSE_ROW_H - 2, mouseX, mouseY);
+            int tx = l + PORTRAIT_W + 4;
+            int tw = l + w - 6 - tx;
+            drawFitted(g, horse.displayName(), tx, ry + 4, tw, sel ? NAME : NAME_DIM);
+            drawFitted(g, "g" + horse.generation() + "  " + horse.coat(),
+                    tx, ry + 5 + this.font.lineHeight, tw, TAG);
         }
         g.disableScissor();
+        ClientHorseCoats.request(onScreen);
 
         if (list.isEmpty()) {
             String note = !ClientHorseRoster.received()
@@ -1252,7 +1296,17 @@ public final class HorseBrowserScreen extends AbstractContainerScreen<HorseBrows
         }
     }
 
-    private void drawPreviewPane(GuiGraphicsExtractor g) {
+    /** The chosen pair, drawn large above their Punnett squares. */
+    private void drawPairPortraits(GuiGraphicsExtractor g, HorseListing dam, HorseListing sire,
+                                   int l, int y, int mouseX, int mouseY) {
+        int size = 34;
+        HorsePortrait.draw(g, ClientHorseCoats.get(dam.id()), !dam.adult(),
+                l, y, size, size, mouseX, mouseY);
+        HorsePortrait.draw(g, ClientHorseCoats.get(sire.id()), !sire.adult(),
+                l + size + 6, y, size, size, mouseX, mouseY);
+    }
+
+    private void drawPreviewPane(GuiGraphicsExtractor g, int mouseX, int mouseY) {
         int l = detailX();
         int r = detailR();
         int top = contentTop();
@@ -1293,10 +1347,14 @@ public final class HorseBrowserScreen extends AbstractContainerScreen<HorseBrows
         int y = top - (int) detailScroll;
         int startY = y;
 
-        drawFitted(g, dam.displayName() + "   x   " + sire.displayName(), l, y, w, HEADING);
-        y += lineH;
-        drawFitted(g, dam.breed() + " mare  x  " + sire.breed() + " stallion", l, y, w, TAG);
-        y += lineH + 4;
+        drawPairPortraits(g, dam, sire, l, y, mouseX, mouseY);
+        int textX = l + 80;
+        drawFitted(g, dam.displayName() + "   x   " + sire.displayName(), textX, y + 4, w - 80, HEADING);
+        drawFitted(g, dam.breed() + " mare  x  " + sire.breed() + " stallion",
+                textX, y + 4 + lineH, w - 80, TAG);
+        drawFitted(g, dam.coat() + "   x   " + sire.coat(),
+                textX, y + 4 + lineH * 2, w - 80, DESC);
+        y += 38;
 
         if (preview.isEmpty()) {
             g.text(this.font, Component.literal(showSettled

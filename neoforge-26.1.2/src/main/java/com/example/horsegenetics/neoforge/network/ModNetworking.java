@@ -186,6 +186,38 @@ public final class ModNetworking {
                 })
         );
 
+        registrar.playToClient(
+                OffspringDataPayload.TYPE,
+                OffspringDataPayload.STREAM_CODEC,
+                (payload, context) -> context.enqueueWork(() ->
+                        com.example.horsegenetics.neoforge.client.ClientOffspring.accept(payload))
+        );
+
+        registrar.playToServer(
+                OffspringRequestPayload.TYPE,
+                OffspringRequestPayload.STREAM_CODEC,
+                (payload, context) -> context.enqueueWork(() ->
+                        handleOffspringRequest(payload, context.player()))
+        );
+
+        registrar.playToClient(
+                HorseCoatBatchPayload.TYPE,
+                HorseCoatBatchPayload.STREAM_CODEC,
+                (payload, context) -> context.enqueueWork(() ->
+                        com.example.horsegenetics.neoforge.client.ClientHorseCoats.accept(payload.entries()))
+        );
+
+        registrar.playToServer(
+                HorseCoatRequestPayload.TYPE,
+                HorseCoatRequestPayload.STREAM_CODEC,
+                (payload, context) -> context.enqueueWork(() -> {
+                    if (context.player() instanceof ServerPlayer serverPlayer) {
+                        com.example.horsegenetics.neoforge.server.HorseCoats.sendTo(
+                                serverPlayer, payload.ids());
+                    }
+                })
+        );
+
         registrar.playToServer(
                 InspectHorsePayload.TYPE,
                 InspectHorsePayload.STREAM_CODEC,
@@ -348,6 +380,37 @@ public final class ModNetworking {
         if (!serverPlayer.getAbilities().instabuild) {
             serverPlayer.getItemInHand(tagHand).shrink(1);
         }
+    }
+
+    /**
+     * A horse's descendants, generation by generation. Capped in both
+     * directions by {@link OffspringDataPayload} - a full record per horse is
+     * not cheap - and each generation reports whether it was cut, so the screen
+     * can say "and more" rather than showing part of a family as the whole of
+     * it.
+     */
+    private static void handleOffspringRequest(OffspringRequestPayload payload,
+                                               net.minecraft.world.entity.player.Player player) {
+        if (!(player instanceof ServerPlayer serverPlayer)) {
+            return;
+        }
+        MinecraftServer server = serverPlayer.level().getServer();
+        if (server == null) {
+            return;
+        }
+        List<List<HorseRecord>> found = HorseAncestryData.get(server)
+                .descendantsOf(payload.rootId(), OffspringDataPayload.MAX_GENERATIONS);
+        List<OffspringDataPayload.Generation> generations = new ArrayList<>();
+        for (List<HorseRecord> generation : found) {
+            boolean truncated = generation.size() > OffspringDataPayload.MAX_PER_GENERATION;
+            generations.add(new OffspringDataPayload.Generation(
+                    truncated
+                            ? List.copyOf(generation.subList(0, OffspringDataPayload.MAX_PER_GENERATION))
+                            : generation,
+                    truncated));
+        }
+        PacketDistributor.sendToPlayer(serverPlayer,
+                new OffspringDataPayload(payload.rootId(), List.copyOf(generations)));
     }
 
     private static void handleFamilyTreeRequest(FamilyTreeRequestPayload payload, net.minecraft.world.entity.player.Player player) {

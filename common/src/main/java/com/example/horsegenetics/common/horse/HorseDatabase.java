@@ -46,4 +46,27 @@ public interface HorseDatabase {
      * </ul>
      */
     List<HorseRecord> ancestorsOf(UUID id, int depth);
+
+    /**
+     * Descendants of {@code id}, <b>grouped by generation</b>: index 0 is the
+     * horse's foals, index 1 its grandfoals, and so on, up to {@code depth}
+     * generations.
+     *
+     * <ul>
+     *   <li>The horse itself is never included.</li>
+     *   <li>Each descendant appears at most once and in the <b>earliest</b>
+     *       generation that reaches it, so a line that folds back on itself -
+     *       a mare bred to her own grandson - lists each horse once rather
+     *       than looping.</li>
+     *   <li>A generation with nobody in it ends the list: there is nothing
+     *       below an empty one.</li>
+     *   <li>{@code depth <= 0} returns an empty list.</li>
+     * </ul>
+     *
+     * <p>Grouped rather than flat because that is the only shape the answer is
+     * useful in - "who came from this horse" is a question about generations,
+     * and flattening it would throw away the one thing the caller then has to
+     * reconstruct.
+     */
+    List<List<HorseRecord>> descendantsOf(UUID id, int depth);
 }

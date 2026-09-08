@@ -15,7 +15,10 @@ import com.example.horsegenetics.common.trait.HorseTraits;
 import com.example.horsegenetics.common.trait.StatAxis;
 import com.example.horsegenetics.common.trait.TraitBreakdown;
 import com.example.horsegenetics.common.trait.Traits;
+import com.example.horsegenetics.common.coat.CoatData;
 import com.example.horsegenetics.neoforge.network.InspectHorsePayload;
+import com.example.horsegenetics.neoforge.network.OffspringDataPayload;
+import com.example.horsegenetics.neoforge.network.OffspringRequestPayload;
 import com.example.horsegenetics.neoforge.network.SetBarnNamePayload;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -64,6 +67,12 @@ import java.util.List;
  *       marks. A gene that does one of those <i>and</i> paints - dhampir - is
  *       here rather than on Coat, because the coat is the least of what it
  *       does. {@link GeneCategory} decides, from what the gene implements.</li>
+ *   <li><b>Offspring</b> - the other direction: this horse's foals, then
+ *       their foals, each generation drawn as a row of little horses under a
+ *       divider. It is the <b>only</b> tab that does not redraw from what the
+ *       client already has - the answer is a walk of the whole ancestry table
+ *       and a full record per descendant, so it is asked for on a
+ *       <b>Refresh</b> press and not before.</li>
  *   <li><b>Family tree</b> - hands straight off to {@link FamilyTreeScreen},
  *       which comes back here when it closes.</li>
  * </ul>
@@ -79,6 +88,7 @@ public final class HorseInfoScreen extends Screen {
         HEALTH("Health"),
         COAT("Coat"),
         OTHER("Other genes"),
+        OFFSPRING("Offspring"),
         FAMILY("Family tree");
 
         final String label;
@@ -128,6 +138,14 @@ public final class HorseInfoScreen extends Screen {
     /** Genes' fixed header: the locus count, and the filter button beside it. */
     private static final int GENES_HEADER_H = 24;
 
+    /** Offspring's fixed header: the Refresh button and what it last found. */
+    private static final int OFFSPRING_HEADER_H = 24;
+
+    /** One descendant's portrait, and the pitch of a row of them. */
+    private static final int FOAL_W = 40;
+    private static final int FOAL_H = 40;
+    private static final int FOAL_GAP = 4;
+
     /** Remembered across openings - reopening on the tab you were reading. */
     private static Tab lastTab = Tab.OVERVIEW;
 
@@ -152,6 +170,7 @@ public final class HorseInfoScreen extends Screen {
     private EditBox barnBox;
     private Button setBarnButton;
     private Button baselineFilterButton;
+    private Button offspringRefreshButton;
 
     /** Ticks since the screen opened, for the once-a-second hold heartbeat. */
     private int heldTicks;
@@ -221,6 +240,7 @@ public final class HorseInfoScreen extends Screen {
         return switch (tab) {
             case OVERVIEW -> contentTop() + HEADER_H;
             case GENES -> contentTop() + GENES_HEADER_H;
+            case OFFSPRING -> contentTop() + OFFSPRING_HEADER_H;
             default -> contentTop();
         };
     }
@@ -272,8 +292,22 @@ public final class HorseInfoScreen extends Screen {
                 .build();
         addRenderableWidget(baselineFilterButton);
 
+        offspringRefreshButton = Button.builder(Component.literal("Refresh"), b -> requestOffspring())
+                .bounds(contentRight() - buttonW("Refresh"), contentTop() - 2, buttonW("Refresh"), 16)
+                .build();
+        addRenderableWidget(offspringRefreshButton);
+
         applyTabWidgets();
         sendHold(true);
+    }
+
+    /** A button exactly as wide as what is written on it - see the browser's twin. */
+    private int buttonW(String label) {
+        return this.font.width(label) + 14;
+    }
+
+    private void requestOffspring() {
+        ClientPacketDistributor.sendToServer(new OffspringRequestPayload(record.id()));
     }
 
     private Component baselineFilterLabel() {
@@ -297,6 +331,11 @@ public final class HorseInfoScreen extends Screen {
         if (baselineFilterButton != null) {
             baselineFilterButton.visible = genes;
             baselineFilterButton.active = genes;
+        }
+        boolean offspring = tab == Tab.OFFSPRING;
+        if (offspringRefreshButton != null) {
+            offspringRefreshButton.visible = offspring;
+            offspringRefreshButton.active = offspring;
         }
     }
 
@@ -441,6 +480,8 @@ public final class HorseInfoScreen extends Screen {
             drawOverviewHeader(g);
         } else if (tab == Tab.GENES) {
             drawGenesHeader(g);
+        } else if (tab == Tab.OFFSPRING) {
+            drawOffspringHeader(g);
         }
 
         int top = pageTop();
@@ -455,6 +496,7 @@ public final class HorseInfoScreen extends Screen {
             case HEALTH -> drawHealth(c);
             case COAT -> drawGeneList(c, GeneCategory.COAT, "Nothing but the baseline colour genes.");
             case OTHER -> drawGeneList(c, GeneCategory.OTHER, "This horse carries no ability, diet or eye genes.");
+            case OFFSPRING -> drawOffspring(c, mouseX, mouseY);
             case FAMILY -> { /* never rendered - selecting it pushes a screen */ }
         }
         g.disableScissor();
@@ -691,7 +733,7 @@ public final class HorseInfoScreen extends Screen {
         if (!hideBaseline || isBaseCoatLocus(gene)) {
             return true;
         }
-        return !genotype.pair(gene).homozygousFor(gene.defaultAllele());
+        return !gene.atBaseline(genotype.pair(gene));
     }
 
     /** Extension, agouti and shade - the base coat, and never filtered out. */
@@ -707,7 +749,7 @@ public final class HorseInfoScreen extends Screen {
             }
             AllelePair pair = genotype.pair(gene);
             Expression expr = genotype.expressionOf(gene);
-            boolean baseline = pair.homozygousFor(gene.defaultAllele());
+            boolean baseline = gene.atBaseline(pair);
             boolean on = !expr.wildType();
             shown++;
             c.row(gene.name(), pair.toTokens(), expr.name(),
@@ -866,17 +908,21 @@ public final class HorseInfoScreen extends Screen {
 
         int shown = 0;
         for (Gene gene : Genes.codeOrder()) {
-            if (GeneCategory.of(gene) != category) {
+            AllelePair pair = genotype.pair(gene);
+            // The per-horse category, not the per-gene one: KIT declares an eye
+            // channel, but only its broad white outcomes ever claim an iris, so
+            // an ordinary sabino belongs on Coat and every horse alive was
+            // getting a KIT row under Other genes instead.
+            if (GeneCategory.of(gene, pair, genotype, epigenome) != category) {
                 continue;
             }
-            AllelePair pair = genotype.pair(gene);
             Expression expr = genotype.expressionOf(gene);
-            boolean baseline = pair.homozygousFor(gene.defaultAllele());
+            boolean baseline = gene.atBaseline(pair);
             boolean on = !expr.wildType();
             // Always show the three loci that define the base horse, and
             // otherwise only a locus the horse carries something at - including
             // a silent carrier, which is exactly what a breeder is looking for.
-            boolean always = gene == Genes.EXTENSION || gene == Genes.AGOUTI || gene == Genes.SHADE;
+            boolean always = isBaseCoatLocus(gene);
             if (!always && baseline) {
                 continue;
             }
@@ -903,6 +949,35 @@ public final class HorseInfoScreen extends Screen {
      * expressed one marked. Empty for most genes - the shared formatter says so
      * and this draws nothing.
      */
+    /**
+     * A descendant's coat, straight off its record. Null when the record has no
+     * genome - the portrait draws an empty well and says nothing it cannot
+     * know, which is the same rule the family tree follows for an ancestor
+     * whose coat is genuinely gone.
+     */
+    private static @Nullable CoatData coatOf(HorseRecord horse) {
+        try {
+            return horse.hasGenome() ? new CoatData(horse.genome()) : null;
+        } catch (RuntimeException unreadable) {
+            return null;
+        }
+    }
+
+    /** Text at {@code (x, y)}, squeezed rather than clipped when it will not fit. */
+    private void drawFitted(GuiGraphicsExtractor g, String text, int x, int y, int maxW, int colour) {
+        float w = this.font.width(text);
+        if (w <= maxW || w <= 0) {
+            g.text(this.font, Component.literal(text), x, y, colour, false);
+            return;
+        }
+        var pose = g.pose();
+        pose.pushMatrix();
+        pose.translate(x, y);
+        pose.scale(maxW / w);
+        g.text(this.font, Component.literal(text), 0, 0, colour, false);
+        pose.popMatrix();
+    }
+
     private void epigenetics(Cursor c, Gene gene) {
         if (epigenome == null) {
             return;
@@ -916,6 +991,73 @@ public final class HorseInfoScreen extends Screen {
         for (String line : lines) {
             c.line(line, ALLELE_TOK, 16);
         }
+    }
+
+    // ------------------------------------------------------------------
+    // Offspring - the pedigree read downward
+    // ------------------------------------------------------------------
+
+    /**
+     * The strip above the generations: what the last answer was, and the button
+     * that asks for another. Fixed rather than scrolling, for the same reason
+     * Overview's barn box is - it is a real widget at a real position and it
+     * cannot be allowed to slide away from the text it belongs to.
+     */
+    private void drawOffspringHeader(GuiGraphicsExtractor g) {
+        int x = contentLeft();
+        int y = contentTop();
+        g.text(this.font, Component.literal("Descendants of " + GuiText.clip(fullName(), 40)),
+                x, y, HEADING, false);
+        y += lineH() + 1;
+        boolean asked = record.id().equals(ClientOffspring.rootId());
+        g.text(this.font, Component.literal(asked
+                        ? "as of the last refresh"
+                        : "press Refresh - this tab is the only one that asks the server"),
+                x, y, DIM_TEXT, false);
+        g.fill(x, contentTop() + OFFSPRING_HEADER_H - 5, contentRight(),
+                contentTop() + OFFSPRING_HEADER_H - 4, RULE);
+    }
+
+    /**
+     * One block per generation - foals, grandfoals, and so on - each a wrapped
+     * row of little horses in their real coats, separated by a rule. A
+     * descendant's coat comes straight off its record (which carries the
+     * epigenome), so nothing here needs a second round trip.
+     */
+    private void drawOffspring(Cursor c, int mouseX, int mouseY) {
+        List<OffspringDataPayload.Generation> generations = ClientOffspring.of(record.id());
+        if (generations.isEmpty()) {
+            c.wrapped(record.id().equals(ClientOffspring.rootId())
+                            ? "This horse has no recorded descendants."
+                            : "Nothing asked for yet. Refresh walks the whole ancestry table and "
+                                    + "sends a full record for every descendant, which is why it is a "
+                                    + "button and not something that happens when you open the tab.",
+                    DIM_TEXT, 0);
+            return;
+        }
+        for (int i = 0; i < generations.size(); i++) {
+            if (i > 0) {
+                c.rule();
+            }
+            OffspringDataPayload.Generation generation = generations.get(i);
+            c.label(generationLabel(i) + "  (" + generation.horses().size()
+                    + (generation.truncated() ? "+" : "") + ")");
+            c.horses(generation.horses(), mouseX, mouseY);
+            if (generation.truncated()) {
+                c.line("...and more than this tab will fetch at once.", DIM_TEXT, 4);
+            }
+            c.gap(2);
+        }
+    }
+
+    /** Foals, grandfoals, great-grandfoals - and then plain numbers. */
+    private static String generationLabel(int index) {
+        return switch (index) {
+            case 0 -> "Foals";
+            case 1 -> "Grandfoals";
+            case 2 -> "Great-grandfoals";
+            default -> (index + 1) + " generations down";
+        };
     }
 
     // ------------------------------------------------------------------
@@ -1004,5 +1146,29 @@ public final class HorseInfoScreen extends Screen {
         void gap(int px) {
             y += px;
         }
+
+        /**
+         * A wrapped row of little horses with their names under them. Each is
+         * drawn from its own record's coat, so the row is what those horses
+         * actually look like rather than a set of icons.
+         */
+        void horses(List<HorseRecord> horses, int mouseX, int mouseY) {
+            int perRow = Math.max(1, width / (FOAL_W + FOAL_GAP));
+            int nameH = font.lineHeight + 1;
+            for (int i = 0; i < horses.size(); i++) {
+                HorseRecord horse = horses.get(i);
+                int col = i % perRow;
+                if (col == 0 && i > 0) {
+                    y += FOAL_H + nameH + FOAL_GAP;
+                }
+                int hx = x + col * (FOAL_W + FOAL_GAP);
+                HorsePortrait.draw(g, coatOf(horse), false, hx, y, FOAL_W, FOAL_H, mouseX, mouseY);
+                HorseInfoScreen.this.drawFitted(g, horse.displayName(), hx, y + FOAL_H + 1, FOAL_W,
+                        horse.sex() == com.example.horsegenetics.common.horse.Sex.FEMALE
+                                ? EXPR_CARRIER : VALUE);
+            }
+            y += FOAL_H + nameH + 4;
+        }
+
     }
 }

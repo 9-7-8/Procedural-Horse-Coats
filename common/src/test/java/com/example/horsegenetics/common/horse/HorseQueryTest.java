@@ -140,6 +140,29 @@ class HorseQueryTest {
         assertFalse(HorseQuery.matches(plain, HorseQuery.terms("gene:extension")));
     }
 
+    /**
+     * A stallion's X-linked pair reads {@code n/Y}, and the reserved {@code Y}
+     * is the slot he does not have rather than something he is carrying. Get
+     * this wrong and {@code gene:brindle} matches every stallion alive.
+     */
+    @Test
+    void aStallionsReservedSlotIsNotAnAlleleHeCarries() {
+        // n/Y: a plain stallion. He is homozygous for nothing, so the old
+        // `homozygousFor(defaultAllele())` test called him a carrier and put a
+        // brindle row on every stallion's gene page.
+        AllelePair plain = new AllelePair(Genes.BRINDLE.n, Genes.BRINDLE.Y);
+        assertTrue(Genes.BRINDLE.atBaseline(plain));
+        HorseListing stallion = row("Stallion", "Arabian",
+                Genotype.wildType().withSex(Sex.MALE).with(plain), true, 1, 0);
+        assertFalse(HorseQuery.matches(stallion, HorseQuery.terms("gene:brindle")));
+
+        AllelePair carries = new AllelePair(Genes.BRINDLE.Brn, Genes.BRINDLE.Y);
+        assertFalse(Genes.BRINDLE.atBaseline(carries));
+        HorseListing brindle = row("Brindle", "Arabian",
+                Genotype.wildType().withSex(Sex.MALE).with(carries), true, 1, 0);
+        assertTrue(HorseQuery.matches(brindle, HorseQuery.terms("gene:brindle")));
+    }
+
     @Test
     void malformedTermsMatchNothingAndDoNotThrow() {
         for (String query : List.of("speed>", "gen>abc", "bond<", ":", ">", "-", "gene:", "expresses:")) {

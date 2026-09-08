@@ -251,6 +251,25 @@ public interface Gene {
     }
 
     /**
+     * <b>Is the horse carrying nothing but the wild type here?</b> The question
+     * every "hide the loci with nothing going on" filter actually wants, and
+     * the reason it is not simply {@code pair.homozygousFor(defaultAllele())}:
+     * a stallion at an {@code X}-linked locus reads {@code n/Y}, which is not
+     * homozygous for anything and is nevertheless a horse carrying nothing.
+     * Testing the <b>real</b> alleles gets both right - a plain stallion is at
+     * baseline, a {@code Brn/Y} stallion is not, and a {@code Brn/n} mare is
+     * not either, which is what makes a carrier visible.
+     */
+    default boolean atBaseline(AllelePair pair) {
+        for (Allele allele : realAlleles(pair)) {
+            if (!allele.equals(defaultAllele())) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
      * Could a horse of <b>some</b> sex carry this combination at all? A pair of
      * placeholders at an {@code X}-linked locus could not - every horse has an
      * {@code X} - and neither could two real alleles at a {@code Y}-linked one.
