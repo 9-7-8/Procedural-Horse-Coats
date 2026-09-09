@@ -93,6 +93,14 @@ every system, and it stays current as the mod grows.
 
 Works client-side and on dedicated servers; both sides need the mod.
 
+Two things in `config/horsegenetics-server.toml` are worth knowing about, because
+they are the only two the mod turns off for you. `health.mode` decides how much of
+the disease layer a world plays with, and **`body.size` decides whether the size
+genes actually resize the horse** - on by default, but a Falabella and a Percheron
+have differently-sized *hitboxes*, so if you would rather every saddle, lead and
+fence gap sit exactly where vanilla puts it, set it `false`. Both are server-side,
+and neither changes what a horse carries or passes to its foals.
+
 **Every release so far is a development release**, and there is no back-compatibility
 layer - a new version will not load a world made by an older one. What changed in each
 is on

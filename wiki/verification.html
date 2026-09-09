@@ -35,6 +35,52 @@
     </p>
 </div>
 
+<h2 id="body-size-toggle">&sect;0-AX &mdash; Body size is now a server toggle (2026-09-09, NOT looked at)</h2>
+
+<p>
+    <code>body.size</code>, a boolean in the server config, <strong>true by
+    default</strong>. False makes <code>HorseRecords.applyTraitsToEntity</code> write a
+    flat <code>1.0</code> to <code>Attributes.SCALE</code> rather than what the alleles
+    resolved to, so a world keeps every size gene and gets vanilla hitboxes. Design:
+    <a href="horse-body.html#body-size">Speed, health, jump &amp; size &sect;
+    <code>body.size</code></a>.
+</p>
+
+<ul>
+    <li><strong>Default behaviour is unchanged.</strong> The first thing to check, and the
+        one a mistake here would break for everyone: a fresh world should still produce
+        visibly big and visibly small horses. If every horse is suddenly vanilla-sized,
+        the default read is coming back false &mdash; most likely the
+        <code>IllegalStateException</code> fallback in
+        <code>ServerConfig.bodySizeActive()</code> firing because the config is consulted
+        before it loads.</li>
+    <li><strong>Set it false and reload.</strong> Edit
+        <code>config/horsegenetics-server.toml</code> in the instance &mdash; in this
+        NeoForge that is where a <code>SERVER</code> config lives, and a world&rsquo;s own
+        <code>serverconfig/</code> folder is an optional per-world <em>override</em> of it
+        &mdash; then quit to title and come back. A Falabella and a Percheron standing side by side should now be the
+        same height. They re-resolve on the entity tick once per level load, so a horse
+        that was already loaded needs the reload &mdash; if one stays big after a full
+        restart, <code>HorseFoundingTickHandler</code> is not re-running.</li>
+    <li><strong>Does the horse still <em>say</em> it is big?</strong> The whole promise of
+        the setting. The info panel reads the live attribute and should say
+        <code>1.00</code>; the family tree, the browser and the inspect paper read the
+        genotype and should still show the real size. If the genotype-side numbers went
+        to 1.00 too, the gate leaked past the one attribute write it is supposed to be.</li>
+    <li><strong>Does tack sit right?</strong> The reason the setting exists. Saddle a
+        horse that would have been oversized and look at where the saddle and the rider
+        sit, and whether it fits a two-block doorway (<a href="known-gaps.html#gap-55">gap
+        55</a> should stop applying entirely with the setting off).</li>
+    <li><strong>Turn it back on.</strong> Reload again; the big horses should come back
+        exactly as they were, because nothing about the genotype was ever touched.</li>
+    <li><strong>The <code>scale</code> effect verb.</strong> No shipped gene uses it, so
+        this one needs a hand-written gene to test: an
+        <a href="gene-effects.html#attribute"><code>attribute</code></a> effect naming
+        <code>scale</code> should be inert with the setting off, and a modifier already
+        standing should come <em>off</em> on the next reconcile rather than staying frozen
+        on the horse.</li>
+</ul>
+
 <h2 id="local-space">&sect;0-AW &mdash; A band can follow a pitched part, and six dead layers woke up (2026-09-09, NOT looked at)</h2>
 
 <p>

@@ -163,7 +163,12 @@ public final class HorseRecords {
      * <p>{@code SCALE} is what makes the size loci visible, and it is doing more
      * than the other three - vanilla scales the model <b>and</b> the hitbox from
      * it, so a pony is genuinely a smaller target and a dwarf genuinely a
-     * shorter one, with no renderer work at all.
+     * shorter one, with no renderer work at all. That second half is why it is
+     * the one trait with a switch: {@code body.size} false writes a flat 1.0
+     * here and nowhere else, so a world that wants its tack and its hitboxes to
+     * sit where vanilla puts them still breeds, carries and reports the size
+     * alleles identically. It is written, not skipped, so flipping the setting
+     * off and reloading actually shrinks the big horses back.
      *
      * <p>Speed goes through {@link HorseSpeedFloor} on the way out, and it is the
      * <b>only</b> place that clamp is applied. The genetics keep whatever they
@@ -179,7 +184,7 @@ public final class HorseRecords {
     public static void applyTraitsToEntity(Horse horse, Traits traits, boolean fullHeal) {
         setBase(horse, Attributes.MOVEMENT_SPEED, HorseSpeedFloor.clamp(traits.speed()));
         setBase(horse, Attributes.JUMP_STRENGTH, traits.jump());
-        setBase(horse, Attributes.SCALE, traits.scale());
+        setBase(horse, Attributes.SCALE, ServerConfig.bodySizeActive() ? traits.scale() : 1.0);
 
         AttributeInstance health = horse.getAttribute(Attributes.MAX_HEALTH);
         if (health != null) {

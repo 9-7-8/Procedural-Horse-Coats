@@ -8,6 +8,7 @@ import com.example.horsegenetics.common.genetics.spec.HorseAbilities;
 import com.example.horsegenetics.common.horse.HorseRecord;
 import com.example.horsegenetics.common.horse.Sex;
 import com.example.horsegenetics.neoforge.HorseGenetics;
+import com.example.horsegenetics.neoforge.ServerConfig;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.particles.BlockParticleOption;
@@ -197,6 +198,19 @@ public final class GeneAbilityHandler {
             Map.entry("gravity", Attributes.GRAVITY));
 
     /**
+     * {@code scale} is the one entry in that table a world may switch off. An
+     * effect that moves it resizes the model and the hitbox exactly as the size
+     * loci do, so it answers to the same {@code body.size} setting - see
+     * {@link ServerConfig#bodySizeActive()}. Both {@link #applyAttribute} and
+     * {@link #clearAttributes} ask, so a world that flips the setting off has
+     * any standing scale modifier taken back off on the next reconcile rather
+     * than left frozen on the horse.
+     */
+    private static boolean attributeAllowed(String attribute) {
+        return !"scale".equals(attribute) || ServerConfig.bodySizeActive();
+    }
+
+    /**
      * Hold up one attribute modifier while its {@code when} is true.
      *
      * <p><b>Not verified in-game.</b> Written against 26.1.2 sources.
@@ -214,6 +228,9 @@ public final class GeneAbilityHandler {
         if (attribute == null) {
             warnUntranslated("attribute:" + mod.attribute(), geneKey);
             return;
+        }
+        if (!attributeAllowed(mod.attribute())) {
+            return; // body.size is off; clearAttributes takes off any modifier already up
         }
         AttributeInstance instance = horse.getAttribute(attribute);
         if (instance == null) {
@@ -247,6 +264,7 @@ public final class GeneAbilityHandler {
         Set<Identifier> keep = new HashSet<>();
         for (HorseAbilities.Active active : wanted) {
             if (active.ability() instanceof GeneAbility.AttributeMod mod
+                    && attributeAllowed(mod.attribute())
                     && conditionHolds(mod.when(), horse, record)) {
                 keep.add(attributeModifierId(active.geneKey(), mod.attribute()));
             }

@@ -3,15 +3,19 @@ package com.example.horsegenetics.neoforge;
 import net.neoforged.neoforge.common.ModConfigSpec;
 
 /**
- * Server-side settings - the first of them, and the reason this class exists at
- * all: how much of the <b>health genetics</b> a world actually plays with.
+ * Server-side settings. Both of them are the same kind of setting: the genetics
+ * are always built and always inherited, and what a world may switch off is
+ * only whether a gene is allowed to <b>touch the animal standing in front of
+ * you</b> - its hearts ({@code health.mode}) or its body size
+ * ({@code body.size}).
  *
- * <p>{@link ClientConfig} was the wrong side for this. Whether a foal dies has
+ * <p>{@link ClientConfig} is the wrong side for both. Whether a foal dies has
  * to be the same answer for everyone on a server, and it has to be the same
- * answer the breeding handler gives when it decides not to make one - both of
- * those are server decisions.
+ * answer the breeding handler gives when it decides not to make one; body size
+ * moves the <b>hitbox</b>, so a client that disagreed with the server about a
+ * horse's size would be aiming at a horse that is not there.
  *
- * <h2>Three positions</h2>
+ * <h2>health.mode - three positions</h2>
  * <ul>
  *   <li><b>{@code full}</b> (the default) - the disorders reduce a horse's max
  *       health, lethal foals are born and then die, and an embryonic lethal
@@ -24,14 +28,27 @@ import net.neoforged.neoforge.common.ModConfigSpec;
  *       all.</li>
  * </ul>
  *
- * <h2>What the setting cannot change</h2>
+ * <h2>body.size</h2>
+ * <b>{@code true} by default.</b> The size loci resolve a body scale, and
+ * writing it to {@code Attributes.SCALE} is what makes them visible - vanilla
+ * scales the model <i>and</i> the hitbox from it. That second half is the catch:
+ * a saddle, a lead, an arrow and a fence gap all meet a Falabella somewhere
+ * other than where they meet a Percheron, and a player who would rather have
+ * every horse fit the way vanilla horses fit can turn the size write off here.
+ * Every horse then renders and collides at scale 1.0 while still carrying,
+ * showing and inheriting exactly the size alleles it always did - the info
+ * panel and the paper both keep reporting what the genotype says, because that
+ * has not changed.
+ *
+ * <h2>What neither setting can change</h2>
  * <b>All the health genetics are built and inherited regardless.</b> The genes
  * are registered in every world, they occupy the same slots in the genotype
  * code, they are drawn from the same founder tables and they pass to foals the
  * same way. If the setting could change any of that, two players on different
  * settings would be breeding different animals, and a horse traded between them
- * would change genotype on the way. All it governs is whether what a horse
- * <i>carries</i> is allowed to affect the horse standing in front of you.
+ * would change genotype on the way. All they govern is whether what a horse
+ * <i>carries</i> is allowed to affect the horse standing in front of you. The
+ * same is true of {@code body.size}: it gates one attribute write, not a gene.
  */
 public final class ServerConfig {
 
@@ -59,6 +76,8 @@ public final class ServerConfig {
 
     public static final ModConfigSpec.EnumValue<HealthMode> HEALTH_MODE;
 
+    public static final ModConfigSpec.BooleanValue BODY_SIZE;
+
     static {
         ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
         HEALTH_MODE = builder
@@ -71,6 +90,19 @@ public final class ServerConfig {
                         "The genes themselves are always registered and always inherited,",
                         "whichever of these is chosen - this only governs the consequences.")
                 .defineEnum("health.mode", HealthMode.FULL);
+        BODY_SIZE = builder
+                .comment("Whether the size loci actually resize the horse. (default: true)",
+                        "  true  - a Falabella is genuinely small and a Percheron genuinely",
+                        "          large: vanilla scales the model AND the hitbox from it.",
+                        "  false - every horse is rendered and collides at scale 1.0, so tack",
+                        "          and hitboxes sit exactly where vanilla puts them.",
+                        "The size genes are registered, inherited and reported either way -",
+                        "this only governs whether the resolved scale reaches the entity.",
+                        "SERVER-SIDE: it moves hitboxes, so the server's answer is the one",
+                        "that counts and every client on it follows.",
+                        "Like health.mode, a change reaches horses already in the world when",
+                        "they next load - each horse re-resolves its body once per level load.")
+                .define("body.size", true);
         SPEC = builder.build();
     }
 
@@ -86,6 +118,19 @@ public final class ServerConfig {
     /** Shorthand for the flag {@code HorseTraits.resolve} takes. */
     public static boolean healthGeneticsActive() {
         return healthMode().affectsBody();
+    }
+
+    /**
+     * <b>May the resolved body scale reach {@code Attributes.SCALE}?</b> False
+     * means every horse is the vanilla size - see the {@code body.size} section
+     * above for why a world would want that.
+     */
+    public static boolean bodySizeActive() {
+        try {
+            return BODY_SIZE.get();
+        } catch (IllegalStateException notLoaded) {
+            return true;
+        }
     }
 
     /** Shorthand: may a lethal genotype actually kill a foal, or refuse a pairing? */

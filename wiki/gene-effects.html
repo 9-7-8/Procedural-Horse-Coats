@@ -498,6 +498,14 @@ Component  &rarr;  (Trigger, Condition, Selector, Effect)</code></pre>
 <tr><td><code>amount</code></td><td><code>0</code></td><td>Signed modifier amount.</td></tr>
 </tbody>
 </table>
+<p>
+    <code>scale</code> is the one entry in that list a world may switch off. It
+    resizes the model and the hitbox exactly as the size loci do, so it answers to
+    the same server setting they do &mdash;
+    <a href="horse-body.html#body-size"><code>body.size</code></a>. With that false
+    the modifier is never applied, and one already standing is taken off on the next
+    reconcile rather than left frozen on the horse.
+</p>
 <pre><code class="language-json">{ "type": "attribute", "attribute": "movement_speed", "op": "multiply_total",
   "amount": 0.15, "when": { "flag": "in_water" } }</code></pre>
 <p>

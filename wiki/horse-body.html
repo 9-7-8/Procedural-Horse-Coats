@@ -558,11 +558,12 @@ public interface GeneEpigenetics {
     </p>
 </div>
 
-<h2 id="config">The server setting</h2>
+<h2 id="config">The server settings</h2>
 
 <p>
-    <code>ServerConfig</code> &mdash; the mod&rsquo;s first, and server-side because
-    whether a foal dies has to be one answer for everyone.
+    <code>ServerConfig</code>, and server-side for the same reason both times:
+    whether a foal dies has to be one answer for everyone, and so does how big a
+    horse is, because size moves the <b>hitbox</b>.
 </p>
 
 <div class="table-wrap">
@@ -577,7 +578,7 @@ public interface GeneEpigenetics {
 </div>
 
 <div class="note rule">
-    <span class="label">What the setting cannot change</span>
+    <span class="label">What <code>health.mode</code> cannot change</span>
     <p>
         <b>All the health genetics are built and inherited regardless.</b> The genes
         are registered in every world, they occupy the same slots in the genotype
@@ -599,6 +600,47 @@ public interface GeneEpigenetics {
     lethal at once &mdash; and only the trait half is ever gated; the coat never is.
 </p>
 
+<h3 id="body-size"><code>body.size</code> &mdash; may the size loci resize the horse?</h3>
+
+<p>
+    A boolean, <b>true by default</b>. The size loci resolve a body scale and
+    <code>HorseRecords.applyTraitsToEntity</code> writes it to
+    <code>Attributes.SCALE</code>; setting this false writes a flat
+    <code>1.0</code> there instead. That is the whole mechanism &mdash; one
+    expression, in the one place listed in the table below.
+</p>
+
+<div class="note">
+    <span class="label">Why anyone would turn it off</span>
+    <p>
+        The same sentence that sells the size system is the reason for the switch:
+        vanilla scales the model <em>and the hitbox</em> from <code>SCALE</code>. A
+        saddle, a lead, an arrow and a fence gap all meet a Falabella somewhere
+        other than where they meet a Percheron, and a player who would rather have
+        their tack sit where vanilla puts it can say so. It is
+        <strong>server-side</strong> precisely because it is a hitbox change: a
+        client that disagreed with the server about a horse&rsquo;s size would be
+        aiming at a horse that is not there.
+    </p>
+</div>
+
+<p>
+    Nothing else is gated. The size genes are registered, drawn from the same
+    founder tables and inherited identically; <code>Traits.scale()</code> still
+    resolves to what the alleles say, so the info screen, the
+    inspect paper and the breeding debug line all keep reporting the real number. Only the entity is held at 1.0. The one other
+    route to <code>SCALE</code> &mdash; an <a href="gene-effects.html">effects</a>
+    <code>attribute</code> verb naming <code>scale</code> &mdash; answers to the
+    same setting, and <code>GeneAbilityHandler.clearAttributes</code> takes a
+    standing modifier back off rather than leaving it frozen on the horse.
+</p>
+
+<p>
+    Like <code>health.mode</code>, a change reaches horses already in the world
+    when they next load: each horse re-resolves its body once per level load, from
+    <a href="architecture.html">the entity tick</a>.
+</p>
+
 <h2 id="attributes">Reaching the game</h2>
 
 <p>
@@ -615,7 +657,7 @@ public interface GeneEpigenetics {
 <tr><td>speed</td><td><code>MOVEMENT_SPEED</code></td><td>base value, floored at vanilla's slowest horse &mdash; the only place that clamp is applied</td></tr>
 <tr><td>health</td><td><code>MAX_HEALTH</code></td><td>current HP clamped down, never healed for free on a reload</td></tr>
 <tr><td>jump</td><td><code>JUMP_STRENGTH</code></td><td>tracked for the first time</td></tr>
-<tr><td>scale</td><td><code>SCALE</code></td><td>vanilla scales the <b>model and the hitbox</b> from it</td></tr>
+<tr><td>scale</td><td><code>SCALE</code></td><td>vanilla scales the <b>model and the hitbox</b> from it &mdash; the one trait with a switch, <a href="#body-size"><code>body.size</code></a></td></tr>
 </tbody>
 </table>
 </div>
