@@ -37,10 +37,9 @@ If no, it goes in the wiki and gets a pointer here at most. In particular:
 | An API quirk of this SDK | `wiki/api-notes.html` |
 | **A derived number** (gene counts, catalogue sizes, test counts) | the code that computes it |
 
-**That last row is a repeat offender.** A number written into prose is stale the
-next time the code moves, and three sessions running have found stale ones by
-hand - see `wiki/known-gaps.html#gap-13`. Prefer naming the accessor
-(`Genes.codeOrder().size()`) over quoting its value.
+**That last row is a repeat offender** - three sessions running found stale ones
+by hand (`wiki/known-gaps.html#gap-13`). Name the accessor
+(`Genes.codeOrder().size()`), never quote its value.
 
 **When you add a line here, look for one to delete.** If this file grows past
 300 lines, that is the signal to move a section out, not to let it ride.
@@ -78,6 +77,7 @@ the same change as the code, and never copy it back into here.
 | Writing a gene; the class-by-class API reference | `wiki/modding.html`, `wiki/api-reference.html` |
 | **Module split, packages, data flow, build setup, running the game** | `wiki/architecture.html` |
 | **NeoForge 26.1.2 API quirks** - read before touching an unfamiliar system | `wiki/api-notes.html` |
+| **Technique** - how to find things out here; traps between two pages | `wiki/coding-notes.html` |
 | Living beside other mods | `wiki/compatibility.html` |
 | **What is broken / unproven / half-built** | `wiki/known-gaps.html` |
 | **The `runClient` checklist** - update after every play session | `wiki/verification.html` |

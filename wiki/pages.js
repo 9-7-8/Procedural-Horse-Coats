@@ -88,6 +88,7 @@ window.HG.pages = {
                 { href: "releases.html", text: "Releases", kind: "core", views: ["gameplay","coding"] },
                 { href: "architecture.html", text: "Architecture & the build", kind: "core", views: ["coding"] },
                 { href: "api-notes.html", text: "NeoForge 26.1.2 API notes", kind: "core", views: ["coding"] },
+                { href: "coding-notes.html", text: "Coding notes", kind: "core", views: ["coding"] },
                 { href: "verification.html", text: "To be verified", kind: "core", views: ["coding"] },
                 { href: "known-gaps.html", text: "Known gaps & lessons", kind: "core", views: ["coding"] },
                 { href: "compatibility.html", text: "Mod compatibility", kind: "core", views: ["coding"] },

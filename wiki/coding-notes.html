@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Coding notes &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow core">Project <span class="sep">/</span> how to work on this codebase</p>
+<h1>Coding notes</h1>
+<p class="lede">
+    The working notebook. Everything here was learned by getting it wrong first, and
+    none of it belongs to a single system, so none of it has an owning page &mdash;
+    it is <em>technique</em> and <em>cross-cutting traps</em> rather than how any one
+    gene or class behaves. This page has no line budget, unlike
+    <code>CLAUDE.md</code>, which is why it exists.
+</p>
+
+<h2 id="scope">What goes here, and what does not</h2>
+
+<p>
+    The routing table at the top of <code>CLAUDE.md</code> still governs. This page is
+    <strong>not</strong> an escape hatch for material that already has a home, and a
+    note that duplicates one of those pages is worse than no note, because it is a
+    second source of truth that nobody will remember to update:
+</p>
+
+<ul>
+<li>What a session built &rarr; <a href="session-log.html">session log</a>.</li>
+<li>A defect or an unchecked assumption &rarr; <a href="known-gaps.html">known gaps</a>.</li>
+<li>How a mask, op or header field behaves &rarr; <a href="gene-format.html">gene format</a>.</li>
+<li>An API quirk of this SDK &rarr; <a href="api-notes.html">API notes</a>.</li>
+<li>What the phases do &rarr; <a href="pipeline.html">the pipeline</a>.</li>
+</ul>
+
+<p>
+    What lands here is the residue: <strong>how to find out</strong>, <strong>how to
+    know a check is real</strong>, and the handful of traps that live in the gaps
+    <em>between</em> those pages, where each individual page is correct and the
+    interaction between two of them is not.
+</p>
+
+<h2 id="measure">Measure it; do not reason about it</h2>
+
+<p>
+    <strong>Reasoning about body space has been wrong more often than it has been
+    right.</strong> The coat pipeline is a stack of coordinate transforms, and every
+    one of them is individually simple enough to feel like it can be held in the head
+    &mdash; which is exactly why the errors survive: a wrong mental model produces a
+    confident, specific, testable claim, and it takes a measurement to notice that it
+    is false.
+</p>
+
+<p>
+    The cheap instrument is a <strong>throwaway probe</strong>: a test, or a gene file,
+    that paints the quantity in question and is deleted afterwards. Two that have paid
+    for themselves repeatedly:
+</p>
+
+<ul>
+<li><strong>A four-band <code>FLAT</code> probe</strong> settles any question about
+    where a body region actually lands on the sheet, in one render. Reasoning about it
+    was wrong three times in a single day; the probe has never been wrong.</li>
+<li><strong>A reading test</strong> &mdash; paint nothing, print the channel &mdash;
+    settles questions about what a mask <em>sees</em>. The <a href="#luma">LUMA table
+    below</a> came from one, and every number in it contradicted a guess that had
+    already been written down as fact.</li>
+</ul>
+
+<p>
+    The rule that generalises: <strong>when a claim is about a number the code can
+    print, print it.</strong> The probe costs a few minutes and the wrong guess costs
+    an evening, and the guess is <em>more</em> expensive when it is nearly right,
+    because a nearly-right coat looks like a different bug.
+</p>
+
+<p class="note">
+    A related discipline for coats specifically: after changing a painter, look at a
+    side-view grid of rendered horses rather than at the numbers. Band measurements
+    have agreed with a horse that was visibly wrong at least twice &mdash; the
+    measurement answers the question you asked, not the question of whether the horse
+    looks right.
+</p>
+
+<h2 id="green">A green check is not evidence until you have watched it go red</h2>
+
+<p>
+    This project has now been bitten <strong>three separate ways</strong> by a gate
+    that reported success while checking nothing. They are worth listing together,
+    because the failure looks identical from outside in all three cases &mdash; a
+    tool prints a large number of passing checks &mdash; and the causes have nothing
+    in common.
+</p>
+
+<ol>
+<li><strong>The oracle was stale.</strong> <code>check-parity.mjs</code> compares the
+    creator's JavaScript against <code>expected.json</code>, which is a checked-in
+    snapshot <em>of the Java</em>. Forget to re-bake it and the file agrees with the
+    JavaScript by definition. A swapped UV pair hid behind this for a day while the
+    creator drew every horse with its spine and belly patches exchanged.</li>
+<li><strong>The oracle was absent.</strong> <code>check-parity.mjs</code> runs
+    <code>restrict()</code> and <code>tint()</code> and has never run
+    <code>compose()</code> &mdash; the magical cases are seeded with a synthetic flat
+    colour rather than resolved through a chart. So the whole composite path had no
+    net at all, and the creator drew every dark coat at full opacity for months
+    (<a href="known-gaps.html#gap-50">gap 50</a>). The gate looked comprehensive and
+    had a hole the exact size of the bug.</li>
+<li><strong>The corpus could not discriminate.</strong> The invert/parts fix was
+    covered by parity and parity stayed green &mdash; because no example gene had a
+    layer whose output differed between the two semantics. The check ran, the
+    comparison was real, and the inputs could not tell the two answers apart.</li>
+</ol>
+
+<p>
+    The countermeasure for all three is the same, and it is cheap:
+    <strong>deliberately regress the thing the check guards, and confirm the check
+    fails.</strong> Then put it back. If it does not fail, the check is decorative and
+    you have just learned that for the price of one edit.
+</p>
+
+<p>
+    Both recent additions were accepted this way and not before: reintroducing the old
+    <code>rgb === 0</code> equality made three composer checks fail, one of them on
+    <code>#161515</code> exactly; regressing the JavaScript twin's invert order made
+    264 parity checks fail. <strong>Neither number was predictable in advance</strong>,
+    which is the point &mdash; had either come back as zero, the fix would have shipped
+    with a check that proved nothing.
+</p>
+
+<p class="note">
+    The deeper limit, which no amount of this fixes: <strong>parity cannot see a
+    mirrored bug.</strong> The two engines agreeing is not either of them being right.
+    Parity catches drift between Java and JavaScript; it says nothing about whether the
+    Java is correct, and a bug introduced into both at once is invisible to it forever.
+</p>
+
+<h2 id="refusals">Scan the corpus before adding a refusal</h2>
+
+<p>
+    Adding a rule to <code>GeneSpecParser</code> is adding a rule to
+    <strong>every gene file that already exists</strong>, and the parser runs at
+    startup, so a refusal that trips a shipped gene is not a warning &mdash; it is a
+    mod that will not load. The order that has worked is:
+</p>
+
+<ol>
+<li><strong>Write the detector as a throwaway scan first</strong> and run it over
+    <code>horsegenetics/genes/</code>. Now the migration cost is a number rather than
+    a surprise.</li>
+<li><strong>If it is zero, the rule is free</strong> &mdash; prevention with no
+    migration behind it, which is the cheapest possible moment to add it. Both recent
+    refusals landed here: zero of 513 banded masks and zero of 130 knob-driven ones
+    trip them.</li>
+<li><strong>If it is not zero, fix the files in the same change</strong>, and say in
+    the commit how many there were. A refusal added on top of known-broken files is a
+    trap for whoever next runs the game.</li>
+</ol>
+
+<p>
+    Two rules that <em>look</em> alike and are not, worth stating because the
+    distinction is the whole reason one of them is exempt:
+</p>
+
+<ul>
+<li><strong>A banded mask with its edges reversed is always a bug.</strong>
+    <code>AXIS</code>, <code>PIGMENT</code>, <code>LUMA</code> and <code>WAVES</code>
+    feed <code>smoothstep</code>, and <code>smoothstep</code> with
+    <code>edge1 &lt;= edge0</code> is a hard step <em>in the original direction</em>.
+    It does not reverse the ramp; it removes it. There is no author intent that this
+    expresses.</li>
+<li><strong>A <code>RAMP</code> with its ends reversed is a gradient the other way
+    round</strong>, which is a thing somebody might mean. Its <code>from</code> /
+    <code>to</code> are the ends of a linear interpolation, not the edges of a step,
+    so it is deliberately exempt from the check above.</li>
+</ul>
+
+<p>
+    And the test has to be <strong>possibility, not certainty</strong>. The worse of
+    the two historical cases pointed <code>to</code> at a knob whose range straddled
+    its own <code>from</code>: about half the horses drew reversed, and nothing about
+    the file looked wrong on any single horse. A knob is a range, two knobs are drawn
+    independently, and &ldquo;this can come out reversed on some horses&rdquo; is
+    exactly the defect.
+</p>
+
+<h2 id="between">Traps in the gaps between pages</h2>
+
+<p>
+    Each of these bit once, and in each case every individual page involved was
+    correct &mdash; the defect was in the interaction, which is precisely why none of
+    them has an owning page.
+</p>
+
+<h3 id="lattice">Every layer of one compound element must share its <code>stretch</code></h3>
+
+<p>
+    <code>SPOTS</code> divides the sample point by <code>spacing &times; stretch</code>
+    <strong>before</strong> walking the lattice. Squashing the sample is what makes an
+    oval &mdash; the cells stay round in the squashed frame and come out stretched on
+    the horse &mdash; but it means <strong>a different <code>stretch</code> is a
+    different lattice</strong>, with its cells in different places.
+</p>
+
+<p>
+    For a single layer that does not matter. For a <em>compound</em> element built from
+    several layers that are supposed to be concentric &mdash; a pupil inside an iris
+    inside a sclera &mdash; it is fatal: give the layers different stretches and each
+    one lands on its own grid, so the parts scatter instead of nesting. This produced a
+    neck of drifting fragments that looked like a radius bug and was not. If layers must
+    line up, <strong>every parameter feeding the lattice walk has to match</strong>,
+    not just the seed.
+</p>
+
+<h3 id="position">A mask's meaning depends on its position in the list</h3>
+
+<p>
+    The <strong>first</strong> mask of a layer <em>defines</em> the region; every later
+    one <em>modifies</em> it. So &ldquo;this mask does not apply here&rdquo; resolves
+    two different ways &mdash; coverage 0 in first position, and skip-it in any later
+    one &mdash; and treating them alike breaks something either way. Collapsing both to
+    &ldquo;skip&rdquo; made four genes paint everywhere they had excluded; collapsing
+    both to 0 deleted galaxy's black field and tribal ward's pale one.
+    <strong>The reasoning is written out in full in <code>SpecPainter.coverage</code>,
+    at the branch itself</strong>, and that is the right place for it &mdash; the note
+    here exists only so the shape of the mistake is findable from outside the file.
+</p>
+
+<h3 id="ground">A ground can be the only thing separating two alleles</h3>
+
+<p>
+    Removing a decorative ground from a gene is a one-line edit that can silently make
+    two of its alleles <strong>byte-identical</strong> &mdash; if the &ldquo;coloured&rdquo;
+    allele differed from the plain one <em>only</em> in the ground, taking the ground
+    out takes the allele with it, and the gene still loads, still passes, and now has a
+    duplicate. Shieldback and tribal ward both did this. The fix is to give the orphaned
+    knob something else to point at, usually the marking itself. <strong>After removing
+    a ground, diff the alleles</strong>; the coat bake golden will catch it, but only if
+    you read which rows moved rather than just re-baking.
+</p>
+
+<h3 id="subtexel">Sub-texel features are arithmetically present and invisible</h3>
+
+<p>
+    <code>TEXELS_PER_UNIT</code> is 2, so anything under about half a body unit does not
+    survive to the sheet. This is the commonest way a gene comes out blank and it never
+    looks like a scale problem. It has a proper treatment on
+    <a href="gene-format.html#scale">the gene format page</a>; it is listed here only
+    because it is the first thing to rule out when a new gene draws nothing.
+</p>
+
+<h2 id="luma">What the chart actually reads &mdash; measured, not assumed</h2>
+
+<p>
+    <code>LUMA</code> asks <strong>what colour the gradient produced</strong>, not what
+    pigment is behind it, which is the whole reason it exists: the
+    <a href="gene-lut.html">LUT locus</a> can hand a horse a chart whose black corner is
+    violet, and that horse has identical pigment and is not black anywhere. So
+    &ldquo;find the black bits&rdquo; is a question about the <em>output</em>, and the
+    thresholds have to be measured against the shipped chart rather than reasoned about.
+</p>
+
+<p>
+    These came from a reading probe on the shipped gradient. <strong>They are
+    properties of that chart, not constants</strong> &mdash; if the gradient art is
+    edited, re-measure before trusting any of them.
+</p>
+
+<table>
+<thead><tr><th>Coat</th><th><code>dark</code></th><th><code>white</code></th><th><code>saturation</code></th></tr></thead>
+<tbody>
+<tr><td>Black</td><td>0.807</td><td>&mdash;</td><td>0.02</td></tr>
+<tr><td>Bay</td><td>0.782</td><td>&mdash;</td><td>0.556</td></tr>
+<tr><td>Chestnut</td><td>0.599</td><td>&mdash;</td><td>&mdash;</td></tr>
+<tr><td>Bald face white</td><td>&mdash;</td><td>1.000</td><td>&mdash;</td></tr>
+<tr><td>Perlino</td><td>&mdash;</td><td>0.871</td><td>&mdash;</td></tr>
+<tr><td>Old grey</td><td>&mdash;</td><td>0.698</td><td>&mdash;</td></tr>
+<tr><td>Palomino</td><td>&mdash;</td><td>0.475</td><td>&mdash;</td></tr>
+</tbody>
+</table>
+
+<p>
+    <strong>The useful finding is that one channel is not enough at either end.</strong>
+    A black horse reads 0.807 on <code>dark</code> and a bay reads 0.782 &mdash; no
+    threshold separates those without losing half the black, because the difference
+    between them is <em>colour</em>, not brightness. <code>saturation</code> separates
+    them immediately: 0.02 against 0.556. That is why Nyxborn's stars are
+    <em>dark AND unsaturated</em>, and why a bay keeps its brown shoulder unstarred.
+</p>
+
+<p>
+    The pale end has the mirror-image problem. A palomino is 0.475 on the achromatic
+    floor while a bald face is 1.000, and both are &ldquo;pale&rdquo; &mdash; so a gene
+    that means &ldquo;the white markings&rdquo; and a gene that means &ldquo;wherever
+    the coat is light&rdquo; want different channels, and picking the wrong one gives a
+    palomino a body-wide marking it should not have.
+</p>
+
+<h3 id="black">&ldquo;As black as possible&rdquo; is <code>#151515</code></h3>
+
+<p>
+    The composite is a <em>multiply</em> over a shaded template, so a genuinely black
+    texel would take the shading with it and flatten the horse into a silhouette.
+    <code>CoatTextureComposer</code> therefore lifts shadows to a floor
+    (<code>SHADOW_FLOOR</code>, <code>0x15</code>) and ramps opacity from
+    <code>PURE_BLACK_ALPHA</code> at black up to fully opaque by <code>NEAR_BLACK</code>
+    (<code>0x30</code>). Two consequences worth knowing before chasing a phantom bug:
+    the blackest a horse gets is about <code>#151515</code>, and <strong>a black coat
+    bakes to roughly <code>#161515</code> rather than <code>#000000</code></strong>
+    &mdash; which is exactly what killed the creator's <code>rgb === 0</code> equality.
+    Never test a colour against pure black in this codebase.
+</p>
+
+<h2 id="mirrors">The mirrors, and how much of each is actually gated</h2>
+
+<p>
+    <a href="modding.html#contracts">The four-file contracts</a> say which files to
+    edit together. This is the complementary question, which is easier to get wrong:
+    <strong>of the hand-written JavaScript ports of <code>common/</code>, which ones
+    does anything check?</strong> The answer has been &ldquo;fewer than it looks&rdquo;
+    every time it has been asked.
+</p>
+
+<table>
+<thead><tr><th>Mirror</th><th>Of</th><th>Gated by</th></tr></thead>
+<tbody>
+<tr><td><code>spec-engine.js</code></td><td><code>SpecPainter</code></td><td><strong>Yes</strong> &mdash; the bulk of parity</td></tr>
+<tr><td><code>schema.js</code></td><td><code>SpecSchema</code></td><td><strong>Yes</strong> &mdash; defaults compared</td></tr>
+<tr><td><code>noise.js</code></td><td><code>BodyNoise</code></td><td><strong>Yes</strong>, via the engine's cases</td></tr>
+<tr><td><code>fields.js</code></td><td><code>CoatTextureComposer</code></td><td><strong>Arithmetic only</strong> &mdash; new; the composite itself cannot be compared in Node, which has no image decoder for the gradient and template</td></tr>
+<tr><td><code>geometry.js</code> + <code>model3d.js</code></td><td><code>HorseSkinGeometry</code></td><td><strong>No</strong> &mdash; <a href="known-gaps.html#gap-100">gap 100</a>; <code>posed()</code> exists twice, in two languages, in two files that are not obviously a pair</td></tr>
+</tbody>
+</table>
+
+<p>
+    <strong>The technique that closes one of these rows is now proven and cheap</strong>,
+    which is the main thing worth recording: bake a table of Java's answers into
+    <code>expected.json</code> from <code>SpecFixtureTool</code>, assert it in
+    <code>parity.js</code>, then regress the twin to prove the table discriminates.
+    Anything that is a pure function of numbers can be gated this way without teaching
+    the Node harness to render. That is exactly how the composer's arithmetic went in,
+    and gap 100 is the same shape &mdash; it needs <code>emitPart</code> exported and a
+    table of posed corners, and it stops being an open question.
+</p>
+
+<p class="note">
+    Hard rule 3 still stands and is not in tension with any of this: <strong>do not
+    write new ports.</strong> These five exist because the creator predates the WebAssembly
+    build; the designer runs the real <code>common/</code> via TeaVM. Anything new that
+    needs genetics in the browser gets an <code>@JSExport</code> on
+    <code>DesignerApi</code>, not a sixth mirror.
+</p>
+
+<h2 id="working">Working the build</h2>
+
+<h3 id="goldens">Two goldens, and only one of them is affordable</h3>
+
+<p>
+    They answer different questions and cost three orders of magnitude apart, so the
+    choice between them is not a matter of thoroughness:
+</p>
+
+<ul>
+<li><code>coat-golden.txt</code> composes a full 128&times;128 texture for a set of whole
+    horses. It is the one that would catch a phase interacting wrongly with another
+    phase, and regenerating it needs a <strong>full <code>:common:test</code></strong>
+    &mdash; nine or ten minutes (<a href="known-gaps.html#gap-97">gap 97</a>).</li>
+<li><code>coat-bake-golden.txt</code> hashes <strong>every registered gene, every
+    variant allele, one at a time</strong>, composed through the real gradient. It
+    runs in <em>seconds</em>, and it is the right instrument for &ldquo;did this edit
+    move any gene I did not mean to touch&rdquo;.</li>
+</ul>
+
+<p>
+    <strong>Read which rows moved, not just whether the file moved.</strong> The bake
+    golden's value is that it names the gene, so an edit intended for one gene that
+    silently moved four is visible immediately &mdash; but only if the diff is actually
+    read. It also asserts it covers every registered gene, so a new gene cannot quietly
+    fall outside it.
+</p>
+
+<h3 id="tripwires">Tests that are supposed to fail eventually</h3>
+
+<p>
+    A few tests assert a <em>bound</em> rather than a behaviour, and when one fires the
+    correct response is usually to move the bound and understand why, not to treat it
+    as a regression. <code>EpigenomeSizeTest</code> caps the serialised epigenome, and
+    <code>ShowcaseGenotypesTest</code> asserts a band that <strong>moves upward with
+    every magical coat gene added</strong> &mdash; by construction, since more magical
+    loci means more of them expressed in the showcase. Both fired during 0.3.0 and both
+    were correct to fire. <strong>Write down which direction a tripwire is expected to
+    drift</strong> when you add one, or the next session cannot tell an expected firing
+    from a real one.
+</p>
+
+<h3 id="portability">The two hard portability rules now enforce themselves</h3>
+
+<p>
+    <code>CommonPortabilityTest</code> scans the sources of <code>common/</code> for
+    Minecraft, NeoForge and Mojang imports (hard rule 1) and for the Java 9+ APIs that
+    have already been removed once (hard rule 2). This matters because <strong>the
+    compiler will not catch either</strong>: <code>common/</code> builds against a full
+    JDK and the NeoForge classpath is right there, so the day the backport starts is
+    the day you would otherwise find out. Note that a non-empty <code>Map.of(k, v)</code>
+    is deliberately allowed &mdash; the ban is on the zero-argument and
+    <code>copyOf</code> forms outside <code>CommonMaps</code>.
+</p>
+
+<p>
+    TeaVM has a related trap that no scan can catch: <strong>it compiles only the
+    reachable graph</strong>, so adding an <code>@JSExport</code> can surface a missing
+    JDK method that has been sitting there all along. Build <code>:web</code> after
+    adding one.
+</p>
+
+<h3 id="shell">Long shell heredocs truncate</h3>
+
+<p>
+    On this machine a heredoc past roughly a hundred lines is silently cut off, and the
+    error it produces is <code>unexpected EOF while looking for matching quote</code>
+    &mdash; which reads as a quoting mistake and sends you looking in entirely the wrong
+    place. For anything substantial, write the file directly or put a patch script in the
+    scratchpad and run it by absolute path. This page was assembled in chunks for exactly
+    that reason.
+</p>
+
+</article>
+</main>
+</body>
+</html>
