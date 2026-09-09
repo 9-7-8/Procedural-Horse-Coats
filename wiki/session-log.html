@@ -29,6 +29,102 @@
 
 <h2 id="d2026-09-09">2026-09-09</h2>
 
+<h3 id="local-frame-2026-09-09">Ask the neck what shape it is &mdash; and six gene layers that had never painted a texel.</h3>
+
+<p>Two defects, both picked for being fixable and provable without opening the game.</p>
+
+<h4>The coat cache was unbounded, and no reload touched it</h4>
+
+<p><a href="known-gaps.html#gap-130">Gap 130</a>, opened by the previous session&rsquo;s
+resolution analysis and closed here. <code>GeneticCoatTextureFactory</code> filled two
+<code>ConcurrentHashMap</code>s with <code>computeIfAbsent</code> and never removed an
+entry, so a client accumulated one permanently registered <code>DynamicTexture</code> per
+distinct genome it had ever drawn &mdash; adult and foal separately, plus a mask for every
+glowing one &mdash; and released them only on logging out. And there was <em>no client
+reload listener anywhere in the mod</em>, so editing the gradient and pressing F3+T
+appeared to do nothing at all.</p>
+
+<p>The fix that matters is the shape of the cache, not its size.
+<code>TexelBudgetCache</code> lives in <code>common/</code> because the interesting part is
+a policy rather than a texture: an LRU whose capacity is <strong>texels</strong> rather
+than entries. One entry is a whole sheet, so what has to stay bounded as
+<code>SHEET_SIZE</code> changes is the memory, not the horse count &mdash; an entry-count
+LRU tuned today would quietly be sixteen times the memory at four times the sheet, which
+is precisely the trap the <a href="texture-resolution.html">resolution work</a> is walking
+toward. A 64-entry floor sits under the budget so the cache can never come out smaller
+than a frame, which would not merely thrash but could release a texture an
+already-submitted draw call still wanted. Every removal, eviction and <code>clear()</code>
+alike, goes through one hook that releases the texture and drops the reverse-map entry.
+<code>CoatAssetReload</code> is the listener; the event is
+<code>AddClientReloadListenersEvent</code>, <em>not</em> the
+<code>RegisterClientReloadListenersEvent</code> the gap guessed at, which is now on
+<a href="api-notes.html">api-notes</a> along with the reshaped
+<code>PreparableReloadListener.reload</code> signature.</p>
+
+<p>Worth recording: the unit test caught an off-by-one in the eviction loop on its first
+run &mdash; it double-counted removals and stopped one entry early.</p>
+
+<h4>The neck&rsquo;s geometry was written out by hand in eleven files, and six of them were dead</h4>
+
+<p><a href="known-gaps.html#gap-103">Gap 103</a>. A Y band across the adult neck is a
+collar: it wraps the crest and the throat alike, which is the bug that put
+<a href="gene-goth.html">goth</a>&rsquo;s hood on the underside of the neck and had to be
+reported twice. The workaround was a <code>WAVES</code> mask with a sawtooth longer than
+the horse (<code>wavelength</code> 90) at an <code>amplitude</code> of 77.94, so the
+displacement never wrapped and the band came out as a plane tilted to
+<code>2A/&lambda; = tan(60&deg;)</code> &mdash; sixty because the neck&rsquo;s own long axis
+is sixty off horizontal.</p>
+
+<p>The gap said five gene files. <strong>It was eleven</strong> &mdash; and the audit found
+why it had spread so quietly. <code>amplitude</code> is in whatever <code>space</code> says
+while <code>wavelength</code> never is, so <strong>six of the eleven had copied the pair
+into <code>space: "part"</code>, where 77.94 displaces the band twenty to forty normalised
+spans off the horse.</strong> Measured over all 1280 neck texels, beetle pearl, diamond
+scutes, duskfall speckle, ink scroll, nebula points and wyrmwood sigils selected
+<b>exactly zero</b>, on every horse and at every seed. They loaded, they registered, they
+had icons, and the layer was inert. Nothing could have said so: a mask cannot fail, it can
+only select nothing.</p>
+
+<p><code>HorseSkinGeometry.local</code> is the replacement &mdash; the inverse of
+<code>posed</code>&rsquo;s frame change, giving a body point as fractions along the edges of
+the part&rsquo;s actual cuboid, read by <code>AXIS</code>, <code>WAVES</code> and
+<code>RAMP</code> as <code>space: "local"</code>. On the neck, <code>axis: "X"</code> is
+across its depth (low is the crest, which is the face the mane box sits on) and
+<code>axis: "Y"</code> is along its length, so a band there is a <em>collar square to the
+neck</em> rather than to the world &mdash; which is what ink scroll and wyrmwood sigils
+described all along. Details on <a href="body-space.html#local-frame">body space</a> and
+<a href="gene-format.html#local-space">the gene format</a>.</p>
+
+<p><strong>The old trick turns out to be exactly that coordinate.</strong> The fit is
+affine with a maximum residual of 0.0002 over the whole neck, which is what made the
+conversion safe rather than hopeful: the five genes whose bands did land converted with a
+texel-for-texel identical selection, and four of them &mdash; cosmic, shark, stars, suit
+&mdash; came back <b>byte-identical in the bake golden</b>. Only goth moved, because its
+<code>$depth</code> knob was in body units and is now a fraction; the range of hoods is
+unchanged and an individual horse redraws. Thirteen golden rows moved in total, which is
+exactly the six revived genes plus goth and nothing else.</p>
+
+<p>What used to be two constants is now assertions. <code>PartLocalFrameTest</code> pins
+that local equals part space on an unpitched part, differs sharply on the pitched neck, and
+that the old sixty-degree coordinate is still affine in the new one with the slope the
+neck&rsquo;s 7-unit depth implies &mdash; and it establishes &ldquo;the crest&rdquo; by
+asking where the <em>mane box</em> is rather than by repeating a number, so it survives the
+neck being reproportioned. Beside it, <code>GeneFilesTest</code> now refuses any
+<code>WAVES</code> amplitude far above 1 in a normalised space, which is the general form
+of the mistake all six made; it was checked by breaking a gene on purpose and watching it
+fire.</p>
+
+<h4>The thing worth carrying forward</h4>
+
+<p>Both defects had the same shape and it is worth naming: <b>a failure that produces no
+output at all is invisible to every test that hashes output.</b> The six dead layers were
+in the bake golden the whole time, hashing consistently, because a mask that selects
+nothing is stable. What found them was measuring <em>where</em> a gene paints, per part,
+rather than whether its bytes moved &mdash; and that measurement took twenty lines. The
+same reasoning is why the cache defect needed a texel budget rather than an entry count:
+both are cases where the number that has to stay true is not the number the code was
+counting.</p>
+
 <h3 id="resolution-and-neighbours-2026-09-09">The sheet size turned out to be a variable in disguise, eight mods got a verdict, and the whistles got a design.</h3>
 
 <p>A documentation session &mdash; no Java changed, no gene moved, no golden touched. Three
