@@ -29,6 +29,55 @@
 
 <h2 id="d2026-09-09">2026-09-09</h2>
 
+<h3 id="body-size-toggle-2026-09-09">Some players would rather their saddles fit.</h3>
+
+<p>An owner's call, and a small one to build: <strong>the size loci now answer to a server
+setting</strong>. <code>body.size</code>, true by default; false and every horse renders and
+collides at 1.0 whatever its alleles say.</p>
+
+<p>The reason it is the one body trait with a switch is the sentence that normally sells
+it. Speed, health and jump are numbers; <code>Attributes.SCALE</code> is not, because
+vanilla scales the <em>hitbox</em> from it as well as the model. So a Falabella and a
+Percheron meet a saddle, a lead, an arrow and a two-block doorway in genuinely different
+places, and that is a feature in most worlds and a nuisance in some. Server-side for the
+same reason: a client that disagreed with the server about a horse's size would be aiming
+at a horse that is not there.</p>
+
+<p><strong>The gate is one expression</strong>, in
+<code>HorseRecords.applyTraitsToEntity</code> &mdash; the single place the resolved scale
+reaches the game. Everything upstream is untouched: the size genes are registered, drawn
+from the same founder tables, inherited and reported identically, and
+<code>Traits.scale()</code> still resolves to what the alleles say, so the info panel, the
+family tree, the browser and the inspect paper all keep showing the real number. Two
+details were deliberate rather than incidental. It <em>writes</em> 1.0 rather than skipping
+the write, so flipping the setting off and reloading actually shrinks the big horses back
+instead of leaving them frozen large. And the <em>other</em> route to
+<code>SCALE</code> &mdash; an <code>effects</code> <code>attribute</code> verb naming
+<code>scale</code>, which no shipped gene uses but the table has always allowed &mdash;
+answers to the same setting in both <code>applyAttribute</code> <b>and</b>
+<code>clearAttributes</code>, so a modifier already standing comes off on the next reconcile
+rather than being stranded on the horse by a setting change.</p>
+
+<p>Two things came out of writing it down that were not in the ask.
+<strong>A breed's height target rides on the same write</strong> &mdash;
+<code>stats.height</code> in hands becomes a <code>StatAxis.SCALE</code> band, which is the
+entire reason a Falabella looks like one &mdash; so with the setting off every breed in the
+mod stands the same height. That is the honest consequence and not a bug, but it costs more
+than "tack fits" and nothing in game says so
+(<a href="known-gaps.html#gap-132">gap 132</a>, with the compress-rather-than-flatten
+alternative written out). And <strong>both gene testers scale their preview by the
+genotype</strong> and cannot know whether the server will honour it &mdash; the designer has
+no server to ask at all (<a href="known-gaps.html#gap-133">gap 133</a>).</p>
+
+<p>The thing this cost, now on <a href="api-notes.html">api-notes</a>: a
+<code>ModConfig.Type.SERVER</code> file is written to the instance's
+<code>config/&lt;modid&gt;-server.toml</code>, and a world's <code>serverconfig/</code>
+folder is an optional <em>override</em> of that path rather than where the file is made.
+The verification entry said the wrong one until the generated file was actually looked at.
+Checks: <a href="verification.html#body-size-toggle">&sect;0-AX</a>, and the first of them
+is that the <em>default</em> is unchanged &mdash; a mistake here flattens every world
+silently.</p>
+
 <h3 id="local-frame-2026-09-09">Ask the neck what shape it is &mdash; and six gene layers that had never painted a texel.</h3>
 
 <p>Two defects, both picked for being fixable and provable without opening the game.</p>
