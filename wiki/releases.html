@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Releases &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow">Project</p>
+<h1>Releases</h1>
+<p class="lede">
+    What shipped in each tagged version, newest first. This is the
+    <strong>player-facing</strong> record &mdash; the reasoning behind each change is in
+    the <a href="session-log.html">session log</a>, and what is
+    <em>known</em> to work is in <a href="verification.html">to be verified</a>.
+    A release is a build that ran green, not a build that has been played.
+</p>
+
+<div class="note">
+    <span class="label">Read this first</span>
+    <p>
+        Every release so far is a <strong>development</strong> release. The suite is
+        green and the jar assembles, but only a small fraction of what is built has been
+        confirmed in a play session &mdash;
+        <a href="verification.html">to be verified</a> is the authority on which is
+        which. Treat a world you care about accordingly.
+    </p>
+</div>
+
+<h2 id="v0-2-0">0.2.0</h2>
+
+<p class="lede">
+    The gene registry roughly triples, a gene becomes a file rather than a Java class,
+    the <kbd>H</kbd> menu grows from two tabs to four and gains a whole second screen,
+    breeds become data, and two villagers move into the world.
+</p>
+
+<h3 id="v0-2-0-genes">Genes</h3>
+
+<p>
+    The registry holds <strong>156 loci</strong> at this tag, of which
+    <strong>85 are data-driven</strong> &mdash; a gene is now a JSON file with a mask
+    stack, not a Java class, and 83 of those files are new since 0.1.0. They are grouped
+    into nine magical families (core, body, ground, fields, spots, speckle, lines, hair,
+    modifiers), which is the grouping the wiki and both gene editors offer.
+</p>
+
+<ul>
+    <li><strong>New natural loci.</strong> Flaxen (a dosage, not folklore), sooty,
+        pangare, rabicano, manchado, the Camarillo white <code>W4</code>, natural zebra
+        (split off from brindle, which had been sharing its stripe field), a
+        <a href="gene-diet.html">diet locus</a> with twelve narrow appetites, and the
+        <a href="gene-dhampir.html">dhampir</a> &mdash; a recessive whose carrier is the
+        advertisement.</li>
+    <li><strong>Loci rebuilt.</strong> Bay is a shade continuum now (blood, bay, liver
+        and seal off one score) rather than four names. Grey is a copy number with four
+        rates instead of one. <a href="gene-dun.html">Dun</a> was re-derived from a field
+        guide &mdash; grullo goes blue and the leg bars stopped being bracelets &mdash;
+        and its mane and tail gained the midtstol. MATP gained sunshine and snowdrop;
+        KIT gained the booster group (<code>W35</code>, <code>W32</code>,
+        <code>W34</code>); and the two splash loci swapped roles, because the common
+        allele had been sitting on the wrong gene.</li>
+    <li><strong>Disorders.</strong> The rest of the reference's disorder genes, including
+        the first dominant ones, each with its own contribution to the body numbers.</li>
+    <li><strong>Eye colour</strong> became its own channel: green and hazel eyes, both
+        heterochromias, and a magic locus that only exists in the heterozygote.
+        See <a href="eye-colour.html">eye colour</a>.</li>
+    <li><strong>Sex-linked genes</strong>, and the sex locus itself.</li>
+    <li><strong>Genes that do something other than paint.</strong> A werewolf locus that
+        swaps the entity at dusk, rainbow dust, a recessive particle locus, cutie marks,
+        and <a href="gene-extreme-white-dominant.html">extreme white dominant</a> &mdash;
+        the first gene here that paints nothing at all, and instead makes white final
+        wherever it already is, so a horse carrying a tobiano <em>and</em> something loud
+        reads as both rather than as the loud thing alone.</li>
+    <li><strong>Removed.</strong> Pink hair (redundant beside mane colour, tail colour
+        and the hair genes the magical import brought), and Waves &mdash; which was not a
+        gene but <a href="gene-cleave.html">Cleave</a> backwards, and is an allele of it
+        now.</li>
+</ul>
+
+<h3 id="v0-2-0-browser">The horse browser &mdash; the <kbd>H</kbd> menu</h3>
+
+<p>
+    <a href="carrots.html">The browser</a> had two tabs at 0.1.0, both of them reference
+    material. It has four now, two of which are about <em>your</em> horses, and it is no
+    longer the only screen: an <strong>&ldquo;i&rdquo; button on the horse inventory</strong>
+    opens a second, six-tab screen about the one horse in front of you.
+</p>
+
+<ul>
+    <li><strong>My horses</strong> (new) &mdash; every horse you own as one sortable,
+        filterable table with clickable column headings. The filter box takes a real query
+        language that reaches every piece of metadata a horse has, <strong>genes
+        included</strong>: <code>gene:SB1</code> finds carriers, not just the horses that
+        show it. Each row draws the horse.</li>
+    <li><strong>Breeding preview</strong> (new) &mdash; pick one of your mares and one of
+        your stallions and read what they could produce at every locus, and how often.
+        It is a Punnett square per gene rather than a rolled foal, grouped so the loci
+        that pull on one trait arrive together.</li>
+    <li><strong>Gene database</strong> and <strong>Crafting</strong> carry over, and the
+        crafting tab's own button is visible again &mdash; the screen paints near-opaque
+        panels across the window, and it had been painting them <em>after</em> the
+        widgets. Chrome under, widgets and slots over.</li>
+</ul>
+
+<p>
+    The <strong>horse information screen</strong> behind the &ldquo;i&rdquo; is six tabs:
+    <strong>Overview</strong> (name, barn name, sex, generation, breed, the four live body
+    numbers, bond, disorders, and who bred, tamed and owns it), <strong>Genes</strong>
+    (one row per locus, filtered by default to the loci this horse is not baseline at),
+    <strong>Health</strong> (each gene's own contribution to speed, health, jump and size
+    rather than the total, plus every disorder), <strong>Coat</strong>,
+    <strong>Other genes</strong> (abilities, diet, eye colour, cutie marks), and
+    <strong>Offspring</strong> &mdash; this horse's foals, then their foals, each
+    generation a row of little horses.
+</p>
+
+<h3 id="v0-2-0-breeds">Breeds, breeding and inheritance</h3>
+
+<ul>
+    <li><strong>A breed is a JSON file now</strong>, not Java &mdash; 49 of them at this
+        tag &mdash; with a founder table, a stat curve, breed spawn eggs, a splice mark,
+        and a browser-based <a href="breed-format.html">breed designer</a>.</li>
+    <li><strong>Epigenetics became literal stored numbers</strong> carried on each allele
+        copy, inherited with the allele and drifted slightly each breeding, rather than a
+        derived quantity.</li>
+    <li><strong>A mare can miscarry</strong>, and a breed lets go of horses that have bred
+        far enough away from it.</li>
+    <li><strong>Five themed splice carrots</strong>, and every gene page now shows how to
+        craft that gene's own carrot.</li>
+</ul>
+
+<h3 id="v0-2-0-world">The world</h3>
+
+<ul>
+    <li><strong>Two villagers.</strong> The <a href="villagers.html">cowboy</a> is a
+        village horse trader with a paddock, a restocking string and cheap horses; the
+        horseman comes with the barn. They have a barn and a house between them, a work
+        post each, and doors they can actually open. Nothing hostile targets the cowboy.</li>
+    <li><strong>Transfer papers</strong> &mdash; sign one and it sells a named horse,
+        pedigree and all.</li>
+    <li><strong>Three generated stables</strong> that spawn with rare horses already
+        standing in them. See <a href="stables.html">generated stables</a> for who built
+        each one.</li>
+</ul>
+
+<h3 id="v0-2-0-coat">The coat engine</h3>
+
+<ul>
+    <li><strong>A new default gradient</strong> (<code>horselut.png</code>), which changed
+        the coat palette under every gene at once, and four dilutions retuned to measured
+        restriction targets afterwards.</li>
+    <li><strong>A shadow pass</strong> at the end of phase 3, so no magical gene paints
+        true black.</li>
+    <li><strong>The paint order was rebuilt.</strong> Nine genes moved: the four modifiers
+        that read somebody else's marking (fielded, yalia, voided, opalized) went above
+        the markings they read, invert above those, and dhampir &mdash; which paints the
+        whole horse white and sat above every data-driven gene &mdash; went to the bottom
+        with suit and hood. <a href="paint-order.html">The paint order</a> is a new page
+        that draws the whole stack from the registry at run time.</li>
+    <li><strong>Fixes to patterns that were drawing the wrong horse:</strong> frame overo
+        was drawing a dipped horse for three separate reasons; the two roans had been the
+        same pattern at two strengths; white fading was unmasking the red a black horse
+        hides, browning every marking on one; and both tobiano's and frame's coverage
+        knobs were lying about what they controlled.</li>
+</ul>
+
+<h3 id="v0-2-0-tools">The browser tools and the wiki</h3>
+
+<ul>
+    <li><strong>The horse designer</strong> &mdash; <code>common/</code> compiled to
+        WebAssembly by TeaVM, so the browser runs the real genetics rather than a port of
+        it. It is the spawn egg screen's twin, with names, JSON export and import, and a
+        scale figure.</li>
+    <li><strong>Both gene editors</strong> gained a randomize menu, per-gene locks and a
+        family filter.</li>
+    <li><strong>A wiki page per gene</strong> &mdash; 155 of them &mdash; each with its
+        alleles, a Punnett square you choose the parents for, a spinnable preview of the
+        gene on a coat it can actually be seen on, and its carrot recipe. Every gene also
+        has a baked icon, photographed off the posed mesh.</li>
+    <li><strong>The wiki split into three views</strong> &mdash; Gameplay, Coding, Science
+        &mdash; with a real search across every page.</li>
+    <li><strong>The LUT lab</strong>: try a gradient on the real pipeline before shipping
+        it, click the chart to read the pigment at a point, and see which region of it a
+        given coat actually reads.</li>
+</ul>
+
+<h3 id="v0-2-0-notes">Notes</h3>
+
+<ul>
+    <li><strong>Not save-compatible with 0.1.0.</strong> This is a development mod with no
+        back-compatibility layer: genotype codes, attachment fields and the gene registry
+        all changed. Start a new world.</li>
+    <li>Still NeoForge, Minecraft <strong>26.1.2</strong> only. Both sides need the
+        mod.</li>
+</ul>
+
+<h2 id="v0-1-0">0.1.0</h2>
+
+<p>
+    The first tagged build, and the first one that worked outside a dev run:
+    <code>implementation project(":common")</code> puts <code>common/</code> on the
+    <code>runClient</code> classpath but does not fold it into the jar, so the 0.0.1 jar
+    shipped with none of the genetics classes and none of the name tables, and threw on
+    world load. The jar task pulls them in now.
+</p>
+
+</article>
+</main>
+</body>
+</html>

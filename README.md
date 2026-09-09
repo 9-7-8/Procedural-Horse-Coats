@@ -86,10 +86,17 @@ every system, and it stays current as the mod grows.
 ## Installation
 
 1. Install **[NeoForge](https://neoforged.net/)** for **Minecraft 26.1.2**.
-2. Drop the mod `.jar` into your `mods/` folder.
+2. Download the `.jar` from
+   **[Releases](https://github.com/9-7-8/Procedural-Horse-Coats/releases)** and drop it
+   into your `mods/` folder.
 3. Launch. No configuration is required.
 
 Works client-side and on dedicated servers; both sides need the mod.
+
+**Every release so far is a development release**, and there is no back-compatibility
+layer - a new version will not load a world made by an older one. What changed in each
+is on
+**[the releases page](https://9-7-8.github.io/Procedural-Horse-Coats/wiki/releases.html)**.
 
 **Currently built for 26.1.2 only.** Porting to other Minecraft versions -
 both backward (a long-planned 1.12.2 backport) and forward, as new versions

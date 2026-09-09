@@ -35,6 +35,142 @@
     </p>
 </div>
 
+<h2 id="jar-0-2-0">&sect;0-AQ &mdash; The 0.2.0 jar, loaded somewhere that is not a dev run (2026-09-08, NOT looked at)</h2>
+
+<p>
+    <strong>This is the check 0.1.0 exists because of.</strong>
+    <code>implementation project(":common")</code> puts <code>common/</code> on the
+    <code>runClient</code> classpath without folding it into the jar, so the 0.0.1 jar
+    shipped with none of the genetics classes and threw on world load &mdash; and
+    <code>runClient</code> could not have told anyone, because in a dev run the module is
+    on the classpath either way.
+</p>
+
+<div class="note">
+    <span class="label">Half of this is already settled, by inspection</span>
+    <p>
+        The built jar was opened and listed while cutting the tag, and everything is in
+        it: the <code>common/</code> classes, all 85 gene files
+        (<code>suit.json</code> present, <code>collar.json</code> and
+        <code>waves.json</code> correctly gone), the 49 breed files, the name tables, the
+        four structure NBTs, and the assets. <code>ExtremeWhiteDominantGene</code> and
+        <code>WhiteLockContribution</code> are compiled into it and
+        <code>PinkHairGene</code> is not, so it is the current tree rather than a stale
+        build. <strong>The packaging bug that produced 0.1.0 has not come back.</strong>
+        What is left is the part a zip listing cannot answer.
+    </p>
+</div>
+
+<ul>
+    <li><strong>Install the jar into a plain NeoForge 26.1.2 instance</strong> &mdash;
+        <code>neoforge-26.1.2/build/libs/</code>, dropped into a real <code>mods/</code>
+        folder, not launched through Gradle. It must reach the main menu, create a world,
+        and load it without a crash report. Being <em>present</em> in the jar and being
+        <em>found</em> at runtime are different claims: the resources are loaded by
+        classloader paths and by the datapack layer, and a dev run resolves both
+        differently from a shaded jar.</li>
+    <li><strong>Then check the trees separately</strong>, because each is read by a
+        different thing and a missing one need not crash on its own: a wild horse must
+        have a generated <em>name</em> (the name tables), a data-driven marking must
+        appear at all (the gene JSON), a breed spawn egg must produce its breed (the
+        breed files), and a stable must generate (the structure NBTs).</li>
+    <li><strong>Open the browser with <kbd>H</kbd> on the installed jar.</strong> Its four
+        tabs read the registry, the roster and this mod's recipes; if the gene bundle did
+        not resolve, the gene database is the tab that says so first.</li>
+</ul>
+
+<div class="note">
+    <span class="label">Also unproven at this tag</span>
+    <p>
+        The release notes on <a href="releases.html">Releases</a> describe roughly a
+        hundred and fifty commits' worth of work, and the great majority of it has never
+        been rendered in a client. Every &sect; below this one is still open. The tag means
+        the suite is green and the jar assembles, and nothing more than that.
+    </p>
+</div>
+
+<h2 id="white-lock">&sect;0-AP &mdash; The white lock, the reordered paint stack, and a locus that became an allele (2026-09-08, NOT looked at)</h2>
+
+<p>
+    Everything here changes <em>where in the stack</em> a marking lands, which means the
+    thing to look at is never one gene on its own &mdash; it is two genes on the same horse.
+    The fastest way to see all of it is the spawn egg (or
+    <a href="horse-designer/index.html">the horse designer</a>, which is the same screen):
+    put a tobiano on a horse, then add one magical marking at a time.
+</p>
+
+<ul>
+<li><strong>Extreme white dominant, on a horse that has white and a marking.</strong>
+    <code>extreme_white_dominant=EWD/n tobiano=To/to</code> plus anything loud &mdash;
+    <code>magic_zebra=Mzeb/Mzeb</code> is the harshest test, because it subtracts 200% from
+    every channel and is designed to read black over <em>anything</em>. The tobiano patches
+    must come out white and unmarked, with the stripes stopping dead at their edges.
+    <strong>The edge is the thing to look at</strong>: if the lock and the marking disagree
+    by a texel about where the boundary is, it will read as a one-texel fringe rather than
+    as a cut.</li>
+<li><strong>And the same horse with no white at all.</strong> Drop the tobiano and the
+    marking must be exactly what it is without the gene &mdash; a unit test says so at the
+    byte level, but the gene is a rule rather than a painter and a rule that quietly dims
+    things is the failure worth catching by eye.</li>
+<li><strong>Eyes on a locked horse.</strong> Blue eyes are deliberately exempt from the lock.
+    A <code>kit=W22/N extreme_white_dominant=EWD/n</code> horse should still have them.</li>
+<li><strong>A dhampir that is not a plain white horse.</strong> Dhampir moved from priority
+    135 to 105, so it is now painted <em>under</em> almost everything.
+    <code>dhampir=Dhmp/Dhmp</code> plus any data-driven marking should read as that marking
+    on a white ground. It used to read as a white horse, full stop.</li>
+<li><strong>Suit and hood, which now lose almost every argument.</strong> Both were moved to
+    the bottom of the magical band (102, 103) on purpose. Put either on a horse with a
+    second marking and the second marking should win.</li>
+<li><strong>The four modifiers at the top of the order.</strong> Fielded, yalia, voided and
+    opalized were moved to 600+ so they resolve after the markings they read. A
+    <code>marble_tobiano</code> or <code>panda</code> horse also carrying
+    <code>opalized=Opl/Opl</code> should now have <em>that gene&rsquo;s</em> white
+    opalized, which it could not before.</li>
+</ul>
+
+<p>Three new alleles and two reshaped genes, none of them ever rendered in a client:</p>
+
+<ul>
+<li><strong><code>opalized=Opb/Opb</code></strong> &mdash; the iridescence on the
+    <em>black</em> regions instead of the white. Best seen on a plain black or a bay with
+    strong points. The risk is that the pigment band it reads (0.70&ndash;0.88 of the black
+    channel) is wrong for a bay, in which case the cells will land on the mane and legs and
+    miss the body.</li>
+<li><strong><code>yalia=Ylo/Ylo</code></strong> &mdash; the outline and none of the
+    architecture. On a tobiano it should draw a bright hard line round every patch and add
+    no white anywhere; on a solid horse it must be completely invisible.</li>
+<li><strong><code>cleave=Wav/Wav</code></strong> &mdash; Waves is now an allele of Cleave
+    rather than a gene, and it is the same interlocking-spear split reversed end for end.
+    Check the two against each other (<code>Clv/Clv</code> and <code>Wav/Wav</code>) and
+    that the heterozygote <code>Clv/Wav</code> shows the Cleave side, not both.</li>
+<li><strong>Cleave&rsquo;s half-opaque outline</strong> &mdash; a soft band on the coat side
+    of the boundary, following the teeth. About two texels wide; if it reads as a blur
+    rather than as an outline, the width is the knob.</li>
+<li><strong>Panda, inside out.</strong> White is now a band round the belly plus the neck,
+    head and tail; the shoulder, the butt and all four legs keep the coat. The previous
+    version was the other way round. The panda face &mdash; ears, muzzle, eye patches &mdash;
+    is kept.</li>
+</ul>
+
+<p>And three wiki surfaces that have never been opened by anyone:</p>
+
+<ul>
+<li><strong><a href="paint-order.html">The paint order</a></strong> &mdash; a new page, one
+    long column of every gene that paints, highest first. It asks the mod at run time, so
+    the failure mode is "the whole list is missing" rather than "one row is wrong".</li>
+<li><strong>The punnett square on every gene page.</strong> It was an allele &times; allele
+    grid; it is now two parent pickers and the four foals they can make, coloured by
+    phenotype. Both parents start heterozygous. Worth checking on a locus with many
+    alleles &mdash; <a href="gene-kit.html">KIT</a> or the new five-allele
+    <a href="gene-cleave.html">Cleave</a> &mdash; where the old version gave up and printed
+    a list.</li>
+<li><strong>The landing page&rsquo;s collapsible sections</strong>, with the health genes
+    shut by default, and <strong>the LUT lab as a tab on
+    <a href="gene-lut.html?view=lab">the LUT gene page</a></strong> rather than a page of its
+    own. The lab is the same widget, moved; if it fails it will fail by not appearing at
+    all.</li>
+</ul>
+
 <h2 id="gene-fixes">&sect;0-AO &mdash; Twenty-four gene fixes, four new painters and a polygenic locus (2026-09-08, NOT looked at)</h2>
 
 <p>
@@ -93,7 +229,7 @@
     caught it.</li>
 <li><strong>The tilted crest band was wrong the first time and is calibrated now</strong>
     (tan 60, not tan 30). It carries <a href="gene-goth.html">Goth</a>'s hood,
-    <a href="gene-cosmic.html">Cosmic</a>'s blanket, <a href="gene-collar.html">Collar</a>'s
+    <a href="gene-cosmic.html">Cosmic</a>'s blanket, <a href="gene-suit.html">Collar</a>'s
     upper boundary, <a href="gene-shark.html">Shark</a>'s collar and
     <a href="gene-stars.html">Stars</a>' density falloff. <strong>Look at the underside of
     the neck on all five</strong> &mdash; that is where the failure shows, and it showed
@@ -135,7 +271,7 @@
 <ul>
 <li><strong><code>WAVES</code></strong> &mdash; a band whose edge is a sine, a triangle or
     a sawtooth. It is the only periodic shape in the vocabulary and three genes now
-    depend on it: <a href="gene-waves.html">Waves</a>' lobed edge,
+    depend on it: <a href="gene-cleave.html">Waves</a>' lobed edge,
     <a href="gene-angler.html">Angler</a>'s strings of lights, and
     <a href="gene-cleave.html">Cleave</a>'s teeth. Check the lobes are <em>even</em> -
     that is the whole point of it, and it is the thing noise could never do.</li>
@@ -175,7 +311,7 @@
 
 <ul>
 <li><strong>Thinner and more broken</strong>: <a href="gene-brindle.html">brindle</a>.</li>
-<li><strong>Moved or extended</strong>: <a href="gene-collar.html">collar</a> up onto the
+<li><strong>Moved or extended</strong>: <a href="gene-suit.html">collar</a> up onto the
     neck, <a href="gene-cosmic.html">cosmic</a> the length of the neck,
     <a href="gene-emitola.html">emitola</a> onto belly and legs,
     <a href="gene-masked.html">masked</a> over the cheeks,
@@ -185,7 +321,7 @@
     <a href="gene-shark.html">shark</a> round the base of the neck,
     <a href="gene-yalia.html">yalia</a> down the legs.</li>
 <li><strong>Rebuilt</strong>: <a href="gene-quarter.html">quarter</a> (it read as a
-    second nimbus and is now actual quadrants), <a href="gene-waves.html">waves</a>,
+    second nimbus and is now actual quadrants), <a href="gene-cleave.html">waves</a>,
     <a href="gene-patina.html">patina</a> (whose <code>PIGMENT</code> thresholds were
     inverted, so the verdigris was landing on the dark parts).</li>
 <li><strong>Goth is on the other edge of the neck.</strong> A Y band on the adult neck is
@@ -208,7 +344,7 @@
 <ul>
 <li>Every gene preview window now offers <strong>six base coats</strong> rather than
     three &mdash; bay, black, chestnut, then a tobiano, splash and sabino bay. The
-    <a href="lut-lab/">LUT lab</a> reads the same list and gained the same three buttons;
+    <a href="gene-lut.html?view=lab">LUT lab</a> reads the same list and gained the same three buttons;
     it has not been opened since.</li>
 </ul>
 
@@ -2555,7 +2691,7 @@
             red pigment is <code>#965C3F</code>, so that is the reddest a bay body can
             physically be &mdash; <code>BODY_BLACK_LIGHT</code> is already almost on it. If
             blood bays should <em>pop</em>, the fix is the chart's warm corner
-            (<a href="lut-lab.html">LUT lab</a>), not a constant in <code>BayCoat</code>.</li>
+            (<a href="gene-lut.html?view=lab">LUT lab</a>), not a constant in <code>BayCoat</code>.</li>
         <li><strong>Should the four bands be named in the UI?</strong> They are real
             <code>Expression</code>s, so the gene browser and the genome display already say
             &ldquo;Seal brown&rdquo; rather than &ldquo;Bay&rdquo;. That is more information
@@ -2605,7 +2741,7 @@
     changed colour at once</strong> and none of it has been seen. The golden test cannot
     help here &mdash; it composes against a synthetic gradient by design
     (<a href="known-gaps.html#gap-48">gap #48</a>) &mdash; so eyes are the only check
-    there is. Fastest route is the <a href="lut-lab.html">LUT lab</a>, then a herd in game.
+    there is. Fastest route is the <a href="gene-lut.html?view=lab">LUT lab</a>, then a herd in game.
 </p>
 
 <ul>
@@ -2674,8 +2810,9 @@
 <h2 id="lut-lab">&sect;0-L &mdash; the LUT lab (new, NOT looked at)</h2>
 
 <p>
-    A <strong>browser</strong> checklist, and a whole new page:
-    <a href="lut-lab.html">wiki/lut-lab.html</a>. Upload a colour gradient and see the
+    A <strong>browser</strong> checklist. It was a page of its own until 2026-09-08 and is
+    now a tab on the locus it belongs to:
+    <a href="gene-lut.html?view=lab">wiki/gene-lut.html?view=lab</a>. Upload a colour gradient and see the
     horses the real pipeline bakes against it &mdash; a chart on the left, a spinnable
     horse on the right, a base-coat row and one row per dilution locus plus tobiano.
     It runs the same wasm the <a href="horse-designer/index.html">designer</a> does and
@@ -2689,7 +2826,7 @@
     <p>
         Same reason as the designer and the preview window: loading the wasm is a
         <code>fetch</code>. The panel says so itself rather than sitting blank. Serve the
-        repo with <code>python -m http.server</code> and open <code>/wiki/lut-lab.html</code>.
+        repo with <code>python -m http.server</code> and open <code>/wiki/gene-lut.html?view=lab</code>.
     </p>
 </div>
 
@@ -5866,7 +6003,7 @@ gold-dust <code>emitter</code> shows, and the horse lights the area around it
         <a href="roadmap.html">Roadmap / backlog</a>
         <a href="horse-traits.html">Trait &amp; effect architecture</a>
         <a href="gene-magic-zebra.html">Magic zebra</a>
-        <a href="gene-pink-hair.html">Pink hair</a>
+        Pink hair
         <a href="gene-grey.html">Grey</a>
         <a href="gene-kit.html">KIT</a>
         <a href="gene-mitf.html">MITF splash</a>

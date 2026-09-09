@@ -29,6 +29,118 @@
 
 <h2 id="d2026-09-08">2026-09-08</h2>
 
+<h3 id="release-0-2-0-2026-09-08">Released 2026-09-08: 0.2.0, and two gene pages that outlived their genes.</h3>
+
+<p>Cutting a release rather than building anything, and the interesting part is what
+the process caught. The tag is <strong>0.2.0</strong>, not the 1.1 that was asked for:
+the only previous tag is 0.1.0, there is no 1.0, and
+<a href="verification.html">to be verified</a> is still the authority on how little of
+this has been seen in a game &mdash; a 1.x on a mod where most of what is built has
+never been rendered in a client would be a claim the project cannot support. Owner&rsquo;s
+call, taken on that reasoning.</p>
+
+<ul>
+
+<li><strong>The re-bake was not a formality.</strong> The session being packaged had
+already staged its regenerated artefacts, and re-running the five bake tasks over the
+same tree still moved four of them &mdash; <code>index.html</code>,
+<code>gene-opalized.html</code>, <code>genes.json</code> and
+<code>wiki/horse-designer/wasm/web.wasm</code>. Nothing warns about this. A staged
+artefact looks exactly like a current one, and the designer would have shipped a wasm
+built before the last two gene edits. This is the whole reason the regenerate table in
+<code>CLAUDE.md</code> is phrased as &ldquo;re-baking is part of the check, not a chore
+beside it&rdquo;, and it is the second time that sentence has earned itself.</li>
+
+<li><strong>Two gene pages outlived their genes, and the wiki&rsquo;s search went on
+serving them.</strong> <code>collar.json</code> became <code>suit.json</code> and
+<code>waves.json</code> was folded into <a href="gene-cleave.html">Cleave</a> as an
+allele; both genes correctly vanished from <code>pages.js</code> and the landing page,
+because the bake writes those spans from the registry. Their
+<code>wiki/gene-*.html</code> files stayed on disk, unreachable from any nav and still
+picked up by <code>build-search-index.mjs</code>, so searching the wiki for
+&ldquo;Collar&rdquo; returned a whole page about a gene that no longer exists.
+<code>bakeGeneWikiPages</code> owns that directory and knows the registry, so it can
+sweep it; until it does, a gene rename leaves a lie in the search results. Gap 115.</li>
+
+<li><strong>A releases page, because the release notes had nowhere to live.</strong>
+The repo allows exactly two markdown files, so there is no <code>CHANGELOG.md</code> to
+write and a release body pasted into GitHub is not a source of truth anybody can find
+later. <a href="releases.html">Releases</a> is the player-facing record &mdash; what
+shipped in each tag, by theme, without the reasoning, which is what this log is for.
+The README now points at it and says plainly that there is no back-compatibility layer
+and a new version will not load an old world.</li>
+
+<li><strong>The jar was opened rather than assumed.</strong> 0.1.0 exists entirely
+because <code>common/</code> was not folded into the jar and a dev run cannot notice,
+and everything added since that fix is <em>resources</em> - 85 gene files, 49 breed
+files, the name tables, four structure NBTs - which would fail the same silent way. So
+the built jar was listed: all of them are in it, <code>suit.json</code> present with
+<code>collar.json</code> and <code>waves.json</code> gone,
+<code>ExtremeWhiteDominantGene</code> compiled in and <code>PinkHairGene</code> not. That
+is the current tree and not a stale build, and it turns the scariest-sounding item on the
+checklist into a much smaller one: what a zip listing cannot answer is whether the
+runtime <em>finds</em> them, which is still &sect;0-AQ.</li>
+
+<li><strong>An interrupted test run blocks the next one.</strong>
+<code>:common:test</code> failed outright on
+<code>Unable to delete directory ... test-results/test/binary</code>, left locked by the
+run that was killed mid-flight. No java process held it and
+<code>gradlew --stop</code> did not clear it; removing the directory did. Worth
+recognising rather than re-diagnosing, because it reads like a build break and is not
+one.</li>
+
+</ul>
+
+<h3 id="white-lock-2026-09-08">Built 2026-09-08: a gene that changes the rule instead of the coat, and the paint order rebuilt round it.</h3>
+
+<p>Owner-driven, and the whole session hangs off one observation: the mod&rsquo;s magical markings are painted after the natural ones and mostly cover them, so a horse carrying both a tobiano and something loud reads as the loud thing alone. Three separate requests were about that, at three different levels.</p>
+
+<ul>
+
+<li><strong><a href="gene-extreme-white-dominant.html">Extreme white dominant</a> is the general answer, and it is the first gene here that paints nothing at all.</strong> While it is present, a white texel is final: every magical gene still runs, in the ordinary order, and every one of them is discarded wherever the coat is already white. <strong>The obvious implementation is wrong and it is worth saying why.</strong> Giving it priority 999 and repainting the white last is a <em>slot</em>, and a marking sitting above the slot paints over the white exactly as before; there is no number high enough, because &ldquo;highest&rdquo; is a position and the rule is not positional. So it is a capability - <code>WhiteLockContribution</code>, read out of band by the composer the way <code>LutContribution</code> is - and the mask it produces is applied at every step of phase 3 <em>and</em> over the overlay pass. Its own priority is a code-order slot and nothing else. <a href="pipeline.html#white-lock">The pipeline page</a> has the mechanism.</li>
+
+<li><strong>The lock is seeded from phase 1 and grows as phase 3 runs.</strong> Seeded from the pigment field, because the texels the melanin genes left unpigmented <em>are</em> the natural white markings, exactly and by construction. Grown after each gene paints, because the owner asked for &ldquo;prevents the painter from ever changing a pixel if it&rsquo;s been set to white&rdquo; - so white a <em>magical</em> gene puts down is locked from the moment it lands too. The eyes are cut back out and never re-added: a blue eye on a white face is pigment biology rather than a marking, and locking it would silently delete every eye-colour gene on precisely the horses whose eyes are worth looking at.</li>
+
+<li><strong>The specific answer was to move nine genes.</strong> Anything that reads somebody else&rsquo;s marking has to be painted after it, so <a href="gene-fielded.html">fielded</a>, <a href="gene-yalia.html">yalia</a>, <a href="gene-voided.html">voided</a> and <a href="gene-opalized.html">opalized</a> went to 600+ and <a href="gene-invert.html">invert</a> to 700. In the other direction, <a href="gene-dhampir.html">dhampir</a> paints the whole horse absolute white and sat at 135, above every data-driven gene in the mod - so a dhampir was a plain white horse whatever else it carried, which is a dead end rather than a phenotype. It is at 105 now, and <a href="gene-suit.html">suit</a> (102) and <a href="gene-hood.html">hood</a> (103) below it. <a href="paint-order.html">The paint order</a> is a new page that draws the whole stack from the registry at run time, highest first, so this is the last session that has to describe it in prose.</li>
+
+<li><strong>Waves was not a gene, it was Cleave backwards.</strong> Owner&rsquo;s call, and once said it is obviously true - both split the horse in half along a boundary, one taking the front and one the back. They are one locus now with four alleles (white and coloured, each way round) and Cleave&rsquo;s spear boundary drawn on both. Cleave also gained the half-opaque outline it was asked for, built by subtracting the hard-edged tooth field from a wide-edged one: <code>SpecPainter.band</code> ramps <em>outside</em> the band, so the difference is a strip on the coat side of the boundary, hugging it and following the teeth. The three hard masks are subtracted one after another rather than <code>MAX</code>ed first, which the fold cannot express and does not need to - over-subtraction can only happen where one of them is 1, which is inside the field, where the field has already painted.</li>
+
+<li><strong>Two genes gained an allele that reads the other end of what they already read.</strong> <a href="gene-opalized.html">Opalized</a>&rsquo;s <code>Opb</code> takes the iridescence to the <em>black</em> regions instead of the white, which needed no new mask type at all: the white form asks for texels with no pigment left, this one asks for texels at the top of the black channel. <a href="gene-yalia.html">Yalia</a>&rsquo;s <code>Ylo</code> is the white form&rsquo;s last layer on its own - the outline round the horse&rsquo;s own white, and nothing else - so it adds no white anywhere and is completely silent on a horse that has none.</li>
+
+<li><strong>Panda was backwards and is now the other way up.</strong> White is a band round the belly and barrel carrying on over the neck, head and tail; the shoulder, the butt and all four legs keep the coat. The panda face is kept, because it is the gene&rsquo;s name.</li>
+
+<li><strong>Pink hair is gone</strong>, owner&rsquo;s call - redundant beside <a href="gene-mane-color.html">mane colour</a>, <a href="gene-tail-color.html">tail colour</a> and the hair genes the magical import brought. Every page that used it as a live example now uses one; every page that used it as a piece of history says what the technique was rather than which gene did it first.</li>
+
+</ul>
+
+<h3 id="icon-choice-2026-09-08">Built 2026-09-08: which horse a gene is photographed on, got right on the third try.</h3>
+
+<p>Three owner reports - Fielded shown on a plain bay, mushroom wanting a chestnut, KIT&rsquo;s icon a featureless white horse - are all the same question, and <code>CoatVisibility</code> answers it for both the icon baker and every gene page&rsquo;s preview window. Two rules changed, and the second one is worth reading before touching it again.</p>
+
+<ul>
+
+<li><strong>&ldquo;The first coat it shows on at all&rdquo; is not &ldquo;the coat it is worth photographing on&rdquo;.</strong> Fielded draws tendrils out of the edges of existing white; on a bay there is no white, but the muzzle and pasterns sit low enough in the pigment band to catch a few dozen texels of it - over the threshold, so the bay &ldquo;worked&rdquo; and the tobiano was never tried. The rule is relative now: measure every base coat and take the first one that reaches 60% of the loudest. An ordinary gene paints about the same amount on all of them and still answers bay.</li>
+
+<li><strong>&ldquo;Not completely white&rdquo; is a claim about pigment, not about pixels - and measuring the pixels failed twice, in opposite directions.</strong> Counting distinct quantised colours let a dominant white straight through: the composite is a multiply against the template&rsquo;s hair shading, so a flat white horse is a spread of a dozen near-whites and reads as varied. Counting <em>contrast</em> then caught the dominant white and caught a cremello, a chestnut, a black and a grey with it - genes for which a horse of one colour is the honest picture. The version that ships asks <strong>phase 1</strong> instead: a dominant white has had its pigment removed, a cremello has had it diluted and still resolves through the gradient. That is a difference in kind rather than a threshold, and it is a number the pipeline already computes.</li>
+
+<li><strong>KIT then needed a second candidate per allele, because every KIT homozygote is a white horse.</strong> Dominant white, camarillo white, near-white or dead - so a homozygotes-only rule can photograph nothing but a blank, while the patterns the locus is famous for are all heterozygous. An allele whose homozygote comes out blank now offers its heterozygote with the wild type instead. <strong>The two pools are ranked together rather than in sequence</strong>, and that mattered: KIT does have one non-blank homozygote, <code>W20/W20</code>, which puts white on four pasterns and reads as a plain bay - preferring any homozygote over any heterozygote settled for it over an eighteen-times louder pinto, and the icon went from an all-white horse to an all-bay one before it went right.</li>
+
+</ul>
+
+<h3 id="wiki-surfaces-2026-09-08">Built 2026-09-08: the punnett square asks who the parents are, and three other wiki changes.</h3>
+
+<ul>
+
+<li><strong>The inheritance grid on every gene page is a real punnett square now.</strong> It was allele &times; allele - every genotype at the locus, which sounds better than it reads: it answers &ldquo;what genotypes exist&rdquo; when the question a player has is &ldquo;I own these two horses, what can they throw&rdquo;. It also fell apart above three alleles and dropped to a plain list. Now the parents are chosen, one across the top and one down the side, and the square is the four gametes they can pair - four cells for any locus however many alleles it has. Each distinct phenotype gets its own colour and anything that does not present is grey, so &ldquo;how often does this actually show&rdquo; is answerable by looking. <strong>Both parents start heterozygous</strong>, which is the cross worth defaulting to: two homozygotes have nothing to say, and carrier &times; carrier is the whole reason a punnett square exists.</li>
+
+<li><strong>A page may now carry a tab of its own</strong>, and the LUT lab is the first - it is a tab on <a href="gene-lut.html?view=lab">the LUT locus&rsquo;s page</a> rather than a page beside it. The three wiki <em>views</em> stay three: the index switcher offers them, the sidebar filters on them, and a fourth would mean a &ldquo;Lab&rdquo; filter that a hundred and fifty pages have nothing for. So a page-local tab gets a button and never becomes the reader&rsquo;s remembered view.</li>
+
+<li><strong>The landing page&rsquo;s sections collapse, and the health genes start shut.</strong> Done at run time by <code>wiki/landing.js</code> walking a flat <code>.section-head</code> + siblings shape, because half of <code>index.html</code> belongs to <code>:common:bakeGeneWikiPages</code> and a wrapper in the markup would have to be understood by both halves. Which sections start shut is <code>GeneFamily.collapsed()</code>, true for exactly one family - forty-odd cards with nothing to show, sitting between the two halves people actually came for.</li>
+
+<li><strong>Accretion Field lost its card and kept its page.</strong> It is a real locus that paints nothing on its own and exists to be read by Accretion, and two adjacent cards for one marking read as two markings. It is <em>detected</em> rather than listed: a gene with <code>affectsCoat()</code> false that some other gene names in <code>coatDependsOn()</code> folds into that gene&rsquo;s entry. A modifier that grows a painter gets its card back at the next bake.</li>
+
+</ul>
+
 <h3 id="creating-a-gene-2026-09-08">Built 2026-09-08: a &ldquo;Creating a gene&rdquo; page, written twice - once for a person and once for a model.</h3>
 
 <p>Owner-driven. <a href="creating-a-gene.html">The page</a> carries two tab panels rather than two pages, so the sidebar has one entry and a reader picks the register they want.</p>
@@ -135,7 +247,7 @@
 
 <li><strong>The bug was found by not believing the file.</strong> <a href="gene-panda.html">Panda</a> is supposed to keep the coat on the shoulder <em>and</em> the hindquarter, its own file said so in two masks unioned with <code>MAX</code>, and the horse had one of them. Rendering the hindquarter mask on its own drew it correctly, which is the fact that made it a code bug rather than a gene bug. <code>SpecPainter.coverage</code> bailed out the moment a <code>MULTIPLY</code> mask took the accumulator to zero &mdash; a sound optimisation for a chain of multiplications and wrong the instant anything later can put coverage <em>back</em>. So the second half of every union was unreachable wherever the first half was empty, which is to say everywhere it mattered. <strong>Fifteen gene files use that shape.</strong> The test is now &ldquo;can anything from here on raise it&rdquo;, and the JavaScript twin had the identical line, which is why <code>check-parity.mjs</code> was green about it for its whole life: two engines agreeing is not the same as two engines being right.</li>
 
-<li><strong>Four things went into the mask vocabulary, and three of them exist because noise cannot repeat.</strong> Every shape in this format that curves, curves because a noise field bent it, and noise never comes back to the same place twice. That is right for a marking and wrong for a <em>lobe</em>, a <em>string of lights</em> and a <em>row of teeth</em>, all three of which are periodic. <code>WAVES</code> is a band whose edge is displaced by a sine, a triangle or a sawtooth: <a href="gene-waves.html">Waves</a> gets the three-to-six even scallops its description had always promised and never drawn, <a href="gene-angler.html">Angler</a>'s lights sit on a curve you can follow with a finger instead of on a forking ridge, and <a href="gene-cleave.html">Cleave</a> gets straight-sided spears &mdash; the triangle and sawtooth are the only way to ask this vocabulary for an edge made of straight lines, because everything noise-derived rounds off however far the softness is wound down.</li>
+<li><strong>Four things went into the mask vocabulary, and three of them exist because noise cannot repeat.</strong> Every shape in this format that curves, curves because a noise field bent it, and noise never comes back to the same place twice. That is right for a marking and wrong for a <em>lobe</em>, a <em>string of lights</em> and a <em>row of teeth</em>, all three of which are periodic. <code>WAVES</code> is a band whose edge is displaced by a sine, a triangle or a sawtooth: <a href="gene-cleave.html">Waves</a> gets the three-to-six even scallops its description had always promised and never drawn, <a href="gene-angler.html">Angler</a>'s lights sit on a curve you can follow with a finger instead of on a forking ridge, and <a href="gene-cleave.html">Cleave</a> gets straight-sided spears &mdash; the triangle and sawtooth are the only way to ask this vocabulary for an edge made of straight lines, because everything noise-derived rounds off however far the softness is wound down.</li>
 
 <li><strong><code>CRACKLE</code> is the giraffe, and it is a different measurement rather than a different tuning.</strong> <code>DAPPLES</code> and <code>SPOTS</code> both draw round marks however hard they are pushed, because both measure the distance to a cell's <em>centre</em>. A giraffe is polygons: straight sides, corners meeting three at a time, an even channel between them. That is the distance to the wall <em>between</em> two cells, which needs the two nearest lattice points and not just the one &mdash; <code>BodyNoise.cellEdge</code>, half the difference of their distances. <a href="gene-qular.html">Qular</a> was fuzzy blobs and is now a giraffe read backwards.</li>
 
@@ -867,7 +979,7 @@
 
 <h3 id="lut-probe-2026-09-06">Built 2026-09-06, NOT yet looked at: the LUT chart can be clicked, and searched by colour.</h3>
 
-<p>Owner: clicking the chart should show &ldquo;the amount of restriction of red and black in that location&rdquo;, and a box to type a colour code into that finds the closest point on the LUT and reports the same thing. Both mark the spot. <a href="lut-lab.html#probe">On the lab</a>; checklist <a href="verification.html#lut-lab">&sect;0-L</a>.</p>
+<p>Owner: clicking the chart should show &ldquo;the amount of restriction of red and black in that location&rdquo;, and a box to type a colour code into that finds the closest point on the LUT and reports the same thing. Both mark the spot. <a href="gene-lut.html?view=lab#probe">On the lab</a>; checklist <a href="verification.html#lut-lab">&sect;0-L</a>.</p>
 
 <ul>
 <li><strong>The inverse of the axis mapping went next to the mapping</strong>, not into the page. <code>GradientLut</code> already owned <code>chartX</code>/<code>chartY</code>; it now owns <code>redAtChartX</code>/<code>blackAtChartY</code> as well. Working the inversion out at the call site would have been a second statement of one fact, free to disagree - and it would disagree by <em>mirroring the chart</em>, which is the most plausible way to get this wrong and the hardest to catch, because a mirrored answer is still a plausible number in range. There is now a test for exactly that: more red must be to the left, more black must be downward.
@@ -927,7 +1039,7 @@
 
 <h3 id="lut-footprint-2026-09-06">Built 2026-09-06, NOT yet looked at: the LUT chart shows which part of itself a coat reads.</h3>
 
-<p>Owner, on the lab below: draw on the gradient &ldquo;where it shows what area of the LUT it's pulling from for that specific coat &hellip; that'll also help me tune all the other genes.&rdquo; It does now. <a href="lut-lab.html#overlay">The overlay</a>; checklist <a href="verification.html#lut-lab">&sect;0-L</a>.</p>
+<p>Owner, on the lab below: draw on the gradient &ldquo;where it shows what area of the LUT it's pulling from for that specific coat &hellip; that'll also help me tune all the other genes.&rdquo; It does now. <a href="gene-lut.html?view=lab#overlay">The overlay</a>; checklist <a href="verification.html#lut-lab">&sect;0-L</a>.</p>
 
 <ul>
 <li><strong>It had to come from phase 1, and that is the whole design decision.</strong> The obvious implementation &mdash; match each baked pixel back to the nearest colour on the chart &mdash; cannot work, and not merely imprecisely: by the time a texel is a pixel its colour has been <em>multiplied by the hair template</em> and moved again by any phase-3 tint, so the position read back is a position the pipeline never sampled. The pigment pair is the thing phase 2 is actually handed, so the pair is the thing to export.
@@ -949,7 +1061,7 @@
 
 <h3 id="lut-lab-2026-09-06">Built 2026-09-06, NOT yet looked at: a page for trying a gradient on the real pipeline before shipping it.</h3>
 
-<p>Owner: a page to &ldquo;upload and view different LUTs&rdquo;, with pre-built buttons for the base coats, then the dilutions, then one white gene. <a href="lut-lab.html">wiki/lut-lab.html</a>, plus the widget under <code>wiki/lut-lab/</code>. Checklist <a href="verification.html#lut-lab">&sect;0-L</a>.</p>
+<p>Owner: a page to &ldquo;upload and view different LUTs&rdquo;, with pre-built buttons for the base coats, then the dilutions, then one white gene. <a href="gene-lut.html?view=lab">wiki/gene-lut.html?view=lab</a>, plus the widget under <code>wiki/lut-lab/</code>. Checklist <a href="verification.html#lut-lab">&sect;0-L</a>.</p>
 
 <ul>
 <li><strong>It is the answer to a bug from earlier the same day.</strong> The near-black regression below was an art edit to the gradient silently switching off a rendering rule, and the only way to have caught it was to launch the game and go looking at a bay. The lab makes that loop a page refresh: <code>DesignerApi.setGradient</code> already existed for boot, nothing caches a baked coat, so pointing it at a file off the reader's disk redraws every horse on the page against the new chart. That is the entire mechanism &mdash; one export, already exported.
