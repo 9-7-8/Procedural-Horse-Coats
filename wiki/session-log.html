@@ -29,6 +29,167 @@
 
 <h2 id="d2026-09-09">2026-09-09</h2>
 
+<h3 id="resolution-and-neighbours-2026-09-09">The sheet size turned out to be a variable in disguise, eight mods got a verdict, and the whistles got a design.</h3>
+
+<p>A documentation session &mdash; no Java changed, no gene moved, no golden touched. Three
+questions asked, and the first one had a better answer than expected.</p>
+
+<h4>Scaling the coat sheet is mostly already done</h4>
+
+<p>The question was &ldquo;what breaks at half, eight, sixteen, thirty-two and sixty-four
+times the current sheet?&rdquo;. The premise of the question was that resolution is baked
+in everywhere. <strong>It is not.</strong> <code>HorseSkinGeometry.faceMapsOf</code>
+multiplies vanilla&rsquo;s own 64-space <code>texOffs</code> by
+<code>TEXELS_PER_UNIT</code>, and <code>HdHorseModel</code> divides by the reciprocal
+through a per-cube <code>texScale</code>, so the UV layout has always been a function of k
+and <strong>nobody has ever typed a texel coordinate into the geometry tables</strong>.
+<code>CoatBuildContext.size()</code> already exists as the seam a gene should read.</p>
+
+<p>So the answer is a short list rather than a rewrite. The absolute references, all of
+them:</p>
+
+<ul>
+<li><strong>The eye rectangles</strong> in <code>CoatRegions</code> are literals &mdash;
+    but every value divides exactly by <code>TEXELS_PER_UNIT</code>, so they are 64-space
+    rectangles that were pre-multiplied once and can be un-multiplied with no behaviour
+    change at the current size. That makes the refactor provable by the goldens.</li>
+<li><strong><code>EyePatch</code>&rsquo;s four-bit iris.</strong> &ldquo;A sector is four
+    bits because an iris is 2&times;2&rdquo; is a rendering fact that stops being true in
+    both directions: it survives larger sheets as a coarse quarter-split and
+    <em>dies</em> at half size, where the iris is one texel and both heterochromias have
+    nowhere to go.</li>
+<li><strong><code>SpecPainter.spread</code></strong> is the only genuinely bad one. It is
+    a per-texel square search whose radius is derived from k, so it is correct at every
+    resolution and <strong>quartic</strong> in cost &mdash; k&sup2; more texels each
+    searching a k&sup2;-times-bigger box. It has to be redesigned rather than
+    re-parameterised, and a signed distance field computed once per bake would speed up
+    the current resolution too.</li>
+<li><strong>The sample grid</strong> is a <code>Sample</code> plus a <code>BodyPoint</code>
+    object per mapped texel &mdash; an object graph, so roughly an order of magnitude more
+    memory per texel than the finished texture, static and never freed. It is the largest
+    allocation in the mod and nobody had counted it.</li>
+</ul>
+
+<p><strong>No gene indexes on texel coordinates at all.</strong> Every gene takes
+<code>(px, py)</code> from <code>forEachTexel</code> as an address to write to and does its
+arithmetic on the <code>BodyPoint</code> beside it; there is no per-texel hash, no
+neighbour step, no threshold on <code>px</code> anywhere in
+<code>genetics/genes/</code>. That is the body-space decision paying off years later, and
+it is why raising the resolution is supersampling rather than reinterpretation. The
+genes that <em>are</em> coupled to k are coupled through the three shared sites above, plus
+the soft one nothing can detect: constants tuned by eye at the current size, which the
+goldens cannot isolate because they all move at once.</p>
+
+<p>Two things also worth having found. <strong>Storage is free</strong> &mdash; no coat is
+ever written to disk, so resolution costs nothing in save size, jar size or bandwidth.
+And <strong>OptiFine is irrelevant</strong>: it, ETF and EMF solve the resource-pack
+<em>selection</em> problem, which a mod that generates its texture does not have.</p>
+
+<h4>The point of the exercise: paint on the player&rsquo;s own pack</h4>
+
+<p>The resolution work is the prerequisite for the feature the owner actually wants
+&mdash; read whatever white horse the player&rsquo;s resource pack ships and paint the
+genome on <em>that</em>, at the pack&rsquo;s own resolution. Checked, not assumed: vanilla
+26.1.2 ships <code>horse_white.png</code> and <code>horse_white_baby.png</code> at 64&sup2;
+under exactly the two paths this mod shadows in its own namespace, and the
+<code>ResourceManager</code> the factory already uses resolves through the active pack
+stack. So it costs a namespace change, plus an un-mirroring pass to give the adult
+sheet&rsquo;s four legs and two ears their own patches &mdash; <strong>the foal needs
+none</strong>, because vanilla&rsquo;s baby model already gives each leg a distinct patch
+&mdash; plus making the sheet size a variable. Two tiers, no fallback chain: a pack that
+ships our namespaced template gets it used verbatim, otherwise we derive from
+<code>minecraft:</code>.</p>
+
+<p>The undecided part is left undecided on the page: a pack whose &ldquo;white&rdquo; horse
+is cream would tint every coat in the game, because the composite is a multiply that
+assumes the template is shading and nothing else. Normalise it, accept it as the
+pack&rsquo;s intent, or gate the feature &mdash; owner&rsquo;s call, flagged rather than
+guessed.</p>
+
+<p>All of it is on the new <a href="texture-resolution.html">texture resolution</a> page,
+which is now the single source of truth for the subject.</p>
+
+<h4>Eight mods, and the finding that the blocker is usually a version</h4>
+
+<p><a href="compatibility.html">Compatibility</a> had the accidental half &mdash; what
+happens when two mods meet and neither knows about the other. It now has the deliberate
+half: what a patch would actually have to do. It decomposes into four seams (entity
+identity, the mesh and its UVs, the renderer, gameplay overlap), and the recurring finding
+across SWEM, Icy&rsquo;s Better Horses, Horseman, Horse Powered, Horse Combat Controls,
+AstikorCarts, armour-only mods and the Fresh Animations pack is that
+<strong>the overlap is nearly always one subsystem and the blocker is nearly always a
+version rather than a technical conflict</strong>. Of the eight, three are co-installable
+with 26.1.2 today.</p>
+
+<p>Two ideas came out of it worth more than the verdicts. <strong>User-written model
+remaps:</strong> <code>HorseSkinGeometry</code> is already a table of pivots, boxes and
+64-space <code>texOffs</code>, and an OptiFine/EMF <code>.jem</code> is very nearly the
+same table &mdash; so describing someone else&rsquo;s horse mesh is a file, not a fork, and
+every gene and both editors would work on it unchanged because no gene has ever known what
+mesh it was painting. What it cannot express is non-box geometry, which is exactly what
+blocks the SWEM patch. <strong>Gaits:</strong> the mod resolves speed, jump and health and
+then says nothing about movement, which throws away a real heritable breed-defining trait
+it already has the inputs for. A <code>GaitContribution</code> resolving in
+<code>common/</code> to a named gait plus a tempo, with a thin per-mod animation mapping on
+the NeoForge side, would make the gene work shared across every detailed-leg mod instead of
+written once per mod.</p>
+
+<h4>Callable horses: bind the whistle, not the player</h4>
+
+<p>The <em>Callable Horses</em> mod binds one personal horse per player to a keybind. Taking
+the feature, not the shape &mdash; a player here has a stable, and picking one favourite is
+the choice this mod exists to make hard. <strong>The binding goes on the item</strong>:
+<code>ModDataComponents.BOUND_HORSE</code> already exists on the stall sign and its javadoc
+already anticipated being reused, so a bound whistle is that component on a whistle, bound
+by right-clicking the horse the way every other item in this mod claims one. Many horses,
+many whistles, and the component&rsquo;s name field puts the horse&rsquo;s name on the
+tooltip for free.</p>
+
+<p><strong>Keybinds: the item is the interface.</strong> The mod has exactly one production
+keybind (<kbd>H</kbd>, the browser) and everything else is an item and a click. Callable
+Horses needs two keys because it has nowhere to put the binding; we do not. At most one
+optional convenience key, registered the way <code>HorseBrowserKeyBindings</code> does it.</p>
+
+<p>Writing it up settled three questions the roadmap was already carrying, which is the
+part worth recording. <strong>Bond gates the bind</strong> &mdash; a whistle that binds to a
+barely-tamed horse makes bond meaningless. <strong>Path if it can, teleport if it
+cannot</strong>, using the range <code>BondFollowGoal</code> already walks. And the three
+whistle tiers become <em>loaded chunk / any distance / any dimension</em>, which finally
+gives the echo whistle an identity that is not just a bigger number, and puts the
+configuration in the crafting ladder rather than in a config file. Against the tickets, the
+split is clean: <strong>a whistle brings the horse to you, a ticket sends it to its
+stall</strong> &mdash; the interdimensional ticket and the echo whistle being the same idea
+pointed opposite ways.</p>
+
+<p>Declined deliberately: respawning a dead horse. A horse here is a genome and a pedigree
+and the breeding layer rests on death being real. The one genuine unknown is finding an
+entity in an unloaded chunk &mdash; <code>HorseRoster</code> already documents that
+whereabouts are entity facts &mdash; and the answer is an index in the per-world horse
+database, which the browser, the stall records and the tickets all want as well. So it is
+shared infrastructure to be scoped on its own, not whistle work.</p>
+
+<h4>Found on the way</h4>
+
+<p><a href="known-gaps.html#gap-130">Gap 130</a>, in two halves and both present-day
+defects at the current resolution. The generated coat textures are never released until
+logout &mdash; <code>clear()</code> does exactly the right thing and its only caller is the
+logout handler &mdash; so a session accumulates one registered <code>DynamicTexture</code>
+per genome it has ever drawn. Harmless now, and the first thing that stops the sheet ever
+getting bigger. And there is <strong>no client reload listener anywhere in the mod</strong>,
+so F3+T leaves every baked coat on screen and leaves the templates and the
+<code>LutSet</code> holding the old pack&rsquo;s pixels &mdash; which means editing the
+gradient and reloading appears to do nothing, and which is a hard prerequisite for the
+resource-pack feature above.</p>
+
+<p><strong>Nothing was built, so nothing new is waiting in
+<a href="verification.html">verification</a>.</strong> The compatibility verdicts are read
+off the other mods&rsquo; public listings rather than their source, and the two that matter
+most &mdash; whether Horse Powered&rsquo;s mob capture preserves data attachments, and
+whether Icy&rsquo;s replaces the renderer for its breed coats &mdash; are exactly what a
+listing does not answer. They are stated on the page as checks, not conclusions.</p>
+
+
+
 <h3 id="rng-and-choice-2026-09-09">The random number generator was never mixing its seed, and two goldens had to move to fix it.</h3>
 
 <p>Eight gaps, taken as four pieces of work. The largest one changed every horse in the mod.</p>
