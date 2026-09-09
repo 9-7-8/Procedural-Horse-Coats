@@ -1010,6 +1010,62 @@ PigmentField after  = new SilverGene().restrict(pair, ctx, before);
     <a href="gene-magic-zebra.html">magic zebra</a> the fullest magical one.
 </div>
 
+<h2 id="killswitch">Switching a gene off without deleting it</h2>
+
+<p>
+    Sometimes a gene is wrong rather than broken &mdash; it loads, it paints, and what it
+    paints is not worth shipping. <strong>Killswitching it means it cannot reach a horse or
+    the wiki, while every file stays on disk</strong> so it can be picked up and retooled
+    later.
+</p>
+
+<p>
+    For a gene that ships with the mod, that is <strong>one line</strong>: take its filename
+    out of <code>common/src/main/resources/horsegenetics/genes/index.json</code>. That file
+    is the only thing that registers a bundled gene, so removing the line is the whole of the
+    switch &mdash; the gene is not in <code>Genes.codeOrder()</code>, no horse carries it, it
+    has no carrot, and it is in neither gene editor.
+</p>
+
+<p>
+    Then re-run the three bake tasks, and the derived artefacts follow on their own:
+</p>
+
+<div class="codebox">
+<div class="filename">after unregistering a gene</div>
+<pre><code class="language-bash">./gradlew :common:bakeGeneBundle :common:bakeGeneIcons :common:bakeGeneWikiPages
+./gradlew :web:bakeDesignerAssets</code></pre>
+</div>
+
+<p>
+    That drops it from the designer&rsquo;s <code>genes.json</code>, from the generated spans
+    of <code>pages.js</code> and <code>index.html</code>, and from its landing card &mdash;
+    <strong>a gene page is registered by existing</strong>, so the page goes off the wiki&rsquo;s
+    page list without being touched.
+</p>
+
+<div class="note">
+<span class="label">Two things worth doing as well</span>
+<ul>
+<li><strong>Put a banner on the gene&rsquo;s page.</strong> The file is still there and still
+    reachable by a direct link, so without one it reads as a live gene. Say why it is off and
+    what puts it back &mdash; <a href="gene-wing-cloak.html">wing cloak</a> is the worked
+    example.</li>
+<li><strong>Keep something linking to the page</strong>, usually the
+    <a href="known-gaps.html">gaps</a> entry explaining the decision. Otherwise
+    <code>check-links.mjs --orphans</code> is right to call it unreachable.</li>
+</ul>
+</div>
+
+<p>
+    <strong>Both goldens will move, and the shape of the move is the check.</strong> The bake
+    golden should lose exactly that gene&rsquo;s lines and no others. The pipeline golden will
+    show every line as changed, because a genotype code names every registered gene and yours
+    has just left it &mdash; so compare the <em>hash</em> column, not the line: if the gene was
+    wild-type in those cases, every hash should come back byte-identical. Anything else means
+    switching it off changed a horse, which is worth understanding before you commit it.
+</p>
+
 <h2 id="contracts">The four-file contracts</h2>
 
 <p>
