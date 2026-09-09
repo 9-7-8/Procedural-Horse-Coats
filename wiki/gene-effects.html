@@ -457,12 +457,12 @@ Component  &rarr;  (Trigger, Condition, Selector, Effect)</code></pre>
 
 <p>
     <strong>Keep this list closed.</strong> It is the main lever on long-term
-    maintainability &mdash; everything else composes these. Eight exist; the rest are
-    the spec&rsquo;s vocabulary, recorded here so a new verb is checked against them
-    before it is written.
+    maintainability &mdash; everything else composes these. Fourteen exist; the rest
+    are the spec&rsquo;s vocabulary, recorded here so a new verb is checked against
+    them before it is written.
 </p>
 
-<h2 id="verbs-live">The eight that exist</h2>
+<h2 id="verbs-live">The ones that exist</h2>
 
 <h3 id="traversal"><code>traversal</code></h3>
 <p>Holds a movement / survival flag up while <code>when</code> is true.</p>
@@ -481,19 +481,19 @@ Component  &rarr;  (Trigger, Condition, Selector, Effect)</code></pre>
 </p>
 <p>
     The spec lists three more flags the gene layer does not accept:
-    <code>flight</code>, <code>swim_speed</code> and <code>phasing</code>.
-    <code>swim_speed</code> is a magnitude rather than a boolean and lives on
+    <code>flight</code>, <code>water_movement_efficiency</code> and <code>phasing</code>.
+    <code>water_movement_efficiency</code> is a magnitude rather than a boolean and lives on
     <code>attribute</code> here; <code>flight</code> and <code>phasing</code> are
     simply absent. See <a href="#divergences">Divergences</a>.
 </p>
 <pre><code class="language-json">{ "type": "traversal", "flag": "fire_immune" }</code></pre>
 
-<h3 id="attribute"><code>attribute</code> <span class="allele wild">not executed yet</span></h3>
+<h3 id="attribute"><code>attribute</code></h3>
 <p>A temporary attribute modifier, present while <code>when</code> holds, removed when it stops.</p>
 <table>
 <thead><tr><th>Field</th><th>Default</th><th>Meaning</th></tr></thead>
 <tbody>
-<tr><td><code>attribute</code></td><td><em>required</em></td><td><code>movement_speed</code>, <code>jump_strength</code>, <code>max_health</code>, <code>armor</code>, <code>armor_toughness</code>, <code>knockback_resistance</code>, <code>step_height</code>, <code>safe_fall_distance</code>, <code>scale</code>, <code>swim_speed</code>.</td></tr>
+<tr><td><code>attribute</code></td><td><em>required</em></td><td><code>movement_speed</code>, <code>jump_strength</code>, <code>max_health</code>, <code>armor</code>, <code>armor_toughness</code>, <code>knockback_resistance</code>, <code>step_height</code>, <code>safe_fall_distance</code>, <code>scale</code>, <code>water_movement_efficiency</code>.</td></tr>
 <tr><td><code>op</code></td><td><code>add</code></td><td><code>add</code>, <code>multiply_base</code>, <code>multiply_total</code> &mdash; vanilla modifier operations.</td></tr>
 <tr><td><code>amount</code></td><td><code>0</code></td><td>Signed modifier amount.</td></tr>
 </tbody>
@@ -501,11 +501,28 @@ Component  &rarr;  (Trigger, Condition, Selector, Effect)</code></pre>
 <pre><code class="language-json">{ "type": "attribute", "attribute": "movement_speed", "op": "multiply_total",
   "amount": 0.15, "when": { "flag": "in_water" } }</code></pre>
 <p>
-    When this is wired, the spec&rsquo;s merge rule applies: additive modifiers with
-    vanilla operation semantics, <strong>and a cap on the total per attribute</strong>.
-    The cap is config, not code: <code>[[per-attribute cap config key? &mdash; no
-    config surface for this yet]]</code>. Modifier IDs must be keyed per
-    gene+attribute so re-application does not duplicate.
+    <strong>There is no <code>swim_speed</code>.</strong> There never was one to
+    translate to: vanilla has no such attribute. What it has is
+    <code>water_movement_efficiency</code> &mdash; the share of its land speed a mob
+    keeps in water, which is Depth Strider&rsquo;s attribute and is what &ldquo;how
+    fast does this horse swim&rdquo; means. The list was corrected when
+    <a href="gene-magic-swim-speed.html">magic swim speed</a> was built and needed it
+    to work.
+</p>
+<p>
+    The modifier is <strong>transient</strong> and its id is derived from the gene and
+    the attribute, so re-applying it every tick is idempotent &mdash; a transient
+    modifier whose id is already present is replaced, not stacked. The removal half is
+    the interesting one: when <code>when</code> goes false the ability is skipped
+    <em>before</em> it reaches the apply path, so nothing would ever take the modifier
+    off. <code>GeneAbilityHandler.clearAttributes</code> therefore runs unconditionally
+    after the ability loop and strips every modifier in the mod&rsquo;s namespace the
+    horse is not currently asking for.
+</p>
+<p>
+    The spec&rsquo;s merge rule also calls for <strong>a cap on the total per
+    attribute</strong>, and that is still unbuilt: <code>[[per-attribute cap config
+    key? &mdash; no config surface for this yet]]</code>.
 </p>
 
 <h3 id="emitter"><code>emitter</code></h3>
@@ -827,6 +844,167 @@ Component  &rarr;  (Trigger, Condition, Selector, Effect)</code></pre>
     Built for <a href="gene-verdant.html">verdant</a>.
 </p>
 
+<h3 id="charges"><code>charges</code></h3>
+<p>Extra uses of <em>somebody else&rsquo;s</em> <code>yield</code> before its cooldown bites.</p>
+<table>
+<thead><tr><th>Field</th><th>Default</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr><td><code>kind</code></td><td><em>required</em></td><td>The <code>yield</code> <code>kind</code> this grants extra uses of.</td></tr>
+<tr><td><code>extra</code></td><td><code>1</code></td><td>Additional uses per cooldown window, 1&ndash;64.</td></tr>
+</tbody>
+</table>
+<pre><code class="language-json">{ "type": "charges", "kind": "milk", "extra": 2 }</code></pre>
+<p>
+    <strong>It names a kind, not a gene</strong>, and that indirection is doing real
+    work rather than being tidy. The gene that <em>produces</em> a thing and the gene
+    that decides <em>how often</em> are different loci, and neither can see the
+    other&rsquo;s epigenome &mdash; a gene is handed its own values and nobody
+    else&rsquo;s, deliberately. So a design where the producing gene asked &ldquo;how
+    voluminous am I&rdquo; could not have read the number at all.
+</p>
+<p>
+    Naming a kind is the only version that works, and it pays off: one volume locus
+    governs every gene that declares the kind, including ones written later. Charges
+    from several genes add. They <strong>divide the cooldown</strong> rather than
+    banking uses, so &ldquo;three times a day&rdquo; means three fillings spread
+    across the day rather than three at dawn &mdash; which needs no state of its own,
+    since the stamp already on the cooldown attachment is enough.
+</p>
+<p>
+    Built for <a href="gene-magic-milk-volume.html">magic milk volume</a>, which
+    governs <a href="gene-milk.html">milk</a>&rsquo;s milk, water and lava at once.
+</p>
+
+<h3 id="breath"><code>breath</code></h3>
+<p>Multiplies how long the horse lasts under water.</p>
+<table>
+<thead><tr><th>Field</th><th>Default</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr><td><code>factor</code></td><td><code>1.0</code></td><td>Multiplier on the air supply &mdash; 2 lasts twice as long, 0.5 half. 0.05&ndash;40.</td></tr>
+</tbody>
+</table>
+<pre><code class="language-json">{ "type": "breath", "factor": 2.5 }</code></pre>
+<p>
+    The <strong>graded</strong> counterpart of the <code>underwater_breathing</code>
+    traversal flag, which is absolute. The two compose the way you would expect: a
+    horse that cannot drown does not care how slowly it would have.
+</p>
+<p>
+    Vanilla takes one point of air per submerged tick, so the translator hands back
+    <code>1 - 1 / factor</code> each tick &mdash; positive for a long-breathed horse,
+    negative for a short-breathed one, one expression for both directions. Air is an
+    <code>int</code> and that is not, so the fraction accumulates per horse.
+    Vanilla&rsquo;s <code>oxygen_bonus</code> attribute was rejected for this: it
+    reaches one direction only, and it rolls a die every tick, so two horses with
+    identical genotypes would drown at different times.
+</p>
+<p>
+    Built for <a href="gene-magic-water-breathing.html">magic water breathing</a>.
+</p>
+
+<h3 id="on_death"><code>on_death</code></h3>
+<p>What happens to the <em>ground</em> where the horse died.</p>
+<table>
+<thead><tr><th>Field</th><th>Default</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr><td><code>effect</code></td><td><em>required</em></td><td>One of <code>lava</code>, <code>water</code>, <code>explode</code>.</td></tr>
+</tbody>
+</table>
+<pre><code class="language-json">{ "type": "on_death", "effect": "explode" }</code></pre>
+<p>
+    <strong>Deliberately not about items.</strong> What a horse leaves behind is
+    <code>item_drop</code>&rsquo;s question, and folding the two together would make
+    &ldquo;drops diamonds and leaves a crater&rdquo; impossible to express as the two
+    independent loci it is.
+</p>
+<p>
+    The two fluids are placed only into a block that is genuinely free &mdash; air, or
+    something a fluid would wash away anyway. The alternative reading turns a novelty
+    verb into a griefing tool nobody can see coming, since the carrier looks like any
+    other horse. Nothing here fires in the horse dimension, like <code>glow</code> and
+    <code>spread</code>.
+</p>
+<p>
+    Built for <a href="gene-magic-on-death.html">magic on death</a>.
+</p>
+
+<h3 id="item_drop"><code>item_drop</code></h3>
+<p>What the horse leaves behind.</p>
+<table>
+<thead><tr><th>Field</th><th>Default</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr><td><code>drop</code></td><td><em>required</em></td><td>One of <code>vanilla</code>, <code>diamonds</code>, <code>spawn_egg</code>, <code>enchanted_sword</code>, <code>meat</code>.</td></tr>
+<tr><td><code>min</code></td><td><code>1</code></td><td>Fewest items, 0&ndash;64.</td></tr>
+<tr><td><code>max</code></td><td><code>1</code></td><td>Most items, at least <code>min</code>.</td></tr>
+</tbody>
+</table>
+<pre><code class="language-json">{ "type": "item_drop", "drop": "diamonds", "min": 2, "max": 5 }</code></pre>
+<p>
+    Every value <strong>replaces</strong> the vanilla drop except <code>meat</code>,
+    which is added beside it. The asymmetry belongs to the genes rather than to the
+    verb: a horse that leaves diamonds instead of its leather is a different animal,
+    and a meaty one is the same animal with more on it &mdash; which is why the two
+    are separate loci and why a diamond horse can also be a meat horse.
+</p>
+<p>
+    <code>spawn_egg</code> carries the horse&rsquo;s own genotype <em>and</em>
+    epigenome, so what comes back is a clone rather than a horse with the same
+    alleles. It reuses the editor&rsquo;s preset egg item rather than introducing one
+    of its own.
+</p>
+<p>
+    Built for <a href="gene-magic-item-drop.html">magic item drop</a> and
+    <a href="gene-magic-meat.html">magic meat</a>.
+</p>
+
+<h3 id="mob_aura"><code>mob_aura</code></h3>
+<p>How mobs feel about the horse.</p>
+<table>
+<thead><tr><th>Field</th><th>Default</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr><td><code>mode</code></td><td><em>required</em></td><td><code>repel</code> keeps hostiles outside the radius; <code>attract</code> makes those inside it prefer the horse to anything else.</td></tr>
+<tr><td><code>radius</code></td><td><code>8</code></td><td>Reach in blocks, 1&ndash;32.</td></tr>
+<tr><td><code>interval</code></td><td><code>20</code></td><td>Ticks between beats, at least 1.</td></tr>
+<tr><td><code>max_targets</code></td><td><code>12</code></td><td>Most entities one beat may reach, 1&ndash;64.</td></tr>
+</tbody>
+</table>
+<pre><code class="language-json">{ "type": "mob_aura", "mode": "repel", "radius": 10 }</code></pre>
+<p>
+    <strong>Repel is a shove, not a wall.</strong> A hostile inside the radius has its
+    target cleared if it was the horse or its rider, and is pushed outward. That is
+    deliberately weaker than a real avoidance goal, and the reason is lifecycle: a
+    goal would have to be added to and taken off every mob that ever walked past, and
+    a horse whose aura stopped expressing would leave the goal behind on everything it
+    had met.
+</p>
+<p>
+    Built for <a href="gene-magic-mob-aura.html">magic mob aura</a>.
+</p>
+
+<h3 id="combat"><code>combat</code></h3>
+<p>What the horse hits for, in health points &mdash; two per heart.</p>
+<table>
+<thead><tr><th>Field</th><th>Default</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr><td><code>damage</code></td><td><code>3</code></td><td>Health points per hit, 0&ndash;200.</td></tr>
+</tbody>
+</table>
+<pre><code class="language-json">{ "type": "combat", "damage": 7.5 }</code></pre>
+<p>
+    A vanilla horse has no attack at all; this mod already gave them an
+    <code>ATTACK_DAMAGE</code> attribute and a melee goal so a wild one could kick
+    back (<code>HorseAggroHandler</code>), so this verb has only to move the number.
+</p>
+<p>
+    The number is <strong>absolute</strong> rather than a modifier, so a reader of a
+    horse&rsquo;s sheet sees the damage it deals and not an adjustment to a baseline
+    they would have to look up. The translator writes it as a base value, and only
+    when it differs.
+</p>
+<p>
+    Built for <a href="gene-magic-fighter.html">magic fighter</a>.
+</p>
+
 <h2 id="verbs-spec">The full verb vocabulary</h2>
 <p>
     Everything not marked live is unbuilt. Before proposing a new verb, check it is
@@ -1109,7 +1287,7 @@ Component  &rarr;  (Trigger, Condition, Selector, Effect)</code></pre>
 <h2 id="attributes">Attributes and traversal flags</h2>
 <p>A flat map, merged across all traits. Both are covered by live verbs; see <a href="#attribute"><code>attribute</code></a> and <a href="#traversal"><code>traversal</code></a>.</p>
 <p><strong>Attributes</strong> &mdash; movement speed, jump strength, max health, armor, knockback resistance, scale</p>
-<p><strong>Traversal flags</strong> &mdash; <code>walk_on_water</code> &middot; <code>walk_on_lava</code> &middot; <code>fire_immune</code> &middot; <code>fall_immune</code> &middot; <code>flight</code> &middot; <code>underwater_breathing</code> &middot; <code>swim_speed</code> &middot; <code>water_averse</code> &middot; <code>phasing</code></p>
+<p><strong>Traversal flags</strong> &mdash; <code>walk_on_water</code> &middot; <code>walk_on_lava</code> &middot; <code>fire_immune</code> &middot; <code>fall_immune</code> &middot; <code>flight</code> &middot; <code>underwater_breathing</code> &middot; <code>water_movement_efficiency</code> &middot; <code>water_averse</code> &middot; <code>phasing</code></p>
 <p>
     Both accept condition-gated modifiers, so a conditional buff is not a separate
     concept from a permanent one &mdash; which the gene layer already gets right via
@@ -1376,6 +1554,12 @@ Component  &rarr;  (Trigger, Condition, Selector, Effect)</code></pre>
 <table>
 <thead><tr><th>Divergence</th><th>Kind</th><th>Note</th></tr></thead>
 <tbody>
+<tr><td>The <code>charges</code> verb</td><td>Addition</td><td>The spec has no notion of one trait modifying another trait&rsquo;s cooldown. It exists because two loci that must cooperate <strong>cannot see each other&rsquo;s epigenome</strong> - a gene is handed its own values and nobody else&rsquo;s. Naming a yield <em>kind</em> is the only version of &ldquo;milked more than once a day&rdquo; that works without breaking that. If the spec grows trait IDs and relations, this is the first thing that should move onto them.</td></tr>
+<tr><td>The <code>breath</code> verb</td><td>Addition</td><td>The spec has <code>underwater_breathing</code> as a boolean traversal flag and no graded form. Same argument as <code>water_movement_efficiency</code> one row below: it is a magnitude, and a magnitude is not a flag.</td></tr>
+<tr><td>The <code>on_death</code> and <code>item_drop</code> verbs</td><td>Addition</td><td>The spec models death effects under <code>spawn_entity</code> / <code>impulse</code> and drops under an unbuilt roll-table system. Both are far larger than what two genes needed, so these are deliberately narrow: three world effects and five drops, all closed sets. If the roll tables are ever built, <code>item_drop</code> becomes a preset over them.</td></tr>
+<tr><td>The <code>mob_aura</code> verb</td><td>Addition</td><td>The spec would express this as <code>set_ai_flag</code> plus a <a href="#selectors">selector</a>, and cannot yet, because selectors are unbuilt. When they land this should be re-read as a selector plus two AI flags rather than kept as its own verb.</td></tr>
+<tr><td>The <code>combat</code> verb</td><td>Addition</td><td>Arguably should be an <code>attribute</code> on <code>attack_damage</code>. It is not, because the gene&rsquo;s number is <strong>absolute</strong>: a modifier would make a horse&rsquo;s sheet read as an adjustment to a baseline the reader has to go and look up, and the baseline is itself a gene constant.</td></tr>
+<tr><td><code>yield</code> has a <code>kind</code></td><td>Addition</td><td>Purely so <code>charges</code> can name it. The spec has no equivalent; it would use a trait ID.</td></tr>
 <tr><td><code>minDose</code> exists on every effect</td><td>Addition</td><td>Genetics-specific. The spec&rsquo;s trait model has no dose concept, and nothing in it needs one.</td></tr>
 <tr><td>The <code>glow</code> verb</td><td>Addition</td><td>The spec models a light as <code>emitter kind:light</code> and has no emissive-render concept at all. <code>glow</code> folds &ldquo;emit world light&rdquo; and &ldquo;render these coat parts full-bright&rdquo; into one verb because they are the two halves of one visible trait. If the spec&rsquo;s emitter ever grows a real <code>light</code> kind, the light half should move there and <code>glow</code> keep only the emissive parts.</td></tr>
 <tr><td><code>glow</code> has a client-render half</td><td>Addition</td><td>Every other verb is translator-only. <code>glow.parts</code> is drawn by <code>client/EmissiveCoatLayer</code>, so &ldquo;add a verb&rdquo; is no longer always just a server <code>case</code>.</td></tr>
@@ -1384,12 +1568,12 @@ Component  &rarr;  (Trigger, Condition, Selector, Effect)</code></pre>
 <tr><td>Conditions evaluate in the translator, not against <code>ContextSnapshot</code></td><td>Gap</td><td>Breaks the domain/translator split for condition logic. See <a href="#split">Domain and integration split</a>.</td></tr>
 <tr><td><code>anchor: body</code> vs the spec&rsquo;s <code>entity</code></td><td>Rename</td><td>Same thing, two names. Pick one before external gene packs exist.</td></tr>
 <tr><td>Emitter shapes lack <code>cone</code> and <code>sphere</code></td><td>Narrowing</td><td>No blocker; both are pure geometry.</td></tr>
-<tr><td><code>swim_speed</code> is an attribute here, a traversal flag in the spec</td><td>Rename</td><td>The gene layer is arguably right &mdash; it is a magnitude, and traversal flags are booleans. Fix the spec, not the code.</td></tr>
+<tr><td><code>water_movement_efficiency</code> is an attribute here, a traversal flag in the spec</td><td>Rename</td><td>The gene layer is arguably right &mdash; it is a magnitude, and traversal flags are booleans. Fix the spec, not the code.</td></tr>
 <tr><td><code>flight</code> and <code>phasing</code> traversal flags absent</td><td>Gap</td><td>Both are large behavioural changes; absence is probably correct for now.</td></tr>
 <tr><td><code>on_interact</code> takes an item ID, not an item tag</td><td>Narrowing</td><td>The spec says <code>item_or_tag</code> everywhere an item appears. Tag support is a translator-side lookup.</td></tr>
 <tr><td><code>yield.produces</code> accepts a recognised item set only</td><td>Narrowing</td><td>The spec allows fluid, effect, entity, block, structure and area-cloud outputs, plus roll tables.</td></tr>
 <tr><td>No trait IDs, cost, relations or budget</td><td>Gap</td><td>The structural prerequisite for most of the unbuilt half of this page.</td></tr>
-<tr><td>No per-attribute cap</td><td>Gap</td><td>The spec requires one. Worth adding when <code>attribute</code> is wired, not after.</td></tr>
+<tr><td>No per-attribute cap</td><td>Gap</td><td>The spec requires one. <code>attribute</code> is now wired and the cap is still absent, which is exactly the order this row warned against.</td></tr>
 <tr><td><code>walk_on_water</code> + <code>water_averse</code> unresolved</td><td>Gap</td><td>The spec resolves mutually exclusive flags by trait priority; there is no priority here.</td></tr>
 <tr><td><code>AbilityType.CONDITION_FLAGS</code> is a closed constant</td><td>Gap</td><td>Blocks the spec&rsquo;s load-time registration of integration condition sources.</td></tr>
 </tbody>
@@ -1589,13 +1773,14 @@ record Sound(Trigger trigger, String sound, double volume, double pitch,
 }</code></pre>
 <p>
     If you can&rsquo;t implement it yet, call <code>warnUntranslated("sound", &hellip;)</code>
-    &mdash; it logs once so a gene author knows the verb parsed but does nothing,
-    exactly like <code>attribute</code> today.
+    &mdash; it logs once so a gene author knows the verb parsed but does nothing. That
+    is what <code>attribute</code> did for months, and what
+    <code>traversal:walk_on_lava</code> still does.
 </p>
 
 <h3>4. A section on this page</h3>
 <p>
-    Add an <code>&lt;h3&gt;</code> under <a href="#verbs-live">The eight that exist</a>
+    Add an <code>&lt;h3&gt;</code> under <a href="#verbs-live">The ones that exist</a>
     with the parameter table and a JSON example, bump the count in that heading, and
     update the verb&rsquo;s row in <a href="#verbs-spec">The full verb vocabulary</a>
     from <em>Unbuilt</em> to its new status. If the verb is <em>not</em> in the

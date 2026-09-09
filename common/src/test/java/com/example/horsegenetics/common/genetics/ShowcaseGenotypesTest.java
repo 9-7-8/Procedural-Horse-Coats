@@ -48,10 +48,17 @@ class ShowcaseGenotypesTest {
         double share = with / (double) DRAWS;
         // MAGICAL_CHANCE is a floor, not a rate: every draw is force()d to a
         // painting magical gene half the time, and the other half still lands
-        // one incidentally about a fifth of the time - so the true share sits
-        // above the coin, nearer 0.6, and the band only has to catch "never
-        // forced" (~0.1) and "always" (1.0).
-        assertTrue(share > 0.44 && share < 0.66,
+        // one incidentally - so the true share sits above the coin and the band
+        // only has to catch "never forced" (~0.1) and "always" (1.0).
+        //
+        // The upper edge MOVES, and upward, every time a magical coat gene is
+        // registered: the incidental tail is "did any of N genes happen to
+        // express", and N only grows. It was 0.66 at a hundred-odd magical
+        // genes and the five added with the mechanical batch took it past that.
+        // Widened rather than pinned, because pinning it would mean editing
+        // this number on every gene import - and the assertion is about the
+        // forcing working at all, not about the exact tail.
+        assertTrue(share > 0.44 && share < 0.80,
                 "magical share drifted to " + share + " (expected about "
                         + ShowcaseGenotypes.MAGICAL_CHANCE + " plus an incidental tail)");
     }

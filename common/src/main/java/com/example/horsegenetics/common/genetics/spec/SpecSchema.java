@@ -79,6 +79,28 @@ public final class SpecSchema {
     public static final List<String> PIGMENT_CHANNELS = List.of("darkness", "red", "black", "total");
 
     /**
+     * Which reading of the <b>resolved colour</b> a {@code LUMA} mask
+     * thresholds. Every one is taken from
+     * {@link com.example.horsegenetics.common.coat.pattern.ColorView#visible} -
+     * the coat as a viewer sees it, after the gradient chart and after every
+     * magical gene that painted before this one.
+     *
+     * <p>{@code dark} and {@code light} are the two halves of one number and
+     * both are here on purpose: a gene that wants the black of the horse should
+     * say {@code "channel": "dark"} rather than {@code "light"} with an
+     * {@code invert}, because an inverted mask also inverts what a {@code spread}
+     * grows and reads backwards at the call site.
+     *
+     * <p>{@code white} is <b>not</b> {@code light}. It is the achromatic floor -
+     * the smallest of the three channels, the HWB whiteness - so a bald white
+     * texel reads 1 and a saturated yellow one reads near 0 however bright it
+     * is. That distinction is the whole reason this mask exists: "the white
+     * markings" and "the pale parts" are different sets of texels on a palomino.
+     */
+    public static final List<String> LUMA_CHANNELS =
+            List.of("dark", "light", "white", "saturation", "red", "green", "blue");
+
+    /**
      * Why a mask needs asking for symmetry rather than getting it free: every
      * field here is sampled in body space, and body space has a signed
      * {@code z}. A lattice point at {@code z = +2} and one at {@code z = -2} are
@@ -90,6 +112,24 @@ public final class SpecSchema {
     private static final String MIRROR_DOC =
             "draw the field on |z| rather than z, so the two sides of the horse get the same "
                     + "marks in the same places - the only way to ask for a symmetrical scatter";
+
+    /**
+     * Which side a {@code spread} may take its growth <b>from</b>.
+     *
+     * <p>{@code any} is the isotropic disc - grow in every direction, which is
+     * what a halo round a marking wants. The other four restrict the search to
+     * candidates on one side along one body axis, so the selection grows the
+     * <i>other</i> way: {@code above} means "a selected texel higher up counts",
+     * and therefore grows the selection <b>downward</b>. That is the only way to
+     * ask for the bottom edge of a marking rather than its whole rim, and
+     * markings that pool, run or drip all want exactly one side of themselves.
+     */
+    public static final List<String> SPREAD_SIDES = List.of("any", "above", "below", "ahead", "behind");
+
+    private static final String SPREAD_FROM_DOC =
+            "which side the growth comes from - 'above' grows the selection downward, 'below' "
+                    + "upward, 'ahead' toward the tail and 'behind' toward the nose. 'any' is the "
+                    + "isotropic disc. Read only when 'spread' is above 0";
 
     /** Which outline a {@code SPOTS} element is drawn with. */
     public static final List<String> SPOT_SHAPES = List.of("round", "heart");
@@ -188,7 +228,26 @@ public final class SpecSchema {
                                 + "found within the radius wins, applied after 'invert'. So an "
                                 + "inverted mask over white grows the white (fielded's wisps run "
                                 + "out of it) and a plain one over darkness grows the dark "
-                                + "(integration's spots spread out of the black points)")));
+                                + "(integration's spots spread out of the black points)"),
+                Param.choice("spreadFrom", SPREAD_SIDES, SPREAD_FROM_DOC)));
+
+        MASKS.put(MaskType.LUMA, List.of(
+                Param.parts("parts", "restrict to these parts"),
+                Param.choice("channel", LUMA_CHANNELS,
+                        "'dark' is 1 - relative luminance, 'light' its complement, 'white' the "
+                                + "achromatic floor (bald white 1, saturated colour ~0)"),
+                Param.value("from", 0.5, "reading where coverage starts climbing"),
+                Param.value("to", 1.0, "reading where coverage reaches 1"),
+                Param.value("spread", 0.0,
+                        "body units to grow WHAT THIS MASK SELECTED by, exactly as on PIGMENT - "
+                                + "the largest coverage found within the radius wins, applied "
+                                + "after 'invert'"),
+                Param.choice("spreadFrom", SPREAD_SIDES, SPREAD_FROM_DOC)));
+
+        MASKS.put(MaskType.EDGE, List.of(
+                Param.parts("parts", "restrict to these parts - one rectangle per face of each"),
+                Param.value("width", 0.6, "how far in from the boundary the rim runs, body units"),
+                Param.value("softness", 0.25, "fade width inside the rim, body units")));
 
         MASKS.put(MaskType.SPOTS, List.of(
                 Param.parts("parts", "restrict to these parts"),

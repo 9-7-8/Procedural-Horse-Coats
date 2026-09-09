@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Magic on death &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow magical">Magical gene <span class="sep">/</span> no coat effect</p>
+
+<h1>Magic on death</h1>
+
+<p class="lede">
+    What happens to the <strong>world</strong> where the horse died &mdash; a
+    lava source, a water source, or a creeper-sized explosion. It says nothing
+    at all about items; that is
+    <a href="gene-magic-item-drop.html">magic item drop</a>, and the two are
+    kept apart on purpose.
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<h2 id="inheritance">Crossing two of them</h2>
+
+<div class="gene-inheritance" data-gene="horsegenetics.magic_on_death"></div>
+
+<h2 id="what">What it does</h2>
+
+<table class="data">
+    <thead><tr><th>Combination</th><th>Outcome</th></tr></thead>
+    <tbody>
+        <tr><td><code>Lav/Lav</code></td><td>a lava source appears where it was standing</td></tr>
+        <tr><td><code>Wat/Wat</code></td><td>a water source appears</td></tr>
+        <tr><td><code>Xpl/Xpl</code></td><td>it goes off like a creeper</td></tr>
+        <tr><td>anything with an <code>n</code></td><td>nothing</td></tr>
+        <tr><td>two <em>different</em> variants</td><td>nothing</td></tr>
+    </tbody>
+</table>
+
+<p>
+    That last row is not a shrug. The three variants are answers to one question
+    &mdash; what happens here &mdash; and a horse carrying two of them is asking
+    for two contradictory things. Rather than pick a winner, the locus says the
+    pair is silent.
+</p>
+
+<h2 id="wild">No feral horse explodes</h2>
+
+<p>
+    <strong>This is the one locus in the mod whose founder table is carriers
+    only.</strong> Wild horses carry the alleles &mdash; a few percent each
+    &mdash; and no wild horse is ever born with two of anything, so a feral
+    animal can never crater the ground it dies on.
+</p>
+
+<p>
+    Every other magical gene here does the opposite, and deliberately: a locus
+    whose carrier is invisible puts its <em>expressing</em> combinations in the
+    wild, so that what you catch is what you watched it do. This one is a hazard
+    rather than a prize, and a horse that leaves a crater has to be
+    somebody&rsquo;s fault.
+</p>
+
+<h2 id="health">Health</h2>
+
+<p>
+    None while alive. A volatile horse is an ordinary horse right up until it
+    stops being one, and it is worth knowing that the explosion is a
+    <em>mob</em> explosion &mdash; whatever killed it, and whatever was standing
+    nearby, is inside the radius.
+</p>
+
+<h2 id="carrot">Its gene carrot</h2>
+
+<!-- The recipe, read off the mod at run time - the rarity tier is the recipe's
+     price, and a price written into fifty pages goes stale silently.
+     See wiki/gene-carrot/gene-carrot.js. -->
+
+<div class="gene-carrot" data-gene="horsegenetics.magic_on_death"></div>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd><code>horsegenetics.magic_on_death</code></dd></div>
+    <div><dt>Alleles</dt><dd><code>Lav</code> lava spring, <code>Wat</code> water spring, <code>Xpl</code> volatile, <code>n</code></dd></div>
+    <div><dt>Priority</dt><dd>134 &mdash; the magical utility band, beside milk</dd></div>
+    <div><dt>Reaches the game as</dt><dd>an <code>on_death</code> effect</dd></div>
+    <div><dt>Coat effect</dt><dd><strong>none, ever</strong></dd></div>
+</dl>
+
+<div class="note warn">
+    <span class="label">Newly built, not yet play-tested</span>
+    <p>
+        Nothing on this page has been seen in game. The translator was written
+        against the 26.1.2 sources and is flagged as unverified in its own
+        comments. Checklist on <a href="verification.html">To be verified</a>.
+    </p>
+</div>
+
+<h2 id="split">Why the ground and the drops are two verbs</h2>
+
+<p>
+    Because they are two questions with two answers, and folding them into one
+    would make &ldquo;explodes <em>and</em> drops diamonds&rdquo; impossible to
+    express as the two independent loci it is. As two verbs on two genes it is a
+    cross; as one table it would have been a row somebody had to remember to
+    write.
+</p>
+
+<p>
+    They are nonetheless handled in one translator class, because they share
+    exactly one thing &mdash; the moment &mdash; and nothing else, including
+    which event they can run on. <code>LivingDropsEvent</code> can rewrite the
+    drop list and cannot usefully place a block;
+    <code>LivingDeathEvent</code> is the other way round.
+</p>
+
+<h2 id="placement">The fluids only fill a free block</h2>
+
+<p>
+    A lava or water source is placed only into air, or into something a fluid
+    would wash away anyway. The alternative reading &mdash; replace whatever is
+    there &mdash; turns a novelty locus into a griefing tool that nobody can see
+    coming, since the carrier looks like any other horse.
+</p>
+
+<div class="codebox">
+<div class="filename">neoforge/server/GeneDeathHandler.java</div>
+<pre><code class="language-java">var existing = level.getBlockState(at);
+if (existing.isAir() || existing.canBeReplaced()
+        || existing.getFluidState().getType() != Fluids.EMPTY) {
+    level.setBlockAndUpdate(at, state);
+}</code></pre>
+</div>
+
+<p>
+    Nothing here fires in the read-only gallery dimension, for the same reason
+    the glow light block and the ground spread do not: a debug pen is for
+    looking at horses, and a horse that craters one is a bug report about the
+    debug pen.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="science">
+
+<h2 id="hazard">The exception that proves the founder rule</h2>
+
+<p>
+    The standing rule for a magical locus with an invisible carrier is that the
+    wild population sits on the combinations that <em>show</em>. The argument is
+    a good one: once a carrier is invisible, a founder population full of
+    carriers is a locus run in the dark &mdash; you cannot see what a horse has,
+    so you cannot choose what to pair it with, and every result is an accident.
+</p>
+
+<p>
+    That argument assumes the outcome is something you would want to find. Here
+    it is not. A wild population of exploding horses would mean a player who has
+    never heard of this gene loses a stable to it, and the discovery would be an
+    accident in the bad direction. So this locus runs the health loci&rsquo;s
+    rule instead &mdash; carriers only, never affected &mdash; and the
+    interesting horse is one you assembled from two ordinary-looking parents.
+</p>
+
+<h2 id="water">The useful one</h2>
+
+<p>
+    Water is on the same locus as lava and the explosion, which makes the whole
+    thing a gamble worth taking: three recessives sharing a locus means a
+    breeder chasing an infinite water source is also breeding, in the same herd,
+    something that will eventually go off.
+</p>
+
+</section>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="gene-magic-item-drop.html">Magic item drop &mdash; the other half</a>
+        <a href="gene-milk.html">Milk &mdash; the other lava/water locus</a>
+        <a href="gene-effects.html">The effects block</a>
+        <a href="verification.html">What to check in-game</a>
+    </div>
+    Source: <code>common/genetics/genes/MagicOnDeathGene.java</code>,
+    <code>neoforge/server/GeneDeathHandler.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+<script defer src="gene-carrot/gene-carrot.js"></script>
+<script defer src="gene-inheritance/gene-inheritance.js"></script>
+</body>
+</html>

@@ -1,0 +1,151 @@
+{
+  "format": 3,
+  "key": "horsegenetics.nyxborn",
+  "name": "Nyxborn",
+  "phase": "magical",
+  "priority": 611,
+  "rarity": "EPIC",
+  "blurb": "Every white the horse has goes black, and then the whole of the black is scattered with tiny white points - a night sky where the markings used to be.",
+  "alleles": [
+    {
+      "token": "Nyx",
+      "label": "Nyxborn (Nyx)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "starSeed",
+      "type": "seed"
+    },
+    {
+      "name": "driftSeed",
+      "type": "seed"
+    },
+    {
+      "name": "density",
+      "min": 0.32,
+      "max": 0.58
+    },
+    {
+      "name": "starSize",
+      "min": 0.27,
+      "max": 0.4
+    }
+  ],
+  "expressions": [
+    {
+      "id": "nyxborn",
+      "name": "Nyxborn",
+      "description": "Two copies. Every white marking the horse carries is painted out in black first - so a tobiano, a splash or a dominant white simply stops being visible, and the horse reads as a solid dark one. Then the whole of that black, the horse's own and the black the gene just made, is dusted with tiny white points. A pinto goes in and a starfield comes out, and the pattern underneath is only recoverable from the genotype.",
+      "when": {
+        "Nyx": 2
+      },
+      "layers": [
+        {
+          "name": "every white the horse has, taken to black",
+          "masks": [
+            {
+              "type": "LUMA",
+              "channel": "white",
+              "from": 0.8,
+              "to": 0.94
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#0b0b12",
+            "strength": 97,
+            "opacity": 100
+          }
+        },
+        {
+          "name": "tiny white points over all of it - the horse's own black, and the black just made",
+          "masks": [
+            {
+              "type": "LUMA",
+              "channel": "dark",
+              "from": 0.7,
+              "to": 0.82
+            },
+            {
+              "type": "LUMA",
+              "channel": "white",
+              "from": 0.8,
+              "to": 0.94,
+              "combine": "MAX"
+            },
+            {
+              "type": "NOISE",
+              "seed": "$driftSeed",
+              "scale": 7.0,
+              "low": 0.45,
+              "high": 1.3
+            },
+            {
+              "type": "SPOTS",
+              "seed": "$starSeed",
+              "spacing": 1.6,
+              "radius": "$starSize",
+              "vary": 0.5,
+              "chance": "$density",
+              "softness": 0.05
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#f4f6ff",
+            "strength": 94
+          }
+        },
+        {
+          "name": "the few bright ones, drawn out into a short cross",
+          "masks": [
+            {
+              "type": "LUMA",
+              "channel": "dark",
+              "from": 0.7,
+              "to": 0.82
+            },
+            {
+              "type": "LUMA",
+              "channel": "white",
+              "from": 0.8,
+              "to": 0.94,
+              "combine": "MAX"
+            },
+            {
+              "type": "SPOTS",
+              "seed": "$starSeed",
+              "spacing": 1.6,
+              "radius": "$starSize",
+              "vary": 0.5,
+              "chance": 0.05,
+              "stretch": 3.4,
+              "axis": "X",
+              "softness": 0.04
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#ffffff",
+            "strength": 100
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "Nothing. One copy is silent - the locus only speaks doubled, so a carrier is indistinguishable from a horse that has never had it.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Nyx/Nyx": 0.05,
+    "n/n": 99.95
+  }
+}

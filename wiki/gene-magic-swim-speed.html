@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Magic swim speed &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow magical">Magical gene <span class="sep">/</span> no coat effect</p>
+
+<h1>Magic swim speed</h1>
+
+<p class="lede">
+    How fast the horse moves <strong>in water</strong>, and nothing else. It is
+    <em>unrelated</em> to <a href="gene-magic-speed.html">magic speed</a> &mdash;
+    not related-but-separate, unrelated &mdash; so a horse can be the slowest
+    thing in the paddock and still cross a river faster than a boat.
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<h2 id="inheritance">Crossing two of them</h2>
+
+<div class="gene-inheritance" data-gene="horsegenetics.magic_swim_speed"></div>
+
+<h2 id="what">What it does</h2>
+
+<p>
+    A horse with the otterlike allele swims faster than it has any business
+    doing. A horse with the stonelike allele crosses water at a crawl. Neither
+    is any different on dry land, which is the entire point of the locus: the
+    thing you bred for is invisible until the horse is in a river.
+</p>
+
+<p>
+    Both copies count, and they <strong>add</strong>. One otterlike copy is
+    worth about a quarter more; two are worth about half again, and rather more
+    when both copies happened to roll well. One of each very nearly cancels
+    &mdash; the horse swims at about the usual pace while carrying, and passing
+    on, both extremes.
+</p>
+
+<h2 id="wild">What you can catch</h2>
+
+<p>
+    About a quarter of wild horses carry one copy, split evenly between the two
+    alleles. <strong>No wild horse carries two of anything</strong>, so every
+    genuinely remarkable swimmer in a world is one somebody bred.
+</p>
+
+<h2 id="health">Health</h2>
+
+<p>
+    None. This locus has no bearing on how long the horse survives underwater
+    &mdash; that is
+    <a href="gene-magic-water-breathing.html">magic water breathing</a>, and
+    the two are independent. A horse that crosses a lake quickly and one that
+    can stay at the bottom of it are two different breeding projects.
+</p>
+
+<h2 id="carrot">Its gene carrot</h2>
+
+<!-- The recipe, read off the mod at run time - the rarity tier is the recipe's
+     price, and a price written into fifty pages goes stale silently.
+     See wiki/gene-carrot/gene-carrot.js. -->
+
+<div class="gene-carrot" data-gene="horsegenetics.magic_swim_speed"></div>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd><code>horsegenetics.magic_swim_speed</code></dd></div>
+    <div><dt>Alleles</dt><dd><code>Otr</code> otterlike, <code>Stne</code> stonelike, <code>n</code></dd></div>
+    <div><dt>Priority</dt><dd>144 &mdash; the magical body-stat band</dd></div>
+    <div><dt>Reaches the game as</dt><dd>an <code>attribute</code> effect on <code>water_movement_efficiency</code></dd></div>
+    <div><dt>Coat effect</dt><dd><strong>none, ever</strong></dd></div>
+</dl>
+
+<div class="note warn">
+    <span class="label">Newly built, not yet play-tested</span>
+    <p>
+        Nothing on this page has been seen in game. The translator was written
+        against the 26.1.2 sources and is flagged as unverified in its own
+        comments. Checklist on <a href="verification.html">To be verified</a>.
+    </p>
+</div>
+
+<h2 id="factor">Not a body stat, and deliberately so</h2>
+
+<p>
+    The four <a href="gene-magic-speed.html">magical body-stat genes</a> push
+    their sum into <code>TraitBuilder</code>, and end up as one of the four
+    numbers on <code>Traits</code>. This gene does not, and neither does
+    <a href="gene-magic-water-breathing.html">water breathing</a>.
+</p>
+
+<p>
+    <code>Traits</code> is a pure function of the genotype &mdash; four numbers
+    and a list of conditions, re-derived wherever they are needed, stored
+    nowhere, and meant to survive a version port unchanged. Swimming speed is
+    not among those four and should not become the fifth: it means nothing
+    without a running game, which is precisely the line
+    <code>GeneAbility</code> exists on. Adding a field to <code>Traits</code>
+    for every magical knob would drag Minecraft-shaped concepts into the one
+    record that is supposed to be portable.
+</p>
+
+<p>
+    So the genetics are shared and the sink is not.
+    <code>AbstractMagicFactorGene</code> is <code>AbstractMagicStatGene</code>
+    with the last step replaced: the same three alleles, the same per-copy
+    percentage on its own epigenetic seed, the same signed sum &mdash; and then
+    a <code>GeneAbility</code> rather than a number.
+</p>
+
+<div class="codebox">
+<div class="filename">common/genetics/genes/MagicSwimSpeedGene.java</div>
+<pre><code class="language-java">@Override
+protected List&lt;GeneAbility&gt; abilitiesFor(double factor) {
+    return List.of(new GeneAbility.AttributeMod(ATTRIBUTE, "multiply_total", factor - 1.0,
+            GeneAbility.Condition.ALWAYS, 1));
+}</code></pre>
+</div>
+
+<h2 id="attribute">There is no <code>swim_speed</code> attribute</h2>
+
+<p>
+    However much the name suggests itself, vanilla has no such attribute. What
+    it has is <code>water_movement_efficiency</code> &mdash; the share of its
+    land speed a mob keeps in water, which is Depth Strider&rsquo;s attribute
+    and is exactly what &ldquo;how fast does this horse swim&rdquo; means.
+</p>
+
+<p>
+    The effect format used to offer <code>swim_speed</code> in its
+    <code>attribute</code> list. It was never translated to anything, because
+    there was nothing to translate it to; the list now names the attributes that
+    exist, and the translator&rsquo;s table is the same set. That table is
+    <strong>closed</strong> on purpose, so a gene naming something this build
+    has never heard of gets one log line rather than a silent no-op.
+</p>
+
+<h2 id="removal">Taking the modifier off again</h2>
+
+<p>
+    The modifier is transient and its id is derived from the gene and the
+    attribute, so re-applying it every tick is idempotent. The removal half is
+    the interesting one: when an ability&rsquo;s condition goes false it is
+    skipped <em>before</em> it reaches the apply path, so nothing would ever take
+    the modifier off. <code>GeneAbilityHandler.clearAttributes</code> therefore
+    runs unconditionally after the ability loop and strips every modifier in the
+    mod&rsquo;s namespace that the horse is not currently asking for.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="science">
+
+<h2 id="why">Why land speed and swimming are two loci</h2>
+
+<p>
+    Because they compose differently, and folding them together would have made
+    one of the two wrong.
+</p>
+
+<p>
+    Land speed has <em>three natural loci under it</em> &mdash;
+    <a href="gene-mstn.html">MSTN</a>, <a href="gene-pdk4.html">PDK4</a> and
+    <a href="gene-ckm.html">CKM</a> &mdash; and the magical version multiplies
+    whatever they settled on, so a magically fast pony stays slower than a
+    magically fast draught horse. That is the right behaviour and it depends
+    entirely on there being something underneath to scale.
+</p>
+
+<p>
+    Swimming has nothing underneath it. No natural locus in the mod makes one
+    horse a better swimmer than another, so this gene is not scaling anything;
+    it is the whole of the fact. Its percentages are correspondingly larger
+    (mean 25% rather than 10%) because a quarter of nothing-in-particular is a
+    smaller claim than a quarter of a bred racehorse.
+</p>
+
+<h2 id="breeding">What it does to breeding</h2>
+
+<p>
+    It adds an axis that nothing else in the mod is correlated with. A breeder
+    who wants a horse that is fast on land <em>and</em> in water has to select
+    for two independent loci at once, and neither one is visible &mdash; which
+    is the same shape as the body-stat genes and, like them, is meant to make a
+    finished animal an achievement rather than a catch.
+</p>
+
+</section>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="gene-magic-water-breathing.html">Magic water breathing</a>
+        <a href="gene-magic-speed.html">Magic speed &mdash; the land one</a>
+        <a href="gene-effects.html">The effects block</a>
+        <a href="verification.html">What to check in-game</a>
+    </div>
+    Source: <code>common/genetics/genes/MagicSwimSpeedGene.java</code>,
+    <code>common/genetics/genes/AbstractMagicFactorGene.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+<script defer src="gene-carrot/gene-carrot.js"></script>
+<script defer src="gene-inheritance/gene-inheritance.js"></script>
+</body>
+</html>

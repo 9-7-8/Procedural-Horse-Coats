@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Magic milk volume &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow magical">Magical gene <span class="sep">/</span> no coat effect</p>
+
+<h1>Magic milk volume</h1>
+
+<p class="lede">
+    How many times a day the horse can be filled from. Wild type is once.
+    The milky allele is worth one to three more, <strong>codominant</strong>, and
+    the copies add &mdash; and because it governs a yield <em>kind</em> rather
+    than a gene, it reaches <a href="gene-milk.html">milk</a>&rsquo;s milk, water
+    and lava all three.
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<h2 id="inheritance">Crossing two of them</h2>
+
+<div class="gene-inheritance" data-gene="horsegenetics.magic_milk_volume"></div>
+
+<h2 id="what">What it does</h2>
+
+<table class="data">
+    <thead><tr><th>Combination</th><th>Fillings a day</th></tr></thead>
+    <tbody>
+        <tr><td><code>n/n</code></td><td>once, as everywhere else in the game</td></tr>
+        <tr><td><code>Mlk/n</code></td><td>once plus that copy&rsquo;s number</td></tr>
+        <tr><td><code>Mlk/Mlk</code></td><td>once plus <strong>both</strong> numbers, added</td></tr>
+    </tbody>
+</table>
+
+<p>
+    Unlike most of the magical loci here, a single copy <strong>shows</strong>.
+    A milky horse can be found rather than only bred, which is what makes this a
+    reasonable first dairy gene to notice.
+</p>
+
+<h2 id="everything">It governs every kind of filling</h2>
+
+<p>
+    Not just milk. A <a href="gene-milk.html">water-bearing</a> or lava-bearing
+    horse is filled from through the same locus, so volume applies to those too
+    &mdash; and to anything the mod ever adds that produces the same kind.
+</p>
+
+<h2 id="spread">Spread across the day, not banked</h2>
+
+<p>
+    Charges divide the cooldown rather than banking uses. &ldquo;Three times a
+    day&rdquo; means three fillings spread across the day, not three at dawn and
+    nothing after. That is what a dairy animal does, and it means a player
+    cannot empty a horse and walk away.
+</p>
+
+<h2 id="health">Health</h2>
+
+<p>
+    None. Milking is still gated on the horse being at its own full health, so a
+    very productive mare is still a mare you have to look after.
+</p>
+
+<h2 id="carrot">Its gene carrot</h2>
+
+<!-- The recipe, read off the mod at run time - the rarity tier is the recipe's
+     price, and a price written into fifty pages goes stale silently.
+     See wiki/gene-carrot/gene-carrot.js. -->
+
+<div class="gene-carrot" data-gene="horsegenetics.magic_milk_volume"></div>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd><code>horsegenetics.magic_milk_volume</code></dd></div>
+    <div><dt>Alleles</dt><dd><code>Mlk</code> milky, <code>n</code></dd></div>
+    <div><dt>Priority</dt><dd>131 &mdash; the magical utility band, beside milk</dd></div>
+    <div><dt>Reaches the game as</dt><dd>a <code>charges</code> effect naming the yield kind <code>milk</code></dd></div>
+    <div><dt>Coat effect</dt><dd><strong>none, ever</strong></dd></div>
+</dl>
+
+<div class="note warn">
+    <span class="label">Newly built, not yet play-tested</span>
+    <p>
+        Nothing on this page has been seen in game. The translator was written
+        against the 26.1.2 sources and is flagged as unverified in its own
+        comments. Checklist on <a href="verification.html">To be verified</a>.
+    </p>
+</div>
+
+<h2 id="kind">It governs a kind, not a gene</h2>
+
+<p>
+    This locus does not know that <a href="gene-milk.html">the milk gene</a>
+    exists. It emits a <code>charges</code> effect naming the yield
+    <em>kind</em> <code>"milk"</code>, and every yield tagged with that kind gets
+    the extra uses &mdash; today the plain milk, the water and the lava, all
+    three on one other locus.
+</p>
+
+<p>
+    The indirection is doing real work rather than being tidy. <strong>The two
+    loci cannot see each other&rsquo;s epigenome</strong> &mdash; a gene is
+    handed its own values and nobody else&rsquo;s, deliberately &mdash; so a
+    design where the milk gene asked &ldquo;how voluminous am I&rdquo; could not
+    have read the number at all. Naming a kind is the only version of this that
+    works, and it has the pleasant side effect that a future gene producing some
+    other fluid is governed for free instead of by somebody remembering.
+</p>
+
+<div class="codebox">
+<div class="filename">neoforge/server/GeneYieldHandler.java</div>
+<pre><code class="language-java">int total = 1;
+for (HorseAbilities.Active active : abilities) {
+    if (active.ability() instanceof GeneAbility.YieldCharges charges
+            &amp;&amp; charges.kind().equals(kind)
+            &amp;&amp; GeneAbilityHandler.conditionHolds(charges.when(), horse, record)) {
+        total += charges.extra();
+    }
+}</code></pre>
+</div>
+
+<h2 id="divide">Why dividing the cooldown, and not a counter</h2>
+
+<p>
+    A burstable version would need a second stored number on the cooldown
+    attachment and would let a player drain the horse in one visit. Dividing the
+    existing cooldown needs no new state at all &mdash; the stamp already on the
+    attachment is enough &mdash; so the whole feature survives a restart for
+    free and is inspectable with what was already there.
+</p>
+
+<h2 id="rounding">Rounded per copy</h2>
+
+<p>
+    Each copy&rsquo;s number is rounded before the two are added, rather than
+    the sum being rounded afterwards. That way the number a horse&rsquo;s sheet
+    shows for each copy is the number that copy actually contributes, and a
+    heterozygote worth &ldquo;2&rdquo; beside a homozygote worth
+    &ldquo;2&nbsp;+&nbsp;3&rdquo; both add up in front of the reader.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="science">
+
+<h2 id="codominant">Codominant, because a dairy trait is</h2>
+
+<p>
+    Milk yield in a real herd is not a switch, and neither is this. Both copies
+    count, the numbers add, and a homozygote from two good parents is
+    substantially better than either of them &mdash; which is the ordinary shape
+    of a production trait and the reason a dairy line is worth
+    <em>keeping</em> rather than merely worth starting.
+</p>
+
+<h2 id="visible">The one loud recessive-adjacent gene</h2>
+
+<p>
+    Most of the utility loci here hide their carriers on purpose. This one does
+    not, and that is a deliberate contrast: a player who has never thought about
+    genetics can notice that one mare fills more buckets than another and start
+    breeding on that alone. It is the gene the mod uses to teach that the
+    numbers are heritable at all.
+</p>
+
+</section>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="gene-milk.html">Milk &mdash; what it governs</a>
+        <a href="gene-magic-meat.html">Magic meat</a>
+        <a href="gene-effects.html">The effects block</a>
+        <a href="verification.html">What to check in-game</a>
+    </div>
+    Source: <code>common/genetics/genes/MagicMilkVolumeGene.java</code>,
+    <code>neoforge/server/GeneYieldHandler.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+<script defer src="gene-carrot/gene-carrot.js"></script>
+<script defer src="gene-inheritance/gene-inheritance.js"></script>
+</body>
+</html>

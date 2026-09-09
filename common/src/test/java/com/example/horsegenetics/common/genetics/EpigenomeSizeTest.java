@@ -25,6 +25,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * <p>The margin matters more than the number: registering a gene with a wide
  * schema is a normal thing to do, and it should fail here rather than in the
  * game.
+ *
+ * <p>It has now fired twice, which is the point of it. The second time was the
+ * batch of fourteen genes that added the mechanical loci: a full code went from
+ * comfortably under 32&nbsp;768 to 35&nbsp;459 characters, so the cap doubled
+ * again. Every gene with an epigenetic schema costs a segment, and the count
+ * only goes up - so expect to be back here, and raise the cap rather than
+ * trimming a gene to fit a number that was arbitrary in the first place.
  */
 class EpigenomeSizeTest {
 
@@ -33,7 +40,7 @@ class EpigenomeSizeTest {
      * {@code common/} cannot see the NeoForge module, which is the whole point
      * of the split.
      */
-    private static final int NETWORK_CAP = 65536;
+    private static final int NETWORK_CAP = 131072;
 
     /** Fail while there is still room to add genes, not once it is too late. */
     private static final double HEADROOM = 0.5;

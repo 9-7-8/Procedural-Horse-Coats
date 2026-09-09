@@ -56,11 +56,10 @@
           "name": "the white regions, broken into hue cells",
           "masks": [
             {
-              "type": "PIGMENT",
-              "channel": "total",
-              "from": 0.02,
-              "to": 0.22,
-              "invert": true
+              "type": "LUMA",
+              "channel": "white",
+              "from": 0.8,
+              "to": 0.94
             }
           ],
           "op": {
@@ -77,18 +76,16 @@
           "name": "the pearlescent rim",
           "masks": [
             {
-              "type": "PIGMENT",
-              "channel": "total",
-              "from": 0.02,
-              "to": 0.22,
-              "invert": true
+              "type": "LUMA",
+              "channel": "white",
+              "from": 0.8,
+              "to": 0.94
             },
             {
-              "type": "PIGMENT",
-              "channel": "total",
-              "from": 0.0,
-              "to": 0.06,
-              "invert": true,
+              "type": "LUMA",
+              "channel": "white",
+              "from": 0.94,
+              "to": 0.995,
               "combine": "SUBTRACT"
             }
           ],

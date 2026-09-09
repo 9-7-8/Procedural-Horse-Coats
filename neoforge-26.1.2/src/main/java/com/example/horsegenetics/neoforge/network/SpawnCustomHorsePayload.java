@@ -54,7 +54,7 @@ public record SpawnCustomHorsePayload(String genotypeCode, String epigenomeCode,
             // packet could not have worked - see EpigenomeSizeTest, which now
             // guards the margin from the common side.
             ByteBufCodecs.stringUtf8(8192), SpawnCustomHorsePayload::genotypeCode,
-            ByteBufCodecs.stringUtf8(65536), SpawnCustomHorsePayload::epigenomeCode,
+            ByteBufCodecs.stringUtf8(131072), SpawnCustomHorsePayload::epigenomeCode,
             ByteBufCodecs.BOOL, SpawnCustomHorsePayload::baby,
             ByteBufCodecs.BOOL, SpawnCustomHorsePayload::female,
             ByteBufCodecs.stringUtf8(64), SpawnCustomHorsePayload::breed,

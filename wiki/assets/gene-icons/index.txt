@@ -105,6 +105,7 @@ picasso_marking
 harlequin_shield
 painted_lady_wing
 shieldback
+ocular
 stars
 duskfall_speckle
 speckling
@@ -132,6 +133,7 @@ wyrmwood_sigils
 moth_wings
 opaline_zebra
 webbed
+stained_glass
 fade
 frostfall
 prismtail
@@ -147,4 +149,8 @@ fielded
 yalia
 opalized
 voided
+nyxborn
+bloodstained
+shadowcreature
 invert
+tron

@@ -97,7 +97,8 @@ window.HG = window.HG || {};
       magicals.push(function (pigment, colour) {
         pigmentBeforeGene = pigment;
         if (opts.coverageLayer >= 0 && layers[opts.coverageLayer]) {
-          coverage = HG.specEngine.coverageMap(spec, layers, opts.coverageLayer, values, skin, pigment);
+          coverage = HG.specEngine.coverageMap(spec, layers, opts.coverageLayer, values, skin,
+            pigment, colour);
         }
         return showsGene ? HG.specEngine.tint(spec, layers, values, skin, pigment, colour) : null;
       });

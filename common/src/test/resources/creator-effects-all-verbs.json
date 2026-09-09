@@ -90,7 +90,8 @@
                 "negate": true
               }
             ]
-          }
+          },
+          "kind": "milk"
         },
         {
           "type": "glow",
@@ -107,6 +108,34 @@
           "type": "spread",
           "cover": "mycelium",
           "minDose": 2
+        },
+        {
+          "type": "charges",
+          "kind": "milk",
+          "extra": 2
+        },
+        {
+          "type": "breath",
+          "factor": 2.5
+        },
+        {
+          "type": "on_death",
+          "effect": "water"
+        },
+        {
+          "type": "item_drop",
+          "drop": "diamonds",
+          "min": 2,
+          "max": 5
+        },
+        {
+          "type": "mob_aura",
+          "mode": "repel",
+          "radius": 10
+        },
+        {
+          "type": "combat",
+          "damage": 7.5
         }
       ]
     },

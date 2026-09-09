@@ -78,6 +78,14 @@ public final class MilkGene implements Gene, TraitContribution, AbilityContribut
      * a dairy) and recharge faster; lava is worth more, so it takes longer.
      */
     public static final int MILK_COOLDOWN_TICKS = 24_000;
+
+    /**
+     * The {@code kind} every filling this locus produces is tagged with, and
+     * the name {@link MagicMilkVolumeGene} asks for. A string rather than a
+     * reference to this class, because the point of the mechanism is that
+     * neither gene has to know about the other.
+     */
+    public static final String YIELD_KIND = "milk";
     public static final int WATER_COOLDOWN_TICKS = 200;
     public static final int LAVA_COOLDOWN_TICKS = 1200;
 
@@ -207,9 +215,16 @@ public final class MilkGene implements Gene, TraitContribution, AbilityContribut
         return "minecraft:milk_bucket";
     }
 
+    /**
+     * Every filling this locus offers is tagged {@link #YIELD_KIND}, which is
+     * how {@link MagicMilkVolumeGene} reaches all three at once. The volume
+     * locus names a <i>kind</i> rather than a gene, so it governs the plain
+     * milk, the water and the lava without knowing that this gene produces
+     * them - and will govern anything else that ever declares the same kind.
+     */
     private static GeneAbility bucketOf(String produces, int cooldown, Condition when) {
         return new GeneAbility.Yield(new Trigger.OnInteract("minecraft:bucket"),
-                "minecraft:bucket", produces, cooldown, 0.0, "", when, 1);
+                "minecraft:bucket", produces, cooldown, 0.0, "", YIELD_KIND, when, 1);
     }
 
     /**
@@ -217,8 +232,10 @@ public final class MilkGene implements Gene, TraitContribution, AbilityContribut
      * {@code when} holds - the else-branch a bare {@code yield} cannot express.
      */
     private static GeneAbility deniedBucket(Condition when, double damage, String messageKey) {
+        // No kind: a refusal is not a filling, and granting it extra charges
+        // would mean a high-volume stallion could be kicked more often.
         return new GeneAbility.Yield(new Trigger.OnInteract("minecraft:bucket"),
-                "", "", 0, damage, messageKey, when, 1);
+                "", "", 0, damage, messageKey, "", when, 1);
     }
 
     private static Condition flag(String name) {

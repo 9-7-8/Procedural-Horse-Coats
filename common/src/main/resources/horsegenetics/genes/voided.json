@@ -31,11 +31,10 @@
           "name": "the white regions, blackened",
           "masks": [
             {
-              "type": "PIGMENT",
-              "channel": "total",
-              "from": 0.02,
-              "to": 0.22,
-              "invert": true
+              "type": "LUMA",
+              "channel": "white",
+              "from": 0.8,
+              "to": 0.94
             }
           ],
           "op": {

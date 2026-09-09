@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shadowcreature &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow magical">Magical gene <span class="sep">/</span> magical coat gene</p>
+
+<h1>Shadowcreature</h1>
+
+<p class="lede">
+    A gene that takes the front third of the horse away. The head, the
+    muzzle, the ears and the whole neck go flat black; the eyes burn gold with
+    no white around them; and where the black meets the barrel it does not stop
+    in a line but runs out into tapering tentacles over the shoulder.
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<h2 id="inheritance">Crossing two of them</h2>
+
+<div class="gene-inheritance" data-gene="horsegenetics.shadowcreature"></div>
+
+<h2 id="what">What it looks like</h2>
+
+<p>
+    Not a dark coat colour &mdash; an absence. The black is painted at full
+    opacity, so nothing the horse&rsquo;s own genes did shows through it and no
+    dilution it carries lightens it. A palomino shadowcreature and a black one
+    have the same head.
+</p>
+
+<p>
+    The eyes are gold and burn in the dark, with no sclera: the whole eye is the
+    colour, not just the iris. On the front of a shadowcreature they are the only
+    thing a viewer can find.
+</p>
+
+<p>
+    The horse gives off light at level 5 &mdash; enough to notice, far short of
+    a torch. A shadowcreature that lit a stable would stop being one.
+</p>
+
+<h2 id="tentacles">The join</h2>
+
+<p>
+    Every horse carries its own tentacles. How far down the barrel they reach,
+    how far apart they sit and how thick they are come off <em>that
+    horse&rsquo;s</em> allele copy and are inherited with it, so two
+    shadowcreatures are not the same animal and a foal that inherits the copy
+    inherits its parent&rsquo;s shoulder.
+</p>
+
+<h2 id="wild">What you can catch</h2>
+
+<p>
+    Recessive, and a single copy shows nothing at all. A twentieth of a percent
+    of wild horses are the doubled form &mdash; and no carriers, so the first one
+    you see is the real thing rather than a hint.
+</p>
+
+<h2 id="health">Health</h2>
+
+<p>
+    None. It is a very strange-looking horse and an entirely ordinary one.
+</p>
+
+<h2 id="carrot">Its gene carrot</h2>
+
+<!-- The recipe, read off the mod at run time - the rarity tier is the recipe's
+     price, and a price written into fifty pages goes stale silently.
+     See wiki/gene-carrot/gene-carrot.js. -->
+
+<div class="gene-carrot" data-gene="horsegenetics.shadowcreature"></div>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd><code>horsegenetics.shadowcreature</code></dd></div>
+    <div><dt>Alleles</dt><dd><code>Shc</code>, <code>n</code></dd></div>
+    <div><dt>Priority</dt><dd>613 &mdash; among the modifiers, after almost everything</dd></div>
+    <div><dt>Reaches the game as</dt><dd>a <code>glow</code> effect at light level 5</dd></div>
+    <div><dt>Coat effect</dt><dd><strong>flat black head and neck, gold eyes, tentacles into the barrel</strong></dd></div>
+</dl>
+
+<div class="note warn">
+    <span class="label">Newly built, not yet play-tested</span>
+    <p>
+        Nothing on this page has been seen in game. The translator was written
+        against the 26.1.2 sources and is flagged as unverified in its own
+        comments. Checklist on <a href="verification.html">To be verified</a>.
+    </p>
+</div>
+
+<h2 id="phases">Three things, three phases</h2>
+
+<p>
+    This is a Java gene rather than a gene file, and the reason is that its three
+    halves land in three different places.
+</p>
+
+<ul>
+    <li><strong>The black</strong> is phase 3, written with
+        <code>ColorField.set</code> &mdash; flat, at full opacity, rather than a
+        walk toward black.</li>
+    <li><strong>The eyes</strong> cannot be phase 3 at all.
+        <code>CoatRegions.redrawEyes</code> restores them from the template as
+        the last act of the bake, precisely so that a wide white pattern can
+        never blind a horse &mdash; so a gene that wants to colour them has to
+        run after that, which is what the overlay pass is for.</li>
+    <li><strong>The light</strong> is a <code>glow</code> ability, which is not
+        a coat concern at all.</li>
+</ul>
+
+<h2 id="sclera">shadeEyes, not tintIris</h2>
+
+<p>
+    <code>CoatOverlay</code> offers both. <code>tintIris</code> colours the iris
+    and leaves the white ring intact, which is what eye colour means;
+    <code>shadeEyes</code> shades the <em>whole</em> eye, which is what
+    &ldquo;no sclera&rdquo; means. The distinction is the entire visual
+    difference between this gene and <a href="gene-light.html">light</a>&rsquo;s
+    gold eyes, and the two share the same gold on purpose &mdash; one glowing
+    gold in the mod, not two.
+</p>
+
+<h2 id="strokes">The tentacles are the STROKES shape</h2>
+
+<p>
+    Deliberately, and not by coincidence: the distance to a value-noise level
+    set, <strong>divided through by the field&rsquo;s own gradient</strong>. The
+    naive <code>|n - 0.5|</code> does not work, because value noise is flat near
+    its extrema and steep between them &mdash; a fixed band is a hairline over
+    half the horse and a blot over the other half.
+</p>
+
+<p>
+    What is <em>not</em> shared with that mask is the falloff, and it is what
+    makes these tentacles rather than stripes: coverage is scaled by how far the
+    texel sits from the shoulder, normalised by the copy&rsquo;s reach and
+    squared, so a tentacle spends most of its length thinning and finishes by
+    running out instead of by stopping.
+</p>
+
+<div class="codebox">
+<div class="filename">common/genetics/genes/ShadowcreatureGene.java</div>
+<pre><code class="language-java">double fade = 1.0 - back / reach;
+fade *= fade;
+double d = levelSetDistance(seed,
+        point.x() / (spacing * 4.0), point.y() / spacing, point.z() / spacing) * spacing;
+double k = (1.0 - BodyStripes.smoothstep(half, half + 0.3, d)) * fade;</code></pre>
+</div>
+
+</section>
+
+<section class="tab-panel" data-tab="science">
+
+<h2 id="colour">Why the black is a colour and not a pigment</h2>
+
+<p>
+    Because black pigment is not black.
+</p>
+
+<p>
+    Phase 1 works in melanin, and melanin is resolved through a gradient chart
+    that the <a href="gene-lut.html">LUT locus</a> can swap. The chart&rsquo;s
+    black corner is whatever the artwork says it is, and on an alternate palette
+    it is not black at all. A shadowcreature&rsquo;s head has to be <em>the
+    absence of the horse</em> on every palette, so it is painted as a colour in
+    phase 3 rather than as a pigment level in phase 1.
+</p>
+
+<p>
+    That is the same argument the new <code>LUMA</code> mask makes from the other
+    direction &mdash; there, &ldquo;find the black&rdquo; has to ask what the
+    chart produced rather than what the pigment was.
+</p>
+
+<h2 id="late">Why it paints so late</h2>
+
+<p>
+    At priority 613 it has the last word on the head and neck. A gene that
+    blackens them and is then painted over by a face marking is not a
+    shadowcreature, it is a horse with a dark head &mdash; the one thing the
+    gene cannot afford to be. <a href="gene-tron.html">Tron</a> still draws over
+    it, which is correct: neon on a void is the horse both genes describe.
+</p>
+
+</section>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="gene-light.html">Light &mdash; the other gold eyes</a>
+        <a href="gene-nyxborn.html">Nyxborn</a>
+        <a href="eye-colour.html">Eye colour and the two hooks</a>
+        <a href="verification.html">What to check in-game</a>
+    </div>
+    Source: <code>common/genetics/genes/ShadowcreatureGene.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+<script defer src="gene-carrot/gene-carrot.js"></script>
+<script defer src="gene-inheritance/gene-inheritance.js"></script>
+</body>
+</html>

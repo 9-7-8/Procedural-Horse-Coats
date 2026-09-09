@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Magic fighter &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow magical">Magical gene <span class="sep">/</span> no coat effect</p>
+
+<h1>Magic fighter</h1>
+
+<p class="lede">
+    What the horse hits for. Wild type is <strong>3 points</strong> &mdash; a
+    heart and a half. The gladiator allele adds a percentage of that, the wimp
+    allele takes one off, and <strong>both copies are added with opposite
+    signs</strong>, so a wimp copy really does count against a gladiator one.
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<h2 id="inheritance">Crossing two of them</h2>
+
+<div class="gene-inheritance" data-gene="horsegenetics.magic_fighter"></div>
+
+<h2 id="what">What it does</h2>
+
+<p>
+    Horses in this mod already fight: a wild one that is hit will path to its
+    attacker and kick it, and its herd comes too. This locus decides how much
+    that hurts.
+</p>
+
+<table class="data">
+    <thead><tr><th>Combination</th><th>Outcome</th><th>Damage</th></tr></thead>
+    <tbody>
+        <tr><td><code>n/n</code></td><td>wild</td><td>3 points</td></tr>
+        <tr><td><code>Gld/n</code></td><td><code>more</code></td><td>+1 to +3 from a wild copy</td></tr>
+        <tr><td><code>Gld/Gld</code></td><td><code>double-more</code></td><td><strong>both</strong> percentages, added &mdash; no ceiling</td></tr>
+        <tr><td><code>Wmp/n</code></td><td><code>less</code></td><td>a share off</td></tr>
+        <tr><td><code>Wmp/Wmp</code></td><td><code>double-less</code></td><td>both off, floored at 1 point</td></tr>
+        <tr><td><code>Gld/Wmp</code></td><td><code>balanced</code></td><td>the two cancel</td></tr>
+    </tbody>
+</table>
+
+<h2 id="cancel">A wimp copy cancels a gladiator copy</h2>
+
+<p>
+    This is the part worth knowing before breeding for it. A
+    <code>Gld/Wmp</code> horse is not &ldquo;a gladiator that also carries a
+    wimp&rdquo; &mdash; the two percentages are added with opposite signs and the
+    horse comes out near the baseline while throwing both extremes.
+</p>
+
+<p>
+    So breeding a fighter means breeding the wimp allele <em>out</em> as much as
+    breeding the gladiator <em>in</em>, and crossing a spectacular fighter with a
+    poor one gives an ordinary foal carrying both. That is a far more interesting
+    animal to own than one which simply inherited the better half.
+</p>
+
+<h2 id="ceiling">No ceiling, but nothing to catch</h2>
+
+<p>
+    A wild gladiator copy is worth between one and three extra points. Nothing
+    caps it after that: the percentage drifts a little at every breeding, so a
+    line selected for it climbs past the wild range and keeps climbing. What a
+    player cannot do is <em>catch</em> a monster &mdash; the founder table lists
+    the two carriers and the plain horse and no doubled form at all.
+</p>
+
+<h2 id="health">Health</h2>
+
+<p>
+    None to the horse. A doubled wimp is harmless rather than unwell.
+</p>
+
+<h2 id="carrot">Its gene carrot</h2>
+
+<!-- The recipe, read off the mod at run time - the rarity tier is the recipe's
+     price, and a price written into fifty pages goes stale silently.
+     See wiki/gene-carrot/gene-carrot.js. -->
+
+<div class="gene-carrot" data-gene="horsegenetics.magic_fighter"></div>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd><code>horsegenetics.magic_fighter</code></dd></div>
+    <div><dt>Alleles</dt><dd><code>Gld</code> gladiator, <code>Wmp</code> wimp, <code>n</code></dd></div>
+    <div><dt>Priority</dt><dd>146 &mdash; the magical body-stat band</dd></div>
+    <div><dt>Reaches the game as</dt><dd>a <code>combat</code> effect &mdash; the horse&rsquo;s <code>ATTACK_DAMAGE</code> base value</dd></div>
+    <div><dt>Coat effect</dt><dd><strong>none, ever</strong></dd></div>
+</dl>
+
+<div class="note warn">
+    <span class="label">Newly built, not yet play-tested</span>
+    <p>
+        Nothing on this page has been seen in game. The translator was written
+        against the 26.1.2 sources and is flagged as unverified in its own
+        comments. Checklist on <a href="verification.html">To be verified</a>.
+    </p>
+</div>
+
+<h2 id="floor">The floor is on the damage, not on the percentage</h2>
+
+<p>
+    A wimp copy subtracts a share of the baseline, and two unlucky ones after a
+    few generations of drift would take a horse to zero or below. Zero damage is
+    not &ldquo;a very weak horse&rdquo;, it is a horse that cannot attack at all,
+    which is a different animal. So the sum is applied and then the
+    <strong>result</strong> is floored at one point.
+</p>
+
+<div class="codebox">
+<div class="filename">common/genetics/genes/MagicFighterGene.java</div>
+<pre><code class="language-java">public static double damageFor(double sum) {
+    return Math.max(MIN_DAMAGE, BASELINE_DAMAGE * (1.0 + sum));
+}</code></pre>
+</div>
+
+<h2 id="two-values">Two epigenetic values, not one</h2>
+
+<p>
+    Every other summed locus here carries a single <code>delta</code> and lets
+    the allele supply the sign. This one carries a gladiator percentage
+    <em>and</em> a wimp percentage on every copy, and only ever reads the one
+    matching its allele.
+</p>
+
+<p>
+    A single shared value would work arithmetically, but it would mean the two
+    alleles drew from the same distribution &mdash; and they should not. A
+    gladiator copy is worth a third to a whole baseline; a wimp copy takes off a
+    seventh to three fifths. Writing both on every copy costs one number, keeps
+    each allele&rsquo;s range its own, and is what lets a carrier&rsquo;s sheet
+    say what it is carrying.
+</p>
+
+<h2 id="baseline">Where the baseline lives</h2>
+
+<p>
+    <code>HorseAggroHandler</code> registers <code>ATTACK_DAMAGE</code> on
+    <code>EntityType.HORSE</code>, because vanilla horses have none. That
+    registration now takes its value from
+    <code>MagicFighterGene.BASELINE_DAMAGE</code> rather than repeating a
+    number: this locus is what a player reads to find out what a horse hits for,
+    and its wild type has to mean the same thing as a horse that has never been
+    near the gene.
+</p>
+
+<p>
+    The translator writes a <strong>base value</strong> rather than a modifier,
+    because the gene&rsquo;s number is absolute &mdash; it is the damage the
+    horse deals, not an adjustment to something the reader would have to go and
+    look up. It is only written when it differs, so the common case is a
+    comparison rather than an attribute write on every tick of every horse.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="science">
+
+<h2 id="codominant">Why codominance is the whole design</h2>
+
+<p>
+    A ranked locus &mdash; gladiator dominant to wimp dominant to wild &mdash;
+    would have been simpler and would have produced a much duller gene. Under
+    ranking, a carrier is a carrier: you cannot tell how good the hidden allele
+    is, and crossing your best fighter with anything gives you either a fighter
+    or not.
+</p>
+
+<p>
+    Summing makes every combination genuinely different, and it makes the
+    <em>bad</em> allele matter. A herd that looks unremarkable can be full of
+    high gladiator percentages masked by wimps, and finding that out is a
+    breeding programme rather than a lookup. It is the same argument the four
+    body-stat genes make, applied to the one axis where a player is going to
+    care about the number in a fight.
+</p>
+
+<h2 id="range">Why the wild range is +1 to +3</h2>
+
+<p>
+    Because a wild horse should be a nuisance and not a threat. Three points is
+    a heart and a half; a wild gladiator carrier hits for four to six, which is
+    a bad surprise and not a death. Everything past that is somebody&rsquo;s
+    project, and the mod would rather a player met their first genuinely
+    dangerous horse in a paddock they built.
+</p>
+
+</section>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="gene-magic-mob-aura.html">Magic mob aura &mdash; what it fights</a>
+        <a href="gene-magic-health.html">Magic health</a>
+        <a href="horse-body.html">The horse&rsquo;s body</a>
+        <a href="verification.html">What to check in-game</a>
+    </div>
+    Source: <code>common/genetics/genes/MagicFighterGene.java</code>,
+    <code>neoforge/server/HorseAggroHandler.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+<script defer src="gene-carrot/gene-carrot.js"></script>
+<script defer src="gene-inheritance/gene-inheritance.js"></script>
+</body>
+</html>

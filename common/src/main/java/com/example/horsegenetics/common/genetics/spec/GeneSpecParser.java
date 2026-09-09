@@ -832,11 +832,27 @@ public final class GeneSpecParser {
         }
         if (emissive) {
             for (Mask m : masks) {
-                if (m.type() == MaskType.PIGMENT) {
+                if (m.type() == MaskType.PIGMENT || m.type() == MaskType.LUMA) {
                     throw new IllegalArgumentException(where + ": an emissive layer cannot use a "
-                            + "PIGMENT mask. Glow is decided in the overlay pass, after the texture "
-                            + "is baked, and there is no pigment field left there to read. Split the "
-                            + "layer: paint the colour with the PIGMENT mask, glow with a shape one.");
+                            + m.type() + " mask. Glow is decided in the overlay pass, after the "
+                            + "texture is baked, and there is neither a pigment field nor a colour "
+                            + "accumulator left there to read. Split the layer: paint the colour "
+                            + "with the " + m.type() + " mask, glow with a shape one.");
+                }
+            }
+        }
+        // LUMA reads the colour the gradient chart resolved. The natural phase
+        // runs before there is one - it is the pass that decides the pigment the
+        // chart will be asked about - so the mask can only ever read zero there,
+        // which looks exactly like a threshold that is too tight.
+        if (natural) {
+            for (Mask m : masks) {
+                if (m.type() == MaskType.LUMA) {
+                    throw new IllegalArgumentException(where + ": a natural gene cannot use a LUMA "
+                            + "mask. It reads the colour phase 2 resolved through the gradient "
+                            + "chart, and the natural phase is what decides the pigment that chart "
+                            + "is handed - there is no colour to read yet. Use a PIGMENT mask to "
+                            + "threshold the pigment levels themselves.");
                 }
             }
         }

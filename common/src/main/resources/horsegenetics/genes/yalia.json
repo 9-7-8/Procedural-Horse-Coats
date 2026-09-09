@@ -205,7 +205,7 @@
           "name": "the horse's own white markings, filled flat like a zone",
           "masks": [
             {
-              "type": "PIGMENT",
+              "type": "LUMA",
               "parts": [
                 "BODY",
                 "NECK",
@@ -214,10 +214,9 @@
                 "LEGS",
                 "HAIR"
               ],
-              "channel": "total",
-              "from": 0.06,
-              "to": 0.34,
-              "invert": true
+              "channel": "white",
+              "from": 0.8,
+              "to": 0.94
             }
           ],
           "op": {
@@ -230,7 +229,7 @@
           "name": "and drawn round in the same outline colour",
           "masks": [
             {
-              "type": "PIGMENT",
+              "type": "LUMA",
               "parts": [
                 "BODY",
                 "NECK",
@@ -239,14 +238,13 @@
                 "LEGS",
                 "HAIR"
               ],
-              "channel": "total",
-              "from": 0.06,
-              "to": 0.34,
-              "invert": true,
+              "channel": "white",
+              "from": 0.8,
+              "to": 0.94,
               "spread": 0.7
             },
             {
-              "type": "PIGMENT",
+              "type": "LUMA",
               "parts": [
                 "BODY",
                 "NECK",
@@ -255,10 +253,9 @@
                 "LEGS",
                 "HAIR"
               ],
-              "channel": "total",
-              "from": 0.06,
-              "to": 0.34,
-              "invert": true,
+              "channel": "white",
+              "from": 0.8,
+              "to": 0.94,
               "combine": "SUBTRACT"
             }
           ],
@@ -444,7 +441,7 @@
           "name": "the outline round the horse's own white, and nothing else",
           "masks": [
             {
-              "type": "PIGMENT",
+              "type": "LUMA",
               "parts": [
                 "BODY",
                 "NECK",
@@ -453,14 +450,13 @@
                 "LEGS",
                 "HAIR"
               ],
-              "channel": "total",
-              "from": 0.06,
-              "to": 0.34,
-              "invert": true,
+              "channel": "white",
+              "from": 0.8,
+              "to": 0.94,
               "spread": 0.7
             },
             {
-              "type": "PIGMENT",
+              "type": "LUMA",
               "parts": [
                 "BODY",
                 "NECK",
@@ -469,10 +465,9 @@
                 "LEGS",
                 "HAIR"
               ],
-              "channel": "total",
-              "from": 0.06,
-              "to": 0.34,
-              "invert": true,
+              "channel": "white",
+              "from": 0.8,
+              "to": 0.94,
               "combine": "SUBTRACT"
             }
           ],

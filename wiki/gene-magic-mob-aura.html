@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Magic mob aura &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow magical">Magical gene <span class="sep">/</span> no coat effect</p>
+
+<h1>Magic mob aura</h1>
+
+<p class="lede">
+    How everything else in the world feels about the horse. A warding horse
+    keeps mobs outside about ten blocks; a baiting one makes every hostile that
+    can see it pick it over anything else in range, including its rider. Both
+    take two copies, and <strong>one of each cancels outright</strong>.
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<h2 id="inheritance">Crossing two of them</h2>
+
+<div class="gene-inheritance" data-gene="horsegenetics.magic_mob_aura"></div>
+
+<h2 id="what">What it does</h2>
+
+<table class="data">
+    <thead><tr><th>Combination</th><th>Outcome</th></tr></thead>
+    <tbody>
+        <tr><td><code>Wrd/Wrd</code></td><td>hostiles will not approach within ~10 blocks</td></tr>
+        <tr><td><code>Bai/Bai</code></td><td>hostiles within ~16 blocks that can see it target it</td></tr>
+        <tr><td><code>Wrd/Bai</code></td><td>nothing &mdash; the two cancel</td></tr>
+        <tr><td>anything with an <code>n</code></td><td>nothing</td></tr>
+    </tbody>
+</table>
+
+<h2 id="uses">What each one is for</h2>
+
+<p>
+    A <strong>ward</strong> is the horse you leave a stable with overnight. It
+    does not hurt anything or teleport anything; hostiles simply turn away at the
+    edge.
+</p>
+
+<p>
+    A <strong>bait</strong> is the horse you take somewhere on purpose. It pulls
+    aggro off its rider and off everything else nearby, which is either a shield
+    or a very short career depending on how much
+    <a href="gene-magic-health.html">magic health</a> and
+    <a href="gene-magic-fighter.html">fighting</a> you bred into it. That pairing
+    is deliberate: the baiting allele is the one that makes the other magical
+    loci worth stacking.
+</p>
+
+<h2 id="wild">What you can catch</h2>
+
+<p>
+    A fraction of a percent of wild horses are the doubled form of each. Both are
+    things you would want to find, so the founder table sits on the expressing
+    combinations rather than on carriers.
+</p>
+
+<h2 id="health">Health</h2>
+
+<p>
+    A doubled baiting horse is in continuous danger anywhere hostile mobs spawn,
+    and it is not a disorder &mdash; the server&rsquo;s health switch will not
+    turn it off. It is the rule of the gene.
+</p>
+
+<h2 id="carrot">Its gene carrot</h2>
+
+<!-- The recipe, read off the mod at run time - the rarity tier is the recipe's
+     price, and a price written into fifty pages goes stale silently.
+     See wiki/gene-carrot/gene-carrot.js. -->
+
+<div class="gene-carrot" data-gene="horsegenetics.magic_mob_aura"></div>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd><code>horsegenetics.magic_mob_aura</code></dd></div>
+    <div><dt>Alleles</dt><dd><code>Wrd</code> warding, <code>Bai</code> baiting, <code>n</code></dd></div>
+    <div><dt>Priority</dt><dd>135 &mdash; the magical utility band, beside milk</dd></div>
+    <div><dt>Reaches the game as</dt><dd>a <code>mob_aura</code> effect</dd></div>
+    <div><dt>Coat effect</dt><dd><strong>none, ever</strong></dd></div>
+</dl>
+
+<div class="note warn">
+    <span class="label">Newly built, not yet play-tested</span>
+    <p>
+        Nothing on this page has been seen in game. The translator was written
+        against the 26.1.2 sources and is flagged as unverified in its own
+        comments. Checklist on <a href="verification.html">To be verified</a>.
+    </p>
+</div>
+
+<h2 id="compound">The compound heterozygote is the interesting row</h2>
+
+<p>
+    <code>Wrd/Bai</code> produces nothing, and not as a shrug. The two alleles
+    are opposite answers to one question &mdash; does a mob want to be near this
+    horse &mdash; and a horse carrying one of each is asking for both at once.
+    Rather than pick a winner, or let a ward and a bait fight every tick in the
+    translator, the locus says the pair is silent.
+</p>
+
+<p>
+    It has the same practical consequence as
+    <a href="gene-magic-on-death.html">on death</a>&rsquo;s mixed pairs: a
+    breeder who crosses their ward line with their bait line gets an
+    ordinary-looking horse that carries and throws both.
+</p>
+
+<h2 id="shove">Repel is a shove, not a wall</h2>
+
+<p>
+    A hostile inside the radius has its target cleared if it was the horse or the
+    horse&rsquo;s rider, and is pushed outward. That is deliberately weaker than
+    a real avoidance goal, and the reason is lifecycle: a goal would have to be
+    added to and taken off <em>every mob that ever walked past</em>, and a horse
+    whose aura stopped expressing would leave the goal behind on everything it
+    had ever met.
+</p>
+
+<div class="codebox">
+<div class="filename">neoforge/server/GeneAbilityHandler.java</div>
+<pre><code class="language-java">Vec3 away = mob.position().subtract(horse.position());
+if (away.lengthSqr() &lt; 1.0e-4) {
+    away = new Vec3(1, 0, 0); // exactly on top of the horse; any direction will do
+}
+away = away.normalize().scale(0.35);
+mob.setDeltaMovement(mob.getDeltaMovement().add(away.x, 0.05, away.z));
+mob.hurtMarked = true;</code></pre>
+</div>
+
+<h2 id="capped">Capped, like every radius effect</h2>
+
+<p>
+    Twelve entities per beat, one beat a second, counted off the horse&rsquo;s
+    own <code>tickCount</code> rather than the world&rsquo;s &mdash; so a field
+    of them does not do all of its work on one tick. The same rule the healing
+    aura follows, and every radius effect in the format is required to state a
+    cap.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="science">
+
+<h2 id="pair">Why both alleles are on one locus</h2>
+
+<p>
+    They could have been two genes, and then a horse could be both, and being
+    both means nothing. Putting them at one locus makes them <em>alternatives</em>
+    &mdash; a herd has a warding line and a baiting line and they are in
+    competition &mdash; and it gives the mod a compound heterozygote that says
+    something true instead of something arbitrary.
+</p>
+
+<h2 id="bait">A gene that is worse for the horse</h2>
+
+<p>
+    Baiting is the clearest case in the mod of a gene bred for the
+    <em>owner&rsquo;s</em> benefit at the horse&rsquo;s expense, and it is the
+    reason the locus is worth having beside
+    <a href="gene-magic-health.html">health</a> and
+    <a href="gene-magic-fighter.html">fighting</a>: on its own it is a way to
+    lose a horse, and it only becomes a strategy when three loci are bred
+    together.
+</p>
+
+</section>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="gene-magic-fighter.html">Magic fighter</a>
+        <a href="gene-magic-health.html">Magic health</a>
+        <a href="gene-effects.html">The effects block</a>
+        <a href="verification.html">What to check in-game</a>
+    </div>
+    Source: <code>common/genetics/genes/MagicMobAuraGene.java</code>,
+    <code>neoforge/server/GeneAbilityHandler.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+<script defer src="gene-carrot/gene-carrot.js"></script>
+<script defer src="gene-inheritance/gene-inheritance.js"></script>
+</body>
+</html>

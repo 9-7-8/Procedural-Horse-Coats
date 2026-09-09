@@ -32,6 +32,14 @@ import com.example.horsegenetics.common.genetics.genes.MagicHealthGene;
 import com.example.horsegenetics.common.genetics.genes.MagicJumpGene;
 import com.example.horsegenetics.common.genetics.genes.MagicSectoralHeterochromiaGene;
 import com.example.horsegenetics.common.genetics.genes.MagicSizeGene;
+import com.example.horsegenetics.common.genetics.genes.MagicFighterGene;
+import com.example.horsegenetics.common.genetics.genes.MagicItemDropGene;
+import com.example.horsegenetics.common.genetics.genes.MagicMeatGene;
+import com.example.horsegenetics.common.genetics.genes.MagicMilkVolumeGene;
+import com.example.horsegenetics.common.genetics.genes.MagicMobAuraGene;
+import com.example.horsegenetics.common.genetics.genes.MagicOnDeathGene;
+import com.example.horsegenetics.common.genetics.genes.MagicSwimSpeedGene;
+import com.example.horsegenetics.common.genetics.genes.MagicWaterBreathingGene;
 import com.example.horsegenetics.common.genetics.genes.MagicSpeedGene;
 import com.example.horsegenetics.common.genetics.genes.MagicZebraGene;
 import com.example.horsegenetics.common.genetics.genes.ManchadoGene;
@@ -62,6 +70,7 @@ import com.example.horsegenetics.common.genetics.genes.Ryr2Gene;
 import com.example.horsegenetics.common.genetics.genes.Scn4aGene;
 import com.example.horsegenetics.common.genetics.genes.SexGene;
 import com.example.horsegenetics.common.genetics.genes.ShadeGene;
+import com.example.horsegenetics.common.genetics.genes.ShadowcreatureGene;
 import com.example.horsegenetics.common.genetics.genes.ShoxGene;
 import com.example.horsegenetics.common.genetics.genes.SilverGene;
 import com.example.horsegenetics.common.genetics.genes.SootyGene;
@@ -284,6 +293,47 @@ public final class Genes {
     public static final MagicSpeedGene MAGIC_SPEED = new MagicSpeedGene();
     public static final MagicHealthGene MAGIC_HEALTH = new MagicHealthGene();
     public static final MagicJumpGene MAGIC_JUMP = new MagicJumpGene();
+    /**
+     * The <b>mechanical magical loci</b> - eight genes that paint nothing and
+     * exist so that a breed can be described by what its horses <i>do</i> and
+     * not only by what they look like.
+     *
+     * <p>They divide in two. {@link #MAGIC_SWIM_SPEED},
+     * {@link #MAGIC_WATER_BREATHING} and {@link #MAGIC_FIGHTER} sit in the
+     * body-stat band and are the same codominant, per-copy-percentage shape as
+     * the four above them - both copies add, and a "down" copy counts against
+     * an "up" one. The rest sit beside {@link #MILK} in the utility band and are
+     * recessive switches: what happens where the horse died, what it left
+     * behind, how mobs feel about it, how much meat, how many fillings a day.
+     *
+     * <p>None of them reaches the game through
+     * {@link com.example.horsegenetics.common.trait.Traits}. That record is four
+     * numbers and a list of conditions, and it is meant to survive a version
+     * port unchanged; "swims faster" and "explodes" are Minecraft-shaped facts
+     * and belong on the {@link com.example.horsegenetics.common.genetics.spec.GeneAbility}
+     * side of the line, which is exactly what that side is for.
+     */
+    public static final MagicSwimSpeedGene MAGIC_SWIM_SPEED = new MagicSwimSpeedGene();
+    public static final MagicWaterBreathingGene MAGIC_WATER_BREATHING = new MagicWaterBreathingGene();
+    public static final MagicFighterGene MAGIC_FIGHTER = new MagicFighterGene();
+    /**
+     * Volume governs a yield <b>kind</b> rather than a gene, so it reaches
+     * {@link #MILK}'s milk, water and lava at once without either locus
+     * knowing about the other - which is the only shape that works, since a
+     * gene is handed its own epigenetic values and nobody else's.
+     */
+    public static final MagicMilkVolumeGene MAGIC_MILK_VOLUME = new MagicMilkVolumeGene();
+    public static final MagicMeatGene MAGIC_MEAT = new MagicMeatGene();
+    public static final MagicItemDropGene MAGIC_ITEM_DROP = new MagicItemDropGene();
+    /**
+     * The one locus in the mod whose founder table is <b>carriers only</b> on
+     * purpose. Every other magical gene with an invisible carrier puts the wild
+     * population on the expressing combinations so that a player can see what
+     * they are catching; this one is a hazard rather than a prize, so a feral
+     * horse is never an exploding one. (Owner's call.)
+     */
+    public static final MagicOnDeathGene MAGIC_ON_DEATH = new MagicOnDeathGene();
+    public static final MagicMobAuraGene MAGIC_MOB_AURA = new MagicMobAuraGene();
     public static final ManeColorGene MANE_COLOR = new ManeColorGene();
     public static final TailColorGene TAIL_COLOR = new TailColorGene();
     public static final ParticleGene PARTICLE = new ParticleGene();
@@ -327,6 +377,14 @@ public final class Genes {
      * channel keeps the last claim, so this one's {@code NOTHING} wins.
      */
     public static final DhampirGene DHAMPIR = new DhampirGene();
+    /**
+     * <b>Shadowcreature</b> - blacks out the head and neck outright, burns the
+     * eyes gold with no white round them, and runs tentacles out of the join
+     * into the barrel. A Java gene because those three land in three different
+     * phases, and the eyes in particular can only be reached from the overlay
+     * pass.
+     */
+    public static final ShadowcreatureGene SHADOWCREATURE = new ShadowcreatureGene();
 
     /**
      * The <b>non-coat genes</b> - performance, size and health. They occupy the
@@ -392,9 +450,11 @@ public final class Genes {
             NATURAL_ZEBRA, ROAN, RABICANO, TOBIANO,
             LEOPARD, EDNRB, KIT, MANCHADO, MITF, PAX3,
             MILK, BODY_SIZE, MAGIC_SPEED, MAGIC_HEALTH, MAGIC_JUMP,
+            MAGIC_SWIM_SPEED, MAGIC_WATER_BREATHING, MAGIC_FIGHTER,
+            MAGIC_MILK_VOLUME, MAGIC_MEAT, MAGIC_ITEM_DROP, MAGIC_ON_DEATH, MAGIC_MOB_AURA,
             MANE_COLOR, TAIL_COLOR, PARTICLE, RAINBOW_DUST, LYCAN,
             LIGHT, HEALER, SECTORAL_EYES, VERDANT, LUT, CUTIE_MARK,
-            DHAMPIR,
+            DHAMPIR, SHADOWCREATURE,
             MSTN, PDK4, CKM, RYR2, LCORL, HMGA2, PATN1, PATN2,
             ACAN, B4GALT7, PLOD1, RAPGEF5, ST14, SHOX, MET,
             PPIB, PRKDC, MYO5A, TOE1, CVM, GBE1, MEGAESOPHAGUS, SCN4A, GYS1);

@@ -1,0 +1,300 @@
+{
+  "format": 3,
+  "key": "horsegenetics.tron",
+  "name": "Tron",
+  "phase": "magical",
+  "priority": 720,
+  "rarity": "EPIC",
+  "blurb": "Neon run along every edge of the horse. It paints later than anything else in the mod, so whatever else the horse is wearing, the lines are drawn on top of it.",
+  "alleles": [
+    {
+      "token": "Trs",
+      "label": "Tron, solid (Trs)"
+    },
+    {
+      "token": "Trg",
+      "label": "Tron, gradient (Trg)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "hue",
+      "min": 0.0,
+      "max": 360.0
+    },
+    {
+      "name": "width",
+      "min": 0.35,
+      "max": 0.7
+    },
+    {
+      "name": "bloom",
+      "min": 0.9,
+      "max": 1.8
+    }
+  ],
+  "expressions": [
+    {
+      "id": "solid",
+      "name": "Solid outline",
+      "description": "One neon colour, run along every edge of every box the horse is made of, with a weaker halo bleeding off it onto the panel either side. The colour is the horse's own and is inherited with the copy, so a line of Tron horses keeps its colour and a cross with another one does not average them - the foal gets one parent's tube or the other's. The tube renders full-bright, so it holds its colour in a dark stable.",
+      "when": [
+        "Trs/Trs",
+        "Trs/n"
+      ],
+      "layers": [
+        {
+          "name": "the halo the tube throws onto the panel around it",
+          "masks": [
+            {
+              "type": "EDGE",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE",
+                "LEGS"
+              ],
+              "width": "$bloom",
+              "softness": 0.55
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.95,
+            "lightness": 0.5,
+            "strength": 34
+          }
+        },
+        {
+          "name": "the lit tube itself, along every edge of every box",
+          "masks": [
+            {
+              "type": "EDGE",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE",
+                "LEGS"
+              ],
+              "width": "$width",
+              "softness": 0.16
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 1.0,
+            "lightness": 0.66,
+            "strength": 100,
+            "opacity": 100
+          },
+          "emissive": true
+        }
+      ]
+    },
+    {
+      "id": "gradient",
+      "name": "Gradient outline",
+      "description": "The same tube, carrying a hue ramp instead of a colour: it starts at the horse's own hue at the tail and travels five sixths of the way round the wheel by the nose, so the line changes colour along the horse rather than along its own length. Which end of the spectrum a horse starts at is the epigenetic value, exactly as on the solid form.",
+      "when": [
+        "Trg/Trg",
+        "Trg/n"
+      ],
+      "layers": [
+        {
+          "name": "the halo the tube throws onto the panel around it",
+          "masks": [
+            {
+              "type": "EDGE",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE",
+                "LEGS"
+              ],
+              "width": "$bloom",
+              "softness": 0.55
+            }
+          ],
+          "op": {
+            "type": "RAMP",
+            "hue": "$hue",
+            "hueSpan": 300.0,
+            "saturation": 0.95,
+            "lightness": 0.5,
+            "axis": "X",
+            "space": "body",
+            "strength": 34
+          }
+        },
+        {
+          "name": "the lit tube, running the whole circle of the wheel tail to nose",
+          "masks": [
+            {
+              "type": "EDGE",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE",
+                "LEGS"
+              ],
+              "width": "$width",
+              "softness": 0.16
+            }
+          ],
+          "op": {
+            "type": "RAMP",
+            "hue": "$hue",
+            "hueSpan": 300.0,
+            "saturation": 1.0,
+            "lightness": 0.66,
+            "axis": "X",
+            "space": "body",
+            "strength": 100,
+            "opacity": 100
+          },
+          "emissive": true
+        }
+      ]
+    },
+    {
+      "id": "both",
+      "name": "Solid and gradient",
+      "description": "One copy of each. Neither is dominant to the other, so the horse gets both tubes laid on the same edges - the ramp over the solid core, which reads as a brighter, harder line than either allele draws alone.",
+      "when": [
+        "Trs/Trg"
+      ],
+      "layers": [
+        {
+          "name": "the halo the tube throws onto the panel around it",
+          "masks": [
+            {
+              "type": "EDGE",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE",
+                "LEGS"
+              ],
+              "width": "$bloom",
+              "softness": 0.55
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.95,
+            "lightness": 0.5,
+            "strength": 34
+          }
+        },
+        {
+          "name": "the lit tube itself, along every edge of every box",
+          "masks": [
+            {
+              "type": "EDGE",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE",
+                "LEGS"
+              ],
+              "width": "$width",
+              "softness": 0.16
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 1.0,
+            "lightness": 0.66,
+            "strength": 100,
+            "opacity": 100
+          },
+          "emissive": true
+        },
+        {
+          "name": "the halo the tube throws onto the panel around it",
+          "masks": [
+            {
+              "type": "EDGE",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE",
+                "LEGS"
+              ],
+              "width": "$bloom",
+              "softness": 0.55
+            }
+          ],
+          "op": {
+            "type": "RAMP",
+            "hue": "$hue",
+            "hueSpan": 300.0,
+            "saturation": 0.95,
+            "lightness": 0.5,
+            "axis": "X",
+            "space": "body",
+            "strength": 34
+          }
+        },
+        {
+          "name": "the lit tube, running the whole circle of the wheel tail to nose",
+          "masks": [
+            {
+              "type": "EDGE",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE",
+                "LEGS"
+              ],
+              "width": "$width",
+              "softness": 0.16
+            }
+          ],
+          "op": {
+            "type": "RAMP",
+            "hue": "$hue",
+            "hueSpan": 300.0,
+            "saturation": 1.0,
+            "lightness": 0.66,
+            "axis": "X",
+            "space": "body",
+            "strength": 100,
+            "opacity": 100
+          },
+          "emissive": true
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "No outline.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Trs/Trs": 0.004,
+    "Trs/n": 0.09,
+    "Trg/Trg": 0.004,
+    "Trg/n": 0.09,
+    "Trs/Trg": 0.012,
+    "n/n": 99.8
+  }
+}

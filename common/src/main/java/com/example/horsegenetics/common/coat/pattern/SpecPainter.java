@@ -4,6 +4,7 @@ import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Axis;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.BodyPoint;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Bounds;
+import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Face;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Part;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Skin;
 import com.example.horsegenetics.common.genetics.spec.GeneSpec;
@@ -66,7 +67,8 @@ public final class SpecPainter {
             PigmentField target = field;
             HorseSkinGeometry.forEachTexel(skin, (px, py, part, face, point) -> {
                 int leg = legIndex(part);
-                double k = coverage(layer, values, skin, bounds, part, point, asRead, px, py, leg, fallbackSeed);
+                double k = coverage(layer, values, skin, bounds, part, face, point, asRead, null,
+                        px, py, leg, fallbackSeed);
                 if (k > 0) {
                     applyPigment(layer.op(), values, target, px, py, leg, k);
                 }
@@ -116,7 +118,8 @@ public final class SpecPainter {
             long fallbackSeed = layerSeed(spec, i);
             HorseSkinGeometry.forEachTexel(skin, (px, py, part, face, point) -> {
                 int leg = legIndex(part);
-                double k = coverage(layer, values, skin, bounds, part, point, coat, px, py, leg, fallbackSeed);
+                double k = coverage(layer, values, skin, bounds, part, face, point, coat, colour,
+                        px, py, leg, fallbackSeed);
                 if (k > 0) {
                     applyColour(layer.op(), values, delta, colour, skin, bounds, part, point,
                             px, py, leg, k, fallbackSeed);
@@ -156,7 +159,7 @@ public final class SpecPainter {
             }
             long fallbackSeed = layerSeed(spec, i);
             HorseSkinGeometry.forEachTexel(skin, (px, py, part, face, point) -> {
-                double k = coverage(layer, values, skin, bounds, part, point, null, px, py,
+                double k = coverage(layer, values, skin, bounds, part, face, point, null, null, px, py,
                         legIndex(part), fallbackSeed);
                 if (k >= GeneSpec.EMISSIVE_THRESHOLD) {
                     out.markEmissive(px, py);
@@ -385,19 +388,28 @@ public final class SpecPainter {
     // Masks
     // ------------------------------------------------------------------
 
+    /**
+     * {@code colour} is the phase-3 accumulator as the genes before this one
+     * left it, and is {@code null} in every phase that has none - the natural
+     * pass, which has not resolved a colour yet, and the overlay pass, which has
+     * already spent it. Only a {@code LUMA} mask reads it, and
+     * {@code GeneSpecParser} refuses that mask in both of those phases, so the
+     * null is a belt on top of a brace rather than a case anyone can reach.
+     */
     private static double coverage(Layer layer, SpecValues v, Skin skin, Map<Part, Bounds> bounds,
-                                   Part part, BodyPoint point, PigmentView coat,
+                                   Part part, Face face, BodyPoint point,
+                                   PigmentView coat, ColorView colour,
                                    int px, int py, int leg, long fallbackSeed) {
         double acc = 1.0;
         List<Mask> masks = layer.masks();
         for (int i = 0; i < masks.size(); i++) {
             Mask mask = masks.get(i);
-            double c = maskCoverage(mask, v, skin, bounds, part, point, coat, px, py, leg,
+            double c = maskCoverage(mask, v, skin, bounds, part, face, point, coat, colour, px, py, leg,
                     fallbackSeed ^ ((long) i * 0x9E3779B97F4A7C15L));
             if (mask.invert()) {
                 c = 1.0 - c;
             }
-            c = spread(mask, v, skin, coat, part, point, px, py, leg, c);
+            c = spread(mask, v, skin, coat, colour, part, face, point, px, py, leg, c);
             acc = switch (mask.combine()) {
                 case MULTIPLY -> acc * c;
                 case MAX -> Math.max(acc, c);
@@ -432,7 +444,8 @@ public final class SpecPainter {
     }
 
     private static double maskCoverage(Mask mask, SpecValues v, Skin skin, Map<Part, Bounds> bounds,
-                                       Part part, BodyPoint point, PigmentView coat,
+                                       Part part, Face face, BodyPoint point,
+                                       PigmentView coat, ColorView colour,
                                        int px, int py, int leg, long seedBase) {
         Params p = mask.params();
         List<Part> parts = p.parts("parts");
@@ -501,6 +514,20 @@ public final class SpecPainter {
             }
             case PIGMENT:
                 return pigmentCoverage(mask, v, coat, px, py, leg);
+            case LUMA:
+                return lumaCoverage(mask, v, colour, px, py, leg);
+            case EDGE: {
+                // The rim of this part's box, measured in the two axes that
+                // span the face the texel is on - the third is the face's own
+                // normal and is constant across it, so measuring against it
+                // would make every texel on the face equally "on the edge".
+                Bounds b = bounds.get(part);
+                double width = Math.max(1e-6, v.get(p.value("width", 0.6), leg));
+                double soft = Math.max(1e-6, v.get(p.value("softness", 0.25), leg));
+                double d = Math.min(edgeDistance(point, b, face.spanA()),
+                        edgeDistance(point, b, face.spanB()));
+                return 1.0 - BodyStripes.smoothstep(width, width + soft, d);
+            }
             case SPOTS: {
                 long seed = v.seed(p.value("seed", 0), seedBase);
                 double spacing = Math.max(0.05, v.get(p.value("spacing", 4.0), leg));
@@ -738,9 +765,10 @@ public final class SpecPainter {
      * table.
      */
     private static double spread(Mask mask, SpecValues v, Skin skin, PigmentView coat,
-                                 Part part, BodyPoint point, int px, int py, int leg,
-                                 double c) {
-        if (mask.type() != GeneSpec.MaskType.PIGMENT || c >= 1) {
+                                 ColorView colour, Part part, Face face, BodyPoint point,
+                                 int px, int py, int leg, double c) {
+        boolean luma = mask.type() == GeneSpec.MaskType.LUMA;
+        if ((mask.type() != GeneSpec.MaskType.PIGMENT && !luma) || c >= 1) {
             return c;
         }
         Params p = mask.params();
@@ -752,6 +780,7 @@ public final class SpecPainter {
         if (radius <= 0) {
             return c;
         }
+        String from = p.text("spreadFrom", "any");
         // Generous by a texel, because the sheet is not exactly two texels to
         // the unit on a face seen at an angle.
         int r = (int) Math.ceil(radius * HorseSkinGeometry.TEXELS_PER_UNIT) + 1;
@@ -778,7 +807,12 @@ public final class SpecPainter {
                 if (bx * bx + by * by + bz * bz > rr) {
                     continue;
                 }
-                double n = pigmentCoverage(mask, v, coat, qx, qy, leg);
+                if (!onSide(from, bx, by)) {
+                    continue;
+                }
+                double n = luma
+                        ? lumaCoverage(mask, v, colour, qx, qy, leg)
+                        : pigmentCoverage(mask, v, coat, qx, qy, leg);
                 if (mask.invert()) {
                     n = 1.0 - n;
                 }
@@ -800,6 +834,81 @@ public final class SpecPainter {
         return BodyStripes.smoothstep(v.get(p.value("from", 0.5), leg),
                 v.get(p.value("to", 1.0), leg),
                 pigmentReading(coat, p.text("channel", "darkness"), px, py));
+    }
+
+    /**
+     * Does a candidate lying {@code (bx, by)} away count, given which side the
+     * growth is allowed to come from? A candidate <b>above</b> the texel has
+     * {@code by > 0}, so {@code "above"} keeps those and the selection ends up
+     * growing downward - see {@link SpecSchema#SPREAD_SIDES}.
+     *
+     * <p>The test is a strict inequality, so a candidate exactly level with the
+     * texel is excluded from every directional side. That is what keeps a
+     * one-sided spread from quietly behaving like a two-sided one along a
+     * horizontal edge, which is the case it is nearly always used on.
+     */
+    private static boolean onSide(String from, double bx, double by) {
+        return switch (from) {
+            case "above" -> by > 0;
+            case "below" -> by < 0;
+            case "ahead" -> bx > 0;
+            case "behind" -> bx < 0;
+            default -> true;
+        };
+    }
+
+    /** How far {@code point} is from the nearer of this part's two bounds along {@code axis}. */
+    private static double edgeDistance(BodyPoint point, Bounds b, Axis axis) {
+        double c = point.along(axis);
+        return Math.min(c - b.min(axis), b.max(axis) - c);
+    }
+
+    /** A {@code LUMA} mask at one texel, before {@code invert} and before {@code spread}. */
+    private static double lumaCoverage(Mask mask, SpecValues v, ColorView colour,
+                                       int px, int py, int leg) {
+        if (colour == null) {
+            return 0; // no accumulator in this phase - the parser refuses to get here
+        }
+        Params p = mask.params();
+        return BodyStripes.smoothstep(v.get(p.value("from", 0.5), leg),
+                v.get(p.value("to", 1.0), leg),
+                lumaReading(colour, p.text("channel", "dark"), px, py));
+    }
+
+    /**
+     * One channel of the <b>resolved colour</b>, as a {@code LUMA} mask reads it.
+     *
+     * <p>Every reading is taken from {@link ColorView#visible}, so a texel the
+     * natural phase left bare reads as the white template a viewer sees rather
+     * than as the transparent black underneath - which is the entire point, and
+     * the difference between "the white markings" meaning what it says and
+     * meaning "everywhere the coat is thin".
+     *
+     * <p>{@code light} is the Rec.709 relative luminance rather than the HSL
+     * lightness. On a chart whose interesting range is browns and greys the two
+     * disagree most exactly where a coat gene cares: a saturated bay reads
+     * markedly darker than an equally "light" grey, which is how an eye sorts
+     * them. {@code white} is the HWB whiteness - {@code min(r, g, b)} - because
+     * "white" is the absence of colour and of shadow at once, and neither
+     * luminance nor saturation alone says that.
+     */
+    private static double lumaReading(ColorView colour, String channel, int px, int py) {
+        double r = colour.visible(px, py, 0) / 255.0;
+        double g = colour.visible(px, py, 1) / 255.0;
+        double b = colour.visible(px, py, 2) / 255.0;
+        double light = clamp01(0.2126 * r + 0.7152 * g + 0.0722 * b);
+        return switch (channel) {
+            case "light" -> light;
+            case "white" -> clamp01(Math.min(r, Math.min(g, b)));
+            case "saturation" -> {
+                double max = Math.max(r, Math.max(g, b));
+                yield max <= 0 ? 0 : clamp01((max - Math.min(r, Math.min(g, b))) / max);
+            }
+            case "red" -> clamp01(r);
+            case "green" -> clamp01(g);
+            case "blue" -> clamp01(b);
+            default -> clamp01(1.0 - light);
+        };
     }
 
     /** One channel of the coat, as a {@code PIGMENT} mask reads it. */

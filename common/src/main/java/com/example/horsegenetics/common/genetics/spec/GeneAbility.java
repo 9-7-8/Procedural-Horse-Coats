@@ -132,8 +132,83 @@ public sealed interface GeneAbility {
      * key and a spec author passes literal text - both render.
      */
     record Yield(Trigger.OnInteract trigger, String consumes, String produces, int cooldownTicks,
-                 double deniedDamage, String deniedMessage,
+                 double deniedDamage, String deniedMessage, String kind,
                  Condition when, int minDose) implements GeneAbility {}
+
+    /**
+     * <b>Extra uses of a cooldown-gated {@link Yield}</b>, before its cooldown
+     * bites - "this horse can be milked three times a day rather than once".
+     *
+     * <p>It is a separate verb rather than a bigger {@code Yield} because the
+     * gene that <i>produces</i> a thing and the gene that decides <i>how often</i>
+     * are different loci, and neither can see the other's epigenome. A yield
+     * declares what {@link Yield#kind()} of thing it is; this names a kind and
+     * adds {@link #extra()} charges to <b>every</b> yield of that kind the horse
+     * expresses. So one volume locus governs plain milk, water and lava at once,
+     * and a second gene that one day produces some other milk is governed by it
+     * for free rather than by remembering to ask.
+     *
+     * <p>Charges from several copies add, which is what makes the volume locus
+     * codominant without the translator knowing that it is.
+     */
+    record YieldCharges(String kind, int extra, Condition when, int minDose) implements GeneAbility {}
+
+    /**
+     * <b>How long the horse lasts under water</b>, as a multiplier on its air
+     * supply. {@code 2.0} is twice as long before the first drowning tick;
+     * {@code 0.5} is half. Unrelated to {@code underwater_breathing}, which is
+     * the absolute version and never runs out - this is the graded one, and the
+     * two compose the way you would expect (a horse that cannot drown does not
+     * care how slowly it would have).
+     */
+    record Breath(double factor, Condition when, int minDose) implements GeneAbility {}
+
+    /**
+     * <b>What the world does when the horse dies</b> - {@code lava},
+     * {@code water} or {@code explode}, the choices on
+     * {@link AbilityType#ON_DEATH}.
+     *
+     * <p>Deliberately <b>not</b> about items. What a horse leaves behind and
+     * what happens to the ground it died on are two different questions with
+     * two different genes behind them, and folding them into one verb would
+     * make "drops diamonds and leaves a crater" impossible to express as the
+     * two independent loci it is.
+     */
+    record OnDeath(String effect, Condition when, int minDose) implements GeneAbility {}
+
+    /**
+     * <b>What the horse leaves behind</b> - one of the {@code drop} choices on
+     * {@link AbilityType#ITEM_DROP}, in a count drawn between {@code min} and
+     * {@code max} inclusive.
+     *
+     * <p>{@code vanilla} means "add nothing, leave the usual leather", and is
+     * the wild type's answer; every other value <b>replaces</b> the vanilla
+     * drop, except {@code meat}, which is added beside it. That asymmetry is
+     * the gene's, not the verb's: a horse that drops diamonds instead of
+     * leather is a different animal, and a meaty horse is the same animal with
+     * more on it.
+     */
+    record ItemDrop(String drop, int min, int max, Condition when, int minDose) implements GeneAbility {}
+
+    /**
+     * <b>How mobs feel about the horse</b> - {@code repel} keeps them outside
+     * {@code radius} blocks, {@code attract} makes hostile mobs that can see it
+     * prefer it to anything else in range.
+     *
+     * <p>{@code maxTargets} caps how many entities one beat may touch, which
+     * every radius effect here is required to do.
+     */
+    record MobAura(String mode, double radius, int intervalTicks, int maxTargets,
+                   Condition when, int minDose) implements GeneAbility {}
+
+    /**
+     * <b>What the horse hits for</b>, in health points - two per heart. A
+     * vanilla horse has no attack at all; this is the whole of the mod's combat
+     * side, and the number is absolute rather than a modifier so that a reader
+     * of a horse's sheet sees the damage it deals and not an adjustment to a
+     * baseline they would have to look up.
+     */
+    record Combat(double damage, Condition when, int minDose) implements GeneAbility {}
 
     /**
      * Makes the carrier <b>glow</b>: emit world light and/or render some coat

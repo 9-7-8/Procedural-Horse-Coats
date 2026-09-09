@@ -148,7 +148,31 @@ window.HG = window.HG || {};
         v("from", 0.5, "reading where coverage starts"),
         v("to", 1.0, "reading where coverage reaches 1"),
         v("spread", 0.0, "body units to grow the PALE side by - 'only beside white the horse already has'",
-          { min: 0, max: 8, step: 0.25 })
+          { min: 0, max: 8, step: 0.25 }),
+        choice("spreadFrom", ["any", "above", "below", "ahead", "behind"],
+          "which side the growth comes from - 'above' grows the selection DOWNWARD, 'below' upward. 'any' is the isotropic disc")
+      ]
+    },
+    LUMA: {
+      blurb: "Wherever the coat underneath already LOOKS dark, or white, or red - the colour the gradient chart resolved, not the pigment behind it. Magical genes only.",
+      params: [
+        parts("parts", "restrict to these parts"),
+        choice("channel", ["dark", "light", "white", "saturation", "red", "green", "blue"],
+          "'dark' is 1 - luminance, 'white' the achromatic floor - bald white 1, saturated colour ~0"),
+        v("from", 0.5, "reading where coverage starts"),
+        v("to", 1.0, "reading where coverage reaches 1"),
+        v("spread", 0.0, "body units to grow what this mask SELECTED by, exactly as on PIGMENT",
+          { min: 0, max: 8, step: 0.25 }),
+        choice("spreadFrom", ["any", "above", "below", "ahead", "behind"],
+          "which side the growth comes from - 'above' grows the selection DOWNWARD, 'below' upward. 'any' is the isotropic disc")
+      ]
+    },
+    EDGE: {
+      blurb: "The rim of each body part's box, on the face the texel is on - a wireframe of the horse. It outlines EVERY box, not the silhouette.",
+      params: [
+        parts("parts", "restrict to these parts - one rectangle per face of each"),
+        v("width", 0.6, "how far in from the boundary the rim runs, body units"),
+        v("softness", 0.25, "fade width inside the rim, body units")
       ]
     },
     SPOTS: {
@@ -382,7 +406,11 @@ window.HG = window.HG || {};
       params: [
         eChoice("attribute", ["movement_speed", "jump_strength", "max_health", "armor",
           "armor_toughness", "knockback_resistance", "step_height", "safe_fall_distance",
-          "scale", "swim_speed"], null, "the attribute to modify"),
+          "scale", "water_movement_efficiency", "movement_efficiency", "oxygen_bonus",
+          "gravity"], null,
+          "the attribute to modify. There is no 'swim_speed' - vanilla has no such attribute; "
+          + "what it has is 'water_movement_efficiency', the share of its land speed a mob "
+          + "keeps in water"),
         eChoice("op", ["add", "multiply_base", "multiply_total"], "add",
           "how 'amount' is applied - vanilla modifier operations"),
         eNum("amount", 0, "signed modifier amount", { min: -10, max: 10, step: 0.01 })
@@ -427,7 +455,9 @@ window.HG = window.HG || {};
         eNum("cooldown", 0, "per-horse cooldown, ticks", { min: 0, max: 24000, step: 20 }),
         eNum("denied_damage", 0, "damage dealt when the condition fails (a stallion kick); 0 = none",
           { min: 0, max: 20, step: 0.5 }),
-        eStr("denied_message", "", "message shown when the condition fails, or empty for silent")
+        eStr("denied_message", "", "message shown when the condition fails, or empty for silent"),
+        eStr("kind", "", "a name for what sort of yield this is, so a 'charges' effect on some "
+          + "OTHER gene can grant extra uses of it. Empty opts out")
       ]
     },
     glow: {
@@ -457,6 +487,56 @@ window.HG = window.HG || {};
         eNum("radius", 2, "reach in blocks", { min: 1, max: 8, step: 1 }),
         eNum("chance", 0.5, "odds of converting on any given beat", { min: 0, max: 1, step: 0.01 }),
         eNum("interval", 40, "ticks between beats", { min: 1, max: 200, step: 1 })
+      ]
+    },
+    charges: {
+      doc: "Grant extra uses of somebody else's yield before its cooldown bites - "
+        + "the 'milked more than once a day' verb. Names a yield KIND, not a gene.",
+      params: [
+        eReq("kind", "the yield 'kind' this grants extra uses of"),
+        eNum("extra", 1, "additional uses per cooldown window", { min: 1, max: 64, step: 1 })
+      ]
+    },
+    breath: {
+      doc: "Multiply how long the horse lasts under water. The graded counterpart of the "
+        + "underwater_breathing traversal flag, which is absolute.",
+      params: [
+        eNum("factor", 1.0, "multiplier on the air supply - 2 lasts twice as long, 0.5 half",
+          { min: 0.05, max: 40, step: 0.05 })
+      ]
+    },
+    on_death: {
+      doc: "What happens to the GROUND where the horse died. Items are a different verb.",
+      params: [
+        eChoice("effect", ["lava", "water", "explode"], null,
+          "what happens at the horse's feet when it dies")
+      ]
+    },
+    item_drop: {
+      doc: "What the horse leaves behind. Every value but 'meat' REPLACES the vanilla drop; "
+        + "'meat' is added beside it.",
+      params: [
+        eChoice("drop", ["vanilla", "diamonds", "spawn_egg", "enchanted_sword", "meat"], null,
+          "what the horse drops"),
+        eNum("min", 1, "fewest items", { min: 0, max: 64, step: 1 }),
+        eNum("max", 1, "most items, at least 'min'", { min: 0, max: 64, step: 1 })
+      ]
+    },
+    mob_aura: {
+      doc: "How mobs feel about the horse - keep away from it, or fight over it.",
+      params: [
+        eChoice("mode", ["repel", "attract"], null,
+          "'repel' keeps mobs outside the radius; 'attract' makes hostiles inside it "
+          + "prefer the horse to anything else"),
+        eNum("radius", 8, "reach in blocks, 1-32", { min: 1, max: 32, step: 1 }),
+        eNum("interval", 20, "ticks between beats (at least 1)", { min: 1, max: 200, step: 1 }),
+        eNum("max_targets", 12, "most entities one beat may reach, 1-64", { min: 1, max: 64, step: 1 })
+      ]
+    },
+    combat: {
+      doc: "What the horse hits for, in health points. A vanilla horse has no attack at all.",
+      params: [
+        eNum("damage", 3, "health points per hit - two per heart", { min: 0, max: 200, step: 0.5 })
       ]
     }
   };

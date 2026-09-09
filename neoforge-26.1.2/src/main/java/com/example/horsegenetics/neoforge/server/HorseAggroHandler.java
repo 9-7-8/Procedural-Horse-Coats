@@ -2,6 +2,7 @@ package com.example.horsegenetics.neoforge.server;
 
 import com.example.horsegenetics.neoforge.data.HorseCareAttachment;
 import com.example.horsegenetics.neoforge.data.ModAttachments;
+import com.example.horsegenetics.common.genetics.genes.MagicFighterGene;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -54,7 +55,13 @@ public final class HorseAggroHandler {
     @SubscribeEvent
     static void addAttackDamage(EntityAttributeModificationEvent event) {
         if (!event.has(EntityType.HORSE, Attributes.ATTACK_DAMAGE)) {
-            event.add(EntityType.HORSE, Attributes.ATTACK_DAMAGE, 4.0);
+            // The baseline lives on the FIGHTER GENE, not here. That locus is
+            // what a player reads to find out what a horse hits for, and its
+            // wild type has to mean the same number as a horse that has never
+            // been near it - so this registration takes the gene's value rather
+            // than repeating one.
+            event.add(EntityType.HORSE, Attributes.ATTACK_DAMAGE,
+                    MagicFighterGene.BASELINE_DAMAGE);
         }
     }
 

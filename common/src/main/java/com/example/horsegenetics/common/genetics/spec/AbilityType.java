@@ -237,8 +237,12 @@ public final class AbilityType {
             List.of(
                     Param.requiredChoice("attribute", List.of(
                             "movement_speed", "jump_strength", "max_health", "armor", "armor_toughness",
-                            "knockback_resistance", "step_height", "safe_fall_distance", "scale", "swim_speed"),
-                            "the attribute to modify"),
+                            "knockback_resistance", "step_height", "safe_fall_distance", "scale",
+                            "water_movement_efficiency", "movement_efficiency", "oxygen_bonus",
+                            "gravity"),
+                            "the attribute to modify. There is no 'swim_speed' - vanilla has no "
+                                    + "such attribute; what it has is 'water_movement_efficiency', "
+                                    + "the share of its land speed a mob keeps in water"),
                     Param.choice("op", List.of("add", "multiply_base", "multiply_total"), "add",
                             "how 'amount' is applied - vanilla modifier operations"),
                     Param.num("amount", 0, "signed modifier amount")),
@@ -335,14 +339,17 @@ public final class AbilityType {
                     Param.str("produces", "", "item id handed back"),
                     Param.num("cooldown", 0, "per-horse cooldown, ticks"),
                     Param.num("denied_damage", 0, "damage dealt when 'when' fails (e.g. a stallion kick); 0 = none"),
-                    Param.str("denied_message", "", "message shown when 'when' fails, or \"\" for silent")),
+                    Param.str("denied_message", "", "message shown when 'when' fails, or \"\" for silent"),
+                    Param.str("kind", "",
+                            "a name for what sort of yield this is, so a 'charges' effect on some "
+                                    + "OTHER gene can grant extra uses of it. \"\" opts out")),
             v -> {
                 if (!(v.trigger("trigger") instanceof Trigger.OnInteract onInteract)) {
                     throw v.bad("a yield fires on 'on_interact' only");
                 }
                 return new GeneAbility.Yield(onInteract, v.str("consumes"), v.str("produces"),
                         v.intOf("cooldown"), v.num("denied_damage"), v.str("denied_message"),
-                        v.when, v.minDose);
+                        v.str("kind"), v.when, v.minDose);
             }));
 
     /**
@@ -425,5 +432,135 @@ public final class AbilityType {
                     throw v.bad("interval must be at least 1 tick, got " + interval);
                 }
                 return new GeneAbility.Spread(v.str("cover"), radius, chance, interval, v.when, v.minDose);
+            }));
+
+    /** The most extra charges one locus may hand a yield. A guard against a typo, not a design. */
+    public static final int MAX_EXTRA_CHARGES = 64;
+
+    /**
+     * <b>Extra uses of somebody else's yield</b> before its cooldown bites -
+     * the "this horse can be milked more than once a day" verb.
+     *
+     * <p>It names a {@link #YIELD} {@code kind} rather than a gene, and that is
+     * the whole design. The gene that <i>produces</i> a thing and the gene that
+     * decides <i>how often</i> are different loci, and neither can see the
+     * other's epigenome; naming the kind means one volume locus governs every
+     * gene that produces that kind - the plain milk, the water, the lava, and
+     * anything written later - instead of each new producer having to remember
+     * to ask.
+     */
+    public static final AbilityType CHARGES = register(new AbilityType("charges",
+            List.of(
+                    Param.required("kind", "the yield 'kind' this grants extra uses of"),
+                    Param.num("extra", 1, "additional uses per cooldown window, 1.." + MAX_EXTRA_CHARGES)),
+            v -> {
+                int extra = v.intOf("extra");
+                if (extra < 1 || extra > MAX_EXTRA_CHARGES) {
+                    throw v.bad("extra must be in [1, " + MAX_EXTRA_CHARGES + "], got " + extra);
+                }
+                return new GeneAbility.YieldCharges(v.str("kind"), extra, v.when, v.minDose);
+            }));
+
+    /** The widest either way a {@link #BREATH} multiplier may go. A guard, not a design. */
+    public static final double MIN_BREATH_FACTOR = 0.05;
+    public static final double MAX_BREATH_FACTOR = 40.0;
+
+    /**
+     * <b>How long the horse lasts under water</b>, as a multiplier on its air
+     * supply. The graded counterpart of the {@code underwater_breathing}
+     * traversal flag, which is absolute; the two compose the way you would
+     * expect, in that a horse which cannot drown does not care how slowly it
+     * would have.
+     */
+    public static final AbilityType BREATH = register(new AbilityType("breath",
+            List.of(Param.num("factor", 1.0,
+                    "multiplier on the air supply - 2 lasts twice as long, 0.5 half")),
+            v -> {
+                double factor = v.num("factor");
+                if (factor < MIN_BREATH_FACTOR || factor > MAX_BREATH_FACTOR) {
+                    throw v.bad("factor must be in [" + MIN_BREATH_FACTOR + ", "
+                            + MAX_BREATH_FACTOR + "], got " + factor);
+                }
+                return new GeneAbility.Breath(factor, v.when, v.minDose);
+            }));
+
+    /**
+     * What the world does where the horse died. Items are deliberately a
+     * different verb ({@link #ITEM_DROP}): what a horse leaves behind and what
+     * happens to the ground it died on are two questions, and folding them
+     * together would make "drops diamonds and leaves a crater" impossible to
+     * express as the two independent loci it is.
+     */
+    public static final AbilityType ON_DEATH = register(new AbilityType("on_death",
+            List.of(Param.requiredChoice("effect", List.of("lava", "water", "explode"),
+                    "what happens at the horse's feet when it dies")),
+            v -> new GeneAbility.OnDeath(v.str("effect"), v.when, v.minDose)));
+
+    /** The most items one death may produce. A guard, not a design. */
+    public static final int MAX_DROP_COUNT = 64;
+
+    /** What the horse leaves behind. Nothing here touches the world - see {@link #ON_DEATH}. */
+    public static final AbilityType ITEM_DROP = register(new AbilityType("item_drop",
+            List.of(
+                    Param.requiredChoice("drop",
+                            List.of("vanilla", "diamonds", "spawn_egg", "enchanted_sword", "meat"),
+                            "what the horse drops. Every value but 'meat' REPLACES the vanilla "
+                                    + "drop; 'meat' is added beside it"),
+                    Param.num("min", 1, "fewest items, 0.." + MAX_DROP_COUNT),
+                    Param.num("max", 1, "most items, at least 'min'")),
+            v -> {
+                int min = v.intOf("min");
+                int max = v.intOf("max");
+                if (min < 0 || max > MAX_DROP_COUNT || min > max) {
+                    throw v.bad("min/max must satisfy 0 <= min <= max <= " + MAX_DROP_COUNT
+                            + ", got " + min + ".." + max);
+                }
+                return new GeneAbility.ItemDrop(v.str("drop"), min, max, v.when, v.minDose);
+            }));
+
+    /** How mobs feel about the horse. */
+    public static final AbilityType MOB_AURA = register(new AbilityType("mob_aura",
+            List.of(
+                    Param.requiredChoice("mode", List.of("repel", "attract"),
+                            "'repel' keeps mobs outside the radius; 'attract' makes hostiles "
+                                    + "inside it prefer the horse to anything else"),
+                    Param.num("radius", 8, "reach in blocks, 1-32"),
+                    Param.num("interval", 20, "ticks between beats (at least 1)"),
+                    Param.num("max_targets", 12, "most entities one beat may reach, 1-64")),
+            v -> {
+                double radius = v.num("radius");
+                if (radius < 1 || radius > 32) {
+                    throw v.bad("radius must be 1-32 blocks, got " + radius);
+                }
+                int interval = v.intOf("interval");
+                if (interval < 1) {
+                    throw v.bad("interval must be at least 1 tick, got " + interval);
+                }
+                int maxTargets = v.intOf("max_targets");
+                if (maxTargets < 1 || maxTargets > 64) {
+                    throw v.bad("max_targets must be 1-64, got " + maxTargets);
+                }
+                return new GeneAbility.MobAura(v.str("mode"), radius, interval, maxTargets,
+                        v.when, v.minDose);
+            }));
+
+    /** The most damage one hit may deal. A guard against a typo, not a balance number. */
+    public static final double MAX_COMBAT_DAMAGE = 200.0;
+
+    /**
+     * What the horse hits for, in health points - two per heart. A vanilla
+     * horse has no attack at all, so this is the whole of the mod's combat
+     * side. The number is <b>absolute</b> rather than a modifier, so that a
+     * reader of a horse's sheet sees the damage it deals and not an adjustment
+     * to a baseline they would have to go and look up.
+     */
+    public static final AbilityType COMBAT = register(new AbilityType("combat",
+            List.of(Param.num("damage", 3, "health points per hit - two per heart")),
+            v -> {
+                double damage = v.num("damage");
+                if (damage < 0 || damage > MAX_COMBAT_DAMAGE) {
+                    throw v.bad("damage must be in [0, " + MAX_COMBAT_DAMAGE + "], got " + damage);
+                }
+                return new GeneAbility.Combat(damage, v.when, v.minDose);
             }));
 }

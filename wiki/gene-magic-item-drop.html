@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Magic item drop &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow magical">Magical gene <span class="sep">/</span> no coat effect</p>
+
+<h1>Magic item drop</h1>
+
+<p class="lede">
+    What the horse leaves behind &mdash; diamonds, a spawn egg that puts
+    <em>this horse</em> back, or an enchanted sword. Every variant takes two
+    copies and none of them shows on the living animal, which is the point:
+    it is worth breeding a line for and impossible to spot in a field.
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<h2 id="inheritance">Crossing two of them</h2>
+
+<div class="gene-inheritance" data-gene="horsegenetics.magic_item_drop"></div>
+
+<h2 id="what">What it does</h2>
+
+<table class="data">
+    <thead><tr><th>Combination</th><th>Drops</th></tr></thead>
+    <tbody>
+        <tr><td><code>Dia/Dia</code></td><td>2&ndash;5 diamonds, instead of the leather</td></tr>
+        <tr><td><code>Egg/Egg</code></td><td>a spawn egg holding this horse</td></tr>
+        <tr><td><code>Swd/Swd</code></td><td>an enchanted iron sword</td></tr>
+        <tr><td>anything with an <code>n</code>, or two different variants</td><td>the usual leather</td></tr>
+    </tbody>
+</table>
+
+<h2 id="egg">The egg is the interesting one</h2>
+
+<p>
+    A self-seeding horse drops a spawn egg carrying its own genotype
+    <strong>and its own epigenome</strong>, so what comes back out is a
+    <em>clone</em> rather than a horse with the same alleles: the same coat, the
+    same particle colours, the same percentages written on every allele copy.
+</p>
+
+<p>
+    It is the only thing in the mod that undoes a death, which is why it takes
+    two copies of a recessive that no amount of looking at a horse will reveal.
+</p>
+
+<h2 id="sword">The sword is a gamble</h2>
+
+<p>
+    One enchantment, rolled at the moment of death rather than fixed by the
+    gene, drawn from whatever the world&rsquo;s registry holds that a sword will
+    accept &mdash; so a data pack&rsquo;s enchantments are in the pool for free.
+    Two horses of identical genotype do not leave identical swords, which makes
+    this the one drop on the locus that is a lottery rather than a certainty.
+</p>
+
+<h2 id="wild">What you can catch</h2>
+
+<p>
+    A fraction of a percent of wild horses are the doubled form of each variant.
+    These are prizes rather than hazards, so the founder table sits on the
+    <em>expressing</em> combinations: a diamond horse can genuinely be caught,
+    and the carriers turn up a generation later.
+</p>
+
+<h2 id="health">Health</h2>
+
+<p>
+    None whatever. Nothing on this locus affects the living horse.
+</p>
+
+<h2 id="carrot">Its gene carrot</h2>
+
+<!-- The recipe, read off the mod at run time - the rarity tier is the recipe's
+     price, and a price written into fifty pages goes stale silently.
+     See wiki/gene-carrot/gene-carrot.js. -->
+
+<div class="gene-carrot" data-gene="horsegenetics.magic_item_drop"></div>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd><code>horsegenetics.magic_item_drop</code></dd></div>
+    <div><dt>Alleles</dt><dd><code>Dia</code> diamond-bearing, <code>Egg</code> self-seeding, <code>Swd</code> sword-bearing, <code>n</code></dd></div>
+    <div><dt>Priority</dt><dd>133 &mdash; the magical utility band, beside milk</dd></div>
+    <div><dt>Reaches the game as</dt><dd>an <code>item_drop</code> effect</dd></div>
+    <div><dt>Coat effect</dt><dd><strong>none, ever</strong></dd></div>
+</dl>
+
+<div class="note warn">
+    <span class="label">Newly built, not yet play-tested</span>
+    <p>
+        Nothing on this page has been seen in game. The translator was written
+        against the 26.1.2 sources and is flagged as unverified in its own
+        comments. Checklist on <a href="verification.html">To be verified</a>.
+    </p>
+</div>
+
+<h2 id="replace">Replace, except meat</h2>
+
+<p>
+    Every value on the <code>item_drop</code> verb <strong>replaces</strong> the
+    vanilla drop except <code>meat</code>, which is added beside it. The
+    asymmetry belongs to the genes rather than to the verb: a horse that leaves
+    diamonds instead of its leather is a different animal, and a
+    <a href="gene-magic-meat.html">meaty</a> one is the same animal with more on
+    it. It is why the two are separate loci, and why a diamond horse can also be
+    a meat horse.
+</p>
+
+<div class="codebox">
+<div class="filename">neoforge/server/GeneDeathHandler.java</div>
+<pre><code class="language-java">added.add(stack);
+replace |= !"meat".equals(drop.drop());
+// ...
+if (replace) {
+    event.getDrops().clear();
+}</code></pre>
+</div>
+
+<h2 id="reuse">The egg is the editor&rsquo;s egg</h2>
+
+<p>
+    It reuses <code>PresetHorseSpawnEggItem</code> rather than introducing an
+    item of its own. The two are the same thing arrived at from different
+    directions &mdash; &ldquo;this exact horse, in an item&rdquo; &mdash; and one
+    of them already has a model, a tooltip and a spawner behind it. The record
+    it carries is <code>StoredGenome</code>, the same payload the stallion seed
+    jar holds.
+</p>
+
+<h2 id="beef">Horse meat is beef</h2>
+
+<p>
+    Not a vanilla item, and the closest honest stand-in needs no new item, no
+    model and no recipe. If the mod ever grows its own, one line in
+    <code>GeneDeathHandler.itemFor</code> is what moves.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="science">
+
+<h2 id="invisible">A locus that is entirely invisible, on purpose</h2>
+
+<p>
+    Nothing about a diamond horse can be seen, felt, ridden or measured. That is
+    unusual even here &mdash; most of the hidden loci at least change a number
+    somebody could notice &mdash; and it is what makes this one a genuine
+    breeding project rather than a shopping trip.
+</p>
+
+<p>
+    It also means the locus leans hard on the rest of the mod: the only way to
+    find out what a horse carries is the
+    <a href="carrots.html">gene database and the research papers</a>, so this is
+    one of the genes those systems exist for.
+</p>
+
+<h2 id="mutual">Why the three cannot combine</h2>
+
+<p>
+    <code>Dia/Egg</code> gives the vanilla drop, not both. A horse leaves behind
+    one thing; two contradictory answers to &ldquo;what is on the ground&rdquo;
+    is not a richer outcome, it is an unwritten rule about which one wins. The
+    silent compound heterozygote states the rule instead, and has the pleasant
+    consequence that crossing two prize lines gives an ordinary-looking foal
+    carrying both.
+</p>
+
+</section>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="gene-magic-on-death.html">Magic on death &mdash; the other half</a>
+        <a href="gene-magic-meat.html">Magic meat</a>
+        <a href="item-preset-horse-spawn-egg.html">The preset horse egg</a>
+        <a href="verification.html">What to check in-game</a>
+    </div>
+    Source: <code>common/genetics/genes/MagicItemDropGene.java</code>,
+    <code>neoforge/server/GeneDeathHandler.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+<script defer src="gene-carrot/gene-carrot.js"></script>
+<script defer src="gene-inheritance/gene-inheritance.js"></script>
+</body>
+</html>

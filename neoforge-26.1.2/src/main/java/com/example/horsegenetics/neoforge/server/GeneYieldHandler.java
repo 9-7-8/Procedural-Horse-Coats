@@ -100,7 +100,8 @@ public final class GeneYieldHandler {
                 if (yield.produces().isEmpty()) {
                     applyDenial(horse, player, yield);
                 } else {
-                    fulfil(horse, player, held, yield, active.geneKey());
+                    fulfil(horse, player, held, yield, active.geneKey(),
+                            chargesFor(yield.kind(), abilities, horse, record));
                 }
             }
             event.setCanceled(true);
@@ -109,11 +110,45 @@ public final class GeneYieldHandler {
         }
     }
 
-    private static void fulfil(Horse horse, Player player, ItemStack held, GeneAbility.Yield yield, String geneKey) {
+    /**
+     * How many uses of this {@code kind} of yield the horse's other genes have
+     * granted - the {@code charges} verb, summed.
+     *
+     * <p>It is looked up by <b>kind</b> rather than by gene, which is the whole
+     * point of that verb: one volume locus governs every gene that produces the
+     * kind, including ones written after it. A yield with no kind (the denial
+     * branches, and anything that opted out) can never be boosted, because an
+     * empty kind matches nothing.
+     */
+    private static int chargesFor(String kind, List<HorseAbilities.Active> abilities,
+                                  Horse horse, HorseRecord record) {
+        if (kind.isEmpty()) {
+            return 1;
+        }
+        int total = 1;
+        for (HorseAbilities.Active active : abilities) {
+            if (active.ability() instanceof GeneAbility.YieldCharges charges
+                    && charges.kind().equals(kind)
+                    && GeneAbilityHandler.conditionHolds(charges.when(), horse, record)) {
+                total += charges.extra();
+            }
+        }
+        return total;
+    }
+
+    private static void fulfil(Horse horse, Player player, ItemStack held, GeneAbility.Yield yield,
+                               String geneKey, int charges) {
         long now = horse.level().getGameTime();
         String key = "yield:" + geneKey;
         HorseCooldownsAttachment cooldowns = horse.getData(ModAttachments.HORSE_COOLDOWNS.get());
-        long cd = Math.max(1, yield.cooldownTicks());
+        // Charges DIVIDE the cooldown rather than banking uses. "Three times a
+        // day" then means three fillings spread across the day rather than
+        // three at dawn and nothing after - which is what a dairy animal does,
+        // and which needs no counter of its own: the stamp already on the
+        // attachment is enough, so the whole feature survives a restart for
+        // free. A burstable version would need a second stored number and would
+        // let a player empty the horse and walk away.
+        long cd = Math.max(1, yield.cooldownTicks() / Math.max(1, charges));
         if (!cooldowns.ready(key, now, cd)) {
             player.sendSystemMessage(
                     Component.translatable("message.horsegenetics.yield.recharging"));

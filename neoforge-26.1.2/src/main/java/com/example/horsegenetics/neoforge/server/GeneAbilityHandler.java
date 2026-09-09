@@ -28,6 +28,12 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.animal.equine.Horse;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.entity.animal.Animal;
@@ -46,6 +52,7 @@ import net.neoforged.neoforge.event.tick.EntityTickEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
 import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -138,7 +145,13 @@ public final class GeneAbilityHandler {
             switch (ability) {
                 case GeneAbility.Traversal t -> applyTraversal(t.flag(), horse);
                 case GeneAbility.Emitter e -> maybeEmit(e, horse, (ServerLevel) level, moving);
-                case GeneAbility.AttributeMod ignored -> warnUntranslated("attribute", active.geneKey());
+                case GeneAbility.AttributeMod am -> applyAttribute(am, horse, active.geneKey());
+                case GeneAbility.Breath b -> breathe(b, horse);
+                case GeneAbility.MobAura ma -> mobAura(ma, horse, (ServerLevel) level);
+                case GeneAbility.Combat c -> setAttackDamage(c, horse);
+                case GeneAbility.YieldCharges ignored -> { /* read by GeneYieldHandler, on interaction */ }
+                case GeneAbility.OnDeath ignored -> { /* read by GeneDeathHandler, when it dies */ }
+                case GeneAbility.ItemDrop ignored -> { /* read by GeneDeathHandler, when it dies */ }
                 case GeneAbility.SelfEffect se -> applyMobEffect(se, horse, active.geneKey());
                 case GeneAbility.Yield ignored -> { /* handled on interaction */ }
                 case GeneAbility.Glow ignored -> { /* reconciled once, after the loop */ }
@@ -148,6 +161,237 @@ public final class GeneAbilityHandler {
         }
 
         reconcileGlow(horse, (ServerLevel) level, record, abilities);
+        clearAttributes(horse, abilities, record);
+    }
+
+    // ------------------------------------------------------------------
+    // Attribute modifiers
+    // ------------------------------------------------------------------
+
+    /**
+     * The attribute names a gene may move, and the vanilla attribute each one
+     * is. A <b>closed table</b>, so a gene naming something this build has never
+     * heard of gets one log line rather than a silent no-op.
+     *
+     * <p>{@code swim_speed} is not among them and never was, however much the
+     * name suggests itself: vanilla has no such attribute. What it has is
+     * {@code water_movement_efficiency} - the share of its land speed a mob
+     * keeps in water, which is Depth Strider's attribute and is what "how fast
+     * does this horse swim" actually means here.
+     */
+    private static final Map<String, Holder<Attribute>> ATTRIBUTES = Map.ofEntries(
+            Map.entry("movement_speed", Attributes.MOVEMENT_SPEED),
+            Map.entry("jump_strength", Attributes.JUMP_STRENGTH),
+            Map.entry("max_health", Attributes.MAX_HEALTH),
+            Map.entry("armor", Attributes.ARMOR),
+            Map.entry("armor_toughness", Attributes.ARMOR_TOUGHNESS),
+            Map.entry("knockback_resistance", Attributes.KNOCKBACK_RESISTANCE),
+            Map.entry("step_height", Attributes.STEP_HEIGHT),
+            Map.entry("safe_fall_distance", Attributes.SAFE_FALL_DISTANCE),
+            Map.entry("scale", Attributes.SCALE),
+            Map.entry("water_movement_efficiency", Attributes.WATER_MOVEMENT_EFFICIENCY),
+            Map.entry("movement_efficiency", Attributes.MOVEMENT_EFFICIENCY),
+            Map.entry("oxygen_bonus", Attributes.OXYGEN_BONUS),
+            Map.entry("gravity", Attributes.GRAVITY));
+
+    /**
+     * Hold up one attribute modifier while its {@code when} is true.
+     *
+     * <p><b>Not verified in-game.</b> Written against 26.1.2 sources.
+     *
+     * <p>The modifier is <b>transient</b> and its id is derived from the gene
+     * and the attribute, so re-applying it every tick is idempotent: a transient
+     * modifier whose id is already present is replaced rather than stacked,
+     * which is exactly what a per-tick reconciliation wants. The removal half is
+     * the interesting one - when {@code when} goes false the ability is skipped
+     * before it ever reaches here, so nothing would take the modifier off again.
+     * {@link #clearAttributes} therefore runs unconditionally afterwards.
+     */
+    private static void applyAttribute(GeneAbility.AttributeMod mod, Horse horse, String geneKey) {
+        Holder<Attribute> attribute = ATTRIBUTES.get(mod.attribute());
+        if (attribute == null) {
+            warnUntranslated("attribute:" + mod.attribute(), geneKey);
+            return;
+        }
+        AttributeInstance instance = horse.getAttribute(attribute);
+        if (instance == null) {
+            return; // the horse simply has no such attribute; not an error
+        }
+        AttributeModifier.Operation op = switch (mod.op()) {
+            case "multiply_base" -> AttributeModifier.Operation.ADD_MULTIPLIED_BASE;
+            case "multiply_total" -> AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL;
+            default -> AttributeModifier.Operation.ADD_VALUE;
+        };
+        instance.addOrUpdateTransientModifier(
+                new AttributeModifier(attributeModifierId(geneKey, mod.attribute()), mod.amount(), op));
+    }
+
+    /** A stable, gene-scoped id, so two genes may move one attribute without fighting. */
+    private static Identifier attributeModifierId(String geneKey, String attribute) {
+        return Identifier.fromNamespaceAndPath(HorseGenetics.MOD_ID,
+                "gene/" + geneKey.replace('.', '_') + "/" + attribute);
+    }
+
+    /**
+     * Take off every gene modifier the horse is <b>not</b> currently asking for.
+     *
+     * <p>A transient modifier survives until something removes it, and the apply
+     * path above only runs while the ability's condition holds - so without this
+     * a modifier gated on {@code in_water} would stay on the horse for ever the
+     * moment it stepped out of the river.
+     */
+    private static void clearAttributes(Horse horse, List<HorseAbilities.Active> wanted,
+                                        HorseRecord record) {
+        Set<Identifier> keep = new HashSet<>();
+        for (HorseAbilities.Active active : wanted) {
+            if (active.ability() instanceof GeneAbility.AttributeMod mod
+                    && conditionHolds(mod.when(), horse, record)) {
+                keep.add(attributeModifierId(active.geneKey(), mod.attribute()));
+            }
+        }
+        for (Holder<Attribute> attribute : ATTRIBUTES.values()) {
+            AttributeInstance instance = horse.getAttribute(attribute);
+            if (instance == null) {
+                continue;
+            }
+            for (AttributeModifier existing : List.copyOf(instance.getModifiers())) {
+                if (existing.id().getNamespace().equals(HorseGenetics.MOD_ID)
+                        && !keep.contains(existing.id())) {
+                    instance.removeModifier(existing.id());
+                }
+            }
+        }
+    }
+
+    // ------------------------------------------------------------------
+    // Breath
+    // ------------------------------------------------------------------
+
+    /**
+     * How much air each horse is owed but has not been handed yet - because air
+     * is an integer and a breath factor is not.
+     */
+    private static final Map<UUID, Double> BREATH_DEBT = new ConcurrentHashMap<>();
+
+    /**
+     * Multiply how long the horse lasts under water.
+     *
+     * <p>Vanilla takes one point of air per submerged tick. For the horse to
+     * last {@code factor} times as long the drain has to be {@code 1 / factor},
+     * so every submerged tick this hands back {@code 1 - 1 / factor} - positive
+     * for a long-breathed horse, negative for a short-breathed one. One
+     * expression covers both directions, which is the reason to write it this
+     * way rather than as two cases.
+     *
+     * <p>Air is an {@code int} and that quantity is not, so the fraction
+     * accumulates per horse until it is worth a whole point. The obvious
+     * alternative - vanilla's {@code oxygen_bonus} attribute - reaches only one
+     * direction, and does it by rolling a die every tick, so two horses with
+     * identical genotypes would drown at different times. This locus is meant to
+     * be bred for, and a bred number that does not hold still is not one.
+     *
+     * <p><b>Not verified in-game.</b>
+     */
+    private static void breathe(GeneAbility.Breath b, Horse horse) {
+        UUID id = horse.getUUID();
+        if (!horse.isUnderWater() || b.factor() <= 0) {
+            BREATH_DEBT.remove(id);
+            return;
+        }
+        double owed = BREATH_DEBT.getOrDefault(id, 0.0) + (1.0 - 1.0 / b.factor());
+        int whole = (int) owed;
+        if (whole != 0) {
+            // Clamped at the top to the horse's own maximum; the bottom is left
+            // alone, because vanilla reads a negative air supply as "drowning"
+            // and that is exactly what a short-breathed horse should do.
+            horse.setAirSupply(Math.min(horse.getMaxAirSupply(), horse.getAirSupply() + whole));
+            owed -= whole;
+        }
+        BREATH_DEBT.put(id, owed);
+    }
+
+    // ------------------------------------------------------------------
+    // Combat
+    // ------------------------------------------------------------------
+
+    /**
+     * What the horse hits for. Horses already have an {@code ATTACK_DAMAGE}
+     * attribute and a melee goal - {@link HorseAggroHandler} gave them both so
+     * that a wild horse could kick back - so this locus has only to move the
+     * number.
+     *
+     * <p>Written as a <b>base value</b> rather than as a modifier because the
+     * gene's number is absolute: it is the damage the horse deals, not an
+     * adjustment to something a reader would have to go and look up. Only
+     * written when it differs, so the common case is a comparison rather than an
+     * attribute write on every tick of every horse.
+     */
+    private static void setAttackDamage(GeneAbility.Combat c, Horse horse) {
+        AttributeInstance instance = horse.getAttribute(Attributes.ATTACK_DAMAGE);
+        if (instance != null && Math.abs(instance.getBaseValue() - c.damage()) > 1.0e-6) {
+            instance.setBaseValue(c.damage());
+        }
+    }
+
+    // ------------------------------------------------------------------
+    // Mob aura
+    // ------------------------------------------------------------------
+
+    /**
+     * Make mobs keep away from the horse, or fight over it.
+     *
+     * <p>Both modes beat on the horse's own {@code tickCount} rather than the
+     * world's, so a field of them does not do all of its work on one tick - the
+     * same reason the healing aura does.
+     *
+     * <p><b>Repel is a shove, not a wall.</b> A hostile inside the radius has
+     * its target cleared if it was the horse or the horse's rider, and is pushed
+     * outward. That is deliberately weaker than a real avoidance goal: a goal
+     * would have to be added to and taken off every mob that ever walked past,
+     * and a horse whose aura stopped expressing would leave the goal behind on
+     * everything it had ever met.
+     *
+     * <p><b>Not verified in-game.</b>
+     */
+    private static void mobAura(GeneAbility.MobAura aura, Horse horse, ServerLevel level) {
+        int interval = Math.max(1, aura.intervalTicks());
+        if (horse.tickCount % interval != 0) {
+            return;
+        }
+        AABB box = horse.getBoundingBox().inflate(aura.radius());
+        double reachSqr = aura.radius() * aura.radius();
+        boolean attract = "attract".equals(aura.mode());
+        int touched = 0;
+        for (Mob mob : level.getEntitiesOfClass(Mob.class, box, Mob::isAlive)) {
+            if (touched >= aura.maxTargets()) {
+                break; // every radius effect is capped - see wiki/gene-effects.html
+            }
+            if (mob == horse || !(mob instanceof Enemy)) {
+                continue;
+            }
+            // The scan box is a box and the aura is a sphere, so check properly.
+            if (mob.distanceToSqr(horse) > reachSqr) {
+                continue;
+            }
+            if (attract) {
+                if (mob.hasLineOfSight(horse) && mob.getTarget() != horse) {
+                    mob.setTarget(horse);
+                    touched++;
+                }
+                continue;
+            }
+            if (mob.getTarget() == horse || mob.getTarget() == horse.getControllingPassenger()) {
+                mob.setTarget(null);
+            }
+            Vec3 away = mob.position().subtract(horse.position());
+            if (away.lengthSqr() < 1.0e-4) {
+                away = new Vec3(1, 0, 0); // exactly on top of the horse; any direction will do
+            }
+            away = away.normalize().scale(0.35);
+            mob.setDeltaMovement(mob.getDeltaMovement().add(away.x, 0.05, away.z));
+            mob.hurtMarked = true; // tell the client the mob was shoved
+            touched++;
+        }
     }
 
     // ------------------------------------------------------------------
@@ -453,6 +697,7 @@ public final class GeneAbilityHandler {
         if (!(event.getEntity() instanceof Horse horse)) {
             return;
         }
+        BREATH_DEBT.remove(horse.getUUID());
         BlockPos pos = GLOW_LIGHT.remove(horse.getUUID());
         if (pos != null && event.getLevel() instanceof ServerLevel level) {
             PENDING_LIGHT_CLEARS.add(new PendingClear(level.dimension(), pos.immutable()));

@@ -29,6 +29,172 @@
 
 <h2 id="d2026-09-08">2026-09-08</h2>
 
+<h3 id="mechanical-genes-2026-09-08">Fourteen genes, a mask that asks the gradient chart what colour it made, and eight loci that paint nothing at all.</h3>
+
+<p>The brief was &ldquo;a bunch more mechanical genetic toggles, so a breed can be
+described by what its horses <em>do</em>&rdquo;, plus six coat genes. It came to fourteen
+genes, two new masks, six new effect verbs and one correction to the effect format that had
+been wrong since it was written.</p>
+
+<h4>The mask that started it: <code>LUMA</code></h4>
+
+<p>Nyxborn was specified as &ldquo;replace all white with black, then put tiny white stars
+over all the black&rdquo;, and the request added: <em>use the LUT to decide what black
+is</em>. That is not a detail, it is a different question from the one the format could
+ask. <code>PIGMENT</code> reads <strong>melanin</strong> &mdash; a pair of levels that mean
+nothing until a gradient chart turns them into a colour. &ldquo;Black&rdquo; and
+&ldquo;white&rdquo; are facts about <em>that colour</em>, and the
+<a href="gene-lut.html">LUT locus</a> can hand a horse a chart whose black corner is
+violet. Such a horse has identical pigment everywhere and is no longer black anywhere.</p>
+
+<p>So <a href="gene-format.html">the format</a> gained <code>LUMA</code>, which thresholds
+the <em>resolved</em> colour &mdash; what phase 2 got out of the chart, plus whatever the
+magical genes before this one painted. Magical genes only: the natural phase is what
+<em>decides</em> the pigment the chart is handed, and the overlay pass has already spent the
+accumulator, so the parser refuses it in both rather than let it read zero.</p>
+
+<p>Its channels were picked off measurement rather than guessed. A throwaway probe baked
+nine representative coats through the real gradient and printed the readings, and the
+useful finding was that <strong><code>white</code> is not <code>light</code></strong>: a
+bald white texel reads 1.000 on the achromatic floor, a perlino 0.871, an old grey 0.698, a
+palomino 0.475 &mdash; while all four are &ldquo;pale&rdquo;. On a palomino &ldquo;the white
+markings&rdquo; and &ldquo;the pale parts&rdquo; are different sets of texels, and only one
+of the two channels tells them apart. The same probe gave the black end: black 0.807, bay
+0.782, chestnut 0.599, which is why Nyxborn&rsquo;s stars land on a bay and not on a
+chestnut.</p>
+
+<p>The four genes that were hunting for the horse&rsquo;s own white through pigment &mdash;
+<a href="gene-fielded.html">fielded</a>, <a href="gene-yalia.html">yalia</a>,
+<a href="gene-voided.html">voided</a> and <a href="gene-opalized.html">opalized</a> &mdash;
+were moved onto it, which is the second half of what was asked for. The three that hunt for
+<em>black</em> through pigment (<a href="gene-integration.html">integration</a> and
+opalized&rsquo;s dark side) were left alone: nobody asked, and moving them would shift
+shipped coats for no stated reason. Worth doing deliberately one day.</p>
+
+<h4>Two more pieces of vocabulary</h4>
+
+<ul>
+<li><strong><code>EDGE</code></strong> &mdash; the rim of each body part&rsquo;s box, on the
+    face the texel is on. It is the one mask that asks about the <em>model</em> rather than
+    about body space, because a field sampled at a point has no idea where the horse stops,
+    and on a Minecraft horse the line where two of a box&rsquo;s faces meet is the only
+    thing that reads as an edge. <a href="gene-tron.html">Tron</a> is built entirely from
+    it.</li>
+<li><strong><code>spreadFrom</code></strong> on <code>PIGMENT</code> and <code>LUMA</code>
+    &mdash; which side a <code>spread</code> may take its growth from. It is the only way
+    to ask for the <em>bottom</em> edge of a marking rather than its whole rim, and
+    <a href="gene-bloodstained.html">bloodstained</a> is the gene that needed it: mask the
+    white, then multiply by the non-white grown <em>upward</em>, and what is left is the
+    band just inside the marking&rsquo;s lower boundary and nowhere else on it.</li>
+</ul>
+
+<h4>The six coat genes</h4>
+
+<p><a href="gene-nyxborn.html">Nyxborn</a>, <a href="gene-stained-glass.html">stained
+glass</a>, <a href="gene-tron.html">Tron</a>, <a href="gene-ocular.html">ocular</a> and
+<a href="gene-bloodstained.html">bloodstained</a> are gene files.
+<a href="gene-shadowcreature.html">Shadowcreature</a> could not be: its three halves land in
+three different phases, and the gold eyes with no sclera can only be reached from the
+overlay pass, because <code>CoatRegions.redrawEyes</code> restores the eyes from the
+template as the last act of the bake.</p>
+
+<p><strong>Every one was baked as an icon and looked at</strong>, and four were wrong on the
+sheet in ways no test would have caught:</p>
+
+<ul>
+<li><strong>Ocular drew nothing at all</strong> at first, then blobs, then eyes whose irises
+    sat <em>beside</em> their whites. The last one is the instructive bug: an eye is four
+    concentric <code>SPOTS</code> draws off one lattice, and <code>stretch</code> divides
+    the sample <em>before</em> the lattice walk &mdash; so a different stretch per layer is
+    a different lattice, and the parts of one eye scatter. Every layer of a compound
+    element must share its stretch. Also: at two texels to the body unit, a
+    <code>radius</code> under 0.5 is sub-texel and most cells paint nothing.</li>
+<li><strong>Stained glass blackened the mane, tail and ears</strong>, which are not in its
+    parts list. An <code>invert</code> is applied <em>after</em> the parts test, so an
+    inverted mask with a <code>parts</code> list paints everything it excluded. Fixed here
+    with a leading <code>PARTS</code> mask &mdash; and ten shipped genes have the same
+    shape, recorded on <a href="known-gaps.html">known gaps</a> rather than changed
+    silently.</li>
+<li><strong>Nyxborn&rsquo;s stars</strong> went from 161 texels to blotches to right, on
+    the same sub-texel arithmetic.</li>
+</ul>
+
+<h4>Eight loci that paint nothing</h4>
+
+<p>Swim speed, water breathing, fighter, on death, item drop, mob aura, meat and milk
+volume. Three shapes between them:</p>
+
+<ul>
+<li><strong>Codominant, per-copy percentage</strong> &mdash; swim speed, water breathing,
+    fighter. <code>AbstractMagicFactorGene</code> is
+    <code>AbstractMagicStatGene</code> with the last step replaced: the same genetics, a
+    <code>GeneAbility</code> instead of a number on <code>TraitBuilder</code>. They are two
+    classes on purpose. <code>Traits</code> is four numbers and a condition list, re-derived
+    from the genotype and stored nowhere, and it is the record meant to survive a version
+    port unchanged &mdash; &ldquo;swims faster&rdquo; means nothing without a running game,
+    which is the line <code>GeneAbility</code> exists on.</li>
+<li><strong>Recessive switches</strong> &mdash; on death, item drop, mob aura, meat. Each
+    has a compound heterozygote that says something true rather than arbitrary: two
+    different variants give the wild type, because &ldquo;what happens where this horse
+    died&rdquo; and &ldquo;does a mob want to be near it&rdquo; cannot have two answers.</li>
+<li><strong>A production trait</strong> &mdash; milk volume, codominant and summed, and meat,
+    whose two copies are <em>averaged</em>. The difference is a claim: a percentage is a
+    dose and two copies are twice the push, but the amount of meat on an animal is a
+    property of the animal, and a homozygote is one horse rather than two half-horses.</li>
+</ul>
+
+<h4>The founder rule, and its one exception</h4>
+
+<p>The standing rule for a magical locus with an invisible carrier is that the wild
+population sits on the combinations that <em>show</em> &mdash; item drop, mob aura, meat and
+the coat genes all follow it. <strong>Magic on death does not</strong>, at the
+owner&rsquo;s explicit instruction: carriers only, never affected, so a feral horse never
+craters the ground it dies on. The argument for the standing rule assumes the outcome is
+something you would want to find, and an exploding horse is not; a player who has never
+heard of the gene should not lose a stable to it.</p>
+
+<h4>Six effect verbs, and one thing that was simply wrong</h4>
+
+<p><code>charges</code>, <code>breath</code>, <code>on_death</code>, <code>item_drop</code>,
+<code>mob_aura</code> and <code>combat</code>, all translated and all flagged unverified in
+their own comments. <code>attribute</code> was also finally wired &mdash; it had been parsed
+and logged-once since it was written.</p>
+
+<p><strong>Its list named <code>swim_speed</code>, and there is no such attribute.</strong>
+Vanilla has never had one; the thing that means &ldquo;how fast does this mob move in
+water&rdquo; is <code>water_movement_efficiency</code>, Depth Strider&rsquo;s attribute. It
+had gone unnoticed because the verb was never executed, so the name never had to resolve to
+anything. That is worth remembering about any verb sitting in the format unbuilt.</p>
+
+<p>The interesting one is <code>charges</code>. Milk volume has to reach the milk
+gene&rsquo;s three fillings, and <strong>the two loci cannot see each other&rsquo;s
+epigenome</strong> &mdash; a gene is handed its own values and nobody else&rsquo;s,
+deliberately. So the verb names a yield <em>kind</em> rather than a gene, the milk locus
+tags all three of its fillings <code>"milk"</code>, and a future gene producing some other
+fluid is governed for free instead of by somebody remembering. Charges divide the cooldown
+rather than banking uses, so &ldquo;three times a day&rdquo; is three fillings spread across
+the day &mdash; which needs no new stored state at all.</p>
+
+<h4>Two tripwires fired, both correctly</h4>
+
+<ul>
+<li><strong>A full epigenome is 35&nbsp;459 characters</strong>, past the half-of-cap
+    headroom <code>EpigenomeSizeTest</code> guards. The cap doubled to 131&nbsp;072 on both
+    sides. Every gene with an epigenetic schema costs a segment and the count only goes up,
+    so this will fire again; raising the cap is the right answer rather than trimming a
+    gene to fit a number that was arbitrary to begin with.</li>
+<li><strong>The showcase magical share drifted to 0.667</strong>, just past a 0.66 ceiling.
+    That edge <em>moves upward every time a magical coat gene is registered</em> &mdash; the
+    incidental tail is &ldquo;did any of N genes happen to express&rdquo;, and N only grows.
+    Widened to 0.80 rather than pinned, because pinning it means editing the number on every
+    gene import and the assertion is about the forcing working at all.</li>
+</ul>
+
+<p><strong>The golden coat file is knowingly a run further behind.</strong> Fourteen genes
+change the registry order, which changes every horse&rsquo;s epigenome slots, which changes
+every hash in it &mdash; and regenerating it needs a full <code>:common:test</code>.
+<a href="known-gaps.html">Known gaps</a> has it.</p>
+
 <h3 id="notes-and-thirty-two-2026-09-08">A gene file can hold its own reasons now, and thirty-two genes arrived to test that.</h3>
 
 <p>Two things, and the first is why the second is worth having. The gene format gained a

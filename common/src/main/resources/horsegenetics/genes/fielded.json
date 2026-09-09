@@ -80,18 +80,17 @@
               "high": "$density"
             },
             {
-              "type": "PIGMENT",
+              "type": "LUMA",
               "parts": [
                 "BODY",
                 "NECK",
                 "HEAD",
                 "LEGS"
               ],
-              "channel": "total",
-              "from": 0.06,
-              "to": 0.34,
+              "channel": "white",
+              "from": 0.8,
+              "to": 0.94,
               "spread": 2.5,
-              "invert": true,
               "combine": "MULTIPLY"
             }
           ],
@@ -128,15 +127,14 @@
               "high": "$density"
             },
             {
-              "type": "PIGMENT",
+              "type": "LUMA",
               "parts": [
                 "HAIR"
               ],
-              "channel": "total",
-              "from": 0.06,
-              "to": 0.34,
+              "channel": "white",
+              "from": 0.8,
+              "to": 0.94,
               "spread": 3.5,
-              "invert": true,
               "combine": "MULTIPLY"
             }
           ],
@@ -189,18 +187,17 @@
               "high": "$density"
             },
             {
-              "type": "PIGMENT",
+              "type": "LUMA",
               "parts": [
                 "BODY",
                 "NECK",
                 "HEAD",
                 "LEGS"
               ],
-              "channel": "total",
-              "from": 0.06,
-              "to": 0.34,
+              "channel": "white",
+              "from": 0.8,
+              "to": 0.94,
               "spread": 2.5,
-              "invert": true,
               "combine": "MULTIPLY"
             }
           ],
@@ -239,15 +236,14 @@
               "high": "$density"
             },
             {
-              "type": "PIGMENT",
+              "type": "LUMA",
               "parts": [
                 "HAIR"
               ],
-              "channel": "total",
-              "from": 0.06,
-              "to": 0.34,
+              "channel": "white",
+              "from": 0.8,
+              "to": 0.94,
               "spread": 3.5,
-              "invert": true,
               "combine": "MULTIPLY"
             }
           ],

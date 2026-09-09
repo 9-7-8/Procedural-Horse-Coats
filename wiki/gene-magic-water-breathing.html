@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Magic water breathing &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow magical">Magical gene <span class="sep">/</span> no coat effect</p>
+
+<h1>Magic water breathing</h1>
+
+<p class="lede">
+    How long the horse lasts under water before it starts to drown. The
+    <em>graded</em> counterpart of the <code>underwater_breathing</code>
+    traversal flag, which is absolute &mdash; and independent of
+    <a href="gene-magic-swim-speed.html">magic swim speed</a>, because crossing
+    a river quickly and surviving the bottom of a lake are different problems.
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<h2 id="inheritance">Crossing two of them</h2>
+
+<div class="gene-inheritance" data-gene="horsegenetics.magic_water_breathing"></div>
+
+<h2 id="what">What it does</h2>
+
+<p>
+    A gilled horse holds its breath longer &mdash; one copy is worth about a
+    quarter more time, two are worth half again and often much more. A
+    shallow-lunged horse drowns sooner by the same measure. Neither swims any
+    faster; this is lung capacity, not propulsion.
+</p>
+
+<p>
+    It is a real hazard in one direction and a real capability in the other, and
+    both are completely invisible on dry land. An owner usually finds out which
+    one they have the first time it matters.
+</p>
+
+<h2 id="wild">What you can catch</h2>
+
+<p>
+    About a quarter of wild horses carry one copy, split evenly between the two
+    alleles, and none carries two. A horse that can genuinely be ridden along a
+    lake bed is a bred animal.
+</p>
+
+<h2 id="health">Health</h2>
+
+<p>
+    A doubled shallow-lunged horse drowns markedly faster than an ordinary one
+    and there is nothing about it to see. It is not a disorder &mdash; the
+    server&rsquo;s health switch does not govern it, because a short breath is
+    the rule of this gene rather than a defect &mdash; but it is the one
+    combination here that can kill a horse its owner was not worried about.
+</p>
+
+<h2 id="carrot">Its gene carrot</h2>
+
+<!-- The recipe, read off the mod at run time - the rarity tier is the recipe's
+     price, and a price written into fifty pages goes stale silently.
+     See wiki/gene-carrot/gene-carrot.js. -->
+
+<div class="gene-carrot" data-gene="horsegenetics.magic_water_breathing"></div>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd><code>horsegenetics.magic_water_breathing</code></dd></div>
+    <div><dt>Alleles</dt><dd><code>Gil</code> gilled, <code>Shal</code> shallow-lunged, <code>n</code></dd></div>
+    <div><dt>Priority</dt><dd>145 &mdash; the magical body-stat band</dd></div>
+    <div><dt>Reaches the game as</dt><dd>a <code>breath</code> effect</dd></div>
+    <div><dt>Coat effect</dt><dd><strong>none, ever</strong></dd></div>
+</dl>
+
+<div class="note warn">
+    <span class="label">Newly built, not yet play-tested</span>
+    <p>
+        Nothing on this page has been seen in game. The translator was written
+        against the 26.1.2 sources and is flagged as unverified in its own
+        comments. Checklist on <a href="verification.html">To be verified</a>.
+    </p>
+</div>
+
+<h2 id="graded">Graded, beside an absolute flag</h2>
+
+<p>
+    The format already had <code>underwater_breathing</code>: a traversal flag
+    that refills the horse&rsquo;s air every tick and can never be beaten. This
+    locus is the dial, and the two are meant to coexist. A horse that cannot
+    drown does not care how slowly it would have, and the composition needs no
+    special case &mdash; the flag simply wins by refilling.
+</p>
+
+<h2 id="accumulator">One expression, both directions</h2>
+
+<p>
+    Vanilla takes one point of air per submerged tick. For the horse to last
+    <code>factor</code> times as long the drain has to be
+    <code>1 / factor</code>, so every submerged tick the translator hands back
+    <code>1 - 1 / factor</code> &mdash; positive for a long-breathed horse,
+    negative for a short-breathed one. One line covers both directions, which is
+    the reason to write it this way rather than as two cases.
+</p>
+
+<div class="codebox">
+<div class="filename">neoforge/server/GeneAbilityHandler.java</div>
+<pre><code class="language-java">double owed = BREATH_DEBT.getOrDefault(id, 0.0) + (1.0 - 1.0 / b.factor());
+int whole = (int) owed;
+if (whole != 0) {
+    horse.setAirSupply(Math.min(horse.getMaxAirSupply(), horse.getAirSupply() + whole));
+    owed -= whole;
+}
+BREATH_DEBT.put(id, owed);</code></pre>
+</div>
+
+<p>
+    Air is an <code>int</code> and that quantity is not, so the fraction
+    accumulates per horse until it is worth a whole point. The map is cleared
+    when the horse surfaces and when it leaves the level.
+</p>
+
+<h2 id="oxygen">Why not the <code>oxygen_bonus</code> attribute</h2>
+
+<p>
+    Vanilla has one, and it does very nearly this: it gives a
+    <code>1 / (bonus + 1)</code> chance per tick of not consuming air, which
+    multiplies breath time by <code>bonus + 1</code>. It was rejected for two
+    reasons.
+</p>
+
+<ul>
+    <li>It reaches <strong>one direction only</strong>. There is no negative
+        bonus that drowns a horse faster, so the shallow-lunged allele would
+        have needed a second mechanism anyway.</li>
+    <li>It <strong>rolls a die every tick</strong>, so two horses with identical
+        genotypes would drown at different times. This locus is meant to be bred
+        for, and a bred number that does not hold still is not one.</li>
+</ul>
+
+</section>
+
+<section class="tab-panel" data-tab="science">
+
+<h2 id="pair">The pair it forms with swim speed</h2>
+
+<p>
+    Two loci, independent draws, and between them they describe every useful
+    kind of water horse: the ferry (fast, ordinary lungs), the diver (ordinary
+    speed, long breath), and the one that is both, which nobody catches.
+</p>
+
+<p>
+    They were deliberately not built as one gene with two knobs. A single locus
+    would mean the two facts were inherited together for ever, and the
+    interesting horses are exactly the ones where they came apart &mdash; a
+    beautiful swimmer that cannot stay under, or a horse that can walk a lake
+    bed at a crawl.
+</p>
+
+<h2 id="drift">What breeding does to it</h2>
+
+<p>
+    The percentage on each copy drifts slightly at every breeding, so a line
+    selected for long breath keeps improving on the horses it started from
+    rather than converging on them. That is the same mechanism every epigenetic
+    locus here uses, and it is why the wild range is a starting point rather
+    than a ceiling.
+</p>
+
+</section>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="gene-magic-swim-speed.html">Magic swim speed</a>
+        <a href="gene-effects.html">The effects block</a>
+        <a href="horse-traits.html">The wider trait architecture</a>
+        <a href="verification.html">What to check in-game</a>
+    </div>
+    Source: <code>common/genetics/genes/MagicWaterBreathingGene.java</code>,
+    <code>common/genetics/genes/AbstractMagicFactorGene.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+<script defer src="gene-carrot/gene-carrot.js"></script>
+<script defer src="gene-inheritance/gene-inheritance.js"></script>
+</body>
+</html>

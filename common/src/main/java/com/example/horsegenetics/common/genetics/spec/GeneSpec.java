@@ -391,6 +391,27 @@ public record GeneSpec(
         /** Coverage read off the pigment the earlier genes left - "find the black". */
         PIGMENT,
         /**
+         * Coverage read off what the coat actually <b>looks like</b> - the
+         * colour phase 2 resolved through the {@code GradientLut}, plus whatever
+         * the magical genes painted before this one.
+         *
+         * <p>{@link #PIGMENT} and this are not two spellings of one idea. Pigment
+         * is <i>melanin</i>: a pair of levels that mean nothing until a gradient
+         * chart turns them into a colour. "Black" and "white" are facts about
+         * that colour, not about the levels - the LUT locus can swap the chart
+         * for one whose black corner is violet, and a horse resolved through it
+         * has exactly the same pigment and is no longer black anywhere. A gene
+         * that says "cover the black parts" has to ask the question the viewer
+         * asks, which is this one.
+         *
+         * <p>It reads {@link com.example.horsegenetics.common.coat.pattern.ColorView#visible}
+         * - the composited appearance - so a texel the natural phase left bare
+         * reads as the white template rather than as the transparent black
+         * underneath it. Magical phase only: phase 1 has no colour yet, and the
+         * overlay pass has no accumulator left, so the parser refuses it in both.
+         */
+        LUMA,
+        /**
          * Discrete round or oval <b>elements</b> on a jittered lattice - a spot
          * field. Unlike {@link #DAPPLES}, which fills the horse with cells and
          * leaves a web between them, this leaves most of the horse bare and puts
@@ -422,6 +443,26 @@ public record GeneSpec(
          * parallel ribbons instead of one edge.
          */
         WAVES,
+        /**
+         * The <b>rim of each body part's box</b>, on the face this texel sits
+         * on - a wireframe of the horse.
+         *
+         * <p>It is the one mask that asks about the <i>model</i> rather than
+         * about body space. Every other shape here is a field sampled at a
+         * point, and a field has no idea where the horse stops; a Minecraft
+         * horse is a handful of boxes, and the line where two of a box's faces
+         * meet is the only thing in this geometry that reads as an <b>edge</b>
+         * to a viewer. So this measures, in the two axes that span the face,
+         * how far the texel is from the nearest of that face's four
+         * boundaries.
+         *
+         * <p>The consequence worth knowing before using it: it outlines
+         * <b>every</b> box, not the silhouette. A leg gets a rectangle round
+         * each of its faces, including the one buried in the barrel. That is
+         * the honest thing for a mask with no visibility test, and on a boxy
+         * model it is also what a wireframe is supposed to look like.
+         */
+        EDGE,
         /**
          * <b>Polygons that tile</b>, each filled solid, separated by a channel
          * of even width - {@code BodyNoise.cellEdge}. A giraffe, a cracked

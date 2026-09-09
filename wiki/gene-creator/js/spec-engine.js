@@ -183,7 +183,7 @@ window.HG = window.HG || {};
 
   // ---- masks -----------------------------------------------------------
 
-  function maskCoverage(mask, values, skin, part, point, coat, px, py, legIndex, seedBase) {
+  function maskCoverage(mask, values, skin, part, face, point, coat, colour, px, py, legIndex, seedBase) {
     var parts = HG.schema.expandParts(mask.parts);
     if (parts.length && mask.type !== "PARTS" && parts.indexOf(part) < 0) return 0;
 
@@ -245,6 +245,18 @@ window.HG = window.HG || {};
       }
       case "PIGMENT":
         return pigmentCoverage(mask, values, coat, px, py, legIndex);
+      case "LUMA":
+        return lumaCoverage(mask, values, colour, px, py, legIndex);
+      case "EDGE": {
+        // The rim of this part's box, in the two axes that span the face - the
+        // third is the face's normal and is constant across it. See the Java.
+        var eb = geo.bounds(skin, part);
+        var ew = Math.max(1e-6, get(values, mask.width, 0.6, legIndex));
+        var es = Math.max(1e-6, get(values, mask.softness, 0.25, legIndex));
+        var ed = Math.min(edgeDistance(point, eb, geo.spanA(face)),
+          edgeDistance(point, eb, geo.spanB(face)));
+        return 1 - smoothstep(ew, ew + es, ed);
+      }
       case "SPOTS": {
         var sp = getSeed(values, mask.seed, seedBase);
         var spacing4 = Math.max(0.05, get(values, mask.spacing, 4.0, legIndex));
@@ -399,12 +411,14 @@ window.HG = window.HG || {};
    * largest coverage in a disc. It runs after `invert` - see the Java for why
    * that is the whole design.
    */
-  function spreadMask(mask, values, skin, coat, part, point, px, py, legIndex, c) {
-    if (mask.type !== "PIGMENT" || c >= 1) return c;
+  function spreadMask(mask, values, skin, coat, colour, part, face, point, px, py, legIndex, c) {
+    var luma = mask.type === "LUMA";
+    if ((mask.type !== "PIGMENT" && !luma) || c >= 1) return c;
     var parts = HG.schema.expandParts(mask.parts);
     if (parts.length && parts.indexOf(part) < 0) return c;
     var radius = get(values, mask.spread, 0, legIndex);
     if (radius <= 0) return c;
+    var from = mask.spreadFrom || "any";
     // The radius is in BODY units and the test is done in body space - a disc
     // measured in texels leaks across a UV seam. See the Java.
     var r = Math.ceil(radius * geo.TEXELS_PER_UNIT) + 1, rr = radius * radius, best = c;
@@ -415,7 +429,9 @@ window.HG = window.HG || {};
         if (!at) continue;
         var bx = at.point.x - point.x, by = at.point.y - point.y, bz = at.point.z - point.z;
         if (bx * bx + by * by + bz * bz > rr) continue;
-        var n = pigmentCoverage(mask, values, coat, qx, qy, legIndex);
+        if (!onSide(from, bx, by)) continue;
+        var n = luma ? lumaCoverage(mask, values, colour, qx, qy, legIndex)
+          : pigmentCoverage(mask, values, coat, qx, qy, legIndex);
         if (mask.invert) n = 1 - n;
         if (n > best) { best = n; if (best >= 1) return 1; }
       }
@@ -428,6 +444,55 @@ window.HG = window.HG || {};
     return smoothstep(get(values, mask.from, 0.5, legIndex),
       get(values, mask.to, 1, legIndex),
       pigmentReading(coat, mask.channel || "darkness", px, py));
+  }
+
+  /**
+   * Does a candidate `(bx, by)` away count, given which side the growth may
+   * come from? A candidate ABOVE has by > 0, so "above" grows the selection
+   * downward. Strict inequalities - see the Java.
+   */
+  function onSide(from, bx, by) {
+    if (from === "above") return by > 0;
+    if (from === "below") return by < 0;
+    if (from === "ahead") return bx > 0;
+    if (from === "behind") return bx < 0;
+    return true;
+  }
+
+  /** How far `point` is from the nearer of this part's two bounds along `axis`. */
+  function edgeDistance(point, b, axis) {
+    var c = axis === "X" ? point.x : axis === "Y" ? point.y : point.z;
+    return Math.min(c - b.min(axis), b.max(axis) - c);
+  }
+
+  /** A LUMA mask at one texel, before invert and before spread. */
+  function lumaCoverage(mask, values, colour, px, py, legIndex) {
+    if (!colour) return 0; // no accumulator in this phase - the parser refuses to get here
+    return smoothstep(get(values, mask.from, 0.5, legIndex),
+      get(values, mask.to, 1, legIndex),
+      lumaReading(colour, mask.channel || "dark", px, py));
+  }
+
+  /**
+   * One channel of the RESOLVED COLOUR, as a LUMA mask reads it - the port of
+   * SpecPainter.lumaReading. Every reading comes off `visible`, so a texel the
+   * natural phase left bare reads as the white template a viewer sees.
+   */
+  function lumaReading(colour, channel, px, py) {
+    var r = colour.visible(px, py, 0) / 255;
+    var g = colour.visible(px, py, 1) / 255;
+    var b = colour.visible(px, py, 2) / 255;
+    var light = clamp01(0.2126 * r + 0.7152 * g + 0.0722 * b);
+    if (channel === "light") return light;
+    if (channel === "white") return clamp01(Math.min(r, Math.min(g, b)));
+    if (channel === "saturation") {
+      var max = Math.max(r, Math.max(g, b));
+      return max <= 0 ? 0 : clamp01((max - Math.min(r, Math.min(g, b))) / max);
+    }
+    if (channel === "red") return clamp01(r);
+    if (channel === "green") return clamp01(g);
+    if (channel === "blue") return clamp01(b);
+    return clamp01(1 - light);
   }
 
   /** One channel of the coat, as a PIGMENT mask reads it. */
@@ -452,15 +517,15 @@ window.HG = window.HG || {};
   // coverage starts at 1, so either returns 1 and the layer covers everything.
   // The creator cannot write one (the picker defaults to MULTIPLY), so this
   // mirrors the arithmetic and leaves the refusing to GeneSpecParser.
-  function coverage(layer, values, skin, part, point, coat, px, py, legIndex, fallbackSeed) {
+  function coverage(layer, values, skin, part, face, point, coat, colour, px, py, legIndex, fallbackSeed) {
     var acc = 1;
     var masks = layer.masks || [];
     for (var i = 0; i < masks.length; i++) {
       var mask = masks[i];
-      var c = maskCoverage(mask, values, skin, part, point, coat, px, py, legIndex,
+      var c = maskCoverage(mask, values, skin, part, face, point, coat, colour, px, py, legIndex,
         noise.xor(fallbackSeed, noise.mul(noise.fromInt(i), noise.K1)));
       if (mask.invert) c = 1 - c;
-      c = spreadMask(mask, values, skin, coat, part, point, px, py, legIndex, c);
+      c = spreadMask(mask, values, skin, coat, colour, part, face, point, px, py, legIndex, c);
       switch (mask.combine || "MULTIPLY") {
         case "MAX": acc = Math.max(acc, c); break;
         case "MIN": acc = Math.min(acc, c); break;
@@ -726,7 +791,7 @@ window.HG = window.HG || {};
       var seed = layerSeed(spec, i);
       geo.forEachTexel(skin, function (px, py, part, face, point) {
         var leg = geo.legIndex(part);
-        var k = coverage(layer, values, skin, part, point, asRead, px, py, leg, seed);
+        var k = coverage(layer, values, skin, part, face, point, asRead, null, px, py, leg, seed);
         if (k > 0) applyPigment(layer.op, values, field, px, py, leg, k);
       });
     });
@@ -739,7 +804,7 @@ window.HG = window.HG || {};
       var seed = layerSeed(spec, i);
       geo.forEachTexel(skin, function (px, py, part, face, point) {
         var leg = geo.legIndex(part);
-        var k = coverage(layer, values, skin, part, point, coat, px, py, leg, seed);
+        var k = coverage(layer, values, skin, part, face, point, coat, colour, px, py, leg, seed);
         if (k > 0) applyColour(layer.op, values, delta, colour, skin, part, point, px, py, leg, k, seed);
       });
     });
@@ -747,13 +812,14 @@ window.HG = window.HG || {};
   }
 
   /** Coverage of one layer at every texel - what the "coverage" overlay draws. */
-  function coverageMap(spec, layers, layerIndex, values, skin, coat) {
+  function coverageMap(spec, layers, layerIndex, values, skin, coat, colour) {
     var layer = layers[layerIndex];
     var seed = layerSeed(spec, layerIndex);
     var out = new Float32Array(geo.SHEET_SIZE * geo.SHEET_SIZE);
     geo.forEachTexel(skin, function (px, py, part, face, point) {
       out[py * geo.SHEET_SIZE + px] =
-        coverage(layer, values, skin, part, point, coat, px, py, geo.legIndex(part), seed);
+        coverage(layer, values, skin, part, face, point, coat, colour || null, px, py,
+          geo.legIndex(part), seed);
     });
     return out;
   }

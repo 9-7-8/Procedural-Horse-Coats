@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Magic meat &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow magical">Magical gene <span class="sep">/</span> no coat effect</p>
+
+<h1>Magic meat</h1>
+
+<p class="lede">
+    How much meat the horse leaves. <strong>Additive</strong>, unlike
+    <a href="gene-magic-item-drop.html">magic item drop</a> &mdash; a meaty
+    horse still drops whatever that locus says, and the meat is on top of it.
+    How much is a number written on the allele copy rather than on the allele.
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<h2 id="inheritance">Crossing two of them</h2>
+
+<div class="gene-inheritance" data-gene="horsegenetics.magic_meat"></div>
+
+<h2 id="what">What it does</h2>
+
+<p>
+    Two meaty copies and the horse drops meat as well as everything else it
+    would have dropped. One copy shows nothing, so a carrier is indistinguishable
+    from a horse that has never had the allele.
+</p>
+
+<p>
+    How much is not fixed by the gene. Each copy carries a number &mdash; two to
+    seven for a wild one &mdash; and the two copies are <strong>averaged</strong>.
+    A foal inherits its parents&rsquo; numbers rather than rolling fresh ones,
+    and the numbers drift slightly at every breeding, so a line bred for yield
+    keeps improving on the horses it started from.
+</p>
+
+<h2 id="stacking">It stacks with the other drop locus</h2>
+
+<p>
+    A horse can be diamond-bearing <em>and</em> meaty: the diamonds replace the
+    leather, the meat is added, and both land. That cross is the reason the two
+    are separate genes.
+</p>
+
+<h2 id="health">Health</h2>
+
+<p>
+    None. A meaty horse is an ordinary horse in every way that can be observed
+    while it is alive.
+</p>
+
+<h2 id="carrot">Its gene carrot</h2>
+
+<!-- The recipe, read off the mod at run time - the rarity tier is the recipe's
+     price, and a price written into fifty pages goes stale silently.
+     See wiki/gene-carrot/gene-carrot.js. -->
+
+<div class="gene-carrot" data-gene="horsegenetics.magic_meat"></div>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd><code>horsegenetics.magic_meat</code></dd></div>
+    <div><dt>Alleles</dt><dd><code>Mty</code> meaty, <code>n</code></dd></div>
+    <div><dt>Priority</dt><dd>132 &mdash; the magical utility band, beside milk</dd></div>
+    <div><dt>Reaches the game as</dt><dd>an <code>item_drop</code> effect with <code>drop: meat</code></dd></div>
+    <div><dt>Coat effect</dt><dd><strong>none, ever</strong></dd></div>
+</dl>
+
+<div class="note warn">
+    <span class="label">Newly built, not yet play-tested</span>
+    <p>
+        Nothing on this page has been seen in game. The translator was written
+        against the 26.1.2 sources and is flagged as unverified in its own
+        comments. Checklist on <a href="verification.html">To be verified</a>.
+    </p>
+</div>
+
+<h2 id="average">Averaged, not summed</h2>
+
+<p>
+    Every other epigenetic locus here that reads both copies <em>adds</em> them.
+    This one averages, and the difference is a claim about what the number
+    means.
+</p>
+
+<p>
+    A per-copy percentage on the body-stat genes is a <em>dose</em>: two copies
+    of an allele that each push the horse are genuinely twice the push. The
+    quantity of meat on an animal is not a dose, it is a property of the animal
+    &mdash; a homozygote is one horse, not two half-horses. Summing would have
+    made a homozygote from two average parents better than either parent for a
+    reason that is arithmetic rather than biological.
+</p>
+
+<div class="codebox">
+<div class="filename">common/genetics/genes/MagicMeatGene.java</div>
+<pre><code class="language-java">double average = (epigenetics.copy(0).get(YIELD) + epigenetics.copy(1).get(YIELD)) / 2.0;
+int count = Math.max(1, (int) Math.round(average));
+return List.of(new GeneAbility.ItemDrop("meat", count, count,
+        GeneAbility.Condition.ALWAYS, 1));</code></pre>
+</div>
+
+<p>
+    Floored at one, because &ldquo;meaty, and drops nothing&rdquo; is not an
+    outcome anybody means.
+</p>
+
+<h2 id="verb">It shares a verb with the treasure locus</h2>
+
+<p>
+    Both emit <code>item_drop</code>; this one names <code>meat</code>, which is
+    the one value that adds rather than replaces. Sharing the verb is what keeps
+    the vocabulary small, and the translator has one drop path rather than two.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="science">
+
+<h2 id="drift">A production trait, behaving like one</h2>
+
+<p>
+    Averaged copies, inherited numbers, and a small drift per generation is the
+    shape of a real production trait: selection works, it works slowly, and the
+    ceiling is wherever the breeder stops. It is the same machinery
+    <a href="gene-magic-milk-volume.html">milk volume</a> uses, and the two are
+    meant to be recognisable as the same kind of gene.
+</p>
+
+<h2 id="recessive">Why the carrier is silent</h2>
+
+<p>
+    A dose-dependent version &mdash; one copy for half the meat &mdash; was the
+    obvious alternative and would have made the locus much easier to breed and
+    much less interesting to own. A silent carrier means a herd&rsquo;s yield
+    potential is invisible until two carriers meet, which is what makes the
+    <a href="carrots.html">gene database</a> worth building for a farmer rather
+    than only for a collector.
+</p>
+
+</section>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="gene-magic-item-drop.html">Magic item drop</a>
+        <a href="gene-magic-milk-volume.html">Magic milk volume</a>
+        <a href="gene-effects.html">The effects block</a>
+        <a href="verification.html">What to check in-game</a>
+    </div>
+    Source: <code>common/genetics/genes/MagicMeatGene.java</code>,
+    <code>neoforge/server/GeneDeathHandler.java</code>
+</div>
+
+</article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+<script defer src="gene-carrot/gene-carrot.js"></script>
+<script defer src="gene-inheritance/gene-inheritance.js"></script>
+</body>
+</html>

@@ -1,0 +1,269 @@
+{
+  "format": 3,
+  "key": "horsegenetics.stained_glass",
+  "name": "Stained Glass",
+  "phase": "magical",
+  "priority": 382,
+  "rarity": "RARE",
+  "blurb": "Black leading in straight lines across the horse, and a quarter-strength wash of colour in each pane between them. Which colours is the allele's business rather than the horse's - this is the one locus where the palette is inherited as an allele and not written on the copy.",
+  "alleles": [
+    {
+      "token": "Sgv",
+      "label": "Stained glass, violet (Sgv)"
+    },
+    {
+      "token": "Sgm",
+      "label": "Stained glass, meadow (Sgm)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "paneSeed",
+      "type": "seed"
+    },
+    {
+      "name": "paneScale",
+      "min": 3.6,
+      "max": 6.4
+    },
+    {
+      "name": "leading",
+      "min": 0.55,
+      "max": 0.85
+    }
+  ],
+  "expressions": [
+    {
+      "id": "violet",
+      "name": "Violet glass",
+      "description": "Two violet copies. The leading is straight-sided everywhere - the polygons are an unwarped tiling, so every edge is a line and the corners meet three at a time - and the panes between it carry a light wash of blue, pink and purple. Each pane takes one colour whole, because the palette is read off the same lattice the leading was cut from: the colour and the shape are the same cell.",
+      "when": {
+        "Sgv": 2
+      },
+      "layers": [
+        {
+          "name": "the panes, each washed a quarter of the way to its own colour",
+          "masks": [
+            {
+              "type": "CRACKLE",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE",
+                "LEGS"
+              ],
+              "seed": "$paneSeed",
+              "scale": "$paneScale",
+              "gap": "$leading",
+              "warp": 0.0,
+              "softness": 0.06
+            }
+          ],
+          "op": {
+            "type": "PALETTE",
+            "colors": [
+              "#4a7ce8",
+              "#e86fbb",
+              "#8b52d6"
+            ],
+            "seed": "$paneSeed",
+            "scale": "$paneScale",
+            "strength": 25
+          }
+        },
+        {
+          "name": "the leading between them",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE",
+                "LEGS"
+              ]
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$paneSeed",
+              "scale": "$paneScale",
+              "gap": "$leading",
+              "warp": 0.0,
+              "softness": 0.06,
+              "invert": true
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#08080c",
+            "strength": 96,
+            "opacity": 100
+          }
+        }
+      ]
+    },
+    {
+      "id": "meadow",
+      "name": "Meadow glass",
+      "description": "Two meadow copies. The same leading, and panes of green, yellow and white instead. Nothing else about the gene changes - the two alleles differ in three colours and in nothing at all besides.",
+      "when": {
+        "Sgm": 2
+      },
+      "layers": [
+        {
+          "name": "the panes, each washed a quarter of the way to its own colour",
+          "masks": [
+            {
+              "type": "CRACKLE",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE",
+                "LEGS"
+              ],
+              "seed": "$paneSeed",
+              "scale": "$paneScale",
+              "gap": "$leading",
+              "warp": 0.0,
+              "softness": 0.06
+            }
+          ],
+          "op": {
+            "type": "PALETTE",
+            "colors": [
+              "#4fbf5c",
+              "#e8d24a",
+              "#f4f2ec"
+            ],
+            "seed": "$paneSeed",
+            "scale": "$paneScale",
+            "strength": 25
+          }
+        },
+        {
+          "name": "the leading between them",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE",
+                "LEGS"
+              ]
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$paneSeed",
+              "scale": "$paneScale",
+              "gap": "$leading",
+              "warp": 0.0,
+              "softness": 0.06,
+              "invert": true
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#08080c",
+            "strength": 96,
+            "opacity": 100
+          }
+        }
+      ]
+    },
+    {
+      "id": "both",
+      "name": "Both windows",
+      "description": "One of each. Neither allele is dominant to the other, so the horse gets a window cut the same way with all six colours in the tray - the only way to see blue and yellow in one coat, and something a breeder has to make on purpose because no wild horse is born with this pair.",
+      "when": {
+        "Sgv": 1,
+        "Sgm": 1
+      },
+      "layers": [
+        {
+          "name": "the panes, each washed a quarter of the way to its own colour",
+          "masks": [
+            {
+              "type": "CRACKLE",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE",
+                "LEGS"
+              ],
+              "seed": "$paneSeed",
+              "scale": "$paneScale",
+              "gap": "$leading",
+              "warp": 0.0,
+              "softness": 0.06
+            }
+          ],
+          "op": {
+            "type": "PALETTE",
+            "colors": [
+              "#4a7ce8",
+              "#e86fbb",
+              "#8b52d6",
+              "#4fbf5c",
+              "#e8d24a",
+              "#f4f2ec"
+            ],
+            "seed": "$paneSeed",
+            "scale": "$paneScale",
+            "strength": 25
+          }
+        },
+        {
+          "name": "the leading between them",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE",
+                "LEGS"
+              ]
+            },
+            {
+              "type": "CRACKLE",
+              "seed": "$paneSeed",
+              "scale": "$paneScale",
+              "gap": "$leading",
+              "warp": 0.0,
+              "softness": 0.06,
+              "invert": true
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#08080c",
+            "strength": 96,
+            "opacity": 100
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "Nothing. Both variants are recessive to the wild type, so a single copy of either is silent and a carrier looks like any other horse.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Sgv/Sgv": 0.06,
+    "Sgm/Sgm": 0.06,
+    "n/n": 99.88
+  }
+}

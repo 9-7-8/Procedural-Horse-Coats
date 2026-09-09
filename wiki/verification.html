@@ -35,6 +35,106 @@
     </p>
 </div>
 
+<h2 id="mechanical-genes">&sect;0-AR &mdash; Fourteen genes, two new masks and seven newly-executed effect verbs (2026-09-08, NOT looked at)</h2>
+
+<p>
+    <strong>Six of the fourteen have been rendered as an icon and looked at; none has ever
+    been in a world.</strong> The eight mechanical loci paint nothing at all, so an icon
+    could not have shown them anything &mdash; every claim below rests on code that
+    compiles and on nothing else.
+</p>
+
+<h3>The effect verbs, which are the risky half</h3>
+
+<p>
+    Six verbs are new and a seventh (<code>attribute</code>) went from &ldquo;parsed and
+    logged once&rdquo; to actually executing. Each touches a system nothing else in the mod
+    touches, and each is flagged unverified in its own comment.
+</p>
+
+<ul>
+    <li><strong>Does an attribute modifier come off again?</strong> Spawn a horse with
+        <a href="gene-magic-swim-speed.html">magic swim speed</a>, swim it, then get it out
+        of the water &mdash; and confirm it is not permanently faster. The apply path only
+        runs while the condition holds, so nothing but
+        <code>GeneAbilityHandler.clearAttributes</code> ever removes a modifier, and that
+        method has never run. Check the reverse too: two genes moving the same attribute
+        must not strip each other, because the ids are gene-scoped and the sweep only
+        spares ids the horse is currently asking for.</li>
+    <li><strong>Does the breath accumulator drown anything?</strong> Hold a
+        <code>Shal/Shal</code> horse under water and a <code>Gil/Gil</code> one, and time
+        them against an ordinary horse. The code assumes vanilla clamps
+        <code>setAirSupply</code> at the top and reads a negative supply as drowning; both
+        are guesses from the sources. A horse that never drowns and a horse that drowns
+        instantly are the two failure shapes.</li>
+    <li><strong>Does the mob-aura shove actually move anything?</strong> Repel is a velocity
+        nudge plus a cleared target, not a goal &mdash; and a pathfinding mob may simply
+        walk straight back through it. Stand a <code>Wrd/Wrd</code> horse in front of
+        zombies at night. Then the other way: a <code>Bai/Bai</code> horse should pull
+        every hostile in sight off its rider, which is the one on this locus that could get
+        somebody killed.</li>
+    <li><strong>Death: the ground and the drops, separately.</strong> Kill a
+        <code>Xpl/Xpl</code> horse (an explosion the size of a creeper&rsquo;s), a
+        <code>Lav/Lav</code> one <em>standing on a floor somebody built</em> (the fluid
+        must refuse to eat it), and a <code>Dia/Dia</code> one (diamonds instead of
+        leather, not as well as). Then a horse that is both volatile and diamond-bearing:
+        two loci, both firing, is the cross the split exists for.</li>
+    <li><strong>The clone egg.</strong> Kill an <code>Egg/Egg</code> horse and use what it
+        drops. The horse that comes back must be a <em>clone</em> &mdash; same coat, same
+        name-worthy details, same numbers &mdash; and not merely a horse with the same
+        alleles. If the epigenome did not survive the round trip it will look subtly
+        different, which is exactly the failure that is easy to miss.</li>
+    <li><strong>Milk volume.</strong> A <code>Mlk/Mlk</code> mare should fill several times
+        a day rather than once. Charges divide the cooldown, so the check is that the
+        second filling is possible after a fraction of a day &mdash; not that four come at
+        once. Confirm it reaches a <em>water</em>-bearing horse too, which is the whole
+        point of naming a kind rather than a gene.</li>
+    <li><strong>Combat.</strong> A <code>Gld/Gld</code> horse should hit measurably harder
+        than an ordinary one, and an ordinary one should now hit for 3 rather than the 4 it
+        used to &mdash; the baseline moved onto the gene.</li>
+</ul>
+
+<h3>The coat genes, which have been seen only as one icon each</h3>
+
+<ul>
+    <li><strong><a href="gene-nyxborn.html">Nyxborn</a> on things that are not a tobiano
+        bay.</strong> The icon is one horse. What it has to do on a chestnut (nothing much
+        &mdash; a chestnut is neither dark nor white by the chart), on a dominant white
+        (the whole horse goes black and then stars) and on a grey mid-way through greying
+        is unverified, and the last one is the interesting case because a grey drifts
+        through the <code>white</code> threshold as it ages.</li>
+    <li><strong><a href="gene-tron.html">Tron</a> in a dark stable.</strong> Its tube is an
+        <code>emissive</code> layer, so it should hold its colour at night &mdash; that is
+        a client render path and the icon baker cannot see it at all.</li>
+    <li><strong><a href="gene-ocular.html">Ocular</a> from the side, on a moving
+        horse.</strong> The eyes are built from four concentric draws off one lattice and
+        they were wrong twice before the icon looked right; whether they still read as eyes
+        on a neck that is turning is a different question from whether they read on a still
+        three-quarter view.</li>
+    <li><strong><a href="gene-shadowcreature.html">Shadowcreature</a>&rsquo;s eyes and
+        light.</strong> The gold-eyes-no-sclera path and the level-5 glow are both
+        overlay/ability code the icon does not exercise.</li>
+    <li><strong><a href="gene-stained-glass.html">Stained glass</a> at 25%.</strong> The
+        wash is faint by design &mdash; it was asked for at exactly a quarter &mdash; and on
+        a dark bay it reads as barely-tinted panes. Worth confirming that is wanted rather
+        than a number to raise.</li>
+    <li><strong><a href="gene-bloodstained.html">Bloodstained</a> on a horse with no white
+        at all.</strong> On a solid chestnut it correctly does nothing, because a red
+        marking with nothing under it has no bottom edge. On a bay it stains where the
+        black points meet the red. Both were measured; neither was looked at.</li>
+</ul>
+
+<h3>The four genes that changed underneath</h3>
+
+<p>
+    <a href="gene-fielded.html">Fielded</a>, <a href="gene-yalia.html">yalia</a>,
+    <a href="gene-voided.html">voided</a> and <a href="gene-opalized.html">opalized</a> were
+    moved from asking the pigment to asking the gradient chart. <strong>They will look
+    different, and on cream coats they will look noticeably different</strong> &mdash; a
+    perlino used to read as largely white and now reads as largely cream. Compare them
+    against the previous icons before assuming a regression.
+</p>
+
 <h2 id="jar-0-2-0">&sect;0-AQ &mdash; The 0.2.0 jar, loaded somewhere that is not a dev run (2026-09-08, NOT looked at)</h2>
 
 <p>

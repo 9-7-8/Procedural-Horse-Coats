@@ -1,0 +1,290 @@
+{
+  "format": 3,
+  "key": "horsegenetics.ocular",
+  "name": "Ocular",
+  "phase": "magical",
+  "priority": 320,
+  "rarity": "EPIC",
+  "blurb": "Eyes down the horse's neck - open ones, with a white, an iris in the line's own colour and a pupil. They are drawn off a single lattice, so every one of them is a real eye and not a smear that happens to be round.",
+  "alleles": [
+    {
+      "token": "Ocu",
+      "label": "Ocular (Ocu)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "eyeSeed",
+      "type": "seed"
+    },
+    {
+      "name": "spacing",
+      "min": 3.4,
+      "max": 4.0
+    },
+    {
+      "name": "socket",
+      "min": 1.8,
+      "max": 2.1
+    },
+    {
+      "name": "sclera",
+      "min": 1.42,
+      "max": 1.66
+    },
+    {
+      "name": "iris",
+      "min": 0.72,
+      "max": 0.86
+    },
+    {
+      "name": "pupil",
+      "min": 0.38,
+      "max": 0.48
+    },
+    {
+      "name": "hue",
+      "min": 0.0,
+      "max": 360.0
+    }
+  ],
+  "expressions": [
+    {
+      "id": "many",
+      "name": "Many eyes",
+      "description": "Two copies, and the neck is crowded with them - most of the lattice carries an eye. Each is built from one cell of a single scatter, drawn four times at shrinking radius: a darker socket, the white, the iris and the pupil, concentric because they are the same cell rather than because anything lined them up. The iris colour is the horse's own and travels with the copy, so a line of these breeds an eye colour the way an ordinary line breeds a coat.",
+      "when": {
+        "Ocu": 2
+      },
+      "layers": [
+        {
+          "name": "the socket the lid sits in, a shade darker than the coat",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "NECK"
+              ],
+              "seed": "$eyeSeed",
+              "spacing": "$spacing",
+              "radius": "$socket",
+              "vary": 0.2,
+              "chance": 0.85,
+              "stretch": 1.5,
+              "axis": "X",
+              "softness": 0.35
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#2a1e22",
+            "strength": 42
+          }
+        },
+        {
+          "name": "the white of the eye",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "NECK"
+              ],
+              "seed": "$eyeSeed",
+              "spacing": "$spacing",
+              "radius": "$sclera",
+              "vary": 0.2,
+              "chance": 0.85,
+              "stretch": 1.5,
+              "axis": "X",
+              "softness": 0.16
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#f2ece4",
+            "strength": 94,
+            "opacity": 100
+          }
+        },
+        {
+          "name": "the iris",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "NECK"
+              ],
+              "seed": "$eyeSeed",
+              "spacing": "$spacing",
+              "radius": "$iris",
+              "vary": 0.2,
+              "chance": 0.85,
+              "stretch": 1.5,
+              "axis": "X",
+              "softness": 0.1
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.72,
+            "lightness": 0.44,
+            "strength": 96,
+            "opacity": 100
+          }
+        },
+        {
+          "name": "the pupil",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "NECK"
+              ],
+              "seed": "$eyeSeed",
+              "spacing": "$spacing",
+              "radius": "$pupil",
+              "vary": 0.2,
+              "chance": 0.85,
+              "stretch": 1.5,
+              "axis": "X",
+              "softness": 0.08
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#08070a",
+            "strength": 100,
+            "opacity": 100
+          }
+        }
+      ]
+    },
+    {
+      "id": "few",
+      "name": "A few eyes",
+      "description": "One copy. The same eyes, in the same places, but only about a third of the lattice carries one - a handful down the crest rather than a covering. The locus is dose-dependent rather than recessive: a single copy is visible, and a breeder can tell a carrier from a homozygote by counting.",
+      "when": [
+        "Ocu/n"
+      ],
+      "layers": [
+        {
+          "name": "the socket the lid sits in, a shade darker than the coat",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "NECK"
+              ],
+              "seed": "$eyeSeed",
+              "spacing": "$spacing",
+              "radius": "$socket",
+              "vary": 0.2,
+              "chance": 0.3,
+              "stretch": 1.5,
+              "axis": "X",
+              "softness": 0.35
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#2a1e22",
+            "strength": 42
+          }
+        },
+        {
+          "name": "the white of the eye",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "NECK"
+              ],
+              "seed": "$eyeSeed",
+              "spacing": "$spacing",
+              "radius": "$sclera",
+              "vary": 0.2,
+              "chance": 0.3,
+              "stretch": 1.5,
+              "axis": "X",
+              "softness": 0.16
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#f2ece4",
+            "strength": 94,
+            "opacity": 100
+          }
+        },
+        {
+          "name": "the iris",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "NECK"
+              ],
+              "seed": "$eyeSeed",
+              "spacing": "$spacing",
+              "radius": "$iris",
+              "vary": 0.2,
+              "chance": 0.3,
+              "stretch": 1.5,
+              "axis": "X",
+              "softness": 0.1
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.72,
+            "lightness": 0.44,
+            "strength": 96,
+            "opacity": 100
+          }
+        },
+        {
+          "name": "the pupil",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "NECK"
+              ],
+              "seed": "$eyeSeed",
+              "spacing": "$spacing",
+              "radius": "$pupil",
+              "vary": 0.2,
+              "chance": 0.3,
+              "stretch": 1.5,
+              "axis": "X",
+              "softness": 0.08
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#08070a",
+            "strength": 100,
+            "opacity": 100
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "The horse has the usual number of eyes.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Ocu/Ocu": 0.01,
+    "Ocu/n": 0.14,
+    "n/n": 99.85
+  }
+}
