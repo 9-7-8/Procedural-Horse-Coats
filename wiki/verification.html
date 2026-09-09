@@ -35,6 +35,55 @@
     </p>
 </div>
 
+<h2 id="fractal-mask">&sect;0-AZ &mdash; The <code>FRACTAL</code> mask, in the creator (2026-09-09, NOT looked at)</h2>
+
+<div class="note">
+    <span class="label">Not a runClient item &mdash; there is nothing to see in a world yet</span>
+    <p>
+        <strong>No registered gene uses <code>FRACTAL</code>.</strong> It is a new mask in
+        the vocabulary, so it changes no horse that currently exists and moved neither
+        coat golden. Loading a world proves nothing about it. What is unlooked-at is the
+        <em>tool</em>: open <a href="gene-creator/index.html">the gene creator</a> from
+        <code>file://</code>, add a mask, and pick <code>FRACTAL</code>.
+    </p>
+</div>
+
+<p>
+    The engine half is covered &mdash; <code>FractalMaskTest</code> pins the field, and
+    <code>check-parity.mjs</code> was confirmed to reach the new code by breaking the JS
+    divisor and watching it go red. The <b>form</b> is what nobody has opened. Worth an eye:
+</p>
+
+<ul>
+    <li><strong>The <code>octaves</code> slider.</strong> It is the only integer-stepped
+        VALUE param on a mask other than <code>CHOICE</code>&rsquo;s
+        (<code>min: 1, max: 6, step: 1</code>). Confirm it does not offer 3.5, and that
+        dragging it changes the amount of <em>detail</em> in the preview without visibly
+        changing how much of the horse the mask covers &mdash; that invariance is the whole
+        reason the mask is normalised the way it is, and the preview is the cheapest place
+        to see it hold or fail.</li>
+    <li><strong><code>shape</code> as a dropdown.</strong> Three words, default
+        <code>fbm</code>. Switching to <code>ridged</code> should keep the shapes and turn
+        their outlines into the marking.</li>
+    <li><strong>The tidy() round trip.</strong> Every fallback in <code>schema.js</code>
+        matches the Java, so a freshly added <code>FRACTAL</code> mask left alone should
+        export as <code>{"type": "FRACTAL"}</code> and nothing else. If any default leaks
+        into the exported JSON, one of the two tables is wrong.</li>
+    <li><strong>Speed.</strong> Six octaves is six lattice samples per texel, plus three
+        more if <code>warp</code> is above zero. The preview redraws on every slider drag;
+        if it feels sluggish at <code>octaves: 6</code> the ceiling is the thing to argue
+        with, not the maths.</li>
+</ul>
+
+<p>
+    Two <code>FRACTAL</code> layers also went into
+    <code>example-genes/prismatic.json</code> (a <code>ridged</code> one on the barrel and
+    a warped <code>fbm</code> one on the neck), so loading <strong>Prismatic</strong> from
+    the creator&rsquo;s examples is the fastest way to see both at once.
+</p>
+
+<hr>
+
 <h2 id="science-tabs">&sect;0-AY &mdash; Twenty-five science tabs, and three owner&rsquo;s calls inside them (2026-09-09, NOT read)</h2>
 
 <div class="note">
