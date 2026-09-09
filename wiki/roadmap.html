@@ -521,9 +521,10 @@
 </div>
 
 <ul>
-    <li><strong>Draw the mask.</strong> SVG / shape / curve tools for the maximal
-        expression, erase-down for the minimal, per-region colour ranges and gradients,
-        glow and particle intensity.</li>
+    <li><strong>Draw the mask.</strong> The curve tools now have something to write
+        into (<code>PATH</code>, below). Still unbuilt beside them: erase-down for the
+        minimal expression, per-region colour ranges and gradients, and glow / particle
+        intensity.</li>
     <li><strong>Fractal pattern definitions &mdash; shipped.</strong> The
         <code>FRACTAL</code> mask joins the vocabulary: octaves,
         lacunarity, gain, a domain warp, and a <code>shape</code> that reads the summed
@@ -542,12 +543,20 @@
         creator does not make the channel <em>visible</em> &mdash; there is no way to
         preview a gene at 0%, 50% and 100% of its own expression, which is what the
         editor was really asking for.</li>
-    <li><strong>A drawn shape becomes vector paths in body space</strong>, not a baked
-        stencil (owner&rsquo;s call). A handful of curve control points in body units:
-        it stays procedural, stays small in the gene file, survives a resized horse, and
-        the same maths runs in Java and in the browser. That makes the drawing tool a
-        <em>curve editor</em> rather than a brush, and it wants a new
-        <code>PATH</code>-family mask before any UI is written.</li>
+    <li><strong>The <code>PATH</code> mask &mdash; shipped.</strong> A drawn shape is
+        vector control points in body space (owner&rsquo;s call), stroked or filled,
+        extruded through the horse; <code>curve</code> smooths them with a spline that
+        passes through every point, because the creator is going to draw those points as
+        draggable handles. Documented on
+        <a href="gene-format.html#path">the gene file format</a>, including the trap that
+        <code>body</code> space runs to the ear tips so the topline is 0.62.
+        <strong>The format is settled and the engine is done, both sides.</strong></li>
+    <li><strong>What is left is the drawing surface itself.</strong> The creator edits a
+        <code>PATH</code>&rsquo;s points as a textarea of <code>u, v</code> pairs, which is
+        genuinely usable against the live preview and is not the point of the exercise. The
+        canvas &mdash; a side view of the horse, draggable handles, click to add, drag to
+        bend &mdash; is the remaining job, and it <em>changes no format</em>: it is a
+        different control over the same array. That is exactly why the mask went first.</li>
     <li><strong>Parity still applies.</strong> Anything the editor previews, it previews
         through the JS port of the pipeline, and <code>check-parity.mjs</code> has to
         cover the new mask and fractal ops &mdash; or the editor will show a horse the

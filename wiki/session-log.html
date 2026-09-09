@@ -29,6 +29,82 @@
 
 <h2 id="d2026-09-09">2026-09-09</h2>
 
+<h3 id="path-mask-2026-09-09">The <code>PATH</code> mask &mdash; a shape you drew, stored as points rather than pixels.</h3>
+
+<p>The other half of <a href="roadmap.html#designer">&sect;10</a>, and the piece the drawing
+tools have to be written against. Every other mask in the vocabulary says what a shape is
+<em>made of</em> &mdash; a lattice of spots, a band of this width, noise at that scale &mdash;
+and lets the geometry and the horse's own numbers decide where it lands. That is the right
+tool for a marking with a rule behind it, which is nearly all of them. A lightning bolt, a
+crescent, a brand, a curl on one particular shoulder has no rule behind it: it is a shape,
+and the only honest way to describe it is to give its outline.</p>
+
+<p>Control points in a plane, stroked as a line or filled as an outline, extruded through the
+horse. <code>plane</code> picks the two axes &mdash; <code>side</code> is the flank and
+appears on <em>both</em> of them, which is what a marking drawn on a side view should do.
+<code>space: "body"</code> normalises the points over the horse, so a shape drawn for the
+adult lands in the same anatomical place on the foal. Full documentation, which is the source
+of truth, is on <a href="gene-format.html#path">the gene file format</a>.</p>
+
+<p><strong>Points rather than a baked stencil</strong> was the owner's call from the previous
+session, and building it confirmed the reasoning: the shape stays procedural, stays legible in
+the JSON, follows a resized horse, and is the same arithmetic in Java and in the browser. It
+is the first parameter kind in the format that is neither a number nor a word, so
+<code>SpecSchema.Kind</code> gained <code>POINTS</code> and the parser gained its errors.</p>
+
+<p><strong>Catmull-Rom, not Bezier</strong>, and the reason is the editor rather than the
+curve. A Bezier's handles do not sit on the curve; Catmull-Rom passes through every control
+point. Since the creator is going to draw those points as draggable handles, a curve that
+merely got <em>near</em> them would make the editor lie about its own data. The ends hold
+their tangent by duplicating the first and last point rather than extrapolating a phantom
+one, which is what stops a smoothed path from overshooting off the horse and back.</p>
+
+<h4>Two things found by building it that were not the job</h4>
+
+<ul>
+    <li><strong>A mask <code>FLAG</code> had no checkbox.</strong> The creator's mask form
+        sent <code>PARTS</code> and <code>CHOICE</code> to their own editors and everything
+        else to the number/knob/per-dose control &mdash; so <code>SPOTS</code>'
+        <code>mirror</code> offered to be driven by a knob, which is not a thing, and could
+        not simply be ticked. <code>PATH</code> carries three flags, which turned an obscure
+        bug into a blocking one. It is a checkbox now, and <code>tidyMask</code> drops an
+        unticked one instead of exporting <code>false</code>.</li>
+    <li><strong>The parity gate could not see <code>PATH_CURVE_SAMPLES</code>.</strong>
+        Sabotaging the creator's copy from 8 to 7 left the check <em>green</em>. The fixtures
+        probe four texels per part, and one sub-segment more or less on a curve moves the line
+        by a fraction of a texel &mdash; so a real divergence in a shared constant was
+        invisible. It is not a schema parameter, so nothing compared it. It is emitted into
+        the fixture and compared directly now, the way the condition flags are, and breaking
+        it fails properly. The fill's crossing test <em>was</em> caught on the first try; both
+        are verified by breaking them and watching parity go red rather than by assuming.</li>
+</ul>
+
+<h4>And one mistake worth keeping</h4>
+
+<p>The first <code>PATH</code> examples were written at <code>v</code> around 0.7 &mdash;
+"high on the flank". Rendered, they were floating above the horse's back. <code>body</code>
+space normalises over the whole-horse box and <strong>that box runs to the ear tips</strong>,
+so on the adult mesh 0.33 is the underline and <strong>0.62 is the spine</strong>. It is the
+same trap <code>WhitePattern.toplineHeight</code> exists because of, met again from the other
+direction: measuring against the whole box is <em>correct</em> for a mask whose author is
+drawing on the whole horse, it is simply not anatomical. Moved to the barrel, and written into
+the format page as its own warning rather than left for the next person.</p>
+
+<p>Also worth recording: <code>PathMaskTest</code> failed twice on first run and both were
+<em>test</em> bugs, not code. One probe point sat exactly on the Catmull-Rom midpoint of a
+symmetric span, so "the curve should leave the chord" was false at the one place it was
+checked; the other measured a stroke's softness fade and called it an overshoot. Both are
+rewritten to sample the spline directly, where neither confound exists.</p>
+
+<p><code>:common:test</code> not run in full (owner's standing rule). Run:
+<code>PathMaskTest</code> (13), <code>FractalMaskTest</code>, both coat goldens (neither moved
+&mdash; no registered gene uses either new mask), <code>GeneSpecParserTest</code>,
+<code>GeneFilesTest</code>, <code>SpecGeneTest</code>,
+<code>CreatorMetadataRoundTripTest</code>, <code>:neoforge-26.1.2:build</code>, and every
+wiki and parity check. Re-baked: spec fixtures, creator assets, designer wasm, search
+index.</p>
+
+
 <h3 id="fractal-mask-2026-09-09">A gene can be a fractal &mdash; and a stale roadmap sent the session somewhere else first.</h3>
 
 <p>The session opened by picking the top item off

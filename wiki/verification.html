@@ -35,6 +35,62 @@
     </p>
 </div>
 
+<h2 id="path-mask">&sect;0-BA &mdash; The <code>PATH</code> mask, and a checkbox that was never one (2026-09-09, NOT looked at)</h2>
+
+<div class="note">
+    <span class="label">Not a runClient item &mdash; but one part of it touches a shipped gene</span>
+    <p>
+        Like <a href="#fractal-mask">&sect;0-AZ</a>, no registered gene uses <code>PATH</code>,
+        so no horse in a world changed and neither coat golden moved. The
+        <strong>exception</strong> is the flag fix below, which changes how an existing mask is
+        edited &mdash; and <code>SPOTS</code> is used by shipped genes.
+    </p>
+</div>
+
+<p>
+    Open <a href="gene-creator/index.html">the gene creator</a> and load
+    <strong>Prismatic</strong> from the examples: it now carries a stroked, smoothed
+    <code>PATH</code> down the shoulder and a filled crescent on the barrel. Worth an eye:
+</p>
+
+<ul>
+    <li><strong>The points editor is a textarea, on purpose.</strong> One
+        <code>u, v</code> pair per line. It is the honest placeholder until the canvas exists
+        &mdash; the question to answer is whether it is usable enough to author a shape with
+        against the live preview, or whether the canvas needs to come next rather than after
+        something else. A half-typed line is left alone rather than wiping the shape, which is
+        the one bit of behaviour worth poking at deliberately.</li>
+    <li><strong><code>fill</code> on a concave shape.</strong> The crescent should keep its
+        notch. If a single row of texels through a filled shape ever comes out inverted, that
+        is the even-odd crossing test hitting a vertex exactly on its own ray &mdash; pinned in
+        <code>PathMaskTest</code>, but the test sweeps a diamond and a chevron, not every shape
+        anyone will draw.</li>
+    <li><strong>Does the smoothed curve look like the handles?</strong> It passes through every
+        control point by construction. What is unlooked-at is whether that <em>reads</em> right
+        at horse scale, or whether spans between distant points bulge more than expected.</li>
+</ul>
+
+<div class="note warn">
+    <span class="label">A mask flag is a checkbox now &mdash; and it was not before</span>
+    <p>
+        The creator's mask form sent <code>PARTS</code> and <code>CHOICE</code> to their own
+        editors and <strong>everything else</strong> to the number / knob / per-dose control.
+        So <code>SPOTS</code>' <code>mirror</code> &mdash; a boolean &mdash; was offered as a
+        number that could be driven by a knob, which is not a thing the game can read.
+    </p>
+    <p>
+        <strong>What to check:</strong> open any gene using <code>SPOTS</code>, confirm
+        <code>mirror</code> is a tick box, that ticking it mirrors the spots, and that leaving
+        it unticked exports <strong>no</strong> <code>mirror</code> key at all rather than
+        <code>"mirror": false</code>. <strong>No gene file was damaged by this</strong> &mdash;
+        every <code>mirror</code>, <code>invert</code> and <code>emissive</code> in every
+        shipped and example gene was checked and all of them are real booleans, so the old
+        control was never actually used to write one.
+    </p>
+</div>
+
+<hr>
+
 <h2 id="fractal-mask">&sect;0-AZ &mdash; The <code>FRACTAL</code> mask, in the creator (2026-09-09, NOT looked at)</h2>
 
 <div class="note">
