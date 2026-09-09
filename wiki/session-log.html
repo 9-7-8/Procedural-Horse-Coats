@@ -82,13 +82,42 @@ declared region than inside it. That is not a curiosity to leave for a decision;
 before-and-after render is a horse that had been dipped in white with a net on its barrel,
 versus a bay with a net on its barrel.</p>
 
-<p>The fix is one condition in <code>coverage</code> and its JavaScript twin: a texel the
-parts test ruled out stays 0 through the invert. <code>PARTS</code> is exempt, because
-there the list <em>is</em> the mask. Ten icons moved and nothing else did, and removing the
-stained-glass workaround produced a <strong>byte-identical</strong> icon &mdash; which is
-the check that the engine fix and the explicit workaround mean the same thing.</p>
+<p>The first fix was one condition &mdash; a texel the parts test ruled out stays 0
+through the invert &mdash; and it was <strong>half right</strong>. It fixed the four, and
+it broke the opposite idiom: <a href="gene-galaxy.html">galaxy</a>&rsquo;s black field and
+<a href="gene-tribal-ward.html">tribal ward</a>&rsquo;s pale one are both &ldquo;a ground,
+with a cut aimed at one part&rdquo;, written as a broad first mask and a narrow inverted
+second one. Zeroing outside the cut deleted the ground everywhere the cut did not reach.
+Tribal ward went from a painted white horse to a plain bay with swirls on it, which is
+visibly not what its own blurb describes.</p>
 
-<p><strong>It also explains an entry already on this page.</strong>
+<p><strong>The rule that serves both</strong> is that a mask&rsquo;s <code>parts</code>
+mean different things depending on where the mask sits. The <em>first</em> mask defines the
+layer&rsquo;s region, so outside its parts coverage is 0 and an invert does not bring it
+back. Every <em>later</em> mask modifies that region, so outside its parts it has nothing
+to say and contributes its combine&rsquo;s identity &mdash; it is skipped.
+<code>PARTS</code> is exempt, because there the list is the mask rather than a restriction
+on it.</p>
+
+<p><strong>Twelve icons moved.</strong> Galaxy and tribal ward came back byte-identical to
+before any of this. Webbed and the other three stayed fixed. And five more moved that
+nobody had been looking at &mdash; <a href="gene-masked.html">masked</a>,
+<a href="gene-ehretia.html">ehretia</a>, <a href="gene-peafowl.html">peafowl</a>,
+<a href="gene-snow-cloud.html">snow cloud</a> and <a href="gene-war-mask.html">war mask</a>
+&mdash; every one a layer that had been <em>losing</em> coverage on a part it explicitly
+listed. Masked&rsquo;s &ldquo;mask over the head and ears&rdquo; was not reaching the ears.
+Ehretia&rsquo;s &ldquo;dorsal stripe from withers to tail&rdquo; was not reaching the tail.
+Those are the genes that quietly paid for the second half of the bug.</p>
+
+<p><strong>The parity check was green about all of it by default</strong>, which is the
+part worth remembering. <code>example-genes/prismatic.json</code> had no layer whose second
+mask was narrower than its first, so nothing in the fixtures could tell the two semantics
+apart. A discriminating layer was added, and then checked <em>by deliberately regressing
+the JavaScript twin</em>: 264 parity checks fail under the old rule and pass under the new
+one. Re-baking a fixture that cannot reach the change is the same trap as not re-baking it
+at all.</p>
+
+<p>It also explains an entry already on this page.
 <a href="known-gaps.html#gap-119">Gap 119</a> records webbed being rebuilt after a contact
 sheet showed it as &ldquo;a white ground with brown islands rather than a net&rdquo;. That
 was this bug all along, and the rebuild had treated the symptom.</p>

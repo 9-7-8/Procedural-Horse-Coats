@@ -505,6 +505,37 @@
             "type": "INVERT",
             "amount": 85.0
           }
+        },
+        {
+          "name": "a ground over the barrel, neck and head, with a cut aimed at the neck alone",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD"
+              ]
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "NECK"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": -0.1,
+              "to": 0.45,
+              "softness": 0.2,
+              "invert": true,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#e8e2d6",
+            "strength": 40
+          }
         }
       ]
     },

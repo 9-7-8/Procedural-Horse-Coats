@@ -406,16 +406,35 @@ public final class SpecPainter {
             Mask mask = masks.get(i);
             double c = maskCoverage(mask, v, skin, bounds, part, face, point, coat, colour, px, py, leg,
                     fallbackSeed ^ ((long) i * 0x9E3779B97F4A7C15L));
-            // The invert must NOT resurrect a texel the parts test excluded.
-            // maskCoverage returns 0 for two different reasons - "outside this
-            // mask's parts" and "inside them, and the field reads 0" - and only
-            // the second is what invert is asking about. Inverting the first
-            // turns "the barrel" into "everything that is not the barrel", at
-            // full strength: four shipped genes were painting the head, ears,
-            // mane, tail and all four legs that way, and one of them
-            // (webbed) put four times more paint outside its declared region
-            // than inside it. See known-gaps gap 120.
-            if (mask.invert() && !excludedByParts(mask, part)) {
+            // A mask the parts test ruled out does not apply here at all, and
+            // what "does not apply" means depends on the mask's POSITION.
+            //
+            // The FIRST mask defines the layer's region - coverage starts at 1
+            // and the first mask folds into it - so being outside its parts
+            // means the layer does not reach this texel: coverage 0. Getting
+            // this wrong is what gap 120 was. The invert used to run over the
+            // top of the parts test, so a 0 meaning "outside this mask" became
+            // a 1, and four shipped genes painted every texel they had
+            // excluded - webbed put four times more paint outside its declared
+            // region than inside it.
+            //
+            // Every LATER mask MODIFIES that region, so being outside its parts
+            // means it has nothing to say: it contributes its combine's
+            // identity, which is exactly "skip it". That is what lets a layer
+            // say "the ground, minus the throat" - a cut aimed at one part,
+            // leaving the rest of the ground alone. Zeroing there instead would
+            // delete the ground everywhere the cut does not apply, which is
+            // galaxy's black field and tribal ward's pale one.
+            if (excludedByParts(mask, part)) {
+                if (i == 0) {
+                    acc = 0;
+                    if (cannotRise(masks, 1)) {
+                        return 0;
+                    }
+                }
+                continue;
+            }
+            if (mask.invert()) {
                 c = 1.0 - c;
             }
             c = spread(mask, v, skin, coat, colour, part, face, point, px, py, leg, c);

@@ -524,11 +524,20 @@ window.HG = window.HG || {};
       var mask = masks[i];
       var c = maskCoverage(mask, values, skin, part, face, point, coat, colour, px, py, legIndex,
         noise.xor(fallbackSeed, noise.mul(noise.fromInt(i), noise.K1)));
-      // The invert must NOT resurrect a texel the parts test excluded - see the
-      // Java. maskCoverage returns 0 both for "outside this mask's parts" and
-      // for "inside them and the field reads 0", and only the second is what
-      // invert is asking about.
-      if (mask.invert && !excludedByParts(mask, part)) c = 1 - c;
+      // A mask the parts test ruled out does not apply here, and what that
+      // means depends on its POSITION: the first mask defines the layer's
+      // region (so outside it, coverage is 0), every later mask modifies that
+      // region (so outside it, the mask contributes its combine's identity -
+      // which is to say, nothing). See the Java for the two genes each half of
+      // that rule exists for.
+      if (excludedByParts(mask, part)) {
+        if (i === 0) {
+          acc = 0;
+          if (cannotRise(masks, 1)) return 0;
+        }
+        continue;
+      }
+      if (mask.invert) c = 1 - c;
       c = spreadMask(mask, values, skin, coat, colour, part, face, point, px, py, legIndex, c);
       switch (mask.combine || "MULTIPLY") {
         case "MAX": acc = Math.max(acc, c); break;

@@ -394,27 +394,41 @@
 <tr><td><code>PATCHES</code></td><td><code>seed</code>, <code>scale</code> 6.0, <code>threshold</code> 0.5, <code>softness</code> 0.12</td><td>Big irregular blobs &mdash; pinto, tobiano, roan patching.</td></tr>
 <tr><td><code>NOISE</code></td><td><code>seed</code>, <code>scale</code> 8.0, <code>low</code> 0, <code>high</code> 1</td><td>Shading rather than a shape &mdash; sooty, countershading.</td></tr>
 <tr><td colspan="3"><div class="note">
-<span class="label"><code>invert</code> stays inside its own <code>parts</code></span>
+<span class="label">What a mask&rsquo;s <code>parts</code> means depends on its position</span>
 <p>
-    An inverted mask means &ldquo;where this field is <em>not</em>&rdquo;, and it means it
-    <strong>within the parts the mask names</strong> &mdash; a texel the
-    <code>parts</code> list ruled out stays at 0 through the invert. So an inverted
-    <code>CRACKLE</code> over <code>[BODY, NECK]</code> is the channel between the
-    polygons on the barrel and the neck, and nothing at all on the head or the legs.
+    A mask that names <code>parts</code> does not apply outside them &mdash; and what
+    &ldquo;does not apply&rdquo; <em>means</em> is decided by where the mask sits in the
+    layer.
+</p>
+<ul>
+    <li><strong>The first mask defines the layer&rsquo;s region.</strong> Coverage starts
+        at 1 and the first mask folds into it, so a texel outside its <code>parts</code>
+        is a texel the layer does not reach: coverage 0, and an <code>invert</code> does
+        not bring it back.</li>
+    <li><strong>Every later mask modifies that region.</strong> Outside its
+        <code>parts</code> it has nothing to say, so it contributes its
+        <code>combine</code>&rsquo;s identity &mdash; which is simply to be skipped. That
+        is what lets a layer say &ldquo;this ground, <em>minus</em> the throat&rdquo;: a
+        cut aimed at one part that leaves the rest of the ground alone.</li>
+</ul>
+<p>
+    Both halves were wrong until 2026-09-08, in opposite directions, and each had shipped
+    genes depending on the wrong behaviour. The <code>invert</code> used to run over the
+    top of the parts test, so a 0 meaning &ldquo;outside this mask&rdquo; became a 1 and a
+    <em>first</em> mask painted everything it had excluded &mdash; four genes were covering
+    the whole horse, and <a href="gene-webbed.html">webbed</a> put four times more paint
+    outside its declared region than inside it. Fixing only that broke the other idiom:
+    <a href="gene-galaxy.html">galaxy</a>&rsquo;s black field and
+    <a href="gene-tribal-ward.html">tribal ward</a>&rsquo;s pale one are both
+    &ldquo;a ground, with a cut aimed at one part&rdquo;, and zeroing outside the cut
+    deleted the ground. The rule above is the one that serves both. See
+    <a href="known-gaps.html#gap-120">gap 120</a>.
 </p>
 <p>
-    It did not always. Until 2026-09-08 the invert ran <em>after</em> the parts test, so a
-    0 that meant &ldquo;outside this mask&rdquo; became a 1 &mdash; and a restricted mask
-    painted <em>everything it excluded</em>, at full strength. Seven shipped genes were
-    doing it, four of them over the whole horse, and
-    <a href="gene-webbed.html">webbed</a> put four times more paint outside its declared
-    region than inside it. See <a href="known-gaps.html#gap-120">gap 120</a>.
-</p>
-<p>
-    <strong><code>PARTS</code> is the exception, and keeps working as it always did.</strong>
-    There the list <em>is</em> the mask rather than a restriction on it, so an inverted
-    <code>PARTS</code> mask still means &ldquo;everywhere except these&rdquo; &mdash; which
-    is the only sensible reading and is how you ask for it.
+    <strong><code>PARTS</code> is exempt from all of this</strong>, because there the list
+    <em>is</em> the mask rather than a restriction on it &mdash; an inverted
+    <code>PARTS</code> mask still means &ldquo;everywhere except these&rdquo;, which is how
+    you ask for that.
 </p>
 </div></td></tr>
 <tr><td><code>PIGMENT</code></td><td><code>channel</code> (darkness/red/black/total), <code>from</code> 0.5, <code>to</code> 1.0, <code>spread</code> 0</td><td>Coverage read off the coat the earlier genes left &mdash; find the black points, then paint them. <code>darkness</code> is <code>0.55&middot;red + 0.95&middot;black</code>, the reading grey uses. <strong>Pick the channel for the question you are asking.</strong> <code>darkness</code> answers &ldquo;how dark does this look&rdquo;, and it <em>saturates</em>: a bay&rsquo;s barrel already reads about 0.84 and its black points 0.95, so a threshold up at 0.7 selects the whole horse rather than the points, and one measured against a chestnut&rsquo;s 0.55 works fine. If what you mean is &ldquo;the black points&rdquo; &mdash; the socks, the muzzle, the mane &mdash; ask <code>black</code> instead, where a bay&rsquo;s body sits at 0.2&ndash;0.45 and its points at 0.85 and up. <a href="gene-integration.html">Integration</a> was reading <code>darkness</code> and treating every horse as one enormous source. <code>spread</code> grows <em>whatever this mask selected</em> by that many body units: the largest coverage found inside the radius wins. It is applied <strong>after <code>invert</code></strong>, which is what lets one parameter serve both directions &mdash; an inverted mask over white grows the white (<a href="gene-fielded.html">Fielded</a>&rsquo;s wisps run out of the edges of it), and a plain one over darkness grows the dark (<a href="gene-integration.html">Integration</a>&rsquo;s spots spread out of the black points). That is the only way to ask for &ldquo;beside something the horse already has&rdquo; &mdash; the coat is one number per texel, and being <em>next to</em> a region is not a property any one of them holds. The radius is in body units and the test is done in body space &mdash; the texel window is only a bound on the search, because a texture atlas packs unrelated parts side by side and a disc measured in <em>texels</em> reaches across a UV seam.</td></tr>

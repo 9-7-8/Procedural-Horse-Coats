@@ -3,13 +3,12 @@ MAGIC GENE BULK IMPORT - finished 2026-09-08
 
 All 84 genes are built and landed. What is left in this folder:
 
+  (the last source file, akkadorian-z-mutation-genes.md, is gone too - the one
+  locus it still held back, Paint Moon, and the reason it was refused, are on
+  wiki/verification.html#magic-import.)
+
   index.csv    the manifest - every gene, its source file, its allele token and
                its painter family. The record of what came from where.
-
-  akkadorian-z-mutation-genes.md
-               one refused locus (Paint Moon) and why. Nothing else survives of
-               the seven source files; each gene's section was deleted as it
-               shipped.
 
   tools/       founders.py, sheet.py, coverage.mjs - still useful, and now
                documented on wiki/gene-format.html#looking rather than here.

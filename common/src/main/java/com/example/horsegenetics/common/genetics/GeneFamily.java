@@ -92,9 +92,12 @@ public enum GeneFamily {
                     + "the very bottom of the paint order, so that almost anything else the "
                     + "horse carries is drawn on top of them."),
     MAGIC_BODY("Magical body-stat genes", false, "Magical body-stat genes",
-            "Four loci that move speed, health, jump and size and paint nothing at all. They "
-                    + "are the magical mirror of the performance genes, with far wider ranges "
-                    + "and no real-world claim behind them."),
+            "Loci that move what a horse's body can do and paint nothing at all - the magical "
+                    + "mirror of the performance genes, with far wider ranges and no real-world "
+                    + "claim behind them. Four of them (speed, health, jump and size) resolve "
+                    + "into the horse's stats and are the ones a breed pins from its stat bands; "
+                    + "the rest reach the game as effects instead, because swimming and fighting "
+                    + "mean nothing without a running game around them."),
 
     // The seven data-driven magical families. Title and lede are the wiki's;
     // GeneWikiTool reads them from here so the section it writes and the menu

@@ -35,7 +35,7 @@
     </p>
 </div>
 
-<h2 id="invert-parts">&sect;0-AS &mdash; Ten genes that stopped painting outside their own parts (2026-09-08, NOT looked at)</h2>
+<h2 id="invert-parts">&sect;0-AS &mdash; Twelve genes whose masks now stay inside the parts they name (2026-09-08, NOT looked at)</h2>
 
 <p>
     <a href="known-gaps.html#gap-120">Gap 120</a> was fixed in the engine, so an inverted
@@ -59,18 +59,29 @@
         <a href="gene-lace.html">lace</a> and
         <a href="gene-fracture.html">fracture</a>. Smaller changes: a muzzle, a mane, some
         ears.</li>
-    <li><strong>Three that moved for a subtler reason</strong> &mdash;
-        <a href="gene-koi.html">koi</a>, <a href="gene-galaxy.html">galaxy</a> and
-        <a href="gene-tribal-ward.html">tribal ward</a>. Their inverted mask is not the
-        first in its layer, so an earlier mask was already zeroing the excluded parts and
-        nothing escaped the horse; what changed is the coverage <em>within</em> the
-        declared region. Confirm they still read the way they did.</li>
+    <li><strong><a href="gene-koi.html">Koi</a></strong> moved for a subtler reason: its
+        coverage <em>within</em> the declared region changed rather than escaping it.</li>
+    <li><strong>Five that gained coverage they had been losing</strong> &mdash;
+        <a href="gene-masked.html">masked</a>, <a href="gene-ehretia.html">ehretia</a>,
+        <a href="gene-peafowl.html">peafowl</a>,
+        <a href="gene-snow-cloud.html">snow cloud</a> and
+        <a href="gene-war-mask.html">war mask</a>. Each had a later mask silently zeroing a
+        part the layer explicitly listed: masked&rsquo;s &ldquo;mask over the head and
+        ears&rdquo; was not reaching the ears, ehretia&rsquo;s &ldquo;dorsal stripe from
+        withers to tail&rdquo; was not reaching the tail. These are small and are believed
+        to be corrections rather than changes, but nobody had been looking at them, so
+        they are the ones most likely to surprise.</li>
+    <li><strong><a href="gene-galaxy.html">Galaxy</a> and
+        <a href="gene-tribal-ward.html">tribal ward</a> are byte-identical to before any of
+        this</strong> and need no checking. They are listed because they were briefly
+        broken by the first attempt at the fix, and the fact that they came back exactly is
+        the evidence the final rule is the right one.</li>
 </ul>
 
 <p>
     <strong>The check that would settle it fastest</strong> is a side-by-side against the
     previous icons: <code>git show HEAD~1:wiki/assets/gene-icons/webbed.png</code> and
-    friends. The engine change is small and precisely scoped &mdash; exactly ten icons
+    friends. The engine change is small and precisely scoped &mdash; exactly twelve icons
     moved and nothing else did &mdash; so anything that looks wrong is a gene whose art
     was tuned around the bug, not a regression in the fix.
 </p>
