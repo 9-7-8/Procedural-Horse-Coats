@@ -74,19 +74,15 @@
           "emissive": true,
           "masks": [
             {
-              "type": "WAVES",
+              "type": "AXIS",
               "parts": [
                 "NECK"
               ],
               "axis": "X",
-              "across": "Y",
-              "shape": "saw",
-              "space": "part",
-              "wavelength": 90.0,
-              "amplitude": 77.94,
-              "softness": 0.12,
-              "from": 0.32,
-              "to": 0.58
+              "space": "local",
+              "from": -1.0,
+              "to": 0.0,
+              "softness": 0.12
             }
           ],
           "op": {
@@ -207,19 +203,15 @@
           "name": "a fan of light up the crest of the neck",
           "masks": [
             {
-              "type": "WAVES",
+              "type": "AXIS",
               "parts": [
                 "NECK"
               ],
               "axis": "X",
-              "across": "Y",
-              "shape": "saw",
-              "space": "part",
-              "wavelength": 90.0,
-              "amplitude": 77.94,
-              "softness": 0.12,
-              "from": 0.32,
-              "to": 0.58
+              "space": "local",
+              "from": -1.0,
+              "to": 0.0,
+              "softness": 0.12
             }
           ],
           "op": {

@@ -112,20 +112,16 @@
               "softness": 0.35
             },
             {
-              "type": "WAVES",
+              "type": "AXIS",
               "parts": [
                 "NECK"
               ],
-              "axis": "X",
-              "across": "Y",
-              "shape": "saw",
-              "space": "part",
-              "wavelength": 90.0,
-              "amplitude": 77.94,
-              "softness": 0.12,
               "combine": "MULTIPLY",
-              "from": 0.4,
-              "to": 0.75
+              "axis": "X",
+              "space": "local",
+              "from": -1.0,
+              "to": 0.1,
+              "softness": 0.12
             }
           ],
           "op": {
@@ -233,20 +229,16 @@
               "softness": 0.35
             },
             {
-              "type": "WAVES",
+              "type": "AXIS",
               "parts": [
                 "NECK"
               ],
-              "axis": "X",
-              "across": "Y",
-              "shape": "saw",
-              "space": "part",
-              "wavelength": 90.0,
-              "amplitude": 77.94,
-              "softness": 0.12,
               "combine": "MULTIPLY",
-              "from": 0.4,
-              "to": 0.75
+              "axis": "X",
+              "space": "local",
+              "from": -1.0,
+              "to": 0.1,
+              "softness": 0.12
             }
           ],
           "op": {

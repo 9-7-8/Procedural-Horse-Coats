@@ -106,19 +106,15 @@
           "name": "the blanket running out along the neck",
           "masks": [
             {
-              "type": "WAVES",
+              "type": "AXIS",
               "parts": [
                 "NECK"
               ],
               "axis": "X",
-              "across": "Y",
-              "space": "units",
-              "shape": "saw",
-              "wavelength": 90.0,
-              "amplitude": 77.94,
-              "from": 44.0,
-              "to": 90.0,
-              "softness": 6.0
+              "space": "local",
+              "from": -1.0,
+              "to": 0.9213,
+              "softness": 0.4286
             },
             {
               "type": "AXIS",
@@ -210,19 +206,15 @@
           "name": "stars carried onto the neck with it",
           "masks": [
             {
-              "type": "WAVES",
+              "type": "AXIS",
               "parts": [
                 "NECK"
               ],
               "axis": "X",
-              "across": "Y",
-              "space": "units",
-              "shape": "saw",
-              "wavelength": 90.0,
-              "amplitude": 77.94,
-              "from": 44.0,
-              "to": 90.0,
-              "softness": 6.0
+              "space": "local",
+              "from": -1.0,
+              "to": 0.9213,
+              "softness": 0.4286
             },
             {
               "type": "AXIS",

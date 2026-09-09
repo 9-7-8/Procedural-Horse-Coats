@@ -1114,19 +1114,15 @@
           "name": "a pale cap over the poll",
           "masks": [
             {
-              "type": "WAVES",
+              "type": "AXIS",
               "parts": [
                 "HEAD"
               ],
               "axis": "X",
-              "across": "Y",
-              "shape": "saw",
-              "space": "part",
-              "wavelength": 90.0,
-              "amplitude": 77.94,
-              "softness": 0.1,
-              "from": 0.58,
-              "to": 1.1
+              "space": "local",
+              "from": -1.0,
+              "to": 0.0,
+              "softness": 0.1
             }
           ],
           "op": {
@@ -1232,19 +1228,15 @@
           "name": "a pale cap over the poll",
           "masks": [
             {
-              "type": "WAVES",
+              "type": "AXIS",
               "parts": [
                 "HEAD"
               ],
               "axis": "X",
-              "across": "Y",
-              "shape": "saw",
-              "space": "part",
-              "wavelength": 90.0,
-              "amplitude": 77.94,
-              "softness": 0.1,
-              "from": 0.58,
-              "to": 1.1
+              "space": "local",
+              "from": -1.0,
+              "to": 0.0,
+              "softness": 0.1
             }
           ],
           "op": {
@@ -4311,19 +4303,15 @@
           "name": "the blanket running out along the neck",
           "masks": [
             {
-              "type": "WAVES",
+              "type": "AXIS",
               "parts": [
                 "NECK"
               ],
               "axis": "X",
-              "across": "Y",
-              "space": "units",
-              "shape": "saw",
-              "wavelength": 90.0,
-              "amplitude": 77.94,
-              "from": 44.0,
-              "to": 90.0,
-              "softness": 6.0
+              "space": "local",
+              "from": -1.0,
+              "to": 0.9213,
+              "softness": 0.4286
             },
             {
               "type": "AXIS",
@@ -4415,19 +4403,15 @@
           "name": "stars carried onto the neck with it",
           "masks": [
             {
-              "type": "WAVES",
+              "type": "AXIS",
               "parts": [
                 "NECK"
               ],
               "axis": "X",
-              "across": "Y",
-              "space": "units",
-              "shape": "saw",
-              "wavelength": 90.0,
-              "amplitude": 77.94,
-              "from": 44.0,
-              "to": 90.0,
-              "softness": 6.0
+              "space": "local",
+              "from": -1.0,
+              "to": 0.9213,
+              "softness": 0.4286
             },
             {
               "type": "AXIS",
@@ -4863,7 +4847,7 @@
   "blurb": "A lattice of hollow diamonds crossing the back, running up the crest of the neck, down the tail and round the forelegs - a dragon's wing-scutes rather than a horse's coat.",
   "notes": [
     "Imported from the magic-gene intake, 2026-09-08. A diamond is two triangle waves crossing, and the format cannot intersect two bands in one mask - so each is its own WAVES entry combined with MAX, which unions the two zigzags into a lattice. The source file expected a STROKES pass to outline them; strokes on top of a wave lattice came out as noise at this scale and were dropped.",
-    "The neck chain uses the 90/77.94 saw-wave trick that lays a band along the crest rather than round the throat. Those two numbers are the neck's own geometry written out by hand and are shared with five other genes - see known-gaps gap 103 before changing either."
+    "The neck chain is a band in the neck's own frame (`'space': 'local', 'axis': 'X'`), which is the crest side of it. It used to be the 90/77.94 saw-wave trick - the neck's geometry written out by hand in eleven gene files - and in this one that trick was in `part` space, where the amplitude is in normalised units, so the band was displaced clean off the horse and the chain painted nothing at all. See wiki/gene-format.html#local-space."
   ],
   "alleles": [
     {
@@ -4961,19 +4945,15 @@
           "name": "the chain along the neck crest",
           "masks": [
             {
-              "type": "WAVES",
+              "type": "AXIS",
               "parts": [
                 "NECK"
               ],
               "axis": "X",
-              "across": "Y",
-              "shape": "saw",
-              "space": "part",
-              "wavelength": 90.0,
-              "amplitude": 77.94,
-              "softness": 0.05,
-              "from": 0.58,
-              "to": 0.66
+              "space": "local",
+              "from": -1.0,
+              "to": -0.2,
+              "softness": 0.1
             },
             {
               "type": "WAVES",
@@ -4981,15 +4961,15 @@
                 "NECK"
               ],
               "axis": "X",
-              "across": "Y",
+              "across": "X",
               "shape": "triangle",
-              "space": "part",
+              "space": "local",
               "wavelength": "$meshWavelength",
-              "amplitude": 0.1,
+              "amplitude": 0.12,
               "softness": 0.04,
               "combine": "MULTIPLY",
-              "from": 0.0,
-              "to": 0.55
+              "from": -0.9,
+              "to": -0.5
             }
           ],
           "op": {
@@ -5105,19 +5085,15 @@
           "name": "the chain along the neck crest",
           "masks": [
             {
-              "type": "WAVES",
+              "type": "AXIS",
               "parts": [
                 "NECK"
               ],
               "axis": "X",
-              "across": "Y",
-              "shape": "saw",
-              "space": "part",
-              "wavelength": 90.0,
-              "amplitude": 77.94,
-              "softness": 0.05,
-              "from": 0.58,
-              "to": 0.66
+              "space": "local",
+              "from": -1.0,
+              "to": -0.2,
+              "softness": 0.1
             },
             {
               "type": "WAVES",
@@ -5125,15 +5101,15 @@
                 "NECK"
               ],
               "axis": "X",
-              "across": "Y",
+              "across": "X",
               "shape": "triangle",
-              "space": "part",
+              "space": "local",
               "wavelength": "$meshWavelength",
-              "amplitude": 0.1,
+              "amplitude": 0.12,
               "softness": 0.04,
               "combine": "MULTIPLY",
-              "from": 0.0,
-              "to": 0.55
+              "from": -0.9,
+              "to": -0.5
             }
           ],
           "op": {
@@ -5986,20 +5962,16 @@
               "softness": 0.35
             },
             {
-              "type": "WAVES",
+              "type": "AXIS",
               "parts": [
                 "NECK"
               ],
-              "axis": "X",
-              "across": "Y",
-              "shape": "saw",
-              "space": "part",
-              "wavelength": 90.0,
-              "amplitude": 77.94,
-              "softness": 0.12,
               "combine": "MULTIPLY",
-              "from": 0.4,
-              "to": 0.75
+              "axis": "X",
+              "space": "local",
+              "from": -1.0,
+              "to": 0.1,
+              "softness": 0.12
             }
           ],
           "op": {
@@ -6107,20 +6079,16 @@
               "softness": 0.35
             },
             {
-              "type": "WAVES",
+              "type": "AXIS",
               "parts": [
                 "NECK"
               ],
-              "axis": "X",
-              "across": "Y",
-              "shape": "saw",
-              "space": "part",
-              "wavelength": 90.0,
-              "amplitude": 77.94,
-              "softness": 0.12,
               "combine": "MULTIPLY",
-              "from": 0.4,
-              "to": 0.75
+              "axis": "X",
+              "space": "local",
+              "from": -1.0,
+              "to": 0.1,
+              "softness": 0.12
             }
           ],
           "op": {
@@ -10177,8 +10145,8 @@
     },
     {
       "name": "depth",
-      "min": 48.0,
-      "max": 55.0
+      "min": 0.1356,
+      "max": 0.6356
     }
   ],
   "expressions": [
@@ -10194,20 +10162,16 @@
           "name": "the hood, depigmented",
           "masks": [
             {
-              "type": "WAVES",
+              "type": "AXIS",
               "parts": [
                 "NECK",
                 "EARS"
               ],
               "axis": "X",
-              "across": "Y",
-              "space": "units",
-              "shape": "saw",
-              "wavelength": 90.0,
-              "amplitude": 77.94,
-              "from": "$depth",
-              "to": 90.0,
-              "softness": 2.6
+              "space": "local",
+              "from": -1.0,
+              "to": "$depth",
+              "softness": 0.1857
             },
             {
               "type": "AXIS",
@@ -10253,20 +10217,16 @@
           "name": "the hood, darker than the coat",
           "masks": [
             {
-              "type": "WAVES",
+              "type": "AXIS",
               "parts": [
                 "NECK",
                 "EARS"
               ],
               "axis": "X",
-              "across": "Y",
-              "space": "units",
-              "shape": "saw",
-              "wavelength": 90.0,
-              "amplitude": 77.94,
-              "from": "$depth",
-              "to": 90.0,
-              "softness": 2.6
+              "space": "local",
+              "from": -1.0,
+              "to": "$depth",
+              "softness": 0.1857
             },
             {
               "type": "AXIS",
@@ -11626,19 +11586,15 @@
           "name": "scrollwork banded round the neck",
           "masks": [
             {
-              "type": "WAVES",
+              "type": "AXIS",
               "parts": [
                 "NECK"
               ],
-              "axis": "X",
-              "across": "Y",
-              "shape": "saw",
-              "space": "part",
-              "wavelength": 90.0,
-              "amplitude": 77.94,
-              "softness": 0.1,
+              "axis": "Y",
+              "space": "local",
               "from": "$neckBandLow",
-              "to": "$neckBandHigh"
+              "to": "$neckBandHigh",
+              "softness": 0.1
             },
             {
               "type": "STROKES",
@@ -11770,19 +11726,15 @@
           "name": "scrollwork banded round the neck",
           "masks": [
             {
-              "type": "WAVES",
+              "type": "AXIS",
               "parts": [
                 "NECK"
               ],
-              "axis": "X",
-              "across": "Y",
-              "shape": "saw",
-              "space": "part",
-              "wavelength": 90.0,
-              "amplitude": 77.94,
-              "softness": 0.1,
+              "axis": "Y",
+              "space": "local",
               "from": "$neckBandLow",
-              "to": "$neckBandHigh"
+              "to": "$neckBandHigh",
+              "softness": 0.1
             },
             {
               "type": "STROKES",
@@ -16058,19 +16010,15 @@
           "emissive": true,
           "masks": [
             {
-              "type": "WAVES",
+              "type": "AXIS",
               "parts": [
                 "NECK"
               ],
               "axis": "X",
-              "across": "Y",
-              "shape": "saw",
-              "space": "part",
-              "wavelength": 90.0,
-              "amplitude": 77.94,
-              "softness": 0.12,
-              "from": 0.32,
-              "to": 0.58
+              "space": "local",
+              "from": -1.0,
+              "to": 0.0,
+              "softness": 0.12
             }
           ],
           "op": {
@@ -16191,19 +16139,15 @@
           "name": "a fan of light up the crest of the neck",
           "masks": [
             {
-              "type": "WAVES",
+              "type": "AXIS",
               "parts": [
                 "NECK"
               ],
               "axis": "X",
-              "across": "Y",
-              "shape": "saw",
-              "space": "part",
-              "wavelength": 90.0,
-              "amplitude": 77.94,
-              "softness": 0.12,
-              "from": 0.32,
-              "to": 0.58
+              "space": "local",
+              "from": -1.0,
+              "to": 0.0,
+              "softness": 0.12
             }
           ],
           "op": {
@@ -23742,19 +23686,15 @@
               "softness": 1.4
             },
             {
-              "type": "WAVES",
+              "type": "AXIS",
               "parts": [
                 "NECK"
               ],
               "axis": "X",
-              "across": "Y",
-              "space": "units",
-              "shape": "saw",
-              "wavelength": 90.0,
-              "amplitude": 77.94,
-              "from": 45.0,
-              "to": 90.0,
-              "softness": 4.5
+              "space": "local",
+              "from": -1.0,
+              "to": 0.8499,
+              "softness": 0.3214
             },
             {
               "type": "NOISE",
@@ -23871,19 +23811,15 @@
               "softness": 1.4
             },
             {
-              "type": "WAVES",
+              "type": "AXIS",
               "parts": [
                 "NECK"
               ],
               "axis": "X",
-              "across": "Y",
-              "space": "units",
-              "shape": "saw",
-              "wavelength": 90.0,
-              "amplitude": 77.94,
-              "from": 45.0,
-              "to": 90.0,
-              "softness": 4.5
+              "space": "local",
+              "from": -1.0,
+              "to": 0.8499,
+              "softness": 0.3214
             },
             {
               "type": "NOISE",
@@ -23962,7 +23898,7 @@
   "blurb": "A scalloped collar across the withers and a fanning column of ringed eyespots down the topline - a shield bug's back, on the horse's own colour.",
   "notes": [
     "Imported from the magic-gene intake, 2026-09-08. The source file is not valid JSON - it has arithmetic in it (`27.0 + \"$collarBorderWidth\"`), which the format has no notion of. Every computed bound here is written out as a constant or a knob instead.",
-    "The collar is a sine band read ACROSS the neck (axis Z) rather than along it, so it scallops round the withers instead of running up the crest. That is the opposite of what the 90/77.94 saw-wave trick does, and it is the right answer for a collar.",
+    "The collar is a sine band read ACROSS the neck (axis Z) rather than along it, so it scallops round the withers instead of running up the crest - the opposite of the crest band the other neck genes draw, and the right answer for a collar. (A collar square to the neck rather than to the world is now `'space': 'local', 'axis': 'Y'`; this one is deliberately in body space, because it wants the withers.)",
     "The shield-bug green ground was removed (owner's call) for the same reason as coccinella's black: it covered the horse before marking it. Only the collar and the eyespots remain, and they now sit on the base coat.",
     "The 'coloured' allele used to vary the GROUND and nothing else, so when the ground was removed the two alleles became byte-identical - a locus with two names for one outcome. The hue knob now drives the collar and the eyespot rings instead, which is what 'a colour the line carries' should always have meant on a gene whose ground was never the interesting part."
   ],
@@ -26143,20 +26079,16 @@
               "softness": 0.42
             },
             {
-              "type": "WAVES",
+              "type": "AXIS",
               "parts": [
                 "NECK"
               ],
+              "combine": "MAX",
               "axis": "X",
-              "across": "Y",
-              "space": "units",
-              "shape": "saw",
-              "wavelength": 90.0,
-              "amplitude": 77.94,
-              "from": 50.0,
-              "to": 90.0,
-              "softness": 9.0,
-              "combine": "MAX"
+              "space": "local",
+              "from": -1.0,
+              "to": 0.4927,
+              "softness": 0.6429
             },
             {
               "type": "AXIS",
@@ -26232,20 +26164,16 @@
               "softness": 0.42
             },
             {
-              "type": "WAVES",
+              "type": "AXIS",
               "parts": [
                 "NECK"
               ],
+              "combine": "MAX",
               "axis": "X",
-              "across": "Y",
-              "space": "units",
-              "shape": "saw",
-              "wavelength": 90.0,
-              "amplitude": 77.94,
-              "from": 50.0,
-              "to": 90.0,
-              "softness": 9.0,
-              "combine": "MAX"
+              "space": "local",
+              "from": -1.0,
+              "to": 0.4927,
+              "softness": 0.6429
             },
             {
               "type": "AXIS",
@@ -26320,20 +26248,16 @@
               "softness": 0.42
             },
             {
-              "type": "WAVES",
+              "type": "AXIS",
               "parts": [
                 "NECK"
               ],
+              "combine": "MAX",
               "axis": "X",
-              "across": "Y",
-              "space": "units",
-              "shape": "saw",
-              "wavelength": 90.0,
-              "amplitude": 77.94,
-              "from": 50.0,
-              "to": 90.0,
-              "softness": 9.0,
-              "combine": "MAX"
+              "space": "local",
+              "from": -1.0,
+              "to": 0.4927,
+              "softness": 0.6429
             },
             {
               "type": "AXIS",
@@ -26411,20 +26335,16 @@
               "softness": 0.42
             },
             {
-              "type": "WAVES",
+              "type": "AXIS",
               "parts": [
                 "NECK"
               ],
+              "combine": "MAX",
               "axis": "X",
-              "across": "Y",
-              "space": "units",
-              "shape": "saw",
-              "wavelength": 90.0,
-              "amplitude": 77.94,
-              "from": 50.0,
-              "to": 90.0,
-              "softness": 9.0,
-              "combine": "MAX"
+              "space": "local",
+              "from": -1.0,
+              "to": 0.4927,
+              "softness": 0.6429
             },
             {
               "type": "AXIS",
@@ -27100,20 +27020,16 @@
               "combine": "MAX"
             },
             {
-              "type": "WAVES",
+              "type": "AXIS",
               "parts": [
                 "NECK"
               ],
+              "combine": "SUBTRACT",
               "axis": "X",
-              "across": "Y",
-              "space": "units",
-              "shape": "saw",
-              "wavelength": 90.0,
-              "amplitude": 77.94,
-              "from": 50.0,
-              "to": 90.0,
-              "softness": 2.2,
-              "combine": "SUBTRACT"
+              "space": "local",
+              "from": -1.0,
+              "to": 0.4927,
+              "softness": 0.1571
             }
           ],
           "op": {
@@ -27180,20 +27096,16 @@
               "combine": "MAX"
             },
             {
-              "type": "WAVES",
+              "type": "AXIS",
               "parts": [
                 "NECK"
               ],
+              "combine": "SUBTRACT",
               "axis": "X",
-              "across": "Y",
-              "space": "units",
-              "shape": "saw",
-              "wavelength": 90.0,
-              "amplitude": 77.94,
-              "from": 50.0,
-              "to": 90.0,
-              "softness": 2.2,
-              "combine": "SUBTRACT"
+              "space": "local",
+              "from": -1.0,
+              "to": 0.4927,
+              "softness": 0.1571
             }
           ],
           "op": {
@@ -29829,19 +29741,15 @@
           "name": "scrollwork banded round the neck",
           "masks": [
             {
-              "type": "WAVES",
+              "type": "AXIS",
               "parts": [
                 "NECK"
               ],
-              "axis": "X",
-              "across": "Y",
-              "shape": "saw",
-              "space": "part",
-              "wavelength": 90.0,
-              "amplitude": 77.94,
-              "softness": 0.1,
+              "axis": "Y",
+              "space": "local",
               "from": 0.44,
-              "to": 0.58
+              "to": 0.58,
+              "softness": 0.1
             },
             {
               "type": "STROKES",
@@ -30054,19 +29962,15 @@
           "name": "scrollwork banded round the neck",
           "masks": [
             {
-              "type": "WAVES",
+              "type": "AXIS",
               "parts": [
                 "NECK"
               ],
-              "axis": "X",
-              "across": "Y",
-              "shape": "saw",
-              "space": "part",
-              "wavelength": 90.0,
-              "amplitude": 77.94,
-              "softness": 0.1,
+              "axis": "Y",
+              "space": "local",
               "from": 0.44,
-              "to": 0.58
+              "to": 0.58,
+              "softness": 0.1
             },
             {
               "type": "STROKES",

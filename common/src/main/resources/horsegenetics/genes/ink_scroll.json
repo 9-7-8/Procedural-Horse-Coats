@@ -74,19 +74,15 @@
           "name": "scrollwork banded round the neck",
           "masks": [
             {
-              "type": "WAVES",
+              "type": "AXIS",
               "parts": [
                 "NECK"
               ],
-              "axis": "X",
-              "across": "Y",
-              "shape": "saw",
-              "space": "part",
-              "wavelength": 90.0,
-              "amplitude": 77.94,
-              "softness": 0.1,
+              "axis": "Y",
+              "space": "local",
               "from": "$neckBandLow",
-              "to": "$neckBandHigh"
+              "to": "$neckBandHigh",
+              "softness": 0.1
             },
             {
               "type": "STROKES",
@@ -218,19 +214,15 @@
           "name": "scrollwork banded round the neck",
           "masks": [
             {
-              "type": "WAVES",
+              "type": "AXIS",
               "parts": [
                 "NECK"
               ],
-              "axis": "X",
-              "across": "Y",
-              "shape": "saw",
-              "space": "part",
-              "wavelength": 90.0,
-              "amplitude": 77.94,
-              "softness": 0.1,
+              "axis": "Y",
+              "space": "local",
               "from": "$neckBandLow",
-              "to": "$neckBandHigh"
+              "to": "$neckBandHigh",
+              "softness": 0.1
             },
             {
               "type": "STROKES",

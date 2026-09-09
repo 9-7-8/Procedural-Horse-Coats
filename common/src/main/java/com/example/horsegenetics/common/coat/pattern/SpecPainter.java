@@ -265,6 +265,7 @@ public final class SpecPainter {
         double t = switch (p.text("space", "part")) {
             case "body" -> normalise(coord, HorseSkinGeometry.bodyBounds(skin), axis);
             case "units" -> coord;
+            case "local" -> HorseSkinGeometry.local(skin, part, point).along(axis);
             default -> partBounds == null ? 0 : normalise(coord, partBounds, axis);
         };
         double from = v.get(p.value("from", 0.0), leg);
@@ -508,6 +509,7 @@ public final class SpecPainter {
                 double t = switch (p.text("space", "part")) {
                     case "body" -> normalise(coord, HorseSkinGeometry.bodyBounds(skin), axis);
                     case "units" -> coord;
+                    case "local" -> HorseSkinGeometry.local(skin, part, point).along(axis);
                     default -> normalise(coord, bounds.get(part), axis);
                 };
                 return band(t, v.get(p.value("from", 0.0), leg), v.get(p.value("to", 1.0), leg),
@@ -714,6 +716,7 @@ public final class SpecPainter {
                 double t = switch (p.text("space", "part")) {
                     case "body" -> normalise(coord, HorseSkinGeometry.bodyBounds(skin), across);
                     case "units" -> coord;
+                    case "local" -> HorseSkinGeometry.local(skin, part, point).along(across);
                     default -> normalise(coord, bounds.get(part), across);
                 };
                 String shape = p.text("shape", "sine");

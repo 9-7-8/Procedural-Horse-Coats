@@ -75,20 +75,16 @@
               "combine": "MAX"
             },
             {
-              "type": "WAVES",
+              "type": "AXIS",
               "parts": [
                 "NECK"
               ],
+              "combine": "SUBTRACT",
               "axis": "X",
-              "across": "Y",
-              "space": "units",
-              "shape": "saw",
-              "wavelength": 90.0,
-              "amplitude": 77.94,
-              "from": 50.0,
-              "to": 90.0,
-              "softness": 2.2,
-              "combine": "SUBTRACT"
+              "space": "local",
+              "from": -1.0,
+              "to": 0.4927,
+              "softness": 0.1571
             }
           ],
           "op": {
@@ -155,20 +151,16 @@
               "combine": "MAX"
             },
             {
-              "type": "WAVES",
+              "type": "AXIS",
               "parts": [
                 "NECK"
               ],
+              "combine": "SUBTRACT",
               "axis": "X",
-              "across": "Y",
-              "space": "units",
-              "shape": "saw",
-              "wavelength": 90.0,
-              "amplitude": 77.94,
-              "from": 50.0,
-              "to": 90.0,
-              "softness": 2.2,
-              "combine": "SUBTRACT"
+              "space": "local",
+              "from": -1.0,
+              "to": 0.4927,
+              "softness": 0.1571
             }
           ],
           "op": {

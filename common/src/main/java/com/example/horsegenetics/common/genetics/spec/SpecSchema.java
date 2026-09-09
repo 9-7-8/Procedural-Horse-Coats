@@ -72,8 +72,19 @@ public final class SpecSchema {
         }
     }
 
-    /** Which coordinate an {@code AXIS} mask measures against. */
-    public static final List<String> AXIS_SPACES = List.of("part", "body", "units");
+    /**
+     * Which coordinate an {@code AXIS} mask measures against.
+     *
+     * <p>{@code part} and {@code local} differ only on a <b>pitched</b> part,
+     * and there they differ completely. {@code part} normalises against the
+     * rest-pose axis-aligned bounding box, so on the 30&deg;-pitched neck a band
+     * on Y is a horizontal slice: it crosses the crest and the throat alike,
+     * which is a collar. {@code local} takes the pitch back out first, so the
+     * same band runs <b>along</b> the part's own edge - a stripe up the crest,
+     * the full length of the neck. Anything that wants to follow a part rather
+     * than cut across it wants {@code local}.
+     */
+    public static final List<String> AXIS_SPACES = List.of("part", "body", "units", "local");
 
     /** Which pigment reading a {@code PIGMENT} mask thresholds. */
     public static final List<String> PIGMENT_CHANNELS = List.of("darkness", "red", "black", "total");
@@ -177,7 +188,9 @@ public final class SpecSchema {
                         "X runs tail to nose, Y hoof to withers, Z centre to the horse's right"),
                 Param.choice("space", AXIS_SPACES,
                         "'part' normalises inside each part (a sock per leg), 'body' across the whole horse, "
-                                + "'units' takes from/to as raw body units"),
+                                + "'units' takes from/to as raw body units, 'local' normalises inside the "
+                                + "part's own box with its pitch taken out (a stripe along the crest, not a "
+                                + "collar round the throat)"),
                 Param.value("from", 0.0, "start of the solid band"),
                 Param.value("to", 1.0, "end of the solid band"),
                 Param.value("softness", 0.15, "fade width outside the band, same units as from/to")));
@@ -322,7 +335,8 @@ public final class SpecSchema {
                 Param.choice("space", AXIS_SPACES,
                         "how 'across' is measured, exactly as on an AXIS mask - and so the units "
                                 + "'from', 'to', 'amplitude', 'spacing' and 'softness' are in. "
-                                + "'wavelength' is always in body units"),
+                                + "'wavelength' is always in body units, which is why an amplitude "
+                                + "tuned in 'units' means something else entirely in 'part' or 'local'"),
                 Param.value("from", 0.0, "start of the band, before the sine displaces it"),
                 Param.value("to", 1.0, "end of the band"),
                 Param.value("wavelength", 8.0, "body units per full oscillation along 'axis'"),
@@ -398,7 +412,8 @@ public final class SpecSchema {
                 Param.value("lightness", 0.55, LIGHTNESS_DOC),
                 Param.choice("axis", List.of("X", "Y", "Z"), "the body axis the ramp runs along"),
                 Param.choice("space", AXIS_SPACES,
-                        "as on an AXIS mask - 'part' runs the ramp inside each part, which is what a mane wants"),
+                        "as on an AXIS mask - 'part' runs the ramp inside each part, which is what a mane "
+                                + "wants, and 'local' runs it along a pitched part's own length"),
                 Param.value("from", 0.0, "axis position the first stop sits at"),
                 Param.value("to", 1.0, "axis position the last stop sits at"),
                 Param.value("strength", 100.0, "percent of the way to the ramp colour"),

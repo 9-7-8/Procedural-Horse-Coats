@@ -233,7 +233,8 @@ window.HG = window.HG || {};
         var space = mask.space || "part";
         var t = space === "body" ? normalise(coord, geo.bodyBounds(skin), axis)
           : space === "units" ? coord
-            : normalise(coord, geo.bounds(skin, part), axis);
+            : space === "local" ? axisOf(geo.local(skin, part, point), axis)
+              : normalise(coord, geo.bounds(skin, part), axis);
         return band(t, get(values, mask.from, 0, legIndex), get(values, mask.to, 1, legIndex),
           get(values, mask.softness, 0.15, legIndex));
       }
@@ -398,7 +399,8 @@ window.HG = window.HG || {};
         var space9 = mask.space || "part";
         var t9 = space9 === "body" ? normalise(coord9, geo.bodyBounds(skin), across)
           : space9 === "units" ? coord9
-            : normalise(coord9, geo.bounds(skin, part), across);
+            : space9 === "local" ? axisOf(geo.local(skin, part, point), across)
+              : normalise(coord9, geo.bounds(skin, part), across);
         var shape9 = mask.shape || "sine";
         var lambda = Math.max(0.05, get(values, mask.wavelength, 8.0, legIndex));
         var amp = get(values, mask.amplitude, 0.5, legIndex);
@@ -699,13 +701,19 @@ window.HG = window.HG || {};
     return mixRgb(hexToRgb(stops[i]), hexToRgb(stops[i + 1]), scaled - i);
   }
 
+  /** One component of a {x,y,z} triple by body-axis name. */
+  function axisOf(p, axis) {
+    return axis === "X" ? p.x : axis === "Y" ? p.y : p.z;
+  }
+
   function axisPosition(op, values, legIndex, skin, part, point) {
     var axis = (op.axis || "X").toUpperCase();
     var coord = axis === "X" ? point.x : axis === "Y" ? point.y : point.z;
     var space = op.space || "part";
     var t = space === "body" ? normalise(coord, geo.bodyBounds(skin), axis)
       : space === "units" ? coord
-        : normalise(coord, geo.bounds(skin, part), axis);
+        : space === "local" ? axisOf(geo.local(skin, part, point), axis)
+          : normalise(coord, geo.bounds(skin, part), axis);
     var from = get(values, op.from, 0, legIndex);
     var to = get(values, op.to, 1, legIndex);
     return to === from ? 0 : clamp01((t - from) / (to - from));

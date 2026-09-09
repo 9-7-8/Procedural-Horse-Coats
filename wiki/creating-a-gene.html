@@ -415,11 +415,13 @@ RULES THAT ARE NOT OPTIONAL
 6. PIGMENT channel: use "black" to find a bay's points (body 0.2-0.45, points
    0.85+). "darkness" saturates on a bay (body ~0.84, points ~0.95).
    "spread" (body units) grows whatever the mask selected, applied after invert.
-7. The adult NECK's long axis is 60 degrees off horizontal. A Y band across it
-   is a COLLAR wrapping crest and throat alike. For a band ALONG the crest use
-   WAVES axis X across Y space units shape saw wavelength 90 amplitude 77.94
-   (slope tan60; 58+ = crest, 52 = upper side, 46 = lower side, below = throat).
-   For a band SQUARE ACROSS the neck use amplitude -25.98 instead.
+7. The NECK, HEAD, MUZZLE, MANE, EARS and TAIL are PITCHED, so their bounding
+   box is not their box and a "part"-space band across one is a horizontal
+   slice - a COLLAR wrapping crest and throat alike. Use space "local", which
+   takes the pitch out: axis X is across the part's depth (low = crest and
+   poll, high = throat), axis Y is along its length (a band there is a collar
+   square to the neck). Fractions run outside 0..1 on a pitched part, so a
+   crest band starts at -1.0. See gene-format.html#local-space.
 8. Size things in body units: structure inside a shape needs several units.
 9. Only WAVES repeats evenly; only WAVES shape=triangle|saw gives straight
    edges; only CRACKLE gives tiling polygons. Everything else is noise-derived

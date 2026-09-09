@@ -93,4 +93,60 @@ class GeneFilesTest {
         }
         assertEquals(List.of(), clashes, "two gene files share a priority - the paint order is then alphabetical");
     }
+
+    /**
+     * <b>A {@code WAVES} amplitude has to fit the space it is measured in.</b>
+     *
+     * <p>{@code from}, {@code to} and {@code amplitude} are in whatever
+     * {@code space} says, while {@code wavelength} is <i>always</i> in body
+     * units - and that asymmetry is a trap that has already been walked into
+     * eleven times. A band along the neck's crest used to be faked with a
+     * sawtooth longer than the horse ({@code wavelength} 90) at an
+     * {@code amplitude} of 77.94, which is a tilted plane and is correct in
+     * {@code units}. Six genes then copied the pair into {@code part} space,
+     * where an amplitude of 77.94 displaces the band twenty to forty
+     * <b>normalised spans</b> off the horse: all six selected exactly zero
+     * texels, on every horse and at every seed, and nothing said so. They
+     * loaded, they registered, they had icons, and their layer was inert.
+     *
+     * <p>So: in a normalised space, an amplitude much over 1 cannot be
+     * deliberate, because 1 already sweeps the band across the entire part. The
+     * bound is generous - it is looking for the 77.94 class of mistake, not
+     * policing taste. {@code units} is exempt: there an amplitude of 77.94 is
+     * the tilted plane and is fine.
+     *
+     * @see com.example.horsegenetics.common.coat.skin.HorseSkinGeometry#local
+     */
+    @Test
+    void noWaveIsDisplacedRightOffTheHorse() {
+        List<String> absurd = new ArrayList<>();
+        for (GeneSpec spec : GeneSpecLoader.fromClasspath().specs()) {
+            for (GeneSpec.ExpressionSpec expression : spec.expressions()) {
+                for (GeneSpec.Layer layer : expression.layers()) {
+                    for (GeneSpec.Mask mask : layer.masks()) {
+                        if (mask.type() != GeneSpec.MaskType.WAVES) {
+                            continue;
+                        }
+                        String space = mask.params().text("space", "part");
+                        if (space.equals("units")) {
+                            continue;   // raw body units - a big amplitude is a tilt, not a bug
+                        }
+                        GeneSpec.Value amplitude = mask.params().value("amplitude", 0.5);
+                        if (!(amplitude instanceof GeneSpec.Value.Const constant)) {
+                            continue;   // a knob; its range is the author's problem
+                        }
+                        if (Math.abs(constant.v()) > 3.0) {
+                            absurd.add(spec.key() + " / " + expression.id() + " / " + layer.name()
+                                    + ": amplitude " + constant.v() + " in '" + space + "' space");
+                        }
+                    }
+                }
+            }
+        }
+        assertEquals(List.of(), absurd,
+                "a WAVES amplitude far above 1 in a normalised space displaces the band clean off "
+                        + "the part, so the mask selects nothing at all and does it silently. If "
+                        + "you want a band that follows a pitched part, use space 'local' - see "
+                        + "wiki/gene-format.html#local-space.");
+    }
 }

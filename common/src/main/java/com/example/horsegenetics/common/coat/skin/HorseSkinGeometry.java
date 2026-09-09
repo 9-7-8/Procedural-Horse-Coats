@@ -303,6 +303,30 @@ public final class HorseSkinGeometry {
             return new BodyPoint(mzMax - mz, myMax - my, -mx);
         }
 
+        /**
+         * The inverse of {@link #posed}'s frame change, as fractions: body
+         * space back to model space, model space back into the part's local
+         * box by undoing the pivot and the pitch, then each local coordinate
+         * divided by that edge's length and flipped to run the body way.
+         */
+        BodyPoint local(Part part, BodyPoint p) {
+            Raw r = raw(part);
+            double mx = -p.z();
+            double my = myMax - p.y();
+            double mz = mzMax - p.x();
+            double a = my - r.py;
+            double b = mz - r.pz;
+            double cos = Math.cos(r.pitch);
+            double sin = Math.sin(r.pitch);
+            double lx = mx - r.px;
+            double ly = a * cos + b * sin;
+            double lz = -a * sin + b * cos;
+            return new BodyPoint(
+                    1.0 - (lz - r.oz) / r.d,
+                    1.0 - (ly - r.oy) / r.h,
+                    1.0 - (lx - r.ox) / r.w);
+        }
+
         BodyPoint posedNormal(Part part, Face face) {
             Raw r = raw(part);
             // The face's outward direction in local space. Every body axis is
@@ -353,6 +377,39 @@ public final class HorseSkinGeometry {
 
     public static Bounds bounds(Skin skin, Part part) {
         return mesh(skin).bounds(part);
+    }
+
+    /**
+     * <b>Where a body-space point sits inside the part's own box</b>, as three
+     * fractions in 0..1 - the part's <i>local frame</i>, with its rest-pose
+     * pitch taken back out.
+     *
+     * <p>This is the answer to "along the neck" and "across the neck", which the
+     * axis-aligned {@link #bounds} cannot express: a pitched part's AABB is not
+     * the part, so a band on body Y across a 30&deg;-pitched neck is a collar
+     * round the throat and the crest alike, not a stripe up the crest. Here the
+     * pitch is undone first, so each fraction runs along one edge of the actual
+     * cuboid however it is tilted.
+     *
+     * <p>The three fractions are named for the <b>body</b> axis each is paired
+     * with and run the same way body space does - X toward the nose, Y upward,
+     * Z toward the horse's right - because a gene author reading
+     * {@code "axis": "X"} should get the same direction whichever space they
+     * asked for. Body and local axes run against each other on all three
+     * (see {@link Mesh#posed}), so each fraction is a flipped local one.
+     *
+     * <p>On an <b>unpitched</b> part the box <i>is</i> its AABB and this returns
+     * exactly what normalising against {@link #bounds} does; the two only
+     * diverge on the neck, the head, the muzzle, the mane, the ears and the
+     * tail. {@code HorseSkinGeometryTest} pins that equivalence.
+     *
+     * <p>Values outside 0..1 are possible and are not clamped: a texel on the
+     * mane sampled against the neck is legitimately off the end of it, and the
+     * band arithmetic in {@code SpecPainter} wants to see that rather than have
+     * it folded back onto the edge.
+     */
+    public static BodyPoint local(Skin skin, Part part, BodyPoint point) {
+        return mesh(skin).local(part, point);
     }
 
     public static Bounds bodyBounds() {

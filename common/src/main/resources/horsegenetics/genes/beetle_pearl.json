@@ -110,19 +110,15 @@
           "name": "a pale cap over the poll",
           "masks": [
             {
-              "type": "WAVES",
+              "type": "AXIS",
               "parts": [
                 "HEAD"
               ],
               "axis": "X",
-              "across": "Y",
-              "shape": "saw",
-              "space": "part",
-              "wavelength": 90.0,
-              "amplitude": 77.94,
-              "softness": 0.1,
-              "from": 0.58,
-              "to": 1.1
+              "space": "local",
+              "from": -1.0,
+              "to": 0.0,
+              "softness": 0.1
             }
           ],
           "op": {
@@ -228,19 +224,15 @@
           "name": "a pale cap over the poll",
           "masks": [
             {
-              "type": "WAVES",
+              "type": "AXIS",
               "parts": [
                 "HEAD"
               ],
               "axis": "X",
-              "across": "Y",
-              "shape": "saw",
-              "space": "part",
-              "wavelength": 90.0,
-              "amplitude": 77.94,
-              "softness": 0.1,
-              "from": 0.58,
-              "to": 1.1
+              "space": "local",
+              "from": -1.0,
+              "to": 0.0,
+              "softness": 0.1
             }
           ],
           "op": {

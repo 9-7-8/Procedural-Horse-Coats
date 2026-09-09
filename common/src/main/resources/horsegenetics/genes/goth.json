@@ -28,8 +28,8 @@
     },
     {
       "name": "depth",
-      "min": 48.0,
-      "max": 55.0
+      "min": 0.1356,
+      "max": 0.6356
     }
   ],
   "expressions": [
@@ -45,20 +45,16 @@
           "name": "the hood, depigmented",
           "masks": [
             {
-              "type": "WAVES",
+              "type": "AXIS",
               "parts": [
                 "NECK",
                 "EARS"
               ],
               "axis": "X",
-              "across": "Y",
-              "space": "units",
-              "shape": "saw",
-              "wavelength": 90.0,
-              "amplitude": 77.94,
-              "from": "$depth",
-              "to": 90.0,
-              "softness": 2.6
+              "space": "local",
+              "from": -1.0,
+              "to": "$depth",
+              "softness": 0.1857
             },
             {
               "type": "AXIS",
@@ -104,20 +100,16 @@
           "name": "the hood, darker than the coat",
           "masks": [
             {
-              "type": "WAVES",
+              "type": "AXIS",
               "parts": [
                 "NECK",
                 "EARS"
               ],
               "axis": "X",
-              "across": "Y",
-              "space": "units",
-              "shape": "saw",
-              "wavelength": 90.0,
-              "amplitude": 77.94,
-              "from": "$depth",
-              "to": 90.0,
-              "softness": 2.6
+              "space": "local",
+              "from": -1.0,
+              "to": "$depth",
+              "softness": 0.1857
             },
             {
               "type": "AXIS",

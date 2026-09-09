@@ -82,8 +82,10 @@ window.HG = window.HG || {};
       params: [
         parts("parts", "restrict to these parts (and, in 'part' space, measure inside each one)"),
         choice("axis", ["Y", "X", "Z"], "X tail-to-nose, Y hoof-to-withers, Z centre-to-right"),
-        choice("space", ["part", "body", "units"],
-          "'part' normalises inside each part - 'to: 0.4' is the lower 40% of EVERY leg"),
+        choice("space", ["part", "body", "units", "local"],
+          "'part' normalises inside each part - 'to: 0.4' is the lower 40% of EVERY leg; "
+          + "'local' does the same inside the part's own tilted box, so a band follows the "
+          + "neck's crest instead of slicing across it"),
         v("from", 0.0, "start of the solid band"),
         v("to", 1.0, "end of the solid band", { min: 0, max: 1, step: 0.01 }, 0.4),
         v("softness", 0.15, "fade width outside the band")
@@ -262,7 +264,9 @@ window.HG = window.HG || {};
         choice("axis", ["X", "Y", "Z"], "the axis the wave runs along"),
         choice("across", ["Y", "X", "Z"], "the axis the wave displaces the band on"),
         choice("shape", ["sine", "triangle", "saw"], "curved, folded into teeth, or cut back square"),
-        choice("space", ["part", "body", "units"], "how 'across' is measured - as on AXIS"),
+        choice("space", ["part", "body", "units", "local"],
+          "how 'across' is measured - as on AXIS. Note 'amplitude' is in this space and "
+          + "'wavelength' never is"),
         v("from", 0.0, "start of the band, before the sine displaces it"),
         v("to", 1.0, "end of the band", { min: -2, max: 2, step: 0.01 }),
         v("wavelength", 8.0, "body units per full oscillation", { min: 0.5, max: 40, step: 0.5 }),
@@ -350,7 +354,9 @@ window.HG = window.HG || {};
         v("hueSpan", 60, "degrees of hue the ramp travels; negative runs the other way",
           { min: -360, max: 360, step: 5 }),
         choice("axis", ["X", "Y", "Z"], "the axis the ramp runs along"),
-        choice("space", ["part", "body", "units"], "'part' runs the ramp inside each part - what a mane wants"),
+        choice("space", ["part", "body", "units", "local"],
+          "'part' runs the ramp inside each part - what a mane wants; 'local' runs it "
+          + "along a pitched part's own length"),
         v("from", 0.0, "axis position the first stop sits at"),
         v("to", 1.0, "axis position the last stop sits at"),
         v("strength", 100, "percent of the way to the ramp colour", { min: 0, max: 100, step: 1 }),

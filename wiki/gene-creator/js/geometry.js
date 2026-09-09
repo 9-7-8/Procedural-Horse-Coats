@@ -289,6 +289,40 @@ window.HG = window.HG || {};
     },
 
     /**
+     * Where a body-space point sits inside the part's own box, as three
+     * fractions - a port of HorseSkinGeometry.local, and the inverse of the
+     * frame change `posed` applies.
+     *
+     * This is what "space": "local" reads. On an unpitched part it is exactly
+     * the part-space normalisation; on the neck, the head, the muzzle, the
+     * mane, the ears and the tail it is not, because their AABB is not their
+     * box - which is the whole reason a band "along the crest" cannot be
+     * written in body space. Fractions outside 0..1 are real and are not
+     * clamped: the texel grid is the AABB, so a pitched part's corners sit off
+     * the ends of its own box.
+     */
+    local: function (skin, part, point) {
+      var pd = this.mesh(skin).parts[part];
+      if (!pd) return { x: 0, y: 0, z: 0 };
+      var r = pd.raw;
+      var m = this.mesh(skin).modelMax;
+      var mx = -point.z;
+      var my = m.y - point.y;
+      var mz = m.z - point.x;
+      var a = my - r.py;
+      var b = mz - r.pz;
+      var cos = Math.cos(r.pitch), sin = Math.sin(r.pitch);
+      var lx = mx - r.px;
+      var ly = a * cos + b * sin;
+      var lz = -a * sin + b * cos;
+      return {
+        x: 1.0 - (lz - r.oz) / r.d,
+        y: 1.0 - (ly - r.oy) / r.h,
+        z: 1.0 - (lx - r.ox) / r.w
+      };
+    },
+
+    /**
      * The outward direction of a posed face, in body space. Mirrors
      * HorseSkinGeometry.posedNormal: the offsets cancel on a direction, so
      * only the pitch, the axis swap and the three sign flips survive.

@@ -387,7 +387,7 @@
 <tbody>
 <tr><td><code>ALL</code></td><td>&mdash;</td><td>Everywhere this horse has skin.</td></tr>
 <tr><td><code>PARTS</code></td><td><code>parts</code></td><td>Named boxes &mdash; a mane stripe, black ears.</td></tr>
-<tr><td><code>AXIS</code></td><td><code>axis</code> (Y/X/Z), <code>space</code> (part/body/units), <code>from</code> 0, <code>to</code> 1, <code>softness</code> 0.15</td><td>A soft band along the horse. <code>space: "part"</code> normalises inside <em>each</em> part, so <code>to: 0.4</code> is the lower 40% of every leg &mdash; socks. X runs tail to nose, Y hoof to withers, Z centre to the horse's right.</td></tr>
+<tr><td><code>AXIS</code></td><td><code>axis</code> (Y/X/Z), <code>space</code> (part/body/units/<strong>local</strong>), <code>from</code> 0, <code>to</code> 1, <code>softness</code> 0.15</td><td>A soft band along the horse. <code>space: "part"</code> normalises inside <em>each</em> part, so <code>to: 0.4</code> is the lower 40% of every leg &mdash; socks. X runs tail to nose, Y hoof to withers, Z centre to the horse's right. <strong><code>space: "local"</code> is the one to reach for on a <em>pitched</em> part</strong> &mdash; see <a href="#local-space">the note below</a>.</td></tr>
 <tr><td><code>CENTERLINE</code></td><td><code>halfWidth</code> 1.0, <code>softness</code> 0.35, <code>offset</code> 0</td><td>A stripe down the middle. A blaze on <code>FACE</code>; a dorsal stripe if you multiply it by a high <code>AXIS</code> band on <code>BARREL</code>.</td></tr>
 <tr><td><code>STRIPES</code></td><td><code>seed</code>, <code>spacing</code> 3.0, <code>duty</code> 0.45, <code>warp</code> 1.0</td><td><code>BodyStripes</code> &mdash; parallel bands with a chevron slant. Body units; the adult barrel is 22 long. The built-in striped genes each have their own field now (<a href="body-space.html#stripe-fields">why</a>); this is the one a data-driven gene gets.</td></tr>
 <tr><td><code>DAPPLES</code></td><td><code>seed</code>, <code>spacing</code> 3.5, <code>warp</code> 0.45, <code>edge0</code> 0.35, <code>edge1</code> 0.78</td><td><code>BodyNoise.cellDistance</code> &mdash; dapples, rosettes, appaloosa spots.</td></tr>
@@ -481,7 +481,7 @@ draws concentric; <code>radius</code> is the only one that may differ.</p></td><
 <tr><td><code>SPECKLE</code></td><td><code>seed</code>, <code>spacing</code> 0.7, <code>size</code> 0.45, <code>density</code> 0.5, <code>clumping</code> 0, <code>clumpScale</code> 7.0, <code>softness</code> 0.3</td><td>Fine stipple with no boundary anywhere &mdash; dust, ticking, speckling. A texel is about 0.5 body units, so <code>spacing</code> under that is scattered single pixels. <code>clumping</code> lets a slow field push the density around, which is the difference between even static and drifts of it.</td></tr>
 <tr><td><code>STROKES</code></td><td><code>seed</code>, <code>spacing</code> 3.0, <code>length</code> 12.0, <code>axis</code> (X/Y/Z), <code>width</code> 0.8, <code>curl</code> 0.35, <code>softness</code> 0.25</td><td><strong><code>width</code> has to stay well under <code>spacing</code></strong>, or neighbouring strokes touch and the field resolves as a wash rather than as lines &mdash; Zebra&rsquo;s Coat shipped with a width of up to 10 body units against a spacing of 3 and came out as a solid white neck. Tapering, curving lines that fork and pinch out &mdash; scratches, riblines, brindle bars, wisps. It is the <em>level set</em> of the noise field sampled in a frame stretched along <code>axis</code>, which is why the strokes end in points and wander rather than sitting parallel like a comb. <code>width</code> and <code>softness</code> are in body units, not fractions: the mask divides by the field\u2019s own gradient so a stroke is the width you asked for everywhere along its run, rather than a hairline where the noise is steep and a blot where it is flat.</td></tr>
 <tr><td><code>SPIRAL</code></td><td><code>seed</code>, <code>radius</code> 4.0, <code>turns</code> 2.0, <code>width</code> 0.5, <code>axis</code> (Z/X/Y), <code>offset</code> 0, <code>softness</code> 0.2</td><td>One closed spiral per named part &mdash; the filigree curl. The only mask that draws a <em>figure</em> rather than a field, so it takes its centre from the part's bounds; <code>offset</code> slides it along the part's long axis.</td></tr>
-<tr><td><code>WAVES</code></td><td><code>seed</code>, <code>axis</code> (X/Y/Z), <code>across</code> (Y/X/Z), <code>shape</code> (sine/triangle/saw), <code>space</code> (part/body/units), <code>from</code> 0, <code>to</code> 1.0, <code>wavelength</code> 8.0, <code>amplitude</code> 0.5, <code>spacing</code> 0, <code>phase</code> 0, <code>softness</code> 0.15</td><td>An <code>AXIS</code> band whose edges are displaced by a <b>periodic wave</b> running along another axis &mdash; a boundary scalloped into even lobes. It is the one shape in this vocabulary that repeats on purpose: everything else that curves here curves because noise bent it, and noise never comes back to the same place twice. <code>from</code>, <code>to</code>, <code>amplitude</code> and <code>spacing</code> are in whatever <code>space</code> says, exactly as on <code>AXIS</code>; <code>wavelength</code> is always in body units. Leave <code>spacing</code> at 0 for one edge (Waves&rsquo; lobed field), or raise it to repeat the band into parallel ribbons that rise and fall together (Angler&rsquo;s strings of lights), and then <code>phase</code> decides whether they stay in step. <code>shape</code> picks the waveform: <code>sine</code> scallops, <code>triangle</code> folds the edge into teeth with <em>straight</em> sides, and <code>saw</code> ramps and then cuts back square into a row of spears all raked one way. Those two are the only way to ask this vocabulary for an edge made of straight lines &mdash; everything noise-derived rounds off however far the softness is wound down, which is why Cleave&rsquo;s boundary could not be drawn before.</td></tr>
+<tr><td><code>WAVES</code></td><td><code>seed</code>, <code>axis</code> (X/Y/Z), <code>across</code> (Y/X/Z), <code>shape</code> (sine/triangle/saw), <code>space</code> (part/body/units/local), <code>from</code> 0, <code>to</code> 1.0, <code>wavelength</code> 8.0, <code>amplitude</code> 0.5, <code>spacing</code> 0, <code>phase</code> 0, <code>softness</code> 0.15</td><td>An <code>AXIS</code> band whose edges are displaced by a <b>periodic wave</b> running along another axis &mdash; a boundary scalloped into even lobes. It is the one shape in this vocabulary that repeats on purpose: everything else that curves here curves because noise bent it, and noise never comes back to the same place twice. <code>from</code>, <code>to</code>, <code>amplitude</code> and <code>spacing</code> are in whatever <code>space</code> says, exactly as on <code>AXIS</code>; <code>wavelength</code> is always in body units. Leave <code>spacing</code> at 0 for one edge (Waves&rsquo; lobed field), or raise it to repeat the band into parallel ribbons that rise and fall together (Angler&rsquo;s strings of lights), and then <code>phase</code> decides whether they stay in step. <code>shape</code> picks the waveform: <code>sine</code> scallops, <code>triangle</code> folds the edge into teeth with <em>straight</em> sides, and <code>saw</code> ramps and then cuts back square into a row of spears all raked one way. Those two are the only way to ask this vocabulary for an edge made of straight lines &mdash; everything noise-derived rounds off however far the softness is wound down, which is why Cleave&rsquo;s boundary could not be drawn before.</td></tr>
 <tr><td><code>CRACKLE</code></td><td><code>seed</code>, <code>scale</code> 5.0, <code>gap</code> 0.5, <code>warp</code> 0.35, <code>chance</code> 1.0, <code>softness</code> 0.08</td><td>Polygons that tile, each filled solid, separated by a channel of even width &mdash; a giraffe, a cracked glaze, a dry lake bed. <code>DAPPLES</code> and <code>SPOTS</code> both draw round marks however hard they are pushed, because both measure to a cell&rsquo;s <em>centre</em>; this measures to the wall <em>between</em> two cells, which is what makes the edges straight and the corners meet three at a time. <code>warp</code> pushes the polygons out of true (0 is a regular tiling), <code>gap</code> is the channel width, and <code>softness</code> is small by default because the point of the mask is the one hard edge in the set. Qular is the gene built on it.</td></tr>
 </tbody>
 </table>
@@ -519,6 +519,69 @@ draws concentric; <code>radius</code> is the only one that may differ.</p></td><
 <tr><td><code>SPECKLE</code></td><td><code>spacing</code> 0.5</td></tr>
 </tbody>
 </table>
+</div>
+
+<h3 id="local-space">A band along a pitched part &mdash; <code>space: "local"</code></h3>
+
+<p>
+    <strong>Six parts are tilted</strong>: the neck, the head, the muzzle, the mane, the
+    ears and the tail. For all of them, the box the pipeline measures against is the
+    rest-pose <em>bounding box</em>, which is not the part &mdash; the adult neck is a
+    4&times;12&times;7 cuboid pitched 30&deg;, and its AABB comes out 4&times;13.9&times;12.1,
+    nearly twice as deep. So an ordinary <code>space: "part"</code> band on Y across the
+    neck is a <em>horizontal slice</em>: it crosses the crest and the throat alike, which
+    is a collar and not a stripe. That is exactly the bug that put
+    <a href="gene-goth.html">goth</a>&rsquo;s hood on the underside of the neck.
+</p>
+
+<p>
+    <code>space: "local"</code> takes the pitch back out before normalising, so each
+    fraction runs along one edge of the actual cuboid. On the neck and the head that gives
+    you the two things body space cannot say:
+</p>
+
+<ul>
+    <li><code>"axis": "X"</code> is <strong>across the part&rsquo;s depth</strong> &mdash;
+        low is the <b>crest</b> (the mane sits just off that face) and the poll, high is
+        the throat. A band here is a stripe running the whole length of the neck.</li>
+    <li><code>"axis": "Y"</code> is <strong>along the part&rsquo;s length</strong> &mdash;
+        a band here is a true <b>collar</b>, square to the neck rather than to the world.</li>
+</ul>
+
+<p>
+    On an <strong>unpitched</strong> part the box is its own AABB and <code>local</code> is
+    exactly <code>part</code>, to the last bit &mdash; so there is never a reason to worry
+    about which to use on a leg or the barrel.
+</p>
+
+<div class="note warn">
+    <span class="label">Fractions run outside 0..1, and that is not a bug</span>
+    <p>
+        The texel grid is the bounding box, so a pitched part&rsquo;s corner texels sit off
+        the ends of its own cuboid: on the adult neck <code>local</code> X spans
+        &minus;0.72 to 1.72 and Y spans &minus;0.23 to 1.23, and nothing clamps them. A band
+        that wants &ldquo;everything from the crest to here&rdquo; should therefore start at
+        <code>-1.0</code> rather than at <code>0.0</code>, which is what the crest genes do.
+    </p>
+</div>
+
+<div class="note">
+    <span class="label">Historical &mdash; the 90/77.94 saw-wave trick</span>
+    <p>
+        Before this space existed, a band along the crest was faked with a
+        <code>WAVES</code> mask whose sawtooth was longer than the horse
+        (<code>wavelength</code> 90) at an amplitude of 77.94, so the displacement never
+        wrapped and the band came out as a tilted plane at
+        <code>2A/&lambda; = tan(60&deg;)</code>. It worked, and it was the neck&rsquo;s own
+        geometry written out by hand in eleven gene files that
+        <code>HorseSkinGeometry</code> knew nothing about. It was also only ever right in
+        <code>space: "units"</code>: <code>amplitude</code> is in whatever
+        <code>space</code> says while <code>wavelength</code> never is, so the six genes
+        that copied the trick into <code>space: "part"</code> displaced their band twenty
+        to forty <em>normalised spans</em> off the horse and selected nothing at all. If
+        you meet those two numbers in an old file, they mean
+        <code>{"space": "local", "axis": "X"}</code>.
+    </p>
 </div>
 
 <h3 id="bounds">Where the parts actually are</h3>
@@ -604,7 +667,7 @@ through black hairs look like. On a chestnut nothing was masked and the op colla
 <tr><td><code>TINT</code></td><td><code>red</code>, <code>green</code>, <code>blue</code> (percent, signed), <code>opacity</code> 100</td><td>Adds signed colour. The accumulator is an uncapped <code>int</code>, so <code>-200</code> on all three channels reads black over <em>any</em> coat and <code>+300</code> on blue is blue whatever else the horse carries. That headroom is the point: your gene never has to know what else is there.</td></tr>
 <tr><td><code>TOWARD</code></td><td><code>color</code>, <code>hue</code> &minus;1, <code>saturation</code> 0.8, <code>lightness</code> 0.55, <code>strength</code> 100, <code>opacity</code> 100</td><td>Walks the texel toward a colour, reading what it already <em>looks</em> like &mdash; so one number lands the same on a black mane and a cremello one, and keeps the strand shading. The pink-hair move.</td></tr>
 <tr><td><code>FLAT</code></td><td><code>color</code>, <code>hue</code> &minus;1, <code>saturation</code> 0.8, <code>lightness</code> 0.55, <code>opacity</code> 100</td><td>Flat paint that <em>replaces</em> what is under it. Order-dependent, so reserve it for a <code>masks</code> expression that must look identical on any base.</td></tr>
-<tr><td><code>RAMP</code></td><td><code>colors</code> (or <code>hue</code> 0 + <code>hueSpan</code> 60), <code>saturation</code> 0.8, <code>lightness</code> 0.55, <code>axis</code> (X/Y/Z), <code>space</code> (part/body/units), <code>from</code> 0, <code>to</code> 1, <code>strength</code> 100, <code>opacity</code> 100</td><td><code>TOWARD</code> with the colour running <em>along an axis</em> &mdash; a spectral tail, an aurora band, a mane fading root to tip. Give it <code>colors</code> for named stops (it interpolates between them, so the result is continuous rather than banded), or leave <code>colors</code> out and it sweeps <code>hueSpan</code> degrees of the wheel from <code>hue</code>.</td></tr>
+<tr><td><code>RAMP</code></td><td><code>colors</code> (or <code>hue</code> 0 + <code>hueSpan</code> 60), <code>saturation</code> 0.8, <code>lightness</code> 0.55, <code>axis</code> (X/Y/Z), <code>space</code> (part/body/units/local), <code>from</code> 0, <code>to</code> 1, <code>strength</code> 100, <code>opacity</code> 100</td><td><code>TOWARD</code> with the colour running <em>along an axis</em> &mdash; a spectral tail, an aurora band, a mane fading root to tip. Give it <code>colors</code> for named stops (it interpolates between them, so the result is continuous rather than banded), or leave <code>colors</code> out and it sweeps <code>hueSpan</code> degrees of the wheel from <code>hue</code>.</td></tr>
 <tr><td><code>PALETTE</code></td><td><code>colors</code> (or <code>hue</code> 0 + <code>hueSpread</code> 40), <code>saturation</code> 0.8, <code>lightness</code> 0.55, <code>seed</code>, <code>scale</code> 5.0, <code>strength</code> 100, <code>opacity</code> 100</td><td><code>TOWARD</code> with the colour drawn <em>per cell</em> &mdash; opal, nebula, galaxy. Adjacent cells take unrelated entries and meet at a wall, which is exactly what separates "iridescent" from "gradient"; <code>RAMP</code> is the other one.</td></tr>
 <tr><td><code>INVERT</code></td><td><code>amount</code> 100, <code>opacity</code> 100</td><td>The photographic negative of whatever the texel already looks like - white to black, orange to blue, <code>amount: 50</code> to flat grey. The only colour op that is a <em>function of the texel</em> rather than a walk toward a colour, which is why it is also the only one whose place in the paint order really matters: put it late, or it inverts a horse that is not finished yet.</td></tr>
 </tbody>

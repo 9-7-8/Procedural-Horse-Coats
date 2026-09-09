@@ -563,6 +563,43 @@ bodyZ = -mx;                // 0 on the centre plane,        + to the horse's ri
     </p>
 </div>
 
+<h3 id="local-frame">Asking a part what shape it is</h3>
+
+<p>
+    The AABB approximation above is fine for <em>looking a texel up</em> and wrong for
+    saying &ldquo;along this part&rdquo;. On the six pitched parts &mdash; neck, head,
+    muzzle, mane, ears, tail &mdash; a band on body Y is a horizontal slice, so a stripe
+    meant for the crest comes out as a collar wrapping the throat as well. Eleven gene
+    files used to work around that with a sawtooth longer than the horse, tilted by hand
+    to <code>tan(60&deg;)</code>, which is the neck&rsquo;s own long axis written out as two
+    constants in files this class had never heard of
+    (<a href="known-gaps.html#gap-103">gap 103</a>).
+</p>
+
+<p>
+    <code>HorseSkinGeometry.local(skin, part, point)</code> is the replacement:
+    the inverse of <code>posed</code>&rsquo;s frame change, returning the point as three
+    fractions along the edges of the part&rsquo;s <em>actual</em> cuboid. Each fraction is
+    named for the body axis it pairs with and runs the same way, so
+    <code>"axis": "X"</code> still means &ldquo;toward the nose&rdquo; in spirit &mdash; on
+    the neck it is across the part&rsquo;s <strong>depth</strong>, low at the crest (the
+    face the mane box sits on) and high at the throat, while <code>"axis": "Y"</code> runs
+    <strong>along the neck&rsquo;s length</strong> and a band there is a collar square to
+    the neck. It is what <code>space: "local"</code> reads on <code>AXIS</code>,
+    <code>WAVES</code> and <code>RAMP</code>.
+</p>
+
+<p>
+    Two properties are worth knowing and are both pinned by
+    <code>PartLocalFrameTest</code>. On an <strong>unpitched</strong> part the box is its
+    own AABB, so <code>local</code> and part-space normalisation agree to the bit &mdash;
+    there is never a reason to think about which to use on a leg. And the fractions
+    <strong>run outside 0..1</strong> on a pitched part, because the texel grid is the
+    bounding box and its corners sit off the ends of the real cuboid: on the adult neck
+    local X spans &minus;0.72 to 1.72. Nothing clamps them, which is why a band meaning
+    &ldquo;everything from the crest to here&rdquo; starts at <code>-1.0</code>.
+</p>
+
 <h3>The texture is an atlas, not a wrap</h3>
 
 <p>

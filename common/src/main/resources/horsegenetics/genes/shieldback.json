@@ -8,7 +8,7 @@
   "blurb": "A scalloped collar across the withers and a fanning column of ringed eyespots down the topline - a shield bug's back, on the horse's own colour.",
   "notes": [
     "Imported from the magic-gene intake, 2026-09-08. The source file is not valid JSON - it has arithmetic in it (`27.0 + \"$collarBorderWidth\"`), which the format has no notion of. Every computed bound here is written out as a constant or a knob instead.",
-    "The collar is a sine band read ACROSS the neck (axis Z) rather than along it, so it scallops round the withers instead of running up the crest. That is the opposite of what the 90/77.94 saw-wave trick does, and it is the right answer for a collar.",
+    "The collar is a sine band read ACROSS the neck (axis Z) rather than along it, so it scallops round the withers instead of running up the crest - the opposite of the crest band the other neck genes draw, and the right answer for a collar. (A collar square to the neck rather than to the world is now `'space': 'local', 'axis': 'Y'`; this one is deliberately in body space, because it wants the withers.)",
     "The shield-bug green ground was removed (owner's call) for the same reason as coccinella's black: it covered the horse before marking it. Only the collar and the eyespots remain, and they now sit on the base coat.",
     "The 'coloured' allele used to vary the GROUND and nothing else, so when the ground was removed the two alleles became byte-identical - a locus with two names for one outcome. The hue knob now drives the collar and the eyespot rings instead, which is what 'a colour the line carries' should always have meant on a gene whose ground was never the interesting part."
   ],

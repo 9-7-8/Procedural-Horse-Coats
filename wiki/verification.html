@@ -35,6 +35,59 @@
     </p>
 </div>
 
+<h2 id="local-space">&sect;0-AW &mdash; A band can follow a pitched part, and six dead layers woke up (2026-09-09, NOT looked at)</h2>
+
+<p>
+    <a href="known-gaps.html#gap-103">Gap 103</a>. The neck&rsquo;s own geometry used to be
+    written out by hand in eleven gene files as a sawtooth of wavelength 90 at an amplitude
+    of 77.94; it is now <code>"space": "local"</code>, which asks the part what shape it is.
+    Six of the eleven had that pair in a normalised space where it cannot work, and were
+    selecting <strong>exactly zero texels</strong> &mdash; so those six genes have a layer
+    that has never been seen by anyone, on any horse.
+</p>
+
+<div class="note">
+    <span class="label">What is already proven here, so you need not check it</span>
+    <p>
+        The four genes whose bands did land and whose knobs did not move &mdash; cosmic,
+        shark, stars and suit &mdash; are <strong>byte-identical</strong> in the coat-bake
+        golden, so the conversion is a refactor for them and there is nothing to look at.
+        The eleven all still parse, the creator agrees with the game (the parity fixtures
+        reach the new space), and the calibration has three tests under it now.
+    </p>
+</div>
+
+<ul>
+<li><strong>The six that were inert.</strong> Each of these draws something on the neck or
+    the head that has never existed before, so this is <em>new art</em>, not a regression
+    check: <a href="gene-beetle-pearl.html">beetle pearl</a> (a pale cap over the poll),
+    <a href="gene-diamond-scutes.html">diamond scutes</a> (a narrow chain up the crest),
+    <a href="gene-duskfall-speckle.html">duskfall speckle</a> (speckling thickest along the
+    crest), <a href="gene-ink-scroll.html">ink scroll</a> and
+    <a href="gene-wyrmwood-sigils.html">wyrmwood sigils</a> (a collar square to the neck),
+    <a href="gene-nebula-points.html">nebula points</a> (a fan up the crest). The question
+    for each is only whether it looks worth having &mdash; the icons say yes, a horse in a
+    world is the real test.</li>
+<li><strong>Goth&rsquo;s hood, which is the one with history.</strong> It went on the
+    <em>underside</em> of the neck once and had to be reported twice. It should sit along
+    the crest and over the ears, stop well above the throat, and stay off the face. Its
+    <code>$depth</code> knob changed units (body units &rarr; a fraction of the neck&rsquo;s
+    depth), so the <em>range</em> of hoods is unchanged but <strong>an individual horse
+    draws a different depth than it used to</strong> &mdash; a goth you have seen before
+    will not look the same.</li>
+<li><strong>The collars, specifically.</strong> Ink scroll and wyrmwood sigils are the
+    first two genes to use <code>axis: "Y"</code> in local space, which is a band square
+    across the neck rather than square to the world. Worth confirming it reads as a band
+    that <em>encircles</em> the neck rather than as an ellipse sliding round it.</li>
+<li><strong>The foal.</strong> Every check above is on the adult mesh. The foal&rsquo;s
+    neck is pitched differently (0.611 rather than 0.524) and it has no mane box, so a
+    crest band there is the same arithmetic against different numbers and has never been
+    rendered at all.</li>
+<li><strong>The gene creator.</strong> <code>space</code> now offers a fourth option in
+    three places (AXIS, WAVES, RAMP). The dropdown has never been opened; the parity check
+    proves the <em>engine</em> agrees, not that the form draws.</li>
+</ul>
+
 <h2 id="coat-cache">&sect;0-AV &mdash; The coat texture cache is bounded, and F3+T now means something (2026-09-09, NOT looked at)</h2>
 
 <p>

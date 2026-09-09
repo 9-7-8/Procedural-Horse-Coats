@@ -724,6 +724,60 @@ window.HG.examples = {
               "type": "INVERT",
               "amount": 85.0
             }
+          },
+          {
+            "name": "a ground over the barrel, neck and head, with a cut aimed at the neck alone",
+            "masks": [
+              {
+                "type": "PARTS",
+                "parts": [
+                  "BODY",
+                  "NECK",
+                  "HEAD"
+                ]
+              },
+              {
+                "type": "AXIS",
+                "parts": [
+                  "NECK"
+                ],
+                "axis": "Y",
+                "space": "local",
+                "from": -0.1,
+                "to": 0.45,
+                "softness": 0.2,
+                "invert": true,
+                "combine": "MULTIPLY"
+              }
+            ],
+            "op": {
+              "type": "TOWARD",
+              "color": "#e8e2d6",
+              "strength": 40
+            }
+          },
+          {
+            "name": "a per-horse three-way choice, gating a patch on the barrel",
+            "masks": [
+              {
+                "type": "PARTS",
+                "parts": [
+                  "BODY"
+                ]
+              },
+              {
+                "type": "CHOICE",
+                "seed": "$strokeSeed",
+                "options": 3,
+                "is": 1,
+                "combine": "MULTIPLY"
+              }
+            ],
+            "op": {
+              "type": "TOWARD",
+              "color": "#7fd4c1",
+              "strength": 55
+            }
           }
         ]
       },

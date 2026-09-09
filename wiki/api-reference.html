@@ -652,7 +652,14 @@ static Texel    project(Skin, Part, Face, BodyPoint);
 // the part's rest-pose AABB; these walk the real rotated cuboid instead.
 static BodyPoint posed(Skin, Part, Face, double fa, double fb);
 static BodyPoint posed(Skin, Part, Face, BodyPoint onBounds);
-static BodyPoint posedNormal(Skin, Part, Face);   // outward unit direction</code></pre>
+static BodyPoint posedNormal(Skin, Part, Face);   // outward unit direction
+
+// The part's own frame: a body point as three 0..1 fractions along the edges of
+// the part's actual box, pitch taken out, named and oriented for the body axis
+// each pairs with. Equals part-space normalisation exactly on an unpitched part;
+// on the neck, head, muzzle, mane, ears and tail it is the only way to say
+// "along this part" rather than "along the world". Reads as space: "local".
+static BodyPoint local(Skin, Part, BodyPoint);</code></pre>
 </div>
 
 <h3><code>CoatData</code> and <code>CoatGenerator</code></h3>

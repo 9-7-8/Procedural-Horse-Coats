@@ -523,7 +523,7 @@
                 "NECK"
               ],
               "axis": "Y",
-              "space": "part",
+              "space": "local",
               "from": -0.1,
               "to": 0.45,
               "softness": 0.2,

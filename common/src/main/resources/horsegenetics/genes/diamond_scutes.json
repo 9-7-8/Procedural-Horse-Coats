@@ -8,7 +8,7 @@
   "blurb": "A lattice of hollow diamonds crossing the back, running up the crest of the neck, down the tail and round the forelegs - a dragon's wing-scutes rather than a horse's coat.",
   "notes": [
     "Imported from the magic-gene intake, 2026-09-08. A diamond is two triangle waves crossing, and the format cannot intersect two bands in one mask - so each is its own WAVES entry combined with MAX, which unions the two zigzags into a lattice. The source file expected a STROKES pass to outline them; strokes on top of a wave lattice came out as noise at this scale and were dropped.",
-    "The neck chain uses the 90/77.94 saw-wave trick that lays a band along the crest rather than round the throat. Those two numbers are the neck's own geometry written out by hand and are shared with five other genes - see known-gaps gap 103 before changing either."
+    "The neck chain is a band in the neck's own frame (`'space': 'local', 'axis': 'X'`), which is the crest side of it. It used to be the 90/77.94 saw-wave trick - the neck's geometry written out by hand in eleven gene files - and in this one that trick was in `part` space, where the amplitude is in normalised units, so the band was displaced clean off the horse and the chain painted nothing at all. See wiki/gene-format.html#local-space."
   ],
   "alleles": [
     {
@@ -106,19 +106,15 @@
           "name": "the chain along the neck crest",
           "masks": [
             {
-              "type": "WAVES",
+              "type": "AXIS",
               "parts": [
                 "NECK"
               ],
               "axis": "X",
-              "across": "Y",
-              "shape": "saw",
-              "space": "part",
-              "wavelength": 90.0,
-              "amplitude": 77.94,
-              "softness": 0.05,
-              "from": 0.58,
-              "to": 0.66
+              "space": "local",
+              "from": -1.0,
+              "to": -0.2,
+              "softness": 0.1
             },
             {
               "type": "WAVES",
@@ -126,15 +122,15 @@
                 "NECK"
               ],
               "axis": "X",
-              "across": "Y",
+              "across": "X",
               "shape": "triangle",
-              "space": "part",
+              "space": "local",
               "wavelength": "$meshWavelength",
-              "amplitude": 0.1,
+              "amplitude": 0.12,
               "softness": 0.04,
               "combine": "MULTIPLY",
-              "from": 0.0,
-              "to": 0.55
+              "from": -0.9,
+              "to": -0.5
             }
           ],
           "op": {
@@ -250,19 +246,15 @@
           "name": "the chain along the neck crest",
           "masks": [
             {
-              "type": "WAVES",
+              "type": "AXIS",
               "parts": [
                 "NECK"
               ],
               "axis": "X",
-              "across": "Y",
-              "shape": "saw",
-              "space": "part",
-              "wavelength": 90.0,
-              "amplitude": 77.94,
-              "softness": 0.05,
-              "from": 0.58,
-              "to": 0.66
+              "space": "local",
+              "from": -1.0,
+              "to": -0.2,
+              "softness": 0.1
             },
             {
               "type": "WAVES",
@@ -270,15 +262,15 @@
                 "NECK"
               ],
               "axis": "X",
-              "across": "Y",
+              "across": "X",
               "shape": "triangle",
-              "space": "part",
+              "space": "local",
               "wavelength": "$meshWavelength",
-              "amplitude": 0.1,
+              "amplitude": 0.12,
               "softness": 0.04,
               "combine": "MULTIPLY",
-              "from": 0.0,
-              "to": 0.55
+              "from": -0.9,
+              "to": -0.5
             }
           ],
           "op": {
