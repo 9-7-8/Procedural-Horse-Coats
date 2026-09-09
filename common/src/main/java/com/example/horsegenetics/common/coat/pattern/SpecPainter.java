@@ -12,6 +12,7 @@ import com.example.horsegenetics.common.genetics.spec.GeneSpec.Layer;
 import com.example.horsegenetics.common.genetics.spec.GeneSpec.Mask;
 import com.example.horsegenetics.common.genetics.spec.GeneSpec.Op;
 import com.example.horsegenetics.common.genetics.spec.GeneSpec.Params;
+import com.example.horsegenetics.common.genetics.spec.SpecSchema;
 import com.example.horsegenetics.common.genetics.spec.SpecValues;
 
 import java.util.EnumMap;
@@ -559,6 +560,25 @@ public final class SpecPainter {
                 double low = v.get(p.value("low", 0.0), leg);
                 return clamp01(low + (v.get(p.value("high", 1.0), leg) - low) * n);
             }
+            case FRACTAL: {
+                long seed = v.seed(p.value("seed", 0), seedBase);
+                double scale = Math.max(0.05, v.get(p.value("scale", 6.0), leg));
+                int octaves = (int) Math.round(v.get(p.value("octaves", 3.0), leg));
+                octaves = Math.max(1, Math.min(SpecSchema.MAX_OCTAVES, octaves));
+                double lacunarity = Math.max(1.01, v.get(p.value("lacunarity", 2.13), leg));
+                double gain = clamp01(v.get(p.value("gain", 0.5), leg));
+                double n = fractal(seed, point.x() / scale, point.y() / scale, point.z() / scale,
+                        octaves, lacunarity, gain, v.get(p.value("warp", 0.0), leg) / scale);
+                String shape = p.text("shape", SpecSchema.FRACTAL_SHAPES.get(0));
+                if ("ridged".equals(shape)) {
+                    n = 1.0 - Math.abs(2.0 * n - 1.0);
+                } else if ("billow".equals(shape)) {
+                    n = Math.abs(2.0 * n - 1.0);
+                }
+                double threshold = v.get(p.value("threshold", 0.5), leg);
+                double soft = Math.max(1e-6, v.get(p.value("softness", 0.12), leg));
+                return BodyStripes.smoothstep(threshold - soft, threshold + soft, n);
+            }
             case CHOICE: {
                 // Constant across the whole horse, and exactly 0 or 1 - no
                 // drift, and no strip of draws that lands between the two.
@@ -1094,6 +1114,67 @@ public final class SpecPainter {
 
     private static double lerp(double a, double b, double t) {
         return a + (b - a) * t;
+    }
+
+    /**
+     * <b>The {@code FRACTAL} mask's field</b>: {@code octaves} samples of
+     * {@link BodyNoise#value} at rising frequency and falling amplitude, summed
+     * into {@code [0, 1]}. Coordinates arrive already divided by the mask's
+     * {@code scale}, so one lattice cell is one coarse feature.
+     *
+     * <p><b>The normalisation is the whole point of this method</b>, and it is
+     * not the usual one. Textbook fbm divides the sum by the total amplitude,
+     * which makes it a weighted <i>mean</i> of independent samples - and a mean
+     * of independent samples is narrower than one sample, more so with every
+     * octave. The field would then bunch harder round 0.5 as {@code octaves}
+     * rose, so an author who added an octave for detail would silently change
+     * how much of the horse cleared {@code threshold}. That is precisely the
+     * defect the white loci's {@code cover} knobs were built on and had to be
+     * rewritten to escape - a knob measured against a field nobody had measured
+     * - and it is cheaper to not have it than to document it.
+     *
+     * <p>Dividing by {@code sqrt(sum of squared amplitudes)} instead keeps the
+     * standard deviation where a single octave put it, whatever {@code octaves}
+     * and {@code gain} are. Two things follow, and both are testable:
+     * {@code octaves = 1} reproduces {@code BodyNoise.value} (the sum is one term
+     * and the divisor is 1, so the two differ only by the rounding of
+     * {@code 0.5 + (v - 0.5)}), which makes a one-octave {@code FRACTAL} a
+     * {@code PATCHES} mask; and the coverage at a given {@code threshold} barely
+     * moves as octaves are added. See {@code FractalMaskTest}.
+     *
+     * <p>{@code warp} is in lattice units - the caller divides by {@code scale}
+     * too. All three offsets are taken from the <i>unwarped</i> point, or the
+     * second axis would be displaced by an already-displaced first one and the
+     * field would depend on the order the axes happen to be written in.
+     */
+    static double fractal(long seed, double x, double y, double z,
+                                  int octaves, double lacunarity, double gain, double warp) {
+        double sx = x;
+        double sy = y;
+        double sz = z;
+        if (warp != 0) {
+            // A coarse field - half the base frequency - so the warp moves whole
+            // features around rather than chewing their edges. Three independent
+            // seeds, because one field reused on three axes shifts every point
+            // along the same diagonal and reads as a skew, not a wander.
+            double wx = BodyNoise.value(seed ^ 0xA11CE5L, x * 0.5, y * 0.5, z * 0.5) - 0.5;
+            double wy = BodyNoise.value(seed ^ 0xB22DF6L, x * 0.5, y * 0.5, z * 0.5) - 0.5;
+            double wz = BodyNoise.value(seed ^ 0xC33E07L, x * 0.5, y * 0.5, z * 0.5) - 0.5;
+            sx += wx * 2.0 * warp;
+            sy += wy * 2.0 * warp;
+            sz += wz * 2.0 * warp;
+        }
+        double sum = 0;
+        double sumSq = 0;
+        double amp = 1;
+        double freq = 1;
+        for (int o = 0; o < octaves; o++) {
+            sum += amp * (BodyNoise.value(seed + 131L * o, sx * freq, sy * freq, sz * freq) - 0.5);
+            sumSq += amp * amp;
+            amp *= gain;
+            freq *= lacunarity;
+        }
+        return clamp01(0.5 + sum / Math.sqrt(sumSq));
     }
 
     private static double clamp01(double v) {

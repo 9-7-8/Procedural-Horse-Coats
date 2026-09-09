@@ -393,7 +393,54 @@
 <tr><td><code>DAPPLES</code></td><td><code>seed</code>, <code>spacing</code> 3.5, <code>warp</code> 0.45, <code>edge0</code> 0.35, <code>edge1</code> 0.78</td><td><code>BodyNoise.cellDistance</code> &mdash; dapples, rosettes, appaloosa spots.</td></tr>
 <tr><td><code>PATCHES</code></td><td><code>seed</code>, <code>scale</code> 6.0, <code>threshold</code> 0.5, <code>softness</code> 0.12</td><td>Big irregular blobs &mdash; pinto, tobiano, roan patching.</td></tr>
 <tr><td><code>NOISE</code></td><td><code>seed</code>, <code>scale</code> 8.0, <code>low</code> 0, <code>high</code> 1</td><td>Shading rather than a shape &mdash; sooty, countershading.</td></tr>
+<tr><td><code>FRACTAL</code></td><td><code>seed</code>, <code>scale</code> 6.0, <code>octaves</code> 3, <code>lacunarity</code> 2.13, <code>gain</code> 0.5, <code>warp</code> 0, <code>shape</code> (<strong>fbm</strong>/ridged/billow), <code>threshold</code> 0.5, <code>softness</code> 0.12</td><td><strong>The same field as <code>PATCHES</code>, at several scales at once.</strong> One octave <em>is</em> <code>PATCHES</code>; each further octave adds finer detail to the same shapes. <code>shape: "ridged"</code> is what makes it worth having &mdash; it turns the blob outlines into lines that fork, taper and pinch out, which at a high <code>threshold</code> is lace. See <a href="#fractal">the note below</a>.</td></tr>
 <tr><td><code>CHOICE</code></td><td><code>seed</code>, <code>options</code> 2, <code>is</code> 0</td><td><strong>A choice made once per horse</strong> &mdash; constant across the whole body, and fully on or fully off.</td></tr>
+<tr><td colspan="3"><div class="note" id="fractal">
+<span class="label"><code>octaves</code> buys detail and nothing else &mdash; on purpose</span>
+<p>
+    A fractal field is several samples of the same noise at rising frequency and falling
+    amplitude, added together. The usual way to add them up is to divide by the total
+    amplitude, which makes the result a weighted <em>mean</em> &mdash; and a mean of
+    independent samples is narrower than one sample, more so with every octave. On such a
+    field, raising <code>octaves</code> from 3 to 5 for a little more detail also drags the
+    coverage toward whatever <code>threshold: 0.5</code> selects, and there is no parameter
+    you could have set to stop it.
+</p>
+<p>
+    This one divides by the <strong>root</strong> of the summed squares instead, which
+    preserves the spread rather than the sum. So <code>octaves</code> is safe to turn:
+    the marking gains detail and keeps covering the same share of the horse. One octave
+    reproduces <code>BodyNoise.value</code>, which is why a one-octave <code>FRACTAL</code>
+    and a <code>PATCHES</code> mask are the same mask.
+</p>
+<p>
+    The other two knobs are worth knowing. <code>lacunarity</code> defaults to
+    <strong>2.13 rather than 2</strong> because whole multiples line the octaves up on the
+    same lattice and the sum grids up visibly &mdash; the same reason
+    <code>PatchNoise</code> uses it. And <code>warp</code> pushes the sample point around
+    with a second, coarser field before any octave is taken, which is the difference between
+    an edge that wobbles and an edge that <em>wanders</em>; it is off by default because it
+    costs three more noise samples per texel.
+</p>
+<p>
+    <code>shape</code> reads the one field three ways. <code>fbm</code> is the field
+    itself. <code>ridged</code> is 1 along the surfaces where it crosses its midpoint and 0
+    either side, so the blob <em>outlines</em> become the marking &mdash; wind
+    <code>threshold</code> up and <code>softness</code> down and they thin into lace.
+    <code>billow</code> is its complement, both extremes bright, which puffs the pattern
+    instead of lacing it.
+</p>
+<p>
+    <strong>Lace is two or three octaves, not six.</strong> How wide a
+    <code>ridged</code> line comes out is set by <code>threshold</code> and
+    <code>softness</code> &mdash; wind them to 0.85 / 0.04 for a filament, 0.7 / 0.1 for a
+    ribbon &mdash; but the number of octaves decides whether it is a <em>line</em> at all.
+    A texel is about 0.5 body units, so by the fourth octave of a <code>scale</code> of 5
+    or 6 the finest detail is below the sheet’s resolution and the ridge breaks into
+    stipple: a perfectly good speckle, and not what was asked for. Take the detail from
+    <code>warp</code> instead, which bends the lines without shortening them.
+</p>
+</div></td></tr>
 <tr><td colspan="3"><div class="note">
 <span class="label"><code>CHOICE</code> is the only mask that does not read where you are</span>
 <p>

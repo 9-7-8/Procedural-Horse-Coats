@@ -146,6 +146,24 @@ public final class SpecSchema {
     public static final List<String> SPOT_SHAPES = List.of("round", "heart");
 
     /**
+     * What a {@code FRACTAL} mask does with the field once the octaves are
+     * summed. All three are the <i>same</i> field read three ways, so switching
+     * between them keeps the shape and changes only what counts as inside it.
+     *
+     * <p>{@code fbm} is the field itself - blobs with detail on their edges, the
+     * multi-scale {@code PATCHES}. {@code ridged} is 1 along the surfaces where
+     * the field crosses its midpoint and 0 either side, which turns those blob
+     * outlines into <b>lines</b>: they curve, fork, pinch out and taper, and at
+     * a high {@code threshold} they are thin enough to read as lace. {@code
+     * billow} is its complement - the field folded at the midpoint, so both
+     * extremes come out bright and the pattern is puffed rather than laced.
+     *
+     * <p>The first entry is the default, so it has to be the one
+     * {@code SpecPainter} falls back to.
+     */
+    public static final List<String> FRACTAL_SHAPES = List.of("fbm", "ridged", "billow");
+
+    /**
      * Which waveform a {@code WAVES} mask is displaced by.
      *
      * <p>{@code sine} scallops, {@code triangle} zigzags into teeth with
@@ -170,6 +188,15 @@ public final class SpecSchema {
                     + "difference between a fixed palette and an epigenetic one.";
     private static final String SATURATION_DOC = "saturation 0 to 1; read only when 'hue' is set";
     private static final String LIGHTNESS_DOC = "lightness 0 to 1; read only when 'hue' is set";
+
+    /**
+     * The most octaves a {@code FRACTAL} mask will take. Every octave is a full
+     * lattice sample - eight hashes - at every mapped texel of every skin, so
+     * this is a cost ceiling rather than a taste one. Six octaves at the default
+     * {@code lacunarity} already put the finest one below a texel, so the next
+     * one would be sampling detail the sheet cannot hold.
+     */
+    public static final int MAX_OCTAVES = 6;
 
     private static final Map<MaskType, List<Param>> MASKS = new LinkedHashMap<>();
     private static final Map<OpType, List<Param>> OPS = new LinkedHashMap<>();
@@ -229,6 +256,33 @@ public final class SpecSchema {
                 Param.value("scale", 8.0, "body units per noise feature"),
                 Param.value("low", 0.0, "coverage the darkest noise maps to"),
                 Param.value("high", 1.0, "coverage the brightest noise maps to")));
+
+        MASKS.put(MaskType.FRACTAL, List.of(
+                Param.parts("parts", "restrict to these parts"),
+                Param.value("seed", 0, "a seed knob; omit for a stable per-gene default"),
+                Param.value("scale", 6.0, "body units across one feature of the COARSEST octave"),
+                Param.value("octaves", 3.0,
+                        "how many times the field is re-sampled at higher frequency, 1 to "
+                                + MAX_OCTAVES + ". 1 is exactly a PATCHES mask; each one after "
+                                + "adds finer detail WITHOUT changing how much of the horse "
+                                + "clears 'threshold'"),
+                Param.value("lacunarity", 2.13,
+                        "frequency multiplier per octave. Deliberately not 2: whole multiples "
+                                + "line the octaves up on the same lattice and the sum grids up "
+                                + "visibly, which is why PatchNoise uses 2.13 too"),
+                Param.value("gain", 0.5, "amplitude multiplier per octave - below 0.5 is smoother, "
+                        + "above is rougher and grainier"),
+                Param.value("warp", 0.0,
+                        "body units the sample point is pushed around by a second, coarser field "
+                                + "before the octaves are taken. 0 is off; it is what stops the "
+                                + "detail from lying in rows along the coarse features, and it is "
+                                + "what makes an edge wander rather than merely wobble"),
+                Param.choice("shape", FRACTAL_SHAPES,
+                        "'fbm' is the field (blobs with detailed edges), 'ridged' its midpoint "
+                                + "crossings (lines that fork and taper - the lace), 'billow' its "
+                                + "fold (both extremes bright)"),
+                Param.value("threshold", 0.5, "how much of the horse the field covers - lower is more"),
+                Param.value("softness", 0.12, "edge fade, in field units either side of the threshold")));
 
         MASKS.put(MaskType.CHOICE, List.of(
                 Param.parts("parts", "restrict to these parts"),

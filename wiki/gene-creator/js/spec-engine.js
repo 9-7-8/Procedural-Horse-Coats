@@ -90,6 +90,42 @@ window.HG = window.HG || {};
    * knob's low bits are not a fair coin, and `% 2` on a raw seed is the kind
    * of thing that comes out 60/40 and is never noticed.
    */
+  /**
+   * The FRACTAL mask's field - mirrors SpecPainter.fractal, including its
+   * unusual divisor.
+   *
+   * Textbook fbm divides the octave sum by the TOTAL amplitude, which makes it
+   * a weighted mean of independent samples - so the field bunches harder round
+   * 0.5 with every octave added, and a threshold tuned at three octaves covers
+   * a different amount of horse at five. Dividing by the ROOT of the summed
+   * squares keeps the spread where one octave put it, so octaves buy detail and
+   * nothing else. See the Java, and common's FractalMaskTest.
+   *
+   * Coordinates arrive already divided by the mask's scale, warp included.
+   */
+  function fractal(seed, x, y, z, octaves, lacunarity, gain, warp) {
+    var sx = x, sy = y, sz = z;
+    if (warp !== 0) {
+      // All three offsets come off the UNWARPED point, or the second axis would
+      // be displaced by an already-displaced first one.
+      var wx = noise.value(noise.xor(seed, noise.u64(0, 0xA11CE5)), x * 0.5, y * 0.5, z * 0.5) - 0.5;
+      var wy = noise.value(noise.xor(seed, noise.u64(0, 0xB22DF6)), x * 0.5, y * 0.5, z * 0.5) - 0.5;
+      var wz = noise.value(noise.xor(seed, noise.u64(0, 0xC33E07)), x * 0.5, y * 0.5, z * 0.5) - 0.5;
+      sx += wx * 2 * warp;
+      sy += wy * 2 * warp;
+      sz += wz * 2 * warp;
+    }
+    var sum = 0, sumSq = 0, amp = 1, freq = 1;
+    for (var o = 0; o < octaves; o++) {
+      sum += amp * (noise.value(noise.add(seed, noise.fromInt(131 * o)),
+        sx * freq, sy * freq, sz * freq) - 0.5);
+      sumSq += amp * amp;
+      amp *= gain;
+      freq *= lacunarity;
+    }
+    return clamp01(0.5 + sum / Math.sqrt(sumSq));
+  }
+
   function choiceOf(seed, options) {
     var z = scramble(seed);
     // The low 32 bits are enough for a modulus this small, and staying inside
@@ -278,6 +314,23 @@ window.HG = window.HG || {};
         var v3 = noise.value(s3, point.x / sc, point.y / sc, point.z / sc);
         var low = get(values, mask.low, 0, legIndex);
         return clamp01(low + (get(values, mask.high, 1, legIndex) - low) * v3);
+      }
+      case "FRACTAL": {
+        var fs = getSeed(values, mask.seed, seedBase);
+        var fsc = Math.max(0.05, get(values, mask.scale, 6.0, legIndex));
+        var oct = Math.round(get(values, mask.octaves, 3.0, legIndex));
+        // 6 is SpecSchema.MAX_OCTAVES - a cost ceiling, not a taste one.
+        oct = Math.max(1, Math.min(6, oct));
+        var lac = Math.max(1.01, get(values, mask.lacunarity, 2.13, legIndex));
+        var gain = clamp01(get(values, mask.gain, 0.5, legIndex));
+        var fn = fractal(fs, point.x / fsc, point.y / fsc, point.z / fsc, oct, lac, gain,
+          get(values, mask.warp, 0.0, legIndex) / fsc);
+        var fshape = mask.shape || "fbm";
+        if (fshape === "ridged") fn = 1 - Math.abs(2 * fn - 1);
+        else if (fshape === "billow") fn = Math.abs(2 * fn - 1);
+        var ft = get(values, mask.threshold, 0.5, legIndex);
+        var fsf = Math.max(1e-6, get(values, mask.softness, 0.12, legIndex));
+        return smoothstep(ft - fsf, ft + fsf, fn);
       }
       case "CHOICE": {
         // Constant across the horse and exactly 0 or 1 - the position is

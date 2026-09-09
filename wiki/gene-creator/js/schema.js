@@ -131,6 +131,22 @@ window.HG = window.HG || {};
         v("softness", 0.12, "patch edge softness")
       ]
     },
+    FRACTAL: {
+      blurb: "Value noise summed over several octaves - detail at more than one scale. 'ridged' turns the blob outlines into lines that fork and taper, which is the lace.",
+      params: [
+        parts("parts", "restrict to these parts"),
+        v("seed", 0, "pick a seed knob, or leave it for a stable default", { seedRef: true }),
+        v("scale", 6.0, "body units across one feature of the COARSEST octave", { min: 0.5, max: 20, step: 0.1 }),
+        v("octaves", 3.0, "how many re-samples at rising frequency - 1 is exactly a PATCHES mask, and each one after adds detail WITHOUT changing how much of the horse clears the threshold", { min: 1, max: 6, step: 1 }),
+        v("lacunarity", 2.13, "frequency multiplier per octave - not 2, because whole multiples line the octaves up and the sum grids up visibly", { min: 1.05, max: 4, step: 0.01 }),
+        v("gain", 0.5, "amplitude multiplier per octave - below 0.5 is smoother, above is grainier"),
+        v("warp", 0.0, "body units the sample point is pushed around before the octaves are taken - what makes an edge wander rather than merely wobble", { min: 0, max: 8, step: 0.05 }),
+        choice("shape", ["fbm", "ridged", "billow"],
+          "'fbm' is the field (blobs with detailed edges), 'ridged' its midpoint crossings (lines that fork and taper), 'billow' its fold (both extremes bright)"),
+        v("threshold", 0.5, "lower covers more of the horse"),
+        v("softness", 0.12, "edge fade, in field units either side of the threshold")
+      ]
+    },
     CHOICE: {
       blurb: "A coin flip made once per horse - the same everywhere on the body, fully on or fully off.",
       params: [

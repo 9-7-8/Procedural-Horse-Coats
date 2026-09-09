@@ -389,6 +389,42 @@ public record GeneSpec(
         /** Smooth value noise as a soft shading field (sooty, countershading). */
         NOISE,
         /**
+         * <b>Value noise summed over several octaves</b> - detail at more than
+         * one scale, which is the whole difference between a blob and a
+         * pattern.
+         *
+         * <p>{@link #PATCHES} and {@link #NOISE} sample the lattice once, so
+         * every feature they draw is the same size. Real markings are not like
+         * that: a laced patch has a coarse outline, a finer scallop riding on
+         * it, and a filigree finer still, and no single frequency can be all
+         * three. This sums {@code octaves} of the same field at rising
+         * frequency and falling amplitude, so one mask carries all of them.
+         *
+         * <p>Two things about it are deliberate and are not what a textbook
+         * fractal-noise routine does:
+         * <ul>
+         *   <li><b>The octaves are normalised to keep their spread, not their
+         *       sum.</b> Dividing by the total amplitude - what
+         *       {@code PatchNoise.field} does, and what every fbm snippet does -
+         *       averages independent samples, so the field concentrates harder
+         *       round 0.5 with every octave added. A {@code threshold} tuned at
+         *       three octaves then covers a different amount of horse at five,
+         *       silently. Dividing by the <i>root</i> of the summed squares
+         *       instead leaves the spread where one octave had it, so
+         *       {@code octaves} buys detail and nothing else, and one octave is
+         *       exactly {@link #PATCHES}. This is the same class of defect as
+         *       the {@code cover} knobs that were written against a field
+         *       nobody had measured.</li>
+         *   <li><b>{@code shape} is applied to the summed field, not per
+         *       octave.</b> Ridging each octave and then summing gives a
+         *       thicket; ridging once gives continuous lines that fork and
+         *       taper - the lace. It is the same move
+         *       {@code BodyNoise.ridge} already makes on a single octave, and
+         *       {@link #STROKES} is built on it.</li>
+         * </ul>
+         */
+        FRACTAL,
+        /**
          * <b>A choice made once per horse</b> - the same everywhere on the body,
          * and either fully on or fully off.
          *

@@ -559,6 +559,56 @@
             "color": "#7fd4c1",
             "strength": 55
           }
+        },
+        {
+          "name": "lace over the hindquarter - a ridged fractal, thresholded thin",
+          "masks": [
+            {
+              "type": "FRACTAL",
+              "parts": [
+                "BODY"
+              ],
+              "seed": "$strokeSeed",
+              "scale": 5.5,
+              "octaves": 4,
+              "lacunarity": 2.13,
+              "gain": 0.55,
+              "warp": 0.0,
+              "shape": "ridged",
+              "threshold": 0.78,
+              "softness": 0.06
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#2b1a3d",
+            "strength": 80
+          }
+        },
+        {
+          "name": "and a warped fbm ground on the neck, so warp and 'fbm' are compared too",
+          "masks": [
+            {
+              "type": "FRACTAL",
+              "parts": [
+                "NECK"
+              ],
+              "seed": "$spotSeed",
+              "scale": 7.0,
+              "octaves": 2,
+              "lacunarity": 1.87,
+              "gain": 0.42,
+              "warp": 1.6,
+              "shape": "fbm",
+              "threshold": 0.55,
+              "softness": 0.18
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#d8a24b",
+            "strength": 45
+          }
         }
       ]
     },
