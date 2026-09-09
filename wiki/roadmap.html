@@ -67,13 +67,11 @@
 </p>
 
 <ol>
-    <li><strong>The rest of the white-pattern calibration</strong>
-        (<a href="#defects">&sect;1</a>) &mdash; the splash waterline is fixed, but
-        EDNRB's frame band and every <code>cover</code> knob are still measured against
-        the wrong reference.</li>
-    <li><strong>The visual marking designer</strong> (<a href="#designer">&sect;9</a>)
+    <li><strong>The visual marking designer</strong> (<a href="#designer">&sect;10</a>)
         &mdash; the blocker for the complex 1.0 patterns, and the largest single job
-        on this page.</li>
+        on this page. The <strong>fractal masks half of it shipped</strong>; what is
+        left is the drawing tools, and the storage question under them is now
+        settled (see the section).</li>
     <li><strong>Epigenetic drift</strong> (<a href="#drift">&sect;6</a>) &mdash; a foal
         copies a parent's per-allele seed exactly, so a closed line converges on one
         look.</li>
@@ -105,34 +103,41 @@
 
 <p>
     All of these are built features behaving incorrectly, so they cost nothing to
-    schedule and everything to leave. The two remaining calibration items are one
-    change: they both come from measuring against the wrong reference, they both move
-    existing coats, and they both want <code>coat-golden.txt</code> regenerated and
+    schedule and everything to leave. Anything here that moves a coat wants
+    <code>coat-golden.txt</code> regenerated and
     <code>WhitePatternGenesTest</code>&rsquo;s monotonicity ladder re-checked in the
     same commit.
 </p>
 
-<h3>1.1 The white-pattern calibration</h3>
-
-<p>
-    The splash waterline is <strong>fixed</strong> (2026-09-06): both painters now
-    measure against a <strong>topline reference</strong> &mdash;
-    <code>bounds(skin, Part.BODY).yMax()</code> &mdash; on a convex ramp, so a
-    single-copy splash reaches the upper cannon instead of the barrel. See
-    <a href="pipeline.html">the pipeline</a>. Two calibration items remain, both about
-    the <em>degree</em> of white rather than where the line sits, and both still using
-    the whole-horse AABB:
-</p>
-
-<div class="table-wrap">
-<table>
-<thead><tr><th>Defect</th><th>Measured</th><th>Fix</th></tr></thead>
-<tbody>
-<tr><td><strong><a href="gene-ednrb.html">EDNRB</a>&rsquo;s frame band does not bite on the barrel</strong></td><td><code>BAND_LO</code> 0.28 / <code>BAND_HI</code> 0.74 are whole-horse-AABB fractions, but the barrel spans only 0.326&ndash;0.622, so the side weight is ~1.0 for every <code>BODY</code> texel and the band never clips below the spine &mdash; ~75% back white on <code>O/N</code>.</td><td>Same topline reference. Careful: a naive per-part fix also strips frame&rsquo;s <em>legitimate</em> neck-side white, so it needs a barrel band and a separate neck rule.</td></tr>
-<tr><td><strong>The <code>cover</code> knobs assume <code>PatchNoise.field</code> is uniform &mdash; it is a bell</strong></td><td>Over 67,200 texels &times; 12 seeds: p1 0.24, p50 0.51, p99 0.77. So EDNRB&rsquo;s <code>cover</code> 0.52&ndash;0.74 actually delivers <strong>58&ndash;98%</strong> white and <a href="gene-tobiano.html">tobiano</a>&rsquo;s 0.40&ndash;0.56 delivers <strong>23&ndash;68%</strong> &mdash; a 3&times; swing where a 1.4&times; one was written.</td><td>Convert every <code>cover</code> knob through the measured quantiles rather than treating it as a coverage fraction.</td></tr>
-<tr><td><strong>Medicine hat reads as two detached ear boxes</strong></td><td><code>WhitePattern.sabino</code> never paints the ears, so a near-white sabino has coloured ones &mdash; owner-confirmed in-game &mdash; but at <code>kit=SB1/SB1</code> the poll measures <strong>100% white</strong> beside them (mane 98.6%, chest 100%): the crest&rsquo;s <code>anchor</code> of 0.16 is nothing against a <code>bodyCut</code> of 0.05 at strength 0.93.</td><td>Make the ear / poll anchor hold at the top of the strength ramp, and add a chest region to anchor a war shield beside it. Note <code>W22</code> dominant white and <code>O/O</code> lethal white are <code>masking</code> outcomes that <code>restrictAll</code> &mdash; they take the ears too, correctly; those are not hats.</td></tr>
-</tbody>
-</table>
+<div class="note good">
+    <span class="label">The white-pattern calibration is done &mdash; all of it</span>
+    <p>
+        Both painters measure against a <strong>topline reference</strong>
+        (<code>WhitePattern.toplineHeight</code>) rather than the whole-horse AABB, so
+        the fractions in them mean something anatomical: 0.05 is the coronet, 0.26 the
+        knee, 0.52 the underline, 1.0 the spine. See
+        <a href="pipeline.html">the pipeline</a> and
+        <a href="gene-ednrb.html">EDNRB</a>.
+    </p>
+    <p>
+        The two items that stood here after the splash fix are also <strong>shipped</strong>
+        and were simply never deleted, which is what this page exists not to do.
+        <strong>EDNRB&rsquo;s frame band</strong> is measured on the barrel&rsquo;s own
+        height now, with a separate band on the neck&rsquo;s (the naive per-part fix
+        <em>did</em> strip frame&rsquo;s legitimate neck white, exactly as the entry
+        warned). And <strong>every <code>cover</code> knob</strong> is an area fraction
+        by construction: both <code>EdnrbGene.paintFrame</code> and
+        <code>TobianoGene</code> score every eligible texel, sort, and cut at the
+        quantile matching <code>cover</code>, so the knob cannot drift when the field
+        or the geometry moves under it.
+    </p>
+    <p>
+        <strong>Medicine hat is not on this list and is not a gene</strong> (owner&rsquo;s
+        call). A near-white sabino keeps its ears and the back of its poll because
+        <code>WhitePattern.sabino</code> never paints the ears; whether that reads as a
+        bonnet on any given horse is left to fall out of the draw. It is not being
+        modelled, retained for, or rolled.
+    </p>
 </div>
 
 <h3>1.2 Genes drawing the wrong thing</h3>
@@ -519,15 +524,30 @@
     <li><strong>Draw the mask.</strong> SVG / shape / curve tools for the maximal
         expression, erase-down for the minimal, per-region colour ranges and gradients,
         glow and particle intensity.</li>
-    <li><strong>Fractal pattern definitions.</strong> A way to author fractal /
-        recursive fields so a gene can <em>be</em> a fractal pattern &mdash; octaves,
-        warp, lacunarity &mdash; feeding the same <code>PatchNoise</code>-family maths
-        the pipeline already runs. Peacock and laced tobiano both want this.</li>
-    <li><strong>It assumes a rendering model the pipeline does not have.</strong>
-        &ldquo;Expression scales parts&rdquo; needs epigenetics to be a
-        <em>percentage</em>, not a seed. Either the editor is honest that it drives
-        thresholds and masks (what exists), or the pipeline grows a scalar-expression
-        channel first. <strong>Decide which before building the UI.</strong></li>
+    <li><strong>Fractal pattern definitions &mdash; shipped.</strong> The
+        <code>FRACTAL</code> mask is the eighteenth in the vocabulary: octaves,
+        lacunarity, gain, a domain warp, and a <code>shape</code> that reads the summed
+        field as <code>fbm</code>, <code>ridged</code> or <code>billow</code>. Peacock
+        and laced tobiano have their primitive. It is documented on
+        <a href="gene-format.html#fractal">the gene file format</a> &mdash; including
+        why <code>octaves</code> is safe to turn, which is the one thing about it that
+        is not the textbook recipe.</li>
+    <li><strong>The pipeline already has the scalar channel</strong> &mdash; this entry
+        used to say to decide that before building the UI, and the code answered it.
+        <code>GeneSpec.Knob</code> plus <code>Value.FromKnob</code> means <em>any</em>
+        mask parameter can be driven by a per-copy stored scalar over a declared range
+        (<code>SpecValues.get</code>), and <code>Value.PerDose</code> gives a per-dose
+        triple beside it. So &ldquo;expression scales parts&rdquo; is expressible today:
+        declare a knob and point every threshold at it. What is missing is that the
+        creator does not make the channel <em>visible</em> &mdash; there is no way to
+        preview a gene at 0%, 50% and 100% of its own expression, which is what the
+        editor was really asking for.</li>
+    <li><strong>A drawn shape becomes vector paths in body space</strong>, not a baked
+        stencil (owner&rsquo;s call). A handful of curve control points in body units:
+        it stays procedural, stays small in the gene file, survives a resized horse, and
+        the same maths runs in Java and in the browser. That makes the drawing tool a
+        <em>curve editor</em> rather than a brush, and it wants a new
+        <code>PATH</code>-family mask before any UI is written.</li>
     <li><strong>Parity still applies.</strong> Anything the editor previews, it previews
         through the JS port of the pipeline, and <code>check-parity.mjs</code> has to
         cover the new mask and fractal ops &mdash; or the editor will show a horse the

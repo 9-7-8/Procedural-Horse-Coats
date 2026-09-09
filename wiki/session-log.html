@@ -29,6 +29,126 @@
 
 <h2 id="d2026-09-09">2026-09-09</h2>
 
+<h3 id="fractal-mask-2026-09-09">A gene can be a fractal &mdash; and a stale roadmap sent the session somewhere else first.</h3>
+
+<p>The session opened by picking the top item off
+<a href="roadmap.html#start">the roadmap</a> and found <strong>two thirds of it already
+shipped</strong>. &sect;1.1 listed three white-pattern calibration defects; the entry for
+EDNRB&rsquo;s frame band still cited <code>BAND_LO</code> / <code>BAND_HI</code>, which
+have not existed since the barrel-and-neck rewrite, and the entry for the
+<code>cover</code> knobs described a threshold-on-a-bell that both
+<code>EdnrbGene.paintFrame</code> and <code>TobianoGene</code> stopped being two sessions
+ago when they became score-sort-and-cut-at-a-quantile. Both had been fixed and written up
+elsewhere, and neither had been <em>deleted from here</em>, which is the failure mode this
+page and <a href="roadmap.html">the roadmap</a>&rsquo;s own header warn about. Both rows
+are gone now.</p>
+
+<p><strong>The third row went the other way and was closed by decision.</strong> Medicine
+hat was measured before it was argued about: over eight seeds a <code>kit=SB1/SB1</code>
+horse comes out <strong>ears 0% white, the rear 30% of the head 0.4%</strong> &mdash; the
+cap is genuinely there &mdash; against a <strong>99.6% white mane and a 100% white
+neck</strong>, so rendered it reads as two dark ears and a smudge behind them. The owner
+declined to model it: <em>&ldquo;it will roll randomly, I do not care if it does or does
+not&rdquo;</em>, and <em>&ldquo;the hat should not be a unique gene&rdquo;</em>. Nothing
+retains for it and nothing rolls for it.
+<a href="known-gaps.html#gap-29">Gap 29</a> is now a record of that call rather than a
+defect.</p>
+
+<h4>The <code>FRACTAL</code> mask</h4>
+
+<p>With &sect;1 closed the owner picked <a href="roadmap.html#designer">&sect;10, the visual
+marking designer</a>, and within it the fractal masks before the drawing tools &mdash; the
+roadmap names them as what <strong>peacock and laced tobiano both want</strong>, they live
+in <code>common/</code>, and the drawing tools sit on top of the mask vocabulary rather
+than beside it. <code>FRACTAL</code> is the eighteenth mask: value noise summed over
+<code>octaves</code> with <code>lacunarity</code>, <code>gain</code> and a domain
+<code>warp</code>, and a <code>shape</code> that reads the summed field as
+<code>fbm</code>, <code>ridged</code> or <code>billow</code>. It is documented on
+<a href="gene-format.html#fractal">the gene file format</a>, which is the source of truth
+for it.</p>
+
+<p><strong>Two things in it are deliberately not the textbook recipe</strong>, and the
+first is the reason the mask is worth a write-up at all.</p>
+
+<ul>
+    <li><strong>The octaves are normalised by the root of the summed squares, not by the
+        summed amplitude.</strong> Dividing by the sum &mdash; what every fbm snippet
+        does, and what <code>PatchNoise.field</code> does &mdash; makes the result a
+        weighted <em>mean</em> of independent samples, and a mean is narrower than one
+        sample, more so with every octave. On such a field an author who adds a fourth
+        octave for detail also drags the coverage toward whatever
+        <code>threshold: 0.5</code> selects, silently, with no parameter to blame.
+        <strong>That is the same defect the <code>cover</code> knobs were built on</strong>
+        &mdash; a knob written against a field nobody had measured, delivering a 3&times;
+        swing where a 1.4&times; one was intended &mdash; and it cost a rewrite of two
+        painters. Dividing by the root preserves the spread instead, so one octave is
+        exactly a <code>PATCHES</code> mask and every octave after buys detail and nothing
+        else. It was cheaper to not have the problem than to document it.</li>
+    <li><strong><code>shape</code> is applied to the summed field, not per octave.</strong>
+        Ridging each octave and then summing gives a thicket; ridging once gives
+        continuous lines that fork, taper and pinch out &mdash; the lace. It is the same
+        move <code>BodyNoise.ridge</code> already makes on a single octave, and the one
+        <code>STROKES</code> is built on.</li>
+</ul>
+
+<p><code>FractalMaskTest</code> pins both, and <strong>measures the naive normalisation
+alongside</strong> so the claim in the comment is not taken on trust: six octaves of the
+textbook form come out visibly narrower, and the shipped form does not.</p>
+
+<h4>Two things looking at it changed</h4>
+
+<ul>
+    <li><strong>One octave is not bit-identical to <code>BodyNoise.value</code></strong>,
+        only identical to a rounding step: the sum is written
+        <code>0.5 + (v - 0.5)</code>, which is not <code>v</code> in binary floating point.
+        The test asserts a last-bit tolerance and the comment says so, rather than claiming
+        an identity that is a hair off.</li>
+    <li><strong>Lace is two or three octaves, not six.</strong> Rendered rather than
+        reasoned about: a texel is about 0.5 body units, so by the fourth octave of a
+        <code>scale</code> of 5 or 6 the finest detail is below the sheet&rsquo;s
+        resolution and a <code>ridged</code> field breaks into stipple &mdash; a perfectly
+        good speckle, and not lace. The guidance to take the extra irregularity from
+        <code>warp</code> instead is on the format page.</li>
+</ul>
+
+<p>All four contract files moved (<code>SpecSchema</code>, <code>SpecPainter</code>, the
+creator&rsquo;s <code>schema.js</code> and <code>spec-engine.js</code>), plus
+<code>gene-format.html</code>. No new primitive was needed in
+<code>js/noise.js</code>: the fractal sum is built out of <code>value</code>, which is
+already ported.</p>
+
+<p><strong>The parity gate was proved to reach it rather than assumed to.</strong> Two
+<code>FRACTAL</code> layers went into <code>example-genes/prismatic.json</code> &mdash; a
+<code>ridged</code> one and a warped <code>fbm</code> one, so both branches are exercised
+&mdash; and then the JS divisor was deliberately broken and <code>check-parity.mjs</code>
+watched to go red before being restored. A fixture that never runs the new code is green
+by definition, which is exactly how the UV swap hid for a day.</p>
+
+<p><strong>Settled for the drawing tools, which are not built:</strong> a drawn shape will
+become <strong>vector paths in body space</strong> &mdash; a handful of curve control
+points in body units &mdash; rather than a baked bitmap stencil. It stays procedural, stays
+small in the gene file, survives a resized horse, and the same maths runs in Java and in
+the browser. That makes the tool a curve editor rather than a brush, and it wants a
+<code>PATH</code>-family mask before any UI is written.</p>
+
+<p><strong>Also settled, by reading the code rather than by asking:</strong> the roadmap
+entry that said to decide whether the pipeline needed a scalar-expression channel
+&ldquo;before building the UI&rdquo; was already answered. <code>GeneSpec.Knob</code> plus
+<code>Value.FromKnob</code> lets any mask parameter be driven by a per-copy stored scalar
+over a declared range, and <code>Value.PerDose</code> gives a per-dose triple beside it.
+&ldquo;Expression scales parts&rdquo; is expressible today; what is missing is that the
+creator never shows the channel.</p>
+
+<p><code>:common:test</code> was <strong>not</strong> run in full (owner&rsquo;s standing
+rule). Run: <code>FractalMaskTest</code>, both coat goldens (neither moved &mdash; no
+registered gene uses the new mask), <code>GeneSpecParserTest</code>,
+<code>GeneFilesTest</code>, <code>:neoforge-26.1.2:build</code>,
+<code>check-parity.mjs</code>, <code>check-links.mjs</code>,
+<code>check-gene-tabs.mjs</code>. Re-baked: spec fixtures, creator assets, the designer
+wasm, the search index. <strong>Unplayed:</strong> nothing new in game &mdash; no shipped
+gene uses <code>FRACTAL</code> yet, so there is nothing to look at until a gene does.</p>
+
+
 <h3 id="science-tabs-2026-09-09">Twenty-five loci get the science they were built from &mdash; and three of them argue back.</h3>
 
 <p>The health layer and most of the natural colour genes have been carrying their
