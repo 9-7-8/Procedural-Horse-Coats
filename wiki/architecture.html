@@ -220,11 +220,18 @@ python neoforge-26.1.2/tools/barn/bake-barn.py   # re-export from a structure bl
     the tag is a tree somebody could check out and build:
     <code>git tag -a v&lt;version&gt; -m "Horse Genetics &lt;version&gt;"</code>, then
     <code>git push origin main --follow-tags</code>.</li>
-<li><strong>The GitHub release itself is manual.</strong> There is no <code>gh</code> CLI
-    on this machine, so the tag pushes but the release object does not: create it at
-    <code>github.com/9-7-8/Procedural-Horse-Coats/releases/new</code>, pick the tag,
-    and attach <code>neoforge-26.1.2/build/libs/</code>&rsquo;s jar. The body is the
-    releases page section, in markdown.</li>
+<li><strong>Create the release object, which the tag does not.</strong> This is the
+    step that looks done and is not: <code>git push --follow-tags</code> publishes the
+    <em>tag</em>, and GitHub files that under <strong>Tags</strong>. A
+    <strong>release</strong> is a separate object, and until it exists the Releases page
+    stays empty and nobody can download a jar. <code>gh</code> is installed (user scope,
+    <code>%LOCALAPPDATA%\Microsoft\WinGet\Links\gh.exe</code>) and authenticated:
+<pre><code class="language-bash">gh release create v&lt;version&gt;   --title "v&lt;version&gt;"   --notes-file &lt;the releases-page section, as markdown&gt;   --verify-tag   "neoforge-26.1.2/build/libs/horsegenetics-&lt;version&gt;.jar#horsegenetics-&lt;version&gt;.jar (NeoForge 26.1.2)"</code></pre>
+    <code>--verify-tag</code> makes it fail rather than invent a tag that was never
+    pushed. Check it afterwards with
+    <code>gh release view v&lt;version&gt; --json isDraft,assets</code>: the asset
+    <code>state</code> must read <code>uploaded</code>, because a release can publish
+    fine with a jar that silently did not attach.</li>
 </ol>
 <p>
     <strong>The jar is the part a dev run cannot check.</strong> 0.1.0 exists because

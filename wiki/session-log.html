@@ -70,6 +70,18 @@ shipped in each tag, by theme, without the reasoning, which is what this log is 
 The README now points at it and says plainly that there is no back-compatibility layer
 and a new version will not load an old world.</li>
 
+<li><strong>A pushed tag is not a release, and the difference is invisible from
+here.</strong> The tag went up with <code>--follow-tags</code> and everything read as
+done; the owner then went looking and the Releases page was empty, because GitHub files
+a bare tag under <em>Tags</em> and a release is a separate object that has to be created.
+<code>gh</code> was not installed, so it now is - user scope through winget, no elevation
+- and <code>gh release create</code> is written into
+<a href="architecture.html#releasing">the release procedure</a> along with the check that
+matters afterwards: <code>gh release view --json isDraft,assets</code>, because a release
+publishes perfectly well with a jar that never attached. The lesson is smaller than the
+mechanism: <strong>the last step of shipping is looking at the thing you shipped from
+where the user looks at it</strong>, and "the tag pushed" was not that.</li>
+
 <li><strong>The jar was opened rather than assumed.</strong> 0.1.0 exists entirely
 because <code>common/</code> was not folded into the jar and a dev run cannot notice,
 and everything added since that fix is <em>resources</em> - 85 gene files, 49 breed
