@@ -29,6 +29,89 @@
 
 <h2 id="d2026-09-09">2026-09-09</h2>
 
+<h3 id="parser-checks-and-mirrors-2026-09-09">Two parser refusals, three live bugs, and the discovery that the composer was never inside the parity gate.</h3>
+
+<p>A code-only audit pass: things findable and fixable without opening the game.</p>
+
+<h4>The parser now refuses what has already shipped broken</h4>
+
+<p>Two gaps had been half-fixed on 2026-09-08 - the broken <em>files</em> were corrected and
+the <em>checks</em> were never written, which is the half that stops it happening again.</p>
+
+<ul>
+<li><strong><a href="known-gaps.html#gap-105">Gap 105</a></strong>: a <code>perDose</code> triple
+    on an expression that can only ever be reached at one dose is a constant written in the
+    form that looks most like a variable. A <em>coloured</em> expression is reached by two
+    copies of the <b>second</b> allele, so its dose is 0 and it reads <code>perDose[0]</code> -
+    which authors write as <code>0.0</code>, because a dose of nothing should draw nothing.
+    A chance of 0 means the mask never fires, and five genes shipped painting nothing at all.</li>
+<li><strong><a href="known-gaps.html#gap-106">Gap 106</a></strong>: <code>smoothstep</code> with
+    its edges reversed is a hard step <em>in the original direction</em> - it does not reverse
+    the ramp, it removes it. The test is <strong>possibility, not certainty</strong>, because
+    the worse of the two historical cases was a knob whose range straddled its own
+    <code>from</code>: half the horses drew reversed and nothing about the file looked wrong.
+    <code>RAMP</code> is deliberately exempt, its from/to being a linear interpolation where
+    reversal is a thing an author might mean.</li>
+</ul>
+
+<p><strong>Both were scanned across the corpus before being written</strong>, and both trip
+<em>zero</em> shipped genes - 513 banded masks, 130 of them pointing at knobs. So these are
+prevention with no migration behind them, which is the cheapest moment to add a rule. Six
+tests cover the two rejections and the three shapes that must keep working.</p>
+
+<h4>Three live bugs</h4>
+
+<ul>
+<li><strong>One item could not be crafted.</strong>
+    <a href="villagers.html#workstation">Cowboy Hitch</a> and
+    <a href="item-horsemans-table.html">Horseman&rsquo;s Table</a> had byte-identical shapeless
+    recipes, so the recipe manager resolved one and the other was unobtainable in survival -
+    and those blocks are how <em>both</em> merchant NPCs come to exist.
+    <a href="villagers.html">Villagers</a> stated the shared recipe as though it were fine,
+    which is how it survived being written down. They now differ along the line that page
+    itself draws between them: the hitch is rope-heavy, the table takes the leather.
+    <code>neoforge-26.1.2/tools/check-recipes.mjs</code> refuses the next collision.</li>
+<li><strong>The gene creator had been drawing every dark coat too dark, for months.</strong>
+    See below - this one is the interesting one.</li>
+<li><strong>Eleven repeated HTML ids</strong>, so eleven sections could not be linked at all
+    while every link to them still looked correct. The link checker now refuses a duplicate id;
+    it found the duplicate <code>gap-46</code> on the gaps page itself, two different gaps under
+    one number.</li>
+</ul>
+
+<h4>The composer was never inside the parity gate</h4>
+
+<p>The creator&rsquo;s mirror of the composer had <code>rgb === 0 ? PURE_BLACK_ALPHA :
+0xFF</code> - an exact equality against pure black, which is what the <em>game</em> used to have
+too. The game was changed to a ramp when a LUT edit moved the chart&rsquo;s black corner off
+<code>#000000</code>; the mirror was not. <strong>So the branch had stopped matching anything at
+all</strong>: black bakes to about <code>#161515</code>, the equality never fired, and the
+creator drew every dark coat at full opacity.</p>
+
+<p><strong>The finding is not the line, it is why nothing caught it.</strong>
+<code>check-parity.mjs</code> runs <code>restrict()</code> and <code>tint()</code> and never runs
+<code>compose()</code> - the magical cases are seeded with a synthetic flat colour field rather
+than resolved through a chart - so the entire composite path had no net whatsoever. The gate
+looked comprehensive and had a hole the exact size of the bug.</p>
+
+<p>The composite itself still cannot be compared in the harness: it needs the gradient PNG and
+the white template, and there is no image decoder in Node there. The <em>arithmetic</em> can be,
+and the arithmetic is what drifted - so the fixture now carries answer tables for
+<code>nearBlackAlpha</code> and the shadow lift, generated from Java, and parity checks them.
+Verified by restoring the old equality and watching three checks fail, one of them on
+<code>#161515</code> exactly.</p>
+
+<h4>What this says about the other mirrors</h4>
+
+<p>There are four JavaScript ports of <code>common/</code> in the creator -
+<code>spec-engine</code>, <code>schema</code>, <code>geometry</code> and the composer in
+<code>fields.js</code> - and until today the gate covered two of them.
+<a href="known-gaps.html#gap-100">Gap 100</a> is the same shape and still open:
+<code>geometry.js</code> never received <code>posed()</code>, and the arithmetic lives one
+directory over in <code>model3d.js</code>. It is now a small job rather than an open question,
+because the technique exists: export the function, bake a table of Java&rsquo;s answers into the
+fixture, compare. That is what closed the composer.</p>
+
 <h3 id="night-genes-and-coat-pass-2026-09-09">Two genes that make a horse frightening, a per-gene coat test, and a category audit that found the taxonomy was sorting on the wrong axis.</h3>
 
 <h4>The night loci</h4>
@@ -2992,7 +3075,7 @@ had to go.</p>
 </li>
 </ul>
 
-<h2 id="d2026-09-06">2026-09-06</h2>
+<h2 id="d2026-09-06-2">2026-09-06</h2>
 <h3 id="owner-verified-in-the-browser-2026-09-06-the-gene-creator-op">Owner-verified in the browser (2026-09-06): the gene creator opens and renders correctly on the live wiki page.</h3>
 
 <p>Owner's words: "that looks correct". Taken as a <strong>general confirmation that the tool loads and the horse reads right</strong>, not an item-by-item walk of the checklist - the same standing the white-pattern rewrite got on 2026-09-04. So it closes: <strong>it opens at all</strong> (the <code>expresses</code> ReferenceError is gone), <strong>the parity line reads green</strong> in the page, and <strong>the 3D preview reads as a horse</strong> rather than the pile of bounding boxes it was. What that cannot cover, and what stays open in <code>wiki/verification.html</code> §0-H, is everything you have to <em>interact</em> with - typing into a field, the Gameplay forms, adding the eight effect verbs, and loading Waterborn to confirm its effects survive the round-trip.</p>
@@ -3006,7 +3089,7 @@ had to go.</p>
 </li>
 </ul>
 
-<h2 id="d2026-09-05">2026-09-05</h2>
+<h2 id="d2026-09-05-2">2026-09-05</h2>
 <h3 id="owner-verified-in-game-2026-09-05">Owner-verified in-game (2026-09-05)</h3>
 
 <ul>
@@ -3014,7 +3097,7 @@ had to go.</p>
 </li>
 </ul>
 
-<h2 id="d2026-09-04">2026-09-04</h2>
+<h2 id="d2026-09-04-2">2026-09-04</h2>
 <h3 id="owner-verified-in-game-2026-09-04">Owner-verified in-game (2026-09-04)</h3>
 
 <ul>
@@ -3022,7 +3105,7 @@ had to go.</p>
 </li>
 </ul>
 
-<h2 id="d2026-09-03">2026-09-03</h2>
+<h2 id="d2026-09-03-2">2026-09-03</h2>
 <h3 id="owner-verified-in-game-2026-09-03">Owner-verified in-game (2026-09-03)</h3>
 
 <ul>
@@ -3030,7 +3113,7 @@ had to go.</p>
 </li>
 </ul>
 
-<h2 id="d2026-09-02">2026-09-02</h2>
+<h2 id="d2026-09-02-2">2026-09-02</h2>
 <h3 id="owner-verified-in-game-2026-09-02">Owner-verified in-game (2026-09-02)</h3>
 
 <ul>
@@ -3096,7 +3179,7 @@ had to go.</p>
 </li>
 </ul>
 
-<h2 id="d2026-09-02">2026-09-02</h2>
+<h2 id="d2026-09-02-3">2026-09-02</h2>
 <h3 id="built-2026-09-02-not-yet-play-tested-7">Built 2026-09-02, NOT yet play-tested</h3>
 
 <p><strong>data-driven genes</strong> and the <strong>rebuilt gene creator</strong>. A gene that fits the format is now a <strong>JSON file</strong> dropped in <code>config/horsegenetics/genes/</code> - no Java, no rebuild - and <code>wiki/gene-creator/</code> is the tool that writes it, previewing the gene on a 3D horse over any of 15 base coats before you export. Nothing about the eleven built-in genes changed: no gene file ships by default, so the registry, the genotype code, the gallery numbers and <code>coat-golden.txt</code> are all untouched. See "Data-driven genes" below; in-game checklist in <code>wiki/verification.html</code>.</p>
@@ -3129,7 +3212,7 @@ had to go.</p>
 
 <p>the <strong>three-phase pigment pipeline</strong> (<code>wiki/roadmap.html</code> §1). Phase 3 is now a signed, uncapped <code>ColorField</code> that magical genes <em>add</em> into, both gene hooks are pure (read-only views in, a contribution out), and <code>CoatBuildContext</code> no longer carries scratch space. <strong>No coat changed</strong>: <code>CoatPipelineGoldenTest</code> hashes 20 genotypes × 3 seeds × adult/foal and every one is byte-identical to the pre-refactor bake, so there is <strong>nothing new to play-test</strong> - it's groundwork for the magical genes. Nothing in <code>neoforge-26.1.2/</code> needed touching, which was the test of whether the refactor stayed inside <code>common/</code>.</p>
 
-<h2 id="d2026-09-01">2026-09-01</h2>
+<h2 id="d2026-09-01-2">2026-09-01</h2>
 <h3 id="built-2026-09-01-not-yet-play-tested">Built 2026-09-01, NOT yet play-tested</h3>
 
 <p><strong>per-allele epigenetics</strong> and the <strong>dapple-grey rework</strong>. Epigenetics moved off the horse and onto the allele copy (<code>Epigenome</code> / <code>Genome</code> / <code>AlleleEpigenetics</code>, each copy carrying a <code>priority</code> + <code>epigeneticSeed</code>, inherited unchanged by a foal); <code>GreyGene</code> now renders a real dapple grey through the new <code>GreyCoat</code> + <code>BodyNoise</code>; and bay's leg black is a uniform per-horse extent with per-leg jitter instead of the old low-biased single number. Compiles, 138 <code>common</code> tests pass, sample bakes look right, nothing seen in-game yet - checklist in <strong><code>wiki/verification.html</code></strong>.</p>
@@ -3149,7 +3232,7 @@ had to go.</p>
 
 <p>shutdown (and sweeps leftovers on the next start), so the button stops filling <code>run/saves</code>. See "Running the game".</p>
 
-<h2 id="build-state">Standing build state</h2>
+<h2 id="build-state-2">Standing build state</h2>
 <h3 id="open-issues-not-verified-in-game">Open issues + NOT verified in-game</h3>
 
 <p>see <strong><code>wiki/verification.html</code></strong>. The two newest items are the top of the list, and they are the same play session: <strong><code>PAX3</code> <code>SW2</code> on 90% of founders</strong> (does a herd still read as a population rather than one horse repeated - and does it read as <em>socks</em> or as four white legs, which would be gap #30 rather than the frequency) and the <strong>face-marking family</strong> (does a three-to-five-texel star read as a star at 128px, does a snip land on the nostrils, is the star above the eyes given the head's approximate rest-pose projection). After those: the <strong>particle locus</strong> (§0c - forty particle ids, six body sites, none of it seen; the emitter-style ones and the ten Bedrock substitutions are the likeliest to read badly), the <strong>seven magical utility genes</strong> (§0a - and inside that, the <strong>walking animation</strong> of a scaled horse and whether the wild size spread reads right across a herd), the <strong>trait / health layer</strong> (§0b), the <strong>random pens</strong> and the <strong>rebuilt spawn egg</strong>, then <strong>foals</strong> (only spot-checked). Update it after each <code>runClient</code>.</p>

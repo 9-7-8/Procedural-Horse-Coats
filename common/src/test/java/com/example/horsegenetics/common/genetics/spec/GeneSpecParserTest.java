@@ -134,6 +134,128 @@ class GeneSpecParserTest {
 
     // --- what it refuses ------------------------------------------------
 
+    // ------------------------------------------------------------------
+    // The two rejections that exist because a gene shipped broken without them
+    // ------------------------------------------------------------------
+
+    /**
+     * Gap 105, reproduced: a "coloured" expression reached by two copies of the
+     * SECOND allele has a dose of zero, so its perDose reads element 0 - which
+     * authors write as 0.0, because a dose of nothing should draw nothing. A
+     * chance of 0 means the mask never fires, and five genes shipped invisible.
+     */
+    @Test
+    void rejectsAPerDoseOnAnExpressionThatCanOnlyBeReachedAtOneDose() {
+        String json = gene("""
+                , "phase": "magical",
+                  "knobs": [ { "name": "hue", "min": 0, "max": 360 } ],
+                  "expressions": [
+                    { "id": "coloured", "when": { "a": 2 },
+                      "layers": [ { "masks": [ { "type": "SPOTS", "chance": { "perDose": [0.0, 0.5, 0.9] } } ],
+                                    "op": { "type": "TOWARD", "hue": "$hue" } } ] },
+                    { "id": "wild", "wildType": true } ]
+                """);
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
+                () -> GeneSpecParser.parse(json, "invisible.json"));
+        assertTrue(e.getMessage().contains("perDose here is a constant"), e.getMessage());
+        assertTrue(e.getMessage().contains("0 copies of 'A'"),
+                "the message should name the dose and the allele it counts: " + e.getMessage());
+        assertTrue(e.getMessage().contains("never paints"),
+                "reading zero is the failure worth calling out: " + e.getMessage());
+    }
+
+    /** A perDose that genuinely spans two doses is exactly what the feature is for. */
+    @Test
+    void acceptsAPerDoseOnAnExpressionThatSpansTwoDoses() {
+        String json = gene("""
+                , "phase": "magical",
+                  "expressions": [
+                    { "id": "v", "when": ["A/A", "A/a"],
+                      "layers": [ { "masks": [ { "type": "SPOTS", "chance": { "perDose": [0.0, 0.5, 0.9] } } ],
+                                    "op": { "type": "TOWARD", "color": "#ffffff" } } ] },
+                    { "id": "wild", "wildType": true } ]
+                """);
+        GeneSpec spec = GeneSpecParser.parse(json, "varies.json");
+        assertEquals(2, spec.expressions().size());
+    }
+
+    /**
+     * Gap 106, first half: patina asked for "fade in as the coat gets lighter"
+     * with from above to, and got "hard on wherever the coat is dark" - the
+     * opposite, with no edge at all.
+     */
+    @Test
+    void rejectsABandWhoseToIsBelowItsFrom() {
+        String json = gene("""
+                , "phase": "magical",
+                  "expressions": [
+                    { "id": "v", "when": ["A/A", "A/a"],
+                      "layers": [ { "masks": [ { "type": "PIGMENT", "from": 0.75, "to": 0.35 } ],
+                                    "op": { "type": "TOWARD", "color": "#ffffff" } } ] },
+                    { "id": "wild", "wildType": true } ]
+                """);
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
+                () -> GeneSpecParser.parse(json, "reversed.json"));
+        assertTrue(e.getMessage().contains("HARD STEP"), e.getMessage());
+        assertTrue(e.getMessage().contains("invert"),
+                "the message should say how to ask for the other side: " + e.getMessage());
+    }
+
+    /**
+     * Gap 106, second half, and the worse one: integration pointed 'to' at a
+     * knob whose range straddled its own 'from', so about half the horses it
+     * drew were reversed and nothing about the file looked wrong.
+     */
+    @Test
+    void rejectsABandWhoseKnobRangeCanCrossTheOtherEnd() {
+        String json = gene("""
+                , "phase": "magical",
+                  "knobs": [ { "name": "edge", "min": 0.3, "max": 0.9 } ],
+                  "expressions": [
+                    { "id": "v", "when": ["A/A", "A/a"],
+                      "layers": [ { "masks": [ { "type": "AXIS", "from": 0.5, "to": "$edge" } ],
+                                    "op": { "type": "TOWARD", "color": "#ffffff" } } ] },
+                    { "id": "wild", "wildType": true } ]
+                """);
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
+                () -> GeneSpecParser.parse(json, "straddle.json"));
+        assertTrue(e.getMessage().contains("can be below"), e.getMessage());
+    }
+
+    /** A knob whose whole range sits above 'from' is fine, and common. */
+    @Test
+    void acceptsABandWhoseKnobRangeStaysAboveItsFrom() {
+        String json = gene("""
+                , "phase": "magical",
+                  "knobs": [ { "name": "edge", "min": 0.6, "max": 0.9 } ],
+                  "expressions": [
+                    { "id": "v", "when": ["A/A", "A/a"],
+                      "layers": [ { "masks": [ { "type": "AXIS", "from": 0.5, "to": "$edge" } ],
+                                    "op": { "type": "TOWARD", "color": "#ffffff" } } ] },
+                    { "id": "wild", "wildType": true } ]
+                """);
+        assertEquals(2, GeneSpecParser.parse(json, "fine.json").expressions().size());
+    }
+
+    /**
+     * The RAMP op has the same two parameter names and is deliberately exempt:
+     * its from/to are the ends of a linear interpolation, so reversing them
+     * reverses the gradient, which is a thing an author might mean.
+     */
+    @Test
+    void allowsAReversedRampBecauseThatReversesTheGradient() {
+        String json = gene("""
+                , "phase": "magical",
+                  "expressions": [
+                    { "id": "v", "when": ["A/A", "A/a"],
+                      "layers": [ { "masks": [],
+                                    "op": { "type": "RAMP", "colors": ["#000000", "#ffffff"],
+                                            "from": 0.9, "to": 0.1 } } ] },
+                    { "id": "wild", "wildType": true } ]
+                """);
+        assertEquals(2, GeneSpecParser.parse(json, "ramp.json").expressions().size());
+    }
+
     @Test
     void rejectsAnUnknownParameter() {
         String json = gene("""

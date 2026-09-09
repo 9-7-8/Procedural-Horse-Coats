@@ -895,19 +895,21 @@
 
 <h3>The two workstations, which cannot both be craftable</h3>
 
-<div class="note danger">
-    <span class="label">Found by audit, not yet seen fail</span>
+<div class="note">
+    <span class="label">Fixed 2026-09-09 &mdash; worth one craft to confirm</span>
     <p>
-        <code>cowboy_hitch.json</code> and <code>horsemans_table.json</code> are the same
-        shapeless recipe - 3 hair cloth + 2 braided rope + 2 fences - with different
-        results, so only one of them can ever match. <strong>Put those seven items in a
-        crafting grid and see which block comes out.</strong> Whichever one does not is
-        currently unobtainable in survival, and with it the NPC it founds.
+        <code>cowboy_hitch.json</code> and <code>horsemans_table.json</code> used to be the
+        same shapeless recipe with different results, so only one of them could ever match
+        and the other was unobtainable in survival. They now differ along the line
+        <a href="villagers.html#workstation">Villagers</a> itself draws between them: the
+        hitch is rope-heavy (2 hair cloth + 3 braided rope + 2 fences), the table takes the
+        leather (3 hair cloth + 2 leather + 2 fences).
     </p>
     <p>
-        <a href="known-gaps.html#gap-92">Gap 92</a>. Deliberately not fixed in the
-        documentation pass that found it: telling a hitch from a table needs a reagent
-        chosen on gameplay grounds, which is the owner&rsquo;s call.
+        <strong>Craft both.</strong> The data is checked by
+        <code>neoforge-26.1.2/tools/check-recipes.mjs</code>, which refuses two recipes that
+        occupy the same slot, but no check can confirm that a recipe a player types into a
+        grid produces the block they wanted. <a href="known-gaps.html#gap-92">Gap 92</a>.
     </p>
 </div>
 
@@ -4892,7 +4894,7 @@
 
 <h2>Wanted (not built yet)</h2>
 
-<div class="note warn" id="eyes">
+<div class="note warn" id="eyes-2">
     <span class="label">Genetic eye colour</span>
     <p>
         The eyes render correctly everywhere, but they are copied verbatim from the
@@ -5798,7 +5800,7 @@ the <a href="session-log.html">session log</a>.</em></p>
     neck for odd dark patches or misplaced marks.
 </p>
 
-<h3 id="epigenetics">9. Per-allele epigenetics + the grey rework</h3>
+<h3 id="epigenetics-2">9. Per-allele epigenetics + the grey rework</h3>
 
 <p>New 2026-09-01, not seen in-game.</p>
 

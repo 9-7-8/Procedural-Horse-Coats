@@ -56,7 +56,12 @@ window.HG.fixtures = {
       "night_watch": { "mode": { "kind": "CHOICE", "required": true, "choices": ["stare", "approach", "line_of_sight", "unseen", "behind"] }, "radius": { "kind": "NUMBER", "required": false, "fallback": 10.000000 }, "silent_steps": { "kind": "BOOL", "required": false, "fallback": true } },
       "combat": { "damage": { "kind": "NUMBER", "required": false, "fallback": 3.000000 } }
     },
-    "conditionFlags": ["sex_female", "sex_male", "tamed", "untamed", "adult", "baby", "full_health", "has_rider", "in_water", "submerged", "on_ground", "on_fire", "day", "night", "raining", "thundering", "sky_visible"]
+    "conditionFlags": ["sex_female", "sex_male", "tamed", "untamed", "adult", "baby", "full_health", "has_rider", "in_water", "submerged", "on_ground", "on_fire", "day", "night", "raining", "thundering", "sky_visible"],
+    "composer": {
+      "nearBlackAlpha": { "000000": 204, "0c0c0c": 217, "161515": 228, "2f2f2f": 254, "303030": 255, "9b4a28": 255, "ffffff": 255 },
+      "shadowFloor": 21,
+      "liftShadows": { "000000": "151515", "0c0c0c": "151515", "161515": "161515", "2f2f2f": "2f2f2f", "303030": "303030", "9b4a28": "9b4a28", "ffffff": "ffffff" }
+    }
   },
   "cases": [
     { "spec": "silver.json", "seed": 1, "dose": 1, "combination": "Z/z", "expression": "silver", "skin": "ADULT",

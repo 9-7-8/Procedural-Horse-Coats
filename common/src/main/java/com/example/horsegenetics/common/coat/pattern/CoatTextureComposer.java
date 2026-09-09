@@ -424,6 +424,42 @@ public final class CoatTextureComposer {
      * at black, ramping to fully opaque by {@link #NEAR_BLACK}. See that
      * constant for why this is a ramp and not an {@code == 0} test.
      */
+    /**
+     * {@link #nearBlackAlpha}, {@link #SHADOW_FLOOR} and one shadow lift,
+     * exposed for {@code SpecFixtureTool} alone.
+     *
+     * <p>They exist because the creator's JavaScript mirror of this class was
+     * never inside the parity gate - {@code check-parity.mjs} runs the painter
+     * and never the composer - and it drifted for months without anything
+     * going red (known-gaps gap 50). Baking the answers into the fixture is the
+     * cheapest way to put the arithmetic under the same gate as everything
+     * else. Nothing in the mod calls these.
+     */
+    public static int nearBlackAlphaFor(int rgb) {
+        return nearBlackAlpha(rgb);
+    }
+
+    /** See {@link #nearBlackAlphaFor}. */
+    public static int shadowFloor() {
+        return SHADOW_FLOOR;
+    }
+
+    /**
+     * One opaque texel through the shadow pass, for the fixture. See
+     * {@link #nearBlackAlphaFor}.
+     */
+    public static int liftedForParity(int rgb) {
+        ColorField one = new ColorField(1);
+        one.setArgb(0, 0, 0xFF000000 | rgb);
+        ColorField delta = ColorField.deltaLike(one);
+        delta.add(0, 0, (rgb >> 16) & 0xFF, (rgb >> 8) & 0xFF, rgb & 0xFF);
+        delta.addOpacity(0, 0, 0xFF);
+        ColorField field = new ColorField(1);
+        field.apply(delta);
+        field.liftShadows(SHADOW_FLOOR);
+        return field.argb(0, 0) & 0xFFFFFF;
+    }
+
     private static int nearBlackAlpha(int rgb) {
         int max = Math.max((rgb >> 16) & 0xFF, Math.max((rgb >> 8) & 0xFF, rgb & 0xFF));
         if (max >= NEAR_BLACK) {

@@ -173,12 +173,13 @@ NeoForge module thin.** That is what makes a future `forge-1.12.2/` cheap.
 ```bash
 ./gradlew :common:test --tests '*XTest'  # one class, seconds - the working loop (see below)
 ./gradlew :neoforge-26.1.2:build     # full compile + jar
-./gradlew :neoforge-26.1.2:runClient # launch the game with the mod
-./gradlew :neoforge-26.1.2:runServer # headless; does not auto-stop, kill it after `Done`
+./gradlew :neoforge-26.1.2:runClient  # launch the game (runServer too - architecture.html#running)
 
 ./gradlew :common:bakeSpecFixtures             # what the real Java spec engine produces...
 node wiki/gene-creator/tools/check-parity.mjs  # ...and does the creator's JS agree?
 ./gradlew :web:bakeDesignerAssets              # recompile common/ to wasm for the designer
+node wiki/tools/check-links.mjs                # every href, #fragment and id in the wiki
+node neoforge-26.1.2/tools/check-recipes.mjs   # no two recipes claim the same inputs
 ```
 
 Requires JDK 25 (auto-provisioned). Crash reports land in
@@ -234,10 +235,8 @@ lives on a page.
   thing to read before claiming something works.
 - Recent work is summarised newest-first in `wiki/session-log.html`; what is
   known to be wrong is in `wiki/known-gaps.html`.
-- **Machine caveat (this dev laptop):** hybrid graphics - `java*.exe` pinned to
-  the NVIDIA GPU and the FML splash disabled via a git-tracked
-  `run/config/fml.toml`, or the JVM dies in the AMD GL driver.
-  `wiki/architecture.html#running`.
+- **Machine caveat (this dev laptop):** hybrid graphics - the JVM dies in the AMD
+  GL driver unless pinned to the NVIDIA GPU. `wiki/architecture.html#running`.
 
 ---
 

@@ -324,6 +324,7 @@ public final class GeneSpecParser {
 
             List<GeneSpec.LocusCondition> needs = readNeeds(o, where);
             List<String> claims = readCombinations(o, id, alleles, combinations);
+            checkPerDoseVaries(layers, claims, alleles, where);
             if (!needs.isEmpty()) {
                 if (claims.isEmpty()) {
                     throw new IllegalArgumentException(where + ": has \"needs\" but no \"when\"."
@@ -426,6 +427,74 @@ public final class GeneSpecParser {
      * ({@code {"Cr": 1, "prl": 1}}), which expands to every combination
      * matching those counts. Absent means "the catch-all".
      */
+    /**
+     * <b>Refuse a {@code perDose} triple on an expression that can only ever be
+     * reached at one dose.</b>
+     *
+     * <p>{@code perDose} is indexed by how many copies of the gene's
+     * <b>first-declared</b> allele the horse carries. An expression claimed only
+     * by combinations that all share a dose therefore reads one fixed element of
+     * the triple, always - it is a constant, written in the form that looks most
+     * like a variable.
+     *
+     * <p>That is not a style complaint. A <i>coloured</i> expression is normally
+     * reached by two copies of the <b>second</b> allele, so its dose is 0 and it
+     * reads {@code perDose[0]} - which authors write as {@code 0.0}, because a
+     * dose of nothing should draw nothing. A {@code chance} of 0 means the mask
+     * never fires. <b>Five shipped genes painted nothing at all</b> that way
+     * (crescents, lasertae, polymoon, stellar, wormholes) and three of them were
+     * found by the owner opening the pages. See known-gaps gap 105.
+     *
+     * <p>The catch-all expression is skipped: its claims are whatever no other
+     * entry took, which is not known until every entry has been read, and a
+     * catch-all spanning a single dose is not a shape that occurs. Everything
+     * with an explicit {@code when} - which is every expression that has ever
+     * had this bug - is checked.
+     */
+    private static void checkPerDoseVaries(List<Layer> layers, List<String> claims,
+                                           List<AlleleSpec> alleles, String where) {
+        if (claims.isEmpty() || layers.isEmpty()) {
+            return;
+        }
+        String variant = alleles.get(0).token();
+        int dose = doseOf(claims.get(0), variant);
+        for (String c : claims) {
+            if (doseOf(c, variant) != dose) {
+                return;     // genuinely varies - the triple is doing its job
+            }
+        }
+        for (Layer layer : layers) {
+            for (Mask mask : layer.masks()) {
+                requireNoPerDose(mask.params(), dose, variant, where + " mask '" + mask.type() + "'");
+            }
+            requireNoPerDose(layer.op().params(), dose, variant,
+                    where + " op '" + layer.op().type() + "'");
+        }
+    }
+
+    /** How many copies of {@code token} the combination {@code "a/b"} carries. */
+    private static int doseOf(String combination, String token) {
+        String[] parts = combination.split("/");
+        return (parts[0].equals(token) ? 1 : 0) + (parts[1].equals(token) ? 1 : 0);
+    }
+
+    private static void requireNoPerDose(Params params, int dose, String variant, String where) {
+        for (Map.Entry<String, Object> e : params.raw().entrySet()) {
+            if (!(e.getValue() instanceof Value.PerDose p)) {
+                continue;
+            }
+            double reads = dose == 0 ? p.zero() : (dose == 1 ? p.one() : p.two());
+            throw new IllegalArgumentException(where + " '" + e.getKey() + "': a perDose here is a "
+                    + "constant. Every combination this expression claims carries " + dose
+                    + " cop" + (dose == 1 ? "y" : "ies") + " of '" + variant + "' - the gene's "
+                    + "first-declared allele, which is what perDose counts - so the triple always "
+                    + "reads its element " + dose + ", which is " + reads + ". Write " + reads
+                    + " instead."
+                    + (reads == 0 ? " (And note that 0 there means this layer never paints at all,"
+                            + " which is how five genes once shipped invisible.)" : ""));
+        }
+    }
+
     private static List<String> readCombinations(Map<String, Object> o, String id,
                                                  List<AlleleSpec> alleles, List<String> combinations) {
         Object when = o.get("when");
@@ -866,7 +935,116 @@ public final class GeneSpecParser {
         boolean invert = flag(o, "invert", false);
         Params params = readParams(o, SpecSchema.maskParams(type), SpecSchema.maskParamNames(type),
                 where + " '" + type + "'", knobs, knobIndex, "type", "combine", "invert");
+        checkBandNotReversed(type, params, knobs, where);
         return new Mask(type, params, combine, invert);
+    }
+
+    /**
+     * Mask types whose {@code from} / {@code to} become a <b>band</b> - either
+     * {@code SpecPainter.band} or a bare {@code smoothstep}.
+     *
+     * <p>The {@code RAMP} op is deliberately absent even though it has the same
+     * two parameter names. Its {@code from} and {@code to} are the ends of a
+     * <i>linear interpolation</i> ({@code (t - from) / (to - from)}), so putting
+     * them the other way round genuinely reverses the gradient and is a thing an
+     * author might mean. On these masks it is never a thing anybody means.
+     */
+    private static final java.util.Set<MaskType> BANDED_MASKS = java.util.EnumSet.of(
+            MaskType.AXIS, MaskType.PIGMENT, MaskType.LUMA, MaskType.WAVES);
+
+    /**
+     * <b>Refuse a band whose {@code to} can land below its {@code from}.</b>
+     *
+     * <p>{@code BodyStripes.smoothstep} is documented to treat {@code edge1 <=
+     * edge0} as a hard step <i>in the original direction</i> - it does not
+     * reverse the ramp, it removes it. That behaviour is correct and load-
+     * bearing; what is wrong is that a gene file could ask for it by accident
+     * and get something that looks nothing like what it said.
+     *
+     * <p>Both halves of known-gaps gap 106 are caught here.
+     * <a href="../../../../../wiki/gene-patina.html">Patina</a> wrote
+     * {@code from: 0.75, to: 0.35} meaning "fade in as the coat gets lighter"
+     * and got "hard on wherever the coat is dark" - the exact opposite, with no
+     * edge at all. <a href="../../../../../wiki/gene-integration.html">Integration</a>
+     * pointed {@code to} at a knob whose <i>range straddled its own
+     * {@code from}</i>, so about half the horses it drew were reversed and the
+     * other half were not, which is the worse of the two failures because
+     * nothing about the file looks wrong.
+     *
+     * <p>So the test is <b>possibility</b>, not certainty: a knob is a range,
+     * two knobs are drawn independently, and "this can come out reversed on some
+     * horses" is exactly the bug. At the time of writing no shipped gene trips
+     * it - 513 banded masks, 130 of them pointing at knobs - so this is
+     * prevention rather than a migration.
+     */
+    private static void checkBandNotReversed(MaskType type, Params params,
+                                             List<Knob> knobs, String where) {
+        if (!BANDED_MASKS.contains(type)) {
+            return;
+        }
+        SpecSchema.Param fromParam = SpecSchema.maskParam(type, "from");
+        SpecSchema.Param toParam = SpecSchema.maskParam(type, "to");
+        if (fromParam == null || toParam == null) {
+            return;
+        }
+        Value from = params.value("from", fromParam.fallback());
+        Value to = params.value("to", toParam.fallback());
+        for (int dose = 0; dose <= 2; dose++) {
+            double highestFrom = highest(from, knobs, dose);
+            double lowestTo = lowest(to, knobs, dose);
+            if (lowestTo < highestFrom) {
+                throw new IllegalArgumentException(where + " '" + type + "': 'to' can be below "
+                        + "'from' (from reaches " + trim(highestFrom) + ", to can be as low as "
+                        + trim(lowestTo) + (dose > 0 || isPerDose(from) || isPerDose(to)
+                                ? " at dose " + dose : "")
+                        + "). smoothstep treats that as a HARD STEP in the original direction "
+                        + "rather than as a reversed ramp - the band loses its edge entirely and "
+                        + "the layer paints the opposite of what the numbers read like. If you "
+                        + "meant to select the other side, swap the two numbers and add "
+                        + "\"invert\": true; if a knob is the problem, narrow its range so it "
+                        + "cannot cross the other end.");
+            }
+        }
+    }
+
+    private static boolean isPerDose(Value v) {
+        return v instanceof Value.PerDose;
+    }
+
+    /**
+     * The largest number this value can take at {@code dose}.
+     *
+     * <p>Written as an {@code instanceof} chain rather than a pattern switch:
+     * {@code common/} compiles for three targets and pattern switches are not
+     * available on all of them (hard rule 2).
+     */
+    private static double highest(Value v, List<Knob> knobs, int dose) {
+        if (v instanceof Value.Const c) {
+            return c.v();
+        }
+        if (v instanceof Value.FromKnob k) {
+            return knobs.get(k.index()).max();
+        }
+        return atDose((Value.PerDose) v, dose);
+    }
+
+    /** The smallest number this value can take at {@code dose}. See {@link #highest}. */
+    private static double lowest(Value v, List<Knob> knobs, int dose) {
+        if (v instanceof Value.Const c) {
+            return c.v();
+        }
+        if (v instanceof Value.FromKnob k) {
+            return knobs.get(k.index()).min();
+        }
+        return atDose((Value.PerDose) v, dose);
+    }
+
+    private static double atDose(Value.PerDose p, int dose) {
+        return dose == 0 ? p.zero() : (dose == 1 ? p.one() : p.two());
+    }
+
+    private static String trim(double d) {
+        return d == Math.rint(d) ? String.valueOf((long) d) : String.valueOf(d);
     }
 
     private static Params readParams(Map<String, Object> o, List<SpecSchema.Param> schema,

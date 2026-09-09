@@ -221,6 +221,10 @@ window.HG = window.HG || {};
   // ---- the composer ----------------------------------------------------
 
   var PURE_BLACK_ALPHA = 0xCC;
+  // The reading at which phase 2 stops softening the alpha. Mirrors
+  // CoatTextureComposer.NEAR_BLACK - see nearBlackAlpha below for why this is a
+  // ramp and not an equality test.
+  var NEAR_BLACK = 0x30;
   var TRANSPARENT_EPS = 0.001;
   var SHADOW_FLOOR = 0x15;
 
@@ -233,6 +237,26 @@ window.HG = window.HG || {};
     var factor = (overlayCh / 255) * a + (1 - a);
     var v = Math.round(templateCh * factor);
     return v < 0 ? 0 : (v > 255 ? 255 : v);
+  }
+
+  /**
+   * The opacity a resolved colour composites at: PURE_BLACK_ALPHA at black,
+   * ramping to fully opaque by NEAR_BLACK. The port of
+   * CoatTextureComposer.nearBlackAlpha.
+   *
+   * <p>This used to be `rgb === 0 ? PURE_BLACK_ALPHA : 0xFF` - an exact
+   * equality against pure black, which is what the GAME used to have too. The
+   * game was changed to a ramp when a LUT edit moved the gradient's black
+   * corner off exactly #000000 and switched the softening off for every bay;
+   * the mirror here was not, so the equality had been DEAD CODE ever since.
+   * Black bakes to about #161515 on the shipped chart, so the branch never
+   * fired and the creator drew every dark coat at full opacity - darker than
+   * the game, on every preview. See known-gaps gap 50.
+   */
+  function nearBlackAlpha(rgb) {
+    var max = Math.max((rgb >> 16) & 0xFF, Math.max((rgb >> 8) & 0xFF, rgb & 0xFF));
+    if (max >= NEAR_BLACK) return 0xFF;
+    return 0xFF - ((0xFF - PURE_BLACK_ALPHA) * (NEAR_BLACK - max) / NEAR_BLACK | 0);
   }
 
   /**
@@ -258,7 +282,7 @@ window.HG = window.HG || {};
       var b = resolved.blackAt(px, py);
       if (r <= TRANSPARENT_EPS && b <= TRANSPARENT_EPS) return;
       var rgb = lut.sample(r, b) & 0xFFFFFF;
-      colour.setArgb(px, py, ((rgb === 0 ? PURE_BLACK_ALPHA << 24 : 0xFF000000) | rgb) >>> 0);
+      colour.setArgb(px, py, ((nearBlackAlpha(rgb) << 24) | rgb) >>> 0);
     });
 
     (opts.magicals || []).forEach(function (fn) {
@@ -299,6 +323,22 @@ window.HG = window.HG || {};
     GradientLut: GradientLut,
     compose: compose,
     TRANSPARENT_EPS: TRANSPARENT_EPS,
-    SHADOW_FLOOR: SHADOW_FLOOR
+    SHADOW_FLOOR: SHADOW_FLOOR,
+
+    // Exported for js/parity.js only - see the composer section there. Nothing
+    // in the creator calls these two directly; compose() uses them internally.
+    nearBlackAlpha: nearBlackAlpha,
+
+    /** One opaque texel through the shadow pass, mirroring the Java fixture helper. */
+    liftedForParity: function (rgb) {
+      var f = new ColorField(1);
+      var d = new ColorField(1);
+      d.add(0, 0, (rgb >> 16) & 0xFF, (rgb >> 8) & 0xFF, rgb & 0xFF);
+      d.addOpacity(0, 0, 0xFF);
+      f.apply(d);
+      f.liftShadows(SHADOW_FLOOR);
+      var hex = (f.argb(0, 0) & 0xFFFFFF).toString(16);
+      return "000000".substring(hex.length) + hex;
+    }
   };
 })(window.HG);

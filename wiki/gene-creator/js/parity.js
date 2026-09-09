@@ -189,6 +189,43 @@ window.HG = window.HG || {};
             + "], the creator [" + HG.schema.CONDITION_FLAGS + "]");
         }
       }
+
+      // The COMPOSER's arithmetic. The probe cases below run restrict() and
+      // tint() and never compose(), so the alpha ramp and the shadow lift had
+      // no net at all - which is where gap 50 lived: this file's mirror kept an
+      // `rgb == 0` equality for months after the game replaced it with a ramp,
+      // and once the gradient's black corner moved off #000000 the branch
+      // stopped matching anything and every dark coat drew too dark.
+      //
+      // The composite itself cannot be compared here (it needs the gradient and
+      // the template, and there is no image decoder in the harness). The
+      // arithmetic can, and the arithmetic is what drifted.
+      if (schema.composer) {
+        var comp = schema.composer;
+        if (comp.shadowFloor !== HG.fields.SHADOW_FLOOR) {
+          fail("SHADOW_FLOOR differs: the game has " + comp.shadowFloor
+            + ", the creator " + HG.fields.SHADOW_FLOOR);
+        }
+        count();
+        Object.keys(comp.nearBlackAlpha || {}).forEach(function (hex) {
+          var want = comp.nearBlackAlpha[hex];
+          var got = HG.fields.nearBlackAlpha(parseInt(hex, 16));
+          if (got !== want) {
+            fail("nearBlackAlpha(#" + hex + "): the game gives " + want
+              + ", the creator " + got);
+          }
+          count();
+        });
+        Object.keys(comp.liftShadows || {}).forEach(function (hex) {
+          var want = comp.liftShadows[hex];
+          var got = HG.fields.liftedForParity(parseInt(hex, 16));
+          if (got !== want) {
+            fail("liftShadows(#" + hex + "): the game gives #" + want
+              + ", the creator #" + got);
+          }
+          count();
+        });
+      }
     } else {
       fail("fixtures have no schema section - re-run ./gradlew :common:bakeSpecFixtures");
     }

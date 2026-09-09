@@ -15,6 +15,7 @@ import com.example.horsegenetics.common.genetics.Genotype;
 import com.example.horsegenetics.common.genetics.epi.EpiRoll;
 
 import java.io.IOException;
+import com.example.horsegenetics.common.coat.pattern.CoatTextureComposer;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -132,8 +133,53 @@ public final class SpecFixtureTool {
         for (int i = 0; i < AbilityType.CONDITION_FLAGS.size(); i++) {
             sb.append(i > 0 ? ", " : "").append("\"").append(AbilityType.CONDITION_FLAGS.get(i)).append("\"");
         }
-        sb.append("]\n  },\n");
+        sb.append("],\n");
+        sb.append(composerSection());
+        sb.append("  },\n");
         return sb.toString();
+    }
+
+    /**
+     * The <b>composer's arithmetic</b>, as answer tables.
+     *
+     * <p>{@code check-parity.mjs} runs {@code restrict} and {@code tint} and
+     * never runs {@code compose}, so everything in the creator's composite
+     * mirror - the phase-2 alpha ramp, the phase-3a shadow lift, the final
+     * multiply - had never been compared against anything. That is the hole
+     * known-gaps gap 50 lived in: the mirror kept an {@code rgb == 0} equality
+     * for months after the game replaced it with a ramp, the equality stopped
+     * matching anything at all when the gradient's black corner moved off
+     * {@code #000000}, and the creator quietly drew every dark coat at full
+     * opacity.
+     *
+     * <p>The composite itself is not comparable here - it needs the gradient
+     * and the template, and the Node harness has no image decoder. The
+     * arithmetic is, because both functions are pure functions of ints, and the
+     * arithmetic is where the drift was. The inputs below are chosen to sit on
+     * both sides of every threshold: pure black, the shipped chart's actual
+     * black, either side of NEAR_BLACK, and an ordinary coat colour.
+     */
+    private static String composerSection() {
+        int[] probes = {0x000000, 0x0C0C0C, 0x161515, 0x2F2F2F, 0x303030, 0x9B4A28, 0xFFFFFF};
+        StringBuilder sb = new StringBuilder("    \"composer\": {\n      \"nearBlackAlpha\": {");
+        for (int i = 0; i < probes.length; i++) {
+            sb.append(i > 0 ? ", " : " ").append("\"").append(hex(probes[i])).append("\": ")
+                    .append(CoatTextureComposer.nearBlackAlphaFor(probes[i]));
+        }
+        sb.append(" },\n      \"shadowFloor\": ").append(CoatTextureComposer.shadowFloor());
+        sb.append(",\n      \"liftShadows\": {");
+        for (int i = 0; i < probes.length; i++) {
+            int lifted = CoatTextureComposer.liftedForParity(probes[i]);
+            sb.append(i > 0 ? ", " : " ").append("\"").append(hex(probes[i])).append("\": \"")
+                    .append(hex(lifted)).append("\"");
+        }
+        sb.append(" }\n    }\n");
+        return sb.toString();
+    }
+
+    private static String hex(int rgb) {
+        String h = Integer.toHexString(rgb & 0xFFFFFF);
+        return "000000".substring(h.length()) + h;
     }
 
     /**

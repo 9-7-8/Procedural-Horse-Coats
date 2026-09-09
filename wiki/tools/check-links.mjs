@@ -61,9 +61,32 @@ function idsFor(file) {
 const broken = [];
 const linkedTo = new Set();
 
+/**
+ * Duplicate ids on one page. An `#anchor` resolves to the FIRST match, so a
+ * repeated id means one of the two sections is unreachable by link and the
+ * other silently answers for it - and every link to it looks fine, here
+ * included, because the id does exist.
+ *
+ * It had already happened: known-gaps.html carried two entries numbered
+ * gap-46, so one of them could not be linked at all.
+ */
+function duplicateIds(html) {
+  const seen = new Set();
+  const dupes = new Set();
+  for (const m of html.matchAll(/\sid="([^"]+)"/g)) {
+    if (seen.has(m[1])) dupes.add(m[1]);
+    seen.add(m[1]);
+  }
+  return [...dupes];
+}
+
 for (const page of pages) {
   const html = readFileSync(page, "utf8");
   const from = relative(ROOT, page).replaceAll("\\", "/");
+
+  for (const id of duplicateIds(html)) {
+    broken.push(`${from} has TWO elements with id="${id}" - an #anchor only ever reaches the first`);
+  }
 
   for (const m of html.matchAll(/\s(?:href|src)="([^"]+)"/g)) {
     const raw = m[1];
