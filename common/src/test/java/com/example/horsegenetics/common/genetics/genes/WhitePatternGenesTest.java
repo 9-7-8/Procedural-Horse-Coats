@@ -286,12 +286,41 @@ class WhitePatternGenesTest {
                         "single-copy splash left the face nearly bare (" + f + ") for " + code + " seed " + seed);
             }
         }
-        // homozygous / two-locus splash goes bald-faced - much more than one copy
-        double one = faceWhite(Codes.of("mitf", "SW1/N"), 3L);
-        double hom = faceWhite(Codes.of("mitf", "SW1/SW1"), 3L);
-        double both = faceWhite(Codes.of("mitf", "SW1/N", "pax3", "SW2/N"), 3L);
-        assertTrue(hom > one + 0.15, "SW1/SW1 face (" + hom + ") not much bolder than SW1/N (" + one + ")");
-        assertTrue(both > one + 0.10, "two-locus splash face (" + both + ") not bolder than one copy (" + one + ")");
+        // Homozygous / two-locus splash goes bald-faced - much more than one
+        // copy. Stated as a MEAN over many seeds, and deliberately not as a
+        // comparison on one seed: that is the shape known-gaps gap 47 is about.
+        //
+        // It used to read faceWhite(..., 3L) for each and compare the three
+        // numbers. The claim is about the dose response, which is a property of
+        // the distribution, but the assertion was a fact about the horse at
+        // seed 3 - so it was hostage to which horse that seed happened to name.
+        // When SeededRng gained a real seed scramble, seed 3 became the single
+        // unluckiest draw in sixty (+0.08 where the mean is +0.43) and the test
+        // went red on a locus whose behaviour had not changed at all.
+        //
+        // Over FACE_SEEDS the margin is roughly three times what is asserted
+        // here, so this has real room to move before it fires - and if it ever
+        // does fire, the dose response actually broke.
+        double one = meanFaceWhite(Codes.of("mitf", "SW1/N"));
+        double hom = meanFaceWhite(Codes.of("mitf", "SW1/SW1"));
+        double both = meanFaceWhite(Codes.of("mitf", "SW1/N", "pax3", "SW2/N"));
+        assertTrue(hom > one + 0.15,
+                "SW1/SW1 mean face (" + hom + ") not much bolder than SW1/N (" + one + ")");
+        assertTrue(both > one + 0.10,
+                "two-locus splash mean face (" + both + ") not bolder than one copy (" + one + ")");
+    }
+
+    /** The seeds the splash dose-response claim is averaged over. */
+    private static final long[] FACE_SEEDS = {0L, 1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L,
+        10L, 11L, 12L, 13L, 14L, 15L, 16L, 17L, 18L, 19L};
+
+    /** Mean face white over {@link #FACE_SEEDS} - a distribution, not a draw. */
+    private static double meanFaceWhite(String code) {
+        double total = 0;
+        for (long seed : FACE_SEEDS) {
+            total += faceWhite(code, seed);
+        }
+        return total / FACE_SEEDS.length;
     }
 
     /** White fraction over the head + muzzle only, one epigenetic seed. */

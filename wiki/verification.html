@@ -35,6 +35,33 @@
     </p>
 </div>
 
+<h2 id="reseed">&sect;0-AU &mdash; Every coat in the mod redrew (2026-09-09, NOT looked at)</h2>
+
+<p>
+    <code>SeededRng</code> never mixed its seed &mdash; <a href="known-gaps.html#gap-44">gap 44</a>
+    &mdash; and now does. <strong>That changed every horse the mod has ever generated</strong>:
+    883 of 1056 lines of the pipeline golden, 218 of 623 of the bake golden, and 154 gene icons.
+    Nothing is <em>expected</em> to look worse, because the same distributions are being drawn
+    from and only the draws moved, but that is an argument rather than an observation and nobody
+    has looked at a paddock since.
+</p>
+
+<ul>
+<li><strong>A paddock of ordinary horses.</strong> The one thing worth eyeballing is whether the
+    population still reads right &mdash; the measured share wearing white markings is about two
+    in three (<a href="known-gaps.html#gap-53">gap 53</a>), which should look like a normal mixed
+    herd and not like a pinto herd.</li>
+<li><strong>Wing cloak, both variant alleles.</strong> It now paints fewer than 24 texels and has
+    lost its wiki icon (<a href="known-gaps.html#gap-129">gap 129</a>). Say whether anything is
+    visible on a horse at all. If it is not, the gene wants rewriting rather than the icon
+    threshold lowering &mdash; and that is an owner's call.</li>
+<li><strong>Quarter.</strong> Its quadrant choices come from the new <code>CHOICE</code> mask
+    rather than a scale-4000 noise trick (<a href="known-gaps.html#gap-102">gap 102</a>). A
+    quarter horse should show one clean quadrant, and a double-quarter one clean half, with no
+    seam where the two halves meet and no half-strength wash &mdash; that last one was a real
+    outcome of the old trick, at about one horse in four hundred.</li>
+</ul>
+
 <h2 id="night-genes">&sect;0-AT &mdash; The night loci, and nine genes repainted (2026-09-09, NOT looked at)</h2>
 
 <p>

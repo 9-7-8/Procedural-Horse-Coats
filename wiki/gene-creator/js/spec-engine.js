@@ -31,8 +31,29 @@ window.HG = window.HG || {};
   var ADDEND = noise.u64(0, 0xB);
   var MASK48_H = 0xFFFF; // the seed is 48 bits: all of `l`, the low 16 of `h`.
 
+  // The seed scramble SeededRng applies before java.util.Random ever sees the
+  // seed - splitmix64's finaliser, mirrored constant for constant.
+  //
+  // java.util.Random's own seed handling is a single XOR, which is not a mix:
+  // neighbouring seeds stay neighbours and the draw at a given position stays
+  // correlated across the whole set. The game scrambles first (see
+  // SeededRng.scramble and known-gaps gaps 44 and 117), so the creator has to
+  // as well - otherwise "seed 7" in the preview is a horse from a different
+  // distribution than "seed 7" in the game, which is exactly the class of
+  // silent divergence this mirror exists to prevent.
+  var SM_GAMMA = noise.fromHex("9E3779B97F4A7C15");
+  var SM_MIX1 = noise.fromHex("BF58476D1CE4E5B9");
+  var SM_MIX2 = noise.fromHex("94D049BB133111EB");
+
+  function scramble(seed) {
+    var z = noise.add(seed, SM_GAMMA);
+    z = noise.mul(noise.xor(z, noise.shru(z, 30)), SM_MIX1);
+    z = noise.mul(noise.xor(z, noise.shru(z, 27)), SM_MIX2);
+    return noise.xor(z, noise.shru(z, 31));
+  }
+
   function JavaRandom(seedHigh, seedLow) {
-    var s = noise.xor(noise.u64(seedHigh, seedLow), MULT);
+    var s = noise.xor(scramble(noise.u64(seedHigh, seedLow)), MULT);
     this.s = noise.u64(s.h & MASK48_H, s.l);
   }
 
@@ -62,6 +83,20 @@ window.HG = window.HG || {};
     var lo = this.next(32);
     return noise.add(noise.u64(hi >>> 0, 0), noise.fromInt(lo));
   };
+
+  /**
+   * Which of `options` outcomes this horse drew - the port of
+   * SpecPainter.choiceOf. Mixed rather than taken modulo directly: a seed
+   * knob's low bits are not a fair coin, and `% 2` on a raw seed is the kind
+   * of thing that comes out 60/40 and is never noticed.
+   */
+  function choiceOf(seed, options) {
+    var z = scramble(seed);
+    // The low 32 bits are enough for a modulus this small, and staying inside
+    // one word avoids a 64-bit division the u64 helpers do not have.
+    var lo = z.l >>> 0;
+    return lo % options;
+  }
 
   /**
    * Round to what an epigenome code can write - the port of
@@ -242,6 +277,15 @@ window.HG = window.HG || {};
         var v3 = noise.value(s3, point.x / sc, point.y / sc, point.z / sc);
         var low = get(values, mask.low, 0, legIndex);
         return clamp01(low + (get(values, mask.high, 1, legIndex) - low) * v3);
+      }
+      case "CHOICE": {
+        // Constant across the horse and exactly 0 or 1 - the position is
+        // deliberately not read. Mirrors SpecPainter's CHOICE case.
+        var cs = getSeed(values, mask.seed, seedBase);
+        var opts = Math.max(1, Math.round(get(values, mask.options, 2.0, legIndex)));
+        var want = Math.round(get(values, mask.is, 0.0, legIndex));
+        var got = choiceOf(cs, opts);
+        return got === (((want % opts) + opts) % opts) ? 1 : 0;
       }
       case "PIGMENT":
         return pigmentCoverage(mask, values, coat, px, py, legIndex);

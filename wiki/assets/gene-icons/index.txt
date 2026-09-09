@@ -84,7 +84,6 @@ quarter
 flametouched
 patina
 ladybug_saddle
-wing_cloak
 aurorae
 glow
 angler

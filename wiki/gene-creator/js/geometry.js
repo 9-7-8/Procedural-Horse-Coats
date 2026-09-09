@@ -246,6 +246,68 @@ window.HG = window.HG || {};
       return { x: m.z - mz, y: m.y - my, z: -mx };
     },
 
+    /**
+     * The body fraction along one axis of a point given as face fractions -
+     * the axis the face's normal runs along is pinned to the face's own side.
+     * Mirrors HorseSkinGeometry.bodyFraction.
+     */
+    bodyFraction: function (axis, face, fa, fb) {
+      var f = FACES[face];
+      if (f.normal === axis) return f.atMax ? 1.0 : 0.0;
+      return spanA(face) === axis ? fa : fb;
+    },
+
+    /**
+     * The same texel, on the POSED cuboid rather than on its bounding box -
+     * a port of HorseSkinGeometry.posed, and the reason this file can be
+     * checked against the Java at all.
+     *
+     * This arithmetic used to live only in model3d.js's emitPart, which is
+     * where the browser first needed it. That made the posed mesh exist twice,
+     * in two languages, in two files that were not obviously a pair, with
+     * nothing comparing them (known-gaps gap 100). It lives here now because
+     * here is where the Java's counterpart lives; emitPart calls it.
+     */
+    posed: function (skin, part, face, fa, fb) {
+      var pd = this.mesh(skin).parts[part];
+      if (!pd) return null;
+      var r = pd.raw;
+      var cx = this.bodyFraction("X", face, fa, fb);
+      var cy = this.bodyFraction("Y", face, fa, fb);
+      var cz = this.bodyFraction("Z", face, fa, fb);
+      // Body and local axes run against each other on all three axes, so a
+      // body fraction c is a local fraction 1 - c on the axis it pairs with:
+      // bodyX <-> local z, bodyY <-> local y, bodyZ <-> local x.
+      var lx = r.ox + (1.0 - cz) * r.w;
+      var ly = r.oy + (1.0 - cy) * r.h;
+      var lz = r.oz + (1.0 - cx) * r.d;
+      var cos = Math.cos(r.pitch), sin = Math.sin(r.pitch);
+      return this.toBody(skin,
+        r.px + lx,
+        r.py + (ly * cos - lz * sin),
+        r.pz + (ly * sin + lz * cos));
+    },
+
+    /**
+     * The outward direction of a posed face, in body space. Mirrors
+     * HorseSkinGeometry.posedNormal: the offsets cancel on a direction, so
+     * only the pitch, the axis swap and the three sign flips survive.
+     */
+    posedNormal: function (skin, part, face) {
+      var pd = this.mesh(skin).parts[part];
+      if (!pd) return null;
+      var r = pd.raw;
+      var f = FACES[face];
+      var sign = f.atMax ? -1.0 : 1.0;
+      var dx = f.normal === "Z" ? sign : 0.0;
+      var dy = f.normal === "Y" ? sign : 0.0;
+      var dz = f.normal === "X" ? sign : 0.0;
+      var cos = Math.cos(r.pitch), sin = Math.sin(r.pitch);
+      var ry = dy * cos - dz * sin;
+      var rz = dy * sin + dz * cos;
+      return { x: -rz, y: -ry, z: -dx };
+    },
+
     /** The sample at a texel, or null where this skin maps nothing. */
     sample: function (skin, px, py) {
       if (px < 0 || py < 0 || px >= SHEET_SIZE || py >= SHEET_SIZE) return null;

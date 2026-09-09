@@ -29,6 +29,122 @@
 
 <h2 id="d2026-09-09">2026-09-09</h2>
 
+<h3 id="rng-and-choice-2026-09-09">The random number generator was never mixing its seed, and two goldens had to move to fix it.</h3>
+
+<p>Eight gaps, taken as four pieces of work. The largest one changed every horse in the mod.</p>
+
+<h4>Three gaps, one root cause</h4>
+
+<p><code>SeededRng</code> wrapped <code>java.util.Random</code>, whose seed handling is a
+single XOR against a constant. <strong>That is not a mix</strong>, and three separate
+entries on the gaps page turned out to be the same fact seen from different angles:</p>
+
+<ul>
+<li><a href="known-gaps.html#gap-44">Gap 44</a>: the first <code>nextFloat()</code> off
+    sequential seeds spanned <strong>0.58 to 0.95, mean 0.77</strong> - never touching
+    either end of [0,1). It had already cost an hour on a 62/22/16 split that measured
+    as 100/0/0.</li>
+<li><a href="known-gaps.html#gap-117">Gap 117</a>: because each gene reads its knobs at
+    its own <em>offset</em> in a shared stream, and the offset is its priority, moving two
+    unrelated genes pushed magic jump's mean 1.7% out - fifteen standard errors on a
+    distribution that had not changed.</li>
+<li><a href="known-gaps.html#gap-47">Gap 47</a>: a related but separate defect -
+    <code>Epigenome.fromSeed</code> drew every gene from one stream in registry order, so
+    adding a locus renumbered every gene after it and the horse at seed 13 became a
+    different horse.</li>
+</ul>
+
+<p>The seed now goes through <strong>splitmix64's finaliser</strong> before
+<code>Random</code> sees it, and each gene draws from its own generator namespaced by its
+key. The first measurement becomes <strong>0.0002 to 0.9999, mean 0.5043</strong>;
+neighbour covariance drops from about 0.013 to about 0.001.</p>
+
+<p><strong>The convincing evidence was a deletion.</strong>
+<code>MagicBodyStatGenesTest</code> carried its own splitmix64 finaliser as a local
+workaround, with a comment saying the real correlation was the gaps page's problem rather
+than the test's. That workaround was removed rather than left to double-mix, and the file
+passes without it - which is the fix demonstrating itself, and leaves the test as a
+tripwire if anyone takes the scramble back out.</p>
+
+<h4>What it cost, and the check that nearly went wrong</h4>
+
+<p>It changed every horse ever generated, exactly as the gap said it would: <strong>883 of
+1056 lines of the pipeline golden and 218 of 623 of the bake golden</strong>, plus 154 gene
+icons, the designer wasm and the spec fixtures. The check that mattered was not the count
+but the <em>membership</em>: the genes that moved are exactly the genes that store
+epigenetics, with <code>acan</code> and <code>b4galt7</code> correctly untouched.</p>
+
+<p><strong>Regenerating the pipeline golden turned out to be impossible as documented</strong>
+(<a href="known-gaps.html#gap-128">gap 128</a>). Its javadoc said "run the test, copy the
+file it writes"; it only wrote that file when the golden was <em>missing</em>, never on a
+mismatch - so <code>build/coat-golden.txt</code> held an older run's output, and copying it
+back reinstated a stale golden while the test went green. The tell was a file that had
+"moved by zero lines" while the test was still failing, which cannot both be true.</p>
+
+<p>Two tests then failed for no real reason, and both were the fragility gap 47 describes -
+a claim about a <em>distribution</em> pinned to specific draws. Neither was widened without
+measuring first: the splash dose response was comparing single horses at seed 3, which after
+the reseeding became the single unluckiest draw in sixty (+0.08 where the mean is +0.43), and
+the grey spread was a <em>range</em> over 8 seeds - the statistic most sensitive to a small
+sample, since it depends only on the two extremes. Over 24 seeds it is about 45 against a
+threshold of 20. Both now state their claim over a distribution.</p>
+
+<h4>The last ungated mirror</h4>
+
+<p><a href="known-gaps.html#gap-100">Gap 100</a> is closed and the creator's geometry port
+is inside the parity gate. <code>posed()</code> existed twice - in
+<code>HorseSkinGeometry</code> and again in <code>model3d.js</code>'s
+<code>emitPart</code> - in two languages, in two files that were not obviously a pair. It
+now exists once in <code>geometry.js</code>, with <code>emitPart</code> calling it;
+<strong>528 cuboid corners were verified bit-identical</strong> before and after, so the
+preview mesh did not move. The fixture bakes every part &times; face on both skins: 924 new
+checks, 5485 to 6409.</p>
+
+<p><strong>The probes are deliberately not only corners.</strong> A corner is a fraction of
+0 or 1 on both axes, and several ways of getting the axis pairing wrong agree at every
+corner and disagree everywhere else - which is the exact shape of the UV swap that once hid
+behind a stale fixture for a day. Proved by regressing the port three ways: swapping the
+body-Y/Z pairing (460 failures), dropping the pitch rotation (402), flipping one sign in the
+normal (44).</p>
+
+<h4>A per-horse choice, and a mirror bug caught before it shipped</h4>
+
+<p><a href="known-gaps.html#gap-102">Gap 102</a>: the mask fold has no branch in it, so
+quarter faked one by sampling noise at a scale of <strong>4000 body units</strong> - a
+hundred times the length of a horse - and amplifying it until the clamp turned it into a
+yes or no. The new <code>CHOICE</code> mask is the real thing: an integer drawn once per
+horse, constant across the body, exactly 0 or 1. Both of the trick's residual defects go
+with it - the slight drift across the body, and the 1-in-401 strip that clamped to neither
+end and produced a half-strength quadrant.</p>
+
+<p><strong>Writing it turned up a 64-vs-32-bit modulus hazard</strong>, and that is why the
+example gene uses <code>options: 3</code>. The draw is mixed and the modulus taken over the
+low 32 bits only, because the creator mirrors this in JavaScript where a 64-bit remainder
+needs long division the u64 helpers do not have. Java over all 64 bits and JS over the low
+word <em>agree for every power-of-two number of options</em> and silently disagree for 3, 5
+and 6 - so a two-way example would have been green either way. With a three-way choice in
+<code>prismatic.json</code>, reintroducing the mismatch fails 72 parity checks.</p>
+
+<h4>Two measurements, and one gap that is a writing job</h4>
+
+<p><a href="known-gaps.html#gap-53">Gap 53</a> is measured and the answer is reassuring:
+<strong>about two founders in three</strong> wear white from the two ordinary-marking loci,
+mean coverage about 10%, only about 8% loudly marked. The estimate on the page was three in
+four, so it was close and slightly high. <strong>The measurement has a trap in it</strong>:
+counting white on a founder directly says 91%, because on a flat greyscale chart a cremello,
+a grey and a palomino are pale <em>coats</em> with no marking on them. The giveaway was 91%
+wearing white while only 78% carried either locus. The test composes each founder twice and
+differences them, so the base coat cancels.</p>
+
+<p><a href="known-gaps.html#gap-89">Gap 89</a> was recounted rather than fixed. The recorded
+24 is 25; a briefly-feared 157 is wrong, because 131 of those are magical genes where having
+no science tab is correct. None of the 25 has an orphaned real-world section that could
+simply be moved, so it is genuinely a writing job and wants the owner - filling those tabs
+means <em>writing</em> veterinary material, not generating it.
+<code>wiki/tools/check-gene-tabs.mjs</code> does the code-side half: it holds the 25 as a
+written-out allowlist and fails if a new natural gene page arrives without a science tab, or
+if one on the list gains a tab and is not removed from it.</p>
+
 <h3 id="parser-checks-and-mirrors-2026-09-09">Two parser refusals, three live bugs, and the discovery that the composer was never inside the parity gate.</h3>
 
 <p>A code-only audit pass: things findable and fixable without opening the game.</p>

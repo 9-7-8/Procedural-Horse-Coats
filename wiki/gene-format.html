@@ -393,6 +393,36 @@
 <tr><td><code>DAPPLES</code></td><td><code>seed</code>, <code>spacing</code> 3.5, <code>warp</code> 0.45, <code>edge0</code> 0.35, <code>edge1</code> 0.78</td><td><code>BodyNoise.cellDistance</code> &mdash; dapples, rosettes, appaloosa spots.</td></tr>
 <tr><td><code>PATCHES</code></td><td><code>seed</code>, <code>scale</code> 6.0, <code>threshold</code> 0.5, <code>softness</code> 0.12</td><td>Big irregular blobs &mdash; pinto, tobiano, roan patching.</td></tr>
 <tr><td><code>NOISE</code></td><td><code>seed</code>, <code>scale</code> 8.0, <code>low</code> 0, <code>high</code> 1</td><td>Shading rather than a shape &mdash; sooty, countershading.</td></tr>
+<tr><td><code>CHOICE</code></td><td><code>seed</code>, <code>options</code> 2, <code>is</code> 0</td><td><strong>A choice made once per horse</strong> &mdash; constant across the whole body, and fully on or fully off.</td></tr>
+<tr><td colspan="3"><div class="note">
+<span class="label"><code>CHOICE</code> is the only mask that does not read where you are</span>
+<p>
+    Every other mask is a function of position on the horse. <code>CHOICE</code> draws an
+    integer in <code>[0, options)</code> from its <code>seed</code> knob and returns 1 where
+    that integer equals <code>is</code> and 0 everywhere else &mdash; the same answer on
+    every texel of that horse, and a different answer on the next horse.
+</p>
+<p>
+    It exists because <strong>the mask fold has no branch in it</strong>. A knob can move a
+    boundary but cannot choose between two of them, so a gene that has to pick
+    <em>which</em> quadrant goes pale had no way to say so. Give each outcome its own layer
+    and gate them on the same seed with different <code>is</code> values, and exactly one
+    fires.
+</p>
+<p>
+    <strong>It replaces a trick, and the trick is worth knowing about</strong> because it
+    reads as deliberate noise if you meet it in an older file:
+    <a href="gene-quarter.html">quarter</a> used to sample <code>NOISE</code> at a
+    <code>scale</code> of 4000 body units &mdash; a hundred times the length of a horse, so
+    the whole animal sat inside one lattice cell and read essentially one number &mdash;
+    and stretched it onto <code>[-200, 201]</code> so the clamp turned it into a hard yes or
+    no. It worked, and it was <em>nearly</em> constant rather than constant: the field still
+    drifted slightly across the body, and about one horse in four hundred landed in the
+    strip that clamps to neither end and wore a half-strength quadrant.
+    <code>CHOICE</code> has no drift and no strip.
+</p>
+</div></td></tr>
+
 <tr><td colspan="3"><div class="note">
 <span class="label">What a mask&rsquo;s <code>parts</code> means depends on its position</span>
 <p>

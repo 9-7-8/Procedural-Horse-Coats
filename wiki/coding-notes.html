@@ -421,15 +421,60 @@
     adding one.
 </p>
 
-<h3 id="shell">Long shell heredocs truncate</h3>
+<h3 id="shell">Shell heredocs lie to you in two different ways</h3>
 
 <p>
-    On this machine a heredoc past roughly a hundred lines is silently cut off, and the
-    error it produces is <code>unexpected EOF while looking for matching quote</code>
-    &mdash; which reads as a quoting mistake and sends you looking in entirely the wrong
-    place. For anything substantial, write the file directly or put a patch script in the
-    scratchpad and run it by absolute path. This page was assembled in chunks for exactly
-    that reason.
+    Both cost real time, and neither produces an error that points anywhere near the
+    cause. Anything substantial should be written to a file directly, or put in a patch
+    script in the scratchpad and run by absolute path.
+</p>
+
+<ul>
+<li><strong>A heredoc past roughly a hundred lines is silently truncated.</strong> The
+    error is <code>unexpected EOF while looking for matching quote</code>, which reads as
+    a quoting mistake and sends you hunting through your own string literals.</li>
+<li><strong>A quoted delimiter does not protect backslashes.</strong>
+    <code>&lt;&lt;'PY'</code> is supposed to pass the body through untouched, and does
+    not: a Python <code>'a\\nb'</code> arrives as <code>a</code>, newline,
+    <code>b</code> &mdash; the escape has already been collapsed before Python sees it.
+    <strong>The failure mode is the dangerous part</strong>: a patch script matching on a
+    string that contains <code>\\n</code> (which is every patch that touches a Java or
+    JavaScript string literal) simply fails to match, and if the script does not assert on
+    its match count it reports success having changed nothing.
+    <em>Always assert the count.</em> Every patch script in this project opens with
+    <code>assert s.count(old) == 1</code> for that reason, and that assertion is what
+    caught this.</li>
+</ul>
+
+<h3 id="regen">Check that a regeneration actually regenerated</h3>
+
+<p>
+    Derived files in this project are checked in and fail silently when stale, so the
+    regeneration step is load-bearing &mdash; and a regeneration that quietly does nothing
+    looks exactly like one that worked. Two real instances, a session apart:
+</p>
+
+<ul>
+<li><strong>A golden test that only wrote its output when the golden was missing.</strong>
+    The documented recipe was &ldquo;run the test, copy the file it writes&rdquo;, but a
+    <em>mismatch</em> wrote nothing, so the file sitting there was from some earlier run.
+    Copying it back reinstated a stale golden and the test went green having compared
+    nothing (<a href="known-gaps.html#gap-128">gap 128</a>). The tell was a file that
+    &ldquo;moved by zero lines&rdquo; while the test was still red &mdash; two facts that
+    cannot both be true, which is the kind of contradiction worth stopping on.</li>
+<li><strong>Gradle reporting <code>processTestResources UP-TO-DATE</code></strong> after
+    the source resource changed, so the test ran against the previously staged copy.
+    If a resource edit does not change a test's result, check the staged file's timestamp
+    before concluding anything about the code.</li>
+</ul>
+
+<p>
+    The general form: <strong>after regenerating, confirm the artefact changed in the way
+    you expected, and confirm the set of things that changed is the set you predicted.</strong>
+    When <code>SeededRng</code> gained a seed scramble, 218 of 623 bake-golden lines moved
+    &mdash; and the check that mattered was not the count but that the moved genes were
+    exactly the ones that store epigenetics, with <code>acan</code> and
+    <code>b4galt7</code> correctly untouched.
 </p>
 
 </article>

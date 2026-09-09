@@ -110,7 +110,45 @@ public final class Epigenome {
      * nothing.
      */
     public static Epigenome fromSeed(long seed) {
-        return random(new SeededRng(seed));
+        Map<String, Copies> m = new LinkedHashMap<>();
+        for (Gene g : Genes.codeOrder()) {
+            if (!stores(g)) {
+                continue;
+            }
+            // Each gene draws from its OWN generator, namespaced by its key,
+            // rather than from a shared stream read in registry order.
+            //
+            // This is what closes known-gaps gap 47. The shared-stream version
+            // walked codeOrder() drawing as it went, so registering a locus at
+            // priority 68 gave every gene above 68 a different draw and the
+            // horse at seed 13 became a different horse. That is free in play -
+            // there are no saves - but it is not free in tests: adding natural
+            // zebra broke three assertions in WhitePatternGenesTest, all by
+            // margins under 0.05, none of them a real regression, and the only
+            // signal was a red build after an unrelated-looking change.
+            //
+            // Keying off the gene makes a seeded horse STABLE under gene
+            // registration: adding, removing or re-prioritising a locus now
+            // moves that locus and nothing else. The narrower shape of the same
+            // gap survives on purpose - changing how many values one gene
+            // declares still reshuffles that gene - but that is one gene, the
+            // bake golden names it, and it is the change you were making.
+            m.put(g.key(), copiesFor(g, seed));
+        }
+        return new Epigenome(m);
+    }
+
+    /**
+     * One gene's seeded copies, from the seed and that gene's key <b>alone</b>.
+     *
+     * <p>Public because it is the whole of the rule {@link #fromSeed} follows,
+     * and {@code EpigenomeTest} asserts that rule directly: recompute a gene on
+     * its own and it must match the one inside a whole seeded horse. That is
+     * what stops the shared-stream behaviour (known-gaps gap 47) coming back
+     * unnoticed.
+     */
+    public static Copies copiesFor(Gene gene, long seed) {
+        return founderCopies(gene.epiSchema(), new SeededRng(seed, gene.key()));
     }
 
     private static Copies founderCopies(EpiSchema schema, Rng rng) {

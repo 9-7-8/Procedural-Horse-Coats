@@ -180,10 +180,10 @@ node wiki/gene-creator/tools/check-parity.mjs  # ...and does the creator's JS ag
 ./gradlew :web:bakeDesignerAssets              # recompile common/ to wasm for the designer
 node wiki/tools/check-links.mjs                # every href, #fragment and id in the wiki
 node neoforge-26.1.2/tools/check-recipes.mjs   # no two recipes claim the same inputs
+node wiki/tools/check-gene-tabs.mjs             # a new natural gene page brings a science tab
 ```
 
-Requires JDK 25 (auto-provisioned). Crash reports land in
-`neoforge-26.1.2/run/crash-reports/` - read the newest.
+Requires JDK 25 (auto-provisioned). Crash reports: `neoforge-26.1.2/run/crash-reports/`.
 
 **Never run the full `:common:test` unless the owner asks.** It is ten minutes and
 they will not wait through it; run one class with `--tests` instead, and say in the
@@ -200,7 +200,7 @@ and fails *silently* when stale:
 
 | If you touched | Re-run | Commit |
 |---|---|---|
-| any gene, or a coat deliberately moved | **two** goldens move. `*CoatBakeGoldenTest` covers every registered gene and regenerates in seconds - run it, look at the icons, copy `common/build/` over the resource. `coat-golden.txt` covers 39 genes and needs a **full** `:common:test`, so leave that one stale, say so, and note it in `wiki/known-gaps.html` | `common/src/test/resources/coat-bake-golden.txt`, `coat-golden.txt` |
+| any gene, or a coat deliberately moved | **two** goldens move, and both write their actual to `common/build/` on a mismatch - run the class, check *which rows* moved, copy back. `*CoatBakeGoldenTest` is every gene in seconds; `*CoatPipelineGoldenTest` is 39 whole horses and also seconds (only the *whole* suite is ten minutes) | `common/src/test/resources/coat-bake-golden.txt`, `coat-golden.txt` |
 | **anything in `common/` or `web/`** | `:web:bakeDesignerAssets` | `wiki/horse-designer/wasm/web.wasm` |
 | any breed, or `BreedSpecWriter` | `:common:bakeBreedFiles` | `common/.../horsegenetics/breeds/` **and** `wiki/horse-designer/assets/breeds.json` |
 | `spec/`, `SpecSchema`, `AbilityType`, `HorseSkinGeometry`, the noise classes | `:common:bakeSpecFixtures` **then** `check-parity.mjs`; geometry also moves `:common:bakeGeneIcons` | `wiki/gene-creator/fixtures/expected.json`, `wiki/assets/gene-icons/` |

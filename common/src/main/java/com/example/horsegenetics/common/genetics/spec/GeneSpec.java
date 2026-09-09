@@ -388,6 +388,28 @@ public record GeneSpec(
         PATCHES,
         /** Smooth value noise as a soft shading field (sooty, countershading). */
         NOISE,
+        /**
+         * <b>A choice made once per horse</b> - the same everywhere on the body,
+         * and either fully on or fully off.
+         *
+         * <p>Every other mask is a function of <i>where</i> you are on the
+         * horse. This one is not: it draws an integer from a seed knob and asks
+         * whether it came out equal to {@code is}. That is the one thing the
+         * mask fold could not express, because a knob can move a boundary but
+         * cannot choose between two of them.
+         *
+         * <p>It replaces a trick. {@code quarter} has to pick which quadrant
+         * goes pale, and did it by sampling {@link #NOISE} at a scale of 4000
+         * body units - a hundred times the length of the horse, so the whole
+         * animal sat inside one lattice cell - and amplifying the result onto
+         * [-200, 201] so the clamp turned it into a hard yes or no. It worked,
+         * and it was <i>nearly</i> constant rather than constant in two ways
+         * that traded off against each other: the field still drifted a little
+         * across the horse, and about one horse in four hundred drew inside the
+         * strip that clamps to neither end and got a half-strength quadrant.
+         * See known-gaps gap 102.
+         */
+        CHOICE,
         /** Coverage read off the pigment the earlier genes left - "find the black". */
         PIGMENT,
         /**

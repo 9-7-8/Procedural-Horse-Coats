@@ -536,6 +536,29 @@
             "color": "#e8e2d6",
             "strength": 40
           }
+        },
+        {
+          "name": "a per-horse three-way choice, gating a patch on the barrel",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "BODY"
+              ]
+            },
+            {
+              "type": "CHOICE",
+              "seed": "$strokeSeed",
+              "options": 3,
+              "is": 1,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#7fd4c1",
+            "strength": 55
+          }
         }
       ]
     },

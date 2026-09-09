@@ -355,37 +355,33 @@ class MagicBodyStatGenesTest {
 
     /**
      * The multiplier this locus applied, i.e. the resolved stat over its
-     * baseline - on the {@code n}th horse of a sample rather than on seed
-     * {@code n}.
+     * baseline - on the {@code n}th horse of a sample.
      *
-     * <p><b>The two are not the same thing, and assuming they were made this
-     * file fail for a reason that had nothing to do with these genes.</b>
-     * {@link Epigenome#fromSeed} is a {@link java.util.Random}, which scrambles
-     * its seed with a single XOR - so {@code new Random(0)}, {@code (1)},
-     * {@code (2)}... are strongly correlated streams, and the draw at a
-     * <i>given position</i> in them is correlated across the whole sample. Each
-     * gene reads its knobs at its own position in that stream, decided by where
-     * it sits in {@link Genes#codeOrder}, and moving <b>an unrelated gene's
-     * priority</b> shifts every gene after it along. Magic jump landed on a bad
-     * position, and 3000 sequential seeds put its mean 1.7% out - fifteen times
-     * the standard error, on a distribution that had not changed at all.
+     * <p><b>This used to have to scramble the seed itself, and no longer
+     * does.</b> {@link Epigenome#fromSeed} runs on {@link SeededRng}, which was
+     * a bare {@link java.util.Random}: that scrambles a seed with a single XOR,
+     * which is not a mix, so {@code 0}, {@code 1}, {@code 2}... were strongly
+     * correlated streams and the draw at a <i>given position</i> in them was
+     * correlated across the whole sample. Each gene read its knobs at its own
+     * position, decided by where it sat in {@link Genes#codeOrder}, so moving
+     * <b>an unrelated gene's priority</b> shifted every gene after it along.
+     * Magic jump landed on a bad position and 3000 sequential seeds put its
+     * mean 1.7% out - fifteen times the standard error, on a distribution that
+     * had not changed at all.
      *
-     * <p>So the seed is passed through a splitmix64 finaliser first, which is
-     * what makes {@code n} a sample index rather than a stream offset. The
-     * sequential-seed correlation itself is <code>wiki/known-gaps.html</code>'s
-     * problem, not this test's: a horse whose epigenetic seed happens to sit
-     * beside another's is a real thing in a real world.
+     * <p>This file carried its own splitmix64 finaliser as the local answer to
+     * that, with a note saying the underlying correlation was known-gaps'
+     * problem rather than this test's. It is now fixed at the source:
+     * {@code SeededRng} scrambles before {@code Random} ever sees the seed, so
+     * {@code n} is a sample index again without help, and the workaround has
+     * been removed rather than left to double-mix.
+     *
+     * <p>That makes this method a tripwire for the fix. If the scramble is ever
+     * taken back out, these means go out by roughly the margin above and this
+     * file goes red - which is the right place for it to be noticed.
      */
     private static double factor(Locus l, String tokens, long seed) {
-        return statWith(l, tokens, Epigenome.fromSeed(decorrelate(seed))) / l.baseline();
-    }
-
-    /** splitmix64's finaliser - a full avalanche, so neighbouring n do not share bits. */
-    private static long decorrelate(long n) {
-        long z = n + 0x9E3779B97F4A7C15L;
-        z = (z ^ (z >>> 30)) * 0xBF58476D1CE4E5B9L;
-        z = (z ^ (z >>> 27)) * 0x94D049BB133111EBL;
-        return z ^ (z >>> 31);
+        return statWith(l, tokens, Epigenome.fromSeed(seed)) / l.baseline();
     }
 
     private static Rng constant(float v) {

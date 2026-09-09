@@ -135,6 +135,7 @@ public final class SpecFixtureTool {
         }
         sb.append("],\n");
         sb.append(composerSection());
+        sb.append(geometrySection());
         sb.append("  },\n");
         return sb.toString();
     }
@@ -173,8 +174,75 @@ public final class SpecFixtureTool {
             sb.append(i > 0 ? ", " : " ").append("\"").append(hex(probes[i])).append("\": \"")
                     .append(hex(lifted)).append("\"");
         }
-        sb.append(" }\n    }\n");
+        sb.append(" }\n    },\n");
         return sb.toString();
+    }
+
+    /**
+     * The <b>posed mesh</b>, as an answer table.
+     *
+     * <p>This is what closes known-gaps gap 100. {@code HorseSkinGeometry.posed} and
+     * {@code posedNormal} walk the raw cuboid rather than its bounding box,
+     * and the browser needs the same walk to draw a horse whose neck is
+     * pitched. For a while that arithmetic existed <b>twice</b> - here, and
+     * again in the creator's {@code model3d.js} - in two languages, in two
+     * files that were not obviously a pair, with nothing comparing them. A
+     * change to how a part is posed could reach the baked icons and not the
+     * browser preview, or the reverse, and the symptom would be a wiki quietly
+     * drawing a slightly different horse from the one the game breeds.
+     *
+     * <p>The creator's copy now lives in {@code geometry.js}, beside the rest
+     * of its port of this class, and this table is what holds the two
+     * together.
+     *
+     * <p><b>Corners alone would not do it.</b> A corner is a fraction of 0 or
+     * 1 on both axes, and several ways of getting the axis pairing wrong agree
+     * at the corners and disagree everywhere else - which is the exact shape of
+     * the UV swap that once hid behind a stale fixture. So the probes include
+     * both face centres and an off-centre point with no symmetry to it, and
+     * they cover every part of both skins: a baby horse is not a scaled adult.
+     */
+    private static String geometrySection() {
+        double[][] probes = {{0, 0}, {1, 0}, {0, 1}, {1, 1}, {0.5, 0.5}, {0.37, 0.81}};
+        StringBuilder sb = new StringBuilder("    \"posed\": {");
+        boolean first = true;
+        for (HorseSkinGeometry.Skin skin : HorseSkinGeometry.Skin.values()) {
+            for (HorseSkinGeometry.Part part : HorseSkinGeometry.Part.values()) {
+                if (!HorseSkinGeometry.hasPart(skin, part)) {
+                    continue;
+                }
+                for (HorseSkinGeometry.Face face : HorseSkinGeometry.Face.values()) {
+                    sb.append(first ? "\n" : ",\n").append("      \"").append(skin).append('|')
+                            .append(part).append('|').append(face).append("\": { \"n\": ")
+                            .append(point(HorseSkinGeometry.posedNormal(skin, part, face)))
+                            .append(", \"p\": [");
+                    for (int i = 0; i < probes.length; i++) {
+                        sb.append(i > 0 ? ", " : "").append(point(HorseSkinGeometry.posed(
+                                skin, part, face, probes[i][0], probes[i][1])));
+                    }
+                    sb.append("] }");
+                    first = false;
+                }
+            }
+        }
+        sb.append("\n    }\n");
+        return sb.toString();
+    }
+
+    /**
+     * A body point, rounded to a precision both languages agree on exactly.
+     * Java and JavaScript both use IEEE-754 doubles and both compute this in
+     * the same order, so the agreement is real rather than a tolerance - the
+     * rounding is only to keep the fixture readable and to stop a negative
+     * zero reading as a difference.
+     */
+    private static String point(HorseSkinGeometry.BodyPoint bp) {
+        return "[" + round(bp.x()) + ", " + round(bp.y()) + ", " + round(bp.z()) + "]";
+    }
+
+    private static String round(double v) {
+        double r = Math.rint(v * 1e6) / 1e6;
+        return Double.toString(r == 0.0 ? 0.0 : r);
     }
 
     private static String hex(int rgb) {

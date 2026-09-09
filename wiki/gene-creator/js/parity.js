@@ -40,6 +40,27 @@ window.HG = window.HG || {};
    * touched, which is the hardest kind of bug to see. (This found exactly that
    * on AXIS.to, DILUTE.keepBlack, DILUTE.blackTint and TOWARD.strength.)
    */
+  // The face fractions SpecFixtureTool.geometrySection() bakes, in its order.
+  // Kept in step by hand, which is safe because a mismatch shows up as a wrong
+  // answer rather than a silent pass: the probes are asymmetric.
+  var PROBES = [[0, 0], [1, 0], [0, 1], [1, 1], [0.5, 0.5], [0.37, 0.81]];
+
+  // Both languages use IEEE-754 doubles and compute this in the same order, so
+  // the agreement is exact rather than approximate. The epsilon is only for the
+  // 1e-6 rounding the fixture applies to stay readable - it is far tighter than
+  // any real disagreement would be, and a genuine axis or sign error is orders
+  // of magnitude bigger than it.
+  function comparePoint(fail, what, want, got) {
+    var g = [got.x, got.y, got.z];
+    for (var i = 0; i < 3; i++) {
+      if (Math.abs(want[i] - g[i]) > 1e-6) {
+        fail(what + ": the game gives [" + want.join(", ") + "], the creator ["
+          + g.map(function (v) { return Math.round(v * 1e6) / 1e6; }).join(", ") + "]");
+        return;
+      }
+    }
+  }
+
   function checkParams(fail, count, kind, type, javaParams, jsParams) {
     var jsByName = {};
     jsParams.forEach(function (p) { jsByName[p.name] = p; });
@@ -224,6 +245,47 @@ window.HG = window.HG || {};
               + ", the creator #" + got);
           }
           count();
+        });
+      }
+
+      // ---- the posed mesh -------------------------------------------------
+      //
+      // geometry.js's posed()/posedNormal() against HorseSkinGeometry's. This
+      // was gap 100: the posed walk lived here AND in model3d.js's emitPart,
+      // in two languages, in two files that were not obviously a pair, and
+      // nothing compared them - so a change to how a part is posed could reach
+      // the baked gene icons and not the browser preview, or the reverse.
+      //
+      // The probes deliberately include face centres and one asymmetric point,
+      // not just corners: a corner is a fraction of 0 or 1 on both axes, and
+      // several ways of getting the axis pairing wrong agree at every corner
+      // and disagree everywhere else. That is the exact shape of the UV swap
+      // that once hid behind a stale fixture for a day.
+      if (schema.posed) {
+        Object.keys(schema.posed).forEach(function (key) {
+          var parts = key.split("|");
+          var skin = parts[0], part = parts[1], face = parts[2];
+          var want = schema.posed[key];
+
+          var gotN = HG.geometry.posedNormal(skin, part, face);
+          if (!gotN) {
+            fail("posedNormal " + key + ": the creator has no such part");
+          } else {
+            comparePoint(fail, "posedNormal " + key, want.n, gotN);
+          }
+          count();
+
+          want.p.forEach(function (w, i) {
+            var probe = PROBES[i];
+            var got = HG.geometry.posed(skin, part, face, probe[0], probe[1]);
+            if (!got) {
+              fail("posed " + key + ": the creator has no such part");
+            } else {
+              comparePoint(fail, "posed " + key + " at (" + probe[0] + ", " + probe[1] + ")",
+                w, got);
+            }
+            count();
+          });
         });
       }
     } else {

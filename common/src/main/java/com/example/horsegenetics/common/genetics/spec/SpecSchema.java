@@ -217,6 +217,12 @@ public final class SpecSchema {
                 Param.value("low", 0.0, "coverage the darkest noise maps to"),
                 Param.value("high", 1.0, "coverage the brightest noise maps to")));
 
+        MASKS.put(MaskType.CHOICE, List.of(
+                Param.parts("parts", "restrict to these parts"),
+                Param.value("seed", 0, "a seed knob; omit for a stable per-gene default"),
+                Param.value("options", 2.0, "how many outcomes the choice has"),
+                Param.value("is", 0.0, "which outcome this layer draws on")));
+
         MASKS.put(MaskType.PIGMENT, List.of(
                 Param.parts("parts", "restrict to these parts"),
                 Param.choice("channel", PIGMENT_CHANNELS,

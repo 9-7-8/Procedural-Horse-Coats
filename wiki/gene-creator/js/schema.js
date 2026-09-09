@@ -129,6 +129,16 @@ window.HG = window.HG || {};
         v("softness", 0.12, "patch edge softness")
       ]
     },
+    CHOICE: {
+      blurb: "A coin flip made once per horse - the same everywhere on the body, fully on or fully off.",
+      params: [
+        parts("parts", "restrict to these parts"),
+        v("seed", 0, "pick a seed knob, or leave it for a stable default", { seedRef: true }),
+        v("options", 2.0, "how many outcomes the choice has", { min: 2, max: 16, step: 1 }),
+        v("is", 0.0, "which outcome this layer draws on", { min: 0, max: 15, step: 1 })
+      ]
+    },
+
     NOISE: {
       blurb: "Smooth shading rather than a shape - sooty, countershading, a mottled overlay.",
       params: [

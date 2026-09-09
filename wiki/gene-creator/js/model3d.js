@@ -65,9 +65,9 @@ window.HG = window.HG || {};
   // (against local x). All three reverse, which is why every fraction below is
   // taken as 1 - c. Two axes swap and all three negate, so the map is
   // orientation-preserving and the winding above still faces outward.
-  function localFractions(c) {
-    return { x: 1 - c[2], y: 1 - c[1], z: 1 - c[0] };
-  }
+  // The body<->local flip itself now lives in geometry.js's posed(), which is
+  // the copy the parity gate checks. Kept here only as the explanation of why
+  // every fraction is taken as 1 - c.
 
   function newSink() {
     return { positions: [], uvs: [], normals: [], indices: [], vertex: 0 };
@@ -79,25 +79,21 @@ window.HG = window.HG || {};
    * or the part's own pivot for one that is going to be rotated about it.
    */
   function emitPart(skin, pd, sink, origin) {
-    var r = pd.raw;
-    var cos = Math.cos(r.pitch), sin = Math.sin(r.pitch);
-
     Object.keys(FACE_CORNERS).forEach(function (face) {
       var fm = pd.faces[face];
       var A = geo.spanA(face), B = geo.spanB(face);
       var quad = [];
 
       FACE_CORNERS[face].forEach(function (c) {
-        var f = localFractions(c);
-        // The cuboid as the model declares it: origin + size, about the pivot.
-        var lx = r.ox + f.x * r.w;
-        var ly = r.oy + f.y * r.h;
-        var lz = r.oz + f.z * r.d;
-        // Pitch rotates y/z about the pivot's model-x axis.
-        var p = geo.toBody(skin,
-          r.px + lx,
-          r.py + (ly * cos - lz * sin),
-          r.pz + (ly * sin + lz * cos));
+        // The posed corner, from geometry.js - the SAME function the game's
+        // HorseSkinGeometry.posed is checked against by check-parity.mjs.
+        // This arithmetic used to be written out again here, which is what
+        // known-gaps gap 100 was: two copies, two languages, nothing
+        // comparing them. A corner is a face fraction pair, so read the two
+        // spanning axes straight off the corner.
+        var along = { X: c[0], Y: c[1], Z: c[2] };
+        var fa = along[A], fb = along[B];
+        var p = geo.posed(skin, pd.raw.part, face, fa, fb);
         quad.push(p);
         sink.positions.push(p.x - origin.x, p.y - origin.y, p.z - origin.z);
 
@@ -105,8 +101,6 @@ window.HG = window.HG || {};
         // the box ended up, so it reads off the same body-axis fractions the
         // pipeline's own face map is written in - rotation carries the
         // texture with the part, exactly as the game's renderer does.
-        var along = { X: c[0], Y: c[1], Z: c[2] };
-        var fa = along[A], fb = along[B];
         var u = lerp(fm.u0, fm.u1, fm.uUsesA ? fa : fb);
         var v = lerp(fm.v0, fm.v1, fm.vUsesA ? fa : fb);
         sink.uvs.push(u / N, v / N);

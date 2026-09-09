@@ -98,4 +98,63 @@ class EpigenomeTest {
         Epigenome moved = withAgouti(copy(5, 0.19), copy(900, 0.21));
         assertNotEquals(base.visibleFingerprint(HET_AGOUTI), moved.visibleFingerprint(HET_AGOUTI));
     }
+
+    // ------------------------------------------------------------------
+    // A seeded horse must not move when an unrelated gene is registered
+    // ------------------------------------------------------------------
+
+    /**
+     * <b>Every gene's seeded epigenetics depend on the seed and that gene's own
+     * key - and on nothing else.</b>
+     *
+     * <p>This is the guard known-gaps gap 47 asked for. {@code fromSeed} used
+     * to walk {@link Genes#codeOrder()} drawing from one shared stream, so
+     * registering a locus at priority 68 gave every gene above 68 a different
+     * draw and the horse at seed 13 became a different horse. Adding natural
+     * zebra broke three assertions in {@code WhitePatternGenesTest} that way,
+     * all by margins under 0.05, none of them a real regression - and the only
+     * signal was a red build after a change that looked unrelated.
+     *
+     * <p>The test recomputes each gene's copies from {@code (seed, key)} alone
+     * and demands the same answer. It does not need to register a gene to prove
+     * the point: if anyone puts the shared stream back, a gene's values will
+     * stop being reproducible from its own key and this goes red immediately.
+     */
+    @Test
+    void seededEpigeneticsDependOnlyOnTheSeedAndTheGeneKey() {
+        for (long seed : new long[]{0L, 1L, 13L, 4242L, -7L}) {
+            Epigenome whole = Epigenome.fromSeed(seed);
+            for (Gene g : Genes.codeOrder()) {
+                if (!Epigenome.carries(g)) {
+                    continue;
+                }
+                // The same gene, drawn on its own, with no other gene in front
+                // of it in any stream.
+                Epigenome.Copies alone = Epigenome.copiesFor(g, seed);
+                assertEquals(whole.copies(g), alone,
+                        g.key() + " at seed " + seed + " depends on something other than"
+                                + " its own key - the shared-stream bug (gap 47) is back");
+            }
+        }
+    }
+
+    /**
+     * The order genes are registered in must not reach a seeded horse at all.
+     * A direct statement of the same property: reversing the walk changes
+     * nothing, because nothing is carried between genes.
+     */
+    @Test
+    void reversingTheRegistryWalkChangesNoSeededValue() {
+        long seed = 99L;
+        Epigenome forwards = Epigenome.fromSeed(seed);
+        java.util.List<Gene> reversed = new java.util.ArrayList<>(Genes.codeOrder());
+        java.util.Collections.reverse(reversed);
+        for (Gene g : reversed) {
+            if (!Epigenome.carries(g)) {
+                continue;
+            }
+            assertEquals(forwards.copies(g), Epigenome.copiesFor(g, seed),
+                    g.key() + " reads differently depending on when it is asked");
+        }
+    }
 }

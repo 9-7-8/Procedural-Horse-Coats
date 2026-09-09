@@ -29,10 +29,10 @@ import static org.junit.jupiter.api.Assertions.fail;
  * pipeline, the field types, the gene hooks - leaves every horse rendering
  * <b>byte-identically</b>. It is not a description of what a coat should look
  * like (the other tests in this package do that), so when a <i>gene</i>
- * deliberately changes, regenerate the golden file: delete
- * {@code common/src/test/resources/coat-golden.txt}, run the test, copy the file
- * it writes to {@code common/build/coat-golden.txt} back into place, and say so
- * in the commit.
+ * deliberately changes, regenerate the golden file: run the test,
+ * copy the {@code common/build/coat-golden.txt} it writes back over
+ * {@code common/src/test/resources/coat-golden.txt}, and say so in the commit.
+ * A failing run writes that file, so there is nothing to delete first.
  */
 class CoatPipelineGoldenTest {
 
@@ -290,6 +290,20 @@ class CoatPipelineGoldenTest {
             Files.writeString(out, actual, StandardCharsets.UTF_8);
             fail("no golden file on the test classpath - wrote a fresh one to " + out.toAbsolutePath()
                     + "; copy it to common/src/test/resources/coat-golden.txt");
+        }
+        // Write the actual on a MISMATCH too, not only when the golden is
+        // missing. The javadoc above has always told you to "run the test, copy
+        // the file it writes" - and until now the only way to make it write one
+        // was to delete the golden first, which is a destructive step to put in
+        // front of someone who is only trying to see what moved. Worse, it made
+        // the obvious reading wrong: a red run left build/coat-golden.txt
+        // holding whatever some earlier run had put there, so copying it back
+        // silently restored a stale golden. CoatBakeGoldenTest already does
+        // this; the two now behave the same way.
+        if (!expected.equals(actual)) {
+            Path out = Path.of("build", "coat-golden.txt");
+            Files.createDirectories(out.toAbsolutePath().getParent());
+            Files.writeString(out, actual, StandardCharsets.UTF_8);
         }
         assertEquals(expected, actual, "the composed coat bytes moved - see this test's javadoc");
     }

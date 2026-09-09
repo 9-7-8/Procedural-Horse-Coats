@@ -233,6 +233,7 @@ window.HG = window.HG || {};
     xor: xor,
     add: add,
     mul: mul,
+    shru: shru,
     K1: K1,
     K3: K3,
     cellDistance: cellDistance,

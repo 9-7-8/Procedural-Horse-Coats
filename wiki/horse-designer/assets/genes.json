@@ -21182,26 +21182,24 @@
               "softness": 2.4
             },
             {
-              "type": "NOISE",
+              "type": "CHOICE",
               "parts": [
                 "BODY",
                 "NECK"
               ],
               "seed": "$sideSeed",
-              "scale": 4000.0,
-              "low": -200.0,
-              "high": 201.0
+              "options": 2,
+              "is": 1
             },
             {
-              "type": "NOISE",
+              "type": "CHOICE",
               "parts": [
                 "BODY",
                 "NECK"
               ],
               "seed": "$planeSeed",
-              "scale": 4000.0,
-              "low": -200.0,
-              "high": 201.0
+              "options": 2,
+              "is": 1
             },
             {
               "type": "NOISE",
@@ -21237,27 +21235,24 @@
               "softness": 2.4
             },
             {
-              "type": "NOISE",
+              "type": "CHOICE",
               "parts": [
                 "BODY",
                 "NECK"
               ],
               "seed": "$sideSeed",
-              "scale": 4000.0,
-              "low": -200.0,
-              "high": 201.0,
-              "invert": true
+              "options": 2,
+              "is": 0
             },
             {
-              "type": "NOISE",
+              "type": "CHOICE",
               "parts": [
                 "BODY",
                 "NECK"
               ],
               "seed": "$planeSeed",
-              "scale": 4000.0,
-              "low": -200.0,
-              "high": 201.0
+              "options": 2,
+              "is": 1
             },
             {
               "type": "NOISE",
@@ -21293,27 +21288,24 @@
               "softness": 2.4
             },
             {
-              "type": "NOISE",
+              "type": "CHOICE",
               "parts": [
                 "BODY",
                 "NECK"
               ],
               "seed": "$sideSeed",
-              "scale": 4000.0,
-              "low": -200.0,
-              "high": 201.0
+              "options": 2,
+              "is": 1
             },
             {
-              "type": "NOISE",
+              "type": "CHOICE",
               "parts": [
                 "BODY",
                 "NECK"
               ],
               "seed": "$planeSeed",
-              "scale": 4000.0,
-              "low": -200.0,
-              "high": 201.0,
-              "invert": true
+              "options": 2,
+              "is": 0
             },
             {
               "type": "NOISE",
@@ -21349,28 +21341,24 @@
               "softness": 2.4
             },
             {
-              "type": "NOISE",
+              "type": "CHOICE",
               "parts": [
                 "BODY",
                 "NECK"
               ],
               "seed": "$sideSeed",
-              "scale": 4000.0,
-              "low": -200.0,
-              "high": 201.0,
-              "invert": true
+              "options": 2,
+              "is": 0
             },
             {
-              "type": "NOISE",
+              "type": "CHOICE",
               "parts": [
                 "BODY",
                 "NECK"
               ],
               "seed": "$planeSeed",
-              "scale": 4000.0,
-              "low": -200.0,
-              "high": 201.0,
-              "invert": true
+              "options": 2,
+              "is": 0
             },
             {
               "type": "NOISE",
@@ -21416,26 +21404,24 @@
               "softness": 2.4
             },
             {
-              "type": "NOISE",
+              "type": "CHOICE",
               "parts": [
                 "BODY",
                 "NECK"
               ],
               "seed": "$sideSeed",
-              "scale": 4000.0,
-              "low": -200.0,
-              "high": 201.0
+              "options": 2,
+              "is": 1
             },
             {
-              "type": "NOISE",
+              "type": "CHOICE",
               "parts": [
                 "BODY",
                 "NECK"
               ],
               "seed": "$planeSeed",
-              "scale": 4000.0,
-              "low": -200.0,
-              "high": 201.0
+              "options": 2,
+              "is": 1
             },
             {
               "type": "NOISE",
@@ -21473,27 +21459,24 @@
               "softness": 2.4
             },
             {
-              "type": "NOISE",
+              "type": "CHOICE",
               "parts": [
                 "BODY",
                 "NECK"
               ],
               "seed": "$sideSeed",
-              "scale": 4000.0,
-              "low": -200.0,
-              "high": 201.0,
-              "invert": true
+              "options": 2,
+              "is": 0
             },
             {
-              "type": "NOISE",
+              "type": "CHOICE",
               "parts": [
                 "BODY",
                 "NECK"
               ],
               "seed": "$planeSeed",
-              "scale": 4000.0,
-              "low": -200.0,
-              "high": 201.0
+              "options": 2,
+              "is": 1
             },
             {
               "type": "NOISE",
@@ -21531,27 +21514,24 @@
               "softness": 2.4
             },
             {
-              "type": "NOISE",
+              "type": "CHOICE",
               "parts": [
                 "BODY",
                 "NECK"
               ],
               "seed": "$sideSeed",
-              "scale": 4000.0,
-              "low": -200.0,
-              "high": 201.0
+              "options": 2,
+              "is": 1
             },
             {
-              "type": "NOISE",
+              "type": "CHOICE",
               "parts": [
                 "BODY",
                 "NECK"
               ],
               "seed": "$planeSeed",
-              "scale": 4000.0,
-              "low": -200.0,
-              "high": 201.0,
-              "invert": true
+              "options": 2,
+              "is": 0
             },
             {
               "type": "NOISE",
@@ -21589,28 +21569,24 @@
               "softness": 2.4
             },
             {
-              "type": "NOISE",
+              "type": "CHOICE",
               "parts": [
                 "BODY",
                 "NECK"
               ],
               "seed": "$sideSeed",
-              "scale": 4000.0,
-              "low": -200.0,
-              "high": 201.0,
-              "invert": true
+              "options": 2,
+              "is": 0
             },
             {
-              "type": "NOISE",
+              "type": "CHOICE",
               "parts": [
                 "BODY",
                 "NECK"
               ],
               "seed": "$planeSeed",
-              "scale": 4000.0,
-              "low": -200.0,
-              "high": 201.0,
-              "invert": true
+              "options": 2,
+              "is": 0
             },
             {
               "type": "NOISE",
@@ -21673,26 +21649,24 @@
               "softness": 2.4
             },
             {
-              "type": "NOISE",
+              "type": "CHOICE",
               "parts": [
                 "BODY",
                 "NECK"
               ],
               "seed": "$sideSeed",
-              "scale": 4000.0,
-              "low": -200.0,
-              "high": 201.0
+              "options": 2,
+              "is": 1
             },
             {
-              "type": "NOISE",
+              "type": "CHOICE",
               "parts": [
                 "BODY",
                 "NECK"
               ],
               "seed": "$planeSeed",
-              "scale": 4000.0,
-              "low": -200.0,
-              "high": 201.0
+              "options": 2,
+              "is": 1
             },
             {
               "type": "NOISE",
@@ -21740,27 +21714,24 @@
               "softness": 2.4
             },
             {
-              "type": "NOISE",
+              "type": "CHOICE",
               "parts": [
                 "BODY",
                 "NECK"
               ],
               "seed": "$sideSeed",
-              "scale": 4000.0,
-              "low": -200.0,
-              "high": 201.0
+              "options": 2,
+              "is": 1
             },
             {
-              "type": "NOISE",
+              "type": "CHOICE",
               "parts": [
                 "BODY",
                 "NECK"
               ],
               "seed": "$planeSeed",
-              "scale": 4000.0,
-              "low": -200.0,
-              "high": 201.0,
-              "invert": true
+              "options": 2,
+              "is": 0
             },
             {
               "type": "NOISE",
@@ -21808,27 +21779,24 @@
               "softness": 2.4
             },
             {
-              "type": "NOISE",
+              "type": "CHOICE",
               "parts": [
                 "BODY",
                 "NECK"
               ],
               "seed": "$sideSeed",
-              "scale": 4000.0,
-              "low": -200.0,
-              "high": 201.0,
-              "invert": true
+              "options": 2,
+              "is": 0
             },
             {
-              "type": "NOISE",
+              "type": "CHOICE",
               "parts": [
                 "BODY",
                 "NECK"
               ],
               "seed": "$planeSeed",
-              "scale": 4000.0,
-              "low": -200.0,
-              "high": 201.0
+              "options": 2,
+              "is": 1
             },
             {
               "type": "NOISE",
@@ -21876,28 +21844,24 @@
               "softness": 2.4
             },
             {
-              "type": "NOISE",
+              "type": "CHOICE",
               "parts": [
                 "BODY",
                 "NECK"
               ],
               "seed": "$sideSeed",
-              "scale": 4000.0,
-              "low": -200.0,
-              "high": 201.0,
-              "invert": true
+              "options": 2,
+              "is": 0
             },
             {
-              "type": "NOISE",
+              "type": "CHOICE",
               "parts": [
                 "BODY",
                 "NECK"
               ],
               "seed": "$planeSeed",
-              "scale": 4000.0,
-              "low": -200.0,
-              "high": 201.0,
-              "invert": true
+              "options": 2,
+              "is": 0
             },
             {
               "type": "NOISE",

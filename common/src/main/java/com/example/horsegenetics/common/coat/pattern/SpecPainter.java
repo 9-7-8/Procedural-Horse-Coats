@@ -557,6 +557,15 @@ public final class SpecPainter {
                 double low = v.get(p.value("low", 0.0), leg);
                 return clamp01(low + (v.get(p.value("high", 1.0), leg) - low) * n);
             }
+            case CHOICE: {
+                // Constant across the whole horse, and exactly 0 or 1 - no
+                // drift, and no strip of draws that lands between the two.
+                // The position is deliberately not read at all.
+                long seed = v.seed(p.value("seed", 0), seedBase);
+                int options = Math.max(1, (int) Math.round(v.get(p.value("options", 2.0), leg)));
+                int is = (int) Math.round(v.get(p.value("is", 0.0), leg));
+                return choiceOf(seed, options) == Math.floorMod(is, options) ? 1.0 : 0.0;
+            }
             case PIGMENT:
                 return pigmentCoverage(mask, v, coat, px, py, leg);
             case LUMA:
@@ -954,6 +963,31 @@ public final class SpecPainter {
             case "blue" -> clamp01(b);
             default -> clamp01(1.0 - light);
         };
+    }
+
+    /**
+     * Which of {@code options} outcomes this horse drew, from a seed alone.
+     *
+     * <p>Mixed rather than taken modulo directly: a seed knob's low bits are
+     * not a fair coin on their own, and {@code % 2} on a raw seed is exactly
+     * the kind of thing that comes out 60/40 and is never noticed. This is
+     * splitmix64's finaliser, the same avalanche {@code SeededRng} applies.
+     */
+    static int choiceOf(long seed, int options) {
+        long z = seed + 0x9E3779B97F4A7C15L;
+        z = (z ^ (z >>> 30)) * 0xBF58476D1CE4E5B9L;
+        z = (z ^ (z >>> 27)) * 0x94D049BB133111EBL;
+        z = z ^ (z >>> 31);
+        // Only the LOW 32 BITS go into the modulus, and that is a compatibility
+        // decision rather than an arithmetic one: the creator mirrors this in
+        // JavaScript, where a 64-bit remainder would need long division the u64
+        // helpers do not have. Taking the modulus over the full 64 bits here
+        // and over the low word there would agree for every power-of-two
+        // `options` and silently disagree for 3, 5, 6 - the worst possible
+        // failure, because the obvious test cases would all pass.
+        // The mix above has already spread entropy across every bit, so the low
+        // word is as good a draw as the whole.
+        return (int) Math.floorMod(z & 0xFFFFFFFFL, (long) options);
     }
 
     /** One channel of the coat, as a {@code PIGMENT} mask reads it. */
