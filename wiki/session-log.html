@@ -29,6 +29,70 @@
 
 <h2 id="d2026-09-09">2026-09-09</h2>
 
+<h3 id="coat-packet-cap-2026-09-09">Two releases nobody could play, and a test that was watching the wrong cap.</h3>
+
+<p>
+    This one arrived from outside, which is new. The owner handed the jar to friends: 0.2.0
+    worked, and <strong>0.3.0 and 0.3.1 both disconnected on trying to make a world</strong>
+    &mdash; <code>Internal Exception: io.netty.handler.codec.EncoderException: Failed to
+    encode packet 'clientbound/minecraft:custom_payload'</code>. The stack, once it arrived,
+    named the line exactly: <code>CoatSyncPayload.java:26</code>, and under it
+    <code>String too big (was 35568 characters, max 32767)</code>.
+</p>
+
+<p>
+    <code>CoatSyncPayload</code> is how a horse&rsquo;s coat reaches the client &mdash; the
+    genotype and the epigenome as text, sent when a player starts tracking the entity. It
+    was writing both with a bare <code>buf.writeUtf(v)</code>. That overload caps at
+    32&nbsp;767 characters, throws rather than truncating, and a throw inside the encoder
+    takes the connection with it. A full epigenome is <strong>35&nbsp;304 characters</strong>
+    today. So the first wild horse to come into render range ended the session, which on a
+    freshly generated world is roughly immediately. Nothing about it is intermittent; it was
+    simply never seen here, because the trigger is a horse coming into view rather than the
+    world load, and a dev world gets entered and quit a lot.
+</p>
+
+<p>
+    <strong>The uncomfortable part is that a test exists for precisely this.</strong>
+    <code>EpigenomeSizeTest</code> was written the last time this threshold was crossed, and
+    it fired then, and it is still green. It was watching
+    <code>SpawnCustomHorsePayload</code>&rsquo;s <code>stringUtf8(131072)</code> &mdash; the
+    one cap in the mod with a number written beside it. An implicit cap has no number to
+    watch. The test could only ever have guarded the site that had already been thought
+    about, which is the site least likely to be wrong.
+</p>
+
+<p>
+    So the fix is not the raised cap, it is <code>GenomeCodeCodecs</code>: two constants and
+    two <code>StreamCodec</code>s that are now the only way a genome code is allowed onto
+    the wire. Four call sites moved onto them &mdash; the coat packet,
+    <code>StoredGenome</code> (which was on <code>ByteBufCodecs.STRING_UTF8</code>, i.e. the
+    same 32&nbsp;767, on a component that rides <em>every inventory sync</em>, so a preset
+    spawn egg or a filled genome jar would have kicked whoever picked one up), and the
+    genotype fields on the roster and spawn payloads. The test now guards each cap at half
+    budget rather than one of them.
+</p>
+
+<p>
+    <strong>The genotype guard failed on its first run</strong>, which is the entire argument
+    for having written it: 5612 characters against the 8192 those payloads had been
+    declaring &mdash; two thirds spent, on a number that grows with every gene registered,
+    and nothing anywhere would have said so until it did the same thing the epigenome had
+    just done. That cap is 32&nbsp;768 now.
+</p>
+
+<p>
+    Shipped as <strong>0.3.2</strong>, and both 0.3.0 and 0.3.1 should be treated as
+    withdrawn &mdash; there is no way to play them. A world made under either is fine and
+    opens normally, since the fault was in what the server sent and never in what it saved.
+    The size problem underneath is untouched and is still
+    <a href="known-gaps.html#gap-66">gap 66</a>: 35&nbsp;KB of text per horse per tracking
+    client is a bandwidth cost nobody has budgeted, and two paths &mdash; the horse record
+    and the transfer deed, both of which cross the wire as NBT &mdash; still have a
+    65&nbsp;535-<em>byte</em> ceiling that no code here declares and no test watches. A
+    little over half spent.
+</p>
+
 <h3 id="path-mask-2026-09-09">The <code>PATH</code> mask &mdash; a shape you drew, stored as points rather than pixels.</h3>
 
 <div class="note">

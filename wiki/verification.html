@@ -35,6 +35,48 @@
     </p>
 </div>
 
+<h2 id="coat-packet-cap">&sect;0-BB &mdash; 0.3.0 and 0.3.1 disconnected on world entry; 0.3.2 should not (2026-09-09, NOT looked at)</h2>
+
+<div class="note">
+    <span class="label">This one was found from outside</span>
+    <p>
+        Reported by the owner&rsquo;s friends against a handed-off jar, not by anyone here
+        and not by the suite: 0.2.0 played, and <strong>both 0.3.0 and 0.3.1 kick the
+        client on entering a world</strong> with
+        <code>Failed to encode packet 'clientbound/minecraft:custom_payload'</code>.
+        See <a href="known-gaps.html#gap-135">gap 135</a>. It has never been reproduced on
+        this machine, because a dev-run world is entered before any horse is in view often
+        enough that it was simply never seen &mdash; the trigger is <em>a horse coming into
+        render range</em>, not the world load itself.
+    </p>
+</div>
+
+<p>
+    So the first thing to confirm is the plain one, and it wants a <strong>fresh</strong>
+    world rather than the usual test save:
+</p>
+
+<ul>
+    <li><strong>Make a new world, find a horse, stay connected.</strong> That is the whole
+        test. Walk until wild horses are in view and keep playing for a minute. Before the
+        fix this disconnected on the first one.</li>
+    <li><strong>An existing 0.3.0/0.3.1 save should be fine.</strong> The fault was in what
+        the server <em>sends</em>, never in what it saved, so a world made under a broken
+        jar should open normally under 0.3.2. Worth confirming with one, because the claim
+        is untested.</li>
+    <li><strong>Pick up a preset horse spawn egg and a filled genome jar.</strong> These
+        carry a <code>stored_genome</code> component that had the same latent fault, and it
+        rides every inventory sync &mdash; so it would have kicked whoever <em>held</em>
+        one, in creative or otherwise. Nobody has ever seen it fire; put one in a hotbar
+        slot and see nothing happen.</li>
+    <li><strong>Open the horse browser and let it list a few horses.</strong> The roster
+        packet&rsquo;s genotype cap moved too, and the roster is the one surface that sends
+        a genome code per horse in bulk.</li>
+    <li><strong>Not a visual change at all.</strong> No coat, gene, breed or stat moved, and
+        neither golden file changed. If any horse <em>looks</em> different under 0.3.2 than
+        under 0.3.1, that is a separate bug and worth saying so.</li>
+</ul>
+
 <h2 id="path-mask">&sect;0-BA &mdash; The <code>PATH</code> mask, and a checkbox that was never one (2026-09-09, NOT looked at)</h2>
 
 <div class="note">

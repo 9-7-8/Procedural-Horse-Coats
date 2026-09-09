@@ -36,6 +36,43 @@
     </p>
 </div>
 
+<h2 id="v0-3-2">0.3.2</h2>
+
+<p class="lede">
+    A one-line fix for the bug that made 0.3.0 and 0.3.1 unplayable: every client was
+    kicked off the moment a horse came into view.
+</p>
+
+<div class="note">
+    <span class="label">Replace 0.3.0 or 0.3.1</span>
+    <p>
+        Both of those releases disconnect you on entering a world with
+        <code>Failed to encode packet 'clientbound/minecraft:custom_payload'</code>.
+        There is nothing wrong with a world made under them &mdash; the fault is in what
+        the server sends, not in what it saved &mdash; so the same save works once the
+        jar is swapped. 0.2.0 is unaffected.
+    </p>
+</div>
+
+<ul>
+    <li><strong>An epigenome code outgrew the wire.</strong> A horse&rsquo;s coat is sent
+        to the client as its genotype and epigenome text, and the epigenome stores literal
+        values for every gene that varies &mdash; so the genes added across 0.3.0 pushed a
+        full code past 32&nbsp;767 characters, which is the length Minecraft&rsquo;s
+        default string writer silently caps at. It throws rather than truncating, and a
+        throw while encoding drops the connection. The coat packet now declares a cap with
+        real room in it, as the other genome-carrying packets already did.</li>
+    <li><strong>The same latent fault was in three other places</strong> &mdash; the stored
+        genome on a preset spawn egg and a genome jar, which would have kicked whoever held
+        one, and the genotype fields on the roster and spawn packets, which were already
+        two thirds of the way to the same crash. All the caps now come from one place, so
+        raising them is one edit.</li>
+    <li><strong>The test that was meant to catch this now can.</strong> It was watching the
+        one cap that had a number written beside it and could not see the implicit one next
+        to it; it now guards every genome-code cap, and it fails while there is still half
+        the budget left.</li>
+</ul>
+
 <h2 id="v0-3-1">0.3.1</h2>
 
 <p class="lede">
