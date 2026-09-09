@@ -16,6 +16,7 @@ import com.example.horsegenetics.common.genetics.Gene;
 import com.example.horsegenetics.common.genetics.Genes;
 import com.example.horsegenetics.common.genetics.Genotype;
 import com.example.horsegenetics.common.genetics.LutContribution;
+import com.example.horsegenetics.common.genetics.WhiteLockContribution;
 
 import java.util.Optional;
 
@@ -183,6 +184,12 @@ public final class CoatTextureComposer {
             colour.setArgb(px, py, (nearBlackAlpha(rgb) << 24) | rgb);
         });
 
+        // The white lock, if any gene asks for one. Seeded with the white the
+        // melanin genes made, and grown after every magical gene paints - see
+        // whiteLock / extendWhiteLock.
+        boolean[] locked = whiteLock(genotype, pigment, skin);
+        boolean[] lockedEyes = locked == null ? null : eyeMask(skin);
+
         // 3. magical phase - each gene's signed RGB delta accumulates.
         for (Gene gene : Genes.magicalOrder()) {
             Expression expression = gene.expressionIn(genotype.pair(gene), genotype);
@@ -191,7 +198,10 @@ public final class CoatTextureComposer {
             }
             ColorField delta = expression.tint(ctx, pigment, colour);
             if (delta != null) {
-                colour.apply(delta);
+                colour.apply(delta, locked);
+                if (locked != null) {
+                    extendWhiteLock(locked, lockedEyes, colour, skin);
+                }
             }
         }
 
@@ -220,6 +230,7 @@ public final class CoatTextureComposer {
         // 5. overlay phase - final pixels and emissive texels, over the finished
         // coat. Runs after the eyes precisely so a gene can colour them.
         CoatOverlay overlay = new CoatOverlay(skin, out.clone());
+        overlay.lock(locked);
 
         // 5a. Eye colour, before the general overlay pass, so a gene that wants
         // the whole eye (light's glowing gold, the leopard complex's white rim)
@@ -282,6 +293,114 @@ public final class CoatTextureComposer {
             }
         }
         return pigment;
+    }
+
+    /**
+     * <b>How white a texel has to be to be locked</b>, as a minimum on every
+     * channel. Not an equality test against {@code #FFFFFF}: a magical gene
+     * paints white with a {@code TOWARD} at 88-98% strength, which lands a few
+     * counts short on every channel, and an equality test would lock the
+     * natural white and silently miss all of it.
+     */
+    private static final int WHITE_MIN = 0xEE;
+
+    /**
+     * The texels the white lock covers, or {@code null} when no gene on this
+     * horse asks for one (the ordinary case, and the reason every caller
+     * downstream takes a nullable mask rather than an all-false array).
+     *
+     * <p>It starts as <b>the white the melanin genes made</b>: a texel phase 1
+     * whitened all the way to zero pigment, which phase 2 leaves fully
+     * transparent so the white template shows through. Those are exactly the
+     * natural markings - a tobiano patch, a splash, a blaze, a stocking.
+     *
+     * <p><b>The eyes are cut back out of it</b>, and only the eyes. A blue eye
+     * on a white face is pigment biology rather than a marking, and the eye
+     * texels of a dominant-white horse are whitened along with the rest of the
+     * head - so locking them would delete every eye-colour gene on precisely
+     * the horses whose eyes are worth looking at.
+     *
+     * @see com.example.horsegenetics.common.genetics.WhiteLockContribution
+     */
+    private static boolean[] whiteLock(Genotype genotype, PigmentField pigment, Skin skin) {
+        boolean locking = false;
+        for (Gene gene : Genes.codeOrder()) {
+            if (!(gene instanceof WhiteLockContribution lock)) {
+                continue;
+            }
+            AllelePair pair = genotype.pair(gene);
+            if (gene.expressionIn(pair, genotype).wildType()) {
+                continue;
+            }
+            if (lock.locksWhite(pair, genotype)) {
+                locking = true;
+                break;
+            }
+        }
+        if (!locking) {
+            return null;
+        }
+        int n = HorseSkinGeometry.SHEET_SIZE;
+        boolean[] locked = new boolean[n * n];
+        HorseSkinGeometry.forEachTexel(skin, (px, py, part, face, point) -> {
+            if (pigment.red(px, py) <= TRANSPARENT_EPS && pigment.black(px, py) <= TRANSPARENT_EPS) {
+                locked[py * n + px] = true;
+            }
+        });
+        boolean[] eyes = eyeMask(skin);
+        for (int i = 0; i < locked.length; i++) {
+            if (eyes[i]) {
+                locked[i] = false;
+            }
+        }
+        return locked;
+    }
+
+    /** The texels inside {@link CoatRegions#eyeRects}, as a sheet-sized mask. */
+    private static boolean[] eyeMask(Skin skin) {
+        int n = HorseSkinGeometry.SHEET_SIZE;
+        boolean[] eyes = new boolean[n * n];
+        for (int[] rect : CoatRegions.eyeRects(skin)) {
+            for (int y = rect[1]; y < rect[1] + rect[3]; y++) {
+                for (int x = rect[0]; x < rect[0] + rect[2]; x++) {
+                    if (x >= 0 && y >= 0 && x < n && y < n) {
+                        eyes[y * n + x] = true;
+                    }
+                }
+            }
+        }
+        return eyes;
+    }
+
+    /**
+     * Grow the lock over whatever the gene that just painted left <b>white</b>.
+     * This is the half that makes the rule "a white texel is final" rather than
+     * "the natural markings win": white a magical gene puts down is locked from
+     * the moment it lands, so the gene above it cannot take it away either.
+     *
+     * <p>{@code eyes} is passed in rather than recomputed because this runs once
+     * per magical gene on the horse. Eye texels are never added, for the reason
+     * {@link #whiteLock} gives - they were cut out of the seed and would
+     * otherwise creep back in the first time anything painted one pale.
+     */
+    private static void extendWhiteLock(boolean[] locked, boolean[] eyes,
+                                        ColorField colour, Skin skin) {
+        int n = HorseSkinGeometry.SHEET_SIZE;
+        HorseSkinGeometry.forEachTexel(skin, (px, py, part, face, point) -> {
+            int i = py * n + px;
+            if (locked[i] || eyes[i]) {
+                return;
+            }
+            int argb = colour.argb(px, py);
+            if ((argb >>> 24) < 0x08) {
+                return;     // nothing painted here yet; the seed pass owns bare template
+            }
+            if (((argb >> 16) & 0xFF) >= WHITE_MIN
+                    && ((argb >> 8) & 0xFF) >= WHITE_MIN
+                    && (argb & 0xFF) >= WHITE_MIN) {
+                locked[i] = true;
+            }
+        });
     }
 
     private static String selectAlternateLut(Genotype genotype) {

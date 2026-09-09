@@ -24,11 +24,17 @@ import { fileURLToPath } from "node:url";
 const WIKI = dirname(dirname(fileURLToPath(import.meta.url)));
 const ORDER = ["gameplay", "coding", "science"];
 
+/** An href to the file it names - a registered link may carry a ?view=. */
+function fileOf(href) {
+    const path = href.split("?")[0].split("#")[0];
+    return path === "../index.html"
+        ? join(dirname(WIKI), "index.html")
+        : join(WIKI, path);
+}
+
 /** The tabs a page has, or null if it is not a tabbed page. */
 function tabsOf(href) {
-    const file = href === "../index.html"
-        ? join(dirname(WIKI), "index.html")
-        : join(WIKI, href);
+    const file = fileOf(href);
     if (!existsSync(file)) { return null; }
     const html = readFileSync(file, "utf8");
     const found = new Set();
@@ -50,8 +56,7 @@ src = src.replace(
     (whole, href, text, kind, views) => {
         const tabs = tabsOf(href);
         if (tabs === null) {
-            if (!existsSync(href === "../index.html"
-                ? join(dirname(WIKI), "index.html") : join(WIKI, href))) {
+            if (!existsSync(fileOf(href))) {
                 missing.push(href);
             }
             return whole;

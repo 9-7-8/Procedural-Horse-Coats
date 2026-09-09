@@ -367,8 +367,11 @@ private static int toward(ColorView colour, int px, int py, int channel, int tar
         That is a legitimate choice &mdash; but it means your position in
         <code>Genes.magicalOrder()</code> now matters, so pick your
         <code>priority()</code> deliberately and say so in the gene&rsquo;s Javadoc.
-        Pink hair (110) runs <em>before</em> magic zebra (120) precisely so that
-        stripes black out pink hair rather than the other way round.
+        Mane colour (112) runs <em>before</em> magic zebra (120) precisely so that
+        stripes black out a coloured mane rather than the other way round. The
+        far end of the same argument is the whole modifier band at 600+
+        (<a href="paint-order.html">the paint order</a>): a gene that reads
+        somebody else's marking has to be painted after it.
     </p>
 </div>
 

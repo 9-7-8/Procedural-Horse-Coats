@@ -21,12 +21,12 @@
 <h1>Opalized</h1>
 
 <p class="lede">
-    The same substrate as Voided taken the other way - every white region comes out as iridescent cells of three to seven hues, pearlescent at the rim and strongest in the middle.
+    The same substrate as Voided taken the other way - a marking comes out as iridescent cells of three to seven hues, pearlescent at the rim and strongest in the middle. Which marking depends on the allele: one opalizes every white region, the other every black one.
 </p>
 
 <section class="tab-panel" data-tab="gameplay">
 
-<div class="gene-preview" data-gene="horsegenetics.opalized" data-base="tobiano"></div>
+<div class="gene-preview" data-gene="horsegenetics.opalized" data-base="black"></div>
 
 <h2 id="outcomes">What it can come out as</h2>
 
@@ -34,7 +34,8 @@
 <table class="facts">
 <thead><tr><th>Outcome</th><th>Carrying</th></tr></thead>
 <tbody>
-<tr><th>Opalized</th><td><code>Opl/Opl</code> &middot; <code>Opl/n</code></td></tr>
+<tr><th>Opalized</th><td><code>Opl/Opl</code> &middot; <code>Opl/Opb</code> &middot; <code>Opl/n</code></td></tr>
+<tr><th>Black-opalized</th><td><code>Opb/Opb</code> &middot; <code>Opb/n</code></td></tr>
 <tr><th>Wild type</th><td><code>n/n</code></td></tr>
 </tbody>
 </table>
@@ -45,14 +46,14 @@
     is on the <a href="#layers">coding tab</a>.
 </p>
 
-<h2 id="inheritance">What you can get</h2>
+<h2 id="inheritance">Crossing two of them</h2>
 
 <div class="gene-inheritance" data-gene="horsegenetics.opalized"></div>
 
 <h2 id="finding">Finding one</h2>
 
 <p>
-    About <strong>1 in 2,500</strong> wild horses is born showing this. That is the whole of the
+    About <strong>1 in 1,190</strong> wild horses is born showing this. That is the whole of the
     supply: catch one, or make one with the carrot below. Breeds set their own
     pools and a breed built around this gene will carry it far more often than
     the wild population does.
@@ -63,8 +64,11 @@
 <thead><tr><th>Wild pair</th><th>Shows as</th><th>How often</th></tr></thead>
 <tbody>
 <tr><td><code>Opl/Opl</code></td><td>Opalized</td><td>0.002% &mdash; 1 in 50,000</td></tr>
+<tr><td><code>Opl/Opb</code></td><td>Opalized</td><td>0.004% &mdash; 1 in 25,000</td></tr>
 <tr><td><code>Opl/n</code></td><td>Opalized</td><td>0.038% &mdash; 1 in 2,632</td></tr>
-<tr><td><code>n/n</code></td><td>Wild type</td><td>99.96%</td></tr>
+<tr><td><code>Opb/Opb</code></td><td>Black-opalized</td><td>0.002% &mdash; 1 in 50,000</td></tr>
+<tr><td><code>Opb/n</code></td><td>Black-opalized</td><td>0.038% &mdash; 1 in 2,632</td></tr>
+<tr><td><code>n/n</code></td><td>Wild type</td><td>99.916%</td></tr>
 </tbody>
 </table>
 </div>
@@ -95,8 +99,8 @@
 <tbody>
 <tr><th>Key</th><td><code>horsegenetics.opalized</code></td></tr>
 <tr><th>Phase</th><td>magical &mdash; it adds signed colour in phase 3, after the pigment has resolved</td></tr>
-<tr><th>Priority</th><td>431 &mdash; where it sits in the one <code>(priority, key)</code> paint order</td></tr>
-<tr><th>Alleles</th><td><code>Opl</code> &middot; <code>n</code></td></tr>
+<tr><th>Priority</th><td>611 &mdash; where it sits in the one <code>(priority, key)</code> paint order</td></tr>
+<tr><th>Alleles</th><td><code>Opl</code> &middot; <code>Opb</code> &middot; <code>n</code></td></tr>
 <tr><th>Varies per horse</th><td>4 values drawn once off the expressing allele copy, so a foal that inherits the copy inherits the look</td></tr>
 <tr><th>Built from</th><td>PALETTE, PIGMENT, TOWARD</td></tr>
 </tbody>
@@ -114,16 +118,25 @@
 
 <h3>Opalized</h3>
 
-<p>The outline is the source pattern's, unchanged, but the inside is not uniform. It breaks into irregular lobed cells of differing colour, a hand's breadth or two across, with soft transitions between neighbours - so it reads as iridescence rather than as a gradient. The cells crowd at the core of a marking and thin toward its perimeter, and the outer inch or two trends pale and low-saturation, near pearl. Three to seven hues are present at once on any one horse: pale blues, mints, lilacs and pearl teals at the light end, reds, oranges, ambers and magentas at the dark.</p>
+<p>Every white region on the horse. The outline is the source pattern's, unchanged, but the inside is not uniform. It breaks into irregular lobed cells of differing colour, a hand's breadth or two across, with soft transitions between neighbours - so it reads as iridescence rather than as a gradient. The cells crowd at the core of a marking and thin toward its perimeter, and the outer inch or two trends pale and low-saturation, near pearl. Three to seven hues are present at once on any one horse: pale blues, mints, lilacs and pearl teals at the light end, reds, oranges, ambers and magentas at the dark.</p>
 
 <ol>
 <li>the white regions, broken into hue cells &mdash; <code>PIGMENT inverted</code>, painted with <code>PALETTE</code></li>
 <li>the pearlescent rim &mdash; <code>PIGMENT inverted</code> &times; <code>PIGMENT inverted</code>, painted with <code>TOWARD</code></li>
 </ol>
 
+<h3>Black-opalized</h3>
+
+<p>The identical iridescence, taken to the other end of the coat: every region the horse wears at its blackest - a black point, a sooty field, the dark half of a bay, the black of a tobiano rather than its white - breaks into the same lobed cells of three to seven hues, pearlescent at the rim and strongest in the middle. On a horse with nothing black on it, it shows nothing, exactly as the white form shows nothing on a horse with no white. Recessive to the white form: it takes two copies, or one beside a wild type.</p>
+
+<ol>
+<li>the black regions, broken into hue cells &mdash; <code>PIGMENT</code>, painted with <code>PALETTE</code></li>
+<li>the pearlescent rim &mdash; <code>PIGMENT</code> &times; <code>PIGMENT</code>, painted with <code>TOWARD</code></li>
+</ol>
+
 <h3>Wild type</h3>
 
-<p>White stays white.</p>
+<p>Neither. White stays white and black stays black.</p>
 
 <p class="muted">Paints nothing.</p>
 

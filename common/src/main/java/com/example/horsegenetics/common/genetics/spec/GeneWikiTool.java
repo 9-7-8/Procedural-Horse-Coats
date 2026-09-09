@@ -314,10 +314,45 @@ public final class GeneWikiTool {
      */
     private static List<Gene> membersForMenu(GeneFamily family) {
         List<Gene> genes = new ArrayList<>(family.members());
+        genes.removeIf(g -> foldedInto(g) != null);
         if (!family.natural()) {
             genes.sort((a, b) -> a.name().compareToIgnoreCase(b.name()));
         }
         return genes;
+    }
+
+    /**
+     * <b>The gene this one is only ever read through</b>, or {@code null} if it
+     * stands on its own - a <i>modifier locus</i>, folded into the entry of the
+     * gene that reads it rather than given a card and a sidebar row beside it.
+     *
+     * <p>Accretion Field is the case that forced it. It is a real locus - every
+     * horse alive carries it, it breeds, it takes a segment in the code - but it
+     * <b>paints nothing whatever</b> on its own; all it does is tell Accretion
+     * which half of the horse to take. Two adjacent cards for one marking, one
+     * of them with no icon because there is nothing to photograph, read as two
+     * markings. (Owner's call.)
+     *
+     * <p><b>Detected, not listed.</b> The two conditions are exactly what the
+     * paragraph above says: {@link Gene#affectsCoat()} is false - every one of
+     * this gene's own combinations is a wild type - and some other gene names
+     * it in {@link Gene#coatDependsOn()}. A modifier
+     * that grows a painter of its own gets its card back at the next bake, and a
+     * new one written tomorrow needs no edit here.
+     *
+     * <p>The page itself is still written and is still reachable - the parent's
+     * page links to it - so nothing is hidden, only un-duplicated.
+     */
+    static Gene foldedInto(Gene gene) {
+        if (gene.affectsCoat()) {
+            return null;
+        }
+        for (Gene other : Genes.all()) {
+            if (other != gene && other.coatDependsOn().contains(gene.key())) {
+                return other;
+            }
+        }
+        return null;
     }
 
     private static String item(String href, String text, String kind, List<String> views) {
@@ -454,7 +489,9 @@ public final class GeneWikiTool {
             if (cards.isEmpty()) {
                 continue;
             }
-            body.append("\n    <div class=\"section-head\">\n        <h2>")
+            body.append("\n    <div class=\"section-head\"")
+                    .append(family.collapsed() ? " data-collapsed=\"true\"" : "")
+                    .append(">\n        <h2>")
                     .append(esc(family.label())).append("</h2>\n        <p>")
                     .append(esc(family.lede())).append("</p>\n    </div>\n")
                     .append("    <div class=\"cards\">\n");
@@ -728,7 +765,7 @@ public final class GeneWikiTool {
 
         sb.append(outcomeSummary(gene));
 
-        sb.append("<h2 id=\"inheritance\">What you can get</h2>\n\n");
+        sb.append("<h2 id=\"inheritance\">Crossing two of them</h2>\n\n");
         sb.append("<div class=\"gene-inheritance\" data-gene=\"").append(gene.key())
                 .append("\"></div>\n\n");
 

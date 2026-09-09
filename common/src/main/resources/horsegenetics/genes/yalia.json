@@ -3,9 +3,9 @@
   "key": "horsegenetics.yalia",
   "name": "Yalia",
   "phase": "magical",
-  "priority": 211,
+  "priority": 601,
   "rarity": "UNCOMMON",
-  "blurb": "Blocky straight-sided zones outlined in a bright colour and filled flat with white - architecture rather than marking - running down onto the legs, with the horse's own white markings taken into the same design.",
+  "blurb": "Blocky straight-sided zones outlined in a bright colour and filled flat with white - architecture rather than marking - running down onto the legs, with the horse's own white markings taken into the same design. A third allele draws the outline and nothing else, so it is invisible on a horse with no white.",
   "alleles": [
     {
       "token": "Yal",
@@ -14,6 +14,10 @@
     {
       "token": "Ylc",
       "label": "Yalia, coloured fill (Ylc)"
+    },
+    {
+      "token": "Ylo",
+      "label": "Yalia, outline only (Ylo)"
     },
     {
       "token": "n",
@@ -49,6 +53,7 @@
       "when": [
         "Yal/Yal",
         "Yal/Ylc",
+        "Yal/Ylo",
         "Yal/n"
       ],
       "layers": [
@@ -271,9 +276,10 @@
       "id": "coloured",
       "name": "Coloured Yalia",
       "description": "The same architecture in a colour the line carries rather than in white. Fully recessive: it takes two copies, and a single copy beside the white allele shows white. Unlike the white form it leaves the horse's own white markings alone - there is nothing for them to match - so a coloured Yalia over a tobiano is genuinely two markings on one horse. It never gives blue eyes.",
-      "when": {
-        "Ylc": 2
-      },
+      "when": [
+        "Ylc/Ylc",
+        "Ylc/Ylo"
+      ],
       "layers": [
         {
           "name": "the white fill, in colour",
@@ -426,6 +432,61 @@
       ]
     },
     {
+      "id": "outline",
+      "name": "Yalia outline",
+      "description": "The outline colour and none of the architecture. It draws no zones, adds no white anywhere, and paints no leg bands or hooves - all it does is run the same bright hard-edged line round whatever white the horse already carries: a tobiano patch, a splash, a blaze, a stocking, a snip. On a horse with no white it is completely silent, however many copies it carries, which makes it the one form of Yalia that can sit unnoticed in a line. Recessive to both filled forms.",
+      "when": [
+        "Ylo/Ylo",
+        "Ylo/n"
+      ],
+      "layers": [
+        {
+          "name": "the outline round the horse's own white, and nothing else",
+          "masks": [
+            {
+              "type": "PIGMENT",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE",
+                "LEGS",
+                "HAIR"
+              ],
+              "channel": "total",
+              "from": 0.06,
+              "to": 0.34,
+              "invert": true,
+              "spread": 0.7
+            },
+            {
+              "type": "PIGMENT",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE",
+                "LEGS",
+                "HAIR"
+              ],
+              "channel": "total",
+              "from": 0.06,
+              "to": 0.34,
+              "invert": true,
+              "combine": "SUBTRACT"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.9,
+            "lightness": 0.45,
+            "strength": 96
+          }
+        }
+      ]
+    },
+    {
       "id": "wild",
       "name": "Wild type",
       "description": "No zones.",
@@ -435,8 +496,12 @@
   "founders": {
     "Yal/Yal": 0.004,
     "Yal/Ylc": 0.016,
+    "Yal/Ylo": 0.016,
     "Yal/n": 0.076,
     "Ylc/Ylc": 0.016,
-    "n/n": 99.888
+    "Ylc/Ylo": 0.016,
+    "Ylo/Ylo": 0.016,
+    "Ylo/n": 0.076,
+    "n/n": 99.764
   }
 }

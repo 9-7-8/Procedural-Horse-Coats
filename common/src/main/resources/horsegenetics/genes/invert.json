@@ -3,7 +3,7 @@
   "key": "horsegenetics.invert",
   "name": "Invert",
   "phase": "magical",
-  "priority": 500,
+  "priority": 700,
   "rarity": "RARE",
   "blurb": "The last thing painted: the whole finished coat comes out as its own negative. White goes black, orange goes blue, and everything the horse was carrying goes with it.",
   "alleles": [

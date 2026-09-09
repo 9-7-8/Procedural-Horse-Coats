@@ -136,14 +136,29 @@ public final class GeneIconTool {
             // Seeded off the key, so re-baking gives the same horse back and the
             // icons do not all churn every time one gene is added.
             Epigenome epi = Epigenome.fromSeed(gene.key().hashCode() * 2654435761L);
-            int[] sheet = showing(gene, BASE, epi, template, luts);
-            for (String backdrop : BACKDROPS) {
-                if (sheet != null) {
-                    break;
+            // The same relative rule the wiki's preview window uses: measure
+            // the bay AND every fallback, then take the bay unless one of the
+            // fallbacks gives the gene substantially more to do. "Does it paint
+            // anything at all on a bay" was the old test, and it photographed
+            // Fielded - which draws out of the edges of existing white - on a
+            // horse whose only white was a couple of dozen texels of muzzle.
+            String[] stage = new String[BACKDROPS.length + 1];
+            stage[0] = BASE;
+            System.arraycopy(BACKDROPS, 0, stage, 1, BACKDROPS.length);
+            CoatVisibility.Shown[] shot = new CoatVisibility.Shown[stage.length];
+            int best = 0;
+            for (int i = 0; i < stage.length; i++) {
+                shot[i] = CoatVisibility.measure(gene, override(stage[i]), epi, template, luts);
+                best = Math.max(best, shot[i] == null ? 0 : shot[i].moved());
+            }
+            int[] sheet = null;
+            for (int i = 0; i < stage.length && sheet == null; i++) {
+                if (shot[i] == null || shot[i].moved() < best * CoatVisibility.ENOUGH_OF_BEST) {
+                    continue;
                 }
-                sheet = showing(gene, backdrop, epi, template, luts);
-                if (sheet != null) {
-                    onBackdrop.computeIfAbsent(backdrop, k -> new ArrayList<>()).add(slug);
+                sheet = shot[i].sheet();
+                if (i > 0) {
+                    onBackdrop.computeIfAbsent(stage[i], k -> new ArrayList<>()).add(slug);
                 }
             }
             if (sheet == null) {
@@ -162,7 +177,8 @@ public final class GeneIconTool {
             written.add(slug);
         }
         onBackdrop.forEach((backdrop, slugs) ->
-                System.out.println("on " + backdrop + " (nothing shows on a plain bay): " + slugs));
+                System.out.println("on " + backdrop + " (a plain bay gives it too little to do): "
+                        + slugs));
         if (!invisible.isEmpty()) {
             System.out.println("no coat of their own, so no icon (" + invisible.size()
                     + "): " + invisible);
@@ -171,17 +187,6 @@ public final class GeneIconTool {
         Files.writeString(outDir.resolve("index.txt"),
                 String.join("\n", written) + "\n", StandardCharsets.UTF_8);
         System.out.println("wrote " + written.size() + " icons to " + outDir.toAbsolutePath());
-    }
-
-    /**
-     * <b>The gene showing itself</b> over one of the {@link #BACKDROPS} - see
-     * {@link CoatVisibility#showing}, which is where the measurement lives so
-     * that {@code GeneWikiTool} can ask the same question and get the same
-     * answer. This is only the genotype spelling around it.
-     */
-    private static int[] showing(Gene gene, String base, Epigenome epi,
-            int[] template, LutSet luts) {
-        return CoatVisibility.showing(gene, override(base), epi, template, luts);
     }
 
     // ------------------------------------------------------------------

@@ -3,7 +3,7 @@
   "key": "horsegenetics.fielded",
   "name": "Fielded",
   "phase": "magical",
-  "priority": 212,
+  "priority": 600,
   "rarity": "COMMON",
   "blurb": "Grass-like tendrils drawn out of the edges of the horse's white markings - and nothing at all on a horse that has none.",
   "alleles": [

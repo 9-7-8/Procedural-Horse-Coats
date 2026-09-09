@@ -76,7 +76,7 @@ public enum GeneFamily {
     NATURAL_HEALTH("Natural health genes", true, "Natural health genes",
             "The loci you cannot see: speed, size, jump, and the disorders. Almost every one "
                     + "is recessive and absent from its own founder table as a homozygote - a "
-                    + "wild horse can carry a disorder but never have one."),
+                    + "wild horse can carry a disorder but never have one.", true),
     NATURAL_OTHER("Other natural genes", true, "Other natural genes",
             "The naturals that are neither pigment nor pattern nor disorder - what the horse "
                     + "will eat, and what colour its eyes are."),
@@ -85,10 +85,12 @@ public enum GeneFamily {
     MAGIC_CORE("Magical genes", false, "Magical genes",
             "Where the magic starts. Every gene from here down was invented for this mod and "
                     + "adds signed colour in phase 3, on top of the pigment the natural genes "
-                    + "have already resolved - or changes what the horse does instead. These "
-                    + "particular ones are Java classes rather than gene files, because most of "
-                    + "them do something no colour op can: swap the whole palette, trail "
-                    + "particles, turn into something else at night."),
+                    + "have already resolved - or changes what the horse does instead. Most of "
+                    + "these are Java classes rather than gene files, because they do something "
+                    + "no colour op can: swap the whole palette, trail particles, turn into "
+                    + "something else at night. The rest are the markings deliberately parked at "
+                    + "the very bottom of the paint order, so that almost anything else the "
+                    + "horse carries is drawn on top of them."),
     MAGIC_BODY("Magical body-stat genes", false, "Magical body-stat genes",
             "Four loci that move speed, health, jump and size and paint nothing at all. They "
                     + "are the magical mirror of the performance genes, with far wider ranges "
@@ -125,12 +127,18 @@ public enum GeneFamily {
     private final boolean natural;
     private final String title;
     private final String lede;
+    private final boolean collapsed;
 
     GeneFamily(String label, boolean natural, String title, String lede) {
+        this(label, natural, title, lede, false);
+    }
+
+    GeneFamily(String label, boolean natural, String title, String lede, boolean collapsed) {
         this.label = label;
         this.natural = natural;
         this.title = title;
         this.lede = lede;
+        this.collapsed = collapsed;
     }
 
     /** What the menus call it. */
@@ -151,6 +159,20 @@ public enum GeneFamily {
     /** The paragraph under that heading. */
     public String lede() {
         return lede;
+    }
+
+    /**
+     * Does the landing page open this family's section <b>shut</b>?
+     *
+     * <p>One family does. The health loci are the largest family in the mod and
+     * the least browsable - forty-odd cards that all say the same thing, because
+     * a disorder locus has nothing to show and its interest is entirely in the
+     * sentence rather than the picture - and they sat between the coat genes and
+     * the magic, which is what people come to the page for. Collapsed by
+     * default, one click away. (Owner's call.)
+     */
+    public boolean collapsed() {
+        return collapsed;
     }
 
     // ------------------------------------------------------------------

@@ -397,10 +397,10 @@ default int visible(int px, int py, int channel);</code></pre>
 </div>
 
 <p>
-    <a href="gene-pink-hair.html">Pink hair</a> is the gene that proved this
-    necessary: a blind <code>add</code> cannot reach pink on a black mane without
-    pushing hard enough to saturate a pale mane to white. Reading first is the whole
-    point of phase-3 read access &mdash; and the cost is that such a gene is
+<a href="gene-mane-color.html">Mane colour</a> is the shape that proved this
+    necessary: a blind <code>add</code> cannot reach a chosen hue on a black mane
+    without pushing hard enough to saturate a pale one to white. Reading first is the
+    whole point of phase-3 read access &mdash; and the cost is that such a gene is
     <strong>order-dependent by choice</strong>.
 </p>
 
@@ -411,12 +411,12 @@ default int visible(int px, int py, int channel);</code></pre>
     hand-written lists &mdash; both are <code>Genes.codeOrder()</code> (every
     registered gene sorted on <code>(</code><code>priority()</code><code>,
     key)</code>) filtered by <code>isNatural()</code>. The magical genes sort to
-    <code>PINK_HAIR</code> (110), <code>MAGIC_ZEBRA</code> (120),
+    <code>SUIT</code> (102), <code>MAGIC_ZEBRA</code> (120),
     <code>TEST</code> (900); a data-driven magical gene slots in by its own
     priority. Those numbers are chosen, not incidental: additive genes commute,
-    so pink hair and magic zebra could in principle go either way &mdash; except
-    pink hair <em>reads</em> what it is painting over, and zebra stripes should
-    black out pink hair rather than the other way round. Test paints flat and is
+    so mane colour and magic zebra could in principle go either way &mdash; except
+    mane colour <em>reads</em> what it is painting over, and zebra stripes should
+    black out a coloured mane rather than the other way round. Test paints flat and is
     <code>COMPLETE_DOMINANT</code>, so it must run <strong>last</strong> (hence
     the large gap to 900) or the genes after it would show through its overlay.
     In the natural band the same logic applies to <em>absolute setters before
@@ -425,6 +425,57 @@ default int visible(int px, int py, int channel);</code></pre>
     <a href="genetics-model.html#gene-priority">Genetics model &sect; Gene
     priority</a>.
 </p>
+
+<h3 id="white-lock">The white lock &mdash; the one gene that changes the rule</h3>
+
+<p>
+    <a href="gene-extreme-white-dominant.html">Extreme white dominant</a> paints nothing
+    at all. What it does instead is change the rule phase 3 is folded with: while it is
+    present, <strong>a white texel is final</strong>, and every gene above it is discarded
+    wherever the coat is already white.
+</p>
+
+<div class="codebox">
+<div class="filename">common/coat/pattern/CoatTextureComposer.java</div>
+<pre><code class="language-java">boolean[] locked = whiteLock(genotype, pigment, skin);   // null unless a gene asks
+
+for (Gene gene : Genes.magicalOrder()) {
+    ...
+    ColorField delta = expression.tint(ctx, pigment, colour);
+    if (delta != null) {
+        colour.apply(delta, locked);                     // locked texels refuse the fold
+        if (locked != null) {
+            extendWhiteLock(locked, colour, skin);       // white it just painted is final too
+        }
+    }
+}
+...
+overlay.lock(locked);                                    // and phase 6 cannot get round it</code></pre>
+</div>
+
+<p>
+    The mask is seeded from <strong>phase 1</strong>: every texel the melanin genes left
+    with essentially no pigment, which is exactly the horse&rsquo;s natural white markings
+    &mdash; a tobiano patch, a splash, a blaze, a stocking. It then <em>grows</em> after
+    each magical gene paints, so white a magical gene puts down is locked from the moment
+    it lands. The eye rectangles are cut back out of it and never re-added: a blue eye on
+    a white face is pigment biology rather than a marking, and locking it would delete
+    every eye-colour gene on precisely the horses whose eyes are worth looking at.
+</p>
+
+<div class="note">
+    <span class="label">Why this is a capability and not a very high priority</span>
+    <p>
+        A priority is a <em>slot</em> &mdash; "apply me after these and before those" &mdash;
+        and a marking sitting above the slot paints over the white exactly as before.
+        There is no number high enough, because "highest" is a position and the rule is
+        not positional. So it is <code>WhiteLockContribution</code>, read out of band by
+        the composer the way <code>LutContribution</code> is, and it applies at
+        <em>every</em> step of the order at once. The gene&rsquo;s own priority is
+        therefore only a code-order slot, and it does not appear on
+        <a href="paint-order.html">the paint order</a> at all.
+    </p>
+</div>
 
 <h3 id="shadow-pass">The shadow pass &mdash; nothing phase 3 paints is true black</h3>
 

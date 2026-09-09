@@ -136,12 +136,6 @@ class CoatPipelineGoldenTest {
             override("natural_zebra=Zeb/Zeb", "magic_zebra=Mzeb/n"),
             override("agouti=A/a", "magic_zebra=Mzeb/n"),
             override("kit=W22/N", "magic_zebra=Mzeb/n"),
-            override("pink_hair=Pihr/Pihr"),
-            override("pink_hair=n/Pihr"),
-            override("extension=e/e", "pink_hair=Pihr/Pihr"),
-            override("kit=W22/N", "pink_hair=Pihr/Pihr"),
-            override("agouti=A/a", "magic_zebra=Mzeb/n", "pink_hair=Pihr/Pihr"),
-            override("magic_zebra=Mzeb/n", "pink_hair=Pihr/Pihr"),
             override("dun=D/d2"),
             override("agouti=A/a", "dun=D/d2"),
             override("dun=d1/d2"),
@@ -255,7 +249,27 @@ class CoatPipelineGoldenTest {
             override("agouti=A/a", "magic_sectoral_heterochromia=blue/chaos"),
             override("agouti=A/a", "magic_sectoral_heterochromia=chaos/chaos"),
             override("agouti=A/a", "magic_sectoral_heterochromia=green/n"),
-            override("agouti=A/a", "mitf=SW1/N", "magic_sectoral_heterochromia=hazel/brown"));
+            override("agouti=A/a", "mitf=SW1/N", "magic_sectoral_heterochromia=hazel/brown"),
+
+            // The white lock. It paints nothing, so the only way it can be seen
+            // at all is beside a white marking AND a magical one: the first two
+            // rows are the marking with and without the lock, and they must
+            // differ. The third is the lock on a horse with no white, where it
+            // must change nothing at all.
+            override("agouti=A/a", "tobiano=To/to", "magic_zebra=Mzeb/n"),
+            override("agouti=A/a", "tobiano=To/to", "magic_zebra=Mzeb/n",
+                    "extreme_white_dominant=EWD/n"),
+            override("agouti=A/a", "magic_zebra=Mzeb/n", "extreme_white_dominant=EWD/EWD"),
+
+            // The three data-driven alleles added with it: the reversed Cleave,
+            // Opalized reading black instead of white, and the Yalia that only
+            // outlines somebody else's white. The last two are modifiers, so
+            // each is on a horse that has something for it to modify.
+            override("agouti=A/a", "cleave=Wav/Wav"),
+            override("agouti=A/a", "cleave=Clv/Wav"),
+            override("agouti=A/a", "opalized=Opb/Opb"),
+            override("agouti=A/a", "tobiano=To/to", "yalia=Ylo/Ylo"),
+            override("agouti=A/a", "tobiano=To/to", "opalized=Opl/Opb"));
 
     private static final long[] SEEDS = {0L, 3L, 4242L};
 

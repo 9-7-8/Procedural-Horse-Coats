@@ -1,19 +1,19 @@
 {
   "format": 3,
-  "key": "horsegenetics.collar",
-  "name": "Collar",
+  "key": "horsegenetics.suit",
+  "name": "Suit",
   "phase": "magical",
-  "priority": 260,
+  "priority": 102,
   "rarity": "RARE",
   "blurb": "A band right round the base of the neck, well up onto the neck itself, with everything behind it going pale and the head, crest and lower legs keeping the coat.",
   "alleles": [
     {
-      "token": "Col",
-      "label": "Collar, white (Col)"
+      "token": "Sut",
+      "label": "Suit, white (Sut)"
     },
     {
-      "token": "Coc",
-      "label": "Collar, coloured (Coc)"
+      "token": "Suc",
+      "label": "Suit, coloured (Suc)"
     },
     {
       "token": "n",
@@ -40,16 +40,16 @@
   "expressions": [
     {
       "id": "white",
-      "name": "Collar",
-      "description": "The band wraps the base of the neck, its back edge landing well forward of the scapula and its front edge running up onto the neck itself - but it passes under the crest rather than over it, so the topline of the neck keeps its colour the whole way. Everything behind the band goes pale, roughly half the animal, while the head, the upper neck and the crest keep theirs. The legs come back to the coat from the knee and hock down, over a soft transition rather than a line. The mane keeps its colour; the tail follows the pale field about half the time.",
+      "name": "Suit",
+      "description": "The suit line wraps the base of the neck, its back edge landing well forward of the scapula and its front edge running up onto the neck itself - but it passes under the crest rather than over it, so the topline of the neck keeps its colour the whole way. Everything behind the band goes pale, roughly half the animal, while the head, the upper neck and the crest keep theirs. The legs come back to the coat from the knee and hock down, over a soft transition rather than a line. The mane keeps its colour; the tail follows the pale field about half the time.",
       "when": [
-        "Col/Col",
-        "Col/Coc",
-        "Col/n"
+        "Sut/Sut",
+        "Sut/Suc",
+        "Sut/n"
       ],
       "layers": [
         {
-          "name": "everything behind the collar",
+          "name": "everything behind the suit line",
           "masks": [
             {
               "type": "AXIS",
@@ -122,14 +122,14 @@
     },
     {
       "id": "coloured",
-      "name": "Coloured collar",
+      "name": "Coloured suit",
       "description": "The same split, with the caudal field in a colour rather than pale. Fully recessive: two copies, and a single copy beside the white allele shows white. It never gives blue eyes.",
       "when": {
-        "Coc": 2
+        "Suc": 2
       },
       "layers": [
         {
-          "name": "everything behind the collar, coloured",
+          "name": "everything behind the suit line, coloured",
           "masks": [
             {
               "type": "AXIS",
@@ -207,15 +207,15 @@
     {
       "id": "wild",
       "name": "Wild type",
-      "description": "No collar.",
+      "description": "No suit.",
       "wildType": true
     }
   ],
   "founders": {
-    "Col/Col": 0.002,
-    "Col/Coc": 0.008,
-    "Col/n": 0.038,
-    "Coc/Coc": 0.008,
+    "Sut/Sut": 0.002,
+    "Sut/Suc": 0.008,
+    "Sut/n": 0.038,
+    "Suc/Suc": 0.008,
     "n/n": 99.944
   }
 }

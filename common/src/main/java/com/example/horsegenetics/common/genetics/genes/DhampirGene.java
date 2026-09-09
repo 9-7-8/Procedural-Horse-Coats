@@ -53,9 +53,10 @@ import java.util.Optional;
  * <h2>What the homozygote is</h2>
  * <ul>
  *   <li><b>Pure white</b>, painted absolutely in phase 3 over whatever the
- *       melanin genes made - so it {@linkplain Expression.Builder#masking()
- *       masks} everything, exactly like dominant white, and the coat underneath
- *       is still in the genome for a foal to inherit.</li>
+ *       melanin genes made - and the coat underneath is still in the genome for
+ *       a foal to inherit. It is painted <b>early</b> in phase 3 (see
+ *       {@link #PRIORITY}), so it is a backdrop rather than a mask: every
+ *       marking gene above it still draws on top.</li>
  *   <li><b>Red eyes and glowing scleras</b>, at
  *       {@link EyeColor#RANK_MAGICAL} - above even a depigmented blue, because
  *       this is paint rather than pigment.</li>
@@ -87,7 +88,18 @@ public final class DhampirGene implements Gene, TraitContribution, EyeColorContr
 
     public static final String KEY = "horsegenetics.dhampir";
 
-    public static final int PRIORITY = 135;
+    /**
+     * <b>Near the bottom of the magical band</b>, deliberately. A dhampir paints
+     * the whole horse absolute white, so wherever it sits in the order is where
+     * the horse's markings stop being visible - and at 135 that was every
+     * data-driven gene in the mod. Moved down here so a dhampir is a
+     * <i>backdrop</i> rather than a dead end: breed one carrying anything else
+     * that paints and the marking still lands on top of the white.
+     * (Owner's call - "so that you aren't stuck with a pure white horse if you
+     * want a Dhampir horse".) Below it sit only {@code suit} and {@code hood},
+     * which are lower still for the same reason.
+     */
+    public static final int PRIORITY = 105;
 
     /** Multipliers on the resolved body. Unclamped - a dhampir is off the ordinary scale. */
     public static final double HEALTH_MULTIPLIER = 3.0;
@@ -130,8 +142,9 @@ public final class DhampirGene implements Gene, TraitContribution, EyeColorContr
                     + "shade or water and will jump a fence to get there. Three times the health "
                     + "of an ordinary horse, half again the speed and twice the jump, and it "
                     + "cannot be fed by any means: the only way it heals is to hunt something "
-                    + "living and take a bite.")
-            .masking()
+                    + "living and take a bite. The white is a backdrop rather than a verdict: "
+                    + "it is painted near the bottom of the magical order, so anything else "
+                    + "the horse carries still draws on top of it.")
             .tint((ctx, coat, colour) -> {
                 ColorField delta = ColorField.deltaLike(colour);
                 // Absolute, not additive: a dhampir is white over a black horse,

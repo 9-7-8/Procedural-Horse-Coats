@@ -81,8 +81,6 @@ class GenotypeCatalogTest {
         // worth more than one gallery pen label.
         assertEquals(List.of("NN", "snosno", "sunsun", "prlprl", "CrN"),
                 tokens(GenotypeCatalog.distinctPairsOf(Genes.MATP)));
-        // pink hair's carrier likewise folds into its wild type
-        assertEquals(List.of("PihrPihr", "nn"), tokens(GenotypeCatalog.distinctPairsOf(Genes.PINK_HAIR)));
         // KIT is the reduction doing real work: most of its combinations look
         // like one of a handful of outcomes, and only one representative of
         // each survives. Note W4W4 rather than W4N - the group keeps the

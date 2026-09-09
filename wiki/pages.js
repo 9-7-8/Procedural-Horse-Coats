@@ -57,6 +57,7 @@ window.HG.pages = {
             items: [
                 { href: "pipeline.html", text: "Three-phase pipeline", kind: "core", views: ["coding"] },
                 { href: "body-space.html", text: "Body space & regions", kind: "core", views: ["coding"] },
+                { href: "paint-order.html", text: "The paint order", kind: "core", views: ["gameplay","coding"] },
                 { href: "eye-colour.html", text: "Eye colour & heterochromia", kind: "core", views: ["gameplay","coding","science"] }
             ]
         },
@@ -74,7 +75,7 @@ window.HG.pages = {
                 { href: "gene-creator/index.html", text: "Gene creator", kind: "tool", views: ["coding"] },
                 { href: "horse-designer/index.html", text: "Horse designer", kind: "tool", views: ["gameplay","coding"] },
                 { href: "breed-designer/index.html", text: "Breed designer", kind: "tool", views: ["coding"] },
-                { href: "lut-lab.html", text: "LUT lab", kind: "tool", views: ["coding"] },
+                { href: "gene-lut.html?view=lab", text: "LUT lab", kind: "tool", views: ["gameplay","coding"] },
                 { href: "creating-a-gene.html", text: "Creating a gene", kind: "core", views: ["gameplay","coding"] },
                 { href: "gene-format.html", text: "Gene file format", kind: "tool", views: ["coding"] },
                 { href: "breed-format.html", text: "Breed file format", kind: "tool", views: ["coding"] },
@@ -103,8 +104,7 @@ window.HG.pages = {
                 { href: "gene-agouti.html", text: "Agouti", kind: "natural", views: ["gameplay","coding","science"] },
                 { href: "gene-brindle.html", text: "Brindle (MBTPS2)", kind: "natural", views: ["gameplay","coding","science"] },
                 { href: "gene-sooty.html", text: "Sooty", kind: "natural", views: ["gameplay","coding","science"] },
-                { href: "gene-pangare.html", text: "Pangaré", kind: "natural", views: ["gameplay","coding","science"] },
-                { href: "gene-shade.html", text: "Shade", kind: "natural", views: ["gameplay","coding","science"] }
+                { href: "gene-pangare.html", text: "Pangaré", kind: "natural", views: ["gameplay","coding","science"] }
             ]
         },
         {
@@ -175,6 +175,7 @@ window.HG.pages = {
                 { href: "gene-cutie-mark.html", text: "Cutie mark", kind: "magical", views: ["gameplay","coding"] },
                 { href: "gene-dhampir.html", text: "Dhampir", kind: "magical", views: ["gameplay","coding","science"] },
                 { href: "gene-healer.html", text: "Healer", kind: "magical", views: ["gameplay","coding","science"] },
+                { href: "gene-hood.html", text: "Hood", kind: "magical", views: ["gameplay","coding"] },
                 { href: "gene-light.html", text: "Light", kind: "magical", views: ["gameplay","coding","science"] },
                 { href: "gene-lut.html", text: "LUT", kind: "magical", views: ["gameplay","coding"] },
                 { href: "gene-lycan.html", text: "LYCAN", kind: "magical", views: ["gameplay","coding","science"] },
@@ -183,8 +184,8 @@ window.HG.pages = {
                 { href: "gene-mane-color.html", text: "Mane colour", kind: "magical", views: ["gameplay","coding"] },
                 { href: "gene-milk.html", text: "Milk", kind: "magical", views: ["gameplay","coding","science"] },
                 { href: "gene-particle.html", text: "Particle", kind: "magical", views: ["gameplay","coding","science"] },
-                { href: "gene-pink-hair.html", text: "Pink hair", kind: "magical", views: ["gameplay","coding","science"] },
                 { href: "gene-rainbow-dust.html", text: "Rainbow dust", kind: "magical", views: ["gameplay","coding","science"] },
+                { href: "gene-suit.html", text: "Suit", kind: "magical", views: ["gameplay","coding"] },
                 { href: "gene-tail-color.html", text: "Tail colour", kind: "magical", views: ["gameplay","coding","science"] },
                 { href: "gene-verdant.html", text: "Verdant", kind: "magical", views: ["gameplay","coding"] }
             ]
@@ -204,7 +205,6 @@ window.HG.pages = {
                 { href: "gene-black-holes.html", text: "Black Holes", kind: "magical", views: ["gameplay","coding"] },
                 { href: "gene-burn.html", text: "Burn", kind: "magical", views: ["gameplay","coding"] },
                 { href: "gene-cleave.html", text: "Cleave", kind: "magical", views: ["gameplay","coding"] },
-                { href: "gene-fielded.html", text: "Fielded", kind: "magical", views: ["gameplay","coding"] },
                 { href: "gene-fracture.html", text: "Fracture", kind: "magical", views: ["gameplay","coding"] },
                 { href: "gene-galaxy.html", text: "Galaxy", kind: "magical", views: ["gameplay","coding"] },
                 { href: "gene-imperial.html", text: "Imperial", kind: "magical", views: ["gameplay","coding"] },
@@ -215,16 +215,13 @@ window.HG.pages = {
                 { href: "gene-suntouched.html", text: "Suntouched", kind: "magical", views: ["gameplay","coding","science"] },
                 { href: "gene-valentine-appaloosa.html", text: "Valentine Appaloosa", kind: "magical", views: ["gameplay","coding"] },
                 { href: "gene-waterborn.html", text: "Waterborn", kind: "magical", views: ["gameplay","coding","science"] },
-                { href: "gene-winged.html", text: "Winged", kind: "magical", views: ["gameplay","coding"] },
-                { href: "gene-yalia.html", text: "Yalia", kind: "magical", views: ["gameplay","coding"] }
+                { href: "gene-winged.html", text: "Winged", kind: "magical", views: ["gameplay","coding"] }
             ]
         },
         {
             title: "Magic: fields and regions",
             items: [
                 { href: "gene-accretion.html", text: "Accretion", kind: "magical", views: ["gameplay","coding"] },
-                { href: "gene-accretion-field.html", text: "Accretion Field", kind: "magical", views: ["gameplay","coding"] },
-                { href: "gene-collar.html", text: "Collar", kind: "magical", views: ["gameplay","coding"] },
                 { href: "gene-cosmic.html", text: "Cosmic", kind: "magical", views: ["gameplay","coding"] },
                 { href: "gene-dutch.html", text: "Dutch", kind: "magical", views: ["gameplay","coding"] },
                 { href: "gene-emitola.html", text: "Emitola", kind: "magical", views: ["gameplay","coding"] },
@@ -245,7 +242,6 @@ window.HG.pages = {
                 { href: "gene-stardust.html", text: "Stardust", kind: "magical", views: ["gameplay","coding"] },
                 { href: "gene-synort.html", text: "Synort", kind: "magical", views: ["gameplay","coding"] },
                 { href: "gene-war-mask.html", text: "War Mask", kind: "magical", views: ["gameplay","coding"] },
-                { href: "gene-waves.html", text: "Waves", kind: "magical", views: ["gameplay","coding"] },
                 { href: "gene-xuke.html", text: "Xuke", kind: "magical", views: ["gameplay","coding"] }
             ]
         },
@@ -304,7 +300,6 @@ window.HG.pages = {
                 { href: "gene-fade.html", text: "Fade", kind: "magical", views: ["gameplay","coding"] },
                 { href: "gene-frostfall.html", text: "Frostfall", kind: "magical", views: ["gameplay","coding"] },
                 { href: "gene-guppy.html", text: "Guppy", kind: "magical", views: ["gameplay","coding"] },
-                { href: "gene-hood.html", text: "Hood", kind: "magical", views: ["gameplay","coding"] },
                 { href: "gene-prismtail.html", text: "Prismtail", kind: "magical", views: ["gameplay","coding"] },
                 { href: "gene-striped-mane-tail.html", text: "Striped Mane and Tail", kind: "magical", views: ["gameplay","coding"] }
             ]
@@ -312,12 +307,15 @@ window.HG.pages = {
         {
             title: "Magic: colour modifiers",
             items: [
+                { href: "gene-extreme-white-dominant.html", text: "Extreme white dominant", kind: "magical", views: ["gameplay","coding"] },
+                { href: "gene-fielded.html", text: "Fielded", kind: "magical", views: ["gameplay","coding"] },
                 { href: "gene-gamma.html", text: "Gamma", kind: "magical", views: ["gameplay","coding"] },
                 { href: "gene-invert.html", text: "Invert", kind: "magical", views: ["gameplay","coding"] },
                 { href: "gene-nebula-light.html", text: "Nebula Light", kind: "magical", views: ["gameplay","coding"] },
                 { href: "gene-opalized.html", text: "Opalized", kind: "magical", views: ["gameplay","coding"] },
                 { href: "gene-spectrum-light.html", text: "Spectrum Light", kind: "magical", views: ["gameplay","coding"] },
-                { href: "gene-voided.html", text: "Voided", kind: "magical", views: ["gameplay","coding"] }
+                { href: "gene-voided.html", text: "Voided", kind: "magical", views: ["gameplay","coding"] },
+                { href: "gene-yalia.html", text: "Yalia", kind: "magical", views: ["gameplay","coding"] }
             ]
         },
         /* END generated by :common:bakeGeneWikiPages */

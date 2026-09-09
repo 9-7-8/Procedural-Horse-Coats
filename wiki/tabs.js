@@ -12,6 +12,21 @@
  * A page with no panels is left completely alone, so the pages that are one
  * subject with one audience (philosophy, the session log) need no change.
  *
+ * A PAGE MAY ALSO CARRY A TAB OF ITS OWN. A panel whose data-tab is not one of
+ * the three gets a button after them, labelled by its data-tab-label:
+ *
+ *     <section class="tab-panel" data-tab="lab" data-tab-label="Lab"
+ *              data-tab-hint="Try a gradient on the real pipeline"> ... </section>
+ *
+ * That is for a tool that belongs to exactly one subject - the LUT lab on the
+ * LUT locus's page - and it deliberately stays local. The three ids above are
+ * the wiki's VIEWS: the index's switcher offers them, the sidebar filters on
+ * them, and every page is expected to answer to one. A fourth of those would
+ * mean a "Lab" filter on the index that a hundred and fifty pages have nothing
+ * for. So a page-local tab is never stored as the reader's view and is never
+ * restored on the next page; it opens when its own page asks for it and that is
+ * all.
+ *
  * WHICH TAB OPENS. In order: an explicit ?view= in the URL, then a #hash that
  * names something inside a panel, then the view the reader last chose (the
  * index's view switcher writes the same key), then gameplay. A view the page
@@ -83,8 +98,23 @@ window.HG = window.HG || {};
         bar.className = "tab-bar";
         bar.setAttribute("role", "tablist");
 
+        // The three wiki views this page has, then any tab the page invented -
+        // in the order they appear in the document, which is the order the
+        // author wrote them in.
+        var pageTabs = TABS.slice();
+        panels.forEach(function (panel) {
+            var id = panel.getAttribute("data-tab");
+            if (valid(id)) { return; }
+            pageTabs.push({
+                id: id,
+                label: panel.getAttribute("data-tab-label") || id,
+                hint: panel.getAttribute("data-tab-hint") || "",
+                local: true
+            });
+        });
+
         var buttons = {};
-        TABS.forEach(function (tab) {
+        pageTabs.forEach(function (tab) {
             if (!have[tab.id]) { return; }
             var b = document.createElement("button");
             b.type = "button";
@@ -105,11 +135,11 @@ window.HG = window.HG || {};
 
         function show(view, userChose) {
             if (!have[view]) {
-                for (var i = 0; i < TABS.length; i++) {
-                    if (have[TABS[i].id]) { view = TABS[i].id; break; }
+                for (var i = 0; i < pageTabs.length; i++) {
+                    if (have[pageTabs[i].id]) { view = pageTabs[i].id; break; }
                 }
             }
-            TABS.forEach(function (tab) {
+            pageTabs.forEach(function (tab) {
                 var on = tab.id === view;
                 if (have[tab.id]) { have[tab.id].hidden = !on; }
                 if (buttons[tab.id]) {
@@ -120,8 +150,13 @@ window.HG = window.HG || {};
             });
             // Retheming is one attribute on <html>: every accent on the page
             // reads var(--view-accent), which the stylesheet redefines per view.
-            document.documentElement.setAttribute("data-view", view);
-            HG.writeView(view);
+            // A page-local tab has no accent of its own and is not a view the
+            // rest of the wiki knows; it borrows the theme of the tab beside it
+            // and is not remembered.
+            if (valid(view)) {
+                document.documentElement.setAttribute("data-view", view);
+                HG.writeView(view);
+            }
             if (userChose) {
                 var url = window.location.pathname + "?view=" + view + window.location.hash;
                 try { window.history.replaceState(null, "", url); } catch (e) { /* file:// */ }
@@ -145,7 +180,7 @@ window.HG = window.HG || {};
         }
 
         var initial = param("view") || hashPanel || HG.readView() || DEFAULT;
-        show(valid(initial) ? initial : DEFAULT, false);
+        show(valid(initial) || have[initial] ? initial : DEFAULT, false);
 
         // The browser could not scroll to a hash that was hidden at load.
         if (hashPanel && window.location.hash.length > 1) {

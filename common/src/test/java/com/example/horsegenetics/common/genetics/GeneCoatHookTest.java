@@ -198,6 +198,11 @@ class GeneCoatHookTest {
      */
     private static boolean paintsNothingItself(Gene gene) {
         return gene instanceof LutContribution
+                // Extreme white dominant is the other out-of-band coat change:
+                // its combination is a real change to the horse and it has no
+                // painter at all, because what it alters is the rule the phase-3
+                // fold is applied WITH. ExtremeWhiteDominantGeneTest covers it.
+                || gene instanceof WhiteLockContribution
                 || gene instanceof EyeColorContribution
                 || gene instanceof EyePatchContribution
                 || paintsNothingOnThisBase(gene);

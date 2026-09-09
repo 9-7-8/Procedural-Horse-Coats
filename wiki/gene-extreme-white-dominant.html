@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Extreme white dominant &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow magical">Magical gene <span class="sep">/</span> changes a rule, paints nothing</p>
+
+<h1>Extreme white dominant</h1>
+
+<p class="lede">
+    The only gene in the mod that changes a coat without painting a single pixel. While
+    it is present, <strong>a white texel is final</strong>: every other gene still runs,
+    in the ordinary order, and every one of them is thrown away wherever the horse is
+    already white. On a horse with no white it does nothing at all. On a horse carrying
+    both a white marking and something magical, it swaps which of the two is on top.
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<h2 id="what">What it does to a horse</h2>
+
+<p>
+    A horse's white markings normally go down <em>first</em>. Tobiano, splash, sabino, a
+    blaze, a stocking &mdash; all of them are natural genes, and natural genes resolve in
+    <a href="pipeline.html">phase&nbsp;1</a>, before any magical marking exists. So a
+    horse carrying both a tobiano and something loud comes out looking like the loud
+    thing: the magic is painted over the top of the white and the white is gone.
+</p>
+
+<p>
+    Extreme white dominant reverses that for one horse. The white patches stay exactly
+    as the melanin genes drew them &mdash; same shape, same edges &mdash; and the magical
+    marking fills in <em>around</em> them, stopping dead at the boundary. A galaxy horse
+    with a blaze keeps the blaze. A cleave horse with four stockings keeps the stockings.
+</p>
+
+<div class="note">
+    <span class="label">It is white that is protected, not the natural genes</span>
+    <p>
+        The rule is about the <em>colour</em>, not about which gene put it there. White
+        a magical gene paints is locked from the moment it lands too, so a marking that
+        goes down white is protected from every marking above it in the order. That is
+        what makes it &ldquo;extreme&rdquo; rather than &ldquo;high priority&rdquo;: there is no slot
+        in the paint order a gene could take that would get over it.
+    </p>
+</div>
+
+<h2 id="eyes">The eyes are the one exception</h2>
+
+<p>
+    Eye colour is left alone. A depigmented blue eye is pigment biology rather than a
+    marking, and the eye texels of a heavily white horse are whitened along with the rest
+    of the head &mdash; so locking them would delete every eye-colour gene on exactly the
+    horses with the most interesting eyes. Nothing else is exempt.
+</p>
+
+<h2 id="inheritance">Crossing two of them</h2>
+
+<div class="gene-inheritance" data-gene="horsegenetics.extreme_white_dominant"></div>
+
+<p>
+    One copy is the whole of it and two look identical: &ldquo;white is final&rdquo; has no second
+    half to reach. That makes it a genuinely dominant magical gene, which is unusual here
+    &mdash; most of the invented loci are recessive, so that finding one is a breeding
+    project rather than a catch.
+</p>
+
+<h2 id="finding">Finding one</h2>
+
+<p>
+    About one wild horse in a hundred and sixty carries a copy, and because a single copy
+    expresses, that is also roughly how often you will see one &mdash; but only on a horse
+    that has white <em>and</em> a magical marking to argue with, which is a great deal
+    rarer than either. Most horses carrying it are indistinguishable from horses that do
+    not.
+</p>
+
+<h2 id="carrot">Its gene carrot</h2>
+
+<!-- The recipe, read off the mod at run time - the rarity tier is the recipe's
+     price, and a price written into a page goes stale silently.
+     See wiki/gene-carrot/gene-carrot.js. -->
+
+<div class="gene-carrot" data-gene="horsegenetics.extreme_white_dominant"></div>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd>horsegenetics.extreme_white_dominant</dd></div>
+    <div><dt>Class</dt><dd><code>ExtremeWhiteDominantGene</code></dd></div>
+    <div><dt>Phase</dt><dd>magical &mdash; but it has no painter in either phase</dd></div>
+    <div><dt>Priority</dt><dd>a code-order slot only; see below</dd></div>
+    <div><dt>Alleles</dt><dd><span class="allele wild">n</span> <span class="allele dom">EWD</span></dd></div>
+    <div><dt>Outcomes</dt><dd>wild, <code>white-dominant</code> (a <code>marker()</code>, not a wild type)</dd></div>
+    <div><dt>Capability</dt><dd><code>WhiteLockContribution</code> &mdash; exactly one implementor</dd></div>
+    <div><dt>Coat effect</dt><dd>none of its own; it masks every other gene's</dd></div>
+</dl>
+
+<div class="note warn">
+    <span class="label">Built, never seen in game</span>
+    <p>
+        No horse carrying this has been rendered in a running client. What is worth
+        looking at first is the <em>edge</em>: a magical marking stopping at a tobiano
+        boundary should read as a hard cut, and if the two disagree about where the
+        boundary is it will show as a one-texel fringe. Checklist on
+        <a href="verification.html">To be verified</a>.
+    </p>
+</div>
+
+<h2 id="capability">Why it is a capability, not a priority</h2>
+
+<p>
+    The obvious way to write this gene is to give it priority 999 and repaint the white
+    last. That is not the same thing, and the difference is the whole gene. A priority is
+    a <strong>slot</strong>: it says "apply me after these and before those", and a
+    marking sitting above the slot paints over the white exactly as before. There is no
+    number high enough, because "highest" is a position and the rule is not positional.
+</p>
+
+<p>
+    So it is <code>WhiteLockContribution</code> instead, which the composer reads out of
+    band &mdash; the same shape <a href="gene-lut.html"><code>LutContribution</code></a>
+    uses for the gradient swap. The composer asks, once, whether any gene on this horse
+    locks the white; if one does, the answer is a mask, and the mask is applied at
+    <em>every</em> step of phase 3 and again over the overlay pass. Its own
+    <code>PRIORITY</code> is therefore only where its segment sits in a genotype code.
+</p>
+
+<h2 id="mask">How the mask is built</h2>
+
+<ol>
+    <li><strong>Seeded from phase 1.</strong> After the natural genes have finished
+        restricting pigment, every texel left with essentially no pigment at all
+        (<code>red</code> and <code>black</code> both under <code>TRANSPARENT_EPS</code>)
+        is locked. Those are exactly the natural white markings: phase 2 leaves them fully
+        transparent, and what shows there is the bare white template.</li>
+    <li><strong>The eye rectangles are cut back out</strong> &mdash; see the gameplay
+        tab.</li>
+    <li><strong>Grown after every magical gene paints.</strong> Any texel the accumulator
+        now holds as near-white (every channel at or above <code>WHITE_MIN</code>) joins
+        the lock. Near-white rather than exactly <code>#FFFFFF</code>, because a gene
+        paints white with a <code>TOWARD</code> at 88&ndash;98% strength and lands a few
+        counts short on every channel; an equality test would lock the natural white and
+        silently miss all of the painted white.</li>
+    <li><strong>Read by <code>ColorField.apply(delta, locked)</code></strong>, which skips
+        locked texels entirely &mdash; absolute paint and additive tint alike &mdash; and
+        by <code>CoatOverlay.paint</code>, so an overlay gene cannot get round it either.</li>
+</ol>
+
+<p>
+    A <code>null</code> mask means no gene asked, which is the ordinary case; every
+    caller downstream takes a nullable mask rather than an all-false array so a horse
+    without this gene costs nothing.
+</p>
+
+<h2 id="order">Its place on the paint order page</h2>
+
+<p>
+    It does not appear on <a href="paint-order.html">the paint order</a> at all, because
+    that page lists genes that paint and this one does not. That is the honest answer
+    and it is also the point: the stack is not where this gene lives.
+</p>
+
+</section>
+
+</article>
+</main>
+<script defer src="gene-inheritance/gene-inheritance.js"></script>
+<script defer src="gene-carrot/gene-carrot.js"></script>
+</body>
+</html>

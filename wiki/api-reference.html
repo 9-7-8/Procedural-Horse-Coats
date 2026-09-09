@@ -59,6 +59,8 @@ genetics/
   AbilityContribution.java  capability: this gene makes the horse DO something
   EpigeneticAbilityContribution.java  ...and what it looks like is on the allele copy
   LutContribution.java      capability: swap the phase-2 gradient (the LUT locus, and ONLY it)
+  WhiteLockContribution.java capability: make a white texel FINAL - applies at every
+                            step of phase 3 at once, so it is not a priority
   CutieMarkContribution.java  capability: modify the cutie mark another gene drew
   EyeColorContribution.java capability: claim the iris colour (ranked; blue beats amber)
   EyeColor.java             one iris-colour claim - id, name, rgb, rank, strength
@@ -785,8 +787,27 @@ public interface LutContribution {
 // redblackgradient.png + every lutResources() texture into the LutSet.
 
 // Expression.Builder.marker() finishes an outcome that is NOT a wild type but
-// has no painter of its own - the LUT swap and tiger eye's iris colour are both
-// applied out of band by the composer.
+// has no painter of its own - the LUT swap, the white lock and tiger eye's iris
+// colour are all applied out of band by the composer.
+
+/** The capability a Gene implements to make WHITE FINAL: once a texel is white,
+ *  nothing painted afterwards may change it. EXACTLY ONE gene implements it
+ *  (extreme white dominant).
+ *
+ *  IT IS NOT A PRIORITY, and that is the whole of the design. A priority is a
+ *  SLOT - "after these, before those" - and a marking above the slot paints over
+ *  the white exactly as before; there is no number high enough, because "highest"
+ *  is a position and this rule is not positional. The composer asks once, builds
+ *  a mask, and applies it at EVERY step of phase 3 and again over the overlay.
+ *  The gene's own priority() is therefore a code-order slot and nothing more. */
+public interface WhiteLockContribution {
+    boolean locksWhite(AllelePair pair, Genotype genotype);
+}
+// The mask is seeded from the PIGMENT FIELD (texels phase 1 left unpigmented =
+// the natural white markings) and grown after each magical gene paints, so white
+// a magical gene lays down is locked too. Eye texels are cut out and never
+// re-added. ColorField.apply(delta, locked) and CoatOverlay.lock(mask) are the
+// two readers; a null mask means no gene asked, which is the ordinary case.
 
 /** The capability a Gene implements to CLAIM THE IRIS COLOUR. Several genes have
  *  a claim on it, so claims are RANKED rather than blended: highest rank wins,

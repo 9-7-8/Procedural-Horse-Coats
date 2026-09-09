@@ -169,11 +169,24 @@ public final class ColorField implements ColorView {
      * replace, every other texel adds.
      */
     public void apply(ColorView delta) {
+        apply(delta, null);
+    }
+
+    /**
+     * {@link #apply(ColorView)}, but with texels {@code locked} says are
+     * <b>finished</b> left exactly as they are - the white lock
+     * ({@link com.example.horsegenetics.common.genetics.WhiteLockContribution}).
+     * A {@code null} mask locks nothing, which is the ordinary case.
+     */
+    public void apply(ColorView delta, boolean[] locked) {
         if (delta.size() != size) {
             throw new IllegalArgumentException("delta is " + delta.size() + "px, field is " + size + "px");
         }
         for (int py = 0; py < size; py++) {
             for (int px = 0; px < size; px++) {
+                if (locked != null && locked[py * size + px]) {
+                    continue;
+                }
                 if (delta.isAbsolute(px, py)) {
                     set(px, py, delta.opacity(px, py), delta.red(px, py), delta.green(px, py), delta.blue(px, py));
                     painted[py * size + px] = true;

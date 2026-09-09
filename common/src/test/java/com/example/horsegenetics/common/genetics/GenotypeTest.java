@@ -187,7 +187,6 @@ class GenotypeTest {
         assertTrue(x.shows(Genes.GREY));
         assertTrue(x.has(Genes.MATP.Cr));
         assertTrue(x.has(Genes.MAGIC_ZEBRA.Mzeb));
-        assertTrue(x.has(Genes.PINK_HAIR.Pihr));
         assertTrue(x.has(Genes.DUN.D));
         assertTrue(x.has(Genes.SILVER.Z));
         assertTrue(x.has(Genes.MUSHROOM.Mu));

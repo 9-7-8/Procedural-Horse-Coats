@@ -21,7 +21,7 @@
 <h1>Cleave</h1>
 
 <p class="lede">
-    The horse split about half and half, along a boundary made of interlocking spears - long narrow triangles driven into each field from the other, and never a curve anywhere.
+    The horse split about half and half along a boundary made of interlocking spears - long narrow triangles driven into each field from the other, never a curve anywhere - edged in a half-opaque outline where the two meet. Which half the split claims is the allele: Cleave takes the front of the horse, Waves the back.
 </p>
 
 <section class="tab-panel" data-tab="gameplay">
@@ -34,9 +34,10 @@
 <table class="facts">
 <thead><tr><th>Outcome</th><th>Carrying</th></tr></thead>
 <tbody>
-<tr><th>Cleave</th><td><code>Clv/Clv</code> &middot; <code>Clv/Clc</code></td></tr>
-<tr><th>Coloured Cleave</th><td><code>Clc/Clc</code></td></tr>
-<tr><th>Cleave carrier</th><td><code>Clv/n</code> &middot; <code>Clc/n</code></td></tr>
+<tr><th>Cleave</th><td><code>Clv/Clv</code> &middot; <code>Clv/Clc</code> &middot; <code>Clv/Wav</code> &middot; <code>Clv/Wac</code> &middot; <code>Clv/n</code></td></tr>
+<tr><th>Coloured Cleave</th><td><code>Clc/Clc</code> &middot; <code>Clc/Wav</code> &middot; <code>Clc/Wac</code> &middot; <code>Clc/n</code></td></tr>
+<tr><th>Waves</th><td><code>Wav/Wav</code> &middot; <code>Wav/Wac</code> &middot; <code>Wav/n</code></td></tr>
+<tr><th>Coloured Waves</th><td><code>Wac/Wac</code> &middot; <code>Wac/n</code></td></tr>
 <tr><th>Wild type</th><td><code>n/n</code></td></tr>
 </tbody>
 </table>
@@ -47,14 +48,14 @@
     is on the <a href="#layers">coding tab</a>.
 </p>
 
-<h2 id="inheritance">What you can get</h2>
+<h2 id="inheritance">Crossing two of them</h2>
 
 <div class="gene-inheritance" data-gene="horsegenetics.cleave"></div>
 
 <h2 id="finding">Finding one</h2>
 
 <p>
-    About <strong>1 in 1,786</strong> wild horses is born showing this. That is the whole of the
+    About <strong>1 in 649</strong> wild horses is born showing this. That is the whole of the
     supply: catch one, or make one with the carrot below. Breeds set their own
     pools and a breed built around this gene will carry it far more often than
     the wild population does.
@@ -64,10 +65,21 @@
 <table class="facts">
 <thead><tr><th>Wild pair</th><th>Shows as</th><th>How often</th></tr></thead>
 <tbody>
-<tr><td><code>Clv/Clv</code></td><td>Cleave</td><td>0.04% &mdash; 1 in 2,500</td></tr>
-<tr><td><code>Clv/Clc</code></td><td>Cleave</td><td>0.008% &mdash; 1 in 12,500</td></tr>
-<tr><td><code>Clc/Clc</code></td><td>Coloured Cleave</td><td>0.008% &mdash; 1 in 12,500</td></tr>
-<tr><td><code>n/n</code></td><td>Wild type</td><td>99.944%</td></tr>
+<tr><td><code>Clv/Clv</code></td><td>Cleave</td><td>0.004% &mdash; 1 in 25,000</td></tr>
+<tr><td><code>Clv/Clc</code></td><td>Cleave</td><td>0.004% &mdash; 1 in 25,000</td></tr>
+<tr><td><code>Clv/Wav</code></td><td>Cleave</td><td>0.004% &mdash; 1 in 25,000</td></tr>
+<tr><td><code>Clv/Wac</code></td><td>Cleave</td><td>0.004% &mdash; 1 in 25,000</td></tr>
+<tr><td><code>Clv/n</code></td><td>Cleave</td><td>0.038% &mdash; 1 in 2,632</td></tr>
+<tr><td><code>Clc/Clc</code></td><td>Coloured Cleave</td><td>0.004% &mdash; 1 in 25,000</td></tr>
+<tr><td><code>Clc/Wav</code></td><td>Coloured Cleave</td><td>0.004% &mdash; 1 in 25,000</td></tr>
+<tr><td><code>Clc/Wac</code></td><td>Coloured Cleave</td><td>0.004% &mdash; 1 in 25,000</td></tr>
+<tr><td><code>Clc/n</code></td><td>Coloured Cleave</td><td>0.019% &mdash; 1 in 5,263</td></tr>
+<tr><td><code>Wav/Wav</code></td><td>Waves</td><td>0.004% &mdash; 1 in 25,000</td></tr>
+<tr><td><code>Wav/Wac</code></td><td>Waves</td><td>0.004% &mdash; 1 in 25,000</td></tr>
+<tr><td><code>Wav/n</code></td><td>Waves</td><td>0.038% &mdash; 1 in 2,632</td></tr>
+<tr><td><code>Wac/Wac</code></td><td>Coloured Waves</td><td>0.004% &mdash; 1 in 25,000</td></tr>
+<tr><td><code>Wac/n</code></td><td>Coloured Waves</td><td>0.019% &mdash; 1 in 5,263</td></tr>
+<tr><td><code>n/n</code></td><td>Wild type</td><td>99.846%</td></tr>
 </tbody>
 </table>
 </div>
@@ -99,8 +111,8 @@
 <tr><th>Key</th><td><code>horsegenetics.cleave</code></td></tr>
 <tr><th>Phase</th><td>magical &mdash; it adds signed colour in phase 3, after the pigment has resolved</td></tr>
 <tr><th>Priority</th><td>202 &mdash; where it sits in the one <code>(priority, key)</code> paint order</td></tr>
-<tr><th>Alleles</th><td><code>Clv</code> &middot; <code>Clc</code> &middot; <code>n</code></td></tr>
-<tr><th>Varies per horse</th><td>4 values drawn once off the expressing allele copy, so a foal that inherits the copy inherits the look</td></tr>
+<tr><th>Alleles</th><td><code>Clv</code> &middot; <code>Clc</code> &middot; <code>Wav</code> &middot; <code>Wac</code> &middot; <code>n</code></td></tr>
+<tr><th>Varies per horse</th><td>5 values drawn once off the expressing allele copy, so a foal that inherits the copy inherits the look</td></tr>
 <tr><th>Built from</th><td>AXIS, SPOTS, TOWARD, WAVES</td></tr>
 </tbody>
 </table>
@@ -117,31 +129,47 @@
 
 <h3>Cleave</h3>
 
-<p>White and coat take about half the horse each - between 45 and 55 per cent, never outside 35 to 65. White has the head, the front and underside of the neck, the chest, the forelegs and the front of the shoulder; the coat keeps the withers, back, croup, hindquarters and hind legs. What makes it Cleave is the boundary: each field drives long narrow triangles into the other, straight along the sides and never convex, with smaller teeth splitting off the flanks of the big ones and the pattern of them different on the two sides. Detached spears of the same shape float within a hand's span of the line. Every edge is hard - no gradient, no roaning, no feathering anywhere on the horse. It takes two copies.</p>
+<p>White and coat take about half the horse each - between 45 and 55 per cent, never outside 35 to 65. White has the front: the head, the front and underside of the neck, the chest, the forelegs and the front of the shoulder; the coat keeps the withers, back, croup, hindquarters and hind legs. What makes it Cleave is the boundary: each field drives long narrow triangles into the other, straight along the sides and never convex, with smaller teeth splitting off the flanks of the big ones and the pattern of them different on the two sides. Detached spears of the same shape float within a hand's span of the line. Where the two meet, a half-opaque outline in the same colour runs along the whole edge - the one soft thing on the horse. Everything else is hard: no gradient, no roaning, no feathering anywhere.</p>
 
 <ol>
-<li>the white half, and the straight-sided teeth it drives into the other &mdash; <code>WAVES</code> &times; <code>WAVES</code> &times; <code>WAVES</code>, painted with <code>TOWARD</code></li>
-<li>detached spears floating in front of the line &mdash; <code>SPOTS</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code></li>
+<li>the front half, and the straight-sided teeth it drives into the other &mdash; <code>WAVES</code> &times; <code>WAVES</code> &times; <code>WAVES</code>, painted with <code>TOWARD</code></li>
+<li>a half-opaque outline where the front half meets the coat &mdash; <code>WAVES</code> &times; <code>WAVES</code> &times; <code>WAVES</code> &times; <code>WAVES</code> &times; <code>WAVES</code> &times; <code>WAVES</code>, painted with <code>TOWARD</code></li>
+<li>detached spears floating clear of the line &mdash; <code>SPOTS</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code></li>
 </ol>
 
 <h3>Coloured Cleave</h3>
 
-<p>The same interlock, with the near half in a colour the line carries rather than in white. Fully recessive: it takes two copies, and a single copy beside the white allele shows white. It never gives blue eyes, whatever the white form does.</p>
+<p>The same front-half interlock, with the near half in a colour the line carries rather than in white. Recessive to the white form but dominant over both Waves alleles: two copies, or one beside a Waves copy, and it is the Cleave side that shows. It never gives blue eyes.</p>
 
 <ol>
-<li>the white half, and the straight-sided teeth it drives into the other, in colour &mdash; <code>WAVES</code> &times; <code>WAVES</code> &times; <code>WAVES</code>, painted with <code>TOWARD</code></li>
-<li>detached spears floating in front of the line, in colour &mdash; <code>SPOTS</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code></li>
+<li>the front half, and the straight-sided teeth it drives into the other, in colour &mdash; <code>WAVES</code> &times; <code>WAVES</code> &times; <code>WAVES</code>, painted with <code>TOWARD</code></li>
+<li>a half-opaque outline where the front half meets the coat, in colour &mdash; <code>WAVES</code> &times; <code>WAVES</code> &times; <code>WAVES</code> &times; <code>WAVES</code> &times; <code>WAVES</code> &times; <code>WAVES</code>, painted with <code>TOWARD</code></li>
+<li>detached spears floating clear of the line, in colour &mdash; <code>SPOTS</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code></li>
 </ol>
 
-<h3>Cleave carrier</h3>
+<h3>Waves</h3>
 
-<p>One copy shows nothing at all.</p>
+<p>The identical split, reversed end for end - which is the whole of what used to be a second gene. White has the back: the croup, the hindquarters, the hind legs and the tail; the coat keeps the shoulder, the neck, the head and the forelegs. What makes it Cleave is the boundary: each field drives long narrow triangles into the other, straight along the sides and never convex, with smaller teeth splitting off the flanks of the big ones and the pattern of them different on the two sides. Detached spears of the same shape float within a hand's span of the line. Where the two meet, a half-opaque outline in the same colour runs along the whole edge - the one soft thing on the horse. Everything else is hard: no gradient, no roaning, no feathering anywhere.</p>
 
-<p class="muted">Paints nothing.</p>
+<ol>
+<li>the back half, and the straight-sided teeth it drives into the other &mdash; <code>WAVES</code> &times; <code>WAVES</code> &times; <code>WAVES</code>, painted with <code>TOWARD</code></li>
+<li>a half-opaque outline where the back half meets the coat &mdash; <code>WAVES</code> &times; <code>WAVES</code> &times; <code>WAVES</code> &times; <code>WAVES</code> &times; <code>WAVES</code> &times; <code>WAVES</code>, painted with <code>TOWARD</code></li>
+<li>detached spears floating clear of the line &mdash; <code>SPOTS</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code></li>
+</ol>
+
+<h3>Coloured Waves</h3>
+
+<p>The reversed split with the caudal half in a colour the line carries rather than in white. The most recessive of the four: it takes two copies. It never gives blue eyes.</p>
+
+<ol>
+<li>the back half, and the straight-sided teeth it drives into the other, in colour &mdash; <code>WAVES</code> &times; <code>WAVES</code> &times; <code>WAVES</code>, painted with <code>TOWARD</code></li>
+<li>a half-opaque outline where the back half meets the coat, in colour &mdash; <code>WAVES</code> &times; <code>WAVES</code> &times; <code>WAVES</code> &times; <code>WAVES</code> &times; <code>WAVES</code> &times; <code>WAVES</code>, painted with <code>TOWARD</code></li>
+<li>detached spears floating clear of the line, in colour &mdash; <code>SPOTS</code> &times; <code>AXIS</code>, painted with <code>TOWARD</code></li>
+</ol>
 
 <h3>Wild type</h3>
 
-<p>No cleave.</p>
+<p>No split.</p>
 
 <p class="muted">Paints nothing.</p>
 

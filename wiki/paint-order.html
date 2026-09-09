@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The paint order &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow">Reference <span class="sep">/</span> what covers what</p>
+<h1>The paint order</h1>
+<p class="lede">
+    Every gene that paints a coat, stacked in the order the composer applies it &mdash;
+    <strong>the last thing painted at the top</strong>. Scroll down and you are working
+    back through the horse: the modifiers that read what is already there, then the
+    markings, then the white, then the pigment underneath all of it, ending at Agouti.
+    A gene higher up this page covers a gene lower down.
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<h2 id="stack">The stack</h2>
+
+<p>
+    Each entry is the gene as the <a href="#icons">icon baker</a> photographs it, its
+    <a href="genetics-model.html">priority</a> number, and which phase it paints in.
+    Click one for its page.
+</p>
+
+<!-- The list. One div and one script: the whole of it - which genes paint, what
+     they are called, what number they sit at - is asked of the mod at run time.
+     A priority typed into a wiki page is stale the next time the code moves.
+     See wiki/paint-order/paint-order.js. -->
+<div class="paint-order"></div>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<h2 id="one-order">There is one order, and it is derived</h2>
+
+<p>
+    <code>Genes</code> sorts <strong>every</strong> registered gene &mdash; built-in and
+    data-driven alike &mdash; on <code>(priority, key)</code>, once. The three views
+    anything else uses are all a <em>result</em> of that sort rather than a source:
+    <code>codeOrder()</code> is the whole list and decides where a gene's segment sits in
+    a genotype code; <code>naturalOrder()</code> is it filtered to the phase-1 genes;
+    <code>magicalOrder()</code> is it filtered to the phase-3 ones. Registration order is
+    never respected, so two people who drop the same gene files in a different order get
+    the same horses.
+</p>
+
+<p>
+    The <strong>phase</strong>, not the number, is what splits the two painting passes.
+    The <code>0</code>&ndash;<code>99</code> / <code>100+</code> bands are a convention
+    that keeps the two readable side by side, and <code>Genes.register</code> logs a
+    warning when a gene sits outside its own band rather than moving it.
+</p>
+
+<h2 id="why-it-matters">What the number decides</h2>
+
+<ul>
+    <li><strong>What covers what.</strong> Phase 3 folds each gene's signed RGB into one
+        accumulator in this order, and a gene that paints <em>absolutely</em> - flat
+        paint rather than a tint - replaces whatever is underneath it outright. That is
+        why a gene that covers the whole horse is deliberately kept low: Dhampir paints
+        every texel white, and at the top of the order it would have been the last word
+        on every horse that carried it.</li>
+    <li><strong>What a modifier has to read.</strong> A gene with no shape of its own -
+        Voided, Opalized, Fielded, Yalia - only means anything once the markings it
+        modifies exist, so all of them sit at the very end. Anything that reacts to
+        another marking has to be painted after it, and the priority is the only place
+        that is said.</li>
+    <li><strong>Where its segment sits in a genotype code.</strong> Same sort, so a code
+        reads in paint order too.</li>
+    <li><strong>Which family it lands in</strong> on the sidebar, the landing page and
+        both gene editors. <code>GeneFamily</code> bands on priority, because the bands
+        were laid out as families in the first place.</li>
+</ul>
+
+<h2 id="exception">The one gene the order does not describe</h2>
+
+<p>
+    <a href="gene-extreme-white-dominant.html">Extreme white dominant</a> paints nothing
+    and has no slot in this stack that means anything. What it does is change the rule
+    the stack is folded with: while it is present, a white texel is final, and every gene
+    above it in the order is discarded wherever the coat is already white. It appears on
+    this page nowhere, because it does not paint - which is the honest answer and also
+    the point of it.
+</p>
+
+<h2 id="icons">Where the pictures come from</h2>
+
+<p>
+    <code>:common:bakeGeneIcons</code>, which bakes each gene on a standard horse and
+    projects it to a three-quarter view. The backdrop is <strong>measured, not
+    declared</strong>: a plain bay unless the gene has too little to do on one, in which
+    case it falls through to a tobiano, a chestnut or a leopard - whichever gives it
+    enough to show. A gene with no icon here is one the baker could not photograph, and
+    for a gene that claims to paint that is a finding rather than a formatting problem.
+</p>
+
+</section>
+
+</article>
+</main>
+<script defer src="paint-order/paint-order.js"></script>
+</body>
+</html>

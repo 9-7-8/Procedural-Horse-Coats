@@ -5,6 +5,7 @@ import com.example.horsegenetics.common.genetics.Allele;
 import com.example.horsegenetics.common.genetics.AllelePair;
 import com.example.horsegenetics.common.genetics.Diet;
 import com.example.horsegenetics.common.genetics.EyeColor;
+import com.example.horsegenetics.common.genetics.Gene;
 import com.example.horsegenetics.common.genetics.Genes;
 import com.example.horsegenetics.common.genetics.Genotype;
 import com.example.horsegenetics.common.genetics.HorseDiet;
@@ -12,6 +13,8 @@ import com.example.horsegenetics.common.trait.HorseTraits;
 import com.example.horsegenetics.common.trait.Traits;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -56,12 +59,32 @@ class DhampirGeneTest {
         assertEquals(Diet.NORMAL, HorseDiet.resolve(gt, null).diet());
     }
 
+    /**
+     * It paints the whole horse white, and it does so <b>early</b> - which is
+     * the difference between a backdrop and a dead end. At its old priority of
+     * 135 it sat above every data-driven gene in the mod, so a dhampir was a
+     * plain white horse whatever else it carried; the owner asked for the
+     * opposite, and the only thing enforcing it is where the number sits.
+     */
     @Test
-    void theHomozygoteIsWhiteAndMasksEverything() {
-        assertTrue(dhampir().expressionOf(DHAMPIR).masks(),
-                "a dhampir hides every other coat gene, like dominant white");
+    void theHomozygoteIsWhiteAndIsPaintedUnderEverything() {
+        assertFalse(dhampir().expressionOf(DHAMPIR).masks(),
+                "a dhampir is a backdrop - every marking above it still paints on top");
         assertTrue(DHAMPIR.affectsCoat());
         assertFalse(DHAMPIR.isNatural(), "it paints in phase 3, over the melanin genes");
+
+        // The claim is the invariant, not a count: nothing that paints may sort
+        // BELOW the dhampir white except the two loci deliberately put lower
+        // still (suit and hood, both "very very low" by the same owner's call).
+        // A count would go stale every time a gene was added.
+        List<String> below = new ArrayList<>();
+        for (Gene g : Genes.magicalOrder()) {
+            if (g != DHAMPIR && g.affectsCoat() && g.priority() < DHAMPIR.priority()) {
+                below.add(g.key());
+            }
+        }
+        assertEquals(List.of("horsegenetics.suit", "horsegenetics.hood"), below,
+                "only suit and hood may be painted under a dhampir");
     }
 
     @Test

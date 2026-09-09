@@ -140,11 +140,13 @@ public final class GeneDescriptions {
                             + "take the gaps to white. Vertical bands off the spine, arcs round the "
                             + "hip, rings down the legs, a dark dorsal stripe and muzzle, and a "
                             + "pale belly."),
-            Map.entry("horsegenetics.pink_hair",
-                    "A magical gene, and the clearest carrier locus in the mod: only two copies do "
-                            + "anything, turning the mane and tail hot pink. The pink is blended "
-                            + "onto the existing strand shading rather than painted flat. One copy "
-                            + "is invisible and worth breeding toward."),
+            Map.entry("horsegenetics.extreme_white_dominant",
+                    "A magical gene that paints nothing at all and changes a rule instead: while "
+                            + "it is present, a white texel is final. Every marking still runs in "
+                            + "the ordinary order and every one of them is discarded wherever the "
+                            + "coat is already white, so the horse's natural white markings come "
+                            + "out on top of the magic instead of under it. Silent on a horse with "
+                            + "no white. One copy is the whole of it."),
             Map.entry("horsegenetics.dun",
                     "Real-horse TBX3, three alleles with two dominance orders. D lightens the body "
                             + "coat while leaving the points dark - tan on a bay, blue-grey grullo "

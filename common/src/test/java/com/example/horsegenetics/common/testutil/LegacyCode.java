@@ -20,7 +20,7 @@ public final class LegacyCode {
 
     private static final String[] ORDER = {
             "extension", "agouti", "kit", "retired_slot3", "champagne", "mitf", "grey", "matp",
-            "magic_zebra", "pink_hair", "dun", "silver", "mushroom", "roan", "tobiano", "ednrb", "pax3"};
+            "magic_zebra", "retired_slot9", "dun", "silver", "mushroom", "roan", "tobiano", "ednrb", "pax3"};
 
     private LegacyCode() {}
 

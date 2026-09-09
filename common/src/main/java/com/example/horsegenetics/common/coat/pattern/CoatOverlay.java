@@ -51,6 +51,13 @@ public final class CoatOverlay {
     private final boolean[] emissive = new boolean[N * N];
     private boolean painted;
     private boolean glowing;
+    /**
+     * The white lock, or {@code null} - see
+     * {@link com.example.horsegenetics.common.genetics.WhiteLockContribution}.
+     * A locked texel refuses every write, so the check sits in {@link #paint}
+     * and every other painter here reaches it for free.
+     */
+    private boolean[] locked;
 
     CoatOverlay(Skin skin, int[] base) {
         this.skin = skin;
@@ -78,9 +85,20 @@ public final class CoatOverlay {
     // Painting
     // ------------------------------------------------------------------
 
+    /**
+     * The texels this overlay may not write - the white lock, held by the
+     * composer. Set once, before any gene paints.
+     */
+    void lock(boolean[] mask) {
+        this.locked = mask;
+    }
+
     /** Replace this texel outright. An {@code argb} with zero alpha is ignored. */
     public void paint(int px, int py, int argb) {
         if ((argb >>> 24) == 0 || px < 0 || py < 0 || px >= N || py >= N) {
+            return;
+        }
+        if (locked != null && locked[py * N + px]) {
             return;
         }
         paint[py * N + px] = argb;

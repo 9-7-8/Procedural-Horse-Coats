@@ -1926,7 +1926,7 @@
   "phase": "magical",
   "priority": 202,
   "rarity": "RARE",
-  "blurb": "The horse split about half and half, along a boundary made of interlocking spears - long narrow triangles driven into each field from the other, and never a curve anywhere.",
+  "blurb": "The horse split about half and half along a boundary made of interlocking spears - long narrow triangles driven into each field from the other, never a curve anywhere - edged in a half-opaque outline where the two meet. Which half the split claims is the allele: Cleave takes the front of the horse, Waves the back.",
   "alleles": [
     {
       "token": "Clv",
@@ -1935,6 +1935,14 @@
     {
       "token": "Clc",
       "label": "Cleave, coloured (Clc)"
+    },
+    {
+      "token": "Wav",
+      "label": "Waves - the same split, reversed, white (Wav)"
+    },
+    {
+      "token": "Wac",
+      "label": "Waves - the same split, reversed, coloured (Wac)"
     },
     {
       "token": "n",
@@ -1960,20 +1968,28 @@
       "name": "reach",
       "min": 0.18,
       "max": 0.38
+    },
+    {
+      "name": "far",
+      "min": 0.62,
+      "max": 0.82
     }
   ],
   "expressions": [
     {
-      "id": "white",
+      "id": "cleave",
       "name": "Cleave",
-      "description": "White and coat take about half the horse each - between 45 and 55 per cent, never outside 35 to 65. White has the head, the front and underside of the neck, the chest, the forelegs and the front of the shoulder; the coat keeps the withers, back, croup, hindquarters and hind legs. What makes it Cleave is the boundary: each field drives long narrow triangles into the other, straight along the sides and never convex, with smaller teeth splitting off the flanks of the big ones and the pattern of them different on the two sides. Detached spears of the same shape float within a hand's span of the line. Every edge is hard - no gradient, no roaning, no feathering anywhere on the horse. It takes two copies.",
+      "description": "White and coat take about half the horse each - between 45 and 55 per cent, never outside 35 to 65. White has the front: the head, the front and underside of the neck, the chest, the forelegs and the front of the shoulder; the coat keeps the withers, back, croup, hindquarters and hind legs. What makes it Cleave is the boundary: each field drives long narrow triangles into the other, straight along the sides and never convex, with smaller teeth splitting off the flanks of the big ones and the pattern of them different on the two sides. Detached spears of the same shape float within a hand's span of the line. Where the two meet, a half-opaque outline in the same colour runs along the whole edge - the one soft thing on the horse. Everything else is hard: no gradient, no roaning, no feathering anywhere.",
       "when": [
         "Clv/Clv",
-        "Clv/Clc"
+        "Clv/Clc",
+        "Clv/Wav",
+        "Clv/Wac",
+        "Clv/n"
       ],
       "layers": [
         {
-          "name": "the white half, and the straight-sided teeth it drives into the other",
+          "name": "the front half, and the straight-sided teeth it drives into the other",
           "masks": [
             {
               "type": "WAVES",
@@ -2043,12 +2059,153 @@
           ],
           "op": {
             "type": "TOWARD",
-            "color": "#ffffff",
-            "strength": 100
+            "strength": 100,
+            "color": "#ffffff"
           }
         },
         {
-          "name": "detached spears floating in front of the line",
+          "name": "a half-opaque outline where the front half meets the coat",
+          "masks": [
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "EARS",
+                "MUZZLE",
+                "FRONT_LEGS"
+              ],
+              "seed": "$toothSeed",
+              "axis": "Y",
+              "across": "X",
+              "shape": "triangle",
+              "space": "body",
+              "from": "$split",
+              "to": 1.6,
+              "wavelength": 4.2,
+              "amplitude": 0.075,
+              "softness": 0.085
+            },
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "EARS",
+                "MUZZLE",
+                "FRONT_LEGS"
+              ],
+              "seed": "$toothSeed",
+              "axis": "Z",
+              "across": "X",
+              "shape": "triangle",
+              "space": "body",
+              "from": "$split",
+              "to": 1.6,
+              "wavelength": 3.1,
+              "amplitude": 0.06,
+              "softness": 0.085,
+              "combine": "MAX"
+            },
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "EARS",
+                "MUZZLE",
+                "FRONT_LEGS"
+              ],
+              "seed": "$toothSeed",
+              "axis": "Y",
+              "across": "X",
+              "shape": "saw",
+              "space": "body",
+              "from": "$split",
+              "to": 1.6,
+              "wavelength": 1.6,
+              "amplitude": 0.035,
+              "softness": 0.085,
+              "combine": "MAX"
+            },
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "EARS",
+                "MUZZLE",
+                "FRONT_LEGS"
+              ],
+              "seed": "$toothSeed",
+              "axis": "Y",
+              "across": "X",
+              "shape": "triangle",
+              "space": "body",
+              "from": "$split",
+              "to": 1.6,
+              "wavelength": 4.2,
+              "amplitude": 0.075,
+              "softness": 0.004,
+              "combine": "SUBTRACT"
+            },
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "EARS",
+                "MUZZLE",
+                "FRONT_LEGS"
+              ],
+              "seed": "$toothSeed",
+              "axis": "Z",
+              "across": "X",
+              "shape": "triangle",
+              "space": "body",
+              "from": "$split",
+              "to": 1.6,
+              "wavelength": 3.1,
+              "amplitude": 0.06,
+              "softness": 0.004,
+              "combine": "SUBTRACT"
+            },
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "EARS",
+                "MUZZLE",
+                "FRONT_LEGS"
+              ],
+              "seed": "$toothSeed",
+              "axis": "Y",
+              "across": "X",
+              "shape": "saw",
+              "space": "body",
+              "from": "$split",
+              "to": 1.6,
+              "wavelength": 1.6,
+              "amplitude": 0.035,
+              "softness": 0.004,
+              "combine": "SUBTRACT"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 50,
+            "color": "#ffffff"
+          }
+        },
+        {
+          "name": "detached spears floating clear of the line",
           "masks": [
             {
               "type": "SPOTS",
@@ -2091,22 +2248,25 @@
           ],
           "op": {
             "type": "TOWARD",
-            "color": "#ffffff",
-            "strength": 100
+            "strength": 100,
+            "color": "#ffffff"
           }
         }
       ]
     },
     {
-      "id": "coloured",
+      "id": "cleave-coloured",
       "name": "Coloured Cleave",
-      "description": "The same interlock, with the near half in a colour the line carries rather than in white. Fully recessive: it takes two copies, and a single copy beside the white allele shows white. It never gives blue eyes, whatever the white form does.",
-      "when": {
-        "Clc": 2
-      },
+      "description": "The same front-half interlock, with the near half in a colour the line carries rather than in white. Recessive to the white form but dominant over both Waves alleles: two copies, or one beside a Waves copy, and it is the Cleave side that shows. It never gives blue eyes.",
+      "when": [
+        "Clc/Clc",
+        "Clc/Wav",
+        "Clc/Wac",
+        "Clc/n"
+      ],
       "layers": [
         {
-          "name": "the white half, and the straight-sided teeth it drives into the other, in colour",
+          "name": "the front half, and the straight-sided teeth it drives into the other, in colour",
           "masks": [
             {
               "type": "WAVES",
@@ -2183,7 +2343,150 @@
           }
         },
         {
-          "name": "detached spears floating in front of the line, in colour",
+          "name": "a half-opaque outline where the front half meets the coat, in colour",
+          "masks": [
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "EARS",
+                "MUZZLE",
+                "FRONT_LEGS"
+              ],
+              "seed": "$toothSeed",
+              "axis": "Y",
+              "across": "X",
+              "shape": "triangle",
+              "space": "body",
+              "from": "$split",
+              "to": 1.6,
+              "wavelength": 4.2,
+              "amplitude": 0.075,
+              "softness": 0.085
+            },
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "EARS",
+                "MUZZLE",
+                "FRONT_LEGS"
+              ],
+              "seed": "$toothSeed",
+              "axis": "Z",
+              "across": "X",
+              "shape": "triangle",
+              "space": "body",
+              "from": "$split",
+              "to": 1.6,
+              "wavelength": 3.1,
+              "amplitude": 0.06,
+              "softness": 0.085,
+              "combine": "MAX"
+            },
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "EARS",
+                "MUZZLE",
+                "FRONT_LEGS"
+              ],
+              "seed": "$toothSeed",
+              "axis": "Y",
+              "across": "X",
+              "shape": "saw",
+              "space": "body",
+              "from": "$split",
+              "to": 1.6,
+              "wavelength": 1.6,
+              "amplitude": 0.035,
+              "softness": 0.085,
+              "combine": "MAX"
+            },
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "EARS",
+                "MUZZLE",
+                "FRONT_LEGS"
+              ],
+              "seed": "$toothSeed",
+              "axis": "Y",
+              "across": "X",
+              "shape": "triangle",
+              "space": "body",
+              "from": "$split",
+              "to": 1.6,
+              "wavelength": 4.2,
+              "amplitude": 0.075,
+              "softness": 0.004,
+              "combine": "SUBTRACT"
+            },
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "EARS",
+                "MUZZLE",
+                "FRONT_LEGS"
+              ],
+              "seed": "$toothSeed",
+              "axis": "Z",
+              "across": "X",
+              "shape": "triangle",
+              "space": "body",
+              "from": "$split",
+              "to": 1.6,
+              "wavelength": 3.1,
+              "amplitude": 0.06,
+              "softness": 0.004,
+              "combine": "SUBTRACT"
+            },
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "EARS",
+                "MUZZLE",
+                "FRONT_LEGS"
+              ],
+              "seed": "$toothSeed",
+              "axis": "Y",
+              "across": "X",
+              "shape": "saw",
+              "space": "body",
+              "from": "$split",
+              "to": 1.6,
+              "wavelength": 1.6,
+              "amplitude": 0.035,
+              "softness": 0.004,
+              "combine": "SUBTRACT"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 50,
+            "hue": "$hue",
+            "saturation": 0.8,
+            "lightness": 0.55
+          }
+        },
+        {
+          "name": "detached spears floating clear of the line, in colour",
           "masks": [
             {
               "type": "SPOTS",
@@ -2235,15 +2538,512 @@
       ]
     },
     {
-      "id": "carrier",
-      "name": "Cleave carrier",
-      "description": "One copy shows nothing at all.",
-      "wildType": true
+      "id": "waves",
+      "name": "Waves",
+      "description": "The identical split, reversed end for end - which is the whole of what used to be a second gene. White has the back: the croup, the hindquarters, the hind legs and the tail; the coat keeps the shoulder, the neck, the head and the forelegs. What makes it Cleave is the boundary: each field drives long narrow triangles into the other, straight along the sides and never convex, with smaller teeth splitting off the flanks of the big ones and the pattern of them different on the two sides. Detached spears of the same shape float within a hand's span of the line. Where the two meet, a half-opaque outline in the same colour runs along the whole edge - the one soft thing on the horse. Everything else is hard: no gradient, no roaning, no feathering anywhere.",
+      "when": [
+        "Wav/Wav",
+        "Wav/Wac",
+        "Wav/n"
+      ],
+      "layers": [
+        {
+          "name": "the back half, and the straight-sided teeth it drives into the other",
+          "masks": [
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY",
+                "HIND_LEGS",
+                "TAIL"
+              ],
+              "seed": "$toothSeed",
+              "axis": "Y",
+              "across": "X",
+              "shape": "triangle",
+              "space": "body",
+              "from": -0.6,
+              "to": "$split",
+              "wavelength": 4.2,
+              "amplitude": 0.075,
+              "softness": 0.004
+            },
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY",
+                "HIND_LEGS",
+                "TAIL"
+              ],
+              "seed": "$toothSeed",
+              "axis": "Z",
+              "across": "X",
+              "shape": "triangle",
+              "space": "body",
+              "from": -0.6,
+              "to": "$split",
+              "wavelength": 3.1,
+              "amplitude": 0.06,
+              "softness": 0.004,
+              "combine": "MAX"
+            },
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY",
+                "HIND_LEGS",
+                "TAIL"
+              ],
+              "seed": "$toothSeed",
+              "axis": "Y",
+              "across": "X",
+              "shape": "saw",
+              "space": "body",
+              "from": -0.6,
+              "to": "$split",
+              "wavelength": 1.6,
+              "amplitude": 0.035,
+              "softness": 0.004,
+              "combine": "MAX"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "color": "#ffffff"
+          }
+        },
+        {
+          "name": "a half-opaque outline where the back half meets the coat",
+          "masks": [
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY",
+                "HIND_LEGS",
+                "TAIL"
+              ],
+              "seed": "$toothSeed",
+              "axis": "Y",
+              "across": "X",
+              "shape": "triangle",
+              "space": "body",
+              "from": -0.6,
+              "to": "$split",
+              "wavelength": 4.2,
+              "amplitude": 0.075,
+              "softness": 0.085
+            },
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY",
+                "HIND_LEGS",
+                "TAIL"
+              ],
+              "seed": "$toothSeed",
+              "axis": "Z",
+              "across": "X",
+              "shape": "triangle",
+              "space": "body",
+              "from": -0.6,
+              "to": "$split",
+              "wavelength": 3.1,
+              "amplitude": 0.06,
+              "softness": 0.085,
+              "combine": "MAX"
+            },
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY",
+                "HIND_LEGS",
+                "TAIL"
+              ],
+              "seed": "$toothSeed",
+              "axis": "Y",
+              "across": "X",
+              "shape": "saw",
+              "space": "body",
+              "from": -0.6,
+              "to": "$split",
+              "wavelength": 1.6,
+              "amplitude": 0.035,
+              "softness": 0.085,
+              "combine": "MAX"
+            },
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY",
+                "HIND_LEGS",
+                "TAIL"
+              ],
+              "seed": "$toothSeed",
+              "axis": "Y",
+              "across": "X",
+              "shape": "triangle",
+              "space": "body",
+              "from": -0.6,
+              "to": "$split",
+              "wavelength": 4.2,
+              "amplitude": 0.075,
+              "softness": 0.004,
+              "combine": "SUBTRACT"
+            },
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY",
+                "HIND_LEGS",
+                "TAIL"
+              ],
+              "seed": "$toothSeed",
+              "axis": "Z",
+              "across": "X",
+              "shape": "triangle",
+              "space": "body",
+              "from": -0.6,
+              "to": "$split",
+              "wavelength": 3.1,
+              "amplitude": 0.06,
+              "softness": 0.004,
+              "combine": "SUBTRACT"
+            },
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY",
+                "HIND_LEGS",
+                "TAIL"
+              ],
+              "seed": "$toothSeed",
+              "axis": "Y",
+              "across": "X",
+              "shape": "saw",
+              "space": "body",
+              "from": -0.6,
+              "to": "$split",
+              "wavelength": 1.6,
+              "amplitude": 0.035,
+              "softness": 0.004,
+              "combine": "SUBTRACT"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 50,
+            "color": "#ffffff"
+          }
+        },
+        {
+          "name": "detached spears floating clear of the line",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "EARS",
+                "MUZZLE",
+                "FRONT_LEGS",
+                "HIND_LEGS"
+              ],
+              "seed": "$toothSeed",
+              "spacing": 3.6,
+              "radius": 1.3,
+              "vary": 0.6,
+              "chance": 0.35,
+              "stretch": 2.4,
+              "axis": "X",
+              "softness": 0.02
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "EARS",
+                "MUZZLE",
+                "FRONT_LEGS",
+                "HIND_LEGS"
+              ],
+              "axis": "X",
+              "space": "body",
+              "from": "$split",
+              "to": "$far",
+              "softness": 0.02,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "color": "#ffffff"
+          }
+        }
+      ]
+    },
+    {
+      "id": "waves-coloured",
+      "name": "Coloured Waves",
+      "description": "The reversed split with the caudal half in a colour the line carries rather than in white. The most recessive of the four: it takes two copies. It never gives blue eyes.",
+      "when": [
+        "Wac/Wac",
+        "Wac/n"
+      ],
+      "layers": [
+        {
+          "name": "the back half, and the straight-sided teeth it drives into the other, in colour",
+          "masks": [
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY",
+                "HIND_LEGS",
+                "TAIL"
+              ],
+              "seed": "$toothSeed",
+              "axis": "Y",
+              "across": "X",
+              "shape": "triangle",
+              "space": "body",
+              "from": -0.6,
+              "to": "$split",
+              "wavelength": 4.2,
+              "amplitude": 0.075,
+              "softness": 0.004
+            },
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY",
+                "HIND_LEGS",
+                "TAIL"
+              ],
+              "seed": "$toothSeed",
+              "axis": "Z",
+              "across": "X",
+              "shape": "triangle",
+              "space": "body",
+              "from": -0.6,
+              "to": "$split",
+              "wavelength": 3.1,
+              "amplitude": 0.06,
+              "softness": 0.004,
+              "combine": "MAX"
+            },
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY",
+                "HIND_LEGS",
+                "TAIL"
+              ],
+              "seed": "$toothSeed",
+              "axis": "Y",
+              "across": "X",
+              "shape": "saw",
+              "space": "body",
+              "from": -0.6,
+              "to": "$split",
+              "wavelength": 1.6,
+              "amplitude": 0.035,
+              "softness": 0.004,
+              "combine": "MAX"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "hue": "$hue",
+            "saturation": 0.8,
+            "lightness": 0.55
+          }
+        },
+        {
+          "name": "a half-opaque outline where the back half meets the coat, in colour",
+          "masks": [
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY",
+                "HIND_LEGS",
+                "TAIL"
+              ],
+              "seed": "$toothSeed",
+              "axis": "Y",
+              "across": "X",
+              "shape": "triangle",
+              "space": "body",
+              "from": -0.6,
+              "to": "$split",
+              "wavelength": 4.2,
+              "amplitude": 0.075,
+              "softness": 0.085
+            },
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY",
+                "HIND_LEGS",
+                "TAIL"
+              ],
+              "seed": "$toothSeed",
+              "axis": "Z",
+              "across": "X",
+              "shape": "triangle",
+              "space": "body",
+              "from": -0.6,
+              "to": "$split",
+              "wavelength": 3.1,
+              "amplitude": 0.06,
+              "softness": 0.085,
+              "combine": "MAX"
+            },
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY",
+                "HIND_LEGS",
+                "TAIL"
+              ],
+              "seed": "$toothSeed",
+              "axis": "Y",
+              "across": "X",
+              "shape": "saw",
+              "space": "body",
+              "from": -0.6,
+              "to": "$split",
+              "wavelength": 1.6,
+              "amplitude": 0.035,
+              "softness": 0.085,
+              "combine": "MAX"
+            },
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY",
+                "HIND_LEGS",
+                "TAIL"
+              ],
+              "seed": "$toothSeed",
+              "axis": "Y",
+              "across": "X",
+              "shape": "triangle",
+              "space": "body",
+              "from": -0.6,
+              "to": "$split",
+              "wavelength": 4.2,
+              "amplitude": 0.075,
+              "softness": 0.004,
+              "combine": "SUBTRACT"
+            },
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY",
+                "HIND_LEGS",
+                "TAIL"
+              ],
+              "seed": "$toothSeed",
+              "axis": "Z",
+              "across": "X",
+              "shape": "triangle",
+              "space": "body",
+              "from": -0.6,
+              "to": "$split",
+              "wavelength": 3.1,
+              "amplitude": 0.06,
+              "softness": 0.004,
+              "combine": "SUBTRACT"
+            },
+            {
+              "type": "WAVES",
+              "parts": [
+                "BODY",
+                "HIND_LEGS",
+                "TAIL"
+              ],
+              "seed": "$toothSeed",
+              "axis": "Y",
+              "across": "X",
+              "shape": "saw",
+              "space": "body",
+              "from": -0.6,
+              "to": "$split",
+              "wavelength": 1.6,
+              "amplitude": 0.035,
+              "softness": 0.004,
+              "combine": "SUBTRACT"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 50,
+            "hue": "$hue",
+            "saturation": 0.8,
+            "lightness": 0.55
+          }
+        },
+        {
+          "name": "detached spears floating clear of the line, in colour",
+          "masks": [
+            {
+              "type": "SPOTS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "EARS",
+                "MUZZLE",
+                "FRONT_LEGS",
+                "HIND_LEGS"
+              ],
+              "seed": "$toothSeed",
+              "spacing": 3.6,
+              "radius": 1.3,
+              "vary": 0.6,
+              "chance": 0.35,
+              "stretch": 2.4,
+              "axis": "X",
+              "softness": 0.02
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "EARS",
+                "MUZZLE",
+                "FRONT_LEGS",
+                "HIND_LEGS"
+              ],
+              "axis": "X",
+              "space": "body",
+              "from": "$split",
+              "to": "$far",
+              "softness": 0.02,
+              "combine": "MULTIPLY"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": 100,
+            "hue": "$hue",
+            "saturation": 0.8,
+            "lightness": 0.55
+          }
+        }
+      ]
     },
     {
       "id": "wild",
       "name": "Wild type",
-      "description": "No cleave.",
+      "description": "No split.",
       "wildType": true,
       "when": [
         "n/n"
@@ -2251,231 +3051,21 @@
     }
   ],
   "founders": {
-    "Clv/Clv": 0.04,
-    "Clv/Clc": 0.008,
-    "Clc/Clc": 0.008,
-    "n/n": 99.944
-  }
-},
-{
-  "format": 3,
-  "key": "horsegenetics.collar",
-  "name": "Collar",
-  "phase": "magical",
-  "priority": 260,
-  "rarity": "RARE",
-  "blurb": "A band right round the base of the neck, well up onto the neck itself, with everything behind it going pale and the head, crest and lower legs keeping the coat.",
-  "alleles": [
-    {
-      "token": "Col",
-      "label": "Collar, white (Col)"
-    },
-    {
-      "token": "Coc",
-      "label": "Collar, coloured (Coc)"
-    },
-    {
-      "token": "n",
-      "label": "Wild-type (n)"
-    }
-  ],
-  "knobs": [
-    {
-      "name": "hue",
-      "min": 0.0,
-      "max": 360.0
-    },
-    {
-      "name": "bandBack",
-      "min": 0.88,
-      "max": 1.0
-    },
-    {
-      "name": "neckReach",
-      "min": 23.4,
-      "max": 26.2
-    }
-  ],
-  "expressions": [
-    {
-      "id": "white",
-      "name": "Collar",
-      "description": "The band wraps the base of the neck, its back edge landing well forward of the scapula and its front edge running up onto the neck itself - but it passes under the crest rather than over it, so the topline of the neck keeps its colour the whole way. Everything behind the band goes pale, roughly half the animal, while the head, the upper neck and the crest keep theirs. The legs come back to the coat from the knee and hock down, over a soft transition rather than a line. The mane keeps its colour; the tail follows the pale field about half the time.",
-      "when": [
-        "Col/Col",
-        "Col/Coc",
-        "Col/n"
-      ],
-      "layers": [
-        {
-          "name": "everything behind the collar",
-          "masks": [
-            {
-              "type": "AXIS",
-              "parts": [
-                "BODY"
-              ],
-              "axis": "X",
-              "space": "part",
-              "from": 0.0,
-              "to": "$bandBack",
-              "softness": 0.1
-            },
-            {
-              "type": "AXIS",
-              "parts": [
-                "NECK"
-              ],
-              "axis": "X",
-              "space": "units",
-              "from": 0.0,
-              "to": "$neckReach",
-              "softness": 1.1,
-              "combine": "MAX"
-            },
-            {
-              "type": "WAVES",
-              "parts": [
-                "NECK"
-              ],
-              "axis": "X",
-              "across": "Y",
-              "space": "units",
-              "shape": "saw",
-              "wavelength": 90.0,
-              "amplitude": 77.94,
-              "from": 50.0,
-              "to": 90.0,
-              "softness": 2.2,
-              "combine": "SUBTRACT"
-            }
-          ],
-          "op": {
-            "type": "TOWARD",
-            "color": "#f2ede1",
-            "strength": 88
-          }
-        },
-        {
-          "name": "the legs coming back to the coat below the knee",
-          "masks": [
-            {
-              "type": "AXIS",
-              "parts": [
-                "LEGS"
-              ],
-              "axis": "Y",
-              "space": "part",
-              "from": 0.42,
-              "to": 1.0,
-              "softness": 0.3
-            }
-          ],
-          "op": {
-            "type": "TOWARD",
-            "color": "#f2ede1",
-            "strength": 84
-          }
-        }
-      ]
-    },
-    {
-      "id": "coloured",
-      "name": "Coloured collar",
-      "description": "The same split, with the caudal field in a colour rather than pale. Fully recessive: two copies, and a single copy beside the white allele shows white. It never gives blue eyes.",
-      "when": {
-        "Coc": 2
-      },
-      "layers": [
-        {
-          "name": "everything behind the collar, coloured",
-          "masks": [
-            {
-              "type": "AXIS",
-              "parts": [
-                "BODY"
-              ],
-              "axis": "X",
-              "space": "part",
-              "from": 0.0,
-              "to": "$bandBack",
-              "softness": 0.1
-            },
-            {
-              "type": "AXIS",
-              "parts": [
-                "NECK"
-              ],
-              "axis": "X",
-              "space": "units",
-              "from": 0.0,
-              "to": "$neckReach",
-              "softness": 1.1,
-              "combine": "MAX"
-            },
-            {
-              "type": "WAVES",
-              "parts": [
-                "NECK"
-              ],
-              "axis": "X",
-              "across": "Y",
-              "space": "units",
-              "shape": "saw",
-              "wavelength": 90.0,
-              "amplitude": 77.94,
-              "from": 50.0,
-              "to": 90.0,
-              "softness": 2.2,
-              "combine": "SUBTRACT"
-            }
-          ],
-          "op": {
-            "type": "TOWARD",
-            "hue": "$hue",
-            "saturation": 0.7,
-            "lightness": 0.55,
-            "strength": 88
-          }
-        },
-        {
-          "name": "the legs, coloured to the knee",
-          "masks": [
-            {
-              "type": "AXIS",
-              "parts": [
-                "LEGS"
-              ],
-              "axis": "Y",
-              "space": "part",
-              "from": 0.42,
-              "to": 1.0,
-              "softness": 0.3
-            }
-          ],
-          "op": {
-            "type": "TOWARD",
-            "hue": "$hue",
-            "saturation": 0.7,
-            "lightness": 0.55,
-            "strength": 84
-          }
-        }
-      ]
-    },
-    {
-      "id": "wild",
-      "name": "Wild type",
-      "description": "No collar.",
-      "wildType": true
-    }
-  ],
-  "founders": {
-    "Col/Col": 0.002,
-    "Col/Coc": 0.008,
-    "Col/n": 0.038,
-    "Coc/Coc": 0.008,
-    "n/n": 99.944
+    "Clv/Clv": 0.004,
+    "Clv/Clc": 0.004,
+    "Clv/Wav": 0.004,
+    "Clv/Wac": 0.004,
+    "Clv/n": 0.038,
+    "Clc/Clc": 0.004,
+    "Clc/Wav": 0.004,
+    "Clc/Wac": 0.004,
+    "Clc/n": 0.019,
+    "Wav/Wav": 0.004,
+    "Wav/Wac": 0.004,
+    "Wav/n": 0.038,
+    "Wac/Wac": 0.004,
+    "Wac/n": 0.019,
+    "n/n": 99.846
   }
 },
 {
@@ -4742,7 +5332,7 @@
   "key": "horsegenetics.fielded",
   "name": "Fielded",
   "phase": "magical",
-  "priority": 212,
+  "priority": 600,
   "rarity": "COMMON",
   "blurb": "Grass-like tendrils drawn out of the edges of the horse's white markings - and nothing at all on a horse that has none.",
   "alleles": [
@@ -7206,7 +7796,7 @@
   "key": "horsegenetics.hood",
   "name": "Hood",
   "phase": "magical",
-  "priority": 405,
+  "priority": 103,
   "rarity": "UNCOMMON",
   "blurb": "A colour laid solid over the head that thins out along the neck and is gone by the shoulder - how far it reaches, and what colour it is, both run in the family.",
   "alleles": [
@@ -7995,7 +8585,7 @@
   "key": "horsegenetics.invert",
   "name": "Invert",
   "phase": "magical",
-  "priority": 500,
+  "priority": 700,
   "rarity": "RARE",
   "blurb": "The last thing painted: the whole finished coat comes out as its own negative. White goes black, orange goes blue, and everything the horse was carrying goes with it.",
   "alleles": [
@@ -9858,13 +10448,17 @@
   "key": "horsegenetics.opalized",
   "name": "Opalized",
   "phase": "magical",
-  "priority": 431,
+  "priority": 611,
   "rarity": "RARE",
-  "blurb": "The same substrate as Voided taken the other way - every white region comes out as iridescent cells of three to seven hues, pearlescent at the rim and strongest in the middle.",
+  "blurb": "The same substrate as Voided taken the other way - a marking comes out as iridescent cells of three to seven hues, pearlescent at the rim and strongest in the middle. Which marking depends on the allele: one opalizes every white region, the other every black one.",
   "alleles": [
     {
       "token": "Opl",
-      "label": "Opalized (Opl)"
+      "label": "Opalized, white regions (Opl)"
+    },
+    {
+      "token": "Opb",
+      "label": "Opalized, black regions (Opb)"
     },
     {
       "token": "n",
@@ -9896,9 +10490,10 @@
     {
       "id": "opalized",
       "name": "Opalized",
-      "description": "The outline is the source pattern's, unchanged, but the inside is not uniform. It breaks into irregular lobed cells of differing colour, a hand's breadth or two across, with soft transitions between neighbours - so it reads as iridescence rather than as a gradient. The cells crowd at the core of a marking and thin toward its perimeter, and the outer inch or two trends pale and low-saturation, near pearl. Three to seven hues are present at once on any one horse: pale blues, mints, lilacs and pearl teals at the light end, reds, oranges, ambers and magentas at the dark.",
+      "description": "Every white region on the horse. The outline is the source pattern's, unchanged, but the inside is not uniform. It breaks into irregular lobed cells of differing colour, a hand's breadth or two across, with soft transitions between neighbours - so it reads as iridescence rather than as a gradient. The cells crowd at the core of a marking and thin toward its perimeter, and the outer inch or two trends pale and low-saturation, near pearl. Three to seven hues are present at once on any one horse: pale blues, mints, lilacs and pearl teals at the light end, reds, oranges, ambers and magentas at the dark.",
       "when": [
         "Opl/Opl",
+        "Opl/Opb",
         "Opl/n"
       ],
       "layers": [
@@ -9951,16 +10546,73 @@
       ]
     },
     {
+      "id": "opalized-black",
+      "name": "Black-opalized",
+      "description": "The identical iridescence, taken to the other end of the coat: every region the horse wears at its blackest - a black point, a sooty field, the dark half of a bay, the black of a tobiano rather than its white - breaks into the same lobed cells of three to seven hues, pearlescent at the rim and strongest in the middle. On a horse with nothing black on it, it shows nothing, exactly as the white form shows nothing on a horse with no white. Recessive to the white form: it takes two copies, or one beside a wild type.",
+      "when": [
+        "Opb/Opb",
+        "Opb/n"
+      ],
+      "layers": [
+        {
+          "name": "the black regions, broken into hue cells",
+          "masks": [
+            {
+              "type": "PIGMENT",
+              "channel": "black",
+              "from": 0.7,
+              "to": 0.88
+            }
+          ],
+          "op": {
+            "type": "PALETTE",
+            "hue": "$hue",
+            "hueSpread": "$spread",
+            "saturation": "$chroma",
+            "lightness": 0.42,
+            "scale": 3.2,
+            "strength": 92
+          }
+        },
+        {
+          "name": "the pearlescent rim",
+          "masks": [
+            {
+              "type": "PIGMENT",
+              "channel": "black",
+              "from": 0.7,
+              "to": 0.88
+            },
+            {
+              "type": "PIGMENT",
+              "channel": "black",
+              "from": 0.88,
+              "to": 0.98,
+              "combine": "SUBTRACT"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#cdd6dc",
+            "strength": 55
+          }
+        }
+      ]
+    },
+    {
       "id": "wild",
       "name": "Wild type",
-      "description": "White stays white.",
+      "description": "Neither. White stays white and black stays black.",
       "wildType": true
     }
   ],
   "founders": {
     "Opl/Opl": 0.002,
+    "Opl/Opb": 0.004,
     "Opl/n": 0.038,
-    "n/n": 99.96
+    "Opb/Opb": 0.002,
+    "Opb/n": 0.038,
+    "n/n": 99.916
   }
 },
 {
@@ -10634,7 +11286,7 @@
   "phase": "magical",
   "priority": 203,
   "rarity": "RARE",
-  "blurb": "A strong white that keeps the coat only in a bellyband round the middle of the horse and down all four legs, with the ears, eye patches and muzzle of a giant panda - and a coloured tail behind an entirely white croup.",
+  "blurb": "A strong white band round the belly and barrel, carrying on over the neck, head and tail, with the shoulder, the butt and all four legs keeping the coat - and the ears, eye patches and muzzle of a giant panda.",
   "alleles": [
     {
       "token": "Pan",
@@ -10673,7 +11325,7 @@
     {
       "id": "white",
       "name": "Panda",
-      "description": "The coat survives in one band round the middle of the horse and nowhere else along it: a bellyband over the shoulder and barrel, wrapping the whole circumference, with all four legs carrying on down from it. Everything else goes white - the head except for the ears, the muzzle and the patches round the eyes, the neck, the back, and the croup and rump behind the band. The tail keeps its colour at the far end of that run, so the horse reads band, then nothing, then tail. The eye patches are a little stylised; muzzle and ear markings are optional. Freckles of coat run along the topline - small, or larger and fawn-like. The edges of the coloured regions are smooth: nothing about Panda is jagged or roaned, and no other marking shows on the white.",
+      "description": "White takes a band right round the middle of the horse - the belly and barrel, wrapping the whole circumference - and carries on over the neck, the head and the tail. The coat survives at the two ends of that band and nowhere else along the body: the shoulder in front of it, the butt and croup behind it, and all four legs the whole way down. The head is white apart from the ears, the muzzle and the patches round the eyes, which keep the coat and are what make it a panda; muzzle and ear markings are optional and the eye patches are a little stylised. Freckles of coat run along the top of the white band - small, or larger and fawn-like. The edges of the coloured regions are smooth: nothing about Panda is jagged or roaned, and no other marking shows on the white.",
       "when": [
         "Pan/Pan",
         "Pan/Pnc",
@@ -10681,7 +11333,7 @@
       ],
       "layers": [
         {
-          "name": "white over everything but the kept regions",
+          "name": "white over the whole horse",
           "masks": [
             {
               "type": "PARTS",
@@ -10690,18 +11342,18 @@
                 "NECK",
                 "HEAD",
                 "LEGS",
-                "MANE"
+                "HAIR"
               ]
             }
           ],
           "op": {
             "type": "TOWARD",
-            "color": "#ffffff",
-            "strength": 99
+            "strength": 99,
+            "color": "#ffffff"
           }
         },
         {
-          "name": "the bellyband round the middle of the barrel, and all four legs",
+          "name": "the coat kept on the shoulder, in front of the band",
           "masks": [
             {
               "type": "AXIS",
@@ -10710,22 +11362,52 @@
               ],
               "axis": "X",
               "space": "part",
-              "from": 0.4,
-              "to": 0.88,
-              "softness": 0.13
-            },
-            {
-              "type": "PARTS",
-              "parts": [
-                "LEGS"
-              ],
-              "combine": "MAX"
+              "from": 0.62,
+              "to": 1.2,
+              "softness": 0.1
             }
           ],
           "op": {
             "type": "TOWARD",
-            "color": "#ffffff",
-            "strength": -99
+            "strength": -99,
+            "color": "#ffffff"
+          }
+        },
+        {
+          "name": "the coat kept on the butt and croup, behind the band",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "space": "part",
+              "from": -0.2,
+              "to": 0.3,
+              "softness": 0.1
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": -99,
+            "color": "#ffffff"
+          }
+        },
+        {
+          "name": "the coat kept on all four legs",
+          "masks": [
+            {
+              "type": "PARTS",
+              "parts": [
+                "LEGS"
+              ]
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": -99,
+            "color": "#ffffff"
           }
         },
         {
@@ -10756,18 +11438,17 @@
           ],
           "op": {
             "type": "TOWARD",
-            "color": "#ffffff",
-            "strength": -99
+            "strength": -99,
+            "color": "#ffffff"
           }
         },
         {
-          "name": "freckles of coat scattered along the topline",
+          "name": "freckles of coat along the top of the band",
           "masks": [
             {
               "type": "SPOTS",
               "parts": [
-                "BODY",
-                "NECK"
+                "BODY"
               ],
               "seed": "$freckleSeed",
               "spacing": 1.8,
@@ -10779,20 +11460,32 @@
             {
               "type": "AXIS",
               "parts": [
-                "BODY",
-                "NECK"
+                "BODY"
               ],
               "axis": "Y",
               "space": "part",
               "from": 0.62,
               "to": 1.0,
-              "softness": 0.28
+              "softness": 0.28,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "space": "part",
+              "from": 0.3,
+              "to": 0.62,
+              "softness": 0.1,
+              "combine": "MULTIPLY"
             }
           ],
           "op": {
             "type": "TOWARD",
-            "color": "#ffffff",
-            "strength": -85
+            "strength": -85,
+            "color": "#ffffff"
           }
         }
       ]
@@ -10806,7 +11499,7 @@
       },
       "layers": [
         {
-          "name": "white over everything but the kept regions, in colour",
+          "name": "white over the whole horse, in colour",
           "masks": [
             {
               "type": "PARTS",
@@ -10815,7 +11508,7 @@
                 "NECK",
                 "HEAD",
                 "LEGS",
-                "MANE"
+                "HAIR"
               ]
             }
           ],
@@ -10828,7 +11521,7 @@
           }
         },
         {
-          "name": "the bellyband round the middle of the barrel, and all four legs, in colour",
+          "name": "the coat kept on the shoulder, in front of the band, in colour",
           "masks": [
             {
               "type": "AXIS",
@@ -10837,16 +11530,50 @@
               ],
               "axis": "X",
               "space": "part",
-              "from": 0.4,
-              "to": 0.88,
-              "softness": 0.13
-            },
+              "from": 0.62,
+              "to": 1.2,
+              "softness": 0.1
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": -99,
+            "hue": "$hue",
+            "saturation": 0.8,
+            "lightness": 0.55
+          }
+        },
+        {
+          "name": "the coat kept on the butt and croup, behind the band, in colour",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "space": "part",
+              "from": -0.2,
+              "to": 0.3,
+              "softness": 0.1
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "strength": -99,
+            "hue": "$hue",
+            "saturation": 0.8,
+            "lightness": 0.55
+          }
+        },
+        {
+          "name": "the coat kept on all four legs, in colour",
+          "masks": [
             {
               "type": "PARTS",
               "parts": [
                 "LEGS"
-              ],
-              "combine": "MAX"
+              ]
             }
           ],
           "op": {
@@ -10892,13 +11619,12 @@
           }
         },
         {
-          "name": "freckles of coat scattered along the topline, in colour",
+          "name": "freckles of coat along the top of the band, in colour",
           "masks": [
             {
               "type": "SPOTS",
               "parts": [
-                "BODY",
-                "NECK"
+                "BODY"
               ],
               "seed": "$freckleSeed",
               "spacing": 1.8,
@@ -10910,20 +11636,34 @@
             {
               "type": "AXIS",
               "parts": [
-                "BODY",
-                "NECK"
+                "BODY"
               ],
               "axis": "Y",
               "space": "part",
               "from": 0.62,
               "to": 1.0,
-              "softness": 0.28
+              "softness": 0.28,
+              "combine": "MULTIPLY"
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "space": "part",
+              "from": 0.3,
+              "to": 0.62,
+              "softness": 0.1,
+              "combine": "MULTIPLY"
             }
           ],
           "op": {
             "type": "TOWARD",
-            "color": "#ffffff",
-            "strength": -85
+            "strength": -85,
+            "hue": "$hue",
+            "saturation": 0.8,
+            "lightness": 0.55
           }
         }
       ]
@@ -16740,6 +17480,227 @@
 },
 {
   "format": 3,
+  "key": "horsegenetics.suit",
+  "name": "Suit",
+  "phase": "magical",
+  "priority": 102,
+  "rarity": "RARE",
+  "blurb": "A band right round the base of the neck, well up onto the neck itself, with everything behind it going pale and the head, crest and lower legs keeping the coat.",
+  "alleles": [
+    {
+      "token": "Sut",
+      "label": "Suit, white (Sut)"
+    },
+    {
+      "token": "Suc",
+      "label": "Suit, coloured (Suc)"
+    },
+    {
+      "token": "n",
+      "label": "Wild-type (n)"
+    }
+  ],
+  "knobs": [
+    {
+      "name": "hue",
+      "min": 0.0,
+      "max": 360.0
+    },
+    {
+      "name": "bandBack",
+      "min": 0.88,
+      "max": 1.0
+    },
+    {
+      "name": "neckReach",
+      "min": 23.4,
+      "max": 26.2
+    }
+  ],
+  "expressions": [
+    {
+      "id": "white",
+      "name": "Suit",
+      "description": "The suit line wraps the base of the neck, its back edge landing well forward of the scapula and its front edge running up onto the neck itself - but it passes under the crest rather than over it, so the topline of the neck keeps its colour the whole way. Everything behind the band goes pale, roughly half the animal, while the head, the upper neck and the crest keep theirs. The legs come back to the coat from the knee and hock down, over a soft transition rather than a line. The mane keeps its colour; the tail follows the pale field about half the time.",
+      "when": [
+        "Sut/Sut",
+        "Sut/Suc",
+        "Sut/n"
+      ],
+      "layers": [
+        {
+          "name": "everything behind the suit line",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "space": "part",
+              "from": 0.0,
+              "to": "$bandBack",
+              "softness": 0.1
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "NECK"
+              ],
+              "axis": "X",
+              "space": "units",
+              "from": 0.0,
+              "to": "$neckReach",
+              "softness": 1.1,
+              "combine": "MAX"
+            },
+            {
+              "type": "WAVES",
+              "parts": [
+                "NECK"
+              ],
+              "axis": "X",
+              "across": "Y",
+              "space": "units",
+              "shape": "saw",
+              "wavelength": 90.0,
+              "amplitude": 77.94,
+              "from": 50.0,
+              "to": 90.0,
+              "softness": 2.2,
+              "combine": "SUBTRACT"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#f2ede1",
+            "strength": 88
+          }
+        },
+        {
+          "name": "the legs coming back to the coat below the knee",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "LEGS"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.42,
+              "to": 1.0,
+              "softness": 0.3
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#f2ede1",
+            "strength": 84
+          }
+        }
+      ]
+    },
+    {
+      "id": "coloured",
+      "name": "Coloured suit",
+      "description": "The same split, with the caudal field in a colour rather than pale. Fully recessive: two copies, and a single copy beside the white allele shows white. It never gives blue eyes.",
+      "when": {
+        "Suc": 2
+      },
+      "layers": [
+        {
+          "name": "everything behind the suit line, coloured",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "BODY"
+              ],
+              "axis": "X",
+              "space": "part",
+              "from": 0.0,
+              "to": "$bandBack",
+              "softness": 0.1
+            },
+            {
+              "type": "AXIS",
+              "parts": [
+                "NECK"
+              ],
+              "axis": "X",
+              "space": "units",
+              "from": 0.0,
+              "to": "$neckReach",
+              "softness": 1.1,
+              "combine": "MAX"
+            },
+            {
+              "type": "WAVES",
+              "parts": [
+                "NECK"
+              ],
+              "axis": "X",
+              "across": "Y",
+              "space": "units",
+              "shape": "saw",
+              "wavelength": 90.0,
+              "amplitude": 77.94,
+              "from": 50.0,
+              "to": 90.0,
+              "softness": 2.2,
+              "combine": "SUBTRACT"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.7,
+            "lightness": 0.55,
+            "strength": 88
+          }
+        },
+        {
+          "name": "the legs, coloured to the knee",
+          "masks": [
+            {
+              "type": "AXIS",
+              "parts": [
+                "LEGS"
+              ],
+              "axis": "Y",
+              "space": "part",
+              "from": 0.42,
+              "to": 1.0,
+              "softness": 0.3
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.7,
+            "lightness": 0.55,
+            "strength": 84
+          }
+        }
+      ]
+    },
+    {
+      "id": "wild",
+      "name": "Wild type",
+      "description": "No suit.",
+      "wildType": true
+    }
+  ],
+  "founders": {
+    "Sut/Sut": 0.002,
+    "Sut/Suc": 0.008,
+    "Sut/n": 0.038,
+    "Suc/Suc": 0.008,
+    "n/n": 99.944
+  }
+},
+{
+  "format": 3,
   "key": "horsegenetics.suntouched",
   "name": "Suntouched",
   "phase": "magical",
@@ -17126,7 +18087,7 @@
   "key": "horsegenetics.voided",
   "name": "Voided",
   "phase": "magical",
-  "priority": 430,
+  "priority": 610,
   "rarity": "UNCOMMON",
   "blurb": "Every white the horse would have had comes out black instead - the same markings, the same edges, the opposite pigment, and as black as it will go.",
   "alleles": [
@@ -17621,242 +18582,6 @@
     "Wtb/Wtb": 0.0123457,
     "Wtb/n": 2.1975309,
     "n/n": 97.7901234
-  }
-},
-{
-  "format": 3,
-  "key": "horsegenetics.waves",
-  "name": "Waves",
-  "phase": "magical",
-  "priority": 258,
-  "rarity": "RARE",
-  "blurb": "The back third of the horse taken as one continuous pale field, its front edge running top to bottom in three to six evenly spaced rounded lobes.",
-  "alleles": [
-    {
-      "token": "Wav",
-      "label": "Waves, white (Wav)"
-    },
-    {
-      "token": "Wac",
-      "label": "Waves, coloured (Wac)"
-    },
-    {
-      "token": "n",
-      "label": "Wild-type (n)"
-    }
-  ],
-  "knobs": [
-    {
-      "name": "lobeSeed",
-      "type": "seed"
-    },
-    {
-      "name": "hue",
-      "min": 0.0,
-      "max": 360.0
-    },
-    {
-      "name": "reach",
-      "min": 0.22,
-      "max": 0.46
-    },
-    {
-      "name": "lobe",
-      "min": 2.4,
-      "max": 4.6
-    },
-    {
-      "name": "swell",
-      "min": 0.05,
-      "max": 0.1
-    }
-  ],
-  "expressions": [
-    {
-      "id": "white",
-      "name": "Waves",
-      "description": "One unbroken field over the hip, thigh, back of the flank and gaskin - a fifth to two-fifths of the horse. Its front edge runs dorso-ventrally and is folded into three to six rounded lobes of even size and even spacing, which is what tells it apart from every other soft-edged field on a horse: this one repeats. It reaches the topline or stops just below it, and runs down as far as the gaskin or the hock. A few detached lobes float a hand's breadth in front of the main edge.",
-      "when": [
-        "Wav/Wav",
-        "Wav/Wac",
-        "Wav/n"
-      ],
-      "layers": [
-        {
-          "name": "the caudal field, its front edge folded into lobes",
-          "masks": [
-            {
-              "type": "WAVES",
-              "parts": [
-                "BODY"
-              ],
-              "seed": "$lobeSeed",
-              "axis": "Y",
-              "across": "X",
-              "shape": "sine",
-              "space": "part",
-              "from": -0.3,
-              "to": "$reach",
-              "wavelength": "$lobe",
-              "amplitude": "$swell",
-              "softness": 0.05
-            },
-            {
-              "type": "AXIS",
-              "parts": [
-                "HIND_LEGS"
-              ],
-              "axis": "Y",
-              "space": "part",
-              "from": 0.4,
-              "to": 1.0,
-              "softness": 0.2,
-              "combine": "MAX"
-            }
-          ],
-          "op": {
-            "type": "TOWARD",
-            "color": "#f7f2e6",
-            "strength": 84
-          }
-        },
-        {
-          "name": "a few detached lobes floating in front of the edge",
-          "masks": [
-            {
-              "type": "SPOTS",
-              "parts": [
-                "BODY"
-              ],
-              "seed": "$lobeSeed",
-              "spacing": 4.0,
-              "radius": 1.5,
-              "vary": 0.5,
-              "chance": 0.3,
-              "stretch": 1.6,
-              "axis": "Y",
-              "softness": 0.25
-            },
-            {
-              "type": "AXIS",
-              "parts": [
-                "BODY"
-              ],
-              "axis": "X",
-              "space": "part",
-              "from": "$reach",
-              "to": 0.62,
-              "softness": 0.12
-            }
-          ],
-          "op": {
-            "type": "TOWARD",
-            "color": "#f7f2e6",
-            "strength": 84
-          }
-        }
-      ]
-    },
-    {
-      "id": "coloured",
-      "name": "Coloured waves",
-      "description": "The same field in a colour the line carries. Fully recessive: two copies, and a single copy beside the white allele shows white. It never gives blue eyes.",
-      "when": {
-        "Wac": 2
-      },
-      "layers": [
-        {
-          "name": "the caudal field, its front edge folded into lobes, in colour",
-          "masks": [
-            {
-              "type": "WAVES",
-              "parts": [
-                "BODY"
-              ],
-              "seed": "$lobeSeed",
-              "axis": "Y",
-              "across": "X",
-              "shape": "sine",
-              "space": "part",
-              "from": -0.3,
-              "to": "$reach",
-              "wavelength": "$lobe",
-              "amplitude": "$swell",
-              "softness": 0.05
-            },
-            {
-              "type": "AXIS",
-              "parts": [
-                "HIND_LEGS"
-              ],
-              "axis": "Y",
-              "space": "part",
-              "from": 0.4,
-              "to": 1.0,
-              "softness": 0.2,
-              "combine": "MAX"
-            }
-          ],
-          "op": {
-            "type": "TOWARD",
-            "strength": 84,
-            "hue": "$hue",
-            "saturation": 0.8,
-            "lightness": 0.55
-          }
-        },
-        {
-          "name": "a few detached lobes floating in front of the edge, in colour",
-          "masks": [
-            {
-              "type": "SPOTS",
-              "parts": [
-                "BODY"
-              ],
-              "seed": "$lobeSeed",
-              "spacing": 4.0,
-              "radius": 1.5,
-              "vary": 0.5,
-              "chance": 0.3,
-              "stretch": 1.6,
-              "axis": "Y",
-              "softness": 0.25
-            },
-            {
-              "type": "AXIS",
-              "parts": [
-                "BODY"
-              ],
-              "axis": "X",
-              "space": "part",
-              "from": "$reach",
-              "to": 0.62,
-              "softness": 0.12
-            }
-          ],
-          "op": {
-            "type": "TOWARD",
-            "strength": 84,
-            "hue": "$hue",
-            "saturation": 0.8,
-            "lightness": 0.55
-          }
-        }
-      ]
-    },
-    {
-      "id": "wild",
-      "name": "Wild type",
-      "description": "No wave field.",
-      "wildType": true
-    }
-  ],
-  "founders": {
-    "Wav/Wav": 0.002,
-    "Wav/Wac": 0.008,
-    "Wav/n": 0.038,
-    "Wac/Wac": 0.008,
-    "n/n": 99.944
   }
 },
 {
@@ -18559,9 +19284,9 @@
   "key": "horsegenetics.yalia",
   "name": "Yalia",
   "phase": "magical",
-  "priority": 211,
+  "priority": 601,
   "rarity": "UNCOMMON",
-  "blurb": "Blocky straight-sided zones outlined in a bright colour and filled flat with white - architecture rather than marking - running down onto the legs, with the horse's own white markings taken into the same design.",
+  "blurb": "Blocky straight-sided zones outlined in a bright colour and filled flat with white - architecture rather than marking - running down onto the legs, with the horse's own white markings taken into the same design. A third allele draws the outline and nothing else, so it is invisible on a horse with no white.",
   "alleles": [
     {
       "token": "Yal",
@@ -18570,6 +19295,10 @@
     {
       "token": "Ylc",
       "label": "Yalia, coloured fill (Ylc)"
+    },
+    {
+      "token": "Ylo",
+      "label": "Yalia, outline only (Ylo)"
     },
     {
       "token": "n",
@@ -18605,6 +19334,7 @@
       "when": [
         "Yal/Yal",
         "Yal/Ylc",
+        "Yal/Ylo",
         "Yal/n"
       ],
       "layers": [
@@ -18827,9 +19557,10 @@
       "id": "coloured",
       "name": "Coloured Yalia",
       "description": "The same architecture in a colour the line carries rather than in white. Fully recessive: it takes two copies, and a single copy beside the white allele shows white. Unlike the white form it leaves the horse's own white markings alone - there is nothing for them to match - so a coloured Yalia over a tobiano is genuinely two markings on one horse. It never gives blue eyes.",
-      "when": {
-        "Ylc": 2
-      },
+      "when": [
+        "Ylc/Ylc",
+        "Ylc/Ylo"
+      ],
       "layers": [
         {
           "name": "the white fill, in colour",
@@ -18982,6 +19713,61 @@
       ]
     },
     {
+      "id": "outline",
+      "name": "Yalia outline",
+      "description": "The outline colour and none of the architecture. It draws no zones, adds no white anywhere, and paints no leg bands or hooves - all it does is run the same bright hard-edged line round whatever white the horse already carries: a tobiano patch, a splash, a blaze, a stocking, a snip. On a horse with no white it is completely silent, however many copies it carries, which makes it the one form of Yalia that can sit unnoticed in a line. Recessive to both filled forms.",
+      "when": [
+        "Ylo/Ylo",
+        "Ylo/n"
+      ],
+      "layers": [
+        {
+          "name": "the outline round the horse's own white, and nothing else",
+          "masks": [
+            {
+              "type": "PIGMENT",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE",
+                "LEGS",
+                "HAIR"
+              ],
+              "channel": "total",
+              "from": 0.06,
+              "to": 0.34,
+              "invert": true,
+              "spread": 0.7
+            },
+            {
+              "type": "PIGMENT",
+              "parts": [
+                "BODY",
+                "NECK",
+                "HEAD",
+                "MUZZLE",
+                "LEGS",
+                "HAIR"
+              ],
+              "channel": "total",
+              "from": 0.06,
+              "to": 0.34,
+              "invert": true,
+              "combine": "SUBTRACT"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "hue": "$hue",
+            "saturation": 0.9,
+            "lightness": 0.45,
+            "strength": 96
+          }
+        }
+      ]
+    },
+    {
       "id": "wild",
       "name": "Wild type",
       "description": "No zones.",
@@ -18991,9 +19777,13 @@
   "founders": {
     "Yal/Yal": 0.004,
     "Yal/Ylc": 0.016,
+    "Yal/Ylo": 0.016,
     "Yal/n": 0.076,
     "Ylc/Ylc": 0.016,
-    "n/n": 99.888
+    "Ylc/Ylo": 0.016,
+    "Ylo/Ylo": 0.016,
+    "Ylo/n": 0.076,
+    "n/n": 99.764
   }
 },
 {

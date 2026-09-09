@@ -71,7 +71,7 @@
 <p>
     Allele <strong>tokens can be any run of characters</strong> &mdash;
     <code>Spl</code>, <code>Cr</code>, <code>prl</code>, <code>Mzeb</code>,
-    <code>Pihr</code> &mdash; not single letters. The <code>=</code>,
+    <code>Blupnk</code> &mdash; not single letters. The <code>=</code>,
     <code>/</code> and <code>-</code> separators (and the gene key, which
     contains none of them) keep that unambiguous. The forward-looking rule for
     third-party genes is stricter: <a href="modding.html#alleles">alphanumeric
@@ -148,7 +148,7 @@
             &ldquo;dominant&rdquo; meant &mdash; <code>E/E</code> and
             <code>E/e</code> both wild type;</li>
         <li>only the double-variant landing on a non-wild-type outcome <em>is</em>
-            what &ldquo;recessive&rdquo; meant &mdash; <code>n/Pihr</code> is a
+            what &ldquo;recessive&rdquo; meant &mdash; <code>Hlr/n</code> is a
             carrier because it maps to a wild type, not because of a label;</li>
         <li>two variant alleles each with their own outcome and a third for the
             pair of them <em>is</em> codominance &mdash;
@@ -338,7 +338,6 @@ public Expression expressionOf(AllelePair pair) {
 <tr><td>80&ndash;92</td><td colspan="5"><strong>the thirteen non-coat genes</strong> &mdash; see the table below</td></tr>
 <tr><td>93</td><td><a href="gene-leopard.html">PATN1</a></td><td><span class="allele dom">PATN1</span> / <span class="allele wild">n</span></td><td>wild only &mdash; a silent modifier&para;&para;</td><td>0 unless the founder rolled <code>LP</code></td><td>neither (paints nothing)</td></tr>
 <tr><td>94</td><td><a href="gene-leopard.html">PATN2</a></td><td><span class="allele dom">PATN2</span> / <span class="allele wild">n</span></td><td>wild only &mdash; a silent modifier&para;&para;</td><td>0 unless the founder rolled <code>LP</code></td><td>neither (paints nothing)</td></tr>
-<tr><td>110</td><td><a href="gene-pink-hair.html">pink hair</a></td><td><span class="allele rec">Pihr</span> / <span class="allele wild">n</span></td><td>wild, pink-carrier, pink-hair</td><td>1/12 per allele</td><td>magical</td></tr>
 <tr><td>112</td><td><a href="gene-mane-color.html">mane colour</a></td><td><span class="allele dom">Mnsld</span> / <span class="allele dom">Mnstrp</span> / <span class="allele wild">n</span></td><td>wild, solid, striped, solid-striped&para;</td><td>2.0% / 1.5% per allele</td><td>magical</td></tr>
 <tr><td>114</td><td><a href="gene-tail-color.html">tail colour</a></td><td><span class="allele dom">Tlsld</span> / <span class="allele dom">Tlstrp</span> / <span class="allele wild">n</span></td><td>wild, solid, striped, solid-striped&para;</td><td>2.0% / 1.5% per allele</td><td>magical</td></tr>
 <tr><td>116</td><td><a href="gene-healer.html">healer</a></td><td><span class="allele rec">Hlr</span> / <span class="allele wild">n</span></td><td>wild, healer-carrier, healer</td><td>9% per allele</td><td>magical</td></tr>
@@ -353,8 +352,21 @@ public Expression expressionOf(AllelePair pair) {
 <tr><td>180</td><td><a href="gene-verdant.html">verdant</a></td><td><span class="allele rec">mush</span> / <span class="allele rec">moss</span> / <span class="allele rec">grass</span> / <span class="allele wild">n</span></td><td>wild, verdant-carrier, mycelium, moss, grass &mdash; <strong>all wild types</strong>&Dagger;</td><td>6% / 7% / 8% per allele</td><td>neither (paints nothing)</td></tr>
 <tr><td>190</td><td><a href="gene-lut.html">LUT</a></td><td><span class="allele wild">n</span> / <span class="allele rec">Blupnk</span></td><td>wild, bluepink-carrier (a wild type), <code>bluepink</code></td><td>~1 in 60 carry a copy; <strong>no homozygote is ever a founder</strong></td><td>magical &mdash; swaps the phase-2 gradient (no phase-1 or phase-3 paint)</td></tr>
 <tr><td>196</td><td><a href="gene-cutie-mark.html">cutie mark</a></td><td><span class="allele rec">Cutmrk</span> / <span class="allele wild">n</span></td><td>wild, cutie-mark-carrier, <code>cutie-mark</code> &mdash; <strong>all wild types</strong>&Dagger;</td><td>6% per allele (recessive)</td><td>neither &mdash; a client render layer draws a 1-3 item emblem on both flanks over everything</td></tr>
+<tr><td>690</td><td><a href="gene-extreme-white-dominant.html">extreme white dominant</a></td><td><span class="allele dom">EWD</span> / <span class="allele wild">n</span></td><td>wild, white-dominant</td><td>1/320 per allele</td><td>neither &mdash; it paints nothing and changes the fold instead</td></tr>
 </tbody>
 </table>
+</div>
+
+<div class="note">
+    <span class="label">This table is the built-ins; the whole order is a page</span>
+    <p>
+        The hundred-odd data-driven genes take their slots by the same rule and are not
+        listed here, because a hundred rows of numbers typed into a wiki page is
+        <a href="known-gaps.html#gap-13">exactly the thing that goes stale</a>.
+        <a href="paint-order.html">The paint order</a> draws every gene that paints,
+        highest first, from the registry at run time. It is the place to look for what
+        covers what.
+    </p>
 </div>
 
 <p>

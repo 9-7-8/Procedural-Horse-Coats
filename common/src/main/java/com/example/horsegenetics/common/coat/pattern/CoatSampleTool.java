@@ -47,10 +47,6 @@ public final class CoatSampleTool {
             {"zebra_bay_long", "agouti=A/a magic_zebra=Mzeb/n"},     // same gene, rings further down the legs
             {"zebra_palomino", "extension=e/e matp=Cr/N magic_zebra=Mzeb/n"},
             {"zebra_white", "kit=W22/N magic_zebra=Mzeb/n"},        // magical paints over dominant white
-            {"pink_hair_black", "pink_hair=Pihr/Pihr"},
-            {"pink_hair_chestnut", "extension=e/e pink_hair=Pihr/Pihr"},
-            {"pink_hair_perlino", "agouti=A/a matp=Cr/Cr pink_hair=Pihr/Pihr"},
-            {"zebra_pink_bay", "agouti=A/a magic_zebra=Mzeb/n pink_hair=Pihr/Pihr"}, // two magical genes at once
             {"dun_bay", "agouti=A/a dun=D/d2"},          // dorsal stripe + leg bars over tan
             {"dun_black", "dun=D/d2"},                    // grullo
             {"dun_chestnut", "extension=e/e dun=D/d2"},   // red dun

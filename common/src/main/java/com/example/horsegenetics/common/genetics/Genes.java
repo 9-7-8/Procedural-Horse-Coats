@@ -13,6 +13,7 @@ import com.example.horsegenetics.common.genetics.genes.DietGene;
 import com.example.horsegenetics.common.genetics.genes.DunGene;
 import com.example.horsegenetics.common.genetics.genes.EdnrbGene;
 import com.example.horsegenetics.common.genetics.genes.ExtensionGene;
+import com.example.horsegenetics.common.genetics.genes.ExtremeWhiteDominantGene;
 import com.example.horsegenetics.common.genetics.genes.FlaxenGene;
 import com.example.horsegenetics.common.genetics.genes.Gbe1Gene;
 import com.example.horsegenetics.common.genetics.genes.GreyGene;
@@ -49,7 +50,6 @@ import com.example.horsegenetics.common.genetics.genes.Patn1Gene;
 import com.example.horsegenetics.common.genetics.genes.Patn2Gene;
 import com.example.horsegenetics.common.genetics.genes.Pax3Gene;
 import com.example.horsegenetics.common.genetics.genes.Pdk4Gene;
-import com.example.horsegenetics.common.genetics.genes.PinkHairGene;
 import com.example.horsegenetics.common.genetics.genes.Plod1Gene;
 import com.example.horsegenetics.common.genetics.genes.PpibGene;
 import com.example.horsegenetics.common.genetics.genes.PrkdcGene;
@@ -150,7 +150,12 @@ public final class Genes {
     public static final GreyGene GREY = new GreyGene();
     public static final MatpGene MATP = new MatpGene();
     public static final MagicZebraGene MAGIC_ZEBRA = new MagicZebraGene();
-    public static final PinkHairGene PINK_HAIR = new PinkHairGene();
+    /**
+     * <b>Extreme white dominant</b> - the only gene that changes the coat by
+     * changing a <i>rule</i> rather than by painting. See
+     * {@link WhiteLockContribution}; its priority is a code-order slot only.
+     */
+    public static final ExtremeWhiteDominantGene EXTREME_WHITE_DOMINANT = new ExtremeWhiteDominantGene();
     public static final DunGene DUN = new DunGene();
     public static final SilverGene SILVER = new SilverGene();
     /**
@@ -381,7 +386,7 @@ public final class Genes {
     /** The hand-written genes. Order here is irrelevant - the registry sorts. */
     private static final List<Gene> BUILTINS = List.of(
             SEX, DIET, EXTENSION, AGOUTI, SHADE, CHAMPAGNE, GREY, MATP,
-            MAGIC_ZEBRA, PINK_HAIR, DUN, SILVER, FLAXEN, SOOTY, PANGARE, HUED_PANGARE,
+            MAGIC_ZEBRA, EXTREME_WHITE_DOMINANT, DUN, SILVER, FLAXEN, SOOTY, PANGARE, HUED_PANGARE,
             MUSHROOM, BRINDLE, TIGER_EYE,
             NATURAL_ZEBRA, ROAN, RABICANO, TOBIANO,
             LEOPARD, EDNRB, KIT, MANCHADO, MITF, PAX3,

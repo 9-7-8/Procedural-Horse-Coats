@@ -3,13 +3,17 @@
   "key": "horsegenetics.opalized",
   "name": "Opalized",
   "phase": "magical",
-  "priority": 431,
+  "priority": 611,
   "rarity": "RARE",
-  "blurb": "The same substrate as Voided taken the other way - every white region comes out as iridescent cells of three to seven hues, pearlescent at the rim and strongest in the middle.",
+  "blurb": "The same substrate as Voided taken the other way - a marking comes out as iridescent cells of three to seven hues, pearlescent at the rim and strongest in the middle. Which marking depends on the allele: one opalizes every white region, the other every black one.",
   "alleles": [
     {
       "token": "Opl",
-      "label": "Opalized (Opl)"
+      "label": "Opalized, white regions (Opl)"
+    },
+    {
+      "token": "Opb",
+      "label": "Opalized, black regions (Opb)"
     },
     {
       "token": "n",
@@ -41,9 +45,10 @@
     {
       "id": "opalized",
       "name": "Opalized",
-      "description": "The outline is the source pattern's, unchanged, but the inside is not uniform. It breaks into irregular lobed cells of differing colour, a hand's breadth or two across, with soft transitions between neighbours - so it reads as iridescence rather than as a gradient. The cells crowd at the core of a marking and thin toward its perimeter, and the outer inch or two trends pale and low-saturation, near pearl. Three to seven hues are present at once on any one horse: pale blues, mints, lilacs and pearl teals at the light end, reds, oranges, ambers and magentas at the dark.",
+      "description": "Every white region on the horse. The outline is the source pattern's, unchanged, but the inside is not uniform. It breaks into irregular lobed cells of differing colour, a hand's breadth or two across, with soft transitions between neighbours - so it reads as iridescence rather than as a gradient. The cells crowd at the core of a marking and thin toward its perimeter, and the outer inch or two trends pale and low-saturation, near pearl. Three to seven hues are present at once on any one horse: pale blues, mints, lilacs and pearl teals at the light end, reds, oranges, ambers and magentas at the dark.",
       "when": [
         "Opl/Opl",
+        "Opl/Opb",
         "Opl/n"
       ],
       "layers": [
@@ -96,15 +101,72 @@
       ]
     },
     {
+      "id": "opalized-black",
+      "name": "Black-opalized",
+      "description": "The identical iridescence, taken to the other end of the coat: every region the horse wears at its blackest - a black point, a sooty field, the dark half of a bay, the black of a tobiano rather than its white - breaks into the same lobed cells of three to seven hues, pearlescent at the rim and strongest in the middle. On a horse with nothing black on it, it shows nothing, exactly as the white form shows nothing on a horse with no white. Recessive to the white form: it takes two copies, or one beside a wild type.",
+      "when": [
+        "Opb/Opb",
+        "Opb/n"
+      ],
+      "layers": [
+        {
+          "name": "the black regions, broken into hue cells",
+          "masks": [
+            {
+              "type": "PIGMENT",
+              "channel": "black",
+              "from": 0.7,
+              "to": 0.88
+            }
+          ],
+          "op": {
+            "type": "PALETTE",
+            "hue": "$hue",
+            "hueSpread": "$spread",
+            "saturation": "$chroma",
+            "lightness": 0.42,
+            "scale": 3.2,
+            "strength": 92
+          }
+        },
+        {
+          "name": "the pearlescent rim",
+          "masks": [
+            {
+              "type": "PIGMENT",
+              "channel": "black",
+              "from": 0.7,
+              "to": 0.88
+            },
+            {
+              "type": "PIGMENT",
+              "channel": "black",
+              "from": 0.88,
+              "to": 0.98,
+              "combine": "SUBTRACT"
+            }
+          ],
+          "op": {
+            "type": "TOWARD",
+            "color": "#cdd6dc",
+            "strength": 55
+          }
+        }
+      ]
+    },
+    {
       "id": "wild",
       "name": "Wild type",
-      "description": "White stays white.",
+      "description": "Neither. White stays white and black stays black.",
       "wildType": true
     }
   ],
   "founders": {
     "Opl/Opl": 0.002,
+    "Opl/Opb": 0.004,
     "Opl/n": 0.038,
-    "n/n": 99.96
+    "Opb/Opb": 0.002,
+    "Opb/n": 0.038,
+    "n/n": 99.916
   }
 }
